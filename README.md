@@ -197,15 +197,57 @@ npm start
 
 ### Vercelへのデプロイ
 
-1. CSVデータを準備してJSON生成を完了させる
-2. `public/data/rs2024-preset-top3.json`（約29KB）をコミット
-3. Vercelにデプロイ
+#### 前提条件
 
+- Vercel CLIのインストール: `npm i -g vercel`
+- GitHubリポジトリとの連携
+- `public/data/rs2024-structured.json`（約110MB）が生成済み
+
+#### デプロイ手順
+
+1. **Vercel CLIでログイン**
+```bash
+vercel login
+```
+
+2. **初回デプロイ**
 ```bash
 vercel
 ```
+プロジェクト名やチーム設定を確認し、デプロイを実行します。
 
-**注意**: `rs2024-structured.json`（約110MB）は大きすぎるためGitにコミットせず、デプロイ時のビルドスクリプトで生成することを推奨します。
+3. **本番デプロイ**
+```bash
+vercel --prod
+```
+
+#### Vercel ダッシュボードからのデプロイ
+
+1. [Vercel Dashboard](https://vercel.com/dashboard) にアクセス
+2. 「Import Project」をクリック
+3. GitHubリポジトリ `igomuni/marumie-rssystem` を選択
+4. ビルド設定:
+   - **Framework Preset**: Next.js
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `.next`
+   - **Install Command**: `npm install`
+5. 「Deploy」をクリック
+
+#### 環境変数（必要に応じて）
+
+Vercelのプロジェクト設定で以下を設定:
+- `NODE_ENV`: `production`
+
+#### 重要な注意事項
+
+**データファイルについて**:
+- `rs2024-structured.json`（約110MB）は`.gitignore`で除外されています
+- ビルド時にこのファイルが必要なため、以下のいずれかの方法で対応してください:
+  1. **推奨**: Vercelのビルドステップで`generate-structured`を実行（ただしビルド時間が長くなる）
+  2. **代替**: `public/data/`をGitに含める（リポジトリサイズが大きくなる）
+  3. **最適**: 外部ストレージ（S3等）にアップロードしてCDN配信
+
+現在の実装では、`rs2024-structured.json`を事前に生成してGitにコミットせず、デプロイ時のビルドステップで生成するか、または小さいプリセットJSONのみを使用する方式を推奨します。
 
 ## トラブルシューティング
 
