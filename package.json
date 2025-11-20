@@ -4,14 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "npm run generate-sankey && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "normalize": "python3 scripts/normalize_csv.py",
-    "generate-sankey": "tsx scripts/generate-budget-sankey.ts && tsx scripts/generate-spending-sankey.ts",
     "generate-structured": "tsx scripts/generate-structured-json.ts",
     "generate-preset": "tsx scripts/generate-preset-json.ts",
-    "setup": "npm install && npm run normalize && npm run generate-sankey"
+    "setup": "npm install && npm run normalize && npm run generate-structured && npm run generate-preset"
   },
   "dependencies": {
     "@nivo/sankey": "^0.87.0",
