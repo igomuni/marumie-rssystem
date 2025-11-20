@@ -168,7 +168,8 @@ marumie-rssystem/
 │   ├── download/RS_2024/        # 手動ダウンロードしたZIPファイル
 │   └── year_2024/               # 正規化済みCSV
 ├── public/data/                 # 生成JSONファイル
-│   ├── rs2024-structured.json   # 構造化データ（約110MB）
+│   ├── rs2024-structured.json.gz # 構造化データ（gzip圧縮、5.9MB）※Gitに含む
+│   ├── rs2024-structured.json   # 構造化データ（展開後、46MB）※.gitignore
 │   └── rs2024-preset-top3.json  # Top3サンキー図データ（約29KB）
 └── docs/                        # 仕様書・設計文書
 ```
@@ -181,8 +182,9 @@ marumie-rssystem/
 | `npm run normalize` | CSVファイルを正規化（Python 3.x + neologdn必須） |
 | `npm run generate-structured` | 構造化JSONファイル生成（rs2024-structured.json） |
 | `npm run generate-preset` | プリセットTop3サンキー図JSON生成（rs2024-preset-top3.json） |
+| `npm run compress-data` | 構造化JSONをgzip圧縮（rs2024-structured.json.gz） |
 | `npm run dev` | 開発サーバー起動（Turbopack有効、ポート3002） |
-| `npm run build` | プロダクションビルド |
+| `npm run build` | プロダクションビルド（自動的にprebuildでデータ展開） |
 | `npm start` | プロダクションサーバー起動 |
 | `npm run lint` | ESLintによるコードチェック |
 
@@ -241,13 +243,24 @@ Vercelのプロジェクト設定で以下を設定:
 #### 重要な注意事項
 
 **データファイルについて**:
-- `rs2024-structured.json`（約110MB）は`.gitignore`で除外されています
-- ビルド時にこのファイルが必要なため、以下のいずれかの方法で対応してください:
-  1. **推奨**: Vercelのビルドステップで`generate-structured`を実行（ただしビルド時間が長くなる）
-  2. **代替**: `public/data/`をGitに含める（リポジトリサイズが大きくなる）
-  3. **最適**: 外部ストレージ（S3等）にアップロードしてCDN配信
+- `rs2024-structured.json`（46MB）は`.gitignore`で除外されています
+- **gzip圧縮版** `rs2024-structured.json.gz`（5.9MB）をGitリポジトリに含めています
+- ビルド時に自動的に展開されます（`prebuild`スクリプト）
 
-現在の実装では、`rs2024-structured.json`を事前に生成してGitにコミットせず、デプロイ時のビルドステップで生成するか、または小さいプリセットJSONのみを使用する方式を推奨します。
+**デプロイフロー**:
+1. `npm run build`が実行される
+2. `prebuild`スクリプトが自動実行され、`.gz`ファイルを展開
+3. Next.jsビルドが実行される
+4. デプロイ完了
+
+**データ更新時の手順**:
+```bash
+npm run generate-structured  # 構造化JSON生成
+npm run compress-data         # gzip圧縮
+git add public/data/rs2024-structured.json.gz
+git commit -m "Update structured data"
+git push
+```
 
 ## トラブルシューティング
 
