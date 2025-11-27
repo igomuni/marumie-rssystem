@@ -315,19 +315,29 @@ function selectData(
 
     topProjects = contributingProjects;
 
-    // 3. Extract ministries from selected projects and show ALL ministries
-    const contributingMinistryNames = new Set(contributingProjects.map(p => p.ministry));
-
-    // Show all ministries, sorted by budget
+    // 3. Select TopN ministries (not all ministries)
     const allMinistries = data.budgetTree.ministries
       .sort((a, b) => b.totalBudget - a.totalBudget);
 
-    topMinistries = allMinistries.map(m => ({
+    // Use 'limit' parameter for ministry selection (default: 3)
+    topMinistries = allMinistries.slice(0, limit).map(m => ({
       name: m.name,
       id: m.id,
       totalBudget: m.totalBudget,
       bureauCount: m.bureaus.length,
     }));
+
+    // Calculate "Other Ministries" budget and spending
+    const otherMinistries = allMinistries.slice(limit);
+    otherMinistriesBudget = otherMinistries.reduce((sum, m) => sum + m.totalBudget, 0);
+
+    // Calculate other ministries spending
+    for (const ministry of otherMinistries) {
+      const ministryStats = data.statistics.byMinistry[ministry.name];
+      if (ministryStats) {
+        otherMinistriesSpending += ministryStats.totalSpending;
+      }
+    }
 
     // Calculate "Other Projects" for Global View to ensure flow continuity
     for (const ministry of topMinistries) {
@@ -350,9 +360,6 @@ function selectData(
         otherProjectsSpendingByMinistry.set(ministry.name, otherSpending);
       }
     }
-
-    otherMinistriesBudget = 0;
-    otherMinistriesSpending = 0;
   }
 
   // --- Common Logic for Spendings (except for Spending View which is handled above) ---
@@ -585,6 +592,9 @@ function buildSankeyData(
 
   // --- STANDARD VIEWS (Global, Ministry, Project) ---
 
+  // Determine view type early for conditional logic
+  const isGlobalView = !targetMinistryName && !targetProjectName && !targetRecipientName;
+
   // Column 0: Total Budget
   // Shown in: Global View, Project View
   // Not shown in: Ministry View (targetMinistryName is set but not targetProjectName)
@@ -650,14 +660,25 @@ function buildSankeyData(
       });
     }
 
+    // Add "Other Ministries" node if applicable (Global View only)
+    if (isGlobalView && otherMinistriesBudget > 0) {
+      standardMinistryNodes.push({
+        id: 'ministry-budget-other',
+        name: 'その他の府省庁',
+        type: 'ministry-budget',
+        value: otherMinistriesBudget,
+        details: {
+          projectCount: 0,
+          bureauCount: 0,
+        },
+      });
+    }
+
     nodes.push(...standardMinistryNodes);
   }
 
   // Column 2: Project Budget Nodes
   const projectBudgetNodes: SankeyNode[] = [];
-
-  // In Global View (recipient-first), skip "Other Projects" nodes entirely
-  const isGlobalView = !targetMinistryName && !targetProjectName && !targetRecipientName;
 
   for (const ministry of topMinistries) {
     const ministryProjects = topProjects.filter(p => p.ministry === ministry.name);
@@ -742,6 +763,8 @@ function buildSankeyData(
   // Global View: Create single "Other Projects" budget node and links
   if (isGlobalView) {
     let totalOtherBudget = 0;
+
+    // Links from topMinistries to "Other Projects"
     for (const ministry of topMinistries) {
       const otherBudget = otherProjectsBudgetByMinistry.get(ministry.name);
       if (otherBudget && otherBudget > 0) {
@@ -752,6 +775,16 @@ function buildSankeyData(
           value: otherBudget,
         });
       }
+    }
+
+    // Link from "Other Ministries" to "Other Projects"
+    if (otherMinistriesBudget > 0) {
+      totalOtherBudget += otherMinistriesBudget;
+      links.push({
+        source: 'ministry-budget-other',
+        target: 'project-budget-other-global',
+        value: otherMinistriesBudget,
+      });
     }
 
     if (totalOtherBudget > 0) {
@@ -780,37 +813,36 @@ function buildSankeyData(
 
   // Column 3: Project Spending Nodes
   const projectSpendingNodes: SankeyNode[] = [];
-  for (const ministry of topMinistries) {
-    const ministryProjects = topProjects.filter(p => p.ministry === ministry.name);
-    for (const project of ministryProjects) {
-      projectSpendingNodes.push({
-        id: `project-spending-${project.projectId}`,
-        name: project.projectName,
-        type: 'project-spending',
-        value: project.totalSpendingAmount,
-        originalId: project.projectId,
-        details: {
-          ministry: project.ministry,
-          bureau: project.bureau,
-          fiscalYear: project.fiscalYear,
-          executionRate: project.executionRate,
-          spendingCount: project.spendingIds.length,
-        },
-      });
 
-      const linkValue = Math.min(project.totalBudget, project.totalSpendingAmount);
+  // Create spending nodes for all projects in topProjects
+  for (const project of topProjects) {
+    projectSpendingNodes.push({
+      id: `project-spending-${project.projectId}`,
+      name: project.projectName,
+      type: 'project-spending',
+      value: project.totalSpendingAmount,
+      originalId: project.projectId,
+      details: {
+        ministry: project.ministry,
+        bureau: project.bureau,
+        fiscalYear: project.fiscalYear,
+        executionRate: project.executionRate,
+        spendingCount: project.spendingIds.length,
+      },
+    });
 
-      links.push({
-        source: `project-budget-${project.projectId}`,
-        target: `project-spending-${project.projectId}`,
-        value: linkValue,
-      });
-    }
+    const linkValue = Math.min(project.totalBudget, project.totalSpendingAmount);
 
-    // Create "Other Projects" spending node
-    // Global View: Single aggregated node handled outside loop
-    // Other Views: Per-ministry nodes
-    if (!isGlobalView) {
+    links.push({
+      source: `project-budget-${project.projectId}`,
+      target: `project-spending-${project.projectId}`,
+      value: linkValue,
+    });
+  }
+
+  // Create "Other Projects" spending nodes (non-Global View only)
+  if (!isGlobalView) {
+    for (const ministry of topMinistries) {
       const otherSpending = otherProjectsSpendingByMinistry.get(ministry.name);
       const otherBudget = otherProjectsBudgetByMinistry.get(ministry.name);
       if (otherSpending && otherSpending > 0 && !targetProjectName) {
@@ -846,12 +878,17 @@ function buildSankeyData(
     let totalOtherSpending = 0;
     let totalOtherBudget = 0; // Need this for link calculation
 
+    // Aggregate from topMinistries
     for (const ministry of topMinistries) {
       const otherSpending = otherProjectsSpendingByMinistry.get(ministry.name);
       const otherBudget = otherProjectsBudgetByMinistry.get(ministry.name);
       if (otherSpending) totalOtherSpending += otherSpending;
       if (otherBudget) totalOtherBudget += otherBudget;
     }
+
+    // Add "Other Ministries" spending
+    totalOtherSpending += otherMinistriesSpending;
+    totalOtherBudget += otherMinistriesBudget;
 
     if (totalOtherSpending > 0) {
       projectSpendingNodes.push({
