@@ -24,7 +24,7 @@ function SankeyContent() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Settings State
-  const [topN, setTopN] = useState(3); // Global view: Number of ministries (not used in new design)
+  const [topN, setTopN] = useState(3); // Global view: Number of ministries
   const [globalSpendingTopN, setGlobalSpendingTopN] = useState(5); // Global view: Number of spending recipients
   const [ministryTopN, setMinistryTopN] = useState(5); // Ministry view: Number of projects/spendings
   const [projectViewTopN, setProjectViewTopN] = useState(10); // Project view: Number of spendings
@@ -811,7 +811,7 @@ function SankeyContent() {
                 onChange={(e) => setTempTopN(parseInt(e.target.value) || 1)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
-              <p className="text-xs text-gray-500 mt-1">全体ビューで表示する府省庁の数（現在は全府省庁表示）</p>
+              <p className="text-xs text-gray-500 mt-1">全体ビューで表示する府省庁の数</p>
             </div>
 
             <div className="mb-4">
