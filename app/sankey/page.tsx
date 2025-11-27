@@ -565,7 +565,12 @@ function SankeyContent() {
                     return '#6b7280'; // グレー系
                   }
 
-                  // 予算系（緑系）、支出系（赤系）、その他（グレー）
+                  // 支出ビューでは全ノードを赤系（支出の世界）
+                  if (viewMode === 'spending') {
+                    return '#ef4444'; // 赤系
+                  }
+
+                  // その他のビュー: 予算系（緑系）、支出系（赤系）
                   if (type === 'ministry-budget' || type === 'project-budget') {
                     return '#10b981'; // 緑系
                   } else if (type === 'project-spending' || type === 'recipient') {
