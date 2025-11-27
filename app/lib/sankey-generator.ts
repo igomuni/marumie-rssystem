@@ -664,7 +664,7 @@ function buildSankeyData(
     if (isGlobalView && otherMinistriesBudget > 0) {
       standardMinistryNodes.push({
         id: 'ministry-budget-other',
-        name: 'その他の府省庁',
+        name: '府省庁(TopN以外)',
         type: 'ministry-budget',
         value: otherMinistriesBudget,
         details: {
@@ -753,7 +753,7 @@ function buildSankeyData(
       if (otherBudget && otherBudget > 0 && !targetProjectName) {
         projectBudgetNodes.push({
           id: `project-budget-other-${ministry.id}`,
-          name: 'その他の事業',
+          name: '事業(TopN以外)',
           type: 'project-budget',
           value: otherBudget,
           details: {
@@ -810,7 +810,7 @@ function buildSankeyData(
     if (totalOtherBudget > 0) {
       projectBudgetNodes.push({
         id: 'project-budget-other-global',
-        name: 'その他の事業',
+        name: '事業(TopN以外)',
         type: 'project-budget',
         value: totalOtherBudget,
         details: {
@@ -872,7 +872,7 @@ function buildSankeyData(
       if (otherSpending && otherSpending > 0 && !targetProjectName) {
         projectSpendingNodes.push({
           id: `project-spending-other-${ministry.id}`,
-          name: 'その他の事業',
+          name: '事業(TopN以外)',
           type: 'project-spending',
           value: otherSpending,
           details: {
@@ -917,7 +917,7 @@ function buildSankeyData(
     if (totalOtherSpending > 0) {
       projectSpendingNodes.push({
         id: 'project-spending-other-global',
-        name: 'その他の事業',
+        name: '事業(TopN以外)',
         type: 'project-spending',
         value: totalOtherSpending,
         details: {
@@ -1116,7 +1116,7 @@ function buildSankeyData(
   let totalOtherRecipientAmount = 0;
 
   if (isGlobalView) {
-    // --- Global View: Calculate "その他の支出先" ---
+    // --- Global View: Calculate "支出先(TopN以外)" ---
     // 1. Flow from "Other Projects" (Global Aggregated Node)
     // We assume all "Other Projects" spending goes to "Other Recipients"
     const otherProjectsSpendingNode = nodes.find(n => n.id === 'project-spending-other-global');
@@ -1179,7 +1179,7 @@ function buildSankeyData(
   if (totalOtherRecipientAmount > 0) {
     recipientNodes.push({
       id: 'recipient-other-aggregated',
-      name: 'その他の支出先',
+      name: '支出先(TopN以外)',
       type: 'recipient',
       value: totalOtherRecipientAmount,
       details: {

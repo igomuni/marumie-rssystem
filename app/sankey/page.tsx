@@ -24,11 +24,11 @@ function SankeyContent() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Settings State
-  const [topN, setTopN] = useState(3); // Global view: Number of ministries
-  const [globalSpendingTopN, setGlobalSpendingTopN] = useState(5); // Global view: Number of spending recipients
+  const [topN, setTopN] = useState(10); // Global view: Number of ministries
+  const [globalSpendingTopN, setGlobalSpendingTopN] = useState(10); // Global view: Number of spending recipients
   const [ministryTopN, setMinistryTopN] = useState(5); // Ministry view: Number of projects/spendings
-  const [projectViewTopN, setProjectViewTopN] = useState(10); // Project view: Number of spendings
-  const [spendingViewTopN, setSpendingViewTopN] = useState(10); // Spending view: Number of projects
+  const [projectViewTopN, setProjectViewTopN] = useState(15); // Project view: Number of spendings
+  const [spendingViewTopN, setSpendingViewTopN] = useState(20); // Spending view: Number of projects
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Temporary settings state for dialog
@@ -185,11 +185,11 @@ function SankeyContent() {
 
     // Handle Project nodes
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
-      // Special handling for "その他の事業" aggregate nodes
-      if (actualNode.name === 'その他の事業') {
+      // Special handling for "事業(TopN以外)" aggregate nodes
+      if (actualNode.name === '事業(TopN以外)') {
         // Paginate to show more items instead of drilling down
         if (viewMode === 'global') {
-          // In Global view, increase ministry offset (like "その他の府省庁")
+          // In Global view, increase ministry offset (like "府省庁(TopN以外)")
           setOffset(prev => prev + topN);
         } else if (viewMode === 'ministry') {
           // In Ministry view, increase project offset
@@ -228,8 +228,8 @@ function SankeyContent() {
         return;
       }
 
-      // Handle "その他の支出先" - same behavior as "Other Ministries"
-      if (actualNode.name === 'その他の支出先') {
+      // Handle "支出先(TopN以外)" - same behavior as "Other Ministries"
+      if (actualNode.name === '支出先(TopN以外)') {
         setOffset(prev => prev + topN);
         return;
       }
@@ -560,8 +560,11 @@ function SankeyContent() {
                   const type = nodeData?.type;
                   const name = nodeData?.name || '';
 
-                  // "その他"ノードはすべてグレー
-                  if (name.startsWith('その他')) {
+                  // TopN以外ノードと"その他"ノードはすべてグレー
+                  if (name.startsWith('その他') ||
+                      name === '府省庁(TopN以外)' ||
+                      name === '事業(TopN以外)' ||
+                      name === '支出先(TopN以外)') {
                     return '#6b7280'; // グレー系
                   }
 
@@ -643,7 +646,7 @@ function SankeyContent() {
                         node.id === 'ministry-budget-other' ||
                         (node.id === 'total-budget' && (offset > 0 || viewMode !== 'global')) ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
-                        ((nodeType === 'project-budget' || nodeType === 'project-spending') && nodeName !== 'その他の事業') ||
+                        ((nodeType === 'project-budget' || nodeType === 'project-spending') && nodeName !== '事業(TopN以外)') ||
                         (nodeType === 'recipient');
 
                       const cursorStyle = isClickable ? 'pointer' : 'default';
@@ -707,7 +710,7 @@ function SankeyContent() {
                       title += ' (クリックで府省庁詳細を表示)';
                     }
                   } else if (nodeType === 'project-budget' || nodeType === 'project-spending') {
-                    if (name === 'その他の事業') {
+                    if (name === '事業(TopN以外)') {
                       title += ' (集約ノード)';
                     } else if (viewMode === 'project') {
                       title += ' (クリックで前のビューへ戻る)';
@@ -717,7 +720,7 @@ function SankeyContent() {
                   } else if (nodeType === 'recipient') {
                     if (name === 'その他') {
                       title += ' (クリックで支出元を表示)';
-                    } else if (name === 'その他の支出先') {
+                    } else if (name === '支出先(TopN以外)') {
                       title += ' (クリックで詳細を表示)';
                     } else if (viewMode === 'spending') {
                       title += ' (クリックで前のビューへ戻る)';
