@@ -619,7 +619,10 @@ function SankeyContent() {
                       let displayAmount = node.value;
                       if (node.value === 0.001) {
                         // Check if this is truly a zero-budget case
-                        if (nodeType === 'project-budget' && actualNode?.details?.totalBudget === 0) {
+                        if (nodeType === 'project-budget' &&
+                            actualNode?.details &&
+                            'totalBudget' in actualNode.details &&
+                            actualNode.details.totalBudget === 0) {
                           displayAmount = 0;
                         } else if (nodeType === 'ministry-budget') {
                           // Ministry nodes shouldn't have dummy values, but handle just in case
