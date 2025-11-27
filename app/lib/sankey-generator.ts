@@ -714,6 +714,13 @@ function buildSankeyData(
           target: `project-budget-${project.projectId}`,
           value: project.totalBudget,
         });
+      } else if (isGlobalView && otherMinistriesBudget > 0) {
+        // In Global View, link projects from non-TopN ministries to "その他の府省庁"
+        links.push({
+          source: 'ministry-budget-other',
+          target: `project-budget-${project.projectId}`,
+          value: project.totalBudget,
+        });
       }
     } else {
       // Project View: Total Budget -> Project Budget
@@ -920,34 +927,72 @@ function buildSankeyData(
 
   // Column 4: Recipient Nodes
   const recipientNodes: SankeyNode[] = [];
-  for (const project of topProjects) {
+
+  if (isGlobalView) {
+    // Global View: Create nodes for all topSpendings and links from their projects
     for (const spending of topSpendings) {
-      const spendingProject = spending.projects.find(p => p.projectId === project.projectId);
-      if (spendingProject) {
-        if (!recipientNodes.some(n => n.id === `recipient-${spending.spendingId}`)) {
-          recipientNodes.push({
-            id: `recipient-${spending.spendingId}`,
-            name: spending.spendingName,
-            type: 'recipient',
-            value: spending.totalSpendingAmount,
-            originalId: spending.spendingId,
+      // Create recipient node
+      recipientNodes.push({
+        id: `recipient-${spending.spendingId}`,
+        name: spending.spendingName,
+        type: 'recipient',
+        value: spending.totalSpendingAmount,
+        originalId: spending.spendingId,
+        details: {
+          corporateNumber: spending.corporateNumber,
+          location: spending.location,
+          projectCount: spending.projectCount,
+        },
+      });
+
+      // Create links from all projects that contribute to this spending
+      for (const spendingProject of spending.projects) {
+        // Check if this project's spending node exists (i.e., it's in topProjects)
+        const projectExists = topProjects.some(p => p.projectId === spendingProject.projectId);
+        if (projectExists) {
+          links.push({
+            source: `project-spending-${spendingProject.projectId}`,
+            target: `recipient-${spending.spendingId}`,
+            value: spendingProject.amount,
             details: {
-              corporateNumber: spending.corporateNumber,
-              location: spending.location,
-              projectCount: spending.projectCount,
+              contractMethod: spendingProject.contractMethod,
+              blockName: spendingProject.blockName,
             },
           });
         }
+      }
+    }
+  } else {
+    // Ministry/Project View: Original logic (project-first)
+    for (const project of topProjects) {
+      for (const spending of topSpendings) {
+        const spendingProject = spending.projects.find(p => p.projectId === project.projectId);
+        if (spendingProject) {
+          if (!recipientNodes.some(n => n.id === `recipient-${spending.spendingId}`)) {
+            recipientNodes.push({
+              id: `recipient-${spending.spendingId}`,
+              name: spending.spendingName,
+              type: 'recipient',
+              value: spending.totalSpendingAmount,
+              originalId: spending.spendingId,
+              details: {
+                corporateNumber: spending.corporateNumber,
+                location: spending.location,
+                projectCount: spending.projectCount,
+              },
+            });
+          }
 
-        links.push({
-          source: `project-spending-${project.projectId}`,
-          target: `recipient-${spending.spendingId}`,
-          value: spendingProject.amount,
-          details: {
-            contractMethod: spendingProject.contractMethod,
-            blockName: spendingProject.blockName,
-          },
-        });
+          links.push({
+            source: `project-spending-${project.projectId}`,
+            target: `recipient-${spending.spendingId}`,
+            value: spendingProject.amount,
+            details: {
+              contractMethod: spendingProject.contractMethod,
+              blockName: spendingProject.blockName,
+            },
+          });
+        }
       }
     }
   }
