@@ -680,55 +680,54 @@ function buildSankeyData(
   // Column 2: Project Budget Nodes
   const projectBudgetNodes: SankeyNode[] = [];
 
-  for (const ministry of topMinistries) {
-    const ministryProjects = topProjects.filter(p => p.ministry === ministry.name);
-    for (const project of ministryProjects) {
-      projectBudgetNodes.push({
-        id: `project-budget-${project.projectId}`,
-        name: project.projectName,
-        type: 'project-budget',
-        value: project.totalBudget,
-        originalId: project.projectId,
-        details: {
-          ministry: project.ministry,
-          bureau: project.bureau,
-          fiscalYear: project.fiscalYear,
-          initialBudget: project.initialBudget,
-          supplementaryBudget: project.supplementaryBudget,
-          carryoverBudget: project.carryoverBudget,
-          reserveFund: project.reserveFund,
-          totalBudget: project.totalBudget,
-          executedAmount: project.executedAmount,
-          carryoverToNext: project.carryoverToNext,
-          accountCategory: project.accountCategory,
-        },
-      });
+  // Create budget nodes for all projects in topProjects
+  for (const project of topProjects) {
+    projectBudgetNodes.push({
+      id: `project-budget-${project.projectId}`,
+      name: project.projectName,
+      type: 'project-budget',
+      value: project.totalBudget,
+      originalId: project.projectId,
+      details: {
+        ministry: project.ministry,
+        bureau: project.bureau,
+        fiscalYear: project.fiscalYear,
+        initialBudget: project.initialBudget,
+        supplementaryBudget: project.supplementaryBudget,
+        carryoverBudget: project.carryoverBudget,
+        reserveFund: project.reserveFund,
+        totalBudget: project.totalBudget,
+        executedAmount: project.executedAmount,
+        carryoverToNext: project.carryoverToNext,
+        accountCategory: project.accountCategory,
+      },
+    });
 
-      // Link: Ministry -> Project Budget (Global & Ministry View only)
-      // In Project View, Total Budget links directly to Project Budget
-      if (!targetProjectName) {
+    // Link: Ministry -> Project Budget (Global & Ministry View only)
+    // In Project View, Total Budget links directly to Project Budget
+    if (!targetProjectName) {
+      // Find ministry ID from topMinistries or full data
+      const ministry = topMinistries.find(m => m.name === project.ministry);
+      if (ministry) {
         links.push({
           source: `ministry-budget-${ministry.id}`,
           target: `project-budget-${project.projectId}`,
           value: project.totalBudget,
         });
-      } else {
-        // Project View: Total Budget -> Project Budget
-        links.push({
-          source: 'total-budget',
-          target: `project-budget-${project.projectId}`,
-          value: project.totalBudget,
-        });
       }
-    }
-
-    // "Other Projects" node
-    // Global View: Single aggregated node
-    // Other Views: Per-ministry nodes
-    if (isGlobalView) {
-      // We do this ONCE after iterating all ministries, but we need to accumulate the value first.
-      // Actually, we can just do it outside the loop.
     } else {
+      // Project View: Total Budget -> Project Budget
+      links.push({
+        source: 'total-budget',
+        target: `project-budget-${project.projectId}`,
+        value: project.totalBudget,
+      });
+    }
+  }
+
+  // Create "Other Projects" budget nodes (non-Global View only)
+  if (!isGlobalView) {
+    for (const ministry of topMinistries) {
       const otherBudget = otherProjectsBudgetByMinistry.get(ministry.name);
       if (otherBudget && otherBudget > 0 && !targetProjectName) {
         projectBudgetNodes.push({
