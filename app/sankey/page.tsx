@@ -319,19 +319,39 @@ function SankeyContent() {
   const { metadata, sankey } = data;
 
   // 金額を兆円、億円、万円で表示（3桁カンマ区切り）
-  const formatCurrency = (value: number | undefined) => {
-    if (value === undefined || value === null) return '---';
-    if (value >= 1e12) {
-      const trillions = value / 1e12;
+  // Helper function to convert dummy values (0.001) to actual values (0)
+  const getActualValue = (value: number | undefined, nodeOrDetails?: any): number | undefined => {
+    if (value === undefined || value === null) return value;
+
+    // If value is 0.001 (dummy value), check if it should be 0
+    if (value === 0.001) {
+      // Check if this node has totalBudget === 0 in details
+      if (nodeOrDetails?.details?.totalBudget === 0) {
+        return 0;
+      }
+      // For other cases with dummy value, also return 0
+      return 0;
+    }
+
+    return value;
+  };
+
+  const formatCurrency = (value: number | undefined, nodeOrDetails?: any) => {
+    // Convert dummy values to actual values
+    const actualValue = getActualValue(value, nodeOrDetails);
+
+    if (actualValue === undefined || actualValue === null) return '---';
+    if (actualValue >= 1e12) {
+      const trillions = actualValue / 1e12;
       return `${trillions.toLocaleString('ja-JP', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}兆円`;
-    } else if (value >= 1e8) {
-      const hundreds = value / 1e8;
+    } else if (actualValue >= 1e8) {
+      const hundreds = actualValue / 1e8;
       return `${hundreds.toLocaleString('ja-JP', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}億円`;
-    } else if (value >= 1e4) {
-      const tenThousands = value / 1e4;
+    } else if (actualValue >= 1e4) {
+      const tenThousands = actualValue / 1e4;
       return `${tenThousands.toLocaleString('ja-JP', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}万円`;
     } else {
-      return `${value.toLocaleString('ja-JP')}円`;
+      return `${actualValue.toLocaleString('ja-JP')}円`;
     }
   };
 
@@ -374,7 +394,7 @@ function SankeyContent() {
       );
       breadcrumbs.push({
         label: selectedProject,
-        amount: projectNode?.value,
+        amount: getActualValue(projectNode?.value, projectNode),
         onClick: () => {
           setViewMode('project');
           setSelectedRecipient(null);
@@ -584,7 +604,19 @@ function SankeyContent() {
                       const actualNode = sankey.nodes.find(n => n.id === node.id);
                       const name = actualNode?.name || node.id;
                       const nodeType = actualNode?.type || '';
-                      const amount = formatCurrency(node.value);
+
+                      // For nodes with dummy value (0.001), show actual amount (0円)
+                      let displayAmount = node.value;
+                      if (node.value === 0.001) {
+                        // Check if this is truly a zero-budget case
+                        if (nodeType === 'project-budget' && actualNode?.details?.totalBudget === 0) {
+                          displayAmount = 0;
+                        } else if (nodeType === 'ministry-budget') {
+                          // Ministry nodes shouldn't have dummy values, but handle just in case
+                          displayAmount = 0;
+                        }
+                      }
+                      const amount = formatCurrency(displayAmount);
 
                       let displayName = name;
                       if (nodeType === 'project-budget') {
@@ -649,7 +681,7 @@ function SankeyContent() {
                   const nodeType = actualNode.type || '';
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   const details = actualNode.details as any;
-                  const value = formatCurrency(node.value);
+                  const value = formatCurrency(node.value, actualNode);
 
                   // ノードタイプに応じてタイトルを調整
                   let title = name;
@@ -763,10 +795,14 @@ function SankeyContent() {
                 }}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 linkTooltip={({ link }: any) => {
+                  // Find actual nodes to check for dummy values
+                  const sourceNode = sankey.nodes.find(n => n.id === link.source.id);
+                  const targetNode = sankey.nodes.find(n => n.id === link.target.id);
+
                   return (
                     <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded shadow-lg border border-gray-200 dark:border-gray-700">
                       <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        {formatCurrency(link.source.value)} → {formatCurrency(link.target.value)}
+                        {formatCurrency(link.source.value, sourceNode)} → {formatCurrency(link.target.value, targetNode)}
                       </div>
                     </div>
                   );
