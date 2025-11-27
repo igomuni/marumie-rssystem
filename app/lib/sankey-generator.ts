@@ -1097,21 +1097,6 @@ function buildSankeyData(
     return { byMinistryId, byMinistryName };
   }
 
-  function calculateOtherMinistriesOtherNamedCorrect(
-    otherMinistryNames: Set<string>,
-    otherNamedSpendingByProject: Map<number, number>,
-    fullData: RS2024StructuredData
-  ): number {
-    let amount = 0;
-    for (const [projectId, val] of otherNamedSpendingByProject.entries()) {
-      const project = fullData.budgets.find(b => b.projectId === projectId);
-      if (project && otherMinistryNames.has(project.ministry)) {
-        amount += val;
-      }
-    }
-    return amount;
-  }
-
   // Aggregated "Other Recipient" Node (for TopN cutoff)
   let totalOtherRecipientAmount = 0;
 

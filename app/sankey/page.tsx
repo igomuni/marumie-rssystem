@@ -320,6 +320,7 @@ function SankeyContent() {
 
   // 金額を兆円、億円、万円で表示（3桁カンマ区切り）
   // Helper function to convert dummy values (0.001) to actual values (0)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getActualValue = (value: number | undefined, nodeOrDetails?: any): number | undefined => {
     if (value === undefined || value === null) return value;
 
@@ -336,6 +337,7 @@ function SankeyContent() {
     return value;
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formatCurrency = (value: number | undefined, nodeOrDetails?: any) => {
     // Convert dummy values to actual values
     const actualValue = getActualValue(value, nodeOrDetails);
