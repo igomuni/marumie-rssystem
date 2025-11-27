@@ -682,11 +682,16 @@ function buildSankeyData(
 
   // Create budget nodes for all projects in topProjects
   for (const project of topProjects) {
+    // Use dummy value 0.001 if budget is 0 but spending exists
+    const budgetNodeValue = project.totalBudget === 0 && project.totalSpendingAmount > 0
+      ? 0.001
+      : project.totalBudget;
+
     projectBudgetNodes.push({
       id: `project-budget-${project.projectId}`,
       name: project.projectName,
       type: 'project-budget',
-      value: project.totalBudget,
+      value: budgetNodeValue,
       originalId: project.projectId,
       details: {
         ministry: project.ministry,
@@ -706,28 +711,37 @@ function buildSankeyData(
     // Link: Ministry -> Project Budget (Global & Ministry View only)
     // In Project View, Total Budget links directly to Project Budget
     if (!targetProjectName) {
+      // Use dummy value 0.001 if budget is 0 but spending exists
+      const linkValue = project.totalBudget === 0 && project.totalSpendingAmount > 0
+        ? 0.001
+        : project.totalBudget;
+
       // Find ministry ID from topMinistries or full data
       const ministry = topMinistries.find(m => m.name === project.ministry);
       if (ministry) {
         links.push({
           source: `ministry-budget-${ministry.id}`,
           target: `project-budget-${project.projectId}`,
-          value: project.totalBudget,
+          value: linkValue,
         });
       } else if (isGlobalView && otherMinistriesBudget > 0) {
         // In Global View, link projects from non-TopN ministries to "その他の府省庁"
         links.push({
           source: 'ministry-budget-other',
           target: `project-budget-${project.projectId}`,
-          value: project.totalBudget,
+          value: linkValue,
         });
       }
     } else {
       // Project View: Total Budget -> Project Budget
+      const linkValue = project.totalBudget === 0 && project.totalSpendingAmount > 0
+        ? 0.001
+        : project.totalBudget;
+
       links.push({
         source: 'total-budget',
         target: `project-budget-${project.projectId}`,
-        value: project.totalBudget,
+        value: linkValue,
       });
     }
   }
@@ -837,7 +851,11 @@ function buildSankeyData(
       },
     });
 
-    const linkValue = Math.min(project.totalBudget, project.totalSpendingAmount);
+    // Use dummy value 0.001 if budget is 0 but spending exists
+    let linkValue = Math.min(project.totalBudget, project.totalSpendingAmount);
+    if (project.totalBudget === 0 && project.totalSpendingAmount > 0) {
+      linkValue = 0.001;
+    }
 
     links.push({
       source: `project-budget-${project.projectId}`,
