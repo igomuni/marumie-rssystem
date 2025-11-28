@@ -756,12 +756,16 @@ function buildSankeyData(
 
     // 【新規追加】「支出元(TopN以外)」ノードとリンク
     if (selection.otherProjectsSpendingInSpendingView && selection.otherProjectsSpendingInSpendingView > 0) {
+      // 非TopN府省庁からの支出も含めた合計値
+      const totalOtherProjectSpending = selection.otherProjectsSpendingInSpendingView +
+        (otherMinistriesSpendingInSpendingView || 0);
+
       // Project Spending列に「支出元(TopN以外)」ノードを追加
       nodes.push({
         id: 'project-spending-other-spending-view',
         name: '支出元(TopN以外)',
         type: 'project-spending',
-        value: selection.otherProjectsSpendingInSpendingView,
+        value: totalOtherProjectSpending,
         details: {
           ministry: '複数府省庁',
           bureau: '',
@@ -790,18 +794,28 @@ function buildSankeyData(
       links.push({
         source: 'project-spending-other-spending-view',
         target: recipientNodeId,
-        value: selection.otherProjectsSpendingInSpendingView,
+        value: totalOtherProjectSpending,
       });
     }
 
     // 【新規追加】「支出元府省庁(TopN以外)」からのリンク
     if (otherMinistriesSpendingInSpendingView && otherMinistriesSpendingInSpendingView > 0) {
-      // リンク: 「支出元府省庁(TopN以外)」 → 受給者（直接）
-      links.push({
-        source: 'ministry-other-spending-view',
-        target: recipientNodeId,
-        value: otherMinistriesSpendingInSpendingView,
-      });
+      // リンク: 「支出元府省庁(TopN以外)」 → 「支出元(TopN以外)」
+      // 支出元(TopN以外)ノードが存在する場合はそこを経由、なければ直接受給者へ
+      if (selection.otherProjectsSpendingInSpendingView && selection.otherProjectsSpendingInSpendingView > 0) {
+        links.push({
+          source: 'ministry-other-spending-view',
+          target: 'project-spending-other-spending-view',
+          value: otherMinistriesSpendingInSpendingView,
+        });
+      } else {
+        // 支出元(TopN以外)がない場合は直接受給者へ
+        links.push({
+          source: 'ministry-other-spending-view',
+          target: recipientNodeId,
+          value: otherMinistriesSpendingInSpendingView,
+        });
+      }
     }
 
     return { nodes, links };
@@ -1265,12 +1279,16 @@ function buildSankeyData(
 
     const topProjectIds = new Set(topProjects.map(p => p.projectId));
     for (const [projectId, otherNamedAmount] of otherNamedSpendingByProject.entries()) {
-      if (otherNamedAmount > 0 && topProjectIds.has(projectId)) {
-        links.push({
-          source: `project-spending-${projectId}`,
-          target: 'recipient-other-named',
-          value: otherNamedAmount,
-        });
+      if (topProjectIds.has(projectId)) {
+        // Use dummy value 0.001 if amount is 0 to prevent broken links
+        const linkValue = otherNamedAmount === 0 ? 0.001 : otherNamedAmount;
+        if (linkValue > 0) {
+          links.push({
+            source: `project-spending-${projectId}`,
+            target: 'recipient-other-named',
+            value: linkValue,
+          });
+        }
       }
     }
 
@@ -1444,11 +1462,13 @@ function buildSankeyData(
 
       // 3. Links from Top Projects to "Other Recipients"
       for (const [projectId, otherAmount] of otherSpendingsByProject.entries()) {
-        if (otherAmount > 0) {
+        // Use dummy value 0.001 if amount is 0 to prevent broken links
+        const linkValue = otherAmount === 0 ? 0.001 : otherAmount;
+        if (linkValue > 0) {
           links.push({
             source: `project-spending-${projectId}`,
             target: 'recipient-other-aggregated',
-            value: otherAmount,
+            value: linkValue,
           });
         }
       }
