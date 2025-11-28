@@ -185,6 +185,15 @@ function SankeyContent() {
 
     // Handle Project nodes
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
+      // Special handling for "支出元(TopN以外)" in Spending View
+      if (actualNode.type === 'project-spending' && actualNode.name === '支出元(TopN以外)') {
+        if (viewMode === 'spending') {
+          // Increase projectOffset to show next TopN projects
+          setProjectOffset(prev => prev + spendingViewTopN);
+        }
+        return;
+      }
+
       // Special handling for "事業(TopN以外)" aggregate nodes
       if (actualNode.name === '事業(TopN以外)') {
         // Paginate to show more items instead of drilling down
@@ -566,7 +575,8 @@ function SankeyContent() {
                   if (name.startsWith('その他') ||
                       name === '府省庁(TopN以外)' ||
                       name === '事業(TopN以外)' ||
-                      name === '支出先(TopN以外)') {
+                      name === '支出先(TopN以外)' ||
+                      name === '支出元(TopN以外)') {
                     return '#6b7280'; // グレー系
                   }
 
