@@ -23,20 +23,30 @@ function SankeyContent() {
   const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Settings State
-  const [topN, setTopN] = useState(10); // Global view: Number of ministries
-  const [globalSpendingTopN, setGlobalSpendingTopN] = useState(10); // Global view: Number of spending recipients
-  const [ministryTopN, setMinistryTopN] = useState(5); // Ministry view: Number of projects/spendings
-  const [projectViewTopN, setProjectViewTopN] = useState(15); // Project view: Number of spendings
-  const [spendingViewTopN, setSpendingViewTopN] = useState(20); // Spending view: Number of projects
+  // Settings State (ビュー別に整理)
+  // 全体ビュー
+  const [globalMinistryTopN, setGlobalMinistryTopN] = useState(10); // 府省庁TopN
+  const [globalSpendingTopN, setGlobalSpendingTopN] = useState(10); // 支出先TopN
+
+  // 府省庁ビュー
+  const [ministryProjectTopN, setMinistryProjectTopN] = useState(10); // 事業TopN
+  const [ministrySpendingTopN, setMinistrySpendingTopN] = useState(10); // 支出先TopN
+
+  // 事業ビュー
+  const [projectSpendingTopN, setProjectSpendingTopN] = useState(20); // 支出先TopN
+
+  // 支出ビュー
+  const [spendingProjectTopN, setSpendingProjectTopN] = useState(15); // 支出元事業TopN
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Temporary settings state for dialog
-  const [tempTopN, setTempTopN] = useState(topN);
+  const [tempGlobalMinistryTopN, setTempGlobalMinistryTopN] = useState(globalMinistryTopN);
   const [tempGlobalSpendingTopN, setTempGlobalSpendingTopN] = useState(globalSpendingTopN);
-  const [tempMinistryTopN, setTempMinistryTopN] = useState(ministryTopN);
-  const [tempProjectViewTopN, setTempProjectViewTopN] = useState(projectViewTopN);
-  const [tempSpendingViewTopN, setTempSpendingViewTopN] = useState(spendingViewTopN);
+  const [tempMinistryProjectTopN, setTempMinistryProjectTopN] = useState(ministryProjectTopN);
+  const [tempMinistrySpendingTopN, setTempMinistrySpendingTopN] = useState(ministrySpendingTopN);
+  const [tempProjectSpendingTopN, setTempProjectSpendingTopN] = useState(projectSpendingTopN);
+  const [tempSpendingProjectTopN, setTempSpendingProjectTopN] = useState(spendingProjectTopN);
 
   // Initialize state from URL parameters on mount
   useEffect(() => {
@@ -98,20 +108,21 @@ function SankeyContent() {
 
         if (viewMode === 'global') {
           params.set('offset', offset.toString());
-          params.set('limit', topN.toString());
+          params.set('limit', globalMinistryTopN.toString());
           params.set('projectLimit', '3'); // Fixed for global view to avoid clutter
           params.set('spendingLimit', globalSpendingTopN.toString());
         } else if (viewMode === 'ministry' && selectedMinistry) {
           params.set('ministryName', selectedMinistry);
-          params.set('projectLimit', ministryTopN.toString());
-          params.set('spendingLimit', ministryTopN.toString());
+          params.set('projectLimit', ministryProjectTopN.toString());
+          params.set('spendingLimit', ministrySpendingTopN.toString());
           params.set('projectOffset', projectOffset.toString());
         } else if (viewMode === 'project' && selectedProject) {
           params.set('projectName', selectedProject);
-          params.set('spendingLimit', projectViewTopN.toString());
+          params.set('spendingLimit', projectSpendingTopN.toString());
         } else if (viewMode === 'spending' && selectedRecipient) {
           params.set('recipientName', selectedRecipient);
-          params.set('projectLimit', spendingViewTopN.toString());
+          params.set('projectLimit', spendingProjectTopN.toString());
+          params.set('projectOffset', projectOffset.toString());
         }
 
         const response = await fetch(`/api/sankey?${params.toString()}`);
@@ -128,7 +139,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [offset, projectOffset, topN, globalSpendingTopN, ministryTopN, projectViewTopN, spendingViewTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient]);
+  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient]);
 
   // スマホ判定
   useEffect(() => {
@@ -147,7 +158,7 @@ function SankeyContent() {
 
     // Handle "Other Ministries" drill-down
     if (actualNode.id === 'ministry-budget-other') {
-      setOffset(prev => prev + topN);
+      setOffset(prev => prev + globalMinistryTopN);
       return;
     }
 
@@ -157,7 +168,7 @@ function SankeyContent() {
         setViewMode('global');
         setSelectedMinistry(null);
       } else if (offset > 0) {
-        setOffset(prev => Math.max(0, prev - topN));
+        setOffset(prev => Math.max(0, prev - globalMinistryTopN));
       }
       return;
     }
@@ -189,7 +200,7 @@ function SankeyContent() {
       if (actualNode.type === 'project-spending' && actualNode.name === '支出元(TopN以外)') {
         if (viewMode === 'spending') {
           // Increase projectOffset to show next TopN projects
-          setProjectOffset(prev => prev + spendingViewTopN);
+          setProjectOffset(prev => prev + spendingProjectTopN);
         }
         return;
       }
@@ -199,10 +210,10 @@ function SankeyContent() {
         // Paginate to show more items instead of drilling down
         if (viewMode === 'global') {
           // In Global view, increase ministry offset (like "府省庁(TopN以外)")
-          setOffset(prev => prev + topN);
+          setOffset(prev => prev + globalMinistryTopN);
         } else if (viewMode === 'ministry') {
           // In Ministry view, increase project offset
-          setProjectOffset(prev => prev + ministryTopN);
+          setProjectOffset(prev => prev + ministryProjectTopN);
         }
         return;
       }
@@ -239,7 +250,7 @@ function SankeyContent() {
 
       // Handle "支出先(TopN以外)" - same behavior as "Other Ministries"
       if (actualNode.name === '支出先(TopN以外)') {
-        setOffset(prev => prev + topN);
+        setOffset(prev => prev + globalMinistryTopN);
         return;
       }
 
@@ -274,25 +285,29 @@ function SankeyContent() {
   };
 
   const openSettings = () => {
-    setTempTopN(topN);
+    setTempGlobalMinistryTopN(globalMinistryTopN);
     setTempGlobalSpendingTopN(globalSpendingTopN);
-    setTempMinistryTopN(ministryTopN);
-    setTempProjectViewTopN(projectViewTopN);
-    setTempSpendingViewTopN(spendingViewTopN);
+    setTempMinistryProjectTopN(ministryProjectTopN);
+    setTempMinistrySpendingTopN(ministrySpendingTopN);
+    setTempProjectSpendingTopN(projectSpendingTopN);
+    setTempSpendingProjectTopN(spendingProjectTopN);
     setIsSettingsOpen(true);
   };
 
   const saveSettings = () => {
-    setTopN(tempTopN);
+    setGlobalMinistryTopN(tempGlobalMinistryTopN);
     setGlobalSpendingTopN(tempGlobalSpendingTopN);
-    setMinistryTopN(tempMinistryTopN);
-    setProjectViewTopN(tempProjectViewTopN);
-    setSpendingViewTopN(tempSpendingViewTopN);
+    setMinistryProjectTopN(tempMinistryProjectTopN);
+    setMinistrySpendingTopN(tempMinistrySpendingTopN);
+    setProjectSpendingTopN(tempProjectSpendingTopN);
+    setSpendingProjectTopN(tempSpendingProjectTopN);
     setIsSettingsOpen(false);
-    // Reset offset if TopN changes to avoid weird states?
-    // Maybe safest to reset offset to 0 if TopN changes.
-    if (tempTopN !== topN) {
+    // Reset offset if TopN changes to avoid weird states
+    if (tempGlobalMinistryTopN !== globalMinistryTopN) {
       setOffset(0);
+    }
+    if (tempMinistryProjectTopN !== ministryProjectTopN) {
+      setProjectOffset(0);
     }
   };
 
@@ -443,7 +458,7 @@ function SankeyContent() {
               {viewMode === 'ministry' && `（${selectedMinistry}）`}
               {viewMode === 'project' && `（${selectedProject}）`}
               {viewMode === 'spending' && `（${selectedRecipient}）`}
-              {viewMode === 'global' && `（Top${topN}）`}
+              {viewMode === 'global' && `（Top${globalMinistryTopN}）`}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               {viewMode === 'global'
@@ -855,82 +870,119 @@ function SankeyContent() {
       {/* 設定ダイアログ */}
       {isSettingsOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">表示設定</h2>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100">TopN表示設定</h2>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                TopN (府省庁一覧)
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="20"
-                value={tempTopN}
-                onChange={(e) => setTempTopN(parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              />
-              <p className="text-xs text-gray-500 mt-1">全体ビューで表示する府省庁の数</p>
+            {/* 全体ビュー */}
+            <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">全体ビュー</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    府省庁TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={tempGlobalMinistryTopN}
+                    onChange={(e) => setTempGlobalMinistryTopN(parseInt(e.target.value) || 1)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    支出先TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={tempGlobalSpendingTopN}
+                    onChange={(e) => setTempGlobalSpendingTopN(parseInt(e.target.value) || 1)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
+                </div>
+              </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                TopN (全体ビュー支出先)
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="50"
-                value={tempGlobalSpendingTopN}
-                onChange={(e) => setTempGlobalSpendingTopN(parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              />
-              <p className="text-xs text-gray-500 mt-1">全体ビューで表示する支出先の数</p>
+            {/* 府省庁ビュー */}
+            <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">府省庁ビュー</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    事業TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={tempMinistryProjectTopN}
+                    onChange={(e) => setTempMinistryProjectTopN(parseInt(e.target.value) || 1)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    支出先TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={tempMinistrySpendingTopN}
+                    onChange={(e) => setTempMinistrySpendingTopN(parseInt(e.target.value) || 1)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
+                </div>
+              </div>
             </div>
 
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                TopN (府省庁詳細)
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="20"
-                value={tempMinistryTopN}
-                onChange={(e) => setTempMinistryTopN(parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              />
-              <p className="text-xs text-gray-500 mt-1">府省庁個別ビューで表示する事業・支出先の数</p>
+            {/* 事業ビュー */}
+            <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">事業ビュー</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    支出先TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={tempProjectSpendingTopN}
+                    onChange={(e) => setTempProjectSpendingTopN(parseInt(e.target.value) || 1)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 20</p>
+                </div>
+              </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                TopN (事業ビュー)
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="20"
-                value={tempProjectViewTopN}
-                onChange={(e) => setTempProjectViewTopN(parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              />
-              <p className="text-xs text-gray-500 mt-1">事業個別ビューで表示する支出先の数</p>
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                TopN (支出ビュー)
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="20"
-                value={tempSpendingViewTopN}
-                onChange={(e) => setTempSpendingViewTopN(parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              />
-              <p className="text-xs text-gray-500 mt-1">支出先個別ビューで表示する事業の数</p>
+            {/* 支出ビュー */}
+            <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">支出ビュー</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    支出元事業TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={tempSpendingProjectTopN}
+                    onChange={(e) => setTempSpendingProjectTopN(parseInt(e.target.value) || 1)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 15</p>
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-end gap-2">
