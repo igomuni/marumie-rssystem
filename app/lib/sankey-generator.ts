@@ -129,6 +129,7 @@ interface DataSelection {
   // Spending View用
   otherProjectsSpendingInSpendingView?: number; // TopN以外のプロジェクトからの支出金額
   otherProjectsSpendingByMinistryInSpendingView?: Map<string, number>; // 府省庁別のTopN以外プロジェクト支出金額
+  otherMinistriesSpendingInSpendingView?: number; // TopN以外の府省庁からの支出金額
   hasMoreProjects?: boolean; // ページネーション可能かどうか
 }
 
@@ -161,6 +162,7 @@ function selectData(
   // Spending View用
   let otherProjectsSpendingInSpendingView: number | undefined = undefined;
   let otherProjectsSpendingByMinistryInSpendingView: Map<string, number> | undefined = undefined;
+  let otherMinistriesSpendingInSpendingView: number | undefined = undefined;
   let hasMoreProjects: boolean | undefined = undefined;
 
   if (targetRecipientName) {
@@ -272,19 +274,19 @@ function selectData(
         }
       }
 
-      // Calculate spending from non-TopN ministries (this will NOT be shown in the diagram)
+      // Calculate spending from non-TopN ministries
       let nonTopMinistrySpending = 0;
       for (let i = limit; i < sortedMinistries.length; i++) {
         nonTopMinistrySpending += sortedMinistries[i][1];
       }
 
-      // Add non-TopN ministry spending to otherProjectsAmount
-      otherProjectsAmount += nonTopMinistrySpending;
-
       // DataSelectionに追加情報を保存
       if (otherProjectsAmount > 0) {
         otherProjectsSpendingInSpendingView = otherProjectsAmount;
         otherProjectsSpendingByMinistryInSpendingView = otherProjectsByMinistry;
+      }
+      if (nonTopMinistrySpending > 0) {
+        otherMinistriesSpendingInSpendingView = nonTopMinistrySpending;
       }
       hasMoreProjects = sortedProjects.length > projectOffset + projectLimit;
 
@@ -577,6 +579,7 @@ function selectData(
     otherNamedSpendingByProject,
     otherProjectsSpendingInSpendingView,
     otherProjectsSpendingByMinistryInSpendingView,
+    otherMinistriesSpendingInSpendingView,
     hasMoreProjects,
   };
 }
@@ -601,6 +604,7 @@ function buildSankeyData(
     topSpendings,
     otherSpendingsByProject,
     otherNamedSpendingByProject,
+    otherMinistriesSpendingInSpendingView,
   } = selection;
 
   const { offset, targetMinistryName, targetProjectName, targetRecipientName } = options;
@@ -733,6 +737,21 @@ function buildSankeyData(
         });
       }
     }
+
+    // 【新規追加】「支出元府省庁(TopN以外)」ノード（非TopN府省庁の集約）
+    if (otherMinistriesSpendingInSpendingView && otherMinistriesSpendingInSpendingView > 0) {
+      ministryNodes.push({
+        id: 'ministry-other-spending-view',
+        name: '支出元府省庁(TopN以外)',
+        type: 'ministry-budget',
+        value: otherMinistriesSpendingInSpendingView,
+        details: {
+          projectCount: 0,
+          bureauCount: 0
+        }
+      });
+    }
+
     nodes.push(...ministryNodes);
 
     // 【新規追加】「支出元(TopN以外)」ノードとリンク
@@ -775,6 +794,16 @@ function buildSankeyData(
       });
     }
 
+    // 【新規追加】「支出元府省庁(TopN以外)」からのリンク
+    if (otherMinistriesSpendingInSpendingView && otherMinistriesSpendingInSpendingView > 0) {
+      // リンク: 「支出元府省庁(TopN以外)」 → 受給者（直接）
+      links.push({
+        source: 'ministry-other-spending-view',
+        target: recipientNodeId,
+        value: otherMinistriesSpendingInSpendingView,
+      });
+    }
+
     return { nodes, links };
   }
 
@@ -783,18 +812,14 @@ function buildSankeyData(
   // Determine view type early for conditional logic
   const isGlobalView = !targetMinistryName && !targetProjectName && !targetRecipientName;
 
-  // Column 0: Total Budget or Ministry Name
-  // Shown in: Global View (as 予算総計), Ministry View (as ministry name), Project View (as ministry name)
-  // Always show this node in all views
-  if (true) {
+  // Column 0: Total Budget (Global View only) or Ministry Name (Project View only)
+  // Ministry View: No Column 0 node (starts from Column 1: Ministry)
+  if (!targetMinistryName) {
     const totalBudget = topMinistries.reduce((sum, m) => sum + m.totalBudget, 0) + otherMinistriesBudget;
 
     // Determine the label based on view mode
     let nodeName: string;
-    if (targetMinistryName && !targetProjectName) {
-      // Ministry View: use ministry name
-      nodeName = targetMinistryName;
-    } else if (targetProjectName && topMinistries.length === 1) {
+    if (targetProjectName && topMinistries.length === 1) {
       // Project View: use ministry name
       nodeName = topMinistries[0].name;
     } else {
@@ -814,7 +839,7 @@ function buildSankeyData(
     });
 
     // Link: Total -> Ministry (Global View only)
-    if (!targetMinistryName && !targetProjectName) {
+    if (!targetProjectName) {
       for (const ministry of topMinistries) {
         links.push({
           source: 'total-budget',
@@ -829,17 +854,6 @@ function buildSankeyData(
           value: otherMinistriesBudget,
         });
       }
-    }
-
-    // Ministry View: Total Budget (ministry name) -> Ministry Budget
-    if (targetMinistryName && !targetProjectName && topMinistries.length === 1) {
-      const ministry = topMinistries[0];
-      const ministryValue = topProjects.filter(p => p.ministry === ministry.name).reduce((sum, p) => sum + p.totalBudget, 0);
-      links.push({
-        source: 'total-budget',
-        target: `ministry-budget-${ministry.id}`,
-        value: ministryValue,
-      });
     }
     // Note: In Project View, Total -> Project Budget links are created in the Project Budget section
   }

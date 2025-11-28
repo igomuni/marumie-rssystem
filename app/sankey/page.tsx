@@ -177,7 +177,10 @@ function SankeyContent() {
     }
 
     // Handle Ministry nodes
-    if (actualNode.type === 'ministry-budget' && actualNode.id !== 'total-budget' && actualNode.id !== 'ministry-budget-other') {
+    if (actualNode.type === 'ministry-budget' &&
+        actualNode.id !== 'total-budget' &&
+        actualNode.id !== 'ministry-budget-other' &&
+        actualNode.id !== 'ministry-other-spending-view') {
       if (viewMode === 'ministry') {
         // In Ministry View, clicking the ministry node goes back to Global
         setViewMode('global');
@@ -596,7 +599,8 @@ function SankeyContent() {
                       name === '府省庁(TopN以外)' ||
                       name === '事業(TopN以外)' ||
                       name === '支出先(TopN以外)' ||
-                      name === '支出元(TopN以外)') {
+                      name === '支出元(TopN以外)' ||
+                      name === '支出元府省庁(TopN以外)') {
                     return '#6b7280'; // グレー系
                   }
 
