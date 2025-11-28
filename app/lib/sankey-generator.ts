@@ -125,6 +125,11 @@ interface DataSelection {
   topSpendings: SpendingRecord[];
   otherSpendingsByProject: Map<number, number>;
   otherNamedSpendingByProject: Map<number, number>;
+
+  // Spending View用
+  otherProjectsSpendingInSpendingView?: number; // TopN以外のプロジェクトからの支出金額
+  otherProjectsSpendingByMinistryInSpendingView?: Map<string, number>; // 府省庁別のTopN以外プロジェクト支出金額
+  hasMoreProjects?: boolean; // ページネーション可能かどうか
 }
 
 function selectData(
@@ -152,6 +157,11 @@ function selectData(
   let topSpendings: SpendingRecord[] = [];
   const otherSpendingsByProject = new Map<number, number>();
   const otherNamedSpendingByProject = new Map<number, number>();
+
+  // Spending View用
+  let otherProjectsSpendingInSpendingView: number | undefined = undefined;
+  let otherProjectsSpendingByMinistryInSpendingView: Map<string, number> | undefined = undefined;
+  let hasMoreProjects: boolean | undefined = undefined;
 
   if (targetRecipientName) {
     // --- Spending View (Reverse Flow) ---
@@ -195,11 +205,56 @@ function selectData(
         return (amountByProject.get(b.projectId) || 0) - (amountByProject.get(a.projectId) || 0);
       });
 
-      // Take Top N Projects
-      topProjects = sortedProjects.slice(0, projectLimit); // Use projectLimit for this view's TopN
+      // Take Top N Projects (with pagination support via projectOffset)
+      topProjects = sortedProjects.slice(projectOffset, projectOffset + projectLimit);
 
-      // 3. Find Ministries for these projects
+      // 【新規追加】TopN以外のプロジェクト金額を集計
+      let otherProjectsAmount = 0;
+      const otherProjectsByMinistry = new Map<string, number>();
+
+      // projectOffset前のプロジェクト（前ページ）
+      for (let i = 0; i < projectOffset; i++) {
+        if (i < sortedProjects.length) {
+          const project = sortedProjects[i];
+          const projectId = project.projectId;
+          const amount = amountByProject.get(projectId) || 0;
+          otherProjectsAmount += amount;
+
+          // 府省庁別に集計
+          const currentMinistryAmount = otherProjectsByMinistry.get(project.ministry) || 0;
+          otherProjectsByMinistry.set(project.ministry, currentMinistryAmount + amount);
+        }
+      }
+
+      // projectOffset + projectLimit以降のプロジェクト（後ページ）
+      for (let i = projectOffset + projectLimit; i < sortedProjects.length; i++) {
+        const project = sortedProjects[i];
+        const projectId = project.projectId;
+        const amount = amountByProject.get(projectId) || 0;
+        otherProjectsAmount += amount;
+
+        // 府省庁別に集計
+        const currentMinistryAmount = otherProjectsByMinistry.get(project.ministry) || 0;
+        otherProjectsByMinistry.set(project.ministry, currentMinistryAmount + amount);
+      }
+
+      // DataSelectionに追加情報を保存
+      if (otherProjectsAmount > 0) {
+        otherProjectsSpendingInSpendingView = otherProjectsAmount;
+        otherProjectsSpendingByMinistryInSpendingView = otherProjectsByMinistry;
+      }
+      hasMoreProjects = sortedProjects.length > projectOffset + projectLimit;
+
+      // 3. Find Ministries for these projects (including ministries from otherProjects)
       const ministryNames = new Set(topProjects.map(p => p.ministry));
+
+      // TopN以外のプロジェクトの府省庁も追加
+      if (otherProjectsByMinistry.size > 0) {
+        for (const ministryName of otherProjectsByMinistry.keys()) {
+          ministryNames.add(ministryName);
+        }
+      }
+
       topMinistries = data.budgetTree.ministries
         .filter(m => ministryNames.has(m.name))
         .map(m => ({
@@ -436,6 +491,9 @@ function selectData(
     topSpendings,
     otherSpendingsByProject,
     otherNamedSpendingByProject,
+    otherProjectsSpendingInSpendingView,
+    otherProjectsSpendingByMinistryInSpendingView,
+    hasMoreProjects,
   };
 }
 
@@ -571,6 +629,12 @@ function buildSankeyData(
         }
       }
 
+      // Add spending from "Other Projects" to this ministry
+      if (selection.otherProjectsSpendingByMinistryInSpendingView) {
+        const otherAmount = selection.otherProjectsSpendingByMinistryInSpendingView.get(ministry.name) || 0;
+        ministryValue += otherAmount;
+      }
+
       if (ministryValue > 0) {
         ministryNodes.push({
           id: `ministry-${ministry.id}`,
@@ -586,6 +650,46 @@ function buildSankeyData(
       }
     }
     nodes.push(...ministryNodes);
+
+    // 【新規追加】「支出元(TopN以外)」ノードとリンク
+    if (selection.otherProjectsSpendingInSpendingView && selection.otherProjectsSpendingInSpendingView > 0) {
+      // Project Spending列に「支出元(TopN以外)」ノードを追加
+      nodes.push({
+        id: 'project-spending-other-spending-view',
+        name: '支出元(TopN以外)',
+        type: 'project-spending',
+        value: selection.otherProjectsSpendingInSpendingView,
+        details: {
+          ministry: '複数府省庁',
+          bureau: '',
+          fiscalYear: 2024,
+          executionRate: 0,
+          spendingCount: 0,
+        },
+      });
+
+      // リンク: 府省庁 → 「支出元(TopN以外)」
+      if (selection.otherProjectsSpendingByMinistryInSpendingView) {
+        for (const [ministryName, amount] of selection.otherProjectsSpendingByMinistryInSpendingView.entries()) {
+          // Find ministry ID
+          const ministry = topMinistries.find(m => m.name === ministryName);
+          if (ministry && amount > 0) {
+            links.push({
+              source: `ministry-${ministry.id}`,
+              target: 'project-spending-other-spending-view',
+              value: amount,
+            });
+          }
+        }
+      }
+
+      // リンク: 「支出元(TopN以外)」 → 受給者
+      links.push({
+        source: 'project-spending-other-spending-view',
+        target: recipientNodeId,
+        value: selection.otherProjectsSpendingInSpendingView,
+      });
+    }
 
     return { nodes, links };
   }
