@@ -37,6 +37,7 @@ function SankeyContent() {
 
   // 支出ビュー
   const [spendingProjectTopN, setSpendingProjectTopN] = useState(15); // 支出元事業TopN
+  const [spendingMinistryTopN, setSpendingMinistryTopN] = useState(10); // 支出元府省庁TopN
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -47,6 +48,7 @@ function SankeyContent() {
   const [tempMinistrySpendingTopN, setTempMinistrySpendingTopN] = useState(ministrySpendingTopN);
   const [tempProjectSpendingTopN, setTempProjectSpendingTopN] = useState(projectSpendingTopN);
   const [tempSpendingProjectTopN, setTempSpendingProjectTopN] = useState(spendingProjectTopN);
+  const [tempSpendingMinistryTopN, setTempSpendingMinistryTopN] = useState(spendingMinistryTopN);
 
   // Initialize state from URL parameters on mount
   useEffect(() => {
@@ -123,6 +125,7 @@ function SankeyContent() {
           params.set('recipientName', selectedRecipient);
           params.set('projectLimit', spendingProjectTopN.toString());
           params.set('projectOffset', projectOffset.toString());
+          params.set('limit', spendingMinistryTopN.toString());
         }
 
         const response = await fetch(`/api/sankey?${params.toString()}`);
@@ -139,7 +142,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient]);
+  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient]);
 
   // スマホ判定
   useEffect(() => {
@@ -291,6 +294,7 @@ function SankeyContent() {
     setTempMinistrySpendingTopN(ministrySpendingTopN);
     setTempProjectSpendingTopN(projectSpendingTopN);
     setTempSpendingProjectTopN(spendingProjectTopN);
+    setTempSpendingMinistryTopN(spendingMinistryTopN);
     setIsSettingsOpen(true);
   };
 
@@ -301,6 +305,7 @@ function SankeyContent() {
     setMinistrySpendingTopN(tempMinistrySpendingTopN);
     setProjectSpendingTopN(tempProjectSpendingTopN);
     setSpendingProjectTopN(tempSpendingProjectTopN);
+    setSpendingMinistryTopN(tempSpendingMinistryTopN);
     setIsSettingsOpen(false);
     // Reset offset if TopN changes to avoid weird states
     if (tempGlobalMinistryTopN !== globalMinistryTopN) {
@@ -981,6 +986,20 @@ function SankeyContent() {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 15</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    支出元府省庁TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={tempSpendingMinistryTopN}
+                    onChange={(e) => setTempSpendingMinistryTopN(parseInt(e.target.value) || 1)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
                 </div>
               </div>
             </div>

@@ -206,9 +206,31 @@ function selectData(
       });
 
       // Take Top N Projects (with pagination support via projectOffset)
-      topProjects = sortedProjects.slice(projectOffset, projectOffset + projectLimit);
+      const candidateTopProjects = sortedProjects.slice(projectOffset, projectOffset + projectLimit);
+
+      // 2.5. Calculate ministry spending to determine TopN ministries
+      const allMinistrySpending = new Map<string, number>();
+
+      for (const project of sortedProjects) {
+        const amount = amountByProject.get(project.projectId) || 0;
+        const current = allMinistrySpending.get(project.ministry) || 0;
+        allMinistrySpending.set(project.ministry, current + amount);
+      }
+
+      // Sort ministries by spending and select TopN
+      const sortedMinistries = Array.from(allMinistrySpending.entries())
+        .sort((a, b) => b[1] - a[1]);
+
+      const topMinistryNames = new Set(sortedMinistries.slice(0, limit).map(([name]) => name));
+
+      // 3. Filter topProjects to only include projects from TopN ministries
+      topProjects = candidateTopProjects.filter(p => topMinistryNames.has(p.ministry));
 
       // 【新規追加】TopN以外のプロジェクト金額を集計
+      // This includes:
+      // - Projects before projectOffset (previous pages)
+      // - Projects after projectOffset + projectLimit (next pages)
+      // - Projects from candidate list that are not in TopN ministries
       let otherProjectsAmount = 0;
       const otherProjectsByMinistry = new Map<string, number>();
 
@@ -218,11 +240,13 @@ function selectData(
           const project = sortedProjects[i];
           const projectId = project.projectId;
           const amount = amountByProject.get(projectId) || 0;
-          otherProjectsAmount += amount;
 
-          // 府省庁別に集計
-          const currentMinistryAmount = otherProjectsByMinistry.get(project.ministry) || 0;
-          otherProjectsByMinistry.set(project.ministry, currentMinistryAmount + amount);
+          // Only add to "Other" if from TopN ministries
+          if (topMinistryNames.has(project.ministry)) {
+            otherProjectsAmount += amount;
+            const currentMinistryAmount = otherProjectsByMinistry.get(project.ministry) || 0;
+            otherProjectsByMinistry.set(project.ministry, currentMinistryAmount + amount);
+          }
         }
       }
 
@@ -231,12 +255,31 @@ function selectData(
         const project = sortedProjects[i];
         const projectId = project.projectId;
         const amount = amountByProject.get(projectId) || 0;
-        otherProjectsAmount += amount;
 
-        // 府省庁別に集計
-        const currentMinistryAmount = otherProjectsByMinistry.get(project.ministry) || 0;
-        otherProjectsByMinistry.set(project.ministry, currentMinistryAmount + amount);
+        // Only add to "Other" if from TopN ministries
+        if (topMinistryNames.has(project.ministry)) {
+          otherProjectsAmount += amount;
+          const currentMinistryAmount = otherProjectsByMinistry.get(project.ministry) || 0;
+          otherProjectsByMinistry.set(project.ministry, currentMinistryAmount + amount);
+        }
       }
+
+      // Projects from candidateTopProjects that are filtered out due to non-TopN ministry
+      for (const project of candidateTopProjects) {
+        if (!topMinistryNames.has(project.ministry)) {
+          const amount = amountByProject.get(project.projectId) || 0;
+          otherProjectsAmount += amount;
+        }
+      }
+
+      // Calculate spending from non-TopN ministries (this will NOT be shown in the diagram)
+      let nonTopMinistrySpending = 0;
+      for (let i = limit; i < sortedMinistries.length; i++) {
+        nonTopMinistrySpending += sortedMinistries[i][1];
+      }
+
+      // Add non-TopN ministry spending to otherProjectsAmount
+      otherProjectsAmount += nonTopMinistrySpending;
 
       // DataSelectionに追加情報を保存
       if (otherProjectsAmount > 0) {
@@ -245,18 +288,9 @@ function selectData(
       }
       hasMoreProjects = sortedProjects.length > projectOffset + projectLimit;
 
-      // 3. Find Ministries for these projects (including ministries from otherProjects)
-      const ministryNames = new Set(topProjects.map(p => p.ministry));
-
-      // TopN以外のプロジェクトの府省庁も追加
-      if (otherProjectsByMinistry.size > 0) {
-        for (const ministryName of otherProjectsByMinistry.keys()) {
-          ministryNames.add(ministryName);
-        }
-      }
-
+      // 4. Build topMinistries list
       topMinistries = data.budgetTree.ministries
-        .filter(m => ministryNames.has(m.name))
+        .filter(m => topMinistryNames.has(m.name))
         .map(m => ({
           name: m.name,
           id: m.id,
@@ -419,20 +453,11 @@ function selectData(
 
   // --- Common Logic for Spendings (except for Spending View which is handled above) ---
   // In Global View, topSpendings is already selected globally.
-  // In Ministry/Project View, we need to select top spendings per project.
+  // In Ministry View, we need independent TopN selection for projects and spendings.
+  // In Project View, we need to select top spendings for the single project.
   if (!targetRecipientName && (targetMinistryName || targetProjectName)) {
-    // For Global View, topSpendings is already selected
-    // For other views, we need to select top spendings per project
-
     // Aggregate "Other" named spendings
     for (const project of data.budgets) {
-      // Optimization: Only process if project is in topProjects or if we need it for "Other" calculations
-      // For simplicity, we might process all, but let's try to be efficient.
-      // Actually, we only need otherNamedSpendingByProject for the selected projects to show the "Other" node correctly linked.
-      // But wait, "Other Named" node aggregates from ALL projects? 
-      // In the original logic: "otherNamedSpendingByProject" was calculated for ALL projects.
-      // Let's keep it consistent.
-
       const projectSpendings = data.spendings
         .filter(s => project.spendingIds.includes(s.spendingId))
         .filter(s => s.spendingName === 'その他');
@@ -447,38 +472,97 @@ function selectData(
       }
     }
 
-    // Select Top Spendings for selected projects
-    const topSpendingIds = new Set<number>();
+    if (targetMinistryName && !targetProjectName) {
+      // --- Ministry View: Independent TopN Selection ---
+      // 1. Projects are already selected by budget (done above in Ministry View section)
+      // 2. Select Top Spendings INDEPENDENTLY (not per-project, but globally across ministry)
 
-    for (const project of topProjects) {
-      const projectSpendings = data.spendings
-        .filter(s => project.spendingIds.includes(s.spendingId))
-        .filter(s => s.spendingName !== 'その他')
-        .map(s => {
-          const projectSpending = s.projects.find(p => p.projectId === project.projectId);
-          return {
-            spending: s,
-            amountFromThisProject: projectSpending?.amount || 0,
-          };
-        });
+      // Get all spendings from all projects in this ministry
+      const ministryProjectIds = data.budgets
+        .filter(p => p.ministry === targetMinistryName)
+        .map(p => p.projectId);
 
-      const sortedSpendings = projectSpendings.sort((a, b) => b.amountFromThisProject - a.amountFromThisProject);
-      const topNSpendings = sortedSpendings.slice(0, spendingLimit);
+      const ministrySpendingMap = new Map<number, number>(); // spendingId -> total amount
 
-      for (const { spending } of topNSpendings) {
-        topSpendingIds.add(spending.spendingId);
+      for (const spending of data.spendings) {
+        if (spending.spendingName === 'その他') continue;
+
+        let totalFromMinistry = 0;
+        for (const proj of spending.projects) {
+          if (ministryProjectIds.includes(proj.projectId)) {
+            totalFromMinistry += proj.amount;
+          }
+        }
+
+        if (totalFromMinistry > 0) {
+          ministrySpendingMap.set(spending.spendingId, totalFromMinistry);
+        }
       }
 
-      const otherSpendingTotal = sortedSpendings
-        .slice(spendingLimit)
-        .reduce((sum, { amountFromThisProject }) => sum + amountFromThisProject, 0);
+      // Sort and select TopN spendings
+      const sortedSpendings = Array.from(ministrySpendingMap.entries())
+        .sort((a, b) => b[1] - a[1]);
 
-      if (otherSpendingTotal > 0) {
-        otherSpendingsByProject.set(project.projectId, otherSpendingTotal);
+      const topSpendingIds = new Set(
+        sortedSpendings.slice(0, spendingLimit).map(([id]) => id)
+      );
+
+      topSpendings = data.spendings.filter(s => topSpendingIds.has(s.spendingId));
+
+      // Calculate "Other Spendings" per project
+      // For each project in topProjects, calculate spending to non-TopN recipients
+      for (const project of topProjects) {
+        const projectSpendings = data.spendings
+          .filter(s => project.spendingIds.includes(s.spendingId))
+          .filter(s => s.spendingName !== 'その他');
+
+        let otherSpendingTotal = 0;
+        for (const spending of projectSpendings) {
+          if (!topSpendingIds.has(spending.spendingId)) {
+            const projectSpending = spending.projects.find(p => p.projectId === project.projectId);
+            otherSpendingTotal += projectSpending?.amount || 0;
+          }
+        }
+
+        if (otherSpendingTotal > 0) {
+          otherSpendingsByProject.set(project.projectId, otherSpendingTotal);
+        }
       }
+
+    } else {
+      // --- Project View: Select top spendings for the single project ---
+      const topSpendingIds = new Set<number>();
+
+      for (const project of topProjects) {
+        const projectSpendings = data.spendings
+          .filter(s => project.spendingIds.includes(s.spendingId))
+          .filter(s => s.spendingName !== 'その他')
+          .map(s => {
+            const projectSpending = s.projects.find(p => p.projectId === project.projectId);
+            return {
+              spending: s,
+              amountFromThisProject: projectSpending?.amount || 0,
+            };
+          });
+
+        const sortedSpendings = projectSpendings.sort((a, b) => b.amountFromThisProject - a.amountFromThisProject);
+        const topNSpendings = sortedSpendings.slice(0, spendingLimit);
+
+        for (const { spending } of topNSpendings) {
+          topSpendingIds.add(spending.spendingId);
+        }
+
+        const otherSpendingTotal = sortedSpendings
+          .slice(spendingLimit)
+          .reduce((sum, { amountFromThisProject }) => sum + amountFromThisProject, 0);
+
+        if (otherSpendingTotal > 0) {
+          otherSpendingsByProject.set(project.projectId, otherSpendingTotal);
+        }
+      }
+
+      topSpendings = data.spendings.filter(s => topSpendingIds.has(s.spendingId));
     }
-
-    topSpendings = data.spendings.filter(s => topSpendingIds.has(s.spendingId));
   }
 
   return {
@@ -699,16 +783,28 @@ function buildSankeyData(
   // Determine view type early for conditional logic
   const isGlobalView = !targetMinistryName && !targetProjectName && !targetRecipientName;
 
-  // Column 0: Total Budget
-  // Shown in: Global View, Project View
-  // Not shown in: Ministry View (targetMinistryName is set but not targetProjectName)
-  if (!targetMinistryName || targetProjectName) {
+  // Column 0: Total Budget or Ministry Name
+  // Shown in: Global View (as 予算総計), Ministry View (as ministry name), Project View (as ministry name)
+  // Always show this node in all views
+  if (true) {
     const totalBudget = topMinistries.reduce((sum, m) => sum + m.totalBudget, 0) + otherMinistriesBudget;
-    const totalBudgetName = offset === 0 ? '予算総計' : `予算総計 (Rank ${offset + 1}+)`;
+
+    // Determine the label based on view mode
+    let nodeName: string;
+    if (targetMinistryName && !targetProjectName) {
+      // Ministry View: use ministry name
+      nodeName = targetMinistryName;
+    } else if (targetProjectName && topMinistries.length === 1) {
+      // Project View: use ministry name
+      nodeName = topMinistries[0].name;
+    } else {
+      // Global View: use "予算総計"
+      nodeName = offset === 0 ? '予算総計' : `予算総計 (Rank ${offset + 1}+)`;
+    }
 
     nodes.push({
       id: 'total-budget',
-      name: totalBudgetName,
+      name: nodeName,
       type: 'ministry-budget',
       value: totalBudget,
       details: {
@@ -733,6 +829,17 @@ function buildSankeyData(
           value: otherMinistriesBudget,
         });
       }
+    }
+
+    // Ministry View: Total Budget (ministry name) -> Ministry Budget
+    if (targetMinistryName && !targetProjectName && topMinistries.length === 1) {
+      const ministry = topMinistries[0];
+      const ministryValue = topProjects.filter(p => p.ministry === ministry.name).reduce((sum, p) => sum + p.totalBudget, 0);
+      links.push({
+        source: 'total-budget',
+        target: `ministry-budget-${ministry.id}`,
+        value: ministryValue,
+      });
     }
     // Note: In Project View, Total -> Project Budget links are created in the Project Budget section
   }
@@ -1105,10 +1212,13 @@ function buildSankeyData(
             });
           }
 
+          // Use dummy value 0.001 if amount is 0 to prevent broken links
+          const linkValue = spendingProject.amount === 0 ? 0.001 : spendingProject.amount;
+
           links.push({
             source: `project-spending-${project.projectId}`,
             target: `recipient-${spending.spendingId}`,
-            value: spendingProject.amount,
+            value: linkValue,
             details: {
               contractMethod: spendingProject.contractMethod,
               blockName: spendingProject.blockName,
@@ -1346,11 +1456,13 @@ function buildSankeyData(
 
       // Links from selected projects to "Other Recipients"
       for (const [projectId, otherAmount] of otherSpendingsByProject.entries()) {
-        if (otherAmount > 0) {
+        if (otherAmount > 0 || otherAmount === 0) {
+          // Use dummy value 0.001 if amount is 0 to prevent broken links
+          const linkValue = otherAmount === 0 ? 0.001 : otherAmount;
           links.push({
             source: `project-spending-${projectId}`,
             target: 'recipient-other-aggregated',
-            value: otherAmount,
+            value: linkValue,
           });
         }
       }
