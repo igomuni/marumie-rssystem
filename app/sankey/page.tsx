@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ResponsiveSankey } from '@nivo/sankey';
 import type { RS2024PresetData } from '@/types/preset';
+import ProjectListModal from '@/client/components/ProjectListModal';
 
 function SankeyContent() {
   const router = useRouter();
@@ -40,6 +41,7 @@ function SankeyContent() {
   const [spendingMinistryTopN, setSpendingMinistryTopN] = useState(10); // 支出元府省庁TopN
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isProjectListOpen, setIsProjectListOpen] = useState(false);
 
   // Temporary settings state for dialog
   const [tempGlobalMinistryTopN, setTempGlobalMinistryTopN] = useState(globalMinistryTopN);
@@ -283,6 +285,33 @@ function SankeyContent() {
     setSelectedRecipient(null);
   };
 
+  const handleSelectProject = (projectName: string) => {
+    setViewMode('project');
+    setSelectedProject(projectName);
+    setSelectedMinistry(null);
+    setSelectedRecipient(null);
+    setProjectOffset(0);
+    setOffset(0);
+  };
+
+  const handleSelectMinistry = (ministryName: string) => {
+    setViewMode('ministry');
+    setSelectedMinistry(ministryName);
+    setSelectedProject(null);
+    setSelectedRecipient(null);
+    setProjectOffset(0);
+    setOffset(0);
+  };
+
+  const handleSelectRecipient = (recipientName: string) => {
+    setViewMode('spending');
+    setSelectedRecipient(recipientName);
+    setSelectedProject(null);
+    setSelectedMinistry(null);
+    setProjectOffset(0);
+    setOffset(0);
+  };
+
   const openSettings = () => {
     setTempGlobalMinistryTopN(globalMinistryTopN);
     setTempGlobalSpendingTopN(globalSpendingTopN);
@@ -450,9 +479,38 @@ function SankeyContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+      {/* 固定ボタン */}
+      <div className="fixed top-4 right-4 z-40 flex gap-2">
+        <button
+          onClick={() => setIsProjectListOpen(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
+          aria-label="事業一覧"
+        >
+          事業一覧
+        </button>
+        <button
+          onClick={openSettings}
+          className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors shadow-lg"
+          aria-label="設定"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+        {(offset > 0 || viewMode === 'ministry') && (
+          <button
+            onClick={handleReset}
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors shadow-lg"
+          >
+            Topへ戻る
+          </button>
+        )}
+      </div>
+
       <div className="max-w-7xl mx-auto">
         {/* ヘッダー */}
-        <div className="mb-8 flex justify-between items-start">
+        <div className="mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               RS2024 サンキー図
@@ -474,26 +532,6 @@ function SankeyContent() {
               <span className="text-green-600">■</span> 予算ベースの世界 |
               <span className="text-red-600">■</span> 支出ベースの世界
             </p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={openSettings}
-              className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              aria-label="設定"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </button>
-            {(offset > 0 || viewMode === 'ministry') && (
-              <button
-                onClick={handleReset}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                Topへ戻る
-              </button>
-            )}
           </div>
         </div>
 
@@ -1011,6 +1049,15 @@ function SankeyContent() {
           </div>
         </div>
       )}
+
+      {/* 事業一覧ダイアログ */}
+      <ProjectListModal
+        isOpen={isProjectListOpen}
+        onClose={() => setIsProjectListOpen(false)}
+        onSelectProject={handleSelectProject}
+        onSelectMinistry={handleSelectMinistry}
+        onSelectRecipient={handleSelectRecipient}
+      />
     </div>
   );
 }
