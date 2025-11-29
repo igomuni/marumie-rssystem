@@ -1080,8 +1080,17 @@ function buildSankeyData(
   // Column 3: Project Spending Nodes
   const projectSpendingNodes: SankeyNode[] = [];
 
+  // Track projects with 0 spending IDs for "支出先なし" node
+  const projectsWithNoSpending: BudgetRecord[] = [];
+
   // Create spending nodes for all projects in topProjects
   for (const project of topProjects) {
+    // Track projects with 0 spending IDs
+    if (project.spendingIds.length === 0) {
+      projectsWithNoSpending.push(project);
+      continue;
+    }
+
     projectSpendingNodes.push({
       id: `project-spending-${project.projectId}`,
       name: project.projectName,
@@ -1510,13 +1519,40 @@ function buildSankeyData(
     }
   }
 
+  // Add "支出先なし" node for projects with 0 spending IDs
+  if (projectsWithNoSpending.length > 0) {
+    const totalBudgetNoSpending = projectsWithNoSpending.reduce((sum, p) => sum + p.totalBudget, 0);
+
+    recipientNodes.push({
+      id: 'recipient-no-spending',
+      name: '支出先なし',
+      type: 'recipient',
+      value: 0, // Display as 0円
+      details: {
+        corporateNumber: '',
+        location: '',
+        projectCount: projectsWithNoSpending.length,
+      },
+    });
+
+    // Create links from project budgets to "支出先なし" node
+    for (const project of projectsWithNoSpending) {
+      links.push({
+        source: `project-budget-${project.projectId}`,
+        target: 'recipient-no-spending',
+        value: 0.001, // Dummy value to create visible link
+      });
+    }
+  }
+
   const regularRecipients = recipientNodes.filter(
-    n => n.id !== 'recipient-other-aggregated' && n.id !== 'recipient-other-named'
+    n => n.id !== 'recipient-other-aggregated' && n.id !== 'recipient-other-named' && n.id !== 'recipient-no-spending'
   );
   const otherNamedRecipient = recipientNodes.filter(n => n.id === 'recipient-other-named');
   const aggregatedOther = recipientNodes.filter(n => n.id === 'recipient-other-aggregated');
+  const noSpendingRecipient = recipientNodes.filter(n => n.id === 'recipient-no-spending');
 
-  nodes.push(...regularRecipients, ...otherNamedRecipient, ...aggregatedOther);
+  nodes.push(...regularRecipients, ...otherNamedRecipient, ...aggregatedOther, ...noSpendingRecipient);
 
   // Filter out nodes that have no links (0-yen ghost nodes)
   // A node must appear in at least one link (as source or target)
