@@ -179,8 +179,7 @@ function SankeyContent() {
     // Handle Ministry nodes
     if (actualNode.type === 'ministry-budget' &&
         actualNode.id !== 'total-budget' &&
-        actualNode.id !== 'ministry-budget-other' &&
-        actualNode.id !== 'ministry-other-spending-view') {
+        actualNode.id !== 'ministry-budget-other') {
       if (viewMode === 'ministry') {
         // In Ministry View, clicking the ministry node goes back to Global
         setViewMode('global');
@@ -202,15 +201,6 @@ function SankeyContent() {
 
     // Handle Project nodes
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
-      // Special handling for "支出元(TopN以外)" in Spending View
-      if (actualNode.type === 'project-spending' && actualNode.name === '支出元(TopN以外)') {
-        if (viewMode === 'spending') {
-          // Increase projectOffset to show next TopN projects
-          setProjectOffset(prev => prev + spendingProjectTopN);
-        }
-        return;
-      }
-
       // Special handling for "事業(TopN以外)" aggregate nodes
       if (actualNode.name === '事業(TopN以外)') {
         // Paginate to show more items instead of drilling down
@@ -220,6 +210,9 @@ function SankeyContent() {
         } else if (viewMode === 'ministry') {
           // In Ministry view, increase project offset
           setProjectOffset(prev => prev + ministryProjectTopN);
+        } else if (viewMode === 'spending') {
+          // In Spending view, increase project offset
+          setProjectOffset(prev => prev + spendingProjectTopN);
         }
         return;
       }
@@ -598,18 +591,11 @@ function SankeyContent() {
                   if (name.startsWith('その他') ||
                       name === '府省庁(TopN以外)' ||
                       name === '事業(TopN以外)' ||
-                      name === '支出先(TopN以外)' ||
-                      name === '支出元(TopN以外)' ||
-                      name === '支出元府省庁(TopN以外)') {
+                      name === '支出先(TopN以外)') {
                     return '#6b7280'; // グレー系
                   }
 
-                  // 支出ビューでは全ノードを赤系（支出の世界）
-                  if (viewMode === 'spending') {
-                    return '#ef4444'; // 赤系
-                  }
-
-                  // その他のビュー: 予算系（緑系）、支出系（赤系）
+                  // 予算系（緑系）、支出系（赤系）
                   if (type === 'ministry-budget' || type === 'project-budget') {
                     return '#10b981'; // 緑系
                   } else if (type === 'project-spending' || type === 'recipient') {
