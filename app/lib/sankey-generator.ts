@@ -135,7 +135,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
         totalSpendings: fullData.metadata.totalRecipients,
         selectedMinistries: selection.topMinistries.length,
         selectedProjects: selection.topProjects.length,
-        selectedSpendings: selection.topSpendings.length,
+        selectedSpendings: targetRecipientName ? 1 : selection.topSpendings.length, // Spending view has 1 recipient
         totalBudget: fullData.metadata.totalBudgetAmount,
         selectedBudget: selectedBudget,
         coverageRate: coverageRate,
@@ -267,11 +267,8 @@ function selectData(
       // 3. Filter topProjects to only include projects from TopN ministries
       topProjects = candidateTopProjects.filter(p => topMinistryNames.has(p.ministry));
 
-      // 【新規追加】TopN以外のプロジェクト金額を集計
-      // This includes:
-      // - Projects before projectOffset (previous pages)
-      // - Projects after projectOffset + projectLimit (next pages)
-      // - Projects from candidate list that are not in TopN ministries
+      // TopN府省庁内のTopN以外事業の金額を集計
+      // (projectOffset前 + projectOffset+projectLimit以降のTopN府省庁の事業)
       let otherProjectsAmount = 0;
       const otherProjectsByMinistry = new Map<string, number>();
 
@@ -305,13 +302,8 @@ function selectData(
         }
       }
 
-      // Projects from candidateTopProjects that are filtered out due to non-TopN ministry
-      for (const project of candidateTopProjects) {
-        if (!topMinistryNames.has(project.ministry)) {
-          const amount = amountByProject.get(project.projectId) || 0;
-          otherProjectsAmount += amount;
-        }
-      }
+      // NOTE: candidateTopProjects内のTopN以外府省庁の事業は、
+      // nonTopMinistrySpendingに既に含まれているため、ここでは処理しない
 
       // Calculate spending from non-TopN ministries
       let nonTopMinistrySpending = 0;
@@ -791,21 +783,19 @@ function buildSankeyData(
     nodes.push(...projectBudgetNodes);
     nodes.push(...ministryBudgetNodes);
 
-    // 【新規追加】「事業(TopN以外)」の予算と支出ノード
-    // TopN以外のプロジェクト + 非TopN府省庁のプロジェクト
-    const totalOtherProjectBudget = selection.otherProjectsSpendingInSpendingView || 0; // Budget情報がないので支出額で代用
-    const totalOtherProjectSpending = (selection.otherProjectsSpendingInSpendingView || 0) +
-      (otherMinistriesSpendingInSpendingView || 0);
+    // 【新規追加】TopN府省庁からの「事業(TopN以外)」ノード
+    const otherProjectsSpending = selection.otherProjectsSpendingInSpendingView || 0;
+    const otherProjectsBudget = otherProjectsSpending; // Budget情報がないので支出額で代用
 
-    if (totalOtherProjectSpending > 0) {
+    if (otherProjectsSpending > 0) {
       // Column 1: 事業予算(TopN以外)ノード
       nodes.push({
         id: 'project-budget-other-spending-view',
         name: `事業(Top${projectLimit}以外)`,
         type: 'project-budget',
-        value: totalOtherProjectBudget > 0 ? totalOtherProjectBudget : totalOtherProjectSpending,
+        value: otherProjectsBudget,
         details: {
-          ministry: '複数府省庁',
+          ministry: 'TopN府省庁',
           bureau: '',
           fiscalYear: 2024,
           initialBudget: 0,
@@ -819,14 +809,14 @@ function buildSankeyData(
         },
       });
 
-      // Column 2: 事業支出(TopN以外)ノード（旧「支出元(TopN以外)」）
+      // Column 2: 事業支出(TopN以外)ノード
       nodes.push({
         id: 'project-spending-other-spending-view',
         name: `事業(Top${projectLimit}以外)`,
         type: 'project-spending',
-        value: totalOtherProjectSpending,
+        value: otherProjectsSpending,
         details: {
-          ministry: '複数府省庁',
+          ministry: 'TopN府省庁',
           bureau: '',
           fiscalYear: 2024,
           executionRate: 0,
@@ -849,21 +839,91 @@ function buildSankeyData(
       }
 
       // リンク: 事業予算(TopN以外) → 事業支出(TopN以外)
-      const budgetToSpendingLink = Math.min(
-        totalOtherProjectBudget > 0 ? totalOtherProjectBudget : totalOtherProjectSpending,
-        totalOtherProjectSpending
-      );
       links.push({
         source: 'project-budget-other-spending-view',
         target: 'project-spending-other-spending-view',
-        value: budgetToSpendingLink > 0 ? budgetToSpendingLink : 0.001,
+        value: otherProjectsSpending,
       });
 
       // リンク: 事業支出(TopN以外) → 受給者
       links.push({
         source: 'project-spending-other-spending-view',
         target: recipientNodeId,
-        value: totalOtherProjectSpending,
+        value: otherProjectsSpending,
+      });
+    }
+
+    // 【新規追加】TopN以外の府省庁からの「府省庁(TopN以外)」ノード
+    const otherMinistriesSpending = otherMinistriesSpendingInSpendingView || 0;
+
+    if (otherMinistriesSpending > 0) {
+      // Column 0: 府省庁予算(TopN以外)ノード
+      nodes.push({
+        id: 'ministry-budget-other-spending-view',
+        name: `府省庁(Top${ministryLimit}以外)`,
+        type: 'ministry-budget',
+        value: otherMinistriesSpending,
+        details: {
+          projectCount: 0,
+          bureauCount: 0,
+        },
+      });
+
+      // Column 1: 事業予算(TopN以外・府省庁)ノード
+      nodes.push({
+        id: 'project-budget-other-ministry-spending-view',
+        name: `事業(Top${ministryLimit}以外府省庁)`,
+        type: 'project-budget',
+        value: otherMinistriesSpending,
+        details: {
+          ministry: 'TopN以外府省庁',
+          bureau: '',
+          fiscalYear: 2024,
+          initialBudget: 0,
+          supplementaryBudget: 0,
+          carryoverBudget: 0,
+          reserveFund: 0,
+          totalBudget: 0,
+          executedAmount: 0,
+          carryoverToNext: 0,
+          accountCategory: '',
+        },
+      });
+
+      // Column 2: 事業支出(TopN以外・府省庁)ノード
+      nodes.push({
+        id: 'project-spending-other-ministry-spending-view',
+        name: `事業(Top${ministryLimit}以外府省庁)`,
+        type: 'project-spending',
+        value: otherMinistriesSpending,
+        details: {
+          ministry: 'TopN以外府省庁',
+          bureau: '',
+          fiscalYear: 2024,
+          executionRate: 0,
+          spendingCount: 0,
+        },
+      });
+
+      // リンク: 府省庁予算(TopN以外) → 事業予算(TopN以外・府省庁)
+      links.push({
+        source: 'ministry-budget-other-spending-view',
+        target: 'project-budget-other-ministry-spending-view',
+        value: otherMinistriesSpending,
+      });
+
+      // リンク: 事業予算(TopN以外・府省庁) → 事業支出(TopN以外・府省庁)
+      links.push({
+        source: 'project-budget-other-ministry-spending-view',
+        target: 'project-spending-other-ministry-spending-view',
+        value: otherMinistriesSpending,
+      });
+
+      // リンク: 事業支出(TopN以外・府省庁) → 受給者
+      links.push({
+        source: 'project-spending-other-ministry-spending-view',
+        target: recipientNodeId,
+        value: otherMinistriesSpending,
       });
     }
 
