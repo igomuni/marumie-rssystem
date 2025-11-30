@@ -44,6 +44,12 @@ function SankeyContent() {
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isProjectListOpen, setIsProjectListOpen] = useState(false);
+  const [projectListFilters, setProjectListFilters] = useState<{
+    ministries?: string[];
+    projectName?: string;
+    spendingName?: string;
+    groupByProject?: boolean;
+  } | undefined>(undefined);
 
   // Temporary settings state for dialog
   const [tempGlobalMinistryTopN, setTempGlobalMinistryTopN] = useState(globalMinistryTopN);
@@ -187,9 +193,18 @@ function SankeyContent() {
       return;
     }
 
-    // Handle "Total Budget" back navigation
+    // Handle "Total Budget" (予算総計)
     if (actualNode.id === 'total-budget') {
-      if (viewMode === 'ministry') {
+      if (viewMode === 'global') {
+        // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
+        setProjectListFilters({
+          ministries: undefined, // All
+          projectName: '',
+          spendingName: '',
+          groupByProject: undefined // Keep previous
+        });
+        setIsProjectListOpen(true);
+      } else if (viewMode === 'ministry') {
         setViewMode('global');
         setSelectedMinistry(null);
       } else if (offset > 0) {
@@ -200,23 +215,33 @@ function SankeyContent() {
 
     // Handle Ministry nodes
     if (actualNode.type === 'ministry-budget' &&
-        actualNode.id !== 'total-budget' &&
-        actualNode.id !== 'ministry-budget-other') {
+      actualNode.id !== 'total-budget' &&
+      actualNode.id !== 'ministry-budget-other') {
+
       if (viewMode === 'ministry') {
-        // In Ministry View, clicking the ministry node goes back to Global
-        setViewMode('global');
-        setSelectedMinistry(null);
-        setProjectOffset(0); // Reset project offset
+        // 府省庁ビュー: 事業一覧を開く（府省庁:選択中、支出先まとめ:維持）
+        setProjectListFilters({
+          ministries: [actualNode.name],
+          projectName: '',
+          spendingName: '',
+          groupByProject: undefined // Keep previous
+        });
+        setIsProjectListOpen(true);
+      } else if (viewMode === 'project') {
+        // 事業ビュー: 府省庁ビューへ遷移
+        setViewMode('ministry');
+        setSelectedMinistry(actualNode.name);
+        setProjectOffset(0);
       } else if (viewMode === 'spending') {
-        // In Spending View, clicking a ministry goes to Ministry View
+        // 支出ビュー: 府省庁ビューへ遷移
         setViewMode('ministry');
         setSelectedMinistry(actualNode.name);
-        setProjectOffset(0); // Reset project offset
+        setProjectOffset(0);
       } else {
-        // In Global/Project View, clicking a ministry goes to Ministry View
+        // Global View: Go to Ministry View (Standard behavior)
         setViewMode('ministry');
         setSelectedMinistry(actualNode.name);
-        setProjectOffset(0); // Reset project offset
+        setProjectOffset(0);
       }
       return;
     }
@@ -225,35 +250,31 @@ function SankeyContent() {
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
       // Special handling for "事業(TopN以外)" aggregate nodes
       if (actualNode.name === '事業(TopN以外)') {
-        // Paginate to show more items instead of drilling down
         if (viewMode === 'global') {
-          // In Global view, increase ministry offset (like "府省庁(TopN以外)")
           setOffset(prev => prev + globalMinistryTopN);
         } else if (viewMode === 'ministry') {
-          // In Ministry view, increase project offset
           setProjectOffset(prev => prev + ministryProjectTopN);
         } else if (viewMode === 'spending') {
-          // In Spending view, increase project offset
           setProjectOffset(prev => prev + spendingProjectTopN);
         }
         return;
       }
 
       if (viewMode === 'project') {
-        // In Project View, clicking the project node goes back to previous view
-        if (selectedMinistry) {
-          setViewMode('ministry');
-          setSelectedProject(null);
-        } else {
-          setViewMode('global');
-          setSelectedProject(null);
-        }
+        // 事業ビュー: 事業一覧を開く（府省庁:すべて、事業名:選択中、支出先まとめ:維持）
+        setProjectListFilters({
+          ministries: undefined, // All (or should it be restricted to current ministry if selected? User said "府省庁フィルタすべて")
+          projectName: actualNode.name,
+          spendingName: '',
+          groupByProject: undefined // Keep previous
+        });
+        setIsProjectListOpen(true);
       } else if (viewMode === 'spending') {
-        // In Spending View, clicking a project goes to Project View
+        // 支出ビュー: 事業ビューへ遷移
         setViewMode('project');
         setSelectedProject(actualNode.name);
       } else {
-        // In Global/Ministry View, clicking a project goes to Project View
+        // Global/Ministry View: Go to Project View (Standard behavior)
         setViewMode('project');
         setSelectedProject(actualNode.name);
       }
@@ -262,33 +283,30 @@ function SankeyContent() {
 
     // Handle Recipient nodes
     if (actualNode.type === 'recipient') {
-      // Special handling for "その他" - go to spending view with that specific recipient
+      // Special handling for "その他"
       if (actualNode.name === 'その他') {
         setViewMode('spending');
         setSelectedRecipient('その他');
         return;
       }
 
-      // Handle "支出先(TopN以外)" - same behavior as "Other Ministries"
+      // Handle "支出先(TopN以外)"
       if (actualNode.name === '支出先(TopN以外)') {
         setOffset(prev => prev + globalMinistryTopN);
         return;
       }
 
       if (viewMode === 'spending') {
-        // In Spending View, clicking the recipient node goes back to previous view
-        if (selectedProject) {
-          setViewMode('project');
-          setSelectedRecipient(null);
-        } else if (selectedMinistry) {
-          setViewMode('ministry');
-          setSelectedRecipient(null);
-        } else {
-          setViewMode('global');
-          setSelectedRecipient(null);
-        }
+        // 支出ビュー: 事業一覧を開く（府省庁:すべて、支出先:選択中、支出先まとめ:OFF）
+        setProjectListFilters({
+          ministries: undefined, // All
+          projectName: '',
+          spendingName: actualNode.name,
+          groupByProject: false // OFF
+        });
+        setIsProjectListOpen(true);
       } else {
-        // In any other view, clicking a recipient goes to Spending View
+        // Other views: Go to Spending View (Standard behavior)
         setViewMode('spending');
         setSelectedRecipient(actualNode.name);
       }
@@ -589,8 +607,8 @@ function SankeyContent() {
                 <button
                   onClick={crumb.onClick}
                   className={`px-4 py-3 rounded-lg shadow transition-colors ${index === breadcrumbs.length - 1
-                      ? 'bg-blue-600 text-white cursor-default'
-                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ? 'bg-blue-600 text-white cursor-default'
+                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   disabled={index === breadcrumbs.length - 1}
                 >
@@ -645,9 +663,9 @@ function SankeyContent() {
 
                   // TopN以外ノードと"その他"ノードはすべてグレー
                   if (name.startsWith('その他') ||
-                      name === '府省庁(TopN以外)' ||
-                      name === '事業(TopN以外)' ||
-                      name === '支出先(TopN以外)') {
+                    name === '府省庁(TopN以外)' ||
+                    name === '事業(TopN以外)' ||
+                    name === '支出先(TopN以外)') {
                     return '#6b7280'; // グレー系
                   }
 
@@ -696,9 +714,9 @@ function SankeyContent() {
                       if (node.value === 0.001) {
                         // Check if this is truly a zero-budget case
                         if (nodeType === 'project-budget' &&
-                            actualNode?.details &&
-                            'totalBudget' in actualNode.details &&
-                            actualNode.details.totalBudget === 0) {
+                          actualNode?.details &&
+                          'totalBudget' in actualNode.details &&
+                          actualNode.details.totalBudget === 0) {
                           displayAmount = 0;
                         } else if (nodeType === 'ministry-budget') {
                           // Ministry nodes shouldn't have dummy values, but handle just in case
@@ -725,7 +743,7 @@ function SankeyContent() {
                       const nodeName = actualNode?.name || '';
                       const isClickable =
                         node.id === 'ministry-budget-other' ||
-                        (node.id === 'total-budget' && (offset > 0 || viewMode !== 'global')) ||
+                        node.id === 'total-budget' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
                         ((nodeType === 'project-budget' || nodeType === 'project-spending') && nodeName !== '事業(TopN以外)') ||
                         (nodeType === 'recipient');
@@ -1075,6 +1093,7 @@ function SankeyContent() {
         onSelectProject={handleSelectProject}
         onSelectMinistry={handleSelectMinistry}
         onSelectRecipient={handleSelectRecipient}
+        initialFilters={projectListFilters}
       />
     </div>
   );
