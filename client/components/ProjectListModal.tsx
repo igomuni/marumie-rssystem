@@ -3,12 +3,20 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import type { RS2024StructuredData, BudgetRecord, SpendingRecord } from '@/types/structured';
 
+export interface ProjectListFilters {
+  ministries?: string[];
+  projectName?: string;
+  spendingName?: string;
+  groupByProject?: boolean;
+}
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSelectProject: (projectName: string) => void;
   onSelectMinistry?: (ministryName: string) => void;
   onSelectRecipient?: (recipientName: string) => void;
+  initialFilters?: ProjectListFilters;
 }
 
 interface SpendingDetail {
@@ -19,13 +27,13 @@ interface SpendingDetail {
   totalBudget: number;
   totalSpendingAmount: number;
   executionRate: number;
-  spendingCount?: number; // まとめた場合の支出先件数
+  spendingCount?: number; // まとめる場合の支出先件数
 }
 
 type SortColumn = 'ministry' | 'projectName' | 'spendingName' | 'totalBudget' | 'totalSpendingAmount' | 'executionRate';
 type SortDirection = 'asc' | 'desc';
 
-export default function ProjectListModal({ isOpen, onClose, onSelectProject, onSelectMinistry, onSelectRecipient }: Props) {
+export default function ProjectListModal({ isOpen, onClose, onSelectProject, onSelectMinistry, onSelectRecipient, initialFilters }: Props) {
   const [allData, setAllData] = useState<BudgetRecord[]>([]);
   const [spendingsData, setSpendingsData] = useState<SpendingRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -72,7 +80,57 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
           .map(([name]) => name);
 
         setAvailableMinistries(ministries);
-        setSelectedMinistries(ministries); // 初期状態は全選択
+
+        // Apply initial filters
+        if (initialFilters) {
+          if (initialFilters.ministries) {
+            setSelectedMinistries(initialFilters.ministries);
+          } else {
+            setSelectedMinistries(ministries); // Default to all if not specified
+          }
+
+          if (initialFilters.projectName !== undefined) {
+            setProjectNameFilter(initialFilters.projectName);
+          } else {
+            setProjectNameFilter('');
+          }
+
+          if (initialFilters.spendingName !== undefined) {
+            setSpendingNameFilter(initialFilters.spendingName);
+          } else {
+            setSpendingNameFilter('');
+          }
+
+          if (initialFilters.groupByProject !== undefined) {
+            setGroupByProject(initialFilters.groupByProject);
+          }
+          // If groupByProject is not specified, keep current state (or default)
+        } else {
+          // No initial filters, reset to defaults
+          setSelectedMinistries(ministries);
+          setProjectNameFilter('');
+          setSpendingNameFilter('');
+          // Keep groupByProject as is or reset? Usually reset is safer for "fresh open"
+          // But user requirement says "Keep previous" for some cases.
+          // The parent component will pass undefined if it wants to keep previous, 
+          // but here we are mounting/opening. 
+          // If the modal is kept mounted but hidden, state persists.
+          // If unmounted, state resets.
+          // This component seems to be conditionally rendered or just hidden?
+          // In page.tsx: <ProjectListModal isOpen={isProjectListOpen} ... />
+          // It is always rendered but isOpen controls visibility (return null if !isOpen).
+          // So state is lost when closed.
+          // So "Keep previous" implies we need to pass the *previous* state back in, 
+          // OR we need to change how this component works (don't return null).
+          // Let's check line 287: if (!isOpen) return null;
+          // Yes, state is lost.
+          // To support "Keep previous", the parent needs to manage the state or we need to not unmount.
+          // However, the user requirement says "Keep previous setting" for "groupByProject" in some cases.
+          // Since we are re-implementing the opening logic, we can pass the desired state from parent.
+          // But wait, if the parent doesn't know the *user's last choice* inside the modal, it can't pass it back.
+          // We might need to lift the state up or change `if (!isOpen) return null` to `style={{display: isOpen ? 'block' : 'none'}}`.
+          // Changing to display:none is easier to preserve state.
+        }
       } catch (error) {
         console.error('Failed to load data:', error);
       } finally {
@@ -81,7 +139,7 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
     }
 
     loadData();
-  }, [isOpen]);
+  }, [isOpen, initialFilters]);
 
   // ドロップダウン外クリックで閉じる
   useEffect(() => {
@@ -284,10 +342,10 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
     }
   };
 
-  if (!isOpen) return null;
+  // if (!isOpen) return null; // Stateを維持するためにアンマウントしない
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-200 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[90vw] h-[90vh] flex flex-col">
         {/* ヘッダー */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -325,91 +383,91 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
               <div className="flex flex-col gap-3">
                 {/* 1行目: 府省庁フィルタと支出先まとめチェックボックス */}
                 <div className="flex items-center gap-3 flex-wrap">
-              {/* 府省庁フィルタ（カスタムドロップダウン） */}
-              <div className="w-64 relative" ref={dropdownRef}>
-                <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">府省庁</label>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-full px-3 py-2 text-sm text-left border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between"
-                >
-                  <span className="truncate">{getDropdownDisplayText()}</span>
-                  <span className="ml-2 text-gray-400 text-lg">▾</span>
-                </button>
+                  {/* 府省庁フィルタ（カスタムドロップダウン） */}
+                  <div className="w-64 relative" ref={dropdownRef}>
+                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">府省庁</label>
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className="w-full px-3 py-2 text-sm text-left border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between"
+                    >
+                      <span className="truncate">{getDropdownDisplayText()}</span>
+                      <span className="ml-2 text-gray-400 text-lg">▾</span>
+                    </button>
 
-                {isDropdownOpen && (
-                  <div className="absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-64 overflow-y-auto">
-                    {/* 全選択/全解除 */}
-                    <label className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-200 dark:border-gray-600">
-                      <input
-                        type="checkbox"
-                        checked={selectedMinistries.length === availableMinistries.length}
-                        onChange={toggleAllMinistries}
-                        className="mr-2"
-                      />
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">すべて選択/解除</span>
-                    </label>
+                    {isDropdownOpen && (
+                      <div className="absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-64 overflow-y-auto">
+                        {/* 全選択/全解除 */}
+                        <label className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-200 dark:border-gray-600">
+                          <input
+                            type="checkbox"
+                            checked={selectedMinistries.length === availableMinistries.length}
+                            onChange={toggleAllMinistries}
+                            className="mr-2"
+                          />
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">すべて選択/解除</span>
+                        </label>
 
-                    {/* 府省庁リスト */}
-                    {availableMinistries.map((ministry) => (
-                      <label
-                        key={ministry}
-                        className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedMinistries.includes(ministry)}
-                          onChange={() => toggleMinistry(ministry)}
-                          className="mr-2"
-                        />
-                        <span className="text-sm text-gray-900 dark:text-white">{ministry}</span>
-                      </label>
-                    ))}
+                        {/* 府省庁リスト */}
+                        {availableMinistries.map((ministry) => (
+                          <label
+                            key={ministry}
+                            className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedMinistries.includes(ministry)}
+                              onChange={() => toggleMinistry(ministry)}
+                              className="mr-2"
+                            />
+                            <span className="text-sm text-gray-900 dark:text-white">{ministry}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* 支出先まとめチェックボックス */}
-              <div className="flex items-center gap-2 mt-5">
-                <input
-                  type="checkbox"
-                  id="groupByProject"
-                  checked={groupByProject}
-                  onChange={(e) => setGroupByProject(e.target.checked)}
-                  className="w-4 h-4"
-                />
-                <label htmlFor="groupByProject" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                  支出先をまとめる
-                </label>
-              </div>
-            </div>
+                  {/* 支出先まとめチェックボックス */}
+                  <div className="flex items-center gap-2 mt-5">
+                    <input
+                      type="checkbox"
+                      id="groupByProject"
+                      checked={groupByProject}
+                      onChange={(e) => setGroupByProject(e.target.checked)}
+                      className="w-4 h-4"
+                    />
+                    <label htmlFor="groupByProject" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                      支出先をまとめる
+                    </label>
+                  </div>
+                </div>
 
-            {/* 2行目: テキスト検索 */}
-            <div className="flex items-center gap-3 flex-wrap">
-              {/* 事業名フィルタ */}
-              <div className="flex-1 min-w-[200px]">
-                <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">事業名</label>
-                <input
-                  type="text"
-                  value={projectNameFilter}
-                  onChange={(e) => setProjectNameFilter(e.target.value)}
-                  placeholder="事業名で検索"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+                {/* 2行目: テキスト検索 */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* 事業名フィルタ */}
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">事業名</label>
+                    <input
+                      type="text"
+                      value={projectNameFilter}
+                      onChange={(e) => setProjectNameFilter(e.target.value)}
+                      placeholder="事業名で検索"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
 
-              {/* 支出先フィルタ */}
-              <div className="flex-1 min-w-[200px]">
-                <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">支出先</label>
-                <input
-                  type="text"
-                  value={spendingNameFilter}
-                  onChange={(e) => setSpendingNameFilter(e.target.value)}
-                  placeholder="支出先で検索"
-                  disabled={groupByProject}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-              </div>
-            </div>
+                  {/* 支出先フィルタ */}
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">支出先</label>
+                    <input
+                      type="text"
+                      value={spendingNameFilter}
+                      onChange={(e) => setSpendingNameFilter(e.target.value)}
+                      placeholder="支出先で検索"
+                      disabled={groupByProject}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -438,9 +496,8 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
                     事業名 {getSortIndicator('projectName')}
                   </th>
                   <th
-                    className={`px-4 py-2 text-left ${
-                      groupByProject ? 'whitespace-nowrap w-28' : 'min-w-[250px]'
-                    } ${groupByProject ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600'}`}
+                    className={`px-4 py-2 text-left ${groupByProject ? 'whitespace-nowrap w-28' : 'min-w-[250px]'
+                      } ${groupByProject ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600'}`}
                     onClick={() => !groupByProject && handleSort('spendingName')}
                   >
                     {groupByProject ? '支出先件数' : `支出先 ${getSortIndicator('spendingName')}`}
