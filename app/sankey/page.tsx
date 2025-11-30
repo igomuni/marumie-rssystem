@@ -193,8 +193,8 @@ function SankeyContent() {
       return;
     }
 
-    // Handle "Total Budget" (予算総計)
-    if (actualNode.id === 'total-budget') {
+    // Handle "Total Budget" (予算総計) - but NOT in Project View where it represents a ministry
+    if (actualNode.id === 'total-budget' && viewMode !== 'project') {
       if (viewMode === 'global') {
         // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
         setProjectListFilters({
@@ -214,10 +214,12 @@ function SankeyContent() {
     }
 
     // Handle Ministry nodes
-    if (actualNode.type === 'ministry-budget' &&
-      actualNode.id !== 'total-budget' &&
-      actualNode.id !== 'ministry-budget-other') {
+    // In Project View, the 'total-budget' node displays the ministry name and should be clickable
+    const isMinistryNode = actualNode.type === 'ministry-budget' &&
+      actualNode.id !== 'ministry-budget-other' &&
+      (actualNode.id !== 'total-budget' || viewMode === 'project');
 
+    if (isMinistryNode) {
       if (viewMode === 'ministry') {
         // 府省庁ビュー: 事業一覧を開く（府省庁:選択中、支出先まとめ:維持）
         setProjectListFilters({
