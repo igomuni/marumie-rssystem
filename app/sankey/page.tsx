@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ResponsiveSankey } from '@nivo/sankey';
 import type { RS2024PresetData } from '@/types/preset';
+import type { RS2024StructuredData } from '@/types/structured';
 import ProjectListModal from '@/client/components/ProjectListModal';
 
 function SankeyContent() {
@@ -11,6 +12,7 @@ function SankeyContent() {
   const searchParams = useSearchParams();
 
   const [data, setData] = useState<RS2024PresetData | null>(null);
+  const [structuredData, setStructuredData] = useState<RS2024StructuredData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -103,6 +105,24 @@ function SankeyContent() {
     const newUrl = params.toString() ? `/sankey?${params.toString()}` : '/sankey';
     router.push(newUrl);
   }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, offset, projectOffset, router, isInitialized]);
+
+  // Load structured data once for breadcrumb total amounts
+  useEffect(() => {
+    async function loadStructuredData() {
+      try {
+        const response = await fetch('/data/rs2024-structured.json');
+        if (!response.ok) {
+          throw new Error('Failed to load structured data');
+        }
+        const json: RS2024StructuredData = await response.json();
+        setStructuredData(json);
+      } catch (err) {
+        console.error('Failed to load structured data:', err);
+      }
+    }
+
+    loadStructuredData();
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -423,14 +443,10 @@ function SankeyContent() {
     });
 
     // Ministry level
-    if (selectedMinistry) {
-      // Find ministry node - it might be in different positions depending on view
-      const ministryNode = sankey.nodes.find(
-        (n) => n.type === 'ministry-budget' && n.name === selectedMinistry
-      );
-
-      // If not found in current view, use the selected budget from metadata
-      const ministryAmount = ministryNode?.value || metadata.summary.selectedBudget;
+    if (selectedMinistry && structuredData) {
+      // Get total budget for selected ministry from budgetTree
+      const ministry = structuredData.budgetTree.ministries.find(m => m.name === selectedMinistry);
+      const ministryAmount = ministry?.totalBudget || metadata.summary.selectedBudget;
 
       breadcrumbs.push({
         label: selectedMinistry,
@@ -444,13 +460,14 @@ function SankeyContent() {
     }
 
     // Project level
-    if (selectedProject) {
-      const projectNode = sankey.nodes.find(
-        (n) => (n.type === 'project-budget' || n.type === 'project-spending') && n.name === selectedProject
-      );
+    if (selectedProject && structuredData) {
+      // Get total budget for selected project from budgets array
+      const project = structuredData.budgets.find(b => b.projectName === selectedProject);
+      const projectAmount = project?.totalBudget;
+
       breadcrumbs.push({
         label: selectedProject,
-        amount: getActualValue(projectNode?.value, projectNode),
+        amount: projectAmount,
         onClick: () => {
           setViewMode('project');
           setSelectedRecipient(null);
@@ -459,13 +476,14 @@ function SankeyContent() {
     }
 
     // Recipient level
-    if (selectedRecipient) {
-      const recipientNode = sankey.nodes.find(
-        (n) => n.type === 'recipient' && n.name === selectedRecipient
-      );
+    if (selectedRecipient && structuredData) {
+      // Get total spending amount for selected recipient from spendings array
+      const recipient = structuredData.spendings.find(s => s.spendingName === selectedRecipient);
+      const recipientAmount = recipient?.totalSpendingAmount;
+
       breadcrumbs.push({
         label: selectedRecipient,
-        amount: recipientNode?.value,
+        amount: recipientAmount,
         onClick: () => {
           // Already at this level, no action
         },
