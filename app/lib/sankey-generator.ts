@@ -267,11 +267,8 @@ function selectData(
       // 3. Filter topProjects to only include projects from TopN ministries
       topProjects = candidateTopProjects.filter(p => topMinistryNames.has(p.ministry));
 
-      // 【新規追加】TopN以外のプロジェクト金額を集計
-      // This includes:
-      // - Projects before projectOffset (previous pages)
-      // - Projects after projectOffset + projectLimit (next pages)
-      // - Projects from candidate list that are not in TopN ministries
+      // TopN府省庁内のTopN以外事業の金額を集計
+      // (projectOffset前 + projectOffset+projectLimit以降のTopN府省庁の事業)
       let otherProjectsAmount = 0;
       const otherProjectsByMinistry = new Map<string, number>();
 
@@ -305,13 +302,8 @@ function selectData(
         }
       }
 
-      // Projects from candidateTopProjects that are filtered out due to non-TopN ministry
-      for (const project of candidateTopProjects) {
-        if (!topMinistryNames.has(project.ministry)) {
-          const amount = amountByProject.get(project.projectId) || 0;
-          otherProjectsAmount += amount;
-        }
-      }
+      // NOTE: candidateTopProjects内のTopN以外府省庁の事業は、
+      // nonTopMinistrySpendingに既に含まれているため、ここでは処理しない
 
       // Calculate spending from non-TopN ministries
       let nonTopMinistrySpending = 0;
