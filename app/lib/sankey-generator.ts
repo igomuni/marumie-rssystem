@@ -94,6 +94,9 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
       targetMinistryName,
       targetProjectName,
       targetRecipientName,
+      ministryLimit,
+      projectLimit,
+      spendingLimit,
     }
   );
 
@@ -628,6 +631,9 @@ function buildSankeyData(
     targetMinistryName?: string;
     targetProjectName?: string;
     targetRecipientName?: string;
+    ministryLimit: number;
+    projectLimit: number;
+    spendingLimit: number;
   }
 ): { nodes: SankeyNode[]; links: SankeyLink[] } {
   const {
@@ -643,7 +649,7 @@ function buildSankeyData(
     otherMinistriesSpendingInSpendingView,
   } = selection;
 
-  const { offset, targetMinistryName, targetProjectName, targetRecipientName } = options;
+  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit } = options;
 
   const nodes: SankeyNode[] = [];
   const links: SankeyLink[] = [];
@@ -795,7 +801,7 @@ function buildSankeyData(
       // Column 1: 事業予算(TopN以外)ノード
       nodes.push({
         id: 'project-budget-other-spending-view',
-        name: '事業(TopN以外)',
+        name: `事業(Top${projectLimit}以外)`,
         type: 'project-budget',
         value: totalOtherProjectBudget > 0 ? totalOtherProjectBudget : totalOtherProjectSpending,
         details: {
@@ -816,7 +822,7 @@ function buildSankeyData(
       // Column 2: 事業支出(TopN以外)ノード（旧「支出元(TopN以外)」）
       nodes.push({
         id: 'project-spending-other-spending-view',
-        name: '事業(TopN以外)',
+        name: `事業(Top${projectLimit}以外)`,
         type: 'project-spending',
         value: totalOtherProjectSpending,
         details: {
@@ -946,7 +952,7 @@ function buildSankeyData(
     if (isGlobalView && otherMinistriesBudget > 0) {
       standardMinistryNodes.push({
         id: 'ministry-budget-other',
-        name: '府省庁(TopN以外)',
+        name: `府省庁(Top${ministryLimit}以外)`,
         type: 'ministry-budget',
         value: otherMinistriesBudget,
         details: {
@@ -1035,7 +1041,7 @@ function buildSankeyData(
       if (otherBudget && otherBudget > 0 && !targetProjectName) {
         projectBudgetNodes.push({
           id: `project-budget-other-${ministry.id}`,
-          name: '事業(TopN以外)',
+          name: `事業(Top${projectLimit}以外)`,
           type: 'project-budget',
           value: otherBudget,
           details: {
@@ -1092,7 +1098,7 @@ function buildSankeyData(
     if (totalOtherBudget > 0) {
       projectBudgetNodes.push({
         id: 'project-budget-other-global',
-        name: '事業(TopN以外)',
+        name: `事業(Top${spendingLimit}以外)`,
         type: 'project-budget',
         value: totalOtherBudget,
         details: {
@@ -1163,7 +1169,7 @@ function buildSankeyData(
       if (otherSpending && otherSpending > 0 && !targetProjectName) {
         projectSpendingNodes.push({
           id: `project-spending-other-${ministry.id}`,
-          name: '事業(TopN以外)',
+          name: `事業(Top${projectLimit}以外)`,
           type: 'project-spending',
           value: otherSpending,
           details: {
@@ -1208,7 +1214,7 @@ function buildSankeyData(
     if (totalOtherSpending > 0) {
       projectSpendingNodes.push({
         id: 'project-spending-other-global',
-        name: '事業(TopN以外)',
+        name: `事業(Top${spendingLimit}以外)`,
         type: 'project-spending',
         value: totalOtherSpending,
         details: {
@@ -1462,7 +1468,7 @@ function buildSankeyData(
   if (totalOtherRecipientAmount > 0) {
     recipientNodes.push({
       id: 'recipient-other-aggregated',
-      name: '支出先(TopN以外)',
+      name: `支出先(Top${spendingLimit}以外)`,
       type: 'recipient',
       value: totalOtherRecipientAmount,
       details: {

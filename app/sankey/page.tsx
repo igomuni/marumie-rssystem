@@ -251,7 +251,7 @@ function SankeyContent() {
     // Handle Project nodes
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
       // Special handling for "事業(TopN以外)" aggregate nodes
-      if (actualNode.name === '事業(TopN以外)') {
+      if (actualNode.name.match(/^事業\(Top\d+以外\)$/)) {
         if (viewMode === 'global') {
           setOffset(prev => prev + globalMinistryTopN);
         } else if (viewMode === 'ministry') {
@@ -293,7 +293,7 @@ function SankeyContent() {
       }
 
       // Handle "支出先(TopN以外)"
-      if (actualNode.name === '支出先(TopN以外)') {
+      if (actualNode.name.match(/^支出先\(Top\d+以外\)$/)) {
         setOffset(prev => prev + globalMinistryTopN);
         return;
       }
@@ -665,9 +665,9 @@ function SankeyContent() {
 
                   // TopN以外ノードと"その他"ノードはすべてグレー
                   if (name.startsWith('その他') ||
-                    name === '府省庁(TopN以外)' ||
-                    name === '事業(TopN以外)' ||
-                    name === '支出先(TopN以外)') {
+                    name.match(/^府省庁\(Top\d+以外\)$/) ||
+                    name.match(/^事業\(Top\d+以外\)$/) ||
+                    name.match(/^支出先\(Top\d+以外\)$/)) {
                     return '#6b7280'; // グレー系
                   }
 
@@ -747,7 +747,7 @@ function SankeyContent() {
                         node.id === 'ministry-budget-other' ||
                         node.id === 'total-budget' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
-                        ((nodeType === 'project-budget' || nodeType === 'project-spending') && nodeName !== '事業(TopN以外)') ||
+                        ((nodeType === 'project-budget' || nodeType === 'project-spending') && !nodeName.match(/^事業\(Top\d+以外\)$/)) ||
                         (nodeType === 'recipient');
 
                       const cursorStyle = isClickable ? 'pointer' : 'default';
@@ -811,7 +811,7 @@ function SankeyContent() {
                       title += ' (クリックで府省庁詳細を表示)';
                     }
                   } else if (nodeType === 'project-budget' || nodeType === 'project-spending') {
-                    if (name === '事業(TopN以外)') {
+                    if (name.match(/^事業\(Top\d+以外\)$/)) {
                       title += ' (集約ノード)';
                     } else if (viewMode === 'project') {
                       title += ' (クリックで前のビューへ戻る)';
@@ -821,7 +821,7 @@ function SankeyContent() {
                   } else if (nodeType === 'recipient') {
                     if (name === 'その他') {
                       title += ' (クリックで支出元を表示)';
-                    } else if (name === '支出先(TopN以外)') {
+                    } else if (name.match(/^支出先\(Top\d+以外\)$/)) {
                       title += ' (クリックで詳細を表示)';
                     } else if (viewMode === 'spending') {
                       title += ' (クリックで前のビューへ戻る)';
