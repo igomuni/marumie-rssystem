@@ -10,6 +10,10 @@ import type {
 // Cache the data in memory to avoid re-reading the large JSON file
 let cachedData: RS2024StructuredData | null = null;
 
+// Cache for generated results to avoid re-processing for same parameters
+const resultCache = new Map<string, RS2024PresetData>();
+const CACHE_SIZE_LIMIT = 100;
+
 interface GenerateOptions {
   ministryOffset?: number;
   projectOffset?: number;
@@ -21,7 +25,30 @@ interface GenerateOptions {
   targetRecipientName?: string;
 }
 
+function getCacheKey(options: GenerateOptions): string {
+  // Canonicalize options with defaults
+  const canonicalOptions = {
+    ministryOffset: options.ministryOffset ?? 0,
+    projectOffset: options.projectOffset ?? 0,
+    ministryLimit: options.ministryLimit ?? 3,
+    projectLimit: options.projectLimit ?? 3,
+    spendingLimit: options.spendingLimit ?? 5,
+    targetMinistryName: options.targetMinistryName ?? '',
+    targetProjectName: options.targetProjectName ?? '',
+    targetRecipientName: options.targetRecipientName ?? '',
+  };
+  return JSON.stringify(canonicalOptions);
+}
+
 export async function generateSankeyData(options: GenerateOptions = {}): Promise<RS2024PresetData> {
+  const cacheKey = getCacheKey(options);
+
+  if (resultCache.has(cacheKey)) {
+    // console.log('Cache hit for key:', cacheKey);
+    return resultCache.get(cacheKey)!;
+  }
+  // console.log('Cache miss for key:', cacheKey);
+
   const {
     ministryOffset = 0,
     projectOffset = 0,
@@ -87,7 +114,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
   if (targetProjectName) presetType = 'project';
   if (targetRecipientName) presetType = 'spending';
 
-  return {
+  const result: RS2024PresetData = {
     metadata: {
       generatedAt: new Date().toISOString(),
       fiscalYear: 2024,
@@ -113,6 +140,15 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
     },
     sankey: sankeyData,
   };
+
+  // Update cache
+  if (resultCache.size >= CACHE_SIZE_LIMIT) {
+    const firstKey = resultCache.keys().next().value;
+    if (firstKey) resultCache.delete(firstKey);
+  }
+  resultCache.set(cacheKey, result);
+
+  return result;
 }
 
 interface DataSelection {
