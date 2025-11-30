@@ -45,6 +45,11 @@ npm run compress-data            # Gzip structured JSON for Git (5.9MB)
 - **Core Logic**: [app/lib/sankey-generator.ts](app/lib/sankey-generator.ts) - Sankey generation algorithm (936 lines)
 - **Data Scripts**: [scripts/](scripts/) - CSV normalization and JSON generation pipeline
 
+### Documentation Standards
+- **Naming Convention**: `/docs` directory uses `YYYYMMDD_HHMM_タイトル.md` format
+  - Example: `20251130_2220_支出ビュー仕様.md`
+  - Ensures chronological ordering and easy identification
+
 ---
 
 # RS2024 Sankey Diagram System - Architecture & Technical Overview
