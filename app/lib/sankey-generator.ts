@@ -369,28 +369,8 @@ function selectData(
       bureauCount: ministry.bureaus.length,
     }];
 
-    // Select Top Projects for this ministry
-    const ministryProjects = data.budgets
-      .filter(p => p.ministry === ministry.name)
-      .sort((a, b) => b.totalBudget - a.totalBudget);
-
-    topProjects = ministryProjects.slice(projectOffset, projectOffset + projectLimit);
-
-    // Calculate other projects budget (remaining after the current page)
-    const otherBudget = ministryProjects
-      .slice(projectOffset + projectLimit)
-      .reduce((sum, p) => sum + p.totalBudget, 0);
-    if (otherBudget > 0) {
-      otherProjectsBudgetByMinistry.set(ministry.name, otherBudget);
-    }
-
-    // Calculate spending amount for "Other Projects"
-    const otherSpending = ministryProjects
-      .slice(projectOffset + projectLimit)
-      .reduce((sum, p) => sum + p.totalSpendingAmount, 0);
-    if (otherSpending > 0) {
-      otherProjectsSpendingByMinistry.set(ministry.name, otherSpending);
-    }
+    // NOTE: Project selection is deferred until after spending TopN selection
+    // (see below in Ministry View Independent TopN Selection section)
 
   } else {
     // --- Global View (Recipient-First Approach) ---
@@ -507,8 +487,7 @@ function selectData(
 
     if (targetMinistryName && !targetProjectName) {
       // --- Ministry View: Independent TopN Selection ---
-      // 1. Projects are already selected by budget (done above in Ministry View section)
-      // 2. Select Top Spendings INDEPENDENTLY (not per-project, but globally across ministry)
+      // Step 1: Select Top Spendings FIRST (globally across ministry)
 
       // Get all spendings from all projects in this ministry
       const ministryProjectIds = data.budgets
@@ -541,6 +520,54 @@ function selectData(
       );
 
       topSpendings = data.spendings.filter(s => topSpendingIds.has(s.spendingId));
+
+      // Step 2: Select Top Projects by contribution to TopN spendings
+      const ministryProjects = data.budgets.filter(p => p.ministry === targetMinistryName);
+
+      // Calculate each project's contribution to TopN spendings
+      const projectScores = ministryProjects.map(project => {
+        let contributionToTopSpendings = 0;
+
+        for (const spendingId of project.spendingIds) {
+          if (topSpendingIds.has(spendingId)) {
+            const spending = data.spendings.find(s => s.spendingId === spendingId);
+            if (spending) {
+              const projectSpending = spending.projects.find(p => p.projectId === project.projectId);
+              if (projectSpending) {
+                contributionToTopSpendings += projectSpending.amount;
+              }
+            }
+          }
+        }
+
+        return {
+          project,
+          score: contributionToTopSpendings
+        };
+      });
+
+      // Sort by contribution score and select TopN projects
+      const sortedProjects = projectScores.sort((a, b) => b.score - a.score);
+      topProjects = sortedProjects
+        .slice(projectOffset, projectOffset + projectLimit)
+        .map(item => item.project);
+
+      // Calculate other projects budget (projects not in topProjects)
+      const topProjectIds = new Set(topProjects.map(p => p.projectId));
+      const otherBudget = sortedProjects
+        .filter(item => !topProjectIds.has(item.project.projectId))
+        .reduce((sum, item) => sum + item.project.totalBudget, 0);
+      if (otherBudget > 0) {
+        otherProjectsBudgetByMinistry.set(targetMinistryName, otherBudget);
+      }
+
+      // Calculate spending amount for "Other Projects"
+      const otherSpending = sortedProjects
+        .filter(item => !topProjectIds.has(item.project.projectId))
+        .reduce((sum, item) => sum + item.project.totalSpendingAmount, 0);
+      if (otherSpending > 0) {
+        otherProjectsSpendingByMinistry.set(targetMinistryName, otherSpending);
+      }
 
       // Calculate "Other Spendings" per project
       // For each project in topProjects, calculate spending to non-TopN recipients
@@ -579,6 +606,7 @@ function selectData(
           });
 
         const sortedSpendings = projectSpendings.sort((a, b) => b.amountFromThisProject - a.amountFromThisProject);
+
         const topNSpendings = sortedSpendings.slice(0, spendingLimit);
 
         for (const { spending } of topNSpendings) {
