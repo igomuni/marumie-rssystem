@@ -658,6 +658,7 @@ function SankeyContent() {
                 }
                 align="justify"
                 sort="input"
+                nodeInnerPadding={0}
                 colors={(node) => {
                   const nodeData = sankey.nodes.find(n => n.id === node.id);
                   const type = nodeData?.type;
@@ -681,8 +682,8 @@ function SankeyContent() {
                 }}
                 nodeOpacity={1}
                 nodeHoverOthersOpacity={0.35}
-                nodeThickness={18}
-                nodeSpacing={24}
+                nodeThickness={44}
+                nodeSpacing={22}
                 nodeBorderWidth={0}
                 nodeBorderColor={{
                   from: 'color',
@@ -691,7 +692,7 @@ function SankeyContent() {
                 linkOpacity={0.5}
                 linkHoverOthersOpacity={0.1}
                 linkContract={3}
-                enableLinkGradient={true}
+                enableLinkGradient={false}
                 labelPosition="outside"
                 labelOrientation="horizontal"
                 labelPadding={16}
@@ -729,17 +730,20 @@ function SankeyContent() {
 
                       let displayName = name;
                       if (nodeType === 'project-budget') {
-                        displayName = name.length > 15 ? name.substring(0, 15) + '...' : name;
+                        displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
                       } else if (nodeType === 'project-spending') {
-                        displayName = name.length > 15 ? name.substring(0, 15) + '...' : name;
-                      } else if (name.length > 18) {
-                        displayName = name.substring(0, 18) + '...';
+                        displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
+                      } else if (name.length > 10) {
+                        displayName = name.substring(0, 10) + '...';
                       }
 
                       // Position based on node type: budget nodes on left, spending nodes on right
                       const isBudgetNode = nodeType === 'ministry-budget' || nodeType === 'project-budget';
-                      const x = isBudgetNode ? node.x - 16 : node.x + node.width + 16;
+                      const x = isBudgetNode ? node.x - 4 : node.x + node.width + 4;
                       const textAnchor = isBudgetNode ? 'end' : 'start';
+
+                      // X position for amount label (centered above node)
+                      const amountX = node.x + node.width / 2;
 
                       // Clickable indication - now "その他" nodes are also clickable
                       const nodeName = actualNode?.name || '';
@@ -755,24 +759,39 @@ function SankeyContent() {
                       const color = isClickable ? '#2563eb' : '#1f2937'; // Blue if clickable
 
                       return (
-                        <g
-                          key={node.id}
-                          transform={`translate(${x}, ${node.y + node.height / 2})`}
-                          style={{ cursor: cursorStyle }}
-                          onClick={() => isClickable && handleNodeClick(node)}
-                        >
+                        <g key={node.id} style={{ cursor: cursorStyle }}>
+                          {/* 金額ラベル（ノードの真上中央に配置） */}
                           <text
+                            x={amountX}
+                            y={node.y - 6}
+                            textAnchor="middle"
+                            dominantBaseline="auto"
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 600,
+                              fill: '#1f2937',
+                              pointerEvents: 'none',
+                            }}
+                          >
+                            {amount}
+                          </text>
+
+                          {/* 名前ラベル（ノードの中央横に配置） */}
+                          <text
+                            x={x}
+                            y={node.y + node.height / 2}
                             textAnchor={textAnchor}
                             dominantBaseline="middle"
                             style={{
                               fill: color,
                               fontSize: 12,
                               fontWeight: fontWeight,
-                              pointerEvents: isClickable ? 'auto' : 'none', // Allow click only if clickable
+                              pointerEvents: isClickable ? 'auto' : 'none',
+                              cursor: cursorStyle,
                             }}
+                            onClick={() => isClickable && handleNodeClick(node)}
                           >
-                            <tspan x={0} dy="-0.6em">{displayName}</tspan>
-                            <tspan x={0} dy="1.2em" style={{ fontSize: 11, fontWeight: 400, fill: '#1f2937' }}>{amount}</tspan>
+                            {displayName}
                           </text>
                         </g>
                       );
@@ -795,39 +814,9 @@ function SankeyContent() {
                   // ノードタイプに応じてタイトルを調整
                   let title = name;
                   if (nodeType === 'project-budget') {
-                    title = `${name} (予算)`;
+                    title = `(予算) ${name}`;
                   } else if (nodeType === 'project-spending') {
-                    title = `${name} (支出)`;
-                  }
-
-                  if (node.id === 'ministry-budget-other') {
-                    title += ' (クリックで詳細を表示)';
-                  } else if (node.id === 'total-budget' && (offset > 0 || viewMode !== 'global')) {
-                    title += ' (クリックで戻る)';
-                  } else if (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') {
-                    if (viewMode === 'ministry') {
-                      title += ' (クリックで全体ビューへ戻る)';
-                    } else {
-                      title += ' (クリックで府省庁詳細を表示)';
-                    }
-                  } else if (nodeType === 'project-budget' || nodeType === 'project-spending') {
-                    if (name.match(/^事業\(Top\d+以外.*\)$/)) {
-                      title += ' (集約ノード)';
-                    } else if (viewMode === 'project') {
-                      title += ' (クリックで前のビューへ戻る)';
-                    } else {
-                      title += ' (クリックで事業詳細を表示)';
-                    }
-                  } else if (nodeType === 'recipient') {
-                    if (name === 'その他') {
-                      title += ' (クリックで支出元を表示)';
-                    } else if (name.match(/^支出先\(Top\d+以外\)$/)) {
-                      title += ' (クリックで詳細を表示)';
-                    } else if (viewMode === 'spending') {
-                      title += ' (クリックで前のビューへ戻る)';
-                    } else {
-                      title += ' (クリックで支出元を表示)';
-                    }
+                    title = `(支出) ${name}`;
                   }
 
                   return (
@@ -904,15 +893,108 @@ function SankeyContent() {
                 }}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 linkTooltip={({ link }: any) => {
-                  // Find actual nodes to check for dummy values
+                  // Find actual nodes and link data
                   const sourceNode = sankey.nodes.find(n => n.id === link.source.id);
                   const targetNode = sankey.nodes.find(n => n.id === link.target.id);
+                  const actualLink = sankey.links.find(l => l.source === link.source.id && l.target === link.target.id);
+
+                  const sourceName = sourceNode?.name || link.source.id;
+                  const targetName = targetNode?.name || link.target.id;
+                  const sourceValue = formatCurrency(link.source.value, sourceNode);
+                  const targetValue = formatCurrency(link.target.value, targetNode);
+                  const linkValue = formatCurrency(link.value, sourceNode);
+
+                  // 事業(予算) → 事業(支出) のリンクかどうかチェック
+                  const isProjectBudgetToSpending =
+                    sourceNode?.type === 'project-budget' &&
+                    targetNode?.type === 'project-spending';
+
+                  // タイトルとラベルを決定
+                  let title = '';
+                  let sourceLabel = '送信元';
+                  let targetLabel = '送信先';
+
+                  if (isProjectBudgetToSpending) {
+                    // 事業ノード間のリンク
+                    title = sourceName; // 事業名をタイトルに
+                    sourceLabel = '予算';
+                    targetLabel = '支出';
+                  } else {
+                    // その他のリンク：ノードタイプに基づいてタイトルを決定
+                    if (sourceNode?.type === 'ministry-budget') {
+                      title = `${sourceName} → 事業`;
+                    } else if (sourceNode?.type === 'project-spending') {
+                      title = `${sourceName} → 支出先`;
+                    } else {
+                      title = '資金の流れ';
+                    }
+                  }
 
                   return (
-                    <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded shadow-lg border border-gray-200 dark:border-gray-700">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        {formatCurrency(link.source.value, sourceNode)} → {formatCurrency(link.target.value, targetNode)}
+                    <div className="bg-white dark:bg-gray-800 px-4 py-3 rounded shadow-lg border border-gray-200 dark:border-gray-700 max-w-md">
+                      {/* タイトル */}
+                      <div className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2 border-b border-gray-200 dark:border-gray-600 pb-2">
+                        {title}
                       </div>
+
+                      {/* 送信元 */}
+                      <div className="mb-2">
+                        {isProjectBudgetToSpending && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{sourceLabel}</div>
+                        )}
+                        {!isProjectBudgetToSpending && (
+                          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                            {sourceName}
+                          </div>
+                        )}
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {sourceValue}
+                        </div>
+                      </div>
+
+                      {/* 矢印と流れる金額 */}
+                      <div className="text-center my-2">
+                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                          ↓ 
+                        </div>
+                      </div>
+
+                      {/* 送信先 */}
+                      <div className="mb-2">
+                        {isProjectBudgetToSpending && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{targetLabel}</div>
+                        )}
+                        {!isProjectBudgetToSpending && (
+                          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                            {targetName}
+                          </div>
+                        )}
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {targetValue}
+                        </div>
+                      </div>
+
+                      {/* リンク詳細情報 */}
+                      {actualLink?.details && (actualLink.details.contractMethod || actualLink.details.blockName) && (
+                        <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
+                          {actualLink.details.contractMethod && (
+                            <div className="mb-1">
+                              <span className="text-xs text-gray-500 dark:text-gray-400">契約方式: </span>
+                              <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                                {actualLink.details.contractMethod}
+                              </span>
+                            </div>
+                          )}
+                          {actualLink.details.blockName && (
+                            <div>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">支出ブロック: </span>
+                              <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                                {actualLink.details.blockName}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 }}
