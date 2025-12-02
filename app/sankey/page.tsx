@@ -693,6 +693,22 @@ function SankeyContent() {
                 linkHoverOthersOpacity={0.1}
                 linkContract={3}
                 enableLinkGradient={false}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                linkColor={(link: any) => {
+                  // link.source と link.target はオブジェクト形式
+                  const sourceNode = sankey.nodes.find(n => n.id === link.source.id);
+                  const targetNode = sankey.nodes.find(n => n.id === link.target.id);
+
+                  // 事業(予算) → 事業(支出) のリンクはグレー
+                  if (sourceNode?.type === 'project-budget' && targetNode?.type === 'project-spending') {
+                    return '#9ca3af'; // グレー系
+                  }
+
+                  // その他のリンクはソースノードの色を取得して返す
+                  // IMPORTANT: 'source' という文字列ではなく、実際の色コードを返す
+                  const sourceColor = link.source.color || '#10b981';
+                  return sourceColor;
+                }}
                 labelPosition="outside"
                 labelOrientation="horizontal"
                 labelPadding={16}
