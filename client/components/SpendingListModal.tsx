@@ -27,10 +27,16 @@ interface SpendingDetail {
   totalSpendingAmount: number;
   executionRate: number;
   projectCount?: number; // まとめる場合の事業件数
+  ministryBreakdown?: MinistryBreakdown[]; // まとめる場合の府省庁別内訳
 }
 
 type SortColumn = 'spendingName' | 'projectName' | 'ministry' | 'totalBudget' | 'totalSpendingAmount' | 'executionRate';
 type SortDirection = 'asc' | 'desc';
+
+interface MinistryBreakdown {
+  ministry: string;
+  amount: number;
+}
 
 export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, onSelectMinistry, onSelectProject, initialFilters }: Props) {
   const [allData, setAllData] = useState<BudgetRecord[]>([]);
@@ -52,6 +58,15 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
       return window.innerWidth >= 768;
     }
     return true;
+  });
+  const [ministryBreakdownModal, setMinistryBreakdownModal] = useState<{
+    isOpen: boolean;
+    spendingName: string;
+    ministries: MinistryBreakdown[];
+  }>({
+    isOpen: false,
+    spendingName: '',
+    ministries: [],
   });
 
   // データ読み込みと府省庁リスト初期化
@@ -163,7 +178,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
 
     // 事業名でまとめる場合
     if (groupBySpending) {
-      const grouped = new Map<string, SpendingDetail>();
+      const grouped = new Map<string, SpendingDetail & { ministryAmounts: Map<string, number> }>();
 
       result.forEach(item => {
         const key = item.spendingName;
@@ -173,19 +188,53 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           existing.totalBudget += item.totalBudget;
           existing.totalSpendingAmount += item.totalSpendingAmount;
           existing.projectCount = (existing.projectCount || 1) + 1;
+          // 府省庁ごとの支出額を記録
+          const currentAmount = existing.ministryAmounts.get(item.ministry) || 0;
+          existing.ministryAmounts.set(item.ministry, currentAmount + item.totalSpendingAmount);
           // 執行率は加重平均で再計算
           existing.executionRate = existing.totalBudget > 0
             ? (existing.totalSpendingAmount / existing.totalBudget) * 100
             : 0;
         } else {
+          const ministryAmounts = new Map<string, number>();
+          ministryAmounts.set(item.ministry, item.totalSpendingAmount);
           grouped.set(key, {
             ...item,
             projectCount: 1,
+            ministryAmounts,
           });
         }
       });
 
-      return Array.from(grouped.values());
+      // 最も割合が大きい府省庁を計算して表示文字列を作成
+      return Array.from(grouped.values()).map(item => {
+        const sortedMinistries = Array.from(item.ministryAmounts.entries())
+          .sort((a, b) => b[1] - a[1]);
+
+        const topMinistry = sortedMinistries[0]?.[0] || '';
+        const otherCount = sortedMinistries.length - 1;
+
+        const ministryDisplay = otherCount > 0
+          ? `${topMinistry} 他${otherCount}件`
+          : topMinistry;
+
+        // 府省庁別内訳データを作成
+        const ministryBreakdown: MinistryBreakdown[] = sortedMinistries.map(([ministry, amount]) => ({
+          ministry,
+          amount,
+        }));
+
+        return {
+          spendingName: item.spendingName,
+          projectName: item.projectName,
+          ministry: ministryDisplay,
+          totalBudget: item.totalBudget,
+          totalSpendingAmount: item.totalSpendingAmount,
+          executionRate: item.executionRate,
+          projectCount: item.projectCount,
+          ministryBreakdown,
+        };
+      });
     }
 
     return result;
@@ -194,8 +243,16 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
   // ソート
   const sortedData = useMemo(() => {
     return [...processedData].sort((a, b) => {
-      let aVal: string | number = a[sortColumn];
-      let bVal: string | number = b[sortColumn];
+      // projectNameでソートする場合、groupBySpendingがOnならprojectCountでソート
+      let column = sortColumn;
+      if (sortColumn === 'projectName' && groupBySpending) {
+        const aCount = a.projectCount || 0;
+        const bCount = b.projectCount || 0;
+        return sortDirection === 'asc' ? aCount - bCount : bCount - aCount;
+      }
+
+      let aVal: string | number = a[column];
+      let bVal: string | number = b[column];
 
       if (typeof aVal === 'string' && typeof bVal === 'string') {
         return sortDirection === 'asc'
@@ -207,7 +264,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
       bVal = bVal as number;
       return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
     });
-  }, [processedData, sortColumn, sortDirection]);
+  }, [processedData, sortColumn, sortDirection, groupBySpending]);
 
   // ページネーション
   const paginatedData = useMemo(() => {
@@ -245,7 +302,10 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     setCurrentPage(1);
   }, [selectedMinistries, projectNameFilter, spendingNameFilter, groupBySpending]);
 
-  if (!isOpen) return null;
+  // 全支出先数の計算
+  const totalSpendingCount = useMemo(() => {
+    return spendingsData.length;
+  }, [spendingsData]);
 
   const formatCurrency = (value: number) => {
     if (value >= 1e12) {
@@ -258,285 +318,406 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     return `${value.toLocaleString()}円`;
   };
 
-  const SortIcon = ({ column }: { column: SortColumn }) => {
-    if (sortColumn !== column) return <span className="text-gray-400">⇅</span>;
-    return sortDirection === 'asc' ? <span>↑</span> : <span>↓</span>;
+  const getSortIndicator = (column: SortColumn) => {
+    if (sortColumn !== column) return '⇅';
+    return sortDirection === 'asc' ? '↑' : '↓';
+  };
+
+  const getDropdownDisplayText = () => {
+    if (selectedMinistries.length === 0) {
+      return '表示対象なし';
+    } else if (selectedMinistries.length === 1) {
+      return selectedMinistries[0];
+    } else {
+      return `選択中 (${selectedMinistries.length}/${availableMinistries.length})`;
+    }
+  };
+
+  const toggleAllMinistries = () => {
+    if (selectedMinistries.length === availableMinistries.length) {
+      setSelectedMinistries([]);
+    } else {
+      setSelectedMinistries(availableMinistries);
+    }
+  };
+
+  const toggleMinistry = (ministry: string) => {
+    if (selectedMinistries.includes(ministry)) {
+      setSelectedMinistries(selectedMinistries.filter((m) => m !== ministry));
+    } else {
+      setSelectedMinistries([...selectedMinistries, ministry]);
+    }
+  };
+
+  const handleMinistryClick = (item: SpendingDetail) => {
+    if (groupBySpending && item.ministryBreakdown && item.ministryBreakdown.length > 1) {
+      // 複数府省庁がある場合はモーダルを表示
+      setMinistryBreakdownModal({
+        isOpen: true,
+        spendingName: item.spendingName,
+        ministries: item.ministryBreakdown,
+      });
+    } else if (onSelectMinistry) {
+      // 単一府省庁の場合は直接遷移
+      const ministry = item.ministryBreakdown?.[0]?.ministry || item.ministry;
+      onSelectMinistry(ministry);
+      onClose();
+    }
+  };
+
+  const handleMinistryBreakdownSelect = (ministry: string) => {
+    setMinistryBreakdownModal({ isOpen: false, spendingName: '', ministries: [] });
+    if (onSelectMinistry) {
+      onSelectMinistry(ministry);
+      onClose();
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-200 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[90vw] h-[90vh] flex flex-col">
         {/* ヘッダー */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              支出先一覧
-            </h2>
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-start mb-2">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">支出先一覧</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl leading-none"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              ✕
             </button>
+          </div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            全{totalSpendingCount.toLocaleString()}支出先
+            {sortedData.length !== totalSpendingCount && ` （フィルター後: ${sortedData.length.toLocaleString()}件）`}
           </div>
         </div>
 
-        {/* フィルタセクション */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        {/* フィルタ */}
+        <div className="border-b border-gray-200 dark:border-gray-700">
+          {/* 折り畳みヘッダー */}
           <button
             onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-            className="w-full md:hidden flex justify-between items-center text-left font-semibold text-gray-900 dark:text-gray-100 mb-2"
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
-            <span>フィルタ設定</span>
-            <span>{isFilterExpanded ? '▲' : '▼'}</span>
+            <span className="font-medium text-gray-900 dark:text-white">フィルタ設定</span>
+            <span className="text-gray-500 dark:text-gray-400 text-lg">
+              {isFilterExpanded ? '▼' : '▶'}
+            </span>
           </button>
 
-          <div className={`space-y-4 ${!isFilterExpanded ? 'hidden md:block' : ''}`}>
-            {/* 検索フィルタ */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  支出先名で検索
-                </label>
-                <input
-                  type="text"
-                  value={spendingNameFilter}
-                  onChange={(e) => setSpendingNameFilter(e.target.value)}
-                  placeholder="支出先名を入力..."
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                />
-              </div>
+          {/* フィルタコンテンツ */}
+          {isFilterExpanded && (
+            <div className="px-4 pb-4">
+              <div className="flex flex-col gap-3">
+                {/* 1行目: 府省庁フィルタと事業名まとめチェックボックス */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* 府省庁フィルタ（カスタムドロップダウン） */}
+                  <div className="w-64 relative" ref={dropdownRef}>
+                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">府省庁</label>
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className="w-full px-3 py-2 text-sm text-left border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between"
+                    >
+                      <span className="truncate">{getDropdownDisplayText()}</span>
+                      <span className="ml-2 text-gray-400 text-lg">▾</span>
+                    </button>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  事業名で検索
-                </label>
-                <input
-                  type="text"
-                  value={projectNameFilter}
-                  onChange={(e) => setProjectNameFilter(e.target.value)}
-                  placeholder="事業名を入力..."
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                />
-              </div>
-            </div>
+                    {isDropdownOpen && (
+                      <div className="absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-64 overflow-y-auto">
+                        {/* 全選択/全解除 */}
+                        <label className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-200 dark:border-gray-600">
+                          <input
+                            type="checkbox"
+                            checked={selectedMinistries.length === availableMinistries.length}
+                            onChange={toggleAllMinistries}
+                            className="mr-2"
+                          />
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">すべて選択/解除</span>
+                        </label>
 
-            {/* 府省庁フィルタ */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                府省庁フィルタ
-              </label>
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-left flex justify-between items-center"
-                >
-                  <span className="text-gray-900 dark:text-gray-100">
-                    {selectedMinistries.length === availableMinistries.length
-                      ? 'すべて'
-                      : `${selectedMinistries.length}件選択中`}
-                  </span>
-                  <span>{isDropdownOpen ? '▲' : '▼'}</span>
-                </button>
-
-                {isDropdownOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                    <div className="p-2 border-b border-gray-200 dark:border-gray-600">
-                      <button
-                        onClick={() => {
-                          if (selectedMinistries.length === availableMinistries.length) {
-                            setSelectedMinistries([]);
-                          } else {
-                            setSelectedMinistries(availableMinistries);
-                          }
-                        }}
-                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                      >
-                        {selectedMinistries.length === availableMinistries.length ? 'すべて解除' : 'すべて選択'}
-                      </button>
-                    </div>
-                    {availableMinistries.map(ministry => (
-                      <label
-                        key={ministry}
-                        className="flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedMinistries.includes(ministry)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedMinistries([...selectedMinistries, ministry]);
-                            } else {
-                              setSelectedMinistries(selectedMinistries.filter(m => m !== ministry));
-                            }
-                          }}
-                          className="mr-2"
-                        />
-                        <span className="text-gray-900 dark:text-gray-100">{ministry}</span>
-                      </label>
-                    ))}
+                        {/* 府省庁リスト */}
+                        {availableMinistries.map((ministry) => (
+                          <label
+                            key={ministry}
+                            className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedMinistries.includes(ministry)}
+                              onChange={() => toggleMinistry(ministry)}
+                              className="mr-2"
+                            />
+                            <span className="text-sm text-gray-900 dark:text-white">{ministry}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  {/* 事業名まとめチェックボックス */}
+                  <div className="flex items-center gap-2 mt-5">
+                    <input
+                      type="checkbox"
+                      id="groupBySpending"
+                      checked={groupBySpending}
+                      onChange={(e) => setGroupBySpending(e.target.checked)}
+                      className="w-4 h-4"
+                    />
+                    <label htmlFor="groupBySpending" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                      事業名をまとめる
+                    </label>
+                  </div>
+                </div>
+
+                {/* 2行目: テキスト検索 */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* 支出先フィルタ */}
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">支出先</label>
+                    <input
+                      type="text"
+                      value={spendingNameFilter}
+                      onChange={(e) => setSpendingNameFilter(e.target.value)}
+                      placeholder="支出先で検索"
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* 事業名フィルタ */}
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">事業名</label>
+                    <input
+                      type="text"
+                      value={projectNameFilter}
+                      onChange={(e) => setProjectNameFilter(e.target.value)}
+                      placeholder="事業名で検索"
+                      disabled={groupBySpending}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* まとめるチェックボックス */}
-            <div>
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={groupBySpending}
-                  onChange={(e) => setGroupBySpending(e.target.checked)}
-                  className="mr-2"
-                />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  事業名をまとめる
-                </span>
-              </label>
-            </div>
-
-            {/* 統計表示 */}
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              {loading ? (
-                <span>読み込み中...</span>
-              ) : (
-                <span>
-                  {sortedData.length.toLocaleString()}件
-                  {groupBySpending && ' (事業名でまとめて表示)'}
-                </span>
-              )}
-            </div>
-          </div>
+          )}
         </div>
 
         {/* テーブル */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto">
           {loading ? (
-            <div className="flex justify-center items-center h-full">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex items-center justify-center h-full text-gray-600 dark:text-gray-400">
+              読み込み中...
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-[5] shadow-sm">
+                <tr className="border-b-2 border-gray-300 dark:border-gray-600">
+                  <th
+                    className="px-4 py-2 text-left cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 min-w-[300px]"
+                    onClick={() => handleSort('spendingName')}
+                  >
+                    支出先 {getSortIndicator('spendingName')}
+                  </th>
+                  <th
+                    className={`px-4 py-2 text-left ${groupBySpending ? 'whitespace-nowrap w-28' : 'min-w-[250px]'
+                      } cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600`}
+                    onClick={() => handleSort('projectName')}
+                  >
+                    {groupBySpending ? `事業件数 ${getSortIndicator('projectName')}` : `事業名 ${getSortIndicator('projectName')}`}
+                  </th>
+                  <th
+                    className="px-4 py-2 text-left cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
+                    onClick={() => handleSort('ministry')}
+                  >
+                    府省庁 {getSortIndicator('ministry')}
+                  </th>
+                  <th
+                    className="px-4 py-2 text-right cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
+                    onClick={() => handleSort('totalBudget')}
+                  >
+                    予算 {getSortIndicator('totalBudget')}
+                  </th>
+                  <th
+                    className="px-4 py-2 text-right cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
+                    onClick={() => handleSort('totalSpendingAmount')}
+                  >
+                    支出 {getSortIndicator('totalSpendingAmount')}
+                  </th>
+                  <th
+                    className="px-4 py-2 text-right cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
+                    onClick={() => handleSort('executionRate')}
+                  >
+                    執行率 {getSortIndicator('executionRate')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedData.map((item, idx) => (
+                  <tr
+                    key={`${item.spendingName}-${idx}`}
+                    className="border-t border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900"
+                  >
+                    <td
+                      className="px-4 py-2 text-gray-900 dark:text-white cursor-pointer hover:underline"
+                      onClick={() => {
+                        onSelectRecipient(item.spendingName);
+                        onClose();
+                      }}
+                    >
+                      {item.spendingName}
+                    </td>
+                    <td
+                      className={`px-4 py-2 text-gray-900 dark:text-white ${!groupBySpending && item.projectName ? 'cursor-pointer hover:underline' : ''}`}
+                      onClick={() => {
+                        if (!groupBySpending && item.projectName && onSelectProject) {
+                          onSelectProject(item.projectName);
+                          onClose();
+                        }
+                      }}
+                    >
+                      {groupBySpending ? (item.projectCount || 0).toLocaleString() : item.projectName}
+                    </td>
+                    <td
+                      className="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white cursor-pointer hover:underline"
+                      onClick={() => handleMinistryClick(item)}
+                    >
+                      {item.ministry}
+                    </td>
+                    <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
+                      {formatCurrency(item.totalBudget)}
+                    </td>
+                    <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
+                      {formatCurrency(item.totalSpendingAmount)}
+                    </td>
+                    <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
+                      {item.executionRate.toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* ページネーション */}
+        {!loading && totalPages > 1 && (
+          <div className="border-t border-gray-200 dark:border-gray-700 px-3 py-2 bg-white dark:bg-gray-800">
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-xs text-gray-600 dark:text-gray-400">
+                {((currentPage - 1) * itemsPerPage + 1).toLocaleString()}-
+                {Math.min(currentPage * itemsPerPage, sortedData.length).toLocaleString()} /
+                {sortedData.length.toLocaleString()}
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  className="w-8 h-8 flex items-center justify-center text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  «
+                </button>
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-8 h-8 flex items-center justify-center text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  ‹
+                </button>
+                <span className="text-xs text-gray-700 dark:text-gray-300 px-2">
+                  {currentPage}/{totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-8 h-8 flex items-center justify-center text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  ›
+                </button>
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  className="w-8 h-8 flex items-center justify-center text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  »
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* フッター */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            閉じる
+          </button>
+        </div>
+      </div>
+
+      {/* 府省庁別内訳モーダル */}
+      {ministryBreakdownModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[600px] max-h-[80vh] flex flex-col">
+            {/* ヘッダー */}
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">府省庁別支出額</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {ministryBreakdownModal.spendingName}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setMinistryBreakdownModal({ isOpen: false, spendingName: '', ministries: [] })}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl leading-none"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* 府省庁リスト */}
+            <div className="flex-1 overflow-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0">
-                  <tr>
-                    <th
-                      onClick={() => handleSort('spendingName')}
-                      className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
-                    >
-                      支出先 <SortIcon column="spendingName" />
-                    </th>
-                    <th
-                      onClick={() => handleSort('projectName')}
-                      className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
-                    >
-                      事業名 <SortIcon column="projectName" />
-                      {groupBySpending && <span className="text-xs text-gray-500 ml-1">(件数)</span>}
-                    </th>
-                    <th
-                      onClick={() => handleSort('ministry')}
-                      className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
-                    >
-                      府省庁 <SortIcon column="ministry" />
-                    </th>
-                    <th
-                      onClick={() => handleSort('totalBudget')}
-                      className="px-4 py-3 text-right font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
-                    >
-                      予算 <SortIcon column="totalBudget" />
-                    </th>
-                    <th
-                      onClick={() => handleSort('totalSpendingAmount')}
-                      className="px-4 py-3 text-right font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
-                    >
-                      支出 <SortIcon column="totalSpendingAmount" />
-                    </th>
-                    <th
-                      onClick={() => handleSort('executionRate')}
-                      className="px-4 py-3 text-right font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
-                    >
-                      執行率 <SortIcon column="executionRate" />
-                    </th>
+                <thead className="sticky top-0 bg-gray-50 dark:bg-gray-700 z-[5] shadow-sm">
+                  <tr className="border-b-2 border-gray-300 dark:border-gray-600">
+                    <th className="px-4 py-2 text-left">府省庁</th>
+                    <th className="px-4 py-2 text-right">支出額</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.map((item, index) => (
+                  {ministryBreakdownModal.ministries.map((m, idx) => (
                     <tr
-                      key={index}
-                      className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      key={idx}
+                      className="border-t border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900 cursor-pointer"
+                      onClick={() => handleMinistryBreakdownSelect(m.ministry)}
                     >
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => onSelectRecipient(item.spendingName)}
-                          className="text-blue-600 dark:text-blue-400 hover:underline text-left"
-                        >
-                          {item.spendingName}
-                        </button>
+                      <td className="px-4 py-2 text-gray-900 dark:text-white hover:underline">
+                        {m.ministry}
                       </td>
-                      <td className="px-4 py-3">
-                        {groupBySpending ? (
-                          <span className="text-gray-900 dark:text-gray-100">
-                            {item.projectCount}件
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => onSelectProject && onSelectProject(item.projectName)}
-                            className="text-blue-600 dark:text-blue-400 hover:underline text-left"
-                          >
-                            {item.projectName}
-                          </button>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => onSelectMinistry && onSelectMinistry(item.ministry)}
-                          className="text-blue-600 dark:text-blue-400 hover:underline text-left"
-                        >
-                          {item.ministry}
-                        </button>
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-900 dark:text-gray-100">
-                        {formatCurrency(item.totalBudget)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-900 dark:text-gray-100">
-                        {formatCurrency(item.totalSpendingAmount)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-900 dark:text-gray-100">
-                        {item.executionRate.toFixed(2)}%
+                      <td className="px-4 py-2 text-right text-gray-900 dark:text-white">
+                        {formatCurrency(m.amount)}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
 
-        {/* ページネーション */}
-        {totalPages > 1 && (
-          <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              前へ
-            </button>
-            <span className="text-gray-700 dark:text-gray-300">
-              {currentPage} / {totalPages} ページ
-            </span>
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              次へ
-            </button>
+            {/* フッター */}
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button
+                onClick={() => setMinistryBreakdownModal({ isOpen: false, spendingName: '', ministries: [] })}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+              >
+                閉じる
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
