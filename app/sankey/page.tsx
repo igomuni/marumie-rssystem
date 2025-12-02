@@ -6,6 +6,7 @@ import { ResponsiveSankey } from '@nivo/sankey';
 import type { RS2024PresetData } from '@/types/preset';
 import type { RS2024StructuredData } from '@/types/structured';
 import ProjectListModal from '@/client/components/ProjectListModal';
+import SpendingListModal from '@/client/components/SpendingListModal';
 
 function SankeyContent() {
   const router = useRouter();
@@ -49,6 +50,13 @@ function SankeyContent() {
     projectName?: string;
     spendingName?: string;
     groupByProject?: boolean;
+  } | undefined>(undefined);
+  const [isSpendingListOpen, setIsSpendingListOpen] = useState(false);
+  const [spendingListFilters, setSpendingListFilters] = useState<{
+    ministries?: string[];
+    projectName?: string;
+    spendingName?: string;
+    groupBySpending?: boolean;
   } | undefined>(undefined);
 
   // Temporary settings state for dialog
@@ -525,6 +533,13 @@ function SankeyContent() {
           aria-label="事業一覧"
         >
           事業一覧
+        </button>
+        <button
+          onClick={() => setIsSpendingListOpen(true)}
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors shadow-lg"
+          aria-label="支出先一覧"
+        >
+          支出先一覧
         </button>
         <button
           onClick={openSettings}
@@ -1178,6 +1193,16 @@ function SankeyContent() {
         onSelectMinistry={handleSelectMinistry}
         onSelectRecipient={handleSelectRecipient}
         initialFilters={projectListFilters}
+      />
+
+      {/* 支出先一覧ダイアログ */}
+      <SpendingListModal
+        isOpen={isSpendingListOpen}
+        onClose={() => setIsSpendingListOpen(false)}
+        onSelectRecipient={handleSelectRecipient}
+        onSelectMinistry={handleSelectMinistry}
+        onSelectProject={handleSelectProject}
+        initialFilters={spendingListFilters}
       />
     </div>
   );
