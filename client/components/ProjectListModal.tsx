@@ -292,7 +292,7 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
     });
 
     return sorted;
-  }, [allData, spendingsData, selectedMinistries, groupByProject, sortColumn, sortDirection, projectNameFilter, spendingNameFilter]);
+  }, [allData, spendingsData, selectedMinistries, groupByProject, sortColumn, sortDirection, projectNameFilter, spendingNameFilter, projectNameSearchMode, spendingNameSearchMode]);
 
   // ページネーション
   const paginatedData = useMemo(() => {

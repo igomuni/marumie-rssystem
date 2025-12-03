@@ -257,7 +257,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     }
 
     return result;
-  }, [allData, spendingsData, selectedMinistries, projectNameFilter, spendingNameFilter, groupBySpending]);
+  }, [allData, spendingsData, selectedMinistries, projectNameFilter, spendingNameFilter, groupBySpending, projectNameSearchMode, spendingNameSearchMode]);
 
   // ソート
   const sortedData = useMemo(() => {

@@ -526,7 +526,7 @@ function SankeyContent() {
   const breadcrumbs = data ? getBreadcrumbs() : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* 固定ボタン */}
       <div className="fixed top-4 right-4 z-40 flex gap-2">
         <button
@@ -563,9 +563,9 @@ function SankeyContent() {
         )}
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-8">
         {/* ヘッダー */}
-        <div className="mb-8 top-0 bg-gray-50 dark:bg-gray-900 z-30 py-4 -mx-8 px-8 border-b border-gray-200 dark:border-gray-800 shadow-sm">
+        <div className="mb-8 top-0 bg-gray-50 dark:bg-gray-900 z-30 py-4 border-b border-gray-200 dark:border-gray-800 shadow-sm">
           <div>
             <div className="flex items-start justify-between">
               <div>
@@ -577,7 +577,7 @@ function SankeyContent() {
                 </div>
                 <div className="flex items-center gap-3">
                   <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    {viewMode === 'global' && `総支出 ${formatCurrency(metadata.summary.totalBudget)}`}
+                    {viewMode === 'global' && structuredData && `総予算${formatCurrency(structuredData.metadata.totalBudgetAmount)}→総支出${formatCurrency(structuredData.metadata.totalSpendingAmount)}`}
                     {viewMode === 'ministry' && selectedMinistry}
                     {viewMode === 'project' && selectedProject}
                     {viewMode === 'spending' && selectedRecipient}
@@ -630,24 +630,24 @@ function SankeyContent() {
           </div>
         </div>
 
-        {/* ノード色の凡例 */}
-        <div className="flex items-center gap-6 mb-4 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#10b981]"></span>
-            <span className="text-gray-700 dark:text-gray-300">予算ノード</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#ef4444]"></span>
-            <span className="text-gray-700 dark:text-gray-300">支出ノード</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[#6b7280]"></span>
-            <span className="text-gray-700 dark:text-gray-300">その他</span>
-          </div>
-        </div>
-
         {/* サンキー図 */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 relative">
+          {/* ノード色の凡例 */}
+          <div className="flex items-center gap-6 mb-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#10b981]"></span>
+              <span className="text-gray-700 dark:text-gray-300">予算ノード</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#ef4444]"></span>
+              <span className="text-gray-700 dark:text-gray-300">支出ノード</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#6b7280]"></span>
+              <span className="text-gray-700 dark:text-gray-300">その他</span>
+            </div>
+          </div>
+
           {loading && (
             <div className="absolute inset-0 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center z-10">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
