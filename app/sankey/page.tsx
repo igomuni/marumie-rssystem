@@ -26,6 +26,7 @@ function SankeyContent() {
   const [selectedMinistry, setSelectedMinistry] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
+  const [excludeTopNMinistries, setExcludeTopNMinistries] = useState(false); // For "Other Ministries" drill-down
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Settings State (ビュー別に整理)
@@ -79,6 +80,7 @@ function SankeyContent() {
     const recipient = searchParams.get('recipient');
     const offsetParam = searchParams.get('offset');
     const projectOffsetParam = searchParams.get('projectOffset');
+    const excludeTopNParam = searchParams.get('excludeTopN');
 
     if (recipient) {
       setViewMode('spending');
@@ -94,6 +96,10 @@ function SankeyContent() {
       }
     } else if (offsetParam) {
       setOffset(parseInt(offsetParam) || 0);
+    }
+
+    if (excludeTopNParam === 'true') {
+      setExcludeTopNMinistries(true);
     }
 
     setIsInitialized(true);
@@ -114,13 +120,18 @@ function SankeyContent() {
       if (projectOffset > 0) {
         params.set('projectOffset', projectOffset.toString());
       }
-    } else if (viewMode === 'global' && offset > 0) {
-      params.set('offset', offset.toString());
+    } else if (viewMode === 'global') {
+      if (offset > 0) {
+        params.set('offset', offset.toString());
+      }
+      if (excludeTopNMinistries) {
+        params.set('excludeTopN', 'true');
+      }
     }
 
     const newUrl = params.toString() ? `/sankey?${params.toString()}` : '/sankey';
     router.push(newUrl);
-  }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, offset, projectOffset, router, isInitialized]);
+  }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, offset, projectOffset, excludeTopNMinistries, router, isInitialized]);
 
   // Load structured data once for breadcrumb total amounts
   useEffect(() => {
@@ -151,6 +162,9 @@ function SankeyContent() {
           params.set('limit', globalMinistryTopN.toString());
           params.set('projectLimit', '3'); // Fixed for global view to avoid clutter
           params.set('spendingLimit', globalSpendingTopN.toString());
+          if (excludeTopNMinistries) {
+            params.set('excludeTopN', 'true');
+          }
         } else if (viewMode === 'ministry' && selectedMinistry) {
           params.set('ministryName', selectedMinistry);
           params.set('projectLimit', ministryProjectTopN.toString());
@@ -180,7 +194,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient]);
+  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient, excludeTopNMinistries]);
 
   // スマホ判定
   useEffect(() => {
@@ -199,21 +213,29 @@ function SankeyContent() {
 
     // Handle "Other Ministries" drill-down
     if (actualNode.id === 'ministry-budget-other') {
-      setOffset(prev => prev + globalMinistryTopN);
+      // Switch to "exclude TopN" mode to show all other ministries
+      setExcludeTopNMinistries(true);
+      setOffset(0); // Reset offset when switching to exclude mode
       return;
     }
 
     // Handle "Total Budget" (予算総計) - but NOT in Project View where it represents a ministry
     if (actualNode.id === 'total-budget' && viewMode !== 'project') {
       if (viewMode === 'global') {
-        // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
-        setProjectListFilters({
-          ministries: undefined, // All
-          projectName: '',
-          spendingName: '',
-          groupByProject: undefined // Keep previous
-        });
-        setIsProjectListOpen(true);
+        if (excludeTopNMinistries) {
+          // Exit exclude mode and return to normal view
+          setExcludeTopNMinistries(false);
+          setOffset(0);
+        } else {
+          // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
+          setProjectListFilters({
+            ministries: undefined, // All
+            projectName: '',
+            spendingName: '',
+            groupByProject: undefined // Keep previous
+          });
+          setIsProjectListOpen(true);
+        }
       } else if (viewMode === 'ministry') {
         setViewMode('global');
         setSelectedMinistry(null);

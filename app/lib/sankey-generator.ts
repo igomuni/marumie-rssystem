@@ -23,6 +23,7 @@ interface GenerateOptions {
   targetMinistryName?: string;
   targetProjectName?: string;
   targetRecipientName?: string;
+  excludeTopNMinistries?: boolean;
 }
 
 function getCacheKey(options: GenerateOptions): string {
@@ -36,6 +37,7 @@ function getCacheKey(options: GenerateOptions): string {
     targetMinistryName: options.targetMinistryName ?? '',
     targetProjectName: options.targetProjectName ?? '',
     targetRecipientName: options.targetRecipientName ?? '',
+    excludeTopNMinistries: options.excludeTopNMinistries ?? false,
   };
   return JSON.stringify(canonicalOptions);
 }
@@ -58,6 +60,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
     targetMinistryName,
     targetProjectName,
     targetRecipientName,
+    excludeTopNMinistries = false,
   } = options;
 
   // 1. Load data
@@ -83,6 +86,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
     targetMinistryName,
     targetProjectName,
     targetRecipientName,
+    excludeTopNMinistries,
   });
 
   // 3. Build Sankey Data
@@ -183,9 +187,10 @@ function selectData(
     targetMinistryName?: string;
     targetProjectName?: string;
     targetRecipientName?: string;
+    excludeTopNMinistries?: boolean;
   }
 ): DataSelection {
-  const { offset, projectOffset, limit, projectLimit, spendingLimit, targetMinistryName, targetProjectName, targetRecipientName } = options;
+  const { offset, projectOffset, limit, projectLimit, spendingLimit, targetMinistryName, targetProjectName, targetRecipientName, excludeTopNMinistries = false } = options;
 
   // Initialize result containers
   let topMinistries: Array<{ name: string; id: number; totalBudget: number; bureauCount: number }> = [];
@@ -421,23 +426,59 @@ function selectData(
     const allMinistries = data.budgetTree.ministries
       .sort((a, b) => b.totalBudget - a.totalBudget);
 
-    // Use 'limit' parameter for ministry selection (default: 3)
-    topMinistries = allMinistries.slice(0, limit).map(m => ({
-      name: m.name,
-      id: m.id,
-      totalBudget: m.totalBudget,
-      bureauCount: m.bureaus.length,
-    }));
+    if (excludeTopNMinistries) {
+      // Show ministries EXCLUDING the TopN (for "Other Ministries" drill-down)
+      const excludedMinistries = allMinistries.slice(0, limit);
+      const remainingMinistries = allMinistries.slice(limit);
 
-    // Calculate "Other Ministries" budget and spending
-    const otherMinistries = allMinistries.slice(limit);
-    otherMinistriesBudget = otherMinistries.reduce((sum, m) => sum + m.totalBudget, 0);
+      // Apply offset and limit to the remaining ministries
+      topMinistries = remainingMinistries.slice(offset, offset + limit).map(m => ({
+        name: m.name,
+        id: m.id,
+        totalBudget: m.totalBudget,
+        bureauCount: m.bureaus.length,
+      }));
 
-    // Calculate other ministries spending
-    for (const ministry of otherMinistries) {
-      const ministryStats = data.statistics.byMinistry[ministry.name];
-      if (ministryStats) {
-        otherMinistriesSpending += ministryStats.totalSpending;
+      // "Other Ministries" in this mode includes:
+      // 1. Original TopN that we're excluding from view
+      // 2. Remaining ministries beyond current page
+      otherMinistriesBudget = excludedMinistries.reduce((sum, m) => sum + m.totalBudget, 0);
+      const afterPage = remainingMinistries.slice(offset + limit);
+      otherMinistriesBudget += afterPage.reduce((sum, m) => sum + m.totalBudget, 0);
+
+      // Calculate spending for "other"
+      for (const ministry of excludedMinistries) {
+        const ministryStats = data.statistics.byMinistry[ministry.name];
+        if (ministryStats) {
+          otherMinistriesSpending += ministryStats.totalSpending;
+        }
+      }
+      for (const ministry of afterPage) {
+        const ministryStats = data.statistics.byMinistry[ministry.name];
+        if (ministryStats) {
+          otherMinistriesSpending += ministryStats.totalSpending;
+        }
+      }
+    } else {
+      // Normal mode: show TopN ministries
+      // Use 'limit' parameter for ministry selection (default: 3)
+      topMinistries = allMinistries.slice(0, limit).map(m => ({
+        name: m.name,
+        id: m.id,
+        totalBudget: m.totalBudget,
+        bureauCount: m.bureaus.length,
+      }));
+
+      // Calculate "Other Ministries" budget and spending
+      const otherMinistries = allMinistries.slice(limit);
+      otherMinistriesBudget = otherMinistries.reduce((sum, m) => sum + m.totalBudget, 0);
+
+      // Calculate other ministries spending
+      for (const ministry of otherMinistries) {
+        const ministryStats = data.statistics.byMinistry[ministry.name];
+        if (ministryStats) {
+          otherMinistriesSpending += ministryStats.totalSpending;
+        }
       }
     }
 

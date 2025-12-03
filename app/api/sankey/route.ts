@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const ministryName = searchParams.get('ministryName') || undefined;
     const projectName = searchParams.get('projectName') || undefined;
     const recipientName = searchParams.get('recipientName') || undefined;
+    const excludeTopN = searchParams.get('excludeTopN') === 'true';
 
     try {
         const data = await generateSankeyData({
@@ -22,6 +23,7 @@ export async function GET(request: NextRequest) {
             targetMinistryName: ministryName,
             targetProjectName: projectName,
             targetRecipientName: recipientName,
+            excludeTopNMinistries: excludeTopN,
         });
         return NextResponse.json(data);
     } catch (error) {
