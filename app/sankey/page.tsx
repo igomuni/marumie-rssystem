@@ -461,6 +461,55 @@ function SankeyContent() {
     }
   };
 
+  // Get budget and spending amounts for current view
+  const getViewAmounts = () => {
+    if (!structuredData) return { budget: 0, spending: 0 };
+
+    if (viewMode === 'global') {
+      return {
+        budget: structuredData.metadata.totalBudgetAmount,
+        spending: structuredData.metadata.totalSpendingAmount,
+      };
+    } else if (viewMode === 'ministry' && selectedMinistry) {
+      const ministry = structuredData.budgetTree.ministries.find(m => m.name === selectedMinistry);
+      const ministryBudget = ministry?.totalBudget || 0;
+
+      // Calculate total spending for this ministry
+      const ministryProjects = structuredData.budgets.filter(b => b.ministry === selectedMinistry);
+      const ministrySpending = ministryProjects.reduce((sum, p) => sum + p.totalSpendingAmount, 0);
+
+      return { budget: ministryBudget, spending: ministrySpending };
+    } else if (viewMode === 'project' && selectedProject) {
+      const project = structuredData.budgets.find(b => b.projectName === selectedProject);
+      return {
+        budget: project?.totalBudget || 0,
+        spending: project?.totalSpendingAmount || 0,
+      };
+    } else if (viewMode === 'spending' && selectedRecipient) {
+      const recipient = structuredData.spendings.find(s => s.spendingName === selectedRecipient);
+
+      // For spending view, calculate total budget from all projects that pay this recipient
+      let totalBudget = 0;
+      if (recipient) {
+        recipient.projects.forEach(proj => {
+          const budget = structuredData.budgets.find(b => b.projectId === proj.projectId);
+          if (budget) {
+            totalBudget += budget.totalBudget;
+          }
+        });
+      }
+
+      return {
+        budget: totalBudget,
+        spending: recipient?.totalSpendingAmount || 0,
+      };
+    }
+
+    return { budget: 0, spending: 0 };
+  };
+
+  const viewAmounts = getViewAmounts();
+
   // Build breadcrumb items
   const getBreadcrumbs = () => {
     const breadcrumbs: Array<{ label: string; amount: number | undefined; onClick: () => void }> = [];
@@ -569,29 +618,37 @@ function SankeyContent() {
           <div>
             <div className="flex items-start justify-between">
               <div>
-                <div className="flex items-center gap-1">
-                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                {/* 1行目: ビュー名 + 概要ボタン */}
+                <div className="flex items-center gap-1 mb-1">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     {viewMode === 'global' && '全体'}
                     {viewMode === 'ministry' && '府省庁'}
                     {viewMode === 'project' && '事業'}
-                    {viewMode === 'spending' && '支出'}
+                    {viewMode === 'spending' && '支出先'}
                   </div>
-                    <button
-                      onClick={() => setIsSummaryOpen(true)}
-                      className="p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 transition-colors mb-1"
-                      aria-label="概要を表示"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-3">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                      </svg>
-                    </button>
-                  </div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  {viewMode === 'global' && structuredData && `総予算${formatCurrency(structuredData.metadata.totalBudgetAmount)}→総支出${formatCurrency(structuredData.metadata.totalSpendingAmount)}`}
+                  <button
+                    onClick={() => setIsSummaryOpen(true)}
+                    className="p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 transition-colors"
+                    aria-label="概要を表示"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* 2行目: 名称または年度 */}
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                  {viewMode === 'global' && structuredData && `予算年度${structuredData.metadata.fiscalYear}年`}
                   {viewMode === 'ministry' && selectedMinistry}
                   {viewMode === 'project' && selectedProject}
                   {viewMode === 'spending' && selectedRecipient}
                 </h1>
+
+                {/* 3行目: 予算→支出 */}
+                <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  予算{formatCurrency(viewAmounts.budget)}→支出{formatCurrency(viewAmounts.spending)}
+                </div>
               </div>
             </div>
           </div>
