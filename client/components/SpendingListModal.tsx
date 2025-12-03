@@ -30,8 +30,9 @@ interface SpendingDetail {
   ministryBreakdown?: MinistryBreakdown[]; // まとめる場合の府省庁別内訳
 }
 
-type SortColumn = 'spendingName' | 'projectName' | 'ministry' | 'totalBudget' | 'totalSpendingAmount' | 'executionRate';
+type SortColumn = 'spendingName' | 'projectName' | 'ministry' | 'totalBudget' | 'totalSpendingAmount' | 'executionRate' | 'projectCount';
 type SortDirection = 'asc' | 'desc';
+type SearchMode = 'contains' | 'exact' | 'prefix';
 
 interface MinistryBreakdown {
   ministry: string;
@@ -46,6 +47,8 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [spendingNameFilter, setSpendingNameFilter] = useState('');
   const [projectNameFilter, setProjectNameFilter] = useState('');
+  const [spendingNameSearchMode, setSpendingNameSearchMode] = useState<SearchMode>('contains');
+  const [projectNameSearchMode, setProjectNameSearchMode] = useState<SearchMode>('contains');
   const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
   const [availableMinistries, setAvailableMinistries] = useState<string[]>([]);
   const [groupBySpending, setGroupBySpending] = useState(true); // 事業名でまとめる
@@ -142,12 +145,26 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     });
 
     // フィルタリング対象の事業を取得
-    const filteredProjects = allData.filter(project => {
+    // フィルタリング関数
+    const checkMatch = (text: string, filter: string, mode: SearchMode) => {
+      if (!filter) return true;
+      const t = text.toLowerCase();
+      const f = filter.toLowerCase();
+      switch (mode) {
+        case 'exact': return t === f;
+        case 'prefix': return t.startsWith(f);
+        case 'contains': default: return t.includes(f);
+      }
+    };
+
+    const filteredProjects = allData.filter((project) => {
       // 府省庁フィルタ
       if (!selectedMinistries.includes(project.ministry)) return false;
 
       // 事業名フィルタ
-      if (projectNameFilter && !project.projectName.includes(projectNameFilter)) return false;
+      if (projectNameFilter && !checkMatch(project.projectName, projectNameFilter, projectNameSearchMode)) {
+        return false;
+      }
 
       return true;
     });
@@ -159,7 +176,9 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
         if (!spending) return;
 
         // 支出先名フィルタ
-        if (spendingNameFilter && !spending.spendingName.includes(spendingNameFilter)) return;
+        if (spendingNameFilter && !checkMatch(spending.spendingName, spendingNameFilter, spendingNameSearchMode)) {
+          return;
+        }
 
         // この事業からの支出額を取得
         const projectSpending = spending.projects.find(p => p.projectId === project.projectId);
@@ -238,7 +257,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     }
 
     return result;
-  }, [allData, spendingsData, selectedMinistries, projectNameFilter, spendingNameFilter, groupBySpending]);
+  }, [allData, spendingsData, selectedMinistries, projectNameFilter, spendingNameFilter, groupBySpending, projectNameSearchMode, spendingNameSearchMode]);
 
   // ソート
   const sortedData = useMemo(() => {
@@ -251,8 +270,17 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
         return sortDirection === 'asc' ? aCount - bCount : bCount - aCount;
       }
 
-      let aVal: string | number = a[column];
-      let bVal: string | number = b[column];
+      if (sortColumn === 'projectCount') {
+        const aCount = a.projectCount || 0;
+        const bCount = b.projectCount || 0;
+        return sortDirection === 'asc' ? aCount - bCount : bCount - aCount;
+      }
+
+      let aVal: string | number | undefined = a[column];
+      let bVal: string | number | undefined = b[column];
+
+      if (aVal === undefined) aVal = 0;
+      if (bVal === undefined) bVal = 0;
 
       if (typeof aVal === 'string' && typeof bVal === 'string') {
         return sortDirection === 'asc'
@@ -260,9 +288,11 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           : bVal.localeCompare(aVal, 'ja');
       }
 
-      aVal = aVal as number;
-      bVal = bVal as number;
-      return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+      // Ensure both are numbers for subtraction
+      const aNum = typeof aVal === 'number' ? aVal : 0;
+      const bNum = typeof bVal === 'number' ? bVal : 0;
+
+      return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
     });
   }, [processedData, sortColumn, sortDirection, groupBySpending]);
 
@@ -470,31 +500,74 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                   </div>
                 </div>
 
-                {/* 2行目: テキスト検索 */}
-                <div className="flex items-center gap-3 flex-wrap">
+                {/* 2行目: テキスト検索（検索モード付き） */}
+                <div className="flex items-center gap-3 flex-wrap w-full">
                   {/* 支出先フィルタ */}
-                  <div className="flex-1 min-w-[200px]">
-                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">支出先</label>
-                    <input
-                      type="text"
-                      value={spendingNameFilter}
-                      onChange={(e) => setSpendingNameFilter(e.target.value)}
-                      placeholder="支出先で検索"
-                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                  <div className="flex-1 min-w-[250px]">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-medium text-gray-700 dark:text-gray-300">支出先</label>
+                      <select
+                        value={spendingNameSearchMode}
+                        onChange={(e) => setSpendingNameSearchMode(e.target.value as SearchMode)}
+                        className="text-xs border-none bg-transparent text-gray-500 focus:ring-0 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        <option value="contains">含む</option>
+                        <option value="exact">完全一致</option>
+                        <option value="prefix">前方一致</option>
+                      </select>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={spendingNameFilter}
+                        onChange={(e) => setSpendingNameFilter(e.target.value)}
+                        placeholder="支出先で検索"
+                        className="w-full px-3 py-2 pr-8 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      {spendingNameFilter && (
+                        <button
+                          onClick={() => setSpendingNameFilter('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* 事業名フィルタ */}
-                  <div className="flex-1 min-w-[200px]">
-                    <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">事業名</label>
-                    <input
-                      type="text"
-                      value={projectNameFilter}
-                      onChange={(e) => setProjectNameFilter(e.target.value)}
-                      placeholder="事業名で検索"
-                      disabled={groupBySpending}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
+                  <div className="flex-1 min-w-[250px]">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-medium text-gray-700 dark:text-gray-300">事業名</label>
+                      <select
+                        value={projectNameSearchMode}
+                        onChange={(e) => setProjectNameSearchMode(e.target.value as SearchMode)}
+                        disabled={groupBySpending}
+                        className="text-xs border-none bg-transparent text-gray-500 focus:ring-0 cursor-pointer hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <option value="contains">含む</option>
+                        <option value="exact">完全一致</option>
+                        <option value="prefix">前方一致</option>
+                      </select>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={projectNameFilter}
+                        onChange={(e) => setProjectNameFilter(e.target.value)}
+                        placeholder="事業名で検索"
+                        disabled={groupBySpending}
+                        className="w-full px-3 py-2 pr-8 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                      {projectNameFilter && !groupBySpending && (
+                        <button
+                          onClick={() => setProjectNameFilter('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -519,11 +592,10 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                     支出先 {getSortIndicator('spendingName')}
                   </th>
                   <th
-                    className={`px-4 py-2 text-left ${groupBySpending ? 'whitespace-nowrap w-28' : 'min-w-[250px]'
-                      } cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600`}
-                    onClick={() => handleSort('projectName')}
+                    className={`px-4 py-2 text-left ${groupBySpending ? 'whitespace-nowrap w-28 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600' : 'min-w-[250px] cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600'}`}
+                    onClick={() => handleSort(groupBySpending ? 'projectCount' : 'projectName')}
                   >
-                    {groupBySpending ? `事業件数 ${getSortIndicator('projectName')}` : `事業名 ${getSortIndicator('projectName')}`}
+                    {groupBySpending ? `事業件数 ${getSortIndicator('projectCount')}` : `事業名 ${getSortIndicator('projectName')}`}
                   </th>
                   <th
                     className="px-4 py-2 text-left cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"

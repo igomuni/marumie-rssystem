@@ -7,6 +7,7 @@ import type { RS2024PresetData } from '@/types/preset';
 import type { RS2024StructuredData } from '@/types/structured';
 import ProjectListModal from '@/client/components/ProjectListModal';
 import SpendingListModal from '@/client/components/SpendingListModal';
+import SummaryDialog from '@/client/components/SummaryDialog';
 
 function SankeyContent() {
   const router = useRouter();
@@ -44,6 +45,7 @@ function SankeyContent() {
   const [spendingMinistryTopN, setSpendingMinistryTopN] = useState(10); // 支出元府省庁TopN
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [isProjectListOpen, setIsProjectListOpen] = useState(false);
   const [projectListFilters, setProjectListFilters] = useState<{
     ministries?: string[];
@@ -524,7 +526,7 @@ function SankeyContent() {
   const breadcrumbs = data ? getBreadcrumbs() : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* 固定ボタン */}
       <div className="fixed top-4 right-4 z-40 flex gap-2">
         <button
@@ -536,7 +538,7 @@ function SankeyContent() {
         </button>
         <button
           onClick={() => setIsSpendingListOpen(true)}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors shadow-lg"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
           aria-label="支出先一覧"
         >
           支出先一覧
@@ -546,9 +548,9 @@ function SankeyContent() {
           className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors shadow-lg"
           aria-label="設定"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </button>
         {(offset > 0 || viewMode === 'ministry') && (
@@ -561,63 +563,41 @@ function SankeyContent() {
         )}
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-8">
         {/* ヘッダー */}
-        <div className="mb-8">
+        <div className="mb-3 top-0 bg-gray-50 dark:bg-gray-900 z-30 py-2 border-b border-gray-200 dark:border-gray-800 shadow-sm">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              RS2024 サンキー図
-              {viewMode === 'ministry' && `（${selectedMinistry}）`}
-              {viewMode === 'project' && `（${selectedProject}）`}
-              {viewMode === 'spending' && `（${selectedRecipient}）`}
-              {viewMode === 'global' && `（Top${globalMinistryTopN}）`}
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              {viewMode === 'global'
-                ? '予算総計 → 府省庁（予算） → 事業（予算） → 事業（支出） → 支出先の予算・支出フロー'
-                : viewMode === 'ministry'
-                  ? `${selectedMinistry}の事業と支出先`
-                  : viewMode === 'project'
-                    ? `${selectedProject}の支出先`
-                    : `${selectedRecipient}への支出元（府省庁 → 事業 → 支出先）`}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-              <span className="text-green-600">■</span> 予算ベースの世界 |
-              <span className="text-red-600">■</span> 支出ベースの世界
-            </p>
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-1">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    {viewMode === 'global' && '全体'}
+                    {viewMode === 'ministry' && '府省庁'}
+                    {viewMode === 'project' && '事業'}
+                    {viewMode === 'spending' && '支出'}
+                  </div>
+                    <button
+                      onClick={() => setIsSummaryOpen(true)}
+                      className="p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 transition-colors mb-1"
+                      aria-label="概要を表示"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                      </svg>
+                    </button>
+                  </div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  {viewMode === 'global' && structuredData && `総予算${formatCurrency(structuredData.metadata.totalBudgetAmount)}→総支出${formatCurrency(structuredData.metadata.totalSpendingAmount)}`}
+                  {viewMode === 'ministry' && selectedMinistry}
+                  {viewMode === 'project' && selectedProject}
+                  {viewMode === 'spending' && selectedRecipient}
+                </h1>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* 統計情報 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">カバー率</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {metadata.summary.coverageRate.toFixed(1)}%
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">選択予算額</p>
-            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {formatCurrency(metadata.summary.selectedBudget)}
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">府省庁/事業</p>
-            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-              {metadata.summary.selectedMinistries} / {metadata.summary.selectedProjects}
-            </p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">支出先</p>
-            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              {metadata.summary.selectedSpendings}
-            </p>
-          </div>
-        </div>
-
         {/* パンくずリスト */}
-        <div className="mb-6">
+        <div className="mb-3">
           <div className="flex flex-wrap items-center gap-2">
             {breadcrumbs.map((crumb, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -649,6 +629,22 @@ function SankeyContent() {
 
         {/* サンキー図 */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 relative">
+          {/* ノード色の凡例 */}
+          <div className="flex items-center gap-6 mb-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#10b981]"></span>
+              <span className="text-gray-700 dark:text-gray-300">予算ノード</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#ef4444]"></span>
+              <span className="text-gray-700 dark:text-gray-300">支出ノード</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-[#6b7280]"></span>
+              <span className="text-gray-700 dark:text-gray-300">その他</span>
+            </div>
+          </div>
+
           {loading && (
             <div className="absolute inset-0 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center z-10">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -669,7 +665,7 @@ function SankeyContent() {
                 data={sankey}
                 margin={isMobile
                   ? { top: 40, right: 100, bottom: 40, left: 100 }
-                  : { top: 40, right: 200, bottom: 40, left: 200 }
+                  : { top: 40, right: 100, bottom: 40, left: 100 }
                 }
                 align="justify"
                 sort="input"
@@ -970,7 +966,7 @@ function SankeyContent() {
                       {/* 矢印と流れる金額 */}
                       <div className="text-center my-2">
                         <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                          ↓ 
+                          ↓
                         </div>
                       </div>
 
@@ -1038,7 +1034,13 @@ function SankeyContent() {
       {/* 設定ダイアログ */}
       {isSettingsOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+            <button
+              onClick={() => setIsSettingsOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl leading-none"
+            >
+              ✕
+            </button>
             <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100">TopN表示設定</h2>
 
             {/* 全体ビュー */}
@@ -1203,6 +1205,14 @@ function SankeyContent() {
         onSelectMinistry={handleSelectMinistry}
         onSelectProject={handleSelectProject}
         initialFilters={spendingListFilters}
+      />
+
+      {/* 概要ダイアログ */}
+      <SummaryDialog
+        isOpen={isSummaryOpen}
+        onClose={() => setIsSummaryOpen(false)}
+        metadata={metadata}
+        formatCurrency={formatCurrency}
       />
     </div>
   );
