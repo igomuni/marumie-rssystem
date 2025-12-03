@@ -1214,8 +1214,8 @@ function buildSankeyData(
       }
     }
 
-    // Link from "Other Ministries" to "Other Projects"
-    if (otherMinistriesBudget > 0) {
+    // Link from "Other Ministries" to "Other Projects" (skip in excludeTopN mode)
+    if (otherMinistriesBudget > 0 && !excludeTopNMinistries) {
       totalOtherBudget += otherMinistriesBudget;
       links.push({
         source: 'ministry-budget-other',
@@ -1336,9 +1336,11 @@ function buildSankeyData(
       if (otherBudget) totalOtherBudget += otherBudget;
     }
 
-    // Add "Other Ministries" spending
-    totalOtherSpending += otherMinistriesSpending;
-    totalOtherBudget += otherMinistriesBudget;
+    // Add "Other Ministries" spending (skip in excludeTopN mode)
+    if (!excludeTopNMinistries) {
+      totalOtherSpending += otherMinistriesSpending;
+      totalOtherBudget += otherMinistriesBudget;
+    }
 
     if (totalOtherSpending > 0) {
       projectSpendingNodes.push({

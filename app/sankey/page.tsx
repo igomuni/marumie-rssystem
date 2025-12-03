@@ -355,6 +355,7 @@ function SankeyContent() {
     setSelectedMinistry(null);
     setSelectedProject(null);
     setSelectedRecipient(null);
+    setExcludeTopNMinistries(false);
   };
 
   const handleSelectProject = (projectName: string) => {
@@ -624,14 +625,6 @@ function SankeyContent() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </button>
-        {(offset > 0 || viewMode === 'ministry') && (
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors shadow-lg"
-          >
-            Topへ戻る
-          </button>
-        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-8">
