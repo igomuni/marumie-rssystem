@@ -531,14 +531,14 @@ function SankeyContent() {
       <div className="fixed top-4 right-4 z-40 flex gap-2">
         <button
           onClick={() => setIsProjectListOpen(true)}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors shadow-lg"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
           aria-label="事業一覧"
         >
           事業一覧
         </button>
         <button
           onClick={() => setIsSpendingListOpen(true)}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors shadow-lg"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
           aria-label="支出先一覧"
         >
           支出先一覧
@@ -565,42 +565,39 @@ function SankeyContent() {
 
       <div className="max-w-7xl mx-auto px-8">
         {/* ヘッダー */}
-        <div className="mb-8 top-0 bg-gray-50 dark:bg-gray-900 z-30 py-4 border-b border-gray-200 dark:border-gray-800 shadow-sm">
+        <div className="mb-3 top-0 bg-gray-50 dark:bg-gray-900 z-30 py-2 border-b border-gray-200 dark:border-gray-800 shadow-sm">
           <div>
             <div className="flex items-start justify-between">
               <div>
-                <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  {viewMode === 'global' && '全体'}
-                  {viewMode === 'ministry' && '府省庁'}
-                  {viewMode === 'project' && '事業'}
-                  {viewMode === 'spending' && '支出'}
-                </div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                    {viewMode === 'global' && structuredData && `総予算${formatCurrency(structuredData.metadata.totalBudgetAmount)}→総支出${formatCurrency(structuredData.metadata.totalSpendingAmount)}`}
-                    {viewMode === 'ministry' && selectedMinistry}
-                    {viewMode === 'project' && selectedProject}
-                    {viewMode === 'spending' && selectedRecipient}
-                  </h1>
-                  <button
-                    onClick={() => setIsSummaryOpen(true)}
-                    className="p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 transition-colors"
-                    aria-label="概要を表示"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                    </svg>
-                  </button>
-                </div>
+                <div className="flex items-center gap-1">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    {viewMode === 'global' && '全体'}
+                    {viewMode === 'ministry' && '府省庁'}
+                    {viewMode === 'project' && '事業'}
+                    {viewMode === 'spending' && '支出'}
+                  </div>
+                    <button
+                      onClick={() => setIsSummaryOpen(true)}
+                      className="p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 transition-colors mb-1"
+                      aria-label="概要を表示"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                      </svg>
+                    </button>
+                  </div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  {viewMode === 'global' && structuredData && `総予算${formatCurrency(structuredData.metadata.totalBudgetAmount)}→総支出${formatCurrency(structuredData.metadata.totalSpendingAmount)}`}
+                  {viewMode === 'ministry' && selectedMinistry}
+                  {viewMode === 'project' && selectedProject}
+                  {viewMode === 'spending' && selectedRecipient}
+                </h1>
               </div>
             </div>
           </div>
         </div>
-
-
-
         {/* パンくずリスト */}
-        <div className="mb-6">
+        <div className="mb-3">
           <div className="flex flex-wrap items-center gap-2">
             {breadcrumbs.map((crumb, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -668,7 +665,7 @@ function SankeyContent() {
                 data={sankey}
                 margin={isMobile
                   ? { top: 40, right: 100, bottom: 40, left: 100 }
-                  : { top: 40, right: 200, bottom: 40, left: 200 }
+                  : { top: 40, right: 100, bottom: 40, left: 100 }
                 }
                 align="justify"
                 sort="input"
