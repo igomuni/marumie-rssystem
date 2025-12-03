@@ -101,6 +101,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
       ministryLimit,
       projectLimit,
       spendingLimit,
+      excludeTopNMinistries,
     }
   );
 
@@ -695,6 +696,7 @@ function buildSankeyData(
     ministryLimit: number;
     projectLimit: number;
     spendingLimit: number;
+    excludeTopNMinistries?: boolean;
   }
 ): { nodes: SankeyNode[]; links: SankeyLink[] } {
   const {
@@ -710,7 +712,7 @@ function buildSankeyData(
     otherMinistriesSpendingInSpendingView,
   } = selection;
 
-  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit } = options;
+  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit, excludeTopNMinistries = false } = options;
 
   const nodes: SankeyNode[] = [];
   const links: SankeyLink[] = [];
