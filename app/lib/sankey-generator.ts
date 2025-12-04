@@ -379,51 +379,10 @@ function selectData(
     // (see below in Ministry View Independent TopN Selection section)
 
   } else {
-    // --- Global View (Recipient-First Approach) ---
-    // 1. Select Top N Recipients (excluding "その他") based on spending amount
-    const allRecipients = data.spendings
-      .filter(s => s.spendingName !== 'その他')
-      .sort((a, b) => b.totalSpendingAmount - a.totalSpendingAmount);
+    // --- Global View ---
+    // IMPORTANT: Select ministries FIRST, then filter projects and spendings based on selected ministries
 
-    const topRecipients = allRecipients.slice(offset, offset + spendingLimit);
-    topSpendings = topRecipients;
-
-    // 2. Find all projects that contribute to TopN recipients
-    const topRecipientIds = new Set(topRecipients.map(r => r.spendingId));
-
-    // Calculate each project's spending to top recipients
-    const projectSpendingToTopRecipients = new Map<number, number>();
-    for (const project of data.budgets) {
-      let spendingToTop = 0;
-      const projectSpendings = data.spendings.filter(s =>
-        s.projects.some(p => p.projectId === project.projectId)
-      );
-      for (const spending of projectSpendings) {
-        if (topRecipientIds.has(spending.spendingId)) {
-          const projectContribution = spending.projects.find(p => p.projectId === project.projectId);
-          if (projectContribution) {
-            spendingToTop += projectContribution.amount;
-          }
-        }
-      }
-      if (spendingToTop > 0) {
-        projectSpendingToTopRecipients.set(project.projectId, spendingToTop);
-      }
-    }
-
-    // Select projects that contribute to TopN recipients, sorted by contribution
-    // Limit to spendingLimit (or a reasonable number) to avoid too many project nodes
-    const contributingProjects = data.budgets
-      .filter(b => projectSpendingToTopRecipients.has(b.projectId))
-      .sort((a, b) => {
-        return (projectSpendingToTopRecipients.get(b.projectId) || 0) -
-          (projectSpendingToTopRecipients.get(a.projectId) || 0);
-      })
-      .slice(0, spendingLimit); // Limit to Top N projects to match user expectation
-
-    topProjects = contributingProjects;
-
-    // 3. Select TopN ministries (not all ministries)
+    // 1. Select TopN ministries (not all ministries)
     const allMinistries = data.budgetTree.ministries
       .sort((a, b) => b.totalBudget - a.totalBudget);
 
@@ -477,6 +436,76 @@ function selectData(
         }
       }
     }
+
+    // 2. Filter projects to only those from selected ministries
+    const selectedMinistryNames = new Set(topMinistries.map(m => m.name));
+    const projectsFromSelectedMinistries = data.budgets.filter(b =>
+      selectedMinistryNames.has(b.ministry)
+    );
+
+    // 3. Select Top N Recipients (excluding "その他") based on spending from selected ministries
+    // Calculate spending per recipient from selected ministries only
+    const recipientSpendingFromSelectedMinistries = new Map<number, number>();
+    for (const spending of data.spendings) {
+      if (spending.spendingName === 'その他') continue;
+
+      let totalFromSelected = 0;
+      for (const project of spending.projects) {
+        const budgetRecord = projectsFromSelectedMinistries.find(b => b.projectId === project.projectId);
+        if (budgetRecord) {
+          totalFromSelected += project.amount;
+        }
+      }
+      if (totalFromSelected > 0) {
+        recipientSpendingFromSelectedMinistries.set(spending.spendingId, totalFromSelected);
+      }
+    }
+
+    // Sort recipients by spending from selected ministries
+    const allRecipients = data.spendings
+      .filter(s => recipientSpendingFromSelectedMinistries.has(s.spendingId))
+      .sort((a, b) => {
+        const aSpending = recipientSpendingFromSelectedMinistries.get(a.spendingId) || 0;
+        const bSpending = recipientSpendingFromSelectedMinistries.get(b.spendingId) || 0;
+        return bSpending - aSpending;
+      });
+
+    const topRecipients = allRecipients.slice(0, spendingLimit);
+    topSpendings = topRecipients;
+
+    // 4. Find all projects that contribute to TopN recipients (from selected ministries)
+    const topRecipientIds = new Set(topRecipients.map(r => r.spendingId));
+
+    // Calculate each project's spending to top recipients
+    const projectSpendingToTopRecipients = new Map<number, number>();
+    for (const project of projectsFromSelectedMinistries) {
+      let spendingToTop = 0;
+      const projectSpendings = data.spendings.filter(s =>
+        s.projects.some(p => p.projectId === project.projectId)
+      );
+      for (const spending of projectSpendings) {
+        if (topRecipientIds.has(spending.spendingId)) {
+          const projectContribution = spending.projects.find(p => p.projectId === project.projectId);
+          if (projectContribution) {
+            spendingToTop += projectContribution.amount;
+          }
+        }
+      }
+      if (spendingToTop > 0) {
+        projectSpendingToTopRecipients.set(project.projectId, spendingToTop);
+      }
+    }
+
+    // Select projects that contribute to TopN recipients, sorted by contribution
+    const contributingProjects = projectsFromSelectedMinistries
+      .filter(b => projectSpendingToTopRecipients.has(b.projectId))
+      .sort((a, b) => {
+        return (projectSpendingToTopRecipients.get(b.projectId) || 0) -
+          (projectSpendingToTopRecipients.get(a.projectId) || 0);
+      })
+      .slice(0, spendingLimit); // Limit to Top N projects to match user expectation
+
+    topProjects = contributingProjects;
 
     // Calculate "Other Projects" for Global View to ensure flow continuity
     for (const ministry of topMinistries) {
