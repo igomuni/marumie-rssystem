@@ -3,7 +3,6 @@ import { generateSankeyData } from '@/app/lib/sankey-generator';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
-    const offset = parseInt(searchParams.get('offset') || '0', 10);
     const projectOffset = parseInt(searchParams.get('projectOffset') || '0', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const projectLimit = parseInt(searchParams.get('projectLimit') || '15', 10);
@@ -15,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     try {
         const data = await generateSankeyData({
-            ministryOffset: offset,
+            ministryOffset: 0, // Not used in drilldown mode - drilldownLevel is used instead
             projectOffset,
             ministryLimit: limit,
             projectLimit,
