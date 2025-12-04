@@ -26,7 +26,7 @@ function SankeyContent() {
   const [selectedMinistry, setSelectedMinistry] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
-  const [excludeTopNMinistries, setExcludeTopNMinistries] = useState(false); // For "Other Ministries" drill-down
+  const [drilldownLevel, setDrilldownLevel] = useState(0); // 0: Top10, 1: Top11-20, 2: Top21-30, etc.
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Settings State (ビュー別に整理)
@@ -80,7 +80,7 @@ function SankeyContent() {
     const recipient = searchParams.get('recipient');
     const offsetParam = searchParams.get('offset');
     const projectOffsetParam = searchParams.get('projectOffset');
-    const excludeTopNParam = searchParams.get('excludeTopN');
+    const drilldownLevelParam = searchParams.get('drilldownLevel');
 
     if (recipient) {
       setViewMode('spending');
@@ -98,8 +98,8 @@ function SankeyContent() {
       setOffset(parseInt(offsetParam) || 0);
     }
 
-    if (excludeTopNParam === 'true') {
-      setExcludeTopNMinistries(true);
+    if (drilldownLevelParam) {
+      setDrilldownLevel(parseInt(drilldownLevelParam) || 0);
     }
 
     setIsInitialized(true);
@@ -124,14 +124,14 @@ function SankeyContent() {
       if (offset > 0) {
         params.set('offset', offset.toString());
       }
-      if (excludeTopNMinistries) {
-        params.set('excludeTopN', 'true');
+      if (drilldownLevel > 0) {
+        params.set('drilldownLevel', drilldownLevel.toString());
       }
     }
 
     const newUrl = params.toString() ? `/sankey?${params.toString()}` : '/sankey';
     router.push(newUrl);
-  }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, offset, projectOffset, excludeTopNMinistries, router, isInitialized]);
+  }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, offset, projectOffset, drilldownLevel, router, isInitialized]);
 
   // Load structured data once for breadcrumb total amounts
   useEffect(() => {
@@ -162,8 +162,8 @@ function SankeyContent() {
           params.set('limit', globalMinistryTopN.toString());
           params.set('projectLimit', '3'); // Fixed for global view to avoid clutter
           params.set('spendingLimit', globalSpendingTopN.toString());
-          if (excludeTopNMinistries) {
-            params.set('excludeTopN', 'true');
+          if (drilldownLevel > 0) {
+            params.set('drilldownLevel', drilldownLevel.toString());
           }
         } else if (viewMode === 'ministry' && selectedMinistry) {
           params.set('ministryName', selectedMinistry);
@@ -194,7 +194,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient, excludeTopNMinistries]);
+  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient, drilldownLevel]);
 
   // スマホ判定
   useEffect(() => {
@@ -211,20 +211,28 @@ function SankeyContent() {
     const actualNode = data?.sankey.nodes.find(n => n.id === node.id);
     if (!actualNode) return;
 
+    // Handle "Return to TopN" nodes
+    if (actualNode.id.startsWith('return-to-top')) {
+      const targetLevel = parseInt(actualNode.id.replace('return-to-top', '')) / 10 - 1;
+      setDrilldownLevel(targetLevel);
+      setOffset(0);
+      return;
+    }
+
     // Handle "Other Ministries" drill-down
     if (actualNode.id === 'ministry-budget-other') {
-      // Switch to "exclude TopN" mode to show all other ministries
-      setExcludeTopNMinistries(true);
-      setOffset(0); // Reset offset when switching to exclude mode
+      // Increment drilldown level to show next TopN ministries
+      setDrilldownLevel(prev => prev + 1);
+      setOffset(0);
       return;
     }
 
     // Handle "Total Budget" (予算総計) - but NOT in Project View where it represents a ministry
     if (actualNode.id === 'total-budget' && viewMode !== 'project') {
       if (viewMode === 'global') {
-        if (excludeTopNMinistries) {
-          // Exit exclude mode and return to normal view
-          setExcludeTopNMinistries(false);
+        if (drilldownLevel > 0) {
+          // Exit drilldown mode and return to normal view
+          setDrilldownLevel(0);
           setOffset(0);
         } else {
           // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
@@ -355,7 +363,7 @@ function SankeyContent() {
     setSelectedMinistry(null);
     setSelectedProject(null);
     setSelectedRecipient(null);
-    setExcludeTopNMinistries(false);
+    setDrilldownLevel(0);
   };
 
   const handleSelectProject = (projectName: string) => {

@@ -23,7 +23,7 @@ interface GenerateOptions {
   targetMinistryName?: string;
   targetProjectName?: string;
   targetRecipientName?: string;
-  excludeTopNMinistries?: boolean;
+  drilldownLevel?: number; // 0: Top10, 1: Top11-20, 2: Top21-30, etc.
 }
 
 function getCacheKey(options: GenerateOptions): string {
@@ -37,7 +37,7 @@ function getCacheKey(options: GenerateOptions): string {
     targetMinistryName: options.targetMinistryName ?? '',
     targetProjectName: options.targetProjectName ?? '',
     targetRecipientName: options.targetRecipientName ?? '',
-    excludeTopNMinistries: options.excludeTopNMinistries ?? false,
+    drilldownLevel: options.drilldownLevel ?? 0,
   };
   return JSON.stringify(canonicalOptions);
 }
@@ -60,7 +60,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
     targetMinistryName,
     targetProjectName,
     targetRecipientName,
-    excludeTopNMinistries = false,
+    drilldownLevel = 0,
   } = options;
 
   // 1. Load data
@@ -86,7 +86,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
     targetMinistryName,
     targetProjectName,
     targetRecipientName,
-    excludeTopNMinistries,
+    drilldownLevel,
   });
 
   // 3. Build Sankey Data
@@ -101,7 +101,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
       ministryLimit,
       projectLimit,
       spendingLimit,
-      excludeTopNMinistries,
+      drilldownLevel,
     }
   );
 
@@ -188,10 +188,10 @@ function selectData(
     targetMinistryName?: string;
     targetProjectName?: string;
     targetRecipientName?: string;
-    excludeTopNMinistries?: boolean;
+    drilldownLevel?: number;
   }
 ): DataSelection {
-  const { offset, projectOffset, limit, projectLimit, spendingLimit, targetMinistryName, targetProjectName, targetRecipientName, excludeTopNMinistries = false } = options;
+  const { offset, projectOffset, limit, projectLimit, spendingLimit, targetMinistryName, targetProjectName, targetRecipientName, drilldownLevel = 0 } = options;
 
   // Initialize result containers
   let topMinistries: Array<{ name: string; id: number; totalBudget: number; bureauCount: number }> = [];
@@ -427,10 +427,13 @@ function selectData(
     const allMinistries = data.budgetTree.ministries
       .sort((a, b) => b.totalBudget - a.totalBudget);
 
-    if (excludeTopNMinistries) {
-      // Show ministries EXCLUDING the TopN (for "Other Ministries" drill-down)
-      const excludedMinistries = allMinistries.slice(0, limit);
-      const remainingMinistries = allMinistries.slice(limit);
+    if (drilldownLevel > 0) {
+      // Drilldown mode: show ministries EXCLUDING previously shown TopN
+      // Level 1: Exclude Top10, show Top11-20
+      // Level 2: Exclude Top10 & Top11-20, show Top21-30
+      const excludeCount = limit * drilldownLevel;
+      const excludedMinistries = allMinistries.slice(0, excludeCount);
+      const remainingMinistries = allMinistries.slice(excludeCount);
 
       // Apply offset and limit to the remaining ministries
       topMinistries = remainingMinistries.slice(offset, offset + limit).map(m => ({
@@ -440,20 +443,12 @@ function selectData(
         bureauCount: m.bureaus.length,
       }));
 
-      // "Other Ministries" in this mode includes:
-      // 1. Original TopN that we're excluding from view
-      // 2. Remaining ministries beyond current page
-      otherMinistriesBudget = excludedMinistries.reduce((sum, m) => sum + m.totalBudget, 0);
+      // "Other Ministries" in this mode only includes ministries beyond current page
+      // (not the original excluded TopN)
       const afterPage = remainingMinistries.slice(offset + limit);
-      otherMinistriesBudget += afterPage.reduce((sum, m) => sum + m.totalBudget, 0);
+      otherMinistriesBudget = afterPage.reduce((sum, m) => sum + m.totalBudget, 0);
 
-      // Calculate spending for "other"
-      for (const ministry of excludedMinistries) {
-        const ministryStats = data.statistics.byMinistry[ministry.name];
-        if (ministryStats) {
-          otherMinistriesSpending += ministryStats.totalSpending;
-        }
-      }
+      // Calculate spending for "other" (only afterPage)
       for (const ministry of afterPage) {
         const ministryStats = data.statistics.byMinistry[ministry.name];
         if (ministryStats) {
@@ -696,7 +691,7 @@ function buildSankeyData(
     ministryLimit: number;
     projectLimit: number;
     spendingLimit: number;
-    excludeTopNMinistries?: boolean;
+    drilldownLevel?: number;
   }
 ): { nodes: SankeyNode[]; links: SankeyLink[] } {
   const {
@@ -712,7 +707,7 @@ function buildSankeyData(
     otherMinistriesSpendingInSpendingView,
   } = selection;
 
-  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit, excludeTopNMinistries = false } = options;
+  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit, drilldownLevel = 0 } = options;
 
   const nodes: SankeyNode[] = [];
   const links: SankeyLink[] = [];
@@ -1048,6 +1043,17 @@ function buildSankeyData(
           value: otherMinistriesBudget,
         });
       }
+      // Add links to "Return to TopN" nodes if in drilldown mode
+      if (drilldownLevel > 0) {
+        for (let level = 1; level <= drilldownLevel; level++) {
+          const targetTop = ministryLimit * level;
+          links.push({
+            source: 'total-budget',
+            target: `return-to-top${targetTop}`,
+            value: 1000000000, // Dummy value: 10億円
+          });
+        }
+      }
     }
     // Note: In Project View, Total -> Project Budget links are created in the Project Budget section
   }
@@ -1091,6 +1097,25 @@ function buildSankeyData(
           bureauCount: 0,
         },
       });
+    }
+
+    // Add "Return to TopN" nodes if in drilldown mode (Global View only)
+    if (isGlobalView && drilldownLevel > 0) {
+      // Add return nodes for all previous levels
+      // e.g., Level 2 shows: "Top10へ戻る", "Top20へ戻る"
+      for (let level = 1; level <= drilldownLevel; level++) {
+        const targetTop = ministryLimit * level;
+        standardMinistryNodes.push({
+          id: `return-to-top${targetTop}`,
+          name: `Top${targetTop}へ戻る`,
+          type: 'ministry-budget',
+          value: 1000000000, // Dummy value: 10億円 for visibility
+          details: {
+            projectCount: 0,
+            bureauCount: 0,
+          },
+        });
+      }
     }
 
     nodes.push(...standardMinistryNodes);
@@ -1216,8 +1241,8 @@ function buildSankeyData(
       }
     }
 
-    // Link from "Other Ministries" to "Other Projects" (skip in excludeTopN mode)
-    if (otherMinistriesBudget > 0 && !excludeTopNMinistries) {
+    // Link from "Other Ministries" to "Other Projects" (skip in drilldown mode)
+    if (otherMinistriesBudget > 0 && drilldownLevel === 0) {
       totalOtherBudget += otherMinistriesBudget;
       links.push({
         source: 'ministry-budget-other',
@@ -1338,8 +1363,8 @@ function buildSankeyData(
       if (otherBudget) totalOtherBudget += otherBudget;
     }
 
-    // Add "Other Ministries" spending (skip in excludeTopN mode)
-    if (!excludeTopNMinistries) {
+    // Add "Other Ministries" spending (skip in drilldown mode)
+    if (drilldownLevel === 0) {
       totalOtherSpending += otherMinistriesSpending;
       totalOtherBudget += otherMinistriesBudget;
     }
