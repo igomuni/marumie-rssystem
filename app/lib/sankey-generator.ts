@@ -394,8 +394,8 @@ function selectData(
       const excludedMinistries = allMinistries.slice(0, excludeCount);
       const remainingMinistries = allMinistries.slice(excludeCount);
 
-      // Apply offset and limit to the remaining ministries
-      topMinistries = remainingMinistries.slice(offset, offset + limit).map(m => ({
+      // Take next 'limit' ministries from remainingMinistries (offset is already applied via excludeCount)
+      topMinistries = remainingMinistries.slice(0, limit).map(m => ({
         name: m.name,
         id: m.id,
         totalBudget: m.totalBudget,
@@ -404,7 +404,7 @@ function selectData(
 
       // "Other Ministries" in this mode only includes ministries beyond current page
       // (not the original excluded TopN)
-      const afterPage = remainingMinistries.slice(offset + limit);
+      const afterPage = remainingMinistries.slice(limit);
       otherMinistriesBudget = afterPage.reduce((sum, m) => sum + m.totalBudget, 0);
 
       // Calculate spending for "other" (only afterPage)
@@ -1125,24 +1125,7 @@ function buildSankeyData(
       });
     }
 
-    // Add "Return to TopN" nodes if in drilldown mode (Global View only)
-    if (isGlobalView && drilldownLevel > 0) {
-      // Add return nodes for all previous levels
-      // e.g., Level 2 shows: "Top10へ戻る", "Top20へ戻る"
-      for (let level = 1; level <= drilldownLevel; level++) {
-        const targetTop = ministryLimit * level;
-        standardMinistryNodes.push({
-          id: `return-to-top${targetTop}`,
-          name: `Top${targetTop}へ戻る`,
-          type: 'ministry-budget',
-          value: 1000000000, // Dummy value: 10億円 for visibility
-          details: {
-            projectCount: 0,
-            bureauCount: 0,
-          },
-        });
-      }
-    }
+    // "Return to TopN" nodes removed - now rendered as external UI buttons
 
     nodes.push(...standardMinistryNodes);
   }
@@ -1277,24 +1260,8 @@ function buildSankeyData(
       });
     }
 
-    // Link from "Return to TopN" nodes to each TopN ministry (drilldown mode)
-    if (drilldownLevel > 0) {
-      for (let level = 1; level <= drilldownLevel; level++) {
-        const targetTop = ministryLimit * level;
-        const returnNodeId = `return-to-top${targetTop}`;
-
-        // Link to each TopN ministry (ministries currently displayed)
-        const targetLevelMinistries = topMinistries.slice(0, ministryLimit);
-
-        for (const ministry of targetLevelMinistries) {
-          links.push({
-            source: returnNodeId,
-            target: `ministry-budget-${ministry.id}`,
-            value: 1000000000 / targetLevelMinistries.length, // Distribute dummy value
-          });
-        }
-      }
-    }
+    // Link from "Return to TopN" nodes now goes to dummy recipient nodes
+    // (See recipient node creation section below)
 
     if (totalOtherBudget > 0) {
       projectBudgetNodes.push({

@@ -20,7 +20,6 @@ function SankeyContent() {
   const [isMobile, setIsMobile] = useState(false);
 
   // Navigation State
-  const [offset, setOffset] = useState(0);
   const [projectOffset, setProjectOffset] = useState(0); // For paginating projects within ministry view
   const [viewMode, setViewMode] = useState<'global' | 'ministry' | 'project' | 'spending'>('global');
   const [selectedMinistry, setSelectedMinistry] = useState<string | null>(null);
@@ -78,9 +77,13 @@ function SankeyContent() {
     const ministry = searchParams.get('ministry');
     const project = searchParams.get('project');
     const recipient = searchParams.get('recipient');
-    const offsetParam = searchParams.get('offset');
     const projectOffsetParam = searchParams.get('projectOffset');
     const drilldownLevelParam = searchParams.get('drilldownLevel');
+
+    // Set drilldownLevel first (before viewMode changes trigger data fetch)
+    if (drilldownLevelParam) {
+      setDrilldownLevel(parseInt(drilldownLevelParam) || 0);
+    }
 
     if (recipient) {
       setViewMode('spending');
@@ -94,12 +97,6 @@ function SankeyContent() {
       if (projectOffsetParam) {
         setProjectOffset(parseInt(projectOffsetParam) || 0);
       }
-    } else if (offsetParam) {
-      setOffset(parseInt(offsetParam) || 0);
-    }
-
-    if (drilldownLevelParam) {
-      setDrilldownLevel(parseInt(drilldownLevelParam) || 0);
     }
 
     setIsInitialized(true);
@@ -121,9 +118,6 @@ function SankeyContent() {
         params.set('projectOffset', projectOffset.toString());
       }
     } else if (viewMode === 'global') {
-      if (offset > 0) {
-        params.set('offset', offset.toString());
-      }
       if (drilldownLevel > 0) {
         params.set('drilldownLevel', drilldownLevel.toString());
       }
@@ -131,7 +125,7 @@ function SankeyContent() {
 
     const newUrl = params.toString() ? `/sankey?${params.toString()}` : '/sankey';
     router.push(newUrl);
-  }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, offset, projectOffset, drilldownLevel, router, isInitialized]);
+  }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, projectOffset, drilldownLevel, router, isInitialized]);
 
   // Load structured data once for breadcrumb total amounts
   useEffect(() => {
@@ -152,19 +146,18 @@ function SankeyContent() {
   }, []);
 
   useEffect(() => {
+    if (!isInitialized) return; // Wait for URL params to be initialized
+
     async function loadData() {
       setLoading(true);
       try {
         const params = new URLSearchParams();
 
         if (viewMode === 'global') {
-          params.set('offset', offset.toString());
           params.set('limit', globalMinistryTopN.toString());
           params.set('projectLimit', '3'); // Fixed for global view to avoid clutter
           params.set('spendingLimit', globalSpendingTopN.toString());
-          if (drilldownLevel > 0) {
-            params.set('drilldownLevel', drilldownLevel.toString());
-          }
+          params.set('drilldownLevel', drilldownLevel.toString());
         } else if (viewMode === 'ministry' && selectedMinistry) {
           params.set('ministryName', selectedMinistry);
           params.set('projectLimit', ministryProjectTopN.toString());
@@ -194,7 +187,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient, drilldownLevel]);
+  }, [isInitialized, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient, drilldownLevel]);
 
   // スマホ判定
   useEffect(() => {
@@ -211,44 +204,28 @@ function SankeyContent() {
     const actualNode = data?.sankey.nodes.find(n => n.id === node.id);
     if (!actualNode) return;
 
-    // Handle "Return to TopN" nodes
-    if (actualNode.id.startsWith('return-to-top')) {
-      const targetLevel = parseInt(actualNode.id.replace('return-to-top', '')) / 10 - 1;
-      setDrilldownLevel(targetLevel);
-      setOffset(0);
-      return;
-    }
-
     // Handle "Other Ministries" drill-down
     if (actualNode.id === 'ministry-budget-other') {
       // Increment drilldown level to show next TopN ministries
-      setDrilldownLevel(prev => prev + 1);
-      setOffset(0);
+      const newLevel = drilldownLevel + 1;
+      setDrilldownLevel(newLevel);
       return;
     }
 
     // Handle "Total Budget" (予算総計) - but NOT in Project View where it represents a ministry
     if (actualNode.id === 'total-budget' && viewMode !== 'project') {
       if (viewMode === 'global') {
-        if (drilldownLevel > 0) {
-          // Exit drilldown mode and return to normal view
-          setDrilldownLevel(0);
-          setOffset(0);
-        } else {
-          // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
-          setProjectListFilters({
-            ministries: undefined, // All
-            projectName: '',
-            spendingName: '',
-            groupByProject: undefined // Keep previous
-          });
-          setIsProjectListOpen(true);
-        }
+        // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
+        setProjectListFilters({
+          ministries: undefined, // All
+          projectName: '',
+          spendingName: '',
+          groupByProject: undefined // Keep previous
+        });
+        setIsProjectListOpen(true);
       } else if (viewMode === 'ministry') {
         setViewMode('global');
         setSelectedMinistry(null);
-      } else if (offset > 0) {
-        setOffset(prev => Math.max(0, prev - globalMinistryTopN));
       }
       return;
     }
@@ -292,13 +269,12 @@ function SankeyContent() {
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
       // Special handling for "事業(TopN以外)" and "事業(TopN以外府省庁)" aggregate nodes
       if (actualNode.name.match(/^事業\(Top\d+以外.*\)$/)) {
-        if (viewMode === 'global') {
-          setOffset(prev => prev + globalMinistryTopN);
-        } else if (viewMode === 'ministry') {
+        if (viewMode === 'ministry') {
           setProjectOffset(prev => prev + ministryProjectTopN);
         } else if (viewMode === 'spending') {
           setProjectOffset(prev => prev + spendingProjectTopN);
         }
+        // Global view: no action needed (handled by drilldownLevel)
         return;
       }
 
@@ -334,7 +310,7 @@ function SankeyContent() {
 
       // Handle "支出先(TopN以外)"
       if (actualNode.name.match(/^支出先\(Top\d+以外\)$/)) {
-        setOffset(prev => prev + globalMinistryTopN);
+        // No action needed for global view (handled by drilldownLevel)
         return;
       }
 
@@ -357,7 +333,6 @@ function SankeyContent() {
   };
 
   const handleReset = () => {
-    setOffset(0);
     setProjectOffset(0);
     setViewMode('global');
     setSelectedMinistry(null);
@@ -372,7 +347,6 @@ function SankeyContent() {
     setSelectedMinistry(null);
     setSelectedRecipient(null);
     setProjectOffset(0);
-    setOffset(0);
   };
 
   const handleSelectMinistry = (ministryName: string) => {
@@ -381,7 +355,6 @@ function SankeyContent() {
     setSelectedProject(null);
     setSelectedRecipient(null);
     setProjectOffset(0);
-    setOffset(0);
   };
 
   const handleSelectRecipient = (recipientName: string) => {
@@ -390,7 +363,6 @@ function SankeyContent() {
     setSelectedProject(null);
     setSelectedMinistry(null);
     setProjectOffset(0);
-    setOffset(0);
   };
 
   const openSettings = () => {
@@ -413,9 +385,9 @@ function SankeyContent() {
     setSpendingProjectTopN(tempSpendingProjectTopN);
     setSpendingMinistryTopN(tempSpendingMinistryTopN);
     setIsSettingsOpen(false);
-    // Reset offset if TopN changes to avoid weird states
+    // Reset drilldown level and offsets if TopN changes to avoid weird states
     if (tempGlobalMinistryTopN !== globalMinistryTopN) {
-      setOffset(0);
+      setDrilldownLevel(0);
     }
     if (tempMinistryProjectTopN !== ministryProjectTopN) {
       setProjectOffset(0);
@@ -736,6 +708,7 @@ function SankeyContent() {
               📱 横スクロールできます
             </div>
           ) : null}
+
           <div
             className={isMobile ? 'overflow-x-auto' : ''}
             style={isMobile ? { WebkitOverflowScrolling: 'touch' } : {}}
@@ -803,27 +776,21 @@ function SankeyContent() {
                       const name = actualNode?.name || node.id;
                       const nodeType = actualNode?.type || '';
 
-                      // Return nodes (Top10へ戻る etc.) should have no amount display
-                      let amount = '';
-                      if (node.id.startsWith('return-to-top')) {
-                        amount = ''; // No amount display for return nodes
-                      } else {
-                        // For nodes with dummy value (0.001), show actual amount (0円)
-                        let displayAmount = node.value;
-                        if (node.value === 0.001) {
-                          // Check if this is truly a zero-budget case
-                          if (nodeType === 'project-budget' &&
-                            actualNode?.details &&
-                            'totalBudget' in actualNode.details &&
-                            actualNode.details.totalBudget === 0) {
-                            displayAmount = 0;
-                          } else if (nodeType === 'ministry-budget') {
-                            // Ministry nodes shouldn't have dummy values, but handle just in case
-                            displayAmount = 0;
-                          }
+                      // For nodes with dummy value (0.001), show actual amount (0円)
+                      let displayAmount = node.value;
+                      if (node.value === 0.001) {
+                        // Check if this is truly a zero-budget case
+                        if (nodeType === 'project-budget' &&
+                          actualNode?.details &&
+                          'totalBudget' in actualNode.details &&
+                          actualNode.details.totalBudget === 0) {
+                          displayAmount = 0;
+                        } else if (nodeType === 'ministry-budget') {
+                          // Ministry nodes shouldn't have dummy values, but handle just in case
+                          displayAmount = 0;
                         }
-                        amount = formatCurrency(displayAmount);
                       }
+                      const amount = formatCurrency(displayAmount);
 
                       let displayName = name;
                       if (nodeType === 'project-budget') {
@@ -842,10 +809,9 @@ function SankeyContent() {
                       // X position for amount label (centered above node)
                       const amountX = node.x + node.width / 2;
 
-                      // Clickable indication - now "その他" nodes and "return-to-top" nodes are also clickable
+                      // Clickable indication
                       const nodeName = actualNode?.name || '';
                       const isClickable =
-                        node.id.startsWith('return-to-top') ||
                         node.id === 'ministry-budget-other' ||
                         node.id === 'total-budget' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
@@ -1099,6 +1065,72 @@ function SankeyContent() {
               />
             </div>
           </div>
+
+          {/* Return to TopN Selector */}
+          {viewMode === 'global' && (
+            <div className="mb-4 flex items-center gap-2">
+              <label htmlFor="topn-selector" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                府省庁Top
+              </label>
+              <button
+                onClick={() => {
+                  if (drilldownLevel > 0) {
+                    const newLevel = drilldownLevel - 1;
+                    setDrilldownLevel(newLevel);
+                  }
+                }}
+                disabled={drilldownLevel === 0}
+                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
+                aria-label="前のTopNへ"
+              >
+                ▲
+              </button>
+              <select
+                id="topn-selector"
+                value={drilldownLevel}
+                onChange={(e) => {
+                  const newLevel = parseInt(e.target.value);
+                  setDrilldownLevel(newLevel);
+                }}
+                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              >
+                {(() => {
+                  const totalMinistries = metadata.summary.totalMinistries || 0;
+                  const maxLevel = Math.max(0, Math.ceil(totalMinistries / globalMinistryTopN) - 1);
+                  return Array.from({ length: maxLevel + 1 }, (_, i) => {
+                    const level = i;
+                    const startNum = level * globalMinistryTopN + 1;
+                    const endNum = Math.min((level + 1) * globalMinistryTopN, totalMinistries);
+                    return (
+                      <option key={level} value={level}>
+                        {startNum}-{endNum}
+                      </option>
+                    );
+                  });
+                })()}
+              </select>
+              <button
+                onClick={() => {
+                  const totalMinistries = metadata.summary.totalMinistries || 0;
+                  const maxLevel = Math.max(0, Math.ceil(totalMinistries / globalMinistryTopN) - 1);
+                  if (drilldownLevel < maxLevel) {
+                    const newLevel = drilldownLevel + 1;
+                    setDrilldownLevel(newLevel);
+                  }
+                }}
+                disabled={(() => {
+                  const totalMinistries = metadata.summary.totalMinistries || 0;
+                  const maxLevel = Math.max(0, Math.ceil(totalMinistries / globalMinistryTopN) - 1);
+                  return drilldownLevel >= maxLevel;
+                })()}
+                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
+                aria-label="次のTopNへ"
+              >
+                ▼
+              </button>
+              <span className="text-sm text-gray-700 dark:text-gray-300">へ</span>
+            </div>
+          )}
         </div>
 
         {/* フッター */}
