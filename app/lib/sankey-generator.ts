@@ -1072,17 +1072,9 @@ function buildSankeyData(
           value: otherMinistriesBudget,
         });
       }
-      // Add links to "Return to TopN" nodes if in drilldown mode
-      if (drilldownLevel > 0) {
-        for (let level = 1; level <= drilldownLevel; level++) {
-          const targetTop = ministryLimit * level;
-          links.push({
-            source: 'total-budget',
-            target: `return-to-top${targetTop}`,
-            value: 1000000000, // Dummy value: 10億円
-          });
-        }
-      }
+      // Note: Return nodes do NOT receive links from total-budget
+      // They are positioned in Column 0 (same as total-budget)
+      // by only having outgoing links to ministry nodes
     }
     // Note: In Project View, Total -> Project Budget links are created in the Project Budget section
   }
@@ -1285,15 +1277,22 @@ function buildSankeyData(
       });
     }
 
-    // Link from "Return to TopN" nodes to "Other Projects" (drilldown mode)
+    // Link from "Return to TopN" nodes to each TopN ministry (drilldown mode)
     if (drilldownLevel > 0) {
       for (let level = 1; level <= drilldownLevel; level++) {
         const targetTop = ministryLimit * level;
-        links.push({
-          source: `return-to-top${targetTop}`,
-          target: 'project-budget-other-global',
-          value: 1000000000, // Dummy value: 10億円
-        });
+        const returnNodeId = `return-to-top${targetTop}`;
+
+        // Link to each TopN ministry (ministries currently displayed)
+        const targetLevelMinistries = topMinistries.slice(0, ministryLimit);
+
+        for (const ministry of targetLevelMinistries) {
+          links.push({
+            source: returnNodeId,
+            target: `ministry-budget-${ministry.id}`,
+            value: 1000000000 / targetLevelMinistries.length, // Distribute dummy value
+          });
+        }
       }
     }
 
