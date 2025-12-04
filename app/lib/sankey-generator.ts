@@ -1447,12 +1447,22 @@ function buildSankeyData(
   if (isGlobalView) {
     // Global View: Create nodes for all topSpendings and links from their projects
     for (const spending of topSpendings) {
-      // Create recipient node
+      // Calculate spending amount from selected TopN projects only
+      let spendingFromSelectedProjects = 0;
+      for (const spendingProject of spending.projects) {
+        // Only count spending from topProjects (selected TopN projects)
+        const projectExists = topProjects.some(p => p.projectId === spendingProject.projectId);
+        if (projectExists) {
+          spendingFromSelectedProjects += spendingProject.amount;
+        }
+      }
+
+      // Create recipient node with spending from selected projects only
       recipientNodes.push({
         id: `recipient-${spending.spendingId}`,
         name: spending.spendingName,
         type: 'recipient',
-        value: spending.totalSpendingAmount,
+        value: spendingFromSelectedProjects,
         originalId: spending.spendingId,
         details: {
           corporateNumber: spending.corporateNumber,
@@ -1479,17 +1489,31 @@ function buildSankeyData(
       }
     }
   } else {
-    // Ministry/Project View: Original logic (project-first)
+    // Ministry/Project View: Calculate spending from selected projects only
+    // First pass: calculate spending amounts for each recipient
+    const recipientSpendingAmounts = new Map<number, number>();
+    for (const project of topProjects) {
+      for (const spending of topSpendings) {
+        const spendingProject = spending.projects.find(p => p.projectId === project.projectId);
+        if (spendingProject) {
+          const currentAmount = recipientSpendingAmounts.get(spending.spendingId) || 0;
+          recipientSpendingAmounts.set(spending.spendingId, currentAmount + spendingProject.amount);
+        }
+      }
+    }
+
+    // Second pass: create nodes and links
     for (const project of topProjects) {
       for (const spending of topSpendings) {
         const spendingProject = spending.projects.find(p => p.projectId === project.projectId);
         if (spendingProject) {
           if (!recipientNodes.some(n => n.id === `recipient-${spending.spendingId}`)) {
+            const spendingFromSelectedProjects = recipientSpendingAmounts.get(spending.spendingId) || 0;
             recipientNodes.push({
               id: `recipient-${spending.spendingId}`,
               name: spending.spendingName,
               type: 'recipient',
-              value: spending.totalSpendingAmount,
+              value: spendingFromSelectedProjects,
               originalId: spending.spendingId,
               details: {
                 corporateNumber: spending.corporateNumber,
@@ -1686,16 +1710,28 @@ function buildSankeyData(
       let otherProjectsValueUsed = 0;
 
       // 1. Links from "Other Projects" (Global) to Top Recipients
-      // If Top Projects don't cover the full amount of a Top Recipient, the rest comes from "Other Projects"
+      // If Top Projects don't cover the full amount of a Top Recipient FROM SELECTED MINISTRIES,
+      // the rest comes from "Other Projects"
       for (const recipient of topSpendings) {
-        // Calculate how much this recipient got from Top Projects
+        // Calculate how much this recipient got from Top Projects (already calculated)
         let receivedFromTopProjects = 0;
         for (const project of topProjects) {
           const p = recipient.projects.find(rp => rp.projectId === project.projectId);
           if (p) receivedFromTopProjects += p.amount;
         }
 
-        const remainder = recipient.totalSpendingAmount - receivedFromTopProjects;
+        // Calculate total spending from selected ministries only (not all ministries)
+        const selectedMinistryNames = new Set(topMinistries.map(m => m.name));
+        let totalFromSelectedMinistries = 0;
+        for (const spendingProject of recipient.projects) {
+          // Only count if project is from selected ministries
+          const projectInData = fullData.budgets.find((b: { projectId: number; ministry: string }) => b.projectId === spendingProject.projectId);
+          if (projectInData && selectedMinistryNames.has(projectInData.ministry)) {
+            totalFromSelectedMinistries += spendingProject.amount;
+          }
+        }
+
+        const remainder = totalFromSelectedMinistries - receivedFromTopProjects;
         if (remainder > 0 && otherProjectsSpendingNode) {
           links.push({
             source: 'project-spending-other-global',
