@@ -26,6 +26,7 @@ function SankeyContent() {
   const [selectedMinistry, setSelectedMinistry] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
+  const [drilldownLevel, setDrilldownLevel] = useState(0); // 0: Top10, 1: Top11-20, 2: Top21-30, etc.
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Settings State (ビュー別に整理)
@@ -79,6 +80,7 @@ function SankeyContent() {
     const recipient = searchParams.get('recipient');
     const offsetParam = searchParams.get('offset');
     const projectOffsetParam = searchParams.get('projectOffset');
+    const drilldownLevelParam = searchParams.get('drilldownLevel');
 
     if (recipient) {
       setViewMode('spending');
@@ -94,6 +96,10 @@ function SankeyContent() {
       }
     } else if (offsetParam) {
       setOffset(parseInt(offsetParam) || 0);
+    }
+
+    if (drilldownLevelParam) {
+      setDrilldownLevel(parseInt(drilldownLevelParam) || 0);
     }
 
     setIsInitialized(true);
@@ -114,13 +120,18 @@ function SankeyContent() {
       if (projectOffset > 0) {
         params.set('projectOffset', projectOffset.toString());
       }
-    } else if (viewMode === 'global' && offset > 0) {
-      params.set('offset', offset.toString());
+    } else if (viewMode === 'global') {
+      if (offset > 0) {
+        params.set('offset', offset.toString());
+      }
+      if (drilldownLevel > 0) {
+        params.set('drilldownLevel', drilldownLevel.toString());
+      }
     }
 
     const newUrl = params.toString() ? `/sankey?${params.toString()}` : '/sankey';
     router.push(newUrl);
-  }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, offset, projectOffset, router, isInitialized]);
+  }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, offset, projectOffset, drilldownLevel, router, isInitialized]);
 
   // Load structured data once for breadcrumb total amounts
   useEffect(() => {
@@ -151,6 +162,9 @@ function SankeyContent() {
           params.set('limit', globalMinistryTopN.toString());
           params.set('projectLimit', '3'); // Fixed for global view to avoid clutter
           params.set('spendingLimit', globalSpendingTopN.toString());
+          if (drilldownLevel > 0) {
+            params.set('drilldownLevel', drilldownLevel.toString());
+          }
         } else if (viewMode === 'ministry' && selectedMinistry) {
           params.set('ministryName', selectedMinistry);
           params.set('projectLimit', ministryProjectTopN.toString());
@@ -180,7 +194,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient]);
+  }, [offset, projectOffset, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient, drilldownLevel]);
 
   // スマホ判定
   useEffect(() => {
@@ -197,23 +211,39 @@ function SankeyContent() {
     const actualNode = data?.sankey.nodes.find(n => n.id === node.id);
     if (!actualNode) return;
 
+    // Handle "Return to TopN" nodes
+    if (actualNode.id.startsWith('return-to-top')) {
+      const targetLevel = parseInt(actualNode.id.replace('return-to-top', '')) / 10 - 1;
+      setDrilldownLevel(targetLevel);
+      setOffset(0);
+      return;
+    }
+
     // Handle "Other Ministries" drill-down
     if (actualNode.id === 'ministry-budget-other') {
-      setOffset(prev => prev + globalMinistryTopN);
+      // Increment drilldown level to show next TopN ministries
+      setDrilldownLevel(prev => prev + 1);
+      setOffset(0);
       return;
     }
 
     // Handle "Total Budget" (予算総計) - but NOT in Project View where it represents a ministry
     if (actualNode.id === 'total-budget' && viewMode !== 'project') {
       if (viewMode === 'global') {
-        // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
-        setProjectListFilters({
-          ministries: undefined, // All
-          projectName: '',
-          spendingName: '',
-          groupByProject: undefined // Keep previous
-        });
-        setIsProjectListOpen(true);
+        if (drilldownLevel > 0) {
+          // Exit drilldown mode and return to normal view
+          setDrilldownLevel(0);
+          setOffset(0);
+        } else {
+          // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
+          setProjectListFilters({
+            ministries: undefined, // All
+            projectName: '',
+            spendingName: '',
+            groupByProject: undefined // Keep previous
+          });
+          setIsProjectListOpen(true);
+        }
       } else if (viewMode === 'ministry') {
         setViewMode('global');
         setSelectedMinistry(null);
@@ -333,6 +363,7 @@ function SankeyContent() {
     setSelectedMinistry(null);
     setSelectedProject(null);
     setSelectedRecipient(null);
+    setDrilldownLevel(0);
   };
 
   const handleSelectProject = (projectName: string) => {
@@ -602,14 +633,6 @@ function SankeyContent() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </button>
-        {(offset > 0 || viewMode === 'ministry') && (
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors shadow-lg"
-          >
-            Topへ戻る
-          </button>
-        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-8">
@@ -780,21 +803,27 @@ function SankeyContent() {
                       const name = actualNode?.name || node.id;
                       const nodeType = actualNode?.type || '';
 
-                      // For nodes with dummy value (0.001), show actual amount (0円)
-                      let displayAmount = node.value;
-                      if (node.value === 0.001) {
-                        // Check if this is truly a zero-budget case
-                        if (nodeType === 'project-budget' &&
-                          actualNode?.details &&
-                          'totalBudget' in actualNode.details &&
-                          actualNode.details.totalBudget === 0) {
-                          displayAmount = 0;
-                        } else if (nodeType === 'ministry-budget') {
-                          // Ministry nodes shouldn't have dummy values, but handle just in case
-                          displayAmount = 0;
+                      // Return nodes (Top10へ戻る etc.) should have no amount display
+                      let amount = '';
+                      if (node.id.startsWith('return-to-top')) {
+                        amount = ''; // No amount display for return nodes
+                      } else {
+                        // For nodes with dummy value (0.001), show actual amount (0円)
+                        let displayAmount = node.value;
+                        if (node.value === 0.001) {
+                          // Check if this is truly a zero-budget case
+                          if (nodeType === 'project-budget' &&
+                            actualNode?.details &&
+                            'totalBudget' in actualNode.details &&
+                            actualNode.details.totalBudget === 0) {
+                            displayAmount = 0;
+                          } else if (nodeType === 'ministry-budget') {
+                            // Ministry nodes shouldn't have dummy values, but handle just in case
+                            displayAmount = 0;
+                          }
                         }
+                        amount = formatCurrency(displayAmount);
                       }
-                      const amount = formatCurrency(displayAmount);
 
                       let displayName = name;
                       if (nodeType === 'project-budget') {
@@ -813,9 +842,10 @@ function SankeyContent() {
                       // X position for amount label (centered above node)
                       const amountX = node.x + node.width / 2;
 
-                      // Clickable indication - now "その他" nodes are also clickable
+                      // Clickable indication - now "その他" nodes and "return-to-top" nodes are also clickable
                       const nodeName = actualNode?.name || '';
                       const isClickable =
+                        node.id.startsWith('return-to-top') ||
                         node.id === 'ministry-budget-other' ||
                         node.id === 'total-budget' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||

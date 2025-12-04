@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const ministryName = searchParams.get('ministryName') || undefined;
     const projectName = searchParams.get('projectName') || undefined;
     const recipientName = searchParams.get('recipientName') || undefined;
+    const drilldownLevel = parseInt(searchParams.get('drilldownLevel') || '0', 10);
 
     try {
         const data = await generateSankeyData({
@@ -22,6 +23,7 @@ export async function GET(request: NextRequest) {
             targetMinistryName: ministryName,
             targetProjectName: projectName,
             targetRecipientName: recipientName,
+            drilldownLevel,
         });
         return NextResponse.json(data);
     } catch (error) {
