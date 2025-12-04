@@ -1116,9 +1116,14 @@ function buildSankeyData(
 
     // Add "Other Ministries" node if applicable (Global View only)
     if (isGlobalView && otherMinistriesBudget > 0) {
+      // Calculate the TopN threshold based on drilldownLevel
+      // Level 0: Top10以外 (ministries 11+)
+      // Level 1: Top20以外 (ministries 21+)
+      // Level 2: Top30以外 (ministries 31+)
+      const currentTopN = ministryLimit * (drilldownLevel + 1);
       standardMinistryNodes.push({
         id: 'ministry-budget-other',
-        name: `府省庁(Top${ministryLimit}以外)`,
+        name: `府省庁(Top${currentTopN}以外)`,
         type: 'ministry-budget',
         value: otherMinistriesBudget,
         details: {
@@ -1270,14 +1275,45 @@ function buildSankeyData(
       }
     }
 
-    // Link from "Other Ministries" to "Other Projects" (skip in drilldown mode)
-    if (otherMinistriesBudget > 0 && drilldownLevel === 0) {
-      totalOtherBudget += otherMinistriesBudget;
-      links.push({
-        source: 'ministry-budget-other',
-        target: 'project-budget-other-global',
-        value: otherMinistriesBudget,
-      });
+    // Link from "Other Ministries" to "Other Projects"
+    if (otherMinistriesBudget > 0) {
+      if (drilldownLevel === 0) {
+        // Normal mode: link to the standard "Other Projects" node
+        totalOtherBudget += otherMinistriesBudget;
+        links.push({
+          source: 'ministry-budget-other',
+          target: 'project-budget-other-global',
+          value: otherMinistriesBudget,
+        });
+      } else {
+        // Drilldown mode: link to a dedicated "事業(Top10以外)" node
+        links.push({
+          source: 'ministry-budget-other',
+          target: 'project-budget-other-drilldown',
+          value: otherMinistriesBudget,
+        });
+
+        // Add the dedicated project node for drilldown
+        projectBudgetNodes.push({
+          id: 'project-budget-other-drilldown',
+          name: `事業(Top${spendingLimit}以外)`,
+          type: 'project-budget',
+          value: otherMinistriesBudget,
+          details: {
+            ministry: '全府省庁',
+            bureau: '',
+            fiscalYear: 2024,
+            initialBudget: otherMinistriesBudget,
+            supplementaryBudget: 0,
+            carryoverBudget: 0,
+            reserveFund: 0,
+            totalBudget: otherMinistriesBudget,
+            executedAmount: 0,
+            carryoverToNext: 0,
+            accountCategory: '',
+          },
+        });
+      }
     }
 
     if (totalOtherBudget > 0) {
@@ -1392,7 +1428,7 @@ function buildSankeyData(
       if (otherBudget) totalOtherBudget += otherBudget;
     }
 
-    // Add "Other Ministries" spending (skip in drilldown mode)
+    // Add "Other Ministries" spending (skip in drilldown mode for normal node)
     if (drilldownLevel === 0) {
       totalOtherSpending += otherMinistriesSpending;
       totalOtherBudget += otherMinistriesBudget;
@@ -1420,6 +1456,33 @@ function buildSankeyData(
         links.push({
           source: 'project-budget-other-global',
           target: 'project-spending-other-global',
+          value: linkValue,
+        });
+      }
+    }
+
+    // Drilldown mode: Create dedicated spending node for "Other Ministries"
+    if (drilldownLevel > 0 && otherMinistriesSpending > 0) {
+      projectSpendingNodes.push({
+        id: 'project-spending-other-drilldown',
+        name: `事業(Top${spendingLimit}以外)`,
+        type: 'project-spending',
+        value: otherMinistriesSpending,
+        details: {
+          ministry: '全府省庁',
+          bureau: '',
+          fiscalYear: 2024,
+          executionRate: 0,
+          spendingCount: 0,
+        },
+      });
+
+      // Link from drilldown budget node to drilldown spending node
+      const linkValue = Math.min(otherMinistriesBudget, otherMinistriesSpending);
+      if (linkValue > 0) {
+        links.push({
+          source: 'project-budget-other-drilldown',
+          target: 'project-spending-other-drilldown',
           value: linkValue,
         });
       }
