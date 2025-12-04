@@ -803,21 +803,27 @@ function SankeyContent() {
                       const name = actualNode?.name || node.id;
                       const nodeType = actualNode?.type || '';
 
-                      // For nodes with dummy value (0.001), show actual amount (0円)
-                      let displayAmount = node.value;
-                      if (node.value === 0.001) {
-                        // Check if this is truly a zero-budget case
-                        if (nodeType === 'project-budget' &&
-                          actualNode?.details &&
-                          'totalBudget' in actualNode.details &&
-                          actualNode.details.totalBudget === 0) {
-                          displayAmount = 0;
-                        } else if (nodeType === 'ministry-budget') {
-                          // Ministry nodes shouldn't have dummy values, but handle just in case
-                          displayAmount = 0;
+                      // Return nodes (Top10へ戻る etc.) should have no amount display
+                      let amount = '';
+                      if (node.id.startsWith('return-to-top')) {
+                        amount = ''; // No amount display for return nodes
+                      } else {
+                        // For nodes with dummy value (0.001), show actual amount (0円)
+                        let displayAmount = node.value;
+                        if (node.value === 0.001) {
+                          // Check if this is truly a zero-budget case
+                          if (nodeType === 'project-budget' &&
+                            actualNode?.details &&
+                            'totalBudget' in actualNode.details &&
+                            actualNode.details.totalBudget === 0) {
+                            displayAmount = 0;
+                          } else if (nodeType === 'ministry-budget') {
+                            // Ministry nodes shouldn't have dummy values, but handle just in case
+                            displayAmount = 0;
+                          }
                         }
+                        amount = formatCurrency(displayAmount);
                       }
-                      const amount = formatCurrency(displayAmount);
 
                       let displayName = name;
                       if (nodeType === 'project-budget') {
@@ -836,9 +842,10 @@ function SankeyContent() {
                       // X position for amount label (centered above node)
                       const amountX = node.x + node.width / 2;
 
-                      // Clickable indication - now "その他" nodes are also clickable
+                      // Clickable indication - now "その他" nodes and "return-to-top" nodes are also clickable
                       const nodeName = actualNode?.name || '';
                       const isClickable =
+                        node.id.startsWith('return-to-top') ||
                         node.id === 'ministry-budget-other' ||
                         node.id === 'total-budget' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
