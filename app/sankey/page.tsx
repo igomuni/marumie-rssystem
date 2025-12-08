@@ -819,9 +819,8 @@ function SankeyContent() {
 
                       // Dynamic label for "事業(TopN以外)" based on drilldown level
                       if (name.match(/^事業\(Top\d+以外.*\)$/) && viewMode === 'ministry') {
-                        const currentStart = projectDrilldownLevel * ministryProjectTopN + 1;
-                        const currentEnd = currentStart + ministryProjectTopN - 1;
-                        displayName = `事業(Top${currentStart}-${currentEnd}以外)`;
+                        const currentEnd = (projectDrilldownLevel + 1) * ministryProjectTopN;
+                        displayName = `事業(Top${currentEnd}以外)`;
                       } else if (nodeType === 'project-budget') {
                         displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
                       } else if (nodeType === 'project-spending') {
