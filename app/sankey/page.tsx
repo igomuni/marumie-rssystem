@@ -843,12 +843,11 @@ function SankeyContent() {
                       const amountX = node.x + node.width / 2;
 
                       // Clickable indication
-                      const nodeName = actualNode?.name || '';
                       const isClickable =
                         node.id === 'ministry-budget-other' ||
                         node.id === 'total-budget' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
-                        ((nodeType === 'project-budget' || nodeType === 'project-spending') && !nodeName.match(/^事業\(Top\d+以外.*\)$/)) ||
+                        (nodeType === 'project-budget' || nodeType === 'project-spending') ||
                         (nodeType === 'recipient');
 
                       const cursorStyle = isClickable ? 'pointer' : 'default';
