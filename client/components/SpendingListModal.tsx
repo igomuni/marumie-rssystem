@@ -266,10 +266,10 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
 
   // 金額範囲フィルタ
   const amountFilteredData = useMemo(() => {
-    const budgetMinVal = budgetMin ? parseFloat(budgetMin) : -Infinity;
-    const budgetMaxVal = budgetMax ? parseFloat(budgetMax) : Infinity;
-    const spendingMinVal = spendingMin ? parseFloat(spendingMin) : -Infinity;
-    const spendingMaxVal = spendingMax ? parseFloat(spendingMax) : Infinity;
+    const budgetMinVal = parseAmountInput(budgetMin) ?? -Infinity;
+    const budgetMaxVal = parseAmountInput(budgetMax) ?? Infinity;
+    const spendingMinVal = parseAmountInput(spendingMin) ?? -Infinity;
+    const spendingMaxVal = parseAmountInput(spendingMax) ?? Infinity;
 
     return processedData.filter(item => {
       const matchBudget = item.totalBudget >= budgetMinVal && item.totalBudget <= budgetMaxVal;
@@ -360,6 +360,37 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
   const totalSpendingCount = useMemo(() => {
     return spendingsData.length;
   }, [spendingsData]);
+
+  // 金額入力をパース（日本語単位対応）
+  const parseAmountInput = (input: string): number | null => {
+    if (!input) return null;
+
+    // 数値のみの場合（億円単位として扱う）
+    const numOnly = parseFloat(input);
+    if (!isNaN(numOnly) && !/[^\d.-]/.test(input.trim())) {
+      return numOnly * 100000; // 億円 → 千円
+    }
+
+    // 単位付き入力をパース
+    const trimmed = input.trim();
+    const match = trimmed.match(/^([\d.]+)\s*(兆|億|万|千)?円?$/);
+
+    if (!match) return null;
+
+    const value = parseFloat(match[1]);
+    const unit = match[2];
+
+    if (isNaN(value)) return null;
+
+    // 千円単位に変換
+    switch (unit) {
+      case '兆': return value * 1000000000; // 兆円 → 千円
+      case '億': return value * 100000;     // 億円 → 千円
+      case '万': return value * 10;         // 万円 → 千円
+      case '千': return value;              // 千円 → 千円
+      default: return value * 100000;       // 単位なしは億円として扱う
+    }
+  };
 
   const formatCurrency = (value: number) => {
     if (value >= 1e12) {
