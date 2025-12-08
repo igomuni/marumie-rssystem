@@ -567,42 +567,8 @@ function selectData(
     }
 
     if (targetMinistryName && !targetProjectName) {
-      // --- Ministry View: Independent TopN Selection ---
-      // Step 1: Select Top Spendings FIRST (globally across ministry)
-
-      // Get all spendings from all projects in this ministry
-      const ministryProjectIds = data.budgets
-        .filter(p => p.ministry === targetMinistryName)
-        .map(p => p.projectId);
-
-      const ministrySpendingMap = new Map<number, number>(); // spendingId -> total amount
-
-      for (const spending of data.spendings) {
-        if (spending.spendingName === 'その他') continue;
-
-        let totalFromMinistry = 0;
-        for (const proj of spending.projects) {
-          if (ministryProjectIds.includes(proj.projectId)) {
-            totalFromMinistry += proj.amount;
-          }
-        }
-
-        if (totalFromMinistry > 0) {
-          ministrySpendingMap.set(spending.spendingId, totalFromMinistry);
-        }
-      }
-
-      // Sort and select TopN spendings
-      const sortedSpendings = Array.from(ministrySpendingMap.entries())
-        .sort((a, b) => b[1] - a[1]);
-
-      const topSpendingIds = new Set(
-        sortedSpendings.slice(0, spendingLimit).map(([id]) => id)
-      );
-
-      topSpendings = data.spendings.filter(s => topSpendingIds.has(s.spendingId));
-
-      // Step 2: Select Top Projects by budget amount (not contribution to spendings)
+      // --- Ministry View: Drilldown-aware TopN Selection ---
+      // Step 1: Select Top Projects by budget amount FIRST
       const ministryProjects = data.budgets.filter(p => p.ministry === targetMinistryName);
 
       // Sort projects by budget amount (descending)
@@ -633,7 +599,38 @@ function selectData(
         otherProjectsSpendingByMinistry.set(targetMinistryName, otherSpending);
       }
 
-      // Calculate "Other Spendings" per project
+      // Step 2: Select Top Spendings from CURRENT PAGE projects only
+      // Get only the project IDs from current page (topProjects)
+      const currentPageProjectIds = topProjects.map(p => p.projectId);
+
+      const currentPageSpendingMap = new Map<number, number>(); // spendingId -> total amount
+
+      for (const spending of data.spendings) {
+        if (spending.spendingName === 'その他') continue;
+
+        let totalFromCurrentPage = 0;
+        for (const proj of spending.projects) {
+          if (currentPageProjectIds.includes(proj.projectId)) {
+            totalFromCurrentPage += proj.amount;
+          }
+        }
+
+        if (totalFromCurrentPage > 0) {
+          currentPageSpendingMap.set(spending.spendingId, totalFromCurrentPage);
+        }
+      }
+
+      // Sort and select TopN spendings from current page only
+      const sortedSpendings = Array.from(currentPageSpendingMap.entries())
+        .sort((a, b) => b[1] - a[1]);
+
+      const topSpendingIds = new Set(
+        sortedSpendings.slice(0, spendingLimit).map(([id]) => id)
+      );
+
+      topSpendings = data.spendings.filter(s => topSpendingIds.has(s.spendingId));
+
+      // Step 3: Calculate "Other Spendings" per project
       // For each project in topProjects, calculate spending to non-TopN recipients
       for (const project of topProjects) {
         const projectSpendings = data.spendings
