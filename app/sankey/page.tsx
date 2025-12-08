@@ -487,16 +487,6 @@ function SankeyContent() {
     }
   };
 
-  // ツールチップ用: 1円単位表示
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const formatYenOnly = (value: number | undefined, nodeOrDetails?: any) => {
-    const actualValue = getActualValue(value, nodeOrDetails);
-    if (actualValue === undefined || actualValue === null) return '---';
-    if (actualValue === 0) return '0円';
-
-    return `${actualValue.toLocaleString('ja-JP')}円`;
-  };
-
   // Get budget and spending amounts for current view
   const getViewAmounts = () => {
     if (!structuredData) return { budget: 0, spending: 0 };
@@ -826,7 +816,13 @@ function SankeyContent() {
                       const amount = formatCurrency(displayAmount);
 
                       let displayName = name;
-                      if (nodeType === 'project-budget') {
+
+                      // Dynamic label for "事業(TopN以外)" based on drilldown level
+                      if (name.match(/^事業\(Top\d+以外.*\)$/) && viewMode === 'ministry') {
+                        const currentStart = projectDrilldownLevel * ministryProjectTopN + 1;
+                        const currentEnd = currentStart + ministryProjectTopN - 1;
+                        displayName = `事業(Top${currentStart}-${currentEnd}以外)`;
+                      } else if (nodeType === 'project-budget') {
                         displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
                       } else if (nodeType === 'project-spending') {
                         displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
@@ -843,11 +839,15 @@ function SankeyContent() {
                       const amountX = node.x + node.width / 2;
 
                       // Clickable indication
+                      const nodeName = actualNode?.name || '';
+                      const isProjectOtherNode = nodeName.match(/^事業\(Top\d+以外.*\)$/);
+                      const isGlobalView = viewMode === 'global';
+
                       const isClickable =
                         node.id === 'ministry-budget-other' ||
                         node.id === 'total-budget' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
-                        (nodeType === 'project-budget' || nodeType === 'project-spending') ||
+                        ((nodeType === 'project-budget' || nodeType === 'project-spending') && !(isProjectOtherNode && isGlobalView)) ||
                         (nodeType === 'recipient');
 
                       const cursorStyle = isClickable ? 'pointer' : 'default';
@@ -905,7 +905,7 @@ function SankeyContent() {
                   const nodeType = actualNode.type || '';
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   const details = actualNode.details as any;
-                  const value = formatYenOnly(node.value, actualNode);
+                  const value = formatCurrency(node.value, actualNode);
 
                   // ノードタイプに応じてタイトルを調整
                   let title = name;
@@ -946,25 +946,25 @@ function SankeyContent() {
                             <div>会計区分: {details.accountCategory}</div>
                           )}
                           {details.initialBudget !== undefined && (
-                            <div>当初予算: {formatYenOnly(details.initialBudget)}</div>
+                            <div>当初予算: {formatCurrency(details.initialBudget)}</div>
                           )}
                           {details.supplementaryBudget !== undefined && details.supplementaryBudget > 0 && (
-                            <div>補正予算: {formatYenOnly(details.supplementaryBudget)}</div>
+                            <div>補正予算: {formatCurrency(details.supplementaryBudget)}</div>
                           )}
                           {details.carryoverBudget !== undefined && details.carryoverBudget > 0 && (
-                            <div>前年度繰越: {formatYenOnly(details.carryoverBudget)}</div>
+                            <div>前年度繰越: {formatCurrency(details.carryoverBudget)}</div>
                           )}
                           {details.reserveFund !== undefined && details.reserveFund > 0 && (
-                            <div>予備費等: {formatYenOnly(details.reserveFund)}</div>
+                            <div>予備費等: {formatCurrency(details.reserveFund)}</div>
                           )}
                           {details.totalBudget !== undefined && nodeType === 'project-budget' && (
-                            <div className="font-semibold">歳出予算現額: {formatYenOnly(details.totalBudget)}</div>
+                            <div className="font-semibold">歳出予算現額: {formatCurrency(details.totalBudget)}</div>
                           )}
                           {details.executedAmount !== undefined && nodeType === 'project-budget' && details.executedAmount > 0 && (
-                            <div>執行額: {formatYenOnly(details.executedAmount)}</div>
+                            <div>執行額: {formatCurrency(details.executedAmount)}</div>
                           )}
                           {details.carryoverToNext !== undefined && details.carryoverToNext > 0 && (
-                            <div>翌年度繰越: {formatYenOnly(details.carryoverToNext)}</div>
+                            <div>翌年度繰越: {formatCurrency(details.carryoverToNext)}</div>
                           )}
 
                           {/* 事業（支出）専用 */}
@@ -996,9 +996,9 @@ function SankeyContent() {
 
                   const sourceName = sourceNode?.name || link.source.id;
                   const targetName = targetNode?.name || link.target.id;
-                  const sourceValue = formatYenOnly(link.source.value, sourceNode);
-                  const targetValue = formatYenOnly(link.target.value, targetNode);
-                  const linkValue = formatYenOnly(link.value, sourceNode);
+                  const sourceValue = formatCurrency(link.source.value, sourceNode);
+                  const targetValue = formatCurrency(link.target.value, targetNode);
+                  const linkValue = formatCurrency(link.value, sourceNode);
 
                   // 事業(予算) → 事業(支出) のリンクかどうかチェック
                   const isProjectBudgetToSpending =

@@ -1058,10 +1058,21 @@ function buildSankeyData(
     // Link: Total -> Ministry (Global View only)
     if (!targetProjectName) {
       for (const ministry of topMinistries) {
+        // In Ministry View, link value should match ministry node value (sum of selected projects)
+        // In Global View, use ministry's total budget
+        let linkValue = targetMinistryName
+          ? topProjects.filter(p => p.ministry === ministry.name).reduce((sum, p) => sum + p.totalBudget, 0)
+          : ministry.totalBudget;
+
+        // Use dummy value if linkValue is 0 to ensure proper layout
+        if (linkValue === 0 && targetMinistryName) {
+          linkValue = 0.001;
+        }
+
         links.push({
           source: 'total-budget',
           target: `ministry-budget-${ministry.id}`,
-          value: ministry.totalBudget,
+          value: linkValue,
         });
       }
       if (otherMinistriesBudget > 0) {
@@ -1088,9 +1099,15 @@ function buildSankeyData(
 
       // In Ministry View, use the sum of selected projects' budgets
       // In Global View, use ministry's total budget
-      const ministryValue = targetMinistryName
+      let ministryValue = targetMinistryName
         ? topProjects.filter(p => p.ministry === ministry.name).reduce((sum, p) => sum + p.totalBudget, 0)
         : ministry.totalBudget;
+
+      // Use dummy value if ministryValue is 0 to ensure proper layout
+      const useDummyValue = ministryValue === 0 && targetMinistryName;
+      if (useDummyValue) {
+        ministryValue = 0.001;
+      }
 
       standardMinistryNodes.push({
         id: `ministry-budget-${ministry.id}`,
