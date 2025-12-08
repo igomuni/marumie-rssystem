@@ -673,18 +673,18 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                   <div className="flex items-center gap-2">
                     <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">予算範囲</label>
                     <input
-                      type="number"
+                      type="text"
                       value={budgetMin}
                       onChange={(e) => setBudgetMin(e.target.value)}
-                      placeholder="下限"
+                      placeholder="下限 (例: 1000億円)"
                       className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <span className="text-gray-500 dark:text-gray-400">〜</span>
                     <input
-                      type="number"
+                      type="text"
                       value={budgetMax}
                       onChange={(e) => setBudgetMax(e.target.value)}
-                      placeholder="上限"
+                      placeholder="上限 (例: 5000億円)"
                       className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {(budgetMin || budgetMax) && (
@@ -701,18 +701,18 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                   <div className="flex items-center gap-2">
                     <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">支出範囲</label>
                     <input
-                      type="number"
+                      type="text"
                       value={spendingMin}
                       onChange={(e) => setSpendingMin(e.target.value)}
-                      placeholder="下限"
+                      placeholder="下限 (例: 100億円)"
                       className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <span className="text-gray-500 dark:text-gray-400">〜</span>
                     <input
-                      type="number"
+                      type="text"
                       value={spendingMax}
                       onChange={(e) => setSpendingMax(e.target.value)}
-                      placeholder="上限"
+                      placeholder="上限 (例: 500億円)"
                       className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {(spendingMin || spendingMax) && (
