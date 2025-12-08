@@ -8,9 +8,9 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const projectLimit = parseInt(searchParams.get('projectLimit') || '15', 10);
     const spendingLimit = parseInt(searchParams.get('spendingLimit') || '10', 10);
-    const ministryName = searchParams.get('ministryName') || undefined;
-    const projectName = searchParams.get('projectName') || undefined;
-    const recipientName = searchParams.get('recipientName') || undefined;
+    const ministryName = searchParams.get('ministry') || searchParams.get('ministryName') || undefined;
+    const projectName = searchParams.get('project') || searchParams.get('projectName') || undefined;
+    const recipientName = searchParams.get('recipient') || searchParams.get('recipientName') || undefined;
     const drilldownLevel = parseInt(searchParams.get('drilldownLevel') || '0', 10);
 
     try {
