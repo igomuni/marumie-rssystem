@@ -143,7 +143,8 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
   const parseAmountInput = (input: string): number | null => {
     if (!input) return null;
 
-    const trimmed = input.trim();
+    // カンマを除去してからトリム
+    const trimmed = input.trim().replace(/,/g, '');
 
     // 単位付き入力をパース（優先）
     const match = trimmed.match(/^([\d.]+)\s*(兆|億|万|千)?円?$/);
