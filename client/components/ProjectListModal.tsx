@@ -379,6 +379,12 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
           <div className="text-sm text-gray-600 dark:text-gray-400">
             全{allData.length.toLocaleString()}事業
             {sortedData.length !== allData.length && ` （フィルター後: ${sortedData.length.toLocaleString()}件）`}
+            <br />
+            {(() => {
+              const totalBudget = sortedData.reduce((sum, item) => sum + item.totalBudget, 0);
+              const totalSpending = sortedData.reduce((sum, item) => sum + item.totalSpendingAmount, 0);
+              return `予算合計: ${formatCurrency(totalBudget * 1000)} / 支出合計: ${formatCurrency(totalSpending * 1000)}`;
+            })()}
           </div>
         </div>
 
