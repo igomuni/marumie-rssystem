@@ -143,14 +143,9 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
   const parseAmountInput = (input: string): number | null => {
     if (!input) return null;
 
-    // 数値のみの場合（億円単位として扱う）
-    const numOnly = parseFloat(input);
-    if (!isNaN(numOnly) && !/[^\d.-]/.test(input.trim())) {
-      return numOnly * 100000; // 億円 → 千円
-    }
-
-    // 単位付き入力をパース
     const trimmed = input.trim();
+
+    // 単位付き入力をパース（優先）
     const match = trimmed.match(/^([\d.]+)\s*(兆|億|万|千)?円?$/);
 
     if (!match) return null;
@@ -160,13 +155,13 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
 
     if (isNaN(value)) return null;
 
-    // 千円単位に変換
+    // 1円単位に変換（データは1円単位で格納されている）
     switch (unit) {
-      case '兆': return value * 1000000000; // 兆円 → 千円
-      case '億': return value * 100000;     // 億円 → 千円
-      case '万': return value * 10;         // 万円 → 千円
-      case '千': return value;              // 千円 → 千円
-      default: return value * 100000;       // 単位なしは億円として扱う
+      case '兆': return value * 1000000000000; // 兆円 → 円
+      case '億': return value * 100000000;     // 億円 → 円
+      case '万': return value * 10000;         // 万円 → 円
+      case '千': return value * 1000;          // 千円 → 円
+      default: return value;                   // 単位なし = 1円単位
     }
   };
 
