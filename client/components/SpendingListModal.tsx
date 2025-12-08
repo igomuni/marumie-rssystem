@@ -62,6 +62,11 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     }
     return true;
   });
+  // 金額範囲フィルタ（千円単位）
+  const [budgetMin, setBudgetMin] = useState<string>('');
+  const [budgetMax, setBudgetMax] = useState<string>('');
+  const [spendingMin, setSpendingMin] = useState<string>('');
+  const [spendingMax, setSpendingMax] = useState<string>('');
   const [ministryBreakdownModal, setMinistryBreakdownModal] = useState<{
     isOpen: boolean;
     spendingName: string;
@@ -259,9 +264,23 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     return result;
   }, [allData, spendingsData, selectedMinistries, projectNameFilter, spendingNameFilter, groupBySpending, projectNameSearchMode, spendingNameSearchMode]);
 
+  // 金額範囲フィルタ
+  const amountFilteredData = useMemo(() => {
+    const budgetMinVal = budgetMin ? parseFloat(budgetMin) : -Infinity;
+    const budgetMaxVal = budgetMax ? parseFloat(budgetMax) : Infinity;
+    const spendingMinVal = spendingMin ? parseFloat(spendingMin) : -Infinity;
+    const spendingMaxVal = spendingMax ? parseFloat(spendingMax) : Infinity;
+
+    return processedData.filter(item => {
+      const matchBudget = item.totalBudget >= budgetMinVal && item.totalBudget <= budgetMaxVal;
+      const matchSpending = item.totalSpendingAmount >= spendingMinVal && item.totalSpendingAmount <= spendingMaxVal;
+      return matchBudget && matchSpending;
+    });
+  }, [processedData, budgetMin, budgetMax, spendingMin, spendingMax]);
+
   // ソート
   const sortedData = useMemo(() => {
-    return [...processedData].sort((a, b) => {
+    return [...amountFilteredData].sort((a, b) => {
       // projectNameでソートする場合、groupBySpendingがOnならprojectCountでソート
       let column = sortColumn;
       if (sortColumn === 'projectName' && groupBySpending) {
@@ -294,7 +313,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
 
       return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
     });
-  }, [processedData, sortColumn, sortDirection, groupBySpending]);
+  }, [amountFilteredData, sortColumn, sortDirection, groupBySpending]);
 
   // ページネーション
   const paginatedData = useMemo(() => {
@@ -314,6 +333,11 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     }
     setCurrentPage(1);
   };
+
+  // フィルタ変更時にページを1にリセット
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [spendingNameFilter, projectNameFilter, selectedMinistries, groupBySpending, sortColumn, sortDirection, budgetMin, budgetMax, spendingMin, spendingMax]);
 
   // ドロップダウン外クリック検知
   useEffect(() => {
@@ -459,7 +483,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
               // 支出合計は単純に合計（まとめON/OFFで既に正しく集計されている）
               const totalSpending = sortedData.reduce((sum, item) => sum + item.totalSpendingAmount, 0);
 
-              return `予算合計: ${formatCurrency(totalBudget * 1000)} / 支出合計: ${formatCurrency(totalSpending * 1000)}`;
+              return `予算: ${formatCurrency(totalBudget)} / 支出: ${formatCurrency(totalSpending)}`;
             })()}
           </div>
         </div>
@@ -609,6 +633,65 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                         </button>
                       )}
                     </div>
+                  </div>
+                </div>
+
+                {/* 3行目: 金額範囲フィルタ */}
+                <div className="flex items-start gap-3 flex-wrap">
+                  {/* 予算範囲 */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">予算範囲</label>
+                    <input
+                      type="number"
+                      value={budgetMin}
+                      onChange={(e) => setBudgetMin(e.target.value)}
+                      placeholder="下限"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-500 dark:text-gray-400">〜</span>
+                    <input
+                      type="number"
+                      value={budgetMax}
+                      onChange={(e) => setBudgetMax(e.target.value)}
+                      placeholder="上限"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {(budgetMin || budgetMax) && (
+                      <button
+                        onClick={() => { setBudgetMin(''); setBudgetMax(''); }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 支出範囲 */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">支出範囲</label>
+                    <input
+                      type="number"
+                      value={spendingMin}
+                      onChange={(e) => setSpendingMin(e.target.value)}
+                      placeholder="下限"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-500 dark:text-gray-400">〜</span>
+                    <input
+                      type="number"
+                      value={spendingMax}
+                      onChange={(e) => setSpendingMax(e.target.value)}
+                      placeholder="上限"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {(spendingMin || spendingMax) && (
+                      <button
+                        onClick={() => { setSpendingMin(''); setSpendingMax(''); }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

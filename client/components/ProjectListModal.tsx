@@ -57,6 +57,11 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
     }
     return true;
   });
+  // 金額範囲フィルタ（千円単位）
+  const [budgetMin, setBudgetMin] = useState<string>('');
+  const [budgetMax, setBudgetMax] = useState<string>('');
+  const [spendingMin, setSpendingMin] = useState<string>('');
+  const [spendingMax, setSpendingMax] = useState<string>('');
 
   // データ読み込みと府省庁リスト初期化
   useEffect(() => {
@@ -241,7 +246,17 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
 
       const matchProject = checkMatch(item.projectName, projectNameFilter, projectNameSearchMode);
       const matchSpending = groupByProject || checkMatch(item.spendingName, spendingNameFilter, spendingNameSearchMode);
-      return matchProject && matchSpending;
+
+      // 金額範囲フィルタ（1円単位）
+      const budgetMinVal = budgetMin ? parseFloat(budgetMin) : -Infinity;
+      const budgetMaxVal = budgetMax ? parseFloat(budgetMax) : Infinity;
+      const spendingMinVal = spendingMin ? parseFloat(spendingMin) : -Infinity;
+      const spendingMaxVal = spendingMax ? parseFloat(spendingMax) : Infinity;
+
+      const matchBudget = item.totalBudget >= budgetMinVal && item.totalBudget <= budgetMaxVal;
+      const matchSpendingAmount = item.totalSpendingAmount >= spendingMinVal && item.totalSpendingAmount <= spendingMaxVal;
+
+      return matchProject && matchSpending && matchBudget && matchSpendingAmount;
     });
 
     // ソート
@@ -292,7 +307,7 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
     });
 
     return sorted;
-  }, [allData, spendingsData, selectedMinistries, groupByProject, sortColumn, sortDirection, projectNameFilter, spendingNameFilter, projectNameSearchMode, spendingNameSearchMode]);
+  }, [allData, spendingsData, selectedMinistries, groupByProject, sortColumn, sortDirection, projectNameFilter, spendingNameFilter, projectNameSearchMode, spendingNameSearchMode, budgetMin, budgetMax, spendingMin, spendingMax]);
 
   // ページネーション
   const paginatedData = useMemo(() => {
@@ -393,7 +408,7 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
 
               const totalBudget = Array.from(uniqueProjects.values()).reduce((sum, p) => sum + p.budget, 0);
               const totalSpending = Array.from(uniqueProjects.values()).reduce((sum, p) => sum + p.spending, 0);
-              return `予算合計: ${formatCurrency(totalBudget * 1000)} / 支出合計: ${formatCurrency(totalSpending * 1000)}`;
+              return `予算: ${formatCurrency(totalBudget)} / 支出: ${formatCurrency(totalSpending)}`;
             })()}
           </div>
         </div>
@@ -543,6 +558,65 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
                         </button>
                       )}
                     </div>
+                  </div>
+                </div>
+
+                {/* 3行目: 金額範囲フィルタ */}
+                <div className="flex items-start gap-3 flex-wrap">
+                  {/* 予算範囲 */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">予算範囲</label>
+                    <input
+                      type="number"
+                      value={budgetMin}
+                      onChange={(e) => setBudgetMin(e.target.value)}
+                      placeholder="下限"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-500 dark:text-gray-400">〜</span>
+                    <input
+                      type="number"
+                      value={budgetMax}
+                      onChange={(e) => setBudgetMax(e.target.value)}
+                      placeholder="上限"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {(budgetMin || budgetMax) && (
+                      <button
+                        onClick={() => { setBudgetMin(''); setBudgetMax(''); }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 支出範囲 */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">支出範囲</label>
+                    <input
+                      type="number"
+                      value={spendingMin}
+                      onChange={(e) => setSpendingMin(e.target.value)}
+                      placeholder="下限"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-500 dark:text-gray-400">〜</span>
+                    <input
+                      type="number"
+                      value={spendingMax}
+                      onChange={(e) => setSpendingMax(e.target.value)}
+                      placeholder="上限"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {(spendingMin || spendingMax) && (
+                      <button
+                        onClick={() => { setSpendingMin(''); setSpendingMax(''); }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
