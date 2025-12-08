@@ -422,8 +422,43 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
             {sortedData.length !== totalSpendingCount && ` （フィルター後: ${sortedData.length.toLocaleString()}件）`}
             <br />
             {(() => {
-              const totalBudget = sortedData.reduce((sum, item) => sum + item.totalBudget, 0);
+              // 事業名まとめOFF時は同じ事業が複数行になる可能性があるため、予算は重複カウントしない
+              // まとめON時は支出先ごとに集計済みだが、同じ事業が複数の支出先に出ている場合は重複する
+              // 正確な合計を出すため、元データ(allData)から関連事業を特定して集計
+              const relatedProjectIds = new Set<number>();
+
+              // sortedDataに含まれる事業を特定
+              if (groupBySpending) {
+                // まとめON: processedDataの生成過程を追う必要があるが、
+                // sortedDataからは元の事業IDが取れないため、
+                // 表示されている支出先名から逆引きする
+                const displayedSpendingNames = new Set(sortedData.map(item => item.spendingName));
+                spendingsData.forEach(spending => {
+                  if (displayedSpendingNames.has(spending.spendingName)) {
+                    spending.projects.forEach(p => relatedProjectIds.add(p.projectId));
+                  }
+                });
+              } else {
+                // まとめOFF: sortedDataの各行がそのまま事業を表す
+                sortedData.forEach(item => {
+                  // projectNameから事業を特定
+                  const project = allData.find(p =>
+                    p.projectName === item.projectName && p.ministry === item.ministry
+                  );
+                  if (project) relatedProjectIds.add(project.projectId);
+                });
+              }
+
+              // 関連事業の予算合計
+              let totalBudget = 0;
+              relatedProjectIds.forEach(projectId => {
+                const project = allData.find(p => p.projectId === projectId);
+                if (project) totalBudget += project.totalBudget;
+              });
+
+              // 支出合計は単純に合計（まとめON/OFFで既に正しく集計されている）
               const totalSpending = sortedData.reduce((sum, item) => sum + item.totalSpendingAmount, 0);
+
               return `予算合計: ${formatCurrency(totalBudget * 1000)} / 支出合計: ${formatCurrency(totalSpending * 1000)}`;
             })()}
           </div>

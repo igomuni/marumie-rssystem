@@ -381,8 +381,18 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
             {sortedData.length !== allData.length && ` （フィルター後: ${sortedData.length.toLocaleString()}件）`}
             <br />
             {(() => {
-              const totalBudget = sortedData.reduce((sum, item) => sum + item.totalBudget, 0);
-              const totalSpending = sortedData.reduce((sum, item) => sum + item.totalSpendingAmount, 0);
+              // 支出先展開時は同じ事業が複数行になるため、予算は重複カウントしないよう事業IDでユニーク化
+              const uniqueProjects = new Map<number, { budget: number; spending: number }>();
+              sortedData.forEach(item => {
+                if (!uniqueProjects.has(item.projectId)) {
+                  uniqueProjects.set(item.projectId, { budget: item.totalBudget, spending: 0 });
+                }
+                const proj = uniqueProjects.get(item.projectId)!;
+                proj.spending += item.totalSpendingAmount;
+              });
+
+              const totalBudget = Array.from(uniqueProjects.values()).reduce((sum, p) => sum + p.budget, 0);
+              const totalSpending = Array.from(uniqueProjects.values()).reduce((sum, p) => sum + p.spending, 0);
               return `予算合計: ${formatCurrency(totalBudget * 1000)} / 支出合計: ${formatCurrency(totalSpending * 1000)}`;
             })()}
           </div>
