@@ -38,6 +38,7 @@ npm run compress-data            # Gzip structured JSON for Git (5.9MB)
 3. **5-Column Sankey**: Budget Budget Budget → Spending Spending (green for budget nodes, red for spending)
 4. **"その他" vs "その他の支出先"**: Two separate final nodes - "その他" for recipients named "その他" (~26T¥), "その他の支出先" for non-TopN items (~51T¥)
 5. **In-Memory Caching**: Server caches rs2024-structured.json in memory for fast API responses
+6. **Data Units**: **CRITICAL** - All monetary amounts in the data are stored in **1円 (yen) units**, NOT 千円 (thousand yen). Total budget is 146 trillion yen = 146,000,000,000,000 yen in the data.
 
 ### Main Entry Points
 - **UI**: [app/sankey/page.tsx](app/sankey/page.tsx) - Main visualization with state management (859 lines)

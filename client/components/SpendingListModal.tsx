@@ -62,6 +62,11 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     }
     return true;
   });
+  // 金額範囲フィルタ（千円単位）
+  const [budgetMin, setBudgetMin] = useState<string>('');
+  const [budgetMax, setBudgetMax] = useState<string>('');
+  const [spendingMin, setSpendingMin] = useState<string>('');
+  const [spendingMax, setSpendingMax] = useState<string>('');
   const [ministryBreakdownModal, setMinistryBreakdownModal] = useState<{
     isOpen: boolean;
     spendingName: string;
@@ -133,6 +138,33 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
 
     loadData();
   }, [isOpen, initialFilters]);
+
+  // 金額入力をパース（日本語単位対応）
+  const parseAmountInput = (input: string): number | null => {
+    if (!input) return null;
+
+    // カンマを除去してからトリム
+    const trimmed = input.trim().replace(/,/g, '');
+
+    // 単位付き入力をパース（優先）
+    const match = trimmed.match(/^([\d.]+)\s*(兆|億|万|千)?円?$/);
+
+    if (!match) return null;
+
+    const value = parseFloat(match[1]);
+    const unit = match[2];
+
+    if (isNaN(value)) return null;
+
+    // 1円単位に変換（データは1円単位で格納されている）
+    switch (unit) {
+      case '兆': return value * 1000000000000; // 兆円 → 円
+      case '億': return value * 100000000;     // 億円 → 円
+      case '万': return value * 10000;         // 万円 → 円
+      case '千': return value * 1000;          // 千円 → 円
+      default: return value;                   // 単位なし = 1円単位
+    }
+  };
 
   // フィルタリング＆集計ロジック
   const processedData = useMemo(() => {
@@ -259,9 +291,23 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     return result;
   }, [allData, spendingsData, selectedMinistries, projectNameFilter, spendingNameFilter, groupBySpending, projectNameSearchMode, spendingNameSearchMode]);
 
+  // 金額範囲フィルタ
+  const amountFilteredData = useMemo(() => {
+    const budgetMinVal = parseAmountInput(budgetMin) ?? -Infinity;
+    const budgetMaxVal = parseAmountInput(budgetMax) ?? Infinity;
+    const spendingMinVal = parseAmountInput(spendingMin) ?? -Infinity;
+    const spendingMaxVal = parseAmountInput(spendingMax) ?? Infinity;
+
+    return processedData.filter(item => {
+      const matchBudget = item.totalBudget >= budgetMinVal && item.totalBudget <= budgetMaxVal;
+      const matchSpending = item.totalSpendingAmount >= spendingMinVal && item.totalSpendingAmount <= spendingMaxVal;
+      return matchBudget && matchSpending;
+    });
+  }, [processedData, budgetMin, budgetMax, spendingMin, spendingMax]);
+
   // ソート
   const sortedData = useMemo(() => {
-    return [...processedData].sort((a, b) => {
+    return [...amountFilteredData].sort((a, b) => {
       // projectNameでソートする場合、groupBySpendingがOnならprojectCountでソート
       let column = sortColumn;
       if (sortColumn === 'projectName' && groupBySpending) {
@@ -294,7 +340,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
 
       return sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
     });
-  }, [processedData, sortColumn, sortDirection, groupBySpending]);
+  }, [amountFilteredData, sortColumn, sortDirection, groupBySpending]);
 
   // ページネーション
   const paginatedData = useMemo(() => {
@@ -314,6 +360,11 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
     }
     setCurrentPage(1);
   };
+
+  // フィルタ変更時にページを1にリセット
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [spendingNameFilter, projectNameFilter, selectedMinistries, groupBySpending, sortColumn, sortDirection, budgetMin, budgetMax, spendingMin, spendingMax]);
 
   // ドロップダウン外クリック検知
   useEffect(() => {
@@ -420,6 +471,47 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           <div className="text-sm text-gray-600 dark:text-gray-400">
             全{totalSpendingCount.toLocaleString()}支出先
             {sortedData.length !== totalSpendingCount && ` （フィルター後: ${sortedData.length.toLocaleString()}件）`}
+            <br />
+            {(() => {
+              // 事業名まとめOFF時は同じ事業が複数行になる可能性があるため、予算は重複カウントしない
+              // まとめON時は支出先ごとに集計済みだが、同じ事業が複数の支出先に出ている場合は重複する
+              // 正確な合計を出すため、元データ(allData)から関連事業を特定して集計
+              const relatedProjectIds = new Set<number>();
+
+              // sortedDataに含まれる事業を特定
+              if (groupBySpending) {
+                // まとめON: processedDataの生成過程を追う必要があるが、
+                // sortedDataからは元の事業IDが取れないため、
+                // 表示されている支出先名から逆引きする
+                const displayedSpendingNames = new Set(sortedData.map(item => item.spendingName));
+                spendingsData.forEach(spending => {
+                  if (displayedSpendingNames.has(spending.spendingName)) {
+                    spending.projects.forEach(p => relatedProjectIds.add(p.projectId));
+                  }
+                });
+              } else {
+                // まとめOFF: sortedDataの各行がそのまま事業を表す
+                sortedData.forEach(item => {
+                  // projectNameから事業を特定
+                  const project = allData.find(p =>
+                    p.projectName === item.projectName && p.ministry === item.ministry
+                  );
+                  if (project) relatedProjectIds.add(project.projectId);
+                });
+              }
+
+              // 関連事業の予算合計
+              let totalBudget = 0;
+              relatedProjectIds.forEach(projectId => {
+                const project = allData.find(p => p.projectId === projectId);
+                if (project) totalBudget += project.totalBudget;
+              });
+
+              // 支出合計は単純に合計（まとめON/OFFで既に正しく集計されている）
+              const totalSpending = sortedData.reduce((sum, item) => sum + item.totalSpendingAmount, 0);
+
+              return `予算: ${formatCurrency(totalBudget)} / 支出: ${formatCurrency(totalSpending)}`;
+            })()}
           </div>
         </div>
 
@@ -568,6 +660,65 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                         </button>
                       )}
                     </div>
+                  </div>
+                </div>
+
+                {/* 3行目: 金額範囲フィルタ */}
+                <div className="flex items-start gap-3 flex-wrap">
+                  {/* 予算範囲 */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">予算範囲</label>
+                    <input
+                      type="text"
+                      value={budgetMin}
+                      onChange={(e) => setBudgetMin(e.target.value)}
+                      placeholder="下限 (例: 1000億円)"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-500 dark:text-gray-400">〜</span>
+                    <input
+                      type="text"
+                      value={budgetMax}
+                      onChange={(e) => setBudgetMax(e.target.value)}
+                      placeholder="上限 (例: 5000億円)"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {(budgetMin || budgetMax) && (
+                      <button
+                        onClick={() => { setBudgetMin(''); setBudgetMax(''); }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 支出範囲 */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">支出範囲</label>
+                    <input
+                      type="text"
+                      value={spendingMin}
+                      onChange={(e) => setSpendingMin(e.target.value)}
+                      placeholder="下限 (例: 100億円)"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-500 dark:text-gray-400">〜</span>
+                    <input
+                      type="text"
+                      value={spendingMax}
+                      onChange={(e) => setSpendingMax(e.target.value)}
+                      placeholder="上限 (例: 500億円)"
+                      className="w-36 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {(spendingMin || spendingMax) && (
+                      <button
+                        onClick={() => { setSpendingMin(''); setSpendingMax(''); }}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
