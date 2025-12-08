@@ -183,6 +183,32 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
     return `選択中 (${selectedMinistries.length}/${availableMinistries.length})`;
   };
 
+  // 金額入力をパース（日本語単位対応）
+  const parseAmountInput = (input: string): number | null => {
+    if (!input) return null;
+
+    const trimmed = input.trim();
+
+    // 単位付き入力をパース（優先）
+    const match = trimmed.match(/^([\d.]+)\s*(兆|億|万|千)?円?$/);
+
+    if (!match) return null;
+
+    const value = parseFloat(match[1]);
+    const unit = match[2];
+
+    if (isNaN(value)) return null;
+
+    // 1円単位に変換（データは1円単位で格納されている）
+    switch (unit) {
+      case '兆': return value * 1000000000000; // 兆円 → 円
+      case '億': return value * 100000000;     // 億円 → 円
+      case '万': return value * 10000;         // 万円 → 円
+      case '千': return value * 1000;          // 千円 → 円
+      default: return value;                   // 単位なし = 1円単位
+    }
+  };
+
   // フィルタリング、支出先展開、ソート
   const sortedData = useMemo(() => {
     // 府省庁でフィルタ
@@ -337,32 +363,6 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
   const getSortIndicator = (column: SortColumn) => {
     if (sortColumn !== column) return '⇅';
     return sortDirection === 'asc' ? '↑' : '↓';
-  };
-
-  // 金額入力をパース（日本語単位対応）
-  const parseAmountInput = (input: string): number | null => {
-    if (!input) return null;
-
-    const trimmed = input.trim();
-
-    // 単位付き入力をパース（優先）
-    const match = trimmed.match(/^([\d.]+)\s*(兆|億|万|千)?円?$/);
-
-    if (!match) return null;
-
-    const value = parseFloat(match[1]);
-    const unit = match[2];
-
-    if (isNaN(value)) return null;
-
-    // 1円単位に変換（データは1円単位で格納されている）
-    switch (unit) {
-      case '兆': return value * 1000000000000; // 兆円 → 円
-      case '億': return value * 100000000;     // 億円 → 円
-      case '万': return value * 10000;         // 万円 → 円
-      case '千': return value * 1000;          // 千円 → 円
-      default: return value;                   // 単位なし = 1円単位
-    }
   };
 
   // 金額フォーマット
