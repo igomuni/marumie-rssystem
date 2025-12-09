@@ -26,7 +26,6 @@ function SankeyContent() {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
   const [drilldownLevel, setDrilldownLevel] = useState(0); // Ministry drilldown: 0: Top10, 1: Top11-20, 2: Top21-30, etc.
-  const [isInitialized, setIsInitialized] = useState(false);
 
   // Settings State (ビュー別に整理)
   // 全体ビュー
@@ -70,62 +69,72 @@ function SankeyContent() {
   const [tempSpendingProjectTopN, setTempSpendingProjectTopN] = useState(spendingProjectTopN);
   const [tempSpendingMinistryTopN, setTempSpendingMinistryTopN] = useState(spendingMinistryTopN);
 
-  // Initialize state from URL parameters on mount
+  // Sync state from URL parameters (runs on mount and whenever URL changes via browser back/forward)
   useEffect(() => {
-    if (isInitialized) return;
-
     const ministry = searchParams.get('ministry');
     const project = searchParams.get('project');
     const recipient = searchParams.get('recipient');
     const projectDrilldownLevelParam = searchParams.get('projectDrilldownLevel');
     const drilldownLevelParam = searchParams.get('drilldownLevel');
 
-    // Set drilldownLevel first (before viewMode changes trigger data fetch)
-    if (drilldownLevelParam) {
-      setDrilldownLevel(parseInt(drilldownLevelParam) || 0);
-    }
+    // Set drilldownLevel
+    setDrilldownLevel(parseInt(drilldownLevelParam || '0') || 0);
+    setProjectDrilldownLevel(parseInt(projectDrilldownLevelParam || '0') || 0);
 
     if (recipient) {
       setViewMode('spending');
       setSelectedRecipient(recipient);
+      setSelectedProject(null);
+      setSelectedMinistry(null);
     } else if (project) {
       setViewMode('project');
       setSelectedProject(project);
+      setSelectedRecipient(null);
+      setSelectedMinistry(null);
     } else if (ministry) {
       setViewMode('ministry');
       setSelectedMinistry(ministry);
-      if (projectDrilldownLevelParam) {
-        setProjectDrilldownLevel(parseInt(projectDrilldownLevelParam) || 0);
-      }
+      setSelectedProject(null);
+      setSelectedRecipient(null);
+    } else {
+      setViewMode('global');
+      setSelectedMinistry(null);
+      setSelectedProject(null);
+      setSelectedRecipient(null);
     }
+  }, [searchParams]);
 
-    setIsInitialized(true);
-  }, [searchParams, isInitialized]);
-
-  // Update URL when view state changes
-  useEffect(() => {
-    if (!isInitialized) return;
-
+  // Helper function to update URL (called from event handlers, not automatically)
+  const navigateToView = (
+    newViewMode: 'global' | 'ministry' | 'project' | 'spending',
+    options: {
+      ministry?: string | null;
+      project?: string | null;
+      recipient?: string | null;
+      projectDrilldownLevel?: number;
+      drilldownLevel?: number;
+    } = {}
+  ) => {
     const params = new URLSearchParams();
 
-    if (viewMode === 'spending' && selectedRecipient) {
-      params.set('recipient', selectedRecipient);
-    } else if (viewMode === 'project' && selectedProject) {
-      params.set('project', selectedProject);
-    } else if (viewMode === 'ministry' && selectedMinistry) {
-      params.set('ministry', selectedMinistry);
-      if (projectDrilldownLevel > 0) {
-        params.set('projectDrilldownLevel', projectDrilldownLevel.toString());
+    if (newViewMode === 'spending' && options.recipient) {
+      params.set('recipient', options.recipient);
+    } else if (newViewMode === 'project' && options.project) {
+      params.set('project', options.project);
+    } else if (newViewMode === 'ministry' && options.ministry) {
+      params.set('ministry', options.ministry);
+      if (options.projectDrilldownLevel && options.projectDrilldownLevel > 0) {
+        params.set('projectDrilldownLevel', options.projectDrilldownLevel.toString());
       }
-    } else if (viewMode === 'global') {
-      if (drilldownLevel > 0) {
-        params.set('drilldownLevel', drilldownLevel.toString());
+    } else if (newViewMode === 'global') {
+      if (options.drilldownLevel && options.drilldownLevel > 0) {
+        params.set('drilldownLevel', options.drilldownLevel.toString());
       }
     }
 
     const newUrl = params.toString() ? `/sankey?${params.toString()}` : '/sankey';
     router.push(newUrl);
-  }, [viewMode, selectedMinistry, selectedProject, selectedRecipient, projectDrilldownLevel, drilldownLevel, router, isInitialized]);
+  };
 
   // Load structured data once for breadcrumb total amounts
   useEffect(() => {
@@ -146,8 +155,6 @@ function SankeyContent() {
   }, []);
 
   useEffect(() => {
-    if (!isInitialized) return; // Wait for URL params to be initialized
-
     async function loadData() {
       setLoading(true);
       try {
@@ -187,7 +194,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [isInitialized, projectDrilldownLevel, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient, drilldownLevel]);
+  }, [projectDrilldownLevel, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient, drilldownLevel]);
 
   // スマホ判定
   useEffect(() => {
@@ -208,7 +215,7 @@ function SankeyContent() {
     if (actualNode.id === 'ministry-budget-other') {
       // Increment drilldown level to show next TopN ministries
       const newLevel = drilldownLevel + 1;
-      setDrilldownLevel(newLevel);
+      navigateToView('global', { drilldownLevel: newLevel });
       return;
     }
 
@@ -224,8 +231,7 @@ function SankeyContent() {
         });
         setIsProjectListOpen(true);
       } else if (viewMode === 'ministry') {
-        setViewMode('global');
-        setSelectedMinistry(null);
+        navigateToView('global', { drilldownLevel });
       }
       return;
     }
@@ -248,19 +254,13 @@ function SankeyContent() {
         setIsProjectListOpen(true);
       } else if (viewMode === 'project') {
         // 事業ビュー: 府省庁ビューへ遷移
-        setViewMode('ministry');
-        setSelectedMinistry(actualNode.name);
-        setProjectDrilldownLevel(0);
+        navigateToView('ministry', { ministry: actualNode.name, projectDrilldownLevel: 0 });
       } else if (viewMode === 'spending') {
         // 支出ビュー: 府省庁ビューへ遷移
-        setViewMode('ministry');
-        setSelectedMinistry(actualNode.name);
-        setProjectDrilldownLevel(0);
+        navigateToView('ministry', { ministry: actualNode.name, projectDrilldownLevel: 0 });
       } else {
         // Global View: Go to Ministry View (Standard behavior)
-        setViewMode('ministry');
-        setSelectedMinistry(actualNode.name);
-        setProjectDrilldownLevel(0);
+        navigateToView('ministry', { ministry: actualNode.name, projectDrilldownLevel: 0 });
       }
       return;
     }
@@ -270,9 +270,9 @@ function SankeyContent() {
       // Special handling for "事業(TopN以外)" and "事業(TopN以外府省庁)" aggregate nodes
       if (actualNode.name.match(/^事業\(Top\d+以外.*\)$/)) {
         if (viewMode === 'ministry') {
-          setProjectDrilldownLevel(prev => prev + 1);
+          navigateToView('ministry', { ministry: selectedMinistry, projectDrilldownLevel: projectDrilldownLevel + 1 });
         } else if (viewMode === 'spending') {
-          setProjectDrilldownLevel(prev => prev + 1);
+          navigateToView('spending', { recipient: selectedRecipient, projectDrilldownLevel: projectDrilldownLevel + 1 });
         }
         // Global view: no action needed (handled by drilldownLevel)
         return;
@@ -289,12 +289,10 @@ function SankeyContent() {
         setIsProjectListOpen(true);
       } else if (viewMode === 'spending') {
         // 支出ビュー: 事業ビューへ遷移
-        setViewMode('project');
-        setSelectedProject(actualNode.name);
+        navigateToView('project', { project: actualNode.name });
       } else {
         // Global/Ministry View: Go to Project View (Standard behavior)
-        setViewMode('project');
-        setSelectedProject(actualNode.name);
+        navigateToView('project', { project: actualNode.name });
       }
       return;
     }
@@ -303,8 +301,7 @@ function SankeyContent() {
     if (actualNode.type === 'recipient') {
       // Special handling for "その他"
       if (actualNode.name === 'その他') {
-        setViewMode('spending');
-        setSelectedRecipient('その他');
+        navigateToView('spending', { recipient: 'その他' });
         return;
       }
 
@@ -325,44 +322,26 @@ function SankeyContent() {
         setIsProjectListOpen(true);
       } else {
         // Other views: Go to Spending View (Standard behavior)
-        setViewMode('spending');
-        setSelectedRecipient(actualNode.name);
+        navigateToView('spending', { recipient: actualNode.name });
       }
       return;
     }
   };
 
   const handleReset = () => {
-    setProjectDrilldownLevel(0);
-    setViewMode('global');
-    setSelectedMinistry(null);
-    setSelectedProject(null);
-    setSelectedRecipient(null);
-    setDrilldownLevel(0);
+    navigateToView('global', { drilldownLevel: 0 });
   };
 
   const handleSelectProject = (projectName: string) => {
-    setViewMode('project');
-    setSelectedProject(projectName);
-    setSelectedMinistry(null);
-    setSelectedRecipient(null);
-    setProjectDrilldownLevel(0);
+    navigateToView('project', { project: projectName });
   };
 
   const handleSelectMinistry = (ministryName: string) => {
-    setViewMode('ministry');
-    setSelectedMinistry(ministryName);
-    setSelectedProject(null);
-    setSelectedRecipient(null);
-    setProjectDrilldownLevel(0);
+    navigateToView('ministry', { ministry: ministryName, projectDrilldownLevel: 0 });
   };
 
   const handleSelectRecipient = (recipientName: string) => {
-    setViewMode('spending');
-    setSelectedRecipient(recipientName);
-    setSelectedProject(null);
-    setSelectedMinistry(null);
-    setProjectDrilldownLevel(0);
+    navigateToView('spending', { recipient: recipientName });
   };
 
   const openSettings = () => {
@@ -557,9 +536,7 @@ function SankeyContent() {
         label: selectedMinistry,
         amount: ministryAmount,
         onClick: () => {
-          setViewMode('ministry');
-          setSelectedProject(null);
-          setSelectedRecipient(null);
+          navigateToView('ministry', { ministry: selectedMinistry, projectDrilldownLevel: 0 });
         },
       });
     }
@@ -574,8 +551,7 @@ function SankeyContent() {
         label: selectedProject,
         amount: projectAmount,
         onClick: () => {
-          setViewMode('project');
-          setSelectedRecipient(null);
+          navigateToView('project', { project: selectedProject });
         },
       });
     }
