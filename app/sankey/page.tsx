@@ -78,8 +78,8 @@ function SankeyContent() {
     const drilldownLevelParam = searchParams.get('drilldownLevel');
 
     // Set drilldownLevel
-    setDrilldownLevel(parseInt(drilldownLevelParam) || 0);
-    setProjectDrilldownLevel(parseInt(projectDrilldownLevelParam) || 0);
+    setDrilldownLevel(parseInt(drilldownLevelParam || '0') || 0);
+    setProjectDrilldownLevel(parseInt(projectDrilldownLevelParam || '0') || 0);
 
     if (recipient) {
       setViewMode('spending');
