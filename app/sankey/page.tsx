@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ResponsiveSankey } from '@nivo/sankey';
 import type { RS2024PresetData } from '@/types/preset';
 import type { RS2024StructuredData } from '@/types/structured';
-import { DEFAULT_VIEW_STATE, DEFAULT_TOPN_SETTINGS, type ViewState, type TopNSettings } from '@/types/view-state';
+import { DEFAULT_VIEW_STATE, DEFAULT_TOPN_SETTINGS, DEFAULT_DIALOG_STATES, type ViewState, type TopNSettings, type DialogStates } from '@/types/view-state';
 import ProjectListModal from '@/client/components/ProjectListModal';
 import SpendingListModal from '@/client/components/SpendingListModal';
 import SummaryDialog from '@/client/components/SummaryDialog';
@@ -27,16 +27,15 @@ function SankeyContent() {
   const [topNSettings, setTopNSettings] = useState<TopNSettings>(DEFAULT_TOPN_SETTINGS);
   const [tempTopNSettings, setTempTopNSettings] = useState<TopNSettings>(DEFAULT_TOPN_SETTINGS);
 
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
-  const [isProjectListOpen, setIsProjectListOpen] = useState(false);
+  // Dialog States (統合)
+  const [dialogStates, setDialogStates] = useState<DialogStates>(DEFAULT_DIALOG_STATES);
+
   const [projectListFilters, setProjectListFilters] = useState<{
     ministries?: string[];
     projectName?: string;
     spendingName?: string;
     groupByProject?: boolean;
   } | undefined>(undefined);
-  const [isSpendingListOpen, setIsSpendingListOpen] = useState(false);
   const [spendingListFilters, setSpendingListFilters] = useState<{
     ministries?: string[];
     projectName?: string;
@@ -193,7 +192,7 @@ function SankeyContent() {
           spendingName: '',
           groupByProject: undefined // Keep previous
         });
-        setIsProjectListOpen(true);
+        setDialogStates(prev => ({ ...prev, projectList: true }));
       } else if (viewState.mode === 'ministry') {
         navigateToView({ mode: 'global' });
       }
@@ -215,7 +214,7 @@ function SankeyContent() {
           spendingName: '',
           groupByProject: undefined // Keep previous
         });
-        setIsProjectListOpen(true);
+        setDialogStates(prev => ({ ...prev, projectList: true }));
       } else if (viewState.mode === 'project') {
         // 事業ビュー: 府省庁ビューへ遷移
         navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
@@ -250,7 +249,7 @@ function SankeyContent() {
           spendingName: '',
           groupByProject: undefined // Keep previous
         });
-        setIsProjectListOpen(true);
+        setDialogStates(prev => ({ ...prev, projectList: true }));
       } else if (viewState.mode === 'spending') {
         // 支出ビュー: 事業ビューへ遷移
         navigateToView({ mode: 'project', selectedProject: actualNode.name });
@@ -283,7 +282,7 @@ function SankeyContent() {
           spendingName: actualNode.name,
           groupByProject: false // OFF
         });
-        setIsProjectListOpen(true);
+        setDialogStates(prev => ({ ...prev, projectList: true }));
       } else {
         // Other views: Go to Spending View (Standard behavior)
         navigateToView({ mode: 'spending', selectedRecipient: actualNode.name });
@@ -310,12 +309,12 @@ function SankeyContent() {
 
   const openSettings = () => {
     setTempTopNSettings(topNSettings);
-    setIsSettingsOpen(true);
+    setDialogStates(prev => ({ ...prev, settings: true }));
   };
 
   const saveSettings = () => {
     setTopNSettings(tempTopNSettings);
-    setIsSettingsOpen(false);
+    setDialogStates(prev => ({ ...prev, settings: false }));
     // Reset drilldown level and offsets if TopN changes to avoid weird states
     if (tempTopNSettings.global.ministry !== topNSettings.global.ministry) {
       setViewState(prev => ({ ...prev, drilldownLevel: 0 }));
@@ -537,14 +536,14 @@ function SankeyContent() {
       {/* 固定ボタン */}
       <div className="fixed top-4 right-4 z-40 flex gap-2">
         <button
-          onClick={() => setIsProjectListOpen(true)}
+          onClick={() => setDialogStates(prev => ({ ...prev, projectList: true }))}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
           aria-label="事業一覧"
         >
           事業一覧
         </button>
         <button
-          onClick={() => setIsSpendingListOpen(true)}
+          onClick={() => setDialogStates(prev => ({ ...prev, spendingList: true }))}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
           aria-label="支出先一覧"
         >
@@ -577,7 +576,7 @@ function SankeyContent() {
                     {viewState.mode === 'spending' && '支出先'}
                   </div>
                   <button
-                    onClick={() => setIsSummaryOpen(true)}
+                    onClick={() => setDialogStates(prev => ({ ...prev, summary: true }))}
                     className="p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 transition-colors"
                     aria-label="概要を表示"
                   >
@@ -1178,11 +1177,11 @@ function SankeyContent() {
       </div>
 
       {/* 設定ダイアログ */}
-      {isSettingsOpen && (
+      {dialogStates.settings && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
             <button
-              onClick={() => setIsSettingsOpen(false)}
+              onClick={() => setDialogStates(prev => ({ ...prev, settings: false }))}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl leading-none"
             >
               ✕
@@ -1317,7 +1316,7 @@ function SankeyContent() {
 
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setIsSettingsOpen(false)}
+                onClick={() => setDialogStates(prev => ({ ...prev, settings: false }))}
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
               >
                 キャンセル
@@ -1335,9 +1334,9 @@ function SankeyContent() {
 
       {/* 事業一覧ダイアログ */}
       <ProjectListModal
-        isOpen={isProjectListOpen}
+        isOpen={dialogStates.projectList}
         onClose={() => {
-          setIsProjectListOpen(false);
+          setDialogStates(prev => ({ ...prev, projectList: false }));
           // モーダルを閉じたら、ノードクリックで設定されたフィルタをリセット
           setProjectListFilters({
             ministries: undefined,
@@ -1354,8 +1353,8 @@ function SankeyContent() {
 
       {/* 支出先一覧ダイアログ */}
       <SpendingListModal
-        isOpen={isSpendingListOpen}
-        onClose={() => setIsSpendingListOpen(false)}
+        isOpen={dialogStates.spendingList}
+        onClose={() => setDialogStates(prev => ({ ...prev, spendingList: false }))}
         onSelectRecipient={handleSelectRecipient}
         onSelectMinistry={handleSelectMinistry}
         onSelectProject={handleSelectProject}
@@ -1364,8 +1363,8 @@ function SankeyContent() {
 
       {/* 概要ダイアログ */}
       <SummaryDialog
-        isOpen={isSummaryOpen}
-        onClose={() => setIsSummaryOpen(false)}
+        isOpen={dialogStates.summary}
+        onClose={() => setDialogStates(prev => ({ ...prev, summary: false }))}
         metadata={metadata}
         formatCurrency={formatCurrency}
       />
