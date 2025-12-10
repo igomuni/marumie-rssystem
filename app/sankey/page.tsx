@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ResponsiveSankey } from '@nivo/sankey';
 import type { RS2024PresetData } from '@/types/preset';
 import type { RS2024StructuredData } from '@/types/structured';
+import { DEFAULT_VIEW_STATE, DEFAULT_TOPN_SETTINGS, DEFAULT_DIALOG_STATES, type ViewState, type TopNSettings, type DialogStates } from '@/types/view-state';
 import ProjectListModal from '@/client/components/ProjectListModal';
 import SpendingListModal from '@/client/components/SpendingListModal';
 import SummaryDialog from '@/client/components/SummaryDialog';
@@ -19,55 +20,28 @@ function SankeyContent() {
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Navigation State
-  const [projectDrilldownLevel, setProjectDrilldownLevel] = useState(0); // Project drilldown: 0: Top10, 1: Top11-20, etc.
-  const [viewMode, setViewMode] = useState<'global' | 'ministry' | 'project' | 'spending'>('global');
-  const [selectedMinistry, setSelectedMinistry] = useState<string | null>(null);
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
-  const [selectedRecipient, setSelectedRecipient] = useState<string | null>(null);
-  const [drilldownLevel, setDrilldownLevel] = useState(0); // Ministry drilldown: 0: Top10, 1: Top11-20, 2: Top21-30, etc.
+  // Navigation State (統合)
+  const [viewState, setViewState] = useState<ViewState>(DEFAULT_VIEW_STATE);
 
-  // Settings State (ビュー別に整理)
-  // 全体ビュー
-  const [globalMinistryTopN, setGlobalMinistryTopN] = useState(10); // 府省庁TopN
-  const [globalSpendingTopN, setGlobalSpendingTopN] = useState(10); // 支出先TopN
+  // TopN Settings State (統合)
+  const [topNSettings, setTopNSettings] = useState<TopNSettings>(DEFAULT_TOPN_SETTINGS);
+  const [tempTopNSettings, setTempTopNSettings] = useState<TopNSettings>(DEFAULT_TOPN_SETTINGS);
 
-  // 府省庁ビュー
-  const [ministryProjectTopN, setMinistryProjectTopN] = useState(10); // 事業TopN
-  const [ministrySpendingTopN, setMinistrySpendingTopN] = useState(10); // 支出先TopN
+  // Dialog States (統合)
+  const [dialogStates, setDialogStates] = useState<DialogStates>(DEFAULT_DIALOG_STATES);
 
-  // 事業ビュー
-  const [projectSpendingTopN, setProjectSpendingTopN] = useState(20); // 支出先TopN
-
-  // 支出ビュー
-  const [spendingProjectTopN, setSpendingProjectTopN] = useState(15); // 支出元事業TopN
-  const [spendingMinistryTopN, setSpendingMinistryTopN] = useState(10); // 支出元府省庁TopN
-
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
-  const [isProjectListOpen, setIsProjectListOpen] = useState(false);
   const [projectListFilters, setProjectListFilters] = useState<{
     ministries?: string[];
     projectName?: string;
     spendingName?: string;
     groupByProject?: boolean;
   } | undefined>(undefined);
-  const [isSpendingListOpen, setIsSpendingListOpen] = useState(false);
   const [spendingListFilters, setSpendingListFilters] = useState<{
     ministries?: string[];
     projectName?: string;
     spendingName?: string;
     groupBySpending?: boolean;
   } | undefined>(undefined);
-
-  // Temporary settings state for dialog
-  const [tempGlobalMinistryTopN, setTempGlobalMinistryTopN] = useState(globalMinistryTopN);
-  const [tempGlobalSpendingTopN, setTempGlobalSpendingTopN] = useState(globalSpendingTopN);
-  const [tempMinistryProjectTopN, setTempMinistryProjectTopN] = useState(ministryProjectTopN);
-  const [tempMinistrySpendingTopN, setTempMinistrySpendingTopN] = useState(ministrySpendingTopN);
-  const [tempProjectSpendingTopN, setTempProjectSpendingTopN] = useState(projectSpendingTopN);
-  const [tempSpendingProjectTopN, setTempSpendingProjectTopN] = useState(spendingProjectTopN);
-  const [tempSpendingMinistryTopN, setTempSpendingMinistryTopN] = useState(spendingMinistryTopN);
 
   // Sync state from URL parameters (runs on mount and whenever URL changes via browser back/forward)
   useEffect(() => {
@@ -77,58 +51,47 @@ function SankeyContent() {
     const projectDrilldownLevelParam = searchParams.get('projectDrilldownLevel');
     const drilldownLevelParam = searchParams.get('drilldownLevel');
 
-    // Set drilldownLevel
-    setDrilldownLevel(parseInt(drilldownLevelParam || '0') || 0);
-    setProjectDrilldownLevel(parseInt(projectDrilldownLevelParam || '0') || 0);
+    const newViewState: ViewState = {
+      mode: 'global',
+      selectedMinistry: null,
+      selectedProject: null,
+      selectedRecipient: null,
+      drilldownLevel: parseInt(drilldownLevelParam || '0') || 0,
+      projectDrilldownLevel: parseInt(projectDrilldownLevelParam || '0') || 0,
+    };
 
     if (recipient) {
-      setViewMode('spending');
-      setSelectedRecipient(recipient);
-      setSelectedProject(null);
-      setSelectedMinistry(null);
+      newViewState.mode = 'spending';
+      newViewState.selectedRecipient = recipient;
     } else if (project) {
-      setViewMode('project');
-      setSelectedProject(project);
-      setSelectedRecipient(null);
-      setSelectedMinistry(null);
+      newViewState.mode = 'project';
+      newViewState.selectedProject = project;
     } else if (ministry) {
-      setViewMode('ministry');
-      setSelectedMinistry(ministry);
-      setSelectedProject(null);
-      setSelectedRecipient(null);
-    } else {
-      setViewMode('global');
-      setSelectedMinistry(null);
-      setSelectedProject(null);
-      setSelectedRecipient(null);
+      newViewState.mode = 'ministry';
+      newViewState.selectedMinistry = ministry;
     }
+
+    setViewState(newViewState);
   }, [searchParams]);
 
   // Helper function to update URL (called from event handlers, not automatically)
-  const navigateToView = (
-    newViewMode: 'global' | 'ministry' | 'project' | 'spending',
-    options: {
-      ministry?: string | null;
-      project?: string | null;
-      recipient?: string | null;
-      projectDrilldownLevel?: number;
-      drilldownLevel?: number;
-    } = {}
-  ) => {
+  const navigateToView = (updates: Partial<ViewState>) => {
+    // 現在の状態をベースに更新を適用
+    const newState = { ...viewState, ...updates };
     const params = new URLSearchParams();
 
-    if (newViewMode === 'spending' && options.recipient) {
-      params.set('recipient', options.recipient);
-    } else if (newViewMode === 'project' && options.project) {
-      params.set('project', options.project);
-    } else if (newViewMode === 'ministry' && options.ministry) {
-      params.set('ministry', options.ministry);
-      if (options.projectDrilldownLevel && options.projectDrilldownLevel > 0) {
-        params.set('projectDrilldownLevel', options.projectDrilldownLevel.toString());
+    if (newState.mode === 'spending' && newState.selectedRecipient) {
+      params.set('recipient', newState.selectedRecipient);
+    } else if (newState.mode === 'project' && newState.selectedProject) {
+      params.set('project', newState.selectedProject);
+    } else if (newState.mode === 'ministry' && newState.selectedMinistry) {
+      params.set('ministry', newState.selectedMinistry);
+      if (newState.projectDrilldownLevel > 0) {
+        params.set('projectDrilldownLevel', newState.projectDrilldownLevel.toString());
       }
-    } else if (newViewMode === 'global') {
-      if (options.drilldownLevel && options.drilldownLevel > 0) {
-        params.set('drilldownLevel', options.drilldownLevel.toString());
+    } else if (newState.mode === 'global') {
+      if (newState.drilldownLevel > 0) {
+        params.set('drilldownLevel', newState.drilldownLevel.toString());
       }
     }
 
@@ -160,24 +123,24 @@ function SankeyContent() {
       try {
         const params = new URLSearchParams();
 
-        if (viewMode === 'global') {
-          params.set('limit', globalMinistryTopN.toString());
+        if (viewState.mode === 'global') {
+          params.set('limit', topNSettings.global.ministry.toString());
           params.set('projectLimit', '3'); // Fixed for global view to avoid clutter
-          params.set('spendingLimit', globalSpendingTopN.toString());
-          params.set('drilldownLevel', drilldownLevel.toString());
-        } else if (viewMode === 'ministry' && selectedMinistry) {
-          params.set('ministryName', selectedMinistry);
-          params.set('projectLimit', ministryProjectTopN.toString());
-          params.set('spendingLimit', ministrySpendingTopN.toString());
-          params.set('projectDrilldownLevel', projectDrilldownLevel.toString());
-        } else if (viewMode === 'project' && selectedProject) {
-          params.set('projectName', selectedProject);
-          params.set('spendingLimit', projectSpendingTopN.toString());
-        } else if (viewMode === 'spending' && selectedRecipient) {
-          params.set('recipientName', selectedRecipient);
-          params.set('projectLimit', spendingProjectTopN.toString());
-          params.set('projectDrilldownLevel', projectDrilldownLevel.toString());
-          params.set('limit', spendingMinistryTopN.toString());
+          params.set('spendingLimit', topNSettings.global.spending.toString());
+          params.set('drilldownLevel', viewState.drilldownLevel.toString());
+        } else if (viewState.mode === 'ministry' && viewState.selectedMinistry) {
+          params.set('ministryName', viewState.selectedMinistry);
+          params.set('projectLimit', topNSettings.ministry.project.toString());
+          params.set('spendingLimit', topNSettings.ministry.spending.toString());
+          params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
+        } else if (viewState.mode === 'project' && viewState.selectedProject) {
+          params.set('projectName', viewState.selectedProject);
+          params.set('spendingLimit', topNSettings.project.spending.toString());
+        } else if (viewState.mode === 'spending' && viewState.selectedRecipient) {
+          params.set('recipientName', viewState.selectedRecipient);
+          params.set('projectLimit', topNSettings.spending.project.toString());
+          params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
+          params.set('limit', topNSettings.spending.ministry.toString());
         }
 
         const response = await fetch(`/api/sankey?${params.toString()}`);
@@ -194,7 +157,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [projectDrilldownLevel, globalMinistryTopN, globalSpendingTopN, ministryProjectTopN, ministrySpendingTopN, projectSpendingTopN, spendingProjectTopN, spendingMinistryTopN, viewMode, selectedMinistry, selectedProject, selectedRecipient, drilldownLevel]);
+  }, [viewState, topNSettings]);
 
   // スマホ判定
   useEffect(() => {
@@ -214,14 +177,14 @@ function SankeyContent() {
     // Handle "Other Ministries" drill-down
     if (actualNode.id === 'ministry-budget-other') {
       // Increment drilldown level to show next TopN ministries
-      const newLevel = drilldownLevel + 1;
-      navigateToView('global', { drilldownLevel: newLevel });
+      const newLevel = viewState.drilldownLevel + 1;
+      navigateToView({ mode: 'global', drilldownLevel: newLevel });
       return;
     }
 
     // Handle "Total Budget" (予算総計) - but NOT in Project View where it represents a ministry
-    if (actualNode.id === 'total-budget' && viewMode !== 'project') {
-      if (viewMode === 'global') {
+    if (actualNode.id === 'total-budget' && viewState.mode !== 'project') {
+      if (viewState.mode === 'global') {
         // 全体ビュー: 事業一覧を開く（府省庁:すべて、支出先まとめ:維持）
         setProjectListFilters({
           ministries: undefined, // All
@@ -229,9 +192,9 @@ function SankeyContent() {
           spendingName: '',
           groupByProject: undefined // Keep previous
         });
-        setIsProjectListOpen(true);
-      } else if (viewMode === 'ministry') {
-        navigateToView('global', { drilldownLevel });
+        setDialogStates(prev => ({ ...prev, projectList: true }));
+      } else if (viewState.mode === 'ministry') {
+        navigateToView({ mode: 'global' });
       }
       return;
     }
@@ -240,10 +203,10 @@ function SankeyContent() {
     // In Project View, the 'total-budget' node displays the ministry name and should be clickable
     const isMinistryNode = actualNode.type === 'ministry-budget' &&
       actualNode.id !== 'ministry-budget-other' &&
-      (actualNode.id !== 'total-budget' || viewMode === 'project');
+      (actualNode.id !== 'total-budget' || viewState.mode === 'project');
 
     if (isMinistryNode) {
-      if (viewMode === 'ministry') {
+      if (viewState.mode === 'ministry') {
         // 府省庁ビュー: 事業一覧を開く（府省庁:選択中、支出先まとめ:維持）
         setProjectListFilters({
           ministries: [actualNode.name],
@@ -251,16 +214,16 @@ function SankeyContent() {
           spendingName: '',
           groupByProject: undefined // Keep previous
         });
-        setIsProjectListOpen(true);
-      } else if (viewMode === 'project') {
+        setDialogStates(prev => ({ ...prev, projectList: true }));
+      } else if (viewState.mode === 'project') {
         // 事業ビュー: 府省庁ビューへ遷移
-        navigateToView('ministry', { ministry: actualNode.name, projectDrilldownLevel: 0 });
-      } else if (viewMode === 'spending') {
+        navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
+      } else if (viewState.mode === 'spending') {
         // 支出ビュー: 府省庁ビューへ遷移
-        navigateToView('ministry', { ministry: actualNode.name, projectDrilldownLevel: 0 });
+        navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
       } else {
         // Global View: Go to Ministry View (Standard behavior)
-        navigateToView('ministry', { ministry: actualNode.name, projectDrilldownLevel: 0 });
+        navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
       }
       return;
     }
@@ -269,16 +232,16 @@ function SankeyContent() {
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
       // Special handling for "事業(TopN以外)" and "事業(TopN以外府省庁)" aggregate nodes
       if (actualNode.name.match(/^事業\(Top\d+以外.*\)$/)) {
-        if (viewMode === 'ministry') {
-          navigateToView('ministry', { ministry: selectedMinistry, projectDrilldownLevel: projectDrilldownLevel + 1 });
-        } else if (viewMode === 'spending') {
-          navigateToView('spending', { recipient: selectedRecipient, projectDrilldownLevel: projectDrilldownLevel + 1 });
+        if (viewState.mode === 'ministry') {
+          navigateToView({ projectDrilldownLevel: viewState.projectDrilldownLevel + 1 });
+        } else if (viewState.mode === 'spending') {
+          navigateToView({ projectDrilldownLevel: viewState.projectDrilldownLevel + 1 });
         }
         // Global view: no action needed (handled by drilldownLevel)
         return;
       }
 
-      if (viewMode === 'project') {
+      if (viewState.mode === 'project') {
         // 事業ビュー: 事業一覧を開く（府省庁:すべて、事業名:選択中、支出先まとめ:維持）
         setProjectListFilters({
           ministries: undefined, // All (or should it be restricted to current ministry if selected? User said "府省庁フィルタすべて")
@@ -286,13 +249,13 @@ function SankeyContent() {
           spendingName: '',
           groupByProject: undefined // Keep previous
         });
-        setIsProjectListOpen(true);
-      } else if (viewMode === 'spending') {
+        setDialogStates(prev => ({ ...prev, projectList: true }));
+      } else if (viewState.mode === 'spending') {
         // 支出ビュー: 事業ビューへ遷移
-        navigateToView('project', { project: actualNode.name });
+        navigateToView({ mode: 'project', selectedProject: actualNode.name });
       } else {
         // Global/Ministry View: Go to Project View (Standard behavior)
-        navigateToView('project', { project: actualNode.name });
+        navigateToView({ mode: 'project', selectedProject: actualNode.name });
       }
       return;
     }
@@ -301,7 +264,7 @@ function SankeyContent() {
     if (actualNode.type === 'recipient') {
       // Special handling for "その他"
       if (actualNode.name === 'その他') {
-        navigateToView('spending', { recipient: 'その他' });
+        navigateToView({ mode: 'spending', selectedRecipient: 'その他' });
         return;
       }
 
@@ -311,7 +274,7 @@ function SankeyContent() {
         return;
       }
 
-      if (viewMode === 'spending') {
+      if (viewState.mode === 'spending') {
         // 支出ビュー: 事業一覧を開く（府省庁:すべて、支出先:選択中、支出先まとめ:OFF）
         setProjectListFilters({
           ministries: undefined, // All
@@ -319,57 +282,45 @@ function SankeyContent() {
           spendingName: actualNode.name,
           groupByProject: false // OFF
         });
-        setIsProjectListOpen(true);
+        setDialogStates(prev => ({ ...prev, projectList: true }));
       } else {
         // Other views: Go to Spending View (Standard behavior)
-        navigateToView('spending', { recipient: actualNode.name });
+        navigateToView({ mode: 'spending', selectedRecipient: actualNode.name });
       }
       return;
     }
   };
 
   const handleReset = () => {
-    navigateToView('global', { drilldownLevel: 0 });
+    navigateToView({ mode: 'global', drilldownLevel: 0 });
   };
 
   const handleSelectProject = (projectName: string) => {
-    navigateToView('project', { project: projectName });
+    navigateToView({ mode: 'project', selectedProject: projectName });
   };
 
   const handleSelectMinistry = (ministryName: string) => {
-    navigateToView('ministry', { ministry: ministryName, projectDrilldownLevel: 0 });
+    navigateToView({ mode: 'ministry', selectedMinistry: ministryName, projectDrilldownLevel: 0 });
   };
 
   const handleSelectRecipient = (recipientName: string) => {
-    navigateToView('spending', { recipient: recipientName });
+    navigateToView({ mode: 'spending', selectedRecipient: recipientName });
   };
 
   const openSettings = () => {
-    setTempGlobalMinistryTopN(globalMinistryTopN);
-    setTempGlobalSpendingTopN(globalSpendingTopN);
-    setTempMinistryProjectTopN(ministryProjectTopN);
-    setTempMinistrySpendingTopN(ministrySpendingTopN);
-    setTempProjectSpendingTopN(projectSpendingTopN);
-    setTempSpendingProjectTopN(spendingProjectTopN);
-    setTempSpendingMinistryTopN(spendingMinistryTopN);
-    setIsSettingsOpen(true);
+    setTempTopNSettings(topNSettings);
+    setDialogStates(prev => ({ ...prev, settings: true }));
   };
 
   const saveSettings = () => {
-    setGlobalMinistryTopN(tempGlobalMinistryTopN);
-    setGlobalSpendingTopN(tempGlobalSpendingTopN);
-    setMinistryProjectTopN(tempMinistryProjectTopN);
-    setMinistrySpendingTopN(tempMinistrySpendingTopN);
-    setProjectSpendingTopN(tempProjectSpendingTopN);
-    setSpendingProjectTopN(tempSpendingProjectTopN);
-    setSpendingMinistryTopN(tempSpendingMinistryTopN);
-    setIsSettingsOpen(false);
+    setTopNSettings(tempTopNSettings);
+    setDialogStates(prev => ({ ...prev, settings: false }));
     // Reset drilldown level and offsets if TopN changes to avoid weird states
-    if (tempGlobalMinistryTopN !== globalMinistryTopN) {
-      setDrilldownLevel(0);
+    if (tempTopNSettings.global.ministry !== topNSettings.global.ministry) {
+      setViewState(prev => ({ ...prev, drilldownLevel: 0 }));
     }
-    if (tempMinistryProjectTopN !== ministryProjectTopN) {
-      setProjectDrilldownLevel(0);
+    if (tempTopNSettings.ministry.project !== topNSettings.ministry.project) {
+      setViewState(prev => ({ ...prev, projectDrilldownLevel: 0 }));
     }
   };
 
@@ -470,28 +421,28 @@ function SankeyContent() {
   const getViewAmounts = () => {
     if (!structuredData) return { budget: 0, spending: 0 };
 
-    if (viewMode === 'global') {
+    if (viewState.mode === 'global') {
       return {
         budget: structuredData.metadata.totalBudgetAmount,
         spending: structuredData.metadata.totalSpendingAmount,
       };
-    } else if (viewMode === 'ministry' && selectedMinistry) {
-      const ministry = structuredData.budgetTree.ministries.find(m => m.name === selectedMinistry);
+    } else if (viewState.mode === 'ministry' && viewState.selectedMinistry) {
+      const ministry = structuredData.budgetTree.ministries.find(m => m.name === viewState.selectedMinistry);
       const ministryBudget = ministry?.totalBudget || 0;
 
       // Calculate total spending for this ministry
-      const ministryProjects = structuredData.budgets.filter(b => b.ministry === selectedMinistry);
+      const ministryProjects = structuredData.budgets.filter(b => b.ministry === viewState.selectedMinistry);
       const ministrySpending = ministryProjects.reduce((sum, p) => sum + p.totalSpendingAmount, 0);
 
       return { budget: ministryBudget, spending: ministrySpending };
-    } else if (viewMode === 'project' && selectedProject) {
-      const project = structuredData.budgets.find(b => b.projectName === selectedProject);
+    } else if (viewState.mode === 'project' && viewState.selectedProject) {
+      const project = structuredData.budgets.find(b => b.projectName === viewState.selectedProject);
       return {
         budget: project?.totalBudget || 0,
         spending: project?.totalSpendingAmount || 0,
       };
-    } else if (viewMode === 'spending' && selectedRecipient) {
-      const recipient = structuredData.spendings.find(s => s.spendingName === selectedRecipient);
+    } else if (viewState.mode === 'spending' && viewState.selectedRecipient) {
+      const recipient = structuredData.spendings.find(s => s.spendingName === viewState.selectedRecipient);
 
       // For spending view, calculate total budget from all projects that pay this recipient
       let totalBudget = 0;
@@ -527,43 +478,47 @@ function SankeyContent() {
     });
 
     // Ministry level
-    if (selectedMinistry && structuredData) {
+    if (viewState.selectedMinistry && structuredData) {
       // Get total budget for selected ministry from budgetTree
-      const ministry = structuredData.budgetTree.ministries.find(m => m.name === selectedMinistry);
+      const ministry = structuredData.budgetTree.ministries.find(m => m.name === viewState.selectedMinistry);
       const ministryAmount = ministry?.totalBudget || metadata.summary.selectedBudget;
 
       breadcrumbs.push({
-        label: selectedMinistry,
+        label: viewState.selectedMinistry,
         amount: ministryAmount,
         onClick: () => {
-          navigateToView('ministry', { ministry: selectedMinistry, projectDrilldownLevel: 0 });
+          if (viewState.selectedMinistry) {
+            navigateToView({ mode: 'ministry', selectedMinistry: viewState.selectedMinistry, projectDrilldownLevel: 0 });
+          }
         },
       });
     }
 
     // Project level
-    if (selectedProject && structuredData) {
+    if (viewState.selectedProject && structuredData) {
       // Get total budget for selected project from budgets array
-      const project = structuredData.budgets.find(b => b.projectName === selectedProject);
+      const project = structuredData.budgets.find(b => b.projectName === viewState.selectedProject);
       const projectAmount = project?.totalBudget;
 
       breadcrumbs.push({
-        label: selectedProject,
+        label: viewState.selectedProject,
         amount: projectAmount,
         onClick: () => {
-          navigateToView('project', { project: selectedProject });
+          if (viewState.selectedProject) {
+            navigateToView({ mode: 'project', selectedProject: viewState.selectedProject });
+          }
         },
       });
     }
 
     // Recipient level
-    if (selectedRecipient && structuredData) {
+    if (viewState.selectedRecipient && structuredData) {
       // Get total spending amount for selected recipient from spendings array
-      const recipient = structuredData.spendings.find(s => s.spendingName === selectedRecipient);
+      const recipient = structuredData.spendings.find(s => s.spendingName === viewState.selectedRecipient);
       const recipientAmount = recipient?.totalSpendingAmount;
 
       breadcrumbs.push({
-        label: selectedRecipient,
+        label: viewState.selectedRecipient,
         amount: recipientAmount,
         onClick: () => {
           // Already at this level, no action
@@ -581,14 +536,14 @@ function SankeyContent() {
       {/* 固定ボタン */}
       <div className="fixed top-4 right-4 z-40 flex gap-2">
         <button
-          onClick={() => setIsProjectListOpen(true)}
+          onClick={() => setDialogStates(prev => ({ ...prev, projectList: true }))}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
           aria-label="事業一覧"
         >
           事業一覧
         </button>
         <button
-          onClick={() => setIsSpendingListOpen(true)}
+          onClick={() => setDialogStates(prev => ({ ...prev, spendingList: true }))}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
           aria-label="支出先一覧"
         >
@@ -615,13 +570,13 @@ function SankeyContent() {
                 {/* 1行目: ビュー名 + 概要ボタン */}
                 <div className="flex items-center gap-1 mb-1">
                   <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    {viewMode === 'global' && '全体'}
-                    {viewMode === 'ministry' && '府省庁'}
-                    {viewMode === 'project' && '事業'}
-                    {viewMode === 'spending' && '支出先'}
+                    {viewState.mode === 'global' && '全体'}
+                    {viewState.mode === 'ministry' && '府省庁'}
+                    {viewState.mode === 'project' && '事業'}
+                    {viewState.mode === 'spending' && '支出先'}
                   </div>
                   <button
-                    onClick={() => setIsSummaryOpen(true)}
+                    onClick={() => setDialogStates(prev => ({ ...prev, summary: true }))}
                     className="p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 transition-colors"
                     aria-label="概要を表示"
                   >
@@ -633,10 +588,10 @@ function SankeyContent() {
 
                 {/* 2行目: 名称または年度 */}
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {viewMode === 'global' && structuredData && `予算年度${structuredData.metadata.fiscalYear}年`}
-                  {viewMode === 'ministry' && selectedMinistry}
-                  {viewMode === 'project' && selectedProject}
-                  {viewMode === 'spending' && selectedRecipient}
+                  {viewState.mode === 'global' && structuredData && `予算年度${structuredData.metadata.fiscalYear}年`}
+                  {viewState.mode === 'ministry' && viewState.selectedMinistry}
+                  {viewState.mode === 'project' && viewState.selectedProject}
+                  {viewState.mode === 'spending' && viewState.selectedRecipient}
                 </h1>
 
                 {/* 3行目: 予算→支出 */}
@@ -794,8 +749,8 @@ function SankeyContent() {
                       let displayName = name;
 
                       // Dynamic label for "事業(TopN以外)" based on drilldown level
-                      if (name.match(/^事業\(Top\d+以外.*\)$/) && viewMode === 'ministry') {
-                        const currentEnd = (projectDrilldownLevel + 1) * ministryProjectTopN;
+                      if (name.match(/^事業\(Top\d+以外.*\)$/) && viewState.mode === 'ministry') {
+                        const currentEnd = (viewState.projectDrilldownLevel + 1) * topNSettings.ministry.project;
                         displayName = `事業(Top${currentEnd}以外)`;
                       } else if (nodeType === 'project-budget') {
                         displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
@@ -816,7 +771,7 @@ function SankeyContent() {
                       // Clickable indication
                       const nodeName = actualNode?.name || '';
                       const isProjectOtherNode = nodeName.match(/^事業\(Top\d+以外.*\)$/);
-                      const isGlobalView = viewMode === 'global';
+                      const isGlobalView = viewState.mode === 'global';
 
                       const isClickable =
                         node.id === 'ministry-budget-other' ||
@@ -1074,19 +1029,19 @@ function SankeyContent() {
           </div>
 
           {/* Return to TopN Selector */}
-          {viewMode === 'global' && (
+          {viewState.mode === 'global' && (
             <div className="mb-4 flex items-center gap-2">
               <label htmlFor="topn-selector" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 府省庁Top
               </label>
               <button
                 onClick={() => {
-                  if (drilldownLevel > 0) {
-                    const newLevel = drilldownLevel - 1;
-                    setDrilldownLevel(newLevel);
+                  if (viewState.drilldownLevel > 0) {
+                    const newLevel = viewState.drilldownLevel - 1;
+                    setViewState(prev => ({ ...prev, drilldownLevel: newLevel }));
                   }
                 }}
-                disabled={drilldownLevel === 0}
+                disabled={viewState.drilldownLevel === 0}
                 className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
                 aria-label="前のTopNへ"
               >
@@ -1094,20 +1049,20 @@ function SankeyContent() {
               </button>
               <select
                 id="topn-selector"
-                value={drilldownLevel}
+                value={viewState.drilldownLevel}
                 onChange={(e) => {
                   const newLevel = parseInt(e.target.value);
-                  setDrilldownLevel(newLevel);
+                  setViewState(prev => ({ ...prev, drilldownLevel: newLevel }));
                 }}
                 className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
                 {(() => {
                   const totalMinistries = metadata.summary.totalMinistries || 0;
-                  const maxLevel = Math.max(0, Math.ceil(totalMinistries / globalMinistryTopN) - 1);
+                  const maxLevel = Math.max(0, Math.ceil(totalMinistries / topNSettings.global.ministry) - 1);
                   return Array.from({ length: maxLevel + 1 }, (_, i) => {
                     const level = i;
-                    const startNum = level * globalMinistryTopN + 1;
-                    const endNum = Math.min((level + 1) * globalMinistryTopN, totalMinistries);
+                    const startNum = level * topNSettings.global.ministry + 1;
+                    const endNum = Math.min((level + 1) * topNSettings.global.ministry, totalMinistries);
                     return (
                       <option key={level} value={level}>
                         {startNum}-{endNum}
@@ -1119,16 +1074,16 @@ function SankeyContent() {
               <button
                 onClick={() => {
                   const totalMinistries = metadata.summary.totalMinistries || 0;
-                  const maxLevel = Math.max(0, Math.ceil(totalMinistries / globalMinistryTopN) - 1);
-                  if (drilldownLevel < maxLevel) {
-                    const newLevel = drilldownLevel + 1;
-                    setDrilldownLevel(newLevel);
+                  const maxLevel = Math.max(0, Math.ceil(totalMinistries / topNSettings.global.ministry) - 1);
+                  if (viewState.drilldownLevel < maxLevel) {
+                    const newLevel = viewState.drilldownLevel + 1;
+                    setViewState(prev => ({ ...prev, drilldownLevel: newLevel }));
                   }
                 }}
                 disabled={(() => {
                   const totalMinistries = metadata.summary.totalMinistries || 0;
-                  const maxLevel = Math.max(0, Math.ceil(totalMinistries / globalMinistryTopN) - 1);
-                  return drilldownLevel >= maxLevel;
+                  const maxLevel = Math.max(0, Math.ceil(totalMinistries / topNSettings.global.ministry) - 1);
+                  return viewState.drilldownLevel >= maxLevel;
                 })()}
                 className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
                 aria-label="次のTopNへ"
@@ -1140,18 +1095,18 @@ function SankeyContent() {
           )}
 
           {/* Ministry View: Project TopN Selector */}
-          {viewMode === 'ministry' && metadata.summary.ministryTotalProjects && metadata.summary.ministryTotalProjects > ministryProjectTopN && (
+          {viewState.mode === 'ministry' && metadata.summary.ministryTotalProjects && metadata.summary.ministryTotalProjects > topNSettings.ministry.project && (
             <div className="mb-4 flex items-center gap-2">
               <label htmlFor="project-topn-selector" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 事業Top
               </label>
               <button
                 onClick={() => {
-                  if (projectDrilldownLevel > 0) {
-                    setProjectDrilldownLevel(prev => prev - 1);
+                  if (viewState.projectDrilldownLevel > 0) {
+                    setViewState(prev => ({ ...prev, projectDrilldownLevel: prev.projectDrilldownLevel - 1 }));
                   }
                 }}
-                disabled={projectDrilldownLevel === 0}
+                disabled={viewState.projectDrilldownLevel === 0}
                 className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
                 aria-label="前のTopNへ"
               >
@@ -1159,20 +1114,20 @@ function SankeyContent() {
               </button>
               <select
                 id="project-topn-selector"
-                value={projectDrilldownLevel}
+                value={viewState.projectDrilldownLevel}
                 onChange={(e) => {
                   const newLevel = parseInt(e.target.value);
-                  setProjectDrilldownLevel(newLevel);
+                  setViewState(prev => ({ ...prev, projectDrilldownLevel: newLevel }));
                 }}
                 className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
                 {(() => {
                   const totalProjects = metadata.summary.ministryTotalProjects || 0;
-                  const maxLevel = Math.max(0, Math.ceil(totalProjects / ministryProjectTopN) - 1);
+                  const maxLevel = Math.max(0, Math.ceil(totalProjects / topNSettings.ministry.project) - 1);
                   return Array.from({ length: maxLevel + 1 }, (_, i) => {
                     const level = i;
-                    const startNum = level * ministryProjectTopN + 1;
-                    const endNum = Math.min((level + 1) * ministryProjectTopN, totalProjects);
+                    const startNum = level * topNSettings.ministry.project + 1;
+                    const endNum = Math.min((level + 1) * topNSettings.ministry.project, totalProjects);
                     return (
                       <option key={level} value={level}>
                         {startNum}-{endNum}
@@ -1184,15 +1139,15 @@ function SankeyContent() {
               <button
                 onClick={() => {
                   const totalProjects = metadata.summary.ministryTotalProjects || 0;
-                  const maxLevel = Math.max(0, Math.ceil(totalProjects / ministryProjectTopN) - 1);
-                  if (projectDrilldownLevel < maxLevel) {
-                    setProjectDrilldownLevel(prev => prev + 1);
+                  const maxLevel = Math.max(0, Math.ceil(totalProjects / topNSettings.ministry.project) - 1);
+                  if (viewState.projectDrilldownLevel < maxLevel) {
+                    setViewState(prev => ({ ...prev, projectDrilldownLevel: prev.projectDrilldownLevel + 1 }));
                   }
                 }}
                 disabled={(() => {
                   const totalProjects = metadata.summary.ministryTotalProjects || 0;
-                  const maxLevel = Math.max(0, Math.ceil(totalProjects / ministryProjectTopN) - 1);
-                  return projectDrilldownLevel >= maxLevel;
+                  const maxLevel = Math.max(0, Math.ceil(totalProjects / topNSettings.ministry.project) - 1);
+                  return viewState.projectDrilldownLevel >= maxLevel;
                 })()}
                 className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
                 aria-label="次のTopNへ"
@@ -1222,11 +1177,11 @@ function SankeyContent() {
       </div>
 
       {/* 設定ダイアログ */}
-      {isSettingsOpen && (
+      {dialogStates.settings && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
             <button
-              onClick={() => setIsSettingsOpen(false)}
+              onClick={() => setDialogStates(prev => ({ ...prev, settings: false }))}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl leading-none"
             >
               ✕
@@ -1245,8 +1200,8 @@ function SankeyContent() {
                     type="number"
                     min="1"
                     max="30"
-                    value={tempGlobalMinistryTopN}
-                    onChange={(e) => setTempGlobalMinistryTopN(parseInt(e.target.value) || 1)}
+                    value={tempTopNSettings.global.ministry}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, global: { ...prev.global, ministry: parseInt(e.target.value) || 1 } }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
@@ -1259,8 +1214,8 @@ function SankeyContent() {
                     type="number"
                     min="1"
                     max="50"
-                    value={tempGlobalSpendingTopN}
-                    onChange={(e) => setTempGlobalSpendingTopN(parseInt(e.target.value) || 1)}
+                    value={tempTopNSettings.global.spending}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, global: { ...prev.global, spending: parseInt(e.target.value) || 1 } }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
@@ -1280,8 +1235,8 @@ function SankeyContent() {
                     type="number"
                     min="1"
                     max="30"
-                    value={tempMinistryProjectTopN}
-                    onChange={(e) => setTempMinistryProjectTopN(parseInt(e.target.value) || 1)}
+                    value={tempTopNSettings.ministry.project}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, ministry: { ...prev.ministry, project: parseInt(e.target.value) || 1 } }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
@@ -1294,8 +1249,8 @@ function SankeyContent() {
                     type="number"
                     min="1"
                     max="30"
-                    value={tempMinistrySpendingTopN}
-                    onChange={(e) => setTempMinistrySpendingTopN(parseInt(e.target.value) || 1)}
+                    value={tempTopNSettings.ministry.spending}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, ministry: { ...prev.ministry, spending: parseInt(e.target.value) || 1 } }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
@@ -1315,8 +1270,8 @@ function SankeyContent() {
                     type="number"
                     min="1"
                     max="50"
-                    value={tempProjectSpendingTopN}
-                    onChange={(e) => setTempProjectSpendingTopN(parseInt(e.target.value) || 1)}
+                    value={tempTopNSettings.project.spending}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, project: { ...prev.project, spending: parseInt(e.target.value) || 1 } }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 20</p>
@@ -1336,8 +1291,8 @@ function SankeyContent() {
                     type="number"
                     min="1"
                     max="50"
-                    value={tempSpendingProjectTopN}
-                    onChange={(e) => setTempSpendingProjectTopN(parseInt(e.target.value) || 1)}
+                    value={tempTopNSettings.spending.project}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, spending: { ...prev.spending, project: parseInt(e.target.value) || 1 } }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 15</p>
@@ -1350,8 +1305,8 @@ function SankeyContent() {
                     type="number"
                     min="1"
                     max="30"
-                    value={tempSpendingMinistryTopN}
-                    onChange={(e) => setTempSpendingMinistryTopN(parseInt(e.target.value) || 1)}
+                    value={tempTopNSettings.spending.ministry}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, spending: { ...prev.spending, ministry: parseInt(e.target.value) || 1 } }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
@@ -1361,7 +1316,7 @@ function SankeyContent() {
 
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setIsSettingsOpen(false)}
+                onClick={() => setDialogStates(prev => ({ ...prev, settings: false }))}
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
               >
                 キャンセル
@@ -1379,9 +1334,9 @@ function SankeyContent() {
 
       {/* 事業一覧ダイアログ */}
       <ProjectListModal
-        isOpen={isProjectListOpen}
+        isOpen={dialogStates.projectList}
         onClose={() => {
-          setIsProjectListOpen(false);
+          setDialogStates(prev => ({ ...prev, projectList: false }));
           // モーダルを閉じたら、ノードクリックで設定されたフィルタをリセット
           setProjectListFilters({
             ministries: undefined,
@@ -1398,8 +1353,8 @@ function SankeyContent() {
 
       {/* 支出先一覧ダイアログ */}
       <SpendingListModal
-        isOpen={isSpendingListOpen}
-        onClose={() => setIsSpendingListOpen(false)}
+        isOpen={dialogStates.spendingList}
+        onClose={() => setDialogStates(prev => ({ ...prev, spendingList: false }))}
         onSelectRecipient={handleSelectRecipient}
         onSelectMinistry={handleSelectMinistry}
         onSelectProject={handleSelectProject}
@@ -1408,8 +1363,8 @@ function SankeyContent() {
 
       {/* 概要ダイアログ */}
       <SummaryDialog
-        isOpen={isSummaryOpen}
-        onClose={() => setIsSummaryOpen(false)}
+        isOpen={dialogStates.summary}
+        onClose={() => setDialogStates(prev => ({ ...prev, summary: false }))}
         metadata={metadata}
         formatCurrency={formatCurrency}
       />
