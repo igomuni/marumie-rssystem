@@ -10,9 +10,8 @@
     "lint": "next lint",
     "normalize": "python3 scripts/normalize_csv.py",
     "generate-structured": "tsx scripts/generate-structured-json.ts",
-    "generate-preset": "tsx scripts/generate-preset-json.ts",
     "compress-data": "gzip -9 -k public/data/rs2024-structured.json",
-    "setup": "npm install && npm run normalize && npm run generate-structured && npm run generate-preset"
+    "setup": "npm install && npm run normalize && npm run generate-structured"
   },
   "dependencies": {
     "@nivo/sankey": "^0.87.0",

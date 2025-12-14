@@ -171,21 +171,9 @@ npm run generate-structured
 - 府省庁・事業・支出先の階層構造を保持
 - 予算情報（当初予算、補正予算、繰越等）を統合
 - 支出情報と関連付け
-- ファイルサイズ: 約110MB
+- ファイルサイズ: 約46MB
 
-### 5. プリセットTop3サンキー図データの生成
-
-```bash
-npm run generate-preset
-```
-
-このコマンドは `public/data/rs2024-preset-top3.json` を生成します。
-- Top3再帰選択によるサンキー図データ
-- ノード数: 45、リンク数: 61
-- カバー率: 約50%（73.58兆円 / 146.63兆円）
-- ファイルサイズ: 約29KB
-
-### 6. 開発サーバーの起動
+### 5. 開発サーバーの起動
 
 ```bash
 npm run dev
@@ -207,7 +195,6 @@ npm run setup
 1. `npm install` - 依存パッケージのインストール
 2. `npm run normalize` - CSVファイルの正規化
 3. `npm run generate-structured` - 構造化JSONの生成
-4. `npm run generate-preset` - プリセットTop3サンキー図データの生成
 
 **注意**: 事前に `data/download/RS_2024/` にZIPファイルを配置し、Python 3とneologdnをインストールしてください。
 
@@ -237,7 +224,6 @@ marumie-rssystem/
 │   ├── normalize_csv.py         # CSV正規化（Python + neologdn）
 │   ├── csv-reader.ts            # CSV読み込み（UTF-8/Shift_JIS対応）
 │   ├── generate-structured-json.ts  # 構造化JSON生成
-│   ├── generate-preset-json.ts      # プリセットTop3サンキー図生成
 │   └── decompress-data.sh       # ビルド時データ展開スクリプト
 ├── types/                       # TypeScript型定義
 │   ├── structured.ts            # 構造化データ型定義
@@ -250,7 +236,6 @@ marumie-rssystem/
 ├── public/data/                 # 生成JSONファイル
 │   ├── rs2024-structured.json.gz # 構造化データ（gzip圧縮、5.9MB）※Gitに含む
 │   ├── rs2024-structured.json   # 構造化データ（展開後、46MB）※.gitignore
-│   └── rs2024-preset-top3.json  # Top3サンキー図データ（約29KB）
 └── docs/                        # 仕様書・設計文書
 ```
 
@@ -258,10 +243,8 @@ marumie-rssystem/
 
 | コマンド | 説明 |
 |---------|------|
-| `npm run setup` | 初回セットアップ（install + normalize + generate-structured + generate-preset） |
 | `npm run normalize` | CSVファイルを正規化（Python 3.x + neologdn必須） |
 | `npm run generate-structured` | 構造化JSONファイル生成（rs2024-structured.json） |
-| `npm run generate-preset` | プリセットTop3サンキー図JSON生成（rs2024-preset-top3.json） |
 | `npm run compress-data` | 構造化JSONをgzip圧縮（rs2024-structured.json.gz） |
 | `npm run dev` | 開発サーバー起動（Turbopack有効、ポート3002） |
 | `npm run build` | プロダクションビルド（自動的にprebuildでデータ展開） |
@@ -369,7 +352,6 @@ git push
 → 以下のコマンドを実行してJSONファイルを生成してください:
 ```bash
 npm run generate-structured
-npm run generate-preset
 ```
 
 ## データ統計（2024年度）
@@ -390,14 +372,15 @@ npm run generate-preset
 - 「その他」ノード: 約26兆円（全事業からの支出先名「その他」への支出）
 - 「支出先(TopN以外)」ノード: 約51兆円（TopN以外 + 事業(TopN以外) + 府省庁(TopN以外)）
 
-## 仕様書
+## 仕様書・ドキュメント
 
-詳細な仕様は `docs/` ディレクトリを参照してください:
+詳細な仕様は `docs/` ディレクトリおよび `CLAUDE.md` を参照してください:
 
-- [データ処理仕様](docs/20251118_1530_データ処理仕様.md)
-- [型定義仕様](docs/20251118_1443_型定義仕様.md)
-- [設計文書](docs/20251118_新リポジトリ設計_RS2024サンキー図.md)
-- [支出ビュー支出元(TopN以外)実装案](docs/20251127_支出ビュー支出元TopN以外実装案.md) - 今後の実装予定
+- [CLAUDE.md](CLAUDE.md) - システム全体のアーキテクチャと技術詳細
+- [構造化JSON仕様書](docs/構造化JSON仕様書.md) - rs2024-structured.jsonのデータ構造
+- [事業概要CSV仕様](docs/20251214_1627_事業概要CSV仕様.md) - 事業詳細情報のCSV仕様
+- [型定義仕様](docs/20251118_1443_型定義仕様.md) - TypeScript型定義
+- [設計文書](docs/20251118_新リポジトリ設計_RS2024サンキー図.md) - 初期設計ドキュメント
 
 ## データソース
 
