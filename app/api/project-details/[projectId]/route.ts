@@ -20,10 +20,10 @@ function getProjectDetails(): ProjectDetailsData {
   if (cachedProjectDetails === null) {
     const filePath = join(process.cwd(), 'public', 'data', 'rs2024-project-details.json');
     const fileContent = readFileSync(filePath, 'utf-8');
-    cachedProjectDetails = JSON.parse(fileContent);
+    cachedProjectDetails = JSON.parse(fileContent) as ProjectDetailsData;
     console.log('[API] Project details data loaded into cache');
   }
-  return cachedProjectDetails;
+  return cachedProjectDetails as ProjectDetailsData;
 }
 
 /**
