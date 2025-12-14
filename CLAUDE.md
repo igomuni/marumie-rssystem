@@ -18,7 +18,6 @@ npm run lint                     # ESLint check
 ```bash
 npm run normalize                # Python CSV normalization (requires: pip3 install neologdn)
 npm run generate-structured      # Generate rs2024-structured.json (46MB)
-npm run generate-preset          # Generate rs2024-preset-top3.json (32KB)
 npm run compress-data            # Gzip structured JSON for Git (5.9MB)
 ```
 
@@ -27,7 +26,6 @@ npm run compress-data            # Gzip structured JSON for Git (5.9MB)
 - **Normalized CSV**: `data/year_2024/` (auto-generated, .gitignore)
 - **Structured JSON**: `public/data/rs2024-structured.json` (46MB, .gitignore)
 - **Compressed JSON**: `public/data/rs2024-structured.json.gz` (5.9MB, in Git)
-- **Preset JSON**: `public/data/rs2024-preset-top3.json` (32KB, in Git)
 
 ### Critical Path Aliases
 - Import alias `@/*` maps to repository root (e.g., `@/types/structured`)
@@ -63,7 +61,6 @@ This is a **Next.js-based web application** that visualizes Japan's 2024 fiscal 
 - Total Budget: 146.63 trillion yen
 - Total Projects: 15,111
 - Total Spending Recipients: 25,892
-- Coverage Rate (Top3 view): 50.18% (73.58 trillion yen)
 
 ---
 
@@ -72,7 +69,7 @@ This is a **Next.js-based web application** that visualizes Japan's 2024 fiscal 
 ### High-Level Flow
 
 ```
-CSV (RS System) 
+CSV (RS System)
   ↓
 [normalize_csv.py] - Text normalization using neologdn
   ↓
@@ -81,10 +78,6 @@ Normalized CSV (data/year_2024/)
 [generate-structured-json.ts] - Full hierarchical data structure
   ↓
 rs2024-structured.json (46MB) → rs2024-structured.json.gz (5.9MB)
-  ↓
-[generate-preset-json.ts] - Pre-generated Top3 Sankey data
-  ↓
-rs2024-preset-top3.json (32KB) - Static preset
   ↓
 [API Route: /api/sankey] - Dynamic Sankey generation
   ↓
@@ -130,21 +123,10 @@ Key processing:
 4. Create hierarchical budget tree for efficient navigation
 5. Generate statistics for top entities
 
-#### Phase 3: Preset JSON Generation (generate-preset-json.ts)
-**Input**: rs2024-structured.json
-**Output**: rs2024-preset-top3.json (32KB)
-
-Implements recursive Top3 selection:
-1. Select Top3 ministries (by budget)
-2. For each ministry, select Top3 projects (by budget)
-3. For each project, select Top3 spending recipients (by amount)
-4. Aggregate all remaining items as "Other" nodes
-5. Build Sankey nodes and links with proper structure
-
-#### Phase 4: Build-Time Data Decompression (decompress-data.sh)
+#### Phase 3: Build-Time Data Decompression (decompress-data.sh)
 **Trigger**: `npm run build`
 **Action**: Automatically decompresses `.gz` file to JSON for runtime use
-**Why**: Reduces Git repository size from 110MB to 5.9MB while keeping data available at runtime
+**Why**: Reduces Git repository size from 46MB to 5.9MB while keeping data available at runtime
 
 ---
 
@@ -186,7 +168,6 @@ marumie-rssystem/
 │   ├── normalize_csv.py           # CSV text normalization (Python)
 │   ├── csv-reader.ts              # CSV parsing utility
 │   ├── generate-structured-json.ts # Create full JSON from CSV
-│   ├── generate-preset-json.ts    # Create Top3 preset
 │   └── decompress-data.sh         # Build-time .gz decompression
 │
 ├── data/                          # Raw & processed data (.gitignore)
@@ -196,7 +177,6 @@ marumie-rssystem/
 ├── public/data/                   # Generated JSON files
 │   ├── rs2024-structured.json.gz  # Gzipped (5.9MB, in Git)
 │   ├── rs2024-structured.json     # Uncompressed (46MB, .gitignore)
-│   └── rs2024-preset-top3.json    # Pre-generated Top3 (32KB)
 │
 └── docs/                          # Documentation
     ├── 20251118_型定義仕様.md      # Type definitions spec
@@ -561,7 +541,6 @@ Update Sankey diagram
 npm install                    # Install dependencies
 npm run normalize             # CSV normalization (Python 3 + neologdn)
 npm run generate-structured   # Generate full structured JSON
-npm run generate-preset       # Generate Top3 preset
 
 # Development
 npm run dev                   # Start with Turbopack (localhost:3002)
@@ -615,7 +594,7 @@ git push                     # Triggers automatic Vercel build
 4. Deploy to Edge Network
 
 **File Size Optimization**:
-- Original structured JSON: ~110MB
+- Original structured JSON: ~46MB
 - Gzipped: ~5.9MB (94% reduction)
 - Storage in Git: Only .gz files
 - Runtime: Decompressed during build
@@ -700,7 +679,6 @@ Write rs2024-structured.json (46MB)
 5. Aggregate totalBudget up the tree
 ```
 
-### Preset JSON Generation (generate-preset-json.ts)
 
 **Recursive Top3 Selection**:
 ```
@@ -738,12 +716,11 @@ Write rs2024-structured.json (46MB)
 ### Architecture Choices
 
 1. **Static vs Dynamic Data**
-   - Static preset (rs2024-preset-top3.json) for fast initial load
    - Dynamic API (/api/sankey) for flexible exploration
    - In-memory caching of large JSON to avoid repeated disk reads
 
 2. **Data Decompression Strategy**
-   - Gzip compression reduces repo size (110MB → 5.9MB)
+   - Gzip compression reduces repo size (46MB → 5.9MB)
    - Decompression at build time (prebuild hook)
    - Allows full data availability without Git size issues
 
@@ -780,7 +757,6 @@ Write rs2024-structured.json (46MB)
 |------|-------|---------|
 | app/sankey/page.tsx | 859 | Main UI, state management, interactions |
 | app/lib/sankey-generator.ts | 936 | Dynamic Sankey generation algorithm |
-| scripts/generate-preset-json.ts | 560+ | Top3 preset generation |
 | scripts/generate-structured-json.ts | 600+ | Full structured JSON from CSV |
 | scripts/normalize_csv.py | 200+ | CSV text normalization |
 
@@ -798,7 +774,6 @@ Write rs2024-structured.json (46MB)
 |------|------|---------|
 | public/data/rs2024-structured.json.gz | 5.9MB | Compressed full data (in Git) |
 | public/data/rs2024-structured.json | 46MB | Uncompressed full data (build output) |
-| public/data/rs2024-preset-top3.json | 32KB | Pre-generated Top3 preset |
 
 ---
 
@@ -810,7 +785,6 @@ Write rs2024-structured.json (46MB)
 # Update source data
 npm run normalize                 # After RS System CSV update
 npm run generate-structured       # Regenerate full structure
-npm run generate-preset           # Regenerate Top3 preset
 npm run compress-data             # Gzip for Git storage
 git add public/data/rs2024-structured.json.gz
 git commit -m "Update data"
@@ -860,7 +834,6 @@ npm run dev                       # Start dev server
 
 **Data Structure Sizes**:
 - Full structured JSON: 46MB (15,111 projects + 25,892 recipients)
-- Preset Top3: 32KB
 - Sankey diagram (Max): ~2000 nodes, ~3000 links
 
 **Optimization Opportunities**:
