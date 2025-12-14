@@ -9,6 +9,7 @@ import { DEFAULT_VIEW_STATE, DEFAULT_TOPN_SETTINGS, DEFAULT_DIALOG_STATES, type 
 import ProjectListModal from '@/client/components/ProjectListModal';
 import SpendingListModal from '@/client/components/SpendingListModal';
 import SummaryDialog from '@/client/components/SummaryDialog';
+import ProjectDetailPanel from '@/client/components/ProjectDetailPanel';
 
 function SankeyContent() {
   const router = useRouter();
@@ -598,6 +599,17 @@ function SankeyContent() {
                 <div className="text-lg font-semibold text-gray-700">
                   予算{formatCurrency(viewAmounts.budget)}→支出{formatCurrency(viewAmounts.spending)}
                 </div>
+
+                {/* 事業詳細パネル（事業ビューのみ） */}
+                {viewState.mode === 'project' && viewState.selectedProject && structuredData && (() => {
+                  const project = structuredData.budgets.find(b => b.projectName === viewState.selectedProject);
+                  return project ? (
+                    <ProjectDetailPanel
+                      projectId={project.projectId}
+                      projectName={project.projectName}
+                    />
+                  ) : null;
+                })()}
               </div>
             </div>
           </div>
