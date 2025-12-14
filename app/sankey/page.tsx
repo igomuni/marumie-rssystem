@@ -326,10 +326,10 @@ function SankeyContent() {
 
   if (loading && !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">データ読み込み中...</p>
+          <p className="text-gray-600">データ読み込み中...</p>
         </div>
       </div>
     );
@@ -337,9 +337,9 @@ function SankeyContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-red-600 dark:text-red-400">エラー: {error}</p>
+          <p className="text-red-600">エラー: {error}</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -532,7 +532,7 @@ function SankeyContent() {
   const breadcrumbs = data ? getBreadcrumbs() : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* 固定ボタン */}
       <div className="fixed top-4 right-4 z-40 flex gap-2">
         <button
@@ -551,7 +551,7 @@ function SankeyContent() {
         </button>
         <button
           onClick={openSettings}
-          className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors shadow-lg"
+          className="p-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors shadow-lg"
           aria-label="設定"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -563,13 +563,13 @@ function SankeyContent() {
 
       <div className="max-w-7xl mx-auto px-8">
         {/* ヘッダー */}
-        <div className="mb-3 top-0 bg-gray-50 dark:bg-gray-900 z-30 py-2 border-b border-gray-200 dark:border-gray-800 shadow-sm">
+        <div className="mb-3 top-0 bg-gray-50 z-30 py-2 border-b border-gray-200 shadow-sm">
           <div>
             <div className="flex items-start justify-between">
               <div>
                 {/* 1行目: ビュー名 + 概要ボタン */}
                 <div className="flex items-center gap-1 mb-1">
-                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <div className="text-sm font-medium text-gray-500">
                     {viewState.mode === 'global' && '全体'}
                     {viewState.mode === 'ministry' && '府省庁'}
                     {viewState.mode === 'project' && '事業'}
@@ -577,7 +577,7 @@ function SankeyContent() {
                   </div>
                   <button
                     onClick={() => setDialogStates(prev => ({ ...prev, summary: true }))}
-                    className="p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 transition-colors"
+                    className="p-1 rounded-full bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
                     aria-label="概要を表示"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-3">
@@ -587,7 +587,7 @@ function SankeyContent() {
                 </div>
 
                 {/* 2行目: 名称または年度 */}
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">
                   {viewState.mode === 'global' && structuredData && `予算年度${structuredData.metadata.fiscalYear}年`}
                   {viewState.mode === 'ministry' && viewState.selectedMinistry}
                   {viewState.mode === 'project' && viewState.selectedProject}
@@ -595,7 +595,7 @@ function SankeyContent() {
                 </h1>
 
                 {/* 3行目: 予算→支出 */}
-                <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                <div className="text-lg font-semibold text-gray-700">
                   予算{formatCurrency(viewAmounts.budget)}→支出{formatCurrency(viewAmounts.spending)}
                 </div>
               </div>
@@ -611,7 +611,7 @@ function SankeyContent() {
                   onClick={crumb.onClick}
                   className={`px-4 py-3 rounded-lg shadow transition-colors ${index === breadcrumbs.length - 1
                     ? 'bg-blue-600 text-white cursor-default'
-                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    : 'bg-white text-gray-900 hover:bg-gray-100'
                     }`}
                   disabled={index === breadcrumbs.length - 1}
                 >
@@ -634,31 +634,31 @@ function SankeyContent() {
         </div>
 
         {/* サンキー図 */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 relative">
+        <div className="bg-white rounded-lg shadow-lg p-6 relative">
           {/* ノード色の凡例 */}
           <div className="flex items-center gap-6 mb-4 text-sm">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#10b981]"></span>
-              <span className="text-gray-700 dark:text-gray-300">予算ノード</span>
+              <span className="text-gray-700">予算ノード</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#ef4444]"></span>
-              <span className="text-gray-700 dark:text-gray-300">支出ノード</span>
+              <span className="text-gray-700">支出ノード</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#6b7280]"></span>
-              <span className="text-gray-700 dark:text-gray-300">その他</span>
+              <span className="text-gray-700">その他</span>
             </div>
           </div>
 
           {loading && (
-            <div className="absolute inset-0 bg-white/50 dark:bg-gray-800/50 flex items-center justify-center z-10">
+            <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
           )}
 
           {isMobile ? (
-            <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+            <div className="mb-4 text-sm text-gray-600">
               📱 横スクロールできます
             </div>
           ) : null}
@@ -667,7 +667,7 @@ function SankeyContent() {
             className={isMobile ? 'overflow-x-auto' : ''}
             style={isMobile ? { WebkitOverflowScrolling: 'touch' } : {}}
           >
-            <div style={{ height: '800px', minWidth: isMobile ? '1200px' : 'auto' }}>
+            <div style={{ height: '800px', minWidth: isMobile ? '1200px' : 'auto', backgroundColor: 'white' }}>
               <ResponsiveSankey
                 data={sankey}
                 margin={isMobile
@@ -715,6 +715,17 @@ function SankeyContent() {
                 labelOrientation="horizontal"
                 labelPadding={16}
                 labelTextColor="#1f2937"
+                theme={{
+                  text: {
+                    fill: '#1f2937',
+                  },
+                  tooltip: {
+                    container: {
+                      background: 'white',
+                      color: '#1f2937',
+                    },
+                  },
+                }}
                 onClick={handleNodeClick}
                 layers={[
                   'links',
@@ -782,7 +793,7 @@ function SankeyContent() {
 
                       const cursorStyle = isClickable ? 'pointer' : 'default';
                       const fontWeight = isClickable ? 'bold' : 500;
-                      const color = isClickable ? '#2563eb' : '#1f2937'; // Blue if clickable
+                      const color = isClickable ? '#2563eb' : '#1f2937'; // Blue if clickable (ダークモードでも同じ色)
 
                       return (
                         <g key={node.id} style={{ cursor: cursorStyle }}>
@@ -846,15 +857,15 @@ function SankeyContent() {
                   }
 
                   return (
-                    <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded shadow-lg border border-gray-200 dark:border-gray-700">
-                      <div className="font-bold text-gray-900 dark:text-gray-100 mb-1">
+                    <div className="bg-white px-3 py-2 rounded shadow-lg border border-gray-200">
+                      <div className="font-bold text-gray-900 mb-1">
                         {title}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm text-gray-600">
                         金額: {value}
                       </div>
                       {details && (
-                        <div className="text-xs text-gray-500 dark:text-gray-500 mt-1 space-y-0.5">
+                        <div className="text-xs text-gray-500 mt-1 space-y-0.5">
                           {/* 府省庁ノード */}
                           {details.projectCount !== undefined && (
                             <div>選択事業数: {details.projectCount}</div>
@@ -957,30 +968,30 @@ function SankeyContent() {
                   }
 
                   return (
-                    <div className="bg-white dark:bg-gray-800 px-4 py-3 rounded shadow-lg border border-gray-200 dark:border-gray-700 max-w-md">
+                    <div className="bg-white px-4 py-3 rounded shadow-lg border border-gray-200 max-w-md">
                       {/* タイトル */}
-                      <div className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2 border-b border-gray-200 dark:border-gray-600 pb-2">
+                      <div className="text-sm font-bold text-gray-900 mb-2 border-b border-gray-200 pb-2">
                         {title}
                       </div>
 
                       {/* 送信元 */}
                       <div className="mb-2">
                         {isProjectBudgetToSpending && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400">{sourceLabel}</div>
+                          <div className="text-xs text-gray-500">{sourceLabel}</div>
                         )}
                         {!isProjectBudgetToSpending && (
-                          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          <div className="text-sm font-semibold text-gray-900 truncate">
                             {sourceName}
                           </div>
                         )}
-                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <div className="text-sm font-medium text-gray-700">
                           {sourceValue}
                         </div>
                       </div>
 
                       {/* 矢印と流れる金額 */}
                       <div className="text-center my-2">
-                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                        <div className="text-sm font-bold text-blue-600">
                           ↓
                         </div>
                       </div>
@@ -988,33 +999,33 @@ function SankeyContent() {
                       {/* 送信先 */}
                       <div className="mb-2">
                         {isProjectBudgetToSpending && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400">{targetLabel}</div>
+                          <div className="text-xs text-gray-500">{targetLabel}</div>
                         )}
                         {!isProjectBudgetToSpending && (
-                          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                          <div className="text-sm font-semibold text-gray-900 truncate">
                             {targetName}
                           </div>
                         )}
-                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <div className="text-sm font-medium text-gray-700">
                           {targetValue}
                         </div>
                       </div>
 
                       {/* リンク詳細情報 */}
                       {actualLink?.details && (actualLink.details.contractMethod || actualLink.details.blockName) && (
-                        <div className="mt-3 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <div className="mt-3 pt-2 border-t border-gray-200">
                           {actualLink.details.contractMethod && (
                             <div className="mb-1">
-                              <span className="text-xs text-gray-500 dark:text-gray-400">契約方式: </span>
-                              <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                              <span className="text-xs text-gray-500">契約方式: </span>
+                              <span className="text-xs font-medium text-gray-900">
                                 {actualLink.details.contractMethod}
                               </span>
                             </div>
                           )}
                           {actualLink.details.blockName && (
                             <div>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">支出ブロック: </span>
-                              <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
+                              <span className="text-xs text-gray-500">支出ブロック: </span>
+                              <span className="text-xs font-medium text-gray-900">
                                 {actualLink.details.blockName}
                               </span>
                             </div>
@@ -1031,7 +1042,7 @@ function SankeyContent() {
           {/* Return to TopN Selector */}
           {viewState.mode === 'global' && (
             <div className="mb-4 flex items-center gap-2">
-              <label htmlFor="topn-selector" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="topn-selector" className="text-sm font-medium text-gray-700">
                 府省庁Top
               </label>
               <button
@@ -1042,7 +1053,7 @@ function SankeyContent() {
                   }
                 }}
                 disabled={viewState.drilldownLevel === 0}
-                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
+                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="前のTopNへ"
               >
                 ▲
@@ -1054,7 +1065,7 @@ function SankeyContent() {
                   const newLevel = parseInt(e.target.value);
                   setViewState(prev => ({ ...prev, drilldownLevel: newLevel }));
                 }}
-                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 {(() => {
                   const totalMinistries = metadata.summary.totalMinistries || 0;
@@ -1085,19 +1096,19 @@ function SankeyContent() {
                   const maxLevel = Math.max(0, Math.ceil(totalMinistries / topNSettings.global.ministry) - 1);
                   return viewState.drilldownLevel >= maxLevel;
                 })()}
-                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
+                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="次のTopNへ"
               >
                 ▼
               </button>
-              <span className="text-sm text-gray-700 dark:text-gray-300">へ</span>
+              <span className="text-sm text-gray-700">へ</span>
             </div>
           )}
 
           {/* Ministry View: Project TopN Selector */}
           {viewState.mode === 'ministry' && metadata.summary.ministryTotalProjects && metadata.summary.ministryTotalProjects > topNSettings.ministry.project && (
             <div className="mb-4 flex items-center gap-2">
-              <label htmlFor="project-topn-selector" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="project-topn-selector" className="text-sm font-medium text-gray-700">
                 事業Top
               </label>
               <button
@@ -1107,7 +1118,7 @@ function SankeyContent() {
                   }
                 }}
                 disabled={viewState.projectDrilldownLevel === 0}
-                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
+                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="前のTopNへ"
               >
                 ▲
@@ -1119,7 +1130,7 @@ function SankeyContent() {
                   const newLevel = parseInt(e.target.value);
                   setViewState(prev => ({ ...prev, projectDrilldownLevel: newLevel }));
                 }}
-                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 {(() => {
                   const totalProjects = metadata.summary.ministryTotalProjects || 0;
@@ -1149,18 +1160,18 @@ function SankeyContent() {
                   const maxLevel = Math.max(0, Math.ceil(totalProjects / topNSettings.ministry.project) - 1);
                   return viewState.projectDrilldownLevel >= maxLevel;
                 })()}
-                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
+                className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="次のTopNへ"
               >
                 ▼
               </button>
-              <span className="text-sm text-gray-700 dark:text-gray-300">へ</span>
+              <span className="text-sm text-gray-700">へ</span>
             </div>
           )}
         </div>
 
         {/* フッター */}
-        <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-8 text-center text-sm text-gray-500">
           <p>生成日時: {new Date(metadata.generatedAt).toLocaleString('ja-JP')}</p>
           <p className="mt-2">
             データソース:{' '}
@@ -1179,21 +1190,21 @@ function SankeyContent() {
       {/* 設定ダイアログ */}
       {dialogStates.settings && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
             <button
               onClick={() => setDialogStates(prev => ({ ...prev, settings: false }))}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl leading-none"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl leading-none"
             >
               ✕
             </button>
-            <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100">TopN表示設定</h2>
+            <h2 className="text-xl font-bold mb-6 text-gray-900">TopN表示設定</h2>
 
             {/* 全体ビュー */}
-            <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">全体ビュー</h3>
+            <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">全体ビュー</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     府省庁TopN
                   </label>
                   <input
@@ -1202,12 +1213,12 @@ function SankeyContent() {
                     max="30"
                     value={tempTopNSettings.global.ministry}
                     onChange={(e) => setTempTopNSettings(prev => ({ ...prev, global: { ...prev.global, ministry: parseInt(e.target.value) || 1 } }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     支出先TopN
                   </label>
                   <input
@@ -1216,7 +1227,7 @@ function SankeyContent() {
                     max="50"
                     value={tempTopNSettings.global.spending}
                     onChange={(e) => setTempTopNSettings(prev => ({ ...prev, global: { ...prev.global, spending: parseInt(e.target.value) || 1 } }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
                 </div>
@@ -1224,11 +1235,11 @@ function SankeyContent() {
             </div>
 
             {/* 府省庁ビュー */}
-            <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">府省庁ビュー</h3>
+            <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">府省庁ビュー</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     事業TopN
                   </label>
                   <input
@@ -1237,12 +1248,12 @@ function SankeyContent() {
                     max="30"
                     value={tempTopNSettings.ministry.project}
                     onChange={(e) => setTempTopNSettings(prev => ({ ...prev, ministry: { ...prev.ministry, project: parseInt(e.target.value) || 1 } }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     支出先TopN
                   </label>
                   <input
@@ -1251,7 +1262,7 @@ function SankeyContent() {
                     max="30"
                     value={tempTopNSettings.ministry.spending}
                     onChange={(e) => setTempTopNSettings(prev => ({ ...prev, ministry: { ...prev.ministry, spending: parseInt(e.target.value) || 1 } }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
                 </div>
@@ -1259,11 +1270,11 @@ function SankeyContent() {
             </div>
 
             {/* 事業ビュー */}
-            <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">事業ビュー</h3>
+            <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">事業ビュー</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     支出先TopN
                   </label>
                   <input
@@ -1272,7 +1283,7 @@ function SankeyContent() {
                     max="50"
                     value={tempTopNSettings.project.spending}
                     onChange={(e) => setTempTopNSettings(prev => ({ ...prev, project: { ...prev.project, spending: parseInt(e.target.value) || 1 } }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 20</p>
                 </div>
@@ -1280,11 +1291,11 @@ function SankeyContent() {
             </div>
 
             {/* 支出ビュー */}
-            <div className="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-              <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">支出ビュー</h3>
+            <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">支出ビュー</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     支出元事業TopN
                   </label>
                   <input
@@ -1293,12 +1304,12 @@ function SankeyContent() {
                     max="50"
                     value={tempTopNSettings.spending.project}
                     onChange={(e) => setTempTopNSettings(prev => ({ ...prev, spending: { ...prev.spending, project: parseInt(e.target.value) || 1 } }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 15</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     支出元府省庁TopN
                   </label>
                   <input
@@ -1307,7 +1318,7 @@ function SankeyContent() {
                     max="30"
                     value={tempTopNSettings.spending.ministry}
                     onChange={(e) => setTempTopNSettings(prev => ({ ...prev, spending: { ...prev.spending, ministry: parseInt(e.target.value) || 1 } }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
                 </div>
@@ -1317,7 +1328,7 @@ function SankeyContent() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setDialogStates(prev => ({ ...prev, settings: false }))}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
               >
                 キャンセル
               </button>
@@ -1375,10 +1386,10 @@ function SankeyContent() {
 export default function SankeyPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">読み込み中...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <p className="mt-4 text-gray-600">読み込み中...</p>
         </div>
       </div>
     }>
