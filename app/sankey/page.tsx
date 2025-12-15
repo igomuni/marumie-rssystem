@@ -775,12 +775,15 @@ function SankeyContent() {
                       if (name.match(/^事業\(Top\d+以外.*\)$/) && viewState.mode === 'ministry') {
                         const currentEnd = (viewState.projectDrilldownLevel + 1) * topNSettings.ministry.project;
                         displayName = `事業(Top${currentEnd}以外)`;
-                      } else if (nodeType === 'project-budget') {
-                        displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
-                      } else if (nodeType === 'project-spending') {
-                        displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
-                      } else if (name.length > 10) {
-                        displayName = name.substring(0, 10) + '...';
+                      } else if (!name.includes('\n')) {
+                        // 改行を含まないラベルのみ文字数で省略
+                        if (nodeType === 'project-budget') {
+                          displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
+                        } else if (nodeType === 'project-spending') {
+                          displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
+                        } else if (name.length > 10) {
+                          displayName = name.substring(0, 10) + '...';
+                        }
                       }
 
                       // Position based on node type: budget nodes on left, spending nodes on right
