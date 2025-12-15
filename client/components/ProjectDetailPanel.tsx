@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import type { ProjectDetail } from '@/types/project-details';
 
 interface ProjectDetailPanelProps {
@@ -17,8 +17,6 @@ export default function ProjectDetailPanel({ projectId, projectName }: ProjectDe
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [purposePreview, setPurposePreview] = useState('');
-  const purposeContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchDetail() {
@@ -48,72 +46,6 @@ export default function ProjectDetailPanel({ projectId, projectName }: ProjectDe
 
     fetchDetail();
   }, [projectId]);
-
-  // コンテナの幅に基づいて目的の文章を動的に切り詰める
-  useEffect(() => {
-    if (!detail || !purposeContainerRef.current || isExpanded) return;
-
-    const calculateTruncatedText = () => {
-      const container = purposeContainerRef.current;
-      if (!container) return;
-
-      const containerWidth = container.offsetWidth;
-      if (containerWidth === 0) return;
-
-      // Canvasを使ってテキストの幅を計算
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      if (!context) return;
-
-      // コンテナのフォントスタイルを取得
-      const computedStyle = window.getComputedStyle(container);
-      context.font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
-
-      const fullText = detail.purpose;
-      const ellipsis = '...';
-      const ellipsisWidth = context.measureText(ellipsis).width;
-      const maxWidth = containerWidth - ellipsisWidth;
-
-      // 二分探索で最適な文字数を見つける
-      let left = 0;
-      let right = fullText.length;
-      let result = fullText;
-
-      while (left < right) {
-        const mid = Math.floor((left + right + 1) / 2);
-        const testText = fullText.substring(0, mid);
-        const textWidth = context.measureText(testText).width;
-
-        if (textWidth <= maxWidth) {
-          left = mid;
-          result = testText;
-        } else {
-          right = mid - 1;
-        }
-      }
-
-      // 結果が全文と同じなら切り詰めない
-      if (result.length >= fullText.length) {
-        setPurposePreview(fullText);
-      } else {
-        setPurposePreview(result + ellipsis);
-      }
-    };
-
-    // 初回計算
-    calculateTruncatedText();
-
-    // ResizeObserverでコンテナのリサイズを監視
-    const resizeObserver = new ResizeObserver(() => {
-      calculateTruncatedText();
-    });
-
-    resizeObserver.observe(purposeContainerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [detail, isExpanded]);
 
   if (loading) {
     return (
@@ -181,14 +113,10 @@ export default function ProjectDetailPanel({ projectId, projectName }: ProjectDe
 
           {/* 事業の目的（プレビュー） */}
           {detail.purpose && (
-            <div className="flex items-start gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2">
               <span className="font-medium text-gray-900 shrink-0">目的:</span>
-              <p
-                ref={purposeContainerRef}
-                className="text-gray-700 leading-relaxed flex-1"
-                style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}
-              >
-                {purposePreview || detail.purpose}
+              <p className="text-gray-700 flex-1 min-w-0 line-clamp-1">
+                {detail.purpose}
               </p>
             </div>
           )}
