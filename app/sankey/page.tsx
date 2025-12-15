@@ -232,7 +232,7 @@ function SankeyContent() {
     // Handle Project nodes
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
       // Special handling for "事業(TopN以外)" and "事業(TopN以外府省庁)" aggregate nodes
-      if (actualNode.name.match(/^事業\(Top\d+以外.*\)$/)) {
+      if (actualNode.name.match(/^事業\(Top\d+以外.*\)$/) || actualNode.name.match(/^事業\n\(Top\d+以外.*\)$/)) {
         if (viewState.mode === 'ministry') {
           navigateToView({ projectDrilldownLevel: viewState.projectDrilldownLevel + 1 });
         } else if (viewState.mode === 'spending') {
