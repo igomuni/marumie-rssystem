@@ -110,6 +110,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
       projectLimit,
       spendingLimit,
       drilldownLevel,
+      projectDrilldownLevel,
     }
   );
 
@@ -717,6 +718,7 @@ function buildSankeyData(
     projectLimit: number;
     spendingLimit: number;
     drilldownLevel?: number;
+    projectDrilldownLevel?: number;
   }
 ): { nodes: SankeyNode[]; links: SankeyLink[] } {
   const {
@@ -732,7 +734,7 @@ function buildSankeyData(
     otherMinistriesSpendingInSpendingView,
   } = selection;
 
-  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit, drilldownLevel = 0 } = options;
+  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit, drilldownLevel = 0, projectDrilldownLevel = 0 } = options;
 
   const nodes: SankeyNode[] = [];
   const links: SankeyLink[] = [];
@@ -1107,9 +1109,16 @@ function buildSankeyData(
         ministryValue = 0.001;
       }
 
+      // In Ministry View with project drilldown, add "(TopN以外)" label
+      let ministryNodeName = ministry.name;
+      if (targetMinistryName && projectDrilldownLevel > 0) {
+        const currentTopN = projectLimit * projectDrilldownLevel;
+        ministryNodeName = `${ministry.name}\n(Top${currentTopN}以外)`;
+      }
+
       standardMinistryNodes.push({
         id: `ministry-budget-${ministry.id}`,
-        name: `${ministry.name}`,
+        name: ministryNodeName,
         type: 'ministry-budget',
         value: ministryValue,
         originalId: ministry.id,

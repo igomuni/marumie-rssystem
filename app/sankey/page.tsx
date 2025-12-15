@@ -772,9 +772,9 @@ function SankeyContent() {
                       let displayName = name;
 
                       // Dynamic label for "事業(TopN以外)" based on drilldown level
-                      if (name.match(/^事業\(Top\d+以外.*\)$/) && viewState.mode === 'ministry') {
+                      if ((name.match(/^事業\(Top\d+以外.*\)$/) || name.match(/^事業\n\(Top\d+以外.*\)$/)) && viewState.mode === 'ministry') {
                         const currentEnd = (viewState.projectDrilldownLevel + 1) * topNSettings.ministry.project;
-                        displayName = `事業(Top${currentEnd}以外)`;
+                        displayName = `事業\n(Top${currentEnd}以外)`;
                       } else if (!name.includes('\n')) {
                         // 改行を含まないラベルのみ文字数で省略
                         if (nodeType === 'project-budget') {
