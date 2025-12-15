@@ -951,7 +951,7 @@ function buildSankeyData(
       // Column 0: 府省庁予算(TopN以外)ノード
       nodes.push({
         id: 'ministry-budget-other-spending-view',
-        name: `府省庁(Top${ministryLimit}以外)`,
+        name: `府省庁\n(Top${ministryLimit}以外)`,
         type: 'ministry-budget',
         value: otherMinistriesSpending,
         details: {
@@ -1037,9 +1037,9 @@ function buildSankeyData(
       // Project View: use ministry name
       nodeName = topMinistries[0].name;
     } else {
-      // Global View: use "予算総計" or "予算総計(Top10以外)" based on drilldownLevel
+      // Global View: use "予算総計" or "予算総計\n(Top10以外)" based on drilldownLevel
       const currentDrilldownLevel = drilldownLevel ?? 0;
-      nodeName = currentDrilldownLevel === 0 ? '予算総計' : `予算総計(Top${ministryLimit * currentDrilldownLevel}以外)`;
+      nodeName = currentDrilldownLevel === 0 ? '予算総計' : `予算総計\n(Top${ministryLimit * currentDrilldownLevel}以外)`;
     }
 
     nodes.push({
@@ -1129,7 +1129,7 @@ function buildSankeyData(
       const currentTopN = ministryLimit * (drilldownLevel + 1);
       standardMinistryNodes.push({
         id: 'ministry-budget-other',
-        name: `府省庁(Top${currentTopN}以外)`,
+        name: `府省庁\n(Top${currentTopN}以外)`,
         type: 'ministry-budget',
         value: otherMinistriesBudget,
         details: {
@@ -1733,7 +1733,7 @@ function buildSankeyData(
   if (totalOtherRecipientAmount > 0) {
     recipientNodes.push({
       id: 'recipient-other-aggregated',
-      name: `支出先(Top${spendingLimit}以外)`,
+      name: `支出先\n(Top${spendingLimit}以外)`,
       type: 'recipient',
       value: totalOtherRecipientAmount,
       details: {
