@@ -840,7 +840,19 @@ function SankeyContent() {
                             }}
                             onClick={() => isClickable && handleNodeClick(node)}
                           >
-                            {displayName}
+                            {displayName.includes('\n') ? (
+                              displayName.split('\n').map((line, i) => (
+                                <tspan
+                                  key={i}
+                                  x={x}
+                                  dy={i === 0 ? '-0.5em' : '1.2em'}
+                                >
+                                  {line}
+                                </tspan>
+                              ))
+                            ) : (
+                              displayName
+                            )}
                           </text>
                         </g>
                       );
