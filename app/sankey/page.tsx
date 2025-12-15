@@ -207,10 +207,13 @@ function SankeyContent() {
       (actualNode.id !== 'total-budget' || viewState.mode === 'project');
 
     if (isMinistryNode) {
+      // Remove "(TopN以外)" suffix from ministry name if present
+      const ministryName = actualNode.name.replace(/\n?\(Top\d+以外\)$/, '');
+
       if (viewState.mode === 'ministry') {
         // 府省庁ビュー: 事業一覧を開く（府省庁:選択中、支出先まとめ:維持）
         setProjectListFilters({
-          ministries: [actualNode.name],
+          ministries: [ministryName],
           projectName: '',
           spendingName: '',
           groupByProject: undefined // Keep previous
@@ -218,13 +221,13 @@ function SankeyContent() {
         setDialogStates(prev => ({ ...prev, projectList: true }));
       } else if (viewState.mode === 'project') {
         // 事業ビュー: 府省庁ビューへ遷移
-        navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
+        navigateToView({ mode: 'ministry', selectedMinistry: ministryName, projectDrilldownLevel: 0 });
       } else if (viewState.mode === 'spending') {
         // 支出ビュー: 府省庁ビューへ遷移
-        navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
+        navigateToView({ mode: 'ministry', selectedMinistry: ministryName, projectDrilldownLevel: 0 });
       } else {
         // Global View: Go to Ministry View (Standard behavior)
-        navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
+        navigateToView({ mode: 'ministry', selectedMinistry: ministryName, projectDrilldownLevel: 0 });
       }
       return;
     }
@@ -797,6 +800,7 @@ function SankeyContent() {
                       // Clickable indication
                       const nodeName = actualNode?.name || '';
                       const isProjectOtherNode = nodeName.match(/^事業\(Top\d+以外.*\)$/);
+                      const isRecipientOtherNode = nodeName.match(/^支出先\n?\(Top\d+以外\)$/);
                       const isGlobalView = viewState.mode === 'global';
 
                       const isClickable =
@@ -804,7 +808,7 @@ function SankeyContent() {
                         node.id === 'total-budget' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
                         ((nodeType === 'project-budget' || nodeType === 'project-spending') && !(isProjectOtherNode && isGlobalView)) ||
-                        (nodeType === 'recipient');
+                        (nodeType === 'recipient' && !isRecipientOtherNode);
 
                       const cursorStyle = isClickable ? 'pointer' : 'default';
                       const fontWeight = isClickable ? 'bold' : 500;
