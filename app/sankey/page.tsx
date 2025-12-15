@@ -207,10 +207,13 @@ function SankeyContent() {
       (actualNode.id !== 'total-budget' || viewState.mode === 'project');
 
     if (isMinistryNode) {
+      // Remove "(TopN以外)" suffix from ministry name if present
+      const ministryName = actualNode.name.replace(/\n?\(Top\d+以外\)$/, '');
+
       if (viewState.mode === 'ministry') {
         // 府省庁ビュー: 事業一覧を開く（府省庁:選択中、支出先まとめ:維持）
         setProjectListFilters({
-          ministries: [actualNode.name],
+          ministries: [ministryName],
           projectName: '',
           spendingName: '',
           groupByProject: undefined // Keep previous
@@ -218,13 +221,13 @@ function SankeyContent() {
         setDialogStates(prev => ({ ...prev, projectList: true }));
       } else if (viewState.mode === 'project') {
         // 事業ビュー: 府省庁ビューへ遷移
-        navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
+        navigateToView({ mode: 'ministry', selectedMinistry: ministryName, projectDrilldownLevel: 0 });
       } else if (viewState.mode === 'spending') {
         // 支出ビュー: 府省庁ビューへ遷移
-        navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
+        navigateToView({ mode: 'ministry', selectedMinistry: ministryName, projectDrilldownLevel: 0 });
       } else {
         // Global View: Go to Ministry View (Standard behavior)
-        navigateToView({ mode: 'ministry', selectedMinistry: actualNode.name, projectDrilldownLevel: 0 });
+        navigateToView({ mode: 'ministry', selectedMinistry: ministryName, projectDrilldownLevel: 0 });
       }
       return;
     }
@@ -232,7 +235,7 @@ function SankeyContent() {
     // Handle Project nodes
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
       // Special handling for "事業(TopN以外)" and "事業(TopN以外府省庁)" aggregate nodes
-      if (actualNode.name.match(/^事業\(Top\d+以外.*\)$/)) {
+      if (actualNode.name.match(/^事業\(Top\d+以外.*\)$/) || actualNode.name.match(/^事業\n\(Top\d+以外.*\)$/)) {
         if (viewState.mode === 'ministry') {
           navigateToView({ projectDrilldownLevel: viewState.projectDrilldownLevel + 1 });
         } else if (viewState.mode === 'spending') {
@@ -772,15 +775,18 @@ function SankeyContent() {
                       let displayName = name;
 
                       // Dynamic label for "事業(TopN以外)" based on drilldown level
-                      if (name.match(/^事業\(Top\d+以外.*\)$/) && viewState.mode === 'ministry') {
+                      if ((name.match(/^事業\(Top\d+以外.*\)$/) || name.match(/^事業\n\(Top\d+以外.*\)$/)) && viewState.mode === 'ministry') {
                         const currentEnd = (viewState.projectDrilldownLevel + 1) * topNSettings.ministry.project;
-                        displayName = `事業(Top${currentEnd}以外)`;
-                      } else if (nodeType === 'project-budget') {
-                        displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
-                      } else if (nodeType === 'project-spending') {
-                        displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
-                      } else if (name.length > 10) {
-                        displayName = name.substring(0, 10) + '...';
+                        displayName = `事業\n(Top${currentEnd}以外)`;
+                      } else if (!name.includes('\n')) {
+                        // 改行を含まないラベルのみ文字数で省略
+                        if (nodeType === 'project-budget') {
+                          displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
+                        } else if (nodeType === 'project-spending') {
+                          displayName = name.length > 10 ? name.substring(0, 10) + '...' : name;
+                        } else if (name.length > 10) {
+                          displayName = name.substring(0, 10) + '...';
+                        }
                       }
 
                       // Position based on node type: budget nodes on left, spending nodes on right
@@ -794,6 +800,7 @@ function SankeyContent() {
                       // Clickable indication
                       const nodeName = actualNode?.name || '';
                       const isProjectOtherNode = nodeName.match(/^事業\(Top\d+以外.*\)$/);
+                      const isRecipientOtherNode = nodeName.match(/^支出先\n?\(Top\d+以外\)$/);
                       const isGlobalView = viewState.mode === 'global';
 
                       const isClickable =
@@ -801,7 +808,7 @@ function SankeyContent() {
                         node.id === 'total-budget' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
                         ((nodeType === 'project-budget' || nodeType === 'project-spending') && !(isProjectOtherNode && isGlobalView)) ||
-                        (nodeType === 'recipient');
+                        (nodeType === 'recipient' && !isRecipientOtherNode);
 
                       const cursorStyle = isClickable ? 'pointer' : 'default';
                       const fontWeight = isClickable ? 'bold' : 500;
@@ -840,7 +847,19 @@ function SankeyContent() {
                             }}
                             onClick={() => isClickable && handleNodeClick(node)}
                           >
-                            {displayName}
+                            {displayName.includes('\n') ? (
+                              displayName.split('\n').map((line: string, i: number) => (
+                                <tspan
+                                  key={i}
+                                  x={x}
+                                  dy={i === 0 ? '-0.5em' : '1.2em'}
+                                >
+                                  {line}
+                                </tspan>
+                              ))
+                            ) : (
+                              displayName
+                            )}
                           </text>
                         </g>
                       );
