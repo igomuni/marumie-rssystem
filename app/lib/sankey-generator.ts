@@ -1037,8 +1037,9 @@ function buildSankeyData(
       // Project View: use ministry name
       nodeName = topMinistries[0].name;
     } else {
-      // Global View: use "予算総計"
-      nodeName = offset === 0 ? '予算総計' : `予算総計 (Rank ${offset + 1}+)`;
+      // Global View: use "予算総計" or "予算総計(Top10以外)" based on drilldownLevel
+      const currentDrilldownLevel = drilldownLevel ?? 0;
+      nodeName = currentDrilldownLevel === 0 ? '予算総計' : `予算総計(Top${ministryLimit * currentDrilldownLevel}以外)`;
     }
 
     nodes.push({
