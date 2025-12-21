@@ -240,14 +240,19 @@ function SankeyContent() {
 
     // Handle Project nodes
     if (actualNode.type === 'project-budget' || actualNode.type === 'project-spending') {
-      // Special handling for "事業(TopN以外)" and "事業(TopN以外府省庁)" aggregate nodes
+      // Disable click for "事業(TopN)" cumulative nodes (drilldown summary)
+      if (actualNode.id === 'project-budget-cumulative' || actualNode.id === 'project-spending-cumulative') {
+        return; // No action
+      }
+
+      // Special handling for "事業(TopN以外)" aggregate nodes
       if (actualNode.name.match(/^事業\(Top\d+以外.*\)$/) || actualNode.name.match(/^事業\n\(Top\d+以外.*\)$/)) {
         if (viewState.mode === 'ministry') {
           navigateToView({ projectDrilldownLevel: viewState.projectDrilldownLevel + 1 });
         } else if (viewState.mode === 'spending') {
           navigateToView({ projectDrilldownLevel: viewState.projectDrilldownLevel + 1 });
         }
-        // Global view: no action needed (handled by drilldownLevel)
+        // Global view: no action for drilldown "other" nodes
         return;
       }
 
@@ -272,7 +277,7 @@ function SankeyContent() {
 
     // Handle Recipient nodes
     if (actualNode.type === 'recipient') {
-      // Handle "Top10合計" - go back to previous spending drilldown level
+      // Handle "支出先(TopN)" - go back to previous spending drilldown level
       if (actualNode.id === 'recipient-top10-summary') {
         const newLevel = Math.max(0, viewState.spendingDrilldownLevel - 1);
         navigateToView({ mode: 'global', spendingDrilldownLevel: newLevel });
@@ -770,12 +775,12 @@ function SankeyContent() {
                       const name = actualNode?.name || node.id;
                       const nodeType = actualNode?.type || '';
 
-                      // For special nodes, use actualNode.value instead of rendered node.value
+                      // For special nodes, use actualValue from details instead of rendered node.value
                       let displayAmount = node.value;
 
-                      // Top summary node: use actualNode.value (cumulative total) instead of link value
-                      if (node.id === 'recipient-top10-summary' && actualNode) {
-                        displayAmount = actualNode.value;
+                      // Check for actualValue in details (used for dummy-value nodes like 事業(Top10), 支出先(Top10))
+                      if (actualNode?.details && 'actualValue' in actualNode.details) {
+                        displayAmount = actualNode.details.actualValue as number;
                       } else if (node.value === 0.001) {
                         // For nodes with dummy value (0.001), show actual amount (0円)
                         // Check if this is truly a zero-budget case
