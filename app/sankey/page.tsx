@@ -51,6 +51,7 @@ function SankeyContent() {
     const recipient = searchParams.get('recipient');
     const projectDrilldownLevelParam = searchParams.get('projectDrilldownLevel');
     const drilldownLevelParam = searchParams.get('drilldownLevel');
+    const spendingDrilldownLevelParam = searchParams.get('spendingDrilldownLevel');
 
     const newViewState: ViewState = {
       mode: 'global',
@@ -59,6 +60,7 @@ function SankeyContent() {
       selectedRecipient: null,
       drilldownLevel: parseInt(drilldownLevelParam || '0') || 0,
       projectDrilldownLevel: parseInt(projectDrilldownLevelParam || '0') || 0,
+      spendingDrilldownLevel: parseInt(spendingDrilldownLevelParam || '0') || 0,
     };
 
     if (recipient) {
@@ -93,6 +95,9 @@ function SankeyContent() {
     } else if (newState.mode === 'global') {
       if (newState.drilldownLevel > 0) {
         params.set('drilldownLevel', newState.drilldownLevel.toString());
+      }
+      if (newState.spendingDrilldownLevel > 0) {
+        params.set('spendingDrilldownLevel', newState.spendingDrilldownLevel.toString());
       }
     }
 
@@ -129,6 +134,7 @@ function SankeyContent() {
           params.set('projectLimit', '3'); // Fixed for global view to avoid clutter
           params.set('spendingLimit', topNSettings.global.spending.toString());
           params.set('drilldownLevel', viewState.drilldownLevel.toString());
+          params.set('spendingDrilldownLevel', viewState.spendingDrilldownLevel.toString());
         } else if (viewState.mode === 'ministry' && viewState.selectedMinistry) {
           params.set('ministryName', viewState.selectedMinistry);
           params.set('projectLimit', topNSettings.ministry.project.toString());
@@ -266,15 +272,23 @@ function SankeyContent() {
 
     // Handle Recipient nodes
     if (actualNode.type === 'recipient') {
-      // Special handling for "その他"
-      if (actualNode.name === 'その他') {
-        navigateToView({ mode: 'spending', selectedRecipient: 'その他' });
+      // Handle "Top10合計" - go back to previous spending drilldown level
+      if (actualNode.id === 'recipient-top10-summary') {
+        const newLevel = Math.max(0, viewState.spendingDrilldownLevel - 1);
+        navigateToView({ mode: 'global', spendingDrilldownLevel: newLevel });
         return;
       }
 
-      // Handle "支出先(TopN以外)"
-      if (actualNode.name.match(/^支出先\(Top\d+以外\)$/)) {
-        // No action needed for global view (handled by drilldownLevel)
+      // Handle "その他の支出先" - drill down to next TopN spending recipients
+      if (actualNode.id === 'recipient-other-aggregated') {
+        const newLevel = viewState.spendingDrilldownLevel + 1;
+        navigateToView({ mode: 'global', spendingDrilldownLevel: newLevel });
+        return;
+      }
+
+      // Special handling for "その他"
+      if (actualNode.name === 'その他') {
+        navigateToView({ mode: 'spending', selectedRecipient: 'その他' });
         return;
       }
 
@@ -756,9 +770,14 @@ function SankeyContent() {
                       const name = actualNode?.name || node.id;
                       const nodeType = actualNode?.type || '';
 
-                      // For nodes with dummy value (0.001), show actual amount (0円)
+                      // For special nodes, use actualNode.value instead of rendered node.value
                       let displayAmount = node.value;
-                      if (node.value === 0.001) {
+
+                      // Top summary node: use actualNode.value (cumulative total) instead of link value
+                      if (node.id === 'recipient-top10-summary' && actualNode) {
+                        displayAmount = actualNode.value;
+                      } else if (node.value === 0.001) {
+                        // For nodes with dummy value (0.001), show actual amount (0円)
                         // Check if this is truly a zero-budget case
                         if (nodeType === 'project-budget' &&
                           actualNode?.details &&
@@ -799,16 +818,17 @@ function SankeyContent() {
 
                       // Clickable indication
                       const nodeName = actualNode?.name || '';
-                      const isProjectOtherNode = nodeName.match(/^事業\(Top\d+以外.*\)$/);
-                      const isRecipientOtherNode = nodeName.match(/^支出先\n?\(Top\d+以外\)$/);
+                      const isProjectOtherNode = nodeName.match(/^事業\n?\(Top\d+以外.*\)$/);
                       const isGlobalView = viewState.mode === 'global';
 
                       const isClickable =
                         node.id === 'ministry-budget-other' ||
                         node.id === 'total-budget' ||
+                        node.id === 'recipient-top10-summary' ||
+                        node.id === 'recipient-other-aggregated' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
                         ((nodeType === 'project-budget' || nodeType === 'project-spending') && !(isProjectOtherNode && isGlobalView)) ||
-                        (nodeType === 'recipient' && !isRecipientOtherNode);
+                        (nodeType === 'recipient' && node.id !== 'recipient-top10-summary' && node.id !== 'recipient-other-aggregated');
 
                       const cursorStyle = isClickable ? 'pointer' : 'default';
                       const fontWeight = isClickable ? 'bold' : 500;
