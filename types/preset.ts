@@ -77,6 +77,7 @@ export interface ProjectBudgetNodeDetails {
   executedAmount: number;         // 執行額(合計)
   carryoverToNext: number;        // 翌年度への繰越し(合計)
   accountCategory: string;        // 会計区分（一般会計、特別会計）
+  actualValue?: number;           // ダミー値使用時の実際の金額（ラベル表示用）
 }
 
 // 事業（支出）ノードの詳細
@@ -86,6 +87,7 @@ export interface ProjectSpendingNodeDetails {
   fiscalYear: number;             // 会計年度
   executionRate: number;          // 執行率（%）
   spendingCount: number;          // 支出先数
+  actualValue?: number;           // ダミー値使用時の実際の金額（ラベル表示用）
 }
 
 // 支出先ノードの詳細
@@ -93,6 +95,7 @@ export interface RecipientNodeDetails {
   corporateNumber: string;        // 法人番号
   location: string;               // 所在地
   projectCount: number;           // 支出元事業数
+  actualValue?: number;           // ダミー値使用時の実際の金額（ラベル表示用）
 }
 
 // サンキーリンク
