@@ -1358,32 +1358,12 @@ function buildSankeyData(
       }
     }
 
-    // Links from topMinistries to "Other Projects" - adjust for cumulative projects
+    // Calculate total other budget first (links will be created after node is confirmed)
     for (const ministry of topMinistries) {
       const otherBudget = otherProjectsBudgetByMinistry.get(ministry.name) || 0;
-      const cumulativeBudgetFromMinistry = cumulativeByMinistry.get(ministry.name) || 0;
-      const adjustedOtherBudget = Math.max(0, otherBudget - cumulativeBudgetFromMinistry);
-
       totalOtherBudget += otherBudget;
-
-      if (adjustedOtherBudget > 0) {
-        links.push({
-          source: `ministry-budget-${ministry.id}`,
-          target: 'project-budget-other-global',
-          value: adjustedOtherBudget,
-        });
-      }
     }
-
-    // Link from "Other Ministries" to "Other Projects" (always use shared node)
-    if (otherMinistriesBudget > 0) {
-      totalOtherBudget += otherMinistriesBudget;
-      links.push({
-        source: 'ministry-budget-other',
-        target: 'project-budget-other-global',
-        value: otherMinistriesBudget,
-      });
-    }
+    totalOtherBudget += otherMinistriesBudget;
 
     // Link from "Return to TopN" nodes now goes to dummy recipient nodes
     // (See recipient node creation section below)
@@ -1463,6 +1443,30 @@ function buildSankeyData(
           accountCategory: '',
         },
       });
+
+      // Links from topMinistries to "Other Projects" - adjust for cumulative projects
+      for (const ministry of topMinistries) {
+        const otherBudget = otherProjectsBudgetByMinistry.get(ministry.name) || 0;
+        const cumulativeBudgetFromMinistry = cumulativeByMinistry.get(ministry.name) || 0;
+        const adjustedMinistryOtherBudget = Math.max(0, otherBudget - cumulativeBudgetFromMinistry);
+
+        if (adjustedMinistryOtherBudget > 0) {
+          links.push({
+            source: `ministry-budget-${ministry.id}`,
+            target: 'project-budget-other-global',
+            value: adjustedMinistryOtherBudget,
+          });
+        }
+      }
+
+      // Link from "Other Ministries" to "Other Projects"
+      if (otherMinistriesBudget > 0) {
+        links.push({
+          source: 'ministry-budget-other',
+          target: 'project-budget-other-global',
+          value: otherMinistriesBudget,
+        });
+      }
     }
   }
   nodes.push(...projectBudgetNodes);
@@ -1625,14 +1629,16 @@ function buildSankeyData(
       });
 
       // Link from budget-side to spending-side "Other Projects"
-      // In global view, we link the global nodes
-      const linkValue = Math.min(adjustedOtherBudgetForLink, adjustedOtherSpending);
-      if (linkValue > 0) {
-        links.push({
-          source: 'project-budget-other-global',
-          target: 'project-spending-other-global',
-          value: linkValue,
-        });
+      // Only create link if budget-side node exists (adjustedOtherBudgetForLink > 0)
+      if (adjustedOtherBudgetForLink > 0) {
+        const linkValue = Math.min(adjustedOtherBudgetForLink, adjustedOtherSpending);
+        if (linkValue > 0) {
+          links.push({
+            source: 'project-budget-other-global',
+            target: 'project-spending-other-global',
+            value: linkValue,
+          });
+        }
       }
     }
   }
