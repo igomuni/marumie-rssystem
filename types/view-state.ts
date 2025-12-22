@@ -27,6 +27,8 @@ export interface ViewState {
   drilldownLevel: number;
   /** 事業ドリルダウンレベル（府省庁・支出ビュー） */
   projectDrilldownLevel: number;
+  /** 支出先ドリルダウンレベル（全体ビュー） */
+  spendingDrilldownLevel: number;
 }
 
 /**
@@ -89,6 +91,7 @@ export const DEFAULT_VIEW_STATE: ViewState = {
   selectedRecipient: null,
   drilldownLevel: 0,
   projectDrilldownLevel: 0,
+  spendingDrilldownLevel: 0,
 };
 
 /**

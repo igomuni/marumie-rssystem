@@ -25,6 +25,7 @@ interface GenerateOptions {
   targetRecipientName?: string;
   drilldownLevel?: number; // Ministry drilldown: 0: Top10, 1: Top11-20, 2: Top21-30, etc.
   projectDrilldownLevel?: number; // Project drilldown (Ministry View): 0: Top10, 1: Top11-20, etc.
+  spendingDrilldownLevel?: number; // Spending drilldown (Global View): 0: Top10, 1: Top11-20, etc.
 }
 
 function getCacheKey(options: GenerateOptions): string {
@@ -33,6 +34,7 @@ function getCacheKey(options: GenerateOptions): string {
     ministryOffset: options.ministryOffset ?? 0,
     projectOffset: options.projectOffset ?? 0, // Keep for backward compatibility
     projectDrilldownLevel: options.projectDrilldownLevel ?? 0,
+    spendingDrilldownLevel: options.spendingDrilldownLevel ?? 0,
     ministryLimit: options.ministryLimit ?? 3,
     projectLimit: options.projectLimit ?? 3,
     spendingLimit: options.spendingLimit ?? 5,
@@ -57,6 +59,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
     ministryOffset = 0,
     projectOffset = 0, // Deprecated
     projectDrilldownLevel = 0,
+    spendingDrilldownLevel = 0,
     ministryLimit = 3,
     projectLimit = 3,
     spendingLimit = 5,
@@ -70,6 +73,9 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
   const calculatedProjectOffset = projectDrilldownLevel > 0
     ? projectDrilldownLevel * projectLimit
     : projectOffset;
+
+  // Calculate spendingOffset from spendingDrilldownLevel
+  const spendingOffset = spendingDrilldownLevel * spendingLimit;
 
   // 1. Load data
   if (!cachedData) {
@@ -88,6 +94,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
   const selection = selectData(fullData, {
     offset: ministryOffset,
     projectOffset: calculatedProjectOffset,
+    spendingOffset,
     limit: ministryLimit,
     projectLimit,
     spendingLimit,
@@ -95,6 +102,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
     targetProjectName,
     targetRecipientName,
     drilldownLevel,
+    spendingDrilldownLevel,
   });
 
   // 3. Build Sankey Data
@@ -111,6 +119,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
       spendingLimit,
       drilldownLevel,
       projectDrilldownLevel,
+      spendingDrilldownLevel,
     }
   );
 
@@ -188,6 +197,13 @@ interface DataSelection {
 
   // Ministry View用
   ministryTotalProjects?: number; // 選択した府省庁の総事業数
+
+  // Spending Drilldown用
+  spendingDrilldownLevel?: number; // 支出先ドリルダウンレベル
+  top10SpendingTotal?: number; // Top10支出先の合計金額（ドリルダウン時のみ）
+  cumulativeSpendings?: SpendingRecord[]; // 累積の支出先リスト（ドリルダウン時のTop合計に含まれる支出先）
+  cumulativeProjects?: BudgetRecord[]; // 累積の事業リスト（累積支出先に貢献した事業Top10）
+  cumulativeProjectSpendingMap?: Map<number, number>; // 累積事業ごとの累積支出先への支出金額
 }
 
 function selectData(
@@ -195,6 +211,7 @@ function selectData(
   options: {
     offset: number;
     projectOffset: number;
+    spendingOffset: number;
     limit: number;
     projectLimit: number;
     spendingLimit: number;
@@ -202,9 +219,10 @@ function selectData(
     targetProjectName?: string;
     targetRecipientName?: string;
     drilldownLevel?: number;
+    spendingDrilldownLevel?: number;
   }
 ): DataSelection {
-  const { offset, projectOffset, limit, projectLimit, spendingLimit, targetMinistryName, targetProjectName, targetRecipientName, drilldownLevel = 0 } = options;
+  const { offset, projectOffset, spendingOffset, limit, projectLimit, spendingLimit, targetMinistryName, targetProjectName, targetRecipientName, drilldownLevel = 0, spendingDrilldownLevel = 0 } = options;
 
   // Initialize result containers
   let topMinistries: Array<{ name: string; id: number; totalBudget: number; bureauCount: number }> = [];
@@ -221,7 +239,13 @@ function selectData(
   let otherProjectsSpendingInSpendingView: number | undefined = undefined;
   let otherProjectsSpendingByMinistryInSpendingView: Map<string, number> | undefined = undefined;
   let otherMinistriesSpendingInSpendingView: number | undefined = undefined;
+
+  // Spending Drilldown用
+  let cumulativeSpendings: SpendingRecord[] | undefined = undefined;
+  let top10SpendingTotal: number | undefined = undefined;
   let hasMoreProjects: boolean | undefined = undefined;
+  let cumulativeProjectsList: BudgetRecord[] | undefined = undefined;
+  let cumulativeProjectSpendingMapVar: Map<number, number> | undefined = undefined;
 
   // Ministry View用
   let ministryTotalProjects: number | undefined = undefined;
@@ -486,15 +510,66 @@ function selectData(
         return bSpending - aSpending;
       });
 
-    const topRecipients = allRecipients.slice(0, spendingLimit);
+    // Apply spending drilldown if enabled
+    const topRecipients = allRecipients.slice(spendingOffset, spendingOffset + spendingLimit);
     topSpendings = topRecipients;
 
-    // 4. Find all projects that contribute to TopN recipients (from selected ministries)
+    // Calculate cumulative spending total and recipient list for drilldown mode
+    // This represents the total spending for all recipients shown up to the PREVIOUS level
+    // Example: Level 1 shows recipients 11-20, so we need total for 1-10
+    //          Level 2 shows recipients 21-30, so we need total for 1-20
+    if (spendingDrilldownLevel > 0) {
+      const cumulativeEndIndex = spendingDrilldownLevel * spendingLimit;
+      const cumulativeRecipients = allRecipients.slice(0, cumulativeEndIndex);
+      cumulativeSpendings = cumulativeRecipients; // Store for later use
+      top10SpendingTotal = cumulativeRecipients.reduce((sum, r) => {
+        return sum + (recipientSpendingFromSelectedMinistries.get(r.spendingId) || 0);
+      }, 0);
+
+      // Calculate cumulative projects (projects that contributed to cumulativeRecipients)
+      const cumulativeRecipientIds = new Set(cumulativeRecipients.map(r => r.spendingId));
+      const projectSpendingToCumulative = new Map<number, number>();
+
+      for (const project of projectsFromSelectedMinistries) {
+        let spendingToCumulative = 0;
+        const projectSpendings = data.spendings.filter(s =>
+          s.projects.some(p => p.projectId === project.projectId)
+        );
+        for (const spending of projectSpendings) {
+          if (cumulativeRecipientIds.has(spending.spendingId)) {
+            const projectContribution = spending.projects.find(p => p.projectId === project.projectId);
+            if (projectContribution) {
+              spendingToCumulative += projectContribution.amount;
+            }
+          }
+        }
+        if (spendingToCumulative > 0) {
+          projectSpendingToCumulative.set(project.projectId, spendingToCumulative);
+        }
+      }
+
+      // Select top projects that contributed to cumulative recipients
+      const cumulativeContributingProjects = projectsFromSelectedMinistries
+        .filter(b => projectSpendingToCumulative.has(b.projectId))
+        .sort((a, b) => {
+          return (projectSpendingToCumulative.get(b.projectId) || 0) -
+            (projectSpendingToCumulative.get(a.projectId) || 0);
+        })
+        .slice(0, spendingLimit); // Same limit as current topProjects
+
+      cumulativeProjectsList = cumulativeContributingProjects;
+      cumulativeProjectSpendingMapVar = projectSpendingToCumulative;
+    }
+
+    // 4. Find all projects that contribute to TopN recipients
     const topRecipientIds = new Set(topRecipients.map(r => r.spendingId));
+
+    // Spending drilldown: プロジェクトは全体から選択（府省庁TopNに限定しない）
+    const projectSource = spendingDrilldownLevel > 0 ? data.budgets : projectsFromSelectedMinistries;
 
     // Calculate each project's spending to top recipients
     const projectSpendingToTopRecipients = new Map<number, number>();
-    for (const project of projectsFromSelectedMinistries) {
+    for (const project of projectSource) {
       let spendingToTop = 0;
       const projectSpendings = data.spendings.filter(s =>
         s.projects.some(p => p.projectId === project.projectId)
@@ -513,7 +588,7 @@ function selectData(
     }
 
     // Select projects that contribute to TopN recipients, sorted by contribution
-    const contributingProjects = projectsFromSelectedMinistries
+    const contributingProjects = projectSource
       .filter(b => projectSpendingToTopRecipients.has(b.projectId))
       .sort((a, b) => {
         return (projectSpendingToTopRecipients.get(b.projectId) || 0) -
@@ -703,6 +778,11 @@ function selectData(
     otherMinistriesSpendingInSpendingView,
     hasMoreProjects,
     ministryTotalProjects,
+    spendingDrilldownLevel,
+    top10SpendingTotal,
+    cumulativeSpendings,
+    cumulativeProjects: cumulativeProjectsList,
+    cumulativeProjectSpendingMap: cumulativeProjectSpendingMapVar,
   };
 }
 
@@ -718,6 +798,7 @@ function buildSankeyData(
     projectLimit: number;
     spendingLimit: number;
     drilldownLevel?: number;
+    spendingDrilldownLevel?: number;
     projectDrilldownLevel?: number;
   }
 ): { nodes: SankeyNode[]; links: SankeyLink[] } {
@@ -732,9 +813,13 @@ function buildSankeyData(
     otherSpendingsByProject,
     otherNamedSpendingByProject,
     otherMinistriesSpendingInSpendingView,
+    top10SpendingTotal,
+    cumulativeSpendings,
+    cumulativeProjects,
+    cumulativeProjectSpendingMap,
   } = selection;
 
-  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit, drilldownLevel = 0, projectDrilldownLevel = 0 } = options;
+  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit, drilldownLevel = 0, projectDrilldownLevel = 0, spendingDrilldownLevel = 0 } = options;
 
   const nodes: SankeyNode[] = [];
   const links: SankeyLink[] = [];
@@ -1156,8 +1241,12 @@ function buildSankeyData(
   // Column 2: Project Budget Nodes
   const projectBudgetNodes: SankeyNode[] = [];
 
-  // Create budget nodes for all projects in topProjects
-  for (const project of topProjects) {
+  // In spending drilldown mode (Level 1+), cumulative projects are aggregated into "事業(TopN)" node
+  // Only current topProjects are rendered as individual nodes
+  const allProjectsToRender = topProjects;
+
+  // Create budget nodes for all projects
+  for (const project of allProjectsToRender) {
     // Use dummy value 0.001 if budget is 0 but spending exists
     const budgetNodeValue = project.totalBudget === 0 && project.totalSpendingAmount > 0
       ? 0.001
@@ -1260,15 +1349,28 @@ function buildSankeyData(
   if (isGlobalView) {
     let totalOtherBudget = 0;
 
-    // Links from topMinistries to "Other Projects"
+    // Calculate cumulative budget by ministry for later adjustment
+    const cumulativeByMinistry = new Map<string, number>();
+    if (spendingDrilldownLevel > 0 && cumulativeProjects) {
+      for (const project of cumulativeProjects) {
+        const current = cumulativeByMinistry.get(project.ministry) || 0;
+        cumulativeByMinistry.set(project.ministry, current + project.totalBudget);
+      }
+    }
+
+    // Links from topMinistries to "Other Projects" - adjust for cumulative projects
     for (const ministry of topMinistries) {
-      const otherBudget = otherProjectsBudgetByMinistry.get(ministry.name);
-      if (otherBudget && otherBudget > 0) {
-        totalOtherBudget += otherBudget;
+      const otherBudget = otherProjectsBudgetByMinistry.get(ministry.name) || 0;
+      const cumulativeBudgetFromMinistry = cumulativeByMinistry.get(ministry.name) || 0;
+      const adjustedOtherBudget = Math.max(0, otherBudget - cumulativeBudgetFromMinistry);
+
+      totalOtherBudget += otherBudget;
+
+      if (adjustedOtherBudget > 0) {
         links.push({
           source: `ministry-budget-${ministry.id}`,
           target: 'project-budget-other-global',
-          value: otherBudget,
+          value: adjustedOtherBudget,
         });
       }
     }
@@ -1286,12 +1388,67 @@ function buildSankeyData(
     // Link from "Return to TopN" nodes now goes to dummy recipient nodes
     // (See recipient node creation section below)
 
-    if (totalOtherBudget > 0) {
+    // In spending drilldown mode, add "事業(Top10)" aggregated node FIRST for top positioning
+    if (spendingDrilldownLevel > 0 && cumulativeProjects && cumulativeProjectSpendingMap) {
+      const cumulativeTopN = spendingDrilldownLevel * spendingLimit;
+      const cumulativeBudgetTotal = cumulativeProjects.reduce((sum, p) => sum + p.totalBudget, 0);
+
+      // Create "事業(Top10)" budget node with dummy value for thin display
+      // actualValue is stored in details for label display
+      const DUMMY_NODE_VALUE = 0.001;
+      projectBudgetNodes.unshift({
+        id: 'project-budget-cumulative',
+        name: `事業\n(Top${cumulativeTopN})`,
+        type: 'project-budget',
+        value: DUMMY_NODE_VALUE,
+        details: {
+          ministry: '全府省庁',
+          bureau: '',
+          fiscalYear: 2024,
+          initialBudget: cumulativeBudgetTotal,
+          supplementaryBudget: 0,
+          carryoverBudget: 0,
+          reserveFund: 0,
+          totalBudget: cumulativeBudgetTotal,
+          executedAmount: 0,
+          carryoverToNext: 0,
+          accountCategory: '',
+          actualValue: cumulativeBudgetTotal, // Store actual value for label
+        },
+      });
+
+      // Links from ministries to "事業(Top10)" node - use dummy values
+      for (const ministry of topMinistries) {
+        const budgetFromMinistry = cumulativeByMinistry.get(ministry.name);
+        if (budgetFromMinistry && budgetFromMinistry > 0) {
+          links.push({
+            source: `ministry-budget-${ministry.id}`,
+            target: 'project-budget-cumulative',
+            value: DUMMY_NODE_VALUE / topMinistries.length, // Distribute dummy value
+          });
+        }
+      }
+    }
+
+    // In spending drilldown mode, subtract cumulative projects budget from "Other" to avoid double counting
+    let adjustedOtherBudget = totalOtherBudget;
+    if (spendingDrilldownLevel > 0 && cumulativeProjects) {
+      const cumulativeBudgetTotal = cumulativeProjects.reduce((sum, p) => sum + p.totalBudget, 0);
+      adjustedOtherBudget = Math.max(0, totalOtherBudget - cumulativeBudgetTotal);
+    }
+
+    if (adjustedOtherBudget > 0) {
+      // Calculate the label based on spending drilldown level
+      // Level 0: 事業(Top10以外)
+      // Level 1+: 事業(Top20以外) - aligned with 支出先(Top20以外)
+      const cumulativeTopN = (spendingDrilldownLevel + 1) * spendingLimit;
+      const otherProjectsLabel = `事業\n(Top${cumulativeTopN}以外)`;
+
       projectBudgetNodes.push({
         id: 'project-budget-other-global',
-        name: `事業\n(Top${spendingLimit}以外)`,
+        name: otherProjectsLabel,
         type: 'project-budget',
-        value: totalOtherBudget,
+        value: adjustedOtherBudget,
         details: {
           ministry: '全府省庁',
           bureau: '',
@@ -1316,8 +1473,8 @@ function buildSankeyData(
   // Track projects with 0 spending IDs for "支出先なし" node
   const projectsWithNoSpending: BudgetRecord[] = [];
 
-  // Create spending nodes for all projects in topProjects
-  for (const project of topProjects) {
+  // Create spending nodes for all projects (same as allProjectsToRender for budget nodes)
+  for (const project of allProjectsToRender) {
     // Track projects with 0 spending IDs
     if (project.spendingIds.length === 0) {
       projectsWithNoSpending.push(project);
@@ -1406,12 +1563,58 @@ function buildSankeyData(
     totalOtherSpending += otherMinistriesSpending;
     totalOtherBudget += otherMinistriesBudget;
 
-    if (totalOtherSpending > 0) {
+    // In spending drilldown mode, add "事業(Top10)" spending node FIRST for top positioning
+    if (spendingDrilldownLevel > 0 && cumulativeProjects && cumulativeProjectSpendingMap) {
+      const cumulativeTopN = spendingDrilldownLevel * spendingLimit;
+      const cumulativeSpendingTotal = Array.from(cumulativeProjectSpendingMap.values()).reduce((sum, v) => sum + v, 0);
+
+      // Use dummy value for thin display
+      const DUMMY_NODE_VALUE = 0.001;
+      projectSpendingNodes.unshift({
+        id: 'project-spending-cumulative',
+        name: `事業\n(Top${cumulativeTopN})`,
+        type: 'project-spending',
+        value: DUMMY_NODE_VALUE,
+        details: {
+          ministry: '全府省庁',
+          bureau: '',
+          fiscalYear: 2024,
+          executionRate: 0,
+          spendingCount: cumulativeProjects.length,
+          actualValue: cumulativeSpendingTotal, // Store actual value for label
+        },
+      });
+
+      // Link from "事業(Top10)" budget to spending - use dummy value
+      links.push({
+        source: 'project-budget-cumulative',
+        target: 'project-spending-cumulative',
+        value: DUMMY_NODE_VALUE,
+      });
+    }
+
+    // In spending drilldown mode, subtract cumulative projects spending from "Other" to avoid double counting
+    let adjustedOtherSpending = totalOtherSpending;
+    let adjustedOtherBudgetForLink = totalOtherBudget;
+    if (spendingDrilldownLevel > 0 && cumulativeProjects && cumulativeProjectSpendingMap) {
+      const cumulativeSpendingTotal = Array.from(cumulativeProjectSpendingMap.values()).reduce((sum, v) => sum + v, 0);
+      const cumulativeBudgetTotal = cumulativeProjects.reduce((sum, p) => sum + p.totalBudget, 0);
+      adjustedOtherSpending = Math.max(0, totalOtherSpending - cumulativeSpendingTotal);
+      adjustedOtherBudgetForLink = Math.max(0, totalOtherBudget - cumulativeBudgetTotal);
+    }
+
+    if (adjustedOtherSpending > 0) {
+      // Calculate the label based on spending drilldown level
+      // Level 0: 事業(Top10以外)
+      // Level 1+: 事業(Top20以外) - aligned with 支出先(Top20以外)
+      const cumulativeTopN = (spendingDrilldownLevel + 1) * spendingLimit;
+      const otherProjectsLabel = `事業\n(Top${cumulativeTopN}以外)`;
+
       projectSpendingNodes.push({
         id: 'project-spending-other-global',
-        name: `事業\n(Top${spendingLimit}以外)`,
+        name: otherProjectsLabel,
         type: 'project-spending',
-        value: totalOtherSpending,
+        value: adjustedOtherSpending,
         details: {
           ministry: '全府省庁',
           bureau: '',
@@ -1423,7 +1626,7 @@ function buildSankeyData(
 
       // Link from budget-side to spending-side "Other Projects"
       // In global view, we link the global nodes
-      const linkValue = Math.min(totalOtherBudget, totalOtherSpending);
+      const linkValue = Math.min(adjustedOtherBudgetForLink, adjustedOtherSpending);
       if (linkValue > 0) {
         links.push({
           source: 'project-budget-other-global',
@@ -1438,8 +1641,31 @@ function buildSankeyData(
   // Column 4: Recipient Nodes
   const recipientNodes: SankeyNode[] = [];
 
+  // Add Top Summary node if in spending drilldown mode (FIRST for top positioning)
+  if (isGlobalView && spendingDrilldownLevel > 0 && top10SpendingTotal) {
+    // Calculate the cumulative range for the summary label
+    // Level 1: Top1-10, Level 2: Top1-20, Level 3: Top1-30, etc.
+    const cumulativeEnd = spendingDrilldownLevel * spendingLimit;
+
+    // Use dummy value for thin display
+    const DUMMY_NODE_VALUE = 0.001;
+    recipientNodes.unshift({
+      id: 'recipient-top10-summary',
+      name: `支出先\n(Top${cumulativeEnd})`,
+      type: 'recipient',
+      value: DUMMY_NODE_VALUE,
+      details: {
+        corporateNumber: '',
+        location: '',
+        projectCount: 0,
+        actualValue: top10SpendingTotal, // Store actual value for label
+      },
+    });
+    // Note: Links to this summary node are created below
+  }
+
   if (isGlobalView) {
-    // Global View: Create nodes for all topSpendings and links from their projects
+    // Global View: Create nodes for current topSpendings and links from their projects
     for (const spending of topSpendings) {
       // Calculate spending amount from selected TopN projects only
       let spendingFromSelectedProjects = 0;
@@ -1481,6 +1707,17 @@ function buildSankeyData(
           });
         }
       }
+    }
+
+    // If in drilldown mode, create link from "事業(Top10)" aggregated node to "支出先(Top10)" summary node
+    // Use dummy value for thin display
+    if (spendingDrilldownLevel > 0 && cumulativeProjects && cumulativeProjectSpendingMap) {
+      const DUMMY_LINK_VALUE = 0.001;
+      links.push({
+        source: 'project-spending-cumulative',
+        target: 'recipient-top10-summary',
+        value: DUMMY_LINK_VALUE,
+      });
     }
   } else {
     // Ministry/Project View: Calculate spending from selected projects only
@@ -1680,27 +1917,65 @@ function buildSankeyData(
 
   if (isGlobalView) {
     // --- Global View: Calculate "支出先(TopN以外)" ---
-    // 1. Flow from "Other Projects" (Global Aggregated Node)
-    // We assume all "Other Projects" spending goes to "Other Recipients"
-    const otherProjectsSpendingNode = nodes.find(n => n.id === 'project-spending-other-global');
-    if (otherProjectsSpendingNode) {
-      totalOtherRecipientAmount += otherProjectsSpendingNode.value;
+    // Strategy: Calculate total spending to recipients BEYOND the current drilldown threshold
+    // This means excluding recipients from position 0 to (spendingDrilldownLevel + 1) * spendingLimit
+
+    // First, rebuild the full sorted recipient list to get all recipients up to current threshold
+    const selectedMinistryNames = new Set(topMinistries.map(m => m.name));
+    const recipientSpendingFromSelectedMinistries = new Map<number, number>();
+
+    for (const spending of fullData.spendings) {
+      let totalFromSelected = 0;
+      for (const project of spending.projects) {
+        const budgetRecord = fullData.budgets.find((b: { projectId: number }) => b.projectId === project.projectId);
+        if (budgetRecord && selectedMinistryNames.has(budgetRecord.ministry)) {
+          totalFromSelected += project.amount;
+        }
+      }
+      if (totalFromSelected > 0) {
+        recipientSpendingFromSelectedMinistries.set(spending.spendingId, totalFromSelected);
+      }
     }
 
-    // 2. Flow from "Top Projects" remainder
-    // Calculate total spending of Top Projects minus what went to Top Recipients
-    const topRecipientIds = new Set(topSpendings.map(s => s.spendingId));
+    // Sort all recipients by spending amount (same order as in selectData)
+    const allSortedRecipients = fullData.spendings
+      .filter(s => recipientSpendingFromSelectedMinistries.has(s.spendingId))
+      .sort((a, b) => {
+        const aSpending = recipientSpendingFromSelectedMinistries.get(a.spendingId) || 0;
+        const bSpending = recipientSpendingFromSelectedMinistries.get(b.spendingId) || 0;
+        return bSpending - aSpending;
+      });
 
+    // Calculate the threshold: exclude all recipients from 0 to (spendingDrilldownLevel + 1) * spendingLimit
+    const excludeUpToIndex = (spendingDrilldownLevel + 1) * spendingLimit;
+    const excludedRecipients = allSortedRecipients.slice(0, excludeUpToIndex);
+    const excludedRecipientIds = new Set(excludedRecipients.map(s => s.spendingId));
+
+    // Calculate total spending to "Other Recipients" (beyond current threshold)
+    // Include spending from both Top Projects and Other Projects
+    for (const spending of allSortedRecipients) {
+      // Skip if this recipient is within the excluded range (0 to current threshold)
+      if (excludedRecipientIds.has(spending.spendingId)) continue;
+
+      // Skip "その他" (handled separately)
+      if (spending.spendingName === 'その他') continue;
+
+      // Sum up all spending to this recipient from selected ministries
+      const spendingAmount = recipientSpendingFromSelectedMinistries.get(spending.spendingId) || 0;
+      totalOtherRecipientAmount += spendingAmount;
+    }
+
+    // Store the breakdown by project for linking purposes
+    // This is used later to create links from individual projects to "Other Recipients"
     for (const project of topProjects) {
       let projectTotalToOthers = 0;
 
-      // Find all recipients for this project
       for (const spendingId of project.spendingIds) {
         const spending = fullData.spendings.find(s => s.spendingId === spendingId);
         if (!spending) continue;
 
-        // Skip topN recipients and "その他"
-        if (topRecipientIds.has(spendingId) || spending.spendingName === 'その他') continue;
+        // Skip excluded recipients and "その他"
+        if (excludedRecipientIds.has(spendingId) || spending.spendingName === 'その他') continue;
 
         // This is an "other recipient"
         const spendingProject = spending.projects.find(p => p.projectId === project.projectId);
@@ -1710,8 +1985,6 @@ function buildSankeyData(
       }
 
       if (projectTotalToOthers > 0) {
-        totalOtherRecipientAmount += projectTotalToOthers;
-        // Store for later linking
         otherSpendingsByProject.set(project.projectId, projectTotalToOthers);
       }
     }
@@ -1740,9 +2013,12 @@ function buildSankeyData(
   }
 
   if (totalOtherRecipientAmount > 0) {
+    // Calculate the current TopN threshold based on drilldown level
+    const currentThreshold = (spendingDrilldownLevel + 1) * spendingLimit;
+
     recipientNodes.push({
       id: 'recipient-other-aggregated',
-      name: `支出先\n(Top${spendingLimit}以外)`,
+      name: `支出先\n(Top${currentThreshold}以外)`,
       type: 'recipient',
       value: totalOtherRecipientAmount,
       details: {
@@ -1791,28 +2067,30 @@ function buildSankeyData(
         }
       }
 
-      // 2. Link from "Other Projects" (Global) to "Other Recipients"
-      // The remaining value of "Other Projects" goes to "Other Recipients"
-      if (otherProjectsSpendingNode) {
-        const remainingValue = otherProjectsSpendingNode.value - otherProjectsValueUsed;
-        if (remainingValue > 0) {
+      // 2. Links from Top Projects to "Other Recipients"
+      // These are the links we calculated and stored in otherSpendingsByProject
+      for (const [projectId, otherAmount] of otherSpendingsByProject.entries()) {
+        if (otherAmount > 0) {
           links.push({
-            source: 'project-spending-other-global',
+            source: `project-spending-${projectId}`,
             target: 'recipient-other-aggregated',
-            value: remainingValue,
+            value: otherAmount,
           });
         }
       }
 
-      // 3. Links from Top Projects to "Other Recipients"
-      for (const [projectId, otherAmount] of otherSpendingsByProject.entries()) {
-        // Use dummy value 0.001 if amount is 0 to prevent broken links
-        const linkValue = otherAmount === 0 ? 0.001 : otherAmount;
-        if (linkValue > 0) {
+      // 3. Link from "Other Projects" (Global) to "Other Recipients"
+      // Calculate how much of "Other Projects" goes to "Other Recipients" (beyond current threshold)
+      // This is: totalOtherRecipientAmount - (sum of otherSpendingsByProject)
+      if (otherProjectsSpendingNode) {
+        const topProjectsToOthers = Array.from(otherSpendingsByProject.values()).reduce((sum, amt) => sum + amt, 0);
+        const otherProjectsToOthers = totalOtherRecipientAmount - topProjectsToOthers;
+
+        if (otherProjectsToOthers > 0) {
           links.push({
-            source: `project-spending-${projectId}`,
+            source: 'project-spending-other-global',
             target: 'recipient-other-aggregated',
-            value: linkValue,
+            value: otherProjectsToOthers,
           });
         }
       }
