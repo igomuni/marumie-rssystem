@@ -349,8 +349,9 @@ function buildBudgetRecords(
       totalSpendingAmount: 0,
     };
 
-    // 2024年度と過去年度を分離
-    if (budget.fiscalYear === TARGET_FISCAL_YEAR) {
+    // 2024年度事業には2023年度予算を使用（過去年度は履歴として保持）
+    // 事業年度2024に対して予算年度2023のデータを使用する
+    if (budget.fiscalYear === TARGET_FISCAL_YEAR - 1) {
       currentYearRecords.push(record);
     } else {
       historicalYearRecords.push(record);

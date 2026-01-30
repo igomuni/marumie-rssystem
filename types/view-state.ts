@@ -116,7 +116,7 @@ export const DEFAULT_TOPN_SETTINGS: TopNSettings = {
   spending: {
     project: 15,
     ministry: 10,
-    subcontract: 10,
+    subcontract: 20,
   },
 };
 

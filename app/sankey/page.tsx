@@ -1484,7 +1484,7 @@ function SankeyContent() {
                     onChange={(e) => setTempTopNSettings(prev => ({ ...prev, spending: { ...prev.spending, subcontract: parseInt(e.target.value) || 1 } }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
-                  <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 20</p>
                 </div>
               </div>
             </div>
