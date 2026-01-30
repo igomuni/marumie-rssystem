@@ -81,6 +81,8 @@ export interface DialogStates {
   projectList: boolean;
   /** 支出先一覧モーダル */
   spendingList: boolean;
+  /** 再委託先詳細モーダル */
+  subcontractDetail: boolean;
 }
 
 /**
@@ -126,4 +128,5 @@ export const DEFAULT_DIALOG_STATES: DialogStates = {
   summary: false,
   projectList: false,
   spendingList: false,
+  subcontractDetail: false,
 };
