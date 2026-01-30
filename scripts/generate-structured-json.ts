@@ -16,6 +16,7 @@ import type {
   BudgetRecord,
   SpendingRecord,
   SpendingProject,
+  SpendingBlockFlow,
   Statistics,
   MinistryNode,
   BureauNode,
@@ -30,6 +31,7 @@ import type {
   BudgetSummary,
   ProjectOverview,
   SpendingInfo,
+  SpendingBlockFlowInfo,
 } from '../types/rs-system';
 
 const DATA_DIR = path.join(__dirname, '../data/year_2024');
@@ -95,8 +97,9 @@ async function main() {
   const overviewPath = path.join(DATA_DIR, '1-2_RS_2024_基本情報_事業概要等.csv');
   const budgetPath = path.join(DATA_DIR, '2-1_RS_2024_予算・執行_サマリ.csv');
   const spendingPath = path.join(DATA_DIR, '5-1_RS_2024_支出先_支出情報.csv');
+  const blockFlowPath = path.join(DATA_DIR, '5-2_RS_2024_支出先_支出ブロックのつながり.csv');
 
-  const requiredFiles = [orgPath, overviewPath, budgetPath, spendingPath];
+  const requiredFiles = [orgPath, overviewPath, budgetPath, spendingPath, blockFlowPath];
   for (const file of requiredFiles) {
     if (!fs.existsSync(file)) {
       console.error(`❌ 必要なCSVファイルが見つかりません: ${file}`);
@@ -109,11 +112,13 @@ async function main() {
   const overviewRows = readShiftJISCSV(overviewPath) as unknown as ProjectOverview[];
   const budgetRows = readShiftJISCSV(budgetPath) as unknown as BudgetSummary[];
   const spendingRows = readShiftJISCSV(spendingPath) as unknown as SpendingInfo[];
+  const blockFlowRows = readShiftJISCSV(blockFlowPath) as unknown as SpendingBlockFlowInfo[];
 
   console.log(`✓ 組織情報: ${orgRows.length}行`);
   console.log(`✓ 事業概要: ${overviewRows.length}行`);
   console.log(`✓ 予算情報: ${budgetRows.length}行`);
-  console.log(`✓ 支出情報: ${spendingRows.length}行\n`);
+  console.log(`✓ 支出情報: ${spendingRows.length}行`);
+  console.log(`✓ 支出ブロックフロー: ${blockFlowRows.length}行\n`);
 
   // データ処理
   console.log('データ処理中...');
@@ -146,11 +151,18 @@ async function main() {
   console.log(`✓ 2024年度予算レコード数: ${currentYearRecords.length}`);
   console.log(`✓ 過去年度予算レコード数: ${historicalYearRecords.length}`);
 
-  // 3. 支出レコード構築
+  // 3. 支出ブロックフローマップ構築
+  console.log('支出ブロックフローマップ構築中...');
+  const blockFlowMap = buildBlockFlowMap(blockFlowRows, spendingRows);
+  console.log(`✓ 直接支出ブロック数: ${blockFlowMap.isDirectFromGov.size}`);
+  console.log(`✓ 間接支出フロー数: ${Array.from(blockFlowMap.outflows.values()).reduce((sum, flows) => sum + flows.length, 0)}`);
+
+  // 4. 支出レコード構築
   console.log('支出レコード構築中...');
   const { spendingRecords, projectSpendingMap } = buildSpendingRecords(
     spendingRows,
-    currentYearRecords
+    currentYearRecords,
+    blockFlowMap
   );
   console.log(`✓ 支出レコード数: ${spendingRecords.length}`);
 
@@ -356,11 +368,113 @@ function buildBudgetRecords(
 }
 
 /**
+ * 支出ブロックフローのマップを構築
+ */
+interface BlockFlowMap {
+  // key: "projectId_blockNumber" (例: "7259_A")
+  // value: outflows（この支出先から他への流出）
+  outflows: Map<string, SpendingBlockFlow[]>;
+
+  // key: "projectId_blockNumber"
+  // value: isDirectFromGov（政府から直接支出か）
+  isDirectFromGov: Map<string, boolean>;
+}
+
+function buildBlockFlowMap(flowRows: SpendingBlockFlowInfo[], spendingRows: SpendingInfo[]): BlockFlowMap {
+  const outflows = new Map<string, SpendingBlockFlow[]>();
+  const isDirectFromGov = new Map<string, boolean>();
+
+  // ブロックごとの金額マップを構築（5-1 CSVから）
+  const blockAmountMap = new Map<string, number>();
+
+  // ブロックごとの個別支出先リストを構築（5-1 CSVから）
+  const blockRecipientsMap = new Map<string, Array<{
+    name: string;
+    corporateNumber: string;
+    amount: number;
+  }>>();
+
+  for (const row of spendingRows) {
+    const projectId = row.予算事業ID;
+    const blockNumber = row.支出先ブロック番号;
+    if (!projectId || !blockNumber) continue;
+
+    const key = `${projectId}_${blockNumber}`;
+
+    // ブロックの合計金額を取得
+    const blockAmount = parseAmount(row.ブロックの合計支出額);
+    const existing = blockAmountMap.get(key) || 0;
+    if (blockAmount > existing) {
+      blockAmountMap.set(key, blockAmount);
+    }
+
+    // 個別支出先を収集（支出先名がある場合）
+    const recipientName = row.支出先名?.trim();
+    if (recipientName) {
+      const amount = parseAmount(row.金額);
+      if (amount > 0) {
+        if (!blockRecipientsMap.has(key)) {
+          blockRecipientsMap.set(key, []);
+        }
+        blockRecipientsMap.get(key)!.push({
+          name: recipientName,
+          corporateNumber: row.法人番号?.trim() || '',
+          amount: amount,
+        });
+      }
+    }
+  }
+
+  for (const row of flowRows) {
+    const projectIdStr = row.予算事業ID;
+    const projectId = parseInt(projectIdStr, 10);
+    const sourceBlock = row.支出元の支出先ブロック;
+    const targetBlock = row.支出先の支出先ブロック;
+    const isDirectStr = row.担当組織からの支出;
+
+    if (!projectIdStr || !targetBlock || isNaN(projectId)) continue;
+
+    // 支出先ブロックが政府から直接支出かどうか
+    if (isDirectStr === 'TRUE') {
+      const key = `${projectIdStr}_${targetBlock}`;
+      isDirectFromGov.set(key, true);
+    }
+
+    // 支出元ブロックがある場合（再委託等）
+    if (sourceBlock && isDirectStr === 'FALSE') {
+      const sourceKey = `${projectIdStr}_${sourceBlock}`;
+      const targetKey = `${projectIdStr}_${targetBlock}`;
+      const amount = blockAmountMap.get(targetKey) || 0;
+      const recipients = blockRecipientsMap.get(targetKey) || [];
+
+      if (!outflows.has(sourceKey)) {
+        outflows.set(sourceKey, []);
+      }
+      outflows.get(sourceKey)!.push({
+        projectId: projectId,
+        projectName: row.事業名,
+        sourceBlockNumber: sourceBlock,
+        sourceBlockName: row.支出元の支出先ブロック名,
+        targetBlockNumber: targetBlock,
+        targetBlockName: row.支出先の支出先ブロック名,
+        flowType: row.資金の流れの補足情報 || '再委託',
+        amount: amount,
+        recipients: recipients.length > 0 ? recipients : undefined,
+        isDirectFromGov: false,
+      });
+    }
+  }
+
+  return { outflows, isDirectFromGov };
+}
+
+/**
  * 支出レコードを構築
  */
 function buildSpendingRecords(
   spendingRows: SpendingInfo[],
-  budgetRecords: BudgetRecord[]
+  budgetRecords: BudgetRecord[],
+  blockFlowMap: BlockFlowMap
 ): {
   spendingRecords: SpendingRecord[];
   projectSpendingMap: Map<number, number[]>;
@@ -380,6 +494,10 @@ function buildSpendingRecords(
     }>;
   }>();
 
+  // 間接支出ブロックの除外統計
+  let indirectBlockCount = 0;
+  let indirectBlockAmount = 0;
+
   for (const row of spendingRows) {
     const projectId = parseInt(row.予算事業ID, 10);
     if (isNaN(projectId)) continue;
@@ -389,6 +507,21 @@ function buildSpendingRecords(
 
     const amount = parseAmount(row.金額);
     if (amount <= 0) continue;
+
+    // 間接支出ブロックをスキップ（重複カウント防止）
+    const blockNumber = row.支出先ブロック番号;
+    if (blockNumber) {
+      const blockKey = `${projectId}_${blockNumber}`;
+      const isDirectFromGov = blockFlowMap.isDirectFromGov.get(blockKey);
+
+      // isDirectFromGovがfalseまたは未定義（=政府から直接支出ではない）の場合
+      // ただし、isDirectFromGovがtrueの場合のみ集計対象とする
+      if (isDirectFromGov !== true) {
+        indirectBlockCount++;
+        indirectBlockAmount += amount;
+        continue; // 間接支出はスキップ
+      }
+    }
 
     const key = getSpendingKey(spendingName, row.法人番号 || '');
 
@@ -458,6 +591,30 @@ function buildSpendingRecords(
       projects: projects.sort((a, b) => b.amount - a.amount),
     });
   }
+
+  // SpendingRecordにoutflowsを追加
+  for (const record of spendingRecords) {
+    const outflows: SpendingBlockFlow[] = [];
+
+    for (const project of record.projects) {
+      // ブロック番号が複数ある場合は最初のものを使用
+      const blockNumbers = project.blockNumber.split(', ').filter(b => b);
+
+      for (const blockNum of blockNumbers) {
+        const blockKey = `${project.projectId}_${blockNum}`;
+        const flows = blockFlowMap.outflows.get(blockKey) || [];
+        outflows.push(...flows);
+      }
+    }
+
+    if (outflows.length > 0) {
+      record.outflows = outflows;
+    }
+  }
+
+  // 間接支出除外の統計を出力
+  console.log(`✓ 間接支出ブロック除外数: ${indirectBlockCount}件`);
+  console.log(`✓ 間接支出除外金額: ${(indirectBlockAmount / 1e12).toFixed(2)}兆円`);
 
   return {
     spendingRecords: spendingRecords.sort((a, b) => b.totalSpendingAmount - a.totalSpendingAmount),

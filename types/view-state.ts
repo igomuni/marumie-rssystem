@@ -62,6 +62,8 @@ export interface TopNSettings {
     project: number;
     /** 支出元府省庁TopN */
     ministry: number;
+    /** 再委託先TopN */
+    subcontract: number;
   };
 }
 
@@ -79,6 +81,8 @@ export interface DialogStates {
   projectList: boolean;
   /** 支出先一覧モーダル */
   spendingList: boolean;
+  /** 再委託先詳細モーダル */
+  subcontractDetail: boolean;
 }
 
 /**
@@ -112,6 +116,7 @@ export const DEFAULT_TOPN_SETTINGS: TopNSettings = {
   spending: {
     project: 15,
     ministry: 10,
+    subcontract: 10,
   },
 };
 
@@ -123,4 +128,5 @@ export const DEFAULT_DIALOG_STATES: DialogStates = {
   summary: false,
   projectList: false,
   spendingList: false,
+  subcontractDetail: false,
 };

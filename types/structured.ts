@@ -126,6 +126,24 @@ export interface BudgetRecord {
   totalSpendingAmount: number;
 }
 
+// 支出ブロック間のフロー情報
+export interface SpendingBlockFlow {
+  projectId: number;                // 事業ID
+  projectName: string;              // 事業名
+  sourceBlockNumber: string;        // 支出元ブロック番号（例: "A"）
+  sourceBlockName: string;          // 支出元ブロック名（例: "株式会社博報堂"）
+  targetBlockNumber: string;        // 支出先ブロック番号（例: "B"）
+  targetBlockName: string;          // 支出先ブロック名（例: "東京電力EP等"）
+  flowType: string;                 // 資金の流れの種類（例: "間接補助金"）
+  amount: number;                   // 金額（円）
+  recipients?: {                    // ブロック内の個別支出先
+    name: string;                   // 支出先名
+    corporateNumber: string;        // 法人番号
+    amount: number;                 // 支出額（円）
+  }[];
+  isDirectFromGov: boolean;         // 担当組織からの直接支出か
+}
+
 // 支出レコード
 export interface SpendingRecord {
   // 基本情報
@@ -141,6 +159,10 @@ export interface SpendingRecord {
   totalSpendingAmount: number;
   projectCount: number;
   projects: SpendingProject[];
+
+  // 再委託情報（5-2 CSVから）
+  outflows?: SpendingBlockFlow[];   // この支出先から他への支出
+  inflows?: SpendingBlockFlow[];    // この支出先への流入（親支出先から）
 }
 
 export interface SpendingProject {
