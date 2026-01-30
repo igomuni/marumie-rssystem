@@ -20,6 +20,7 @@ interface GenerateOptions {
   ministryLimit?: number;
   projectLimit?: number;
   spendingLimit?: number;
+  subcontractLimit?: number; // Spending View: Top N subcontract recipients
   targetMinistryName?: string;
   targetProjectName?: string;
   targetRecipientName?: string;
@@ -38,6 +39,7 @@ function getCacheKey(options: GenerateOptions): string {
     ministryLimit: options.ministryLimit ?? 3,
     projectLimit: options.projectLimit ?? 3,
     spendingLimit: options.spendingLimit ?? 5,
+    subcontractLimit: options.subcontractLimit ?? 10,
     targetMinistryName: options.targetMinistryName ?? '',
     targetProjectName: options.targetProjectName ?? '',
     targetRecipientName: options.targetRecipientName ?? '',
@@ -117,6 +119,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
       ministryLimit,
       projectLimit,
       spendingLimit,
+      subcontractLimit: options.subcontractLimit,
       drilldownLevel,
       projectDrilldownLevel,
       spendingDrilldownLevel,
@@ -797,6 +800,7 @@ function buildSankeyData(
     ministryLimit: number;
     projectLimit: number;
     spendingLimit: number;
+    subcontractLimit?: number;
     drilldownLevel?: number;
     spendingDrilldownLevel?: number;
     projectDrilldownLevel?: number;
@@ -819,7 +823,7 @@ function buildSankeyData(
     cumulativeProjectSpendingMap,
   } = selection;
 
-  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit, drilldownLevel = 0, projectDrilldownLevel = 0, spendingDrilldownLevel = 0 } = options;
+  const { offset, targetMinistryName, targetProjectName, targetRecipientName, ministryLimit, projectLimit, spendingLimit, subcontractLimit = 10, drilldownLevel = 0, projectDrilldownLevel = 0, spendingDrilldownLevel = 0 } = options;
 
   const nodes: SankeyNode[] = [];
   const links: SankeyLink[] = [];
@@ -944,7 +948,164 @@ function buildSankeyData(
       });
     }
 
-    // Add nodes in order: recipient, project spending, project budget, ministry budget
+    // Column 4: Subcontract Recipient Nodes (再委託先)
+    const subcontractNodes: SankeyNode[] = [];
+    const subcontractLinks: SankeyLink[] = [];
+
+    // 選択した支出先の再委託先を取得
+    const selectedRecipient = topSpendings.find(s => s.spendingName === targetRecipientName);
+    const outflows = selectedRecipient?.outflows || [];
+
+    if (outflows.length > 0) {
+      // 再委託先を集約（個別支出先または同名の支出先はまとめる）
+      const subcontractAggregation = new Map<string, {
+        name: string;
+        corporateNumber?: string;
+        flowTypes: Set<string>;
+        totalAmount: number;
+        projects: Map<number, { projectId: number; projectName: string; amount: number }>;
+      }>();
+
+      for (const flow of outflows) {
+        // 個別支出先が存在する場合は個別にノードを作成
+        if (flow.recipients && flow.recipients.length > 0) {
+          for (const recipient of flow.recipients) {
+            const recipientKey = `${recipient.name}_${recipient.corporateNumber}`;
+            if (!subcontractAggregation.has(recipientKey)) {
+              subcontractAggregation.set(recipientKey, {
+                name: recipient.name,
+                corporateNumber: recipient.corporateNumber,
+                flowTypes: new Set(),
+                totalAmount: 0,
+                projects: new Map(),
+              });
+            }
+            const agg = subcontractAggregation.get(recipientKey)!;
+            agg.flowTypes.add(flow.flowType);
+            agg.totalAmount += recipient.amount;
+
+            // 事業情報を追加
+            if (!agg.projects.has(flow.projectId)) {
+              agg.projects.set(flow.projectId, {
+                projectId: flow.projectId,
+                projectName: flow.projectName,
+                amount: 0,
+              });
+            }
+            const projectData = agg.projects.get(flow.projectId)!;
+            projectData.amount += recipient.amount;
+          }
+        } else {
+          // 個別支出先がない場合はブロック名で集約
+          const targetName = flow.targetBlockName;
+          if (!subcontractAggregation.has(targetName)) {
+            subcontractAggregation.set(targetName, {
+              name: targetName,
+              flowTypes: new Set(),
+              totalAmount: 0,
+              projects: new Map(),
+            });
+          }
+          const agg = subcontractAggregation.get(targetName)!;
+          agg.flowTypes.add(flow.flowType);
+          agg.totalAmount += flow.amount;
+
+          // 事業情報を追加
+          if (!agg.projects.has(flow.projectId)) {
+            agg.projects.set(flow.projectId, {
+              projectId: flow.projectId,
+              projectName: flow.projectName,
+              amount: 0,
+            });
+          }
+          const projectData = agg.projects.get(flow.projectId)!;
+          projectData.amount += flow.amount;
+        }
+      }
+
+      // 再委託先を金額順にソート
+      const sortedSubcontracts = Array.from(subcontractAggregation.entries())
+        .map(([key, data]) => ({ key, ...data }))
+        .sort((a, b) => b.totalAmount - a.totalAmount);
+
+      // TopN設定（デフォルト10）
+      const subcontractLimit = options.subcontractLimit || 10;
+      const topSubcontracts = sortedSubcontracts.slice(0, subcontractLimit);
+      const otherSubcontracts = sortedSubcontracts.slice(subcontractLimit);
+
+      // TopN再委託先ノードを作成
+      for (const data of topSubcontracts) {
+        const nodeId = `subcontract-${data.key}`;
+        const projectList = Array.from(data.projects.values()).sort((a, b) => b.amount - a.amount);
+
+        subcontractNodes.push({
+          id: nodeId,
+          name: data.name,
+          type: 'subcontract-recipient',
+          value: data.totalAmount,
+          details: {
+            flowTypes: Array.from(data.flowTypes).join(', '),
+            sourceRecipient: targetRecipientName,
+            projects: projectList,
+          }
+        });
+
+        // リンク: 支出先 → 再委託先
+        subcontractLinks.push({
+          source: recipientNodeId,
+          target: nodeId,
+          value: data.totalAmount,
+          details: {
+            blockName: Array.from(data.flowTypes).join(', '),
+          }
+        });
+      }
+
+      // 「その他の再委託先」集約ノード
+      if (otherSubcontracts.length > 0) {
+        const otherTotalAmount = otherSubcontracts.reduce((sum, s) => sum + s.totalAmount, 0);
+        const otherFlowTypes = new Set<string>();
+        const otherProjects = new Map<number, { projectId: number; projectName: string; amount: number }>();
+
+        for (const data of otherSubcontracts) {
+          for (const flowType of data.flowTypes) {
+            otherFlowTypes.add(flowType);
+          }
+          for (const [projectId, project] of data.projects) {
+            if (!otherProjects.has(projectId)) {
+              otherProjects.set(projectId, { ...project, amount: 0 });
+            }
+            otherProjects.get(projectId)!.amount += project.amount;
+          }
+        }
+
+        const otherNodeId = 'subcontract-other';
+        const otherProjectList = Array.from(otherProjects.values()).sort((a, b) => b.amount - a.amount);
+
+        subcontractNodes.push({
+          id: otherNodeId,
+          name: `再委託先\n(Top${subcontractLimit}以外)`,
+          type: 'subcontract-recipient',
+          value: otherTotalAmount,
+          details: {
+            flowTypes: Array.from(otherFlowTypes).join(', '),
+            sourceRecipient: targetRecipientName,
+            projects: otherProjectList,
+          }
+        });
+
+        subcontractLinks.push({
+          source: recipientNodeId,
+          target: otherNodeId,
+          value: otherTotalAmount,
+          details: {
+            blockName: Array.from(otherFlowTypes).join(', '),
+          }
+        });
+      }
+    }
+
+    // Add nodes in order: recipient, project spending, project budget, ministry budget, subcontract
     nodes.push({
       id: recipientNodeId,
       name: targetRecipientName,
@@ -960,6 +1121,8 @@ function buildSankeyData(
     nodes.push(...projectSpendingNodes);
     nodes.push(...projectBudgetNodes);
     nodes.push(...ministryBudgetNodes);
+    nodes.push(...subcontractNodes); // 再委託先ノード
+    links.push(...subcontractLinks); // 再委託先リンク
 
     // 【新規追加】TopN府省庁からの「事業(TopN以外)」ノード
     const otherProjectsSpending = selection.otherProjectsSpendingInSpendingView || 0;

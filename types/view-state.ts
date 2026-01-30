@@ -62,6 +62,8 @@ export interface TopNSettings {
     project: number;
     /** 支出元府省庁TopN */
     ministry: number;
+    /** 再委託先TopN */
+    subcontract: number;
   };
 }
 
@@ -112,6 +114,7 @@ export const DEFAULT_TOPN_SETTINGS: TopNSettings = {
   spending: {
     project: 15,
     ministry: 10,
+    subcontract: 10,
   },
 };
 

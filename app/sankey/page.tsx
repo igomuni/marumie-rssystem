@@ -148,6 +148,7 @@ function SankeyContent() {
           params.set('projectLimit', topNSettings.spending.project.toString());
           params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
           params.set('limit', topNSettings.spending.ministry.toString());
+          params.set('subcontractLimit', topNSettings.spending.subcontract.toString());
         }
 
         const response = await fetch(`/api/sankey?${params.toString()}`);
@@ -724,11 +725,13 @@ function SankeyContent() {
                     return '#6b7280'; // グレー系
                   }
 
-                  // 予算系（緑系）、支出系（赤系）
+                  // 予算系（緑系）、支出系（赤系）、再委託先（オレンジ系）
                   if (type === 'ministry-budget' || type === 'project-budget') {
                     return '#10b981'; // 緑系
                   } else if (type === 'project-spending' || type === 'recipient') {
                     return '#ef4444'; // 赤系
+                  } else if (type === 'subcontract-recipient') {
+                    return '#f97316'; // オレンジ系（再委託先）
                   }
                   return '#6b7280'; // グレー系
                 }}
@@ -1374,6 +1377,20 @@ function SankeyContent() {
                     max="30"
                     value={tempTopNSettings.spending.ministry}
                     onChange={(e) => setTempTopNSettings(prev => ({ ...prev, spending: { ...prev.spending, ministry: parseInt(e.target.value) || 1 } }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    再委託先TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={tempTopNSettings.spending.subcontract}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, spending: { ...prev.spending, subcontract: parseInt(e.target.value) || 1 } }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
