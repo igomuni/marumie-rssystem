@@ -10,6 +10,7 @@ import ProjectListModal from '@/client/components/ProjectListModal';
 import SpendingListModal from '@/client/components/SpendingListModal';
 import SummaryDialog from '@/client/components/SummaryDialog';
 import ProjectDetailPanel from '@/client/components/ProjectDetailPanel';
+import SubcontractDetailDialog from '@/client/components/SubcontractDetailDialog';
 
 function SankeyContent() {
   const router = useRouter();
@@ -43,6 +44,16 @@ function SankeyContent() {
     spendingName?: string;
     groupBySpending?: boolean;
   } | undefined>(undefined);
+
+  // 再委託先詳細情報
+  const [subcontractDetail, setSubcontractDetail] = useState<{
+    name: string;
+    sourceRecipient: string;
+    totalAmount: number;
+    flowTypes: string;
+    projects: { projectId: number; projectName: string; amount: number }[];
+    furtherOutflows?: { name: string; amount: number; flowType: string }[];
+  } | null>(null);
 
   // Sync state from URL parameters (runs on mount and whenever URL changes via browser back/forward)
   useEffect(() => {
@@ -148,6 +159,7 @@ function SankeyContent() {
           params.set('projectLimit', topNSettings.spending.project.toString());
           params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
           params.set('limit', topNSettings.spending.ministry.toString());
+          params.set('subcontractLimit', topNSettings.spending.subcontract.toString());
         }
 
         const response = await fetch(`/api/sankey?${params.toString()}`);
@@ -309,6 +321,59 @@ function SankeyContent() {
       } else {
         // Other views: Go to Spending View (Standard behavior)
         navigateToView({ mode: 'spending', selectedRecipient: actualNode.name });
+      }
+      return;
+    }
+
+    // Handle Subcontract Recipient nodes
+    if (actualNode.type === 'subcontract-recipient') {
+      // Skip "再委託先(TopN以外)" aggregate nodes
+      if (actualNode.name.match(/^再委託先\n\(Top\d+以外.*\)$/)) {
+        return; // No action for aggregate node
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const details = actualNode.details as any;
+      if (details) {
+        // Find further outflows (再々委託先) from structuredData
+        let furtherOutflows: { name: string; amount: number; flowType: string }[] = [];
+        if (structuredData) {
+          const spendingRecord = structuredData.spendings.find(s => s.spendingName === actualNode.name);
+          if (spendingRecord && spendingRecord.outflows) {
+            // Aggregate recipients from outflows
+            const recipientMap = new Map<string, { amount: number; flowTypes: Set<string> }>();
+
+            for (const flow of spendingRecord.outflows) {
+              if (flow.recipients && flow.recipients.length > 0) {
+                for (const recipient of flow.recipients) {
+                  const key = recipient.name;
+                  if (!recipientMap.has(key)) {
+                    recipientMap.set(key, { amount: 0, flowTypes: new Set() });
+                  }
+                  const data = recipientMap.get(key)!;
+                  data.amount += recipient.amount;
+                  data.flowTypes.add(flow.flowType);
+                }
+              }
+            }
+
+            furtherOutflows = Array.from(recipientMap.entries()).map(([name, data]) => ({
+              name,
+              amount: data.amount,
+              flowType: Array.from(data.flowTypes).join(', '),
+            })).sort((a, b) => b.amount - a.amount);
+          }
+        }
+
+        setSubcontractDetail({
+          name: actualNode.name,
+          sourceRecipient: details.sourceRecipient || '',
+          totalAmount: actualNode.value,
+          flowTypes: details.flowTypes || '',
+          projects: details.projects || [],
+          furtherOutflows: furtherOutflows.length > 0 ? furtherOutflows : undefined,
+        });
+        setDialogStates(prev => ({ ...prev, subcontractDetail: true }));
       }
       return;
     }
@@ -720,15 +785,16 @@ function SankeyContent() {
                   if (name.startsWith('その他') ||
                     name.match(/^府省庁\(Top\d+以外.*\)$/) ||
                     name.match(/^事業\(Top\d+以外.*\)$/) ||
-                    name.match(/^支出先\(Top\d+以外.*\)$/)) {
+                    name.match(/^支出先\(Top\d+以外.*\)$/) ||
+                    name.match(/^再委託先\n\(Top\d+以外.*\)$/)) {
                     return '#6b7280'; // グレー系
                   }
 
                   // 予算系（緑系）、支出系（赤系）
                   if (type === 'ministry-budget' || type === 'project-budget') {
                     return '#10b981'; // 緑系
-                  } else if (type === 'project-spending' || type === 'recipient') {
-                    return '#ef4444'; // 赤系
+                  } else if (type === 'project-spending' || type === 'recipient' || type === 'subcontract-recipient') {
+                    return '#ef4444'; // 赤系（支出先・再委託先）
                   }
                   return '#6b7280'; // グレー系
                 }}
@@ -826,6 +892,7 @@ function SankeyContent() {
                       const isProjectOtherNode = nodeName.match(/^事業\n?\(Top\d+以外.*\)$/);
                       const isGlobalView = viewState.mode === 'global';
 
+                      const isSubcontractOtherNode = nodeName.match(/^再委託先\n\(Top\d+以外.*\)$/);
                       const isClickable =
                         node.id === 'ministry-budget-other' ||
                         node.id === 'total-budget' ||
@@ -833,7 +900,8 @@ function SankeyContent() {
                         node.id === 'recipient-other-aggregated' ||
                         (nodeType === 'ministry-budget' && node.id !== 'total-budget' && node.id !== 'ministry-budget-other') ||
                         ((nodeType === 'project-budget' || nodeType === 'project-spending') && !(isProjectOtherNode && isGlobalView)) ||
-                        (nodeType === 'recipient' && node.id !== 'recipient-top10-summary' && node.id !== 'recipient-other-aggregated');
+                        (nodeType === 'recipient' && node.id !== 'recipient-top10-summary' && node.id !== 'recipient-other-aggregated') ||
+                        (nodeType === 'subcontract-recipient' && !isSubcontractOtherNode);
 
                       const cursorStyle = isClickable ? 'pointer' : 'default';
                       const fontWeight = isClickable ? 'bold' : 500;
@@ -978,6 +1046,32 @@ function SankeyContent() {
                           )}
                           {details.location && (
                             <div>所在地: {details.location}</div>
+                          )}
+
+                          {/* 再委託先ノード */}
+                          {nodeType === 'subcontract-recipient' && details.sourceRecipient && (
+                            <div className="mt-1 pt-1 border-t border-gray-300">
+                              <div className="font-semibold">委託元: {details.sourceRecipient}</div>
+                              {details.flowTypes && (
+                                <div>資金の流れ: {details.flowTypes}</div>
+                              )}
+                              {details.projects && details.projects.length > 0 && (
+                                <div className="mt-1">
+                                  <div className="font-semibold">関連事業:</div>
+                                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                  {details.projects.slice(0, 5).map((proj: any, idx: number) => (
+                                    <div key={idx} className="ml-2">
+                                      • {proj.projectName}: {formatCurrency(proj.amount)}
+                                    </div>
+                                  ))}
+                                  {details.projects.length > 5 && (
+                                    <div className="ml-2 text-gray-400">
+                                      ... 他{details.projects.length - 5}事業
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       )}
@@ -1378,6 +1472,20 @@ function SankeyContent() {
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    再委託先TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={tempTopNSettings.spending.subcontract}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, spending: { ...prev.spending, subcontract: parseInt(e.target.value) || 1 } }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
+                </div>
               </div>
             </div>
 
@@ -1433,6 +1541,14 @@ function SankeyContent() {
         isOpen={dialogStates.summary}
         onClose={() => setDialogStates(prev => ({ ...prev, summary: false }))}
         metadata={metadata}
+        formatCurrency={formatCurrency}
+      />
+
+      {/* 再委託先詳細ダイアログ */}
+      <SubcontractDetailDialog
+        isOpen={dialogStates.subcontractDetail}
+        onClose={() => setDialogStates(prev => ({ ...prev, subcontractDetail: false }))}
+        detail={subcontractDetail}
         formatCurrency={formatCurrency}
       />
     </div>
