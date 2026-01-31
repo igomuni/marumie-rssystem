@@ -2,6 +2,8 @@
  * RS2024プリセットJSONデータの型定義
  */
 
+import type { SpendingTags } from './structured';
+
 // トップレベル構造
 export interface RS2024PresetData {
   metadata: PresetMetadata;
@@ -96,6 +98,7 @@ export interface RecipientNodeDetails {
   location: string;               // 所在地
   projectCount: number;           // 支出元事業数
   actualValue?: number;           // ダミー値使用時の実際の金額（ラベル表示用）
+  tags?: SpendingTags;            // タグ情報（組織種別・業種）
 }
 
 // 再委託先ノードの詳細
@@ -108,6 +111,7 @@ export interface SubcontractRecipientNodeDetails {
     amount: number;
   }[];
   actualValue?: number;           // ダミー値使用時の実際の金額（ラベル表示用）
+  tags?: SpendingTags;            // タグ情報（組織種別・業種）
 }
 
 // サンキーリンク

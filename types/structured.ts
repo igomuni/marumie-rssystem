@@ -163,6 +163,9 @@ export interface SpendingRecord {
   // 再委託情報（5-2 CSVから）
   outflows?: SpendingBlockFlow[];   // この支出先から他への支出
   inflows?: SpendingBlockFlow[];    // この支出先への流入（親支出先から）
+
+  // タグ情報（自動分類）
+  tags?: SpendingTags;
 }
 
 export interface SpendingProject {
@@ -205,4 +208,60 @@ export interface Statistics {
     ministry: string;
     totalSpendingAmount: number;
   }[];
+}
+
+// ========================================
+// タグ付け体系
+// ========================================
+
+/**
+ * 組織種別の大分類（Primary Category）
+ */
+export type PrimaryCategory = 'government' | 'private' | 'public-interest' | 'individual-other';
+
+/**
+ * 業種タグ
+ */
+export type IndustryTag =
+  | 'ITシステム・保守'
+  | '防衛・装備'
+  | '建設・土木'
+  | 'コンサルティング'
+  | '事務局・BPR'
+  | '教育・研究'
+  | '医療・保険'
+  | 'エネルギー'
+  | '金融'
+  | '物流・運輸'
+  | '印刷・広告'
+  | '農林水産'
+  | '製造'
+  | 'その他';
+
+/**
+ * ベンダーロックインリスク評価レベル
+ */
+export type LockInRisk = 'critical' | 'warning' | 'monitor' | 'strategic';
+
+/**
+ * 支出先タグ情報
+ */
+export interface SpendingTags {
+  /** 大分類（自動判定） */
+  primaryCategory: PrimaryCategory;
+
+  /** 中分類（自動判定） */
+  secondaryCategory: string;
+
+  /** 主要業種（UIのバッジ表示用） */
+  primaryIndustryTag: IndustryTag;
+
+  /** 全業種タグ（詳細表示用） */
+  industryTags: IndustryTag[];
+
+  /** ベンダーロックインリスク評価（分析結果） */
+  lockInRisk?: LockInRisk;
+
+  /** リスク評価の根拠 */
+  lockInRiskReason?: string;
 }

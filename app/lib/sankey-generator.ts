@@ -590,13 +590,11 @@ function selectData(
       }
     }
 
-    // Select projects that contribute to TopN recipients, sorted by contribution
+    // Select projects that contribute to TopN recipients
+    // Sort by total budget (descending) for intuitive ordering
     const contributingProjects = projectSource
       .filter(b => projectSpendingToTopRecipients.has(b.projectId))
-      .sort((a, b) => {
-        return (projectSpendingToTopRecipients.get(b.projectId) || 0) -
-          (projectSpendingToTopRecipients.get(a.projectId) || 0);
-      })
+      .sort((a, b) => b.totalBudget - a.totalBudget)
       .slice(0, spendingLimit); // Limit to Top N projects to match user expectation
 
     topProjects = contributingProjects;
@@ -731,7 +729,7 @@ function selectData(
 
     } else {
       // --- Project View: Select top spendings for the single project ---
-      const topSpendingIds = new Set<number>();
+      const topSpendingsArray: SpendingRecord[] = [];
 
       for (const project of topProjects) {
         const projectSpendings = data.spendings
@@ -749,8 +747,9 @@ function selectData(
 
         const topNSpendings = sortedSpendings.slice(0, spendingLimit);
 
+        // ソート済みの順序を保持して追加
         for (const { spending } of topNSpendings) {
-          topSpendingIds.add(spending.spendingId);
+          topSpendingsArray.push(spending);
         }
 
         const otherSpendingTotal = sortedSpendings
@@ -762,7 +761,7 @@ function selectData(
         }
       }
 
-      topSpendings = data.spendings.filter(s => topSpendingIds.has(s.spendingId));
+      topSpendings = topSpendingsArray;
     }
   }
 
@@ -1038,6 +1037,9 @@ function buildSankeyData(
         const nodeId = `subcontract-${data.key}`;
         const projectList = Array.from(data.projects.values()).sort((a, b) => b.amount - a.amount);
 
+        // 名前からspendingRecordを検索してtagsを取得
+        const matchingSpending = fullData.spendings.find(s => s.spendingName === data.name);
+
         subcontractNodes.push({
           id: nodeId,
           name: data.name,
@@ -1047,6 +1049,7 @@ function buildSankeyData(
             flowTypes: Array.from(data.flowTypes).join(', '),
             sourceRecipient: targetRecipientName,
             projects: projectList,
+            tags: matchingSpending?.tags,
           }
         });
 
@@ -1857,6 +1860,7 @@ function buildSankeyData(
           corporateNumber: spending.corporateNumber,
           location: spending.location,
           projectCount: spending.projectCount,
+          tags: spending.tags,
         },
       });
 
@@ -1919,6 +1923,7 @@ function buildSankeyData(
                 corporateNumber: spending.corporateNumber,
                 location: spending.location,
                 projectCount: spending.projectCount,
+                tags: spending.tags,
               },
             });
           }
