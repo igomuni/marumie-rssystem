@@ -590,13 +590,11 @@ function selectData(
       }
     }
 
-    // Select projects that contribute to TopN recipients, sorted by contribution
+    // Select projects that contribute to TopN recipients
+    // Sort by total budget (descending) for intuitive ordering
     const contributingProjects = projectSource
       .filter(b => projectSpendingToTopRecipients.has(b.projectId))
-      .sort((a, b) => {
-        return (projectSpendingToTopRecipients.get(b.projectId) || 0) -
-          (projectSpendingToTopRecipients.get(a.projectId) || 0);
-      })
+      .sort((a, b) => b.totalBudget - a.totalBudget)
       .slice(0, spendingLimit); // Limit to Top N projects to match user expectation
 
     topProjects = contributingProjects;
