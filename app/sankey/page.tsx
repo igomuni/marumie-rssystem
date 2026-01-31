@@ -738,11 +738,11 @@ function SankeyContent() {
           <div className="flex items-center gap-6 mb-4 text-sm">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#10b981]"></span>
-              <span className="text-gray-700">予算ノード</span>
+              <span className="text-gray-700">予算</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#ef4444]"></span>
-              <span className="text-gray-700">支出ノード</span>
+              <span className="text-gray-700">支出</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#6b7280]"></span>
