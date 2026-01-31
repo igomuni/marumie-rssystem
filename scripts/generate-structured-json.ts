@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { readShiftJISCSV, parseAmount } from './csv-reader';
 import { buildHierarchyPath, hierarchyPathToString } from '../client/lib/buildHierarchyPath';
+import { classifySpending } from './tag-classifier';
 import type { HierarchyPath } from '../types/rs-system';
 import type {
   RS2024StructuredData,
@@ -581,7 +582,7 @@ function buildSpendingRecords(
       projectSpendingMap.get(projectId)!.push(currentSpendingId);
     }
 
-    spendingRecords.push({
+    const record: SpendingRecord = {
       spendingId: currentSpendingId,
       spendingName: spending.name,
       corporateNumber: spending.corporateNumber,
@@ -590,7 +591,12 @@ function buildSpendingRecords(
       totalSpendingAmount: projects.reduce((sum, p) => sum + p.amount, 0),
       projectCount: projects.length,
       projects: projects.sort((a, b) => b.amount - a.amount),
-    });
+    };
+
+    // タグを自動付与
+    record.tags = classifySpending(record);
+
+    spendingRecords.push(record);
   }
 
   // SpendingRecordにoutflowsを追加
