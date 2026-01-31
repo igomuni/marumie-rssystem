@@ -8,7 +8,6 @@ import type { RS2024StructuredData } from '@/types/structured';
 import { DEFAULT_VIEW_STATE, DEFAULT_TOPN_SETTINGS, DEFAULT_DIALOG_STATES, type ViewState, type TopNSettings, type DialogStates } from '@/types/view-state';
 import ProjectListModal from '@/client/components/ProjectListModal';
 import SpendingListModal from '@/client/components/SpendingListModal';
-import SummaryDialog from '@/client/components/SummaryDialog';
 import ProjectDetailPanel from '@/client/components/ProjectDetailPanel';
 import SubcontractDetailDialog from '@/client/components/SubcontractDetailDialog';
 
@@ -655,23 +654,12 @@ function SankeyContent() {
           <div>
             <div className="flex items-start justify-between">
               <div>
-                {/* 1行目: ビュー名 + 概要ボタン */}
-                <div className="flex items-center gap-1 mb-1">
-                  <div className="text-sm font-medium text-gray-500">
-                    {viewState.mode === 'global' && '全体'}
-                    {viewState.mode === 'ministry' && '府省庁'}
-                    {viewState.mode === 'project' && '事業'}
-                    {viewState.mode === 'spending' && '支出先'}
-                  </div>
-                  <button
-                    onClick={() => setDialogStates(prev => ({ ...prev, summary: true }))}
-                    className="p-1 rounded-full bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
-                    aria-label="概要を表示"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-3">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                    </svg>
-                  </button>
+                {/* 1行目: ビュー名 */}
+                <div className="text-sm font-medium text-gray-500 mb-1">
+                  {viewState.mode === 'global' && '全体'}
+                  {viewState.mode === 'ministry' && '府省庁'}
+                  {viewState.mode === 'project' && '事業'}
+                  {viewState.mode === 'spending' && '支出先'}
                 </div>
 
                 {/* 2行目: 名称または年度 */}
@@ -1147,7 +1135,7 @@ function SankeyContent() {
 
                       {/* 矢印と流れる金額 */}
                       <div className="text-center my-2">
-                        <div className="text-sm font-bold text-blue-600">
+                        <div className="text-sm font-bold text-gray-900">
                           ↓ {linkValue}
                         </div>
                       </div>
@@ -1540,14 +1528,6 @@ function SankeyContent() {
         onSelectMinistry={handleSelectMinistry}
         onSelectProject={handleSelectProject}
         initialFilters={spendingListFilters}
-      />
-
-      {/* 概要ダイアログ */}
-      <SummaryDialog
-        isOpen={dialogStates.summary}
-        onClose={() => setDialogStates(prev => ({ ...prev, summary: false }))}
-        metadata={metadata}
-        formatCurrency={formatCurrency}
       />
 
       {/* 再委託先詳細ダイアログ */}
