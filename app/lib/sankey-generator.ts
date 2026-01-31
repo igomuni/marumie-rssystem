@@ -1038,6 +1038,9 @@ function buildSankeyData(
         const nodeId = `subcontract-${data.key}`;
         const projectList = Array.from(data.projects.values()).sort((a, b) => b.amount - a.amount);
 
+        // 名前からspendingRecordを検索してtagsを取得
+        const matchingSpending = fullData.spendings.find(s => s.spendingName === data.name);
+
         subcontractNodes.push({
           id: nodeId,
           name: data.name,
@@ -1047,6 +1050,7 @@ function buildSankeyData(
             flowTypes: Array.from(data.flowTypes).join(', '),
             sourceRecipient: targetRecipientName,
             projects: projectList,
+            tags: matchingSpending?.tags,
           }
         });
 
@@ -1857,6 +1861,7 @@ function buildSankeyData(
           corporateNumber: spending.corporateNumber,
           location: spending.location,
           projectCount: spending.projectCount,
+          tags: spending.tags,
         },
       });
 
@@ -1919,6 +1924,7 @@ function buildSankeyData(
                 corporateNumber: spending.corporateNumber,
                 location: spending.location,
                 projectCount: spending.projectCount,
+                tags: spending.tags,
               },
             });
           }

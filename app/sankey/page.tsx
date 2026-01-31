@@ -1048,6 +1048,20 @@ function SankeyContent() {
                             <div>所在地: {details.location}</div>
                           )}
 
+                          {/* タグ情報（支出先・再委託先） */}
+                          {details.tags && (
+                            <div className="mt-1 pt-1 border-t border-gray-300">
+                              <div className="flex flex-wrap gap-1 items-center">
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                                  {details.tags.secondaryCategory}
+                                </span>
+                                <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs font-medium">
+                                  {details.tags.primaryIndustryTag}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
                           {/* 再委託先ノード */}
                           {nodeType === 'subcontract-recipient' && details.sourceRecipient && (
                             <div className="mt-1 pt-1 border-t border-gray-300">
