@@ -731,7 +731,7 @@ function selectData(
 
     } else {
       // --- Project View: Select top spendings for the single project ---
-      const topSpendingIds = new Set<number>();
+      const topSpendingsArray: SpendingRecord[] = [];
 
       for (const project of topProjects) {
         const projectSpendings = data.spendings
@@ -749,8 +749,9 @@ function selectData(
 
         const topNSpendings = sortedSpendings.slice(0, spendingLimit);
 
+        // ソート済みの順序を保持して追加
         for (const { spending } of topNSpendings) {
-          topSpendingIds.add(spending.spendingId);
+          topSpendingsArray.push(spending);
         }
 
         const otherSpendingTotal = sortedSpendings
@@ -762,7 +763,7 @@ function selectData(
         }
       }
 
-      topSpendings = data.spendings.filter(s => topSpendingIds.has(s.spendingId));
+      topSpendings = topSpendingsArray;
     }
   }
 
