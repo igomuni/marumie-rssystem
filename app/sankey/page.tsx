@@ -1148,7 +1148,7 @@ function SankeyContent() {
                       {/* 矢印と流れる金額 */}
                       <div className="text-center my-2">
                         <div className="text-sm font-bold text-blue-600">
-                          ↓
+                          ↓ {linkValue}
                         </div>
                       </div>
 
