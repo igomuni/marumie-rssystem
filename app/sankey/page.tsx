@@ -972,18 +972,10 @@ function SankeyContent() {
                   const details = actualNode.details as any;
                   const value = formatCurrency(node.value, actualNode);
 
-                  // ノードタイプに応じてタイトルを調整
-                  let title = name;
-                  if (nodeType === 'project-budget') {
-                    title = `(予算) ${name}`;
-                  } else if (nodeType === 'project-spending') {
-                    title = `(支出) ${name}`;
-                  }
-
                   return (
                     <div className="bg-white px-3 py-2 rounded shadow-lg border border-gray-200">
                       <div className="font-bold text-gray-900 mb-1">
-                        {title}
+                        {name}
                       </div>
                       <div className="text-sm text-gray-600">
                         金額: {value}
