@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type { RS2024StructuredData, BudgetRecord, SpendingRecord } from '@/types/structured';
+import type { RS2024StructuredData, BudgetRecord, SpendingRecord, MOFFundingData, FundingSources } from '@/types/structured';
 import type {
   RS2024PresetData,
   SankeyNode,
@@ -9,6 +9,7 @@ import type {
 
 // Cache the data in memory to avoid re-reading the large JSON file
 let cachedData: RS2024StructuredData | null = null;
+let cachedMOFData: MOFFundingData | null = null;
 
 // Cache for generated results to avoid re-processing for same parameters
 const resultCache = new Map<string, RS2024PresetData>();
@@ -46,6 +47,56 @@ function getCacheKey(options: GenerateOptions): string {
     drilldownLevel: options.drilldownLevel ?? 0,
   };
   return JSON.stringify(canonicalOptions);
+}
+
+/**
+ * 府省庁名からMOF財源情報を取得
+ * RSシステムの府省庁名をMOF標準形式に変換してから検索
+ */
+function getMinistryFundingSources(ministryName: string): FundingSources | undefined {
+  if (!cachedMOFData) return undefined;
+
+  // RSシステムの府省庁名からMOF形式への変換マップ
+  const RS_TO_MOF_MAPPING: Record<string, string> = {
+    '内閣官房': '内閣',
+    '警察庁': '内閣府',
+    '金融庁': '内閣府',
+    '消費者庁': '内閣府',
+    '個人情報保護委員会': '内閣府',
+    '公害等調整委員会': '総務省',
+    '消防庁': '総務省',
+    '公安調査庁': '法務省',
+    '出入国在留管理庁': '法務省',
+    '公正取引委員会': '内閣府',
+    '国家公安委員会': '内閣府',
+    '宮内庁': '内閣府',
+    '特許庁': '経済産業省',
+    '中小企業庁': '経済産業省',
+    '資源エネルギー庁': '経済産業省',
+    '気象庁': '国土交通省',
+    '海上保安庁': '国土交通省',
+    '観光庁': '国土交通省',
+    '林野庁': '農林水産省',
+    '水産庁': '農林水産省',
+    '文化庁': '文部科学省',
+    'スポーツ庁': '文部科学省',
+    '原子力規制委員会': '環境省',
+    '検察庁': '法務省',
+  };
+
+  const mofMinistryName = RS_TO_MOF_MAPPING[ministryName] || ministryName;
+
+  // 府省庁別財源情報から検索
+  const ministryFunding = cachedMOFData.ministryFundings.find(
+    (m) => m.ministryName === mofMinistryName
+  );
+
+  if (ministryFunding) {
+    return ministryFunding.totalFunding;
+  }
+
+  // 見つからない場合は一般会計の按分（概算）を返す
+  return undefined;
 }
 
 export async function generateSankeyData(options: GenerateOptions = {}): Promise<RS2024PresetData> {
@@ -91,6 +142,19 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
     }
   }
   const fullData = cachedData!;
+
+  // 1.5. Load MOF funding data
+  if (!cachedMOFData) {
+    const mofDataPath = path.join(process.cwd(), 'public/data/mof-funding-2024.json');
+    try {
+      if (fs.existsSync(mofDataPath)) {
+        const rawMOFData = fs.readFileSync(mofDataPath, 'utf-8');
+        cachedMOFData = JSON.parse(rawMOFData);
+      }
+    } catch (error) {
+      console.warn('MOF funding data not found or invalid, funding info will be unavailable');
+    }
+  }
 
   // 2. Select Data
   const selection = selectData(fullData, {
@@ -942,7 +1006,8 @@ function buildSankeyData(
         originalId: ministry.id,
         details: {
           projectCount: ministryProjects.length,
-          bureauCount: ministry.bureauCount
+          bureauCount: ministry.bureauCount,
+          fundingSources: getMinistryFundingSources(ministry.name),
         }
       });
     }
@@ -1376,6 +1441,7 @@ function buildSankeyData(
         details: {
           projectCount: projectCount,
           bureauCount: ministry.bureauCount,
+          fundingSources: getMinistryFundingSources(ministry.name),
         },
       });
     }
