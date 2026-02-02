@@ -2,7 +2,7 @@
  * RS2024プリセットJSONデータの型定義
  */
 
-import type { SpendingTags } from './structured';
+import type { SpendingTags, FundingSources } from './structured';
 
 // トップレベル構造
 export interface RS2024PresetData {
@@ -64,6 +64,7 @@ export interface SankeyNode {
 export interface MinistryNodeDetails {
   projectCount: number;           // 事業数
   bureauCount: number;            // 局・庁数
+  fundingSources?: FundingSources; // 財源構成（MOFデータより）
 }
 
 // 事業（予算）ノードの詳細
