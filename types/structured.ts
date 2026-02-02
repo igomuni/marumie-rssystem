@@ -211,6 +211,91 @@ export interface Statistics {
 }
 
 // ========================================
+// MOF財源データ
+// ========================================
+
+/**
+ * 財源の種類
+ */
+export type FundingSourceType =
+  | '租税'           // 所得税、法人税、消費税等
+  | '公債金'         // 国債発行による収入
+  | '保険料'         // 社会保険料（年金、医療、雇用等）
+  | '一般会計繰入'   // 一般会計から特別会計への繰入（税金由来）
+  | 'その他';        // 国有財産収入、諸収入等
+
+/**
+ * 財源構成
+ */
+export interface FundingSources {
+  /** 租税（所得税、法人税、消費税等）- 円単位 */
+  taxRevenue: number;
+  /** 公債金（新規国債） - 円単位 */
+  publicBonds: number;
+  /** 社会保険料 - 円単位 */
+  insurancePremiums: number;
+  /** 一般会計繰入（税金由来） - 円単位 */
+  transferFromGeneral: number;
+  /** その他（国有財産収入等） - 円単位 */
+  other: number;
+  /** 合計 - 円単位 */
+  total: number;
+}
+
+/**
+ * 特別会計の財源情報
+ */
+export interface SpecialAccountFunding {
+  /** 特別会計名 */
+  specialAccountName: string;
+  /** 勘定名（厚生年金勘定、国民年金勘定等） */
+  accountingName?: string;
+  /** 所管（内閣府及び厚生労働省等） */
+  jurisdiction: string;
+  /** 財源構成 */
+  fundingSources: FundingSources;
+}
+
+/**
+ * 府省庁の財源情報
+ */
+export interface MinistryFunding {
+  /** 府省庁名 */
+  ministryName: string;
+  /** 一般会計（税金ベース）の財源構成 */
+  generalAccount: FundingSources;
+  /** 特別会計の財源構成（該当する場合） */
+  specialAccounts: SpecialAccountFunding[];
+  /** 合計財源構成 */
+  totalFunding: FundingSources;
+}
+
+/**
+ * MOF財源データ全体
+ */
+export interface MOFFundingData {
+  /** データ生成日時 */
+  generatedAt: string;
+  /** 会計年度 */
+  fiscalYear: number;
+  /** データ種別（予算/決算） */
+  dataType: 'budget' | 'settlement';
+  /** 一般会計の財源構成 */
+  generalAccountTotal: FundingSources;
+  /** 特別会計への一般会計繰入 */
+  transfersToSpecialAccounts: {
+    /** 特別会計名 */
+    specialAccountName: string;
+    /** 繰入額（円） */
+    amount: number;
+  }[];
+  /** 特別会計別の財源情報 */
+  specialAccountFundings: SpecialAccountFunding[];
+  /** 府省庁別の財源情報 */
+  ministryFundings: MinistryFunding[];
+}
+
+// ========================================
 // タグ付け体系
 // ========================================
 
