@@ -36,6 +36,8 @@ next-env.d.ts
 /public/data/
 # Allow compressed data files
 !/public/data/*.gz
+# Allow MOF budget data (small static file)
+!/public/data/mof-budget-overview-*.json
 
 # raw CSV data (939MB)
 /data/
