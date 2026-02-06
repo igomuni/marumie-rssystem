@@ -92,36 +92,43 @@ export default function MOFBudgetOverviewPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* ヘッダー */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                MOF予算全体ビュー
-              </h1>
-              <p className="text-gray-600 mt-2">
-                財務省予算総額（556.3兆円）とRS対象範囲（151.1兆円）の可視化
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                データ年度: 2023年度（令和5年度）当初予算
-              </p>
+      {/* 固定ボタン */}
+      <div className="fixed top-4 right-4 z-40 flex gap-2">
+        <Link
+          href="/"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
+        >
+          ホームに戻る
+        </Link>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-8">
+        {/* ヘッダー */}
+        <div className="mb-3 top-0 bg-gray-50 z-30 py-2 border-b border-gray-200 shadow-sm">
+          <div>
+            <div className="flex items-start justify-between">
+              <div>
+                {/* 1行目: ビュー名 */}
+                <div className="text-sm font-medium text-gray-500 mb-1">
+                  MOF予算全体
+                </div>
+
+                {/* 2行目: タイトル */}
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                  2023年度（令和5年度）当初予算
+                </h1>
+
+                {/* 3行目: 予算総額とRS対象 */}
+                <div className="text-lg font-semibold text-gray-700">
+                  予算総額{formatBudgetFromYen(data.metadata.totalBudget)} → RS対象{formatBudgetFromYen(data.metadata.rsTargetBudget)}
+                </div>
+              </div>
             </div>
-            <Link
-              href="/"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            >
-              ホームに戻る
-            </Link>
           </div>
         </div>
-      </header>
 
-      {/* メインコンテンツ */}
-      <main className="container mx-auto px-4 py-8">
         {/* サンキー図 */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-bold mb-4">予算の流れ</h2>
+        <div className="mb-6">
           <div
             style={{
               height: isMobile ? '600px' : '900px',
@@ -168,7 +175,7 @@ export default function MOFBudgetOverviewPage() {
 
         {/* 注記 */}
         <NotesPanel notes={data.metadata.notes} />
-      </main>
+      </div>
     </div>
   );
 }
@@ -320,50 +327,50 @@ function SummaryPanel({
   metadata: MOFBudgetOverviewData['metadata'];
 }) {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-      <h2 className="text-xl font-bold mb-4">予算サマリー</h2>
+    <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 className="text-lg font-bold mb-4 text-gray-800">予算サマリー</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* 全体 */}
-        <div className="border-l-4 border-blue-600 pl-4">
-          <h3 className="font-semibold text-gray-700 mb-2">予算総額</h3>
-          <p className="text-3xl font-bold text-blue-600">
+        <div className="border-l-4 border-blue-600 pl-3">
+          <div className="text-sm text-gray-600 mb-1">予算総額</div>
+          <div className="text-2xl font-bold text-blue-600">
             {formatBudgetFromYen(metadata.totalBudget)}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            一般会計 + 特別会計（重複含む）
-          </p>
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            一般会計 + 特別会計
+          </div>
         </div>
 
         {/* RS対象 */}
-        <div className="border-l-4 border-green-600 pl-4">
-          <h3 className="font-semibold text-gray-700 mb-2">RS対象</h3>
-          <p className="text-3xl font-bold text-green-600">
+        <div className="border-l-4 border-green-600 pl-3">
+          <div className="text-sm text-gray-600 mb-1">RS対象</div>
+          <div className="text-2xl font-bold text-green-600">
             {formatBudgetFromYen(metadata.rsTargetBudget)}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            事業レビュー対象（{summary.overall.rsTargetRate.toFixed(1)}%）
-          </p>
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            {summary.overall.rsTargetRate.toFixed(1)}%
+          </div>
         </div>
 
         {/* RS対象外 */}
-        <div className="border-l-4 border-red-600 pl-4">
-          <h3 className="font-semibold text-gray-700 mb-2">RS対象外</h3>
-          <p className="text-3xl font-bold text-red-600">
+        <div className="border-l-4 border-red-600 pl-3">
+          <div className="text-sm text-gray-600 mb-1">RS対象外</div>
+          <div className="text-2xl font-bold text-red-600">
             {formatBudgetFromYen(metadata.rsExcludedBudget)}
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            制度的支出（{(100 - summary.overall.rsTargetRate).toFixed(1)}%）
-          </p>
+          </div>
+          <div className="text-xs text-gray-500 mt-1">
+            {(100 - summary.overall.rsTargetRate).toFixed(1)}%
+          </div>
         </div>
       </div>
 
       {/* 詳細情報 */}
-      <div className="mt-6 pt-6 border-t grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="pt-4 border-t grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* 一般会計 */}
         <div>
-          <h4 className="font-semibold text-gray-800 mb-3">一般会計</h4>
-          <table className="w-full text-sm">
+          <h4 className="font-semibold text-gray-800 mb-2 text-sm">一般会計</h4>
+          <table className="w-full text-xs">
             <tbody>
               <tr>
                 <td className="py-1 text-gray-600">総額</td>
@@ -391,8 +398,8 @@ function SummaryPanel({
 
         {/* 特別会計 */}
         <div>
-          <h4 className="font-semibold text-gray-800 mb-3">特別会計</h4>
-          <table className="w-full text-sm">
+          <h4 className="font-semibold text-gray-800 mb-2 text-sm">特別会計</h4>
+          <table className="w-full text-xs">
             <tbody>
               <tr>
                 <td className="py-1 text-gray-600">総額</td>
@@ -427,60 +434,55 @@ function SummaryPanel({
  */
 function ExplanationPanel() {
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
-      <h2 className="text-xl font-bold text-blue-900 mb-4">
+    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <h2 className="text-base font-bold text-blue-900 mb-3">
         サンキー図の見方
       </h2>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <h3 className="font-semibold text-blue-800 mb-2">各列の説明</h3>
-          <ul className="space-y-2 text-sm text-gray-700">
+          <h3 className="font-semibold text-blue-800 mb-2 text-sm">各列の説明</h3>
+          <ul className="space-y-1 text-xs text-gray-700">
             <li>
-              <span className="font-semibold">Column 1（左端）:</span>{' '}
-              財源詳細（税目別、公債金、社会保険料等）
+              <span className="font-semibold">Column 1:</span> 財源詳細（税目別、公債金、社会保険料等）
             </li>
             <li>
-              <span className="font-semibold">Column 2:</span>{' '}
-              会計区分（一般会計 vs 特別会計）
+              <span className="font-semibold">Column 2:</span> 会計区分（一般会計 vs 特別会計）
             </li>
             <li>
-              <span className="font-semibold">Column 3:</span>{' '}
-              RS対象区分（事業レビュー対象 vs 対象外）
+              <span className="font-semibold">Column 3:</span> RS対象区分（事業レビュー対象 vs 対象外）
             </li>
             <li>
-              <span className="font-semibold">Column 4:</span>{' '}
-              詳細内訳（国債費、地方交付税、年金事業等）
+              <span className="font-semibold">Column 4:</span> 詳細内訳（国債費、地方交付税、年金事業等）
             </li>
             <li>
-              <span className="font-semibold">Column 5（右端）:</span>{' '}
-              RS集約（RSシステム対象 vs RS対象外）
+              <span className="font-semibold">Column 5:</span> RS集約（RSシステム対象 vs RS対象外）
             </li>
           </ul>
         </div>
 
         <div>
-          <h3 className="font-semibold text-blue-800 mb-2">配色の意味</h3>
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <h3 className="font-semibold text-blue-800 mb-2 text-sm">配色の意味</h3>
+          <div className="grid grid-cols-2 gap-1 text-xs">
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-green-600 rounded mr-2"></div>
+              <div className="w-3 h-3 bg-green-600 rounded mr-1.5"></div>
               <span>租税（持続可能な財源）</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-red-600 rounded mr-2"></div>
-              <span>公債金（国債、将来世代の負担）</span>
+              <div className="w-3 h-3 bg-red-600 rounded mr-1.5"></div>
+              <span>公債金（国債）</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-blue-600 rounded mr-2"></div>
+              <div className="w-3 h-3 bg-blue-600 rounded mr-1.5"></div>
               <span>社会保険料</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
-              <span>RS対象（事業レビュー対象）</span>
+              <div className="w-3 h-3 bg-green-500 rounded mr-1.5"></div>
+              <span>RS対象</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-red-400 rounded mr-2"></div>
-              <span>RS対象外（制度的支出）</span>
+              <div className="w-3 h-3 bg-red-400 rounded mr-1.5"></div>
+              <span>RS対象外</span>
             </div>
           </div>
         </div>
@@ -494,29 +496,30 @@ function ExplanationPanel() {
  */
 function NotesPanel({ notes }: { notes: string[] }) {
   return (
-    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-      <h2 className="text-xl font-bold text-yellow-900 mb-4">重要な注意事項</h2>
+    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+      <h2 className="text-base font-bold text-yellow-900 mb-3">重要な注意事項</h2>
 
-      <ul className="space-y-3 text-sm text-gray-700">
+      <ul className="space-y-2 text-xs text-gray-700">
         {notes.map((note, index) => (
           <li key={index} className="flex items-start">
-            <span className="text-yellow-600 mr-2">⚠️</span>
+            <span className="text-yellow-600 mr-1.5 text-sm">⚠️</span>
             <span>{note}</span>
           </li>
         ))}
 
-        <li className="flex items-start mt-4 pt-4 border-t border-yellow-300">
-          <span className="text-yellow-600 mr-2">📊</span>
+        <li className="flex items-start mt-3 pt-3 border-t border-yellow-300">
+          <span className="text-yellow-600 mr-1.5 text-sm">📊</span>
           <span>
-            詳細な分析結果は以下のドキュメントをご参照ください:{' '}
+            詳細な分析結果は{' '}
             <Link
               href="https://github.com/igomuni/marumie-rssystem/blob/main/docs/20260202_0000_MOF%E4%BA%88%E7%AE%97%E5%85%A8%E4%BD%93%E3%81%A8RS%E5%AF%BE%E8%B1%A1%E7%AF%84%E5%9B%B2%E3%81%AE%E5%8F%AF%E8%A6%96%E5%8C%96.md"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 underline"
             >
-              MOF予算全体とRS対象範囲の可視化
+              こちらのドキュメント
             </Link>
+            をご参照ください
           </span>
         </li>
       </ul>
