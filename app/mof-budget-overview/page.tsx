@@ -149,7 +149,7 @@ export default function MOFBudgetOverviewPage() {
               linkBlendMode="multiply"
               enableLinkGradient={false}
               label={(node) => {
-                const budget = formatBudgetFromYen(node.value);
+                const budget = formatBudgetFromYen(node.value || 0);
                 return `${node.name}\n${budget}`;
               }}
               labelPosition="outside"
@@ -250,7 +250,7 @@ function renderTooltip(node: SankeyNode & { details?: MOFBudgetNodeDetails }) {
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-md">
       <h3 className="font-bold text-lg mb-2">{node.name}</h3>
       <p className="text-2xl font-bold text-blue-600 mb-2">
-        {formatBudgetFromYen(node.value)}
+        {formatBudgetFromYen(node.value || 0)}
       </p>
 
       {details?.description && (
