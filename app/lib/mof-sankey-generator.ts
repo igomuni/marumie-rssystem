@@ -113,15 +113,27 @@ export function generateMOFBudgetOverviewSankey(
 
 /**
  * Column 1: 財源詳細ノード作成
+ * 並び順: 一般会計分（金額降順）→特別会計分
  */
 function createRevenueDetailNodes(
   mofData: MOFBudgetData
 ): (SankeyNode & { details?: MOFBudgetNodeDetails })[] {
   const nodes: (SankeyNode & { details?: MOFBudgetNodeDetails })[] = [];
 
-  // 租税（税目別）
+  // 一般会計の歳入項目（金額降順でソート）
   const taxes = mofData.generalAccount.revenue.taxes;
-  nodes.push(
+  const otherTaxes =
+    taxes.inheritanceTax +
+    taxes.gasolineTax +
+    taxes.sakeTax +
+    taxes.customsDuty +
+    taxes.tobaccoTax +
+    taxes.petroleumCoalTax +
+    taxes.automobileWeightTax +
+    taxes.powerDevelopmentTax +
+    taxes.otherTaxes;
+
+  const generalAccountRevenues = [
     {
       id: 'revenue-consumption-tax',
       name: '消費税',
@@ -154,110 +166,93 @@ function createRevenueDetailNodes(
         description: '企業利益への課税（21.3%）',
         amount: taxes.corporateTax,
       },
-    }
-  );
-
-  // その他の税をまとめる
-  const otherTaxes =
-    taxes.inheritanceTax +
-    taxes.gasolineTax +
-    taxes.sakeTax +
-    taxes.customsDuty +
-    taxes.tobaccoTax +
-    taxes.petroleumCoalTax +
-    taxes.automobileWeightTax +
-    taxes.powerDevelopmentTax +
-    taxes.otherTaxes;
-
-  nodes.push({
-    id: 'revenue-other-taxes',
-    name: 'その他税',
-    type: 'tax-detail' as MOFBudgetNodeType,
-    value: otherTaxes,
-    details: {
-      taxType: 'その他税',
-      description: '相続税、揮発油税、酒税、関税等',
-      amount: otherTaxes,
     },
-  });
-
-  // 公債金
-  nodes.push({
-    id: 'revenue-public-bonds',
-    name: '公債金（国債）',
-    type: 'public-bonds' as MOFBudgetNodeType,
-    value: mofData.generalAccount.revenue.publicBonds,
-    details: {
-      description: '新規国債発行（将来世代の負担）',
-      amount: mofData.generalAccount.revenue.publicBonds,
+    {
+      id: 'revenue-public-bonds',
+      name: '公債金（国債）',
+      type: 'public-bonds' as MOFBudgetNodeType,
+      value: mofData.generalAccount.revenue.publicBonds,
+      details: {
+        description: '新規国債発行（将来世代の負担）',
+        amount: mofData.generalAccount.revenue.publicBonds,
+      },
     },
-  });
+    {
+      id: 'revenue-other-taxes',
+      name: 'その他税',
+      type: 'tax-detail' as MOFBudgetNodeType,
+      value: otherTaxes,
+      details: {
+        taxType: 'その他税',
+        description: '相続税、揮発油税、酒税、関税等',
+        amount: otherTaxes,
+      },
+    },
+  ];
 
-  // 社会保険料
+  // 一般会計分を金額降順でソート
+  generalAccountRevenues.sort((a, b) => b.value - a.value);
+  nodes.push(...generalAccountRevenues);
+
+  // 特別会計の歳入項目
   const insurancePremiums = mofData.specialAccount.revenue.insurancePremiums;
-  nodes.push({
-    id: 'revenue-insurance-premiums',
-    name: '社会保険料',
-    type: 'insurance-premium' as MOFBudgetNodeType,
-    value: insurancePremiums.total,
-    details: {
-      description: '年金・医療・雇用保険料（国民・企業が負担）',
-      amount: insurancePremiums.total,
-    },
-  });
-
-  // 公債金（借換債）
-  nodes.push({
-    id: 'revenue-refinancing-bonds',
-    name: '公債金（借換債）',
-    type: 'public-bonds' as MOFBudgetNodeType,
-    value: mofData.specialAccount.revenue.publicBonds,
-    details: {
-      description: '既存国債の借り換え（特別会計）',
-      amount: mofData.specialAccount.revenue.publicBonds,
-    },
-  });
-
-  // 一般会計繰入
-  nodes.push({
-    id: 'revenue-transfer-from-general',
-    name: '一般会計繰入',
-    type: 'other-revenue' as MOFBudgetNodeType,
-    value: mofData.specialAccount.revenue.transferFromGeneral,
-    details: {
-      description: '一般会計から特別会計への繰入（税金由来）',
-      amount: mofData.specialAccount.revenue.transferFromGeneral,
-    },
-  });
-
-  // 他会計繰入
-  nodes.push({
-    id: 'revenue-transfer-from-other',
-    name: '他会計繰入',
-    type: 'other-revenue' as MOFBudgetNodeType,
-    value: mofData.specialAccount.revenue.transferFromOther,
-    details: {
-      description: '特別会計間の資金移動（重複計上）',
-      amount: mofData.specialAccount.revenue.transferFromOther,
-    },
-  });
-
-  // その他収入
   const otherRevenue =
     mofData.generalAccount.revenue.stampRevenue +
     mofData.generalAccount.revenue.otherRevenue +
     mofData.specialAccount.revenue.other;
 
-  nodes.push({
-    id: 'revenue-other',
-    name: 'その他収入',
-    type: 'other-revenue' as MOFBudgetNodeType,
-    value: otherRevenue,
-    details: {
-      description: '印紙収入、諸収入等',
-      amount: otherRevenue,
+  nodes.push(
+    {
+      id: 'revenue-insurance-premiums',
+      name: '社会保険料',
+      type: 'insurance-premium' as MOFBudgetNodeType,
+      value: insurancePremiums.total,
+      details: {
+        description: '年金・医療・雇用保険料（国民・企業が負担）',
+        amount: insurancePremiums.total,
+      },
     },
-  });
+    {
+      id: 'revenue-refinancing-bonds',
+      name: '公債金（借換債）',
+      type: 'public-bonds' as MOFBudgetNodeType,
+      value: mofData.specialAccount.revenue.publicBonds,
+      details: {
+        description: '既存国債の借り換え（特別会計）',
+        amount: mofData.specialAccount.revenue.publicBonds,
+      },
+    },
+    {
+      id: 'revenue-transfer-from-general',
+      name: '一般会計繰入',
+      type: 'other-revenue' as MOFBudgetNodeType,
+      value: mofData.specialAccount.revenue.transferFromGeneral,
+      details: {
+        description: '一般会計から特別会計への繰入（税金由来）',
+        amount: mofData.specialAccount.revenue.transferFromGeneral,
+      },
+    },
+    {
+      id: 'revenue-transfer-from-other',
+      name: '他会計繰入',
+      type: 'other-revenue' as MOFBudgetNodeType,
+      value: mofData.specialAccount.revenue.transferFromOther,
+      details: {
+        description: '特別会計間の資金移動（重複計上）',
+        amount: mofData.specialAccount.revenue.transferFromOther,
+      },
+    },
+    {
+      id: 'revenue-other',
+      name: 'その他収入',
+      type: 'other-revenue' as MOFBudgetNodeType,
+      value: otherRevenue,
+      details: {
+        description: '印紙収入、諸収入等',
+        amount: otherRevenue,
+      },
+    }
+  );
 
   return nodes;
 }
@@ -329,11 +324,13 @@ function createAccountTypeNodes(
 
 /**
  * Column 3: RS対象区分ノード作成
+ * 並び順: RS対象を上に配置（一般会計RS対象、特別会計RS対象、一般会計RS対象外、特別会計RS対象外）
  */
 function createRSCategoryNodes(
   mofData: MOFBudgetData
 ): (SankeyNode & { details?: MOFBudgetNodeDetails })[] {
   return [
+    // RS対象（上側）
     {
       id: 'rs-category-general-target',
       name: '一般会計RS対象',
@@ -346,6 +343,19 @@ function createRSCategoryNodes(
         amount: mofData.generalAccount.expenditure.rsTarget,
       },
     },
+    {
+      id: 'rs-category-special-target',
+      name: '特別会計RS対象',
+      type: 'rs-category' as MOFBudgetNodeType,
+      value: mofData.specialAccount.expenditure.rsTarget.total,
+      details: {
+        category: 'RS対象',
+        parentAccount: '特別会計',
+        description: '年金・労働保険等の事業（17.8%）',
+        amount: mofData.specialAccount.expenditure.rsTarget.total,
+      },
+    },
+    // RS対象外（下側）
     {
       id: 'rs-category-general-excluded',
       name: '一般会計RS対象外',
@@ -365,18 +375,6 @@ function createRSCategoryNodes(
       },
     },
     {
-      id: 'rs-category-special-target',
-      name: '特別会計RS対象',
-      type: 'rs-category' as MOFBudgetNodeType,
-      value: mofData.specialAccount.expenditure.rsTarget.total,
-      details: {
-        category: 'RS対象',
-        parentAccount: '特別会計',
-        description: '年金・労働保険等の事業（17.8%）',
-        amount: mofData.specialAccount.expenditure.rsTarget.total,
-      },
-    },
-    {
       id: 'rs-category-special-excluded',
       name: '特別会計RS対象外',
       type: 'rs-category' as MOFBudgetNodeType,
@@ -393,12 +391,13 @@ function createRSCategoryNodes(
 
 /**
  * Column 4: 詳細内訳ノード作成
+ * 並び順: RS対象を上に配置（一般会計事業、特別会計事業たち、一般会計RS対象外たち、特別会計RS対象外たち）
  */
 function createBudgetDetailNodes(
   mofData: MOFBudgetData
 ): (SankeyNode & { details?: MOFBudgetNodeDetails })[] {
   return [
-    // 一般会計RS対象
+    // RS対象（上側）- 一般会計
     {
       id: 'detail-general-projects',
       name: '一般会計事業',
@@ -411,32 +410,7 @@ function createBudgetDetailNodes(
         amount: mofData.generalAccount.expenditure.rsTarget,
       },
     },
-    // 一般会計RS対象外
-    {
-      id: 'detail-debt-service',
-      name: '国債費',
-      type: 'budget-detail' as MOFBudgetNodeType,
-      value: mofData.generalAccount.expenditure.debtService,
-      details: {
-        detailType: '国債費',
-        isRSTarget: false,
-        description: '国債の利払い・償還',
-        amount: mofData.generalAccount.expenditure.debtService,
-      },
-    },
-    {
-      id: 'detail-local-allocation-tax',
-      name: '地方交付税',
-      type: 'budget-detail' as MOFBudgetNodeType,
-      value: mofData.generalAccount.expenditure.localAllocationTax,
-      details: {
-        detailType: '地方交付税',
-        isRSTarget: false,
-        description: '地方自治体への財源移転',
-        amount: mofData.generalAccount.expenditure.localAllocationTax,
-      },
-    },
-    // 特別会計RS対象
+    // RS対象（上側）- 特別会計
     {
       id: 'detail-pension-projects',
       name: '年金事業',
@@ -481,7 +455,32 @@ function createBudgetDetailNodes(
           mofData.specialAccount.expenditure.accounts.others.rsTarget,
       },
     },
-    // 特別会計RS対象外
+    // RS対象外（下側）- 一般会計
+    {
+      id: 'detail-debt-service',
+      name: '国債費',
+      type: 'budget-detail' as MOFBudgetNodeType,
+      value: mofData.generalAccount.expenditure.debtService,
+      details: {
+        detailType: '国債費',
+        isRSTarget: false,
+        description: '国債の利払い・償還',
+        amount: mofData.generalAccount.expenditure.debtService,
+      },
+    },
+    {
+      id: 'detail-local-allocation-tax',
+      name: '地方交付税',
+      type: 'budget-detail' as MOFBudgetNodeType,
+      value: mofData.generalAccount.expenditure.localAllocationTax,
+      details: {
+        detailType: '地方交付税',
+        isRSTarget: false,
+        description: '地方自治体への財源移転',
+        amount: mofData.generalAccount.expenditure.localAllocationTax,
+      },
+    },
+    // RS対象外（下側）- 特別会計
     {
       id: 'detail-debt-retirement',
       name: '国債整理基金',
