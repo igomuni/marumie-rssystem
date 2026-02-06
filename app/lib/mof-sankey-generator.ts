@@ -224,7 +224,7 @@ function createSourceNodes(
     if (a.name === 'その他税') return 1;
     if (b.name === 'その他税') return -1;
     // それ以外は金額降順
-    return b.value - a.value;
+    return (b.value || 0) - (a.value || 0);
   });
   nodes.push(...generalAccountRevenues);
 
