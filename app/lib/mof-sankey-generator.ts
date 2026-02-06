@@ -172,7 +172,7 @@ function createSourceNodes(
   ];
 
   // その他の税（1兆円以上を個別表示）
-  const otherTaxItems = [
+  const otherTaxItems: Array<{ id: string; name: import('@/types/mof-budget-overview').TaxType; value: number }> = [
     { id: 'inheritance-tax', name: '相続税', value: taxes.inheritanceTax },
     { id: 'gasoline-tax', name: '揮発油税', value: taxes.gasolineTax },
     { id: 'sake-tax', name: '酒税', value: taxes.sakeTax },
