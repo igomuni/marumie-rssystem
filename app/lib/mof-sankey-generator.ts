@@ -691,7 +691,7 @@ function createRevenueToAccountLinks(
   const transferOther = revenueNodes.find(n => n.id === 'revenue-transfer-from-other')!;
 
   // List of accounts and their needs
-  const accountNeeds = Object.entries(specialAccounts).map(([key, node]) => {
+  const accountNeeds = Object.entries(specialAccounts).map(([_key, node]) => {
     return {
       id: node.id,
       need: getNeed(node.id, node.value || 0)
@@ -780,7 +780,7 @@ function createAccountToRSCategoryLinks(
     if (accKey === 'allocation-tax') accKey = 'allocationTax';
 
     // Look up in mofData
-    // @ts-ignore
+    // @ts-expect-error - Dynamic key access for account mapping
     const accData = mofData.specialAccount.expenditure.accounts[accKey] as { rsTarget: number, rsExcluded: number };
 
     if (accData) {
@@ -944,7 +944,7 @@ function createDetailToSummaryLinks(
   )!;
 
   detailNodes.forEach((detailNode) => {
-    const details = (detailNode as any).details as MOFBudgetNodeDetails | undefined;
+    const details = (detailNode as SankeyNode & { details?: MOFBudgetNodeDetails }).details;
     if (details) {
       const target = details.isRSTarget ? rsTargetSummary : rsExcludedSummary;
       links.push({
