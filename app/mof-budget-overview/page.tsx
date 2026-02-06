@@ -155,7 +155,7 @@ export default function MOFBudgetOverviewPage() {
               labelPosition="outside"
               labelPadding={16}
               labelTextColor="#333"
-              tooltip={({ node }) => renderTooltip(node as SankeyNode & { name: string; value: number; type: string })}
+              nodeTooltip={({ node }) => renderTooltip(node as SankeyNode & { name: string; value: number; type: string })}
             />
           </div>
         </div>
