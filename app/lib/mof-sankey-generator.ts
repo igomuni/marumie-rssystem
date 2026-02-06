@@ -125,14 +125,14 @@ function createSourceNodes(
   const taxes = mofData.generalAccount.revenue.taxes;
   const THRESHOLD = 1_000_000_000_000; // 1兆円
 
-  const generalAccountRevenues = [
+  const generalAccountRevenues: (SankeyNode & { details?: MOFBudgetNodeDetails })[] = [
     {
       id: 'revenue-consumption-tax',
       name: '消費税',
       type: 'tax-detail' as MOFBudgetNodeType,
       value: taxes.consumptionTax,
       details: {
-        taxType: '消費税',
+        taxType: '消費税' as const,
         description: '最大の税収源（34.2%）',
         amount: taxes.consumptionTax,
       },
@@ -143,7 +143,7 @@ function createSourceNodes(
       type: 'tax-detail' as MOFBudgetNodeType,
       value: taxes.incomeTax,
       details: {
-        taxType: '所得税',
+        taxType: '所得税' as const,
         description: '個人所得への課税（30.7%）',
         amount: taxes.incomeTax,
       },
@@ -154,7 +154,7 @@ function createSourceNodes(
       type: 'tax-detail' as MOFBudgetNodeType,
       value: taxes.corporateTax,
       details: {
-        taxType: '法人税',
+        taxType: '法人税' as const,
         description: '企業利益への課税（21.3%）',
         amount: taxes.corporateTax,
       },
@@ -211,7 +211,7 @@ function createSourceNodes(
       type: 'tax-detail' as MOFBudgetNodeType,
       value: otherTaxesSum,
       details: {
-        taxType: 'その他税',
+        taxType: 'その他税' as const,
         description: `その他税（${(otherTaxesSum / 1e12).toFixed(1)}兆円）`,
         amount: otherTaxesSum,
       },
