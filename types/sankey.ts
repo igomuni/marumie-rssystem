@@ -6,6 +6,9 @@
 export interface SankeyNode {
   id: string;
   nodeColor?: string;
+  name?: string;
+  value?: number;
+  type?: string;
 }
 
 export interface SankeyLink {

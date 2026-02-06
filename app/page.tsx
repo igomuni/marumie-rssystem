@@ -30,6 +30,30 @@ export default function Home() {
               </ul>
             </div>
           </Link>
+
+          {/* MOF予算全体ビュー（NEW） */}
+          <Link href="/mof-budget-overview">
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-purple-500">
+              <div className="flex items-center mb-3">
+                <h2 className="text-2xl font-semibold text-purple-600 dark:text-purple-400">
+                  🏛️ MOF予算全体ビュー
+                </h2>
+                <span className="ml-3 px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded">
+                  NEW
+                </span>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                財務省予算総額（556.3兆円）とRS対象範囲（151.1兆円）を財源詳細から支出先まで一貫して可視化します。
+              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>• <strong>財源詳細</strong>: 租税を税目別に分解（消費税、所得税、法人税等）</li>
+                <li>• <strong>予算の流れ</strong>: 財源 → 会計区分 → RS対象区分 → 詳細内訳 → RS集約</li>
+                <li>• <strong>RS対象率</strong>: 全体27.2%（一般会計63.4%、特別会計17.8%）</li>
+                <li>• <strong>誤解防止</strong>: 国債費・地方交付税等の制度的支出を明示</li>
+                <li>• データ年度: 2023年度（令和5年度）当初予算</li>
+              </ul>
+            </div>
+          </Link>
         </div>
 
         <footer className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
