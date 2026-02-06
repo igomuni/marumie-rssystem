@@ -176,8 +176,8 @@ export default function MOFBudgetOverviewPage() {
 /**
  * ノードの配色
  */
-function getNodeColor(node: SankeyNode): string {
-  const details = node.details as MOFBudgetNodeDetails | undefined;
+function getNodeColor(node: SankeyNode & { details?: MOFBudgetNodeDetails }): string {
+  const details = node.details;
 
   // 税目別
   if (node.type === 'tax-detail') {
