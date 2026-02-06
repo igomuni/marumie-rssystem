@@ -123,16 +123,7 @@ function createSourceNodes(
 
   // 一般会計の歳入項目（金額降順でソート）
   const taxes = mofData.generalAccount.revenue.taxes;
-  const otherTaxes =
-    taxes.inheritanceTax +
-    taxes.gasolineTax +
-    taxes.sakeTax +
-    taxes.customsDuty +
-    taxes.tobaccoTax +
-    taxes.petroleumCoalTax +
-    taxes.automobileWeightTax +
-    taxes.powerDevelopmentTax +
-    taxes.otherTaxes;
+  const THRESHOLD = 1_000_000_000_000; // 1兆円
 
   const generalAccountRevenues = [
     {
@@ -178,18 +169,54 @@ function createSourceNodes(
         amount: mofData.generalAccount.revenue.publicBonds,
       },
     },
-    {
+  ];
+
+  // その他の税（1兆円以上を個別表示）
+  const otherTaxItems = [
+    { id: 'inheritance-tax', name: '相続税', value: taxes.inheritanceTax },
+    { id: 'gasoline-tax', name: '揮発油税', value: taxes.gasolineTax },
+    { id: 'sake-tax', name: '酒税', value: taxes.sakeTax },
+    { id: 'customs-duty', name: '関税', value: taxes.customsDuty },
+    { id: 'tobacco-tax', name: 'たばこ税', value: taxes.tobaccoTax },
+    { id: 'petroleum-coal-tax', name: '石油石炭税', value: taxes.petroleumCoalTax },
+    { id: 'automobile-weight-tax', name: '自動車重量税', value: taxes.automobileWeightTax },
+    { id: 'power-development-tax', name: '電源開発促進税', value: taxes.powerDevelopmentTax },
+    { id: 'other-taxes', name: 'その他税', value: taxes.otherTaxes },
+  ];
+
+  let otherTaxesSum = 0;
+  otherTaxItems.forEach(item => {
+    if (item.value >= THRESHOLD) {
+      generalAccountRevenues.push({
+        id: `revenue-${item.id}`,
+        name: item.name,
+        type: 'tax-detail' as MOFBudgetNodeType,
+        value: item.value,
+        details: {
+          taxType: item.name,
+          description: `${item.name}（${(item.value / 1e12).toFixed(1)}兆円）`,
+          amount: item.value,
+        },
+      });
+    } else {
+      otherTaxesSum += item.value;
+    }
+  });
+
+  // 1兆円未満の税をまとめて「その他税」として追加
+  if (otherTaxesSum > 0) {
+    generalAccountRevenues.push({
       id: 'revenue-other-taxes',
       name: 'その他税',
       type: 'tax-detail' as MOFBudgetNodeType,
-      value: otherTaxes,
+      value: otherTaxesSum,
       details: {
         taxType: 'その他税',
-        description: '相続税、揮発油税、酒税、関税等',
-        amount: otherTaxes,
+        description: `その他税（${(otherTaxesSum / 1e12).toFixed(1)}兆円）`,
+        amount: otherTaxesSum,
       },
-    },
-  ];
+    });
+  }
 
   // 一般会計分を金額降順でソート
   generalAccountRevenues.sort((a, b) => b.value - a.value);
@@ -198,7 +225,7 @@ function createSourceNodes(
   // 特別会計ノード
   const accounts = mofData.specialAccount.expenditure.accounts;
 
-  // 年金特別会計
+  // 年金特別会計（常に表示）
   nodes.push({
     id: 'source-pension',
     name: '年金特会',
@@ -214,7 +241,7 @@ function createSourceNodes(
     },
   });
 
-  // 労働保険特別会計
+  // 労働保険特別会計（常に表示）
   nodes.push({
     id: 'source-labor',
     name: '労働保険特会',
@@ -230,51 +257,62 @@ function createSourceNodes(
     },
   });
 
-  // その他特別会計（統合）
-  const otherTotal =
-    accounts.energy.total +
-    accounts.food.total +
-    accounts.reconstruction.total +
-    accounts.forex.total +
-    accounts.debtRetirement.total +
-    accounts.allocationTax.total +
-    accounts.filp.total +
-    accounts.others.total;
+  // その他特別会計（1兆円以上を個別表示）
+  const otherSpecialAccounts = [
+    { id: 'energy', name: 'エネ対策特会', data: accounts.energy },
+    { id: 'food', name: '食料安定特会', data: accounts.food },
+    { id: 'reconstruction', name: '復興特会', data: accounts.reconstruction },
+    { id: 'forex', name: '外為特会', data: accounts.forex },
+    { id: 'debt-retirement', name: '国債整理基金', data: accounts.debtRetirement },
+    { id: 'allocation-tax', name: '交付税配付', data: accounts.allocationTax },
+    { id: 'filp', name: '財政投融資', data: accounts.filp },
+    { id: 'others', name: 'その他特会', data: accounts.others },
+  ];
 
-  const otherRSTarget =
-    accounts.energy.rsTarget +
-    accounts.food.rsTarget +
-    accounts.reconstruction.rsTarget +
-    accounts.forex.rsTarget +
-    accounts.debtRetirement.rsTarget +
-    accounts.allocationTax.rsTarget +
-    accounts.filp.rsTarget +
-    accounts.others.rsTarget;
+  let otherSpecialTotal = 0;
+  let otherSpecialRSTarget = 0;
+  let otherSpecialRSExcluded = 0;
 
-  const otherRSExcluded =
-    accounts.energy.rsExcluded +
-    accounts.food.rsExcluded +
-    accounts.reconstruction.rsExcluded +
-    accounts.forex.rsExcluded +
-    accounts.debtRetirement.rsExcluded +
-    accounts.allocationTax.rsExcluded +
-    accounts.filp.rsExcluded +
-    accounts.others.rsExcluded;
-
-  nodes.push({
-    id: 'source-other-special',
-    name: 'その他特会',
-    type: 'account-type' as MOFBudgetNodeType,
-    value: otherTotal,
-    details: {
-      accountType: '特別会計',
-      rsTargetAmount: otherRSTarget,
-      rsExcludedAmount: otherRSExcluded,
-      rsTargetRate: otherTotal > 0 ? (otherRSTarget / otherTotal) * 100 : 0,
-      description: `その他特会統合（${(otherTotal / 1e12).toFixed(1)}兆円）`,
-      amount: otherTotal,
-    },
+  otherSpecialAccounts.forEach(acc => {
+    if (acc.data.total >= THRESHOLD) {
+      nodes.push({
+        id: `source-${acc.id}`,
+        name: acc.name,
+        type: 'account-type' as MOFBudgetNodeType,
+        value: acc.data.total,
+        details: {
+          accountType: '特別会計',
+          rsTargetAmount: acc.data.rsTarget,
+          rsExcludedAmount: acc.data.rsExcluded,
+          rsTargetRate: acc.data.total > 0 ? (acc.data.rsTarget / acc.data.total) * 100 : 0,
+          description: `${acc.name}（${(acc.data.total / 1e12).toFixed(1)}兆円）`,
+          amount: acc.data.total,
+        },
+      });
+    } else {
+      otherSpecialTotal += acc.data.total;
+      otherSpecialRSTarget += acc.data.rsTarget;
+      otherSpecialRSExcluded += acc.data.rsExcluded;
+    }
   });
+
+  // 1兆円未満の特会をまとめて「その他特会」として追加
+  if (otherSpecialTotal > 0) {
+    nodes.push({
+      id: 'source-other-special',
+      name: 'その他特会',
+      type: 'account-type' as MOFBudgetNodeType,
+      value: otherSpecialTotal,
+      details: {
+        accountType: '特別会計',
+        rsTargetAmount: otherSpecialRSTarget,
+        rsExcludedAmount: otherSpecialRSExcluded,
+        rsTargetRate: otherSpecialTotal > 0 ? (otherSpecialRSTarget / otherSpecialTotal) * 100 : 0,
+        description: `その他特会（${(otherSpecialTotal / 1e12).toFixed(1)}兆円）`,
+        amount: otherSpecialTotal,
+      },
+    });
+  }
 
   return nodes;
 }
