@@ -155,14 +155,86 @@ export default function MOFBudgetOverviewPage() {
               linkHoverOthersOpacity={0.1}
               linkBlendMode="multiply"
               enableLinkGradient={false}
-              label={(node) => {
-                const budget = formatBudgetFromYen(node.value || 0);
-                return `${node.name}\n${budget}`;
-              }}
-              labelPosition="outside"
-              labelPadding={16}
-              labelTextColor="#333"
               nodeTooltip={({ node }) => renderTooltip(node as SankeyNode & { name: string; value: number; type: string })}
+              layers={[
+                'links',
+                'nodes',
+                'legends',
+                // カスタムレイヤーで金額を上に、名前を横に配置
+                // @ts-expect-error - Nivoのカスタムレイヤー型定義が不完全なため
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ({ nodes }: any) => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  return nodes.map((node: any) => {
+                    const actualNode = data.sankey.nodes.find((n: SankeyNode) => n.id === node.id) as SankeyNode & { name?: string; value?: number; type?: string; details?: MOFBudgetNodeDetails };
+                    const name = actualNode?.name || node.id;
+                    const amount = formatBudgetFromYen(node.value || 0);
+
+                    // Position based on column: left columns on left, right columns on right
+                    // Column 1-2: Revenue/Account types (left)
+                    // Column 3-5: RS categories/Details/Summary (right)
+                    const isLeftColumn = actualNode?.type === 'tax-detail' ||
+                                        actualNode?.type === 'public-bonds' ||
+                                        actualNode?.type === 'insurance-premium' ||
+                                        actualNode?.type === 'other-revenue' ||
+                                        actualNode?.type === 'account-type';
+
+                    const x = isLeftColumn ? node.x - 4 : node.x + node.width + 4;
+                    const textAnchor = isLeftColumn ? 'end' : 'start';
+
+                    // X position for amount label (centered above node)
+                    const amountX = node.x + node.width / 2;
+
+                    return (
+                      <g key={node.id}>
+                        {/* 金額ラベル（ノードの真上中央に配置） */}
+                        <text
+                          x={amountX}
+                          y={node.y - 6}
+                          textAnchor="middle"
+                          dominantBaseline="auto"
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            fill: '#1f2937',
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          {amount}
+                        </text>
+
+                        {/* 名前ラベル（ノードの中央横に配置） */}
+                        <text
+                          x={x}
+                          y={node.y + node.height / 2}
+                          textAnchor={textAnchor}
+                          dominantBaseline="middle"
+                          style={{
+                            fill: '#1f2937',
+                            fontSize: 12,
+                            fontWeight: 500,
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          {name.includes('\n') ? (
+                            name.split('\n').map((line: string, i: number) => (
+                              <tspan
+                                key={i}
+                                x={x}
+                                dy={i === 0 ? 0 : 14}
+                              >
+                                {line}
+                              </tspan>
+                            ))
+                          ) : (
+                            name
+                          )}
+                        </text>
+                      </g>
+                    );
+                  });
+                },
+              ]}
             />
           </div>
         </div>
