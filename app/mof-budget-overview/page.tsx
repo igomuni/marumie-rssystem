@@ -147,8 +147,8 @@ export default function MOFBudgetOverviewPage() {
                 colors={getNodeColor}
               nodeOpacity={1}
               nodeHoverOthersOpacity={0.35}
-              nodeThickness={24}
-              nodeSpacing={16}
+              nodeThickness={42}
+              nodeSpacing={20}
               nodeBorderWidth={0}
               nodeBorderRadius={3}
               linkOpacity={0.4}
@@ -261,12 +261,12 @@ function getNodeColor(node: SankeyNode & { details?: MOFBudgetNodeDetails }): st
 
   // 税目別
   if (node.type === 'tax-detail') {
-    return '#10b981'; // 緑（持続可能な財源）
+    return '#90caf9'; // 緑（持続可能な財源）
   }
 
   // 公債金
   if (node.type === 'public-bonds') {
-    return '#ef4444'; // 赤（将来世代の負担）
+    return '#70bbf8'; // 赤（将来世代の負担）
   }
 
   // 社会保険料
@@ -281,12 +281,12 @@ function getNodeColor(node: SankeyNode & { details?: MOFBudgetNodeDetails }): st
 
   // 一般会計
   if (details?.accountType === '一般会計') {
-    return '#bbdefb'; // 薄青
+    return '#90caf9'; // 薄青
   }
 
   // 特別会計
   if (details?.accountType === '特別会計') {
-    return '#90caf9'; // 青
+    return '#f19d2f'; // 青
   }
 
   // RS対象
