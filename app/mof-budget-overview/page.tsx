@@ -137,8 +137,14 @@ export default function MOFBudgetOverviewPage() {
               <ResponsiveSankey
                 data={data.sankey}
                 margin={{ top: 40, right: 100, bottom: 40, left: 100 }}
-              align="justify"
-              colors={getNodeColor}
+                align="justify"
+                sort={(a, b) => {
+                  // カスタムソート: データ配列の順序を維持
+                  const indexA = data.sankey.nodes.findIndex((n) => n.id === a.id);
+                  const indexB = data.sankey.nodes.findIndex((n) => n.id === b.id);
+                  return indexA - indexB;
+                }}
+                colors={getNodeColor}
               nodeOpacity={1}
               nodeHoverOthersOpacity={0.35}
               nodeThickness={24}
