@@ -128,21 +128,15 @@ export default function MOFBudgetOverviewPage() {
         </div>
 
         {/* サンキー図 */}
-        <div className="mb-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 relative">
           <div
-            style={{
-              height: isMobile ? '600px' : '900px',
-              minWidth: isMobile ? '1200px' : '100%',
-              overflowX: isMobile ? 'auto' : 'visible',
-            }}
+            className={isMobile ? 'overflow-x-auto' : ''}
+            style={isMobile ? { WebkitOverflowScrolling: 'touch' } : {}}
           >
-            <ResponsiveSankey
-              data={data.sankey}
-              margin={
-                isMobile
-                  ? { top: 40, right: 150, bottom: 40, left: 150 }
-                  : { top: 40, right: 250, bottom: 40, left: 250 }
-              }
+            <div style={{ height: '800px', minWidth: isMobile ? '1200px' : 'auto', backgroundColor: 'white' }}>
+              <ResponsiveSankey
+                data={data.sankey}
+                margin={{ top: 40, right: 100, bottom: 40, left: 100 }}
               align="justify"
               colors={getNodeColor}
               nodeOpacity={1}
@@ -236,6 +230,7 @@ export default function MOFBudgetOverviewPage() {
                 },
               ]}
             />
+            </div>
           </div>
         </div>
 
