@@ -23,25 +23,30 @@ export function generateMOFBudgetOverviewSankey(
   const revenueNodes = createRevenueDetailNodes(mofData);
   nodes.push(...revenueNodes);
 
-  // Column 2: 会計区分ノード
-  const accountNodes = createAccountTypeNodes(mofData);
-  nodes.push(...accountNodes);
+  // Column 2: 会計集約ノード（一般会計、特別会計集約）
+  const accountAggregateNodes = createAccountAggregateNodes(mofData);
+  nodes.push(...accountAggregateNodes);
 
-  // Column 3: RS対象区分ノード
+  // Column 3: 会計詳細ノード（一般会計、年金特会、労働保険特会、その他特会）
+  const accountDetailNodes = createAccountDetailNodes(mofData);
+  nodes.push(...accountDetailNodes);
+
+  // Column 4: RS対象区分ノード
   const rsCategoryNodes = createRSCategoryNodes(mofData);
   nodes.push(...rsCategoryNodes);
 
-  // Column 4: 詳細内訳ノード
+  // Column 5: 詳細内訳ノード
   const detailNodes = createBudgetDetailNodes(mofData);
   nodes.push(...detailNodes);
 
-  // Column 5: RS集約ノード
+  // Column 6: RS集約ノード
   const summaryNodes = createRSSummaryNodes(mofData);
   nodes.push(...summaryNodes);
 
   // リンク生成
-  links.push(...createRevenueToAccountLinks(revenueNodes, accountNodes, mofData));
-  links.push(...createAccountToRSCategoryLinks(accountNodes, rsCategoryNodes, mofData));
+  links.push(...createRevenueToAccountAggregateLinks(revenueNodes, accountAggregateNodes, mofData));
+  links.push(...createAccountAggregateToDetailLinks(accountAggregateNodes, accountDetailNodes, mofData));
+  links.push(...createAccountDetailToRSCategoryLinks(accountDetailNodes, rsCategoryNodes, mofData));
   links.push(...createRSCategoryToDetailLinks(rsCategoryNodes, detailNodes));
   links.push(...createDetailToSummaryLinks(detailNodes, summaryNodes));
 
@@ -196,10 +201,61 @@ function createRevenueDetailNodes(
 }
 
 /**
- * Column 2: 会計区分ノード作成（シンプル化）
- * 一般会計 + 主要特別会計（年金、労働保険）+ その他統合
+ * Column 2: 会計集約ノード作成
+ * 一般会計 + 特別会計（集約）の2つのみ
  */
-function createAccountTypeNodes(
+function createAccountAggregateNodes(
+  mofData: MOFBudgetData
+): (SankeyNode & { details?: MOFBudgetNodeDetails })[] {
+  const nodes: (SankeyNode & { details?: MOFBudgetNodeDetails })[] = [];
+
+  // 1. 一般会計
+  const generalRSTarget = mofData.generalAccount.expenditure.rsTarget;
+  const generalRSExcluded =
+    mofData.generalAccount.expenditure.debtService +
+    mofData.generalAccount.expenditure.localAllocationTax +
+    mofData.generalAccount.expenditure.reserves;
+
+  nodes.push({
+    id: 'aggregate-general',
+    name: '一般会計',
+    type: 'account-type' as MOFBudgetNodeType,
+    value: mofData.generalAccount.total,
+    details: {
+      accountType: '一般会計',
+      rsTargetAmount: generalRSTarget,
+      rsExcludedAmount: generalRSExcluded,
+      rsTargetRate: (generalRSTarget / mofData.generalAccount.total) * 100,
+      description: '国の基本的な予算（114.4兆円）',
+      amount: mofData.generalAccount.total,
+    },
+  });
+
+  // 2. 特別会計（集約）
+  nodes.push({
+    id: 'aggregate-special',
+    name: '特別会計',
+    type: 'account-type' as MOFBudgetNodeType,
+    value: mofData.specialAccount.total,
+    details: {
+      accountType: '特別会計',
+      rsTargetAmount: mofData.specialAccount.expenditure.rsTarget.total,
+      rsExcludedAmount: mofData.specialAccount.expenditure.rsExcluded.total,
+      rsTargetRate:
+        (mofData.specialAccount.expenditure.rsTarget.total / mofData.specialAccount.total) * 100,
+      description: `特別会計統合（${(mofData.specialAccount.total / 1e12).toFixed(1)}兆円）`,
+      amount: mofData.specialAccount.total,
+    },
+  });
+
+  return nodes;
+}
+
+/**
+ * Column 3: 会計詳細ノード作成
+ * 一般会計（パススルー） + 主要特別会計（年金、労働保険）+ その他統合
+ */
+function createAccountDetailNodes(
   mofData: MOFBudgetData
 ): (SankeyNode & { details?: MOFBudgetNodeDetails })[] {
   const nodes: (SankeyNode & { details?: MOFBudgetNodeDetails })[] = [];
@@ -588,40 +644,88 @@ function createRSSummaryNodes(
 }
 
 /**
- * 財源 → 会計区分 のリンク作成（シンプル化）
- * Column 1の税収・公債金 → Column 2の一般会計のみ
- * 特会はColumn 2から独立して開始
+ * Column 1 → Column 2 のリンク作成
+ * 税収・公債金 → 一般会計（集約）
  */
-function createRevenueToAccountLinks(
+function createRevenueToAccountAggregateLinks(
   revenueNodes: SankeyNode[],
-  accountNodes: SankeyNode[],
+  accountAggregateNodes: SankeyNode[],
   _mofData: MOFBudgetData
 ): SankeyLink[] {
   const links: SankeyLink[] = [];
-  const generalAccount = accountNodes.find((n) => n.id === 'account-general')!;
+  const generalAggregate = accountAggregateNodes.find((n) => n.id === 'aggregate-general')!;
 
-  // すべての歳入（税収詳細 + 公債金）→ 一般会計
+  // すべての歳入（税収詳細 + 公債金）→ 一般会計（集約）
   revenueNodes.forEach(n => {
-    links.push({ source: n.id, target: generalAccount.id, value: n.value || 0 });
+    links.push({ source: n.id, target: generalAggregate.id, value: n.value || 0 });
   });
 
   return links;
 }
 
 /**
- * 会計区分 → RS対象区分 のリンク作成（シンプル化対応）
+ * Column 2 → Column 3 のリンク作成
+ * 一般会計（集約）→ 一般会計（詳細）、特別会計（集約）→ 年金特会等
  */
-function createAccountToRSCategoryLinks(
-  accountNodes: SankeyNode[],
+function createAccountAggregateToDetailLinks(
+  accountAggregateNodes: SankeyNode[],
+  accountDetailNodes: SankeyNode[],
+  _mofData: MOFBudgetData
+): SankeyLink[] {
+  const links: SankeyLink[] = [];
+
+  const generalAggregate = accountAggregateNodes.find((n) => n.id === 'aggregate-general')!;
+  const specialAggregate = accountAggregateNodes.find((n) => n.id === 'aggregate-special')!;
+
+  const generalDetail = accountDetailNodes.find((n) => n.id === 'account-general')!;
+  const pensionDetail = accountDetailNodes.find((n) => n.id === 'account-pension')!;
+  const laborDetail = accountDetailNodes.find((n) => n.id === 'account-labor')!;
+  const otherSpecialDetail = accountDetailNodes.find((n) => n.id === 'account-other-special')!;
+
+  // 一般会計（集約）→ 一般会計（詳細）パススルー
+  links.push({
+    source: generalAggregate.id,
+    target: generalDetail.id,
+    value: generalAggregate.value || 0,
+  });
+
+  // 特別会計（集約）→ 年金特会、労働保険特会、その他特会
+  links.push(
+    {
+      source: specialAggregate.id,
+      target: pensionDetail.id,
+      value: pensionDetail.value || 0,
+    },
+    {
+      source: specialAggregate.id,
+      target: laborDetail.id,
+      value: laborDetail.value || 0,
+    },
+    {
+      source: specialAggregate.id,
+      target: otherSpecialDetail.id,
+      value: otherSpecialDetail.value || 0,
+    }
+  );
+
+  return links;
+}
+
+/**
+ * Column 3 → Column 4 のリンク作成
+ * 会計詳細 → RS対象区分
+ */
+function createAccountDetailToRSCategoryLinks(
+  accountDetailNodes: SankeyNode[],
   rsCategoryNodes: SankeyNode[],
   mofData: MOFBudgetData
 ): SankeyLink[] {
   const links: SankeyLink[] = [];
 
-  const generalAccount = accountNodes.find((n) => n.id === 'account-general')!;
-  const pensionAccount = accountNodes.find((n) => n.id === 'account-pension')!;
-  const laborAccount = accountNodes.find((n) => n.id === 'account-labor')!;
-  const otherSpecialAccount = accountNodes.find((n) => n.id === 'account-other-special')!;
+  const generalAccount = accountDetailNodes.find((n) => n.id === 'account-general')!;
+  const pensionAccount = accountDetailNodes.find((n) => n.id === 'account-pension')!;
+  const laborAccount = accountDetailNodes.find((n) => n.id === 'account-labor')!;
+  const otherSpecialAccount = accountDetailNodes.find((n) => n.id === 'account-other-special')!;
 
   const generalTarget = rsCategoryNodes.find(
     (n) => n.id === 'rs-category-general-target'
