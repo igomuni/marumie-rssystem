@@ -11,6 +11,7 @@
     "normalize": "python3 scripts/normalize_csv.py",
     "generate-structured": "tsx scripts/generate-structured-json.ts",
     "generate-project-details": "tsx scripts/generate-project-details.ts",
+    "generate-mof-data": "tsx scripts/generate-mof-budget-overview-data.ts",
     "compress-data": "gzip -9 -k public/data/rs2024-structured.json && gzip -9 -k public/data/rs2024-project-details.json",
     "validate-tags": "tsx scripts/validate-tags.ts",
     "setup": "npm install && npm run normalize && npm run generate-structured && npm run generate-project-details"
