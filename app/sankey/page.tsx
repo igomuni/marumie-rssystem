@@ -820,7 +820,6 @@ function SankeyContent() {
                   'nodes',
                   'legends',
                   // カスタムレイヤーで2行ラベルを実現
-                  // @ts-expect-error - Nivoのカスタムレイヤー型定義が不完全なため
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   ({ nodes }: any) => {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -184,7 +184,6 @@ export default function TransferDetailPage() {
               'nodes',
               'legends',
               // カスタムレイヤーで金額と名前を表示
-              // @ts-expect-error - Nivoのカスタムレイヤー型定義が不完全なため
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ({ nodes }: any) => {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
