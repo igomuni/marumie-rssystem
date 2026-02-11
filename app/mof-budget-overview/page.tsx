@@ -127,6 +127,22 @@ export default function MOFBudgetOverviewPage() {
           </div>
         </div>
 
+        {/* ビュー切替ナビゲーション */}
+        <div className="mb-4 bg-white rounded-lg shadow p-4">
+          <h2 className="text-sm font-semibold text-gray-700 mb-2">詳細ビュー</h2>
+          <div className="flex flex-wrap gap-2">
+            <div className="px-4 py-2 bg-blue-100 text-blue-700 rounded font-medium border-2 border-blue-300">
+              全体フロー（現在）
+            </div>
+            <Link
+              href="/mof-budget-overview/transfer-detail"
+              className="px-4 py-2 bg-white text-gray-700 rounded font-medium border-2 border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              特別会計 財源内訳
+            </Link>
+          </div>
+        </div>
+
         {/* サンキー図 */}
         <div className="bg-white rounded-lg shadow-lg p-6 relative">
           <div

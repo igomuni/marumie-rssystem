@@ -3,6 +3,11 @@
  */
 
 import type { SankeyNode, SankeyLink } from './sankey';
+import type {
+  TransferFromGeneralAccount,
+  InsurancePremiumAllocation,
+  TransferBetweenSpecialAccounts,
+} from './mof-transfer';
 
 /**
  * MOF予算全体ビューのノード種別
@@ -161,15 +166,23 @@ export interface MOFBudgetData {
   specialAccount: {
     total: number;
     revenue: {
-      insurancePremiums: {
-        pension: number; // 年金保険料
-        labor: number; // 労働保険料
-        other: number; // その他保険料
-        total: number; // 保険料合計
-      };
-      transferFromGeneral: number; // 一般会計繰入
+      // 社会保険料（シンプル版または詳細版）
+      insurancePremiums:
+        | {
+            pension: number; // 年金保険料
+            labor: number; // 労働保険料
+            other: number; // その他保険料
+            total: number; // 保険料合計
+          }
+        | InsurancePremiumAllocation; // 詳細版（将来実装）
+
+      // 一般会計繰入（総額のみまたは詳細版）
+      transferFromGeneral: number | TransferFromGeneralAccount;
+
+      // 特別会計間繰入（総額のみまたは詳細版）
+      transferFromOther: number | TransferBetweenSpecialAccounts;
+
       publicBonds: number; // 公債金（借換債）
-      transferFromOther: number; // 他会計繰入
       other: number; // その他
       total: number; // 歳入合計
     };
