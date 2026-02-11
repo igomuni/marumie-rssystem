@@ -177,7 +177,6 @@ export default function MOFBudgetOverviewPage() {
                 'nodes',
                 'legends',
                 // カスタムレイヤーで金額を上に、名前を横に配置
-                // @ts-expect-error - Nivoのカスタムレイヤー型定義が不完全なため
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ({ nodes }: any) => {
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -343,7 +342,7 @@ function renderTooltip(node: SankeyNode & { details?: MOFBudgetNodeDetails }) {
   const details = node.details;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-md">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-[280px] max-w-md">
       <h3 className="font-bold text-lg mb-2">{node.name}</h3>
       <p className="text-2xl font-bold text-blue-600 mb-2">
         {formatBudgetFromYen(node.value || 0)}
