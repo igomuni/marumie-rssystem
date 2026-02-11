@@ -235,7 +235,7 @@ export function generateTransferDetailSankey(mofData: MOFBudgetData): {
   links.push({
     source: 'category-other-transfer',
     target: 'special-account-total',
-    value: mofData.specialAccount.revenue.transferFromOther,
+    value: typeof transferFromOther === 'number' ? transferFromOther : transferFromOther.total,
   });
 
   links.push({
