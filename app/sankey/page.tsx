@@ -960,7 +960,7 @@ function SankeyContent() {
                   const value = formatCurrency(node.value, actualNode);
 
                   return (
-                    <div className="bg-white px-3 py-2 rounded shadow-lg border border-gray-200">
+                    <div className="bg-white px-3 py-2 rounded shadow-lg border border-gray-200 min-w-[280px]">
                       <div className="font-bold text-gray-900 mb-1">
                         {name}
                       </div>
@@ -1111,7 +1111,7 @@ function SankeyContent() {
                   }
 
                   return (
-                    <div className="bg-white px-4 py-3 rounded shadow-lg border border-gray-200 max-w-md">
+                    <div className="bg-white px-4 py-3 rounded shadow-lg border border-gray-200 min-w-[280px] max-w-md">
                       {/* タイトル */}
                       <div className="text-sm font-bold text-gray-900 mb-2 border-b border-gray-200 pb-2">
                         {title}

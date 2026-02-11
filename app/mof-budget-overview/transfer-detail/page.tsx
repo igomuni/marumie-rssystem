@@ -170,7 +170,7 @@ export default function TransferDetailPage() {
             enableLinkGradient={true}
             label={(node) => `${node.id}`}
             nodeTooltip={({ node }) => (
-              <div className="bg-white px-3 py-2 rounded shadow-lg border border-gray-200">
+              <div className="bg-white px-3 py-2 rounded shadow-lg border border-gray-200 min-w-[240px]">
                 <div className="font-semibold text-gray-900">
                   {(node as SankeyNode & { name?: string }).name || node.id}
                 </div>
