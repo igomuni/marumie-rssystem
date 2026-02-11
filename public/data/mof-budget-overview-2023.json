@@ -41,7 +41,50 @@
         "other": 8770000000000,
         "total": 50170000000000
       },
-      "transferFromGeneral": 32510000000000,
+      "transferFromGeneral": {
+        "total": 32808963296000,
+        "totalIncludingDebt": 58057963296000,
+        "breakdown": {
+          "pension": {
+            "total": 15100000000000,
+            "details": {
+              "basicPension": 12200000000000,
+              "nurseryBenefit": 1374000000000,
+              "childAllowance": 1029000000000,
+              "pensionAdministration": 497000000000
+            }
+          },
+          "localAllocationTax": {
+            "total": 16451000000000,
+            "details": {
+              "generalTransfer": 16182000000000,
+              "specialTransfer": 217000000000,
+              "trafficViolationFund": 52000000000
+            }
+          },
+          "debtRetirement": {
+            "total": 25249000000000,
+            "details": {
+              "ordinaryBondRedemption": 24764000000000,
+              "pensionBondRedemption": 272000000000,
+              "investmentBondRedemption": 213000000000
+            }
+          },
+          "energy": {
+            "total": 813000000000,
+            "details": {
+              "petroleumCoalTax": 520000000000,
+              "powerDevelopmentTax": 293000000000
+            }
+          },
+          "foodSupply": 315486380000,
+          "laborInsurance": 35162866000,
+          "automotiveSafety": 33559546000,
+          "reconstruction": 29794771000,
+          "forestryDebtManagement": 29114372000,
+          "patent": 1845361000
+        }
+      },
       "publicBonds": 165120000000000,
       "transferFromOther": 81320000000000,
       "other": 114310000000000,
