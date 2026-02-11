@@ -126,10 +126,11 @@ export function generateTransferDetailSankey(mofData: MOFBudgetData): {
     type: 'revenue-category',
   });
 
+  const transferFromOther = mofData.specialAccount.revenue.transferFromOther;
   nodes.push({
     id: 'category-other-transfer',
     name: '他会計繰入',
-    value: mofData.specialAccount.revenue.transferFromOther,
+    value: typeof transferFromOther === 'number' ? transferFromOther : transferFromOther.total,
     type: 'revenue-category',
   });
 
