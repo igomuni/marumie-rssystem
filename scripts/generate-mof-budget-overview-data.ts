@@ -284,8 +284,10 @@ function main() {
   console.log(
     `\n社会保険料合計: ${(mofBudgetData.specialAccount.revenue.insurancePremiums.total / 1e12).toFixed(2)}兆円`
   );
+  const premiums = mofBudgetData.specialAccount.revenue.insurancePremiums;
+  const pensionAmount = 'breakdown' in premiums ? premiums.breakdown.pension : premiums.pension;
   console.log(
-    `  - 年金保険料: ${(mofBudgetData.specialAccount.revenue.insurancePremiums.pension / 1e12).toFixed(2)}兆円`
+    `  - 年金保険料: ${(pensionAmount / 1e12).toFixed(2)}兆円`
   );
 
   // JSONファイルに保存
