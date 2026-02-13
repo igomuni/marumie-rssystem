@@ -45,9 +45,10 @@ npm run compress-data            # Gzip structured JSON for Git (5.9MB)
 - **Data Scripts**: [scripts/](scripts/) - CSV normalization and JSON generation pipeline
 
 ### Documentation Standards
-- **Naming Convention**: `/docs` directory uses `YYYYMMDD_HHMM_タイトル.md` format
-  - Example: `20251130_2220_支出ビュー仕様.md`
-  - Ensures chronological ordering and easy identification
+- **Task docs** (設計・調査・実装計画): `docs/tasks/YYYYMMDD_HHMM_タイトル.md`
+  - Example: `docs/tasks/20251130_2220_支出ビュー仕様.md`
+- **Architecture guides** (恒久的な参照ドキュメント): `docs/*.md`
+  - Example: `docs/sankey-architecture-guide.md`
 
 ---
 
