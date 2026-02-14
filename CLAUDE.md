@@ -10,15 +10,15 @@ npm run lint             # ESLint チェック
 
 # データパイプライン（CSVファイル更新後）
 npm run normalize        # CSV正規化（要: pip3 install neologdn）
-npm run generate-structured  # rs2024-structured.json 生成（46MB）
-npm run compress-data    # Gzip圧縮（5.9MB、Git管理用）
+npm run generate-structured  # rs2024-structured.json 生成（~96MB）
+npm run compress-data    # Gzip圧縮（~11MB、Git管理用）
 ```
 
 ## Architecture
 
 日本の2024年度予算・支出データをインタラクティブなSankey図で可視化する Next.js アプリ。
 
-**Key Statistics**: 146.63兆円 総予算 / 15,111事業 / 25,892支出先
+**Key Statistics**: 151.12兆円 総予算 / 5,003事業 / 26,823支出先（予算年度2023実績・再委託先含む）
 
 ### Layer Design Rules
 
@@ -33,10 +33,10 @@ npm run compress-data    # Gzip圧縮（5.9MB、Git管理用）
 
 ### Critical Notes
 
-- **データ単位**: 全金額は **1円単位**（千円単位ではない）。総予算 = 146,000,000,000,000円
+- **データ単位**: 全金額は **1円単位**（千円単位ではない）。総予算 = 151,120,000,000,000円
 - **「その他」vs「その他の支出先」**: 別ノード。"その他" = 支出先名が「その他」(~26兆円)、"その他の支出先" = TopN以外集計(~51兆円)
 - **Import alias**: `@/*` はリポジトリルートにマップ（例: `@/types/structured`）
-- **データ圧縮**: `.gz` のみGit管理（5.9MB）、ビルド時に自動展開（46MB）
+- **データ圧縮**: `.gz` のみGit管理（~11MB）、ビルド時に自動展開（~96MB）
 
 ## Main Entry Points
 
@@ -51,8 +51,8 @@ npm run compress-data    # Gzip圧縮（5.9MB、Git管理用）
 
 - **Source CSV**: `data/download/RS_2024/`（rssystem.go.jp から手動DL）
 - **Normalized CSV**: `data/year_2024/`（自動生成、.gitignore）
-- **Structured JSON**: `public/data/rs2024-structured.json`（46MB、.gitignore）
-- **Compressed JSON**: `public/data/rs2024-structured.json.gz`（5.9MB、Git管理）
+- **Structured JSON**: `public/data/rs2024-structured.json`（~96MB、.gitignore）
+- **Compressed JSON**: `public/data/rs2024-structured.json.gz`（~11MB、Git管理）
 
 ## Deployment
 

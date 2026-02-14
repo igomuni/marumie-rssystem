@@ -11,9 +11,9 @@ data/download/RS_2024/*.zip   （手動ダウンロード）
   ↓ npm run normalize
 data/year_2024/*.csv           （UTF-8正規化済み、.gitignore）
   ↓ npm run generate-structured
-public/data/rs2024-structured.json  （46MB、.gitignore）
+public/data/rs2024-structured.json  （~96MB、.gitignore）
   ↓ npm run compress-data
-public/data/rs2024-structured.json.gz  （5.9MB、Git管理）
+public/data/rs2024-structured.json.gz  （~11MB、Git管理）
   ↓ npm run build（prebuildフック）
 public/data/rs2024-structured.json  （ビルド時に再展開）
   ↓
@@ -42,7 +42,7 @@ public/data/rs2024-structured.json  （ビルド時に再展開）
 1. neologdn.normalize(text)           # 日本語テキスト正規化（最優先）
 2. convert_circled_numbers(text)      # ① → 1
 3. unicodedata.normalize('NFKC', text)# Unicode正規化
-4. convert_era_to_year(text)          # 令和5年 → 2024年
+4. convert_era_to_year(text)          # 令和5年 → 2023年、令和6年 → 2024年
 5. convert_fullwidth_brackets(text)   # （） → ()
 6. unify_hyphens(text)                # 各種ダッシュ → -
 7. fix_hyphen_to_choon(text)          # ア- → アー
@@ -57,12 +57,12 @@ public/data/rs2024-structured.json  （ビルド時に再展開）
 **コマンド**: `npm run generate-structured`
 
 **入力**: `data/year_2024/*.csv`
-**出力**: `public/data/rs2024-structured.json`（~46MB）
+**出力**: `public/data/rs2024-structured.json`（~96MB）
 
 **生成内容**:
 - `BudgetTree`: 府省庁 → 局 → 部 → 課 → 室 → 班 → 係 の階層ツリー
-- `BudgetRecord[]`: 事業ごとの予算詳細（15,111件）
-- `SpendingRecord[]`: 支出先ごとの支出情報（25,892件）
+- `BudgetRecord[]`: 事業ごとの予算詳細（5,003件・予算年度2023）
+- `SpendingRecord[]`: 支出先ごとの支出情報（26,823件・再委託先含む）
 - `Statistics`: 府省庁別・事業別・支出先別の集計
 
 **キーアルゴリズム（階層ツリー構築）**:
@@ -81,7 +81,7 @@ public/data/rs2024-structured.json  （ビルド時に再展開）
 
 **コマンド**: `npm run compress-data`
 
-- `rs2024-structured.json`（46MB）→ `rs2024-structured.json.gz`（5.9MB、94%削減）
+- `rs2024-structured.json`（~96MB）→ `rs2024-structured.json.gz`（~11MB、~89%削減）
 - `.gz` ファイルのみ Git 管理（`.json` は `.gitignore`）
 
 ---
@@ -120,8 +120,8 @@ marumie-rssystem/
 │   ├── download/RS_2024/       # ZIPダウンロード先
 │   └── year_2024/              # 正規化済みCSV
 └── public/data/
-    ├── rs2024-structured.json.gz  # Git管理（5.9MB）
-    └── rs2024-structured.json     # ビルド成果物（46MB、.gitignore）
+    ├── rs2024-structured.json.gz  # Git管理（~11MB）
+    └── rs2024-structured.json     # ビルド成果物（~96MB、.gitignore）
 ```
 
 ---
