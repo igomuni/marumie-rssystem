@@ -143,6 +143,7 @@ function SankeyContent() {
           params.set('limit', topNSettings.global.ministry.toString());
           params.set('projectLimit', '3'); // Fixed for global view to avoid clutter
           params.set('spendingLimit', topNSettings.global.spending.toString());
+          params.set('subcontractLimit', topNSettings.global.subcontract.toString());
           params.set('drilldownLevel', viewState.drilldownLevel.toString());
           params.set('spendingDrilldownLevel', viewState.spendingDrilldownLevel.toString());
         } else if (viewState.mode === 'ministry' && viewState.selectedMinistry) {
@@ -761,7 +762,7 @@ function SankeyContent() {
                   ? { top: 40, right: 100, bottom: 40, left: 100 }
                   : { top: 40, right: 100, bottom: 40, left: 100 }
                 }
-                align="justify"
+                align={viewState.mode === 'global' && sankey.nodes.some(n => n.type === 'subcontract-recipient') ? 'start' : 'justify'}
                 sort="input"
                 nodeInnerPadding={0}
                 colors={(node) => {
@@ -1373,6 +1374,20 @@ function SankeyContent() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                   />
                   <p className="text-xs text-gray-500 mt-1">デフォルト: 10</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    再委託先TopN
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={tempTopNSettings.global.subcontract}
+                    onChange={(e) => setTempTopNSettings(prev => ({ ...prev, global: { ...prev.global, subcontract: parseInt(e.target.value) || 1 } }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">デフォルト: 5</p>
                 </div>
               </div>
             </div>

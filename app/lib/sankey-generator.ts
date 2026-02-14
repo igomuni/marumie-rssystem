@@ -2429,7 +2429,86 @@ function buildSankeyData(
   const aggregatedOther = recipientNodes.filter(n => n.id === 'recipient-other-aggregated');
   const noSpendingRecipient = recipientNodes.filter(n => n.id === 'recipient-no-spending');
 
-  nodes.push(...regularRecipients, ...otherNamedRecipient, ...aggregatedOther, ...noSpendingRecipient);
+  // Global View: Add sub-contractor (再委託先) nodes as rightmost column
+  const subcontractNodes: SankeyNode[] = [];
+  if (isGlobalView) {
+    const globalSubcontractAgg = new Map<string, { name: string; totalAmount: number }>();
+
+    for (const spending of topSpendings) {
+      if (!spending.outflows) continue;
+      for (const flow of spending.outflows) {
+        const key = flow.targetBlockName;
+        if (!globalSubcontractAgg.has(key)) {
+          globalSubcontractAgg.set(key, { name: flow.targetBlockName, totalAmount: 0 });
+        }
+        globalSubcontractAgg.get(key)!.totalAmount += flow.amount;
+      }
+    }
+
+    if (globalSubcontractAgg.size > 0) {
+      const sorted = Array.from(globalSubcontractAgg.entries())
+        .sort((a, b) => b[1].totalAmount - a[1].totalAmount);
+
+      const topSubcontracts = sorted.slice(0, subcontractLimit);
+      const otherSubcontracts = sorted.slice(subcontractLimit);
+
+      for (const [, data] of topSubcontracts) {
+        const nodeId = `subcontract-global-${data.name}`;
+        subcontractNodes.push({
+          id: nodeId,
+          name: data.name,
+          type: 'subcontract-recipient',
+          value: data.totalAmount,
+          details: { corporateNumber: '', location: '', projectCount: 0 },
+        });
+
+        for (const spending of topSpendings) {
+          if (!spending.outflows) continue;
+          const amount = spending.outflows
+            .filter(f => f.targetBlockName === data.name)
+            .reduce((sum, f) => sum + f.amount, 0);
+          if (amount > 0) {
+            links.push({
+              source: `recipient-${spending.spendingId}`,
+              target: nodeId,
+              value: amount,
+            });
+          }
+        }
+      }
+
+      if (otherSubcontracts.length > 0) {
+        const otherTotal = otherSubcontracts.reduce((sum, [, d]) => sum + d.totalAmount, 0);
+        if (otherTotal > 0) {
+          const otherNodeId = 'subcontract-other-global';
+          subcontractNodes.push({
+            id: otherNodeId,
+            name: `再委託先\n(Top${subcontractLimit}以外)`,
+            type: 'subcontract-recipient',
+            value: otherTotal,
+            details: { corporateNumber: '', location: '', projectCount: 0 },
+          });
+
+          const otherNames = new Set(otherSubcontracts.map(([name]) => name));
+          for (const spending of topSpendings) {
+            if (!spending.outflows) continue;
+            const amount = spending.outflows
+              .filter(f => otherNames.has(f.targetBlockName))
+              .reduce((sum, f) => sum + f.amount, 0);
+            if (amount > 0) {
+              links.push({
+                source: `recipient-${spending.spendingId}`,
+                target: otherNodeId,
+                value: amount,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  nodes.push(...regularRecipients, ...otherNamedRecipient, ...aggregatedOther, ...noSpendingRecipient, ...subcontractNodes);
 
   // Filter out nodes that have no links (0-yen ghost nodes)
   // A node must appear in at least one link (as source or target)
