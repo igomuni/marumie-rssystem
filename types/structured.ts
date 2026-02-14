@@ -175,6 +175,8 @@ export interface SpendingProject {
   blockName: string;
   contractSummary: string;
   contractMethod: string;
+  isDirectFromGov?: boolean;    // 政府から直接支出か（falseなら委託経由）
+  sourceChainPath?: string;    // 委託元チェーンパス（例: "博報堂 → EYストラテジー"、間接支出の場合のみ）
 }
 
 // 統計情報
