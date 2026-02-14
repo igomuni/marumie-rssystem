@@ -160,7 +160,7 @@ async function main() {
 
   // 4. 支出レコード構築
   console.log('支出レコード構築中...');
-  const { spendingRecords, projectSpendingMap } = buildSpendingRecords(
+  const { spendingRecords, projectSpendingMap, directSpendingTotal } = buildSpendingRecords(
     spendingRows,
     currentYearRecords,
     blockFlowMap
@@ -188,7 +188,7 @@ async function main() {
     totalProjects: currentYearRecords.length,
     totalRecipients: spendingRecords.length,
     totalBudgetAmount: currentYearRecords.reduce((sum, b) => sum + b.totalBudget, 0),
-    totalSpendingAmount: spendingRecords.reduce((sum, s) => sum + s.totalSpendingAmount, 0),
+    totalSpendingAmount: directSpendingTotal,  // 直接支出のみ（二重計上防止）
   };
 
   // 8. 構造化データ生成（2024年度 + 過去年度）
@@ -380,11 +380,21 @@ interface BlockFlowMap {
   // key: "projectId_blockNumber"
   // value: isDirectFromGov（政府から直接支出か）
   isDirectFromGov: Map<string, boolean>;
+
+  // key: "projectId_blockNumber" (間接支出ブロック)
+  // value: 委託元の支出先ブロック名（sourceBlockName）
+  inflows: Map<string, string>;
+
+  // key: "projectId_blockNumber" (間接支出ブロック)
+  // value: 委託元の支出先ブロック番号（チェーン探索用）
+  inflowsNumber: Map<string, string>;
 }
 
 function buildBlockFlowMap(flowRows: SpendingBlockFlowInfo[], spendingRows: SpendingInfo[]): BlockFlowMap {
   const outflows = new Map<string, SpendingBlockFlow[]>();
   const isDirectFromGov = new Map<string, boolean>();
+  const inflows = new Map<string, string>(); // targetKey → 委託元のブロック名
+  const inflowsNumber = new Map<string, string>(); // targetKey → 委託元のブロック番号（チェーン探索用）
 
   // ブロックごとの金額マップを構築（5-1 CSVから）
   const blockAmountMap = new Map<string, number>();
@@ -446,6 +456,9 @@ function buildBlockFlowMap(flowRows: SpendingBlockFlowInfo[], spendingRows: Spen
     if (sourceBlock && isDirectStr === 'FALSE') {
       const sourceKey = `${projectIdStr}_${sourceBlock}`;
       const targetKey = `${projectIdStr}_${targetBlock}`;
+      // 逆引きマップ: 委託先ブロック → 委託元ブロック名/番号
+      inflows.set(targetKey, row.支出元の支出先ブロック名);
+      inflowsNumber.set(targetKey, sourceBlock);
       const amount = blockAmountMap.get(targetKey) || 0;
       const recipients = blockRecipientsMap.get(targetKey) || [];
 
@@ -467,7 +480,37 @@ function buildBlockFlowMap(flowRows: SpendingBlockFlowInfo[], spendingRows: Spen
     }
   }
 
-  return { outflows, isDirectFromGov };
+  return { outflows, isDirectFromGov, inflows, inflowsNumber };
+}
+
+/**
+ * ブロックから政府直接支出ブロックまでのフルチェーンパスを計算
+ * 例: block D (← C ← A=博報堂) → "株式会社博報堂 → EYストラテジー..."
+ */
+function computeSourceChainPath(
+  projectId: number,
+  blockNumber: string,
+  blockFlowMap: BlockFlowMap
+): string | undefined {
+  const pathNames: string[] = [];
+  let currentBlockNumber = blockNumber;
+  const visited = new Set<string>();
+
+  while (true) {
+    const currentKey = `${projectId}_${currentBlockNumber}`;
+    if (visited.has(currentKey)) break; // サイクル防止
+    visited.add(currentKey);
+
+    const sourceBlockName = blockFlowMap.inflows.get(currentKey);
+    const sourceBlockNumber = blockFlowMap.inflowsNumber.get(currentKey);
+
+    if (!sourceBlockName || !sourceBlockNumber) break;
+
+    pathNames.unshift(sourceBlockName);
+    currentBlockNumber = sourceBlockNumber;
+  }
+
+  return pathNames.length > 0 ? pathNames.join(' → ') : undefined;
 }
 
 /**
@@ -480,19 +523,27 @@ function buildSpendingRecords(
 ): {
   spendingRecords: SpendingRecord[];
   projectSpendingMap: Map<number, number[]>;
+  directSpendingTotal: number;
 } {
+  // 直接支出の合計（メタデータ用、二重計上防止）
+  let directSpendingTotal = 0;
+
   // 支出先キー（名前+法人番号）ごとに集計
+  // blocks Map key = `${projectId}_${blockNumber}` でブロック単位に分割
   const spendingMap = new Map<string, {
     name: string;
     corporateNumber: string;
     location: string;
     corporateType: string;
-    projects: Map<number, {
+    blocks: Map<string, {         // key = `${projectId}_${blockNumber}`
+      projectId: number;
+      blockNumber: string;
+      blockName: string;
       amount: number;
-      blockNumbers: Set<string>;
-      blockNames: Set<string>;
       contractSummaries: Set<string>;
       contractMethods: Set<string>;
+      isDirectFromGov: boolean;
+      sourceChainPath?: string;   // フルチェーンパス（間接の場合）
     }>;
   }>();
 
@@ -510,19 +561,26 @@ function buildSpendingRecords(
     const amount = parseAmount(row.金額);
     if (amount <= 0) continue;
 
-    // 間接支出ブロックをスキップ（重複カウント防止）
-    const blockNumber = row.支出先ブロック番号;
-    if (blockNumber) {
-      const blockKey = `${projectId}_${blockNumber}`;
-      const isDirectFromGov = blockFlowMap.isDirectFromGov.get(blockKey);
+    // ブロックキーを決定
+    const blockNumber = row.支出先ブロック番号 || 'DIRECT';
+    const blockKey = `${projectId}_${blockNumber}`;
 
-      // isDirectFromGovがfalseまたは未定義（=政府から直接支出ではない）の場合
-      // ただし、isDirectFromGovがtrueの場合のみ集計対象とする
-      if (isDirectFromGov !== true) {
+    // ブロックの直接/間接フラグを確認（統計・メタデータ用）
+    let blockIsDirect = true;
+    let blockSourceChainPath: string | undefined;
+    if (row.支出先ブロック番号) {
+      const isBlockDirect = blockFlowMap.isDirectFromGov.get(blockKey) === true;
+      if (!isBlockDirect) {
         indirectBlockCount++;
         indirectBlockAmount += amount;
-        continue; // 間接支出はスキップ
+        blockIsDirect = false;
+        blockSourceChainPath = computeSourceChainPath(projectId, blockNumber, blockFlowMap);
+      } else {
+        directSpendingTotal += amount;
       }
+    } else {
+      // ブロック番号なし = 直接支出として扱う
+      directSpendingTotal += amount;
     }
 
     const key = getSpendingKey(spendingName, row.法人番号 || '');
@@ -533,53 +591,57 @@ function buildSpendingRecords(
         corporateNumber: row.法人番号 || '',
         location: row.所在地 || '',
         corporateType: row.法人種別 || '',
-        projects: new Map(),
+        blocks: new Map(),
       });
     }
 
     const spending = spendingMap.get(key)!;
-    if (!spending.projects.has(projectId)) {
-      spending.projects.set(projectId, {
+    if (!spending.blocks.has(blockKey)) {
+      spending.blocks.set(blockKey, {
+        projectId,
+        blockNumber: row.支出先ブロック番号 || '',
+        blockName: row.支出先ブロック名 || '',
         amount: 0,
-        blockNumbers: new Set(),
-        blockNames: new Set(),
         contractSummaries: new Set(),
         contractMethods: new Set(),
+        isDirectFromGov: blockIsDirect,
+        sourceChainPath: blockIsDirect ? undefined : blockSourceChainPath,
       });
     }
 
-    const project = spending.projects.get(projectId)!;
-    project.amount += amount;
-    if (row.支出先ブロック番号) project.blockNumbers.add(row.支出先ブロック番号);
-    if (row.支出先ブロック名) project.blockNames.add(row.支出先ブロック名);
-    if (row.契約概要) project.contractSummaries.add(row.契約概要);
-    if (row.契約方式等) project.contractMethods.add(row.契約方式等);
+    const block = spending.blocks.get(blockKey)!;
+    block.amount += amount;
+    if (row.契約概要) block.contractSummaries.add(row.契約概要);
+    if (row.契約方式等) block.contractMethods.add(row.契約方式等);
   }
 
   // SpendingRecordに変換
   const spendingRecords: SpendingRecord[] = [];
-  const projectSpendingMap = new Map<number, number[]>();
+  // Set を使って同一 spendingId の重複を防ぐ（同一会社が複数ブロックで同一プロジェクトに現れる場合）
+  const projectSpendingSetMap = new Map<number, Set<number>>();
   let spendingId = 1;
 
   for (const [_key, spending] of spendingMap.entries()) {
     const currentSpendingId = spendingId++;
     const projects: SpendingProject[] = [];
 
-    for (const [projectId, proj] of spending.projects.entries()) {
+    for (const [_blockKey, block] of spending.blocks.entries()) {
       projects.push({
-        projectId,
-        amount: proj.amount,
-        blockNumber: Array.from(proj.blockNumbers).join(', '),
-        blockName: Array.from(proj.blockNames).join(', '),
-        contractSummary: Array.from(proj.contractSummaries).join(', '),
-        contractMethod: Array.from(proj.contractMethods).join(', '),
+        projectId: block.projectId,
+        amount: block.amount,
+        blockNumber: block.blockNumber,
+        blockName: block.blockName,
+        contractSummary: Array.from(block.contractSummaries).join(', '),
+        contractMethod: Array.from(block.contractMethods).join(', '),
+        isDirectFromGov: block.isDirectFromGov,
+        sourceChainPath: block.isDirectFromGov ? undefined : block.sourceChainPath,
       });
 
-      // プロジェクト→支出先のマッピング
-      if (!projectSpendingMap.has(projectId)) {
-        projectSpendingMap.set(projectId, []);
+      // プロジェクト→支出先のマッピング（Set で重複排除）
+      if (!projectSpendingSetMap.has(block.projectId)) {
+        projectSpendingSetMap.set(block.projectId, new Set());
       }
-      projectSpendingMap.get(projectId)!.push(currentSpendingId);
+      projectSpendingSetMap.get(block.projectId)!.add(currentSpendingId);
     }
 
     const record: SpendingRecord = {
@@ -599,19 +661,21 @@ function buildSpendingRecords(
     spendingRecords.push(record);
   }
 
+  // Set → Array に変換して projectSpendingMap を構築
+  const projectSpendingMap = new Map<number, number[]>();
+  for (const [projectId, idSet] of projectSpendingSetMap) {
+    projectSpendingMap.set(projectId, Array.from(idSet));
+  }
+
   // SpendingRecordにoutflowsを追加
   for (const record of spendingRecords) {
     const outflows: SpendingBlockFlow[] = [];
 
     for (const project of record.projects) {
-      // ブロック番号が複数ある場合は最初のものを使用
-      const blockNumbers = project.blockNumber.split(', ').filter(b => b);
-
-      for (const blockNum of blockNumbers) {
-        const blockKey = `${project.projectId}_${blockNum}`;
-        const flows = blockFlowMap.outflows.get(blockKey) || [];
-        outflows.push(...flows);
-      }
+      if (!project.blockNumber) continue;
+      const blockKey = `${project.projectId}_${project.blockNumber}`;
+      const flows = blockFlowMap.outflows.get(blockKey) || [];
+      outflows.push(...flows);
     }
 
     if (outflows.length > 0) {
@@ -626,6 +690,7 @@ function buildSpendingRecords(
   return {
     spendingRecords: spendingRecords.sort((a, b) => b.totalSpendingAmount - a.totalSpendingAmount),
     projectSpendingMap,
+    directSpendingTotal,
   };
 }
 
@@ -647,14 +712,17 @@ function linkBudgetAndSpending(
     const spendingIds = projectSpendingMap.get(budget.projectId) || [];
     budget.spendingIds = spendingIds;
 
-    // この事業の総支出額を支出レコードから計算
+    // この事業の総支出額を支出レコードから計算（直接支出ブロックのみ、二重計上防止）
     let totalSpending = 0;
     for (const spendingId of spendingIds) {
       const spending = spendingMap.get(spendingId);
       if (spending) {
-        const project = spending.projects.find(p => p.projectId === budget.projectId);
-        if (project) {
-          totalSpending += project.amount;
+        // 同一projectIdのブロックが複数ある場合、直接支出のもののみ合算
+        const directProjects = spending.projects.filter(
+          p => p.projectId === budget.projectId && p.isDirectFromGov !== false
+        );
+        for (const p of directProjects) {
+          totalSpending += p.amount;
         }
       }
     }

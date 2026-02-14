@@ -28,6 +28,7 @@ interface SpendingDetail {
   executionRate: number;
   projectCount?: number; // まとめる場合の事業件数
   ministryBreakdown?: MinistryBreakdown[]; // まとめる場合の府省庁別内訳
+  sourceBlockName?: string; // 委託元ブロック名（間接支出の場合のみ）
 }
 
 type SortColumn = 'spendingName' | 'projectName' | 'ministry' | 'totalBudget' | 'totalSpendingAmount' | 'executionRate' | 'projectCount';
@@ -212,24 +213,27 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           return;
         }
 
-        // この事業からの支出額を取得
-        const projectSpending = spending.projects.find(p => p.projectId === project.projectId);
-        if (!projectSpending) return;
+        // この事業からの支出額を取得（同一会社が複数チェーンで出現する場合は各チェーンを別行に）
+        const projectSpendings = spending.projects.filter(p => p.projectId === project.projectId);
+        if (projectSpendings.length === 0) return;
 
-        result.push({
-          spendingName: spending.spendingName,
-          projectName: project.projectName,
-          ministry: project.ministry,
-          totalBudget: project.totalBudget,
-          totalSpendingAmount: projectSpending.amount,
-          executionRate: project.executionRate,
-        });
+        for (const projectSpending of projectSpendings) {
+          result.push({
+            spendingName: spending.spendingName,
+            projectName: project.projectName,
+            ministry: project.ministry,
+            totalBudget: project.totalBudget,
+            totalSpendingAmount: projectSpending.amount,
+            executionRate: project.executionRate,
+            sourceBlockName: projectSpending.sourceChainPath,
+          });
+        }
       });
     });
 
     // 事業名でまとめる場合
     if (groupBySpending) {
-      const grouped = new Map<string, SpendingDetail & { ministryAmounts: Map<string, number> }>();
+      const grouped = new Map<string, SpendingDetail & { ministryAmounts: Map<string, number>; sourcesSet: Set<string> }>();
 
       result.forEach(item => {
         const key = item.spendingName;
@@ -246,13 +250,18 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           existing.executionRate = existing.totalBudget > 0
             ? (existing.totalSpendingAmount / existing.totalBudget) * 100
             : 0;
+          // 委託元を収集
+          if (item.sourceBlockName) existing.sourcesSet.add(item.sourceBlockName);
         } else {
           const ministryAmounts = new Map<string, number>();
           ministryAmounts.set(item.ministry, item.totalSpendingAmount);
+          const sourcesSet = new Set<string>();
+          if (item.sourceBlockName) sourcesSet.add(item.sourceBlockName);
           grouped.set(key, {
             ...item,
             projectCount: 1,
             ministryAmounts,
+            sourcesSet,
           });
         }
       });
@@ -275,6 +284,12 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           amount,
         }));
 
+        // 委託元表示
+        const sources = Array.from(item.sourcesSet);
+        const sourceBlockName = sources.length === 0 ? undefined
+          : sources.length === 1 ? sources[0]
+          : '複数';
+
         return {
           spendingName: item.spendingName,
           projectName: item.projectName,
@@ -284,6 +299,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           executionRate: item.executionRate,
           projectCount: item.projectCount,
           ministryBreakdown,
+          sourceBlockName,
         };
       });
     }
@@ -772,6 +788,9 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                   >
                     執行率 {getSortIndicator('executionRate')}
                   </th>
+                  <th className="px-4 py-2 text-left whitespace-nowrap">
+                    委託元
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -814,6 +833,9 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                     </td>
                     <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
                       {item.executionRate.toFixed(1)}%
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-gray-500 dark:text-gray-400 text-xs">
+                      {item.sourceBlockName || ''}
                     </td>
                   </tr>
                 ))}
