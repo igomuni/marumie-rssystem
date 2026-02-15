@@ -841,16 +841,26 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                       {formatCurrency(item.totalSpendingAmount)}
                     </td>
                     <td className="px-4 py-2 text-right whitespace-nowrap">
-                      {item.outflowAmount ? (
-                        <div className="text-orange-600 dark:text-orange-400">
-                          <div>{formatCurrency(item.outflowAmount)}</div>
-                          <div className="text-xs">
-                            {item.totalSpendingAmount > 0
-                              ? `(${(item.outflowAmount / item.totalSpendingAmount * 100).toFixed(1)}%)`
-                              : ''}
+                      {item.outflowAmount ? (() => {
+                        const rate = item.totalSpendingAmount > 0
+                          ? item.outflowAmount / item.totalSpendingAmount * 100
+                          : 0;
+                        return (
+                          <div className="text-orange-600 dark:text-orange-400">
+                            <div>{formatCurrency(item.outflowAmount)}</div>
+                            {rate > 100 ? (
+                              <span
+                                className="text-xs cursor-help underline decoration-dotted"
+                                title="再委託額が受取額を超えています。都道府県・市区町村等の地方負担分（共同負担）が含まれる可能性があります。"
+                              >
+                                ※
+                              </span>
+                            ) : (
+                              <div className="text-xs">({rate.toFixed(1)}%)</div>
+                            )}
                           </div>
-                        </div>
-                      ) : (
+                        );
+                      })() : (
                         <span className="text-gray-400 dark:text-gray-600">-</span>
                       )}
                     </td>
