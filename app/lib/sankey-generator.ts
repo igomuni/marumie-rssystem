@@ -690,8 +690,9 @@ function selectData(
   // In Global View, topSpendings is already selected globally.
   // In Ministry View, we need independent TopN selection for projects and spendings.
   // In Project View, we need to select top spendings for the single project.
-  if (!targetRecipientName && (targetMinistryName || targetProjectName)) {
-    // Aggregate "Other" named spendings
+
+  // Aggregate "Other" named spendings (all views except Recipient View)
+  if (!targetRecipientName) {
     for (const project of data.budgets) {
       const projectSpendings = data.spendings
         .filter(s => project.spendingIds.includes(s.spendingId))
@@ -706,7 +707,9 @@ function selectData(
         otherNamedSpendingByProject.set(project.projectId, otherNamedTotal);
       }
     }
+  }
 
+  if (!targetRecipientName && (targetMinistryName || targetProjectName)) {
     if (targetMinistryName && !targetProjectName) {
       // --- Ministry View: Drilldown-aware TopN Selection ---
       // Step 1: Select Top Projects by budget amount FIRST
@@ -2059,6 +2062,26 @@ function buildSankeyData(
             source: `project-spending-other-${ministryId}`,
             target: 'recipient-other-named',
             value: amount,
+          });
+        }
+      }
+    }
+
+    // Global View: Link from "Other Projects" to "Other Named"
+    if (isGlobalView) {
+      let otherProjectsOtherNamedAmount = 0;
+      for (const [projectId, amount] of otherNamedSpendingByProject.entries()) {
+        if (!topProjectIds.has(projectId)) {
+          otherProjectsOtherNamedAmount += amount;
+        }
+      }
+      if (otherProjectsOtherNamedAmount > 0) {
+        const otherProjectsSpendingNodeExists = nodes.some(n => n.id === 'project-spending-other-global');
+        if (otherProjectsSpendingNodeExists) {
+          links.push({
+            source: 'project-spending-other-global',
+            target: 'recipient-other-named',
+            value: otherProjectsOtherNamedAmount,
           });
         }
       }
