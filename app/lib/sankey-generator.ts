@@ -2494,17 +2494,27 @@ function buildSankeyData(
   const aggregatedOther = recipientNodes.filter(n => n.id === 'recipient-other-aggregated');
   const noSpendingRecipient = recipientNodes.filter(n => n.id === 'recipient-no-spending');
 
-  // Global View: Add sub-contractor (再委託先) nodes as rightmost column
+  // Global View / Project View: Add sub-contractor (再委託先) nodes as rightmost column
   // One aggregated node per recipient that has outflows
   const subcontractNodes: SankeyNode[] = [];
-  if (isGlobalView) {
+  const isProjectView = !!targetProjectName && !isGlobalView;
+  if (isGlobalView || isProjectView) {
+    // Project View: outflows を選択事業の projectId でフィルタ（他事業の再委託を除外）
+    const selectedProjectId = isProjectView ? (topProjects[0]?.projectId ?? null) : null;
+
     for (const spending of topSpendings) {
       if (!spending.outflows || spending.outflows.length === 0) continue;
+
+      const relevantOutflows = selectedProjectId !== null
+        ? spending.outflows.filter(f => f.projectId === selectedProjectId)
+        : spending.outflows;
+
+      if (relevantOutflows.length === 0) continue;
 
       // Count unique subcontract recipients and total amount
       const uniqueRecipients = new Set<string>();
       let totalOutflow = 0;
-      for (const flow of spending.outflows) {
+      for (const flow of relevantOutflows) {
         if (flow.recipients && flow.recipients.length > 0) {
           for (const r of flow.recipients) {
             uniqueRecipients.add(`${r.name}_${r.corporateNumber}`);
@@ -2537,7 +2547,7 @@ function buildSankeyData(
       links.push({
         source: `recipient-${spending.spendingId}`,
         target: nodeId,
-        value: totalOutflow,
+        value: totalOutflow === 0 ? 0.001 : totalOutflow,
       });
     }
   }
