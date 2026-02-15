@@ -604,10 +604,9 @@ function selectData(
         );
         for (const spending of projectSpendings) {
           if (cumulativeRecipientIds.has(spending.spendingId)) {
-            const projectContribution = spending.projects.find(p => p.projectId === project.projectId);
-            if (projectContribution) {
-              spendingToCumulative += projectContribution.amount;
-            }
+            spendingToCumulative += spending.projects
+              .filter(p => p.projectId === project.projectId)
+              .reduce((sum, p) => sum + p.amount, 0);
           }
         }
         if (spendingToCumulative > 0) {
@@ -643,10 +642,9 @@ function selectData(
       );
       for (const spending of projectSpendings) {
         if (topRecipientIds.has(spending.spendingId)) {
-          const projectContribution = spending.projects.find(p => p.projectId === project.projectId);
-          if (projectContribution) {
-            spendingToTop += projectContribution.amount;
-          }
+          spendingToTop += spending.projects
+            .filter(p => p.projectId === project.projectId)
+            .reduce((sum, p) => sum + p.amount, 0);
         }
       }
       if (spendingToTop > 0) {
@@ -699,8 +697,9 @@ function selectData(
         .filter(s => s.spendingName === 'その他');
 
       const otherNamedTotal = projectSpendings.reduce((sum, s) => {
-        const projectSpending = s.projects.find(p => p.projectId === project.projectId);
-        return sum + (projectSpending?.amount || 0);
+        return sum + s.projects
+          .filter(p => p.projectId === project.projectId)
+          .reduce((a, p) => a + p.amount, 0);
       }, 0);
 
       if (otherNamedTotal > 0) {
@@ -784,8 +783,9 @@ function selectData(
         let otherSpendingTotal = 0;
         for (const spending of projectSpendings) {
           if (!topSpendingIds.has(spending.spendingId)) {
-            const projectSpending = spending.projects.find(p => p.projectId === project.projectId);
-            otherSpendingTotal += projectSpending?.amount || 0;
+            otherSpendingTotal += spending.projects
+              .filter(p => p.projectId === project.projectId)
+              .reduce((sum, p) => sum + p.amount, 0);
           }
         }
 
@@ -803,10 +803,12 @@ function selectData(
           .filter(s => project.spendingIds.includes(s.spendingId))
           .filter(s => s.spendingName !== 'その他')
           .map(s => {
-            const projectSpending = s.projects.find(p => p.projectId === project.projectId);
+            const amountFromThisProject = s.projects
+              .filter(p => p.projectId === project.projectId)
+              .reduce((sum, p) => sum + p.amount, 0);
             return {
               spending: s,
-              amountFromThisProject: projectSpending?.amount || 0,
+              amountFromThisProject,
             };
           });
 
@@ -906,8 +908,9 @@ function buildSankeyData(
       // Find amount contributed by this project to the target recipient
       let amount = 0;
       for (const s of topSpendings) {
-        const p = s.projects.find(p => p.projectId === project.projectId);
-        if (p) amount += p.amount;
+        amount += s.projects
+          .filter(p => p.projectId === project.projectId)
+          .reduce((sum, p) => sum + p.amount, 0);
       }
 
       if (amount > 0) {
@@ -943,8 +946,9 @@ function buildSankeyData(
       // Find spending amount for this project
       let spendingAmount = 0;
       for (const s of topSpendings) {
-        const p = s.projects.find(p => p.projectId === project.projectId);
-        if (p) spendingAmount += p.amount;
+        spendingAmount += s.projects
+          .filter(p => p.projectId === project.projectId)
+          .reduce((sum, p) => sum + p.amount, 0);
       }
 
       if (spendingAmount > 0) {
@@ -1986,10 +1990,12 @@ function buildSankeyData(
     const recipientSpendingAmounts = new Map<number, number>();
     for (const project of topProjects) {
       for (const spending of topSpendings) {
-        const spendingProject = spending.projects.find(p => p.projectId === project.projectId);
-        if (spendingProject) {
+        const amount = spending.projects
+          .filter(p => p.projectId === project.projectId)
+          .reduce((sum, p) => sum + p.amount, 0);
+        if (amount > 0) {
           const currentAmount = recipientSpendingAmounts.get(spending.spendingId) || 0;
-          recipientSpendingAmounts.set(spending.spendingId, currentAmount + spendingProject.amount);
+          recipientSpendingAmounts.set(spending.spendingId, currentAmount + amount);
         }
       }
     }
@@ -1997,8 +2003,8 @@ function buildSankeyData(
     // Second pass: create nodes and links
     for (const project of topProjects) {
       for (const spending of topSpendings) {
-        const spendingProject = spending.projects.find(p => p.projectId === project.projectId);
-        if (spendingProject) {
+        const matchingProjects = spending.projects.filter(p => p.projectId === project.projectId);
+        if (matchingProjects.length > 0) {
           if (!recipientNodes.some(n => n.id === `recipient-${spending.spendingId}`)) {
             const spendingFromSelectedProjects = recipientSpendingAmounts.get(spending.spendingId) || 0;
             recipientNodes.push({
@@ -2016,16 +2022,18 @@ function buildSankeyData(
             });
           }
 
+          const totalAmount = matchingProjects.reduce((sum, p) => sum + p.amount, 0);
           // Use dummy value 0.001 if amount is 0 to prevent broken links
-          const linkValue = spendingProject.amount === 0 ? 0.001 : spendingProject.amount;
+          const linkValue = totalAmount === 0 ? 0.001 : totalAmount;
+          const blockName = matchingProjects.map(p => p.blockName).filter(Boolean).join(', ');
 
           links.push({
             source: `project-spending-${project.projectId}`,
             target: `recipient-${spending.spendingId}`,
             value: linkValue,
             details: {
-              contractMethod: spendingProject.contractMethod,
-              blockName: spendingProject.blockName,
+              contractMethod: matchingProjects[0].contractMethod,
+              blockName,
             },
           });
         }
@@ -2149,10 +2157,9 @@ function buildSankeyData(
         let amountFromOtherProjects = 0;
 
         for (const otherProject of otherProjects) {
-          const spendingProject = spending.projects.find(p => p.projectId === otherProject.projectId);
-          if (spendingProject) {
-            amountFromOtherProjects += spendingProject.amount;
-          }
+          amountFromOtherProjects += spending.projects
+            .filter(p => p.projectId === otherProject.projectId)
+            .reduce((sum, p) => sum + p.amount, 0);
         }
 
         // Create link from "Other Projects" to this recipient only if recipient node exists
@@ -2277,10 +2284,9 @@ function buildSankeyData(
         if (excludedRecipientIds.has(spendingId) || spending.spendingName === 'その他') continue;
 
         // This is an "other recipient"
-        const spendingProject = spending.projects.find(p => p.projectId === project.projectId);
-        if (spendingProject) {
-          projectTotalToOthers += spendingProject.amount;
-        }
+        projectTotalToOthers += spending.projects
+          .filter(p => p.projectId === project.projectId)
+          .reduce((sum, p) => sum + p.amount, 0);
       }
 
       if (projectTotalToOthers > 0) {
@@ -2340,8 +2346,9 @@ function buildSankeyData(
         // Calculate how much this recipient got from Top Projects (already calculated)
         let receivedFromTopProjects = 0;
         for (const project of topProjects) {
-          const p = recipient.projects.find(rp => rp.projectId === project.projectId);
-          if (p) receivedFromTopProjects += p.amount;
+          receivedFromTopProjects += recipient.projects
+            .filter(rp => rp.projectId === project.projectId)
+            .reduce((sum, p) => sum + p.amount, 0);
         }
 
         // Calculate total spending from selected ministries only (not all ministries)
@@ -2421,10 +2428,9 @@ function buildSankeyData(
               if (spending.spendingName === 'その他') continue; // Skip "その他" (handled separately)
               if (topSpendingIds.has(spending.spendingId)) continue; // Skip TopN recipients (handled above)
 
-              const spendingProject = spending.projects.find(p => p.projectId === otherProject.projectId);
-              if (spendingProject) {
-                amountToOtherRecipients += spendingProject.amount;
-              }
+              amountToOtherRecipients += spending.projects
+                .filter(p => p.projectId === otherProject.projectId)
+                .reduce((sum, p) => sum + p.amount, 0);
             }
           }
 
