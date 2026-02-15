@@ -551,6 +551,19 @@ function buildSpendingRecords(
   let indirectBlockCount = 0;
   let indirectBlockAmount = 0;
 
+  // 事前パス: 支出先ブロック名マップを構築（ブロック集計行から取得）
+  // 集計行は支出先名が空で支出先ブロック名が記入されている行
+  const blockNameMap = new Map<string, string>(); // key = `${projectId}_${blockNumber}`
+  for (const row of spendingRows) {
+    const projectId = parseInt(row.予算事業ID, 10);
+    if (isNaN(projectId)) continue;
+    if (!row.支出先ブロック番号 || !row.支出先ブロック名) continue;
+    const key = `${projectId}_${row.支出先ブロック番号}`;
+    if (!blockNameMap.has(key)) {
+      blockNameMap.set(key, row.支出先ブロック名.trim());
+    }
+  }
+
   for (const row of spendingRows) {
     const projectId = parseInt(row.予算事業ID, 10);
     if (isNaN(projectId)) continue;
@@ -600,7 +613,7 @@ function buildSpendingRecords(
       spending.blocks.set(blockKey, {
         projectId,
         blockNumber: row.支出先ブロック番号 || '',
-        blockName: row.支出先ブロック名 || '',
+        blockName: blockNameMap.get(blockKey) || row.支出先ブロック名 || '',
         amount: 0,
         contractSummaries: new Set(),
         contractMethods: new Set(),

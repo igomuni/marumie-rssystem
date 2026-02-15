@@ -29,6 +29,7 @@ interface SpendingDetail {
   projectCount?: number; // まとめる場合の事業件数
   ministryBreakdown?: MinistryBreakdown[]; // まとめる場合の府省庁別内訳
   sourceBlockName?: string; // 委託元ブロック名（間接支出の場合のみ）
+  blockName?: string; // 支出先ブロック名（複数ブロック表示時の識別用）
 }
 
 type SortColumn = 'spendingName' | 'projectName' | 'ministry' | 'totalBudget' | 'totalSpendingAmount' | 'executionRate' | 'projectCount';
@@ -226,6 +227,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
             totalSpendingAmount: projectSpending.amount,
             executionRate: project.executionRate,
             sourceBlockName: projectSpending.sourceChainPath,
+            blockName: projectSpending.blockName,
           });
         }
       });
@@ -300,6 +302,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           projectCount: item.projectCount,
           ministryBreakdown,
           sourceBlockName,
+          blockName: undefined,
         };
       });
     }
@@ -807,6 +810,11 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                       }}
                     >
                       {item.spendingName}
+                      {!groupBySpending && item.blockName && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+                          {item.blockName}
+                        </div>
+                      )}
                     </td>
                     <td
                       className={`px-4 py-2 text-gray-900 dark:text-white ${!groupBySpending && item.projectName ? 'cursor-pointer hover:underline' : ''}`}
