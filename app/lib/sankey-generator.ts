@@ -2015,9 +2015,26 @@ function buildSankeyData(
   }
 
 
+  // For Global View drilldown: compute excluded project IDs (from previously-shown ministries)
+  // so that their "その他" spending is NOT counted in the current page's "その他" node.
+  const excludedProjectIds = new Set<number>();
+  if (isGlobalView && drilldownLevel > 0) {
+    const allMinistriesSorted = fullData.budgetTree.ministries
+      .slice()
+      .sort((a, b) => b.totalBudget - a.totalBudget);
+    const excludeCount = (ministryLimit ?? 3) * drilldownLevel;
+    const excludedMinistryNames = new Set(allMinistriesSorted.slice(0, excludeCount).map(m => m.name));
+    for (const b of fullData.budgets) {
+      if (excludedMinistryNames.has(b.ministry)) {
+        excludedProjectIds.add(b.projectId);
+      }
+    }
+  }
+
   // "Other Named" (その他)
   let totalOtherNamedAmount = 0;
-  for (const [, otherNamedAmount] of otherNamedSpendingByProject.entries()) {
+  for (const [projectId, otherNamedAmount] of otherNamedSpendingByProject.entries()) {
+    if (excludedProjectIds.has(projectId)) continue; // Skip excluded ministry projects
     totalOtherNamedAmount += otherNamedAmount;
   }
 
@@ -2071,9 +2088,9 @@ function buildSankeyData(
     if (isGlobalView) {
       let otherProjectsOtherNamedAmount = 0;
       for (const [projectId, amount] of otherNamedSpendingByProject.entries()) {
-        if (!topProjectIds.has(projectId)) {
-          otherProjectsOtherNamedAmount += amount;
-        }
+        if (topProjectIds.has(projectId)) continue; // Already linked directly
+        if (excludedProjectIds.has(projectId)) continue; // Skip excluded ministries
+        otherProjectsOtherNamedAmount += amount;
       }
       if (otherProjectsOtherNamedAmount > 0) {
         const otherProjectsSpendingNodeExists = nodes.some(n => n.id === 'project-spending-other-global');
