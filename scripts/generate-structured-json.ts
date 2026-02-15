@@ -671,11 +671,23 @@ function buildSpendingRecords(
   for (const record of spendingRecords) {
     const outflows: SpendingBlockFlow[] = [];
 
+    // 同一支出先が同一プロジェクトの複数ブロックに登録されている場合、
+    // 複数ブロックが同じターゲットブロックへ接続していると同一アウトフローが重複追加される。
+    // (例: PID=18672 で福島県がB/D/E/F/H/Iの6ブロックに存在し、各ブロックが
+    //      同じBlock K「地方公共団体(43市町村等)」547億へ接続 → 6回重複)
+    // (projectId, targetBlockNumber) をキーに重複排除する。
+    const seenOutflowKeys = new Set<string>();
+
     for (const project of record.projects) {
       if (!project.blockNumber) continue;
       const blockKey = `${project.projectId}_${project.blockNumber}`;
       const flows = blockFlowMap.outflows.get(blockKey) || [];
-      outflows.push(...flows);
+      for (const flow of flows) {
+        const dedupeKey = `${flow.projectId}_${flow.targetBlockNumber}`;
+        if (seenOutflowKeys.has(dedupeKey)) continue;
+        seenOutflowKeys.add(dedupeKey);
+        outflows.push(flow);
+      }
     }
 
     if (outflows.length > 0) {
