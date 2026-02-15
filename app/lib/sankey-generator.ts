@@ -803,14 +803,16 @@ function selectData(
           .filter(s => project.spendingIds.includes(s.spendingId))
           .filter(s => s.spendingName !== 'その他')
           .map(s => {
+            // isDirectFromGov=false のブロック（再委託先ブロック）は除外して直接支出のみ集計
             const amountFromThisProject = s.projects
-              .filter(p => p.projectId === project.projectId)
+              .filter(p => p.projectId === project.projectId && p.isDirectFromGov !== false)
               .reduce((sum, p) => sum + p.amount, 0);
             return {
               spending: s,
               amountFromThisProject,
             };
-          });
+          })
+          .filter(({ amountFromThisProject }) => amountFromThisProject > 0); // 間接支出のみの会社を除外
 
         const sortedSpendings = projectSpendings.sort((a, b) => b.amountFromThisProject - a.amountFromThisProject);
 
@@ -1986,12 +1988,12 @@ function buildSankeyData(
     }
   } else {
     // Ministry/Project View: Calculate spending from selected projects only
-    // First pass: calculate spending amounts for each recipient
+    // First pass: calculate spending amounts for each recipient (direct from gov only)
     const recipientSpendingAmounts = new Map<number, number>();
     for (const project of topProjects) {
       for (const spending of topSpendings) {
         const amount = spending.projects
-          .filter(p => p.projectId === project.projectId)
+          .filter(p => p.projectId === project.projectId && p.isDirectFromGov !== false)
           .reduce((sum, p) => sum + p.amount, 0);
         if (amount > 0) {
           const currentAmount = recipientSpendingAmounts.get(spending.spendingId) || 0;
@@ -2003,7 +2005,10 @@ function buildSankeyData(
     // Second pass: create nodes and links
     for (const project of topProjects) {
       for (const spending of topSpendings) {
-        const matchingProjects = spending.projects.filter(p => p.projectId === project.projectId);
+        // 直接支出ブロックのみを対象とする（isDirectFromGov=false の間接ブロックを除外）
+        const matchingProjects = spending.projects.filter(
+          p => p.projectId === project.projectId && p.isDirectFromGov !== false
+        );
         if (matchingProjects.length > 0) {
           if (!recipientNodes.some(n => n.id === `recipient-${spending.spendingId}`)) {
             const spendingFromSelectedProjects = recipientSpendingAmounts.get(spending.spendingId) || 0;
