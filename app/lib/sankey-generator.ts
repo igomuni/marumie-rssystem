@@ -1906,16 +1906,31 @@ function buildSankeyData(
   }
 
   if (isGlobalView) {
+    // In ministry drilldown (level > 0), build a lookup to exclude projects from excluded ministries.
+    // When spending drilldown is active, topProjects is built from all budgets, so excluded ministry
+    // projects can appear in topProjects. We need to filter them out from recipient node values/links.
+    const projectMinistryMap = drilldownLevel > 0
+      ? new Map(fullData.budgets.map(b => [b.projectId, b.ministry]))
+      : null;
+    const selectedMinistryNames = drilldownLevel > 0
+      ? new Set(topMinistries.map(m => m.name))
+      : null;
+
     // Global View: Create nodes for current topSpendings and links from their projects
     for (const spending of topSpendings) {
       // Calculate spending amount from selected TopN projects only
+      // (In ministry drilldown, also filter to selected ministries only)
       let spendingFromSelectedProjects = 0;
       for (const spendingProject of spending.projects) {
         // Only count spending from topProjects (selected TopN projects)
         const projectExists = topProjects.some(p => p.projectId === spendingProject.projectId);
-        if (projectExists) {
-          spendingFromSelectedProjects += spendingProject.amount;
+        if (!projectExists) continue;
+        // In ministry drilldown, exclude projects from excluded ministries
+        if (projectMinistryMap && selectedMinistryNames) {
+          const ministry = projectMinistryMap.get(spendingProject.projectId);
+          if (!ministry || !selectedMinistryNames.has(ministry)) continue;
         }
+        spendingFromSelectedProjects += spendingProject.amount;
       }
 
       // Create recipient node with spending from selected projects only
@@ -1937,17 +1952,21 @@ function buildSankeyData(
       for (const spendingProject of spending.projects) {
         // Check if this project's spending node exists (i.e., it's in topProjects)
         const projectExists = topProjects.some(p => p.projectId === spendingProject.projectId);
-        if (projectExists) {
-          links.push({
-            source: `project-spending-${spendingProject.projectId}`,
-            target: `recipient-${spending.spendingId}`,
-            value: spendingProject.amount,
-            details: {
-              contractMethod: spendingProject.contractMethod,
-              blockName: spendingProject.blockName,
-            },
-          });
+        if (!projectExists) continue;
+        // In ministry drilldown, exclude projects from excluded ministries
+        if (projectMinistryMap && selectedMinistryNames) {
+          const ministry = projectMinistryMap.get(spendingProject.projectId);
+          if (!ministry || !selectedMinistryNames.has(ministry)) continue;
         }
+        links.push({
+          source: `project-spending-${spendingProject.projectId}`,
+          target: `recipient-${spending.spendingId}`,
+          value: spendingProject.amount,
+          details: {
+            contractMethod: spendingProject.contractMethod,
+            blockName: spendingProject.blockName,
+          },
+        });
       }
     }
 
