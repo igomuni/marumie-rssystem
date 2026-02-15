@@ -25,13 +25,14 @@ interface SpendingDetail {
   ministry: string;
   totalBudget: number;
   totalSpendingAmount: number;
-  executionRate: number;
+  outflowAmount?: number; // 再委託額
   projectCount?: number; // まとめる場合の事業件数
   ministryBreakdown?: MinistryBreakdown[]; // まとめる場合の府省庁別内訳
   sourceBlockName?: string; // 委託元ブロック名（間接支出の場合のみ）
+  blockName?: string; // 支出先ブロック名（複数ブロック表示時の識別用）
 }
 
-type SortColumn = 'spendingName' | 'projectName' | 'ministry' | 'totalBudget' | 'totalSpendingAmount' | 'executionRate' | 'projectCount';
+type SortColumn = 'spendingName' | 'projectName' | 'ministry' | 'totalBudget' | 'totalSpendingAmount' | 'projectCount';
 type SortDirection = 'asc' | 'desc';
 type SearchMode = 'contains' | 'exact' | 'prefix';
 
@@ -218,14 +219,19 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
         if (projectSpendings.length === 0) return;
 
         for (const projectSpending of projectSpendings) {
+          const outflowAmount = spending.outflows
+            ?.filter(f => f.projectId === project.projectId)
+            .reduce((sum, f) => sum + f.amount, 0) ?? 0;
+
           result.push({
             spendingName: spending.spendingName,
             projectName: project.projectName,
             ministry: project.ministry,
             totalBudget: project.totalBudget,
             totalSpendingAmount: projectSpending.amount,
-            executionRate: project.executionRate,
+            outflowAmount: outflowAmount > 0 ? outflowAmount : undefined,
             sourceBlockName: projectSpending.sourceChainPath,
+            blockName: projectSpending.blockName,
           });
         }
       });
@@ -246,10 +252,10 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           // 府省庁ごとの支出額を記録
           const currentAmount = existing.ministryAmounts.get(item.ministry) || 0;
           existing.ministryAmounts.set(item.ministry, currentAmount + item.totalSpendingAmount);
-          // 執行率は加重平均で再計算
-          existing.executionRate = existing.totalBudget > 0
-            ? (existing.totalSpendingAmount / existing.totalBudget) * 100
-            : 0;
+          // 再委託額を集計
+          if (item.outflowAmount) {
+            existing.outflowAmount = (existing.outflowAmount ?? 0) + item.outflowAmount;
+          }
           // 委託元を収集
           if (item.sourceBlockName) existing.sourcesSet.add(item.sourceBlockName);
         } else {
@@ -296,10 +302,11 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           ministry: ministryDisplay,
           totalBudget: item.totalBudget,
           totalSpendingAmount: item.totalSpendingAmount,
-          executionRate: item.executionRate,
+          outflowAmount: item.outflowAmount,
           projectCount: item.projectCount,
           ministryBreakdown,
           sourceBlockName,
+          blockName: undefined,
         };
       });
     }
@@ -782,11 +789,8 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                   >
                     支出 {getSortIndicator('totalSpendingAmount')}
                   </th>
-                  <th
-                    className="px-4 py-2 text-right cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
-                    onClick={() => handleSort('executionRate')}
-                  >
-                    執行率 {getSortIndicator('executionRate')}
+                  <th className="px-4 py-2 text-right whitespace-nowrap text-orange-600 dark:text-orange-400">
+                    再委託
                   </th>
                   <th className="px-4 py-2 text-left whitespace-nowrap">
                     委託元
@@ -807,6 +811,11 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                       }}
                     >
                       {item.spendingName}
+                      {!groupBySpending && item.blockName && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 font-normal mt-0.5">
+                          {item.blockName}
+                        </div>
+                      )}
                     </td>
                     <td
                       className={`px-4 py-2 text-gray-900 dark:text-white ${!groupBySpending && item.projectName ? 'cursor-pointer hover:underline' : ''}`}
@@ -831,8 +840,29 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                     <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
                       {formatCurrency(item.totalSpendingAmount)}
                     </td>
-                    <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
-                      {item.executionRate.toFixed(1)}%
+                    <td className="px-4 py-2 text-right whitespace-nowrap">
+                      {item.outflowAmount ? (() => {
+                        const rate = item.totalSpendingAmount > 0
+                          ? item.outflowAmount / item.totalSpendingAmount * 100
+                          : 0;
+                        return (
+                          <div className="text-orange-600 dark:text-orange-400">
+                            <div>{formatCurrency(item.outflowAmount)}</div>
+                            {rate > 100 ? (
+                              <span
+                                className="text-xs cursor-help underline decoration-dotted"
+                                title="再委託額が受取額を超えています。都道府県・市区町村等の地方負担分（共同負担）が含まれる可能性があります。"
+                              >
+                                ※
+                              </span>
+                            ) : (
+                              <div className="text-xs">({rate.toFixed(1)}%)</div>
+                            )}
+                          </div>
+                        );
+                      })() : (
+                        <span className="text-gray-400 dark:text-gray-600">-</span>
+                      )}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-gray-500 dark:text-gray-400 text-xs">
                       {item.sourceBlockName || ''}

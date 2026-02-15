@@ -551,6 +551,19 @@ function buildSpendingRecords(
   let indirectBlockCount = 0;
   let indirectBlockAmount = 0;
 
+  // 事前パス: 支出先ブロック名マップを構築（ブロック集計行から取得）
+  // 集計行は支出先名が空で支出先ブロック名が記入されている行
+  const blockNameMap = new Map<string, string>(); // key = `${projectId}_${blockNumber}`
+  for (const row of spendingRows) {
+    const projectId = parseInt(row.予算事業ID, 10);
+    if (isNaN(projectId)) continue;
+    if (!row.支出先ブロック番号 || !row.支出先ブロック名) continue;
+    const key = `${projectId}_${row.支出先ブロック番号}`;
+    if (!blockNameMap.has(key)) {
+      blockNameMap.set(key, row.支出先ブロック名.trim());
+    }
+  }
+
   for (const row of spendingRows) {
     const projectId = parseInt(row.予算事業ID, 10);
     if (isNaN(projectId)) continue;
@@ -600,7 +613,7 @@ function buildSpendingRecords(
       spending.blocks.set(blockKey, {
         projectId,
         blockNumber: row.支出先ブロック番号 || '',
-        blockName: row.支出先ブロック名 || '',
+        blockName: blockNameMap.get(blockKey) || row.支出先ブロック名 || '',
         amount: 0,
         contractSummaries: new Set(),
         contractMethods: new Set(),
@@ -667,15 +680,54 @@ function buildSpendingRecords(
     projectSpendingMap.set(projectId, Array.from(idSet));
   }
 
+  // 会社名正規化（法人格・「ほか」等を除去してコア名を抽出）
+  function normalizeCompanyName(name: string): string {
+    return name
+      .replace(/^(一般社団法人|公益財団法人|公益社団法人|特定非営利活動法人|NPO法人|独立行政法人|学校法人|医療法人|社会福祉法人|宗教法人|弁護士法人|税理士法人|監査法人|有限責任監査法人)/, '')
+      .replace(/^(株式会社|有限会社|合同会社|合資会社|合名会社)/, '')
+      .replace(/(株式会社|有限会社|合同会社|合資会社|合名会社)$/, '')
+      .replace(/ほか.*$/, '')
+      .replace(/他\d*$/, '')
+      .replace(/[・\s]/g, '')
+      .trim();
+  }
+
   // SpendingRecordにoutflowsを追加
+  // ブロック単位のoutflowを「代表企業」のみに紐づける。
+  // ブロック名（sourceBlockName）に会社名が含まれる場合のみ割り当てる。
+  // これにより、ブロック内の全社に同一outflowが付くという重複集計を防ぐ。
+  // （例: PID=5603 Block E「トランスコスモス株式会社ほか」→ トランス・コスモスのみに付け、
+  //       同ブロックのパソナ等には付けない）
   for (const record of spendingRecords) {
     const outflows: SpendingBlockFlow[] = [];
+
+    // 同一支出先が同一プロジェクトの複数ブロックに登録されている場合、
+    // 複数ブロックが同じターゲットブロックへ接続していると同一アウトフローが重複追加される。
+    // (例: PID=18672 で福島県がB/D/E/F/H/Iの6ブロックに存在し、各ブロックが
+    //      同じBlock K「地方公共団体(43市町村等)」547億へ接続 → 6回重複)
+    // (projectId, targetBlockNumber) をキーに重複排除する。
+    const seenOutflowKeys = new Set<string>();
+    const normalizedRecordName = normalizeCompanyName(record.spendingName);
 
     for (const project of record.projects) {
       if (!project.blockNumber) continue;
       const blockKey = `${project.projectId}_${project.blockNumber}`;
       const flows = blockFlowMap.outflows.get(blockKey) || [];
-      outflows.push(...flows);
+      for (const flow of flows) {
+        // ブロック代表企業チェック: flowのsourceBlockNameと会社名が一致する場合のみ追加
+        // （ブロック内の全社に同一金額が付く重複集計を防ぐ）
+        const normalizedSourceBlock = normalizeCompanyName(flow.sourceBlockName);
+        const isRepresentative =
+          normalizedSourceBlock.length > 0 && normalizedRecordName.length > 0 &&
+          (normalizedSourceBlock.includes(normalizedRecordName) ||
+           normalizedRecordName.includes(normalizedSourceBlock));
+        if (!isRepresentative) continue;
+
+        const dedupeKey = `${flow.projectId}_${flow.targetBlockNumber}`;
+        if (seenOutflowKeys.has(dedupeKey)) continue;
+        seenOutflowKeys.add(dedupeKey);
+        outflows.push(flow);
+      }
     }
 
     if (outflows.length > 0) {

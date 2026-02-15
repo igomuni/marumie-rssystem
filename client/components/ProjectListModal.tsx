@@ -26,11 +26,11 @@ interface SpendingDetail {
   spendingName: string;
   totalBudget: number;
   totalSpendingAmount: number;
-  executionRate: number;
+  outflowAmount?: number; // 再委託額
   spendingCount?: number; // まとめる場合の支出先件数
 }
 
-type SortColumn = 'ministry' | 'projectName' | 'spendingName' | 'totalBudget' | 'totalSpendingAmount' | 'executionRate' | 'spendingCount';
+type SortColumn = 'ministry' | 'projectName' | 'spendingName' | 'totalBudget' | 'totalSpendingAmount' | 'spendingCount';
 type SortDirection = 'asc' | 'desc';
 type SearchMode = 'contains' | 'exact' | 'prefix';
 
@@ -227,7 +227,6 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
         spendingName: '', // まとめる場合は空
         totalBudget: item.totalBudget,
         totalSpendingAmount: item.totalSpendingAmount,
-        executionRate: item.executionRate,
         spendingCount: item.spendingIds.length,
       }));
     } else {
@@ -241,9 +240,14 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
           const spending = spendingMap.get(spendingId);
           if (!spending) return;
 
-          // この支出先がこの事業からいくら受け取っているかを計算
-          const projectSpending = spending.projects.find(p => p.projectId === budget.projectId);
-          const spendingAmount = projectSpending?.amount || 0;
+          // この支出先がこの事業からいくら受け取っているかを計算（複数ブロック対応）
+          const spendingAmount = spending.projects
+            .filter(p => p.projectId === budget.projectId)
+            .reduce((sum, p) => sum + p.amount, 0);
+
+          const outflowAmount = spending.outflows
+            ?.filter(f => f.projectId === budget.projectId)
+            .reduce((sum, f) => sum + f.amount, 0) ?? 0;
 
           details.push({
             projectId: budget.projectId,
@@ -252,7 +256,7 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
             spendingName: spending.spendingName,
             totalBudget: budget.totalBudget,
             totalSpendingAmount: spendingAmount, // この事業からこの支出先への支出額
-            executionRate: budget.totalBudget > 0 ? (spendingAmount / budget.totalBudget) * 100 : 0,
+            outflowAmount: outflowAmount > 0 ? outflowAmount : undefined,
           });
         });
       });
@@ -311,10 +315,6 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
         case 'totalSpendingAmount':
           aValue = a.totalSpendingAmount;
           bValue = b.totalSpendingAmount;
-          break;
-        case 'executionRate':
-          aValue = a.executionRate;
-          bValue = b.executionRate;
           break;
         case 'spendingCount':
           aValue = a.spendingCount || 0;
@@ -691,12 +691,11 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
                   >
                     支出 {getSortIndicator('totalSpendingAmount')}
                   </th>
-                  <th
-                    className="px-4 py-2 text-right cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 whitespace-nowrap"
-                    onClick={() => handleSort('executionRate')}
-                  >
-                    執行率 {getSortIndicator('executionRate')}
-                  </th>
+                  {!groupByProject && (
+                    <th className="px-4 py-2 text-right whitespace-nowrap text-orange-600 dark:text-orange-400">
+                      再委託
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -729,9 +728,32 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
                     <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
                       {formatCurrency(item.totalSpendingAmount)}
                     </td>
-                    <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
-                      {item.executionRate.toFixed(1)}%
-                    </td>
+                    {!groupByProject && (
+                      <td className="px-4 py-2 text-right whitespace-nowrap">
+                        {item.outflowAmount ? (() => {
+                          const rate = item.totalSpendingAmount > 0
+                            ? item.outflowAmount / item.totalSpendingAmount * 100
+                            : 0;
+                          return (
+                            <div className="text-orange-600 dark:text-orange-400">
+                              <div>{formatCurrency(item.outflowAmount)}</div>
+                              {rate > 100 ? (
+                                <span
+                                  className="text-xs cursor-help underline decoration-dotted"
+                                  title="再委託額が受取額を超えています。都道府県・市区町村等の地方負担分（共同負担）が含まれる可能性があります。"
+                                >
+                                  ※
+                                </span>
+                              ) : (
+                                <div className="text-xs">({rate.toFixed(1)}%)</div>
+                              )}
+                            </div>
+                          );
+                        })() : (
+                          <span className="text-gray-400 dark:text-gray-600">-</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
