@@ -2499,11 +2499,12 @@ function buildSankeyData(
   const aggregatedOther = recipientNodes.filter(n => n.id === 'recipient-other-aggregated');
   const noSpendingRecipient = recipientNodes.filter(n => n.id === 'recipient-no-spending');
 
-  // Global View: One aggregated node per direct recipient that has outflows
+  // Global/Ministry View: One aggregated node per direct recipient that has outflows
   // Project View: TopN individual subcontract recipient nodes aggregated across all direct recipients
   const subcontractNodes: SankeyNode[] = [];
   const isProjectView = !!targetProjectName && !isGlobalView;
-  if (isGlobalView) {
+  const isMinistryView = !!targetMinistryName && !targetProjectName && !isGlobalView;
+  if (isGlobalView || isMinistryView) {
     for (const spending of topSpendings) {
       if (!spending.outflows || spending.outflows.length === 0) continue;
 
