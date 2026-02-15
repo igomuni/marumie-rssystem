@@ -52,6 +52,7 @@ function SankeyContent() {
     flowTypes: string;
     projects: { projectId: number; projectName: string; amount: number }[];
     furtherOutflows?: { name: string; amount: number; flowType: string }[];
+    subcontracts?: { name: string; amount: number; flowType: string }[];
   } | null>(null);
 
   // Sync state from URL parameters (runs on mount and whenever URL changes via browser back/forward)
@@ -334,47 +335,101 @@ function SankeyContent() {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const details = actualNode.details as any;
-      if (details) {
-        // Find further outflows (再々委託先) from structuredData
-        let furtherOutflows: { name: string; amount: number; flowType: string }[] = [];
-        if (structuredData) {
-          const spendingRecord = structuredData.spendings.find(s => s.spendingName === actualNode.name);
-          if (spendingRecord && spendingRecord.outflows) {
-            // Aggregate recipients from outflows
-            const recipientMap = new Map<string, { amount: number; flowTypes: Set<string> }>();
+      if (!details) return;
 
-            for (const flow of spendingRecord.outflows) {
-              if (flow.recipients && flow.recipients.length > 0) {
-                for (const recipient of flow.recipients) {
-                  const key = recipient.name;
-                  if (!recipientMap.has(key)) {
-                    recipientMap.set(key, { amount: 0, flowTypes: new Set() });
-                  }
-                  const data = recipientMap.get(key)!;
-                  data.amount += recipient.amount;
-                  data.flowTypes.add(flow.flowType);
+      // Global View aggregated subcontract node: build dialog data from outflows
+      if (details.isGlobalSubcontractAgg && structuredData) {
+        const spendingId = details.spendingId as number;
+        const spendingRecord = structuredData.spendings.find(s => s.spendingId === spendingId);
+        if (spendingRecord?.outflows && spendingRecord.outflows.length > 0) {
+          const subcontractMap = new Map<string, { amount: number; flowTypes: Set<string> }>();
+          const projectMap = new Map<number, { projectId: number; projectName: string; amount: number }>();
+          const allFlowTypes = new Set<string>();
+
+          for (const flow of spendingRecord.outflows) {
+            if (flow.recipients && flow.recipients.length > 0) {
+              for (const r of flow.recipients) {
+                const key = r.name;
+                if (!subcontractMap.has(key)) subcontractMap.set(key, { amount: 0, flowTypes: new Set() });
+                const d = subcontractMap.get(key)!;
+                d.amount += r.amount;
+                d.flowTypes.add(flow.flowType);
+                allFlowTypes.add(flow.flowType);
+                if (!projectMap.has(flow.projectId)) {
+                  projectMap.set(flow.projectId, { projectId: flow.projectId, projectName: flow.projectName, amount: 0 });
                 }
+                projectMap.get(flow.projectId)!.amount += r.amount;
+              }
+            } else {
+              const key = flow.targetBlockName;
+              if (!subcontractMap.has(key)) subcontractMap.set(key, { amount: 0, flowTypes: new Set() });
+              const d = subcontractMap.get(key)!;
+              d.amount += flow.amount;
+              d.flowTypes.add(flow.flowType);
+              allFlowTypes.add(flow.flowType);
+              if (!projectMap.has(flow.projectId)) {
+                projectMap.set(flow.projectId, { projectId: flow.projectId, projectName: flow.projectName, amount: 0 });
+              }
+              projectMap.get(flow.projectId)!.amount += flow.amount;
+            }
+          }
+
+          const subcontracts = Array.from(subcontractMap.entries())
+            .map(([name, d]) => ({ name, amount: d.amount, flowType: Array.from(d.flowTypes).join(', ') }))
+            .sort((a, b) => b.amount - a.amount);
+
+          setSubcontractDetail({
+            name: details.sourceRecipient as string,
+            sourceRecipient: details.sourceRecipient as string,
+            totalAmount: actualNode.value,
+            flowTypes: Array.from(allFlowTypes).join(', '),
+            projects: Array.from(projectMap.values()).sort((a, b) => b.amount - a.amount),
+            subcontracts,
+          });
+          setDialogStates(prev => ({ ...prev, subcontractDetail: true }));
+        }
+        return;
+      }
+
+      // Spending View individual subcontract node: find further outflows (再々委託先)
+      let furtherOutflows: { name: string; amount: number; flowType: string }[] = [];
+      if (structuredData) {
+        const spendingRecord = structuredData.spendings.find(s => s.spendingName === actualNode.name);
+        if (spendingRecord && spendingRecord.outflows) {
+          // Aggregate recipients from outflows
+          const recipientMap = new Map<string, { amount: number; flowTypes: Set<string> }>();
+
+          for (const flow of spendingRecord.outflows) {
+            if (flow.recipients && flow.recipients.length > 0) {
+              for (const recipient of flow.recipients) {
+                const key = recipient.name;
+                if (!recipientMap.has(key)) {
+                  recipientMap.set(key, { amount: 0, flowTypes: new Set() });
+                }
+                const data = recipientMap.get(key)!;
+                data.amount += recipient.amount;
+                data.flowTypes.add(flow.flowType);
               }
             }
-
-            furtherOutflows = Array.from(recipientMap.entries()).map(([name, data]) => ({
-              name,
-              amount: data.amount,
-              flowType: Array.from(data.flowTypes).join(', '),
-            })).sort((a, b) => b.amount - a.amount);
           }
-        }
 
-        setSubcontractDetail({
-          name: actualNode.name,
-          sourceRecipient: details.sourceRecipient || '',
-          totalAmount: actualNode.value,
-          flowTypes: details.flowTypes || '',
-          projects: details.projects || [],
-          furtherOutflows: furtherOutflows.length > 0 ? furtherOutflows : undefined,
-        });
-        setDialogStates(prev => ({ ...prev, subcontractDetail: true }));
+          furtherOutflows = Array.from(recipientMap.entries()).map(([name, data]) => ({
+            name,
+            amount: data.amount,
+            flowType: Array.from(data.flowTypes).join(', '),
+          })).sort((a, b) => b.amount - a.amount);
+        }
       }
+
+      setSubcontractDetail({
+        name: actualNode.name,
+        sourceRecipient: details.sourceRecipient || '',
+        totalAmount: actualNode.value,
+        flowTypes: details.flowTypes || '',
+        projects: details.projects || [],
+        furtherOutflows: furtherOutflows.length > 0 ? furtherOutflows : undefined,
+      });
+      setDialogStates(prev => ({ ...prev, subcontractDetail: true }));
       return;
     }
   };
@@ -762,7 +817,7 @@ function SankeyContent() {
                   ? { top: 40, right: 100, bottom: 40, left: 100 }
                   : { top: 40, right: 100, bottom: 40, left: 100 }
                 }
-                align={viewState.mode === 'global' && sankey.nodes.some(n => n.type === 'subcontract-recipient') ? 'start' : 'justify'}
+                align={(viewState.mode === 'global' || viewState.mode === 'ministry' || viewState.mode === 'project') && sankey.nodes.some(n => n.type === 'subcontract-recipient') ? 'start' : 'justify'}
                 sort="input"
                 nodeInnerPadding={0}
                 colors={(node) => {
