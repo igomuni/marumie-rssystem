@@ -2662,6 +2662,21 @@ function buildSankeyData(
     }
   }
 
+  // Global/Ministry View: sort subcontract nodes to match recipient node vertical order
+  // (prevents position mismatch caused by d3-sankey's input-sort on multi-project link graphs)
+  if (isGlobalView || isMinistryView) {
+    const recipientOrderMap = new Map(regularRecipients.map((n, i) => [n.id, i]));
+    subcontractNodes.sort((a, b) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const aSpendingId = (a.details as any)?.spendingId;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bSpendingId = (b.details as any)?.spendingId;
+      const aOrder = recipientOrderMap.get(`recipient-${aSpendingId}`) ?? 999;
+      const bOrder = recipientOrderMap.get(`recipient-${bSpendingId}`) ?? 999;
+      return aOrder - bOrder;
+    });
+  }
+
   nodes.push(...regularRecipients, ...otherNamedRecipient, ...aggregatedOther, ...noSpendingRecipient, ...subcontractNodes);
 
   // Filter out nodes that have no links (0-yen ghost nodes)
