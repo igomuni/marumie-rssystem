@@ -817,7 +817,7 @@ function SankeyContent() {
                   ? { top: 40, right: 100, bottom: 40, left: 100 }
                   : { top: 40, right: 100, bottom: 40, left: 100 }
                 }
-                align={viewState.mode === 'global' && sankey.nodes.some(n => n.type === 'subcontract-recipient') ? 'start' : 'justify'}
+                align={(viewState.mode === 'global' || viewState.mode === 'project') && sankey.nodes.some(n => n.type === 'subcontract-recipient') ? 'start' : 'justify'}
                 sort="input"
                 nodeInnerPadding={0}
                 colors={(node) => {
