@@ -104,15 +104,18 @@ export interface RecipientNodeDetails {
 
 // 再委託先ノードの詳細
 export interface SubcontractRecipientNodeDetails {
-  flowTypes: string;              // 資金の流れの種類（例: "間接補助金, 委託"）
-  sourceRecipient: string;        // 支出元の支出先名
-  projects: {                     // 関連する事業のリスト
+  flowTypes?: string;             // 資金の流れの種類（例: "間接補助金, 委託"）
+  sourceRecipient?: string;       // 支出元の支出先名
+  projects?: {                    // 関連する事業のリスト
     projectId: number;
     projectName: string;
     amount: number;
   }[];
   actualValue?: number;           // ダミー値使用時の実際の金額（ラベル表示用）
   tags?: SpendingTags;            // タグ情報（組織種別・業種）
+  // Global View aggregated subcontract node fields
+  isGlobalSubcontractAgg?: boolean; // 全体ビューの集約ノードフラグ
+  spendingId?: number;            // 集約元の支出先ID（クリック時のデータ取得用）
 }
 
 // サンキーリンク

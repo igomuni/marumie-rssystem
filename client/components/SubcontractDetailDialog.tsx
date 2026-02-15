@@ -16,6 +16,7 @@ interface Props {
     flowTypes: string;
     projects: SubcontractProject[];
     furtherOutflows?: { name: string; amount: number; flowType: string }[];
+    subcontracts?: { name: string; amount: number; flowType: string }[];
   } | null;
   formatCurrency: (value: number) => string;
 }
@@ -57,6 +58,47 @@ export default function SubcontractDetailDialog({ isOpen, onClose, detail, forma
               </p>
             </div>
           </div>
+
+          {/* 再委託先一覧（全体ビュー集約ノード用） */}
+          {detail.subcontracts && detail.subcontracts.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                再委託先一覧 ({detail.subcontracts.length}先)
+              </h3>
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        支出先名
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        資金の流れ
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        金額
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {detail.subcontracts.map((sub, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                          {sub.name}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                          {sub.flowType}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-right text-gray-900 dark:text-white whitespace-nowrap">
+                          {formatCurrency(sub.amount)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* 関連事業リスト */}
           {detail.projects.length > 0 && (
@@ -134,8 +176,8 @@ export default function SubcontractDetailDialog({ isOpen, onClose, detail, forma
             </div>
           )}
 
-          {/* 注記 */}
-          {(!detail.furtherOutflows || detail.furtherOutflows.length === 0) && (
+          {/* 注記（個別再委託先ノードのみ表示） */}
+          {!detail.subcontracts && (!detail.furtherOutflows || detail.furtherOutflows.length === 0) && (
             <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
               <p className="text-xs text-blue-800 dark:text-blue-300">
                 ※ この再委託先からの再々委託先はありません
