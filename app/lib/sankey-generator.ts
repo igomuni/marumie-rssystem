@@ -2494,27 +2494,17 @@ function buildSankeyData(
   const aggregatedOther = recipientNodes.filter(n => n.id === 'recipient-other-aggregated');
   const noSpendingRecipient = recipientNodes.filter(n => n.id === 'recipient-no-spending');
 
-  // Global View / Project View: Add sub-contractor (再委託先) nodes as rightmost column
-  // One aggregated node per recipient that has outflows
+  // Global View: One aggregated node per direct recipient that has outflows
+  // Project View: TopN individual subcontract recipient nodes aggregated across all direct recipients
   const subcontractNodes: SankeyNode[] = [];
   const isProjectView = !!targetProjectName && !isGlobalView;
-  if (isGlobalView || isProjectView) {
-    // Project View: outflows を選択事業の projectId でフィルタ（他事業の再委託を除外）
-    const selectedProjectId = isProjectView ? (topProjects[0]?.projectId ?? null) : null;
-
+  if (isGlobalView) {
     for (const spending of topSpendings) {
       if (!spending.outflows || spending.outflows.length === 0) continue;
 
-      const relevantOutflows = selectedProjectId !== null
-        ? spending.outflows.filter(f => f.projectId === selectedProjectId)
-        : spending.outflows;
-
-      if (relevantOutflows.length === 0) continue;
-
-      // Count unique subcontract recipients and total amount
       const uniqueRecipients = new Set<string>();
       let totalOutflow = 0;
-      for (const flow of relevantOutflows) {
+      for (const flow of spending.outflows) {
         if (flow.recipients && flow.recipients.length > 0) {
           for (const r of flow.recipients) {
             uniqueRecipients.add(`${r.name}_${r.corporateNumber}`);
@@ -2549,6 +2539,120 @@ function buildSankeyData(
         target: nodeId,
         value: totalOutflow === 0 ? 0.001 : totalOutflow,
       });
+    }
+  } else if (isProjectView) {
+    // Aggregate subcontract recipients across all direct recipients, filtered to the selected project
+    const selectedProjectId = topProjects[0]?.projectId ?? null;
+    const subcontractLimit = options.subcontractLimit ?? 10;
+
+    const subcontractAggregation = new Map<string, {
+      name: string;
+      corporateNumber?: string;
+      flowTypes: Set<string>;
+      totalAmount: number;
+      perSource: Map<number, number>; // spendingId → amount
+      projects: Map<number, { projectId: number; projectName: string; amount: number }>;
+    }>();
+
+    for (const spending of topSpendings) {
+      if (!spending.outflows || spending.outflows.length === 0) continue;
+
+      const relevantOutflows = selectedProjectId !== null
+        ? spending.outflows.filter(f => f.projectId === selectedProjectId)
+        : spending.outflows;
+
+      if (relevantOutflows.length === 0) continue;
+
+      for (const flow of relevantOutflows) {
+        if (flow.recipients && flow.recipients.length > 0) {
+          for (const r of flow.recipients) {
+            const key = `${r.name}_${r.corporateNumber}`;
+            if (!subcontractAggregation.has(key)) {
+              subcontractAggregation.set(key, { name: r.name, corporateNumber: r.corporateNumber, flowTypes: new Set(), totalAmount: 0, perSource: new Map(), projects: new Map() });
+            }
+            const agg = subcontractAggregation.get(key)!;
+            agg.flowTypes.add(flow.flowType);
+            agg.totalAmount += r.amount;
+            agg.perSource.set(spending.spendingId, (agg.perSource.get(spending.spendingId) ?? 0) + r.amount);
+            if (!agg.projects.has(flow.projectId)) {
+              agg.projects.set(flow.projectId, { projectId: flow.projectId, projectName: flow.projectName, amount: 0 });
+            }
+            agg.projects.get(flow.projectId)!.amount += r.amount;
+          }
+        } else {
+          const key = flow.targetBlockName;
+          if (!subcontractAggregation.has(key)) {
+            subcontractAggregation.set(key, { name: flow.targetBlockName, flowTypes: new Set(), totalAmount: 0, perSource: new Map(), projects: new Map() });
+          }
+          const agg = subcontractAggregation.get(key)!;
+          agg.flowTypes.add(flow.flowType);
+          agg.totalAmount += flow.amount;
+          agg.perSource.set(spending.spendingId, (agg.perSource.get(spending.spendingId) ?? 0) + flow.amount);
+          if (!agg.projects.has(flow.projectId)) {
+            agg.projects.set(flow.projectId, { projectId: flow.projectId, projectName: flow.projectName, amount: 0 });
+          }
+          agg.projects.get(flow.projectId)!.amount += flow.amount;
+        }
+      }
+    }
+
+    const sortedSubcontracts = Array.from(subcontractAggregation.entries())
+      .map(([key, data]) => ({ key, ...data }))
+      .sort((a, b) => b.totalAmount - a.totalAmount);
+
+    const topSubcontracts = sortedSubcontracts.slice(0, subcontractLimit);
+    const otherSubcontracts = sortedSubcontracts.slice(subcontractLimit);
+
+    for (const data of topSubcontracts) {
+      const nodeId = `subcontract-${data.key}`;
+      const projectList = Array.from(data.projects.values()).sort((a, b) => b.amount - a.amount);
+      subcontractNodes.push({
+        id: nodeId,
+        name: data.name,
+        type: 'subcontract-recipient',
+        value: data.totalAmount,
+        details: {
+          flowTypes: Array.from(data.flowTypes).join(', '),
+          sourceRecipient: targetProjectName,
+          projects: projectList,
+        },
+      });
+      for (const [spendingId, amount] of data.perSource) {
+        links.push({ source: `recipient-${spendingId}`, target: nodeId, value: amount });
+      }
+    }
+
+    if (otherSubcontracts.length > 0) {
+      const otherPerSource = new Map<number, number>();
+      let otherTotal = 0;
+      const otherFlowTypes = new Set<string>();
+      const otherProjects = new Map<number, { projectId: number; projectName: string; amount: number }>();
+      for (const data of otherSubcontracts) {
+        otherTotal += data.totalAmount;
+        for (const flowType of data.flowTypes) otherFlowTypes.add(flowType);
+        for (const [spendingId, amount] of data.perSource) {
+          otherPerSource.set(spendingId, (otherPerSource.get(spendingId) ?? 0) + amount);
+        }
+        for (const [projectId, project] of data.projects) {
+          if (!otherProjects.has(projectId)) otherProjects.set(projectId, { ...project, amount: 0 });
+          otherProjects.get(projectId)!.amount += project.amount;
+        }
+      }
+      const otherProjectList = Array.from(otherProjects.values()).sort((a, b) => b.amount - a.amount);
+      subcontractNodes.push({
+        id: 'subcontract-project-other',
+        name: `再委託先\n(Top${subcontractLimit}以外)`,
+        type: 'subcontract-recipient',
+        value: otherTotal,
+        details: {
+          flowTypes: Array.from(otherFlowTypes).join(', '),
+          sourceRecipient: targetProjectName,
+          projects: otherProjectList,
+        },
+      });
+      for (const [spendingId, amount] of otherPerSource) {
+        links.push({ source: `recipient-${spendingId}`, target: 'subcontract-project-other', value: amount });
+      }
     }
   }
 
