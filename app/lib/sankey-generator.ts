@@ -2559,17 +2559,6 @@ function buildSankeyData(
       projects: Map<number, { projectId: number; projectName: string; amount: number }>;
     }>();
 
-    // Build lookup of direct recipients to avoid duplicating them as subcontract nodes
-    const directRecipientCorpNums = new Set<string>();
-    const directRecipientNames = new Set<string>();
-    for (const sp of topSpendings) {
-      if (sp.corporateNumber) directRecipientCorpNums.add(sp.corporateNumber);
-      directRecipientNames.add(sp.spendingName);
-    }
-    const isDirectRecipient = (name: string, corporateNumber?: string): boolean =>
-      (!!corporateNumber && directRecipientCorpNums.has(corporateNumber)) ||
-      directRecipientNames.has(name);
-
     for (const spending of topSpendings) {
       if (!spending.outflows || spending.outflows.length === 0) continue;
 
@@ -2582,8 +2571,6 @@ function buildSankeyData(
       for (const flow of relevantOutflows) {
         if (flow.recipients && flow.recipients.length > 0) {
           for (const r of flow.recipients) {
-            // Skip targets already shown as direct recipients in Column 4
-            if (isDirectRecipient(r.name, r.corporateNumber)) continue;
             const key = `${r.name}_${r.corporateNumber}`;
             if (!subcontractAggregation.has(key)) {
               subcontractAggregation.set(key, { name: r.name, corporateNumber: r.corporateNumber, flowTypes: new Set(), totalAmount: 0, perSource: new Map(), projects: new Map() });
@@ -2598,8 +2585,6 @@ function buildSankeyData(
             agg.projects.get(flow.projectId)!.amount += r.amount;
           }
         } else {
-          // Skip targets already shown as direct recipients in Column 4
-          if (isDirectRecipient(flow.targetBlockName)) continue;
           const key = flow.targetBlockName;
           if (!subcontractAggregation.has(key)) {
             subcontractAggregation.set(key, { name: flow.targetBlockName, flowTypes: new Set(), totalAmount: 0, perSource: new Map(), projects: new Map() });
