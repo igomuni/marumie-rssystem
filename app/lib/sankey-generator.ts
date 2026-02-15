@@ -698,7 +698,7 @@ function selectData(
 
       const otherNamedTotal = projectSpendings.reduce((sum, s) => {
         return sum + s.projects
-          .filter(p => p.projectId === project.projectId)
+          .filter(p => p.projectId === project.projectId && p.isDirectFromGov !== false)
           .reduce((a, p) => a + p.amount, 0);
       }, 0);
 
@@ -753,7 +753,7 @@ function selectData(
 
         let totalFromCurrentPage = 0;
         for (const proj of spending.projects) {
-          if (currentPageProjectIds.includes(proj.projectId)) {
+          if (currentPageProjectIds.includes(proj.projectId) && proj.isDirectFromGov !== false) {
             totalFromCurrentPage += proj.amount;
           }
         }
@@ -784,7 +784,7 @@ function selectData(
         for (const spending of projectSpendings) {
           if (!topSpendingIds.has(spending.spendingId)) {
             otherSpendingTotal += spending.projects
-              .filter(p => p.projectId === project.projectId)
+              .filter(p => p.projectId === project.projectId && p.isDirectFromGov !== false)
               .reduce((sum, p) => sum + p.amount, 0);
           }
         }
