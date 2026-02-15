@@ -26,6 +26,7 @@ interface SpendingDetail {
   spendingName: string;
   totalBudget: number;
   totalSpendingAmount: number;
+  outflowAmount?: number; // 再委託額
   spendingCount?: number; // まとめる場合の支出先件数
 }
 
@@ -244,6 +245,10 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
             .filter(p => p.projectId === budget.projectId)
             .reduce((sum, p) => sum + p.amount, 0);
 
+          const outflowAmount = spending.outflows
+            ?.filter(f => f.projectId === budget.projectId)
+            .reduce((sum, f) => sum + f.amount, 0) ?? 0;
+
           details.push({
             projectId: budget.projectId,
             ministry: budget.ministry,
@@ -251,6 +256,7 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
             spendingName: spending.spendingName,
             totalBudget: budget.totalBudget,
             totalSpendingAmount: spendingAmount, // この事業からこの支出先への支出額
+            outflowAmount: outflowAmount > 0 ? outflowAmount : undefined,
           });
         });
       });
@@ -685,6 +691,11 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
                   >
                     支出 {getSortIndicator('totalSpendingAmount')}
                   </th>
+                  {!groupByProject && (
+                    <th className="px-4 py-2 text-right whitespace-nowrap text-orange-600 dark:text-orange-400">
+                      再委託
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -717,6 +728,22 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
                     <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
                       {formatCurrency(item.totalSpendingAmount)}
                     </td>
+                    {!groupByProject && (
+                      <td className="px-4 py-2 text-right whitespace-nowrap">
+                        {item.outflowAmount ? (
+                          <div className="text-orange-600 dark:text-orange-400">
+                            <div>{formatCurrency(item.outflowAmount)}</div>
+                            <div className="text-xs">
+                              {item.totalSpendingAmount > 0
+                                ? `(${(item.outflowAmount / item.totalSpendingAmount * 100).toFixed(1)}%)`
+                                : ''}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 dark:text-gray-600">-</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

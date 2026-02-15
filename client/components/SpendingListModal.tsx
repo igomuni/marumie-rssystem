@@ -25,6 +25,7 @@ interface SpendingDetail {
   ministry: string;
   totalBudget: number;
   totalSpendingAmount: number;
+  outflowAmount?: number; // 再委託額
   projectCount?: number; // まとめる場合の事業件数
   ministryBreakdown?: MinistryBreakdown[]; // まとめる場合の府省庁別内訳
   sourceBlockName?: string; // 委託元ブロック名（間接支出の場合のみ）
@@ -218,12 +219,17 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
         if (projectSpendings.length === 0) return;
 
         for (const projectSpending of projectSpendings) {
+          const outflowAmount = spending.outflows
+            ?.filter(f => f.projectId === project.projectId)
+            .reduce((sum, f) => sum + f.amount, 0) ?? 0;
+
           result.push({
             spendingName: spending.spendingName,
             projectName: project.projectName,
             ministry: project.ministry,
             totalBudget: project.totalBudget,
             totalSpendingAmount: projectSpending.amount,
+            outflowAmount: outflowAmount > 0 ? outflowAmount : undefined,
             sourceBlockName: projectSpending.sourceChainPath,
             blockName: projectSpending.blockName,
           });
@@ -246,6 +252,10 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           // 府省庁ごとの支出額を記録
           const currentAmount = existing.ministryAmounts.get(item.ministry) || 0;
           existing.ministryAmounts.set(item.ministry, currentAmount + item.totalSpendingAmount);
+          // 再委託額を集計
+          if (item.outflowAmount) {
+            existing.outflowAmount = (existing.outflowAmount ?? 0) + item.outflowAmount;
+          }
           // 委託元を収集
           if (item.sourceBlockName) existing.sourcesSet.add(item.sourceBlockName);
         } else {
@@ -292,6 +302,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
           ministry: ministryDisplay,
           totalBudget: item.totalBudget,
           totalSpendingAmount: item.totalSpendingAmount,
+          outflowAmount: item.outflowAmount,
           projectCount: item.projectCount,
           ministryBreakdown,
           sourceBlockName,
@@ -778,6 +789,9 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                   >
                     支出 {getSortIndicator('totalSpendingAmount')}
                   </th>
+                  <th className="px-4 py-2 text-right whitespace-nowrap text-orange-600 dark:text-orange-400">
+                    再委託
+                  </th>
                   <th className="px-4 py-2 text-left whitespace-nowrap">
                     委託元
                   </th>
@@ -825,6 +839,20 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                     </td>
                     <td className="px-4 py-2 text-right whitespace-nowrap text-gray-900 dark:text-white">
                       {formatCurrency(item.totalSpendingAmount)}
+                    </td>
+                    <td className="px-4 py-2 text-right whitespace-nowrap">
+                      {item.outflowAmount ? (
+                        <div className="text-orange-600 dark:text-orange-400">
+                          <div>{formatCurrency(item.outflowAmount)}</div>
+                          <div className="text-xs">
+                            {item.totalSpendingAmount > 0
+                              ? `(${(item.outflowAmount / item.totalSpendingAmount * 100).toFixed(1)}%)`
+                              : ''}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 dark:text-gray-600">-</span>
+                      )}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-gray-500 dark:text-gray-400 text-xs">
                       {item.sourceBlockName || ''}
