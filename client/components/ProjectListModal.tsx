@@ -241,9 +241,10 @@ export default function ProjectListModal({ isOpen, onClose, onSelectProject, onS
           const spending = spendingMap.get(spendingId);
           if (!spending) return;
 
-          // この支出先がこの事業からいくら受け取っているかを計算
-          const projectSpending = spending.projects.find(p => p.projectId === budget.projectId);
-          const spendingAmount = projectSpending?.amount || 0;
+          // この支出先がこの事業からいくら受け取っているかを計算（複数ブロック対応）
+          const spendingAmount = spending.projects
+            .filter(p => p.projectId === budget.projectId)
+            .reduce((sum, p) => sum + p.amount, 0);
 
           details.push({
             projectId: budget.projectId,
