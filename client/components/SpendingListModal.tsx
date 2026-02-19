@@ -456,6 +456,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
   };
 
   const handleMinistryClick = (item: SpendingDetail) => {
+    if (window.getSelection()?.toString()) return;
     if (groupBySpending && item.ministryBreakdown && item.ministryBreakdown.length > 1) {
       // 複数府省庁がある場合はモーダルを表示
       setMinistryBreakdownModal({
@@ -472,6 +473,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
   };
 
   const handleMinistryBreakdownSelect = (ministry: string) => {
+    if (window.getSelection()?.toString()) return;
     setMinistryBreakdownModal({ isOpen: false, spendingName: '', ministries: [] });
     if (onSelectMinistry) {
       onSelectMinistry(ministry);
@@ -480,8 +482,8 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
   };
 
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-200 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[90vw] h-[90vh] flex flex-col">
+    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-200 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={onClose}>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[90vw] h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
         {/* ヘッダー */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-start mb-2">
@@ -808,6 +810,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                     <td
                       className="px-4 py-2 text-gray-900 dark:text-white cursor-pointer hover:underline"
                       onClick={() => {
+                        if (window.getSelection()?.toString()) return;
                         onSelectRecipient(item.spendingName);
                         onClose();
                       }}
@@ -822,6 +825,7 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
                     <td
                       className={`px-4 py-2 text-gray-900 dark:text-white ${!groupBySpending && item.projectName ? 'cursor-pointer hover:underline' : ''}`}
                       onClick={() => {
+                        if (window.getSelection()?.toString()) return;
                         if (!groupBySpending && item.projectName && onSelectProject) {
                           onSelectProject(item.projectName);
                           onClose();
@@ -935,8 +939,8 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
 
       {/* 府省庁別内訳モーダル */}
       {ministryBreakdownModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[600px] max-h-[80vh] flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]" onClick={() => setMinistryBreakdownModal({ isOpen: false, spendingName: '', ministries: [] })}>
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[600px] max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
             {/* ヘッダー */}
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex justify-between items-start mb-2">
