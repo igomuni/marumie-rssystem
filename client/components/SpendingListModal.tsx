@@ -219,8 +219,10 @@ export default function SpendingListModal({ isOpen, onClose, onSelectRecipient, 
         if (projectSpendings.length === 0) return;
 
         for (const projectSpending of projectSpendings) {
+          // ブロック番号（sourceBlockNumber）で絞り込み、このブロック分の再委託額のみを計算する
+          // （projectId のみで絞ると同一会社の複数ブロック全体の合計が全行に重複するため）
           const outflowAmount = spending.outflows
-            ?.filter(f => f.projectId === project.projectId)
+            ?.filter(f => f.projectId === project.projectId && f.sourceBlockNumber === projectSpending.blockNumber)
             .reduce((sum, f) => sum + f.amount, 0) ?? 0;
 
           result.push({
