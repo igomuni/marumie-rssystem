@@ -53,6 +53,8 @@ const ENTITY_TYPE_FILL: Record<string, string> = {
 };
 
 type SearchMode = 'contains' | 'exact' | 'regex';
+type SortField = 'displayName' | 'totalSpendingAmount' | 'projectCount' | 'variantCount';
+type SortDir = 'asc' | 'desc';
 
 const PAGE_SIZE = 50;
 
@@ -144,13 +146,20 @@ function EntityTypeBadge({ type }: { type: string | null }) {
 // バリエーションダイアログ
 // ========================================
 
+// VariantDialog に渡すアイテム（spendingName でデデュープ済み）
+interface UniqueVariant {
+  spendingName: string;
+  totalSpendingAmount: number;
+  isSameAsDisplay: boolean;
+}
+
 interface VariantDialogProps {
   displayName: string;
-  items: EntityListItem[];
+  variants: UniqueVariant[];
   onClose: () => void;
 }
 
-function VariantDialog({ displayName, items, onClose }: VariantDialogProps) {
+function VariantDialog({ displayName, variants, onClose }: VariantDialogProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
@@ -173,19 +182,19 @@ function VariantDialog({ displayName, items, onClose }: VariantDialogProps) {
           </button>
         </div>
         <div className="overflow-y-auto flex-1 divide-y divide-gray-100 dark:divide-gray-700">
-          {items.map(item => (
-            <div key={item.spendingId} className="px-5 py-3 flex items-start gap-3">
+          {variants.map(v => (
+            <div key={v.spendingName} className="px-5 py-3 flex items-start gap-3">
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-800 dark:text-gray-200 break-words">{item.spendingName}</p>
-                {item.spendingName === item.displayName && (
+                <p className="text-sm text-gray-800 dark:text-gray-200 break-words">{v.spendingName}</p>
+                {v.isSameAsDisplay && (
                   <p className="text-xs text-gray-400 mt-0.5">（正規化名と同一）</p>
                 )}
               </div>
               <span className="text-xs font-mono text-gray-500 dark:text-gray-400 shrink-0">
-                {formatAmount(item.totalSpendingAmount)}
+                {formatAmount(v.totalSpendingAmount)}
               </span>
               <Link
-                href={`/sankey?recipient=${encodeURIComponent(item.spendingName)}`}
+                href={`/sankey?recipient=${encodeURIComponent(v.spendingName)}`}
                 className="text-xs text-blue-500 hover:text-blue-700 underline whitespace-nowrap shrink-0"
                 onClick={onClose}
               >
@@ -195,7 +204,7 @@ function VariantDialog({ displayName, items, onClose }: VariantDialogProps) {
           ))}
         </div>
         <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-400">
-          {items.length} バリエーション
+          {variants.length} バリエーション
         </div>
       </div>
     </div>
@@ -221,8 +230,12 @@ export default function EntitiesPage() {
   // ページ
   const [page, setPage] = useState(1);
 
+  // ソート
+  const [sortField, setSortField] = useState<SortField>('totalSpendingAmount');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+
   // バリエーションダイアログ
-  const [variantDialog, setVariantDialog] = useState<{ displayName: string; items: EntityListItem[] } | null>(null);
+  const [variantDialog, setVariantDialog] = useState<{ displayName: string; variants: UniqueVariant[] } | null>(null);
 
   useEffect(() => {
     fetch('/api/entities')
@@ -235,15 +248,30 @@ export default function EntitiesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // displayName → 同一グループの全エントリ
+  // displayName → ユニークな spendingName ごとのサマリ
+  // 同一spendingNameが複数spendingIdで現れる（同名で複数事業）場合は金額を合算して1エントリに
   const clusterMap = useMemo(() => {
-    if (!data) return new Map<string, EntityListItem[]>();
-    const map = new Map<string, EntityListItem[]>();
+    if (!data) return new Map<string, UniqueVariant[]>();
+    const map = new Map<string, Map<string, UniqueVariant>>();
     for (const e of data.entities) {
-      if (!map.has(e.displayName)) map.set(e.displayName, []);
-      map.get(e.displayName)!.push(e);
+      if (!map.has(e.displayName)) map.set(e.displayName, new Map());
+      const nameMap = map.get(e.displayName)!;
+      if (!nameMap.has(e.spendingName)) {
+        nameMap.set(e.spendingName, {
+          spendingName: e.spendingName,
+          totalSpendingAmount: 0,
+          isSameAsDisplay: e.spendingName === e.displayName,
+        });
+      }
+      nameMap.get(e.spendingName)!.totalSpendingAmount += e.totalSpendingAmount;
     }
-    return map;
+    // Map<displayName, UniqueVariant[]> に変換（金額降順）
+    return new Map(
+      Array.from(map.entries()).map(([key, nameMap]) => [
+        key,
+        Array.from(nameMap.values()).sort((a, b) => b.totalSpendingAmount - a.totalSpendingAmount),
+      ])
+    );
   }, [data]);
 
   // フィルタリング
@@ -276,11 +304,41 @@ export default function EntitiesPage() {
     });
   }, [data, searchQuery, searchMode, selectedTypes]);
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // ソート済み一覧
+  const sorted = useMemo<EntityListItem[]>(() => {
+    const arr = [...filtered];
+    const dir = sortDir === 'asc' ? 1 : -1;
+    arr.sort((a, b) => {
+      switch (sortField) {
+        case 'displayName':
+          return dir * a.displayName.localeCompare(b.displayName, 'ja');
+        case 'totalSpendingAmount':
+          return dir * (a.totalSpendingAmount - b.totalSpendingAmount);
+        case 'projectCount':
+          return dir * (a.projectCount - b.projectCount);
+        case 'variantCount': {
+          const va = clusterMap.get(a.displayName)?.length ?? 1;
+          const vb = clusterMap.get(b.displayName)?.length ?? 1;
+          return dir * (va - vb);
+        }
+      }
+    });
+    return arr;
+  }, [filtered, sortField, sortDir, clusterMap]);
+
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+  const pageItems = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleSearch = useCallback((q: string) => { setSearchQuery(q); setPage(1); }, []);
   const handleModeChange = useCallback((m: SearchMode) => { setSearchMode(m); setPage(1); }, []);
+  const handleSort = useCallback((field: SortField) => {
+    setSortField(prev => {
+      if (prev === field) { setSortDir(d => d === 'asc' ? 'desc' : 'asc'); return field; }
+      setSortDir('desc');
+      return field;
+    });
+    setPage(1);
+  }, []);
   const toggleType = useCallback((type: EntityType) => {
     setSelectedTypes(prev => {
       const next = new Set(prev);
@@ -322,7 +380,7 @@ export default function EntitiesPage() {
       {variantDialog && (
         <VariantDialog
           displayName={variantDialog.displayName}
-          items={variantDialog.items}
+          variants={variantDialog.variants}
           onClose={() => setVariantDialog(null)}
         />
       )}
@@ -468,8 +526,8 @@ export default function EntitiesPage() {
 
         {/* 検索結果件数 */}
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          {filtered.length.toLocaleString()}件
-          {filtered.length !== summary.total && ` / 全${summary.total.toLocaleString()}件`}
+          {sorted.length.toLocaleString()}件
+          {sorted.length !== summary.total && ` / 全${summary.total.toLocaleString()}件`}
           {totalPages > 1 && `（${page}/${totalPages}ページ）`}
         </p>
 
@@ -478,18 +536,43 @@ export default function EntitiesPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
               <tr>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">支出先名</th>
+                {/* ソート可能な列ヘッダー */}
+                {(
+                  [
+                    { field: 'displayName' as SortField, label: '支出先名', cls: 'text-left px-4 py-3' },
+                  ] as const
+                ).map(({ field, label, cls }) => (
+                  <th key={field} className={`${cls} text-xs font-medium text-gray-500 dark:text-gray-400 cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200`}
+                    onClick={() => handleSort(field)}>
+                    {label}{sortField === field ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                  </th>
+                ))}
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 hidden md:table-cell">種別</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400">支出額</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 hidden sm:table-cell">事業数</th>
-                <th className="text-center px-3 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 hidden sm:table-cell">表記</th>
+                <th
+                  className="text-right px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200"
+                  onClick={() => handleSort('totalSpendingAmount')}
+                >
+                  支出額{sortField === 'totalSpendingAmount' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                </th>
+                <th
+                  className="text-right px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 hidden sm:table-cell cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200"
+                  onClick={() => handleSort('projectCount')}
+                >
+                  事業数{sortField === 'projectCount' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                </th>
+                <th
+                  className="text-center px-3 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 hidden sm:table-cell cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200"
+                  onClick={() => handleSort('variantCount')}
+                >
+                  表記数{sortField === 'variantCount' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                </th>
                 <th className="px-4 py-3 hidden lg:table-cell" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {pageItems.map(entity => {
-                const variants = clusterMap.get(entity.displayName);
-                const variantCount = variants ? variants.length : 1;
+                const variants = clusterMap.get(entity.displayName) ?? [];
+                const variantCount = variants.length;
                 return (
                   <tr
                     key={entity.spendingId}
@@ -527,10 +610,10 @@ export default function EntitiesPage() {
                     <td className="px-3 py-3 text-center hidden sm:table-cell">
                       {variantCount > 1 ? (
                         <button
-                          onClick={() => setVariantDialog({ displayName: entity.displayName, items: variants! })}
+                          onClick={() => setVariantDialog({ displayName: entity.displayName, variants })}
                           className="px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200 hover:bg-orange-200 dark:hover:bg-orange-800 transition-colors"
                         >
-                          {variantCount}表記
+                          {variantCount}
                         </button>
                       ) : (
                         <span className="text-xs text-gray-300 dark:text-gray-600">1</span>
