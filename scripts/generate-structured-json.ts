@@ -160,7 +160,7 @@ async function main() {
   console.log(`✓ 間接支出フロー数: ${Array.from(blockFlowMap.outflows.values()).reduce((sum, flows) => sum + flows.length, 0)}`);
 
   // 4. エンティティ名正規化辞書読み込み
-  const entityDictPath = path.join(__dirname, '../data/entity-normalization.json');
+  const entityDictPath = path.join(__dirname, '../public/data/entity-normalization.json');
   let entityDict: Record<string, { displayName: string; entityType: string; parentName?: string }> = {};
   if (fs.existsSync(entityDictPath)) {
     try {

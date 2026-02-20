@@ -20,7 +20,7 @@ import type { EntityType } from '../types/structured';
 import type { SpendingInfo } from '../types/rs-system';
 
 const CSV_PATH = path.join(__dirname, '../data/year_2024/5-1_RS_2024_支出先_支出情報.csv');
-const OUTPUT_PATH = path.join(__dirname, '../data/entity-normalization.json');
+const OUTPUT_PATH = path.join(__dirname, '../public/data/entity-normalization.json');
 
 // ========================================
 // 型定義
