@@ -26,6 +26,7 @@ import type {
   OfficeNode,
   GroupNode,
   SectionNode,
+  EntityType,
 } from '../types/structured';
 import type {
   OrganizationInfo,
@@ -158,12 +159,27 @@ async function main() {
   console.log(`✓ 直接支出ブロック数: ${blockFlowMap.isDirectFromGov.size}`);
   console.log(`✓ 間接支出フロー数: ${Array.from(blockFlowMap.outflows.values()).reduce((sum, flows) => sum + flows.length, 0)}`);
 
-  // 4. 支出レコード構築
+  // 4. エンティティ名正規化辞書読み込み
+  const entityDictPath = path.join(__dirname, '../data/entity-normalization.json');
+  let entityDict: Record<string, { displayName: string; entityType: string; parentName?: string }> = {};
+  if (fs.existsSync(entityDictPath)) {
+    try {
+      entityDict = JSON.parse(fs.readFileSync(entityDictPath, 'utf-8'));
+      console.log(`✓ エンティティ辞書読み込み: ${Object.keys(entityDict).length.toLocaleString()}件`);
+    } catch {
+      console.warn('⚠️ エンティティ辞書の読み込みに失敗しました（スキップ）');
+    }
+  } else {
+    console.log('⚠️ エンティティ辞書が未生成です（npm run generate-entity-dict を実行してください）');
+  }
+
+  // 5. 支出レコード構築
   console.log('支出レコード構築中...');
   const { spendingRecords, projectSpendingMap, directSpendingTotal } = buildSpendingRecords(
     spendingRows,
     currentYearRecords,
-    blockFlowMap
+    blockFlowMap,
+    entityDict
   );
   console.log(`✓ 支出レコード数: ${spendingRecords.length}`);
 
@@ -519,7 +535,8 @@ function computeSourceChainPath(
 function buildSpendingRecords(
   spendingRows: SpendingInfo[],
   budgetRecords: BudgetRecord[],
-  blockFlowMap: BlockFlowMap
+  blockFlowMap: BlockFlowMap,
+  entityDict: Record<string, { displayName: string; entityType: string; parentName?: string }>
 ): {
   spendingRecords: SpendingRecord[];
   projectSpendingMap: Map<number, number[]>;
@@ -657,9 +674,13 @@ function buildSpendingRecords(
       projectSpendingSetMap.get(block.projectId)!.add(currentSpendingId);
     }
 
+    const dictEntry = entityDict[spending.name];
     const record: SpendingRecord = {
       spendingId: currentSpendingId,
       spendingName: spending.name,
+      ...(dictEntry?.displayName ? { displayName: dictEntry.displayName } : {}),
+      ...(dictEntry?.entityType ? { entityType: dictEntry.entityType as EntityType } : {}),
+      ...(dictEntry?.parentName ? { parentName: dictEntry.parentName } : {}),
       corporateNumber: spending.corporateNumber,
       location: spending.location,
       corporateType: spending.corporateType,
@@ -687,9 +708,14 @@ function buildSpendingRecords(
       .replace(/^(株式会社|有限会社|合同会社|合資会社|合名会社)/, '')
       .replace(/(株式会社|有限会社|合同会社|合資会社|合名会社)$/, '')
       .replace(/ほか.*$/, '')
-      .replace(/他\d*$/, '')
+      .replace(/他\d+$/, '')  // 数字付き「他N」のみ除去（「株式会社XXX他」の誤除去防止）
       .replace(/[・\s]/g, '')
       .trim();
+  }
+
+  // 辞書の displayName を取得（辞書未登録の場合は normalizeCompanyName の結果を使う）
+  function getDisplayName(name: string): string {
+    return entityDict[name]?.displayName || normalizeCompanyName(name);
   }
 
   // SpendingRecordにoutflowsを追加
@@ -717,10 +743,23 @@ function buildSpendingRecords(
         // ブロック代表企業チェック: flowのsourceBlockNameと会社名が一致する場合のみ追加
         // （ブロック内の全社に同一金額が付く重複集計を防ぐ）
         const normalizedSourceBlock = normalizeCompanyName(flow.sourceBlockName);
-        const isRepresentative =
+
+        // 1. 辞書ベースマッチング（優先）: 両方の displayName が一致すれば確定マッチ
+        //    これにより「JTB」が「JTB埼玉支店」ブロックにマッチする偽陽性を防ぐ
+        const recordDisplayName = getDisplayName(record.spendingName);
+        const blockDisplayName = getDisplayName(flow.sourceBlockName);
+        const dictMatch =
+          recordDisplayName.length > 0 && blockDisplayName.length > 0 &&
+          recordDisplayName === blockDisplayName;
+
+        // 2. フォールバック: 従来のサブストリング一致（辞書未登録の場合）
+        const substringMatch =
+          !(record.spendingName in entityDict) &&
           normalizedSourceBlock.length > 0 && normalizedRecordName.length > 0 &&
           (normalizedSourceBlock.includes(normalizedRecordName) ||
            normalizedRecordName.includes(normalizedSourceBlock));
+
+        const isRepresentative = dictMatch || substringMatch;
         if (!isRepresentative) continue;
 
         const dedupeKey = `${flow.projectId}_${flow.targetBlockNumber}`;
