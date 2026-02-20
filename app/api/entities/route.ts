@@ -20,7 +20,8 @@ export interface EntityListItem {
 export interface EntitiesResponse {
   entities: EntityListItem[];
   summary: {
-    total: number;
+    total: number;                  // 表記上のユニーク件数（spendingName 単位）
+    normalizedCount: number;        // 正規化後のユニーク件数（displayName 単位）
     totalAmount: number;
     byEntityType: Record<string, { count: number; totalAmount: number }>;
   };
@@ -57,6 +58,7 @@ export async function GET() {
     // entityType 別の集計
     const byEntityType: Record<string, { count: number; totalAmount: number }> = {};
     let totalAmount = 0;
+    const displayNameSet = new Set<string>();
 
     for (const e of entities) {
       const key = e.entityType ?? 'その他';
@@ -64,12 +66,14 @@ export async function GET() {
       byEntityType[key].count++;
       byEntityType[key].totalAmount += e.totalSpendingAmount;
       totalAmount += e.totalSpendingAmount;
+      displayNameSet.add(e.displayName);
     }
 
     const response: EntitiesResponse = {
       entities,
       summary: {
         total: entities.length,
+        normalizedCount: displayNameSet.size,
         totalAmount,
         byEntityType,
       },
