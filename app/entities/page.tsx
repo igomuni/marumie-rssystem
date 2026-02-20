@@ -332,13 +332,14 @@ export default function EntitiesPage() {
   const handleSearch = useCallback((q: string) => { setSearchQuery(q); setPage(1); }, []);
   const handleModeChange = useCallback((m: SearchMode) => { setSearchMode(m); setPage(1); }, []);
   const handleSort = useCallback((field: SortField) => {
-    setSortField(prev => {
-      if (prev === field) { setSortDir(d => d === 'asc' ? 'desc' : 'asc'); return field; }
+    if (field === sortField) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
       setSortDir('desc');
-      return field;
-    });
+    }
     setPage(1);
-  }, []);
+  }, [sortField]);
   const toggleType = useCallback((type: EntityType) => {
     setSelectedTypes(prev => {
       const next = new Set(prev);
