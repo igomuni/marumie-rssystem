@@ -12,6 +12,12 @@ npm run lint             # ESLint チェック
 npm run normalize        # CSV正規化（要: pip3 install neologdn）
 npm run generate-structured  # rs2024-structured.json 生成（~96MB）
 npm run compress-data    # Gzip圧縮（~11MB、Git管理用）
+
+# 法人番号照合データ（支出先ブラウザ用・オプション）
+# 事前に data/download/houjin-bangou/ に国税庁ZIPを配置
+# 取得元: https://www.houjin-bangou.nta.go.jp/download/zenken/index.html
+npm run build-houjin-db      # ZIP → SQLite（~1GB、初回のみ・約44秒）
+npm run build-houjin-lookup  # SQLite → data/houjin-lookup.json（約4秒）
 ```
 
 ## Architecture

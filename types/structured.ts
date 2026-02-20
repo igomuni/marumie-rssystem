@@ -144,11 +144,32 @@ export interface SpendingBlockFlow {
   isDirectFromGov: boolean;         // 担当組織からの直接支出か
 }
 
+/**
+ * エンティティ種別（entity-normalization.json 辞書による分類）
+ */
+export type EntityType =
+  | '民間企業'
+  | '地方公共団体'
+  | '国の機関'
+  | '独立行政法人'
+  | '公益法人・NPO'
+  | '外国法人'
+  | 'その他';
+
 // 支出レコード
 export interface SpendingRecord {
   // 基本情報
   spendingId: number;
   spendingName: string;
+
+  // 正規化表示名（entity-normalization.json 辞書から。未登録の場合は省略→spendingName にフォールバック）
+  displayName?: string;
+
+  // エンティティ種別（辞書による分類）
+  entityType?: EntityType;
+
+  // 親会社の displayName（支店・支社の場合のみ）
+  parentName?: string;
 
   // 法人情報
   corporateNumber: string;

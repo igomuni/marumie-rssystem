@@ -11,7 +11,7 @@ export default function Home() {
           2024年度 行政事業レビューシステムの予算・支出データを可視化
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* インタラクティブサンキー図 */}
           <Link href="/sankey">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-blue-500">
@@ -51,6 +51,28 @@ export default function Home() {
                 <li>• <strong>RS対象率</strong>: 全体27.2%（一般会計63.4%、特別会計17.8%）</li>
                 <li>• <strong>誤解防止</strong>: 国債費・地方交付税等の制度的支出を明示</li>
                 <li>• データ年度: 2023年度（令和5年度）当初予算</li>
+              </ul>
+            </div>
+          </Link>
+          {/* 支出先ブラウザ（NEW） */}
+          <Link href="/entities">
+            <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900 dark:to-teal-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-green-500">
+              <div className="flex items-center mb-3">
+                <h2 className="text-2xl font-semibold text-green-600 dark:text-green-400">
+                  🏢 支出先ブラウザ
+                </h2>
+                <span className="ml-3 px-2 py-1 bg-green-600 text-white text-xs font-bold rounded">
+                  NEW
+                </span>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                2024年度の全支出先 26,000件以上を種別・金額でブラウズ。エンティティ種別（民間企業・地方公共団体・独立行政法人 等）ごとの集計や検索が可能です。
+              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>• <strong>種別フィルタ</strong>: 民間企業・地方公共団体・国の機関・独立行政法人・公益法人・NPO・外国法人</li>
+                <li>• <strong>名称検索</strong>: 支出先名のインクリメンタル検索</li>
+                <li>• <strong>Sankey連携</strong>: 各支出先からサンキー図にジャンプ</li>
+                <li>• <strong>支店・親会社</strong>: 支店エントリは親会社を表示</li>
               </ul>
             </div>
           </Link>

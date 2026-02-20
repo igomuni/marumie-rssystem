@@ -179,7 +179,32 @@ npm run generate-structured
 - 支出情報と関連付け
 - ファイルサイズ: 約96MB
 
-### 5. 開発サーバーの起動
+### 5. MOF予算データの生成（オプション）
+
+財務省予算データを使用する場合は、以下を実行してください。
+
+```bash
+npm run generate-mof-data
+```
+
+`public/data/mof-budget-overview-{年度}.json`（財務省の一般会計・特別会計予算概要）と `public/data/mof-funding-{年度}.json`（財源別データ）を生成します。これらは小容量のためGit管理されています。
+
+### 6. 法人番号データの準備（支出先ブラウザ用・オプション）
+
+[国税庁法人番号公表サイト](https://www.houjin-bangou.nta.go.jp/download/zenken/index.html) から「CSV形式・Unicode」をダウンロードし、`data/download/houjin-bangou/` に配置してください。
+
+```bash
+# ZIPから SQLite DB を構築（初回のみ、約44秒・1GB）
+npm run build-houjin-db
+
+# SQLite から RSシステム使用分のみ抽出（約4秒）
+# → data/houjin-lookup.json を生成（API が起動時に読み込む）
+npm run build-houjin-lookup
+```
+
+> **注意**: 法人番号データが存在しない場合も支出先ブラウザは動作しますが、ダイアログの「✓ 一致 / 別法人」表示がされません。
+
+### 6. 開発サーバーの起動
 
 ```bash
 npm run dev
@@ -252,6 +277,9 @@ marumie-rssystem/
 | `npm run normalize` | CSVファイルを正規化（Python 3.x + neologdn必須） |
 | `npm run generate-structured` | 構造化JSONファイル生成（rs2024-structured.json） |
 | `npm run compress-data` | 構造化JSONをgzip圧縮（rs2024-structured.json.gz） |
+| `npm run generate-mof-data` | 財務省予算データ生成（mof-budget-overview-*.json 等） |
+| `npm run build-houjin-db` | 国税庁法人番号ZIPからSQLite構築（初回のみ・約44秒） |
+| `npm run build-houjin-lookup` | SQLiteからRSシステム使用分のみ抽出 → public/data/houjin-lookup.json（約4秒） |
 | `npm run dev` | 開発サーバー起動（Turbopack有効、ポート3002） |
 | `npm run build` | プロダクションビルド（自動的にprebuildでデータ展開） |
 | `npm start` | プロダクションサーバー起動 |
@@ -399,6 +427,8 @@ npm run generate-structured
 
 - [行政事業レビューシステム](https://rssystem.go.jp/)
 - [2024年度CSVダウンロード](https://rssystem.go.jp/download-csv/2024)
+- [財務省 予算・決算](https://www.mof.go.jp/policy/budget/)（MOF予算データの参照元）
+- [国税庁法人番号公表サイト](https://www.houjin-bangou.nta.go.jp/download/zenken/index.html)（支出先ブラウザの法人番号照合用、CSV形式・Unicodeをダウンロード）
 
 ## ライセンス
 
