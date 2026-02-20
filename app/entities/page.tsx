@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import type { EntitiesResponse, EntityListItem } from '@/app/api/entities/route';
+import type { EntitiesResponse, EntityListItem, CorporateNumberInfo } from '@/app/api/entities/route';
 import type { EntityType } from '@/types/structured';
 
 // ========================================
@@ -53,7 +53,7 @@ const ENTITY_TYPE_FILL: Record<string, string> = {
 };
 
 type SearchMode = 'contains' | 'exact' | 'regex';
-type SortField = 'displayName' | 'totalSpendingAmount' | 'projectCount' | 'variantCount';
+type SortField = 'displayName' | 'totalSpendingAmount' | 'projectCount' | 'variantCount' | 'corporateNumberCount';
 type SortDir = 'asc' | 'desc';
 
 const PAGE_SIZE = 50;
@@ -151,6 +151,7 @@ interface UniqueVariant {
   spendingName: string;
   totalSpendingAmount: number;
   isSameAsDisplay: boolean;
+  corporateNumbers: string[];
 }
 
 interface VariantDialogProps {
@@ -189,6 +190,14 @@ function VariantDialog({ displayName, variants, onClose }: VariantDialogProps) {
                 {v.isSameAsDisplay && (
                   <p className="text-xs text-gray-400 mt-0.5">（正規化名と同一）</p>
                 )}
+                {v.corporateNumbers.length > 0 && (
+                  <p className="text-xs font-mono text-gray-400 dark:text-gray-500 mt-0.5">
+                    法人番号: {v.corporateNumbers.join(', ')}
+                    {v.corporateNumbers.length > 1 && (
+                      <span className="ml-1 text-amber-500 font-sans">⚠ {v.corporateNumbers.length}件</span>
+                    )}
+                  </p>
+                )}
               </div>
               <span className="text-xs font-mono text-gray-500 dark:text-gray-400 shrink-0">
                 {formatAmount(v.totalSpendingAmount)}
@@ -205,6 +214,83 @@ function VariantDialog({ displayName, variants, onClose }: VariantDialogProps) {
         </div>
         <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-400">
           {variants.length} バリエーション
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ========================================
+// 法人番号ダイアログ
+// ========================================
+
+interface CorporateNumberDialogProps {
+  spendingName: string;
+  corporateNumbers: string[];
+  corporateNumberInfo: Record<string, CorporateNumberInfo | null>;
+  onClose: () => void;
+}
+
+function CorporateNumberDialog({ spendingName, corporateNumbers, corporateNumberInfo, onClose }: CorporateNumberDialogProps) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">法人番号一覧（出典: 国税庁法人番号公表サイト）</p>
+            <p className="font-semibold text-gray-900 dark:text-gray-100">{spendingName}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none px-2"
+          >
+            ×
+          </button>
+        </div>
+        <div className="overflow-y-auto flex-1 divide-y divide-gray-100 dark:divide-gray-700">
+          {corporateNumbers.map((cn, i) => {
+            const info = corporateNumberInfo[cn] ?? null;
+            return (
+              <div key={cn || `empty-${i}`} className="px-5 py-3 flex items-start gap-3">
+                <span className="text-xs text-gray-400 dark:text-gray-500 w-5 shrink-0 mt-0.5">{i + 1}.</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-sm text-gray-800 dark:text-gray-200">{cn}</span>
+                    {info?.isMatch && (
+                      <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-1.5 py-0.5 rounded">
+                        ✓ 一致
+                      </span>
+                    )}
+                    {info && !info.isMatch && (
+                      <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded">
+                        別法人
+                      </span>
+                    )}
+                    {!info && (
+                      <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">
+                        NTA未登録
+                      </span>
+                    )}
+                  </div>
+                  {info && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {info.name}
+                      {info.address && <span className="ml-1 text-gray-400">（{info.address}）</span>}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-400 dark:text-gray-500">
+          RSシステムの元CSVに {corporateNumbers.length} 件の法人番号で記録されています
         </div>
       </div>
     </div>
@@ -237,6 +323,13 @@ export default function EntitiesPage() {
   // バリエーションダイアログ
   const [variantDialog, setVariantDialog] = useState<{ displayName: string; variants: UniqueVariant[] } | null>(null);
 
+  // 法人番号ダイアログ
+  const [corporateNumberDialog, setCorporateNumberDialog] = useState<{
+    spendingName: string;
+    corporateNumbers: string[];
+    corporateNumberInfo: Record<string, CorporateNumberInfo | null>;
+  } | null>(null);
+
   useEffect(() => {
     fetch('/api/entities')
       .then(res => {
@@ -249,29 +342,24 @@ export default function EntitiesPage() {
   }, []);
 
   // displayName → ユニークな spendingName ごとのサマリ
-  // 同一spendingNameが複数spendingIdで現れる（同名で複数事業）場合は金額を合算して1エントリに
+  // API側で既に spendingName 単位に集約済みのため、ここでは displayName でグループ化するのみ
   const clusterMap = useMemo(() => {
     if (!data) return new Map<string, UniqueVariant[]>();
-    const map = new Map<string, Map<string, UniqueVariant>>();
+    const map = new Map<string, UniqueVariant[]>();
     for (const e of data.entities) {
-      if (!map.has(e.displayName)) map.set(e.displayName, new Map());
-      const nameMap = map.get(e.displayName)!;
-      if (!nameMap.has(e.spendingName)) {
-        nameMap.set(e.spendingName, {
-          spendingName: e.spendingName,
-          totalSpendingAmount: 0,
-          isSameAsDisplay: e.spendingName === e.displayName,
-        });
-      }
-      nameMap.get(e.spendingName)!.totalSpendingAmount += e.totalSpendingAmount;
+      if (!map.has(e.displayName)) map.set(e.displayName, []);
+      map.get(e.displayName)!.push({
+        spendingName: e.spendingName,
+        totalSpendingAmount: e.totalSpendingAmount,
+        isSameAsDisplay: e.spendingName === e.displayName,
+        corporateNumbers: e.corporateNumbers,
+      });
     }
-    // Map<displayName, UniqueVariant[]> に変換（金額降順）
-    return new Map(
-      Array.from(map.entries()).map(([key, nameMap]) => [
-        key,
-        Array.from(nameMap.values()).sort((a, b) => b.totalSpendingAmount - a.totalSpendingAmount),
-      ])
-    );
+    // 金額降順に並べ替え
+    for (const variants of map.values()) {
+      variants.sort((a, b) => b.totalSpendingAmount - a.totalSpendingAmount);
+    }
+    return map;
   }, [data]);
 
   // フィルタリング
@@ -321,6 +409,8 @@ export default function EntitiesPage() {
           const vb = clusterMap.get(b.displayName)?.length ?? 1;
           return dir * (va - vb);
         }
+        case 'corporateNumberCount':
+          return dir * (a.corporateNumbers.length - b.corporateNumbers.length);
       }
     });
     return arr;
@@ -383,6 +473,16 @@ export default function EntitiesPage() {
           displayName={variantDialog.displayName}
           variants={variantDialog.variants}
           onClose={() => setVariantDialog(null)}
+        />
+      )}
+
+      {/* 法人番号ダイアログ */}
+      {corporateNumberDialog && (
+        <CorporateNumberDialog
+          spendingName={corporateNumberDialog.spendingName}
+          corporateNumbers={corporateNumberDialog.corporateNumbers}
+          corporateNumberInfo={corporateNumberDialog.corporateNumberInfo}
+          onClose={() => setCorporateNumberDialog(null)}
         />
       )}
 
@@ -567,6 +667,12 @@ export default function EntitiesPage() {
                 >
                   表記数{sortField === 'variantCount' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
                 </th>
+                <th
+                  className="text-center px-3 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 hidden md:table-cell cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200"
+                  onClick={() => handleSort('corporateNumberCount')}
+                >
+                  法人番号数{sortField === 'corporateNumberCount' ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                </th>
                 <th className="px-4 py-3 hidden lg:table-cell" />
               </tr>
             </thead>
@@ -576,7 +682,7 @@ export default function EntitiesPage() {
                 const variantCount = variants.length;
                 return (
                   <tr
-                    key={entity.spendingId}
+                    key={entity.spendingName}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                   >
                     <td className="px-4 py-3">
@@ -618,6 +724,20 @@ export default function EntitiesPage() {
                         </button>
                       ) : (
                         <span className="text-xs text-gray-300 dark:text-gray-600">1</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 text-center hidden md:table-cell">
+                      {entity.corporateNumbers.length > 1 ? (
+                        <button
+                          onClick={() => setCorporateNumberDialog({ spendingName: entity.spendingName, corporateNumbers: entity.corporateNumbers, corporateNumberInfo: entity.corporateNumberInfo })}
+                          className="px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors"
+                        >
+                          {entity.corporateNumbers.length}
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-300 dark:text-gray-600">
+                          {entity.corporateNumbers.length === 1 ? '1' : '-'}
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">

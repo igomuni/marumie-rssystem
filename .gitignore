@@ -38,8 +38,11 @@ next-env.d.ts
 !/public/data/*.gz
 # Allow MOF budget data (small static file)
 !/public/data/mof-budget-overview-*.json
+# Allow houjin lookup (NTA corporate number subset for entities browser, ~2.4MB)
+!/public/data/houjin-lookup.json
 
-# raw CSV data (939MB)
+# raw CSV data (939MB) and build artifacts (houjin.db etc.)
+# Exception: entity-normalization.json is committed (curated dict, needed to regenerate structured JSON)
 /data/
 
 # IDE
