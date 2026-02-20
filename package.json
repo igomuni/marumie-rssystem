@@ -13,10 +13,14 @@
     "generate-project-details": "tsx scripts/generate-project-details.ts",
     "generate-mof-data": "tsx scripts/generate-mof-budget-overview-data.ts",
     "compress-data": "gzip -9 -k public/data/rs2024-structured.json && gzip -9 -k public/data/rs2024-project-details.json",
+    "generate-entity-dict": "tsx scripts/generate-entity-dict.ts",
     "validate-tags": "tsx scripts/validate-tags.ts",
+    "build-houjin-db": "python3 scripts/build-houjin-sqlite.py",
+    "build-houjin-lookup": "python3 scripts/build-houjin-lookup.py",
     "setup": "npm install && npm run normalize && npm run generate-structured && npm run generate-project-details"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@nivo/sankey": "^0.99.0",
     "next": "15.1.11",
     "react": "^18.3.1",
