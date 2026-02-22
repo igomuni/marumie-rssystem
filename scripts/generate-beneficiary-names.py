@@ -24,7 +24,7 @@
 import csv
 import os
 
-OUTPUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'result', 'beneficiary_names.csv')
+OUTPUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'public', 'data', 'dictionaries', 'beneficiary_names.csv')
 FIELDNAMES = ['beneficiary_id', 'category', 'canonical_name', 'name', 'name_type']
 
 def rows(bid, category, canonical, aliases=None):

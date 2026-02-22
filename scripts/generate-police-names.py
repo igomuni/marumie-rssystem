@@ -14,7 +14,7 @@ prefecture_names.csv（都道府県名）にも municipality_names.csv（市区�
 import csv
 import os
 
-OUTPUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'result', 'police_names.csv')
+OUTPUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'public', 'data', 'dictionaries', 'police_names.csv')
 
 # (pref_code, prefecture_name, canonical_name, alias)
 # alias: 別称が存在する場合のみ設定

@@ -17,8 +17,8 @@ import re
 import sqlite3
 
 HOUJIN_DB  = os.path.join(os.path.dirname(__file__), '..', 'data', 'houjin.db')
-PREF_OUT   = os.path.join(os.path.dirname(__file__), '..', 'data', 'result', 'prefecture_names.csv')
-MUNI_OUT   = os.path.join(os.path.dirname(__file__), '..', 'data', 'result', 'municipality_names.csv')
+PREF_OUT   = os.path.join(os.path.dirname(__file__), '..', 'public', 'data', 'dictionaries', 'prefecture_names.csv')
+MUNI_OUT   = os.path.join(os.path.dirname(__file__), '..', 'public', 'data', 'dictionaries', 'municipality_names.csv')
 
 # 都道府県コード（JIS X 0401）と正式名称・通称
 PREFECTURES = [

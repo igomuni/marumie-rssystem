@@ -1,0 +1,20 @@
+country_code,country_name,canonical_name,name,name_type
+us,アメリカ合衆国,米空軍省,米空軍省,canonical
+us,アメリカ合衆国,米空軍省,アメリカ空軍省,alias
+us,アメリカ合衆国,米空軍省,在日米空軍,alias
+us,アメリカ合衆国,米海軍省,米海軍省,canonical
+us,アメリカ合衆国,米海軍省,アメリカ海軍省,alias
+us,アメリカ合衆国,米海軍省,在日米海軍,alias
+us,アメリカ合衆国,米陸軍省,米陸軍省,canonical
+us,アメリカ合衆国,米陸軍省,アメリカ陸軍省,alias
+us,アメリカ合衆国,米陸軍省,在日米陸軍,alias
+us,アメリカ合衆国,在日米軍司令部,在日米軍司令部,canonical
+us,アメリカ合衆国,在日米軍司令部,在日米軍,alias
+us,アメリカ合衆国,米国航空宇宙局(NASA)ジョンソン宇宙センター,米国航空宇宙局(NASA)ジョンソン宇宙センター,canonical
+us,アメリカ合衆国,米国航空宇宙局(NASA)ジョンソン宇宙センター,NASA,alias
+us,アメリカ合衆国,米国航空宇宙局(NASA)ジョンソン宇宙センター,アメリカ航空宇宙局,alias
+us,アメリカ合衆国,日米教育委員会,日米教育委員会,canonical
+us,アメリカ合衆国,日米教育委員会,フルブライト委員会,alias
+intl,国際機関,米州開発銀行,米州開発銀行,canonical
+intl,国際機関,米州開発銀行,IDB,alias
+intl,国際機関,米州開発銀行,Inter-American Development Bank,alias

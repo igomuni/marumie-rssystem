@@ -20,7 +20,7 @@
 import csv
 import os
 
-OUTPUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'result', 'embassy_names.csv')
+OUTPUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'public', 'data', 'dictionaries', 'embassy_names.csv')
 FIELDNAMES = ['embassy_id', 'embassy_type', 'canonical_name', 'name', 'name_type']
 
 

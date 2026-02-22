@@ -18,7 +18,7 @@
 import csv
 import os
 
-OUTPUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'result', 'international_org_names.csv')
+OUTPUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'public', 'data', 'dictionaries', 'international_org_names.csv')
 FIELDNAMES = ['org_id', 'org_type', 'canonical_name', 'name', 'name_type']
 
 def rows(org_id, org_type, canonical, aliases=None):

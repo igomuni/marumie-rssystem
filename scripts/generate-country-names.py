@@ -8,7 +8,7 @@
 import csv
 import os
 
-OUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'result', 'country_names.csv')
+OUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'public', 'data', 'dictionaries', 'country_names.csv')
 
 # (country_id, canonical_name, [aliases...])
 # canonical_name は外務省が用いる正式名称

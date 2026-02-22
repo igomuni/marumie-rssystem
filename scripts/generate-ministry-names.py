@@ -16,7 +16,7 @@ import os
 import sqlite3
 
 DB_PATH  = os.path.join(os.path.dirname(__file__), '..', 'data', 'result', 'recipients.db')
-OUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'result', 'ministry_names.csv')
+OUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'public', 'data', 'dictionaries', 'ministry_names.csv')
 
 FIELDS = ["policy_ministry", "ministry", "bureau", "division",
           "section", "office", "team", "unit", "source"]
