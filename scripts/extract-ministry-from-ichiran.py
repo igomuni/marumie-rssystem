@@ -6,7 +6,7 @@
   形式: 各省庁 → Ａ内部部局 / Ｂ審議会等 / Ｃ施設等機関 / Ｄ特別の機関 / Ｅ外局 / Ｆ地方支分部局
         局・部名 ［課名、課名、...］ という構造
 
-出力: data/result/ministry_from_ichiran.csv
+出力: public/data/dictionaries/ministry_from_ichiran.csv
 列: ministry, category, bureau, section
 """
 
@@ -18,7 +18,7 @@ PDF_PATH = os.path.join(
     os.path.dirname(__file__), '..', 'data', 'download', 'kouji_ichiran', 'r071215kouji.pdf'
 )
 OUT_PATH = os.path.join(
-    os.path.dirname(__file__), '..', 'data', 'result', 'ministry_from_ichiran.csv'
+    os.path.dirname(__file__), '..', 'public', 'data', 'dictionaries', 'ministry_from_ichiran.csv'
 )
 
 # 省庁ヘッダパターン（章番号 + 省庁名）
