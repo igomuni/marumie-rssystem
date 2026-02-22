@@ -9,6 +9,8 @@
   列: pref_code, prefecture_name, canonical_name, name, name_type
 
 市区町村データのソース: data/houjin.db の (prefecture, city) カラム
+  houjin.db の元データ: 国税庁 法人番号公表サイト（全件データ ZIP）
+  https://www.houjin-bangou.nta.go.jp/download/zenken/index.html
 """
 
 import csv

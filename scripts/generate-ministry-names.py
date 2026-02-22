@@ -5,6 +5,8 @@
 ソース:
   1. data/result/recipients.db   (2024年度支出実績から自動抽出)
   2. SUPPLEMENT リスト           (実績データに現れない主要機関を手動補完)
+     参照: 内閣官房 行政機関一覧（人事局 組織・定員管理）
+     https://www.cas.go.jp/jp/gaiyou/jimu/jinjikyoku/satei_01_03_01.html
 
 出力: data/result/ministry_names.csv
 列: policy_ministry, ministry, bureau, division, section, office, team, unit, source

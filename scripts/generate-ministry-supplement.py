@@ -5,6 +5,9 @@
 ministry_from_ichiran.csv（府省庁一覧PDF由来）に収録されていない
 地方出先機関を手動整理データとして補完する。
 
+参照: 内閣官房 行政機関一覧（人事局 組織・定員管理）
+https://www.cas.go.jp/jp/gaiyou/jimu/jinjikyoku/satei_01_03_01.html
+
 対象カテゴリ:
   1. 都道府県労働局（厚生労働省・47局）
   2. 農政局・農政事務所（農林水産省・8組織）
