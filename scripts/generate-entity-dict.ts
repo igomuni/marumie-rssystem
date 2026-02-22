@@ -118,6 +118,21 @@ const CORP_FORM_PATTERNS = [
 // 支店・支社サフィックスパターン
 const BRANCH_SUFFIXES = ['支店', '支社', '出張所', '営業所'];
 
+// 国の出先機関キーワード（名称に含まれれば「国の機関」と判定）
+// 農政局・財務局・地方整備局など、民間や地方公共団体とは重複しない語
+// 注意: 「税関」は「世界税関機構」(国際機関)に誤マッチするため除外
+// 注意: 「法務局」は「〇〇法務局」の形で機能するが「○○法人」は含まない
+const GOVERNMENT_OFFICE_KEYWORDS: string[] = [
+  '農政局', '農政事務所',
+  '地方整備局', '地方航空局', '地方環境事務所',
+  '地方厚生局', '地方運輸局', '地方経済産業局',
+  '財務局',
+  '地方法務局', '法務局',
+  '矯正管区', '刑務所', '拘置所', '少年院', '保護観察所',
+  '公安調査局', '入国在留管理局',
+  '高等裁判所', '地方裁判所', '家庭裁判所', '簡易裁判所',
+];
+
 // ========================================
 // ユーティリティ関数
 // ========================================
@@ -168,6 +183,11 @@ function detectEntityTypeFromName(name: string): EntityType | null {
     return '地方公共団体';
   }
 
+  // 国の出先機関キーワード
+  for (const keyword of GOVERNMENT_OFFICE_KEYWORDS) {
+    if (name.includes(keyword)) return '国の機関';
+  }
+
   return null;
 }
 
@@ -182,8 +202,8 @@ function detectBranchParent(displayName: string): string | undefined {
   return undefined;
 }
 
-function applyRuleBased(name: string, corporateType: string): EntityEntry | null {
-  // 1. 名称プレフィックスによる判定（最優先）
+function applyRuleBased(name: string, corporateType: string, cn?: string): EntityEntry | null {
+  // 1. 名称プレフィックス・キーワードによる判定（最優先）
   const nameType = detectEntityTypeFromName(name);
   if (nameType) {
     const displayName = stripCorporateForm(name);
@@ -281,13 +301,16 @@ async function main() {
   console.log('5-1 CSV 読み込み中...');
   const rows = readShiftJISCSV(CSV_PATH) as unknown as SpendingInfo[];
 
-  // ユニーク支出先名を抽出（法人種別コードも保持）
-  const entities = new Map<string, string>(); // name → corporateType
+  // ユニーク支出先名を抽出（法人種別コード・法人番号も保持）
+  const entities = new Map<string, { corporateType: string; cn: string }>();
   for (const row of rows) {
     const name = row['支出先名']?.trim();
     if (!name) continue;
     if (!entities.has(name)) {
-      entities.set(name, row['法人種別']?.trim() || '');
+      entities.set(name, {
+        corporateType: row['法人種別']?.trim() || '',
+        cn: row['法人番号']?.trim() || '',
+      });
     }
   }
   console.log(`✓ ユニーク支出先名: ${entities.size.toLocaleString()}件\n`);
@@ -297,8 +320,8 @@ async function main() {
   const ruleBasedDict: EntityDict = {};
   const needsLLM: { name: string; corporateType: string }[] = [];
 
-  for (const [name, corporateType] of entities) {
-    const entry = applyRuleBased(name, corporateType);
+  for (const [name, { corporateType, cn }] of entities) {
+    const entry = applyRuleBased(name, corporateType, cn);
     if (entry) {
       ruleBasedDict[name] = entry;
     } else {
