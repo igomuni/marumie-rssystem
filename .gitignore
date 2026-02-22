@@ -42,6 +42,8 @@ next-env.d.ts
 !/public/data/houjin-lookup.json
 # Allow entity normalization dict (curated mapping, needed to regenerate structured JSON)
 !/public/data/entity-normalization.json
+# Allow mirai political funds summary (generated from public data)
+!/public/data/mirai-summary.json
 
 # raw CSV data (939MB) and build artifacts (houjin.db etc.)
 /data/

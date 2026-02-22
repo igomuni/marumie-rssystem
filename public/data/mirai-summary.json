@@ -1,0 +1,399 @@
+{
+  "generatedAt": "2026-02-22T02:44:43.682Z",
+  "sourceFile": "transactions_team-mirai_2026-02-22.csv",
+  "summary": {
+    "totalIncome": 272472775,
+    "totalExpense": 164922622,
+    "totalTransactions": 27532,
+    "dateRange": {
+      "from": "2025-05",
+      "to": "2025-12"
+    }
+  },
+  "monthly": [
+    {
+      "month": "2025-05",
+      "income": 148000,
+      "expense": 144618,
+      "incomeCount": 17,
+      "expenseCount": 61
+    },
+    {
+      "month": "2025-06",
+      "income": 58941010,
+      "expense": 63240464,
+      "incomeCount": 562,
+      "expenseCount": 653
+    },
+    {
+      "month": "2025-07",
+      "income": 107858779,
+      "expense": 54267184,
+      "incomeCount": 7311,
+      "expenseCount": 7617
+    },
+    {
+      "month": "2025-08",
+      "income": 9453745,
+      "expense": 14480683,
+      "incomeCount": 262,
+      "expenseCount": 349
+    },
+    {
+      "month": "2025-09",
+      "income": 16007412,
+      "expense": 9518136,
+      "incomeCount": 1239,
+      "expenseCount": 1320
+    },
+    {
+      "month": "2025-10",
+      "income": 46009547,
+      "expense": 11897645,
+      "incomeCount": 2142,
+      "expenseCount": 2231
+    },
+    {
+      "month": "2025-11",
+      "income": 33404282,
+      "expense": 11334009,
+      "incomeCount": 1849,
+      "expenseCount": 1912
+    },
+    {
+      "month": "2025-12",
+      "income": 650000,
+      "expense": 39883,
+      "incomeCount": 1,
+      "expenseCount": 6
+    }
+  ],
+  "incomeByCategory": [
+    {
+      "category": "個人からの寄附",
+      "subCategory": "個人からの寄附",
+      "amount": 163824526,
+      "count": 9627
+    },
+    {
+      "category": "政治団体からの寄附",
+      "subCategory": "候補者後援会からの寄附",
+      "amount": 24697690,
+      "count": 10
+    },
+    {
+      "category": "その他の収入",
+      "subCategory": "政党交付金",
+      "amount": 24095500,
+      "count": 1
+    },
+    {
+      "category": "政治団体からの寄附",
+      "subCategory": "安野貴博の政治団体からの寄附",
+      "amount": 21000000,
+      "count": 2
+    },
+    {
+      "category": "借入金",
+      "subCategory": "安野貴博からの借入",
+      "amount": 20000000,
+      "count": 1
+    },
+    {
+      "category": "個人の負担する党費又は会費",
+      "subCategory": "党費",
+      "amount": 10809112,
+      "count": 3723
+    },
+    {
+      "category": "その他の収入",
+      "subCategory": "立法事務費",
+      "amount": 3250000,
+      "count": 5
+    },
+    {
+      "category": "その他の収入",
+      "subCategory": "手続き不備の供託金返還",
+      "amount": 3000000,
+      "count": 1
+    },
+    {
+      "category": "機関紙誌の発行その他の事業による収入",
+      "subCategory": "BBQ交流会",
+      "amount": 1731240,
+      "count": 3
+    },
+    {
+      "category": "その他の収入",
+      "subCategory": "デビットカードキャッシュバック",
+      "amount": 31568,
+      "count": 3
+    },
+    {
+      "category": "機関紙誌の発行その他の事業による収入",
+      "subCategory": "サポーター交流会",
+      "amount": 26521,
+      "count": 1
+    },
+    {
+      "category": "その他の収入",
+      "subCategory": "返金",
+      "amount": 4068,
+      "count": 5
+    },
+    {
+      "category": "その他の収入",
+      "subCategory": "受取利息",
+      "amount": 2550,
+      "count": 1
+    }
+  ],
+  "expenseByCategory": [
+    {
+      "category": "選挙関係費",
+      "amount": 75865010,
+      "count": 157
+    },
+    {
+      "category": "宣伝事業費",
+      "amount": 43461295,
+      "count": 276
+    },
+    {
+      "category": "人件費",
+      "amount": 31934239,
+      "count": 4
+    },
+    {
+      "category": "組織活動費",
+      "amount": 10060497,
+      "count": 241
+    },
+    {
+      "category": "その他の経費",
+      "amount": 3510511,
+      "count": 13462
+    },
+    {
+      "category": "備品・消耗品費",
+      "amount": 43640,
+      "count": 6
+    },
+    {
+      "category": "事務所費",
+      "amount": 27630,
+      "count": 2
+    },
+    {
+      "category": "調査研究費",
+      "amount": 19800,
+      "count": 1
+    }
+  ],
+  "partyFeeDistribution": [
+    {
+      "amount": 1500,
+      "count": 2710,
+      "percentage": 72.8
+    },
+    {
+      "amount": 5000,
+      "count": 698,
+      "percentage": 18.7
+    },
+    {
+      "amount": 10000,
+      "count": 298,
+      "percentage": 8
+    },
+    {
+      "amount": 11922,
+      "count": 3,
+      "percentage": 0.1
+    },
+    {
+      "amount": 11111,
+      "count": 3,
+      "percentage": 0.1
+    },
+    {
+      "amount": 10001,
+      "count": 3,
+      "percentage": 0.1
+    },
+    {
+      "amount": 30000,
+      "count": 3,
+      "percentage": 0.1
+    },
+    {
+      "amount": 20000,
+      "count": 3,
+      "percentage": 0.1
+    },
+    {
+      "amount": 15000,
+      "count": 1,
+      "percentage": 0
+    },
+    {
+      "amount": 10010,
+      "count": 1,
+      "percentage": 0
+    }
+  ],
+  "donationDistribution": [
+    {
+      "label": "〜999円",
+      "count": 20,
+      "totalAmount": 9980
+    },
+    {
+      "label": "1,000〜4,999円",
+      "count": 5776,
+      "totalAmount": 12542546
+    },
+    {
+      "label": "5,000〜9,999円",
+      "count": 1256,
+      "totalAmount": 6491000
+    },
+    {
+      "label": "10,000〜29,999円",
+      "count": 1985,
+      "totalAmount": 21602000
+    },
+    {
+      "label": "30,000円〜",
+      "count": 590,
+      "totalAmount": 123179000
+    }
+  ],
+  "partyFeeMonthly": [
+    {
+      "month": "2025-09",
+      "count": 811,
+      "totalAmount": 2551044,
+      "byTier": [
+        {
+          "amount": 1500,
+          "count": 562
+        },
+        {
+          "amount": 5000,
+          "count": 163
+        },
+        {
+          "amount": 10000,
+          "count": 80
+        },
+        {
+          "amount": 10001,
+          "count": 1
+        },
+        {
+          "amount": 10010,
+          "count": 1
+        },
+        {
+          "amount": 11111,
+          "count": 1
+        },
+        {
+          "amount": 11922,
+          "count": 1
+        },
+        {
+          "amount": 20000,
+          "count": 1
+        },
+        {
+          "amount": 30000,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "month": "2025-10",
+      "count": 1413,
+      "totalAmount": 4033534,
+      "byTier": [
+        {
+          "amount": 1500,
+          "count": 1037
+        },
+        {
+          "amount": 5000,
+          "count": 263
+        },
+        {
+          "amount": 10000,
+          "count": 108
+        },
+        {
+          "amount": 10001,
+          "count": 1
+        },
+        {
+          "amount": 11111,
+          "count": 1
+        },
+        {
+          "amount": 11922,
+          "count": 1
+        },
+        {
+          "amount": 20000,
+          "count": 1
+        },
+        {
+          "amount": 30000,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "month": "2025-11",
+      "count": 1499,
+      "totalAmount": 4224534,
+      "byTier": [
+        {
+          "amount": 1500,
+          "count": 1111
+        },
+        {
+          "amount": 5000,
+          "count": 272
+        },
+        {
+          "amount": 10000,
+          "count": 110
+        },
+        {
+          "amount": 10001,
+          "count": 1
+        },
+        {
+          "amount": 11111,
+          "count": 1
+        },
+        {
+          "amount": 11922,
+          "count": 1
+        },
+        {
+          "amount": 15000,
+          "count": 1
+        },
+        {
+          "amount": 20000,
+          "count": 1
+        },
+        {
+          "amount": 30000,
+          "count": 1
+        }
+      ]
+    }
+  ]
+}
