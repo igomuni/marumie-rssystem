@@ -17,16 +17,18 @@ import csv
 import json
 import os
 import re
+import sqlite3
 import sys
 from collections import defaultdict
 
 # ─────────────────────────────────────────────────────────────
 # パス設定
 # ─────────────────────────────────────────────────────────────
-REPO_ROOT   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-INPUT_CSV   = os.path.join(REPO_ROOT, 'data', 'year_2024', '5-1_RS_2024_支出先_支出情報.csv')
-DICT_DIR    = os.path.join(REPO_ROOT, 'public', 'data', 'dictionaries')
-OUTPUT_JSON = os.path.join(REPO_ROOT, 'public', 'data', 'entity-labels-csv.json')
+REPO_ROOT      = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+INPUT_CSV      = os.path.join(REPO_ROOT, 'data', 'year_2024', '5-1_RS_2024_支出先_支出情報.csv')
+DICT_DIR       = os.path.join(REPO_ROOT, 'public', 'data', 'dictionaries')
+OUTPUT_JSON    = os.path.join(REPO_ROOT, 'public', 'data', 'entity-labels-csv.json')
+HOUJIN_DB_PATH = os.path.join(REPO_ROOT, 'data', 'houjin.db')
 
 # ─────────────────────────────────────────────────────────────
 # 辞書ファイルの L1/L2 ラベル
@@ -377,9 +379,60 @@ def main():
             kaku_hits.add(name)
             bypass_count += 1
 
-    labeled_count = len(labels)
     print(f'  スキップ対象（複合名称）: {len(skipped_names):,}件  うちバイパス: {bypass_count}件')
-    print(f'  ラベル付与: {labeled_count:,}件 / {total_count:,}件 = {labeled_count/total_count*100:.1f}%')
+
+    # ── Step 3: 法人番号 → houjin.db 公式名称 → 辞書/格パターン ──
+    step3_count = 0
+    if os.path.exists(HOUJIN_DB_PATH):
+        print('Step 3: houjin.db 公式名称ルックアップ中...')
+        conn = sqlite3.connect(f'file:{HOUJIN_DB_PATH}?mode=ro', uri=True)
+        cur  = conn.cursor()
+        for name in all_names:
+            if name in labels:
+                continue
+            cn = name_data[name]['cn']
+            if not cn:
+                continue
+            row = cur.execute(
+                'SELECT name FROM houjin WHERE corporate_number = ?', (cn,)
+            ).fetchone()
+            if not row:
+                continue
+            official = row[0]
+            norm_off = _normalize_for_match(official)
+
+            # Step 1a: 辞書完全一致
+            if official in dict_labels:
+                l1, l2 = dict_labels[official]
+                labels[name] = {'l1': l1, 'l2': l2, 'source': 'cn_lookup'}
+                step3_count += 1
+                continue
+
+            # Step 1b: 辞書正規表現
+            matched_dict = False
+            for pat, l1, l2 in dict_regex:
+                if pat.search(norm_off):
+                    labels[name] = {'l1': l1, 'l2': l2, 'source': 'cn_lookup'}
+                    step3_count += 1
+                    matched_dict = True
+                    break
+            if matched_dict:
+                continue
+
+            # Step 2: 格パターン
+            if not is_skip_target(official):
+                for l1, l2, pat in KAKU_COMPILED:
+                    if pat.search(norm_off):
+                        labels[name] = {'l1': l1, 'l2': l2, 'source': 'cn_lookup'}
+                        step3_count += 1
+                        break
+        conn.close()
+        print(f'  ラベル付与（Step 3）: {step3_count:,}件')
+    else:
+        print('Step 3: houjin.db が見つかりません（スキップ）')
+
+    labeled_count = len(labels)
+    print(f'  合計ラベル付与: {labeled_count:,}件 / {total_count:,}件 = {labeled_count/total_count*100:.1f}%')
 
     # L1 分布を表示
     from collections import Counter

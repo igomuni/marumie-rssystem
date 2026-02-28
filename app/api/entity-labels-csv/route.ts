@@ -9,7 +9,7 @@ export interface EntityLabelItem {
   name: string;
   l1: string | null;
   l2: string | null;
-  source: 'dict' | 'kaku' | 'both' | 'none';
+  source: 'dict' | 'kaku' | 'both' | 'none' | 'cn_lookup';
   amount: number;
   count: number;
   cn: string;
@@ -24,7 +24,7 @@ export interface EntityLabelsCsvResponse {
     labeledAmount: number;
     totalAmount: number;
     byL1: Record<string, { count: number; amount: number }>;
-    bySource: Record<'dict' | 'kaku' | 'both' | 'none', { count: number }>;
+    bySource: Record<'dict' | 'kaku' | 'both' | 'none' | 'cn_lookup', { count: number }>;
   };
 }
 
@@ -52,10 +52,11 @@ function loadData(): EntityLabelsCsvResponse {
   let totalAmount = 0;
   const byL1: Record<string, { count: number; amount: number }> = {};
   const bySource: Record<string, { count: number }> = {
-    dict: { count: 0 },
-    kaku: { count: 0 },
-    both: { count: 0 },
-    none: { count: 0 },
+    dict:      { count: 0 },
+    kaku:      { count: 0 },
+    both:      { count: 0 },
+    cn_lookup: { count: 0 },
+    none:      { count: 0 },
   };
 
   for (const item of items) {

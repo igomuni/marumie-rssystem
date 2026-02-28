@@ -65,20 +65,22 @@ const L1_COLORS: Record<string, L1ColorSet> = {
 const DEFAULT_COLOR: L1ColorSet = { badge: 'bg-gray-100 text-gray-700', chip: 'bg-gray-400 text-white border-gray-400', fill: '#9ca3af' };
 
 const SOURCE_LABELS: Record<string, string> = {
-  dict: '辞書',
-  kaku: '格パターン',
-  both: '両方',
-  none: '未ラベル',
+  dict:      '辞書',
+  kaku:      '格パターン',
+  both:      '両方',
+  cn_lookup: '法人番号照合',
+  none:      '未ラベル',
 };
 
 const SOURCE_BADGE: Record<string, string> = {
-  dict: 'bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-  kaku: 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300',
-  both: 'bg-purple-50 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
-  none: 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+  dict:      'bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  kaku:      'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+  both:      'bg-purple-50 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  cn_lookup: 'bg-orange-50 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+  none:      'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
 };
 
-type SourceFilter = 'all' | 'dict' | 'kaku' | 'both' | 'none';
+type SourceFilter = 'all' | 'dict' | 'kaku' | 'both' | 'cn_lookup' | 'none';
 type SortField = 'amount' | 'count' | 'name';
 type SortDir = 'asc' | 'desc';
 
@@ -312,7 +314,7 @@ export default function EntityLabelsCsvPage() {
 
           {/* ソース内訳 */}
           <div className="flex flex-wrap gap-2 mt-2 text-xs">
-            {(['dict', 'kaku', 'both', 'none'] as const).map(src => (
+            {(['dict', 'kaku', 'both', 'cn_lookup', 'none'] as const).map(src => (
               <span key={src} className={`px-2 py-0.5 rounded-full ${SOURCE_BADGE[src]}`}>
                 {SOURCE_LABELS[src]}: {summary.bySource[src].count.toLocaleString()}件
               </span>
@@ -380,7 +382,7 @@ export default function EntityLabelsCsvPage() {
           {/* ソースフィルタ */}
           <div className="flex flex-wrap gap-1.5 items-center">
             <span className="text-xs text-gray-500 dark:text-gray-400">ラベルソース:</span>
-            {(['all', 'dict', 'kaku', 'both', 'none'] as const).map(src => (
+            {(['all', 'dict', 'kaku', 'both', 'cn_lookup', 'none'] as const).map(src => (
               <button
                 key={src}
                 onClick={() => setSelectedSource(src)}
