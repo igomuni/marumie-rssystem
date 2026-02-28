@@ -36,3 +36,17 @@ rodo_kyoku_agg,行政機関,労働局（集合）,その他[0-9]+(都道府県)?
 rodo_kyoku_agg,行政機関,労働局（集合）,その他労働局\([0-9]+局\),alias,regex
 intl_org_agg,国際機関,国際機関（集合）,国際機関（集合）,canonical,exact
 intl_org_agg,国際機関,国際機関（集合）,その他国際機関,alias,exact
+local_gov_simple,地方公共団体,地方公共団体（集合）,地方公共団体,alias,exact
+local_gov_simple,地方公共団体,地方公共団体（集合）,^地方公共団体[\(（\[],alias,regex
+local_gov_hoka,地方公共団体,地方公共団体（集合）,(?:都|道|府|県|市|区|町|村)ほか$,alias,regex
+gov_agency_agg,行政機関,行政機関（集合）,局ほか[0-9]+件,alias,regex
+gov_agency_agg,行政機関,行政機関（集合）,本部等\([0-9]+機関\),alias,regex
+pref_aggregate,都道府県,都道府県（集合）,都道府県,alias,exact
+pref_aggregate,都道府県,都道府県（集合）,各都道府県,alias,exact
+pref_aggregate,都道府県,都道府県（集合）,各都道府県等,alias,exact
+pref_aggregate,都道府県,都道府県（集合）,都道府県等,alias,exact
+local_gov_mixed,地方公共団体,地方公共団体（都道府県・市区町村集合）,都道府県が適当と認めた団体,alias,exact
+local_gov_mixed,地方公共団体,地方公共団体（都道府県・市区町村集合）,都道府県・市(特別区含む),alias,exact
+local_gov_mixed,地方公共団体,地方公共団体（都道府県・市区町村集合）,地方自治体,alias,exact
+local_gov_mixed,地方公共団体,地方公共団体（都道府県・市区町村集合）,地方自治体等,alias,exact
+beneficiary_agg,受益者,中小企業者,中小企業者,alias,exact

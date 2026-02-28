@@ -17,6 +17,8 @@
     "validate-tags": "tsx scripts/validate-tags.ts",
     "build-houjin-db": "python3 scripts/build-houjin-sqlite.py",
     "build-houjin-lookup": "python3 scripts/build-houjin-lookup.py",
+    "generate-entity-labels": "python3 scripts/generate-entity-labels.py",
+    "generate-entity-labels-csv": "python3 scripts/generate-entity-labels-csv.py",
     "setup": "npm install && npm run normalize && npm run generate-structured && npm run generate-project-details"
   },
   "dependencies": {

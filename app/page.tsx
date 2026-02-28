@@ -76,6 +76,26 @@ export default function Home() {
               </ul>
             </div>
           </Link>
+
+          {/* 支出先ラベリング確認 */}
+          <Link href="/entity-labels-csv">
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-orange-500">
+              <div className="flex items-center mb-3">
+                <h2 className="text-2xl font-semibold text-orange-600 dark:text-orange-400">
+                  🏷️ 支出先ラベリング確認
+                </h2>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                元CSVから直接抽出した26,148件の支出先名に対して、辞書・格パターンでラベリングした結果を確認します。
+              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>• <strong>L1/L2 分類</strong>: 民間企業・公益法人・地方公共団体・国の機関 等19区分</li>
+                <li>• <strong>ソース表示</strong>: 辞書マッチ・格パターン・両方・未ラベルで判別</li>
+                <li>• <strong>件数カバレッジ</strong>: 約80.1%（20,939件 / 26,148件）</li>
+                <li>• <strong>金額カバレッジ</strong>: 約98%（金額上位が辞書でカバー済み）</li>
+              </ul>
+            </div>
+          </Link>
         </div>
 
         <footer className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
