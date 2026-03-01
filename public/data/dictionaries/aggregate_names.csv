@@ -41,6 +41,9 @@ local_gov_simple,地方公共団体,地方公共団体（集合）,^地方公共
 local_gov_hoka,地方公共団体,地方公共団体（集合）,(?:都|道|府|県|市|区|町|村)ほか$,alias,regex
 gov_agency_agg,行政機関,行政機関（集合）,局ほか[0-9]+件,alias,regex
 gov_agency_agg,行政機関,行政機関（集合）,本部等\([0-9]+機関\),alias,regex
+gov_agency_agg,行政機関,行政機関（集合）,各経済産業局及び沖縄総合事務局,alias,exact
+gov_agency_agg,行政機関,行政機関（集合）,資源エネルギー庁、地方経済産業局8局,alias,exact
+gov_agency_agg,行政機関,行政機関（集合）,資源エネルギー庁、地方経済産業局8局、経済産業本省、沖縄総合事務局,alias,exact
 pref_aggregate,都道府県,都道府県（集合）,都道府県,alias,exact
 pref_aggregate,都道府県,都道府県（集合）,各都道府県,alias,exact
 pref_aggregate,都道府県,都道府県（集合）,各都道府県等,alias,exact

@@ -136,7 +136,24 @@ KAKU_PATTERNS = [
     ('実行委員会等',  '組織委員会',        r'組織委員会'),
     # その他（集合・プレースホルダー）
     ('国の機関',    '行政機関集合',   r'^(その他|局ほか)[0-9]+(都道府県)?労働局'),  # 集合形式（辞書未収録）
-    ('国の機関',    '行政機関',       r'^.+労働局$'),                                # 個別労働局フォールバック
+    ('国の機関',    '行政機関集合',   r'^その他[\(（]?\d+局[\)）]?$'),              # その他(37局)等
+    # ─ 国の機関 局種別フォールバック ─────────────────────────────────────────
+    ('国の機関',    '労働局',         r'^.+労働局$'),
+    ('国の機関',    '法務局',         r'法務局'),
+    ('国の機関',    '地方整備局',     r'地方整備局|整備局$'),
+    ('国の機関',    '農政局',         r'農政局'),
+    ('国の機関',    '運輸局',         r'運輸局$'),
+    ('国の機関',    '経済産業局',     r'経済産業局'),
+    ('国の機関',    '管区警察局',     r'管区警察局|警察支局$'),
+    ('国の機関',    '厚生局',         r'厚生局'),
+    ('国の機関',    '公安調査局',     r'公安調査局'),
+    ('国の機関',    '防衛局',         r'防衛局$|防衛支局$'),
+    ('国の機関',    '森林管理局',     r'森林管理局'),
+    ('国の機関',    '出入国在留管理局', r'出入国在留管理局'),
+    ('国の機関',    '総合通信局',     r'総合通信局'),
+    ('国の機関',    '航空局',         r'航空局$'),
+    ('国の機関',    '国税局',         r'国税局$'),
+    ('国の機関',    '開発局',         r'開発局$'),
     ('その他',       'プレースホルダー', r'^その他$|^その他の支出先$|^その他支出先$|^その他の支出$|^その他契約$'),
     # 民間企業(集合)
     ('民間企業',      '民間企業(集合)',  r'その他民間|^その他事業者$|その他[（(]?[0-9]+社[）)]?|その他[0-9]+社'),
@@ -205,14 +222,17 @@ def load_dict_labels(dict_dir: str) -> dict[str, tuple[str, str]]:
 
             elif 'name' in fieldnames and fname in DICT_LABEL:
                 # 標準スキーマ（match_type列を尊重するが完全一致のみ辞書化）
-                l1, l2 = DICT_LABEL[fname]
+                l1, l2_default = DICT_LABEL[fname]
                 has_match_type = 'match_type' in fieldnames
+                has_l2_col = 'l2' in fieldnames  # per-row l2 override (e.g. field_office_names.csv)
                 for row in reader:
                     name = row.get('name', '').strip()
-                    if not name:
+                    if not name or name.startswith('#'):
                         continue
                     if has_match_type and row.get('match_type', '').strip() == 'regex':
                         continue  # regex エントリはスキップ（完全一致のみ辞書化）
+                    row_l2 = row.get('l2', '').strip() if has_l2_col else ''
+                    l2 = row_l2 if row_l2 else l2_default
                     if name not in result:
                         result[name] = (l1, l2)
 
