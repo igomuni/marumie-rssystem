@@ -26,7 +26,7 @@ const L1_CATEGORIES = [
   'コンソーシアム・共同体',
   '協議会',
   '実行委員会等',
-  'その他(集合)',
+  'その他',
   '特殊法人・特別の法人',
   'ラベルなし',
 ] as const;
@@ -50,7 +50,7 @@ const L1_COLORS: Record<string, L1ColorSet> = {
   'コンソーシアム・共同体': { badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',       chip: 'bg-amber-500 text-white border-amber-500',     fill: '#f59e0b' },
   '協議会':                 { badge: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200', chip: 'bg-emerald-500 text-white border-emerald-500', fill: '#10b981' },
   '実行委員会等':           { badge: 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200',               chip: 'bg-sky-500 text-white border-sky-500',         fill: '#0ea5e9' },
-  'その他(集合)':         { badge: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',       chip: 'bg-slate-500 text-white border-slate-500',     fill: '#64748b' },
+  'その他':               { badge: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',       chip: 'bg-slate-500 text-white border-slate-500',     fill: '#64748b' },
   '特殊法人・特別の法人':   { badge: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',           chip: 'bg-pink-500 text-white border-pink-500',       fill: '#ec4899' },
   'ラベルなし':             { badge: 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500',           chip: 'bg-gray-300 text-gray-700 border-gray-300',    fill: '#d1d5db' },
 };

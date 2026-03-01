@@ -38,13 +38,14 @@ DICT_LABEL: dict[str, tuple[str, str]] = {
     'prefecture_names.csv':         ('地方公共団体', '都道府県'),
     'municipality_names.csv':       ('地方公共団体', '市区町村'),
     'municipality_supplement.csv':  ('地方公共団体', '市区町村'),
+    # 国の機関（地方機関）
+    'field_office_names.csv':       ('国の機関', '行政機関'),
     # 外国法人・国際機関
     'foreign_agency_names.csv':     ('外国法人・国際機関', '外国政府機関'),
     'embassy_names.csv':            ('外国法人・国際機関', '大使館'),
     'international_org_names.csv':  ('外国法人・国際機関', '国際機関'),
     'country_names.csv':            ('外国法人・国際機関', '外国'),
-    # その他集合名称
-    'aggregate_names.csv':          ('その他(集合)', '集合名称'),
+    # ※ aggregate_names.csv は category フィールドで L2 を決めるため別処理
     # ※ special_corporation_names.csv は special_subtype を使うため別処理
 }
 
@@ -134,7 +135,9 @@ KAKU_PATTERNS = [
     ('実行委員会等',  '運営委員会',        r'運営委員会'),
     ('実行委員会等',  '組織委員会',        r'組織委員会'),
     # その他（集合・プレースホルダー）
-    ('その他(集合)', 'プレースホルダー', r'^その他$|^その他の支出先$|^その他支出先$|^その他の支出$|^その他契約$'),
+    ('国の機関',    '行政機関集合',   r'^(その他|局ほか)[0-9]+(都道府県)?労働局'),  # 集合形式（辞書未収録）
+    ('国の機関',    '行政機関',       r'^.+労働局$'),                                # 個別労働局フォールバック
+    ('その他',       'プレースホルダー', r'^その他$|^その他の支出先$|^その他支出先$|^その他の支出$|^その他契約$'),
     # 民間企業(集合)
     ('民間企業',      '民間企業(集合)',  r'その他民間|^その他事業者$|その他[（(]?[0-9]+社[）)]?|その他[0-9]+社'),
     # 医療機関(集合)
@@ -181,8 +184,8 @@ def load_dict_labels(dict_dir: str) -> dict[str, tuple[str, str]]:
         if not fname.endswith('.csv'):
             continue
 
-        # special_corporation_names.csv は別処理
-        if fname == 'special_corporation_names.csv':
+        # 別処理ファイル
+        if fname in ('special_corporation_names.csv', 'aggregate_names.csv'):
             continue
 
         fpath = os.path.join(dict_dir, fname)
@@ -227,6 +230,44 @@ def load_dict_labels(dict_dir: str) -> dict[str, tuple[str, str]]:
                 l2 = '特殊会社' if subtype.startswith('特殊会社') else '特殊法人'
                 if name not in result:
                     result[name] = ('特殊法人・特別の法人', l2)
+
+    # aggregate_names.csv: category → (L1, L2) マッピング（完全一致のみ）
+    _AGG_L1: dict[str, str] = {
+        '都道府県':    '地方公共団体',
+        '市区町村':    '地方公共団体',
+        '地方公共団体': '地方公共団体',
+        '行政機関':    '国の機関',
+        '国際機関':    'その他',
+        '受益者':      'その他',
+    }
+    _AGG_CATEGORY_L2: dict[str, str] = {
+        '都道府県':    '地方公共団体集合',
+        '市区町村':    '地方公共団体集合',
+        '地方公共団体': '地方公共団体集合',
+        '行政機関':    '行政機関集合',
+        '国際機関':    '特定団体集合',
+        '受益者':      '受益者集合',
+    }
+    _AGG_NAME_OVERRIDE_L1: dict[str, str] = {
+        '都道府県が適当と認めた団体': 'その他',
+    }
+    _AGG_NAME_OVERRIDE_L2: dict[str, str] = {
+        '都道府県が適当と認めた団体': '特定団体集合',
+    }
+    agg_path = os.path.join(dict_dir, 'aggregate_names.csv')
+    if os.path.exists(agg_path):
+        with open(agg_path, encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                name = row.get('name', '').strip()
+                category = row.get('category', '').strip()
+                match_type = row.get('match_type', '').strip()
+                if not name or match_type == 'regex':
+                    continue
+                l1 = _AGG_NAME_OVERRIDE_L1.get(name) or _AGG_L1.get(category, 'その他')
+                l2 = _AGG_NAME_OVERRIDE_L2.get(name) or _AGG_CATEGORY_L2.get(category, '不明')
+                if name not in result:
+                    result[name] = (l1, l2)
 
     return result
 

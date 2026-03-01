@@ -41,12 +41,12 @@ DICT_LABEL: dict[str, tuple[str, str]] = {
     'prefecture_names.csv':        ('地方公共団体', '都道府県'),
     'municipality_names.csv':      ('地方公共団体', '市区町村'),
     'municipality_supplement.csv': ('地方公共団体', '市区町村'),
+    'field_office_names.csv':      ('国の機関', '行政機関'),
     'foreign_agency_names.csv':    ('外国法人・国際機関', '外国政府機関'),
     'embassy_names.csv':           ('外国法人・国際機関', '大使館'),
     'international_org_names.csv': ('外国法人・国際機関', '国際機関'),
     'country_names.csv':           ('外国法人・国際機関', '外国'),
-    'aggregate_names.csv':         ('その他(集合)', '集合名称'),
-    'beneficiary_names.csv':       ('その他(集合)', '受益者'),
+    'beneficiary_names.csv':       ('その他', '受益者集合'),
     'person_names.csv':            ('個人', '個人'),
 }
 
@@ -97,7 +97,7 @@ KAKU_PATTERNS = [
     ('医療・福祉法人', '社会福祉法人',       r'社会福祉法人'),
     ('医療・福祉法人', '赤十字',             r'赤十字'),
     ('医療・福祉法人', '病院',              r'病院$'),
-    ('その他(集合)', '集合名称',          r'^病院、訪問看護ステーション等$'),
+    ('その他',       '特定団体集合',       r'^病院、訪問看護ステーション等$'),
     ('その他法人',    '宗教法人',            r'宗教法人|寺$|神社$|宮$|大社$|不動院$'),
     ('その他法人',    '互助会',              r'職員互助会'),
     ('その他法人',    '管理組合法人',        r'管理組合法人'),
@@ -190,11 +190,15 @@ KAKU_PATTERNS = [
     ('実行委員会等',  '運営委員会',          r'運営委員会'),
     ('実行委員会等',  '組織委員会',          r'組織委員会'),
     ('実行委員会等',  '実行委員会',          r'イベント主催団体[A-Za-z\d]'),  # イベント主催団体A〜H
-    ('その他(集合)', '集合名称',           r'^他[0-9]+'),
-    ('その他(集合)', '集合名称',           r'支出先上位\d+者以降|以降補助事業$'),  # 支出先上位11者以降補助事業等
-    ('その他(集合)', '集合名称',           r'^その他\d+局$'),                    # その他37局等
-    ('その他(集合)', '集合名称',           r'^その他.*センター連合|^その他.*センター運営法人'),  # その他シルバー人材センター連合等
-    ('その他(集合)', 'プレースホルダー',   r'^その他$|^その他の支出先$|^その他支出先$|^その他の支出$|^その他契約$'),
+    ('地方公共団体', '地方公共団体集合',   r'^他[0-9]+(都道府県|道府県|府県)$'),          # 他37都道府県等
+    ('国の機関',    '行政機関集合',       r'^他[0-9]+.*(局|庁)'),                         # 他37局・他37都道府県労働局等
+    ('その他',       '特定団体集合',       r'^他[0-9]+医療機関'),                          # 他429医療機関等
+    ('その他',       '不明',              r'^他[0-9]+'),                                   # 他88者等（種別不明の集合）
+    ('その他',       '不明',              r'支出先上位\d+者以降|以降補助事業$'),  # 支出先上位11者以降補助事業等
+    ('国の機関',    '行政機関集合',       r'^その他\d+局$'),                    # その他37局等
+    ('国の機関',    '行政機関',           r'^.+労働局$'),                       # 都道府県別労働局（辞書未収録の場合のフォールバック）
+    ('その他',       '特定団体集合',       r'^その他.*センター連合|^その他.*センター運営法人'),  # その他シルバー人材センター連合等
+    ('その他',       'プレースホルダー',   r'^その他$|^その他の支出先$|^その他支出先$|^その他の支出$|^その他契約$'),
     ('民間企業',      '民間企業(集合)',    r'その他民間|^その他事業者$|その他[（(]?[0-9]+社[）)]?|その他[0-9]+社|その他の?社$|^民間企業$|^民間企業等|^民間企業[A-Za-z]|補助事業者\(民間企業\)|^企業[A-Za-z]{1,2}$|^地域企業[A-Za-z]$'),
     ('外国法人・国際機関', '外国企業',        r'^外国企業|所在企業$'),
     ('外国法人・国際機関', '外国企業(集合)', r'^海外法人\d'),
@@ -254,8 +258,8 @@ KAKU_PATTERNS = [
     ('経費',          '特別会計',            r'特別会計$|特別会計.*勘定$'),    # 食料安定供給特別会計・農業再保険勘定等
     ('経費',          '勘定',               r'年金勘定$|勘定$'),              # 基礎年金勘定・国民年金勘定等
     ('経費',          '庁費',               r'庁費$'),                        # 審査審判庁費等
-    ('その他(集合)', '受益者',             r'^利水者|^農業者年金|^被保険者|^退職者|^留学生|^研修生$|^給付対象者'),
-    ('その他(集合)', '受益者',             r'^ハンセン病療養所.*退所者'),  # ハンセン病補償給付金等
+    ('その他',       '受益者集合',          r'^利水者|^農業者年金|^被保険者|^退職者|^留学生|^研修生$|^給付対象者'),
+    ('その他',       '受益者集合',          r'^ハンセン病療養所.*退所者'),  # ハンセン病補償給付金等
     ('民間企業',      '金融機関',          r'^金融機関'),                  # 金融機関への借入金返済・融資等
     # ─ 匿名化法人・企業 フォールバック ─────────────────────────────────────────
     ('事業者',        '事業者',              r'^[A-Za-z]事業所$'),          # A事業所〜J事業所（匿名化）
@@ -341,7 +345,7 @@ def load_dict_labels(dict_dir: str) -> tuple[dict[str, tuple[str, str]], list[tu
     for fname in sorted(os.listdir(dict_dir)):
         if not fname.endswith('.csv'):
             continue
-        if fname == 'special_corporation_names.csv':
+        if fname in ('special_corporation_names.csv', 'aggregate_names.csv'):
             continue
 
         fpath = os.path.join(dict_dir, fname)
@@ -386,6 +390,61 @@ def load_dict_labels(dict_dir: str) -> tuple[dict[str, tuple[str, str]], list[tu
                 l2 = '特殊会社' if subtype.startswith('特殊会社') else '特殊法人'
                 if name not in result:
                     result[name] = ('特殊法人・特別の法人', l2)
+
+    # aggregate_names.csv: category → (L1, L2) マッピング
+    _AGG_L1: dict[str, str] = {
+        '都道府県':    '地方公共団体',
+        '市区町村':    '地方公共団体',
+        '地方公共団体': '地方公共団体',
+        '行政機関':    '国の機関',
+        '国際機関':    'その他',
+        '受益者':      'その他',
+    }
+    _AGG_CATEGORY_L2: dict[str, str] = {
+        '都道府県':    '地方公共団体集合',
+        '市区町村':    '地方公共団体集合',
+        '地方公共団体': '地方公共団体集合',
+        '行政機関':    '行政機関集合',
+        '国際機関':    '特定団体集合',
+        '受益者':      '受益者集合',
+    }
+    # 名称単位の特例（category で一括処理できないもの）
+    _AGG_NAME_OVERRIDE_L1: dict[str, str] = {
+        '都道府県が適当と認めた団体': 'その他',
+    }
+    _AGG_NAME_OVERRIDE_L2: dict[str, str] = {
+        '都道府県が適当と認めた団体': '特定団体集合',  # 地方公共団体とは限らない指定団体
+    }
+    agg_path = os.path.join(dict_dir, 'aggregate_names.csv')
+    if os.path.exists(agg_path):
+        with open(agg_path, encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            # 行政機関パターンを先に追加: 都道府県パターンの部分一致（search）より
+            # 具体的な行政機関パターンを優先させるため
+            priority_regex: list[tuple[re.Pattern, str, str]] = []
+            other_regex: list[tuple[re.Pattern, str, str]] = []
+            for row in reader:
+                name = row.get('name', '').strip()
+                category = row.get('category', '').strip()
+                match_type = row.get('match_type', '').strip()
+                if not name:
+                    continue
+                l1 = _AGG_NAME_OVERRIDE_L1.get(name) or _AGG_L1.get(category, 'その他')
+                l2 = _AGG_NAME_OVERRIDE_L2.get(name) or _AGG_CATEGORY_L2.get(category, '不明')
+                if match_type == 'regex':
+                    try:
+                        entry = (re.compile(name), l1, l2)
+                        if category == '行政機関':
+                            priority_regex.append(entry)
+                        else:
+                            other_regex.append(entry)
+                    except re.error:
+                        pass
+                    continue
+                if name not in result:
+                    result[name] = (l1, l2)
+            regex_entries.extend(priority_regex)
+            regex_entries.extend(other_regex)
 
     return result, regex_entries
 
