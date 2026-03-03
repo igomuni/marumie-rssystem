@@ -53,3 +53,11 @@ local_gov_mixed,地方公共団体,地方公共団体（都道府県・市区町
 local_gov_mixed,地方公共団体,地方公共団体（都道府県・市区町村集合）,地方自治体,alias,exact
 local_gov_mixed,地方公共団体,地方公共団体（都道府県・市区町村集合）,地方自治体等,alias,exact
 beneficiary_agg,受益者,中小企業者,中小企業者,alias,exact
+muni_agg_n,市区町村,市区町村（集合）,[0-9]+市町村等,alias,regex
+pref_agg_soto,都道府県,都道府県（集合）,外[0-9]+府県,alias,regex
+local_agg_dantai,地方公共団体,地方公共団体（集合）,その他\([0-9]+団体\),alias,regex
+pref_agg_ken,都道府県,都道府県（集合）,その他\([0-9]+県\),alias,regex
+pref_agg_shiga,都道府県,都道府県（集合）,滋賀県その他,alias,exact
+pref_agg_gunma,都道府県,都道府県（集合）,群馬県他[0-9]+県,alias,regex
+muni_agg_yaku,市区町村,市区町村（集合）,市区町村\(約[0-9]+市町村\),alias,regex
+travel_support_office,地方公共団体,地方公共団体（集合）,全国旅行支援群馬県事務局,alias,exact

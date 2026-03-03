@@ -31,6 +31,7 @@ const L1_CATEGORIES = [
   '個人',
   '人件費',
   '経費',
+  '事業',
   'ラベルなし',
 ] as const;
 
@@ -59,6 +60,7 @@ const L1_COLORS: Record<string, L1ColorSet> = {
   '個人':                   { badge: 'bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900 dark:text-fuchsia-200', chip: 'bg-fuchsia-500 text-white border-fuchsia-500', fill: '#d946ef' },
   '人件費':                 { badge: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300',             chip: 'bg-zinc-600 text-white border-zinc-600',       fill: '#52525b' },
   '経費':                   { badge: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-300', chip: 'bg-neutral-500 text-white border-neutral-500', fill: '#737373' },
+  '事業':                   { badge: 'bg-amber-200 text-amber-900 dark:bg-amber-900 dark:text-amber-200',         chip: 'bg-amber-700 text-white border-amber-700',     fill: '#b45309' },
   'ラベルなし':             { badge: 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500',           chip: 'bg-gray-300 text-gray-700 border-gray-300',    fill: '#d1d5db' },
 };
 
