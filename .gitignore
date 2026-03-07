@@ -62,5 +62,9 @@ next-env.d.ts
 *.sln
 *.sw?
 
+# Python cache
+__pycache__/
+*.pyc
+
 # --- IGNORE ---
 docs/*ignore*
