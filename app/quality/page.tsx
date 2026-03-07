@@ -382,7 +382,7 @@ export default function QualityPage() {
                           <div>
                             <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">支出先名品質</h4>
                             <div className="space-y-0.5 text-gray-600 dark:text-gray-400">
-                              <div>valid: {item.validCount} / invalid: {item.invalidCount}</div>
+                              <div>valid: {item.validCount}{item.suppValidCount > 0 && <span className="text-blue-500"> (+補助{item.suppValidCount})</span>} / invalid: {item.invalidCount}</div>
                               <div>valid率: {pct(item.validRatio)}</div>
                               <div>CN記入: {item.cnFilled} / 未記入: {item.cnEmpty}</div>
                               <div>CN記入率: {pct(item.cnFillRatio)}</div>
@@ -403,8 +403,8 @@ export default function QualityPage() {
                             <div className="space-y-0.5 text-gray-600 dark:text-gray-400">
                               <div>ブロック数: {item.blockCount}{item.orphanBlockCount > 0 && <span className="text-red-500"> (孤立: {item.orphanBlockCount})</span>}</div>
                               <div>再委託: {item.hasRedelegation ? `あり (階層${item.redelegationDepth})` : 'なし'}</div>
-                              <div>支出先名不明率: {pct(item.unknownNameRatio)}</div>
-                              <div className="text-[10px] text-gray-400">（支出先名「その他」行の割合）</div>
+                              <div>不透明支出先率: {pct(item.opaqueRatio)}</div>
+                              <div className="text-[10px] text-gray-400">（不透明キーワード辞書にマッチする行の割合）</div>
                               <div>支出先行数: {item.rowCount}</div>
                             </div>
                           </div>

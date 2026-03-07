@@ -14,6 +14,7 @@ export interface QualityScoreItem {
   unit: string;
   rowCount: number;
   validCount: number;
+  suppValidCount: number;
   invalidCount: number;
   validRatio: number | null;
   cnFilled: number;
@@ -28,7 +29,7 @@ export interface QualityScoreItem {
   orphanBlockCount: number;
   hasRedelegation: boolean;
   redelegationDepth: number;
-  unknownNameRatio: number | null;
+  opaqueRatio: number | null;
   axis1: number | null;
   axis2: number | null;
   axis3: number | null;

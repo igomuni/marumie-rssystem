@@ -6,7 +6,7 @@
   2. 法人番号の記入率 (cn_fill_ratio)    重み 20%
   3. 予算・支出バランス (gap_ratio)       重み 20%
   4. ブロック構造の妥当性                 重み 10%
-  5. 支出先名不明率の抑制（「その他」行の割合） 重み 10%
+  5. 支出先名の透明性（不透明キーワード辞書ベース） 重み 10%
 
 実行:
   python3 scripts/score-project-quality.py [--limit N]
@@ -17,6 +17,7 @@
 
 import csv
 import json
+import re
 import unicodedata
 import collections
 import argparse
@@ -27,6 +28,8 @@ BUDGET_CSV = REPO_ROOT / 'data' / 'year_2024' / '2-1_RS_2024_予算・執行_サ
 SPEND_CSV  = REPO_ROOT / 'data' / 'year_2024' / '5-1_RS_2024_支出先_支出情報.csv'
 BLOCK_CSV  = REPO_ROOT / 'data' / 'year_2024' / '5-2_RS_2024_支出先_支出ブロックのつながり.csv'
 DICT_CSV   = REPO_ROOT / 'data' / 'result' / 'recipient_dictionary.csv'
+SUPP_CSV   = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'supplementary_valid_names.csv'
+OPAQUE_CSV = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'opaque_recipient_keywords.csv'
 OUT_CSV    = REPO_ROOT / 'data' / 'result' / 'project_quality_scores.csv'
 OUT_JSON   = REPO_ROOT / 'public' / 'data' / 'project-quality-scores.json'
 
@@ -43,6 +46,37 @@ dict_map = {}
 with open(DICT_CSV, encoding='utf-8') as f:
     for r in csv.DictReader(f):
         dict_map[r['name']] = r['valid'] == 'True'
+
+# 補助辞書ロード（厳密辞書invalidの中から実在確認済みの名称を救済）
+supp_map = {}  # name -> category
+with open(SUPP_CSV, encoding='utf-8') as f:
+    for r in csv.DictReader(f):
+        supp_map[r['name']] = r['category']
+print(f'  補助辞書: {len(supp_map):,}件')
+
+# 不透明支出先名キーワード辞書ロード
+opaque_rules = []  # list of (match_type, pattern, level, compiled_regex_or_None)
+with open(OPAQUE_CSV, encoding='utf-8') as f:
+    for r in csv.DictReader(f):
+        mt = r['match_type'].strip()
+        pat = r['pattern'].strip()
+        level = int(r['level'].strip())
+        compiled = re.compile(pat) if mt == 'regex' else None
+        opaque_rules.append((mt, pat, level, compiled))
+print(f'  不透明キーワード辞書: {len(opaque_rules)}ルール')
+
+def is_opaque_name(name: str) -> int:
+    """不透明な支出先名か判定。マッチしたらlevel(1-3)を返す、マッチしなければ0"""
+    for mt, pat, level, compiled in opaque_rules:
+        if mt == 'exact' and name == pat:
+            return level
+        elif mt == 'prefix' and name.startswith(pat) and name != pat:
+            return level
+        elif mt == 'contains' and pat in name and name != pat:
+            return level
+        elif mt == 'regex' and compiled and compiled.search(name):
+            return level
+    return 0
 print(f'  辞書: {len(dict_map):,}件')
 
 # ── 2. 予算サマリ（予算年度2023, 会計区分=空の合計行） ──
@@ -140,13 +174,13 @@ print('支出先データ ロード中...')
 class ProjectStats:
     __slots__ = [
         'pid', 'name', 'ministry', 'bureau', 'division', 'section', 'office', 'team', 'unit',
-        'valid_count', 'invalid_count',
+        'valid_count', 'supp_valid_count', 'invalid_count',
         'cn_filled', 'cn_empty',
         'spend_total', 'spend_net_total',
         'block_names', 'has_redelegation', 'redelegation_depth',
         'block_amounts', 'recipient_amounts_by_block',
         'orphan_block_count',
-        'other_true', 'other_false',
+        'opaque_count',
         'row_count',
     ]
     def __init__(self, pid, name, ministry, bureau, division, section, office, team, unit):
@@ -160,6 +194,7 @@ class ProjectStats:
         self.team = team
         self.unit = unit
         self.valid_count = 0
+        self.supp_valid_count = 0
         self.invalid_count = 0
         self.cn_filled = 0
         self.cn_empty = 0
@@ -171,8 +206,7 @@ class ProjectStats:
         self.block_amounts = {}          # block_no -> block_amount
         self.recipient_amounts_by_block = collections.defaultdict(int)  # block_no -> sum of recipient amounts
         self.orphan_block_count = 0     # 5-2に未記載の孤立ブロック数
-        self.other_true = 0
-        self.other_false = 0
+        self.opaque_count = 0           # 不透明キーワードにマッチした支出先行数
         self.row_count = 0
 
 projects = {}  # pid -> ProjectStats
@@ -209,6 +243,8 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         if recipient_name in dict_map:
             if dict_map[recipient_name]:
                 ps.valid_count += 1
+            elif recipient_name in supp_map:
+                ps.supp_valid_count += 1
             else:
                 ps.invalid_count += 1
 
@@ -230,12 +266,9 @@ with open(SPEND_CSV, encoding='utf-8') as f:
                 if block_no in roots:
                     ps.spend_net_total += amt
 
-        # 軸5: その他支出先フラグ
-        other_flag = r.get('その他支出先', '').strip().upper()
-        if other_flag == 'TRUE':
-            ps.other_true += 1
-        elif other_flag == 'FALSE':
-            ps.other_false += 1
+        # 軸5: 不透明支出先名キーワード判定
+        if is_opaque_name(recipient_name):
+            ps.opaque_count += 1
 
 print(f'  事業数: {len(projects):,}')
 
@@ -262,9 +295,10 @@ def calc_scores(ps):
     scores = {}
 
     # 軸1: 支出先名品質 (0-100)
-    dict_total = ps.valid_count + ps.invalid_count
+    # valid = 厳密辞書valid, supp_valid = 補助辞書で救済, invalid = 厳密辞書invalid かつ補助辞書にもなし
+    dict_total = ps.valid_count + ps.supp_valid_count + ps.invalid_count
     if dict_total > 0:
-        scores['valid_ratio'] = ps.valid_count / dict_total
+        scores['valid_ratio'] = (ps.valid_count + ps.supp_valid_count) / dict_total
         scores['axis1'] = clamp(scores['valid_ratio'] * 100)
     else:
         scores['valid_ratio'] = None
@@ -323,17 +357,16 @@ def calc_scores(ps):
     scores['has_redelegation'] = ps.has_redelegation
     scores['redelegation_depth'] = ps.redelegation_depth
 
-    # 軸5: 支出先名不明率の抑制 (0-100)
-    # 「その他支出先=TRUE」= 支出先名が「その他」（具体名不明の残額集計行）
-    other_total = ps.other_true + ps.other_false
-    if other_total > 0:
-        other_ratio = ps.other_true / other_total
-        scores['other_flag_ratio'] = other_ratio
+    # 軸5: 支出先名の透明性 (0-100)
+    # 不透明キーワード辞書にマッチする支出先名の割合で評価
+    if ps.row_count > 0:
+        opaque_ratio = ps.opaque_count / ps.row_count
+        scores['opaque_ratio'] = opaque_ratio
         # ratio=0 → 100点, ratio>=0.5 → 0点（線形）
-        scores['axis5'] = clamp((1 - other_ratio / 0.5) * 100)
+        scores['axis5'] = clamp((1 - opaque_ratio / 0.5) * 100)
     else:
-        scores['other_flag_ratio'] = 0
-        scores['axis5'] = 100  # フラグ自体がない場合は問題なし
+        scores['opaque_ratio'] = 0
+        scores['axis5'] = 100
 
     # 総合スコア（重み付き平均、Noneの軸は除外して再配分）
     weights = [
@@ -361,13 +394,13 @@ def calc_scores(ps):
 # ── 5. CSV出力 ──
 fieldnames = [
     '予算事業ID', '事業名', '府省庁', '局・庁', '部', '課', '室', '班', '係',
-    '支出先行数', 'valid数', 'invalid数', 'valid率',
+    '支出先行数', 'valid数', '補助辞書valid数', 'invalid数', 'valid率',
     'CN記入数', 'CN未記入数', 'CN記入率',
     '予算額', '執行額', '支出先合計額', '実質支出額', '乖離率',
     'ブロック数', '再委託有無', '再委託階層',
-    '支出先名不明率',
+    '不透明支出先率',
     '軸1_支出先名品質', '軸2_法人番号記入率', '軸3_予算支出バランス',
-    '軸4_ブロック構造', '軸5_支出先名不明率抑制',
+    '軸4_ブロック構造', '軸5_透明性',
     '総合スコア',
 ]
 
@@ -407,6 +440,7 @@ for pid in sorted_pids:
         '係': ps.unit,
         '支出先行数': ps.row_count,
         'valid数': ps.valid_count,
+        '補助辞書valid数': ps.supp_valid_count,
         'invalid数': ps.invalid_count,
         'valid率': fmt_pct(sc['valid_ratio']),
         'CN記入数': ps.cn_filled,
@@ -420,12 +454,12 @@ for pid in sorted_pids:
         'ブロック数': sc['block_count'],
         '再委託有無': 'あり' if sc['has_redelegation'] else 'なし',
         '再委託階層': sc['redelegation_depth'],
-        '支出先名不明率': fmt_pct(sc['other_flag_ratio']),
+        '不透明支出先率': fmt_pct(sc['opaque_ratio']),
         '軸1_支出先名品質': fmt_score(sc['axis1']),
         '軸2_法人番号記入率': fmt_score(sc['axis2']),
         '軸3_予算支出バランス': fmt_score(sc['axis3']),
         '軸4_ブロック構造': fmt_score(sc['axis4']),
-        '軸5_支出先名不明率抑制': fmt_score(sc['axis5']),
+        '軸5_透明性': fmt_score(sc['axis5']),
         '総合スコア': fmt_score(sc['total_score']),
     })
 
@@ -451,6 +485,7 @@ for pid in sorted_pids:
         'unit': ps.unit,
         'rowCount': ps.row_count,
         'validCount': ps.valid_count,
+        'suppValidCount': ps.supp_valid_count,
         'invalidCount': ps.invalid_count,
         'validRatio': sc['valid_ratio'],
         'cnFilled': ps.cn_filled,
@@ -465,7 +500,7 @@ for pid in sorted_pids:
         'orphanBlockCount': ps.orphan_block_count,
         'hasRedelegation': sc['has_redelegation'],
         'redelegationDepth': sc['redelegation_depth'],
-        'unknownNameRatio': sc.get('other_flag_ratio', 0),
+        'opaqueRatio': sc.get('opaque_ratio', 0),
         'axis1': sc['axis1'],
         'axis2': sc['axis2'],
         'axis3': sc['axis3'],
