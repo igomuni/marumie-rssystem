@@ -14,7 +14,7 @@ flowchart TB
 
     subgraph 辞書
         DICT["厳密辞書<br/>recipient_dictionary.csv<br/>(26,192件)"]
-        SUPP["補助辞書<br/>supplementary_valid_names.csv<br/>(602件)"]
+        SUPP["補助辞書<br/>supplementary_valid_names.csv<br/>(509件)"]
         OPAQUE["不透明キーワード辞書<br/>opaque_recipient_keywords.csv<br/>(13ルール)"]
     end
 
@@ -48,9 +48,9 @@ flowchart TB
 ```mermaid
 flowchart LR
     subgraph "Phase 1: 辞書ロード"
-        D1["厳密辞書ロード<br/>dict_map: name → bool"]
-        D2["補助辞書ロード<br/>supp_map: name → category"]
-        D3["不透明辞書ロード<br/>opaque_rules: 13ルール"]
+        D1["厳密辞書ロード<br/>dict_map: name → bool<br/>public/data/dictionaries/recipient_dictionary.csv"]
+        D2["補助辞書ロード<br/>supp_map: name → category<br/>public/data/dictionaries/supplementary_valid_names.csv"]
+        D3["不透明辞書ロード<br/>opaque_rules: 13ルール<br/>public/data/dictionaries/opaque_recipient_keywords.csv"]
     end
 
     subgraph "Phase 2: 予算サマリ"
@@ -108,13 +108,13 @@ flowchart TD
 flowchart LR
     subgraph "厳密辞書 (recipient_dictionary.csv)"
         direction TB
-        STRICT_V["valid=True: 18,140件<br/>法人番号DBと名称一致"]
-        STRICT_I["valid=False: 8,052件<br/>名称不一致 or 法人番号なし"]
+        STRICT_V["valid=True: 18,233件<br/>法人番号DBと名称一致<br/>or 都道府県prefix市区町村"]
+        STRICT_I["valid=False: 7,959件<br/>名称不一致 or 法人番号なし"]
     end
 
     subgraph "補助辞書 (supplementary_valid_names.csv)"
         direction TB
-        SUPP_GOV["government_branch: 524件<br/>地方整備局・農政局・労働局<br/>都道府県警察・市区町村 等"]
+        SUPP_GOV["government_branch: 431件<br/>地方整備局・農政局・労働局<br/>都道府県警察 等"]
         SUPP_UNI["university_rename: 78件<br/>改組前大学名<br/>(東京工業大学→東京科学大学 等)"]
     end
 
