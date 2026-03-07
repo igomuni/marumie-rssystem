@@ -109,6 +109,34 @@ releg_counts = collections.Counter(redelegation_by_pid.values())
 print(f'  ブロック接続: {sum(len(v) for v in block_links_by_pid.values()):,}行, {len(block_links_by_pid):,}事業')
 print(f'  再委託深度分布: { {k: releg_counts[k] for k in sorted(releg_counts)} }')
 
+# 5-2に登場するすべてのブロック（source / dest 両方）を記録
+blocks_in_5_2_by_pid = collections.defaultdict(set)
+for pid, links in block_links_by_pid.items():
+    for src, dst, _ in links:
+        if src:
+            blocks_in_5_2_by_pid[pid].add(src)
+        if dst:
+            blocks_in_5_2_by_pid[pid].add(dst)
+
+# 5-1のブロック一覧を事前スキャンして「孤立ブロック」（5-2に未記載）を補完
+# 5-2にエントリがあるPIDでも一部ブロックが記載漏れの場合がある
+print('5-1の孤立ブロックをルートとして補完中...')
+supplemented = 0
+with open(SPEND_CSV, encoding='utf-8') as f:
+    for r in csv.DictReader(f):
+        pid = r['予算事業ID'].strip()
+        block_no = r['支出先ブロック番号'].strip()
+        if not block_no:
+            continue
+        if block_no not in blocks_in_5_2_by_pid.get(pid, set()):
+            # 5-2に登場しないブロック = 組織直下のルートブロックとして扱う
+            if pid not in root_blocks_by_pid:
+                root_blocks_by_pid[pid] = set()
+            if block_no not in root_blocks_by_pid[pid]:
+                root_blocks_by_pid[pid].add(block_no)
+                supplemented += 1
+print(f'  補完ブロック: {supplemented}件')
+
 # ── 4. 支出先データ ──
 print('支出先データ ロード中...')
 
