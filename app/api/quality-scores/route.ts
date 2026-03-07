@@ -25,6 +25,7 @@ export interface QualityScoreItem {
   spendNetTotal: number;
   gapRatio: number | null;
   blockCount: number;
+  orphanBlockCount: number;
   hasRedelegation: boolean;
   redelegationDepth: number;
   unknownNameRatio: number | null;

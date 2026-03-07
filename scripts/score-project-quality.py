@@ -118,24 +118,21 @@ for pid, links in block_links_by_pid.items():
         if dst:
             blocks_in_5_2_by_pid[pid].add(dst)
 
-# 5-1のブロック一覧を事前スキャンして「孤立ブロック」（5-2に未記載）を補完
-# 5-2にエントリがあるPIDでも一部ブロックが記載漏れの場合がある
-print('5-1の孤立ブロックをルートとして補完中...')
-supplemented = 0
+# 5-1のブロック一覧を事前スキャンして「孤立ブロック」（5-2に未記載）を検出
+# ※ルートとして補完はしない（リンクが辿れないため根拠がない）
+print('5-1の孤立ブロックを検出中...')
+orphan_blocks_by_pid = collections.defaultdict(set)  # pid -> set of orphan block_nos
 with open(SPEND_CSV, encoding='utf-8') as f:
     for r in csv.DictReader(f):
         pid = r['予算事業ID'].strip()
         block_no = r['支出先ブロック番号'].strip()
         if not block_no:
             continue
-        if block_no not in blocks_in_5_2_by_pid.get(pid, set()):
-            # 5-2に登場しないブロック = 組織直下のルートブロックとして扱う
-            if pid not in root_blocks_by_pid:
-                root_blocks_by_pid[pid] = set()
-            if block_no not in root_blocks_by_pid[pid]:
-                root_blocks_by_pid[pid].add(block_no)
-                supplemented += 1
-print(f'  補完ブロック: {supplemented}件')
+        # 5-2にエントリがあるPIDで、当該ブロックが5-2に未記載の場合のみ検出
+        if pid in blocks_in_5_2_by_pid and block_no not in blocks_in_5_2_by_pid[pid]:
+            orphan_blocks_by_pid[pid].add(block_no)
+orphan_count = sum(len(v) for v in orphan_blocks_by_pid.values())
+print(f'  孤立ブロック: {orphan_count}件 ({len(orphan_blocks_by_pid)}事業)')
 
 # ── 4. 支出先データ ──
 print('支出先データ ロード中...')
@@ -148,6 +145,7 @@ class ProjectStats:
         'spend_total', 'spend_net_total',
         'block_names', 'has_redelegation', 'redelegation_depth',
         'block_amounts', 'recipient_amounts_by_block',
+        'orphan_block_count',
         'other_true', 'other_false',
         'row_count',
     ]
@@ -172,6 +170,7 @@ class ProjectStats:
         self.redelegation_depth = 0
         self.block_amounts = {}          # block_no -> block_amount
         self.recipient_amounts_by_block = collections.defaultdict(int)  # block_no -> sum of recipient amounts
+        self.orphan_block_count = 0     # 5-2に未記載の孤立ブロック数
         self.other_true = 0
         self.other_false = 0
         self.row_count = 0
@@ -240,7 +239,7 @@ with open(SPEND_CSV, encoding='utf-8') as f:
 
 print(f'  事業数: {len(projects):,}')
 
-# 5-2グラフから再委託情報をProjectStatsに反映
+# 5-2グラフから再委託情報・孤立ブロック情報をProjectStatsに反映
 for pid, ps in projects.items():
     depth = redelegation_by_pid.get(pid, 0)
     if depth > 0:
@@ -249,6 +248,8 @@ for pid, ps in projects.items():
     # 5-2データがない事業はルートブロック情報なし → 全額を実質支出とみなす
     if pid not in root_blocks_by_pid:
         ps.spend_net_total = ps.spend_total
+    # 孤立ブロック数を反映
+    ps.orphan_block_count = len(orphan_blocks_by_pid.get(pid, set()))
 
 # ── 5. スコア計算 ──
 # (section numbers: 1=dict, 2=budget, 3=block-graph, 4=spending, 5=scores)
@@ -461,6 +462,7 @@ for pid in sorted_pids:
         'spendNetTotal': sc['spend_net_total'],
         'gapRatio': sc['gap_ratio'],
         'blockCount': sc['block_count'],
+        'orphanBlockCount': ps.orphan_block_count,
         'hasRedelegation': sc['has_redelegation'],
         'redelegationDepth': sc['redelegation_depth'],
         'unknownNameRatio': sc.get('other_flag_ratio', 0),

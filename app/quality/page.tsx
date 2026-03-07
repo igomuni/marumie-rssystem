@@ -88,13 +88,14 @@ export default function QualityPage() {
     }
 
     if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
+      const normalize = (s: string) => s.replace(/（/g, '(').replace(/）/g, ')').toLowerCase();
+      const q = normalize(searchQuery.trim());
       items = items.filter(i =>
-        i.name.toLowerCase().includes(q) ||
+        normalize(i.name).includes(q) ||
         i.pid.includes(q) ||
-        i.bureau.toLowerCase().includes(q) ||
-        i.section.toLowerCase().includes(q) ||
-        i.division.toLowerCase().includes(q)
+        normalize(i.bureau).includes(q) ||
+        normalize(i.section).includes(q) ||
+        normalize(i.division).includes(q)
       );
     }
 
@@ -400,7 +401,7 @@ export default function QualityPage() {
                           <div>
                             <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">ブロック構造</h4>
                             <div className="space-y-0.5 text-gray-600 dark:text-gray-400">
-                              <div>ブロック数: {item.blockCount}</div>
+                              <div>ブロック数: {item.blockCount}{item.orphanBlockCount > 0 && <span className="text-red-500"> (孤立: {item.orphanBlockCount})</span>}</div>
                               <div>再委託: {item.hasRedelegation ? `あり (階層${item.redelegationDepth})` : 'なし'}</div>
                               <div>支出先名不明率: {pct(item.unknownNameRatio)}</div>
                               <div className="text-[10px] text-gray-400">（支出先名「その他」行の割合）</div>
