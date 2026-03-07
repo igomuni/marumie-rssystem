@@ -47,7 +47,7 @@ function ScoreBar({ score }: { score: number | null }) {
   );
 }
 
-type ScoreRange = 'all' | '0-9' | '10-19' | '20-29' | '30-39' | '40-49' | '50-59' | '60-69' | '70-79' | '80-89' | '90-100';
+type ScoreRange = 'all' | '0-9' | '10-19' | '20-29' | '30-39' | '40-49' | '50-59' | '60-69' | '70-79' | '80-89' | '90-99' | '100-100';
 
 export default function QualityPage() {
   const [data, setData] = useState<QualityScoresResponse | null>(null);
@@ -185,7 +185,8 @@ export default function QualityPage() {
       <div className="max-w-[1600px] mx-auto px-4 py-3">
         {(() => {
           const binRanges: { label: string; range: ScoreRange; lo: number; hi: number }[] = [
-            { label: '90-100', range: '90-100', lo: 90, hi: 100 },
+            { label: '100', range: '100-100', lo: 100, hi: 100 },
+            { label: '90-99', range: '90-99', lo: 90, hi: 99 },
             { label: '80-89', range: '80-89', lo: 80, hi: 89 },
             { label: '70-79', range: '70-79', lo: 70, hi: 79 },
             { label: '60-69', range: '60-69', lo: 60, hi: 69 },
@@ -207,7 +208,7 @@ export default function QualityPage() {
             return { bg: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', bar: 'bg-red-400' };
           };
           return (
-            <div className="flex items-end gap-4">
+            <div className="flex items-end gap-4 flex-wrap">
               <div className="flex items-end gap-0.5">
                 {binRanges.map(({ label, range, lo }, i) => {
                   const count = counts[i];
@@ -230,7 +231,7 @@ export default function QualityPage() {
               </div>
               <button
                 onClick={() => setScoreRange('all')}
-                className={`rounded-lg px-3 py-1.5 text-center transition-all ${
+                className={`rounded-lg px-3 py-1.5 text-center transition-all self-end ${
                   scoreRange === 'all'
                     ? 'ring-2 ring-blue-500 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:opacity-100 opacity-80'
@@ -239,35 +240,33 @@ export default function QualityPage() {
                 <div className="text-[10px] font-medium">全件</div>
                 <div className="text-sm font-bold">{summary.total.toLocaleString()}</div>
               </button>
+              <div className="flex flex-col gap-1.5 self-end flex-1 min-w-[200px]">
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    type="text"
+                    placeholder="事業名・PID・組織名で検索..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="flex-1 min-w-[200px] px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                  <select
+                    value={selectedMinistry}
+                    onChange={e => setSelectedMinistry(e.target.value)}
+                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="">全府省庁</option>
+                    {summary.ministries.map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {filtered.length.toLocaleString()}件表示
+                </div>
+              </div>
             </div>
           );
         })()}
-      </div>
-
-      {/* Filters */}
-      <div className="max-w-[1600px] mx-auto px-4 pb-3">
-        <div className="flex flex-wrap gap-2">
-          <input
-            type="text"
-            placeholder="事業名・PID・組織名で検索..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="flex-1 min-w-[200px] px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-          <select
-            value={selectedMinistry}
-            onChange={e => setSelectedMinistry(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          >
-            <option value="">全府省庁</option>
-            {summary.ministries.map(m => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-        </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {filtered.length.toLocaleString()}件表示
-        </div>
       </div>
 
       {/* Table */}
