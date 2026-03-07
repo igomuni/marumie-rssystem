@@ -77,6 +77,26 @@ export default function Home() {
             </div>
           </Link>
 
+          {/* 事業別データ品質スコア */}
+          <Link href="/quality">
+            <div className="bg-gradient-to-r from-cyan-50 to-sky-50 dark:from-cyan-900 dark:to-sky-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-cyan-500">
+              <div className="flex items-center mb-3">
+                <h2 className="text-2xl font-semibold text-cyan-600 dark:text-cyan-400">
+                  📋 事業別データ品質スコア
+                </h2>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                全5,664事業の支出先データ品質を5軸でスコア化。府省庁・組織階層別にフィルタ・ソート・検索して改善優先度を確認できます。
+              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>• <strong>軸1 支出先名品質</strong>: 法人番号DB突合による valid 率（重み40%）</li>
+                <li>• <strong>軸2 法人番号記入率</strong>: CN の記入カバレッジ（重み20%）</li>
+                <li>• <strong>軸3 予算・支出バランス</strong>: 執行額と支出先合計の乖離率（重み20%）</li>
+                <li>• <strong>軸4/5</strong>: ブロック構造・支出先名の透明性（各重み10%）</li>
+              </ul>
+            </div>
+          </Link>
+
           {/* 支出先ラベリング確認 */}
           <Link href="/entity-labels-csv">
             <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-orange-500">
