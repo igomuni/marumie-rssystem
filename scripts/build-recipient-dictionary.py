@@ -4,7 +4,7 @@
 data/result/recipients_without_total.csv を元に、ユニークな支出先名リストを作成し
 法人番号DB（data/houjin.db）との突合結果を付加する。
 
-出力: data/result/recipient_dictionary.csv
+出力: public/data/dictionaries/recipient_dictionary.csv
 
 列:
   name             - 元の支出先名
@@ -14,8 +14,9 @@ data/result/recipients_without_total.csv を元に、ユニークな支出先名
   name_in_db       - normalized_name が法人番号DBに存在するか
   cn_in_db         - corporate_number が法人番号DBに存在するか
   name_cn_match    - corporate_number の法人名が normalized_name と一致するか
+  pref_municipality- 都道府県prefix付き市区町村名（DB名が末尾一致し市区町村サフィックスを持つ）
   db_name_by_cn    - corporate_number から引いたDBの法人名
-  valid            - name_in_db OR name_cn_match
+  valid            - (name_in_db AND name_cn_match) OR pref_municipality
 
 実行:
   python3 scripts/build-recipient-dictionary.py
@@ -30,7 +31,9 @@ from pathlib import Path
 REPO_ROOT   = Path(__file__).parent.parent
 INPUT_CSV   = REPO_ROOT / 'data' / 'result' / 'recipients_without_total.csv'
 HOUJIN_DB   = REPO_ROOT / 'data' / 'houjin.db'
-OUTPUT_CSV  = REPO_ROOT / 'data' / 'result' / 'recipient_dictionary.csv'
+OUTPUT_CSV  = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'recipient_dictionary.csv'
+
+MUNI_SUFFIXES = ('市', '区', '町', '村')
 
 # ─────────────────────────────────────────────────────────────
 # 略称展開マップ
@@ -175,30 +178,39 @@ def main():
         cn_in_db      = best_cn in cn_to_name if best_cn else False
         db_name_by_cn = cn_to_name.get(best_cn, '') if best_cn else ''
         name_cn_match = (normalize(db_name_by_cn) == norm_key) if (best_cn and db_name_by_cn) else False
-        # 名前一致 かつ CN あり かつ CN→名前も一致、の3条件すべて必要
-        valid = name_in_db and bool(best_cn) and name_cn_match
-        # CNはDBに存在し、かつDBの法人名が支出先名に含まれている（親組織名を含む支出先名等）
+        # 都道府県prefix付き市区町村:
+        #   CN→DB名が市区町村サフィックスで終わり、かつ支出先名がDB名で終わる（prefix付き別名表記）
+        #   例: 北海道剣淵町 → DB: 剣淵町（町）
         db_name_norm = normalize(db_name_by_cn) if db_name_by_cn else ''
-        cn_name_contained = cn_in_db and not name_cn_match and bool(db_name_norm) and db_name_norm in norm_key
+        pref_municipality = (
+            cn_in_db
+            and not name_cn_match
+            and bool(db_name_norm)
+            and db_name_by_cn.endswith(MUNI_SUFFIXES)
+            and norm_key.endswith(db_name_norm)
+            and norm_key != db_name_norm
+        )
+        # valid: 通常一致（name_in_db AND name_cn_match） OR 都道府県prefix市区町村
+        valid = (name_in_db and bool(best_cn) and name_cn_match) or pref_municipality
 
         out_rows.append({
-            'name':           name,
-            'normalized_name': normalized,
-            'corporate_number': best_cn,
-            'cn_count':       cn_count,
-            'name_in_db':     name_in_db,
-            'cn_in_db':       cn_in_db,
-            'name_cn_match':  name_cn_match,
-            'cn_name_contained': cn_name_contained,
-            'db_name_by_cn':  db_name_by_cn,
-            'valid':          valid,
+            'name':              name,
+            'normalized_name':   normalized,
+            'corporate_number':  best_cn,
+            'cn_count':          cn_count,
+            'name_in_db':        name_in_db,
+            'cn_in_db':          cn_in_db,
+            'name_cn_match':     name_cn_match,
+            'pref_municipality': pref_municipality,
+            'db_name_by_cn':     db_name_by_cn,
+            'valid':             valid,
         })
 
     out_rows.sort(key=lambda r: r['name'])
 
     # ── 出力 ──
     fieldnames = ['name', 'normalized_name', 'corporate_number', 'cn_count',
-                  'name_in_db', 'cn_in_db', 'name_cn_match', 'cn_name_contained', 'db_name_by_cn', 'valid']
+                  'name_in_db', 'cn_in_db', 'name_cn_match', 'pref_municipality', 'db_name_by_cn', 'valid']
     with open(OUTPUT_CSV, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -212,20 +224,22 @@ def main():
     cn_only     = [r for r in out_rows if r['cn_in_db'] and not r['name_in_db']]
     invalid     = [r for r in out_rows if not r['valid']]
     multi_cn    = [r for r in out_rows if r['cn_count'] > 1]
+    pref_muni   = [r for r in out_rows if r['pref_municipality']]
     normalized_diff = [r for r in out_rows if r['name'] != r['normalized_name']]
 
     print()
     print('=' * 60)
     print('  支出先 法人辞書構築 サマリー')
     print('=' * 60)
-    print(f'ユニーク支出先名:      {total:>7,}件')
-    print(f'略称展開あり:          {len(normalized_diff):>7,}件')
-    print(f'同名異法人（CN複数）:  {len(multi_cn):>7,}件')
+    print(f'ユニーク支出先名:              {total:>7,}件')
+    print(f'略称展開あり:                  {len(normalized_diff):>7,}件')
+    print(f'同名異法人（CN複数）:          {len(multi_cn):>7,}件')
     print()
-    print(f'valid（法人DB確認済）: {len(valid_rows):>7,}件  ({len(valid_rows)/total*100:.1f}%)')
-    print(f'  └ 法人名で一致:      {len(name_match):>7,}件')
-    print(f'  └ CN→名称で一致:    {len(cn_match):>7,}件')
-    print(f'invalid（DB未確認）:   {len(invalid):>7,}件  ({len(invalid)/total*100:.1f}%)')
+    print(f'valid（法人DB確認済）:         {len(valid_rows):>7,}件  ({len(valid_rows)/total*100:.1f}%)')
+    print(f'  └ 法人名・CN完全一致:        {len(name_match):>7,}件')
+    print(f'  └ CN→名称で一致:            {len(cn_match):>7,}件')
+    print(f'  └ 都道府県prefix市区町村:    {len(pref_muni):>7,}件')
+    print(f'invalid（DB未確認）:           {len(invalid):>7,}件  ({len(invalid)/total*100:.1f}%)')
     print(f'  └ CNあるが名称不一致: {len(cn_only):>6,}件')
     print()
 
