@@ -92,7 +92,7 @@ export default function Home() {
                 <li>• <strong>軸1 支出先名品質</strong>: 法人番号DB突合による valid 率（重み40%）</li>
                 <li>• <strong>軸2 法人番号記入率</strong>: CN の記入カバレッジ（重み20%）</li>
                 <li>• <strong>軸3 予算・支出バランス</strong>: 執行額と支出先合計の乖離率（重み20%）</li>
-                <li>• <strong>軸4/5</strong>: ブロック構造・その他支出先フラグ（各重み10%）</li>
+                <li>• <strong>軸4/5</strong>: ブロック構造・支出先名不明率（各重み10%）</li>
               </ul>
             </div>
           </Link>

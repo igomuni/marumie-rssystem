@@ -6,7 +6,7 @@
   2. 法人番号の記入率 (cn_fill_ratio)    重み 20%
   3. 予算・支出バランス (gap_ratio)       重み 20%
   4. ブロック構造の妥当性                 重み 10%
-  5. その他支出先フラグの抑制             重み 10%
+  5. 支出先名不明率の抑制（「その他」行の割合） 重み 10%
 
 実行:
   python3 scripts/score-project-quality.py [--limit N]
@@ -17,7 +17,6 @@
 
 import csv
 import json
-import re
 import unicodedata
 import collections
 import argparse
@@ -26,6 +25,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).parent.parent
 BUDGET_CSV = REPO_ROOT / 'data' / 'year_2024' / '2-1_RS_2024_予算・執行_サマリ.csv'
 SPEND_CSV  = REPO_ROOT / 'data' / 'year_2024' / '5-1_RS_2024_支出先_支出情報.csv'
+BLOCK_CSV  = REPO_ROOT / 'data' / 'year_2024' / '5-2_RS_2024_支出先_支出ブロックのつながり.csv'
 DICT_CSV   = REPO_ROOT / 'data' / 'result' / 'recipient_dictionary.csv'
 OUT_CSV    = REPO_ROOT / 'data' / 'result' / 'project_quality_scores.csv'
 OUT_JSON   = REPO_ROOT / 'public' / 'data' / 'project-quality-scores.json'
@@ -57,7 +57,59 @@ with open(BUDGET_CSV, encoding='utf-8') as f:
             budget_by_pid[pid] = to_int(r['計(歳出予算現額合計)'])
 print(f'  予算年度2023合計行: {len(exec_by_pid):,}事業')
 
-# ── 3. 支出先データ ──
+# ── 3. ブロック接続グラフ（5-2 CSV）から再委託深度を算出 ──
+print('ブロック接続グラフ ロード中...')
+# pid -> list of (src_block, dst_block, from_org:bool)
+block_links_by_pid = collections.defaultdict(list)
+with open(BLOCK_CSV, encoding='utf-8') as f:
+    for r in csv.DictReader(f):
+        pid = r['予算事業ID'].strip()
+        src_block = r['支出元の支出先ブロック'].strip()
+        dst_block = r['支出先の支出先ブロック'].strip()
+        from_org = r['担当組織からの支出'].strip().upper() == 'TRUE'
+        block_links_by_pid[pid].append((src_block, dst_block, from_org))
+
+def calc_redelegation_depth(pid_links):
+    """BFSでルート（担当組織からの支出=TRUE）からの最大深度を算出"""
+    children = collections.defaultdict(list)
+    roots = set()
+    for src, dst, from_org in pid_links:
+        if from_org:
+            roots.add(dst)
+        else:
+            children[src].append(dst)
+    if not roots:
+        return 0
+    max_depth = 0
+    visited = set()
+    queue = collections.deque((r, 0) for r in roots)
+    while queue:
+        node, depth = queue.popleft()
+        if node in visited:
+            continue
+        visited.add(node)
+        max_depth = max(max_depth, depth)
+        for child in children.get(node, []):
+            queue.append((child, depth + 1))
+    return max_depth
+
+redelegation_by_pid = {}
+root_blocks_by_pid = {}  # pid -> set of root block letters (e.g. {'A', 'I', 'H'})
+for pid, links in block_links_by_pid.items():
+    depth = calc_redelegation_depth(links)
+    redelegation_by_pid[pid] = depth
+    # ルートブロック（担当組織からの直接支出先）を記録
+    roots = set()
+    for src, dst, from_org in links:
+        if from_org:
+            roots.add(dst)
+    root_blocks_by_pid[pid] = roots
+
+releg_counts = collections.Counter(redelegation_by_pid.values())
+print(f'  ブロック接続: {sum(len(v) for v in block_links_by_pid.values()):,}行, {len(block_links_by_pid):,}事業')
+print(f'  再委託深度分布: { {k: releg_counts[k] for k in sorted(releg_counts)} }')
+
+# ── 4. 支出先データ ──
 print('支出先データ ロード中...')
 
 class ProjectStats:
@@ -65,7 +117,7 @@ class ProjectStats:
         'pid', 'name', 'ministry', 'bureau', 'division', 'section', 'office', 'team', 'unit',
         'valid_count', 'invalid_count',
         'cn_filled', 'cn_empty',
-        'spend_total',
+        'spend_total', 'spend_net_total',
         'block_names', 'has_redelegation', 'redelegation_depth',
         'block_amounts', 'recipient_amounts_by_block',
         'other_true', 'other_false',
@@ -86,6 +138,7 @@ class ProjectStats:
         self.cn_filled = 0
         self.cn_empty = 0
         self.spend_total = 0
+        self.spend_net_total = 0  # ルートブロックのみの実質支出額
         self.block_names = set()
         self.has_redelegation = False
         self.redelegation_depth = 0
@@ -96,8 +149,6 @@ class ProjectStats:
         self.row_count = 0
 
 projects = {}  # pid -> ProjectStats
-
-REDEGELATION_RE = re.compile(r'再々?委託')
 
 with open(SPEND_CSV, encoding='utf-8') as f:
     for r in csv.DictReader(f):
@@ -121,13 +172,6 @@ with open(SPEND_CSV, encoding='utf-8') as f:
             block_amt = to_int(r.get('ブロックの合計支出額', ''))
             if block_amt:
                 ps.block_amounts[block_no] = block_amt
-            if REDEGELATION_RE.search(block_name):
-                ps.has_redelegation = True
-                if '再々委託' in block_name:
-                    ps.redelegation_depth = max(ps.redelegation_depth, 2)
-                else:
-                    ps.redelegation_depth = max(ps.redelegation_depth, 1)
-
         # 支出先行（支出先名がある）
         if not recipient_name:
             continue
@@ -154,6 +198,10 @@ with open(SPEND_CSV, encoding='utf-8') as f:
             ps.spend_total += amt
             if block_no:
                 ps.recipient_amounts_by_block[block_no] += amt
+                # ルートブロックのみ実質支出額に加算（再委託先は二重計上なので除外）
+                roots = root_blocks_by_pid.get(pid, set())
+                if block_no in roots:
+                    ps.spend_net_total += amt
 
         # 軸5: その他支出先フラグ
         other_flag = r.get('その他支出先', '').strip().upper()
@@ -164,7 +212,18 @@ with open(SPEND_CSV, encoding='utf-8') as f:
 
 print(f'  事業数: {len(projects):,}')
 
-# ── 4. スコア計算 ──
+# 5-2グラフから再委託情報をProjectStatsに反映
+for pid, ps in projects.items():
+    depth = redelegation_by_pid.get(pid, 0)
+    if depth > 0:
+        ps.has_redelegation = True
+        ps.redelegation_depth = depth
+    # 5-2データがない事業はルートブロック情報なし → 全額を実質支出とみなす
+    if pid not in root_blocks_by_pid:
+        ps.spend_net_total = ps.spend_total
+
+# ── 5. スコア計算 ──
+# (section numbers: 1=dict, 2=budget, 3=block-graph, 4=spending, 5=scores)
 print('スコア計算中...')
 
 def clamp(v, lo=0, hi=100):
@@ -197,12 +256,13 @@ def calc_scores(ps):
     scores['budget_amount'] = budget_amt
     scores['exec_amount'] = exec_amt
     scores['spend_total'] = ps.spend_total
+    scores['spend_net_total'] = ps.spend_net_total
     if exec_amt > 0:
-        gap = abs(exec_amt - ps.spend_total) / exec_amt
+        gap = abs(exec_amt - ps.spend_net_total) / exec_amt
         scores['gap_ratio'] = gap
         # gap=0 → 100点, gap>=1 → 0点（線形）
         scores['axis3'] = clamp((1 - gap) * 100)
-    elif ps.spend_total == 0 and exec_amt == 0:
+    elif ps.spend_net_total == 0 and exec_amt == 0:
         scores['gap_ratio'] = 0
         scores['axis3'] = 100  # 両方ゼロは整合
     else:
@@ -211,14 +271,14 @@ def calc_scores(ps):
 
     # 軸4: ブロック構造 (0-100)
     # 基礎点100から減点方式:
-    #   - 再委託あり: -20
-    #   - 再々委託あり: さらに-20
+    #   - 再委託深度1: -10
+    #   - 再委託深度2: -20
+    #   - 再委託深度3: -30
+    #   - 再委託深度4+: -40
     #   - ブロック合計と支出先合計の不整合: -30 (1つ以上のブロックで20%超の乖離)
     axis4 = 100
     if ps.has_redelegation:
-        axis4 -= 20
-        if ps.redelegation_depth >= 2:
-            axis4 -= 20
+        axis4 -= min(40, ps.redelegation_depth * 10)
 
     # ブロック内整合性チェック
     block_inconsistent = 0
@@ -234,7 +294,8 @@ def calc_scores(ps):
     scores['has_redelegation'] = ps.has_redelegation
     scores['redelegation_depth'] = ps.redelegation_depth
 
-    # 軸5: その他支出先の抑制 (0-100)
+    # 軸5: 支出先名不明率の抑制 (0-100)
+    # 「その他支出先=TRUE」= 支出先名が「その他」（具体名不明の残額集計行）
     other_total = ps.other_true + ps.other_false
     if other_total > 0:
         other_ratio = ps.other_true / other_total
@@ -273,11 +334,11 @@ fieldnames = [
     '予算事業ID', '事業名', '府省庁', '局・庁', '部', '課', '室', '班', '係',
     '支出先行数', 'valid数', 'invalid数', 'valid率',
     'CN記入数', 'CN未記入数', 'CN記入率',
-    '予算額', '執行額', '支出先合計額', '乖離率',
+    '予算額', '執行額', '支出先合計額', '実質支出額', '乖離率',
     'ブロック数', '再委託有無', '再委託階層',
-    'その他支出先率',
+    '支出先名不明率',
     '軸1_支出先名品質', '軸2_法人番号記入率', '軸3_予算支出バランス',
-    '軸4_ブロック構造', '軸5_その他支出先抑制',
+    '軸4_ブロック構造', '軸5_支出先名不明率抑制',
     '総合スコア',
 ]
 
@@ -325,16 +386,17 @@ for pid in sorted_pids:
         '予算額': sc['budget_amount'],
         '執行額': sc['exec_amount'],
         '支出先合計額': sc['spend_total'],
+        '実質支出額': sc['spend_net_total'],
         '乖離率': fmt_pct(sc['gap_ratio']),
         'ブロック数': sc['block_count'],
         '再委託有無': 'あり' if sc['has_redelegation'] else 'なし',
         '再委託階層': sc['redelegation_depth'],
-        'その他支出先率': fmt_pct(sc['other_flag_ratio']),
+        '支出先名不明率': fmt_pct(sc['other_flag_ratio']),
         '軸1_支出先名品質': fmt_score(sc['axis1']),
         '軸2_法人番号記入率': fmt_score(sc['axis2']),
         '軸3_予算支出バランス': fmt_score(sc['axis3']),
         '軸4_ブロック構造': fmt_score(sc['axis4']),
-        '軸5_その他支出先抑制': fmt_score(sc['axis5']),
+        '軸5_支出先名不明率抑制': fmt_score(sc['axis5']),
         '総合スコア': fmt_score(sc['total_score']),
     })
 
@@ -368,11 +430,12 @@ for pid in sorted_pids:
         'budgetAmount': sc['budget_amount'],
         'execAmount': sc['exec_amount'],
         'spendTotal': sc['spend_total'],
+        'spendNetTotal': sc['spend_net_total'],
         'gapRatio': sc['gap_ratio'],
         'blockCount': sc['block_count'],
         'hasRedelegation': sc['has_redelegation'],
         'redelegationDepth': sc['redelegation_depth'],
-        'otherFlagRatio': sc.get('other_flag_ratio', 0),
+        'unknownNameRatio': sc.get('other_flag_ratio', 0),
         'axis1': sc['axis1'],
         'axis2': sc['axis2'],
         'axis3': sc['axis3'],

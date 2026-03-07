@@ -7,7 +7,7 @@ import type { QualityScoreItem, QualityScoresResponse } from '@/app/api/quality-
 const PAGE_SIZE = 50;
 
 type SortField = 'totalScore' | 'axis1' | 'axis2' | 'axis3' | 'axis4' | 'axis5'
-  | 'budgetAmount' | 'execAmount' | 'spendTotal' | 'rowCount' | 'pid' | 'name';
+  | 'budgetAmount' | 'execAmount' | 'spendTotal' | 'spendNetTotal' | 'redelegationDepth' | 'rowCount' | 'pid' | 'name';
 type SortDir = 'asc' | 'desc';
 
 function formatAmount(yen: number): string {
@@ -38,8 +38,8 @@ function ScoreBar({ score }: { score: number | null }) {
   else if (score >= 70) bg = 'bg-blue-400';
   else if (score >= 50) bg = 'bg-yellow-400';
   return (
-    <div className="flex items-center gap-1.5">
-      <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+    <div className="flex items-center gap-1">
+      <div className="w-8 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${bg}`} style={{ width: `${w}%` }} />
       </div>
       <span className={`text-xs font-mono ${scoreColor(score)}`}>{score.toFixed(0)}</span>
@@ -47,7 +47,7 @@ function ScoreBar({ score }: { score: number | null }) {
   );
 }
 
-type ScoreRange = 'all' | '90-100' | '70-89' | '50-69' | '0-49';
+type ScoreRange = 'all' | '0-9' | '10-19' | '20-29' | '30-39' | '40-49' | '50-59' | '60-69' | '70-79' | '80-89' | '90-100';
 
 export default function QualityPage() {
   const [data, setData] = useState<QualityScoresResponse | null>(null);
@@ -175,49 +175,73 @@ export default function QualityPage() {
               事業別 支出先データ品質スコア
             </h1>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {summary.total.toLocaleString()}事業 / 平均スコア {summary.avgScore.toFixed(1)}点
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {summary.total.toLocaleString()}事業 / 平均 {summary.avgScore.toFixed(1)} / 中央値 {summary.medianScore.toFixed(1)} / 最頻値 {summary.modeScore}
           </p>
         </div>
       </div>
 
-      {/* Score distribution summary */}
+      {/* Score distribution summary (10-point bins) + histogram */}
       <div className="max-w-[1600px] mx-auto px-4 py-3">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-          {[
-            { label: '90-100', range: '90-100' as ScoreRange, color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-            { label: '70-89', range: '70-89' as ScoreRange, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-            { label: '50-69', range: '50-69' as ScoreRange, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' },
-            { label: '0-49', range: '0-49' as ScoreRange, color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-          ].map(({ label, range, color }) => {
-            const [lo, hi] = range.split('-').map(Number);
-            const cnt = data.items.filter(i => i.totalScore !== null && i.totalScore >= lo && i.totalScore <= hi).length;
-            const isActive = scoreRange === range;
-            return (
+        {(() => {
+          const binRanges: { label: string; range: ScoreRange; lo: number; hi: number }[] = [
+            { label: '90-100', range: '90-100', lo: 90, hi: 100 },
+            { label: '80-89', range: '80-89', lo: 80, hi: 89 },
+            { label: '70-79', range: '70-79', lo: 70, hi: 79 },
+            { label: '60-69', range: '60-69', lo: 60, hi: 69 },
+            { label: '50-59', range: '50-59', lo: 50, hi: 59 },
+            { label: '40-49', range: '40-49', lo: 40, hi: 49 },
+            { label: '30-39', range: '30-39', lo: 30, hi: 39 },
+            { label: '20-29', range: '20-29', lo: 20, hi: 29 },
+            { label: '10-19', range: '10-19', lo: 10, hi: 19 },
+            { label: '0-9', range: '0-9', lo: 0, hi: 9 },
+          ];
+          const counts = binRanges.map(({ lo, hi }) =>
+            data.items.filter(i => i.totalScore !== null && i.totalScore >= lo && i.totalScore <= hi).length
+          );
+          const maxCount = Math.max(...counts, 1);
+          const binColor = (lo: number) => {
+            if (lo >= 90) return { bg: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', bar: 'bg-green-400' };
+            if (lo >= 70) return { bg: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', bar: 'bg-blue-400' };
+            if (lo >= 50) return { bg: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200', bar: 'bg-yellow-400' };
+            return { bg: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', bar: 'bg-red-400' };
+          };
+          return (
+            <div className="flex items-end gap-4">
+              <div className="flex items-end gap-0.5">
+                {binRanges.map(({ label, range, lo }, i) => {
+                  const count = counts[i];
+                  const h = Math.max(2, Math.round((count / maxCount) * 48));
+                  const { bar } = binColor(lo);
+                  const isActive = scoreRange === range;
+                  return (
+                    <button
+                      key={range}
+                      onClick={() => setScoreRange(isActive ? 'all' : range)}
+                      className={`flex flex-col items-center transition-all ${isActive ? 'ring-1 ring-blue-500 rounded' : ''}`}
+                      title={`${label}点: ${count}件`}
+                    >
+                      <span className="text-[9px] font-mono text-gray-500 mb-0.5">{count || ''}</span>
+                      <div className={`w-5 rounded-sm ${bar}`} style={{ height: `${h}px` }} />
+                      <span className="text-[8px] font-mono text-gray-400 mt-0.5">{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
               <button
-                key={range}
-                onClick={() => setScoreRange(isActive ? 'all' : range)}
-                className={`rounded-lg px-3 py-2 text-center transition-all ${
-                  isActive ? 'ring-2 ring-blue-500 ' + color : color + ' opacity-80 hover:opacity-100'
+                onClick={() => setScoreRange('all')}
+                className={`rounded-lg px-3 py-1.5 text-center transition-all ${
+                  scoreRange === 'all'
+                    ? 'ring-2 ring-blue-500 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:opacity-100 opacity-80'
                 }`}
               >
-                <div className="text-xs font-medium">{label}点</div>
-                <div className="text-lg font-bold">{cnt.toLocaleString()}</div>
+                <div className="text-[10px] font-medium">全件</div>
+                <div className="text-sm font-bold">{summary.total.toLocaleString()}</div>
               </button>
-            );
-          })}
-          <button
-            onClick={() => setScoreRange('all')}
-            className={`rounded-lg px-3 py-2 text-center transition-all col-span-2 sm:col-span-1 md:col-span-2 ${
-              scoreRange === 'all'
-                ? 'ring-2 ring-blue-500 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:opacity-100 opacity-80'
-            }`}
-          >
-            <div className="text-xs font-medium">全件</div>
-            <div className="text-lg font-bold">{summary.total.toLocaleString()}</div>
-          </button>
-        </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Filters */}
@@ -264,22 +288,34 @@ export default function QualityPage() {
                   総合<SortIcon field="totalScore" />
                 </th>
                 <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('axis1')}>
-                  軸1 名称<SortIcon field="axis1" />
+                  名称<SortIcon field="axis1" />
                 </th>
                 <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('axis2')}>
-                  軸2 CN<SortIcon field="axis2" />
+                  CN<SortIcon field="axis2" />
                 </th>
                 <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('axis3')}>
-                  軸3 収支<SortIcon field="axis3" />
+                  収支<SortIcon field="axis3" />
                 </th>
                 <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('axis4')}>
-                  軸4 構造<SortIcon field="axis4" />
+                  構造<SortIcon field="axis4" />
                 </th>
                 <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('axis5')}>
-                  軸5 他<SortIcon field="axis5" />
+                  透明性<SortIcon field="axis5" />
+                </th>
+                <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('budgetAmount')}>
+                  予算額<SortIcon field="budgetAmount" />
                 </th>
                 <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('execAmount')}>
                   執行額<SortIcon field="execAmount" />
+                </th>
+                <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('spendTotal')}>
+                  支出先合計<SortIcon field="spendTotal" />
+                </th>
+                <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('spendNetTotal')}>
+                  実質支出額<SortIcon field="spendNetTotal" />
+                </th>
+                <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('redelegationDepth')}>
+                  再委託階層<SortIcon field="redelegationDepth" />
                 </th>
                 <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('rowCount')}>
                   行数<SortIcon field="rowCount" />
@@ -310,13 +346,26 @@ export default function QualityPage() {
                     <td className="px-2 py-1.5"><ScoreBar score={item.axis4} /></td>
                     <td className="px-2 py-1.5"><ScoreBar score={item.axis5} /></td>
                     <td className="px-2 py-1.5 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                      {item.budgetAmount ? formatAmount(item.budgetAmount) : '-'}
+                    </td>
+                    <td className="px-2 py-1.5 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
                       {item.execAmount ? formatAmount(item.execAmount) : '-'}
+                    </td>
+                    <td className="px-2 py-1.5 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                      {item.spendTotal ? formatAmount(item.spendTotal) : '-'}
+                    </td>
+                    <td className="px-2 py-1.5 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                      {item.spendNetTotal ? formatAmount(item.spendNetTotal) : '-'}
+                    </td>
+                    <td className="px-2 py-1.5 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                      {item.redelegationDepth || '-'}
                     </td>
                     <td className="px-2 py-1.5 text-right font-mono text-gray-500">{item.rowCount}</td>
                   </tr>
                   {expandedRow === item.pid && (
                     <tr className="bg-gray-50 dark:bg-gray-800/50">
-                      <td colSpan={12} className="px-4 py-3">
+                      <td colSpan={16} className="px-4 py-3">
+                        <div>{item.name}</div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                           <div>
                             <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">組織</h4>
@@ -344,8 +393,9 @@ export default function QualityPage() {
                             <div className="space-y-0.5 text-gray-600 dark:text-gray-400">
                               <div>予算額: {formatAmount(item.budgetAmount)}</div>
                               <div>執行額: {formatAmount(item.execAmount)}</div>
-                              <div>支出先合計: {formatAmount(item.spendTotal)}</div>
-                              <div>乖離率: {pct(item.gapRatio)}</div>
+                              <div>支出先合計（全ブロック）: {formatAmount(item.spendTotal)}</div>
+                              <div>実質支出額（ルートのみ）: {formatAmount(item.spendNetTotal)}</div>
+                              <div>乖離率（実質 vs 執行）: {pct(item.gapRatio)}</div>
                             </div>
                           </div>
                           <div>
@@ -353,7 +403,8 @@ export default function QualityPage() {
                             <div className="space-y-0.5 text-gray-600 dark:text-gray-400">
                               <div>ブロック数: {item.blockCount}</div>
                               <div>再委託: {item.hasRedelegation ? `あり (階層${item.redelegationDepth})` : 'なし'}</div>
-                              <div>その他支出先率: {pct(item.otherFlagRatio)}</div>
+                              <div>支出先名不明率: {pct(item.unknownNameRatio)}</div>
+                              <div className="text-[10px] text-gray-400">（支出先名「その他」行の割合）</div>
                               <div>支出先行数: {item.rowCount}</div>
                             </div>
                           </div>

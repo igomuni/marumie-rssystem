@@ -22,11 +22,12 @@ export interface QualityScoreItem {
   budgetAmount: number;
   execAmount: number;
   spendTotal: number;
+  spendNetTotal: number;
   gapRatio: number | null;
   blockCount: number;
   hasRedelegation: boolean;
   redelegationDepth: number;
-  otherFlagRatio: number | null;
+  unknownNameRatio: number | null;
   axis1: number | null;
   axis2: number | null;
   axis3: number | null;
@@ -40,6 +41,9 @@ export interface QualityScoresResponse {
   summary: {
     total: number;
     avgScore: number;
+    medianScore: number;
+    stddevScore: number;
+    modeScore: number;
     ministries: string[];
   };
 }
@@ -61,13 +65,47 @@ function loadData(): QualityScoresResponse {
 
   const ministries = [...new Set(items.map(i => i.ministry))].sort();
   const scored = items.filter(i => i.totalScore !== null);
-  const avgScore = scored.length > 0
-    ? scored.reduce((sum, i) => sum + (i.totalScore ?? 0), 0) / scored.length
+  const scores = scored.map(i => i.totalScore as number).sort((a, b) => a - b);
+  const avgScore = scores.length > 0
+    ? scores.reduce((sum, s) => sum + s, 0) / scores.length
     : 0;
+
+  // 中央値
+  let medianScore = 0;
+  if (scores.length > 0) {
+    const mid = Math.floor(scores.length / 2);
+    medianScore = scores.length % 2 === 0
+      ? (scores[mid - 1] + scores[mid]) / 2
+      : scores[mid];
+  }
+
+  // 標準偏差
+  let stddevScore = 0;
+  if (scores.length > 0) {
+    const variance = scores.reduce((sum, s) => sum + (s - avgScore) ** 2, 0) / scores.length;
+    stddevScore = Math.sqrt(variance);
+  }
+
+  // 最頻値（1点刻みでビン化）
+  let modeScore = 0;
+  if (scores.length > 0) {
+    const bins = new Map<number, number>();
+    for (const s of scores) {
+      const bin = Math.round(s);
+      bins.set(bin, (bins.get(bin) ?? 0) + 1);
+    }
+    let maxCount = 0;
+    for (const [bin, count] of bins) {
+      if (count > maxCount) {
+        maxCount = count;
+        modeScore = bin;
+      }
+    }
+  }
 
   cached = {
     items,
-    summary: { total: items.length, avgScore, ministries },
+    summary: { total: items.length, avgScore, medianScore, stddevScore, modeScore, ministries },
   };
   return cached;
 }
