@@ -407,27 +407,23 @@ def calc_scores(ps):
         scores['axis2'] = None
 
     # 軸3: 予算・支出バランス (0-100)
-    # 予算額に対する実質支出額の乖離で評価（予算額がなければ執行額で代替）
+    # 執行額に対する実質支出合計の乖離で評価
     exec_amt = exec_by_pid.get(ps.pid, 0)
     budget_amt = budget_by_pid.get(ps.pid, 0)
     scores['budget_amount'] = budget_amt
     scores['exec_amount'] = exec_amt
     scores['spend_total'] = ps.spend_total
     scores['spend_net_total'] = ps.spend_net_total
-    ref_amt = budget_amt if budget_amt > 0 else exec_amt
-    if ref_amt > 0:
-        gap = abs(ref_amt - ps.spend_net_total) / ref_amt
+    if exec_amt > 0:
+        gap = abs(exec_amt - ps.spend_net_total) / exec_amt
         scores['gap_ratio'] = gap
-        scores['gap_ref_is_budget'] = budget_amt > 0
         # gap=0 → 100点, gap>=1 → 0点（線形）
         scores['axis3'] = clamp((1 - gap) * 100)
     elif ps.spend_net_total == 0:
         scores['gap_ratio'] = 0
-        scores['gap_ref_is_budget'] = False
         scores['axis3'] = 100  # 両方ゼロは整合
     else:
         scores['gap_ratio'] = None
-        scores['gap_ref_is_budget'] = False
         scores['axis3'] = None
 
     # 軸4: ブロック構造 (0-100)
@@ -596,7 +592,6 @@ for pid in sorted_pids:
         'spendTotal': sc['spend_total'],
         'spendNetTotal': sc['spend_net_total'],
         'gapRatio': sc['gap_ratio'],
-        'gapRefIsBudget': sc['gap_ref_is_budget'],
         'blockCount': sc['block_count'],
         'orphanBlockCount': ps.orphan_block_count,
         'hasRedelegation': sc['has_redelegation'],

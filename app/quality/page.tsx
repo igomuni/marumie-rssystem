@@ -198,12 +198,10 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                 </div>
                 <div className="flex gap-3 flex-wrap font-mono text-gray-400">
                   {item.budgetAmount > 0 && <span>予算執行率: {pct(item.execAmount / item.budgetAmount)}</span>}
-                  <span>
-                    {item.gapRefIsBudget ? '予算 vs 実質支出 乖離' : '執行 vs 実質支出 乖離'}: {pct(item.gapRatio)}
-                  </span>
+                  <span>執行 vs 実質支出 乖離: {pct(item.gapRatio)}</span>
                 </div>
                 <div className="font-mono text-gray-400">
-                  基準額({item.gapRefIsBudget ? '予算額' : '執行額'}) − 実質支出 の乖離率 {pct(item.gapRatio)} → (1 − {pct(item.gapRatio)}) × 100 = {item.axis3 !== null ? item.axis3.toFixed(1) : '-'}点
+                  執行額 − 実質支出 の乖離率 {pct(item.gapRatio)} → (1 − {pct(item.gapRatio)}) × 100 = {item.axis3 !== null ? item.axis3.toFixed(1) : '-'}点
                 </div>
               </div>
             </div>
