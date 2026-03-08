@@ -23,7 +23,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
   const [recipients, setRecipients] = useState<RecipientRow[] | null>(null);
   const [recipientsError, setRecipientsError] = useState(false);
   const [recipientSearch, setRecipientSearch] = useState('');
-  const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a' | 'a2'>('chain');
+  const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a2'>('chain');
   const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
   const [showAxisDetail, setShowAxisDetail] = useState(false);
 
@@ -49,12 +49,11 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
     }
     return [...rows].sort((a, b) => {
       let cmp = 0;
-      if (recipientSortField === 'chain') cmp = (a.chain ?? a.b).localeCompare(b.chain ?? b.b) || (b.a ?? -1) - (a.a ?? -1);
-      else if (recipientSortField === 'b') cmp = a.b.localeCompare(b.b) || (b.a ?? -1) - (a.a ?? -1);
+      if (recipientSortField === 'chain') cmp = (a.chain ?? a.b).localeCompare(b.chain ?? b.b) || (b.a2 ?? -1) - (a.a2 ?? -1);
+      else if (recipientSortField === 'b') cmp = a.b.localeCompare(b.b) || (b.a2 ?? -1) - (a.a2 ?? -1);
       else if (recipientSortField === 's') cmp = a.s.localeCompare(b.s);
       else if (recipientSortField === 'c') cmp = (b.c ? 1 : 0) - (a.c ? 1 : 0);
       else if (recipientSortField === 'o') cmp = (b.o ? 1 : 0) - (a.o ? 1 : 0);
-      else if (recipientSortField === 'a') cmp = (b.a ?? -1) - (a.a ?? -1);
       else if (recipientSortField === 'a2') cmp = (b.a2 ?? -1) - (a.a2 ?? -1);
       return recipientSortDir === 'desc' ? -cmp : cmp;
     });
@@ -65,7 +64,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
       setRecipientSortDir(d => d === 'asc' ? 'desc' : 'asc');
     } else {
       setRecipientSortField(field);
-      setRecipientSortDir(field === 'a' || field === 'a2' ? 'desc' : 'asc');
+      setRecipientSortDir(field === 'a2' ? 'desc' : 'asc');
     }
   }
 
@@ -321,13 +320,6 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                     </th>
                     <th
                       className="px-2 py-1.5 text-right font-medium whitespace-nowrap cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
-                      onClick={() => handleRecipientSort('a')}
-                      title="支出先の合計支出額（CSVの「支出先の合計支出額」列）"
-                    >
-                      支出先合計額<RSortIcon field="a" />
-                    </th>
-                    <th
-                      className="px-2 py-1.5 text-right font-medium whitespace-nowrap cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
                       onClick={() => handleRecipientSort('a2')}
                       title="個別支出額（CSVの「金額」列）"
                     >
@@ -367,9 +359,6 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                             ? <span className="text-red-500" title="不透明キーワードにマッチ">⚠</span>
                             : <span className="text-gray-300 dark:text-gray-600">-</span>
                           }
-                        </td>
-                        <td className="px-2 py-1 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                          {row.a === null ? <span className="text-gray-300 dark:text-gray-600">-</span> : formatAmount(row.a)}
                         </td>
                         <td className="px-2 py-1 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
                           {row.a2 === null ? <span className="text-gray-300 dark:text-gray-600">-</span> : formatAmount(row.a2)}

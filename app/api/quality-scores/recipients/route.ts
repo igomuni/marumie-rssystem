@@ -4,7 +4,7 @@ import * as path from 'path';
 
 // フィールド名は短縮形（JSONサイズ削減のため）
 // n=name, b=blockNo, s=status, c=cnFilled, o=opaque
-// a=支出先の合計支出額, a2=金額（個別支出額）, r=isRoot
+// a2=金額（個別支出額）, r=isRoot
 // chain=ブロック委託チェーン("組織→A→B→C"), d=委託深度
 // role=事業を行う上での役割（ブロック単位）, cc=契約概要
 export interface RecipientRow {
@@ -13,7 +13,6 @@ export interface RecipientRow {
   s: 'valid' | 'gov' | 'supp' | 'invalid' | 'unknown';
   c: boolean;
   o: boolean;
-  a: number | null;
   a2: number | null;
   r: boolean;
   chain: string;

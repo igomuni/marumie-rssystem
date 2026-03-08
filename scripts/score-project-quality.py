@@ -335,17 +335,21 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         if opaque:
             ps.opaque_count += 1
 
-        # per-recipient行を収集
+        # per-recipient行を収集（支出先合計行は除外、金額行のみ）
+        # 支出先合計行（支出先の合計支出額あり・金額なし）は常に金額行とペアで存在するため除外可能
         # フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque
-        # a=支出先の合計支出額(None=空欄,0=明示的ゼロ), a2=金額（個別支出額、同上）
+        # a2=金額（個別支出額、None=空欄,0=明示的ゼロ）
         # role=事業を行う上での役割（ブロック単位）, cc=契約概要
+        has_total = bool(r.get('支出先の合計支出額', '').strip())
+        has_amt   = bool(r.get('金額', '').strip())
+        if has_total and not has_amt:
+            continue  # 支出先合計行はスキップ
         ps.recipient_rows.append({
             'n': recipient_name,
             'b': block_no,
             's': row_status,
             'c': bool(cn),
             'o': opaque,
-            'a': to_int_or_none(r.get('支出先の合計支出額', '')),
             'a2': to_int_or_none(r.get('金額', '')),
             'role': ps.block_roles.get(block_no, ''),
             'cc': r.get('契約概要', '').strip(),
