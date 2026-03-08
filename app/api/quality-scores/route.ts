@@ -14,6 +14,7 @@ export interface QualityScoreItem {
   unit: string;
   rowCount: number;
   validCount: number;
+  govAgencyCount: number;
   suppValidCount: number;
   invalidCount: number;
   validRatio: number | null;
