@@ -31,8 +31,9 @@ DICT_CSV   = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'recipient_diction
 GOV_CSV    = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'government_agency_names.csv'
 SUPP_CSV   = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'supplementary_valid_names.csv'
 OPAQUE_CSV = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'opaque_recipient_keywords.csv'
-OUT_CSV    = REPO_ROOT / 'data' / 'result' / 'project_quality_scores.csv'
-OUT_JSON   = REPO_ROOT / 'public' / 'data' / 'project-quality-scores.json'
+OUT_CSV              = REPO_ROOT / 'data' / 'result' / 'project_quality_scores.csv'
+OUT_JSON             = REPO_ROOT / 'public' / 'data' / 'project-quality-scores.json'
+OUT_RECIPIENTS_JSON  = REPO_ROOT / 'public' / 'data' / 'project-quality-recipients.json'
 
 def to_int(s):
     try:    return int(str(s).replace(',', '').strip())
@@ -190,6 +191,7 @@ class ProjectStats:
         'orphan_block_count',
         'opaque_count',
         'row_count',
+        'recipient_rows',  # per-recipient detail for recipients JSON
     ]
     def __init__(self, pid, name, ministry, bureau, division, section, office, team, unit):
         self.pid = pid
@@ -217,6 +219,7 @@ class ProjectStats:
         self.orphan_block_count = 0     # 5-2に未記載の孤立ブロック数
         self.opaque_count = 0           # 不透明キーワードにマッチした支出先行数
         self.row_count = 0
+        self.recipient_rows = []        # per-recipient detail rows
 
 projects = {}  # pid -> ProjectStats
 
@@ -252,12 +255,18 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         if recipient_name in dict_map:
             if dict_map[recipient_name]:
                 ps.valid_count += 1
+                row_status = 'valid'
             elif recipient_name in gov_agency_map:
                 ps.gov_agency_count += 1
+                row_status = 'gov'
             elif recipient_name in supp_map:
                 ps.supp_valid_count += 1
+                row_status = 'supp'
             else:
                 ps.invalid_count += 1
+                row_status = 'invalid'
+        else:
+            row_status = 'unknown'
 
         # 軸2: 法人番号記入率
         cn = r.get('法人番号', '').strip()
@@ -278,8 +287,19 @@ with open(SPEND_CSV, encoding='utf-8') as f:
                     ps.spend_net_total += amt
 
         # 軸5: 不透明支出先名キーワード判定
-        if is_opaque_name(recipient_name):
+        opaque = is_opaque_name(recipient_name) > 0
+        if opaque:
             ps.opaque_count += 1
+
+        # per-recipient行を収集（フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque, a=amount）
+        ps.recipient_rows.append({
+            'n': recipient_name,
+            'b': block_no,
+            's': row_status,
+            'c': bool(cn),
+            'o': opaque,
+            'a': amt,
+        })
 
 print(f'  事業数: {len(projects):,}')
 
@@ -294,6 +314,18 @@ for pid, ps in projects.items():
         ps.spend_net_total = ps.spend_total
     # 孤立ブロック数を反映
     ps.orphan_block_count = len(orphan_blocks_by_pid.get(pid, set()))
+
+# recipient_rows に isRoot フィールドを付与
+# （root_blocks_by_pid は5-2グラフから確定済み）
+for pid, ps in projects.items():
+    roots = root_blocks_by_pid.get(pid, set())
+    has_block_data = pid in root_blocks_by_pid
+    for row in ps.recipient_rows:
+        if has_block_data:
+            row['r'] = row['b'] in roots
+        else:
+            # 5-2データがない事業は全行をルート扱い（spend_net_total = spend_total と同じ扱い）
+            row['r'] = True
 
 # ── 5. スコア計算 ──
 # (section numbers: 1=dict, 2=budget, 3=block-graph, 4=spending, 5=scores)
@@ -525,6 +557,11 @@ for pid in sorted_pids:
 
 with open(OUT_JSON, 'w', encoding='utf-8') as f:
     json.dump(json_items, f, ensure_ascii=False)
+
+# ── recipients JSON出力（支出先ごとの詳細行、ダイアログ用）──
+recipients_by_pid = {pid: projects[pid].recipient_rows for pid in sorted_pids}
+with open(OUT_RECIPIENTS_JSON, 'w', encoding='utf-8') as f:
+    json.dump(recipients_by_pid, f, ensure_ascii=False)
 
 print(f'\n出力: {OUT_CSV}')
 print(f'  JSON: {OUT_JSON} ({len(json_items):,}件, {OUT_JSON.stat().st_size / 1024:.0f}KB)')
