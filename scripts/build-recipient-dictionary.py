@@ -15,8 +15,9 @@ data/result/recipients_without_total.csv を元に、ユニークな支出先名
   cn_in_db         - corporate_number が法人番号DBに存在するか
   name_cn_match    - corporate_number の法人名が normalized_name と一致するか
   pref_municipality- 都道府県prefix付き市区町村名（DB名が末尾一致し市区町村サフィックスを持つ）
+  pref_abbr        - 都道府県略称（例: 和歌山 → DB: 和歌山県）
   db_name_by_cn    - corporate_number から引いたDBの法人名
-  valid            - (name_in_db AND name_cn_match) OR pref_municipality
+  valid            - (name_in_db AND name_cn_match) OR pref_municipality OR pref_abbr
 
 実行:
   python3 scripts/build-recipient-dictionary.py
@@ -34,6 +35,7 @@ HOUJIN_DB   = REPO_ROOT / 'data' / 'houjin.db'
 OUTPUT_CSV  = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'recipient_dictionary.csv'
 
 MUNI_SUFFIXES = ('市', '区', '町', '村')
+PREF_SUFFIXES = ('都', '道', '府', '県')
 
 # ─────────────────────────────────────────────────────────────
 # 略称展開マップ
@@ -190,8 +192,17 @@ def main():
             and norm_key.endswith(db_name_norm)
             and norm_key != db_name_norm
         )
-        # valid: 通常一致（name_in_db AND name_cn_match） OR 都道府県prefix市区町村
-        valid = (name_in_db and bool(best_cn) and name_cn_match) or pref_municipality
+        # 都道府県略称: DB名が都道府県サフィックスで終わり、支出先名はその省略形
+        #   例: 和歌山 → DB: 和歌山県（和歌山 + 県 = 和歌山県）
+        pref_abbr = (
+            cn_in_db
+            and not name_cn_match
+            and bool(db_name_norm)
+            and db_name_by_cn.endswith(PREF_SUFFIXES)
+            and norm_key + db_name_norm[-1] == db_name_norm
+        )
+        # valid: 通常一致（name_in_db AND name_cn_match） OR 都道府県prefix市区町村 OR 都道府県略称
+        valid = (name_in_db and bool(best_cn) and name_cn_match) or pref_municipality or pref_abbr
 
         out_rows.append({
             'name':              name,
@@ -202,6 +213,7 @@ def main():
             'cn_in_db':          cn_in_db,
             'name_cn_match':     name_cn_match,
             'pref_municipality': pref_municipality,
+            'pref_abbr':         pref_abbr,
             'db_name_by_cn':     db_name_by_cn,
             'valid':             valid,
         })
@@ -210,7 +222,7 @@ def main():
 
     # ── 出力 ──
     fieldnames = ['name', 'normalized_name', 'corporate_number', 'cn_count',
-                  'name_in_db', 'cn_in_db', 'name_cn_match', 'pref_municipality', 'db_name_by_cn', 'valid']
+                  'name_in_db', 'cn_in_db', 'name_cn_match', 'pref_municipality', 'pref_abbr', 'db_name_by_cn', 'valid']
     with open(OUTPUT_CSV, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -225,6 +237,7 @@ def main():
     invalid     = [r for r in out_rows if not r['valid']]
     multi_cn    = [r for r in out_rows if r['cn_count'] > 1]
     pref_muni   = [r for r in out_rows if r['pref_municipality']]
+    pref_abbr_rows = [r for r in out_rows if r['pref_abbr']]
     normalized_diff = [r for r in out_rows if r['name'] != r['normalized_name']]
 
     print()
@@ -239,6 +252,7 @@ def main():
     print(f'  └ 法人名・CN完全一致:        {len(name_match):>7,}件')
     print(f'  └ CN→名称で一致:            {len(cn_match):>7,}件')
     print(f'  └ 都道府県prefix市区町村:    {len(pref_muni):>7,}件')
+    print(f'  └ 都道府県略称:              {len(pref_abbr_rows):>7,}件')
     print(f'invalid（DB未確認）:           {len(invalid):>7,}件  ({len(invalid)/total*100:.1f}%)')
     print(f'  └ CNあるが名称不一致: {len(cn_only):>6,}件')
     print()
