@@ -333,6 +333,8 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                     >
                       金額<RSortIcon field="a2" />
                     </th>
+                    <th className="px-2 py-1.5 text-left font-medium whitespace-nowrap" title="事業を行う上での役割（ブロック単位）">役割</th>
+                    <th className="px-2 py-1.5 text-left font-medium whitespace-nowrap" title="契約概要">契約概要</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -371,6 +373,12 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                         </td>
                         <td className="px-2 py-1 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
                           {row.a2 === null ? <span className="text-gray-300 dark:text-gray-600">-</span> : formatAmount(row.a2)}
+                        </td>
+                        <td className="px-2 py-1 text-gray-500 dark:text-gray-400 max-w-[160px] truncate text-xs" title={row.role || undefined}>
+                          {row.role || <span className="text-gray-300 dark:text-gray-600">-</span>}
+                        </td>
+                        <td className="px-2 py-1 text-gray-600 dark:text-gray-300 max-w-[200px] truncate text-xs" title={row.cc || undefined}>
+                          {row.cc || <span className="text-gray-300 dark:text-gray-600">-</span>}
                         </td>
                       </tr>
                     );

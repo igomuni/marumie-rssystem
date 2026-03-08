@@ -6,6 +6,7 @@ import * as path from 'path';
 // n=name, b=blockNo, s=status, c=cnFilled, o=opaque
 // a=支出先の合計支出額, a2=金額（個別支出額）, r=isRoot
 // chain=ブロック委託チェーン("組織→A→B→C"), d=委託深度
+// role=事業を行う上での役割（ブロック単位）, cc=契約概要
 export interface RecipientRow {
   n: string;
   b: string;
@@ -17,6 +18,8 @@ export interface RecipientRow {
   r: boolean;
   chain: string;
   d: number;
+  role: string;
+  cc: string;
 }
 
 let cached: Record<string, RecipientRow[]> | null = null;

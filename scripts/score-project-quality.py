@@ -226,7 +226,7 @@ class ProjectStats:
         'cn_filled', 'cn_empty',
         'spend_total', 'spend_net_total',
         'block_names', 'has_redelegation', 'redelegation_depth',
-        'block_amounts', 'recipient_amounts_by_block',
+        'block_amounts', 'block_roles', 'recipient_amounts_by_block',
         'orphan_block_count',
         'opaque_count',
         'row_count',
@@ -254,6 +254,7 @@ class ProjectStats:
         self.has_redelegation = False
         self.redelegation_depth = 0
         self.block_amounts = {}          # block_no -> block_amount
+        self.block_roles = {}            # block_no -> 事業を行う上での役割
         self.recipient_amounts_by_block = collections.defaultdict(int)  # block_no -> sum of recipient amounts
         self.orphan_block_count = 0     # 5-2に未記載の孤立ブロック数
         self.opaque_count = 0           # 不透明キーワードにマッチした支出先行数
@@ -284,6 +285,9 @@ with open(SPEND_CSV, encoding='utf-8') as f:
             block_amt = to_int(r.get('ブロックの合計支出額', ''))
             if block_amt:
                 ps.block_amounts[block_no] = block_amt
+            role = r.get('事業を行う上での役割', '').strip()
+            if role and block_no not in ps.block_roles:
+                ps.block_roles[block_no] = role
         # 支出先行（支出先名がある）
         if not recipient_name:
             continue
@@ -334,6 +338,7 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         # per-recipient行を収集
         # フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque
         # a=支出先の合計支出額(None=空欄,0=明示的ゼロ), a2=金額（個別支出額、同上）
+        # role=事業を行う上での役割（ブロック単位）, cc=契約概要
         ps.recipient_rows.append({
             'n': recipient_name,
             'b': block_no,
@@ -342,6 +347,8 @@ with open(SPEND_CSV, encoding='utf-8') as f:
             'o': opaque,
             'a': to_int_or_none(r.get('支出先の合計支出額', '')),
             'a2': to_int_or_none(r.get('金額', '')),
+            'role': ps.block_roles.get(block_no, ''),
+            'cc': r.get('契約概要', '').strip(),
         })
 
 print(f'  事業数: {len(projects):,}')
