@@ -26,6 +26,7 @@ export interface QualityScoreItem {
   spendTotal: number;
   spendNetTotal: number;
   gapRatio: number | null;
+  gapRefIsBudget: boolean;
   blockCount: number;
   orphanBlockCount: number;
   hasRedelegation: boolean;

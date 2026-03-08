@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // フィールド名は短縮形（JSONサイズ削減のため）
-// n=name, b=blockNo, s=status, c=cnFilled, o=opaque, a=amount, r=isRoot
+// n=name, b=blockNo, s=status, c=cnFilled, o=opaque
+// a=支出先の合計支出額, a2=金額（個別支出額）, r=isRoot
 export interface RecipientRow {
   n: string;
   b: string;
@@ -11,6 +12,7 @@ export interface RecipientRow {
   c: boolean;
   o: boolean;
   a: number;
+  a2: number;
   r: boolean;
 }
 

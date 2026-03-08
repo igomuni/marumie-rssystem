@@ -275,8 +275,9 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         else:
             ps.cn_empty += 1
 
-        # 金額（支出先の合計支出額を優先、なければ金額）
-        amt = to_int(r.get('支出先の合計支出額', ''))
+        # 金額（支出先の合計支出額 / 金額 を別々に収集）
+        amt = to_int(r.get('支出先の合計支出額', ''))   # 支出先の合計支出額
+        amt2 = to_int(r.get('金額', ''))                # 個別支出額
         if amt:
             ps.spend_total += amt
             if block_no:
@@ -291,7 +292,9 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         if opaque:
             ps.opaque_count += 1
 
-        # per-recipient行を収集（フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque, a=amount）
+        # per-recipient行を収集
+        # フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque
+        # a=支出先の合計支出額, a2=金額（個別支出額）
         ps.recipient_rows.append({
             'n': recipient_name,
             'b': block_no,
@@ -299,6 +302,7 @@ with open(SPEND_CSV, encoding='utf-8') as f:
             'c': bool(cn),
             'o': opaque,
             'a': amt,
+            'a2': amt2,
         })
 
 print(f'  事業数: {len(projects):,}')
@@ -358,22 +362,27 @@ def calc_scores(ps):
         scores['axis2'] = None
 
     # 軸3: 予算・支出バランス (0-100)
+    # 予算額に対する実質支出額の乖離で評価（予算額がなければ執行額で代替）
     exec_amt = exec_by_pid.get(ps.pid, 0)
     budget_amt = budget_by_pid.get(ps.pid, 0)
     scores['budget_amount'] = budget_amt
     scores['exec_amount'] = exec_amt
     scores['spend_total'] = ps.spend_total
     scores['spend_net_total'] = ps.spend_net_total
-    if exec_amt > 0:
-        gap = abs(exec_amt - ps.spend_net_total) / exec_amt
+    ref_amt = budget_amt if budget_amt > 0 else exec_amt
+    if ref_amt > 0:
+        gap = abs(ref_amt - ps.spend_net_total) / ref_amt
         scores['gap_ratio'] = gap
+        scores['gap_ref_is_budget'] = budget_amt > 0
         # gap=0 → 100点, gap>=1 → 0点（線形）
         scores['axis3'] = clamp((1 - gap) * 100)
-    elif ps.spend_net_total == 0 and exec_amt == 0:
+    elif ps.spend_net_total == 0:
         scores['gap_ratio'] = 0
+        scores['gap_ref_is_budget'] = False
         scores['axis3'] = 100  # 両方ゼロは整合
     else:
         scores['gap_ratio'] = None
+        scores['gap_ref_is_budget'] = False
         scores['axis3'] = None
 
     # 軸4: ブロック構造 (0-100)
@@ -542,6 +551,7 @@ for pid in sorted_pids:
         'spendTotal': sc['spend_total'],
         'spendNetTotal': sc['spend_net_total'],
         'gapRatio': sc['gap_ratio'],
+        'gapRefIsBudget': sc['gap_ref_is_budget'],
         'blockCount': sc['block_count'],
         'orphanBlockCount': ps.orphan_block_count,
         'hasRedelegation': sc['has_redelegation'],
