@@ -271,24 +271,13 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         ps = projects[pid]
 
         # ブロックヘッダー行（支出先名が空でブロック名がある）
-        block_amt_raw = to_int(r.get('ブロックの合計支出額', ''))
         if block_name and block_no:
             ps.block_names.add(block_name)
-            if block_amt_raw:
-                ps.block_amounts[block_no] = block_amt_raw
-        # ブロックヘッダー行もrecipient_rowsに追加（ba列の表示用）
+            block_amt = to_int(r.get('ブロックの合計支出額', ''))
+            if block_amt:
+                ps.block_amounts[block_no] = block_amt
+        # 支出先行（支出先名がある）
         if not recipient_name:
-            if block_no and block_amt_raw:
-                ps.recipient_rows.append({
-                    'n': block_name or '',
-                    'b': block_no,
-                    's': 'block',
-                    'c': False,
-                    'o': False,
-                    'a': 0,
-                    'a2': 0,
-                    'ba': block_amt_raw,
-                })
             continue
 
         ps.row_count += 1
@@ -336,7 +325,7 @@ with open(SPEND_CSV, encoding='utf-8') as f:
 
         # per-recipient行を収集
         # フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque
-        # a=支出先の合計支出額, a2=金額（個別支出額）, ba=ブロックの合計支出額
+        # a=支出先の合計支出額, a2=金額（個別支出額）
         ps.recipient_rows.append({
             'n': recipient_name,
             'b': block_no,
@@ -345,7 +334,6 @@ with open(SPEND_CSV, encoding='utf-8') as f:
             'o': opaque,
             'a': amt,
             'a2': amt2,
-            'ba': block_amt_raw,  # CSVの当該行のブロックの合計支出額（通常0）
         })
 
 print(f'  事業数: {len(projects):,}')
