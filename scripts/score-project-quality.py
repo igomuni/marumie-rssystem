@@ -590,6 +590,7 @@ for pid in sorted_pids:
         'team': ps.team,
         'unit': ps.unit,
         'rowCount': ps.row_count,
+        'recipientCount': len(ps.recipient_rows),
         'validCount': ps.valid_count,
         'govAgencyCount': ps.gov_agency_count,
         'suppValidCount': ps.supp_valid_count,
