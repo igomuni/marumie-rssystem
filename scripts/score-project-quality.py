@@ -39,6 +39,14 @@ def to_int(s):
     try:    return int(str(s).replace(',', '').strip())
     except: return 0
 
+def to_int_or_none(s):
+    """空欄はNone、'0'は0、それ以外は整数を返す（表示上の区別用）"""
+    stripped = str(s).replace(',', '').strip()
+    if not stripped:
+        return None
+    try:    return int(stripped)
+    except: return None
+
 def normalize(s):
     return unicodedata.normalize('NFKC', s)
 
@@ -325,15 +333,15 @@ with open(SPEND_CSV, encoding='utf-8') as f:
 
         # per-recipient行を収集
         # フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque
-        # a=支出先の合計支出額, a2=金額（個別支出額）
+        # a=支出先の合計支出額(None=空欄,0=明示的ゼロ), a2=金額（個別支出額、同上）
         ps.recipient_rows.append({
             'n': recipient_name,
             'b': block_no,
             's': row_status,
             'c': bool(cn),
             'o': opaque,
-            'a': amt,
-            'a2': amt2,
+            'a': to_int_or_none(r.get('支出先の合計支出額', '')),
+            'a2': to_int_or_none(r.get('金額', '')),
         })
 
 print(f'  事業数: {len(projects):,}')

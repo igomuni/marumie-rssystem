@@ -12,8 +12,8 @@ export interface RecipientRow {
   s: 'valid' | 'gov' | 'supp' | 'invalid' | 'unknown';
   c: boolean;
   o: boolean;
-  a: number;
-  a2: number;
+  a: number | null;
+  a2: number | null;
   r: boolean;
   chain: string;
   d: number;

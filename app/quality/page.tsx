@@ -49,13 +49,13 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
     }
     return [...rows].sort((a, b) => {
       let cmp = 0;
-      if (recipientSortField === 'chain') cmp = (a.chain ?? a.b).localeCompare(b.chain ?? b.b) || b.a - a.a;
-      else if (recipientSortField === 'b') cmp = a.b.localeCompare(b.b) || b.a - a.a;
+      if (recipientSortField === 'chain') cmp = (a.chain ?? a.b).localeCompare(b.chain ?? b.b) || (b.a ?? -1) - (a.a ?? -1);
+      else if (recipientSortField === 'b') cmp = a.b.localeCompare(b.b) || (b.a ?? -1) - (a.a ?? -1);
       else if (recipientSortField === 's') cmp = a.s.localeCompare(b.s);
       else if (recipientSortField === 'c') cmp = (b.c ? 1 : 0) - (a.c ? 1 : 0);
       else if (recipientSortField === 'o') cmp = (b.o ? 1 : 0) - (a.o ? 1 : 0);
-      else if (recipientSortField === 'a') cmp = b.a - a.a;
-      else if (recipientSortField === 'a2') cmp = b.a2 - a.a2;
+      else if (recipientSortField === 'a') cmp = (b.a ?? -1) - (a.a ?? -1);
+      else if (recipientSortField === 'a2') cmp = (b.a2 ?? -1) - (a.a2 ?? -1);
       return recipientSortDir === 'desc' ? -cmp : cmp;
     });
   }, [recipients, recipientSearch, recipientSortField, recipientSortDir]);
@@ -369,10 +369,10 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                           }
                         </td>
                         <td className="px-2 py-1 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                          {row.a ? formatAmount(row.a) : <span className="text-gray-300 dark:text-gray-600">-</span>}
+                          {row.a === null ? <span className="text-gray-300 dark:text-gray-600">-</span> : formatAmount(row.a)}
                         </td>
                         <td className="px-2 py-1 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                          {row.a2 ? formatAmount(row.a2) : <span className="text-gray-300 dark:text-gray-600">-</span>}
+                          {row.a2 === null ? <span className="text-gray-300 dark:text-gray-600">-</span> : formatAmount(row.a2)}
                         </td>
                       </tr>
                     );
