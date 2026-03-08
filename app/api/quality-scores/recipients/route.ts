@@ -5,6 +5,7 @@ import * as path from 'path';
 // フィールド名は短縮形（JSONサイズ削減のため）
 // n=name, b=blockNo, s=status, c=cnFilled, o=opaque
 // a=支出先の合計支出額, a2=金額（個別支出額）, r=isRoot
+// chain=ブロック委託チェーン("組織→A→B→C"), d=委託深度
 export interface RecipientRow {
   n: string;
   b: string;
@@ -14,6 +15,8 @@ export interface RecipientRow {
   a: number;
   a2: number;
   r: boolean;
+  chain: string;
+  d: number;
 }
 
 let cached: Record<string, RecipientRow[]> | null = null;

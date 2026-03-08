@@ -152,6 +152,37 @@ releg_counts = collections.Counter(redelegation_by_pid.values())
 print(f'  ブロック接続: {sum(len(v) for v in block_links_by_pid.values()):,}行, {len(block_links_by_pid):,}事業')
 print(f'  再委託深度分布: { {k: releg_counts[k] for k in sorted(releg_counts)} }')
 
+# ブロックチェーンパスを計算（per-recipient表示用: "組織→A→B→C"）
+block_chain_by_pid = {}
+for pid, links in block_links_by_pid.items():
+    parent_map = {}  # block -> parent block (None = root/from_org)
+    children_map = collections.defaultdict(list)
+    for src, dst, from_org in links:
+        if from_org:
+            # 担当組織からの直接支出 → dst はルートブロック
+            if dst not in parent_map:
+                parent_map[dst] = None
+        else:
+            # ブロック間委託: src -> dst
+            if dst not in parent_map:
+                parent_map[dst] = src
+            children_map[src].append(dst)
+    chain = {}
+    queue = collections.deque()
+    for b, parent in parent_map.items():
+        if parent is None:
+            chain[b] = f'組織→{b}'
+            queue.append(b)
+    visited = set(chain.keys())
+    while queue:
+        block = queue.popleft()
+        for dst in children_map.get(block, []):
+            if dst not in visited:
+                visited.add(dst)
+                chain[dst] = f'{chain[block]}→{dst}'
+                queue.append(dst)
+    block_chain_by_pid[pid] = chain
+
 # 5-2に登場するすべてのブロック（source / dest 両方）を記録
 blocks_in_5_2_by_pid = collections.defaultdict(set)
 for pid, links in block_links_by_pid.items():
@@ -325,11 +356,17 @@ for pid, ps in projects.items():
     roots = root_blocks_by_pid.get(pid, set())
     has_block_data = pid in root_blocks_by_pid
     for row in ps.recipient_rows:
+        chain_map = block_chain_by_pid.get(pid, {})
         if has_block_data:
             row['r'] = row['b'] in roots
+            c = chain_map.get(row['b'], row['b'])
+            row['chain'] = c
+            row['d'] = c.count('→') - 1 if c.startswith('組織→') else 0
         else:
             # 5-2データがない事業は全行をルート扱い（spend_net_total = spend_total と同じ扱い）
             row['r'] = True
+            row['chain'] = row['b']
+            row['d'] = 0
 
 # ── 5. スコア計算 ──
 # (section numbers: 1=dict, 2=budget, 3=block-graph, 4=spending, 5=scores)

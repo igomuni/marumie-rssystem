@@ -23,7 +23,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
   const [recipients, setRecipients] = useState<RecipientRow[] | null>(null);
   const [recipientsError, setRecipientsError] = useState(false);
   const [recipientSearch, setRecipientSearch] = useState('');
-  const [recipientSortField, setRecipientSortField] = useState<'b' | 's' | 'c' | 'o' | 'a' | 'a2'>('b');
+  const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a' | 'a2'>('chain');
   const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
   const [showAxisDetail, setShowAxisDetail] = useState(false);
 
@@ -31,7 +31,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
     setRecipients(null);
     setRecipientsError(false);
     setRecipientSearch('');
-    setRecipientSortField('b');
+    setRecipientSortField('chain');
     setRecipientSortDir('asc');
     setShowAxisDetail(false);
     fetch(`/api/quality-scores/recipients?pid=${item.pid}`)
@@ -49,7 +49,8 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
     }
     return [...rows].sort((a, b) => {
       let cmp = 0;
-      if (recipientSortField === 'b') cmp = a.b.localeCompare(b.b) || b.a - a.a;
+      if (recipientSortField === 'chain') cmp = (a.chain ?? a.b).localeCompare(b.chain ?? b.b) || b.a - a.a;
+      else if (recipientSortField === 'b') cmp = a.b.localeCompare(b.b) || b.a - a.a;
       else if (recipientSortField === 's') cmp = a.s.localeCompare(b.s);
       else if (recipientSortField === 'c') cmp = (b.c ? 1 : 0) - (a.c ? 1 : 0);
       else if (recipientSortField === 'o') cmp = (b.o ? 1 : 0) - (a.o ? 1 : 0);
@@ -296,10 +297,11 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                   <tr className="text-gray-500 dark:text-gray-400">
                     <th className="px-3 py-1.5 text-left font-medium">支出先名</th>
                     <th
-                      className="px-2 py-1.5 text-center font-medium whitespace-nowrap cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
-                      onClick={() => handleRecipientSort('b')}
+                      className="px-2 py-1.5 text-left font-medium whitespace-nowrap cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
+                      onClick={() => handleRecipientSort('chain')}
+                      title="委託チェーン（組織→A→B→C）でソート"
                     >
-                      ブロック<RSortIcon field="b" />
+                      委託チェーン<RSortIcon field="chain" />
                     </th>
                     <th
                       className="px-2 py-1.5 text-center font-medium whitespace-nowrap cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
@@ -343,8 +345,10 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                         <td className="px-3 py-1 text-gray-800 dark:text-gray-200 max-w-[220px] truncate" title={row.n}>
                           {row.n}
                         </td>
-                        <td className="px-2 py-1 text-center font-mono text-gray-500">
-                          {row.b || '-'}
+                        <td className="px-2 py-1 font-mono text-gray-500 whitespace-nowrap" title={row.chain}>
+                          {row.chain
+                            ? (row.chain.startsWith('組織→') ? row.chain.slice('組織→'.length) : row.chain)
+                            : (row.b || '-')}
                           {row.r && <span className="ml-1 text-[9px] text-green-500">●</span>}
                         </td>
                         <td className="px-2 py-1 text-center">
