@@ -3,15 +3,22 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // フィールド名は短縮形（JSONサイズ削減のため）
-// n=name, b=blockNo, s=status, c=cnFilled, o=opaque, a=amount, r=isRoot
+// n=name, b=blockNo, s=status, c=cnFilled, o=opaque
+// a2=金額（個別支出額）, r=isRoot
+// chain=ブロック委託チェーン("組織→A→B→C"), d=委託深度
+// role=事業を行う上での役割（ブロック単位）, cc=契約概要
 export interface RecipientRow {
   n: string;
   b: string;
   s: 'valid' | 'gov' | 'supp' | 'invalid' | 'unknown';
   c: boolean;
   o: boolean;
-  a: number;
+  a2: number | null;
   r: boolean;
+  chain: string;
+  d: number;
+  role: string;
+  cc: string;
 }
 
 let cached: Record<string, RecipientRow[]> | null = null;

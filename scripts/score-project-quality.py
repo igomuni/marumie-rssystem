@@ -39,6 +39,14 @@ def to_int(s):
     try:    return int(str(s).replace(',', '').strip())
     except: return 0
 
+def to_int_or_none(s):
+    """空欄はNone、'0'は0、それ以外は整数を返す（表示上の区別用）"""
+    stripped = str(s).replace(',', '').strip()
+    if not stripped:
+        return None
+    try:    return int(stripped)
+    except: return None
+
 def normalize(s):
     return unicodedata.normalize('NFKC', s)
 
@@ -152,6 +160,37 @@ releg_counts = collections.Counter(redelegation_by_pid.values())
 print(f'  ブロック接続: {sum(len(v) for v in block_links_by_pid.values()):,}行, {len(block_links_by_pid):,}事業')
 print(f'  再委託深度分布: { {k: releg_counts[k] for k in sorted(releg_counts)} }')
 
+# ブロックチェーンパスを計算（per-recipient表示用: "組織→A→B→C"）
+block_chain_by_pid = {}
+for pid, links in block_links_by_pid.items():
+    parent_map = {}  # block -> parent block (None = root/from_org)
+    children_map = collections.defaultdict(list)
+    for src, dst, from_org in links:
+        if from_org:
+            # 担当組織からの直接支出 → dst はルートブロック
+            if dst not in parent_map:
+                parent_map[dst] = None
+        else:
+            # ブロック間委託: src -> dst
+            if dst not in parent_map:
+                parent_map[dst] = src
+            children_map[src].append(dst)
+    chain = {}
+    queue = collections.deque()
+    for b, parent in parent_map.items():
+        if parent is None:
+            chain[b] = f'組織→{b}'
+            queue.append(b)
+    visited = set(chain.keys())
+    while queue:
+        block = queue.popleft()
+        for dst in children_map.get(block, []):
+            if dst not in visited:
+                visited.add(dst)
+                chain[dst] = f'{chain[block]}→{dst}'
+                queue.append(dst)
+    block_chain_by_pid[pid] = chain
+
 # 5-2に登場するすべてのブロック（source / dest 両方）を記録
 blocks_in_5_2_by_pid = collections.defaultdict(set)
 for pid, links in block_links_by_pid.items():
@@ -187,7 +226,7 @@ class ProjectStats:
         'cn_filled', 'cn_empty',
         'spend_total', 'spend_net_total',
         'block_names', 'has_redelegation', 'redelegation_depth',
-        'block_amounts', 'recipient_amounts_by_block',
+        'block_amounts', 'block_roles', 'recipient_amounts_by_block',
         'orphan_block_count',
         'opaque_count',
         'row_count',
@@ -215,6 +254,7 @@ class ProjectStats:
         self.has_redelegation = False
         self.redelegation_depth = 0
         self.block_amounts = {}          # block_no -> block_amount
+        self.block_roles = {}            # block_no -> 事業を行う上での役割
         self.recipient_amounts_by_block = collections.defaultdict(int)  # block_no -> sum of recipient amounts
         self.orphan_block_count = 0     # 5-2に未記載の孤立ブロック数
         self.opaque_count = 0           # 不透明キーワードにマッチした支出先行数
@@ -245,6 +285,9 @@ with open(SPEND_CSV, encoding='utf-8') as f:
             block_amt = to_int(r.get('ブロックの合計支出額', ''))
             if block_amt:
                 ps.block_amounts[block_no] = block_amt
+            role = r.get('事業を行う上での役割', '').strip()
+            if role and block_no not in ps.block_roles:
+                ps.block_roles[block_no] = role
         # 支出先行（支出先名がある）
         if not recipient_name:
             continue
@@ -275,8 +318,9 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         else:
             ps.cn_empty += 1
 
-        # 金額（支出先の合計支出額を優先、なければ金額）
-        amt = to_int(r.get('支出先の合計支出額', ''))
+        # 金額（支出先の合計支出額 / 金額 を別々に収集）
+        amt = to_int(r.get('支出先の合計支出額', ''))   # 支出先の合計支出額
+        amt2 = to_int(r.get('金額', ''))                # 個別支出額
         if amt:
             ps.spend_total += amt
             if block_no:
@@ -291,14 +335,24 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         if opaque:
             ps.opaque_count += 1
 
-        # per-recipient行を収集（フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque, a=amount）
+        # per-recipient行を収集（支出先合計行は除外、金額行のみ）
+        # 支出先合計行（支出先の合計支出額あり・金額なし）は常に金額行とペアで存在するため除外可能
+        # フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque
+        # a2=金額（個別支出額、None=空欄,0=明示的ゼロ）
+        # role=事業を行う上での役割（ブロック単位）, cc=契約概要
+        has_total = bool(r.get('支出先の合計支出額', '').strip())
+        has_amt   = bool(r.get('金額', '').strip())
+        if has_total and not has_amt:
+            continue  # 支出先合計行はスキップ
         ps.recipient_rows.append({
             'n': recipient_name,
             'b': block_no,
             's': row_status,
             'c': bool(cn),
             'o': opaque,
-            'a': amt,
+            'a2': to_int_or_none(r.get('金額', '')),
+            'role': ps.block_roles.get(block_no, ''),
+            'cc': r.get('契約概要', '').strip(),
         })
 
 print(f'  事業数: {len(projects):,}')
@@ -321,11 +375,17 @@ for pid, ps in projects.items():
     roots = root_blocks_by_pid.get(pid, set())
     has_block_data = pid in root_blocks_by_pid
     for row in ps.recipient_rows:
+        chain_map = block_chain_by_pid.get(pid, {})
         if has_block_data:
             row['r'] = row['b'] in roots
+            c = chain_map.get(row['b'], row['b'])
+            row['chain'] = c
+            row['d'] = c.count('→') - 1 if c.startswith('組織→') else 0
         else:
             # 5-2データがない事業は全行をルート扱い（spend_net_total = spend_total と同じ扱い）
             row['r'] = True
+            row['chain'] = row['b']
+            row['d'] = 0
 
 # ── 5. スコア計算 ──
 # (section numbers: 1=dict, 2=budget, 3=block-graph, 4=spending, 5=scores)
@@ -358,6 +418,7 @@ def calc_scores(ps):
         scores['axis2'] = None
 
     # 軸3: 予算・支出バランス (0-100)
+    # 執行額に対する実質支出合計の乖離で評価
     exec_amt = exec_by_pid.get(ps.pid, 0)
     budget_amt = budget_by_pid.get(ps.pid, 0)
     scores['budget_amount'] = budget_amt
@@ -369,7 +430,7 @@ def calc_scores(ps):
         scores['gap_ratio'] = gap
         # gap=0 → 100点, gap>=1 → 0点（線形）
         scores['axis3'] = clamp((1 - gap) * 100)
-    elif ps.spend_net_total == 0 and exec_amt == 0:
+    elif ps.spend_net_total == 0:
         scores['gap_ratio'] = 0
         scores['axis3'] = 100  # 両方ゼロは整合
     else:
@@ -529,6 +590,7 @@ for pid in sorted_pids:
         'team': ps.team,
         'unit': ps.unit,
         'rowCount': ps.row_count,
+        'recipientCount': len(ps.recipient_rows),
         'validCount': ps.valid_count,
         'govAgencyCount': ps.gov_agency_count,
         'suppValidCount': ps.supp_valid_count,
