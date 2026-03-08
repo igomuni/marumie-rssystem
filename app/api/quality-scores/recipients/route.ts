@@ -9,7 +9,7 @@ import * as path from 'path';
 export interface RecipientRow {
   n: string;
   b: string;
-  s: 'valid' | 'gov' | 'supp' | 'invalid' | 'unknown';
+  s: 'valid' | 'gov' | 'supp' | 'invalid' | 'unknown' | 'block';
   c: boolean;
   o: boolean;
   a: number;

@@ -17,6 +17,7 @@ const STATUS_META: Record<RecipientRow['s'], { label: string; cls: string }> = {
   supp:    { label: '補助辞書', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
   invalid: { label: '不一致',  cls: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
   unknown: { label: '未登録',  cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+  block:   { label: 'ブロック', cls: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
 };
 
 function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose: () => void }) {
@@ -348,8 +349,11 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {displayedRecipients.map((row, i) => {
                     const sm = STATUS_META[row.s];
+                    const isBlockRow = row.s === 'block';
                     return (
-                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <tr key={i} className={isBlockRow
+                        ? "bg-yellow-50/60 dark:bg-yellow-900/10 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                        : "hover:bg-gray-50 dark:hover:bg-gray-800/50"}>
                         <td className="px-3 py-1 text-gray-800 dark:text-gray-200 max-w-[220px] truncate" title={row.n}>
                           {row.n}
                         </td>
