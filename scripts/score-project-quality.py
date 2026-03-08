@@ -325,7 +325,7 @@ with open(SPEND_CSV, encoding='utf-8') as f:
 
         # per-recipient行を収集
         # フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque
-        # a=支出先の合計支出額, a2=金額（個別支出額）
+        # a=支出先の合計支出額, a2=金額（個別支出額）, ba=ブロックの合計支出額
         ps.recipient_rows.append({
             'n': recipient_name,
             'b': block_no,
@@ -334,6 +334,7 @@ with open(SPEND_CSV, encoding='utf-8') as f:
             'o': opaque,
             'a': amt,
             'a2': amt2,
+            'ba': ps.block_amounts.get(block_no, 0),
         })
 
 print(f'  事業数: {len(projects):,}')

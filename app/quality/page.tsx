@@ -23,7 +23,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
   const [recipients, setRecipients] = useState<RecipientRow[] | null>(null);
   const [recipientsError, setRecipientsError] = useState(false);
   const [recipientSearch, setRecipientSearch] = useState('');
-  const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a' | 'a2'>('chain');
+  const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a' | 'a2' | 'ba'>('chain');
   const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
   const [showAxisDetail, setShowAxisDetail] = useState(false);
 
@@ -56,6 +56,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
       else if (recipientSortField === 'o') cmp = (b.o ? 1 : 0) - (a.o ? 1 : 0);
       else if (recipientSortField === 'a') cmp = b.a - a.a;
       else if (recipientSortField === 'a2') cmp = b.a2 - a.a2;
+      else if (recipientSortField === 'ba') cmp = b.ba - a.ba;
       return recipientSortDir === 'desc' ? -cmp : cmp;
     });
   }, [recipients, recipientSearch, recipientSortField, recipientSortDir]);
@@ -335,6 +336,13 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                     >
                       金額<RSortIcon field="a2" />
                     </th>
+                    <th
+                      className="px-2 py-1.5 text-right font-medium whitespace-nowrap cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
+                      onClick={() => handleRecipientSort('ba')}
+                      title="ブロックの合計支出額（CSVの「ブロックの合計支出額」列）"
+                    >
+                      ブロック合計<RSortIcon field="ba" />
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -373,6 +381,9 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                         </td>
                         <td className="px-2 py-1 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
                           {row.a2 ? formatAmount(row.a2) : <span className="text-gray-300 dark:text-gray-600">-</span>}
+                        </td>
+                        <td className="px-2 py-1 text-right font-mono text-gray-500 dark:text-gray-500 whitespace-nowrap">
+                          {row.ba ? formatAmount(row.ba) : <span className="text-gray-300 dark:text-gray-600">-</span>}
                         </td>
                       </tr>
                     );
