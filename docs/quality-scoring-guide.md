@@ -14,7 +14,8 @@ flowchart TB
 
     subgraph 辞書
         DICT["厳密辞書<br/>recipient_dictionary.csv<br/>(26,192件)"]
-        SUPP["補助辞書<br/>supplementary_valid_names.csv<br/>(509件)"]
+        GOV["行政機関辞書<br/>government_agency_names.csv<br/>(518件)"]
+        SUPP["補助辞書<br/>supplementary_valid_names.csv<br/>(78件)"]
         OPAQUE["不透明キーワード辞書<br/>opaque_recipient_keywords.csv<br/>(13ルール)"]
     end
 
@@ -30,6 +31,7 @@ flowchart TB
     CSV2 --> A4
     CSV3 --> A3
     DICT --> A1
+    GOV --> A1
     SUPP --> A1
     OPAQUE --> A5
     CSV1 --> A3
@@ -49,8 +51,9 @@ flowchart TB
 flowchart LR
     subgraph "Phase 1: 辞書ロード"
         D1["厳密辞書ロード<br/>dict_map: name → bool<br/>public/data/dictionaries/recipient_dictionary.csv"]
-        D2["補助辞書ロード<br/>supp_map: name → category<br/>public/data/dictionaries/supplementary_valid_names.csv"]
-        D3["不透明辞書ロード<br/>opaque_rules: 13ルール<br/>public/data/dictionaries/opaque_recipient_keywords.csv"]
+        D2["行政機関辞書ロード<br/>gov_agency_map: name → agency_type<br/>public/data/dictionaries/government_agency_names.csv"]
+        D3["補助辞書ロード<br/>supp_map: name → category<br/>public/data/dictionaries/supplementary_valid_names.csv"]
+        D4["不透明辞書ロード<br/>opaque_rules: 13ルール<br/>public/data/dictionaries/opaque_recipient_keywords.csv"]
     end
 
     subgraph "Phase 2: 予算サマリ"
@@ -73,7 +76,7 @@ flowchart LR
         SP1 --> SP2
     end
 
-    D1 & D2 & D3 --> SP2
+    D1 & D2 & D3 & D4 --> SP2
     B2 --> SC
     BL2 & BL3 & BL4 --> SP2
     SP2 --> SC["Phase 5: スコア計算"]
@@ -90,13 +93,16 @@ flowchart TD
     Q1 -- Yes --> Q2{"valid = True?"}
     Q1 -- No --> SKIP["カウント対象外<br/>(辞書未登録)"]
     Q2 -- Yes --> VALID["valid_count++"]
-    Q2 -- No --> Q3{"補助辞書に<br/>存在する?"}
-    Q3 -- Yes --> SUPP["supp_valid_count++"]
-    Q3 -- No --> INVALID["invalid_count++"]
+    Q2 -- No --> Q3{"行政機関辞書に<br/>存在する?"}
+    Q3 -- Yes --> GOV["gov_agency_count++"]
+    Q3 -- No --> Q4{"補助辞書に<br/>存在する?"}
+    Q4 -- Yes --> SUPP["supp_valid_count++"]
+    Q4 -- No --> INVALID["invalid_count++"]
 
-    VALID & SUPP & INVALID --> CALC["axis1 = (valid + supp_valid)<br/>/ (valid + supp_valid + invalid)<br/>× 100"]
+    VALID & GOV & SUPP & INVALID --> CALC["axis1 = (valid + gov_agency + supp_valid)<br/>/ (valid + gov_agency + supp_valid + invalid)<br/>× 100"]
 
     style VALID fill:#4ade80
+    style GOV fill:#86efac
     style SUPP fill:#60a5fa
     style INVALID fill:#f87171
     style SKIP fill:#9ca3af
@@ -112,13 +118,21 @@ flowchart LR
         STRICT_I["valid=False: 7,959件<br/>名称不一致 or 法人番号なし"]
     end
 
+    subgraph "行政機関辞書 (government_agency_names.csv)"
+        direction TB
+        GOV_FO["field_office: 352件<br/>地方整備局・農政局・労働局・法務局 等"]
+        GOV_PB["prefectural_branch: 87件<br/>都道府県警察・都道府県教育委員会 等"]
+        GOV_MC["municipal_committee: 72件<br/>市区町村教育委員会・農業委員会 等"]
+        GOV_SP["special_org: 7件<br/>特殊法人・学校法人地方機関 等"]
+    end
+
     subgraph "補助辞書 (supplementary_valid_names.csv)"
         direction TB
-        SUPP_GOV["government_branch: 431件<br/>地方整備局・農政局・労働局<br/>都道府県警察 等"]
         SUPP_UNI["university_rename: 78件<br/>改組前大学名<br/>(東京工業大学→東京科学大学 等)"]
     end
 
-    STRICT_I -.->|"invalidの中から<br/>実在確認済みを救済"| SUPP_GOV & SUPP_UNI
+    STRICT_I -.->|"行政機関として確認済みを救済"| GOV_FO & GOV_PB & GOV_MC & GOV_SP
+    STRICT_I -.->|"大学名改組等を救済"| SUPP_UNI
 ```
 
 ---

@@ -28,6 +28,7 @@ BUDGET_CSV = REPO_ROOT / 'data' / 'year_2024' / '2-1_RS_2024_予算・執行_サ
 SPEND_CSV  = REPO_ROOT / 'data' / 'year_2024' / '5-1_RS_2024_支出先_支出情報.csv'
 BLOCK_CSV  = REPO_ROOT / 'data' / 'year_2024' / '5-2_RS_2024_支出先_支出ブロックのつながり.csv'
 DICT_CSV   = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'recipient_dictionary.csv'
+GOV_CSV    = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'government_agency_names.csv'
 SUPP_CSV   = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'supplementary_valid_names.csv'
 OPAQUE_CSV = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'opaque_recipient_keywords.csv'
 OUT_CSV    = REPO_ROOT / 'data' / 'result' / 'project_quality_scores.csv'
@@ -47,7 +48,14 @@ with open(DICT_CSV, encoding='utf-8') as f:
     for r in csv.DictReader(f):
         dict_map[r['name']] = r['valid'] == 'True'
 
-# 補助辞書ロード（厳密辞書invalidの中から実在確認済みの名称を救済）
+# 行政機関辞書ロード（厳密辞書invalidの中から行政機関として確認済みの名称を救済）
+gov_agency_map = {}  # name -> agency_type
+with open(GOV_CSV, encoding='utf-8') as f:
+    for r in csv.DictReader(f):
+        gov_agency_map[r['name']] = r['agency_type']
+print(f'  行政機関辞書: {len(gov_agency_map):,}件')
+
+# 補助辞書ロード（厳密辞書invalidの中から実在確認済みの名称を救済 / 大学名改組等）
 supp_map = {}  # name -> category
 with open(SUPP_CSV, encoding='utf-8') as f:
     for r in csv.DictReader(f):
@@ -174,7 +182,7 @@ print('支出先データ ロード中...')
 class ProjectStats:
     __slots__ = [
         'pid', 'name', 'ministry', 'bureau', 'division', 'section', 'office', 'team', 'unit',
-        'valid_count', 'supp_valid_count', 'invalid_count',
+        'valid_count', 'gov_agency_count', 'supp_valid_count', 'invalid_count',
         'cn_filled', 'cn_empty',
         'spend_total', 'spend_net_total',
         'block_names', 'has_redelegation', 'redelegation_depth',
@@ -194,6 +202,7 @@ class ProjectStats:
         self.team = team
         self.unit = unit
         self.valid_count = 0
+        self.gov_agency_count = 0
         self.supp_valid_count = 0
         self.invalid_count = 0
         self.cn_filled = 0
@@ -239,10 +248,12 @@ with open(SPEND_CSV, encoding='utf-8') as f:
 
         ps.row_count += 1
 
-        # 軸1: 支出先名品質
+        # 軸1: 支出先名品質（3層辞書: 厳密 → 行政機関 → 補助）
         if recipient_name in dict_map:
             if dict_map[recipient_name]:
                 ps.valid_count += 1
+            elif recipient_name in gov_agency_map:
+                ps.gov_agency_count += 1
             elif recipient_name in supp_map:
                 ps.supp_valid_count += 1
             else:
@@ -295,10 +306,11 @@ def calc_scores(ps):
     scores = {}
 
     # 軸1: 支出先名品質 (0-100)
-    # valid = 厳密辞書valid, supp_valid = 補助辞書で救済, invalid = 厳密辞書invalid かつ補助辞書にもなし
-    dict_total = ps.valid_count + ps.supp_valid_count + ps.invalid_count
+    # valid = 厳密辞書valid, gov_agency = 行政機関辞書で救済, supp_valid = 補助辞書で救済
+    # invalid = いずれの辞書にも存在しない
+    dict_total = ps.valid_count + ps.gov_agency_count + ps.supp_valid_count + ps.invalid_count
     if dict_total > 0:
-        scores['valid_ratio'] = (ps.valid_count + ps.supp_valid_count) / dict_total
+        scores['valid_ratio'] = (ps.valid_count + ps.gov_agency_count + ps.supp_valid_count) / dict_total
         scores['axis1'] = clamp(scores['valid_ratio'] * 100)
     else:
         scores['valid_ratio'] = None
@@ -394,7 +406,7 @@ def calc_scores(ps):
 # ── 5. CSV出力 ──
 fieldnames = [
     '予算事業ID', '事業名', '府省庁', '局・庁', '部', '課', '室', '班', '係',
-    '支出先行数', 'valid数', '補助辞書valid数', 'invalid数', 'valid率',
+    '支出先行数', 'valid数', '行政機関辞書valid数', '補助辞書valid数', 'invalid数', 'valid率',
     'CN記入数', 'CN未記入数', 'CN記入率',
     '予算額', '執行額', '支出先合計額', '実質支出額', '乖離率',
     'ブロック数', '再委託有無', '再委託階層',
@@ -440,6 +452,7 @@ for pid in sorted_pids:
         '係': ps.unit,
         '支出先行数': ps.row_count,
         'valid数': ps.valid_count,
+        '行政機関辞書valid数': ps.gov_agency_count,
         '補助辞書valid数': ps.supp_valid_count,
         'invalid数': ps.invalid_count,
         'valid率': fmt_pct(sc['valid_ratio']),
@@ -485,6 +498,7 @@ for pid in sorted_pids:
         'unit': ps.unit,
         'rowCount': ps.row_count,
         'validCount': ps.valid_count,
+        'govAgencyCount': ps.gov_agency_count,
         'suppValidCount': ps.supp_valid_count,
         'invalidCount': ps.invalid_count,
         'validRatio': sc['valid_ratio'],

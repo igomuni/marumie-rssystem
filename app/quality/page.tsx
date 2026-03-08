@@ -382,7 +382,7 @@ export default function QualityPage() {
                           <div>
                             <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-1">支出先名品質</h4>
                             <div className="space-y-0.5 text-gray-600 dark:text-gray-400">
-                              <div>valid: {item.validCount}{item.suppValidCount > 0 && <span className="text-blue-500"> (+補助{item.suppValidCount})</span>} / invalid: {item.invalidCount}</div>
+                              <div>valid: {item.validCount}{item.govAgencyCount > 0 && <span className="text-green-600"> (+行政{item.govAgencyCount})</span>}{item.suppValidCount > 0 && <span className="text-blue-500"> (+補助{item.suppValidCount})</span>} / invalid: {item.invalidCount}</div>
                               <div>valid率: {pct(item.validRatio)}</div>
                               <div>CN記入: {item.cnFilled} / 未記入: {item.cnEmpty}</div>
                               <div>CN記入率: {pct(item.cnFillRatio)}</div>
