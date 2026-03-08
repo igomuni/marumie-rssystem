@@ -13,6 +13,7 @@ export interface QualityScoreItem {
   team: string;
   unit: string;
   rowCount: number;
+  recipientCount?: number;
   validCount: number;
   govAgencyCount: number;
   suppValidCount: number;

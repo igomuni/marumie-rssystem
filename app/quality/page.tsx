@@ -22,26 +22,64 @@ const STATUS_META: Record<RecipientRow['s'], { label: string; cls: string }> = {
 function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose: () => void }) {
   const [recipients, setRecipients] = useState<RecipientRow[] | null>(null);
   const [recipientsError, setRecipientsError] = useState(false);
+  const [recipientSearch, setRecipientSearch] = useState('');
+  const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a2' | 'pct'>('chain');
+  const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
+  const [showAxisDetail, setShowAxisDetail] = useState(false);
 
   useEffect(() => {
     setRecipients(null);
     setRecipientsError(false);
+    setRecipientSearch('');
+    setRecipientSortField('chain');
+    setRecipientSortDir('asc');
+    setShowAxisDetail(false);
     fetch(`/api/quality-scores/recipients?pid=${item.pid}`)
       .then(res => res.ok ? res.json() : Promise.reject())
-      .then((rows: RecipientRow[]) => {
-        // ブロック番号順 → 金額降順
-        rows.sort((a, b) => a.b.localeCompare(b.b) || b.a - a.a);
-        setRecipients(rows);
-      })
+      .then((rows: RecipientRow[]) => setRecipients(rows))
       .catch(() => setRecipientsError(true));
   }, [item.pid]);
 
+  const displayedRecipients = useMemo(() => {
+    if (!recipients) return [];
+    let rows = recipients;
+    if (recipientSearch.trim()) {
+      const q = recipientSearch.trim().toLowerCase();
+      rows = rows.filter(r => r.n.toLowerCase().includes(q));
+    }
+    return [...rows].sort((a, b) => {
+      let cmp = 0;
+      if (recipientSortField === 'chain') cmp = (a.chain ?? a.b).localeCompare(b.chain ?? b.b) || (b.a2 ?? -1) - (a.a2 ?? -1);
+      else if (recipientSortField === 'b') cmp = a.b.localeCompare(b.b) || (b.a2 ?? -1) - (a.a2 ?? -1);
+      else if (recipientSortField === 's') cmp = a.s.localeCompare(b.s);
+      else if (recipientSortField === 'c') cmp = (b.c ? 1 : 0) - (a.c ? 1 : 0);
+      else if (recipientSortField === 'o') cmp = (b.o ? 1 : 0) - (a.o ? 1 : 0);
+      else if (recipientSortField === 'a2') cmp = (b.a2 ?? -1) - (a.a2 ?? -1);
+      else if (recipientSortField === 'pct') {
+        const net = item.spendNetTotal || 1;
+        const ap = a.a2 !== null && a.a2 > 0 ? a.a2 / net : -1;
+        const bp = b.a2 !== null && b.a2 > 0 ? b.a2 / net : -1;
+        cmp = bp - ap;
+      }
+      return recipientSortDir === 'desc' ? -cmp : cmp;
+    });
+  }, [recipients, recipientSearch, recipientSortField, recipientSortDir]);
+
+  function handleRecipientSort(field: typeof recipientSortField) {
+    if (recipientSortField === field) {
+      setRecipientSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setRecipientSortField(field);
+      setRecipientSortDir(field === 'a2' || field === 'pct' ? 'desc' : 'asc');
+    }
+  }
+
   const axes = [
     { key: 'axis1', label: '軸1: 支出先名品質', weight: 40, score: item.axis1 },
-    { key: 'axis2', label: '軸2: 法人番号記入率', weight: 20, score: item.axis2 },
+    { key: 'axis2', label: '軸2: CN記入率', weight: 20, score: item.axis2 },
     { key: 'axis3', label: '軸3: 予算・支出バランス', weight: 20, score: item.axis3 },
     { key: 'axis4', label: '軸4: ブロック構造', weight: 10, score: item.axis4 },
-    { key: 'axis5', label: '軸5: 支出先名の透明性', weight: 10, score: item.axis5 },
+    { key: 'axis5', label: '軸5: 透明性', weight: 10, score: item.axis5 },
   ] as const;
 
   const axis1Total = item.validCount + item.govAgencyCount + item.suppValidCount + item.invalidCount;
@@ -50,21 +88,9 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
   const axis4TotalDeduct = item.axis4 !== null ? Math.round(100 - item.axis4) : null;
   const axis4IncoDeduct = axis4TotalDeduct !== null ? Math.max(0, axis4TotalDeduct - axis4RedelDeduct) : null;
 
-  function AxisBar({ score }: { score: number | null }) {
-    if (score === null) return <span className="text-gray-400 text-xs">-</span>;
-    const w = Math.max(0, Math.min(100, score));
-    let bg = 'bg-red-400';
-    if (score >= 90) bg = 'bg-green-400';
-    else if (score >= 70) bg = 'bg-blue-400';
-    else if (score >= 50) bg = 'bg-yellow-400';
-    return (
-      <div className="flex items-center gap-2">
-        <div className="w-32 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full ${bg}`} style={{ width: `${w}%` }} />
-        </div>
-        <span className={`text-sm font-bold font-mono ${scoreColor(score)}`}>{score.toFixed(1)}</span>
-      </div>
-    );
+  function RSortIcon({ field }: { field: typeof recipientSortField }) {
+    if (recipientSortField !== field) return <span className="text-gray-300 ml-0.5">↕</span>;
+    return <span className="text-blue-400 ml-0.5">{recipientSortDir === 'desc' ? '↓' : '↑'}</span>;
   }
 
   return (
@@ -73,206 +99,305 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl mx-4 max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-start justify-between gap-2">
-          <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">PID {item.pid} · {item.ministry}</div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-white leading-snug">{item.name}</div>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none mt-0.5 shrink-0">×</button>
-        </div>
-
-        {/* Total score */}
-        <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4">
-          <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">総合スコア</div>
-            <div className={`text-3xl font-bold font-mono ${scoreColor(item.totalScore)}`}>
-              {item.totalScore !== null ? item.totalScore.toFixed(1) : '-'}
+        <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 flex items-start justify-between gap-3 shrink-0 bg-gray-50 dark:bg-gray-800 rounded-t-2xl">
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-bold text-gray-900 dark:text-white leading-snug">{item.name}</div>
+            <div className="flex items-center gap-1.5 flex-wrap mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+              <span className="font-mono bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded">PID {item.pid}</span>
+              {[item.ministry, item.bureau, item.division, item.section, item.office, item.team, item.unit].filter(Boolean).map((org, i) => (
+                <span key={i}>{i > 0 ? '' : ''}<span className={i === 0 ? 'font-medium' : ''}>{org}</span>{i < [item.ministry, item.bureau, item.division, item.section, item.office, item.team, item.unit].filter(Boolean).length - 1 ? <span className="text-gray-300 dark:text-gray-600 mx-0.5">›</span> : null}</span>
+              ))}
             </div>
           </div>
-          <div className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
-            {axes.filter(a => a.score !== null).map(a => `軸${a.key.slice(4)}×${a.weight}%`).join(' + ')}
-            <br />の加重平均
-          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">×</button>
         </div>
 
-        {/* Axes */}
-        <div className="divide-y divide-gray-100 dark:divide-gray-800">
-          {/* Axis 1 */}
-          <div className="px-5 py-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">軸1: 支出先名品質 <span className="text-gray-400 font-normal">（重み40%）</span></div>
-              <AxisBar score={item.axis1} />
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5 ml-0">
-              <div className="flex gap-3 flex-wrap">
-                <span className="text-green-600 dark:text-green-400">厳密valid: {item.validCount}</span>
-                {item.govAgencyCount > 0 && <span className="text-green-500 dark:text-green-500">行政機関: {item.govAgencyCount}</span>}
-                {item.suppValidCount > 0 && <span className="text-blue-500">補助辞書: {item.suppValidCount}</span>}
-                <span className="text-red-500">invalid: {item.invalidCount}</span>
-                <span className="text-gray-400">計: {axis1Total}</span>
+        {/* Score summary — single compact row */}
+        <div className="px-6 py-2.5 border-b border-gray-200 dark:border-gray-700 shrink-0">
+          <div className="flex items-center gap-4">
+            {/* Score badge */}
+            <div className="shrink-0 text-center">
+              <div className={`text-2xl font-bold font-mono leading-none ${scoreColor(item.totalScore)}`}>
+                {item.totalScore !== null ? item.totalScore.toFixed(1) : '-'}
               </div>
-              {axis1Total > 0 && (
-                <div className="mt-1 font-mono text-gray-400">
-                  ({axis1Num} / {axis1Total}) × 100 = {item.axis1 !== null ? item.axis1.toFixed(1) : '-'}点
+              <div className="text-[9px] text-gray-400 dark:text-gray-500 mt-0.5">総合</div>
+            </div>
+            {/* Divider */}
+            <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 shrink-0" />
+            {/* Axis scores — horizontal row */}
+            <div className="flex items-center gap-3 shrink-0">
+              {axes.map(a => (
+                <div key={a.key} className="text-center">
+                  <div className={`text-xs font-bold font-mono leading-none ${scoreColor(a.score)}`}>
+                    {a.score !== null ? a.score.toFixed(0) : '-'}
+                  </div>
+                  <div className="text-[8px] text-gray-400 mt-0.5 whitespace-nowrap">{a.label.replace(/^軸\d: /, '')}</div>
                 </div>
+              ))}
+            </div>
+            {/* Divider */}
+            <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 shrink-0" />
+            {/* Key metrics — 3 lines inline */}
+            <div className="flex-1 min-w-0 text-[10px] text-gray-700 dark:text-gray-200 space-y-0.5">
+              <div className="flex flex-wrap gap-x-3">
+                <span><span className="text-gray-400">予算:</span><span className="font-mono">{formatAmount(item.budgetAmount)}</span></span>
+                <span><span className="text-gray-400">執行:</span><span className="font-mono">{formatAmount(item.execAmount)}</span></span>
+                <span><span className="text-gray-400">実質支出:</span><span className="font-mono">{formatAmount(item.spendNetTotal)}</span></span>
+                <span><span className="text-gray-400">乖離率:</span><span className="font-mono">{pct(item.gapRatio)}</span></span>
+              </div>
+              <div className="flex flex-wrap gap-x-3">
+                <span><span className="text-gray-400">支出先数:</span><span className="font-mono">{recipients?.length ?? '...'}</span></span>
+                <span><span className="text-gray-400">ブロック:</span>{item.blockCount}件</span>
+                {item.hasRedelegation && <span><span className="text-gray-400">深度:</span><span className="text-orange-500">{item.redelegationDepth}</span></span>}
+                {item.opaqueRatio !== null && item.opaqueRatio > 0 && <span><span className="text-gray-400">不透明:</span><span className="text-amber-500">{pct(item.opaqueRatio)}</span></span>}
+              </div>
+              <div className="flex flex-wrap gap-x-3">
+                <span><span className="text-gray-400">valid</span> <span className="font-mono">{axis1Num}/{axis1Total}</span></span>
+                <span><span className="text-gray-400">CN</span> <span className="font-mono">{item.cnFilled}/{item.cnFilled + item.cnEmpty}</span></span>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowAxisDetail(d => !d)}
+            className="mt-1 text-[11px] text-blue-500 hover:text-blue-700 dark:hover:text-blue-300"
+          >
+            {showAxisDetail ? '▲ 計算根拠を閉じる' : '▼ スコア計算根拠'}
+          </button>
+        </div>
+
+        {/* Axis detail (collapsible) */}
+        {showAxisDetail && (
+          <div className="border-b border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800 shrink-0 overflow-y-auto max-h-72">
+            {/* Axis 1 */}
+            <div className="px-5 py-2.5">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">軸1: 支出先名品質（重み40%）</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                <div className="flex gap-3 flex-wrap">
+                  <span className="text-green-600 dark:text-green-400">厳密valid: {item.validCount}</span>
+                  {item.govAgencyCount > 0 && <span className="text-emerald-500">行政機関: {item.govAgencyCount}</span>}
+                  {item.suppValidCount > 0 && <span className="text-blue-500">補助辞書: {item.suppValidCount}</span>}
+                  <span className="text-red-500">invalid: {item.invalidCount}</span>
+                  <span className="text-gray-400">計: {axis1Total}</span>
+                </div>
+                {axis1Total > 0 && (
+                  <div className="font-mono text-gray-400">
+                    ({axis1Num} / {axis1Total}) × 100 = {item.axis1 !== null ? item.axis1.toFixed(1) : '-'}点
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Axis 2 */}
+            <div className="px-5 py-2.5">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">軸2: 法人番号記入率（重み20%）</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                <div className="flex gap-3 flex-wrap">
+                  <span className="text-green-600 dark:text-green-400">CN記入: {item.cnFilled}</span>
+                  <span className="text-red-500">未記入: {item.cnEmpty}</span>
+                </div>
+                <div className="font-mono text-gray-400">
+                  ({item.cnFilled} / {item.cnFilled + item.cnEmpty}) × 100 = {item.axis2 !== null ? item.axis2.toFixed(1) : '-'}点
+                </div>
+              </div>
+            </div>
+
+            {/* Axis 3 */}
+            <div className="px-5 py-2.5">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">軸3: 予算・支出バランス（重み20%）</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                <div className="flex gap-3 flex-wrap">
+                  <span>予算額: {formatAmount(item.budgetAmount)}</span>
+                  <span>執行額: {formatAmount(item.execAmount)}</span>
+                  <span>実質支出: {formatAmount(item.spendNetTotal)}</span>
+                </div>
+                <div className="flex gap-3 flex-wrap font-mono text-gray-400">
+                  {item.budgetAmount > 0 && <span>予算執行率: {pct(item.execAmount / item.budgetAmount)}</span>}
+                  <span>執行 vs 実質支出 乖離: {pct(item.gapRatio)}</span>
+                </div>
+                <div className="font-mono text-gray-400">
+                  執行額 − 実質支出 の乖離率 {pct(item.gapRatio)} → (1 − {pct(item.gapRatio)}) × 100 = {item.axis3 !== null ? item.axis3.toFixed(1) : '-'}点
+                </div>
+              </div>
+            </div>
+
+            {/* Axis 4 */}
+            <div className="px-5 py-2.5">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">軸4: ブロック構造（重み10%）</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                <div className="flex gap-3 flex-wrap">
+                  <span>ブロック数: {item.blockCount}</span>
+                  {item.orphanBlockCount > 0 && <span className="text-orange-500">孤立: {item.orphanBlockCount}</span>}
+                </div>
+                <div className="flex gap-2 flex-wrap font-mono text-gray-400">
+                  <span>基礎: 100点</span>
+                  {axis4RedelDeduct > 0 && (
+                    <span className="text-red-400">再委託深度{item.redelegationDepth}: −{axis4RedelDeduct}点</span>
+                  )}
+                  {axis4IncoDeduct !== null && axis4IncoDeduct > 0 && (
+                    <span className="text-red-400">金額不整合: −{axis4IncoDeduct}点</span>
+                  )}
+                  <span>= {item.axis4 !== null ? item.axis4.toFixed(1) : '-'}点</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Axis 5 */}
+            <div className="px-5 py-2.5">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">軸5: 支出先名の透明性（重み10%）</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                <div>不透明支出先率: {pct(item.opaqueRatio)}</div>
+                <div className="font-mono text-gray-400">
+                  (1 − {pct(item.opaqueRatio)} / 50%) × 100 = {item.axis5 !== null ? item.axis5.toFixed(1) : '-'}点
+                </div>
+              </div>
+            </div>
+
+            {/* Weighted sum */}
+            <div className="px-5 py-2 bg-gray-50 dark:bg-gray-800">
+              <div className="text-xs font-mono text-gray-400">
+                {axes.filter(a => a.score !== null).map(a => `${a.score!.toFixed(1)}×${a.weight}`).join(' + ')}
+                {' '}= <span className={`font-bold ${scoreColor(item.totalScore)}`}>{item.totalScore?.toFixed(1)}</span>点
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Recipients */}
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="px-6 py-2.5 border-b border-gray-200 dark:border-gray-700 shrink-0 bg-gray-50 dark:bg-gray-800/50">
+            <div className="flex items-center gap-3">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 shrink-0">
+                支出先一覧
+                {recipients && (
+                  <span className="ml-1.5 text-gray-400 font-normal font-mono">
+                    {recipientSearch.trim() && displayedRecipients.length !== recipients.length
+                      ? `${displayedRecipients.length} / ${recipients.length}件`
+                      : `${recipients.length}件`}
+                  </span>
+                )}
+              </div>
+              {recipients && recipients.length > 0 && (
+                <input
+                  type="text"
+                  placeholder="支出先名で検索..."
+                  value={recipientSearch}
+                  onChange={e => setRecipientSearch(e.target.value)}
+                  className="flex-1 px-3 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none"
+                />
               )}
             </div>
           </div>
 
-          {/* Axis 2 */}
-          <div className="px-5 py-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">軸2: 法人番号記入率 <span className="text-gray-400 font-normal">（重み20%）</span></div>
-              <AxisBar score={item.axis2} />
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-              <div className="flex gap-3 flex-wrap">
-                <span className="text-green-600 dark:text-green-400">CN記入: {item.cnFilled}</span>
-                <span className="text-red-500">未記入: {item.cnEmpty}</span>
-              </div>
-              <div className="font-mono text-gray-400">
-                ({item.cnFilled} / {item.cnFilled + item.cnEmpty}) × 100 = {item.axis2 !== null ? item.axis2.toFixed(1) : '-'}点
-              </div>
-            </div>
-          </div>
-
-          {/* Axis 3 */}
-          <div className="px-5 py-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">軸3: 予算・支出バランス <span className="text-gray-400 font-normal">（重み20%）</span></div>
-              <AxisBar score={item.axis3} />
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-              <div className="flex gap-3 flex-wrap">
-                <span>執行額: {formatAmount(item.execAmount)}</span>
-                <span>実質支出: {formatAmount(item.spendNetTotal)}</span>
-              </div>
-              <div className="font-mono text-gray-400">
-                乖離率 {pct(item.gapRatio)} → (1 − {pct(item.gapRatio)}) × 100 = {item.axis3 !== null ? item.axis3.toFixed(1) : '-'}点
-              </div>
-            </div>
-          </div>
-
-          {/* Axis 4 */}
-          <div className="px-5 py-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">軸4: ブロック構造 <span className="text-gray-400 font-normal">（重み10%）</span></div>
-              <AxisBar score={item.axis4} />
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-              <div className="flex gap-3 flex-wrap">
-                <span>ブロック数: {item.blockCount}</span>
-                {item.orphanBlockCount > 0 && <span className="text-orange-500">孤立: {item.orphanBlockCount}</span>}
-              </div>
-              <div className="flex gap-2 flex-wrap font-mono text-gray-400">
-                <span>基礎: 100点</span>
-                {axis4RedelDeduct > 0 && (
-                  <span className="text-red-400">再委託深度{item.redelegationDepth}: −{axis4RedelDeduct}点</span>
-                )}
-                {axis4IncoDeduct !== null && axis4IncoDeduct > 0 && (
-                  <span className="text-red-400">金額不整合: −{axis4IncoDeduct}点</span>
-                )}
-                <span>= {item.axis4 !== null ? item.axis4.toFixed(1) : '-'}点</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Axis 5 */}
-          <div className="px-5 py-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">軸5: 支出先名の透明性 <span className="text-gray-400 font-normal">（重み10%）</span></div>
-              <AxisBar score={item.axis5} />
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-              <div>不透明支出先率: {pct(item.opaqueRatio)}</div>
-              <div className="font-mono text-gray-400">
-                (1 − {pct(item.opaqueRatio)} / 50%) × 100 = {item.axis5 !== null ? item.axis5.toFixed(1) : '-'}点
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Weighted sum */}
-        <div className="px-5 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-xs font-mono text-gray-400 leading-relaxed">
-            {axes
-              .filter(a => a.score !== null)
-              .map(a => `${a.score!.toFixed(1)}×${a.weight}`)
-              .join(' + ')}
-            {' '}= <span className={`font-bold ${scoreColor(item.totalScore)}`}>{item.totalScore?.toFixed(1)}</span>点
-          </div>
-        </div>
-
-        {/* Recipients */}
-        <div className="border-t border-gray-200 dark:border-gray-700">
-          <div className="px-5 py-3 flex items-center justify-between">
-            <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-              支出先一覧
-              {recipients && <span className="ml-1 text-gray-400 font-normal">({recipients.length}件)</span>}
-            </div>
-          </div>
           {recipientsError && (
-            <div className="px-5 pb-4 text-xs text-gray-400">
+            <div className="px-6 py-4 text-xs text-gray-400">
               データを読み込めません（<code>python3 scripts/score-project-quality.py</code> を実行してください）
             </div>
           )}
           {!recipientsError && recipients === null && (
-            <div className="px-5 pb-4 flex items-center gap-2 text-xs text-gray-400">
+            <div className="px-6 py-4 flex items-center gap-2 text-xs text-gray-400">
               <div className="animate-spin h-3 w-3 border border-gray-400 border-t-transparent rounded-full" />
               読み込み中...
             </div>
           )}
           {recipients && recipients.length === 0 && (
-            <div className="px-5 pb-4 text-xs text-gray-400">支出先データなし</div>
+            <div className="px-6 py-4 text-xs text-gray-400">支出先データなし</div>
           )}
           {recipients && recipients.length > 0 && (
-            <div className="overflow-x-auto">
+            <div className="overflow-y-auto flex-1">
               <table className="w-full text-xs">
-                <thead className="bg-gray-50 dark:bg-gray-800">
-                  <tr className="text-gray-500 dark:text-gray-400">
-                    <th className="px-3 py-1.5 text-left font-medium">支出先名</th>
-                    <th className="px-2 py-1.5 text-center font-medium whitespace-nowrap">ブロック</th>
-                    <th className="px-2 py-1.5 text-center font-medium whitespace-nowrap">軸1判定</th>
-                    <th className="px-2 py-1.5 text-center font-medium whitespace-nowrap">CN</th>
-                    <th className="px-2 py-1.5 text-center font-medium whitespace-nowrap">透明性</th>
-                    <th className="px-2 py-1.5 text-right font-medium whitespace-nowrap">金額</th>
+                <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
+                  <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                    <th className="px-4 py-2 text-left font-semibold">支出先名</th>
+                    <th
+                      className="px-3 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
+                      onClick={() => handleRecipientSort('chain')}
+                      title="委託チェーン（A→B→C）でソート"
+                    >
+                      委託チェーン<RSortIcon field="chain" />
+                    </th>
+                    <th
+                      className="px-3 py-2 text-center font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
+                      onClick={() => handleRecipientSort('s')}
+                    >
+                      軸1判定<RSortIcon field="s" />
+                    </th>
+                    <th
+                      className="px-3 py-2 text-center font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
+                      onClick={() => handleRecipientSort('c')}
+                    >
+                      CN<RSortIcon field="c" />
+                    </th>
+                    <th
+                      className="px-3 py-2 text-center font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
+                      onClick={() => handleRecipientSort('o')}
+                    >
+                      透明性<RSortIcon field="o" />
+                    </th>
+                    <th
+                      className="px-3 py-2 text-right font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
+                      onClick={() => handleRecipientSort('a2')}
+                      title="個別支出額（CSVの「金額」列）"
+                    >
+                      金額<RSortIcon field="a2" />
+                    </th>
+                    <th
+                      className="px-3 py-2 text-right font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none text-gray-400"
+                      onClick={() => handleRecipientSort('pct')}
+                      title="実質支出合計に対する割合"
+                    >
+                      実支出比<RSortIcon field="pct" />
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold whitespace-nowrap" title="事業を行う上での役割（ブロック単位）">役割</th>
+                    <th className="px-3 py-2 text-left font-semibold whitespace-nowrap" title="契約概要">契約概要</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {recipients.map((row, i) => {
+                  {displayedRecipients.map((row, i) => {
                     const sm = STATUS_META[row.s];
                     return (
-                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                        <td className="px-3 py-1 text-gray-800 dark:text-gray-200 max-w-[200px] truncate" title={row.n}>
+                      <tr key={i} className="hover:bg-blue-50/50 dark:hover:bg-gray-800/60 transition-colors">
+                        <td className="px-4 py-1.5 text-gray-800 dark:text-gray-200 max-w-[260px] truncate font-medium" title={row.n}>
                           {row.n}
                         </td>
-                        <td className="px-2 py-1 text-center font-mono text-gray-500">
-                          {row.b || '-'}
-                          {row.r && <span className="ml-1 text-[9px] text-green-500">●</span>}
+                        <td className="px-3 py-1.5 font-mono text-gray-500 dark:text-gray-400 whitespace-nowrap" title={row.chain}>
+                          {row.chain
+                            ? (row.chain.startsWith('組織→') ? row.chain.slice('組織→'.length) : row.chain)
+                            : (row.b || '-')}
                         </td>
-                        <td className="px-2 py-1 text-center">
-                          <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${sm.cls}`}>
+                        <td className="px-3 py-1.5 text-center">
+                          <span className={`inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold ${sm.cls}`}>
                             {sm.label}
                           </span>
                         </td>
-                        <td className="px-2 py-1 text-center">
+                        <td className="px-3 py-1.5 text-center">
                           {row.c
-                            ? <span className="text-green-500">✓</span>
-                            : <span className="text-gray-300 dark:text-gray-600">-</span>
+                            ? <span className="text-emerald-500 font-bold">✓</span>
+                            : <span className="text-gray-300 dark:text-gray-600">—</span>
                           }
                         </td>
-                        <td className="px-2 py-1 text-center">
+                        <td className="px-3 py-1.5 text-center">
                           {row.o
-                            ? <span className="text-red-500" title="不透明キーワードにマッチ">⚠</span>
-                            : <span className="text-gray-300 dark:text-gray-600">-</span>
+                            ? <span className="text-amber-500 font-bold" title="不透明キーワードにマッチ">⚠</span>
+                            : <span className="text-gray-300 dark:text-gray-600">—</span>
                           }
                         </td>
-                        <td className="px-2 py-1 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                          {row.a ? formatAmount(row.a) : '-'}
+                        <td className="px-3 py-1.5 text-right font-mono text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                          {row.a2 === null ? <span className="text-gray-300 dark:text-gray-600">—</span> : formatAmount(row.a2)}
+                        </td>
+                        <td className="px-3 py-1.5 text-right font-mono text-gray-400 whitespace-nowrap">
+                          {row.a2 !== null && row.a2 > 0 && item.spendNetTotal > 0
+                            ? (() => { const p = row.a2 / item.spendNetTotal * 100; return p >= 1 ? `${p.toFixed(0)}%` : '<1%'; })()
+                            : <span className="text-gray-300 dark:text-gray-600">—</span>}
+                        </td>
+                        <td className="px-3 py-1.5 text-gray-500 dark:text-gray-400 max-w-[200px] truncate" title={row.role || undefined}>
+                          {row.role || <span className="text-gray-300 dark:text-gray-600">—</span>}
+                        </td>
+                        <td className="px-3 py-1.5 text-gray-600 dark:text-gray-300 max-w-[240px] truncate" title={row.cc || undefined}>
+                          {row.cc || <span className="text-gray-300 dark:text-gray-600">—</span>}
                         </td>
                       </tr>
                     );
@@ -597,7 +722,7 @@ export default function QualityPage() {
                   再委託階層<SortIcon field="redelegationDepth" />
                 </th>
                 <th className="px-2 py-2 text-right cursor-pointer whitespace-nowrap" onClick={() => handleSort('rowCount')}>
-                  行数<SortIcon field="rowCount" />
+                  支出先数<SortIcon field="rowCount" />
                 </th>
               </tr>
             </thead>
@@ -639,7 +764,7 @@ export default function QualityPage() {
                     <td className="px-2 py-1.5 text-right font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap">
                       {item.redelegationDepth || '-'}
                     </td>
-                    <td className="px-2 py-1.5 text-right font-mono text-gray-500">{item.rowCount}</td>
+                    <td className="px-2 py-1.5 text-right font-mono text-gray-500">{item.recipientCount ?? item.rowCount}</td>
                   </tr>
                   {expandedRow === item.pid && (
                     <tr className="bg-gray-50 dark:bg-gray-800/50">
