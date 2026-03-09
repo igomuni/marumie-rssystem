@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import type { QualityScoreItem, QualityScoresResponse } from '@/app/api/quality-scores/route';
 import type { RecipientRow } from '@/app/api/quality-scores/recipients/route';
@@ -26,6 +26,23 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
   const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a2' | 'pct'>('chain');
   const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
   const [showAxisDetail, setShowAxisDetail] = useState(false);
+  const COL_MAX_WIDTHS = [undefined, 70, 50, 30, 40, 70, 50, undefined, undefined];
+  const [colWidths, setColWidths] = useState<number[]>([200, 70, 50, 30, 40, 70, 50, 150, 200]);
+  const resizingCol = useRef<{ index: number; startX: number; startW: number } | null>(null);
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!resizingCol.current) return;
+      const { index, startX, startW } = resizingCol.current;
+      const maxW = COL_MAX_WIDTHS[index];
+      const newW = Math.min(maxW ?? Infinity, Math.max(40, startW + e.clientX - startX));
+      setColWidths(prev => { const next = [...prev]; next[index] = newW; return next; });
+    };
+    const onMouseUp = () => { resizingCol.current = null; };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    return () => { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp); };
+  }, []);
 
   useEffect(() => {
     setRecipients(null);
@@ -99,7 +116,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl mx-4 max-h-[92vh] flex flex-col"
+        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-8xl mx-4 max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -308,51 +325,36 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
           )}
           {recipients && recipients.length > 0 && (
             <div className="overflow-y-auto flex-1">
-              <table className="w-full text-xs">
+              <table className="w-full text-xs table-fixed">
+                <colgroup>
+                  {colWidths.map((w, i) => <col key={i} style={{ width: w, maxWidth: COL_MAX_WIDTHS[i] }} />)}
+                </colgroup>
                 <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
                   <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                    <th className="px-4 py-2 text-left font-semibold">支出先名</th>
-                    <th
-                      className="px-3 py-2 text-left font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
-                      onClick={() => handleRecipientSort('chain')}
-                      title="委託チェーン（A→B→C）でソート"
-                    >
-                      委託チェーン<RSortIcon field="chain" />
-                    </th>
-                    <th
-                      className="px-3 py-2 text-center font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
-                      onClick={() => handleRecipientSort('s')}
-                    >
-                      軸1判定<RSortIcon field="s" />
-                    </th>
-                    <th
-                      className="px-3 py-2 text-center font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
-                      onClick={() => handleRecipientSort('c')}
-                    >
-                      CN<RSortIcon field="c" />
-                    </th>
-                    <th
-                      className="px-3 py-2 text-center font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
-                      onClick={() => handleRecipientSort('o')}
-                    >
-                      透明性<RSortIcon field="o" />
-                    </th>
-                    <th
-                      className="px-3 py-2 text-right font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none"
-                      onClick={() => handleRecipientSort('a2')}
-                      title="個別支出額（CSVの「金額」列）"
-                    >
-                      金額<RSortIcon field="a2" />
-                    </th>
-                    <th
-                      className="px-3 py-2 text-right font-semibold whitespace-nowrap cursor-pointer hover:text-gray-800 dark:hover:text-gray-200 select-none text-gray-400"
-                      onClick={() => handleRecipientSort('pct')}
-                      title="実質支出合計に対する割合"
-                    >
-                      実支出比<RSortIcon field="pct" />
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold whitespace-nowrap" title="事業を行う上での役割（ブロック単位）">役割</th>
-                    <th className="px-3 py-2 text-left font-semibold whitespace-nowrap" title="契約概要">契約概要</th>
+                    {([
+                      { label: '支出先名', align: 'left', sort: null, title: undefined },
+                      { label: '委託チェーン', align: 'left', sort: 'chain' as const, title: '委託チェーン（A→B→C）でソート' },
+                      { label: '軸1判定', align: 'center', sort: 's' as const, title: undefined },
+                      { label: 'CN', align: 'center', sort: 'c' as const, title: undefined },
+                      { label: '透明性', align: 'center', sort: 'o' as const, title: undefined },
+                      { label: '金額', align: 'right', sort: 'a2' as const, title: '個別支出額（CSVの「金額」列）' },
+                      { label: '実支出比', align: 'right', sort: 'pct' as const, title: '実質支出合計に対する割合' },
+                      { label: '役割', align: 'left', sort: null, title: '事業を行う上での役割（ブロック単位）' },
+                      { label: '契約概要', align: 'left', sort: null, title: undefined },
+                    ] as const).map((col, ci) => (
+                      <th
+                        key={ci}
+                        className={`px-3 py-2 font-semibold whitespace-nowrap select-none relative ${col.sort ? 'cursor-pointer hover:text-gray-800 dark:hover:text-gray-200' : ''} text-${col.align}`}
+                        onClick={col.sort ? () => handleRecipientSort(col.sort!) : undefined}
+                        title={col.title}
+                      >
+                        <span className="truncate block overflow-hidden">{col.label}{col.sort && <RSortIcon field={col.sort} />}</span>
+                        <div
+                          className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-400 dark:hover:bg-blue-500 z-20"
+                          onMouseDown={e => { e.preventDefault(); resizingCol.current = { index: ci, startX: e.clientX, startW: colWidths[ci] }; }}
+                        />
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -360,10 +362,10 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                     const sm = STATUS_META[row.s];
                     return (
                       <tr key={i} className="hover:bg-blue-50/50 dark:hover:bg-gray-800/60 transition-colors">
-                        <td className="px-4 py-1.5 text-gray-800 dark:text-gray-200 max-w-[260px] truncate font-medium" title={row.n}>
+                        <td className="px-4 py-1.5 text-gray-800 dark:text-gray-200 truncate font-medium" title={row.n}>
                           {row.n}
                         </td>
-                        <td className="px-3 py-1.5 font-mono text-gray-500 dark:text-gray-400 whitespace-nowrap" title={row.chain}>
+                        <td className="px-3 py-1.5 font-mono text-gray-500 dark:text-gray-400 truncate" title={row.chain}>
                           {row.chain
                             ? (row.chain.startsWith('組織→') ? row.chain.slice('組織→'.length) : row.chain)
                             : (row.b || '-')}
@@ -393,10 +395,10 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                             ? (() => { const p = row.a2 / item.spendNetTotal * 100; return p >= 1 ? `${p.toFixed(0)}%` : '<1%'; })()
                             : <span className="text-gray-300 dark:text-gray-600">—</span>}
                         </td>
-                        <td className="px-3 py-1.5 text-gray-500 dark:text-gray-400 max-w-[200px] truncate" title={row.role || undefined}>
+                        <td className="px-3 py-1.5 text-gray-500 dark:text-gray-400 truncate" title={row.role || undefined}>
                           {row.role || <span className="text-gray-300 dark:text-gray-600">—</span>}
                         </td>
-                        <td className="px-3 py-1.5 text-gray-600 dark:text-gray-300 max-w-[240px] truncate" title={row.cc || undefined}>
+                        <td className="px-3 py-1.5 text-gray-600 dark:text-gray-300 truncate" title={row.cc || undefined}>
                           {row.cc || <span className="text-gray-300 dark:text-gray-600">—</span>}
                         </td>
                       </tr>
@@ -459,8 +461,8 @@ export default function QualityPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMinistry, setSelectedMinistry] = useState<string>('');
   const [scoreRange, setScoreRange] = useState<ScoreRange>('all');
-  const [sortField, setSortField] = useState<SortField>('totalScore');
-  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [sortField, setSortField] = useState<SortField>('spendNetTotal');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [dialogItem, setDialogItem] = useState<QualityScoreItem | null>(null);
