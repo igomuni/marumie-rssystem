@@ -266,7 +266,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
             <div className="px-5 py-2.5">
               <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">軸5: 支出先名の透明性（重み10%）</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-                <div>不透明支出先率: {pct(item.opaqueRatio)}</div>
+                <div>不透明支出比: {pct(item.opaqueRatio)}</div>
                 <div className="font-mono text-gray-400">
                   (1 − {pct(item.opaqueRatio)} / 50%) × 100 = {item.axis5 !== null ? item.axis5.toFixed(1) : '-'}点
                 </div>
@@ -800,8 +800,8 @@ export default function QualityPage() {
                             <div className="space-y-0.5 text-gray-600 dark:text-gray-400">
                               <div>ブロック数: {item.blockCount}{item.orphanBlockCount > 0 && <span className="text-red-500"> (孤立: {item.orphanBlockCount})</span>}</div>
                               <div>再委託: {item.hasRedelegation ? `あり (階層${item.redelegationDepth})` : 'なし'}</div>
-                              <div>不透明支出先率: {pct(item.opaqueRatio)}</div>
-                              <div className="text-[10px] text-gray-400">（不透明キーワード辞書にマッチする行の割合）</div>
+                              <div>不透明支出比: {pct(item.opaqueRatio)}</div>
+                              <div className="text-[10px] text-gray-400">（不透明キーワード辞書にマッチする支出先への支出額の割合）</div>
                               <div>支出先行数: {item.rowCount}</div>
                             </div>
                           </div>
