@@ -12,7 +12,7 @@ type SortField = 'totalScore' | 'axis1' | 'axis2' | 'axis3' | 'axis4' | 'axis5'
 type SortDir = 'asc' | 'desc';
 
 const STATUS_META: Record<RecipientRow['s'], { label: string; cls: string }> = {
-  valid:   { label: '厳密OK',  cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+  valid:   { label: 'OK',      cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
   gov:     { label: '行政機関', cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' },
   supp:    { label: '補助辞書', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
   invalid: { label: '不一致',  cls: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
@@ -26,8 +26,8 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
   const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a2' | 'pct'>('chain');
   const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
   const [showAxisDetail, setShowAxisDetail] = useState(false);
-  const COL_MAX_WIDTHS = [undefined, 70, 50, 30, 40, 70, 50, undefined, undefined];
-  const [colWidths, setColWidths] = useState<number[]>([200, 70, 50, 30, 40, 70, 50, 150, 200]);
+  const COL_MAX_WIDTHS = [undefined, 70, 40, 60, 50, undefined, undefined];
+  const [colWidths, setColWidths] = useState<number[]>([200, 70, 40, 60, 50, 200, 200]);
   const resizingCol = useRef<{ index: number; startX: number; startW: number } | null>(null);
 
   useEffect(() => {
@@ -334,9 +334,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                     {([
                       { label: '支出先名', align: 'left', sort: null, title: undefined },
                       { label: '委託チェーン', align: 'left', sort: 'chain' as const, title: '委託チェーン（A→B→C）でソート' },
-                      { label: '軸1判定', align: 'center', sort: 's' as const, title: undefined },
                       { label: 'CN', align: 'center', sort: 'c' as const, title: undefined },
-                      { label: '透明性', align: 'center', sort: 'o' as const, title: undefined },
                       { label: '金額', align: 'right', sort: 'a2' as const, title: '個別支出額（CSVの「金額」列）' },
                       { label: '実支出比', align: 'right', sort: 'pct' as const, title: '実質支出合計に対する割合' },
                       { label: '役割', align: 'left', sort: null, title: '事業を行う上での役割（ブロック単位）' },
@@ -362,8 +360,12 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                     const sm = STATUS_META[row.s];
                     return (
                       <tr key={i} className="hover:bg-blue-50/50 dark:hover:bg-gray-800/60 transition-colors">
-                        <td className="px-4 py-1.5 text-gray-800 dark:text-gray-200 truncate font-medium" title={row.n}>
-                          {row.n}
+                        <td className="px-4 py-1.5 text-gray-800 dark:text-gray-200 font-medium" title={row.n}>
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="truncate flex-1">{row.n}</span>
+                            {!row.o && <span className={`shrink-0 inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold ${sm.cls}`}>{sm.label}</span>}
+                            {row.o && <span className="shrink-0 inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" title="不透明キーワードにマッチ">不透明</span>}
+                          </div>
                         </td>
                         <td className="px-3 py-1.5 font-mono text-gray-500 dark:text-gray-400 truncate" title={row.chain}>
                           {row.chain
@@ -371,19 +373,8 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
                             : (row.b || '-')}
                         </td>
                         <td className="px-3 py-1.5 text-center">
-                          <span className={`inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold ${sm.cls}`}>
-                            {sm.label}
-                          </span>
-                        </td>
-                        <td className="px-3 py-1.5 text-center">
                           {row.c
                             ? <span className="text-emerald-500 font-bold">✓</span>
-                            : <span className="text-gray-300 dark:text-gray-600">—</span>
-                          }
-                        </td>
-                        <td className="px-3 py-1.5 text-center">
-                          {row.o
-                            ? <span className="text-amber-500 font-bold" title="不透明キーワードにマッチ">⚠</span>
                             : <span className="text-gray-300 dark:text-gray-600">—</span>
                           }
                         </td>
