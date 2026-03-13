@@ -23,7 +23,16 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
+    "@dagrejs/dagre": "^2.0.4",
     "@nivo/sankey": "^0.99.0",
+    "@types/d3-hierarchy": "^3.1.7",
+    "@types/d3-interpolate": "^3.0.4",
+    "@types/d3-scale": "^4.0.9",
+    "@xyflow/react": "^12.10.1",
+    "d3-hierarchy": "^3.1.2",
+    "d3-interpolate": "^3.0.1",
+    "d3-scale": "^4.0.2",
+    "dagre": "^0.8.5",
     "next": "15.1.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
