@@ -266,7 +266,7 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
             <div className="px-5 py-2.5">
               <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">軸5: 支出先名の透明性（重み10%）</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-                <div>不透明支出先率: {pct(item.opaqueRatio)}</div>
+                <div>不透明支出比: {pct(item.opaqueRatio)}</div>
                 <div className="font-mono text-gray-400">
                   (1 − {pct(item.opaqueRatio)} / 50%) × 100 = {item.axis5 !== null ? item.axis5.toFixed(1) : '-'}点
                 </div>
@@ -442,6 +442,22 @@ function ScoreBar({ score }: { score: number | null }) {
   );
 }
 
+function parseAmountInput(input: string): number | null {
+  if (!input) return null;
+  const trimmed = input.trim().replace(/,/g, '');
+  const match = trimmed.match(/^([\d.]+)\s*(兆|億|万|千)?円?$/);
+  if (!match) return null;
+  const value = parseFloat(match[1]);
+  if (isNaN(value)) return null;
+  switch (match[2]) {
+    case '兆': return value * 1e12;
+    case '億': return value * 1e8;
+    case '万': return value * 1e4;
+    case '千': return value * 1e3;
+    default: return value;
+  }
+}
+
 type ScoreRange = 'all' | '0-9' | '10-19' | '20-29' | '30-39' | '40-49' | '50-59' | '60-69' | '70-79' | '80-89' | '90-99' | '100-100';
 
 export default function QualityPage() {
@@ -452,6 +468,12 @@ export default function QualityPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMinistry, setSelectedMinistry] = useState<string>('');
   const [scoreRange, setScoreRange] = useState<ScoreRange>('all');
+  const [amountFilters, setAmountFilters] = useState<Record<string, { min: string; max: string }>>({
+    budgetAmount: { min: '', max: '' },
+    execAmount: { min: '', max: '' },
+    spendTotal: { min: '', max: '' },
+    spendNetTotal: { min: '', max: '' },
+  });
   const [sortField, setSortField] = useState<SortField>('spendNetTotal');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
@@ -495,6 +517,13 @@ export default function QualityPage() {
       );
     }
 
+    for (const [field, { min, max }] of Object.entries(amountFilters)) {
+      const minVal = parseAmountInput(min);
+      const maxVal = parseAmountInput(max);
+      if (minVal !== null) items = items.filter(i => (i[field as keyof QualityScoreItem] as number) >= minVal);
+      if (maxVal !== null) items = items.filter(i => (i[field as keyof QualityScoreItem] as number) <= maxVal);
+    }
+
     items = [...items].sort((a, b) => {
       let cmp = 0;
       if (sortField === 'pid') {
@@ -512,10 +541,11 @@ export default function QualityPage() {
     });
 
     return items;
-  }, [data, selectedMinistry, scoreRange, searchQuery, sortField, sortDir]);
+  }, [data, selectedMinistry, scoreRange, searchQuery, amountFilters, sortField, sortDir]);
 
   // Reset page on filter change
-  const filterKey = `${selectedMinistry}|${scoreRange}|${searchQuery}|${sortField}|${sortDir}`;
+  const amountFilterKey = Object.values(amountFilters).map(f => `${f.min}-${f.max}`).join(',');
+  const filterKey = `${selectedMinistry}|${scoreRange}|${searchQuery}|${amountFilterKey}|${sortField}|${sortDir}`;
   const [lastFilterKey, setLastFilterKey] = useState(filterKey);
   if (filterKey !== lastFilterKey) {
     setLastFilterKey(filterKey);
@@ -657,6 +687,43 @@ export default function QualityPage() {
                       <option key={m} value={m}>{m}</option>
                     ))}
                   </select>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  {([
+                    { key: 'budgetAmount', label: '予算' },
+                    { key: 'execAmount', label: '執行' },
+                    { key: 'spendTotal', label: '支出計' },
+                    { key: 'spendNetTotal', label: '実質' },
+                  ] as const).map(({ key, label }) => (
+                    <div key={key} className="flex items-center gap-0.5 shrink-0">
+                      <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap mr-0.5">{label}</span>
+                      <input
+                        type="text"
+                        placeholder="下限"
+                        title="下限 (例: 100億, 1兆)"
+                        value={amountFilters[key].min}
+                        onChange={e => setAmountFilters(prev => ({ ...prev, [key]: { ...prev[key], min: e.target.value } }))}
+                        className="w-16 px-1.5 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      />
+                      <span className="text-gray-400 mx-0.5">〜</span>
+                      <input
+                        type="text"
+                        placeholder="上限"
+                        title="上限 (例: 1兆, 5000億)"
+                        value={amountFilters[key].max}
+                        onChange={e => setAmountFilters(prev => ({ ...prev, [key]: { ...prev[key], max: e.target.value } }))}
+                        className="w-16 px-1.5 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      />
+                      {(amountFilters[key].min || amountFilters[key].max) && (
+                        <button
+                          onClick={() => setAmountFilters(prev => ({ ...prev, [key]: { min: '', max: '' } }))}
+                          className="ml-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   {filtered.length.toLocaleString()}件表示
@@ -800,8 +867,8 @@ export default function QualityPage() {
                             <div className="space-y-0.5 text-gray-600 dark:text-gray-400">
                               <div>ブロック数: {item.blockCount}{item.orphanBlockCount > 0 && <span className="text-red-500"> (孤立: {item.orphanBlockCount})</span>}</div>
                               <div>再委託: {item.hasRedelegation ? `あり (階層${item.redelegationDepth})` : 'なし'}</div>
-                              <div>不透明支出先率: {pct(item.opaqueRatio)}</div>
-                              <div className="text-[10px] text-gray-400">（不透明キーワード辞書にマッチする行の割合）</div>
+                              <div>不透明支出比: {pct(item.opaqueRatio)}</div>
+                              <div className="text-[10px] text-gray-400">（不透明キーワード辞書にマッチする支出先への支出額の割合）</div>
                               <div>支出先行数: {item.rowCount}</div>
                             </div>
                           </div>

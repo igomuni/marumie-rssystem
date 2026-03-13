@@ -228,7 +228,7 @@ class ProjectStats:
         'block_names', 'has_redelegation', 'redelegation_depth',
         'block_amounts', 'block_roles', 'recipient_amounts_by_block',
         'orphan_block_count',
-        'opaque_count',
+        'opaque_count', 'opaque_amount', 'total_recipient_amount',
         'row_count',
         'recipient_rows',  # per-recipient detail for recipients JSON
     ]
@@ -258,6 +258,8 @@ class ProjectStats:
         self.recipient_amounts_by_block = collections.defaultdict(int)  # block_no -> sum of recipient amounts
         self.orphan_block_count = 0     # 5-2に未記載の孤立ブロック数
         self.opaque_count = 0           # 不透明キーワードにマッチした支出先行数
+        self.opaque_amount = 0          # 不透明行の金額（個別支出額）合計
+        self.total_recipient_amount = 0 # 全支出先行の金額（個別支出額）合計
         self.row_count = 0
         self.recipient_rows = []        # per-recipient detail rows
 
@@ -294,11 +296,23 @@ with open(SPEND_CSV, encoding='utf-8') as f:
 
         ps.row_count += 1
 
+        # 軸2: 法人番号記入率
+        cn = r.get('法人番号', '').strip()
+        if cn:
+            ps.cn_filled += 1
+        else:
+            ps.cn_empty += 1
+
         # 軸1: 支出先名品質（3層辞書: 厳密 → 行政機関 → 補助）
+        # 厳密辞書マッチでもCNなしはinvalid（法人はCNが必須）
         if recipient_name in dict_map:
             if dict_map[recipient_name]:
-                ps.valid_count += 1
-                row_status = 'valid'
+                if cn:
+                    ps.valid_count += 1
+                    row_status = 'valid'
+                else:
+                    ps.invalid_count += 1
+                    row_status = 'invalid'
             elif recipient_name in gov_agency_map:
                 ps.gov_agency_count += 1
                 row_status = 'gov'
@@ -310,13 +324,6 @@ with open(SPEND_CSV, encoding='utf-8') as f:
                 row_status = 'invalid'
         else:
             row_status = 'unknown'
-
-        # 軸2: 法人番号記入率
-        cn = r.get('法人番号', '').strip()
-        if cn:
-            ps.cn_filled += 1
-        else:
-            ps.cn_empty += 1
 
         # 金額（支出先の合計支出額 / 金額 を別々に収集）
         amt = to_int(r.get('支出先の合計支出額', ''))   # 支出先の合計支出額
@@ -332,8 +339,12 @@ with open(SPEND_CSV, encoding='utf-8') as f:
 
         # 軸5: 不透明支出先名キーワード判定
         opaque = is_opaque_name(recipient_name) > 0
+        if amt2:
+            ps.total_recipient_amount += amt2
         if opaque:
             ps.opaque_count += 1
+            if amt2:
+                ps.opaque_amount += amt2
 
         # per-recipient行を収集（支出先合計行は除外、金額行のみ）
         # 支出先合計行（支出先の合計支出額あり・金額なし）は常に金額行とペアで存在するため除外可能
@@ -463,15 +474,17 @@ def calc_scores(ps):
     scores['redelegation_depth'] = ps.redelegation_depth
 
     # 軸5: 支出先名の透明性 (0-100)
-    # 不透明キーワード辞書にマッチする支出先名の割合で評価
-    if ps.row_count > 0:
+    # 不透明キーワード辞書にマッチする支出先への支出額の割合で評価（金額ベース）
+    # 金額データがない場合は件数ベースにフォールバック
+    if ps.total_recipient_amount > 0:
+        opaque_ratio = ps.opaque_amount / ps.total_recipient_amount
+    elif ps.row_count > 0:
         opaque_ratio = ps.opaque_count / ps.row_count
-        scores['opaque_ratio'] = opaque_ratio
-        # ratio=0 → 100点, ratio>=0.5 → 0点（線形）
-        scores['axis5'] = clamp((1 - opaque_ratio / 0.5) * 100)
     else:
-        scores['opaque_ratio'] = 0
-        scores['axis5'] = 100
+        opaque_ratio = 0
+    scores['opaque_ratio'] = opaque_ratio
+    # ratio=0 → 100点, ratio>=0.5 → 0点（線形）
+    scores['axis5'] = clamp((1 - opaque_ratio / 0.5) * 100)
 
     # 総合スコア（重み付き平均、Noneの軸は除外して再配分）
     weights = [
