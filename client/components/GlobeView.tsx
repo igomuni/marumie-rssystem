@@ -114,10 +114,13 @@ function generateIcosphere(subdivisions: number, radius: number): IcoSphere {
   return { vertices, indices: indicesArr, faceCount, adjacency };
 }
 
-// ─── Face → Ministry assignment ─────────────────────────────────────
-// Two-phase Pangaea algorithm:
-//   Phase A: BFS from continent center → continent vs ocean separation
-//   Phase B: Within continent, seed-based flood fill (large→small)
+// ─── Face → Ministry assignment (サッカーボール展開方式) ────────────
+// 正二十面体の20元面を活用したカーソル走査方式:
+//   Phase 1: 元面→海/大陸の分離
+//   Phase 2: 大陸元面内でカーソル走査により府省庁を割り当て
+//   Phase 3: 境界滑らか化
+
+const FACES_PER_ORIGINAL = 4 ** ICO_SUBDIVISIONS; // 16384
 
 function lonLatToXYZ(lon: number, lat: number): [number, number, number] {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -157,177 +160,274 @@ function assignFaces(
     totalAssigned += targetCounts[m];
   }
 
-  // Identify ocean ministry (index 0 = largest = 厚生労働省)
   const oceanIdx = 0;
   const continentFaceCount = faceCount - targetCounts[oceanIdx];
 
-  // Find seed face for each ministry
-  const seedFaces = new Int32Array(ministries.length);
-  for (let m = 0; m < ministries.length; m++) {
-    const [sx, sy, sz] = lonLatToXYZ(ministries[m].seed[0], ministries[m].seed[1]);
-    let bestFace = 0;
-    let bestDist = Infinity;
-    for (let f = 0; f < faceCount; f++) {
-      const dx = centroids[f*3] - sx, dy = centroids[f*3+1] - sy, dz = centroids[f*3+2] - sz;
-      const dist = dx*dx + dy*dy + dz*dz;
-      if (dist < bestDist) { bestDist = dist; bestFace = f; }
+  // ─── Phase 1: 元面→海/大陸の分離 ─────────────────────────────────
+  // 20元面の重心を計算し、大陸中心からの距離で海/大陸を分ける
+  const NUM_ORIGINAL = 20;
+  const origCentroids = new Float32Array(NUM_ORIGINAL * 3); // 元面の重心
+
+  for (let o = 0; o < NUM_ORIGINAL; o++) {
+    let sx = 0, sy = 0, sz = 0;
+    const startF = o * FACES_PER_ORIGINAL;
+    const endF = startF + FACES_PER_ORIGINAL;
+    for (let f = startF; f < endF; f++) {
+      sx += centroids[f * 3];
+      sy += centroids[f * 3 + 1];
+      sz += centroids[f * 3 + 2];
     }
-    seedFaces[m] = bestFace;
+    origCentroids[o * 3]     = sx / FACES_PER_ORIGINAL;
+    origCentroids[o * 3 + 1] = sy / FACES_PER_ORIGINAL;
+    origCentroids[o * 3 + 2] = sz / FACES_PER_ORIGINAL;
   }
 
-  // ─── Phase A: Continent vs Ocean ────────────────────────────────
-  // BFS from the continent center (seed of index 1, the largest continent ministry)
-  // to claim exactly continentFaceCount faces as "continent"
-  const isContinent = new Uint8Array(faceCount); // 0=ocean, 1=continent
-  {
-    // Use seed of index 1 (largest continent ministry) as continent center
-    const continentSeed = seedFaces[1];
-    const queue: number[] = [continentSeed];
-    isContinent[continentSeed] = 1;
-    let claimed = 1;
-    let head = 0;
+  // 大陸中心: 経産省(index 1)のseed位置を使う
+  const [ccx, ccy, ccz] = lonLatToXYZ(ministries[1].seed[0], ministries[1].seed[1]);
 
-    while (head < queue.length && claimed < continentFaceCount) {
-      const face = queue[head++];
-      for (let e = 0; e < 3; e++) {
-        if (claimed >= continentFaceCount) break;
-        const nb = adjacency[face * 3 + e];
-        if (nb === -1 || isContinent[nb]) continue;
-        isContinent[nb] = 1;
-        claimed++;
-        queue.push(nb);
+  // 元面を大陸中心からの距離でソート
+  const origDists: { idx: number; dist: number }[] = [];
+  for (let o = 0; o < NUM_ORIGINAL; o++) {
+    const dx = origCentroids[o*3] - ccx;
+    const dy = origCentroids[o*3+1] - ccy;
+    const dz = origCentroids[o*3+2] - ccz;
+    origDists.push({ idx: o, dist: dx*dx + dy*dy + dz*dz });
+  }
+  origDists.sort((a, b) => a.dist - b.dist);
+
+  // 大陸に必要な元面数を計算: continentFaceCount / FACES_PER_ORIGINAL
+  // 境界元面は海と大陸を内部で分割する
+  const fullContinentOriginals = Math.floor(continentFaceCount / FACES_PER_ORIGINAL);
+  const boundaryFaces = continentFaceCount - fullContinentOriginals * FACES_PER_ORIGINAL;
+
+  const isOrigContinent = new Uint8Array(NUM_ORIGINAL); // 0=ocean, 1=continent, 2=boundary
+  for (let i = 0; i < origDists.length; i++) {
+    if (i < fullContinentOriginals) {
+      isOrigContinent[origDists[i].idx] = 1; // fully continent
+    } else if (i === fullContinentOriginals && boundaryFaces > 0) {
+      isOrigContinent[origDists[i].idx] = 2; // boundary
+    }
+    // else: ocean
+  }
+
+  // 海面の割り当て
+  const isContinent = new Uint8Array(faceCount);
+  for (let f = 0; f < faceCount; f++) {
+    const origId = Math.floor(f / FACES_PER_ORIGINAL);
+    if (isOrigContinent[origId] === 1) {
+      isContinent[f] = 1;
+    } else if (isOrigContinent[origId] === 2) {
+      isContinent[f] = 1; // 境界元面は仮に大陸扱い
+    }
+  }
+
+  // 境界元面の処理: 大陸中心に近い面から順にboundaryFaces面だけ大陸にする
+  if (boundaryFaces > 0) {
+    const boundaryOrigIdx = origDists[fullContinentOriginals].idx;
+    const startF = boundaryOrigIdx * FACES_PER_ORIGINAL;
+    const endF = startF + FACES_PER_ORIGINAL;
+
+    // 境界元面内の面を大陸中心からの距離でソート
+    const faceDists: { f: number; dist: number }[] = [];
+    for (let f = startF; f < endF; f++) {
+      const dx = centroids[f*3] - ccx;
+      const dy = centroids[f*3+1] - ccy;
+      const dz = centroids[f*3+2] - ccz;
+      faceDists.push({ f, dist: dx*dx + dy*dy + dz*dz });
+    }
+    faceDists.sort((a, b) => a.dist - b.dist);
+
+    // 近い方からboundaryFaces面だけ大陸、残りは海
+    for (let i = 0; i < faceDists.length; i++) {
+      if (i < boundaryFaces) {
+        isContinent[faceDists[i].f] = 1;
+      } else {
+        isContinent[faceDists[i].f] = 0;
       }
     }
   }
 
-  // Assign ocean faces immediately
+  // 海の割り当て
   for (let f = 0; f < faceCount; f++) {
     if (!isContinent[f]) assignment[f] = oceanIdx;
   }
 
-  // ─── Phase B: Subdivide continent among non-ocean ministries ────
-  // Flood fill within continent only, small→large order
-  // (small ministries form compact clusters, largest fills remaining space)
+  // ─── Phase 2: 再帰二分割ツリーマップ方式 ─────────────────────────
+  // 面リストを縦横交互にソート+二分割して矩形領域を作る
+  // 面数ベースで分割するため、球面の不均一密度に影響されない
+
   const continentMinistries = Array.from({ length: ministries.length }, (_, i) => i)
     .filter(i => i !== oceanIdx);
-  // Sort ascending by target count (small grow first → compact regions)
-  continentMinistries.sort((a, b) => targetCounts[a] - targetCounts[b]);
 
-  const currentCounts = new Int32Array(ministries.length);
+  // 大陸中心のローカル座標系を構築
+  const ccLen = Math.sqrt(ccx*ccx + ccy*ccy + ccz*ccz);
+  const cnx = ccx/ccLen, cny = ccy/ccLen, cnz = ccz/ccLen;
+  let cupx = 0, cupy = 1, cupz = 0;
+  if (Math.abs(cny) > 0.9) { cupx = 1; cupy = 0; }
+  let ctx = cupy*cnz - cupz*cny, cty = cupz*cnx - cupx*cnz, ctz = cupx*cny - cupy*cnx;
+  const ctLen = Math.sqrt(ctx*ctx + cty*cty + ctz*ctz);
+  ctx /= ctLen; cty /= ctLen; ctz /= ctLen;
+  const cbx = cny*ctz - cnz*cty, cby = cnz*ctx - cnx*ctz, cbz = cnx*cty - cny*ctx;
 
-  // Grow all except the last (largest continent ministry) via BFS
-  const largestContinentIdx = continentMinistries[continentMinistries.length - 1];
-  for (const m of continentMinistries) {
-    if (m === largestContinentIdx) continue; // save for last — absorbs all remaining
-    const target = targetCounts[m];
-    if (target <= 0) continue;
-
-    // Find seed: prefer the original seed if it's on continent and unassigned
-    let startFace = seedFaces[m];
-    if (!isContinent[startFace] || assignment[startFace] !== -1) {
-      const [sx, sy, sz] = lonLatToXYZ(ministries[m].seed[0], ministries[m].seed[1]);
-      let bestFace = -1;
-      let bestDist = Infinity;
-      for (let f = 0; f < faceCount; f++) {
-        if (!isContinent[f] || assignment[f] !== -1) continue;
-        const dx = centroids[f*3] - sx, dy = centroids[f*3+1] - sy, dz = centroids[f*3+2] - sz;
-        const dist = dx*dx + dy*dy + dz*dz;
-        if (dist < bestDist) { bestDist = dist; bestFace = f; }
-      }
-      if (bestFace === -1) continue;
-      startFace = bestFace;
-    }
-
-    const queue: number[] = [startFace];
-    assignment[startFace] = m;
-    currentCounts[m] = 1;
-    let head = 0;
-
-    while (head < queue.length && currentCounts[m] < target) {
-      const face = queue[head++];
-      for (let e = 0; e < 3; e++) {
-        if (currentCounts[m] >= target) break;
-        const nb = adjacency[face * 3 + e];
-        if (nb === -1 || !isContinent[nb] || assignment[nb] !== -1) continue;
-        assignment[nb] = m;
-        currentCounts[m]++;
-        queue.push(nb);
-      }
-    }
-  }
-
-  // Last: largest continent ministry absorbs ALL remaining unassigned continent faces
+  // 全大陸面を2Dローカル座標に射影
+  interface FaceUV { f: number; u: number; v: number }
+  const continentFaceUV: FaceUV[] = [];
   for (let f = 0; f < faceCount; f++) {
-    if (assignment[f] === -1) assignment[f] = largestContinentIdx;
+    if (!isContinent[f]) continue;
+    const dx = centroids[f*3] - ccx, dy = centroids[f*3+1] - ccy, dz = centroids[f*3+2] - ccz;
+    continentFaceUV.push({
+      f,
+      u: dx*ctx + dy*cty + dz*ctz,
+      v: dx*cbx + dy*cby + dz*cbz,
+    });
   }
 
-  // ─── Connectivity fix: merge continent fragments ────────────────
-  // For each non-ocean ministry, keep only the largest connected component
-  // and reassign fragments to adjacent continent ministries (not ocean-only)
+  // 再帰二分割: 面リストと府省庁リストを交互にソート方向を変えて分割
+  type MItem = { ministry: number; area: number };
+
+  function assignRecursive(
+    faces: FaceUV[],
+    items: MItem[],
+    splitByV: boolean,
+  ): void {
+    if (items.length === 0 || faces.length === 0) return;
+    if (items.length === 1) {
+      for (const face of faces) assignment[face.f] = items[0].ministry;
+      return;
+    }
+
+    // 面を現在の軸でソート
+    if (splitByV) {
+      faces.sort((a, b) => a.v - b.v || a.u - b.u);
+    } else {
+      faces.sort((a, b) => a.u - b.u || a.v - b.v);
+    }
+
+    // 府省庁を面積の半分で二分割
+    const totalArea = items.reduce((s, it) => s + it.area, 0);
+    const halfArea = totalArea / 2;
+
+    const firstHalf: MItem[] = [];
+    let firstArea = 0;
+    const rest = [...items];
+
+    while (rest.length > 1) {
+      if (firstArea + rest[0].area > halfArea && firstHalf.length > 0) break;
+      const item = rest.shift()!;
+      firstHalf.push(item);
+      firstArea += item.area;
+    }
+
+    // 面を面積比で分割
+    const splitIdx = Math.round(faces.length * firstArea / totalArea);
+    const firstFaces = faces.slice(0, splitIdx);
+    const secondFaces = faces.slice(splitIdx);
+
+    // 次の軸で再帰
+    assignRecursive(firstFaces, firstHalf, !splitByV);
+    assignRecursive(secondFaces, rest, !splitByV);
+  }
+
+  // 小規模府省庁（面積 < 閾値）はツリーマップから外して辺に沿って配置
+  const EDGE_THRESHOLD = 1200;
+  const treemapMinistries: MItem[] = [];
+  const edgeMinistries: MItem[] = [];
   for (const m of continentMinistries) {
-    const myFaces: number[] = [];
+    if (targetCounts[m] >= EDGE_THRESHOLD) {
+      treemapMinistries.push({ ministry: m, area: targetCounts[m] });
+    } else {
+      edgeMinistries.push({ ministry: m, area: targetCounts[m] });
+    }
+  }
+  const edgeTotalArea = edgeMinistries.reduce((s, it) => s + it.area, 0);
+
+  // ツリーマップには「エッジゾーン」を1ブロックとして含める
+  const EDGE_ZONE = -999;
+  const treemapItems: MItem[] = [
+    ...treemapMinistries,
+    { ministry: EDGE_ZONE, area: edgeTotalArea },
+  ];
+
+  assignRecursive([...continentFaceUV], treemapItems, true);
+
+  // エッジゾーンの面を収集し、BFSで小規模府省庁を辺に沿って配置
+  if (edgeMinistries.length > 0) {
+    // エッジゾーン面の中から、大陸境界(海に隣接)に近い面を起点にBFS
+    const edgeFaces: number[] = [];
     for (let f = 0; f < faceCount; f++) {
-      if (assignment[f] === m) myFaces.push(f);
-    }
-    if (myFaces.length <= 1) continue;
-
-    // BFS to find connected components
-    const visited = new Uint8Array(faceCount);
-    const components: number[][] = [];
-    for (const startFace of myFaces) {
-      if (visited[startFace]) continue;
-      const comp: number[] = [startFace];
-      visited[startFace] = 1;
-      let head = 0;
-      while (head < comp.length) {
-        const face = comp[head++];
-        for (let e = 0; e < 3; e++) {
-          const nb = adjacency[face * 3 + e];
-          if (nb !== -1 && !visited[nb] && assignment[nb] === m) {
-            visited[nb] = 1;
-            comp.push(nb);
-          }
-        }
-      }
-      components.push(comp);
+      if (assignment[f] === EDGE_ZONE) edgeFaces.push(f);
     }
 
-    if (components.length <= 1) continue;
+    // エッジ面をBFS順に並べる（海に隣接する面から開始）
+    const edgeSet = new Set(edgeFaces);
+    const edgeBfsOrder: number[] = [];
+    const edgeVisited = new Uint8Array(faceCount);
 
-    // Keep largest, reassign fragments to any adjacent non-ocean ministry
-    components.sort((a, b) => b.length - a.length);
-    for (let ci = 1; ci < components.length; ci++) {
-      for (const face of components[ci]) {
-        const nbMinistries = new Map<number, number>();
-        for (let e = 0; e < 3; e++) {
-          const nb = adjacency[face * 3 + e];
-          if (nb !== -1 && assignment[nb] !== m && assignment[nb] !== oceanIdx) {
-            nbMinistries.set(assignment[nb], (nbMinistries.get(assignment[nb]) || 0) + 1);
-          }
-        }
-        if (nbMinistries.size > 0) {
-          let bestM = -1, bestC = 0;
-          for (const [nm, cnt] of nbMinistries) {
-            if (cnt > bestC) { bestC = cnt; bestM = nm; }
-          }
-          assignment[face] = bestM;
+    // 海に隣接するエッジ面をシードにする
+    const edgeSeeds: number[] = [];
+    for (const f of edgeFaces) {
+      for (let e = 0; e < 3; e++) {
+        const nb = adjacency[f * 3 + e];
+        if (nb !== -1 && assignment[nb] === oceanIdx) {
+          edgeSeeds.push(f);
+          break;
         }
       }
     }
-    // Note: no reclaim step — fragment faces go to neighbors without stealing back.
-    // Boundary smoothing will handle minor count adjustments.
+    // シードがなければ全エッジ面の先頭を使う
+    if (edgeSeeds.length === 0 && edgeFaces.length > 0) {
+      edgeSeeds.push(edgeFaces[0]);
+    }
+
+    const bfsQueue: number[] = [];
+    for (const s of edgeSeeds) {
+      if (!edgeVisited[s]) {
+        edgeVisited[s] = 1;
+        bfsQueue.push(s);
+      }
+    }
+    let bfsHead = 0;
+    while (bfsHead < bfsQueue.length) {
+      const face = bfsQueue[bfsHead++];
+      edgeBfsOrder.push(face);
+      for (let e = 0; e < 3; e++) {
+        const nb = adjacency[face * 3 + e];
+        if (nb !== -1 && !edgeVisited[nb] && edgeSet.has(nb)) {
+          edgeVisited[nb] = 1;
+          bfsQueue.push(nb);
+        }
+      }
+    }
+
+    // BFS順で小規模府省庁を割り当て（面積降順）
+    edgeMinistries.sort((a, b) => b.area - a.area);
+    let cursor = 0;
+    for (const item of edgeMinistries) {
+      let assigned = 0;
+      while (assigned < item.area && cursor < edgeBfsOrder.length) {
+        assignment[edgeBfsOrder[cursor]] = item.ministry;
+        assigned++;
+        cursor++;
+      }
+    }
+    // 残りは最後の小規模府省庁に
+    const lastEdge = edgeMinistries[edgeMinistries.length - 1].ministry;
+    while (cursor < edgeBfsOrder.length) {
+      assignment[edgeBfsOrder[cursor]] = lastEdge;
+      cursor++;
+    }
   }
 
-  // ─── Boundary smoothing ───────────────────────────────────────────
-  const maxDeviation = new Int32Array(ministries.length);
-  for (let m = 0; m < ministries.length; m++) {
-    maxDeviation[m] = Math.max(1, Math.round(targetCounts[m] * 0.01));
-  }
-
-  currentCounts.fill(0);
+  // ─── Phase 3: 境界滑らか化 ───────────────────────────────────────
+  const currentCounts = new Int32Array(ministries.length);
   for (let f = 0; f < faceCount; f++) currentCounts[assignment[f]]++;
 
-  const SMOOTH_ITERATIONS = 3;
+  const maxDeviation = new Int32Array(ministries.length);
+  for (let m = 0; m < ministries.length; m++) {
+    maxDeviation[m] = Math.max(1, Math.round(targetCounts[m] * 0.02));
+  }
+
+  const SMOOTH_ITERATIONS = 5;
   for (let iter = 0; iter < SMOOTH_ITERATIONS; iter++) {
     let swaps = 0;
     for (let f = 0; f < faceCount; f++) {
