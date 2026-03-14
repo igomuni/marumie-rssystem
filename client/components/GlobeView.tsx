@@ -64,6 +64,12 @@ export default function GlobeView() {
     // OrbitControls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enablePan = false;
+    controls.enableRotate = true;
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: undefined as unknown as THREE.MOUSE, // 将来のコンテキストメニュー用に空ける
+    };
     controls.minDistance = 1.5;
     controls.maxDistance = 10;
     controls.rotateSpeed = 0.5;
