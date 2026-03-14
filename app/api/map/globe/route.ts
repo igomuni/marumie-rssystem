@@ -65,7 +65,9 @@ function loadGlobeData(): GlobeResponse {
   const ICO_FACES = 81920;
   const visible: typeof sorted = [];
   let otherSpending = 0;
+  let otherBudget = 0;
   let otherProjectCount = 0;
+  let otherRecipientCount = 0;
 
   for (const m of sorted) {
     const fraction = totalSpending > 0 ? m.totalSpending / totalSpending : 0;
@@ -73,7 +75,9 @@ function loadGlobeData(): GlobeResponse {
       visible.push(m);
     } else {
       otherSpending += m.totalSpending;
+      otherBudget += m.totalBudget;
       otherProjectCount += m.projectCount;
+      otherRecipientCount += m.recipientCount;
     }
   }
 
@@ -82,7 +86,9 @@ function loadGlobeData(): GlobeResponse {
     visible.push({
       name: 'その他',
       totalSpending: otherSpending,
+      totalBudget: otherBudget,
       projectCount: otherProjectCount,
+      recipientCount: otherRecipientCount,
     });
   }
 
