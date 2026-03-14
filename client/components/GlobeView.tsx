@@ -115,8 +115,9 @@ function generateIcosphere(subdivisions: number, radius: number): IcoSphere {
 }
 
 // ─── Face → Ministry assignment ─────────────────────────────────────
-// Seed-based flood fill: small ministries grow first as compact "islands",
-// large ministries fill remaining space as "continents"
+// Two-phase Pangaea algorithm:
+//   Phase A: BFS from continent center → continent vs ocean separation
+//   Phase B: Within continent, seed-based flood fill (large→small)
 
 function lonLatToXYZ(lon: number, lat: number): [number, number, number] {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -133,8 +134,7 @@ function assignFaces(
   ministries: GlobeMinistry[],
 ): Int32Array {
   const { vertices, indices, faceCount, adjacency } = ico;
-  const UNASSIGNED = -1;
-  const assignment = new Int32Array(faceCount).fill(UNASSIGNED);
+  const assignment = new Int32Array(faceCount).fill(-1);
 
   // Compute face centroids
   const centroids = new Float32Array(faceCount * 3);
@@ -157,7 +157,11 @@ function assignFaces(
     totalAssigned += targetCounts[m];
   }
 
-  // Find seed face for each ministry (closest face centroid to seed position)
+  // Identify ocean ministry (index 0 = largest = 厚生労働省)
+  const oceanIdx = 0;
+  const continentFaceCount = faceCount - targetCounts[oceanIdx];
+
+  // Find seed face for each ministry
   const seedFaces = new Int32Array(ministries.length);
   for (let m = 0; m < ministries.length; m++) {
     const [sx, sy, sz] = lonLatToXYZ(ministries[m].seed[0], ministries[m].seed[1]);
@@ -171,34 +175,71 @@ function assignFaces(
     seedFaces[m] = bestFace;
   }
 
-  // Sort ministries by target count ascending (smallest grow first → compact islands)
-  const growOrder = Array.from({ length: ministries.length }, (_, i) => i);
-  growOrder.sort((a, b) => targetCounts[a] - targetCounts[b]);
+  // ─── Phase A: Continent vs Ocean ────────────────────────────────
+  // BFS from the continent center (seed of index 1, the largest continent ministry)
+  // to claim exactly continentFaceCount faces as "continent"
+  const isContinent = new Uint8Array(faceCount); // 0=ocean, 1=continent
+  {
+    // Use seed of index 1 (largest continent ministry) as continent center
+    const continentSeed = seedFaces[1];
+    const queue: number[] = [continentSeed];
+    isContinent[continentSeed] = 1;
+    let claimed = 1;
+    let head = 0;
 
-  // Flood fill: each ministry grows from its seed via BFS
+    while (head < queue.length && claimed < continentFaceCount) {
+      const face = queue[head++];
+      for (let e = 0; e < 3; e++) {
+        if (claimed >= continentFaceCount) break;
+        const nb = adjacency[face * 3 + e];
+        if (nb === -1 || isContinent[nb]) continue;
+        isContinent[nb] = 1;
+        claimed++;
+        queue.push(nb);
+      }
+    }
+  }
+
+  // Assign ocean faces immediately
+  for (let f = 0; f < faceCount; f++) {
+    if (!isContinent[f]) assignment[f] = oceanIdx;
+  }
+
+  // ─── Phase B: Subdivide continent among non-ocean ministries ────
+  // Flood fill within continent only, small→large order
+  // (small ministries form compact clusters, largest fills remaining space)
+  const continentMinistries = Array.from({ length: ministries.length }, (_, i) => i)
+    .filter(i => i !== oceanIdx);
+  // Sort ascending by target count (small grow first → compact regions)
+  continentMinistries.sort((a, b) => targetCounts[a] - targetCounts[b]);
+
   const currentCounts = new Int32Array(ministries.length);
 
-  for (const m of growOrder) {
+  // Grow all except the last (largest continent ministry) via BFS
+  const largestContinentIdx = continentMinistries[continentMinistries.length - 1];
+  for (const m of continentMinistries) {
+    if (m === largestContinentIdx) continue; // save for last — absorbs all remaining
     const target = targetCounts[m];
     if (target <= 0) continue;
 
-    const queue: number[] = [seedFaces[m]];
-    if (assignment[seedFaces[m]] !== UNASSIGNED) {
-      // Seed already taken — find nearest unassigned face
+    // Find seed: prefer the original seed if it's on continent and unassigned
+    let startFace = seedFaces[m];
+    if (!isContinent[startFace] || assignment[startFace] !== -1) {
+      const [sx, sy, sz] = lonLatToXYZ(ministries[m].seed[0], ministries[m].seed[1]);
       let bestFace = -1;
       let bestDist = Infinity;
-      const [sx, sy, sz] = lonLatToXYZ(ministries[m].seed[0], ministries[m].seed[1]);
       for (let f = 0; f < faceCount; f++) {
-        if (assignment[f] !== UNASSIGNED) continue;
+        if (!isContinent[f] || assignment[f] !== -1) continue;
         const dx = centroids[f*3] - sx, dy = centroids[f*3+1] - sy, dz = centroids[f*3+2] - sz;
         const dist = dx*dx + dy*dy + dz*dz;
         if (dist < bestDist) { bestDist = dist; bestFace = f; }
       }
       if (bestFace === -1) continue;
-      queue[0] = bestFace;
+      startFace = bestFace;
     }
 
-    assignment[queue[0]] = m;
+    const queue: number[] = [startFace];
+    assignment[startFace] = m;
     currentCounts[m] = 1;
     let head = 0;
 
@@ -206,51 +247,33 @@ function assignFaces(
       const face = queue[head++];
       for (let e = 0; e < 3; e++) {
         if (currentCounts[m] >= target) break;
-        const neighbor = adjacency[face * 3 + e];
-        if (neighbor === -1 || assignment[neighbor] !== UNASSIGNED) continue;
-        assignment[neighbor] = m;
+        const nb = adjacency[face * 3 + e];
+        if (nb === -1 || !isContinent[nb] || assignment[nb] !== -1) continue;
+        assignment[nb] = m;
         currentCounts[m]++;
-        queue.push(neighbor);
+        queue.push(nb);
       }
     }
   }
 
-  // Assign any remaining unassigned faces to nearest assigned neighbor
-  let hasUnassigned = true;
-  while (hasUnassigned) {
-    hasUnassigned = false;
-    for (let f = 0; f < faceCount; f++) {
-      if (assignment[f] !== UNASSIGNED) continue;
-      for (let e = 0; e < 3; e++) {
-        const neighbor = adjacency[f * 3 + e];
-        if (neighbor !== -1 && assignment[neighbor] !== UNASSIGNED) {
-          assignment[f] = assignment[neighbor];
-          break;
-        }
-      }
-      if (assignment[f] === UNASSIGNED) hasUnassigned = true;
-    }
+  // Last: largest continent ministry absorbs ALL remaining unassigned continent faces
+  for (let f = 0; f < faceCount; f++) {
+    if (assignment[f] === -1) assignment[f] = largestContinentIdx;
   }
 
-  // ─── Connectivity fix: merge floating islands into neighbors ──────
-  // For each non-ocean ministry, find connected components.
-  // Keep only the largest; reassign fragments to adjacent ministries.
-  // Then let the ministry reclaim faces by expanding its main region.
-  const oceanIdx = growOrder[growOrder.length - 1]; // largest = ocean
-  for (const m of growOrder) {
-    if (m === oceanIdx) continue; // ocean can be disconnected (wraps around)
-
-    // Find all faces belonging to this ministry
+  // ─── Connectivity fix: merge continent fragments ────────────────
+  // For each non-ocean ministry, keep only the largest connected component
+  // and reassign fragments to adjacent continent ministries (not ocean-only)
+  for (const m of continentMinistries) {
     const myFaces: number[] = [];
     for (let f = 0; f < faceCount; f++) {
       if (assignment[f] === m) myFaces.push(f);
     }
     if (myFaces.length <= 1) continue;
 
-    // BFS to find connected components within this ministry's faces
+    // BFS to find connected components
     const visited = new Uint8Array(faceCount);
     const components: number[][] = [];
-
     for (const startFace of myFaces) {
       if (visited[startFace]) continue;
       const comp: number[] = [startFace];
@@ -269,17 +292,16 @@ function assignFaces(
       components.push(comp);
     }
 
-    if (components.length <= 1) continue; // already connected
+    if (components.length <= 1) continue;
 
-    // Keep the largest component, reassign others to adjacent ministries
+    // Keep largest, reassign fragments to any adjacent non-ocean ministry
     components.sort((a, b) => b.length - a.length);
     for (let ci = 1; ci < components.length; ci++) {
       for (const face of components[ci]) {
-        // Find most common adjacent ministry (excluding self)
         const nbMinistries = new Map<number, number>();
         for (let e = 0; e < 3; e++) {
           const nb = adjacency[face * 3 + e];
-          if (nb !== -1 && assignment[nb] !== m) {
+          if (nb !== -1 && assignment[nb] !== m && assignment[nb] !== oceanIdx) {
             nbMinistries.set(assignment[nb], (nbMinistries.get(assignment[nb]) || 0) + 1);
           }
         }
@@ -289,48 +311,11 @@ function assignFaces(
             if (cnt > bestC) { bestC = cnt; bestM = nm; }
           }
           assignment[face] = bestM;
-        } else {
-          // No non-self neighbor yet — assign to ocean as fallback
-          assignment[face] = oceanIdx;
         }
       }
     }
-
-    // Reclaim: the ministry lost some faces, grow from its main component boundary
-    let myCount = 0;
-    for (let f = 0; f < faceCount; f++) {
-      if (assignment[f] === m) myCount++;
-    }
-    const deficit = targetCounts[m] - myCount;
-    if (deficit > 0) {
-      // BFS expand from main component boundary
-      const frontier: number[] = [];
-      for (const f of components[0]) {
-        for (let e = 0; e < 3; e++) {
-          const nb = adjacency[f * 3 + e];
-          if (nb !== -1 && assignment[nb] !== m) {
-            frontier.push(f);
-            break;
-          }
-        }
-      }
-      let claimed = 0;
-      let fHead = 0;
-      while (fHead < frontier.length && claimed < deficit) {
-        const face = frontier[fHead++];
-        for (let e = 0; e < 3; e++) {
-          if (claimed >= deficit) break;
-          const nb = adjacency[face * 3 + e];
-          if (nb === -1 || assignment[nb] === m) continue;
-          // Only steal from ocean to avoid cascading island issues
-          if (assignment[nb] === oceanIdx) {
-            assignment[nb] = m;
-            claimed++;
-            frontier.push(nb);
-          }
-        }
-      }
-    }
+    // Note: no reclaim step — fragment faces go to neighbors without stealing back.
+    // Boundary smoothing will handle minor count adjustments.
   }
 
   // ─── Boundary smoothing ───────────────────────────────────────────
@@ -339,7 +324,6 @@ function assignFaces(
     maxDeviation[m] = Math.max(1, Math.round(targetCounts[m] * 0.01));
   }
 
-  // Recount after connectivity fix
   currentCounts.fill(0);
   for (let f = 0; f < faceCount; f++) currentCounts[assignment[f]]++;
 
