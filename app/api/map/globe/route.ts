@@ -7,9 +7,9 @@ export interface GlobeMinistry {
   name: string;
   totalSpending: number;
   areaFraction: number;
-  centroid: [number, number]; // [lat, lon] in degrees
+  seed: [number, number]; // [lon, lat] in degrees — Fibonacci lattice position
   projectCount: number;
-  color: string; // HSL color string
+  color: string;
 }
 
 export interface GlobeResponse {
@@ -21,23 +21,22 @@ let cachedResponse: GlobeResponse | null = null;
 
 /**
  * Fibonacci格子で球面上にN点を準均等配置する
- * Returns [lat, lon] in degrees for each point
+ * Returns [lon, lat] in degrees (GeoJSON convention)
  */
 function fibonacciSphere(n: number): [number, number][] {
   const goldenRatio = (1 + Math.sqrt(5)) / 2;
   const points: [number, number][] = [];
 
   for (let i = 0; i < n; i++) {
-    // Polar angle (0 to π)
     const theta = Math.acos(1 - 2 * (i + 0.5) / n);
-    // Azimuthal angle (golden angle increment)
     const phi = 2 * Math.PI * i / goldenRatio;
 
-    // Convert to lat/lon in degrees
-    const lat = 90 - (theta * 180) / Math.PI; // -90 to 90
-    const lon = ((phi * 180) / Math.PI) % 360 - 180; // -180 to 180
+    const lat = 90 - (theta * 180) / Math.PI;
+    let lon = ((phi * 180) / Math.PI) % 360 - 180;
+    if (lon < -180) lon += 360;
+    if (lon > 180) lon -= 360;
 
-    points.push([lat, lon]);
+    points.push([lon, lat]);
   }
 
   return points;
@@ -52,28 +51,51 @@ function loadGlobeData(): GlobeResponse {
   const stats = raw.statistics.byMinistry;
   const ministryNames = Object.keys(stats);
 
-  // Calculate total spending across all ministries
   let totalSpending = 0;
   for (const name of ministryNames) {
     totalSpending += stats[name].totalSpending;
   }
 
-  // Sort by spending (descending) for consistent ordering
+  // Sort by spending (descending)
   const sorted = ministryNames
     .map(name => ({ name, ...stats[name] }))
     .sort((a, b) => b.totalSpending - a.totalSpending);
 
-  // Generate Fibonacci sphere points
-  const points = fibonacciSphere(sorted.length);
+  // Merge ministries that would get 0 icosphere faces at level 6 (81,920 faces)
+  const ICO_FACES = 81920;
+  const visible: typeof sorted = [];
+  let otherSpending = 0;
+  let otherProjectCount = 0;
 
-  // Assign colors (HSL hue distributed across 360°)
-  const ministries: GlobeMinistry[] = sorted.map((m, i) => ({
+  for (const m of sorted) {
+    const fraction = totalSpending > 0 ? m.totalSpending / totalSpending : 0;
+    if (Math.round(fraction * ICO_FACES) >= 1) {
+      visible.push(m);
+    } else {
+      otherSpending += m.totalSpending;
+      otherProjectCount += m.projectCount;
+    }
+  }
+
+  // Add "その他" group if any ministries were merged
+  if (otherSpending > 0) {
+    visible.push({
+      name: 'その他',
+      totalSpending: otherSpending,
+      projectCount: otherProjectCount,
+    });
+  }
+
+  // Fibonacci lattice seeds
+  const seeds = fibonacciSphere(visible.length);
+
+  const ministries: GlobeMinistry[] = visible.map((m, i) => ({
     name: m.name,
     totalSpending: m.totalSpending,
-    areaFraction: totalSpending > 0 ? m.totalSpending / totalSpending : 0,
-    centroid: points[i],
+    areaFraction: totalSpending > 0 ? m.totalSpending / totalSpending : 1 / visible.length,
+    seed: seeds[i],
     projectCount: m.projectCount,
-    color: `hsl(${Math.round((i * 360) / sorted.length)}, 70%, 50%)`,
+    color: `hsl(${Math.round((i * 360) / visible.length)}, 70%, 50%)`,
   }));
 
   cachedResponse = { totalSpending, ministries };
