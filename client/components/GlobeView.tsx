@@ -2,11 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js';
 import type { GlobeResponse, GlobeMinistry } from '@/app/api/map/globe/route';
 
 const SPHERE_RADIUS = 1;
-const ICO_SUBDIVISIONS = 6; // 20 * 4^6 = 81,920 faces
+const ICO_SUBDIVISIONS = 7; // 20 * 4^7 = 327,680 faces
 
 // ─── Icosphere generation ───────────────────────────────────────────
 
@@ -14,6 +14,7 @@ interface IcoSphere {
   vertices: Float32Array;  // flat xyz array
   indices: Uint32Array;    // triangle indices
   faceCount: number;
+  adjacency: Int32Array;   // 3 neighbors per face (faceIdx*3+0..2), -1 if none
 }
 
 function generateIcosphere(subdivisions: number, radius: number): IcoSphere {
@@ -83,47 +84,300 @@ function generateIcosphere(subdivisions: number, radius: number): IcoSphere {
     vertices[i] = verts[i] * radius;
   }
 
-  return {
-    vertices,
-    indices: new Uint32Array(faces),
-    faceCount: faces.length / 3,
-  };
+  const indicesArr = new Uint32Array(faces);
+  const faceCount = faces.length / 3;
+
+  // Build face adjacency graph: for each edge, find the two faces sharing it
+  const adjacency = new Int32Array(faceCount * 3).fill(-1);
+  const edgeToFace = new Map<string, number>();
+
+  for (let f = 0; f < faceCount; f++) {
+    for (let e = 0; e < 3; e++) {
+      const v0 = indicesArr[f * 3 + e];
+      const v1 = indicesArr[f * 3 + (e + 1) % 3];
+      const key = v0 < v1 ? `${v0}_${v1}` : `${v1}_${v0}`;
+      const other = edgeToFace.get(key);
+      if (other !== undefined) {
+        // Find empty adjacency slot for both faces
+        for (let s = 0; s < 3; s++) {
+          if (adjacency[f * 3 + s] === -1) { adjacency[f * 3 + s] = other; break; }
+        }
+        for (let s = 0; s < 3; s++) {
+          if (adjacency[other * 3 + s] === -1) { adjacency[other * 3 + s] = f; break; }
+        }
+      } else {
+        edgeToFace.set(key, f);
+      }
+    }
+  }
+
+  return { vertices, indices: indicesArr, faceCount, adjacency };
 }
 
 // ─── Face → Ministry assignment ─────────────────────────────────────
-// 緯度帯で北極→南極の順に面積比例で割り当て
+// Seed-based flood fill: small ministries grow first as compact "islands",
+// large ministries fill remaining space as "continents"
+
+function lonLatToXYZ(lon: number, lat: number): [number, number, number] {
+  const phi = (90 - lat) * (Math.PI / 180);
+  const theta = (lon + 180) * (Math.PI / 180);
+  return [
+    -Math.sin(phi) * Math.cos(theta),
+    Math.cos(phi),
+    Math.sin(phi) * Math.sin(theta),
+  ];
+}
 
 function assignFaces(
   ico: IcoSphere,
   ministries: GlobeMinistry[],
 ): Int32Array {
-  const { vertices, indices, faceCount } = ico;
-  const assignment = new Int32Array(faceCount);
+  const { vertices, indices, faceCount, adjacency } = ico;
+  const UNASSIGNED = -1;
+  const assignment = new Int32Array(faceCount).fill(UNASSIGNED);
 
-  // Compute centroid Y (latitude) for each face and sort by it (north→south)
-  const faceOrder: number[] = [];
-  const faceCentroidY = new Float32Array(faceCount);
-
+  // Compute face centroids
+  const centroids = new Float32Array(faceCount * 3);
   for (let f = 0; f < faceCount; f++) {
     const i0 = indices[f * 3], i1 = indices[f * 3 + 1], i2 = indices[f * 3 + 2];
-    faceCentroidY[f] = (vertices[i0*3+1] + vertices[i1*3+1] + vertices[i2*3+1]) / 3;
-    faceOrder.push(f);
+    centroids[f * 3]     = (vertices[i0*3]   + vertices[i1*3]   + vertices[i2*3])   / 3;
+    centroids[f * 3 + 1] = (vertices[i0*3+1] + vertices[i1*3+1] + vertices[i2*3+1]) / 3;
+    centroids[f * 3 + 2] = (vertices[i0*3+2] + vertices[i1*3+2] + vertices[i2*3+2]) / 3;
   }
 
-  // Sort faces from north pole (Y=+1) to south pole (Y=-1)
-  faceOrder.sort((a, b) => faceCentroidY[b] - faceCentroidY[a]);
-
-  // Assign contiguous bands to ministries (sorted by spending, largest first)
-  let cursor = 0;
+  // Compute target face counts
+  const targetCounts = new Int32Array(ministries.length);
+  let totalAssigned = 0;
   for (let m = 0; m < ministries.length; m++) {
-    const count = m < ministries.length - 1
-      ? Math.round(ministries[m].areaFraction * faceCount)
-      : faceCount - cursor; // Last ministry gets remainder
-    const end = Math.min(cursor + count, faceCount);
-    for (let i = cursor; i < end; i++) {
-      assignment[faceOrder[i]] = m;
+    if (m < ministries.length - 1) {
+      targetCounts[m] = Math.round(ministries[m].areaFraction * faceCount);
+    } else {
+      targetCounts[m] = faceCount - totalAssigned;
     }
-    cursor = end;
+    totalAssigned += targetCounts[m];
+  }
+
+  // Find seed face for each ministry (closest face centroid to seed position)
+  const seedFaces = new Int32Array(ministries.length);
+  for (let m = 0; m < ministries.length; m++) {
+    const [sx, sy, sz] = lonLatToXYZ(ministries[m].seed[0], ministries[m].seed[1]);
+    let bestFace = 0;
+    let bestDist = Infinity;
+    for (let f = 0; f < faceCount; f++) {
+      const dx = centroids[f*3] - sx, dy = centroids[f*3+1] - sy, dz = centroids[f*3+2] - sz;
+      const dist = dx*dx + dy*dy + dz*dz;
+      if (dist < bestDist) { bestDist = dist; bestFace = f; }
+    }
+    seedFaces[m] = bestFace;
+  }
+
+  // Sort ministries by target count ascending (smallest grow first → compact islands)
+  const growOrder = Array.from({ length: ministries.length }, (_, i) => i);
+  growOrder.sort((a, b) => targetCounts[a] - targetCounts[b]);
+
+  // Flood fill: each ministry grows from its seed via BFS
+  const currentCounts = new Int32Array(ministries.length);
+
+  for (const m of growOrder) {
+    const target = targetCounts[m];
+    if (target <= 0) continue;
+
+    const queue: number[] = [seedFaces[m]];
+    if (assignment[seedFaces[m]] !== UNASSIGNED) {
+      // Seed already taken — find nearest unassigned face
+      let bestFace = -1;
+      let bestDist = Infinity;
+      const [sx, sy, sz] = lonLatToXYZ(ministries[m].seed[0], ministries[m].seed[1]);
+      for (let f = 0; f < faceCount; f++) {
+        if (assignment[f] !== UNASSIGNED) continue;
+        const dx = centroids[f*3] - sx, dy = centroids[f*3+1] - sy, dz = centroids[f*3+2] - sz;
+        const dist = dx*dx + dy*dy + dz*dz;
+        if (dist < bestDist) { bestDist = dist; bestFace = f; }
+      }
+      if (bestFace === -1) continue;
+      queue[0] = bestFace;
+    }
+
+    assignment[queue[0]] = m;
+    currentCounts[m] = 1;
+    let head = 0;
+
+    while (head < queue.length && currentCounts[m] < target) {
+      const face = queue[head++];
+      for (let e = 0; e < 3; e++) {
+        if (currentCounts[m] >= target) break;
+        const neighbor = adjacency[face * 3 + e];
+        if (neighbor === -1 || assignment[neighbor] !== UNASSIGNED) continue;
+        assignment[neighbor] = m;
+        currentCounts[m]++;
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  // Assign any remaining unassigned faces to nearest assigned neighbor
+  let hasUnassigned = true;
+  while (hasUnassigned) {
+    hasUnassigned = false;
+    for (let f = 0; f < faceCount; f++) {
+      if (assignment[f] !== UNASSIGNED) continue;
+      for (let e = 0; e < 3; e++) {
+        const neighbor = adjacency[f * 3 + e];
+        if (neighbor !== -1 && assignment[neighbor] !== UNASSIGNED) {
+          assignment[f] = assignment[neighbor];
+          break;
+        }
+      }
+      if (assignment[f] === UNASSIGNED) hasUnassigned = true;
+    }
+  }
+
+  // ─── Connectivity fix: merge floating islands into neighbors ──────
+  // For each non-ocean ministry, find connected components.
+  // Keep only the largest; reassign fragments to adjacent ministries.
+  // Then let the ministry reclaim faces by expanding its main region.
+  const oceanIdx = growOrder[growOrder.length - 1]; // largest = ocean
+  for (const m of growOrder) {
+    if (m === oceanIdx) continue; // ocean can be disconnected (wraps around)
+
+    // Find all faces belonging to this ministry
+    const myFaces: number[] = [];
+    for (let f = 0; f < faceCount; f++) {
+      if (assignment[f] === m) myFaces.push(f);
+    }
+    if (myFaces.length <= 1) continue;
+
+    // BFS to find connected components within this ministry's faces
+    const visited = new Uint8Array(faceCount);
+    const components: number[][] = [];
+
+    for (const startFace of myFaces) {
+      if (visited[startFace]) continue;
+      const comp: number[] = [startFace];
+      visited[startFace] = 1;
+      let head = 0;
+      while (head < comp.length) {
+        const face = comp[head++];
+        for (let e = 0; e < 3; e++) {
+          const nb = adjacency[face * 3 + e];
+          if (nb !== -1 && !visited[nb] && assignment[nb] === m) {
+            visited[nb] = 1;
+            comp.push(nb);
+          }
+        }
+      }
+      components.push(comp);
+    }
+
+    if (components.length <= 1) continue; // already connected
+
+    // Keep the largest component, reassign others to adjacent ministries
+    components.sort((a, b) => b.length - a.length);
+    for (let ci = 1; ci < components.length; ci++) {
+      for (const face of components[ci]) {
+        // Find most common adjacent ministry (excluding self)
+        const nbMinistries = new Map<number, number>();
+        for (let e = 0; e < 3; e++) {
+          const nb = adjacency[face * 3 + e];
+          if (nb !== -1 && assignment[nb] !== m) {
+            nbMinistries.set(assignment[nb], (nbMinistries.get(assignment[nb]) || 0) + 1);
+          }
+        }
+        if (nbMinistries.size > 0) {
+          let bestM = -1, bestC = 0;
+          for (const [nm, cnt] of nbMinistries) {
+            if (cnt > bestC) { bestC = cnt; bestM = nm; }
+          }
+          assignment[face] = bestM;
+        } else {
+          // No non-self neighbor yet — assign to ocean as fallback
+          assignment[face] = oceanIdx;
+        }
+      }
+    }
+
+    // Reclaim: the ministry lost some faces, grow from its main component boundary
+    let myCount = 0;
+    for (let f = 0; f < faceCount; f++) {
+      if (assignment[f] === m) myCount++;
+    }
+    const deficit = targetCounts[m] - myCount;
+    if (deficit > 0) {
+      // BFS expand from main component boundary
+      const frontier: number[] = [];
+      for (const f of components[0]) {
+        for (let e = 0; e < 3; e++) {
+          const nb = adjacency[f * 3 + e];
+          if (nb !== -1 && assignment[nb] !== m) {
+            frontier.push(f);
+            break;
+          }
+        }
+      }
+      let claimed = 0;
+      let fHead = 0;
+      while (fHead < frontier.length && claimed < deficit) {
+        const face = frontier[fHead++];
+        for (let e = 0; e < 3; e++) {
+          if (claimed >= deficit) break;
+          const nb = adjacency[face * 3 + e];
+          if (nb === -1 || assignment[nb] === m) continue;
+          // Only steal from ocean to avoid cascading island issues
+          if (assignment[nb] === oceanIdx) {
+            assignment[nb] = m;
+            claimed++;
+            frontier.push(nb);
+          }
+        }
+      }
+    }
+  }
+
+  // ─── Boundary smoothing ───────────────────────────────────────────
+  const maxDeviation = new Int32Array(ministries.length);
+  for (let m = 0; m < ministries.length; m++) {
+    maxDeviation[m] = Math.max(1, Math.round(targetCounts[m] * 0.01));
+  }
+
+  // Recount after connectivity fix
+  currentCounts.fill(0);
+  for (let f = 0; f < faceCount; f++) currentCounts[assignment[f]]++;
+
+  const SMOOTH_ITERATIONS = 3;
+  for (let iter = 0; iter < SMOOTH_ITERATIONS; iter++) {
+    let swaps = 0;
+    for (let f = 0; f < faceCount; f++) {
+      const myMinistry = assignment[f];
+      const neighborMinistries = new Map<number, number>();
+      for (let e = 0; e < 3; e++) {
+        const neighbor = adjacency[f * 3 + e];
+        if (neighbor === -1) continue;
+        const nm = assignment[neighbor];
+        neighborMinistries.set(nm, (neighborMinistries.get(nm) || 0) + 1);
+      }
+
+      let bestMinistry = myMinistry;
+      let bestCount = neighborMinistries.get(myMinistry) || 0;
+      for (const [nm, count] of neighborMinistries) {
+        if (nm !== myMinistry && count > bestCount) {
+          bestMinistry = nm;
+          bestCount = count;
+        }
+      }
+
+      if (bestMinistry !== myMinistry) {
+        const srcDev = currentCounts[myMinistry] - 1 - targetCounts[myMinistry];
+        const dstDev = currentCounts[bestMinistry] + 1 - targetCounts[bestMinistry];
+        if (Math.abs(srcDev) <= maxDeviation[myMinistry] &&
+            Math.abs(dstDev) <= maxDeviation[bestMinistry]) {
+          assignment[f] = bestMinistry;
+          currentCounts[myMinistry]--;
+          currentCounts[bestMinistry]++;
+          swaps++;
+        }
+      }
+    }
+    if (swaps === 0) break;
   }
 
   return assignment;
@@ -167,6 +421,8 @@ export default function GlobeView({ data }: GlobeViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const zoomInputRef = useRef<HTMLInputElement>(null);
+  const coordsRef = useRef<HTMLSpanElement>(null);
+  const autoRotateRef = useRef(true);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -259,31 +515,25 @@ export default function GlobeView({ data }: GlobeViewProps) {
       faceCounts[faceAssignment[f]]++;
     }
 
-    // Labels — position at the northern boundary (highest Y face) of each ministry
+    // Labels — position at the centroid (average of all face centroids) of each ministry
     const labelGroup = new THREE.Group();
     scene.add(labelGroup);
     if (data) {
       const nonIdxPos = nonIndexedGeom.getAttribute('position');
-      // Find the highest-Y face centroid for each ministry
-      const maxY = new Float32Array(data.ministries.length).fill(-Infinity);
       const labelPositions: THREE.Vector3[] = data.ministries.map(() => new THREE.Vector3());
 
       for (let f = 0; f < ico.faceCount; f++) {
         const mi = faceAssignment[f];
         const v = f * 3;
-        const cy = (nonIdxPos.getY(v) + nonIdxPos.getY(v+1) + nonIdxPos.getY(v+2)) / 3;
-        if (cy > maxY[mi]) {
-          maxY[mi] = cy;
-          labelPositions[mi].set(
-            (nonIdxPos.getX(v) + nonIdxPos.getX(v+1) + nonIdxPos.getX(v+2)) / 3,
-            cy,
-            (nonIdxPos.getZ(v) + nonIdxPos.getZ(v+1) + nonIdxPos.getZ(v+2)) / 3,
-          );
-        }
+        labelPositions[mi].x += (nonIdxPos.getX(v) + nonIdxPos.getX(v+1) + nonIdxPos.getX(v+2)) / 3;
+        labelPositions[mi].y += (nonIdxPos.getY(v) + nonIdxPos.getY(v+1) + nonIdxPos.getY(v+2)) / 3;
+        labelPositions[mi].z += (nonIdxPos.getZ(v) + nonIdxPos.getZ(v+1) + nonIdxPos.getZ(v+2)) / 3;
       }
 
       for (let mi = 0; mi < data.ministries.length; mi++) {
-        if (maxY[mi] === -Infinity) continue;
+        if (faceCounts[mi] === 0) continue;
+        // Average → normalize to sphere surface + small offset
+        labelPositions[mi].divideScalar(faceCounts[mi]);
         labelPositions[mi].normalize().multiplyScalar(SPHERE_RADIUS + 0.03);
 
         const label = createTextSprite(data.ministries[mi].name);
@@ -292,20 +542,15 @@ export default function GlobeView({ data }: GlobeViewProps) {
       }
     }
 
-    // OrbitControls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enablePan = false;
-    controls.enableRotate = true;
-    controls.mouseButtons = {
-      LEFT: THREE.MOUSE.ROTATE,
-      MIDDLE: THREE.MOUSE.DOLLY,
-      RIGHT: undefined as unknown as THREE.MOUSE,
-    };
+    // TrackballControls — no polar angle limits, full sphere rotation
+    const controls = new TrackballControls(camera, renderer.domElement);
+    controls.noPan = true;
+    controls.noZoom = false;
+    controls.rotateSpeed = 2.0;
+    controls.zoomSpeed = 1.2;
     controls.minDistance = SPHERE_RADIUS + camera.near; // 1.1 — prevents near-plane clipping
     controls.maxDistance = 50;
-    controls.rotateSpeed = 0.5;
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
+    controls.dynamicDampingFactor = 0.15;
 
     // Raycaster for hover
     const raycaster = new THREE.Raycaster();
@@ -411,7 +656,9 @@ export default function GlobeView({ data }: GlobeViewProps) {
       animationId = requestAnimationFrame(animate);
       const delta = clock.getDelta();
 
-      globeMesh.rotation.y += delta * 0.05;
+      if (autoRotateRef.current) {
+        globeMesh.rotation.y += delta * 0.05;
+      }
       labelGroup.rotation.y = globeMesh.rotation.y;
 
       // Scale labels so they appear constant size on screen regardless of zoom
@@ -431,6 +678,20 @@ export default function GlobeView({ data }: GlobeViewProps) {
       const zoomLevel = INITIAL_DIST / camDist;
       if (zoomInputRef.current && document.activeElement !== zoomInputRef.current) {
         zoomInputRef.current.value = zoomLevel.toFixed(2);
+      }
+
+      // Compute center lat/lon: ray from camera through origin hits sphere at the front center
+      // The "look-at" direction in world space, accounting for globe rotation
+      if (coordsRef.current) {
+        const camDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+        // Undo globe rotation to get point on unrotated sphere
+        const invRot = new THREE.Quaternion().setFromEuler(globeMesh.rotation).invert();
+        camDir.applyQuaternion(invRot);
+        // Convert to lat/lon
+        const lat = Math.asin(Math.max(-1, Math.min(1, camDir.y))) * (180 / Math.PI);
+        const lon = Math.atan2(camDir.z, -camDir.x) * (180 / Math.PI) - 180;
+        const normLon = ((lon % 360) + 540) % 360 - 180;
+        coordsRef.current.textContent = `${lat.toFixed(1)}°, ${normLon.toFixed(1)}°`;
       }
 
       controls.update();
@@ -482,7 +743,7 @@ export default function GlobeView({ data }: GlobeViewProps) {
           zIndex: 10,
         }}
       />
-      {/* Zoom controls */}
+      {/* Controls overlay */}
       <div
         style={{
           position: 'absolute',
@@ -494,30 +755,49 @@ export default function GlobeView({ data }: GlobeViewProps) {
           borderRadius: '6px',
           fontSize: '13px',
           display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
+          flexDirection: 'column',
+          gap: '6px',
           zIndex: 10,
         }}
       >
-        <span>Zoom:</span>
-        <input
-          ref={zoomInputRef}
-          type="number"
-          defaultValue={1}
-          min={0.06}
-          max={2.73}
-          step={0.05}
-          style={{
-            width: '72px',
-            background: 'rgba(255, 255, 255, 0.15)',
-            color: '#fff',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '4px',
-            padding: '2px 6px',
-            fontSize: '13px',
-            textAlign: 'right',
-          }}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>Zoom:</span>
+          <input
+            ref={zoomInputRef}
+            type="number"
+            defaultValue={1}
+            min={0.06}
+            max={2.73}
+            step={0.05}
+            style={{
+              width: '72px',
+              background: 'rgba(255, 255, 255, 0.15)',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '4px',
+              padding: '2px 6px',
+              fontSize: '13px',
+              textAlign: 'right',
+            }}
+          />
+          <button
+            onClick={() => { autoRotateRef.current = !autoRotateRef.current; }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.15)',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '4px',
+              padding: '2px 8px',
+              fontSize: '13px',
+              cursor: 'pointer',
+            }}
+          >
+            {'\u23F8 / \u25B6'}
+          </button>
+        </div>
+        <div style={{ fontSize: '12px', opacity: 0.7 }}>
+          <span ref={coordsRef}>0.0°, 0.0°</span>
+        </div>
       </div>
     </div>
   );
