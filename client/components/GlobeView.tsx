@@ -160,262 +160,208 @@ function assignFaces(
     totalAssigned += targetCounts[m];
   }
 
-  const oceanIdx = 0;
-  const continentFaceCount = faceCount - targetCounts[oceanIdx];
+  // ─── Phase 2: 多面体シード配置 + 六角形、海は余り ──────────────────
+  // バッチ1: 立方体8頂点（xyz再帰分割）
+  // バッチ2: 正八面体6頂点（軸交点 = バッチ1の分割面が交わる点）
+  // バッチ3: 立方八面体12頂点（辺中点 = バッチ1&2の間の隙間）
+  // バッチ4: 残り（軸交点再利用）
+  // 全バッチ後の未割り当て面 → 海（厚生労働省）
 
-  // ─── Phase 1: 元面→海/大陸の分離 ─────────────────────────────────
-  // 20元面の重心を計算し、大陸中心からの距離で海/大陸を分ける
-  const NUM_ORIGINAL = 20;
-  const origCentroids = new Float32Array(NUM_ORIGINAL * 3); // 元面の重心
-
-  for (let o = 0; o < NUM_ORIGINAL; o++) {
-    let sx = 0, sy = 0, sz = 0;
-    const startF = o * FACES_PER_ORIGINAL;
-    const endF = startF + FACES_PER_ORIGINAL;
-    for (let f = startF; f < endF; f++) {
-      sx += centroids[f * 3];
-      sy += centroids[f * 3 + 1];
-      sz += centroids[f * 3 + 2];
-    }
-    origCentroids[o * 3]     = sx / FACES_PER_ORIGINAL;
-    origCentroids[o * 3 + 1] = sy / FACES_PER_ORIGINAL;
-    origCentroids[o * 3 + 2] = sz / FACES_PER_ORIGINAL;
-  }
-
-  // 大陸中心: 経産省(index 1)のseed位置を使う
-  const [ccx, ccy, ccz] = lonLatToXYZ(ministries[1].seed[0], ministries[1].seed[1]);
-
-  // 元面を大陸中心からの距離でソート
-  const origDists: { idx: number; dist: number }[] = [];
-  for (let o = 0; o < NUM_ORIGINAL; o++) {
-    const dx = origCentroids[o*3] - ccx;
-    const dy = origCentroids[o*3+1] - ccy;
-    const dz = origCentroids[o*3+2] - ccz;
-    origDists.push({ idx: o, dist: dx*dx + dy*dy + dz*dz });
-  }
-  origDists.sort((a, b) => a.dist - b.dist);
-
-  // 大陸に必要な元面数を計算: continentFaceCount / FACES_PER_ORIGINAL
-  // 境界元面は海と大陸を内部で分割する
-  const fullContinentOriginals = Math.floor(continentFaceCount / FACES_PER_ORIGINAL);
-  const boundaryFaces = continentFaceCount - fullContinentOriginals * FACES_PER_ORIGINAL;
-
-  const isOrigContinent = new Uint8Array(NUM_ORIGINAL); // 0=ocean, 1=continent, 2=boundary
-  for (let i = 0; i < origDists.length; i++) {
-    if (i < fullContinentOriginals) {
-      isOrigContinent[origDists[i].idx] = 1; // fully continent
-    } else if (i === fullContinentOriginals && boundaryFaces > 0) {
-      isOrigContinent[origDists[i].idx] = 2; // boundary
-    }
-    // else: ocean
-  }
-
-  // 海面の割り当て
-  const isContinent = new Uint8Array(faceCount);
+  interface Face3D { f: number; x: number; y: number; z: number }
+  const allFaces: Face3D[] = [];
   for (let f = 0; f < faceCount; f++) {
-    const origId = Math.floor(f / FACES_PER_ORIGINAL);
-    if (isOrigContinent[origId] === 1) {
-      isContinent[f] = 1;
-    } else if (isOrigContinent[origId] === 2) {
-      isContinent[f] = 1; // 境界元面は仮に大陸扱い
-    }
+    allFaces.push({ f, x: centroids[f*3], y: centroids[f*3+1], z: centroids[f*3+2] });
   }
 
-  // 境界元面の処理: 大陸中心に近い面から順にboundaryFaces面だけ大陸にする
-  if (boundaryFaces > 0) {
-    const boundaryOrigIdx = origDists[fullContinentOriginals].idx;
-    const startF = boundaryOrigIdx * FACES_PER_ORIGINAL;
-    const endF = startF + FACES_PER_ORIGINAL;
+  const S3 = Math.sqrt(3);
+  const oceanIdx = 0; // 厚生労働省 = 海（最後の余り）
 
-    // 境界元面内の面を大陸中心からの距離でソート
-    const faceDists: { f: number; dist: number }[] = [];
-    for (let f = startF; f < endF; f++) {
-      const dx = centroids[f*3] - ccx;
-      const dy = centroids[f*3+1] - ccy;
-      const dz = centroids[f*3+2] - ccz;
-      faceDists.push({ f, dist: dx*dx + dy*dy + dz*dz });
-    }
-    faceDists.sort((a, b) => a.dist - b.dist);
+  // 3D座標で再帰二分割（バッチ1用: 立方体8頂点）
+  function splitIntoGroups(
+    faces: Face3D[],
+    groupCount: number,
+    axisIndex: number,
+  ): Face3D[][] {
+    if (groupCount <= 1) return [faces];
 
-    // 近い方からboundaryFaces面だけ大陸、残りは海
-    for (let i = 0; i < faceDists.length; i++) {
-      if (i < boundaryFaces) {
-        isContinent[faceDists[i].f] = 1;
-      } else {
-        isContinent[faceDists[i].f] = 0;
+    const axis = axisIndex % 3;
+    if (axis === 0) faces.sort((a, b) => a.x - b.x);
+    else if (axis === 1) faces.sort((a, b) => a.y - b.y);
+    else faces.sort((a, b) => a.z - b.z);
+
+    const leftCount = Math.floor(groupCount / 2);
+    const rightCount = groupCount - leftCount;
+    const splitIdx = Math.round(faces.length * leftCount / groupCount);
+
+    const left = splitIntoGroups(faces.slice(0, splitIdx), leftCount, axisIndex + 1);
+    const right = splitIntoGroups(faces.slice(splitIdx), rightCount, axisIndex + 1);
+    return [...left, ...right];
+  }
+
+  // シード点によるVoronoiグルーピング（バッチ2+用）
+  function groupByNearestSeed(faces: Face3D[], seeds: number[][]): Face3D[][] {
+    const groups: Face3D[][] = seeds.map(() => []);
+    for (const face of faces) {
+      let minDist = Infinity, minIdx = 0;
+      for (let s = 0; s < seeds.length; s++) {
+        const dx = face.x - seeds[s][0], dy = face.y - seeds[s][1], dz = face.z - seeds[s][2];
+        const dist = dx * dx + dy * dy + dz * dz;
+        if (dist < minDist) { minDist = dist; minIdx = s; }
       }
+      groups[minIdx].push(face);
     }
+    return groups;
   }
 
-  // 海の割り当て
-  for (let f = 0; f < faceCount; f++) {
-    if (!isContinent[f]) assignment[f] = oceanIdx;
-  }
-
-  // ─── Phase 2: 再帰二分割ツリーマップ方式 ─────────────────────────
-  // 面リストを縦横交互にソート+二分割して矩形領域を作る
-  // 面数ベースで分割するため、球面の不均一密度に影響されない
-
-  const continentMinistries = Array.from({ length: ministries.length }, (_, i) => i)
-    .filter(i => i !== oceanIdx);
-
-  // 大陸中心のローカル座標系を構築
-  const ccLen = Math.sqrt(ccx*ccx + ccy*ccy + ccz*ccz);
-  const cnx = ccx/ccLen, cny = ccy/ccLen, cnz = ccz/ccLen;
-  let cupx = 0, cupy = 1, cupz = 0;
-  if (Math.abs(cny) > 0.9) { cupx = 1; cupy = 0; }
-  let ctx = cupy*cnz - cupz*cny, cty = cupz*cnx - cupx*cnz, ctz = cupx*cny - cupy*cnx;
-  const ctLen = Math.sqrt(ctx*ctx + cty*cty + ctz*ctz);
-  ctx /= ctLen; cty /= ctLen; ctz /= ctLen;
-  const cbx = cny*ctz - cnz*cty, cby = cnz*ctx - cnx*ctz, cbz = cnx*cty - cny*ctx;
-
-  // 全大陸面を2Dローカル座標に射影
-  interface FaceUV { f: number; u: number; v: number }
-  const continentFaceUV: FaceUV[] = [];
-  for (let f = 0; f < faceCount; f++) {
-    if (!isContinent[f]) continue;
-    const dx = centroids[f*3] - ccx, dy = centroids[f*3+1] - ccy, dz = centroids[f*3+2] - ccz;
-    continentFaceUV.push({
-      f,
-      u: dx*ctx + dy*cty + dz*ctz,
-      v: dx*cbx + dy*cby + dz*cbz,
-    });
-  }
-
-  // 再帰二分割: 面リストと府省庁リストを交互にソート方向を変えて分割
-  type MItem = { ministry: number; area: number };
-
-  function assignRecursive(
-    faces: FaceUV[],
-    items: MItem[],
-    splitByV: boolean,
-  ): void {
-    if (items.length === 0 || faces.length === 0) return;
-    if (items.length === 1) {
-      for (const face of faces) assignment[face.f] = items[0].ministry;
-      return;
-    }
-
-    // 面を現在の軸でソート
-    if (splitByV) {
-      faces.sort((a, b) => a.v - b.v || a.u - b.u);
-    } else {
-      faces.sort((a, b) => a.u - b.u || a.v - b.v);
-    }
-
-    // 府省庁を面積の半分で二分割
-    const totalArea = items.reduce((s, it) => s + it.area, 0);
-    const halfArea = totalArea / 2;
-
-    const firstHalf: MItem[] = [];
-    let firstArea = 0;
-    const rest = [...items];
-
-    while (rest.length > 1) {
-      if (firstArea + rest[0].area > halfArea && firstHalf.length > 0) break;
-      const item = rest.shift()!;
-      firstHalf.push(item);
-      firstArea += item.area;
-    }
-
-    // 面を面積比で分割
-    const splitIdx = Math.round(faces.length * firstArea / totalArea);
-    const firstFaces = faces.slice(0, splitIdx);
-    const secondFaces = faces.slice(splitIdx);
-
-    // 次の軸で再帰
-    assignRecursive(firstFaces, firstHalf, !splitByV);
-    assignRecursive(secondFaces, rest, !splitByV);
-  }
-
-  // 小規模府省庁（面積 < 閾値）はツリーマップから外して辺に沿って配置
-  const EDGE_THRESHOLD = 1200;
-  const treemapMinistries: MItem[] = [];
-  const edgeMinistries: MItem[] = [];
-  for (const m of continentMinistries) {
-    if (targetCounts[m] >= EDGE_THRESHOLD) {
-      treemapMinistries.push({ ministry: m, area: targetCounts[m] });
-    } else {
-      edgeMinistries.push({ ministry: m, area: targetCounts[m] });
-    }
-  }
-  const edgeTotalArea = edgeMinistries.reduce((s, it) => s + it.area, 0);
-
-  // ツリーマップには「エッジゾーン」を1ブロックとして含める
-  const EDGE_ZONE = -999;
-  const treemapItems: MItem[] = [
-    ...treemapMinistries,
-    { ministry: EDGE_ZONE, area: edgeTotalArea },
+  // シード定義
+  const R2 = Math.SQRT1_2;
+  // 正八面体6頂点（軸交点）
+  const octahedronSeeds: number[][] = [
+    [1,0,0], [-1,0,0], [0,1,0], [0,-1,0], [0,0,1], [0,0,-1],
+  ];
+  // 立方八面体12頂点（辺中点）
+  const cuboctahedronSeeds: number[][] = [
+    [R2,R2,0], [R2,-R2,0], [-R2,R2,0], [-R2,-R2,0],
+    [R2,0,R2], [R2,0,-R2], [-R2,0,R2], [-R2,0,-R2],
+    [0,R2,R2], [0,R2,-R2], [0,-R2,R2], [0,-R2,-R2],
   ];
 
-  assignRecursive([...continentFaceUV], treemapItems, true);
+  // バッチ定義: サイズ + グルーピング方法
+  const batchDefs: { size: number; mode: 'split' | 'seed' | 'coastline'; seeds?: number[][] }[] = [
+    { size: 8,  mode: 'split' },                            // 立方体8頂点
+    { size: 6,  mode: 'seed', seeds: octahedronSeeds },      // 正八面体6頂点
+    { size: 12, mode: 'seed', seeds: cuboctahedronSeeds },   // 立方八面体12頂点
+    { size: 6,  mode: 'coastline' },                         // 残り（海岸線BFS配置）
+  ];
 
-  // エッジゾーンの面を収集し、BFSで小規模府省庁を辺に沿って配置
-  if (edgeMinistries.length > 0) {
-    // エッジゾーン面の中から、大陸境界(海に隣接)に近い面を起点にBFS
-    const edgeFaces: number[] = [];
-    for (let f = 0; f < faceCount; f++) {
-      if (assignment[f] === EDGE_ZONE) edgeFaces.push(f);
-    }
+  // 海以外の府省庁を面積降順にソート
+  const nonOceanMinistries = Array.from({ length: ministries.length }, (_, i) => i)
+    .filter(i => i !== oceanIdx)
+    .sort((a, b) => targetCounts[b] - targetCounts[a]);
 
-    // エッジ面をBFS順に並べる（海に隣接する面から開始）
-    const edgeSet = new Set(edgeFaces);
-    const edgeBfsOrder: number[] = [];
-    const edgeVisited = new Uint8Array(faceCount);
+  let ministryOffset = 0;
+  for (let batchIdx = 0; batchIdx < batchDefs.length && ministryOffset < nonOceanMinistries.length; batchIdx++) {
+    const def = batchDefs[batchIdx];
+    const batchSize = Math.min(def.size, nonOceanMinistries.length - ministryOffset);
+    const batch = nonOceanMinistries.slice(ministryOffset, ministryOffset + batchSize);
 
-    // 海に隣接するエッジ面をシードにする
-    const edgeSeeds: number[] = [];
-    for (const f of edgeFaces) {
-      for (let e = 0; e < 3; e++) {
-        const nb = adjacency[f * 3 + e];
-        if (nb !== -1 && assignment[nb] === oceanIdx) {
-          edgeSeeds.push(f);
-          break;
+    if (def.mode === 'coastline') {
+      // 海岸線BFS配置: 既存の非海大陸に隣接する未割り当て面をBFS順に配置
+      // 各府省庁ごとに海岸線から1点BFSで連続配置
+      for (const ministry of batch) {
+        const target = targetCounts[ministry];
+
+        // 海岸線面を1つ見つける（未割り当てで非海隣接あり）
+        let seed = -1;
+        for (let f = 0; f < faceCount; f++) {
+          if (assignment[f] !== -1) continue;
+          for (let e = 0; e < 3; e++) {
+            const nb = adjacency[f * 3 + e];
+            if (nb !== -1 && assignment[nb] !== -1 && assignment[nb] !== oceanIdx) {
+              seed = f; break;
+            }
+          }
+          if (seed !== -1) break;
+        }
+        if (seed === -1) break;
+
+        // シードからBFSで成長
+        const q = [seed];
+        assignment[seed] = ministry;
+        let assigned = 1, head = 0;
+        while (assigned < target && head < q.length) {
+          const cur = q[head++];
+          for (let e = 0; e < 3; e++) {
+            const nb = adjacency[cur * 3 + e];
+            if (nb !== -1 && assignment[nb] === -1 && assigned < target) {
+              assignment[nb] = ministry;
+              assigned++;
+              q.push(nb);
+            }
+          }
+        }
+      }
+    } else {
+      // split / seed モード: 六角形配置
+      const unassigned = allFaces.filter(face => assignment[face.f] === -1);
+      if (unassigned.length === 0) { ministryOffset += batchSize; continue; }
+
+      let groups: Face3D[][];
+      if (def.mode === 'split') {
+        groups = splitIntoGroups([...unassigned], batch.length, 0);
+      } else {
+        groups = groupByNearestSeed(unassigned, def.seeds!);
+        if (groups.length > batch.length) {
+          const indexed = groups.map((g, i) => ({ g, i, len: g.length }));
+          indexed.sort((a, b) => b.len - a.len);
+          groups = indexed.slice(0, batch.length).map(x => x.g);
+        }
+      }
+
+      for (let g = 0; g < groups.length && g < batch.length; g++) {
+        const group = groups[g];
+        const ministry = batch[g];
+        const target = targetCounts[ministry];
+
+        if (group.length === 0) continue;
+
+        // グループ重心を計算（3D）
+        let sx = 0, sy = 0, sz = 0;
+        for (const f of group) { sx += f.x; sy += f.y; sz += f.z; }
+        const gcx = sx / group.length, gcy = sy / group.length, gcz = sz / group.length;
+
+        // 重心からのローカル接平面を構築（六角距離計算用）
+        const glen = Math.sqrt(gcx*gcx + gcy*gcy + gcz*gcz);
+        const gnx = gcx/glen, gny = gcy/glen, gnz = gcz/glen;
+        let gupx = 0, gupy = 1, gupz = 0;
+        if (Math.abs(gny) > 0.9) { gupx = 1; gupy = 0; }
+        let gtx = gupy*gnz - gupz*gny, gty = gupz*gnx - gupx*gnz, gtz = gupx*gny - gupy*gnx;
+        const gtLen = Math.sqrt(gtx*gtx + gty*gty + gtz*gtz);
+        gtx /= gtLen; gty /= gtLen; gtz /= gtLen;
+        const gbx = gny*gtz - gnz*gty, gby = gnz*gtx - gnx*gtz, gbz = gnx*gty - gny*gtx;
+
+        // ローカル2Dに射影して面密度を推定
+        const localUV: { f: number; u: number; v: number }[] = [];
+        let luMin = Infinity, luMax = -Infinity, lvMin = Infinity, lvMax = -Infinity;
+        for (const face of group) {
+          const dx = face.x - gcx, dy = face.y - gcy, dz = face.z - gcz;
+          const u = dx*gtx + dy*gty + dz*gtz;
+          const v = dx*gbx + dy*gby + dz*gbz;
+          localUV.push({ f: face.f, u, v });
+          if (u < luMin) luMin = u;
+          if (u > luMax) luMax = u;
+          if (v < lvMin) lvMin = v;
+          if (v > lvMax) lvMax = v;
+        }
+        const localArea = (luMax - luMin) * (lvMax - lvMin);
+        const localDensity = localArea > 0 ? group.length / localArea : group.length;
+
+        // 六角形の外接半径（ローカル座標系での）
+        const R = Math.sqrt(2 * target / (3 * S3 * localDensity));
+
+        // 六角距離でソート（内側から順に割り当て）
+        localUV.sort((a, b) => {
+          const adxA = Math.abs(a.u), adyA = Math.abs(a.v);
+          const dA = Math.max(adyA / (R * S3 / 2), (S3 * adxA + adyA) / (R * S3));
+          const adxB = Math.abs(b.u), adyB = Math.abs(b.v);
+          const dB = Math.max(adyB / (R * S3 / 2), (S3 * adxB + adyB) / (R * S3));
+          return dA - dB;
+        });
+
+        // 六角形の内側からtarget面だけ割り当て
+        const count = Math.min(target, localUV.length);
+        for (let i = 0; i < count; i++) {
+          assignment[localUV[i].f] = ministry;
         }
       }
     }
-    // シードがなければ全エッジ面の先頭を使う
-    if (edgeSeeds.length === 0 && edgeFaces.length > 0) {
-      edgeSeeds.push(edgeFaces[0]);
-    }
 
-    const bfsQueue: number[] = [];
-    for (const s of edgeSeeds) {
-      if (!edgeVisited[s]) {
-        edgeVisited[s] = 1;
-        bfsQueue.push(s);
-      }
-    }
-    let bfsHead = 0;
-    while (bfsHead < bfsQueue.length) {
-      const face = bfsQueue[bfsHead++];
-      edgeBfsOrder.push(face);
-      for (let e = 0; e < 3; e++) {
-        const nb = adjacency[face * 3 + e];
-        if (nb !== -1 && !edgeVisited[nb] && edgeSet.has(nb)) {
-          edgeVisited[nb] = 1;
-          bfsQueue.push(nb);
-        }
-      }
-    }
+    ministryOffset += batchSize;
+  }
 
-    // BFS順で小規模府省庁を割り当て（面積降順）
-    edgeMinistries.sort((a, b) => b.area - a.area);
-    let cursor = 0;
-    for (const item of edgeMinistries) {
-      let assigned = 0;
-      while (assigned < item.area && cursor < edgeBfsOrder.length) {
-        assignment[edgeBfsOrder[cursor]] = item.ministry;
-        assigned++;
-        cursor++;
-      }
-    }
-    // 残りは最後の小規模府省庁に
-    const lastEdge = edgeMinistries[edgeMinistries.length - 1].ministry;
-    while (cursor < edgeBfsOrder.length) {
-      assignment[edgeBfsOrder[cursor]] = lastEdge;
-      cursor++;
-    }
+  // 未割り当て面 → 海（厚生労働省）
+  for (let f = 0; f < faceCount; f++) {
+    if (assignment[f] === -1) assignment[f] = oceanIdx;
   }
 
   // ─── Phase 3: 境界滑らか化 ───────────────────────────────────────

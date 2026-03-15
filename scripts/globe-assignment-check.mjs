@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 /**
- * Globe面割り当て検証スクリプト（再帰二分割ツリーマップ方式）
+ * Globe面割り当て検証スクリプト（8ゾーン均等分割 + 回転軸 + 六角形配置、海は余り）
  * Usage: node scripts/globe-assignment-check.mjs > globe-assignment.csv
  */
 
 const ICO_SUBDIVISIONS = 7;
 const SPHERE_RADIUS = 1;
-const FACES_PER_ORIGINAL = 4 ** ICO_SUBDIVISIONS;
 
 const API_URL = process.env.API_URL || 'http://localhost:3002/api/map/globe';
 const res = await fetch(API_URL);
@@ -71,12 +70,6 @@ function generateIcosphere(subdivisions, radius) {
   return { vertices, indices, faceCount, adjacency };
 }
 
-function lonLatToXYZ(lon, lat) {
-  const phi = (90 - lat) * Math.PI / 180;
-  const theta = (lon + 180) * Math.PI / 180;
-  return [-Math.sin(phi)*Math.cos(theta), Math.cos(phi), Math.sin(phi)*Math.sin(theta)];
-}
-
 function assignFaces(ico, ministries) {
   const { vertices, indices, faceCount, adjacency } = ico;
   const assignment = new Int32Array(faceCount).fill(-1);
@@ -97,193 +90,177 @@ function assignFaces(ico, ministries) {
     totalAssigned += targetCounts[m];
   }
 
+  // Phase 2: 多面体シード配置 + 六角形、海は余り
+  const allFaces = [];
+  for (let f = 0; f < faceCount; f++) {
+    allFaces.push({ f, x: centroids[f*3], y: centroids[f*3+1], z: centroids[f*3+2] });
+  }
+
+  const S3 = Math.sqrt(3);
   const oceanIdx = 0;
-  const continentFaceCount = faceCount - targetCounts[oceanIdx];
+  const R2 = Math.SQRT1_2;
 
-  // Phase 1: 元面→海/大陸の分離
-  const NUM_ORIGINAL = 20;
-  const origCentroids = new Float32Array(NUM_ORIGINAL * 3);
-  for (let o = 0; o < NUM_ORIGINAL; o++) {
-    let sx = 0, sy = 0, sz = 0;
-    const startF = o * FACES_PER_ORIGINAL;
-    const endF = startF + FACES_PER_ORIGINAL;
-    for (let f = startF; f < endF; f++) {
-      sx += centroids[f*3]; sy += centroids[f*3+1]; sz += centroids[f*3+2];
+  // 再帰二分割（バッチ1用）
+  function splitIntoGroups(faces, groupCount, axisIndex) {
+    if (groupCount <= 1) return [faces];
+    const axis = axisIndex % 3;
+    if (axis === 0) faces.sort((a, b) => a.x - b.x);
+    else if (axis === 1) faces.sort((a, b) => a.y - b.y);
+    else faces.sort((a, b) => a.z - b.z);
+    const leftCount = Math.floor(groupCount / 2);
+    const rightCount = groupCount - leftCount;
+    const splitIdx = Math.round(faces.length * leftCount / groupCount);
+    const left = splitIntoGroups(faces.slice(0, splitIdx), leftCount, axisIndex + 1);
+    const right = splitIntoGroups(faces.slice(splitIdx), rightCount, axisIndex + 1);
+    return [...left, ...right];
+  }
+
+  // Voronoiグルーピング（バッチ2+用）
+  function groupByNearestSeed(faces, seeds) {
+    const groups = seeds.map(() => []);
+    for (const face of faces) {
+      let minDist = Infinity, minIdx = 0;
+      for (let s = 0; s < seeds.length; s++) {
+        const dx = face.x - seeds[s][0], dy = face.y - seeds[s][1], dz = face.z - seeds[s][2];
+        const dist = dx*dx + dy*dy + dz*dz;
+        if (dist < minDist) { minDist = dist; minIdx = s; }
+      }
+      groups[minIdx].push(face);
     }
-    origCentroids[o*3] = sx / FACES_PER_ORIGINAL;
-    origCentroids[o*3+1] = sy / FACES_PER_ORIGINAL;
-    origCentroids[o*3+2] = sz / FACES_PER_ORIGINAL;
+    return groups;
   }
 
-  const [ccx, ccy, ccz] = lonLatToXYZ(ministries[1].seed[0], ministries[1].seed[1]);
-
-  const origDists = [];
-  for (let o = 0; o < NUM_ORIGINAL; o++) {
-    const dx = origCentroids[o*3]-ccx, dy = origCentroids[o*3+1]-ccy, dz = origCentroids[o*3+2]-ccz;
-    origDists.push({ idx: o, dist: dx*dx+dy*dy+dz*dz });
-  }
-  origDists.sort((a, b) => a.dist - b.dist);
-
-  const fullContinentOriginals = Math.floor(continentFaceCount / FACES_PER_ORIGINAL);
-  const boundaryFaces = continentFaceCount - fullContinentOriginals * FACES_PER_ORIGINAL;
-
-  const isOrigContinent = new Uint8Array(NUM_ORIGINAL);
-  for (let i = 0; i < origDists.length; i++) {
-    if (i < fullContinentOriginals) isOrigContinent[origDists[i].idx] = 1;
-    else if (i === fullContinentOriginals && boundaryFaces > 0) isOrigContinent[origDists[i].idx] = 2;
-  }
-
-  const isContinent = new Uint8Array(faceCount);
-  for (let f = 0; f < faceCount; f++) {
-    const origId = Math.floor(f / FACES_PER_ORIGINAL);
-    if (isOrigContinent[origId] >= 1) isContinent[f] = 1;
-  }
-
-  if (boundaryFaces > 0) {
-    const bOrigIdx = origDists[fullContinentOriginals].idx;
-    const startF = bOrigIdx * FACES_PER_ORIGINAL;
-    const endF = startF + FACES_PER_ORIGINAL;
-    const faceDists = [];
-    for (let f = startF; f < endF; f++) {
-      const dx = centroids[f*3]-ccx, dy = centroids[f*3+1]-ccy, dz = centroids[f*3+2]-ccz;
-      faceDists.push({ f, dist: dx*dx+dy*dy+dz*dz });
-    }
-    faceDists.sort((a, b) => a.dist - b.dist);
-    for (let i = 0; i < faceDists.length; i++) {
-      isContinent[faceDists[i].f] = i < boundaryFaces ? 1 : 0;
-    }
-  }
-
-  for (let f = 0; f < faceCount; f++) if (!isContinent[f]) assignment[f] = oceanIdx;
-
-  // Phase 2: 再帰二分割ツリーマップ
-  const continentMinistries = Array.from({length: ministries.length}, (_, i) => i).filter(i => i !== oceanIdx);
-
-  const ccLen = Math.sqrt(ccx*ccx+ccy*ccy+ccz*ccz);
-  const cnx = ccx/ccLen, cny = ccy/ccLen, cnz = ccz/ccLen;
-  let cupx = 0, cupy = 1, cupz = 0;
-  if (Math.abs(cny) > 0.9) { cupx = 1; cupy = 0; }
-  let ctx = cupy*cnz-cupz*cny, cty = cupz*cnx-cupx*cnz, ctz = cupx*cny-cupy*cnx;
-  const ctLen = Math.sqrt(ctx*ctx+cty*cty+ctz*ctz);
-  ctx /= ctLen; cty /= ctLen; ctz /= ctLen;
-  const cbx = cny*ctz-cnz*cty, cby = cnz*ctx-cnx*ctz, cbz = cnx*cty-cny*ctx;
-
-  const continentFaceUV = [];
-  for (let f = 0; f < faceCount; f++) {
-    if (!isContinent[f]) continue;
-    const dx = centroids[f*3]-ccx, dy = centroids[f*3+1]-ccy, dz = centroids[f*3+2]-ccz;
-    continentFaceUV.push({ f, u: dx*ctx+dy*cty+dz*ctz, v: dx*cbx+dy*cby+dz*cbz });
-  }
-
-  function assignRecursive(faces, items, splitByV) {
-    if (items.length === 0 || faces.length === 0) return;
-    if (items.length === 1) {
-      for (const face of faces) assignment[face.f] = items[0].ministry;
-      return;
-    }
-    if (splitByV) {
-      faces.sort((a, b) => a.v - b.v || a.u - b.u);
-    } else {
-      faces.sort((a, b) => a.u - b.u || a.v - b.v);
-    }
-    const totalArea = items.reduce((s, it) => s + it.area, 0);
-    const halfArea = totalArea / 2;
-    const firstHalf = [];
-    let firstArea = 0;
-    const rest = [...items];
-    while (rest.length > 1) {
-      if (firstArea + rest[0].area > halfArea && firstHalf.length > 0) break;
-      const item = rest.shift();
-      firstHalf.push(item);
-      firstArea += item.area;
-    }
-    const splitIdx = Math.round(faces.length * firstArea / totalArea);
-    assignRecursive(faces.slice(0, splitIdx), firstHalf, !splitByV);
-    assignRecursive(faces.slice(splitIdx), rest, !splitByV);
-  }
-
-  // 小規模府省庁はツリーマップから外してエッジゾーンに配置
-  const EDGE_THRESHOLD = 1200;
-  const treemapMinistries = [];
-  const edgeMinistries = [];
-  for (const m of continentMinistries) {
-    if (targetCounts[m] >= EDGE_THRESHOLD) {
-      treemapMinistries.push({ ministry: m, area: targetCounts[m] });
-    } else {
-      edgeMinistries.push({ ministry: m, area: targetCounts[m] });
-    }
-  }
-  const edgeTotalArea = edgeMinistries.reduce((s, it) => s + it.area, 0);
-
-  const EDGE_ZONE = -999;
-  const treemapItems = [
-    ...treemapMinistries,
-    { ministry: EDGE_ZONE, area: edgeTotalArea },
+  // シード定義
+  const octahedronSeeds = [
+    [1,0,0], [-1,0,0], [0,1,0], [0,-1,0], [0,0,1], [0,0,-1],
   ];
-  assignRecursive([...continentFaceUV], treemapItems, true);
+  const cuboctahedronSeeds = [
+    [R2,R2,0], [R2,-R2,0], [-R2,R2,0], [-R2,-R2,0],
+    [R2,0,R2], [R2,0,-R2], [-R2,0,R2], [-R2,0,-R2],
+    [0,R2,R2], [0,R2,-R2], [0,-R2,R2], [0,-R2,-R2],
+  ];
 
-  // エッジゾーンの面をBFSで小規模府省庁に割り当て
-  if (edgeMinistries.length > 0) {
-    const edgeFaces = [];
-    for (let f = 0; f < faceCount; f++) {
-      if (assignment[f] === EDGE_ZONE) edgeFaces.push(f);
-    }
+  const batchDefs = [
+    { size: 8,  mode: 'split' },
+    { size: 6,  mode: 'seed', seeds: octahedronSeeds },
+    { size: 12, mode: 'seed', seeds: cuboctahedronSeeds },
+    { size: 6,  mode: 'coastline' },
+  ];
 
-    const edgeSet = new Set(edgeFaces);
-    const edgeBfsOrder = [];
-    const edgeVisited = new Uint8Array(faceCount);
+  const nonOceanMinistries = Array.from({length: ministries.length}, (_, i) => i)
+    .filter(i => i !== oceanIdx)
+    .sort((a, b) => targetCounts[b] - targetCounts[a]);
 
-    // 海に隣接するエッジ面をシードにする
-    const edgeSeeds = [];
-    for (const f of edgeFaces) {
-      for (let e = 0; e < 3; e++) {
-        const nb = adjacency[f * 3 + e];
-        if (nb !== -1 && assignment[nb] === oceanIdx) {
-          edgeSeeds.push(f);
-          break;
+  let ministryOffset = 0;
+  for (let batchIdx = 0; batchIdx < batchDefs.length && ministryOffset < nonOceanMinistries.length; batchIdx++) {
+    const def = batchDefs[batchIdx];
+    const batchSize = Math.min(def.size, nonOceanMinistries.length - ministryOffset);
+    const batch = nonOceanMinistries.slice(ministryOffset, ministryOffset + batchSize);
+
+    if (def.mode === 'coastline') {
+      // 各府省庁ごとに海岸線から1点BFSで連続配置
+      for (const ministry of batch) {
+        const target = targetCounts[ministry];
+        let seed = -1;
+        for (let f = 0; f < faceCount; f++) {
+          if (assignment[f] !== -1) continue;
+          for (let e = 0; e < 3; e++) {
+            const nb = adjacency[f * 3 + e];
+            if (nb !== -1 && assignment[nb] !== -1 && assignment[nb] !== oceanIdx) {
+              seed = f; break;
+            }
+          }
+          if (seed !== -1) break;
+        }
+        if (seed === -1) break;
+        const q = [seed];
+        assignment[seed] = ministry;
+        let assigned = 1, head = 0;
+        while (assigned < target && head < q.length) {
+          const cur = q[head++];
+          for (let e = 0; e < 3; e++) {
+            const nb = adjacency[cur * 3 + e];
+            if (nb !== -1 && assignment[nb] === -1 && assigned < target) {
+              assignment[nb] = ministry; assigned++; q.push(nb);
+            }
+          }
+        }
+      }
+    } else {
+      // split / seed モード
+      const unassigned = allFaces.filter(face => assignment[face.f] === -1);
+      if (unassigned.length === 0) { ministryOffset += batchSize; continue; }
+
+      let groups;
+      if (def.mode === 'split') {
+        groups = splitIntoGroups([...unassigned], batch.length, 0);
+      } else {
+        groups = groupByNearestSeed(unassigned, def.seeds);
+        if (groups.length > batch.length) {
+          const indexed = groups.map((g, i) => ({ g, i, len: g.length }));
+          indexed.sort((a, b) => b.len - a.len);
+          groups = indexed.slice(0, batch.length).map(x => x.g);
+        }
+      }
+
+      for (let g = 0; g < groups.length && g < batch.length; g++) {
+        const group = groups[g];
+        const ministry = batch[g];
+        const target = targetCounts[ministry];
+
+        if (group.length === 0) continue;
+
+        let sx = 0, sy = 0, sz = 0;
+        for (const f of group) { sx += f.x; sy += f.y; sz += f.z; }
+        const gcx = sx / group.length, gcy = sy / group.length, gcz = sz / group.length;
+
+        const glen = Math.sqrt(gcx*gcx + gcy*gcy + gcz*gcz);
+        const gnx = gcx/glen, gny = gcy/glen, gnz = gcz/glen;
+        let gupx = 0, gupy = 1, gupz = 0;
+        if (Math.abs(gny) > 0.9) { gupx = 1; gupy = 0; }
+        let gtx = gupy*gnz - gupz*gny, gty = gupz*gnx - gupx*gnz, gtz = gupx*gny - gupy*gnx;
+        const gtLen = Math.sqrt(gtx*gtx + gty*gty + gtz*gtz);
+        gtx /= gtLen; gty /= gtLen; gtz /= gtLen;
+        const gbx = gny*gtz - gnz*gty, gby = gnz*gtx - gnx*gtz, gbz = gnx*gty - gny*gtx;
+
+        const localUV = [];
+        let luMin = Infinity, luMax = -Infinity, lvMin = Infinity, lvMax = -Infinity;
+        for (const face of group) {
+          const dx = face.x - gcx, dy = face.y - gcy, dz = face.z - gcz;
+          const u = dx*gtx + dy*gty + dz*gtz;
+          const v = dx*gbx + dy*gby + dz*gbz;
+          localUV.push({ f: face.f, u, v });
+          if (u < luMin) luMin = u;
+          if (u > luMax) luMax = u;
+          if (v < lvMin) lvMin = v;
+          if (v > lvMax) lvMax = v;
+        }
+        const localArea = (luMax - luMin) * (lvMax - lvMin);
+        const localDensity = localArea > 0 ? group.length / localArea : group.length;
+
+        const R = Math.sqrt(2 * target / (3 * S3 * localDensity));
+
+        localUV.sort((a, b) => {
+          const adxA = Math.abs(a.u), adyA = Math.abs(a.v);
+          const dA = Math.max(adyA / (R * S3 / 2), (S3 * adxA + adyA) / (R * S3));
+          const adxB = Math.abs(b.u), adyB = Math.abs(b.v);
+          const dB = Math.max(adyB / (R * S3 / 2), (S3 * adxB + adyB) / (R * S3));
+          return dA - dB;
+        });
+
+        const count = Math.min(target, localUV.length);
+        for (let i = 0; i < count; i++) {
+          assignment[localUV[i].f] = ministry;
         }
       }
     }
-    if (edgeSeeds.length === 0 && edgeFaces.length > 0) {
-      edgeSeeds.push(edgeFaces[0]);
-    }
 
-    const bfsQueue = [];
-    for (const s of edgeSeeds) {
-      if (!edgeVisited[s]) {
-        edgeVisited[s] = 1;
-        bfsQueue.push(s);
-      }
-    }
-    let bfsHead = 0;
-    while (bfsHead < bfsQueue.length) {
-      const face = bfsQueue[bfsHead++];
-      edgeBfsOrder.push(face);
-      for (let e = 0; e < 3; e++) {
-        const nb = adjacency[face * 3 + e];
-        if (nb !== -1 && !edgeVisited[nb] && edgeSet.has(nb)) {
-          edgeVisited[nb] = 1;
-          bfsQueue.push(nb);
-        }
-      }
-    }
+    ministryOffset += batchSize;
+  }
 
-    // BFS順で小規模府省庁を割り当て（面積降順）
-    edgeMinistries.sort((a, b) => b.area - a.area);
-    let cursor = 0;
-    for (const item of edgeMinistries) {
-      let assigned = 0;
-      while (assigned < item.area && cursor < edgeBfsOrder.length) {
-        assignment[edgeBfsOrder[cursor]] = item.ministry;
-        assigned++;
-        cursor++;
-      }
-    }
-    const lastEdge = edgeMinistries[edgeMinistries.length - 1].ministry;
-    while (cursor < edgeBfsOrder.length) {
-      assignment[edgeBfsOrder[cursor]] = lastEdge;
-      cursor++;
-    }
+  // 未割り当て面 → 海（厚生労働省）
+  for (let f = 0; f < faceCount; f++) {
+    if (assignment[f] === -1) assignment[f] = oceanIdx;
   }
 
   // Phase 3: 境界滑らか化
