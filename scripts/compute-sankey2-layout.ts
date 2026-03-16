@@ -92,6 +92,7 @@ interface LayoutEdge {
 interface LayoutData {
   metadata: Record<string, unknown> & {
     layout: {
+      minX: number;
       totalWidth: number;
       totalHeight: number;
       nodeCount: number;
@@ -360,7 +361,9 @@ function main() {
 
   // 5. エッジBezierパス計算
   console.log('\n[4/5] エッジパス計算');
-  const maxEdgeValue = Math.max(...graph.edges.map(e => e.value));
+  const maxEdgeValue = graph.edges.length > 0
+    ? Math.max(...graph.edges.map(e => e.value))
+    : 1;
   const layoutEdges: LayoutEdge[] = [];
 
   for (const edge of graph.edges) {
@@ -386,8 +389,9 @@ function main() {
 
   // 6. バウンディングボックス計算 & 出力
   console.log('\n[5/5] JSON出力');
-  let maxX = 0, maxY = 0;
+  let minX = 0, maxX = 0, maxY = 0;
   for (const node of layoutNodes) {
+    minX = Math.min(minX, node.x);
     maxX = Math.max(maxX, node.x + node.width);
     maxY = Math.max(maxY, node.y + node.height);
   }
@@ -396,7 +400,8 @@ function main() {
     metadata: {
       ...graph.metadata,
       layout: {
-        totalWidth: Math.ceil(maxX),
+        minX: Math.floor(minX),
+        totalWidth: Math.ceil(maxX - minX),
         totalHeight: Math.ceil(maxY),
         nodeCount: layoutNodes.length,
         edgeCount: layoutEdges.length,
@@ -416,13 +421,15 @@ function main() {
 
   console.log(`  出力: ${outputPath}`);
   console.log(`  サイズ: ${sizeMB} MB`);
-  console.log(`  仮想空間: ${Math.ceil(maxX).toLocaleString()} × ${Math.ceil(maxY).toLocaleString()} px`);
+  const totalWidth = Math.ceil(maxX - minX);
+  const totalHeight = Math.ceil(maxY);
+  console.log(`  仮想空間: ${totalWidth.toLocaleString()} × ${totalHeight.toLocaleString()} px (minX: ${Math.floor(minX)})`);
   console.log(`
 === サマリ ===
   グリッド: ${GRID_COLS}列 × ${gridRows}行
   ノード: ${layoutNodes.length.toLocaleString()} 件
   エッジ: ${layoutEdges.length.toLocaleString()} 件
-  仮想空間: ${Math.ceil(maxX).toLocaleString()} × ${Math.ceil(maxY).toLocaleString()} px
+  仮想空間: ${totalWidth.toLocaleString()} × ${totalHeight.toLocaleString()} px
   ファイルサイズ: ${sizeMB} MB
 `);
 }
