@@ -20,6 +20,7 @@
     "generate-entity-labels": "python3 scripts/generate-entity-labels.py",
     "generate-entity-labels-csv": "python3 scripts/generate-entity-labels-csv.py",
     "generate-sankey2": "tsx scripts/generate-sankey2-data.ts",
+    "compute-sankey2-layout": "tsx scripts/compute-sankey2-layout.ts",
     "setup": "npm install && npm run normalize && npm run generate-structured && npm run generate-project-details"
   },
   "dependencies": {
