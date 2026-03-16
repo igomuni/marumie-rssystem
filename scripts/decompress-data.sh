@@ -47,4 +47,26 @@ if [ -f "$DATA_DIR/project-quality-recipients.json.gz" ]; then
   fi
 fi
 
+# Decompress sankey2-graph.json if needed
+if [ -f "$DATA_DIR/sankey2-graph.json.gz" ]; then
+  if [ ! -f "$DATA_DIR/sankey2-graph.json" ] || [ "$DATA_DIR/sankey2-graph.json.gz" -nt "$DATA_DIR/sankey2-graph.json" ]; then
+    echo "🔓 Decompressing sankey2-graph.json.gz..."
+    gunzip -k -f "$DATA_DIR/sankey2-graph.json.gz"
+    echo "✅ Decompression complete ($(du -h "$DATA_DIR/sankey2-graph.json" | cut -f1))"
+  else
+    echo "✅ sankey2-graph.json already exists and is up to date"
+  fi
+fi
+
+# Decompress sankey2-layout.json if needed
+if [ -f "$DATA_DIR/sankey2-layout.json.gz" ]; then
+  if [ ! -f "$DATA_DIR/sankey2-layout.json" ] || [ "$DATA_DIR/sankey2-layout.json.gz" -nt "$DATA_DIR/sankey2-layout.json" ]; then
+    echo "🔓 Decompressing sankey2-layout.json.gz..."
+    gunzip -k -f "$DATA_DIR/sankey2-layout.json.gz"
+    echo "✅ Decompression complete ($(du -h "$DATA_DIR/sankey2-layout.json" | cut -f1))"
+  else
+    echo "✅ sankey2-layout.json already exists and is up to date"
+  fi
+fi
+
 echo "✅ All data files ready"

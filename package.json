@@ -12,7 +12,7 @@
     "generate-structured": "tsx scripts/generate-structured-json.ts",
     "generate-project-details": "tsx scripts/generate-project-details.ts",
     "generate-mof-data": "tsx scripts/generate-mof-budget-overview-data.ts",
-    "compress-data": "gzip -9 -k public/data/rs2024-structured.json && gzip -9 -k public/data/rs2024-project-details.json && gzip -9 -k public/data/project-quality-recipients.json",
+    "compress-data": "gzip -9 -k public/data/rs2024-structured.json && gzip -9 -k public/data/rs2024-project-details.json && gzip -9 -k public/data/project-quality-recipients.json && gzip -9 -k -f public/data/sankey2-graph.json && gzip -9 -k -f public/data/sankey2-layout.json",
     "generate-entity-dict": "tsx scripts/generate-entity-dict.ts",
     "validate-tags": "tsx scripts/validate-tags.ts",
     "build-houjin-db": "python3 scripts/build-houjin-sqlite.py",
@@ -20,6 +20,7 @@
     "generate-entity-labels": "python3 scripts/generate-entity-labels.py",
     "generate-entity-labels-csv": "python3 scripts/generate-entity-labels-csv.py",
     "generate-sankey2": "tsx scripts/generate-sankey2-data.ts",
+    "compute-sankey2-layout": "tsx scripts/compute-sankey2-layout.ts",
     "setup": "npm install && npm run normalize && npm run generate-structured && npm run generate-project-details"
   },
   "dependencies": {
