@@ -1,12 +1,13 @@
 /**
- * /sankey2 レイアウト計算スクリプト
+ * /sankey2 レイアウト計算スクリプト（グリッド配置版）
  *
  * sankey2-graph.json からノード座標・エッジBezierパスを事前計算し、
  * sankey2-layout.json に出力する。
  *
  * レイアウト方針:
- *   - X座標: type別ベースライン（左→右の大まかな流れ）
- *   - Y座標: 府省庁セクション分割、金額比例高さ
+ *   - 37府省庁を6列×7行のグリッドに配置（予算額降順）
+ *   - 各セルが独立したミニSankeyフロー（ministry→project→recipient）
+ *   - ノード高さ: 線形スケール、GAP=0px
  *   - エッジ: 3次Bezier曲線（S字カーブ）
  */
 
@@ -15,13 +16,18 @@ import * as path from 'path';
 
 // ─── 定数 ──────────────────────────────────────────────
 
-/** type別のX座標ベースライン */
-const LAYER_X: Record<string, number> = {
-  'total':            0,
-  'ministry':         400,
-  'project-budget':   800,
-  'project-spending': 1200,
-  'recipient':        1600,
+/** グリッド設定 */
+const GRID_COLS = 6;
+const CELL_WIDTH = 400;       // セル幅（4type帯 × 100px）
+const CELL_H_GAP = 50;       // セル間の水平余白
+const CELL_V_GAP = 50;       // 行間の垂直余白
+
+/** セル内のtype別X座標オフセット */
+const TYPE_X_OFFSET: Record<string, number> = {
+  'ministry':         0,
+  'project-budget':   100,
+  'project-spending': 200,
+  'recipient':        300,
 };
 
 const NODE_WIDTH = 50;
@@ -30,11 +36,8 @@ const NODE_WIDTH = 50;
 const MIN_NODE_HEIGHT = 1;
 const AMOUNT_SCALE = 1e-11;  // 1兆円 = 10px
 
-/** ノード間の垂直余白 */
-const NODE_VERTICAL_GAP = 2;
-
-/** 府省庁セクション間の垂直余白 */
-const MINISTRY_SECTION_GAP = 20;
+/** totalノードの配置 */
+const TOTAL_X = -200;        // グリッド左外
 
 /** Bezier制御点のオフセット比率（水平距離の40%） */
 const BEZIER_CONTROL_RATIO = 0.4;
@@ -93,6 +96,8 @@ interface LayoutData {
       totalHeight: number;
       nodeCount: number;
       edgeCount: number;
+      gridCols: number;
+      gridRows: number;
     };
   };
   nodes: LayoutNode[];
@@ -131,7 +136,7 @@ function generateBezierPath(
   sx: number, sy: number, tx: number, ty: number
 ): [number, number][] {
   const dx = tx - sx;
-  const offset = dx * BEZIER_CONTROL_RATIO;
+  const offset = Math.abs(dx) * BEZIER_CONTROL_RATIO;
   const p0: [number, number] = [sx, sy];
   const p1: [number, number] = [sx + offset, sy];
   const p2: [number, number] = [tx - offset, ty];
@@ -154,7 +159,7 @@ function valueToWidth(value: number, maxValue: number): number {
 // ─── メイン処理 ──────────────────────────────────────────
 
 function main() {
-  console.log('=== sankey2 レイアウト計算 ===\n');
+  console.log('=== sankey2 グリッドレイアウト計算 ===\n');
 
   // 1. グラフデータ読み込み
   const inputPath = path.join(__dirname, '../public/data/sankey2-graph.json');
@@ -167,46 +172,8 @@ function main() {
   const nodeMap = new Map<string, GraphNode>();
   for (const node of graph.nodes) nodeMap.set(node.id, node);
 
-  // 2. X座標の割り当て
-  console.log('\n[2/5] X座標計算');
-  const layoutNodes: LayoutNode[] = [];
-  const layoutNodeMap = new Map<string, LayoutNode>();
-
-  for (const node of graph.nodes) {
-    const x = LAYER_X[node.type] ?? 0;
-    const height = amountToHeight(node.amount);
-    const ln: LayoutNode = {
-      id: node.id,
-      label: node.label,
-      type: node.type,
-      amount: node.amount,
-      x,
-      y: 0, // Phase 3で計算
-      width: NODE_WIDTH,
-      height,
-      ...(node.ministry && { ministry: node.ministry }),
-      ...(node.projectId !== undefined && { projectId: node.projectId }),
-    };
-    layoutNodes.push(ln);
-    layoutNodeMap.set(ln.id, ln);
-  }
-
-  // 3. Y座標の計算（府省庁セクション分割）
-  console.log('\n[3/5] Y座標計算');
-
-  // 府省庁を金額降順にソート
-  const ministryNodes = layoutNodes
-    .filter(n => n.type === 'ministry')
-    .sort((a, b) => b.amount - a.amount);
-
-  const ministryOrder = ministryNodes.map(n => n.label);
-  console.log(`  府省庁セクション: ${ministryOrder.length}`);
-
-  // 各typeのノードを府省庁別にグルーピング
-  const typeGroups = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'];
-
-  // 支出先は複数事業から受け取るため、最大金額の事業の府省庁でグルーピング
-  // まず支出先→府省庁の最大フローを計算
+  // 2. 支出先→府省庁の帰属計算（最大フロー元）
+  console.log('\n[2/5] 支出先の府省庁帰属計算');
   const recipientMinistry = new Map<string, string>();
   const recipientMinistryAmount = new Map<string, number>();
 
@@ -220,62 +187,178 @@ function main() {
       recipientMinistryAmount.set(edge.target, edge.value);
     }
   }
+  console.log(`  帰属決定: ${recipientMinistry.size.toLocaleString()} 支出先`);
 
-  // type別・府省庁別にノードをグルーピングして積み上げ
-  for (const type of typeGroups) {
-    if (type === 'total') {
-      // totalノードは1つだけ、Y=0
-      const totalNode = layoutNodeMap.get('total');
-      if (totalNode) totalNode.y = 0;
-      continue;
+  // 3. 府省庁別にノードをグルーピング
+  console.log('\n[3/5] グリッド配置');
+  const ministryNodeGroups = new Map<string, Map<string, GraphNode[]>>();
+
+  for (const node of graph.nodes) {
+    if (node.type === 'total') continue;
+
+    let ministry: string | undefined;
+    if (node.type === 'ministry') {
+      ministry = node.label;
+    } else if (node.type === 'recipient') {
+      ministry = recipientMinistry.get(node.id);
+    } else {
+      ministry = node.ministry;
     }
+    if (!ministry) continue;
 
-    let currentY = 0;
+    if (!ministryNodeGroups.has(ministry)) {
+      ministryNodeGroups.set(ministry, new Map());
+    }
+    const typeMap = ministryNodeGroups.get(ministry)!;
+    if (!typeMap.has(node.type)) typeMap.set(node.type, []);
+    typeMap.get(node.type)!.push(node);
+  }
 
-    for (const ministry of ministryOrder) {
-      let nodesInSection: LayoutNode[];
+  // 府省庁を予算額降順にソート
+  const ministrySorted = graph.nodes
+    .filter(n => n.type === 'ministry')
+    .sort((a, b) => b.amount - a.amount)
+    .map(n => n.label);
 
-      if (type === 'ministry') {
-        nodesInSection = layoutNodes.filter(n => n.type === type && n.label === ministry);
-      } else if (type === 'recipient') {
-        nodesInSection = layoutNodes.filter(n => n.type === type && recipientMinistry.get(n.id) === ministry);
-      } else {
-        nodesInSection = layoutNodes.filter(n => n.type === type && n.ministry === ministry);
+  const gridRows = Math.ceil(ministrySorted.length / GRID_COLS);
+  console.log(`  グリッド: ${GRID_COLS}列 × ${gridRows}行`);
+
+  // 4. セル内レイアウト計算
+  const layoutNodes: LayoutNode[] = [];
+  const layoutNodeMap = new Map<string, LayoutNode>();
+  const types = ['ministry', 'project-budget', 'project-spending', 'recipient'];
+
+  // 各セルの高さを計算（行ごとの最大高さで揃える）
+  const cellHeights: number[] = new Array(ministrySorted.length).fill(0);
+
+  for (let i = 0; i < ministrySorted.length; i++) {
+    const ministry = ministrySorted[i];
+    const typeMap = ministryNodeGroups.get(ministry);
+    if (!typeMap) continue;
+
+    let maxColHeight = 0;
+    for (const type of types) {
+      const nodes = typeMap.get(type) || [];
+      let colHeight = 0;
+      for (const node of nodes) {
+        colHeight += amountToHeight(node.amount); // GAP=0
       }
+      maxColHeight = Math.max(maxColHeight, colHeight);
+    }
+    cellHeights[i] = maxColHeight;
+  }
 
+  // 行ごとの高さ（行内の最大セル高さで揃える）
+  const rowHeights: number[] = [];
+  for (let row = 0; row < gridRows; row++) {
+    let maxH = 0;
+    for (let col = 0; col < GRID_COLS; col++) {
+      const idx = row * GRID_COLS + col;
+      if (idx < cellHeights.length) {
+        maxH = Math.max(maxH, cellHeights[idx]);
+      }
+    }
+    rowHeights.push(maxH);
+  }
+
+  // 行のY開始位置
+  const rowYStart: number[] = [];
+  let cumY = 0;
+  for (let row = 0; row < gridRows; row++) {
+    rowYStart.push(cumY);
+    cumY += rowHeights[row] + CELL_V_GAP;
+  }
+
+  console.log(`  行高さ: ${rowHeights.map(h => Math.round(h)).join(', ')}`);
+
+  // 各府省庁のノードを配置
+  for (let i = 0; i < ministrySorted.length; i++) {
+    const ministry = ministrySorted[i];
+    const typeMap = ministryNodeGroups.get(ministry);
+    if (!typeMap) continue;
+
+    const gridCol = i % GRID_COLS;
+    const gridRow = Math.floor(i / GRID_COLS);
+
+    const cellLeft = gridCol * (CELL_WIDTH + CELL_H_GAP);
+    const cellTop = rowYStart[gridRow];
+
+    for (const type of types) {
+      const nodes = typeMap.get(type) || [];
       // 金額降順ソート
-      nodesInSection.sort((a, b) => b.amount - a.amount);
+      nodes.sort((a, b) => b.amount - a.amount);
 
-      for (const node of nodesInSection) {
-        node.y = currentY;
-        currentY += node.height + NODE_VERTICAL_GAP;
+      const typeX = cellLeft + (TYPE_X_OFFSET[type] ?? 0);
+      let y = cellTop;
+
+      for (const node of nodes) {
+        const height = amountToHeight(node.amount);
+        const ln: LayoutNode = {
+          id: node.id,
+          label: node.label,
+          type: node.type,
+          amount: node.amount,
+          x: typeX,
+          y,
+          width: NODE_WIDTH,
+          height,
+          ...(node.ministry && { ministry: node.ministry }),
+          ...(node.projectId !== undefined && { projectId: node.projectId }),
+        };
+        layoutNodes.push(ln);
+        layoutNodeMap.set(ln.id, ln);
+        y += height; // GAP=0
       }
-
-      if (nodesInSection.length > 0) {
-        currentY += MINISTRY_SECTION_GAP;
-      }
-    }
-
-    // 府省庁に紐づかない支出先（フォールバック）
-    if (type === 'recipient') {
-      const unassigned = layoutNodes.filter(n => n.type === 'recipient' && !recipientMinistry.has(n.id));
-      for (const node of unassigned) {
-        node.y = currentY;
-        currentY += node.height + NODE_VERTICAL_GAP;
-      }
-    }
-  }
-
-  // totalノードのY座標: 府省庁セクション全体の中央に配置
-  const totalNode = layoutNodeMap.get('total');
-  if (totalNode) {
-    const ministryYs = ministryNodes.map(n => n.y + n.height / 2);
-    if (ministryYs.length > 0) {
-      totalNode.y = (Math.min(...ministryYs) + Math.max(...ministryYs)) / 2 - totalNode.height / 2;
     }
   }
 
-  // 4. エッジBezierパス計算
+  // 府省庁に帰属しない支出先（フォールバック: 最終セルの下）
+  const unassignedRecipients = graph.nodes.filter(
+    n => n.type === 'recipient' && !recipientMinistry.has(n.id)
+  );
+  if (unassignedRecipients.length > 0) {
+    console.log(`  未帰属支出先: ${unassignedRecipients.length} 件（最終行下に配置）`);
+    let y = cumY;
+    for (const node of unassignedRecipients) {
+      const height = amountToHeight(node.amount);
+      const ln: LayoutNode = {
+        id: node.id,
+        label: node.label,
+        type: node.type,
+        amount: node.amount,
+        x: (GRID_COLS - 1) * (CELL_WIDTH + CELL_H_GAP) + (TYPE_X_OFFSET['recipient'] ?? 0),
+        y,
+        width: NODE_WIDTH,
+        height,
+      };
+      layoutNodes.push(ln);
+      layoutNodeMap.set(ln.id, ln);
+      y += height;
+    }
+  }
+
+  // totalノード: グリッド左外、全体の垂直中央
+  const totalGraphNode = graph.nodes.find(n => n.type === 'total');
+  if (totalGraphNode) {
+    const totalHeight = amountToHeight(totalGraphNode.amount);
+    const gridTotalHeight = cumY - CELL_V_GAP;
+    const ln: LayoutNode = {
+      id: totalGraphNode.id,
+      label: totalGraphNode.label,
+      type: totalGraphNode.type,
+      amount: totalGraphNode.amount,
+      x: TOTAL_X,
+      y: gridTotalHeight / 2 - totalHeight / 2,
+      width: NODE_WIDTH,
+      height: totalHeight,
+    };
+    layoutNodes.push(ln);
+    layoutNodeMap.set(ln.id, ln);
+  }
+
+  console.log(`  配置済みノード: ${layoutNodes.length.toLocaleString()}`);
+
+  // 5. エッジBezierパス計算
   console.log('\n[4/5] エッジパス計算');
   const maxEdgeValue = Math.max(...graph.edges.map(e => e.value));
   const layoutEdges: LayoutEdge[] = [];
@@ -301,7 +384,7 @@ function main() {
   }
   console.log(`  エッジパス: ${layoutEdges.length.toLocaleString()} 件`);
 
-  // 5. バウンディングボックス計算 & 出力
+  // 6. バウンディングボックス計算 & 出力
   console.log('\n[5/5] JSON出力');
   let maxX = 0, maxY = 0;
   for (const node of layoutNodes) {
@@ -317,6 +400,8 @@ function main() {
         totalHeight: Math.ceil(maxY),
         nodeCount: layoutNodes.length,
         edgeCount: layoutEdges.length,
+        gridCols: GRID_COLS,
+        gridRows,
       },
     },
     nodes: layoutNodes,
@@ -334,6 +419,7 @@ function main() {
   console.log(`  仮想空間: ${Math.ceil(maxX).toLocaleString()} × ${Math.ceil(maxY).toLocaleString()} px`);
   console.log(`
 === サマリ ===
+  グリッド: ${GRID_COLS}列 × ${gridRows}行
   ノード: ${layoutNodes.length.toLocaleString()} 件
   エッジ: ${layoutEdges.length.toLocaleString()} 件
   仮想空間: ${Math.ceil(maxX).toLocaleString()} × ${Math.ceil(maxY).toLocaleString()} px
