@@ -218,9 +218,9 @@ export default function Sankey2View({ data }: Props) {
     const s = searchParams.get('s');
 
     if (m) setMinistryFilter(new Set(m.split(',')));
-    let parsedMin = min ? Math.max(0, Number(min) || 0) : 0;
+    let parsedMin = min ? Math.round(Math.max(0, Number(min) || 0)) : 0;
     let parsedMax = max ? (Number(max) || Infinity) : Infinity;
-    if (parsedMax < Infinity) parsedMax = Math.max(0, parsedMax);
+    if (parsedMax < Infinity) parsedMax = Math.round(Math.max(0, parsedMax));
     if (parsedMin > 0 && parsedMax < Infinity && parsedMin > parsedMax) {
       [parsedMin, parsedMax] = [parsedMax, parsedMin];
     }
