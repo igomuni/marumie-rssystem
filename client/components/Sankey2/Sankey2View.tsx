@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import type { Sankey2LayoutData, LayoutNode, LayoutEdge } from '@/client/components/Sankey2/types';
 
 // ─── 定数 ──────────────────────────────────────────────
@@ -12,6 +12,15 @@ const TYPE_COLORS: Record<string, string> = {
   'project-budget':   '#22c55e', // green-500
   'project-spending': '#f97316', // orange-500
   'recipient':        '#ef4444', // red-500
+};
+
+/** typeの日本語表示名 */
+const TYPE_LABELS: Record<string, string> = {
+  'total':            '予算総計',
+  'ministry':         '府省庁',
+  'project-budget':   '事業（予算）',
+  'project-spending': '事業（支出）',
+  'recipient':        '支出先',
 };
 
 /** 面積ベースLOD: スクリーン上でこの面積(px²)未満のノードは描画しない */
@@ -26,6 +35,29 @@ const ZOOM_SENSITIVITY = 0.002;
 
 /** ビューポート外のマージン（px、仮想座標系） */
 const VIEWPORT_MARGIN = 100;
+
+/** サイドパネル幅 */
+const PANEL_WIDTH = 320;
+
+/** BFS最大ホップ数（Shift押下時） */
+const BFS_MAX_DEPTH = 3;
+
+/** ホップ距離に応じたopacity */
+const DEPTH_OPACITY = [1.0, 0.8, 0.5, 0.3];
+
+/** サイドパネルの接続先表示上限 */
+const PANEL_MAX_CONNECTIONS = 20;
+
+/** Minimap設定 */
+const MINIMAP_WIDTH = 200;
+const MINIMAP_PADDING = 12;
+
+// ─── 型 ──────────────────────────────────────────────────
+
+interface EdgeIndex {
+  bySource: Map<string, LayoutEdge[]>;
+  byTarget: Map<string, LayoutEdge[]>;
+}
 
 // ─── ユーティリティ ──────────────────────────────────────
 
@@ -42,6 +74,35 @@ function pathToPolyline(path: [number, number][]): string {
   return path.map(([x, y]) => `${x},${y}`).join(' ');
 }
 
+/** BFS探索: startIdから上流・下流をmaxDepthホップまで探索 */
+function bfsHighlight(
+  startId: string,
+  edgeIndex: EdgeIndex,
+  maxDepth: number,
+): Map<string, number> {
+  const distances = new Map<string, number>([[startId, 0]]);
+  const queue: [string, number][] = [[startId, 0]];
+
+  while (queue.length > 0) {
+    const [nodeId, depth] = queue.shift()!;
+    if (depth >= maxDepth) continue;
+
+    for (const edge of edgeIndex.bySource.get(nodeId) ?? []) {
+      if (!distances.has(edge.target)) {
+        distances.set(edge.target, depth + 1);
+        queue.push([edge.target, depth + 1]);
+      }
+    }
+    for (const edge of edgeIndex.byTarget.get(nodeId) ?? []) {
+      if (!distances.has(edge.source)) {
+        distances.set(edge.source, depth + 1);
+        queue.push([edge.source, depth + 1]);
+      }
+    }
+  }
+  return distances;
+}
+
 // ─── コンポーネント ──────────────────────────────────────
 
 interface Props {
@@ -51,20 +112,87 @@ interface Props {
 export default function Sankey2View({ data }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const minimapCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Transform state: pan + zoom
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 0.15 });
   const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const panStartRef = useRef({ x: 0, y: 0 });
 
-  // Hover state
+  // Hover / Selection state
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isShiftHeld, setIsShiftHeld] = useState(false);
 
   // コンテナサイズ
   const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 
-  // 初期表示: データの中央にフィット
-  // コンテナサイズをResizeObserverで追跡
+  // ── エッジインデックス（O(1)接続検索） ──
+
+  const edgeIndex = useMemo<EdgeIndex>(() => {
+    if (!data) return { bySource: new Map(), byTarget: new Map() };
+    const bySource = new Map<string, LayoutEdge[]>();
+    const byTarget = new Map<string, LayoutEdge[]>();
+    for (const edge of data.edges) {
+      let s = bySource.get(edge.source);
+      if (!s) { s = []; bySource.set(edge.source, s); }
+      s.push(edge);
+      let t = byTarget.get(edge.target);
+      if (!t) { t = []; byTarget.set(edge.target, t); }
+      t.push(edge);
+    }
+    return { bySource, byTarget };
+  }, [data]);
+
+  // ── ノードMap ──
+
+  const nodeMap = useMemo(() => {
+    if (!data) return new Map<string, LayoutNode>();
+    const m = new Map<string, LayoutNode>();
+    for (const node of data.nodes) m.set(node.id, node);
+    return m;
+  }, [data]);
+
+  // ── stable hover handlers (4-4メモ化) ──
+
+  const hoverHandlers = useMemo(() => {
+    if (!data) return new Map<string, { start: () => void; end: () => void }>();
+    const map = new Map<string, { start: () => void; end: () => void }>();
+    for (const node of data.nodes) {
+      map.set(node.id, {
+        start: () => setHoveredNodeId(node.id),
+        end: () => setHoveredNodeId(null),
+      });
+    }
+    return map;
+  }, [data]);
+
+  // ── Shiftキー追跡 ──
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => { if (e.key === 'Shift') setIsShiftHeld(true); };
+    const up = (e: KeyboardEvent) => { if (e.key === 'Shift') setIsShiftHeld(false); };
+    const blur = () => setIsShiftHeld(false);
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', blur);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', blur);
+    };
+  }, []);
+
+  // ── Escキーで選択解除 ──
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedNodeId(null); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  // ── コンテナサイズをResizeObserverで追跡 ──
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -103,22 +231,17 @@ export default function Sankey2View({ data }: Props) {
     const { w: cw, h: ch } = containerSize;
     const k2 = k * k;
 
-    // ビューポート範囲（仮想座標系）
     const vpLeft   = (-tx / k) - VIEWPORT_MARGIN;
     const vpTop    = (-ty / k) - VIEWPORT_MARGIN;
     const vpRight  = (cw - tx) / k + VIEWPORT_MARGIN;
     const vpBottom = (ch - ty) / k + VIEWPORT_MARGIN;
 
-    // 面積ベースLOD + ビューポートカリング
     const nodeSet = new Set<string>();
     const filteredNodes: LayoutNode[] = [];
 
     for (const node of data.nodes) {
-      // 面積LOD: スクリーン上の面積が閾値未満なら描画しない
       const screenArea = (node.area ?? node.width * node.height) * k2;
       if (screenArea < MIN_SCREEN_AREA) continue;
-
-      // ビューポートカリング
       if (node.x + node.width < vpLeft || node.x > vpRight) continue;
       if (node.y + node.height < vpTop || node.y > vpBottom) continue;
 
@@ -126,7 +249,6 @@ export default function Sankey2View({ data }: Props) {
       filteredNodes.push(node);
     }
 
-    // 表示ノード両端が見えるエッジのみ描画
     const filteredEdges: LayoutEdge[] = [];
     for (const edge of data.edges) {
       if (nodeSet.has(edge.source) && nodeSet.has(edge.target)) {
@@ -137,18 +259,41 @@ export default function Sankey2View({ data }: Props) {
     return { visibleNodes: filteredNodes, visibleEdges: filteredEdges };
   }, [data, transform, containerSize]);
 
-  // ホバー時の接続ノードID集合
-  const connectedSet = useMemo(() => {
-    if (!hoveredNodeId || !data) return new Set<string>();
-    const set = new Set<string>([hoveredNodeId]);
-    for (const edge of data.edges) {
-      if (edge.source === hoveredNodeId) set.add(edge.target);
-      if (edge.target === hoveredNodeId) set.add(edge.source);
-    }
-    return set;
-  }, [hoveredNodeId, data]);
+  // ── ハイライト: BFS or 1-hop ──
 
-  // ── Wheel zoom（ネイティブリスナーでpreventDefault対応） ──
+  const activeNodeId = selectedNodeId ?? hoveredNodeId;
+
+  const highlightMap = useMemo(() => {
+    if (!activeNodeId) return new Map<string, number>();
+    const maxDepth = isShiftHeld ? BFS_MAX_DEPTH : 1;
+    return bfsHighlight(activeNodeId, edgeIndex, maxDepth);
+  }, [activeNodeId, edgeIndex, isShiftHeld]);
+
+  const isHighlighting = highlightMap.size > 0;
+
+  // ── ノードクリック ──
+
+  const handleNodeClick = useCallback((nodeId: string) => {
+    setSelectedNodeId(prev => prev === nodeId ? null : nodeId);
+  }, []);
+
+  // ── パネル内接続先クリック → 選択切替 + ズーム移動 ──
+
+  const handlePanelNodeClick = useCallback((nodeId: string) => {
+    setSelectedNodeId(nodeId);
+    const node = nodeMap.get(nodeId);
+    if (!node || !containerRef.current) return;
+    const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
+    const ch = containerRef.current.clientHeight;
+    const targetK = Math.max(transform.k, 0.5);
+    setTransform({
+      x: cw / 2 - (node.x + node.width / 2) * targetK,
+      y: ch / 2 - (node.y + node.height / 2) * targetK,
+      k: targetK,
+    });
+  }, [nodeMap, transform.k, selectedNodeId]);
+
+  // ── Wheel zoom ──
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -180,21 +325,105 @@ export default function Sankey2View({ data }: Props) {
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setIsPanning(true);
-    setPanStart({ x: e.clientX - transform.x, y: e.clientY - transform.y });
-  }, [transform.x, transform.y]);
+    panStartRef.current = { x: e.clientX, y: e.clientY };
+  }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning) return;
-    setTransform(prev => ({
-      ...prev,
-      x: e.clientX - panStart.x,
-      y: e.clientY - panStart.y,
-    }));
-  }, [isPanning, panStart]);
+    const dx = e.clientX - panStartRef.current.x;
+    const dy = e.clientY - panStartRef.current.y;
+    panStartRef.current = { x: e.clientX, y: e.clientY };
+    setTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
+  }, [isPanning]);
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
   }, []);
+
+  // ── SVG背景クリックで選択解除 ──
+
+  const handleSvgClick = useCallback((e: React.MouseEvent) => {
+    if ((e.target as Element).tagName === 'svg' || (e.target as Element).classList.contains('bg-rect')) {
+      setSelectedNodeId(null);
+    }
+  }, []);
+
+  // ── Minimap描画 ──
+
+  const minimapHeight = useMemo(() => {
+    if (!data) return 0;
+    const { totalWidth, totalHeight } = data.metadata.layout;
+    return Math.round(MINIMAP_WIDTH * (totalHeight / totalWidth));
+  }, [data]);
+
+  useEffect(() => {
+    const canvas = minimapCanvasRef.current;
+    if (!canvas || !data) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const { totalWidth, totalHeight } = data.metadata.layout;
+    const scale = MINIMAP_WIDTH / totalWidth;
+
+    ctx.clearRect(0, 0, MINIMAP_WIDTH, minimapHeight);
+
+    // クラスタ背景
+    const { clusterWidth, clusterHeight, clusterGap } = data.metadata.layout;
+    for (let i = 0; i < 5; i++) {
+      const cx = (clusterWidth + clusterGap) * i * scale;
+      const cw = clusterWidth * scale;
+      const ch = clusterHeight * scale;
+      ctx.fillStyle = 'rgba(100, 116, 139, 0.15)';
+      ctx.fillRect(cx, 0, cw, ch);
+    }
+
+    // ビューポート矩形
+    const { k, x: tx, y: ty } = transform;
+    const { w: cw, h: ch } = containerSize;
+    const vpX = (-tx / k) * scale;
+    const vpY = (-ty / k) * scale;
+    const vpW = (cw / k) * scale;
+    const vpH = (ch / k) * scale;
+
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(
+      Math.max(0, vpX),
+      Math.max(0, vpY),
+      Math.min(vpW, totalWidth * scale - Math.max(0, vpX)),
+      Math.min(vpH, totalHeight * scale - Math.max(0, vpY)),
+    );
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+    ctx.fillRect(
+      Math.max(0, vpX),
+      Math.max(0, vpY),
+      Math.min(vpW, totalWidth * scale - Math.max(0, vpX)),
+      Math.min(vpH, totalHeight * scale - Math.max(0, vpY)),
+    );
+  }, [data, transform, containerSize, minimapHeight]);
+
+  // ── Minimapクリック → ビューポート移動 ──
+
+  const handleMinimapClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!data || !containerRef.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const { totalWidth } = data.metadata.layout;
+    const scale = MINIMAP_WIDTH / totalWidth;
+    const { w: cw, h: ch } = containerSize;
+    const { k } = transform;
+
+    const worldX = mx / scale;
+    const worldY = my / scale;
+
+    setTransform(prev => ({
+      ...prev,
+      x: cw / 2 - worldX * k,
+      y: ch / 2 - worldY * k,
+    }));
+  }, [data, containerSize, transform]);
 
   // ── 描画 ──
 
@@ -206,160 +435,343 @@ export default function Sankey2View({ data }: Props) {
     );
   }
 
-  const isHovering = hoveredNodeId !== null;
   const k2 = transform.k * transform.k;
+  const showPanel = selectedNodeId !== null;
+  const selectedNode = selectedNodeId ? nodeMap.get(selectedNodeId) : undefined;
 
   return (
     <div
       ref={containerRef}
-      className="w-full h-full overflow-hidden bg-gray-50 dark:bg-gray-950 select-none"
-      style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
+      className="w-full h-full overflow-hidden bg-gray-50 dark:bg-gray-950 select-none flex"
     >
-      {/* ヘッダー情報 */}
-      <div className="absolute top-3 left-3 z-10 bg-white/90 dark:bg-gray-800/90 rounded-lg px-3 py-2 text-xs text-gray-600 dark:text-gray-300 shadow-sm backdrop-blur-sm">
-        <div className="font-semibold mb-1">/sankey2 予算フロー</div>
-        <div>描画: {visibleNodes.length.toLocaleString()} nodes / {visibleEdges.length.toLocaleString()} edges</div>
-        <div>全量: {data.nodes.length.toLocaleString()} nodes / {data.edges.length.toLocaleString()} edges</div>
-        <div>Zoom: {(transform.k * 100).toFixed(0)}%</div>
-      </div>
-
-      {/* 凡例 */}
-      <div className="absolute top-3 right-3 z-10 bg-white/90 dark:bg-gray-800/90 rounded-lg px-3 py-2 text-xs shadow-sm backdrop-blur-sm">
-        {Object.entries(TYPE_COLORS).map(([type, color]) => (
-          <div key={type} className="flex items-center gap-1.5 mb-0.5 last:mb-0">
-            <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
-            <span className="text-gray-700 dark:text-gray-300">{type}</span>
-          </div>
-        ))}
-      </div>
-
-      <svg
-        ref={svgRef}
-        className="w-full h-full"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+      {/* SVG領域 */}
+      <div
+        className="relative flex-1 h-full overflow-hidden"
+        style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
       >
-        <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
-          {/* エッジ描画 */}
-          <g className="edges">
-            {visibleEdges.map((edge, i) => (
-              <EdgeLine
-                key={`${edge.source}-${edge.target}-${i}`}
-                edge={edge}
-                isHovering={isHovering}
-                isConnected={connectedSet.has(edge.source) && connectedSet.has(edge.target)}
-              />
-            ))}
-          </g>
+        {/* ヘッダー情報 */}
+        <div className="absolute top-3 left-3 z-10 bg-white/90 dark:bg-gray-800/90 rounded-lg px-3 py-2 text-xs text-gray-600 dark:text-gray-300 shadow-sm backdrop-blur-sm">
+          <div className="font-semibold mb-1">/sankey2 予算フロー</div>
+          <div>描画: {visibleNodes.length.toLocaleString()} nodes / {visibleEdges.length.toLocaleString()} edges</div>
+          <div>全量: {data.nodes.length.toLocaleString()} nodes / {data.edges.length.toLocaleString()} edges</div>
+          <div>Zoom: {(transform.k * 100).toFixed(0)}%</div>
+          {isShiftHeld && <div className="text-blue-500 font-semibold mt-1">Shift: BFS {BFS_MAX_DEPTH}ホップ</div>}
+        </div>
 
-          {/* ノード矩形（下層） */}
-          <g className="node-rects">
-            {visibleNodes.map(node => (
-              <NodeRect
-                key={node.id}
-                node={node}
-                zoom={transform.k}
-                isHovering={isHovering}
-                isConnected={connectedSet.has(node.id)}
-                isHovered={hoveredNodeId === node.id}
-                onHoverStart={() => setHoveredNodeId(node.id)}
-                onHoverEnd={() => setHoveredNodeId(null)}
-              />
-            ))}
-          </g>
+        {/* 凡例 */}
+        <div className="absolute top-3 right-3 z-10 bg-white/90 dark:bg-gray-800/90 rounded-lg px-3 py-2 text-xs shadow-sm backdrop-blur-sm">
+          {Object.entries(TYPE_COLORS).map(([type, color]) => (
+            <div key={type} className="flex items-center gap-1.5 mb-0.5 last:mb-0">
+              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
+              <span className="text-gray-700 dark:text-gray-300">{TYPE_LABELS[type] ?? type}</span>
+            </div>
+          ))}
+        </div>
 
-          {/* ラベル（上層 — foreignObjectで折り返し対応） */}
-          <g className="node-labels">
-            {visibleNodes.map(node => {
-              // 面積ベースLOD: スクリーン面積がラベル閾値未満なら非表示
-              const screenArea = (node.area ?? node.width * node.height) * k2;
-              if (screenArea < LABEL_SCREEN_AREA) return null;
+        {/* Minimap */}
+        <div
+          className="absolute z-10 bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm overflow-hidden"
+          style={{ bottom: MINIMAP_PADDING, left: MINIMAP_PADDING }}
+        >
+          <canvas
+            ref={minimapCanvasRef}
+            width={MINIMAP_WIDTH}
+            height={minimapHeight}
+            className="cursor-crosshair block"
+            onClick={handleMinimapClick}
+          />
+        </div>
 
-              // 矩形のスクリーンサイズが小さすぎるなら非表示
-              const screenW = node.width * transform.k;
-              const screenH = node.height * transform.k;
-              if (screenW < 20 || screenH < 10) return null;
+        <svg
+          ref={svgRef}
+          className="w-full h-full"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onClick={handleSvgClick}
+        >
+          <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
+            {/* エッジ描画 */}
+            <g className="edges">
+              {visibleEdges.map((edge, i) => {
+                const srcDist = highlightMap.get(edge.source);
+                const tgtDist = highlightMap.get(edge.target);
+                const edgeConnected = srcDist !== undefined && tgtDist !== undefined;
+                const edgeDepth = edgeConnected ? Math.max(srcDist, tgtDist) : -1;
 
-              // フォントサイズ: 矩形の短辺ベース、折り返し前提
-              const fontSize = Math.min(node.height * 0.25, node.width * 0.18, 150);
+                return (
+                  <MemoEdgeLine
+                    key={`${edge.source}-${edge.target}-${i}`}
+                    edge={edge}
+                    isHighlighting={isHighlighting}
+                    isConnected={edgeConnected}
+                    depthOpacity={edgeConnected ? (DEPTH_OPACITY[edgeDepth] ?? 0.3) : 0}
+                  />
+                );
+              })}
+            </g>
 
-              // スクリーン上で6px未満なら非表示
-              if (fontSize * transform.k < 6) return null;
+            {/* ノード矩形 */}
+            <g className="node-rects">
+              {visibleNodes.map(node => {
+                const depth = highlightMap.get(node.id);
+                const handlers = hoverHandlers.get(node.id);
+                return (
+                  <MemoNodeRect
+                    key={node.id}
+                    node={node}
+                    zoom={transform.k}
+                    isHighlighting={isHighlighting}
+                    isConnected={depth !== undefined}
+                    isHovered={hoveredNodeId === node.id}
+                    isSelected={selectedNodeId === node.id}
+                    depthOpacity={depth !== undefined ? (DEPTH_OPACITY[depth] ?? 0.3) : 0}
+                    onHoverStart={handlers?.start ?? noop}
+                    onHoverEnd={handlers?.end ?? noop}
+                    onClick={handleNodeClick}
+                  />
+                );
+              })}
+            </g>
 
-              const opacity = isHovering
-                ? (connectedSet.has(node.id) ? 1 : 0.08)
-                : 1;
+            {/* ラベル */}
+            <g className="node-labels">
+              {visibleNodes.map(node => {
+                const screenArea = (node.area ?? node.width * node.height) * k2;
+                if (screenArea < LABEL_SCREEN_AREA) return null;
 
-              const text = hoveredNodeId === node.id
-                ? `${node.label} (${formatAmount(node.amount)})`
-                : node.label;
+                const screenW = node.width * transform.k;
+                const screenH = node.height * transform.k;
+                if (screenW < 20 || screenH < 10) return null;
 
-              return (
-                <foreignObject
-                  key={node.id}
-                  x={node.x}
-                  y={node.y}
-                  width={node.width}
-                  height={node.height}
-                  opacity={opacity}
-                  style={{ pointerEvents: 'none', overflow: 'hidden' }}
-                >
-                  <div
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: `${fontSize}px`,
-                      color: '#fff',
-                      textShadow: '0 0 3px rgba(0,0,0,0.9)',
-                      lineHeight: 1.1,
-                      textAlign: 'center',
-                      wordBreak: 'break-all',
-                      overflow: 'hidden',
-                      padding: `${fontSize * 0.1}px`,
-                    }}
+                const fontSize = Math.min(node.height * 0.25, node.width * 0.18, 150);
+                if (fontSize * transform.k < 6) return null;
+
+                const depth = highlightMap.get(node.id);
+                const opacity = isHighlighting
+                  ? (depth !== undefined ? (DEPTH_OPACITY[depth] ?? 0.3) : 0.08)
+                  : 1;
+
+                const text = (hoveredNodeId === node.id || selectedNodeId === node.id)
+                  ? `${node.label} (${formatAmount(node.amount)})`
+                  : node.label;
+
+                return (
+                  <foreignObject
+                    key={node.id}
+                    x={node.x}
+                    y={node.y}
+                    width={node.width}
+                    height={node.height}
+                    opacity={opacity}
+                    style={{ pointerEvents: 'none', overflow: 'hidden' }}
                   >
-                    {text}
-                  </div>
-                </foreignObject>
-              );
-            })}
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: `${fontSize}px`,
+                        color: '#fff',
+                        textShadow: '0 0 3px rgba(0,0,0,0.9)',
+                        lineHeight: 1.1,
+                        textAlign: 'center',
+                        wordBreak: 'break-all',
+                        overflow: 'hidden',
+                        padding: `${fontSize * 0.1}px`,
+                      }}
+                    >
+                      {text}
+                    </div>
+                  </foreignObject>
+                );
+              })}
+            </g>
           </g>
-        </g>
-      </svg>
+        </svg>
+      </div>
+
+      {/* サイドパネル */}
+      {showPanel && selectedNode && (
+        <DetailPanel
+          node={selectedNode}
+          edgeIndex={edgeIndex}
+          nodeMap={nodeMap}
+          onClose={() => setSelectedNodeId(null)}
+          onNodeClick={handlePanelNodeClick}
+        />
+      )}
     </div>
   );
 }
 
-// ─── サブコンポーネント ──────────────────────────────────
+// ─── noop ──────────────────────────────────────────────
+
+const noop = () => {};
+
+// ─── サイドパネル ──────────────────────────────────────
+
+interface DetailPanelProps {
+  node: LayoutNode;
+  edgeIndex: EdgeIndex;
+  nodeMap: Map<string, LayoutNode>;
+  onClose: () => void;
+  onNodeClick: (nodeId: string) => void;
+}
+
+function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailPanelProps) {
+  const inEdges = (edgeIndex.byTarget.get(node.id) ?? [])
+    .slice()
+    .sort((a, b) => b.value - a.value);
+  const outEdges = (edgeIndex.bySource.get(node.id) ?? [])
+    .slice()
+    .sort((a, b) => b.value - a.value);
+
+  const color = TYPE_COLORS[node.type] || '#999';
+
+  return (
+    <div
+      className="h-full border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-y-auto"
+      style={{ width: PANEL_WIDTH, minWidth: PANEL_WIDTH }}
+    >
+      {/* ヘッダー */}
+      <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3 z-10">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-sm text-gray-900 dark:text-gray-100 break-all leading-tight">
+              {node.label}
+            </div>
+            <div className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-1">
+              {formatAmount(node.amount)}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none p-1"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <span
+            className="inline-block px-2 py-0.5 rounded text-xs font-medium text-white"
+            style={{ backgroundColor: color }}
+          >
+            {TYPE_LABELS[node.type] ?? node.type}
+          </span>
+          {node.ministry && (
+            <span className="text-xs text-gray-500 dark:text-gray-400">{node.ministry}</span>
+          )}
+        </div>
+      </div>
+
+      {/* 流入元 */}
+      <ConnectionList
+        title="流入元"
+        arrow="←"
+        edges={inEdges}
+        getNodeId={e => e.source}
+        nodeMap={nodeMap}
+        onNodeClick={onNodeClick}
+      />
+
+      {/* 流出先 */}
+      <ConnectionList
+        title="流出先"
+        arrow="→"
+        edges={outEdges}
+        getNodeId={e => e.target}
+        nodeMap={nodeMap}
+        onNodeClick={onNodeClick}
+      />
+    </div>
+  );
+}
+
+interface ConnectionListProps {
+  title: string;
+  arrow: string;
+  edges: LayoutEdge[];
+  getNodeId: (e: LayoutEdge) => string;
+  nodeMap: Map<string, LayoutNode>;
+  onNodeClick: (nodeId: string) => void;
+}
+
+function ConnectionList({ title, arrow, edges, getNodeId, nodeMap, onNodeClick }: ConnectionListProps) {
+  if (edges.length === 0) return null;
+
+  const shown = edges.slice(0, PANEL_MAX_CONNECTIONS);
+  const remaining = edges.length - shown.length;
+
+  return (
+    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+      <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+        {arrow} {title}（{edges.length}件）
+      </div>
+      <div className="space-y-1">
+        {shown.map((edge, i) => {
+          const targetId = getNodeId(edge);
+          const targetNode = nodeMap.get(targetId);
+          const color = targetNode ? (TYPE_COLORS[targetNode.type] || '#999') : '#999';
+          return (
+            <button
+              key={`${targetId}-${i}`}
+              onClick={() => onNodeClick(targetId)}
+              className="w-full text-left flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+            >
+              <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
+              <span className="text-xs text-gray-700 dark:text-gray-300 truncate flex-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                {targetNode?.label ?? targetId}
+              </span>
+              <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                {formatAmount(edge.value)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {remaining > 0 && (
+        <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 pl-2">
+          …他 {remaining.toLocaleString()} 件
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── メモ化サブコンポーネント ──────────────────────────────
 
 interface NodeRectProps {
   node: LayoutNode;
   zoom: number;
-  isHovering: boolean;
+  isHighlighting: boolean;
   isConnected: boolean;
   isHovered: boolean;
+  isSelected: boolean;
+  depthOpacity: number;
   onHoverStart: () => void;
   onHoverEnd: () => void;
+  onClick: (nodeId: string) => void;
 }
 
-function NodeRect({
+const MemoNodeRect = React.memo(function NodeRect({
   node, zoom,
-  isHovering, isConnected, isHovered,
-  onHoverStart, onHoverEnd,
+  isHighlighting, isConnected, isHovered, isSelected, depthOpacity,
+  onHoverStart, onHoverEnd, onClick,
 }: NodeRectProps) {
   const color = TYPE_COLORS[node.type] || '#999';
-  const opacity = isHovering ? (isConnected ? 1 : 0.08) : 1;
+  const opacity = isHighlighting ? (isConnected ? depthOpacity : 0.08) : 1;
+  const highlighted = isHovered || isSelected;
 
   return (
     <g
       opacity={opacity}
       onMouseEnter={onHoverStart}
       onMouseLeave={onHoverEnd}
+      onClick={(e) => { e.stopPropagation(); onClick(node.id); }}
       style={{ cursor: 'pointer' }}
     >
       <rect
@@ -368,23 +780,24 @@ function NodeRect({
         width={node.width}
         height={node.height}
         fill={color}
-        stroke={isHovered ? '#fff' : 'none'}
-        strokeWidth={isHovered ? 2 / zoom : 0}
+        stroke={highlighted ? '#fff' : 'none'}
+        strokeWidth={highlighted ? 2 / zoom : 0}
       >
         <title>{`${node.label}\n${formatAmount(node.amount)}`}</title>
       </rect>
     </g>
   );
-}
+});
 
 interface EdgeLineProps {
   edge: LayoutEdge;
-  isHovering: boolean;
+  isHighlighting: boolean;
   isConnected: boolean;
+  depthOpacity: number;
 }
 
-function EdgeLine({ edge, isHovering, isConnected }: EdgeLineProps) {
-  const opacity = isHovering ? (isConnected ? 0.6 : 0.02) : 0.04;
+const MemoEdgeLine = React.memo(function EdgeLine({ edge, isHighlighting, isConnected, depthOpacity }: EdgeLineProps) {
+  const opacity = isHighlighting ? (isConnected ? depthOpacity * 0.6 : 0.02) : 0.04;
 
   return (
     <polyline
@@ -397,4 +810,4 @@ function EdgeLine({ edge, isHovering, isConnected }: EdgeLineProps) {
       strokeLinejoin="round"
     />
   );
-}
+});
