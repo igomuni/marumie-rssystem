@@ -172,9 +172,15 @@ export default function Sankey2View({ data }: Props) {
   useEffect(() => {
     const down = (e: KeyboardEvent) => { if (e.key === 'Shift') setIsShiftHeld(true); };
     const up = (e: KeyboardEvent) => { if (e.key === 'Shift') setIsShiftHeld(false); };
+    const blur = () => setIsShiftHeld(false);
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
-    return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); };
+    window.addEventListener('blur', blur);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', blur);
+    };
   }, []);
 
   // ── Escキーで選択解除 ──
