@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import type { Sankey2LayoutData, LayoutNode, LayoutEdge } from '@/client/components/Sankey2/types';
 
 // ─── 定数 ──────────────────────────────────────────────
@@ -51,6 +52,16 @@ const PANEL_MAX_CONNECTIONS = 20;
 /** Minimap設定 */
 const MINIMAP_WIDTH = 200;
 const MINIMAP_PADDING = 12;
+
+/** 検索デバウンス(ms) */
+const SEARCH_DEBOUNCE = 150;
+
+/** 検索候補の最大表示数 */
+const SEARCH_MAX_RESULTS = 20;
+
+/** 金額スライダーの対数スケール範囲 (10^4 = 1万 〜 10^14 = 100兆) */
+const MIN_AMOUNT_LOG_MIN = 4;
+const MIN_AMOUNT_LOG_MAX = 14;
 
 // ─── 型 ──────────────────────────────────────────────────
 
@@ -114,6 +125,9 @@ export default function Sankey2View({ data }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const minimapCanvasRef = useRef<HTMLCanvasElement>(null);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   // Transform state: pan + zoom
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 0.15 });
   const [isPanning, setIsPanning] = useState(false);
@@ -126,6 +140,17 @@ export default function Sankey2View({ data }: Props) {
 
   // コンテナサイズ
   const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
+
+  // ── フィルタ・検索 state ──
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [ministryFilter, setMinistryFilter] = useState<Set<string>>(new Set());
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [minAmount, setMinAmount] = useState(0);
+  const [maxAmount, setMaxAmount] = useState(Infinity);
+  const [labelFilter, setLabelFilter] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // ── エッジインデックス（O(1)接続検索） ──
 
@@ -167,6 +192,97 @@ export default function Sankey2View({ data }: Props) {
     return map;
   }, [data]);
 
+  // ── 府省庁リスト（金額降順） ──
+
+  const ministryList = useMemo(() => {
+    if (!data) return [];
+    return data.nodes
+      .filter(n => n.type === 'ministry')
+      .sort((a, b) => b.amount - a.amount);
+  }, [data]);
+
+  // ── フィルタ状態の集計 ──
+
+  const activeFilterCount = (ministryFilter.size > 0 ? 1 : 0) + (minAmount > 0 ? 1 : 0) + (maxAmount < Infinity ? 1 : 0) + (labelFilter ? 1 : 0);
+  const hasActiveFilter = activeFilterCount > 0;
+
+  // ── URLパラメータからの初期復元 ──
+
+  useEffect(() => {
+    if (!data) return;
+    const m = searchParams.get('m');
+    const min = searchParams.get('min');
+    const max = searchParams.get('max');
+    const l = searchParams.get('l');
+    const q = searchParams.get('q');
+    const s = searchParams.get('s');
+
+    if (m) setMinistryFilter(new Set(m.split(',')));
+    let parsedMin = min ? Math.round(Math.max(0, Number(min) || 0)) : 0;
+    let parsedMax = max ? (Number(max) || Infinity) : Infinity;
+    if (parsedMax < Infinity) parsedMax = Math.round(Math.max(0, parsedMax));
+    if (parsedMin > 0 && parsedMax < Infinity && parsedMin > parsedMax) {
+      [parsedMin, parsedMax] = [parsedMax, parsedMin];
+    }
+    if (parsedMin > 0) setMinAmount(parsedMin);
+    if (parsedMax < Infinity) setMaxAmount(parsedMax);
+    if (l) setLabelFilter(l);
+    if (q) { setSearchQuery(q); setDebouncedQuery(q); }
+    if (s) setSelectedNodeId(s);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  // ── 検索デバウンス ──
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), SEARCH_DEBOUNCE);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // ── URLパラメータ同期 ──
+
+  useEffect(() => {
+    if (!data) return;
+    const params = new URLSearchParams();
+    if (ministryFilter.size > 0) params.set('m', [...ministryFilter].join(','));
+    if (minAmount > 0) params.set('min', String(minAmount));
+    if (maxAmount < Infinity) params.set('max', String(maxAmount));
+    if (labelFilter) params.set('l', labelFilter);
+    if (debouncedQuery) params.set('q', debouncedQuery);
+    if (selectedNodeId) params.set('s', selectedNodeId);
+
+    const str = params.toString();
+    const current = window.location.search.replace(/^\?/, '');
+    if (str !== current) {
+      router.replace(str ? `?${str}` : window.location.pathname, { scroll: false });
+    }
+  }, [data, ministryFilter, minAmount, maxAmount, labelFilter, debouncedQuery, selectedNodeId, router]);
+
+  // ── 検索結果 ──
+
+  const searchResults = useMemo(() => {
+    if (!data || debouncedQuery.length < 2) return [];
+    const q = debouncedQuery;
+    const hasMinistryFilter = ministryFilter.size > 0;
+    return data.nodes
+      .filter(n => {
+        if (!n.label.includes(q)) return false;
+        // フィルタと一致させる（visibleNodesと同じ条件）
+        if (n.type !== 'total') {
+          if (minAmount > 0 && n.amount < minAmount) return false;
+          if (maxAmount < Infinity && n.amount > maxAmount) return false;
+        }
+        if (labelFilter && !n.label.includes(labelFilter)) return false;
+        if (hasMinistryFilter) {
+          if (n.type === 'ministry') { if (!ministryFilter.has(n.label)) return false; }
+          else if (n.type !== 'total') { if (!n.ministry || !ministryFilter.has(n.ministry)) return false; }
+        }
+        return true;
+      })
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, SEARCH_MAX_RESULTS);
+  }, [data, debouncedQuery, ministryFilter, minAmount, maxAmount, labelFilter]);
+
   // ── Shiftキー追跡 ──
 
   useEffect(() => {
@@ -183,13 +299,19 @@ export default function Sankey2View({ data }: Props) {
     };
   }, []);
 
-  // ── Escキーで選択解除 ──
+  // ── Escキーで選択解除・パネル閉じ ──
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelectedNodeId(null); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showSearchResults) { setShowSearchResults(false); return; }
+        if (showFilterPanel) { setShowFilterPanel(false); return; }
+        setSelectedNodeId(null);
+      }
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [showSearchResults, showFilterPanel]);
 
   // ── コンテナサイズをResizeObserverで追跡 ──
 
@@ -230,6 +352,7 @@ export default function Sankey2View({ data }: Props) {
     const { k, x: tx, y: ty } = transform;
     const { w: cw, h: ch } = containerSize;
     const k2 = k * k;
+    const hasMinistryFilter = ministryFilter.size > 0;
 
     const vpLeft   = (-tx / k) - VIEWPORT_MARGIN;
     const vpTop    = (-ty / k) - VIEWPORT_MARGIN;
@@ -240,8 +363,29 @@ export default function Sankey2View({ data }: Props) {
     const filteredNodes: LayoutNode[] = [];
 
     for (const node of data.nodes) {
+      // 金額閾値フィルタ（totalは常に表示）
+      if (node.type !== 'total') {
+        if (minAmount > 0 && node.amount < minAmount) continue;
+        if (maxAmount < Infinity && node.amount > maxAmount) continue;
+      }
+
+      // ノード名フィルタ
+      if (labelFilter && !node.label.includes(labelFilter)) continue;
+
+      // 府省庁フィルタ
+      if (hasMinistryFilter) {
+        if (node.type === 'ministry') {
+          if (!ministryFilter.has(node.label)) continue;
+        } else if (node.type !== 'total') {
+          if (!node.ministry || !ministryFilter.has(node.ministry)) continue;
+        }
+      }
+
+      // 面積ベースLOD
       const screenArea = (node.area ?? node.width * node.height) * k2;
       if (screenArea < MIN_SCREEN_AREA) continue;
+
+      // ビューポートカリング
       if (node.x + node.width < vpLeft || node.x > vpRight) continue;
       if (node.y + node.height < vpTop || node.y > vpBottom) continue;
 
@@ -257,7 +401,7 @@ export default function Sankey2View({ data }: Props) {
     }
 
     return { visibleNodes: filteredNodes, visibleEdges: filteredEdges };
-  }, [data, transform, containerSize]);
+  }, [data, transform, containerSize, ministryFilter, minAmount, maxAmount, labelFilter]);
 
   // ── ハイライト: BFS or 1-hop ──
 
@@ -274,6 +418,7 @@ export default function Sankey2View({ data }: Props) {
   // ── ノードクリック ──
 
   const handleNodeClick = useCallback((nodeId: string) => {
+    if (didPanRef.current) return;
     setSelectedNodeId(prev => prev === nodeId ? null : nodeId);
   }, []);
 
@@ -281,17 +426,37 @@ export default function Sankey2View({ data }: Props) {
 
   const handlePanelNodeClick = useCallback((nodeId: string) => {
     setSelectedNodeId(nodeId);
+    setShowSearchResults(false);
     const node = nodeMap.get(nodeId);
     if (!node || !containerRef.current) return;
-    const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
-    const ch = containerRef.current.clientHeight;
-    const targetK = Math.max(transform.k, 0.5);
-    setTransform({
-      x: cw / 2 - (node.x + node.width / 2) * targetK,
-      y: ch / 2 - (node.y + node.height / 2) * targetK,
-      k: targetK,
-    });
-  }, [nodeMap, transform.k, selectedNodeId]);
+
+    // 現在のZoomでノードがスクリーン上で視認可能か判定（4×4px相当以上）
+    const nodeArea = (node.area ?? node.width * node.height);
+    const screenArea = nodeArea * transform.k * transform.k;
+    if (screenArea >= MIN_SCREEN_AREA * 16) return;
+
+    // 視認不可 → Fitと同じロジック（接続ノード含むバウンディングボックス）
+    let minX = node.x, minY = node.y;
+    let maxX = node.x + node.width, maxY = node.y + node.height;
+    for (const edge of edgeIndex.bySource.get(nodeId) ?? []) {
+      const t = nodeMap.get(edge.target);
+      if (t) { minX = Math.min(minX, t.x); minY = Math.min(minY, t.y); maxX = Math.max(maxX, t.x + t.width); maxY = Math.max(maxY, t.y + t.height); }
+    }
+    for (const edge of edgeIndex.byTarget.get(nodeId) ?? []) {
+      const s = nodeMap.get(edge.source);
+      if (s) { minX = Math.min(minX, s.x); minY = Math.min(minY, s.y); maxX = Math.max(maxX, s.x + s.width); maxY = Math.max(maxY, s.y + s.height); }
+    }
+
+    const bw = Math.max(maxX - minX, 1);
+    const bh = Math.max(maxY - minY, 1);
+    const cx = minX + bw / 2;
+    const cy = minY + bh / 2;
+    const cw = Math.max(1, containerRef.current.clientWidth - PANEL_WIDTH);
+    const ch = Math.max(1, containerRef.current.clientHeight);
+    const targetK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(cw / bw, ch / bh) * 0.85));
+
+    setTransform({ x: cw / 2 - cx * targetK, y: ch / 2 - cy * targetK, k: targetK });
+  }, [nodeMap, edgeIndex, transform.k]);
 
   // ── Wheel zoom ──
 
@@ -322,9 +487,12 @@ export default function Sankey2View({ data }: Props) {
     return () => svg.removeEventListener('wheel', handler);
   }, [data]);
 
+  const didPanRef = useRef(false);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setIsPanning(true);
+    didPanRef.current = false;
     panStartRef.current = { x: e.clientX, y: e.clientY };
   }, []);
 
@@ -332,6 +500,7 @@ export default function Sankey2View({ data }: Props) {
     if (!isPanning) return;
     const dx = e.clientX - panStartRef.current.x;
     const dy = e.clientY - panStartRef.current.y;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) didPanRef.current = true;
     panStartRef.current = { x: e.clientX, y: e.clientY };
     setTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
   }, [isPanning]);
@@ -340,9 +509,10 @@ export default function Sankey2View({ data }: Props) {
     setIsPanning(false);
   }, []);
 
-  // ── SVG背景クリックで選択解除 ──
+  // ── SVG背景クリックで選択解除（Pan後は無視） ──
 
   const handleSvgClick = useCallback((e: React.MouseEvent) => {
+    if (didPanRef.current) return;
     if ((e.target as Element).tagName === 'svg' || (e.target as Element).classList.contains('bg-rect')) {
       setSelectedNodeId(null);
     }
@@ -402,6 +572,82 @@ export default function Sankey2View({ data }: Props) {
     );
   }, [data, transform, containerSize, minimapHeight]);
 
+  // ── Zoomコントロール ──
+
+  const handleZoomFit = useCallback(() => {
+    if (!data || !containerRef.current) return;
+    const { totalWidth, totalHeight } = data.metadata.layout;
+    const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
+    const ch = containerRef.current.clientHeight;
+    const k = Math.min(cw / totalWidth, ch / totalHeight) * 0.9;
+    setTransform({ x: (cw - totalWidth * k) / 2, y: (ch - totalHeight * k) / 2, k });
+  }, [data, selectedNodeId]);
+
+  const handleZoomIn = useCallback(() => {
+    setTransform(prev => {
+      const cw = containerRef.current?.clientWidth ?? 0;
+      const ch = containerRef.current?.clientHeight ?? 0;
+      const newK = Math.min(MAX_ZOOM, prev.k * 1.5);
+      const ratio = newK / prev.k;
+      return { x: cw / 2 - (cw / 2 - prev.x) * ratio, y: ch / 2 - (ch / 2 - prev.y) * ratio, k: newK };
+    });
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setTransform(prev => {
+      const cw = containerRef.current?.clientWidth ?? 0;
+      const ch = containerRef.current?.clientHeight ?? 0;
+      const newK = Math.max(MIN_ZOOM, prev.k / 1.5);
+      const ratio = newK / prev.k;
+      return { x: cw / 2 - (cw / 2 - prev.x) * ratio, y: ch / 2 - (ch / 2 - prev.y) * ratio, k: newK };
+    });
+  }, []);
+
+  /** Fit: Activeノード + 接続ノードがすべて見えるZoom */
+  const handleZoomFitActive = useCallback(() => {
+    if (!activeNodeId || !containerRef.current) return;
+    const node = nodeMap.get(activeNodeId);
+    if (!node) return;
+
+    // 接続ノードのバウンディングボックスを計算
+    let minX = node.x, minY = node.y;
+    let maxX = node.x + node.width, maxY = node.y + node.height;
+    for (const edge of edgeIndex.bySource.get(activeNodeId) ?? []) {
+      const t = nodeMap.get(edge.target);
+      if (t) { minX = Math.min(minX, t.x); minY = Math.min(minY, t.y); maxX = Math.max(maxX, t.x + t.width); maxY = Math.max(maxY, t.y + t.height); }
+    }
+    for (const edge of edgeIndex.byTarget.get(activeNodeId) ?? []) {
+      const s = nodeMap.get(edge.source);
+      if (s) { minX = Math.min(minX, s.x); minY = Math.min(minY, s.y); maxX = Math.max(maxX, s.x + s.width); maxY = Math.max(maxY, s.y + s.height); }
+    }
+
+    const bw = Math.max(maxX - minX, 1);
+    const bh = Math.max(maxY - minY, 1);
+    const cx = minX + bw / 2;
+    const cy = minY + bh / 2;
+    const cw = Math.max(1, containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0));
+    const ch = Math.max(1, containerRef.current.clientHeight);
+    const targetK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(cw / bw, ch / bh) * 0.85));
+
+    setTransform({ x: cw / 2 - cx * targetK, y: ch / 2 - cy * targetK, k: targetK });
+  }, [activeNodeId, nodeMap, edgeIndex, selectedNodeId]);
+
+  /** Focus: Activeノード単体を画面中央に */
+  const handleZoomFocusActive = useCallback(() => {
+    const node = activeNodeId ? nodeMap.get(activeNodeId) : undefined;
+    if (!node || !containerRef.current) return;
+    const cw = Math.max(1, containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0));
+    const ch = Math.max(1, containerRef.current.clientHeight);
+    const screenTarget = Math.max(1, Math.min(cw, ch) / 4);
+    const nodeSide = Math.max(node.width, node.height, 1);
+    const targetK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, screenTarget / nodeSide));
+    setTransform({
+      x: cw / 2 - (node.x + node.width / 2) * targetK,
+      y: ch / 2 - (node.y + node.height / 2) * targetK,
+      k: targetK,
+    });
+  }, [activeNodeId, nodeMap, selectedNodeId]);
+
   // ── Minimapクリック → ビューポート移動 ──
 
   const handleMinimapClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -449,13 +695,144 @@ export default function Sankey2View({ data }: Props) {
         className="relative flex-1 h-full overflow-hidden"
         style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
       >
-        {/* ヘッダー情報 */}
-        <div className="absolute top-3 left-3 z-10 bg-white/90 dark:bg-gray-800/90 rounded-lg px-3 py-2 text-xs text-gray-600 dark:text-gray-300 shadow-sm backdrop-blur-sm">
-          <div className="font-semibold mb-1">/sankey2 予算フロー</div>
-          <div>描画: {visibleNodes.length.toLocaleString()} nodes / {visibleEdges.length.toLocaleString()} edges</div>
-          <div>全量: {data.nodes.length.toLocaleString()} nodes / {data.edges.length.toLocaleString()} edges</div>
-          <div>Zoom: {(transform.k * 100).toFixed(0)}%</div>
-          {isShiftHeld && <div className="text-blue-500 font-semibold mt-1">Shift: BFS {BFS_MAX_DEPTH}ホップ</div>}
+        {/* ヘッダー情報 + 検索 + フィルタ */}
+        <div className="absolute top-3 left-3 z-20 flex flex-col gap-2" style={{ maxWidth: 320 }}>
+          {/* 統計情報 */}
+          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg px-3 py-2 text-xs text-gray-600 dark:text-gray-300 shadow-sm backdrop-blur-sm">
+            <div className="font-semibold mb-1">/sankey2 予算フロー</div>
+            <div>描画: {visibleNodes.length.toLocaleString()} nodes / {visibleEdges.length.toLocaleString()} edges</div>
+            <div>Zoom: {(transform.k * 100).toFixed(0)}%</div>
+            {isShiftHeld && <div className="text-blue-500 font-semibold mt-1">Shift: BFS {BFS_MAX_DEPTH}ホップ</div>}
+            {minAmount > 0 && <div className="text-orange-500 mt-0.5">最小金額: {formatAmount(minAmount)}</div>}
+            {maxAmount < Infinity && <div className="text-orange-500 mt-0.5">最大金額: {formatAmount(maxAmount)}</div>}
+            {labelFilter && <div className="text-green-500 mt-0.5">名前: &quot;{labelFilter}&quot;</div>}
+            {ministryFilter.size > 0 && <div className="text-blue-500 mt-0.5">府省庁: {ministryFilter.size}件選択</div>}
+          </div>
+
+          {/* 検索バー */}
+          <div className="relative">
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
+              onFocus={() => { if (debouncedQuery.length >= 2) setShowSearchResults(true); }}
+              placeholder="ノード検索（2文字以上）"
+              className="w-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => { setSearchQuery(''); setDebouncedQuery(''); setShowSearchResults(false); }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+              >✕</button>
+            )}
+            {/* 検索結果ドロップダウン */}
+            {showSearchResults && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-64 overflow-y-auto z-30">
+                {searchResults.map(node => (
+                  <button
+                    key={node.id}
+                    onClick={() => {
+                      setShowSearchResults(false);
+                      handlePanelNodeClick(node.id);
+                    }}
+                    className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-sm"
+                  >
+                    <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: TYPE_COLORS[node.type] || '#999' }} />
+                    <span className="truncate flex-1 text-gray-800 dark:text-gray-200">{node.label}</span>
+                    <span className="text-xs text-gray-400 flex-shrink-0">{formatAmount(node.amount)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* フィルタボタン群 */}
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => setShowFilterPanel(prev => !prev)}
+              className={`text-xs px-2.5 py-1.5 rounded-lg shadow-sm backdrop-blur-sm border transition-colors flex items-center gap-1 ${
+                hasActiveFilter
+                  ? 'bg-blue-500 text-white border-blue-500'
+                  : 'bg-white/90 dark:bg-gray-800/90 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              フィルタ{hasActiveFilter ? ` (${activeFilterCount})` : ''}
+            </button>
+            {hasActiveFilter && (
+              <button
+                onClick={() => { setMinistryFilter(new Set()); setMinAmount(0); setMaxAmount(Infinity); setLabelFilter(''); }}
+                className="text-xs px-2 py-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-red-500 border border-gray-200 dark:border-gray-700 shadow-sm backdrop-blur-sm hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                リセット
+              </button>
+            )}
+          </div>
+
+          {/* フィルタパネル */}
+          {showFilterPanel && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 max-h-[70vh] overflow-y-auto">
+              {/* 金額範囲スライダー */}
+              <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">金額範囲</div>
+                <AmountSlider label="最小" value={minAmount} noValueLabel="なし" accent="blue" onChange={setMinAmount} isMax={false} />
+                <div className="mt-2">
+                  <AmountSlider label="最大" value={maxAmount} noValueLabel="なし" accent="orange" onChange={setMaxAmount} isMax={true} />
+                </div>
+              </div>
+
+              {/* ノード名フィルタ */}
+              <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">ノード名フィルタ</div>
+                <input
+                  type="text"
+                  value={labelFilter}
+                  onChange={e => setLabelFilter(e.target.value)}
+                  placeholder="含む文字列..."
+                  className="w-full text-xs bg-gray-50 dark:bg-gray-700 rounded px-2 py-1.5 border border-gray-200 dark:border-gray-600 outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 dark:text-gray-200"
+                />
+              </div>
+
+              {/* 府省庁フィルタ */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">府省庁</span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setMinistryFilter(new Set(ministryList.map(n => n.label)))}
+                      className="text-xs text-blue-500 hover:text-blue-700"
+                    >全選択</button>
+                    <span className="text-gray-300">|</span>
+                    <button
+                      onClick={() => setMinistryFilter(new Set())}
+                      className="text-xs text-blue-500 hover:text-blue-700"
+                    >全解除</button>
+                  </div>
+                </div>
+                <div className="space-y-0.5">
+                  {ministryList.map(m => (
+                    <label key={m.id} className="flex items-center gap-2 px-1 py-0.5 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={ministryFilter.has(m.label)}
+                        onChange={e => {
+                          setMinistryFilter(prev => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.add(m.label); else next.delete(m.label);
+                            return next;
+                          });
+                        }}
+                        className="accent-blue-500"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300 flex-1 truncate">{m.label}</span>
+                      <span className="text-[10px] text-gray-400">{formatAmount(m.amount)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 凡例 */}
@@ -466,6 +843,33 @@ export default function Sankey2View({ data }: Props) {
               <span className="text-gray-700 dark:text-gray-300">{TYPE_LABELS[type] ?? type}</span>
             </div>
           ))}
+        </div>
+
+        {/* Zoomコントロール */}
+        <div
+          className="absolute z-10 flex flex-col gap-1"
+          style={{ bottom: MINIMAP_PADDING + minimapHeight + 8, left: MINIMAP_PADDING }}
+        >
+          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden">
+            <button onClick={handleZoomIn} className="px-2.5 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="ズームイン">＋</button>
+            <div className="text-[10px] text-center text-gray-500 dark:text-gray-400 border-y border-gray-200 dark:border-gray-700 py-0.5">
+              {(transform.k * 100).toFixed(0)}%
+            </div>
+            <button onClick={handleZoomOut} className="px-2.5 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="ズームアウト">ー</button>
+          </div>
+          <button onClick={handleZoomFit} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center" title="全体表示">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+          </button>
+          {activeNodeId && (
+            <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden">
+              <button onClick={handleZoomFitActive} className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center" title="接続ノードを含めてフィット">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+              </button>
+              <button onClick={handleZoomFocusActive} className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center border-t border-gray-200 dark:border-gray-700" title="選択ノードにフォーカス">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Minimap */}
@@ -811,3 +1215,101 @@ const MemoEdgeLine = React.memo(function EdgeLine({ edge, isHighlighting, isConn
     />
   );
 });
+
+// ─── 金額スライダー + 直接入力 ──────────────────────────
+
+interface AmountSliderProps {
+  label: string;
+  value: number;
+  noValueLabel: string;
+  accent: 'blue' | 'orange';
+  isMax: boolean;
+  onChange: (v: number) => void;
+}
+
+function AmountSlider({ label, value, noValueLabel, accent, isMax, onChange }: AmountSliderProps) {
+  const [editing, setEditing] = useState(false);
+  const [inputText, setInputText] = useState('');
+
+  const isNoValue = isMax ? value >= Infinity : value <= 0;
+  const displayText = isNoValue ? noValueLabel : formatAmount(value);
+
+  const sliderValue = isMax
+    ? (value >= Infinity ? 100 : ((Math.log10(value) - MIN_AMOUNT_LOG_MIN) / (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)) * 100)
+    : (value <= 0 ? 0 : ((Math.log10(value) - MIN_AMOUNT_LOG_MIN) / (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)) * 100);
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = Number(e.target.value);
+    if (isMax) {
+      onChange(v >= 100 ? Infinity : Math.round(Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN))));
+    } else {
+      onChange(v <= 0 ? 0 : Math.round(Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN))));
+    }
+  };
+
+  const parseAmountInput = (text: string): number | null => {
+    const t = text.trim().replace(/,/g, '');
+    // "100兆円" → 100e12, "5億円" → 5e8, "1万円" → 1e4
+    const chouMatch = t.match(/^([\d.]+)\s*兆/);
+    if (chouMatch) return Math.round(parseFloat(chouMatch[1]) * 1e12);
+    const okuMatch = t.match(/^([\d.]+)\s*億/);
+    if (okuMatch) return Math.round(parseFloat(okuMatch[1]) * 1e8);
+    const manMatch = t.match(/^([\d.]+)\s*万/);
+    if (manMatch) return Math.round(parseFloat(manMatch[1]) * 1e4);
+    // 数字のみ → 円
+    const num = parseFloat(t.replace(/円$/, ''));
+    if (!isNaN(num) && num >= 0) return Math.round(num);
+    return null;
+  };
+
+  const commitInput = () => {
+    setEditing(false);
+    if (!inputText.trim()) {
+      onChange(isMax ? Infinity : 0);
+      return;
+    }
+    const parsed = parseAmountInput(inputText);
+    if (parsed !== null) onChange(parsed);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-1">
+        <span>{label}:</span>
+        {editing ? (
+          <input
+            type="text"
+            value={inputText}
+            onChange={e => setInputText(e.target.value)}
+            onBlur={commitInput}
+            onKeyDown={e => { if (e.key === 'Enter') commitInput(); if (e.key === 'Escape') setEditing(false); }}
+            autoFocus
+            placeholder="例: 1億, 100万, 5兆"
+            className="flex-1 text-xs bg-gray-50 dark:bg-gray-700 rounded px-1.5 py-0.5 border border-gray-300 dark:border-gray-600 outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 dark:text-gray-200"
+          />
+        ) : (
+          <button
+            onClick={() => { setInputText(isNoValue ? '' : String(Math.round(value))); setEditing(true); }}
+            className="text-xs text-blue-500 hover:text-blue-700 hover:underline cursor-text"
+            title="クリックして直接入力"
+          >
+            {displayText}
+          </button>
+        )}
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={sliderValue}
+        onChange={handleSliderChange}
+        className={`w-full h-1.5 ${accent === 'blue' ? 'accent-blue-500' : 'accent-orange-500'}`}
+      />
+      <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+        <span>{isMax ? '1万' : 'なし'}</span>
+        <span>10億</span>
+        <span>{isMax ? 'なし' : '100兆'}</span>
+      </div>
+    </div>
+  );
+}
