@@ -1,14 +1,14 @@
 /**
- * /sankey2 レイアウト計算スクリプト（グリッド配置版）
+ * /sankey2 レイアウト計算スクリプト（Treemapクラスタ版）
  *
  * sankey2-graph.json からノード座標・エッジBezierパスを事前計算し、
  * sankey2-layout.json に出力する。
  *
  * レイアウト方針:
- *   - 37府省庁を6列×7行のグリッドに配置（予算額降順）
- *   - 各セルが独立したミニSankeyフロー（ministry→project→recipient）
- *   - ノード高さ: 線形スケール、GAP=0px
- *   - エッジ: 3次Bezier曲線（S字カーブ）
+ *   - 5つのtypeクラスタ（total, ministry, project-budget, project-spending, recipient）
+ *   - 各クラスタ内は Squarified Treemap で面積∝金額の矩形配置
+ *   - 事業/支出先クラスタは2段階treemap（府省庁グループ→個別ノード）
+ *   - エッジ: 右辺中央→左辺中央の3次Bezier曲線
  */
 
 import * as fs from 'fs';
@@ -16,28 +16,14 @@ import * as path from 'path';
 
 // ─── 定数 ──────────────────────────────────────────────
 
-/** グリッド設定 */
-const GRID_COLS = 6;
-const CELL_WIDTH = 400;       // セル幅（4type帯 × 100px）
-const CELL_H_GAP = 50;       // セル間の水平余白
-const CELL_V_GAP = 50;       // 行間の垂直余白
+/** クラスタ配置 */
+const CLUSTER_WIDTH = 4000;    // 各クラスタの幅
+const CLUSTER_HEIGHT = 4000;   // 各クラスタの高さ
+const CLUSTER_GAP = 1200;      // クラスタ間のギャップ（エッジ描画用）
+const NODE_GAP = 1;            // treemap内ノード間のギャップ(px)
 
-/** セル内のtype別X座標オフセット */
-const TYPE_X_OFFSET: Record<string, number> = {
-  'ministry':         0,
-  'project-budget':   100,
-  'project-spending': 200,
-  'recipient':        300,
-};
-
-const NODE_WIDTH = 50;
-
-/** ノード高さ計算用 */
-const MIN_NODE_HEIGHT = 1;
-const AMOUNT_SCALE = 1e-11;  // 1兆円 = 10px
-
-/** totalノードの配置 */
-const TOTAL_X = -200;        // グリッド左外
+/** クラスタ定義（左→右の順序） */
+const CLUSTER_TYPES = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
 
 /** Bezier制御点のオフセット比率（水平距離の40%） */
 const BEZIER_CONTROL_RATIO = 0.4;
@@ -77,6 +63,7 @@ interface LayoutNode {
   y: number;
   width: number;
   height: number;
+  area: number;
   ministry?: string;
   projectId?: number;
 }
@@ -92,26 +79,181 @@ interface LayoutEdge {
 interface LayoutData {
   metadata: Record<string, unknown> & {
     layout: {
-      minX: number;
       totalWidth: number;
       totalHeight: number;
       nodeCount: number;
       edgeCount: number;
-      gridCols: number;
-      gridRows: number;
+      clusterWidth: number;
+      clusterHeight: number;
+      clusterGap: number;
     };
   };
   nodes: LayoutNode[];
   edges: LayoutEdge[];
 }
 
-// ─── ユーティリティ ──────────────────────────────────────
-
-/** 金額からノード高さを計算 */
-function amountToHeight(amount: number): number {
-  if (amount <= 0) return MIN_NODE_HEIGHT;
-  return Math.max(MIN_NODE_HEIGHT, amount * AMOUNT_SCALE);
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
+
+// ─── Squarified Treemap ──────────────────────────────────
+
+interface TreemapItem {
+  key: string;
+  value: number;
+  data?: GraphNode;  // リーフノードの場合
+  children?: TreemapItem[];  // サブグループの場合
+}
+
+interface TreemapResult {
+  key: string;
+  rect: Rect;
+  data?: GraphNode;
+}
+
+/**
+ * Squarified Treemap (Bruls et al. 2000)
+ * items を rect 内に面積比例で配置する
+ */
+function squarifiedTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
+  if (items.length === 0) return [];
+
+  const totalValue = items.reduce((s, it) => s + it.value, 0);
+  if (totalValue <= 0) {
+    // 全て0のケース: 均等分割
+    return items.map((it, i) => ({
+      key: it.key,
+      rect: {
+        x: rect.x,
+        y: rect.y + (rect.height / items.length) * i,
+        width: rect.width,
+        height: rect.height / items.length,
+      },
+      data: it.data,
+    }));
+  }
+
+  // value>0のアイテムのみsquarify、value<=0は座標0のノードとして追加
+  const positiveItems = items.filter(it => it.value > 0);
+  const zeroItems = items.filter(it => it.value <= 0);
+
+  // 面積降順ソート
+  const sorted = [...positiveItems].sort((a, b) => b.value - a.value);
+
+  const results: TreemapResult[] = [];
+  let remaining = { ...rect };
+  let remainingValue = positiveItems.reduce((s, it) => s + it.value, 0);
+  let idx = 0;
+
+  while (idx < sorted.length) {
+    const isVerticalSlice = remaining.width >= remaining.height;
+    const sideLength = isVerticalSlice ? remaining.height : remaining.width;
+
+    // 行を構築: アスペクト比が改善する限り追加
+    const row: TreemapItem[] = [sorted[idx]];
+    let rowValue = sorted[idx].value;
+    idx++;
+
+    while (idx < sorted.length) {
+      const candidate = sorted[idx];
+      const newRowValue = rowValue + candidate.value;
+      if (worstRatio(row, rowValue, sideLength, remainingValue, remaining) <=
+          worstRatio([...row, candidate], newRowValue, sideLength, remainingValue, remaining)) {
+        break;
+      }
+      row.push(candidate);
+      rowValue = newRowValue;
+      idx++;
+    }
+
+    // 行を配置
+    const rowFraction = rowValue / remainingValue;
+    const rowThickness = isVerticalSlice
+      ? remaining.width * rowFraction
+      : remaining.height * rowFraction;
+
+    let offset = 0;
+    for (const item of row) {
+      const itemFraction = item.value / rowValue;
+      const itemLength = sideLength * itemFraction;
+
+      const itemRect: Rect = isVerticalSlice
+        ? {
+            x: remaining.x,
+            y: remaining.y + offset,
+            width: rowThickness,
+            height: itemLength,
+          }
+        : {
+            x: remaining.x + offset,
+            y: remaining.y,
+            width: itemLength,
+            height: rowThickness,
+          };
+
+      results.push({ key: item.key, rect: itemRect, data: item.data });
+      offset += itemLength;
+    }
+
+    // 残り領域を更新
+    if (isVerticalSlice) {
+      remaining = {
+        x: remaining.x + rowThickness,
+        y: remaining.y,
+        width: remaining.width - rowThickness,
+        height: remaining.height,
+      };
+    } else {
+      remaining = {
+        x: remaining.x,
+        y: remaining.y + rowThickness,
+        width: remaining.width,
+        height: remaining.height - rowThickness,
+      };
+    }
+    remainingValue -= rowValue;
+  }
+
+  // value<=0のアイテムを座標0サイズで追加
+  for (const item of zeroItems) {
+    results.push({
+      key: item.key,
+      rect: { x: rect.x, y: rect.y, width: 0, height: 0 },
+      data: item.data,
+    });
+  }
+
+  return results;
+}
+
+/** アスペクト比の最悪値を計算 */
+function worstRatio(
+  row: TreemapItem[],
+  rowValue: number,
+  sideLength: number,
+  totalValue: number,
+  container: Rect
+): number {
+  if (rowValue <= 0 || sideLength <= 0 || totalValue <= 0) return Infinity;
+
+  const totalArea = container.width * container.height;
+  const rowArea = totalArea * (rowValue / totalValue);
+  const rowThickness = rowArea / sideLength;
+
+  let worst = 0;
+  for (const item of row) {
+    const itemArea = totalArea * (item.value / totalValue);
+    const itemLength = itemArea / rowThickness;
+    const ratio = Math.max(rowThickness / itemLength, itemLength / rowThickness);
+    worst = Math.max(worst, ratio);
+  }
+  return worst;
+}
+
+// ─── ユーティリティ ──────────────────────────────────────
 
 /** 3次Bezier補間 */
 function cubicBezier(
@@ -127,8 +269,8 @@ function cubicBezier(
   const t2 = t * t;
   const t3 = t2 * t;
   return [
-    Math.round(mt3 * p0[0] + 3 * mt2 * t * p1[0] + 3 * mt * t2 * p2[0] + t3 * p3[0]),
-    Math.round(mt3 * p0[1] + 3 * mt2 * t * p1[1] + 3 * mt * t2 * p2[1] + t3 * p3[1]),
+    Math.round((mt3 * p0[0] + 3 * mt2 * t * p1[0] + 3 * mt * t2 * p2[0] + t3 * p3[0]) * 10) / 10,
+    Math.round((mt3 * p0[1] + 3 * mt2 * t * p1[1] + 3 * mt * t2 * p2[1] + t3 * p3[1]) * 10) / 10,
   ];
 }
 
@@ -152,15 +294,23 @@ function generateBezierPath(
 
 /** エッジ幅の計算（対数スケール） */
 function valueToWidth(value: number, maxValue: number): number {
-  if (value <= 0) return 0.5;
+  if (value <= 0 || maxValue <= 0) return 0.5;
   const logScale = Math.log10(value + 1) / Math.log10(maxValue + 1);
   return Math.max(0.5, logScale * 20);
+}
+
+/** treemap矩形にGAPパディングを適用 */
+function applyGap(rect: Rect, gap: number): Rect {
+  const half = gap / 2;
+  const w = Math.max(0, rect.width - gap);
+  const h = Math.max(0, rect.height - gap);
+  return { x: rect.x + half, y: rect.y + half, width: w, height: h };
 }
 
 // ─── メイン処理 ──────────────────────────────────────────
 
 function main() {
-  console.log('=== sankey2 グリッドレイアウト計算 ===\n');
+  console.log('=== sankey2 Treemapクラスタレイアウト計算 ===\n');
 
   // 1. グラフデータ読み込み
   const inputPath = path.join(__dirname, '../public/data/sankey2-graph.json');
@@ -169,31 +319,36 @@ function main() {
   console.log(`  ノード: ${graph.nodes.length.toLocaleString()}`);
   console.log(`  エッジ: ${graph.edges.length.toLocaleString()}`);
 
-  // ノードマップ
   const nodeMap = new Map<string, GraphNode>();
   for (const node of graph.nodes) nodeMap.set(node.id, node);
 
   // 2. 支出先→府省庁の帰属計算（最大フロー元）
   console.log('\n[2/5] 支出先の府省庁帰属計算');
   const recipientMinistry = new Map<string, string>();
-  const recipientMinistryAmount = new Map<string, number>();
+  const recipientMinistryTotals = new Map<string, Map<string, number>>();
 
   for (const edge of graph.edges) {
     if (!edge.source.startsWith('project-spending-')) continue;
     const sourceNode = nodeMap.get(edge.source);
     if (!sourceNode?.ministry) continue;
-    const prev = recipientMinistryAmount.get(edge.target) || 0;
-    if (edge.value > prev) {
-      recipientMinistry.set(edge.target, sourceNode.ministry);
-      recipientMinistryAmount.set(edge.target, edge.value);
-    }
+    const totals = recipientMinistryTotals.get(edge.target) ?? new Map<string, number>();
+    totals.set(
+      sourceNode.ministry,
+      (totals.get(sourceNode.ministry) ?? 0) + edge.value,
+    );
+    recipientMinistryTotals.set(edge.target, totals);
+  }
+  for (const [recipientId, totals] of recipientMinistryTotals) {
+    const winner = [...totals.entries()].sort((a, b) => b[1] - a[1])[0];
+    if (winner) recipientMinistry.set(recipientId, winner[0]);
   }
   console.log(`  帰属決定: ${recipientMinistry.size.toLocaleString()} 支出先`);
 
-  // 3. 府省庁別にノードをグルーピング
-  console.log('\n[3/5] グリッド配置');
-  const ministryNodeGroups = new Map<string, Map<string, GraphNode[]>>();
+  // 3. クラスタ内ノードグルーピング
+  console.log('\n[3/5] Treemapクラスタ配置');
 
+  // 府省庁→ノードリスト（type別）
+  const ministryGroups = new Map<string, Map<string, GraphNode[]>>();
   for (const node of graph.nodes) {
     if (node.type === 'total') continue;
 
@@ -207,157 +362,148 @@ function main() {
     }
     if (!ministry) continue;
 
-    if (!ministryNodeGroups.has(ministry)) {
-      ministryNodeGroups.set(ministry, new Map());
+    if (!ministryGroups.has(ministry)) {
+      ministryGroups.set(ministry, new Map());
     }
-    const typeMap = ministryNodeGroups.get(ministry)!;
+    const typeMap = ministryGroups.get(ministry)!;
     if (!typeMap.has(node.type)) typeMap.set(node.type, []);
     typeMap.get(node.type)!.push(node);
   }
 
-  // 府省庁を予算額降順にソート
-  const ministrySorted = graph.nodes
+  // 府省庁を予算額降順ソート
+  const ministryNodes = graph.nodes
     .filter(n => n.type === 'ministry')
-    .sort((a, b) => b.amount - a.amount)
-    .map(n => n.label);
+    .sort((a, b) => b.amount - a.amount);
 
-  const gridRows = Math.ceil(ministrySorted.length / GRID_COLS);
-  console.log(`  グリッド: ${GRID_COLS}列 × ${gridRows}行`);
-
-  // 4. セル内レイアウト計算
+  // 4. 各クラスタのTreemap配置
   const layoutNodes: LayoutNode[] = [];
   const layoutNodeMap = new Map<string, LayoutNode>();
-  const types = ['ministry', 'project-budget', 'project-spending', 'recipient'];
 
-  // 各セルの高さを計算（行ごとの最大高さで揃える）
-  const cellHeights: number[] = new Array(ministrySorted.length).fill(0);
+  for (let ci = 0; ci < CLUSTER_TYPES.length; ci++) {
+    const clusterType = CLUSTER_TYPES[ci];
+    const clusterX = ci * (CLUSTER_WIDTH + CLUSTER_GAP);
+    const clusterRect: Rect = {
+      x: clusterX,
+      y: 0,
+      width: CLUSTER_WIDTH,
+      height: CLUSTER_HEIGHT,
+    };
 
-  for (let i = 0; i < ministrySorted.length; i++) {
-    const ministry = ministrySorted[i];
-    const typeMap = ministryNodeGroups.get(ministry);
-    if (!typeMap) continue;
-
-    let maxColHeight = 0;
-    for (const type of types) {
-      const nodes = typeMap.get(type) || [];
-      let colHeight = 0;
-      for (const node of nodes) {
-        colHeight += amountToHeight(node.amount); // GAP=0
-      }
-      maxColHeight = Math.max(maxColHeight, colHeight);
-    }
-    cellHeights[i] = maxColHeight;
-  }
-
-  // 行ごとの高さ（行内の最大セル高さで揃える）
-  const rowHeights: number[] = [];
-  for (let row = 0; row < gridRows; row++) {
-    let maxH = 0;
-    for (let col = 0; col < GRID_COLS; col++) {
-      const idx = row * GRID_COLS + col;
-      if (idx < cellHeights.length) {
-        maxH = Math.max(maxH, cellHeights[idx]);
-      }
-    }
-    rowHeights.push(maxH);
-  }
-
-  // 行のY開始位置
-  const rowYStart: number[] = [];
-  let cumY = 0;
-  for (let row = 0; row < gridRows; row++) {
-    rowYStart.push(cumY);
-    cumY += rowHeights[row] + CELL_V_GAP;
-  }
-
-  console.log(`  行高さ: ${rowHeights.map(h => Math.round(h)).join(', ')}`);
-
-  // 各府省庁のノードを配置
-  for (let i = 0; i < ministrySorted.length; i++) {
-    const ministry = ministrySorted[i];
-    const typeMap = ministryNodeGroups.get(ministry);
-    if (!typeMap) continue;
-
-    const gridCol = i % GRID_COLS;
-    const gridRow = Math.floor(i / GRID_COLS);
-
-    const cellLeft = gridCol * (CELL_WIDTH + CELL_H_GAP);
-    const cellTop = rowYStart[gridRow];
-
-    for (const type of types) {
-      const nodes = typeMap.get(type) || [];
-      // 金額降順ソート
-      nodes.sort((a, b) => b.amount - a.amount);
-
-      const typeX = cellLeft + (TYPE_X_OFFSET[type] ?? 0);
-      let y = cellTop;
-
-      for (const node of nodes) {
-        const height = amountToHeight(node.amount);
+    if (clusterType === 'total') {
+      // totalクラスタ: 1ノード = クラスタ全体
+      const totalNode = graph.nodes.find(n => n.type === 'total');
+      if (totalNode) {
         const ln: LayoutNode = {
-          id: node.id,
-          label: node.label,
-          type: node.type,
-          amount: node.amount,
-          x: typeX,
-          y,
-          width: NODE_WIDTH,
-          height,
-          ...(node.ministry && { ministry: node.ministry }),
-          ...(node.projectId !== undefined && { projectId: node.projectId }),
+          id: totalNode.id,
+          label: totalNode.label,
+          type: totalNode.type,
+          amount: totalNode.amount,
+          x: clusterRect.x,
+          y: clusterRect.y,
+          width: clusterRect.width,
+          height: clusterRect.height,
+          area: clusterRect.width * clusterRect.height,
         };
         layoutNodes.push(ln);
         layoutNodeMap.set(ln.id, ln);
-        y += height; // GAP=0
+      }
+    } else if (clusterType === 'ministry') {
+      // ministryクラスタ: 37ノードを直接treemap
+      const items: TreemapItem[] = ministryNodes.map(n => ({
+        key: n.id,
+        value: n.amount,
+        data: n,
+      }));
+
+      const results = squarifiedTreemap(items, clusterRect);
+      for (const res of results) {
+        if (!res.data) continue;
+        const r = applyGap(res.rect, NODE_GAP);
+        const ln: LayoutNode = {
+          id: res.data.id,
+          label: res.data.label,
+          type: res.data.type,
+          amount: res.data.amount,
+          x: r.x,
+          y: r.y,
+          width: r.width,
+          height: r.height,
+          area: r.width * r.height,
+        };
+        layoutNodes.push(ln);
+        layoutNodeMap.set(ln.id, ln);
+      }
+    } else {
+      // project-budget, project-spending, recipient: 2段階treemap
+
+      // 第1層: 府省庁グループのtreemap
+      const ministryItems: TreemapItem[] = [];
+      for (const mn of ministryNodes) {
+        const typeMap = ministryGroups.get(mn.label);
+        const nodes = typeMap?.get(clusterType) || [];
+        const groupValue = nodes.reduce((s, n) => s + n.amount, 0);
+        if (nodes.length > 0) {
+          ministryItems.push({
+            key: mn.label,
+            value: groupValue,
+            children: nodes.map(n => ({ key: n.id, value: n.amount, data: n })),
+          });
+        }
+      }
+
+      // 未帰属ノード（recipientで府省庁不明）
+      if (clusterType === 'recipient') {
+        const unassigned = graph.nodes.filter(
+          n => n.type === 'recipient' && !recipientMinistry.has(n.id)
+        );
+        if (unassigned.length > 0) {
+          const uValue = unassigned.reduce((s, n) => s + n.amount, 0);
+          ministryItems.push({
+            key: '__unassigned__',
+            value: uValue,
+            children: unassigned.map(n => ({ key: n.id, value: n.amount, data: n })),
+          });
+        }
+      }
+
+      const layer1 = squarifiedTreemap(ministryItems, clusterRect);
+
+      // 第2層: 各府省庁矩形内でノードをtreemap
+      for (const group of layer1) {
+        const ministryItem = ministryItems.find(m => m.key === group.key);
+        if (!ministryItem?.children) continue;
+
+        const layer2 = squarifiedTreemap(ministryItem.children, group.rect);
+        for (const res of layer2) {
+          if (!res.data) continue;
+          const r = applyGap(res.rect, NODE_GAP);
+          const ln: LayoutNode = {
+            id: res.data.id,
+            label: res.data.label,
+            type: res.data.type,
+            amount: res.data.amount,
+            x: r.x,
+            y: r.y,
+            width: r.width,
+            height: r.height,
+            area: r.width * r.height,
+            ...(res.data.ministry && { ministry: res.data.ministry }),
+            ...(res.data.projectId !== undefined && { projectId: res.data.projectId }),
+          };
+          layoutNodes.push(ln);
+          layoutNodeMap.set(ln.id, ln);
+        }
       }
     }
   }
 
-  // 府省庁に帰属しない支出先（フォールバック: 最終セルの下）
-  const unassignedRecipients = graph.nodes.filter(
-    n => n.type === 'recipient' && !recipientMinistry.has(n.id)
-  );
-  if (unassignedRecipients.length > 0) {
-    console.log(`  未帰属支出先: ${unassignedRecipients.length} 件（最終行下に配置）`);
-    let y = cumY;
-    for (const node of unassignedRecipients) {
-      const height = amountToHeight(node.amount);
-      const ln: LayoutNode = {
-        id: node.id,
-        label: node.label,
-        type: node.type,
-        amount: node.amount,
-        x: (GRID_COLS - 1) * (CELL_WIDTH + CELL_H_GAP) + (TYPE_X_OFFSET['recipient'] ?? 0),
-        y,
-        width: NODE_WIDTH,
-        height,
-      };
-      layoutNodes.push(ln);
-      layoutNodeMap.set(ln.id, ln);
-      y += height;
-    }
-  }
-
-  // totalノード: グリッド左外、全体の垂直中央
-  const totalGraphNode = graph.nodes.find(n => n.type === 'total');
-  if (totalGraphNode) {
-    const totalHeight = amountToHeight(totalGraphNode.amount);
-    const gridTotalHeight = cumY - CELL_V_GAP;
-    const ln: LayoutNode = {
-      id: totalGraphNode.id,
-      label: totalGraphNode.label,
-      type: totalGraphNode.type,
-      amount: totalGraphNode.amount,
-      x: TOTAL_X,
-      y: gridTotalHeight / 2 - totalHeight / 2,
-      width: NODE_WIDTH,
-      height: totalHeight,
-    };
-    layoutNodes.push(ln);
-    layoutNodeMap.set(ln.id, ln);
-  }
-
   console.log(`  配置済みノード: ${layoutNodes.length.toLocaleString()}`);
+
+  // クラスタ別統計
+  for (const ct of CLUSTER_TYPES) {
+    const nodes = layoutNodes.filter(n => n.type === ct);
+    console.log(`    ${ct}: ${nodes.length.toLocaleString()} ノード`);
+  }
 
   // 5. エッジBezierパス計算
   console.log('\n[4/5] エッジパス計算');
@@ -371,7 +517,7 @@ function main() {
     const target = layoutNodeMap.get(edge.target);
     if (!source || !target) continue;
 
-    // ソースの右端 → ターゲットの左端
+    // ソースの右辺中央 → ターゲットの左辺中央
     const sx = source.x + source.width;
     const sy = source.y + source.height / 2;
     const tx = target.x;
@@ -387,26 +533,22 @@ function main() {
   }
   console.log(`  エッジパス: ${layoutEdges.length.toLocaleString()} 件`);
 
-  // 6. バウンディングボックス計算 & 出力
+  // 6. 出力
   console.log('\n[5/5] JSON出力');
-  let minX = 0, maxX = 0, maxY = 0;
-  for (const node of layoutNodes) {
-    minX = Math.min(minX, node.x);
-    maxX = Math.max(maxX, node.x + node.width);
-    maxY = Math.max(maxY, node.y + node.height);
-  }
+  const totalWidth = CLUSTER_TYPES.length * CLUSTER_WIDTH + (CLUSTER_TYPES.length - 1) * CLUSTER_GAP;
+  const totalHeight = CLUSTER_HEIGHT;
 
   const layoutData: LayoutData = {
     metadata: {
       ...graph.metadata,
       layout: {
-        minX: Math.floor(minX),
-        totalWidth: Math.ceil(maxX - minX),
-        totalHeight: Math.ceil(maxY),
+        totalWidth,
+        totalHeight,
         nodeCount: layoutNodes.length,
         edgeCount: layoutEdges.length,
-        gridCols: GRID_COLS,
-        gridRows,
+        clusterWidth: CLUSTER_WIDTH,
+        clusterHeight: CLUSTER_HEIGHT,
+        clusterGap: CLUSTER_GAP,
       },
     },
     nodes: layoutNodes,
@@ -421,12 +563,10 @@ function main() {
 
   console.log(`  出力: ${outputPath}`);
   console.log(`  サイズ: ${sizeMB} MB`);
-  const totalWidth = Math.ceil(maxX - minX);
-  const totalHeight = Math.ceil(maxY);
-  console.log(`  仮想空間: ${totalWidth.toLocaleString()} × ${totalHeight.toLocaleString()} px (minX: ${Math.floor(minX)})`);
+  console.log(`  仮想空間: ${totalWidth.toLocaleString()} × ${totalHeight.toLocaleString()} px`);
   console.log(`
 === サマリ ===
-  グリッド: ${GRID_COLS}列 × ${gridRows}行
+  クラスタ: ${CLUSTER_TYPES.length}面 (${CLUSTER_WIDTH}×${CLUSTER_HEIGHT}px)
   ノード: ${layoutNodes.length.toLocaleString()} 件
   エッジ: ${layoutEdges.length.toLocaleString()} 件
   仮想空間: ${totalWidth.toLocaleString()} × ${totalHeight.toLocaleString()} px
