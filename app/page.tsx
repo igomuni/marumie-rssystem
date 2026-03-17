@@ -54,6 +54,29 @@ export default function Home() {
               </ul>
             </div>
           </Link>
+          {/* 予算フローマップ（NEW） */}
+          <Link href="/sankey2">
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900 dark:to-blue-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-indigo-500">
+              <div className="flex items-center mb-3">
+                <h2 className="text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
+                  🗺️ 予算フローマップ
+                </h2>
+                <span className="ml-3 px-2 py-1 bg-indigo-600 text-white text-xs font-bold rounded">
+                  NEW
+                </span>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                全5,664事業・25,892支出先をGoogle Maps風のZoom/Panで自由に探索。37府省庁を6列×7行のグリッドに配置したSVGフロー可視化。
+              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>• <strong>全量表示</strong>: 37,258ノード・74,390エッジを事前計算レイアウトで描画</li>
+                <li>• <strong>Zoom/Pan</strong>: ホイールでズーム、ドラッグでパン</li>
+                <li>• <strong>段階ラベル</strong>: ズームレベルに応じて府省庁→事業→支出先のラベルを段階表示</li>
+                <li>• <strong>ハイライト</strong>: ノードホバーで接続フローをハイライト</li>
+              </ul>
+            </div>
+          </Link>
+
           {/* 支出先ブラウザ（NEW） */}
           <Link href="/entities">
             <div className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900 dark:to-teal-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-green-500">
