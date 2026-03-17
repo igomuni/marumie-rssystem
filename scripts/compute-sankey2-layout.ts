@@ -136,12 +136,16 @@ function squarifiedTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
     }));
   }
 
+  // value>0のアイテムのみsquarify、value<=0は座標0のノードとして追加
+  const positiveItems = items.filter(it => it.value > 0);
+  const zeroItems = items.filter(it => it.value <= 0);
+
   // 面積降順ソート
-  const sorted = [...items].sort((a, b) => b.value - a.value);
+  const sorted = [...positiveItems].sort((a, b) => b.value - a.value);
 
   const results: TreemapResult[] = [];
   let remaining = { ...rect };
-  let remainingValue = totalValue;
+  let remainingValue = positiveItems.reduce((s, it) => s + it.value, 0);
   let idx = 0;
 
   while (idx < sorted.length) {
@@ -211,6 +215,15 @@ function squarifiedTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
       };
     }
     remainingValue -= rowValue;
+  }
+
+  // value<=0のアイテムを座標0サイズで追加
+  for (const item of zeroItems) {
+    results.push({
+      key: item.key,
+      rect: { x: rect.x, y: rect.y, width: 0, height: 0 },
+      data: item.data,
+    });
   }
 
   return results;

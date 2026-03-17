@@ -64,12 +64,24 @@ export default function Sankey2View({ data }: Props) {
   const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 
   // 初期表示: データの中央にフィット
+  // コンテナサイズをResizeObserverで追跡
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      setContainerSize({ w: width, h: height });
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  // 初期表示: データの中央にフィット
   useEffect(() => {
     if (!data || !containerRef.current) return;
     const { totalWidth, totalHeight } = data.metadata.layout;
-    const container = containerRef.current;
-    const cw = container.clientWidth;
-    const ch = container.clientHeight;
+    const cw = containerRef.current.clientWidth;
+    const ch = containerRef.current.clientHeight;
     setContainerSize({ w: cw, h: ch });
 
     const scaleX = cw / totalWidth;

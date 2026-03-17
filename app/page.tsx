@@ -66,12 +66,12 @@ export default function Home() {
                 </span>
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                全5,664事業・25,892支出先をGoogle Maps風のZoom/Panで自由に探索。37府省庁を6列×7行のグリッドに配置したSVGフロー可視化。
+                全5,664事業・25,892支出先をGoogle Maps風のZoom/Panで自由に探索。Treemapクラスタで面積∝金額の直感的なSVGフロー可視化。
               </p>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                 <li>• <strong>全量表示</strong>: 37,258ノード・74,390エッジを事前計算レイアウトで描画</li>
                 <li>• <strong>Zoom/Pan</strong>: ホイールでズーム、ドラッグでパン</li>
-                <li>• <strong>段階ラベル</strong>: ズームレベルに応じて府省庁→事業→支出先のラベルを段階表示</li>
+                <li>• <strong>面積ベースLOD</strong>: ズームに応じてノード・ラベルが連続的に出現</li>
                 <li>• <strong>ハイライト</strong>: ノードホバーで接続フローをハイライト</li>
               </ul>
             </div>
