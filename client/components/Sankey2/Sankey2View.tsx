@@ -410,26 +410,34 @@ export default function Sankey2View({ data }: Props) {
     setShowSearchResults(false);
     const node = nodeMap.get(nodeId);
     if (!node || !containerRef.current) return;
-    const cw = containerRef.current.clientWidth - PANEL_WIDTH;
-    const ch = containerRef.current.clientHeight;
 
-    // 現在のZoomでノードがスクリーン上で視認可能か判定（MIN_SCREEN_AREA以上）
+    // 現在のZoomでノードがスクリーン上で視認可能か判定（4×4px相当以上）
     const nodeArea = (node.area ?? node.width * node.height);
     const screenArea = nodeArea * transform.k * transform.k;
-    if (screenArea >= MIN_SCREEN_AREA * 16) {
-      // 既に視認可能（4×4px相当以上）→ Zoom変更も移動も不要
-      return;
+    if (screenArea >= MIN_SCREEN_AREA * 16) return;
+
+    // 視認不可 → Fitと同じロジック（接続ノード含むバウンディングボックス）
+    let minX = node.x, minY = node.y;
+    let maxX = node.x + node.width, maxY = node.y + node.height;
+    for (const edge of edgeIndex.bySource.get(nodeId) ?? []) {
+      const t = nodeMap.get(edge.target);
+      if (t) { minX = Math.min(minX, t.x); minY = Math.min(minY, t.y); maxX = Math.max(maxX, t.x + t.width); maxY = Math.max(maxY, t.y + t.height); }
+    }
+    for (const edge of edgeIndex.byTarget.get(nodeId) ?? []) {
+      const s = nodeMap.get(edge.source);
+      if (s) { minX = Math.min(minX, s.x); minY = Math.min(minY, s.y); maxX = Math.max(maxX, s.x + s.width); maxY = Math.max(maxY, s.y + s.height); }
     }
 
-    // 視認不可 → ノードが見える最小限のZoom（スクリーン上で~10×10px程度）
-    const targetK = Math.sqrt(100 / Math.max(nodeArea, 1));
+    const bw = maxX - minX;
+    const bh = maxY - minY;
+    const cx = minX + bw / 2;
+    const cy = minY + bh / 2;
+    const cw = containerRef.current.clientWidth - PANEL_WIDTH;
+    const ch = containerRef.current.clientHeight;
+    const targetK = Math.min(cw / bw, ch / bh) * 0.85;
 
-    setTransform({
-      x: cw / 2 - (node.x + node.width / 2) * targetK,
-      y: ch / 2 - (node.y + node.height / 2) * targetK,
-      k: targetK,
-    });
-  }, [nodeMap, transform.k]);
+    setTransform({ x: cw / 2 - cx * targetK, y: ch / 2 - cy * targetK, k: targetK });
+  }, [nodeMap, edgeIndex, transform.k]);
 
   // ── Wheel zoom ──
 
