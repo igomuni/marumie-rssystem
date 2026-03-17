@@ -399,6 +399,7 @@ export default function Sankey2View({ data }: Props) {
   // ── ノードクリック ──
 
   const handleNodeClick = useCallback((nodeId: string) => {
+    if (didPanRef.current) return;
     setSelectedNodeId(prev => prev === nodeId ? null : nodeId);
   }, []);
 
@@ -412,12 +413,18 @@ export default function Sankey2View({ data }: Props) {
     const cw = containerRef.current.clientWidth - PANEL_WIDTH;
     const ch = containerRef.current.clientHeight;
 
-    // ノードが画面の1/8〜1/4程度になるZoom率を計算（ノードも周辺も見える）
-    const screenTarget = Math.min(cw, ch) / 4;
+    // 現在のZoomでノードがスクリーン上で視認可能か判定
+    const nodeArea = (node.area ?? node.width * node.height);
+    const screenArea = nodeArea * transform.k * transform.k;
+    if (screenArea >= LABEL_SCREEN_AREA) {
+      // 既に視認可能 → Zoom変更も移動も不要
+      return;
+    }
+
+    // 視認不可 → 隣接エッジが見える程度にZoom（ノードが画面の1/10程度）
+    const screenTarget = Math.min(cw, ch) / 10;
     const nodeSide = Math.max(node.width, node.height, 1);
-    const fitK = screenTarget / nodeSide;
-    // 現在のZoomが十分大きければそのまま、小さければ調整
-    const targetK = Math.min(Math.max(transform.k, fitK), fitK * 2);
+    const targetK = screenTarget / nodeSide;
 
     setTransform({
       x: cw / 2 - (node.x + node.width / 2) * targetK,
