@@ -413,18 +413,16 @@ export default function Sankey2View({ data }: Props) {
     const cw = containerRef.current.clientWidth - PANEL_WIDTH;
     const ch = containerRef.current.clientHeight;
 
-    // 現在のZoomでノードがスクリーン上で視認可能か判定
+    // 現在のZoomでノードがスクリーン上で視認可能か判定（MIN_SCREEN_AREA以上）
     const nodeArea = (node.area ?? node.width * node.height);
     const screenArea = nodeArea * transform.k * transform.k;
-    if (screenArea >= LABEL_SCREEN_AREA) {
-      // 既に視認可能 → Zoom変更も移動も不要
+    if (screenArea >= MIN_SCREEN_AREA * 16) {
+      // 既に視認可能（4×4px相当以上）→ Zoom変更も移動も不要
       return;
     }
 
-    // 視認不可 → 隣接エッジが見える程度にZoom（ノードが画面の1/10程度）
-    const screenTarget = Math.min(cw, ch) / 10;
-    const nodeSide = Math.max(node.width, node.height, 1);
-    const targetK = screenTarget / nodeSide;
+    // 視認不可 → ノードが見える最小限のZoom（スクリーン上で~10×10px程度）
+    const targetK = Math.sqrt(100 / Math.max(nodeArea, 1));
 
     setTransform({
       x: cw / 2 - (node.x + node.width / 2) * targetK,
@@ -546,6 +544,52 @@ export default function Sankey2View({ data }: Props) {
       Math.min(vpH, totalHeight * scale - Math.max(0, vpY)),
     );
   }, [data, transform, containerSize, minimapHeight]);
+
+  // ── Zoomコントロール ──
+
+  const handleZoomFit = useCallback(() => {
+    if (!data || !containerRef.current) return;
+    const { totalWidth, totalHeight } = data.metadata.layout;
+    const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
+    const ch = containerRef.current.clientHeight;
+    const k = Math.min(cw / totalWidth, ch / totalHeight) * 0.9;
+    setTransform({ x: (cw - totalWidth * k) / 2, y: (ch - totalHeight * k) / 2, k });
+  }, [data, selectedNodeId]);
+
+  const handleZoomIn = useCallback(() => {
+    setTransform(prev => {
+      const cw = containerRef.current?.clientWidth ?? 0;
+      const ch = containerRef.current?.clientHeight ?? 0;
+      const newK = Math.min(MAX_ZOOM, prev.k * 1.5);
+      const ratio = newK / prev.k;
+      return { x: cw / 2 - (cw / 2 - prev.x) * ratio, y: ch / 2 - (ch / 2 - prev.y) * ratio, k: newK };
+    });
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setTransform(prev => {
+      const cw = containerRef.current?.clientWidth ?? 0;
+      const ch = containerRef.current?.clientHeight ?? 0;
+      const newK = Math.max(MIN_ZOOM, prev.k / 1.5);
+      const ratio = newK / prev.k;
+      return { x: cw / 2 - (cw / 2 - prev.x) * ratio, y: ch / 2 - (ch / 2 - prev.y) * ratio, k: newK };
+    });
+  }, []);
+
+  const handleZoomToActive = useCallback(() => {
+    const node = activeNodeId ? nodeMap.get(activeNodeId) : undefined;
+    if (!node || !containerRef.current) return;
+    const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
+    const ch = containerRef.current.clientHeight;
+    const screenTarget = Math.min(cw, ch) / 4;
+    const nodeSide = Math.max(node.width, node.height, 1);
+    const targetK = screenTarget / nodeSide;
+    setTransform({
+      x: cw / 2 - (node.x + node.width / 2) * targetK,
+      y: ch / 2 - (node.y + node.height / 2) * targetK,
+      k: targetK,
+    });
+  }, [activeNodeId, nodeMap, selectedNodeId]);
 
   // ── Minimapクリック → ビューポート移動 ──
 
@@ -742,6 +786,28 @@ export default function Sankey2View({ data }: Props) {
               <span className="text-gray-700 dark:text-gray-300">{TYPE_LABELS[type] ?? type}</span>
             </div>
           ))}
+        </div>
+
+        {/* Zoomコントロール */}
+        <div
+          className="absolute z-10 flex flex-col gap-1"
+          style={{ bottom: MINIMAP_PADDING + minimapHeight + 8, left: MINIMAP_PADDING }}
+        >
+          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden">
+            <button onClick={handleZoomIn} className="px-2.5 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="ズームイン">＋</button>
+            <div className="text-[10px] text-center text-gray-500 dark:text-gray-400 border-y border-gray-200 dark:border-gray-700 py-0.5">
+              {(transform.k * 100).toFixed(0)}%
+            </div>
+            <button onClick={handleZoomOut} className="px-2.5 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="ズームアウト">ー</button>
+          </div>
+          <button onClick={handleZoomFit} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-[10px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="全体表示">
+            全体
+          </button>
+          {activeNodeId && (
+            <button onClick={handleZoomToActive} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-[10px] text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20" title="選択ノードにフィット">
+              Fit
+            </button>
+          )}
         </div>
 
         {/* Minimap */}
