@@ -151,7 +151,6 @@ export default function Sankey2View({ data }: Props) {
   const [maxAmount, setMaxAmount] = useState(Infinity);
   const [labelFilter, setLabelFilter] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const urlUpdateRef = useRef(false);
 
   // ── エッジインデックス（O(1)接続検索） ──
 
@@ -219,8 +218,14 @@ export default function Sankey2View({ data }: Props) {
     const s = searchParams.get('s');
 
     if (m) setMinistryFilter(new Set(m.split(',')));
-    if (min) setMinAmount(Number(min) || 0);
-    if (max) setMaxAmount(Number(max) || Infinity);
+    let parsedMin = min ? Math.max(0, Number(min) || 0) : 0;
+    let parsedMax = max ? (Number(max) || Infinity) : Infinity;
+    if (parsedMax < Infinity) parsedMax = Math.max(0, parsedMax);
+    if (parsedMin > 0 && parsedMax < Infinity && parsedMin > parsedMax) {
+      [parsedMin, parsedMax] = [parsedMax, parsedMin];
+    }
+    if (parsedMin > 0) setMinAmount(parsedMin);
+    if (parsedMax < Infinity) setMaxAmount(parsedMax);
     if (l) setLabelFilter(l);
     if (q) { setSearchQuery(q); setDebouncedQuery(q); }
     if (s) setSelectedNodeId(s);
@@ -237,7 +242,7 @@ export default function Sankey2View({ data }: Props) {
   // ── URLパラメータ同期 ──
 
   useEffect(() => {
-    if (!data || urlUpdateRef.current) { urlUpdateRef.current = false; return; }
+    if (!data) return;
     const params = new URLSearchParams();
     if (ministryFilter.size > 0) params.set('m', [...ministryFilter].join(','));
     if (minAmount > 0) params.set('min', String(minAmount));
@@ -258,11 +263,25 @@ export default function Sankey2View({ data }: Props) {
   const searchResults = useMemo(() => {
     if (!data || debouncedQuery.length < 2) return [];
     const q = debouncedQuery;
+    const hasMinistryFilter = ministryFilter.size > 0;
     return data.nodes
-      .filter(n => n.label.includes(q))
+      .filter(n => {
+        if (!n.label.includes(q)) return false;
+        // フィルタと一致させる（visibleNodesと同じ条件）
+        if (n.type !== 'total') {
+          if (minAmount > 0 && n.amount < minAmount) return false;
+          if (maxAmount < Infinity && n.amount > maxAmount) return false;
+        }
+        if (labelFilter && !n.label.includes(labelFilter)) return false;
+        if (hasMinistryFilter) {
+          if (n.type === 'ministry') { if (!ministryFilter.has(n.label)) return false; }
+          else if (n.type !== 'total') { if (!n.ministry || !ministryFilter.has(n.ministry)) return false; }
+        }
+        return true;
+      })
       .sort((a, b) => b.amount - a.amount)
       .slice(0, SEARCH_MAX_RESULTS);
-  }, [data, debouncedQuery]);
+  }, [data, debouncedQuery, ministryFilter, minAmount, maxAmount, labelFilter]);
 
   // ── Shiftキー追跡 ──
 
@@ -428,13 +447,13 @@ export default function Sankey2View({ data }: Props) {
       if (s) { minX = Math.min(minX, s.x); minY = Math.min(minY, s.y); maxX = Math.max(maxX, s.x + s.width); maxY = Math.max(maxY, s.y + s.height); }
     }
 
-    const bw = maxX - minX;
-    const bh = maxY - minY;
+    const bw = Math.max(maxX - minX, 1);
+    const bh = Math.max(maxY - minY, 1);
     const cx = minX + bw / 2;
     const cy = minY + bh / 2;
-    const cw = containerRef.current.clientWidth - PANEL_WIDTH;
-    const ch = containerRef.current.clientHeight;
-    const targetK = Math.min(cw / bw, ch / bh) * 0.85;
+    const cw = Math.max(1, containerRef.current.clientWidth - PANEL_WIDTH);
+    const ch = Math.max(1, containerRef.current.clientHeight);
+    const targetK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(cw / bw, ch / bh) * 0.85));
 
     setTransform({ x: cw / 2 - cx * targetK, y: ch / 2 - cy * targetK, k: targetK });
   }, [nodeMap, edgeIndex, transform.k]);
@@ -602,14 +621,13 @@ export default function Sankey2View({ data }: Props) {
       if (s) { minX = Math.min(minX, s.x); minY = Math.min(minY, s.y); maxX = Math.max(maxX, s.x + s.width); maxY = Math.max(maxY, s.y + s.height); }
     }
 
-    const bw = maxX - minX;
-    const bh = maxY - minY;
+    const bw = Math.max(maxX - minX, 1);
+    const bh = Math.max(maxY - minY, 1);
     const cx = minX + bw / 2;
     const cy = minY + bh / 2;
-    const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
-    const ch = containerRef.current.clientHeight;
-    const padding = 0.85;
-    const targetK = Math.min(cw / bw, ch / bh) * padding;
+    const cw = Math.max(1, containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0));
+    const ch = Math.max(1, containerRef.current.clientHeight);
+    const targetK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(cw / bw, ch / bh) * 0.85));
 
     setTransform({ x: cw / 2 - cx * targetK, y: ch / 2 - cy * targetK, k: targetK });
   }, [activeNodeId, nodeMap, edgeIndex, selectedNodeId]);
@@ -618,11 +636,11 @@ export default function Sankey2View({ data }: Props) {
   const handleZoomFocusActive = useCallback(() => {
     const node = activeNodeId ? nodeMap.get(activeNodeId) : undefined;
     if (!node || !containerRef.current) return;
-    const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
-    const ch = containerRef.current.clientHeight;
-    const screenTarget = Math.min(cw, ch) / 4;
+    const cw = Math.max(1, containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0));
+    const ch = Math.max(1, containerRef.current.clientHeight);
+    const screenTarget = Math.max(1, Math.min(cw, ch) / 4);
     const nodeSide = Math.max(node.width, node.height, 1);
-    const targetK = screenTarget / nodeSide;
+    const targetK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, screenTarget / nodeSide));
     setTransform({
       x: cw / 2 - (node.x + node.width / 2) * targetK,
       y: ch / 2 - (node.y + node.height / 2) * targetK,
@@ -1223,9 +1241,9 @@ function AmountSlider({ label, value, noValueLabel, accent, isMax, onChange }: A
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
     if (isMax) {
-      onChange(v >= 100 ? Infinity : Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)));
+      onChange(v >= 100 ? Infinity : Math.round(Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN))));
     } else {
-      onChange(v <= 0 ? 0 : Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)));
+      onChange(v <= 0 ? 0 : Math.round(Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN))));
     }
   };
 
@@ -1233,14 +1251,14 @@ function AmountSlider({ label, value, noValueLabel, accent, isMax, onChange }: A
     const t = text.trim().replace(/,/g, '');
     // "100兆円" → 100e12, "5億円" → 5e8, "1万円" → 1e4
     const chouMatch = t.match(/^([\d.]+)\s*兆/);
-    if (chouMatch) return parseFloat(chouMatch[1]) * 1e12;
+    if (chouMatch) return Math.round(parseFloat(chouMatch[1]) * 1e12);
     const okuMatch = t.match(/^([\d.]+)\s*億/);
-    if (okuMatch) return parseFloat(okuMatch[1]) * 1e8;
+    if (okuMatch) return Math.round(parseFloat(okuMatch[1]) * 1e8);
     const manMatch = t.match(/^([\d.]+)\s*万/);
-    if (manMatch) return parseFloat(manMatch[1]) * 1e4;
+    if (manMatch) return Math.round(parseFloat(manMatch[1]) * 1e4);
     // 数字のみ → 円
     const num = parseFloat(t.replace(/円$/, ''));
-    if (!isNaN(num) && num >= 0) return num;
+    if (!isNaN(num) && num >= 0) return Math.round(num);
     return null;
   };
 
@@ -1289,7 +1307,7 @@ function AmountSlider({ label, value, noValueLabel, accent, isMax, onChange }: A
       />
       <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
         <span>{isMax ? '1万' : 'なし'}</span>
-        <span>1億</span>
+        <span>10億</span>
         <span>{isMax ? 'なし' : '100兆'}</span>
       </div>
     </div>
