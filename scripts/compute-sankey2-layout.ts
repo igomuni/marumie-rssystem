@@ -325,17 +325,22 @@ function main() {
   // 2. 支出先→府省庁の帰属計算（最大フロー元）
   console.log('\n[2/5] 支出先の府省庁帰属計算');
   const recipientMinistry = new Map<string, string>();
-  const recipientMinistryAmount = new Map<string, number>();
+  const recipientMinistryTotals = new Map<string, Map<string, number>>();
 
   for (const edge of graph.edges) {
     if (!edge.source.startsWith('project-spending-')) continue;
     const sourceNode = nodeMap.get(edge.source);
     if (!sourceNode?.ministry) continue;
-    const prev = recipientMinistryAmount.get(edge.target) || 0;
-    if (edge.value > prev) {
-      recipientMinistry.set(edge.target, sourceNode.ministry);
-      recipientMinistryAmount.set(edge.target, edge.value);
-    }
+    const totals = recipientMinistryTotals.get(edge.target) ?? new Map<string, number>();
+    totals.set(
+      sourceNode.ministry,
+      (totals.get(sourceNode.ministry) ?? 0) + edge.value,
+    );
+    recipientMinistryTotals.set(edge.target, totals);
+  }
+  for (const [recipientId, totals] of recipientMinistryTotals) {
+    const winner = [...totals.entries()].sort((a, b) => b[1] - a[1])[0];
+    if (winner) recipientMinistry.set(recipientId, winner[0]);
   }
   console.log(`  帰属決定: ${recipientMinistry.size.toLocaleString()} 支出先`);
 

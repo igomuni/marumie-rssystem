@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useCallback, useEffect, useMemo } from 'react';
-import type { Sankey2LayoutData, LayoutNode, LayoutEdge } from './types';
+import type { Sankey2LayoutData, LayoutNode, LayoutEdge } from '@/client/components/Sankey2/types';
 
 // ─── 定数 ──────────────────────────────────────────────
 
