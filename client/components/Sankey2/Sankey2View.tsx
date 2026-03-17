@@ -412,11 +412,12 @@ export default function Sankey2View({ data }: Props) {
     const cw = containerRef.current.clientWidth - PANEL_WIDTH;
     const ch = containerRef.current.clientHeight;
 
-    // ノードがスクリーン上で十分見えるZoom率を計算
-    const nodeArea = node.area ?? node.width * node.height;
-    const minScreenArea = Math.max(LABEL_SCREEN_AREA * 4, 2500); // 少なくとも50×50px相当
-    const neededK = Math.sqrt(minScreenArea / Math.max(nodeArea, 1));
-    const targetK = Math.max(transform.k, neededK, 0.5);
+    // ノードが画面の1/8〜1/4程度になるZoom率を計算（ノードも周辺も見える）
+    const screenTarget = Math.min(cw, ch) / 4;
+    const nodeSide = Math.max(node.width, node.height, 1);
+    const fitK = screenTarget / nodeSide;
+    // 現在のZoomが十分大きければそのまま、小さければ調整
+    const targetK = Math.min(Math.max(transform.k, fitK), fitK * 2);
 
     setTransform({
       x: cw / 2 - (node.x + node.width / 2) * targetK,
@@ -454,9 +455,12 @@ export default function Sankey2View({ data }: Props) {
     return () => svg.removeEventListener('wheel', handler);
   }, [data]);
 
+  const didPanRef = useRef(false);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setIsPanning(true);
+    didPanRef.current = false;
     panStartRef.current = { x: e.clientX, y: e.clientY };
   }, []);
 
@@ -464,6 +468,7 @@ export default function Sankey2View({ data }: Props) {
     if (!isPanning) return;
     const dx = e.clientX - panStartRef.current.x;
     const dy = e.clientY - panStartRef.current.y;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) didPanRef.current = true;
     panStartRef.current = { x: e.clientX, y: e.clientY };
     setTransform(prev => ({ ...prev, x: prev.x + dx, y: prev.y + dy }));
   }, [isPanning]);
@@ -472,9 +477,10 @@ export default function Sankey2View({ data }: Props) {
     setIsPanning(false);
   }, []);
 
-  // ── SVG背景クリックで選択解除 ──
+  // ── SVG背景クリックで選択解除（Pan後は無視） ──
 
   const handleSvgClick = useCallback((e: React.MouseEvent) => {
+    if (didPanRef.current) return;
     if ((e.target as Element).tagName === 'svg' || (e.target as Element).classList.contains('bg-rect')) {
       setSelectedNodeId(null);
     }
