@@ -409,15 +409,21 @@ export default function Sankey2View({ data }: Props) {
     setShowSearchResults(false);
     const node = nodeMap.get(nodeId);
     if (!node || !containerRef.current) return;
-    const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
+    const cw = containerRef.current.clientWidth - PANEL_WIDTH;
     const ch = containerRef.current.clientHeight;
-    const targetK = Math.max(transform.k, 0.5);
+
+    // ノードがスクリーン上で十分見えるZoom率を計算
+    const nodeArea = node.area ?? node.width * node.height;
+    const minScreenArea = Math.max(LABEL_SCREEN_AREA * 4, 2500); // 少なくとも50×50px相当
+    const neededK = Math.sqrt(minScreenArea / Math.max(nodeArea, 1));
+    const targetK = Math.max(transform.k, neededK, 0.5);
+
     setTransform({
       x: cw / 2 - (node.x + node.width / 2) * targetK,
       y: ch / 2 - (node.y + node.height / 2) * targetK,
       k: targetK,
     });
-  }, [nodeMap, transform.k, selectedNodeId]);
+  }, [nodeMap, transform.k]);
 
   // ── Wheel zoom ──
 
@@ -608,7 +614,7 @@ export default function Sankey2View({ data }: Props) {
             )}
             {/* 検索結果ドロップダウン */}
             {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-64 overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-64 overflow-y-auto z-30">
                 {searchResults.map(node => (
                   <button
                     key={node.id}
@@ -656,43 +662,9 @@ export default function Sankey2View({ data }: Props) {
               {/* 金額範囲スライダー */}
               <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
                 <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">金額範囲</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                  最小: {minAmount > 0 ? formatAmount(minAmount) : 'なし'}
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={minAmount <= 0 ? 0 : ((Math.log10(minAmount) - MIN_AMOUNT_LOG_MIN) / (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)) * 100}
-                  onChange={e => {
-                    const v = Number(e.target.value);
-                    setMinAmount(v <= 0 ? 0 : Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)));
-                  }}
-                  className="w-full h-1.5 accent-blue-500"
-                />
-                <div className="flex justify-between text-[10px] text-gray-400 mt-0.5 mb-2">
-                  <span>なし</span>
-                  <span>1億</span>
-                  <span>100兆</span>
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                  最大: {maxAmount < Infinity ? formatAmount(maxAmount) : 'なし'}
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={maxAmount >= Infinity ? 100 : ((Math.log10(maxAmount) - MIN_AMOUNT_LOG_MIN) / (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)) * 100}
-                  onChange={e => {
-                    const v = Number(e.target.value);
-                    setMaxAmount(v >= 100 ? Infinity : Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)));
-                  }}
-                  className="w-full h-1.5 accent-orange-500"
-                />
-                <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
-                  <span>1万</span>
-                  <span>1億</span>
-                  <span>なし</span>
+                <AmountSlider label="最小" value={minAmount} noValueLabel="なし" accent="blue" onChange={setMinAmount} isMax={false} />
+                <div className="mt-2">
+                  <AmountSlider label="最大" value={maxAmount} noValueLabel="なし" accent="orange" onChange={setMaxAmount} isMax={true} />
                 </div>
               </div>
 
@@ -1102,3 +1074,101 @@ const MemoEdgeLine = React.memo(function EdgeLine({ edge, isHighlighting, isConn
     />
   );
 });
+
+// ─── 金額スライダー + 直接入力 ──────────────────────────
+
+interface AmountSliderProps {
+  label: string;
+  value: number;
+  noValueLabel: string;
+  accent: 'blue' | 'orange';
+  isMax: boolean;
+  onChange: (v: number) => void;
+}
+
+function AmountSlider({ label, value, noValueLabel, accent, isMax, onChange }: AmountSliderProps) {
+  const [editing, setEditing] = useState(false);
+  const [inputText, setInputText] = useState('');
+
+  const isNoValue = isMax ? value >= Infinity : value <= 0;
+  const displayText = isNoValue ? noValueLabel : formatAmount(value);
+
+  const sliderValue = isMax
+    ? (value >= Infinity ? 100 : ((Math.log10(value) - MIN_AMOUNT_LOG_MIN) / (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)) * 100)
+    : (value <= 0 ? 0 : ((Math.log10(value) - MIN_AMOUNT_LOG_MIN) / (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)) * 100);
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = Number(e.target.value);
+    if (isMax) {
+      onChange(v >= 100 ? Infinity : Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)));
+    } else {
+      onChange(v <= 0 ? 0 : Math.pow(10, MIN_AMOUNT_LOG_MIN + (v / 100) * (MIN_AMOUNT_LOG_MAX - MIN_AMOUNT_LOG_MIN)));
+    }
+  };
+
+  const parseAmountInput = (text: string): number | null => {
+    const t = text.trim().replace(/,/g, '');
+    // "100兆円" → 100e12, "5億円" → 5e8, "1万円" → 1e4
+    const chouMatch = t.match(/^([\d.]+)\s*兆/);
+    if (chouMatch) return parseFloat(chouMatch[1]) * 1e12;
+    const okuMatch = t.match(/^([\d.]+)\s*億/);
+    if (okuMatch) return parseFloat(okuMatch[1]) * 1e8;
+    const manMatch = t.match(/^([\d.]+)\s*万/);
+    if (manMatch) return parseFloat(manMatch[1]) * 1e4;
+    // 数字のみ → 円
+    const num = parseFloat(t.replace(/円$/, ''));
+    if (!isNaN(num) && num >= 0) return num;
+    return null;
+  };
+
+  const commitInput = () => {
+    setEditing(false);
+    if (!inputText.trim()) {
+      onChange(isMax ? Infinity : 0);
+      return;
+    }
+    const parsed = parseAmountInput(inputText);
+    if (parsed !== null) onChange(parsed);
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-1">
+        <span>{label}:</span>
+        {editing ? (
+          <input
+            type="text"
+            value={inputText}
+            onChange={e => setInputText(e.target.value)}
+            onBlur={commitInput}
+            onKeyDown={e => { if (e.key === 'Enter') commitInput(); if (e.key === 'Escape') setEditing(false); }}
+            autoFocus
+            placeholder="例: 1億, 100万, 5兆"
+            className="flex-1 text-xs bg-gray-50 dark:bg-gray-700 rounded px-1.5 py-0.5 border border-gray-300 dark:border-gray-600 outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 dark:text-gray-200"
+          />
+        ) : (
+          <button
+            onClick={() => { setInputText(isNoValue ? '' : String(Math.round(value))); setEditing(true); }}
+            className="text-xs text-blue-500 hover:text-blue-700 hover:underline cursor-text"
+            title="クリックして直接入力"
+          >
+            {displayText}
+          </button>
+        )}
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        value={sliderValue}
+        onChange={handleSliderChange}
+        className={`w-full h-1.5 ${accent === 'blue' ? 'accent-blue-500' : 'accent-orange-500'}`}
+      />
+      <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+        <span>{isMax ? '1万' : 'なし'}</span>
+        <span>1億</span>
+        <span>{isMax ? 'なし' : '100兆'}</span>
+      </div>
+    </div>
+  );
+}
