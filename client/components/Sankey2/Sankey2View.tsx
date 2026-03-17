@@ -576,7 +576,38 @@ export default function Sankey2View({ data }: Props) {
     });
   }, []);
 
-  const handleZoomToActive = useCallback(() => {
+  /** Fit: Activeノード + 接続ノードがすべて見えるZoom */
+  const handleZoomFitActive = useCallback(() => {
+    if (!activeNodeId || !containerRef.current) return;
+    const node = nodeMap.get(activeNodeId);
+    if (!node) return;
+
+    // 接続ノードのバウンディングボックスを計算
+    let minX = node.x, minY = node.y;
+    let maxX = node.x + node.width, maxY = node.y + node.height;
+    for (const edge of edgeIndex.bySource.get(activeNodeId) ?? []) {
+      const t = nodeMap.get(edge.target);
+      if (t) { minX = Math.min(minX, t.x); minY = Math.min(minY, t.y); maxX = Math.max(maxX, t.x + t.width); maxY = Math.max(maxY, t.y + t.height); }
+    }
+    for (const edge of edgeIndex.byTarget.get(activeNodeId) ?? []) {
+      const s = nodeMap.get(edge.source);
+      if (s) { minX = Math.min(minX, s.x); minY = Math.min(minY, s.y); maxX = Math.max(maxX, s.x + s.width); maxY = Math.max(maxY, s.y + s.height); }
+    }
+
+    const bw = maxX - minX;
+    const bh = maxY - minY;
+    const cx = minX + bw / 2;
+    const cy = minY + bh / 2;
+    const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
+    const ch = containerRef.current.clientHeight;
+    const padding = 0.85;
+    const targetK = Math.min(cw / bw, ch / bh) * padding;
+
+    setTransform({ x: cw / 2 - cx * targetK, y: ch / 2 - cy * targetK, k: targetK });
+  }, [activeNodeId, nodeMap, edgeIndex, selectedNodeId]);
+
+  /** Focus: Activeノード単体を画面中央に */
+  const handleZoomFocusActive = useCallback(() => {
     const node = activeNodeId ? nodeMap.get(activeNodeId) : undefined;
     if (!node || !containerRef.current) return;
     const cw = containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0);
@@ -800,13 +831,18 @@ export default function Sankey2View({ data }: Props) {
             </div>
             <button onClick={handleZoomOut} className="px-2.5 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="ズームアウト">ー</button>
           </div>
-          <button onClick={handleZoomFit} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-[10px] text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="全体表示">
-            全体
+          <button onClick={handleZoomFit} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center" title="全体表示">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
           </button>
           {activeNodeId && (
-            <button onClick={handleZoomToActive} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-[10px] text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20" title="選択ノードにフィット">
-              Fit
-            </button>
+            <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden">
+              <button onClick={handleZoomFitActive} className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center" title="接続ノードを含めてフィット">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+              </button>
+              <button onClick={handleZoomFocusActive} className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center border-t border-gray-200 dark:border-gray-700" title="選択ノードにフォーカス">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
+              </button>
+            </div>
           )}
         </div>
 
