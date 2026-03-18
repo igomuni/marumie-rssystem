@@ -150,7 +150,11 @@ export default function Sankey2View({ data }: Props) {
   const [minAmount, setMinAmount] = useState(0);
   const [maxAmount, setMaxAmount] = useState(Infinity);
   const [labelFilter, setLabelFilter] = useState('');
+  /** ラベル非表示にするノードtype（6-3） */
+  const [labelTypeHidden, setLabelTypeHidden] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
+  /** 次のURL同期でpushするかどうか（確定操作時にtrue） */
+  const shouldPushRef = useRef(false);
 
   // ── エッジインデックス（O(1)接続検索） ──
 
@@ -203,34 +207,50 @@ export default function Sankey2View({ data }: Props) {
 
   // ── フィルタ状態の集計 ──
 
-  const activeFilterCount = (ministryFilter.size > 0 ? 1 : 0) + (minAmount > 0 ? 1 : 0) + (maxAmount < Infinity ? 1 : 0) + (labelFilter ? 1 : 0);
+  const activeFilterCount = (ministryFilter.size > 0 ? 1 : 0) + (minAmount > 0 ? 1 : 0) + (maxAmount < Infinity ? 1 : 0) + (labelFilter ? 1 : 0) + (labelTypeHidden.size > 0 ? 1 : 0);
   const hasActiveFilter = activeFilterCount > 0;
 
-  // ── URLパラメータからの初期復元 ──
+  // ── URLパラメータからの復元（初期ロード + popstate） ──
 
-  useEffect(() => {
-    if (!data) return;
-    const m = searchParams.get('m');
-    const min = searchParams.get('min');
-    const max = searchParams.get('max');
-    const l = searchParams.get('l');
-    const q = searchParams.get('q');
-    const s = searchParams.get('s');
+  const restoreFromUrl = useCallback((params: URLSearchParams) => {
+    const m = params.get('m');
+    const min = params.get('min');
+    const max = params.get('max');
+    const l = params.get('l');
+    const lt = params.get('lt');
+    const q = params.get('q');
+    const s = params.get('s');
 
-    if (m) setMinistryFilter(new Set(m.split(',')));
+    setMinistryFilter(m ? new Set(m.split(',')) : new Set());
     let parsedMin = min ? Math.round(Math.max(0, Number(min) || 0)) : 0;
     let parsedMax = max ? (Number(max) || Infinity) : Infinity;
     if (parsedMax < Infinity) parsedMax = Math.round(Math.max(0, parsedMax));
     if (parsedMin > 0 && parsedMax < Infinity && parsedMin > parsedMax) {
       [parsedMin, parsedMax] = [parsedMax, parsedMin];
     }
-    if (parsedMin > 0) setMinAmount(parsedMin);
-    if (parsedMax < Infinity) setMaxAmount(parsedMax);
-    if (l) setLabelFilter(l);
-    if (q) { setSearchQuery(q); setDebouncedQuery(q); }
-    if (s) setSelectedNodeId(s);
+    setMinAmount(parsedMin);
+    setMaxAmount(parsedMax < Infinity ? parsedMax : Infinity);
+    setLabelFilter(l ?? '');
+    setLabelTypeHidden(lt ? new Set(lt.split(',')) : new Set());
+    if (q) { setSearchQuery(q); setDebouncedQuery(q); } else { setSearchQuery(''); setDebouncedQuery(''); }
+    setSelectedNodeId(s ?? null);
+  }, []);
+
+  // 初期ロード
+  useEffect(() => {
+    if (!data) return;
+    restoreFromUrl(searchParams);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  // popstate（ブラウザ戻る/進む）
+  useEffect(() => {
+    const handler = () => {
+      restoreFromUrl(new URLSearchParams(window.location.search));
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, [restoreFromUrl]);
 
   // ── 検索デバウンス ──
 
@@ -248,15 +268,22 @@ export default function Sankey2View({ data }: Props) {
     if (minAmount > 0) params.set('min', String(minAmount));
     if (maxAmount < Infinity) params.set('max', String(maxAmount));
     if (labelFilter) params.set('l', labelFilter);
+    if (labelTypeHidden.size > 0) params.set('lt', [...labelTypeHidden].join(','));
     if (debouncedQuery) params.set('q', debouncedQuery);
     if (selectedNodeId) params.set('s', selectedNodeId);
 
     const str = params.toString();
     const current = window.location.search.replace(/^\?/, '');
     if (str !== current) {
-      router.replace(str ? `?${str}` : window.location.pathname, { scroll: false });
+      const url = str ? `?${str}` : window.location.pathname;
+      if (shouldPushRef.current) {
+        shouldPushRef.current = false;
+        router.push(url, { scroll: false });
+      } else {
+        router.replace(url, { scroll: false });
+      }
     }
-  }, [data, ministryFilter, minAmount, maxAmount, labelFilter, debouncedQuery, selectedNodeId, router]);
+  }, [data, ministryFilter, minAmount, maxAmount, labelFilter, labelTypeHidden, debouncedQuery, selectedNodeId, router]);
 
   // ── 検索結果 ──
 
@@ -419,12 +446,14 @@ export default function Sankey2View({ data }: Props) {
 
   const handleNodeClick = useCallback((nodeId: string) => {
     if (didPanRef.current) return;
+    shouldPushRef.current = true;
     setSelectedNodeId(prev => prev === nodeId ? null : nodeId);
   }, []);
 
   // ── パネル内接続先クリック → 選択切替 + ズーム移動 ──
 
   const handlePanelNodeClick = useCallback((nodeId: string) => {
+    shouldPushRef.current = true;
     setSelectedNodeId(nodeId);
     setShowSearchResults(false);
     const node = nodeMap.get(nodeId);
@@ -514,6 +543,7 @@ export default function Sankey2View({ data }: Props) {
   const handleSvgClick = useCallback((e: React.MouseEvent) => {
     if (didPanRef.current) return;
     if ((e.target as Element).tagName === 'svg' || (e.target as Element).classList.contains('bg-rect')) {
+      shouldPushRef.current = true;
       setSelectedNodeId(null);
     }
   }, []);
@@ -762,7 +792,7 @@ export default function Sankey2View({ data }: Props) {
             </button>
             {hasActiveFilter && (
               <button
-                onClick={() => { setMinistryFilter(new Set()); setMinAmount(0); setMaxAmount(Infinity); setLabelFilter(''); }}
+                onClick={() => { shouldPushRef.current = true; setMinistryFilter(new Set()); setMinAmount(0); setMaxAmount(Infinity); setLabelFilter(''); setLabelTypeHidden(new Set()); }}
                 className="text-xs px-2 py-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-red-500 border border-gray-200 dark:border-gray-700 shadow-sm backdrop-blur-sm hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 リセット
@@ -794,18 +824,43 @@ export default function Sankey2View({ data }: Props) {
                 />
               </div>
 
+              {/* ラベル表示フィルタ (6-3) */}
+              <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">ラベル表示</div>
+                <div className="space-y-0.5">
+                  {(['ministry', 'project-budget', 'project-spending', 'recipient'] as const).map(type => (
+                    <label key={type} className="flex items-center gap-2 px-1 py-0.5 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!labelTypeHidden.has(type)}
+                        onChange={e => {
+                          setLabelTypeHidden(prev => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.delete(type); else next.add(type);
+                            return next;
+                          });
+                        }}
+                        className="accent-blue-500"
+                      />
+                      <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: TYPE_COLORS[type] }} />
+                      <span className="text-xs text-gray-700 dark:text-gray-300">{TYPE_LABELS[type]}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* 府省庁フィルタ */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">府省庁</span>
                   <div className="flex gap-1">
                     <button
-                      onClick={() => setMinistryFilter(new Set(ministryList.map(n => n.label)))}
+                      onClick={() => { shouldPushRef.current = true; setMinistryFilter(new Set(ministryList.map(n => n.label))); }}
                       className="text-xs text-blue-500 hover:text-blue-700"
                     >全選択</button>
                     <span className="text-gray-300">|</span>
                     <button
-                      onClick={() => setMinistryFilter(new Set())}
+                      onClick={() => { shouldPushRef.current = true; setMinistryFilter(new Set()); }}
                       className="text-xs text-blue-500 hover:text-blue-700"
                     >全解除</button>
                   </div>
@@ -817,6 +872,7 @@ export default function Sankey2View({ data }: Props) {
                         type="checkbox"
                         checked={ministryFilter.has(m.label)}
                         onChange={e => {
+                          shouldPushRef.current = true;
                           setMinistryFilter(prev => {
                             const next = new Set(prev);
                             if (e.target.checked) next.add(m.label); else next.delete(m.label);
@@ -945,6 +1001,9 @@ export default function Sankey2View({ data }: Props) {
                 const screenArea = (node.area ?? node.width * node.height) * k2;
                 if (screenArea < LABEL_SCREEN_AREA) return null;
 
+                // 6-3: type別ラベル非表示
+                if (labelTypeHidden.has(node.type)) return null;
+
                 const screenW = node.width * transform.k;
                 const screenH = node.height * transform.k;
                 if (screenW < 20 || screenH < 10) return null;
@@ -957,9 +1016,12 @@ export default function Sankey2View({ data }: Props) {
                   ? (depth !== undefined ? (DEPTH_OPACITY[depth] ?? 0.3) : 0.08)
                   : 1;
 
-                const text = (hoveredNodeId === node.id || selectedNodeId === node.id)
-                  ? `${node.label} (${formatAmount(node.amount)})`
-                  : node.label;
+                // 6-2: screenArea段階表示
+                // hover/selected中は常に全情報表示
+                const isActive = hoveredNodeId === node.id || selectedNodeId === node.id;
+                const showAmount = isActive || screenArea >= 2000;
+                const showBadge = isActive || screenArea >= 8000;
+                const subFontSize = fontSize * 0.6;
 
                 return (
                   <foreignObject
@@ -976,19 +1038,42 @@ export default function Sankey2View({ data }: Props) {
                         width: '100%',
                         height: '100%',
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: `${fontSize}px`,
                         color: '#fff',
                         textShadow: '0 0 3px rgba(0,0,0,0.9)',
-                        lineHeight: 1.1,
                         textAlign: 'center',
-                        wordBreak: 'break-all',
                         overflow: 'hidden',
                         padding: `${fontSize * 0.1}px`,
                       }}
                     >
-                      {text}
+                      <div style={{ fontSize: `${fontSize}px`, lineHeight: 1.1, wordBreak: 'break-all' }}>
+                        {node.label}
+                      </div>
+                      {showAmount && (
+                        <div style={{ fontSize: `${subFontSize}px`, lineHeight: 1.2, opacity: 0.85, marginTop: `${fontSize * 0.05}px` }}>
+                          {formatAmount(node.amount)}
+                        </div>
+                      )}
+                      {showBadge && node.ministry && node.type !== 'ministry' && (
+                        <div style={{ fontSize: `${subFontSize}px`, lineHeight: 1.2, opacity: 0.7, marginTop: `${fontSize * 0.03}px` }}>
+                          {node.ministry}
+                        </div>
+                      )}
+                      {showBadge && (
+                        <div style={{
+                          fontSize: `${subFontSize * 0.85}px`,
+                          lineHeight: 1,
+                          marginTop: `${fontSize * 0.05}px`,
+                          backgroundColor: TYPE_COLORS[node.type] || '#999',
+                          padding: `${subFontSize * 0.1}px ${subFontSize * 0.3}px`,
+                          borderRadius: `${subFontSize * 0.2}px`,
+                          opacity: 0.9,
+                        }}>
+                          {TYPE_LABELS[node.type] ?? node.type}
+                        </div>
+                      )}
                     </div>
                   </foreignObject>
                 );
