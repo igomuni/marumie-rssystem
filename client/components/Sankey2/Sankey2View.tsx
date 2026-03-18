@@ -1289,7 +1289,7 @@ interface EdgeLineProps {
 const MemoEdgeLine = React.memo(function EdgeLine({ edge, isHighlighting, isConnected, depthOpacity }: EdgeLineProps) {
   const isSubcontract = edge.edgeType === 'subcontract';
   const opacity = isHighlighting ? (isConnected ? depthOpacity * 0.6 : 0.02) : (isSubcontract ? 0.15 : 0.04);
-  const strokeColor = isConnected ? '#3b82f6' : (isSubcontract ? '#f59e0b' : '#9ca3af');
+  const strokeColor = isSubcontract ? '#f59e0b' : (isConnected ? '#3b82f6' : '#9ca3af');
 
   return (
     <polyline
@@ -1300,7 +1300,7 @@ const MemoEdgeLine = React.memo(function EdgeLine({ edge, isHighlighting, isConn
       opacity={opacity}
       strokeLinecap="round"
       strokeLinejoin="round"
-      {...(isSubcontract && !isConnected ? { strokeDasharray: '8 4' } : {})}
+      {...(isSubcontract ? { strokeDasharray: '8 4' } : {})}
     />
   );
 });
