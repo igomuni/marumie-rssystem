@@ -529,19 +529,19 @@ function main() {
 
     let pathPoints: [number, number][];
     if (isSubcontract) {
-      // 同一クラスタ内エッジ: ソース右辺中央 → ターゲット左辺中央（短距離Bezier）
+      // 委託エッジ: ソース右辺中央 → ターゲット上辺or下辺中央
       const sx = source.x + source.width;
       const sy = source.y + source.height / 2;
-      const tx = target.x;
-      const ty = target.y + target.height / 2;
+      // ターゲット: ソースが上なら上辺、下なら下辺で接続
+      const sourceAbove = source.y + source.height / 2 < target.y + target.height / 2;
+      const tx = target.x + target.width / 2;
+      const ty = sourceAbove ? target.y : target.y + target.height;
       const dx = Math.abs(tx - sx);
       const dy = Math.abs(ty - sy);
-      const offset = Math.max(dx, dy) * 0.3 + 50; // 短距離でも曲線が見えるようオフセット追加
-      pathPoints = generateBezierPath(sx, sy, tx, ty);
-      // オフセット再計算で上書き（同一クラスタ用）
+      const offset = Math.max(Math.max(dx, dy) * 0.4, 30);
       const p0: [number, number] = [sx, sy];
       const p1: [number, number] = [sx + offset, sy];
-      const p2: [number, number] = [tx - offset, ty];
+      const p2: [number, number] = [tx, sourceAbove ? ty - offset : ty + offset];
       const p3: [number, number] = [tx, ty];
       pathPoints = [];
       for (let i = 0; i <= BEZIER_SEGMENTS; i++) {
