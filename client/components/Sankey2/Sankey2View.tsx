@@ -27,6 +27,9 @@ const TYPE_LABELS: Record<string, string> = {
 /** 面積ベースLOD: スクリーン上でこの面積(px²)未満のノードは描画しない */
 const MIN_SCREEN_AREA = 1;
 
+/** エッジ面積ベースLOD: スクリーン上でこの面積(px²)未満のエッジは描画しない */
+const MIN_EDGE_SCREEN_AREA = 2;
+
 /** 面積ベースLOD: スクリーン上でこの面積(px²)以上ならラベル表示 */
 const LABEL_SCREEN_AREA = 400; // ~20×20px
 
@@ -130,6 +133,8 @@ export default function Sankey2View({ data }: Props) {
 
   // Transform state: pan + zoom
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 0.15 });
+  const transformRef = useRef(transform);
+  transformRef.current = transform;
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef({ x: 0, y: 0 });
 
@@ -153,6 +158,36 @@ export default function Sankey2View({ data }: Props) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   /** 次のURL同期でpushするかどうか（確定操作時にtrue） */
   const shouldPushRef = useRef(false);
+
+  // ── rAFバッチ化用ref（8-4A） ──
+  const pendingTransformRef = useRef<{ x: number; y: number; k: number } | null>(null);
+  const rafIdRef = useRef(0);
+
+  // ── FPSカウンター（8-1: 開発時のみ） ──
+  const [fps, setFps] = useState(0);
+  const fpsFramesRef = useRef(0);
+  const fpsLastRef = useRef(performance.now());
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+    let running = true;
+    const tick = () => {
+      if (!running) return;
+      fpsFramesRef.current++;
+      const now = performance.now();
+      if (now - fpsLastRef.current >= 1000) {
+        setFps(fpsFramesRef.current);
+        fpsFramesRef.current = 0;
+        fpsLastRef.current = now;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    return () => { running = false; };
+  }, []);
+
+  // ── Minimap背景キャッシュ（8-4B） ──
+  const minimapBgRef = useRef<ImageData | null>(null);
 
   // ── エッジインデックス（O(1)接続検索） ──
 
@@ -373,6 +408,7 @@ export default function Sankey2View({ data }: Props) {
 
   const { visibleNodes, visibleEdges } = useMemo(() => {
     if (!data) return { visibleNodes: [], visibleEdges: [] };
+    const _t0 = process.env.NODE_ENV === 'development' ? performance.now() : 0;
 
     const { k, x: tx, y: ty } = transform;
     const { w: cw, h: ch } = containerSize;
@@ -420,11 +456,24 @@ export default function Sankey2View({ data }: Props) {
 
     const filteredEdges: LayoutEdge[] = [];
     for (const edge of data.edges) {
-      if (nodeSet.has(edge.source) && nodeSet.has(edge.target)) {
-        filteredEdges.push(edge);
-      }
+      if (!nodeSet.has(edge.source) || !nodeSet.has(edge.target)) continue;
+
+      // 8-3: エッジ面積ベースLOD（スクリーン上で小さすぎるエッジを間引き）
+      const p = edge.path;
+      const edgeScreenLength = Math.hypot(
+        (p[p.length - 1][0] - p[0][0]) * k,
+        (p[p.length - 1][1] - p[0][1]) * k,
+      );
+      const edgeScreenArea = edge.width * k * edgeScreenLength;
+      if (edgeScreenArea < MIN_EDGE_SCREEN_AREA) continue;
+
+      filteredEdges.push(edge);
     }
 
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.debug(`[sankey2] visibleNodes=${filteredNodes.length} visibleEdges=${filteredEdges.length} ${(performance.now() - _t0).toFixed(1)}ms`);
+    }
     return { visibleNodes: filteredNodes, visibleEdges: filteredEdges };
   }, [data, transform, containerSize, ministryFilter, minAmount, maxAmount, labelFilter]);
 
@@ -487,6 +536,7 @@ export default function Sankey2View({ data }: Props) {
 
   // ── Wheel zoom ──
 
+  // 8-4A: rAFバッチ化 — 高頻度wheelイベントを60FPSに制限
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -497,21 +547,32 @@ export default function Sankey2View({ data }: Props) {
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
 
-      setTransform(prev => {
-        const factor = 1 - e.deltaY * ZOOM_SENSITIVITY;
-        const newK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, prev.k * factor));
-        const ratio = newK / prev.k;
+      const base = pendingTransformRef.current ?? transformRef.current;
+      const factor = 1 - e.deltaY * ZOOM_SENSITIVITY;
+      const newK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, base.k * factor));
+      const ratio = newK / base.k;
+      pendingTransformRef.current = {
+        x: mx - (mx - base.x) * ratio,
+        y: my - (my - base.y) * ratio,
+        k: newK,
+      };
 
-        return {
-          x: mx - (mx - prev.x) * ratio,
-          y: my - (my - prev.y) * ratio,
-          k: newK,
-        };
-      });
+      if (!rafIdRef.current) {
+        rafIdRef.current = requestAnimationFrame(() => {
+          if (pendingTransformRef.current) {
+            setTransform(pendingTransformRef.current);
+            pendingTransformRef.current = null;
+          }
+          rafIdRef.current = 0;
+        });
+      }
     };
 
     svg.addEventListener('wheel', handler, { passive: false });
-    return () => svg.removeEventListener('wheel', handler);
+    return () => {
+      svg.removeEventListener('wheel', handler);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
   }, [data]);
 
   const didPanRef = useRef(false);
@@ -554,13 +615,14 @@ export default function Sankey2View({ data }: Props) {
     return Math.round(MINIMAP_WIDTH * (totalHeight / totalWidth));
   }, [data]);
 
+  // 8-4B: Minimap背景を初回のみ描画してキャッシュ
   useEffect(() => {
     const canvas = minimapCanvasRef.current;
-    if (!canvas || !data) return;
+    if (!canvas || !data || !minimapHeight) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const { totalWidth, totalHeight } = data.metadata.layout;
+    const { totalWidth } = data.metadata.layout;
     const scale = MINIMAP_WIDTH / totalWidth;
 
     ctx.clearRect(0, 0, MINIMAP_WIDTH, minimapHeight);
@@ -574,6 +636,23 @@ export default function Sankey2View({ data }: Props) {
       ctx.fillStyle = 'rgba(100, 116, 139, 0.15)';
       ctx.fillRect(cx, 0, cw, ch);
     }
+
+    // 背景をキャッシュ
+    minimapBgRef.current = ctx.getImageData(0, 0, MINIMAP_WIDTH, minimapHeight);
+  }, [data, minimapHeight]);
+
+  // 8-4B: ビューポート矩形のみ再描画（transform変更時）
+  useEffect(() => {
+    const canvas = minimapCanvasRef.current;
+    if (!canvas || !data || !minimapBgRef.current) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // 背景をキャッシュから復元（全体再描画を回避）
+    ctx.putImageData(minimapBgRef.current, 0, 0);
+
+    const { totalWidth, totalHeight } = data.metadata.layout;
+    const scale = MINIMAP_WIDTH / totalWidth;
 
     // ビューポート矩形
     const { k, x: tx, y: ty } = transform;
@@ -914,6 +993,16 @@ export default function Sankey2View({ data }: Props) {
             onClick={handleMinimapClick}
           />
         </div>
+
+        {/* 8-1: FPSカウンター（開発時のみ） */}
+        {process.env.NODE_ENV === 'development' && (
+          <div
+            className="absolute z-10 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono"
+            style={{ bottom: MINIMAP_PADDING, right: MINIMAP_PADDING }}
+          >
+            {fps} FPS
+          </div>
+        )}
 
         <svg
           ref={svgRef}
