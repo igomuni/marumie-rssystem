@@ -27,6 +27,12 @@ const TYPE_LABELS: Record<string, string> = {
 /** 面積ベースLOD: スクリーン上でこの面積(px²)未満のノードは描画しない */
 const MIN_SCREEN_AREA = 1;
 
+/** エッジ面積ベースLOD: スクリーン上でこの面積(px²)未満のエッジは描画しない */
+const MIN_EDGE_SCREEN_AREA = 2;
+
+/** ノードごとに表示するエッジの最大数（value降順） */
+const EDGE_TOP_N = 3;
+
 /** 面積ベースLOD: スクリーン上でこの面積(px²)以上ならラベル表示 */
 const LABEL_SCREEN_AREA = 400; // ~20×20px
 
@@ -130,6 +136,8 @@ export default function Sankey2View({ data }: Props) {
 
   // Transform state: pan + zoom
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 0.15 });
+  const transformRef = useRef(transform);
+  transformRef.current = transform;
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef({ x: 0, y: 0 });
 
@@ -153,6 +161,36 @@ export default function Sankey2View({ data }: Props) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   /** 次のURL同期でpushするかどうか（確定操作時にtrue） */
   const shouldPushRef = useRef(false);
+
+  // ── rAFバッチ化用ref（8-4A） ──
+  const pendingTransformRef = useRef<{ x: number; y: number; k: number } | null>(null);
+  const rafIdRef = useRef(0);
+
+  // ── FPSカウンター（8-1: 開発時のみ） ──
+  const [fps, setFps] = useState(0);
+  const fpsFramesRef = useRef(0);
+  const fpsLastRef = useRef(performance.now());
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+    let running = true;
+    const tick = () => {
+      if (!running) return;
+      fpsFramesRef.current++;
+      const now = performance.now();
+      if (now - fpsLastRef.current >= 1000) {
+        setFps(fpsFramesRef.current);
+        fpsFramesRef.current = 0;
+        fpsLastRef.current = now;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    return () => { running = false; };
+  }, []);
+
+  // ── Minimap背景キャッシュ（8-4B） ──
+  const minimapBgRef = useRef<ImageData | null>(null);
 
   // ── エッジインデックス（O(1)接続検索） ──
 
@@ -369,10 +407,71 @@ export default function Sankey2View({ data }: Props) {
     setTransform({ x: tx, y: ty, k });
   }, [data]);
 
-  // ── 面積ベースLOD + ビューポートカリング ──
+  // ── TopNエッジセット（ノードごとにvalue上位N本のみ保持） ──
+
+  const topEdgeSet = useMemo(() => {
+    if (!data) return new Set<LayoutEdge>();
+    const set = new Set<LayoutEdge>();
+    // ノードごとに接続エッジをvalue降順でTopN選択
+    for (const edges of edgeIndex.bySource.values()) {
+      const sorted = [...edges].sort((a, b) => b.value - a.value);
+      for (let i = 0; i < Math.min(EDGE_TOP_N, sorted.length); i++) {
+        set.add(sorted[i]);
+      }
+    }
+    for (const edges of edgeIndex.byTarget.values()) {
+      const sorted = [...edges].sort((a, b) => b.value - a.value);
+      for (let i = 0; i < Math.min(EDGE_TOP_N, sorted.length); i++) {
+        set.add(sorted[i]);
+      }
+    }
+    return set;
+  }, [data, edgeIndex]);
+
+  // ── 委託チェーン重複エッジの除外セット ──
+  // project→委託元→受託先のチェーンがある場合、project→受託先の直接エッジは冗長
+  const redundantEdgeSet = useMemo(() => {
+    if (!data) return new Set<LayoutEdge>();
+    const set = new Set<LayoutEdge>();
+    for (const edge of data.edges) {
+      if (edge.edgeType === 'subcontract') continue;
+      // targetが委託元（subcontract out-edgesあり）なら中継点 → 直接エッジは残す
+      const targetOutEdges = edgeIndex.bySource.get(edge.target);
+      if (targetOutEdges?.some(e => e.edgeType === 'subcontract')) continue;
+      // edge: source(project) → target(最終受託先)
+      // targetに再委託で流入しているソース(委託元)を確認
+      const subInEdges = edgeIndex.byTarget.get(edge.target);
+      if (!subInEdges) continue;
+      for (const subEdge of subInEdges) {
+        if (subEdge.edgeType !== 'subcontract') continue;
+        // 委託元(subEdge.source)がedge.source(同じproject)からも流入しているか
+        const intermediaryInEdges = edgeIndex.byTarget.get(subEdge.source);
+        if (intermediaryInEdges?.some(ie => ie.source === edge.source)) {
+          set.add(edge);
+          break;
+        }
+      }
+    }
+    return set;
+  }, [data, edgeIndex]);
+
+  // ── ハイライト: BFS or 1-hop ──
+
+  const activeNodeId = selectedNodeId ?? hoveredNodeId;
+
+  const highlightMap = useMemo(() => {
+    if (!activeNodeId) return new Map<string, number>();
+    const maxDepth = isShiftHeld ? BFS_MAX_DEPTH : 1;
+    return bfsHighlight(activeNodeId, edgeIndex, maxDepth);
+  }, [activeNodeId, edgeIndex, isShiftHeld]);
+
+  const isHighlighting = highlightMap.size > 0;
+
+  // ── 面積ベースLOD + ビューポートカリング + TopNエッジ間引き ──
 
   const { visibleNodes, visibleEdges } = useMemo(() => {
     if (!data) return { visibleNodes: [], visibleEdges: [] };
+    const _t0 = process.env.NODE_ENV === 'development' ? performance.now() : 0;
 
     const { k, x: tx, y: ty } = transform;
     const { w: cw, h: ch } = containerSize;
@@ -406,13 +505,17 @@ export default function Sankey2View({ data }: Props) {
         }
       }
 
-      // 面積ベースLOD
-      const screenArea = (node.area ?? node.width * node.height) * k2;
-      if (screenArea < MIN_SCREEN_AREA) continue;
+      // ハイライト中のノードはLOD・カリングをスキップ
+      const inHighlight = highlightMap.has(node.id);
+      if (!inHighlight) {
+        // 面積ベースLOD
+        const screenArea = (node.area ?? node.width * node.height) * k2;
+        if (screenArea < MIN_SCREEN_AREA) continue;
 
-      // ビューポートカリング
-      if (node.x + node.width < vpLeft || node.x > vpRight) continue;
-      if (node.y + node.height < vpTop || node.y > vpBottom) continue;
+        // ビューポートカリング
+        if (node.x + node.width < vpLeft || node.x > vpRight) continue;
+        if (node.y + node.height < vpTop || node.y > vpBottom) continue;
+      }
 
       nodeSet.add(node.id);
       filteredNodes.push(node);
@@ -420,25 +523,36 @@ export default function Sankey2View({ data }: Props) {
 
     const filteredEdges: LayoutEdge[] = [];
     for (const edge of data.edges) {
-      if (nodeSet.has(edge.source) && nodeSet.has(edge.target)) {
-        filteredEdges.push(edge);
+      if (!nodeSet.has(edge.source) || !nodeSet.has(edge.target)) continue;
+
+      // 委託チェーン重複エッジを除外（project→受託先の直接エッジが委託経由と重複）
+      if (redundantEdgeSet.has(edge)) continue;
+
+      // ハイライト中のエッジは面積LOD・TopN間引きをスキップして全表示
+      const inHighlight = highlightMap.has(edge.source) && highlightMap.has(edge.target);
+      if (!inHighlight) {
+        // 8-3: エッジ面積ベースLOD（スクリーン上で小さすぎるエッジを間引き）
+        const p = edge.path;
+        const edgeScreenLength = Math.hypot(
+          (p[p.length - 1][0] - p[0][0]) * k,
+          (p[p.length - 1][1] - p[0][1]) * k,
+        );
+        const edgeScreenArea = edge.width * k * edgeScreenLength;
+        if (edgeScreenArea < MIN_EDGE_SCREEN_AREA) continue;
+
+        // TopNエッジ間引き
+        if (!topEdgeSet.has(edge)) continue;
       }
+
+      filteredEdges.push(edge);
     }
 
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.debug(`[sankey2] visibleNodes=${filteredNodes.length} visibleEdges=${filteredEdges.length} ${(performance.now() - _t0).toFixed(1)}ms`);
+    }
     return { visibleNodes: filteredNodes, visibleEdges: filteredEdges };
-  }, [data, transform, containerSize, ministryFilter, minAmount, maxAmount, labelFilter]);
-
-  // ── ハイライト: BFS or 1-hop ──
-
-  const activeNodeId = selectedNodeId ?? hoveredNodeId;
-
-  const highlightMap = useMemo(() => {
-    if (!activeNodeId) return new Map<string, number>();
-    const maxDepth = isShiftHeld ? BFS_MAX_DEPTH : 1;
-    return bfsHighlight(activeNodeId, edgeIndex, maxDepth);
-  }, [activeNodeId, edgeIndex, isShiftHeld]);
-
-  const isHighlighting = highlightMap.size > 0;
+  }, [data, transform, containerSize, ministryFilter, minAmount, maxAmount, labelFilter, topEdgeSet, highlightMap, redundantEdgeSet]);
 
   // ── ノードクリック ──
 
@@ -487,6 +601,7 @@ export default function Sankey2View({ data }: Props) {
 
   // ── Wheel zoom ──
 
+  // 8-4A: rAFバッチ化 — 高頻度wheelイベントを60FPSに制限
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
@@ -497,21 +612,32 @@ export default function Sankey2View({ data }: Props) {
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
 
-      setTransform(prev => {
-        const factor = 1 - e.deltaY * ZOOM_SENSITIVITY;
-        const newK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, prev.k * factor));
-        const ratio = newK / prev.k;
+      const base = pendingTransformRef.current ?? transformRef.current;
+      const factor = 1 - e.deltaY * ZOOM_SENSITIVITY;
+      const newK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, base.k * factor));
+      const ratio = newK / base.k;
+      pendingTransformRef.current = {
+        x: mx - (mx - base.x) * ratio,
+        y: my - (my - base.y) * ratio,
+        k: newK,
+      };
 
-        return {
-          x: mx - (mx - prev.x) * ratio,
-          y: my - (my - prev.y) * ratio,
-          k: newK,
-        };
-      });
+      if (!rafIdRef.current) {
+        rafIdRef.current = requestAnimationFrame(() => {
+          if (pendingTransformRef.current) {
+            setTransform(pendingTransformRef.current);
+            pendingTransformRef.current = null;
+          }
+          rafIdRef.current = 0;
+        });
+      }
     };
 
     svg.addEventListener('wheel', handler, { passive: false });
-    return () => svg.removeEventListener('wheel', handler);
+    return () => {
+      svg.removeEventListener('wheel', handler);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
   }, [data]);
 
   const didPanRef = useRef(false);
@@ -554,13 +680,14 @@ export default function Sankey2View({ data }: Props) {
     return Math.round(MINIMAP_WIDTH * (totalHeight / totalWidth));
   }, [data]);
 
+  // 8-4B: Minimap背景を初回のみ描画してキャッシュ
   useEffect(() => {
     const canvas = minimapCanvasRef.current;
-    if (!canvas || !data) return;
+    if (!canvas || !data || !minimapHeight) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const { totalWidth, totalHeight } = data.metadata.layout;
+    const { totalWidth } = data.metadata.layout;
     const scale = MINIMAP_WIDTH / totalWidth;
 
     ctx.clearRect(0, 0, MINIMAP_WIDTH, minimapHeight);
@@ -574,6 +701,23 @@ export default function Sankey2View({ data }: Props) {
       ctx.fillStyle = 'rgba(100, 116, 139, 0.15)';
       ctx.fillRect(cx, 0, cw, ch);
     }
+
+    // 背景をキャッシュ
+    minimapBgRef.current = ctx.getImageData(0, 0, MINIMAP_WIDTH, minimapHeight);
+  }, [data, minimapHeight]);
+
+  // 8-4B: ビューポート矩形のみ再描画（transform変更時）
+  useEffect(() => {
+    const canvas = minimapCanvasRef.current;
+    if (!canvas || !data || !minimapBgRef.current) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // 背景をキャッシュから復元（全体再描画を回避）
+    ctx.putImageData(minimapBgRef.current, 0, 0);
+
+    const { totalWidth, totalHeight } = data.metadata.layout;
+    const scale = MINIMAP_WIDTH / totalWidth;
 
     // ビューポート矩形
     const { k, x: tx, y: ty } = transform;
@@ -915,6 +1059,16 @@ export default function Sankey2View({ data }: Props) {
           />
         </div>
 
+        {/* 8-1: FPSカウンター（開発時のみ） */}
+        {process.env.NODE_ENV === 'development' && (
+          <div
+            className="absolute z-10 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono"
+            style={{ bottom: MINIMAP_PADDING, right: MINIMAP_PADDING }}
+          >
+            {fps} FPS
+          </div>
+        )}
+
         <svg
           ref={svgRef}
           className="w-full h-full"
@@ -1089,6 +1243,21 @@ function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailP
     .slice()
     .sort((a, b) => b.value - a.value);
 
+  // 委託経由の重複エッジを除外:
+  // project→委託元→当ノードのチェーンがある場合、project→当ノードの直接エッジは冗長
+  const subcontractSourceIds = new Set(
+    inEdges.filter(e => e.edgeType === 'subcontract').map(e => e.source)
+  );
+  const directInEdges = inEdges.filter(e => {
+    if (e.edgeType === 'subcontract') return false;
+    // この事業(source)が委託元にも流入している場合は重複
+    for (const subSourceId of subcontractSourceIds) {
+      const subSourceInEdges = edgeIndex.byTarget.get(subSourceId) ?? [];
+      if (subSourceInEdges.some(se => se.source === e.source)) return false;
+    }
+    return true;
+  });
+
   const color = TYPE_COLORS[node.type] || '#999';
   const hasSubcontract = node.isIndirect
     || inEdges.some(e => e.edgeType === 'subcontract')
@@ -1138,23 +1307,26 @@ function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailP
         </div>
       </div>
 
-      {/* 流入元（通常） */}
+      {/* 流入元（通常・委託元と重複しないもの） */}
       <ConnectionList
         title="流入元"
         arrow="←"
-        edges={inEdges.filter(e => e.edgeType !== 'subcontract')}
+        edges={directInEdges}
         getNodeId={e => e.source}
         nodeMap={nodeMap}
         onNodeClick={onNodeClick}
       />
 
-      {/* 委託元（再委託の流入） */}
-      <ConnectionList
+      {/* 委託元（再委託の流入・事業別グループ） */}
+      <SubcontractGroupList
         title="委託元"
         arrow="←"
         edges={inEdges.filter(e => e.edgeType === 'subcontract')}
         getNodeId={e => e.source}
         nodeMap={nodeMap}
+        edgeIndex={edgeIndex}
+        selectedNode={node}
+        direction="in"
         onNodeClick={onNodeClick}
       />
 
@@ -1168,13 +1340,16 @@ function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailP
         onNodeClick={onNodeClick}
       />
 
-      {/* 委託先（再委託の流出） */}
-      <ConnectionList
+      {/* 委託先（再委託の流出・事業別グループ） */}
+      <SubcontractGroupList
         title="委託先"
         arrow="→"
         edges={outEdges.filter(e => e.edgeType === 'subcontract')}
         getNodeId={e => e.target}
         nodeMap={nodeMap}
+        edgeIndex={edgeIndex}
+        selectedNode={node}
+        direction="out"
         onNodeClick={onNodeClick}
       />
     </div>
@@ -1228,6 +1403,143 @@ function ConnectionList({ title, arrow, edges, getNodeId, nodeMap, onNodeClick }
           …他 {remaining.toLocaleString()} 件
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── 委託グループ表示（事業別） ──────────────────────────────
+
+interface SubcontractGroupListProps {
+  title: string;
+  arrow: string;
+  edges: LayoutEdge[];
+  getNodeId: (e: LayoutEdge) => string;
+  nodeMap: Map<string, LayoutNode>;
+  edgeIndex: EdgeIndex;
+  selectedNode: LayoutNode;
+  direction: 'in' | 'out';
+  onNodeClick: (nodeId: string) => void;
+}
+
+function SubcontractGroupList({
+  title, arrow, edges, getNodeId, nodeMap, edgeIndex, selectedNode, direction, onNodeClick,
+}: SubcontractGroupListProps) {
+  if (edges.length === 0) return null;
+
+  // 委託元/委託先ノードが接続している事業を特定してグループ化
+  type GroupEntry = { edge: LayoutEdge; nodeId: string; node: LayoutNode | undefined };
+  const groups = new Map<string, { projectNode: LayoutNode | undefined; entries: GroupEntry[] }>();
+
+  for (const edge of edges) {
+    const counterpartId = getNodeId(edge);
+    const counterpart = nodeMap.get(counterpartId);
+
+    // 委託元/委託先の接続元事業を探す
+    let projectLabel = '不明な事業';
+    let projectNode: LayoutNode | undefined;
+
+    if (direction === 'in') {
+      // 委託元の場合: 委託元ノード(source)への流入元(project)を探す
+      const counterpartInEdges = edgeIndex.byTarget.get(counterpartId) ?? [];
+      // 選択中ノードも同一事業に接続しているものを優先
+      const selectedInSources = new Set(
+        (edgeIndex.byTarget.get(selectedNode.id) ?? []).map(e => e.source)
+      );
+      const sharedProject = counterpartInEdges.find(e =>
+        e.edgeType !== 'subcontract' && selectedInSources.has(e.source)
+      );
+      if (sharedProject) {
+        projectNode = nodeMap.get(sharedProject.source);
+      } else if (counterpartInEdges.length > 0) {
+        const directIn = counterpartInEdges.find(e => e.edgeType !== 'subcontract');
+        projectNode = directIn ? nodeMap.get(directIn.source) : undefined;
+      }
+    } else {
+      // 委託先の場合: 選択中ノードへの流入元(project)を共有事業として使う
+      const selectedInEdges = edgeIndex.byTarget.get(selectedNode.id) ?? [];
+      // 委託先ノードにも接続している事業を探す
+      const counterpartInEdges = edgeIndex.byTarget.get(counterpartId) ?? [];
+      const counterpartSources = new Set(counterpartInEdges.map(e => e.source));
+      const sharedProject = selectedInEdges.find(e =>
+        e.edgeType !== 'subcontract' && counterpartSources.has(e.source)
+      );
+      if (sharedProject) {
+        projectNode = nodeMap.get(sharedProject.source);
+      } else if (selectedInEdges.length > 0) {
+        const directIn = selectedInEdges.find(e => e.edgeType !== 'subcontract');
+        projectNode = directIn ? nodeMap.get(directIn.source) : undefined;
+      }
+    }
+
+    if (projectNode) projectLabel = projectNode.label;
+    const groupKey = projectNode?.id ?? '_unknown';
+    if (!groups.has(groupKey)) {
+      groups.set(groupKey, { projectNode, entries: [] });
+    }
+    groups.get(groupKey)!.entries.push({ edge, nodeId: counterpartId, node: counterpart });
+  }
+
+  // 事業グループを金額降順でソート
+  const sortedGroups = [...groups.entries()].sort((a, b) => {
+    const aTotal = a[1].entries.reduce((s, e) => s + e.edge.value, 0);
+    const bTotal = b[1].entries.reduce((s, e) => s + e.edge.value, 0);
+    return bTotal - aTotal;
+  });
+
+  return (
+    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+      <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+        {arrow} {title}（{edges.length}件）
+      </div>
+      {sortedGroups.map(([groupKey, { projectNode, entries }]) => {
+        const groupTotal = entries.reduce((s, e) => s + e.edge.value, 0);
+        const shown = entries.slice(0, PANEL_MAX_CONNECTIONS);
+        const remaining = entries.length - shown.length;
+        return (
+          <div key={groupKey} className="mb-2">
+            <div className="flex items-center gap-1 mb-1">
+              {projectNode ? (
+                <button
+                  onClick={() => onNodeClick(projectNode!.id)}
+                  className="text-xs text-amber-700 dark:text-amber-400 font-medium truncate hover:underline"
+                >
+                  {projectNode.label}
+                </button>
+              ) : (
+                <span className="text-xs text-gray-400 font-medium">不明な事業</span>
+              )}
+              <span className="text-xs text-gray-400 flex-shrink-0">
+                {formatAmount(groupTotal)}
+              </span>
+            </div>
+            <div className="space-y-1 pl-2">
+              {shown.map((entry, i) => {
+                const color = entry.node ? (TYPE_COLORS[entry.node.type] || '#999') : '#999';
+                return (
+                  <button
+                    key={`${entry.nodeId}-${i}`}
+                    onClick={() => onNodeClick(entry.nodeId)}
+                    className="w-full text-left flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+                  >
+                    <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
+                    <span className="text-xs text-gray-700 dark:text-gray-300 truncate flex-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                      {entry.node?.label ?? entry.nodeId}
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                      {formatAmount(entry.edge.value)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {remaining > 0 && (
+              <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 pl-4">
+                …他 {remaining.toLocaleString()} 件
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1289,7 +1601,9 @@ interface EdgeLineProps {
 const MemoEdgeLine = React.memo(function EdgeLine({ edge, isHighlighting, isConnected, depthOpacity }: EdgeLineProps) {
   const isSubcontract = edge.edgeType === 'subcontract';
   const opacity = isHighlighting ? (isConnected ? depthOpacity * 0.6 : 0.02) : (isSubcontract ? 0.15 : 0.04);
-  const strokeColor = isSubcontract ? '#f59e0b' : (isConnected ? '#3b82f6' : '#9ca3af');
+  const strokeColor = isConnected
+    ? (isSubcontract ? '#f59e0b' : '#3b82f6')
+    : '#9ca3af';
 
   return (
     <polyline
