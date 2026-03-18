@@ -14,13 +14,16 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as zlib from 'zlib';
 import { readShiftJISCSV, parseAmount } from './csv-reader';
 import type { CSVRow } from '@/types/rs-system';
+import type { RS2024StructuredData } from '@/types/structured';
 
 // ─── 定数 ──────────────────────────────────────────────
 const DATA_DIR = path.join(__dirname, '../data/year_2024');
 const OUTPUT_DIR = path.join(__dirname, '../public/data');
 const OUTPUT_FILE = 'sankey2-graph.json';
+const STRUCTURED_GZ = path.join(__dirname, '../public/data/rs2024-structured.json.gz');
 const TARGET_BUDGET_YEAR = 2023; // 2024年度事業 → 2023年度予算データを使用
 
 // ─── 型定義 ──────────────────────────────────────────────
@@ -35,6 +38,10 @@ interface Sankey2Node {
   projectId?: number;
   /** ministry / project のみ: 府省庁名 */
   ministry?: string;
+  /** recipient のみ: 間接支出（委託経由）を含むか */
+  isIndirect?: boolean;
+  /** recipient のみ: ユニークな委託経路リスト */
+  chainPaths?: string[];
 }
 
 /** グラフエッジ */
@@ -42,6 +49,8 @@ interface Sankey2Edge {
   source: string;
   target: string;
   value: number;        // フロー金額（1円単位）
+  /** エッジ種別: direct=通常支出、subcontract=再委託 */
+  edgeType?: 'direct' | 'subcontract';
 }
 
 /** 出力JSON */
@@ -282,6 +291,115 @@ function main() {
   }
   console.log(`  支出先: ${recipientMap.size.toLocaleString()} 件`);
   console.log(`  エッジ: ${edges.length.toLocaleString()} 件`);
+
+  // 5e. 委託チェーン情報の付与（structured.json から）
+  console.log('\n[3.5/4] 委託チェーン情報の付与');
+  let structuredData: RS2024StructuredData | null = null;
+  if (fs.existsSync(STRUCTURED_GZ)) {
+    const gzBuf = fs.readFileSync(STRUCTURED_GZ);
+    structuredData = JSON.parse(zlib.gunzipSync(gzBuf).toString('utf-8'));
+    console.log(`  structured.json 読み込み完了（${structuredData!.spendings.length.toLocaleString()} 支出先）`);
+  } else {
+    throw new Error(
+      `Missing required input: ${STRUCTURED_GZ}. Run 'npm run generate-structured && npm run compress-data' first.`
+    );
+  }
+
+  if (structuredData) {
+    // recipientノードのindexを作成（高速検索用）
+    const recipientNodeIndex = new Map<string, Sankey2Node>();
+    for (const node of nodes) {
+      if (node.type === 'recipient') {
+        recipientNodeIndex.set(node.label, node);
+      }
+    }
+
+    // 支出先ごとの委託情報を付与
+    let enrichedCount = 0;
+    for (const spending of structuredData.spendings) {
+      const recipientNode = recipientNodeIndex.get(spending.spendingName);
+      if (!recipientNode) continue;
+
+      // isIndirect: いずれかのprojectでisDirectFromGov === false
+      const hasIndirect = spending.projects.some(p => p.isDirectFromGov === false);
+      if (hasIndirect) {
+        recipientNode.isIndirect = true;
+        enrichedCount++;
+      }
+
+      // chainPaths: sourceChainPathをSetで収集（ユニーク化）
+      const pathSet = new Set<string>();
+      for (const p of spending.projects) {
+        if (p.sourceChainPath) pathSet.add(p.sourceChainPath);
+      }
+      if (pathSet.size > 0) {
+        const existing = recipientNode.chainPaths || [];
+        recipientNode.chainPaths = [...new Set([...existing, ...pathSet])];
+      }
+    }
+    console.log(`  間接支出ノード: ${enrichedCount.toLocaleString()} 件`);
+
+    // 再委託エッジの生成（outflows.recipients から recipient→recipient）
+    // flowTypeが委託・外注・請負系のもののみ対象（補助金交付・旅費等は除外）
+    const isSubcontractFlow = (flowType: string) =>
+      /委託|外注|請負|下請/.test(flowType);
+
+    let subcontractEdgeCount = 0;
+    const subcontractAmounts = new Map<string, number>(); // edgeKey → amount
+    let unmatchedFlows = 0;
+    let skippedByFlowType = 0;
+
+    for (const spending of structuredData.spendings) {
+      if (!spending.outflows || spending.outflows.length === 0) continue;
+      const sourceNode = recipientNodeIndex.get(spending.spendingName);
+      if (!sourceNode) continue;
+
+      for (const flow of spending.outflows) {
+        // flowTypeフィルタ: 委託・外注・請負系以外はスキップ
+        if (!isSubcontractFlow(flow.flowType || '')) {
+          skippedByFlowType++;
+          continue;
+        }
+
+        // recipients[] の個別名でマッチング（targetBlockNameは「〜ほか」等でマッチしにくい）
+        if (flow.recipients && flow.recipients.length > 0) {
+          for (const r of flow.recipients) {
+            const targetNode = recipientNodeIndex.get(r.name);
+            if (!targetNode) { unmatchedFlows++; continue; }
+            if (sourceNode.id === targetNode.id) continue;
+
+            const edgeKey = `${sourceNode.id}→${targetNode.id}`;
+            subcontractAmounts.set(edgeKey, (subcontractAmounts.get(edgeKey) || 0) + r.amount);
+          }
+        } else {
+          // recipients がない場合は targetBlockName でフォールバック
+          const targetNode = recipientNodeIndex.get(flow.targetBlockName);
+          if (!targetNode) { unmatchedFlows++; continue; }
+          if (sourceNode.id === targetNode.id) continue;
+
+          const edgeKey = `${sourceNode.id}→${targetNode.id}`;
+          subcontractAmounts.set(edgeKey, (subcontractAmounts.get(edgeKey) || 0) + flow.amount);
+        }
+      }
+    }
+
+    // 累積結果をエッジに変換
+    for (const [edgeKey, amount] of subcontractAmounts) {
+      if (amount <= 0) continue;
+      const [sourceId, targetId] = edgeKey.split('→');
+
+      edges.push({
+        source: sourceId,
+        target: targetId,
+        value: amount,
+        edgeType: 'subcontract',
+      });
+      subcontractEdgeCount++;
+    }
+    console.log(`  再委託エッジ: ${subcontractEdgeCount.toLocaleString()} 件（未マッチ: ${unmatchedFlows.toLocaleString()}, flowType除外: ${skippedByFlowType.toLocaleString()}）`);
+  }
+
+  console.log(`  最終エッジ数: ${edges.length.toLocaleString()} 件`);
 
   // 6. 出力
   console.log('\n[4/4] JSON出力');

@@ -12,6 +12,8 @@ export interface LayoutNode {
   area: number;
   ministry?: string;
   projectId?: number;
+  isIndirect?: boolean;
+  chainPaths?: string[];
 }
 
 export interface LayoutEdge {
@@ -20,6 +22,7 @@ export interface LayoutEdge {
   value: number;
   path: [number, number][];
   width: number;
+  edgeType?: 'direct' | 'subcontract';
 }
 
 export interface LayoutMetadata {
