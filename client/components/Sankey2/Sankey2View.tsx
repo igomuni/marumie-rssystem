@@ -150,8 +150,6 @@ export default function Sankey2View({ data }: Props) {
   const [minAmount, setMinAmount] = useState(0);
   const [maxAmount, setMaxAmount] = useState(Infinity);
   const [labelFilter, setLabelFilter] = useState('');
-  /** ラベル非表示にするノードtype（6-3） */
-  const [labelTypeHidden, setLabelTypeHidden] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
   /** 次のURL同期でpushするかどうか（確定操作時にtrue） */
   const shouldPushRef = useRef(false);
@@ -207,7 +205,7 @@ export default function Sankey2View({ data }: Props) {
 
   // ── フィルタ状態の集計 ──
 
-  const activeFilterCount = (ministryFilter.size > 0 ? 1 : 0) + (minAmount > 0 ? 1 : 0) + (maxAmount < Infinity ? 1 : 0) + (labelFilter ? 1 : 0) + (labelTypeHidden.size > 0 ? 1 : 0);
+  const activeFilterCount = (ministryFilter.size > 0 ? 1 : 0) + (minAmount > 0 ? 1 : 0) + (maxAmount < Infinity ? 1 : 0) + (labelFilter ? 1 : 0);
   const hasActiveFilter = activeFilterCount > 0;
 
   // ── URLパラメータからの復元（初期ロード + popstate） ──
@@ -217,7 +215,6 @@ export default function Sankey2View({ data }: Props) {
     const min = params.get('min');
     const max = params.get('max');
     const l = params.get('l');
-    const lt = params.get('lt');
     const q = params.get('q');
     const s = params.get('s');
 
@@ -231,7 +228,6 @@ export default function Sankey2View({ data }: Props) {
     setMinAmount(parsedMin);
     setMaxAmount(parsedMax < Infinity ? parsedMax : Infinity);
     setLabelFilter(l ?? '');
-    setLabelTypeHidden(lt ? new Set(lt.split(',')) : new Set());
     if (q) { setSearchQuery(q); setDebouncedQuery(q); } else { setSearchQuery(''); setDebouncedQuery(''); }
     setSelectedNodeId(s ?? null);
   }, []);
@@ -268,7 +264,6 @@ export default function Sankey2View({ data }: Props) {
     if (minAmount > 0) params.set('min', String(minAmount));
     if (maxAmount < Infinity) params.set('max', String(maxAmount));
     if (labelFilter) params.set('l', labelFilter);
-    if (labelTypeHidden.size > 0) params.set('lt', [...labelTypeHidden].join(','));
     if (debouncedQuery) params.set('q', debouncedQuery);
     if (selectedNodeId) params.set('s', selectedNodeId);
 
@@ -286,7 +281,7 @@ export default function Sankey2View({ data }: Props) {
       // URL差分なし → フラグをクリア（次の無関係な同期でpushされるのを防ぐ）
       shouldPushRef.current = false;
     }
-  }, [data, ministryFilter, minAmount, maxAmount, labelFilter, labelTypeHidden, debouncedQuery, selectedNodeId, router]);
+  }, [data, ministryFilter, minAmount, maxAmount, labelFilter, debouncedQuery, selectedNodeId, router]);
 
   // ── 検索結果 ──
 
@@ -795,7 +790,7 @@ export default function Sankey2View({ data }: Props) {
             </button>
             {hasActiveFilter && (
               <button
-                onClick={() => { shouldPushRef.current = true; setMinistryFilter(new Set()); setMinAmount(0); setMaxAmount(Infinity); setLabelFilter(''); setLabelTypeHidden(new Set()); }}
+                onClick={() => { shouldPushRef.current = true; setMinistryFilter(new Set()); setMinAmount(0); setMaxAmount(Infinity); setLabelFilter(''); }}
                 className="text-xs px-2 py-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-red-500 border border-gray-200 dark:border-gray-700 shadow-sm backdrop-blur-sm hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 リセット
@@ -825,32 +820,6 @@ export default function Sankey2View({ data }: Props) {
                   placeholder="含む文字列..."
                   className="w-full text-xs bg-gray-50 dark:bg-gray-700 rounded px-2 py-1.5 border border-gray-200 dark:border-gray-600 outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 dark:text-gray-200"
                 />
-              </div>
-
-              {/* ラベル表示フィルタ (6-3) */}
-              <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">ラベル表示</div>
-                <div className="space-y-0.5">
-                  {(['ministry', 'project-budget', 'project-spending', 'recipient'] as const).map(type => (
-                    <label key={type} className="flex items-center gap-2 px-1 py-0.5 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!labelTypeHidden.has(type)}
-                        onChange={e => {
-                          shouldPushRef.current = true;
-                          setLabelTypeHidden(prev => {
-                            const next = new Set(prev);
-                            if (e.target.checked) next.delete(type); else next.add(type);
-                            return next;
-                          });
-                        }}
-                        className="accent-blue-500"
-                      />
-                      <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: TYPE_COLORS[type] }} />
-                      <span className="text-xs text-gray-700 dark:text-gray-300">{TYPE_LABELS[type]}</span>
-                    </label>
-                  ))}
-                </div>
               </div>
 
               {/* 府省庁フィルタ */}
@@ -1005,9 +974,6 @@ export default function Sankey2View({ data }: Props) {
                 const screenArea = (node.area ?? node.width * node.height) * k2;
                 const isActive = hoveredNodeId === node.id || selectedNodeId === node.id;
                 if (!isActive && screenArea < LABEL_SCREEN_AREA) return null;
-
-                // 6-3: type別ラベル非表示
-                if (!isActive && labelTypeHidden.has(node.type)) return null;
 
                 const screenW = node.width * transform.k;
                 const screenH = node.height * transform.k;
