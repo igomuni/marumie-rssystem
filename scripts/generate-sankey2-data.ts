@@ -340,14 +340,9 @@ function main() {
     console.log(`  間接支出ノード: ${enrichedCount.toLocaleString()} 件`);
 
     // 再委託エッジの生成（outflows.recipients から recipient→recipient）
-    // flowTypeが委託・外注・請負系のもののみ対象（補助金交付・旅費等は除外）
-    const isSubcontractFlow = (flowType: string) =>
-      /委託|外注|請負|下請/.test(flowType);
-
     let subcontractEdgeCount = 0;
     const subcontractAmounts = new Map<string, number>(); // edgeKey → amount
     let unmatchedFlows = 0;
-    let skippedByFlowType = 0;
 
     for (const spending of structuredData.spendings) {
       if (!spending.outflows || spending.outflows.length === 0) continue;
@@ -355,12 +350,6 @@ function main() {
       if (!sourceNode) continue;
 
       for (const flow of spending.outflows) {
-        // flowTypeフィルタ: 委託・外注・請負系以外はスキップ
-        if (!isSubcontractFlow(flow.flowType || '')) {
-          skippedByFlowType++;
-          continue;
-        }
-
         // recipients[] の個別名でマッチング（targetBlockNameは「〜ほか」等でマッチしにくい）
         if (flow.recipients && flow.recipients.length > 0) {
           for (const r of flow.recipients) {
@@ -396,7 +385,7 @@ function main() {
       });
       subcontractEdgeCount++;
     }
-    console.log(`  再委託エッジ: ${subcontractEdgeCount.toLocaleString()} 件（未マッチ: ${unmatchedFlows.toLocaleString()}, flowType除外: ${skippedByFlowType.toLocaleString()}）`);
+    console.log(`  再委託エッジ: ${subcontractEdgeCount.toLocaleString()} 件（未マッチ: ${unmatchedFlows.toLocaleString()}）`);
   }
 
   console.log(`  最終エッジ数: ${edges.length.toLocaleString()} 件`);
