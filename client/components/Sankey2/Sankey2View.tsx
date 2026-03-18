@@ -282,6 +282,9 @@ export default function Sankey2View({ data }: Props) {
       } else {
         router.replace(url, { scroll: false });
       }
+    } else {
+      // URL差分なし → フラグをクリア（次の無関係な同期でpushされるのを防ぐ）
+      shouldPushRef.current = false;
     }
   }, [data, ministryFilter, minAmount, maxAmount, labelFilter, labelTypeHidden, debouncedQuery, selectedNodeId, router]);
 
@@ -834,6 +837,7 @@ export default function Sankey2View({ data }: Props) {
                         type="checkbox"
                         checked={!labelTypeHidden.has(type)}
                         onChange={e => {
+                          shouldPushRef.current = true;
                           setLabelTypeHidden(prev => {
                             const next = new Set(prev);
                             if (e.target.checked) next.delete(type); else next.add(type);
@@ -999,17 +1003,18 @@ export default function Sankey2View({ data }: Props) {
             <g className="node-labels">
               {visibleNodes.map(node => {
                 const screenArea = (node.area ?? node.width * node.height) * k2;
-                if (screenArea < LABEL_SCREEN_AREA) return null;
+                const isActive = hoveredNodeId === node.id || selectedNodeId === node.id;
+                if (!isActive && screenArea < LABEL_SCREEN_AREA) return null;
 
                 // 6-3: type別ラベル非表示
-                if (labelTypeHidden.has(node.type)) return null;
+                if (!isActive && labelTypeHidden.has(node.type)) return null;
 
                 const screenW = node.width * transform.k;
                 const screenH = node.height * transform.k;
-                if (screenW < 20 || screenH < 10) return null;
+                if (!isActive && (screenW < 20 || screenH < 10)) return null;
 
                 const fontSize = Math.min(node.height * 0.25, node.width * 0.18, 150);
-                if (fontSize * transform.k < 6) return null;
+                if (!isActive && fontSize * transform.k < 6) return null;
 
                 const depth = highlightMap.get(node.id);
                 const opacity = isHighlighting
@@ -1018,7 +1023,6 @@ export default function Sankey2View({ data }: Props) {
 
                 // 6-2: screenArea段階表示
                 // hover/selected中は常に全情報表示
-                const isActive = hoveredNodeId === node.id || selectedNodeId === node.id;
                 const showAmount = isActive || screenArea >= 2000;
                 const showBadge = isActive || screenArea >= 8000;
                 const subFontSize = fontSize * 0.6;
