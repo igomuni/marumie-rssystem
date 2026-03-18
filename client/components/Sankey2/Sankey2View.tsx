@@ -1126,7 +1126,7 @@ function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailP
           </span>
           {hasSubcontract && (
             <span
-              className="inline-block px-2 py-0.5 rounded text-xs font-medium text-white"
+              className="inline-block px-2 py-0.5 rounded text-xs font-medium text-gray-900"
               style={{ backgroundColor: '#f59e0b' }}
             >
               再委託

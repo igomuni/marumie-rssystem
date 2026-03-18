@@ -333,7 +333,8 @@ function main() {
         if (p.sourceChainPath) pathSet.add(p.sourceChainPath);
       }
       if (pathSet.size > 0) {
-        recipientNode.chainPaths = [...pathSet];
+        const existing = recipientNode.chainPaths || [];
+        recipientNode.chainPaths = [...new Set([...existing, ...pathSet])];
       }
     }
     console.log(`  間接支出ノード: ${enrichedCount.toLocaleString()} 件`);
