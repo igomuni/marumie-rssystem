@@ -40,12 +40,15 @@ interface GraphNode {
   amount: number;
   projectId?: number;
   ministry?: string;
+  isIndirect?: boolean;
+  chainPaths?: string[];
 }
 
 interface GraphEdge {
   source: string;
   target: string;
   value: number;
+  edgeType?: 'direct' | 'subcontract';
 }
 
 interface GraphData {
@@ -66,6 +69,8 @@ interface LayoutNode {
   area: number;
   ministry?: string;
   projectId?: number;
+  isIndirect?: boolean;
+  chainPaths?: string[];
 }
 
 interface LayoutEdge {
@@ -74,6 +79,7 @@ interface LayoutEdge {
   value: number;
   path: [number, number][];
   width: number;
+  edgeType?: 'direct' | 'subcontract';
 }
 
 interface LayoutData {
@@ -489,6 +495,8 @@ function main() {
             area: r.width * r.height,
             ...(res.data.ministry && { ministry: res.data.ministry }),
             ...(res.data.projectId !== undefined && { projectId: res.data.projectId }),
+            ...(res.data.isIndirect && { isIndirect: true }),
+            ...(res.data.chainPaths && res.data.chainPaths.length > 0 && { chainPaths: res.data.chainPaths }),
           };
           layoutNodes.push(ln);
           layoutNodeMap.set(ln.id, ln);
@@ -517,18 +525,44 @@ function main() {
     const target = layoutNodeMap.get(edge.target);
     if (!source || !target) continue;
 
-    // ソースの右辺中央 → ターゲットの左辺中央
-    const sx = source.x + source.width;
-    const sy = source.y + source.height / 2;
-    const tx = target.x;
-    const ty = target.y + target.height / 2;
+    const isSubcontract = edge.edgeType === 'subcontract';
+
+    let pathPoints: [number, number][];
+    if (isSubcontract) {
+      // 同一クラスタ内エッジ: ソース右辺中央 → ターゲット左辺中央（短距離Bezier）
+      const sx = source.x + source.width;
+      const sy = source.y + source.height / 2;
+      const tx = target.x;
+      const ty = target.y + target.height / 2;
+      const dx = Math.abs(tx - sx);
+      const dy = Math.abs(ty - sy);
+      const offset = Math.max(dx, dy) * 0.3 + 50; // 短距離でも曲線が見えるようオフセット追加
+      pathPoints = generateBezierPath(sx, sy, tx, ty);
+      // オフセット再計算で上書き（同一クラスタ用）
+      const p0: [number, number] = [sx, sy];
+      const p1: [number, number] = [sx + offset, sy];
+      const p2: [number, number] = [tx - offset, ty];
+      const p3: [number, number] = [tx, ty];
+      pathPoints = [];
+      for (let i = 0; i <= BEZIER_SEGMENTS; i++) {
+        pathPoints.push(cubicBezier(p0, p1, p2, p3, i / BEZIER_SEGMENTS));
+      }
+    } else {
+      // クラスタ間エッジ: ソースの右辺中央 → ターゲットの左辺中央
+      const sx = source.x + source.width;
+      const sy = source.y + source.height / 2;
+      const tx = target.x;
+      const ty = target.y + target.height / 2;
+      pathPoints = generateBezierPath(sx, sy, tx, ty);
+    }
 
     layoutEdges.push({
       source: edge.source,
       target: edge.target,
       value: edge.value,
-      path: generateBezierPath(sx, sy, tx, ty),
+      path: pathPoints,
       width: valueToWidth(edge.value, maxEdgeValue),
+      ...(isSubcontract && { edgeType: 'subcontract' as const }),
     });
   }
   console.log(`  エッジパス: ${layoutEdges.length.toLocaleString()} 件`);

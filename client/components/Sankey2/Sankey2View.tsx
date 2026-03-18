@@ -1090,6 +1090,9 @@ function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailP
     .sort((a, b) => b.value - a.value);
 
   const color = TYPE_COLORS[node.type] || '#999';
+  const hasSubcontract = node.isIndirect
+    || inEdges.some(e => e.edgeType === 'subcontract')
+    || outEdges.some(e => e.edgeType === 'subcontract');
 
   return (
     <div
@@ -1114,34 +1117,62 @@ function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailP
             ✕
           </button>
         </div>
-        <div className="flex items-center gap-2 mt-2">
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
           <span
             className="inline-block px-2 py-0.5 rounded text-xs font-medium text-white"
             style={{ backgroundColor: color }}
           >
             {TYPE_LABELS[node.type] ?? node.type}
           </span>
+          {hasSubcontract && (
+            <span
+              className="inline-block px-2 py-0.5 rounded text-xs font-medium text-white"
+              style={{ backgroundColor: '#f59e0b' }}
+            >
+              再委託
+            </span>
+          )}
           {node.ministry && (
             <span className="text-xs text-gray-500 dark:text-gray-400">{node.ministry}</span>
           )}
         </div>
       </div>
 
-      {/* 流入元 */}
+      {/* 流入元（通常） */}
       <ConnectionList
         title="流入元"
         arrow="←"
-        edges={inEdges}
+        edges={inEdges.filter(e => e.edgeType !== 'subcontract')}
         getNodeId={e => e.source}
         nodeMap={nodeMap}
         onNodeClick={onNodeClick}
       />
 
-      {/* 流出先 */}
+      {/* 委託元（再委託の流入） */}
+      <ConnectionList
+        title="委託元"
+        arrow="←"
+        edges={inEdges.filter(e => e.edgeType === 'subcontract')}
+        getNodeId={e => e.source}
+        nodeMap={nodeMap}
+        onNodeClick={onNodeClick}
+      />
+
+      {/* 流出先（通常） */}
       <ConnectionList
         title="流出先"
         arrow="→"
-        edges={outEdges}
+        edges={outEdges.filter(e => e.edgeType !== 'subcontract')}
+        getNodeId={e => e.target}
+        nodeMap={nodeMap}
+        onNodeClick={onNodeClick}
+      />
+
+      {/* 委託先（再委託の流出） */}
+      <ConnectionList
+        title="委託先"
+        arrow="→"
+        edges={outEdges.filter(e => e.edgeType === 'subcontract')}
         getNodeId={e => e.target}
         nodeMap={nodeMap}
         onNodeClick={onNodeClick}
@@ -1256,17 +1287,20 @@ interface EdgeLineProps {
 }
 
 const MemoEdgeLine = React.memo(function EdgeLine({ edge, isHighlighting, isConnected, depthOpacity }: EdgeLineProps) {
-  const opacity = isHighlighting ? (isConnected ? depthOpacity * 0.6 : 0.02) : 0.04;
+  const isSubcontract = edge.edgeType === 'subcontract';
+  const opacity = isHighlighting ? (isConnected ? depthOpacity * 0.6 : 0.02) : (isSubcontract ? 0.15 : 0.04);
+  const strokeColor = isConnected ? '#3b82f6' : (isSubcontract ? '#f59e0b' : '#9ca3af');
 
   return (
     <polyline
       points={pathToPolyline(edge.path)}
       fill="none"
-      stroke={isConnected ? '#3b82f6' : '#9ca3af'}
+      stroke={strokeColor}
       strokeWidth={Math.max(edge.width, 0.3)}
       opacity={opacity}
       strokeLinecap="round"
       strokeLinejoin="round"
+      {...(isSubcontract && !isConnected ? { strokeDasharray: '8 4' } : {})}
     />
   );
 });
