@@ -305,11 +305,12 @@ function valueToWidth(value: number, maxValue: number): number {
   return Math.max(0.5, logScale * 20);
 }
 
-/** treemap矩形にGAPパディングを適用 */
+/** treemap矩形にGAPパディングを適用（最小サイズ0.01pxを保証） */
+const MIN_NODE_SIZE = 0.01;
 function applyGap(rect: Rect, gap: number): Rect {
   const half = gap / 2;
-  const w = Math.max(0, rect.width - gap);
-  const h = Math.max(0, rect.height - gap);
+  const w = Math.max(MIN_NODE_SIZE, rect.width - gap);
+  const h = Math.max(MIN_NODE_SIZE, rect.height - gap);
   return { x: rect.x + half, y: rect.y + half, width: w, height: h };
 }
 
