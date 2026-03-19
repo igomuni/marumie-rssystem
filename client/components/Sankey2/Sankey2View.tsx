@@ -1156,7 +1156,7 @@ export default function Sankey2View({ data }: Props) {
           onClick={handleSvgClick}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
-            {/* ズームで表示されるノードのエリア表示 */}
+            {/* ズームで表示されるノードのエリア表示（ラベルはホバー時のみ） */}
             <g className="aggregate-nodes">
             {aggregateNodes.map(agg => {
               const { minX, minY, maxX, maxY } = agg.bbox;
@@ -1167,6 +1167,7 @@ export default function Sankey2View({ data }: Props) {
               return (
                 <g
                   key={agg.id}
+                  className="aggregate-node"
                   transform={`translate(${minX},${minY})`}
                   style={{ cursor: 'pointer' }}
                   onClick={() => handleAggregateClick(agg)}
@@ -1178,29 +1179,29 @@ export default function Sankey2View({ data }: Props) {
                     fillOpacity={0.1}
                     stroke="none"
                   />
-                  <text
-                    x={bw / 2}
-                    y={bh / 2 - fontSize * 0.5}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill={color}
-                    fontSize={fontSize * 0.9}
-                    opacity={0.6}
-                  >
-                    {agg.label}
-                  </text>
-                  <text
-                    x={bw / 2}
-                    y={bh / 2 + fontSize * 0.7}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill={color}
-                    fontSize={fontSize}
-                    fontWeight="bold"
-                    opacity={0.7}
-                  >
-                    {`+${agg.count.toLocaleString()}件 ${formatAmount(agg.amount)}`}
-                  </text>
+                  <g className="aggregate-label" opacity={0}>
+                    <text
+                      x={bw / 2}
+                      y={bh / 2 - fontSize * 0.5}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill={color}
+                      fontSize={fontSize * 0.9}
+                    >
+                      {agg.label}
+                    </text>
+                    <text
+                      x={bw / 2}
+                      y={bh / 2 + fontSize * 0.7}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill={color}
+                      fontSize={fontSize}
+                      fontWeight="bold"
+                    >
+                      {`+${agg.count.toLocaleString()}件 ${formatAmount(agg.amount)}`}
+                    </text>
+                  </g>
                 </g>
               );
             })}
