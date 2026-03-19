@@ -25,7 +25,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 /** 面積ベースLOD: スクリーン上でこの面積(px²)未満のノードは描画しない */
-const MIN_SCREEN_AREA = 25;
+const MIN_SCREEN_AREA = 4;
 
 /** エッジ面積ベースLOD: スクリーン上でこの面積(px²)未満のエッジは描画しない */
 const MIN_EDGE_SCREEN_AREA = 2;
