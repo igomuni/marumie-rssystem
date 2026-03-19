@@ -235,7 +235,7 @@ function squarifiedTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
   return results;
 }
 
-/** 金額順スライスレイアウト: 入力順を保持して左上→右下に配置 */
+/** 順序保持treemap: squarifyの行構築ロジックを使い、入力順を保持 */
 function sliceTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
   if (items.length === 0) return [];
 
@@ -254,21 +254,54 @@ function sliceTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
 
   let remaining = { ...rect };
   let remainingValue = positiveItems.reduce((s, it) => s + it.value, 0);
+  let idx = 0;
 
-  for (const item of positiveItems) {
-    const fraction = item.value / remainingValue;
+  while (idx < positiveItems.length) {
     const isVerticalSlice = remaining.width >= remaining.height;
+    const sideLength = isVerticalSlice ? remaining.height : remaining.width;
 
-    if (isVerticalSlice) {
-      const w = remaining.width * fraction;
-      results.push({ key: item.key, rect: { x: remaining.x, y: remaining.y, width: w, height: remaining.height }, data: item.data });
-      remaining = { x: remaining.x + w, y: remaining.y, width: remaining.width - w, height: remaining.height };
-    } else {
-      const h = remaining.height * fraction;
-      results.push({ key: item.key, rect: { x: remaining.x, y: remaining.y, width: remaining.width, height: h }, data: item.data });
-      remaining = { x: remaining.x, y: remaining.y + h, width: remaining.width, height: remaining.height - h };
+    // 行を構築: アスペクト比が改善する限りアイテムを追加（squarify方式）
+    const row: TreemapItem[] = [positiveItems[idx]];
+    let rowValue = positiveItems[idx].value;
+    idx++;
+
+    while (idx < positiveItems.length) {
+      const candidate = positiveItems[idx];
+      const newRowValue = rowValue + candidate.value;
+      const currentWorst = worstRatio(row, rowValue, sideLength, remainingValue, remaining);
+      const newWorst = worstRatio([...row, candidate], newRowValue, sideLength, remainingValue, remaining);
+      if (newWorst > currentWorst) break;
+      row.push(candidate);
+      rowValue = newRowValue;
+      idx++;
     }
-    remainingValue -= item.value;
+
+    // 行を配置
+    const rowFraction = rowValue / remainingValue;
+    const rowThickness = isVerticalSlice
+      ? remaining.width * rowFraction
+      : remaining.height * rowFraction;
+
+    let offset = 0;
+    for (const item of row) {
+      const itemFraction = item.value / rowValue;
+      const itemLength = sideLength * itemFraction;
+
+      const itemRect: Rect = isVerticalSlice
+        ? { x: remaining.x, y: remaining.y + offset, width: rowThickness, height: itemLength }
+        : { x: remaining.x + offset, y: remaining.y, width: itemLength, height: rowThickness };
+
+      results.push({ key: item.key, rect: itemRect, data: item.data });
+      offset += itemLength;
+    }
+
+    // 残り領域を更新
+    if (isVerticalSlice) {
+      remaining = { x: remaining.x + rowThickness, y: remaining.y, width: remaining.width - rowThickness, height: remaining.height };
+    } else {
+      remaining = { x: remaining.x, y: remaining.y + rowThickness, width: remaining.width, height: remaining.height - rowThickness };
+    }
+    remainingValue -= rowValue;
   }
 
   for (const item of zeroItems) {
