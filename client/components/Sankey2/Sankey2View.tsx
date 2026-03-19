@@ -1357,6 +1357,66 @@ export default function Sankey2View({ data }: Props) {
             })}
             </g>
 
+            {/* ノードツールチップ（最前面・イベント透過） */}
+            {hoveredNodeId && !selectedNodeId && (() => {
+              const node = nodeMap.get(hoveredNodeId);
+              if (!node) return null;
+              const fontSize = 11 / transform.k;
+              const pad = fontSize * 0.5;
+              const color = TYPE_COLORS[node.type] || '#999';
+              const labelW = fontSize * 14;
+              const labelH = fontSize * 4.5;
+              const lx = node.x + node.width / 2 - labelW / 2;
+              const ly = node.y - labelH - pad;
+              return (
+                <g style={{ pointerEvents: 'none' }}>
+                  <rect
+                    x={lx}
+                    y={ly}
+                    width={labelW}
+                    height={labelH}
+                    fill={color}
+                    fillOpacity={0.9}
+                    rx={fontSize * 0.3}
+                  />
+                  <text
+                    x={lx + labelW / 2}
+                    y={ly + fontSize * 1.2}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#fff"
+                    fontSize={fontSize}
+                    fontWeight="bold"
+                  >
+                    {node.label}
+                  </text>
+                  <text
+                    x={lx + labelW / 2}
+                    y={ly + fontSize * 2.5}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#fff"
+                    fontSize={fontSize * 0.9}
+                  >
+                    {formatAmount(node.amount)}
+                  </text>
+                  {node.ministry && node.type !== 'ministry' && (
+                    <text
+                      x={lx + labelW / 2}
+                      y={ly + fontSize * 3.7}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#fff"
+                      fontSize={fontSize * 0.8}
+                      opacity={0.8}
+                    >
+                      {node.ministry}
+                    </text>
+                  )}
+                </g>
+              );
+            })()}
+
             </g>
           </g>
         </svg>
@@ -1739,9 +1799,7 @@ const MemoNodeRect = React.memo(function NodeRect({
         fill={color}
         stroke={highlighted ? '#fff' : 'none'}
         strokeWidth={highlighted ? 2 / zoom : 0}
-      >
-        <title>{`${node.label}\n${formatAmount(node.amount)}`}</title>
-      </rect>
+      />
     </g>
   );
 });
