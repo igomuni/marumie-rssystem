@@ -1156,6 +1156,58 @@ export default function Sankey2View({ data }: Props) {
           onClick={handleSvgClick}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
+            {/* 集約ノード（非表示エリアの背景塗り） */}
+            <g className="aggregate-nodes">
+            {aggregateNodes.map(agg => {
+              const { minX, minY, maxX, maxY } = agg.bbox;
+              const bw = maxX - minX;
+              const bh = maxY - minY;
+              const fontSize = 11 / transform.k;
+              const color = TYPE_COLORS[agg.type] || '#999';
+              return (
+                <g
+                  key={agg.id}
+                  transform={`translate(${minX},${minY})`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleAggregateClick(agg)}
+                >
+                  <rect
+                    width={bw}
+                    height={bh}
+                    fill={color}
+                    fillOpacity={0.15}
+                    stroke={color}
+                    strokeWidth={1 / transform.k}
+                    strokeOpacity={0.3}
+                  />
+                  <text
+                    x={bw / 2}
+                    y={bh / 2 - fontSize * 0.5}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill={color}
+                    fontSize={fontSize * 0.9}
+                    opacity={0.7}
+                  >
+                    {agg.label}
+                  </text>
+                  <text
+                    x={bw / 2}
+                    y={bh / 2 + fontSize * 0.7}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill={color}
+                    fontSize={fontSize}
+                    fontWeight="bold"
+                    opacity={0.8}
+                  >
+                    {`他 ${agg.count.toLocaleString()}件 / ${formatAmount(agg.amount)}`}
+                  </text>
+                </g>
+              );
+            })}
+            </g>
+
             {/* エッジ描画 */}
             <g className="edges">
               {visibleEdges.map((edge, i) => {
@@ -1280,56 +1332,6 @@ export default function Sankey2View({ data }: Props) {
                   </foreignObject>
                 );
               })}
-            {/* 集約ノード（LOD非表示ノードの代表） — bounding box形状 */}
-            {aggregateNodes.map(agg => {
-              const { minX, minY, maxX, maxY } = agg.bbox;
-              const bw = maxX - minX;
-              const bh = maxY - minY;
-              const fontSize = 11 / transform.k;
-              const color = TYPE_COLORS[agg.type] || '#999';
-              return (
-                <g
-                  key={agg.id}
-                  transform={`translate(${minX},${minY})`}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleAggregateClick(agg)}
-                >
-                  <rect
-                    width={bw}
-                    height={bh}
-                    rx={2 / transform.k}
-                    fill={color}
-                    fillOpacity={0.08}
-                    stroke={color}
-                    strokeWidth={1.5 / transform.k}
-                    strokeDasharray={`${4 / transform.k} ${3 / transform.k}`}
-                  />
-                  <text
-                    x={bw / 2}
-                    y={bh / 2 - fontSize * 0.5}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill={color}
-                    fontSize={fontSize * 0.9}
-                    opacity={0.8}
-                  >
-                    {agg.label}
-                  </text>
-                  <text
-                    x={bw / 2}
-                    y={bh / 2 + fontSize * 0.7}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fill={color}
-                    fontSize={fontSize}
-                    fontWeight="bold"
-                  >
-                    {`他 ${agg.count.toLocaleString()}件 / ${formatAmount(agg.amount)}`}
-                  </text>
-                </g>
-              );
-            })}
-
             </g>
           </g>
         </svg>
