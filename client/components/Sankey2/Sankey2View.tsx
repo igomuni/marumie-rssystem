@@ -469,8 +469,18 @@ export default function Sankey2View({ data }: Props) {
 
   // ── 面積ベースLOD + ビューポートカリング + TopNエッジ間引き ──
 
-  const { visibleNodes, visibleEdges } = useMemo(() => {
-    if (!data) return { visibleNodes: [], visibleEdges: [] };
+  interface AggregateNode {
+    id: string;
+    type: string;
+    count: number;
+    amount: number;
+    cx: number;
+    cy: number;
+    bbox: { minX: number; minY: number; maxX: number; maxY: number };
+  }
+
+  const { visibleNodes, visibleEdges, aggregateNodes } = useMemo(() => {
+    if (!data) return { visibleNodes: [], visibleEdges: [], aggregateNodes: [] };
     const _t0 = process.env.NODE_ENV === 'development' ? performance.now() : 0;
 
     const { k, x: tx, y: ty } = transform;
@@ -485,6 +495,9 @@ export default function Sankey2View({ data }: Props) {
 
     const nodeSet = new Set<string>();
     const filteredNodes: LayoutNode[] = [];
+
+    // LOD除外ノードをtype別に集計
+    const hiddenByType = new Map<string, LayoutNode[]>();
 
     for (const node of data.nodes) {
       // 金額閾値フィルタ（totalは常に表示）
@@ -510,7 +523,15 @@ export default function Sankey2View({ data }: Props) {
       if (!inHighlight) {
         // 面積ベースLOD
         const screenArea = (node.area ?? node.width * node.height) * k2;
-        if (screenArea < MIN_SCREEN_AREA) continue;
+        if (screenArea < MIN_SCREEN_AREA) {
+          // LOD除外 → 集約候補
+          if (node.type !== 'total' && node.type !== 'ministry') {
+            let arr = hiddenByType.get(node.type);
+            if (!arr) { arr = []; hiddenByType.set(node.type, arr); }
+            arr.push(node);
+          }
+          continue;
+        }
 
         // ビューポートカリング
         if (node.x + node.width < vpLeft || node.x > vpRight) continue;
@@ -519,6 +540,34 @@ export default function Sankey2View({ data }: Props) {
 
       nodeSet.add(node.id);
       filteredNodes.push(node);
+    }
+
+    // 集約ノード生成
+    const aggNodes: AggregateNode[] = [];
+    for (const [type, nodes] of hiddenByType) {
+      if (nodes.length === 0) continue;
+      let sumX = 0, sumY = 0, sumAmount = 0;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const n of nodes) {
+        const cx = n.x + n.width / 2;
+        const cy = n.y + n.height / 2;
+        sumX += cx;
+        sumY += cy;
+        sumAmount += n.amount;
+        minX = Math.min(minX, n.x);
+        minY = Math.min(minY, n.y);
+        maxX = Math.max(maxX, n.x + n.width);
+        maxY = Math.max(maxY, n.y + n.height);
+      }
+      aggNodes.push({
+        id: `__lod-aggregate-${type}`,
+        type,
+        count: nodes.length,
+        amount: sumAmount,
+        cx: sumX / nodes.length,
+        cy: sumY / nodes.length,
+        bbox: { minX, minY, maxX, maxY },
+      });
     }
 
     const filteredEdges: LayoutEdge[] = [];
@@ -549,10 +598,25 @@ export default function Sankey2View({ data }: Props) {
 
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.debug(`[sankey2] visibleNodes=${filteredNodes.length} visibleEdges=${filteredEdges.length} ${(performance.now() - _t0).toFixed(1)}ms`);
+      console.debug(`[sankey2] visibleNodes=${filteredNodes.length} visibleEdges=${filteredEdges.length} aggregates=${aggNodes.length} ${(performance.now() - _t0).toFixed(1)}ms`);
     }
-    return { visibleNodes: filteredNodes, visibleEdges: filteredEdges };
+    return { visibleNodes: filteredNodes, visibleEdges: filteredEdges, aggregateNodes: aggNodes };
   }, [data, transform, containerSize, ministryFilter, minAmount, maxAmount, labelFilter, topEdgeSet, highlightMap, redundantEdgeSet]);
+
+  // ── 集約ノードクリック → bounding boxにズームイン ──
+
+  const handleAggregateClick = useCallback((agg: AggregateNode) => {
+    if (!containerRef.current) return;
+    const { minX, minY, maxX, maxY } = agg.bbox;
+    const bw = Math.max(maxX - minX, 1);
+    const bh = Math.max(maxY - minY, 1);
+    const cx = minX + bw / 2;
+    const cy = minY + bh / 2;
+    const cw = Math.max(1, containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0));
+    const ch = Math.max(1, containerRef.current.clientHeight);
+    const targetK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(cw / bw, ch / bh) * 0.85));
+    setTransform({ x: cw / 2 - cx * targetK, y: ch / 2 - cy * targetK, k: targetK });
+  }, [selectedNodeId]);
 
   // ── ノードクリック ──
 
@@ -1203,6 +1267,50 @@ export default function Sankey2View({ data }: Props) {
                   </foreignObject>
                 );
               })}
+            {/* 集約ノード（LOD非表示ノードの代表） */}
+            {aggregateNodes.map(agg => {
+              const sz = 120 / transform.k;
+              const fontSize = 12 / transform.k;
+              return (
+                <g
+                  key={agg.id}
+                  transform={`translate(${agg.cx - sz / 2},${agg.cy - sz / 2})`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleAggregateClick(agg)}
+                >
+                  <rect
+                    width={sz}
+                    height={sz * 0.6}
+                    rx={sz * 0.05}
+                    fill={TYPE_COLORS[agg.type] || '#999'}
+                    fillOpacity={0.15}
+                    stroke={TYPE_COLORS[agg.type] || '#999'}
+                    strokeWidth={1.5 / transform.k}
+                    strokeDasharray={`${4 / transform.k} ${3 / transform.k}`}
+                  />
+                  <text
+                    x={sz / 2}
+                    y={sz * 0.25}
+                    textAnchor="middle"
+                    fill={TYPE_COLORS[agg.type] || '#999'}
+                    fontSize={fontSize}
+                    fontWeight="bold"
+                  >
+                    {`他 ${agg.count.toLocaleString()}件`}
+                  </text>
+                  <text
+                    x={sz / 2}
+                    y={sz * 0.25 + fontSize * 1.3}
+                    textAnchor="middle"
+                    fill={TYPE_COLORS[agg.type] || '#999'}
+                    fontSize={fontSize * 0.85}
+                  >
+                    {formatAmount(agg.amount)}
+                  </text>
+                </g>
+              );
+            })}
+
             </g>
           </g>
         </svg>
