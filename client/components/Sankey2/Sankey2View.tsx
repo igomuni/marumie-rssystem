@@ -472,6 +472,7 @@ export default function Sankey2View({ data }: Props) {
   interface AggregateNode {
     id: string;
     type: string;
+    label: string;
     count: number;
     amount: number;
     cx: number;
@@ -496,8 +497,9 @@ export default function Sankey2View({ data }: Props) {
     const nodeSet = new Set<string>();
     const filteredNodes: LayoutNode[] = [];
 
-    // LOD除外ノードをtype別に集計
-    const hiddenByType = new Map<string, LayoutNode[]>();
+    // LOD除外ノードを集計キー別に収集
+    // project-budget/project-spending: type+ministry別、recipient: type別（1グループ）
+    const hiddenByKey = new Map<string, { type: string; label: string; nodes: LayoutNode[] }>();
 
     for (const node of data.nodes) {
       // 金額閾値フィルタ（totalは常に表示）
@@ -526,9 +528,19 @@ export default function Sankey2View({ data }: Props) {
         if (screenArea < MIN_SCREEN_AREA) {
           // LOD除外 → 集約候補
           if (node.type !== 'total' && node.type !== 'ministry') {
-            let arr = hiddenByType.get(node.type);
-            if (!arr) { arr = []; hiddenByType.set(node.type, arr); }
-            arr.push(node);
+            // project系: 府省庁別、recipient: 全体で1グループ
+            const key = node.type === 'recipient'
+              ? `recipient`
+              : `${node.type}::${node.ministry || '__unknown__'}`;
+            let group = hiddenByKey.get(key);
+            if (!group) {
+              const label = node.type === 'recipient'
+                ? '支出先'
+                : (node.ministry || '不明');
+              group = { type: node.type, label, nodes: [] };
+              hiddenByKey.set(key, group);
+            }
+            group.nodes.push(node);
           }
           continue;
         }
@@ -544,11 +556,11 @@ export default function Sankey2View({ data }: Props) {
 
     // 集約ノード生成
     const aggNodes: AggregateNode[] = [];
-    for (const [type, nodes] of hiddenByType) {
-      if (nodes.length === 0) continue;
+    for (const [key, group] of hiddenByKey) {
+      if (group.nodes.length === 0) continue;
       let sumX = 0, sumY = 0, sumAmount = 0;
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      for (const n of nodes) {
+      for (const n of group.nodes) {
         const cx = n.x + n.width / 2;
         const cy = n.y + n.height / 2;
         sumX += cx;
@@ -560,12 +572,13 @@ export default function Sankey2View({ data }: Props) {
         maxY = Math.max(maxY, n.y + n.height);
       }
       aggNodes.push({
-        id: `__lod-aggregate-${type}`,
-        type,
-        count: nodes.length,
+        id: `__lod-aggregate-${key}`,
+        type: group.type,
+        label: group.label,
+        count: group.nodes.length,
         amount: sumAmount,
-        cx: sumX / nodes.length,
-        cy: sumY / nodes.length,
+        cx: sumX / group.nodes.length,
+        cy: sumY / group.nodes.length,
         bbox: { minX, minY, maxX, maxY },
       });
     }
@@ -1269,40 +1282,52 @@ export default function Sankey2View({ data }: Props) {
               })}
             {/* 集約ノード（LOD非表示ノードの代表） */}
             {aggregateNodes.map(agg => {
-              const sz = 120 / transform.k;
-              const fontSize = 12 / transform.k;
+              const w = 140 / transform.k;
+              const h = 56 / transform.k;
+              const fontSize = 11 / transform.k;
+              const color = TYPE_COLORS[agg.type] || '#999';
               return (
                 <g
                   key={agg.id}
-                  transform={`translate(${agg.cx - sz / 2},${agg.cy - sz / 2})`}
+                  transform={`translate(${agg.cx - w / 2},${agg.cy - h / 2})`}
                   style={{ cursor: 'pointer' }}
                   onClick={() => handleAggregateClick(agg)}
                 >
                   <rect
-                    width={sz}
-                    height={sz * 0.6}
-                    rx={sz * 0.05}
-                    fill={TYPE_COLORS[agg.type] || '#999'}
-                    fillOpacity={0.15}
-                    stroke={TYPE_COLORS[agg.type] || '#999'}
+                    width={w}
+                    height={h}
+                    rx={3 / transform.k}
+                    fill={color}
+                    fillOpacity={0.12}
+                    stroke={color}
                     strokeWidth={1.5 / transform.k}
                     strokeDasharray={`${4 / transform.k} ${3 / transform.k}`}
                   />
                   <text
-                    x={sz / 2}
-                    y={sz * 0.25}
+                    x={w / 2}
+                    y={fontSize * 1.3}
                     textAnchor="middle"
-                    fill={TYPE_COLORS[agg.type] || '#999'}
+                    fill={color}
+                    fontSize={fontSize * 0.9}
+                    opacity={0.8}
+                  >
+                    {agg.label}
+                  </text>
+                  <text
+                    x={w / 2}
+                    y={fontSize * 2.5}
+                    textAnchor="middle"
+                    fill={color}
                     fontSize={fontSize}
                     fontWeight="bold"
                   >
                     {`他 ${agg.count.toLocaleString()}件`}
                   </text>
                   <text
-                    x={sz / 2}
-                    y={sz * 0.25 + fontSize * 1.3}
+                    x={w / 2}
+                    y={fontSize * 3.7}
                     textAnchor="middle"
-                    fill={TYPE_COLORS[agg.type] || '#999'}
+                    fill={color}
                     fontSize={fontSize * 0.85}
                   >
                     {formatAmount(agg.amount)}
