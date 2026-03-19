@@ -1156,7 +1156,7 @@ export default function Sankey2View({ data }: Props) {
           onClick={handleSvgClick}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
-            {/* 集約ノード（非表示エリアの背景塗り） */}
+            {/* ズームで表示されるノードのエリア表示 */}
             <g className="aggregate-nodes">
             {aggregateNodes.map(agg => {
               const { minX, minY, maxX, maxY } = agg.bbox;
@@ -1175,10 +1175,8 @@ export default function Sankey2View({ data }: Props) {
                     width={bw}
                     height={bh}
                     fill={color}
-                    fillOpacity={0.15}
-                    stroke={color}
-                    strokeWidth={1 / transform.k}
-                    strokeOpacity={0.3}
+                    fillOpacity={0.1}
+                    stroke="none"
                   />
                   <text
                     x={bw / 2}
@@ -1187,7 +1185,7 @@ export default function Sankey2View({ data }: Props) {
                     dominantBaseline="middle"
                     fill={color}
                     fontSize={fontSize * 0.9}
-                    opacity={0.7}
+                    opacity={0.6}
                   >
                     {agg.label}
                   </text>
@@ -1199,9 +1197,9 @@ export default function Sankey2View({ data }: Props) {
                     fill={color}
                     fontSize={fontSize}
                     fontWeight="bold"
-                    opacity={0.8}
+                    opacity={0.7}
                   >
-                    {`他 ${agg.count.toLocaleString()}件 / ${formatAmount(agg.amount)}`}
+                    {`+${agg.count.toLocaleString()}件 ${formatAmount(agg.amount)}`}
                   </text>
                 </g>
               );
