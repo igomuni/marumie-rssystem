@@ -25,7 +25,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 /** 面積ベースLOD: スクリーン上でこの面積(px²)未満のノードは描画しない */
-const MIN_SCREEN_AREA = 1;
+const MIN_SCREEN_AREA = 25;
 
 /** エッジ面積ベースLOD: スクリーン上でこの面積(px²)未満のエッジは描画しない */
 const MIN_EDGE_SCREEN_AREA = 2;
@@ -1155,7 +1155,8 @@ export default function Sankey2View({ data }: Props) {
                     width={node.width}
                     height={node.height}
                     opacity={opacity}
-                    style={{ pointerEvents: 'none', overflow: 'hidden' }}
+                    overflow="hidden"
+                    style={{ pointerEvents: 'none' }}
                   >
                     <div
                       style={{
