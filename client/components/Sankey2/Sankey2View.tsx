@@ -37,7 +37,7 @@ const EDGE_TOP_N = 3;
 const LABEL_SCREEN_AREA = 400; // ~20×20px
 
 const MIN_ZOOM = 0.02;
-const MAX_ZOOM = 1000;
+const MAX_ZOOM = 10000;
 const ZOOM_SENSITIVITY = 0.002;
 
 /** ビューポート外のマージン（px、仮想座標系） */
@@ -1235,7 +1235,8 @@ export default function Sankey2View({ data }: Props) {
                 const screenH = node.height * transform.k;
                 if (!isActive && (screenW < 20 || screenH < 10)) return null;
 
-                const fontSize = Math.min(node.height * 0.25, node.width * 0.18, 150);
+                const maxFontInLayout = 48 / transform.k; // 画面上最大48px
+                const fontSize = Math.min(node.height * 0.25, node.width * 0.18, maxFontInLayout);
                 if (!isActive && fontSize * transform.k < 6) return null;
 
                 const depth = highlightMap.get(node.id);
