@@ -25,11 +25,3 @@ body {
     text-wrap: balance;
   }
 }
-
-/* 集約ノード: ホバー時のみラベル表示 */
-.aggregate-node .aggregate-label {
-  transition: opacity 0.15s ease;
-}
-.aggregate-node:hover .aggregate-label {
-  opacity: 0.85 !important;
-}

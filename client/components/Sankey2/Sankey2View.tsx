@@ -143,6 +143,7 @@ export default function Sankey2View({ data }: Props) {
 
   // Hover / Selection state
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+  const [hoveredAggId, setHoveredAggId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isShiftHeld, setIsShiftHeld] = useState(false);
 
@@ -1156,7 +1157,7 @@ export default function Sankey2View({ data }: Props) {
           onClick={handleSvgClick}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
-            {/* ズームで表示されるノードのエリア背景塗り */}
+            {/* ズームで表示されるノードのエリア背景塗り（ホバー検知もここ） */}
             <g className="aggregate-bg">
             {aggregateNodes.map(agg => {
               const { minX, minY, maxX, maxY } = agg.bbox;
@@ -1171,6 +1172,10 @@ export default function Sankey2View({ data }: Props) {
                   fill={color}
                   fillOpacity={0.1}
                   stroke="none"
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={() => setHoveredAggId(agg.id)}
+                  onMouseLeave={() => setHoveredAggId(prev => prev === agg.id ? null : prev)}
+                  onClick={() => handleAggregateClick(agg)}
                 />
               );
             })}
@@ -1300,9 +1305,10 @@ export default function Sankey2View({ data }: Props) {
                   </foreignObject>
                 );
               })}
-            {/* 集約ノードのホバーラベル（最前面） */}
-            <g className="aggregate-labels">
+            {/* 集約ノードのホバーラベル（最前面・イベント透過） */}
+            <g style={{ pointerEvents: 'none' }}>
             {aggregateNodes.map(agg => {
+              if (hoveredAggId !== agg.id) return null;
               const { minX, minY, maxX, maxY } = agg.bbox;
               const bw = maxX - minX;
               const bh = maxY - minY;
@@ -1314,49 +1320,38 @@ export default function Sankey2View({ data }: Props) {
               return (
                 <g
                   key={agg.id}
-                  className="aggregate-node"
                   transform={`translate(${minX},${minY})`}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleAggregateClick(agg)}
                 >
-                  {/* ホバー検知用の透明矩形（エリア全体） */}
                   <rect
-                    width={bw}
-                    height={bh}
-                    fill="transparent"
+                    x={bw - labelW - pad}
+                    y={bh - labelH - pad}
+                    width={labelW}
+                    height={labelH}
+                    fill={color}
+                    fillOpacity={0.85}
+                    rx={fontSize * 0.3}
                   />
-                  <g className="aggregate-label" opacity={0}>
-                    <rect
-                      x={bw - labelW - pad}
-                      y={bh - labelH - pad}
-                      width={labelW}
-                      height={labelH}
-                      fill={color}
-                      fillOpacity={0.85}
-                      rx={fontSize * 0.3}
-                    />
-                    <text
-                      x={bw - labelW / 2 - pad}
-                      y={bh - labelH + fontSize * 0.9 - pad}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#fff"
-                      fontSize={fontSize * 0.9}
-                    >
-                      {agg.label}
-                    </text>
-                    <text
-                      x={bw - labelW / 2 - pad}
-                      y={bh - fontSize * 1.1 - pad}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#fff"
-                      fontSize={fontSize}
-                      fontWeight="bold"
-                    >
-                      {`+${agg.count.toLocaleString()}件 ${formatAmount(agg.amount)}`}
-                    </text>
-                  </g>
+                  <text
+                    x={bw - labelW / 2 - pad}
+                    y={bh - labelH + fontSize * 0.9 - pad}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#fff"
+                    fontSize={fontSize * 0.9}
+                  >
+                    {agg.label}
+                  </text>
+                  <text
+                    x={bw - labelW / 2 - pad}
+                    y={bh - fontSize * 1.1 - pad}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#fff"
+                    fontSize={fontSize}
+                    fontWeight="bold"
+                  >
+                    {`+${agg.count.toLocaleString()}件 ${formatAmount(agg.amount)}`}
+                  </text>
                 </g>
               );
             })}
