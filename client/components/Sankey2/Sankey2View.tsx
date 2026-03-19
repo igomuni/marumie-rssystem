@@ -1156,62 +1156,22 @@ export default function Sankey2View({ data }: Props) {
           onClick={handleSvgClick}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
-            {/* ズームで表示されるノードのエリア表示（ラベルはホバー時のみ） */}
-            <g className="aggregate-nodes">
+            {/* ズームで表示されるノードのエリア背景塗り */}
+            <g className="aggregate-bg">
             {aggregateNodes.map(agg => {
               const { minX, minY, maxX, maxY } = agg.bbox;
-              const bw = maxX - minX;
-              const bh = maxY - minY;
-              const fontSize = 11 / transform.k;
               const color = TYPE_COLORS[agg.type] || '#999';
               return (
-                <g
+                <rect
                   key={agg.id}
-                  className="aggregate-node"
-                  transform={`translate(${minX},${minY})`}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleAggregateClick(agg)}
-                >
-                  <rect
-                    width={bw}
-                    height={bh}
-                    fill={color}
-                    fillOpacity={0.1}
-                    stroke="none"
-                  />
-                  <g className="aggregate-label" opacity={0}>
-                    <rect
-                      x={bw - fontSize * 12}
-                      y={bh - fontSize * 3.2}
-                      width={fontSize * 12}
-                      height={fontSize * 3.2}
-                      fill="#000"
-                      fillOpacity={0.7}
-                      rx={fontSize * 0.3}
-                    />
-                    <text
-                      x={bw - fontSize * 6}
-                      y={bh - fontSize * 2.1}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#fff"
-                      fontSize={fontSize * 0.9}
-                    >
-                      {agg.label}
-                    </text>
-                    <text
-                      x={bw - fontSize * 6}
-                      y={bh - fontSize * 0.8}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fill="#fff"
-                      fontSize={fontSize}
-                      fontWeight="bold"
-                    >
-                      {`+${agg.count.toLocaleString()}件 ${formatAmount(agg.amount)}`}
-                    </text>
-                  </g>
-                </g>
+                  x={minX}
+                  y={minY}
+                  width={maxX - minX}
+                  height={maxY - minY}
+                  fill={color}
+                  fillOpacity={0.1}
+                  stroke="none"
+                />
               );
             })}
             </g>
@@ -1340,6 +1300,68 @@ export default function Sankey2View({ data }: Props) {
                   </foreignObject>
                 );
               })}
+            {/* 集約ノードのホバーラベル（最前面） */}
+            <g className="aggregate-labels">
+            {aggregateNodes.map(agg => {
+              const { minX, minY, maxX, maxY } = agg.bbox;
+              const bw = maxX - minX;
+              const bh = maxY - minY;
+              const fontSize = 11 / transform.k;
+              const pad = fontSize * 0.5;
+              const color = TYPE_COLORS[agg.type] || '#999';
+              const labelW = fontSize * 12;
+              const labelH = fontSize * 3.2;
+              return (
+                <g
+                  key={agg.id}
+                  className="aggregate-node"
+                  transform={`translate(${minX},${minY})`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleAggregateClick(agg)}
+                >
+                  {/* ホバー検知用の透明矩形（エリア全体） */}
+                  <rect
+                    width={bw}
+                    height={bh}
+                    fill="transparent"
+                  />
+                  <g className="aggregate-label" opacity={0}>
+                    <rect
+                      x={bw - labelW - pad}
+                      y={bh - labelH - pad}
+                      width={labelW}
+                      height={labelH}
+                      fill={color}
+                      fillOpacity={0.85}
+                      rx={fontSize * 0.3}
+                    />
+                    <text
+                      x={bw - labelW / 2 - pad}
+                      y={bh - labelH + fontSize * 0.9 - pad}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#fff"
+                      fontSize={fontSize * 0.9}
+                    >
+                      {agg.label}
+                    </text>
+                    <text
+                      x={bw - labelW / 2 - pad}
+                      y={bh - fontSize * 1.1 - pad}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fill="#fff"
+                      fontSize={fontSize}
+                      fontWeight="bold"
+                    >
+                      {`+${agg.count.toLocaleString()}件 ${formatAmount(agg.amount)}`}
+                    </text>
+                  </g>
+                </g>
+              );
+            })}
+            </g>
+
             </g>
           </g>
         </svg>
