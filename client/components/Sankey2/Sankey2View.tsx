@@ -37,7 +37,7 @@ const EDGE_TOP_N = 3;
 const LABEL_SCREEN_AREA = 400; // ~20×20px
 
 const MIN_ZOOM = 0.02;
-const MAX_ZOOM = 100;
+const MAX_ZOOM = 1000;
 const ZOOM_SENSITIVITY = 0.002;
 
 /** ビューポート外のマージン（px、仮想座標系） */
@@ -1172,7 +1172,7 @@ export default function Sankey2View({ data }: Props) {
                         padding: `${fontSize * 0.1}px`,
                       }}
                     >
-                      <div style={{ fontSize: `${fontSize}px`, lineHeight: 1.1, wordBreak: 'break-all' }}>
+                      <div style={{ fontSize: `${fontSize}px`, lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
                         {node.label}
                       </div>
                       {showAmount && (
