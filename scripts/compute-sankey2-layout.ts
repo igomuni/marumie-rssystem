@@ -235,6 +235,49 @@ function squarifiedTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
   return results;
 }
 
+/** 金額順スライスレイアウト: 入力順を保持して左上→右下に配置 */
+function sliceTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
+  if (items.length === 0) return [];
+
+  const totalValue = items.reduce((s, it) => s + it.value, 0);
+  if (totalValue <= 0) {
+    return items.map((it, i) => ({
+      key: it.key,
+      rect: { x: rect.x, y: rect.y + (rect.height / items.length) * i, width: rect.width, height: rect.height / items.length },
+      data: it.data,
+    }));
+  }
+
+  const positiveItems = items.filter(it => it.value > 0);
+  const zeroItems = items.filter(it => it.value <= 0);
+  const results: TreemapResult[] = [];
+
+  let remaining = { ...rect };
+  let remainingValue = positiveItems.reduce((s, it) => s + it.value, 0);
+
+  for (const item of positiveItems) {
+    const fraction = item.value / remainingValue;
+    const isVerticalSlice = remaining.width >= remaining.height;
+
+    if (isVerticalSlice) {
+      const w = remaining.width * fraction;
+      results.push({ key: item.key, rect: { x: remaining.x, y: remaining.y, width: w, height: remaining.height }, data: item.data });
+      remaining = { x: remaining.x + w, y: remaining.y, width: remaining.width - w, height: remaining.height };
+    } else {
+      const h = remaining.height * fraction;
+      results.push({ key: item.key, rect: { x: remaining.x, y: remaining.y, width: remaining.width, height: h }, data: item.data });
+      remaining = { x: remaining.x, y: remaining.y + h, width: remaining.width, height: remaining.height - h };
+    }
+    remainingValue -= item.value;
+  }
+
+  for (const item of zeroItems) {
+    results.push({ key: item.key, rect: { x: rect.x, y: rect.y, width: 0, height: 0 }, data: item.data });
+  }
+
+  return results;
+}
+
 /** アスペクト比の最悪値を計算 */
 function worstRatio(
   row: TreemapItem[],
@@ -441,8 +484,42 @@ function main() {
         layoutNodes.push(ln);
         layoutNodeMap.set(ln.id, ln);
       }
+    } else if (clusterType === 'recipient') {
+      // recipient: 金額降順の1段階スライスレイアウト（府省庁グループなし）
+      const allRecipients = graph.nodes
+        .filter(n => n.type === 'recipient')
+        .sort((a, b) => b.amount - a.amount);
+
+      const items: TreemapItem[] = allRecipients.map(n => ({
+        key: n.id,
+        value: n.amount,
+        data: n,
+      }));
+
+      const results = sliceTreemap(items, clusterRect);
+      for (const res of results) {
+        if (!res.data) continue;
+        const r = applyGap(res.rect, NODE_GAP);
+        const ministry = recipientMinistry.get(res.data.id);
+        const ln: LayoutNode = {
+          id: res.data.id,
+          label: res.data.label,
+          type: res.data.type,
+          amount: res.data.amount,
+          x: r.x,
+          y: r.y,
+          width: r.width,
+          height: r.height,
+          area: r.width * r.height,
+          ...(ministry && { ministry }),
+          ...(res.data.isIndirect && { isIndirect: true }),
+          ...(res.data.chainPaths && res.data.chainPaths.length > 0 && { chainPaths: res.data.chainPaths }),
+        };
+        layoutNodes.push(ln);
+        layoutNodeMap.set(ln.id, ln);
+      }
     } else {
-      // project-budget, project-spending, recipient: 2段階treemap
+      // project-budget, project-spending: 2段階treemap
 
       // 第1層: 府省庁グループのtreemap
       const ministryItems: TreemapItem[] = [];
@@ -455,21 +532,6 @@ function main() {
             key: mn.label,
             value: groupValue,
             children: nodes.map(n => ({ key: n.id, value: n.amount, data: n })),
-          });
-        }
-      }
-
-      // 未帰属ノード（recipientで府省庁不明）
-      if (clusterType === 'recipient') {
-        const unassigned = graph.nodes.filter(
-          n => n.type === 'recipient' && !recipientMinistry.has(n.id)
-        );
-        if (unassigned.length > 0) {
-          const uValue = unassigned.reduce((s, n) => s + n.amount, 0);
-          ministryItems.push({
-            key: '__unassigned__',
-            value: uValue,
-            children: unassigned.map(n => ({ key: n.id, value: n.amount, data: n })),
           });
         }
       }
