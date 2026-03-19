@@ -1180,22 +1180,31 @@ export default function Sankey2View({ data }: Props) {
                     stroke="none"
                   />
                   <g className="aggregate-label" opacity={0}>
+                    <rect
+                      x={bw - fontSize * 12}
+                      y={bh - fontSize * 3.2}
+                      width={fontSize * 12}
+                      height={fontSize * 3.2}
+                      fill="#000"
+                      fillOpacity={0.7}
+                      rx={fontSize * 0.3}
+                    />
                     <text
-                      x={bw / 2}
-                      y={bh / 2 - fontSize * 0.5}
+                      x={bw - fontSize * 6}
+                      y={bh - fontSize * 2.1}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      fill={color}
+                      fill="#fff"
                       fontSize={fontSize * 0.9}
                     >
                       {agg.label}
                     </text>
                     <text
-                      x={bw / 2}
-                      y={bh / 2 + fontSize * 0.7}
+                      x={bw - fontSize * 6}
+                      y={bh - fontSize * 0.8}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      fill={color}
+                      fill="#fff"
                       fontSize={fontSize}
                       fontWeight="bold"
                     >
