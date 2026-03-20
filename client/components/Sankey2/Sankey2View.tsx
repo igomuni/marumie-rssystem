@@ -25,7 +25,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 /** 面積ベースLOD: スクリーン上でこの面積(px²)未満のノードは描画しない */
-const MIN_SCREEN_AREA = 1;
+const MIN_SCREEN_AREA = 4;
 
 /** エッジ面積ベースLOD: スクリーン上でこの面積(px²)未満のエッジは描画しない */
 const MIN_EDGE_SCREEN_AREA = 2;
@@ -37,7 +37,7 @@ const EDGE_TOP_N = 3;
 const LABEL_SCREEN_AREA = 400; // ~20×20px
 
 const MIN_ZOOM = 0.02;
-const MAX_ZOOM = 100;
+const MAX_ZOOM = 1350;
 const ZOOM_SENSITIVITY = 0.002;
 
 /** ビューポート外のマージン（px、仮想座標系） */
@@ -82,8 +82,8 @@ interface EdgeIndex {
 function formatAmount(amount: number): string {
   if (amount >= 1e12) return `${(amount / 1e12).toFixed(1)}兆円`;
   if (amount >= 1e8) return `${(amount / 1e8).toFixed(0)}億円`;
-  if (amount >= 1e4) return `${(amount / 1e4).toFixed(0)}万円`;
-  return `${amount.toLocaleString()}円`;
+  if (amount >= 1e4) return `${Math.round(amount / 1e4)}万円`;
+  return `${Math.round(amount).toLocaleString()}円`;
 }
 
 /** polyline points文字列を生成 */
@@ -142,8 +142,12 @@ export default function Sankey2View({ data }: Props) {
   const panStartRef = useRef({ x: 0, y: 0 });
 
   // Hover / Selection state
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+  const [hoveredAggId, setHoveredAggId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isEditingZoom, setIsEditingZoom] = useState(false);
+  const [zoomInputValue, setZoomInputValue] = useState('');
   const [isShiftHeld, setIsShiftHeld] = useState(false);
 
   // コンテナサイズ
@@ -225,8 +229,13 @@ export default function Sankey2View({ data }: Props) {
     const map = new Map<string, { start: () => void; end: () => void }>();
     for (const node of data.nodes) {
       map.set(node.id, {
-        start: () => setHoveredNodeId(node.id),
-        end: () => setHoveredNodeId(null),
+        start: () => {
+          if (hoverTimeoutRef.current) { clearTimeout(hoverTimeoutRef.current); hoverTimeoutRef.current = null; }
+          setHoveredNodeId(node.id);
+        },
+        end: () => {
+          hoverTimeoutRef.current = setTimeout(() => setHoveredNodeId(null), 120);
+        },
       });
     }
     return map;
@@ -455,22 +464,42 @@ export default function Sankey2View({ data }: Props) {
     return set;
   }, [data, edgeIndex]);
 
-  // ── ハイライト: BFS or 1-hop ──
+  // ── ハイライト: BFS or 1-hop（選択とホバーは独立） ──
 
-  const activeNodeId = selectedNodeId ?? hoveredNodeId;
+  const activeNodeId = hoveredNodeId ?? selectedNodeId;
 
   const highlightMap = useMemo(() => {
-    if (!activeNodeId) return new Map<string, number>();
     const maxDepth = isShiftHeld ? BFS_MAX_DEPTH : 1;
-    return bfsHighlight(activeNodeId, edgeIndex, maxDepth);
-  }, [activeNodeId, edgeIndex, isShiftHeld]);
+    if (!hoveredNodeId && !selectedNodeId) return new Map<string, number>();
+    // 選択とホバー両方のBFSをマージ（近い方の距離を採用）
+    const selected = selectedNodeId ? bfsHighlight(selectedNodeId, edgeIndex, maxDepth) : new Map<string, number>();
+    if (!hoveredNodeId || hoveredNodeId === selectedNodeId) return selected;
+    const hovered = bfsHighlight(hoveredNodeId, edgeIndex, maxDepth);
+    const merged = new Map(selected);
+    for (const [id, dist] of hovered) {
+      const existing = merged.get(id);
+      merged.set(id, existing !== undefined ? Math.min(existing, dist) : dist);
+    }
+    return merged;
+  }, [hoveredNodeId, selectedNodeId, edgeIndex, isShiftHeld]);
 
   const isHighlighting = highlightMap.size > 0;
 
   // ── 面積ベースLOD + ビューポートカリング + TopNエッジ間引き ──
 
-  const { visibleNodes, visibleEdges } = useMemo(() => {
-    if (!data) return { visibleNodes: [], visibleEdges: [] };
+  interface AggregateNode {
+    id: string;
+    type: string;
+    label: string;
+    count: number;
+    amount: number;
+    cx: number;
+    cy: number;
+    bbox: { minX: number; minY: number; maxX: number; maxY: number };
+  }
+
+  const { visibleNodes, visibleEdges, aggregateNodes } = useMemo(() => {
+    if (!data) return { visibleNodes: [], visibleEdges: [], aggregateNodes: [] };
     const _t0 = process.env.NODE_ENV === 'development' ? performance.now() : 0;
 
     const { k, x: tx, y: ty } = transform;
@@ -485,6 +514,10 @@ export default function Sankey2View({ data }: Props) {
 
     const nodeSet = new Set<string>();
     const filteredNodes: LayoutNode[] = [];
+
+    // LOD除外ノードを集計キー別に収集
+    // project-budget/project-spending: type+ministry別、recipient: type別（1グループ）
+    const hiddenByKey = new Map<string, { type: string; label: string; nodes: LayoutNode[] }>();
 
     for (const node of data.nodes) {
       // 金額閾値フィルタ（totalは常に表示）
@@ -510,7 +543,25 @@ export default function Sankey2View({ data }: Props) {
       if (!inHighlight) {
         // 面積ベースLOD
         const screenArea = (node.area ?? node.width * node.height) * k2;
-        if (screenArea < MIN_SCREEN_AREA) continue;
+        if (screenArea < MIN_SCREEN_AREA) {
+          // LOD除外 → 集約候補
+          if (node.type !== 'total' && node.type !== 'ministry') {
+            // project系: 府省庁別、recipient: 全体で1グループ
+            const key = node.type === 'recipient'
+              ? `recipient`
+              : `${node.type}::${node.ministry || '__unknown__'}`;
+            let group = hiddenByKey.get(key);
+            if (!group) {
+              const label = node.type === 'recipient'
+                ? '支出先'
+                : (node.ministry || '不明');
+              group = { type: node.type, label, nodes: [] };
+              hiddenByKey.set(key, group);
+            }
+            group.nodes.push(node);
+          }
+          continue;
+        }
 
         // ビューポートカリング
         if (node.x + node.width < vpLeft || node.x > vpRight) continue;
@@ -519,6 +570,35 @@ export default function Sankey2View({ data }: Props) {
 
       nodeSet.add(node.id);
       filteredNodes.push(node);
+    }
+
+    // 集約ノード生成
+    const aggNodes: AggregateNode[] = [];
+    for (const [key, group] of hiddenByKey) {
+      if (group.nodes.length === 0) continue;
+      let sumX = 0, sumY = 0, sumAmount = 0;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const n of group.nodes) {
+        const cx = n.x + n.width / 2;
+        const cy = n.y + n.height / 2;
+        sumX += cx;
+        sumY += cy;
+        sumAmount += n.amount;
+        minX = Math.min(minX, n.x);
+        minY = Math.min(minY, n.y);
+        maxX = Math.max(maxX, n.x + n.width);
+        maxY = Math.max(maxY, n.y + n.height);
+      }
+      aggNodes.push({
+        id: `__lod-aggregate-${key}`,
+        type: group.type,
+        label: group.label,
+        count: group.nodes.length,
+        amount: sumAmount,
+        cx: sumX / group.nodes.length,
+        cy: sumY / group.nodes.length,
+        bbox: { minX, minY, maxX, maxY },
+      });
     }
 
     const filteredEdges: LayoutEdge[] = [];
@@ -549,10 +629,25 @@ export default function Sankey2View({ data }: Props) {
 
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.debug(`[sankey2] visibleNodes=${filteredNodes.length} visibleEdges=${filteredEdges.length} ${(performance.now() - _t0).toFixed(1)}ms`);
+      console.debug(`[sankey2] visibleNodes=${filteredNodes.length} visibleEdges=${filteredEdges.length} aggregates=${aggNodes.length} ${(performance.now() - _t0).toFixed(1)}ms`);
     }
-    return { visibleNodes: filteredNodes, visibleEdges: filteredEdges };
+    return { visibleNodes: filteredNodes, visibleEdges: filteredEdges, aggregateNodes: aggNodes };
   }, [data, transform, containerSize, ministryFilter, minAmount, maxAmount, labelFilter, topEdgeSet, highlightMap, redundantEdgeSet]);
+
+  // ── 集約ノードクリック → bounding boxにズームイン ──
+
+  const handleAggregateClick = useCallback((agg: AggregateNode) => {
+    if (!containerRef.current) return;
+    const { minX, minY, maxX, maxY } = agg.bbox;
+    const bw = Math.max(maxX - minX, 1);
+    const bh = Math.max(maxY - minY, 1);
+    const cx = minX + bw / 2;
+    const cy = minY + bh / 2;
+    const cw = Math.max(1, containerRef.current.clientWidth - (selectedNodeId ? PANEL_WIDTH : 0));
+    const ch = Math.max(1, containerRef.current.clientHeight);
+    const targetK = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(cw / bw, ch / bh) * 0.85));
+    setTransform({ x: cw / 2 - cx * targetK, y: ch / 2 - cy * targetK, k: targetK });
+  }, [selectedNodeId]);
 
   // ── ノードクリック ──
 
@@ -775,6 +870,17 @@ export default function Sankey2View({ data }: Props) {
     });
   }, []);
 
+  /** 指定倍率にズーム（画面中心を基準） */
+  const handleZoomTo = useCallback((newK: number) => {
+    setTransform(prev => {
+      const cw = containerRef.current?.clientWidth ?? 0;
+      const ch = containerRef.current?.clientHeight ?? 0;
+      const clampedK = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newK));
+      const ratio = clampedK / prev.k;
+      return { x: cw / 2 - (cw / 2 - prev.x) * ratio, y: ch / 2 - (ch / 2 - prev.y) * ratio, k: clampedK };
+    });
+  }, []);
+
   /** Fit: Activeノード + 接続ノードがすべて見えるZoom */
   const handleZoomFitActive = useCallback(() => {
     if (!activeNodeId || !containerRef.current) return;
@@ -854,6 +960,12 @@ export default function Sankey2View({ data }: Props) {
   }
 
   const k2 = transform.k * transform.k;
+  // ノード表示閾値金額: この金額以下のノードはLODで非表示
+  // amount = MIN_SCREEN_AREA × totalAmount / (CLUSTER_AREA × k² × GAP_FACTOR)
+  const TOTAL_AMOUNT = 151_123_034_375_145;
+  const CLUSTER_AREA = 4000 * 4000;
+  const GAP_FACTOR = 0.64; // (1 - 0.2)²
+  const thresholdAmount = Math.round(MIN_SCREEN_AREA * TOTAL_AMOUNT / (CLUSTER_AREA * k2 * GAP_FACTOR));
   const showPanel = selectedNodeId !== null;
   const selectedNode = selectedNodeId ? nodeMap.get(selectedNodeId) : undefined;
 
@@ -873,7 +985,7 @@ export default function Sankey2View({ data }: Props) {
           <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg px-3 py-2 text-xs text-gray-600 dark:text-gray-300 shadow-sm backdrop-blur-sm">
             <div className="font-semibold mb-1">/sankey2 予算フロー</div>
             <div>描画: {visibleNodes.length.toLocaleString()} nodes / {visibleEdges.length.toLocaleString()} edges</div>
-            <div>Zoom: {(transform.k * 100).toFixed(0)}%</div>
+            <div>Zoom: {(transform.k * 100).toFixed(0)}% （≥{formatAmount(thresholdAmount)}）</div>
             {isShiftHeld && <div className="text-blue-500 font-semibold mt-1">Shift: BFS {BFS_MAX_DEPTH}ホップ</div>}
             {minAmount > 0 && <div className="text-orange-500 mt-0.5">最小金額: {formatAmount(minAmount)}</div>}
             {maxAmount < Infinity && <div className="text-orange-500 mt-0.5">最大金額: {formatAmount(maxAmount)}</div>}
@@ -1023,26 +1135,78 @@ export default function Sankey2View({ data }: Props) {
           className="absolute z-10 flex flex-col gap-1"
           style={{ bottom: MINIMAP_PADDING + minimapHeight + 8, left: MINIMAP_PADDING }}
         >
-          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden">
+          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden" style={{ width: 44 }}>
             <button onClick={handleZoomIn} className="px-2.5 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="ズームイン">＋</button>
-            <div className="text-[10px] text-center text-gray-500 dark:text-gray-400 border-y border-gray-200 dark:border-gray-700 py-0.5">
-              {(transform.k * 100).toFixed(0)}%
+            {/* Zoomスライダー（対数スケール） */}
+            <div className="px-1 py-1 flex justify-center border-y border-gray-200 dark:border-gray-700">
+              <input
+                type="range"
+                min={Math.log10(MIN_ZOOM)}
+                max={Math.log10(MAX_ZOOM)}
+                step={0.01}
+                value={Math.log10(transform.k)}
+                onChange={e => handleZoomTo(Math.pow(10, parseFloat(e.target.value)))}
+                className="h-20 accent-gray-500"
+                style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 16 }}
+                title={`Zoom: ${(transform.k * 100).toFixed(0)}%`}
+              />
             </div>
             <button onClick={handleZoomOut} className="px-2.5 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="ズームアウト">ー</button>
           </div>
-          <button onClick={handleZoomFit} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center" title="全体表示">
+          {/* Zoom率 直接入力 */}
+          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm overflow-hidden" style={{ width: 44 }}>
+            {isEditingZoom ? (
+              <input
+                type="text"
+                autoFocus
+                value={zoomInputValue}
+                onChange={e => setZoomInputValue(e.target.value)}
+                onBlur={() => {
+                  const v = parseFloat(zoomInputValue);
+                  if (!isNaN(v) && v > 0) handleZoomTo(v / 100);
+                  setIsEditingZoom(false);
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    const v = parseFloat(zoomInputValue);
+                    if (!isNaN(v) && v > 0) handleZoomTo(v / 100);
+                    setIsEditingZoom(false);
+                  } else if (e.key === 'Escape') {
+                    setIsEditingZoom(false);
+                  }
+                }}
+                className="w-full text-[10px] text-center py-1 bg-transparent text-gray-700 dark:text-gray-200 outline-none"
+              />
+            ) : (
+              <button
+                onClick={() => { setZoomInputValue((transform.k * 100).toFixed(0)); setIsEditingZoom(true); }}
+                className="w-full text-[10px] text-center py-1 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-text"
+                title="クリックしてZoom率を直接入力"
+              >
+                {(transform.k * 100).toFixed(0)}%
+              </button>
+            )}
+          </div>
+          {/* 表示閾値金額 */}
+          <div
+            className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm text-[9px] text-center text-gray-400 dark:text-gray-500 py-1 px-1 leading-tight"
+            style={{ width: 44 }}
+            title={`現在のZoomで表示可能な最小ノード金額（概算）: ${formatAmount(thresholdAmount)}`}
+          >
+            <div>≥</div>
+            <div>{formatAmount(thresholdAmount)}</div>
+          </div>
+          <button onClick={handleZoomFit} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center" style={{ width: 44 }} title="全体表示">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
           </button>
-          {activeNodeId && (
-            <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden">
-              <button onClick={handleZoomFitActive} className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center" title="接続ノードを含めてフィット">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-              </button>
-              <button onClick={handleZoomFocusActive} className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center border-t border-gray-200 dark:border-gray-700" title="選択ノードにフォーカス">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
-              </button>
-            </div>
-          )}
+          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden" style={{ width: 44 }}>
+            <button onClick={handleZoomFitActive} className={`px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center ${activeNodeId ? 'text-blue-500' : 'text-gray-400 dark:text-gray-600'}`} title="接続ノードを含めてフィット" disabled={!activeNodeId}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+            </button>
+            <button onClick={handleZoomFocusActive} className={`px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center border-t border-gray-200 dark:border-gray-700 ${activeNodeId ? 'text-blue-500' : 'text-gray-400 dark:text-gray-600'}`} title="選択ノードにフォーカス" disabled={!activeNodeId}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
+            </button>
+          </div>
         </div>
 
         {/* Minimap */}
@@ -1079,8 +1243,32 @@ export default function Sankey2View({ data }: Props) {
           onClick={handleSvgClick}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
-            {/* エッジ描画 */}
-            <g className="edges">
+            {/* ズームで表示されるノードのエリア背景塗り（ホバー検知もここ） */}
+            <g className="aggregate-bg">
+            {aggregateNodes.map(agg => {
+              const { minX, minY, maxX, maxY } = agg.bbox;
+              const color = TYPE_COLORS[agg.type] || '#999';
+              return (
+                <rect
+                  key={agg.id}
+                  x={minX}
+                  y={minY}
+                  width={maxX - minX}
+                  height={maxY - minY}
+                  fill={color}
+                  fillOpacity={0.1}
+                  stroke="none"
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={() => setHoveredAggId(agg.id)}
+                  onMouseLeave={() => setHoveredAggId(prev => prev === agg.id ? null : prev)}
+                  onClick={() => handleAggregateClick(agg)}
+                />
+              );
+            })}
+            </g>
+
+            {/* エッジ描画（pointer-events:none で集約ノードホバーを妨げない） */}
+            <g className="edges" style={{ pointerEvents: 'none' }}>
               {visibleEdges.map((edge, i) => {
                 const srcDist = highlightMap.get(edge.source);
                 const tgtDist = highlightMap.get(edge.target);
@@ -1133,7 +1321,8 @@ export default function Sankey2View({ data }: Props) {
                 const screenH = node.height * transform.k;
                 if (!isActive && (screenW < 20 || screenH < 10)) return null;
 
-                const fontSize = Math.min(node.height * 0.25, node.width * 0.18, 150);
+                const maxFontInLayout = 48 / transform.k; // 画面上最大48px
+                const fontSize = Math.min(node.height * 0.25, node.width * 0.18, maxFontInLayout);
                 if (!isActive && fontSize * transform.k < 6) return null;
 
                 const depth = highlightMap.get(node.id);
@@ -1155,7 +1344,8 @@ export default function Sankey2View({ data }: Props) {
                     width={node.width}
                     height={node.height}
                     opacity={opacity}
-                    style={{ pointerEvents: 'none', overflow: 'hidden' }}
+                    overflow="hidden"
+                    style={{ pointerEvents: 'none' }}
                   >
                     <div
                       style={{
@@ -1165,6 +1355,7 @@ export default function Sankey2View({ data }: Props) {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        pointerEvents: 'none',
                         color: '#fff',
                         textShadow: '0 0 3px rgba(0,0,0,0.9)',
                         textAlign: 'center',
@@ -1172,7 +1363,7 @@ export default function Sankey2View({ data }: Props) {
                         padding: `${fontSize * 0.1}px`,
                       }}
                     >
-                      <div style={{ fontSize: `${fontSize}px`, lineHeight: 1.1, wordBreak: 'break-all' }}>
+                      <div style={{ fontSize: `${fontSize}px`, lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
                         {node.label}
                       </div>
                       {showAmount && (
@@ -1202,8 +1393,119 @@ export default function Sankey2View({ data }: Props) {
                   </foreignObject>
                 );
               })}
+            {/* 集約ノードのホバーラベル（最前面・イベント透過） */}
+            <g style={{ pointerEvents: 'none' }}>
+            {aggregateNodes.map(agg => {
+              if (hoveredAggId !== agg.id) return null;
+              const { minX, minY, maxX, maxY } = agg.bbox;
+              const bw = maxX - minX;
+              const bh = maxY - minY;
+              const fontSize = 11 / transform.k;
+              const pad = fontSize * 0.5;
+              const color = TYPE_COLORS[agg.type] || '#999';
+              const labelW = fontSize * 12;
+              const labelH = fontSize * 3.2;
+              return (
+                <g
+                  key={agg.id}
+                  transform={`translate(${minX},${minY})`}
+                >
+                  <rect
+                    x={bw - labelW - pad}
+                    y={bh - labelH - pad}
+                    width={labelW}
+                    height={labelH}
+                    fill={color}
+                    fillOpacity={0.85}
+                    rx={fontSize * 0.3}
+                  />
+                  <text
+                    x={bw - labelW / 2 - pad}
+                    y={bh - labelH + fontSize * 0.9 - pad}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#fff"
+                    fontSize={fontSize * 0.9}
+                  >
+                    {agg.label}
+                  </text>
+                  <text
+                    x={bw - labelW / 2 - pad}
+                    y={bh - fontSize * 1.1 - pad}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="#fff"
+                    fontSize={fontSize}
+                    fontWeight="bold"
+                  >
+                    {`+${agg.count.toLocaleString()}件 ${formatAmount(agg.amount)}`}
+                  </text>
+                </g>
+              );
+            })}
+            </g>
+
+
             </g>
           </g>
+
+          {/* ノードツールチップ（transformグループ外・スクリーン座標で描画） */}
+          {hoveredNodeId && (() => {
+            const node = nodeMap.get(hoveredNodeId);
+            if (!node) return null;
+            const tipFontSize = 11; // スクリーンpx固定
+            // ノード内ラベルのフォントサイズ（スクリーンpx換算）
+            const nodeLabelScreenFont = Math.min(node.height * 0.25, node.width * 0.18, 48 / transform.k) * transform.k;
+            // ノード内ラベルがツールチップ以上のサイズで、テキストがノード幅に収まっている場合はツールチップ不要
+            const nodeScreenW = node.width * transform.k;
+            const textFitsInNode = nodeLabelScreenFont >= tipFontSize
+              && node.label.length * nodeLabelScreenFont * 0.6 <= nodeScreenW;
+            if (textFitsInNode) return null;
+            const color = TYPE_COLORS[node.type] || '#999';
+            const tipW = 200;
+            const tipH = 80;
+            // ノード中央上にスクリーン座標で配置
+            const screenCx = node.x * transform.k + transform.x + nodeScreenW / 2;
+            const screenTop = node.y * transform.k + transform.y;
+            const lx = screenCx - tipW / 2;
+            const ly = screenTop - tipH - 6;
+            return (
+              <foreignObject
+                x={lx}
+                y={ly}
+                width={tipW}
+                height={tipH}
+                overflow="visible"
+              >
+                <div
+                  style={{
+                    background: color,
+                    opacity: 0.92,
+                    borderRadius: 4,
+                    padding: '5px 8px',
+                    color: '#fff',
+                    textAlign: 'center',
+                    fontSize: tipFontSize,
+                    lineHeight: 1.3,
+                    wordBreak: 'break-word',
+                    border: '1.5px solid rgba(255,255,255,0.6)',
+                  }}
+                  onMouseEnter={() => {
+                    if (hoverTimeoutRef.current) { clearTimeout(hoverTimeoutRef.current); hoverTimeoutRef.current = null; }
+                  }}
+                  onMouseLeave={() => {
+                    hoverTimeoutRef.current = setTimeout(() => setHoveredNodeId(null), 120);
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold' }}>{node.label}</div>
+                  <div style={{ fontSize: tipFontSize * 0.9 }}>{formatAmount(node.amount)}</div>
+                  {node.ministry && node.type !== 'ministry' && (
+                    <div style={{ fontSize: tipFontSize * 0.8, opacity: 0.8 }}>{node.ministry}</div>
+                  )}
+                </div>
+              </foreignObject>
+            );
+          })()}
         </svg>
       </div>
 
@@ -1584,9 +1886,7 @@ const MemoNodeRect = React.memo(function NodeRect({
         fill={color}
         stroke={highlighted ? '#fff' : 'none'}
         strokeWidth={highlighted ? 2 / zoom : 0}
-      >
-        <title>{`${node.label}\n${formatAmount(node.amount)}`}</title>
-      </rect>
+      />
     </g>
   );
 });

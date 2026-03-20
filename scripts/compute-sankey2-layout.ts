@@ -235,6 +235,82 @@ function squarifiedTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
   return results;
 }
 
+/** 順序保持treemap: squarifyの行構築ロジックを使い、入力順を保持 */
+function sliceTreemap(items: TreemapItem[], rect: Rect): TreemapResult[] {
+  if (items.length === 0) return [];
+
+  const totalValue = items.reduce((s, it) => s + it.value, 0);
+  if (totalValue <= 0) {
+    return items.map((it, i) => ({
+      key: it.key,
+      rect: { x: rect.x, y: rect.y + (rect.height / items.length) * i, width: rect.width, height: rect.height / items.length },
+      data: it.data,
+    }));
+  }
+
+  const positiveItems = items.filter(it => it.value > 0);
+  const zeroItems = items.filter(it => it.value <= 0);
+  const results: TreemapResult[] = [];
+
+  let remaining = { ...rect };
+  let remainingValue = positiveItems.reduce((s, it) => s + it.value, 0);
+  let idx = 0;
+
+  while (idx < positiveItems.length) {
+    const isVerticalSlice = remaining.width >= remaining.height;
+    const sideLength = isVerticalSlice ? remaining.height : remaining.width;
+
+    // 行を構築: アスペクト比が改善する限りアイテムを追加（squarify方式）
+    const row: TreemapItem[] = [positiveItems[idx]];
+    let rowValue = positiveItems[idx].value;
+    idx++;
+
+    while (idx < positiveItems.length) {
+      const candidate = positiveItems[idx];
+      const newRowValue = rowValue + candidate.value;
+      const currentWorst = worstRatio(row, rowValue, sideLength, remainingValue, remaining);
+      const newWorst = worstRatio([...row, candidate], newRowValue, sideLength, remainingValue, remaining);
+      if (newWorst > currentWorst) break;
+      row.push(candidate);
+      rowValue = newRowValue;
+      idx++;
+    }
+
+    // 行を配置
+    const rowFraction = rowValue / remainingValue;
+    const rowThickness = isVerticalSlice
+      ? remaining.width * rowFraction
+      : remaining.height * rowFraction;
+
+    let offset = 0;
+    for (const item of row) {
+      const itemFraction = item.value / rowValue;
+      const itemLength = sideLength * itemFraction;
+
+      const itemRect: Rect = isVerticalSlice
+        ? { x: remaining.x, y: remaining.y + offset, width: rowThickness, height: itemLength }
+        : { x: remaining.x + offset, y: remaining.y, width: itemLength, height: rowThickness };
+
+      results.push({ key: item.key, rect: itemRect, data: item.data });
+      offset += itemLength;
+    }
+
+    // 残り領域を更新
+    if (isVerticalSlice) {
+      remaining = { x: remaining.x + rowThickness, y: remaining.y, width: remaining.width - rowThickness, height: remaining.height };
+    } else {
+      remaining = { x: remaining.x, y: remaining.y + rowThickness, width: remaining.width, height: remaining.height - rowThickness };
+    }
+    remainingValue -= rowValue;
+  }
+
+  for (const item of zeroItems) {
+    results.push({ key: item.key, rect: { x: rect.x, y: rect.y, width: 0, height: 0 }, data: item.data });
+  }
+
+  return results;
+}
+
 /** アスペクト比の最悪値を計算 */
 function worstRatio(
   row: TreemapItem[],
@@ -305,11 +381,13 @@ function valueToWidth(value: number, maxValue: number): number {
   return Math.max(0.5, logScale * 20);
 }
 
-/** treemap矩形にGAPパディングを適用 */
+/** treemap矩形にGAPパディングを適用（比例gap: ノード寸法の20%以上は取らない） */
+const GAP_RATIO = 0.2;
 function applyGap(rect: Rect, gap: number): Rect {
-  const half = gap / 2;
-  const w = Math.max(0, rect.width - gap);
-  const h = Math.max(0, rect.height - gap);
+  const effectiveGap = Math.min(gap, Math.min(rect.width, rect.height) * GAP_RATIO);
+  const half = effectiveGap / 2;
+  const w = rect.width - effectiveGap;
+  const h = rect.height - effectiveGap;
   return { x: rect.x + half, y: rect.y + half, width: w, height: h };
 }
 
@@ -439,8 +517,42 @@ function main() {
         layoutNodes.push(ln);
         layoutNodeMap.set(ln.id, ln);
       }
+    } else if (clusterType === 'recipient') {
+      // recipient: 金額降順の1段階スライスレイアウト（府省庁グループなし）
+      const allRecipients = graph.nodes
+        .filter(n => n.type === 'recipient')
+        .sort((a, b) => b.amount - a.amount);
+
+      const items: TreemapItem[] = allRecipients.map(n => ({
+        key: n.id,
+        value: n.amount,
+        data: n,
+      }));
+
+      const results = sliceTreemap(items, clusterRect);
+      for (const res of results) {
+        if (!res.data) continue;
+        const r = applyGap(res.rect, NODE_GAP);
+        const ministry = recipientMinistry.get(res.data.id);
+        const ln: LayoutNode = {
+          id: res.data.id,
+          label: res.data.label,
+          type: res.data.type,
+          amount: res.data.amount,
+          x: r.x,
+          y: r.y,
+          width: r.width,
+          height: r.height,
+          area: r.width * r.height,
+          ...(ministry && { ministry }),
+          ...(res.data.isIndirect && { isIndirect: true }),
+          ...(res.data.chainPaths && res.data.chainPaths.length > 0 && { chainPaths: res.data.chainPaths }),
+        };
+        layoutNodes.push(ln);
+        layoutNodeMap.set(ln.id, ln);
+      }
     } else {
-      // project-budget, project-spending, recipient: 2段階treemap
+      // project-budget, project-spending: 2段階treemap
 
       // 第1層: 府省庁グループのtreemap
       const ministryItems: TreemapItem[] = [];
@@ -453,21 +565,6 @@ function main() {
             key: mn.label,
             value: groupValue,
             children: nodes.map(n => ({ key: n.id, value: n.amount, data: n })),
-          });
-        }
-      }
-
-      // 未帰属ノード（recipientで府省庁不明）
-      if (clusterType === 'recipient') {
-        const unassigned = graph.nodes.filter(
-          n => n.type === 'recipient' && !recipientMinistry.has(n.id)
-        );
-        if (unassigned.length > 0) {
-          const uValue = unassigned.reduce((s, n) => s + n.amount, 0);
-          ministryItems.push({
-            key: '__unassigned__',
-            value: uValue,
-            children: unassigned.map(n => ({ key: n.id, value: n.amount, data: n })),
           });
         }
       }
