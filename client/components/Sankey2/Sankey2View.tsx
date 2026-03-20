@@ -37,7 +37,7 @@ const EDGE_TOP_N = 3;
 const LABEL_SCREEN_AREA = 400; // ~20×20px
 
 const MIN_ZOOM = 0.02;
-const MAX_ZOOM = 10000;
+const MAX_ZOOM = 1350;
 const ZOOM_SENSITIVITY = 0.002;
 
 /** ビューポート外のマージン（px、仮想座標系） */
@@ -82,8 +82,8 @@ interface EdgeIndex {
 function formatAmount(amount: number): string {
   if (amount >= 1e12) return `${(amount / 1e12).toFixed(1)}兆円`;
   if (amount >= 1e8) return `${(amount / 1e8).toFixed(0)}億円`;
-  if (amount >= 1e4) return `${(amount / 1e4).toFixed(0)}万円`;
-  return `${amount.toLocaleString()}円`;
+  if (amount >= 1e4) return `${Math.round(amount / 1e4)}万円`;
+  return `${Math.round(amount).toLocaleString()}円`;
 }
 
 /** polyline points文字列を生成 */
@@ -142,9 +142,12 @@ export default function Sankey2View({ data }: Props) {
   const panStartRef = useRef({ x: 0, y: 0 });
 
   // Hover / Selection state
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [hoveredAggId, setHoveredAggId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isEditingZoom, setIsEditingZoom] = useState(false);
+  const [zoomInputValue, setZoomInputValue] = useState('');
   const [isShiftHeld, setIsShiftHeld] = useState(false);
 
   // コンテナサイズ
@@ -226,8 +229,13 @@ export default function Sankey2View({ data }: Props) {
     const map = new Map<string, { start: () => void; end: () => void }>();
     for (const node of data.nodes) {
       map.set(node.id, {
-        start: () => setHoveredNodeId(node.id),
-        end: () => setHoveredNodeId(null),
+        start: () => {
+          if (hoverTimeoutRef.current) { clearTimeout(hoverTimeoutRef.current); hoverTimeoutRef.current = null; }
+          setHoveredNodeId(node.id);
+        },
+        end: () => {
+          hoverTimeoutRef.current = setTimeout(() => setHoveredNodeId(null), 120);
+        },
       });
     }
     return map;
@@ -456,15 +464,24 @@ export default function Sankey2View({ data }: Props) {
     return set;
   }, [data, edgeIndex]);
 
-  // ── ハイライト: BFS or 1-hop ──
+  // ── ハイライト: BFS or 1-hop（選択とホバーは独立） ──
 
-  const activeNodeId = selectedNodeId ?? hoveredNodeId;
+  const activeNodeId = hoveredNodeId ?? selectedNodeId;
 
   const highlightMap = useMemo(() => {
-    if (!activeNodeId) return new Map<string, number>();
     const maxDepth = isShiftHeld ? BFS_MAX_DEPTH : 1;
-    return bfsHighlight(activeNodeId, edgeIndex, maxDepth);
-  }, [activeNodeId, edgeIndex, isShiftHeld]);
+    if (!hoveredNodeId && !selectedNodeId) return new Map<string, number>();
+    // 選択とホバー両方のBFSをマージ（近い方の距離を採用）
+    const selected = selectedNodeId ? bfsHighlight(selectedNodeId, edgeIndex, maxDepth) : new Map<string, number>();
+    if (!hoveredNodeId || hoveredNodeId === selectedNodeId) return selected;
+    const hovered = bfsHighlight(hoveredNodeId, edgeIndex, maxDepth);
+    const merged = new Map(selected);
+    for (const [id, dist] of hovered) {
+      const existing = merged.get(id);
+      merged.set(id, existing !== undefined ? Math.min(existing, dist) : dist);
+    }
+    return merged;
+  }, [hoveredNodeId, selectedNodeId, edgeIndex, isShiftHeld]);
 
   const isHighlighting = highlightMap.size > 0;
 
@@ -853,6 +870,17 @@ export default function Sankey2View({ data }: Props) {
     });
   }, []);
 
+  /** 指定倍率にズーム（画面中心を基準） */
+  const handleZoomTo = useCallback((newK: number) => {
+    setTransform(prev => {
+      const cw = containerRef.current?.clientWidth ?? 0;
+      const ch = containerRef.current?.clientHeight ?? 0;
+      const clampedK = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newK));
+      const ratio = clampedK / prev.k;
+      return { x: cw / 2 - (cw / 2 - prev.x) * ratio, y: ch / 2 - (ch / 2 - prev.y) * ratio, k: clampedK };
+    });
+  }, []);
+
   /** Fit: Activeノード + 接続ノードがすべて見えるZoom */
   const handleZoomFitActive = useCallback(() => {
     if (!activeNodeId || !containerRef.current) return;
@@ -932,6 +960,12 @@ export default function Sankey2View({ data }: Props) {
   }
 
   const k2 = transform.k * transform.k;
+  // ノード表示閾値金額: この金額以下のノードはLODで非表示
+  // amount = MIN_SCREEN_AREA × totalAmount / (CLUSTER_AREA × k² × GAP_FACTOR)
+  const TOTAL_AMOUNT = 151_123_034_375_145;
+  const CLUSTER_AREA = 4000 * 4000;
+  const GAP_FACTOR = 0.64; // (1 - 0.2)²
+  const thresholdAmount = Math.round(MIN_SCREEN_AREA * TOTAL_AMOUNT / (CLUSTER_AREA * k2 * GAP_FACTOR));
   const showPanel = selectedNodeId !== null;
   const selectedNode = selectedNodeId ? nodeMap.get(selectedNodeId) : undefined;
 
@@ -951,7 +985,7 @@ export default function Sankey2View({ data }: Props) {
           <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg px-3 py-2 text-xs text-gray-600 dark:text-gray-300 shadow-sm backdrop-blur-sm">
             <div className="font-semibold mb-1">/sankey2 予算フロー</div>
             <div>描画: {visibleNodes.length.toLocaleString()} nodes / {visibleEdges.length.toLocaleString()} edges</div>
-            <div>Zoom: {(transform.k * 100).toFixed(0)}%</div>
+            <div>Zoom: {(transform.k * 100).toFixed(0)}% （≥{formatAmount(thresholdAmount)}）</div>
             {isShiftHeld && <div className="text-blue-500 font-semibold mt-1">Shift: BFS {BFS_MAX_DEPTH}ホップ</div>}
             {minAmount > 0 && <div className="text-orange-500 mt-0.5">最小金額: {formatAmount(minAmount)}</div>}
             {maxAmount < Infinity && <div className="text-orange-500 mt-0.5">最大金額: {formatAmount(maxAmount)}</div>}
@@ -1101,26 +1135,78 @@ export default function Sankey2View({ data }: Props) {
           className="absolute z-10 flex flex-col gap-1"
           style={{ bottom: MINIMAP_PADDING + minimapHeight + 8, left: MINIMAP_PADDING }}
         >
-          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden">
+          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden" style={{ width: 44 }}>
             <button onClick={handleZoomIn} className="px-2.5 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="ズームイン">＋</button>
-            <div className="text-[10px] text-center text-gray-500 dark:text-gray-400 border-y border-gray-200 dark:border-gray-700 py-0.5">
-              {(transform.k * 100).toFixed(0)}%
+            {/* Zoomスライダー（対数スケール） */}
+            <div className="px-1 py-1 flex justify-center border-y border-gray-200 dark:border-gray-700">
+              <input
+                type="range"
+                min={Math.log10(MIN_ZOOM)}
+                max={Math.log10(MAX_ZOOM)}
+                step={0.01}
+                value={Math.log10(transform.k)}
+                onChange={e => handleZoomTo(Math.pow(10, parseFloat(e.target.value)))}
+                className="h-20 accent-gray-500"
+                style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 16 }}
+                title={`Zoom: ${(transform.k * 100).toFixed(0)}%`}
+              />
             </div>
             <button onClick={handleZoomOut} className="px-2.5 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" title="ズームアウト">ー</button>
           </div>
-          <button onClick={handleZoomFit} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center" title="全体表示">
+          {/* Zoom率 直接入力 */}
+          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm overflow-hidden" style={{ width: 44 }}>
+            {isEditingZoom ? (
+              <input
+                type="text"
+                autoFocus
+                value={zoomInputValue}
+                onChange={e => setZoomInputValue(e.target.value)}
+                onBlur={() => {
+                  const v = parseFloat(zoomInputValue);
+                  if (!isNaN(v) && v > 0) handleZoomTo(v / 100);
+                  setIsEditingZoom(false);
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    const v = parseFloat(zoomInputValue);
+                    if (!isNaN(v) && v > 0) handleZoomTo(v / 100);
+                    setIsEditingZoom(false);
+                  } else if (e.key === 'Escape') {
+                    setIsEditingZoom(false);
+                  }
+                }}
+                className="w-full text-[10px] text-center py-1 bg-transparent text-gray-700 dark:text-gray-200 outline-none"
+              />
+            ) : (
+              <button
+                onClick={() => { setZoomInputValue((transform.k * 100).toFixed(0)); setIsEditingZoom(true); }}
+                className="w-full text-[10px] text-center py-1 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-text"
+                title="クリックしてZoom率を直接入力"
+              >
+                {(transform.k * 100).toFixed(0)}%
+              </button>
+            )}
+          </div>
+          {/* 表示閾値金額 */}
+          <div
+            className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm text-[9px] text-center text-gray-400 dark:text-gray-500 py-1 px-1 leading-tight"
+            style={{ width: 44 }}
+            title={`現在のZoomで表示可能な最小ノード金額（概算）: ${formatAmount(thresholdAmount)}`}
+          >
+            <div>≥</div>
+            <div>{formatAmount(thresholdAmount)}</div>
+          </div>
+          <button onClick={handleZoomFit} className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm px-2 py-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center" style={{ width: 44 }} title="全体表示">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
           </button>
-          {activeNodeId && (
-            <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden">
-              <button onClick={handleZoomFitActive} className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center" title="接続ノードを含めてフィット">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-              </button>
-              <button onClick={handleZoomFocusActive} className="px-2 py-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center border-t border-gray-200 dark:border-gray-700" title="選択ノードにフォーカス">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
-              </button>
-            </div>
-          )}
+          <div className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden" style={{ width: 44 }}>
+            <button onClick={handleZoomFitActive} className={`px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center ${activeNodeId ? 'text-blue-500' : 'text-gray-400 dark:text-gray-600'}`} title="接続ノードを含めてフィット" disabled={!activeNodeId}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+            </button>
+            <button onClick={handleZoomFocusActive} className={`px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center border-t border-gray-200 dark:border-gray-700 ${activeNodeId ? 'text-blue-500' : 'text-gray-400 dark:text-gray-600'}`} title="選択ノードにフォーカス" disabled={!activeNodeId}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M2 12h4"/><path d="M18 12h4"/></svg>
+            </button>
+          </div>
         </div>
 
         {/* Minimap */}
@@ -1181,8 +1267,8 @@ export default function Sankey2View({ data }: Props) {
             })}
             </g>
 
-            {/* エッジ描画 */}
-            <g className="edges">
+            {/* エッジ描画（pointer-events:none で集約ノードホバーを妨げない） */}
+            <g className="edges" style={{ pointerEvents: 'none' }}>
               {visibleEdges.map((edge, i) => {
                 const srcDist = highlightMap.get(edge.source);
                 const tgtDist = highlightMap.get(edge.target);
@@ -1269,6 +1355,7 @@ export default function Sankey2View({ data }: Props) {
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        pointerEvents: 'none',
                         color: '#fff',
                         textShadow: '0 0 3px rgba(0,0,0,0.9)',
                         textAlign: 'center',
@@ -1358,49 +1445,67 @@ export default function Sankey2View({ data }: Props) {
             })}
             </g>
 
-            {/* ノードツールチップ（最前面・イベント透過） */}
-            {hoveredNodeId && !selectedNodeId && (() => {
-              const node = nodeMap.get(hoveredNodeId);
-              if (!node) return null;
-              const fontSize = 11 / transform.k;
-              const pad = fontSize * 0.5;
-              const color = TYPE_COLORS[node.type] || '#999';
-              const tipW = fontSize * 16;
-              const tipH = fontSize * 6;
-              const lx = node.x + node.width / 2 - tipW / 2;
-              const ly = node.y - tipH - pad;
-              return (
-                <foreignObject
-                  x={lx}
-                  y={ly}
-                  width={tipW}
-                  height={tipH}
-                  overflow="visible"
-                  style={{ pointerEvents: 'none' }}
-                >
-                  <div style={{
-                    background: color,
-                    opacity: 0.92,
-                    borderRadius: `${fontSize * 0.3}px`,
-                    padding: `${fontSize * 0.4}px ${fontSize * 0.6}px`,
-                    color: '#fff',
-                    textAlign: 'center',
-                    fontSize: `${fontSize}px`,
-                    lineHeight: 1.3,
-                    wordBreak: 'break-word',
-                  }}>
-                    <div style={{ fontWeight: 'bold' }}>{node.label}</div>
-                    <div style={{ fontSize: `${fontSize * 0.9}px` }}>{formatAmount(node.amount)}</div>
-                    {node.ministry && node.type !== 'ministry' && (
-                      <div style={{ fontSize: `${fontSize * 0.8}px`, opacity: 0.8 }}>{node.ministry}</div>
-                    )}
-                  </div>
-                </foreignObject>
-              );
-            })()}
 
             </g>
           </g>
+
+          {/* ノードツールチップ（transformグループ外・スクリーン座標で描画） */}
+          {hoveredNodeId && (() => {
+            const node = nodeMap.get(hoveredNodeId);
+            if (!node) return null;
+            const tipFontSize = 11; // スクリーンpx固定
+            // ノード内ラベルのフォントサイズ（スクリーンpx換算）
+            const nodeLabelScreenFont = Math.min(node.height * 0.25, node.width * 0.18, 48 / transform.k) * transform.k;
+            // ノード内ラベルがツールチップ以上のサイズで、テキストがノード幅に収まっている場合はツールチップ不要
+            const nodeScreenW = node.width * transform.k;
+            const textFitsInNode = nodeLabelScreenFont >= tipFontSize
+              && node.label.length * nodeLabelScreenFont * 0.6 <= nodeScreenW;
+            if (textFitsInNode) return null;
+            const color = TYPE_COLORS[node.type] || '#999';
+            const tipW = 200;
+            const tipH = 80;
+            // ノード中央上にスクリーン座標で配置
+            const screenCx = node.x * transform.k + transform.x + nodeScreenW / 2;
+            const screenTop = node.y * transform.k + transform.y;
+            const lx = screenCx - tipW / 2;
+            const ly = screenTop - tipH - 6;
+            return (
+              <foreignObject
+                x={lx}
+                y={ly}
+                width={tipW}
+                height={tipH}
+                overflow="visible"
+              >
+                <div
+                  style={{
+                    background: color,
+                    opacity: 0.92,
+                    borderRadius: 4,
+                    padding: '5px 8px',
+                    color: '#fff',
+                    textAlign: 'center',
+                    fontSize: tipFontSize,
+                    lineHeight: 1.3,
+                    wordBreak: 'break-word',
+                    border: '1.5px solid rgba(255,255,255,0.6)',
+                  }}
+                  onMouseEnter={() => {
+                    if (hoverTimeoutRef.current) { clearTimeout(hoverTimeoutRef.current); hoverTimeoutRef.current = null; }
+                  }}
+                  onMouseLeave={() => {
+                    hoverTimeoutRef.current = setTimeout(() => setHoveredNodeId(null), 120);
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold' }}>{node.label}</div>
+                  <div style={{ fontSize: tipFontSize * 0.9 }}>{formatAmount(node.amount)}</div>
+                  {node.ministry && node.type !== 'ministry' && (
+                    <div style={{ fontSize: tipFontSize * 0.8, opacity: 0.8 }}>{node.ministry}</div>
+                  )}
+                </div>
+              </foreignObject>
+            );
+          })()}
         </svg>
       </div>
 
