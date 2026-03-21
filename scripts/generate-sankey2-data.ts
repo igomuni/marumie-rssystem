@@ -53,6 +53,33 @@ interface Sankey2Edge {
   edgeType?: 'direct' | 'subcontract';
 }
 
+/** 再委託フロー（事業単位） */
+interface SubcontractFlow {
+  from: string;
+  to: string;
+  sourceBlock: string;  // 支出元ブロック番号（例: "A"）
+  targetBlock: string;  // 支出先ブロック番号（例: "B"）
+  amount: number;
+  recipients: { name: string; amount: number }[];
+}
+
+/** ブロック接続情報（5-2 CSV + 5-1 CSV由来） */
+interface BlockConnection {
+  source: string;      // ブロック番号（例: "A"）
+  sourceName: string;  // ブロック名（例: "一般社団法人行政情報システム研究所"）
+  target: string;      // ブロック番号（例: "B"）
+  targetName: string;  // ブロック名（例: "富士通株式会社"）
+  amount: number;      // targetブロックの支出合計（5-1 CSV由来）
+  recipients: { name: string; amount: number }[];  // targetブロックの支出先一覧
+}
+
+/** 事業ごとの再委託チェーン */
+interface SubcontractChain {
+  projectId: number;
+  blockChain: BlockConnection[];  // ブロック接続の順序（A→B→C→D→E）
+  flows: SubcontractFlow[];
+}
+
 /** 出力JSON */
 interface Sankey2Graph {
   metadata: {
@@ -66,6 +93,7 @@ interface Sankey2Graph {
   };
   nodes: Sankey2Node[];
   edges: Sankey2Edge[];
+  subcontractChains: SubcontractChain[];
 }
 
 // ─── CSV読み込み ──────────────────────────────────────────
@@ -88,6 +116,7 @@ function main() {
   const orgRows = loadCSV('1-1_RS_2024_基本情報_組織情報.csv');
   const budgetRows = loadCSV('2-1_RS_2024_予算・執行_サマリ.csv');
   const spendingRows = loadCSV('5-1_RS_2024_支出先_支出情報.csv');
+  const blockRows = loadCSV('5-2_RS_2024_支出先_支出ブロックのつながり.csv');
 
   // 2. 組織情報マップ（予算事業ID → 府省庁名）
   console.log('\n[2/4] ノード生成');
@@ -314,6 +343,47 @@ function main() {
       }
     }
 
+    // ── isDirectFromGov フィルタリング ──
+    // 間接支出ペア(projectId, spendingName)を収集し、直接エッジを除去・金額を修正
+    const indirectPairs = new Set<string>(); // "pid:spendingName"
+    for (const spending of structuredData.spendings) {
+      for (const p of spending.projects) {
+        if (p.isDirectFromGov === false) {
+          indirectPairs.add(`${p.projectId}:${spending.spendingName}`);
+        }
+      }
+    }
+    console.log(`  間接支出ペア: ${indirectPairs.size.toLocaleString()} 件`);
+
+    // project-spending → recipient エッジから間接分を除去
+    let removedEdgeCount = 0;
+    for (let i = edges.length - 1; i >= 0; i--) {
+      const edge = edges[i];
+      if (!edge.source.startsWith('project-spending-') || !edge.target.startsWith('recipient-')) continue;
+      const pid = parseInt(edge.source.replace('project-spending-', ''), 10);
+      const recipientName = edge.target.replace('recipient-', '');
+      if (indirectPairs.has(`${pid}:${recipientName}`)) {
+        edges.splice(i, 1);
+        removedEdgeCount++;
+      }
+    }
+    console.log(`  間接エッジ除去: ${removedEdgeCount.toLocaleString()} 件`);
+
+    // project-spending ノードの金額を直接支出のみに修正
+    let amountFixCount = 0;
+    for (const node of nodes) {
+      if (node.type !== 'project-spending' || !node.projectId) continue;
+      // このproject-spendingから出る直接エッジの合計を再計算
+      const directAmount = edges
+        .filter(e => e.source === node.id && e.target.startsWith('recipient-'))
+        .reduce((sum, e) => sum + e.value, 0);
+      if (directAmount > 0 && directAmount !== node.amount) {
+        node.amount = directAmount;
+        amountFixCount++;
+      }
+    }
+    console.log(`  支出額修正: ${amountFixCount.toLocaleString()} 件`);
+
     // 支出先ごとの委託情報を付与
     let enrichedCount = 0;
     for (const spending of structuredData.spendings) {
@@ -390,6 +460,85 @@ function main() {
 
   console.log(`  最終エッジ数: ${edges.length.toLocaleString()} 件`);
 
+  // 5f. ブロック別支出データの構築（5-1 CSV）
+  // key: "pid:block" → { name, amount }[]
+  const blockSpending = new Map<string, { name: string; amount: number }[]>();
+  for (const row of spendingRows) {
+    const pid = parseInt(row['予算事業ID'], 10);
+    if (isNaN(pid)) continue;
+    const block = (row['支出先ブロック番号'] || '').trim();
+    const name = (row['支出先名'] || '').trim();
+    const amount = parseAmount(row['金額']);
+    if (!block || !name || amount <= 0) continue;
+    const key = `${pid}:${block}`;
+    const list = blockSpending.get(key) ?? [];
+    list.push({ name, amount });
+    blockSpending.set(key, list);
+  }
+
+  // 5g. ブロックチェーン構造の構築（5-2 CSV + 5-1 CSV）
+  const blockChainByProject = new Map<number, BlockConnection[]>();
+  for (const row of blockRows) {
+    const pid = parseInt(row['予算事業ID'], 10);
+    if (isNaN(pid)) continue;
+    const source = (row['支出元の支出先ブロック'] || '').trim();
+    const sourceName = (row['支出元の支出先ブロック名'] || '').trim();
+    const target = (row['支出先の支出先ブロック'] || '').trim();
+    const targetName = (row['支出先の支出先ブロック名'] || '').trim();
+    if (!source || !target) continue; // 担当組織→A（sourceが空）はスキップ
+
+    // targetブロックの支出先一覧を5-1 CSVから取得
+    const targetRecipients = blockSpending.get(`${pid}:${target}`) ?? [];
+    const targetAmount = targetRecipients.reduce((sum, r) => sum + r.amount, 0);
+
+    const connections = blockChainByProject.get(pid) ?? [];
+    connections.push({
+      source, sourceName, target, targetName,
+      amount: targetAmount,
+      recipients: targetRecipients.sort((a, b) => b.amount - a.amount),
+    });
+    blockChainByProject.set(pid, connections);
+  }
+  console.log(`  ブロックチェーン: ${blockChainByProject.size.toLocaleString()} 事業`);
+
+  // 5g. 再委託チェーンの事業別集約
+  const subcontractChains: SubcontractChain[] = [];
+  if (structuredData) {
+    const chainsByProject = new Map<number, SubcontractFlow[]>();
+    for (const spending of structuredData.spendings) {
+      if (!spending.outflows || spending.outflows.length === 0) continue;
+      for (const flow of spending.outflows) {
+        const pid = flow.projectId;
+        const recipients = (flow.recipients || []).map((r: { name: string; amount: number }) => ({
+          name: r.name,
+          amount: r.amount,
+        }));
+        if (recipients.length === 0) continue;
+        const flows = chainsByProject.get(pid) ?? [];
+        flows.push({
+          from: spending.spendingName,
+          to: flow.targetBlockName,
+          sourceBlock: flow.sourceBlockNumber,
+          targetBlock: flow.targetBlockNumber,
+          amount: flow.amount,
+          recipients,
+        });
+        chainsByProject.set(pid, flows);
+      }
+    }
+
+    // ブロックチェーン構造を持つ全事業（outflowsがなくてもブロック接続があれば含める）
+    const allProjectIds = new Set([...chainsByProject.keys(), ...blockChainByProject.keys()]);
+    for (const projectId of allProjectIds) {
+      const flows = chainsByProject.get(projectId) ?? [];
+      const blockChain = (blockChainByProject.get(projectId) ?? []).sort(
+        (a, b) => a.source.localeCompare(b.source) || a.target.localeCompare(b.target)
+      );
+      subcontractChains.push({ projectId, blockChain, flows });
+    }
+    console.log(`  再委託チェーン: ${subcontractChains.length.toLocaleString()} 事業`);
+  }
+
   // 6. 出力
   console.log('\n[4/4] JSON出力');
   const graph: Sankey2Graph = {
@@ -404,6 +553,7 @@ function main() {
     },
     nodes,
     edges,
+    subcontractChains,
   };
 
   const outputPath = path.join(OUTPUT_DIR, OUTPUT_FILE);

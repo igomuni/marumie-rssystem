@@ -37,8 +37,33 @@ export interface LayoutMetadata {
   };
 }
 
+export interface SubcontractFlow {
+  from: string;
+  to: string;
+  sourceBlock: string;
+  targetBlock: string;
+  amount: number;
+  recipients: { name: string; amount: number }[];
+}
+
+export interface BlockConnection {
+  source: string;
+  sourceName: string;
+  target: string;
+  targetName: string;
+  amount: number;
+  recipients: { name: string; amount: number }[];
+}
+
+export interface SubcontractChain {
+  projectId: number;
+  blockChain: BlockConnection[];
+  flows: SubcontractFlow[];
+}
+
 export interface Sankey2LayoutData {
   metadata: LayoutMetadata;
   nodes: LayoutNode[];
   edges: LayoutEdge[];
+  subcontractChains?: SubcontractChain[];
 }

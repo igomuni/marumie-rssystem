@@ -55,6 +55,7 @@ interface GraphData {
   metadata: Record<string, unknown>;
   nodes: GraphNode[];
   edges: GraphEdge[];
+  subcontractChains?: unknown[];
 }
 
 interface LayoutNode {
@@ -96,6 +97,7 @@ interface LayoutData {
   };
   nodes: LayoutNode[];
   edges: LayoutEdge[];
+  subcontractChains?: unknown[];
 }
 
 interface Rect {
@@ -684,6 +686,7 @@ function main() {
     },
     nodes: layoutNodes,
     edges: layoutEdges,
+    ...(graph.subcontractChains && { subcontractChains: graph.subcontractChains }),
   };
 
   const outputPath = path.join(__dirname, '../public/data/sankey2-layout.json');

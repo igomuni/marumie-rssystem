@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import type { Sankey2LayoutData, LayoutNode, LayoutEdge } from '@/client/components/Sankey2/types';
+import type { Sankey2LayoutData, LayoutNode, LayoutEdge, SubcontractChain } from '@/client/components/Sankey2/types';
 
 // ─── 定数 ──────────────────────────────────────────────
 
@@ -1515,6 +1515,7 @@ export default function Sankey2View({ data }: Props) {
           node={selectedNode}
           edgeIndex={edgeIndex}
           nodeMap={nodeMap}
+          subcontractChains={data?.subcontractChains}
           onClose={() => setSelectedNodeId(null)}
           onNodeClick={handlePanelNodeClick}
         />
@@ -1533,11 +1534,12 @@ interface DetailPanelProps {
   node: LayoutNode;
   edgeIndex: EdgeIndex;
   nodeMap: Map<string, LayoutNode>;
+  subcontractChains?: SubcontractChain[];
   onClose: () => void;
   onNodeClick: (nodeId: string) => void;
 }
 
-function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailPanelProps) {
+function DetailPanel({ node, edgeIndex, nodeMap, subcontractChains, onClose, onNodeClick }: DetailPanelProps) {
   const inEdges = (edgeIndex.byTarget.get(node.id) ?? [])
     .slice()
     .sort((a, b) => b.value - a.value);
@@ -1567,7 +1569,7 @@ function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailP
 
   return (
     <div
-      className="h-full border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-y-auto"
+      className="h-full border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-y-auto select-text"
       style={{ width: PANEL_WIDTH, minWidth: PANEL_WIDTH }}
     >
       {/* ヘッダー */}
@@ -1632,28 +1634,38 @@ function DetailPanel({ node, edgeIndex, nodeMap, onClose, onNodeClick }: DetailP
         onNodeClick={onNodeClick}
       />
 
-      {/* 流出先（通常） */}
-      <ConnectionList
-        title="流出先"
-        arrow="→"
-        edges={outEdges.filter(e => e.edgeType !== 'subcontract')}
-        getNodeId={e => e.target}
-        nodeMap={nodeMap}
-        onNodeClick={onNodeClick}
-      />
-
-      {/* 委託先（再委託の流出・事業別グループ） */}
-      <SubcontractGroupList
-        title="委託先"
-        arrow="→"
-        edges={outEdges.filter(e => e.edgeType === 'subcontract')}
-        getNodeId={e => e.target}
-        nodeMap={nodeMap}
-        edgeIndex={edgeIndex}
-        selectedNode={node}
-        direction="out"
-        onNodeClick={onNodeClick}
-      />
+      {/* 資金の流れ（project-spending: 直接支出+再委託統合 / それ以外: 流出先） */}
+      {node.type === 'project-spending' && node.projectId !== undefined && subcontractChains ? (
+        <SubcontractChainTree
+          projectId={node.projectId}
+          chains={subcontractChains}
+          directOutEdges={outEdges.filter(e => e.edgeType !== 'subcontract')}
+          nodeMap={nodeMap}
+          onNodeClick={onNodeClick}
+        />
+      ) : (
+        <>
+          <ConnectionList
+            title="流出先"
+            arrow="→"
+            edges={outEdges.filter(e => e.edgeType !== 'subcontract')}
+            getNodeId={e => e.target}
+            nodeMap={nodeMap}
+            onNodeClick={onNodeClick}
+          />
+          <SubcontractGroupList
+            title="委託先"
+            arrow="→"
+            edges={outEdges.filter(e => e.edgeType === 'subcontract')}
+            getNodeId={e => e.target}
+            nodeMap={nodeMap}
+            edgeIndex={edgeIndex}
+            selectedNode={node}
+            direction="out"
+            onNodeClick={onNodeClick}
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -1918,6 +1930,173 @@ const MemoEdgeLine = React.memo(function EdgeLine({ edge, isHighlighting, isConn
     />
   );
 });
+
+// ─── 再委託チェーンツリー ──────────────────────────────
+
+interface SubcontractChainTreeProps {
+  projectId: number;
+  chains: SubcontractChain[];
+  directOutEdges: LayoutEdge[];
+  nodeMap: Map<string, LayoutNode>;
+  onNodeClick: (nodeId: string) => void;
+}
+
+function SubcontractChainTree({ projectId, chains, directOutEdges, nodeMap, onNodeClick }: SubcontractChainTreeProps) {
+  const chain = chains.find(c => c.projectId === projectId);
+
+  // 直接支出の合計
+  const directTotal = directOutEdges.reduce((sum, e) => sum + e.value, 0);
+  // 再委託合計（blockChainのtargetブロック支出合計）
+  const subcontractTotal = chain ? chain.blockChain.reduce((sum, bc) => sum + bc.amount, 0) : 0;
+
+  // 支出先レコード数（直接支出 + 再委託の全recipients）
+  const recipientCount = directOutEdges.length
+    + (chain ? chain.blockChain.reduce((sum, bc) => sum + bc.recipients.length, 0) : 0);
+
+  const hasBlockChain = chain && chain.blockChain.length > 0;
+  if (directOutEdges.length === 0 && !hasBlockChain) return null;
+
+  return (
+    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+      <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+        → 資金の流れ（{recipientCount}件）
+      </div>
+
+      {/* 直接支出 */}
+      {directOutEdges.length > 0 && (
+        <div className="mb-2">
+          <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1">
+            直接支出 {formatAmount(directTotal)}
+          </div>
+          {directOutEdges.map((edge, i) => {
+            const targetNode = nodeMap.get(edge.target);
+            const color = targetNode ? (TYPE_COLORS[targetNode.type] || '#999') : '#999';
+            return (
+              <button
+                key={`${edge.target}-${i}`}
+                onClick={() => onNodeClick(edge.target)}
+                className="w-full text-left flex items-center gap-1 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+              >
+                <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
+                <span className="text-xs text-gray-700 dark:text-gray-300 truncate flex-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                  {targetNode?.label ?? edge.target}
+                </span>
+                <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                  {formatAmount(edge.value)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 再委託（blockChainベースで全ステップ表示） */}
+      {hasBlockChain && (
+        <div>
+          <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1">
+            再委託 {formatAmount(subcontractTotal)}
+          </div>
+          <div className="space-y-2">
+            {chain.blockChain.map((bc, i) => (
+              <SubcontractStepNode
+                key={`${bc.source}-${bc.target}-${i}`}
+                step={{
+                  sourceBlock: bc.source,
+                  targetBlock: bc.target,
+                  from: bc.sourceName,
+                  to: bc.targetName,
+                  amount: bc.amount,
+                  recipients: bc.recipients,
+                }}
+                onNodeClick={onNodeClick}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const STEP_MAX_COLLAPSED = 4;
+
+interface SubcontractStepNodeProps {
+  step: {
+    sourceBlock: string;
+    targetBlock: string;
+    from: string;
+    to: string;
+    amount: number;
+    recipients: { name: string; amount: number }[];
+  };
+  onNodeClick: (nodeId: string) => void;
+}
+
+function SubcontractStepNode({ step, onNodeClick }: SubcontractStepNodeProps) {
+  const [expanded, setExpanded] = useState(false);
+  const recipients = step.recipients.slice().sort((a, b) => b.amount - a.amount);
+  const showAll = expanded || recipients.length <= STEP_MAX_COLLAPSED;
+  const shown = showAll ? recipients : recipients.slice(0, STEP_MAX_COLLAPSED);
+  const remaining = recipients.length - shown.length;
+
+  return (
+    <div>
+      {/* ブロック遷移ヘッダー（2行表示） */}
+      <div className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
+        <button
+          onClick={() => onNodeClick(`recipient-${step.from}`)}
+          className="hover:text-blue-600 dark:hover:text-blue-400"
+        >
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-semibold text-[10px] mr-1">
+            {step.sourceBlock}
+          </span>
+          {step.from}
+        </button>
+        <div className="pl-2 text-gray-400 dark:text-gray-500">↓ {formatAmount(step.amount)}</div>
+        <span>
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-semibold text-[10px] mr-1">
+            {step.targetBlock}
+          </span>
+          {step.to}
+        </span>
+      </div>
+      {/* 個別支出先 */}
+      <div className="ml-3">
+        {shown.map((r, i) => (
+          <button
+            key={`${r.name}-${i}`}
+            onClick={() => onNodeClick(`recipient-${r.name}`)}
+            className="w-full text-left flex items-center gap-1 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+          >
+            <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: '#f59e0b' }} />
+            <span className="text-xs text-gray-700 dark:text-gray-300 truncate flex-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              {r.name}
+            </span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+              {formatAmount(r.amount)}
+            </span>
+          </button>
+        ))}
+        {remaining > 0 && !expanded && (
+          <button
+            onClick={() => setExpanded(true)}
+            className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 py-0.5 ml-3"
+          >
+            …他 {remaining} 社を表示
+          </button>
+        )}
+        {expanded && recipients.length > STEP_MAX_COLLAPSED && (
+          <button
+            onClick={() => setExpanded(false)}
+            className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 py-0.5 ml-3"
+          >
+            折りたたむ
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ─── 金額スライダー + 直接入力 ──────────────────────────
 
