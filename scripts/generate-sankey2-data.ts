@@ -593,15 +593,9 @@ function main() {
     const flowsByProject = new Map<number, SubcontractFlow[]>();
     for (const [pid, connections] of blockChainByProject) {
       for (const conn of connections) {
-        const sourceRecipients = blockSpending.get(`${pid}:${conn.source}`) ?? [];
-        if (sourceRecipients.length === 0) continue;
-
-        // sourceブロックの代表支出先名（最大金額）
-        const topSource = sourceRecipients.sort((a, b) => b.amount - a.amount)[0];
-
         const flows = flowsByProject.get(pid) ?? [];
         flows.push({
-          from: topSource.name,
+          from: conn.sourceName,
           to: conn.targetName,
           sourceBlock: conn.source,
           targetBlock: conn.target,
