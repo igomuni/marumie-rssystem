@@ -51,6 +51,8 @@ interface Sankey2Edge {
   value: number;        // フロー金額（1円単位）
   /** エッジ種別: direct=通常支出、subcontract=再委託 */
   edgeType?: 'direct' | 'subcontract';
+  /** subcontractエッジのみ: 由来する事業ID一覧 */
+  projectIds?: number[];
 }
 
 /** 再委託フロー（事業単位） */
@@ -73,10 +75,18 @@ interface BlockConnection {
   recipients: { name: string; amount: number }[];  // targetブロックの支出先一覧
 }
 
+/** 直接支出ブロック情報 */
+interface DirectBlock {
+  block: string;                   // ブロック番号（例: "A"）
+  blockName: string;               // ブロック名（例: "キャッシュレス推進協議会"）
+  recipients: string[];            // ブロック内の支出先名（5-1 CSV由来）
+}
+
 /** 事業ごとの再委託チェーン */
 interface SubcontractChain {
   projectId: number;
-  blockChain: BlockConnection[];  // ブロック接続の順序（A→B→C→D→E）
+  directBlocks: DirectBlock[];     // 直接支出ブロック一覧
+  blockChain: BlockConnection[];   // ブロック接続の順序（A→B→C→D→E）
   flows: SubcontractFlow[];
 }
 
@@ -344,30 +354,48 @@ function main() {
     }
 
     // ── isDirectFromGov フィルタリング ──
-    // 間接支出ペア(projectId, spendingName)を収集し、直接エッジを除去・金額を修正
+    // 間接のみ・直接のみ・両方を持つペアを分類
     const indirectPairs = new Set<string>(); // "pid:spendingName"
+    const directPairs = new Set<string>();   // "pid:spendingName"
+    // 直接分の金額: "pid:spendingName" → 直接支出額合計
+    const directAmountByPair = new Map<string, number>();
     for (const spending of structuredData.spendings) {
       for (const p of spending.projects) {
+        const key = `${p.projectId}:${spending.spendingName}`;
         if (p.isDirectFromGov === false) {
-          indirectPairs.add(`${p.projectId}:${spending.spendingName}`);
+          indirectPairs.add(key);
+        } else {
+          directPairs.add(key);
+          directAmountByPair.set(key, (directAmountByPair.get(key) || 0) + p.amount);
         }
       }
     }
-    console.log(`  間接支出ペア: ${indirectPairs.size.toLocaleString()} 件`);
+    // 間接のみ（直接レコードがない）のペアだけ除去対象
+    const indirectOnlyPairs = new Set([...indirectPairs].filter(k => !directPairs.has(k)));
+    console.log(`  間接のみペア: ${indirectOnlyPairs.size.toLocaleString()} 件（直接+間接: ${([...indirectPairs].filter(k => directPairs.has(k))).length} 件）`);
 
-    // project-spending → recipient エッジから間接分を除去
+    // project-spending → recipient エッジから間接のみ分を除去、両方ある場合は直接分の金額に修正
     let removedEdgeCount = 0;
+    let adjustedEdgeCount = 0;
     for (let i = edges.length - 1; i >= 0; i--) {
       const edge = edges[i];
       if (!edge.source.startsWith('project-spending-') || !edge.target.startsWith('recipient-')) continue;
       const pid = parseInt(edge.source.replace('project-spending-', ''), 10);
       const recipientName = edge.target.replace('recipient-', '');
-      if (indirectPairs.has(`${pid}:${recipientName}`)) {
+      const key = `${pid}:${recipientName}`;
+      if (indirectOnlyPairs.has(key)) {
         edges.splice(i, 1);
         removedEdgeCount++;
+      } else if (indirectPairs.has(key) && directPairs.has(key)) {
+        // 直接+間接の両方がある場合: エッジの金額を直接分のみに修正
+        const directAmt = directAmountByPair.get(key) || 0;
+        if (directAmt > 0) {
+          edge.value = directAmt;
+          adjustedEdgeCount++;
+        }
       }
     }
-    console.log(`  間接エッジ除去: ${removedEdgeCount.toLocaleString()} 件`);
+    console.log(`  間接エッジ除去: ${removedEdgeCount.toLocaleString()} 件、金額修正: ${adjustedEdgeCount.toLocaleString()} 件`);
 
     // project-spending ノードの金額を直接支出のみに修正
     let amountFixCount = 0;
@@ -412,6 +440,7 @@ function main() {
     // 再委託エッジの生成（outflows.recipients から recipient→recipient）
     let subcontractEdgeCount = 0;
     const subcontractAmounts = new Map<string, number>(); // edgeKey → amount
+    const subcontractProjectIds = new Map<string, Set<number>>(); // edgeKey → projectIds
     let unmatchedFlows = 0;
 
     for (const spending of structuredData.spendings) {
@@ -429,6 +458,8 @@ function main() {
 
             const edgeKey = `${sourceNode.id}→${targetNode.id}`;
             subcontractAmounts.set(edgeKey, (subcontractAmounts.get(edgeKey) || 0) + r.amount);
+            if (!subcontractProjectIds.has(edgeKey)) subcontractProjectIds.set(edgeKey, new Set());
+            subcontractProjectIds.get(edgeKey)!.add(flow.projectId);
           }
         } else {
           // recipients がない場合は targetBlockName でフォールバック
@@ -438,6 +469,8 @@ function main() {
 
           const edgeKey = `${sourceNode.id}→${targetNode.id}`;
           subcontractAmounts.set(edgeKey, (subcontractAmounts.get(edgeKey) || 0) + flow.amount);
+          if (!subcontractProjectIds.has(edgeKey)) subcontractProjectIds.set(edgeKey, new Set());
+          subcontractProjectIds.get(edgeKey)!.add(flow.projectId);
         }
       }
     }
@@ -446,12 +479,14 @@ function main() {
     for (const [edgeKey, amount] of subcontractAmounts) {
       if (amount <= 0) continue;
       const [sourceId, targetId] = edgeKey.split('→');
+      const pids = subcontractProjectIds.get(edgeKey);
 
       edges.push({
         source: sourceId,
         target: targetId,
         value: amount,
         edgeType: 'subcontract',
+        projectIds: pids ? [...pids].sort((a, b) => a - b) : undefined,
       });
       subcontractEdgeCount++;
     }
@@ -478,6 +513,8 @@ function main() {
 
   // 5g. ブロックチェーン構造の構築（5-2 CSV + 5-1 CSV）
   const blockChainByProject = new Map<number, BlockConnection[]>();
+  // 直接支出ブロック（sourceが空）: pid → Map<block, blockName>
+  const directBlocksByProject = new Map<number, Map<string, string>>();
   for (const row of blockRows) {
     const pid = parseInt(row['予算事業ID'], 10);
     if (isNaN(pid)) continue;
@@ -485,7 +522,15 @@ function main() {
     const sourceName = (row['支出元の支出先ブロック名'] || '').trim();
     const target = (row['支出先の支出先ブロック'] || '').trim();
     const targetName = (row['支出先の支出先ブロック名'] || '').trim();
-    if (!source || !target) continue; // 担当組織→A（sourceが空）はスキップ
+    if (!target) continue;
+
+    if (!source) {
+      // 担当組織→ブロック（直接支出）: ブロック番号・名前を記録
+      const directBlocks = directBlocksByProject.get(pid) ?? new Map<string, string>();
+      directBlocks.set(target, targetName);
+      directBlocksByProject.set(pid, directBlocks);
+      continue;
+    }
 
     // targetブロックの支出先一覧を5-1 CSVから取得
     const targetRecipients = blockSpending.get(`${pid}:${target}`) ?? [];
@@ -528,13 +573,21 @@ function main() {
     }
 
     // ブロックチェーン構造を持つ全事業（outflowsがなくてもブロック接続があれば含める）
-    const allProjectIds = new Set([...chainsByProject.keys(), ...blockChainByProject.keys()]);
+    const allProjectIds = new Set([...chainsByProject.keys(), ...blockChainByProject.keys(), ...directBlocksByProject.keys()]);
     for (const projectId of allProjectIds) {
       const flows = chainsByProject.get(projectId) ?? [];
       const blockChain = (blockChainByProject.get(projectId) ?? []).sort(
         (a, b) => a.source.localeCompare(b.source) || a.target.localeCompare(b.target)
       );
-      subcontractChains.push({ projectId, blockChain, flows });
+      const directBlockMap = directBlocksByProject.get(projectId) ?? new Map<string, string>();
+      const directBlocks: DirectBlock[] = [...directBlockMap.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([block, blockName]) => ({
+          block,
+          blockName,
+          recipients: (blockSpending.get(`${projectId}:${block}`) ?? []).map(r => r.name),
+        }));
+      subcontractChains.push({ projectId, directBlocks, blockChain, flows });
     }
     console.log(`  再委託チェーン: ${subcontractChains.length.toLocaleString()} 事業`);
   }

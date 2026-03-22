@@ -49,6 +49,7 @@ interface GraphEdge {
   target: string;
   value: number;
   edgeType?: 'direct' | 'subcontract';
+  projectIds?: number[];
 }
 
 interface GraphData {
@@ -81,6 +82,7 @@ interface LayoutEdge {
   path: [number, number][];
   width: number;
   edgeType?: 'direct' | 'subcontract';
+  projectIds?: number[];
 }
 
 interface LayoutData {
@@ -662,6 +664,7 @@ function main() {
       path: pathPoints,
       width: valueToWidth(edge.value, maxEdgeValue),
       ...(isSubcontract && { edgeType: 'subcontract' as const }),
+      ...(edge.projectIds && { projectIds: edge.projectIds }),
     });
   }
   console.log(`  エッジパス: ${layoutEdges.length.toLocaleString()} 件`);

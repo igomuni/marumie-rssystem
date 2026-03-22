@@ -23,6 +23,7 @@ export interface LayoutEdge {
   path: [number, number][];
   width: number;
   edgeType?: 'direct' | 'subcontract';
+  projectIds?: number[];
 }
 
 export interface LayoutMetadata {
@@ -55,8 +56,15 @@ export interface BlockConnection {
   recipients: { name: string; amount: number }[];
 }
 
+export interface DirectBlock {
+  block: string;
+  blockName: string;
+  recipients: string[];
+}
+
 export interface SubcontractChain {
   projectId: number;
+  directBlocks: DirectBlock[];
   blockChain: BlockConnection[];
   flows: SubcontractFlow[];
 }

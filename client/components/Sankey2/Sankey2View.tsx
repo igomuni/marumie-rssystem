@@ -91,7 +91,18 @@ function pathToPolyline(path: [number, number][]): string {
   return path.map(([x, y]) => `${x},${y}`).join(' ');
 }
 
-/** BFS探索: startIdから上流・下流をmaxDepthホップまで探索 */
+/** BFS探索: startIdから上流・下流をmaxDepthホップまで探索
+ *  サブコントラクトエッジのprojectIdsを使い、事業帰属を正しくフィルタリング。
+ *
+ *  制約の仕組み:
+ *  - サブコントラクトエッジを通過すると、そのエッジのprojectIdsが制約として伝搬
+ *  - 制約付きノードから上流のproject-spending探索: projectIdが制約に含まれる事業のみ
+ *  - 制約付きノードから下流のサブコントラクト展開: projectIdsが制約と重なるエッジのみ
+ *
+ *  例: 朝倉市 ← 北海道(subcontract, pids=[3440]) → さつま町(subcontract, pids=[3440])
+ *  北海道に制約{3440}が付与され、下流のさつま町にも伝搬。
+ *  さつま町からPID=113(高校生の地域留学)への遡りはブロックされる。
+ */
 function bfsHighlight(
   startId: string,
   edgeIndex: EdgeIndex,
@@ -99,21 +110,62 @@ function bfsHighlight(
 ): Map<string, number> {
   const distances = new Map<string, number>([[startId, 0]]);
   const queue: [string, number][] = [[startId, 0]];
+  // サブコントラクトエッジ経由で到達したノードの事業ID制約
+  const projectConstraints = new Map<string, Set<number>>();
 
   while (queue.length > 0) {
     const [nodeId, depth] = queue.shift()!;
     if (depth >= maxDepth) continue;
+    const constraint = projectConstraints.get(nodeId);
 
+    // 下流（source→target）
     for (const edge of edgeIndex.bySource.get(nodeId) ?? []) {
-      if (!distances.has(edge.target)) {
-        distances.set(edge.target, depth + 1);
-        queue.push([edge.target, depth + 1]);
+      if (distances.has(edge.target)) continue;
+
+      // 制約付きノードから下流サブコントラクト: projectIdsが制約と重なるエッジのみ
+      if (constraint && edge.edgeType === 'subcontract') {
+        if (!edge.projectIds || !edge.projectIds.some(pid => constraint.has(pid))) continue;
+      }
+
+      distances.set(edge.target, depth + 1);
+      queue.push([edge.target, depth + 1]);
+
+      // 下流サブコントラクトエッジの制約伝搬
+      if (constraint && edge.edgeType === 'subcontract' && edge.projectIds) {
+        // 親の制約とエッジのprojectIdsの交差を伝搬
+        const intersection = edge.projectIds.filter(pid => constraint.has(pid));
+        if (intersection.length > 0) {
+          const existing = projectConstraints.get(edge.target);
+          if (existing) {
+            for (const pid of intersection) existing.add(pid);
+          } else {
+            projectConstraints.set(edge.target, new Set(intersection));
+          }
+        }
       }
     }
+
+    // 上流（target←source）
     for (const edge of edgeIndex.byTarget.get(nodeId) ?? []) {
-      if (!distances.has(edge.source)) {
-        distances.set(edge.source, depth + 1);
-        queue.push([edge.source, depth + 1]);
+      if (distances.has(edge.source)) continue;
+
+      // 制約付きノードからproject-spending遡り: projectIdで絞り込み
+      if (constraint && edge.source.startsWith('project-spending-')) {
+        const pid = parseInt(edge.source.replace('project-spending-', ''), 10);
+        if (!constraint.has(pid)) continue;
+      }
+
+      distances.set(edge.source, depth + 1);
+      queue.push([edge.source, depth + 1]);
+
+      // 上流サブコントラクトエッジの制約伝搬
+      if (edge.edgeType === 'subcontract' && edge.projectIds) {
+        const existing = projectConstraints.get(edge.source);
+        if (existing) {
+          for (const pid of edge.projectIds) existing.add(pid);
+        } else {
+          projectConstraints.set(edge.source, new Set(edge.projectIds));
+        }
       }
     }
   }
@@ -1752,10 +1804,23 @@ function SubcontractGroupList({
     let projectLabel = '不明な事業';
     let projectNode: LayoutNode | undefined;
 
-    if (direction === 'in') {
-      // 委託元の場合: 委託元ノード(source)への流入元(project)を探す
+    // サブコントラクトエッジのprojectIdsから事業ノードを直接特定
+    if (edge.projectIds && edge.projectIds.length > 0) {
+      // 最大金額の事業を代表として使用
+      let bestNode: LayoutNode | undefined;
+      let bestAmount = -1;
+      for (const pid of edge.projectIds) {
+        const psId = `project-spending-${pid}`;
+        const psNode = nodeMap.get(psId);
+        if (psNode && psNode.amount > bestAmount) {
+          bestNode = psNode;
+          bestAmount = psNode.amount;
+        }
+      }
+      projectNode = bestNode;
+    } else if (direction === 'in') {
+      // フォールバック: 委託元ノードへの流入元事業を探す
       const counterpartInEdges = edgeIndex.byTarget.get(counterpartId) ?? [];
-      // 選択中ノードも同一事業に接続しているものを優先
       const selectedInSources = new Set(
         (edgeIndex.byTarget.get(selectedNode.id) ?? []).map(e => e.source)
       );
@@ -1769,9 +1834,8 @@ function SubcontractGroupList({
         projectNode = directIn ? nodeMap.get(directIn.source) : undefined;
       }
     } else {
-      // 委託先の場合: 選択中ノードへの流入元(project)を共有事業として使う
+      // フォールバック: 選択中ノードへの流入元事業を探す
       const selectedInEdges = edgeIndex.byTarget.get(selectedNode.id) ?? [];
-      // 委託先ノードにも接続している事業を探す
       const counterpartInEdges = edgeIndex.byTarget.get(counterpartId) ?? [];
       const counterpartSources = new Set(counterpartInEdges.map(e => e.source));
       const sharedProject = selectedInEdges.find(e =>
@@ -1954,7 +2018,8 @@ function SubcontractChainTree({ projectId, chains, directOutEdges, nodeMap, onNo
     + (chain ? chain.blockChain.reduce((sum, bc) => sum + bc.recipients.length, 0) : 0);
 
   const hasBlockChain = chain && chain.blockChain.length > 0;
-  if (directOutEdges.length === 0 && !hasBlockChain) return null;
+  const hasDirectBlocks = chain && chain.directBlocks.length > 0;
+  if (directOutEdges.length === 0 && !hasBlockChain && !hasDirectBlocks) return null;
 
   return (
     <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
@@ -1962,36 +2027,59 @@ function SubcontractChainTree({ projectId, chains, directOutEdges, nodeMap, onNo
         → 資金の流れ（{recipientCount}件）
       </div>
 
-      {/* 直接支出 */}
-      {directOutEdges.length > 0 && (
-        <div className="mb-2">
-          <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1">
-            直接支出 {formatAmount(directTotal)}
+      {/* 直接支出（ブロック単位） */}
+      {(directOutEdges.length > 0 || (chain && chain.directBlocks.length > 0)) && (() => {
+        // エッジをブロック単位でグルーピング
+        type DirectEdgeWithBlock = { edge: LayoutEdge; block: string | undefined };
+        const edgesWithBlock: DirectEdgeWithBlock[] = directOutEdges.map(edge => {
+          const name = nodeMap.get(edge.target)?.label ?? edge.target.replace('recipient-', '');
+          const block = chain?.directBlocks.find(db => db.recipients.includes(name))?.block;
+          return { edge, block };
+        });
+        // ブロックごとにグルーピング（ブロックなし = undefined）
+        const blockGroups = new Map<string | undefined, LayoutEdge[]>();
+        for (const { edge, block } of edgesWithBlock) {
+          const list = blockGroups.get(block) ?? [];
+          list.push(edge);
+          blockGroups.set(block, list);
+        }
+        // エッジのないdirectBlocksも空エントリとして追加
+        if (chain) {
+          for (const db of chain.directBlocks) {
+            if (!blockGroups.has(db.block)) {
+              blockGroups.set(db.block, []);
+            }
+          }
+        }
+        const sortedBlocks = [...blockGroups.entries()].sort((a, b) => {
+          if (!a[0]) return 1; if (!b[0]) return -1;
+          return a[0].localeCompare(b[0]);
+        });
+        return (
+          <div className="mb-2">
+            <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1">
+              直接支出 {formatAmount(directTotal)}
+            </div>
+            <div className="space-y-1">
+              {sortedBlocks.map(([block, edges]) => (
+                <DirectBlockGroup
+                  key={block ?? '_none'}
+                  block={block}
+                  blockName={chain?.directBlocks.find(db => db.block === block)?.blockName}
+                  edges={edges}
+                  nodeMap={nodeMap}
+                  onNodeClick={onNodeClick}
+                />
+              ))}
+            </div>
           </div>
-          {directOutEdges.map((edge, i) => {
-            const targetNode = nodeMap.get(edge.target);
-            const color = targetNode ? (TYPE_COLORS[targetNode.type] || '#999') : '#999';
-            return (
-              <button
-                key={`${edge.target}-${i}`}
-                onClick={() => onNodeClick(edge.target)}
-                className="w-full text-left flex items-center gap-1 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
-              >
-                <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
-                <span className="text-xs text-gray-700 dark:text-gray-300 truncate flex-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                  {targetNode?.label ?? edge.target}
-                </span>
-                <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
-                  {formatAmount(edge.value)}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+        );
+      })()}
 
       {/* 再委託（blockChainベースで全ステップ表示） */}
-      {hasBlockChain && (
+      {hasBlockChain && (() => {
+        const directBlockIds = new Set(chain.directBlocks.map(db => db.block));
+        return (
         <div>
           <div className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1">
             再委託 {formatAmount(subcontractTotal)}
@@ -2008,12 +2096,107 @@ function SubcontractChainTree({ projectId, chains, directOutEdges, nodeMap, onNo
                   amount: bc.amount,
                   recipients: bc.recipients,
                 }}
+                directBlockIds={directBlockIds}
                 onNodeClick={onNodeClick}
               />
             ))}
           </div>
         </div>
+        );
+      })()}
+    </div>
+  );
+}
+
+const DIRECT_BLOCK_MAX_COLLAPSED = 4;
+
+interface DirectBlockGroupProps {
+  block: string | undefined;
+  blockName: string | undefined;
+  edges: LayoutEdge[];
+  nodeMap: Map<string, LayoutNode>;
+  onNodeClick: (nodeId: string) => void;
+}
+
+function DirectBlockGroup({ block, blockName, edges, nodeMap, onNodeClick }: DirectBlockGroupProps) {
+  const [expanded, setExpanded] = useState(false);
+  const sorted = edges.slice().sort((a, b) => b.value - a.value);
+  const blockTotal = sorted.reduce((sum, e) => sum + e.value, 0);
+
+  // エッジが0件のブロック（支出データなし）
+  if (sorted.length === 0 && block) {
+    return (
+      <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500 py-0.5">
+        <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 font-semibold text-[10px] flex-shrink-0">
+          {block}
+        </span>
+        <span className="truncate">{blockName ?? block}</span>
+        <span className="flex-shrink-0 ml-auto">{formatAmount(0)}</span>
+      </div>
+    );
+  }
+
+  // ブロック内に1件のみ、またはブロックなしの場合はフラット表示
+  const isSingleOrNoBlock = !block || sorted.length === 1;
+  const showAll = isSingleOrNoBlock || expanded || sorted.length <= DIRECT_BLOCK_MAX_COLLAPSED;
+  const shown = showAll ? sorted : sorted.slice(0, DIRECT_BLOCK_MAX_COLLAPSED);
+  const remaining = sorted.length - shown.length;
+
+  return (
+    <div>
+      {/* ブロックヘッダー（複数件のブロックのみ） */}
+      {!isSingleOrNoBlock && (
+        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-0.5">
+          <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 font-semibold text-[10px] flex-shrink-0">
+            {block}
+          </span>
+          <span className="truncate">{blockName}</span>
+          <span className="flex-shrink-0 ml-auto">{formatAmount(blockTotal)}</span>
+        </div>
       )}
+      {/* 支出先一覧 */}
+      <div className={!isSingleOrNoBlock ? 'ml-3' : ''}>
+        {shown.map((edge, i) => {
+          const targetNode = nodeMap.get(edge.target);
+          const color = targetNode ? (TYPE_COLORS[targetNode.type] || '#999') : '#999';
+          return (
+            <button
+              key={`${edge.target}-${i}`}
+              onClick={() => onNodeClick(edge.target)}
+              className="w-full text-left flex items-center gap-1 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+            >
+              {isSingleOrNoBlock && block && (
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 font-semibold text-[10px] flex-shrink-0">
+                  {block}
+                </span>
+              )}
+              <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
+              <span className="text-xs text-gray-700 dark:text-gray-300 truncate flex-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                {targetNode?.label ?? edge.target}
+              </span>
+              <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                {formatAmount(edge.value)}
+              </span>
+            </button>
+          );
+        })}
+        {remaining > 0 && !expanded && (
+          <button
+            onClick={() => setExpanded(true)}
+            className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 py-0.5 ml-3"
+          >
+            …他 {remaining} 件を表示
+          </button>
+        )}
+        {expanded && sorted.length > DIRECT_BLOCK_MAX_COLLAPSED && (
+          <button
+            onClick={() => setExpanded(false)}
+            className="text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 py-0.5 ml-3"
+          >
+            折りたたむ
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -2029,10 +2212,11 @@ interface SubcontractStepNodeProps {
     amount: number;
     recipients: { name: string; amount: number }[];
   };
+  directBlockIds?: Set<string>;
   onNodeClick: (nodeId: string) => void;
 }
 
-function SubcontractStepNode({ step, onNodeClick }: SubcontractStepNodeProps) {
+function SubcontractStepNode({ step, directBlockIds, onNodeClick }: SubcontractStepNodeProps) {
   const [expanded, setExpanded] = useState(false);
   const recipients = step.recipients.slice().sort((a, b) => b.amount - a.amount);
   const showAll = expanded || recipients.length <= STEP_MAX_COLLAPSED;
@@ -2041,24 +2225,30 @@ function SubcontractStepNode({ step, onNodeClick }: SubcontractStepNodeProps) {
 
   return (
     <div>
-      {/* ブロック遷移ヘッダー（2行表示） */}
-      <div className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
-        <button
-          onClick={() => onNodeClick(`recipient-${step.from}`)}
-          className="hover:text-blue-600 dark:hover:text-blue-400"
-        >
-          <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-semibold text-[10px] mr-1">
-            {step.sourceBlock}
-          </span>
-          {step.from}
-        </button>
-        <div className="pl-2 text-gray-400 dark:text-gray-500">↓ {formatAmount(step.amount)}</div>
-        <span>
-          <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 font-semibold text-[10px] mr-1">
-            {step.targetBlock}
-          </span>
-          {step.to}
+      {/* ブロック遷移ヘッダー: A → B ブロック名 金額 */}
+      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-0.5">
+        <span className={`inline-flex items-center justify-center w-4 h-4 rounded font-semibold text-[10px] flex-shrink-0 ${
+          directBlockIds?.has(step.sourceBlock)
+            ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
+            : 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300'
+        }`}>
+          {step.sourceBlock}
         </span>
+        <span className="text-gray-400">→</span>
+        <span className={`inline-flex items-center justify-center w-4 h-4 rounded font-semibold text-[10px] flex-shrink-0 ${
+          directBlockIds?.has(step.targetBlock)
+            ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
+            : 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300'
+        }`}>
+          {step.targetBlock}
+        </span>
+        <button
+          onClick={() => onNodeClick(`recipient-${step.to}`)}
+          className="truncate hover:text-blue-600 dark:hover:text-blue-400"
+        >
+          {step.to}
+        </button>
+        <span className="flex-shrink-0 ml-auto">{formatAmount(step.amount)}</span>
       </div>
       {/* 個別支出先 */}
       <div className="ml-3">
