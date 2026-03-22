@@ -530,9 +530,8 @@ function main() {
   console.log(`  間接支出ノード: ${enrichedCount.toLocaleString()} 件`);
 
   // 5i. サブコントラクトエッジの生成（5-2 CSVブロック接続 + 5-1 CSV）
-  // ブロック接続 A→B: ブロックAの代表支出先 → ブロックBの各支出先 のエッジを生成
-  // 代表支出先 = ブロック番号で取得した支出先のうち最大金額（「その他」除外）
-  // 同一事業内で同じターゲットブロック・支出先への金額は二重計上しない
+  // ブロック接続 A→B: ブロック名Aが支出先ノードに一致する場合のみ → ブロックBの各支出先 のエッジを生成
+  // ブロック名がカテゴリ名（都府県、市町村等）の場合はエッジを生成しない（CSVにない関係の捏造を防止）
   let subcontractEdgeCount = 0;
   let skippedNoSource = 0;
   const subcontractAmounts = new Map<string, number>();
@@ -542,15 +541,10 @@ function main() {
 
   for (const [pid, connections] of blockChainByProject) {
     for (const conn of connections) {
-      // sourceブロック番号で支出先を取得し、代表を選定
-      const sourceRecipients = (blockSpending.get(`${pid}:${conn.source}`) ?? [])
-        .filter(r => r.name !== 'その他');
-      if (sourceRecipients.length === 0) { skippedNoSource++; continue; }
-
-      // 代表 = 最大金額の支出先
-      const representative = sourceRecipients.reduce((best, r) => r.amount > best.amount ? r : best);
-      const sourceNode = recipientNodeIndex.get(representative.name);
-      if (!sourceNode) continue;
+      // sourceブロック名が支出先ノードに一致する場合のみエッジ生成
+      // ブロック名がカテゴリ名（都府県、市町村等）の場合はスキップ
+      const sourceNode = recipientNodeIndex.get(conn.sourceName);
+      if (!sourceNode) { skippedNoSource++; continue; }
 
       // targetブロックの各支出先へエッジ生成（二重計上チェック付き）
       const targetRecipients = conn.recipients;
