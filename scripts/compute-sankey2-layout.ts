@@ -49,12 +49,14 @@ interface GraphEdge {
   target: string;
   value: number;
   edgeType?: 'direct' | 'subcontract';
+  projectIds?: number[];
 }
 
 interface GraphData {
   metadata: Record<string, unknown>;
   nodes: GraphNode[];
   edges: GraphEdge[];
+  subcontractChains?: unknown[];
 }
 
 interface LayoutNode {
@@ -80,6 +82,7 @@ interface LayoutEdge {
   path: [number, number][];
   width: number;
   edgeType?: 'direct' | 'subcontract';
+  projectIds?: number[];
 }
 
 interface LayoutData {
@@ -96,6 +99,7 @@ interface LayoutData {
   };
   nodes: LayoutNode[];
   edges: LayoutEdge[];
+  subcontractChains?: unknown[];
 }
 
 interface Rect {
@@ -660,6 +664,7 @@ function main() {
       path: pathPoints,
       width: valueToWidth(edge.value, maxEdgeValue),
       ...(isSubcontract && { edgeType: 'subcontract' as const }),
+      ...(edge.projectIds && { projectIds: edge.projectIds }),
     });
   }
   console.log(`  エッジパス: ${layoutEdges.length.toLocaleString()} 件`);
@@ -684,6 +689,7 @@ function main() {
     },
     nodes: layoutNodes,
     edges: layoutEdges,
+    ...(graph.subcontractChains && { subcontractChains: graph.subcontractChains }),
   };
 
   const outputPath = path.join(__dirname, '../public/data/sankey2-layout.json');
