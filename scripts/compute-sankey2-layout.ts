@@ -430,7 +430,40 @@ function main() {
     const winner = [...totals.entries()].sort((a, b) => b[1] - a[1])[0];
     if (winner) recipientMinistry.set(recipientId, winner[0]);
   }
-  console.log(`  帰属決定: ${recipientMinistry.size.toLocaleString()} 支出先`);
+  const directAttribution = recipientMinistry.size;
+
+  // サブコントラクトエッジ経由の帰属フォールバック:
+  // 直接エッジがない間接支出先はサブコントラクトのソースの帰属を継承
+  // BFS的に複数ラウンド繰り返し、チェーンの深い支出先にも伝搬
+  const subEdgesByTarget = new Map<string, { source: string; value: number }[]>();
+  for (const edge of graph.edges) {
+    if (edge.edgeType !== 'subcontract') continue;
+    const list = subEdgesByTarget.get(edge.target) ?? [];
+    list.push({ source: edge.source, value: edge.value });
+    subEdgesByTarget.set(edge.target, list);
+  }
+
+  let propagated = 0;
+  for (let round = 0; round < 10; round++) {
+    let changed = false;
+    for (const [targetId, sources] of subEdgesByTarget) {
+      if (recipientMinistry.has(targetId)) continue;
+      // ソースの帰属のうち最大フローを採用
+      let best: string | undefined;
+      let bestValue = -1;
+      for (const { source, value } of sources) {
+        const m = recipientMinistry.get(source);
+        if (m && value > bestValue) { best = m; bestValue = value; }
+      }
+      if (best) {
+        recipientMinistry.set(targetId, best);
+        propagated++;
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
+  console.log(`  帰属決定: ${directAttribution.toLocaleString()} 支出先（直接） + ${propagated.toLocaleString()}（サブコントラクト伝搬）`);
 
   // 3. クラスタ内ノードグルーピング
   console.log('\n[3/5] Treemapクラスタ配置');
