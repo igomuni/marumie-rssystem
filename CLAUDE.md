@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Quick Reference
 
 ```bash
@@ -7,11 +9,17 @@
 npm run dev              # Dev server (localhost:3002, Turbopack)
 npm run build            # Production build（prebuildで.gzを自動展開）
 npm run lint             # ESLint チェック
+npx tsc --noEmit         # TypeScript 型チェック
 
 # データパイプライン（CSVファイル更新後）
 npm run normalize        # CSV正規化（要: pip3 install neologdn）
 npm run generate-structured  # rs2024-structured.json 生成（~96MB）
-npm run compress-data    # Gzip圧縮（~11MB、Git管理用）
+npm run compress-data    # Gzip圧縮（Git管理用）
+
+# Sankey2パイプライン（5-1/5-2 CSVから直接生成）
+npm run generate-sankey2         # sankey2-graph.json 生成（~25MB）
+npm run compute-sankey2-layout   # sankey2-layout.json 生成（~45MB）
+# compress-data で graph.json.gz / layout.json.gz も圧縮される
 
 # 法人番号照合データ（支出先ブラウザ用・オプション）
 # 事前に data/download/houjin-bangou/ に国税庁ZIPを配置
@@ -46,11 +54,28 @@ npm run build-houjin-lookup  # SQLite → data/houjin-lookup.json（約4秒）
 
 ## Main Entry Points
 
+### /sankey（動的生成版）
+
 | File | Purpose |
 |------|---------|
 | [app/sankey/page.tsx](app/sankey/page.tsx) | メインUI・状態管理・ノードインタラクション |
 | [app/lib/sankey-generator.ts](app/lib/sankey-generator.ts) | Sankey生成コアロジック |
 | [app/api/sankey/route.ts](app/api/sankey/route.ts) | 動的Sankeyデータエンドポイント |
+
+### /sankey2（事前計算版）
+
+| File | Purpose |
+|------|---------|
+| [app/sankey2/page.tsx](app/sankey2/page.tsx) | Sankey2 UI・Canvas描画・ノードインタラクション |
+| [client/components/Sankey2/Sankey2View.tsx](client/components/Sankey2/Sankey2View.tsx) | Sankey2メインコンポーネント（BFS・パネル・描画） |
+| [client/components/Sankey2/types.ts](client/components/Sankey2/types.ts) | Sankey2専用型定義 |
+| [scripts/generate-sankey2-data.ts](scripts/generate-sankey2-data.ts) | 5-1/5-2 CSV → graph.json 生成 |
+| [scripts/compute-sankey2-layout.ts](scripts/compute-sankey2-layout.ts) | graph.json → layout.json（座標計算） |
+
+### 共通
+
+| File | Purpose |
+|------|---------|
 | [scripts/](scripts/) | CSV正規化・JSON生成パイプライン |
 
 ## Data Location
@@ -59,6 +84,8 @@ npm run build-houjin-lookup  # SQLite → data/houjin-lookup.json（約4秒）
 - **Normalized CSV**: `data/year_2024/`（自動生成、.gitignore）
 - **Structured JSON**: `public/data/rs2024-structured.json`（~96MB、.gitignore）
 - **Compressed JSON**: `public/data/rs2024-structured.json.gz`（~11MB、Git管理）
+- **Sankey2 Graph**: `public/data/sankey2-graph.json(.gz)`（5-1/5-2 CSVから生成）
+- **Sankey2 Layout**: `public/data/sankey2-layout.json(.gz)`（graph.jsonから座標計算）
 
 ## Deployment
 
@@ -81,3 +108,8 @@ npm run build-houjin-lookup  # SQLite → data/houjin-lookup.json（約4秒）
 | Sankey生成ロジック・UI・ノード処理 | [docs/sankey-architecture-guide.md](docs/sankey-architecture-guide.md) |
 | データパイプライン・CSV処理・JSON生成 | [docs/data-pipeline-guide.md](docs/data-pipeline-guide.md) |
 | APIエンドポイント仕様 | [docs/api-guide.md](docs/api-guide.md) |
+
+## Known Bugs / Limitations
+
+- **Multi-block spending**: 支出先が同一事業の複数ブロックに出現する場合、`projects.find()` ではなく `projects.filter().reduce()` で金額を合算すること
+- **Sankey2 再委託エッジ**: 支出先ノードのみでは再委託チェーンの27.3%が表現不可能（ブロックノード層導入で解決予定。詳細: [docs/tasks/20260322_1751_再委託チェーン表現の限界と次のステップ.md](docs/tasks/20260322_1751_再委託チェーン表現の限界と次のステップ.md)）
