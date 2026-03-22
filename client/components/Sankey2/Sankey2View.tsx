@@ -2242,12 +2242,13 @@ function SubcontractStepNode({ step, directBlockIds, onNodeClick }: SubcontractS
         }`}>
           {step.targetBlock}
         </span>
-        <button
-          onClick={() => onNodeClick(`recipient-${step.to}`)}
-          className="truncate hover:text-blue-600 dark:hover:text-blue-400"
-        >
+        <span className="truncate text-gray-600 dark:text-gray-300">
+          {step.from}
+        </span>
+        <span className="text-gray-400">→</span>
+        <span className="truncate text-gray-600 dark:text-gray-300">
           {step.to}
-        </button>
+        </span>
         <span className="flex-shrink-0 ml-auto">{formatAmount(step.amount)}</span>
       </div>
       {/* 個別支出先 */}
