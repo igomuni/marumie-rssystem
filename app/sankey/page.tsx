@@ -10,6 +10,7 @@ import ProjectListModal from '@/client/components/ProjectListModal';
 import SpendingListModal from '@/client/components/SpendingListModal';
 import ProjectDetailPanel from '@/client/components/ProjectDetailPanel';
 import SubcontractDetailDialog from '@/client/components/SubcontractDetailDialog';
+import RecipientRangeSlider from '@/client/components/RecipientRangeSlider';
 
 function SankeyContent() {
   const router = useRouter();
@@ -1237,6 +1238,21 @@ function SankeyContent() {
               />
             </div>
           </div>
+
+          {/* Recipient Range Slider (Global View only) */}
+          {viewState.mode === 'global' && data?.metadata?.summary?.totalFilteredSpendings && (
+            <div className="mt-4 mb-4">
+              <RecipientRangeSlider
+                value={viewState.spendingDrilldownLevel * (topNSettings.global.spending || 10)}
+                total={data.metadata.summary.totalFilteredSpendings}
+                step={topNSettings.global.spending || 10}
+                onChangeCommitted={(newValue) => {
+                  const newLevel = Math.floor(newValue / (topNSettings.global.spending || 10));
+                  navigateToView({ mode: 'global', spendingDrilldownLevel: newLevel });
+                }}
+              />
+            </div>
+          )}
 
           {/* Return to TopN Selector */}
           {viewState.mode === 'global' && (
