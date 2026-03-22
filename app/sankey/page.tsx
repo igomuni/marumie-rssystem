@@ -779,7 +779,7 @@ function SankeyContent() {
 
         {/* サンキー図 */}
         <div className="bg-white rounded-lg shadow-lg p-6 relative">
-          {/* ノード色の凡例 */}
+          {/* ノード色の凡例 + 支出先スライダー */}
           <div className="flex items-center gap-6 mb-4 text-sm">
             <div className="flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-[#10b981]"></span>
@@ -793,6 +793,19 @@ function SankeyContent() {
               <span className="w-3 h-3 rounded-full bg-[#6b7280]"></span>
               <span className="text-gray-700">その他</span>
             </div>
+            {viewState.mode === 'global' && data?.metadata?.summary?.totalFilteredSpendings && (
+              <div className="ml-auto w-[400px]">
+                <RecipientRangeSlider
+                  value={viewState.spendingDrilldownLevel * (topNSettings.global.spending || 10)}
+                  total={data.metadata.summary.totalFilteredSpendings}
+                  step={topNSettings.global.spending || 10}
+                  onChangeCommitted={(newValue) => {
+                    const newLevel = Math.floor(newValue / (topNSettings.global.spending || 10));
+                    navigateToView({ mode: 'global', spendingDrilldownLevel: newLevel });
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {loading && (
@@ -1238,21 +1251,6 @@ function SankeyContent() {
               />
             </div>
           </div>
-
-          {/* Recipient Range Slider (Global View only) */}
-          {viewState.mode === 'global' && data?.metadata?.summary?.totalFilteredSpendings && (
-            <div className="mt-4 mb-4">
-              <RecipientRangeSlider
-                value={viewState.spendingDrilldownLevel * (topNSettings.global.spending || 10)}
-                total={data.metadata.summary.totalFilteredSpendings}
-                step={topNSettings.global.spending || 10}
-                onChangeCommitted={(newValue) => {
-                  const newLevel = Math.floor(newValue / (topNSettings.global.spending || 10));
-                  navigateToView({ mode: 'global', spendingDrilldownLevel: newLevel });
-                }}
-              />
-            </div>
-          )}
 
           {/* Return to TopN Selector */}
           {viewState.mode === 'global' && (
