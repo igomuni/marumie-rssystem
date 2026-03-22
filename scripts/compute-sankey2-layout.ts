@@ -526,9 +526,10 @@ function main() {
         layoutNodeMap.set(ln.id, ln);
       }
     } else if (clusterType === 'spending-block') {
-      // spending-block: 親事業(project-spending)のY座標に揃えてトポロジー配置
-      // 各事業のブロックノード群を、親事業の y 〜 y+height の帯にtreemap配置
+      // spending-block: 親事業(project-spending)の2D区画をミラーしてトポロジー配置
+      // 各事業のブロックノード群を、親事業と同じ相対位置・サイズの矩形にtreemap配置
       const blockNodes = graph.nodes.filter(n => n.type === 'spending-block');
+      const psClusterX = CLUSTER_TYPES.indexOf('project-spending') * (CLUSTER_WIDTH + CLUSTER_GAP);
 
       // projectId → ブロックノード群
       const blocksByProject = new Map<number, GraphNode[]>();
@@ -544,11 +545,11 @@ function main() {
         const parentLayout = layoutNodeMap.get(`project-spending-${projectId}`);
         if (!parentLayout) continue;
 
-        // 親事業のY帯にブロックを配置
+        // 親事業の2D区画をspending-blockクラスタにミラー
         const bandRect: Rect = {
-          x: clusterRect.x,
+          x: clusterRect.x + (parentLayout.x - psClusterX),
           y: parentLayout.y,
-          width: clusterRect.width,
+          width: parentLayout.width,
           height: parentLayout.height,
         };
 
