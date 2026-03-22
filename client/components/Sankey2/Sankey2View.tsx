@@ -12,6 +12,7 @@ const TYPE_COLORS: Record<string, string> = {
   'ministry':         '#3b82f6', // blue-500
   'project-budget':   '#22c55e', // green-500
   'project-spending': '#f97316', // orange-500
+  'spending-block':   '#a855f7', // purple-500
   'recipient':        '#ef4444', // red-500
 };
 
@@ -21,6 +22,7 @@ const TYPE_LABELS: Record<string, string> = {
   'ministry':         '府省庁',
   'project-budget':   '事業（予算）',
   'project-spending': '事業（支出）',
+  'spending-block':   '支出ブロック',
   'recipient':        '支出先',
 };
 

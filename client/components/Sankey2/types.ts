@@ -3,7 +3,7 @@
 export interface LayoutNode {
   id: string;
   label: string;
-  type: 'total' | 'ministry' | 'project-budget' | 'project-spending' | 'recipient';
+  type: 'total' | 'ministry' | 'project-budget' | 'project-spending' | 'spending-block' | 'recipient';
   amount: number;
   x: number;
   y: number;
