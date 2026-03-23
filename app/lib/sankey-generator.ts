@@ -3,6 +3,7 @@ import * as path from 'path';
 import type { RS2024StructuredData, BudgetRecord, SpendingRecord, MOFFundingData, FundingSources } from '@/types/structured';
 import type {
   RS2024PresetData,
+  RecipientSummary,
   SankeyNode,
   SankeyLink,
 } from '@/types/preset';
@@ -234,6 +235,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
       },
     },
     sankey: sankeyData,
+    allRecipients: selection.allRecipientsForClient,
   };
 
   // Update cache
@@ -265,6 +267,7 @@ interface DataSelection {
 
   // Global View スライダー用
   totalFilteredRecipients?: number; // フィルタ後の支出先総数（"その他"除外）
+  allRecipientsForClient?: RecipientSummary[]; // クライアント側ページング用の全支出先データ
 
   // Ministry View用
   ministryTotalProjects?: number; // 選択した府省庁の総事業数
@@ -323,6 +326,7 @@ function selectData(
 
   // Global View スライダー用
   let totalFilteredRecipients: number | undefined = undefined;
+  let allRecipientsForClient: RecipientSummary[] | undefined = undefined;
 
   if (targetRecipientName) {
     // --- Spending View (Reverse Flow) ---
@@ -585,6 +589,35 @@ function selectData(
       });
 
     totalFilteredRecipients = allRecipients.length;
+
+    // Build lightweight recipient data for client-side paging
+    const topProjectIds = new Set(topProjects.map(p => p.projectId));
+    allRecipientsForClient = allRecipients.map(s => {
+      const projects: RecipientSummary['projects'] = [];
+      for (const sp of s.projects) {
+        if (!topProjectIds.has(sp.projectId)) continue;
+        // In ministry drilldown, further filter by selected ministries
+        if (drilldownLevel > 0) {
+          const budgetRecord = projectsFromSelectedMinistries.find(b => b.projectId === sp.projectId);
+          if (!budgetRecord) continue;
+        }
+        projects.push({
+          projectId: sp.projectId,
+          amount: sp.amount,
+          contractMethod: sp.contractMethod || undefined,
+          blockName: sp.blockName || undefined,
+        });
+      }
+      return {
+        spendingId: s.spendingId,
+        spendingName: s.spendingName,
+        corporateNumber: s.corporateNumber,
+        location: s.location,
+        projectCount: s.projectCount,
+        tags: s.tags,
+        projects,
+      };
+    });
 
     // Apply spending drilldown if enabled
     const topRecipients = allRecipients.slice(spendingOffset, spendingOffset + spendingLimit);
@@ -861,6 +894,7 @@ function selectData(
     hasMoreProjects,
     ministryTotalProjects,
     totalFilteredRecipients,
+    allRecipientsForClient,
     spendingDrilldownLevel,
     top10SpendingTotal,
     cumulativeSpendings,

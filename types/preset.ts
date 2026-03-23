@@ -8,6 +8,20 @@ import type { SpendingTags, FundingSources } from './structured';
 export interface RS2024PresetData {
   metadata: PresetMetadata;
   sankey: SankeyData;
+  // Global View: クライアント側で支出先ページングを行うための全支出先データ（ソート済み）
+  allRecipients?: RecipientSummary[];
+}
+
+// クライアント側支出先ページング用の軽量支出先データ
+export interface RecipientSummary {
+  spendingId: number;
+  spendingName: string;
+  corporateNumber: string;
+  location: string;
+  projectCount: number;
+  tags?: SpendingTags;
+  // この支出先への支出元プロジェクトごとの金額（topProjects に含まれるもののみ）
+  projects: { projectId: number; amount: number; contractMethod?: string; blockName?: string }[];
 }
 
 // プリセットメタデータ

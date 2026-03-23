@@ -57,9 +57,8 @@ function SankeyContent() {
     subcontracts?: { name: string; amount: number; flowType: string }[];
   } | null>(null);
 
-  // Client-side cache for prefetched spending drilldown pages (Global View)
-  const spendingPageCache = useRef<Map<string, RS2024PresetData>>(new Map());
-  const prefetchAbortRef = useRef<AbortController | null>(null);
+  // Global View: base data (level 0) with allRecipients for client-side paging
+  const globalBaseData = useRef<RS2024PresetData | null>(null);
 
   // Sync state from URL parameters (runs on mount and whenever URL changes via browser back/forward)
   useEffect(() => {
@@ -140,38 +139,169 @@ function SankeyContent() {
     loadStructuredData();
   }, []);
 
-  // Build Global View API params for a given spendingDrilldownLevel
-  const buildGlobalParams = useCallback((spendingLevel: number) => {
-    const params = new URLSearchParams();
-    params.set('limit', topNSettings.global.ministry.toString());
-    params.set('projectLimit', '3');
-    params.set('spendingLimit', topNSettings.global.spending.toString());
-    params.set('subcontractLimit', topNSettings.global.subcontract.toString());
-    params.set('drilldownLevel', viewState.drilldownLevel.toString());
-    params.set('spendingDrilldownLevel', spendingLevel.toString());
-    return params.toString();
-  }, [topNSettings, viewState.drilldownLevel]);
+  // Build sankey data with client-side recipient paging for Global View
+  const buildGlobalSankeyForLevel = useCallback((base: RS2024PresetData, level: number): RS2024PresetData => {
+    if (level === 0 || !base.allRecipients) return base;
+
+    const spendingLimit = topNSettings.global.spending || 10;
+    const offset = level * spendingLimit;
+    const pageRecipients = base.allRecipients.slice(offset, offset + spendingLimit);
+
+    // Remove existing recipient nodes/links from base sankey
+    const baseNodes = base.sankey.nodes.filter(n =>
+      n.type !== 'recipient' && n.type !== 'subcontract-recipient'
+    );
+    const recipientNodeIds = new Set(base.sankey.nodes.filter(n => n.type === 'recipient' || n.type === 'subcontract-recipient').map(n => n.id));
+    const baseLinks = base.sankey.links.filter(l =>
+      !recipientNodeIds.has(l.target) && l.target !== 'recipient-other-aggregated' && l.target !== 'recipient-other-named' && l.target !== 'recipient-top10-summary'
+    );
+
+    // Also remove "recipient-other-aggregated", "recipient-other-named", "recipient-top10-summary" from baseNodes
+    const filteredBaseNodes = baseNodes.filter(n =>
+      n.id !== 'recipient-other-aggregated' && n.id !== 'recipient-other-named' && n.id !== 'recipient-top10-summary'
+    );
+
+    // Build new recipient nodes
+    const newNodes = [...filteredBaseNodes];
+    const newLinks = [...baseLinks];
+    const topProjectIds = new Set(base.sankey.nodes.filter(n => n.type === 'project-spending').map(n => n.originalId));
+
+    // "支出先(Top{prev})" summary node for cumulative
+    const prevEnd = level * spendingLimit;
+    const prevRecipients = base.allRecipients.slice(0, prevEnd);
+    const prevTotal = prevRecipients.reduce((sum, r) => r.projects.reduce((acc, p) => acc + p.amount, sum), 0);
+
+    newNodes.push({
+      id: 'recipient-top10-summary',
+      name: `支出先\n(Top${prevEnd})`,
+      type: 'recipient',
+      value: prevTotal || 0.001,
+      details: { corporateNumber: '', location: '', projectCount: prevEnd, actualValue: prevTotal },
+    });
+
+    // Add cumulative link from "project-spending-cumulative" if it exists
+    const cumulativeNode = filteredBaseNodes.find(n => n.id === 'project-spending-cumulative');
+    if (cumulativeNode) {
+      newLinks.push({
+        source: 'project-spending-cumulative',
+        target: 'recipient-top10-summary',
+        value: 0.001,
+      });
+    }
+
+    // Current page recipient nodes + links
+    for (const r of pageRecipients) {
+      const spendingFromTopProjects = r.projects
+        .filter(p => topProjectIds.has(p.projectId))
+        .reduce((sum, p) => sum + p.amount, 0);
+
+      newNodes.push({
+        id: `recipient-${r.spendingId}`,
+        name: r.spendingName,
+        type: 'recipient',
+        value: spendingFromTopProjects,
+        originalId: r.spendingId,
+        details: {
+          corporateNumber: r.corporateNumber,
+          location: r.location,
+          projectCount: r.projectCount,
+          tags: r.tags,
+        },
+      });
+
+      for (const p of r.projects) {
+        if (!topProjectIds.has(p.projectId)) continue;
+        newLinks.push({
+          source: `project-spending-${p.projectId}`,
+          target: `recipient-${r.spendingId}`,
+          value: p.amount,
+          details: {
+            contractMethod: p.contractMethod,
+            blockName: p.blockName,
+          },
+        });
+      }
+    }
+
+    // "その他" named spending node (from base level 0 data)
+    const otherNamedNode = base.sankey.nodes.find(n => n.id === 'recipient-other-named');
+    if (otherNamedNode) {
+      newNodes.push(otherNamedNode);
+      // Copy links to this node from base
+      for (const l of base.sankey.links) {
+        if (l.target === 'recipient-other-named') newLinks.push(l);
+      }
+    }
+
+    // "支出先(TopN以外)" aggregated node
+    const excludeUpTo = (level + 1) * spendingLimit;
+    const remainingRecipients = base.allRecipients.slice(excludeUpTo);
+    const totalOtherAmount = remainingRecipients.reduce((sum, r) =>
+      r.projects.filter(p => topProjectIds.has(p.projectId)).reduce((acc, p) => acc + p.amount, sum), 0);
+
+    if (totalOtherAmount > 0) {
+      newNodes.push({
+        id: 'recipient-other-aggregated',
+        name: `支出先\n(Top${excludeUpTo}以外)`,
+        type: 'recipient',
+        value: totalOtherAmount,
+      });
+
+      // Links from each top project to "other aggregated"
+      for (const projectNode of base.sankey.nodes.filter(n => n.type === 'project-spending' && n.originalId)) {
+        let projectToOther = 0;
+        for (const r of remainingRecipients) {
+          for (const p of r.projects) {
+            if (p.projectId === projectNode.originalId) projectToOther += p.amount;
+          }
+        }
+        if (projectToOther > 0) {
+          newLinks.push({
+            source: projectNode.id,
+            target: 'recipient-other-aggregated',
+            value: projectToOther,
+          });
+        }
+      }
+    }
+
+    return {
+      ...base,
+      sankey: { nodes: newNodes, links: newLinks },
+    };
+  }, [topNSettings.global.spending]);
 
   useEffect(() => {
     async function loadData() {
+      setLoading(true);
       try {
-        let params: URLSearchParams;
+        const params = new URLSearchParams();
 
         if (viewState.mode === 'global') {
-          const cacheKey = buildGlobalParams(viewState.spendingDrilldownLevel);
+          // For Global View, always fetch level 0 (base data with allRecipients)
+          // Then client-side generates the current level's recipient nodes
+          if (!globalBaseData.current || viewState.drilldownLevel !== (globalBaseData.current as RS2024PresetData & { _drilldownLevel?: number })._drilldownLevel) {
+            params.set('limit', topNSettings.global.ministry.toString());
+            params.set('projectLimit', '3');
+            params.set('spendingLimit', topNSettings.global.spending.toString());
+            params.set('subcontractLimit', topNSettings.global.subcontract.toString());
+            params.set('drilldownLevel', viewState.drilldownLevel.toString());
+            params.set('spendingDrilldownLevel', '0');
 
-          // Check client-side cache first
-          const cached = spendingPageCache.current.get(cacheKey);
-          if (cached) {
-            setData(cached);
-            return;
+            const response = await fetch(`/api/sankey?${params.toString()}`);
+            if (!response.ok) throw new Error('Failed to load data');
+            const json: RS2024PresetData = await response.json();
+            globalBaseData.current = json;
+            // Tag with drilldown level to invalidate when ministry drilldown changes
+            (globalBaseData.current as RS2024PresetData & { _drilldownLevel?: number })._drilldownLevel = viewState.drilldownLevel;
           }
 
-          setLoading(true);
-          params = new URLSearchParams(cacheKey);
+          // Generate sankey for current spending drilldown level client-side
+          const result = buildGlobalSankeyForLevel(globalBaseData.current, viewState.spendingDrilldownLevel);
+          setData(result);
         } else {
-          setLoading(true);
-          params = new URLSearchParams();
+          // Non-global views: standard API fetch
+          globalBaseData.current = null;
 
           if (viewState.mode === 'ministry' && viewState.selectedMinistry) {
             params.set('ministryName', viewState.selectedMinistry);
@@ -188,18 +318,11 @@ function SankeyContent() {
             params.set('limit', topNSettings.spending.ministry.toString());
             params.set('subcontractLimit', topNSettings.spending.subcontract.toString());
           }
-        }
 
-        const response = await fetch(`/api/sankey?${params.toString()}`);
-        if (!response.ok) {
-          throw new Error('Failed to load data');
-        }
-        const json: RS2024PresetData = await response.json();
-        setData(json);
-
-        // Cache Global View responses
-        if (viewState.mode === 'global') {
-          spendingPageCache.current.set(params.toString(), json);
+          const response = await fetch(`/api/sankey?${params.toString()}`);
+          if (!response.ok) throw new Error('Failed to load data');
+          const json: RS2024PresetData = await response.json();
+          setData(json);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
@@ -209,44 +332,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [viewState, topNSettings, buildGlobalParams]);
-
-  // Prefetch all spending drilldown pages in background (Global View only)
-  useEffect(() => {
-    if (viewState.mode !== 'global' || !data?.metadata?.summary?.totalFilteredSpendings) return;
-
-    // Cancel any previous prefetch
-    prefetchAbortRef.current?.abort();
-    const controller = new AbortController();
-    prefetchAbortRef.current = controller;
-
-    const total = data.metadata.summary.totalFilteredSpendings;
-    const step = topNSettings.global.spending || 10;
-    const maxLevel = Math.ceil(total / step) - 1;
-
-    async function prefetchAll() {
-      for (let level = 0; level <= maxLevel; level++) {
-        if (controller.signal.aborted) return;
-        const cacheKey = buildGlobalParams(level);
-        if (spendingPageCache.current.has(cacheKey)) continue;
-
-        try {
-          const response = await fetch(`/api/sankey?${cacheKey}`, { signal: controller.signal });
-          if (response.ok) {
-            const json: RS2024PresetData = await response.json();
-            spendingPageCache.current.set(cacheKey, json);
-          }
-        } catch {
-          // Abort or network error — stop silently
-          return;
-        }
-      }
-    }
-
-    prefetchAll();
-
-    return () => { controller.abort(); };
-  }, [viewState.mode, data?.metadata?.summary?.totalFilteredSpendings, topNSettings.global.spending, buildGlobalParams]);
+  }, [viewState, topNSettings, buildGlobalSankeyForLevel]);
 
   // スマホ判定
   useEffect(() => {
