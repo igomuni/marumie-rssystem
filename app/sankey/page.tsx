@@ -11,6 +11,7 @@ import SpendingListModal from '@/client/components/SpendingListModal';
 import ProjectDetailPanel from '@/client/components/ProjectDetailPanel';
 import SubcontractDetailDialog from '@/client/components/SubcontractDetailDialog';
 import RecipientRangeSlider from '@/client/components/RecipientRangeSlider';
+import SankeyGlobalView from '@/client/components/SankeyGlobalView';
 
 function SankeyContent() {
   const router = useRouter();
@@ -825,13 +826,27 @@ function SankeyContent() {
             style={isMobile ? { WebkitOverflowScrolling: 'touch' } : {}}
           >
             <div style={{ height: '800px', minWidth: isMobile ? '1200px' : 'auto', backgroundColor: 'white' }}>
+              {viewState.mode === 'global' ? (
+                <SankeyGlobalView
+                  data={sankey}
+                  width={isMobile ? 1200 : 1200}
+                  height={800}
+                  margin={{ top: 40, right: 100, bottom: 40, left: 100 }}
+                  hasSubcontractNodes={sankey.nodes.some(n => n.type === 'subcontract-recipient')}
+                  onNodeClick={handleNodeClick}
+                  formatCurrency={formatCurrency}
+                  getActualValue={getActualValue}
+                  viewState={viewState}
+                  topNSettings={topNSettings}
+                />
+              ) : (
               <ResponsiveSankey
                 data={sankey}
                 margin={isMobile
                   ? { top: 40, right: 100, bottom: 40, left: 100 }
                   : { top: 40, right: 100, bottom: 40, left: 100 }
                 }
-                align={(viewState.mode === 'global' || viewState.mode === 'ministry' || viewState.mode === 'project') && sankey.nodes.some(n => n.type === 'subcontract-recipient') ? 'start' : 'justify'}
+                align={(viewState.mode === 'ministry' || viewState.mode === 'project') && sankey.nodes.some(n => n.type === 'subcontract-recipient') ? 'start' : 'justify'}
                 sort="input"
                 nodeInnerPadding={0}
                 colors={(node) => {
@@ -1249,6 +1264,7 @@ function SankeyContent() {
                   );
                 }}
               />
+              )}
             </div>
           </div>
 
