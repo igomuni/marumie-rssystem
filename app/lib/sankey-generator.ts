@@ -230,6 +230,7 @@ export async function generateSankeyData(options: GenerateOptions = {}): Promise
         selectedBudget: selectedBudget,
         coverageRate: coverageRate,
         ministryTotalProjects: selection.ministryTotalProjects,
+        totalFilteredSpendings: selection.totalFilteredRecipients,
       },
     },
     sankey: sankeyData,
@@ -261,6 +262,9 @@ interface DataSelection {
   otherProjectsSpendingByMinistryInSpendingView?: Map<string, number>; // 府省庁別のTopN以外プロジェクト支出金額
   otherMinistriesSpendingInSpendingView?: number; // TopN以外の府省庁からの支出金額
   hasMoreProjects?: boolean; // ページネーション可能かどうか
+
+  // Global View スライダー用
+  totalFilteredRecipients?: number; // フィルタ後の支出先総数（"その他"除外）
 
   // Ministry View用
   ministryTotalProjects?: number; // 選択した府省庁の総事業数
@@ -316,6 +320,9 @@ function selectData(
 
   // Ministry View用
   let ministryTotalProjects: number | undefined = undefined;
+
+  // Global View スライダー用
+  let totalFilteredRecipients: number | undefined = undefined;
 
   if (targetRecipientName) {
     // --- Spending View (Reverse Flow) ---
@@ -576,6 +583,8 @@ function selectData(
         const bSpending = recipientSpendingFromSelectedMinistries.get(b.spendingId) || 0;
         return bSpending - aSpending;
       });
+
+    totalFilteredRecipients = allRecipients.length;
 
     // Apply spending drilldown if enabled
     const topRecipients = allRecipients.slice(spendingOffset, spendingOffset + spendingLimit);
@@ -851,6 +860,7 @@ function selectData(
     otherMinistriesSpendingInSpendingView,
     hasMoreProjects,
     ministryTotalProjects,
+    totalFilteredRecipients,
     spendingDrilldownLevel,
     top10SpendingTotal,
     cumulativeSpendings,
