@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ResponsiveSankey } from '@nivo/sankey';
 import type { RS2024PresetData } from '@/types/preset';
@@ -56,6 +56,10 @@ function SankeyContent() {
     furtherOutflows?: { name: string; amount: number; flowType: string }[];
     subcontracts?: { name: string; amount: number; flowType: string }[];
   } | null>(null);
+
+  // Client-side cache for prefetched spending drilldown pages (Global View)
+  const spendingPageCache = useRef<Map<string, RS2024PresetData>>(new Map());
+  const prefetchAbortRef = useRef<AbortController | null>(null);
 
   // Sync state from URL parameters (runs on mount and whenever URL changes via browser back/forward)
   useEffect(() => {
@@ -136,33 +140,54 @@ function SankeyContent() {
     loadStructuredData();
   }, []);
 
+  // Build Global View API params for a given spendingDrilldownLevel
+  const buildGlobalParams = useCallback((spendingLevel: number) => {
+    const params = new URLSearchParams();
+    params.set('limit', topNSettings.global.ministry.toString());
+    params.set('projectLimit', '3');
+    params.set('spendingLimit', topNSettings.global.spending.toString());
+    params.set('subcontractLimit', topNSettings.global.subcontract.toString());
+    params.set('drilldownLevel', viewState.drilldownLevel.toString());
+    params.set('spendingDrilldownLevel', spendingLevel.toString());
+    return params.toString();
+  }, [topNSettings, viewState.drilldownLevel]);
+
   useEffect(() => {
     async function loadData() {
-      setLoading(true);
       try {
-        const params = new URLSearchParams();
+        let params: URLSearchParams;
 
         if (viewState.mode === 'global') {
-          params.set('limit', topNSettings.global.ministry.toString());
-          params.set('projectLimit', '3'); // Fixed for global view to avoid clutter
-          params.set('spendingLimit', topNSettings.global.spending.toString());
-          params.set('subcontractLimit', topNSettings.global.subcontract.toString());
-          params.set('drilldownLevel', viewState.drilldownLevel.toString());
-          params.set('spendingDrilldownLevel', viewState.spendingDrilldownLevel.toString());
-        } else if (viewState.mode === 'ministry' && viewState.selectedMinistry) {
-          params.set('ministryName', viewState.selectedMinistry);
-          params.set('projectLimit', topNSettings.ministry.project.toString());
-          params.set('spendingLimit', topNSettings.ministry.spending.toString());
-          params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
-        } else if (viewState.mode === 'project' && viewState.selectedProject) {
-          params.set('projectName', viewState.selectedProject);
-          params.set('spendingLimit', topNSettings.project.spending.toString());
-        } else if (viewState.mode === 'spending' && viewState.selectedRecipient) {
-          params.set('recipientName', viewState.selectedRecipient);
-          params.set('projectLimit', topNSettings.spending.project.toString());
-          params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
-          params.set('limit', topNSettings.spending.ministry.toString());
-          params.set('subcontractLimit', topNSettings.spending.subcontract.toString());
+          const cacheKey = buildGlobalParams(viewState.spendingDrilldownLevel);
+
+          // Check client-side cache first
+          const cached = spendingPageCache.current.get(cacheKey);
+          if (cached) {
+            setData(cached);
+            return;
+          }
+
+          setLoading(true);
+          params = new URLSearchParams(cacheKey);
+        } else {
+          setLoading(true);
+          params = new URLSearchParams();
+
+          if (viewState.mode === 'ministry' && viewState.selectedMinistry) {
+            params.set('ministryName', viewState.selectedMinistry);
+            params.set('projectLimit', topNSettings.ministry.project.toString());
+            params.set('spendingLimit', topNSettings.ministry.spending.toString());
+            params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
+          } else if (viewState.mode === 'project' && viewState.selectedProject) {
+            params.set('projectName', viewState.selectedProject);
+            params.set('spendingLimit', topNSettings.project.spending.toString());
+          } else if (viewState.mode === 'spending' && viewState.selectedRecipient) {
+            params.set('recipientName', viewState.selectedRecipient);
+            params.set('projectLimit', topNSettings.spending.project.toString());
+            params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
+            params.set('limit', topNSettings.spending.ministry.toString());
+            params.set('subcontractLimit', topNSettings.spending.subcontract.toString());
+          }
         }
 
         const response = await fetch(`/api/sankey?${params.toString()}`);
@@ -171,6 +196,11 @@ function SankeyContent() {
         }
         const json: RS2024PresetData = await response.json();
         setData(json);
+
+        // Cache Global View responses
+        if (viewState.mode === 'global') {
+          spendingPageCache.current.set(params.toString(), json);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -179,7 +209,44 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [viewState, topNSettings]);
+  }, [viewState, topNSettings, buildGlobalParams]);
+
+  // Prefetch all spending drilldown pages in background (Global View only)
+  useEffect(() => {
+    if (viewState.mode !== 'global' || !data?.metadata?.summary?.totalFilteredSpendings) return;
+
+    // Cancel any previous prefetch
+    prefetchAbortRef.current?.abort();
+    const controller = new AbortController();
+    prefetchAbortRef.current = controller;
+
+    const total = data.metadata.summary.totalFilteredSpendings;
+    const step = topNSettings.global.spending || 10;
+    const maxLevel = Math.ceil(total / step) - 1;
+
+    async function prefetchAll() {
+      for (let level = 0; level <= maxLevel; level++) {
+        if (controller.signal.aborted) return;
+        const cacheKey = buildGlobalParams(level);
+        if (spendingPageCache.current.has(cacheKey)) continue;
+
+        try {
+          const response = await fetch(`/api/sankey?${cacheKey}`, { signal: controller.signal });
+          if (response.ok) {
+            const json: RS2024PresetData = await response.json();
+            spendingPageCache.current.set(cacheKey, json);
+          }
+        } catch {
+          // Abort or network error — stop silently
+          return;
+        }
+      }
+    }
+
+    prefetchAll();
+
+    return () => { controller.abort(); };
+  }, [viewState.mode, data?.metadata?.summary?.totalFilteredSpendings, topNSettings.global.spending, buildGlobalParams]);
 
   // スマホ判定
   useEffect(() => {
