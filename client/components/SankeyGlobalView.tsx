@@ -1,40 +1,51 @@
 'use client';
 
 import React, { useMemo, useState, useCallback, useRef } from 'react';
-import {
-  sankey as d3Sankey,
-  sankeyLinkHorizontal,
-  sankeyJustify,
-  sankeyLeft,
-} from 'd3-sankey';
 import type { SankeyNode, SankeyLink } from '@/types/preset';
 
-// d3-sankey augmented types
-interface D3Node {
+// Pre-computed layout node (from sankey-global-layout.json)
+interface LayoutNode {
   id: string;
   name: string;
   type: string;
   value: number;
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+  originalId?: number;
   details?: SankeyNode['details'];
-  // d3-sankey computed
-  x0?: number;
-  x1?: number;
-  y0?: number;
-  y1?: number;
-  index?: number;
-  sourceLinks?: D3Link[];
-  targetLinks?: D3Link[];
 }
 
-interface D3Link {
-  source: D3Node;
-  target: D3Node;
+// Pre-computed layout link (from sankey-global-layout.json)
+interface LayoutLink {
+  source: string;
+  target: string;
   value: number;
+  path: string;
+  width: number;
+  y0: number;
+  y1: number;
   details?: SankeyLink['details'];
-  width?: number;
-  y0?: number;
-  y1?: number;
-  index?: number;
+}
+
+// Pre-computed level layout
+export interface LevelLayout {
+  nodes: LayoutNode[];
+  links: LayoutLink[];
+}
+
+// Full pre-computed layout data
+export interface GlobalLayoutData {
+  metadata: {
+    totalLevels: number;
+    recipientsPerLevel: number;
+    totalRecipients: number;
+    svgWidth: number;
+    svgHeight: number;
+    margin: { top: number; right: number; bottom: number; left: number };
+  };
+  levels: Record<string, LevelLayout>;
 }
 
 // ── Color helpers ──
@@ -65,24 +76,20 @@ const MemoNode = React.memo(function MemoNode({
   onMouseLeave,
   onClick,
 }: {
-  node: D3Node;
+  node: LayoutNode;
   opacity: number;
   onMouseEnter: (e: React.MouseEvent) => void;
   onMouseLeave: () => void;
   onClick: () => void;
 }) {
-  const x = node.x0 ?? 0;
-  const y = node.y0 ?? 0;
-  const w = (node.x1 ?? 0) - x;
-  const h = (node.y1 ?? 0) - y;
   const color = getNodeColor(node.type, node.name);
 
   return (
     <rect
-      x={x}
-      y={y}
-      width={w}
-      height={h}
+      x={node.x0}
+      y={node.y0}
+      width={node.x1 - node.x0}
+      height={node.y1 - node.y0}
       fill={color}
       opacity={opacity}
       style={{ cursor: 'pointer', transition: 'opacity 0.15s' }}
@@ -96,25 +103,22 @@ const MemoNode = React.memo(function MemoNode({
 const MemoLink = React.memo(function MemoLink({
   link,
   opacity,
-  pathGenerator,
   onMouseEnter,
   onMouseLeave,
 }: {
-  link: D3Link;
+  link: LayoutLink;
   opacity: number;
-  pathGenerator: (link: D3Link) => string | null;
   onMouseEnter: (e: React.MouseEvent) => void;
   onMouseLeave: () => void;
 }) {
-  const d = pathGenerator(link);
-  if (!d) return null;
+  if (!link.path) return null;
 
   return (
     <path
-      d={d}
+      d={link.path}
       fill="none"
       stroke="#9ca3af"
-      strokeWidth={Math.max(link.width ?? 1, 1)}
+      strokeWidth={Math.max(link.width, 1)}
       strokeOpacity={opacity}
       style={{ transition: 'stroke-opacity 0.15s' }}
       onMouseEnter={onMouseEnter}
@@ -126,31 +130,26 @@ const MemoLink = React.memo(function MemoLink({
 // ── Main component ──
 
 interface Props {
-  data: { nodes: SankeyNode[]; links: SankeyLink[] };
+  layout: LevelLayout;
   width: number;
   height: number;
   margin?: { top: number; right: number; bottom: number; left: number };
-  hasSubcontractNodes?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onNodeClick: (node: any) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formatCurrency: (value: number | undefined, nodeOrDetails?: any) => string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getActualValue: (value: number | undefined, nodeOrDetails?: any) => number | undefined;
   viewState: { mode: string; projectDrilldownLevel: number; spendingDrilldownLevel: number };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   topNSettings: any;
 }
 
 export default function SankeyGlobalView({
-  data,
+  layout,
   width,
   height,
   margin = { top: 40, right: 100, bottom: 40, left: 100 },
-  hasSubcontractNodes = false,
   onNodeClick,
   formatCurrency,
-  getActualValue,
   viewState,
   topNSettings,
 }: Props) {
@@ -161,64 +160,22 @@ export default function SankeyGlobalView({
     type: 'node' | 'link';
     x: number;
     y: number;
-    node?: D3Node;
-    link?: D3Link;
+    node?: LayoutNode;
+    link?: LayoutLink;
   } | null>(null);
 
-  const innerWidth = width - margin.left - margin.right;
-  const innerHeight = height - margin.top - margin.bottom;
-
-  // ── d3-sankey layout ──
-  const { layoutNodes, layoutLinks, pathGenerator } = useMemo(() => {
-    const nodes: D3Node[] = data.nodes.map((n) => ({
-      id: n.id,
-      name: n.name,
-      type: n.type,
-      value: n.value,
-      details: n.details,
-    }));
-
-    const nodeMap = new Map(nodes.map((n, i) => [n.id, i]));
-    const links: D3Link[] = data.links
-      .filter((l) => nodeMap.has(l.source) && nodeMap.has(l.target))
-      .map((l) => ({
-        source: nodes[nodeMap.get(l.source)!],
-        target: nodes[nodeMap.get(l.target)!],
-        value: l.value,
-        details: l.details,
-      }));
-
-    const generator = d3Sankey<D3Node, D3Link>()
-      .nodeId((d) => d.id)
-      .nodeWidth(44)
-      .nodePadding(22)
-      .nodeAlign(hasSubcontractNodes ? sankeyLeft : sankeyJustify)
-      .nodeSort(null) // preserve input order
-      .extent([
-        [0, 0],
-        [innerWidth, innerHeight],
-      ]);
-
-    const { nodes: layoutNodes, links: layoutLinks } = generator({
-      nodes,
-      links,
-    });
-
-    const pathGen = sankeyLinkHorizontal<D3Node, D3Link>();
-
-    return { layoutNodes, layoutLinks, pathGenerator: pathGen };
-  }, [data, innerWidth, innerHeight, hasSubcontractNodes]);
+  // Use pre-computed layout directly (no d3-sankey computation)
+  const layoutNodes = layout.nodes;
+  const layoutLinks = layout.links;
 
   // ── Adjacency map for hover highlight ──
   const adjacency = useMemo(() => {
     const map = new Map<string, Set<string>>();
     for (const link of layoutLinks) {
-      const sId = link.source.id;
-      const tId = link.target.id;
-      if (!map.has(sId)) map.set(sId, new Set());
-      if (!map.has(tId)) map.set(tId, new Set());
-      map.get(sId)!.add(tId);
-      map.get(tId)!.add(sId);
+      if (!map.has(link.source)) map.set(link.source, new Set());
+      if (!map.has(link.target)) map.set(link.target, new Set());
+      map.get(link.source)!.add(link.target);
+      map.get(link.target)!.add(link.source);
     }
     return map;
   }, [layoutLinks]);
@@ -233,16 +190,16 @@ export default function SankeyGlobalView({
   );
 
   const isLinkConnected = useCallback(
-    (link: D3Link) => {
+    (link: LayoutLink) => {
       if (!hoveredNodeId) return true;
-      return link.source.id === hoveredNodeId || link.target.id === hoveredNodeId;
+      return link.source === hoveredNodeId || link.target === hoveredNodeId;
     },
     [hoveredNodeId]
   );
 
   // ── Event handlers ──
   const handleNodeMouseEnter = useCallback(
-    (node: D3Node, event: React.MouseEvent) => {
+    (node: LayoutNode, event: React.MouseEvent) => {
       setHoveredNodeId(node.id);
       const svgRect = svgRef.current?.getBoundingClientRect();
       if (svgRect) {
@@ -263,7 +220,7 @@ export default function SankeyGlobalView({
   }, []);
 
   const handleLinkMouseEnter = useCallback(
-    (link: D3Link, index: number, event: React.MouseEvent) => {
+    (link: LayoutLink, index: number, event: React.MouseEvent) => {
       setHoveredLinkIndex(index);
       setHoveredNodeId(null);
       const svgRect = svgRef.current?.getBoundingClientRect();
@@ -286,7 +243,7 @@ export default function SankeyGlobalView({
 
   // ── Label helpers (ported from nivo custom layer) ──
   const getDisplayAmount = useCallback(
-    (node: D3Node): string => {
+    (node: LayoutNode): string => {
       let displayAmount: number | undefined = node.value;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const details = node.details as any;
@@ -305,7 +262,7 @@ export default function SankeyGlobalView({
   );
 
   const getDisplayName = useCallback(
-    (node: D3Node): string => {
+    (node: LayoutNode): string => {
       let name = node.name;
       if (
         (name.match(/^事業\(Top\d+以外.*\)$/) || name.match(/^事業\n\(Top\d+以外.*\)$/)) &&
@@ -322,7 +279,7 @@ export default function SankeyGlobalView({
     [viewState, topNSettings]
   );
 
-  const isClickable = useCallback((node: D3Node): boolean => {
+  const isClickable = useCallback((node: LayoutNode): boolean => {
     const name = node.name;
     const isProjectOtherNode = name.match(/^事業\n?\(Top\d+以外.*\)$/);
     const isSubcontractOtherNode = name.match(/^再委託先\n?\(Top\d+以外.*\)$/);
@@ -341,14 +298,12 @@ export default function SankeyGlobalView({
 
   // ── Node tooltip renderer ──
   const renderNodeTooltip = useCallback(
-    (node: D3Node) => {
-      const actualNode = data.nodes.find((n) => n.id === node.id);
-      if (!actualNode) return null;
-      const name = actualNode.name;
-      const nodeType = actualNode.type || '';
+    (node: LayoutNode) => {
+      const name = node.name;
+      const nodeType = node.type || '';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const details = actualNode.details as any;
-      const value = formatCurrency(node.value, actualNode);
+      const details = node.details as any;
+      const value = formatCurrency(node.value, node);
 
       return (
         <div className="bg-white px-3 py-2 rounded shadow-lg border border-gray-200 min-w-[280px]">
@@ -423,20 +378,26 @@ export default function SankeyGlobalView({
         </div>
       );
     },
-    [data.nodes, formatCurrency]
+    [formatCurrency]
   );
+
+  // ── Node map for tooltip lookups ──
+  const nodeMap = useMemo(() => {
+    const map = new Map<string, LayoutNode>();
+    for (const n of layoutNodes) map.set(n.id, n);
+    return map;
+  }, [layoutNodes]);
 
   // ── Link tooltip renderer ──
   const renderLinkTooltip = useCallback(
-    (link: D3Link) => {
-      const sourceNode = data.nodes.find((n) => n.id === link.source.id);
-      const targetNode = data.nodes.find((n) => n.id === link.target.id);
-      const actualLink = data.links.find((l) => l.source === link.source.id && l.target === link.target.id);
+    (link: LayoutLink) => {
+      const sourceNode = nodeMap.get(link.source);
+      const targetNode = nodeMap.get(link.target);
 
-      const sourceName = sourceNode?.name || link.source.id;
-      const targetName = targetNode?.name || link.target.id;
-      const sourceValue = formatCurrency(link.source.value, sourceNode);
-      const targetValue = formatCurrency(link.target.value, targetNode);
+      const sourceName = sourceNode?.name || link.source;
+      const targetName = targetNode?.name || link.target;
+      const sourceValue = formatCurrency(sourceNode?.value, sourceNode);
+      const targetValue = formatCurrency(targetNode?.value, targetNode);
       const linkValue = formatCurrency(link.value, sourceNode);
 
       const isProjectBudgetToSpending =
@@ -475,18 +436,18 @@ export default function SankeyGlobalView({
             )}
             <div className="text-sm font-medium text-gray-700">{targetValue}</div>
           </div>
-          {actualLink?.details && (actualLink.details.contractMethod || actualLink.details.blockName) && (
+          {link.details && (link.details.contractMethod || link.details.blockName) && (
             <div className="mt-3 pt-2 border-t border-gray-200">
-              {actualLink.details.contractMethod && (
+              {link.details.contractMethod && (
                 <div className="mb-1">
                   <span className="text-xs text-gray-500">契約方式: </span>
-                  <span className="text-xs font-medium text-gray-900">{actualLink.details.contractMethod}</span>
+                  <span className="text-xs font-medium text-gray-900">{link.details.contractMethod}</span>
                 </div>
               )}
-              {actualLink.details.blockName && (
+              {link.details.blockName && (
                 <div>
                   <span className="text-xs text-gray-500">支出ブロック: </span>
-                  <span className="text-xs font-medium text-gray-900">{actualLink.details.blockName}</span>
+                  <span className="text-xs font-medium text-gray-900">{link.details.blockName}</span>
                 </div>
               )}
             </div>
@@ -494,7 +455,7 @@ export default function SankeyGlobalView({
         </div>
       );
     },
-    [data.nodes, data.links, formatCurrency]
+    [nodeMap, formatCurrency]
   );
 
   return (
@@ -507,10 +468,9 @@ export default function SankeyGlobalView({
               const linkOpacity = hoveredLinkIndex === i ? 0.8 : isLinkConnected(link) ? 0.5 : 0.1;
               return (
                 <MemoLink
-                  key={`${link.source.id}-${link.target.id}-${i}`}
+                  key={`${link.source}-${link.target}-${i}`}
                   link={link}
                   opacity={linkOpacity}
-                  pathGenerator={pathGenerator}
                   onMouseEnter={(e: React.MouseEvent) => handleLinkMouseEnter(link, i, e)}
                   onMouseLeave={handleLinkMouseLeave}
                 />
@@ -529,7 +489,7 @@ export default function SankeyGlobalView({
                   opacity={nodeOpacity}
                   onMouseEnter={(e: React.MouseEvent) => handleNodeMouseEnter(node, e)}
                   onMouseLeave={handleNodeMouseLeave}
-                  onClick={() => onNodeClick({ id: node.id, x: node.x0, y: node.y0, width: (node.x1 ?? 0) - (node.x0 ?? 0), height: (node.y1 ?? 0) - (node.y0 ?? 0) })}
+                  onClick={() => onNodeClick({ id: node.id, x: node.x0, y: node.y0, width: node.x1 - node.x0, height: node.y1 - node.y0 })}
                 />
               );
             })}
@@ -539,11 +499,11 @@ export default function SankeyGlobalView({
           <g>
             {layoutNodes.map((node) => {
               const isBudgetNode = node.type === 'ministry-budget' || node.type === 'project-budget';
-              const x = isBudgetNode ? (node.x0 ?? 0) - 4 : (node.x1 ?? 0) + 4;
+              const x = isBudgetNode ? node.x0 - 4 : node.x1 + 4;
               const textAnchor = isBudgetNode ? 'end' : 'start';
-              const amountX = ((node.x0 ?? 0) + (node.x1 ?? 0)) / 2;
-              const nodeY = node.y0 ?? 0;
-              const nodeH = (node.y1 ?? 0) - nodeY;
+              const amountX = (node.x0 + node.x1) / 2;
+              const nodeY = node.y0;
+              const nodeH = node.y1 - nodeY;
               const clickable = isClickable(node);
               const color = clickable ? '#2563eb' : '#1f2937';
               const fontWeight = clickable ? 'bold' : 500;
@@ -571,7 +531,7 @@ export default function SankeyGlobalView({
                     textAnchor={textAnchor}
                     dominantBaseline="middle"
                     style={{ fill: color, fontSize: 12, fontWeight, pointerEvents: clickable ? 'auto' : 'none', cursor: cursorStyle }}
-                    onClick={() => clickable && onNodeClick({ id: node.id, x: node.x0, y: node.y0, width: (node.x1 ?? 0) - (node.x0 ?? 0), height: (node.y1 ?? 0) - (node.y0 ?? 0) })}
+                    onClick={() => clickable && onNodeClick({ id: node.id, x: node.x0, y: node.y0, width: node.x1 - node.x0, height: node.y1 - node.y0 })}
                   >
                     {displayName.includes('\n') ? (
                       displayName.split('\n').map((line, i) => (

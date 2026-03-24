@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ResponsiveSankey } from '@nivo/sankey';
 import type { RS2024PresetData } from '@/types/preset';
@@ -11,7 +11,7 @@ import SpendingListModal from '@/client/components/SpendingListModal';
 import ProjectDetailPanel from '@/client/components/ProjectDetailPanel';
 import SubcontractDetailDialog from '@/client/components/SubcontractDetailDialog';
 import RecipientRangeSlider from '@/client/components/RecipientRangeSlider';
-import SankeyGlobalView from '@/client/components/SankeyGlobalView';
+import SankeyGlobalView, { type GlobalLayoutData, type LevelLayout } from '@/client/components/SankeyGlobalView';
 
 function SankeyContent() {
   const router = useRouter();
@@ -57,8 +57,8 @@ function SankeyContent() {
     subcontracts?: { name: string; amount: number; flowType: string }[];
   } | null>(null);
 
-  // Global View: base data (level 0) with allRecipients for client-side paging
-  const globalBaseData = useRef<RS2024PresetData | null>(null);
+  // Global View: pre-computed layout data (all levels)
+  const [globalLayoutData, setGlobalLayoutData] = useState<GlobalLayoutData | null>(null);
 
   // Sync state from URL parameters (runs on mount and whenever URL changes via browser back/forward)
   useEffect(() => {
@@ -139,191 +139,84 @@ function SankeyContent() {
     loadStructuredData();
   }, []);
 
-  // Build sankey data with client-side recipient paging for Global View
-  const buildGlobalSankeyForLevel = useCallback((base: RS2024PresetData, level: number): RS2024PresetData => {
-    if (level === 0 || !base.allRecipients) return base;
-
-    const spendingLimit = topNSettings.global.spending || 10;
-    const offset = level * spendingLimit;
-    const pageRecipients = base.allRecipients.slice(offset, offset + spendingLimit);
-
-    // Remove existing recipient nodes/links from base sankey
-    const baseNodes = base.sankey.nodes.filter(n =>
-      n.type !== 'recipient' && n.type !== 'subcontract-recipient'
-    );
-    const recipientNodeIds = new Set(base.sankey.nodes.filter(n => n.type === 'recipient' || n.type === 'subcontract-recipient').map(n => n.id));
-    const baseLinks = base.sankey.links.filter(l =>
-      !recipientNodeIds.has(l.target) && l.target !== 'recipient-other-aggregated' && l.target !== 'recipient-other-named' && l.target !== 'recipient-top10-summary'
-    );
-
-    // Also remove "recipient-other-aggregated", "recipient-other-named", "recipient-top10-summary" from baseNodes
-    const filteredBaseNodes = baseNodes.filter(n =>
-      n.id !== 'recipient-other-aggregated' && n.id !== 'recipient-other-named' && n.id !== 'recipient-top10-summary'
-    );
-
-    // Build new recipient nodes
-    const newNodes = [...filteredBaseNodes];
-    const newLinks = [...baseLinks];
-    const topProjectIds = new Set(base.sankey.nodes.filter(n => n.type === 'project-spending').map(n => n.originalId));
-
-    // "支出先(Top{prev})" summary node for cumulative
-    const prevEnd = level * spendingLimit;
-    const prevRecipients = base.allRecipients.slice(0, prevEnd);
-    const prevTotal = prevRecipients.reduce((sum, r) => r.projects.reduce((acc, p) => acc + p.amount, sum), 0);
-
-    newNodes.push({
-      id: 'recipient-top10-summary',
-      name: `支出先\n(Top${prevEnd})`,
-      type: 'recipient',
-      value: prevTotal || 0.001,
-      details: { corporateNumber: '', location: '', projectCount: prevEnd, actualValue: prevTotal },
-    });
-
-    // Add cumulative link from "project-spending-cumulative" if it exists
-    const cumulativeNode = filteredBaseNodes.find(n => n.id === 'project-spending-cumulative');
-    if (cumulativeNode) {
-      newLinks.push({
-        source: 'project-spending-cumulative',
-        target: 'recipient-top10-summary',
-        value: 0.001,
-      });
-    }
-
-    // Current page recipient nodes + links
-    for (const r of pageRecipients) {
-      const spendingFromTopProjects = r.projects
-        .filter(p => topProjectIds.has(p.projectId))
-        .reduce((sum, p) => sum + p.amount, 0);
-
-      newNodes.push({
-        id: `recipient-${r.spendingId}`,
-        name: r.spendingName,
-        type: 'recipient',
-        value: spendingFromTopProjects,
-        originalId: r.spendingId,
-        details: {
-          corporateNumber: r.corporateNumber,
-          location: r.location,
-          projectCount: r.projectCount,
-          tags: r.tags,
-        },
-      });
-
-      for (const p of r.projects) {
-        if (!topProjectIds.has(p.projectId)) continue;
-        newLinks.push({
-          source: `project-spending-${p.projectId}`,
-          target: `recipient-${r.spendingId}`,
-          value: p.amount,
-          details: {
-            contractMethod: p.contractMethod,
-            blockName: p.blockName,
-          },
-        });
-      }
-    }
-
-    // "その他" named spending node (from base level 0 data)
-    const otherNamedNode = base.sankey.nodes.find(n => n.id === 'recipient-other-named');
-    if (otherNamedNode) {
-      newNodes.push(otherNamedNode);
-      // Copy links to this node from base
-      for (const l of base.sankey.links) {
-        if (l.target === 'recipient-other-named') newLinks.push(l);
-      }
-    }
-
-    // "支出先(TopN以外)" aggregated node
-    const excludeUpTo = (level + 1) * spendingLimit;
-    const remainingRecipients = base.allRecipients.slice(excludeUpTo);
-    const totalOtherAmount = remainingRecipients.reduce((sum, r) =>
-      r.projects.filter(p => topProjectIds.has(p.projectId)).reduce((acc, p) => acc + p.amount, sum), 0);
-
-    if (totalOtherAmount > 0) {
-      newNodes.push({
-        id: 'recipient-other-aggregated',
-        name: `支出先\n(Top${excludeUpTo}以外)`,
-        type: 'recipient',
-        value: totalOtherAmount,
-      });
-
-      // Links from each top project to "other aggregated"
-      for (const projectNode of base.sankey.nodes.filter(n => n.type === 'project-spending' && n.originalId)) {
-        let projectToOther = 0;
-        for (const r of remainingRecipients) {
-          for (const p of r.projects) {
-            if (p.projectId === projectNode.originalId) projectToOther += p.amount;
-          }
+  // Load pre-computed Global View layout data once
+  useEffect(() => {
+    async function loadGlobalLayout() {
+      try {
+        const response = await fetch('/data/sankey-global-layout.json');
+        if (!response.ok) {
+          console.error('Failed to load sankey-global-layout.json. Run: npm run compute-sankey-global-layout');
+          return;
         }
-        if (projectToOther > 0) {
-          newLinks.push({
-            source: projectNode.id,
-            target: 'recipient-other-aggregated',
-            value: projectToOther,
-          });
-        }
+        const json: GlobalLayoutData = await response.json();
+        setGlobalLayoutData(json);
+      } catch (err) {
+        console.error('Failed to load global layout:', err);
       }
     }
+    loadGlobalLayout();
+  }, []);
 
-    return {
-      ...base,
-      sankey: { nodes: newNodes, links: newLinks },
-    };
-  }, [topNSettings.global.spending]);
+  // Current level layout for Global View (O(1) lookup)
+  const currentGlobalLayout: LevelLayout | null = globalLayoutData
+    ? globalLayoutData.levels[String(viewState.spendingDrilldownLevel)] || null
+    : null;
 
   useEffect(() => {
     async function loadData() {
+      if (viewState.mode === 'global') {
+        // Global View uses pre-computed layout — no API call needed
+        // Just set loading state based on whether layout data is available
+        if (globalLayoutData) {
+          setLoading(false);
+          // Set minimal data for metadata (slider total, etc.)
+          setData({
+            metadata: {
+              generatedAt: '',
+              fiscalYear: 2024,
+              presetType: 'global',
+              sourceFile: '',
+              filterSettings: { topMinistries: 3, topProjects: 3, topSpendings: 10, sortBy: 'budget' },
+              summary: {
+                totalMinistries: 0, totalProjects: 0, totalSpendings: 0,
+                selectedMinistries: 0, selectedProjects: 0, selectedSpendings: 0,
+                totalBudget: 0, selectedBudget: 0, coverageRate: 0,
+                totalFilteredSpendings: globalLayoutData.metadata.totalRecipients,
+              },
+            },
+            sankey: { nodes: [], links: [] },
+          });
+        } else {
+          setLoading(true);
+        }
+        return;
+      }
+
+      // Non-global views: standard API fetch
       setLoading(true);
       try {
         const params = new URLSearchParams();
 
-        if (viewState.mode === 'global') {
-          // For Global View, always fetch level 0 (base data with allRecipients)
-          // Then client-side generates the current level's recipient nodes
-          if (!globalBaseData.current || viewState.drilldownLevel !== (globalBaseData.current as RS2024PresetData & { _drilldownLevel?: number })._drilldownLevel) {
-            params.set('limit', topNSettings.global.ministry.toString());
-            params.set('projectLimit', '3');
-            params.set('spendingLimit', topNSettings.global.spending.toString());
-            params.set('subcontractLimit', topNSettings.global.subcontract.toString());
-            params.set('drilldownLevel', viewState.drilldownLevel.toString());
-            params.set('spendingDrilldownLevel', '0');
-
-            const response = await fetch(`/api/sankey?${params.toString()}`);
-            if (!response.ok) throw new Error('Failed to load data');
-            const json: RS2024PresetData = await response.json();
-            globalBaseData.current = json;
-            // Tag with drilldown level to invalidate when ministry drilldown changes
-            (globalBaseData.current as RS2024PresetData & { _drilldownLevel?: number })._drilldownLevel = viewState.drilldownLevel;
-          }
-
-          // Generate sankey for current spending drilldown level client-side
-          const result = buildGlobalSankeyForLevel(globalBaseData.current, viewState.spendingDrilldownLevel);
-          setData(result);
-        } else {
-          // Non-global views: standard API fetch
-          globalBaseData.current = null;
-
-          if (viewState.mode === 'ministry' && viewState.selectedMinistry) {
-            params.set('ministryName', viewState.selectedMinistry);
-            params.set('projectLimit', topNSettings.ministry.project.toString());
-            params.set('spendingLimit', topNSettings.ministry.spending.toString());
-            params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
-          } else if (viewState.mode === 'project' && viewState.selectedProject) {
-            params.set('projectName', viewState.selectedProject);
-            params.set('spendingLimit', topNSettings.project.spending.toString());
-          } else if (viewState.mode === 'spending' && viewState.selectedRecipient) {
-            params.set('recipientName', viewState.selectedRecipient);
-            params.set('projectLimit', topNSettings.spending.project.toString());
-            params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
-            params.set('limit', topNSettings.spending.ministry.toString());
-            params.set('subcontractLimit', topNSettings.spending.subcontract.toString());
-          }
-
-          const response = await fetch(`/api/sankey?${params.toString()}`);
-          if (!response.ok) throw new Error('Failed to load data');
-          const json: RS2024PresetData = await response.json();
-          setData(json);
+        if (viewState.mode === 'ministry' && viewState.selectedMinistry) {
+          params.set('ministryName', viewState.selectedMinistry);
+          params.set('projectLimit', topNSettings.ministry.project.toString());
+          params.set('spendingLimit', topNSettings.ministry.spending.toString());
+          params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
+        } else if (viewState.mode === 'project' && viewState.selectedProject) {
+          params.set('projectName', viewState.selectedProject);
+          params.set('spendingLimit', topNSettings.project.spending.toString());
+        } else if (viewState.mode === 'spending' && viewState.selectedRecipient) {
+          params.set('recipientName', viewState.selectedRecipient);
+          params.set('projectLimit', topNSettings.spending.project.toString());
+          params.set('projectDrilldownLevel', viewState.projectDrilldownLevel.toString());
+          params.set('limit', topNSettings.spending.ministry.toString());
+          params.set('subcontractLimit', topNSettings.spending.subcontract.toString());
         }
+
+        const response = await fetch(`/api/sankey?${params.toString()}`);
+        if (!response.ok) throw new Error('Failed to load data');
+        const json: RS2024PresetData = await response.json();
+        setData(json);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -332,7 +225,7 @@ function SankeyContent() {
     }
 
     loadData();
-  }, [viewState, topNSettings, buildGlobalSankeyForLevel]);
+  }, [viewState, topNSettings, globalLayoutData]);
 
   // スマホ判定
   useEffect(() => {
@@ -346,7 +239,12 @@ function SankeyContent() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleNodeClick = (node: any) => {
-    const actualNode = data?.sankey.nodes.find(n => n.id === node.id);
+    // Look up node in either pre-computed layout (Global View) or API data (other views)
+    const layoutNode = currentGlobalLayout?.nodes.find(n => n.id === node.id);
+    const apiNode = data?.sankey.nodes.find(n => n.id === node.id);
+    const actualNode = layoutNode
+      ? { id: layoutNode.id, name: layoutNode.name, type: layoutNode.type, value: layoutNode.value, originalId: layoutNode.originalId, details: layoutNode.details }
+      : apiNode;
     if (!actualNode) return;
 
     // Handle "Other Ministries" drill-down
@@ -947,14 +845,14 @@ function SankeyContent() {
               <span className="w-3 h-3 rounded-full bg-[#6b7280]"></span>
               <span className="text-gray-700">その他</span>
             </div>
-            {viewState.mode === 'global' && data?.metadata?.summary?.totalFilteredSpendings && (
+            {viewState.mode === 'global' && globalLayoutData && (
               <div className="ml-auto w-[400px]">
                 <RecipientRangeSlider
-                  value={viewState.spendingDrilldownLevel * (topNSettings.global.spending || 10)}
-                  total={data.metadata.summary.totalFilteredSpendings}
-                  step={topNSettings.global.spending || 10}
+                  value={viewState.spendingDrilldownLevel * (globalLayoutData.metadata.recipientsPerLevel)}
+                  total={globalLayoutData.metadata.totalRecipients}
+                  step={globalLayoutData.metadata.recipientsPerLevel}
                   onChangeCommitted={(newValue) => {
-                    const newLevel = Math.floor(newValue / (topNSettings.global.spending || 10));
+                    const newLevel = Math.floor(newValue / globalLayoutData.metadata.recipientsPerLevel);
                     navigateToView({ mode: 'global', spendingDrilldownLevel: newLevel });
                   }}
                 />
@@ -979,16 +877,14 @@ function SankeyContent() {
             style={isMobile ? { WebkitOverflowScrolling: 'touch' } : {}}
           >
             <div style={{ height: '800px', minWidth: isMobile ? '1200px' : 'auto', backgroundColor: 'white' }}>
-              {viewState.mode === 'global' ? (
+              {viewState.mode === 'global' && currentGlobalLayout ? (
                 <SankeyGlobalView
-                  data={sankey}
+                  layout={currentGlobalLayout}
                   width={isMobile ? 1200 : 1200}
                   height={800}
                   margin={{ top: 40, right: 100, bottom: 40, left: 100 }}
-                  hasSubcontractNodes={sankey.nodes.some(n => n.type === 'subcontract-recipient')}
                   onNodeClick={handleNodeClick}
                   formatCurrency={formatCurrency}
-                  getActualValue={getActualValue}
                   viewState={viewState}
                   topNSettings={topNSettings}
                 />

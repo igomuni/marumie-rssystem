@@ -69,4 +69,15 @@ if [ -f "$DATA_DIR/sankey2-layout.json.gz" ]; then
   fi
 fi
 
+# Decompress sankey-global-layout.json if needed
+if [ -f "$DATA_DIR/sankey-global-layout.json.gz" ]; then
+  if [ ! -f "$DATA_DIR/sankey-global-layout.json" ] || [ "$DATA_DIR/sankey-global-layout.json.gz" -nt "$DATA_DIR/sankey-global-layout.json" ]; then
+    echo "🔓 Decompressing sankey-global-layout.json.gz..."
+    gunzip -k -f "$DATA_DIR/sankey-global-layout.json.gz"
+    echo "✅ Decompression complete ($(du -h "$DATA_DIR/sankey-global-layout.json" | cut -f1))"
+  else
+    echo "✅ sankey-global-layout.json already exists and is up to date"
+  fi
+fi
+
 echo "✅ All data files ready"

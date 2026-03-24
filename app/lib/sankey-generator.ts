@@ -16,6 +16,22 @@ let cachedMOFData: MOFFundingData | null = null;
 const resultCache = new Map<string, RS2024PresetData>();
 const CACHE_SIZE_LIMIT = 100;
 
+// Cache for Global View common computation (shared across spendingDrilldownLevel)
+interface GlobalBaseCache {
+  topMinistries: Array<{ name: string; id: number; totalBudget: number; bureauCount: number }>;
+  otherMinistriesBudget: number;
+  otherMinistriesSpending: number;
+  projectsFromSelectedMinistries: BudgetRecord[];
+  allRecipients: SpendingRecord[];
+  recipientSpendingFromSelectedMinistries: Map<number, number>;
+  totalFilteredRecipients: number;
+  // Reverse index: projectId → [{spendingId, amount}]
+  projectToSpendings: Map<number, Array<{ spendingId: number; amount: number }>>;
+  // Cached otherNamedSpendingByProject (same for all levels)
+  otherNamedSpendingByProject: Map<number, number>;
+}
+let globalBaseCache: { key: string; value: GlobalBaseCache } | null = null;
+
 interface GenerateOptions {
   ministryOffset?: number;
   projectOffset?: number; // Deprecated: use projectDrilldownLevel instead
@@ -268,6 +284,8 @@ interface DataSelection {
   // Global View スライダー用
   totalFilteredRecipients?: number; // フィルタ後の支出先総数（"その他"除外）
   allRecipientsForClient?: RecipientSummary[]; // クライアント側ページング用の全支出先データ
+  recipientSpendingFromSelectedMinistries?: Map<number, number>; // spendingId → 選択府省庁からの支出額
+  allSortedRecipientIds?: number[]; // 全支出先のspendingId（支出額降順ソート済み）
 
   // Ministry View用
   ministryTotalProjects?: number; // 選択した府省庁の総事業数
@@ -327,6 +345,8 @@ function selectData(
   // Global View スライダー用
   let totalFilteredRecipients: number | undefined = undefined;
   let allRecipientsForClient: RecipientSummary[] | undefined = undefined;
+  let recipientSpendingFromSelectedMinistries: Map<number, number> | undefined = undefined;
+  let allSortedRecipientIds: number[] | undefined = undefined;
 
   if (targetRecipientName) {
     // --- Spending View (Reverse Flow) ---
@@ -500,95 +520,155 @@ function selectData(
     // --- Global View ---
     // IMPORTANT: Select ministries FIRST, then filter projects and spendings based on selected ministries
 
-    // 1. Select TopN ministries (not all ministries)
-    const allMinistries = data.budgetTree.ministries
-      .sort((a, b) => b.totalBudget - a.totalBudget);
+    // Cache key for the common computation (independent of spendingDrilldownLevel)
+    const globalBaseCacheKey = `${offset}:${limit}:${drilldownLevel}`;
 
-    if (drilldownLevel > 0) {
-      // Drilldown mode: show ministries EXCLUDING previously shown TopN
-      // Level 1: Exclude Top10, show Top11-20
-      // Level 2: Exclude Top10 & Top11-20, show Top21-30
-      const excludeCount = limit * drilldownLevel;
-      const excludedMinistries = allMinistries.slice(0, excludeCount);
-      const remainingMinistries = allMinistries.slice(excludeCount);
+    let base: GlobalBaseCache;
 
-      // Take next 'limit' ministries from remainingMinistries (offset is already applied via excludeCount)
-      topMinistries = remainingMinistries.slice(0, limit).map(m => ({
-        name: m.name,
-        id: m.id,
-        totalBudget: m.totalBudget,
-        bureauCount: m.bureaus.length,
-      }));
-
-      // "Other Ministries" in this mode only includes ministries beyond current page
-      // (not the original excluded TopN)
-      const afterPage = remainingMinistries.slice(limit);
-      otherMinistriesBudget = afterPage.reduce((sum, m) => sum + m.totalBudget, 0);
-
-      // Calculate spending for "other" (only afterPage)
-      for (const ministry of afterPage) {
-        const ministryStats = data.statistics.byMinistry[ministry.name];
-        if (ministryStats) {
-          otherMinistriesSpending += ministryStats.totalSpending;
-        }
-      }
+    if (globalBaseCache && globalBaseCache.key === globalBaseCacheKey) {
+      // Cache hit: reuse expensive computation
+      base = globalBaseCache.value;
     } else {
-      // Normal mode: show TopN ministries
-      // Use 'limit' parameter for ministry selection (default: 3)
-      topMinistries = allMinistries.slice(0, limit).map(m => ({
-        name: m.name,
-        id: m.id,
-        totalBudget: m.totalBudget,
-        bureauCount: m.bureaus.length,
-      }));
+      // Cache miss: compute from scratch
 
-      // Calculate "Other Ministries" budget and spending
-      const otherMinistries = allMinistries.slice(limit);
-      otherMinistriesBudget = otherMinistries.reduce((sum, m) => sum + m.totalBudget, 0);
+      // 1. Select TopN ministries (not all ministries)
+      const allMinistries = data.budgetTree.ministries
+        .sort((a, b) => b.totalBudget - a.totalBudget);
 
-      // Calculate other ministries spending
-      for (const ministry of otherMinistries) {
-        const ministryStats = data.statistics.byMinistry[ministry.name];
-        if (ministryStats) {
-          otherMinistriesSpending += ministryStats.totalSpending;
+      let baseTopMinistries: GlobalBaseCache['topMinistries'];
+      let baseOtherMinistriesBudget = 0;
+      let baseOtherMinistriesSpending = 0;
+
+      if (drilldownLevel > 0) {
+        const excludeCount = limit * drilldownLevel;
+        const remainingMinistries = allMinistries.slice(excludeCount);
+
+        baseTopMinistries = remainingMinistries.slice(0, limit).map(m => ({
+          name: m.name,
+          id: m.id,
+          totalBudget: m.totalBudget,
+          bureauCount: m.bureaus.length,
+        }));
+
+        const afterPage = remainingMinistries.slice(limit);
+        baseOtherMinistriesBudget = afterPage.reduce((sum, m) => sum + m.totalBudget, 0);
+
+        for (const ministry of afterPage) {
+          const ministryStats = data.statistics.byMinistry[ministry.name];
+          if (ministryStats) {
+            baseOtherMinistriesSpending += ministryStats.totalSpending;
+          }
+        }
+      } else {
+        baseTopMinistries = allMinistries.slice(0, limit).map(m => ({
+          name: m.name,
+          id: m.id,
+          totalBudget: m.totalBudget,
+          bureauCount: m.bureaus.length,
+        }));
+
+        const otherMinistries = allMinistries.slice(limit);
+        baseOtherMinistriesBudget = otherMinistries.reduce((sum, m) => sum + m.totalBudget, 0);
+
+        for (const ministry of otherMinistries) {
+          const ministryStats = data.statistics.byMinistry[ministry.name];
+          if (ministryStats) {
+            baseOtherMinistriesSpending += ministryStats.totalSpending;
+          }
         }
       }
-    }
 
-    // 2. Filter projects to only those from selected ministries
-    const selectedMinistryNames = new Set(topMinistries.map(m => m.name));
-    const projectsFromSelectedMinistries = data.budgets.filter(b =>
-      selectedMinistryNames.has(b.ministry)
-    );
+      // 2. Filter projects to only those from selected ministries
+      const selectedMinistryNames = new Set(baseTopMinistries.map(m => m.name));
+      const baseProjectsFromSelectedMinistries = data.budgets.filter(b =>
+        selectedMinistryNames.has(b.ministry)
+      );
 
-    // 3. Select Top N Recipients (excluding "その他") based on spending from selected ministries
-    // Calculate spending per recipient from selected ministries only
-    const recipientSpendingFromSelectedMinistries = new Map<number, number>();
-    for (const spending of data.spendings) {
-      if (spending.spendingName === 'その他') continue;
+      // 3. Select Top N Recipients (excluding "その他") based on spending from selected ministries
+      const baseRecipientSpending = new Map<number, number>();
+      for (const spending of data.spendings) {
+        if (spending.spendingName === 'その他') continue;
 
-      let totalFromSelected = 0;
-      for (const project of spending.projects) {
-        const budgetRecord = projectsFromSelectedMinistries.find(b => b.projectId === project.projectId);
-        if (budgetRecord) {
-          totalFromSelected += project.amount;
+        let totalFromSelected = 0;
+        for (const project of spending.projects) {
+          const budgetRecord = baseProjectsFromSelectedMinistries.find(b => b.projectId === project.projectId);
+          if (budgetRecord) {
+            totalFromSelected += project.amount;
+          }
+        }
+        if (totalFromSelected > 0) {
+          baseRecipientSpending.set(spending.spendingId, totalFromSelected);
         }
       }
-      if (totalFromSelected > 0) {
-        recipientSpendingFromSelectedMinistries.set(spending.spendingId, totalFromSelected);
+
+      const baseAllRecipients = data.spendings
+        .filter(s => baseRecipientSpending.has(s.spendingId))
+        .sort((a, b) => {
+          const aSpending = baseRecipientSpending.get(a.spendingId) || 0;
+          const bSpending = baseRecipientSpending.get(b.spendingId) || 0;
+          return bSpending - aSpending;
+        });
+
+      // Build reverse index: projectId → [{spendingId, amount}]
+      const baseProjectToSpendings = new Map<number, Array<{ spendingId: number; amount: number }>>();
+      for (const spending of data.spendings) {
+        for (const p of spending.projects) {
+          let arr = baseProjectToSpendings.get(p.projectId);
+          if (!arr) {
+            arr = [];
+            baseProjectToSpendings.set(p.projectId, arr);
+          }
+          arr.push({ spendingId: spending.spendingId, amount: p.amount });
+        }
       }
+
+      // Pre-compute otherNamedSpendingByProject (same for all levels)
+      const baseOtherNamedSpendingByProject = new Map<number, number>();
+      const spendingLookup = new Map(data.spendings.map(s => [s.spendingId, s]));
+      for (const project of data.budgets) {
+        let otherNamedTotal = 0;
+        const entries = baseProjectToSpendings.get(project.projectId);
+        if (entries) {
+          for (const entry of entries) {
+            const spending = spendingLookup.get(entry.spendingId);
+            if (spending && spending.spendingName === 'その他') {
+              const directAmount = spending.projects
+                .filter(p => p.projectId === project.projectId && p.isDirectFromGov !== false)
+                .reduce((sum, p) => sum + p.amount, 0);
+              otherNamedTotal += directAmount;
+            }
+          }
+        }
+        if (otherNamedTotal > 0) {
+          baseOtherNamedSpendingByProject.set(project.projectId, otherNamedTotal);
+        }
+      }
+
+      base = {
+        topMinistries: baseTopMinistries,
+        otherMinistriesBudget: baseOtherMinistriesBudget,
+        otherMinistriesSpending: baseOtherMinistriesSpending,
+        projectsFromSelectedMinistries: baseProjectsFromSelectedMinistries,
+        allRecipients: baseAllRecipients,
+        recipientSpendingFromSelectedMinistries: baseRecipientSpending,
+        totalFilteredRecipients: baseAllRecipients.length,
+        projectToSpendings: baseProjectToSpendings,
+        otherNamedSpendingByProject: baseOtherNamedSpendingByProject,
+      };
+
+      globalBaseCache = { key: globalBaseCacheKey, value: base };
     }
 
-    // Sort recipients by spending from selected ministries
-    const allRecipients = data.spendings
-      .filter(s => recipientSpendingFromSelectedMinistries.has(s.spendingId))
-      .sort((a, b) => {
-        const aSpending = recipientSpendingFromSelectedMinistries.get(a.spendingId) || 0;
-        const bSpending = recipientSpendingFromSelectedMinistries.get(b.spendingId) || 0;
-        return bSpending - aSpending;
-      });
-
-    totalFilteredRecipients = allRecipients.length;
+    // Apply cached base values
+    topMinistries = base.topMinistries;
+    otherMinistriesBudget = base.otherMinistriesBudget;
+    otherMinistriesSpending = base.otherMinistriesSpending;
+    const projectsFromSelectedMinistries = base.projectsFromSelectedMinistries;
+    const allRecipients = base.allRecipients;
+    recipientSpendingFromSelectedMinistries = base.recipientSpendingFromSelectedMinistries;
+    allSortedRecipientIds = allRecipients.map(s => s.spendingId);
+    totalFilteredRecipients = base.totalFilteredRecipients;
+    const projectToSpendings = base.projectToSpendings;
 
     // Build lightweight recipient data for client-side paging
     const topProjectIds = new Set(topProjects.map(p => p.projectId));
@@ -632,7 +712,7 @@ function selectData(
       const cumulativeRecipients = allRecipients.slice(0, cumulativeEndIndex);
       cumulativeSpendings = cumulativeRecipients; // Store for later use
       top10SpendingTotal = cumulativeRecipients.reduce((sum, r) => {
-        return sum + (recipientSpendingFromSelectedMinistries.get(r.spendingId) || 0);
+        return sum + (recipientSpendingFromSelectedMinistries!.get(r.spendingId) || 0);
       }, 0);
 
       // Calculate cumulative projects (projects that contributed to cumulativeRecipients)
@@ -640,15 +720,12 @@ function selectData(
       const projectSpendingToCumulative = new Map<number, number>();
 
       for (const project of projectsFromSelectedMinistries) {
+        const entries = projectToSpendings.get(project.projectId);
+        if (!entries) continue;
         let spendingToCumulative = 0;
-        const projectSpendings = data.spendings.filter(s =>
-          s.projects.some(p => p.projectId === project.projectId)
-        );
-        for (const spending of projectSpendings) {
-          if (cumulativeRecipientIds.has(spending.spendingId)) {
-            spendingToCumulative += spending.projects
-              .filter(p => p.projectId === project.projectId)
-              .reduce((sum, p) => sum + p.amount, 0);
+        for (const entry of entries) {
+          if (cumulativeRecipientIds.has(entry.spendingId)) {
+            spendingToCumulative += entry.amount;
           }
         }
         if (spendingToCumulative > 0) {
@@ -678,15 +755,12 @@ function selectData(
     // Calculate each project's spending to top recipients
     const projectSpendingToTopRecipients = new Map<number, number>();
     for (const project of projectSource) {
+      const entries = projectToSpendings.get(project.projectId);
+      if (!entries) continue;
       let spendingToTop = 0;
-      const projectSpendings = data.spendings.filter(s =>
-        s.projects.some(p => p.projectId === project.projectId)
-      );
-      for (const spending of projectSpendings) {
-        if (topRecipientIds.has(spending.spendingId)) {
-          spendingToTop += spending.projects
-            .filter(p => p.projectId === project.projectId)
-            .reduce((sum, p) => sum + p.amount, 0);
+      for (const entry of entries) {
+        if (topRecipientIds.has(entry.spendingId)) {
+          spendingToTop += entry.amount;
         }
       }
       if (spendingToTop > 0) {
@@ -724,6 +798,11 @@ function selectData(
         otherProjectsSpendingByMinistry.set(ministry.name, otherSpending);
       }
     }
+
+    // Populate otherNamedSpendingByProject from cache (avoids O(N×M) recomputation)
+    for (const [k, v] of base.otherNamedSpendingByProject) {
+      otherNamedSpendingByProject.set(k, v);
+    }
   }
 
   // --- Common Logic for Spendings (except for Spending View which is handled above) ---
@@ -732,7 +811,8 @@ function selectData(
   // In Project View, we need to select top spendings for the single project.
 
   // Aggregate "Other" named spendings (all views except Recipient View)
-  if (!targetRecipientName) {
+  // For Global View, this is pre-computed in GlobalBaseCache — skip if already populated
+  if (!targetRecipientName && otherNamedSpendingByProject.size === 0) {
     for (const project of data.budgets) {
       const projectSpendings = data.spendings
         .filter(s => project.spendingIds.includes(s.spendingId))
@@ -895,6 +975,8 @@ function selectData(
     ministryTotalProjects,
     totalFilteredRecipients,
     allRecipientsForClient,
+    recipientSpendingFromSelectedMinistries,
+    allSortedRecipientIds,
     spendingDrilldownLevel,
     top10SpendingTotal,
     cumulativeSpendings,
@@ -941,6 +1023,9 @@ function buildSankeyData(
 
   const nodes: SankeyNode[] = [];
   const links: SankeyLink[] = [];
+
+  // Lookup map: spendingId → SpendingRecord (avoids O(N) fullData.spendings.find per lookup)
+  const spendingById = new Map(fullData.spendings.map(s => [s.spendingId, s]));
 
   // --- SPENDING VIEW (Reverse Flow with Budget) ---
   if (targetRecipientName) {
@@ -2275,49 +2360,20 @@ function buildSankeyData(
     // Strategy: Calculate total spending to recipients BEYOND the current drilldown threshold
     // This means excluding recipients from position 0 to (spendingDrilldownLevel + 1) * spendingLimit
 
-    // First, rebuild the full sorted recipient list to get all recipients up to current threshold
-    const selectedMinistryNames = new Set(topMinistries.map(m => m.name));
-    const recipientSpendingFromSelectedMinistries = new Map<number, number>();
-
-    for (const spending of fullData.spendings) {
-      let totalFromSelected = 0;
-      for (const project of spending.projects) {
-        const budgetRecord = fullData.budgets.find((b: { projectId: number }) => b.projectId === project.projectId);
-        if (budgetRecord && selectedMinistryNames.has(budgetRecord.ministry)) {
-          totalFromSelected += project.amount;
-        }
-      }
-      if (totalFromSelected > 0) {
-        recipientSpendingFromSelectedMinistries.set(spending.spendingId, totalFromSelected);
-      }
-    }
-
-    // Sort all recipients by spending amount (same order as in selectData)
-    const allSortedRecipients = fullData.spendings
-      .filter(s => recipientSpendingFromSelectedMinistries.has(s.spendingId))
-      .sort((a, b) => {
-        const aSpending = recipientSpendingFromSelectedMinistries.get(a.spendingId) || 0;
-        const bSpending = recipientSpendingFromSelectedMinistries.get(b.spendingId) || 0;
-        return bSpending - aSpending;
-      });
+    // Use pre-computed data from selectData (avoids O(N²) recomputation and O(N log N) re-sort)
+    const recipientSpendingMap = selection.recipientSpendingFromSelectedMinistries ?? new Map<number, number>();
+    const sortedIds = selection.allSortedRecipientIds ?? [];
 
     // Calculate the threshold: exclude all recipients from 0 to (spendingDrilldownLevel + 1) * spendingLimit
     const excludeUpToIndex = (spendingDrilldownLevel + 1) * spendingLimit;
-    const excludedRecipients = allSortedRecipients.slice(0, excludeUpToIndex);
-    const excludedRecipientIds = new Set(excludedRecipients.map(s => s.spendingId));
+    const excludedRecipientIds = new Set(sortedIds.slice(0, excludeUpToIndex));
 
     // Calculate total spending to "Other Recipients" (beyond current threshold)
-    // Include spending from both Top Projects and Other Projects
-    for (const spending of allSortedRecipients) {
-      // Skip if this recipient is within the excluded range (0 to current threshold)
-      if (excludedRecipientIds.has(spending.spendingId)) continue;
-
-      // Skip "その他" (handled separately)
-      if (spending.spendingName === 'その他') continue;
-
-      // Sum up all spending to this recipient from selected ministries
-      const spendingAmount = recipientSpendingFromSelectedMinistries.get(spending.spendingId) || 0;
-      totalOtherRecipientAmount += spendingAmount;
+    for (let i = excludeUpToIndex; i < sortedIds.length; i++) {
+      const id = sortedIds[i];
+      const s = spendingById.get(id);
+      if (!s || s.spendingName === 'その他') continue;
+      totalOtherRecipientAmount += recipientSpendingMap.get(id) || 0;
     }
 
     // Store the breakdown by project for linking purposes
@@ -2326,7 +2382,7 @@ function buildSankeyData(
       let projectTotalToOthers = 0;
 
       for (const spendingId of project.spendingIds) {
-        const spending = fullData.spendings.find(s => s.spendingId === spendingId);
+        const spending = spendingById.get(spendingId);
         if (!spending) continue;
 
         // Skip excluded recipients and "その他"
@@ -2400,16 +2456,8 @@ function buildSankeyData(
             .reduce((sum, p) => sum + p.amount, 0);
         }
 
-        // Calculate total spending from selected ministries only (not all ministries)
-        const selectedMinistryNames = new Set(topMinistries.map(m => m.name));
-        let totalFromSelectedMinistries = 0;
-        for (const spendingProject of recipient.projects) {
-          // Only count if project is from selected ministries
-          const projectInData = fullData.budgets.find((b: { projectId: number; ministry: string }) => b.projectId === spendingProject.projectId);
-          if (projectInData && selectedMinistryNames.has(projectInData.ministry)) {
-            totalFromSelectedMinistries += spendingProject.amount;
-          }
-        }
+        // Use pre-computed map from selectData (avoids O(N) budgets.find per recipient)
+        const totalFromSelectedMinistries = selection.recipientSpendingFromSelectedMinistries?.get(recipient.spendingId) ?? 0;
 
         const remainder = totalFromSelectedMinistries - receivedFromTopProjects;
         if (remainder > 0 && otherProjectsSpendingNode) {
