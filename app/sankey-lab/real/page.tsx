@@ -428,7 +428,7 @@ export default function RealDataSankeyPage() {
     const my = e.clientY - rect.top;
 
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.2, Math.min(10, zoom * delta));
+    const newZoom = Math.max(0.2, Math.min(50, zoom * delta));
 
     // Adjust pan so zoom centers on mouse position
     const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
@@ -509,22 +509,32 @@ export default function RealDataSankeyPage() {
             {/* Controls overlay */}
             <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                省庁: {topMinistry}
+                省庁:
+                <input type="number" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
                 <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ width: 80 }} />
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                事業: {topProject}
+                事業:
+                <input type="number" min={1} max={50} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(50, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
                 <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ width: 80 }} />
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                支出先: {topRecipient}
-                <input type="range" min={1} max={50} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ width: 80 }} />
+                支出先:
+                <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ width: 80 }} />
               </label>
               <span style={{ color: '#ccc' }}>|</span>
-              <button onClick={() => { const nz = Math.min(10, zoom * 1.3); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: SVG_H/2 - (SVG_H/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>+</button>
+              <button onClick={() => { const nz = Math.min(50, zoom * 1.3); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: SVG_H/2 - (SVG_H/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>+</button>
               <button onClick={() => { const nz = Math.max(0.2, zoom * 0.7); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: SVG_H/2 - (SVG_H/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>-</button>
               <button onClick={resetView} style={{ height: 26, padding: '0 6px', border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 11 }}>Reset</button>
-              <span style={{ color: '#999', fontSize: 11 }}>{(zoom * 100).toFixed(0)}%</span>
+              <input
+                type="number"
+                min={20} max={5000} step={10}
+                value={Math.round(zoom * 100)}
+                onChange={e => { const nz = Math.max(0.2, Math.min(50, Number(e.target.value) / 100 || 1)); setZoom(nz); }}
+                style={{ width: 48, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 11 }}
+              />
+              <span style={{ color: '#999', fontSize: 11 }}>%</span>
             </div>
             <svg
               ref={svgRef}
@@ -559,7 +569,7 @@ export default function RealDataSankeyPage() {
                       : 0.25
                     }
                     stroke={hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? getLinkColor(link) : 'none'}
-                    strokeWidth={hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? 1 : 0}
+                    strokeWidth={hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? Math.min(1, Math.min(link.sourceWidth, link.targetWidth) * 0.3) : 0}
                     onMouseEnter={(e) => {
                       const rect = containerRef.current?.getBoundingClientRect();
                       if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
