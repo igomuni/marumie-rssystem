@@ -251,9 +251,21 @@ function filterTopN(
         edges.push({ source: sp.id, target: '__agg-recipient', value: otherForProject });
       }
     }
+    // __agg-project-spending → top recipients
+    for (const rid of topRecipientIds) {
+      const amount = allEdges
+        .filter(e => otherProjectSpendingIds.has(e.source) && e.target === rid)
+        .reduce((s, e) => s + e.value, 0);
+      if (amount > 0) {
+        edges.push({ source: '__agg-project-spending', target: rid, value: amount });
+      }
+    }
     // __agg-project-spending → __agg-recipient
-    if (otherProjectRecipientTotal > 0) {
-      edges.push({ source: '__agg-project-spending', target: '__agg-recipient', value: otherProjectRecipientTotal });
+    const otherProjectToOtherRecipient = otherProjectRecipientTotal -
+      Array.from(topRecipientIds).reduce((s, rid) =>
+        s + allEdges.filter(e => otherProjectSpendingIds.has(e.source) && e.target === rid).reduce((ss, e) => ss + e.value, 0), 0);
+    if (otherProjectToOtherRecipient > 0) {
+      edges.push({ source: '__agg-project-spending', target: '__agg-recipient', value: otherProjectToOtherRecipient });
     }
   }
 
