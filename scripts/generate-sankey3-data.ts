@@ -290,9 +290,11 @@ function main() {
   }
   console.log(`  事業: ${projectCount.toLocaleString()}`);
 
-  // 6d. 支出先ノード + エッジ
-  for (const [, recipient] of recipientMap) {
-    const recipientId = `recipient-${recipient.name}`;
+  // 6d. 支出先ノード + エッジ（金額降順で連番IDを付与）
+  const sortedRecipients = Array.from(recipientMap.values()).sort((a, b) => b.totalAmount - a.totalAmount);
+  for (let i = 0; i < sortedRecipients.length; i++) {
+    const recipient = sortedRecipients[i];
+    const recipientId = `r-${i + 1}`;
     nodes.push({
       id: recipientId,
       name: recipient.name,
@@ -362,7 +364,7 @@ function main() {
   console.log(`  total→ministry合計: ${(totalToMinistry / 1e12).toFixed(2)} 兆円 (totalBudget: ${(totalBudget / 1e12).toFixed(2)} 兆円) ${totalToMinistry === totalBudget ? '✓' : '✗'}`);
 
   // spending→recipient の合計 = directTotalAmount
-  const spendingToRecipient = edges.filter(e => e.source.startsWith('project-spending-') && e.target.startsWith('recipient-')).reduce((s, e) => s + e.value, 0);
+  const spendingToRecipient = edges.filter(e => e.source.startsWith('project-spending-') && e.target.startsWith('r-')).reduce((s, e) => s + e.value, 0);
   console.log(`  spending→recipient合計: ${(spendingToRecipient / 1e12).toFixed(2)} 兆円 (直接支出: ${(directTotalAmount / 1e12).toFixed(2)} 兆円) ${spendingToRecipient === directTotalAmount ? '✓' : '✗'}`);
 
   // ノードタイプ別カウント

@@ -133,7 +133,7 @@ function filterTopN(
   // 3. TopN recipients (from edges connected to top projects)
   const recipientAmounts = new Map<string, number>();
   for (const e of allEdges) {
-    if (topSpendingIds.has(e.source) && e.target.startsWith('recipient-')) {
+    if (topSpendingIds.has(e.source) && e.target.startsWith('r-')) {
       recipientAmounts.set(e.target, (recipientAmounts.get(e.target) || 0) + e.value);
     }
   }
@@ -141,7 +141,7 @@ function filterTopN(
   const otherProjectSpendingIds = new Set(otherProjects.map(n => n.id));
   let otherProjectRecipientTotal = 0;
   for (const e of allEdges) {
-    if (otherProjectSpendingIds.has(e.source) && e.target.startsWith('recipient-')) {
+    if (otherProjectSpendingIds.has(e.source) && e.target.startsWith('r-')) {
       otherProjectRecipientTotal += e.value;
     }
   }
@@ -158,7 +158,7 @@ function filterTopN(
   // Top ministries
   for (const n of topMinistryNodes) nodes.push(n);
   if (otherMinistryValue > 0) {
-    nodes.push({ id: 'ministry-other', name: `その他(${otherMinistries.length}省庁)`, type: 'ministry', value: otherMinistryValue, aggregated: true });
+    nodes.push({ id: '__agg-ministry', name: `その他(${otherMinistries.length}省庁)`, type: 'ministry', value: otherMinistryValue, aggregated: true });
   }
 
   // Top project budget + spending
@@ -172,8 +172,8 @@ function filterTopN(
       const bn = allNodes.find(b => b.id === `project-budget-${n.projectId}`);
       return s + (bn?.value || 0);
     }, 0);
-    nodes.push({ id: 'project-budget-other', name: `その他(${otherProjects.length}事業)`, type: 'project-budget', value: otherBudgetValue, aggregated: true });
-    nodes.push({ id: 'project-spending-other', name: `その他(${otherProjects.length}事業)`, type: 'project-spending', value: otherProjectValue, aggregated: true });
+    nodes.push({ id: '__agg-project-budget', name: `その他(${otherProjects.length}事業)`, type: 'project-budget', value: otherBudgetValue, aggregated: true });
+    nodes.push({ id: '__agg-project-spending', name: `その他(${otherProjects.length}事業)`, type: 'project-spending', value: otherProjectValue, aggregated: true });
   }
 
   // Top recipients
@@ -182,7 +182,7 @@ function filterTopN(
     if (rNode) nodes.push({ ...rNode, value: recipientAmounts.get(rid) || rNode.value });
   }
   if (otherRecipientValue > 0) {
-    nodes.push({ id: 'recipient-other', name: `その他の支出先`, type: 'recipient', value: otherRecipientValue, aggregated: true });
+    nodes.push({ id: '__agg-recipient', name: `その他の支出先`, type: 'recipient', value: otherRecipientValue, aggregated: true });
   }
 
   // Build filtered edges
@@ -193,7 +193,7 @@ function filterTopN(
     if (e.source === 'total' && topMinistryIds.has(e.target)) edges.push(e);
   }
   if (otherMinistryValue > 0) {
-    edges.push({ source: 'total', target: 'ministry-other', value: otherMinistryValue });
+    edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryValue });
   }
 
   // ministry → project-budget
@@ -213,7 +213,7 @@ function filterTopN(
           return s + (bn?.value || 0);
         }, 0);
       if (otherBudgetForMinistry > 0) {
-        edges.push({ source: mn.id, target: 'project-budget-other', value: otherBudgetForMinistry });
+        edges.push({ source: mn.id, target: '__agg-project-budget', value: otherBudgetForMinistry });
       }
     }
     // From ministry-other (all projects of non-top ministries)
@@ -223,7 +223,7 @@ function filterTopN(
         return s + (bn?.value || 0);
       }, 0);
       if (otherMinistryBudgetTotal > 0) {
-        edges.push({ source: 'ministry-other', target: 'project-budget-other', value: otherMinistryBudgetTotal });
+        edges.push({ source: '__agg-ministry', target: '__agg-project-budget', value: otherMinistryBudgetTotal });
       }
     }
   }
@@ -233,27 +233,27 @@ function filterTopN(
     if (topBudgetIds.has(e.source) && topSpendingIds.has(e.target)) edges.push(e);
   }
   if (otherProjectValue > 0) {
-    const otherBudgetNode = nodes.find(n => n.id === 'project-budget-other');
-    edges.push({ source: 'project-budget-other', target: 'project-spending-other', value: Math.min(otherBudgetNode?.value || 0, otherProjectValue) });
+    const otherBudgetNode = nodes.find(n => n.id === '__agg-project-budget');
+    edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: Math.min(otherBudgetNode?.value || 0, otherProjectValue) });
   }
 
   // project-spending → recipient
   for (const e of allEdges) {
     if (topSpendingIds.has(e.source) && topRecipientIds.has(e.target)) edges.push(e);
   }
-  // Top spending → recipient-other
+  // Top spending → __agg-recipient
   if (otherRecipientValue > 0) {
     for (const sp of topProjectNodes) {
       const otherForProject = allEdges
-        .filter(e => e.source === sp.id && e.target.startsWith('recipient-') && !topRecipientIds.has(e.target))
+        .filter(e => e.source === sp.id && e.target.startsWith('r-') && !topRecipientIds.has(e.target))
         .reduce((s, e) => s + e.value, 0);
       if (otherForProject > 0) {
-        edges.push({ source: sp.id, target: 'recipient-other', value: otherForProject });
+        edges.push({ source: sp.id, target: '__agg-recipient', value: otherForProject });
       }
     }
-    // other spending → recipient-other
+    // __agg-project-spending → __agg-recipient
     if (otherProjectRecipientTotal > 0) {
-      edges.push({ source: 'project-spending-other', target: 'recipient-other', value: otherProjectRecipientTotal });
+      edges.push({ source: '__agg-project-spending', target: '__agg-recipient', value: otherProjectRecipientTotal });
     }
   }
 
