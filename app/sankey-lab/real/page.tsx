@@ -73,7 +73,7 @@ function sortPriority(node: { id: string; name: string; aggregated?: boolean }):
   return 0;
 }
 
-const SVG_H = 800;
+const SVG_H_MIN = 400;
 const MARGIN = { top: 30, right: 20, bottom: 10, left: 20 };
 const NODE_W = 18;
 const NODE_PAD = 2;
@@ -262,9 +262,9 @@ function filterTopN(
 
 // ── Custom Layout Engine ──
 
-function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[], containerWidth: number) {
+function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[], containerWidth: number, containerHeight: number) {
   const innerW = containerWidth - MARGIN.left - MARGIN.right;
-  const innerH = SVG_H - MARGIN.top - MARGIN.bottom;
+  const innerH = containerHeight - MARGIN.top - MARGIN.bottom;
   const usedCols = new Set<number>();
   for (const n of filteredNodes) usedCols.add(getColumn(n));
   const maxCol = Math.max(...usedCols, 1);
@@ -359,7 +359,15 @@ function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[], conta
     }
   }
 
-  return { nodes, links, ky, maxCol, innerW, innerH };
+  // Content bounding box (in inner coords, before MARGIN)
+  let contentMaxX = 0, contentMaxY = 0;
+  for (const node of nodes) {
+    contentMaxX = Math.max(contentMaxX, node.x1);
+    contentMaxY = Math.max(contentMaxY, node.y1);
+  }
+
+  const LABEL_SPACE = 200; // approximate space for rightmost column labels
+  return { nodes, links, ky, maxCol, innerW, innerH, contentW: contentMaxX + NODE_W + LABEL_SPACE, contentH: contentMaxY };
 }
 
 function ribbonPath(link: LayoutLink): string {
@@ -396,18 +404,26 @@ export default function RealDataSankeyPage() {
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // Container width
+  // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
   const [svgWidth, setSvgWidth] = useState(1200);
+  const [svgHeight, setSvgHeight] = useState(800);
 
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const update = () => setSvgWidth(el.clientWidth);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
+    const updateSize = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      setSvgWidth(el.clientWidth);
+      // Fill remaining viewport height (container top to window bottom, minus padding)
+      const rect = el.getBoundingClientRect();
+      const h = Math.max(SVG_H_MIN, window.innerHeight - rect.top - 40);
+      setSvgHeight(h);
+    };
+    updateSize();
+    const ro = new ResizeObserver(updateSize);
+    if (containerRef.current) ro.observe(containerRef.current);
+    window.addEventListener('resize', updateSize);
+    return () => { ro.disconnect(); window.removeEventListener('resize', updateSize); };
   }, []);
 
   // Zoom/Pan state
@@ -457,10 +473,29 @@ export default function RealDataSankeyPage() {
     setIsPanning(false);
   }, []);
 
+  const layoutRef = useRef<{ contentW: number; contentH: number } | null>(null);
+
   const resetView = useCallback(() => {
+    const container = containerRef.current;
+    const l = layoutRef.current;
     setZoom(1);
-    setPan({ x: 0, y: 0 });
+    if (container && l) {
+      const cW = container.clientWidth;
+      const cH = container.clientHeight;
+      const totalW = MARGIN.left + l.contentW;
+      const totalH = MARGIN.top + l.contentH;
+      setPan({ x: (cW - totalW) / 2, y: (cH - totalH) / 2 });
+    } else {
+      setPan({ x: 0, y: 0 });
+    }
   }, []);
+
+  // Minimap refs (hooks must be unconditional)
+  const MINIMAP_W = 200;
+  const minimapH = Math.round(MINIMAP_W * (svgHeight / (svgWidth || 1)));
+  const minimapRef = useRef<HTMLCanvasElement>(null);
+  const minimapDragging = useRef(false);
+  const showMinimap = true;
 
   useEffect(() => {
     fetch('/data/sankey3-graph.json')
@@ -479,8 +514,92 @@ export default function RealDataSankeyPage() {
 
   const layout = useMemo(() => {
     if (!filtered) return null;
-    return computeLayout(filtered.nodes, filtered.edges, svgWidth);
-  }, [filtered, svgWidth]);
+    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
+    layoutRef.current = { contentW: result.contentW, contentH: result.contentH };
+    return result;
+  }, [filtered, svgWidth, svgHeight]);
+
+  // Center on initial load / layout change
+  const initialCentered = useRef(false);
+  useEffect(() => {
+    if (layout && !initialCentered.current) {
+      initialCentered.current = true;
+      resetView();
+    }
+  }, [layout, resetView]);
+
+  // Draw minimap
+  useEffect(() => {
+    if (!showMinimap || !layout) return;
+    const canvas = minimapRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // The "world" that the minimap represents = the full SVG content area
+    // Nodes are at (MARGIN.left + x0, MARGIN.top + y0) in SVG coords
+    // The SVG transform: translate(pan.x, pan.y) scale(zoom) then translate(MARGIN, MARGIN)
+    // So a node at inner (x0,y0) appears at screen (pan.x + (MARGIN.left+x0)*zoom, pan.y + (MARGIN.top+y0)*zoom)
+    const worldW = svgWidth;
+    const worldH = svgHeight;
+    const scaleX = MINIMAP_W / worldW;
+    const scaleY = minimapH / worldH;
+
+    ctx.clearRect(0, 0, MINIMAP_W, minimapH);
+    ctx.fillStyle = 'rgba(245,245,245,0.95)';
+    ctx.fillRect(0, 0, MINIMAP_W, minimapH);
+
+    // Draw nodes (at their SVG-coord positions including MARGIN)
+    for (const node of layout.nodes) {
+      const x = (MARGIN.left + node.x0) * scaleX;
+      const y = (MARGIN.top + node.y0) * scaleY;
+      const w = Math.max(1, NODE_W * scaleX);
+      const h = Math.max(0.5, (node.y1 - node.y0) * scaleY);
+      ctx.fillStyle = getNodeColor(node);
+      ctx.fillRect(x, y, w, h);
+    }
+
+    // Viewport: what part of the SVG world is visible in the container?
+    // Container shows screen coords (0,0) to (containerW, containerH)
+    // Screen to SVG: svgX = (screenX - pan.x) / zoom
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    const vpLeft = -pan.x / zoom;
+    const vpTop = -pan.y / zoom;
+    const vpW = cW / zoom;
+    const vpH = cH / zoom;
+
+    // Convert to minimap coords
+    const mX = vpLeft * scaleX;
+    const mY = vpTop * scaleY;
+    const mW = vpW * scaleX;
+    const mH = vpH * scaleY;
+
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(mX, mY, mW, mH);
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
+    ctx.fillRect(mX, mY, mW, mH);
+  }, [showMinimap, layout, zoom, pan, svgWidth, minimapH]);
+
+  const minimapNavigate = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = minimapRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    // Minimap coord to SVG world coord
+    const scaleX = MINIMAP_W / svgWidth;
+    const scaleY = minimapH / svgHeight;
+    const svgX = mx / scaleX;
+    const svgY = my / scaleY;
+    // Center the container on this SVG coord
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    setPan({ x: cW / 2 - svgX * zoom, y: cH / 2 - svgY * zoom });
+  }, [svgWidth, minimapH, zoom]);
 
   return (
     <div style={{ padding: 20, fontFamily: 'system-ui, sans-serif', background: '#f8f9fa', minHeight: '100vh' }}>
@@ -524,8 +643,8 @@ export default function RealDataSankeyPage() {
                 <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ width: 80 }} />
               </label>
               <span style={{ color: '#ccc' }}>|</span>
-              <button onClick={() => { const nz = Math.min(50, zoom * 1.3); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: SVG_H/2 - (SVG_H/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>+</button>
-              <button onClick={() => { const nz = Math.max(0.2, zoom * 0.7); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: SVG_H/2 - (SVG_H/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>-</button>
+              <button onClick={() => { const nz = Math.min(50, zoom * 1.3); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: svgHeight/2 - (svgHeight/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>+</button>
+              <button onClick={() => { const nz = Math.max(0.2, zoom * 0.7); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: svgHeight/2 - (svgHeight/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>-</button>
               <button onClick={resetView} style={{ height: 26, padding: '0 6px', border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 11 }}>Reset</button>
               <input
                 type="number"
@@ -539,7 +658,7 @@ export default function RealDataSankeyPage() {
             <svg
               ref={svgRef}
               width={svgWidth}
-              height={SVG_H}
+              height={svgHeight}
               overflow="visible"
               style={{ display: 'block' }}
             >
@@ -603,7 +722,10 @@ export default function RealDataSankeyPage() {
                   const lastCol = layout.maxCol;
                   return layout.nodes.map((node) => {
                     const h = node.y1 - node.y0;
-                    const showLabel = h * zoom > 10;
+                    // Label is 9px on screen (fontSize 9/zoom * zoom = 9).
+                    // Available space per node on screen = (h + NODE_PAD) * zoom.
+                    // Show label when available space exceeds font height.
+                    const showLabel = (h + NODE_PAD) * zoom > 10;
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
                     return (
@@ -647,6 +769,30 @@ export default function RealDataSankeyPage() {
               </g>
               </g>
             </svg>
+
+            {/* Minimap */}
+            {showMinimap && (
+              <canvas
+                ref={minimapRef}
+                width={MINIMAP_W}
+                height={minimapH}
+                onClick={minimapNavigate}
+                onMouseDown={(e) => { e.stopPropagation(); minimapDragging.current = true; minimapNavigate(e); }}
+                onMouseMove={(e) => { if (minimapDragging.current) minimapNavigate(e); }}
+                onMouseUp={() => { minimapDragging.current = false; }}
+                onMouseLeave={() => { minimapDragging.current = false; }}
+                style={{
+                  position: 'absolute',
+                  left: 8,
+                  bottom: 8,
+                  zIndex: 10,
+                  border: '1px solid #ccc',
+                  borderRadius: 4,
+                  cursor: 'crosshair',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+                }}
+              />
+            )}
 
             {/* DOM tooltip — outside SVG zoom group so it stays visible */}
             {/* DOM tooltip — link hover */}
