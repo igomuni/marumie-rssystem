@@ -116,12 +116,14 @@ function filterTopN(
   const otherMinistries = ministries.slice(topMinistry);
   const otherMinistryValue = otherMinistries.reduce((s, n) => s + n.value, 0);
 
-  // 2. TopN projects by spending value (only from top ministries)
-  const projectSpending = allNodes.filter(n => n.type === 'project-spending' && topMinistryNames.has(n.ministry || ''));
-  projectSpending.sort((a, b) => b.value - a.value);
-  const topProjectNodes = projectSpending.slice(0, topProject);
-  // Aggregated project spending
-  const otherProjects = projectSpending.slice(topProject);
+  // 2. TopN projects by spending value (from top ministries only for ranking)
+  const topMinistryProjectSpending = allNodes.filter(n => n.type === 'project-spending' && topMinistryNames.has(n.ministry || ''));
+  topMinistryProjectSpending.sort((a, b) => b.value - a.value);
+  const topProjectNodes = topMinistryProjectSpending.slice(0, topProject);
+  // Other projects = remaining from top ministries + ALL from other ministries
+  const otherProjectsFromTopMinistries = topMinistryProjectSpending.slice(topProject);
+  const otherMinistryProjects = allNodes.filter(n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || ''));
+  const otherProjects = [...otherProjectsFromTopMinistries, ...otherMinistryProjects];
   const otherProjectValue = otherProjects.reduce((s, n) => s + n.value, 0);
 
   // Corresponding budget nodes
@@ -135,7 +137,7 @@ function filterTopN(
       recipientAmounts.set(e.target, (recipientAmounts.get(e.target) || 0) + e.value);
     }
   }
-  // Also include recipients from other (non-top) projects of top ministries
+  // Also include recipients from other (non-top) projects
   const otherProjectSpendingIds = new Set(otherProjects.map(n => n.id));
   let otherProjectRecipientTotal = 0;
   for (const e of allEdges) {
@@ -202,9 +204,9 @@ function filterTopN(
   }
   // ministry → project-budget-other (aggregated)
   if (otherProjectValue > 0) {
-    // Group by ministry
+    // From top ministries (their non-top projects)
     for (const mn of topMinistryNodes) {
-      const otherBudgetForMinistry = otherProjects
+      const otherBudgetForMinistry = otherProjectsFromTopMinistries
         .filter(p => p.ministry === mn.name)
         .reduce((s, p) => {
           const bn = allNodes.find(b => b.id === `project-budget-${p.projectId}`);
@@ -212,6 +214,16 @@ function filterTopN(
         }, 0);
       if (otherBudgetForMinistry > 0) {
         edges.push({ source: mn.id, target: 'project-budget-other', value: otherBudgetForMinistry });
+      }
+    }
+    // From ministry-other (all projects of non-top ministries)
+    if (otherMinistryValue > 0) {
+      const otherMinistryBudgetTotal = otherMinistryProjects.reduce((s, p) => {
+        const bn = allNodes.find(b => b.id === `project-budget-${p.projectId}`);
+        return s + (bn?.value || 0);
+      }, 0);
+      if (otherMinistryBudgetTotal > 0) {
+        edges.push({ source: 'ministry-other', target: 'project-budget-other', value: otherMinistryBudgetTotal });
       }
     }
   }
@@ -321,6 +333,12 @@ function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[], conta
     }
   }
 
+  // Sort links by target/source y-position so ribbons don't cross unnecessarily
+  for (const node of nodes) {
+    node.sourceLinks.sort((a, b) => a.target.y0 - b.target.y0);
+    node.targetLinks.sort((a, b) => a.source.y0 - b.source.y0);
+  }
+
   for (const node of nodes) {
     const nodeHeight = node.y1 - node.y0;
     const totalSrcValue = node.sourceLinks.reduce((s, l) => s + l.value, 0);
@@ -375,6 +393,8 @@ export default function RealDataSankeyPage() {
   const [topProject, setTopProject] = useState(10);
   const [topRecipient, setTopRecipient] = useState(10);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   // Container width
   const containerRef = useRef<HTMLDivElement>(null);
@@ -400,9 +420,9 @@ export default function RealDataSankeyPage() {
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
-    const svg = svgRef.current;
-    if (!svg) return;
-    const rect = svg.getBoundingClientRect();
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
     // Mouse position relative to SVG
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
@@ -472,50 +492,46 @@ export default function RealDataSankeyPage() {
         )}
       </p>
 
-      {/* Sliders */}
-      <div style={{ marginBottom: 16, display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 13 }}>
-        <label>
-          Top省庁: {topMinistry}
-          <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ marginLeft: 8, width: 120 }} />
-        </label>
-        <label>
-          Top事業: {topProject}
-          <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ marginLeft: 8, width: 120 }} />
-        </label>
-        <label>
-          Top支出先: {topRecipient}
-          <input type="range" min={1} max={50} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ marginLeft: 8, width: 120 }} />
-        </label>
-      </div>
-
       {loading && <p>Loading sankey3-graph.json...</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {layout && (
         <>
-          <p style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
-            Nodes: {layout.nodes.length} / Links: {layout.links.length} / ky: {layout.ky.toExponential(2)}
-          </p>
-
-          <div ref={containerRef} style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, overflow: 'hidden', position: 'relative' }}>
-            {/* Zoom controls */}
-            <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, display: 'flex', gap: 4 }}>
-              <button onClick={() => { const nz = Math.min(10, zoom * 1.3); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: SVG_H/2 - (SVG_H/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 28, height: 28, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 16 }}>+</button>
-              <button onClick={() => { const nz = Math.max(0.2, zoom * 0.7); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: SVG_H/2 - (SVG_H/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 28, height: 28, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 16 }}>-</button>
-              <button onClick={resetView} style={{ height: 28, padding: '0 8px', border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 11 }}>Reset</button>
-              <span style={{ fontSize: 11, lineHeight: '28px', color: '#999' }}>{(zoom * 100).toFixed(0)}%</span>
+          <div
+            ref={containerRef}
+            style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, overflow: 'hidden', position: 'relative', cursor: isPanning ? 'grabbing' : 'grab' }}
+            onWheel={handleWheel}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
+            {/* Controls overlay */}
+            <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                省庁: {topMinistry}
+                <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ width: 80 }} />
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                事業: {topProject}
+                <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ width: 80 }} />
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                支出先: {topRecipient}
+                <input type="range" min={1} max={50} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ width: 80 }} />
+              </label>
+              <span style={{ color: '#ccc' }}>|</span>
+              <button onClick={() => { const nz = Math.min(10, zoom * 1.3); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: SVG_H/2 - (SVG_H/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>+</button>
+              <button onClick={() => { const nz = Math.max(0.2, zoom * 0.7); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: SVG_H/2 - (SVG_H/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>-</button>
+              <button onClick={resetView} style={{ height: 26, padding: '0 6px', border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 11 }}>Reset</button>
+              <span style={{ color: '#999', fontSize: 11 }}>{(zoom * 100).toFixed(0)}%</span>
             </div>
             <svg
               ref={svgRef}
               width={svgWidth}
               height={SVG_H}
               overflow="visible"
-              onWheel={handleWheel}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              style={{ cursor: isPanning ? 'grabbing' : 'grab', display: 'block' }}
+              style={{ display: 'block' }}
             >
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
@@ -536,69 +552,153 @@ export default function RealDataSankeyPage() {
                     key={i}
                     d={ribbonPath(link)}
                     fill={getLinkColor(link)}
-                    fillOpacity={hoveredLink === link ? 0.6 : 0.25}
-                    stroke={hoveredLink === link ? getLinkColor(link) : 'none'}
-                    strokeWidth={hoveredLink === link ? 1 : 0}
-                    onMouseEnter={() => setHoveredLink(link)}
+                    fillOpacity={
+                      hoveredLink === link ? 0.6
+                      : hoveredNode && (link.source === hoveredNode || link.target === hoveredNode) ? 0.5
+                      : (hoveredNode || hoveredLink) ? 0.1
+                      : 0.25
+                    }
+                    stroke={hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? getLinkColor(link) : 'none'}
+                    strokeWidth={hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? 1 : 0}
+                    onMouseEnter={(e) => {
+                      const rect = containerRef.current?.getBoundingClientRect();
+                      if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                      setHoveredLink(link);
+                    }}
+                    onMouseMove={(e) => {
+                      const rect = containerRef.current?.getBoundingClientRect();
+                      if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                    }}
                     onMouseLeave={() => setHoveredLink(null)}
                     style={{ cursor: 'pointer' }}
                   />
                 ))}
 
-                {/* Nodes */}
-                {layout.nodes.map((node) => {
-                  const h = node.y1 - node.y0;
-                  const showLabel = h > 6;
-                  return (
-                    <g key={node.id}>
-                      <rect
-                        x={node.x0}
-                        y={node.y0}
-                        width={NODE_W}
-                        height={Math.max(1, h)}
-                        fill={getNodeColor(node)}
-                        rx={1}
-                      />
-                      {showLabel && (
-                        <text
-                          x={node.x1 + 3}
-                          y={node.y0 + h / 2}
-                          fontSize={9}
-                          dominantBaseline="middle"
-                          fill="#333"
-                        >
-                          {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)})
-                        </text>
-                      )}
-                    </g>
-                  );
-                })}
+                {/* Label clip regions per non-last column */}
+                {(() => {
+                  const colSpacing = layout.maxCol > 0 ? (layout.innerW - NODE_W) / layout.maxCol : layout.innerW;
+                  const lastCol = layout.maxCol;
+                  const cols = new Set(layout.nodes.map(n => getColumn(n)));
+                  return Array.from(cols).filter(c => c < lastCol).map(c => (
+                    <defs key={`clip-col-${c}`}>
+                      <clipPath id={`clip-col-${c}`}>
+                        <rect x={c * colSpacing + NODE_W} y={-1000} width={colSpacing - NODE_W} height={10000} />
+                      </clipPath>
+                    </defs>
+                  ));
+                })()}
 
-                {/* Hover tooltip */}
-                {hoveredLink && (
-                  <g>
-                    <rect
-                      x={layout.innerW / 2 - 200}
-                      y={layout.innerH - 30}
-                      width={400}
-                      height={24}
-                      fill="rgba(0,0,0,0.8)"
-                      rx={4}
-                    />
-                    <text
-                      x={layout.innerW / 2}
-                      y={layout.innerH - 14}
-                      textAnchor="middle"
-                      fontSize={10}
-                      fill="#fff"
-                    >
-                      {hoveredLink.source.name} → {hoveredLink.target.name}: {formatYen(hoveredLink.value)}
-                    </text>
-                  </g>
-                )}
+                {/* Nodes */}
+                {(() => {
+                  const lastCol = layout.maxCol;
+                  return layout.nodes.map((node) => {
+                    const h = node.y1 - node.y0;
+                    const showLabel = h * zoom > 10;
+                    const col = getColumn(node);
+                    const isLastCol = col === lastCol;
+                    return (
+                      <g key={node.id}>
+                        <rect
+                          x={node.x0}
+                          y={node.y0}
+                          width={NODE_W}
+                          height={Math.max(1, h)}
+                          fill={getNodeColor(node)}
+                          opacity={hoveredNode && hoveredNode !== node ? 0.4 : 1}
+                          rx={1}
+                          style={{ cursor: 'pointer' }}
+                          onMouseEnter={(e) => {
+                            const rect = containerRef.current?.getBoundingClientRect();
+                            if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                            setHoveredNode(node);
+                          }}
+                          onMouseMove={(e) => {
+                            const rect = containerRef.current?.getBoundingClientRect();
+                            if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                          }}
+                          onMouseLeave={() => setHoveredNode(null)}
+                        />
+                        {showLabel && (
+                          <text
+                            x={node.x1 + 3}
+                            y={node.y0 + h / 2}
+                            fontSize={9 / zoom}
+                            dominantBaseline="middle"
+                            fill="#333"
+                            clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
+                          >
+                            {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)})
+                          </text>
+                        )}
+                      </g>
+                    );
+                  });
+                })()}
               </g>
               </g>
             </svg>
+
+            {/* DOM tooltip — outside SVG zoom group so it stays visible */}
+            {/* DOM tooltip — link hover */}
+            {hoveredLink && !hoveredNode && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: mousePos.x + 12,
+                  top: mousePos.y - 10,
+                  background: 'rgba(0,0,0,0.85)',
+                  color: '#fff',
+                  padding: '6px 10px',
+                  borderRadius: 4,
+                  fontSize: 12,
+                  lineHeight: 1.4,
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap',
+                  zIndex: 10,
+                }}
+              >
+                <div>{hoveredLink.source.name} → {hoveredLink.target.name}</div>
+                <div style={{ color: '#adf' }}>{formatYen(hoveredLink.value)}</div>
+              </div>
+            )}
+            {/* DOM tooltip — node hover */}
+            {hoveredNode && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: mousePos.x + 12,
+                  top: mousePos.y - 10,
+                  background: 'rgba(0,0,0,0.85)',
+                  color: '#fff',
+                  padding: '8px 12px',
+                  borderRadius: 4,
+                  fontSize: 12,
+                  lineHeight: 1.5,
+                  pointerEvents: 'none',
+                  zIndex: 10,
+                  maxWidth: 360,
+                }}
+              >
+                <div style={{ fontWeight: 'bold', marginBottom: 2 }}>{hoveredNode.name}</div>
+                <div style={{ color: '#7df' }}>{formatYen(hoveredNode.value)}</div>
+                {hoveredNode.sourceLinks.length > 0 && (
+                  <div style={{ marginTop: 4, color: '#ddd' }}>
+                    {hoveredNode.sourceLinks.slice(0, 3).map((l, i) => (
+                      <div key={i}>→ {l.target.name} ({formatYen(l.value)})</div>
+                    ))}
+                    {hoveredNode.sourceLinks.length > 3 && <div style={{ color: '#aaa' }}>他{hoveredNode.sourceLinks.length - 3}件</div>}
+                  </div>
+                )}
+                {hoveredNode.targetLinks.length > 0 && (
+                  <div style={{ marginTop: 4, color: '#ddd' }}>
+                    {hoveredNode.targetLinks.slice(0, 3).map((l, i) => (
+                      <div key={i}>← {l.source.name} ({formatYen(l.value)})</div>
+                    ))}
+                    {hoveredNode.targetLinks.length > 3 && <div style={{ color: '#aaa' }}>他{hoveredNode.targetLinks.length - 3}件</div>}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Legend */}
