@@ -211,10 +211,9 @@ function filterTopN(
   for (const n of topProjectNodes) {
     const wv = projectWindowValue.get(n.id) || 0;
     const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
-    // skipLinkOverride: preserve original budget value for both height and label/tooltip.
-    // The outgoing edge (budget→spending = wv) will occupy only a portion of the node height,
-    // visually showing that only part of the budget flows to the current window.
-    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true });
+    // skipLinkOverride: preserve original budget value for label/tooltip.
+    // layoutCap = wv: cap height to match the spending node height.
+    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true, layoutCap: wv });
     // layoutCap = wv: the tail edge (project-spending → __agg-recipient) makes srcSum > tgtSum,
     // causing computeLayout to inflate the node height to window + tail. Cap it to window only.
     nodes.push({ ...n, value: wv, layoutCap: wv });
