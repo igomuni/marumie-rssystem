@@ -213,8 +213,14 @@ function filterTopN(
     nodes.push({ ...n, value: wv });
   }
   if (otherProjectWindowTotal > 0) {
-    nodes.push({ id: '__agg-project-budget', name: `その他(${otherProjects.length}事業)`, type: 'project-budget', value: otherProjectWindowTotal, aggregated: true });
-    nodes.push({ id: '__agg-project-spending', name: `その他(${otherProjects.length}事業)`, type: 'project-spending', value: otherProjectWindowTotal, aggregated: true });
+    // Cap layout height based on min visible project window value × topProject
+    const minTopProjectWindowValue = topProjectNodes.length > 0
+      ? Math.min(...topProjectNodes.map(n => projectWindowValue.get(n.id) || 0))
+      : otherProjectWindowTotal;
+    const projectLayoutCap = minTopProjectWindowValue * topProject;
+    const projectCapped = otherProjectWindowTotal > projectLayoutCap ? projectLayoutCap : undefined;
+    nodes.push({ id: '__agg-project-budget', name: `その他(${otherProjects.length}事業)`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectCapped, aggregated: true });
+    nodes.push({ id: '__agg-project-spending', name: `その他(${otherProjects.length}事業)`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectCapped, aggregated: true });
   }
 
   for (const [rid] of windowRecipients) {
