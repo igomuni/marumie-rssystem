@@ -240,7 +240,7 @@ function filterTopN(
     const layoutCap = minWindowRecipientValue * topRecipient;
     nodes.push({
       id: '__agg-recipient',
-      name: `その他の支出先`,
+      name: `${tailRecipients.length}支出先`,
       type: 'recipient',
       value: aggRecipientValue,
       layoutCap: layoutCap,
