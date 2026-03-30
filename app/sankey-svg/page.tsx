@@ -210,18 +210,21 @@ function filterTopN(
     const wv = projectWindowValue.get(n.id) || 0;
     const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
     if (budgetNode) nodes.push({ ...budgetNode, value: wv });
-    nodes.push({ ...n, value: wv });
+    // layoutCap = wv: the tail edge (project-spending → __agg-recipient) makes srcSum > tgtSum,
+    // causing computeLayout to inflate the node height to window + tail. Cap it to window only.
+    nodes.push({ ...n, value: wv, layoutCap: wv });
   }
-  if (otherProjectWindowTotal > 0) {
-    // Cap layout height based on min visible project window value × topProject
+  // Create __agg-project-budget only when there is window spending (needs ministry→budget edges).
+  // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
+  // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
+  if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
     const minTopProjectWindowValue = topProjectNodes.length > 0
       ? Math.min(...topProjectNodes.map(n => projectWindowValue.get(n.id) || 0))
-      : otherProjectWindowTotal;
-    const projectLayoutCap = minTopProjectWindowValue * topProject;
-    // Always set layoutCap — the layout engine applies it only when the actual link-sum (which
-    // includes tail payments) exceeds the cap. Without this, the conditional would miss cases
-    // where otherProjectWindowTotal ≤ cap but linkSum (window + tail) still exceeds it.
-    nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+      : 0;
+    const projectLayoutCap = minTopProjectWindowValue > 0 ? minTopProjectWindowValue * topProject : otherProjectTailTotal;
+    if (otherProjectWindowTotal > 0) {
+      nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+    }
     nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
   }
 
