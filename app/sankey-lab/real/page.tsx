@@ -218,9 +218,11 @@ function filterTopN(
       ? Math.min(...topProjectNodes.map(n => projectWindowValue.get(n.id) || 0))
       : otherProjectWindowTotal;
     const projectLayoutCap = minTopProjectWindowValue * topProject;
-    const projectCapped = otherProjectWindowTotal > projectLayoutCap ? projectLayoutCap : undefined;
-    nodes.push({ id: '__agg-project-budget', name: `その他(${otherProjects.length}事業)`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectCapped, aggregated: true });
-    nodes.push({ id: '__agg-project-spending', name: `その他(${otherProjects.length}事業)`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectCapped, aggregated: true });
+    // Always set layoutCap — the layout engine applies it only when the actual link-sum (which
+    // includes tail payments) exceeds the cap. Without this, the conditional would miss cases
+    // where otherProjectWindowTotal ≤ cap but linkSum (window + tail) still exceeds it.
+    nodes.push({ id: '__agg-project-budget', name: `その他(${otherProjects.length}事業)`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+    nodes.push({ id: '__agg-project-spending', name: `その他(${otherProjects.length}事業)`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
   }
 
   for (const [rid] of windowRecipients) {
@@ -241,7 +243,7 @@ function filterTopN(
       name: `その他の支出先`,
       type: 'recipient',
       value: aggRecipientValue,
-      layoutCap: aggRecipientValue > layoutCap ? layoutCap : undefined,
+      layoutCap: layoutCap,
       aggregated: true,
     });
   }
