@@ -441,8 +441,8 @@ function ribbonPath(link: LayoutLink): string {
 
 function formatYen(value: number): string {
   if (value >= 1e12) return `${(value / 1e12).toFixed(2)}兆円`;
-  if (value >= 1e8) return `${(value / 1e8).toFixed(0)}億円`;
-  if (value >= 1e4) return `${(value / 1e4).toFixed(0)}万円`;
+  if (value >= 1e8) return `${Math.round(value / 1e8).toLocaleString()}億円`;
+  if (value >= 1e4) return `${Math.round(value / 1e4).toLocaleString()}万円`;
   return `${value.toLocaleString()}円`;
 }
 
