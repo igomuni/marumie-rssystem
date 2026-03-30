@@ -9,6 +9,10 @@ interface RawNode {
   name: string;
   type: 'total' | 'ministry' | 'project-budget' | 'project-spending' | 'recipient';
   value: number;
+  /** Actual value preserved when layout height is capped (used for tooltip display) */
+  rawValue?: number;
+  /** If set, layout engine caps node height to this value after computing link-sum */
+  layoutCap?: number;
   aggregated?: boolean;
   projectId?: number;
   ministry?: string;
@@ -220,7 +224,20 @@ function filterTopN(
   const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0);
   const aggRecipientValue = tailValue + otherProjectTailTotal;
   if (aggRecipientValue > 0) {
-    nodes.push({ id: '__agg-recipient', name: `その他の支出先`, type: 'recipient', value: aggRecipientValue, aggregated: true });
+    // Cap layout height so the aggregate bar doesn't overwhelm the window recipients.
+    // Cap = min window-recipient value × topRecipient  (≈ total height of all window bars if all were minimum-sized).
+    const minWindowRecipientValue = windowRecipients.length > 0
+      ? Math.min(...windowRecipients.map(([, v]) => v))
+      : aggRecipientValue;
+    const layoutCap = minWindowRecipientValue * topRecipient;
+    nodes.push({
+      id: '__agg-recipient',
+      name: `その他の支出先`,
+      type: 'recipient',
+      value: aggRecipientValue,
+      layoutCap: aggRecipientValue > layoutCap ? layoutCap : undefined,
+      aggregated: true,
+    });
   }
 
   // ── Build edges ──
@@ -318,6 +335,11 @@ function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[], conta
     const tgtSum = node.targetLinks.reduce((s, l) => s + l.value, 0);
     const linkValue = Math.max(srcSum, tgtSum);
     if (linkValue > 0) node.value = linkValue;
+    // Apply layout cap: preserve actual value in rawValue, shrink value for height computation
+    if (node.layoutCap !== undefined && node.value > node.layoutCap) {
+      node.rawValue = node.value;
+      node.value = node.layoutCap;
+    }
   }
 
   const columns: Map<number, LayoutNode[]> = new Map();
@@ -810,7 +832,7 @@ export default function RealDataSankeyPage() {
                             fill="#333"
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                           >
-                            {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)})
+                            {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.rawValue ?? node.value)})
                           </text>
                         )}
                       </g>
@@ -888,8 +910,11 @@ export default function RealDataSankeyPage() {
                 }}
               >
                 <div style={{ fontWeight: 'bold', marginBottom: 2 }}>{hoveredNode.name}</div>
-                <div style={{ color: '#7df' }}>{formatYen(hoveredNode.value)}</div>
-                <div style={{ color: '#aaa', fontSize: 11 }}>{hoveredNode.value.toLocaleString()}円</div>
+                <div style={{ color: '#7df' }}>{formatYen(hoveredNode.rawValue ?? hoveredNode.value)}</div>
+                <div style={{ color: '#aaa', fontSize: 11 }}>{(hoveredNode.rawValue ?? hoveredNode.value).toLocaleString()}円</div>
+                {hoveredNode.rawValue !== undefined && (
+                  <div style={{ color: '#fa8', fontSize: 11 }}>※表示高さは上限値で制限</div>
+                )}
                 {hoveredNode.sourceLinks.length > 0 && (
                   <div style={{ marginTop: 4, color: '#ddd' }}>
                     {hoveredNode.sourceLinks.slice(0, 3).map((l, i) => (
