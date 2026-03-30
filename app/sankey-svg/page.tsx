@@ -183,6 +183,14 @@ function filterTopN(
 
   const totalWindowSpending = windowRecipients.reduce((s, [, v]) => s + v, 0);
 
+  // Top projects that have ANY spending to tail recipients (= not all recipients are in window)
+  const topProjectsWithTail = new Set<string>();
+  for (const e of allEdges) {
+    if (topProjectIds.has(e.source) && tailRecipientIds.has(e.target)) {
+      topProjectsWithTail.add(e.source);
+    }
+  }
+
   // 6. Ministry window values
   const ministryWindowValue = new Map<string, number>();
   for (const e of allEdges) {
@@ -215,9 +223,10 @@ function filterTopN(
     // No layoutCap: visible budget nodes always have window recipients (topProjectNodes filters wv>0),
     // so full budget height is shown as-is.
     if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true });
-    // layoutCap = wv: the tail edge (project-spending → __agg-recipient) makes srcSum > tgtSum,
-    // causing computeLayout to inflate the node height to window + tail. Cap it to window only.
-    nodes.push({ ...n, value: wv, layoutCap: wv });
+    // layoutCap = wv only when the project has tail spending (some recipients outside the window).
+    // If all recipients are in the window, no tail edge exists so no inflation — cap not needed.
+    const hasTail = topProjectsWithTail.has(n.id);
+    nodes.push({ ...n, value: wv, layoutCap: hasTail ? wv : undefined });
   }
   // Create __agg-project-budget only when there is window spending (needs ministry→budget edges).
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
