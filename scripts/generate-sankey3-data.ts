@@ -17,7 +17,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { readShiftJISCSV, parseAmount } from './csv-reader';
+import { readShiftJISCSV, parseAmount } from '@/scripts/csv-reader';
 import type { CSVRow } from '@/types/rs-system';
 
 // ─── 定数 ──────────────────────────────────────────────
@@ -225,6 +225,10 @@ function main() {
   }
 
   for (const [ministry, budget] of ministryBudgets) {
+    if (!ministry || !ministry.trim()) {
+      console.warn('  !! 空の省庁名を検出、スキップします');
+      continue;
+    }
     const ministryId = `ministry-${ministry}`;
     nodes.push({
       id: ministryId,

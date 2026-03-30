@@ -106,6 +106,9 @@ function filterTopN(
   topProject: number,
   topRecipient: number,
 ): { nodes: RawNode[]; edges: RawEdge[] } {
+  // Build O(1) lookup map
+  const nodeById = new Map(allNodes.map(n => [n.id, n]));
+
   // 1. TopN ministries by value
   const ministries = allNodes.filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
   const topMinistryNodes = ministries.slice(0, topMinistry);
@@ -163,13 +166,13 @@ function filterTopN(
 
   // Top project budget + spending
   for (const n of topProjectNodes) {
-    const budgetNode = allNodes.find(bn => bn.id === `project-budget-${n.projectId}`);
+    const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
     if (budgetNode) nodes.push(budgetNode);
     nodes.push(n);
   }
   if (otherProjectValue > 0) {
     const otherBudgetValue = otherProjects.reduce((s, n) => {
-      const bn = allNodes.find(b => b.id === `project-budget-${n.projectId}`);
+      const bn = nodeById.get(`project-budget-${n.projectId}`);
       return s + (bn?.value || 0);
     }, 0);
     nodes.push({ id: '__agg-project-budget', name: `その他(${otherProjects.length}事業)`, type: 'project-budget', value: otherBudgetValue, aggregated: true });
@@ -613,6 +616,12 @@ export default function RealDataSankeyPage() {
     setPan({ x: cW / 2 - svgX * zoom, y: cH / 2 - svgY * zoom });
   }, [svgWidth, minimapH, zoom]);
 
+  const applyZoom = useCallback((factor: number) => {
+    const nz = Math.max(0.2, Math.min(50, zoom * factor));
+    setPan({ x: svgWidth / 2 - (svgWidth / 2 - pan.x) * (nz / zoom), y: svgHeight / 2 - (svgHeight / 2 - pan.y) * (nz / zoom) });
+    setZoom(nz);
+  }, [zoom, pan, svgWidth, svgHeight]);
+
   return (
     <div style={{ padding: 20, fontFamily: 'system-ui, sans-serif', background: '#f8f9fa', minHeight: '100vh' }}>
       <h1 style={{ fontSize: 20, marginBottom: 4 }}>Sankey3 — 直接支出先のみ（sankey3-graph.json）</h1>
@@ -655,8 +664,8 @@ export default function RealDataSankeyPage() {
                 <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ width: 80 }} />
               </label>
               <span style={{ color: '#ccc' }}>|</span>
-              <button onClick={() => { const nz = Math.min(50, zoom * 1.3); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: svgHeight/2 - (svgHeight/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>+</button>
-              <button onClick={() => { const nz = Math.max(0.2, zoom * 0.7); setPan({ x: svgWidth/2 - (svgWidth/2 - pan.x) * (nz/zoom), y: svgHeight/2 - (svgHeight/2 - pan.y) * (nz/zoom) }); setZoom(nz); }} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>-</button>
+              <button onClick={() => applyZoom(1.3)} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>+</button>
+              <button onClick={() => applyZoom(0.7)} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>-</button>
               <button onClick={resetView} style={{ height: 26, padding: '0 6px', border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 11 }}>Reset</button>
               <input
                 type="number"
