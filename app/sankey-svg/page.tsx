@@ -209,7 +209,8 @@ function filterTopN(
   for (const n of topProjectNodes) {
     const wv = projectWindowValue.get(n.id) || 0;
     const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
-    if (budgetNode) nodes.push({ ...budgetNode, value: wv });
+    // Keep original budget value in rawValue for label/tooltip; height is driven by link edges (wv).
+    if (budgetNode) nodes.push({ ...budgetNode, rawValue: budgetNode.value });
     // layoutCap = wv: the tail edge (project-spending → __agg-recipient) makes srcSum > tgtSum,
     // causing computeLayout to inflate the node height to window + tail. Cap it to window only.
     nodes.push({ ...n, value: wv, layoutCap: wv });
