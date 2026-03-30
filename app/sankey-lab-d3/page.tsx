@@ -413,7 +413,7 @@ function computeLayout(data: TestData, approach: Approach) {
     .nodeWidth(NODE_W)
     .nodePadding(NODE_PAD)
     .nodeAlign(approach.align)
-    .nodeSort(undefined)
+
     .extent([
       [0, 0],
       [INNER_W, INNER_H],
