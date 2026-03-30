@@ -136,6 +136,8 @@ function filterTopN(
   const windowRecipientIds = new Set(windowRecipients.map(([id]) => id));
   const tailRecipients = allSortedRecipients.slice(recipientOffset + topRecipient);
   const tailRecipientIds = new Set(tailRecipients.map(([id]) => id));
+  // Recipients before the window (pre-window) are also hidden
+  const preWindowRecipientIds = new Set(allSortedRecipients.slice(0, recipientOffset).map(([id]) => id));
 
   // 3. Per-project window spending (all projects, used for re-ranking)
   const projectWindowValue = new Map<string, number>();
@@ -183,11 +185,12 @@ function filterTopN(
 
   const totalWindowSpending = windowRecipients.reduce((s, [, v]) => s + v, 0);
 
-  // Top projects that have ANY spending to tail recipients (= not all recipients are in window)
-  const topProjectsWithTail = new Set<string>();
+  // Top projects that have spending to hidden recipients (pre-window OR tail).
+  // These projects do NOT have all their recipients visible → apply height cap.
+  const topProjectsWithHiddenRecipients = new Set<string>();
   for (const e of allEdges) {
-    if (topProjectIds.has(e.source) && tailRecipientIds.has(e.target)) {
-      topProjectsWithTail.add(e.source);
+    if (topProjectIds.has(e.source) && (tailRecipientIds.has(e.target) || preWindowRecipientIds.has(e.target))) {
+      topProjectsWithHiddenRecipients.add(e.source);
     }
   }
 
@@ -219,14 +222,11 @@ function filterTopN(
   for (const n of topProjectNodes) {
     const wv = projectWindowValue.get(n.id) || 0;
     const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
-    // skipLinkOverride: preserve original budget value for height and label/tooltip.
-    // No layoutCap: visible budget nodes always have window recipients (topProjectNodes filters wv>0),
-    // so full budget height is shown as-is.
-    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true });
-    // layoutCap = wv only when the project has tail spending (some recipients outside the window).
-    // If all recipients are in the window, no tail edge exists so no inflation — cap not needed.
-    const hasTail = topProjectsWithTail.has(n.id);
-    nodes.push({ ...n, value: wv, layoutCap: hasTail ? wv : undefined });
+    // Apply cap only when some recipients are hidden (pre-window or tail).
+    // If ALL recipients are in the current window, show full height.
+    const hasHidden = topProjectsWithHiddenRecipients.has(n.id);
+    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true, layoutCap: hasHidden ? wv : undefined });
+    nodes.push({ ...n, value: wv, layoutCap: hasHidden ? wv : undefined });
   }
   // Create __agg-project-budget only when there is window spending (needs ministry→budget edges).
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
