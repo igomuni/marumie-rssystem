@@ -213,16 +213,13 @@ function filterTopN(
     nodes.push({ ...n, value: wv });
   }
   if (otherProjectWindowTotal > 0) {
-    // Cap layout height based on min visible project window value × topProject
-    const minTopProjectWindowValue = topProjectNodes.length > 0
-      ? Math.min(...topProjectNodes.map(n => projectWindowValue.get(n.id) || 0))
-      : otherProjectWindowTotal;
-    const projectLayoutCap = minTopProjectWindowValue * topProject;
-    // Always set layoutCap — the layout engine applies it only when the actual link-sum (which
-    // includes tail payments) exceeds the cap. Without this, the conditional would miss cases
-    // where otherProjectWindowTotal ≤ cap but linkSum (window + tail) still exceeds it.
-    nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
-    nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+    // Cap layout height to otherProjectWindowTotal (window spending only).
+    // The link-sum override gives __agg-project-spending = window + tail (because it also has
+    // an outgoing edge to __agg-recipient for tail payments), which inflates node height far
+    // beyond individual project nodes. Capping at the window total keeps it semantically correct:
+    // node height = spending visible in the current window, tail flow is shown by the edge width.
+    nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: otherProjectWindowTotal, aggregated: true });
+    nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: otherProjectWindowTotal, aggregated: true });
   }
 
   for (const [rid] of windowRecipients) {
