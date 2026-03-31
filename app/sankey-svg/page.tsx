@@ -185,6 +185,14 @@ function filterTopN(
 
   const totalWindowSpending = windowRecipients.reduce((s, [, v]) => s + v, 0);
 
+  // Projects with hidden recipients (pre-window or tail) — used for budget node cap.
+  const topProjectsWithHiddenRecipients = new Set<string>();
+  for (const e of allEdges) {
+    if (topProjectIds.has(e.source) && (tailRecipientIds.has(e.target) || preWindowRecipientIds.has(e.target))) {
+      topProjectsWithHiddenRecipients.add(e.source);
+    }
+  }
+
   // 6. Ministry window values
   const ministryWindowValue = new Map<string, number>();
   for (const e of allEdges) {
@@ -213,8 +221,9 @@ function filterTopN(
   for (const n of topProjectNodes) {
     const wv = projectWindowValue.get(n.id) || 0;
     const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
-    // skipLinkOverride: budget node keeps its original full-budget value for height/label.
-    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true });
+    // Budget: full height when all recipients visible; capped to wv when any are hidden.
+    const hasHidden = topProjectsWithHiddenRecipients.has(n.id);
+    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true, layoutCap: hasHidden ? wv : undefined });
     // skipLinkOverride + value=wv: spending node height = window spending only, no cap needed.
     // The tail edge still renders (ribbon to __agg-recipient) but doesn't inflate node height.
     nodes.push({ ...n, value: wv, skipLinkOverride: true });
