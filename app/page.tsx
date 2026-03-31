@@ -31,6 +31,29 @@ export default function Home() {
             </div>
           </Link>
 
+          {/* 直接支出サンキー図 SVG版 */}
+          <Link href="/sankey-svg">
+            <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900 dark:to-red-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-orange-500">
+              <div className="flex items-center mb-3">
+                <h2 className="text-2xl font-semibold text-orange-600 dark:text-orange-400">
+                  🔍 直接支出サンキー図（SVG）
+                </h2>
+                <span className="ml-3 px-2 py-1 bg-orange-600 text-white text-xs font-bold rounded">
+                  NEW
+                </span>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                直接支出先のみを対象に、自前SVGレイアウトエンジンで高速描画。支出先ウィンドウのスライドで任意のランキング帯を探索できます。
+              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>• <strong>支出先ウィンドウ</strong>: オフセットスライダーで任意の順位帯を選択</li>
+                <li>• <strong>動的再ランキング</strong>: スライダー変化に合わせて府省庁・事業を再集計</li>
+                <li>• <strong>ズーム/パン</strong>: ホイールズーム（最大50x）＋ドラッグパン</li>
+                <li>• <strong>ミニマップ</strong>: 全体俯瞰ナビゲーション</li>
+              </ul>
+            </div>
+          </Link>
+
           {/* MOF予算全体ビュー（NEW） */}
           <Link href="/mof-budget-overview">
             <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-purple-500">
