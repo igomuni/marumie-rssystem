@@ -1017,9 +1017,9 @@ export default function RealDataSankeyPage() {
               autoFocus
               min={1} max={500} step={1}
               value={zoomInputValue}
-              onChange={e => setZoomInputValue(e.target.value)}
-              onBlur={() => { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / zoom); setIsEditingZoom(false); }}
-              onKeyDown={e => { if (e.key === 'Enter') { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / zoom); setIsEditingZoom(false); } else if (e.key === 'Escape') setIsEditingZoom(false); }}
+              onChange={e => { setZoomInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / zoom); }}
+              onBlur={() => setIsEditingZoom(false)}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingZoom(false); }}
               style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '3px 0', border: 'none', outline: 'none', background: 'transparent', color: '#555', boxSizing: 'border-box' }}
             />
           ) : (
