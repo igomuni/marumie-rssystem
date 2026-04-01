@@ -510,7 +510,13 @@ export default function RealDataSankeyPage() {
   const panOrigin = useRef({ x: 0, y: 0 });
   const svgRef = useRef<SVGSVGElement>(null);
 
+  // Prevent overlay control interactions from bubbling into canvas pan/zoom
+  const isOverlayControlTarget = (target: EventTarget | null) =>
+    target instanceof HTMLElement &&
+    !!target.closest('[data-pan-disabled],button,input,select,textarea,label');
+
   const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (isOverlayControlTarget(e.target)) return;
     e.preventDefault();
     const el = containerRef.current;
     if (!el) return;
@@ -520,7 +526,7 @@ export default function RealDataSankeyPage() {
     const my = e.clientY - rect.top;
 
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.2, Math.min(50, zoom * delta));
+    const newZoom = Math.max(0.2, Math.min(5, zoom * delta));
 
     // Adjust pan so zoom centers on mouse position
     const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
@@ -531,7 +537,7 @@ export default function RealDataSankeyPage() {
   }, [zoom, pan]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return; // left click only
+    if (e.button !== 0 || isOverlayControlTarget(e.target)) return; // left click only
     setIsPanning(true);
     panStart.current = { x: e.clientX, y: e.clientY };
     panOrigin.current = { ...pan };
@@ -560,7 +566,27 @@ export default function RealDataSankeyPage() {
       const cH = container.clientHeight;
       const totalW = MARGIN.left + l.contentW;
       const totalH = MARGIN.top + l.contentH;
-      const k = Math.max(0.2, Math.min(50, Math.min(cW / totalW, cH / totalH) * 0.9));
+      const k = Math.max(0.2, Math.min(5, Math.min(cW / totalW, cH / totalH) * 0.9));
+      setZoom(k);
+      setBaseZoom(k);
+      setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
+    } else {
+      setZoom(1);
+      setBaseZoom(1);
+      setPan({ x: 0, y: 0 });
+    }
+  }, []);
+
+  // Viewport-only reset (zoom/pan only, recipientOffset unchanged)
+  const resetViewport = useCallback(() => {
+    const container = containerRef.current;
+    const l = layoutRef.current;
+    if (container && l) {
+      const cW = container.clientWidth;
+      const cH = container.clientHeight;
+      const totalW = MARGIN.left + l.contentW;
+      const totalH = MARGIN.top + l.contentH;
+      const k = Math.max(0.2, Math.min(5, Math.min(cW / totalW, cH / totalH) * 0.9));
       setZoom(k);
       setBaseZoom(k);
       setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
@@ -686,7 +712,7 @@ export default function RealDataSankeyPage() {
   }, [svgWidth, minimapH, zoom]);
 
   const applyZoom = useCallback((factor: number) => {
-    const nz = Math.max(0.2, Math.min(50, zoom * factor));
+    const nz = Math.max(0.2, Math.min(5, zoom * factor));
     setPan({ x: svgWidth / 2 - (svgWidth / 2 - pan.x) * (nz / zoom), y: svgHeight / 2 - (svgHeight / 2 - pan.y) * (nz / zoom) });
     setZoom(nz);
   }, [zoom, pan, svgWidth, svgHeight]);
@@ -915,12 +941,16 @@ export default function RealDataSankeyPage() {
             <div style={{ position: 'relative' }}>
               <button
                 onClick={() => setShowSettings(s => !s)}
+                aria-label="TopN 設定を開く"
+                aria-expanded={showSettings}
+                aria-controls="sankey-topn-settings"
+                aria-haspopup="dialog"
                 style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: showSettings ? '#eee' : '#fff', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >⚙</button>
               {showSettings && (
                 <>
                   <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-                  <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10 }}>
                     <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ width: 48, color: '#555' }}>省庁:</span>
@@ -967,10 +997,11 @@ export default function RealDataSankeyPage() {
           <div style={{ padding: '4px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid #e5e7eb' }}>
             <input
               type="range"
+              aria-label="ズーム倍率"
               min={Math.log10(0.2)}
-              max={Math.log10(50)}
+              max={Math.log10(5)}
               step={0.01}
-              value={Math.log10(Math.max(0.2, Math.min(50, zoom)))}
+              value={Math.log10(Math.max(0.2, Math.min(5, zoom)))}
               onChange={e => { const newK = Math.pow(10, parseFloat(e.target.value)); applyZoom(newK / zoom); }}
               style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 16, height: 80 }}
               title={`Zoom: ${Math.round(zoom / baseZoom * 100)}%`}
@@ -984,7 +1015,7 @@ export default function RealDataSankeyPage() {
             <input
               type="number"
               autoFocus
-              min={1} max={5000} step={10}
+              min={1} max={500} step={10}
               value={zoomInputValue}
               onChange={e => setZoomInputValue(e.target.value)}
               onBlur={() => { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / zoom); setIsEditingZoom(false); }}
@@ -1001,7 +1032,7 @@ export default function RealDataSankeyPage() {
         </div>
         {/* 全体表示ボタン */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-          <button onClick={resetView} title="全体表示" style={{ width: '100%', fontSize: 16, textAlign: 'center', padding: '3px 0', border: 'none', background: 'transparent', color: '#666', cursor: 'pointer' }}>⛶</button>
+          <button onClick={resetViewport} title="全体表示" style={{ width: '100%', fontSize: 16, textAlign: 'center', padding: '3px 0', border: 'none', background: 'transparent', color: '#666', cursor: 'pointer' }}>⛶</button>
         </div>
       </div>
     </div>
