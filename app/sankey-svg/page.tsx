@@ -478,6 +478,7 @@ export default function RealDataSankeyPage() {
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [showSettings, setShowSettings] = useState(false);
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -489,10 +490,7 @@ export default function RealDataSankeyPage() {
       const el = containerRef.current;
       if (!el) return;
       setSvgWidth(el.clientWidth);
-      // Fill remaining viewport height (container top to window bottom, minus padding)
-      const rect = el.getBoundingClientRect();
-      const h = Math.max(SVG_H_MIN, window.innerHeight - rect.top - 40);
-      setSvgHeight(h);
+      setSvgHeight(el.clientHeight);
     };
     updateSize();
     const ro = new ResizeObserver(updateSize);
@@ -687,79 +685,35 @@ export default function RealDataSankeyPage() {
   }, [zoom, pan, svgWidth, svgHeight]);
 
   return (
-    <div style={{ padding: 20, fontFamily: 'system-ui, sans-serif', background: '#f8f9fa', minHeight: '100vh' }}>
-      <h1 style={{ fontSize: 20, marginBottom: 4 }}>Sankey3 — 直接支出先のみ（sankey3-graph.json）</h1>
-      <p style={{ fontSize: 12, color: '#666', marginBottom: 16 }}>
-        自前レイアウトエンジン + sankey3-graph.json（直接支出のみ、5-2 CSV判定）
-        {graphData && (
-          <> / 直接支出: {formatYen(graphData.metadata.directSpending)} / 間接支出: {formatYen(graphData.metadata.indirectSpending)}（データ外）</>
-        )}
-      </p>
+    <div
+      ref={containerRef}
+      style={{ position: 'fixed', inset: 0, overflow: 'hidden', background: '#fff', fontFamily: 'system-ui, sans-serif', cursor: isPanning ? 'grabbing' : 'grab' }}
+      onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
 
-      {loading && <p>Loading sankey3-graph.json...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {loading && (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5, pointerEvents: 'none' }}>
+          <p style={{ color: '#666', fontSize: 14 }}>Loading sankey3-graph.json...</p>
+        </div>
+      )}
+      {error && (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5, pointerEvents: 'none' }}>
+          <p style={{ color: 'red', fontSize: 14 }}>{error}</p>
+        </div>
+      )}
 
       {layout && (
         <>
-          <div
-            ref={containerRef}
-            style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 4, overflow: 'hidden', position: 'relative', cursor: isPanning ? 'grabbing' : 'grab' }}
-            onWheel={handleWheel}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
-            {/* Controls overlay */}
-            <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                省庁:
-                <input type="number" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ width: 80 }} />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                事業:
-                <input type="number" min={1} max={50} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(50, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ width: 80 }} />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                支出先:
-                <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ width: 80 }} />
-              </label>
-              {filtered && (() => {
-                const maxOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
-                const clampedOffset = Math.min(recipientOffset, maxOffset);
-                const rangeStart = clampedOffset + 1;
-                const rangeEnd = Math.min(clampedOffset + topRecipient, filtered.totalRecipientCount);
-                return (
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <input type="number" min={1} max={rangeEnd} value={rangeStart} onChange={e => setRecipientOffset(Math.max(0, Math.min(maxOffset, (Number(e.target.value) || 1) - 1)))} style={{ width: 40, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                    <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}位</span>
-                    <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => setRecipientOffset(Number(e.target.value))} style={{ width: 100 }} />
-                    <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
-                  </label>
-                );
-              })()}
-              <span style={{ color: '#ccc' }}>|</span>
-              <button onClick={() => applyZoom(1.3)} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>+</button>
-              <button onClick={() => applyZoom(0.7)} style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 14, lineHeight: '24px' }}>-</button>
-              <button onClick={resetView} style={{ height: 26, padding: '0 6px', border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 11 }}>Reset</button>
-              <input
-                type="number"
-                min={20} max={5000} step={10}
-                value={Math.round(zoom * 100)}
-                onChange={e => { const nz = Math.max(0.2, Math.min(50, Number(e.target.value) / 100 || 1)); setZoom(nz); }}
-                style={{ width: 48, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 11 }}
-              />
-              <span style={{ color: '#999', fontSize: 11 }}>%</span>
-            </div>
             <svg
               ref={svgRef}
               width={svgWidth}
               height={svgHeight}
               overflow="visible"
-              style={{ display: 'block' }}
+              style={{ position: 'absolute', inset: 0, display: 'block' }}
             >
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
@@ -893,89 +847,123 @@ export default function RealDataSankeyPage() {
               />
             )}
 
-            {/* DOM tooltip — outside SVG zoom group so it stays visible */}
-            {/* DOM tooltip — link hover */}
-            {hoveredLink && !hoveredNode && (
-              <div
-                style={{
-                  position: 'absolute',
-                  left: mousePos.x + 12,
-                  top: mousePos.y - 10,
-                  background: 'rgba(0,0,0,0.85)',
-                  color: '#fff',
-                  padding: '6px 10px',
-                  borderRadius: 4,
-                  fontSize: 12,
-                  lineHeight: 1.4,
-                  pointerEvents: 'none',
-                  whiteSpace: 'nowrap',
-                  zIndex: 10,
-                }}
-              >
-                <div>{hoveredLink.source.name} → {hoveredLink.target.name}</div>
-                <div style={{ color: '#adf' }}>{formatYen(hoveredLink.value)}</div>
-                <div style={{ color: '#aaa', fontSize: 11 }}>{hoveredLink.value.toLocaleString()}円</div>
-              </div>
-            )}
-            {/* DOM tooltip — node hover */}
-            {hoveredNode && (
-              <div
-                style={{
-                  position: 'absolute',
-                  left: mousePos.x + 12,
-                  top: mousePos.y - 10,
-                  background: 'rgba(0,0,0,0.85)',
-                  color: '#fff',
-                  padding: '8px 12px',
-                  borderRadius: 4,
-                  fontSize: 12,
-                  lineHeight: 1.5,
-                  pointerEvents: 'none',
-                  zIndex: 10,
-                  maxWidth: 360,
-                }}
-              >
-                <div style={{ fontWeight: 'bold', marginBottom: 2 }}>{hoveredNode.name}</div>
-                <div style={{ color: '#7df' }}>{formatYen(hoveredNode.rawValue ?? hoveredNode.value)}</div>
-                <div style={{ color: '#aaa', fontSize: 11 }}>{(hoveredNode.rawValue ?? hoveredNode.value).toLocaleString()}円</div>
-                {hoveredNode.rawValue !== undefined && (
-                  <div style={{ color: '#fa8', fontSize: 11 }}>※表示高さは上限値で制限</div>
-                )}
-                {hoveredNode.sourceLinks.length > 0 && (
-                  <div style={{ marginTop: 4, color: '#ddd' }}>
-                    {hoveredNode.sourceLinks.slice(0, 3).map((l, i) => (
-                      <div key={i}>→ {l.target.name} ({formatYen(l.value)})</div>
-                    ))}
-                    {hoveredNode.sourceLinks.length > 3 && <div style={{ color: '#aaa' }}>他{hoveredNode.sourceLinks.length - 3}件</div>}
-                  </div>
-                )}
-                {hoveredNode.targetLinks.length > 0 && (
-                  <div style={{ marginTop: 4, color: '#ddd' }}>
-                    {hoveredNode.targetLinks.slice(0, 3).map((l, i) => (
-                      <div key={i}>← {l.source.name} ({formatYen(l.value)})</div>
-                    ))}
-                    {hoveredNode.targetLinks.length > 3 && <div style={{ color: '#aaa' }}>他{hoveredNode.targetLinks.length - 3}件</div>}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Legend */}
-          <div style={{ marginTop: 12, display: 'flex', gap: 16, fontSize: 12 }}>
-            {[
-              { label: '予算側', color: '#4db870' },
-              { label: '支出側', color: '#e07040' },
-              { label: '集約ノード', color: '#999' },
-            ].map(({ label, color }) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <div style={{ width: 10, height: 10, background: color, borderRadius: 2 }} />
-                {label}
-              </div>
-            ))}
-          </div>
+          {/* DOM tooltip — link hover */}
+          {hoveredLink && !hoveredNode && (
+            <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.85)', color: '#fff', padding: '6px 10px', borderRadius: 4, fontSize: 12, lineHeight: 1.4, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 20 }}>
+              <div>{hoveredLink.source.name} → {hoveredLink.target.name}</div>
+              <div style={{ color: '#adf' }}>{formatYen(hoveredLink.value)}</div>
+              <div style={{ color: '#aaa', fontSize: 11 }}>{hoveredLink.value.toLocaleString()}円</div>
+            </div>
+          )}
+          {/* DOM tooltip — node hover */}
+          {hoveredNode && (
+            <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.85)', color: '#fff', padding: '8px 12px', borderRadius: 4, fontSize: 12, lineHeight: 1.5, pointerEvents: 'none', zIndex: 20, maxWidth: 360 }}>
+              <div style={{ fontWeight: 'bold', marginBottom: 2 }}>{hoveredNode.name}</div>
+              <div style={{ color: '#7df' }}>{formatYen(hoveredNode.rawValue ?? hoveredNode.value)}</div>
+              <div style={{ color: '#aaa', fontSize: 11 }}>{(hoveredNode.rawValue ?? hoveredNode.value).toLocaleString()}円</div>
+              {hoveredNode.rawValue !== undefined && (
+                <div style={{ color: '#fa8', fontSize: 11 }}>※表示高さは上限値で制限</div>
+              )}
+              {hoveredNode.sourceLinks.length > 0 && (
+                <div style={{ marginTop: 4, color: '#ddd' }}>
+                  {hoveredNode.sourceLinks.slice(0, 3).map((l, i) => (
+                    <div key={i}>→ {l.target.name} ({formatYen(l.value)})</div>
+                  ))}
+                  {hoveredNode.sourceLinks.length > 3 && <div style={{ color: '#aaa' }}>他{hoveredNode.sourceLinks.length - 3}件</div>}
+                </div>
+              )}
+              {hoveredNode.targetLinks.length > 0 && (
+                <div style={{ marginTop: 4, color: '#ddd' }}>
+                  {hoveredNode.targetLinks.slice(0, 3).map((l, i) => (
+                    <div key={i}>← {l.source.name} ({formatYen(l.value)})</div>
+                  ))}
+                  {hoveredNode.targetLinks.length > 3 && <div style={{ color: '#aaa' }}>他{hoveredNode.targetLinks.length - 3}件</div>}
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
+
+      {/* Title badge — top left */}
+      <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 15, background: 'rgba(255,255,255,0.75)', padding: '4px 8px', borderRadius: 4, fontSize: 11, color: '#555', border: '1px solid #e0e0e0', pointerEvents: 'none' }}>
+        直接支出サンキー図
+      </div>
+
+      {/* Top-right panel: offset slider + settings button */}
+      {filtered && (() => {
+        const maxOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
+        const clampedOffset = Math.min(recipientOffset, maxOffset);
+        const rangeStart = clampedOffset + 1;
+        const rangeEnd = Math.min(clampedOffset + topRecipient, filtered.totalRecipientCount);
+        return (
+          <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
+              <input type="number" min={1} max={rangeEnd} value={rangeStart} onChange={e => setRecipientOffset(Math.max(0, Math.min(maxOffset, (Number(e.target.value) || 1) - 1)))} style={{ width: 40, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+              <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}位</span>
+              <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => setRecipientOffset(Number(e.target.value))} style={{ width: 100 }} />
+              <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
+            </label>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowSettings(s => !s)}
+                style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: showSettings ? '#eee' : '#fff', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >⚙</button>
+              {showSettings && (
+                <>
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
+                  <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 48, color: '#555' }}>省庁:</span>
+                      <input type="number" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                      <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ flex: 1 }} />
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 48, color: '#555' }}>事業:</span>
+                      <input type="number" min={1} max={50} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(50, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                      <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ flex: 1 }} />
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 48, color: '#555' }}>支出先:</span>
+                      <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                      <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ flex: 1 }} />
+                    </label>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Legend — bottom left, beside minimap */}
+      <div style={{ position: 'absolute', bottom: 12, left: MINIMAP_W + 20, zIndex: 15, display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(255,255,255,0.85)', padding: '5px 10px', borderRadius: 5, fontSize: 11, border: '1px solid #e0e0e0', pointerEvents: 'none' }}>
+        {[
+          { label: '予算側', color: '#4db870' },
+          { label: '支出側', color: '#e07040' },
+          { label: '集約ノード', color: '#999' },
+        ].map(({ label, color }) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ width: 10, height: 10, background: color, borderRadius: 2 }} />
+            {label}
+          </div>
+        ))}
+      </div>
+
+      {/* Zoom controls — bottom right */}
+      <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
+        <span style={{ color: '#555', fontSize: 11, minWidth: 42, textAlign: 'right' }}>{Math.round(zoom * 100)}%</span>
+        <input
+          type="range"
+          min={20} max={500} step={5}
+          value={Math.min(500, Math.round(zoom * 100))}
+          onChange={e => { const target = Number(e.target.value) / 100; applyZoom(target / zoom); }}
+          style={{ width: 100 }}
+        />
+        <button onClick={resetView} style={{ height: 26, padding: '0 8px', border: '1px solid #ccc', borderRadius: 4, background: '#fff', cursor: 'pointer', fontSize: 11 }}>Reset</button>
+      </div>
     </div>
   );
 }
