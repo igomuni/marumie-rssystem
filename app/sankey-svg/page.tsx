@@ -171,15 +171,16 @@ function filterTopN(
 
   // 5. Aggregated values
   let otherProjectWindowTotal = 0;
-  for (const e of allEdges) {
-    if (otherProjectSpendingIds.has(e.source) && windowRecipientIds.has(e.target)) {
-      otherProjectWindowTotal += e.value;
-    }
-  }
   let otherProjectTailTotal = 0;
+  const otherProjectsWithFlow = new Set<string>();
   for (const e of allEdges) {
-    if (otherProjectSpendingIds.has(e.source) && tailRecipientIds.has(e.target)) {
+    if (!otherProjectSpendingIds.has(e.source)) continue;
+    if (windowRecipientIds.has(e.target)) {
+      otherProjectWindowTotal += e.value;
+      otherProjectsWithFlow.add(e.source);
+    } else if (tailRecipientIds.has(e.target)) {
       otherProjectTailTotal += e.value;
+      otherProjectsWithFlow.add(e.source);
     }
   }
 
@@ -237,9 +238,9 @@ function filterTopN(
       : 0;
     const projectLayoutCap = minTopProjectWindowValue > 0 ? minTopProjectWindowValue * topProject : otherProjectTailTotal;
     if (otherProjectWindowTotal > 0) {
-      nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+      nodes.push({ id: '__agg-project-budget', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
     }
-    nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+    nodes.push({ id: '__agg-project-spending', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
   }
 
   for (const [rid] of windowRecipients) {
