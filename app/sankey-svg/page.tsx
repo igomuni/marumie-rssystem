@@ -1015,7 +1015,7 @@ export default function RealDataSankeyPage() {
             <input
               type="number"
               autoFocus
-              min={1} max={500} step={10}
+              min={1} max={500} step={1}
               value={zoomInputValue}
               onChange={e => setZoomInputValue(e.target.value)}
               onBlur={() => { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / zoom); setIsEditingZoom(false); }}
