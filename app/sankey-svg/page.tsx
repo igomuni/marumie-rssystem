@@ -479,8 +479,6 @@ export default function RealDataSankeyPage() {
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
-  const [isEditingZoom, setIsEditingZoom] = useState(false);
-  const [zoomInputValue, setZoomInputValue] = useState('');
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -553,15 +551,17 @@ export default function RealDataSankeyPage() {
   const resetView = useCallback(() => {
     const container = containerRef.current;
     const l = layoutRef.current;
-    setZoom(1);
     setRecipientOffset(0);
     if (container && l) {
       const cW = container.clientWidth;
       const cH = container.clientHeight;
       const totalW = MARGIN.left + l.contentW;
       const totalH = MARGIN.top + l.contentH;
-      setPan({ x: (cW - totalW) / 2, y: (cH - totalH) / 2 });
+      const k = Math.max(0.2, Math.min(50, Math.min(cW / totalW, cH / totalH) * 0.9));
+      setZoom(k);
+      setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
     } else {
+      setZoom(1);
       setPan({ x: 0, y: 0 });
     }
   }, []);
@@ -973,25 +973,16 @@ export default function RealDataSankeyPage() {
           </div>
           <button onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '6px 0', textAlign: 'center', fontSize: 14, color: '#555', background: 'transparent', border: 'none', cursor: 'pointer' }}>ー</button>
         </div>
-        {/* Zoom% — クリックで直接入力 */}
+        {/* Zoom% — 数値入力（スピンボタン付き） */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-          {isEditingZoom ? (
-            <input
-              type="text"
-              autoFocus
-              value={zoomInputValue}
-              onChange={e => setZoomInputValue(e.target.value)}
-              onBlur={() => { const v = parseFloat(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100) / zoom); setIsEditingZoom(false); }}
-              onKeyDown={e => { if (e.key === 'Enter') { const v = parseFloat(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100) / zoom); setIsEditingZoom(false); } else if (e.key === 'Escape') setIsEditingZoom(false); }}
-              style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '4px 0', border: 'none', outline: 'none', background: 'transparent', color: '#555', boxSizing: 'border-box' }}
-            />
-          ) : (
-            <button
-              onClick={() => { setZoomInputValue(Math.round(zoom * 100).toString()); setIsEditingZoom(true); }}
-              title="クリックしてZoom率を直接入力"
-              style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '4px 0', border: 'none', background: 'transparent', color: '#888', cursor: 'text' }}
-            >{Math.round(zoom * 100)}%</button>
-          )}
+          <input
+            type="number"
+            min={20} max={5000} step={10}
+            value={Math.round(zoom * 100)}
+            onChange={e => { const v = Number(e.target.value); if (!isNaN(v) && v > 0) applyZoom((v / 100) / zoom); }}
+            title="Zoom率（%）"
+            style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '3px 0', border: 'none', outline: 'none', background: 'transparent', color: '#555', boxSizing: 'border-box' }}
+          />
         </div>
         {/* Reset */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
