@@ -479,6 +479,9 @@ export default function RealDataSankeyPage() {
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
+  const [baseZoom, setBaseZoom] = useState(1);
+  const [isEditingZoom, setIsEditingZoom] = useState(false);
+  const [zoomInputValue, setZoomInputValue] = useState('');
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -559,9 +562,11 @@ export default function RealDataSankeyPage() {
       const totalH = MARGIN.top + l.contentH;
       const k = Math.max(0.2, Math.min(50, Math.min(cW / totalW, cH / totalH) * 0.9));
       setZoom(k);
+      setBaseZoom(k);
       setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
     } else {
       setZoom(1);
+      setBaseZoom(1);
       setPan({ x: 0, y: 0 });
     }
   }, []);
@@ -968,25 +973,35 @@ export default function RealDataSankeyPage() {
               value={Math.log10(Math.max(0.2, Math.min(50, zoom)))}
               onChange={e => { const newK = Math.pow(10, parseFloat(e.target.value)); applyZoom(newK / zoom); }}
               style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 16, height: 80 }}
-              title={`Zoom: ${Math.round(zoom * 100)}%`}
+              title={`Zoom: ${Math.round(zoom / baseZoom * 100)}%`}
             />
           </div>
           <button onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '6px 0', textAlign: 'center', fontSize: 14, color: '#555', background: 'transparent', border: 'none', cursor: 'pointer' }}>ー</button>
         </div>
-        {/* Zoom% — 数値入力（スピンボタン付き） */}
+        {/* Zoom% — 非編集時は "N%" 表示、クリックで数値入力 */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-          <input
-            type="number"
-            min={20} max={5000} step={10}
-            value={Math.round(zoom * 100)}
-            onChange={e => { const v = Number(e.target.value); if (!isNaN(v) && v > 0) applyZoom((v / 100) / zoom); }}
-            title="Zoom率（%）"
-            style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '3px 0', border: 'none', outline: 'none', background: 'transparent', color: '#555', boxSizing: 'border-box' }}
-          />
+          {isEditingZoom ? (
+            <input
+              type="number"
+              autoFocus
+              min={1} max={5000} step={10}
+              value={zoomInputValue}
+              onChange={e => setZoomInputValue(e.target.value)}
+              onBlur={() => { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / zoom); setIsEditingZoom(false); }}
+              onKeyDown={e => { if (e.key === 'Enter') { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / zoom); setIsEditingZoom(false); } else if (e.key === 'Escape') setIsEditingZoom(false); }}
+              style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '3px 0', border: 'none', outline: 'none', background: 'transparent', color: '#555', boxSizing: 'border-box' }}
+            />
+          ) : (
+            <button
+              onClick={() => { setZoomInputValue(String(Math.round(zoom / baseZoom * 100))); setIsEditingZoom(true); }}
+              title="クリックしてZoom率を入力"
+              style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '4px 0', border: 'none', background: 'transparent', color: '#888', cursor: 'text' }}
+            >{Math.round(zoom / baseZoom * 100)}%</button>
+          )}
         </div>
-        {/* Reset */}
+        {/* 全体表示ボタン */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-          <button onClick={resetView} title="ビューをリセット" style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '5px 0', border: 'none', background: 'transparent', color: '#888', cursor: 'pointer' }}>Reset</button>
+          <button onClick={resetView} title="全体表示" style={{ width: '100%', fontSize: 16, textAlign: 'center', padding: '3px 0', border: 'none', background: 'transparent', color: '#666', cursor: 'pointer' }}>⛶</button>
         </div>
       </div>
     </div>
