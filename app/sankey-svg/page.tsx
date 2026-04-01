@@ -629,10 +629,14 @@ export default function RealDataSankeyPage() {
     return result;
   }, [filtered, svgWidth, svgHeight]);
 
-  // Fit view on every layout change (TopN / offset / window resize)
+  // Center on initial load / layout change
+  const initialCentered = useRef(false);
   useEffect(() => {
-    if (layout) resetViewport();
-  }, [layout, resetViewport]);
+    if (layout && !initialCentered.current) {
+      initialCentered.current = true;
+      resetView();
+    }
+  }, [layout, resetView]);
 
   // Draw minimap
   useEffect(() => {
