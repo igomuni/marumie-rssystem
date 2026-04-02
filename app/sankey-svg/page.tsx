@@ -496,6 +496,10 @@ export default function RealDataSankeyPage() {
   const [offsetInputValue, setOffsetInputValue] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -648,18 +652,31 @@ export default function RealDataSankeyPage() {
     return result;
   }, [filtered, svgWidth, svgHeight]);
 
-  const selectedNode = useMemo(
-    () => (selectedNodeId && layout ? layout.nodes.find(n => n.id === selectedNodeId) ?? null : null),
+  const selectedNode = useMemo(() => {
+    if (!selectedNodeId) return null;
+    // First: try current layout
+    const layoutNode = layout?.nodes.find(n => n.id === selectedNodeId) ?? null;
+    if (layoutNode) return layoutNode;
+    // Fallback: synthesize from graphData for nodes outside current layout
+    // (ministry/project not in TopN — panel shows info but no highlight)
+    const rawNode = graphData?.nodes.find(n => n.id === selectedNodeId) ?? null;
+    if (!rawNode) return null;
+    return { ...rawNode, x0: 0, x1: 0, y0: 0, y1: 0, sourceLinks: [], targetLinks: [] } as LayoutNode;
+  }, [selectedNodeId, layout, graphData]);
+
+  // True only when the node exists in the current layout (for highlight/dim)
+  const selectedNodeInLayout = useMemo(
+    () => selectedNodeId !== null && (layout?.nodes.some(n => n.id === selectedNodeId) ?? false),
     [selectedNodeId, layout],
   );
 
   const connectedNodeIds = useMemo(() => {
-    if (!selectedNode) return null;
+    if (!selectedNode || !selectedNodeInLayout) return null;
     const ids = new Set<string>([selectedNode.id]);
     for (const l of selectedNode.sourceLinks) ids.add(l.target.id);
     for (const l of selectedNode.targetLinks) ids.add(l.source.id);
     return ids;
-  }, [selectedNode]);
+  }, [selectedNode, selectedNodeInLayout]);
 
   // Global recipient rank (0-indexed, value-descending) — for offset jump
   const allRecipientRanks = useMemo(() => {
@@ -713,12 +730,12 @@ export default function RealDataSankeyPage() {
     if (id !== null) setIsPanelCollapsed(false);
   }, []);
 
-  // Auto-clear stale selection when layout no longer contains the selected node
+  // Auto-clear stale selection when node no longer exists in graphData at all
   useEffect(() => {
-    if (selectedNodeId !== null && layout && !selectedNode) {
+    if (selectedNodeId !== null && !selectedNode) {
       selectNode(null);
     }
-  }, [layout, selectedNode, selectedNodeId, selectNode]);
+  }, [selectedNode, selectedNodeId, selectNode]);
 
   const handleConnectionClick = useCallback((nodeId: string) => {
     // If already in layout, just select
@@ -726,23 +743,68 @@ export default function RealDataSankeyPage() {
       selectNode(nodeId);
       return;
     }
-    // Recipient outside window: jump offset so it's visible
+    // Helper: jump recipientOffset to center on a recipient rank
+    const jumpToRecipientRank = (rank: number, totalCount: number) => {
+      const maxOffset = Math.max(0, totalCount - topRecipient);
+      const newOffset = Math.max(0, Math.min(rank - Math.floor(topRecipient / 2), maxOffset));
+      setRecipientOffset(newOffset);
+    };
+
     if (nodeId.startsWith('r-') && filtered) {
+      // Recipient outside window: jump offset so it's visible
       const rank = allRecipientRanks.get(nodeId);
-      if (rank !== undefined) {
-        const maxOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
-        const newOffset = Math.max(0, Math.min(rank - Math.floor(topRecipient / 2), maxOffset));
-        setRecipientOffset(newOffset);
-        selectNode(nodeId);
+      if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
+    } else if ((nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-')) && filtered && graphData) {
+      // Project outside TopN: find its highest-value recipient edge and jump there.
+      // This shifts the window so the project's window spending increases → likely enters TopN.
+      const spendingId = nodeId.startsWith('project-budget-')
+        ? nodeId.replace('project-budget-', 'project-spending-')
+        : nodeId;
+      let bestRecipientId: string | null = null;
+      let bestValue = 0;
+      for (const e of graphData.edges) {
+        if (e.source === spendingId && e.target.startsWith('r-') && e.value > bestValue) {
+          bestValue = e.value;
+          bestRecipientId = e.target;
+        }
+      }
+      if (bestRecipientId !== null) {
+        const rank = allRecipientRanks.get(bestRecipientId);
+        if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
       }
     }
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode]);
+    // select — if node enters layout after offset change, highlight/dim applies;
+    // otherwise panel shows info from graphData only
+    selectNode(nodeId);
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
     if (didPanRef.current) return;
     selectNode(selectedNodeId === node.id ? null : node.id);
   }, [selectedNodeId, selectNode]);
+
+  // ── Search ──
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 150);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const searchResults = useMemo(() => {
+    if (!graphData || debouncedQuery.length < 2) return [];
+    const q = debouncedQuery;
+    const results: { id: string; name: string; type: string; value: number }[] = [];
+    for (const n of graphData.nodes) {
+      if (n.name.includes(q)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+    }
+    return results.sort((a, b) => b.value - a.value).slice(0, 20);
+  }, [graphData, debouncedQuery]);
+
+  const handleSearchSelect = useCallback((nodeId: string) => {
+    setShowSearchResults(false);
+    handleConnectionClick(nodeId);
+  }, [handleConnectionClick]);
 
   // Center on initial load / layout change
   const initialCentered = useRef(false);
@@ -1243,9 +1305,66 @@ export default function RealDataSankeyPage() {
         </div>
       )}
 
-      {/* Title badge — top left */}
-      <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 15, background: 'rgba(255,255,255,0.75)', padding: '4px 8px', borderRadius: 4, fontSize: 11, color: '#555', border: '1px solid #e0e0e0', pointerEvents: 'none' }}>
-        直接支出サンキー図
+      {/* Search box — top left */}
+      <div
+        data-pan-disabled="true"
+        style={{ position: 'absolute', top: 12, left: 12, zIndex: 15, width: 260 }}
+      >
+        <div style={{ position: 'relative' }}>
+          {/* Search icon */}
+          <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999"
+            style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
+            onFocus={() => { if (debouncedQuery.length >= 2) setShowSearchResults(true); }}
+            onKeyDown={e => { if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); } }}
+            placeholder="ノード検索（2文字以上）"
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              paddingLeft: 30, paddingRight: searchQuery ? 28 : 10, paddingTop: 7, paddingBottom: 7,
+              fontSize: 13, border: '1px solid #e0e0e0', borderRadius: 8,
+              background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              outline: 'none', color: '#333',
+            }}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => { setSearchQuery(''); setDebouncedQuery(''); setShowSearchResults(false); searchInputRef.current?.focus(); }}
+              style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
+            >✕</button>
+          )}
+        </div>
+        {/* Dropdown */}
+        {showSearchResults && searchResults.length > 0 && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 280, overflowY: 'auto', zIndex: 20 }}>
+            {searchResults.map(node => (
+              <button
+                key={node.id}
+                type="button"
+                onClick={() => handleSearchSelect(node.id)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#f5f5f5')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: getNodeColor(node) }} />
+                <span style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
+                <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {/* No results */}
+        {showSearchResults && debouncedQuery.length >= 2 && searchResults.length === 0 && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 20 }}>
+            該当なし
+          </div>
+        )}
       </div>
 
       {/* Top-right panel: offset slider */}
