@@ -652,18 +652,31 @@ export default function RealDataSankeyPage() {
     return result;
   }, [filtered, svgWidth, svgHeight]);
 
-  const selectedNode = useMemo(
-    () => (selectedNodeId && layout ? layout.nodes.find(n => n.id === selectedNodeId) ?? null : null),
+  const selectedNode = useMemo(() => {
+    if (!selectedNodeId) return null;
+    // First: try current layout
+    const layoutNode = layout?.nodes.find(n => n.id === selectedNodeId) ?? null;
+    if (layoutNode) return layoutNode;
+    // Fallback: synthesize from graphData for nodes outside current layout
+    // (ministry/project not in TopN — panel shows info but no highlight)
+    const rawNode = graphData?.nodes.find(n => n.id === selectedNodeId) ?? null;
+    if (!rawNode) return null;
+    return { ...rawNode, x0: 0, x1: 0, y0: 0, y1: 0, sourceLinks: [], targetLinks: [] } as LayoutNode;
+  }, [selectedNodeId, layout, graphData]);
+
+  // True only when the node exists in the current layout (for highlight/dim)
+  const selectedNodeInLayout = useMemo(
+    () => selectedNodeId !== null && (layout?.nodes.some(n => n.id === selectedNodeId) ?? false),
     [selectedNodeId, layout],
   );
 
   const connectedNodeIds = useMemo(() => {
-    if (!selectedNode) return null;
+    if (!selectedNode || !selectedNodeInLayout) return null;
     const ids = new Set<string>([selectedNode.id]);
     for (const l of selectedNode.sourceLinks) ids.add(l.target.id);
     for (const l of selectedNode.targetLinks) ids.add(l.source.id);
     return ids;
-  }, [selectedNode]);
+  }, [selectedNode, selectedNodeInLayout]);
 
   // Global recipient rank (0-indexed, value-descending) — for offset jump
   const allRecipientRanks = useMemo(() => {
@@ -717,12 +730,12 @@ export default function RealDataSankeyPage() {
     if (id !== null) setIsPanelCollapsed(false);
   }, []);
 
-  // Auto-clear stale selection when layout no longer contains the selected node
+  // Auto-clear stale selection when node no longer exists in graphData at all
   useEffect(() => {
-    if (selectedNodeId !== null && layout && !selectedNode) {
+    if (selectedNodeId !== null && !selectedNode) {
       selectNode(null);
     }
-  }, [layout, selectedNode, selectedNodeId, selectNode]);
+  }, [selectedNode, selectedNodeId, selectNode]);
 
   const handleConnectionClick = useCallback((nodeId: string) => {
     // If already in layout, just select
@@ -730,16 +743,18 @@ export default function RealDataSankeyPage() {
       selectNode(nodeId);
       return;
     }
-    // Recipient outside window: jump offset so it's visible
+    // Recipient outside window: jump offset so it's visible, then select
     if (nodeId.startsWith('r-') && filtered) {
       const rank = allRecipientRanks.get(nodeId);
       if (rank !== undefined) {
         const maxOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
         const newOffset = Math.max(0, Math.min(rank - Math.floor(topRecipient / 2), maxOffset));
         setRecipientOffset(newOffset);
-        selectNode(nodeId);
       }
     }
+    // Any other node not in layout (ministry/project outside TopN):
+    // select anyway — panel shows info from graphData, no highlight/dim applied
+    selectNode(nodeId);
   }, [layout, filtered, allRecipientRanks, topRecipient, selectNode]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
@@ -758,18 +773,12 @@ export default function RealDataSankeyPage() {
   const searchResults = useMemo(() => {
     if (!graphData || debouncedQuery.length < 2) return [];
     const q = debouncedQuery;
-    const visibleNodeIds = new Set(layout?.nodes.map(n => n.id) ?? []);
     const results: { id: string; name: string; type: string; value: number }[] = [];
     for (const n of graphData.nodes) {
-      if (!n.name.includes(q)) continue;
-      // Only include nodes that can actually be navigated:
-      // - already visible in current layout, OR
-      // - a recipient node (can jump via recipientOffset)
-      if (!visibleNodeIds.has(n.id) && !n.id.startsWith('r-')) continue;
-      results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+      if (n.name.includes(q)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
     }
     return results.sort((a, b) => b.value - a.value).slice(0, 20);
-  }, [graphData, debouncedQuery, layout]);
+  }, [graphData, debouncedQuery]);
 
   const handleSearchSelect = useCallback((nodeId: string) => {
     setShowSearchResults(false);
