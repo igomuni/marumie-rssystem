@@ -952,7 +952,7 @@ export default function RealDataSankeyPage() {
                 <button
                   onClick={() => { setOffsetInputValue(String(rangeStart)); setIsEditingOffset(true); }}
                   title="クリックして開始位置を入力"
-                  style={{ width: 40, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12, background: '#fff', cursor: 'text', padding: '1px 0' }}
+                  style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
                 >{rangeStart}</button>
               )}
               <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}位</span>
