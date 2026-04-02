@@ -661,10 +661,75 @@ export default function RealDataSankeyPage() {
     return ids;
   }, [selectedNode]);
 
+  // Global recipient rank (0-indexed, value-descending) — for offset jump
+  const allRecipientRanks = useMemo(() => {
+    if (!graphData) return new Map<string, number>();
+    const amounts = new Map<string, number>();
+    for (const e of graphData.edges) {
+      if (e.target.startsWith('r-')) amounts.set(e.target, (amounts.get(e.target) || 0) + e.value);
+    }
+    const sorted = Array.from(amounts.entries()).sort((a, b) => b[1] - a[1]);
+    return new Map(sorted.map(([id], i) => [id, i]));
+  }, [graphData]);
+
+  // Full connection list from raw graphData (bypasses TopN aggregation)
+  const selectedNodeAllConnections = useMemo(() => {
+    if (!selectedNode || !graphData) return null;
+    const nodeNameById = new Map(graphData.nodes.map(n => [n.id, n.name]));
+    if (selectedNode.aggregated) {
+      // Aggregated nodes: use layout links as-is
+      return {
+        inEdges: [...selectedNode.targetLinks]
+          .sort((a, b) => b.value - a.value)
+          .map(l => ({ id: l.source.id, name: l.source.name, value: l.value, aggregated: l.source.aggregated })),
+        outEdges: [...selectedNode.sourceLinks]
+          .sort((a, b) => b.value - a.value)
+          .map(l => ({ id: l.target.id, name: l.target.name, value: l.value, aggregated: l.target.aggregated })),
+      };
+    }
+    // Real nodes: sum all raw edges from graphData
+    const inMap = new Map<string, number>();
+    const outMap = new Map<string, number>();
+    for (const e of graphData.edges) {
+      if (e.target === selectedNode.id) inMap.set(e.source, (inMap.get(e.source) || 0) + e.value);
+      if (e.source === selectedNode.id) outMap.set(e.target, (outMap.get(e.target) || 0) + e.value);
+    }
+    return {
+      inEdges: Array.from(inMap.entries())
+        .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false }))
+        .sort((a, b) => b.value - a.value),
+      outEdges: Array.from(outMap.entries())
+        .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false }))
+        .sort((a, b) => b.value - a.value),
+    };
+  }, [selectedNode, graphData]);
+
+  const [inDisplayCount, setInDisplayCount] = useState(8);
+  const [outDisplayCount, setOutDisplayCount] = useState(8);
+  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); }, [selectedNodeId]);
+
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
     if (id !== null) setIsPanelCollapsed(false);
   }, []);
+
+  const handleConnectionClick = useCallback((nodeId: string) => {
+    // If already in layout, just select
+    if (layout?.nodes.find(n => n.id === nodeId)) {
+      selectNode(nodeId);
+      return;
+    }
+    // Recipient outside window: jump offset so it's visible
+    if (nodeId.startsWith('r-') && filtered) {
+      const rank = allRecipientRanks.get(nodeId);
+      if (rank !== undefined) {
+        const maxOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
+        const newOffset = Math.max(0, Math.min(rank - Math.floor(topRecipient / 2), maxOffset));
+        setRecipientOffset(newOffset);
+        selectNode(nodeId);
+      }
+    }
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1103,41 +1168,51 @@ export default function RealDataSankeyPage() {
               </div>
 
               {/* 流入元 */}
-              {selectedNode.targetLinks.length > 0 && (
+              {selectedNodeAllConnections && selectedNodeAllConnections.inEdges.length > 0 && (
                 <div style={{ padding: '10px 14px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>流入元</div>
-                  {[...selectedNode.targetLinks].sort((a, b) => b.value - a.value).slice(0, 8).map((l, i) => (
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    流入元 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.inEdges.length}件)</span>
+                  </div>
+                  {selectedNodeAllConnections.inEdges.slice(0, inDisplayCount).map((item, i) => (
                     <div
                       key={i}
-                      onClick={() => !l.source.aggregated && selectNode(l.source.id)}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', cursor: l.source.aggregated ? 'default' : 'pointer', gap: 6 }}
+                      onClick={() => !item.aggregated && handleConnectionClick(item.id)}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', cursor: item.aggregated ? 'default' : 'pointer', gap: 6 }}
                     >
-                      <span style={{ flex: 1, fontSize: 12, color: l.source.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>← {l.source.name}</span>
-                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(l.value)}</span>
+                      <span style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>← {item.name}</span>
+                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                     </div>
                   ))}
-                  {selectedNode.targetLinks.length > 8 && (
-                    <div style={{ fontSize: 11, color: '#bbb', paddingTop: 4 }}>他{selectedNode.targetLinks.length - 8}件</div>
+                  {inDisplayCount < selectedNodeAllConnections.inEdges.length && (
+                    <button
+                      onClick={() => setInDisplayCount(c => c + 8)}
+                      style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', width: '100%', textAlign: 'left' }}
+                    >さらに{Math.min(8, selectedNodeAllConnections.inEdges.length - inDisplayCount)}件表示（残{selectedNodeAllConnections.inEdges.length - inDisplayCount}件）</button>
                   )}
                 </div>
               )}
 
               {/* 流出先 */}
-              {selectedNode.sourceLinks.length > 0 && (
-                <div style={{ padding: '10px 14px', borderTop: selectedNode.targetLinks.length > 0 ? '1px solid #f0f0f0' : 'none' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>流出先</div>
-                  {[...selectedNode.sourceLinks].sort((a, b) => b.value - a.value).slice(0, 8).map((l, i) => (
+              {selectedNodeAllConnections && selectedNodeAllConnections.outEdges.length > 0 && (
+                <div style={{ padding: '10px 14px', borderTop: selectedNodeAllConnections.inEdges.length > 0 ? '1px solid #f0f0f0' : 'none' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    流出先 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.outEdges.length}件)</span>
+                  </div>
+                  {selectedNodeAllConnections.outEdges.slice(0, outDisplayCount).map((item, i) => (
                     <div
                       key={i}
-                      onClick={() => !l.target.aggregated && selectNode(l.target.id)}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', cursor: l.target.aggregated ? 'default' : 'pointer', gap: 6 }}
+                      onClick={() => !item.aggregated && handleConnectionClick(item.id)}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', cursor: item.aggregated ? 'default' : 'pointer', gap: 6 }}
                     >
-                      <span style={{ flex: 1, fontSize: 12, color: l.target.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.target.name} →</span>
-                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(l.value)}</span>
+                      <span style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name} →</span>
+                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                     </div>
                   ))}
-                  {selectedNode.sourceLinks.length > 8 && (
-                    <div style={{ fontSize: 11, color: '#bbb', paddingTop: 4 }}>他{selectedNode.sourceLinks.length - 8}件</div>
+                  {outDisplayCount < selectedNodeAllConnections.outEdges.length && (
+                    <button
+                      onClick={() => setOutDisplayCount(c => c + 8)}
+                      style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', width: '100%', textAlign: 'left' }}
+                    >さらに{Math.min(8, selectedNodeAllConnections.outEdges.length - outDisplayCount)}件表示（残{selectedNodeAllConnections.outEdges.length - outDisplayCount}件）</button>
                   )}
                 </div>
               )}
