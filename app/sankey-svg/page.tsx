@@ -483,6 +483,8 @@ export default function RealDataSankeyPage() {
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
+  const [isEditingOffset, setIsEditingOffset] = useState(false);
+  const [offsetInputValue, setOffsetInputValue] = useState('');
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -935,7 +937,24 @@ export default function RealDataSankeyPage() {
           <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
-              <input type="number" min={1} max={maxStartRank} value={rangeStart} onChange={e => setRecipientOffset(Math.max(0, Math.min(maxOffset, (Number(e.target.value) || 1) - 1)))} style={{ width: 40, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+              {isEditingOffset ? (
+                <input
+                  type="number"
+                  autoFocus
+                  min={1} max={maxStartRank} step={1}
+                  value={offsetInputValue}
+                  onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) setRecipientOffset(Math.max(0, Math.min(maxOffset, v - 1))); }}
+                  onBlur={() => setIsEditingOffset(false)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingOffset(false); }}
+                  style={{ width: 40, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
+                />
+              ) : (
+                <button
+                  onClick={() => { setOffsetInputValue(String(rangeStart)); setIsEditingOffset(true); }}
+                  title="クリックして開始位置を入力"
+                  style={{ width: 40, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12, background: '#fff', cursor: 'text', padding: '1px 0' }}
+                >{rangeStart}</button>
+              )}
               <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}位</span>
               <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => setRecipientOffset(Number(e.target.value))} style={{ width: 100 }} />
               <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
