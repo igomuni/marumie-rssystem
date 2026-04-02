@@ -758,7 +758,7 @@ export default function RealDataSankeyPage() {
                   const maxCol = layout.maxCol || 1;
                   const colTotals: (number | null)[] = [
                     layout.nodes.find(n => n.type === 'total')?.value ?? null,
-                    null,
+                    layout.nodes.filter(n => n.type === 'ministry').reduce((s, n) => s + n.value, 0),
                     layout.nodes.filter(n => n.type === 'project-budget').reduce((s, n) => s + n.value, 0),
                     layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + n.value, 0),
                     layout.nodes.filter(n => n.type === 'recipient').reduce((s, n) => s + n.value, 0),
