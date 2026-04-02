@@ -92,6 +92,14 @@ const TYPE_COLORS: Record<string, string> = {
   'recipient': '#d94545',
 };
 
+const TYPE_LABELS: Record<string, string> = {
+  'total': '予算総計',
+  'ministry': '府省庁',
+  'project-budget': '事業（予算）',
+  'project-spending': '事業（支出）',
+  'recipient': '支出先',
+};
+
 function getNodeColor(node: { type: string; aggregated?: boolean }): string {
   if (node.aggregated) return '#999';
   return TYPE_COLORS[node.type] || '#999';
@@ -486,6 +494,8 @@ export default function RealDataSankeyPage() {
   const [zoomInputValue, setZoomInputValue] = useState('');
   const [isEditingOffset, setIsEditingOffset] = useState(false);
   const [offsetInputValue, setOffsetInputValue] = useState('');
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -512,6 +522,7 @@ export default function RealDataSankeyPage() {
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
   const panOrigin = useRef({ x: 0, y: 0 });
+  const didPanRef = useRef(false);
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Prevent overlay control interactions from bubbling into canvas pan/zoom
@@ -542,6 +553,7 @@ export default function RealDataSankeyPage() {
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || isOverlayControlTarget(e.target)) return; // left click only
+    didPanRef.current = false;
     setIsPanning(true);
     panStart.current = { x: e.clientX, y: e.clientY };
     panOrigin.current = { ...pan };
@@ -549,9 +561,12 @@ export default function RealDataSankeyPage() {
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning) return;
+    const dx = e.clientX - panStart.current.x;
+    const dy = e.clientY - panStart.current.y;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didPanRef.current = true;
     setPan({
-      x: panOrigin.current.x + (e.clientX - panStart.current.x),
-      y: panOrigin.current.y + (e.clientY - panStart.current.y),
+      x: panOrigin.current.x + dx,
+      y: panOrigin.current.y + dy,
     });
   }, [isPanning]);
 
@@ -632,6 +647,30 @@ export default function RealDataSankeyPage() {
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH };
     return result;
   }, [filtered, svgWidth, svgHeight]);
+
+  const selectedNode = useMemo(
+    () => (selectedNodeId && layout ? layout.nodes.find(n => n.id === selectedNodeId) ?? null : null),
+    [selectedNodeId, layout],
+  );
+
+  const connectedNodeIds = useMemo(() => {
+    if (!selectedNode) return null;
+    const ids = new Set<string>([selectedNode.id]);
+    for (const l of selectedNode.sourceLinks) ids.add(l.target.id);
+    for (const l of selectedNode.targetLinks) ids.add(l.source.id);
+    return ids;
+  }, [selectedNode]);
+
+  const selectNode = useCallback((id: string | null) => {
+    setSelectedNodeId(id);
+    if (id !== null) setIsPanelCollapsed(false);
+  }, []);
+
+  const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (didPanRef.current) return;
+    selectNode(selectedNodeId === node.id ? null : node.id);
+  }, [selectedNodeId, selectNode]);
 
   // Center on initial load / layout change
   const initialCentered = useRef(false);
@@ -730,6 +769,9 @@ export default function RealDataSankeyPage() {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onClick={(e) => { if (didPanRef.current) return; if (!isOverlayControlTarget(e.target)) selectNode(null); }}
+      onKeyDown={(e) => { if (e.key === 'Escape') selectNode(null); }}
+      tabIndex={-1}
     >
 
       {loading && (
@@ -803,13 +845,25 @@ export default function RealDataSankeyPage() {
                     d={ribbonPath(link)}
                     fill={getLinkColor(link)}
                     fillOpacity={
-                      hoveredLink === link ? 0.6
-                      : hoveredNode && (link.source === hoveredNode || link.target === hoveredNode) ? 0.5
-                      : (hoveredNode || hoveredLink) ? 0.1
-                      : 0.25
+                      selectedNode
+                        ? (link.source.id === selectedNode.id || link.target.id === selectedNode.id)
+                          ? (hoveredLink === link ? 0.6 : 0.5)
+                          : 0.05
+                        : hoveredLink === link ? 0.6
+                          : hoveredNode && (link.source === hoveredNode || link.target === hoveredNode) ? 0.5
+                          : (hoveredNode || hoveredLink) ? 0.1
+                          : 0.25
                     }
-                    stroke={hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? getLinkColor(link) : 'none'}
-                    strokeWidth={hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? Math.min(1, Math.min(link.sourceWidth, link.targetWidth) * 0.3) : 0}
+                    stroke={
+                      selectedNode
+                        ? (link.source.id === selectedNode.id || link.target.id === selectedNode.id) ? getLinkColor(link) : 'none'
+                        : hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? getLinkColor(link) : 'none'
+                    }
+                    strokeWidth={
+                      selectedNode
+                        ? (link.source.id === selectedNode.id || link.target.id === selectedNode.id) ? Math.min(1, Math.min(link.sourceWidth, link.targetWidth) * 0.3) : 0
+                        : hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? Math.min(1, Math.min(link.sourceWidth, link.targetWidth) * 0.3) : 0
+                    }
                     onMouseEnter={(e) => {
                       const rect = containerRef.current?.getBoundingClientRect();
                       if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
@@ -857,7 +911,11 @@ export default function RealDataSankeyPage() {
                           width={NODE_W}
                           height={Math.max(1, h)}
                           fill={getNodeColor(node)}
-                          opacity={hoveredNode && hoveredNode !== node ? 0.4 : 1}
+                          opacity={
+                            connectedNodeIds
+                              ? (connectedNodeIds.has(node.id) ? 1 : 0.3)
+                              : (hoveredNode && hoveredNode !== node ? 0.4 : 1)
+                          }
                           rx={1}
                           style={{ cursor: 'pointer' }}
                           onMouseEnter={(e) => {
@@ -870,6 +928,7 @@ export default function RealDataSankeyPage() {
                             if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
                           }}
                           onMouseLeave={() => setHoveredNode(null)}
+                          onClick={(e) => handleNodeClick(node, e)}
                         />
                         {showLabel && (
                           <text
@@ -924,31 +983,11 @@ export default function RealDataSankeyPage() {
               <div style={{ color: '#aaa', fontSize: 11 }}>{hoveredLink.value.toLocaleString()}円</div>
             </div>
           )}
-          {/* DOM tooltip — node hover */}
+          {/* DOM tooltip — node hover (mini: name + amount only) */}
           {hoveredNode && (
-            <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.85)', color: '#fff', padding: '8px 12px', borderRadius: 4, fontSize: 12, lineHeight: 1.5, pointerEvents: 'none', zIndex: 20, maxWidth: 360 }}>
-              <div style={{ fontWeight: 'bold', marginBottom: 2 }}>{hoveredNode.name}</div>
-              <div style={{ color: '#7df' }}>{formatYen(hoveredNode.rawValue ?? hoveredNode.value)}</div>
-              <div style={{ color: '#aaa', fontSize: 11 }}>{(hoveredNode.rawValue ?? hoveredNode.value).toLocaleString()}円</div>
-              {hoveredNode.rawValue !== undefined && (
-                <div style={{ color: '#fa8', fontSize: 11 }}>※表示高さは上限値で制限</div>
-              )}
-              {hoveredNode.sourceLinks.length > 0 && (
-                <div style={{ marginTop: 4, color: '#ddd' }}>
-                  {hoveredNode.sourceLinks.slice(0, 3).map((l, i) => (
-                    <div key={i}>→ {l.target.name} ({formatYen(l.value)})</div>
-                  ))}
-                  {hoveredNode.sourceLinks.length > 3 && <div style={{ color: '#aaa' }}>他{hoveredNode.sourceLinks.length - 3}件</div>}
-                </div>
-              )}
-              {hoveredNode.targetLinks.length > 0 && (
-                <div style={{ marginTop: 4, color: '#ddd' }}>
-                  {hoveredNode.targetLinks.slice(0, 3).map((l, i) => (
-                    <div key={i}>← {l.source.name} ({formatYen(l.value)})</div>
-                  ))}
-                  {hoveredNode.targetLinks.length > 3 && <div style={{ color: '#aaa' }}>他{hoveredNode.targetLinks.length - 3}件</div>}
-                </div>
-              )}
+            <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.78)', color: '#fff', padding: '5px 9px', borderRadius: 4, fontSize: 12, lineHeight: 1.4, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 20 }}>
+              <div style={{ fontWeight: 500 }}>{hoveredNode.name}</div>
+              <div style={{ color: '#7df', fontSize: 11 }}>{formatYen(hoveredNode.rawValue ?? hoveredNode.value)}</div>
             </div>
           )}
           {/* DOM tooltip — column label hover */}
@@ -980,6 +1019,121 @@ export default function RealDataSankeyPage() {
             );
           })()}
         </>
+      )}
+
+      {/* Left side panel — node detail */}
+      {selectedNodeId !== null && (
+        <div
+          data-pan-disabled="true"
+          style={{
+            position: 'fixed', left: 0, top: 0, height: '100%',
+            width: isPanelCollapsed ? 0 : 280,
+            background: '#fff',
+            borderRight: isPanelCollapsed ? 'none' : '1px solid #e0e0e0',
+            boxShadow: isPanelCollapsed ? 'none' : '2px 0 8px rgba(0,0,0,0.1)',
+            zIndex: 25,
+            transition: 'width 0.2s ease',
+            overflow: 'visible',
+          }}
+        >
+          {/* Collapse/expand toggle button */}
+          <button
+            data-pan-disabled="true"
+            onClick={() => setIsPanelCollapsed(c => !c)}
+            title={isPanelCollapsed ? 'パネルを展開' : 'パネルを折りたたむ'}
+            style={{
+              position: 'absolute', right: -18, top: '50%', transform: 'translateY(-50%)',
+              width: 18, height: 48,
+              background: '#fff', border: '1px solid #e0e0e0', borderLeft: 'none',
+              borderRadius: '0 6px 6px 0',
+              boxShadow: '2px 0 4px rgba(0,0,0,0.08)',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 0,
+            }}
+          >
+            {/* chevron_right when collapsed, chevron_left when expanded */}
+            <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#888">
+              {isPanelCollapsed
+                ? <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                : <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>}
+            </svg>
+          </button>
+
+          {/* Panel content */}
+          {!isPanelCollapsed && selectedNode && (
+            <div style={{ height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+              {/* Header */}
+              <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
+                      {selectedNode.name}
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#222', marginTop: 3 }}>
+                      {formatYen(selectedNode.rawValue ?? selectedNode.value)}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => selectNode(null)}
+                    title="閉じる"
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 16, lineHeight: 1, padding: '2px 4px', flexShrink: 0 }}
+                  >✕</button>
+                </div>
+                <div style={{ display: 'flex', gap: 5, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ background: getNodeColor(selectedNode), color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>
+                    {TYPE_LABELS[selectedNode.type] ?? selectedNode.type}
+                  </span>
+                  {selectedNode.aggregated && (
+                    <span style={{ background: '#999', color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>集約</span>
+                  )}
+                  {selectedNode.ministry && selectedNode.type !== 'ministry' && (
+                    <span style={{ fontSize: 11, color: '#666' }}>{selectedNode.ministry}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* 流入元 */}
+              {selectedNode.targetLinks.length > 0 && (
+                <div style={{ padding: '10px 14px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>流入元</div>
+                  {[...selectedNode.targetLinks].sort((a, b) => b.value - a.value).slice(0, 8).map((l, i) => (
+                    <div
+                      key={i}
+                      onClick={() => !l.source.aggregated && selectNode(l.source.id)}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', cursor: l.source.aggregated ? 'default' : 'pointer', gap: 6 }}
+                    >
+                      <span style={{ flex: 1, fontSize: 12, color: l.source.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>← {l.source.name}</span>
+                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(l.value)}</span>
+                    </div>
+                  ))}
+                  {selectedNode.targetLinks.length > 8 && (
+                    <div style={{ fontSize: 11, color: '#bbb', paddingTop: 4 }}>他{selectedNode.targetLinks.length - 8}件</div>
+                  )}
+                </div>
+              )}
+
+              {/* 流出先 */}
+              {selectedNode.sourceLinks.length > 0 && (
+                <div style={{ padding: '10px 14px', borderTop: selectedNode.targetLinks.length > 0 ? '1px solid #f0f0f0' : 'none' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>流出先</div>
+                  {[...selectedNode.sourceLinks].sort((a, b) => b.value - a.value).slice(0, 8).map((l, i) => (
+                    <div
+                      key={i}
+                      onClick={() => !l.target.aggregated && selectNode(l.target.id)}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', cursor: l.target.aggregated ? 'default' : 'pointer', gap: 6 }}
+                    >
+                      <span style={{ flex: 1, fontSize: 12, color: l.target.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.target.name} →</span>
+                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(l.value)}</span>
+                    </div>
+                  ))}
+                  {selectedNode.sourceLinks.length > 8 && (
+                    <div style={{ fontSize: 11, color: '#bbb', paddingTop: 4 }}>他{selectedNode.sourceLinks.length - 8}件</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Title badge — top left */}
