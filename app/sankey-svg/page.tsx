@@ -756,12 +756,13 @@ export default function RealDataSankeyPage() {
                 {/* Column labels with totals */}
                 {(() => {
                   const maxCol = layout.maxCol || 1;
+                  const amt = (n: LayoutNode) => n.rawValue ?? n.value;
                   const colTotals: (number | null)[] = [
-                    layout.nodes.find(n => n.type === 'total')?.value ?? null,
-                    layout.nodes.filter(n => n.type === 'ministry').reduce((s, n) => s + n.value, 0),
-                    layout.nodes.filter(n => n.type === 'project-budget').reduce((s, n) => s + n.value, 0),
-                    layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + n.value, 0),
-                    layout.nodes.filter(n => n.type === 'recipient').reduce((s, n) => s + n.value, 0),
+                    (() => { const n = layout.nodes.find(n => n.type === 'total'); return n ? amt(n) : null; })(),
+                    layout.nodes.filter(n => n.type === 'ministry').reduce((s, n) => s + amt(n), 0),
+                    layout.nodes.filter(n => n.type === 'project-budget').reduce((s, n) => s + amt(n), 0),
+                    layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + amt(n), 0),
+                    layout.nodes.filter(n => n.type === 'recipient').reduce((s, n) => s + amt(n), 0),
                   ];
                   return COL_LABELS.map((label, i) => {
                     const x = (i / maxCol) * (layout.innerW - NODE_W);
