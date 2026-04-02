@@ -478,11 +478,14 @@ export default function RealDataSankeyPage() {
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
+  const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
+  const [isEditingOffset, setIsEditingOffset] = useState(false);
+  const [offsetInputValue, setOffsetInputValue] = useState('');
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -751,16 +754,47 @@ export default function RealDataSankeyPage() {
             >
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
-                {/* Column labels */}
-                {COL_LABELS.map((label, i) => {
+                {/* Column labels with totals */}
+                {(() => {
                   const maxCol = layout.maxCol || 1;
-                  const x = (i / maxCol) * (layout.innerW - NODE_W);
-                  return (
-                    <text key={i} x={x + NODE_W / 2} y={-10} textAnchor="middle" fontSize={11} fill="#999">
-                      {label}
-                    </text>
+                  const amt = (n: LayoutNode) => n.rawValue ?? n.value;
+                  const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
+                  const colNodes = colNodeTypes.map(t =>
+                    t === 'total'
+                      ? layout.nodes.filter(n => n.type === 'total')
+                      : layout.nodes.filter(n => n.type === t)
                   );
-                })}
+                  const colTotals: (number | null)[] = colNodes.map((nodes, i) =>
+                    i === 0 ? (nodes[0] ? amt(nodes[0]) : null) : nodes.reduce((s, n) => s + amt(n), 0)
+                  );
+                  const colCounts: (number | null)[] = colNodes.map((nodes, i) =>
+                    i === 0 ? null : nodes.length
+                  );
+                  return COL_LABELS.map((label, i) => {
+                    const x = (i / maxCol) * (layout.innerW - NODE_W);
+                    const total = colTotals[i];
+                    return (
+                      <text
+                        key={i}
+                        x={x + NODE_W / 2} y={-10}
+                        textAnchor="middle" fontSize={11} fill="#999"
+                        style={{ cursor: 'default' }}
+                        onMouseEnter={(e) => {
+                          const rect = containerRef.current?.getBoundingClientRect();
+                          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                          setHoveredColIndex(i);
+                        }}
+                        onMouseMove={(e) => {
+                          const rect = containerRef.current?.getBoundingClientRect();
+                          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                        }}
+                        onMouseLeave={() => setHoveredColIndex(null)}
+                      >
+                        {label}{total != null ? ` ${formatYen(total)}` : ''}
+                      </text>
+                    );
+                  });
+                })()}
 
                 {/* Links */}
                 {layout.links.map((link, i) => (
@@ -844,6 +878,7 @@ export default function RealDataSankeyPage() {
                             fontSize={9 / zoom}
                             dominantBaseline="middle"
                             fill="#333"
+                            style={{ userSelect: 'none', pointerEvents: 'none' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                           >
                             {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.rawValue ?? node.value)})
@@ -916,6 +951,34 @@ export default function RealDataSankeyPage() {
               )}
             </div>
           )}
+          {/* DOM tooltip — column label hover */}
+          {hoveredColIndex !== null && layout && (() => {
+            const amt = (n: LayoutNode) => n.rawValue ?? n.value;
+            const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
+            const nodes = hoveredColIndex === 0
+              ? layout.nodes.filter(n => n.type === 'total')
+              : layout.nodes.filter(n => n.type === colNodeTypes[hoveredColIndex]);
+            const total = hoveredColIndex === 0
+              ? (nodes[0] ? amt(nodes[0]) : 0)
+              : nodes.reduce((s, n) => s + amt(n), 0);
+            const count = hoveredColIndex === 0 ? null : nodes.length;
+            const colDescs = [
+              'ウィンドウ内支出先合計',
+              'ウィンドウ内支出合計',
+              '元の予算額合計（ウィンドウ非依存）',
+              'ウィンドウ内支出先への支出合計（tail除外）',
+              '全エッジ合計（ウィンドウ外流入含む）',
+            ];
+            return (
+              <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y + 16, background: 'rgba(0,0,0,0.85)', color: '#fff', padding: '8px 12px', borderRadius: 4, fontSize: 12, lineHeight: 1.5, pointerEvents: 'none', zIndex: 20, whiteSpace: 'nowrap' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: 2 }}>{COL_LABELS[hoveredColIndex]}</div>
+                {count != null && <div style={{ color: '#aaa', fontSize: 11 }}>{count.toLocaleString()}件</div>}
+                <div style={{ color: '#7df' }}>{formatYen(total)}</div>
+                <div style={{ color: '#aaa', fontSize: 11 }}>{total.toLocaleString()}円</div>
+                <div style={{ color: '#888', fontSize: 10, marginTop: 4 }}>{colDescs[hoveredColIndex]}</div>
+              </div>
+            );
+          })()}
         </>
       )}
 
@@ -924,7 +987,7 @@ export default function RealDataSankeyPage() {
         直接支出サンキー図
       </div>
 
-      {/* Top-right panel: offset slider + settings button */}
+      {/* Top-right panel: offset slider */}
       {filtered && (() => {
         const maxOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
         const clampedOffset = Math.min(recipientOffset, maxOffset);
@@ -932,70 +995,83 @@ export default function RealDataSankeyPage() {
         const rangeEnd = Math.min(clampedOffset + topRecipient, filtered.totalRecipientCount);
         const maxStartRank = maxOffset + 1;
         return (
-          <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
+          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
-              <input type="number" min={1} max={maxStartRank} value={rangeStart} onChange={e => setRecipientOffset(Math.max(0, Math.min(maxOffset, (Number(e.target.value) || 1) - 1)))} style={{ width: 40, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+              {isEditingOffset ? (
+                <input
+                  type="number"
+                  autoFocus
+                  min={1} max={maxStartRank} step={1}
+                  value={offsetInputValue}
+                  onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) setRecipientOffset(Math.max(0, Math.min(maxOffset, v - 1))); }}
+                  onBlur={() => setIsEditingOffset(false)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingOffset(false); }}
+                  style={{ width: `${Math.max(40, String(maxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
+                />
+              ) : (
+                <button
+                  onClick={() => { setOffsetInputValue(String(rangeStart)); setIsEditingOffset(true); }}
+                  title="クリックして開始位置を入力"
+                  style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
+                >{rangeStart}</button>
+              )}
               <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}位</span>
               <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => setRecipientOffset(Number(e.target.value))} style={{ width: 100 }} />
               <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
             </label>
-            <div style={{ position: 'relative' }}>
-              <button
-                onClick={() => setShowSettings(s => !s)}
-                aria-label="TopN 設定を開く"
-                aria-expanded={showSettings}
-                aria-controls="sankey-topn-settings"
-                aria-haspopup="dialog"
-                style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: showSettings ? '#eee' : '#fff', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >⚙</button>
-              {showSettings && (
-                <>
-                  <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-                  <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ width: 48, color: '#555' }}>省庁:</span>
-                      <input type="number" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                      <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ flex: 1 }} />
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ width: 48, color: '#555' }}>事業:</span>
-                      <input type="number" min={1} max={50} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(50, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                      <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ flex: 1 }} />
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ width: 48, color: '#555' }}>支出先:</span>
-                      <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                      <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ flex: 1 }} />
-                    </label>
-                  </div>
-                </>
-              )}
-            </div>
           </div>
         );
       })()}
 
-      {/* Legend — bottom left, beside minimap */}
-      <div style={{ position: 'absolute', bottom: 12, left: MINIMAP_W + 20, zIndex: 15, display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(255,255,255,0.85)', padding: '5px 10px', borderRadius: 5, fontSize: 11, border: '1px solid #e0e0e0', pointerEvents: 'none' }}>
-        {[
-          { label: '予算側', color: '#4db870' },
-          { label: '支出側', color: '#e07040' },
-          { label: '集約ノード', color: '#999' },
-        ].map(({ label, color }) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <div style={{ width: 10, height: 10, background: color, borderRadius: 2 }} />
-            {label}
-          </div>
-        ))}
+      {/* Settings button — independent, top right */}
+      <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 15 }}>
+        <button
+          onClick={() => setShowSettings(s => !s)}
+          aria-label="TopN 設定を開く"
+          aria-expanded={showSettings}
+          aria-controls="sankey-topn-settings"
+          aria-haspopup="dialog"
+          style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          {/* Material Icons: more_vert */}
+          <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill={showSettings ? '#333' : '#888'}>
+            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+          </svg>
+        </button>
+        {showSettings && (
+          <>
+            <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
+            <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 48, color: '#555' }}>省庁:</span>
+                <input type="number" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ flex: 1 }} />
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 48, color: '#555' }}>事業:</span>
+                <input type="number" min={1} max={50} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(50, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ flex: 1 }} />
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 48, color: '#555' }}>支出先:</span>
+                <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ flex: 1 }} />
+              </label>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Zoom controls — left, above minimap (sankey2 style) */}
-      <div style={{ position: 'absolute', bottom: minimapH + 16, left: 8, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* Zoom controls — bottom right (sankey2 style) */}
+      <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {/* + / vertical slider / - */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <button onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '6px 0', textAlign: 'center', fontSize: 14, color: '#555', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>＋</button>
+          {/* Material Icons: add */}
+          <button aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          </button>
           <div style={{ padding: '4px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid #e5e7eb' }}>
             <input
               type="range"
@@ -1009,7 +1085,10 @@ export default function RealDataSankeyPage() {
               title={`Zoom: ${Math.round(zoom / baseZoom * 100)}%`}
             />
           </div>
-          <button onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '6px 0', textAlign: 'center', fontSize: 14, color: '#555', background: 'transparent', border: 'none', cursor: 'pointer' }}>ー</button>
+          {/* Material Icons: remove */}
+          <button aria-label="ズームアウト" onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13H5v-2h14v2z"/></svg>
+          </button>
         </div>
         {/* Zoom% — 非編集時は "N%" 表示、クリックで数値入力 */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
@@ -1034,7 +1113,10 @@ export default function RealDataSankeyPage() {
         </div>
         {/* 全体表示ボタン */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-          <button onClick={resetViewport} title="全体表示" style={{ width: '100%', fontSize: 16, textAlign: 'center', padding: '3px 0', border: 'none', background: 'transparent', color: '#666', cursor: 'pointer' }}>⛶</button>
+          {/* Material Icons: fullscreen */}
+          <button aria-label="全体表示" onClick={resetViewport} title="全体表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+          </button>
         </div>
       </div>
     </div>
