@@ -1480,7 +1480,7 @@ export default function RealDataSankeyPage() {
                 ))}
               </div>
               {/* Material Icons: vertical_align_top — オフセットリセット */}
-              <button onClick={() => setRecipientOffset(0)} title="先頭へリセット" aria-label="先頭へリセット"
+              <button onClick={e => { e.preventDefault(); setRecipientOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
