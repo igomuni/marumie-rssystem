@@ -743,19 +743,40 @@ export default function RealDataSankeyPage() {
       selectNode(nodeId);
       return;
     }
-    // Recipient outside window: jump offset so it's visible, then select
+    // Helper: jump recipientOffset to center on a recipient rank
+    const jumpToRecipientRank = (rank: number, totalCount: number) => {
+      const maxOffset = Math.max(0, totalCount - topRecipient);
+      const newOffset = Math.max(0, Math.min(rank - Math.floor(topRecipient / 2), maxOffset));
+      setRecipientOffset(newOffset);
+    };
+
     if (nodeId.startsWith('r-') && filtered) {
+      // Recipient outside window: jump offset so it's visible
       const rank = allRecipientRanks.get(nodeId);
-      if (rank !== undefined) {
-        const maxOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
-        const newOffset = Math.max(0, Math.min(rank - Math.floor(topRecipient / 2), maxOffset));
-        setRecipientOffset(newOffset);
+      if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
+    } else if ((nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-')) && filtered && graphData) {
+      // Project outside TopN: find its highest-value recipient edge and jump there.
+      // This shifts the window so the project's window spending increases → likely enters TopN.
+      const spendingId = nodeId.startsWith('project-budget-')
+        ? nodeId.replace('project-budget-', 'project-spending-')
+        : nodeId;
+      let bestRecipientId: string | null = null;
+      let bestValue = 0;
+      for (const e of graphData.edges) {
+        if (e.source === spendingId && e.target.startsWith('r-') && e.value > bestValue) {
+          bestValue = e.value;
+          bestRecipientId = e.target;
+        }
+      }
+      if (bestRecipientId !== null) {
+        const rank = allRecipientRanks.get(bestRecipientId);
+        if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
       }
     }
-    // Any other node not in layout (ministry/project outside TopN):
-    // select anyway — panel shows info from graphData, no highlight/dim applied
+    // select — if node enters layout after offset change, highlight/dim applies;
+    // otherwise panel shows info from graphData only
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode]);
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
