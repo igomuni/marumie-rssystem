@@ -496,6 +496,10 @@ export default function RealDataSankeyPage() {
   const [offsetInputValue, setOffsetInputValue] = useState('');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -743,6 +747,30 @@ export default function RealDataSankeyPage() {
     if (didPanRef.current) return;
     selectNode(selectedNodeId === node.id ? null : node.id);
   }, [selectedNodeId, selectNode]);
+
+  // ── Search ──
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 150);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const searchResults = useMemo(() => {
+    if (!graphData || debouncedQuery.length < 2) return [];
+    const q = debouncedQuery;
+    const results: { id: string; name: string; type: string; value: number }[] = [];
+    for (const n of graphData.nodes) {
+      if (n.name.includes(q)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+    }
+    return results.sort((a, b) => b.value - a.value).slice(0, 20);
+  }, [graphData, debouncedQuery]);
+
+  const handleSearchSelect = useCallback((nodeId: string) => {
+    setShowSearchResults(false);
+    setSearchQuery('');
+    setDebouncedQuery('');
+    handleConnectionClick(nodeId);
+  }, [handleConnectionClick]);
 
   // Center on initial load / layout change
   const initialCentered = useRef(false);
@@ -1243,9 +1271,66 @@ export default function RealDataSankeyPage() {
         </div>
       )}
 
-      {/* Title badge — top left */}
-      <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 15, background: 'rgba(255,255,255,0.75)', padding: '4px 8px', borderRadius: 4, fontSize: 11, color: '#555', border: '1px solid #e0e0e0', pointerEvents: 'none' }}>
-        直接支出サンキー図
+      {/* Search box — top left */}
+      <div
+        data-pan-disabled="true"
+        style={{ position: 'absolute', top: 12, left: 12, zIndex: 30, width: 260 }}
+      >
+        <div style={{ position: 'relative' }}>
+          {/* Search icon */}
+          <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999"
+            style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
+            onFocus={() => { if (debouncedQuery.length >= 2) setShowSearchResults(true); }}
+            onKeyDown={e => { if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); } }}
+            placeholder="ノード検索（2文字以上）"
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              paddingLeft: 30, paddingRight: searchQuery ? 28 : 10, paddingTop: 7, paddingBottom: 7,
+              fontSize: 13, border: '1px solid #e0e0e0', borderRadius: 8,
+              background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              outline: 'none', color: '#333',
+            }}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => { setSearchQuery(''); setDebouncedQuery(''); setShowSearchResults(false); searchInputRef.current?.focus(); }}
+              style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
+            >✕</button>
+          )}
+        </div>
+        {/* Dropdown */}
+        {showSearchResults && searchResults.length > 0 && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 280, overflowY: 'auto', zIndex: 40 }}>
+            {searchResults.map(node => (
+              <button
+                key={node.id}
+                type="button"
+                onClick={() => handleSearchSelect(node.id)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#f5f5f5')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: getNodeColor(node) }} />
+                <span style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
+                <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {/* No results */}
+        {showSearchResults && debouncedQuery.length >= 2 && searchResults.length === 0 && (
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 40 }}>
+            該当なし
+          </div>
+        )}
       </div>
 
       {/* Top-right panel: offset slider */}
