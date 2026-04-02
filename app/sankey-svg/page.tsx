@@ -767,8 +767,6 @@ export default function RealDataSankeyPage() {
 
   const handleSearchSelect = useCallback((nodeId: string) => {
     setShowSearchResults(false);
-    setSearchQuery('');
-    setDebouncedQuery('');
     handleConnectionClick(nodeId);
   }, [handleConnectionClick]);
 
@@ -1274,7 +1272,7 @@ export default function RealDataSankeyPage() {
       {/* Search box — top left */}
       <div
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: 12, zIndex: 30, width: 260 }}
+        style={{ position: 'absolute', top: 12, left: 12, zIndex: 15, width: 260 }}
       >
         <div style={{ position: 'relative' }}>
           {/* Search icon */}
@@ -1308,7 +1306,7 @@ export default function RealDataSankeyPage() {
         </div>
         {/* Dropdown */}
         {showSearchResults && searchResults.length > 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 280, overflowY: 'auto', zIndex: 40 }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 280, overflowY: 'auto', zIndex: 20 }}>
             {searchResults.map(node => (
               <button
                 key={node.id}
@@ -1327,7 +1325,7 @@ export default function RealDataSankeyPage() {
         )}
         {/* No results */}
         {showSearchResults && debouncedQuery.length >= 2 && searchResults.length === 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 40 }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
         )}
