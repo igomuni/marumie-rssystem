@@ -481,7 +481,7 @@ export default function RealDataSankeyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [topMinistry, setTopMinistry] = useState(37);
-  const [topProject, setTopProject] = useState(50);
+  const [topProject, setTopProject] = useState(100);
   const [topRecipient, setTopRecipient] = useState(100);
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
@@ -527,6 +527,10 @@ export default function RealDataSankeyPage() {
   const panStart = useRef({ x: 0, y: 0 });
   const panOrigin = useRef({ x: 0, y: 0 });
   const didPanRef = useRef(false);
+  const offsetRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stopOffsetRepeat = useCallback(() => {
+    if (offsetRepeatRef.current !== null) { clearInterval(offsetRepeatRef.current); offsetRepeatRef.current = null; }
+  }, []);
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Prevent overlay control interactions from bubbling into canvas pan/zoom
@@ -545,7 +549,7 @@ export default function RealDataSankeyPage() {
     const my = e.clientY - rect.top;
 
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.2, Math.min(5, zoom * delta));
+    const newZoom = Math.max(0.2, Math.min(10, zoom * delta));
 
     // Adjust pan so zoom centers on mouse position
     const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
@@ -589,7 +593,7 @@ export default function RealDataSankeyPage() {
       const cH = container.clientHeight;
       const totalW = MARGIN.left + l.contentW;
       const totalH = MARGIN.top + l.contentH;
-      const k = Math.max(0.2, Math.min(5, Math.min(cW / totalW, cH / totalH) * 0.9));
+      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, cH / totalH) * 0.9));
       setZoom(k);
       setBaseZoom(k);
       setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
@@ -609,7 +613,7 @@ export default function RealDataSankeyPage() {
       const cH = container.clientHeight;
       const totalW = MARGIN.left + l.contentW;
       const totalH = MARGIN.top + l.contentH;
-      const k = Math.max(0.2, Math.min(5, Math.min(cW / totalW, cH / totalH) * 0.9));
+      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, cH / totalH) * 0.9));
       setZoom(k);
       setBaseZoom(k);
       setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
@@ -895,8 +899,54 @@ export default function RealDataSankeyPage() {
     return () => window.removeEventListener('keydown', handler);
   }, [selectNode]);
 
+  const focusOnSelectedNode = useCallback(() => {
+    if (!selectedNode || !selectedNodeInLayout || !containerRef.current) return;
+    const container = containerRef.current;
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    // Node center in SVG coords (including MARGIN)
+    const cx = MARGIN.left + selectedNode.x0 + NODE_W / 2;
+    const cy = MARGIN.top + selectedNode.y0 + (selectedNode.y1 - selectedNode.y0) / 2;
+    // Labels appear when (h + NODE_PAD) * zoom > 10.
+    // Target: minimum zoom that makes the label visible, with small margin.
+    const h = selectedNode.y1 - selectedNode.y0;
+    const minZoomForLabel = 10 / (h + NODE_PAD);
+    const targetK = Math.max(zoom, Math.min(10, minZoomForLabel * 1.2));
+    setZoom(targetK);
+    setPan({ x: cW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
+  }, [selectedNode, selectedNodeInLayout, zoom]);
+
+  const focusOnNeighborhood = useCallback(() => {
+    if (!selectedNode || !selectedNodeInLayout || !layout || !containerRef.current) return;
+    const container = containerRef.current;
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    // Collect selected node + all 1-hop connected layout nodes
+    const neighborIds = new Set<string>([selectedNode.id]);
+    for (const l of selectedNode.sourceLinks) neighborIds.add(l.target.id);
+    for (const l of selectedNode.targetLinks) neighborIds.add(l.source.id);
+    const neighborNodes = layout.nodes.filter(n => neighborIds.has(n.id));
+    if (neighborNodes.length === 0) return;
+    // Bounding box in inner coords
+    const minX = Math.min(...neighborNodes.map(n => n.x0));
+    const minY = Math.min(...neighborNodes.map(n => n.y0));
+    const maxX = Math.max(...neighborNodes.map(n => n.x1));
+    const maxY = Math.max(...neighborNodes.map(n => n.y1));
+    const PADDING = 40;
+    const boxW = (maxX - minX) + PADDING * 2;
+    const boxH = (maxY - minY) + PADDING * 2;
+    // Account for side panel: visible area is shifted right when panel is open
+    const panelW = isPanelCollapsed ? 0 : 280;
+    const availableW = cW - panelW;
+    const targetK = Math.max(0.2, Math.min(10, Math.min(availableW / boxW, cH / boxH) * 0.9));
+    const centerX = MARGIN.left + (minX + maxX) / 2;
+    const centerY = MARGIN.top + (minY + maxY) / 2;
+    setZoom(targetK);
+    setPan({ x: panelW + availableW / 2 - centerX * targetK, y: cH / 2 - centerY * targetK });
+  }, [selectedNode, selectedNodeInLayout, layout, isPanelCollapsed]);
+
   const applyZoom = useCallback((factor: number) => {
-    const nz = Math.max(0.2, Math.min(5, zoom * factor));
+    const nz = Math.max(0.2, Math.min(10, zoom * factor));
     setPan({ x: svgWidth / 2 - (svgWidth / 2 - pan.x) * (nz / zoom), y: svgHeight / 2 - (svgHeight / 2 - pan.y) * (nz / zoom) });
     setZoom(nz);
   }, [zoom, pan, svgWidth, svgHeight]);
@@ -1134,6 +1184,7 @@ export default function RealDataSankeyPage() {
             <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.78)', color: '#fff', padding: '5px 9px', borderRadius: 4, fontSize: 12, lineHeight: 1.4, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 20 }}>
               <div style={{ fontWeight: 500 }}>{hoveredNode.name}</div>
               <div style={{ color: '#7df', fontSize: 11 }}>{formatYen(hoveredNode.rawValue ?? hoveredNode.value)}</div>
+              <div style={{ color: '#aaa', fontSize: 10 }}>{(hoveredNode.rawValue ?? hoveredNode.value).toLocaleString()}円</div>
             </div>
           )}
           {/* DOM tooltip — column label hover */}
@@ -1227,6 +1278,9 @@ export default function RealDataSankeyPage() {
                     <div style={{ fontSize: 15, fontWeight: 600, color: '#222', marginTop: 3 }}>
                       {formatYen(selectedNode.rawValue ?? selectedNode.value)}
                     </div>
+                    <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>
+                      {(selectedNode.rawValue ?? selectedNode.value).toLocaleString()}円
+                    </div>
                   </div>
                   <button
                     onClick={() => selectNode(null)}
@@ -1261,7 +1315,7 @@ export default function RealDataSankeyPage() {
                       onClick={() => handleConnectionClick(item.id)}
                       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                     >
-                      <span style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>← {item.name}</span>
+                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>← {item.name}</span>
                       <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                     </button>
                   ))}
@@ -1288,7 +1342,7 @@ export default function RealDataSankeyPage() {
                       onClick={() => handleConnectionClick(item.id)}
                       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                     >
-                      <span style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name} →</span>
+                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name} →</span>
                       <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                     </button>
                   ))}
@@ -1399,6 +1453,31 @@ export default function RealDataSankeyPage() {
               <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}位</span>
               <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => setRecipientOffset(Number(e.target.value))} style={{ width: 100 }} />
               <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
+                {([
+                  [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '次へ'],
+                  [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '前へ'],
+                ] as [number, string, string][]).map(([delta, path, title]) => (
+                  <button key={delta} title={title} aria-label={title}
+                    onMouseDown={() => {
+                      const startOffsetRepeat = () => { setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); };
+                      startOffsetRepeat();
+                      offsetRepeatRef.current = setInterval(startOffsetRepeat, 120);
+                    }}
+                    onMouseUp={stopOffsetRepeat} onMouseLeave={stopOffsetRepeat}
+                    onClick={e => e.preventDefault()}
+                    style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
+                  </button>
+                ))}
+              </div>
+              {/* Material Icons: vertical_align_top — オフセットリセット */}
+              <button onClick={() => setRecipientOffset(0)} title="先頭へリセット" aria-label="先頭へリセット"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
+                </button>
             </label>
           </div>
         );
@@ -1431,8 +1510,8 @@ export default function RealDataSankeyPage() {
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 48, color: '#555' }}>事業:</span>
-                <input type="number" min={1} max={50} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(50, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ flex: 1 }} />
+                <input type="number" min={1} max={100} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={100} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ flex: 1 }} />
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 48, color: '#555' }}>支出先:</span>
@@ -1457,9 +1536,9 @@ export default function RealDataSankeyPage() {
               type="range"
               aria-label="ズーム倍率"
               min={Math.log10(0.2)}
-              max={Math.log10(5)}
+              max={Math.log10(10)}
               step={0.01}
-              value={Math.log10(Math.max(0.2, Math.min(5, zoom)))}
+              value={Math.log10(Math.max(0.2, Math.min(10, zoom)))}
               onChange={e => { const newK = Math.pow(10, parseFloat(e.target.value)); applyZoom(newK / zoom); }}
               style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 16, height: 80 }}
               title={`Zoom: ${Math.round(zoom / baseZoom * 100)}%`}
@@ -1476,7 +1555,7 @@ export default function RealDataSankeyPage() {
             <input
               type="number"
               autoFocus
-              min={1} max={500} step={1}
+              min={1} max={1000} step={1}
               value={zoomInputValue}
               onChange={e => { setZoomInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / zoom); }}
               onBlur={() => setIsEditingZoom(false)}
@@ -1498,6 +1577,19 @@ export default function RealDataSankeyPage() {
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
           </button>
         </div>
+        {/* 選択ノードフォーカスボタン — 選択中のみ表示 */}
+        {selectedNodeInLayout && (
+          <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
+            {/* Material Icons: fit_screen */}
+            <button aria-label="選択ノードと接続先をフィット表示" onClick={focusOnNeighborhood} title="選択ノードと接続先をフィット表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M17 4h3c1.1 0 2 .9 2 2v2h-2V6h-3V4zM4 8V6h3V4H4c-1.1 0-2 .9-2 2v2h2zm16 8v2h-3v2h3c1.1 0 2-.9 2-2v-2h-2zM7 18H4v-2H2v2c0 1.1.9 2 2 2h3v-2zM18 8H6v8h12V8z"/></svg>
+            </button>
+            {/* Material Icons: center_focus_weak */}
+            <button aria-label="選択ノードにフォーカス" onClick={focusOnSelectedNode} title="選択ノードにフォーカス" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', borderTop: '1px solid #eee', borderLeft: 'none', borderRight: 'none', borderBottom: 'none', background: 'transparent', cursor: 'pointer' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M5 15H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm0-10h4V3H5C3.9 3 3 3.9 3 5v4h2V5zm14-2h-4v2h4v4h2V5c0-1.1-.9-2-2-2zm0 16h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zM12 8.5c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/></svg>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
