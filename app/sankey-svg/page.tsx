@@ -1004,22 +1004,8 @@ export default function RealDataSankeyPage() {
         )}
       </div>
 
-      {/* Legend — bottom left, beside minimap */}
-      <div style={{ position: 'absolute', bottom: 12, left: MINIMAP_W + 20, zIndex: 15, display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(255,255,255,0.85)', padding: '5px 10px', borderRadius: 5, fontSize: 11, border: '1px solid #e0e0e0', pointerEvents: 'none' }}>
-        {[
-          { label: '予算側', color: '#4db870' },
-          { label: '支出側', color: '#e07040' },
-          { label: '集約ノード', color: '#999' },
-        ].map(({ label, color }) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <div style={{ width: 10, height: 10, background: color, borderRadius: 2 }} />
-            {label}
-          </div>
-        ))}
-      </div>
-
-      {/* Zoom controls — left, above minimap (sankey2 style) */}
-      <div style={{ position: 'absolute', bottom: minimapH + 16, left: 8, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* Zoom controls — bottom right (sankey2 style) */}
+      <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {/* + / vertical slider / - */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Material Icons: add */}
