@@ -758,12 +758,18 @@ export default function RealDataSankeyPage() {
   const searchResults = useMemo(() => {
     if (!graphData || debouncedQuery.length < 2) return [];
     const q = debouncedQuery;
+    const visibleNodeIds = new Set(layout?.nodes.map(n => n.id) ?? []);
     const results: { id: string; name: string; type: string; value: number }[] = [];
     for (const n of graphData.nodes) {
-      if (n.name.includes(q)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+      if (!n.name.includes(q)) continue;
+      // Only include nodes that can actually be navigated:
+      // - already visible in current layout, OR
+      // - a recipient node (can jump via recipientOffset)
+      if (!visibleNodeIds.has(n.id) && !n.id.startsWith('r-')) continue;
+      results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
     }
     return results.sort((a, b) => b.value - a.value).slice(0, 20);
-  }, [graphData, debouncedQuery]);
+  }, [graphData, debouncedQuery, layout]);
 
   const handleSearchSelect = useCallback((nodeId: string) => {
     setShowSearchResults(false);
