@@ -753,16 +753,26 @@ export default function RealDataSankeyPage() {
             >
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
-                {/* Column labels */}
-                {COL_LABELS.map((label, i) => {
+                {/* Column labels with totals */}
+                {(() => {
                   const maxCol = layout.maxCol || 1;
-                  const x = (i / maxCol) * (layout.innerW - NODE_W);
-                  return (
-                    <text key={i} x={x + NODE_W / 2} y={-10} textAnchor="middle" fontSize={11} fill="#999">
-                      {label}
-                    </text>
-                  );
-                })}
+                  const colTotals: (number | null)[] = [
+                    layout.nodes.find(n => n.type === 'total')?.value ?? null,
+                    null,
+                    layout.nodes.filter(n => n.type === 'project-budget').reduce((s, n) => s + n.value, 0),
+                    layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + n.value, 0),
+                    layout.nodes.filter(n => n.type === 'recipient').reduce((s, n) => s + n.value, 0),
+                  ];
+                  return COL_LABELS.map((label, i) => {
+                    const x = (i / maxCol) * (layout.innerW - NODE_W);
+                    const total = colTotals[i];
+                    return (
+                      <text key={i} x={x + NODE_W / 2} y={-10} textAnchor="middle" fontSize={11} fill="#999">
+                        {label}{total != null ? ` ${formatYen(total)}` : ''}
+                      </text>
+                    );
+                  });
+                })()}
 
                 {/* Links */}
                 {layout.links.map((link, i) => (
