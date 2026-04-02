@@ -902,7 +902,7 @@ export default function RealDataSankeyPage() {
                         key={i}
                         x={x + NODE_W / 2} y={-10}
                         textAnchor="middle" fontSize={11} fill="#999"
-                        style={{ cursor: 'default' }}
+                        style={{ cursor: 'default', userSelect: 'none' }}
                         onMouseEnter={(e) => {
                           const rect = containerRef.current?.getBoundingClientRect();
                           if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
