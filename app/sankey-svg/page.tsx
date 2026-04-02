@@ -846,6 +846,7 @@ export default function RealDataSankeyPage() {
                             fontSize={9 / zoom}
                             dominantBaseline="middle"
                             fill="#333"
+                            style={{ userSelect: 'none', pointerEvents: 'none' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                           >
                             {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.rawValue ?? node.value)})
