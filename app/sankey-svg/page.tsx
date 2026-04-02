@@ -946,7 +946,7 @@ export default function RealDataSankeyPage() {
                   onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) setRecipientOffset(Math.max(0, Math.min(maxOffset, v - 1))); }}
                   onBlur={() => setIsEditingOffset(false)}
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingOffset(false); }}
-                  style={{ width: 40, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
+                  style={{ width: `${Math.max(40, String(maxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
                 />
               ) : (
                 <button
