@@ -966,7 +966,7 @@ export default function RealDataSankeyPage() {
                 aria-expanded={showSettings}
                 aria-controls="sankey-topn-settings"
                 aria-haspopup="dialog"
-                style={{ width: 26, height: 26, border: '1px solid #ccc', borderRadius: 4, background: showSettings ? '#eee' : '#fff', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ width: 26, height: 26, border: 'none', borderRadius: 4, background: 'transparent', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', color: showSettings ? '#333' : '#888' }}
               >⚙</button>
               {showSettings && (
                 <>
