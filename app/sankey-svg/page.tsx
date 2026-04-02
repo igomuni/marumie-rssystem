@@ -1021,7 +1021,10 @@ export default function RealDataSankeyPage() {
       <div style={{ position: 'absolute', bottom: minimapH + 16, left: 8, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
         {/* + / vertical slider / - */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <button onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '6px 0', textAlign: 'center', fontSize: 14, color: '#555', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>＋</button>
+          {/* Material Icons: add */}
+          <button onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          </button>
           <div style={{ padding: '4px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid #e5e7eb' }}>
             <input
               type="range"
@@ -1035,7 +1038,10 @@ export default function RealDataSankeyPage() {
               title={`Zoom: ${Math.round(zoom / baseZoom * 100)}%`}
             />
           </div>
-          <button onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '6px 0', textAlign: 'center', fontSize: 14, color: '#555', background: 'transparent', border: 'none', cursor: 'pointer' }}>ー</button>
+          {/* Material Icons: remove */}
+          <button onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13H5v-2h14v2z"/></svg>
+          </button>
         </div>
         {/* Zoom% — 非編集時は "N%" 表示、クリックで数値入力 */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
@@ -1060,7 +1066,10 @@ export default function RealDataSankeyPage() {
         </div>
         {/* 全体表示ボタン */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-          <button onClick={resetViewport} title="全体表示" style={{ width: '100%', fontSize: 16, textAlign: 'center', padding: '3px 0', border: 'none', background: 'transparent', color: '#666', cursor: 'pointer' }}>⛶</button>
+          {/* Material Icons: fit_screen */}
+          <button onClick={resetViewport} title="全体表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M17 19H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h5v2H7v10h10v-5h2v5c0 1.1-.9 2-2 2zm-1-8V7h-4l1.5-1.5-1.06-1.06L9.88 7H9v.88L6.44 10.44l1.06 1.06L9 10v1h7zm-3-3h3v3l-3-3z"/></svg>
+          </button>
         </div>
       </div>
     </div>
