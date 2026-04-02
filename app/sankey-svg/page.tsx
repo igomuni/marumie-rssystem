@@ -926,7 +926,7 @@ export default function RealDataSankeyPage() {
         直接支出サンキー図
       </div>
 
-      {/* Top-right panel: offset slider + settings button */}
+      {/* Top-right panel: offset slider */}
       {filtered && (() => {
         const maxOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
         const clampedOffset = Math.min(recipientOffset, maxOffset);
@@ -934,7 +934,7 @@ export default function RealDataSankeyPage() {
         const rangeEnd = Math.min(clampedOffset + topRecipient, filtered.totalRecipientCount);
         const maxStartRank = maxOffset + 1;
         return (
-          <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
+          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
               {isEditingOffset ? (
@@ -959,42 +959,44 @@ export default function RealDataSankeyPage() {
               <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => setRecipientOffset(Number(e.target.value))} style={{ width: 100 }} />
               <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
             </label>
-            <div style={{ position: 'relative' }}>
-              <button
-                onClick={() => setShowSettings(s => !s)}
-                aria-label="TopN 設定を開く"
-                aria-expanded={showSettings}
-                aria-controls="sankey-topn-settings"
-                aria-haspopup="dialog"
-                style={{ width: 26, height: 26, border: 'none', borderRadius: 4, background: 'transparent', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', color: showSettings ? '#333' : '#888' }}
-              >⚙</button>
-              {showSettings && (
-                <>
-                  <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-                  <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ width: 48, color: '#555' }}>省庁:</span>
-                      <input type="number" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                      <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ flex: 1 }} />
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ width: 48, color: '#555' }}>事業:</span>
-                      <input type="number" min={1} max={50} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(50, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                      <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ flex: 1 }} />
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ width: 48, color: '#555' }}>支出先:</span>
-                      <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                      <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ flex: 1 }} />
-                    </label>
-                  </div>
-                </>
-              )}
-            </div>
           </div>
         );
       })()}
+
+      {/* Settings button — independent, top right */}
+      <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 15 }}>
+        <button
+          onClick={() => setShowSettings(s => !s)}
+          aria-label="TopN 設定を開く"
+          aria-expanded={showSettings}
+          aria-controls="sankey-topn-settings"
+          aria-haspopup="dialog"
+          style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'transparent', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: showSettings ? '#333' : '#888' }}
+        >⋮</button>
+        {showSettings && (
+          <>
+            <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
+            <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 48, color: '#555' }}>省庁:</span>
+                <input type="number" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ flex: 1 }} />
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 48, color: '#555' }}>事業:</span>
+                <input type="number" min={1} max={50} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(50, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={50} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ flex: 1 }} />
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 48, color: '#555' }}>支出先:</span>
+                <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ flex: 1 }} />
+              </label>
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Legend — bottom left, beside minimap */}
       <div style={{ position: 'absolute', bottom: 12, left: MINIMAP_W + 20, zIndex: 15, display: 'flex', gap: 12, alignItems: 'center', background: 'rgba(255,255,255,0.85)', padding: '5px 10px', borderRadius: 5, fontSize: 11, border: '1px solid #e0e0e0', pointerEvents: 'none' }}>
