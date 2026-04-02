@@ -478,6 +478,7 @@ export default function RealDataSankeyPage() {
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
+  const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
   const [baseZoom, setBaseZoom] = useState(1);
@@ -757,18 +758,38 @@ export default function RealDataSankeyPage() {
                 {(() => {
                   const maxCol = layout.maxCol || 1;
                   const amt = (n: LayoutNode) => n.rawValue ?? n.value;
-                  const colTotals: (number | null)[] = [
-                    (() => { const n = layout.nodes.find(n => n.type === 'total'); return n ? amt(n) : null; })(),
-                    layout.nodes.filter(n => n.type === 'ministry').reduce((s, n) => s + amt(n), 0),
-                    layout.nodes.filter(n => n.type === 'project-budget').reduce((s, n) => s + amt(n), 0),
-                    layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + amt(n), 0),
-                    layout.nodes.filter(n => n.type === 'recipient').reduce((s, n) => s + amt(n), 0),
-                  ];
+                  const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
+                  const colNodes = colNodeTypes.map(t =>
+                    t === 'total'
+                      ? layout.nodes.filter(n => n.type === 'total')
+                      : layout.nodes.filter(n => n.type === t)
+                  );
+                  const colTotals: (number | null)[] = colNodes.map((nodes, i) =>
+                    i === 0 ? (nodes[0] ? amt(nodes[0]) : null) : nodes.reduce((s, n) => s + amt(n), 0)
+                  );
+                  const colCounts: (number | null)[] = colNodes.map((nodes, i) =>
+                    i === 0 ? null : nodes.length
+                  );
                   return COL_LABELS.map((label, i) => {
                     const x = (i / maxCol) * (layout.innerW - NODE_W);
                     const total = colTotals[i];
                     return (
-                      <text key={i} x={x + NODE_W / 2} y={-10} textAnchor="middle" fontSize={11} fill="#999">
+                      <text
+                        key={i}
+                        x={x + NODE_W / 2} y={-10}
+                        textAnchor="middle" fontSize={11} fill="#999"
+                        style={{ cursor: 'default' }}
+                        onMouseEnter={(e) => {
+                          const rect = containerRef.current?.getBoundingClientRect();
+                          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                          setHoveredColIndex(i);
+                        }}
+                        onMouseMove={(e) => {
+                          const rect = containerRef.current?.getBoundingClientRect();
+                          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                        }}
+                        onMouseLeave={() => setHoveredColIndex(null)}
+                      >
                         {label}{total != null ? ` ${formatYen(total)}` : ''}
                       </text>
                     );
@@ -930,6 +951,34 @@ export default function RealDataSankeyPage() {
               )}
             </div>
           )}
+          {/* DOM tooltip — column label hover */}
+          {hoveredColIndex !== null && layout && (() => {
+            const amt = (n: LayoutNode) => n.rawValue ?? n.value;
+            const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
+            const nodes = hoveredColIndex === 0
+              ? layout.nodes.filter(n => n.type === 'total')
+              : layout.nodes.filter(n => n.type === colNodeTypes[hoveredColIndex]);
+            const total = hoveredColIndex === 0
+              ? (nodes[0] ? amt(nodes[0]) : 0)
+              : nodes.reduce((s, n) => s + amt(n), 0);
+            const count = hoveredColIndex === 0 ? null : nodes.length;
+            const colDescs = [
+              'ウィンドウ内支出先合計',
+              'ウィンドウ内支出合計',
+              '元の予算額合計（ウィンドウ非依存）',
+              'ウィンドウ内支出先への支出合計（tail除外）',
+              '全エッジ合計（ウィンドウ外流入含む）',
+            ];
+            return (
+              <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y + 16, background: 'rgba(0,0,0,0.85)', color: '#fff', padding: '8px 12px', borderRadius: 4, fontSize: 12, lineHeight: 1.5, pointerEvents: 'none', zIndex: 20, whiteSpace: 'nowrap' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: 2 }}>{COL_LABELS[hoveredColIndex]}</div>
+                {count != null && <div style={{ color: '#aaa', fontSize: 11 }}>{count.toLocaleString()}件</div>}
+                <div style={{ color: '#7df' }}>{formatYen(total)}</div>
+                <div style={{ color: '#aaa', fontSize: 11 }}>{total.toLocaleString()}円</div>
+                <div style={{ color: '#888', fontSize: 10, marginTop: 4 }}>{colDescs[hoveredColIndex]}</div>
+              </div>
+            );
+          })()}
         </>
       )}
 
