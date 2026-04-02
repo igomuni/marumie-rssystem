@@ -964,13 +964,14 @@ export default function RealDataSankeyPage() {
                 onMouseLeave={() => { minimapDragging.current = false; }}
                 style={{
                   position: 'absolute',
-                  left: 8,
+                  left: selectedNodeId !== null ? (isPanelCollapsed ? 26 : 288) : 8,
                   bottom: 8,
                   zIndex: 10,
                   border: '1px solid #ccc',
                   borderRadius: 4,
                   cursor: 'crosshair',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+                  transition: 'left 0.2s ease',
                 }}
               />
             )}
@@ -1036,28 +1037,49 @@ export default function RealDataSankeyPage() {
             overflow: 'visible',
           }}
         >
-          {/* Collapse/expand toggle button */}
-          <button
+          {/* Collapse/expand toggle + close buttons on right edge */}
+          <div
             data-pan-disabled="true"
-            onClick={() => setIsPanelCollapsed(c => !c)}
-            title={isPanelCollapsed ? 'パネルを展開' : 'パネルを折りたたむ'}
             style={{
               position: 'absolute', right: -18, top: '50%', transform: 'translateY(-50%)',
-              width: 18, height: 48,
+              width: 18,
               background: '#fff', border: '1px solid #e0e0e0', borderLeft: 'none',
               borderRadius: '0 6px 6px 0',
               boxShadow: '2px 0 4px rgba(0,0,0,0.08)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: 0,
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
             }}
           >
-            {/* chevron_right when collapsed, chevron_left when expanded */}
-            <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#888">
-              {isPanelCollapsed
-                ? <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                : <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>}
-            </svg>
-          </button>
+            {/* Close button (✕): deselects node, panel disappears */}
+            <button
+              data-pan-disabled="true"
+              onClick={() => selectNode(null)}
+              title="閉じる（選択解除）"
+              style={{
+                width: 18, height: 28,
+                background: 'transparent', border: 'none', borderBottom: '1px solid #e8e8e8',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 0, color: '#bbb', fontSize: 11, lineHeight: 1, borderRadius: '0 6px 0 0',
+              }}
+            >✕</button>
+            {/* Collapse/expand button: panel folds, node stays selected */}
+            <button
+              data-pan-disabled="true"
+              onClick={() => setIsPanelCollapsed(c => !c)}
+              title={isPanelCollapsed ? 'パネルを展開' : 'パネルを折りたたむ'}
+              style={{
+                width: 18, height: 28,
+                background: 'transparent', border: 'none',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: 0, borderRadius: '0 0 6px 0',
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#aaa">
+                {isPanelCollapsed
+                  ? <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                  : <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>}
+              </svg>
+            </button>
+          </div>
 
           {/* Panel content */}
           {!isPanelCollapsed && selectedNode && (
@@ -1073,11 +1095,6 @@ export default function RealDataSankeyPage() {
                       {formatYen(selectedNode.rawValue ?? selectedNode.value)}
                     </div>
                   </div>
-                  <button
-                    onClick={() => selectNode(null)}
-                    title="閉じる"
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 16, lineHeight: 1, padding: '2px 4px', flexShrink: 0 }}
-                  >✕</button>
                 </div>
                 <div style={{ display: 'flex', gap: 5, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                   <span style={{ background: getNodeColor(selectedNode), color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>
