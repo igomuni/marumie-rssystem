@@ -713,6 +713,13 @@ export default function RealDataSankeyPage() {
     if (id !== null) setIsPanelCollapsed(false);
   }, []);
 
+  // Auto-clear stale selection when layout no longer contains the selected node
+  useEffect(() => {
+    if (selectedNodeId !== null && layout && !selectedNode) {
+      selectNode(null);
+    }
+  }, [layout, selectedNode, selectedNodeId, selectNode]);
+
   const handleConnectionClick = useCallback((nodeId: string) => {
     // If already in layout, just select
     if (layout?.nodes.find(n => n.id === nodeId)) {
@@ -819,6 +826,13 @@ export default function RealDataSankeyPage() {
     setPan({ x: cW / 2 - svgX * zoom, y: cH / 2 - svgY * zoom });
   }, [svgWidth, minimapH, zoom]);
 
+  // Escape key deselects via window listener (reliable regardless of focus)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') selectNode(null); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectNode]);
+
   const applyZoom = useCallback((factor: number) => {
     const nz = Math.max(0.2, Math.min(5, zoom * factor));
     setPan({ x: svgWidth / 2 - (svgWidth / 2 - pan.x) * (nz / zoom), y: svgHeight / 2 - (svgHeight / 2 - pan.y) * (nz / zoom) });
@@ -834,9 +848,6 @@ export default function RealDataSankeyPage() {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      onClick={(e) => { if (didPanRef.current) return; if (!isOverlayControlTarget(e.target)) selectNode(null); }}
-      onKeyDown={(e) => { if (e.key === 'Escape') selectNode(null); }}
-      tabIndex={-1}
     >
 
       {loading && (
@@ -859,6 +870,12 @@ export default function RealDataSankeyPage() {
               overflow="visible"
               style={{ position: 'absolute', inset: 0, display: 'block' }}
             >
+              {/* Backdrop: full-SVG invisible rect for deselection on background click */}
+              <rect
+                x={0} y={0} width={svgWidth} height={svgHeight}
+                fill="transparent"
+                onClick={() => { if (!didPanRef.current) selectNode(null); }}
+              />
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
                 {/* Column labels with totals */}
@@ -939,6 +956,7 @@ export default function RealDataSankeyPage() {
                       if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
                     }}
                     onMouseLeave={() => setHoveredLink(null)}
+                    onClick={(e) => e.stopPropagation()}
                     style={{ cursor: 'pointer' }}
                   />
                 ))}
@@ -1022,7 +1040,7 @@ export default function RealDataSankeyPage() {
                 ref={minimapRef}
                 width={MINIMAP_W}
                 height={minimapH}
-                onClick={minimapNavigate}
+                onClick={(e) => { e.stopPropagation(); minimapNavigate(e); }}
                 onMouseDown={(e) => { e.stopPropagation(); minimapDragging.current = true; minimapNavigate(e); }}
                 onMouseMove={(e) => { if (minimapDragging.current) minimapNavigate(e); }}
                 onMouseUp={() => { minimapDragging.current = false; }}
@@ -1174,14 +1192,16 @@ export default function RealDataSankeyPage() {
                     流入元 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.inEdges.length}件)</span>
                   </div>
                   {selectedNodeAllConnections.inEdges.slice(0, inDisplayCount).map((item, i) => (
-                    <div
+                    <button
                       key={i}
-                      onClick={() => !item.aggregated && handleConnectionClick(item.id)}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', cursor: item.aggregated ? 'default' : 'pointer', gap: 6 }}
+                      type="button"
+                      disabled={item.aggregated}
+                      onClick={() => handleConnectionClick(item.id)}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                     >
                       <span style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>← {item.name}</span>
                       <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
-                    </div>
+                    </button>
                   ))}
                   {inDisplayCount < selectedNodeAllConnections.inEdges.length && (
                     <button
@@ -1199,14 +1219,16 @@ export default function RealDataSankeyPage() {
                     流出先 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.outEdges.length}件)</span>
                   </div>
                   {selectedNodeAllConnections.outEdges.slice(0, outDisplayCount).map((item, i) => (
-                    <div
+                    <button
                       key={i}
-                      onClick={() => !item.aggregated && handleConnectionClick(item.id)}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', cursor: item.aggregated ? 'default' : 'pointer', gap: 6 }}
+                      type="button"
+                      disabled={item.aggregated}
+                      onClick={() => handleConnectionClick(item.id)}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                     >
                       <span style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name} →</span>
                       <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
-                    </div>
+                    </button>
                   ))}
                   {outDisplayCount < selectedNodeAllConnections.outEdges.length && (
                     <button
