@@ -1066,9 +1066,9 @@ export default function RealDataSankeyPage() {
         </div>
         {/* 全体表示ボタン */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-          {/* Material Icons: fit_screen */}
+          {/* Material Icons: fullscreen */}
           <button onClick={resetViewport} title="全体表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M17 19H7c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2h5v2H7v10h10v-5h2v5c0 1.1-.9 2-2 2zm-1-8V7h-4l1.5-1.5-1.06-1.06L9.88 7H9v.88L6.44 10.44l1.06 1.06L9 10v1h7zm-3-3h3v3l-3-3z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
           </button>
         </div>
       </div>
