@@ -1049,28 +1049,16 @@ export default function RealDataSankeyPage() {
               display: 'flex', flexDirection: 'column', alignItems: 'center',
             }}
           >
-            {/* Close button (✕): deselects node, panel disappears */}
-            <button
-              data-pan-disabled="true"
-              onClick={() => selectNode(null)}
-              title="閉じる（選択解除）"
-              style={{
-                width: 18, height: 28,
-                background: 'transparent', border: 'none', borderBottom: '1px solid #e8e8e8',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 0, color: '#bbb', fontSize: 11, lineHeight: 1, borderRadius: '0 6px 0 0',
-              }}
-            >✕</button>
             {/* Collapse/expand button: panel folds, node stays selected */}
             <button
               data-pan-disabled="true"
               onClick={() => setIsPanelCollapsed(c => !c)}
               title={isPanelCollapsed ? 'パネルを展開' : 'パネルを折りたたむ'}
               style={{
-                width: 18, height: 28,
+                width: 18, height: 48,
                 background: 'transparent', border: 'none',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 0, borderRadius: '0 0 6px 0',
+                padding: 0, borderRadius: '0 6px 6px 0',
               }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#aaa">
@@ -1095,6 +1083,11 @@ export default function RealDataSankeyPage() {
                       {formatYen(selectedNode.rawValue ?? selectedNode.value)}
                     </div>
                   </div>
+                  <button
+                    onClick={() => selectNode(null)}
+                    title="閉じる（選択解除）"
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 16, lineHeight: 1, padding: '2px 4px', flexShrink: 0 }}
+                  >✕</button>
                 </div>
                 <div style={{ display: 'flex', gap: 5, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                   <span style={{ background: getNodeColor(selectedNode), color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>
