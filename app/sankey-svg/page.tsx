@@ -531,6 +531,11 @@ export default function RealDataSankeyPage() {
   const stopOffsetRepeat = useCallback(() => {
     if (offsetRepeatRef.current !== null) { clearInterval(offsetRepeatRef.current); offsetRepeatRef.current = null; }
   }, []);
+  useEffect(() => {
+    const onBlur = () => stopOffsetRepeat();
+    window.addEventListener('blur', onBlur);
+    return () => { stopOffsetRepeat(); window.removeEventListener('blur', onBlur); };
+  }, [stopOffsetRepeat]);
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Prevent overlay control interactions from bubbling into canvas pan/zoom
@@ -549,7 +554,7 @@ export default function RealDataSankeyPage() {
     const my = e.clientY - rect.top;
 
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.2, Math.min(10, zoom * delta));
+    const newZoom = Math.max(0.2, Math.min(baseZoom * 10, zoom * delta));
 
     // Adjust pan so zoom centers on mouse position
     const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
@@ -557,7 +562,7 @@ export default function RealDataSankeyPage() {
 
     setZoom(newZoom);
     setPan({ x: newPanX, y: newPanY });
-  }, [zoom, pan]);
+  }, [zoom, pan, baseZoom]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || isOverlayControlTarget(e.target)) return; // left click only
@@ -911,10 +916,12 @@ export default function RealDataSankeyPage() {
     // Target: minimum zoom that makes the label visible, with small margin.
     const h = selectedNode.y1 - selectedNode.y0;
     const minZoomForLabel = 10 / (h + NODE_PAD);
-    const targetK = Math.max(zoom, Math.min(10, minZoomForLabel * 1.2));
+    const panelW = isPanelCollapsed ? 0 : 280;
+    const availableW = cW - panelW;
+    const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
     setZoom(targetK);
-    setPan({ x: cW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
-  }, [selectedNode, selectedNodeInLayout, zoom]);
+    setPan({ x: panelW + availableW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
+  }, [selectedNode, selectedNodeInLayout, zoom, baseZoom, isPanelCollapsed]);
 
   const focusOnNeighborhood = useCallback(() => {
     if (!selectedNode || !selectedNodeInLayout || !layout || !containerRef.current) return;
@@ -938,18 +945,18 @@ export default function RealDataSankeyPage() {
     // Account for side panel: visible area is shifted right when panel is open
     const panelW = isPanelCollapsed ? 0 : 280;
     const availableW = cW - panelW;
-    const targetK = Math.max(0.2, Math.min(10, Math.min(availableW / boxW, cH / boxH) * 0.9));
+    const targetK = Math.max(0.2, Math.min(baseZoom * 10, Math.min(availableW / boxW, cH / boxH) * 0.9));
     const centerX = MARGIN.left + (minX + maxX) / 2;
     const centerY = MARGIN.top + (minY + maxY) / 2;
     setZoom(targetK);
     setPan({ x: panelW + availableW / 2 - centerX * targetK, y: cH / 2 - centerY * targetK });
-  }, [selectedNode, selectedNodeInLayout, layout, isPanelCollapsed]);
+  }, [selectedNode, selectedNodeInLayout, layout, isPanelCollapsed, baseZoom]);
 
   const applyZoom = useCallback((factor: number) => {
-    const nz = Math.max(0.2, Math.min(10, zoom * factor));
+    const nz = Math.max(0.2, Math.min(baseZoom * 10, zoom * factor));
     setPan({ x: svgWidth / 2 - (svgWidth / 2 - pan.x) * (nz / zoom), y: svgHeight / 2 - (svgHeight / 2 - pan.y) * (nz / zoom) });
     setZoom(nz);
-  }, [zoom, pan, svgWidth, svgHeight]);
+  }, [zoom, pan, svgWidth, svgHeight, baseZoom]);
 
   return (
     <div
@@ -1536,9 +1543,9 @@ export default function RealDataSankeyPage() {
               type="range"
               aria-label="ズーム倍率"
               min={Math.log10(0.2)}
-              max={Math.log10(10)}
+              max={Math.log10(baseZoom * 10)}
               step={0.01}
-              value={Math.log10(Math.max(0.2, Math.min(10, zoom)))}
+              value={Math.log10(Math.max(0.2, Math.min(baseZoom * 10, zoom)))}
               onChange={e => { const newK = Math.pow(10, parseFloat(e.target.value)); applyZoom(newK / zoom); }}
               style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 16, height: 80 }}
               title={`Zoom: ${Math.round(zoom / baseZoom * 100)}%`}
