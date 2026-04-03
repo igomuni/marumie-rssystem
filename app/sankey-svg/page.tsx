@@ -757,11 +757,30 @@ export default function RealDataSankeyPage() {
     }
   }, [selectedNode, selectedNodeId, selectNode]);
 
+  // Imperatively focus a layout node (direct call + pending effect)
+  const focusOnNode = useCallback((node: LayoutNode) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    const cx = MARGIN.left + node.x0 + NODE_W / 2;
+    const cy = MARGIN.top + node.y0 + (node.y1 - node.y0) / 2;
+    const h = node.y1 - node.y0;
+    const minZoomForLabel = 10 / (h + NODE_PAD);
+    const panelW = isPanelCollapsed ? 0 : 280;
+    const availableW = cW - panelW;
+    const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
+    setZoom(targetK);
+    setPan({ x: panelW + availableW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
+  }, [zoom, baseZoom, isPanelCollapsed]);
+
   const handleConnectionClick = useCallback((nodeId: string) => {
-    // If already in layout, just select (clear any existing pin)
-    if (layout?.nodes.find(n => n.id === nodeId)) {
+    // If already in layout, select and focus directly (no effect needed)
+    const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
+    if (inLayoutNode) {
       setPinnedProjectId(null);
       selectNode(nodeId);
+      focusOnNode(inLayoutNode);
       return;
     }
     // Helper: jump recipientOffset to center on a recipient rank
@@ -796,10 +815,10 @@ export default function RealDataSankeyPage() {
     } else {
       setPinnedProjectId(null);
     }
-    // Focus on the node after selection (works for both in-layout and newly pinned nodes)
+    // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
     pendingFocusId.current = nodeId;
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData]);
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNode]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -839,25 +858,14 @@ export default function RealDataSankeyPage() {
     }
   }, [layout, resetView]);
 
-  // Focus on node after search selection (fires once node appears in layout)
+  // Focus on node after selection — fires when node appears in layout (pinned TopN+1 case)
   useEffect(() => {
-    if (!pendingFocusId.current || !layout || !containerRef.current) return;
+    if (!pendingFocusId.current || !layout) return;
     const node = layout.nodes.find(n => n.id === pendingFocusId.current);
     if (!node) return;
     pendingFocusId.current = null;
-    const container = containerRef.current;
-    const cW = container.clientWidth;
-    const cH = container.clientHeight;
-    const cx = MARGIN.left + node.x0 + NODE_W / 2;
-    const cy = MARGIN.top + node.y0 + (node.y1 - node.y0) / 2;
-    const h = node.y1 - node.y0;
-    const minZoomForLabel = 10 / (h + NODE_PAD);
-    const panelW = isPanelCollapsed ? 0 : 280;
-    const availableW = cW - panelW;
-    const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
-    setZoom(targetK);
-    setPan({ x: panelW + availableW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
-  }, [layout, selectedNodeId, zoom, baseZoom, isPanelCollapsed]);
+    focusOnNode(node);
+  }, [layout, focusOnNode]);
 
   // Draw minimap
   useEffect(() => {
