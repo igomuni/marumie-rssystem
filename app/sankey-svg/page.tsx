@@ -120,6 +120,7 @@ function filterTopN(
   topProject: number,
   topRecipient: number,
   recipientOffset: number,
+  pinnedProjectId: string | null = null,
 ): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number } {
   // Build O(1) lookup map
   const nodeById = new Map(allNodes.map(n => [n.id, n]));
@@ -166,10 +167,17 @@ function filterTopN(
   const topProjectNodes = topMinistryAllProjects
     .slice(0, topProject)
     .filter(n => (projectWindowValue.get(n.id) || 0) > 0);
+  // Pin: force-include the pinned project (TopN+1) if not already present
+  if (pinnedProjectId) {
+    const pinned = allNodes.find(n => n.id === pinnedProjectId && n.type === 'project-spending');
+    if (pinned && !topProjectNodes.some(n => n.id === pinnedProjectId)) {
+      topProjectNodes.push(pinned);
+    }
+  }
   const topProjectIds = new Set(topProjectNodes.map(n => n.id));
 
   const otherMinistryProjects = allNodes.filter(
-    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '')
+    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id)
   );
   const otherProjects = [
     ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id)),
@@ -289,7 +297,8 @@ function filterTopN(
   // ministry → project-budget
   for (const n of topProjectNodes) {
     const wv = projectWindowValue.get(n.id) || 0;
-    if (wv > 0) edges.push({ source: `ministry-${n.ministry}`, target: `project-budget-${n.projectId}`, value: wv });
+    const ministrySource = topMinistryNames.has(n.ministry || '') ? `ministry-${n.ministry}` : '__agg-ministry';
+    if (wv > 0) edges.push({ source: ministrySource, target: `project-budget-${n.projectId}`, value: wv });
   }
   if (otherProjectWindowTotal > 0) {
     for (const mn of topMinistryNodes) {
@@ -484,6 +493,7 @@ export default function RealDataSankeyPage() {
   const [topProject, setTopProject] = useState(100);
   const [topRecipient, setTopRecipient] = useState(100);
   const [recipientOffset, setRecipientOffset] = useState(0);
+  const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
@@ -528,6 +538,7 @@ export default function RealDataSankeyPage() {
   const panOrigin = useRef({ x: 0, y: 0 });
   const didPanRef = useRef(false);
   const offsetRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pendingFocusId = useRef<string | null>(null);
   const stopOffsetRepeat = useCallback(() => {
     if (offsetRepeatRef.current !== null) { clearInterval(offsetRepeatRef.current); offsetRepeatRef.current = null; }
   }, []);
@@ -651,8 +662,8 @@ export default function RealDataSankeyPage() {
     // Clamp offset to valid range
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset]);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -737,6 +748,7 @@ export default function RealDataSankeyPage() {
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
     if (id !== null) setIsPanelCollapsed(false);
+    else setPinnedProjectId(null);
   }, []);
 
   // Auto-clear stale selection when node no longer exists in graphData at all
@@ -746,10 +758,30 @@ export default function RealDataSankeyPage() {
     }
   }, [selectedNode, selectedNodeId, selectNode]);
 
+  // Imperatively focus a layout node (direct call + pending effect)
+  const focusOnNode = useCallback((node: LayoutNode) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    const cx = MARGIN.left + node.x0 + NODE_W / 2;
+    const cy = MARGIN.top + node.y0 + (node.y1 - node.y0) / 2;
+    const h = node.y1 - node.y0;
+    const minZoomForLabel = 10 / (h + NODE_PAD);
+    const panelW = isPanelCollapsed ? 0 : 280;
+    const availableW = cW - panelW;
+    const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
+    setZoom(targetK);
+    setPan({ x: panelW + availableW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
+  }, [zoom, baseZoom, isPanelCollapsed]);
+
   const handleConnectionClick = useCallback((nodeId: string) => {
-    // If already in layout, just select
-    if (layout?.nodes.find(n => n.id === nodeId)) {
+    // If already in layout, select and focus directly (no effect needed)
+    const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
+    if (inLayoutNode) {
+      setPinnedProjectId(null);
       selectNode(nodeId);
+      focusOnNode(inLayoutNode);
       return;
     }
     // Helper: jump recipientOffset to center on a recipient rank
@@ -764,11 +796,11 @@ export default function RealDataSankeyPage() {
       const rank = allRecipientRanks.get(nodeId);
       if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
     } else if ((nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-')) && filtered && graphData) {
-      // Project outside TopN: find its highest-value recipient edge and jump there.
-      // This shifts the window so the project's window spending increases → likely enters TopN.
+      // Project outside TopN: pin it (TopN+1) and jump offset to its best recipient
       const spendingId = nodeId.startsWith('project-budget-')
         ? nodeId.replace('project-budget-', 'project-spending-')
         : nodeId;
+      setPinnedProjectId(spendingId);
       let bestRecipientId: string | null = null;
       let bestValue = 0;
       for (const e of graphData.edges) {
@@ -781,11 +813,13 @@ export default function RealDataSankeyPage() {
         const rank = allRecipientRanks.get(bestRecipientId);
         if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
       }
+    } else {
+      setPinnedProjectId(null);
     }
-    // select — if node enters layout after offset change, highlight/dim applies;
-    // otherwise panel shows info from graphData only
+    // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
+    pendingFocusId.current = nodeId;
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData]);
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNode]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -823,6 +857,15 @@ export default function RealDataSankeyPage() {
       resetView();
     }
   }, [layout, resetView]);
+
+  // Focus on node after selection — fires when node appears in layout (pinned TopN+1 case)
+  useEffect(() => {
+    if (!pendingFocusId.current || !layout) return;
+    const node = layout.nodes.find(n => n.id === pendingFocusId.current);
+    if (!node) return;
+    pendingFocusId.current = null;
+    focusOnNode(node);
+  }, [layout, focusOnNode]);
 
   // Draw minimap
   useEffect(() => {
