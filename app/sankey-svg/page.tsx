@@ -796,7 +796,8 @@ export default function RealDataSankeyPage() {
     } else {
       setPinnedProjectId(null);
     }
-    // select — node is now guaranteed in layout (if pinned) or panel shows info from graphData only
+    // Focus on the node after selection (works for both in-layout and newly pinned nodes)
+    pendingFocusId.current = nodeId;
     selectNode(nodeId);
   }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData]);
 
