@@ -1,0 +1,352 @@
+import type { RawNode, RawEdge, LayoutNode, LayoutLink } from '@/types/sankey-svg';
+import { MARGIN, NODE_W, NODE_PAD, getColumn, sortPriority } from '@/app/lib/sankey-svg-constants';
+
+// ── Client-side TopN filtering ──
+
+export function filterTopN(
+  allNodes: RawNode[],
+  allEdges: RawEdge[],
+  topMinistry: number,
+  topProject: number,
+  topRecipient: number,
+  recipientOffset: number,
+  pinnedProjectId: string | null = null,
+): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number } {
+  // Build O(1) lookup map
+  const nodeById = new Map(allNodes.map(n => [n.id, n]));
+
+  // 1. TopN ministries by total value (stable ranking)
+  const ministries = allNodes.filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
+  const topMinistryNodes = ministries.slice(0, topMinistry);
+  const topMinistryIds = new Set(topMinistryNodes.map(n => n.id));
+  const topMinistryNames = new Set(topMinistryNodes.map(n => n.name));
+  const otherMinistries = ministries.slice(topMinistry);
+
+  // 2. Recipient window — ranked by total amount across ALL edges (stable ranking)
+  const allRecipientAmounts = new Map<string, number>();
+  for (const e of allEdges) {
+    if (e.target.startsWith('r-')) {
+      allRecipientAmounts.set(e.target, (allRecipientAmounts.get(e.target) || 0) + e.value);
+    }
+  }
+  const allSortedRecipients = Array.from(allRecipientAmounts.entries()).sort((a, b) => b[1] - a[1]);
+  const totalRecipientCount = allSortedRecipients.length;
+  const windowRecipients = allSortedRecipients.slice(recipientOffset, recipientOffset + topRecipient);
+  const windowRecipientIds = new Set(windowRecipients.map(([id]) => id));
+  const tailRecipients = allSortedRecipients.slice(recipientOffset + topRecipient);
+  const tailRecipientIds = new Set(tailRecipients.map(([id]) => id));
+  // Recipients before the window (pre-window) are also hidden
+  const preWindowRecipientIds = new Set(allSortedRecipients.slice(0, recipientOffset).map(([id]) => id));
+
+  // 3. Per-project window spending (all projects, used for re-ranking)
+  const projectWindowValue = new Map<string, number>();
+  for (const e of allEdges) {
+    if (windowRecipientIds.has(e.target)) {
+      projectWindowValue.set(e.source, (projectWindowValue.get(e.source) || 0) + e.value);
+    }
+  }
+
+  // 4. TopN projects re-ranked by WINDOW spending (dynamic as offset changes)
+  //    Scope: projects belonging to top ministries only
+  const topMinistryAllProjects = allNodes.filter(
+    n => n.type === 'project-spending' && topMinistryNames.has(n.ministry || '')
+  );
+  topMinistryAllProjects.sort(
+    (a, b) => (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0)
+  );
+  const topProjectNodes = topMinistryAllProjects
+    .slice(0, topProject)
+    .filter(n => (projectWindowValue.get(n.id) || 0) > 0);
+  // Pin: force-include the pinned project (TopN+1) if not already present
+  if (pinnedProjectId) {
+    const pinned = allNodes.find(n => n.id === pinnedProjectId && n.type === 'project-spending');
+    if (pinned && !topProjectNodes.some(n => n.id === pinnedProjectId)) {
+      topProjectNodes.push(pinned);
+    }
+  }
+  const topProjectIds = new Set(topProjectNodes.map(n => n.id));
+
+  const otherMinistryProjects = allNodes.filter(
+    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id)
+  );
+  const otherProjects = [
+    ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id)),
+    ...otherMinistryProjects,
+  ];
+  const otherProjectSpendingIds = new Set(otherProjects.map(n => n.id));
+
+  // 5. Aggregated values
+  let otherProjectWindowTotal = 0;
+  let otherProjectTailTotal = 0;
+  const otherProjectsWithFlow = new Set<string>();
+  for (const e of allEdges) {
+    if (!otherProjectSpendingIds.has(e.source)) continue;
+    if (windowRecipientIds.has(e.target)) {
+      otherProjectWindowTotal += e.value;
+      otherProjectsWithFlow.add(e.source);
+    } else if (tailRecipientIds.has(e.target)) {
+      otherProjectTailTotal += e.value;
+      otherProjectsWithFlow.add(e.source);
+    }
+  }
+
+  const totalWindowSpending = windowRecipients.reduce((s, [, v]) => s + v, 0);
+
+  // Projects with hidden recipients (pre-window or tail) — used for budget node cap.
+  const topProjectsWithHiddenRecipients = new Set<string>();
+  for (const e of allEdges) {
+    if (topProjectIds.has(e.source) && (tailRecipientIds.has(e.target) || preWindowRecipientIds.has(e.target))) {
+      topProjectsWithHiddenRecipients.add(e.source);
+    }
+  }
+
+  // 6. Ministry window values
+  const ministryWindowValue = new Map<string, number>();
+  for (const e of allEdges) {
+    if (windowRecipientIds.has(e.target)) {
+      const spNode = nodeById.get(e.source);
+      if (spNode?.type === 'project-spending' && spNode.ministry) {
+        ministryWindowValue.set(spNode.ministry, (ministryWindowValue.get(spNode.ministry) || 0) + e.value);
+      }
+    }
+  }
+  const otherMinistryWindowValue = otherMinistries.reduce((s, n) => s + (ministryWindowValue.get(n.name) || 0), 0);
+
+  // ── Build nodes ──
+  const nodes: RawNode[] = [];
+  const totalNode = allNodes.find(n => n.type === 'total');
+  if (totalNode) nodes.push({ ...totalNode, value: totalWindowSpending });
+
+  for (const n of topMinistryNodes) {
+    const wv = ministryWindowValue.get(n.name) || 0;
+    if (wv > 0) nodes.push({ ...n, value: wv });
+  }
+  if (otherMinistryWindowValue > 0) {
+    nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryWindowValue, aggregated: true });
+  }
+
+  for (const n of topProjectNodes) {
+    const wv = projectWindowValue.get(n.id) || 0;
+    const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
+    // Budget: full height when all recipients visible; capped to wv when any are hidden.
+    const hasHidden = topProjectsWithHiddenRecipients.has(n.id);
+    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true, layoutCap: hasHidden ? wv : undefined });
+    // skipLinkOverride + value=wv: spending node height = window spending only, no cap needed.
+    // The tail edge still renders (ribbon to __agg-recipient) but doesn't inflate node height.
+    nodes.push({ ...n, value: wv, skipLinkOverride: true });
+  }
+  // Create __agg-project-budget only when there is window spending (needs ministry→budget edges).
+  // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
+  // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
+  if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
+    const minTopProjectWindowValue = topProjectNodes.length > 0
+      ? Math.min(...topProjectNodes.map(n => projectWindowValue.get(n.id) || 0))
+      : 0;
+    const projectLayoutCap = minTopProjectWindowValue > 0 ? minTopProjectWindowValue * topProject : otherProjectTailTotal;
+    if (otherProjectWindowTotal > 0) {
+      nodes.push({ id: '__agg-project-budget', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+    }
+    nodes.push({ id: '__agg-project-spending', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+  }
+
+  for (const [rid] of windowRecipients) {
+    const rNode = nodeById.get(rid);
+    if (rNode) nodes.push({ ...rNode, value: allRecipientAmounts.get(rid) || rNode.value });
+  }
+  const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0);
+  const aggRecipientValue = tailValue + otherProjectTailTotal;
+  if (aggRecipientValue > 0) {
+    // Cap layout height so the aggregate bar doesn't overwhelm the window recipients.
+    // Cap = min window-recipient value × topRecipient  (≈ total height of all window bars if all were minimum-sized).
+    const minWindowRecipientValue = windowRecipients.length > 0
+      ? Math.min(...windowRecipients.map(([, v]) => v))
+      : aggRecipientValue;
+    const layoutCap = minWindowRecipientValue * topRecipient;
+    nodes.push({
+      id: '__agg-recipient',
+      name: `${tailRecipients.length.toLocaleString()}支出先`,
+      type: 'recipient',
+      value: aggRecipientValue,
+      layoutCap: layoutCap,
+      aggregated: true,
+    });
+  }
+
+  // ── Build edges ──
+  const edges: RawEdge[] = [];
+
+  // total → ministry
+  for (const mn of topMinistryNodes) {
+    const wv = ministryWindowValue.get(mn.name) || 0;
+    if (wv > 0) edges.push({ source: 'total', target: mn.id, value: wv });
+  }
+  if (otherMinistryWindowValue > 0) {
+    edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryWindowValue });
+  }
+
+  // ministry → project-budget
+  for (const n of topProjectNodes) {
+    const wv = projectWindowValue.get(n.id) || 0;
+    const ministrySource = topMinistryNames.has(n.ministry || '') ? `ministry-${n.ministry}` : '__agg-ministry';
+    if (wv > 0) edges.push({ source: ministrySource, target: `project-budget-${n.projectId}`, value: wv });
+  }
+  if (otherProjectWindowTotal > 0) {
+    for (const mn of topMinistryNodes) {
+      const v = otherProjects
+        .filter(p => p.ministry === mn.name)
+        .reduce((s, p) => s + (projectWindowValue.get(p.id) || 0), 0);
+      if (v > 0) edges.push({ source: mn.id, target: '__agg-project-budget', value: v });
+    }
+    const otherMinRemain = otherProjects
+      .filter(p => !topMinistryNames.has(p.ministry || ''))
+      .reduce((s, p) => s + (projectWindowValue.get(p.id) || 0), 0);
+    if (otherMinRemain > 0) edges.push({ source: '__agg-ministry', target: '__agg-project-budget', value: otherMinRemain });
+  }
+
+  // project-budget → project-spending
+  for (const n of topProjectNodes) {
+    const wv = projectWindowValue.get(n.id) || 0;
+    edges.push({ source: `project-budget-${n.projectId}`, target: n.id, value: wv });
+  }
+  if (otherProjectWindowTotal > 0) {
+    edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: otherProjectWindowTotal });
+  }
+
+  // project-spending → window recipients
+  const topProjectSpendingIds = new Set(topProjectNodes.map(n => n.id));
+  for (const e of allEdges) {
+    if (topProjectSpendingIds.has(e.source) && windowRecipientIds.has(e.target)) edges.push(e);
+  }
+  // project-spending → __agg-recipient (tail)
+  for (const sp of topProjectNodes) {
+    const v = allEdges.filter(e => e.source === sp.id && tailRecipientIds.has(e.target)).reduce((s, e) => s + e.value, 0);
+    if (v > 0) edges.push({ source: sp.id, target: '__agg-recipient', value: v });
+  }
+
+  // __agg-project-spending → window recipients
+  for (const rid of windowRecipientIds) {
+    const v = allEdges.filter(e => otherProjectSpendingIds.has(e.source) && e.target === rid).reduce((s, e) => s + e.value, 0);
+    if (v > 0) edges.push({ source: '__agg-project-spending', target: rid, value: v });
+  }
+  // __agg-project-spending → __agg-recipient (tail)
+  if (otherProjectTailTotal > 0) {
+    edges.push({ source: '__agg-project-spending', target: '__agg-recipient', value: otherProjectTailTotal });
+  }
+
+  return { nodes, edges, totalRecipientCount };
+}
+
+// ── Custom Layout Engine ──
+
+export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[], containerWidth: number, containerHeight: number) {
+  const innerW = containerWidth - MARGIN.left - MARGIN.right;
+  const innerH = containerHeight - MARGIN.top - MARGIN.bottom;
+  const usedCols = new Set<number>();
+  for (const n of filteredNodes) usedCols.add(getColumn(n));
+  const maxCol = Math.max(...usedCols, 1);
+  const colSpacing = (innerW - NODE_W) / maxCol;
+
+  const nodeMap = new Map<string, LayoutNode>();
+  for (const n of filteredNodes) {
+    nodeMap.set(n.id, { ...n, x0: 0, x1: 0, y0: 0, y1: 0, sourceLinks: [], targetLinks: [] });
+  }
+
+  const links: LayoutLink[] = [];
+  for (const l of filteredEdges) {
+    const src = nodeMap.get(l.source);
+    const tgt = nodeMap.get(l.target);
+    if (!src || !tgt) continue;
+    const link: LayoutLink = { source: src, target: tgt, value: l.value, sourceWidth: 0, targetWidth: 0, y0: 0, y1: 0 };
+    links.push(link);
+    src.sourceLinks.push(link);
+    tgt.targetLinks.push(link);
+  }
+
+  const nodes = Array.from(nodeMap.values());
+  for (const node of nodes) {
+    const srcSum = node.sourceLinks.reduce((s, l) => s + l.value, 0);
+    const tgtSum = node.targetLinks.reduce((s, l) => s + l.value, 0);
+    const linkValue = Math.max(srcSum, tgtSum);
+    if (linkValue > 0 && !node.skipLinkOverride) node.value = linkValue;
+    // Apply layout cap: preserve actual value in rawValue, shrink value for height computation
+    if (node.layoutCap !== undefined && node.value > node.layoutCap) {
+      node.rawValue = node.value;
+      node.value = node.layoutCap;
+    }
+  }
+
+  const columns: Map<number, LayoutNode[]> = new Map();
+  for (const node of nodes) {
+    const col = getColumn(node);
+    if (!columns.has(col)) columns.set(col, []);
+    columns.get(col)!.push(node);
+  }
+
+  for (const [, colNodes] of columns) {
+    colNodes.sort((a, b) => {
+      const ap = sortPriority(a);
+      const bp = sortPriority(b);
+      if (ap !== bp) return ap - bp;
+      return b.value - a.value;
+    });
+  }
+
+  let ky = Infinity;
+  for (const [, colNodes] of columns) {
+    const totalValue = colNodes.reduce((s, n) => s + n.value, 0);
+    const totalPadding = Math.max(0, (colNodes.length - 1) * NODE_PAD);
+    const available = innerH - totalPadding;
+    if (totalValue > 0) ky = Math.min(ky, available / totalValue);
+  }
+  if (!isFinite(ky)) ky = 1;
+
+  for (const [col, colNodes] of columns) {
+    for (const node of colNodes) {
+      node.x0 = col * colSpacing;
+      node.x1 = node.x0 + NODE_W;
+    }
+    let y = 0;
+    for (const node of colNodes) {
+      const h = Math.max(1, node.value * ky);
+      node.y0 = y;
+      node.y1 = y + h;
+      y += h + NODE_PAD;
+    }
+  }
+
+  // Sort links by target/source y-position so ribbons don't cross unnecessarily
+  for (const node of nodes) {
+    node.sourceLinks.sort((a, b) => a.target.y0 - b.target.y0);
+    node.targetLinks.sort((a, b) => a.source.y0 - b.source.y0);
+  }
+
+  for (const node of nodes) {
+    const nodeHeight = node.y1 - node.y0;
+    const totalSrcValue = node.sourceLinks.reduce((s, l) => s + l.value, 0);
+    const totalTgtValue = node.targetLinks.reduce((s, l) => s + l.value, 0);
+    let sy = node.y0;
+    for (const link of node.sourceLinks) {
+      const proportion = totalSrcValue > 0 ? link.value / totalSrcValue : 0;
+      link.sourceWidth = nodeHeight * proportion;
+      link.y0 = sy;
+      sy += link.sourceWidth;
+    }
+    let ty = node.y0;
+    for (const link of node.targetLinks) {
+      const proportion = totalTgtValue > 0 ? link.value / totalTgtValue : 0;
+      link.targetWidth = nodeHeight * proportion;
+      link.y1 = ty;
+      ty += link.targetWidth;
+    }
+  }
+
+  // Content bounding box (in inner coords, before MARGIN)
+  let contentMaxX = 0, contentMaxY = 0;
+  for (const node of nodes) {
+    contentMaxX = Math.max(contentMaxX, node.x1);
+    contentMaxY = Math.max(contentMaxY, node.y1);
+  }
+
+  const LABEL_SPACE = 200; // approximate space for rightmost column labels
+  return { nodes, links, ky, maxCol, innerW, innerH, contentW: contentMaxX + NODE_W + LABEL_SPACE, contentH: contentMaxY };
+}
