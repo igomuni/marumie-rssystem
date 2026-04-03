@@ -856,7 +856,7 @@ export default function RealDataSankeyPage() {
     const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
     setZoom(targetK);
     setPan({ x: panelW + availableW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
-  }, [layout, zoom, baseZoom, isPanelCollapsed]);
+  }, [layout, selectedNodeId, zoom, baseZoom, isPanelCollapsed]);
 
   // Draw minimap
   useEffect(() => {
