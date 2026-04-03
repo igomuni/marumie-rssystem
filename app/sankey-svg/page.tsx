@@ -120,6 +120,7 @@ function filterTopN(
   topProject: number,
   topRecipient: number,
   recipientOffset: number,
+  pinnedProjectId: string | null = null,
 ): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number } {
   // Build O(1) lookup map
   const nodeById = new Map(allNodes.map(n => [n.id, n]));
@@ -166,6 +167,13 @@ function filterTopN(
   const topProjectNodes = topMinistryAllProjects
     .slice(0, topProject)
     .filter(n => (projectWindowValue.get(n.id) || 0) > 0);
+  // Pin: force-include the pinned project (TopN+1) if not already present
+  if (pinnedProjectId) {
+    const pinned = allNodes.find(n => n.id === pinnedProjectId && n.type === 'project-spending');
+    if (pinned && !topProjectNodes.some(n => n.id === pinnedProjectId)) {
+      topProjectNodes.push(pinned);
+    }
+  }
   const topProjectIds = new Set(topProjectNodes.map(n => n.id));
 
   const otherMinistryProjects = allNodes.filter(
@@ -484,6 +492,7 @@ export default function RealDataSankeyPage() {
   const [topProject, setTopProject] = useState(100);
   const [topRecipient, setTopRecipient] = useState(100);
   const [recipientOffset, setRecipientOffset] = useState(0);
+  const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
@@ -651,8 +660,8 @@ export default function RealDataSankeyPage() {
     // Clamp offset to valid range
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset]);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -737,6 +746,7 @@ export default function RealDataSankeyPage() {
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
     if (id !== null) setIsPanelCollapsed(false);
+    else setPinnedProjectId(null);
   }, []);
 
   // Auto-clear stale selection when node no longer exists in graphData at all
@@ -747,8 +757,9 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, selectedNodeId, selectNode]);
 
   const handleConnectionClick = useCallback((nodeId: string) => {
-    // If already in layout, just select
+    // If already in layout, just select (clear any existing pin)
     if (layout?.nodes.find(n => n.id === nodeId)) {
+      setPinnedProjectId(null);
       selectNode(nodeId);
       return;
     }
@@ -764,11 +775,11 @@ export default function RealDataSankeyPage() {
       const rank = allRecipientRanks.get(nodeId);
       if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
     } else if ((nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-')) && filtered && graphData) {
-      // Project outside TopN: find its highest-value recipient edge and jump there.
-      // This shifts the window so the project's window spending increases → likely enters TopN.
+      // Project outside TopN: pin it (TopN+1) and jump offset to its best recipient
       const spendingId = nodeId.startsWith('project-budget-')
         ? nodeId.replace('project-budget-', 'project-spending-')
         : nodeId;
+      setPinnedProjectId(spendingId);
       let bestRecipientId: string | null = null;
       let bestValue = 0;
       for (const e of graphData.edges) {
@@ -781,9 +792,10 @@ export default function RealDataSankeyPage() {
         const rank = allRecipientRanks.get(bestRecipientId);
         if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
       }
+    } else {
+      setPinnedProjectId(null);
     }
-    // select — if node enters layout after offset change, highlight/dim applies;
-    // otherwise panel shows info from graphData only
+    // select — node is now guaranteed in layout (if pinned) or panel shows info from graphData only
     selectNode(nodeId);
   }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData]);
 
