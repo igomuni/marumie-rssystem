@@ -537,6 +537,7 @@ export default function RealDataSankeyPage() {
   const panOrigin = useRef({ x: 0, y: 0 });
   const didPanRef = useRef(false);
   const offsetRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pendingFocusId = useRef<string | null>(null);
   const stopOffsetRepeat = useCallback(() => {
     if (offsetRepeatRef.current !== null) { clearInterval(offsetRepeatRef.current); offsetRepeatRef.current = null; }
   }, []);
@@ -824,6 +825,7 @@ export default function RealDataSankeyPage() {
 
   const handleSearchSelect = useCallback((nodeId: string) => {
     setShowSearchResults(false);
+    pendingFocusId.current = nodeId;
     handleConnectionClick(nodeId);
   }, [handleConnectionClick]);
 
@@ -835,6 +837,26 @@ export default function RealDataSankeyPage() {
       resetView();
     }
   }, [layout, resetView]);
+
+  // Focus on node after search selection (fires once node appears in layout)
+  useEffect(() => {
+    if (!pendingFocusId.current || !layout || !containerRef.current) return;
+    const node = layout.nodes.find(n => n.id === pendingFocusId.current);
+    if (!node) return;
+    pendingFocusId.current = null;
+    const container = containerRef.current;
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    const cx = MARGIN.left + node.x0 + NODE_W / 2;
+    const cy = MARGIN.top + node.y0 + (node.y1 - node.y0) / 2;
+    const h = node.y1 - node.y0;
+    const minZoomForLabel = 10 / (h + NODE_PAD);
+    const panelW = isPanelCollapsed ? 0 : 280;
+    const availableW = cW - panelW;
+    const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
+    setZoom(targetK);
+    setPan({ x: panelW + availableW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
+  }, [layout, zoom, baseZoom, isPanelCollapsed]);
 
   // Draw minimap
   useEffect(() => {
