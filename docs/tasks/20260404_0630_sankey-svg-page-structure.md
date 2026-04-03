@@ -1,26 +1,27 @@
 # /sankey-svg page.tsx 現在の構成
 
 > 作成日: 2026-04-04  
-> 対象ファイル: `app/sankey-svg/page.tsx`（約1646行）  
+> 更新日: 2026-04-04（PR #125 リファクタリング後）  
+> 対象ファイル: `app/sankey-svg/page.tsx`（約1171行、リファクタリング前: 1646行）  
 > 目的: Issue #116 コンポーネント分割に向けた現状把握
 
 ---
 
-## ファイル全体の構成
+## ファイル全体の構成（PR #125 リファクタリング後）
 
-```
-app/sankey-svg/page.tsx
-├── Types（行 5–60）
-├── Layout定数・ユーティリティ（行 62–113）
-├── filterTopN（行 116–347）
-├── computeLayout（行 351–462）
-├── ribbonPath（行 464–476）
-├── formatYen（行 477–482）
-└── SankeySvgPage コンポーネント（行 484–1646）
-    ├── State（行 489–535）
-    ├── Refs（行 512–541）
-    ├── Handlers・Callbacks（行 542–998）
-    └── JSX（行 1002–1646）
+純粋ロジック・型・定数を3ファイルに抽出済み:
+
+```text
+types/sankey-svg.ts                  ← 型定義（RawNode, RawEdge, GraphData, LayoutNode, LayoutLink）
+app/lib/sankey-svg-constants.ts      ← 定数 + 純粋関数（COL_MAP, MARGIN, getNodeColor, ribbonPath, formatYen 等）
+app/lib/sankey-svg-filter.ts         ← フィルタ・レイアウトエンジン（filterTopN, computeLayout）
+app/sankey-svg/page.tsx              ← コンポーネント本体（~1171行）
+    ├── Imports（3ファイルから）
+    └── RealDataSankeyPage コンポーネント
+        ├── State
+        ├── Refs
+        ├── Handlers・Callbacks
+        └── JSX
 ```
 
 ---
@@ -185,7 +186,7 @@ app/sankey-svg/page.tsx
 
 ## JSX 構成（レンダリング）
 
-```
+```text
 <div> (ルートコンテナ)
 ├── <div> SVGコンテナ (containerRef)
 │   ├── <svg> (svgRef)

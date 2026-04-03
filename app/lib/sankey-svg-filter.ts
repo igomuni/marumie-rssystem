@@ -142,7 +142,7 @@ export function filterTopN(
     const minTopProjectWindowValue = topProjectNodes.length > 0
       ? Math.min(...topProjectNodes.map(n => projectWindowValue.get(n.id) || 0))
       : 0;
-    const projectLayoutCap = minTopProjectWindowValue > 0 ? minTopProjectWindowValue * topProject : otherProjectTailTotal;
+    const projectLayoutCap = Math.max(1, minTopProjectWindowValue > 0 ? minTopProjectWindowValue * topProject : otherProjectTailTotal);
     if (otherProjectWindowTotal > 0) {
       nodes.push({ id: '__agg-project-budget', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
     }
