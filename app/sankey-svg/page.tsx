@@ -177,7 +177,7 @@ function filterTopN(
   const topProjectIds = new Set(topProjectNodes.map(n => n.id));
 
   const otherMinistryProjects = allNodes.filter(
-    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '')
+    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id)
   );
   const otherProjects = [
     ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id)),
@@ -297,7 +297,8 @@ function filterTopN(
   // ministry → project-budget
   for (const n of topProjectNodes) {
     const wv = projectWindowValue.get(n.id) || 0;
-    if (wv > 0) edges.push({ source: `ministry-${n.ministry}`, target: `project-budget-${n.projectId}`, value: wv });
+    const ministrySource = topMinistryNames.has(n.ministry || '') ? `ministry-${n.ministry}` : '__agg-ministry';
+    if (wv > 0) edges.push({ source: ministrySource, target: `project-budget-${n.projectId}`, value: wv });
   }
   if (otherProjectWindowTotal > 0) {
     for (const mn of topMinistryNodes) {
