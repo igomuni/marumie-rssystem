@@ -846,7 +846,6 @@ export default function RealDataSankeyPage() {
 
   const handleSearchSelect = useCallback((nodeId: string) => {
     setShowSearchResults(false);
-    pendingFocusId.current = nodeId;
     handleConnectionClick(nodeId);
   }, [handleConnectionClick]);
 
