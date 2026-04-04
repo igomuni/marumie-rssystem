@@ -15,8 +15,8 @@ export default function RealDataSankeyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [topMinistry, setTopMinistry] = useState(37);
-  const [topProject, setTopProject] = useState(100);
-  const [topRecipient, setTopRecipient] = useState(100);
+  const [topProject, setTopProject] = useState(20);
+  const [topRecipient, setTopRecipient] = useState(20);
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
@@ -65,7 +65,7 @@ export default function RealDataSankeyPage() {
   const offsetRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pendingFocusId = useRef<string | null>(null);
   const stopOffsetRepeat = useCallback(() => {
-    if (offsetRepeatRef.current !== null) { clearInterval(offsetRepeatRef.current); offsetRepeatRef.current = null; }
+    if (offsetRepeatRef.current !== null) { clearTimeout(offsetRepeatRef.current); clearInterval(offsetRepeatRef.current); offsetRepeatRef.current = null; }
   }, []);
   useEffect(() => {
     const onBlur = () => stopOffsetRepeat();
@@ -655,7 +655,7 @@ export default function RealDataSankeyPage() {
                     }}
                     onMouseLeave={() => setHoveredLink(null)}
                     onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: 'grab', transition: 'fill-opacity 0.2s ease, stroke-opacity 0.2s ease, stroke-width 0.2s ease' }}
                   />
                 ))}
 
@@ -700,7 +700,7 @@ export default function RealDataSankeyPage() {
                               : (hoveredNode && hoveredNode !== node ? 0.4 : 1)
                           }
                           rx={1}
-                          style={{ cursor: 'pointer' }}
+                          style={{ cursor: 'pointer', transition: 'opacity 0.2s ease' }}
                           onMouseEnter={(e) => {
                             const rect = containerRef.current?.getBoundingClientRect();
                             if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
@@ -719,7 +719,7 @@ export default function RealDataSankeyPage() {
                             y={node.y0 + h / 2}
                             fontSize={9 / zoom}
                             dominantBaseline="middle"
-                            fill="#333"
+                            fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#999' : '#333'}
                             style={{ userSelect: 'none', pointerEvents: 'none' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                           >
@@ -819,6 +819,7 @@ export default function RealDataSankeyPage() {
             zIndex: 25,
             transition: 'width 0.2s ease',
             overflow: 'visible',
+            cursor: 'default',
           }}
         >
           {/* Collapse/expand toggle + close buttons on right edge */}
@@ -892,8 +893,23 @@ export default function RealDataSankeyPage() {
               {/* 流入元 */}
               {selectedNodeAllConnections && selectedNodeAllConnections.inEdges.length > 0 && (
                 <div style={{ padding: '10px 14px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    流入元 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.inEdges.length}件)</span>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span>流入元 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.inEdges.length}件)</span></span>
+                    {selectedNode?.type === 'recipient' && (() => {
+                      const allMinistries = Array.from(new Set(selectedNodeAllConnections.inEdges.map(e => e.ministry ?? '(不明)')));
+                      const allCollapsed = allMinistries.every(m => collapsedMinistries.has(m));
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => setCollapsedMinistries(allCollapsed ? new Set() : new Set(allMinistries))}
+                          style={iconBtnStyle}
+                          title={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'}
+                          aria-label={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'}
+                        >
+                          {allCollapsed ? svgExpandAll : svgCollapseAll}
+                        </button>
+                      );
+                    })()}
                   </div>
                   {selectedNode?.type === 'recipient' ? (() => {
                     // 府省庁グループ表示
@@ -1002,12 +1018,12 @@ export default function RealDataSankeyPage() {
                     </button>
                   ))}
                   {(() => { const rem = selectedNodeAllConnections.outEdges.length - outDisplayCount; return (
-                    <div style={{ display: 'flex', gap: 0, padding: '2px 0' }}>
+                    <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
                       {rem > 0 && <>
-                        <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件表示（残{rem}件）</button>
-                        <button onClick={() => setOutDisplayCount(selectedNodeAllConnections.outEdges.length)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>すべて表示</button>
+                        <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
+                        <button onClick={() => setOutDisplayCount(selectedNodeAllConnections.outEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
                       </>}
-                      {outDisplayCount > 8 && <button onClick={() => setOutDisplayCount(8)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>折りたたむ</button>}
+                      {outDisplayCount > 8 && <button onClick={() => setOutDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
                     </div>
                   ); })()}
                 </div>
@@ -1087,7 +1103,7 @@ export default function RealDataSankeyPage() {
         const rangeEnd = Math.min(clampedOffset + topRecipient, filtered.totalRecipientCount);
         const maxStartRank = maxOffset + 1;
         return (
-          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '6px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
+          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
               {isEditingOffset ? (
@@ -1118,9 +1134,11 @@ export default function RealDataSankeyPage() {
                 ] as [number, string, string][]).map(([delta, path, title]) => (
                   <button key={delta} title={title} aria-label={title}
                     onMouseDown={() => {
-                      const startOffsetRepeat = () => { setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); };
-                      startOffsetRepeat();
-                      offsetRepeatRef.current = setInterval(startOffsetRepeat, 120);
+                      const step = () => { setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); };
+                      step();
+                      offsetRepeatRef.current = setTimeout(() => {
+                        offsetRepeatRef.current = setInterval(step, 150);
+                      }, 400);
                     }}
                     onMouseUp={stopOffsetRepeat} onMouseLeave={stopOffsetRepeat}
                     onClick={e => e.preventDefault()}
@@ -1142,7 +1160,7 @@ export default function RealDataSankeyPage() {
       })()}
 
       {/* Settings button — independent, top right */}
-      <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 15 }}>
+      <div style={{ position: 'absolute', top: 14, right: 12, zIndex: 15 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
           aria-label="TopN 設定を開く"
