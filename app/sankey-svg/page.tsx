@@ -334,9 +334,11 @@ export default function RealDataSankeyPage() {
     // If already in layout, select and focus directly (no effect needed)
     const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
     if (inLayoutNode) {
+      const needsDeferredFocus = pinnedProjectId !== null || isPanelCollapsed;
       setPinnedProjectId(null);
+      if (needsDeferredFocus) pendingFocusId.current = nodeId;
       selectNode(nodeId);
-      focusOnNeighborhood(inLayoutNode);
+      if (!needsDeferredFocus) focusOnNeighborhood(inLayoutNode);
       return;
     }
     // Helper: jump recipientOffset to center on a recipient rank
@@ -374,7 +376,7 @@ export default function RealDataSankeyPage() {
     // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
     pendingFocusId.current = nodeId;
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood]);
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
