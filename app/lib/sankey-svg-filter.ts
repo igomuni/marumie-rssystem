@@ -35,14 +35,14 @@ export function filterTopN(
   const windowRecipientIds = new Set(windowRecipients.map(([id]) => id));
   const tailRecipients = allSortedRecipients.slice(recipientOffset + topRecipient);
   const tailRecipientIds = new Set(tailRecipients.map(([id]) => id));
-  // Recipients before the window (pre-window) are also hidden
-  const preWindowRecipientIds = new Set(allSortedRecipients.slice(0, recipientOffset).map(([id]) => id));
 
-  // 3. Per-project window spending (all projects, used for re-ranking)
+  // 3. Per-project and per-recipient window spending (all projects, used for re-ranking)
   const projectWindowValue = new Map<string, number>();
+  const recipientWindowValue = new Map<string, number>();
   for (const e of allEdges) {
     if (windowRecipientIds.has(e.target)) {
       projectWindowValue.set(e.source, (projectWindowValue.get(e.source) || 0) + e.value);
+      recipientWindowValue.set(e.target, (recipientWindowValue.get(e.target) || 0) + e.value);
     }
   }
 
@@ -92,14 +92,6 @@ export function filterTopN(
 
   const totalWindowSpending = windowRecipients.reduce((s, [, v]) => s + v, 0);
 
-  // Projects with hidden recipients (pre-window or tail) — used for budget node cap.
-  const topProjectsWithHiddenRecipients = new Set<string>();
-  for (const e of allEdges) {
-    if (topProjectIds.has(e.source) && (tailRecipientIds.has(e.target) || preWindowRecipientIds.has(e.target))) {
-      topProjectsWithHiddenRecipients.add(e.source);
-    }
-  }
-
   // 6. Ministry window values
   const ministryWindowValue = new Map<string, number>();
   for (const e of allEdges) {
@@ -128,30 +120,25 @@ export function filterTopN(
   for (const n of topProjectNodes) {
     const wv = projectWindowValue.get(n.id) || 0;
     const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
-    // Budget: full height when all recipients visible; capped to wv when any are hidden.
-    const hasHidden = topProjectsWithHiddenRecipients.has(n.id);
-    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true, layoutCap: hasHidden ? wv : undefined });
-    // skipLinkOverride + value=wv: spending node height = window spending only, no cap needed.
-    // The tail edge still renders (ribbon to __agg-recipient) but doesn't inflate node height.
+    // Budget height = window spending (same scale as spending node).
+    // rawValue preserves the original budget amount for tooltip/panel display.
+    if (budgetNode) nodes.push({ ...budgetNode, rawValue: budgetNode.value, value: wv, skipLinkOverride: true });
+    // spending node height = window spending only; tail edge still renders but doesn't inflate height.
     nodes.push({ ...n, value: wv, skipLinkOverride: true });
   }
   // Create __agg-project-budget only when there is window spending (needs ministry→budget edges).
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
   // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
   if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
-    const minTopProjectWindowValue = topProjectNodes.length > 0
-      ? Math.min(...topProjectNodes.map(n => projectWindowValue.get(n.id) || 0))
-      : 0;
-    const projectLayoutCap = Math.max(1, minTopProjectWindowValue > 0 ? minTopProjectWindowValue * topProject : otherProjectTailTotal);
     if (otherProjectWindowTotal > 0) {
-      nodes.push({ id: '__agg-project-budget', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+      nodes.push({ id: '__agg-project-budget', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, skipLinkOverride: true, aggregated: true });
     }
-    nodes.push({ id: '__agg-project-spending', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+    nodes.push({ id: '__agg-project-spending', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, skipLinkOverride: true, aggregated: true });
   }
 
   for (const [rid] of windowRecipients) {
     const rNode = nodeById.get(rid);
-    if (rNode) nodes.push({ ...rNode, value: allRecipientAmounts.get(rid) || rNode.value });
+    if (rNode) nodes.push({ ...rNode, value: recipientWindowValue.get(rid) || 0, skipLinkOverride: true });
   }
   const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0);
   const aggRecipientValue = tailValue + otherProjectTailTotal;

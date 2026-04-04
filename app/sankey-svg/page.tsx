@@ -223,6 +223,30 @@ export default function RealDataSankeyPage() {
     return ids;
   }, [selectedNode, selectedNodeInLayout]);
 
+  // Per-ministry project stats — for total/ministry node side panel
+  type ProjectStat = { pid: number; name: string; budgetId: string; spendingId: string; budgetValue: number; spendingValue: number };
+  type MinistryStat = { total: number; budgetOnly: number; spendingOnly: number; neither: number; projects: ProjectStat[] };
+  const ministryProjectStats = useMemo(() => {
+    if (!graphData) return new Map<string, MinistryStat>();
+    const spendingByPid = new Map(graphData.nodes.filter(n => n.type === 'project-spending').map(n => [n.projectId!, n] as const));
+    const stats = new Map<string, MinistryStat>();
+    for (const n of graphData.nodes) {
+      if (n.type !== 'project-budget' || !n.projectId || !n.ministry) continue;
+      const sn = spendingByPid.get(n.projectId);
+      const b = n.value;
+      const s = sn?.value ?? 0;
+      const m = n.ministry;
+      if (!stats.has(m)) stats.set(m, { total: 0, budgetOnly: 0, spendingOnly: 0, neither: 0, projects: [] });
+      const st = stats.get(m)!;
+      st.total++;
+      if (b === 0 && s === 0) st.neither++;
+      else if (b === 0) st.spendingOnly++;
+      else if (s === 0) st.budgetOnly++;
+      if (b === 0 || s === 0) st.projects.push({ pid: n.projectId, name: n.name, budgetId: n.id, spendingId: sn?.id ?? `project-spending-${n.projectId}`, budgetValue: b, spendingValue: s });
+    }
+    return stats;
+  }, [graphData]);
+
   // Global recipient rank (0-indexed, value-descending) — for offset jump
   const allRecipientRanks = useMemo(() => {
     if (!graphData) return new Map<string, number>();
@@ -271,7 +295,9 @@ export default function RealDataSankeyPage() {
   const [outDisplayCount, setOutDisplayCount] = useState(8);
   const [collapsedMinistries, setCollapsedMinistries] = useState<Set<string>>(new Set());
   const [ministryDisplayCounts, setMinistryDisplayCounts] = useState<Map<string, number>>(new Map());
-  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); }, [selectedNodeId]);
+  const [collapsedTotalGroups, setCollapsedTotalGroups] = useState<Set<string>>(new Set());
+  const [expandedZeroSections, setExpandedZeroSections] = useState<Set<string>>(new Set());
+  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setCollapsedTotalGroups(new Set()); setExpandedZeroSections(new Set()); }, [selectedNodeId]);
 
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
@@ -889,6 +915,120 @@ export default function RealDataSankeyPage() {
                   )}
                 </div>
               </div>
+
+              {/* 事業統計（total / ministry ノード） */}
+              {(selectedNode?.type === 'total' || selectedNode?.type === 'ministry') && (() => {
+                const isTotalNode = selectedNode.type === 'total';
+                // ministry ノードの場合: 自省庁のみ / total の場合: 全省庁
+                const targetMinistry = isTotalNode ? null : selectedNode.name;
+                const entries = isTotalNode
+                  ? Array.from(ministryProjectStats.entries()).sort((a, b) => b[1].total - a[1].total)
+                  : (ministryProjectStats.has(selectedNode.name) ? [[selectedNode.name, ministryProjectStats.get(selectedNode.name)!] as [string, typeof ministryProjectStats extends Map<string, infer V> ? V : never]] : []);
+                const totalProjects = isTotalNode
+                  ? Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.total, 0)
+                  : (ministryProjectStats.get(selectedNode.name)?.total ?? 0);
+                const totalBudgetOnly = isTotalNode
+                  ? Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.budgetOnly, 0)
+                  : (ministryProjectStats.get(selectedNode.name)?.budgetOnly ?? 0);
+                const totalSpendingOnly = isTotalNode
+                  ? Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.spendingOnly, 0)
+                  : (ministryProjectStats.get(selectedNode.name)?.spendingOnly ?? 0);
+                const hasImbalance = totalBudgetOnly > 0 || totalSpendingOnly > 0;
+                const linkStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' };
+                void targetMinistry;
+                return (
+                  <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0' }}>
+                    {/* サマリ */}
+                    <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      事業 <span style={{ fontWeight: 400 }}>{totalProjects.toLocaleString()}件</span>
+                      {hasImbalance && (
+                        <span style={{ marginLeft: 6, fontWeight: 400 }}>
+                          {totalBudgetOnly > 0 && <span style={{ color: '#e07700' }}>支出なし {totalBudgetOnly}件</span>}
+                          {totalBudgetOnly > 0 && totalSpendingOnly > 0 && <span style={{ color: '#aaa' }}> / </span>}
+                          {totalSpendingOnly > 0 && <span style={{ color: '#c0392b' }}>予算なし {totalSpendingOnly}件</span>}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* total ノード: 府省庁グループ別リスト */}
+                    {isTotalNode && entries.map(([ministry, st]) => {
+                      const isCollapsed = collapsedTotalGroups.has(ministry);
+                      const imbalance = st.budgetOnly + st.spendingOnly;
+                      return (
+                        <div key={ministry} style={{ marginBottom: 4 }}>
+                          <button
+                            type="button"
+                            aria-expanded={!isCollapsed}
+                            onClick={() => setCollapsedTotalGroups(prev => { const next = new Set(prev); if (next.has(ministry)) next.delete(ministry); else next.add(ministry); return next; })}
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: '#f8f8f8', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}
+                          >
+                            <span style={{ fontSize: 11, fontWeight: 600, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{isCollapsed ? '▶' : '▼'} {ministry}</span>
+                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                              {st.total}件{imbalance > 0 && <span style={{ color: '#e07700', marginLeft: 4 }}>⚠{imbalance}</span>}
+                            </span>
+                          </button>
+                          {!isCollapsed && st.projects.length > 0 && (
+                            <div style={{ paddingLeft: 6 }}>
+                              {st.projects.map((p) => (
+                                <button key={p.pid} type="button" onClick={() => handleConnectionClick(p.spendingValue > 0 ? p.spendingId : p.budgetId)} style={linkStyle}>
+                                  <span title={p.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                                  <span style={{ fontSize: 11, color: (p.budgetValue === 0 && p.spendingValue > 0) ? '#c0392b' : '#e07700', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                                    {(p.budgetValue === 0 && p.spendingValue > 0) ? '予算なし' : '支出なし'}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* ministry ノード: 欠損事業セクション */}
+                    {!isTotalNode && (() => {
+                      const st = ministryProjectStats.get(selectedNode.name);
+                      if (!st || st.projects.length === 0) return null;
+                      const budgetOnlyProjects = st.projects.filter(p => p.budgetValue > 0 && p.spendingValue === 0);
+                      const spendingOnlyProjects = st.projects.filter(p => p.spendingValue > 0 && p.budgetValue === 0);
+                      return (
+                        <>
+                          {budgetOnlyProjects.length > 0 && (
+                            <div style={{ marginBottom: 4 }}>
+                              <button type="button" aria-expanded={expandedZeroSections.has('budget-only')}
+                                onClick={() => setExpandedZeroSections(prev => { const next = new Set(prev); if (next.has('budget-only')) next.delete('budget-only'); else next.add('budget-only'); return next; })}
+                                style={{ display: 'flex', justifyContent: 'space-between', width: '100%', background: '#fff8f0', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: '#e07700' }}>{expandedZeroSections.has('budget-only') ? '▼' : '▶'} 支出データなし</span>
+                                <span style={{ fontSize: 11, color: '#e07700' }}>{budgetOnlyProjects.length}件</span>
+                              </button>
+                              {expandedZeroSections.has('budget-only') && budgetOnlyProjects.map(p => (
+                                <button key={p.pid} type="button" onClick={() => handleConnectionClick(p.budgetId)} style={linkStyle}>
+                                  <span title={p.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                                  <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(p.budgetValue)}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          {spendingOnlyProjects.length > 0 && (
+                            <div style={{ marginBottom: 4 }}>
+                              <button type="button" aria-expanded={expandedZeroSections.has('spending-only')}
+                                onClick={() => setExpandedZeroSections(prev => { const next = new Set(prev); if (next.has('spending-only')) next.delete('spending-only'); else next.add('spending-only'); return next; })}
+                                style={{ display: 'flex', justifyContent: 'space-between', width: '100%', background: '#fff0f0', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: '#c0392b' }}>{expandedZeroSections.has('spending-only') ? '▼' : '▶'} 予算データなし</span>
+                                <span style={{ fontSize: 11, color: '#c0392b' }}>{spendingOnlyProjects.length}件</span>
+                              </button>
+                              {expandedZeroSections.has('spending-only') && spendingOnlyProjects.map(p => (
+                                <button key={p.pid} type="button" onClick={() => handleConnectionClick(p.spendingId)} style={linkStyle}>
+                                  <span title={p.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                                  <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(p.spendingValue)}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                );
+              })()}
 
               {/* 流入元 */}
               {selectedNodeAllConnections && selectedNodeAllConnections.inEdges.length > 0 && (
