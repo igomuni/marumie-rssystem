@@ -669,8 +669,10 @@ export default function RealDataSankeyPage() {
                     const h = node.y1 - node.y0;
                     // Label is 9px on screen (fontSize 9/zoom * zoom = 9).
                     // Available space per node on screen = (h + NODE_PAD) * zoom.
-                    // Show label when available space exceeds font height.
-                    const showLabel = (h + NODE_PAD) * zoom > 10;
+                    // Show label when available space exceeds font height,
+                    // or when the node is selected / connected to the selected node.
+                    const isHighlighted = connectedNodeIds?.has(node.id) ?? false;
+                    const showLabel = (h + NODE_PAD) * zoom > 10 || isHighlighted;
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
                     return (
