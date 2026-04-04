@@ -432,13 +432,14 @@ export default function RealDataSankeyPage() {
   }, [layout, resetView]);
 
   // Focus on node after selection — fires when node appears in layout (pinned TopN+1 case)
+  // Also watches isPanelCollapsed: when panel opens, recalculate fit with updated panel width
   useEffect(() => {
-    if (!pendingFocusId.current || !layout) return;
+    if (!pendingFocusId.current || !layout || isPanelCollapsed) return;
     const node = layout.nodes.find(n => n.id === pendingFocusId.current);
     if (!node) return;
     pendingFocusId.current = null;
     focusOnNeighborhood(node);
-  }, [layout, focusOnNeighborhood]);
+  }, [layout, focusOnNeighborhood, isPanelCollapsed]);
 
   // Draw minimap
   useEffect(() => {
@@ -974,7 +975,7 @@ export default function RealDataSankeyPage() {
                             <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
                             <button onClick={() => setInDisplayCount(selectedNodeAllConnections.inEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
                           </>}
-                          {inDisplayCount > 10 && <button onClick={() => setInDisplayCount(10)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
+                          {inDisplayCount > 8 && <button onClick={() => setInDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
                         </div>
                       ); })()}
                     </>
@@ -1006,7 +1007,7 @@ export default function RealDataSankeyPage() {
                         <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件表示（残{rem}件）</button>
                         <button onClick={() => setOutDisplayCount(selectedNodeAllConnections.outEdges.length)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>すべて表示</button>
                       </>}
-                      {outDisplayCount > 10 && <button onClick={() => setOutDisplayCount(10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>折りたたむ</button>}
+                      {outDisplayCount > 8 && <button onClick={() => setOutDisplayCount(8)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>折りたたむ</button>}
                     </div>
                   ); })()}
                 </div>
