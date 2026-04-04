@@ -390,8 +390,8 @@ export default function RealDataSankeyPage() {
   }, [searchQuery]);
 
   const searchResults = useMemo(() => {
-    if (!graphData || debouncedQuery.length < 2) return [];
     const q = debouncedQuery.trim();
+    if (!graphData || q.length < 2) return [];
     const results: { id: string; name: string; type: string; value: number }[] = [];
     // PID search: pure numeric query matches project-spending nodes by projectId
     const pidQuery = /^\d+$/.test(q) ? Number(q) : null;
@@ -903,6 +903,7 @@ export default function RealDataSankeyPage() {
                         <div key={ministry} style={{ marginBottom: 4 }}>
                           <button
                             type="button"
+                            aria-expanded={!isCollapsed}
                             onClick={() => setCollapsedMinistries(prev => {
                               const next = new Set(prev);
                               if (next.has(ministry)) next.delete(ministry); else next.add(ministry);
@@ -931,10 +932,10 @@ export default function RealDataSankeyPage() {
                             <div style={{ display: 'flex', gap: 0, padding: '2px 4px', alignItems: 'center' }}>
                               {remaining > 0 && <>
                                 <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, displayCount + 10))} style={btnStyle}>さらに{Math.min(10, remaining)}件（残{remaining}）</button>
-                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, items.length))} style={iconBtnStyle} title="すべて表示">{svgExpandAll}</button>
+                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, items.length))} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
                               </>}
                               {displayCount > 10 && (
-                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, 10))} style={iconBtnStyle} title="折りたたむ">{svgCollapseAll}</button>
+                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, 10))} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>
                               )}
                             </div>
                           </>)}
@@ -959,9 +960,9 @@ export default function RealDataSankeyPage() {
                         <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
                           {rem > 0 && <>
                             <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
-                            <button onClick={() => setInDisplayCount(selectedNodeAllConnections.inEdges.length)} style={iconBtnStyle} title="すべて表示">{svgExpandAll}</button>
+                            <button onClick={() => setInDisplayCount(selectedNodeAllConnections.inEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
                           </>}
-                          {inDisplayCount > 10 && <button onClick={() => setInDisplayCount(10)} style={iconBtnStyle} title="折りたたむ">{svgCollapseAll}</button>}
+                          {inDisplayCount > 10 && <button onClick={() => setInDisplayCount(10)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
                         </div>
                       ); })()}
                     </>
@@ -1019,7 +1020,7 @@ export default function RealDataSankeyPage() {
             type="text"
             value={searchQuery}
             onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
-            onFocus={() => { if (debouncedQuery.length >= 2) setShowSearchResults(true); }}
+            onFocus={() => { if (debouncedQuery.trim().length >= 2) setShowSearchResults(true); }}
             onKeyDown={e => { if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); } }}
             placeholder="ノード検索（2文字以上）"
             style={{
@@ -1058,7 +1059,7 @@ export default function RealDataSankeyPage() {
           </div>
         )}
         {/* No results */}
-        {showSearchResults && debouncedQuery.length >= 2 && searchResults.length === 0 && (
+        {showSearchResults && debouncedQuery.trim().length >= 2 && searchResults.length === 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
