@@ -1133,15 +1133,17 @@ export default function RealDataSankeyPage() {
                   [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '前へ'],
                 ] as [number, string, string][]).map(([delta, path, title]) => (
                   <button key={delta} title={title} aria-label={title}
-                    onMouseDown={() => {
+                    onPointerDown={(e) => {
+                      if (e.pointerType === 'mouse' && e.button !== 0) return;
                       const step = () => { setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); };
+                      stopOffsetRepeat();
                       step();
                       offsetRepeatRef.current = setTimeout(() => {
                         offsetRepeatRef.current = setInterval(step, 150);
                       }, 400);
                     }}
-                    onMouseUp={stopOffsetRepeat} onMouseLeave={stopOffsetRepeat}
-                    onClick={e => e.preventDefault()}
+                    onPointerUp={stopOffsetRepeat} onPointerLeave={stopOffsetRepeat} onPointerCancel={stopOffsetRepeat}
+                    onClick={(e) => { if (e.detail === 0) setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); }}
                     style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
