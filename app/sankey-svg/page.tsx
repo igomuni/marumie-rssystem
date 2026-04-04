@@ -281,6 +281,26 @@ export default function RealDataSankeyPage() {
       if (e.target === selectedNode.id) inMap.set(e.source, (inMap.get(e.source) || 0) + e.value);
       if (e.source === selectedNode.id) outMap.set(e.target, (outMap.get(e.target) || 0) + e.value);
     }
+    // For ministry nodes: also add project-budget nodes with no edge (value=0) so they appear in outEdges
+    if (selectedNode.type === 'ministry') {
+      for (const n of graphData.nodes) {
+        if (n.type === 'project-budget' && n.ministry === selectedNode.name && !outMap.has(n.id)) {
+          outMap.set(n.id, 0);
+        }
+      }
+    }
+    // For project-budget nodes: ensure the paired project-spending node appears in outEdges even if spending=0
+    if (selectedNode.type === 'project-budget' && selectedNode.projectId != null) {
+      const pid = selectedNode.projectId;
+      const spendingNode = graphData.nodes.find(n => n.type === 'project-spending' && n.projectId === pid);
+      if (spendingNode && !outMap.has(spendingNode.id)) outMap.set(spendingNode.id, 0);
+    }
+    // For project-spending nodes: ensure the paired project-budget node appears in inEdges even if budget=0
+    if (selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
+      const pid = selectedNode.projectId;
+      const budgetNode = graphData.nodes.find(n => n.type === 'project-budget' && n.projectId === pid);
+      if (budgetNode && !inMap.has(budgetNode.id)) inMap.set(budgetNode.id, 0);
+    }
     return {
       inEdges: Array.from(inMap.entries())
         .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false, ministry: nodeById.get(id)?.ministry }))
