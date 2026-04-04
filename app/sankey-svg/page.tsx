@@ -237,16 +237,17 @@ export default function RealDataSankeyPage() {
   // Full connection list from raw graphData (bypasses TopN aggregation)
   const selectedNodeAllConnections = useMemo(() => {
     if (!selectedNode || !graphData) return null;
+    const nodeById = new Map(graphData.nodes.map(n => [n.id, n]));
     const nodeNameById = new Map(graphData.nodes.map(n => [n.id, n.name]));
     if (selectedNode.aggregated) {
       // Aggregated nodes: use layout links as-is
       return {
         inEdges: [...selectedNode.targetLinks]
           .sort((a, b) => b.value - a.value)
-          .map(l => ({ id: l.source.id, name: l.source.name, value: l.value, aggregated: l.source.aggregated })),
+          .map(l => ({ id: l.source.id, name: l.source.name, value: l.value, aggregated: l.source.aggregated, ministry: l.source.ministry })),
         outEdges: [...selectedNode.sourceLinks]
           .sort((a, b) => b.value - a.value)
-          .map(l => ({ id: l.target.id, name: l.target.name, value: l.value, aggregated: l.target.aggregated })),
+          .map(l => ({ id: l.target.id, name: l.target.name, value: l.value, aggregated: l.target.aggregated, ministry: l.target.ministry })),
       };
     }
     // Real nodes: sum all raw edges from graphData
@@ -258,17 +259,19 @@ export default function RealDataSankeyPage() {
     }
     return {
       inEdges: Array.from(inMap.entries())
-        .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false }))
+        .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false, ministry: nodeById.get(id)?.ministry }))
         .sort((a, b) => b.value - a.value),
       outEdges: Array.from(outMap.entries())
-        .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false }))
+        .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false, ministry: nodeById.get(id)?.ministry }))
         .sort((a, b) => b.value - a.value),
     };
   }, [selectedNode, graphData]);
 
   const [inDisplayCount, setInDisplayCount] = useState(8);
   const [outDisplayCount, setOutDisplayCount] = useState(8);
-  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); }, [selectedNodeId]);
+  const [collapsedMinistries, setCollapsedMinistries] = useState<Set<string>>(new Set());
+  const [ministryDisplayCounts, setMinistryDisplayCounts] = useState<Map<string, number>>(new Map());
+  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); }, [selectedNodeId]);
 
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
@@ -300,13 +303,52 @@ export default function RealDataSankeyPage() {
     setPan({ x: panelW + availableW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
   }, [zoom, baseZoom, isPanelCollapsed]);
 
+  const focusOnNeighborhood = useCallback((nodeOverride?: LayoutNode) => {
+    const node = nodeOverride ?? selectedNode;
+    if (!node || (!nodeOverride && !selectedNodeInLayout) || !layout || !containerRef.current) return;
+    const container = containerRef.current;
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    const neighborIds = new Set<string>([node.id]);
+    for (const l of node.sourceLinks) neighborIds.add(l.target.id);
+    for (const l of node.targetLinks) neighborIds.add(l.source.id);
+    const neighborNodes = layout.nodes.filter(n => neighborIds.has(n.id));
+    if (neighborNodes.length === 0) return;
+    const minX = Math.min(...neighborNodes.map(n => n.x0));
+    const minY = Math.min(...neighborNodes.map(n => n.y0));
+    const maxX = Math.max(...neighborNodes.map(n => n.x1));
+    const maxY = Math.max(...neighborNodes.map(n => n.y1));
+    const PADDING = 40;
+    const boxW = (maxX - minX) + PADDING * 2;
+    const boxH = (maxY - minY) + PADDING * 2;
+    const panelW = isPanelCollapsed ? 0 : 280;
+    const availableW = cW - panelW;
+    const targetK = Math.max(0.2, Math.min(baseZoom * 10, Math.min(availableW / boxW, cH / boxH) * 0.9));
+    const centerX = MARGIN.left + (minX + maxX) / 2;
+    const centerY = MARGIN.top + (minY + maxY) / 2;
+    setZoom(targetK);
+    setPan({ x: panelW + availableW / 2 - centerX * targetK, y: cH / 2 - centerY * targetK });
+  }, [selectedNode, selectedNodeInLayout, layout, isPanelCollapsed, baseZoom]);
+
   const handleConnectionClick = useCallback((nodeId: string) => {
     // If already in layout, select and focus directly (no effect needed)
     const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
     if (inLayoutNode) {
-      setPinnedProjectId(null);
+      // Preserve pin if the clicked node belongs to the same pinned project
+      const derivedPinnedId = nodeId.startsWith('project-budget-')
+        ? nodeId.replace('project-budget-', 'project-spending-')
+        : nodeId.startsWith('project-spending-')
+          ? nodeId
+          : null;
+      const nextPinnedProjectId =
+        derivedPinnedId !== null && derivedPinnedId === pinnedProjectId
+          ? pinnedProjectId
+          : null;
+      const needsDeferredFocus = nextPinnedProjectId !== pinnedProjectId || isPanelCollapsed;
+      setPinnedProjectId(nextPinnedProjectId);
+      if (needsDeferredFocus) pendingFocusId.current = nodeId;
       selectNode(nodeId);
-      focusOnNode(inLayoutNode);
+      if (!needsDeferredFocus) focusOnNeighborhood(inLayoutNode);
       return;
     }
     // Helper: jump recipientOffset to center on a recipient rank
@@ -344,7 +386,7 @@ export default function RealDataSankeyPage() {
     // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
     pendingFocusId.current = nodeId;
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNode]);
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -360,11 +402,17 @@ export default function RealDataSankeyPage() {
   }, [searchQuery]);
 
   const searchResults = useMemo(() => {
-    if (!graphData || debouncedQuery.length < 2) return [];
-    const q = debouncedQuery;
+    const q = debouncedQuery.trim();
+    if (!graphData || q.length < 2) return [];
     const results: { id: string; name: string; type: string; value: number }[] = [];
+    // PID search: pure numeric query matches project-spending nodes by projectId
+    const pidQuery = /^\d+$/.test(q) ? Number(q) : null;
     for (const n of graphData.nodes) {
-      if (n.name.includes(q)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+      if (pidQuery !== null) {
+        if (n.type === 'project-spending' && n.projectId === pidQuery) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+      } else {
+        if (n.name.includes(q)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+      }
     }
     return results.sort((a, b) => b.value - a.value).slice(0, 20);
   }, [graphData, debouncedQuery]);
@@ -384,13 +432,14 @@ export default function RealDataSankeyPage() {
   }, [layout, resetView]);
 
   // Focus on node after selection — fires when node appears in layout (pinned TopN+1 case)
+  // Also watches isPanelCollapsed: when panel opens, recalculate fit with updated panel width
   useEffect(() => {
-    if (!pendingFocusId.current || !layout) return;
+    if (!pendingFocusId.current || !layout || isPanelCollapsed) return;
     const node = layout.nodes.find(n => n.id === pendingFocusId.current);
     if (!node) return;
     pendingFocusId.current = null;
-    focusOnNode(node);
-  }, [layout, focusOnNode]);
+    focusOnNeighborhood(node);
+  }, [layout, focusOnNeighborhood, isPanelCollapsed]);
 
   // Draw minimap
   useEffect(() => {
@@ -473,58 +522,20 @@ export default function RealDataSankeyPage() {
   }, [selectNode]);
 
   const focusOnSelectedNode = useCallback(() => {
-    if (!selectedNode || !selectedNodeInLayout || !containerRef.current) return;
-    const container = containerRef.current;
-    const cW = container.clientWidth;
-    const cH = container.clientHeight;
-    // Node center in SVG coords (including MARGIN)
-    const cx = MARGIN.left + selectedNode.x0 + NODE_W / 2;
-    const cy = MARGIN.top + selectedNode.y0 + (selectedNode.y1 - selectedNode.y0) / 2;
-    // Labels appear when (h + NODE_PAD) * zoom > 10.
-    // Target: minimum zoom that makes the label visible, with small margin.
-    const h = selectedNode.y1 - selectedNode.y0;
-    const minZoomForLabel = 10 / (h + NODE_PAD);
-    const panelW = isPanelCollapsed ? 0 : 280;
-    const availableW = cW - panelW;
-    const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
-    setZoom(targetK);
-    setPan({ x: panelW + availableW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
-  }, [selectedNode, selectedNodeInLayout, zoom, baseZoom, isPanelCollapsed]);
+    if (!selectedNode || !selectedNodeInLayout) return;
+    focusOnNode(selectedNode);
+  }, [selectedNode, selectedNodeInLayout, focusOnNode]);
 
-  const focusOnNeighborhood = useCallback(() => {
-    if (!selectedNode || !selectedNodeInLayout || !layout || !containerRef.current) return;
-    const container = containerRef.current;
-    const cW = container.clientWidth;
-    const cH = container.clientHeight;
-    // Collect selected node + all 1-hop connected layout nodes
-    const neighborIds = new Set<string>([selectedNode.id]);
-    for (const l of selectedNode.sourceLinks) neighborIds.add(l.target.id);
-    for (const l of selectedNode.targetLinks) neighborIds.add(l.source.id);
-    const neighborNodes = layout.nodes.filter(n => neighborIds.has(n.id));
-    if (neighborNodes.length === 0) return;
-    // Bounding box in inner coords
-    const minX = Math.min(...neighborNodes.map(n => n.x0));
-    const minY = Math.min(...neighborNodes.map(n => n.y0));
-    const maxX = Math.max(...neighborNodes.map(n => n.x1));
-    const maxY = Math.max(...neighborNodes.map(n => n.y1));
-    const PADDING = 40;
-    const boxW = (maxX - minX) + PADDING * 2;
-    const boxH = (maxY - minY) + PADDING * 2;
-    // Account for side panel: visible area is shifted right when panel is open
-    const panelW = isPanelCollapsed ? 0 : 280;
-    const availableW = cW - panelW;
-    const targetK = Math.max(0.2, Math.min(baseZoom * 10, Math.min(availableW / boxW, cH / boxH) * 0.9));
-    const centerX = MARGIN.left + (minX + maxX) / 2;
-    const centerY = MARGIN.top + (minY + maxY) / 2;
-    setZoom(targetK);
-    setPan({ x: panelW + availableW / 2 - centerX * targetK, y: cH / 2 - centerY * targetK });
-  }, [selectedNode, selectedNodeInLayout, layout, isPanelCollapsed, baseZoom]);
 
   const applyZoom = useCallback((factor: number) => {
     const nz = Math.max(0.2, Math.min(baseZoom * 10, zoom * factor));
     setPan({ x: svgWidth / 2 - (svgWidth / 2 - pan.x) * (nz / zoom), y: svgHeight / 2 - (svgHeight / 2 - pan.y) * (nz / zoom) });
     setZoom(nz);
   }, [zoom, pan, svgWidth, svgHeight, baseZoom]);
+
+  const iconBtnStyle: React.CSSProperties = { color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '1px 2px', display: 'inline-flex', alignItems: 'center', flexShrink: 0 };
+  const svgExpandAll = <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#4a90d9" style={{pointerEvents:'none'}}><path transform="rotate(180 480 -480)" d="m291-192-51-51 240-240 240 240-51 51-189-189-189 189Zm0-285-51-51 240-240 240 240-51 51-189-189-189 189Z"/></svg>;
+  const svgCollapseAll = <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#4a90d9" style={{pointerEvents:'none'}}><path d="m291-192-51-51 240-240 240 240-51 51-189-189-189 189Zm0-285-51-51 240-240 240 240-51 51-189-189-189 189Z"/></svg>;
 
   return (
     <div
@@ -671,8 +682,8 @@ export default function RealDataSankeyPage() {
                     // Available space per node on screen = (h + NODE_PAD) * zoom.
                     // Show label when available space exceeds font height,
                     // or when the node is selected / connected to the selected node.
-                    const isHighlighted = connectedNodeIds?.has(node.id) ?? false;
-                    const showLabel = (h + NODE_PAD) * zoom > 10 || isHighlighted;
+                    const isSelected = node.id === selectedNodeId;
+                    const showLabel = (h + NODE_PAD) * zoom > 10 || isSelected;
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
                     return (
@@ -884,23 +895,90 @@ export default function RealDataSankeyPage() {
                   <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     流入元 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.inEdges.length}件)</span>
                   </div>
-                  {selectedNodeAllConnections.inEdges.slice(0, inDisplayCount).map((item, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      disabled={item.aggregated}
-                      onClick={() => handleConnectionClick(item.id)}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
-                    >
-                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>← {item.name}</span>
-                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
-                    </button>
-                  ))}
-                  {inDisplayCount < selectedNodeAllConnections.inEdges.length && (
-                    <button
-                      onClick={() => setInDisplayCount(c => c + 8)}
-                      style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', width: '100%', textAlign: 'left' }}
-                    >さらに{Math.min(8, selectedNodeAllConnections.inEdges.length - inDisplayCount)}件表示（残{selectedNodeAllConnections.inEdges.length - inDisplayCount}件）</button>
+                  {selectedNode?.type === 'recipient' ? (() => {
+                    // 府省庁グループ表示
+                    const grouped = new Map<string, typeof selectedNodeAllConnections.inEdges>();
+                    for (const item of selectedNodeAllConnections.inEdges) {
+                      const key = item.ministry ?? '(不明)';
+                      if (!grouped.has(key)) grouped.set(key, []);
+                      grouped.get(key)!.push(item);
+                    }
+                    const sortedGroups = Array.from(grouped.entries()).sort((a, b) =>
+                      b[1].reduce((s, x) => s + x.value, 0) - a[1].reduce((s, x) => s + x.value, 0)
+                    );
+                    const btnStyle: React.CSSProperties = { fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' };
+                    return sortedGroups.map(([ministry, items]) => {
+                      const isCollapsed = collapsedMinistries.has(ministry);
+                      const displayCount = ministryDisplayCounts.get(ministry) ?? 10;
+                      const total = items.reduce((s, x) => s + x.value, 0);
+                      const remaining = items.length - displayCount;
+                      return (
+                        <div key={ministry} style={{ marginBottom: 4 }}>
+                          <button
+                            type="button"
+                            aria-expanded={!isCollapsed}
+                            onClick={() => setCollapsedMinistries(prev => {
+                              const next = new Set(prev);
+                              if (next.has(ministry)) next.delete(ministry); else next.add(ministry);
+                              return next;
+                            })}
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: '#f8f8f8', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}
+                          >
+                            <span style={{ fontSize: 11, fontWeight: 600, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {isCollapsed ? '▶' : '▼'} {ministry}
+                            </span>
+                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{items.length}件 {formatYen(total)}</span>
+                          </button>
+                          {!isCollapsed && (<>
+                            {items.slice(0, displayCount).map((item, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                disabled={item.aggregated}
+                                onClick={() => handleConnectionClick(item.id)}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 6px', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                              >
+                                <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                                <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
+                              </button>
+                            ))}
+                            <div style={{ display: 'flex', gap: 0, padding: '2px 4px', alignItems: 'center' }}>
+                              {remaining > 0 && <>
+                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, displayCount + 10))} style={btnStyle}>さらに{Math.min(10, remaining)}件（残{remaining}）</button>
+                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, items.length))} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
+                              </>}
+                              {displayCount > 10 && (
+                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, 10))} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>
+                              )}
+                            </div>
+                          </>)}
+                        </div>
+                      );
+                    });
+                  })() : (
+                    <>
+                      {selectedNodeAllConnections.inEdges.slice(0, inDisplayCount).map((item, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          disabled={item.aggregated}
+                          onClick={() => handleConnectionClick(item.id)}
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                        >
+                          <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                          <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
+                        </button>
+                      ))}
+                      {(() => { const rem = selectedNodeAllConnections.inEdges.length - inDisplayCount; return (
+                        <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
+                          {rem > 0 && <>
+                            <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
+                            <button onClick={() => setInDisplayCount(selectedNodeAllConnections.inEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
+                          </>}
+                          {inDisplayCount > 8 && <button onClick={() => setInDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
+                        </div>
+                      ); })()}
+                    </>
                   )}
                 </div>
               )}
@@ -919,16 +997,19 @@ export default function RealDataSankeyPage() {
                       onClick={() => handleConnectionClick(item.id)}
                       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                     >
-                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name} →</span>
+                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                       <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                     </button>
                   ))}
-                  {outDisplayCount < selectedNodeAllConnections.outEdges.length && (
-                    <button
-                      onClick={() => setOutDisplayCount(c => c + 8)}
-                      style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', width: '100%', textAlign: 'left' }}
-                    >さらに{Math.min(8, selectedNodeAllConnections.outEdges.length - outDisplayCount)}件表示（残{selectedNodeAllConnections.outEdges.length - outDisplayCount}件）</button>
-                  )}
+                  {(() => { const rem = selectedNodeAllConnections.outEdges.length - outDisplayCount; return (
+                    <div style={{ display: 'flex', gap: 0, padding: '2px 0' }}>
+                      {rem > 0 && <>
+                        <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件表示（残{rem}件）</button>
+                        <button onClick={() => setOutDisplayCount(selectedNodeAllConnections.outEdges.length)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>すべて表示</button>
+                      </>}
+                      {outDisplayCount > 8 && <button onClick={() => setOutDisplayCount(8)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>折りたたむ</button>}
+                    </div>
+                  ); })()}
                 </div>
               )}
             </div>
@@ -952,7 +1033,7 @@ export default function RealDataSankeyPage() {
             type="text"
             value={searchQuery}
             onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
-            onFocus={() => { if (debouncedQuery.length >= 2) setShowSearchResults(true); }}
+            onFocus={() => { if (debouncedQuery.trim().length >= 2) setShowSearchResults(true); }}
             onKeyDown={e => { if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); } }}
             placeholder="ノード検索（2文字以上）"
             style={{
@@ -991,7 +1072,7 @@ export default function RealDataSankeyPage() {
           </div>
         )}
         {/* No results */}
-        {showSearchResults && debouncedQuery.length >= 2 && searchResults.length === 0 && (
+        {showSearchResults && debouncedQuery.trim().length >= 2 && searchResults.length === 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
@@ -1149,21 +1230,21 @@ export default function RealDataSankeyPage() {
         </div>
         {/* 全体表示ボタン */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-          {/* Material Icons: fullscreen */}
+          {/* fit screen */}
           <button aria-label="全体表示" onClick={resetViewport} title="全体表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path d="M792-576v-120H672v-72h120q30 0 51 21.15T864-696v120h-72Zm-696 0v-120q0-30 21.15-51T168-768h120v72H168v120H96Zm576 384v-72h120v-120h72v120q0 30-21.15 51T792-192H672Zm-504 0q-30 0-51-21.15T96-264v-120h72v120h120v72H168Zm72-144v-288h480v288H240Zm72-72h336v-144H312v144Zm0 0v-144 144Z"/></svg>
           </button>
         </div>
         {/* 選択ノードフォーカスボタン — 選択中のみ表示 */}
         {selectedNodeInLayout && (
           <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-            {/* Material Icons: fit_screen */}
-            <button aria-label="選択ノードと接続先をフィット表示" onClick={focusOnNeighborhood} title="選択ノードと接続先をフィット表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M17 4h3c1.1 0 2 .9 2 2v2h-2V6h-3V4zM4 8V6h3V4H4c-1.1 0-2 .9-2 2v2h2zm16 8v2h-3v2h3c1.1 0 2-.9 2-2v-2h-2zM7 18H4v-2H2v2c0 1.1.9 2 2 2h3v-2zM18 8H6v8h12V8z"/></svg>
+            {/* Material Icons: account_tree (flowchart) */}
+            <button aria-label="選択ノードと接続先をフィット表示" onClick={() => focusOnNeighborhood()} title="選択ノードと接続先をフィット表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path transform="scale(-1, 1) translate(-960, 0)" d="M576-168v-84H444v-192h-60v84H96v-240h288v84h60v-192h132v-84h288v240H576v-84h-60v312h60v-84h288v240H576Zm72-72h144v-96H648v96ZM168-432h144v-96H168v96Zm480-192h144v-96H648v96Zm0 384v-96 96ZM312-432v-96 96Zm336-192v-96 96Z"/></svg>
             </button>
-            {/* Material Icons: center_focus_weak */}
+            {/* Focus */}
             <button aria-label="選択ノードにフォーカス" onClick={focusOnSelectedNode} title="選択ノードにフォーカス" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', borderTop: '1px solid #eee', borderLeft: 'none', borderRight: 'none', borderBottom: 'none', background: 'transparent', cursor: 'pointer' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#666"><path d="M5 15H3v4c0 1.1.9 2 2 2h4v-2H5v-4zm0-10h4V3H5C3.9 3 3 3.9 3 5v4h2V5zm14-2h-4v2h4v4h2V5c0-1.1-.9-2-2-2zm0 16h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zM12 8.5c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path transform="rotate(180 480 -480)" d="M168-360h240v-240H168v240Zm312 72H96v-384h384v156h384v72H480v156ZM288-480Z"/></svg>
             </button>
           </div>
         )}
