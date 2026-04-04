@@ -334,8 +334,18 @@ export default function RealDataSankeyPage() {
     // If already in layout, select and focus directly (no effect needed)
     const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
     if (inLayoutNode) {
-      const needsDeferredFocus = pinnedProjectId !== null || isPanelCollapsed;
-      setPinnedProjectId(null);
+      // Preserve pin if the clicked node belongs to the same pinned project
+      const derivedPinnedId = nodeId.startsWith('project-budget-')
+        ? nodeId.replace('project-budget-', 'project-spending-')
+        : nodeId.startsWith('project-spending-')
+          ? nodeId
+          : null;
+      const nextPinnedProjectId =
+        derivedPinnedId !== null && derivedPinnedId === pinnedProjectId
+          ? pinnedProjectId
+          : null;
+      const needsDeferredFocus = nextPinnedProjectId !== pinnedProjectId || isPanelCollapsed;
+      setPinnedProjectId(nextPinnedProjectId);
       if (needsDeferredFocus) pendingFocusId.current = nodeId;
       selectNode(nodeId);
       if (!needsDeferredFocus) focusOnNeighborhood(inLayoutNode);
