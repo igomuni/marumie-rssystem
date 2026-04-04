@@ -520,6 +520,10 @@ export default function RealDataSankeyPage() {
     setZoom(nz);
   }, [zoom, pan, svgWidth, svgHeight, baseZoom]);
 
+  const iconBtnStyle: React.CSSProperties = { color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '1px 2px', display: 'inline-flex', alignItems: 'center', flexShrink: 0 };
+  const svgExpandAll = <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#4a90d9" style={{pointerEvents:'none'}}><path transform="rotate(180 480 -480)" d="m291-192-51-51 240-240 240 240-51 51-189-189-189 189Zm0-285-51-51 240-240 240 240-51 51-189-189-189 189Z"/></svg>;
+  const svgCollapseAll = <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#4a90d9" style={{pointerEvents:'none'}}><path d="m291-192-51-51 240-240 240 240-51 51-189-189-189 189Zm0-285-51-51 240-240 240 240-51 51-189-189-189 189Z"/></svg>;
+
   return (
     <div
       ref={containerRef}
@@ -924,17 +928,15 @@ export default function RealDataSankeyPage() {
                                 <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                               </button>
                             ))}
-                            {remaining > 0 && (
-                              <div style={{ display: 'flex', gap: 0, padding: '2px 4px' }}>
-                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, displayCount + 10))} style={btnStyle}>さらに10件表示（残{remaining}件）</button>
-                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, items.length))} style={btnStyle}>すべて表示</button>
-                              </div>
-                            )}
-                            {displayCount > 10 && remaining <= 0 && (
-                              <div style={{ padding: '2px 4px' }}>
-                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, 10))} style={btnStyle}>折りたたむ</button>
-                              </div>
-                            )}
+                            <div style={{ display: 'flex', gap: 0, padding: '2px 4px', alignItems: 'center' }}>
+                              {remaining > 0 && <>
+                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, displayCount + 10))} style={btnStyle}>さらに{Math.min(10, remaining)}件（残{remaining}）</button>
+                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, items.length))} style={iconBtnStyle} title="すべて表示">{svgExpandAll}</button>
+                              </>}
+                              {displayCount > 10 && (
+                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, 10))} style={iconBtnStyle} title="折りたたむ">{svgCollapseAll}</button>
+                              )}
+                            </div>
                           </>)}
                         </div>
                       );
@@ -953,15 +955,15 @@ export default function RealDataSankeyPage() {
                           <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                         </button>
                       ))}
-                      {inDisplayCount < selectedNodeAllConnections.inEdges.length && (
-                        <div style={{ display: 'flex', gap: 0, padding: '2px 0' }}>
-                          <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに10件表示（残{selectedNodeAllConnections.inEdges.length - inDisplayCount}件）</button>
-                          <button onClick={() => setInDisplayCount(selectedNodeAllConnections.inEdges.length)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>すべて表示</button>
+                      {(() => { const rem = selectedNodeAllConnections.inEdges.length - inDisplayCount; return (
+                        <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
+                          {rem > 0 && <>
+                            <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
+                            <button onClick={() => setInDisplayCount(selectedNodeAllConnections.inEdges.length)} style={iconBtnStyle} title="すべて表示">{svgExpandAll}</button>
+                          </>}
+                          {inDisplayCount > 10 && <button onClick={() => setInDisplayCount(10)} style={iconBtnStyle} title="折りたたむ">{svgCollapseAll}</button>}
                         </div>
-                      )}
-                      {inDisplayCount > 10 && inDisplayCount >= selectedNodeAllConnections.inEdges.length && (
-                        <button onClick={() => setInDisplayCount(10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 0' }}>折りたたむ</button>
-                      )}
+                      ); })()}
                     </>
                   )}
                 </div>
@@ -985,15 +987,15 @@ export default function RealDataSankeyPage() {
                       <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                     </button>
                   ))}
-                  {outDisplayCount < selectedNodeAllConnections.outEdges.length && (
+                  {(() => { const rem = selectedNodeAllConnections.outEdges.length - outDisplayCount; return (
                     <div style={{ display: 'flex', gap: 0, padding: '2px 0' }}>
-                      <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに10件表示（残{selectedNodeAllConnections.outEdges.length - outDisplayCount}件）</button>
-                      <button onClick={() => setOutDisplayCount(selectedNodeAllConnections.outEdges.length)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>すべて表示</button>
+                      {rem > 0 && <>
+                        <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件表示（残{rem}件）</button>
+                        <button onClick={() => setOutDisplayCount(selectedNodeAllConnections.outEdges.length)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>すべて表示</button>
+                      </>}
+                      {outDisplayCount > 10 && <button onClick={() => setOutDisplayCount(10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>折りたたむ</button>}
                     </div>
-                  )}
-                  {outDisplayCount > 10 && outDisplayCount >= selectedNodeAllConnections.outEdges.length && (
-                    <button onClick={() => setOutDisplayCount(10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 0' }}>折りたたむ</button>
-                  )}
+                  ); })()}
                 </div>
               )}
             </div>
