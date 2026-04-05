@@ -225,7 +225,7 @@ export default function RealDataSankeyPage() {
 
   // Per-ministry project stats — for total/ministry node side panel
   type ProjectStat = { pid: number; name: string; budgetId: string; spendingId: string; budgetValue: number; spendingValue: number };
-  type MinistryStat = { total: number; budgetOnly: number; spendingOnly: number; neither: number; projects: ProjectStat[] };
+  type MinistryStat = { total: number; budgetTotal: number; budgetOnly: number; spendingOnly: number; neither: number; projects: ProjectStat[] };
   const ministryProjectStats = useMemo(() => {
     if (!graphData) return new Map<string, MinistryStat>();
     const spendingByPid = new Map(graphData.nodes.filter(n => n.type === 'project-spending').map(n => [n.projectId!, n] as const));
@@ -236,13 +236,14 @@ export default function RealDataSankeyPage() {
       const b = n.value;
       const s = sn?.value ?? 0;
       const m = n.ministry;
-      if (!stats.has(m)) stats.set(m, { total: 0, budgetOnly: 0, spendingOnly: 0, neither: 0, projects: [] });
+      if (!stats.has(m)) stats.set(m, { total: 0, budgetTotal: 0, budgetOnly: 0, spendingOnly: 0, neither: 0, projects: [] });
       const st = stats.get(m)!;
       st.total++;
+      st.budgetTotal += b;
       if (b === 0 && s === 0) st.neither++;
       else if (b === 0) st.spendingOnly++;
       else if (s === 0) st.budgetOnly++;
-      if (b === 0 || s === 0) st.projects.push({ pid: n.projectId, name: n.name, budgetId: n.id, spendingId: sn?.id ?? `project-spending-${n.projectId}`, budgetValue: b, spendingValue: s });
+      if (s === 0) st.projects.push({ pid: n.projectId, name: n.name, budgetId: n.id, spendingId: sn?.id ?? `project-spending-${n.projectId}`, budgetValue: b, spendingValue: s });
     }
     return stats;
   }, [graphData]);
@@ -910,10 +911,19 @@ export default function RealDataSankeyPage() {
                       {selectedNode.name}
                     </div>
                     <div style={{ fontSize: 15, fontWeight: 600, color: '#222', marginTop: 3 }}>
-                      {formatYen(selectedNode.rawValue ?? selectedNode.value)}
+                      {(selectedNode.type === 'total' || selectedNode.type === 'ministry') ? (() => {
+                        const bt = selectedNode.type === 'total'
+                          ? Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.budgetTotal, 0)
+                          : ministryProjectStats.get(selectedNode.name)?.budgetTotal ?? 0;
+                        return formatYen(bt);
+                      })() : formatYen(selectedNode.rawValue ?? selectedNode.value)}
                     </div>
                     <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>
-                      {(selectedNode.rawValue ?? selectedNode.value).toLocaleString()}円
+                      {((selectedNode.type === 'total' || selectedNode.type === 'ministry') ? (() => {
+                        return selectedNode.type === 'total'
+                          ? Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.budgetTotal, 0)
+                          : ministryProjectStats.get(selectedNode.name)?.budgetTotal ?? 0;
+                      })() : (selectedNode.rawValue ?? selectedNode.value)).toLocaleString()}円
                     </div>
                   </div>
                   <button
@@ -942,9 +952,10 @@ export default function RealDataSankeyPage() {
                   ? Array.from(ministryProjectStats.values())
                   : (ministryProjectStats.has(selectedNode.name) ? [ministryProjectStats.get(selectedNode.name)!] : []);
                 const totalProjects = allStats.reduce((s, v) => s + v.total, 0);
-                const budgetOnlyProjects = allStats.flatMap(v => v.projects.filter(p => p.budgetValue > 0 && p.spendingValue === 0));
+                // 支出データなし: s=0（予算あり・なし問わず）、予算データなし: b=0 かつ s>0
+                const noSpendingProjects = allStats.flatMap(v => v.projects.filter(p => p.spendingValue === 0));
                 const spendingOnlyProjects = allStats.flatMap(v => v.projects.filter(p => p.spendingValue > 0 && p.budgetValue === 0));
-                const hasImbalance = budgetOnlyProjects.length > 0 || spendingOnlyProjects.length > 0;
+                const hasImbalance = noSpendingProjects.length > 0 || spendingOnlyProjects.length > 0;
                 const linkStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' };
                 return (
                   <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0' }}>
@@ -953,23 +964,23 @@ export default function RealDataSankeyPage() {
                       事業 <span style={{ fontWeight: 400 }}>{totalProjects.toLocaleString()}件</span>
                       {hasImbalance && (
                         <span style={{ marginLeft: 6, fontWeight: 400 }}>
-                          {budgetOnlyProjects.length > 0 && <span style={{ color: '#e07700' }}>支出なし {budgetOnlyProjects.length}件</span>}
-                          {budgetOnlyProjects.length > 0 && spendingOnlyProjects.length > 0 && <span style={{ color: '#aaa' }}> / </span>}
+                          {noSpendingProjects.length > 0 && <span style={{ color: '#e07700' }}>支出なし {noSpendingProjects.length}件</span>}
+                          {noSpendingProjects.length > 0 && spendingOnlyProjects.length > 0 && <span style={{ color: '#aaa' }}> / </span>}
                           {spendingOnlyProjects.length > 0 && <span style={{ color: '#c0392b' }}>予算なし {spendingOnlyProjects.length}件</span>}
                         </span>
                       )}
                     </div>
 
                     {/* 支出データなし（予算あり・支出=0） */}
-                    {budgetOnlyProjects.length > 0 && (
+                    {noSpendingProjects.length > 0 && (
                       <div style={{ marginBottom: 4 }}>
                         <button type="button" aria-expanded={expandedZeroSections.has('budget-only')}
                           onClick={() => setExpandedZeroSections(prev => { const next = new Set(prev); if (next.has('budget-only')) next.delete('budget-only'); else next.add('budget-only'); return next; })}
                           style={{ display: 'flex', justifyContent: 'space-between', width: '100%', background: '#fff8f0', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}>
                           <span style={{ fontSize: 11, fontWeight: 600, color: '#e07700' }}>{expandedZeroSections.has('budget-only') ? '▼' : '▶'} 支出データなし</span>
-                          <span style={{ fontSize: 11, color: '#e07700' }}>{budgetOnlyProjects.length}件</span>
+                          <span style={{ fontSize: 11, color: '#e07700' }}>{noSpendingProjects.length}件</span>
                         </button>
-                        {expandedZeroSections.has('budget-only') && budgetOnlyProjects.map(p => (
+                        {expandedZeroSections.has('budget-only') && noSpendingProjects.map(p => (
                           <button key={p.pid} type="button" onClick={() => handleConnectionClick(p.budgetId)} style={linkStyle}>
                             <span title={p.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
                             <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(p.budgetValue)}</span>
