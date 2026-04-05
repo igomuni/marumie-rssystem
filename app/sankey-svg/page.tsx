@@ -1078,14 +1078,20 @@ export default function RealDataSankeyPage() {
                         流入元 <span style={{ fontWeight: 400, fontSize: 11 }}>({
                           selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
                             ? filtered.aggNodeMembers.get('__agg-project-spending')!.length
-                            : selectedNodeAllConnections.inEdges.length
+                            : selectedNode?.id === '__agg-recipient' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                              ? selectedNodeAllConnections.inEdges.reduce((s, item) =>
+                                  s + (item.id === '__agg-project-spending' ? (filtered.aggNodeMembers.get('__agg-project-spending')?.length ?? 1) : 1), 0)
+                              : selectedNodeAllConnections.inEdges.length
                         })</span>
                       </button>}
                       {hasOut && <button type="button" style={activeTab === 'out' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('out')}>
                         流出先 <span style={{ fontWeight: 400, fontSize: 11 }}>({
                           selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget')
                             ? filtered.aggNodeMembers.get('__agg-project-budget')!.length
-                            : selectedNodeAllConnections.outEdges.length
+                            : selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-recipient')
+                              ? selectedNodeAllConnections.outEdges.reduce((s, item) =>
+                                  s + (item.id === '__agg-recipient' ? (filtered.aggNodeMembers.get('__agg-recipient')?.length ?? 1) : 1), 0)
+                              : selectedNodeAllConnections.outEdges.length
                         })</span>
                       </button>}
                     </div>
@@ -1100,23 +1106,38 @@ export default function RealDataSankeyPage() {
                         return (<>
                           {useGrouped && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>{renderGroupToggle(aggMembers)}</div>}
                           {useGrouped ? renderGrouped(aggMembers) : (<>
-                            {selectedNodeAllConnections.inEdges.slice(0, inDisplayCount).map((item, i) => (
-                              <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
-                              >
-                                <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                                <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
-                              </button>
-                            ))}
-                            {(() => { const rem = selectedNodeAllConnections.inEdges.length - inDisplayCount; return (
-                              <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
-                                {rem > 0 && <>
-                                  <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
-                                  <button onClick={() => setInDisplayCount(selectedNodeAllConnections.inEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
-                                </>}
-                                {inDisplayCount > 8 && <button onClick={() => setInDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
-                              </div>
-                            ); })()}
+                            {(() => {
+                              // expand __agg-project-spending inline when rendering __agg-recipient inEdges
+                              const expandedInEdges = selectedNode?.id === '__agg-recipient'
+                                ? selectedNodeAllConnections.inEdges.flatMap(item =>
+                                    item.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                                      ? filtered.aggNodeMembers.get('__agg-project-spending')!
+                                      : [item]
+                                  )
+                                : selectedNodeAllConnections.inEdges;
+                              return (<>
+                                {expandedInEdges.slice(0, inDisplayCount).map((item, i) => (
+                                  <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', gap: 6, textAlign: 'left' }}
+                                  >
+                                    <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {item.ministry && <span style={{ fontSize: 10, color: '#aaa', marginRight: 4 }}>{item.ministry}</span>}
+                                      {item.name}
+                                    </span>
+                                    <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
+                                  </button>
+                                ))}
+                                {(() => { const rem = expandedInEdges.length - inDisplayCount; return (
+                                  <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
+                                    {rem > 0 && <>
+                                      <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
+                                      <button onClick={() => setInDisplayCount(expandedInEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
+                                    </>}
+                                    {inDisplayCount > 8 && <button onClick={() => setInDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
+                                  </div>
+                                ); })()}
+                              </>);
+                            })()}
                           </>)}
                         </>);
                       })()}
@@ -1124,22 +1145,30 @@ export default function RealDataSankeyPage() {
                       {activeTab === 'out' && hasOut && (() => {
                         const useGrouped = selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget');
                         const aggMembers = useGrouped ? filtered!.aggNodeMembers.get('__agg-project-budget')! : [];
+                        // expand __agg-recipient inline when rendering __agg-project-spending outEdges
+                        const expandedOutEdges = selectedNode?.id === '__agg-project-spending'
+                          ? selectedNodeAllConnections.outEdges.flatMap(item =>
+                              item.id === '__agg-recipient' && filtered?.aggNodeMembers?.has('__agg-recipient')
+                                ? filtered.aggNodeMembers.get('__agg-recipient')!
+                                : [item]
+                            )
+                          : selectedNodeAllConnections.outEdges;
                         return (<>
                           {useGrouped && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>{renderGroupToggle(aggMembers)}</div>}
                           {useGrouped ? renderGrouped(aggMembers) : (<>
-                            {selectedNodeAllConnections.outEdges.slice(0, outDisplayCount).map((item, i) => (
-                              <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                            {expandedOutEdges.slice(0, outDisplayCount).map((item, i) => (
+                              <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' }}
                               >
-                                <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                                <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                                 <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                               </button>
                             ))}
-                            {(() => { const rem = selectedNodeAllConnections.outEdges.length - outDisplayCount; return (
+                            {(() => { const rem = expandedOutEdges.length - outDisplayCount; return (
                               <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
                                 {rem > 0 && <>
                                   <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
-                                  <button onClick={() => setOutDisplayCount(selectedNodeAllConnections.outEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
+                                  <button onClick={() => setOutDisplayCount(expandedOutEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
                                 </>}
                                 {outDisplayCount > 8 && <button onClick={() => setOutDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
                               </div>
