@@ -1130,8 +1130,23 @@ export default function RealDataSankeyPage() {
               {/* 流出先 */}
               {selectedNodeAllConnections && selectedNodeAllConnections.outEdges.length > 0 && (
                 <div style={{ padding: '10px 14px', borderTop: selectedNodeAllConnections.inEdges.length > 0 ? '1px solid #f0f0f0' : 'none' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    流出先 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.outEdges.length}件)</span>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span>流出先 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.outEdges.length}件)</span></span>
+                    {(selectedNode?.id === '__agg-project-budget' || selectedNode?.id === '__agg-project-spending') && filtered?.aggNodeMembers?.has(selectedNode.id) && (() => {
+                      const members = filtered.aggNodeMembers.get(selectedNode.id)!;
+                      const allMinistries = Array.from(new Set(members.map(m => m.ministry ?? '(不明)')));
+                      const allCollapsed = allMinistries.every(m => collapsedMinistries.has(m));
+                      return (
+                        <button type="button"
+                          onClick={() => setCollapsedMinistries(allCollapsed ? new Set() : new Set(allMinistries))}
+                          style={iconBtnStyle}
+                          title={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'}
+                          aria-label={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'}
+                        >
+                          {allCollapsed ? svgExpandAll : svgCollapseAll}
+                        </button>
+                      );
+                    })()}
                   </div>
                   {/* 集約プロジェクトノード: aggNodeMembers を府省庁グループ表示 */}
                   {(selectedNode?.id === '__agg-project-budget' || selectedNode?.id === '__agg-project-spending') && filtered?.aggNodeMembers?.has(selectedNode.id) ? (() => {
