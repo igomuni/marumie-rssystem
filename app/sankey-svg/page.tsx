@@ -1073,7 +1073,7 @@ export default function RealDataSankeyPage() {
                 return (
                   <div style={{ borderTop: '1px solid #f0f0f0' }}>
                     {/* Tab bar */}
-                    <div style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
+                    <div style={{ display: 'flex', borderBottom: '1px solid #eee', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
                       {hasIn && <button type="button" style={activeTab === 'in' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('in')}>
                         流入元 <span style={{ fontWeight: 400, fontSize: 11 }}>({
                           selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
