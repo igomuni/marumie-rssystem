@@ -895,7 +895,9 @@ export default function RealDataSankeyPage() {
 
           {/* Panel content */}
           {!isPanelCollapsed && selectedNode && (
-            <div style={{ height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {/* Scrollable body — header is sticky inside this scroll container */}
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               {/* Header */}
               <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
@@ -1188,6 +1190,7 @@ export default function RealDataSankeyPage() {
                   </div>
                 );
               })()}
+              </div>{/* end scrollable body */}
             </div>
           )}
         </div>
