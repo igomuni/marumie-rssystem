@@ -681,16 +681,8 @@ export default function RealDataSankeyPage() {
                           : (hoveredNode || hoveredLink) ? 0.1
                           : 0.25
                     }
-                    stroke={
-                      selectedNode
-                        ? (link.source.id === selectedNode.id || link.target.id === selectedNode.id) ? getLinkColor(link) : 'none'
-                        : hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? getLinkColor(link) : 'none'
-                    }
-                    strokeWidth={
-                      selectedNode
-                        ? (link.source.id === selectedNode.id || link.target.id === selectedNode.id) ? Math.min(1, Math.min(link.sourceWidth, link.targetWidth) * 0.3) : 0
-                        : hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? Math.min(1, Math.min(link.sourceWidth, link.targetWidth) * 0.3) : 0
-                    }
+                    stroke="none"
+                    strokeWidth={0}
                     onMouseEnter={(e) => {
                       const rect = containerRef.current?.getBoundingClientRect();
                       if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
@@ -702,7 +694,7 @@ export default function RealDataSankeyPage() {
                     }}
                     onMouseLeave={() => setHoveredLink(null)}
                     onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'grab', transition: 'fill-opacity 0.2s ease, stroke-opacity 0.2s ease, stroke-width 0.2s ease' }}
+                    style={{ cursor: 'grab', transition: 'fill-opacity 0.2s ease' }}
                   />
                 ))}
 
