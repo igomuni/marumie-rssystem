@@ -1100,9 +1100,16 @@ export default function RealDataSankeyPage() {
                     <div style={{ padding: '10px 14px' }}>
                       {activeTab === 'in' && hasIn && (() => {
                         const useGrouped = selectedNode?.type === 'recipient' || selectedNode?.id === '__agg-project-spending';
-                        const aggMembers = selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                        const aggMembers: GroupItem[] = selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
                           ? filtered.aggNodeMembers.get('__agg-project-spending')!
-                          : selectedNodeAllConnections.inEdges;
+                          : selectedNode?.type === 'recipient'
+                            // expand __agg-project-spending within inEdges before grouping
+                            ? selectedNodeAllConnections.inEdges.flatMap(item =>
+                                item.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                                  ? filtered.aggNodeMembers.get('__agg-project-spending')!
+                                  : [item]
+                              )
+                            : selectedNodeAllConnections.inEdges;
                         return (<>
                           {useGrouped && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>{renderGroupToggle(aggMembers)}</div>}
                           {useGrouped ? renderGrouped(aggMembers) : (<>
