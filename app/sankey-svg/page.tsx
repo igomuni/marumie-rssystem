@@ -1153,13 +1153,14 @@ export default function RealDataSankeyPage() {
                         const useGrouped = selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget');
                         const aggMembers = useGrouped ? filtered!.aggNodeMembers.get('__agg-project-budget')! : [];
                         // expand __agg-recipient inline when rendering __agg-project-spending outEdges
-                        const expandedOutEdges = selectedNode?.id === '__agg-project-spending'
+                        const expandedOutEdges = (selectedNode?.id === '__agg-project-spending'
                           ? selectedNodeAllConnections.outEdges.flatMap(item =>
                               item.id === '__agg-recipient' && filtered?.aggNodeMembers?.has('__agg-recipient')
                                 ? filtered.aggNodeMembers.get('__agg-recipient')!
                                 : [item]
                             )
-                          : selectedNodeAllConnections.outEdges;
+                          : selectedNodeAllConnections.outEdges
+                        ).slice().sort((a, b) => b.value - a.value);
                         return (<>
                           {useGrouped && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>{renderGroupToggle(aggMembers)}</div>}
                           {useGrouped ? renderGrouped(aggMembers) : (<>
