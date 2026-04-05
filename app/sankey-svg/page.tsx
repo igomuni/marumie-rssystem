@@ -896,10 +896,8 @@ export default function RealDataSankeyPage() {
           {/* Panel content */}
           {!isPanelCollapsed && selectedNode && (
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              {/* Scrollable body — header is sticky inside this scroll container */}
-              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-              {/* Header */}
-              <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
+              {/* Header — fixed, never scrolls */}
+              <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', flexShrink: 0, background: '#fff' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 13, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
@@ -953,7 +951,7 @@ export default function RealDataSankeyPage() {
                 const hasImbalance = noSpendingProjects.length > 0 || spendingOnlyProjects.length > 0;
                 const linkStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' };
                 return (
-                  <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0' }}>
+                  <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0', flexShrink: 0 }}>
                     {/* サマリ */}
                     <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       事業 <span style={{ fontWeight: 400 }}>{totalProjects.toLocaleString()}件</span>
@@ -1073,9 +1071,9 @@ export default function RealDataSankeyPage() {
                   );
                 };
                 return (
-                  <div style={{ borderTop: '1px solid #f0f0f0' }}>
+                  <div style={{ borderTop: '1px solid #f0f0f0', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* Tab bar */}
-                    <div style={{ display: 'flex', borderBottom: '1px solid #eee', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
+                    <div style={{ display: 'flex', borderBottom: '1px solid #eee', flexShrink: 0, background: '#fff' }}>
                       {hasIn && <button type="button" style={activeTab === 'in' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('in')}>
                         流入元 <span style={{ fontWeight: 400, fontSize: 11 }}>({
                           selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
@@ -1099,7 +1097,7 @@ export default function RealDataSankeyPage() {
                     </div>
 
                     {/* Tab content */}
-                    <div style={{ padding: '10px 14px' }}>
+                    <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
                       {activeTab === 'in' && hasIn && (() => {
                         const useGrouped = selectedNode?.type === 'recipient' || selectedNode?.id === '__agg-project-spending';
                         const aggMembers: GroupItem[] = selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
@@ -1190,7 +1188,6 @@ export default function RealDataSankeyPage() {
                   </div>
                 );
               })()}
-              </div>{/* end scrollable body */}
             </div>
           )}
         </div>
