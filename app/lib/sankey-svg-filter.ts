@@ -3,6 +3,8 @@ import { MARGIN, NODE_W, NODE_PAD, getColumn, sortPriority } from '@/app/lib/san
 
 // ── Client-side TopN filtering ──
 
+type AggMember = { id: string; name: string; value: number; ministry?: string };
+
 export function filterTopN(
   allNodes: RawNode[],
   allEdges: RawEdge[],
@@ -11,7 +13,7 @@ export function filterTopN(
   topRecipient: number,
   recipientOffset: number,
   pinnedProjectId: string | null = null,
-): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number } {
+): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number; aggNodeMembers: Map<string, AggMember[]> } {
   // Build O(1) lookup map
   const nodeById = new Map(allNodes.map(n => [n.id, n]));
 
@@ -238,7 +240,34 @@ export function filterTopN(
     edges.push({ source: '__agg-project-spending', target: '__agg-recipient', value: otherProjectTailTotal });
   }
 
-  return { nodes, edges, totalRecipientCount };
+  // Build aggregation membership map for side panel display
+  const aggNodeMembers = new Map<string, { id: string; name: string; value: number; ministry?: string }[]>();
+  // __agg-ministry → actual ministry nodes
+  if (otherMinistries.length > 0) {
+    aggNodeMembers.set('__agg-ministry', otherMinistries.map(n => ({
+      id: n.id, name: n.name, value: ministryBudgetValue.get(n.name) || 0,
+    })).sort((a, b) => b.value - a.value));
+  }
+  // __agg-project-budget / __agg-project-spending → actual project-budget nodes
+  if (otherProjects.length > 0) {
+    const projectBudgetMembers = otherProjects.map(sp => {
+      const bn = sp.projectId != null ? nodeById.get(`project-budget-${sp.projectId}`) : undefined;
+      return { id: bn?.id ?? `project-budget-${sp.projectId}`, name: sp.name, value: bn?.value ?? 0, ministry: sp.ministry };
+    }).sort((a, b) => b.value - a.value);
+    aggNodeMembers.set('__agg-project-budget', projectBudgetMembers);
+    aggNodeMembers.set('__agg-project-spending', otherProjects.map(sp => ({
+      id: sp.id, name: sp.name, value: projectWindowValue.get(sp.id) || 0, ministry: sp.ministry,
+    })).sort((a, b) => b.value - a.value));
+  }
+  // __agg-recipient → tail recipient nodes
+  if (tailRecipients.length > 0) {
+    aggNodeMembers.set('__agg-recipient', tailRecipients.map(([id, value]) => {
+      const n = nodeById.get(id);
+      return { id, name: n?.name ?? id, value };
+    }));
+  }
+
+  return { nodes, edges, totalRecipientCount, aggNodeMembers };
 }
 
 // ── Custom Layout Engine ──

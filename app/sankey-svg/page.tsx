@@ -317,7 +317,8 @@ export default function RealDataSankeyPage() {
   const [collapsedMinistries, setCollapsedMinistries] = useState<Set<string>>(new Set());
   const [ministryDisplayCounts, setMinistryDisplayCounts] = useState<Map<string, number>>(new Map());
   const [expandedZeroSections, setExpandedZeroSections] = useState<Set<string>>(new Set());
-  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setExpandedZeroSections(new Set()); }, [selectedNodeId]);
+  const [showAggAll, setShowAggAll] = useState(false);
+  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setExpandedZeroSections(new Set()); setShowAggAll(false); }, [selectedNodeId]);
 
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
@@ -1005,6 +1006,38 @@ export default function RealDataSankeyPage() {
                           </button>
                         ))}
                       </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* 集約ノードメンバーリスト */}
+              {selectedNode?.aggregated && filtered?.aggNodeMembers?.has(selectedNode.id) && (() => {
+                const members = filtered.aggNodeMembers.get(selectedNode.id)!;
+                const label = selectedNode.id === '__agg-ministry' ? '省庁'
+                  : selectedNode.id === '__agg-project-budget' ? '事業（予算）'
+                  : selectedNode.id === '__agg-project-spending' ? '事業（支出）'
+                  : '支出先';
+                const linkStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' };
+                const displayMembers = showAggAll ? members : members.slice(0, 20);
+                return (
+                  <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0' }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      {label} <span style={{ fontWeight: 400 }}>({members.length}件)</span>
+                    </div>
+                    {displayMembers.map((m: { id: string; name: string; value: number; ministry?: string }) => (
+                      <button key={m.id} type="button" onClick={() => handleConnectionClick(m.id)} style={linkStyle}>
+                        <span title={m.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {m.ministry && selectedNode.id !== '__agg-ministry' && <span style={{ fontSize: 10, color: '#aaa', marginRight: 4 }}>{m.ministry}</span>}
+                          {m.name}
+                        </span>
+                        <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(m.value)}</span>
+                      </button>
+                    ))}
+                    {!showAggAll && members.length > 20 && (
+                      <button type="button" onClick={() => setShowAggAll(true)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0' }}>
+                        さらに{members.length - 20}件を表示
+                      </button>
                     )}
                   </div>
                 );
