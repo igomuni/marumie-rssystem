@@ -97,7 +97,7 @@ export function filterTopN(
 
   const totalWindowSpending = windowRecipients.reduce((s, [, v]) => s + v, 0);
 
-  // 6. Ministry window values
+  // 6. Ministry window values (for edge widths)
   const ministryWindowValue = new Map<string, number>();
   for (const e of allEdges) {
     if (windowRecipientIds.has(e.target)) {
@@ -109,17 +109,28 @@ export function filterTopN(
   }
   const otherMinistryWindowValue = otherMinistries.reduce((s, n) => s + (ministryWindowValue.get(n.name) || 0), 0);
 
+  // 7. Ministry budget totals (sum of project-budget values per ministry — for node heights)
+  const ministryBudgetValue = new Map<string, number>();
+  for (const n of allNodes) {
+    if (n.type === 'project-budget' && n.ministry) {
+      ministryBudgetValue.set(n.ministry, (ministryBudgetValue.get(n.ministry) || 0) + n.value);
+    }
+  }
+  const totalBudget = Array.from(ministryBudgetValue.values()).reduce((s, v) => s + v, 0);
+  const otherMinistryBudgetValue = otherMinistries.reduce((s, n) => s + (ministryBudgetValue.get(n.name) || 0), 0);
+
   // ── Build nodes ──
   const nodes: RawNode[] = [];
   const totalNode = allNodes.find(n => n.type === 'total');
-  if (totalNode) nodes.push({ ...totalNode, value: totalWindowSpending });
+  if (totalNode) nodes.push({ ...totalNode, value: totalBudget, skipLinkOverride: true });
 
   for (const n of topMinistryNodes) {
     const wv = ministryWindowValue.get(n.name) || 0;
-    if (wv > 0) nodes.push({ ...n, value: wv });
+    const bv = ministryBudgetValue.get(n.name) || 0;
+    if (wv > 0) nodes.push({ ...n, value: bv, skipLinkOverride: true });
   }
   if (otherMinistryWindowValue > 0) {
-    nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryWindowValue, aggregated: true });
+    nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryBudgetValue, skipLinkOverride: true, aggregated: true });
   }
 
   for (const n of topProjectNodes) {

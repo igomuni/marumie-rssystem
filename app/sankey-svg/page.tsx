@@ -833,9 +833,9 @@ export default function RealDataSankeyPage() {
               : nodes.reduce((s, n) => s + amt(n), 0);
             const count = hoveredColIndex === 0 ? null : nodes.length;
             const colDescs = [
-              'ウィンドウ内支出先合計',
-              'ウィンドウ内支出合計',
-              '各事業の予算額合計（予算案ベース）',
+              '全事業の予算額合計（予算案ベース）',
+              '各府省庁所管事業の予算額合計',
+              '各事業の予算額',
               'ウィンドウ内支出先への支出合計（tail除外）',
               '全エッジ合計（ウィンドウ外流入含む）',
             ];
