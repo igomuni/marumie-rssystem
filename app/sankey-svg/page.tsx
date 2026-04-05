@@ -317,8 +317,8 @@ export default function RealDataSankeyPage() {
   const [collapsedMinistries, setCollapsedMinistries] = useState<Set<string>>(new Set());
   const [ministryDisplayCounts, setMinistryDisplayCounts] = useState<Map<string, number>>(new Map());
   const [expandedZeroSections, setExpandedZeroSections] = useState<Set<string>>(new Set());
-  const [showAggAll, setShowAggAll] = useState(false);
-  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setExpandedZeroSections(new Set()); setShowAggAll(false); }, [selectedNodeId]);
+  const [aggDisplayCount, setAggDisplayCount] = useState(20);
+  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setExpandedZeroSections(new Set()); setAggDisplayCount(20); }, [selectedNodeId]);
 
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
@@ -1019,7 +1019,8 @@ export default function RealDataSankeyPage() {
                   : selectedNode.id === '__agg-project-spending' ? '事業（支出）'
                   : '支出先';
                 const linkStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' };
-                const displayMembers = showAggAll ? members : members.slice(0, 20);
+                const displayMembers = members.slice(0, aggDisplayCount);
+                const rem = members.length - aggDisplayCount;
                 return (
                   <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0' }}>
                     <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -1034,11 +1035,13 @@ export default function RealDataSankeyPage() {
                         <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(m.value)}</span>
                       </button>
                     ))}
-                    {!showAggAll && members.length > 20 && (
-                      <button type="button" onClick={() => setShowAggAll(true)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0' }}>
-                        さらに{members.length - 20}件を表示
-                      </button>
-                    )}
+                    <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
+                      {rem > 0 && <>
+                        <button onClick={() => setAggDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
+                        <button onClick={() => setAggDisplayCount(members.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
+                      </>}
+                      {aggDisplayCount > 20 && <button onClick={() => setAggDisplayCount(20)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
+                    </div>
                   </div>
                 );
               })()}
