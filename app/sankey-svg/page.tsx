@@ -1016,8 +1016,11 @@ export default function RealDataSankeyPage() {
                 <div style={{ padding: '10px 14px' }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span>流入元 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.inEdges.length}件)</span></span>
-                    {selectedNode?.type === 'recipient' && (() => {
-                      const allMinistries = Array.from(new Set(selectedNodeAllConnections.inEdges.map(e => e.ministry ?? '(不明)')));
+                    {(selectedNode?.type === 'recipient' || selectedNode?.id === '__agg-project-spending') && (() => {
+                      const members = selectedNode.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                        ? filtered.aggNodeMembers.get('__agg-project-spending')!
+                        : selectedNodeAllConnections.inEdges;
+                      const allMinistries = Array.from(new Set(members.map(e => e.ministry ?? '(不明)')));
                       const allCollapsed = allMinistries.every(m => collapsedMinistries.has(m));
                       return (
                         <button
@@ -1032,10 +1035,14 @@ export default function RealDataSankeyPage() {
                       );
                     })()}
                   </div>
-                  {selectedNode?.type === 'recipient' ? (() => {
+                  {(selectedNode?.type === 'recipient' || selectedNode?.id === '__agg-project-spending') ? (() => {
                     // 府省庁グループ表示
-                    const grouped = new Map<string, typeof selectedNodeAllConnections.inEdges>();
-                    for (const item of selectedNodeAllConnections.inEdges) {
+                    type GroupItem = { id: string; name: string; value: number; ministry?: string; aggregated?: boolean };
+                    const rawMembers: GroupItem[] = selectedNode.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                      ? filtered.aggNodeMembers.get('__agg-project-spending')!
+                      : selectedNodeAllConnections.inEdges;
+                    const grouped = new Map<string, GroupItem[]>();
+                    for (const item of rawMembers) {
                       const key = item.ministry ?? '(不明)';
                       if (!grouped.has(key)) grouped.set(key, []);
                       grouped.get(key)!.push(item);
