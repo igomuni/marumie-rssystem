@@ -178,41 +178,43 @@ export function filterTopN(
   // ── Build edges ──
   const edges: RawEdge[] = [];
 
-  // total → ministry
+  // total → ministry (budget-based)
   for (const mn of topMinistryNodes) {
-    const wv = ministryWindowValue.get(mn.name) || 0;
-    if (wv > 0) edges.push({ source: 'total', target: mn.id, value: wv });
+    const bv = ministryBudgetValue.get(mn.name) || 0;
+    if (bv > 0) edges.push({ source: 'total', target: mn.id, value: bv });
   }
-  if (otherMinistryWindowValue > 0) {
-    edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryWindowValue });
+  if (otherMinistryBudgetValue > 0) {
+    edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryBudgetValue });
   }
 
-  // ministry → project-budget
+  // ministry → project-budget (budget-based)
   for (const n of topProjectNodes) {
-    const wv = projectWindowValue.get(n.id) || 0;
+    const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
+    const bv = budgetNode?.value ?? 0;
     const ministrySource = topMinistryNames.has(n.ministry || '') ? `ministry-${n.ministry}` : '__agg-ministry';
-    if (wv > 0) edges.push({ source: ministrySource, target: `project-budget-${n.projectId}`, value: wv });
+    if (bv > 0) edges.push({ source: ministrySource, target: `project-budget-${n.projectId}`, value: bv });
   }
   if (otherProjectWindowTotal > 0) {
     for (const mn of topMinistryNodes) {
       const v = otherProjects
-        .filter(p => p.ministry === mn.name)
-        .reduce((s, p) => s + (projectWindowValue.get(p.id) || 0), 0);
+        .filter(p => p.ministry === mn.name && p.projectId != null)
+        .reduce((s, p) => s + (nodeById.get(`project-budget-${p.projectId}`)?.value ?? 0), 0);
       if (v > 0) edges.push({ source: mn.id, target: '__agg-project-budget', value: v });
     }
     const otherMinRemain = otherProjects
-      .filter(p => !topMinistryNames.has(p.ministry || ''))
-      .reduce((s, p) => s + (projectWindowValue.get(p.id) || 0), 0);
+      .filter(p => !topMinistryNames.has(p.ministry || '') && p.projectId != null)
+      .reduce((s, p) => s + (nodeById.get(`project-budget-${p.projectId}`)?.value ?? 0), 0);
     if (otherMinRemain > 0) edges.push({ source: '__agg-ministry', target: '__agg-project-budget', value: otherMinRemain });
   }
 
-  // project-budget → project-spending
+  // project-budget → project-spending (budget-based)
   for (const n of topProjectNodes) {
-    const wv = projectWindowValue.get(n.id) || 0;
-    edges.push({ source: `project-budget-${n.projectId}`, target: n.id, value: wv });
+    const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
+    const bv = budgetNode?.value ?? 0;
+    if (bv > 0) edges.push({ source: `project-budget-${n.projectId}`, target: n.id, value: bv });
   }
-  if (otherProjectWindowTotal > 0) {
-    edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: otherProjectWindowTotal });
+  if (otherProjectBudgetTotal > 0) {
+    edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: otherProjectBudgetTotal });
   }
 
   // project-spending → window recipients
