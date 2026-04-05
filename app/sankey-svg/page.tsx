@@ -1132,7 +1132,7 @@ export default function RealDataSankeyPage() {
                 <div style={{ padding: '10px 14px', borderTop: selectedNodeAllConnections.inEdges.length > 0 ? '1px solid #f0f0f0' : 'none' }}>
                   <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span>流出先 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.outEdges.length}件)</span></span>
-                    {(selectedNode?.id === '__agg-project-budget' || selectedNode?.id === '__agg-project-spending') && filtered?.aggNodeMembers?.has(selectedNode.id) && (() => {
+                    {selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has(selectedNode.id) && (() => {
                       const members = filtered.aggNodeMembers.get(selectedNode.id)!;
                       const allMinistries = Array.from(new Set(members.map(m => m.ministry ?? '(不明)')));
                       const allCollapsed = allMinistries.every(m => collapsedMinistries.has(m));
@@ -1148,8 +1148,8 @@ export default function RealDataSankeyPage() {
                       );
                     })()}
                   </div>
-                  {/* 集約プロジェクトノード: aggNodeMembers を府省庁グループ表示 */}
-                  {(selectedNode?.id === '__agg-project-budget' || selectedNode?.id === '__agg-project-spending') && filtered?.aggNodeMembers?.has(selectedNode.id) ? (() => {
+                  {/* 集約予算ノード: aggNodeMembers を府省庁グループ表示 */}
+                  {selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has(selectedNode.id) ? (() => {
                     const members = filtered.aggNodeMembers.get(selectedNode.id)!;
                     const grouped = new Map<string, typeof members>();
                     for (const m of members) {
