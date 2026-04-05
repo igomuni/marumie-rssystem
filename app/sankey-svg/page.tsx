@@ -1083,10 +1083,18 @@ export default function RealDataSankeyPage() {
                     {/* Tab bar */}
                     <div style={{ display: 'flex', borderBottom: '1px solid #eee' }}>
                       {hasIn && <button type="button" style={activeTab === 'in' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('in')}>
-                        流入元 <span style={{ fontWeight: 400, fontSize: 11 }}>({selectedNodeAllConnections.inEdges.length})</span>
+                        流入元 <span style={{ fontWeight: 400, fontSize: 11 }}>({
+                          selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                            ? filtered.aggNodeMembers.get('__agg-project-spending')!.length
+                            : selectedNodeAllConnections.inEdges.length
+                        })</span>
                       </button>}
                       {hasOut && <button type="button" style={activeTab === 'out' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('out')}>
-                        流出先 <span style={{ fontWeight: 400, fontSize: 11 }}>({selectedNodeAllConnections.outEdges.length})</span>
+                        流出先 <span style={{ fontWeight: 400, fontSize: 11 }}>({
+                          selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget')
+                            ? filtered.aggNodeMembers.get('__agg-project-budget')!.length
+                            : selectedNodeAllConnections.outEdges.length
+                        })</span>
                       </button>}
                     </div>
 
