@@ -186,18 +186,12 @@ export function filterTopN(
   const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0) - hiddenTailSpending;
   const aggRecipientValue = tailValue;
   if (aggRecipientValue > 0) {
-    // Cap layout height so the aggregate bar doesn't overwhelm the window recipients.
-    // Cap = min window-recipient value × topRecipient  (≈ total height of all window bars if all were minimum-sized).
-    const minWindowRecipientValue = windowRecipients.length > 0
-      ? Math.min(...windowRecipients.map(([, v]) => v))
-      : aggRecipientValue;
-    const layoutCap = minWindowRecipientValue * topRecipient;
     nodes.push({
       id: '__agg-recipient',
       name: `${tailRecipients.length.toLocaleString()}支出先`,
       type: 'recipient',
       value: aggRecipientValue,
-      layoutCap: layoutCap,
+      skipLinkOverride: true,
       aggregated: true,
     });
   }
