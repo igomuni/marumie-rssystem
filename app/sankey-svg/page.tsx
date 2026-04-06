@@ -1005,10 +1005,10 @@ export default function RealDataSankeyPage() {
 
 
               {/* 流入元 / 流出先 タブ */}
-              {selectedNodeAllConnections && (selectedNodeAllConnections.inEdges.length > 0 || selectedNodeAllConnections.outEdges.length > 0) && (() => {
+              {selectedNodeAllConnections && (() => {
                 const hasIn = selectedNodeAllConnections.inEdges.length > 0;
                 const hasOut = selectedNodeAllConnections.outEdges.length > 0;
-                const activeTab = (!hasIn && hasOut) ? 'out' : (!hasOut && hasIn) ? 'in' : connectionTab;
+                const activeTab = connectionTab;
                 const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: 12, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
                 const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
                 // grouped list helper (for recipient / agg-project nodes)
@@ -1074,7 +1074,7 @@ export default function RealDataSankeyPage() {
                   <div style={{ borderTop: '1px solid #f0f0f0', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* Tab bar */}
                     <div style={{ display: 'flex', borderBottom: '1px solid #eee', flexShrink: 0, background: '#fff' }}>
-                      {hasIn && <button type="button" style={activeTab === 'in' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('in')}>
+                      <button type="button" style={activeTab === 'in' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('in')}>
                         流入元 <span style={{ fontWeight: 400, fontSize: 11 }}>({
                           selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
                             ? filtered.aggNodeMembers.get('__agg-project-spending')!.length
@@ -1083,8 +1083,8 @@ export default function RealDataSankeyPage() {
                                   s + (item.id === '__agg-project-spending' ? (filtered.aggNodeMembers.get('__agg-project-spending')?.length ?? 1) : 1), 0)
                               : selectedNodeAllConnections.inEdges.length
                         })</span>
-                      </button>}
-                      {hasOut && <button type="button" style={activeTab === 'out' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('out')}>
+                      </button>
+                      <button type="button" style={activeTab === 'out' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('out')}>
                         流出先 <span style={{ fontWeight: 400, fontSize: 11 }}>({
                           selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget')
                             ? filtered.aggNodeMembers.get('__agg-project-budget')!.length
@@ -1093,11 +1093,12 @@ export default function RealDataSankeyPage() {
                                   s + (item.id === '__agg-recipient' ? (filtered.aggNodeMembers.get('__agg-recipient')?.length ?? 1) : 1), 0)
                               : selectedNodeAllConnections.outEdges.length
                         })</span>
-                      </button>}
+                      </button>
                     </div>
 
                     {/* Tab content */}
                     <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
+                      {activeTab === 'in' && !hasIn && <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>}
                       {activeTab === 'in' && hasIn && (() => {
                         const useGrouped = selectedNode?.type === 'recipient' || selectedNode?.id === '__agg-project-spending';
                         const aggMembers: GroupItem[] = selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
@@ -1148,6 +1149,7 @@ export default function RealDataSankeyPage() {
                         </>);
                       })()}
 
+                      {activeTab === 'out' && !hasOut && <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>}
                       {activeTab === 'out' && hasOut && (() => {
                         const useGrouped = selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget');
                         const aggMembers = useGrouped ? filtered!.aggNodeMembers.get('__agg-project-budget')! : [];
