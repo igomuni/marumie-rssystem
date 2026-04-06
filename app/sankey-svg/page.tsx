@@ -1026,7 +1026,7 @@ export default function RealDataSankeyPage() {
                     <div style={{ display: 'flex', borderBottom: '1px solid #eee', flexShrink: 0, background: '#fff' }}>
                       <button type="button" style={activeTab === 'in' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('in')}>
                         流入元 <span style={{ fontWeight: 400, fontSize: 11 }}>({
-                          selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-budget')
+                          (selectedNode?.id === '__agg-project-spending' || selectedNode?.id === '__agg-project-budget') && filtered?.aggNodeMembers?.has('__agg-project-budget')
                             ? filtered.aggNodeMembers.get('__agg-project-budget')!.length
                             : selectedNode?.id === '__agg-recipient' && filtered?.aggNodeMembers?.has('__agg-project-spending')
                               ? selectedNodeAllConnections.inEdges.reduce((s, item) =>
@@ -1050,8 +1050,10 @@ export default function RealDataSankeyPage() {
                     <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
                       {activeTab === 'in' && !hasIn && <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>}
                       {activeTab === 'in' && hasIn && (() => {
-                        const useGrouped = selectedNode?.type === 'recipient' || selectedNode?.id === '__agg-project-spending';
+                        const useGrouped = selectedNode?.type === 'recipient' || selectedNode?.id === '__agg-project-spending' || selectedNode?.id === '__agg-project-budget';
                         const aggMembers: GroupItem[] = selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-budget')
+                          ? filtered.aggNodeMembers.get('__agg-project-budget')!
+                          : selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget')
                           ? filtered.aggNodeMembers.get('__agg-project-budget')!
                           : selectedNode?.type === 'recipient'
                             // expand __agg-project-spending within inEdges before grouping
