@@ -62,9 +62,9 @@ if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
 
 ### 変更1: `__agg-project-budget` ノード生成条件
 
-```
-変更前: if (otherProjectWindowTotal > 0)
-変更後: if (otherProjectBudgetTotal > 0)
+```diff
+-変更前: if (otherProjectWindowTotal > 0)
++変更後: if (otherProjectBudgetTotal > 0)
 ```
 
 ただし `__agg-project-spending` が生成されない場合（`otherProjectWindowTotal = 0 && otherProjectTailTotal = 0`）は `__agg-project-budget` も不要なので、外側の `if` 文の中に含める形は維持する。

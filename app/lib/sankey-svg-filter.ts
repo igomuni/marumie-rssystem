@@ -160,7 +160,8 @@ export function filterTopN(
     const hidden = projectAboveWindowSpending.get(n.id) || 0;
     nodes.push({ ...n, value: n.value - hidden, skipLinkOverride: true });
   }
-  // Create __agg-project-budget only when there is window spending (needs ministry→budget edges).
+  // Create __agg-project-budget when aggregated projects have budget (otherProjectBudgetTotal > 0),
+  // while still requiring aggregated spending flow via the outer guard.
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
   // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
   if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
