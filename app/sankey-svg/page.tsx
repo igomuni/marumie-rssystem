@@ -951,7 +951,7 @@ export default function RealDataSankeyPage() {
                 const hasImbalance = noSpendingProjects.length > 0 || spendingOnlyProjects.length > 0;
                 const linkStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' };
                 return (
-                  <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0', flexShrink: 0 }}>
+                  <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0' }}>
                     {/* サマリ */}
                     <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       事業 <span style={{ fontWeight: 400 }}>{totalProjects.toLocaleString()}件</span>
@@ -1128,7 +1128,6 @@ export default function RealDataSankeyPage() {
                                     style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', gap: 6, textAlign: 'left' }}
                                   >
                                     <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                      {item.ministry && <span style={{ fontSize: 10, color: '#aaa', marginRight: 4 }}>{item.ministry}</span>}
                                       {item.name}
                                     </span>
                                     <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
