@@ -974,7 +974,7 @@ export default function RealDataSankeyPage() {
                           <span style={{ fontSize: 11, color: '#e07700' }}>{noSpendingProjects.length}件</span>
                         </button>
                         {expandedZeroSections.has('budget-only') && noSpendingProjects.map(p => (
-                          <button key={p.pid} type="button" onClick={() => handleConnectionClick(p.budgetId)} style={linkStyle}>
+                          <button key={p.pid} type="button" onClick={() => handleConnectionClick(p.spendingId)} style={linkStyle}>
                             <span title={p.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
                             <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(p.budgetValue)}</span>
                           </button>
