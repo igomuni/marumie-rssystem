@@ -176,8 +176,11 @@ export function filterTopN(
     const rNode = nodeById.get(rid);
     if (rNode) nodes.push({ ...rNode, value: recipientWindowValue.get(rid) || 0, skipLinkOverride: true });
   }
+  // tailValue = total inflow to rank (offset+topRecipient)+ recipients from ALL projects.
+  // otherProjectTailTotal is a subset of tailValue (aggregated projects' tail flow),
+  // so it must NOT be added separately — that would double-count.
   const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0);
-  const aggRecipientValue = tailValue + otherProjectTailTotal;
+  const aggRecipientValue = tailValue;
   if (aggRecipientValue > 0) {
     // Cap layout height so the aggregate bar doesn't overwhelm the window recipients.
     // Cap = min window-recipient value × topRecipient  (≈ total height of all window bars if all were minimum-sized).
