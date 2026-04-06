@@ -19,6 +19,10 @@ export default function RealDataSankeyPage() {
   const [topRecipient, setTopRecipient] = useState(20);
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
+  const [hiddenProjectIds, setHiddenProjectIds] = useState<Set<string>>(new Set());
+  const prevTopProjectIdsRef = useRef<Set<string>>(new Set());
+  // Reset hidden projects when settings other than offset change
+  useEffect(() => { setHiddenProjectIds(new Set()); prevTopProjectIdsRef.current = new Set(); }, [graphData, topMinistry, topProject, topRecipient]);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
@@ -182,13 +186,43 @@ export default function RealDataSankeyPage() {
       .catch(e => { setError(String(e)); setLoading(false); });
   }, []);
 
-  const filtered = useMemo(() => {
-    if (!graphData) return null;
-    // Clamp offset to valid range
+  // Compute projectsWithWindowFlow independently of hiddenProjectIds to avoid circular deps in the effect below.
+  // This includes ALL projects (not just TopN) that have spending to the current window.
+  const rawProjectsWithWindowFlow = useMemo(() => {
+    if (!graphData) return new Set<string>();
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId).projectsWithWindowFlow;
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
+
+  // Update hiddenProjectIds: projects that had window flow before but lost it should be hidden.
+  // No dependency on hiddenProjectIds → no circular loop.
+  useEffect(() => {
+    if (recipientOffset === 0) {
+      setHiddenProjectIds(h => h.size === 0 ? h : new Set());
+      prevTopProjectIdsRef.current = rawProjectsWithWindowFlow;
+      return;
+    }
+    const prev = prevTopProjectIdsRef.current;
+    const curr = rawProjectsWithWindowFlow;
+    if (prev.size > 0) {
+      setHiddenProjectIds(h => {
+        const next = new Set(h);
+        for (const id of prev) { if (!curr.has(id)) next.add(id); }
+        for (const id of h) { if (curr.has(id)) next.delete(id); }
+        if (next.size === h.size && [...h].every(id => next.has(id))) return h;
+        return next;
+      });
+    }
+    prevTopProjectIdsRef.current = curr;
+  }, [rawProjectsWithWindowFlow, recipientOffset]);
+
+  const filtered = useMemo(() => {
+    if (!graphData) return null;
+    const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
+    const clampedOffset = Math.min(recipientOffset, maxOffset);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, hiddenProjectIds);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, hiddenProjectIds]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -222,6 +256,35 @@ export default function RealDataSankeyPage() {
     for (const l of selectedNode.targetLinks) ids.add(l.source.id);
     return ids;
   }, [selectedNode, selectedNodeInLayout]);
+
+  // Per-ministry project stats — for total/ministry node side panel
+  type ProjectStat = { pid: number; name: string; budgetId: string; spendingId: string; budgetValue: number; spendingValue: number };
+  type MinistryStat = { total: number; budgetTotal: number; budgetOnly: number; spendingOnly: number; neither: number; projects: ProjectStat[] };
+  const ministryProjectStats = useMemo(() => {
+    if (!graphData) return new Map<string, MinistryStat>();
+    const spendingByPid = new Map(
+      graphData.nodes
+        .filter((n): n is typeof n & { projectId: number } => n.type === 'project-spending' && n.projectId != null)
+        .map(n => [n.projectId, n] as const)
+    );
+    const stats = new Map<string, MinistryStat>();
+    for (const n of graphData.nodes) {
+      if (n.type !== 'project-budget' || !n.projectId || !n.ministry) continue;
+      const sn = spendingByPid.get(n.projectId);
+      const b = n.value;
+      const s = sn?.value ?? 0;
+      const m = n.ministry;
+      if (!stats.has(m)) stats.set(m, { total: 0, budgetTotal: 0, budgetOnly: 0, spendingOnly: 0, neither: 0, projects: [] });
+      const st = stats.get(m)!;
+      st.total++;
+      st.budgetTotal += b;
+      if (b === 0 && s === 0) st.neither++;
+      else if (b === 0) st.spendingOnly++;
+      else if (s === 0) st.budgetOnly++;
+      if (s === 0) st.projects.push({ pid: n.projectId, name: n.name, budgetId: n.id, spendingId: sn?.id ?? `project-spending-${n.projectId}`, budgetValue: b, spendingValue: s });
+    }
+    return stats;
+  }, [graphData]);
 
   // Global recipient rank (0-indexed, value-descending) — for offset jump
   const allRecipientRanks = useMemo(() => {
@@ -257,6 +320,26 @@ export default function RealDataSankeyPage() {
       if (e.target === selectedNode.id) inMap.set(e.source, (inMap.get(e.source) || 0) + e.value);
       if (e.source === selectedNode.id) outMap.set(e.target, (outMap.get(e.target) || 0) + e.value);
     }
+    // For ministry nodes: also add project-budget nodes with no edge (value=0) so they appear in outEdges
+    if (selectedNode.type === 'ministry') {
+      for (const n of graphData.nodes) {
+        if (n.type === 'project-budget' && n.ministry === selectedNode.name && !outMap.has(n.id)) {
+          outMap.set(n.id, 0);
+        }
+      }
+    }
+    // For project-budget nodes: ensure the paired project-spending node appears in outEdges even if spending=0
+    if (selectedNode.type === 'project-budget' && selectedNode.projectId != null) {
+      const pid = selectedNode.projectId;
+      const spendingNode = graphData.nodes.find(n => n.type === 'project-spending' && n.projectId === pid);
+      if (spendingNode && !outMap.has(spendingNode.id)) outMap.set(spendingNode.id, spendingNode.value);
+    }
+    // For project-spending nodes: ensure the paired project-budget node appears in inEdges even if budget=0
+    if (selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
+      const pid = selectedNode.projectId;
+      const budgetNode = graphData.nodes.find(n => n.type === 'project-budget' && n.projectId === pid);
+      if (budgetNode && !inMap.has(budgetNode.id)) inMap.set(budgetNode.id, budgetNode.value);
+    }
     return {
       inEdges: Array.from(inMap.entries())
         .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false, ministry: nodeById.get(id)?.ministry }))
@@ -271,7 +354,8 @@ export default function RealDataSankeyPage() {
   const [outDisplayCount, setOutDisplayCount] = useState(8);
   const [collapsedMinistries, setCollapsedMinistries] = useState<Set<string>>(new Set());
   const [ministryDisplayCounts, setMinistryDisplayCounts] = useState<Map<string, number>>(new Map());
-  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); }, [selectedNodeId]);
+  const [connectionTab, setConnectionTab] = useState<'in' | 'out'>('in');
+  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setConnectionTab('in'); }, [selectedNodeId]);
 
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
@@ -634,16 +718,8 @@ export default function RealDataSankeyPage() {
                           : (hoveredNode || hoveredLink) ? 0.1
                           : 0.25
                     }
-                    stroke={
-                      selectedNode
-                        ? (link.source.id === selectedNode.id || link.target.id === selectedNode.id) ? getLinkColor(link) : 'none'
-                        : hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? getLinkColor(link) : 'none'
-                    }
-                    strokeWidth={
-                      selectedNode
-                        ? (link.source.id === selectedNode.id || link.target.id === selectedNode.id) ? Math.min(1, Math.min(link.sourceWidth, link.targetWidth) * 0.3) : 0
-                        : hoveredLink === link || (hoveredNode && (link.source === hoveredNode || link.target === hoveredNode)) ? Math.min(1, Math.min(link.sourceWidth, link.targetWidth) * 0.3) : 0
-                    }
+                    stroke="none"
+                    strokeWidth={0}
                     onMouseEnter={(e) => {
                       const rect = containerRef.current?.getBoundingClientRect();
                       if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
@@ -655,7 +731,7 @@ export default function RealDataSankeyPage() {
                     }}
                     onMouseLeave={() => setHoveredLink(null)}
                     onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'grab', transition: 'fill-opacity 0.2s ease, stroke-opacity 0.2s ease, stroke-width 0.2s ease' }}
+                    style={{ cursor: 'grab', transition: 'fill-opacity 0.2s ease' }}
                   />
                 ))}
 
@@ -787,9 +863,9 @@ export default function RealDataSankeyPage() {
               : nodes.reduce((s, n) => s + amt(n), 0);
             const count = hoveredColIndex === 0 ? null : nodes.length;
             const colDescs = [
-              'ウィンドウ内支出先合計',
-              'ウィンドウ内支出合計',
-              '元の予算額合計（ウィンドウ非依存）',
+              '全事業の予算額合計（予算案ベース）',
+              '各府省庁所管事業の予算額合計',
+              '各事業の予算額',
               'ウィンドウ内支出先への支出合計（tail除外）',
               '全エッジ合計（ウィンドウ外流入含む）',
             ];
@@ -856,19 +932,28 @@ export default function RealDataSankeyPage() {
 
           {/* Panel content */}
           {!isPanelCollapsed && selectedNode && (
-            <div style={{ height: '100%', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-              {/* Header */}
-              <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {/* Header — fixed, never scrolls */}
+              <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', flexShrink: 0, background: '#fff' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 13, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
                       {selectedNode.name}
                     </div>
                     <div style={{ fontSize: 15, fontWeight: 600, color: '#222', marginTop: 3 }}>
-                      {formatYen(selectedNode.rawValue ?? selectedNode.value)}
+                      {(selectedNode.type === 'total' || selectedNode.type === 'ministry') ? (() => {
+                        const bt = selectedNode.type === 'total'
+                          ? Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.budgetTotal, 0)
+                          : ministryProjectStats.get(selectedNode.name)?.budgetTotal ?? 0;
+                        return formatYen(bt);
+                      })() : formatYen(selectedNode.rawValue ?? selectedNode.value)}
                     </div>
                     <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>
-                      {(selectedNode.rawValue ?? selectedNode.value).toLocaleString()}円
+                      {((selectedNode.type === 'total' || selectedNode.type === 'ministry') ? (() => {
+                        return selectedNode.type === 'total'
+                          ? Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.budgetTotal, 0)
+                          : ministryProjectStats.get(selectedNode.name)?.budgetTotal ?? 0;
+                      })() : (selectedNode.rawValue ?? selectedNode.value)).toLocaleString()}円
                     </div>
                   </div>
                   <button
@@ -890,144 +975,210 @@ export default function RealDataSankeyPage() {
                 </div>
               </div>
 
-              {/* 流入元 */}
-              {selectedNodeAllConnections && selectedNodeAllConnections.inEdges.length > 0 && (
-                <div style={{ padding: '10px 14px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>流入元 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.inEdges.length}件)</span></span>
-                    {selectedNode?.type === 'recipient' && (() => {
-                      const allMinistries = Array.from(new Set(selectedNodeAllConnections.inEdges.map(e => e.ministry ?? '(不明)')));
-                      const allCollapsed = allMinistries.every(m => collapsedMinistries.has(m));
-                      return (
-                        <button
-                          type="button"
-                          onClick={() => setCollapsedMinistries(allCollapsed ? new Set() : new Set(allMinistries))}
-                          style={iconBtnStyle}
-                          title={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'}
-                          aria-label={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'}
-                        >
-                          {allCollapsed ? svgExpandAll : svgCollapseAll}
-                        </button>
-                      );
-                    })()}
+              {/* 事業統計（total / ministry ノード） */}
+              {(selectedNode?.type === 'total' || selectedNode?.type === 'ministry') && (() => {
+                const isTotalNode = selectedNode.type === 'total';
+                const allStats = isTotalNode
+                  ? Array.from(ministryProjectStats.values())
+                  : (ministryProjectStats.has(selectedNode.name) ? [ministryProjectStats.get(selectedNode.name)!] : []);
+                const totalProjects = allStats.reduce((s, v) => s + v.total, 0);
+                return (
+                  <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0' }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      事業 <span style={{ fontWeight: 400 }}>{totalProjects.toLocaleString()}件</span>
+                    </div>
                   </div>
-                  {selectedNode?.type === 'recipient' ? (() => {
-                    // 府省庁グループ表示
-                    const grouped = new Map<string, typeof selectedNodeAllConnections.inEdges>();
-                    for (const item of selectedNodeAllConnections.inEdges) {
-                      const key = item.ministry ?? '(不明)';
-                      if (!grouped.has(key)) grouped.set(key, []);
-                      grouped.get(key)!.push(item);
-                    }
-                    const sortedGroups = Array.from(grouped.entries()).sort((a, b) =>
-                      b[1].reduce((s, x) => s + x.value, 0) - a[1].reduce((s, x) => s + x.value, 0)
+                );
+              })()}
+
+
+              {/* 流入元 / 流出先 タブ */}
+              {selectedNodeAllConnections && (() => {
+                const hasIn = selectedNodeAllConnections.inEdges.length > 0;
+                const hasOut = selectedNodeAllConnections.outEdges.length > 0;
+                const activeTab = connectionTab;
+                const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: 12, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
+                const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
+                // grouped list helper (for recipient / agg-project nodes)
+                type GroupItem = { id: string; name: string; value: number; ministry?: string; aggregated?: boolean };
+                const renderGrouped = (rawMembers: GroupItem[]) => {
+                  const grouped = new Map<string, GroupItem[]>();
+                  for (const item of rawMembers) {
+                    const key = item.ministry ?? '(不明)';
+                    if (!grouped.has(key)) grouped.set(key, []);
+                    grouped.get(key)!.push(item);
+                  }
+                  const sortedGroups = Array.from(grouped.entries()).sort((a, b) =>
+                    b[1].reduce((s, x) => s + x.value, 0) - a[1].reduce((s, x) => s + x.value, 0)
+                  );
+                  const btnStyle: React.CSSProperties = { fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' };
+                  return sortedGroups.map(([ministry, items]) => {
+                    const isCollapsed = collapsedMinistries.has(ministry);
+                    const displayCount = ministryDisplayCounts.get(ministry) ?? 10;
+                    const total = items.reduce((s, x) => s + x.value, 0);
+                    const remaining = items.length - displayCount;
+                    return (
+                      <div key={ministry} style={{ marginBottom: 4 }}>
+                        <button type="button" aria-expanded={!isCollapsed}
+                          onClick={() => setCollapsedMinistries(prev => { const next = new Set(prev); if (next.has(ministry)) next.delete(ministry); else next.add(ministry); return next; })}
+                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: '#f8f8f8', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}
+                        >
+                          <span style={{ fontSize: 11, fontWeight: 600, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{isCollapsed ? '▶' : '▼'} {ministry}</span>
+                          <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{items.length}件 {formatYen(total)}</span>
+                        </button>
+                        {!isCollapsed && (<>
+                          {items.slice(0, displayCount).map((item, i) => (
+                            <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
+                              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 6px', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                            >
+                              <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                              <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
+                            </button>
+                          ))}
+                          <div style={{ display: 'flex', gap: 0, padding: '2px 4px', alignItems: 'center' }}>
+                            {remaining > 0 && <>
+                              <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, displayCount + 10))} style={btnStyle}>さらに{Math.min(10, remaining)}件（残{remaining}）</button>
+                              <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, items.length))} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
+                            </>}
+                            {displayCount > 10 && <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, 10))} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
+                          </div>
+                        </>)}
+                      </div>
                     );
-                    const btnStyle: React.CSSProperties = { fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' };
-                    return sortedGroups.map(([ministry, items]) => {
-                      const isCollapsed = collapsedMinistries.has(ministry);
-                      const displayCount = ministryDisplayCounts.get(ministry) ?? 10;
-                      const total = items.reduce((s, x) => s + x.value, 0);
-                      const remaining = items.length - displayCount;
-                      return (
-                        <div key={ministry} style={{ marginBottom: 4 }}>
-                          <button
-                            type="button"
-                            aria-expanded={!isCollapsed}
-                            onClick={() => setCollapsedMinistries(prev => {
-                              const next = new Set(prev);
-                              if (next.has(ministry)) next.delete(ministry); else next.add(ministry);
-                              return next;
-                            })}
-                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: '#f8f8f8', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}
-                          >
-                            <span style={{ fontSize: 11, fontWeight: 600, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {isCollapsed ? '▶' : '▼'} {ministry}
-                            </span>
-                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{items.length}件 {formatYen(total)}</span>
-                          </button>
-                          {!isCollapsed && (<>
-                            {items.slice(0, displayCount).map((item, i) => (
-                              <button
-                                key={i}
-                                type="button"
-                                disabled={item.aggregated}
-                                onClick={() => handleConnectionClick(item.id)}
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 6px', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                  });
+                };
+                // collapse-all toggle for grouped views
+                const renderGroupToggle = (members: GroupItem[]) => {
+                  const allMinistries = Array.from(new Set(members.map(m => m.ministry ?? '(不明)')));
+                  const allCollapsed = allMinistries.every(m => collapsedMinistries.has(m));
+                  return (
+                    <button type="button" onClick={() => setCollapsedMinistries(allCollapsed ? new Set() : new Set(allMinistries))}
+                      style={iconBtnStyle} title={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'} aria-label={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'}>
+                      {allCollapsed ? svgExpandAll : svgCollapseAll}
+                    </button>
+                  );
+                };
+                return (
+                  <div style={{ borderTop: '1px solid #f0f0f0', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    {/* Tab bar */}
+                    <div style={{ display: 'flex', borderBottom: '1px solid #eee', flexShrink: 0, background: '#fff' }}>
+                      <button type="button" style={activeTab === 'in' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('in')}>
+                        流入元 <span style={{ fontWeight: 400, fontSize: 11 }}>({
+                          (selectedNode?.id === '__agg-project-spending' || selectedNode?.id === '__agg-project-budget') && filtered?.aggNodeMembers?.has('__agg-project-budget')
+                            ? filtered.aggNodeMembers.get('__agg-project-budget')!.length
+                            : selectedNode?.id === '__agg-recipient' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                              ? selectedNodeAllConnections.inEdges.reduce((s, item) =>
+                                  s + (item.id === '__agg-project-spending' ? (filtered.aggNodeMembers.get('__agg-project-spending')?.length ?? 1) : 1), 0)
+                              : selectedNodeAllConnections.inEdges.length
+                        })</span>
+                      </button>
+                      <button type="button" style={activeTab === 'out' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('out')}>
+                        流出先 <span style={{ fontWeight: 400, fontSize: 11 }}>({
+                          selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget')
+                            ? filtered.aggNodeMembers.get('__agg-project-budget')!.length
+                            : selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-recipient')
+                              ? selectedNodeAllConnections.outEdges.reduce((s, item) =>
+                                  s + (item.id === '__agg-recipient' ? (filtered.aggNodeMembers.get('__agg-recipient')?.length ?? 1) : 1), 0)
+                              : selectedNodeAllConnections.outEdges.length
+                        })</span>
+                      </button>
+                    </div>
+
+                    {/* Tab content */}
+                    <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
+                      {activeTab === 'in' && !hasIn && <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>}
+                      {activeTab === 'in' && hasIn && (() => {
+                        const useGrouped = selectedNode?.type === 'recipient' || selectedNode?.id === '__agg-project-spending' || selectedNode?.id === '__agg-project-budget';
+                        const aggMembers: GroupItem[] = selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-budget')
+                          ? filtered.aggNodeMembers.get('__agg-project-budget')!
+                          : selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget')
+                          ? filtered.aggNodeMembers.get('__agg-project-budget')!
+                          : selectedNode?.type === 'recipient'
+                            // expand __agg-project-spending within inEdges before grouping
+                            ? selectedNodeAllConnections.inEdges.flatMap(item =>
+                                item.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                                  ? filtered.aggNodeMembers.get('__agg-project-spending')!
+                                  : [item]
+                              )
+                            : selectedNodeAllConnections.inEdges;
+                        return (<>
+                          {useGrouped && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>{renderGroupToggle(aggMembers)}</div>}
+                          {useGrouped ? renderGrouped(aggMembers) : (<>
+                            {(() => {
+                              // expand __agg-project-spending inline when rendering __agg-recipient inEdges
+                              const expandedInEdges = selectedNode?.id === '__agg-recipient'
+                                ? selectedNodeAllConnections.inEdges.flatMap(item =>
+                                    item.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                                      ? filtered.aggNodeMembers.get('__agg-project-spending')!
+                                      : [item]
+                                  )
+                                : selectedNodeAllConnections.inEdges;
+                              return (<>
+                                {expandedInEdges.slice(0, inDisplayCount).map((item, i) => (
+                                  <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', gap: 6, textAlign: 'left' }}
+                                  >
+                                    <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {item.name}
+                                    </span>
+                                    <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
+                                  </button>
+                                ))}
+                                {(() => { const rem = expandedInEdges.length - inDisplayCount; return (
+                                  <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
+                                    {rem > 0 && <>
+                                      <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
+                                      <button onClick={() => setInDisplayCount(expandedInEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
+                                    </>}
+                                    {inDisplayCount > 8 && <button onClick={() => setInDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
+                                  </div>
+                                ); })()}
+                              </>);
+                            })()}
+                          </>)}
+                        </>);
+                      })()}
+
+                      {activeTab === 'out' && !hasOut && <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>}
+                      {activeTab === 'out' && hasOut && (() => {
+                        const useGrouped = selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget');
+                        const aggMembers = useGrouped ? filtered!.aggNodeMembers.get('__agg-project-budget')! : [];
+                        // expand __agg-recipient inline when rendering __agg-project-spending outEdges
+                        const expandedOutEdges = (selectedNode?.id === '__agg-project-spending'
+                          ? selectedNodeAllConnections.outEdges.flatMap(item =>
+                              item.id === '__agg-recipient' && filtered?.aggNodeMembers?.has('__agg-recipient')
+                                ? filtered.aggNodeMembers.get('__agg-recipient')!
+                                : [item]
+                            )
+                          : selectedNodeAllConnections.outEdges
+                        ).slice().sort((a, b) => b.value - a.value);
+                        return (<>
+                          {useGrouped && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>{renderGroupToggle(aggMembers)}</div>}
+                          {useGrouped ? renderGrouped(aggMembers) : (<>
+                            {expandedOutEdges.slice(0, outDisplayCount).map((item, i) => (
+                              <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' }}
                               >
-                                <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                                <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                                 <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                               </button>
                             ))}
-                            <div style={{ display: 'flex', gap: 0, padding: '2px 4px', alignItems: 'center' }}>
-                              {remaining > 0 && <>
-                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, displayCount + 10))} style={btnStyle}>さらに{Math.min(10, remaining)}件（残{remaining}）</button>
-                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, items.length))} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
-                              </>}
-                              {displayCount > 10 && (
-                                <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, 10))} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>
-                              )}
-                            </div>
+                            {(() => { const rem = expandedOutEdges.length - outDisplayCount; return (
+                              <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
+                                {rem > 0 && <>
+                                  <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
+                                  <button onClick={() => setOutDisplayCount(expandedOutEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
+                                </>}
+                                {outDisplayCount > 8 && <button onClick={() => setOutDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
+                              </div>
+                            ); })()}
                           </>)}
-                        </div>
-                      );
-                    });
-                  })() : (
-                    <>
-                      {selectedNodeAllConnections.inEdges.slice(0, inDisplayCount).map((item, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          disabled={item.aggregated}
-                          onClick={() => handleConnectionClick(item.id)}
-                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
-                        >
-                          <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                          <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
-                        </button>
-                      ))}
-                      {(() => { const rem = selectedNodeAllConnections.inEdges.length - inDisplayCount; return (
-                        <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
-                          {rem > 0 && <>
-                            <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
-                            <button onClick={() => setInDisplayCount(selectedNodeAllConnections.inEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
-                          </>}
-                          {inDisplayCount > 8 && <button onClick={() => setInDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
-                        </div>
-                      ); })()}
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* 流出先 */}
-              {selectedNodeAllConnections && selectedNodeAllConnections.outEdges.length > 0 && (
-                <div style={{ padding: '10px 14px', borderTop: selectedNodeAllConnections.inEdges.length > 0 ? '1px solid #f0f0f0' : 'none' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    流出先 <span style={{ fontWeight: 400 }}>({selectedNodeAllConnections.outEdges.length}件)</span>
-                  </div>
-                  {selectedNodeAllConnections.outEdges.slice(0, outDisplayCount).map((item, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      disabled={item.aggregated}
-                      onClick={() => handleConnectionClick(item.id)}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
-                    >
-                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
-                    </button>
-                  ))}
-                  {(() => { const rem = selectedNodeAllConnections.outEdges.length - outDisplayCount; return (
-                    <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
-                      {rem > 0 && <>
-                        <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
-                        <button onClick={() => setOutDisplayCount(selectedNodeAllConnections.outEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
-                      </>}
-                      {outDisplayCount > 8 && <button onClick={() => setOutDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
+                        </>);
+                      })()}
                     </div>
-                  ); })()}
-                </div>
-              )}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>

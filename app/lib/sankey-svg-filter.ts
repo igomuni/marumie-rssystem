@@ -3,6 +3,8 @@ import { MARGIN, NODE_W, NODE_PAD, getColumn, sortPriority } from '@/app/lib/san
 
 // ── Client-side TopN filtering ──
 
+type AggMember = { id: string; name: string; value: number; ministry?: string };
+
 export function filterTopN(
   allNodes: RawNode[],
   allEdges: RawEdge[],
@@ -11,7 +13,8 @@ export function filterTopN(
   topRecipient: number,
   recipientOffset: number,
   pinnedProjectId: string | null = null,
-): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number } {
+  hiddenProjectIds: Set<string> = new Set(),
+): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number; aggNodeMembers: Map<string, AggMember[]>; topProjectIds: Set<string>; projectsWithWindowFlow: Set<string> } {
   // Build O(1) lookup map
   const nodeById = new Map(allNodes.map(n => [n.id, n]));
 
@@ -35,14 +38,26 @@ export function filterTopN(
   const windowRecipientIds = new Set(windowRecipients.map(([id]) => id));
   const tailRecipients = allSortedRecipients.slice(recipientOffset + topRecipient);
   const tailRecipientIds = new Set(tailRecipients.map(([id]) => id));
-  // Recipients before the window (pre-window) are also hidden
-  const preWindowRecipientIds = new Set(allSortedRecipients.slice(0, recipientOffset).map(([id]) => id));
 
-  // 3. Per-project window spending (all projects, used for re-ranking)
+  // 3. Per-project and per-recipient window spending (all projects, used for re-ranking)
   const projectWindowValue = new Map<string, number>();
+  const recipientWindowValue = new Map<string, number>();
   for (const e of allEdges) {
     if (windowRecipientIds.has(e.target)) {
       projectWindowValue.set(e.source, (projectWindowValue.get(e.source) || 0) + e.value);
+      recipientWindowValue.set(e.target, (recipientWindowValue.get(e.target) || 0) + e.value);
+    }
+  }
+
+  // Recipients before the window (rank 0..offset-1) are neither in window nor tail — their flow is hidden.
+  // Compute per-project spending to these hidden recipients so we can subtract from node heights.
+  const aboveWindowRecipientIds = new Set(allSortedRecipients.slice(0, recipientOffset).map(([id]) => id));
+  const projectAboveWindowSpending = new Map<string, number>();
+  if (recipientOffset > 0) {
+    for (const e of allEdges) {
+      if (aboveWindowRecipientIds.has(e.target)) {
+        projectAboveWindowSpending.set(e.source, (projectAboveWindowSpending.get(e.source) || 0) + e.value);
+      }
     }
   }
 
@@ -67,10 +82,10 @@ export function filterTopN(
   const topProjectIds = new Set(topProjectNodes.map(n => n.id));
 
   const otherMinistryProjects = allNodes.filter(
-    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id)
+    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id) && !hiddenProjectIds.has(n.id)
   );
   const otherProjects = [
-    ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id)),
+    ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id) && !hiddenProjectIds.has(n.id)),
     ...otherMinistryProjects,
   ];
   const otherProjectSpendingIds = new Set(otherProjects.map(n => n.id));
@@ -89,18 +104,15 @@ export function filterTopN(
       otherProjectsWithFlow.add(e.source);
     }
   }
+  // Sum of budget amounts for aggregated projects (budget-column height basis).
+  const otherProjectBudgetTotal = otherProjects.reduce((s, p) => {
+    const bn = p.projectId != null ? nodeById.get(`project-budget-${p.projectId}`) : undefined;
+    return s + (bn?.value ?? 0);
+  }, 0);
 
   const totalWindowSpending = windowRecipients.reduce((s, [, v]) => s + v, 0);
 
-  // Projects with hidden recipients (pre-window or tail) — used for budget node cap.
-  const topProjectsWithHiddenRecipients = new Set<string>();
-  for (const e of allEdges) {
-    if (topProjectIds.has(e.source) && (tailRecipientIds.has(e.target) || preWindowRecipientIds.has(e.target))) {
-      topProjectsWithHiddenRecipients.add(e.source);
-    }
-  }
-
-  // 6. Ministry window values
+  // 6. Ministry window values (for edge widths)
   const ministryWindowValue = new Map<string, number>();
   for (const e of allEdges) {
     if (windowRecipientIds.has(e.target)) {
@@ -112,49 +124,68 @@ export function filterTopN(
   }
   const otherMinistryWindowValue = otherMinistries.reduce((s, n) => s + (ministryWindowValue.get(n.name) || 0), 0);
 
+  // 7. Ministry budget totals (sum of project-budget values per ministry — for node heights)
+  // Exclude hidden projects (projects that left TopN due to offset change)
+  const ministryBudgetValue = new Map<string, number>();
+  for (const n of allNodes) {
+    if (n.type === 'project-budget' && n.ministry) {
+      const spendingId = n.projectId != null ? `project-spending-${n.projectId}` : null;
+      if (spendingId && hiddenProjectIds.has(spendingId)) continue;
+      ministryBudgetValue.set(n.ministry, (ministryBudgetValue.get(n.ministry) || 0) + n.value);
+    }
+  }
+  const totalBudget = Array.from(ministryBudgetValue.values()).reduce((s, v) => s + v, 0);
+  const otherMinistryBudgetValue = otherMinistries.reduce((s, n) => s + (ministryBudgetValue.get(n.name) || 0), 0);
+
   // ── Build nodes ──
   const nodes: RawNode[] = [];
   const totalNode = allNodes.find(n => n.type === 'total');
-  if (totalNode) nodes.push({ ...totalNode, value: totalWindowSpending });
+  if (totalNode) nodes.push({ ...totalNode, value: totalBudget, skipLinkOverride: true });
 
   for (const n of topMinistryNodes) {
     const wv = ministryWindowValue.get(n.name) || 0;
-    if (wv > 0) nodes.push({ ...n, value: wv });
+    const bv = ministryBudgetValue.get(n.name) || 0;
+    if (wv > 0) nodes.push({ ...n, value: bv, skipLinkOverride: true });
   }
   if (otherMinistryWindowValue > 0) {
-    nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryWindowValue, aggregated: true });
+    nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryBudgetValue, skipLinkOverride: true, aggregated: true });
   }
 
   for (const n of topProjectNodes) {
     const wv = projectWindowValue.get(n.id) || 0;
     const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
-    // Budget: full height when all recipients visible; capped to wv when any are hidden.
-    const hasHidden = topProjectsWithHiddenRecipients.has(n.id);
-    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true, layoutCap: hasHidden ? wv : undefined });
-    // skipLinkOverride + value=wv: spending node height = window spending only, no cap needed.
-    // The tail edge still renders (ribbon to __agg-recipient) but doesn't inflate node height.
-    nodes.push({ ...n, value: wv, skipLinkOverride: true });
+    // Budget height = original budget amount (budget-column basis).
+    // skipLinkOverride prevents layout engine from overriding with edge-sum (which is window spending).
+    if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true });
+    // spending node height = total spending minus spending to above-window (hidden) recipients.
+    const hidden = projectAboveWindowSpending.get(n.id) || 0;
+    nodes.push({ ...n, value: n.value - hidden, skipLinkOverride: true });
   }
   // Create __agg-project-budget only when there is window spending (needs ministry→budget edges).
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
   // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
   if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
-    const minTopProjectWindowValue = topProjectNodes.length > 0
-      ? Math.min(...topProjectNodes.map(n => projectWindowValue.get(n.id) || 0))
-      : 0;
-    const projectLayoutCap = Math.max(1, minTopProjectWindowValue > 0 ? minTopProjectWindowValue * topProject : otherProjectTailTotal);
     if (otherProjectWindowTotal > 0) {
-      nodes.push({ id: '__agg-project-budget', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-budget', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+      nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
     }
-    nodes.push({ id: '__agg-project-spending', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, layoutCap: projectLayoutCap, aggregated: true });
+    const otherProjectSpendingTotal = otherProjects.reduce((s, p) => s + p.value - (projectAboveWindowSpending.get(p.id) || 0), 0);
+    nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectSpendingTotal, skipLinkOverride: true, aggregated: true });
   }
 
   for (const [rid] of windowRecipients) {
     const rNode = nodeById.get(rid);
-    if (rNode) nodes.push({ ...rNode, value: allRecipientAmounts.get(rid) || rNode.value });
+    if (rNode) nodes.push({ ...rNode, value: recipientWindowValue.get(rid) || 0, skipLinkOverride: true });
   }
-  const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0);
-  const aggRecipientValue = tailValue + otherProjectTailTotal;
+  // tailValue = total inflow to rank (offset+topRecipient)+ recipients from ALL projects.
+  // otherProjectTailTotal is a subset of tailValue (aggregated projects' tail flow),
+  // so it must NOT be added separately — that would double-count.
+  // Also subtract tail spending from hidden projects (they are excluded from project-spending column).
+  const hiddenTailSpending = hiddenProjectIds.size > 0
+    ? allEdges.filter(e => hiddenProjectIds.has(e.source) && tailRecipientIds.has(e.target))
+              .reduce((s, e) => s + e.value, 0)
+    : 0;
+  const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0) - hiddenTailSpending;
+  const aggRecipientValue = tailValue;
   if (aggRecipientValue > 0) {
     // Cap layout height so the aggregate bar doesn't overwhelm the window recipients.
     // Cap = min window-recipient value × topRecipient  (≈ total height of all window bars if all were minimum-sized).
@@ -175,41 +206,43 @@ export function filterTopN(
   // ── Build edges ──
   const edges: RawEdge[] = [];
 
-  // total → ministry
+  // total → ministry (budget-based)
   for (const mn of topMinistryNodes) {
-    const wv = ministryWindowValue.get(mn.name) || 0;
-    if (wv > 0) edges.push({ source: 'total', target: mn.id, value: wv });
+    const bv = ministryBudgetValue.get(mn.name) || 0;
+    if (bv > 0) edges.push({ source: 'total', target: mn.id, value: bv });
   }
-  if (otherMinistryWindowValue > 0) {
-    edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryWindowValue });
+  if (otherMinistryBudgetValue > 0) {
+    edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryBudgetValue });
   }
 
-  // ministry → project-budget
+  // ministry → project-budget (budget-based)
   for (const n of topProjectNodes) {
-    const wv = projectWindowValue.get(n.id) || 0;
+    const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
+    const bv = budgetNode?.value ?? 0;
     const ministrySource = topMinistryNames.has(n.ministry || '') ? `ministry-${n.ministry}` : '__agg-ministry';
-    if (wv > 0) edges.push({ source: ministrySource, target: `project-budget-${n.projectId}`, value: wv });
+    if (bv > 0) edges.push({ source: ministrySource, target: `project-budget-${n.projectId}`, value: bv });
   }
   if (otherProjectWindowTotal > 0) {
     for (const mn of topMinistryNodes) {
       const v = otherProjects
-        .filter(p => p.ministry === mn.name)
-        .reduce((s, p) => s + (projectWindowValue.get(p.id) || 0), 0);
+        .filter(p => p.ministry === mn.name && p.projectId != null)
+        .reduce((s, p) => s + (nodeById.get(`project-budget-${p.projectId}`)?.value ?? 0), 0);
       if (v > 0) edges.push({ source: mn.id, target: '__agg-project-budget', value: v });
     }
     const otherMinRemain = otherProjects
-      .filter(p => !topMinistryNames.has(p.ministry || ''))
-      .reduce((s, p) => s + (projectWindowValue.get(p.id) || 0), 0);
+      .filter(p => !topMinistryNames.has(p.ministry || '') && p.projectId != null)
+      .reduce((s, p) => s + (nodeById.get(`project-budget-${p.projectId}`)?.value ?? 0), 0);
     if (otherMinRemain > 0) edges.push({ source: '__agg-ministry', target: '__agg-project-budget', value: otherMinRemain });
   }
 
-  // project-budget → project-spending
+  // project-budget → project-spending (budget-based)
   for (const n of topProjectNodes) {
-    const wv = projectWindowValue.get(n.id) || 0;
-    edges.push({ source: `project-budget-${n.projectId}`, target: n.id, value: wv });
+    const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
+    const bv = budgetNode?.value ?? 0;
+    if (bv > 0) edges.push({ source: `project-budget-${n.projectId}`, target: n.id, value: bv });
   }
-  if (otherProjectWindowTotal > 0) {
-    edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: otherProjectWindowTotal });
+  if (otherProjectBudgetTotal > 0) {
+    edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: otherProjectBudgetTotal });
   }
 
   // project-spending → window recipients
@@ -233,7 +266,37 @@ export function filterTopN(
     edges.push({ source: '__agg-project-spending', target: '__agg-recipient', value: otherProjectTailTotal });
   }
 
-  return { nodes, edges, totalRecipientCount };
+  // Build aggregation membership map for side panel display
+  const aggNodeMembers = new Map<string, { id: string; name: string; value: number; ministry?: string }[]>();
+  // __agg-ministry → actual ministry nodes
+  if (otherMinistries.length > 0) {
+    aggNodeMembers.set('__agg-ministry', otherMinistries.map(n => ({
+      id: n.id, name: n.name, value: ministryBudgetValue.get(n.name) || 0,
+    })).sort((a, b) => b.value - a.value));
+  }
+  // __agg-project-budget / __agg-project-spending → actual project-budget nodes
+  if (otherProjects.length > 0) {
+    const projectBudgetMembers = otherProjects.map(sp => {
+      const bn = sp.projectId != null ? nodeById.get(`project-budget-${sp.projectId}`) : undefined;
+      return { id: bn?.id ?? `project-budget-${sp.projectId}`, name: sp.name, value: bn?.value ?? 0, ministry: sp.ministry };
+    }).sort((a, b) => b.value - a.value);
+    aggNodeMembers.set('__agg-project-budget', projectBudgetMembers);
+    aggNodeMembers.set('__agg-project-spending', otherProjects.map(sp => ({
+      id: sp.id, name: sp.name, value: sp.value, ministry: sp.ministry,
+    })).sort((a, b) => b.value - a.value));
+  }
+  // __agg-recipient → tail recipient nodes
+  if (tailRecipients.length > 0) {
+    aggNodeMembers.set('__agg-recipient', tailRecipients.map(([id, value]) => {
+      const n = nodeById.get(id);
+      return { id, name: n?.name ?? id, value };
+    }));
+  }
+
+  const projectsWithWindowFlow = new Set(
+    allNodes.filter(n => n.type === 'project-spending' && (projectWindowValue.get(n.id) || 0) > 0).map(n => n.id)
+  );
+  return { nodes, edges, totalRecipientCount, aggNodeMembers, topProjectIds, projectsWithWindowFlow };
 }
 
 // ── Custom Layout Engine ──
