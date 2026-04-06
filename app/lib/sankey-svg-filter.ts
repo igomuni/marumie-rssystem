@@ -14,7 +14,7 @@ export function filterTopN(
   recipientOffset: number,
   pinnedProjectId: string | null = null,
   hiddenProjectIds: Set<string> = new Set(),
-): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number; aggNodeMembers: Map<string, AggMember[]>; topProjectIds: Set<string> } {
+): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number; aggNodeMembers: Map<string, AggMember[]>; topProjectIds: Set<string>; projectsWithWindowFlow: Set<string> } {
   // Build O(1) lookup map
   const nodeById = new Map(allNodes.map(n => [n.id, n]));
 
@@ -293,7 +293,10 @@ export function filterTopN(
     }));
   }
 
-  return { nodes, edges, totalRecipientCount, aggNodeMembers, topProjectIds };
+  const projectsWithWindowFlow = new Set(
+    allNodes.filter(n => n.type === 'project-spending' && (projectWindowValue.get(n.id) || 0) > 0).map(n => n.id)
+  );
+  return { nodes, edges, totalRecipientCount, aggNodeMembers, topProjectIds, projectsWithWindowFlow };
 }
 
 // ── Custom Layout Engine ──

@@ -186,24 +186,25 @@ export default function RealDataSankeyPage() {
       .catch(e => { setError(String(e)); setLoading(false); });
   }, []);
 
-  // Compute topProjectIds independently of hiddenProjectIds to avoid circular deps in the effect below.
-  const rawTopProjectIds = useMemo(() => {
+  // Compute projectsWithWindowFlow independently of hiddenProjectIds to avoid circular deps in the effect below.
+  // This includes ALL projects (not just TopN) that have spending to the current window.
+  const rawProjectsWithWindowFlow = useMemo(() => {
     if (!graphData) return new Set<string>();
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId).topProjectIds;
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId).projectsWithWindowFlow;
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
 
-  // Update hiddenProjectIds when rawTopProjectIds changes (offset change).
+  // Update hiddenProjectIds: projects that had window flow before but lost it should be hidden.
   // No dependency on hiddenProjectIds → no circular loop.
   useEffect(() => {
     if (recipientOffset === 0) {
       setHiddenProjectIds(h => h.size === 0 ? h : new Set());
-      prevTopProjectIdsRef.current = rawTopProjectIds;
+      prevTopProjectIdsRef.current = rawProjectsWithWindowFlow;
       return;
     }
     const prev = prevTopProjectIdsRef.current;
-    const curr = rawTopProjectIds;
+    const curr = rawProjectsWithWindowFlow;
     if (prev.size > 0) {
       setHiddenProjectIds(h => {
         const next = new Set(h);
@@ -214,7 +215,7 @@ export default function RealDataSankeyPage() {
       });
     }
     prevTopProjectIdsRef.current = curr;
-  }, [rawTopProjectIds, recipientOffset]);
+  }, [rawProjectsWithWindowFlow, recipientOffset]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
