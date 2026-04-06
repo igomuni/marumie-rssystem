@@ -201,15 +201,16 @@ export default function RealDataSankeyPage() {
     const curr = filtered.topProjectIds;
     if (prev.size > 0) {
       const newlyHidden = [...prev].filter(id => !curr.has(id));
-      const newlyVisible = [...curr].filter(id => !prev.has(id));
-      if (newlyHidden.length > 0 || newlyVisible.length > 0) {
-        setHiddenProjectIds(h => {
-          const next = new Set(h);
-          newlyHidden.forEach(id => next.add(id));
-          newlyVisible.forEach(id => next.delete(id));
-          return next;
-        });
-      }
+      setHiddenProjectIds(h => {
+        // Add projects that just left TopN
+        // Remove ALL hidden projects that are now back in TopN (not just "newly visible vs prev")
+        const toUnhide = [...h].filter(id => curr.has(id));
+        if (newlyHidden.length === 0 && toUnhide.length === 0) return h;
+        const next = new Set(h);
+        newlyHidden.forEach(id => next.add(id));
+        toUnhide.forEach(id => next.delete(id));
+        return next;
+      });
     }
     prevTopProjectIdsRef.current = curr;
   }, [filtered]);
