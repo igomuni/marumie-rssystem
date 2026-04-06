@@ -140,8 +140,6 @@ export function filterTopN(
     const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
     // Budget height = original budget amount (budget-column basis).
     // skipLinkOverride prevents layout engine from overriding with edge-sum (which is window spending).
-    // Only show if wv > 0 (pinned projects with no window flow are excluded from layout).
-    if (wv === 0) continue;
     if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true });
     // spending node height = window spending only; tail edge still renders but doesn't inflate height.
     nodes.push({ ...n, value: wv, skipLinkOverride: true });
