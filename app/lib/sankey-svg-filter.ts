@@ -179,7 +179,12 @@ export function filterTopN(
   // tailValue = total inflow to rank (offset+topRecipient)+ recipients from ALL projects.
   // otherProjectTailTotal is a subset of tailValue (aggregated projects' tail flow),
   // so it must NOT be added separately — that would double-count.
-  const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0);
+  // Also subtract tail spending from hidden projects (they are excluded from project-spending column).
+  const hiddenTailSpending = hiddenProjectIds.size > 0
+    ? allEdges.filter(e => hiddenProjectIds.has(e.source) && tailRecipientIds.has(e.target))
+              .reduce((s, e) => s + e.value, 0)
+    : 0;
+  const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0) - hiddenTailSpending;
   const aggRecipientValue = tailValue;
   if (aggRecipientValue > 0) {
     // Cap layout height so the aggregate bar doesn't overwhelm the window recipients.
