@@ -143,11 +143,10 @@ export function filterTopN(
   if (totalNode) nodes.push({ ...totalNode, value: totalBudget, skipLinkOverride: true });
 
   for (const n of topMinistryNodes) {
-    const wv = ministryWindowValue.get(n.name) || 0;
     const bv = ministryBudgetValue.get(n.name) || 0;
-    if (wv > 0) nodes.push({ ...n, value: bv, skipLinkOverride: true });
+    if (bv > 0) nodes.push({ ...n, value: bv, skipLinkOverride: true });
   }
-  if (otherMinistryWindowValue > 0) {
+  if (otherMinistryBudgetValue > 0) {
     nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryBudgetValue, skipLinkOverride: true, aggregated: true });
   }
 
@@ -161,11 +160,12 @@ export function filterTopN(
     const hidden = projectAboveWindowSpending.get(n.id) || 0;
     nodes.push({ ...n, value: n.value - hidden, skipLinkOverride: true });
   }
-  // Create __agg-project-budget only when there is window spending (needs ministry→budget edges).
+  // Create __agg-project-budget when aggregated projects have budget (otherProjectBudgetTotal > 0),
+  // while still requiring aggregated spending flow via the outer guard.
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
   // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
   if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
-    if (otherProjectWindowTotal > 0) {
+    if (otherProjectBudgetTotal > 0) {
       nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
     }
     const otherProjectSpendingTotal = otherProjects.reduce((s, p) => s + p.value - (projectAboveWindowSpending.get(p.id) || 0), 0);
@@ -187,18 +187,12 @@ export function filterTopN(
   const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0) - hiddenTailSpending;
   const aggRecipientValue = tailValue;
   if (aggRecipientValue > 0) {
-    // Cap layout height so the aggregate bar doesn't overwhelm the window recipients.
-    // Cap = min window-recipient value × topRecipient  (≈ total height of all window bars if all were minimum-sized).
-    const minWindowRecipientValue = windowRecipients.length > 0
-      ? Math.min(...windowRecipients.map(([, v]) => v))
-      : aggRecipientValue;
-    const layoutCap = minWindowRecipientValue * topRecipient;
     nodes.push({
       id: '__agg-recipient',
       name: `${tailRecipients.length.toLocaleString()}支出先`,
       type: 'recipient',
       value: aggRecipientValue,
-      layoutCap: layoutCap,
+      skipLinkOverride: true,
       aggregated: true,
     });
   }
@@ -222,7 +216,7 @@ export function filterTopN(
     const ministrySource = topMinistryNames.has(n.ministry || '') ? `ministry-${n.ministry}` : '__agg-ministry';
     if (bv > 0) edges.push({ source: ministrySource, target: `project-budget-${n.projectId}`, value: bv });
   }
-  if (otherProjectWindowTotal > 0) {
+  if (otherProjectBudgetTotal > 0) {
     for (const mn of topMinistryNodes) {
       const v = otherProjects
         .filter(p => p.ministry === mn.name && p.projectId != null)
