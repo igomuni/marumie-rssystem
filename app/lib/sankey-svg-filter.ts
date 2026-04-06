@@ -91,8 +91,11 @@ export function filterTopN(
       otherProjectsWithFlow.add(e.source);
     }
   }
-  // Sum of budget amounts for all aggregated projects (budget-column height basis)
+  // Sum of budget amounts for aggregated projects WITH flow only (budget-column height basis).
+  // Projects with no window/tail flow (e.g. TopN projects that shifted out of window) are excluded
+  // to avoid inflating the aggregate budget node when the window offset changes.
   const otherProjectBudgetTotal = otherProjects.reduce((s, p) => {
+    if (!otherProjectsWithFlow.has(p.id)) return s;
     const bn = p.projectId != null ? nodeById.get(`project-budget-${p.projectId}`) : undefined;
     return s + (bn?.value ?? 0);
   }, 0);
