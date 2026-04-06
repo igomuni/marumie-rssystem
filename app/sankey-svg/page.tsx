@@ -194,15 +194,21 @@ export default function RealDataSankeyPage() {
     return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, hiddenProjectIds);
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, hiddenProjectIds]);
 
-  // Track projects leaving TopN (due to offset change) and add to hiddenProjectIds
+  // Track projects entering/leaving TopN (due to offset change) and update hiddenProjectIds
   useEffect(() => {
     if (!filtered) return;
     const prev = prevTopProjectIdsRef.current;
     const curr = filtered.topProjectIds;
     if (prev.size > 0) {
       const newlyHidden = [...prev].filter(id => !curr.has(id));
-      if (newlyHidden.length > 0) {
-        setHiddenProjectIds(h => { const next = new Set(h); newlyHidden.forEach(id => next.add(id)); return next; });
+      const newlyVisible = [...curr].filter(id => !prev.has(id));
+      if (newlyHidden.length > 0 || newlyVisible.length > 0) {
+        setHiddenProjectIds(h => {
+          const next = new Set(h);
+          newlyHidden.forEach(id => next.add(id));
+          newlyVisible.forEach(id => next.delete(id));
+          return next;
+        });
       }
     }
     prevTopProjectIdsRef.current = curr;
