@@ -149,9 +149,9 @@ export function filterTopN(
   // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
   if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
     if (otherProjectWindowTotal > 0) {
-      nodes.push({ id: '__agg-project-budget', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
+      nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
     }
-    nodes.push({ id: '__agg-project-spending', name: `${otherProjectsWithFlow.size.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, skipLinkOverride: true, aggregated: true });
+    nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, skipLinkOverride: true, aggregated: true });
   }
 
   for (const [rid] of windowRecipients) {
