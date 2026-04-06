@@ -69,10 +69,10 @@ export function filterTopN(
   const topProjectIds = new Set(topProjectNodes.map(n => n.id));
 
   const otherMinistryProjects = allNodes.filter(
-    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id) && n.id !== pinnedProjectId
+    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id)
   );
   const otherProjects = [
-    ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id) && n.id !== pinnedProjectId),
+    ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id)),
     ...otherMinistryProjects,
   ];
   const otherProjectSpendingIds = new Set(otherProjects.map(n => n.id));
