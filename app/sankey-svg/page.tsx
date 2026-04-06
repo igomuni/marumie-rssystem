@@ -194,26 +194,31 @@ export default function RealDataSankeyPage() {
     return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, hiddenProjectIds);
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, hiddenProjectIds]);
 
-  // Track projects entering/leaving TopN (due to offset change) and update hiddenProjectIds
+  // When offset returns to 0, always reset hiddenProjectIds (nothing should be hidden at baseline).
+  // When offset > 0: add projects that just left TopN; remove projects that came back to TopN.
   useEffect(() => {
     if (!filtered) return;
+    if (recipientOffset === 0) {
+      setHiddenProjectIds(new Set());
+      prevTopProjectIdsRef.current = filtered.topProjectIds;
+      return;
+    }
     const prev = prevTopProjectIdsRef.current;
     const curr = filtered.topProjectIds;
     if (prev.size > 0) {
       const newlyHidden = [...prev].filter(id => !curr.has(id));
-      setHiddenProjectIds(h => {
-        // Add projects that just left TopN
-        // Remove ALL hidden projects that are now back in TopN (not just "newly visible vs prev")
-        const toUnhide = [...h].filter(id => curr.has(id));
-        if (newlyHidden.length === 0 && toUnhide.length === 0) return h;
-        const next = new Set(h);
-        newlyHidden.forEach(id => next.add(id));
-        toUnhide.forEach(id => next.delete(id));
-        return next;
-      });
+      const toUnhide = [...filtered.topProjectIds].filter(id => hiddenProjectIds.has(id));
+      if (newlyHidden.length > 0 || toUnhide.length > 0) {
+        setHiddenProjectIds(h => {
+          const next = new Set(h);
+          newlyHidden.forEach(id => next.add(id));
+          toUnhide.forEach(id => next.delete(id));
+          return next;
+        });
+      }
     }
     prevTopProjectIdsRef.current = curr;
-  }, [filtered]);
+  }, [filtered, recipientOffset]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
