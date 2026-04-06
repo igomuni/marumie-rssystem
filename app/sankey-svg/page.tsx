@@ -316,9 +316,8 @@ export default function RealDataSankeyPage() {
   const [outDisplayCount, setOutDisplayCount] = useState(8);
   const [collapsedMinistries, setCollapsedMinistries] = useState<Set<string>>(new Set());
   const [ministryDisplayCounts, setMinistryDisplayCounts] = useState<Map<string, number>>(new Map());
-  const [expandedZeroSections, setExpandedZeroSections] = useState<Set<string>>(new Set());
   const [connectionTab, setConnectionTab] = useState<'in' | 'out'>('in');
-  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setExpandedZeroSections(new Set()); setConnectionTab('in'); }, [selectedNodeId]);
+  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setConnectionTab('in'); }, [selectedNodeId]);
 
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
@@ -945,60 +944,11 @@ export default function RealDataSankeyPage() {
                   ? Array.from(ministryProjectStats.values())
                   : (ministryProjectStats.has(selectedNode.name) ? [ministryProjectStats.get(selectedNode.name)!] : []);
                 const totalProjects = allStats.reduce((s, v) => s + v.total, 0);
-                // 支出データなし: s=0（予算あり・なし問わず）、予算データなし: b=0 かつ s>0
-                const noSpendingProjects = allStats.flatMap(v => v.projects.filter(p => p.spendingValue === 0));
-                const spendingOnlyProjects = allStats.flatMap(v => v.projects.filter(p => p.spendingValue > 0 && p.budgetValue === 0));
-                const hasImbalance = noSpendingProjects.length > 0 || spendingOnlyProjects.length > 0;
-                const linkStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' };
                 return (
                   <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0' }}>
-                    {/* サマリ */}
-                    <div style={{ fontSize: 11, fontWeight: 600, color: '#999', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       事業 <span style={{ fontWeight: 400 }}>{totalProjects.toLocaleString()}件</span>
-                      {hasImbalance && (
-                        <span style={{ marginLeft: 6, fontWeight: 400 }}>
-                          {noSpendingProjects.length > 0 && <span style={{ color: '#e07700' }}>支出なし {noSpendingProjects.length}件</span>}
-                          {noSpendingProjects.length > 0 && spendingOnlyProjects.length > 0 && <span style={{ color: '#aaa' }}> / </span>}
-                          {spendingOnlyProjects.length > 0 && <span style={{ color: '#c0392b' }}>予算なし {spendingOnlyProjects.length}件</span>}
-                        </span>
-                      )}
                     </div>
-
-                    {/* 支出データなし（予算あり・支出=0） */}
-                    {noSpendingProjects.length > 0 && (
-                      <div style={{ marginBottom: 4 }}>
-                        <button type="button" aria-expanded={expandedZeroSections.has('budget-only')}
-                          onClick={() => setExpandedZeroSections(prev => { const next = new Set(prev); if (next.has('budget-only')) next.delete('budget-only'); else next.add('budget-only'); return next; })}
-                          style={{ display: 'flex', justifyContent: 'space-between', width: '100%', background: '#fff8f0', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}>
-                          <span style={{ fontSize: 11, fontWeight: 600, color: '#e07700' }}>{expandedZeroSections.has('budget-only') ? '▼' : '▶'} 支出データなし</span>
-                          <span style={{ fontSize: 11, color: '#e07700' }}>{noSpendingProjects.length}件</span>
-                        </button>
-                        {expandedZeroSections.has('budget-only') && noSpendingProjects.map(p => (
-                          <button key={p.pid} type="button" onClick={() => handleConnectionClick(p.spendingId)} style={linkStyle}>
-                            <span title={p.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(p.budgetValue)}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* 予算データなし（支出あり・予算=0） */}
-                    {spendingOnlyProjects.length > 0 && (
-                      <div style={{ marginBottom: 4 }}>
-                        <button type="button" aria-expanded={expandedZeroSections.has('spending-only')}
-                          onClick={() => setExpandedZeroSections(prev => { const next = new Set(prev); if (next.has('spending-only')) next.delete('spending-only'); else next.add('spending-only'); return next; })}
-                          style={{ display: 'flex', justifyContent: 'space-between', width: '100%', background: '#fff0f0', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}>
-                          <span style={{ fontSize: 11, fontWeight: 600, color: '#c0392b' }}>{expandedZeroSections.has('spending-only') ? '▼' : '▶'} 予算データなし</span>
-                          <span style={{ fontSize: 11, color: '#c0392b' }}>{spendingOnlyProjects.length}件</span>
-                        </button>
-                        {expandedZeroSections.has('spending-only') && spendingOnlyProjects.map(p => (
-                          <button key={p.pid} type="button" onClick={() => handleConnectionClick(p.spendingId)} style={linkStyle}>
-                            <span title={p.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(p.spendingValue)}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 );
               })()}
