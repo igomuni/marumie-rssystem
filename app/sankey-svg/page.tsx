@@ -262,7 +262,11 @@ export default function RealDataSankeyPage() {
   type MinistryStat = { total: number; budgetTotal: number; budgetOnly: number; spendingOnly: number; neither: number; projects: ProjectStat[] };
   const ministryProjectStats = useMemo(() => {
     if (!graphData) return new Map<string, MinistryStat>();
-    const spendingByPid = new Map(graphData.nodes.filter(n => n.type === 'project-spending').map(n => [n.projectId!, n] as const));
+    const spendingByPid = new Map(
+      graphData.nodes
+        .filter((n): n is typeof n & { projectId: number } => n.type === 'project-spending' && n.projectId != null)
+        .map(n => [n.projectId, n] as const)
+    );
     const stats = new Map<string, MinistryStat>();
     for (const n of graphData.nodes) {
       if (n.type !== 'project-budget' || !n.projectId || !n.ministry) continue;
