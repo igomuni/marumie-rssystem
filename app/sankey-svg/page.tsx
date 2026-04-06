@@ -186,39 +186,42 @@ export default function RealDataSankeyPage() {
       .catch(e => { setError(String(e)); setLoading(false); });
   }, []);
 
+  // Compute topProjectIds independently of hiddenProjectIds to avoid circular deps in the effect below.
+  const rawTopProjectIds = useMemo(() => {
+    if (!graphData) return new Set<string>();
+    const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
+    const clampedOffset = Math.min(recipientOffset, maxOffset);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId).topProjectIds;
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
+
+  // Update hiddenProjectIds when rawTopProjectIds changes (offset change).
+  // No dependency on hiddenProjectIds → no circular loop.
+  useEffect(() => {
+    if (recipientOffset === 0) {
+      setHiddenProjectIds(h => h.size === 0 ? h : new Set());
+      prevTopProjectIdsRef.current = rawTopProjectIds;
+      return;
+    }
+    const prev = prevTopProjectIdsRef.current;
+    const curr = rawTopProjectIds;
+    if (prev.size > 0) {
+      setHiddenProjectIds(h => {
+        const next = new Set(h);
+        for (const id of prev) { if (!curr.has(id)) next.add(id); }
+        for (const id of h) { if (curr.has(id)) next.delete(id); }
+        if (next.size === h.size && [...h].every(id => next.has(id))) return h;
+        return next;
+      });
+    }
+    prevTopProjectIdsRef.current = curr;
+  }, [rawTopProjectIds, recipientOffset]);
+
   const filtered = useMemo(() => {
     if (!graphData) return null;
-    // Clamp offset to valid range
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
     return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, hiddenProjectIds);
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, hiddenProjectIds]);
-
-  // When offset returns to 0, always reset hiddenProjectIds (nothing should be hidden at baseline).
-  // When offset > 0: add projects that just left TopN; remove projects that came back to TopN.
-  useEffect(() => {
-    if (!filtered) return;
-    if (recipientOffset === 0) {
-      setHiddenProjectIds(new Set());
-      prevTopProjectIdsRef.current = filtered.topProjectIds;
-      return;
-    }
-    const prev = prevTopProjectIdsRef.current;
-    const curr = filtered.topProjectIds;
-    if (prev.size > 0) {
-      const newlyHidden = [...prev].filter(id => !curr.has(id));
-      const toUnhide = [...filtered.topProjectIds].filter(id => hiddenProjectIds.has(id));
-      if (newlyHidden.length > 0 || toUnhide.length > 0) {
-        setHiddenProjectIds(h => {
-          const next = new Set(h);
-          newlyHidden.forEach(id => next.add(id));
-          toUnhide.forEach(id => next.delete(id));
-          return next;
-        });
-      }
-    }
-    prevTopProjectIdsRef.current = curr;
-  }, [filtered, recipientOffset]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
