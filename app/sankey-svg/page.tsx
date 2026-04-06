@@ -294,13 +294,13 @@ export default function RealDataSankeyPage() {
     if (selectedNode.type === 'project-budget' && selectedNode.projectId != null) {
       const pid = selectedNode.projectId;
       const spendingNode = graphData.nodes.find(n => n.type === 'project-spending' && n.projectId === pid);
-      if (spendingNode && !outMap.has(spendingNode.id)) outMap.set(spendingNode.id, 0);
+      if (spendingNode && !outMap.has(spendingNode.id)) outMap.set(spendingNode.id, spendingNode.value);
     }
     // For project-spending nodes: ensure the paired project-budget node appears in inEdges even if budget=0
     if (selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
       const pid = selectedNode.projectId;
       const budgetNode = graphData.nodes.find(n => n.type === 'project-budget' && n.projectId === pid);
-      if (budgetNode && !inMap.has(budgetNode.id)) inMap.set(budgetNode.id, 0);
+      if (budgetNode && !inMap.has(budgetNode.id)) inMap.set(budgetNode.id, budgetNode.value);
     }
     return {
       inEdges: Array.from(inMap.entries())
