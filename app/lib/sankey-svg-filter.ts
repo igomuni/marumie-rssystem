@@ -145,8 +145,8 @@ export function filterTopN(
     // Budget height = original budget amount (budget-column basis).
     // skipLinkOverride prevents layout engine from overriding with edge-sum (which is window spending).
     if (budgetNode) nodes.push({ ...budgetNode, skipLinkOverride: true });
-    // spending node height = window spending only; tail edge still renders but doesn't inflate height.
-    nodes.push({ ...n, value: wv, skipLinkOverride: true });
+    // spending node height = actual total spending; skipLinkOverride prevents layout from capping to edge-sum.
+    nodes.push({ ...n, skipLinkOverride: true });
   }
   // Create __agg-project-budget only when there is window spending (needs ministry→budget edges).
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
@@ -155,7 +155,8 @@ export function filterTopN(
     if (otherProjectWindowTotal > 0) {
       nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
     }
-    nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectWindowTotal, skipLinkOverride: true, aggregated: true });
+    const otherProjectSpendingTotal = otherProjects.reduce((s, p) => s + p.value, 0);
+    nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectSpendingTotal, skipLinkOverride: true, aggregated: true });
   }
 
   for (const [rid] of windowRecipients) {
