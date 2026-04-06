@@ -19,6 +19,10 @@ export default function RealDataSankeyPage() {
   const [topRecipient, setTopRecipient] = useState(20);
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
+  const [hiddenProjectIds, setHiddenProjectIds] = useState<Set<string>>(new Set());
+  const prevTopProjectIdsRef = useRef<Set<string>>(new Set());
+  // Reset hidden projects when settings other than offset change
+  useEffect(() => { setHiddenProjectIds(new Set()); prevTopProjectIdsRef.current = new Set(); }, [graphData, topMinistry, topProject, topRecipient]);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
@@ -187,8 +191,22 @@ export default function RealDataSankeyPage() {
     // Clamp offset to valid range
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, hiddenProjectIds);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, hiddenProjectIds]);
+
+  // Track projects leaving TopN (due to offset change) and add to hiddenProjectIds
+  useEffect(() => {
+    if (!filtered) return;
+    const prev = prevTopProjectIdsRef.current;
+    const curr = filtered.topProjectIds;
+    if (prev.size > 0) {
+      const newlyHidden = [...prev].filter(id => !curr.has(id));
+      if (newlyHidden.length > 0) {
+        setHiddenProjectIds(h => { const next = new Set(h); newlyHidden.forEach(id => next.add(id)); return next; });
+      }
+    }
+    prevTopProjectIdsRef.current = curr;
+  }, [filtered]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;

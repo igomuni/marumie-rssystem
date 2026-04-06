@@ -13,7 +13,8 @@ export function filterTopN(
   topRecipient: number,
   recipientOffset: number,
   pinnedProjectId: string | null = null,
-): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number; aggNodeMembers: Map<string, AggMember[]> } {
+  hiddenProjectIds: Set<string> = new Set(),
+): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number; aggNodeMembers: Map<string, AggMember[]>; topProjectIds: Set<string> } {
   // Build O(1) lookup map
   const nodeById = new Map(allNodes.map(n => [n.id, n]));
 
@@ -69,10 +70,10 @@ export function filterTopN(
   const topProjectIds = new Set(topProjectNodes.map(n => n.id));
 
   const otherMinistryProjects = allNodes.filter(
-    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id)
+    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id) && !hiddenProjectIds.has(n.id)
   );
   const otherProjects = [
-    ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id)),
+    ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id) && !hiddenProjectIds.has(n.id)),
     ...otherMinistryProjects,
   ];
   const otherProjectSpendingIds = new Set(otherProjects.map(n => n.id));
@@ -92,11 +93,7 @@ export function filterTopN(
     }
   }
   // Sum of budget amounts for aggregated projects (budget-column height basis).
-  // Exclude projects that have spending > 0 but no flow to window/tail recipients:
-  // these are projects temporarily displaced from TopN due to window offset change.
-  // Projects with spending = 0 (truly no data) are always included.
   const otherProjectBudgetTotal = otherProjects.reduce((s, p) => {
-    if (p.value > 0 && !otherProjectsWithFlow.has(p.id)) return s;
     const bn = p.projectId != null ? nodeById.get(`project-budget-${p.projectId}`) : undefined;
     return s + (bn?.value ?? 0);
   }, 0);
@@ -116,9 +113,12 @@ export function filterTopN(
   const otherMinistryWindowValue = otherMinistries.reduce((s, n) => s + (ministryWindowValue.get(n.name) || 0), 0);
 
   // 7. Ministry budget totals (sum of project-budget values per ministry — for node heights)
+  // Exclude hidden projects (projects that left TopN due to offset change)
   const ministryBudgetValue = new Map<string, number>();
   for (const n of allNodes) {
     if (n.type === 'project-budget' && n.ministry) {
+      const spendingId = n.projectId != null ? `project-spending-${n.projectId}` : null;
+      if (spendingId && hiddenProjectIds.has(spendingId)) continue;
       ministryBudgetValue.set(n.ministry, (ministryBudgetValue.get(n.ministry) || 0) + n.value);
     }
   }
@@ -271,7 +271,7 @@ export function filterTopN(
     }));
   }
 
-  return { nodes, edges, totalRecipientCount, aggNodeMembers };
+  return { nodes, edges, totalRecipientCount, aggNodeMembers, topProjectIds };
 }
 
 // ── Custom Layout Engine ──
