@@ -143,11 +143,10 @@ export function filterTopN(
   if (totalNode) nodes.push({ ...totalNode, value: totalBudget, skipLinkOverride: true });
 
   for (const n of topMinistryNodes) {
-    const wv = ministryWindowValue.get(n.name) || 0;
     const bv = ministryBudgetValue.get(n.name) || 0;
-    if (wv > 0) nodes.push({ ...n, value: bv, skipLinkOverride: true });
+    if (bv > 0) nodes.push({ ...n, value: bv, skipLinkOverride: true });
   }
-  if (otherMinistryWindowValue > 0) {
+  if (otherMinistryBudgetValue > 0) {
     nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryBudgetValue, skipLinkOverride: true, aggregated: true });
   }
 
@@ -165,7 +164,7 @@ export function filterTopN(
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
   // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
   if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
-    if (otherProjectWindowTotal > 0) {
+    if (otherProjectBudgetTotal > 0) {
       nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
     }
     const otherProjectSpendingTotal = otherProjects.reduce((s, p) => s + p.value - (projectAboveWindowSpending.get(p.id) || 0), 0);
@@ -222,7 +221,7 @@ export function filterTopN(
     const ministrySource = topMinistryNames.has(n.ministry || '') ? `ministry-${n.ministry}` : '__agg-ministry';
     if (bv > 0) edges.push({ source: ministrySource, target: `project-budget-${n.projectId}`, value: bv });
   }
-  if (otherProjectWindowTotal > 0) {
+  if (otherProjectBudgetTotal > 0) {
     for (const mn of topMinistryNodes) {
       const v = otherProjects
         .filter(p => p.ministry === mn.name && p.projectId != null)
