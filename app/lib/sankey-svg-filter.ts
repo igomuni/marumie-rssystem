@@ -256,7 +256,7 @@ export function filterTopN(
     }).sort((a, b) => b.value - a.value);
     aggNodeMembers.set('__agg-project-budget', projectBudgetMembers);
     aggNodeMembers.set('__agg-project-spending', otherProjects.map(sp => ({
-      id: sp.id, name: sp.name, value: projectWindowValue.get(sp.id) || 0, ministry: sp.ministry,
+      id: sp.id, name: sp.name, value: sp.value, ministry: sp.ministry,
     })).sort((a, b) => b.value - a.value));
   }
   // __agg-recipient → tail recipient nodes
