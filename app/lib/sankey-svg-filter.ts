@@ -13,8 +13,7 @@ export function filterTopN(
   topRecipient: number,
   recipientOffset: number,
   pinnedProjectId: string | null = null,
-  hiddenProjectIds: Set<string> = new Set(),
-): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number; aggNodeMembers: Map<string, AggMember[]>; topProjectIds: Set<string>; projectsWithWindowFlow: Set<string> } {
+): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number; aggNodeMembers: Map<string, AggMember[]>; topProjectIds: Set<string> } {
   // Build O(1) lookup map
   const nodeById = new Map(allNodes.map(n => [n.id, n]));
 
@@ -39,13 +38,16 @@ export function filterTopN(
   const tailRecipients = allSortedRecipients.slice(recipientOffset + topRecipient);
   const tailRecipientIds = new Set(tailRecipients.map(([id]) => id));
 
-  // 3. Per-project and per-recipient window spending (all projects, used for re-ranking)
+  // 3. Per-project and per-recipient window/tail spending (all projects, used for re-ranking)
   const projectWindowValue = new Map<string, number>();
   const recipientWindowValue = new Map<string, number>();
+  const projectTailValue = new Map<string, number>();
   for (const e of allEdges) {
     if (windowRecipientIds.has(e.target)) {
       projectWindowValue.set(e.source, (projectWindowValue.get(e.source) || 0) + e.value);
       recipientWindowValue.set(e.target, (recipientWindowValue.get(e.target) || 0) + e.value);
+    } else if (tailRecipientIds.has(e.target)) {
+      projectTailValue.set(e.source, (projectTailValue.get(e.source) || 0) + e.value);
     }
   }
 
@@ -81,11 +83,31 @@ export function filterTopN(
   }
   const topProjectIds = new Set(topProjectNodes.map(n => n.id));
 
+  // Projects that originally have spending (node.value > 0) but have no flow to any visible recipient
+  // (neither window nor tail — all spending goes to above-window recipients only) are effectively hidden.
+  // Projects with tail-only flow remain in aggregation and ministry totals.
+  // Pinned projects are exempted: they are kept visible even when effectively hidden so that
+  // ministryBudgetValue and project budget columns stay in sync.
+  // This is computed purely from current state (path-independent).
+  const effectivelyHiddenIds = new Set(
+    allNodes
+      .filter(n => n.type === 'project-spending' && n.value > 0
+        && !topProjectIds.has(n.id)  // pinned projects are in topProjectIds — do not hide them
+        && (projectWindowValue.get(n.id) || 0) === 0
+        && (projectTailValue.get(n.id) || 0) === 0)
+      .map(n => n.id)
+  );
+  const effectivelyHiddenBudgetIds = new Set(
+    allNodes
+      .filter(n => n.type === 'project-spending' && effectivelyHiddenIds.has(n.id) && n.projectId != null)
+      .map(n => `project-budget-${n.projectId}`)
+  );
+
   const otherMinistryProjects = allNodes.filter(
-    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id) && !hiddenProjectIds.has(n.id)
+    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id) && !effectivelyHiddenIds.has(n.id)
   );
   const otherProjects = [
-    ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id) && !hiddenProjectIds.has(n.id)),
+    ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id) && !effectivelyHiddenIds.has(n.id)),
     ...otherMinistryProjects,
   ];
   const otherProjectSpendingIds = new Set(otherProjects.map(n => n.id));
@@ -125,12 +147,11 @@ export function filterTopN(
   const otherMinistryWindowValue = otherMinistries.reduce((s, n) => s + (ministryWindowValue.get(n.name) || 0), 0);
 
   // 7. Ministry budget totals (sum of project-budget values per ministry — for node heights)
-  // Exclude hidden projects (projects that left TopN due to offset change)
+  // Exclude effectively hidden projects (had spending but lost window flow at current offset)
   const ministryBudgetValue = new Map<string, number>();
   for (const n of allNodes) {
     if (n.type === 'project-budget' && n.ministry) {
-      const spendingId = n.projectId != null ? `project-spending-${n.projectId}` : null;
-      if (spendingId && hiddenProjectIds.has(spendingId)) continue;
+      if (effectivelyHiddenBudgetIds.has(n.id)) continue;
       ministryBudgetValue.set(n.ministry, (ministryBudgetValue.get(n.ministry) || 0) + n.value);
     }
   }
@@ -160,14 +181,14 @@ export function filterTopN(
     const hidden = projectAboveWindowSpending.get(n.id) || 0;
     nodes.push({ ...n, value: n.value - hidden, skipLinkOverride: true });
   }
-  // Create __agg-project-budget when aggregated projects have budget (otherProjectBudgetTotal > 0),
-  // while still requiring aggregated spending flow via the outer guard.
+  // Create __agg-project-budget when aggregated projects have budget (otherProjectBudgetTotal > 0).
+  // This can happen even when flow is zero (budget-only projects with no spending edges).
+  if (otherProjectBudgetTotal > 0) {
+    nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
+  }
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
   // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
   if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
-    if (otherProjectBudgetTotal > 0) {
-      nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
-    }
     const otherProjectSpendingTotal = otherProjects.reduce((s, p) => s + p.value - (projectAboveWindowSpending.get(p.id) || 0), 0);
     nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectSpendingTotal, skipLinkOverride: true, aggregated: true });
   }
@@ -179,9 +200,9 @@ export function filterTopN(
   // tailValue = total inflow to rank (offset+topRecipient)+ recipients from ALL projects.
   // otherProjectTailTotal is a subset of tailValue (aggregated projects' tail flow),
   // so it must NOT be added separately — that would double-count.
-  // Also subtract tail spending from hidden projects (they are excluded from project-spending column).
-  const hiddenTailSpending = hiddenProjectIds.size > 0
-    ? allEdges.filter(e => hiddenProjectIds.has(e.source) && tailRecipientIds.has(e.target))
+  // Subtract effectively hidden projects' tail spending (excluded from project-spending column).
+  const hiddenTailSpending = effectivelyHiddenIds.size > 0
+    ? allEdges.filter(e => effectivelyHiddenIds.has(e.source) && tailRecipientIds.has(e.target))
               .reduce((s, e) => s + e.value, 0)
     : 0;
   const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0) - hiddenTailSpending;
@@ -235,7 +256,7 @@ export function filterTopN(
     const bv = budgetNode?.value ?? 0;
     if (bv > 0) edges.push({ source: `project-budget-${n.projectId}`, target: n.id, value: bv });
   }
-  if (otherProjectBudgetTotal > 0) {
+  if (otherProjectBudgetTotal > 0 && (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0)) {
     edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: otherProjectBudgetTotal });
   }
 
@@ -287,10 +308,7 @@ export function filterTopN(
     }));
   }
 
-  const projectsWithWindowFlow = new Set(
-    allNodes.filter(n => n.type === 'project-spending' && (projectWindowValue.get(n.id) || 0) > 0).map(n => n.id)
-  );
-  return { nodes, edges, totalRecipientCount, aggNodeMembers, topProjectIds, projectsWithWindowFlow };
+  return { nodes, edges, totalRecipientCount, aggNodeMembers, topProjectIds };
 }
 
 // ── Custom Layout Engine ──

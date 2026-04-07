@@ -19,10 +19,6 @@ export default function RealDataSankeyPage() {
   const [topRecipient, setTopRecipient] = useState(20);
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
-  const [hiddenProjectIds, setHiddenProjectIds] = useState<Set<string>>(new Set());
-  const prevTopProjectIdsRef = useRef<Set<string>>(new Set());
-  // Reset hidden projects when settings other than offset change
-  useEffect(() => { setHiddenProjectIds(new Set()); prevTopProjectIdsRef.current = new Set(); }, [graphData, topMinistry, topProject, topRecipient]);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
@@ -186,43 +182,12 @@ export default function RealDataSankeyPage() {
       .catch(e => { setError(String(e)); setLoading(false); });
   }, []);
 
-  // Compute projectsWithWindowFlow independently of hiddenProjectIds to avoid circular deps in the effect below.
-  // This includes ALL projects (not just TopN) that have spending to the current window.
-  const rawProjectsWithWindowFlow = useMemo(() => {
-    if (!graphData) return new Set<string>();
-    const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
-    const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId).projectsWithWindowFlow;
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
-
-  // Update hiddenProjectIds: projects that had window flow before but lost it should be hidden.
-  // No dependency on hiddenProjectIds → no circular loop.
-  useEffect(() => {
-    if (recipientOffset === 0) {
-      setHiddenProjectIds(h => h.size === 0 ? h : new Set());
-      prevTopProjectIdsRef.current = rawProjectsWithWindowFlow;
-      return;
-    }
-    const prev = prevTopProjectIdsRef.current;
-    const curr = rawProjectsWithWindowFlow;
-    if (prev.size > 0) {
-      setHiddenProjectIds(h => {
-        const next = new Set(h);
-        for (const id of prev) { if (!curr.has(id)) next.add(id); }
-        for (const id of h) { if (curr.has(id)) next.delete(id); }
-        if (next.size === h.size && [...h].every(id => next.has(id))) return h;
-        return next;
-      });
-    }
-    prevTopProjectIdsRef.current = curr;
-  }, [rawProjectsWithWindowFlow, recipientOffset]);
-
   const filtered = useMemo(() => {
     if (!graphData) return null;
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, hiddenProjectIds);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, hiddenProjectIds]);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
