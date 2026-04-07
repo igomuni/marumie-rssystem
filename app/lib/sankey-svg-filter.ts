@@ -256,7 +256,7 @@ export function filterTopN(
     const bv = budgetNode?.value ?? 0;
     if (bv > 0) edges.push({ source: `project-budget-${n.projectId}`, target: n.id, value: bv });
   }
-  if (otherProjectBudgetTotal > 0) {
+  if (otherProjectBudgetTotal > 0 && (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0)) {
     edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: otherProjectBudgetTotal });
   }
 
