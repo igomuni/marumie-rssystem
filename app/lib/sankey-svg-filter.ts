@@ -86,10 +86,13 @@ export function filterTopN(
   // Projects that originally have spending (node.value > 0) but have no flow to any visible recipient
   // (neither window nor tail — all spending goes to above-window recipients only) are effectively hidden.
   // Projects with tail-only flow remain in aggregation and ministry totals.
+  // Pinned projects are exempted: they are kept visible even when effectively hidden so that
+  // ministryBudgetValue and project budget columns stay in sync.
   // This is computed purely from current state (path-independent).
   const effectivelyHiddenIds = new Set(
     allNodes
       .filter(n => n.type === 'project-spending' && n.value > 0
+        && !topProjectIds.has(n.id)  // pinned projects are in topProjectIds — do not hide them
         && (projectWindowValue.get(n.id) || 0) === 0
         && (projectTailValue.get(n.id) || 0) === 0)
       .map(n => n.id)
@@ -178,14 +181,14 @@ export function filterTopN(
     const hidden = projectAboveWindowSpending.get(n.id) || 0;
     nodes.push({ ...n, value: n.value - hidden, skipLinkOverride: true });
   }
-  // Create __agg-project-budget when aggregated projects have budget (otherProjectBudgetTotal > 0),
-  // while still requiring aggregated spending flow via the outer guard.
+  // Create __agg-project-budget when aggregated projects have budget (otherProjectBudgetTotal > 0).
+  // This can happen even when flow is zero (budget-only projects with no spending edges).
+  if (otherProjectBudgetTotal > 0) {
+    nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
+  }
   // Create __agg-project-spending whenever there is ANY flow through it (window OR tail),
   // so that the tail edge __agg-project-spending→__agg-recipient always has a valid source node.
   if (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0) {
-    if (otherProjectBudgetTotal > 0) {
-      nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, skipLinkOverride: true, aggregated: true });
-    }
     const otherProjectSpendingTotal = otherProjects.reduce((s, p) => s + p.value - (projectAboveWindowSpending.get(p.id) || 0), 0);
     nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectSpendingTotal, skipLinkOverride: true, aggregated: true });
   }
