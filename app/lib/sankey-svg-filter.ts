@@ -370,7 +370,12 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
   let ky = Infinity;
   for (const [, colNodes] of columns) {
     const totalValue = colNodes.reduce((s, n) => s + n.value, 0);
-    const totalPadding = Math.max(0, (colNodes.length - 1) * effectivePad);
+    // Estimate extra gap count: use baseKy (NODE_PAD only) to approximate which nodes are "small"
+    const baseKy = totalValue > 0 ? (innerH - Math.max(0, (colNodes.length - 1) * NODE_PAD)) / totalValue : 0;
+    const extraGapCount = effectivePad > NODE_PAD
+      ? colNodes.map(n => Math.max(1, n.value * Math.max(0, baseKy))).filter(h => h < effectivePad).length
+      : 0;
+    const totalPadding = Math.max(0, (colNodes.length - 1) * NODE_PAD + extraGapCount * (effectivePad - NODE_PAD));
     const available = innerH - totalPadding;
     if (totalValue > 0) ky = Math.min(ky, available / totalValue);
   }

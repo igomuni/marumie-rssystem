@@ -190,12 +190,14 @@ export default function RealDataSankeyPage() {
     return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId);
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
 
+  const minNodeGap = showLabels ? 12 / zoom : undefined;
+
   const layout = useMemo(() => {
     if (!filtered) return null;
-    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, showLabels ? 12 / zoom : undefined);
+    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, minNodeGap);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH };
     return result;
-  }, [filtered, svgWidth, svgHeight, showLabels, zoom]);
+  }, [filtered, svgWidth, svgHeight, minNodeGap]);
 
   const selectedNode = useMemo(() => {
     if (!selectedNodeId) return null;
