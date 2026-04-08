@@ -313,7 +313,7 @@ export function filterTopN(
 
 // ── Custom Layout Engine ──
 
-export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[], containerWidth: number, containerHeight: number) {
+export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[], containerWidth: number, containerHeight: number, minNodeGap: number = NODE_PAD) {
   const innerW = containerWidth - MARGIN.left - MARGIN.right;
   const innerH = containerHeight - MARGIN.top - MARGIN.bottom;
   const usedCols = new Set<number>();
@@ -366,10 +366,11 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     });
   }
 
+  const effectivePad = Math.max(NODE_PAD, minNodeGap);
   let ky = Infinity;
   for (const [, colNodes] of columns) {
     const totalValue = colNodes.reduce((s, n) => s + n.value, 0);
-    const totalPadding = Math.max(0, (colNodes.length - 1) * NODE_PAD);
+    const totalPadding = Math.max(0, (colNodes.length - 1) * effectivePad);
     const available = innerH - totalPadding;
     if (totalValue > 0) ky = Math.min(ky, available / totalValue);
   }
@@ -385,7 +386,9 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
       const h = Math.max(1, node.value * ky);
       node.y0 = y;
       node.y1 = y + h;
-      y += h + NODE_PAD;
+      // Apply extra gap only for small nodes (those whose label would be hidden in OFF mode)
+      const gap = (effectivePad > NODE_PAD && h < effectivePad) ? effectivePad : NODE_PAD;
+      y += h + gap;
     }
   }
 
