@@ -367,19 +367,35 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
   }
 
   const effectivePad = Math.max(NODE_PAD, minNodeGap);
+
+  // Compute the total rendered column height at a given ky using the exact same
+  // gap rule used in placement below.
+  const colHeight = (colNodes: RawNode[], candidateKy: number): number => {
+    let total = 0;
+    for (const node of colNodes) {
+      const h = Math.max(1, node.value * candidateKy);
+      const gap = (effectivePad > NODE_PAD && h < effectivePad) ? effectivePad : NODE_PAD;
+      total += h + gap;
+    }
+    return total;
+  };
+
+  // Binary-search for the largest ky such that every column fits within innerH.
   let ky = Infinity;
   for (const [, colNodes] of columns) {
     const totalValue = colNodes.reduce((s, n) => s + n.value, 0);
-    // Estimate extra gap count: use baseKy (NODE_PAD only) to approximate which nodes are "small"
-    const baseKy = totalValue > 0 ? (innerH - Math.max(0, (colNodes.length - 1) * NODE_PAD)) / totalValue : 0;
-    const extraGapCount = effectivePad > NODE_PAD
-      ? colNodes.map(n => Math.max(1, n.value * Math.max(0, baseKy))).filter(h => h < effectivePad).length
-      : 0;
-    const totalPadding = Math.max(0, (colNodes.length - 1) * NODE_PAD + extraGapCount * (effectivePad - NODE_PAD));
-    const available = innerH - totalPadding;
-    if (totalValue > 0) ky = Math.min(ky, available / totalValue);
+    if (totalValue <= 0) continue;
+    let lo = 0;
+    let hi = innerH / totalValue;  // upper bound: ignores floor(1) and gap overhead
+    // Expand hi until the column fits at hi (lo stays valid lower bound of ky)
+    while (colHeight(colNodes, hi) > innerH && hi > 1e-9) hi /= 2;
+    for (let i = 0; i < 50; i++) {
+      const mid = (lo + hi) / 2;
+      if (colHeight(colNodes, mid) <= innerH) lo = mid; else hi = mid;
+    }
+    ky = Math.min(ky, lo);
   }
-  if (!isFinite(ky)) ky = 1;
+  if (!isFinite(ky) || ky <= 0) ky = 1;
 
   for (const [col, colNodes] of columns) {
     for (const node of colNodes) {
