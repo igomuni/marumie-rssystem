@@ -1040,8 +1040,8 @@ export default function RealDataSankeyPage() {
                       </button>
                       <button type="button" style={activeTab === 'out' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('out')}>
                         流出先 <span style={{ fontWeight: 400, fontSize: 11 }}>({
-                          selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget')
-                            ? filtered.aggNodeMembers.get('__agg-project-budget')!.length
+                          selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                            ? filtered.aggNodeMembers.get('__agg-project-spending')!.length
                             : selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-recipient')
                               ? selectedNodeAllConnections.outEdges.reduce((s, item) =>
                                   s + (item.id === '__agg-recipient' ? (filtered.aggNodeMembers.get('__agg-recipient')?.length ?? 1) : 1), 0)
@@ -1107,8 +1107,8 @@ export default function RealDataSankeyPage() {
 
                       {activeTab === 'out' && !hasOut && <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>}
                       {activeTab === 'out' && hasOut && (() => {
-                        const useGrouped = selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget');
-                        const aggMembers = useGrouped ? filtered!.aggNodeMembers.get('__agg-project-budget')! : [];
+                        const useGrouped = selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-spending');
+                        const aggMembers = useGrouped ? filtered!.aggNodeMembers.get('__agg-project-spending')! : [];
                         // expand __agg-recipient inline when rendering __agg-project-spending outEdges
                         const expandedOutEdges = (selectedNode?.id === '__agg-project-spending'
                           ? selectedNodeAllConnections.outEdges.flatMap(item =>
