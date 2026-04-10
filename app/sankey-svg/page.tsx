@@ -25,6 +25,7 @@ export default function RealDataSankeyPage() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
+  const [includeZeroSpending, setIncludeZeroSpending] = useState(false);
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -187,8 +188,8 @@ export default function RealDataSankeyPage() {
     if (!graphData) return null;
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending]);
 
   const minNodeGap = showLabels ? 12 / zoom : undefined;
 
@@ -421,11 +422,12 @@ export default function RealDataSankeyPage() {
         : nodeId;
       setPinnedProjectId(spendingId);
       let bestRecipientId: string | null = null;
-      let bestValue = 0;
+      let bestRecipientTotal = -1;
+      const nodeById = new Map(graphData.nodes.map(n => [n.id, n]));
       for (const e of graphData.edges) {
-        if (e.source === spendingId && e.target.startsWith('r-') && e.value > bestValue) {
-          bestValue = e.value;
-          bestRecipientId = e.target;
+        if (e.source === spendingId && e.target.startsWith('r-')) {
+          const total = nodeById.get(e.target)?.value ?? 0;
+          if (total > bestRecipientTotal) { bestRecipientTotal = total; bestRecipientId = e.target; }
         }
       }
       if (bestRecipientId !== null) {
@@ -1039,8 +1041,8 @@ export default function RealDataSankeyPage() {
                       </button>
                       <button type="button" style={activeTab === 'out' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('out')}>
                         流出先 <span style={{ fontWeight: 400, fontSize: 11 }}>({
-                          selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget')
-                            ? filtered.aggNodeMembers.get('__agg-project-budget')!.length
+                          selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-spending')
+                            ? filtered.aggNodeMembers.get('__agg-project-spending')!.length
                             : selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-recipient')
                               ? selectedNodeAllConnections.outEdges.reduce((s, item) =>
                                   s + (item.id === '__agg-recipient' ? (filtered.aggNodeMembers.get('__agg-recipient')?.length ?? 1) : 1), 0)
@@ -1106,8 +1108,8 @@ export default function RealDataSankeyPage() {
 
                       {activeTab === 'out' && !hasOut && <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>}
                       {activeTab === 'out' && hasOut && (() => {
-                        const useGrouped = selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget');
-                        const aggMembers = useGrouped ? filtered!.aggNodeMembers.get('__agg-project-budget')! : [];
+                        const useGrouped = selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-spending');
+                        const aggMembers = useGrouped ? filtered!.aggNodeMembers.get('__agg-project-spending')! : [];
                         // expand __agg-recipient inline when rendering __agg-project-spending outEdges
                         const expandedOutEdges = (selectedNode?.id === '__agg-project-spending'
                           ? selectedNodeAllConnections.outEdges.flatMap(item =>
@@ -1315,6 +1317,10 @@ export default function RealDataSankeyPage() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => setShowLabels(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={includeZeroSpending} onChange={e => setIncludeZeroSpending(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>支出が0円の事業を対象にする</span>
               </label>
             </div>
           </>
