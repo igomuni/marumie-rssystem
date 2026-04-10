@@ -90,7 +90,7 @@ export function filterTopN(
   // Pin: force-include the pinned project (TopN+1) if not already present
   if (pinnedProjectId) {
     const pinned = allNodes.find(n => n.id === pinnedProjectId && n.type === 'project-spending');
-    if (pinned && !topProjectNodes.some(n => n.id === pinnedProjectId)) {
+    if (pinned && (includeZeroSpending || !zeroSpendingProjectIds.has(pinned.id)) && !topProjectNodes.some(n => n.id === pinnedProjectId)) {
       topProjectNodes.push(pinned);
     }
   }
