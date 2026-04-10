@@ -24,6 +24,7 @@ export default function RealDataSankeyPage() {
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
+  const [showLabels, setShowLabels] = useState(true);
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -189,12 +190,14 @@ export default function RealDataSankeyPage() {
     return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId);
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId]);
 
+  const minNodeGap = showLabels ? 12 / zoom : undefined;
+
   const layout = useMemo(() => {
     if (!filtered) return null;
-    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
+    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, minNodeGap);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH };
     return result;
-  }, [filtered, svgWidth, svgHeight]);
+  }, [filtered, svgWidth, svgHeight, minNodeGap]);
 
   const selectedNode = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -719,12 +722,9 @@ export default function RealDataSankeyPage() {
                   const lastCol = layout.maxCol;
                   return layout.nodes.map((node) => {
                     const h = node.y1 - node.y0;
-                    // Label is 9px on screen (fontSize 9/zoom * zoom = 9).
-                    // Available space per node on screen = (h + NODE_PAD) * zoom.
-                    // Show label when available space exceeds font height,
-                    // or when the node is selected / connected to the selected node.
                     const isSelected = node.id === selectedNodeId;
-                    const showLabel = (h + NODE_PAD) * zoom > 10 || isSelected;
+                    // When showLabels is off, use legacy rule: show only when there is enough screen space or node is selected.
+                    const labelVisible = showLabels || (h + NODE_PAD) * zoom > 10 || isSelected;
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
                     return (
@@ -754,13 +754,13 @@ export default function RealDataSankeyPage() {
                           onMouseLeave={() => setHoveredNode(null)}
                           onClick={(e) => handleNodeClick(node, e)}
                         />
-                        {showLabel && (
+                        {labelVisible && (
                           <text
                             x={node.x1 + 3}
                             y={node.y0 + h / 2}
                             fontSize={9 / zoom}
                             dominantBaseline="middle"
-                            fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#999' : '#333'}
+                            fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : '#333'}
                             style={{ userSelect: 'none', pointerEvents: 'none' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                           >
@@ -1000,7 +1000,7 @@ export default function RealDataSankeyPage() {
                               <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                             </button>
                           ))}
-                          <div style={{ display: 'flex', gap: 0, padding: '2px 4px', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', gap: 0, padding: '2px 4px', alignItems: 'center', justifyContent: 'flex-end' }}>
                             {remaining > 0 && <>
                               <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, displayCount + 10))} style={btnStyle}>さらに{Math.min(10, remaining)}件（残{remaining}）</button>
                               <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, items.length))} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
@@ -1090,7 +1090,7 @@ export default function RealDataSankeyPage() {
                                   </button>
                                 ))}
                                 {(() => { const rem = expandedInEdges.length - inDisplayCount; return (
-                                  <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
+                                  <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center', justifyContent: 'flex-end' }}>
                                     {rem > 0 && <>
                                       <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
                                       <button onClick={() => setInDisplayCount(expandedInEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
@@ -1129,7 +1129,7 @@ export default function RealDataSankeyPage() {
                               </button>
                             ))}
                             {(() => { const rem = expandedOutEdges.length - outDisplayCount; return (
-                              <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center' }}>
+                              <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center', justifyContent: 'flex-end' }}>
                                 {rem > 0 && <>
                                   <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
                                   <button onClick={() => setOutDisplayCount(expandedOutEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
@@ -1311,6 +1311,10 @@ export default function RealDataSankeyPage() {
                 <span style={{ width: 48, color: '#555' }}>支出先:</span>
                 <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
                 <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ flex: 1 }} />
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={showLabels} onChange={e => setShowLabels(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
               </label>
             </div>
           </>
