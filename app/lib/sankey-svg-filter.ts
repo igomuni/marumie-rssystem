@@ -13,9 +13,22 @@ export function filterTopN(
   topRecipient: number,
   recipientOffset: number,
   pinnedProjectId: string | null = null,
+  includeZeroSpending: boolean = true,
 ): { nodes: RawNode[]; edges: RawEdge[]; totalRecipientCount: number; aggNodeMembers: Map<string, AggMember[]>; topProjectIds: Set<string> } {
   // Build O(1) lookup map
   const nodeById = new Map(allNodes.map(n => [n.id, n]));
+
+  // Zero-spending exclusion sets (populated only when includeZeroSpending is false)
+  const zeroSpendingProjectIds = new Set<string>();
+  const zeroSpendingBudgetIds = new Set<string>();
+  if (!includeZeroSpending) {
+    for (const n of allNodes) {
+      if (n.type === 'project-spending' && n.value === 0) {
+        zeroSpendingProjectIds.add(n.id);
+        if (n.projectId != null) zeroSpendingBudgetIds.add(`project-budget-${n.projectId}`);
+      }
+    }
+  }
 
   // 1. TopN ministries by total value (stable ranking)
   const ministries = allNodes.filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
@@ -66,7 +79,7 @@ export function filterTopN(
   // 4. TopN projects re-ranked by WINDOW spending (dynamic as offset changes)
   //    Scope: projects belonging to top ministries only
   const topMinistryAllProjects = allNodes.filter(
-    n => n.type === 'project-spending' && topMinistryNames.has(n.ministry || '')
+    n => n.type === 'project-spending' && topMinistryNames.has(n.ministry || '') && !zeroSpendingProjectIds.has(n.id)
   );
   topMinistryAllProjects.sort(
     (a, b) => (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0)
@@ -104,7 +117,7 @@ export function filterTopN(
   );
 
   const otherMinistryProjects = allNodes.filter(
-    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id) && !effectivelyHiddenIds.has(n.id)
+    n => n.type === 'project-spending' && !topMinistryNames.has(n.ministry || '') && !topProjectIds.has(n.id) && !effectivelyHiddenIds.has(n.id) && !zeroSpendingProjectIds.has(n.id)
   );
   const otherProjects = [
     ...topMinistryAllProjects.filter(n => !topProjectIds.has(n.id) && !effectivelyHiddenIds.has(n.id)),
@@ -152,6 +165,7 @@ export function filterTopN(
   for (const n of allNodes) {
     if (n.type === 'project-budget' && n.ministry) {
       if (effectivelyHiddenBudgetIds.has(n.id)) continue;
+      if (zeroSpendingBudgetIds.has(n.id)) continue;
       ministryBudgetValue.set(n.ministry, (ministryBudgetValue.get(n.ministry) || 0) + n.value);
     }
   }
