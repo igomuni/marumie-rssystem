@@ -422,11 +422,12 @@ export default function RealDataSankeyPage() {
         : nodeId;
       setPinnedProjectId(spendingId);
       let bestRecipientId: string | null = null;
-      let bestValue = 0;
+      let bestRecipientTotal = -1;
+      const nodeById = new Map(graphData.nodes.map(n => [n.id, n]));
       for (const e of graphData.edges) {
-        if (e.source === spendingId && e.target.startsWith('r-') && e.value > bestValue) {
-          bestValue = e.value;
-          bestRecipientId = e.target;
+        if (e.source === spendingId && e.target.startsWith('r-')) {
+          const total = nodeById.get(e.target)?.value ?? 0;
+          if (total > bestRecipientTotal) { bestRecipientTotal = total; bestRecipientId = e.target; }
         }
       }
       if (bestRecipientId !== null) {
