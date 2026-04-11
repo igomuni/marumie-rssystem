@@ -26,6 +26,7 @@ export default function RealDataSankeyPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
   const [includeZeroSpending, setIncludeZeroSpending] = useState(false);
+  const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -188,8 +189,8 @@ export default function RealDataSankeyPage() {
     if (!graphData) return null;
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending]);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient]);
 
   const minNodeGap = showLabels ? 12 / zoom : undefined;
 
@@ -1313,6 +1314,10 @@ export default function RealDataSankeyPage() {
                 <span style={{ width: 48, color: '#555' }}>支出先:</span>
                 <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
                 <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ flex: 1 }} />
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={showAggRecipient} onChange={e => setShowAggRecipient(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>支出先の集約ノードを表示</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => setShowLabels(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
