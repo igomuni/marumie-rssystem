@@ -9,6 +9,42 @@ import {
 } from '@/app/lib/sankey-svg-constants';
 import { filterTopN, computeLayout } from '@/app/lib/sankey-svg-filter';
 
+// ── URL state serialization ──
+
+interface SankeyUrlState {
+  selectedNodeId: string | null;
+  pinnedProjectId: string | null;
+  pinnedRecipientId: string | null;
+  pinnedMinistryName: string | null;
+  recipientOffset: number;
+  topMinistry: number;
+  topProject: number;
+  topRecipient: number;
+  showLabels: boolean;
+  includeZeroSpending: boolean;
+  showAggRecipient: boolean;
+  scaleBudgetToVisible: boolean;
+  focusRelated: boolean;
+}
+
+function parseSearchParams(search: string): Partial<SankeyUrlState> {
+  const p = new URLSearchParams(search);
+  const result: Partial<SankeyUrlState> = {};
+  const sel = p.get('sel'); if (sel !== null) result.selectedNodeId = sel;
+  const pp = p.get('pp'); if (pp !== null) result.pinnedProjectId = pp;
+  const pr = p.get('pr'); if (pr !== null) result.pinnedRecipientId = pr;
+  const pm = p.get('pm'); if (pm !== null) result.pinnedMinistryName = pm;
+  const ro = p.get('ro'); if (ro !== null) { const n = parseInt(ro, 10); if (!isNaN(n)) result.recipientOffset = Math.max(0, n); }
+  const tm = p.get('tm'); if (tm !== null) { const n = parseInt(tm, 10); if (!isNaN(n)) result.topMinistry = Math.max(1, Math.min(37, n)); }
+  const tp = p.get('tp'); if (tp !== null) { const n = parseInt(tp, 10); if (!isNaN(n)) result.topProject = Math.max(1, Math.min(100, n)); }
+  const tr = p.get('tr'); if (tr !== null) { const n = parseInt(tr, 10); if (!isNaN(n)) result.topRecipient = Math.max(1, Math.min(100, n)); }
+  const sl = p.get('sl'); if (sl !== null) result.showLabels = sl !== '0';
+  const iz = p.get('iz'); if (iz !== null) result.includeZeroSpending = iz !== '0';
+  const ar = p.get('ar'); if (ar !== null) result.showAggRecipient = ar !== '0';
+  const sb = p.get('sb'); if (sb !== null) result.scaleBudgetToVisible = sb !== '0';
+  const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr !== '0';
+  return result;
+}
 
 export default function RealDataSankeyPage() {
   const [graphData, setGraphData] = useState<GraphData | null>(null);
@@ -42,6 +78,8 @@ export default function RealDataSankeyPage() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  // Tracks whether the next URL update should push (navigation) or replace (slider/toggle)
+  const pendingHistoryAction = useRef<'push' | 'replace' | null>(null);
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,6 +99,75 @@ export default function RealDataSankeyPage() {
     window.addEventListener('resize', updateSize);
     return () => { ro.disconnect(); window.removeEventListener('resize', updateSize); };
   }, []);
+
+  // Initialize state from URL on mount
+  useEffect(() => {
+    const parsed = parseSearchParams(window.location.search);
+    if (parsed.selectedNodeId !== undefined) { setSelectedNodeId(parsed.selectedNodeId); pendingFocusId.current = parsed.selectedNodeId; }
+    if (parsed.pinnedProjectId !== undefined) setPinnedProjectId(parsed.pinnedProjectId);
+    if (parsed.pinnedRecipientId !== undefined) setPinnedRecipientId(parsed.pinnedRecipientId);
+    if (parsed.pinnedMinistryName !== undefined) setPinnedMinistryName(parsed.pinnedMinistryName);
+    if (parsed.recipientOffset !== undefined) setRecipientOffset(parsed.recipientOffset);
+    if (parsed.topMinistry !== undefined) setTopMinistry(parsed.topMinistry);
+    if (parsed.topProject !== undefined) setTopProject(parsed.topProject);
+    if (parsed.topRecipient !== undefined) setTopRecipient(parsed.topRecipient);
+    if (parsed.showLabels !== undefined) setShowLabels(parsed.showLabels);
+    if (parsed.includeZeroSpending !== undefined) setIncludeZeroSpending(parsed.includeZeroSpending);
+    if (parsed.showAggRecipient !== undefined) setShowAggRecipient(parsed.showAggRecipient);
+    if (parsed.scaleBudgetToVisible !== undefined) setScaleBudgetToVisible(parsed.scaleBudgetToVisible);
+    if (parsed.focusRelated !== undefined) setFocusRelated(parsed.focusRelated);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Restore state on browser back/forward
+  useEffect(() => {
+    const handler = () => {
+      const parsed = parseSearchParams(window.location.search);
+      setSelectedNodeId(parsed.selectedNodeId ?? null);
+      setPinnedProjectId(parsed.pinnedProjectId ?? null);
+      setPinnedRecipientId(parsed.pinnedRecipientId ?? null);
+      setPinnedMinistryName(parsed.pinnedMinistryName ?? null);
+      setRecipientOffset(parsed.recipientOffset ?? 0);
+      setTopMinistry(parsed.topMinistry ?? 37);
+      setTopProject(parsed.topProject ?? 40);
+      setTopRecipient(parsed.topRecipient ?? 40);
+      setShowLabels(parsed.showLabels ?? true);
+      setIncludeZeroSpending(parsed.includeZeroSpending ?? false);
+      setShowAggRecipient(parsed.showAggRecipient ?? true);
+      setScaleBudgetToVisible(parsed.scaleBudgetToVisible ?? true);
+      setFocusRelated(parsed.focusRelated ?? true);
+      if (parsed.selectedNodeId) pendingFocusId.current = parsed.selectedNodeId;
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync URL after user actions (push for node selection, replace for sliders/toggles)
+  useEffect(() => {
+    const action = pendingHistoryAction.current;
+    if (action === null) return;
+    pendingHistoryAction.current = null;
+    const p = new URLSearchParams();
+    if (selectedNodeId !== null) p.set('sel', selectedNodeId);
+    if (pinnedProjectId !== null) p.set('pp', pinnedProjectId);
+    if (pinnedRecipientId !== null) p.set('pr', pinnedRecipientId);
+    if (pinnedMinistryName !== null) p.set('pm', pinnedMinistryName);
+    if (recipientOffset !== 0) p.set('ro', String(recipientOffset));
+    if (topMinistry !== 37) p.set('tm', String(topMinistry));
+    if (topProject !== 40) p.set('tp', String(topProject));
+    if (topRecipient !== 40) p.set('tr', String(topRecipient));
+    if (!showLabels) p.set('sl', '0');
+    if (includeZeroSpending) p.set('iz', '1');
+    if (!showAggRecipient) p.set('ar', '0');
+    if (!scaleBudgetToVisible) p.set('sb', '0');
+    if (!focusRelated) p.set('fr', '0');
+    const qs = p.toString();
+    const url = qs ? `?${qs}` : window.location.pathname;
+    if (action === 'push') {
+      window.history.pushState(null, '', url);
+    } else {
+      window.history.replaceState(null, '', url);
+    }
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated]);
 
   // Zoom/Pan state
   const [zoom, setZoom] = useState(1);
@@ -361,6 +468,7 @@ export default function RealDataSankeyPage() {
   useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setConnectionTab('in'); }, [selectedNodeId]);
 
   const selectNode = useCallback((id: string | null) => {
+    pendingHistoryAction.current = id !== null ? 'push' : 'replace';
     setSelectedNodeId(id);
     if (id !== null) setIsPanelCollapsed(false);
     else { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); }
@@ -1375,7 +1483,7 @@ export default function RealDataSankeyPage() {
                   autoFocus
                   min={1} max={maxStartRank} step={1}
                   value={offsetInputValue}
-                  onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) setRecipientOffset(Math.max(0, Math.min(maxOffset, v - 1))); }}
+                  onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) { pendingHistoryAction.current = 'replace'; setRecipientOffset(Math.max(0, Math.min(maxOffset, v - 1))); } }}
                   onBlur={() => setIsEditingOffset(false)}
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingOffset(false); }}
                   style={{ width: `${Math.max(40, String(maxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
@@ -1388,7 +1496,7 @@ export default function RealDataSankeyPage() {
                 >{rangeStart}</button>
               )}
               <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}位</span>
-              <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => setRecipientOffset(Number(e.target.value))} style={{ width: 100 }} />
+              <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => { pendingHistoryAction.current = 'replace'; setRecipientOffset(Number(e.target.value)); }} style={{ width: 100 }} />
               <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                 {([
@@ -1398,7 +1506,7 @@ export default function RealDataSankeyPage() {
                   <button key={delta} title={title} aria-label={title}
                     onPointerDown={(e) => {
                       if (e.pointerType === 'mouse' && e.button !== 0) return;
-                      const step = () => { setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); };
+                      const step = () => { pendingHistoryAction.current = 'replace'; setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); };
                       stopOffsetRepeat();
                       step();
                       offsetRepeatRef.current = setTimeout(() => {
@@ -1406,7 +1514,7 @@ export default function RealDataSankeyPage() {
                       }, 400);
                     }}
                     onPointerUp={stopOffsetRepeat} onPointerLeave={stopOffsetRepeat} onPointerCancel={stopOffsetRepeat}
-                    onClick={(e) => { if (e.detail === 0) setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); }}
+                    onClick={(e) => { if (e.detail === 0) { pendingHistoryAction.current = 'replace'; setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); } }}
                     style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
@@ -1414,7 +1522,7 @@ export default function RealDataSankeyPage() {
                 ))}
               </div>
               {/* Material Icons: vertical_align_top — オフセットリセット */}
-              <button onClick={e => { e.preventDefault(); setRecipientOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
+              <button onClick={e => { e.preventDefault(); pendingHistoryAction.current = 'replace'; setRecipientOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
@@ -1446,37 +1554,37 @@ export default function RealDataSankeyPage() {
               <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 48, color: '#555' }}>省庁:</span>
-                <input type="number" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={37} value={topMinistry} onChange={e => setTopMinistry(Number(e.target.value))} style={{ flex: 1 }} />
+                <input type="number" min={1} max={37} value={topMinistry} onChange={e => { pendingHistoryAction.current = 'replace'; setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={37} value={topMinistry} onChange={e => { pendingHistoryAction.current = 'replace'; setTopMinistry(Number(e.target.value)); }} style={{ flex: 1 }} />
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 48, color: '#555' }}>事業:</span>
-                <input type="number" min={1} max={100} value={topProject} onChange={e => setTopProject(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={100} value={topProject} onChange={e => setTopProject(Number(e.target.value))} style={{ flex: 1 }} />
+                <input type="number" min={1} max={100} value={topProject} onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={100} value={topProject} onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Number(e.target.value)); }} style={{ flex: 1 }} />
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 48, color: '#555' }}>支出先:</span>
-                <input type="number" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ flex: 1 }} />
+                <input type="number" min={1} max={100} value={topRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+                <input type="range" min={1} max={100} value={topRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Number(e.target.value)); }} style={{ flex: 1 }} />
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={showLabels} onChange={e => setShowLabels(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={includeZeroSpending} onChange={e => setIncludeZeroSpending(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <input type="checkbox" checked={includeZeroSpending} onChange={e => { pendingHistoryAction.current = 'replace'; setIncludeZeroSpending(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>支出が0円の事業を対象にする</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={showAggRecipient} onChange={e => setShowAggRecipient(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <input type="checkbox" checked={showAggRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggRecipient(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>支出先の集約ノードを表示</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={scaleBudgetToVisible} onChange={e => setScaleBudgetToVisible(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <input type="checkbox" checked={scaleBudgetToVisible} onChange={e => { pendingHistoryAction.current = 'replace'; setScaleBudgetToVisible(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>事業の予算額を支出額に合わせて調整</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={focusRelated} onChange={e => setFocusRelated(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <input type="checkbox" checked={focusRelated} onChange={e => { pendingHistoryAction.current = 'replace'; setFocusRelated(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>選択ノードの関連ノードのみ表示</span>
               </label>
             </div>
