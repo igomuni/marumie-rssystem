@@ -5,6 +5,8 @@ export interface RawNode {
   value: number;
   /** Actual value preserved when layout height is capped (used for tooltip display) */
   rawValue?: number;
+  /** True when a budget node's height has been scaled by visible spending fraction */
+  isScaled?: boolean;
   /** If set, layout engine caps node height to this value after computing link-sum */
   layoutCap?: number;
   /** If true, layout engine skips the link-sum override so node.value stays as initialized */

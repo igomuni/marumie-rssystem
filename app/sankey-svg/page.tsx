@@ -27,6 +27,7 @@ export default function RealDataSankeyPage() {
   const [showLabels, setShowLabels] = useState(true);
   const [includeZeroSpending, setIncludeZeroSpending] = useState(false);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
+  const [scaleBudgetToVisible, setScaleBudgetToVisible] = useState(true);
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -189,8 +190,8 @@ export default function RealDataSankeyPage() {
     if (!graphData) return null;
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient]);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible]);
 
   const minNodeGap = showLabels ? 12 / zoom : undefined;
 
@@ -229,7 +230,7 @@ export default function RealDataSankeyPage() {
 
   // Per-ministry project stats — for total/ministry node side panel
   type ProjectStat = { pid: number; name: string; budgetId: string; spendingId: string; budgetValue: number; spendingValue: number };
-  type MinistryStat = { total: number; budgetTotal: number; budgetOnly: number; spendingOnly: number; neither: number; projects: ProjectStat[] };
+  type MinistryStat = { total: number; budgetTotal: number; spendingTotal: number; budgetOnly: number; spendingOnly: number; neither: number; projects: ProjectStat[] };
   const ministryProjectStats = useMemo(() => {
     if (!graphData) return new Map<string, MinistryStat>();
     const spendingByPid = new Map(
@@ -244,10 +245,11 @@ export default function RealDataSankeyPage() {
       const b = n.value;
       const s = sn?.value ?? 0;
       const m = n.ministry;
-      if (!stats.has(m)) stats.set(m, { total: 0, budgetTotal: 0, budgetOnly: 0, spendingOnly: 0, neither: 0, projects: [] });
+      if (!stats.has(m)) stats.set(m, { total: 0, budgetTotal: 0, spendingTotal: 0, budgetOnly: 0, spendingOnly: 0, neither: 0, projects: [] });
       const st = stats.get(m)!;
       st.total++;
       st.budgetTotal += b;
+      st.spendingTotal += s;
       if (b === 0 && s === 0) st.neither++;
       else if (b === 0) st.spendingOnly++;
       else if (s === 0) st.budgetOnly++;
@@ -634,7 +636,7 @@ export default function RealDataSankeyPage() {
                 {/* Column labels with totals */}
                 {(() => {
                   const maxCol = layout.maxCol || 1;
-                  const amt = (n: LayoutNode) => n.rawValue ?? n.value;
+                  const amt = (n: LayoutNode) => n.value;
                   const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
                   const colNodes = colNodeTypes.map(t =>
                     t === 'total'
@@ -767,7 +769,7 @@ export default function RealDataSankeyPage() {
                             style={{ userSelect: 'none', pointerEvents: 'none' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                           >
-                            {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.rawValue ?? node.value)})
+                            {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#aaa"> 元: {formatYen(node.rawValue)}</tspan>)}
                           </text>
                         )}
                       </g>
@@ -815,13 +817,16 @@ export default function RealDataSankeyPage() {
           {hoveredNode && (
             <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.78)', color: '#fff', padding: '5px 9px', borderRadius: 4, fontSize: 12, lineHeight: 1.4, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 20 }}>
               <div style={{ fontWeight: 500 }}>{hoveredNode.name}</div>
-              <div style={{ color: '#7df', fontSize: 11 }}>{formatYen(hoveredNode.rawValue ?? hoveredNode.value)}</div>
-              <div style={{ color: '#aaa', fontSize: 10 }}>{(hoveredNode.rawValue ?? hoveredNode.value).toLocaleString()}円</div>
+              <div style={{ color: '#7df', fontSize: 11 }}>{formatYen(hoveredNode.value)}</div>
+              <div style={{ color: '#aaa', fontSize: 10 }}>{hoveredNode.value.toLocaleString()}円</div>
+              {hoveredNode.isScaled && hoveredNode.rawValue != null && (
+                <div style={{ color: '#888', fontSize: 10 }}>元: {formatYen(hoveredNode.rawValue)}</div>
+              )}
             </div>
           )}
           {/* DOM tooltip — column label hover */}
           {hoveredColIndex !== null && layout && (() => {
-            const amt = (n: LayoutNode) => n.rawValue ?? n.value;
+            const amt = (n: LayoutNode) => n.value;
             const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
             const nodes = hoveredColIndex === 0
               ? layout.nodes.filter(n => n.type === 'total')
@@ -908,21 +913,61 @@ export default function RealDataSankeyPage() {
                     <div style={{ fontWeight: 700, fontSize: 13, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
                       {selectedNode.name}
                     </div>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#222', marginTop: 3 }}>
-                      {(selectedNode.type === 'total' || selectedNode.type === 'ministry') ? (() => {
-                        const bt = selectedNode.type === 'total'
-                          ? Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.budgetTotal, 0)
-                          : ministryProjectStats.get(selectedNode.name)?.budgetTotal ?? 0;
-                        return formatYen(bt);
-                      })() : formatYen(selectedNode.rawValue ?? selectedNode.value)}
-                    </div>
-                    <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>
-                      {((selectedNode.type === 'total' || selectedNode.type === 'ministry') ? (() => {
-                        return selectedNode.type === 'total'
-                          ? Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.budgetTotal, 0)
-                          : ministryProjectStats.get(selectedNode.name)?.budgetTotal ?? 0;
-                      })() : (selectedNode.rawValue ?? selectedNode.value)).toLocaleString()}円
-                    </div>
+                    {(() => {
+                      // Main value (予算額 for budget types, 支出額 for spending type)
+                      let mainValue = 0;
+                      let mainLabel = '';
+                      let subValue: number | null = null;
+                      let subLabel = '';
+                      if (selectedNode.type === 'total' || selectedNode.type === 'ministry') {
+                        const stats = selectedNode.type === 'total'
+                          ? Array.from(ministryProjectStats.values())
+                          : (ministryProjectStats.has(selectedNode.name) ? [ministryProjectStats.get(selectedNode.name)!] : []);
+                        mainValue = selectedNode.value;
+                        mainLabel = '予算額';
+                        subValue = stats.reduce((s, v) => s + v.spendingTotal, 0);
+                        subLabel = '支出額';
+                      } else if (selectedNode.type === 'project-budget') {
+                        mainValue = selectedNode.value;
+                        mainLabel = '予算額';
+                        if (selectedNode.projectId != null) {
+                          const sn = filtered?.nodes.find(n => n.type === 'project-spending' && n.projectId === selectedNode.projectId);
+                          if (sn) { subValue = sn.value; subLabel = '支出額'; }
+                        }
+                      } else if (selectedNode.type === 'project-spending') {
+                        mainValue = selectedNode.value;
+                        mainLabel = '支出額';
+                        if (selectedNode.projectId != null) {
+                          const bn = filtered?.nodes.find(n => n.type === 'project-budget' && n.projectId === selectedNode.projectId);
+                          if (bn) { subValue = bn.value; subLabel = '予算額'; }
+                        }
+                      } else {
+                        mainValue = selectedNode.value;
+                      }
+                      const rawMain = selectedNode.isScaled && selectedNode.rawValue != null ? selectedNode.rawValue : null;
+                      const rawMainLabel = mainLabel ? `元の${mainLabel}` : '元の値';
+                      return (<>
+                        <div style={{ fontSize: 15, fontWeight: 600, color: '#222', marginTop: 3 }}>
+                          {mainLabel && <span style={{ fontSize: 10, color: '#aaa', fontWeight: 400, marginRight: 4 }}>{mainLabel}</span>}
+                          {formatYen(mainValue)}
+                        </div>
+                        <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>{mainValue.toLocaleString()}円</div>
+                        {rawMain !== null && (
+                          <div style={{ fontSize: 11, color: '#bbb', marginTop: 1 }}>
+                            <span style={{ fontSize: 10, color: '#ccc', marginRight: 4 }}>{rawMainLabel}</span>
+                            {formatYen(rawMain)}
+                            <span style={{ fontSize: 10, color: '#ccc', marginLeft: 4 }}>{rawMain.toLocaleString()}円</span>
+                          </div>
+                        )}
+                        {subValue !== null && (
+                          <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>
+                            <span style={{ fontSize: 10, color: '#aaa', marginRight: 4 }}>{subLabel}</span>
+                            {formatYen(subValue)}
+                            <span style={{ fontSize: 10, color: '#bbb', marginLeft: 4 }}>{subValue.toLocaleString()}円</span>
+                          </div>
+                        )}
+                      </>);
+                    })()}
                   </div>
                   <button
                     onClick={() => selectNode(null)}
@@ -1318,6 +1363,10 @@ export default function RealDataSankeyPage() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showAggRecipient} onChange={e => setShowAggRecipient(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>支出先の集約ノードを表示</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={scaleBudgetToVisible} onChange={e => setScaleBudgetToVisible(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>事業の予算額を支出額に合わせて調整</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => setShowLabels(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
