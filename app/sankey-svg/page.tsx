@@ -117,7 +117,8 @@ export default function RealDataSankeyPage() {
     if (parsed.showAggRecipient !== undefined) setShowAggRecipient(parsed.showAggRecipient);
     if (parsed.scaleBudgetToVisible !== undefined) setScaleBudgetToVisible(parsed.scaleBudgetToVisible);
     if (parsed.focusRelated !== undefined) setFocusRelated(parsed.focusRelated);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps — intentional mount-only init; state setters and refs are stable
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
+  }, []);
 
   // Restore state on browser back/forward
   useEffect(() => {
