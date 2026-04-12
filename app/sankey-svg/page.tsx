@@ -80,6 +80,7 @@ export default function RealDataSankeyPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   // Tracks whether the next URL update should push (navigation) or replace (slider/toggle)
   const pendingHistoryAction = useRef<'push' | 'replace' | null>(null);
+  const pendingFocusId = useRef<string | null>(null);
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -116,7 +117,7 @@ export default function RealDataSankeyPage() {
     if (parsed.showAggRecipient !== undefined) setShowAggRecipient(parsed.showAggRecipient);
     if (parsed.scaleBudgetToVisible !== undefined) setScaleBudgetToVisible(parsed.scaleBudgetToVisible);
     if (parsed.focusRelated !== undefined) setFocusRelated(parsed.focusRelated);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps — intentional mount-only init; state setters and refs are stable
 
   // Restore state on browser back/forward
   useEffect(() => {
@@ -177,7 +178,6 @@ export default function RealDataSankeyPage() {
   const panOrigin = useRef({ x: 0, y: 0 });
   const didPanRef = useRef(false);
   const offsetRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pendingFocusId = useRef<string | null>(null);
   const stopOffsetRepeat = useCallback(() => {
     if (offsetRepeatRef.current !== null) { clearTimeout(offsetRepeatRef.current); clearInterval(offsetRepeatRef.current); offsetRepeatRef.current = null; }
   }, []);
@@ -470,8 +470,7 @@ export default function RealDataSankeyPage() {
   const selectNode = useCallback((id: string | null) => {
     pendingHistoryAction.current = id !== null ? 'push' : 'replace';
     setSelectedNodeId(id);
-    if (id !== null) setIsPanelCollapsed(false);
-    else { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); }
+    if (id === null) { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); }
   }, [setPinnedRecipientId, setPinnedMinistryName]);
 
   // Auto-clear stale selection when node no longer exists in graphData at all
