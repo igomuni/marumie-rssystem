@@ -15,10 +15,12 @@ export default function RealDataSankeyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [topMinistry, setTopMinistry] = useState(37);
-  const [topProject, setTopProject] = useState(20);
-  const [topRecipient, setTopRecipient] = useState(20);
+  const [topProject, setTopProject] = useState(40);
+  const [topRecipient, setTopRecipient] = useState(40);
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
+  const [pinnedRecipientId, setPinnedRecipientId] = useState<string | null>(null);
+  const [pinnedMinistryName, setPinnedMinistryName] = useState<string | null>(null);
   const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
@@ -28,6 +30,7 @@ export default function RealDataSankeyPage() {
   const [includeZeroSpending, setIncludeZeroSpending] = useState(false);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [scaleBudgetToVisible, setScaleBudgetToVisible] = useState(true);
+  const [focusRelated, setFocusRelated] = useState(true);
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -190,10 +193,10 @@ export default function RealDataSankeyPage() {
     if (!graphData) return null;
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible]);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName]);
 
-  const minNodeGap = showLabels ? 12 / zoom : undefined;
+  const minNodeGap = showLabels ? 14 / zoom : undefined;
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -214,19 +217,37 @@ export default function RealDataSankeyPage() {
     return { ...rawNode, x0: 0, x1: 0, y0: 0, y1: 0, sourceLinks: [], targetLinks: [] } as LayoutNode;
   }, [selectedNodeId, layout, graphData]);
 
-  // True only when the node exists in the current layout (for highlight/dim)
+  // The selected node in the current layout (null if not in layout)
   const selectedNodeInLayout = useMemo(
-    () => selectedNodeId !== null && (layout?.nodes.some(n => n.id === selectedNodeId) ?? false),
+    () => (selectedNodeId !== null ? (layout?.nodes.find(n => n.id === selectedNodeId) ?? null) : null),
     [selectedNodeId, layout],
   );
 
   const connectedNodeIds = useMemo(() => {
-    if (!selectedNode || !selectedNodeInLayout) return null;
-    const ids = new Set<string>([selectedNode.id]);
-    for (const l of selectedNode.sourceLinks) ids.add(l.target.id);
-    for (const l of selectedNode.targetLinks) ids.add(l.source.id);
+    if (!selectedNodeInLayout) return null;
+    const ids = new Set<string>();
+    // BFS upstream (follow targetLinks → source recursively) — separate visited set
+    const uVisited = new Set<string>();
+    const uQueue = [selectedNodeInLayout];
+    while (uQueue.length) {
+      const n = uQueue.shift()!;
+      if (uVisited.has(n.id)) continue;
+      uVisited.add(n.id);
+      ids.add(n.id);
+      for (const l of n.targetLinks) if (!uVisited.has(l.source.id)) uQueue.push(l.source);
+    }
+    // BFS downstream (follow sourceLinks → target recursively) — separate visited set
+    const dVisited = new Set<string>();
+    const dQueue = [selectedNodeInLayout];
+    while (dQueue.length) {
+      const n = dQueue.shift()!;
+      if (dVisited.has(n.id)) continue;
+      dVisited.add(n.id);
+      ids.add(n.id);
+      for (const l of n.sourceLinks) if (!dVisited.has(l.target.id)) dQueue.push(l.target);
+    }
     return ids;
-  }, [selectedNode, selectedNodeInLayout]);
+  }, [selectedNodeInLayout]);
 
   // Per-ministry project stats — for total/ministry node side panel
   type ProjectStat = { pid: number; name: string; budgetId: string; spendingId: string; budgetValue: number; spendingValue: number };
@@ -267,6 +288,16 @@ export default function RealDataSankeyPage() {
     }
     const sorted = Array.from(amounts.entries()).sort((a, b) => b[1] - a[1]);
     return new Map(sorted.map(([id], i) => [id, i]));
+  }, [graphData]);
+
+  // Recipient count per project-spending node (from raw graphData)
+  const projectRecipientCount = useMemo(() => {
+    if (!graphData) return new Map<string, number>();
+    const countMap = new Map<string, number>();
+    for (const e of graphData.edges) {
+      if (e.target.startsWith('r-')) countMap.set(e.source, (countMap.get(e.source) || 0) + 1);
+    }
+    return countMap;
   }, [graphData]);
 
   // Full connection list from raw graphData (bypasses TopN aggregation)
@@ -332,8 +363,8 @@ export default function RealDataSankeyPage() {
   const selectNode = useCallback((id: string | null) => {
     setSelectedNodeId(id);
     if (id !== null) setIsPanelCollapsed(false);
-    else setPinnedProjectId(null);
-  }, []);
+    else { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); }
+  }, [setPinnedRecipientId, setPinnedMinistryName]);
 
   // Auto-clear stale selection when node no longer exists in graphData at all
   useEffect(() => {
@@ -390,6 +421,22 @@ export default function RealDataSankeyPage() {
     // If already in layout, select and focus directly (no effect needed)
     const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
     if (inLayoutNode) {
+      if (focusRelated && nodeId.startsWith('r-') && !inLayoutNode.aggregated) {
+        setPinnedRecipientId(nodeId);
+        setPinnedProjectId(null);
+        setPinnedMinistryName(null);
+        selectNode(nodeId);
+        focusOnNeighborhood(inLayoutNode);
+        return;
+      }
+      if (focusRelated && inLayoutNode.type === 'ministry' && !inLayoutNode.aggregated) {
+        setPinnedMinistryName(inLayoutNode.name);
+        setPinnedProjectId(null);
+        setPinnedRecipientId(null);
+        selectNode(nodeId);
+        focusOnNeighborhood(inLayoutNode);
+        return;
+      }
       // Preserve pin if the clicked node belongs to the same pinned project
       const derivedPinnedId = nodeId.startsWith('project-budget-')
         ? nodeId.replace('project-budget-', 'project-spending-')
@@ -397,9 +444,12 @@ export default function RealDataSankeyPage() {
           ? nodeId
           : null;
       const nextPinnedProjectId =
-        derivedPinnedId !== null && derivedPinnedId === pinnedProjectId
-          ? pinnedProjectId
-          : null;
+        focusRelated && derivedPinnedId !== null
+          ? derivedPinnedId
+          : derivedPinnedId !== null && derivedPinnedId === pinnedProjectId
+            ? pinnedProjectId
+            : null;
+      if (focusRelated && derivedPinnedId !== null) { setPinnedRecipientId(null); setPinnedMinistryName(null); }
       const needsDeferredFocus = nextPinnedProjectId !== pinnedProjectId || isPanelCollapsed;
       setPinnedProjectId(nextPinnedProjectId);
       if (needsDeferredFocus) pendingFocusId.current = nodeId;
@@ -443,13 +493,37 @@ export default function RealDataSankeyPage() {
     // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
     pendingFocusId.current = nodeId;
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed]);
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
     if (didPanRef.current) return;
-    selectNode(selectedNodeId === node.id ? null : node.id);
-  }, [selectedNodeId, selectNode]);
+    const newId = selectedNodeId === node.id ? null : node.id;
+    if (focusRelated && newId !== null && !node.aggregated) {
+      if (node.type === 'recipient') {
+        setPinnedRecipientId(node.id);
+        setPinnedProjectId(null);
+        setPinnedMinistryName(null);
+      } else if (node.type === 'ministry') {
+        setPinnedMinistryName(node.name);
+        setPinnedProjectId(null);
+        setPinnedRecipientId(null);
+      } else {
+        const spendingId = node.type === 'project-budget'
+          ? node.id.replace('project-budget-', 'project-spending-')
+          : node.type === 'project-spending'
+            ? node.id
+            : null;
+        setPinnedProjectId(spendingId);
+        setPinnedRecipientId(null);
+        setPinnedMinistryName(null);
+      }
+    } else if (!focusRelated || newId === null) {
+      setPinnedRecipientId(null);
+      setPinnedMinistryName(null);
+    }
+    selectNode(newId);
+  }, [selectedNodeId, selectNode, focusRelated]);
 
   // ── Search ──
 
@@ -618,6 +692,10 @@ export default function RealDataSankeyPage() {
 
       {layout && (
         <>
+            <style>{`
+              @keyframes snk-fade-in { from { opacity: 0 } to { opacity: 1 } }
+              .snk-node { animation: snk-fade-in 0.25s ease forwards; }
+            `}</style>
             <svg
               ref={svgRef}
               width={svgWidth}
@@ -655,8 +733,8 @@ export default function RealDataSankeyPage() {
                     return (
                       <text
                         key={i}
-                        x={x + NODE_W / 2} y={-10}
-                        textAnchor="middle" fontSize={11} fill="#999"
+                        x={x + NODE_W / 2} y={-13}
+                        textAnchor="middle" fontSize={15} fill="#999"
                         style={{ cursor: 'default', userSelect: 'none' }}
                         onMouseEnter={(e) => {
                           const rect = containerRef.current?.getBoundingClientRect();
@@ -676,15 +754,14 @@ export default function RealDataSankeyPage() {
                 })()}
 
                 {/* Links */}
-                {layout.links.map((link, i) => (
+                {layout.links.map((link) => (
                   <path
-                    key={i}
-                    d={ribbonPath(link)}
+                    key={`${link.source.id}→${link.target.id}`}
                     fill={getLinkColor(link)}
                     fillOpacity={
-                      selectedNode
-                        ? (link.source.id === selectedNode.id || link.target.id === selectedNode.id)
-                          ? (hoveredLink === link ? 0.6 : 0.5)
+                      connectedNodeIds
+                        ? (connectedNodeIds.has(link.source.id) && connectedNodeIds.has(link.target.id))
+                          ? (hoveredLink === link ? 0.45 : 0.35)
                           : 0.05
                         : hoveredLink === link ? 0.6
                           : hoveredNode && (link.source === hoveredNode || link.target === hoveredNode) ? 0.5
@@ -704,7 +781,7 @@ export default function RealDataSankeyPage() {
                     }}
                     onMouseLeave={() => setHoveredLink(null)}
                     onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'grab', transition: 'fill-opacity 0.2s ease' }}
+                    style={{ cursor: 'grab', transition: 'fill-opacity 0.2s ease, d 0.3s ease', d: `path("${ribbonPath(link)}")` } as React.CSSProperties}
                   />
                 ))}
 
@@ -733,20 +810,21 @@ export default function RealDataSankeyPage() {
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
                     return (
-                      <g key={node.id}>
+                      <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0}px)`, transition: 'transform 0.3s ease' }}>
                         <rect
                           x={node.x0}
-                          y={node.y0}
+                          y={0}
                           width={NODE_W}
-                          height={Math.max(1, h)}
                           fill={getNodeColor(node)}
-                          opacity={
-                            connectedNodeIds
-                              ? (connectedNodeIds.has(node.id) ? 1 : 0.3)
-                              : (hoveredNode && hoveredNode !== node ? 0.4 : 1)
-                          }
                           rx={1}
-                          style={{ cursor: 'pointer', transition: 'opacity 0.2s ease' }}
+                          style={{
+                            height: Math.max(1, h),
+                            opacity: connectedNodeIds
+                              ? (connectedNodeIds.has(node.id) ? 1 : 0.3)
+                              : (hoveredNode && hoveredNode !== node ? 0.4 : 1),
+                            cursor: 'pointer',
+                            transition: 'opacity 0.2s ease, height 0.3s ease',
+                          }}
                           onMouseEnter={(e) => {
                             const rect = containerRef.current?.getBoundingClientRect();
                             if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
@@ -762,14 +840,14 @@ export default function RealDataSankeyPage() {
                         {labelVisible && (
                           <text
                             x={node.x1 + 3}
-                            y={node.y0 + h / 2}
-                            fontSize={9 / zoom}
+                            y={h / 2}
+                            fontSize={11 / zoom}
                             dominantBaseline="middle"
                             fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : '#333'}
                             style={{ userSelect: 'none', pointerEvents: 'none' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                           >
-                            {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#aaa"> 元: {formatYen(node.rawValue)}</tspan>)}
+                            {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                           </text>
                         )}
                       </g>
@@ -810,7 +888,7 @@ export default function RealDataSankeyPage() {
             <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.85)', color: '#fff', padding: '6px 10px', borderRadius: 4, fontSize: 12, lineHeight: 1.4, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 20 }}>
               <div>{hoveredLink.source.name} → {hoveredLink.target.name}</div>
               <div style={{ color: '#adf' }}>{formatYen(hoveredLink.value)}</div>
-              <div style={{ color: '#aaa', fontSize: 11 }}>{hoveredLink.value.toLocaleString()}円</div>
+              <div style={{ color: '#aaa', fontSize: 11 }}>{Math.round(hoveredLink.value).toLocaleString()}円</div>
             </div>
           )}
           {/* DOM tooltip — node hover (mini: name + amount only) */}
@@ -818,9 +896,9 @@ export default function RealDataSankeyPage() {
             <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.78)', color: '#fff', padding: '5px 9px', borderRadius: 4, fontSize: 12, lineHeight: 1.4, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 20 }}>
               <div style={{ fontWeight: 500 }}>{hoveredNode.name}</div>
               <div style={{ color: '#7df', fontSize: 11 }}>{formatYen(hoveredNode.value)}</div>
-              <div style={{ color: '#aaa', fontSize: 10 }}>{hoveredNode.value.toLocaleString()}円</div>
+              <div style={{ color: '#aaa', fontSize: 10 }}>{Math.round(hoveredNode.value).toLocaleString()}円</div>
               {hoveredNode.isScaled && hoveredNode.rawValue != null && (
-                <div style={{ color: '#888', fontSize: 10 }}>元: {formatYen(hoveredNode.rawValue)}</div>
+                <div style={{ color: '#888', fontSize: 10 }}>/ {formatYen(hoveredNode.rawValue)}</div>
               )}
             </div>
           )}
@@ -847,7 +925,7 @@ export default function RealDataSankeyPage() {
                 <div style={{ fontWeight: 'bold', marginBottom: 2 }}>{COL_LABELS[hoveredColIndex]}</div>
                 {count != null && <div style={{ color: '#aaa', fontSize: 11 }}>{count.toLocaleString()}件</div>}
                 <div style={{ color: '#7df' }}>{formatYen(total)}</div>
-                <div style={{ color: '#aaa', fontSize: 11 }}>{total.toLocaleString()}円</div>
+                <div style={{ color: '#aaa', fontSize: 11 }}>{Math.round(total).toLocaleString()}円</div>
                 <div style={{ color: '#888', fontSize: 10, marginTop: 4 }}>{colDescs[hoveredColIndex]}</div>
               </div>
             );
@@ -951,19 +1029,19 @@ export default function RealDataSankeyPage() {
                           {mainLabel && <span style={{ fontSize: 10, color: '#aaa', fontWeight: 400, marginRight: 4 }}>{mainLabel}</span>}
                           {formatYen(mainValue)}
                         </div>
-                        <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>{mainValue.toLocaleString()}円</div>
+                        <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>{Math.round(mainValue).toLocaleString()}円</div>
                         {rawMain !== null && (
                           <div style={{ fontSize: 11, color: '#bbb', marginTop: 1 }}>
                             <span style={{ fontSize: 10, color: '#ccc', marginRight: 4 }}>{rawMainLabel}</span>
                             {formatYen(rawMain)}
-                            <span style={{ fontSize: 10, color: '#ccc', marginLeft: 4 }}>{rawMain.toLocaleString()}円</span>
+                            <span style={{ fontSize: 10, color: '#ccc', marginLeft: 4 }}>{Math.round(rawMain).toLocaleString()}円</span>
                           </div>
                         )}
                         {subValue !== null && (
                           <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>
                             <span style={{ fontSize: 10, color: '#aaa', marginRight: 4 }}>{subLabel}</span>
                             {formatYen(subValue)}
-                            <span style={{ fontSize: 10, color: '#bbb', marginLeft: 4 }}>{subValue.toLocaleString()}円</span>
+                            <span style={{ fontSize: 10, color: '#bbb', marginLeft: 4 }}>{Math.round(subValue).toLocaleString()}円</span>
                           </div>
                         )}
                       </>);
@@ -1040,14 +1118,21 @@ export default function RealDataSankeyPage() {
                           <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{items.length}件 {formatYen(total)}</span>
                         </button>
                         {!isCollapsed && (<>
-                          {items.slice(0, displayCount).map((item, i) => (
-                            <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
-                              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 6px', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
-                            >
-                              <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                              <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
-                            </button>
-                          ))}
+                          {items.slice(0, displayCount).map((item, i) => {
+                            const spId = item.id.startsWith('project-budget-') ? item.id.replace('project-budget-', 'project-spending-') : item.id;
+                            const rCount = projectRecipientCount.get(spId);
+                            return (
+                              <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
+                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 6px', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                              >
+                                <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                                <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                                  {rCount != null && <span style={{ fontSize: 10, color: '#bbb', marginRight: 4 }}>{rCount.toLocaleString()}先</span>}
+                                  {formatYen(item.value)}
+                                </span>
+                              </button>
+                            );
+                          })}
                           <div style={{ display: 'flex', gap: 0, padding: '2px 4px', alignItems: 'center', justifyContent: 'flex-end' }}>
                             {remaining > 0 && <>
                               <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, displayCount + 10))} style={btnStyle}>さらに{Math.min(10, remaining)}件（残{remaining}）</button>
@@ -1127,16 +1212,23 @@ export default function RealDataSankeyPage() {
                                   )
                                 : selectedNodeAllConnections.inEdges;
                               return (<>
-                                {expandedInEdges.slice(0, inDisplayCount).map((item, i) => (
-                                  <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
-                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', gap: 6, textAlign: 'left' }}
-                                  >
-                                    <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                      {item.name}
-                                    </span>
-                                    <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
-                                  </button>
-                                ))}
+                                {expandedInEdges.slice(0, inDisplayCount).map((item, i) => {
+                                  const spId = item.id.startsWith('project-budget-') ? item.id.replace('project-budget-', 'project-spending-') : item.id;
+                                  const rCount = projectRecipientCount.get(spId);
+                                  return (
+                                    <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
+                                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', gap: 6, textAlign: 'left' }}
+                                    >
+                                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {item.name}
+                                      </span>
+                                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                                        {rCount != null && <span style={{ fontSize: 10, color: '#bbb', marginRight: 4 }}>{rCount.toLocaleString()}先</span>}
+                                        {formatYen(item.value)}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
                                 {(() => { const rem = expandedInEdges.length - inDisplayCount; return (
                                   <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center', justifyContent: 'flex-end' }}>
                                     {rem > 0 && <>
@@ -1168,14 +1260,21 @@ export default function RealDataSankeyPage() {
                         return (<>
                           {useGrouped && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>{renderGroupToggle(aggMembers)}</div>}
                           {useGrouped ? renderGrouped(aggMembers) : (<>
-                            {expandedOutEdges.slice(0, outDisplayCount).map((item, i) => (
-                              <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' }}
-                              >
-                                <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                                <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
-                              </button>
-                            ))}
+                            {expandedOutEdges.slice(0, outDisplayCount).map((item, i) => {
+                              const spId = item.id.startsWith('project-budget-') ? item.id.replace('project-budget-', 'project-spending-') : item.id;
+                              const rCount = projectRecipientCount.get(spId);
+                              return (
+                                <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
+                                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' }}
+                                >
+                                  <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                                  <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                                    {rCount != null && <span style={{ fontSize: 10, color: '#bbb', marginRight: 4 }}>{rCount.toLocaleString()}先</span>}
+                                    {formatYen(item.value)}
+                                  </span>
+                                </button>
+                              );
+                            })}
                             {(() => { const rem = expandedOutEdges.length - outDisplayCount; return (
                               <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center', justifyContent: 'flex-end' }}>
                                 {rem > 0 && <>
@@ -1343,7 +1442,7 @@ export default function RealDataSankeyPage() {
         {showSettings && (
           <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-            <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
               <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 48, color: '#555' }}>省庁:</span>
@@ -1361,6 +1460,14 @@ export default function RealDataSankeyPage() {
                 <input type="range" min={1} max={100} value={topRecipient} onChange={e => setTopRecipient(Number(e.target.value))} style={{ flex: 1 }} />
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={showLabels} onChange={e => setShowLabels(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={includeZeroSpending} onChange={e => setIncludeZeroSpending(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>支出が0円の事業を対象にする</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showAggRecipient} onChange={e => setShowAggRecipient(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>支出先の集約ノードを表示</span>
               </label>
@@ -1369,12 +1476,8 @@ export default function RealDataSankeyPage() {
                 <span style={{ color: '#555' }}>事業の予算額を支出額に合わせて調整</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={showLabels} onChange={e => setShowLabels(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={includeZeroSpending} onChange={e => setIncludeZeroSpending(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>支出が0円の事業を対象にする</span>
+                <input type="checkbox" checked={focusRelated} onChange={e => setFocusRelated(e.target.checked)} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>選択ノードの関連ノードのみ表示</span>
               </label>
             </div>
           </>
