@@ -77,7 +77,9 @@ export default function RealDataSankeyPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchCursorIndex, setSearchCursorIndex] = useState(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchDropdownRef = useRef<HTMLDivElement>(null);
   // Tracks whether the next URL update should push (navigation) or replace (slider/toggle)
   const pendingHistoryAction = useRef<'push' | 'replace' | null>(null);
   const pendingFocusId = useRef<string | null>(null);
@@ -1076,8 +1078,8 @@ export default function RealDataSankeyPage() {
           <div
             data-pan-disabled="true"
             style={{
-              position: 'absolute', right: -18, top: '50%', transform: 'translateY(-50%)',
-              width: 18,
+              position: 'absolute', right: -25, top: '50%', transform: 'translateY(-50%)',
+              width: 25,
               background: '#fff', border: '1px solid #e0e0e0', borderLeft: 'none',
               borderRadius: '0 6px 6px 0',
               boxShadow: '2px 0 4px rgba(0,0,0,0.08)',
@@ -1090,16 +1092,16 @@ export default function RealDataSankeyPage() {
               onClick={() => setIsPanelCollapsed(c => !c)}
               title={isPanelCollapsed ? 'パネルを展開' : 'パネルを折りたたむ'}
               style={{
-                width: 18, height: 48,
+                width: 25, height: 56,
                 background: 'transparent', border: 'none',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 padding: 0, borderRadius: '0 6px 6px 0',
               }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#aaa">
+              <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 {isPanelCollapsed
-                  ? <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                  : <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>}
+                  ? <polyline points="9 6 15 12 9 18"/>
+                  : <polyline points="15 6 9 12 15 18"/>}
               </svg>
             </button>
           </div>
@@ -1422,7 +1424,7 @@ export default function RealDataSankeyPage() {
       {/* Search box — top left */}
       <div
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: 12, zIndex: 15, width: 260 }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 292 : 12, zIndex: 100, width: 260, transition: 'left 0.2s ease' }}
       >
         <div style={{ position: 'relative' }}>
           {/* Search icon */}
@@ -1434,9 +1436,33 @@ export default function RealDataSankeyPage() {
             ref={searchInputRef}
             type="text"
             value={searchQuery}
-            onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); }}
+            onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); setSearchCursorIndex(-1); }}
             onFocus={() => { if (debouncedQuery.trim().length >= 2) setShowSearchResults(true); }}
-            onKeyDown={e => { if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); } }}
+            onKeyDown={e => {
+              if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
+              if (!showSearchResults || searchResults.length === 0) return;
+              if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSearchCursorIndex(i => {
+                  const next = Math.min(i + 1, searchResults.length - 1);
+                  setTimeout(() => searchDropdownRef.current?.children[next]?.scrollIntoView({ block: 'nearest' }), 0);
+                  return next;
+                });
+              } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSearchCursorIndex(i => {
+                  const next = Math.max(i - 1, 0);
+                  setTimeout(() => searchDropdownRef.current?.children[next]?.scrollIntoView({ block: 'nearest' }), 0);
+                  return next;
+                });
+              } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (searchCursorIndex >= 0 && searchCursorIndex < searchResults.length) {
+                  handleSearchSelect(searchResults[searchCursorIndex].id);
+                  setSearchCursorIndex(-1);
+                }
+              }
+            }}
             placeholder="ノード検索（2文字以上）"
             style={{
               width: '100%', boxSizing: 'border-box',
@@ -1456,18 +1482,18 @@ export default function RealDataSankeyPage() {
         </div>
         {/* Dropdown */}
         {showSearchResults && searchResults.length > 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 280, overflowY: 'auto', zIndex: 20 }}>
-            {searchResults.map(node => (
+          <div ref={searchDropdownRef} style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 280, overflowY: 'auto', zIndex: 20 }}>
+            {searchResults.map((node, i) => (
               <button
                 key={node.id}
                 type="button"
-                onClick={() => handleSearchSelect(node.id)}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#f5f5f5')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                onClick={() => { handleSearchSelect(node.id); setSearchCursorIndex(-1); }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: i === searchCursorIndex ? '#e8f0fe' : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                onMouseEnter={e => { if (i !== searchCursorIndex) e.currentTarget.style.background = '#f5f5f5'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = i === searchCursorIndex ? '#e8f0fe' : 'transparent'; }}
               >
                 <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: getNodeColor(node) }} />
-                <span style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
+                <span title={node.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
                 <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
               </button>
             ))}
