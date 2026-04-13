@@ -46,6 +46,17 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   return result;
 }
 
+/**
+ * 事業統合ノードの SVG パスを生成する。
+ * x0 = 予算ノード左端, nodeW = NODE_W, bH = 予算高さ, sH = 支出高さ (共通 y0=0 基準)
+ * 上辺: 直線, 下辺: 予算下端 ↔ 支出下端を結ぶベジェ曲線
+ */
+function mergedProjectPath(x0: number, nodeW: number, bH: number, sH: number): string {
+  const x2 = x0 + nodeW * 2;
+  const mx = (x0 + x2) / 2;
+  return `M${x0},0 L${x2},0 L${x2},${sH} C${mx},${sH} ${mx},${bH} ${x0},${bH} Z`;
+}
+
 /** ノードID → フォーカスピン状態を導出する純粋ヘルパー */
 function computeFocusPins(
   nodeId: string,
@@ -820,11 +831,19 @@ export default function RealDataSankeyPage() {
               />
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
+                {/* Gradient for merged project nodes */}
+                <defs>
+                  <linearGradient id="proj-node-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#4db870" />
+                    <stop offset="100%" stopColor="#e07040" />
+                  </linearGradient>
+                </defs>
+
                 {/* Column labels with totals */}
                 {(() => {
                   const maxCol = layout.maxCol || 1;
                   const amt = (n: LayoutNode) => n.value;
-                  const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
+                  const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
                   const colNodes = colNodeTypes.map(t =>
                     t === 'total'
                       ? layout.nodes.filter(n => n.type === 'total')
@@ -862,8 +881,8 @@ export default function RealDataSankeyPage() {
                   });
                 })()}
 
-                {/* Links */}
-                {layout.links.map((link) => (
+                {/* Links (skip internal project-budget → project-spending links) */}
+                {layout.links.filter(link => !(link.source.type === 'project-budget' && link.target.type === 'project-spending')).map((link) => (
                   <path
                     key={`${link.source.id}→${link.target.id}`}
                     fill={getLinkColor(link)}
@@ -911,10 +930,83 @@ export default function RealDataSankeyPage() {
                 {/* Nodes */}
                 {(() => {
                   const lastCol = layout.maxCol;
-                  return layout.nodes.map((node) => {
+                  // Build spending node lookup for merged project rendering
+                  const spendingByBudgetId = new Map<string, LayoutNode>();
+                  for (const n of layout.nodes) {
+                    if (n.type === 'project-spending' && n.projectId != null) {
+                      spendingByBudgetId.set(`project-budget-${n.projectId}`, n);
+                    } else if (n.id === '__agg-project-spending') {
+                      spendingByBudgetId.set('__agg-project-budget', n);
+                    }
+                  }
+                  // project-spending nodes are rendered as part of their budget node
+                  return layout.nodes.filter(node => node.type !== 'project-spending').map((node) => {
+                    if (node.type === 'project-budget' || node.id === '__agg-project-budget') {
+                      // Merged project node: budget (left) + spending (right) as one shape
+                      const spendingNode = spendingByBudgetId.get(node.id);
+                      const bH = Math.max(1, node.y1 - node.y0);
+                      const sH = spendingNode ? Math.max(1, spendingNode.y1 - spendingNode.y0) : bH;
+                      const isConnected = connectedNodeIds
+                        ? (connectedNodeIds.has(node.id) || (spendingNode != null && connectedNodeIds.has(spendingNode.id)))
+                        : null;
+                      const isSelectedMerged = node.id === selectedNodeId || spendingNode?.id === selectedNodeId;
+                      const labelVisible = showLabels || Math.max(bH, sH) * zoom > 10 || isSelectedMerged;
+                      const nodeOpacity = connectedNodeIds
+                        ? (isConnected ? 1 : 0.3)
+                        : (hoveredNode && hoveredNode !== node ? 0.4 : 1);
+                      const nodeFill = node.aggregated ? '#999' : 'url(#proj-node-grad)';
+                      if (!spendingNode) {
+                        // No paired spending node — render as plain budget rect
+                        return (
+                          <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0}px)`, transition: 'transform 0.3s ease' }}>
+                            <rect x={node.x0} y={0} width={NODE_W} fill={getNodeColor(node)} rx={1}
+                              style={{ height: bH, opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease, height 0.3s ease' }}
+                              onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                              onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                              onMouseLeave={() => setHoveredNode(null)}
+                              onClick={(e) => handleNodeClick(node, e)}
+                            />
+                            {labelVisible && (
+                              <text x={node.x1 + 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                                fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                                style={{ userSelect: 'none', pointerEvents: 'none' }} clipPath={`url(#clip-col-${getColumn(node)})`}>
+                                {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.rawValue ?? node.value)})
+                              </text>
+                            )}
+                          </g>
+                        );
+                      }
+                      return (
+                        <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0}px)`, transition: 'transform 0.3s ease' }}>
+                          <path
+                            d={mergedProjectPath(node.x0, NODE_W, bH, sH)}
+                            fill={nodeFill}
+                            style={{ opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease' }}
+                            onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                            onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                            onMouseLeave={() => setHoveredNode(null)}
+                            onClick={(e) => handleNodeClick(node, e)}
+                          />
+                          {labelVisible && (<>
+                            {/* Left label: budget amount */}
+                            <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
+                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#888'}
+                              style={{ userSelect: 'none', pointerEvents: 'none' }}>
+                              {formatYen(node.rawValue ?? node.value)}
+                            </text>
+                            {/* Right label: project name + spending amount */}
+                            <text x={spendingNode.x1 + 3} y={sH / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                              style={{ userSelect: 'none', pointerEvents: 'none' }} clipPath={`url(#clip-col-${getColumn(node)})`}>
+                              {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
+                            </text>
+                          </>)}
+                        </g>
+                      );
+                    }
+                    // Regular node (total, ministry, recipient)
                     const h = node.y1 - node.y0;
                     const isSelected = node.id === selectedNodeId;
-                    // When showLabels is off, use legacy rule: show only when there is enough screen space or node is selected.
                     const labelVisible = showLabels || (h + NODE_PAD) * zoom > 10 || isSelected;
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
@@ -1014,7 +1106,7 @@ export default function RealDataSankeyPage() {
           {/* DOM tooltip — column label hover */}
           {hoveredColIndex !== null && layout && (() => {
             const amt = (n: LayoutNode) => n.value;
-            const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
+            const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
             const nodes = hoveredColIndex === 0
               ? layout.nodes.filter(n => n.type === 'total')
               : layout.nodes.filter(n => n.type === colNodeTypes[hoveredColIndex]);
@@ -1025,8 +1117,7 @@ export default function RealDataSankeyPage() {
             const colDescs = [
               '全事業の予算額合計（予算案ベース）',
               '各府省庁所管事業の予算額合計',
-              '各事業の予算額',
-              'ウィンドウ内支出先への支出合計（tail除外）',
+              '各事業の予算額（左：予算 / 右：支出）',
               '全エッジ合計（ウィンドウ外流入含む）',
             ];
             return (

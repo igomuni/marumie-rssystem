@@ -10,7 +10,7 @@ export const COL_MAP: Record<string, number> = {
   'recipient': 4,
 };
 
-export const COL_LABELS = ['総計', '省庁', '事業(予算)', '事業(支出)', '支出先'];
+export const COL_LABELS = ['総計', '省庁', '事業', '支出先'];
 
 export function getColumn(node: { type: string }): number {
   return COL_MAP[node.type] ?? 0;
