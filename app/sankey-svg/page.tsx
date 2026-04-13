@@ -46,6 +46,26 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   return result;
 }
 
+/** ノードID → フォーカスピン状態を導出する純粋ヘルパー */
+function computeFocusPins(
+  nodeId: string,
+  nodes: Array<{ id: string; name: string }> | undefined,
+): { pinnedProjectId: string | null; pinnedRecipientId: string | null; pinnedMinistryName: string | null } {
+  if (nodeId.startsWith('r-')) {
+    return { pinnedProjectId: null, pinnedRecipientId: nodeId, pinnedMinistryName: null };
+  }
+  if (nodeId.startsWith('project-budget-') || nodeId.startsWith('project-spending-')) {
+    const spendingId = nodeId.startsWith('project-budget-')
+      ? nodeId.replace('project-budget-', 'project-spending-')
+      : nodeId;
+    return { pinnedProjectId: spendingId, pinnedRecipientId: null, pinnedMinistryName: null };
+  }
+  if (nodeId.startsWith('ministry-')) {
+    return { pinnedProjectId: null, pinnedRecipientId: null, pinnedMinistryName: nodes?.find(n => n.id === nodeId)?.name ?? null };
+  }
+  return { pinnedProjectId: null, pinnedRecipientId: null, pinnedMinistryName: null };
+}
+
 export default function RealDataSankeyPage() {
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -531,18 +551,9 @@ export default function RealDataSankeyPage() {
     // If already in layout, select and focus directly (no effect needed)
     const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
     if (inLayoutNode) {
-      if (focusRelated && nodeId.startsWith('r-') && !inLayoutNode.aggregated) {
-        setPinnedRecipientId(nodeId);
-        setPinnedProjectId(null);
-        setPinnedMinistryName(null);
-        selectNode(nodeId);
-        focusOnNeighborhood(inLayoutNode);
-        return;
-      }
-      if (focusRelated && inLayoutNode.type === 'ministry' && !inLayoutNode.aggregated) {
-        setPinnedMinistryName(inLayoutNode.name);
-        setPinnedProjectId(null);
-        setPinnedRecipientId(null);
+      if (focusRelated && (nodeId.startsWith('r-') || inLayoutNode.type === 'ministry') && !inLayoutNode.aggregated) {
+        const pins = computeFocusPins(nodeId, graphData?.nodes);
+        setPinnedProjectId(pins.pinnedProjectId); setPinnedRecipientId(pins.pinnedRecipientId); setPinnedMinistryName(pins.pinnedMinistryName);
         selectNode(nodeId);
         focusOnNeighborhood(inLayoutNode);
         return;
@@ -576,19 +587,8 @@ export default function RealDataSankeyPage() {
 
     if (focusRelated) {
       // focusRelated ON: 現在のフォーカスコンテキストをクリアして新しいノードに切り替える
-      if (nodeId.startsWith('r-')) {
-        setPinnedRecipientId(nodeId); setPinnedProjectId(null); setPinnedMinistryName(null);
-      } else if (nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-')) {
-        const spendingId = nodeId.startsWith('project-budget-')
-          ? nodeId.replace('project-budget-', 'project-spending-')
-          : nodeId;
-        setPinnedProjectId(spendingId); setPinnedRecipientId(null); setPinnedMinistryName(null);
-      } else if (nodeId.startsWith('ministry-')) {
-        const ministryNode = graphData?.nodes.find(n => n.id === nodeId);
-        if (ministryNode) { setPinnedMinistryName(ministryNode.name); setPinnedProjectId(null); setPinnedRecipientId(null); }
-      } else {
-        setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null);
-      }
+      const pins = computeFocusPins(nodeId, graphData?.nodes);
+      setPinnedProjectId(pins.pinnedProjectId); setPinnedRecipientId(pins.pinnedRecipientId); setPinnedMinistryName(pins.pinnedMinistryName);
     } else if (nodeId.startsWith('r-') && filtered) {
       // Recipient outside window: jump offset so it's visible
       const rank = allRecipientRanks.get(nodeId);
@@ -625,30 +625,14 @@ export default function RealDataSankeyPage() {
     if (didPanRef.current) return;
     const newId = selectedNodeId === node.id ? null : node.id;
     if (focusRelated && newId !== null && !node.aggregated) {
-      if (node.type === 'recipient') {
-        setPinnedRecipientId(node.id);
-        setPinnedProjectId(null);
-        setPinnedMinistryName(null);
-      } else if (node.type === 'ministry') {
-        setPinnedMinistryName(node.name);
-        setPinnedProjectId(null);
-        setPinnedRecipientId(null);
-      } else {
-        const spendingId = node.type === 'project-budget'
-          ? node.id.replace('project-budget-', 'project-spending-')
-          : node.type === 'project-spending'
-            ? node.id
-            : null;
-        setPinnedProjectId(spendingId);
-        setPinnedRecipientId(null);
-        setPinnedMinistryName(null);
-      }
+      const pins = computeFocusPins(node.id, graphData?.nodes);
+      setPinnedProjectId(pins.pinnedProjectId); setPinnedRecipientId(pins.pinnedRecipientId); setPinnedMinistryName(pins.pinnedMinistryName);
     } else if (!focusRelated || newId === null) {
       setPinnedRecipientId(null);
       setPinnedMinistryName(null);
     }
     selectNode(newId);
-  }, [selectedNodeId, selectNode, focusRelated]);
+  }, [selectedNodeId, selectNode, focusRelated, graphData]);
 
   // ── Search ──
 
