@@ -572,7 +572,22 @@ export default function RealDataSankeyPage() {
       setRecipientOffset(newOffset);
     };
 
-    if (nodeId.startsWith('r-') && filtered) {
+    if (focusRelated) {
+      // focusRelated ON: 現在のフォーカスコンテキストをクリアして新しいノードに切り替える
+      if (nodeId.startsWith('r-')) {
+        setPinnedRecipientId(nodeId); setPinnedProjectId(null); setPinnedMinistryName(null);
+      } else if (nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-')) {
+        const spendingId = nodeId.startsWith('project-budget-')
+          ? nodeId.replace('project-budget-', 'project-spending-')
+          : nodeId;
+        setPinnedProjectId(spendingId); setPinnedRecipientId(null); setPinnedMinistryName(null);
+      } else if (nodeId.startsWith('ministry-')) {
+        const ministryNode = graphData?.nodes.find(n => n.id === nodeId);
+        if (ministryNode) { setPinnedMinistryName(ministryNode.name); setPinnedProjectId(null); setPinnedRecipientId(null); }
+      } else {
+        setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null);
+      }
+    } else if (nodeId.startsWith('r-') && filtered) {
       // Recipient outside window: jump offset so it's visible
       const rank = allRecipientRanks.get(nodeId);
       if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
