@@ -165,7 +165,7 @@ export function filterTopN(
   );
   const topProjectNodes = topMinistryAllProjects
     .slice(0, topProject)
-    .filter(n => (projectWindowValue.get(n.id) || 0) > 0);
+    .filter(n => includeZeroSpending || (projectWindowValue.get(n.id) || 0) > 0);
   // Pin: force-include the pinned project (TopN+1) if not already present
   if (pinnedProjectId) {
     const pinned = allNodes.find(n => n.id === pinnedProjectId && n.type === 'project-spending');
@@ -343,7 +343,9 @@ export function filterTopN(
   // Create __agg-project-spending whenever there is flow through it.
   // In range mode: window flow only (no __agg-recipient, so tail-only nodes have no outgoing edge).
   // In normal mode: window OR tail flow (tail goes to __agg-recipient).
-  const aggProjectSpendingNeeded = !showAggRecipient ? otherProjectWindowTotal > 0 : (otherProjectWindowTotal > 0 || otherProjectTailTotal > 0);
+  // Create __agg-project-spending whenever there is aggregate budget (needed for merged shape rendering)
+  // or when there is actual flow (window/tail). This ensures a spending pair always exists for the budget node.
+  const aggProjectSpendingNeeded = otherProjectBudgetTotal > 0;
   if (aggProjectSpendingNeeded) {
     const otherProjectSpendingTotal = (recipientFocusMode || !showAggRecipient)
       ? otherProjectWindowTotal
