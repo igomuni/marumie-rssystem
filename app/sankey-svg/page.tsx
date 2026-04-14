@@ -835,6 +835,8 @@ export default function RealDataSankeyPage() {
                 <defs>
                   <linearGradient id="proj-node-grad" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#4db870" />
+                    <stop offset="44%" stopColor="#4db870" />
+                    <stop offset="56%" stopColor="#e07040" />
                     <stop offset="100%" stopColor="#e07040" />
                   </linearGradient>
                 </defs>
