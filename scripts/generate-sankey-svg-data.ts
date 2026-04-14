@@ -1,12 +1,17 @@
 /**
- * /sankey3 用グラフデータ生成スクリプト
+ * /sankey-svg 用グラフデータ生成スクリプト
  *
  * 5-1 CSV（支出情報）+ 5-2 CSV（ブロックのつながり）から、
  * 直接支出先のみのサンキー図用データを生成する。
  *
  * 直接支出の判定: 5-2 CSVの「担当組織からの支出=TRUE」
  *
- * 出力: public/data/sankey3-graph.json
+ * 使用法:
+ *   tsx scripts/generate-sankey-svg-data.ts [YEAR]
+ *   例: tsx scripts/generate-sankey-svg-data.ts 2025
+ *   デフォルト: 2024
+ *
+ * 出力: public/data/sankey-svg-{YEAR}-graph.json
  *
  * 使用CSV:
  *   1-1: 組織情報（府省庁階層）
@@ -20,11 +25,18 @@ import * as path from 'path';
 import { readShiftJISCSV, parseAmount } from '@/scripts/csv-reader';
 import type { CSVRow } from '@/types/rs-system';
 
+// ─── 年度設定 ──────────────────────────────────────────────
+const YEAR = parseInt(process.argv[2] || '2024', 10);
+if (isNaN(YEAR) || YEAR < 2000 || YEAR > 2100) {
+  console.error(`Invalid year: ${process.argv[2]}`);
+  process.exit(1);
+}
+
 // ─── 定数 ──────────────────────────────────────────────
-const DATA_DIR = path.join(__dirname, '../data/year_2024');
+const DATA_DIR = path.join(__dirname, `../data/year_${YEAR}`);
 const OUTPUT_DIR = path.join(__dirname, '../public/data');
-const OUTPUT_FILE = 'sankey3-graph.json';
-const TARGET_BUDGET_YEAR = 2023; // 2024年度事業 → 2023年度予算データを使用
+const OUTPUT_FILE = `sankey-svg-${YEAR}-graph.json`;
+const TARGET_BUDGET_YEAR = YEAR - 1; // 例: 2025年度事業 → 2024年度予算データを使用
 
 // ─── 型定義 ──────────────────────────────────────────────
 
@@ -49,6 +61,7 @@ interface SankeyEdge {
 interface SankeyGraphData {
   metadata: {
     generatedAt: string;
+    year: number;
     totalBudget: number;
     totalSpending: number;
     directSpending: number;
@@ -75,14 +88,17 @@ function loadCSV(filename: string): CSVRow[] {
 // ─── メイン処理 ──────────────────────────────────────────
 
 function main() {
-  console.log('=== sankey3 グラフデータ生成 ===\n');
+  console.log(`=== sankey-svg グラフデータ生成 (${YEAR}年度) ===\n`);
+  console.log(`  データディレクトリ: ${DATA_DIR}`);
+  console.log(`  出力ファイル: ${OUTPUT_FILE}`);
+  console.log(`  予算年度フィルタ: ${TARGET_BUDGET_YEAR}\n`);
 
   // 1. CSV読み込み
   console.log('[1/5] CSV読み込み');
-  const orgRows = loadCSV('1-1_RS_2024_基本情報_組織情報.csv');
-  const budgetRows = loadCSV('2-1_RS_2024_予算・執行_サマリ.csv');
-  const spendingRows = loadCSV('5-1_RS_2024_支出先_支出情報.csv');
-  const blockRows = loadCSV('5-2_RS_2024_支出先_支出ブロックのつながり.csv');
+  const orgRows = loadCSV(`1-1_RS_${YEAR}_基本情報_組織情報.csv`);
+  const budgetRows = loadCSV(`2-1_RS_${YEAR}_予算・執行_サマリ.csv`);
+  const spendingRows = loadCSV(`5-1_RS_${YEAR}_支出先_支出情報.csv`);
+  const blockRows = loadCSV(`5-2_RS_${YEAR}_支出先_支出ブロックのつながり.csv`);
 
   // 2. 組織情報マップ（予算事業ID → 府省庁名・事業名）
   console.log('\n[2/5] 組織・予算データ構築');
@@ -97,7 +113,7 @@ function main() {
   }
   console.log(`  組織情報: ${orgMap.size.toLocaleString()} 事業`);
 
-  // 3. 予算データ集計（予算年度=2023のみ）
+  // 3. 予算データ集計（予算年度=TARGET_BUDGET_YEAR のみ）
   const budgetMap = new Map<number, { totalBudget: number; executedAmount: number }>();
   for (const row of budgetRows) {
     const pid = parseInt(row['予算事業ID'], 10);
@@ -321,6 +337,7 @@ function main() {
   const graph: SankeyGraphData = {
     metadata: {
       generatedAt: new Date().toISOString(),
+      year: YEAR,
       totalBudget,
       totalSpending: directTotalAmount + indirectTotalAmount,
       directSpending: directTotalAmount,

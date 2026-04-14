@@ -25,6 +25,7 @@ interface SankeyUrlState {
   showAggRecipient: boolean;
   scaleBudgetToVisible: boolean;
   focusRelated: boolean;
+  year: '2024' | '2025';
 }
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
@@ -43,6 +44,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const ar = p.get('ar'); if (ar !== null) result.showAggRecipient = ar !== '0';
   const sb = p.get('sb'); if (sb !== null) result.scaleBudgetToVisible = sb !== '0';
   const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr !== '0';
+  const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   return result;
 }
 
@@ -98,6 +100,7 @@ export default function RealDataSankeyPage() {
   const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [scaleBudgetToVisible, setScaleBudgetToVisible] = useState(true);
   const [focusRelated, setFocusRelated] = useState(true);
+  const [year, setYear] = useState<'2024' | '2025'>('2025');
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -152,6 +155,7 @@ export default function RealDataSankeyPage() {
     if (parsed.showAggRecipient !== undefined) setShowAggRecipient(parsed.showAggRecipient);
     if (parsed.scaleBudgetToVisible !== undefined) setScaleBudgetToVisible(parsed.scaleBudgetToVisible);
     if (parsed.focusRelated !== undefined) setFocusRelated(parsed.focusRelated);
+    if (parsed.year !== undefined) setYear(parsed.year);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
 
@@ -172,6 +176,7 @@ export default function RealDataSankeyPage() {
       setShowAggRecipient(parsed.showAggRecipient ?? true);
       setScaleBudgetToVisible(parsed.scaleBudgetToVisible ?? true);
       setFocusRelated(parsed.focusRelated ?? true);
+      if (parsed.year !== undefined) setYear(parsed.year);
       if (parsed.selectedNodeId) pendingFocusId.current = parsed.selectedNodeId;
     };
     window.addEventListener('popstate', handler);
@@ -197,6 +202,7 @@ export default function RealDataSankeyPage() {
     if (!showAggRecipient) p.set('ar', '0');
     if (!scaleBudgetToVisible) p.set('sb', '0');
     if (!focusRelated) p.set('fr', '0');
+    if (year !== '2025') p.set('yr', year);
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
     if (action === 'push') {
@@ -204,7 +210,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, year]);
 
   // Zoom/Pan state
   const [zoom, setZoom] = useState(1);
@@ -328,14 +334,17 @@ export default function RealDataSankeyPage() {
   const showMinimap = true;
 
   useEffect(() => {
-    fetch('/data/sankey3-graph.json')
+    setGraphData(null);
+    setLoading(true);
+    setError(null);
+    fetch(`/data/sankey-svg-${year}-graph.json`)
       .then(res => {
         if (!res.ok) throw new Error(`Fetch error: ${res.status}`);
         return res.json();
       })
       .then(data => { setGraphData(data); setLoading(false); })
       .catch(e => { setError(String(e)); setLoading(false); });
-  }, []);
+  }, [year]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -964,7 +973,7 @@ export default function RealDataSankeyPage() {
 
       {loading && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5, pointerEvents: 'none' }}>
-          <p style={{ color: '#666', fontSize: 14 }}>Loading sankey3-graph.json...</p>
+          <p style={{ color: '#666', fontSize: 14 }}>Loading sankey-svg-{year}-graph.json...</p>
         </div>
       )}
       {error && (
@@ -1558,6 +1567,22 @@ export default function RealDataSankeyPage() {
           )}
         </div>
       )}
+
+      {/* Year selector — top center */}
+      <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}>
+        <select
+          value={year}
+          onChange={e => { pendingHistoryAction.current = 'replace'; setYear(e.target.value as '2024' | '2025'); }}
+          style={{ fontSize: 13, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
+        >
+          <option value="2025">2025年度</option>
+          <option value="2024">2024年度</option>
+        </select>
+        {/* dropdown arrow */}
+        <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+          <path d="M7 10l5 5 5-5z"/>
+        </svg>
+      </div>
 
       {/* Search box — top left */}
       <div
