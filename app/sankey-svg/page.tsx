@@ -839,6 +839,13 @@ export default function RealDataSankeyPage() {
                     <stop offset="60%" stopColor="#e07040" />
                     <stop offset="100%" stopColor="#e07040" />
                   </linearGradient>
+                  <linearGradient id="proj-agg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#999" />
+                    <stop offset="40%" stopColor="#999" />
+                    <stop offset="50%" stopColor="#777" />
+                    <stop offset="60%" stopColor="#999" />
+                    <stop offset="100%" stopColor="#999" />
+                  </linearGradient>
                 </defs>
 
                 {/* Column labels with totals */}
@@ -956,7 +963,7 @@ export default function RealDataSankeyPage() {
                       const nodeOpacity = connectedNodeIds
                         ? (isConnected ? 1 : 0.3)
                         : (hoveredNode && hoveredNode !== node ? 0.4 : 1);
-                      const nodeFill = node.aggregated ? '#aaa' : 'url(#proj-node-grad)';
+                      const nodeFill = node.aggregated ? 'url(#proj-agg-grad)' : 'url(#proj-node-grad)';
                       if (!spendingNode) {
                         // No paired spending node — render as plain budget rect
                         return (
