@@ -606,6 +606,9 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, graphData, filtered, projectRecipientCount]);
 
   const [panelTab, setPanelTab] = useState<'ministry' | 'project' | 'recipient'>('ministry');
+  // Auto-select panel tab based on selected node type.
+  // selectedNode is derived from selectedNodeId and won't change for the same id
+  // when only layout/graphData updates, so it is intentionally excluded from deps.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const t = selectedNode?.type; const id = selectedNode?.id;
@@ -1422,8 +1425,8 @@ export default function RealDataSankeyPage() {
                 type PanelItem = { id: string; name: string; value: number; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; };
                 const renderFlatList = (items: PanelItem[]) => {
                   if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
-                  return items.map((item, i) => (
-                    <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
+                  return items.map((item) => (
+                    <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                     >
                       <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
@@ -1453,8 +1456,8 @@ export default function RealDataSankeyPage() {
                       {panelTab === 'ministry' && (() => {
                         const items = panelSections.ministries;
                         if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
-                        return items.map((item, i) => (
-                          <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
+                        return items.map((item) => (
+                          <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                             style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                           >
                             <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
@@ -1493,8 +1496,8 @@ export default function RealDataSankeyPage() {
                           );
                         }
                         // All other nodes: flat list with budget/spending values where available
-                        return items.map((item, i) => (
-                          <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
+                        return items.map((item) => (
+                          <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                             style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                           >
                             <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
