@@ -1683,8 +1683,23 @@ export default function RealDataSankeyPage() {
         const maxStartRank = maxOffset + 1;
         return (
           <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
+            {/* TopN: 事業・支出先 */}
+            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ color: '#555', fontSize: 11 }}>事業:</span>
+              <input type="number" min={1} max={100} value={topProject}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }}
+                style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ color: '#555', fontSize: 11 }}>支出先 Top:</span>
+              <input type="number" min={1} max={100} value={topRecipient}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }}
+                style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+            </label>
+            {/* 区切り */}
+            <div style={{ width: 1, alignSelf: 'stretch', background: '#e0e0e0', margin: '0 2px' }} />
             <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
+              <span style={{ color: '#555', fontSize: 11 }}>オフセット:</span>
               {isEditingOffset ? (
                 <input
                   type="number"
@@ -1758,23 +1773,7 @@ export default function RealDataSankeyPage() {
         {showSettings && (
           <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-            <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
-              <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 48, color: '#555' }}>省庁:</span>
-                <input type="number" min={1} max={37} value={topMinistry} onChange={e => { pendingHistoryAction.current = 'replace'; setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={37} value={topMinistry} onChange={e => { pendingHistoryAction.current = 'replace'; setTopMinistry(Number(e.target.value)); }} style={{ flex: 1 }} />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 48, color: '#555' }}>事業:</span>
-                <input type="number" min={1} max={100} value={topProject} onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={100} value={topProject} onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Number(e.target.value)); }} style={{ flex: 1 }} />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 48, color: '#555' }}>支出先:</span>
-                <input type="number" min={1} max={100} value={topRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={100} value={topRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Number(e.target.value)); }} style={{ flex: 1 }} />
-              </label>
+            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
