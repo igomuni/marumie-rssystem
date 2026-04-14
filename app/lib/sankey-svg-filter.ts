@@ -638,7 +638,7 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     const spendingHeight = node.y1 - node.y0;
     const newY0 = budgetNode.y0;
     node.x0 = budgetNode.x1;
-    node.x1 = budgetNode.x1 + NODE_W;
+    node.x1 = budgetNode.x1 + NODE_W * 3;  // spending width = 3×NODE_W → total merged = 4×NODE_W
     // Re-compute source link y0 positions (spending → recipient ribbons)
     let sy = newY0;
     for (const link of node.sourceLinks) {

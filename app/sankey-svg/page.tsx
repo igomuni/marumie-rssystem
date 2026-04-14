@@ -979,7 +979,7 @@ export default function RealDataSankeyPage() {
                       return (
                         <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0}px)`, transition: 'transform 0.3s ease' }}>
                           <path
-                            d={mergedProjectPath(node.x0, NODE_W, bH, sH)}
+                            d={mergedProjectPath(node.x0, NODE_W * 2, bH, sH)}
                             fill={nodeFill}
                             style={{ opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease' }}
                             onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -988,9 +988,9 @@ export default function RealDataSankeyPage() {
                             onClick={(e) => handleNodeClick(node, e)}
                           />
                           {labelVisible && (<>
-                            {/* Left label: budget amount */}
-                            <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
-                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#888'}
+                            {/* Left label: budget amount (inside green portion, white text) */}
+                            <text x={node.x0 + NODE_W * 2 - 4} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
+                              fill={connectedNodeIds && !isConnected ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.9)'}
                               style={{ userSelect: 'none', pointerEvents: 'none' }}>
                               {formatYen(node.rawValue ?? node.value)}
                             </text>
