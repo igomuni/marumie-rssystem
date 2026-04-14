@@ -69,14 +69,25 @@ if [ -f "$DATA_DIR/sankey2-layout.json.gz" ]; then
   fi
 fi
 
-# Decompress sankey3-graph.json if needed
-if [ -f "$DATA_DIR/sankey3-graph.json.gz" ]; then
-  if [ ! -f "$DATA_DIR/sankey3-graph.json" ] || [ "$DATA_DIR/sankey3-graph.json.gz" -nt "$DATA_DIR/sankey3-graph.json" ]; then
-    echo "🔓 Decompressing sankey3-graph.json.gz..."
-    gunzip -k -f "$DATA_DIR/sankey3-graph.json.gz"
-    echo "✅ Decompression complete ($(du -h "$DATA_DIR/sankey3-graph.json" | cut -f1))"
+# Decompress sankey-svg-2024-graph.json if needed
+if [ -f "$DATA_DIR/sankey-svg-2024-graph.json.gz" ]; then
+  if [ ! -f "$DATA_DIR/sankey-svg-2024-graph.json" ] || [ "$DATA_DIR/sankey-svg-2024-graph.json.gz" -nt "$DATA_DIR/sankey-svg-2024-graph.json" ]; then
+    echo "🔓 Decompressing sankey-svg-2024-graph.json.gz..."
+    gunzip -k -f "$DATA_DIR/sankey-svg-2024-graph.json.gz"
+    echo "✅ Decompression complete ($(du -h "$DATA_DIR/sankey-svg-2024-graph.json" | cut -f1))"
   else
-    echo "✅ sankey3-graph.json already exists and is up to date"
+    echo "✅ sankey-svg-2024-graph.json already exists and is up to date"
+  fi
+fi
+
+# Decompress sankey-svg-2025-graph.json if needed
+if [ -f "$DATA_DIR/sankey-svg-2025-graph.json.gz" ]; then
+  if [ ! -f "$DATA_DIR/sankey-svg-2025-graph.json" ] || [ "$DATA_DIR/sankey-svg-2025-graph.json.gz" -nt "$DATA_DIR/sankey-svg-2025-graph.json" ]; then
+    echo "🔓 Decompressing sankey-svg-2025-graph.json.gz..."
+    gunzip -k -f "$DATA_DIR/sankey-svg-2025-graph.json.gz"
+    echo "✅ Decompression complete ($(du -h "$DATA_DIR/sankey-svg-2025-graph.json" | cut -f1))"
+  else
+    echo "✅ sankey-svg-2025-graph.json already exists and is up to date"
   fi
 fi
 

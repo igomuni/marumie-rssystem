@@ -25,6 +25,7 @@ interface SankeyUrlState {
   showAggRecipient: boolean;
   scaleBudgetToVisible: boolean;
   focusRelated: boolean;
+  year: '2024' | '2025';
 }
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
@@ -43,6 +44,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const ar = p.get('ar'); if (ar !== null) result.showAggRecipient = ar !== '0';
   const sb = p.get('sb'); if (sb !== null) result.scaleBudgetToVisible = sb !== '0';
   const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr !== '0';
+  const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   return result;
 }
 
@@ -98,6 +100,7 @@ export default function RealDataSankeyPage() {
   const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [scaleBudgetToVisible, setScaleBudgetToVisible] = useState(true);
   const [focusRelated, setFocusRelated] = useState(true);
+  const [year, setYear] = useState<'2024' | '2025'>('2025');
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -152,6 +155,7 @@ export default function RealDataSankeyPage() {
     if (parsed.showAggRecipient !== undefined) setShowAggRecipient(parsed.showAggRecipient);
     if (parsed.scaleBudgetToVisible !== undefined) setScaleBudgetToVisible(parsed.scaleBudgetToVisible);
     if (parsed.focusRelated !== undefined) setFocusRelated(parsed.focusRelated);
+    if (parsed.year !== undefined) setYear(parsed.year);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
 
@@ -172,6 +176,7 @@ export default function RealDataSankeyPage() {
       setShowAggRecipient(parsed.showAggRecipient ?? true);
       setScaleBudgetToVisible(parsed.scaleBudgetToVisible ?? true);
       setFocusRelated(parsed.focusRelated ?? true);
+      if (parsed.year !== undefined) setYear(parsed.year);
       if (parsed.selectedNodeId) pendingFocusId.current = parsed.selectedNodeId;
     };
     window.addEventListener('popstate', handler);
@@ -197,6 +202,7 @@ export default function RealDataSankeyPage() {
     if (!showAggRecipient) p.set('ar', '0');
     if (!scaleBudgetToVisible) p.set('sb', '0');
     if (!focusRelated) p.set('fr', '0');
+    if (year !== '2025') p.set('yr', year);
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
     if (action === 'push') {
@@ -204,7 +210,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, year]);
 
   // Zoom/Pan state
   const [zoom, setZoom] = useState(1);
@@ -328,14 +334,17 @@ export default function RealDataSankeyPage() {
   const showMinimap = true;
 
   useEffect(() => {
-    fetch('/data/sankey3-graph.json')
+    setGraphData(null);
+    setLoading(true);
+    setError(null);
+    fetch(`/data/sankey-svg-${year}-graph.json`)
       .then(res => {
         if (!res.ok) throw new Error(`Fetch error: ${res.status}`);
         return res.json();
       })
       .then(data => { setGraphData(data); setLoading(false); })
       .catch(e => { setError(String(e)); setLoading(false); });
-  }, []);
+  }, [year]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -964,7 +973,7 @@ export default function RealDataSankeyPage() {
 
       {loading && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5, pointerEvents: 'none' }}>
-          <p style={{ color: '#666', fontSize: 14 }}>Loading sankey3-graph.json...</p>
+          <p style={{ color: '#666', fontSize: 14 }}>Loading sankey-svg-{year}-graph.json...</p>
         </div>
       )}
       {error && (
@@ -1731,6 +1740,18 @@ export default function RealDataSankeyPage() {
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
             <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
               <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: '#555' }}>年度:</span>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                  <input type="radio" name="year" value="2025" checked={year === '2025'} onChange={() => { pendingHistoryAction.current = 'replace'; setYear('2025'); }} style={{ cursor: 'pointer' }} />
+                  <span style={{ color: '#555' }}>2025</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                  <input type="radio" name="year" value="2024" checked={year === '2024'} onChange={() => { pendingHistoryAction.current = 'replace'; setYear('2024'); }} style={{ cursor: 'pointer' }} />
+                  <span style={{ color: '#555' }}>2024</span>
+                </label>
+              </div>
+              <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '2px 0' }} />
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 48, color: '#555' }}>省庁:</span>
                 <input type="number" min={1} max={37} value={topMinistry} onChange={e => { pendingHistoryAction.current = 'replace'; setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
