@@ -46,6 +46,17 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   return result;
 }
 
+/**
+ * 事業統合ノードの SVG パスを生成する。
+ * x0 = 予算ノード左端, nodeW = NODE_W, bH = 予算高さ, sH = 支出高さ (共通 y0=0 基準)
+ * 上辺: 直線, 下辺: 予算下端 ↔ 支出下端を結ぶベジェ曲線
+ */
+function mergedProjectPath(x0: number, nodeW: number, bH: number, sH: number): string {
+  const x2 = x0 + nodeW * 2;
+  const mx = (x0 + x2) / 2;
+  return `M${x0},0 L${x2},0 L${x2},${sH} C${mx},${sH} ${mx},${bH} ${x0},${bH} Z`;
+}
+
 /** ノードID → フォーカスピン状態を導出する純粋ヘルパー */
 function computeFocusPins(
   nodeId: string,
@@ -262,6 +273,9 @@ export default function RealDataSankeyPage() {
 
   const layoutRef = useRef<{ contentW: number; contentH: number } | null>(null);
 
+  // Top offset reserved for the search box (top:12 + height:36 + gap:8)
+  const SEARCH_BOX_RESERVE = 56;
+
   const resetView = useCallback(() => {
     const container = containerRef.current;
     const l = layoutRef.current;
@@ -271,14 +285,15 @@ export default function RealDataSankeyPage() {
       const cH = container.clientHeight;
       const totalW = MARGIN.left + l.contentW;
       const totalH = MARGIN.top + l.contentH;
-      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, cH / totalH) * 0.9));
+      const availH = cH - SEARCH_BOX_RESERVE;
+      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, availH / totalH) * 0.9));
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
+      setPan({ x: (cW - totalW * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
     } else {
       setZoom(1);
       setBaseZoom(1);
-      setPan({ x: 0, y: 0 });
+      setPan({ x: 0, y: SEARCH_BOX_RESERVE });
     }
   }, []);
 
@@ -291,14 +306,15 @@ export default function RealDataSankeyPage() {
       const cH = container.clientHeight;
       const totalW = MARGIN.left + l.contentW;
       const totalH = MARGIN.top + l.contentH;
-      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, cH / totalH) * 0.9));
+      const availH = cH - SEARCH_BOX_RESERVE;
+      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, availH / totalH) * 0.9));
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
+      setPan({ x: (cW - totalW * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
     } else {
       setZoom(1);
       setBaseZoom(1);
-      setPan({ x: 0, y: 0 });
+      setPan({ x: 0, y: SEARCH_BOX_RESERVE });
     }
   }, []);
 
@@ -326,14 +342,24 @@ export default function RealDataSankeyPage() {
     return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName);
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName]);
 
-  const minNodeGap = showLabels ? 14 / zoom : undefined;
-
   const layout = useMemo(() => {
     if (!filtered) return null;
-    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, minNodeGap);
+    if (!showLabels) {
+      const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
+      layoutRef.current = { contentW: result.contentW, contentH: result.contentH };
+      return result;
+    }
+    // Two-pass: estimate fit zoom from ungapped layout, derive stable minNodeGap from it.
+    // This breaks the zoom→minNodeGap→layout→zoom feedback loop.
+    const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
+    const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
+    const fitZoom = Math.max(0.1, Math.min(10,
+      Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
+    ));
+    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, 14 / fitZoom);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH };
     return result;
-  }, [filtered, svgWidth, svgHeight, minNodeGap]);
+  }, [filtered, svgWidth, svgHeight, showLabels]);
 
   const selectedNode = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -378,6 +404,11 @@ export default function RealDataSankeyPage() {
     }
     return ids;
   }, [selectedNodeInLayout]);
+
+  // Spending partner of the currently hovered merged project node (for link highlight)
+  const hoveredPartnerSpendingId = hoveredNode?.type === 'project-budget' && hoveredNode.projectId != null
+    ? `project-spending-${hoveredNode.projectId}`
+    : hoveredNode?.id === '__agg-project-budget' ? '__agg-project-spending' : null;
 
   // Per-ministry project stats — for total/ministry node side panel
   type ProjectStat = { pid: number; name: string; budgetId: string; spendingId: string; budgetValue: number; spendingValue: number };
@@ -657,10 +688,31 @@ export default function RealDataSankeyPage() {
     return results.sort((a, b) => b.value - a.value).slice(0, 20);
   }, [graphData, debouncedQuery]);
 
+  const pendingSearchResetRef = useRef(false);
+
   const handleSearchSelect = useCallback((nodeId: string) => {
     setShowSearchResults(false);
     handleConnectionClick(nodeId);
-  }, [handleConnectionClick]);
+    if (focusRelated) {
+      // focusRelated ON: show full view after layout settles (so related nodes are all visible)
+      pendingSearchResetRef.current = true;
+    } else {
+      // focusRelated OFF: explicitly pan to the node
+      const inLayout = layout?.nodes.find(n => n.id === nodeId);
+      if (inLayout) {
+        focusOnNeighborhood(inLayout);
+      } else {
+        pendingFocusId.current = nodeId;
+      }
+    }
+  }, [handleConnectionClick, focusRelated, layout, focusOnNeighborhood]);
+
+  // Reset viewport after search-triggered selection when focusRelated is ON
+  useEffect(() => {
+    if (!pendingSearchResetRef.current || !layout) return;
+    pendingSearchResetRef.current = false;
+    resetViewport();
+  }, [layout, resetViewport]);
 
   // Center on initial load / layout change
   const initialCentered = useRef(false);
@@ -812,6 +864,22 @@ export default function RealDataSankeyPage() {
               overflow="visible"
               style={{ position: 'absolute', inset: 0, display: 'block' }}
             >
+              {/* Gradient defs for merged project nodes */}
+              <defs>
+                <linearGradient id="proj-node-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#4db870" />
+                  <stop offset="44%" stopColor="#4db870" />
+                  <stop offset="56%" stopColor="#e07040" />
+                  <stop offset="100%" stopColor="#e07040" />
+                </linearGradient>
+                <linearGradient id="proj-agg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#999" />
+                  <stop offset="44%" stopColor="#999" />
+                  <stop offset="50%" stopColor="#777" />
+                  <stop offset="56%" stopColor="#999" />
+                  <stop offset="100%" stopColor="#999" />
+                </linearGradient>
+              </defs>
               {/* Backdrop: full-SVG invisible rect for deselection on background click */}
               <rect
                 x={0} y={0} width={svgWidth} height={svgHeight}
@@ -820,50 +888,8 @@ export default function RealDataSankeyPage() {
               />
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
-                {/* Column labels with totals */}
-                {(() => {
-                  const maxCol = layout.maxCol || 1;
-                  const amt = (n: LayoutNode) => n.value;
-                  const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
-                  const colNodes = colNodeTypes.map(t =>
-                    t === 'total'
-                      ? layout.nodes.filter(n => n.type === 'total')
-                      : layout.nodes.filter(n => n.type === t)
-                  );
-                  const colTotals: (number | null)[] = colNodes.map((nodes, i) =>
-                    i === 0 ? (nodes[0] ? amt(nodes[0]) : null) : nodes.reduce((s, n) => s + amt(n), 0)
-                  );
-                  const colCounts: (number | null)[] = colNodes.map((nodes, i) =>
-                    i === 0 ? null : nodes.length
-                  );
-                  return COL_LABELS.map((label, i) => {
-                    const x = (i / maxCol) * (layout.innerW - NODE_W);
-                    const total = colTotals[i];
-                    return (
-                      <text
-                        key={i}
-                        x={x + NODE_W / 2} y={-13}
-                        textAnchor="middle" fontSize={15} fill="#999"
-                        style={{ cursor: 'default', userSelect: 'none' }}
-                        onMouseEnter={(e) => {
-                          const rect = containerRef.current?.getBoundingClientRect();
-                          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-                          setHoveredColIndex(i);
-                        }}
-                        onMouseMove={(e) => {
-                          const rect = containerRef.current?.getBoundingClientRect();
-                          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-                        }}
-                        onMouseLeave={() => setHoveredColIndex(null)}
-                      >
-                        {label}{total != null ? ` ${formatYen(total)}` : ''}
-                      </text>
-                    );
-                  });
-                })()}
-
-                {/* Links */}
-                {layout.links.map((link) => (
+                {/* Links (skip internal project-budget → project-spending links) */}
+                {layout.links.filter(link => !(link.source.type === 'project-budget' && link.target.type === 'project-spending')).map((link) => (
                   <path
                     key={`${link.source.id}→${link.target.id}`}
                     fill={getLinkColor(link)}
@@ -873,7 +899,8 @@ export default function RealDataSankeyPage() {
                           ? (hoveredLink === link ? 0.45 : 0.35)
                           : 0.05
                         : hoveredLink === link ? 0.6
-                          : hoveredNode && (link.source === hoveredNode || link.target === hoveredNode) ? 0.5
+                          : hoveredNode && (link.source === hoveredNode || link.target === hoveredNode
+                              || link.source.id === hoveredPartnerSpendingId || link.target.id === hoveredPartnerSpendingId) ? 0.5
                           : (hoveredNode || hoveredLink) ? 0.1
                           : 0.25
                     }
@@ -911,10 +938,83 @@ export default function RealDataSankeyPage() {
                 {/* Nodes */}
                 {(() => {
                   const lastCol = layout.maxCol;
-                  return layout.nodes.map((node) => {
+                  // Build spending node lookup for merged project rendering
+                  const spendingByBudgetId = new Map<string, LayoutNode>();
+                  for (const n of layout.nodes) {
+                    if (n.type === 'project-spending' && n.projectId != null) {
+                      spendingByBudgetId.set(`project-budget-${n.projectId}`, n);
+                    } else if (n.id === '__agg-project-spending') {
+                      spendingByBudgetId.set('__agg-project-budget', n);
+                    }
+                  }
+                  // project-spending nodes are rendered as part of their budget node
+                  return layout.nodes.filter(node => node.type !== 'project-spending').map((node) => {
+                    if (node.type === 'project-budget' || node.id === '__agg-project-budget') {
+                      // Merged project node: budget (left) + spending (right) as one shape
+                      const spendingNode = spendingByBudgetId.get(node.id);
+                      const bH = Math.max(1, node.y1 - node.y0);
+                      const sH = spendingNode ? Math.max(1, spendingNode.y1 - spendingNode.y0) : bH;
+                      const isConnected = connectedNodeIds
+                        ? (connectedNodeIds.has(node.id) || (spendingNode != null && connectedNodeIds.has(spendingNode.id)))
+                        : null;
+                      const isSelectedMerged = node.id === selectedNodeId || spendingNode?.id === selectedNodeId;
+                      const labelVisible = showLabels || Math.max(bH, sH) * zoom > 10 || isSelectedMerged;
+                      const nodeOpacity = connectedNodeIds
+                        ? (isConnected ? 1 : 0.3)
+                        : (hoveredNode && hoveredNode !== node ? 0.4 : 1);
+                      const nodeFill = node.aggregated ? 'url(#proj-agg-grad)' : 'url(#proj-node-grad)';
+                      if (!spendingNode) {
+                        // No paired spending node — render as plain budget rect
+                        return (
+                          <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0}px)`, transition: 'transform 0.3s ease' }}>
+                            <rect x={node.x0} y={0} width={NODE_W} fill={getNodeColor(node)} rx={1}
+                              style={{ height: bH, opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease, height 0.3s ease' }}
+                              onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                              onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                              onMouseLeave={() => setHoveredNode(null)}
+                              onClick={(e) => handleNodeClick(node, e)}
+                            />
+                            {labelVisible && (
+                              <text x={node.x1 + 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                                fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                                style={{ userSelect: 'none', pointerEvents: 'none' }} clipPath={`url(#clip-col-${getColumn(node)})`}>
+                                {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
+                              </text>
+                            )}
+                          </g>
+                        );
+                      }
+                      return (
+                        <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0}px)`, transition: 'transform 0.3s ease' }}>
+                          <path
+                            d={mergedProjectPath(node.x0, NODE_W, bH, sH)}
+                            fill={nodeFill}
+                            style={{ opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease' }}
+                            onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                            onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                            onMouseLeave={() => setHoveredNode(null)}
+                            onClick={(e) => handleNodeClick(node, e)}
+                          />
+                          {labelVisible && (<>
+                            {/* Left label: budget amount */}
+                            <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
+                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                              style={{ userSelect: 'none', pointerEvents: 'none' }}>
+                              {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
+                            </text>
+                            {/* Right label: project name + spending amount */}
+                            <text x={spendingNode.x1 + 3} y={sH / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                              style={{ userSelect: 'none', pointerEvents: 'none' }} clipPath={`url(#clip-col-${getColumn(node)})`}>
+                              {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
+                            </text>
+                          </>)}
+                        </g>
+                      );
+                    }
+                    // Regular node (total, ministry, recipient)
                     const h = node.y1 - node.y0;
                     const isSelected = node.id === selectedNodeId;
-                    // When showLabels is off, use legacy rule: show only when there is enough screen space or node is selected.
                     const labelVisible = showLabels || (h + NODE_PAD) * zoom > 10 || isSelected;
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
@@ -967,6 +1067,51 @@ export default function RealDataSankeyPage() {
               </g>
             </svg>
 
+            {/* Column labels — DOM overlay, positioned from zoom/pan to avoid hiding behind search box */}
+            {(() => {
+              const maxCol = layout.maxCol || 1;
+              const innerW = svgWidth - MARGIN.left - MARGIN.right;
+              const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
+              const colAmounts: (number | null)[] = colNodeTypes.map((t, i) => {
+                const nodes = t === 'total' ? layout.nodes.filter(n => n.type === 'total') : layout.nodes.filter(n => n.type === t);
+                return i === 0 ? (nodes[0]?.value ?? null) : nodes.reduce((s, n) => s + n.value, 0);
+              });
+              const projectSpendingTotal = layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + n.value, 0);
+              // Screen y of node area top — label bottom sits just above this
+              const nodeAreaScreenY = pan.y + MARGIN.top * zoom;
+              return COL_LABELS.map((label, i) => {
+                const colInnerX = MARGIN.left + (i / maxCol) * (innerW - NODE_W) + NODE_W / 2;
+                const screenX = pan.x + colInnerX * zoom;
+                const total = colAmounts[i];
+                const amountLine = i === 2 && total != null
+                  ? `${formatYen(total)} / ${formatYen(projectSpendingTotal)}`
+                  : total != null ? formatYen(total) : '';
+                // Position: bottom of label block 8px above node area top, clamped to stay on-screen
+                const labelBlockH = amountLine ? 34 : 18;
+                const top = Math.max(SEARCH_BOX_RESERVE, nodeAreaScreenY - labelBlockH - 8);
+                return (
+                  <div
+                    key={i}
+                    data-pan-disabled="true"
+                    style={{
+                      position: 'absolute', left: screenX, top,
+                      transform: 'translateX(-50%)',
+                      textAlign: 'center', fontSize: 13, color: '#999',
+                      whiteSpace: 'nowrap', userSelect: 'none', cursor: 'default',
+                      zIndex: 8, lineHeight: 1.4,
+                      background: 'rgba(255,255,255,0.82)', padding: '2px 8px', borderRadius: 4,
+                    }}
+                    onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredColIndex(i); }}
+                    onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                    onMouseLeave={() => setHoveredColIndex(null)}
+                  >
+                    <div>{label}</div>
+                    {amountLine && <div style={{ fontSize: 11 }}>{amountLine}</div>}
+                  </div>
+                );
+              });
+            })()}
+
             {/* Minimap */}
             {showMinimap && (
               <canvas
@@ -1014,7 +1159,7 @@ export default function RealDataSankeyPage() {
           {/* DOM tooltip — column label hover */}
           {hoveredColIndex !== null && layout && (() => {
             const amt = (n: LayoutNode) => n.value;
-            const colNodeTypes = ['total', 'ministry', 'project-budget', 'project-spending', 'recipient'] as const;
+            const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
             const nodes = hoveredColIndex === 0
               ? layout.nodes.filter(n => n.type === 'total')
               : layout.nodes.filter(n => n.type === colNodeTypes[hoveredColIndex]);
@@ -1025,8 +1170,7 @@ export default function RealDataSankeyPage() {
             const colDescs = [
               '全事業の予算額合計（予算案ベース）',
               '各府省庁所管事業の予算額合計',
-              '各事業の予算額',
-              'ウィンドウ内支出先への支出合計（tail除外）',
+              '各事業の予算額（左：予算 / 右：支出）',
               '全エッジ合計（ウィンドウ外流入含む）',
             ];
             return (
@@ -1565,7 +1709,7 @@ export default function RealDataSankeyPage() {
           aria-expanded={showSettings}
           aria-controls="sankey-topn-settings"
           aria-haspopup="dialog"
-          style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           {/* Material Icons: more_vert */}
           <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill={showSettings ? '#333' : '#888'}>

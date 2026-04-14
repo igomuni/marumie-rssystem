@@ -617,6 +617,57 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     }
   }
 
+  // ── Project node merging: position spending adjacent to budget, shift recipients ──
+  // 1. Shift recipient nodes left by one colSpacing (project-spending col visually merges into budget col)
+  for (const node of nodes) {
+    if (node.type === 'recipient') {
+      node.x0 -= colSpacing;
+      node.x1 -= colSpacing;
+    }
+  }
+  // 2. Move project-spending nodes to be horizontally adjacent to their paired budget node (top-aligned)
+  //    Then re-compute their source link y0 positions accordingly.
+  for (const node of nodes) {
+    let budgetNode: LayoutNode | undefined;
+    if (node.type === 'project-spending' && node.projectId != null) {
+      budgetNode = nodeMap.get(`project-budget-${node.projectId}`);
+    } else if (node.id === '__agg-project-spending') {
+      budgetNode = nodeMap.get('__agg-project-budget');
+    }
+    if (!budgetNode) continue;
+    const spendingHeight = node.y1 - node.y0;
+    const newY0 = budgetNode.y0;
+    node.x0 = budgetNode.x1;
+    node.x1 = budgetNode.x1 + NODE_W;  // spending width = NODE_W → total merged = 2×NODE_W
+    // Re-compute source link y0 positions (spending → recipient ribbons)
+    let sy = newY0;
+    for (const link of node.sourceLinks) {
+      link.y0 = sy;
+      sy += link.sourceWidth;
+    }
+    node.y0 = newY0;
+    node.y1 = newY0 + spendingHeight;
+  }
+
+  // 3. Repack recipient targetLinks — spending y0 positions changed, so resort and reassign y1
+  const affectedRecipients = new Set<LayoutNode>();
+  for (const node of nodes) {
+    if ((node.type === 'project-spending' && node.projectId != null) || node.id === '__agg-project-spending') {
+      for (const link of node.sourceLinks) affectedRecipients.add(link.target);
+    }
+  }
+  for (const recipient of affectedRecipients) {
+    recipient.targetLinks.sort((a, b) => a.source.y0 - b.source.y0);
+    const recipientH = recipient.y1 - recipient.y0;
+    const totalTgt = recipient.targetLinks.reduce((s, l) => s + l.value, 0);
+    let ty = recipient.y0;
+    for (const link of recipient.targetLinks) {
+      link.targetWidth = totalTgt > 0 ? recipientH * (link.value / totalTgt) : 0;
+      link.y1 = ty;
+      ty += link.targetWidth;
+    }
+  }
+
   // Content bounding box (in inner coords, before MARGIN)
   let contentMaxX = 0, contentMaxY = 0;
   for (const node of nodes) {
