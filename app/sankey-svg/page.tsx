@@ -1683,23 +1683,8 @@ export default function RealDataSankeyPage() {
         const maxStartRank = maxOffset + 1;
         return (
           <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
-            {/* TopN: 事業・支出先 */}
-            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ color: '#555', fontSize: 11 }}>事業:</span>
-              <input type="number" min={1} max={300} value={topProject}
-                onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, Number(e.target.value) || 1))); }}
-                style={{ width: 44, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ color: '#555', fontSize: 11 }}>支出先 Top:</span>
-              <input type="number" min={1} max={300} value={topRecipient}
-                onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, Number(e.target.value) || 1))); }}
-                style={{ width: 44, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-            </label>
-            {/* 区切り */}
-            <div style={{ width: 1, alignSelf: 'stretch', background: '#e0e0e0', margin: '0 2px' }} />
             <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ color: '#555', fontSize: 11 }}>オフセット:</span>
+              <span style={{ color: '#555', fontSize: 11 }}>Top</span>
               {isEditingOffset ? (
                 <input
                   type="number"
@@ -1718,8 +1703,8 @@ export default function RealDataSankeyPage() {
                   style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
                 >{rangeStart}</button>
               )}
-              <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}位</span>
-              <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => { pendingHistoryAction.current = 'replace'; setRecipientOffset(Number(e.target.value)); }} style={{ width: 100 }} />
+              <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}</span>
+              <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => { pendingHistoryAction.current = 'replace'; setRecipientOffset(Number(e.target.value)); }} style={{ width: 60 }} />
               <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                 {([
@@ -1750,6 +1735,21 @@ export default function RealDataSankeyPage() {
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
                 </button>
+            </label>
+            {/* 区切り */}
+            <div style={{ width: 1, alignSelf: 'stretch', background: '#e0e0e0', margin: '0 2px' }} />
+            {/* TopN: 事業・支出先 */}
+            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ color: '#555', fontSize: 11 }}>事業:</span>
+              <input type="number" min={1} max={300} value={topProject}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(1000, Number(e.target.value) || 1))); }}
+                style={{ width: 50, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
+              <input type="number" min={1} max={300} value={topRecipient}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(1000, Number(e.target.value) || 1))); }}
+                style={{ width: 50, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
             </label>
           </div>
         );
