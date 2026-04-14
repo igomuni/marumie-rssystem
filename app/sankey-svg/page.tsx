@@ -435,7 +435,7 @@ export default function RealDataSankeyPage() {
       if (b === 0 && s === 0) st.neither++;
       else if (b === 0) st.spendingOnly++;
       else if (s === 0) st.budgetOnly++;
-      if (s === 0) st.projects.push({ pid: n.projectId, name: n.name, budgetId: n.id, spendingId: sn?.id ?? `project-spending-${n.projectId}`, budgetValue: b, spendingValue: s });
+      st.projects.push({ pid: n.projectId, name: n.name, budgetId: n.id, spendingId: sn?.id ?? `project-spending-${n.projectId}`, budgetValue: b, spendingValue: s });
     }
     return stats;
   }, [graphData]);
@@ -461,65 +461,164 @@ export default function RealDataSankeyPage() {
     return countMap;
   }, [graphData]);
 
-  // Full connection list from raw graphData (bypasses TopN aggregation)
-  const selectedNodeAllConnections = useMemo(() => {
+  // Panel sections — 3-tab data (府省庁 / 事業 / 支出先)
+  type PanelEntry = { id: string; name: string; value: number; ministry?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; projectCount?: number; };
+  type PanelSections = { ministries: PanelEntry[]; projects: PanelEntry[]; recipients: PanelEntry[]; };
+  const panelSections = useMemo((): PanelSections | null => {
     if (!selectedNode || !graphData) return null;
     const nodeById = new Map(graphData.nodes.map(n => [n.id, n]));
-    const nodeNameById = new Map(graphData.nodes.map(n => [n.id, n.name]));
-    if (selectedNode.aggregated) {
-      // Aggregated nodes: use layout links as-is
-      return {
-        inEdges: [...selectedNode.targetLinks]
-          .sort((a, b) => b.value - a.value)
-          .map(l => ({ id: l.source.id, name: l.source.name, value: l.value, aggregated: l.source.aggregated, ministry: l.source.ministry })),
-        outEdges: [...selectedNode.sourceLinks]
-          .sort((a, b) => b.value - a.value)
-          .map(l => ({ id: l.target.id, name: l.target.name, value: l.value, aggregated: l.target.aggregated, ministry: l.target.ministry })),
-      };
-    }
-    // Real nodes: sum all raw edges from graphData
-    const inMap = new Map<string, number>();
-    const outMap = new Map<string, number>();
-    for (const e of graphData.edges) {
-      if (e.target === selectedNode.id) inMap.set(e.source, (inMap.get(e.source) || 0) + e.value);
-      if (e.source === selectedNode.id) outMap.set(e.target, (outMap.get(e.target) || 0) + e.value);
-    }
-    // For ministry nodes: also add project-budget nodes with no edge (value=0) so they appear in outEdges
-    if (selectedNode.type === 'ministry') {
-      for (const n of graphData.nodes) {
-        if (n.type === 'project-budget' && n.ministry === selectedNode.name && !outMap.has(n.id)) {
-          outMap.set(n.id, 0);
-        }
+    const spendingByPid = new Map(
+      graphData.nodes
+        .filter((n): n is typeof n & { projectId: number } => n.type === 'project-spending' && n.projectId != null)
+        .map(n => [n.projectId, n] as const)
+    );
+    const budgetByPid = new Map(
+      graphData.nodes
+        .filter((n): n is typeof n & { projectId: number } => n.type === 'project-budget' && n.projectId != null)
+        .map(n => [n.projectId, n] as const)
+    );
+    const toProjectEntry = (budgetNode: { id: string; name: string; value: number; projectId?: number; ministry?: string }): PanelEntry => {
+      const sn = budgetNode.projectId != null ? spendingByPid.get(budgetNode.projectId) : undefined;
+      const spId = sn?.id ?? (budgetNode.projectId != null ? `project-spending-${budgetNode.projectId}` : budgetNode.id);
+      return { id: budgetNode.id, name: budgetNode.name, value: sn?.value ?? 0, ministry: budgetNode.ministry, budgetValue: budgetNode.value, spendingValue: sn?.value ?? 0, recipientCount: projectRecipientCount.get(spId) };
+    };
+
+    const nid = selectedNode.id;
+    const ntype = selectedNode.type;
+
+    // ── Precompute per-ministry project/recipient counts (used by total & ministry) ──
+    const ministryProjectCounts = new Map<string, number>();
+    const ministrySpendingIdsMap = new Map<string, Set<string>>();
+    for (const n of graphData.nodes) {
+      if (n.type === 'project-budget' && n.ministry) ministryProjectCounts.set(n.ministry, (ministryProjectCounts.get(n.ministry) || 0) + 1);
+      if (n.type === 'project-spending' && n.ministry) {
+        if (!ministrySpendingIdsMap.has(n.ministry)) ministrySpendingIdsMap.set(n.ministry, new Set());
+        ministrySpendingIdsMap.get(n.ministry)!.add(n.id);
       }
     }
-    // For project-budget nodes: ensure the paired project-spending node appears in outEdges even if spending=0
-    if (selectedNode.type === 'project-budget' && selectedNode.projectId != null) {
-      const pid = selectedNode.projectId;
-      const spendingNode = graphData.nodes.find(n => n.type === 'project-spending' && n.projectId === pid);
-      if (spendingNode && !outMap.has(spendingNode.id)) outMap.set(spendingNode.id, spendingNode.value);
+    const ministryRecipientCounts = new Map<string, number>();
+    for (const [ministry, spIds] of ministrySpendingIdsMap) {
+      const rSet = new Set<string>();
+      for (const e of graphData.edges) { if (spIds.has(e.source) && e.target.startsWith('r-')) rSet.add(e.target); }
+      ministryRecipientCounts.set(ministry, rSet.size);
     }
-    // For project-spending nodes: ensure the paired project-budget node appears in inEdges even if budget=0
-    if (selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
-      const pid = selectedNode.projectId;
-      const budgetNode = graphData.nodes.find(n => n.type === 'project-budget' && n.projectId === pid);
-      if (budgetNode && !inMap.has(budgetNode.id)) inMap.set(budgetNode.id, budgetNode.value);
-    }
-    return {
-      inEdges: Array.from(inMap.entries())
-        .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false, ministry: nodeById.get(id)?.ministry }))
-        .sort((a, b) => b.value - a.value),
-      outEdges: Array.from(outMap.entries())
-        .map(([id, value]) => ({ id, name: nodeNameById.get(id) ?? id, value, aggregated: false, ministry: nodeById.get(id)?.ministry }))
-        .sort((a, b) => b.value - a.value),
-    };
-  }, [selectedNode, graphData]);
 
-  const [inDisplayCount, setInDisplayCount] = useState(8);
-  const [outDisplayCount, setOutDisplayCount] = useState(8);
-  const [collapsedMinistries, setCollapsedMinistries] = useState<Set<string>>(new Set());
-  const [ministryDisplayCounts, setMinistryDisplayCounts] = useState<Map<string, number>>(new Map());
-  const [connectionTab, setConnectionTab] = useState<'in' | 'out'>('in');
-  useEffect(() => { setInDisplayCount(8); setOutDisplayCount(8); setCollapsedMinistries(new Set()); setMinistryDisplayCounts(new Map()); setConnectionTab('in'); }, [selectedNodeId]);
+    // ── total ──────────────────────────────────────────────────────────
+    if (ntype === 'total') {
+      const ministries: PanelEntry[] = graphData.nodes.filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value).map(n => ({
+        id: n.id, name: n.name, value: n.value,
+        projectCount: ministryProjectCounts.get(n.name), recipientCount: ministryRecipientCounts.get(n.name),
+      }));
+      const projects: PanelEntry[] = graphData.nodes.filter(n => n.type === 'project-budget').sort((a, b) => b.value - a.value).map(toProjectEntry);
+      const windowRecipients = (filtered?.nodes ?? []).filter(n => n.type === 'recipient').map(n => ({ id: n.id, name: n.name, value: n.value }));
+      const aggRecipients = (filtered?.aggNodeMembers?.get('__agg-recipient') ?? []).map(r => ({ id: r.id, name: r.name, value: r.value }));
+      const recipients: PanelEntry[] = [...windowRecipients, ...aggRecipients].sort((a, b) => b.value - a.value);
+      return { ministries, projects, recipients };
+    }
+
+    // ── ministry ───────────────────────────────────────────────────────
+    if (ntype === 'ministry') {
+      const projects: PanelEntry[] = graphData.nodes
+        .filter(n => n.type === 'project-budget' && n.ministry === selectedNode.name)
+        .sort((a, b) => { const sa = a.projectId != null ? (spendingByPid.get(a.projectId)?.value ?? 0) : 0; const sb = b.projectId != null ? (spendingByPid.get(b.projectId)?.value ?? 0) : 0; return sb - sa; })
+        .map(toProjectEntry);
+      const ministrySpendingIds = ministrySpendingIdsMap.get(selectedNode.name) ?? new Set<string>();
+      const rMap = new Map<string, number>();
+      for (const e of graphData.edges) { if (ministrySpendingIds.has(e.source) && e.target.startsWith('r-')) rMap.set(e.target, (rMap.get(e.target) || 0) + e.value); }
+      const recipients: PanelEntry[] = Array.from(rMap.entries()).sort((a, b) => b[1] - a[1]).map(([id, value]) => ({ id, name: nodeById.get(id)?.name ?? id, value }));
+      const ministries: PanelEntry[] = [{ id: selectedNode.id, name: selectedNode.name, value: selectedNode.value, projectCount: projects.length, recipientCount: recipients.length }];
+      return { ministries, projects, recipients };
+    }
+
+    // ── project-budget / project-spending (non-aggregated) ─────────────
+    if ((ntype === 'project-budget' || ntype === 'project-spending') && !selectedNode.aggregated) {
+      const pid = selectedNode.projectId;
+      const budgetNode = ntype === 'project-budget' ? nodeById.get(nid) : (pid != null ? budgetByPid.get(pid) : undefined);
+      const spendingNode = pid != null ? spendingByPid.get(pid) : undefined;
+      const ministryName = selectedNode.ministry ?? budgetNode?.ministry ?? spendingNode?.ministry;
+      const ministryNode = ministryName ? graphData.nodes.find(n => n.type === 'ministry' && n.name === ministryName) : undefined;
+      const ministries: PanelEntry[] = ministryNode ? [{ id: ministryNode.id, name: ministryNode.name, value: ministryNode.value }] : [];
+      const bValue = budgetNode?.value ?? 0;
+      const sValue = spendingNode?.value ?? 0;
+      const spId = spendingNode?.id ?? (pid != null ? `project-spending-${pid}` : nid);
+      const projects: PanelEntry[] = [{ id: nid, name: selectedNode.name, value: sValue, ministry: ministryName, budgetValue: bValue, spendingValue: sValue, recipientCount: projectRecipientCount.get(spId) }];
+      const recipients: PanelEntry[] = [];
+      if (spendingNode) {
+        for (const e of graphData.edges) { if (e.source === spendingNode.id && e.target.startsWith('r-')) recipients.push({ id: e.target, name: nodeById.get(e.target)?.name ?? e.target, value: e.value }); }
+        recipients.sort((a, b) => b.value - a.value);
+      }
+      return { ministries, projects, recipients };
+    }
+
+    // ── __agg-project-budget / __agg-project-spending ──────────────────
+    if (nid === '__agg-project-budget' || nid === '__agg-project-spending') {
+      const aggBudgetMembers = filtered?.aggNodeMembers?.get('__agg-project-budget') ?? [];
+      const aggSpendingMembers = filtered?.aggNodeMembers?.get('__agg-project-spending') ?? [];
+      const mMap = new Map<string, number>();
+      for (const m of aggBudgetMembers) { if (m.ministry) mMap.set(m.ministry, (mMap.get(m.ministry) || 0) + m.value); }
+      const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
+      const projects: PanelEntry[] = aggBudgetMembers.map(m => { const bn = nodeById.get(m.id); return bn ? toProjectEntry(bn) : { id: m.id, name: m.name, value: m.value, ministry: m.ministry }; });
+      const rMap = new Map<string, { name: string; value: number }>();
+      for (const sm of aggSpendingMembers) { for (const e of graphData.edges) { if (e.source === sm.id && e.target.startsWith('r-')) { const prev = rMap.get(e.target); if (prev) prev.value += e.value; else rMap.set(e.target, { name: nodeById.get(e.target)?.name ?? e.target, value: e.value }); } } }
+      const recipients: PanelEntry[] = Array.from(rMap.entries()).sort((a, b) => b[1].value - a[1].value).map(([id, { name, value }]) => ({ id, name, value }));
+      return { ministries, projects, recipients };
+    }
+
+    // ── recipient (non-aggregated) ──────────────────────────────────────
+    if (ntype === 'recipient' && !selectedNode.aggregated) {
+      const pMap = new Map<string, number>();
+      for (const e of graphData.edges) { if (e.target === nid) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); }
+      const projects: PanelEntry[] = Array.from(pMap.entries()).sort((a, b) => b[1] - a[1]).map(([id, value]) => { const n = nodeById.get(id); return { id, name: n?.name ?? id, value, ministry: n?.ministry }; });
+      const mMap = new Map<string, number>();
+      for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
+      const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
+      const recipients: PanelEntry[] = [{ id: nid, name: selectedNode.name, value: selectedNode.value }];
+      return { ministries, projects, recipients };
+    }
+
+    // ── __agg-recipient ────────────────────────────────────────────────
+    if (nid === '__agg-recipient') {
+      const aggRcpts = filtered?.aggNodeMembers?.get('__agg-recipient') ?? [];
+      const pMap = new Map<string, number>();
+      for (const r of aggRcpts) { for (const e of graphData.edges) { if (e.target === r.id) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); } }
+      const projects: PanelEntry[] = Array.from(pMap.entries()).sort((a, b) => b[1] - a[1]).map(([id, value]) => { const n = nodeById.get(id); return { id, name: n?.name ?? id, value, ministry: n?.ministry }; });
+      const mMap = new Map<string, number>();
+      for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
+      const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
+      const recipients: PanelEntry[] = aggRcpts.map(r => ({ id: r.id, name: r.name, value: r.value }));
+      return { ministries, projects, recipients };
+    }
+
+    // ── __agg-ministry ─────────────────────────────────────────────────
+    if (nid === '__agg-ministry') {
+      const aggMins = filtered?.aggNodeMembers?.get('__agg-ministry') ?? [];
+      const ministries: PanelEntry[] = aggMins.map(m => ({ id: m.id, name: m.name, value: m.value }));
+      const aggMinNames = new Set(aggMins.map(m => m.name));
+      const projects: PanelEntry[] = graphData.nodes.filter(n => n.type === 'project-budget' && n.ministry != null && aggMinNames.has(n.ministry!)).sort((a, b) => b.value - a.value).map(toProjectEntry);
+      const spIds = new Set(graphData.nodes.filter(n => n.type === 'project-spending' && n.ministry != null && aggMinNames.has(n.ministry!)).map(n => n.id));
+      const rMap = new Map<string, number>();
+      for (const e of graphData.edges) { if (spIds.has(e.source) && e.target.startsWith('r-')) rMap.set(e.target, (rMap.get(e.target) || 0) + e.value); }
+      const recipients: PanelEntry[] = Array.from(rMap.entries()).sort((a, b) => b[1] - a[1]).map(([id, value]) => ({ id, name: nodeById.get(id)?.name ?? id, value }));
+      return { ministries, projects, recipients };
+    }
+
+    return { ministries: [], projects: [], recipients: [] };
+  }, [selectedNode, graphData, filtered, projectRecipientCount]);
+
+  const [panelTab, setPanelTab] = useState<'ministry' | 'project' | 'recipient'>('ministry');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const t = selectedNode?.type; const id = selectedNode?.id;
+    let tab: 'ministry' | 'project' | 'recipient' = 'ministry';
+    if (t === 'total') tab = 'ministry';
+    else if (t === 'ministry') tab = 'project';
+    else if (id === '__agg-ministry') tab = 'ministry';
+    else if (t === 'project-budget' || t === 'project-spending') tab = 'recipient';
+    else if (id === '__agg-project-budget' || id === '__agg-project-spending') tab = 'project';
+    else if (t === 'recipient') tab = 'project';
+    else if (id === '__agg-recipient') tab = 'recipient';
+    setPanelTab(tab);
+  }, [selectedNodeId]);
 
   const selectNode = useCallback((id: string | null) => {
     pendingHistoryAction.current = id !== null ? 'push' : 'replace';
@@ -825,9 +924,6 @@ export default function RealDataSankeyPage() {
     setZoom(nz);
   }, [zoom, pan, svgWidth, svgHeight, baseZoom]);
 
-  const iconBtnStyle: React.CSSProperties = { color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '1px 2px', display: 'inline-flex', alignItems: 'center', flexShrink: 0 };
-  const svgExpandAll = <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#4a90d9" style={{pointerEvents:'none'}}><path transform="rotate(180 480 -480)" d="m291-192-51-51 240-240 240 240-51 51-189-189-189 189Zm0-285-51-51 240-240 240 240-51 51-189-189-189 189Z"/></svg>;
-  const svgCollapseAll = <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#4a90d9" style={{pointerEvents:'none'}}><path d="m291-192-51-51 240-240 240 240-51 51-189-189-189 189Zm0-285-51-51 240-240 240 240-51 51-189-189-189 189Z"/></svg>;
 
   return (
     <div
@@ -1319,226 +1415,114 @@ export default function RealDataSankeyPage() {
                 </div>
               </div>
 
-              {/* 事業統計（total / ministry ノード） */}
-              {(selectedNode?.type === 'total' || selectedNode?.type === 'ministry') && (() => {
-                const isTotalNode = selectedNode.type === 'total';
-                const allStats = isTotalNode
-                  ? Array.from(ministryProjectStats.values())
-                  : (ministryProjectStats.has(selectedNode.name) ? [ministryProjectStats.get(selectedNode.name)!] : []);
-                const totalProjects = allStats.reduce((s, v) => s + v.total, 0);
-                return (
-                  <div style={{ padding: '10px 14px', borderTop: '1px solid #f0f0f0' }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      事業 <span style={{ fontWeight: 400 }}>{totalProjects.toLocaleString()}件</span>
-                    </div>
-                  </div>
-                );
-              })()}
-
-
-              {/* 流入元 / 流出先 タブ */}
-              {selectedNodeAllConnections && (() => {
-                const hasIn = selectedNodeAllConnections.inEdges.length > 0;
-                const hasOut = selectedNodeAllConnections.outEdges.length > 0;
-                const activeTab = connectionTab;
+              {/* 府省庁 / 事業 / 支出先 3タブ */}
+              {panelSections && (() => {
                 const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: 12, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
                 const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
-                // grouped list helper (for recipient / agg-project nodes)
-                type GroupItem = { id: string; name: string; value: number; ministry?: string; aggregated?: boolean };
-                const renderGrouped = (rawMembers: GroupItem[]) => {
-                  const grouped = new Map<string, GroupItem[]>();
-                  for (const item of rawMembers) {
-                    const key = item.ministry ?? '(不明)';
-                    if (!grouped.has(key)) grouped.set(key, []);
-                    grouped.get(key)!.push(item);
-                  }
-                  const sortedGroups = Array.from(grouped.entries()).sort((a, b) =>
-                    b[1].reduce((s, x) => s + x.value, 0) - a[1].reduce((s, x) => s + x.value, 0)
-                  );
-                  const btnStyle: React.CSSProperties = { fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' };
-                  return sortedGroups.map(([ministry, items]) => {
-                    const isCollapsed = collapsedMinistries.has(ministry);
-                    const displayCount = ministryDisplayCounts.get(ministry) ?? 10;
-                    const total = items.reduce((s, x) => s + x.value, 0);
-                    const remaining = items.length - displayCount;
-                    return (
-                      <div key={ministry} style={{ marginBottom: 4 }}>
-                        <button type="button" aria-expanded={!isCollapsed}
-                          onClick={() => setCollapsedMinistries(prev => { const next = new Set(prev); if (next.has(ministry)) next.delete(ministry); else next.add(ministry); return next; })}
-                          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: '#f8f8f8', border: 'none', borderRadius: 4, padding: '4px 6px', cursor: 'pointer', gap: 6 }}
-                        >
-                          <span style={{ fontSize: 11, fontWeight: 600, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{isCollapsed ? '▶' : '▼'} {ministry}</span>
-                          <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{items.length}件 {formatYen(total)}</span>
-                        </button>
-                        {!isCollapsed && (<>
-                          {items.slice(0, displayCount).map((item, i) => {
-                            const spId = item.id.startsWith('project-budget-') ? item.id.replace('project-budget-', 'project-spending-') : item.id;
-                            const rCount = projectRecipientCount.get(spId);
-                            return (
-                              <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '4px 6px', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
-                              >
-                                <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                                <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                                  {rCount != null && <span style={{ fontSize: 10, color: '#bbb', marginRight: 4 }}>{rCount.toLocaleString()}先</span>}
-                                  {formatYen(item.value)}
-                                </span>
-                              </button>
-                            );
-                          })}
-                          <div style={{ display: 'flex', gap: 0, padding: '2px 4px', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {remaining > 0 && <>
-                              <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, displayCount + 10))} style={btnStyle}>さらに{Math.min(10, remaining)}件（残{remaining}）</button>
-                              <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, items.length))} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
-                            </>}
-                            {displayCount > 10 && <button onClick={() => setMinistryDisplayCounts(prev => new Map(prev).set(ministry, 10))} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
-                          </div>
-                        </>)}
-                      </div>
-                    );
-                  });
-                };
-                // collapse-all toggle for grouped views
-                const renderGroupToggle = (members: GroupItem[]) => {
-                  const allMinistries = Array.from(new Set(members.map(m => m.ministry ?? '(不明)')));
-                  const allCollapsed = allMinistries.every(m => collapsedMinistries.has(m));
-                  return (
-                    <button type="button" onClick={() => setCollapsedMinistries(allCollapsed ? new Set() : new Set(allMinistries))}
-                      style={iconBtnStyle} title={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'} aria-label={allCollapsed ? 'すべて展開' : 'すべて折りたたむ'}>
-                      {allCollapsed ? svgExpandAll : svgCollapseAll}
+                type PanelItem = { id: string; name: string; value: number; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; };
+                const renderFlatList = (items: PanelItem[]) => {
+                  if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
+                  return items.map((item, i) => (
+                    <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                    >
+                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                     </button>
-                  );
+                  ));
                 };
+                const isProjectNode = selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending';
+                const isSelfRecipient = selectedNode.type === 'recipient' && !selectedNode.aggregated;
                 return (
                   <div style={{ borderTop: '1px solid #f0f0f0', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* Tab bar */}
                     <div style={{ display: 'flex', borderBottom: '1px solid #eee', flexShrink: 0, background: '#fff' }}>
-                      <button type="button" style={activeTab === 'in' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('in')}>
-                        流入元 <span style={{ fontWeight: 400, fontSize: 11 }}>({
-                          (selectedNode?.id === '__agg-project-spending' || selectedNode?.id === '__agg-project-budget') && filtered?.aggNodeMembers?.has('__agg-project-budget')
-                            ? filtered.aggNodeMembers.get('__agg-project-budget')!.length
-                            : selectedNode?.id === '__agg-recipient' && filtered?.aggNodeMembers?.has('__agg-project-spending')
-                              ? selectedNodeAllConnections.inEdges.reduce((s, item) =>
-                                  s + (item.id === '__agg-project-spending' ? (filtered.aggNodeMembers.get('__agg-project-spending')?.length ?? 1) : 1), 0)
-                              : selectedNodeAllConnections.inEdges.length
-                        })</span>
+                      <button type="button" style={panelTab === 'ministry' ? tabBtnActive : tabBtnBase} onClick={() => setPanelTab('ministry')}>
+                        府省庁<span style={{ fontWeight: 400, fontSize: 11 }}>({panelSections.ministries.length})</span>
                       </button>
-                      <button type="button" style={activeTab === 'out' ? tabBtnActive : tabBtnBase} onClick={() => setConnectionTab('out')}>
-                        流出先 <span style={{ fontWeight: 400, fontSize: 11 }}>({
-                          selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-spending')
-                            ? filtered.aggNodeMembers.get('__agg-project-spending')!.length
-                            : selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-recipient')
-                              ? selectedNodeAllConnections.outEdges.reduce((s, item) =>
-                                  s + (item.id === '__agg-recipient' ? (filtered.aggNodeMembers.get('__agg-recipient')?.length ?? 1) : 1), 0)
-                              : selectedNodeAllConnections.outEdges.length
-                        })</span>
+                      <button type="button" style={panelTab === 'project' ? tabBtnActive : tabBtnBase} onClick={() => setPanelTab('project')}>
+                        事業<span style={{ fontWeight: 400, fontSize: 11 }}>({panelSections.projects.length})</span>
+                      </button>
+                      <button type="button" style={panelTab === 'recipient' ? tabBtnActive : tabBtnBase} onClick={() => setPanelTab('recipient')}>
+                        支出先<span style={{ fontWeight: 400, fontSize: 11 }}>({panelSections.recipients.length})</span>
                       </button>
                     </div>
-
                     {/* Tab content */}
                     <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
-                      {activeTab === 'in' && !hasIn && <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>}
-                      {activeTab === 'in' && hasIn && (() => {
-                        const useGrouped = selectedNode?.type === 'recipient' || selectedNode?.id === '__agg-project-spending' || selectedNode?.id === '__agg-project-budget';
-                        const aggMembers: GroupItem[] = selectedNode?.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-budget')
-                          ? filtered.aggNodeMembers.get('__agg-project-budget')!
-                          : selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-budget')
-                          ? filtered.aggNodeMembers.get('__agg-project-budget')!
-                          : selectedNode?.type === 'recipient'
-                            // expand __agg-project-spending within inEdges before grouping
-                            ? selectedNodeAllConnections.inEdges.flatMap(item =>
-                                item.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
-                                  ? filtered.aggNodeMembers.get('__agg-project-spending')!
-                                  : [item]
-                              )
-                            : selectedNodeAllConnections.inEdges;
-                        return (<>
-                          {useGrouped && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>{renderGroupToggle(aggMembers)}</div>}
-                          {useGrouped ? renderGrouped(aggMembers) : (<>
-                            {(() => {
-                              // expand __agg-project-spending inline when rendering __agg-recipient inEdges
-                              const expandedInEdges = selectedNode?.id === '__agg-recipient'
-                                ? selectedNodeAllConnections.inEdges.flatMap(item =>
-                                    item.id === '__agg-project-spending' && filtered?.aggNodeMembers?.has('__agg-project-spending')
-                                      ? filtered.aggNodeMembers.get('__agg-project-spending')!
-                                      : [item]
-                                  )
-                                : selectedNodeAllConnections.inEdges;
-                              return (<>
-                                {expandedInEdges.slice(0, inDisplayCount).map((item, i) => {
-                                  const spId = item.id.startsWith('project-budget-') ? item.id.replace('project-budget-', 'project-spending-') : item.id;
-                                  const rCount = projectRecipientCount.get(spId);
-                                  return (
-                                    <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
-                                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', gap: 6, textAlign: 'left' }}
-                                    >
-                                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        {item.name}
-                                      </span>
-                                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                                        {rCount != null && <span style={{ fontSize: 10, color: '#bbb', marginRight: 4 }}>{rCount.toLocaleString()}先</span>}
-                                        {formatYen(item.value)}
-                                      </span>
-                                    </button>
-                                  );
-                                })}
-                                {(() => { const rem = expandedInEdges.length - inDisplayCount; return (
-                                  <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                    {rem > 0 && <>
-                                      <button onClick={() => setInDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
-                                      <button onClick={() => setInDisplayCount(expandedInEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
-                                    </>}
-                                    {inDisplayCount > 8 && <button onClick={() => setInDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
-                                  </div>
-                                ); })()}
-                              </>);
-                            })()}
-                          </>)}
-                        </>);
+                      {/* 府省庁タブ */}
+                      {panelTab === 'ministry' && (() => {
+                        const items = panelSections.ministries;
+                        if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
+                        return items.map((item, i) => (
+                          <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                          >
+                            <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                              {item.projectCount != null && <span style={{ fontSize: 10, color: '#bbb' }}>事業{item.projectCount.toLocaleString()}件</span>}
+                              {item.recipientCount != null && <span style={{ fontSize: 10, color: '#bbb' }}>支出先{item.recipientCount.toLocaleString()}件</span>}
+                              {formatYen(item.value)}
+                            </span>
+                          </button>
+                        ));
                       })()}
-
-                      {activeTab === 'out' && !hasOut && <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>}
-                      {activeTab === 'out' && hasOut && (() => {
-                        const useGrouped = selectedNode?.id === '__agg-project-budget' && filtered?.aggNodeMembers?.has('__agg-project-spending');
-                        const aggMembers = useGrouped ? filtered!.aggNodeMembers.get('__agg-project-spending')! : [];
-                        // expand __agg-recipient inline when rendering __agg-project-spending outEdges
-                        const expandedOutEdges = (selectedNode?.id === '__agg-project-spending'
-                          ? selectedNodeAllConnections.outEdges.flatMap(item =>
-                              item.id === '__agg-recipient' && filtered?.aggNodeMembers?.has('__agg-recipient')
-                                ? filtered.aggNodeMembers.get('__agg-recipient')!
-                                : [item]
-                            )
-                          : selectedNodeAllConnections.outEdges
-                        ).slice().sort((a, b) => b.value - a.value);
-                        return (<>
-                          {useGrouped && <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>{renderGroupToggle(aggMembers)}</div>}
-                          {useGrouped ? renderGrouped(aggMembers) : (<>
-                            {expandedOutEdges.slice(0, outDisplayCount).map((item, i) => {
-                              const spId = item.id.startsWith('project-budget-') ? item.id.replace('project-budget-', 'project-spending-') : item.id;
-                              const rCount = projectRecipientCount.get(spId);
-                              return (
-                                <button key={i} type="button" onClick={() => handleConnectionClick(item.id)}
-                                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', width: '100%', background: 'transparent', border: 'none', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', gap: 6, textAlign: 'left' }}
-                                >
-                                  <span title={item.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                                  <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                                    {rCount != null && <span style={{ fontSize: 10, color: '#bbb', marginRight: 4 }}>{rCount.toLocaleString()}先</span>}
-                                    {formatYen(item.value)}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                            {(() => { const rem = expandedOutEdges.length - outDisplayCount; return (
-                              <div style={{ display: 'flex', gap: 0, padding: '2px 0', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                {rem > 0 && <>
-                                  <button onClick={() => setOutDisplayCount(c => c + 10)} style={{ fontSize: 11, color: '#4a90d9', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px' }}>さらに{Math.min(10, rem)}件（残{rem}）</button>
-                                  <button onClick={() => setOutDisplayCount(expandedOutEdges.length)} style={iconBtnStyle} title="すべて表示" aria-label="すべて表示">{svgExpandAll}</button>
-                                </>}
-                                {outDisplayCount > 8 && <button onClick={() => setOutDisplayCount(8)} style={iconBtnStyle} title="折りたたむ" aria-label="折りたたむ">{svgCollapseAll}</button>}
+                      {/* 事業タブ */}
+                      {panelTab === 'project' && (() => {
+                        const items = panelSections.projects;
+                        if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
+                        // Project node: single budget/spending card
+                        if (isProjectNode) {
+                          const card = items[0];
+                          return (
+                            <div style={{ background: '#f8f8f8', borderRadius: 6, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                <span style={{ fontSize: 12, color: '#666' }}>予算額</span>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: '#333' }}>{formatYen(card.budgetValue ?? 0)}</span>
                               </div>
-                            ); })()}
-                          </>)}
-                        </>);
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                <span style={{ fontSize: 12, color: '#666' }}>支出額</span>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: '#e07040' }}>{formatYen(card.spendingValue ?? 0)}</span>
+                              </div>
+                              {card.recipientCount != null && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                  <span style={{ fontSize: 12, color: '#666' }}>支出先件数</span>
+                                  <span style={{ fontSize: 13, fontWeight: 600, color: '#333' }}>{card.recipientCount.toLocaleString()}件</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }
+                        // All other nodes: flat list with budget/spending values where available
+                        return items.map((item, i) => (
+                          <button key={i} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                          >
+                            <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                              {item.recipientCount != null && <span style={{ fontSize: 10, color: '#bbb', marginRight: 4 }}>{item.recipientCount.toLocaleString()}件</span>}
+                              {item.budgetValue != null && item.spendingValue != null
+                                ? <>予算{formatYen(item.budgetValue)} / 支出{formatYen(item.spendingValue)}</>
+                                : formatYen(item.value)}
+                            </span>
+                          </button>
+                        ));
+                      })()}
+                      {/* 支出先タブ */}
+                      {panelTab === 'recipient' && (() => {
+                        const items = panelSections.recipients;
+                        if (isSelfRecipient) {
+                          if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
+                          const self = items[0];
+                          return (
+                            <div style={{ background: '#f8f8f8', borderRadius: 6, padding: '10px 12px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                <span style={{ fontSize: 12, color: '#666' }}>支出受取額</span>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: '#d94545' }}>{formatYen(self.value)}</span>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return renderFlatList(items);
                       })()}
                     </div>
                   </div>
