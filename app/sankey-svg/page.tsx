@@ -892,7 +892,8 @@ export default function RealDataSankeyPage() {
                         }}
                         onMouseLeave={() => setHoveredColIndex(null)}
                       >
-                        {label}{amountText}
+                        <tspan x={x + NODE_W / 2}>{label}</tspan>
+                        {amountText && <tspan x={x + NODE_W / 2} dy="1.3em">{amountText.trim()}</tspan>}
                       </text>
                     );
                   });
