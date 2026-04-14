@@ -37,8 +37,8 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const pm = p.get('pm'); if (pm !== null) result.pinnedMinistryName = pm;
   const ro = p.get('ro'); if (ro !== null) { const n = parseInt(ro, 10); if (!isNaN(n)) result.recipientOffset = Math.max(0, n); }
   const tm = p.get('tm'); if (tm !== null) { const n = parseInt(tm, 10); if (!isNaN(n)) result.topMinistry = Math.max(1, Math.min(37, n)); }
-  const tp = p.get('tp'); if (tp !== null) { const n = parseInt(tp, 10); if (!isNaN(n)) result.topProject = Math.max(1, Math.min(100, n)); }
-  const tr = p.get('tr'); if (tr !== null) { const n = parseInt(tr, 10); if (!isNaN(n)) result.topRecipient = Math.max(1, Math.min(100, n)); }
+  const tp = p.get('tp'); if (tp !== null) { const n = parseInt(tp, 10); if (!isNaN(n)) result.topProject = Math.max(1, Math.min(300, n)); }
+  const tr = p.get('tr'); if (tr !== null) { const n = parseInt(tr, 10); if (!isNaN(n)) result.topRecipient = Math.max(1, Math.min(300, n)); }
   const sl = p.get('sl'); if (sl !== null) result.showLabels = sl !== '0';
   const iz = p.get('iz'); if (iz !== null) result.includeZeroSpending = iz !== '0';
   const ar = p.get('ar'); if (ar !== null) result.showAggRecipient = ar !== '0';
@@ -1109,6 +1109,7 @@ export default function RealDataSankeyPage() {
                               <text x={node.x1 + 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
                                 style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
+                                onMouseDown={(e) => e.preventDefault()}
                                 onClick={(e) => handleNodeClick(node, e)}>
                                 {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                               </text>
@@ -1132,6 +1133,7 @@ export default function RealDataSankeyPage() {
                             <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
+                              onMouseDown={(e) => e.preventDefault()}
                               onClick={(e) => handleNodeClick(node, e)}>
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
@@ -1139,6 +1141,7 @@ export default function RealDataSankeyPage() {
                             <text x={spendingNode.x1 + 3} y={sH / 2} fontSize={11 / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
+                              onMouseDown={(e) => e.preventDefault()}
                               onClick={(e) => handleNodeClick(node, e)}>
                               {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
                             </text>
@@ -1189,6 +1192,7 @@ export default function RealDataSankeyPage() {
                             fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : '#333'}
                             style={{ userSelect: 'none', cursor: 'pointer' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
+                            onMouseDown={(e) => e.preventDefault()}
                             onClick={(e) => handleNodeClick(node, e)}
                           >
                             {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
@@ -1684,7 +1688,7 @@ export default function RealDataSankeyPage() {
         return (
           <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
+              <span style={{ color: '#555', fontSize: 11 }}>Top</span>
               {isEditingOffset ? (
                 <input
                   type="number"
@@ -1703,8 +1707,8 @@ export default function RealDataSankeyPage() {
                   style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
                 >{rangeStart}</button>
               )}
-              <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}位</span>
-              <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => { pendingHistoryAction.current = 'replace'; setRecipientOffset(Number(e.target.value)); }} style={{ width: 100 }} />
+              <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}</span>
+              <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => { pendingHistoryAction.current = 'replace'; setRecipientOffset(Number(e.target.value)); }} style={{ width: 60 }} />
               <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                 {([
@@ -1736,6 +1740,21 @@ export default function RealDataSankeyPage() {
                   <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
                 </button>
             </label>
+            {/* 区切り */}
+            <div style={{ width: 1, alignSelf: 'stretch', background: '#e0e0e0', margin: '0 2px' }} />
+            {/* TopN: 事業・支出先 */}
+            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ color: '#555', fontSize: 11 }}>事業:</span>
+              <input type="number" min={1} max={300} value={topProject}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(1000, Number(e.target.value) || 1))); }}
+                style={{ width: 50, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
+              <input type="number" min={1} max={300} value={topRecipient}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(1000, Number(e.target.value) || 1))); }}
+                style={{ width: 50, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+            </label>
           </div>
         );
       })()}
@@ -1758,23 +1777,7 @@ export default function RealDataSankeyPage() {
         {showSettings && (
           <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-            <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
-              <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 48, color: '#555' }}>省庁:</span>
-                <input type="number" min={1} max={37} value={topMinistry} onChange={e => { pendingHistoryAction.current = 'replace'; setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={37} value={topMinistry} onChange={e => { pendingHistoryAction.current = 'replace'; setTopMinistry(Number(e.target.value)); }} style={{ flex: 1 }} />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 48, color: '#555' }}>事業:</span>
-                <input type="number" min={1} max={100} value={topProject} onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={100} value={topProject} onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Number(e.target.value)); }} style={{ flex: 1 }} />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 48, color: '#555' }}>支出先:</span>
-                <input type="number" min={1} max={100} value={topRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-                <input type="range" min={1} max={100} value={topRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Number(e.target.value)); }} style={{ flex: 1 }} />
-              </label>
+            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
