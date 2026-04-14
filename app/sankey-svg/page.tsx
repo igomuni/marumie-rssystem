@@ -878,7 +878,7 @@ export default function RealDataSankeyPage() {
                     return (
                       <text
                         key={i}
-                        x={x + NODE_W / 2} y={-13}
+                        x={x + NODE_W / 2} y={amountText ? -26 : -13}
                         textAnchor="middle" fontSize={15} fill="#999"
                         style={{ cursor: 'default', userSelect: 'none' }}
                         onMouseEnter={(e) => {
