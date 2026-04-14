@@ -111,6 +111,8 @@ export default function RealDataSankeyPage() {
   const [searchCursorIndex, setSearchCursorIndex] = useState(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
+  const [zeroSpendingAlert, setZeroSpendingAlert] = useState(false);
+  const zeroSpendingAlertTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Tracks whether the next URL update should push (navigation) or replace (slider/toggle)
   const pendingHistoryAction = useRef<'push' | 'replace' | null>(null);
   const pendingFocusId = useRef<string | null>(null);
@@ -681,6 +683,21 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, selectedNodeInLayout, layout, isPanelCollapsed, baseZoom]);
 
   const handleConnectionClick = useCallback((nodeId: string) => {
+    // Block selection of zero-spending projects when includeZeroSpending is OFF
+    if (!includeZeroSpending && graphData) {
+      const spId = nodeId.startsWith('project-budget-')
+        ? nodeId.replace('project-budget-', 'project-spending-')
+        : nodeId;
+      if (spId.startsWith('project-spending-')) {
+        const spNode = graphData.nodes.find(n => n.id === spId);
+        if (spNode && spNode.value === 0) {
+          if (zeroSpendingAlertTimer.current) clearTimeout(zeroSpendingAlertTimer.current);
+          setZeroSpendingAlert(true);
+          zeroSpendingAlertTimer.current = setTimeout(() => setZeroSpendingAlert(false), 3500);
+          return;
+        }
+      }
+    }
     // If already in layout, select and focus directly (no effect needed)
     const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
     if (inLayoutNode) {
@@ -751,7 +768,7 @@ export default function RealDataSankeyPage() {
     // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
     pendingFocusId.current = nodeId;
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName]);
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, includeZeroSpending]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -938,6 +955,12 @@ export default function RealDataSankeyPage() {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
+
+      {zeroSpendingAlert && (
+        <div style={{ position: 'absolute', top: 60, left: '50%', transform: 'translateX(-50%)', background: '#fff8e1', border: '1px solid #f9a825', color: '#5d4037', padding: '10px 18px', borderRadius: 8, fontSize: 13, boxShadow: '0 2px 10px rgba(0,0,0,0.15)', zIndex: 30, whiteSpace: 'nowrap', pointerEvents: 'none' }}>
+          支出0円のため現在の設定では選択できません。「支出0円事業を対象にする」をオンにしてください。
+        </div>
+      )}
 
       {loading && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5, pointerEvents: 'none' }}>
