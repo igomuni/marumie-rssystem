@@ -19,7 +19,7 @@ const STATUS_META: Record<RecipientRow['s'], { label: string; cls: string }> = {
   unknown: { label: '未登録',  cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
 };
 
-function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose: () => void }) {
+function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreItem; onClose: () => void; year: string }) {
   const [recipients, setRecipients] = useState<RecipientRow[] | null>(null);
   const [recipientsError, setRecipientsError] = useState(false);
   const [recipientSearch, setRecipientSearch] = useState('');
@@ -51,11 +51,11 @@ function ScoreDetailDialog({ item, onClose }: { item: QualityScoreItem; onClose:
     setRecipientSortField('chain');
     setRecipientSortDir('asc');
     setShowAxisDetail(false);
-    fetch(`/api/quality-scores/recipients?pid=${item.pid}`)
+    fetch(`/api/quality-scores/recipients?pid=${item.pid}&year=${year}`)
       .then(res => res.ok ? res.json() : Promise.reject())
       .then((rows: RecipientRow[]) => setRecipients(rows))
       .catch(() => setRecipientsError(true));
-  }, [item.pid]);
+  }, [item.pid, year]);
 
   const displayedRecipients = useMemo(() => {
     if (!recipients) return [];
@@ -461,6 +461,7 @@ function parseAmountInput(input: string): number | null {
 type ScoreRange = 'all' | '0-9' | '10-19' | '20-29' | '30-39' | '40-49' | '50-59' | '60-69' | '70-79' | '80-89' | '90-99' | '100-100';
 
 export default function QualityPage() {
+  const [year, setYear] = useState<'2024' | '2025'>('2025');
   const [data, setData] = useState<QualityScoresResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -481,12 +482,16 @@ export default function QualityPage() {
   const [dialogItem, setDialogItem] = useState<QualityScoreItem | null>(null);
 
   useEffect(() => {
-    fetch('/api/quality-scores')
+    setData(null);
+    setLoading(true);
+    setError(null);
+    setSelectedMinistry('');
+    fetch(`/api/quality-scores?year=${year}`)
       .then(res => res.ok ? res.json() : Promise.reject(res.status))
       .then((json: QualityScoresResponse) => setData(json))
       .catch(e => setError(String(e)))
       .finally(() => setLoading(false));
-  }, []);
+  }, [year]);
 
   const filtered = useMemo<QualityScoreItem[]>(() => {
     if (!data) return [];
@@ -591,7 +596,7 @@ export default function QualityPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {dialogItem && <ScoreDetailDialog item={dialogItem} onClose={() => setDialogItem(null)} />}
+      {dialogItem && <ScoreDetailDialog item={dialogItem} onClose={() => setDialogItem(null)} year={year} />}
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-4">
         <div className="max-w-[1600px] mx-auto">
@@ -602,6 +607,14 @@ export default function QualityPage() {
             <h1 className="text-lg font-bold text-gray-900 dark:text-white">
               事業別 支出先データ品質スコア
             </h1>
+            <select
+              value={year}
+              onChange={e => setYear(e.target.value as '2024' | '2025')}
+              className="ml-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 cursor-pointer"
+            >
+              <option value="2025">2025年度</option>
+              <option value="2024">2024年度</option>
+            </select>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {summary.total.toLocaleString()}事業 / 平均 {summary.avgScore.toFixed(1)} / 中央値 {summary.medianScore.toFixed(1)} / 最頻値 {summary.modeScore}

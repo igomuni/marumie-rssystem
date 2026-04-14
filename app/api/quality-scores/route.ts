@@ -52,16 +52,16 @@ export interface QualityScoresResponse {
   };
 }
 
-let cached: QualityScoresResponse | null = null;
+const cache = new Map<string, QualityScoresResponse>();
 
-function loadData(): QualityScoresResponse {
-  if (cached) return cached;
+function loadData(year: string): QualityScoresResponse {
+  if (cache.has(year)) return cache.get(year)!;
 
-  const jsonPath = path.join(process.cwd(), 'public', 'data', 'project-quality-scores.json');
+  const jsonPath = path.join(process.cwd(), 'public', 'data', `project-quality-scores-${year}.json`);
   if (!fs.existsSync(jsonPath)) {
     throw new Error(
-      'project-quality-scores.json が見つかりません。' +
-      'python3 scripts/score-project-quality.py を実行してください。'
+      `project-quality-scores-${year}.json が見つかりません。` +
+      `python3 scripts/score-project-quality.py --year ${year} を実行してください。`
     );
   }
 
@@ -107,16 +107,19 @@ function loadData(): QualityScoresResponse {
     }
   }
 
-  cached = {
+  const result: QualityScoresResponse = {
     items,
     summary: { total: items.length, avgScore, medianScore, stddevScore, modeScore, ministries },
   };
-  return cached;
+  cache.set(year, result);
+  return result;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const data = loadData();
+    const url = new URL(req.url);
+    const year = url.searchParams.get('year') ?? '2024';
+    const data = loadData(year);
     return NextResponse.json(data);
   } catch (e) {
     return NextResponse.json(
