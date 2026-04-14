@@ -390,6 +390,11 @@ export default function RealDataSankeyPage() {
     return ids;
   }, [selectedNodeInLayout]);
 
+  // Spending partner of the currently hovered merged project node (for link highlight)
+  const hoveredPartnerSpendingId = hoveredNode?.type === 'project-budget' && hoveredNode.projectId != null
+    ? `project-spending-${hoveredNode.projectId}`
+    : hoveredNode?.id === '__agg-project-budget' ? '__agg-project-spending' : null;
+
   // Per-ministry project stats — for total/ministry node side panel
   type ProjectStat = { pid: number; name: string; budgetId: string; spendingId: string; budgetValue: number; spendingValue: number };
   type MinistryStat = { total: number; budgetTotal: number; spendingTotal: number; budgetOnly: number; spendingOnly: number; neither: number; projects: ProjectStat[] };
@@ -823,6 +828,22 @@ export default function RealDataSankeyPage() {
               overflow="visible"
               style={{ position: 'absolute', inset: 0, display: 'block' }}
             >
+              {/* Gradient defs for merged project nodes */}
+              <defs>
+                <linearGradient id="proj-node-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#4db870" />
+                  <stop offset="44%" stopColor="#4db870" />
+                  <stop offset="56%" stopColor="#e07040" />
+                  <stop offset="100%" stopColor="#e07040" />
+                </linearGradient>
+                <linearGradient id="proj-agg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#999" />
+                  <stop offset="44%" stopColor="#999" />
+                  <stop offset="50%" stopColor="#777" />
+                  <stop offset="56%" stopColor="#999" />
+                  <stop offset="100%" stopColor="#999" />
+                </linearGradient>
+              </defs>
               {/* Backdrop: full-SVG invisible rect for deselection on background click */}
               <rect
                 x={0} y={0} width={svgWidth} height={svgHeight}
@@ -831,23 +852,6 @@ export default function RealDataSankeyPage() {
               />
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
-                {/* Gradient for merged project nodes */}
-                <defs>
-                  <linearGradient id="proj-node-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#4db870" />
-                    <stop offset="44%" stopColor="#4db870" />
-                    <stop offset="56%" stopColor="#e07040" />
-                    <stop offset="100%" stopColor="#e07040" />
-                  </linearGradient>
-                  <linearGradient id="proj-agg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#999" />
-                    <stop offset="44%" stopColor="#999" />
-                    <stop offset="50%" stopColor="#777" />
-                    <stop offset="56%" stopColor="#999" />
-                    <stop offset="100%" stopColor="#999" />
-                  </linearGradient>
-                </defs>
-
                 {/* Column labels with totals */}
                 {(() => {
                   const maxCol = layout.maxCol || 1;
@@ -901,7 +905,8 @@ export default function RealDataSankeyPage() {
                           ? (hoveredLink === link ? 0.45 : 0.35)
                           : 0.05
                         : hoveredLink === link ? 0.6
-                          : hoveredNode && (link.source === hoveredNode || link.target === hoveredNode) ? 0.5
+                          : hoveredNode && (link.source === hoveredNode || link.target === hoveredNode
+                              || link.source.id === hoveredPartnerSpendingId || link.target.id === hoveredPartnerSpendingId) ? 0.5
                           : (hoveredNode || hoveredLink) ? 0.1
                           : 0.25
                     }
@@ -979,7 +984,7 @@ export default function RealDataSankeyPage() {
                               <text x={node.x1 + 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
                                 style={{ userSelect: 'none', pointerEvents: 'none' }} clipPath={`url(#clip-col-${getColumn(node)})`}>
-                                {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.rawValue ?? node.value)})
+                                {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                               </text>
                             )}
                           </g>
