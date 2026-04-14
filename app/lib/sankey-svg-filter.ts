@@ -649,6 +649,25 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     node.y1 = newY0 + spendingHeight;
   }
 
+  // 3. Repack recipient targetLinks — spending y0 positions changed, so resort and reassign y1
+  const affectedRecipients = new Set<LayoutNode>();
+  for (const node of nodes) {
+    if ((node.type === 'project-spending' && node.projectId != null) || node.id === '__agg-project-spending') {
+      for (const link of node.sourceLinks) affectedRecipients.add(link.target);
+    }
+  }
+  for (const recipient of affectedRecipients) {
+    recipient.targetLinks.sort((a, b) => a.source.y0 - b.source.y0);
+    const recipientH = recipient.y1 - recipient.y0;
+    const totalTgt = recipient.targetLinks.reduce((s, l) => s + l.value, 0);
+    let ty = recipient.y0;
+    for (const link of recipient.targetLinks) {
+      link.targetWidth = totalTgt > 0 ? recipientH * (link.value / totalTgt) : 0;
+      link.y1 = ty;
+      ty += link.targetWidth;
+    }
+  }
+
   // Content bounding box (in inner coords, before MARGIN)
   let contentMaxX = 0, contentMaxY = 0;
   for (const node of nodes) {
