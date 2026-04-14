@@ -136,6 +136,18 @@ def normalize_text(text: str) -> str:
 
     return text
 
+def fix_zip_filename(raw: str) -> str:
+    """ZIPエントリのファイル名文字化けを修正する。
+    UTF-8フラグ未設定のZIPはPythonがcp437として読む。
+    日本語ZIPはcp932(Shift-JIS)で格納されているため、
+    cp437バイト列に戻してcp932として再デコードする。
+    """
+    try:
+        return raw.encode('cp437').decode('cp932')
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return raw  # 変換失敗時は元の文字列を使用
+
+
 def extract_all_zips(directory: Path) -> List[Path]:
     """ディレクトリ内のすべてのZIPファイルを解凍"""
     zip_files = list(directory.glob('*.zip'))
@@ -152,8 +164,12 @@ def extract_all_zips(directory: Path) -> List[Path]:
         try:
             print(f'📦 解凍中: {zip_path.name}')
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(directory)
-                extracted_files.extend([directory / name for name in zip_ref.namelist()])
+                for info in zip_ref.infolist():
+                    # UTF-8フラグ未設定の場合、cp932(Shift-JIS)として再デコード
+                    if not (info.flag_bits & 0x800):
+                        info.filename = fix_zip_filename(info.filename)
+                    zip_ref.extract(info, directory)
+                    extracted_files.append(directory / info.filename)
             print(f'   ✅ 完了')
         except Exception as e:
             print(f'   ❌ エラー: {e}')
