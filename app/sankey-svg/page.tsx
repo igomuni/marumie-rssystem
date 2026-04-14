@@ -988,11 +988,11 @@ export default function RealDataSankeyPage() {
                             onClick={(e) => handleNodeClick(node, e)}
                           />
                           {labelVisible && (<>
-                            {/* Left label: budget amount (inside green portion, white text) */}
-                            <text x={node.x0 + NODE_W * 2 - 4} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
-                              fill={connectedNodeIds && !isConnected ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.9)'}
+                            {/* Left label: budget amount */}
+                            <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
+                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', pointerEvents: 'none' }}>
-                              {formatYen(node.rawValue ?? node.value)}
+                              {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
                             {/* Right label: project name + spending amount */}
                             <text x={spendingNode.x1 + 3} y={sH / 2} fontSize={11 / zoom} dominantBaseline="middle"
