@@ -1568,6 +1568,22 @@ export default function RealDataSankeyPage() {
         </div>
       )}
 
+      {/* Year selector — top center */}
+      <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}>
+        <select
+          value={year}
+          onChange={e => { pendingHistoryAction.current = 'replace'; setYear(e.target.value as '2024' | '2025'); }}
+          style={{ fontSize: 13, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
+        >
+          <option value="2025">2025年度</option>
+          <option value="2024">2024年度</option>
+        </select>
+        {/* dropdown arrow */}
+        <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+          <path d="M7 10l5 5 5-5z"/>
+        </svg>
+      </div>
+
       {/* Search box — top left */}
       <div
         data-pan-disabled="true"
@@ -1740,18 +1756,6 @@ export default function RealDataSankeyPage() {
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
             <div id="sankey-topn-settings" role="dialog" aria-label="TopN 設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
               <div style={{ fontWeight: 'bold', color: '#333', marginBottom: 2 }}>TopN 設定</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ color: '#555' }}>年度:</span>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-                  <input type="radio" name="year" value="2025" checked={year === '2025'} onChange={() => { pendingHistoryAction.current = 'replace'; setYear('2025'); }} style={{ cursor: 'pointer' }} />
-                  <span style={{ color: '#555' }}>2025</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
-                  <input type="radio" name="year" value="2024" checked={year === '2024'} onChange={() => { pendingHistoryAction.current = 'replace'; setYear('2024'); }} style={{ cursor: 'pointer' }} />
-                  <span style={{ color: '#555' }}>2024</span>
-                </label>
-              </div>
-              <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '2px 0' }} />
               <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ width: 48, color: '#555' }}>省庁:</span>
                 <input type="number" min={1} max={37} value={topMinistry} onChange={e => { pendingHistoryAction.current = 'replace'; setTopMinistry(Math.max(1, Math.min(37, Number(e.target.value) || 1))); }} style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
