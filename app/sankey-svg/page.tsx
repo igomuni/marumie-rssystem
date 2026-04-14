@@ -835,8 +835,8 @@ export default function RealDataSankeyPage() {
                 <defs>
                   <linearGradient id="proj-node-grad" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor="#4db870" />
-                    <stop offset="44%" stopColor="#4db870" />
-                    <stop offset="56%" stopColor="#e07040" />
+                    <stop offset="40%" stopColor="#4db870" />
+                    <stop offset="60%" stopColor="#e07040" />
                     <stop offset="100%" stopColor="#e07040" />
                   </linearGradient>
                 </defs>
@@ -981,7 +981,7 @@ export default function RealDataSankeyPage() {
                       return (
                         <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0}px)`, transition: 'transform 0.3s ease' }}>
                           <path
-                            d={mergedProjectPath(node.x0, NODE_W * 2, bH, sH)}
+                            d={mergedProjectPath(node.x0, NODE_W, bH, sH)}
                             fill={nodeFill}
                             style={{ opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease' }}
                             onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
