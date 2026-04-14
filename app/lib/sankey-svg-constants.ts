@@ -48,7 +48,7 @@ export const TYPE_LABELS: Record<string, string> = {
 };
 
 export function getNodeColor(node: { type: string; aggregated?: boolean }): string {
-  if (node.aggregated) return '#999';
+  if (node.aggregated) return '#aaa';
   return TYPE_COLORS[node.type] || '#999';
 }
 
