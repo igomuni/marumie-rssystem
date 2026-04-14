@@ -37,8 +37,8 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const pm = p.get('pm'); if (pm !== null) result.pinnedMinistryName = pm;
   const ro = p.get('ro'); if (ro !== null) { const n = parseInt(ro, 10); if (!isNaN(n)) result.recipientOffset = Math.max(0, n); }
   const tm = p.get('tm'); if (tm !== null) { const n = parseInt(tm, 10); if (!isNaN(n)) result.topMinistry = Math.max(1, Math.min(37, n)); }
-  const tp = p.get('tp'); if (tp !== null) { const n = parseInt(tp, 10); if (!isNaN(n)) result.topProject = Math.max(1, Math.min(100, n)); }
-  const tr = p.get('tr'); if (tr !== null) { const n = parseInt(tr, 10); if (!isNaN(n)) result.topRecipient = Math.max(1, Math.min(100, n)); }
+  const tp = p.get('tp'); if (tp !== null) { const n = parseInt(tp, 10); if (!isNaN(n)) result.topProject = Math.max(1, Math.min(300, n)); }
+  const tr = p.get('tr'); if (tr !== null) { const n = parseInt(tr, 10); if (!isNaN(n)) result.topRecipient = Math.max(1, Math.min(300, n)); }
   const sl = p.get('sl'); if (sl !== null) result.showLabels = sl !== '0';
   const iz = p.get('iz'); if (iz !== null) result.includeZeroSpending = iz !== '0';
   const ar = p.get('ar'); if (ar !== null) result.showAggRecipient = ar !== '0';
@@ -1686,15 +1686,15 @@ export default function RealDataSankeyPage() {
             {/* TopN: 事業・支出先 */}
             <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
               <span style={{ color: '#555', fontSize: 11 }}>事業:</span>
-              <input type="number" min={1} max={100} value={topProject}
-                onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }}
-                style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+              <input type="number" min={1} max={300} value={topProject}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, Number(e.target.value) || 1))); }}
+                style={{ width: 44, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
             </label>
             <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
               <span style={{ color: '#555', fontSize: 11 }}>支出先 Top:</span>
-              <input type="number" min={1} max={100} value={topRecipient}
-                onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(100, Number(e.target.value) || 1))); }}
-                style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
+              <input type="number" min={1} max={300} value={topRecipient}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, Number(e.target.value) || 1))); }}
+                style={{ width: 44, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
             </label>
             {/* 区切り */}
             <div style={{ width: 1, alignSelf: 'stretch', background: '#e0e0e0', margin: '0 2px' }} />
