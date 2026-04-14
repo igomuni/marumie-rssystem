@@ -21,21 +21,22 @@ export interface RecipientRow {
   cc: string;
 }
 
-let cached: Record<string, RecipientRow[]> | null = null;
+const cache = new Map<string, Record<string, RecipientRow[]>>();
 
-function loadData(): Record<string, RecipientRow[]> {
-  if (cached) return cached;
+function loadData(year: string): Record<string, RecipientRow[]> {
+  if (cache.has(year)) return cache.get(year)!;
 
-  const jsonPath = path.join(process.cwd(), 'public', 'data', 'project-quality-recipients.json');
+  const jsonPath = path.join(process.cwd(), 'public', 'data', `project-quality-recipients-${year}.json`);
   if (!fs.existsSync(jsonPath)) {
     throw new Error(
-      'project-quality-recipients.json が見つかりません。' +
-      'python3 scripts/score-project-quality.py を実行してください。'
+      `project-quality-recipients-${year}.json が見つかりません。` +
+      `python3 scripts/score-project-quality.py --year ${year} を実行してください。`
     );
   }
 
-  cached = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-  return cached!;
+  const data: Record<string, RecipientRow[]> = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+  cache.set(year, data);
+  return data;
 }
 
 export async function GET(req: Request) {
@@ -45,8 +46,9 @@ export async function GET(req: Request) {
     if (!pid) {
       return NextResponse.json({ error: 'pid パラメータが必要です' }, { status: 400 });
     }
+    const year = url.searchParams.get('year') ?? '2024';
 
-    const data = loadData();
+    const data = loadData(year);
     return NextResponse.json(data[pid] ?? []);
   } catch (e) {
     return NextResponse.json(

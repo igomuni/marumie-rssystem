@@ -9,10 +9,13 @@
   5. 支出先名の透明性（不透明キーワード辞書ベース） 重み 10%
 
 実行:
-  python3 scripts/score-project-quality.py [--limit N]
+  python3 scripts/score-project-quality.py [--year YEAR] [--limit N]
+  デフォルト: --year 2024
 
 出力:
-  data/result/project_quality_scores.csv
+  data/result/project_quality_scores_{YEAR}.csv
+  public/data/project-quality-scores-{YEAR}.json
+  public/data/project-quality-recipients-{YEAR}.json
 """
 
 import csv
@@ -23,17 +26,25 @@ import collections
 import argparse
 from pathlib import Path
 
+# ── CLI引数 ──
+parser = argparse.ArgumentParser(description='事業別 支出先データ品質スコア計算')
+parser.add_argument('--year', type=int, default=2024, help='対象年度 (例: 2025, デフォルト: 2024)')
+parser.add_argument('--limit', type=int, default=0, help='Limit number of projects (0=all)')
+args = parser.parse_args()
+YEAR = args.year
+BUDGET_YEAR = YEAR - 1  # 予算CSVの「予算年度」列でフィルタする値
+
 REPO_ROOT = Path(__file__).parent.parent
-BUDGET_CSV = REPO_ROOT / 'data' / 'year_2024' / '2-1_RS_2024_予算・執行_サマリ.csv'
-SPEND_CSV  = REPO_ROOT / 'data' / 'year_2024' / '5-1_RS_2024_支出先_支出情報.csv'
-BLOCK_CSV  = REPO_ROOT / 'data' / 'year_2024' / '5-2_RS_2024_支出先_支出ブロックのつながり.csv'
+BUDGET_CSV = REPO_ROOT / 'data' / f'year_{YEAR}' / f'2-1_RS_{YEAR}_予算・執行_サマリ.csv'
+SPEND_CSV  = REPO_ROOT / 'data' / f'year_{YEAR}' / f'5-1_RS_{YEAR}_支出先_支出情報.csv'
+BLOCK_CSV  = REPO_ROOT / 'data' / f'year_{YEAR}' / f'5-2_RS_{YEAR}_支出先_支出ブロックのつながり.csv'
 DICT_CSV   = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'recipient_dictionary.csv'
 GOV_CSV    = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'government_agency_names.csv'
 SUPP_CSV   = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'supplementary_valid_names.csv'
 OPAQUE_CSV = REPO_ROOT / 'public' / 'data' / 'dictionaries' / 'opaque_recipient_keywords.csv'
-OUT_CSV              = REPO_ROOT / 'data' / 'result' / 'project_quality_scores.csv'
-OUT_JSON             = REPO_ROOT / 'public' / 'data' / 'project-quality-scores.json'
-OUT_RECIPIENTS_JSON  = REPO_ROOT / 'public' / 'data' / 'project-quality-recipients.json'
+OUT_CSV              = REPO_ROOT / 'data' / 'result' / f'project_quality_scores_{YEAR}.csv'
+OUT_JSON             = REPO_ROOT / 'public' / 'data' / f'project-quality-scores-{YEAR}.json'
+OUT_RECIPIENTS_JSON  = REPO_ROOT / 'public' / 'data' / f'project-quality-recipients-{YEAR}.json'
 
 def to_int(s):
     try:    return int(str(s).replace(',', '').strip())
@@ -96,17 +107,17 @@ def is_opaque_name(name: str) -> int:
     return 0
 print(f'  辞書: {len(dict_map):,}件')
 
-# ── 2. 予算サマリ（予算年度2023, 会計区分=空の合計行） ──
+# ── 2. 予算サマリ（予算年度=BUDGET_YEAR, 会計区分=空の合計行） ──
 print('予算サマリ ロード中...')
 exec_by_pid = {}    # pid -> exec_amount
 budget_by_pid = {}  # pid -> budget_amount (歳出予算現額合計)
 with open(BUDGET_CSV, encoding='utf-8') as f:
     for r in csv.DictReader(f):
-        if r['予算年度'] == '2023' and r['会計区分'].strip() == '':
+        if r['予算年度'] == str(BUDGET_YEAR) and r['会計区分'].strip() == '':
             pid = r['予算事業ID']
             exec_by_pid[pid] = to_int(r['執行額(合計)'])
             budget_by_pid[pid] = to_int(r['計(歳出予算現額合計)'])
-print(f'  予算年度2023合計行: {len(exec_by_pid):,}事業')
+print(f'  予算年度{BUDGET_YEAR}合計行: {len(exec_by_pid):,}事業')
 
 # ── 3. ブロック接続グラフ（5-2 CSV）から再委託深度を算出 ──
 print('ブロック接続グラフ ロード中...')
@@ -532,11 +543,6 @@ def fmt_score(v):
 
 # Sort by PID
 sorted_pids = sorted(projects.keys(), key=lambda x: to_int(x))
-
-# Apply limit if specified
-parser = argparse.ArgumentParser()
-parser.add_argument('--limit', type=int, default=0, help='Limit number of projects (0=all)')
-args = parser.parse_args()
 
 if args.limit > 0:
     sorted_pids = sorted_pids[:args.limit]
