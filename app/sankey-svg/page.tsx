@@ -865,12 +865,16 @@ export default function RealDataSankeyPage() {
                   const colTotals: (number | null)[] = colNodes.map((nodes, i) =>
                     i === 0 ? (nodes[0] ? amt(nodes[0]) : null) : nodes.reduce((s, n) => s + amt(n), 0)
                   );
-                  const colCounts: (number | null)[] = colNodes.map((nodes, i) =>
-                    i === 0 ? null : nodes.length
-                  );
+                  // col 2 (事業): spending total for budget/spending display
+                  const projectSpendingTotal = layout.nodes
+                    .filter(n => n.type === 'project-spending')
+                    .reduce((s, n) => s + n.value, 0);
                   return COL_LABELS.map((label, i) => {
                     const x = (i / maxCol) * (layout.innerW - NODE_W);
                     const total = colTotals[i];
+                    const amountText = i === 2 && total != null
+                      ? ` ${formatYen(total)}/${formatYen(projectSpendingTotal)}`
+                      : total != null ? ` ${formatYen(total)}` : '';
                     return (
                       <text
                         key={i}
@@ -888,7 +892,7 @@ export default function RealDataSankeyPage() {
                         }}
                         onMouseLeave={() => setHoveredColIndex(null)}
                       >
-                        {label}{total != null ? ` ${formatYen(total)}` : ''}
+                        {label}{amountText}
                       </text>
                     );
                   });
