@@ -956,7 +956,7 @@ export default function RealDataSankeyPage() {
                       const nodeOpacity = connectedNodeIds
                         ? (isConnected ? 1 : 0.3)
                         : (hoveredNode && hoveredNode !== node ? 0.4 : 1);
-                      const nodeFill = node.aggregated ? '#999' : 'url(#proj-node-grad)';
+                      const nodeFill = node.aggregated ? '#bbb' : 'url(#proj-node-grad)';
                       if (!spendingNode) {
                         // No paired spending node — render as plain budget rect
                         return (
