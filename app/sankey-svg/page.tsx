@@ -273,6 +273,9 @@ export default function RealDataSankeyPage() {
 
   const layoutRef = useRef<{ contentW: number; contentH: number } | null>(null);
 
+  // Top offset reserved for the search box (top:12 + height:36 + gap:8)
+  const SEARCH_BOX_RESERVE = 56;
+
   const resetView = useCallback(() => {
     const container = containerRef.current;
     const l = layoutRef.current;
@@ -282,14 +285,15 @@ export default function RealDataSankeyPage() {
       const cH = container.clientHeight;
       const totalW = MARGIN.left + l.contentW;
       const totalH = MARGIN.top + l.contentH;
-      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, cH / totalH) * 0.9));
+      const availH = cH - SEARCH_BOX_RESERVE;
+      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, availH / totalH) * 0.9));
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
+      setPan({ x: (cW - totalW * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
     } else {
       setZoom(1);
       setBaseZoom(1);
-      setPan({ x: 0, y: 0 });
+      setPan({ x: 0, y: SEARCH_BOX_RESERVE });
     }
   }, []);
 
@@ -302,14 +306,15 @@ export default function RealDataSankeyPage() {
       const cH = container.clientHeight;
       const totalW = MARGIN.left + l.contentW;
       const totalH = MARGIN.top + l.contentH;
-      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, cH / totalH) * 0.9));
+      const availH = cH - SEARCH_BOX_RESERVE;
+      const k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, availH / totalH) * 0.9));
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: (cW - totalW * k) / 2, y: (cH - totalH * k) / 2 });
+      setPan({ x: (cW - totalW * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
     } else {
       setZoom(1);
       setBaseZoom(1);
-      setPan({ x: 0, y: 0 });
+      setPan({ x: 0, y: SEARCH_BOX_RESERVE });
     }
   }, []);
 
@@ -337,14 +342,24 @@ export default function RealDataSankeyPage() {
     return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName);
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName]);
 
-  const minNodeGap = showLabels ? 14 / zoom : undefined;
-
   const layout = useMemo(() => {
     if (!filtered) return null;
-    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, minNodeGap);
+    if (!showLabels) {
+      const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
+      layoutRef.current = { contentW: result.contentW, contentH: result.contentH };
+      return result;
+    }
+    // Two-pass: estimate fit zoom from ungapped layout, derive stable minNodeGap from it.
+    // This breaks the zoom→minNodeGap→layout→zoom feedback loop.
+    const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
+    const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
+    const fitZoom = Math.max(0.1, Math.min(10,
+      Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
+    ));
+    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, 14 / fitZoom);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH };
     return result;
-  }, [filtered, svgWidth, svgHeight, minNodeGap]);
+  }, [filtered, svgWidth, svgHeight, showLabels]);
 
   const selectedNode = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -673,10 +688,31 @@ export default function RealDataSankeyPage() {
     return results.sort((a, b) => b.value - a.value).slice(0, 20);
   }, [graphData, debouncedQuery]);
 
+  const pendingSearchResetRef = useRef(false);
+
   const handleSearchSelect = useCallback((nodeId: string) => {
     setShowSearchResults(false);
     handleConnectionClick(nodeId);
-  }, [handleConnectionClick]);
+    if (focusRelated) {
+      // focusRelated ON: show full view after layout settles (so related nodes are all visible)
+      pendingSearchResetRef.current = true;
+    } else {
+      // focusRelated OFF: explicitly pan to the node
+      const inLayout = layout?.nodes.find(n => n.id === nodeId);
+      if (inLayout) {
+        focusOnNeighborhood(inLayout);
+      } else {
+        pendingFocusId.current = nodeId;
+      }
+    }
+  }, [handleConnectionClick, focusRelated, layout, focusOnNeighborhood]);
+
+  // Reset viewport after search-triggered selection when focusRelated is ON
+  useEffect(() => {
+    if (!pendingSearchResetRef.current || !layout) return;
+    pendingSearchResetRef.current = false;
+    resetViewport();
+  }, [layout, resetViewport]);
 
   // Center on initial load / layout change
   const initialCentered = useRef(false);
@@ -1052,7 +1088,7 @@ export default function RealDataSankeyPage() {
                   : total != null ? formatYen(total) : '';
                 // Position: bottom of label block 8px above node area top, clamped to stay on-screen
                 const labelBlockH = amountLine ? 34 : 18;
-                const top = Math.max(4, nodeAreaScreenY - labelBlockH - 8);
+                const top = Math.max(SEARCH_BOX_RESERVE, nodeAreaScreenY - labelBlockH - 8);
                 return (
                   <div
                     key={i}
@@ -1063,6 +1099,7 @@ export default function RealDataSankeyPage() {
                       textAlign: 'center', fontSize: 13, color: '#999',
                       whiteSpace: 'nowrap', userSelect: 'none', cursor: 'default',
                       zIndex: 8, lineHeight: 1.4,
+                      background: 'rgba(255,255,255,0.82)', padding: '2px 8px', borderRadius: 4,
                     }}
                     onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredColIndex(i); }}
                     onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -1672,7 +1709,7 @@ export default function RealDataSankeyPage() {
           aria-expanded={showSettings}
           aria-controls="sankey-topn-settings"
           aria-haspopup="dialog"
-          style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           {/* Material Icons: more_vert */}
           <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill={showSettings ? '#333' : '#888'}>
