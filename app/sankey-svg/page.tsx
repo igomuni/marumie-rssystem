@@ -852,53 +852,6 @@ export default function RealDataSankeyPage() {
               />
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
-                {/* Column labels with totals */}
-                {(() => {
-                  const maxCol = layout.maxCol || 1;
-                  const amt = (n: LayoutNode) => n.value;
-                  const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
-                  const colNodes = colNodeTypes.map(t =>
-                    t === 'total'
-                      ? layout.nodes.filter(n => n.type === 'total')
-                      : layout.nodes.filter(n => n.type === t)
-                  );
-                  const colTotals: (number | null)[] = colNodes.map((nodes, i) =>
-                    i === 0 ? (nodes[0] ? amt(nodes[0]) : null) : nodes.reduce((s, n) => s + amt(n), 0)
-                  );
-                  // col 2 (事業): spending total for budget/spending display
-                  const projectSpendingTotal = layout.nodes
-                    .filter(n => n.type === 'project-spending')
-                    .reduce((s, n) => s + n.value, 0);
-                  return COL_LABELS.map((label, i) => {
-                    const x = (i / maxCol) * (layout.innerW - NODE_W);
-                    const total = colTotals[i];
-                    const amountText = i === 2 && total != null
-                      ? ` ${formatYen(total)}/${formatYen(projectSpendingTotal)}`
-                      : total != null ? ` ${formatYen(total)}` : '';
-                    return (
-                      <text
-                        key={i}
-                        x={x + NODE_W / 2} y={amountText ? -26 : -13}
-                        textAnchor="middle" fontSize={15} fill="#999"
-                        style={{ cursor: 'default', userSelect: 'none' }}
-                        onMouseEnter={(e) => {
-                          const rect = containerRef.current?.getBoundingClientRect();
-                          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-                          setHoveredColIndex(i);
-                        }}
-                        onMouseMove={(e) => {
-                          const rect = containerRef.current?.getBoundingClientRect();
-                          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-                        }}
-                        onMouseLeave={() => setHoveredColIndex(null)}
-                      >
-                        <tspan x={x + NODE_W / 2}>{label}</tspan>
-                        {amountText && <tspan x={x + NODE_W / 2} dy="1.3em">{amountText.trim()}</tspan>}
-                      </text>
-                    );
-                  });
-                })()}
-
                 {/* Links (skip internal project-budget → project-spending links) */}
                 {layout.links.filter(link => !(link.source.type === 'project-budget' && link.target.type === 'project-spending')).map((link) => (
                   <path
@@ -1077,6 +1030,50 @@ export default function RealDataSankeyPage() {
               </g>
               </g>
             </svg>
+
+            {/* Column labels — DOM overlay, positioned from zoom/pan to avoid hiding behind search box */}
+            {(() => {
+              const maxCol = layout.maxCol || 1;
+              const innerW = svgWidth - MARGIN.left - MARGIN.right;
+              const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
+              const colAmounts: (number | null)[] = colNodeTypes.map((t, i) => {
+                const nodes = t === 'total' ? layout.nodes.filter(n => n.type === 'total') : layout.nodes.filter(n => n.type === t);
+                return i === 0 ? (nodes[0]?.value ?? null) : nodes.reduce((s, n) => s + n.value, 0);
+              });
+              const projectSpendingTotal = layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + n.value, 0);
+              // Screen y of node area top — label bottom sits just above this
+              const nodeAreaScreenY = pan.y + MARGIN.top * zoom;
+              return COL_LABELS.map((label, i) => {
+                const colInnerX = MARGIN.left + (i / maxCol) * (innerW - NODE_W) + NODE_W / 2;
+                const screenX = pan.x + colInnerX * zoom;
+                const total = colAmounts[i];
+                const amountLine = i === 2 && total != null
+                  ? `${formatYen(total)} / ${formatYen(projectSpendingTotal)}`
+                  : total != null ? formatYen(total) : '';
+                // Position: bottom of label block 8px above node area top, clamped to stay on-screen
+                const labelBlockH = amountLine ? 34 : 18;
+                const top = Math.max(4, nodeAreaScreenY - labelBlockH - 8);
+                return (
+                  <div
+                    key={i}
+                    data-pan-disabled="true"
+                    style={{
+                      position: 'absolute', left: screenX, top,
+                      transform: 'translateX(-50%)',
+                      textAlign: 'center', fontSize: 13, color: '#999',
+                      whiteSpace: 'nowrap', userSelect: 'none', cursor: 'default',
+                      zIndex: 8, lineHeight: 1.4,
+                    }}
+                    onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredColIndex(i); }}
+                    onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                    onMouseLeave={() => setHoveredColIndex(null)}
+                  >
+                    <div>{label}</div>
+                    {amountLine && <div style={{ fontSize: 11 }}>{amountLine}</div>}
+                  </div>
+                );
+              });
+            })()}
 
             {/* Minimap */}
             {showMinimap && (
