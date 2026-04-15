@@ -284,7 +284,9 @@ export function filterTopN(
       totalProjectCount = allNodes.filter(
         n => n.type === 'project-spending' && n.ministry === pinnedMinistryName && !zeroSpendingProjectIds.has(n.id)
       ).length;
-    } else if (!recipientFocusMode && !projectRecipientsMode) {
+    } else {
+      // recipientFocusMode / projectRecipientsMode: project offset is overridden by focus,
+      // but still return a valid count so the slider label is not "Top 1〜0 /0件".
       totalProjectCount = topMinistryAllProjects.length;
     }
   }

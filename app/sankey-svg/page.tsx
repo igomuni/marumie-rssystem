@@ -154,6 +154,11 @@ export default function RealDataSankeyPage() {
   // Initialize state from URL on mount
   useEffect(() => {
     const parsed = parseSearchParams(window.location.search);
+    // Pre-update prev refs before setters so reset effects don't fire for URL-restored values.
+    // The refs are declared below but are accessible here via closure (closures capture by reference).
+    if (parsed.offsetTarget !== undefined) prevOffsetTargetRef.current = parsed.offsetTarget;
+    if (parsed.projectSortBy !== undefined) prevProjectSortByRef.current = parsed.projectSortBy;
+    if (parsed.topProject !== undefined) prevTopProjectRef.current = parsed.topProject;
     if (parsed.selectedNodeId !== undefined) { setSelectedNodeId(parsed.selectedNodeId); pendingFocusId.current = parsed.selectedNodeId; }
     if (parsed.pinnedProjectId !== undefined) setPinnedProjectId(parsed.pinnedProjectId);
     if (parsed.pinnedRecipientId !== undefined) setPinnedRecipientId(parsed.pinnedRecipientId);
@@ -179,6 +184,10 @@ export default function RealDataSankeyPage() {
   useEffect(() => {
     const handler = () => {
       const parsed = parseSearchParams(window.location.search);
+      // Pre-update prev refs so reset effects don't fire for URL-restored values
+      prevOffsetTargetRef.current = parsed.offsetTarget ?? 'recipient';
+      prevProjectSortByRef.current = parsed.projectSortBy ?? 'budget';
+      prevTopProjectRef.current = parsed.topProject ?? 40;
       setSelectedNodeId(parsed.selectedNodeId ?? null);
       setPinnedProjectId(parsed.pinnedProjectId ?? null);
       setPinnedRecipientId(parsed.pinnedRecipientId ?? null);
@@ -1838,13 +1847,13 @@ export default function RealDataSankeyPage() {
             <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
               <span style={{ color: '#555', fontSize: 11 }}>事業:</span>
               <input type="number" min={1} max={300} value={topProject}
-                onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(1000, Number(e.target.value) || 1))); }}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, Number(e.target.value) || 1))); }}
                 style={{ width: 50, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
             </label>
             <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
               <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
               <input type="number" min={1} max={300} value={topRecipient}
-                onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(1000, Number(e.target.value) || 1))); }}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, Number(e.target.value) || 1))); }}
                 style={{ width: 50, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
             </label>
           </div>
