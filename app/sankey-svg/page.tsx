@@ -17,12 +17,16 @@ interface SankeyUrlState {
   pinnedRecipientId: string | null;
   pinnedMinistryName: string | null;
   recipientOffset: number;
+  projectOffset: number;
+  offsetTarget: 'recipient' | 'project';
   topMinistry: number;
   topProject: number;
   topRecipient: number;
   showLabels: boolean;
   includeZeroSpending: boolean;
   showAggRecipient: boolean;
+  showAggProject: boolean;
+  projectSortBy: 'budget' | 'spending';
   scaleBudgetToVisible: boolean;
   focusRelated: boolean;
   year: '2024' | '2025';
@@ -36,12 +40,16 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const pr = p.get('pr'); if (pr !== null) result.pinnedRecipientId = pr;
   const pm = p.get('pm'); if (pm !== null) result.pinnedMinistryName = pm;
   const ro = p.get('ro'); if (ro !== null) { const n = parseInt(ro, 10); if (!isNaN(n)) result.recipientOffset = Math.max(0, n); }
+  const ot = p.get('ot'); if (ot === 'p') result.offsetTarget = 'project';
+  const po = p.get('po'); if (po !== null) { const n = parseInt(po, 10); if (!isNaN(n)) result.projectOffset = Math.max(0, n); }
   const tm = p.get('tm'); if (tm !== null) { const n = parseInt(tm, 10); if (!isNaN(n)) result.topMinistry = Math.max(1, Math.min(37, n)); }
   const tp = p.get('tp'); if (tp !== null) { const n = parseInt(tp, 10); if (!isNaN(n)) result.topProject = Math.max(1, Math.min(300, n)); }
   const tr = p.get('tr'); if (tr !== null) { const n = parseInt(tr, 10); if (!isNaN(n)) result.topRecipient = Math.max(1, Math.min(300, n)); }
   const sl = p.get('sl'); if (sl !== null) result.showLabels = sl !== '0';
   const iz = p.get('iz'); if (iz !== null) result.includeZeroSpending = iz !== '0';
   const ar = p.get('ar'); if (ar !== null) result.showAggRecipient = ar !== '0';
+  const ap = p.get('ap'); if (ap !== null) result.showAggProject = ap !== '0';
+  const ps = p.get('ps'); if (ps === 's') result.projectSortBy = 'spending';
   const sb = p.get('sb'); if (sb !== null) result.scaleBudgetToVisible = sb !== '0';
   const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr !== '0';
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
@@ -87,6 +95,8 @@ export default function RealDataSankeyPage() {
   const [topProject, setTopProject] = useState(40);
   const [topRecipient, setTopRecipient] = useState(40);
   const [recipientOffset, setRecipientOffset] = useState(0);
+  const [projectOffset, setProjectOffset] = useState(0);
+  const [offsetTarget, setOffsetTarget] = useState<'recipient' | 'project'>('recipient');
   const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
   const [pinnedRecipientId, setPinnedRecipientId] = useState<string | null>(null);
   const [pinnedMinistryName, setPinnedMinistryName] = useState<string | null>(null);
@@ -98,6 +108,8 @@ export default function RealDataSankeyPage() {
   const [showLabels, setShowLabels] = useState(true);
   const [includeZeroSpending, setIncludeZeroSpending] = useState(false);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
+  const [showAggProject, setShowAggProject] = useState(true);
+  const [projectSortBy, setProjectSortBy] = useState<'budget' | 'spending'>('budget');
   const [scaleBudgetToVisible, setScaleBudgetToVisible] = useState(true);
   const [focusRelated, setFocusRelated] = useState(true);
   const [year, setYear] = useState<'2024' | '2025'>('2025');
@@ -147,12 +159,16 @@ export default function RealDataSankeyPage() {
     if (parsed.pinnedRecipientId !== undefined) setPinnedRecipientId(parsed.pinnedRecipientId);
     if (parsed.pinnedMinistryName !== undefined) setPinnedMinistryName(parsed.pinnedMinistryName);
     if (parsed.recipientOffset !== undefined) setRecipientOffset(parsed.recipientOffset);
+    if (parsed.offsetTarget !== undefined) setOffsetTarget(parsed.offsetTarget);
+    if (parsed.projectOffset !== undefined) setProjectOffset(parsed.projectOffset);
     if (parsed.topMinistry !== undefined) setTopMinistry(parsed.topMinistry);
     if (parsed.topProject !== undefined) setTopProject(parsed.topProject);
     if (parsed.topRecipient !== undefined) setTopRecipient(parsed.topRecipient);
     if (parsed.showLabels !== undefined) setShowLabels(parsed.showLabels);
     if (parsed.includeZeroSpending !== undefined) setIncludeZeroSpending(parsed.includeZeroSpending);
     if (parsed.showAggRecipient !== undefined) setShowAggRecipient(parsed.showAggRecipient);
+    if (parsed.showAggProject !== undefined) setShowAggProject(parsed.showAggProject);
+    if (parsed.projectSortBy !== undefined) setProjectSortBy(parsed.projectSortBy);
     if (parsed.scaleBudgetToVisible !== undefined) setScaleBudgetToVisible(parsed.scaleBudgetToVisible);
     if (parsed.focusRelated !== undefined) setFocusRelated(parsed.focusRelated);
     if (parsed.year !== undefined) setYear(parsed.year);
@@ -168,12 +184,16 @@ export default function RealDataSankeyPage() {
       setPinnedRecipientId(parsed.pinnedRecipientId ?? null);
       setPinnedMinistryName(parsed.pinnedMinistryName ?? null);
       setRecipientOffset(parsed.recipientOffset ?? 0);
+      setOffsetTarget(parsed.offsetTarget ?? 'recipient');
+      setProjectOffset(parsed.projectOffset ?? 0);
       setTopMinistry(parsed.topMinistry ?? 37);
       setTopProject(parsed.topProject ?? 40);
       setTopRecipient(parsed.topRecipient ?? 40);
       setShowLabels(parsed.showLabels ?? true);
       setIncludeZeroSpending(parsed.includeZeroSpending ?? false);
       setShowAggRecipient(parsed.showAggRecipient ?? true);
+      setShowAggProject(parsed.showAggProject ?? true);
+      setProjectSortBy(parsed.projectSortBy ?? 'budget');
       setScaleBudgetToVisible(parsed.scaleBudgetToVisible ?? true);
       setFocusRelated(parsed.focusRelated ?? true);
       if (parsed.year !== undefined) setYear(parsed.year);
@@ -194,12 +214,16 @@ export default function RealDataSankeyPage() {
     if (pinnedRecipientId !== null) p.set('pr', pinnedRecipientId);
     if (pinnedMinistryName !== null) p.set('pm', pinnedMinistryName);
     if (recipientOffset !== 0) p.set('ro', String(recipientOffset));
+    if (offsetTarget === 'project') p.set('ot', 'p');
+    if (projectOffset !== 0) p.set('po', String(projectOffset));
     if (topMinistry !== 37) p.set('tm', String(topMinistry));
     if (topProject !== 40) p.set('tp', String(topProject));
     if (topRecipient !== 40) p.set('tr', String(topRecipient));
     if (!showLabels) p.set('sl', '0');
     if (includeZeroSpending) p.set('iz', '1');
     if (!showAggRecipient) p.set('ar', '0');
+    if (!showAggProject) p.set('ap', '0');
+    if (projectSortBy === 'spending') p.set('ps', 's');
     if (!scaleBudgetToVisible) p.set('sb', '0');
     if (!focusRelated) p.set('fr', '0');
     if (year !== '2025') p.set('yr', year);
@@ -210,7 +234,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, year]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, year]);
 
   // Zoom/Pan state
   const [zoom, setZoom] = useState(1);
@@ -228,6 +252,42 @@ export default function RealDataSankeyPage() {
     window.addEventListener('blur', onBlur);
     return () => { stopOffsetRepeat(); window.removeEventListener('blur', onBlur); };
   }, [stopOffsetRepeat]);
+
+  // Reset both offsets when offsetTarget switches
+  const prevOffsetTargetRef = useRef(offsetTarget);
+  useEffect(() => {
+    if (prevOffsetTargetRef.current !== offsetTarget) {
+      prevOffsetTargetRef.current = offsetTarget;
+      pendingHistoryAction.current = 'replace';
+      setRecipientOffset(0);
+      setProjectOffset(0);
+    }
+  }, [offsetTarget]);
+
+  // Reset projectOffset when projectSortBy changes (ranking order changes)
+  const prevProjectSortByRef = useRef(projectSortBy);
+  useEffect(() => {
+    if (prevProjectSortByRef.current !== projectSortBy) {
+      prevProjectSortByRef.current = projectSortBy;
+      if (offsetTarget === 'project') {
+        pendingHistoryAction.current = 'replace';
+        setProjectOffset(0);
+      }
+    }
+  }, [projectSortBy, offsetTarget]);
+
+  // Reset projectOffset when topProject changes (only in project offset mode)
+  const prevTopProjectRef = useRef(topProject);
+  useEffect(() => {
+    if (prevTopProjectRef.current !== topProject) {
+      prevTopProjectRef.current = topProject;
+      if (offsetTarget === 'project') {
+        pendingHistoryAction.current = 'replace';
+        setProjectOffset(0);
+      }
+    }
+  }, [topProject, offsetTarget]);
+
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Prevent overlay control interactions from bubbling into canvas pan/zoom
@@ -350,8 +410,8 @@ export default function RealDataSankeyPage() {
     if (!graphData) return null;
     const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName]);
+    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, projectSortBy);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -744,16 +804,17 @@ export default function RealDataSankeyPage() {
       setRecipientOffset(newOffset);
     };
 
+    const projectOffsetModeActive = offsetTarget === 'project';
     if (focusRelated) {
       // focusRelated ON: 現在のフォーカスコンテキストをクリアして新しいノードに切り替える
       const pins = computeFocusPins(nodeId, graphData?.nodes);
       setPinnedProjectId(pins.pinnedProjectId); setPinnedRecipientId(pins.pinnedRecipientId); setPinnedMinistryName(pins.pinnedMinistryName);
-    } else if (nodeId.startsWith('r-') && filtered) {
-      // Recipient outside window: jump offset so it's visible
+    } else if (!projectOffsetModeActive && nodeId.startsWith('r-') && filtered) {
+      // Recipient outside window: jump offset so it's visible (disabled in project offset mode)
       const rank = allRecipientRanks.get(nodeId);
       if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
-    } else if ((nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-')) && filtered && graphData) {
-      // Project outside TopN: pin it (TopN+1) and jump offset to its best recipient
+    } else if (!projectOffsetModeActive && (nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-')) && filtered && graphData) {
+      // Project outside TopN: pin it (TopN+1) and jump offset to its best recipient (disabled in project offset mode)
       const spendingId = nodeId.startsWith('project-budget-')
         ? nodeId.replace('project-budget-', 'project-spending-')
         : nodeId;
@@ -777,7 +838,7 @@ export default function RealDataSankeyPage() {
     // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
     pendingFocusId.current = nodeId;
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, includeZeroSpending]);
+  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, includeZeroSpending, offsetTarget]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1680,36 +1741,63 @@ export default function RealDataSankeyPage() {
 
       {/* Top-right panel: offset slider */}
       {filtered && (() => {
-        const maxOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
-        const clampedOffset = Math.min(recipientOffset, maxOffset);
-        const rangeStart = clampedOffset + 1;
-        const rangeEnd = Math.min(clampedOffset + topRecipient, filtered.totalRecipientCount);
-        const maxStartRank = maxOffset + 1;
+        // Recipient offset mode
+        const maxRecipOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
+        const clampedOffset = Math.min(recipientOffset, maxRecipOffset);
+        const recipRangeStart = clampedOffset + 1;
+        const recipRangeEnd = Math.min(clampedOffset + topRecipient, filtered.totalRecipientCount);
+        const recipMaxStartRank = maxRecipOffset + 1;
+        // Project offset mode
+        const maxProjOffset = Math.max(0, filtered.totalProjectCount - topProject);
+        const clampedProjOffset = Math.min(projectOffset, maxProjOffset);
+        const projRangeStart = clampedProjOffset + 1;
+        const projRangeEnd = Math.min(clampedProjOffset + topProject, filtered.totalProjectCount);
+        // Active values for shared controls
+        const isProjectMode = offsetTarget === 'project';
+        const activeOffset = isProjectMode ? clampedProjOffset : clampedOffset;
+        const activeMax = isProjectMode ? maxProjOffset : maxRecipOffset;
+        const activeTotalCount = isProjectMode ? filtered.totalProjectCount : filtered.totalRecipientCount;
+        const activeRangeStart = isProjectMode ? projRangeStart : recipRangeStart;
+        const activeRangeEnd = isProjectMode ? projRangeEnd : recipRangeEnd;
+        const activeMaxStartRank = isProjectMode ? maxProjOffset + 1 : recipMaxStartRank;
+        const setActiveOffset = (v: number) => {
+          pendingHistoryAction.current = 'replace';
+          if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
+        };
         return (
           <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
+            {/* オフセット対象コンボボックス */}
+            <select
+              value={offsetTarget}
+              onChange={e => { pendingHistoryAction.current = 'replace'; setOffsetTarget(e.target.value as 'recipient' | 'project'); }}
+              style={{ fontSize: 11, border: '1px solid #ccc', borderRadius: 3, padding: '1px 2px', background: '#fff', color: '#555', cursor: 'pointer' }}
+            >
+              <option value="recipient">支出先</option>
+              <option value="project">事業</option>
+            </select>
             <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ color: '#555', fontSize: 11 }}>Top</span>
               {isEditingOffset ? (
                 <input
                   type="number"
                   autoFocus
-                  min={1} max={maxStartRank} step={1}
+                  min={1} max={activeMaxStartRank} step={1}
                   value={offsetInputValue}
-                  onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) { pendingHistoryAction.current = 'replace'; setRecipientOffset(Math.max(0, Math.min(maxOffset, v - 1))); } }}
+                  onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) setActiveOffset(Math.max(0, Math.min(activeMax, v - 1))); }}
                   onBlur={() => setIsEditingOffset(false)}
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingOffset(false); }}
-                  style={{ width: `${Math.max(40, String(maxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
+                  style={{ width: `${Math.max(40, String(activeMaxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
                 />
               ) : (
                 <button
-                  onClick={() => { setOffsetInputValue(String(rangeStart)); setIsEditingOffset(true); }}
+                  onClick={() => { setOffsetInputValue(String(activeRangeStart)); setIsEditingOffset(true); }}
                   title="クリックして開始位置を入力"
                   style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
-                >{rangeStart}</button>
+                >{activeRangeStart}</button>
               )}
-              <span style={{ color: '#999', fontSize: 11 }}>〜{rangeEnd}</span>
-              <input type="range" min={0} max={maxOffset} value={clampedOffset} onChange={e => { pendingHistoryAction.current = 'replace'; setRecipientOffset(Number(e.target.value)); }} style={{ width: 60 }} />
-              <span style={{ color: '#999', fontSize: 11 }}>/{filtered.totalRecipientCount}件</span>
+              <span style={{ color: '#999', fontSize: 11 }}>〜{activeRangeEnd}</span>
+              <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => setActiveOffset(Number(e.target.value))} style={{ width: 60 }} />
+              <span style={{ color: '#999', fontSize: 11 }}>/{activeTotalCount}件</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                 {([
                   [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '次へ'],
@@ -1718,7 +1806,11 @@ export default function RealDataSankeyPage() {
                   <button key={delta} title={title} aria-label={title}
                     onPointerDown={(e) => {
                       if (e.pointerType === 'mouse' && e.button !== 0) return;
-                      const step = () => { pendingHistoryAction.current = 'replace'; setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); };
+                      const step = () => {
+                        pendingHistoryAction.current = 'replace';
+                        if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
+                        else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
+                      };
                       stopOffsetRepeat();
                       step();
                       offsetRepeatRef.current = setTimeout(() => {
@@ -1726,7 +1818,7 @@ export default function RealDataSankeyPage() {
                       }, 400);
                     }}
                     onPointerUp={stopOffsetRepeat} onPointerLeave={stopOffsetRepeat} onPointerCancel={stopOffsetRepeat}
-                    onClick={(e) => { if (e.detail === 0) { pendingHistoryAction.current = 'replace'; setRecipientOffset(prev => Math.max(0, Math.min(maxOffset, prev + delta))); } }}
+                    onClick={(e) => { if (e.detail === 0) setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta))); }}
                     style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
@@ -1734,7 +1826,7 @@ export default function RealDataSankeyPage() {
                 ))}
               </div>
               {/* Material Icons: vertical_align_top — オフセットリセット */}
-              <button onClick={e => { e.preventDefault(); pendingHistoryAction.current = 'replace'; setRecipientOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
+              <button onClick={e => { e.preventDefault(); setActiveOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
@@ -1790,6 +1882,17 @@ export default function RealDataSankeyPage() {
                 <input type="checkbox" checked={showAggRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggRecipient(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>支出先の集約ノードを表示</span>
               </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={showAggProject} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggProject(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>事業の集約ノードを表示</span>
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ color: '#555' }}>事業ノードの並び順:</span>
+                <select value={projectSortBy} onChange={e => { pendingHistoryAction.current = 'replace'; setProjectSortBy(e.target.value as 'budget' | 'spending'); }} style={{ fontSize: 12, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }} data-pan-disabled>
+                  <option value="budget">予算額</option>
+                  <option value="spending">支出額</option>
+                </select>
+              </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={scaleBudgetToVisible} onChange={e => { pendingHistoryAction.current = 'replace'; setScaleBudgetToVisible(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>事業の予算額を支出額に合わせて調整</span>

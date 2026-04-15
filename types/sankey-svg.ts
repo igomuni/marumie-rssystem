@@ -7,6 +7,8 @@ export interface RawNode {
   rawValue?: number;
   /** True when a budget node's height has been scaled by visible spending fraction */
   isScaled?: boolean;
+  /** If set, layout engine uses this value as the column sort key instead of value */
+  layoutSortValue?: number;
   /** If set, layout engine caps node height to this value after computing link-sum */
   layoutCap?: number;
   /** If true, layout engine skips the link-sum override so node.value stays as initialized */
