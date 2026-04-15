@@ -183,7 +183,11 @@ export function filterTopN(
   for (const e of allEdges) {
     if (windowRecipientIds.has(e.target)) {
       projectWindowValue.set(e.source, (projectWindowValue.get(e.source) || 0) + e.value);
-      recipientWindowValue.set(e.target, (recipientWindowValue.get(e.target) || 0) + e.value);
+      // In projectOffsetMode, above-window projects have no visible nodes/edges.
+      // Exclude their flow from recipientWindowValue so recipient heights match visible incoming edges.
+      if (!projectOffsetMode || !aboveWindowSpendingIds.has(e.source)) {
+        recipientWindowValue.set(e.target, (recipientWindowValue.get(e.target) || 0) + e.value);
+      }
     } else if (tailRecipientIds.has(e.target)) {
       projectTailValue.set(e.source, (projectTailValue.get(e.source) || 0) + e.value);
     }
@@ -237,7 +241,7 @@ export function filterTopN(
   });
   const topProjectNodes = topMinistryAllProjects
     .slice(0, topProject)
-    .filter(n => includeZeroSpending || (projectWindowValue.get(n.id) || 0) > 0);
+    .filter(n => includeZeroSpending || projectSortBy === 'budget' || (projectWindowValue.get(n.id) || 0) > 0);
   // Pin: force-include the pinned project (TopN+1) if not already present
   if (pinnedProjectId) {
     const pinned = allNodes.find(n => n.id === pinnedProjectId && n.type === 'project-spending');
@@ -285,9 +289,9 @@ export function filterTopN(
     }
   }
 
-  // When showAggProject is OFF OR projectOffsetMode is ON, recipient heights should reflect
-  // only window-project inflow (aggregate project → recipient edges are hidden).
-  const recipientValueFromTopProjects = (showAggProject && !projectOffsetMode) ? null : (() => {
+  // When showAggProject is OFF, recipient heights should reflect only top-project inflow
+  // (aggregate project → recipient edges are hidden, so their contribution is excluded).
+  const recipientValueFromTopProjects = showAggProject ? null : (() => {
     const m = new Map<string, number>();
     for (const e of allEdges) {
       if (topProjectIds.has(e.source) && windowRecipientIds.has(e.target)) {
@@ -308,6 +312,9 @@ export function filterTopN(
       .filter(n => n.type === 'project-spending' && n.value > 0
         && !topProjectIds.has(n.id)  // pinned projects are in topProjectIds — do not hide them
         && !aboveWindowSpendingIds.has(n.id)  // above-window projects excluded via their own path
+        // In projectOffsetMode, aggregate projects are always shown via the aggregate node
+        // regardless of recipient overlap with the window — never treat them as effectively hidden.
+        && !projectOffsetAggregateSpendingIds.has(n.id)
         && (projectWindowValue.get(n.id) || 0) === 0
         && (!showAggRecipient || (projectTailValue.get(n.id) || 0) === 0))
       .map(n => n.id)
@@ -356,6 +363,24 @@ export function filterTopN(
       otherProjectsWithFlow.add(e.source);
     }
   }
+  // In projectOffsetMode: aggregate projects can flow to recipients outside the window/tail scope.
+  // Compute their total flow and unique count so __agg-recipient reflects all non-shown recipients.
+  let otherProjectAggOnlyTotal = 0;
+  let aggOnlyRecipientCount = 0;
+  if (projectOffsetMode) {
+    const aggOnlyRecips = new Set<string>();
+    for (const e of allEdges) {
+      if (otherProjectSpendingIds.has(e.source) && e.target.startsWith('r-')
+          && !windowRecipientIds.has(e.target) && !tailRecipientIds.has(e.target)) {
+        otherProjectAggOnlyTotal += e.value;
+        aggOnlyRecips.add(e.target);
+      }
+    }
+    aggOnlyRecipientCount = aggOnlyRecips.size;
+    // Merge into otherProjectTailTotal so the __agg-project-spending → __agg-recipient edge includes this flow
+    otherProjectTailTotal += otherProjectAggOnlyTotal;
+  }
+
   // Sum of adjusted budget amounts for aggregated projects (budget-column height basis).
   const otherProjectBudgetTotal = otherProjects.reduce((s, p) => {
     if (p.projectId == null) return s;
@@ -491,14 +516,16 @@ export function filterTopN(
               .reduce((s, e) => s + e.value, 0)
     : 0;
   const tailValue = tailRecipients.reduce((s, [, v]) => s + v, 0) - hiddenTailSpending;
-  const aggRecipientValue = tailValue;
+  // In projectOffsetMode, include aggregate-project-only recipient flow in the node check value.
+  const aggRecipientValue = tailValue + otherProjectAggOnlyTotal;
+  const aggRecipientCount = tailRecipients.length + aggOnlyRecipientCount;
   if (showAggRecipient && aggRecipientValue > 0) {
     nodes.push({
       id: '__agg-recipient',
-      name: `${tailRecipients.length.toLocaleString()}支出先`,
+      name: `${aggRecipientCount.toLocaleString()}支出先`,
       type: 'recipient',
       value: aggRecipientValue,
-      skipLinkOverride: true,
+      // No skipLinkOverride: height auto-computed from incoming edges (includes agg-project flow)
       aggregated: true,
     });
   }
@@ -569,16 +596,15 @@ export function filterTopN(
     }
   }
 
-  // __agg-project-spending → window recipients — skipped when agg-project is hidden or projectOffsetMode.
-  // In projectOffsetMode recipients only reflect window-project inflow, so agg-project edges are suppressed.
-  if (showAggProject && !projectOffsetMode) {
+  // __agg-project-spending → window recipients — skipped when agg-project is hidden
+  if (showAggProject) {
     for (const rid of windowRecipientIds) {
       const v = allEdges.filter(e => otherProjectSpendingIds.has(e.source) && e.target === rid).reduce((s, e) => s + e.value, 0);
       if (v > 0) edges.push({ source: '__agg-project-spending', target: rid, value: v });
     }
   }
-  // __agg-project-spending → __agg-recipient (tail) — skipped in projectOffsetMode (agg project has no recipient edges)
-  if (showAggProject && showAggRecipient && otherProjectTailTotal > 0 && !projectOffsetMode) {
+  // __agg-project-spending → __agg-recipient (tail) — skipped when agg-recipient or agg-project is hidden
+  if (showAggProject && showAggRecipient && otherProjectTailTotal > 0) {
     edges.push({ source: '__agg-project-spending', target: '__agg-recipient', value: otherProjectTailTotal });
   }
 
