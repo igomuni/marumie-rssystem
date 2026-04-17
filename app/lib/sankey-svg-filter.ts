@@ -489,11 +489,12 @@ export function filterTopN(
     ? otherProjectWindowTotal
     : otherProjects.reduce((s, p) => s + p.value - (projectAboveWindowSpending.get(p.id) || 0), 0);
   const otherProjectSpendingRawTotal = otherProjects.reduce((s, p) => s + p.value, 0);
-  // Create __agg-project-budget when aggregated projects have budget and showAggProject is enabled.
-  if (otherProjectBudgetTotal > 0 && showAggProject) {
+  // Create __agg-project-budget whenever aggregate projects have spending to show
+  // (budget may be 0, in which case the node has height 0 but still anchors the merged shape label).
+  if (otherProjectSpendingTotal > 0 && showAggProject) {
     nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, rawValue: otherProjectBudgetRawTotal, isScaled: otherProjectBudgetTotal < otherProjectBudgetRawTotal, skipLinkOverride: true, aggregated: true });
   }
-  // Create __agg-project-spending when aggregate projects have spending (budget may be zero).
+  // Create __agg-project-spending when aggregate projects have spending.
   if (otherProjectSpendingTotal > 0 && showAggProject) {
     const aggSpendingTrimmed = otherProjectSpendingTotal < otherProjectSpendingRawTotal;
     nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectSpendingTotal, rawValue: aggSpendingTrimmed ? otherProjectSpendingRawTotal : undefined, isScaled: aggSpendingTrimmed, skipLinkOverride: true, aggregated: true });
