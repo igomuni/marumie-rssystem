@@ -556,11 +556,12 @@ export function filterTopN(
   // ── Build edges ──
   const edges: RawEdge[] = [];
 
-  // total → ministry (budget-based)
+  // total → ministry (budget-based; spending fallback when budget = 0 so edge is visible)
   // In recipientFocusMode, use ministryNodesToShow (all ministries) instead of topMinistryNodes only
   for (const mn of ministryNodesToShow) {
     const bv = ministryBudgetValue.get(mn.name) || 0;
-    if (bv > 0) edges.push({ source: 'total', target: mn.id, value: bv });
+    const edgeVal = bv > 0 ? bv : (ministrySpendingValue.get(mn.name) || 0);
+    if (edgeVal > 0) edges.push({ source: 'total', target: mn.id, value: edgeVal });
   }
   if (!recipientFocusMode && otherMinistryBudgetValue > 0) {
     edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryBudgetValue });
