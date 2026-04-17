@@ -80,7 +80,8 @@ export function filterTopN(
         if (projectSortBy === 'budget') {
           const ba = nodeById.get(`project-budget-${a.projectId}`)?.value ?? 0;
           const bb = nodeById.get(`project-budget-${b.projectId}`)?.value ?? 0;
-          return bb - ba;
+          if (bb !== ba) return bb - ba;
+          return b.value - a.value;
         }
         return b.value - a.value;
       });
@@ -235,7 +236,8 @@ export function filterTopN(
     if (projectSortBy === 'budget') {
       const ba = nodeById.get(`project-budget-${a.projectId}`)?.value ?? 0;
       const bb = nodeById.get(`project-budget-${b.projectId}`)?.value ?? 0;
-      return bb - ba;
+      if (bb !== ba) return bb - ba;
+      return b.value - a.value;
     }
     return (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0);
   });
