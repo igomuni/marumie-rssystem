@@ -470,11 +470,12 @@ export function filterTopN(
   for (const n of ministryNodesToShow) {
     const bv = ministryBudgetValue.get(n.name) || 0;
     const rawBv = ministryBudgetRawValue.get(n.name) || 0;
-    // When budget = 0 (e.g. high project offset where only zero-budget projects remain),
-    // use spending value so the ministry node remains visible.
-    const sv = bv > 0 ? 0 : (ministrySpendingValue.get(n.name) || 0);
-    const displayVal = bv > 0 ? bv : sv;
-    if (displayVal > 0) nodes.push({ ...n, value: displayVal, rawValue: rawBv || undefined, isScaled: bv > 0 && bv < rawBv, skipLinkOverride: true });
+    // Show ministry node when budget > 0, or when there are visible projects with spending
+    // (budget = 0 case: node value is 0 so amounts stay consistent).
+    const hasVisibleSpending = (ministrySpendingValue.get(n.name) || 0) > 0;
+    if (bv > 0 || hasVisibleSpending) {
+      nodes.push({ ...n, value: bv, rawValue: rawBv || undefined, isScaled: bv > 0 && bv < rawBv, skipLinkOverride: true });
+    }
   }
   if (!recipientFocusMode && otherMinistryBudgetValue > 0) {
     nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryBudgetValue, rawValue: otherMinistryBudgetRawValue, isScaled: otherMinistryBudgetValue < otherMinistryBudgetRawValue, skipLinkOverride: true, aggregated: true });
@@ -555,12 +556,11 @@ export function filterTopN(
   // ── Build edges ──
   const edges: RawEdge[] = [];
 
-  // total → ministry (budget-based, or spending when budget = 0)
+  // total → ministry (budget-based)
   // In recipientFocusMode, use ministryNodesToShow (all ministries) instead of topMinistryNodes only
   for (const mn of ministryNodesToShow) {
     const bv = ministryBudgetValue.get(mn.name) || 0;
-    const edgeVal = bv > 0 ? bv : (ministrySpendingValue.get(mn.name) || 0);
-    if (edgeVal > 0) edges.push({ source: 'total', target: mn.id, value: edgeVal });
+    if (bv > 0) edges.push({ source: 'total', target: mn.id, value: bv });
   }
   if (!recipientFocusMode && otherMinistryBudgetValue > 0) {
     edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryBudgetValue });
