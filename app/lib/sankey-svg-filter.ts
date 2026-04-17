@@ -272,9 +272,10 @@ export function filterTopN(
   }
   const topProjectIds = new Set(topProjectNodes.map(n => n.id));
 
-  // In projectOffsetMode: replace topProjectNodes with the pre-computed window set
+  // In projectOffsetMode: replace topProjectNodes with the pre-computed window set.
+  // Use topMinistryAllProjects (already sorted) instead of allNodes to preserve sort order.
   if (projectOffsetMode) {
-    topProjectNodes.splice(0, topProjectNodes.length, ...allNodes.filter(n => projectOffsetWindowProjectIds.has(n.id)));
+    topProjectNodes.splice(0, topProjectNodes.length, ...topMinistryAllProjects.filter(n => projectOffsetWindowProjectIds.has(n.id)));
     topProjectIds.clear();
     topProjectNodes.forEach(n => topProjectIds.add(n.id));
   }
