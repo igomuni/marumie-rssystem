@@ -777,17 +777,18 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     const nodeHeight = node.y1 - node.y0;
     const totalSrcValue = node.sourceLinks.reduce((s, l) => s + l.value, 0);
     const totalTgtValue = node.targetLinks.reduce((s, l) => s + l.value, 0);
+    const MIN_LINK_W = 1; // minimum ribbon width in px for zero-value edges
     let sy = node.y0;
     for (const link of node.sourceLinks) {
       const proportion = totalSrcValue > 0 ? link.value / totalSrcValue : 0;
-      link.sourceWidth = nodeHeight * proportion;
+      link.sourceWidth = link.value === 0 ? MIN_LINK_W : nodeHeight * proportion;
       link.y0 = sy;
       sy += link.sourceWidth;
     }
     let ty = node.y0;
     for (const link of node.targetLinks) {
       const proportion = totalTgtValue > 0 ? link.value / totalTgtValue : 0;
-      link.targetWidth = nodeHeight * proportion;
+      link.targetWidth = link.value === 0 ? MIN_LINK_W : nodeHeight * proportion;
       link.y1 = ty;
       ty += link.targetWidth;
     }
