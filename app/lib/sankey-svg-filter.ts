@@ -556,12 +556,12 @@ export function filterTopN(
   // ── Build edges ──
   const edges: RawEdge[] = [];
 
-  // total → ministry (budget-based; spending fallback when budget = 0 so edge is visible)
+  // total → ministry (budget-based; 0-value edge emitted when budget = 0 so hierarchy is visible)
   // In recipientFocusMode, use ministryNodesToShow (all ministries) instead of topMinistryNodes only
   for (const mn of ministryNodesToShow) {
     const bv = ministryBudgetValue.get(mn.name) || 0;
-    const edgeVal = bv > 0 ? bv : (ministrySpendingValue.get(mn.name) || 0);
-    if (edgeVal > 0) edges.push({ source: 'total', target: mn.id, value: edgeVal });
+    const hasVisibleSpending = (ministrySpendingValue.get(mn.name) || 0) > 0;
+    if (bv > 0 || hasVisibleSpending) edges.push({ source: 'total', target: mn.id, value: bv });
   }
   if (!recipientFocusMode && otherMinistryBudgetValue > 0) {
     edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryBudgetValue });
@@ -576,7 +576,8 @@ export function filterTopN(
     const budgetId = `project-budget-${n.projectId}`;
     const bv = projectAdjustedBudget.get(budgetId) ?? nodeById.get(budgetId)?.value ?? 0;
     const ministrySource = visibleMinistryNames.has(n.ministry || '') ? `ministry-${n.ministry}` : '__agg-ministry';
-    if (bv > 0) edges.push({ source: ministrySource, target: budgetId, value: bv });
+    // Emit edge even when bv = 0 so hierarchy remains visible (0-value edges render as hairlines)
+    edges.push({ source: ministrySource, target: budgetId, value: bv });
   }
   if (otherProjectBudgetTotal > 0 && showAggProject) {
     for (const mn of topMinistryNodes) {
