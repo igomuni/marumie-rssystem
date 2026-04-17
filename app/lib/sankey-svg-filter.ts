@@ -440,6 +440,19 @@ export function filterTopN(
       ministryBudgetRawValue.set(n.ministry, (ministryBudgetRawValue.get(n.ministry) || 0) + n.value);
     }
   }
+  // Fallback spending value per ministry — used when all visible projects have 0 budget.
+  const ministrySpendingValue = new Map<string, number>();
+  for (const n of allNodes) {
+    if (n.type === 'project-spending' && n.ministry) {
+      if (ministryFocusMode && n.ministry !== pinnedMinistryName) continue;
+      if (effectivelyHiddenIds.has(n.id)) continue;
+      if (zeroSpendingProjectIds.has(n.id)) continue;
+      if (aboveWindowSpendingIds.has(n.id)) continue;
+      if (!showAggProject && otherProjectSpendingIds.has(n.id)) continue;
+      const sv = n.value - (projectAboveWindowSpending.get(n.id) || 0);
+      if (sv > 0) ministrySpendingValue.set(n.ministry, (ministrySpendingValue.get(n.ministry) || 0) + sv);
+    }
+  }
   const totalBudget = Array.from(ministryBudgetValue.values()).reduce((s, v) => s + v, 0);
   const totalBudgetRaw = Array.from(ministryBudgetRawValue.values()).reduce((s, v) => s + v, 0);
   const otherMinistryBudgetValue = otherMinistries.reduce((s, n) => s + (ministryBudgetValue.get(n.name) || 0), 0);
@@ -457,7 +470,11 @@ export function filterTopN(
   for (const n of ministryNodesToShow) {
     const bv = ministryBudgetValue.get(n.name) || 0;
     const rawBv = ministryBudgetRawValue.get(n.name) || 0;
-    if (bv > 0) nodes.push({ ...n, value: bv, rawValue: rawBv, isScaled: bv < rawBv, skipLinkOverride: true });
+    // When budget = 0 (e.g. high project offset where only zero-budget projects remain),
+    // use spending value so the ministry node remains visible.
+    const sv = bv > 0 ? 0 : (ministrySpendingValue.get(n.name) || 0);
+    const displayVal = bv > 0 ? bv : sv;
+    if (displayVal > 0) nodes.push({ ...n, value: displayVal, rawValue: rawBv || undefined, isScaled: bv > 0 && bv < rawBv, skipLinkOverride: true });
   }
   if (!recipientFocusMode && otherMinistryBudgetValue > 0) {
     nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryBudgetValue, rawValue: otherMinistryBudgetRawValue, isScaled: otherMinistryBudgetValue < otherMinistryBudgetRawValue, skipLinkOverride: true, aggregated: true });
@@ -538,11 +555,12 @@ export function filterTopN(
   // ── Build edges ──
   const edges: RawEdge[] = [];
 
-  // total → ministry (budget-based)
+  // total → ministry (budget-based, or spending when budget = 0)
   // In recipientFocusMode, use ministryNodesToShow (all ministries) instead of topMinistryNodes only
   for (const mn of ministryNodesToShow) {
     const bv = ministryBudgetValue.get(mn.name) || 0;
-    if (bv > 0) edges.push({ source: 'total', target: mn.id, value: bv });
+    const edgeVal = bv > 0 ? bv : (ministrySpendingValue.get(mn.name) || 0);
+    if (edgeVal > 0) edges.push({ source: 'total', target: mn.id, value: edgeVal });
   }
   if (!recipientFocusMode && otherMinistryBudgetValue > 0) {
     edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryBudgetValue });
