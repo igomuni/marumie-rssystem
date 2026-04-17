@@ -483,19 +483,18 @@ export function filterTopN(
       : n.value;
     nodes.push({ ...n, value: spendingValue, rawValue: spendingTrimmed ? n.value : undefined, isScaled: spendingTrimmed, layoutSortValue: spendingLayoutSortValue, skipLinkOverride: true });
   }
-  // Create __agg-project-budget when aggregated projects have budget (otherProjectBudgetTotal > 0)
-  // and showAggProject is enabled.
+  // Compute aggregate spending total independently of budget so zero-budget aggregate projects
+  // still get a spending node (budget and spending gates are evaluated separately).
+  const otherProjectSpendingTotal = (recipientFocusMode || !showAggRecipient)
+    ? otherProjectWindowTotal
+    : otherProjects.reduce((s, p) => s + p.value - (projectAboveWindowSpending.get(p.id) || 0), 0);
+  const otherProjectSpendingRawTotal = otherProjects.reduce((s, p) => s + p.value, 0);
+  // Create __agg-project-budget when aggregated projects have budget and showAggProject is enabled.
   if (otherProjectBudgetTotal > 0 && showAggProject) {
     nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, rawValue: otherProjectBudgetRawTotal, isScaled: otherProjectBudgetTotal < otherProjectBudgetRawTotal, skipLinkOverride: true, aggregated: true });
   }
-  // Create __agg-project-spending whenever there is aggregate budget (needed for merged shape rendering)
-  // and showAggProject is enabled.
-  const aggProjectSpendingNeeded = otherProjectBudgetTotal > 0 && showAggProject;
-  if (aggProjectSpendingNeeded) {
-    const otherProjectSpendingTotal = (recipientFocusMode || !showAggRecipient)
-      ? otherProjectWindowTotal
-      : otherProjects.reduce((s, p) => s + p.value - (projectAboveWindowSpending.get(p.id) || 0), 0);
-    const otherProjectSpendingRawTotal = otherProjects.reduce((s, p) => s + p.value, 0);
+  // Create __agg-project-spending when aggregate projects have spending (budget may be zero).
+  if (otherProjectSpendingTotal > 0 && showAggProject) {
     const aggSpendingTrimmed = otherProjectSpendingTotal < otherProjectSpendingRawTotal;
     nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectSpendingTotal, rawValue: aggSpendingTrimmed ? otherProjectSpendingRawTotal : undefined, isScaled: aggSpendingTrimmed, skipLinkOverride: true, aggregated: true });
   }
@@ -581,7 +580,7 @@ export function filterTopN(
     const bv = projectAdjustedBudget.get(budgetId) ?? nodeById.get(budgetId)?.value ?? 0;
     if (bv > 0) edges.push({ source: budgetId, target: n.id, value: bv });
   }
-  if (otherProjectBudgetTotal > 0 && aggProjectSpendingNeeded) {
+  if (otherProjectBudgetTotal > 0 && otherProjectSpendingTotal > 0 && showAggProject) {
     edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: otherProjectBudgetTotal });
   }
 
