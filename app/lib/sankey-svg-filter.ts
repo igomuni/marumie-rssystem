@@ -441,9 +441,18 @@ export function filterTopN(
     }
   }
   // Fallback spending value per ministry — used when all visible projects have 0 budget.
+  // Must apply the same focus-mode filters as ministryBudgetValue to avoid showing unrelated ministries.
+  const recipientFocusProjectSpendingIds = recipientFocusProjectBudgetIds
+    ? new Set([
+        ...topProjectNodes.filter(n => n.projectId != null).map(n => n.id),
+        ...otherProjects.filter(n => n.projectId != null).map(n => n.id),
+      ])
+    : null;
   const ministrySpendingValue = new Map<string, number>();
   for (const n of allNodes) {
     if (n.type === 'project-spending' && n.ministry) {
+      if (projectRecipientsMode && n.id !== pinnedProjectId) continue;
+      if (recipientFocusMode && !recipientFocusProjectSpendingIds?.has(n.id)) continue;
       if (ministryFocusMode && n.ministry !== pinnedMinistryName) continue;
       if (effectivelyHiddenIds.has(n.id)) continue;
       if (zeroSpendingProjectIds.has(n.id)) continue;
