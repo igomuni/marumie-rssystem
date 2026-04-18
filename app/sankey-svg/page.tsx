@@ -31,6 +31,7 @@ interface SankeyUrlState {
   scaleBudgetToVisible: boolean;
   focusRelated: boolean;
   year: '2024' | '2025';
+  zoom?: number;
 }
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
@@ -54,6 +55,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const sb = p.get('sb'); if (sb !== null) result.scaleBudgetToVisible = sb !== '0';
   const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr !== '0';
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
+  const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= 0.1 && n <= 10) result.zoom = n; }
   return result;
 }
 
@@ -132,6 +134,10 @@ export default function RealDataSankeyPage() {
   // Tracks whether the next URL update should push (navigation) or replace (slider/toggle)
   const pendingHistoryAction = useRef<'push' | 'replace' | null>(null);
   const pendingFocusId = useRef<string | null>(null);
+  // Zoom URL state
+  const urlRestoredZoomRef = useRef<number | null>(null); // zoom to restore on first layout (no sel= case)
+  const zoomRef = useRef(1);                              // always-current zoom for debounce callbacks
+  const zoomUrlDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -178,6 +184,10 @@ export default function RealDataSankeyPage() {
     if (parsed.scaleBudgetToVisible !== undefined) setScaleBudgetToVisible(parsed.scaleBudgetToVisible);
     if (parsed.focusRelated !== undefined) setFocusRelated(parsed.focusRelated);
     if (parsed.year !== undefined) setYear(parsed.year);
+    // Restore zoom only when no sel= (focusOnNeighborhood will handle zoom for sel= case)
+    if (parsed.zoom !== undefined && parsed.selectedNodeId === undefined) {
+      urlRestoredZoomRef.current = parsed.zoom;
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
 
@@ -246,8 +256,13 @@ export default function RealDataSankeyPage() {
     }
   }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, year]);
 
+  // Keep zoomRef in sync for debounce callbacks
+  // (declared before zoom state so the effect below can reference it)
+
   // Zoom/Pan state
   const [zoom, setZoom] = useState(1);
+  // Keep zoomRef current for use in debounce timeouts
+  useEffect(() => { zoomRef.current = zoom; }, [zoom]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
@@ -305,6 +320,17 @@ export default function RealDataSankeyPage() {
     target instanceof HTMLElement &&
     !!target.closest('[data-pan-disabled],button,input,select,textarea,label');
 
+  // Debounced zoom URL write — called only on explicit user zoom (wheel / buttons)
+  const scheduleZoomUrlWrite = useCallback(() => {
+    if (zoomUrlDebounceRef.current) clearTimeout(zoomUrlDebounceRef.current);
+    zoomUrlDebounceRef.current = setTimeout(() => {
+      const p = new URLSearchParams(window.location.search);
+      p.set('z', zoomRef.current.toFixed(2));
+      const qs = p.toString();
+      window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+    }, 500);
+  }, []);
+
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (isOverlayControlTarget(e.target)) return;
     e.preventDefault();
@@ -324,7 +350,8 @@ export default function RealDataSankeyPage() {
 
     setZoom(newZoom);
     setPan({ x: newPanX, y: newPanY });
-  }, [zoom, pan, baseZoom]);
+    scheduleZoomUrlWrite();
+  }, [zoom, pan, baseZoom, scheduleZoomUrlWrite]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || isOverlayControlTarget(e.target)) return; // left click only
@@ -706,19 +733,23 @@ export default function RealDataSankeyPage() {
     setPanelTab(tab);
   }, [selectedNodeId]);
 
-  const selectNode = useCallback((id: string | null) => {
-    pendingHistoryAction.current = id !== null ? 'push' : 'replace';
+  const selectNode = useCallback((id: string | null, forceReplace?: boolean) => {
+    // User-initiated select/deselect both push to history so back/forward works naturally.
+    // Auto-deselect (stale node cleanup) passes forceReplace=true to avoid polluting history.
+    pendingHistoryAction.current = forceReplace ? 'replace' : 'push';
     setSelectedNodeId(id);
     setIsProjectDetailExpanded(false);
     if (id === null) { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); }
   }, [setPinnedRecipientId, setPinnedMinistryName, setIsProjectDetailExpanded]);
 
   // Auto-clear stale selection when node no longer exists in graphData at all
+  // Guard: skip while graphData is loading to avoid clearing URL-restored selection
   useEffect(() => {
+    if (!graphData) return;
     if (selectedNodeId !== null && !selectedNode) {
-      selectNode(null);
+      selectNode(null, true); // forceReplace: don't push to history for automatic cleanup
     }
-  }, [selectedNode, selectedNodeId, selectNode]);
+  }, [selectedNode, selectedNodeId, selectNode, graphData]);
 
   // Pre-fetch project detail on node selection (for collapsed preview)
   useEffect(() => {
@@ -935,7 +966,29 @@ export default function RealDataSankeyPage() {
   useEffect(() => {
     if (layout && !initialCentered.current) {
       initialCentered.current = true;
-      resetView();
+      if (urlRestoredZoomRef.current !== null) {
+        // URL had z= but no sel=: center layout at user zoom
+        const k = urlRestoredZoomRef.current;
+        urlRestoredZoomRef.current = null;
+        const container = containerRef.current;
+        const l = layoutRef.current;
+        setRecipientOffset(0);
+        if (container && l) {
+          const cW = container.clientWidth;
+          const cH = container.clientHeight;
+          const totalW = MARGIN.left + l.contentW;
+          const totalH = MARGIN.top + l.contentH;
+          const availH = cH - SEARCH_BOX_RESERVE;
+          const fitK = Math.max(0.2, Math.min(10, Math.min(cW / totalW, availH / totalH) * 0.9));
+          setBaseZoom(fitK);
+          setZoom(k);
+          setPan({ x: (cW - totalW * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
+        } else {
+          setZoom(k); setBaseZoom(k); setPan({ x: 0, y: SEARCH_BOX_RESERVE });
+        }
+      } else {
+        resetView();
+      }
     }
   }, [layout, resetView]);
 
@@ -1039,7 +1092,8 @@ export default function RealDataSankeyPage() {
     const nz = Math.max(0.2, Math.min(baseZoom * 10, zoom * factor));
     setPan({ x: svgWidth / 2 - (svgWidth / 2 - pan.x) * (nz / zoom), y: svgHeight / 2 - (svgHeight / 2 - pan.y) * (nz / zoom) });
     setZoom(nz);
-  }, [zoom, pan, svgWidth, svgHeight, baseZoom]);
+    scheduleZoomUrlWrite();
+  }, [zoom, pan, svgWidth, svgHeight, baseZoom, scheduleZoomUrlWrite]);
 
 
   return (
