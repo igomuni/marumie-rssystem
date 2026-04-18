@@ -1488,13 +1488,23 @@ export default function RealDataSankeyPage() {
                       } else if (selectedNode.id === '__agg-project-budget') {
                         mainValue = selectedNode.value;
                         mainLabel = '予算額';
-                        const aggSp = filtered?.nodes.find(n => n.id === '__agg-project-spending');
-                        if (aggSp) { subValue = aggSp.value; subLabel = '支出額'; }
+                        // spending node is a direct source-link target in the layout
+                        const spLink = selectedNode.sourceLinks.find(l => l.target.id === '__agg-project-spending');
+                        if (spLink) { subValue = spLink.target.value; subLabel = '支出額'; }
+                        else {
+                          const aggSp = filtered?.nodes.find(n => n.id === '__agg-project-spending');
+                          if (aggSp) { subValue = aggSp.value; subLabel = '支出額'; }
+                        }
                       } else if (selectedNode.id === '__agg-project-spending') {
                         mainValue = selectedNode.value;
                         mainLabel = '支出額';
-                        const aggBu = filtered?.nodes.find(n => n.id === '__agg-project-budget');
-                        if (aggBu) { subValue = aggBu.value; subLabel = '予算額'; }
+                        // budget node is a direct target-link source in the layout
+                        const buLink = selectedNode.targetLinks.find(l => l.source.id === '__agg-project-budget');
+                        if (buLink) { subValue = buLink.source.value; subLabel = '予算額'; }
+                        else {
+                          const aggBu = filtered?.nodes.find(n => n.id === '__agg-project-budget');
+                          if (aggBu) { subValue = aggBu.value; subLabel = '予算額'; }
+                        }
                       } else if (selectedNode.type === 'project-budget') {
                         mainValue = selectedNode.value;
                         mainLabel = '予算額';
