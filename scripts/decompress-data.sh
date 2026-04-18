@@ -36,6 +36,17 @@ else
   echo "✅ rs2024-project-details.json already exists and is up to date"
 fi
 
+# Decompress rs2025-project-details.json if needed
+if [ -f "$DATA_DIR/rs2025-project-details.json.gz" ]; then
+  if [ ! -f "$DATA_DIR/rs2025-project-details.json" ] || [ "$DATA_DIR/rs2025-project-details.json.gz" -nt "$DATA_DIR/rs2025-project-details.json" ]; then
+    echo "🔓 Decompressing rs2025-project-details.json.gz..."
+    gunzip -k -f "$DATA_DIR/rs2025-project-details.json.gz"
+    echo "✅ Decompression complete ($(du -h "$DATA_DIR/rs2025-project-details.json" | cut -f1))"
+  else
+    echo "✅ rs2025-project-details.json already exists and is up to date"
+  fi
+fi
+
 # Decompress project-quality-recipients-2024.json if needed
 if [ -f "$DATA_DIR/project-quality-recipients-2024.json.gz" ]; then
   if [ ! -f "$DATA_DIR/project-quality-recipients-2024.json" ] || [ "$DATA_DIR/project-quality-recipients-2024.json.gz" -nt "$DATA_DIR/project-quality-recipients-2024.json" ]; then
