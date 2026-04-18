@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { GraphData, LayoutNode, LayoutLink } from '@/types/sankey-svg';
+import type { ProjectDetail } from '@/types/project-details';
 import {
   COL_LABELS, MARGIN, NODE_W, NODE_PAD,
   TYPE_LABELS,
@@ -685,6 +686,8 @@ export default function RealDataSankeyPage() {
     return { ministries: [], projects: [], recipients: [] };
   }, [selectedNode, graphData, filtered, projectRecipientCount]);
 
+  const [isProjectDetailExpanded, setIsProjectDetailExpanded] = useState(false);
+  const [projectDetailCache, setProjectDetailCache] = useState<Map<number, ProjectDetail | null>>(new Map());
   const [panelTab, setPanelTab] = useState<'ministry' | 'project' | 'recipient'>('ministry');
   // Auto-select panel tab based on selected node type.
   // selectedNode is derived from selectedNodeId and won't change for the same id
@@ -706,8 +709,9 @@ export default function RealDataSankeyPage() {
   const selectNode = useCallback((id: string | null) => {
     pendingHistoryAction.current = id !== null ? 'push' : 'replace';
     setSelectedNodeId(id);
+    setIsProjectDetailExpanded(false);
     if (id === null) { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); }
-  }, [setPinnedRecipientId, setPinnedMinistryName]);
+  }, [setPinnedRecipientId, setPinnedMinistryName, setIsProjectDetailExpanded]);
 
   // Auto-clear stale selection when node no longer exists in graphData at all
   useEffect(() => {
@@ -1527,6 +1531,91 @@ export default function RealDataSankeyPage() {
                   )}
                 </div>
               </div>
+
+              {/* 事業概要アコーディオン — project-budget / project-spending（非集約）のみ */}
+              {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (() => {
+                const pid = selectedNode.projectId;
+                const cachedDetail = projectDetailCache.get(pid);
+                const isLoading = isProjectDetailExpanded && cachedDetail === undefined;
+                const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name)}&fiscalYear=${year}`;
+                const handleToggle = () => {
+                  const next = !isProjectDetailExpanded;
+                  setIsProjectDetailExpanded(next);
+                  if (next && !projectDetailCache.has(pid)) {
+                    fetch(`/api/project-details/${pid}?year=${year}`)
+                      .then(r => r.ok ? r.json() : null)
+                      .then((data: ProjectDetail | null) => setProjectDetailCache(prev => new Map(prev).set(pid, data)))
+                      .catch(() => setProjectDetailCache(prev => new Map(prev).set(pid, null)));
+                  }
+                };
+                return (
+                  <div style={{ borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', padding: '7px 14px', gap: 4 }}>
+                      <button type="button" onClick={handleToggle}
+                        style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+                      >
+                        <span style={{ fontSize: 11, color: '#888' }}>{isProjectDetailExpanded ? '▼' : '▶'}</span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>事業概要</span>
+                      </button>
+                      <a href={rsUrl} target="_blank" rel="noopener noreferrer"
+                        title="RSシステムで開く"
+                        style={{ fontSize: 11, color: '#4a90d9', textDecoration: 'none', flexShrink: 0, lineHeight: 1 }}
+                      >↗</a>
+                    </div>
+                    {isProjectDetailExpanded && (
+                      <div style={{ padding: '0 14px 10px', fontSize: 12, color: '#444' }}>
+                        {isLoading && <span style={{ color: '#aaa' }}>読み込み中...</span>}
+                        {!isLoading && cachedDetail === null && <span style={{ color: '#aaa' }}>詳細情報が見つかりませんでした</span>}
+                        {!isLoading && cachedDetail && (() => {
+                          const d = cachedDetail;
+                          const fieldStyle: React.CSSProperties = { marginBottom: 8 };
+                          const labelStyle: React.CSSProperties = { fontSize: 10, color: '#aaa', display: 'block', marginBottom: 2 };
+                          const textStyle: React.CSSProperties = { lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-all' };
+                          return (<>
+                            {d.category && (
+                              <div style={fieldStyle}>
+                                <span style={labelStyle}>事業区分</span>
+                                <span>{d.category}</span>
+                                {(d.startYear || d.endYear || d.noEndDate) && (
+                                  <span style={{ marginLeft: 8, color: '#888' }}>
+                                    {d.startYear ?? (d.startYearUnknown ? '不明' : '?')}年度〜{d.noEndDate ? '終了予定なし' : (d.endYear ? `${d.endYear}年度` : '?')}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {d.implementationMethods.length > 0 && (
+                              <div style={fieldStyle}>
+                                <span style={labelStyle}>実施方法</span>
+                                <span>{d.implementationMethods.join('・')}</span>
+                              </div>
+                            )}
+                            {d.overview && (
+                              <div style={fieldStyle}>
+                                <span style={labelStyle}>概要</span>
+                                <span style={textStyle}>{d.overview}</span>
+                              </div>
+                            )}
+                            {d.purpose && (
+                              <div style={fieldStyle}>
+                                <span style={labelStyle}>目的</span>
+                                <span style={textStyle}>{d.purpose}</span>
+                              </div>
+                            )}
+                            {d.url && (
+                              <div style={fieldStyle}>
+                                <a href={d.url} target="_blank" rel="noopener noreferrer"
+                                  style={{ fontSize: 11, color: '#4a90d9', wordBreak: 'break-all' }}>
+                                  事業概要URL ↗
+                                </a>
+                              </div>
+                            )}
+                          </>);
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* 府省庁 / 事業 / 支出先 3タブ */}
               {panelSections && (() => {
