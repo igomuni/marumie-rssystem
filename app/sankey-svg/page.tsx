@@ -590,7 +590,7 @@ export default function RealDataSankeyPage() {
         id: n.id, name: n.name, value: n.value,
         projectCount: ministryProjectCounts.get(n.name), recipientCount: ministryRecipientCounts.get(n.name),
       }));
-      const projects: PanelEntry[] = graphData.nodes.filter(n => n.type === 'project-budget').sort((a, b) => b.value - a.value).map(toProjectEntry);
+      const projects: PanelEntry[] = graphData.nodes.filter(n => n.type === 'project-budget').map(toProjectEntry).sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
       const windowRecipients = (filtered?.nodes ?? []).filter(n => n.type === 'recipient').map(n => ({ id: n.id, name: n.name, value: n.value }));
       const aggRecipients = (filtered?.aggNodeMembers?.get('__agg-recipient') ?? []).map(r => ({ id: r.id, name: r.name, value: r.value }));
       const recipients: PanelEntry[] = [...windowRecipients, ...aggRecipients].sort((a, b) => b.value - a.value);
@@ -601,8 +601,8 @@ export default function RealDataSankeyPage() {
     if (ntype === 'ministry') {
       const projects: PanelEntry[] = graphData.nodes
         .filter(n => n.type === 'project-budget' && n.ministry === selectedNode.name)
-        .sort((a, b) => { const sa = a.projectId != null ? (spendingByPid.get(a.projectId)?.value ?? 0) : 0; const sb = b.projectId != null ? (spendingByPid.get(b.projectId)?.value ?? 0) : 0; return sb - sa; })
-        .map(toProjectEntry);
+        .map(toProjectEntry)
+        .sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
       const ministrySpendingIds = ministrySpendingIdsMap.get(selectedNode.name) ?? new Set<string>();
       const rMap = new Map<string, number>();
       for (const e of graphData.edges) { if (ministrySpendingIds.has(e.source) && e.target.startsWith('r-')) rMap.set(e.target, (rMap.get(e.target) || 0) + e.value); }
@@ -638,7 +638,7 @@ export default function RealDataSankeyPage() {
       const mMap = new Map<string, number>();
       for (const m of aggBudgetMembers) { if (m.ministry) mMap.set(m.ministry, (mMap.get(m.ministry) || 0) + m.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
-      const projects: PanelEntry[] = aggBudgetMembers.map(m => { const bn = nodeById.get(m.id); return bn ? toProjectEntry(bn) : { id: m.id, name: m.name, value: m.value, ministry: m.ministry }; });
+      const projects: PanelEntry[] = aggBudgetMembers.map(m => { const bn = nodeById.get(m.id); return bn ? toProjectEntry(bn) : { id: m.id, name: m.name, value: m.value, ministry: m.ministry }; }).sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
       const rMap = new Map<string, { name: string; value: number }>();
       for (const sm of aggSpendingMembers) { for (const e of graphData.edges) { if (e.source === sm.id && e.target.startsWith('r-')) { const prev = rMap.get(e.target); if (prev) prev.value += e.value; else rMap.set(e.target, { name: nodeById.get(e.target)?.name ?? e.target, value: e.value }); } } }
       const recipients: PanelEntry[] = Array.from(rMap.entries()).sort((a, b) => b[1].value - a[1].value).map(([id, { name, value }]) => ({ id, name, value }));
@@ -649,7 +649,7 @@ export default function RealDataSankeyPage() {
     if (ntype === 'recipient' && !selectedNode.aggregated) {
       const pMap = new Map<string, number>();
       for (const e of graphData.edges) { if (e.target === nid) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); }
-      const projects: PanelEntry[] = Array.from(pMap.entries()).sort((a, b) => b[1] - a[1]).map(([id, value]) => { const n = nodeById.get(id); return { id, name: n?.name ?? id, value, ministry: n?.ministry }; });
+      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); return { id, name: n?.name ?? id, value, ministry: n?.ministry }; }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
@@ -662,7 +662,7 @@ export default function RealDataSankeyPage() {
       const aggRcpts = filtered?.aggNodeMembers?.get('__agg-recipient') ?? [];
       const pMap = new Map<string, number>();
       for (const r of aggRcpts) { for (const e of graphData.edges) { if (e.target === r.id) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); } }
-      const projects: PanelEntry[] = Array.from(pMap.entries()).sort((a, b) => b[1] - a[1]).map(([id, value]) => { const n = nodeById.get(id); return { id, name: n?.name ?? id, value, ministry: n?.ministry }; });
+      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); return { id, name: n?.name ?? id, value, ministry: n?.ministry }; }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
@@ -1485,6 +1485,26 @@ export default function RealDataSankeyPage() {
                         mainLabel = '予算額';
                         subValue = stats.reduce((s, v) => s + v.spendingTotal, 0);
                         subLabel = '支出額';
+                      } else if (selectedNode.id === '__agg-project-budget') {
+                        mainValue = selectedNode.value;
+                        mainLabel = '予算額';
+                        // spending node is a direct source-link target in the layout
+                        const spLink = selectedNode.sourceLinks.find(l => l.target.id === '__agg-project-spending');
+                        if (spLink) { subValue = spLink.target.value; subLabel = '支出額'; }
+                        else {
+                          const aggSp = filtered?.nodes.find(n => n.id === '__agg-project-spending');
+                          if (aggSp) { subValue = aggSp.value; subLabel = '支出額'; }
+                        }
+                      } else if (selectedNode.id === '__agg-project-spending') {
+                        mainValue = selectedNode.value;
+                        mainLabel = '支出額';
+                        // budget node is a direct target-link source in the layout
+                        const buLink = selectedNode.targetLinks.find(l => l.source.id === '__agg-project-budget');
+                        if (buLink) { subValue = buLink.source.value; subLabel = '予算額'; }
+                        else {
+                          const aggBu = filtered?.nodes.find(n => n.id === '__agg-project-budget');
+                          if (aggBu) { subValue = aggBu.value; subLabel = '予算額'; }
+                        }
                       } else if (selectedNode.type === 'project-budget') {
                         mainValue = selectedNode.value;
                         mainLabel = '予算額';
@@ -1551,7 +1571,7 @@ export default function RealDataSankeyPage() {
                 const pid = selectedNode.projectId;
                 const cachedDetail = projectDetailCache.get(`${year}-${pid}`);
                 const isLoading = isProjectDetailExpanded && cachedDetail === undefined;
-                const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name.replace(/\//g, ''))}&fiscalYear=${year}`;
+                const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name.replace(/\//g, ''))}&fiscalYear=${year}&isSearchTargetProjectName=true`;
                 const handleToggle = () => setIsProjectDetailExpanded(v => !v);
                 return (
                   <div style={{ borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
@@ -1574,7 +1594,7 @@ export default function RealDataSankeyPage() {
                       </div>
                     )}
                     {isProjectDetailExpanded && (
-                      <div style={{ padding: '0 14px 10px', fontSize: 12, color: '#444' }}>
+                      <div style={{ padding: '0 14px 10px', fontSize: 12, color: '#444', maxHeight: 320, overflowY: 'auto' }}>
                         {isLoading && <span style={{ color: '#aaa' }}>読み込み中...</span>}
                         {!isLoading && cachedDetail === null && <span style={{ color: '#aaa' }}>詳細情報が見つかりませんでした</span>}
                         {!isLoading && cachedDetail && (() => {
@@ -1633,19 +1653,18 @@ export default function RealDataSankeyPage() {
                 const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: 12, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
                 const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
                 type PanelItem = { id: string; name: string; value: number; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; };
-                const renderFlatList = (items: PanelItem[]) => {
+                const renderFlatList = (items: PanelItem[], getValue?: (item: PanelItem) => number) => {
+                  const getVal = getValue ?? ((item: PanelItem) => item.value);
                   if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
                   return items.map((item) => (
                     <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                     >
                       <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
+                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(getVal(item))}</span>
                     </button>
                   ));
                 };
-                const isProjectNode = selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending';
-                const isSelfRecipient = selectedNode.type === 'recipient' && !selectedNode.aggregated;
                 return (
                   <div style={{ borderTop: '1px solid #f0f0f0', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* Tab bar */}
@@ -1683,58 +1702,11 @@ export default function RealDataSankeyPage() {
                       {panelTab === 'project' && (() => {
                         const items = panelSections.projects;
                         if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
-                        // Project node: single budget/spending card
-                        if (isProjectNode) {
-                          const card = items[0];
-                          return (
-                            <div style={{ background: '#f8f8f8', borderRadius: 6, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                <span style={{ fontSize: 12, color: '#666' }}>予算額</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: '#333' }}>{formatYen(card.budgetValue ?? 0)}</span>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                <span style={{ fontSize: 12, color: '#666' }}>支出額</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: '#e07040' }}>{formatYen(card.spendingValue ?? 0)}</span>
-                              </div>
-                              {card.recipientCount != null && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                  <span style={{ fontSize: 12, color: '#666' }}>支出先件数</span>
-                                  <span style={{ fontSize: 13, fontWeight: 600, color: '#333' }}>{card.recipientCount.toLocaleString()}件</span>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        }
-                        // All other nodes: flat list with budget/spending values where available
-                        return items.map((item) => (
-                          <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
-                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
-                          >
-                            <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                              {item.recipientCount != null && <span style={{ fontSize: 10, color: '#bbb', marginRight: 4 }}>{item.recipientCount.toLocaleString()}件</span>}
-                              {item.budgetValue != null && item.spendingValue != null
-                                ? <>予算{formatYen(item.budgetValue)} / 支出{formatYen(item.spendingValue)}</>
-                                : formatYen(item.value)}
-                            </span>
-                          </button>
-                        ));
+                        return renderFlatList(items, item => item.budgetValue ?? item.value);
                       })()}
                       {/* 支出先タブ */}
                       {panelTab === 'recipient' && (() => {
                         const items = panelSections.recipients;
-                        if (isSelfRecipient) {
-                          if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
-                          const self = items[0];
-                          return (
-                            <div style={{ background: '#f8f8f8', borderRadius: 6, padding: '10px 12px' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                <span style={{ fontSize: 12, color: '#666' }}>支出受取額</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: '#d94545' }}>{formatYen(self.value)}</span>
-                              </div>
-                            </div>
-                          );
-                        }
                         return renderFlatList(items);
                       })()}
                     </div>
