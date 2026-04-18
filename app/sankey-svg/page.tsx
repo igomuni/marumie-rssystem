@@ -687,7 +687,7 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, graphData, filtered, projectRecipientCount]);
 
   const [isProjectDetailExpanded, setIsProjectDetailExpanded] = useState(false);
-  const [projectDetailCache, setProjectDetailCache] = useState<Map<number, ProjectDetail | null>>(new Map());
+  const [projectDetailCache, setProjectDetailCache] = useState<Map<string, ProjectDetail | null>>(new Map());
   const [panelTab, setPanelTab] = useState<'ministry' | 'project' | 'recipient'>('ministry');
   // Auto-select panel tab based on selected node type.
   // selectedNode is derived from selectedNodeId and won't change for the same id
@@ -725,13 +725,14 @@ export default function RealDataSankeyPage() {
     if (!selectedNode || selectedNode.aggregated) return;
     if (selectedNode.type !== 'project-budget' && selectedNode.type !== 'project-spending') return;
     const pid = selectedNode.projectId;
-    if (pid == null || projectDetailCache.has(pid)) return;
+    const cacheKey = `${year}-${pid}`;
+    if (pid == null || projectDetailCache.has(cacheKey)) return;
     fetch(`/api/project-details/${pid}?year=${year}`)
       .then(r => r.ok ? r.json() : null)
-      .then((data: ProjectDetail | null) => setProjectDetailCache(prev => new Map(prev).set(pid, data)))
-      .catch(() => setProjectDetailCache(prev => new Map(prev).set(pid, null)));
+      .then((data: ProjectDetail | null) => setProjectDetailCache(prev => new Map(prev).set(cacheKey, data)))
+      .catch(() => setProjectDetailCache(prev => new Map(prev).set(cacheKey, null)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNode?.id]);
+  }, [selectedNode?.id, year]);
 
   // Imperatively focus a layout node (direct call + pending effect)
   const focusOnNode = useCallback((node: LayoutNode) => {
@@ -1548,7 +1549,7 @@ export default function RealDataSankeyPage() {
               {/* 事業概要アコーディオン — project-budget / project-spending（非集約）のみ */}
               {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (() => {
                 const pid = selectedNode.projectId;
-                const cachedDetail = projectDetailCache.get(pid);
+                const cachedDetail = projectDetailCache.get(`${year}-${pid}`);
                 const isLoading = isProjectDetailExpanded && cachedDetail === undefined;
                 const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name.replace(/\//g, ''))}&fiscalYear=${year}`;
                 const handleToggle = () => setIsProjectDetailExpanded(v => !v);
