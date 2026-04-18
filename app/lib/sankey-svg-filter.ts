@@ -234,16 +234,20 @@ export function filterTopN(
   );
   topMinistryAllProjects.sort((a, b) => {
     if (projectSortBy === 'budget') {
-      const ba = nodeById.get(`project-budget-${a.projectId}`)?.value ?? 0;
-      const bb = nodeById.get(`project-budget-${b.projectId}`)?.value ?? 0;
+      // Use adjusted budget (scaled by visible spending fraction) so ranking reacts to recipient offset.
+      const ba = projectAdjustedBudget.get(`project-budget-${a.projectId}`) ?? nodeById.get(`project-budget-${a.projectId}`)?.value ?? 0;
+      const bb = projectAdjustedBudget.get(`project-budget-${b.projectId}`) ?? nodeById.get(`project-budget-${b.projectId}`)?.value ?? 0;
       if (bb !== ba) return bb - ba;
-      return b.value - a.value;
+      return (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0);
     }
     return (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0);
   });
+  // Filter before slice so that projects with no visible flow don't consume TopN slots.
   const topProjectNodes = topMinistryAllProjects
-    .slice(0, topProject)
-    .filter(n => includeZeroSpending || projectSortBy === 'budget' || (projectWindowValue.get(n.id) || 0) > 0);
+    .filter(n => n.id === pinnedProjectId || includeZeroSpending
+      || (projectWindowValue.get(n.id) || 0) > 0
+      || (showAggRecipient && (projectTailValue.get(n.id) || 0) > 0))
+    .slice(0, topProject);
   // Pin: force-include the pinned project (TopN+1) if not already present
   if (pinnedProjectId) {
     const pinned = allNodes.find(n => n.id === pinnedProjectId && n.type === 'project-spending');
