@@ -1537,7 +1537,7 @@ export default function RealDataSankeyPage() {
                 const pid = selectedNode.projectId;
                 const cachedDetail = projectDetailCache.get(pid);
                 const isLoading = isProjectDetailExpanded && cachedDetail === undefined;
-                const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name)}&fiscalYear=${year}`;
+                const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name.replace(/\//g, ''))}&fiscalYear=${year}`;
                 const handleToggle = () => {
                   const next = !isProjectDetailExpanded;
                   setIsProjectDetailExpanded(next);
