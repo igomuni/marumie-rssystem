@@ -3,19 +3,22 @@
 /**
  * 事業詳細データ生成スクリプト
  *
- * 入力: data/year_2024/1-2_RS_2024_基本情報_事業概要等.csv
- * 出力: public/data/rs2024-project-details.json
+ * 入力: data/year_{YEAR}/1-2_RS_{YEAR}_基本情報_事業概要等.csv
+ * 出力: public/data/rs{YEAR}-project-details.json
  *
- * 実行方法: npm run generate-project-details
+ * 実行方法:
+ *   npm run generate-project-details          # 2024年度
+ *   npm run generate-project-details -- 2025  # 2025年度
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import type { ProjectDetail, ProjectDetailsData, ImplementationMethod } from '@/types/project-details';
 
-// ファイルパス
-const PROJECT_OVERVIEW_CSV = 'data/year_2024/1-2_RS_2024_基本情報_事業概要等.csv';
-const OUTPUT_JSON = 'public/data/rs2024-project-details.json';
+// 年度: コマンドライン引数 or デフォルト 2024
+const YEAR = process.argv[2] ?? '2024';
+const PROJECT_OVERVIEW_CSV = `data/year_${YEAR}/1-2_RS_${YEAR}_基本情報_事業概要等.csv`;
+const OUTPUT_JSON = `public/data/rs${YEAR}-project-details.json`;
 
 /**
  * CSV行を解析してフィールド配列に分割
@@ -147,7 +150,7 @@ function normalizeString(value: string): string {
  * メイン処理
  */
 function main() {
-  console.log('事業詳細データ生成スクリプト開始...');
+  console.log(`事業詳細データ生成スクリプト開始... (年度: ${YEAR})`);
   console.log(`入力CSV: ${PROJECT_OVERVIEW_CSV}`);
 
   // CSVファイル読み込み

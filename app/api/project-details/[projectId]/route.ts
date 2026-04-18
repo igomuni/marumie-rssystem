@@ -1,6 +1,6 @@
 /**
  * 事業詳細データAPI
- * GET /api/project-details/[projectId]
+ * GET /api/project-details/[projectId]?year=2024|2025
  *
  * 指定されたprojectIdの詳細情報を返す
  */
@@ -10,24 +10,31 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import type { ProjectDetailsData, ProjectDetail } from '@/types/project-details';
 
-// データをメモリにキャッシュ（サーバー起動時に1回だけ読み込み）
-let cachedProjectDetails: ProjectDetailsData | null = null;
+// データをメモリにキャッシュ（年度別）
+const cache = new Map<string, ProjectDetailsData>();
 
-/**
- * 事業詳細データを取得（キャッシュ付き）
- */
-function getProjectDetails(): ProjectDetailsData {
-  if (cachedProjectDetails === null) {
-    const filePath = join(process.cwd(), 'public', 'data', 'rs2024-project-details.json');
-    const fileContent = readFileSync(filePath, 'utf-8');
-    cachedProjectDetails = JSON.parse(fileContent) as ProjectDetailsData;
-    console.log('[API] Project details data loaded into cache');
-  }
-  return cachedProjectDetails as ProjectDetailsData;
+const SUPPORTED_YEARS = ['2024', '2025'] as const;
+type SupportedYear = typeof SUPPORTED_YEARS[number];
+
+function isSupportedYear(year: string): year is SupportedYear {
+  return (SUPPORTED_YEARS as readonly string[]).includes(year);
 }
 
 /**
- * GET /api/project-details/[projectId]
+ * 事業詳細データを取得（年度別キャッシュ付き）
+ */
+function getProjectDetails(year: SupportedYear): ProjectDetailsData {
+  if (!cache.has(year)) {
+    const filePath = join(process.cwd(), 'public', 'data', `rs${year}-project-details.json`);
+    const fileContent = readFileSync(filePath, 'utf-8');
+    cache.set(year, JSON.parse(fileContent) as ProjectDetailsData);
+    console.log(`[API] Project details data loaded into cache (year=${year})`);
+  }
+  return cache.get(year)!;
+}
+
+/**
+ * GET /api/project-details/[projectId]?year=2024|2025
  */
 export async function GET(
   request: NextRequest,
@@ -35,6 +42,7 @@ export async function GET(
 ) {
   try {
     const { projectId } = await params;
+    const yearParam = request.nextUrl.searchParams.get('year') ?? '2024';
 
     // バリデーション
     if (!projectId) {
@@ -44,8 +52,15 @@ export async function GET(
       );
     }
 
+    if (!isSupportedYear(yearParam)) {
+      return NextResponse.json(
+        { error: `Unsupported year: ${yearParam}` },
+        { status: 400 }
+      );
+    }
+
     // データ取得
-    const projectDetails = getProjectDetails();
+    const projectDetails = getProjectDetails(yearParam);
     const detail = projectDetails[projectId];
 
     if (!detail) {
