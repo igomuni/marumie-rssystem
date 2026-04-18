@@ -720,6 +720,19 @@ export default function RealDataSankeyPage() {
     }
   }, [selectedNode, selectedNodeId, selectNode]);
 
+  // Pre-fetch project detail on node selection (for collapsed preview)
+  useEffect(() => {
+    if (!selectedNode || selectedNode.aggregated) return;
+    if (selectedNode.type !== 'project-budget' && selectedNode.type !== 'project-spending') return;
+    const pid = selectedNode.projectId;
+    if (pid == null || projectDetailCache.has(pid)) return;
+    fetch(`/api/project-details/${pid}?year=${year}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((data: ProjectDetail | null) => setProjectDetailCache(prev => new Map(prev).set(pid, data)))
+      .catch(() => setProjectDetailCache(prev => new Map(prev).set(pid, null)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedNode?.id]);
+
   // Imperatively focus a layout node (direct call + pending effect)
   const focusOnNode = useCallback((node: LayoutNode) => {
     const container = containerRef.current;
@@ -730,7 +743,7 @@ export default function RealDataSankeyPage() {
     const cy = MARGIN.top + node.y0 + (node.y1 - node.y0) / 2;
     const h = node.y1 - node.y0;
     const minZoomForLabel = 10 / (h + NODE_PAD);
-    const panelW = isPanelCollapsed ? 0 : 280;
+    const panelW = isPanelCollapsed ? 0 : 310;
     const availableW = cW - panelW;
     const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
     setZoom(targetK);
@@ -755,7 +768,7 @@ export default function RealDataSankeyPage() {
     const PADDING = 40;
     const boxW = (maxX - minX) + PADDING * 2;
     const boxH = (maxY - minY) + PADDING * 2;
-    const panelW = isPanelCollapsed ? 0 : 280;
+    const panelW = isPanelCollapsed ? 0 : 310;
     const availableW = cW - panelW;
     const targetK = Math.max(0.2, Math.min(baseZoom * 10, Math.min(availableW / boxW, cH / boxH) * 0.9));
     const centerX = MARGIN.left + (minX + maxX) / 2;
@@ -1338,7 +1351,7 @@ export default function RealDataSankeyPage() {
                 onMouseLeave={() => { minimapDragging.current = false; }}
                 style={{
                   position: 'absolute',
-                  left: selectedNodeId !== null ? (isPanelCollapsed ? 26 : 288) : 8,
+                  left: selectedNodeId !== null ? (isPanelCollapsed ? 26 : 318) : 8,
                   bottom: 8,
                   zIndex: 10,
                   border: '1px solid #ccc',
@@ -1405,7 +1418,7 @@ export default function RealDataSankeyPage() {
           data-pan-disabled="true"
           style={{
             position: 'fixed', left: 0, top: 0, height: '100%',
-            width: isPanelCollapsed ? 0 : 280,
+            width: isPanelCollapsed ? 0 : 310,
             background: '#fff',
             borderRight: isPanelCollapsed ? 'none' : '1px solid #e0e0e0',
             boxShadow: isPanelCollapsed ? 'none' : '2px 0 8px rgba(0,0,0,0.1)',
@@ -1538,16 +1551,7 @@ export default function RealDataSankeyPage() {
                 const cachedDetail = projectDetailCache.get(pid);
                 const isLoading = isProjectDetailExpanded && cachedDetail === undefined;
                 const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name.replace(/\//g, ''))}&fiscalYear=${year}`;
-                const handleToggle = () => {
-                  const next = !isProjectDetailExpanded;
-                  setIsProjectDetailExpanded(next);
-                  if (next && !projectDetailCache.has(pid)) {
-                    fetch(`/api/project-details/${pid}?year=${year}`)
-                      .then(r => r.ok ? r.json() : null)
-                      .then((data: ProjectDetail | null) => setProjectDetailCache(prev => new Map(prev).set(pid, data)))
-                      .catch(() => setProjectDetailCache(prev => new Map(prev).set(pid, null)));
-                  }
-                };
+                const handleToggle = () => setIsProjectDetailExpanded(v => !v);
                 return (
                   <div style={{ borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', padding: '7px 14px', gap: 4 }}>
@@ -1562,6 +1566,12 @@ export default function RealDataSankeyPage() {
                         style={{ fontSize: 11, color: '#4a90d9', textDecoration: 'none', flexShrink: 0, lineHeight: 1 }}
                       >↗</a>
                     </div>
+                    {!isProjectDetailExpanded && cachedDetail?.overview && (
+                      <div style={{ padding: '0 14px 8px', fontSize: 11, color: '#888', lineHeight: 1.5,
+                        display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', wordBreak: 'break-all' }}>
+                        {cachedDetail.overview}
+                      </div>
+                    )}
                     {isProjectDetailExpanded && (
                       <div style={{ padding: '0 14px 10px', fontSize: 12, color: '#444' }}>
                         {isLoading && <span style={{ color: '#aaa' }}>読み込み中...</span>}
@@ -1754,7 +1764,7 @@ export default function RealDataSankeyPage() {
       {/* Search box — top left */}
       <div
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 292 : 12, zIndex: 100, width: 260, transition: 'left 0.2s ease' }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 322 : 12, zIndex: 100, width: 260, transition: 'left 0.2s ease' }}
       >
         <div style={{ position: 'relative' }}>
           {/* Search icon */}
