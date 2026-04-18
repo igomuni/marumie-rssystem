@@ -315,7 +315,7 @@ export function filterTopN(
   const effectivelyHiddenIds = new Set(
     allNodes
       .filter(n => n.type === 'project-spending' && n.value > 0
-        && !topProjectIds.has(n.id)  // pinned projects are in topProjectIds — do not hide them
+        && n.id !== pinnedProjectId  // only exempt the pinned project; top-N alone is not enough
         && !aboveWindowSpendingIds.has(n.id)  // above-window projects excluded via their own path
         // In projectOffsetMode, aggregate projects are always shown via the aggregate node
         // regardless of recipient overlap with the window — never treat them as effectively hidden.
