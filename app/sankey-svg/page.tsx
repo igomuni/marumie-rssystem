@@ -330,6 +330,10 @@ export default function RealDataSankeyPage() {
       window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
     }, 500);
   }, []);
+  // Cancel pending zoom URL write on unmount to avoid mutating the next page's history
+  useEffect(() => {
+    return () => { if (zoomUrlDebounceRef.current) { clearTimeout(zoomUrlDebounceRef.current); zoomUrlDebounceRef.current = null; } };
+  }, []);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     if (isOverlayControlTarget(e.target)) return;
