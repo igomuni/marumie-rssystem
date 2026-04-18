@@ -1568,7 +1568,7 @@ export default function RealDataSankeyPage() {
                     </div>
                     {!isProjectDetailExpanded && cachedDetail?.overview && (
                       <div style={{ padding: '0 14px 8px', fontSize: 11, color: '#888', lineHeight: 1.5,
-                        display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', wordBreak: 'break-all' }}>
+                        maxHeight: '4.5em', overflowY: 'auto', wordBreak: 'break-all' }}>
                         {cachedDetail.overview}
                       </div>
                     )}
