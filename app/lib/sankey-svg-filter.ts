@@ -458,7 +458,9 @@ export function filterTopN(
       if (zeroSpendingProjectIds.has(n.id)) continue;
       if (aboveWindowSpendingIds.has(n.id)) continue;
       if (!showAggProject && otherProjectSpendingIds.has(n.id)) continue;
-      const sv = n.value - (projectAboveWindowSpending.get(n.id) || 0);
+      const sv = (recipientFocusMode || !showAggRecipient)
+        ? (projectWindowValue.get(n.id) || 0)
+        : n.value - (projectAboveWindowSpending.get(n.id) || 0);
       if (sv > 0) ministrySpendingValue.set(n.ministry, (ministrySpendingValue.get(n.ministry) || 0) + sv);
     }
   }
@@ -466,6 +468,7 @@ export function filterTopN(
   const totalBudgetRaw = Array.from(ministryBudgetRawValue.values()).reduce((s, v) => s + v, 0);
   const otherMinistryBudgetValue = otherMinistries.reduce((s, n) => s + (ministryBudgetValue.get(n.name) || 0), 0);
   const otherMinistryBudgetRawValue = otherMinistries.reduce((s, n) => s + (ministryBudgetRawValue.get(n.name) || 0), 0);
+  const otherMinistrySpendingValue = otherMinistries.reduce((s, n) => s + (ministrySpendingValue.get(n.name) || 0), 0);
 
   // ── Build nodes ──
   const nodes: RawNode[] = [];
@@ -486,7 +489,7 @@ export function filterTopN(
       nodes.push({ ...n, value: bv, rawValue: rawBv || undefined, isScaled: bv > 0 && bv < rawBv, skipLinkOverride: true });
     }
   }
-  if (!recipientFocusMode && otherMinistryBudgetValue > 0) {
+  if (!recipientFocusMode && (otherMinistryBudgetValue > 0 || otherMinistrySpendingValue > 0)) {
     nodes.push({ id: '__agg-ministry', name: `${otherMinistries.length.toLocaleString()}省庁`, type: 'ministry', value: otherMinistryBudgetValue, rawValue: otherMinistryBudgetRawValue, isScaled: otherMinistryBudgetValue < otherMinistryBudgetRawValue, skipLinkOverride: true, aggregated: true });
   }
 
@@ -572,7 +575,7 @@ export function filterTopN(
     const hasVisibleSpending = (ministrySpendingValue.get(mn.name) || 0) > 0;
     if (bv > 0 || hasVisibleSpending) edges.push({ source: 'total', target: mn.id, value: bv });
   }
-  if (!recipientFocusMode && otherMinistryBudgetValue > 0) {
+  if (!recipientFocusMode && (otherMinistryBudgetValue > 0 || otherMinistrySpendingValue > 0)) {
     edges.push({ source: 'total', target: '__agg-ministry', value: otherMinistryBudgetValue });
   }
 
@@ -841,6 +844,7 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     // Re-compute source link y0 positions (spending → recipient ribbons)
     let sy = newY0;
     for (const link of node.sourceLinks) {
+      if (link.value === 0) { link.y0 = newY0; continue; } // preserve MIN_LINK_W, update origin
       link.y0 = sy;
       sy += link.sourceWidth;
     }
@@ -861,6 +865,7 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     const totalTgt = recipient.targetLinks.reduce((s, l) => s + l.value, 0);
     let ty = recipient.y0;
     for (const link of recipient.targetLinks) {
+      if (link.value === 0) { link.y1 = recipient.y0; continue; } // preserve MIN_LINK_W, update origin
       link.targetWidth = totalTgt > 0 ? recipientH * (link.value / totalTgt) : 0;
       link.y1 = ty;
       ty += link.targetWidth;
