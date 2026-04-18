@@ -579,15 +579,17 @@ export function filterTopN(
     // Emit edge even when bv = 0 so hierarchy remains visible (0-value edges render as hairlines)
     edges.push({ source: ministrySource, target: budgetId, value: bv });
   }
-  if (otherProjectBudgetTotal > 0 && showAggProject) {
+  if (otherProjectSpendingTotal > 0 && showAggProject) {
     for (const mn of topMinistryNodes) {
+      const hasAggProjects = otherProjects.some(p => p.ministry === mn.name);
+      if (!hasAggProjects) continue;
       const v = otherProjects
         .filter(p => p.ministry === mn.name && p.projectId != null)
         .reduce((s, p) => {
           const budgetId = `project-budget-${p.projectId}`;
           return s + (projectAdjustedBudget.get(budgetId) ?? nodeById.get(budgetId)?.value ?? 0);
         }, 0);
-      if (v > 0) edges.push({ source: mn.id, target: '__agg-project-budget', value: v });
+      edges.push({ source: mn.id, target: '__agg-project-budget', value: v });
     }
     const otherMinRemain = otherProjects
       .filter(p => !topMinistryNames.has(p.ministry || '') && p.projectId != null)
@@ -595,16 +597,17 @@ export function filterTopN(
         const budgetId = `project-budget-${p.projectId}`;
         return s + (projectAdjustedBudget.get(budgetId) ?? nodeById.get(budgetId)?.value ?? 0);
       }, 0);
-    if (otherMinRemain > 0) edges.push({ source: '__agg-ministry', target: '__agg-project-budget', value: otherMinRemain });
+    const hasOtherMinAggProjects = otherProjects.some(p => !topMinistryNames.has(p.ministry || ''));
+    if (hasOtherMinAggProjects) edges.push({ source: '__agg-ministry', target: '__agg-project-budget', value: otherMinRemain });
   }
 
-  // project-budget → project-spending (adjusted budget-based)
+  // project-budget → project-spending (adjusted budget-based; 0-value edges emitted for hierarchy)
   for (const n of topProjectNodes) {
     const budgetId = `project-budget-${n.projectId}`;
     const bv = projectAdjustedBudget.get(budgetId) ?? nodeById.get(budgetId)?.value ?? 0;
-    if (bv > 0) edges.push({ source: budgetId, target: n.id, value: bv });
+    edges.push({ source: budgetId, target: n.id, value: bv });
   }
-  if (otherProjectBudgetTotal > 0 && otherProjectSpendingTotal > 0 && showAggProject) {
+  if (otherProjectSpendingTotal > 0 && showAggProject) {
     edges.push({ source: '__agg-project-budget', target: '__agg-project-spending', value: otherProjectBudgetTotal });
   }
 
