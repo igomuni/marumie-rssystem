@@ -1499,6 +1499,16 @@ export default function RealDataSankeyPage() {
                           const bn = filtered?.nodes.find(n => n.type === 'project-budget' && n.projectId === selectedNode.projectId);
                           if (bn) { subValue = bn.value; subLabel = '予算額'; }
                         }
+                      } else if (selectedNode.id === '__agg-project-budget') {
+                        mainValue = selectedNode.value;
+                        mainLabel = '予算額';
+                        const aggSp = filtered?.nodes.find(n => n.id === '__agg-project-spending');
+                        if (aggSp) { subValue = aggSp.value; subLabel = '支出額'; }
+                      } else if (selectedNode.id === '__agg-project-spending') {
+                        mainValue = selectedNode.value;
+                        mainLabel = '支出額';
+                        const aggBu = filtered?.nodes.find(n => n.id === '__agg-project-budget');
+                        if (aggBu) { subValue = aggBu.value; subLabel = '予算額'; }
                       } else {
                         mainValue = selectedNode.value;
                       }
