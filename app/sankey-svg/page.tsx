@@ -1551,7 +1551,7 @@ export default function RealDataSankeyPage() {
                 const pid = selectedNode.projectId;
                 const cachedDetail = projectDetailCache.get(`${year}-${pid}`);
                 const isLoading = isProjectDetailExpanded && cachedDetail === undefined;
-                const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name.replace(/\//g, ''))}&fiscalYear=${year}`;
+                const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name.replace(/\//g, ''))}&fiscalYear=${year}&isSearchTargetProjectName=true`;
                 const handleToggle = () => setIsProjectDetailExpanded(v => !v);
                 return (
                   <div style={{ borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
@@ -1644,8 +1644,6 @@ export default function RealDataSankeyPage() {
                     </button>
                   ));
                 };
-                const isProjectNode = selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending';
-                const isSelfRecipient = selectedNode.type === 'recipient' && !selectedNode.aggregated;
                 return (
                   <div style={{ borderTop: '1px solid #f0f0f0', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* Tab bar */}
@@ -1683,58 +1681,11 @@ export default function RealDataSankeyPage() {
                       {panelTab === 'project' && (() => {
                         const items = panelSections.projects;
                         if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
-                        // Project node: single budget/spending card
-                        if (isProjectNode) {
-                          const card = items[0];
-                          return (
-                            <div style={{ background: '#f8f8f8', borderRadius: 6, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                <span style={{ fontSize: 12, color: '#666' }}>予算額</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: '#333' }}>{formatYen(card.budgetValue ?? 0)}</span>
-                              </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                <span style={{ fontSize: 12, color: '#666' }}>支出額</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: '#e07040' }}>{formatYen(card.spendingValue ?? 0)}</span>
-                              </div>
-                              {card.recipientCount != null && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                  <span style={{ fontSize: 12, color: '#666' }}>支出先件数</span>
-                                  <span style={{ fontSize: 13, fontWeight: 600, color: '#333' }}>{card.recipientCount.toLocaleString()}件</span>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        }
-                        // All other nodes: flat list with budget/spending values where available
-                        return items.map((item) => (
-                          <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
-                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
-                          >
-                            <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                              {item.recipientCount != null && <span style={{ fontSize: 10, color: '#bbb', marginRight: 4 }}>{item.recipientCount.toLocaleString()}件</span>}
-                              {item.budgetValue != null && item.spendingValue != null
-                                ? <>予算{formatYen(item.budgetValue)} / 支出{formatYen(item.spendingValue)}</>
-                                : formatYen(item.value)}
-                            </span>
-                          </button>
-                        ));
+                        return renderFlatList(items);
                       })()}
                       {/* 支出先タブ */}
                       {panelTab === 'recipient' && (() => {
                         const items = panelSections.recipients;
-                        if (isSelfRecipient) {
-                          if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
-                          const self = items[0];
-                          return (
-                            <div style={{ background: '#f8f8f8', borderRadius: 6, padding: '10px 12px' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                                <span style={{ fontSize: 12, color: '#666' }}>支出受取額</span>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: '#d94545' }}>{formatYen(self.value)}</span>
-                              </div>
-                            </div>
-                          );
-                        }
                         return renderFlatList(items);
                       })()}
                     </div>
