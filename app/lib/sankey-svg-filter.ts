@@ -494,6 +494,7 @@ export function filterTopN(
   }
 
   for (const n of topProjectNodes) {
+    if (effectivelyHiddenIds.has(n.id)) continue;
     const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
     // Budget height = adjusted budget (scaled by visible spending fraction when scaleBudgetToVisible).
     // rawValue preserves original budget for label display.
@@ -585,6 +586,7 @@ export function filterTopN(
     ? new Set(topProjectNodes.map(n => n.ministry).filter(Boolean) as string[])
     : topMinistryNames;
   for (const n of topProjectNodes) {
+    if (effectivelyHiddenIds.has(n.id)) continue;
     const budgetId = `project-budget-${n.projectId}`;
     const bv = projectAdjustedBudget.get(budgetId) ?? nodeById.get(budgetId)?.value ?? 0;
     const ministrySource = visibleMinistryNames.has(n.ministry || '') ? `ministry-${n.ministry}` : '__agg-ministry';
@@ -615,6 +617,7 @@ export function filterTopN(
 
   // project-budget → project-spending (adjusted budget-based; 0-value edges emitted for hierarchy)
   for (const n of topProjectNodes) {
+    if (effectivelyHiddenIds.has(n.id)) continue;
     const budgetId = `project-budget-${n.projectId}`;
     const bv = projectAdjustedBudget.get(budgetId) ?? nodeById.get(budgetId)?.value ?? 0;
     edges.push({ source: budgetId, target: n.id, value: bv });
@@ -624,7 +627,7 @@ export function filterTopN(
   }
 
   // project-spending → window recipients
-  const topProjectSpendingIds = new Set(topProjectNodes.map(n => n.id));
+  const topProjectSpendingIds = new Set(topProjectNodes.filter(n => !effectivelyHiddenIds.has(n.id)).map(n => n.id));
   for (const e of allEdges) {
     if (topProjectSpendingIds.has(e.source) && windowRecipientIds.has(e.target)) edges.push(e);
   }
