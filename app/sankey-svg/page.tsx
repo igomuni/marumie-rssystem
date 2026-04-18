@@ -1594,7 +1594,7 @@ export default function RealDataSankeyPage() {
                       </div>
                     )}
                     {isProjectDetailExpanded && (
-                      <div style={{ padding: '0 14px 10px', fontSize: 12, color: '#444' }}>
+                      <div style={{ padding: '0 14px 10px', fontSize: 12, color: '#444', maxHeight: 320, overflowY: 'auto' }}>
                         {isLoading && <span style={{ color: '#aaa' }}>読み込み中...</span>}
                         {!isLoading && cachedDetail === null && <span style={{ color: '#aaa' }}>詳細情報が見つかりませんでした</span>}
                         {!isLoading && cachedDetail && (() => {
