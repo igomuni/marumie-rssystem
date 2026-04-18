@@ -602,7 +602,7 @@ export default function RealDataSankeyPage() {
       const projects: PanelEntry[] = graphData.nodes
         .filter(n => n.type === 'project-budget' && n.ministry === selectedNode.name)
         .map(toProjectEntry)
-        .sort((a, b) => { const sv = (b.spendingValue ?? 0) - (a.spendingValue ?? 0); return sv !== 0 ? sv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
+        .sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
       const ministrySpendingIds = ministrySpendingIdsMap.get(selectedNode.name) ?? new Set<string>();
       const rMap = new Map<string, number>();
       for (const e of graphData.edges) { if (ministrySpendingIds.has(e.source) && e.target.startsWith('r-')) rMap.set(e.target, (rMap.get(e.target) || 0) + e.value); }
