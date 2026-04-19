@@ -127,6 +127,7 @@ export default function RealDataSankeyPage() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchCursorIndex, setSearchCursorIndex] = useState(-1);
+  const [searchUseRegex, setSearchUseRegex] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
   const [zeroSpendingAlert, setZeroSpendingAlert] = useState(false);
@@ -923,21 +924,35 @@ export default function RealDataSankeyPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const searchRegexError = useMemo(() => {
+    if (!searchUseRegex || debouncedQuery.trim().length < 2) return false;
+    try { new RegExp(debouncedQuery.trim()); return false; } catch { return true; }
+  }, [searchUseRegex, debouncedQuery]);
+
   const searchResults = useMemo(() => {
     const q = debouncedQuery.trim();
     if (!graphData || q.length < 2) return [];
     const results: { id: string; name: string; type: string; value: number }[] = [];
     // PID search: pure numeric query matches project-spending nodes by projectId
     const pidQuery = /^\d+$/.test(q) ? Number(q) : null;
+    let matcher: (name: string) => boolean;
+    if (pidQuery !== null) {
+      matcher = () => false;
+    } else if (searchUseRegex) {
+      try { const re = new RegExp(q, 'i'); matcher = name => re.test(name); }
+      catch { return []; }  // invalid regex → no results
+    } else {
+      matcher = name => name.includes(q);
+    }
     for (const n of graphData.nodes) {
       if (pidQuery !== null) {
         if (n.type === 'project-spending' && n.projectId === pidQuery) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
       } else {
-        if (n.name.includes(q)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+        if (matcher(n.name)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
       }
     }
     return results.sort((a, b) => b.value - a.value).slice(0, 20);
-  }, [graphData, debouncedQuery]);
+  }, [graphData, debouncedQuery, searchUseRegex]);
 
   const pendingSearchResetRef = useRef(false);
 
@@ -1837,12 +1852,28 @@ export default function RealDataSankeyPage() {
             placeholder="ノード検索（2文字以上）"
             style={{
               width: '100%', boxSizing: 'border-box',
-              paddingLeft: 30, paddingRight: searchQuery ? 28 : 10, paddingTop: 7, paddingBottom: 7,
-              fontSize: 13, border: '1px solid #e0e0e0', borderRadius: 8,
+              paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
+              fontSize: 13,
+              border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: 8,
               background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
               outline: 'none', color: '#333',
             }}
           />
+          {/* .* regex toggle */}
+          <button
+            type="button"
+            title="正規表現で検索"
+            onClick={() => setSearchUseRegex(v => !v)}
+            style={{
+              position: 'absolute', right: searchQuery ? 30 : 6, top: '50%', transform: 'translateY(-50%)',
+              background: searchUseRegex ? '#1a73e8' : 'transparent',
+              border: 'none',
+              borderRadius: 4, cursor: 'pointer',
+              color: searchUseRegex ? '#fff' : '#888',
+              fontSize: 11, fontFamily: 'monospace', fontWeight: 'bold',
+              lineHeight: 1, padding: '2px 4px',
+            }}
+          >.*</button>
           {searchQuery && (
             <button
               type="button"
