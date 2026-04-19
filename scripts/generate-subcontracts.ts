@@ -28,7 +28,10 @@ const OUTPUT_FILE = `subcontracts-${YEAR}.json`;
 
 // ─── 2-1: 予算・執行 ──────────────────────────────────────────────
 
-console.log('📖 Reading 2-1 (budget/execution)...');
+// sankey-svg と同様: 事業年度=YEAR のファイルから 予算年度=YEAR-1 の行のみ使用
+const TARGET_BUDGET_YEAR = YEAR - 1;
+
+console.log(`📖 Reading 2-1 (budget/execution, 予算年度=${TARGET_BUDGET_YEAR})...`);
 const csv21 = readShiftJISCSV(path.join(DATA_DIR, `2-1_RS_${YEAR}_予算・執行_サマリ.csv`));
 
 // projectId → { budget, execution, projectName, ministry }
@@ -36,7 +39,10 @@ const budgetMap = new Map<number, { budget: number; execution: number; projectNa
 for (const row of csv21) {
   const projectId = parseInt(row['予算事業ID'] ?? '', 10);
   if (isNaN(projectId)) continue;
-  const budget = parseAmount(row['当初予算(合計)'] ?? '');
+  // 複数年度が混在するため対象年度のみ抽出
+  const fiscalYear = parseInt(row['予算年度'] ?? '', 10);
+  if (fiscalYear !== TARGET_BUDGET_YEAR) continue;
+  const budget = parseAmount(row['計(歳出予算現額合計)'] ?? '');
   const execution = parseAmount(row['執行額(合計)'] ?? '');
   if (!budgetMap.has(projectId)) {
     budgetMap.set(projectId, {
@@ -46,7 +52,7 @@ for (const row of csv21) {
       ministry: row['府省庁'] ?? '',
     });
   } else {
-    // 同一事業IDが複数行ある場合は合算
+    // 同一事業ID・同一予算年度で複数会計がある場合は合算
     const existing = budgetMap.get(projectId)!;
     existing.budget += budget;
     existing.execution += execution;
