@@ -506,21 +506,21 @@ export function filterTopN(
     // rawValue preserves original budget for label display.
     if (budgetNode) {
       const adjBv = projectAdjustedBudget.get(budgetNode.id) ?? budgetNode.value;
-      // layoutSortValue: align both columns to the same sort criterion.
-      // spending sort → budget column sorts by spending n.value
-      // budget sort   → budget column sorts by raw budgetNode.value (canonical, scale-independent)
-      const budgetLayoutSortValue = projectSortBy === 'spending' ? n.value : budgetNode.value;
-      nodes.push({ ...budgetNode, value: adjBv, rawValue: budgetNode.value, isScaled: adjBv < budgetNode.value, layoutSortValue: budgetLayoutSortValue, skipLinkOverride: true });
+      // layoutSortValue: determines vertical position — must match topMinistryAllProjects sort key.
+      // project-offset + budget sort → adjusted budget; otherwise → window spending.
+      const layoutSortBase = (projectSortBy === 'budget' && projectOffsetMode)
+        ? (projectAdjustedBudget.get(budgetNode.id) ?? budgetNode.value)
+        : (projectWindowValue.get(n.id) || 0);
+      nodes.push({ ...budgetNode, value: adjBv, rawValue: budgetNode.value, isScaled: adjBv < budgetNode.value, layoutSortValue: layoutSortBase, skipLinkOverride: true });
     }
     // spending node height = window spending only (agg hidden) or total minus above-window (normal).
     const spendingValue = (recipientFocusMode || !showAggRecipient)
       ? (projectWindowValue.get(n.id) || 0)
       : n.value - (projectAboveWindowSpending.get(n.id) || 0);
     const spendingTrimmed = spendingValue < n.value;
-    // budget sort → spending column sorts by raw budgetNode.value; spending sort → sort by n.value
-    const spendingLayoutSortValue = projectSortBy === 'budget'
-      ? (nodeById.get(`project-budget-${n.projectId}`)?.value ?? n.value)
-      : n.value;
+    const spendingLayoutSortValue = (projectSortBy === 'budget' && projectOffsetMode)
+      ? (projectAdjustedBudget.get(`project-budget-${n.projectId}`) ?? nodeById.get(`project-budget-${n.projectId}`)?.value ?? n.value)
+      : (projectWindowValue.get(n.id) || 0);
     nodes.push({ ...n, value: spendingValue, rawValue: spendingTrimmed ? n.value : undefined, isScaled: spendingTrimmed, layoutSortValue: spendingLayoutSortValue, skipLinkOverride: true });
   }
   // Compute aggregate spending total independently of budget so zero-budget aggregate projects
