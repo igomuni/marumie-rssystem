@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { SubcontractGraph, BlockNode, BlockRecipient } from '@/types/subcontract';
@@ -169,7 +169,7 @@ function RecipientCard({
 
 // ─── メインページ ──────────────────────────────────────────────
 
-export default function SubcontractDetailPage() {
+function SubcontractDetailPageInner() {
   const params = useParams<{ projectId: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -492,5 +492,13 @@ export default function SubcontractDetailPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SubcontractDetailPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 24, color: '#6b7280', fontSize: 14 }}>読み込み中...</div>}>
+      <SubcontractDetailPageInner />
+    </Suspense>
   );
 }

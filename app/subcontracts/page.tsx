@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import type { SubcontractGraph } from '@/types/subcontract';
@@ -15,7 +15,7 @@ function formatYen(v: number): string {
   return `${v.toLocaleString()}円`;
 }
 
-export default function SubcontractsPage() {
+function SubcontractsPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [year, setYear] = useState(() => {
@@ -232,5 +232,13 @@ export default function SubcontractsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SubcontractsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 24, color: '#6b7280', fontSize: 14 }}>読み込み中...</div>}>
+      <SubcontractsPageInner />
+    </Suspense>
   );
 }
