@@ -47,6 +47,10 @@ export interface LayoutEdge {
   y1: number;
   x2: number;
   y2: number;
+  /** true = バックエッジ（循環・参照フロー） */
+  isBackEdge: boolean;
+  /** true = 自己ループ（sourceBlock === targetBlock） */
+  isSelfLoop: boolean;
 }
 
 export interface SubcontractLayout {
@@ -184,28 +188,60 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     const target = layoutById.get(f.targetBlock);
     if (!target) continue;
 
-    const tx = target.x;
-    const ty = target.y + target.h / 2;
+    const isSelfLoop = f.sourceBlock === f.targetBlock;
 
     if (f.sourceBlock === null) {
-      // ルート → ブロック
+      // ルート → ブロック（常に順方向）
       edges.push({
         ...f,
         x1: root.x + root.w,
         y1: root.y + root.h / 2,
-        x2: tx,
-        y2: ty,
+        x2: target.x,
+        y2: target.y + target.h / 2,
+        isBackEdge: false,
+        isSelfLoop: false,
       });
     } else {
       const source = layoutById.get(f.sourceBlock);
       if (!source) continue;
-      edges.push({
-        ...f,
-        x1: source.x + source.w,
-        y1: source.y + source.h / 2,
-        x2: tx,
-        y2: ty,
-      });
+
+      // sourceDepth >= targetDepth のエッジはバックエッジ（循環・参照フロー）
+      const isBackEdge = isSelfLoop || source.depth >= target.depth;
+
+      if (isSelfLoop) {
+        // 自己ループ: ノード右端から出てループして戻る
+        edges.push({
+          ...f,
+          x1: source.x + source.w,
+          y1: source.y + source.h / 2,
+          x2: source.x + source.w,
+          y2: source.y + source.h / 2,
+          isBackEdge: true,
+          isSelfLoop: true,
+        });
+      } else if (isBackEdge) {
+        // バックエッジ: ソース左端 → ターゲット左端（下方アークで描画）
+        edges.push({
+          ...f,
+          x1: source.x,
+          y1: source.y + source.h,
+          x2: target.x,
+          y2: target.y + target.h,
+          isBackEdge: true,
+          isSelfLoop: false,
+        });
+      } else {
+        // 順方向エッジ
+        edges.push({
+          ...f,
+          x1: source.x + source.w,
+          y1: source.y + source.h / 2,
+          x2: target.x,
+          y2: target.y + target.h / 2,
+          isBackEdge: false,
+          isSelfLoop: false,
+        });
+      }
     }
   }
 
@@ -226,8 +262,20 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
   };
 }
 
-/** SVG ベジェ曲線パス (ソース右端 → ターゲット左端) */
+/** 順方向エッジ: ソース右端 → ターゲット左端 */
 export function bezierPath(x1: number, y1: number, x2: number, y2: number): string {
   const cx = (x1 + x2) / 2;
   return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
+}
+
+/** バックエッジ: ノード下端を通る下方アーク (ソース左端 → ターゲット左端) */
+export function backEdgePath(x1: number, y1: number, x2: number, y2: number): string {
+  const arcY = Math.max(y1, y2) + 40;
+  return `M ${x1} ${y1} C ${x1} ${arcY}, ${x2} ${arcY}, ${x2} ${y2}`;
+}
+
+/** 自己ループ: ノード右端から小さなループを描く */
+export function selfLoopPath(x: number, y: number): string {
+  const r = 20;
+  return `M ${x} ${y - 6} C ${x + r * 2} ${y - r}, ${x + r * 2} ${y + r}, ${x} ${y + 6}`;
 }

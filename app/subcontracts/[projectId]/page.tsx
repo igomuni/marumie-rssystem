@@ -7,6 +7,8 @@ import type { SubcontractGraph, BlockNode, BlockRecipient } from '@/types/subcon
 import {
   computeSubcontractLayout,
   bezierPath,
+  backEdgePath,
+  selfLoopPath,
   formatYen,
   COLOR_DIRECT,
   COLOR_SUBCONTRACT,
@@ -15,6 +17,8 @@ import {
   NODE_W,
   NODE_PAD,
 } from '@/app/lib/subcontract-layout';
+
+const COLOR_BACK_EDGE = 'rgba(217,119,6,0.65)'; // amber
 
 const RECIPIENT_TOP_N = 5;
 
@@ -354,7 +358,7 @@ function SubcontractDetailPageInner() {
       </div>
 
       {/* 凡例 */}
-      <div style={{ padding: '6px 16px', background: '#fff', borderBottom: '1px solid #f3f4f6', display: 'flex', gap: 16, fontSize: 11, color: '#6b7280' }}>
+      <div style={{ padding: '6px 16px', background: '#fff', borderBottom: '1px solid #f3f4f6', display: 'flex', gap: 16, fontSize: 11, color: '#6b7280', flexWrap: 'wrap' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <span style={{ width: 12, height: 12, borderRadius: 2, background: COLOR_DIRECT, display: 'inline-block' }} />
           直接支出ブロック
@@ -362,6 +366,12 @@ function SubcontractDetailPageInner() {
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <span style={{ width: 12, height: 12, borderRadius: 2, background: COLOR_SUBCONTRACT, display: 'inline-block' }} />
           再委託ブロック
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <svg width="28" height="10" style={{ flexShrink: 0 }}>
+            <line x1="0" y1="5" x2="28" y2="5" stroke={COLOR_BACK_EDGE} strokeWidth="1.5" strokeDasharray="5 3" />
+          </svg>
+          参照フロー（循環）
         </span>
         <span style={{ color: '#9ca3af' }}>ブロックをクリックで詳細表示 ／ ホイールでズーム ／ ドラッグでパン</span>
       </div>
@@ -379,15 +389,42 @@ function SubcontractDetailPageInner() {
           onMouseLeave={onMouseUp}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
-            {/* エッジ */}
-            {safeLayout.edges.map((edge, i) => (
+            {/* 矢印マーカー定義 */}
+            <defs>
+              <marker id="arrow-fwd" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill={COLOR_EDGE} />
+              </marker>
+              <marker id="arrow-back" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+                <path d="M6,0 L6,6 L0,3 z" fill={COLOR_BACK_EDGE} />
+              </marker>
+            </defs>
+
+            {/* 順方向エッジ */}
+            {safeLayout.edges.filter(e => !e.isBackEdge).map((edge, i) => (
               <path
-                key={i}
+                key={`fwd-${i}`}
                 d={bezierPath(edge.x1, edge.y1, edge.x2, edge.y2)}
                 fill="none"
                 stroke={COLOR_EDGE}
                 strokeWidth={2}
+                markerEnd="url(#arrow-fwd)"
               />
+            ))}
+
+            {/* バックエッジ（循環・参照フロー） */}
+            {safeLayout.edges.filter(e => e.isBackEdge).map((edge, i) => (
+              <g key={`back-${i}`}>
+                <path
+                  d={edge.isSelfLoop
+                    ? selfLoopPath(edge.x1, edge.y1)
+                    : backEdgePath(edge.x1, edge.y1, edge.x2, edge.y2)}
+                  fill="none"
+                  stroke={COLOR_BACK_EDGE}
+                  strokeWidth={1.5}
+                  strokeDasharray="5 3"
+                  markerEnd="url(#arrow-back)"
+                />
+              </g>
             ))}
 
             {/* エッジラベル */}
@@ -395,11 +432,15 @@ function SubcontractDetailPageInner() {
               edge.note ? (
                 <text
                   key={`note-${i}`}
-                  x={(edge.x1 + edge.x2) / 2}
-                  y={(edge.y1 + edge.y2) / 2 - 6}
+                  x={edge.isSelfLoop ? edge.x1 + 44 : (edge.x1 + edge.x2) / 2}
+                  y={edge.isSelfLoop ? edge.y1 : (
+                    edge.isBackEdge
+                      ? Math.max(edge.y1, edge.y2) + 54
+                      : (edge.y1 + edge.y2) / 2 - 6
+                  )}
                   textAnchor="middle"
                   fontSize={9}
-                  fill="#94a3b8"
+                  fill={edge.isBackEdge ? '#b45309' : '#94a3b8'}
                 >
                   {edge.note}
                 </text>
