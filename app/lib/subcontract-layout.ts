@@ -205,8 +205,8 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
       const source = layoutById.get(f.sourceBlock);
       if (!source) continue;
 
-      // sourceDepth >= targetDepth のエッジはバックエッジ（循環・参照フロー）
-      const isBackEdge = isSelfLoop || source.depth >= target.depth;
+      // source.depth > target.depth のみバックエッジ（同一深さは順方向として扱う）
+      const isBackEdge = isSelfLoop || source.depth > target.depth;
 
       if (isSelfLoop) {
         // 自己ループ: ノード右端から出てループして戻る
@@ -220,13 +220,13 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
           isSelfLoop: true,
         });
       } else if (isBackEdge) {
-        // バックエッジ: ソース左端 → ターゲット左端（下方アークで描画）
+        // バックエッジ: ノード左端から左側オフセットの弧を描画（backEdgePath で計算）
         edges.push({
           ...f,
           x1: source.x,
-          y1: source.y + source.h,
+          y1: source.y + source.h / 2,
           x2: target.x,
-          y2: target.y + target.h,
+          y2: target.y + target.h / 2,
           isBackEdge: true,
           isSelfLoop: false,
         });
@@ -268,10 +268,10 @@ export function bezierPath(x1: number, y1: number, x2: number, y2: number): stri
   return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
 }
 
-/** バックエッジ: ノード下端を通る下方アーク (ソース左端 → ターゲット左端) */
+/** バックエッジ: 左側を通る弧 (ソース左端 → ターゲット左端) */
 export function backEdgePath(x1: number, y1: number, x2: number, y2: number): string {
-  const arcY = Math.max(y1, y2) + 40;
-  return `M ${x1} ${y1} C ${x1} ${arcY}, ${x2} ${arcY}, ${x2} ${y2}`;
+  const arcX = Math.min(x1, x2) - 40;
+  return `M ${x1} ${y1} C ${arcX} ${y1}, ${arcX} ${y2}, ${x2} ${y2}`;
 }
 
 /** 自己ループ: ノード右端から小さなループを描く */

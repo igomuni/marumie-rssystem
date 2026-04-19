@@ -571,8 +571,8 @@ function SubcontractDetailPageInner() {
           </g>
         </svg>
 
-        {/* ズームコントロール — 右下 */}
-        <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* ズームコントロール — 右下（BlockPanel 表示時は左にシフト） */}
+        <div style={{ position: 'absolute', bottom: 12, right: selectedBlock ? 372 : 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4, transition: 'right 0.15s' }}>
           {/* + / スライダー / - */}
           <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <button aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
@@ -603,9 +603,9 @@ function SubcontractDetailPageInner() {
                 autoFocus
                 min={1} max={1000} step={1}
                 value={zoomInputValue}
-                onChange={e => { setZoomInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / transform.scale); }}
-                onBlur={() => setIsEditingZoom(false)}
-                onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingZoom(false); }}
+                onChange={e => setZoomInputValue(e.target.value)}
+                onBlur={() => { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / transform.scale); setIsEditingZoom(false); }}
+                onKeyDown={e => { if (e.key === 'Enter') { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / transform.scale); setIsEditingZoom(false); } else if (e.key === 'Escape') { setIsEditingZoom(false); } }}
                 style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '3px 0', border: 'none', outline: 'none', background: 'transparent', color: '#555', boxSizing: 'border-box' }}
               />
             ) : (
