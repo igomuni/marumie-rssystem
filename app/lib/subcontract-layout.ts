@@ -47,6 +47,10 @@ export interface LayoutEdge {
   y1: number;
   x2: number;
   y2: number;
+  /** true = バックエッジ（循環・参照フロー） */
+  isBackEdge: boolean;
+  /** true = 自己ループ（sourceBlock === targetBlock） */
+  isSelfLoop: boolean;
 }
 
 export interface SubcontractLayout {
@@ -60,9 +64,11 @@ export interface SubcontractLayout {
 // ─── ヘルパー ──────────────────────────────────────────────
 
 function formatYen(v: number): string {
-  if (v >= 1e8) return `${(v / 1e8).toFixed(1)}億円`;
-  if (v >= 1e4) return `${(v / 1e4).toFixed(0)}万円`;
-  return `${v.toLocaleString()}円`;
+  if (v >= 1e12) return `${(v / 1e12).toFixed(2)}兆円`;
+  if (v >= 1e10) return `${Math.round(v / 1e8).toLocaleString()}億円`;
+  if (v >= 1e8) return `${(v / 1e8).toFixed(2)}億円`;
+  if (v >= 1e4) return `${Math.round(v / 1e4).toLocaleString()}万円`;
+  return `${Math.round(v).toLocaleString()}円`;
 }
 export { formatYen };
 
@@ -85,8 +91,8 @@ function computeDepths(flows: BlockEdge[]): Map<string, number> {
 
   while (queue.length > 0) {
     const { blockId, depth } = queue.shift()!;
-    const existing = depthMap.get(blockId) ?? 0;
-    if (depth <= existing || depth > MAX_DEPTH_LIMIT) continue;
+    // 最小深さ採用: 既訪問ノードはスキップ（サイクル対策）
+    if (depthMap.has(blockId) || depth > MAX_DEPTH_LIMIT) continue;
     depthMap.set(blockId, depth);
     for (const child of (children.get(blockId) ?? [])) {
       queue.push({ blockId: child, depth: depth + 1 });
@@ -182,28 +188,60 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     const target = layoutById.get(f.targetBlock);
     if (!target) continue;
 
-    const tx = target.x;
-    const ty = target.y + target.h / 2;
+    const isSelfLoop = f.sourceBlock === f.targetBlock;
 
     if (f.sourceBlock === null) {
-      // ルート → ブロック
+      // ルート → ブロック（常に順方向）
       edges.push({
         ...f,
         x1: root.x + root.w,
         y1: root.y + root.h / 2,
-        x2: tx,
-        y2: ty,
+        x2: target.x,
+        y2: target.y + target.h / 2,
+        isBackEdge: false,
+        isSelfLoop: false,
       });
     } else {
       const source = layoutById.get(f.sourceBlock);
       if (!source) continue;
-      edges.push({
-        ...f,
-        x1: source.x + source.w,
-        y1: source.y + source.h / 2,
-        x2: tx,
-        y2: ty,
-      });
+
+      // source.depth > target.depth のみバックエッジ（同一深さは順方向として扱う）
+      const isBackEdge = isSelfLoop || source.depth > target.depth;
+
+      if (isSelfLoop) {
+        // 自己ループ: ノード右端から出てループして戻る
+        edges.push({
+          ...f,
+          x1: source.x + source.w,
+          y1: source.y + source.h / 2,
+          x2: source.x + source.w,
+          y2: source.y + source.h / 2,
+          isBackEdge: true,
+          isSelfLoop: true,
+        });
+      } else if (isBackEdge) {
+        // バックエッジ: ノード左端から左側オフセットの弧を描画（backEdgePath で計算）
+        edges.push({
+          ...f,
+          x1: source.x,
+          y1: source.y + source.h / 2,
+          x2: target.x,
+          y2: target.y + target.h / 2,
+          isBackEdge: true,
+          isSelfLoop: false,
+        });
+      } else {
+        // 順方向エッジ
+        edges.push({
+          ...f,
+          x1: source.x + source.w,
+          y1: source.y + source.h / 2,
+          x2: target.x,
+          y2: target.y + target.h / 2,
+          isBackEdge: false,
+          isSelfLoop: false,
+        });
+      }
     }
   }
 
@@ -224,8 +262,20 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
   };
 }
 
-/** SVG ベジェ曲線パス (ソース右端 → ターゲット左端) */
+/** 順方向エッジ: ソース右端 → ターゲット左端 */
 export function bezierPath(x1: number, y1: number, x2: number, y2: number): string {
   const cx = (x1 + x2) / 2;
   return `M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}`;
+}
+
+/** バックエッジ: 左側を通る弧 (ソース左端 → ターゲット左端) */
+export function backEdgePath(x1: number, y1: number, x2: number, y2: number): string {
+  const arcX = Math.min(x1, x2) - 40;
+  return `M ${x1} ${y1} C ${arcX} ${y1}, ${arcX} ${y2}, ${x2} ${y2}`;
+}
+
+/** 自己ループ: ノード右端から小さなループを描く */
+export function selfLoopPath(x: number, y: number): string {
+  const r = 20;
+  return `M ${x} ${y - 6} C ${x + r * 2} ${y - r}, ${x + r * 2} ${y + r}, ${x} ${y + 6}`;
 }

@@ -9,10 +9,11 @@ type SortKey = 'projectId' | 'budget' | 'execution' | 'maxDepth' | 'totalBlockCo
 type SortDir = 'asc' | 'desc';
 
 function formatYen(v: number): string {
-  if (v >= 1e12) return `${(v / 1e12).toFixed(1)}兆円`;
-  if (v >= 1e8) return `${(v / 1e8).toFixed(1)}億円`;
-  if (v >= 1e4) return `${(v / 1e4).toFixed(0)}万円`;
-  return `${v.toLocaleString()}円`;
+  if (v >= 1e12) return `${(v / 1e12).toFixed(2)}兆円`;
+  if (v >= 1e10) return `${Math.round(v / 1e8).toLocaleString()}億円`;
+  if (v >= 1e8) return `${(v / 1e8).toFixed(2)}億円`;
+  if (v >= 1e4) return `${Math.round(v / 1e4).toLocaleString()}万円`;
+  return `${Math.round(v).toLocaleString()}円`;
 }
 
 function SubcontractsPageInner() {

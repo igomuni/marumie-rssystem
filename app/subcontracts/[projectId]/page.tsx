@@ -7,6 +7,8 @@ import type { SubcontractGraph, BlockNode, BlockRecipient } from '@/types/subcon
 import {
   computeSubcontractLayout,
   bezierPath,
+  backEdgePath,
+  selfLoopPath,
   formatYen,
   COLOR_DIRECT,
   COLOR_SUBCONTRACT,
@@ -15,6 +17,8 @@ import {
   NODE_W,
   NODE_PAD,
 } from '@/app/lib/subcontract-layout';
+
+const COLOR_BACK_EDGE = 'rgba(217,119,6,0.65)'; // amber
 
 const RECIPIENT_TOP_N = 5;
 
@@ -184,7 +188,11 @@ function SubcontractDetailPageInner() {
 
   // ズーム/パン
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
+  const [baseZoom, setBaseZoom] = useState(1);
+  const [isEditingZoom, setIsEditingZoom] = useState(false);
+  const [zoomInputValue, setZoomInputValue] = useState('');
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const isPanning = useRef(false);
   const panStart = useRef({ x: 0, y: 0 });
 
@@ -232,6 +240,49 @@ function SubcontractDetailPageInner() {
     return () => el.removeEventListener('wheel', handleWheel);
   }, [handleWheel, graph]);
 
+  // ページタイトル
+  useEffect(() => {
+    if (graph) document.title = `再委託 ${graph.projectName}`;
+    return () => { document.title = '再委託構造ブラウザ'; };
+  }, [graph]);
+
+  // Hooks はすべて early return より前に呼ぶ必要がある
+  const layout = useMemo(() => graph ? computeSubcontractLayout(graph) : null, [graph]);
+
+  const applyZoom = useCallback((factor: number) => {
+    setTransform((prev) => {
+      const newScale = Math.max(0.1, Math.min(10, prev.scale * factor));
+      const container = containerRef.current;
+      if (!container) return { ...prev, scale: newScale };
+      const cx = container.clientWidth / 2;
+      const cy = container.clientHeight / 2;
+      return {
+        scale: newScale,
+        x: cx - (cx - prev.x) * (newScale / prev.scale),
+        y: cy - (cy - prev.y) * (newScale / prev.scale),
+      };
+    });
+  }, []);
+
+  const resetViewport = useCallback(() => {
+    const container = containerRef.current;
+    if (!container || !layout) return;
+    const cW = container.clientWidth;
+    const cH = container.clientHeight;
+    const fitZoom = Math.max(0.05, Math.min(10, Math.min(cW / layout.svgWidth, cH / layout.svgHeight) * 0.9));
+    setBaseZoom(fitZoom);
+    setTransform({
+      x: (cW - layout.svgWidth * fitZoom) / 2,
+      y: (cH - layout.svgHeight * fitZoom) / 2,
+      scale: fitZoom,
+    });
+  }, [layout]);
+
+  // グラフ読み込み後に全体表示
+  useEffect(() => {
+    if (layout) resetViewport();
+  }, [layout]); // eslint-disable-line react-hooks/exhaustive-deps
+
   function onMouseDown(e: React.MouseEvent) {
     if (e.button !== 0) return;
     isPanning.current = true;
@@ -242,9 +293,6 @@ function SubcontractDetailPageInner() {
     setTransform((prev) => ({ ...prev, x: e.clientX - panStart.current.x, y: e.clientY - panStart.current.y }));
   }
   function onMouseUp() { isPanning.current = false; }
-
-  // Hooks はすべて early return より前に呼ぶ必要がある
-  const layout = useMemo(() => graph ? computeSubcontractLayout(graph) : null, [graph]);
 
   if (loading) {
     return (
@@ -308,15 +356,15 @@ function SubcontractDetailPageInner() {
         </select>
 
         <button
-          onClick={() => setTransform({ x: 0, y: 0, scale: 1 })}
+          onClick={resetViewport}
           style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 12, background: '#fff', cursor: 'pointer' }}
         >
-          リセット
+          全体表示
         </button>
       </div>
 
       {/* 凡例 */}
-      <div style={{ padding: '6px 16px', background: '#fff', borderBottom: '1px solid #f3f4f6', display: 'flex', gap: 16, fontSize: 11, color: '#6b7280' }}>
+      <div style={{ padding: '6px 16px', background: '#fff', borderBottom: '1px solid #f3f4f6', display: 'flex', gap: 16, fontSize: 11, color: '#6b7280', flexWrap: 'wrap' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <span style={{ width: 12, height: 12, borderRadius: 2, background: COLOR_DIRECT, display: 'inline-block' }} />
           直接支出ブロック
@@ -325,11 +373,17 @@ function SubcontractDetailPageInner() {
           <span style={{ width: 12, height: 12, borderRadius: 2, background: COLOR_SUBCONTRACT, display: 'inline-block' }} />
           再委託ブロック
         </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <svg width="28" height="10" style={{ flexShrink: 0 }}>
+            <line x1="0" y1="5" x2="28" y2="5" stroke={COLOR_BACK_EDGE} strokeWidth="1.5" strokeDasharray="5 3" />
+          </svg>
+          参照フロー（循環）
+        </span>
         <span style={{ color: '#9ca3af' }}>ブロックをクリックで詳細表示 ／ ホイールでズーム ／ ドラッグでパン</span>
       </div>
 
       {/* SVGキャンバス */}
-      <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+      <div ref={containerRef} style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         <svg
           ref={svgRef}
           width="100%"
@@ -341,15 +395,42 @@ function SubcontractDetailPageInner() {
           onMouseLeave={onMouseUp}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
-            {/* エッジ */}
-            {safeLayout.edges.map((edge, i) => (
+            {/* 矢印マーカー定義 */}
+            <defs>
+              <marker id="arrow-fwd" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill={COLOR_EDGE} />
+              </marker>
+              <marker id="arrow-back" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
+                <path d="M6,0 L6,6 L0,3 z" fill={COLOR_BACK_EDGE} />
+              </marker>
+            </defs>
+
+            {/* 順方向エッジ */}
+            {safeLayout.edges.filter(e => !e.isBackEdge).map((edge, i) => (
               <path
-                key={i}
+                key={`fwd-${i}`}
                 d={bezierPath(edge.x1, edge.y1, edge.x2, edge.y2)}
                 fill="none"
                 stroke={COLOR_EDGE}
                 strokeWidth={2}
+                markerEnd="url(#arrow-fwd)"
               />
+            ))}
+
+            {/* バックエッジ（循環・参照フロー） */}
+            {safeLayout.edges.filter(e => e.isBackEdge).map((edge, i) => (
+              <g key={`back-${i}`}>
+                <path
+                  d={edge.isSelfLoop
+                    ? selfLoopPath(edge.x1, edge.y1)
+                    : backEdgePath(edge.x1, edge.y1, edge.x2, edge.y2)}
+                  fill="none"
+                  stroke={COLOR_BACK_EDGE}
+                  strokeWidth={1.5}
+                  strokeDasharray="5 3"
+                  markerEnd="url(#arrow-back)"
+                />
+              </g>
             ))}
 
             {/* エッジラベル */}
@@ -357,11 +438,15 @@ function SubcontractDetailPageInner() {
               edge.note ? (
                 <text
                   key={`note-${i}`}
-                  x={(edge.x1 + edge.x2) / 2}
-                  y={(edge.y1 + edge.y2) / 2 - 6}
+                  x={edge.isSelfLoop ? edge.x1 + 44 : (edge.x1 + edge.x2) / 2}
+                  y={edge.isSelfLoop ? edge.y1 : (
+                    edge.isBackEdge
+                      ? Math.max(edge.y1, edge.y2) + 54
+                      : (edge.y1 + edge.y2) / 2 - 6
+                  )}
                   textAnchor="middle"
                   fontSize={9}
-                  fill="#94a3b8"
+                  fill={edge.isBackEdge ? '#b45309' : '#94a3b8'}
                 >
                   {edge.note}
                 </text>
@@ -485,6 +570,59 @@ function SubcontractDetailPageInner() {
             })}
           </g>
         </svg>
+
+        {/* ズームコントロール — 右下（BlockPanel 表示時は左にシフト） */}
+        <div style={{ position: 'absolute', bottom: 12, right: selectedBlock ? 372 : 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4, transition: 'right 0.15s' }}>
+          {/* + / スライダー / - */}
+          <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <button aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            </button>
+            <div style={{ padding: '4px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid #e5e7eb' }}>
+              <input
+                type="range"
+                aria-label="ズーム倍率"
+                min={Math.log10(0.1)}
+                max={Math.log10(10)}
+                step={0.01}
+                value={Math.log10(Math.max(0.1, Math.min(10, transform.scale)))}
+                onChange={e => { const newK = Math.pow(10, parseFloat(e.target.value)); applyZoom(newK / transform.scale); }}
+                style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 16, height: 80 }}
+                title={`Zoom: ${Math.round(transform.scale / baseZoom * 100)}%`}
+              />
+            </div>
+            <button aria-label="ズームアウト" onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13H5v-2h14v2z"/></svg>
+            </button>
+          </div>
+          {/* Zoom% */}
+          <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
+            {isEditingZoom ? (
+              <input
+                type="number"
+                autoFocus
+                min={1} max={1000} step={1}
+                value={zoomInputValue}
+                onChange={e => setZoomInputValue(e.target.value)}
+                onBlur={() => { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / transform.scale); setIsEditingZoom(false); }}
+                onKeyDown={e => { if (e.key === 'Enter') { const v = Number(zoomInputValue); if (!isNaN(v) && v > 0) applyZoom((v / 100 * baseZoom) / transform.scale); setIsEditingZoom(false); } else if (e.key === 'Escape') { setIsEditingZoom(false); } }}
+                style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '3px 0', border: 'none', outline: 'none', background: 'transparent', color: '#555', boxSizing: 'border-box' }}
+              />
+            ) : (
+              <button
+                onClick={() => { setZoomInputValue(String(Math.round(transform.scale / baseZoom * 100))); setIsEditingZoom(true); }}
+                title="クリックしてZoom率を入力"
+                style={{ width: '100%', fontSize: 10, textAlign: 'center', padding: '4px 0', border: 'none', background: 'transparent', color: '#888', cursor: 'text' }}
+              >{Math.round(transform.scale / baseZoom * 100)}%</button>
+            )}
+          </div>
+          {/* 全体表示 */}
+          <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
+            <button aria-label="全体表示" onClick={resetViewport} title="全体表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path d="M792-576v-120H672v-72h120q30 0 51 21.15T864-696v120h-72Zm-696 0v-120q0-30 21.15-51T168-768h120v72H168v120H96Zm576 384v-72h120v-120h72v120q0 30-21.15 51T792-192H672Zm-504 0q-30 0-51-21.15T96-264v-120h72v120h120v72H168Zm72-144v-288h480v288H240Zm72-72h336v-144H312v144Zm0 0v-144 144Z"/></svg>
+            </button>
+          </div>
+        </div>
 
         {/* 詳細パネル */}
         {selectedBlock && (
