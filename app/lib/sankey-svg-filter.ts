@@ -242,7 +242,10 @@ export function filterTopN(
       const bb = projectAdjustedBudget.get(`project-budget-${b.projectId}`) ?? nodeById.get(`project-budget-${b.projectId}`)?.value ?? 0;
       if (bb !== ba) return bb - ba;
     }
-    return (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0);
+    // Use window + tail (= visible spending) so the aggregate recipient's contribution is included.
+    const va = (projectWindowValue.get(a.id) || 0) + (showAggRecipient ? (projectTailValue.get(a.id) || 0) : 0);
+    const vb = (projectWindowValue.get(b.id) || 0) + (showAggRecipient ? (projectTailValue.get(b.id) || 0) : 0);
+    return vb - va;
   });
   // Filter before slice so that projects with no visible flow don't consume TopN slots.
   const topProjectNodes = topMinistryAllProjects
@@ -501,27 +504,26 @@ export function filterTopN(
 
   for (const n of topProjectNodes) {
     if (effectivelyHiddenIds.has(n.id)) continue;
-    const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
-    // Budget height = adjusted budget (scaled by visible spending fraction when scaleBudgetToVisible).
-    // rawValue preserves original budget for label display.
-    if (budgetNode) {
-      const adjBv = projectAdjustedBudget.get(budgetNode.id) ?? budgetNode.value;
-      // layoutSortValue: determines vertical position — must match topMinistryAllProjects sort key.
-      // project-offset + budget sort → adjusted budget; otherwise → window spending.
-      const layoutSortBase = (projectSortBy === 'budget' && projectOffsetMode)
-        ? (projectAdjustedBudget.get(budgetNode.id) ?? budgetNode.value)
-        : (projectWindowValue.get(n.id) || 0);
-      nodes.push({ ...budgetNode, value: adjBv, rawValue: budgetNode.value, isScaled: adjBv < budgetNode.value, layoutSortValue: layoutSortBase, skipLinkOverride: true });
-    }
     // spending node height = window spending only (agg hidden) or total minus above-window (normal).
     const spendingValue = (recipientFocusMode || !showAggRecipient)
       ? (projectWindowValue.get(n.id) || 0)
       : n.value - (projectAboveWindowSpending.get(n.id) || 0);
     const spendingTrimmed = spendingValue < n.value;
-    const spendingLayoutSortValue = (projectSortBy === 'budget' && projectOffsetMode)
+    // layoutSortValue: determines vertical position — must match topMinistryAllProjects sort key.
+    // project-offset + budget sort → adjusted budget; otherwise → visible spending (window + tail).
+    // Use spendingValue (= window + tail) rather than windowValue alone so the aggregate
+    // recipient's contribution is included in the sort, matching the displayed node height.
+    const layoutSortBase = (projectSortBy === 'budget' && projectOffsetMode)
       ? (projectAdjustedBudget.get(`project-budget-${n.projectId}`) ?? nodeById.get(`project-budget-${n.projectId}`)?.value ?? n.value)
-      : (projectWindowValue.get(n.id) || 0);
-    nodes.push({ ...n, value: spendingValue, rawValue: spendingTrimmed ? n.value : undefined, isScaled: spendingTrimmed, layoutSortValue: spendingLayoutSortValue, skipLinkOverride: true });
+      : spendingValue;
+    const budgetNode = nodeById.get(`project-budget-${n.projectId}`);
+    // Budget height = adjusted budget (scaled by visible spending fraction when scaleBudgetToVisible).
+    // rawValue preserves original budget for label display.
+    if (budgetNode) {
+      const adjBv = projectAdjustedBudget.get(budgetNode.id) ?? budgetNode.value;
+      nodes.push({ ...budgetNode, value: adjBv, rawValue: budgetNode.value, isScaled: adjBv < budgetNode.value, layoutSortValue: layoutSortBase, skipLinkOverride: true });
+    }
+    nodes.push({ ...n, value: spendingValue, rawValue: spendingTrimmed ? n.value : undefined, isScaled: spendingTrimmed, layoutSortValue: layoutSortBase, skipLinkOverride: true });
   }
   // Compute aggregate spending total independently of budget so zero-budget aggregate projects
   // still get a spending node (budget and spending gates are evaluated separately).
