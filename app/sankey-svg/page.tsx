@@ -1675,8 +1675,30 @@ export default function RealDataSankeyPage() {
                       </button>
                       <a href={rsUrl} target="_blank" rel="noopener noreferrer"
                         title="RSシステムで開く"
-                        style={{ fontSize: 11, color: '#4a90d9', textDecoration: 'none', flexShrink: 0, lineHeight: 1 }}
-                      >↗</a>
+                        style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" height="14" width="18" viewBox="0 0 24 20" fill="none">
+                          <text x="12" y="16" textAnchor="middle" fontSize="14" fontWeight="700" fontFamily="sans-serif" fill="#4a90d9">RS</text>
+                        </svg>
+                      </a>
+                      {cachedDetail?.url && /^https?:\/\//.test(cachedDetail.url) && (
+                        <a href={cachedDetail.url} target="_blank" rel="noopener noreferrer"
+                          title="事業概要URL"
+                          style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#4a90d9">
+                            <path d="M320-440h320v-80H320v80Zm0 120h320v-80H320v80Zm0 120h200v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z"/>
+                          </svg>
+                        </a>
+                      )}
+                      <a href={`/subcontracts/${pid}?year=${year}`} target="_blank" rel="noopener noreferrer"
+                        title="再委託構造を見る"
+                        style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#4a90d9">
+                          <path d="M760-120q-39 0-70-22.5T647-200H440q-66 0-113-47t-47-113q0-66 47-113t113-47h80q33 0 56.5-23.5T600-600q0-33-23.5-56.5T520-680H313q-13 35-43.5 57.5T200-600q-50 0-85-35t-35-85q0-50 35-85t85-35q39 0 69.5 22.5T313-760h207q66 0 113 47t47 113q0 66-47 113t-113 47h-80q-33 0-56.5 23.5T360-360q0 33 23.5 56.5T440-280h207q13-35 43.5-57.5T760-360q50 0 85 35t35 85q0 50-35 85t-85 35ZM228.5-691.5Q240-703 240-720t-11.5-28.5Q217-760 200-760t-28.5 11.5Q160-737 160-720t11.5 28.5Q183-680 200-680t28.5-11.5Z"/>
+                        </svg>
+                      </a>
                     </div>
                     {!isProjectDetailExpanded && cachedDetail?.overview && (
                       <div style={{ padding: '0 14px 8px', fontSize: 11, color: '#888', lineHeight: 1.5,
