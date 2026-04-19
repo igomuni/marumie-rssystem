@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import type { SubcontractGraph } from '@/types/subcontract';
 
 type SortKey = 'projectId' | 'budget' | 'execution' | 'maxDepth' | 'totalBlockCount' | 'totalRecipientCount';
@@ -15,7 +16,12 @@ function formatYen(v: number): string {
 }
 
 export default function SubcontractsPage() {
-  const [year, setYear] = useState(2024);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [year, setYear] = useState(() => {
+    const y = parseInt(searchParams.get('year') ?? '2024', 10);
+    return [2024, 2025].includes(y) ? y : 2024;
+  });
   const [graphs, setGraphs] = useState<SubcontractGraph[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,7 +121,7 @@ export default function SubcontractsPage() {
         <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
           <select
             value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
+            onChange={(e) => { const y = Number(e.target.value); setYear(y); router.replace(`/subcontracts?year=${y}`); }}
             style={{
               padding: '6px 10px',
               borderRadius: 6,

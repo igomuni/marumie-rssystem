@@ -181,10 +181,11 @@ for (const row of csv53) {
   if (!recipientName) continue;
 
   const corporateNumber = (row['法人番号'] ?? '').trim();
+  const contractSummary53 = (row['契約概要'] ?? '').trim();
   const category = (row['費目'] ?? '').trim();
   const purpose = (row['使途'] ?? '').trim();
   const amountStr = (row['金額'] ?? '').trim();
-  if (!category && !purpose) continue;
+  if (!category && !purpose && !contractSummary53) continue;
 
   const blockKey = `${projectId}:${blockId}`;
   const block = blockMap.get(blockKey);
@@ -193,6 +194,12 @@ for (const row of csv53) {
   const recipientKey = `${recipientName}|${corporateNumber}`;
   const recipient = block.recipients.get(recipientKey);
   if (!recipient) continue;
+
+  if (contractSummary53 && !recipient.contractSummaries.includes(contractSummary53)) {
+    recipient.contractSummaries.push(contractSummary53);
+  }
+
+  if (!category && !purpose) continue;
 
   recipient.expenses.push({
     category,

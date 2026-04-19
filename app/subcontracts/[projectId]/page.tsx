@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { SubcontractGraph, BlockNode, BlockRecipient } from '@/types/subcontract';
@@ -191,6 +191,7 @@ export default function SubcontractDetailPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
+    setSelectedBlock(null);
     fetch(`/api/subcontracts/${projectId}?year=${year}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -259,7 +260,7 @@ export default function SubcontractDetailPage() {
     );
   }
 
-  const layout = computeSubcontractLayout(graph);
+  const layout = useMemo(() => computeSubcontractLayout(graph), [graph]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>

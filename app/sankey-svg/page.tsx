@@ -1681,7 +1681,7 @@ export default function RealDataSankeyPage() {
                           <text x="12" y="16" textAnchor="middle" fontSize="14" fontWeight="700" fontFamily="sans-serif" fill="#4a90d9">RS</text>
                         </svg>
                       </a>
-                      {cachedDetail?.url && (
+                      {cachedDetail?.url && /^https?:\/\//.test(cachedDetail.url) && (
                         <a href={cachedDetail.url} target="_blank" rel="noopener noreferrer"
                           title="事業概要URL"
                           style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
