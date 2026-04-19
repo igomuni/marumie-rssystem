@@ -113,4 +113,26 @@ if [ -f "$DATA_DIR/sankey-svg-2025-graph.json.gz" ]; then
   fi
 fi
 
+# Decompress subcontracts-2024.json if needed
+if [ -f "$DATA_DIR/subcontracts-2024.json.gz" ]; then
+  if [ ! -f "$DATA_DIR/subcontracts-2024.json" ] || [ "$DATA_DIR/subcontracts-2024.json.gz" -nt "$DATA_DIR/subcontracts-2024.json" ]; then
+    echo "🔓 Decompressing subcontracts-2024.json.gz..."
+    gunzip -k -f "$DATA_DIR/subcontracts-2024.json.gz"
+    echo "✅ Decompression complete ($(du -h "$DATA_DIR/subcontracts-2024.json" | cut -f1))"
+  else
+    echo "✅ subcontracts-2024.json already exists and is up to date"
+  fi
+fi
+
+# Decompress subcontracts-2025.json if needed
+if [ -f "$DATA_DIR/subcontracts-2025.json.gz" ]; then
+  if [ ! -f "$DATA_DIR/subcontracts-2025.json" ] || [ "$DATA_DIR/subcontracts-2025.json.gz" -nt "$DATA_DIR/subcontracts-2025.json" ]; then
+    echo "🔓 Decompressing subcontracts-2025.json.gz..."
+    gunzip -k -f "$DATA_DIR/subcontracts-2025.json.gz"
+    echo "✅ Decompression complete ($(du -h "$DATA_DIR/subcontracts-2025.json" | cut -f1))"
+  else
+    echo "✅ subcontracts-2025.json already exists and is up to date"
+  fi
+fi
+
 echo "✅ All data files ready"

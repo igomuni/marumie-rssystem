@@ -143,6 +143,29 @@ export default function Home() {
             </div>
           </Link>
 
+          {/* 再委託構造ブラウザ */}
+          <Link href="/subcontracts">
+            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-teal-500">
+              <div className="flex items-center mb-3">
+                <h2 className="text-2xl font-semibold text-teal-600 dark:text-teal-400">
+                  🔗 再委託構造ブラウザ
+                </h2>
+                <span className="ml-3 px-2 py-1 bg-teal-600 text-white text-xs font-bold rounded">
+                  NEW
+                </span>
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
+                事業ごとのブロック間フロー（再委託構造）を自前SVGで可視化。担当組織→直接ブロック→再委託ブロックの階層をDAGで表示します。
+              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>• <strong>再委託階層</strong>: ブロック間フローの最大深さを一覧で確認</li>
+                <li>• <strong>DAG描画</strong>: Fan-In/Fan-Outを含む再委託構造をSVGで表示</li>
+                <li>• <strong>支出先詳細</strong>: 契約概要・費目・使途をパネルで確認</li>
+                <li>• <strong>sankey-svg連携</strong>: 事業選択時から直接ジャンプ可能</li>
+              </ul>
+            </div>
+          </Link>
+
           {/* 支出先ラベリング確認 */}
           <Link href="/entity-labels-csv">
             <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900 dark:to-amber-900 rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer border-2 border-transparent hover:border-orange-500">
