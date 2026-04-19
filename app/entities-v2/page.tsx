@@ -464,7 +464,7 @@ export default function EntitiesV2Page() {
             🏷️ 支出先ブラウザ v2
           </h1>
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            2024年度 行政事業レビュー（ラベリング改善版）
+            行政事業レビュー（ラベリング改善版）
           </span>
           <span className="ml-auto">
             <Link href="/entities" className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 border border-gray-300 dark:border-gray-600 rounded px-2 py-1">

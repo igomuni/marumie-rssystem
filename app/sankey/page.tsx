@@ -1394,7 +1394,7 @@ function SankeyContent() {
               rel="noopener noreferrer"
               className="underline hover:text-blue-600"
             >
-              行政事業レビューシステム (2024年度)
+              行政事業レビューシステム
             </a>
           </p>
         </div>
