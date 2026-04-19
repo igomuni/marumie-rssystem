@@ -129,6 +129,8 @@ export default function RealDataSankeyPage() {
   const [searchCursorIndex, setSearchCursorIndex] = useState(-1);
   const [searchUseRegex, setSearchUseRegex] = useState(false);
   const [searchPage, setSearchPage] = useState(0);
+  const isPidQuery = (q: string) => /^\d+$/.test(q);
+  const meetsSearchMinLength = (q: string) => isPidQuery(q) ? q.length >= 1 : q.length >= 2;
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
   const [zeroSpendingAlert, setZeroSpendingAlert] = useState(false);
@@ -936,8 +938,8 @@ export default function RealDataSankeyPage() {
 
   const searchResults = useMemo(() => {
     const q = debouncedQuery.trim();
-    const pidQuery = /^\d+$/.test(q) ? Number(q) : null;
-    if (!graphData || (pidQuery !== null ? q.length < 1 : q.length < 2)) return [];
+    const pidQuery = isPidQuery(q) ? Number(q) : null;
+    if (!graphData || !meetsSearchMinLength(q)) return [];
     const results: { id: string; name: string; type: string; value: number; projectId?: number }[] = [];
     let matcher: (name: string) => boolean;
     if (pidQuery !== null) {
@@ -1839,7 +1841,7 @@ export default function RealDataSankeyPage() {
             type="text"
             value={searchQuery}
             onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); setSearchCursorIndex(-1); }}
-            onFocus={() => { const q = debouncedQuery.trim(); if (/^\d+$/.test(q) ? q.length >= 1 : q.length >= 2) setShowSearchResults(true); }}
+            onFocus={() => { const q = debouncedQuery.trim(); if (meetsSearchMinLength(q)) setShowSearchResults(true); }}
             onKeyDown={e => {
               if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
               if (!showSearchResults || searchPagedResults.length === 0) return;
@@ -1865,7 +1867,7 @@ export default function RealDataSankeyPage() {
                 }
               }
             }}
-            placeholder="ノード検索（2文字以上）"
+            placeholder="ノード検索（2文字以上／PIDは1文字〜）"
             style={{
               width: '100%', boxSizing: 'border-box',
               paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
@@ -1937,7 +1939,7 @@ export default function RealDataSankeyPage() {
           </div>
         )}
         {/* No results */}
-        {showSearchResults && (() => { const q = debouncedQuery.trim(); return /^\d+$/.test(q) ? q.length >= 1 : q.length >= 2; })() && searchResults.length === 0 && (
+        {showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
