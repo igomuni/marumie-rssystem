@@ -128,6 +128,7 @@ export default function RealDataSankeyPage() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchCursorIndex, setSearchCursorIndex] = useState(-1);
   const [searchUseRegex, setSearchUseRegex] = useState(false);
+  const [searchPage, setSearchPage] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
   const [zeroSpendingAlert, setZeroSpendingAlert] = useState(false);
@@ -924,6 +925,8 @@ export default function RealDataSankeyPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  useEffect(() => { setSearchPage(0); setSearchCursorIndex(-1); }, [debouncedQuery]);
+
   const searchRegexError = useMemo(() => {
     if (!searchUseRegex || debouncedQuery.trim().length < 2) return false;
     try { new RegExp(debouncedQuery.trim()); return false; } catch { return true; }
@@ -951,8 +954,15 @@ export default function RealDataSankeyPage() {
         if (matcher(n.name)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
       }
     }
-    return results.sort((a, b) => b.value - a.value).slice(0, 20);
+    return results.sort((a, b) => b.value - a.value);
   }, [graphData, debouncedQuery, searchUseRegex]);
+
+  const SEARCH_PAGE_SIZE = 200;
+  const searchPagedResults = useMemo(
+    () => searchResults.slice(searchPage * SEARCH_PAGE_SIZE, (searchPage + 1) * SEARCH_PAGE_SIZE),
+    [searchResults, searchPage]
+  );
+  const searchTotalPages = Math.ceil(searchResults.length / SEARCH_PAGE_SIZE);
 
   const pendingSearchResetRef = useRef(false);
 
@@ -1826,25 +1836,25 @@ export default function RealDataSankeyPage() {
             onFocus={() => { if (debouncedQuery.trim().length >= 2) setShowSearchResults(true); }}
             onKeyDown={e => {
               if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
-              if (!showSearchResults || searchResults.length === 0) return;
+              if (!showSearchResults || searchPagedResults.length === 0) return;
               if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 setSearchCursorIndex(i => {
-                  const next = Math.min(i + 1, searchResults.length - 1);
-                  setTimeout(() => searchDropdownRef.current?.children[next]?.scrollIntoView({ block: 'nearest' }), 0);
+                  const next = Math.min(i + 1, searchPagedResults.length - 1);
+                  setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
                   return next;
                 });
               } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 setSearchCursorIndex(i => {
                   const next = Math.max(i - 1, 0);
-                  setTimeout(() => searchDropdownRef.current?.children[next]?.scrollIntoView({ block: 'nearest' }), 0);
+                  setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
                   return next;
                 });
               } else if (e.key === 'Enter') {
                 e.preventDefault();
-                if (searchCursorIndex >= 0 && searchCursorIndex < searchResults.length) {
-                  handleSearchSelect(searchResults[searchCursorIndex].id);
+                if (searchCursorIndex >= 0 && searchCursorIndex < searchPagedResults.length) {
+                  handleSearchSelect(searchPagedResults[searchCursorIndex].id);
                   setSearchCursorIndex(-1);
                 }
               }
@@ -1884,21 +1894,37 @@ export default function RealDataSankeyPage() {
         </div>
         {/* Dropdown */}
         {showSearchResults && searchResults.length > 0 && (
-          <div ref={searchDropdownRef} style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 280, overflowY: 'auto', zIndex: 20 }}>
-            {searchResults.map((node, i) => (
-              <button
-                key={node.id}
-                type="button"
-                onClick={() => { handleSearchSelect(node.id); setSearchCursorIndex(-1); }}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: i === searchCursorIndex ? '#e8f0fe' : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-                onMouseEnter={e => { if (i !== searchCursorIndex) e.currentTarget.style.background = '#f5f5f5'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = i === searchCursorIndex ? '#e8f0fe' : 'transparent'; }}
-              >
-                <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: getNodeColor(node) }} />
-                <span title={node.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
-                <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
-              </button>
-            ))}
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
+            {/* Count header */}
+            <div style={{ padding: '5px 10px', fontSize: 11, color: '#999', borderBottom: '1px solid #f0f0f0' }}>
+              {searchResults.length}件{searchTotalPages > 1 ? `（${searchPage + 1} / ${searchTotalPages} ページ）` : ''}
+            </div>
+            {/* Scrollable list */}
+            <div ref={searchDropdownRef} style={{ maxHeight: 280, overflowY: 'auto' }}>
+              {searchPagedResults.map((node, i) => (
+                <button
+                  key={node.id}
+                  type="button"
+                  onClick={() => { handleSearchSelect(node.id); setSearchCursorIndex(-1); }}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: i === searchCursorIndex ? '#e8f0fe' : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                  onMouseEnter={e => { if (i !== searchCursorIndex) e.currentTarget.style.background = '#f5f5f5'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = i === searchCursorIndex ? '#e8f0fe' : 'transparent'; }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: getNodeColor(node) }} />
+                  <span title={node.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
+                  <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
+                </button>
+              ))}
+            </div>
+            {/* Pagination footer */}
+            {searchTotalPages > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 8px', borderTop: '1px solid #f0f0f0' }}>
+                <button type="button" onClick={() => { setSearchPage(p => Math.max(p - 1, 0)); setSearchCursorIndex(-1); }} disabled={searchPage === 0}
+                  style={{ fontSize: 11, padding: '2px 8px', border: '1px solid #e0e0e0', borderRadius: 4, background: 'transparent', cursor: searchPage === 0 ? 'default' : 'pointer', color: searchPage === 0 ? '#ccc' : '#555' }}>‹ 前へ</button>
+                <button type="button" onClick={() => { setSearchPage(p => Math.min(p + 1, searchTotalPages - 1)); setSearchCursorIndex(-1); }} disabled={searchPage === searchTotalPages - 1}
+                  style={{ fontSize: 11, padding: '2px 8px', border: '1px solid #e0e0e0', borderRadius: 4, background: 'transparent', cursor: searchPage === searchTotalPages - 1 ? 'default' : 'pointer', color: searchPage === searchTotalPages - 1 ? '#ccc' : '#555' }}>次へ ›</button>
+              </div>
+            )}
           </div>
         )}
         {/* No results */}
