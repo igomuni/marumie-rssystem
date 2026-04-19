@@ -87,8 +87,8 @@ function computeDepths(flows: BlockEdge[]): Map<string, number> {
 
   while (queue.length > 0) {
     const { blockId, depth } = queue.shift()!;
-    const existing = depthMap.get(blockId) ?? 0;
-    if (depth <= existing || depth > MAX_DEPTH_LIMIT) continue;
+    // 最小深さ採用: 既訪問ノードはスキップ（サイクル対策）
+    if (depthMap.has(blockId) || depth > MAX_DEPTH_LIMIT) continue;
     depthMap.set(blockId, depth);
     for (const child of (children.get(blockId) ?? [])) {
       queue.push({ blockId: child, depth: depth + 1 });
