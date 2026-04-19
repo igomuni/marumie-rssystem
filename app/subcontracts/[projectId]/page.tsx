@@ -240,6 +240,12 @@ function SubcontractDetailPageInner() {
     return () => el.removeEventListener('wheel', handleWheel);
   }, [handleWheel, graph]);
 
+  // ページタイトル
+  useEffect(() => {
+    if (graph) document.title = `再委託 ${graph.projectName}`;
+    return () => { document.title = '再委託構造ブラウザ'; };
+  }, [graph]);
+
   // Hooks はすべて early return より前に呼ぶ必要がある
   const layout = useMemo(() => graph ? computeSubcontractLayout(graph) : null, [graph]);
 
