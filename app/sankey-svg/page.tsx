@@ -936,10 +936,9 @@ export default function RealDataSankeyPage() {
 
   const searchResults = useMemo(() => {
     const q = debouncedQuery.trim();
-    if (!graphData || q.length < 2) return [];
-    const results: { id: string; name: string; type: string; value: number }[] = [];
-    // PID search: pure numeric query matches project-spending nodes by projectId
     const pidQuery = /^\d+$/.test(q) ? Number(q) : null;
+    if (!graphData || (pidQuery !== null ? q.length < 1 : q.length < 2)) return [];
+    const results: { id: string; name: string; type: string; value: number; projectId?: number }[] = [];
     let matcher: (name: string) => boolean;
     if (pidQuery !== null) {
       matcher = () => false;
@@ -953,9 +952,9 @@ export default function RealDataSankeyPage() {
     }
     for (const n of graphData.nodes) {
       if (pidQuery !== null) {
-        if (n.type === 'project-spending' && n.projectId === pidQuery) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+        if (n.type === 'project-spending' && n.projectId === pidQuery) results.push({ id: n.id, name: n.name, type: n.type, value: n.value, projectId: n.projectId });
       } else {
-        if (matcher(n.name)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value });
+        if (matcher(n.name)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value, projectId: n.projectId });
       }
     }
     return results.sort((a, b) => b.value - a.value);
@@ -1647,6 +1646,9 @@ export default function RealDataSankeyPage() {
                   {selectedNode.aggregated && (
                     <span style={{ background: '#999', color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>集約</span>
                   )}
+                  {selectedNode.projectId != null && (
+                    <span style={{ fontSize: 11, color: '#aaa' }}>PID:{selectedNode.projectId}</span>
+                  )}
                   {selectedNode.ministry && selectedNode.type !== 'ministry' && (
                     <span style={{ fontSize: 11, color: '#666' }}>{selectedNode.ministry}</span>
                   )}
@@ -1837,7 +1839,7 @@ export default function RealDataSankeyPage() {
             type="text"
             value={searchQuery}
             onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); setSearchCursorIndex(-1); }}
-            onFocus={() => { if (debouncedQuery.trim().length >= 2) setShowSearchResults(true); }}
+            onFocus={() => { const q = debouncedQuery.trim(); if (/^\d+$/.test(q) ? q.length >= 1 : q.length >= 2) setShowSearchResults(true); }}
             onKeyDown={e => {
               if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
               if (!showSearchResults || searchPagedResults.length === 0) return;
@@ -1918,6 +1920,7 @@ export default function RealDataSankeyPage() {
                 >
                   <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: getNodeColor(node) }} />
                   <span title={node.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
+                  {node.projectId != null && <span style={{ fontSize: 10, color: '#bbb', whiteSpace: 'nowrap', flexShrink: 0 }}>PID:{node.projectId}</span>}
                   <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
                 </button>
               ))}
@@ -1934,7 +1937,7 @@ export default function RealDataSankeyPage() {
           </div>
         )}
         {/* No results */}
-        {showSearchResults && debouncedQuery.trim().length >= 2 && searchResults.length === 0 && (
+        {showSearchResults && (() => { const q = debouncedQuery.trim(); return /^\d+$/.test(q) ? q.length >= 1 : q.length >= 2; })() && searchResults.length === 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
