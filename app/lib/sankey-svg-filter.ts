@@ -233,12 +233,14 @@ export function filterTopN(
     n => n.type === 'project-spending' && topMinistryNames.has(n.ministry || '') && !zeroSpendingProjectIds.has(n.id)
   );
   topMinistryAllProjects.sort((a, b) => {
-    if (projectSortBy === 'budget') {
-      // Use adjusted budget (scaled by visible spending fraction) so ranking reacts to recipient offset.
+    // projectSortBy='budget' is only meaningful in project-offset mode where there is no recipient
+    // offset and raw budget order is stable. In recipient-offset mode the adjusted budget
+    // (rawBudget × visible-fraction) still ranks large-budget projects above small-budget ones
+    // even when their window spending is far lower, so always sort by window spending instead.
+    if (projectSortBy === 'budget' && projectOffsetMode) {
       const ba = projectAdjustedBudget.get(`project-budget-${a.projectId}`) ?? nodeById.get(`project-budget-${a.projectId}`)?.value ?? 0;
       const bb = projectAdjustedBudget.get(`project-budget-${b.projectId}`) ?? nodeById.get(`project-budget-${b.projectId}`)?.value ?? 0;
       if (bb !== ba) return bb - ba;
-      return (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0);
     }
     return (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0);
   });
