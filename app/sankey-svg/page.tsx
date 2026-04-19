@@ -927,8 +927,10 @@ export default function RealDataSankeyPage() {
 
   useEffect(() => { setSearchPage(0); setSearchCursorIndex(-1); }, [debouncedQuery]);
 
+  const SEARCH_REGEX_MAX_LEN = 100;
   const searchRegexError = useMemo(() => {
     if (!searchUseRegex || debouncedQuery.trim().length < 2) return false;
+    if (debouncedQuery.trim().length > SEARCH_REGEX_MAX_LEN) return true;
     try { new RegExp(debouncedQuery.trim()); return false; } catch { return true; }
   }, [searchUseRegex, debouncedQuery]);
 
@@ -942,10 +944,12 @@ export default function RealDataSankeyPage() {
     if (pidQuery !== null) {
       matcher = () => false;
     } else if (searchUseRegex) {
+      if (q.length > SEARCH_REGEX_MAX_LEN) return [];
       try { const re = new RegExp(q, 'i'); matcher = name => re.test(name); }
       catch { return []; }  // invalid regex → no results
     } else {
-      matcher = name => name.includes(q);
+      const qLower = q.toLocaleLowerCase();
+      matcher = name => name.toLocaleLowerCase().includes(qLower);
     }
     for (const n of graphData.nodes) {
       if (pidQuery !== null) {
@@ -1872,7 +1876,9 @@ export default function RealDataSankeyPage() {
           {/* .* regex toggle */}
           <button
             type="button"
-            title="正規表現で検索"
+            title={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
+            aria-label={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
+            aria-pressed={searchUseRegex}
             onClick={() => setSearchUseRegex(v => !v)}
             style={{
               position: 'absolute', right: searchQuery ? 30 : 6, top: '50%', transform: 'translateY(-50%)',
