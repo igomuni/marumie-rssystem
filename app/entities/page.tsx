@@ -496,7 +496,7 @@ export default function EntitiesPage() {
             🏢 支出先ブラウザ
           </h1>
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            2024年度 行政事業レビュー
+            行政事業レビュー
           </span>
         </div>
       </div>

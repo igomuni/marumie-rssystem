@@ -5,10 +5,10 @@ export default function Home() {
     <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <main className="max-w-4xl w-full">
         <h1 className="text-4xl font-bold text-center mb-4 text-gray-900 dark:text-gray-100">
-          RS2024 サンキー図
+          行政事業レビュー サンキー図
         </h1>
         <p className="text-center text-gray-600 dark:text-gray-400 mb-12">
-          2024年度 行政事業レビューシステムの予算・支出データを可視化
+          行政事業レビューシステムの予算・支出データを可視化
         </p>
 
         <div className="grid grid-cols-1 gap-6">
@@ -89,10 +89,10 @@ export default function Home() {
                 </span>
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                全5,664事業・25,892支出先をGoogle Maps風のZoom/Panで自由に探索。Treemapクラスタで面積∝金額の直感的なSVGフロー可視化。
+                事業・支出先をGoogle Maps風のZoom/Panで自由に探索。Treemapクラスタで面積∝金額の直感的なSVGフロー可視化。
               </p>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                <li>• <strong>全量表示</strong>: 37,258ノード・74,390エッジを事前計算レイアウトで描画</li>
+                <li>• <strong>全量表示</strong>: 全ノード・エッジを事前計算レイアウトで描画</li>
                 <li>• <strong>Zoom/Pan</strong>: ホイールでズーム、ドラッグでパン</li>
                 <li>• <strong>面積ベースLOD</strong>: ズームに応じてノード・ラベルが連続的に出現</li>
                 <li>• <strong>ハイライト</strong>: ノードホバーで接続フローをハイライト</li>
@@ -112,7 +112,7 @@ export default function Home() {
                 </span>
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                2024年度の全支出先 26,000件以上を種別・金額でブラウズ。エンティティ種別（民間企業・地方公共団体・独立行政法人 等）ごとの集計や検索が可能です。
+                全支出先 26,000件以上を種別・金額でブラウズ。エンティティ種別（民間企業・地方公共団体・独立行政法人 等）ごとの集計や検索が可能です。
               </p>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                 <li>• <strong>種別フィルタ</strong>: 民間企業・地方公共団体・国の機関・独立行政法人・公益法人・NPO・外国法人</li>
@@ -132,7 +132,7 @@ export default function Home() {
                 </h2>
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                全5,664事業の支出先データ品質を5軸でスコア化。府省庁・組織階層別にフィルタ・ソート・検索して改善優先度を確認できます。
+                全事業の支出先データ品質を5軸でスコア化。府省庁・組織階層別にフィルタ・ソート・検索して改善優先度を確認できます。
               </p>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                 <li>• <strong>軸1 支出先名品質</strong>: 法人番号DB突合による valid 率（重み40%）</li>
@@ -152,12 +152,12 @@ export default function Home() {
                 </h2>
               </div>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                元CSVから直接抽出した26,148件の支出先名に対して、辞書・格パターンでラベリングした結果を確認します。
+                元CSVから直接抽出した支出先名に対して、辞書・格パターンでラベリングした結果を確認します。
               </p>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                 <li>• <strong>L1/L2 分類</strong>: 民間企業・公益法人・地方公共団体・国の機関 等19区分</li>
                 <li>• <strong>ソース表示</strong>: 辞書マッチ・格パターン・両方・未ラベルで判別</li>
-                <li>• <strong>件数カバレッジ</strong>: 約80.1%（20,939件 / 26,148件）</li>
+                <li>• <strong>件数カバレッジ</strong>: 約80.1%</li>
                 <li>• <strong>金額カバレッジ</strong>: 約98%（金額上位が辞書でカバー済み）</li>
               </ul>
             </div>
@@ -165,7 +165,7 @@ export default function Home() {
         </div>
 
         <footer className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>データソース: <a href="https://rssystem.go.jp/download-csv/2024" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600">行政事業レビューシステム (2024年度)</a></p>
+          <p>データソース: <a href="https://rssystem.go.jp/download-csv" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600">行政事業レビューシステム</a></p>
         </footer>
       </main>
     </div>
