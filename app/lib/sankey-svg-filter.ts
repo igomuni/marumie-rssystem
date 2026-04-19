@@ -238,13 +238,9 @@ export function filterTopN(
       const ba = projectAdjustedBudget.get(`project-budget-${a.projectId}`) ?? nodeById.get(`project-budget-${a.projectId}`)?.value ?? 0;
       const bb = projectAdjustedBudget.get(`project-budget-${b.projectId}`) ?? nodeById.get(`project-budget-${b.projectId}`)?.value ?? 0;
       if (bb !== ba) return bb - ba;
+      return (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0);
     }
-    const wa = projectWindowValue.get(a.id) || 0;
-    const wb = projectWindowValue.get(b.id) || 0;
-    if (wb !== wa) return wb - wa;
-    // Tiebreaker: tail spending — at high offset where window spending is 0, order by tail flow
-    // so projects sort by visible contribution rather than preserving original data order.
-    return (projectTailValue.get(b.id) || 0) - (projectTailValue.get(a.id) || 0);
+    return (projectWindowValue.get(b.id) || 0) - (projectWindowValue.get(a.id) || 0);
   });
   // Filter before slice so that projects with no visible flow don't consume TopN slots.
   const topProjectNodes = topMinistryAllProjects
