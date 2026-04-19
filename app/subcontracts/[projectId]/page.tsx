@@ -243,6 +243,9 @@ export default function SubcontractDetailPage() {
   }
   function onMouseUp() { isPanning.current = false; }
 
+  // Hooks はすべて early return より前に呼ぶ必要がある
+  const layout = useMemo(() => graph ? computeSubcontractLayout(graph) : null, [graph]);
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9fafb' }}>
@@ -260,7 +263,8 @@ export default function SubcontractDetailPage() {
     );
   }
 
-  const layout = useMemo(() => computeSubcontractLayout(graph), [graph]);
+  // ここに到達した時点で graph は必ず非 null
+  const safeLayout = layout!;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
@@ -338,7 +342,7 @@ export default function SubcontractDetailPage() {
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
             {/* エッジ */}
-            {layout.edges.map((edge, i) => (
+            {safeLayout.edges.map((edge, i) => (
               <path
                 key={i}
                 d={bezierPath(edge.x1, edge.y1, edge.x2, edge.y2)}
@@ -349,7 +353,7 @@ export default function SubcontractDetailPage() {
             ))}
 
             {/* エッジラベル */}
-            {layout.edges.map((edge, i) =>
+            {safeLayout.edges.map((edge, i) =>
               edge.note ? (
                 <text
                   key={`note-${i}`}
@@ -367,16 +371,16 @@ export default function SubcontractDetailPage() {
             {/* 担当組織ルートノード */}
             <g>
               <rect
-                x={layout.root.x}
-                y={layout.root.y}
-                width={layout.root.w}
-                height={layout.root.h}
+                x={safeLayout.root.x}
+                y={safeLayout.root.y}
+                width={safeLayout.root.w}
+                height={safeLayout.root.h}
                 rx={6}
                 fill={COLOR_ROOT}
               />
               <text
-                x={layout.root.x + layout.root.w / 2}
-                y={layout.root.y + layout.root.h / 2}
+                x={safeLayout.root.x + safeLayout.root.w / 2}
+                y={safeLayout.root.y + safeLayout.root.h / 2}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fontSize={11}
@@ -388,8 +392,8 @@ export default function SubcontractDetailPage() {
             </g>
 
             {/* ブロックノード */}
-            {layout.blocks.map((lb) => {
-              const isAmbiguous = lb.node.recipients.length >= 2 && layout.edges.some((e) => e.sourceBlock === lb.blockId);
+            {safeLayout.blocks.map((lb) => {
+              const isAmbiguous = lb.node.recipients.length >= 2 && safeLayout.edges.some((e) => e.sourceBlock === lb.blockId);
               const nodeColor = lb.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT;
               const topRecipients = lb.node.recipients.slice(0, RECIPIENT_TOP_N);
               const remaining = lb.node.recipients.length - RECIPIENT_TOP_N;
