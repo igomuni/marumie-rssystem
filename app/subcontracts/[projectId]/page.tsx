@@ -209,6 +209,10 @@ function SubcontractDetailPageInner() {
     setLoading(true);
     setError(null);
     setSelectedBlock(null);
+    setHoveredBlock(null);
+    setHoveredRecipient(null);
+    currentHoverKey.current = null;
+    if (hoverTimerRef.current) { clearTimeout(hoverTimerRef.current); hoverTimerRef.current = null; }
     fetch(`/api/subcontracts/${projectId}?year=${year}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);

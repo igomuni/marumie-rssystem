@@ -318,16 +318,12 @@ function _worstRatio(row: TItem[], rowValue: number, side: number, totalValue: n
 /** Squarified Treemap (Bruls et al. 2000) — items を rect 内に面積比例で配置 */
 export function squarifiedTreemap(items: TItem[], rect: TRect): TResult[] {
   if (items.length === 0) return [];
-  const totalValue = items.reduce((s, it) => s + it.value, 0);
-  if (totalValue <= 0) {
-    return items.map((it, i) => ({
-      key: it.key,
-      rect: { x: rect.x, y: rect.y + (rect.h / items.length) * i, w: rect.w, h: rect.h / items.length },
-    }));
-  }
+  const zeroRect = (it: TItem): TResult => ({ key: it.key, rect: { x: rect.x, y: rect.y, w: 0, h: 0 } });
+  if (rect.w <= 0 || rect.h <= 0) return items.map(zeroRect);
 
   const positive = [...items].filter(it => it.value > 0).sort((a, b) => b.value - a.value);
   const zeros = items.filter(it => it.value <= 0);
+  if (positive.length === 0) return items.map(zeroRect);
   const results: TResult[] = [];
   let rem = { ...rect };
   let remValue = positive.reduce((s, it) => s + it.value, 0);
