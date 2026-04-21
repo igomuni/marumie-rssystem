@@ -194,5 +194,23 @@ RSシステムと財務省（MOF）の予算データは目的・粒度が異な
 
 ---
 
-**最終更新**: 2026-02-14
-**対象年度**: 2024年度データ（RSシステム公開版）
+## 8. 2025年度データについて
+
+2025年度データ（`RS_2025_*.csv`）は現在このアプリでも部分的にサポートしている。
+
+| 項目 | 2024年度 | 2025年度 |
+|------|----------|----------|
+| structured.json | `rs2024-structured.json` | 非対応（/sankey は2024固定） |
+| sankey-svg グラフ | `sankey-svg-2024-graph.json.gz` | `sankey-svg-2025-graph.json.gz` |
+| 再委託データ | `subcontracts-2024.json.gz` | `subcontracts-2025.json.gz` |
+| 品質スコア | `project-quality-scores-2024.json` | `project-quality-scores-2025.json` |
+| 事業詳細 | `rs2024-project-details.json.gz` | `rs2025-project-details.json.gz` |
+
+**年度の意味（2025年度シート）**:
+- 事業年度: 2025（CSVラベル）
+- 予算年度: 2024（実際の執行実績が記録されている年度）
+
+---
+
+**最終更新**: 2026-04-22
+**対象年度**: 2024年度・2025年度データ（RSシステム公開版）

@@ -309,14 +309,15 @@ interface Statistics {
    - `SpendingRecord.projects[].projectId` が `BudgetRecord.projectId` に存在
    - 組織階層ノードの `projectIds[]` の各IDが `BudgetRecord.projectId` に存在
 
-## ファイルサイズ見積もり
+## ファイルサイズ（実測値）
 
-- 2024年度事業数: 約5,700件
-- 過去年度事業レコード数: 約13,000件
-- 支出先数: 約27,000件
-- 支出レコード数: 約194,000件
+- 2024年度事業数: 5,003件
+- 支出先数: 26,823件（再委託先含む）
 
-推定ファイルサイズ: 40-50MB（圧縮なし、JSON形式）
+| ファイル | サイズ |
+|---------|--------|
+| `rs2024-structured.json`（非圧縮） | ~96MB |
+| `rs2024-structured.json.gz`（Git管理） | ~11MB |
 
 ## 利用例
 

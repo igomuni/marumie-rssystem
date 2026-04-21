@@ -39,8 +39,8 @@ flowchart TB
 
     A1 & A2 & A3 & A4 & A5 --> TOTAL["総合スコア<br/>(重み付き平均 0-100)"]
 
-    TOTAL --> OUT_JSON["project-quality-scores.json"]
-    TOTAL --> OUT_CSV["project_quality_scores.csv"]
+    TOTAL --> OUT_JSON["project-quality-scores-{YEAR}.json"]
+    TOTAL --> OUT_CSV["project_quality_scores_{YEAR}.csv"]
 ```
 
 ---
@@ -327,9 +327,11 @@ $$
 
 ```mermaid
 flowchart LR
-    CALC["スコア計算結果<br/>(5,664事業)"]
-    CALC --> CSV["data/result/<br/>project_quality_scores.csv<br/>(分析用)"]
-    CALC --> JSON["public/data/<br/>project-quality-scores.json<br/>(UI表示用)"]
+    CALC["スコア計算結果"]
+    CALC --> CSV["data/result/<br/>project_quality_scores_{YEAR}.csv<br/>(分析用)"]
+    CALC --> JSON["public/data/<br/>project-quality-scores-{YEAR}.json<br/>(UI表示用)"]
+    CALC --> RJSON["public/data/<br/>project-quality-recipients-{YEAR}.json<br/>(支出先詳細用)"]
     JSON --> API["app/api/quality-scores/<br/>route.ts"]
+    RJSON --> API2["app/api/quality-scores/recipients/<br/>route.ts"]
     API --> UI["app/quality/page.tsx"]
 ```
