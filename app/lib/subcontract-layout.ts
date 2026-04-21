@@ -3,7 +3,7 @@ import type { SubcontractGraph, BlockNode, BlockEdge } from '@/types/subcontract
 // ─── 定数 ──────────────────────────────────────────────
 
 export const NODE_W = 200;
-export const NODE_MIN_H = 40;
+export const NODE_MIN_H = 90;
 export const NODE_PAD = 16;
 export const COL_GAP = 160;
 export const ROW_PAD = 12;
@@ -105,7 +105,7 @@ function computeDepths(flows: BlockEdge[]): Map<string, number> {
 /** ノードの高さを金額から算出（最小高さあり、比例スケール） */
 function blockHeight(graph: SubcontractGraph, totalAmount: number): number {
   const maxAmount = Math.max(...graph.blocks.map((b) => b.totalAmount), 1);
-  const maxH = 180;
+  const maxH = 300;
   const scaled = NODE_MIN_H + (totalAmount / maxAmount) * (maxH - NODE_MIN_H);
   return Math.max(NODE_MIN_H, Math.round(scaled));
 }
@@ -119,7 +119,7 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
   const blockById = new Map<string, BlockNode>();
   for (const b of graph.blocks) blockById.set(b.blockId, b);
 
-  // 深さ別にブロックをグループ化（totalAmount 降順）
+  // 深さ別にブロックをグループ化
   const byDepth = new Map<number, BlockNode[]>();
   for (const [blockId, depth] of depthMap) {
     const node = blockById.get(blockId);
@@ -127,8 +127,41 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     if (!byDepth.has(depth)) byDepth.set(depth, []);
     byDepth.get(depth)!.push(node);
   }
-  for (const arr of byDepth.values()) {
-    arr.sort((a, b) => b.totalAmount - a.totalAmount);
+
+  // depth-1 を金額降順でソート
+  (byDepth.get(1) ?? []).sort((a, b) => b.totalAmount - a.totalAmount);
+
+  // 各ブロックの「即時親」リスト（順方向エッジのみ: sourceDepth < targetDepth）
+  const immediateParents = new Map<string, string[]>();
+  for (const f of graph.flows) {
+    if (f.sourceBlock === null) continue;
+    const sd = depthMap.get(f.sourceBlock) ?? -1;
+    const td = depthMap.get(f.targetBlock) ?? -1;
+    if (sd >= td) continue; // バックエッジは無視
+    if (!immediateParents.has(f.targetBlock)) immediateParents.set(f.targetBlock, []);
+    immediateParents.get(f.targetBlock)!.push(f.sourceBlock);
+  }
+
+  // 各深さを「親の layout 順位」基準で反復ソート
+  // blockPosition: blockId → 当該深さでの順位（0始まり）
+  const blockPosition = new Map<string, number>();
+  (byDepth.get(1) ?? []).forEach((b, i) => blockPosition.set(b.blockId, i));
+
+  const maxDepthVal = depthMap.size > 0 ? Math.max(...depthMap.values()) : 1;
+  for (let depth = 2; depth <= maxDepthVal; depth++) {
+    const nodes = byDepth.get(depth);
+    if (!nodes) continue;
+    nodes.sort((a, b) => {
+      // 親の中の最小順位（fan-in 対応: 最も上にいる親に揃える）
+      const minPos = (id: string) => {
+        const ps = immediateParents.get(id) ?? [];
+        return ps.length > 0 ? Math.min(...ps.map(p => blockPosition.get(p) ?? 9999)) : 9999;
+      };
+      const diff = minPos(a.blockId) - minPos(b.blockId);
+      return diff !== 0 ? diff : b.totalAmount - a.totalAmount;
+    });
+    // ソート結果を次の深さの基準として登録
+    nodes.forEach((b, i) => blockPosition.set(b.blockId, i));
   }
 
   const maxDepth = depthMap.size > 0 ? Math.max(...depthMap.values()) : 1;
@@ -260,6 +293,84 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     svgWidth: maxX,
     svgHeight: maxY,
   };
+}
+
+// ─── Squarified Treemap ──────────────────────────────────────────────
+
+export interface TRect { x: number; y: number; w: number; h: number; }
+export interface TItem { key: string; value: number; }
+export interface TResult { key: string; rect: TRect; }
+
+function _worstRatio(row: TItem[], rowValue: number, side: number, totalValue: number, container: TRect): number {
+  if (rowValue <= 0 || side <= 0 || totalValue <= 0) return Infinity;
+  const totalArea = container.w * container.h;
+  const rowArea = totalArea * (rowValue / totalValue);
+  const thickness = rowArea / side;
+  let worst = 0;
+  for (const item of row) {
+    const len = totalArea * (item.value / totalValue) / thickness;
+    const r = Math.max(thickness / len, len / thickness);
+    if (r > worst) worst = r;
+  }
+  return worst;
+}
+
+/** Squarified Treemap (Bruls et al. 2000) — items を rect 内に面積比例で配置 */
+export function squarifiedTreemap(items: TItem[], rect: TRect): TResult[] {
+  if (items.length === 0) return [];
+  const totalValue = items.reduce((s, it) => s + it.value, 0);
+  if (totalValue <= 0) {
+    return items.map((it, i) => ({
+      key: it.key,
+      rect: { x: rect.x, y: rect.y + (rect.h / items.length) * i, w: rect.w, h: rect.h / items.length },
+    }));
+  }
+
+  const positive = [...items].filter(it => it.value > 0).sort((a, b) => b.value - a.value);
+  const zeros = items.filter(it => it.value <= 0);
+  const results: TResult[] = [];
+  let rem = { ...rect };
+  let remValue = positive.reduce((s, it) => s + it.value, 0);
+  let idx = 0;
+
+  while (idx < positive.length) {
+    const isVert = rem.w >= rem.h;
+    const side = isVert ? rem.h : rem.w;
+    const row: TItem[] = [positive[idx]];
+    let rowValue = positive[idx].value;
+    idx++;
+
+    while (idx < positive.length) {
+      const cand = positive[idx];
+      const newVal = rowValue + cand.value;
+      if (_worstRatio([...row, cand], newVal, side, remValue, rem) > _worstRatio(row, rowValue, side, remValue, rem)) break;
+      row.push(cand);
+      rowValue = newVal;
+      idx++;
+    }
+
+    const thickness = (rem.w * rem.h) * (rowValue / remValue) / side;
+    let offset = 0;
+    for (const item of row) {
+      const len = side * (item.value / rowValue);
+      results.push({
+        key: item.key,
+        rect: isVert
+          ? { x: rem.x, y: rem.y + offset, w: thickness, h: len }
+          : { x: rem.x + offset, y: rem.y, w: len, h: thickness },
+      });
+      offset += len;
+    }
+
+    if (isVert) { rem = { x: rem.x + thickness, y: rem.y, w: rem.w - thickness, h: rem.h }; }
+    else        { rem = { x: rem.x, y: rem.y + thickness, w: rem.w, h: rem.h - thickness }; }
+    remValue -= rowValue;
+  }
+
+  for (const item of zeros) {
+    results.push({ key: item.key, rect: { x: rect.x, y: rect.y, w: 0, h: 0 } });
+  }
+  return results;
 }
 
 /** 順方向エッジ: ソース右端 → ターゲット左端 */

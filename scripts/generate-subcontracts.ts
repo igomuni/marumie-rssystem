@@ -108,6 +108,7 @@ const csv51 = readShiftJISCSV(path.join(DATA_DIR, `5-1_RS_${YEAR}_支出先_支�
 interface BlockAccum {
   blockName: string;
   totalAmount: number;
+  role: string;
   recipients: Map<string, BlockRecipient>;
 }
 const blockMap = new Map<string, BlockAccum>();
@@ -127,12 +128,14 @@ for (const row of csv51) {
   const totalAmountStr = (row['ブロックの合計支出額'] ?? '').trim();
 
   if (blockName && !recipientName && totalAmountStr) {
+    const role = (row['事業を行う上での役割'] ?? '').trim();
     if (!blockMap.has(key)) {
-      blockMap.set(key, { blockName, totalAmount: parseAmount(totalAmountStr), recipients: new Map() });
+      blockMap.set(key, { blockName, totalAmount: parseAmount(totalAmountStr), role, recipients: new Map() });
     } else {
       const b = blockMap.get(key)!;
       if (!b.blockName) b.blockName = blockName;
       if (!b.totalAmount) b.totalAmount = parseAmount(totalAmountStr);
+      if (!b.role) b.role = role;
     }
     continue;
   }
@@ -140,7 +143,7 @@ for (const row of csv51) {
   if (!recipientName) continue;
 
   if (!blockMap.has(key)) {
-    blockMap.set(key, { blockName: '', totalAmount: 0, recipients: new Map() });
+    blockMap.set(key, { blockName: '', totalAmount: 0, role: '', recipients: new Map() });
   }
   const block = blockMap.get(key)!;
 
@@ -281,6 +284,7 @@ for (const [projectId, flowEntry] of flowMap) {
       blockName: blockData?.blockName ?? blockId,
       totalAmount: blockData?.totalAmount ?? 0,
       isDirect: flowEntry.directBlocks.has(blockId),
+      role: blockData?.role || undefined,
       recipients,
     });
   }
