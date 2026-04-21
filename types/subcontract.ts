@@ -17,6 +17,7 @@ export interface BlockNode {
   blockName: string;
   totalAmount: number;
   isDirect: boolean;
+  role?: string;
   recipients: BlockRecipient[];
 }
 
