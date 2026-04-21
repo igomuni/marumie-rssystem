@@ -104,7 +104,7 @@ ministryName あり  → presetType: 'ministry'
 
 **データソース**: `public/data/project-quality-scores-{year}.json`
 
-**レスポンス**: `QualityScoreItem[]`（事業ごとの5軸スコア・総合スコア等）
+**レスポンス**: `QualityScoresResponse`（`items: QualityScoreItem[]` と `summary` を含む）
 
 ---
 
