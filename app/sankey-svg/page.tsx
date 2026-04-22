@@ -128,6 +128,7 @@ export default function RealDataSankeyPage() {
   const [topProjectInputValue, setTopProjectInputValue] = useState('');
   const [topRecipientInputValue, setTopRecipientInputValue] = useState('');
   const [showTopNSliders, setShowTopNSliders] = useState(true);
+  const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -362,21 +363,31 @@ export default function RealDataSankeyPage() {
     const el = containerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    // Mouse position relative to SVG
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
 
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.2, Math.min(baseZoom * 10, zoom * delta));
+    const doZoom = (dy: number) => {
+      const delta = dy > 0 ? 0.9 : 1.1;
+      const newZoom = Math.max(0.2, Math.min(baseZoom * 10, zoom * delta));
+      const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
+      const newPanY = my - (my - pan.y) * (newZoom / zoom);
+      setZoom(newZoom);
+      setPan({ x: newPanX, y: newPanY });
+      scheduleZoomUrlWrite();
+    };
 
-    // Adjust pan so zoom centers on mouse position
-    const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
-    const newPanY = my - (my - pan.y) * (newZoom / zoom);
-
-    setZoom(newZoom);
-    setPan({ x: newPanX, y: newPanY });
-    scheduleZoomUrlWrite();
-  }, [zoom, pan, baseZoom, scheduleZoomUrlWrite]);
+    if (scrollMode === 'zoom') {
+      doZoom(e.deltaY);
+    } else {
+      // Illustratorモード: Ctrl+scroll = zoom、それ以外 = pan
+      if (e.ctrlKey || e.metaKey) {
+        doZoom(e.deltaY);
+      } else {
+        const speed = 1.2;
+        setPan(prev => ({ x: prev.x - e.deltaX * speed, y: prev.y - e.deltaY * speed }));
+      }
+    }
+  }, [zoom, pan, baseZoom, scheduleZoomUrlWrite, scrollMode]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || isOverlayControlTarget(e.target)) return; // left click only
@@ -2249,6 +2260,17 @@ export default function RealDataSankeyPage() {
 
       {/* Zoom controls — bottom right (sankey2 style) */}
       <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* スクロールモード切替ボタン */}
+        <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
+          <button
+            aria-label={scrollMode === 'pan' ? 'スクロール移動モード（クリックでズームモードへ）' : 'スクロール移動モードに切替'}
+            title={scrollMode === 'pan' ? 'スクロール: 移動モード\nCtrl/Cmd+スクロール = ズーム\nクリックでズームモードへ' : 'スクロール: ズームモード\nクリックで移動モードへ'}
+            onClick={() => setScrollMode(m => m === 'zoom' ? 'pan' : 'zoom')}
+            style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: scrollMode === 'pan' ? '#e8f0fe' : 'transparent', cursor: 'pointer' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill={scrollMode === 'pan' ? '#1a73e8' : '#bbb'}><path d="M480-80 310-250l57-57 73 73v-166H274l73 74-57 57L120-440l170-170 57 57-74 73h166v-166l-73 73-57-57 170-170 170 170-57 57-73-73v166h166l-74-73 57-57 170 170-170 170-57-57 74-74H520v166l73-73 57 57L480-80Z"/></svg>
+          </button>
+        </div>
         {/* + / vertical slider / - */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Material Icons: add */}
