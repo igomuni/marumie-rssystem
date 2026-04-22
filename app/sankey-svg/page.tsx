@@ -121,6 +121,13 @@ export default function RealDataSankeyPage() {
   const [zoomInputValue, setZoomInputValue] = useState('');
   const [isEditingOffset, setIsEditingOffset] = useState(false);
   const [offsetInputValue, setOffsetInputValue] = useState('');
+  const [localTopProject, setLocalTopProject] = useState<number | null>(null);
+  const [localTopRecipient, setLocalTopRecipient] = useState<number | null>(null);
+  const [isEditingTopProject, setIsEditingTopProject] = useState(false);
+  const [isEditingTopRecipient, setIsEditingTopRecipient] = useState(false);
+  const [topProjectInputValue, setTopProjectInputValue] = useState('');
+  const [topRecipientInputValue, setTopRecipientInputValue] = useState('');
+  const [showTopNSliders, setShowTopNSliders] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -281,6 +288,16 @@ export default function RealDataSankeyPage() {
     window.addEventListener('blur', onBlur);
     return () => { stopOffsetRepeat(); window.removeEventListener('blur', onBlur); };
   }, [stopOffsetRepeat]);
+
+  const topNRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stopTopNRepeat = useCallback(() => {
+    if (topNRepeatRef.current !== null) { clearTimeout(topNRepeatRef.current); clearInterval(topNRepeatRef.current); topNRepeatRef.current = null; }
+  }, []);
+  useEffect(() => {
+    const onBlur = () => stopTopNRepeat();
+    window.addEventListener('blur', onBlur);
+    return () => { stopTopNRepeat(); window.removeEventListener('blur', onBlur); };
+  }, [stopTopNRepeat]);
 
   // Reset both offsets when offsetTarget switches
   const prevOffsetTargetRef = useRef(offsetTarget);
@@ -1994,88 +2011,179 @@ export default function RealDataSankeyPage() {
           if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
         };
         return (
-          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', gap: 8, alignItems: 'center', background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
-            {/* オフセット対象コンボボックス */}
-            <select
-              value={offsetTarget}
-              onChange={e => { pendingHistoryAction.current = 'replace'; setOffsetTarget(e.target.value as 'recipient' | 'project'); }}
-              style={{ fontSize: 11, border: '1px solid #ccc', borderRadius: 3, padding: '1px 2px', background: '#fff', color: '#555', cursor: 'pointer' }}
-            >
-              <option value="recipient">支出先</option>
-              <option value="project">事業</option>
-            </select>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ color: '#555', fontSize: 11 }}>Top</span>
-              {isEditingOffset ? (
-                <input
-                  type="number"
-                  autoFocus
-                  min={1} max={activeMaxStartRank} step={1}
-                  value={offsetInputValue}
-                  onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) setActiveOffset(Math.max(0, Math.min(activeMax, v - 1))); }}
-                  onBlur={() => setIsEditingOffset(false)}
-                  onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingOffset(false); }}
-                  style={{ width: `${Math.max(40, String(activeMaxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
-                />
-              ) : (
-                <button
-                  onClick={() => { setOffsetInputValue(String(activeRangeStart)); setIsEditingOffset(true); }}
-                  title="クリックして開始位置を入力"
-                  style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
-                >{activeRangeStart}</button>
-              )}
-              <span style={{ color: '#999', fontSize: 11 }}>〜{activeRangeEnd}</span>
-              <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => setActiveOffset(Number(e.target.value))} style={{ width: 60 }} />
-              <span style={{ color: '#999', fontSize: 11 }}>/{activeTotalCount}件</span>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
-                {([
-                  [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '次へ'],
-                  [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '前へ'],
-                ] as [number, string, string][]).map(([delta, path, title]) => (
-                  <button key={delta} title={title} aria-label={title}
-                    onPointerDown={(e) => {
-                      if (e.pointerType === 'mouse' && e.button !== 0) return;
-                      const step = () => {
-                        pendingHistoryAction.current = 'replace';
-                        if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
-                        else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
-                      };
-                      stopOffsetRepeat();
-                      step();
-                      offsetRepeatRef.current = setTimeout(() => {
-                        offsetRepeatRef.current = setInterval(step, 150);
-                      }, 400);
-                    }}
-                    onPointerUp={stopOffsetRepeat} onPointerLeave={stopOffsetRepeat} onPointerCancel={stopOffsetRepeat}
-                    onClick={(e) => { if (e.detail === 0) setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta))); }}
-                    style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
-                  </button>
-                ))}
-              </div>
-              {/* Material Icons: vertical_align_top — オフセットリセット */}
-              <button onClick={e => { e.preventDefault(); setActiveOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
+          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: 12 }}>
+            {/* Row 1: オフセットスライダー（2列スパン） */}
+            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}>
+              {/* オフセット対象コンボボックス */}
+              <select
+                value={offsetTarget}
+                onChange={e => { pendingHistoryAction.current = 'replace'; setOffsetTarget(e.target.value as 'recipient' | 'project'); }}
+                style={{ fontSize: 11, border: '1px solid #ccc', borderRadius: 3, padding: '1px 2px', background: '#fff', color: '#555', cursor: 'pointer' }}
+              >
+                <option value="recipient">支出先</option>
+                <option value="project">事業</option>
+              </select>
+              <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ color: '#555', fontSize: 11 }}>Top</span>
+                {isEditingOffset ? (
+                  <input
+                    type="number"
+                    autoFocus
+                    min={1} max={activeMaxStartRank} step={1}
+                    value={offsetInputValue}
+                    onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) setActiveOffset(Math.max(0, Math.min(activeMax, v - 1))); }}
+                    onBlur={() => setIsEditingOffset(false)}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingOffset(false); }}
+                    style={{ width: `${Math.max(40, String(activeMaxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
+                  />
+                ) : (
+                  <button
+                    onClick={() => { setOffsetInputValue(String(activeRangeStart)); setIsEditingOffset(true); }}
+                    title="クリックして開始位置を入力"
+                    style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
+                  >{activeRangeStart}</button>
+                )}
+                <span style={{ color: '#999', fontSize: 11 }}>〜{activeRangeEnd}</span>
+                <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => setActiveOffset(Number(e.target.value))} style={{ width: 60 }} />
+                <span style={{ color: '#999', fontSize: 11 }}>/{activeTotalCount}件</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
+                  {([
+                    [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '次へ'],
+                    [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '前へ'],
+                  ] as [number, string, string][]).map(([delta, path, title]) => (
+                    <button key={delta} title={title} aria-label={title}
+                      onPointerDown={(e) => {
+                        if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        const step = () => {
+                          pendingHistoryAction.current = 'replace';
+                          if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
+                          else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
+                        };
+                        stopOffsetRepeat();
+                        step();
+                        offsetRepeatRef.current = setTimeout(() => {
+                          offsetRepeatRef.current = setInterval(step, 150);
+                        }, 400);
+                      }}
+                      onPointerUp={stopOffsetRepeat} onPointerLeave={stopOffsetRepeat} onPointerCancel={stopOffsetRepeat}
+                      onClick={(e) => { if (e.detail === 0) setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta))); }}
+                      style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
+                    </button>
+                  ))}
+                </div>
+                {/* Material Icons: vertical_align_top — オフセットリセット */}
+                <button onClick={e => { e.preventDefault(); setActiveOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
                 </button>
-            </label>
-            {/* 区切り */}
-            <div style={{ width: 1, alignSelf: 'stretch', background: '#e0e0e0', margin: '0 2px' }} />
-            {/* TopN: 事業・支出先 */}
-            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ color: '#555', fontSize: 11 }}>事業:</span>
-              <input type="number" min={1} max={300} value={topProject}
-                onChange={e => { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, Number(e.target.value) || 1))); }}
-                style={{ width: 50, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ color: '#555', fontSize: 11 }}>支出先:</span>
-              <input type="number" min={1} max={300} value={topRecipient}
-                onChange={e => { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, Number(e.target.value) || 1))); }}
-                style={{ width: 50, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }} />
-            </label>
+              </label>
+            </div>
+            {/* Row 2: 事業・支出先 TopN スライダー（各グリッドセル） */}
+            {showTopNSliders && <>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
+                <span style={{ color: '#555', fontSize: 11, whiteSpace: 'nowrap' }}>事業</span>
+                <input
+                  type="range" min={1} max={300} step={1}
+                  value={localTopProject ?? topProject}
+                  onChange={e => { setLocalTopProject(Number(e.target.value)); }}
+                  onPointerUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
+                  onTouchEnd={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
+                  style={{ flex: 1, minWidth: 0, width: 0 }}
+                />
+                {isEditingTopProject ? (
+                  <input type="number" autoFocus min={1} max={300} step={1}
+                    value={topProjectInputValue}
+                    onChange={e => setTopProjectInputValue(e.target.value)}
+                    onBlur={() => { const v = Number(topProjectInputValue); if (!isNaN(v) && v >= 1) { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); } setIsEditingTopProject(false); }}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
+                    style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 11 }}
+                  />
+                ) : (
+                  <button onClick={() => { setTopProjectInputValue(String(topProject)); setIsEditingTopProject(true); }} title="クリックして直接入力"
+                    style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
+                  >{localTopProject ?? topProject}</button>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
+                  {([
+                    [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '増やす'],
+                    [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '減らす'],
+                  ] as [number, string, string][]).map(([delta, path, title]) => (
+                    <button key={delta} title={title} aria-label={title}
+                      onPointerDown={(e) => {
+                        if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        const step = () => { pendingHistoryAction.current = 'replace'; setTopProject(prev => Math.max(1, Math.min(300, prev + delta))); };
+                        stopTopNRepeat(); step();
+                        topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
+                      }}
+                      onPointerUp={stopTopNRepeat} onPointerLeave={stopTopNRepeat} onPointerCancel={stopTopNRepeat}
+                      onClick={(e) => { if (e.detail === 0) { pendingHistoryAction.current = 'replace'; setTopProject(prev => Math.max(1, Math.min(300, prev + delta))); } }}
+                      style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
+                    </button>
+                  ))}
+                </div>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
+                <span style={{ color: '#555', fontSize: 11, whiteSpace: 'nowrap' }}>支出先</span>
+                <input
+                  type="range" min={1} max={300} step={1}
+                  value={localTopRecipient ?? topRecipient}
+                  onChange={e => { setLocalTopRecipient(Number(e.target.value)); }}
+                  onPointerUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
+                  onTouchEnd={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
+                  style={{ flex: 1, minWidth: 0, width: 0 }}
+                />
+                {isEditingTopRecipient ? (
+                  <input type="number" autoFocus min={1} max={300} step={1}
+                    value={topRecipientInputValue}
+                    onChange={e => setTopRecipientInputValue(e.target.value)}
+                    onBlur={() => { const v = Number(topRecipientInputValue); if (!isNaN(v) && v >= 1) { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); } setIsEditingTopRecipient(false); }}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
+                    style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 11 }}
+                  />
+                ) : (
+                  <button onClick={() => { setTopRecipientInputValue(String(topRecipient)); setIsEditingTopRecipient(true); }} title="クリックして直接入力"
+                    style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
+                  >{localTopRecipient ?? topRecipient}</button>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
+                  {([
+                    [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '増やす'],
+                    [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '前へ'],
+                  ] as [number, string, string][]).map(([delta, path, title]) => (
+                    <button key={delta} title={title} aria-label={title}
+                      onPointerDown={(e) => {
+                        if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        const step = () => { pendingHistoryAction.current = 'replace'; setTopRecipient(prev => Math.max(1, Math.min(300, prev + delta))); };
+                        stopTopNRepeat(); step();
+                        topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
+                      }}
+                      onPointerUp={stopTopNRepeat} onPointerLeave={stopTopNRepeat} onPointerCancel={stopTopNRepeat}
+                      onClick={(e) => { if (e.detail === 0) { pendingHistoryAction.current = 'replace'; setTopRecipient(prev => Math.max(1, Math.min(300, prev + delta))); } }}
+                      style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
+                    </button>
+                  ))}
+                </div>
+              </label>
+            </>}
+          </div>
+          {/* トグルボタン（パネル外・下部） */}
+          <button
+            onClick={() => setShowTopNSliders(s => !s)}
+            title={showTopNSliders ? 'TopN設定 を隠す' : 'TopN設定 を表示'}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', border: '1px solid #e0e0e0', borderTop: 'none', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
+              <path d={showTopNSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
+            </svg>
+          </button>
           </div>
         );
       })()}
