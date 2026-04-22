@@ -2092,6 +2092,8 @@ export default function RealDataSankeyPage() {
                   onChange={e => { setLocalTopProject(Number(e.target.value)); }}
                   onPointerUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
                   onTouchEnd={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
+                  onKeyUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
+                  onBlur={e => { if (localTopProject === null) return; const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
                   style={{ flex: 1, minWidth: 0, width: 0 }}
                 />
                 {isEditingTopProject ? (
@@ -2136,6 +2138,8 @@ export default function RealDataSankeyPage() {
                   onChange={e => { setLocalTopRecipient(Number(e.target.value)); }}
                   onPointerUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
                   onTouchEnd={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
+                  onKeyUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
+                  onBlur={e => { if (localTopRecipient === null) return; const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
                   style={{ flex: 1, minWidth: 0, width: 0 }}
                 />
                 {isEditingTopRecipient ? (
@@ -2154,7 +2158,7 @@ export default function RealDataSankeyPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                   {([
                     [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '増やす'],
-                    [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '前へ'],
+                    [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '減らす'],
                   ] as [number, string, string][]).map(([delta, path, title]) => (
                     <button key={delta} title={title} aria-label={title}
                       onPointerDown={(e) => {
