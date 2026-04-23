@@ -379,7 +379,7 @@ export default function RealDataSankeyPage() {
     if (scrollMode === 'zoom') {
       doZoom(e.deltaY);
     } else {
-      // Illustratorモード: Ctrl+scroll = zoom、それ以外 = pan
+      // 移動モード: Ctrl/Cmd+scroll = zoom、それ以外 = pan
       if (e.ctrlKey || e.metaKey) {
         doZoom(e.deltaY);
       } else {
