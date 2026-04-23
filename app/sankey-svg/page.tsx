@@ -1311,7 +1311,7 @@ export default function RealDataSankeyPage() {
                             />
                             {labelVisible && (
                               <text x={node.x1 + 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
-                                fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                                fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNode && hoveredNode !== node ? '#bbb' : '#333'}
                                 style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                                 onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                                 onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -1338,7 +1338,7 @@ export default function RealDataSankeyPage() {
                           {labelVisible && (<>
                             {/* Left label: budget amount */}
                             <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
-                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                              fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNode && hoveredNode !== node ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -1349,7 +1349,7 @@ export default function RealDataSankeyPage() {
                             </text>
                             {/* Right label: project name + spending amount */}
                             <text x={spendingNode.x1 + 3} y={sH / 2} fontSize={11 / zoom} dominantBaseline="middle"
-                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                              fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNode && hoveredNode !== node ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -1402,7 +1402,7 @@ export default function RealDataSankeyPage() {
                             y={h / 2}
                             fontSize={11 / zoom}
                             dominantBaseline="middle"
-                            fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : '#333'}
+                            fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : hoveredNode && hoveredNode !== node ? '#bbb' : '#333'}
                             style={{ userSelect: 'none', cursor: 'pointer' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                             onMouseEnter={(e) => { const rect = containerRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); setHoveredNode(node); }}
