@@ -1529,8 +1529,9 @@ export default function RealDataSankeyPage() {
           {/* DOM tooltip — link hover */}
           {hoveredLink && !hoveredNode && (() => {
             const tipW = 220;
+            const tipH = 58;
             const lx = Math.max(4, Math.min(mousePos.x + 12, svgWidth - tipW - 4));
-            const ly = mousePos.y - 10;
+            const ly = Math.max(4, Math.min(mousePos.y - 10, svgHeight - tipH - 4));
             return (
               <div style={{
                 position: 'absolute', left: lx, top: ly, width: tipW, boxSizing: 'border-box',
@@ -1594,10 +1595,13 @@ export default function RealDataSankeyPage() {
             const lyAboveCursor = mousePos.y - tipH - cursorGap;
             const largeNode = nodeScreenH > tipH;
             const showBelow = labelTopScreenY - GAP < 40;
-            const ly = largeNode
+            const lyRaw = largeNode
               ? (lyAboveCursor >= 4 ? lyAboveCursor : mousePos.y + cursorGap + 16)
               : showBelow ? screenBottom + GAP : labelTopScreenY - GAP;
             const transform = (!largeNode && !showBelow) ? 'translateY(-100%)' : undefined;
+            const minLy = transform === 'translateY(-100%)' ? tipH + 4 : 4;
+            const maxLy = transform === 'translateY(-100%)' ? svgHeight - 4 : svgHeight - tipH - 4;
+            const ly = Math.max(minLy, Math.min(lyRaw, maxLy));
             const amtCol = (label: string, val: number) => (
               <div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 3 }}>
