@@ -128,6 +128,7 @@ export default function RealDataSankeyPage() {
   const [topProjectInputValue, setTopProjectInputValue] = useState('');
   const [topRecipientInputValue, setTopRecipientInputValue] = useState('');
   const [showTopNSliders, setShowTopNSliders] = useState(true);
+  const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -362,21 +363,31 @@ export default function RealDataSankeyPage() {
     const el = containerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    // Mouse position relative to SVG
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
 
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newZoom = Math.max(0.2, Math.min(baseZoom * 10, zoom * delta));
+    const doZoom = (dy: number) => {
+      const delta = dy > 0 ? 0.9 : 1.1;
+      const newZoom = Math.max(0.2, Math.min(baseZoom * 10, zoom * delta));
+      const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
+      const newPanY = my - (my - pan.y) * (newZoom / zoom);
+      setZoom(newZoom);
+      setPan({ x: newPanX, y: newPanY });
+      scheduleZoomUrlWrite();
+    };
 
-    // Adjust pan so zoom centers on mouse position
-    const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
-    const newPanY = my - (my - pan.y) * (newZoom / zoom);
-
-    setZoom(newZoom);
-    setPan({ x: newPanX, y: newPanY });
-    scheduleZoomUrlWrite();
-  }, [zoom, pan, baseZoom, scheduleZoomUrlWrite]);
+    if (scrollMode === 'zoom') {
+      doZoom(e.deltaY);
+    } else {
+      // 移動モード: Ctrl/Cmd+scroll = zoom、それ以外 = pan
+      if (e.ctrlKey || e.metaKey) {
+        doZoom(e.deltaY);
+      } else {
+        const speed = 1.2;
+        setPan(prev => ({ x: prev.x - e.deltaX * speed, y: prev.y - e.deltaY * speed }));
+      }
+    }
+  }, [zoom, pan, baseZoom, scheduleZoomUrlWrite, scrollMode]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || isOverlayControlTarget(e.target)) return; // left click only
@@ -537,6 +548,31 @@ export default function RealDataSankeyPage() {
     }
     return ids;
   }, [selectedNodeInLayout]);
+
+  // Connected node IDs for hovered node (upstream + downstream BFS)
+  const hoveredNodeIds = useMemo(() => {
+    if (!hoveredNode) return null;
+    const ids = new Set<string>();
+    const uVisited = new Set<string>();
+    const uQueue = [hoveredNode];
+    while (uQueue.length) {
+      const n = uQueue.shift()!;
+      if (uVisited.has(n.id)) continue;
+      uVisited.add(n.id);
+      ids.add(n.id);
+      for (const l of n.targetLinks) if (!uVisited.has(l.source.id)) uQueue.push(l.source);
+    }
+    const dVisited = new Set<string>();
+    const dQueue = [hoveredNode];
+    while (dQueue.length) {
+      const n = dQueue.shift()!;
+      if (dVisited.has(n.id)) continue;
+      dVisited.add(n.id);
+      ids.add(n.id);
+      for (const l of n.sourceLinks) if (!dVisited.has(l.target.id)) dQueue.push(l.target);
+    }
+    return ids;
+  }, [hoveredNode]);
 
   // Spending partner of the currently hovered merged project node (for link highlight)
   const hoveredPartnerSpendingId = hoveredNode?.type === 'project-budget' && hoveredNode.projectId != null
@@ -1300,8 +1336,11 @@ export default function RealDataSankeyPage() {
                             />
                             {labelVisible && (
                               <text x={node.x1 + 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
-                                fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                                fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                                 style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
+                                onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                                onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                                onMouseLeave={() => setHoveredNode(null)}
                                 onMouseDown={(e) => e.preventDefault()}
                                 onClick={(e) => handleNodeClick(node, e)}>
                                 {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
@@ -1324,16 +1363,22 @@ export default function RealDataSankeyPage() {
                           {labelVisible && (<>
                             {/* Left label: budget amount */}
                             <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
-                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                              fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
+                              onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                              onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                              onMouseLeave={() => setHoveredNode(null)}
                               onMouseDown={(e) => e.preventDefault()}
                               onClick={(e) => handleNodeClick(node, e)}>
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
                             {/* Right label: project name + spending amount */}
                             <text x={spendingNode.x1 + 3} y={sH / 2} fontSize={11 / zoom} dominantBaseline="middle"
-                              fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
+                              fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
+                              onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                              onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                              onMouseLeave={() => setHoveredNode(null)}
                               onMouseDown={(e) => e.preventDefault()}
                               onClick={(e) => handleNodeClick(node, e)}>
                               {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
@@ -1382,9 +1427,12 @@ export default function RealDataSankeyPage() {
                             y={h / 2}
                             fontSize={11 / zoom}
                             dominantBaseline="middle"
-                            fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : '#333'}
+                            fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                             style={{ userSelect: 'none', cursor: 'pointer' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
+                            onMouseEnter={(e) => { const rect = containerRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); setHoveredNode(node); }}
+                            onMouseMove={(e) => { const rect = containerRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); }}
+                            onMouseLeave={() => setHoveredNode(null)}
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={(e) => handleNodeClick(node, e)}
                           >
@@ -2249,6 +2297,17 @@ export default function RealDataSankeyPage() {
 
       {/* Zoom controls — bottom right (sankey2 style) */}
       <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* スクロールモード切替ボタン */}
+        <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
+          <button
+            aria-label={scrollMode === 'pan' ? 'スクロール移動モード（クリックでズームモードへ）' : 'スクロール移動モードに切替'}
+            title={scrollMode === 'pan' ? 'スクロール: 移動モード\nCtrl/Cmd+スクロール = ズーム\nクリックでズームモードへ' : 'スクロール: ズームモード\nクリックで移動モードへ'}
+            onClick={() => setScrollMode(m => m === 'zoom' ? 'pan' : 'zoom')}
+            style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: scrollMode === 'pan' ? '#e8f0fe' : 'transparent', cursor: 'pointer' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill={scrollMode === 'pan' ? '#1a73e8' : '#bbb'}><path d="M480-80 310-250l57-57 73 73v-166H274l73 74-57 57L120-440l170-170 57 57-74 73h166v-166l-73 73-57-57 170-170 170 170-57 57-73-73v166h166l-74-73 57-57 170 170-170 170-57-57 74-74H520v166l73-73 57 57L480-80Z"/></svg>
+          </button>
+        </div>
         {/* + / vertical slider / - */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Material Icons: add */}
