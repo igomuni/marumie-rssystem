@@ -1313,6 +1313,9 @@ export default function RealDataSankeyPage() {
                               <text x={node.x1 + 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
                                 style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
+                                onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                                onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                                onMouseLeave={() => setHoveredNode(null)}
                                 onMouseDown={(e) => e.preventDefault()}
                                 onClick={(e) => handleNodeClick(node, e)}>
                                 {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
@@ -1337,6 +1340,9 @@ export default function RealDataSankeyPage() {
                             <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
+                              onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                              onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                              onMouseLeave={() => setHoveredNode(null)}
                               onMouseDown={(e) => e.preventDefault()}
                               onClick={(e) => handleNodeClick(node, e)}>
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
@@ -1345,6 +1351,9 @@ export default function RealDataSankeyPage() {
                             <text x={spendingNode.x1 + 3} y={sH / 2} fontSize={11 / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
+                              onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
+                              onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
+                              onMouseLeave={() => setHoveredNode(null)}
                               onMouseDown={(e) => e.preventDefault()}
                               onClick={(e) => handleNodeClick(node, e)}>
                               {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
@@ -1396,6 +1405,9 @@ export default function RealDataSankeyPage() {
                             fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : '#333'}
                             style={{ userSelect: 'none', cursor: 'pointer' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
+                            onMouseEnter={(e) => { const rect = containerRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); setHoveredNode(node); }}
+                            onMouseMove={(e) => { const rect = containerRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); }}
+                            onMouseLeave={() => setHoveredNode(null)}
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={(e) => handleNodeClick(node, e)}
                           >
