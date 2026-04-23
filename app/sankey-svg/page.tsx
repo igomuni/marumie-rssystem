@@ -1457,8 +1457,12 @@ export default function RealDataSankeyPage() {
                 return i === 0 ? (nodes[0]?.value ?? null) : nodes.reduce((s, n) => s + n.value, 0);
               });
               const projectSpendingTotal = layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + n.value, 0);
-              // Screen y of node area top — label bottom sits just above this
               const nodeAreaScreenY = pan.y + MARGIN.top * zoom;
+              const labelFontPx = 11;
+              // 列ごとの最上端ノードを取得（ラベル基準位置の計算用）
+              const topNodeByCol = colNodeTypes.map(t =>
+                layout.nodes.filter(n => n.type === t).reduce<typeof layout.nodes[0] | null>((top, n) => (top === null || n.y0 < top.y0 ? n : top), null)
+              );
               return COL_LABELS.map((label, i) => {
                 const colInnerX = MARGIN.left + (i / maxCol) * (innerW - NODE_W) + NODE_W / 2;
                 const screenX = pan.x + colInnerX * zoom;
@@ -1466,9 +1470,14 @@ export default function RealDataSankeyPage() {
                 const amountLine = i === 2 && total != null
                   ? `${formatYen(total)} / ${formatYen(projectSpendingTotal)}`
                   : total != null ? formatYen(total) : '';
-                // Position: bottom of label block 8px above node area top, clamped to stay on-screen
                 const labelBlockH = amountLine ? 34 : 18;
-                const top = Math.max(SEARCH_BOX_RESERVE, nodeAreaScreenY - labelBlockH - 8);
+                // ノード高さがラベル高さ以下のとき、ノードラベルのTop位置を基準にする
+                const topNode = topNodeByCol[i];
+                const nodeScreenH = topNode ? (topNode.y1 - topNode.y0) * zoom : labelFontPx;
+                const refScreenY = nodeScreenH < labelFontPx
+                  ? nodeAreaScreenY + nodeScreenH / 2 - labelFontPx / 2
+                  : nodeAreaScreenY;
+                const top = Math.max(SEARCH_BOX_RESERVE, refScreenY - labelBlockH - 8);
                 return (
                   <div
                     key={i}
@@ -1518,24 +1527,113 @@ export default function RealDataSankeyPage() {
             )}
 
           {/* DOM tooltip — link hover */}
-          {hoveredLink && !hoveredNode && (
-            <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.85)', color: '#fff', padding: '6px 10px', borderRadius: 4, fontSize: 12, lineHeight: 1.4, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 20 }}>
-              <div>{hoveredLink.source.name} → {hoveredLink.target.name}</div>
-              <div style={{ color: '#adf' }}>{formatYen(hoveredLink.value)}</div>
-              <div style={{ color: '#aaa', fontSize: 11 }}>{Math.round(hoveredLink.value).toLocaleString()}円</div>
-            </div>
-          )}
-          {/* DOM tooltip — node hover (mini: name + amount only) */}
-          {hoveredNode && (
-            <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y - 10, background: 'rgba(0,0,0,0.78)', color: '#fff', padding: '5px 9px', borderRadius: 4, fontSize: 12, lineHeight: 1.4, pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 20 }}>
-              <div style={{ fontWeight: 500 }}>{hoveredNode.name}</div>
-              <div style={{ color: '#7df', fontSize: 11 }}>{formatYen(hoveredNode.value)}</div>
-              <div style={{ color: '#aaa', fontSize: 10 }}>{Math.round(hoveredNode.value).toLocaleString()}円</div>
-              {hoveredNode.isScaled && hoveredNode.rawValue != null && (
-                <div style={{ color: '#888', fontSize: 10 }}>/ {formatYen(hoveredNode.rawValue)}</div>
-              )}
-            </div>
-          )}
+          {hoveredLink && !hoveredNode && (() => {
+            const tipW = 220;
+            const tipH = 58;
+            const lx = Math.max(4, Math.min(mousePos.x + 12, svgWidth - tipW - 4));
+            const ly = Math.max(4, Math.min(mousePos.y - 10, svgHeight - tipH - 4));
+            return (
+              <div style={{
+                position: 'absolute', left: lx, top: ly, width: tipW, boxSizing: 'border-box',
+                background: 'rgba(255,255,255,0.97)', borderRadius: 6, padding: '6px 10px',
+                color: '#222', lineHeight: 1.3, textAlign: 'center', wordBreak: 'break-word',
+                border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                pointerEvents: 'none', zIndex: 20,
+              }}>
+                <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 5, textAlign: 'left' }}>{hoveredLink.source.name} → {hoveredLink.target.name}</div>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: 10, fontWeight: 500, color: '#222' }}>{formatYen(hoveredLink.value)}</div>
+                    <div style={{ fontSize: 9, color: '#555' }}>{Math.round(hoveredLink.value).toLocaleString()}円</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+          {/* DOM tooltip — node hover (sankey2スタイル: ノード上方・ノード色背景) */}
+          {hoveredNode && layout && (() => {
+            const GAP = 8;
+            const tipW = 240;
+            const nodeScreenH = (hoveredNode.y1 - hoveredNode.y0) * zoom;
+            const screenCx = pan.x + (MARGIN.left + hoveredNode.x0 + NODE_W / 2) * zoom;
+            const screenTop = pan.y + (MARGIN.top + hoveredNode.y0) * zoom;
+            const screenBottom = screenTop + nodeScreenH;
+            const lx = Math.max(4, Math.min(screenCx - tipW / 2, svgWidth - tipW - 4));
+            // ノードタイプ別に予算・支出を解決
+            let budget: number | null = null;
+            let spending: number | null = null;
+            const t = hoveredNode.type;
+            if (t === 'project-budget') {
+              budget = hoveredNode.rawValue ?? hoveredNode.value;
+              // sourceLinks から project-spending ノードを探す（集約ノード含む）
+              const spLink = hoveredNode.sourceLinks.find(l => l.target.type === 'project-spending');
+              spending = spLink?.target.value ?? null;
+            } else if (t === 'project-spending') {
+              spending = hoveredNode.value;
+              // targetLinks から project-budget ノードを探す（集約ノード含む）
+              const bdLink = hoveredNode.targetLinks.find(l => l.source.type === 'project-budget');
+              budget = bdLink ? (bdLink.source.rawValue ?? bdLink.source.value) : null;
+            } else if (t === 'ministry') {
+              budget = hoveredNode.value;
+              // サイドパネルと同じ計算: ministryProjectStats.spendingTotal
+              spending = ministryProjectStats.get(hoveredNode.name)?.spendingTotal ?? null;
+            } else if (t === 'total') {
+              budget = hoveredNode.value;
+              // サイドパネルと同じ計算: 全 ministryProjectStats の spendingTotal 合計
+              spending = Array.from(ministryProjectStats.values()).reduce((s, v) => s + v.spendingTotal, 0);
+            } else {
+              // recipient: 支出のみ
+              spending = hoveredNode.value;
+            }
+            // 予算・支出が両方ある場合は2列グリッドで横並び、片方だけなら1列
+            const both = budget != null && spending != null;
+            const tipH = both ? 78 : 68;
+            // 大ノード: マウスY連動（カーソル上方）/ 小ノード: ラベル上端-GAPにポップアップ底辺を固定
+            const labelFontPx = 11; // SVG font-size = 11/zoom → screen px = 11
+            const labelTopScreenY = screenTop + nodeScreenH / 2 - labelFontPx / 2;
+            const cursorGap = 12;
+            const lyAboveCursor = mousePos.y - tipH - cursorGap;
+            const largeNode = nodeScreenH > tipH;
+            const showBelow = labelTopScreenY - GAP < 40;
+            const lyRaw = largeNode
+              ? (lyAboveCursor >= 4 ? lyAboveCursor : mousePos.y + cursorGap + 16)
+              : showBelow ? screenBottom + GAP : labelTopScreenY - GAP;
+            const transform = (!largeNode && !showBelow) ? 'translateY(-100%)' : undefined;
+            const minLy = transform === 'translateY(-100%)' ? tipH + 4 : 4;
+            const maxLy = transform === 'translateY(-100%)' ? svgHeight - 4 : svgHeight - tipH - 4;
+            const ly = Math.max(minLy, Math.min(lyRaw, maxLy));
+            const amtCol = (label: string, val: number) => (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 3 }}>
+                  <span style={{ fontSize: 9, color: '#888', flexShrink: 0, paddingTop: 1 }}>{label}</span>
+                  <span style={{ fontSize: 10, fontWeight: 500, color: '#222' }}>{formatYen(val)}</span>
+                </div>
+                <div style={{ fontSize: 9, color: '#555', wordBreak: 'break-all' }}>{Math.round(val).toLocaleString()}円</div>
+              </div>
+            );
+            return (
+              <div style={{
+                position: 'absolute', left: lx, top: ly, width: tipW, boxSizing: 'border-box',
+                transform,
+                background: 'rgba(255,255,255,0.97)', borderRadius: 6, padding: '6px 10px',
+                color: '#222', lineHeight: 1.3, textAlign: 'center', wordBreak: 'break-word',
+                border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                pointerEvents: 'none', zIndex: 20,
+              }}>
+                <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 5, color: '#111', textAlign: 'left' }}>{hoveredNode.name}</div>
+                {both ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px', textAlign: 'left' }}>
+                    {amtCol('予算', budget!)}
+                    {amtCol('支出', spending!)}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    {budget != null ? amtCol('予算', budget) : spending != null ? amtCol('支出', spending) : null}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
           {/* DOM tooltip — column label hover */}
           {hoveredColIndex !== null && layout && (() => {
             const amt = (n: LayoutNode) => n.value;
