@@ -967,7 +967,8 @@ export default function RealDataSankeyPage() {
     selectNode(nodeId);
   }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, includeZeroSpending, offsetTarget]);
 
-  // focusRelated=ON のままPinは維持してフィルターだけ解除
+  // Step2 → Step1 遷移: 選択ノード (selectedNodeId) は維持し、
+  // focusRelated と pinnedProject/Recipient/Ministry (Step2 用のフォーカスピン) のみ解除
   const exitFocusRelated = useCallback(() => {
     pendingHistoryAction.current = 'push';
     setPinnedProjectId(null);
@@ -1104,13 +1105,13 @@ export default function RealDataSankeyPage() {
   // Focus on node after selection — fires when node appears in layout (pinned TopN+1 case)
   // Also watches isPanelCollapsed: when panel opens, recalculate fit with updated panel width
   useEffect(() => {
-    if (!layout || isPanelCollapsed) return;
+    if (!layout) return;
     if (pendingResetViewport.current) {
       pendingResetViewport.current = false;
-      resetViewport();
+      if (!isPanelCollapsed) resetViewport();
       return;
     }
-    if (!pendingFocusId.current) return;
+    if (isPanelCollapsed || !pendingFocusId.current) return;
     const node = layout.nodes.find(n => n.id === pendingFocusId.current);
     if (!node) return;
     pendingFocusId.current = null;
