@@ -53,7 +53,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const ap = p.get('ap'); if (ap !== null) result.showAggProject = ap !== '0';
   const ps = p.get('ps'); if (ps === 's') result.projectSortBy = 'spending';
   const sb = p.get('sb'); if (sb !== null) result.scaleBudgetToVisible = sb !== '0';
-  const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr !== '0';
+  const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr === '1';
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= 0.1 && n <= 10) result.zoom = n; }
   return result;
@@ -114,7 +114,7 @@ export default function RealDataSankeyPage() {
   const [showAggProject, setShowAggProject] = useState(true);
   const [projectSortBy, setProjectSortBy] = useState<'budget' | 'spending'>('budget');
   const [scaleBudgetToVisible, setScaleBudgetToVisible] = useState(true);
-  const [focusRelated, setFocusRelated] = useState(true);
+  const [focusRelated, setFocusRelated] = useState(false);
   const [year, setYear] = useState<'2024' | '2025'>('2025');
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
@@ -146,6 +146,7 @@ export default function RealDataSankeyPage() {
   // Tracks whether the next URL update should push (navigation) or replace (slider/toggle)
   const pendingHistoryAction = useRef<'push' | 'replace' | null>(null);
   const pendingFocusId = useRef<string | null>(null);
+  const pendingResetViewport = useRef<boolean>(false);
   // Zoom URL state
   const urlRestoredZoomRef = useRef<number | null>(null); // zoom to restore on first layout (no sel= case)
   const zoomRef = useRef(1);                              // always-current zoom for debounce callbacks
@@ -227,9 +228,9 @@ export default function RealDataSankeyPage() {
       setShowAggProject(parsed.showAggProject ?? true);
       setProjectSortBy(parsed.projectSortBy ?? 'budget');
       setScaleBudgetToVisible(parsed.scaleBudgetToVisible ?? true);
-      setFocusRelated(parsed.focusRelated ?? true);
+      setFocusRelated(parsed.focusRelated ?? false);
       if (parsed.year !== undefined) setYear(parsed.year);
-      if (parsed.selectedNodeId) pendingFocusId.current = parsed.selectedNodeId;
+      if (parsed.selectedNodeId) pendingResetViewport.current = true;
     };
     window.addEventListener('popstate', handler);
     return () => window.removeEventListener('popstate', handler);
@@ -257,7 +258,7 @@ export default function RealDataSankeyPage() {
     if (!showAggProject) p.set('ap', '0');
     if (projectSortBy === 'spending') p.set('ps', 's');
     if (!scaleBudgetToVisible) p.set('sb', '0');
-    if (!focusRelated) p.set('fr', '0');
+    if (focusRelated) p.set('fr', '1');
     if (year !== '2025') p.set('yr', year);
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
@@ -551,7 +552,7 @@ export default function RealDataSankeyPage() {
 
   // Connected node IDs for hovered node (upstream + downstream BFS)
   const hoveredNodeIds = useMemo(() => {
-    if (!hoveredNode) return null;
+    if (!hoveredNode || selectedNode) return null;
     const ids = new Set<string>();
     const uVisited = new Set<string>();
     const uQueue = [hoveredNode];
@@ -572,7 +573,7 @@ export default function RealDataSankeyPage() {
       for (const l of n.sourceLinks) if (!dVisited.has(l.target.id)) dQueue.push(l.target);
     }
     return ids;
-  }, [hoveredNode]);
+  }, [hoveredNode, selectedNode]);
 
   // Spending partner of the currently hovered merged project node (for link highlight)
   const hoveredPartnerSpendingId = hoveredNode?.type === 'project-budget' && hoveredNode.projectId != null
@@ -800,7 +801,7 @@ export default function RealDataSankeyPage() {
     pendingHistoryAction.current = forceReplace ? 'replace' : 'push';
     setSelectedNodeId(id);
     setIsProjectDetailExpanded(false);
-    if (id === null) { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); }
+    if (id === null) { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); setFocusRelated(false); }
   }, [setPinnedRecipientId, setPinnedMinistryName, setIsProjectDetailExpanded]);
 
   // Auto-clear stale selection when node no longer exists in graphData at all
@@ -849,9 +850,16 @@ export default function RealDataSankeyPage() {
     const container = containerRef.current;
     const cW = container.clientWidth;
     const cH = container.clientHeight;
-    const neighborIds = new Set<string>([node.id]);
-    for (const l of node.sourceLinks) neighborIds.add(l.target.id);
-    for (const l of node.targetLinks) neighborIds.add(l.source.id);
+    // BFS: include all transitively connected nodes (upstream + downstream)
+    const neighborIds = new Set<string>();
+    const queue: LayoutNode[] = [node];
+    while (queue.length) {
+      const cur = queue.shift()!;
+      if (neighborIds.has(cur.id)) continue;
+      neighborIds.add(cur.id);
+      for (const l of cur.sourceLinks) if (!neighborIds.has(l.target.id)) queue.push(l.target);
+      for (const l of cur.targetLinks) if (!neighborIds.has(l.source.id)) queue.push(l.source);
+    }
     const neighborNodes = layout.nodes.filter(n => neighborIds.has(n.id));
     if (neighborNodes.length === 0) return;
     const minX = Math.min(...neighborNodes.map(n => n.x0));
@@ -959,19 +967,33 @@ export default function RealDataSankeyPage() {
     selectNode(nodeId);
   }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, includeZeroSpending, offsetTarget]);
 
+  // focusRelated=ON のままPinは維持してフィルターだけ解除
+  const exitFocusRelated = useCallback(() => {
+    pendingHistoryAction.current = 'push';
+    setPinnedProjectId(null);
+    setPinnedRecipientId(null);
+    setPinnedMinistryName(null);
+    setFocusRelated(false);
+  }, [setPinnedRecipientId, setPinnedMinistryName]);
+
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
     if (didPanRef.current) return;
     const newId = selectedNodeId === node.id ? null : node.id;
-    if (focusRelated && newId !== null && !node.aggregated) {
-      const pins = computeFocusPins(node.id, graphData?.nodes);
-      setPinnedProjectId(pins.pinnedProjectId); setPinnedRecipientId(pins.pinnedRecipientId); setPinnedMinistryName(pins.pinnedMinistryName);
-    } else if (!focusRelated || newId === null) {
+    if (newId === null && focusRelated) {
+      // Pin中ノードを再クリック → フィルターのみOFF（Pin解除しない）
+      exitFocusRelated();
+      return;
+    }
+    if (newId !== null) {
+      // 新規選択は常に Step1（Pin状態のみ）: フィルター・ピンをリセット
+      if (focusRelated) setFocusRelated(false);
+      setPinnedProjectId(null);
       setPinnedRecipientId(null);
       setPinnedMinistryName(null);
     }
     selectNode(newId);
-  }, [selectedNodeId, selectNode, focusRelated, graphData]);
+  }, [selectedNodeId, selectNode, focusRelated, exitFocusRelated]);
 
   // ── Search ──
 
@@ -1082,11 +1104,19 @@ export default function RealDataSankeyPage() {
   // Focus on node after selection — fires when node appears in layout (pinned TopN+1 case)
   // Also watches isPanelCollapsed: when panel opens, recalculate fit with updated panel width
   useEffect(() => {
-    if (!pendingFocusId.current || !layout || isPanelCollapsed) return;
+    if (!layout || isPanelCollapsed) return;
+    if (pendingResetViewport.current) {
+      pendingResetViewport.current = false;
+      resetViewport();
+      return;
+    }
+    if (!pendingFocusId.current) return;
     const node = layout.nodes.find(n => n.id === pendingFocusId.current);
     if (!node) return;
     pendingFocusId.current = null;
     focusOnNeighborhood(node);
+    // resetViewport is useCallback(()=>{}, []) — stable, intentionally omitted from deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout, focusOnNeighborhood, isPanelCollapsed]);
 
   // Draw minimap
@@ -1162,12 +1192,14 @@ export default function RealDataSankeyPage() {
     setPan({ x: cW / 2 - svgX * zoom, y: cH / 2 - svgY * zoom });
   }, [svgWidth, minimapH, zoom]);
 
-  // Escape key deselects via window listener (reliable regardless of focus)
+  // Escape key: focusRelated ON → フィルターのみOFF、OFF → 選択解除
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') selectNode(null); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { if (focusRelated) exitFocusRelated(); else selectNode(null); }
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [selectNode]);
+  }, [selectNode, focusRelated, exitFocusRelated]);
 
   const focusOnSelectedNode = useCallback(() => {
     if (!selectedNode || !selectedNodeInLayout) return;
@@ -1244,7 +1276,7 @@ export default function RealDataSankeyPage() {
               <rect
                 x={0} y={0} width={svgWidth} height={svgHeight}
                 fill="transparent"
-                onClick={() => { if (!didPanRef.current) selectNode(null); }}
+                onClick={() => { if (!didPanRef.current) { if (focusRelated) exitFocusRelated(); else selectNode(null); } }}
               />
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
@@ -2384,10 +2416,6 @@ export default function RealDataSankeyPage() {
                 <input type="checkbox" checked={scaleBudgetToVisible} onChange={e => { pendingHistoryAction.current = 'replace'; setScaleBudgetToVisible(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>事業の予算額を支出額に合わせて調整</span>
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={focusRelated} onChange={e => { pendingHistoryAction.current = 'replace'; setFocusRelated(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>選択ノードの関連ノードのみ表示</span>
-              </label>
             </div>
           </>
         )}
@@ -2458,14 +2486,34 @@ export default function RealDataSankeyPage() {
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path d="M792-576v-120H672v-72h120q30 0 51 21.15T864-696v120h-72Zm-696 0v-120q0-30 21.15-51T168-768h120v72H168v120H96Zm576 384v-72h120v-120h72v120q0 30-21.15 51T792-192H672Zm-504 0q-30 0-51-21.15T96-264v-120h72v120h120v72H168Zm72-144v-288h480v288H240Zm72-72h336v-144H312v144Zm0 0v-144 144Z"/></svg>
           </button>
         </div>
-        {/* 選択ノードフォーカスボタン — 選択中のみ表示 */}
-        {selectedNodeInLayout && (
+        {/* 関連ノードのみ表示トグル — Pin状態のときのみ表示 */}
+        {selectedNode && (
           <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
-            {/* Material Icons: account_tree (flowchart) */}
-            <button aria-label="選択ノードと接続先をフィット表示" onClick={() => focusOnNeighborhood()} title="選択ノードと接続先をフィット表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path transform="scale(-1, 1) translate(-960, 0)" d="M576-168v-84H444v-192h-60v84H96v-240h288v84h60v-192h132v-84h288v240H576v-84h-60v312h60v-84h288v240H576Zm72-72h144v-96H648v96ZM168-432h144v-96H168v96Zm480-192h144v-96H648v96Zm0 384v-96 96ZM312-432v-96 96Zm336-192v-96 96Z"/></svg>
+            {/* Material Icons: account_tree — 関連ノードのみ表示トグル */}
+            <button
+              aria-label={focusRelated ? '関連ノードのみ表示 ON（クリックでOFF）' : '関連ノードのみ表示 OFF（クリックでON）'}
+              title={focusRelated ? '関連ノードのみ表示: ON\nクリックでOFF' : '関連ノードのみ表示: OFF\nクリックでON'}
+              onClick={() => {
+                pendingHistoryAction.current = 'push';
+                const next = !focusRelated;
+                if (next && selectedNode) {
+                  const pins = computeFocusPins(selectedNode.id, graphData?.nodes);
+                  setPinnedProjectId(pins.pinnedProjectId);
+                  setPinnedRecipientId(pins.pinnedRecipientId);
+                  setPinnedMinistryName(pins.pinnedMinistryName);
+                  pendingResetViewport.current = true;
+                } else if (!next) {
+                  setPinnedProjectId(null);
+                  setPinnedRecipientId(null);
+                  setPinnedMinistryName(null);
+                }
+                setFocusRelated(next);
+              }}
+              style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: focusRelated ? '#e8f0fe' : 'transparent', cursor: 'pointer' }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill={focusRelated ? '#1a73e8' : '#888'}><path transform="scale(-1, 1) translate(-960, 0)" d="M576-168v-84H444v-192h-60v84H96v-240h288v84h60v-192h132v-84h288v240H576v-84h-60v312h60v-84h288v240H576Zm72-72h144v-96H648v96ZM168-432h144v-96H168v96Zm480-192h144v-96H648v96Zm0 384v-96 96ZM312-432v-96 96Zm336-192v-96 96Z"/></svg>
             </button>
-            {/* Focus */}
+            {/* 選択ノードにフォーカス */}
             <button aria-label="選択ノードにフォーカス" onClick={focusOnSelectedNode} title="選択ノードにフォーカス" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', borderTop: '1px solid #eee', borderLeft: 'none', borderRight: 'none', borderBottom: 'none', background: 'transparent', cursor: 'pointer' }}>
               <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path transform="rotate(180 480 -480)" d="M168-360h240v-240H168v240Zm312 72H96v-384h384v156h384v72H480v156ZM288-480Z"/></svg>
             </button>
