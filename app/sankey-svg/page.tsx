@@ -78,6 +78,29 @@ function formatOkuYen(okuYen: number): string {
   return `${okuYen.toLocaleString()}億円`;
 }
 
+/** "1.26億", "4567万円", "1兆2000億", "100" (→億円) などを億円単位の数値に変換。解析失敗時 null */
+function parseAmountToOkuYen(s: string): number | null {
+  const t = s.trim().replace(/[,，\s]/g, '');
+  if (!t) return null;
+  // 兆 + 億 の複合 (例: "1兆2000億")
+  const comboMatch = t.match(/^([\d.]+)兆([\d.]+)億?$/);
+  if (comboMatch) {
+    const cho = parseFloat(comboMatch[1]);
+    const oku = parseFloat(comboMatch[2]);
+    if (!isNaN(cho) && !isNaN(oku)) return cho * 10000 + oku;
+  }
+  const m = t.match(/^([\d.]+)\s*(兆円?|億円?|万円?|円)?$/);
+  if (!m) return null;
+  const n = parseFloat(m[1]);
+  if (isNaN(n)) return null;
+  const unit = m[2] ?? '';
+  if (unit.startsWith('兆')) return n * 10000;
+  if (unit.startsWith('億')) return n;
+  if (unit.startsWith('万')) return n / 100;
+  if (unit === '円') return n / 1e8;
+  return n; // 単位なし → 億円
+}
+
 function computeFocusPins(
   nodeId: string,
   nodes: Array<{ id: string; name: string }> | undefined,
@@ -148,10 +171,11 @@ export default function RealDataSankeyPage() {
   // Filter feature
   const [filterActive, setFilterActive] = useState(false);
   const [showAmountSliders, setShowAmountSliders] = useState(false);
-  const [filterMinBudget, setFilterMinBudget] = useState(0);        // 億円; 0 = no min
-  const [filterMaxBudget, setFilterMaxBudget] = useState<number | null>(null); // null = no max
-  const [filterMinSpending, setFilterMinSpending] = useState(0);    // 億円; 0 = no min
-  const [filterMaxSpending, setFilterMaxSpending] = useState<number | null>(null);
+  const [filterTarget, setFilterTarget] = useState<'all' | 'project' | 'recipient'>('all');
+  const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
+  const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
+  const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
+  const [filterMaxSpendingText, setFilterMaxSpendingText] = useState('');
   const isPidQuery = (q: string) => /^\d+$/.test(q);
   const meetsSearchMinLength = (q: string) => isPidQuery(q) ? q.length >= 1 : q.length >= 2;
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -519,19 +543,24 @@ export default function RealDataSankeyPage() {
   // Pre-filter exclusion set: built from filter conditions, applied before filterTopN
   const filterExcludedIds = useMemo(() => {
     if (!graphData) return null;
-    const hasBudget = filterMinBudget > 0 || filterMaxBudget !== null;
-    const hasSpending = filterMinSpending > 0 || filterMaxSpending !== null;
+    const minBudgetOku = parseAmountToOkuYen(filterMinBudgetText);
+    const maxBudgetOku = parseAmountToOkuYen(filterMaxBudgetText);
+    const minSpendingOku = parseAmountToOkuYen(filterMinSpendingText);
+    const maxSpendingOku = parseAmountToOkuYen(filterMaxSpendingText);
+    const hasBudget = minBudgetOku !== null || maxBudgetOku !== null;
+    const hasSpending = minSpendingOku !== null || maxSpendingOku !== null;
     const trimmedQuery = debouncedQuery.trim();
     const hasName = filterActive && trimmedQuery.length >= 2;
     if (!hasBudget && !hasSpending && !hasName) return null;
-    const minBudgetYen = filterMinBudget * 1e8;
-    const maxBudgetYen = filterMaxBudget !== null ? filterMaxBudget * 1e8 : Infinity;
-    const minSpendingYen = filterMinSpending * 1e8;
-    const maxSpendingYen = filterMaxSpending !== null ? filterMaxSpending * 1e8 : Infinity;
+    const minBudgetYen = (minBudgetOku ?? 0) * 1e8;
+    const maxBudgetYen = maxBudgetOku !== null ? maxBudgetOku * 1e8 : Infinity;
+    const minSpendingYen = (minSpendingOku ?? 0) * 1e8;
+    const maxSpendingYen = maxSpendingOku !== null ? maxSpendingOku * 1e8 : Infinity;
     let nameRegex: RegExp | null = null;
     if (hasName && searchUseRegex) {
-      try { nameRegex = new RegExp(trimmedQuery, 'i'); } catch { /* invalid regex — treat as no name filter */ }
+      try { nameRegex = new RegExp(trimmedQuery, 'i'); } catch { /* invalid regex */ }
     }
+    const matchesName = (name: string) => nameRegex ? nameRegex.test(name) : name.includes(trimmedQuery);
     const excluded = new Set<string>();
     const spendingByPid = new Map(
       graphData.nodes.filter(n => n.type === 'project-spending' && n.projectId != null).map(n => [n.projectId!, n])
@@ -542,15 +571,16 @@ export default function RealDataSankeyPage() {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudgetYen || n.value > maxBudgetYen);
         const failSpending = hasSpending && sn && (sn.value < minSpendingYen || sn.value > maxSpendingYen);
-        if (failBudget || failSpending) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
+        const failName = hasName && (filterTarget === 'project' || filterTarget === 'all') && !matchesName(n.name);
+        if (failBudget || failSpending || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpendingYen || n.value > maxSpendingYen);
-        const failName = hasName && (nameRegex ? !nameRegex.test(n.name) : !n.name.includes(trimmedQuery));
+        const failName = hasName && (filterTarget === 'recipient' || filterTarget === 'all') && !matchesName(n.name);
         if (failSpending || failName) excluded.add(n.id);
       }
     }
     return excluded.size > 0 ? excluded : null;
-  }, [graphData, filterActive, filterMinBudget, filterMaxBudget, filterMinSpending, filterMaxSpending, debouncedQuery, searchUseRegex]);
+  }, [graphData, filterActive, filterTarget, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -2299,57 +2329,54 @@ export default function RealDataSankeyPage() {
 
             {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
             {showAmountSliders && (
-              <div style={{ padding: '0 12px 10px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[
-                  { label: '予算', min: filterMinBudget, max: filterMaxBudget, dataMax: graphDataStats.maxBudget, setMin: setFilterMinBudget, setMax: setFilterMaxBudget },
-                  { label: '支出', min: filterMinSpending, max: filterMaxSpending, dataMax: graphDataStats.maxSpending, setMin: setFilterMinSpending, setMax: setFilterMaxSpending },
-                ].map(({ label, min, max, dataMax, setMin, setMax }) => (
-                  <div key={label}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#444' }}>{label}</span>
-                      {(min > 0 || max !== null) && (
-                        <button type="button" onClick={() => { setMin(0); setMax(null); }}
-                          style={{ fontSize: 10, color: '#1a73e8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>リセット</button>
-                      )}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                      <span style={{ fontSize: 10, color: '#777', width: 22, flexShrink: 0 }}>下限</span>
-                      <input type="range" min={0} max={dataMax} step={Math.max(1, Math.floor(dataMax / 500))}
-                        value={min}
-                        onChange={e => { const v = Number(e.target.value); setMin(v); if (max !== null && v > max) setMax(v); }}
-                        style={{ flex: 1, accentColor: '#1a73e8' }}
-                      />
-                      <span style={{ fontSize: 10, color: min > 0 ? '#1a73e8' : '#aaa', width: 64, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                        {min === 0 ? '制限なし' : formatOkuYen(min)}
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 10, color: '#777', width: 22, flexShrink: 0 }}>上限</span>
-                      <input type="range" min={0} max={dataMax} step={Math.max(1, Math.floor(dataMax / 500))}
-                        value={max ?? dataMax}
-                        onChange={e => { const v = Number(e.target.value); const next = v >= dataMax ? null : v; setMax(next); if (next !== null && next < min) setMin(next); }}
-                        style={{ flex: 1, accentColor: '#1a73e8' }}
-                      />
-                      <span style={{ fontSize: 10, color: max !== null ? '#1a73e8' : '#aaa', width: 64, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                        {max === null ? '制限なし' : formatOkuYen(max)}
-                      </span>
-                    </div>
+              <div style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {/* フィルター対象 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 11, color: '#555', flexShrink: 0 }}>対象</span>
+                  <select value={filterTarget} onChange={e => setFilterTarget(e.target.value as 'all' | 'project' | 'recipient')}
+                    style={{ flex: 1, fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '2px 4px', background: '#fff', color: '#333', cursor: 'pointer' }}>
+                    <option value="all">すべて</option>
+                    <option value="project">事業</option>
+                    <option value="recipient">支出先</option>
+                  </select>
+                </div>
+                {/* 予算・支出 テキスト入力 */}
+                {([
+                  { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
+                  { label: '支出', minText: filterMinSpendingText, maxText: filterMaxSpendingText, setMin: setFilterMinSpendingText, setMax: setFilterMaxSpendingText },
+                ] as const).map(({ label, minText, maxText, setMin, setMax }) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>{label}</span>
+                    <input type="text" value={minText} onChange={e => setMin(e.target.value)}
+                      placeholder="下限"
+                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToOkuYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                    />
+                    <span style={{ fontSize: 11, color: '#aaa', flexShrink: 0 }}>〜</span>
+                    <input type="text" value={maxText} onChange={e => setMax(e.target.value)}
+                      placeholder="上限"
+                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToOkuYen(maxText) !== null || !maxText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                    />
+                    {(minText || maxText) && (
+                      <button type="button" onClick={() => { setMin(''); setMax(''); }}
+                        style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                    )}
                   </div>
                 ))}
+                <div style={{ fontSize: 10, color: '#bbb' }}>例: 1.26億 / 4567万円 / 1兆2000億</div>
               </div>
             )}
           </div>{/* end card */}
 
           {/* トグルボタン（card外・下部 — TopNの構造と同一） */}
           {(() => {
-            const amountActive = filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null;
+            const amountActive = !!(filterMinBudgetText || filterMaxBudgetText || filterMinSpendingText || filterMaxSpendingText);
             return (
               <button
                 type="button"
                 title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
                 aria-pressed={showAmountSliders}
                 onClick={() => setShowAmountSliders(s => !s)}
-                style={{ alignSelf: 'flex-end', display: 'flex', alignItems: 'center', justifyContent: 'center', background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)', border: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderTop: 'none', borderRadius: '0 0 8px 8px', cursor: 'pointer', padding: '0 8px', marginTop: -1, userSelect: 'none' }}
+                style={{ alignSelf: 'flex-end', display: 'flex', alignItems: 'center', justifyContent: 'center', background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)', border: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderTop: 'none', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill={amountActive ? '#1a73e8' : '#bbb'}>
                   <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
