@@ -33,6 +33,13 @@ interface SankeyUrlState {
   autoFocusRelated: boolean;
   year: '2024' | '2025';
   zoom?: number;
+  filterActive?: boolean;
+  filterTarget?: 'all' | 'project' | 'recipient';
+  filterNameQuery?: string;
+  filterMinBudgetText?: string;
+  filterMaxBudgetText?: string;
+  filterMinSpendingText?: string;
+  filterMaxSpendingText?: string;
 }
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
@@ -58,6 +65,13 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const afr = p.get('afr'); if (afr !== null) result.autoFocusRelated = afr === '1';
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= 0.1 && n <= 10) result.zoom = n; }
+  const f = p.get('f'); if (f === '1') result.filterActive = true;
+  const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient'; else if (nft === 'a') result.filterTarget = 'all';
+  const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
+  const fmb = p.get('fmb'); if (fmb !== null) result.filterMinBudgetText = fmb;
+  const fxb = p.get('fxb'); if (fxb !== null) result.filterMaxBudgetText = fxb;
+  const fms = p.get('fms'); if (fms !== null) result.filterMinSpendingText = fms;
+  const fxs = p.get('fxs'); if (fxs !== null) result.filterMaxSpendingText = fxs;
   return result;
 }
 
@@ -73,11 +87,6 @@ function mergedProjectPath(x0: number, nodeW: number, bH: number, sH: number): s
 }
 
 /** ノードID → フォーカスピン状態を導出する純粋ヘルパー */
-function formatOkuYen(okuYen: number): string {
-  if (okuYen >= 10000) return `${(okuYen / 10000 % 1 === 0 ? okuYen / 10000 : (okuYen / 10000).toFixed(1))}兆円`;
-  return `${okuYen.toLocaleString()}億円`;
-}
-
 function parseJapaneseNumeral(s: string): number {
   const d: Record<string, number> = { 一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9 };
   let result = 0, cur = 0;
@@ -265,6 +274,13 @@ export default function RealDataSankeyPage() {
     if (parsed.zoom !== undefined && parsed.selectedNodeId === undefined) {
       urlRestoredZoomRef.current = parsed.zoom;
     }
+    if (parsed.filterActive !== undefined) setFilterActive(parsed.filterActive);
+    if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget);
+    if (parsed.filterNameQuery !== undefined) { setSearchQuery(parsed.filterNameQuery); }
+    if (parsed.filterMinBudgetText !== undefined) setFilterMinBudgetText(parsed.filterMinBudgetText);
+    if (parsed.filterMaxBudgetText !== undefined) setFilterMaxBudgetText(parsed.filterMaxBudgetText);
+    if (parsed.filterMinSpendingText !== undefined) setFilterMinSpendingText(parsed.filterMinSpendingText);
+    if (parsed.filterMaxSpendingText !== undefined) setFilterMaxSpendingText(parsed.filterMaxSpendingText);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
 
@@ -295,6 +311,13 @@ export default function RealDataSankeyPage() {
       setFocusRelated(parsed.focusRelated ?? false);
       setAutoFocusRelated(parsed.autoFocusRelated ?? true);
       if (parsed.year !== undefined) setYear(parsed.year);
+      setFilterActive(parsed.filterActive ?? false);
+      if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('all');
+      setSearchQuery(parsed.filterNameQuery ?? '');
+      setFilterMinBudgetText(parsed.filterMinBudgetText ?? '');
+      setFilterMaxBudgetText(parsed.filterMaxBudgetText ?? '');
+      setFilterMinSpendingText(parsed.filterMinSpendingText ?? '');
+      setFilterMaxSpendingText(parsed.filterMaxSpendingText ?? '');
       if (parsed.selectedNodeId) pendingResetViewport.current = true;
     };
     window.addEventListener('popstate', handler);
@@ -326,6 +349,13 @@ export default function RealDataSankeyPage() {
     if (focusRelated) p.set('fr', '1');
     if (!autoFocusRelated) p.set('afr', '0');
     if (year !== '2025') p.set('yr', year);
+    if (filterActive) p.set('f', '1');
+    if (filterTarget !== 'all') p.set('nft', filterTarget === 'project' ? 'p' : 'r');
+    if (filterActive && searchQuery) p.set('nf', searchQuery);
+    if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
+    if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
+    if (filterMinSpendingText) p.set('fms', filterMinSpendingText);
+    if (filterMaxSpendingText) p.set('fxs', filterMaxSpendingText);
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
     if (action === 'push') {
@@ -333,7 +363,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -368,6 +398,22 @@ export default function RealDataSankeyPage() {
   }, [stopTopNRepeat]);
 
   // Reset both offsets when offsetTarget switches
+  // Reset offsets and sync URL when filter conditions change
+  const filterSigInitRef = useRef(false);
+  useEffect(() => {
+    if (!filterSigInitRef.current) { filterSigInitRef.current = true; return; }
+    pendingHistoryAction.current = 'replace';
+    setRecipientOffset(0);
+    setProjectOffset(0);
+  }, [filterActive, filterTarget, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery]);
+
+  // Sync URL when filter name query changes (separate from above to avoid double reset)
+  const filterQueryInitRef = useRef(false);
+  useEffect(() => {
+    if (!filterQueryInitRef.current) { filterQueryInitRef.current = true; return; }
+    pendingHistoryAction.current = 'replace';
+  }, [searchQuery]);
+
   const prevOffsetTargetRef = useRef(offsetTarget);
   useEffect(() => {
     if (prevOffsetTargetRef.current !== offsetTarget) {
@@ -580,7 +626,8 @@ export default function RealDataSankeyPage() {
     if (hasName && searchUseRegex) {
       try { nameRegex = new RegExp(trimmedQuery, 'i'); } catch { /* invalid regex */ }
     }
-    const matchesName = (name: string) => nameRegex ? nameRegex.test(name) : name.includes(trimmedQuery);
+    const trimmedQueryLower = trimmedQuery.toLocaleLowerCase();
+    const matchesName = (name: string) => nameRegex ? nameRegex.test(name) : name.toLocaleLowerCase().includes(trimmedQueryLower);
     const excluded = new Set<string>();
     const spendingByPid = new Map(
       graphData.nodes.filter(n => n.type === 'project-spending' && n.projectId != null).map(n => [n.projectId!, n])
