@@ -570,7 +570,7 @@ export default function RealDataSankeyPage() {
     const hasBudget = minBudgetYen !== null || maxBudgetYen !== null;
     const hasSpending = minSpendingYen !== null || maxSpendingYen !== null;
     const trimmedQuery = debouncedQuery.trim();
-    const hasName = trimmedQuery.length >= 2;
+    const hasName = filterActive && trimmedQuery.length >= 2;
     if (!hasBudget && !hasSpending && !hasName) return null;
     const minBudget = minBudgetYen ?? 0;
     const maxBudget = maxBudgetYen ?? Infinity;
