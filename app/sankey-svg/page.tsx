@@ -2335,11 +2335,23 @@ export default function RealDataSankeyPage() {
           <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: '8px 8px 0 0', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
             {/* Input row */}
             <div style={{ position: 'relative' }}>
-              {/* Search icon */}
-              <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999"
-                style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-              </svg>
+              {/* Search/Filter mode toggle icon */}
+              <button
+                type="button"
+                title={filterActive ? 'フィルタモード（クリックで検索モードに切替）' : '検索モード（クリックでフィルタモードに切替）'}
+                onClick={() => setFilterActive(f => !f)}
+                style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}
+              >
+                {filterActive ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#1a73e8">
+                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                  </svg>
+                )}
+              </button>
               {/* Filter target select — フィルタモード時のみ表示、虫眼鏡の隣 */}
               {filterActive && (
                 <select
@@ -2464,19 +2476,6 @@ export default function RealDataSankeyPage() {
           })()}
         </div>{/* end 検索セクション */}
 
-        {/* フィルタアイコンボタン */}
-        <button
-          type="button"
-          title={filterActive ? 'フィルタモード（クリックで検索モードに切替）' : '検索モード（クリックでフィルタモードに切替）'}
-          aria-pressed={filterActive}
-          onClick={() => setFilterActive(f => !f)}
-          style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${filterActive ? '#1a73e8' : '#e0e0e0'}`, borderRadius: 8, background: filterActive ? '#e8f0fe' : 'rgba(255,255,255,0.95)', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
-        >
-          {/* Material Icons: filter_list */}
-          <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill={filterActive ? '#1a73e8' : '#888'}>
-            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
-          </svg>
-        </button>
         </div>{/* end Row 1 flex */}
 
         {/* Dropdown */}
