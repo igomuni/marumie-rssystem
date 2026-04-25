@@ -602,14 +602,12 @@ export default function RealDataSankeyPage() {
         if (failSpending || failName) excluded.add(n.id);
       }
     }
-    // 支出先フィルタが有効な場合、残存支出先のない事業も除外する
-    // （filterTopNが予算額順に事業を選ぶため、小額支出先の事業が選ばれない問題を防ぐ）
-    const recipientFilterActive = hasSpending || (hasName && (filterTarget === 'recipient' || filterTarget === 'all'));
-    if (recipientFilterActive) {
+    // Pass 2: 支出先フィルタが有効な場合、残存支出先のない事業を除外（recipient → project のカスケード）
+    if (hasSpending || (hasName && (filterTarget === 'recipient' || filterTarget === 'all'))) {
       const projectsWithSurvivingRecipients = new Set(
         graphData.edges
           .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
-          .map(e => e.source) // project-spending IDs
+          .map(e => e.source)
       );
       for (const [pid, sn] of spendingByPid) {
         if (!excluded.has(sn.id) && !projectsWithSurvivingRecipients.has(sn.id)) {
@@ -617,6 +615,17 @@ export default function RealDataSankeyPage() {
           const bn = budgetByPid.get(pid);
           if (bn) excluded.add(bn.id);
         }
+      }
+    }
+    // Pass 3: 残存事業のない省庁を除外（project → ministry のカスケード）
+    const ministriesWithSurvivingProjects = new Set(
+      graphData.edges
+        .filter(e => !excluded.has(e.source) && !excluded.has(e.target) && e.target.startsWith('project-budget-'))
+        .map(e => e.source)
+    );
+    for (const n of graphData.nodes) {
+      if (n.type === 'ministry' && !n.aggregated && !excluded.has(n.id)) {
+        if (!ministriesWithSurvivingProjects.has(n.id)) excluded.add(n.id);
       }
     }
     return excluded.size > 0 ? excluded : null;
