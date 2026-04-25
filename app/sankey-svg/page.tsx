@@ -2222,146 +2222,137 @@ export default function RealDataSankeyPage() {
       >
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
-        {/* 検索セクション: input panel + sliders + toggle（TopNパネルと同じ構造） */}
-        <div style={{ flex: 1, position: 'relative' }}>
-          {/* Input panel — border/bg/shadow をここで管理 */}
-          <div style={{ position: 'relative', background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: showAmountSliders ? '8px 8px 0 0' : '8px 8px 0 8px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
-            {/* Search icon */}
-            <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999"
-              style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-            </svg>
-            <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={e => { setSearchQuery(e.target.value); if (!filterActive) setShowSearchResults(true); setSearchCursorIndex(-1); }}
-              onFocus={() => { const q = debouncedQuery.trim(); if (meetsSearchMinLength(q)) setShowSearchResults(true); }}
-              onKeyDown={e => {
-                if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
-                if (!showSearchResults || searchPagedResults.length === 0) return;
-                if (e.key === 'ArrowDown') {
-                  e.preventDefault();
-                  setSearchCursorIndex(i => {
-                    const next = Math.min(i + 1, searchPagedResults.length - 1);
-                    setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
-                    return next;
-                  });
-                } else if (e.key === 'ArrowUp') {
-                  e.preventDefault();
-                  setSearchCursorIndex(i => {
-                    const next = Math.max(i - 1, 0);
-                    setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
-                    return next;
-                  });
-                } else if (e.key === 'Enter') {
-                  e.preventDefault();
-                  if (searchCursorIndex >= 0 && searchCursorIndex < searchPagedResults.length) {
-                    handleSearchSelect(searchPagedResults[searchCursorIndex].id);
-                    setSearchCursorIndex(-1);
+        {/* 検索セクション: input card（内部にsliders）+ toggle（TopNと同じ構造） */}
+        <div style={{ flex: 1 }}>
+          {/* Card: input + optional sliders（TopNのパネルdivに相当） */}
+          <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
+            {/* Input row */}
+            <div style={{ position: 'relative' }}>
+              {/* Search icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999"
+                style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={e => { setSearchQuery(e.target.value); if (!filterActive) setShowSearchResults(true); setSearchCursorIndex(-1); }}
+                onFocus={() => { const q = debouncedQuery.trim(); if (meetsSearchMinLength(q)) setShowSearchResults(true); }}
+                onKeyDown={e => {
+                  if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
+                  if (!showSearchResults || searchPagedResults.length === 0) return;
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setSearchCursorIndex(i => {
+                      const next = Math.min(i + 1, searchPagedResults.length - 1);
+                      setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
+                      return next;
+                    });
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setSearchCursorIndex(i => {
+                      const next = Math.max(i - 1, 0);
+                      setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
+                      return next;
+                    });
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (searchCursorIndex >= 0 && searchCursorIndex < searchPagedResults.length) {
+                      handleSearchSelect(searchPagedResults[searchCursorIndex].id);
+                      setSearchCursorIndex(-1);
+                    }
                   }
-                }
-              }}
-              placeholder={filterActive ? '支出先名フィルタ（2文字以上）' : 'ノード検索（2文字以上／PIDは1文字〜）'}
-              style={{
-                width: '100%', boxSizing: 'border-box',
-                paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
-                fontSize: 13, border: 'none', borderRadius: 8,
-                background: 'transparent', outline: 'none', color: '#333',
-              }}
-            />
-            {/* .* regex toggle */}
-            <button
-              type="button"
-              title={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
-              aria-label={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
-              aria-pressed={searchUseRegex}
-              onClick={() => setSearchUseRegex(v => !v)}
-              style={{
-                position: 'absolute', right: searchQuery ? 30 : 6, top: '50%', transform: 'translateY(-50%)',
-                background: searchUseRegex ? '#1a73e8' : 'transparent',
-                border: 'none', borderRadius: 4, cursor: 'pointer',
-                color: searchUseRegex ? '#fff' : '#888',
-                fontSize: 11, fontFamily: 'monospace', fontWeight: 'bold',
-                lineHeight: 1, padding: '2px 4px',
-              }}
-            >.*</button>
-            {searchQuery && (
+                }}
+                placeholder={filterActive ? '支出先名フィルタ（2文字以上）' : 'ノード検索（2文字以上／PIDは1文字〜）'}
+                style={{
+                  width: '100%', boxSizing: 'border-box',
+                  paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
+                  fontSize: 13, border: 'none', borderRadius: 8,
+                  background: 'transparent', outline: 'none', color: '#333',
+                }}
+              />
+              {/* .* regex toggle */}
               <button
                 type="button"
-                onClick={() => { setSearchQuery(''); setDebouncedQuery(''); setShowSearchResults(false); searchInputRef.current?.focus(); }}
-                style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
-              >✕</button>
+                title={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
+                aria-label={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
+                aria-pressed={searchUseRegex}
+                onClick={() => setSearchUseRegex(v => !v)}
+                style={{
+                  position: 'absolute', right: searchQuery ? 30 : 6, top: '50%', transform: 'translateY(-50%)',
+                  background: searchUseRegex ? '#1a73e8' : 'transparent',
+                  border: 'none', borderRadius: 4, cursor: 'pointer',
+                  color: searchUseRegex ? '#fff' : '#888',
+                  fontSize: 11, fontFamily: 'monospace', fontWeight: 'bold',
+                  lineHeight: 1, padding: '2px 4px',
+                }}
+              >.*</button>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => { setSearchQuery(''); setDebouncedQuery(''); setShowSearchResults(false); searchInputRef.current?.focus(); }}
+                  style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
+                >✕</button>
+              )}
+            </div>{/* end input row */}
+
+            {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
+            {showAmountSliders && (
+              <div style={{ borderTop: '1px solid #e8e8e8', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { label: '予算', min: filterMinBudget, max: filterMaxBudget, dataMax: graphDataStats.maxBudget, setMin: setFilterMinBudget, setMax: setFilterMaxBudget },
+                  { label: '支出', min: filterMinSpending, max: filterMaxSpending, dataMax: graphDataStats.maxSpending, setMin: setFilterMinSpending, setMax: setFilterMaxSpending },
+                ].map(({ label, min, max, dataMax, setMin, setMax }) => (
+                  <div key={label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: '#444' }}>{label}</span>
+                      {(min > 0 || max !== null) && (
+                        <button type="button" onClick={() => { setMin(0); setMax(null); }}
+                          style={{ fontSize: 10, color: '#1a73e8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>リセット</button>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                      <span style={{ fontSize: 10, color: '#777', width: 22, flexShrink: 0 }}>下限</span>
+                      <input type="range" min={0} max={dataMax} step={Math.max(1, Math.floor(dataMax / 500))}
+                        value={min}
+                        onChange={e => { const v = Number(e.target.value); setMin(v); if (max !== null && v > max) setMax(v); }}
+                        style={{ flex: 1, accentColor: '#1a73e8' }}
+                      />
+                      <span style={{ fontSize: 10, color: min > 0 ? '#1a73e8' : '#aaa', width: 64, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                        {min === 0 ? '制限なし' : formatOkuYen(min)}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 10, color: '#777', width: 22, flexShrink: 0 }}>上限</span>
+                      <input type="range" min={0} max={dataMax} step={Math.max(1, Math.floor(dataMax / 500))}
+                        value={max ?? dataMax}
+                        onChange={e => { const v = Number(e.target.value); const next = v >= dataMax ? null : v; setMax(next); if (next !== null && next < min) setMin(next); }}
+                        style={{ flex: 1, accentColor: '#1a73e8' }}
+                      />
+                      <span style={{ fontSize: 10, color: max !== null ? '#1a73e8' : '#aaa', width: 64, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                        {max === null ? '制限なし' : formatOkuYen(max)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </div>{/* end input panel */}
+          </div>{/* end card */}
 
-          {/* 金額フィルタパネル（showAmountSliders=true のとき表示、input panelに連結） */}
-          {showAmountSliders && (
-            <div style={{ marginTop: -1, background: 'rgba(255,255,255,0.97)', border: '1px solid #e0e0e0', borderTop: 'none', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { label: '予算', min: filterMinBudget, max: filterMaxBudget, dataMax: graphDataStats.maxBudget, setMin: setFilterMinBudget, setMax: setFilterMaxBudget },
-                { label: '支出', min: filterMinSpending, max: filterMaxSpending, dataMax: graphDataStats.maxSpending, setMin: setFilterMinSpending, setMax: setFilterMaxSpending },
-              ].map(({ label, min, max, dataMax, setMin, setMax }) => (
-                <div key={label}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#444' }}>{label}</span>
-                    {(min > 0 || max !== null) && (
-                      <button type="button" onClick={() => { setMin(0); setMax(null); }}
-                        style={{ fontSize: 10, color: '#1a73e8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>リセット</button>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                    <span style={{ fontSize: 10, color: '#777', width: 22, flexShrink: 0 }}>下限</span>
-                    <input type="range" min={0} max={dataMax} step={Math.max(1, Math.floor(dataMax / 500))}
-                      value={min}
-                      onChange={e => { const v = Number(e.target.value); setMin(v); if (max !== null && v > max) setMax(v); }}
-                      style={{ flex: 1, accentColor: '#1a73e8' }}
-                    />
-                    <span style={{ fontSize: 10, color: min > 0 ? '#1a73e8' : '#aaa', width: 64, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                      {min === 0 ? '制限なし' : formatOkuYen(min)}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 10, color: '#777', width: 22, flexShrink: 0 }}>上限</span>
-                    <input type="range" min={0} max={dataMax} step={Math.max(1, Math.floor(dataMax / 500))}
-                      value={max ?? dataMax}
-                      onChange={e => { const v = Number(e.target.value); const next = v >= dataMax ? null : v; setMax(next); if (next !== null && next < min) setMin(next); }}
-                      style={{ flex: 1, accentColor: '#1a73e8' }}
-                    />
-                    <span style={{ fontSize: 10, color: max !== null ? '#1a73e8' : '#aaa', width: 64, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
-                      {max === null ? '制限なし' : formatOkuYen(max)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* トグルボタン — sliders表示時: パネル下部full-width / 非表示時: 右下コーナータブ */}
+          {/* トグルボタン（card外・下部 — TopNの構造と同一） */}
           {(() => {
             const amountActive = filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null;
-            const borderColor = amountActive ? '#1a73e8' : '#e0e0e0';
-            const bg = amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)';
-            const fill = amountActive ? '#1a73e8' : '#bbb';
-            if (showAmountSliders) {
-              return (
-                <button type="button" title="金額フィルタ を隠す" aria-pressed={true}
-                  onClick={() => setShowAmountSliders(s => !s)}
-                  style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', background: bg, border: `1px solid ${borderColor}`, borderTop: 'none', borderRadius: '0 0 8px 8px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill={fill}>
-                    <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
-                  </svg>
-                </button>
-              );
-            }
             return (
-              <button type="button" title="金額フィルタ を表示" aria-pressed={false}
+              <button
+                type="button"
+                title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
+                aria-pressed={showAmountSliders}
                 onClick={() => setShowAmountSliders(s => !s)}
-                style={{ position: 'absolute', bottom: 0, right: 0, transform: 'translateY(100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: bg, border: 'none', borderRight: `1px solid ${borderColor}`, borderBottom: `1px solid ${borderColor}`, borderRadius: '0 0 8px 0', cursor: 'pointer', padding: '1px 8px', userSelect: 'none' }}
+                style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)', border: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderTop: 'none', borderRadius: '0 0 8px 8px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill={fill}>
-                  <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+                <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill={amountActive ? '#1a73e8' : '#bbb'}>
+                  <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
                 </svg>
               </button>
             );
