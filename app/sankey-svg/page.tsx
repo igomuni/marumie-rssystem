@@ -585,6 +585,9 @@ export default function RealDataSankeyPage() {
     const spendingByPid = new Map(
       graphData.nodes.filter(n => n.type === 'project-spending' && n.projectId != null).map(n => [n.projectId!, n])
     );
+    const budgetByPid = new Map(
+      graphData.nodes.filter(n => n.type === 'project-budget' && n.projectId != null).map(n => [n.projectId!, n])
+    );
     for (const n of graphData.nodes) {
       if (n.aggregated) continue;
       if (n.type === 'project-budget' && n.projectId != null) {
@@ -597,6 +600,23 @@ export default function RealDataSankeyPage() {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
         const failName = hasName && (filterTarget === 'recipient' || filterTarget === 'all') && !matchesName(n.name);
         if (failSpending || failName) excluded.add(n.id);
+      }
+    }
+    // 支出先フィルタが有効な場合、残存支出先のない事業も除外する
+    // （filterTopNが予算額順に事業を選ぶため、小額支出先の事業が選ばれない問題を防ぐ）
+    const recipientFilterActive = hasSpending || (hasName && (filterTarget === 'recipient' || filterTarget === 'all'));
+    if (recipientFilterActive) {
+      const projectsWithSurvivingRecipients = new Set(
+        graphData.edges
+          .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
+          .map(e => e.source) // project-spending IDs
+      );
+      for (const [pid, sn] of spendingByPid) {
+        if (!excluded.has(sn.id) && !projectsWithSurvivingRecipients.has(sn.id)) {
+          excluded.add(sn.id);
+          const bn = budgetByPid.get(pid);
+          if (bn) excluded.add(bn.id);
+        }
       }
     }
     return excluded.size > 0 ? excluded : null;
