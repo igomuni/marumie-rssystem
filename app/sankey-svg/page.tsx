@@ -118,7 +118,7 @@ function parseAmountToYen(s: string): number | null {
   if (unit.startsWith('億')) return n * 1e8;
   if (unit.startsWith('万')) return n * 1e4;
   if (unit === '円') return n;
-  return n; // 単位なし → 1円単位
+  return n * 1e8; // 単位なし → 億円換算
 }
 
 function computeFocusPins(
