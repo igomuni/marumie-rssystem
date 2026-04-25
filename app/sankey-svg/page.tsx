@@ -570,7 +570,7 @@ export default function RealDataSankeyPage() {
     const hasBudget = minBudgetYen !== null || maxBudgetYen !== null;
     const hasSpending = minSpendingYen !== null || maxSpendingYen !== null;
     const trimmedQuery = debouncedQuery.trim();
-    const hasName = filterActive && trimmedQuery.length >= 2;
+    const hasName = filterActive && trimmedQuery.length >= 1;
     if (!hasBudget && !hasSpending && !hasName) return null;
     const minBudget = minBudgetYen ?? 0;
     const maxBudget = maxBudgetYen ?? Infinity;
@@ -2383,7 +2383,7 @@ export default function RealDataSankeyPage() {
                     }
                   }
                 }}
-                placeholder={filterActive ? 'フィルタ(2文字以上)' : '検索(2文字以上/PID)'}
+                placeholder={filterActive ? 'フィルタ' : '検索(2文字以上/PID)'}
                 style={{
                   width: '100%', boxSizing: 'border-box',
                   paddingLeft: filterActive ? 90 : 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
