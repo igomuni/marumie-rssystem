@@ -203,6 +203,7 @@ export default function RealDataSankeyPage() {
     if (parsed.projectSortBy !== undefined) setProjectSortBy(parsed.projectSortBy);
     if (parsed.scaleBudgetToVisible !== undefined) setScaleBudgetToVisible(parsed.scaleBudgetToVisible);
     if (parsed.focusRelated !== undefined) setFocusRelated(parsed.focusRelated);
+    if (parsed.autoFocusRelated !== undefined) setAutoFocusRelated(parsed.autoFocusRelated);
     if (parsed.year !== undefined) setYear(parsed.year);
     // Restore zoom only when no sel= (focusOnNeighborhood will handle zoom for sel= case)
     if (parsed.zoom !== undefined && parsed.selectedNodeId === undefined) {
@@ -236,7 +237,7 @@ export default function RealDataSankeyPage() {
       setProjectSortBy(parsed.projectSortBy ?? 'budget');
       setScaleBudgetToVisible(parsed.scaleBudgetToVisible ?? true);
       setFocusRelated(parsed.focusRelated ?? false);
-      setAutoFocusRelated(parsed.autoFocusRelated ?? false);
+      setAutoFocusRelated(parsed.autoFocusRelated ?? true);
       if (parsed.year !== undefined) setYear(parsed.year);
       if (parsed.selectedNodeId) pendingResetViewport.current = true;
     };
@@ -267,7 +268,7 @@ export default function RealDataSankeyPage() {
     if (projectSortBy === 'spending') p.set('ps', 's');
     if (!scaleBudgetToVisible) p.set('sb', '0');
     if (focusRelated) p.set('fr', '1');
-    if (autoFocusRelated) p.set('afr', '1');
+    if (!autoFocusRelated) p.set('afr', '0');
     if (year !== '2025') p.set('yr', year);
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
@@ -633,11 +634,13 @@ export default function RealDataSankeyPage() {
   // Global project rank (0-indexed) — for projectOffset jump
   const allProjectRanks = useMemo(() => {
     if (!graphData) return new Map<string, number>();
-    const budgetValues = new Map<string | undefined, number>(
-      graphData.nodes.filter(n => n.type === 'project-budget').map(n => [`project-spending-${n.projectId}`, n.value] as const)
+    const budgetValues = new Map<string, number>(
+      graphData.nodes
+        .filter(n => n.type === 'project-budget' && n.projectId != null)
+        .map(n => [`project-spending-${n.projectId}`, n.value] as const)
     );
     const ranked = graphData.nodes
-      .filter(n => n.type === 'project-spending' && n.value > 0)
+      .filter(n => n.type === 'project-spending' && (includeZeroSpending || n.value > 0))
       .sort((a, b) => {
         if (projectSortBy === 'budget') {
           const ba = budgetValues.get(a.id) ?? 0;
@@ -647,7 +650,7 @@ export default function RealDataSankeyPage() {
         return b.value - a.value;
       });
     return new Map(ranked.map((n, i) => [n.id, i]));
-  }, [graphData, projectSortBy]);
+  }, [graphData, projectSortBy, includeZeroSpending]);
 
   // Recipient count per project-spending node (from raw graphData)
   const projectRecipientCount = useMemo(() => {
