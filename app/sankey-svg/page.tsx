@@ -2417,16 +2417,15 @@ export default function RealDataSankeyPage() {
 
           {/* トグルボタン（card外・下部 — TopNの構造と同一） */}
           {(() => {
-            const amountActive = !!(filterMinBudgetText || filterMaxBudgetText || filterMinSpendingText || filterMaxSpendingText);
             return (
               <button
                 type="button"
                 title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
                 aria-pressed={showAmountSliders}
                 onClick={() => setShowAmountSliders(s => !s)}
-                style={{ alignSelf: 'flex-end', display: 'flex', alignItems: 'center', justifyContent: 'center', background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)', borderTop: 'none', borderLeft: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderRight: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderBottom: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
+                style={{ alignSelf: 'flex-end', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', borderTop: 'none', borderLeft: '1px solid #e0e0e0', borderRight: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill={amountActive ? '#1a73e8' : '#bbb'}>
+                <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
                   <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
                 </svg>
               </button>
