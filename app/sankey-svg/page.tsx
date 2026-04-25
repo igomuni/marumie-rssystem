@@ -520,11 +520,17 @@ export default function RealDataSankeyPage() {
     if (!filterActive || !graphData) return null;
     const hasBudget = filterMinBudget > 0 || filterMaxBudget !== null;
     const hasSpending = filterMinSpending > 0 || filterMaxSpending !== null;
-    if (!hasBudget && !hasSpending) return null;
+    const trimmedQuery = debouncedQuery.trim();
+    const hasName = trimmedQuery.length >= 2;
+    if (!hasBudget && !hasSpending && !hasName) return null;
     const minBudgetYen = filterMinBudget * 1e8;
     const maxBudgetYen = filterMaxBudget !== null ? filterMaxBudget * 1e8 : Infinity;
     const minSpendingYen = filterMinSpending * 1e8;
     const maxSpendingYen = filterMaxSpending !== null ? filterMaxSpending * 1e8 : Infinity;
+    let nameRegex: RegExp | null = null;
+    if (hasName && searchUseRegex) {
+      try { nameRegex = new RegExp(trimmedQuery, 'i'); } catch { /* invalid regex — treat as no name filter */ }
+    }
     const excluded = new Set<string>();
     const spendingByPid = new Map(
       graphData.nodes.filter(n => n.type === 'project-spending' && n.projectId != null).map(n => [n.projectId!, n])
@@ -537,11 +543,13 @@ export default function RealDataSankeyPage() {
         const failSpending = hasSpending && sn && (sn.value < minSpendingYen || sn.value > maxSpendingYen);
         if (failBudget || failSpending) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
-        if (hasSpending && (n.value < minSpendingYen || n.value > maxSpendingYen)) excluded.add(n.id);
+        const failSpending = hasSpending && (n.value < minSpendingYen || n.value > maxSpendingYen);
+        const failName = hasName && (nameRegex ? !nameRegex.test(n.name) : !n.name.includes(trimmedQuery));
+        if (failSpending || failName) excluded.add(n.id);
       }
     }
     return excluded.size > 0 ? excluded : null;
-  }, [graphData, filterActive, filterMinBudget, filterMaxBudget, filterMinSpending, filterMaxSpending]);
+  }, [graphData, filterActive, filterMinBudget, filterMaxBudget, filterMinSpending, filterMaxSpending, debouncedQuery, searchUseRegex]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -2223,7 +2231,7 @@ export default function RealDataSankeyPage() {
             ref={searchInputRef}
             type="text"
             value={searchQuery}
-            onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); setSearchCursorIndex(-1); }}
+            onChange={e => { setSearchQuery(e.target.value); if (!filterActive) setShowSearchResults(true); setSearchCursorIndex(-1); }}
             onFocus={() => { const q = debouncedQuery.trim(); if (meetsSearchMinLength(q)) setShowSearchResults(true); }}
             onKeyDown={e => {
               if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
@@ -2250,7 +2258,7 @@ export default function RealDataSankeyPage() {
                 }
               }
             }}
-            placeholder="ノード検索（2文字以上／PIDは1文字〜）"
+            placeholder={filterActive ? '支出先名フィルタ（2文字以上）' : 'ノード検索（2文字以上／PIDは1文字〜）'}
             style={{
               width: '100%', boxSizing: 'border-box',
               paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
@@ -2288,7 +2296,7 @@ export default function RealDataSankeyPage() {
         {/* フィルタアイコンボタン */}
         <button
           type="button"
-          title={filterActive ? 'フィルタ ON（クリックでOFF）' : 'フィルタ OFF（クリックでON）'}
+          title={filterActive ? 'フィルタモード（クリックで検索モードに切替）' : '検索モード（クリックでフィルタモードに切替）'}
           aria-pressed={filterActive}
           onClick={() => setFilterActive(f => !f)}
           style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${filterActive ? '#1a73e8' : '#e0e0e0'}`, borderRadius: 8, background: filterActive ? '#e8f0fe' : 'rgba(255,255,255,0.95)', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
@@ -2300,22 +2308,7 @@ export default function RealDataSankeyPage() {
         </button>
         </div>{/* end Row 1 flex */}
 
-        {/* Row 2: TopN設定 表示トグルボタン */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 3 }}>
-          <button
-            type="button"
-            onClick={() => setShowTopNSliders(s => !s)}
-            title={showTopNSliders ? 'TopN・オフセット設定 を隠す' : 'TopN・オフセット設定 を表示'}
-            style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'rgba(255,255,255,0.92)', border: '1px solid #e0e0e0', borderRadius: 6, cursor: 'pointer', padding: '2px 7px', fontSize: 11, color: '#666', userSelect: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.07)' }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#999">
-              <path d={showTopNSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
-            </svg>
-            TopN・オフセット
-          </button>
-        </div>
-
-        {/* Row 3: フィルタパネル（filterActive=true のとき表示） */}
+        {/* Row 2: フィルタパネル（filterActive=true のとき表示） */}
         {filterActive && (
           <div style={{ marginTop: 4, background: 'rgba(255,255,255,0.97)', border: `1px solid #c5d8f8`, borderRadius: 8, padding: '10px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {/* ── 予算フィルタ ── */}
@@ -2361,7 +2354,7 @@ export default function RealDataSankeyPage() {
         )}
 
         {/* Dropdown */}
-        {showSearchResults && searchResults.length > 0 && (
+        {!filterActive && showSearchResults && searchResults.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
             {/* Count header */}
             <div style={{ padding: '5px 10px', fontSize: 11, color: '#999', borderBottom: '1px solid #f0f0f0' }}>
@@ -2397,7 +2390,7 @@ export default function RealDataSankeyPage() {
           </div>
         )}
         {/* No results */}
-        {showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
+        {!filterActive && showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
