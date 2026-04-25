@@ -2330,7 +2330,7 @@ export default function RealDataSankeyPage() {
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
         {/* 検索セクション: input card（内部にsliders）+ toggle（TopNと同じ構造） */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           {/* Card: input + optional sliders（TopNのパネルdivに相当） */}
           <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: '8px 8px 0 0', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
             {/* Input row */}
@@ -2441,7 +2441,7 @@ export default function RealDataSankeyPage() {
                     )}
                   </div>
                 ))}
-                <div style={{ fontSize: 10, color: '#bbb' }}>例: 1.26億 / 4567万円 / 1兆2000億</div>
+                <div style={{ fontSize: 10, color: '#bbb', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>例: 1.26億 / 4567万円 / 1兆2000億</div>
               </div>
             )}
           </div>{/* end card */}
