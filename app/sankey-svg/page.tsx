@@ -147,6 +147,7 @@ export default function RealDataSankeyPage() {
   const [searchPage, setSearchPage] = useState(0);
   // Filter feature
   const [filterActive, setFilterActive] = useState(false);
+  const [showAmountSliders, setShowAmountSliders] = useState(false);
   const [filterMinBudget, setFilterMinBudget] = useState(0);        // 億円; 0 = no min
   const [filterMaxBudget, setFilterMaxBudget] = useState<number | null>(null); // null = no max
   const [filterMinSpending, setFilterMinSpending] = useState(0);    // 億円; 0 = no min
@@ -517,11 +518,11 @@ export default function RealDataSankeyPage() {
 
   // Pre-filter exclusion set: built from filter conditions, applied before filterTopN
   const filterExcludedIds = useMemo(() => {
-    if (!filterActive || !graphData) return null;
+    if (!graphData) return null;
     const hasBudget = filterMinBudget > 0 || filterMaxBudget !== null;
     const hasSpending = filterMinSpending > 0 || filterMaxSpending !== null;
     const trimmedQuery = debouncedQuery.trim();
-    const hasName = trimmedQuery.length >= 2;
+    const hasName = filterActive && trimmedQuery.length >= 2;
     if (!hasBudget && !hasSpending && !hasName) return null;
     const minBudgetYen = filterMinBudget * 1e8;
     const maxBudgetYen = filterMaxBudget !== null ? filterMaxBudget * 1e8 : Infinity;
@@ -2306,10 +2307,23 @@ export default function RealDataSankeyPage() {
             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
           </svg>
         </button>
+        {/* 金額スライダー表示トグルボタン */}
+        <button
+          type="button"
+          title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
+          aria-pressed={showAmountSliders}
+          onClick={() => setShowAmountSliders(s => !s)}
+          style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${(filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null) ? '#1a73e8' : '#e0e0e0'}`, borderRadius: 8, background: (filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null) ? '#e8f0fe' : 'rgba(255,255,255,0.95)', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
+        >
+          {/* Material Icons: tune */}
+          <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill={(filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null) ? '#1a73e8' : '#888'}>
+            <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/>
+          </svg>
+        </button>
         </div>{/* end Row 1 flex */}
 
-        {/* Row 2: フィルタパネル（filterActive=true のとき表示） */}
-        {filterActive && (
+        {/* Row 2: 金額フィルタパネル（showAmountSliders=true のとき表示） */}
+        {showAmountSliders && (
           <div style={{ marginTop: 4, background: 'rgba(255,255,255,0.97)', border: `1px solid #c5d8f8`, borderRadius: 8, padding: '10px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', gap: 10 }}>
             {/* ── 予算フィルタ ── */}
             {[
