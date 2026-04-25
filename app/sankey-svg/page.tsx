@@ -989,6 +989,21 @@ export default function RealDataSankeyPage() {
         const rank = allRecipientRanks.get(bestRecipientId);
         if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
       }
+    } else if (projectOffsetModeActive && nodeId.startsWith('r-') && graphData) {
+      // Recipient in project offset mode: find parent project and jump offset so the project (and recipient) become visible
+      let parentSpendingId: string | null = null;
+      let bestEdgeValue = -1;
+      for (const e of graphData.edges) {
+        if (e.target === nodeId && e.source.startsWith('project-spending-') && e.value > bestEdgeValue) {
+          bestEdgeValue = e.value;
+          parentSpendingId = e.source;
+        }
+      }
+      if (parentSpendingId !== null) {
+        const rank = allProjectRanks.get(parentSpendingId);
+        if (rank !== undefined) jumpToProjectRank(rank);
+      }
+      setPinnedProjectId(null);
     } else if (projectOffsetModeActive && (nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-'))) {
       // Project offset mode: jump projectOffset window so the target project is visible
       const spendingId = nodeId.startsWith('project-budget-')
