@@ -2383,7 +2383,7 @@ export default function RealDataSankeyPage() {
                     }
                   }
                 }}
-                placeholder="検索(2文字以上/PID)"
+                placeholder={filterActive ? 'フィルタ(2文字以上)' : '検索(2文字以上/PID)'}
                 style={{
                   width: '100%', boxSizing: 'border-box',
                   paddingLeft: filterActive ? 90 : 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
