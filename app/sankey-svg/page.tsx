@@ -2223,7 +2223,7 @@ export default function RealDataSankeyPage() {
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
         {/* 検索セクション: input card（内部にsliders）+ toggle（TopNと同じ構造） */}
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Card: input + optional sliders（TopNのパネルdivに相当） */}
           <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: '8px 8px 0 0', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
             {/* Input row */}
@@ -2349,7 +2349,7 @@ export default function RealDataSankeyPage() {
                 title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
                 aria-pressed={showAmountSliders}
                 onClick={() => setShowAmountSliders(s => !s)}
-                style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)', border: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderTop: 'none', borderRadius: '0 0 8px 8px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
+                style={{ alignSelf: 'flex-end', display: 'flex', alignItems: 'center', justifyContent: 'center', background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)', border: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderTop: 'none', borderRadius: '0 0 8px 0', cursor: 'pointer', padding: '0 8px', marginTop: -1, userSelect: 'none' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill={amountActive ? '#1a73e8' : '#bbb'}>
                   <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
