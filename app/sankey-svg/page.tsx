@@ -2342,7 +2342,7 @@ export default function RealDataSankeyPage() {
                     }
                   }
                 }}
-                placeholder={filterActive ? '支出先名フィルタ（2文字以上）' : 'ノード検索（2文字以上／PIDは1文字〜）'}
+                placeholder="検索(2文字以上/PID)"
                 style={{
                   width: '100%', boxSizing: 'border-box',
                   paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
