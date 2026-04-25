@@ -2332,7 +2332,7 @@ export default function RealDataSankeyPage() {
         {/* 検索セクション: input card（内部にsliders）+ toggle（TopNと同じ構造） */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Card: input + optional sliders（TopNのパネルdivに相当） */}
-          <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: '8px 8px 0 0', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
+          <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: '8px 8px 0 0', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
             {/* Input row */}
             <div style={{ position: 'relative' }}>
               {/* Search icon */}
