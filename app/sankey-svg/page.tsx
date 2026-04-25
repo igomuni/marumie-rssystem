@@ -118,7 +118,7 @@ function parseAmountToYen(s: string): number | null {
   if (unit.startsWith('億')) return n * 1e8;
   if (unit.startsWith('万')) return n * 1e4;
   if (unit === '円') return n;
-  return n * 1e8; // 単位なし → 億円換算
+  return n; // 単位なし → 1円単位
 }
 
 function computeFocusPins(
@@ -2397,12 +2397,12 @@ export default function RealDataSankeyPage() {
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>{label}</span>
                     <input type="text" value={minText} onChange={e => setMin(e.target.value)}
-                      placeholder="下限"
+                      placeholder="例: 100億、50万円"
                       style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
                     />
                     <span style={{ fontSize: 11, color: '#aaa', flexShrink: 0 }}>〜</span>
                     <input type="text" value={maxText} onChange={e => setMax(e.target.value)}
-                      placeholder="上限"
+                      placeholder="例: 1兆、500億"
                       style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToYen(maxText) !== null || !maxText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
                     />
                     {(minText || maxText) && (
