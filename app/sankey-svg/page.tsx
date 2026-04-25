@@ -593,9 +593,8 @@ export default function RealDataSankeyPage() {
       if (n.type === 'project-budget' && n.projectId != null) {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
-        const failSpending = hasSpending && sn && (sn.value < minSpending || sn.value > maxSpending);
         const failName = hasName && (filterTarget === 'project' || filterTarget === 'all') && !matchesName(n.name);
-        if (failBudget || failSpending || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
+        if (failBudget || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
         const failName = hasName && (filterTarget === 'recipient' || filterTarget === 'all') && !matchesName(n.name);
