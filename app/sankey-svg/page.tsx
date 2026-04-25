@@ -999,8 +999,14 @@ export default function RealDataSankeyPage() {
       }
     } else if (projectOffsetModeActive && nodeId.startsWith('r-') && graphData) {
       // Recipient in project offset mode: resolve parent project and jump offset to it.
-      // Prefer pinnedContextProjectId (the project the user was exploring) over max-flow fallback.
-      let parentSpendingId: string | null = pinnedContextProjectId.current;
+      // Prefer pinnedContextProjectId (the project the user was exploring), but only if it
+      // actually parents this recipient (guards against stale ref from a different flow).
+      let parentSpendingId: string | null = null;
+      const ctxId = pinnedContextProjectId.current;
+      pinnedContextProjectId.current = null;
+      if (ctxId && graphData.edges.some(e => e.target === nodeId && e.source === ctxId)) {
+        parentSpendingId = ctxId;
+      }
       if (!parentSpendingId) {
         let bestEdgeValue = -1;
         for (const e of graphData.edges) {
@@ -1010,7 +1016,6 @@ export default function RealDataSankeyPage() {
           }
         }
       }
-      pinnedContextProjectId.current = null;
       if (parentSpendingId !== null) {
         const rank = allProjectRanks.get(parentSpendingId);
         if (rank !== undefined) jumpToProjectRank(rank);
