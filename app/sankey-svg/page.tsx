@@ -151,6 +151,9 @@ export default function RealDataSankeyPage() {
   const pendingFocusId = useRef<string | null>(null);
   const pendingResetViewport = useRef<boolean>(false);
   const pendingConnectionNodeId = useRef<string | null>(null);
+  // focusRelated ON中に事業をピンしたときのコンテキスト事業ID
+  // projectOffsetMode + r-* 選択後にfocusRelated=OFFしたとき、親事業の特定に使う
+  const pinnedContextProjectId = useRef<string | null>(null);
   // Zoom URL state
   const urlRestoredZoomRef = useRef<number | null>(null); // zoom to restore on first layout (no sel= case)
   const zoomRef = useRef(1);                              // always-current zoom for debounce callbacks
@@ -942,6 +945,7 @@ export default function RealDataSankeyPage() {
             ? pinnedProjectId
             : null;
       if (focusRelated && derivedPinnedId !== null) { setPinnedRecipientId(null); setPinnedMinistryName(null); }
+      if (focusRelated && nextPinnedProjectId) pinnedContextProjectId.current = nextPinnedProjectId;
       const needsDeferredFocus = nextPinnedProjectId !== pinnedProjectId || isPanelCollapsed;
       setPinnedProjectId(nextPinnedProjectId);
       if (needsDeferredFocus) pendingFocusId.current = nodeId;
@@ -966,6 +970,7 @@ export default function RealDataSankeyPage() {
       // focusRelated ON: 現在のフォーカスコンテキストをクリアして新しいノードに切り替える
       const pins = computeFocusPins(nodeId, graphData?.nodes);
       setPinnedProjectId(pins.pinnedProjectId); setPinnedRecipientId(pins.pinnedRecipientId); setPinnedMinistryName(pins.pinnedMinistryName);
+      if (pins.pinnedProjectId) pinnedContextProjectId.current = pins.pinnedProjectId;
     } else if (!projectOffsetModeActive && nodeId.startsWith('r-') && filtered) {
       // Recipient outside window: jump offset so it's visible (disabled in project offset mode)
       const rank = allRecipientRanks.get(nodeId);
@@ -990,18 +995,26 @@ export default function RealDataSankeyPage() {
         if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
       }
     } else if (projectOffsetModeActive && nodeId.startsWith('r-') && graphData) {
-      // Recipient in project offset mode: find parent project and jump offset so the project (and recipient) become visible
-      let parentSpendingId: string | null = null;
-      let bestEdgeValue = -1;
-      for (const e of graphData.edges) {
-        if (e.target === nodeId && e.source.startsWith('project-spending-') && e.value > bestEdgeValue) {
-          bestEdgeValue = e.value;
-          parentSpendingId = e.source;
+      // Recipient in project offset mode: resolve parent project and jump offset to it.
+      // Prefer pinnedContextProjectId (the project the user was exploring) over max-flow fallback.
+      let parentSpendingId: string | null = pinnedContextProjectId.current;
+      if (!parentSpendingId) {
+        let bestEdgeValue = -1;
+        for (const e of graphData.edges) {
+          if (e.target === nodeId && e.source.startsWith('project-spending-') && e.value > bestEdgeValue) {
+            bestEdgeValue = e.value;
+            parentSpendingId = e.source;
+          }
         }
       }
+      pinnedContextProjectId.current = null;
       if (parentSpendingId !== null) {
         const rank = allProjectRanks.get(parentSpendingId);
         if (rank !== undefined) jumpToProjectRank(rank);
+        setPinnedProjectId(null);
+        pendingFocusId.current = parentSpendingId;
+        selectNode(parentSpendingId);
+        return;
       }
       setPinnedProjectId(null);
     } else if (projectOffsetModeActive && (nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-'))) {
@@ -1047,6 +1060,7 @@ export default function RealDataSankeyPage() {
         setPinnedProjectId(pins.pinnedProjectId);
         setPinnedRecipientId(pins.pinnedRecipientId);
         setPinnedMinistryName(pins.pinnedMinistryName);
+        if (pins.pinnedProjectId) pinnedContextProjectId.current = pins.pinnedProjectId;
         setFocusRelated(true);
         pendingResetViewport.current = true;
         selectNode(newId);
@@ -2587,6 +2601,7 @@ export default function RealDataSankeyPage() {
                   setPinnedProjectId(pins.pinnedProjectId);
                   setPinnedRecipientId(pins.pinnedRecipientId);
                   setPinnedMinistryName(pins.pinnedMinistryName);
+                  if (pins.pinnedProjectId) pinnedContextProjectId.current = pins.pinnedProjectId;
                   pendingResetViewport.current = true;
                 } else if (!next) {
                   setPinnedProjectId(null);
