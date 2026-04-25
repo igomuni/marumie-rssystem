@@ -2223,9 +2223,9 @@ export default function RealDataSankeyPage() {
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
         {/* 検索セクション: input panel + sliders + toggle（TopNパネルと同じ構造） */}
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, position: 'relative' }}>
           {/* Input panel — border/bg/shadow をここで管理 */}
-          <div style={{ position: 'relative', background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
+          <div style={{ position: 'relative', background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: showAmountSliders ? '8px 8px 0 0' : '8px 8px 0 8px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
             {/* Search icon */}
             <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999"
               style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
@@ -2337,19 +2337,31 @@ export default function RealDataSankeyPage() {
             </div>
           )}
 
-          {/* トグルボタン（パネル外・下部 — TopNと同じ構造） */}
+          {/* トグルボタン — sliders表示時: パネル下部full-width / 非表示時: 右下コーナータブ */}
           {(() => {
             const amountActive = filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null;
+            const borderColor = amountActive ? '#1a73e8' : '#e0e0e0';
+            const bg = amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)';
+            const fill = amountActive ? '#1a73e8' : '#bbb';
+            if (showAmountSliders) {
+              return (
+                <button type="button" title="金額フィルタ を隠す" aria-pressed={true}
+                  onClick={() => setShowAmountSliders(s => !s)}
+                  style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', background: bg, border: `1px solid ${borderColor}`, borderTop: 'none', borderRadius: '0 0 8px 8px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill={fill}>
+                    <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
+                  </svg>
+                </button>
+              );
+            }
             return (
-              <button
-                type="button"
-                title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
-                aria-pressed={showAmountSliders}
+              <button type="button" title="金額フィルタ を表示" aria-pressed={false}
                 onClick={() => setShowAmountSliders(s => !s)}
-                style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center', background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)', border: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderTop: 'none', borderRadius: '0 0 8px 8px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
+                style={{ position: 'absolute', bottom: 0, right: 0, transform: 'translateY(100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: bg, border: 'none', borderRight: `1px solid ${borderColor}`, borderBottom: `1px solid ${borderColor}`, borderRadius: '0 0 8px 0', cursor: 'pointer', padding: '1px 8px', userSelect: 'none' }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill={amountActive ? '#1a73e8' : '#bbb'}>
-                  <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
+                <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill={fill}>
+                  <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
                 </svg>
               </button>
             );
