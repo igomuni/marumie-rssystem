@@ -78,11 +78,31 @@ function formatOkuYen(okuYen: number): string {
   return `${okuYen.toLocaleString()}億円`;
 }
 
-/** "1.26億", "4567万円", "1兆2000億", "100" (→億円) などを億円単位の数値に変換。解析失敗時 null */
+function parseJapaneseNumeral(s: string): number {
+  const d: Record<string, number> = { 一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9 };
+  let result = 0, cur = 0;
+  for (const c of s) {
+    if (c in d) { cur = d[c]; }
+    else if (c === '十') { result += (cur || 1) * 10; cur = 0; }
+    else if (c === '百') { result += (cur || 1) * 100; cur = 0; }
+    else if (c === '千') { result += (cur || 1) * 1000; cur = 0; }
+  }
+  return result + cur;
+}
+
+function normalizeAmountInput(s: string): string {
+  // 全角数字・小数点 → 半角
+  let t = s.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFF10 + 0x30));
+  t = t.replace(/[．]/g, '.').replace(/[，　,\s]/g, '');
+  // 和数字ブロック（一〜千）→ アラビア数字
+  t = t.replace(/[一二三四五六七八九十百千]+/g, m => String(parseJapaneseNumeral(m)));
+  return t;
+}
+
+/** "1.26億", "４５６７万円", "一千二百億", "1兆2000億", "100" (→億円) などを億円単位の数値に変換。解析失敗時 null */
 function parseAmountToOkuYen(s: string): number | null {
-  const t = s.trim().replace(/[,，\s]/g, '');
+  const t = normalizeAmountInput(s);
   if (!t) return null;
-  // 兆 + 億 の複合 (例: "1兆2000億")
   const comboMatch = t.match(/^([\d.]+)兆([\d.]+)億?$/);
   if (comboMatch) {
     const cho = parseFloat(comboMatch[1]);
@@ -98,7 +118,7 @@ function parseAmountToOkuYen(s: string): number | null {
   if (unit.startsWith('億')) return n;
   if (unit.startsWith('万')) return n / 100;
   if (unit === '円') return n / 1e8;
-  return n; // 単位なし → 億円
+  return n;
 }
 
 function computeFocusPins(
@@ -550,7 +570,7 @@ export default function RealDataSankeyPage() {
     const hasBudget = minBudgetOku !== null || maxBudgetOku !== null;
     const hasSpending = minSpendingOku !== null || maxSpendingOku !== null;
     const trimmedQuery = debouncedQuery.trim();
-    const hasName = filterActive && trimmedQuery.length >= 2;
+    const hasName = trimmedQuery.length >= 2;
     if (!hasBudget && !hasSpending && !hasName) return null;
     const minBudgetYen = (minBudgetOku ?? 0) * 1e8;
     const maxBudgetYen = maxBudgetOku !== null ? maxBudgetOku * 1e8 : Infinity;
