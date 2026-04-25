@@ -2225,7 +2225,7 @@ export default function RealDataSankeyPage() {
         {/* 検索セクション: input card（内部にsliders）+ toggle（TopNと同じ構造） */}
         <div style={{ flex: 1 }}>
           {/* Card: input + optional sliders（TopNのパネルdivに相当） */}
-          <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: showAmountSliders ? '8px 8px 0 0' : 8, boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
+          <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: '8px 8px 0 0', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
             {/* Input row */}
             <div style={{ position: 'relative' }}>
               {/* Search icon */}
@@ -2299,7 +2299,7 @@ export default function RealDataSankeyPage() {
 
             {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
             {showAmountSliders && (
-              <div style={{ borderTop: '1px solid #e8e8e8', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ padding: '0 12px 10px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
                   { label: '予算', min: filterMinBudget, max: filterMaxBudget, dataMax: graphDataStats.maxBudget, setMin: setFilterMinBudget, setMax: setFilterMaxBudget },
                   { label: '支出', min: filterMinSpending, max: filterMaxSpending, dataMax: graphDataStats.maxSpending, setMin: setFilterMinSpending, setMax: setFilterMaxSpending },
