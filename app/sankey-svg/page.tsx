@@ -599,22 +599,13 @@ export default function RealDataSankeyPage() {
         if (n.type === 'project-budget' && matchesName(n.name)) matchingBudgetIds.add(n.id);
         if (n.type === 'recipient' && matchesName(n.name)) matchingRecipientIds.add(n.id);
       }
-      // Step2: マッチ支出先を持つ事業もマッチ扱い（OR拡張）
+      // Step2: マッチ支出先を持つ事業もマッチ扱い（支出先→事業 の一方向OR拡張のみ）
       for (const e of graphData.edges) {
         if (!e.target.startsWith('r-') || !matchingRecipientIds.has(e.target)) continue;
         const sn = nodeById.get(e.source);
         if (sn?.projectId != null) {
           const bn = budgetByPid.get(sn.projectId);
           if (bn) matchingBudgetIds.add(bn.id);
-        }
-      }
-      // Step3: マッチした事業の支出先もマッチ扱い（OR拡張）
-      for (const e of graphData.edges) {
-        if (!e.target.startsWith('r-')) continue;
-        const sn = nodeById.get(e.source);
-        if (sn?.projectId != null) {
-          const bn = budgetByPid.get(sn.projectId);
-          if (bn && matchingBudgetIds.has(bn.id)) matchingRecipientIds.add(e.target);
         }
       }
     }
