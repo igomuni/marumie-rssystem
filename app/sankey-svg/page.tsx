@@ -73,6 +73,11 @@ function mergedProjectPath(x0: number, nodeW: number, bH: number, sH: number): s
 }
 
 /** ノードID → フォーカスピン状態を導出する純粋ヘルパー */
+function formatOkuYen(okuYen: number): string {
+  if (okuYen >= 10000) return `${(okuYen / 10000 % 1 === 0 ? okuYen / 10000 : (okuYen / 10000).toFixed(1))}兆円`;
+  return `${okuYen.toLocaleString()}億円`;
+}
+
 function computeFocusPins(
   nodeId: string,
   nodes: Array<{ id: string; name: string }> | undefined,
@@ -140,6 +145,12 @@ export default function RealDataSankeyPage() {
   const [searchCursorIndex, setSearchCursorIndex] = useState(-1);
   const [searchUseRegex, setSearchUseRegex] = useState(false);
   const [searchPage, setSearchPage] = useState(0);
+  // Filter feature
+  const [filterActive, setFilterActive] = useState(false);
+  const [filterMinBudget, setFilterMinBudget] = useState(0);        // 億円; 0 = no min
+  const [filterMaxBudget, setFilterMaxBudget] = useState<number | null>(null); // null = no max
+  const [filterMinSpending, setFilterMinSpending] = useState(0);    // 億円; 0 = no min
+  const [filterMaxSpending, setFilterMaxSpending] = useState<number | null>(null);
   const isPidQuery = (q: string) => /^\d+$/.test(q);
   const meetsSearchMinLength = (q: string) => isPidQuery(q) ? q.length >= 1 : q.length >= 2;
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -490,12 +501,61 @@ export default function RealDataSankeyPage() {
       .catch(e => { setError(String(e)); setLoading(false); });
   }, [year]);
 
+  // Max values for filter sliders (in 億円)
+  const graphDataStats = useMemo(() => {
+    if (!graphData) return { maxBudget: 100000, maxSpending: 100000 };
+    let mb = 0, ms = 0;
+    for (const n of graphData.nodes) {
+      if (n.type === 'project-budget') mb = Math.max(mb, n.value);
+      else if (n.type === 'project-spending' || n.type === 'recipient') ms = Math.max(ms, n.value);
+    }
+    return {
+      maxBudget: Math.max(1000, Math.ceil(mb / 1e8 / 1000) * 1000),
+      maxSpending: Math.max(1000, Math.ceil(ms / 1e8 / 1000) * 1000),
+    };
+  }, [graphData]);
+
+  // Pre-filter exclusion set: built from filter conditions, applied before filterTopN
+  const filterExcludedIds = useMemo(() => {
+    if (!filterActive || !graphData) return null;
+    const hasBudget = filterMinBudget > 0 || filterMaxBudget !== null;
+    const hasSpending = filterMinSpending > 0 || filterMaxSpending !== null;
+    if (!hasBudget && !hasSpending) return null;
+    const minBudgetYen = filterMinBudget * 1e8;
+    const maxBudgetYen = filterMaxBudget !== null ? filterMaxBudget * 1e8 : Infinity;
+    const minSpendingYen = filterMinSpending * 1e8;
+    const maxSpendingYen = filterMaxSpending !== null ? filterMaxSpending * 1e8 : Infinity;
+    const excluded = new Set<string>();
+    const spendingByPid = new Map(
+      graphData.nodes.filter(n => n.type === 'project-spending' && n.projectId != null).map(n => [n.projectId!, n])
+    );
+    for (const n of graphData.nodes) {
+      if (n.aggregated) continue;
+      if (n.type === 'project-budget' && n.projectId != null) {
+        const sn = spendingByPid.get(n.projectId);
+        const failBudget = hasBudget && (n.value < minBudgetYen || n.value > maxBudgetYen);
+        const failSpending = hasSpending && sn && (sn.value < minSpendingYen || sn.value > maxSpendingYen);
+        if (failBudget || failSpending) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
+      } else if (n.type === 'recipient') {
+        if (hasSpending && (n.value < minSpendingYen || n.value > maxSpendingYen)) excluded.add(n.id);
+      }
+    }
+    return excluded.size > 0 ? excluded : null;
+  }, [graphData, filterActive, filterMinBudget, filterMaxBudget, filterMinSpending, filterMaxSpending]);
+
   const filtered = useMemo(() => {
     if (!graphData) return null;
-    const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
+    // Apply pre-filter: remove excluded nodes and their edges before TopN selection
+    const nodes = filterExcludedIds
+      ? graphData.nodes.filter(n => !filterExcludedIds.has(n.id))
+      : graphData.nodes;
+    const edges = filterExcludedIds
+      ? graphData.edges.filter(e => !filterExcludedIds.has(e.source) && !filterExcludedIds.has(e.target))
+      : graphData.edges;
+    const maxOffset = Math.max(0, (nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, projectSortBy);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset]);
+    return filterTopN(nodes, edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, projectSortBy);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, filterExcludedIds]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -2149,9 +2209,11 @@ export default function RealDataSankeyPage() {
       {/* Search box — top left */}
       <div
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 322 : 12, zIndex: 100, width: 260, transition: 'left 0.2s ease' }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 322 : 12, zIndex: 100, width: 296, transition: 'left 0.2s ease' }}
       >
-        <div style={{ position: 'relative' }}>
+        {/* Row 1: 検索inputとフィルタボタン */}
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+        <div style={{ position: 'relative', flex: 1 }}>
           {/* Search icon */}
           <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999"
             style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
@@ -2222,7 +2284,82 @@ export default function RealDataSankeyPage() {
               style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
             >✕</button>
           )}
+        </div>{/* end search input wrapper */}
+        {/* フィルタアイコンボタン */}
+        <button
+          type="button"
+          title={filterActive ? 'フィルタ ON（クリックでOFF）' : 'フィルタ OFF（クリックでON）'}
+          aria-pressed={filterActive}
+          onClick={() => setFilterActive(f => !f)}
+          style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${filterActive ? '#1a73e8' : '#e0e0e0'}`, borderRadius: 8, background: filterActive ? '#e8f0fe' : 'rgba(255,255,255,0.95)', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
+        >
+          {/* Material Icons: filter_list */}
+          <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill={filterActive ? '#1a73e8' : '#888'}>
+            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+          </svg>
+        </button>
+        </div>{/* end Row 1 flex */}
+
+        {/* Row 2: TopN設定 表示トグルボタン */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 3 }}>
+          <button
+            type="button"
+            onClick={() => setShowTopNSliders(s => !s)}
+            title={showTopNSliders ? 'TopN・オフセット設定 を隠す' : 'TopN・オフセット設定 を表示'}
+            style={{ display: 'flex', alignItems: 'center', gap: 3, background: 'rgba(255,255,255,0.92)', border: '1px solid #e0e0e0', borderRadius: 6, cursor: 'pointer', padding: '2px 7px', fontSize: 11, color: '#666', userSelect: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.07)' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#999">
+              <path d={showTopNSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
+            </svg>
+            TopN・オフセット
+          </button>
         </div>
+
+        {/* Row 3: フィルタパネル（filterActive=true のとき表示） */}
+        {filterActive && (
+          <div style={{ marginTop: 4, background: 'rgba(255,255,255,0.97)', border: `1px solid #c5d8f8`, borderRadius: 8, padding: '10px 12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* ── 予算フィルタ ── */}
+            {[
+              { label: '予算', min: filterMinBudget, max: filterMaxBudget, dataMax: graphDataStats.maxBudget, setMin: setFilterMinBudget, setMax: setFilterMaxBudget },
+              { label: '支出', min: filterMinSpending, max: filterMaxSpending, dataMax: graphDataStats.maxSpending, setMin: setFilterMinSpending, setMax: setFilterMaxSpending },
+            ].map(({ label, min, max, dataMax, setMin, setMax }) => (
+              <div key={label}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#444' }}>{label}</span>
+                  {(min > 0 || max !== null) && (
+                    <button type="button" onClick={() => { setMin(0); setMax(null); }}
+                      style={{ fontSize: 10, color: '#1a73e8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>リセット</button>
+                  )}
+                </div>
+                {/* 下限スライダー */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                  <span style={{ fontSize: 10, color: '#777', width: 22, flexShrink: 0 }}>下限</span>
+                  <input type="range" min={0} max={dataMax} step={Math.max(1, Math.floor(dataMax / 500))}
+                    value={min}
+                    onChange={e => { const v = Number(e.target.value); setMin(v); if (max !== null && v > max) setMax(v); }}
+                    style={{ flex: 1, accentColor: '#1a73e8' }}
+                  />
+                  <span style={{ fontSize: 10, color: min > 0 ? '#1a73e8' : '#aaa', width: 64, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                    {min === 0 ? '制限なし' : formatOkuYen(min)}
+                  </span>
+                </div>
+                {/* 上限スライダー */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 10, color: '#777', width: 22, flexShrink: 0 }}>上限</span>
+                  <input type="range" min={0} max={dataMax} step={Math.max(1, Math.floor(dataMax / 500))}
+                    value={max ?? dataMax}
+                    onChange={e => { const v = Number(e.target.value); const next = v >= dataMax ? null : v; setMax(next); if (next !== null && next < min) setMin(next); }}
+                    style={{ flex: 1, accentColor: '#1a73e8' }}
+                  />
+                  <span style={{ fontSize: 10, color: max !== null ? '#1a73e8' : '#aaa', width: 64, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                    {max === null ? '制限なし' : formatOkuYen(max)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Dropdown */}
         {showSearchResults && searchResults.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
