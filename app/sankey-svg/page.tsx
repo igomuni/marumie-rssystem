@@ -99,26 +99,26 @@ function normalizeAmountInput(s: string): string {
   return t;
 }
 
-/** "1.26億", "４５６７万円", "一千二百億", "1兆2000億", "100" (→億円) などを億円単位の数値に変換。解析失敗時 null */
-function parseAmountToOkuYen(s: string): number | null {
+/** "1.26億", "４５６７万円", "一千二百億", "1兆2000億", "100億" などを1円単位の数値に変換。解析失敗時 null */
+function parseAmountToYen(s: string): number | null {
   const t = normalizeAmountInput(s);
   if (!t) return null;
   const comboMatch = t.match(/^([\d.]+)兆([\d.]+)億?$/);
   if (comboMatch) {
     const cho = parseFloat(comboMatch[1]);
     const oku = parseFloat(comboMatch[2]);
-    if (!isNaN(cho) && !isNaN(oku)) return cho * 10000 + oku;
+    if (!isNaN(cho) && !isNaN(oku)) return (cho * 10000 + oku) * 1e8;
   }
   const m = t.match(/^([\d.]+)\s*(兆円?|億円?|万円?|円)?$/);
   if (!m) return null;
   const n = parseFloat(m[1]);
   if (isNaN(n)) return null;
   const unit = m[2] ?? '';
-  if (unit.startsWith('兆')) return n * 10000;
-  if (unit.startsWith('億')) return n;
-  if (unit.startsWith('万')) return n / 100;
-  if (unit === '円') return n / 1e8;
-  return n;
+  if (unit.startsWith('兆')) return n * 1e12;
+  if (unit.startsWith('億')) return n * 1e8;
+  if (unit.startsWith('万')) return n * 1e4;
+  if (unit === '円') return n;
+  return n * 1e8; // 単位なし → 億円換算
 }
 
 function computeFocusPins(
@@ -563,19 +563,19 @@ export default function RealDataSankeyPage() {
   // Pre-filter exclusion set: built from filter conditions, applied before filterTopN
   const filterExcludedIds = useMemo(() => {
     if (!graphData) return null;
-    const minBudgetOku = parseAmountToOkuYen(filterMinBudgetText);
-    const maxBudgetOku = parseAmountToOkuYen(filterMaxBudgetText);
-    const minSpendingOku = parseAmountToOkuYen(filterMinSpendingText);
-    const maxSpendingOku = parseAmountToOkuYen(filterMaxSpendingText);
-    const hasBudget = minBudgetOku !== null || maxBudgetOku !== null;
-    const hasSpending = minSpendingOku !== null || maxSpendingOku !== null;
+    const minBudgetYen = parseAmountToYen(filterMinBudgetText);
+    const maxBudgetYen = parseAmountToYen(filterMaxBudgetText);
+    const minSpendingYen = parseAmountToYen(filterMinSpendingText);
+    const maxSpendingYen = parseAmountToYen(filterMaxSpendingText);
+    const hasBudget = minBudgetYen !== null || maxBudgetYen !== null;
+    const hasSpending = minSpendingYen !== null || maxSpendingYen !== null;
     const trimmedQuery = debouncedQuery.trim();
     const hasName = trimmedQuery.length >= 2;
     if (!hasBudget && !hasSpending && !hasName) return null;
-    const minBudgetYen = (minBudgetOku ?? 0) * 1e8;
-    const maxBudgetYen = maxBudgetOku !== null ? maxBudgetOku * 1e8 : Infinity;
-    const minSpendingYen = (minSpendingOku ?? 0) * 1e8;
-    const maxSpendingYen = maxSpendingOku !== null ? maxSpendingOku * 1e8 : Infinity;
+    const minBudget = minBudgetYen ?? 0;
+    const maxBudget = maxBudgetYen ?? Infinity;
+    const minSpending = minSpendingYen ?? 0;
+    const maxSpending = maxSpendingYen ?? Infinity;
     let nameRegex: RegExp | null = null;
     if (hasName && searchUseRegex) {
       try { nameRegex = new RegExp(trimmedQuery, 'i'); } catch { /* invalid regex */ }
@@ -589,12 +589,12 @@ export default function RealDataSankeyPage() {
       if (n.aggregated) continue;
       if (n.type === 'project-budget' && n.projectId != null) {
         const sn = spendingByPid.get(n.projectId);
-        const failBudget = hasBudget && (n.value < minBudgetYen || n.value > maxBudgetYen);
-        const failSpending = hasSpending && sn && (sn.value < minSpendingYen || sn.value > maxSpendingYen);
+        const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
+        const failSpending = hasSpending && sn && (sn.value < minSpending || sn.value > maxSpending);
         const failName = hasName && (filterTarget === 'project' || filterTarget === 'all') && !matchesName(n.name);
         if (failBudget || failSpending || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
-        const failSpending = hasSpending && (n.value < minSpendingYen || n.value > maxSpendingYen);
+        const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
         const failName = hasName && (filterTarget === 'recipient' || filterTarget === 'all') && !matchesName(n.name);
         if (failSpending || failName) excluded.add(n.id);
       }
@@ -2369,12 +2369,12 @@ export default function RealDataSankeyPage() {
                     <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>{label}</span>
                     <input type="text" value={minText} onChange={e => setMin(e.target.value)}
                       placeholder="下限"
-                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToOkuYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
                     />
                     <span style={{ fontSize: 11, color: '#aaa', flexShrink: 0 }}>〜</span>
                     <input type="text" value={maxText} onChange={e => setMax(e.target.value)}
                       placeholder="上限"
-                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToOkuYen(maxText) !== null || !maxText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToYen(maxText) !== null || !maxText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
                     />
                     {(minText || maxText) && (
                       <button type="button" onClick={() => { setMin(''); setMax(''); }}
