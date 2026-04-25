@@ -2308,18 +2308,22 @@ export default function RealDataSankeyPage() {
           </svg>
         </button>
         {/* 金額スライダー表示トグルボタン */}
-        <button
-          type="button"
-          title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
-          aria-pressed={showAmountSliders}
-          onClick={() => setShowAmountSliders(s => !s)}
-          style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${(filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null) ? '#1a73e8' : '#e0e0e0'}`, borderRadius: 8, background: (filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null) ? '#e8f0fe' : 'rgba(255,255,255,0.95)', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
-        >
-          {/* Material Icons: tune */}
-          <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill={(filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null) ? '#1a73e8' : '#888'}>
-            <path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/>
-          </svg>
-        </button>
+        {(() => {
+          const amountActive = filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null;
+          return (
+            <button
+              type="button"
+              title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
+              aria-pressed={showAmountSliders}
+              onClick={() => setShowAmountSliders(s => !s)}
+              style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderRadius: 8, background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.95)', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill={amountActive ? '#1a73e8' : '#bbb'}>
+                <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
+              </svg>
+            </button>
+          );
+        })()}
         </div>{/* end Row 1 flex */}
 
         {/* Row 2: 金額フィルタパネル（showAmountSliders=true のとき表示） */}
