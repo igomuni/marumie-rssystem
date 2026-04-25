@@ -588,16 +588,54 @@ export default function RealDataSankeyPage() {
     const budgetByPid = new Map(
       graphData.nodes.filter(n => n.type === 'project-budget' && n.projectId != null).map(n => [n.projectId!, n])
     );
+    // すべて(OR)用: 事業名・支出先名それぞれのマッチセットを事前計算し相互拡張
+    const matchingBudgetIds = new Set<string>();
+    const matchingRecipientIds = new Set<string>();
+    if (hasName && filterTarget === 'all') {
+      const nodeById = new Map(graphData.nodes.map(n => [n.id, n]));
+      // Step1: 名前が一致するノードを収集
+      for (const n of graphData.nodes) {
+        if (n.aggregated) continue;
+        if (n.type === 'project-budget' && matchesName(n.name)) matchingBudgetIds.add(n.id);
+        if (n.type === 'recipient' && matchesName(n.name)) matchingRecipientIds.add(n.id);
+      }
+      // Step2: マッチ支出先を持つ事業もマッチ扱い（OR拡張）
+      for (const e of graphData.edges) {
+        if (!e.target.startsWith('r-') || !matchingRecipientIds.has(e.target)) continue;
+        const sn = nodeById.get(e.source);
+        if (sn?.projectId != null) {
+          const bn = budgetByPid.get(sn.projectId);
+          if (bn) matchingBudgetIds.add(bn.id);
+        }
+      }
+      // Step3: マッチした事業の支出先もマッチ扱い（OR拡張）
+      for (const e of graphData.edges) {
+        if (!e.target.startsWith('r-')) continue;
+        const sn = nodeById.get(e.source);
+        if (sn?.projectId != null) {
+          const bn = budgetByPid.get(sn.projectId);
+          if (bn && matchingBudgetIds.has(bn.id)) matchingRecipientIds.add(e.target);
+        }
+      }
+    }
     for (const n of graphData.nodes) {
       if (n.aggregated) continue;
       if (n.type === 'project-budget' && n.projectId != null) {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
-        const failName = hasName && (filterTarget === 'project' || filterTarget === 'all') && !matchesName(n.name);
+        const failName = hasName && (
+          filterTarget === 'project' ? !matchesName(n.name) :
+          filterTarget === 'all' ? !matchingBudgetIds.has(n.id) :
+          false
+        );
         if (failBudget || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
-        const failName = hasName && (filterTarget === 'recipient' || filterTarget === 'all') && !matchesName(n.name);
+        const failName = hasName && (
+          filterTarget === 'recipient' ? !matchesName(n.name) :
+          filterTarget === 'all' ? !matchingRecipientIds.has(n.id) :
+          false
+        );
         if (failSpending || failName) excluded.add(n.id);
       }
     }
@@ -2311,6 +2349,18 @@ export default function RealDataSankeyPage() {
                 style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
                 <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
               </svg>
+              {/* Filter target select — フィルタモード時のみ表示、虫眼鏡の隣 */}
+              {filterActive && (
+                <select
+                  value={filterTarget}
+                  onChange={e => setFilterTarget(e.target.value as 'all' | 'project' | 'recipient')}
+                  style={{ position: 'absolute', left: 28, top: '50%', transform: 'translateY(-50%)', fontSize: 10, border: '1px solid #ddd', borderRadius: 3, padding: '1px 2px', background: 'rgba(255,255,255,0.9)', color: '#555', cursor: 'pointer', height: 20 }}
+                >
+                  <option value="all">すべて</option>
+                  <option value="project">事業</option>
+                  <option value="recipient">支出先</option>
+                </select>
+              )}
               <input
                 ref={searchInputRef}
                 type="text"
@@ -2345,7 +2395,7 @@ export default function RealDataSankeyPage() {
                 placeholder="検索(2文字以上/PID)"
                 style={{
                   width: '100%', boxSizing: 'border-box',
-                  paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
+                  paddingLeft: filterActive ? 90 : 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
                   fontSize: 13, border: 'none', borderRadius: 8,
                   background: 'transparent', outline: 'none', color: '#333',
                 }}
@@ -2378,16 +2428,6 @@ export default function RealDataSankeyPage() {
             {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
             {showAmountSliders && (
               <div style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {/* フィルター対象 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 11, color: '#555', flexShrink: 0 }}>対象</span>
-                  <select value={filterTarget} onChange={e => setFilterTarget(e.target.value as 'all' | 'project' | 'recipient')}
-                    style={{ flex: 1, fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '2px 4px', background: '#fff', color: '#333', cursor: 'pointer' }}>
-                    <option value="all">すべて</option>
-                    <option value="project">事業</option>
-                    <option value="recipient">支出先</option>
-                  </select>
-                </div>
                 {/* 予算・支出 テキスト入力 */}
                 {([
                   { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
