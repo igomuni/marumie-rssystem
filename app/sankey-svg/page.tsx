@@ -2293,6 +2293,23 @@ export default function RealDataSankeyPage() {
               style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
             >✕</button>
           )}
+          {/* 金額スライダー表示トグルボタン — 検索ボックス右下 */}
+          {(() => {
+            const amountActive = filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null;
+            return (
+              <button
+                type="button"
+                title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
+                aria-pressed={showAmountSliders}
+                onClick={() => setShowAmountSliders(s => !s)}
+                style={{ position: 'absolute', bottom: -1, right: 6, transform: 'translateY(100%)', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.92)', border: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderTop: 'none', borderRadius: '0 0 6px 6px', cursor: 'pointer', padding: '1px 8px', userSelect: 'none' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill={amountActive ? '#1a73e8' : '#bbb'}>
+                  <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
+                </svg>
+              </button>
+            );
+          })()}
         </div>{/* end search input wrapper */}
         {/* フィルタアイコンボタン */}
         <button
@@ -2307,23 +2324,6 @@ export default function RealDataSankeyPage() {
             <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
           </svg>
         </button>
-        {/* 金額スライダー表示トグルボタン */}
-        {(() => {
-          const amountActive = filterMinBudget > 0 || filterMaxBudget !== null || filterMinSpending > 0 || filterMaxSpending !== null;
-          return (
-            <button
-              type="button"
-              title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
-              aria-pressed={showAmountSliders}
-              onClick={() => setShowAmountSliders(s => !s)}
-              style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${amountActive ? '#1a73e8' : '#e0e0e0'}`, borderRadius: 8, background: amountActive ? '#e8f0fe' : 'rgba(255,255,255,0.95)', cursor: 'pointer', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill={amountActive ? '#1a73e8' : '#bbb'}>
-                <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
-              </svg>
-            </button>
-          );
-        })()}
         </div>{/* end Row 1 flex */}
 
         {/* Row 2: 金額フィルタパネル（showAmountSliders=true のとき表示） */}
