@@ -2011,11 +2011,11 @@ export default function RealDataSankeyPage() {
               '全エッジ合計（ウィンドウ外流入含む）',
             ];
             return (
-              <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y + 16, background: 'rgba(0,0,0,0.85)', color: '#fff', padding: '8px 12px', borderRadius: 4, fontSize: 12, lineHeight: 1.5, pointerEvents: 'none', zIndex: 20, whiteSpace: 'nowrap' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: 2 }}>{COL_LABELS[hoveredColIndex]}</div>
-                {count != null && <div style={{ color: '#aaa', fontSize: 11 }}>{count.toLocaleString()}件</div>}
-                <div style={{ color: '#7df' }}>{formatYen(total)}</div>
-                <div style={{ color: '#aaa', fontSize: 11 }}>{Math.round(total).toLocaleString()}円</div>
+              <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y + 16, background: 'rgba(255,255,255,0.97)', color: '#222', padding: '6px 10px', borderRadius: 6, fontSize: 12, lineHeight: 1.5, pointerEvents: 'none', zIndex: 20, whiteSpace: 'nowrap', border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 2 }}>{COL_LABELS[hoveredColIndex]}</div>
+                {count != null && <div style={{ color: '#888', fontSize: 10 }}>{count.toLocaleString()}件</div>}
+                <div style={{ fontWeight: 500, fontSize: 10, color: '#222' }}>{formatYen(total)}</div>
+                <div style={{ color: '#555', fontSize: 9 }}>{Math.round(total).toLocaleString()}円</div>
                 <div style={{ color: '#888', fontSize: 10, marginTop: 4 }}>{colDescs[hoveredColIndex]}</div>
               </div>
             );
