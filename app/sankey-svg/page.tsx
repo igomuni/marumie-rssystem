@@ -30,6 +30,7 @@ interface SankeyUrlState {
   projectSortBy: 'budget' | 'spending';
   scaleBudgetToVisible: boolean;
   focusRelated: boolean;
+  autoFocusRelated: boolean;
   year: '2024' | '2025';
   zoom?: number;
 }
@@ -54,6 +55,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const ps = p.get('ps'); if (ps === 's') result.projectSortBy = 'spending';
   const sb = p.get('sb'); if (sb !== null) result.scaleBudgetToVisible = sb !== '0';
   const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr === '1';
+  const afr = p.get('afr'); if (afr !== null) result.autoFocusRelated = afr === '1';
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= 0.1 && n <= 10) result.zoom = n; }
   return result;
@@ -115,6 +117,7 @@ export default function RealDataSankeyPage() {
   const [projectSortBy, setProjectSortBy] = useState<'budget' | 'spending'>('budget');
   const [scaleBudgetToVisible, setScaleBudgetToVisible] = useState(true);
   const [focusRelated, setFocusRelated] = useState(false);
+  const [autoFocusRelated, setAutoFocusRelated] = useState(true);
   const [year, setYear] = useState<'2024' | '2025'>('2025');
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
@@ -147,6 +150,7 @@ export default function RealDataSankeyPage() {
   const pendingHistoryAction = useRef<'push' | 'replace' | null>(null);
   const pendingFocusId = useRef<string | null>(null);
   const pendingResetViewport = useRef<boolean>(false);
+  const pendingConnectionNodeId = useRef<string | null>(null);
   // Zoom URL state
   const urlRestoredZoomRef = useRef<number | null>(null); // zoom to restore on first layout (no sel= case)
   const zoomRef = useRef(1);                              // always-current zoom for debounce callbacks
@@ -229,6 +233,7 @@ export default function RealDataSankeyPage() {
       setProjectSortBy(parsed.projectSortBy ?? 'budget');
       setScaleBudgetToVisible(parsed.scaleBudgetToVisible ?? true);
       setFocusRelated(parsed.focusRelated ?? false);
+      setAutoFocusRelated(parsed.autoFocusRelated ?? false);
       if (parsed.year !== undefined) setYear(parsed.year);
       if (parsed.selectedNodeId) pendingResetViewport.current = true;
     };
@@ -259,6 +264,7 @@ export default function RealDataSankeyPage() {
     if (projectSortBy === 'spending') p.set('ps', 's');
     if (!scaleBudgetToVisible) p.set('sb', '0');
     if (focusRelated) p.set('fr', '1');
+    if (autoFocusRelated) p.set('afr', '1');
     if (year !== '2025') p.set('yr', year);
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
@@ -267,7 +273,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, year]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -621,6 +627,25 @@ export default function RealDataSankeyPage() {
     return new Map(sorted.map(([id], i) => [id, i]));
   }, [graphData]);
 
+  // Global project rank (0-indexed) — for projectOffset jump
+  const allProjectRanks = useMemo(() => {
+    if (!graphData) return new Map<string, number>();
+    const budgetValues = new Map<string | undefined, number>(
+      graphData.nodes.filter(n => n.type === 'project-budget').map(n => [`project-spending-${n.projectId}`, n.value] as const)
+    );
+    const ranked = graphData.nodes
+      .filter(n => n.type === 'project-spending' && n.value > 0)
+      .sort((a, b) => {
+        if (projectSortBy === 'budget') {
+          const ba = budgetValues.get(a.id) ?? 0;
+          const bb = budgetValues.get(b.id) ?? 0;
+          if (bb !== ba) return bb - ba;
+        }
+        return b.value - a.value;
+      });
+    return new Map(ranked.map((n, i) => [n.id, i]));
+  }, [graphData, projectSortBy]);
+
   // Recipient count per project-spending node (from raw graphData)
   const projectRecipientCount = useMemo(() => {
     if (!graphData) return new Map<string, number>();
@@ -932,6 +957,11 @@ export default function RealDataSankeyPage() {
     };
 
     const projectOffsetModeActive = offsetTarget === 'project';
+    const jumpToProjectRank = (rank: number) => {
+      const maxOffset = Math.max(0, allProjectRanks.size - topProject);
+      const newOffset = Math.max(0, Math.min(rank - Math.floor(topProject / 2), maxOffset));
+      setProjectOffset(newOffset);
+    };
     if (focusRelated) {
       // focusRelated ON: 現在のフォーカスコンテキストをクリアして新しいノードに切り替える
       const pins = computeFocusPins(nodeId, graphData?.nodes);
@@ -959,22 +989,31 @@ export default function RealDataSankeyPage() {
         const rank = allRecipientRanks.get(bestRecipientId);
         if (rank !== undefined) jumpToRecipientRank(rank, filtered.totalRecipientCount);
       }
+    } else if (projectOffsetModeActive && (nodeId.startsWith('project-spending-') || nodeId.startsWith('project-budget-'))) {
+      // Project offset mode: jump projectOffset window so the target project is visible
+      const spendingId = nodeId.startsWith('project-budget-')
+        ? nodeId.replace('project-budget-', 'project-spending-')
+        : nodeId;
+      const rank = allProjectRanks.get(spendingId);
+      if (rank !== undefined) jumpToProjectRank(rank);
+      setPinnedProjectId(null);
     } else {
       setPinnedProjectId(null);
     }
     // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
     pendingFocusId.current = nodeId;
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, topRecipient, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, includeZeroSpending, offsetTarget]);
+  }, [layout, filtered, allRecipientRanks, allProjectRanks, topRecipient, topProject, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, includeZeroSpending, offsetTarget, setProjectOffset]);
 
   // Step2 → Step1 遷移: 選択ノード (selectedNodeId) は維持し、
   // focusRelated と pinnedProject/Recipient/Ministry (Step2 用のフォーカスピン) のみ解除
-  const exitFocusRelated = useCallback(() => {
+  const exitFocusRelated = useCallback((nodeId?: string) => {
     pendingHistoryAction.current = 'push';
     setPinnedProjectId(null);
     setPinnedRecipientId(null);
     setPinnedMinistryName(null);
     setFocusRelated(false);
+    if (nodeId) pendingConnectionNodeId.current = nodeId;
   }, [setPinnedRecipientId, setPinnedMinistryName]);
 
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
@@ -983,18 +1022,45 @@ export default function RealDataSankeyPage() {
     const newId = selectedNodeId === node.id ? null : node.id;
     if (newId === null && focusRelated) {
       // Pin中ノードを再クリック → フィルターのみOFF（Pin解除しない）
-      exitFocusRelated();
+      exitFocusRelated(selectedNodeId ?? undefined);
       return;
     }
     if (newId !== null) {
-      // 新規選択は常に Step1（Pin状態のみ）: フィルター・ピンをリセット
-      if (focusRelated) setFocusRelated(false);
+      if (autoFocusRelated) {
+        // 自動focusRelated: ピンを新ノードに切り替えてStep2へ直行
+        const pins = computeFocusPins(newId, graphData?.nodes);
+        setPinnedProjectId(pins.pinnedProjectId);
+        setPinnedRecipientId(pins.pinnedRecipientId);
+        setPinnedMinistryName(pins.pinnedMinistryName);
+        setFocusRelated(true);
+        pendingResetViewport.current = true;
+        selectNode(newId);
+        return;
+      }
+      if (focusRelated) {
+        // focusRelated=ON 中の新規選択: ピン・フィルターをリセットし、
+        // レイアウト更新後に handleConnectionClick でオフセット調整
+        setFocusRelated(false);
+        setPinnedProjectId(null);
+        setPinnedRecipientId(null);
+        setPinnedMinistryName(null);
+        pendingConnectionNodeId.current = newId;
+        return;
+      }
       setPinnedProjectId(null);
       setPinnedRecipientId(null);
       setPinnedMinistryName(null);
     }
     selectNode(newId);
-  }, [selectedNodeId, selectNode, focusRelated, exitFocusRelated]);
+  }, [selectedNodeId, selectNode, focusRelated, autoFocusRelated, exitFocusRelated, graphData]);
+
+  // focusRelated=ON 中に別ノードをクリックした後、フルレイアウト更新後にオフセット調整
+  useEffect(() => {
+    if (!pendingConnectionNodeId.current || !layout) return;
+    const id = pendingConnectionNodeId.current;
+    pendingConnectionNodeId.current = null;
+    handleConnectionClick(id);
+  }, [layout, handleConnectionClick]);
 
   // ── Search ──
 
@@ -1196,7 +1262,7 @@ export default function RealDataSankeyPage() {
   // Escape key: focusRelated ON → フィルターのみOFF、OFF → 選択解除
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { if (focusRelated) exitFocusRelated(); else selectNode(null); }
+      if (e.key === 'Escape') { if (focusRelated) exitFocusRelated(selectedNodeId ?? undefined); else selectNode(null); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -1277,7 +1343,7 @@ export default function RealDataSankeyPage() {
               <rect
                 x={0} y={0} width={svgWidth} height={svgHeight}
                 fill="transparent"
-                onClick={() => { if (!didPanRef.current) { if (focusRelated) exitFocusRelated(); else selectNode(null); } }}
+                onClick={() => { if (!didPanRef.current) { if (focusRelated) exitFocusRelated(selectedNodeId ?? undefined); else selectNode(null); } }}
               />
               <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
               <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
@@ -2417,6 +2483,10 @@ export default function RealDataSankeyPage() {
                 <input type="checkbox" checked={scaleBudgetToVisible} onChange={e => { pendingHistoryAction.current = 'replace'; setScaleBudgetToVisible(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>事業の予算額を支出額に合わせて調整</span>
               </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={autoFocusRelated} onChange={e => { pendingHistoryAction.current = 'replace'; setAutoFocusRelated(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>選択時に関連ノードのみ表示</span>
+              </label>
             </div>
           </>
         )}
@@ -2507,6 +2577,8 @@ export default function RealDataSankeyPage() {
                   setPinnedProjectId(null);
                   setPinnedRecipientId(null);
                   setPinnedMinistryName(null);
+                  // 選択ノードがある場合はレイアウト更新後にオフセット調整
+                  if (selectedNode) pendingConnectionNodeId.current = selectedNode.id;
                 }
                 setFocusRelated(next);
               }}
