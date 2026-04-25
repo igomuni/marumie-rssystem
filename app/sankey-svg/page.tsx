@@ -33,6 +33,13 @@ interface SankeyUrlState {
   autoFocusRelated: boolean;
   year: '2024' | '2025';
   zoom?: number;
+  filterActive?: boolean;
+  filterTarget?: 'all' | 'project' | 'recipient';
+  filterNameQuery?: string;
+  filterMinBudgetText?: string;
+  filterMaxBudgetText?: string;
+  filterMinSpendingText?: string;
+  filterMaxSpendingText?: string;
 }
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
@@ -58,6 +65,13 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const afr = p.get('afr'); if (afr !== null) result.autoFocusRelated = afr === '1';
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= 0.1 && n <= 10) result.zoom = n; }
+  const f = p.get('f'); if (f === '1') result.filterActive = true;
+  const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient'; else if (nft === 'a') result.filterTarget = 'all';
+  const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
+  const fmb = p.get('fmb'); if (fmb !== null) result.filterMinBudgetText = fmb;
+  const fxb = p.get('fxb'); if (fxb !== null) result.filterMaxBudgetText = fxb;
+  const fms = p.get('fms'); if (fms !== null) result.filterMinSpendingText = fms;
+  const fxs = p.get('fxs'); if (fxs !== null) result.filterMaxSpendingText = fxs;
   return result;
 }
 
@@ -73,6 +87,49 @@ function mergedProjectPath(x0: number, nodeW: number, bH: number, sH: number): s
 }
 
 /** ノードID → フォーカスピン状態を導出する純粋ヘルパー */
+function parseJapaneseNumeral(s: string): number {
+  const d: Record<string, number> = { 一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9 };
+  let result = 0, cur = 0;
+  for (const c of s) {
+    if (c in d) { cur = d[c]; }
+    else if (c === '十') { result += (cur || 1) * 10; cur = 0; }
+    else if (c === '百') { result += (cur || 1) * 100; cur = 0; }
+    else if (c === '千') { result += (cur || 1) * 1000; cur = 0; }
+  }
+  return result + cur;
+}
+
+function normalizeAmountInput(s: string): string {
+  // 全角数字・小数点 → 半角
+  let t = s.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFF10 + 0x30));
+  t = t.replace(/[．]/g, '.').replace(/[，　,\s]/g, '');
+  // 和数字ブロック（一〜千）→ アラビア数字
+  t = t.replace(/[一二三四五六七八九十百千]+/g, m => String(parseJapaneseNumeral(m)));
+  return t;
+}
+
+/** "1.26億", "４５６７万円", "一千二百億", "1兆2000億", "100億" などを1円単位の数値に変換。解析失敗時 null */
+function parseAmountToYen(s: string): number | null {
+  const t = normalizeAmountInput(s);
+  if (!t) return null;
+  const comboMatch = t.match(/^([\d.]+)兆([\d.]+)億?$/);
+  if (comboMatch) {
+    const cho = parseFloat(comboMatch[1]);
+    const oku = parseFloat(comboMatch[2]);
+    if (!isNaN(cho) && !isNaN(oku)) return (cho * 10000 + oku) * 1e8;
+  }
+  const m = t.match(/^([\d.]+)\s*(兆円?|億円?|万円?|円)?$/);
+  if (!m) return null;
+  const n = parseFloat(m[1]);
+  if (isNaN(n)) return null;
+  const unit = m[2] ?? '';
+  if (unit.startsWith('兆')) return n * 1e12;
+  if (unit.startsWith('億')) return n * 1e8;
+  if (unit.startsWith('万')) return n * 1e4;
+  if (unit === '円') return n;
+  return n; // 単位なし → 1円単位
+}
+
 function computeFocusPins(
   nodeId: string,
   nodes: Array<{ id: string; name: string }> | undefined,
@@ -140,6 +197,14 @@ export default function RealDataSankeyPage() {
   const [searchCursorIndex, setSearchCursorIndex] = useState(-1);
   const [searchUseRegex, setSearchUseRegex] = useState(false);
   const [searchPage, setSearchPage] = useState(0);
+  // Filter feature
+  const [filterActive, setFilterActive] = useState(false);
+  const [showAmountSliders, setShowAmountSliders] = useState(false);
+  const [filterTarget, setFilterTarget] = useState<'all' | 'project' | 'recipient'>('all');
+  const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
+  const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
+  const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
+  const [filterMaxSpendingText, setFilterMaxSpendingText] = useState('');
   const isPidQuery = (q: string) => /^\d+$/.test(q);
   const meetsSearchMinLength = (q: string) => isPidQuery(q) ? q.length >= 1 : q.length >= 2;
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -209,6 +274,13 @@ export default function RealDataSankeyPage() {
     if (parsed.zoom !== undefined && parsed.selectedNodeId === undefined) {
       urlRestoredZoomRef.current = parsed.zoom;
     }
+    if (parsed.filterActive !== undefined) setFilterActive(parsed.filterActive);
+    if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget);
+    if (parsed.filterNameQuery !== undefined) { setSearchQuery(parsed.filterNameQuery); }
+    if (parsed.filterMinBudgetText !== undefined) setFilterMinBudgetText(parsed.filterMinBudgetText);
+    if (parsed.filterMaxBudgetText !== undefined) setFilterMaxBudgetText(parsed.filterMaxBudgetText);
+    if (parsed.filterMinSpendingText !== undefined) setFilterMinSpendingText(parsed.filterMinSpendingText);
+    if (parsed.filterMaxSpendingText !== undefined) setFilterMaxSpendingText(parsed.filterMaxSpendingText);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
 
@@ -239,6 +311,13 @@ export default function RealDataSankeyPage() {
       setFocusRelated(parsed.focusRelated ?? false);
       setAutoFocusRelated(parsed.autoFocusRelated ?? true);
       if (parsed.year !== undefined) setYear(parsed.year);
+      setFilterActive(parsed.filterActive ?? false);
+      if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('all');
+      setSearchQuery(parsed.filterNameQuery ?? '');
+      setFilterMinBudgetText(parsed.filterMinBudgetText ?? '');
+      setFilterMaxBudgetText(parsed.filterMaxBudgetText ?? '');
+      setFilterMinSpendingText(parsed.filterMinSpendingText ?? '');
+      setFilterMaxSpendingText(parsed.filterMaxSpendingText ?? '');
       if (parsed.selectedNodeId) pendingResetViewport.current = true;
     };
     window.addEventListener('popstate', handler);
@@ -270,6 +349,13 @@ export default function RealDataSankeyPage() {
     if (focusRelated) p.set('fr', '1');
     if (!autoFocusRelated) p.set('afr', '0');
     if (year !== '2025') p.set('yr', year);
+    if (filterActive) p.set('f', '1');
+    if (filterTarget !== 'all') p.set('nft', filterTarget === 'project' ? 'p' : 'r');
+    if (filterActive && searchQuery) p.set('nf', searchQuery);
+    if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
+    if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
+    if (filterMinSpendingText) p.set('fms', filterMinSpendingText);
+    if (filterMaxSpendingText) p.set('fxs', filterMaxSpendingText);
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
     if (action === 'push') {
@@ -277,7 +363,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -312,6 +398,22 @@ export default function RealDataSankeyPage() {
   }, [stopTopNRepeat]);
 
   // Reset both offsets when offsetTarget switches
+  // Reset offsets and sync URL when filter conditions change
+  const filterSigInitRef = useRef(false);
+  useEffect(() => {
+    if (!filterSigInitRef.current) { filterSigInitRef.current = true; return; }
+    pendingHistoryAction.current = 'replace';
+    setRecipientOffset(0);
+    setProjectOffset(0);
+  }, [filterActive, filterTarget, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery]);
+
+  // Sync URL when filter name query changes (separate from above to avoid double reset)
+  const filterQueryInitRef = useRef(false);
+  useEffect(() => {
+    if (!filterQueryInitRef.current) { filterQueryInitRef.current = true; return; }
+    pendingHistoryAction.current = 'replace';
+  }, [searchQuery]);
+
   const prevOffsetTargetRef = useRef(offsetTarget);
   useEffect(() => {
     if (prevOffsetTargetRef.current !== offsetTarget) {
@@ -490,12 +592,133 @@ export default function RealDataSankeyPage() {
       .catch(e => { setError(String(e)); setLoading(false); });
   }, [year]);
 
+  // Max values for filter sliders (in 億円)
+  const graphDataStats = useMemo(() => {
+    if (!graphData) return { maxBudget: 100000, maxSpending: 100000 };
+    let mb = 0, ms = 0;
+    for (const n of graphData.nodes) {
+      if (n.type === 'project-budget') mb = Math.max(mb, n.value);
+      else if (n.type === 'project-spending' || n.type === 'recipient') ms = Math.max(ms, n.value);
+    }
+    return {
+      maxBudget: Math.max(1000, Math.ceil(mb / 1e8 / 1000) * 1000),
+      maxSpending: Math.max(1000, Math.ceil(ms / 1e8 / 1000) * 1000),
+    };
+  }, [graphData]);
+
+  // Pre-filter exclusion set: built from filter conditions, applied before filterTopN
+  const filterExcludedIds = useMemo(() => {
+    if (!graphData) return null;
+    const minBudgetYen = parseAmountToYen(filterMinBudgetText);
+    const maxBudgetYen = parseAmountToYen(filterMaxBudgetText);
+    const minSpendingYen = parseAmountToYen(filterMinSpendingText);
+    const maxSpendingYen = parseAmountToYen(filterMaxSpendingText);
+    const hasBudget = minBudgetYen !== null || maxBudgetYen !== null;
+    const hasSpending = minSpendingYen !== null || maxSpendingYen !== null;
+    const trimmedQuery = debouncedQuery.trim();
+    const hasName = filterActive && trimmedQuery.length >= 1;
+    if (!hasBudget && !hasSpending && !hasName) return null;
+    const minBudget = minBudgetYen ?? 0;
+    const maxBudget = maxBudgetYen ?? Infinity;
+    const minSpending = minSpendingYen ?? 0;
+    const maxSpending = maxSpendingYen ?? Infinity;
+    let nameRegex: RegExp | null = null;
+    if (hasName && searchUseRegex) {
+      try { nameRegex = new RegExp(trimmedQuery, 'i'); } catch { /* invalid regex */ }
+    }
+    const trimmedQueryLower = trimmedQuery.toLocaleLowerCase();
+    const matchesName = (name: string) => nameRegex ? nameRegex.test(name) : name.toLocaleLowerCase().includes(trimmedQueryLower);
+    const excluded = new Set<string>();
+    const spendingByPid = new Map(
+      graphData.nodes.filter(n => n.type === 'project-spending' && n.projectId != null).map(n => [n.projectId!, n])
+    );
+    const budgetByPid = new Map(
+      graphData.nodes.filter(n => n.type === 'project-budget' && n.projectId != null).map(n => [n.projectId!, n])
+    );
+    // すべて(OR)用: 事業名・支出先名それぞれのマッチセットを事前計算し相互拡張
+    const matchingBudgetIds = new Set<string>();
+    const matchingRecipientIds = new Set<string>();
+    if (hasName && filterTarget === 'all') {
+      const nodeById = new Map(graphData.nodes.map(n => [n.id, n]));
+      // Step1: 名前が一致するノードを収集
+      for (const n of graphData.nodes) {
+        if (n.aggregated) continue;
+        if (n.type === 'project-budget' && matchesName(n.name)) matchingBudgetIds.add(n.id);
+        if (n.type === 'recipient' && matchesName(n.name)) matchingRecipientIds.add(n.id);
+      }
+      // Step2: マッチ支出先を持つ事業もマッチ扱い（支出先→事業 の一方向OR拡張のみ）
+      for (const e of graphData.edges) {
+        if (!e.target.startsWith('r-') || !matchingRecipientIds.has(e.target)) continue;
+        const sn = nodeById.get(e.source);
+        if (sn?.projectId != null) {
+          const bn = budgetByPid.get(sn.projectId);
+          if (bn) matchingBudgetIds.add(bn.id);
+        }
+      }
+    }
+    for (const n of graphData.nodes) {
+      if (n.aggregated) continue;
+      if (n.type === 'project-budget' && n.projectId != null) {
+        const sn = spendingByPid.get(n.projectId);
+        const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
+        const failName = hasName && (
+          filterTarget === 'project' ? !matchesName(n.name) :
+          filterTarget === 'all' ? !matchingBudgetIds.has(n.id) :
+          false
+        );
+        if (failBudget || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
+      } else if (n.type === 'recipient') {
+        const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
+        const failName = hasName && (
+          filterTarget === 'recipient' ? !matchesName(n.name) :
+          filterTarget === 'all' ? !matchingRecipientIds.has(n.id) :
+          false
+        );
+        if (failSpending || failName) excluded.add(n.id);
+      }
+    }
+    // Pass 2: 支出先フィルタが有効な場合、残存支出先のない事業を除外（recipient → project のカスケード）
+    if (hasSpending || (hasName && (filterTarget === 'recipient' || filterTarget === 'all'))) {
+      const projectsWithSurvivingRecipients = new Set(
+        graphData.edges
+          .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
+          .map(e => e.source)
+      );
+      for (const [pid, sn] of spendingByPid) {
+        if (!excluded.has(sn.id) && !projectsWithSurvivingRecipients.has(sn.id)) {
+          excluded.add(sn.id);
+          const bn = budgetByPid.get(pid);
+          if (bn) excluded.add(bn.id);
+        }
+      }
+    }
+    // Pass 3: 残存事業のない省庁を除外（project → ministry のカスケード）
+    const ministriesWithSurvivingProjects = new Set(
+      graphData.edges
+        .filter(e => !excluded.has(e.source) && !excluded.has(e.target) && e.target.startsWith('project-budget-'))
+        .map(e => e.source)
+    );
+    for (const n of graphData.nodes) {
+      if (n.type === 'ministry' && !n.aggregated && !excluded.has(n.id)) {
+        if (!ministriesWithSurvivingProjects.has(n.id)) excluded.add(n.id);
+      }
+    }
+    return excluded.size > 0 ? excluded : null;
+  }, [graphData, filterActive, filterTarget, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex]);
+
   const filtered = useMemo(() => {
     if (!graphData) return null;
-    const maxOffset = Math.max(0, (graphData.nodes.filter(n => n.type === 'recipient').length) - topRecipient);
+    // Apply pre-filter: remove excluded nodes and their edges before TopN selection
+    const nodes = filterExcludedIds
+      ? graphData.nodes.filter(n => !filterExcludedIds.has(n.id))
+      : graphData.nodes;
+    const edges = filterExcludedIds
+      ? graphData.edges.filter(e => !filterExcludedIds.has(e.source) && !filterExcludedIds.has(e.target))
+      : graphData.edges;
+    const maxOffset = Math.max(0, (nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(graphData.nodes, graphData.edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, projectSortBy);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset]);
+    return filterTopN(nodes, edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, projectSortBy);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, filterExcludedIds]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -2149,82 +2372,161 @@ export default function RealDataSankeyPage() {
       {/* Search box — top left */}
       <div
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 322 : 12, zIndex: 100, width: 260, transition: 'left 0.2s ease' }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 322 : 12, zIndex: 100, width: 296, transition: 'left 0.2s ease' }}
       >
-        <div style={{ position: 'relative' }}>
-          {/* Search icon */}
-          <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999"
-            style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-          </svg>
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); setSearchCursorIndex(-1); }}
-            onFocus={() => { const q = debouncedQuery.trim(); if (meetsSearchMinLength(q)) setShowSearchResults(true); }}
-            onKeyDown={e => {
-              if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
-              if (!showSearchResults || searchPagedResults.length === 0) return;
-              if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                setSearchCursorIndex(i => {
-                  const next = Math.min(i + 1, searchPagedResults.length - 1);
-                  setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
-                  return next;
-                });
-              } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                setSearchCursorIndex(i => {
-                  const next = Math.max(i - 1, 0);
-                  setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
-                  return next;
-                });
-              } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (searchCursorIndex >= 0 && searchCursorIndex < searchPagedResults.length) {
-                  handleSearchSelect(searchPagedResults[searchCursorIndex].id);
-                  setSearchCursorIndex(-1);
-                }
-              }
-            }}
-            placeholder="ノード検索（2文字以上／PIDは1文字〜）"
-            style={{
-              width: '100%', boxSizing: 'border-box',
-              paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
-              fontSize: 13,
-              border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: 8,
-              background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-              outline: 'none', color: '#333',
-            }}
-          />
-          {/* .* regex toggle */}
-          <button
-            type="button"
-            title={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
-            aria-label={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
-            aria-pressed={searchUseRegex}
-            onClick={() => setSearchUseRegex(v => !v)}
-            style={{
-              position: 'absolute', right: searchQuery ? 30 : 6, top: '50%', transform: 'translateY(-50%)',
-              background: searchUseRegex ? '#1a73e8' : 'transparent',
-              border: 'none',
-              borderRadius: 4, cursor: 'pointer',
-              color: searchUseRegex ? '#fff' : '#888',
-              fontSize: 11, fontFamily: 'monospace', fontWeight: 'bold',
-              lineHeight: 1, padding: '2px 4px',
-            }}
-          >.*</button>
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => { setSearchQuery(''); setDebouncedQuery(''); setShowSearchResults(false); searchInputRef.current?.focus(); }}
-              style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
-            >✕</button>
-          )}
-        </div>
+        {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
+        <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
+        {/* 検索セクション: input card（内部にsliders）+ toggle（TopNと同じ構造） */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          {/* Card: input + optional sliders（TopNのパネルdivに相当） */}
+          <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: '8px 8px 0 0', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+            {/* Input row */}
+            <div style={{ position: 'relative' }}>
+              {/* Search/Filter mode toggle icon */}
+              <button
+                type="button"
+                title={filterActive ? 'フィルタモード（クリックで検索モードに切替）' : '検索モード（クリックでフィルタモードに切替）'}
+                onClick={() => setFilterActive(f => !f)}
+                style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}
+              >
+                {filterActive ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#1a73e8">
+                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999">
+                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                  </svg>
+                )}
+              </button>
+              {/* Filter target select — フィルタモード時のみ表示、虫眼鏡の隣 */}
+              {filterActive && (
+                <select
+                  value={filterTarget}
+                  onChange={e => setFilterTarget(e.target.value as 'all' | 'project' | 'recipient')}
+                  style={{ position: 'absolute', left: 28, top: '50%', transform: 'translateY(-50%)', fontSize: 10, border: '1px solid #ddd', borderRadius: 3, padding: '1px 2px', background: 'rgba(255,255,255,0.9)', color: '#555', cursor: 'pointer', height: 20 }}
+                >
+                  <option value="all">すべて</option>
+                  <option value="project">事業</option>
+                  <option value="recipient">支出先</option>
+                </select>
+              )}
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={e => { setSearchQuery(e.target.value); if (!filterActive) setShowSearchResults(true); setSearchCursorIndex(-1); }}
+                onFocus={() => { const q = debouncedQuery.trim(); if (meetsSearchMinLength(q)) setShowSearchResults(true); }}
+                onKeyDown={e => {
+                  if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
+                  if (!showSearchResults || searchPagedResults.length === 0) return;
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setSearchCursorIndex(i => {
+                      const next = Math.min(i + 1, searchPagedResults.length - 1);
+                      setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
+                      return next;
+                    });
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setSearchCursorIndex(i => {
+                      const next = Math.max(i - 1, 0);
+                      setTimeout(() => searchDropdownRef.current?.children[next + 1]?.scrollIntoView({ block: 'nearest' }), 0);
+                      return next;
+                    });
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (searchCursorIndex >= 0 && searchCursorIndex < searchPagedResults.length) {
+                      handleSearchSelect(searchPagedResults[searchCursorIndex].id);
+                      setSearchCursorIndex(-1);
+                    }
+                  }
+                }}
+                placeholder={filterActive ? 'フィルタ' : '検索(2文字以上/PID)'}
+                style={{
+                  width: '100%', boxSizing: 'border-box',
+                  paddingLeft: filterActive ? 90 : 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
+                  fontSize: 13, border: 'none', borderRadius: 8,
+                  background: 'transparent', outline: 'none', color: '#333',
+                }}
+              />
+              {/* .* regex toggle */}
+              <button
+                type="button"
+                title={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
+                aria-label={searchUseRegex ? '正規表現検索をオフ' : '正規表現で検索'}
+                aria-pressed={searchUseRegex}
+                onClick={() => setSearchUseRegex(v => !v)}
+                style={{
+                  position: 'absolute', right: searchQuery ? 30 : 6, top: '50%', transform: 'translateY(-50%)',
+                  background: searchUseRegex ? '#1a73e8' : 'transparent',
+                  border: 'none', borderRadius: 4, cursor: 'pointer',
+                  color: searchUseRegex ? '#fff' : '#888',
+                  fontSize: 11, fontFamily: 'monospace', fontWeight: 'bold',
+                  lineHeight: 1, padding: '2px 4px',
+                }}
+              >.*</button>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => { setSearchQuery(''); setDebouncedQuery(''); setShowSearchResults(false); searchInputRef.current?.focus(); }}
+                  style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
+                >✕</button>
+              )}
+            </div>{/* end input row */}
+
+            {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
+            {showAmountSliders && (
+              <div style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {/* 予算・支出 テキスト入力 */}
+                {([
+                  { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
+                  { label: '支出', minText: filterMinSpendingText, maxText: filterMaxSpendingText, setMin: setFilterMinSpendingText, setMax: setFilterMaxSpendingText },
+                ] as const).map(({ label, minText, maxText, setMin, setMax }) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>{label}</span>
+                    <input type="text" value={minText} onChange={e => setMin(e.target.value)}
+                      placeholder="例: 100億、50万円"
+                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                    />
+                    <span style={{ fontSize: 11, color: '#aaa', flexShrink: 0 }}>〜</span>
+                    <input type="text" value={maxText} onChange={e => setMax(e.target.value)}
+                      placeholder="例: 1兆、500億"
+                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToYen(maxText) !== null || !maxText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                    />
+                    {(minText || maxText) && (
+                      <button type="button" onClick={() => { setMin(''); setMax(''); }}
+                        style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                    )}
+                  </div>
+                ))}
+                <div style={{ fontSize: 10, color: '#bbb', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>例: 1.26億 / 4567万円 / 1兆2000億</div>
+              </div>
+            )}
+          </div>{/* end card */}
+
+          {/* トグルボタン（card外・下部 — TopNの構造と同一） */}
+          {(() => {
+            return (
+              <button
+                type="button"
+                title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
+                aria-pressed={showAmountSliders}
+                onClick={() => setShowAmountSliders(s => !s)}
+                style={{ alignSelf: 'flex-end', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', borderTop: 'none', borderLeft: '1px solid #e0e0e0', borderRight: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
+                  <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
+                </svg>
+              </button>
+            );
+          })()}
+        </div>{/* end 検索セクション */}
+
+        </div>{/* end Row 1 flex */}
+
         {/* Dropdown */}
-        {showSearchResults && searchResults.length > 0 && (
+        {!filterActive && showSearchResults && searchResults.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
             {/* Count header */}
             <div style={{ padding: '5px 10px', fontSize: 11, color: '#999', borderBottom: '1px solid #f0f0f0' }}>
@@ -2260,7 +2562,7 @@ export default function RealDataSankeyPage() {
           </div>
         )}
         {/* No results */}
-        {showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
+        {!filterActive && showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
@@ -2464,7 +2766,7 @@ export default function RealDataSankeyPage() {
           <button
             onClick={() => setShowTopNSliders(s => !s)}
             title={showTopNSliders ? 'TopN設定 を隠す' : 'TopN設定 を表示'}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', border: '1px solid #e0e0e0', borderTop: 'none', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', borderTop: 'none', borderLeft: '1px solid #e0e0e0', borderRight: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
               <path d={showTopNSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
