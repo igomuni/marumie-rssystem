@@ -577,7 +577,14 @@ export default function RealDataSankeyPage() {
   const minimapH = Math.round(MINIMAP_W * (svgHeight / (svgWidth || 1)));
   const minimapRef = useRef<HTMLCanvasElement>(null);
   const minimapDragging = useRef(false);
-  const showMinimap = true;
+  const [showMinimap, setShowMinimap] = useState(false);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
+  // Max height for search dropdown: from search box bottom to minimap top (or viewport bottom when minimap hidden)
+  const searchDropdownMaxH = useMemo(() => {
+    const searchBottom = searchBoxRef.current?.getBoundingClientRect().bottom ?? (12 + 40);
+    const minimapTopY = showMinimap ? svgHeight - 8 - 32 - minimapH : svgHeight - 32 - 32 - 8;
+    return Math.max(120, minimapTopY - searchBottom - 4 - 8);
+  }, [svgHeight, minimapH, showMinimap, showAmountSliders]);
 
   useEffect(() => {
     setGraphData(null);
@@ -1325,26 +1332,43 @@ export default function RealDataSankeyPage() {
     const q = debouncedQuery.trim();
     const pidQuery = isPidQuery(q) ? Number(q) : null;
     if (!graphData || !meetsSearchMinLength(q)) return [];
-    const results: { id: string; name: string; type: string; value: number; projectId?: number }[] = [];
+    type SearchResult = { id: string; name: string; type: string; value: number; sortValue: number; projectId?: number; budgetValue?: number };
+    const results: SearchResult[] = [];
     let matcher: (name: string) => boolean;
     if (pidQuery !== null) {
       matcher = () => false;
     } else if (searchUseRegex) {
       if (q.length > SEARCH_REGEX_MAX_LEN) return [];
       try { const re = new RegExp(q, 'i'); matcher = name => re.test(name); }
-      catch { return []; }  // invalid regex → no results
+      catch { return []; }
     } else {
       const qLower = q.toLocaleLowerCase();
       matcher = name => name.toLocaleLowerCase().includes(qLower);
     }
+    // Pre-build budget lookup for project merging
+    const budgetByPid = new Map<number, number>();
     for (const n of graphData.nodes) {
+      if (n.type === 'project-budget' && n.projectId != null) budgetByPid.set(n.projectId, n.value);
+    }
+    for (const n of graphData.nodes) {
+      if (n.type === 'project-budget') continue; // merged into project-spending entry
       if (pidQuery !== null) {
-        if (n.type === 'project-spending' && n.projectId === pidQuery) results.push({ id: n.id, name: n.name, type: n.type, value: n.value, projectId: n.projectId });
+        if (n.type === 'project-spending' && n.projectId === pidQuery) {
+          const bv = budgetByPid.get(n.projectId) ?? 0;
+          results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
+        }
       } else {
-        if (matcher(n.name)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value, projectId: n.projectId });
+        if (matcher(n.name)) {
+          if (n.type === 'project-spending' && n.projectId != null) {
+            const bv = budgetByPid.get(n.projectId) ?? 0;
+            results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
+          } else {
+            results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: n.value });
+          }
+        }
       }
     }
-    return results.sort((a, b) => b.value - a.value);
+    return results.sort((a, b) => b.sortValue - a.sortValue);
   }, [graphData, debouncedQuery, searchUseRegex]);
 
   const SEARCH_PAGE_SIZE = 200;
@@ -1844,28 +1868,43 @@ export default function RealDataSankeyPage() {
             })()}
 
             {/* Minimap */}
-            {showMinimap && (
-              <canvas
-                ref={minimapRef}
-                width={MINIMAP_W}
-                height={minimapH}
-                onClick={(e) => { e.stopPropagation(); minimapNavigate(e); }}
-                onMouseDown={(e) => { e.stopPropagation(); minimapDragging.current = true; minimapNavigate(e); }}
-                onMouseMove={(e) => { if (minimapDragging.current) minimapNavigate(e); }}
-                onMouseUp={() => { minimapDragging.current = false; }}
-                onMouseLeave={() => { minimapDragging.current = false; }}
-                style={{
-                  position: 'absolute',
-                  left: selectedNodeId !== null ? (isPanelCollapsed ? 26 : 318) : 8,
-                  bottom: 8,
-                  zIndex: 10,
-                  border: '1px solid #ccc',
-                  borderRadius: 4,
-                  cursor: 'crosshair',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
-                  transition: 'left 0.2s ease',
-                }}
-              />
+            {showMinimap ? (
+              <div
+                data-pan-disabled="true"
+                style={{ position: 'absolute', left: selectedNodeId !== null ? (isPanelCollapsed ? 26 : 318) : 8, bottom: 8, zIndex: 10, transition: 'left 0.2s ease' }}
+              >
+                <canvas
+                  ref={minimapRef}
+                  width={MINIMAP_W}
+                  height={minimapH}
+                  onClick={(e) => { e.stopPropagation(); minimapNavigate(e); }}
+                  onMouseDown={(e) => { e.stopPropagation(); minimapDragging.current = true; minimapNavigate(e); }}
+                  onMouseMove={(e) => { if (minimapDragging.current) minimapNavigate(e); }}
+                  onMouseUp={() => { minimapDragging.current = false; }}
+                  onMouseLeave={() => { minimapDragging.current = false; }}
+                  style={{ display: 'block', border: '1px solid #ccc', borderRadius: '4px 4px 0px 4px', cursor: 'crosshair', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }}
+                />
+                {/* Close button — outside bottom-right of minimap frame */}
+                <button
+                  type="button"
+                  title="ミニマップを隠す"
+                  onClick={(e) => { e.stopPropagation(); setShowMinimap(false); }}
+                  style={{ position: 'absolute', bottom: 0, right: -13, zIndex: 12, background: 'rgba(255,255,255,0.92)', borderTop: '1px solid #ccc', borderRight: '1px solid #ccc', borderBottom: '1px solid #ccc', borderLeft: 'none', borderRadius: '0 4px 4px 0', width: 14, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px" fill="#aaa"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
+                </button>
+              </div>
+            ) : (
+              /* Map icon button when minimap is hidden */
+              <button
+                type="button"
+                data-pan-disabled="true"
+                title="ミニマップを表示"
+                onClick={(e) => { e.stopPropagation(); setShowMinimap(true); }}
+                style={{ position: 'absolute', left: selectedNodeId !== null ? (isPanelCollapsed ? 34 : 326) : 16, bottom: 16, zIndex: 11, background: 'rgba(255,255,255,0.7)', border: 'none', borderRadius: 6, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, transition: 'left 0.2s ease' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#888"><path d="m600-120-240-84-186 72q-20 8-37-4.5T120-170v-560q0-13 7.5-23t20.5-15l212-72 240 84 186-72q20-8 37 4.5t17 33.5v560q0 13-7.5 23T812-192l-212 72Zm-40-98v-468l-160-56v468l160 56Zm80 0 120-40v-474l-120 46v468Zm-440-10 120-46v-468l-120 40v474Zm440-458v468-468Zm-320-56v468-468Z"/></svg>
+              </button>
             )}
 
           {/* DOM tooltip — link hover */}
@@ -2354,6 +2393,7 @@ export default function RealDataSankeyPage() {
 
       {/* Search box — top left */}
       <div
+        ref={searchBoxRef}
         data-pan-disabled="true"
         style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 322 : 12, zIndex: 100, width: 296, transition: 'left 0.2s ease' }}
       >
@@ -2515,7 +2555,7 @@ export default function RealDataSankeyPage() {
               {searchResults.length}件{searchTotalPages > 1 ? `（${searchPage + 1} / ${searchTotalPages} ページ）` : ''}
             </div>
             {/* Scrollable list */}
-            <div ref={searchDropdownRef} style={{ maxHeight: 280, overflowY: 'auto' }}>
+            <div ref={searchDropdownRef} style={{ maxHeight: searchDropdownMaxH, overflowY: 'auto' }}>
               {searchPagedResults.map((node, i) => (
                 <button
                   key={node.id}
@@ -2525,10 +2565,13 @@ export default function RealDataSankeyPage() {
                   onMouseEnter={e => { if (i !== searchCursorIndex) e.currentTarget.style.background = '#f5f5f5'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = i === searchCursorIndex ? '#e8f0fe' : 'transparent'; }}
                 >
-                  <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: getNodeColor(node) }} />
+                  <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: 'budgetValue' in node ? 'linear-gradient(to right, #4db870 44%, #e07040 56%)' : getNodeColor(node) }} />
                   <span title={node.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
                   {node.projectId != null && <span style={{ fontSize: 10, color: '#bbb', whiteSpace: 'nowrap', flexShrink: 0 }}>PID:{node.projectId}</span>}
-                  <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
+                  {'budgetValue' in node
+                    ? <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>予{formatYen(node.budgetValue ?? 0)} / 支{formatYen(node.value)}</span>
+                    : <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
+                  }
                 </button>
               ))}
             </div>
@@ -2762,7 +2805,7 @@ export default function RealDataSankeyPage() {
       <div style={{ position: 'absolute', top: 14, right: 12, zIndex: 15 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
-          aria-label="TopN 設定を開く"
+          aria-label="表示設定を開く"
           aria-expanded={showSettings}
           aria-controls="sankey-topn-settings"
           aria-haspopup="dialog"
