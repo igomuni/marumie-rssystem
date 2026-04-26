@@ -66,7 +66,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= 0.1 && n <= 10) result.zoom = n; }
   const f = p.get('f'); if (f === '1') result.filterActive = true;
-  const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient'; else if (nft === 'a') result.filterTarget = 'all';
+  const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient';
   const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
   const fmb = p.get('fmb'); if (fmb !== null) result.filterMinBudgetText = fmb;
   const fxb = p.get('fxb'); if (fxb !== null) result.filterMaxBudgetText = fxb;
@@ -350,7 +350,7 @@ export default function RealDataSankeyPage() {
     if (!autoFocusRelated) p.set('afr', '0');
     if (year !== '2025') p.set('yr', year);
     if (filterActive) p.set('f', '1');
-    if (filterTarget !== 'recipient') p.set('nft', filterTarget === 'project' ? 'p' : 'a');
+    if (filterTarget === 'project') p.set('nft', 'p');
     if (filterActive && searchQuery) p.set('nf', searchQuery);
     if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
     if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
@@ -692,19 +692,9 @@ export default function RealDataSankeyPage() {
         }
       }
     }
-    // ゼロ予算プロジェクトはgraph生成時にministry→project-budgetエッジを持たないため、
-    // そのままではSankeyの階層から切り離されてしまう。
-    // ただし予算フィルタの下限が0より大きい場合（minBudget > 0）のみ除外する。
-    // ・予算フィルタなし / minBudget=0 のとき: ゼロ予算事業は通常通り表示対象
-    // ・minBudget > 0 のとき: 0円は範囲外なので除外（failBudget でも除外されるが明示的に処理）
+    // ゼロ予算事業は graph 生成時に ministry→project-budget エッジを持たないため Pass 3 で
+    // 省庁保護ロジックを切り替える必要がある。minBudget > 0 の場合は failBudget が除外済み。
     const excludeZeroBudget = hasBudget && minBudget > 0;
-    for (const [pid, bn] of budgetByPid) {
-      if (bn.value === 0 && !excluded.has(bn.id) && excludeZeroBudget) {
-        excluded.add(bn.id);
-        const sn = spendingByPid.get(pid);
-        if (sn) excluded.add(sn.id);
-      }
-    }
     // Pass 3: 残存事業のない省庁を除外（project → ministry のカスケード）
     const ministriesWithSurvivingProjects = new Set(
       graphData.edges
