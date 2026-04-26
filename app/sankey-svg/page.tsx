@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 import type { GraphData, LayoutNode, LayoutLink } from '@/types/sankey-svg';
 import type { ProjectDetail } from '@/types/project-details';
 import {
   COL_LABELS, MARGIN, NODE_W, NODE_PAD,
-  TYPE_LABELS,
+  TYPE_COLORS, TYPE_LABELS,
   getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen,
 } from '@/app/lib/sankey-svg-constants';
+import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { filterTopN, computeLayout } from '@/app/lib/sankey-svg-filter';
 
 // ── URL state serialization ──
@@ -577,7 +578,35 @@ export default function RealDataSankeyPage() {
   const minimapH = Math.round(MINIMAP_W * (svgHeight / (svgWidth || 1)));
   const minimapRef = useRef<HTMLCanvasElement>(null);
   const minimapDragging = useRef(false);
-  const showMinimap = true;
+  const [showMinimap, setShowMinimap] = useState(false);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
+
+  // Layout constants for bottom-right widgets the dropdown must clear
+  const MINIMAP_BOTTOM = 8;       // minimap wrapper bottom offset
+  const MINIMAP_BUFFER = 32;      // extra clearance above minimap when visible
+  const MAP_ICON_BOTTOM = 32;     // bottom clearance for map icon (includes extra margin)
+  const MAP_ICON_HEIGHT = 32;     // map icon button height
+  const MAP_ICON_GAP = 8;         // gap between map icon and dropdown bottom
+  const DROPDOWN_GAP = 12;        // gap between search box bottom and dropdown top
+
+  const [searchBoxBottom, setSearchBoxBottom] = useState(52); // 12 (top) + ~40 (approx height)
+  useLayoutEffect(() => {
+    const measure = () => {
+      const r = searchBoxRef.current?.getBoundingClientRect();
+      if (r) setSearchBoxBottom(r.bottom);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (searchBoxRef.current) ro.observe(searchBoxRef.current);
+    return () => ro.disconnect();
+  }, [showAmountSliders, filterActive]);
+
+  const searchDropdownMaxH = useMemo(() => {
+    const obstacleTop = showMinimap
+      ? svgHeight - MINIMAP_BOTTOM - MINIMAP_BUFFER - minimapH
+      : svgHeight - MAP_ICON_BOTTOM - MAP_ICON_HEIGHT - MAP_ICON_GAP;
+    return Math.max(120, obstacleTop - searchBoxBottom - DROPDOWN_GAP);
+  }, [svgHeight, minimapH, showMinimap, searchBoxBottom]);
 
   useEffect(() => {
     setGraphData(null);
@@ -606,6 +635,16 @@ export default function RealDataSankeyPage() {
     };
   }, [graphData]);
 
+  // Shared lookup: projectId → project-budget node (depends only on graphData)
+  const budgetNodeByPid = useMemo(() => {
+    const m = new Map<number, NonNullable<typeof graphData>['nodes'][number]>();
+    if (!graphData) return m;
+    for (const n of graphData.nodes) {
+      if (n.type === 'project-budget' && n.projectId != null) m.set(n.projectId, n);
+    }
+    return m;
+  }, [graphData]);
+
   // Pre-filter exclusion set: built from filter conditions, applied before filterTopN
   const filterExcludedIds = useMemo(() => {
     if (!graphData) return null;
@@ -632,9 +671,6 @@ export default function RealDataSankeyPage() {
     const spendingByPid = new Map(
       graphData.nodes.filter(n => n.type === 'project-spending' && n.projectId != null).map(n => [n.projectId!, n])
     );
-    const budgetByPid = new Map(
-      graphData.nodes.filter(n => n.type === 'project-budget' && n.projectId != null).map(n => [n.projectId!, n])
-    );
     for (const n of graphData.nodes) {
       if (n.aggregated) continue;
       if (n.type === 'project-budget' && n.projectId != null) {
@@ -658,7 +694,7 @@ export default function RealDataSankeyPage() {
       for (const [pid, sn] of spendingByPid) {
         if (!excluded.has(sn.id) && !projectsWithSurvivingRecipients.has(sn.id)) {
           excluded.add(sn.id);
-          const bn = budgetByPid.get(pid);
+          const bn = budgetNodeByPid.get(pid);
           if (bn) excluded.add(bn.id);
         }
       }
@@ -879,11 +915,6 @@ export default function RealDataSankeyPage() {
         .filter((n): n is typeof n & { projectId: number } => n.type === 'project-spending' && n.projectId != null)
         .map(n => [n.projectId, n] as const)
     );
-    const budgetByPid = new Map(
-      graphData.nodes
-        .filter((n): n is typeof n & { projectId: number } => n.type === 'project-budget' && n.projectId != null)
-        .map(n => [n.projectId, n] as const)
-    );
     const toProjectEntry = (budgetNode: { id: string; name: string; value: number; projectId?: number; ministry?: string }): PanelEntry => {
       const sn = budgetNode.projectId != null ? spendingByPid.get(budgetNode.projectId) : undefined;
       const spId = sn?.id ?? (budgetNode.projectId != null ? `project-spending-${budgetNode.projectId}` : budgetNode.id);
@@ -940,7 +971,7 @@ export default function RealDataSankeyPage() {
     // ── project-budget / project-spending (non-aggregated) ─────────────
     if ((ntype === 'project-budget' || ntype === 'project-spending') && !selectedNode.aggregated) {
       const pid = selectedNode.projectId;
-      const budgetNode = ntype === 'project-budget' ? nodeById.get(nid) : (pid != null ? budgetByPid.get(pid) : undefined);
+      const budgetNode = ntype === 'project-budget' ? nodeById.get(nid) : (pid != null ? budgetNodeByPid.get(pid) : undefined);
       const spendingNode = pid != null ? spendingByPid.get(pid) : undefined;
       const ministryName = selectedNode.ministry ?? budgetNode?.ministry ?? spendingNode?.ministry;
       const ministryNode = ministryName ? graphData.nodes.find(n => n.type === 'ministry' && n.name === ministryName) : undefined;
@@ -1325,26 +1356,38 @@ export default function RealDataSankeyPage() {
     const q = debouncedQuery.trim();
     const pidQuery = isPidQuery(q) ? Number(q) : null;
     if (!graphData || !meetsSearchMinLength(q)) return [];
-    const results: { id: string; name: string; type: string; value: number; projectId?: number }[] = [];
+    type SearchResult = { id: string; name: string; type: string; value: number; sortValue: number; projectId?: number; budgetValue?: number };
+    const results: SearchResult[] = [];
     let matcher: (name: string) => boolean;
     if (pidQuery !== null) {
       matcher = () => false;
     } else if (searchUseRegex) {
       if (q.length > SEARCH_REGEX_MAX_LEN) return [];
       try { const re = new RegExp(q, 'i'); matcher = name => re.test(name); }
-      catch { return []; }  // invalid regex → no results
+      catch { return []; }
     } else {
       const qLower = q.toLocaleLowerCase();
       matcher = name => name.toLocaleLowerCase().includes(qLower);
     }
     for (const n of graphData.nodes) {
+      if (n.type === 'project-budget') continue; // merged into project-spending entry
       if (pidQuery !== null) {
-        if (n.type === 'project-spending' && n.projectId === pidQuery) results.push({ id: n.id, name: n.name, type: n.type, value: n.value, projectId: n.projectId });
+        if (n.type === 'project-spending' && n.projectId === pidQuery) {
+          const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
+          results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
+        }
       } else {
-        if (matcher(n.name)) results.push({ id: n.id, name: n.name, type: n.type, value: n.value, projectId: n.projectId });
+        if (matcher(n.name)) {
+          if (n.type === 'project-spending' && n.projectId != null) {
+            const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
+            results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
+          } else {
+            results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: n.value });
+          }
+        }
       }
     }
-    return results.sort((a, b) => b.value - a.value);
+    return results.sort((a, b) => b.sortValue - a.sortValue);
   }, [graphData, debouncedQuery, searchUseRegex]);
 
   const SEARCH_PAGE_SIZE = 200;
@@ -1844,29 +1887,17 @@ export default function RealDataSankeyPage() {
             })()}
 
             {/* Minimap */}
-            {showMinimap && (
-              <canvas
-                ref={minimapRef}
-                width={MINIMAP_W}
-                height={minimapH}
-                onClick={(e) => { e.stopPropagation(); minimapNavigate(e); }}
-                onMouseDown={(e) => { e.stopPropagation(); minimapDragging.current = true; minimapNavigate(e); }}
-                onMouseMove={(e) => { if (minimapDragging.current) minimapNavigate(e); }}
-                onMouseUp={() => { minimapDragging.current = false; }}
-                onMouseLeave={() => { minimapDragging.current = false; }}
-                style={{
-                  position: 'absolute',
-                  left: selectedNodeId !== null ? (isPanelCollapsed ? 26 : 318) : 8,
-                  bottom: 8,
-                  zIndex: 10,
-                  border: '1px solid #ccc',
-                  borderRadius: 4,
-                  cursor: 'crosshair',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
-                  transition: 'left 0.2s ease',
-                }}
-              />
-            )}
+            <MinimapOverlay
+              show={showMinimap}
+              onShow={() => setShowMinimap(true)}
+              onHide={() => setShowMinimap(false)}
+              left={selectedNodeId !== null ? (isPanelCollapsed ? 26 : 318) : 8}
+              minimapW={MINIMAP_W}
+              minimapH={minimapH}
+              canvasRef={minimapRef}
+              navigate={minimapNavigate}
+              dragging={minimapDragging}
+            />
 
           {/* DOM tooltip — link hover */}
           {hoveredLink && !hoveredNode && (() => {
@@ -2354,6 +2385,7 @@ export default function RealDataSankeyPage() {
 
       {/* Search box — top left */}
       <div
+        ref={searchBoxRef}
         data-pan-disabled="true"
         style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 322 : 12, zIndex: 100, width: 296, transition: 'left 0.2s ease' }}
       >
@@ -2515,7 +2547,7 @@ export default function RealDataSankeyPage() {
               {searchResults.length}件{searchTotalPages > 1 ? `（${searchPage + 1} / ${searchTotalPages} ページ）` : ''}
             </div>
             {/* Scrollable list */}
-            <div ref={searchDropdownRef} style={{ maxHeight: 280, overflowY: 'auto' }}>
+            <div ref={searchDropdownRef} style={{ maxHeight: searchDropdownMaxH, overflowY: 'auto' }}>
               {searchPagedResults.map((node, i) => (
                 <button
                   key={node.id}
@@ -2525,10 +2557,13 @@ export default function RealDataSankeyPage() {
                   onMouseEnter={e => { if (i !== searchCursorIndex) e.currentTarget.style.background = '#f5f5f5'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = i === searchCursorIndex ? '#e8f0fe' : 'transparent'; }}
                 >
-                  <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: getNodeColor(node) }} />
+                  <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: node.budgetValue !== undefined ? `linear-gradient(to right, ${TYPE_COLORS['project-budget']} 44%, ${TYPE_COLORS['project-spending']} 56%)` : getNodeColor(node) }} />
                   <span title={node.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
                   {node.projectId != null && <span style={{ fontSize: 10, color: '#bbb', whiteSpace: 'nowrap', flexShrink: 0 }}>PID:{node.projectId}</span>}
-                  <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
+                  {node.budgetValue !== undefined
+                    ? <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>予{formatYen(node.budgetValue)} / 支{formatYen(node.value)}</span>
+                    : <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
+                  }
                 </button>
               ))}
             </div>
@@ -2762,7 +2797,7 @@ export default function RealDataSankeyPage() {
       <div style={{ position: 'absolute', top: 14, right: 12, zIndex: 15 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
-          aria-label="TopN 設定を開く"
+          aria-label="表示設定を開く"
           aria-expanded={showSettings}
           aria-controls="sankey-topn-settings"
           aria-haspopup="dialog"
