@@ -34,7 +34,7 @@ interface SankeyUrlState {
   year: '2024' | '2025';
   zoom?: number;
   filterActive?: boolean;
-  filterTarget?: 'all' | 'project' | 'recipient';
+  filterTarget?: 'project' | 'recipient';
   filterNameQuery?: string;
   filterMinBudgetText?: string;
   filterMaxBudgetText?: string;
@@ -200,7 +200,7 @@ export default function RealDataSankeyPage() {
   // Filter feature
   const [filterActive, setFilterActive] = useState(false);
   const [showAmountSliders, setShowAmountSliders] = useState(false);
-  const [filterTarget, setFilterTarget] = useState<'all' | 'project' | 'recipient'>('recipient');
+  const [filterTarget, setFilterTarget] = useState<'project' | 'recipient'>('recipient');
   const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
   const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
   const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
@@ -635,50 +635,21 @@ export default function RealDataSankeyPage() {
     const budgetByPid = new Map(
       graphData.nodes.filter(n => n.type === 'project-budget' && n.projectId != null).map(n => [n.projectId!, n])
     );
-    // すべて(OR)用: 事業名・支出先名それぞれのマッチセットを事前計算し相互拡張
-    const matchingBudgetIds = new Set<string>();
-    const matchingRecipientIds = new Set<string>();
-    if (hasName && filterTarget === 'all') {
-      const nodeById = new Map(graphData.nodes.map(n => [n.id, n]));
-      // Step1: 名前が一致するノードを収集
-      for (const n of graphData.nodes) {
-        if (n.aggregated) continue;
-        if (n.type === 'project-budget' && matchesName(n.name)) matchingBudgetIds.add(n.id);
-        if (n.type === 'recipient' && matchesName(n.name)) matchingRecipientIds.add(n.id);
-      }
-      // Step2: マッチ支出先を持つ事業もマッチ扱い（支出先→事業 の一方向OR拡張のみ）
-      for (const e of graphData.edges) {
-        if (!e.target.startsWith('r-') || !matchingRecipientIds.has(e.target)) continue;
-        const sn = nodeById.get(e.source);
-        if (sn?.projectId != null) {
-          const bn = budgetByPid.get(sn.projectId);
-          if (bn) matchingBudgetIds.add(bn.id);
-        }
-      }
-    }
     for (const n of graphData.nodes) {
       if (n.aggregated) continue;
       if (n.type === 'project-budget' && n.projectId != null) {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
-        const failName = hasName && (
-          filterTarget === 'project' ? !matchesName(n.name) :
-          filterTarget === 'all' ? !matchingBudgetIds.has(n.id) :
-          false
-        );
+        const failName = hasName && filterTarget === 'project' && !matchesName(n.name);
         if (failBudget || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
-        const failName = hasName && (
-          filterTarget === 'recipient' ? !matchesName(n.name) :
-          filterTarget === 'all' ? !matchingRecipientIds.has(n.id) :
-          false
-        );
+        const failName = hasName && filterTarget === 'recipient' && !matchesName(n.name);
         if (failSpending || failName) excluded.add(n.id);
       }
     }
     // Pass 2: 支出先フィルタが有効な場合、残存支出先のない事業を除外（recipient → project のカスケード）
-    if (hasSpending || (hasName && (filterTarget === 'recipient' || filterTarget === 'all'))) {
+    if (hasSpending || (hasName && filterTarget === 'recipient')) {
       const projectsWithSurvivingRecipients = new Set(
         graphData.edges
           .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
@@ -2415,7 +2386,7 @@ export default function RealDataSankeyPage() {
               {filterActive && (
                 <select
                   value={filterTarget}
-                  onChange={e => setFilterTarget(e.target.value as 'all' | 'project' | 'recipient')}
+                  onChange={e => setFilterTarget(e.target.value as 'project' | 'recipient')}
                   style={{ position: 'absolute', left: 28, top: '50%', transform: 'translateY(-50%)', fontSize: 10, border: '1px solid #ddd', borderRadius: 3, padding: '1px 2px', background: 'rgba(255,255,255,0.9)', color: '#555', cursor: 'pointer', height: 20 }}
                 >
                   <option value="project">事業</option>
