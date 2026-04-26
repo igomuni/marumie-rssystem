@@ -200,7 +200,7 @@ export default function RealDataSankeyPage() {
   // Filter feature
   const [filterActive, setFilterActive] = useState(false);
   const [showAmountSliders, setShowAmountSliders] = useState(false);
-  const [filterTarget, setFilterTarget] = useState<'all' | 'project' | 'recipient'>('all');
+  const [filterTarget, setFilterTarget] = useState<'all' | 'project' | 'recipient'>('recipient');
   const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
   const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
   const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
@@ -312,7 +312,7 @@ export default function RealDataSankeyPage() {
       setAutoFocusRelated(parsed.autoFocusRelated ?? true);
       if (parsed.year !== undefined) setYear(parsed.year);
       setFilterActive(parsed.filterActive ?? false);
-      if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('all');
+      if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('recipient');
       setSearchQuery(parsed.filterNameQuery ?? '');
       setFilterMinBudgetText(parsed.filterMinBudgetText ?? '');
       setFilterMaxBudgetText(parsed.filterMaxBudgetText ?? '');
@@ -350,7 +350,7 @@ export default function RealDataSankeyPage() {
     if (!autoFocusRelated) p.set('afr', '0');
     if (year !== '2025') p.set('yr', year);
     if (filterActive) p.set('f', '1');
-    if (filterTarget !== 'all') p.set('nft', filterTarget === 'project' ? 'p' : 'r');
+    if (filterTarget !== 'recipient') p.set('nft', filterTarget === 'project' ? 'p' : 'a');
     if (filterActive && searchQuery) p.set('nf', searchQuery);
     if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
     if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
@@ -692,12 +692,34 @@ export default function RealDataSankeyPage() {
         }
       }
     }
+    // ゼロ予算プロジェクトはgraph生成時にministry→project-budgetエッジを持たないため、
+    // そのままではSankeyの階層から切り離されてしまう。
+    // ただし予算フィルタの下限が0より大きい場合（minBudget > 0）のみ除外する。
+    // ・予算フィルタなし / minBudget=0 のとき: ゼロ予算事業は通常通り表示対象
+    // ・minBudget > 0 のとき: 0円は範囲外なので除外（failBudget でも除外されるが明示的に処理）
+    const excludeZeroBudget = hasBudget && minBudget > 0;
+    for (const [pid, bn] of budgetByPid) {
+      if (bn.value === 0 && !excluded.has(bn.id) && excludeZeroBudget) {
+        excluded.add(bn.id);
+        const sn = spendingByPid.get(pid);
+        if (sn) excluded.add(sn.id);
+      }
+    }
     // Pass 3: 残存事業のない省庁を除外（project → ministry のカスケード）
     const ministriesWithSurvivingProjects = new Set(
       graphData.edges
         .filter(e => !excluded.has(e.source) && !excluded.has(e.target) && e.target.startsWith('project-budget-'))
         .map(e => e.source)
     );
+    // ゼロ予算事業がいる可能性がある場合（excludeZeroBudget=false）は、
+    // ministry→project-budgetエッジが存在しないため、生き残ったproject-spendingノードから省庁を保護する。
+    if (!excludeZeroBudget) {
+      for (const n of graphData.nodes) {
+        if (n.type === 'project-spending' && !excluded.has(n.id) && n.value > 0 && n.ministry) {
+          ministriesWithSurvivingProjects.add(`ministry-${n.ministry}`);
+        }
+      }
+    }
     for (const n of graphData.nodes) {
       if (n.type === 'ministry' && !n.aggregated && !excluded.has(n.id)) {
         if (!ministriesWithSurvivingProjects.has(n.id)) excluded.add(n.id);
@@ -1721,7 +1743,7 @@ export default function RealDataSankeyPage() {
                           />
                           {labelVisible && (<>
                             {/* Left label: budget amount */}
-                            <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
+                            <text x={node.x0 - 3} y={Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -1732,7 +1754,7 @@ export default function RealDataSankeyPage() {
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
                             {/* Right label: project name + spending amount */}
-                            <text x={spendingNode.x1 + 3} y={sH / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                            <text x={spendingNode.x1 + 3} y={Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -2406,7 +2428,6 @@ export default function RealDataSankeyPage() {
                   onChange={e => setFilterTarget(e.target.value as 'all' | 'project' | 'recipient')}
                   style={{ position: 'absolute', left: 28, top: '50%', transform: 'translateY(-50%)', fontSize: 10, border: '1px solid #ddd', borderRadius: 3, padding: '1px 2px', background: 'rgba(255,255,255,0.9)', color: '#555', cursor: 'pointer', height: 20 }}
                 >
-                  <option value="all">すべて</option>
                   <option value="project">事業</option>
                   <option value="recipient">支出先</option>
                 </select>
