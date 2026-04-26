@@ -34,7 +34,7 @@ interface SankeyUrlState {
   year: '2024' | '2025';
   zoom?: number;
   filterActive?: boolean;
-  filterTarget?: 'all' | 'project' | 'recipient';
+  filterTarget?: 'project' | 'recipient';
   filterNameQuery?: string;
   filterMinBudgetText?: string;
   filterMaxBudgetText?: string;
@@ -66,7 +66,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= 0.1 && n <= 10) result.zoom = n; }
   const f = p.get('f'); if (f === '1') result.filterActive = true;
-  const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient'; else if (nft === 'a') result.filterTarget = 'all';
+  const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient';
   const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
   const fmb = p.get('fmb'); if (fmb !== null) result.filterMinBudgetText = fmb;
   const fxb = p.get('fxb'); if (fxb !== null) result.filterMaxBudgetText = fxb;
@@ -200,7 +200,7 @@ export default function RealDataSankeyPage() {
   // Filter feature
   const [filterActive, setFilterActive] = useState(false);
   const [showAmountSliders, setShowAmountSliders] = useState(false);
-  const [filterTarget, setFilterTarget] = useState<'all' | 'project' | 'recipient'>('all');
+  const [filterTarget, setFilterTarget] = useState<'project' | 'recipient'>('recipient');
   const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
   const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
   const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
@@ -312,7 +312,7 @@ export default function RealDataSankeyPage() {
       setAutoFocusRelated(parsed.autoFocusRelated ?? true);
       if (parsed.year !== undefined) setYear(parsed.year);
       setFilterActive(parsed.filterActive ?? false);
-      if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('all');
+      if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('recipient');
       setSearchQuery(parsed.filterNameQuery ?? '');
       setFilterMinBudgetText(parsed.filterMinBudgetText ?? '');
       setFilterMaxBudgetText(parsed.filterMaxBudgetText ?? '');
@@ -350,7 +350,7 @@ export default function RealDataSankeyPage() {
     if (!autoFocusRelated) p.set('afr', '0');
     if (year !== '2025') p.set('yr', year);
     if (filterActive) p.set('f', '1');
-    if (filterTarget !== 'all') p.set('nft', filterTarget === 'project' ? 'p' : 'r');
+    if (filterTarget === 'project') p.set('nft', 'p');
     if (filterActive && searchQuery) p.set('nf', searchQuery);
     if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
     if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
@@ -635,50 +635,21 @@ export default function RealDataSankeyPage() {
     const budgetByPid = new Map(
       graphData.nodes.filter(n => n.type === 'project-budget' && n.projectId != null).map(n => [n.projectId!, n])
     );
-    // すべて(OR)用: 事業名・支出先名それぞれのマッチセットを事前計算し相互拡張
-    const matchingBudgetIds = new Set<string>();
-    const matchingRecipientIds = new Set<string>();
-    if (hasName && filterTarget === 'all') {
-      const nodeById = new Map(graphData.nodes.map(n => [n.id, n]));
-      // Step1: 名前が一致するノードを収集
-      for (const n of graphData.nodes) {
-        if (n.aggregated) continue;
-        if (n.type === 'project-budget' && matchesName(n.name)) matchingBudgetIds.add(n.id);
-        if (n.type === 'recipient' && matchesName(n.name)) matchingRecipientIds.add(n.id);
-      }
-      // Step2: マッチ支出先を持つ事業もマッチ扱い（支出先→事業 の一方向OR拡張のみ）
-      for (const e of graphData.edges) {
-        if (!e.target.startsWith('r-') || !matchingRecipientIds.has(e.target)) continue;
-        const sn = nodeById.get(e.source);
-        if (sn?.projectId != null) {
-          const bn = budgetByPid.get(sn.projectId);
-          if (bn) matchingBudgetIds.add(bn.id);
-        }
-      }
-    }
     for (const n of graphData.nodes) {
       if (n.aggregated) continue;
       if (n.type === 'project-budget' && n.projectId != null) {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
-        const failName = hasName && (
-          filterTarget === 'project' ? !matchesName(n.name) :
-          filterTarget === 'all' ? !matchingBudgetIds.has(n.id) :
-          false
-        );
+        const failName = hasName && filterTarget === 'project' && !matchesName(n.name);
         if (failBudget || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
-        const failName = hasName && (
-          filterTarget === 'recipient' ? !matchesName(n.name) :
-          filterTarget === 'all' ? !matchingRecipientIds.has(n.id) :
-          false
-        );
+        const failName = hasName && filterTarget === 'recipient' && !matchesName(n.name);
         if (failSpending || failName) excluded.add(n.id);
       }
     }
     // Pass 2: 支出先フィルタが有効な場合、残存支出先のない事業を除外（recipient → project のカスケード）
-    if (hasSpending || (hasName && (filterTarget === 'recipient' || filterTarget === 'all'))) {
+    if (hasSpending || (hasName && filterTarget === 'recipient')) {
       const projectsWithSurvivingRecipients = new Set(
         graphData.edges
           .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
@@ -692,12 +663,24 @@ export default function RealDataSankeyPage() {
         }
       }
     }
+    // ゼロ予算事業は graph 生成時に ministry→project-budget エッジを持たないため Pass 3 で
+    // 省庁保護ロジックを切り替える必要がある。minBudget > 0 の場合は failBudget が除外済み。
+    const excludeZeroBudget = hasBudget && minBudget > 0;
     // Pass 3: 残存事業のない省庁を除外（project → ministry のカスケード）
     const ministriesWithSurvivingProjects = new Set(
       graphData.edges
         .filter(e => !excluded.has(e.source) && !excluded.has(e.target) && e.target.startsWith('project-budget-'))
         .map(e => e.source)
     );
+    // ゼロ予算事業がいる可能性がある場合（excludeZeroBudget=false）は、
+    // ministry→project-budgetエッジが存在しないため、生き残ったproject-spendingノードから省庁を保護する。
+    if (!excludeZeroBudget) {
+      for (const n of graphData.nodes) {
+        if (n.type === 'project-spending' && !excluded.has(n.id) && n.value > 0 && n.ministry) {
+          ministriesWithSurvivingProjects.add(`ministry-${n.ministry}`);
+        }
+      }
+    }
     for (const n of graphData.nodes) {
       if (n.type === 'ministry' && !n.aggregated && !excluded.has(n.id)) {
         if (!ministriesWithSurvivingProjects.has(n.id)) excluded.add(n.id);
@@ -1721,7 +1704,7 @@ export default function RealDataSankeyPage() {
                           />
                           {labelVisible && (<>
                             {/* Left label: budget amount */}
-                            <text x={node.x0 - 3} y={bH / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
+                            <text x={node.x0 - 3} y={Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -1732,7 +1715,7 @@ export default function RealDataSankeyPage() {
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
                             {/* Right label: project name + spending amount */}
-                            <text x={spendingNode.x1 + 3} y={sH / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                            <text x={spendingNode.x1 + 3} y={Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -2403,10 +2386,9 @@ export default function RealDataSankeyPage() {
               {filterActive && (
                 <select
                   value={filterTarget}
-                  onChange={e => setFilterTarget(e.target.value as 'all' | 'project' | 'recipient')}
+                  onChange={e => setFilterTarget(e.target.value as 'project' | 'recipient')}
                   style={{ position: 'absolute', left: 28, top: '50%', transform: 'translateY(-50%)', fontSize: 10, border: '1px solid #ddd', borderRadius: 3, padding: '1px 2px', background: 'rgba(255,255,255,0.9)', color: '#555', cursor: 'pointer', height: 20 }}
                 >
-                  <option value="all">すべて</option>
                   <option value="project">事業</option>
                   <option value="recipient">支出先</option>
                 </select>

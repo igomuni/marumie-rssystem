@@ -86,16 +86,21 @@ export function filterTopN(
         return b.value - a.value;
       });
     totalProjectCount = ranked.length;
+    // Clamp offset so it never exceeds the last valid window start.
+    // Without this, an offset from URL or stale state can push the entire ranked list into
+    // aboveWindowSpendingIds, leaving the window empty while non-top-ministry projects
+    // still appear in the aggregate node.
+    const effectiveProjectOffset = Math.min(projectOffset, Math.max(0, ranked.length - topProject));
 
     // Above-window: excluded entirely (pinned project is exempted)
-    const aboveWindowProjects = ranked.slice(0, projectOffset).filter(n => n.id !== pinnedProjectId);
+    const aboveWindowProjects = ranked.slice(0, effectiveProjectOffset).filter(n => n.id !== pinnedProjectId);
     aboveWindowSpendingIds = new Set(aboveWindowProjects.map(n => n.id));
     aboveWindowBudgetIds = new Set(
       aboveWindowProjects.filter(n => n.projectId != null).map(n => `project-budget-${n.projectId}`)
     );
 
-    // Window projects: [projectOffset, projectOffset + topProject)
-    const windowSlice = ranked.slice(projectOffset, projectOffset + topProject);
+    // Window projects: [effectiveProjectOffset, effectiveProjectOffset + topProject)
+    const windowSlice = ranked.slice(effectiveProjectOffset, effectiveProjectOffset + topProject);
     // If pinned project is above-window, force it into the window
     if (pinnedProjectId) {
       const aboveWinIds = aboveWindowSpendingIds;
@@ -106,8 +111,8 @@ export function filterTopN(
     }
     projectOffsetWindowProjectIds = new Set(windowSlice.map(n => n.id));
 
-    // Aggregate projects: [projectOffset + topProject, ...)
-    projectOffsetAggregateSpendingIds = new Set(ranked.slice(projectOffset + topProject).map(n => n.id));
+    // Aggregate projects: [effectiveProjectOffset + topProject, ...)
+    projectOffsetAggregateSpendingIds = new Set(ranked.slice(effectiveProjectOffset + topProject).map(n => n.id));
   }
 
 
@@ -521,7 +526,7 @@ export function filterTopN(
     // rawValue preserves original budget for label display.
     if (budgetNode) {
       const adjBv = projectAdjustedBudget.get(budgetNode.id) ?? budgetNode.value;
-      nodes.push({ ...budgetNode, value: adjBv, rawValue: budgetNode.value, isScaled: adjBv < budgetNode.value, layoutSortValue: layoutSortBase, skipLinkOverride: true });
+      nodes.push({ ...budgetNode, value: adjBv, rawValue: budgetNode.value, isScaled: adjBv < budgetNode.value, layoutSortValue: layoutSortBase, skipLinkOverride: true, layoutHeight: Math.max(adjBv, spendingValue) });
     }
     nodes.push({ ...n, value: spendingValue, rawValue: spendingTrimmed ? n.value : undefined, isScaled: spendingTrimmed, layoutSortValue: layoutSortBase, skipLinkOverride: true });
   }
@@ -534,7 +539,7 @@ export function filterTopN(
   // Create __agg-project-budget whenever aggregate projects have spending to show
   // (budget may be 0, in which case the node has height 0 but still anchors the merged shape label).
   if (otherProjectSpendingTotal > 0 && showAggProject) {
-    nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, rawValue: otherProjectBudgetRawTotal, isScaled: otherProjectBudgetTotal < otherProjectBudgetRawTotal, skipLinkOverride: true, aggregated: true });
+    nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, rawValue: otherProjectBudgetRawTotal, isScaled: otherProjectBudgetTotal < otherProjectBudgetRawTotal, skipLinkOverride: true, aggregated: true, layoutHeight: Math.max(otherProjectBudgetTotal, otherProjectSpendingTotal) });
   }
   // Create __agg-project-spending when aggregate projects have spending.
   if (otherProjectSpendingTotal > 0 && showAggProject) {
@@ -751,9 +756,9 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
   const colHeight = (colNodes: RawNode[], candidateKy: number): number => {
     let total = 0;
     for (const node of colNodes) {
-      const h = Math.max(1, node.value * candidateKy);
-      const gap = (effectivePad > NODE_PAD && h < effectivePad) ? effectivePad : NODE_PAD;
-      total += h + gap;
+      const effectiveH = Math.max(1, (node.layoutHeight ?? node.value) * candidateKy);
+      const gap = (effectivePad > NODE_PAD && effectiveH < effectivePad) ? effectivePad : NODE_PAD;
+      total += effectiveH + gap;
     }
     return total;
   };
@@ -785,11 +790,13 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     let y = 0;
     for (const node of colNodes) {
       const h = Math.max(1, node.value * ky);
+      // effectiveH accounts for merged shape overflow (e.g. spending > budget for project nodes)
+      const effectiveH = Math.max(1, (node.layoutHeight ?? node.value) * ky);
       node.y0 = y;
       node.y1 = y + h;
       // Apply extra gap only for small nodes (those whose label would be hidden in OFF mode)
-      const gap = (effectivePad > NODE_PAD && h < effectivePad) ? effectivePad : NODE_PAD;
-      y += h + gap;
+      const gap = (effectivePad > NODE_PAD && effectiveH < effectivePad) ? effectivePad : NODE_PAD;
+      y += effectiveH + gap;
     }
   }
 
@@ -808,7 +815,7 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     for (const link of node.sourceLinks) {
       if (link.value === 0) {
         link.sourceWidth = MIN_LINK_W;
-        link.y0 = node.y0; // all zero-value links originate from the same point
+        link.y0 = sy; // zero-value links go after non-zero links (at current sy position)
       } else {
         const proportion = totalSrcValue > 0 ? link.value / totalSrcValue : 0;
         link.sourceWidth = nodeHeight * proportion;
@@ -820,7 +827,7 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     for (const link of node.targetLinks) {
       if (link.value === 0) {
         link.targetWidth = MIN_LINK_W;
-        link.y1 = node.y0; // all zero-value links arrive at the same point
+        link.y1 = ty; // zero-value links go after non-zero links (at current ty position)
       } else {
         const proportion = totalTgtValue > 0 ? link.value / totalTgtValue : 0;
         link.targetWidth = nodeHeight * proportion;
@@ -855,7 +862,7 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     // Re-compute source link y0 positions (spending → recipient ribbons)
     let sy = newY0;
     for (const link of node.sourceLinks) {
-      if (link.value === 0) { link.y0 = newY0; continue; } // preserve MIN_LINK_W, update origin
+      if (link.value === 0) { link.y0 = sy; continue; } // preserve MIN_LINK_W; position after non-zero links
       link.y0 = sy;
       sy += link.sourceWidth;
     }
@@ -876,7 +883,7 @@ export function computeLayout(filteredNodes: RawNode[], filteredEdges: RawEdge[]
     const totalTgt = recipient.targetLinks.reduce((s, l) => s + l.value, 0);
     let ty = recipient.y0;
     for (const link of recipient.targetLinks) {
-      if (link.value === 0) { link.y1 = recipient.y0; continue; } // preserve MIN_LINK_W, update origin
+      if (link.value === 0) { link.y1 = ty; continue; } // preserve MIN_LINK_W; position after non-zero links
       link.targetWidth = totalTgt > 0 ? recipientH * (link.value / totalTgt) : 0;
       link.y1 = ty;
       ty += link.targetWidth;
