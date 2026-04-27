@@ -261,7 +261,6 @@ function main() {
 
   // 6c. 事業ノード
   let projectCount = 0;
-  const noSpendingPids = new Set<number>(); // 予算あり・直接支出先なし事業のPID
   for (const [pid, org] of orgMap) {
     projectCount++;
     const budget = budgetMap.get(pid);
@@ -309,19 +308,25 @@ function main() {
       });
     }
 
-    // 予算あり・直接支出先なし事業を記録（r-no-spending へ 0円エッジを張る）
+    // 予算あり・直接支出先なし事業 → recipientMap に支出先なしエントリを追加
     if (budgetAmount > 0 && spendingAmount === 0) {
-      noSpendingPids.add(pid);
+      let noSpendingEntry = recipientMap.get('__no-spending__');
+      if (!noSpendingEntry) {
+        noSpendingEntry = { name: '支出先なし', totalAmount: 0, projectAmounts: new Map() };
+        recipientMap.set('__no-spending__', noSpendingEntry);
+      }
+      noSpendingEntry.projectAmounts.set(pid, 0);
     }
   }
+  const noSpendingEntry = recipientMap.get('__no-spending__');
   console.log(`  事業: ${projectCount.toLocaleString()}`);
-  console.log(`  直接支出先なし事業: ${noSpendingPids.size.toLocaleString()}`);
+  console.log(`  直接支出先なし事業: ${noSpendingEntry?.projectAmounts.size ?? 0}`);
 
-  // 6d. 支出先ノード + エッジ（金額降順で連番IDを付与）
-  const sortedRecipients = Array.from(recipientMap.values()).sort((a, b) => b.totalAmount - a.totalAmount);
-  for (let i = 0; i < sortedRecipients.length; i++) {
-    const recipient = sortedRecipients[i];
-    const recipientId = `r-${i + 1}`;
+  // 6d. 支出先ノード + エッジ（金額降順で連番ID。支出先なしは固定ID r-no-spending を使用）
+  const sortedRecipients = Array.from(recipientMap.entries()).sort(([, a], [, b]) => b.totalAmount - a.totalAmount);
+  let recipientSeq = 0;
+  for (const [key, recipient] of sortedRecipients) {
+    const recipientId = key === '__no-spending__' ? 'r-no-spending' : `r-${++recipientSeq}`;
     nodes.push({
       id: recipientId,
       name: recipient.name,
@@ -337,27 +342,9 @@ function main() {
       });
     }
   }
-  console.log(`  支出先: ${recipientMap.size.toLocaleString()}`);
-
-  // 6e. 支出先なしノード（予算あり・直接支出先なし事業の受け皿）
-  // value=0（実際の支出なし）、最低高さでレイアウト表示
-  if (noSpendingPids.size > 0) {
-    const noSpendingId = 'r-no-spending';
-    nodes.push({
-      id: noSpendingId,
-      name: '支出先なし',
-      type: 'recipient',
-      value: 0,
-    });
-    for (const pid of noSpendingPids) {
-      edges.push({
-        source: `project-spending-${pid}`,
-        target: noSpendingId,
-        value: 0,
-      });
-    }
-    console.log(`  支出先なしノード: ${noSpendingPids.size.toLocaleString()}事業`);
-  }
+  const realRecipientCount = recipientMap.size - (recipientMap.has('__no-spending__') ? 1 : 0);
+  console.log(`  支出先: ${realRecipientCount.toLocaleString()}`);
+  if (noSpendingEntry) console.log(`  支出先なしノード: ${noSpendingEntry.projectAmounts.size.toLocaleString()}事業`);
 
   console.log(`  エッジ: ${edges.length.toLocaleString()}`);
 
@@ -372,7 +359,7 @@ function main() {
       indirectSpending: indirectTotalAmount,
       ministryCount: ministryBudgets.size,
       projectCount,
-      recipientCount: recipientMap.size,
+      recipientCount: realRecipientCount,
       edgeCount: edges.length,
     },
     nodes,
@@ -397,7 +384,7 @@ function main() {
   console.log(`  間接支出:   ${(indirectTotalAmount / 1e12).toFixed(2)} 兆円 (${(indirectTotalAmount * 100 / (directTotalAmount + indirectTotalAmount)).toFixed(1)}%)`);
   console.log(`  府省庁:     ${ministryBudgets.size}`);
   console.log(`  事業:       ${projectCount.toLocaleString()}`);
-  console.log(`  直接支出先: ${recipientMap.size.toLocaleString()}`);
+  console.log(`  直接支出先: ${realRecipientCount.toLocaleString()}`);
 
   // ノード・エッジの整合性チェック
   const nodeIds = new Set(nodes.map(n => n.id));
