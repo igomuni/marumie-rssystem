@@ -927,11 +927,13 @@ export default function RealDataSankeyPage() {
     // ── Precompute per-ministry project/recipient counts (used by total & ministry) ──
     const ministryProjectCounts = new Map<string, number>();
     const ministrySpendingIdsMap = new Map<string, Set<string>>();
+    const ministrySpendingTotals = new Map<string, number>();
     for (const n of graphData.nodes) {
       if (n.type === 'project-budget' && n.ministry) ministryProjectCounts.set(n.ministry, (ministryProjectCounts.get(n.ministry) || 0) + 1);
       if (n.type === 'project-spending' && n.ministry) {
         if (!ministrySpendingIdsMap.has(n.ministry)) ministrySpendingIdsMap.set(n.ministry, new Set());
         ministrySpendingIdsMap.get(n.ministry)!.add(n.id);
+        ministrySpendingTotals.set(n.ministry, (ministrySpendingTotals.get(n.ministry) || 0) + n.value);
       }
     }
     const ministryRecipientCounts = new Map<string, number>();
@@ -944,7 +946,7 @@ export default function RealDataSankeyPage() {
     // ── total ──────────────────────────────────────────────────────────
     if (ntype === 'total') {
       const ministries: PanelEntry[] = graphData.nodes.filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value).map(n => ({
-        id: n.id, name: n.name, value: n.value,
+        id: n.id, name: n.name, value: n.value, budgetValue: n.value, spendingValue: ministrySpendingTotals.get(n.name) ?? 0,
         projectCount: ministryProjectCounts.get(n.name), recipientCount: ministryRecipientCounts.get(n.name),
       }));
       const projects: PanelEntry[] = graphData.nodes.filter(n => n.type === 'project-budget').map(toProjectEntry).sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
@@ -964,7 +966,7 @@ export default function RealDataSankeyPage() {
       const rMap = new Map<string, number>();
       for (const e of graphData.edges) { if (ministrySpendingIds.has(e.source) && e.target.startsWith('r-')) rMap.set(e.target, (rMap.get(e.target) || 0) + e.value); }
       const recipients: PanelEntry[] = Array.from(rMap.entries()).sort((a, b) => b[1] - a[1]).map(([id, value]) => ({ id, name: nodeById.get(id)?.name ?? id, value }));
-      const ministries: PanelEntry[] = [{ id: selectedNode.id, name: selectedNode.name, value: selectedNode.value, projectCount: projects.length, recipientCount: recipients.length }];
+      const ministries: PanelEntry[] = [{ id: selectedNode.id, name: selectedNode.name, value: selectedNode.value, budgetValue: selectedNode.value, spendingValue: ministrySpendingTotals.get(selectedNode.name) ?? 0, projectCount: projects.length, recipientCount: recipients.length }];
       return { ministries, projects, recipients };
     }
 
@@ -975,7 +977,7 @@ export default function RealDataSankeyPage() {
       const spendingNode = pid != null ? spendingByPid.get(pid) : undefined;
       const ministryName = selectedNode.ministry ?? budgetNode?.ministry ?? spendingNode?.ministry;
       const ministryNode = ministryName ? graphData.nodes.find(n => n.type === 'ministry' && n.name === ministryName) : undefined;
-      const ministries: PanelEntry[] = ministryNode ? [{ id: ministryNode.id, name: ministryNode.name, value: ministryNode.value }] : [];
+      const ministries: PanelEntry[] = ministryNode ? [{ id: ministryNode.id, name: ministryNode.name, value: ministryNode.value, budgetValue: ministryNode.value, spendingValue: ministrySpendingTotals.get(ministryNode.name) ?? 0 }] : [];
       const bValue = budgetNode?.value ?? 0;
       const sValue = spendingNode?.value ?? 0;
       const spId = spendingNode?.id ?? (pid != null ? `project-spending-${pid}` : nid);
@@ -994,7 +996,7 @@ export default function RealDataSankeyPage() {
       const aggSpendingMembers = filtered?.aggNodeMembers?.get('__agg-project-spending') ?? [];
       const mMap = new Map<string, number>();
       for (const m of aggBudgetMembers) { if (m.ministry) mMap.set(m.ministry, (mMap.get(m.ministry) || 0) + m.value); }
-      const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
+      const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value, budgetValue: value, spendingValue: ministrySpendingTotals.get(name) ?? 0 }; });
       const projects: PanelEntry[] = aggBudgetMembers.map(m => { const bn = nodeById.get(m.id); return bn ? toProjectEntry(bn) : { id: m.id, name: m.name, value: m.value, ministry: m.ministry }; }).sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
       const rMap = new Map<string, { name: string; value: number }>();
       for (const sm of aggSpendingMembers) { for (const e of graphData.edges) { if (e.source === sm.id && e.target.startsWith('r-')) { const prev = rMap.get(e.target); if (prev) prev.value += e.value; else rMap.set(e.target, { name: nodeById.get(e.target)?.name ?? e.target, value: e.value }); } } }
@@ -1009,7 +1011,7 @@ export default function RealDataSankeyPage() {
       const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null; return { id, name: n?.name ?? id, value, ministry: n?.ministry, budgetValue: bn?.value, spendingValue: n?.value }; }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
-      const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
+      const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value, budgetValue: mn?.value, spendingValue: ministrySpendingTotals.get(name) ?? 0 }; });
       const recipients: PanelEntry[] = [{ id: nid, name: selectedNode.name, value: selectedNode.value }];
       return { ministries, projects, recipients };
     }
@@ -1022,7 +1024,7 @@ export default function RealDataSankeyPage() {
       const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null; return { id, name: n?.name ?? id, value, ministry: n?.ministry, budgetValue: bn?.value, spendingValue: n?.value }; }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
-      const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
+      const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value, budgetValue: mn?.value, spendingValue: ministrySpendingTotals.get(name) ?? 0 }; });
       const recipients: PanelEntry[] = aggRcpts.map(r => ({ id: r.id, name: r.name, value: r.value }));
       return { ministries, projects, recipients };
     }
@@ -1030,7 +1032,7 @@ export default function RealDataSankeyPage() {
     // ── __agg-ministry ─────────────────────────────────────────────────
     if (nid === '__agg-ministry') {
       const aggMins = filtered?.aggNodeMembers?.get('__agg-ministry') ?? [];
-      const ministries: PanelEntry[] = aggMins.map(m => ({ id: m.id, name: m.name, value: m.value }));
+      const ministries: PanelEntry[] = aggMins.map(m => ({ id: m.id, name: m.name, value: m.value, budgetValue: m.value, spendingValue: ministrySpendingTotals.get(m.name) ?? 0 }));
       const aggMinNames = new Set(aggMins.map(m => m.name));
       const projects: PanelEntry[] = graphData.nodes.filter(n => n.type === 'project-budget' && n.ministry != null && aggMinNames.has(n.ministry!)).sort((a, b) => b.value - a.value).map(toProjectEntry);
       const spIds = new Set(graphData.nodes.filter(n => n.type === 'project-spending' && n.ministry != null && aggMinNames.has(n.ministry!)).map(n => n.id));
@@ -2342,7 +2344,10 @@ export default function RealDataSankeyPage() {
                             <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'baseline', gap: 4 }}>
                               {item.projectCount != null && <span style={{ fontSize: 10, color: '#bbb' }}>事業{item.projectCount.toLocaleString()}件</span>}
                               {item.recipientCount != null && <span style={{ fontSize: 10, color: '#bbb' }}>支出先{item.recipientCount.toLocaleString()}件</span>}
-                              {formatYen(item.value)}
+                              {item.budgetValue != null
+                                ? <span>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</span>
+                                : formatYen(item.value)
+                              }
                             </span>
                           </button>
                         ));
