@@ -261,7 +261,7 @@ function main() {
 
   // 6c. 事業ノード
   let projectCount = 0;
-  const noSpendingMap = new Map<number, number>(); // pid → budgetAmount（直接支出先なし事業）
+  const noSpendingPids = new Set<number>(); // 予算あり・直接支出先なし事業のPID
   for (const [pid, org] of orgMap) {
     projectCount++;
     const budget = budgetMap.get(pid);
@@ -269,11 +269,6 @@ function main() {
     const spendingAmount = projectSpendingMap.get(pid) || 0;
     const budgetNodeId = `project-budget-${pid}`;
     const spendingNodeId = `project-spending-${pid}`;
-
-    // 直接支出先なし事業（予算あり・直接支出0）
-    const isNoSpending = budgetAmount > 0 && spendingAmount === 0;
-    // 支出先なしノードへ流すための仮想支出額（予算額を使用）
-    const effectiveSpendingValue = isNoSpending ? budgetAmount : spendingAmount;
 
     // 事業(予算)ノード
     nodes.push({
@@ -285,12 +280,12 @@ function main() {
       ministry: org.ministry,
     });
 
-    // 事業(支出)ノード — 直接支出額のみ（支出先なし事業は予算額で補完）
+    // 事業(支出)ノード — 直接支出額のみ（0円のまま保持）
     nodes.push({
       id: spendingNodeId,
       name: org.projectName,
       type: 'project-spending',
-      value: effectiveSpendingValue,
+      value: spendingAmount,
       projectId: pid,
       ministry: org.ministry,
     });
@@ -305,7 +300,7 @@ function main() {
     }
 
     // 事業(予算) → 事業(支出)
-    const flowValue = Math.min(budgetAmount, effectiveSpendingValue);
+    const flowValue = Math.min(budgetAmount, spendingAmount);
     if (flowValue > 0) {
       edges.push({
         source: budgetNodeId,
@@ -314,12 +309,13 @@ function main() {
       });
     }
 
-    if (isNoSpending) {
-      noSpendingMap.set(pid, budgetAmount);
+    // 予算あり・直接支出先なし事業を記録（r-no-spending へ 0円エッジを張る）
+    if (budgetAmount > 0 && spendingAmount === 0) {
+      noSpendingPids.add(pid);
     }
   }
   console.log(`  事業: ${projectCount.toLocaleString()}`);
-  console.log(`  直接支出先なし事業: ${noSpendingMap.size.toLocaleString()}`);
+  console.log(`  直接支出先なし事業: ${noSpendingPids.size.toLocaleString()}`);
 
   // 6d. 支出先ノード + エッジ（金額降順で連番IDを付与）
   const sortedRecipients = Array.from(recipientMap.values()).sort((a, b) => b.totalAmount - a.totalAmount);
@@ -344,24 +340,24 @@ function main() {
   console.log(`  支出先: ${recipientMap.size.toLocaleString()}`);
 
   // 6e. 支出先なしノード（予算あり・直接支出先なし事業の受け皿）
-  if (noSpendingMap.size > 0) {
-    const totalNoSpending = Array.from(noSpendingMap.values()).reduce((s, v) => s + v, 0);
+  // value=0（実際の支出なし）、最低高さでレイアウト表示
+  if (noSpendingPids.size > 0) {
     const noSpendingId = 'r-no-spending';
     nodes.push({
       id: noSpendingId,
       name: '支出先なし',
       type: 'recipient',
-      value: totalNoSpending,
+      value: 0,
       aggregated: true,
     });
-    for (const [pid, amount] of noSpendingMap) {
+    for (const pid of noSpendingPids) {
       edges.push({
         source: `project-spending-${pid}`,
         target: noSpendingId,
-        value: amount,
+        value: 0,
       });
     }
-    console.log(`  支出先なしノード: ${(totalNoSpending / 1e8).toFixed(0)}億円`);
+    console.log(`  支出先なしノード: ${noSpendingPids.size.toLocaleString()}事業`);
   }
 
   console.log(`  エッジ: ${edges.length.toLocaleString()}`);

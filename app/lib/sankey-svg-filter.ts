@@ -179,6 +179,11 @@ export function filterTopN(
     windowRecipients = [...windowRecipients, tailRecipients[0]];
     tailRecipients = [];
   }
+  // r-no-spending は value=0 で TopN に入らないため常にウィンドウ末尾に追加
+  // recipientFocusMode（別支出先フォーカス中）の場合は除外
+  if (!recipientFocusMode && nodeById.has('r-no-spending') && !windowRecipients.some(([id]) => id === 'r-no-spending')) {
+    windowRecipients = [...windowRecipients, ['r-no-spending', 0]];
+  }
   const windowRecipientIds = new Set(windowRecipients.map(([id]) => id));
   const tailRecipientIds = new Set(tailRecipients.map(([id]) => id));
 
