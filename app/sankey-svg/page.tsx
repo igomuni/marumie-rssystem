@@ -1006,7 +1006,7 @@ export default function RealDataSankeyPage() {
     if (ntype === 'recipient' && !selectedNode.aggregated) {
       const pMap = new Map<string, number>();
       for (const e of graphData.edges) { if (e.target === nid) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); }
-      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); return { id, name: n?.name ?? id, value, ministry: n?.ministry }; }).sort((a, b) => b.value - a.value);
+      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null; return { id, name: n?.name ?? id, value, ministry: n?.ministry, budgetValue: bn?.value, spendingValue: n?.value }; }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
@@ -1019,7 +1019,7 @@ export default function RealDataSankeyPage() {
       const aggRcpts = filtered?.aggNodeMembers?.get('__agg-recipient') ?? [];
       const pMap = new Map<string, number>();
       for (const r of aggRcpts) { for (const e of graphData.edges) { if (e.target === r.id) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); } }
-      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); return { id, name: n?.name ?? id, value, ministry: n?.ministry }; }).sort((a, b) => b.value - a.value);
+      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null; return { id, name: n?.name ?? id, value, ministry: n?.ministry, budgetValue: bn?.value, spendingValue: n?.value }; }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
@@ -2351,7 +2351,17 @@ export default function RealDataSankeyPage() {
                       {panelTab === 'project' && (() => {
                         const items = panelSections.projects;
                         if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
-                        return renderFlatList(items, item => item.budgetValue ?? item.value);
+                        return items.map((item) => (
+                          <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                          >
+                            <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                            {item.budgetValue != null
+                              ? <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</span>
+                              : <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
+                            }
+                          </button>
+                        ));
                       })()}
                       {/* 支出先タブ */}
                       {panelTab === 'recipient' && (() => {
