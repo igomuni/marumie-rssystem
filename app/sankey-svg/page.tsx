@@ -2341,11 +2341,9 @@ export default function RealDataSankeyPage() {
                             style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                           >
                             <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                              {item.projectCount != null && <span style={{ fontSize: 10, color: '#bbb' }}>事業{item.projectCount.toLocaleString()}件</span>}
-                              {item.recipientCount != null && <span style={{ fontSize: 10, color: '#bbb' }}>支出先{item.recipientCount.toLocaleString()}件</span>}
+                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
                               {item.budgetValue != null
-                                ? <span>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</span>
+                                ? <>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</>
                                 : formatYen(item.value)
                               }
                             </span>
