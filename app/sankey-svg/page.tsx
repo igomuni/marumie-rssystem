@@ -1002,7 +1002,7 @@ export default function RealDataSankeyPage() {
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value }; });
-      const recipients: PanelEntry[] = [{ id: nid, name: selectedNode.name, value: selectedNode.value }];
+      const recipients: PanelEntry[] = nid === 'r-no-spending' ? [] : [{ id: nid, name: selectedNode.name, value: selectedNode.value }];
       return { ministries, projects, recipients };
     }
 
