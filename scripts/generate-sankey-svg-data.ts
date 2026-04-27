@@ -348,7 +348,6 @@ function main() {
       name: '支出先なし',
       type: 'recipient',
       value: 0,
-      aggregated: true,
     });
     for (const pid of noSpendingPids) {
       edges.push({
