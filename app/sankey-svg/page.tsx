@@ -36,6 +36,7 @@ interface SankeyUrlState {
   filterActive?: boolean;
   filterTarget?: 'project' | 'recipient';
   filterNameQuery?: string;
+  filterMinistryName?: string;
   filterMinBudgetText?: string;
   filterMaxBudgetText?: string;
   filterMinSpendingText?: string;
@@ -67,6 +68,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const f = p.get('f'); if (f === '1') result.filterActive = true;
   const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient';
   const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
+  const fm = p.get('fm'); if (fm !== null) result.filterMinistryName = fm;
   const fmb = p.get('fmb'); if (fmb !== null) result.filterMinBudgetText = fmb;
   const fxb = p.get('fxb'); if (fxb !== null) result.filterMaxBudgetText = fxb;
   const fms = p.get('fms'); if (fms !== null) result.filterMinSpendingText = fms;
@@ -201,6 +203,7 @@ export default function RealDataSankeyPage() {
   const [filterActive, setFilterActive] = useState(false);
   const [showAmountSliders, setShowAmountSliders] = useState(false);
   const [filterTarget, setFilterTarget] = useState<'project' | 'recipient'>('recipient');
+  const [filterMinistryName, setFilterMinistryName] = useState('');
   const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
   const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
   const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
@@ -274,6 +277,7 @@ export default function RealDataSankeyPage() {
     if (parsed.filterActive !== undefined) setFilterActive(parsed.filterActive);
     if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget);
     if (parsed.filterNameQuery !== undefined) { setSearchQuery(parsed.filterNameQuery); }
+    if (parsed.filterMinistryName !== undefined) setFilterMinistryName(parsed.filterMinistryName);
     if (parsed.filterMinBudgetText !== undefined) setFilterMinBudgetText(parsed.filterMinBudgetText);
     if (parsed.filterMaxBudgetText !== undefined) setFilterMaxBudgetText(parsed.filterMaxBudgetText);
     if (parsed.filterMinSpendingText !== undefined) setFilterMinSpendingText(parsed.filterMinSpendingText);
@@ -310,6 +314,7 @@ export default function RealDataSankeyPage() {
       setFilterActive(parsed.filterActive ?? false);
       if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('recipient');
       setSearchQuery(parsed.filterNameQuery ?? '');
+      setFilterMinistryName(parsed.filterMinistryName ?? '');
       setFilterMinBudgetText(parsed.filterMinBudgetText ?? '');
       setFilterMaxBudgetText(parsed.filterMaxBudgetText ?? '');
       setFilterMinSpendingText(parsed.filterMinSpendingText ?? '');
@@ -347,6 +352,7 @@ export default function RealDataSankeyPage() {
     if (filterActive) p.set('f', '1');
     if (filterTarget === 'project') p.set('nft', 'p');
     if (filterActive && searchQuery) p.set('nf', searchQuery);
+    if (filterMinistryName) p.set('fm', filterMinistryName);
     if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
     if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
     if (filterMinSpendingText) p.set('fms', filterMinSpendingText);
@@ -358,7 +364,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, filterMinistryName, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -650,7 +656,8 @@ export default function RealDataSankeyPage() {
     const hasSpending = minSpendingYen !== null || maxSpendingYen !== null;
     const trimmedQuery = debouncedQuery.trim();
     const hasName = filterActive && trimmedQuery.length >= 1;
-    if (!hasBudget && !hasSpending && !hasName) return null;
+    const hasMinistry = !!filterMinistryName;
+    if (!hasBudget && !hasSpending && !hasName && !hasMinistry) return null;
     const minBudget = minBudgetYen ?? -Infinity;
     const maxBudget = maxBudgetYen ?? Infinity;
     const minSpending = minSpendingYen ?? 0;
@@ -671,7 +678,8 @@ export default function RealDataSankeyPage() {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
         const failName = hasName && filterTarget === 'project' && !matchesName(n.name);
-        if (failBudget || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
+        const failMinistry = hasMinistry && n.ministry !== filterMinistryName;
+        if (failBudget || failName || failMinistry) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
         const failName = hasName && filterTarget === 'recipient' && !matchesName(n.name);
@@ -717,7 +725,7 @@ export default function RealDataSankeyPage() {
       }
     }
     return excluded.size > 0 ? excluded : null;
-  }, [graphData, filterActive, filterTarget, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex]);
+  }, [graphData, filterActive, filterTarget, filterMinistryName, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -2479,6 +2487,24 @@ export default function RealDataSankeyPage() {
             {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
             {showAmountSliders && (
               <div style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {/* 府省庁フィルタ */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>省庁</span>
+                  <select
+                    value={filterMinistryName}
+                    onChange={e => { pendingHistoryAction.current = 'replace'; setFilterMinistryName(e.target.value); }}
+                    style={{ flex: 1, minWidth: 0, fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: filterMinistryName ? '#333' : '#aaa', outline: 'none', cursor: 'pointer' }}
+                  >
+                    <option value="">全府省庁</option>
+                    {graphData?.nodes.filter(n => n.type === 'ministry').sort((a, b) => a.name.localeCompare(b.name, 'ja')).map(n => (
+                      <option key={n.id} value={n.name}>{n.name}</option>
+                    ))}
+                  </select>
+                  {filterMinistryName && (
+                    <button type="button" onClick={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryName(''); }}
+                      style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                  )}
+                </div>
                 {/* 予算・支出 テキスト入力 */}
                 {([
                   { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
