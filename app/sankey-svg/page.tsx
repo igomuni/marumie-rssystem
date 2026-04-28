@@ -25,7 +25,6 @@ interface SankeyUrlState {
   topProject: number;
   topRecipient: number;
   showLabels: boolean;
-  includeZeroSpending: boolean;
   showAggRecipient: boolean;
   showAggProject: boolean;
   projectSortBy: 'budget' | 'spending';
@@ -57,7 +56,6 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const tp = p.get('tp'); if (tp !== null) { const n = parseInt(tp, 10); if (!isNaN(n)) result.topProject = Math.max(1, Math.min(300, n)); }
   const tr = p.get('tr'); if (tr !== null) { const n = parseInt(tr, 10); if (!isNaN(n)) result.topRecipient = Math.max(1, Math.min(300, n)); }
   const sl = p.get('sl'); if (sl !== null) result.showLabels = sl !== '0';
-  const iz = p.get('iz'); if (iz !== null) result.includeZeroSpending = iz !== '0';
   const ar = p.get('ar'); if (ar !== null) result.showAggRecipient = ar !== '0';
   const ap = p.get('ap'); if (ap !== null) result.showAggProject = ap !== '0';
   const ps = p.get('ps'); if (ps === 's') result.projectSortBy = 'spending';
@@ -169,7 +167,6 @@ export default function RealDataSankeyPage() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
-  const [includeZeroSpending, setIncludeZeroSpending] = useState(false);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [showAggProject, setShowAggProject] = useState(true);
   const [projectSortBy, setProjectSortBy] = useState<'budget' | 'spending'>('budget');
@@ -210,8 +207,6 @@ export default function RealDataSankeyPage() {
   const meetsSearchMinLength = (q: string) => isPidQuery(q) ? q.length >= 1 : q.length >= 2;
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
-  const [zeroSpendingAlert, setZeroSpendingAlert] = useState(false);
-  const zeroSpendingAlertTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Tracks whether the next URL update should push (navigation) or replace (slider/toggle)
   const pendingHistoryAction = useRef<'push' | 'replace' | null>(null);
   const pendingFocusId = useRef<string | null>(null);
@@ -263,7 +258,6 @@ export default function RealDataSankeyPage() {
     if (parsed.topProject !== undefined) setTopProject(parsed.topProject);
     if (parsed.topRecipient !== undefined) setTopRecipient(parsed.topRecipient);
     if (parsed.showLabels !== undefined) setShowLabels(parsed.showLabels);
-    if (parsed.includeZeroSpending !== undefined) setIncludeZeroSpending(parsed.includeZeroSpending);
     if (parsed.showAggRecipient !== undefined) setShowAggRecipient(parsed.showAggRecipient);
     if (parsed.showAggProject !== undefined) setShowAggProject(parsed.showAggProject);
     if (parsed.projectSortBy !== undefined) setProjectSortBy(parsed.projectSortBy);
@@ -304,7 +298,6 @@ export default function RealDataSankeyPage() {
       setTopProject(parsed.topProject ?? 40);
       setTopRecipient(parsed.topRecipient ?? 40);
       setShowLabels(parsed.showLabels ?? true);
-      setIncludeZeroSpending(parsed.includeZeroSpending ?? false);
       setShowAggRecipient(parsed.showAggRecipient ?? true);
       setShowAggProject(parsed.showAggProject ?? true);
       setProjectSortBy(parsed.projectSortBy ?? 'budget');
@@ -342,7 +335,6 @@ export default function RealDataSankeyPage() {
     if (topProject !== 40) p.set('tp', String(topProject));
     if (topRecipient !== 40) p.set('tr', String(topRecipient));
     if (!showLabels) p.set('sl', '0');
-    if (includeZeroSpending) p.set('iz', '1');
     if (!showAggRecipient) p.set('ar', '0');
     if (!showAggProject) p.set('ap', '0');
     if (projectSortBy === 'spending') p.set('ps', 's');
@@ -364,7 +356,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -736,8 +728,8 @@ export default function RealDataSankeyPage() {
       : graphData.edges;
     const maxOffset = Math.max(0, (nodes.filter(n => n.type === 'recipient').length) - topRecipient);
     const clampedOffset = Math.min(recipientOffset, maxOffset);
-    return filterTopN(nodes, edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, projectSortBy);
-  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, includeZeroSpending, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, filterExcludedIds]);
+    return filterTopN(nodes, edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, true, showAggRecipient, showAggProject, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, projectSortBy);
+  }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, filterExcludedIds]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -882,7 +874,7 @@ export default function RealDataSankeyPage() {
         .map(n => [`project-spending-${n.projectId}`, n.value] as const)
     );
     const ranked = graphData.nodes
-      .filter(n => n.type === 'project-spending' && (includeZeroSpending || n.value > 0))
+      .filter(n => n.type === 'project-spending')
       .sort((a, b) => {
         if (projectSortBy === 'budget') {
           const ba = budgetValues.get(a.id) ?? 0;
@@ -892,7 +884,7 @@ export default function RealDataSankeyPage() {
         return b.value - a.value;
       });
     return new Map(ranked.map((n, i) => [n.id, i]));
-  }, [graphData, projectSortBy, includeZeroSpending]);
+  }, [graphData, projectSortBy]);
 
   // Recipient count per project-spending node (from raw graphData)
   const projectRecipientCount = useMemo(() => {
@@ -1149,21 +1141,6 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, selectedNodeInLayout, layout, isPanelCollapsed, baseZoom]);
 
   const handleConnectionClick = useCallback((nodeId: string) => {
-    // Block selection of zero-spending projects when includeZeroSpending is OFF
-    if (!includeZeroSpending && graphData) {
-      const spId = nodeId.startsWith('project-budget-')
-        ? nodeId.replace('project-budget-', 'project-spending-')
-        : nodeId;
-      if (spId.startsWith('project-spending-')) {
-        const spNode = graphData.nodes.find(n => n.id === spId);
-        if (spNode && spNode.value === 0) {
-          if (zeroSpendingAlertTimer.current) clearTimeout(zeroSpendingAlertTimer.current);
-          setZeroSpendingAlert(true);
-          zeroSpendingAlertTimer.current = setTimeout(() => setZeroSpendingAlert(false), 3500);
-          return;
-        }
-      }
-    }
     // If already in layout, select and focus directly (no effect needed)
     const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
     if (inLayoutNode) {
@@ -1278,7 +1255,7 @@ export default function RealDataSankeyPage() {
     // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
     pendingFocusId.current = nodeId;
     selectNode(nodeId);
-  }, [layout, filtered, allRecipientRanks, allProjectRanks, topRecipient, topProject, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, includeZeroSpending, offsetTarget, setProjectOffset]);
+  }, [layout, filtered, allRecipientRanks, allProjectRanks, topRecipient, topProject, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, offsetTarget, setProjectOffset]);
 
   // Step2 → Step1 遷移: 選択ノード (selectedNodeId) は維持し、
   // focusRelated と pinnedProject/Recipient/Ministry (Step2 用のフォーカスピン) のみ解除
@@ -1581,11 +1558,6 @@ export default function RealDataSankeyPage() {
       onMouseLeave={handleMouseUp}
     >
 
-      {zeroSpendingAlert && (
-        <div style={{ position: 'absolute', top: 60, left: '50%', transform: 'translateX(-50%)', background: '#fff8e1', border: '1px solid #f9a825', color: '#5d4037', padding: '10px 18px', borderRadius: 8, fontSize: 13, boxShadow: '0 2px 10px rgba(0,0,0,0.15)', zIndex: 30, whiteSpace: 'nowrap', pointerEvents: 'none' }}>
-          支出0円のため現在の設定では選択できません。「支出0円事業を対象にする」をオンにしてください。
-        </div>
-      )}
 
       {loading && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 5, pointerEvents: 'none' }}>
@@ -2828,10 +2800,6 @@ export default function RealDataSankeyPage() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={includeZeroSpending} onChange={e => { pendingHistoryAction.current = 'replace'; setIncludeZeroSpending(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>支出が0円の事業を対象にする</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showAggRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggRecipient(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
