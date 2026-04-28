@@ -701,8 +701,8 @@ export default function RealDataSankeyPage() {
         if (failSpending || failName) excluded.add(n.id);
       }
     }
-    // Pass 2: 支出先フィルタが有効な場合、残存支出先のない事業を除外（recipient → project のカスケード）
-    if (hasSpending || (hasName && filterTarget === 'recipient')) {
+    // Pass 2: 支出先・予算フィルタが有効な場合、残存支出先のない事業／孤立支出先を除外
+    if (hasSpending || hasBudget || hasMinistry || (hasName && filterTarget === 'recipient')) {
       const projectsWithSurvivingRecipients = new Set(
         graphData.edges
           .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
