@@ -69,7 +69,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const f = p.get('f'); if (f === '1') result.filterActive = true;
   const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient';
   const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
-  const fm = p.get('fm'); if (fm !== null) result.filterMinistryNames = fm ? fm.split(',') : [];
+  const fm = p.getAll('fm'); if (fm.length > 0) result.filterMinistryNames = Array.from(new Set(fm.map(v => v.trim()).filter(Boolean)));
   const fmb = p.get('fmb'); if (fmb !== null) result.filterMinBudgetText = fmb;
   const fxb = p.get('fxb'); if (fxb !== null) result.filterMaxBudgetText = fxb;
   const fms = p.get('fms'); if (fms !== null) result.filterMinSpendingText = fms;
@@ -357,7 +357,7 @@ export default function RealDataSankeyPage() {
     if (filterActive) p.set('f', '1');
     if (filterTarget === 'project') p.set('nft', 'p');
     if (filterActive && searchQuery) p.set('nf', searchQuery);
-    if (filterMinistryNames.length > 0) p.set('fm', filterMinistryNames.join(','));
+    for (const name of filterMinistryNames) p.append('fm', name);
     if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
     if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
     if (filterMinSpendingText) p.set('fms', filterMinSpendingText);
@@ -380,13 +380,25 @@ export default function RealDataSankeyPage() {
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
   useEffect(() => {
     if (!showMinistryDropdown) return;
-    const handler = (e: MouseEvent) => {
+    const onMouseDown = (e: MouseEvent) => {
       if (ministryDropdownRef.current && !ministryDropdownRef.current.contains(e.target as Node)) {
         setShowMinistryDropdown(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    const recompute = () => {
+      if (ministryButtonRef.current) {
+        const r = ministryButtonRef.current.getBoundingClientRect();
+        setMinistryDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width, maxHeight: Math.max(120, window.innerHeight - r.bottom - 16) });
+      }
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('resize', recompute);
+    window.addEventListener('scroll', recompute, true);
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('resize', recompute);
+      window.removeEventListener('scroll', recompute, true);
+    };
   }, [showMinistryDropdown]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -673,6 +685,7 @@ export default function RealDataSankeyPage() {
     const hasName = filterActive && trimmedQuery.length >= 1;
     const hasMinistry = filterMinistryNames.length > 0;
     if (!hasBudget && !hasSpending && !hasName && !hasMinistry) return null;
+    const selectedMinistrySet = new Set(filterMinistryNames);
     const minBudget = minBudgetYen ?? -Infinity;
     const maxBudget = maxBudgetYen ?? Infinity;
     const minSpending = minSpendingYen ?? 0;
@@ -693,7 +706,7 @@ export default function RealDataSankeyPage() {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
         const failName = hasName && filterTarget === 'project' && !matchesName(n.name);
-        const failMinistry = hasMinistry && !filterMinistryNames.includes(n.ministry ?? '');
+        const failMinistry = hasMinistry && !selectedMinistrySet.has(n.ministry ?? '');
         if (failBudget || failName || failMinistry) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
@@ -1374,12 +1387,13 @@ export default function RealDataSankeyPage() {
       matcher = name => name.toLocaleLowerCase().includes(qLower);
     }
     // 府省庁フィルタが設定されている場合、検索対象を選択府省庁の事業・支出先に絞る
+    const searchMinistrySet = new Set(filterMinistryNames);
     let allowedIds: Set<string> | null = null;
     if (filterMinistryNames.length > 0) {
       allowedIds = new Set<string>();
       const allowedSpendingIds = new Set<string>();
       for (const n of graphData.nodes) {
-        if (n.type === 'project-spending' && n.ministry != null && filterMinistryNames.includes(n.ministry)) {
+        if (n.type === 'project-spending' && n.ministry != null && searchMinistrySet.has(n.ministry)) {
           allowedIds.add(n.id);
           allowedSpendingIds.add(n.id);
         }
