@@ -287,7 +287,14 @@ export function filterTopN(
     }
     const allRecipientProjects = allNodes
       .filter(n => n.type === 'project-spending' && flowToRecipient.has(n.id))
-      .sort((a, b) => (flowToRecipient.get(b.id) || 0) - (flowToRecipient.get(a.id) || 0));
+      .sort((a, b) => {
+        const va = flowToRecipient.get(a.id) || 0;
+        const vb = flowToRecipient.get(b.id) || 0;
+        if (vb !== va) return vb - va;
+        const ba = projectAdjustedBudget.get(`project-budget-${a.projectId}`) ?? nodeById.get(`project-budget-${a.projectId}`)?.value ?? 0;
+        const bb = projectAdjustedBudget.get(`project-budget-${b.projectId}`) ?? nodeById.get(`project-budget-${b.projectId}`)?.value ?? 0;
+        return bb - ba;
+      });
     topProjectNodes.splice(0, topProjectNodes.length, ...allRecipientProjects.slice(0, topProject));
     recipientFocusOtherProjects = allRecipientProjects.slice(topProject);
   }
