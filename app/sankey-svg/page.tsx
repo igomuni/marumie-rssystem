@@ -1376,7 +1376,7 @@ export default function RealDataSankeyPage() {
     const hasMinistryFilter = filterMinistryNames.length > 0;
     for (const n of graphData.nodes) {
       if (n.type === 'project-budget') continue; // merged into project-spending entry
-      if (hasMinistryFilter && n.ministry != null && !filterMinistryNames.includes(n.ministry)) continue;
+      if (hasMinistryFilter && (n.ministry == null || !filterMinistryNames.includes(n.ministry))) continue;
       if (pidQuery !== null) {
         if (n.type === 'project-spending' && n.projectId === pidQuery) {
           const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
