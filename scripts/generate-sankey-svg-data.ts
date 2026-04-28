@@ -130,25 +130,30 @@ function main() {
   }
   console.log(`  予算データ: ${budgetMap.size.toLocaleString()} 事業`);
 
-  // 4. 直接支出ブロックセットの構築（5-2 CSV）
+  // 4. 再委託ブロックセットの構築（5-2 CSV）
+  // 判定方針: 「担当組織からの支出=FALSE」は明示的な再委託（間接）→ 除外
+  //           「TRUE」または 5-2 に登場しないブロックは担当組織が直接支出 → 含める
+  //           FALSE と TRUE の両方がある場合は TRUE（直接）を優先
   console.log('\n[3/5] 直接支出ブロック判定（5-2 CSV）');
-  const directBlocks = new Set<string>(); // "pid:block" 形式
+  const indirectOnlyBlocks = new Set<string>(); // FALSE のみで TRUE がない "pid:block"
+  const directBlocks = new Set<string>();        // 少なくとも1つ TRUE がある "pid:block"
   let totalBlockRows = 0;
-  let directBlockRows = 0;
   for (const row of blockRows) {
     totalBlockRows++;
-    const isDirect = row['担当組織からの支出'] === 'TRUE';
-    if (!isDirect) continue;
-
     const pid = row['予算事業ID'];
     const block = (row['支出先の支出先ブロック'] || '').trim();
     if (!pid || !block) continue;
 
-    directBlocks.add(`${pid}:${block}`);
-    directBlockRows++;
+    const key = `${pid}:${block}`;
+    if (row['担当組織からの支出'] === 'TRUE') {
+      directBlocks.add(key);
+      indirectOnlyBlocks.delete(key); // TRUE があれば間接扱いを解除
+    } else if (row['担当組織からの支出'] === 'FALSE' && !directBlocks.has(key)) {
+      indirectOnlyBlocks.add(key);
+    }
   }
   console.log(`  5-2 CSV: ${totalBlockRows.toLocaleString()} 行`);
-  console.log(`  直接支出ブロック: ${directBlocks.size.toLocaleString()} ペア（${directBlockRows.toLocaleString()} 行）`);
+  console.log(`  再委託ブロック（間接）: ${indirectOnlyBlocks.size.toLocaleString()} ペア`);
 
   // 5. 支出データ集計（直接支出先のみ）
   console.log('\n[4/5] 支出データ集計（直接支出先のみ）');
@@ -186,9 +191,9 @@ function main() {
     const block = (row['支出先ブロック番号'] || '').trim();
     if (!block) { skippedNoBlock++; continue; }
 
-    // 直接支出ブロック判定
+    // 直接支出ブロック判定: 明示的に再委託（FALSE のみ）のブロックを除外
     const key = `${pid}:${block}`;
-    if (!directBlocks.has(key)) {
+    if (indirectOnlyBlocks.has(key)) {
       indirectRows++;
       indirectTotalAmount += amount;
       continue;
