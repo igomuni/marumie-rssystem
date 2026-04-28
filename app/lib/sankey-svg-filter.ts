@@ -553,7 +553,7 @@ export function filterTopN(
   // r-no-spending がウィンドウにあり、集約事業が接続しているかチェック
   const otherProjectsConnectToNoSpending = windowRecipientIds.has('r-no-spending') &&
     allEdges.some(e => otherProjectSpendingIds.has(e.source) && e.target === 'r-no-spending');
-  const showAggProjectNodes = showAggProject && (otherProjectSpendingTotal > 0 || otherProjectsConnectToNoSpending);
+  const showAggProjectNodes = showAggProject && (otherProjectSpendingTotal > 0 || otherProjectBudgetTotal > 0 || otherProjectsConnectToNoSpending);
   // Create __agg-project-budget whenever aggregate projects have spending to show
   // (budget may be 0, in which case the node has height 0 but still anchors the merged shape label).
   if (showAggProjectNodes) {
@@ -624,7 +624,7 @@ export function filterTopN(
     // Emit edge even when bv = 0 so hierarchy remains visible (0-value edges render as hairlines)
     edges.push({ source: ministrySource, target: budgetId, value: bv });
   }
-  if (otherProjectSpendingTotal > 0 && showAggProject) {
+  if (showAggProjectNodes) {
     for (const mn of topMinistryNodes) {
       const hasAggProjects = otherProjects.some(p => p.ministry === mn.name);
       if (!hasAggProjects) continue;
