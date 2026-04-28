@@ -179,6 +179,12 @@ export function filterTopN(
     windowRecipients = [...windowRecipients, tailRecipients[0]];
     tailRecipients = [];
   }
+  // r-no-spending は常に window 末尾に昇格（tail にある場合のみ）
+  const noSpendingTailIdx = tailRecipients.findIndex(([id]) => id === 'r-no-spending');
+  if (noSpendingTailIdx >= 0) {
+    const [noSpendingEntry] = tailRecipients.splice(noSpendingTailIdx, 1);
+    windowRecipients = [...windowRecipients, noSpendingEntry];
+  }
   const windowRecipientIds = new Set(windowRecipients.map(([id]) => id));
   const tailRecipientIds = new Set(tailRecipients.map(([id]) => id));
 
