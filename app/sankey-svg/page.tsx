@@ -206,7 +206,7 @@ export default function RealDataSankeyPage() {
   const [filterTarget, setFilterTarget] = useState<'project' | 'recipient'>('recipient');
   const [filterMinistryNames, setFilterMinistryNames] = useState<string[]>([]);
   const [showMinistryDropdown, setShowMinistryDropdown] = useState(false);
-  const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
   const ministryDropdownRef = useRef<HTMLDivElement>(null);
   const ministryButtonRef = useRef<HTMLButtonElement>(null);
   const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
@@ -1373,8 +1373,10 @@ export default function RealDataSankeyPage() {
       const qLower = q.toLocaleLowerCase();
       matcher = name => name.toLocaleLowerCase().includes(qLower);
     }
+    const hasMinistryFilter = filterMinistryNames.length > 0;
     for (const n of graphData.nodes) {
       if (n.type === 'project-budget') continue; // merged into project-spending entry
+      if (hasMinistryFilter && n.ministry != null && !filterMinistryNames.includes(n.ministry)) continue;
       if (pidQuery !== null) {
         if (n.type === 'project-spending' && n.projectId === pidQuery) {
           const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
@@ -1392,7 +1394,7 @@ export default function RealDataSankeyPage() {
       }
     }
     return results.sort((a, b) => b.sortValue - a.sortValue);
-  }, [graphData, debouncedQuery, searchUseRegex]);
+  }, [graphData, debouncedQuery, searchUseRegex, filterMinistryNames, budgetNodeByPid]);
 
   const SEARCH_PAGE_SIZE = 200;
   const searchPagedResults = useMemo(
@@ -2521,7 +2523,7 @@ export default function RealDataSankeyPage() {
                           onClick={() => {
                             if (ministryButtonRef.current) {
                               const r = ministryButtonRef.current.getBoundingClientRect();
-                              setMinistryDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width });
+                              setMinistryDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width, maxHeight: Math.max(120, window.innerHeight - r.bottom - 16) });
                             }
                             setShowMinistryDropdown(v => !v);
                           }}
@@ -2529,7 +2531,7 @@ export default function RealDataSankeyPage() {
                         >{label}</button>
                         <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>{chevron}</span>
                         {showMinistryDropdown && ministryDropdownRect && createPortal(
-                          <div style={{ position: 'fixed', top: ministryDropdownRect.top, left: ministryDropdownRect.left, width: ministryDropdownRect.width, zIndex: 9999, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 480, overflowY: 'auto' }}
+                          <div style={{ position: 'fixed', top: ministryDropdownRect.top, left: ministryDropdownRect.left, width: ministryDropdownRect.width, zIndex: 9999, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: ministryDropdownRect.maxHeight, overflowY: 'auto' }}
                             onMouseDown={e => e.stopPropagation()}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
                               <input type="checkbox" checked={allSelected} onChange={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames([]); }} style={{ width: 12, height: 12 }} />
