@@ -660,8 +660,11 @@ export function filterTopN(
   // __agg-project-spending → window recipients — skipped when agg-project is hidden
   if (showAggProject) {
     for (const rid of windowRecipientIds) {
-      const v = allEdges.filter(e => otherProjectSpendingIds.has(e.source) && e.target === rid).reduce((s, e) => s + e.value, 0);
-      if (v > 0) edges.push({ source: '__agg-project-spending', target: rid, value: v });
+      const windowEdges = allEdges.filter(e => otherProjectSpendingIds.has(e.source) && e.target === rid);
+      const v = windowEdges.reduce((s, e) => s + e.value, 0);
+      // r-no-spending への0値エッジも接続として扱う
+      const hasNoSpendingEdge = rid === 'r-no-spending' && windowEdges.length > 0;
+      if (v > 0 || hasNoSpendingEdge) edges.push({ source: '__agg-project-spending', target: rid, value: v });
     }
   }
   // __agg-project-spending → __agg-recipient (tail) — skipped when agg-recipient or agg-project is hidden
