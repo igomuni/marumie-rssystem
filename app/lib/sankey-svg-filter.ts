@@ -131,8 +131,9 @@ export function filterTopN(
   let ministrySpecificSortedRecipients: [string, number][] = [];
   if (recipientFocusMode && pinnedRecipientId) {
     // Show only the one pinned recipient; no tail (projects are restricted in step 4)
-    const totalFlow = allEdges.reduce((s, e) => e.target === pinnedRecipientId ? s + e.value : s, 0);
-    windowRecipients = totalFlow > 0 ? [[pinnedRecipientId, totalFlow]] : [];
+    // Use allRecipientAmounts.has() instead of totalFlow>0 so 0-value recipients (r-no-spending) are included
+    const totalFlow = allRecipientAmounts.get(pinnedRecipientId) ?? 0;
+    windowRecipients = allRecipientAmounts.has(pinnedRecipientId) ? [[pinnedRecipientId, totalFlow]] : [];
     tailRecipients = [];
   } else if (projectOffsetMode) {
     // Recipients ranked by flow from window projects only; no recipient offset.
