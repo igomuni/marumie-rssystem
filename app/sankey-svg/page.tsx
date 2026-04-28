@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import type { GraphData, LayoutNode, LayoutLink } from '@/types/sankey-svg';
 import type { ProjectDetail } from '@/types/project-details';
 import {
@@ -36,6 +37,7 @@ interface SankeyUrlState {
   filterActive?: boolean;
   filterTarget?: 'project' | 'recipient';
   filterNameQuery?: string;
+  filterMinistryNames?: string[];
   filterMinBudgetText?: string;
   filterMaxBudgetText?: string;
   filterMinSpendingText?: string;
@@ -67,6 +69,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const f = p.get('f'); if (f === '1') result.filterActive = true;
   const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient';
   const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
+  const fm = p.getAll('fm'); if (fm.length > 0) result.filterMinistryNames = Array.from(new Set(fm.map(v => v.trim()).filter(Boolean)));
   const fmb = p.get('fmb'); if (fmb !== null) result.filterMinBudgetText = fmb;
   const fxb = p.get('fxb'); if (fxb !== null) result.filterMaxBudgetText = fxb;
   const fms = p.get('fms'); if (fms !== null) result.filterMinSpendingText = fms;
@@ -201,6 +204,11 @@ export default function RealDataSankeyPage() {
   const [filterActive, setFilterActive] = useState(false);
   const [showAmountSliders, setShowAmountSliders] = useState(false);
   const [filterTarget, setFilterTarget] = useState<'project' | 'recipient'>('recipient');
+  const [filterMinistryNames, setFilterMinistryNames] = useState<string[]>([]);
+  const [showMinistryDropdown, setShowMinistryDropdown] = useState(false);
+  const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
+  const ministryDropdownRef = useRef<HTMLDivElement>(null);
+  const ministryButtonRef = useRef<HTMLButtonElement>(null);
   const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
   const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
   const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
@@ -274,6 +282,7 @@ export default function RealDataSankeyPage() {
     if (parsed.filterActive !== undefined) setFilterActive(parsed.filterActive);
     if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget);
     if (parsed.filterNameQuery !== undefined) { setSearchQuery(parsed.filterNameQuery); }
+    if (parsed.filterMinistryNames !== undefined) setFilterMinistryNames(parsed.filterMinistryNames);
     if (parsed.filterMinBudgetText !== undefined) setFilterMinBudgetText(parsed.filterMinBudgetText);
     if (parsed.filterMaxBudgetText !== undefined) setFilterMaxBudgetText(parsed.filterMaxBudgetText);
     if (parsed.filterMinSpendingText !== undefined) setFilterMinSpendingText(parsed.filterMinSpendingText);
@@ -310,6 +319,7 @@ export default function RealDataSankeyPage() {
       setFilterActive(parsed.filterActive ?? false);
       if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('recipient');
       setSearchQuery(parsed.filterNameQuery ?? '');
+      setFilterMinistryNames(parsed.filterMinistryNames ?? []);
       setFilterMinBudgetText(parsed.filterMinBudgetText ?? '');
       setFilterMaxBudgetText(parsed.filterMaxBudgetText ?? '');
       setFilterMinSpendingText(parsed.filterMinSpendingText ?? '');
@@ -347,6 +357,7 @@ export default function RealDataSankeyPage() {
     if (filterActive) p.set('f', '1');
     if (filterTarget === 'project') p.set('nft', 'p');
     if (filterActive && searchQuery) p.set('nf', searchQuery);
+    for (const name of filterMinistryNames) p.append('fm', name);
     if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
     if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
     if (filterMinSpendingText) p.set('fms', filterMinSpendingText);
@@ -358,7 +369,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, filterMinistryNames, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -367,6 +378,28 @@ export default function RealDataSankeyPage() {
   const [zoom, setZoom] = useState(1);
   // Keep zoomRef current for use in debounce timeouts
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  useEffect(() => {
+    if (!showMinistryDropdown) return;
+    const onMouseDown = (e: MouseEvent) => {
+      if (ministryDropdownRef.current && !ministryDropdownRef.current.contains(e.target as Node)) {
+        setShowMinistryDropdown(false);
+      }
+    };
+    const recompute = () => {
+      if (ministryButtonRef.current) {
+        const r = ministryButtonRef.current.getBoundingClientRect();
+        setMinistryDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width, maxHeight: Math.max(120, window.innerHeight - r.bottom - 16) });
+      }
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('resize', recompute);
+    window.addEventListener('scroll', recompute, true);
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('resize', recompute);
+      window.removeEventListener('scroll', recompute, true);
+    };
+  }, [showMinistryDropdown]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
@@ -400,7 +433,7 @@ export default function RealDataSankeyPage() {
     pendingHistoryAction.current = 'replace';
     setRecipientOffset(0);
     setProjectOffset(0);
-  }, [filterActive, filterTarget, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery]);
+  }, [filterActive, filterTarget, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery]);
 
   // Sync URL when filter name query changes (separate from above to avoid double reset)
   const filterQueryInitRef = useRef(false);
@@ -650,7 +683,9 @@ export default function RealDataSankeyPage() {
     const hasSpending = minSpendingYen !== null || maxSpendingYen !== null;
     const trimmedQuery = debouncedQuery.trim();
     const hasName = filterActive && trimmedQuery.length >= 1;
-    if (!hasBudget && !hasSpending && !hasName) return null;
+    const hasMinistry = filterMinistryNames.length > 0;
+    if (!hasBudget && !hasSpending && !hasName && !hasMinistry) return null;
+    const selectedMinistrySet = new Set(filterMinistryNames);
     const minBudget = minBudgetYen ?? -Infinity;
     const maxBudget = maxBudgetYen ?? Infinity;
     const minSpending = minSpendingYen ?? 0;
@@ -671,15 +706,16 @@ export default function RealDataSankeyPage() {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
         const failName = hasName && filterTarget === 'project' && !matchesName(n.name);
-        if (failBudget || failName) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
+        const failMinistry = hasMinistry && !selectedMinistrySet.has(n.ministry ?? '');
+        if (failBudget || failName || failMinistry) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
         const failName = hasName && filterTarget === 'recipient' && !matchesName(n.name);
         if (failSpending || failName) excluded.add(n.id);
       }
     }
-    // Pass 2: 支出先フィルタが有効な場合、残存支出先のない事業を除外（recipient → project のカスケード）
-    if (hasSpending || (hasName && filterTarget === 'recipient')) {
+    // Pass 2: 支出先・予算フィルタが有効な場合、残存支出先のない事業／孤立支出先を除外
+    if (hasSpending || hasBudget || hasMinistry || (hasName && filterTarget === 'recipient')) {
       const projectsWithSurvivingRecipients = new Set(
         graphData.edges
           .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
@@ -717,7 +753,7 @@ export default function RealDataSankeyPage() {
       }
     }
     return excluded.size > 0 ? excluded : null;
-  }, [graphData, filterActive, filterTarget, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex]);
+  }, [graphData, filterActive, filterTarget, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -1350,7 +1386,28 @@ export default function RealDataSankeyPage() {
       const qLower = q.toLocaleLowerCase();
       matcher = name => name.toLocaleLowerCase().includes(qLower);
     }
-    for (const n of graphData.nodes) {
+    // 府省庁フィルタが設定されている場合、検索対象を選択府省庁の事業・支出先に絞る
+    const searchMinistrySet = new Set(filterMinistryNames);
+    let allowedIds: Set<string> | null = null;
+    if (filterMinistryNames.length > 0) {
+      allowedIds = new Set<string>();
+      const allowedSpendingIds = new Set<string>();
+      for (const n of graphData.nodes) {
+        if (n.type === 'project-spending' && n.ministry != null && searchMinistrySet.has(n.ministry)) {
+          allowedIds.add(n.id);
+          allowedSpendingIds.add(n.id);
+        }
+      }
+      for (const e of graphData.edges) {
+        if (allowedSpendingIds.has(e.source) && e.target.startsWith('r-')) allowedIds.add(e.target);
+      }
+    }
+    // 金額フィルタは filterExcludedIds 経由で適用
+    const nodesToSearch = graphData.nodes.filter(n =>
+      (!allowedIds || allowedIds.has(n.id)) &&
+      (!filterExcludedIds || !filterExcludedIds.has(n.id))
+    );
+    for (const n of nodesToSearch) {
       if (n.type === 'project-budget') continue; // merged into project-spending entry
       if (pidQuery !== null) {
         if (n.type === 'project-spending' && n.projectId === pidQuery) {
@@ -1369,7 +1426,7 @@ export default function RealDataSankeyPage() {
       }
     }
     return results.sort((a, b) => b.sortValue - a.sortValue);
-  }, [graphData, debouncedQuery, searchUseRegex]);
+  }, [graphData, debouncedQuery, searchUseRegex, filterExcludedIds, filterMinistryNames, budgetNodeByPid]);
 
   const SEARCH_PAGE_SIZE = 200;
   const searchPagedResults = useMemo(
@@ -2479,6 +2536,59 @@ export default function RealDataSankeyPage() {
             {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
             {showAmountSliders && (
               <div style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {/* 府省庁フィルタ（複数選択ドロップダウン） */}
+                {(() => {
+                  const ministryNodes = (graphData?.nodes ?? []).filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
+                  const allSelected = filterMinistryNames.length === 0;
+                  const label = allSelected ? '全府省庁' : filterMinistryNames.length === 1 ? filterMinistryNames[0] : `選択中 (${filterMinistryNames.length}/${ministryNodes.length})`;
+                  const chevron = (
+                    <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="#aaa"
+                      style={{ transform: showMinistryDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', display: 'block' }}>
+                      <path d="M480-360 280-560h400L480-360Z"/>
+                    </svg>
+                  );
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={ministryDropdownRef}>
+                      <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>省庁</span>
+                      <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+                        <button type="button" ref={ministryButtonRef}
+                          onClick={() => {
+                            if (ministryButtonRef.current) {
+                              const r = ministryButtonRef.current.getBoundingClientRect();
+                              setMinistryDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width, maxHeight: Math.max(120, window.innerHeight - r.bottom - 16) });
+                            }
+                            setShowMinistryDropdown(v => !v);
+                          }}
+                          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: allSelected ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        >{label}</button>
+                        <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>{chevron}</span>
+                        {showMinistryDropdown && ministryDropdownRect && createPortal(
+                          <div style={{ position: 'fixed', top: ministryDropdownRect.top, left: ministryDropdownRect.left, width: ministryDropdownRect.width, zIndex: 9999, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: ministryDropdownRect.maxHeight, overflowY: 'auto' }}
+                            onMouseDown={e => e.stopPropagation()}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
+                              <input type="checkbox" checked={allSelected} onChange={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames([]); }} style={{ width: 12, height: 12 }} />
+                              <span style={{ fontSize: 11, color: '#333' }}>すべて選択/解除</span>
+                            </label>
+                            {ministryNodes.map(n => (
+                              <label key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', cursor: 'pointer' }}>
+                                <input type="checkbox"
+                                  checked={!allSelected && filterMinistryNames.includes(n.name)}
+                                  onChange={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames(prev => prev.includes(n.name) ? prev.filter(m => m !== n.name) : [...prev, n.name]); }}
+                                  style={{ width: 12, height: 12 }} />
+                                <span style={{ fontSize: 11, color: '#333' }}>{n.name}</span>
+                              </label>
+                            ))}
+                          </div>,
+                          document.body
+                        )}
+                      </div>
+                      {!allSelected && (
+                        <button type="button" onClick={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames([]); }}
+                          style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                      )}
+                    </div>
+                  );
+                })()}
                 {/* 予算・支出 テキスト入力 */}
                 {([
                   { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
