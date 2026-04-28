@@ -550,13 +550,17 @@ export function filterTopN(
     ? otherProjectWindowTotal
     : otherProjects.reduce((s, p) => s + p.value - (projectAboveWindowSpending.get(p.id) || 0), 0);
   const otherProjectSpendingRawTotal = otherProjects.reduce((s, p) => s + p.value, 0);
+  // r-no-spending がウィンドウにあり、集約事業が接続しているかチェック
+  const otherProjectsConnectToNoSpending = windowRecipientIds.has('r-no-spending') &&
+    allEdges.some(e => otherProjectSpendingIds.has(e.source) && e.target === 'r-no-spending');
+  const showAggProjectNodes = showAggProject && (otherProjectSpendingTotal > 0 || otherProjectsConnectToNoSpending);
   // Create __agg-project-budget whenever aggregate projects have spending to show
   // (budget may be 0, in which case the node has height 0 but still anchors the merged shape label).
-  if (otherProjectSpendingTotal > 0 && showAggProject) {
+  if (showAggProjectNodes) {
     nodes.push({ id: '__agg-project-budget', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-budget', value: otherProjectBudgetTotal, rawValue: otherProjectBudgetRawTotal, isScaled: otherProjectBudgetTotal < otherProjectBudgetRawTotal, skipLinkOverride: true, aggregated: true, layoutHeight: Math.max(otherProjectBudgetTotal, otherProjectSpendingTotal) });
   }
-  // Create __agg-project-spending when aggregate projects have spending.
-  if (otherProjectSpendingTotal > 0 && showAggProject) {
+  // Create __agg-project-spending when aggregate projects have spending or no-spending connections.
+  if (showAggProjectNodes) {
     const aggSpendingTrimmed = otherProjectSpendingTotal < otherProjectSpendingRawTotal;
     nodes.push({ id: '__agg-project-spending', name: `${otherProjects.length.toLocaleString()}事業`, type: 'project-spending', value: otherProjectSpendingTotal, rawValue: aggSpendingTrimmed ? otherProjectSpendingRawTotal : undefined, isScaled: aggSpendingTrimmed, skipLinkOverride: true, aggregated: true });
   }
@@ -670,7 +674,7 @@ export function filterTopN(
   }
 
   // __agg-project-spending → window recipients — skipped when agg-project is hidden
-  if (showAggProject) {
+  if (showAggProjectNodes) {
     for (const rid of windowRecipientIds) {
       const windowEdges = allEdges.filter(e => otherProjectSpendingIds.has(e.source) && e.target === rid);
       const v = windowEdges.reduce((s, e) => s + e.value, 0);
@@ -681,7 +685,7 @@ export function filterTopN(
   }
   // __agg-project-spending → __agg-recipient (tail) — skipped when agg-recipient or agg-project is hidden
   const otherProjectsHaveNoSpendingEdge = rNoSpendingInTail && allEdges.some(e => otherProjectSpendingIds.has(e.source) && e.target === 'r-no-spending');
-  if (showAggProject && showAggRecipient && (otherProjectTailTotal > 0 || otherProjectsHaveNoSpendingEdge)) {
+  if (showAggProjectNodes && showAggRecipient && (otherProjectTailTotal > 0 || otherProjectsHaveNoSpendingEdge)) {
     edges.push({ source: '__agg-project-spending', target: '__agg-recipient', value: otherProjectTailTotal });
   }
 
