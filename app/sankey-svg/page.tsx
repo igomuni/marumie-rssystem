@@ -2529,7 +2529,7 @@ export default function RealDataSankeyPage() {
                         >{label}</button>
                         <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>{chevron}</span>
                         {showMinistryDropdown && ministryDropdownRect && createPortal(
-                          <div style={{ position: 'fixed', top: ministryDropdownRect.top, left: ministryDropdownRect.left, width: ministryDropdownRect.width, zIndex: 9999, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 260, overflowY: 'auto' }}
+                          <div style={{ position: 'fixed', top: ministryDropdownRect.top, left: ministryDropdownRect.left, width: ministryDropdownRect.width, zIndex: 9999, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 480, overflowY: 'auto' }}
                             onMouseDown={e => e.stopPropagation()}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
                               <input type="checkbox" checked={allSelected} onChange={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames([]); }} style={{ width: 12, height: 12 }} />
