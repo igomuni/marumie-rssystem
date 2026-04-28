@@ -36,7 +36,7 @@ interface SankeyUrlState {
   filterActive?: boolean;
   filterTarget?: 'project' | 'recipient';
   filterNameQuery?: string;
-  filterMinistryName?: string;
+  filterMinistryNames?: string[];
   filterMinBudgetText?: string;
   filterMaxBudgetText?: string;
   filterMinSpendingText?: string;
@@ -68,7 +68,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const f = p.get('f'); if (f === '1') result.filterActive = true;
   const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient';
   const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
-  const fm = p.get('fm'); if (fm !== null) result.filterMinistryName = fm;
+  const fm = p.get('fm'); if (fm !== null) result.filterMinistryNames = fm ? fm.split(',') : [];
   const fmb = p.get('fmb'); if (fmb !== null) result.filterMinBudgetText = fmb;
   const fxb = p.get('fxb'); if (fxb !== null) result.filterMaxBudgetText = fxb;
   const fms = p.get('fms'); if (fms !== null) result.filterMinSpendingText = fms;
@@ -203,7 +203,9 @@ export default function RealDataSankeyPage() {
   const [filterActive, setFilterActive] = useState(false);
   const [showAmountSliders, setShowAmountSliders] = useState(false);
   const [filterTarget, setFilterTarget] = useState<'project' | 'recipient'>('recipient');
-  const [filterMinistryName, setFilterMinistryName] = useState('');
+  const [filterMinistryNames, setFilterMinistryNames] = useState<string[]>([]);
+  const [showMinistryDropdown, setShowMinistryDropdown] = useState(false);
+  const ministryDropdownRef = useRef<HTMLDivElement>(null);
   const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
   const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
   const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
@@ -277,7 +279,7 @@ export default function RealDataSankeyPage() {
     if (parsed.filterActive !== undefined) setFilterActive(parsed.filterActive);
     if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget);
     if (parsed.filterNameQuery !== undefined) { setSearchQuery(parsed.filterNameQuery); }
-    if (parsed.filterMinistryName !== undefined) setFilterMinistryName(parsed.filterMinistryName);
+    if (parsed.filterMinistryNames !== undefined) setFilterMinistryNames(parsed.filterMinistryNames);
     if (parsed.filterMinBudgetText !== undefined) setFilterMinBudgetText(parsed.filterMinBudgetText);
     if (parsed.filterMaxBudgetText !== undefined) setFilterMaxBudgetText(parsed.filterMaxBudgetText);
     if (parsed.filterMinSpendingText !== undefined) setFilterMinSpendingText(parsed.filterMinSpendingText);
@@ -314,7 +316,7 @@ export default function RealDataSankeyPage() {
       setFilterActive(parsed.filterActive ?? false);
       if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('recipient');
       setSearchQuery(parsed.filterNameQuery ?? '');
-      setFilterMinistryName(parsed.filterMinistryName ?? '');
+      setFilterMinistryNames(parsed.filterMinistryNames ?? []);
       setFilterMinBudgetText(parsed.filterMinBudgetText ?? '');
       setFilterMaxBudgetText(parsed.filterMaxBudgetText ?? '');
       setFilterMinSpendingText(parsed.filterMinSpendingText ?? '');
@@ -352,7 +354,7 @@ export default function RealDataSankeyPage() {
     if (filterActive) p.set('f', '1');
     if (filterTarget === 'project') p.set('nft', 'p');
     if (filterActive && searchQuery) p.set('nf', searchQuery);
-    if (filterMinistryName) p.set('fm', filterMinistryName);
+    if (filterMinistryNames.length > 0) p.set('fm', filterMinistryNames.join(','));
     if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
     if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
     if (filterMinSpendingText) p.set('fms', filterMinSpendingText);
@@ -364,7 +366,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, filterMinistryName, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, filterMinistryNames, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -373,6 +375,16 @@ export default function RealDataSankeyPage() {
   const [zoom, setZoom] = useState(1);
   // Keep zoomRef current for use in debounce timeouts
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  useEffect(() => {
+    if (!showMinistryDropdown) return;
+    const handler = (e: MouseEvent) => {
+      if (ministryDropdownRef.current && !ministryDropdownRef.current.contains(e.target as Node)) {
+        setShowMinistryDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showMinistryDropdown]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
@@ -656,7 +668,7 @@ export default function RealDataSankeyPage() {
     const hasSpending = minSpendingYen !== null || maxSpendingYen !== null;
     const trimmedQuery = debouncedQuery.trim();
     const hasName = filterActive && trimmedQuery.length >= 1;
-    const hasMinistry = !!filterMinistryName;
+    const hasMinistry = filterMinistryNames.length > 0;
     if (!hasBudget && !hasSpending && !hasName && !hasMinistry) return null;
     const minBudget = minBudgetYen ?? -Infinity;
     const maxBudget = maxBudgetYen ?? Infinity;
@@ -678,7 +690,7 @@ export default function RealDataSankeyPage() {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
         const failName = hasName && filterTarget === 'project' && !matchesName(n.name);
-        const failMinistry = hasMinistry && n.ministry !== filterMinistryName;
+        const failMinistry = hasMinistry && !filterMinistryNames.includes(n.ministry ?? '');
         if (failBudget || failName || failMinistry) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
@@ -725,7 +737,7 @@ export default function RealDataSankeyPage() {
       }
     }
     return excluded.size > 0 ? excluded : null;
-  }, [graphData, filterActive, filterTarget, filterMinistryName, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex]);
+  }, [graphData, filterActive, filterTarget, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -2487,24 +2499,46 @@ export default function RealDataSankeyPage() {
             {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
             {showAmountSliders && (
               <div style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {/* 府省庁フィルタ */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>省庁</span>
-                  <select
-                    value={filterMinistryName}
-                    onChange={e => { pendingHistoryAction.current = 'replace'; setFilterMinistryName(e.target.value); }}
-                    style={{ flex: 1, minWidth: 0, fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: filterMinistryName ? '#333' : '#aaa', outline: 'none', cursor: 'pointer' }}
-                  >
-                    <option value="">全府省庁</option>
-                    {graphData?.nodes.filter(n => n.type === 'ministry').sort((a, b) => a.name.localeCompare(b.name, 'ja')).map(n => (
-                      <option key={n.id} value={n.name}>{n.name}</option>
-                    ))}
-                  </select>
-                  {filterMinistryName && (
-                    <button type="button" onClick={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryName(''); }}
-                      style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
-                  )}
-                </div>
+                {/* 府省庁フィルタ（複数選択ドロップダウン） */}
+                {(() => {
+                  const ministryNodes = (graphData?.nodes ?? []).filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
+                  const allSelected = filterMinistryNames.length === 0;
+                  const label = allSelected ? '全府省庁' : filterMinistryNames.length === 1 ? filterMinistryNames[0] : `選択中 (${filterMinistryNames.length}/${ministryNodes.length})`;
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={ministryDropdownRef}>
+                      <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>省庁</span>
+                      <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+                        <button type="button"
+                          onClick={() => setShowMinistryDropdown(v => !v)}
+                          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: allSelected ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        >{label}</button>
+                        <span style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: 10, color: '#aaa' }}>{showMinistryDropdown ? '▲' : '▼'}</span>
+                        {showMinistryDropdown && (
+                          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 220, overflowY: 'auto', marginTop: 2 }}
+                            onMouseDown={e => e.stopPropagation()}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
+                              <input type="checkbox" checked={allSelected} onChange={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames([]); }} style={{ width: 12, height: 12 }} />
+                              <span style={{ fontSize: 11, color: '#333' }}>すべて選択/解除</span>
+                            </label>
+                            {ministryNodes.map(n => (
+                              <label key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', cursor: 'pointer' }}>
+                                <input type="checkbox"
+                                  checked={!allSelected && filterMinistryNames.includes(n.name)}
+                                  onChange={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames(prev => prev.includes(n.name) ? prev.filter(m => m !== n.name) : [...prev, n.name]); }}
+                                  style={{ width: 12, height: 12 }} />
+                                <span style={{ fontSize: 11, color: '#333' }}>{n.name}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {!allSelected && (
+                        <button type="button" onClick={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames([]); }}
+                          style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                      )}
+                    </div>
+                  );
+                })()}
                 {/* 予算・支出 テキスト入力 */}
                 {([
                   { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
