@@ -179,14 +179,10 @@ export function filterTopN(
     windowRecipients = [...windowRecipients, tailRecipients[0]];
     tailRecipients = [];
   }
-  // r-no-spending は常に window 末尾に昇格（tail にある場合のみ）
-  const noSpendingTailIdx = tailRecipients.findIndex(([id]) => id === 'r-no-spending');
-  if (noSpendingTailIdx >= 0) {
-    const [noSpendingEntry] = tailRecipients.splice(noSpendingTailIdx, 1);
-    windowRecipients = [...windowRecipients, noSpendingEntry];
-  }
   const windowRecipientIds = new Set(windowRecipients.map(([id]) => id));
   const tailRecipientIds = new Set(tailRecipients.map(([id]) => id));
+  // r-no-spending が tail に存在するか（0値エッジのルーティング制御に使用）
+  const rNoSpendingInTail = tailRecipientIds.has('r-no-spending');
 
   // 3. Per-project and per-recipient window/tail spending (all projects, used for re-ranking)
   const projectWindowValue = new Map<string, number>();
@@ -574,7 +570,7 @@ export function filterTopN(
   // In projectOffsetMode, include aggregate-project-only recipient flow in the node check value.
   const aggRecipientValue = tailValue + otherProjectAggOnlyTotal;
   const aggRecipientCount = tailRecipients.length + aggOnlyRecipientCount;
-  if (showAggRecipient && aggRecipientValue > 0) {
+  if (showAggRecipient && aggRecipientCount > 0) {
     nodes.push({
       id: '__agg-recipient',
       name: `${aggRecipientCount.toLocaleString()}支出先`,
@@ -653,8 +649,11 @@ export function filterTopN(
   // project-spending → __agg-recipient (tail) — skipped when agg-recipient is hidden
   if (showAggRecipient) {
     for (const sp of topProjectNodes) {
-      const v = allEdges.filter(e => e.source === sp.id && tailRecipientIds.has(e.target)).reduce((s, e) => s + e.value, 0);
-      if (v > 0) edges.push({ source: sp.id, target: '__agg-recipient', value: v });
+      const tailEdges = allEdges.filter(e => e.source === sp.id && tailRecipientIds.has(e.target));
+      const v = tailEdges.reduce((s, e) => s + e.value, 0);
+      // r-no-spending へのエッジ（0値）も集約先への接続として扱う
+      const hasNoSpendingEdge = rNoSpendingInTail && tailEdges.some(e => e.target === 'r-no-spending');
+      if (v > 0 || hasNoSpendingEdge) edges.push({ source: sp.id, target: '__agg-recipient', value: v });
     }
   }
 
@@ -666,7 +665,8 @@ export function filterTopN(
     }
   }
   // __agg-project-spending → __agg-recipient (tail) — skipped when agg-recipient or agg-project is hidden
-  if (showAggProject && showAggRecipient && otherProjectTailTotal > 0) {
+  const otherProjectsHaveNoSpendingEdge = rNoSpendingInTail && allEdges.some(e => otherProjectSpendingIds.has(e.source) && e.target === 'r-no-spending');
+  if (showAggProject && showAggRecipient && (otherProjectTailTotal > 0 || otherProjectsHaveNoSpendingEdge)) {
     edges.push({ source: '__agg-project-spending', target: '__agg-recipient', value: otherProjectTailTotal });
   }
 
