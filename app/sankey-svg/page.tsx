@@ -1374,9 +1374,25 @@ export default function RealDataSankeyPage() {
       matcher = name => name.toLocaleLowerCase().includes(qLower);
     }
     const hasMinistryFilter = filterMinistryNames.length > 0;
+    // recipientノードは ministry フィールドを持たないため、選択府省庁の事業と接続されているかでフィルタする
+    let allowedRecipientIds: Set<string> | null = null;
+    if (hasMinistryFilter) {
+      const allowedProjectIds = new Set(
+        graphData.nodes.filter(n => n.type === 'project-spending' && n.ministry != null && filterMinistryNames.includes(n.ministry)).map(n => n.id)
+      );
+      allowedRecipientIds = new Set(
+        graphData.edges.filter(e => allowedProjectIds.has(e.source)).map(e => e.target)
+      );
+    }
     for (const n of graphData.nodes) {
       if (n.type === 'project-budget') continue; // merged into project-spending entry
-      if (hasMinistryFilter && (n.ministry == null || !filterMinistryNames.includes(n.ministry))) continue;
+      if (hasMinistryFilter) {
+        if (n.type === 'recipient') {
+          if (!allowedRecipientIds!.has(n.id)) continue;
+        } else if (n.ministry == null || !filterMinistryNames.includes(n.ministry)) {
+          continue;
+        }
+      }
       if (pidQuery !== null) {
         if (n.type === 'project-spending' && n.projectId === pidQuery) {
           const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
