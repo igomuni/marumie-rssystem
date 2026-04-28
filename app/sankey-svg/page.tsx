@@ -1373,26 +1373,12 @@ export default function RealDataSankeyPage() {
       const qLower = q.toLocaleLowerCase();
       matcher = name => name.toLocaleLowerCase().includes(qLower);
     }
-    const hasMinistryFilter = filterMinistryNames.length > 0;
-    // recipientノードは ministry フィールドを持たないため、選択府省庁の事業と接続されているかでフィルタする
-    let allowedRecipientIds: Set<string> | null = null;
-    if (hasMinistryFilter) {
-      const allowedProjectIds = new Set(
-        graphData.nodes.filter(n => n.type === 'project-spending' && n.ministry != null && filterMinistryNames.includes(n.ministry)).map(n => n.id)
-      );
-      allowedRecipientIds = new Set(
-        graphData.edges.filter(e => allowedProjectIds.has(e.source)).map(e => e.target)
-      );
-    }
-    for (const n of graphData.nodes) {
+    // filterExcludedIds をフィルタの唯一の根拠として使用（金額・府省庁・名前 全条件を一元管理）
+    const nodesToSearch = filterExcludedIds
+      ? graphData.nodes.filter(n => !filterExcludedIds.has(n.id))
+      : graphData.nodes;
+    for (const n of nodesToSearch) {
       if (n.type === 'project-budget') continue; // merged into project-spending entry
-      if (hasMinistryFilter) {
-        if (n.type === 'recipient') {
-          if (!allowedRecipientIds!.has(n.id)) continue;
-        } else if (n.ministry == null || !filterMinistryNames.includes(n.ministry)) {
-          continue;
-        }
-      }
       if (pidQuery !== null) {
         if (n.type === 'project-spending' && n.projectId === pidQuery) {
           const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
@@ -1410,7 +1396,7 @@ export default function RealDataSankeyPage() {
       }
     }
     return results.sort((a, b) => b.sortValue - a.sortValue);
-  }, [graphData, debouncedQuery, searchUseRegex, filterMinistryNames, budgetNodeByPid]);
+  }, [graphData, debouncedQuery, searchUseRegex, filterExcludedIds, budgetNodeByPid]);
 
   const SEARCH_PAGE_SIZE = 200;
   const searchPagedResults = useMemo(
