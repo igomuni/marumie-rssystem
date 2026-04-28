@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import type { GraphData, LayoutNode, LayoutLink } from '@/types/sankey-svg';
 import type { ProjectDetail } from '@/types/project-details';
 import {
@@ -205,7 +206,9 @@ export default function RealDataSankeyPage() {
   const [filterTarget, setFilterTarget] = useState<'project' | 'recipient'>('recipient');
   const [filterMinistryNames, setFilterMinistryNames] = useState<string[]>([]);
   const [showMinistryDropdown, setShowMinistryDropdown] = useState(false);
+  const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const ministryDropdownRef = useRef<HTMLDivElement>(null);
+  const ministryButtonRef = useRef<HTMLButtonElement>(null);
   const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
   const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
   const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
@@ -2504,17 +2507,29 @@ export default function RealDataSankeyPage() {
                   const ministryNodes = (graphData?.nodes ?? []).filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
                   const allSelected = filterMinistryNames.length === 0;
                   const label = allSelected ? '全府省庁' : filterMinistryNames.length === 1 ? filterMinistryNames[0] : `選択中 (${filterMinistryNames.length}/${ministryNodes.length})`;
+                  const chevron = (
+                    <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="#aaa"
+                      style={{ transform: showMinistryDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', display: 'block' }}>
+                      <path d="M480-360 280-560h400L480-360Z"/>
+                    </svg>
+                  );
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={ministryDropdownRef}>
                       <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>省庁</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-                        <button type="button"
-                          onClick={() => setShowMinistryDropdown(v => !v)}
+                        <button type="button" ref={ministryButtonRef}
+                          onClick={() => {
+                            if (ministryButtonRef.current) {
+                              const r = ministryButtonRef.current.getBoundingClientRect();
+                              setMinistryDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width });
+                            }
+                            setShowMinistryDropdown(v => !v);
+                          }}
                           style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: allSelected ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                         >{label}</button>
-                        <span style={{ position: 'absolute', right: 5, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: 10, color: '#aaa' }}>{showMinistryDropdown ? '▲' : '▼'}</span>
-                        {showMinistryDropdown && (
-                          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 220, overflowY: 'auto', marginTop: 2 }}
+                        <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>{chevron}</span>
+                        {showMinistryDropdown && ministryDropdownRect && createPortal(
+                          <div style={{ position: 'fixed', top: ministryDropdownRect.top, left: ministryDropdownRect.left, width: ministryDropdownRect.width, zIndex: 9999, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 260, overflowY: 'auto' }}
                             onMouseDown={e => e.stopPropagation()}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
                               <input type="checkbox" checked={allSelected} onChange={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames([]); }} style={{ width: 12, height: 12 }} />
@@ -2529,7 +2544,8 @@ export default function RealDataSankeyPage() {
                                 <span style={{ fontSize: 11, color: '#333' }}>{n.name}</span>
                               </label>
                             ))}
-                          </div>
+                          </div>,
+                          document.body
                         )}
                       </div>
                       {!allSelected && (
