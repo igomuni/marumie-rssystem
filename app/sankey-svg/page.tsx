@@ -433,7 +433,7 @@ export default function RealDataSankeyPage() {
     pendingHistoryAction.current = 'replace';
     setRecipientOffset(0);
     setProjectOffset(0);
-  }, [filterActive, filterTarget, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery]);
+  }, [filterActive, filterTarget, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery]);
 
   // Sync URL when filter name query changes (separate from above to avoid double reset)
   const filterQueryInitRef = useRef(false);
