@@ -253,7 +253,11 @@ export function filterTopN(
     // Use window + tail (= visible spending) so the aggregate recipient's contribution is included.
     const va = (projectWindowValue.get(a.id) || 0) + (showAggRecipient ? (projectTailValue.get(a.id) || 0) : 0);
     const vb = (projectWindowValue.get(b.id) || 0) + (showAggRecipient ? (projectTailValue.get(b.id) || 0) : 0);
-    return vb - va;
+    if (vb !== va) return vb - va;
+    // Tiebreaker: budget amount desc（支出が同値の場合、予算額で並べる）
+    const ba = projectAdjustedBudget.get(`project-budget-${a.projectId}`) ?? nodeById.get(`project-budget-${a.projectId}`)?.value ?? 0;
+    const bb = projectAdjustedBudget.get(`project-budget-${b.projectId}`) ?? nodeById.get(`project-budget-${b.projectId}`)?.value ?? 0;
+    return bb - ba;
   });
   // Filter before slice so that projects with no visible flow don't consume TopN slots.
   const topProjectNodes = topMinistryAllProjects
