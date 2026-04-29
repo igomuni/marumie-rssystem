@@ -308,7 +308,7 @@ export default function RealDataSankeyPage() {
       setTopMinistry(parsed.topMinistry ?? 37);
       setTopProject(parsed.topProject ?? 40);
       setTopRecipient(parsed.topRecipient ?? 40);
-      setShowLabels(parsed.showLabels ?? true);
+      setShowLabels(parsed.showLabels ?? false);
       setShowAggRecipient(parsed.showAggRecipient ?? true);
       setShowAggProject(parsed.showAggProject ?? true);
       setProjectSortBy(parsed.projectSortBy ?? 'budget');
