@@ -2,7 +2,7 @@
 name: sync-rs-vis
 description: rs-visリポジトリへmarumie-rssystemの最新開発成果を反映する。「rs-visに反映」「リリースリポジトリに同期」「sync-rs-vis」と言われたときに使用する。
 compatibility: Requires git, rsync, npm, gh CLI. Set MARUMIE_RS_ROOT (path to marumie-rssystem) and RS_VIS_ROOT (path to rs-vis) before execution, or confirm paths interactively.
-allowed-tools: Bash(git:*) Bash(gh:*) Bash(rsync:*) Bash(cp:*) Bash(npm:*) Bash(find:*) Bash(ls:*)
+allowed-tools: Bash(git:*) Bash(gh:*) Bash(rsync:*) Bash(cp:*) Bash(npm:*) Bash(find:*) Bash(ls:*) Bash(grep:*) Bash(sort:*) Bash(date:*)
 ---
 
 ## 概要
@@ -34,9 +34,10 @@ git -C "${MARUMIE_RS_ROOT}" diff --name-only <起点コミット> HEAD \
 ### 3. rs-vis にブランチを作成
 
 ```bash
+BRANCH_NAME="sync/$(TZ=Asia/Tokyo date +%Y%m%d)"
 git -C "${RS_VIS_ROOT}" checkout main
 git -C "${RS_VIS_ROOT}" pull origin main
-git -C "${RS_VIS_ROOT}" checkout -b sync/$(TZ=Asia/Tokyo date +%Y%m%d)
+git -C "${RS_VIS_ROOT}" checkout -b "${BRANCH_NAME}"
 ```
 
 ### 4. ソースコードのコピー
@@ -80,7 +81,7 @@ feat: marumie-rssystem の最新状態を反映（YYYY-MM-DD時点）
 ### 8. プッシュ・PR作成
 
 ```bash
-git -C "${RS_VIS_ROOT}" push -u origin sync/$(TZ=Asia/Tokyo date +%Y%m%d)
+git -C "${RS_VIS_ROOT}" push -u origin "${BRANCH_NAME}"
 gh -C "${RS_VIS_ROOT}" pr create --base main \
   --title "sync: marumie-rssystem 反映（YYYY-MM-DD）" --body "..."
 ```
