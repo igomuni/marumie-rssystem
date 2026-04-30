@@ -44,6 +44,7 @@ interface SankeyUrlState {
   filterMaxSpendingText?: string;
   acGeneral?: boolean;
   acSpecial?: boolean;
+  acBoth?: boolean;
   acNone?: boolean;
 }
 
@@ -81,6 +82,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   if (ac !== null) {
     result.acGeneral = ac.includes('g');
     result.acSpecial = ac.includes('s');
+    result.acBoth    = ac.includes('b');
     result.acNone    = ac.includes('n');
   }
   return result;
@@ -224,6 +226,7 @@ export default function RealDataSankeyPage() {
   const [filterMaxSpendingText, setFilterMaxSpendingText] = useState('');
   const [acGeneral, setAcGeneral] = useState(true);
   const [acSpecial, setAcSpecial] = useState(true);
+  const [acBoth,    setAcBoth]    = useState(true);
   const [acNone,    setAcNone]    = useState(true);
   const isPidQuery = (q: string) => /^\d+$/.test(q);
   const meetsSearchMinLength = (q: string) => isPidQuery(q) ? q.length >= 1 : q.length >= 2;
@@ -301,6 +304,7 @@ export default function RealDataSankeyPage() {
     if (parsed.filterMaxSpendingText !== undefined) setFilterMaxSpendingText(parsed.filterMaxSpendingText);
     if (parsed.acGeneral !== undefined) setAcGeneral(parsed.acGeneral);
     if (parsed.acSpecial !== undefined) setAcSpecial(parsed.acSpecial);
+    if (parsed.acBoth    !== undefined) setAcBoth(parsed.acBoth);
     if (parsed.acNone    !== undefined) setAcNone(parsed.acNone);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
@@ -341,6 +345,7 @@ export default function RealDataSankeyPage() {
       setFilterMaxSpendingText(parsed.filterMaxSpendingText ?? '');
       setAcGeneral(parsed.acGeneral ?? true);
       setAcSpecial(parsed.acSpecial ?? true);
+      setAcBoth(parsed.acBoth ?? true);
       setAcNone(parsed.acNone ?? true);
       if (parsed.selectedNodeId) pendingResetViewport.current = true;
     };
@@ -380,8 +385,8 @@ export default function RealDataSankeyPage() {
     if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
     if (filterMinSpendingText) p.set('fms', filterMinSpendingText);
     if (filterMaxSpendingText) p.set('fxs', filterMaxSpendingText);
-    if (!acGeneral || !acSpecial || !acNone) {
-      p.set('ac', `${acGeneral ? 'g' : ''}${acSpecial ? 's' : ''}${acNone ? 'n' : ''}`);
+    if (!acGeneral || !acSpecial || !acBoth || !acNone) {
+      p.set('ac', `${acGeneral ? 'g' : ''}${acSpecial ? 's' : ''}${acBoth ? 'b' : ''}${acNone ? 'n' : ''}`);
     }
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
@@ -390,7 +395,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, filterMinistryNames, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acNone]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, filterMinistryNames, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -733,7 +738,7 @@ export default function RealDataSankeyPage() {
     const trimmedQuery = debouncedQuery.trim();
     const hasName = filterActive && trimmedQuery.length >= 1;
     const hasMinistry = filterMinistryNames.length > 0;
-    const hasAccountFilter = !acGeneral || !acSpecial || !acNone;
+    const hasAccountFilter = !acGeneral || !acSpecial || !acBoth || !acNone;
     if (!hasBudget && !hasSpending && !hasName && !hasMinistry && !hasAccountFilter) return null;
     const selectedMinistrySet = new Set(filterMinistryNames);
     const minBudget = minBudgetYen ?? -Infinity;
@@ -761,7 +766,7 @@ export default function RealDataSankeyPage() {
           const cat = n.accountCategory;
           if (cat === 'general') return !acGeneral;
           if (cat === 'special') return !acSpecial;
-          if (cat === 'both') return !acGeneral && !acSpecial;
+          if (cat === 'both') return !acBoth;
           return !acNone; // undefined → 'none'
         })();
         if (failBudget || failName || failMinistry || failAccount) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
@@ -810,7 +815,7 @@ export default function RealDataSankeyPage() {
       }
     }
     return excluded.size > 0 ? excluded : null;
-  }, [graphData, filterActive, filterTarget, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex, acGeneral, acSpecial, acNone]);
+  }, [graphData, filterActive, filterTarget, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex, acGeneral, acSpecial, acBoth, acNone]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -2718,6 +2723,7 @@ export default function RealDataSankeyPage() {
                     {([
                       { label: '一般会計', value: acGeneral, setter: setAcGeneral },
                       { label: '特別会計', value: acSpecial, setter: setAcSpecial },
+                      { label: '一般・特別', value: acBoth,  setter: setAcBoth    },
                       { label: 'なし',     value: acNone,    setter: setAcNone    },
                     ] as const).map(({ label, value, setter }) => (
                       <label key={label} style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer', fontSize: 11, color: value ? '#333' : '#aaa' }}>
