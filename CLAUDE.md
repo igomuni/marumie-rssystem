@@ -72,6 +72,15 @@ npm run build-houjin-lookup  # SQLite → data/houjin-lookup.json（約4秒）
 | [scripts/generate-sankey2-data.ts](scripts/generate-sankey2-data.ts) | 5-1/5-2 CSV → graph.json 生成 |
 | [scripts/compute-sankey2-layout.ts](scripts/compute-sankey2-layout.ts) | graph.json → layout.json（座標計算） |
 
+### /sankey-svg（SVG ベース動的 Sankey 図）
+
+| File | Purpose |
+|------|---------|
+| [app/sankey-svg/page.tsx](app/sankey-svg/page.tsx) | SVG Sankey UI・Canvas描画・ドリルダウン・サイドパネル |
+| [app/lib/sankey-svg-filter.ts](app/lib/sankey-svg-filter.ts) | フィルタロジック（府省庁・事業・支出先・金額） |
+| [app/lib/sankey-svg-constants.ts](app/lib/sankey-svg-constants.ts) | レイアウト定数・ノード幅・間隔 |
+| [app/lib/sankey-generator.ts](app/lib/sankey-generator.ts) | Sankey データ生成（共有） |
+
 ### 共通
 
 | File | Purpose |
