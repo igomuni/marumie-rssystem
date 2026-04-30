@@ -171,7 +171,7 @@ export default function RealDataSankeyPage() {
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
-  const [showLabels, setShowLabels] = useState(false);
+  const [showLabels, setShowLabels] = useState(true);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [showAggProject, setShowAggProject] = useState(true);
   const [projectSortBy, setProjectSortBy] = useState<'budget' | 'spending'>('budget');
@@ -308,7 +308,7 @@ export default function RealDataSankeyPage() {
       setTopMinistry(parsed.topMinistry ?? 37);
       setTopProject(parsed.topProject ?? 40);
       setTopRecipient(parsed.topRecipient ?? 40);
-      setShowLabels(parsed.showLabels ?? false);
+      setShowLabels(parsed.showLabels ?? true);
       setShowAggRecipient(parsed.showAggRecipient ?? true);
       setShowAggProject(parsed.showAggProject ?? true);
       setProjectSortBy(parsed.projectSortBy ?? 'budget');
@@ -562,7 +562,7 @@ export default function RealDataSankeyPage() {
 
   // Compute max extra height from label shifts at a given zoom level (2-pass helper)
   const calcShiftExtraH = useCallback((nodes: { y0: number; y1: number; id: string; type: string }[], zoomK: number): number => {
-    if (showLabelsRef.current) return 0;
+    if (!showLabelsRef.current) return 0;
     const LABEL_SLOT = 12;
     const colShifts = new Map<number, number>();
     for (const node of nodes) {
@@ -799,19 +799,19 @@ export default function RealDataSankeyPage() {
 
   const layout = useMemo(() => {
     if (!filtered) return null;
-    // Two-pass: estimate fit zoom from ungapped layout, derive stable gaps from it.
+    // Two-pass: fitZoom 基準で列間隔を算出（ON/OFF 共通）
     const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
     const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
     const fitZoom = Math.max(0.1, Math.min(10,
       Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
     ));
-    const minNodeGap = showLabels ? 14 / fitZoom : NODE_PAD;
-    const extraRecipientGapSVG = 360 / fitZoom;  // project-spending → recipient label space
-    const extraMinistryGapSVG = 310 / fitZoom;   // ministry → project-budget label space
-    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, minNodeGap, extraRecipientGapSVG, extraMinistryGapSVG);
+    const extraRecipientGapSVG = 360 / fitZoom;
+    const extraMinistryGapSVG  = 310 / fitZoom;
+    // ON: topShift あり、OFF: topShift なし — minNodeGap は両モードとも NODE_PAD
+    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
-  }, [filtered, svgWidth, svgHeight, showLabels]);
+  }, [filtered, svgWidth, svgHeight]);
 
   // Extra height (data units) added by node shifts — stored in ref for use in zoom/pan callbacks
   const shiftExtraHRef = useRef(0);
@@ -820,7 +820,7 @@ export default function RealDataSankeyPage() {
   const nodeShiftInfo = useMemo(() => {
     const LABEL_SLOT = 12;
     const info = new Map<string, { cumShift: number; topShift: number }>();
-    if (!layout || showLabels) { shiftExtraHRef.current = 0; return info; }
+    if (!layout || !showLabels) { shiftExtraHRef.current = 0; return info; }
     const nodesByColumn = new Map<number, typeof layout.nodes[0][]>();
     for (const node of layout.nodes) {
       const col = getColumn(node);
@@ -1841,7 +1841,7 @@ export default function RealDataSankeyPage() {
                       const isSelectedMerged = node.id === selectedNodeId || spendingNode?.id === selectedNodeId;
                       const maxH = Math.max(bH, sH);
                       const { cumShift = 0, topShift = 0 } = nodeShiftInfo.get(node.id) ?? {};
-                      const labelVisible = showLabels || topShift > 0 || maxH * zoom > 10 || isSelectedMerged;
+                      const labelVisible = topShift > 0 || maxH * zoom > 10 || isSelectedMerged;
                       const nodeOpacity = connectedNodeIds
                         ? (isConnected ? 1 : 0.3)
                         : (hoveredNode && hoveredNode !== node ? 0.4 : 1);
@@ -1915,7 +1915,7 @@ export default function RealDataSankeyPage() {
                     const h = node.y1 - node.y0;
                     const isSelected = node.id === selectedNodeId;
                     const { cumShift = 0, topShift = 0 } = nodeShiftInfo.get(node.id) ?? {};
-                    const labelVisible = showLabels || topShift > 0 || (h + NODE_PAD) * zoom > 10 || isSelected;
+                    const labelVisible = topShift > 0 || (h + NODE_PAD) * zoom > 10 || isSelected;
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
                     return (
