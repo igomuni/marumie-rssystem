@@ -811,7 +811,7 @@ export default function RealDataSankeyPage() {
     const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
-  }, [filtered, svgWidth, svgHeight, showLabels]);
+  }, [filtered, svgWidth, svgHeight]);
 
   // Extra height (data units) added by node shifts — stored in ref for use in zoom/pan callbacks
   const shiftExtraHRef = useRef(0);
