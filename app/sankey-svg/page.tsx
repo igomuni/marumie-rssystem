@@ -2132,9 +2132,19 @@ export default function RealDataSankeyPage() {
               // recipient: 支出のみ
               spending = hoveredNode.value;
             }
+            // 会計区分ラベル（project-budget / project-spending のみ）
+            let hoveredAcLabel: string | null = null;
+            if (t === 'project-budget' || t === 'project-spending') {
+              const cat = t === 'project-budget'
+                ? hoveredNode.accountCategory
+                : hoveredNode.targetLinks.find(l => l.source.type === 'project-budget')?.source.accountCategory;
+              if (cat === 'general') hoveredAcLabel = '一般会計';
+              else if (cat === 'special') hoveredAcLabel = '特別会計';
+              else if (cat === 'both') hoveredAcLabel = '一般・特別';
+            }
             // 予算・支出が両方ある場合は2列グリッドで横並び、片方だけなら1列
             const both = budget != null && spending != null;
-            const tipH = both ? 78 : 68;
+            const tipH = (both ? 78 : 68) + (hoveredAcLabel ? 16 : 0);
             // 大ノード: マウスY連動（カーソル上方）/ 小ノード: ラベル上端-GAPにポップアップ底辺を固定
             const labelFontPx = 11; // SVG font-size = 11/zoom → screen px = 11
             const labelTopScreenY = screenTop + nodeScreenH / 2 - labelFontPx / 2;
@@ -2168,6 +2178,15 @@ export default function RealDataSankeyPage() {
                 pointerEvents: 'none', zIndex: 20,
               }}>
                 <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 5, color: '#111', textAlign: 'left' }}>{hoveredNode.name}</div>
+                {hoveredAcLabel && (
+                  <div style={{ marginBottom: 4, textAlign: 'left' }}>
+                    <span style={{
+                      fontSize: 10, padding: '1px 5px', borderRadius: 8, fontWeight: 500,
+                      background: hoveredAcLabel === '一般会計' ? '#e3f0fb' : hoveredAcLabel === '特別会計' ? '#fce8d0' : '#ede8fc',
+                      color: hoveredAcLabel === '一般会計' ? '#2a6a9e' : hoveredAcLabel === '特別会計' ? '#c06a20' : '#6a45a0',
+                    }}>{hoveredAcLabel}</span>
+                  </div>
+                )}
                 {both ? (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px', textAlign: 'left' }}>
                     {amtCol('予算', budget!)}
@@ -2364,6 +2383,21 @@ export default function RealDataSankeyPage() {
                   {selectedNode.ministry && selectedNode.type !== 'ministry' && (
                     <span style={{ fontSize: 11, color: '#666' }}>{selectedNode.ministry}</span>
                   )}
+                  {(() => {
+                    let cat = selectedNode.accountCategory;
+                    if (!cat && selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
+                      cat = budgetNodeByPid.get(selectedNode.projectId)?.accountCategory;
+                    }
+                    if (!cat) return null;
+                    const label = cat === 'general' ? '一般会計' : cat === 'special' ? '特別会計' : '一般・特別';
+                    const bg = cat === 'general' ? '#e3f0fb' : cat === 'special' ? '#fce8d0' : '#ede8fc';
+                    const color = cat === 'general' ? '#2a6a9e' : cat === 'special' ? '#c06a20' : '#6a45a0';
+                    return (
+                      <span style={{ background: bg, color, padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>
+                        {label}
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
 
