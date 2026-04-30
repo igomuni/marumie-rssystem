@@ -220,6 +220,10 @@ export default function RealDataSankeyPage() {
   const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
   const ministryDropdownRef = useRef<HTMLDivElement>(null);
   const ministryButtonRef = useRef<HTMLButtonElement>(null);
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const [accountDropdownRect, setAccountDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
+  const accountDropdownRef = useRef<HTMLDivElement>(null);
+  const accountButtonRef = useRef<HTMLButtonElement>(null);
   const [filterMinBudgetText, setFilterMinBudgetText] = useState('');
   const [filterMaxBudgetText, setFilterMaxBudgetText] = useState('');
   const [filterMinSpendingText, setFilterMinSpendingText] = useState('');
@@ -426,6 +430,28 @@ export default function RealDataSankeyPage() {
       window.removeEventListener('scroll', recompute, true);
     };
   }, [showMinistryDropdown]);
+  useEffect(() => {
+    if (!showAccountDropdown) return;
+    const onMouseDown = (e: MouseEvent) => {
+      if (accountDropdownRef.current && !accountDropdownRef.current.contains(e.target as Node)) {
+        setShowAccountDropdown(false);
+      }
+    };
+    const recompute = () => {
+      if (accountButtonRef.current) {
+        const r = accountButtonRef.current.getBoundingClientRect();
+        setAccountDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width, maxHeight: Math.max(120, window.innerHeight - r.bottom - 16) });
+      }
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('resize', recompute);
+    window.addEventListener('scroll', recompute, true);
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('resize', recompute);
+      window.removeEventListener('scroll', recompute, true);
+    };
+  }, [showAccountDropdown]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
@@ -2185,11 +2211,7 @@ export default function RealDataSankeyPage() {
                 <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 5, color: '#111', textAlign: 'left' }}>{hoveredNode.name}</div>
                 {hoveredAcLabel && (
                   <div style={{ marginBottom: 4, textAlign: 'left' }}>
-                    <span style={{
-                      fontSize: 10, padding: '1px 5px', borderRadius: 8, fontWeight: 500,
-                      background: hoveredAcLabel === '一般会計' ? '#e3f0fb' : hoveredAcLabel === '特別会計' ? '#fce8d0' : '#ede8fc',
-                      color: hoveredAcLabel === '一般会計' ? '#2a6a9e' : hoveredAcLabel === '特別会計' ? '#c06a20' : '#6a45a0',
-                    }}>{hoveredAcLabel}</span>
+                    <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 8, fontWeight: 500, background: '#f0f0f0', color: '#666' }}>{hoveredAcLabel}</span>
                   </div>
                 )}
                 {both ? (
@@ -2395,10 +2417,8 @@ export default function RealDataSankeyPage() {
                     }
                     if (!cat) return null;
                     const label = cat === 'general' ? '一般会計' : cat === 'special' ? '特別会計' : '一般・特別';
-                    const bg = cat === 'general' ? '#e3f0fb' : cat === 'special' ? '#fce8d0' : '#ede8fc';
-                    const color = cat === 'general' ? '#2a6a9e' : cat === 'special' ? '#c06a20' : '#6a45a0';
                     return (
-                      <span style={{ background: bg, color, padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>
+                      <span style={{ background: '#f0f0f0', color: '#666', padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>
                         {label}
                       </span>
                     );
@@ -2716,25 +2736,66 @@ export default function RealDataSankeyPage() {
             {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
             {showAmountSliders && (
               <div style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {/* 会計区分フィルタ */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>会計</span>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {([
-                      { label: '一般会計', value: acGeneral, setter: setAcGeneral },
-                      { label: '特別会計', value: acSpecial, setter: setAcSpecial },
-                      { label: '一般・特別', value: acBoth,  setter: setAcBoth    },
-                      { label: 'なし',     value: acNone,    setter: setAcNone    },
-                    ] as const).map(({ label, value, setter }) => (
-                      <label key={label} style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer', fontSize: 11, color: value ? '#333' : '#aaa' }}>
-                        <input type="checkbox" checked={value}
-                          onChange={() => { pendingHistoryAction.current = 'replace'; setter(v => !v); }}
-                          style={{ width: 12, height: 12 }} />
-                        {label}
-                      </label>
-                    ))}
-                  </div>
-                </div>
+                {/* 会計区分フィルタ（コンボボックス） */}
+                {(() => {
+                  const acOptions = [
+                    { label: '一般会計', value: acGeneral, setter: setAcGeneral },
+                    { label: '特別会計', value: acSpecial, setter: setAcSpecial },
+                    { label: '一般・特別', value: acBoth,  setter: setAcBoth    },
+                    { label: 'なし',     value: acNone,    setter: setAcNone    },
+                  ] as const;
+                  const acAllSelected = acGeneral && acSpecial && acBoth && acNone;
+                  const selectedLabels = acOptions.filter(o => o.value).map(o => o.label);
+                  const acLabel = acAllSelected ? 'すべて' : selectedLabels.length === 1 ? selectedLabels[0] : `選択中 (${selectedLabels.length}/4)`;
+                  const chevron = (
+                    <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="#aaa"
+                      style={{ transform: showAccountDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', display: 'block' }}>
+                      <path d="M480-360 280-560h400L480-360Z"/>
+                    </svg>
+                  );
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={accountDropdownRef}>
+                      <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>会計</span>
+                      <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+                        <button type="button" ref={accountButtonRef}
+                          onClick={() => {
+                            if (accountButtonRef.current) {
+                              const r = accountButtonRef.current.getBoundingClientRect();
+                              setAccountDropdownRect({ top: r.bottom + 2, left: r.left, width: r.width, maxHeight: Math.max(120, window.innerHeight - r.bottom - 16) });
+                            }
+                            setShowAccountDropdown(v => !v);
+                          }}
+                          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: acAllSelected ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        >{acLabel}</button>
+                        <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>{chevron}</span>
+                        {showAccountDropdown && accountDropdownRect && createPortal(
+                          <div style={{ position: 'fixed', top: accountDropdownRect.top, left: accountDropdownRect.left, width: accountDropdownRect.width, zIndex: 9999, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: accountDropdownRect.maxHeight, overflowY: 'auto' }}
+                            onMouseDown={e => e.stopPropagation()}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
+                              <input type="checkbox" checked={acAllSelected}
+                                onChange={() => { pendingHistoryAction.current = 'replace'; const v = !acAllSelected; setAcGeneral(v); setAcSpecial(v); setAcBoth(v); setAcNone(v); }}
+                                style={{ width: 12, height: 12 }} />
+                              <span style={{ fontSize: 11, color: '#333' }}>すべて選択/解除</span>
+                            </label>
+                            {acOptions.map(({ label, value, setter }) => (
+                              <label key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', cursor: 'pointer' }}>
+                                <input type="checkbox" checked={value}
+                                  onChange={() => { pendingHistoryAction.current = 'replace'; setter(v => !v); }}
+                                  style={{ width: 12, height: 12 }} />
+                                <span style={{ fontSize: 11, color: '#333' }}>{label}</span>
+                              </label>
+                            ))}
+                          </div>,
+                          document.body
+                        )}
+                      </div>
+                      {!acAllSelected && (
+                        <button type="button" onClick={() => { pendingHistoryAction.current = 'replace'; setAcGeneral(true); setAcSpecial(true); setAcBoth(true); setAcNone(true); }}
+                          style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                      )}
+                    </div>
+                  );
+                })()}
                 {/* 府省庁フィルタ（複数選択ドロップダウン） */}
                 {(() => {
                   const ministryNodes = (graphData?.nodes ?? []).filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
