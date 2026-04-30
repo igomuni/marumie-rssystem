@@ -2,28 +2,57 @@
 description: Sankey図関連の実装を行う
 ---
 
+## 作業対象の確認
+
+ユーザーの指示から作業対象ルートを判断し、対応するファイルを読み込む。
+
+### /sankey-svg（現在のメイン開発対象）
+
+```
+app/sankey-svg/page.tsx          - SVG Sankey UI・ドリルダウン・サイドパネル・状態管理
+app/lib/sankey-svg-filter.ts     - フィルタロジック（府省庁・事業・支出先・金額）
+app/lib/sankey-svg-constants.ts  - レイアウト定数・ノード幅・列間隔
+client/components/SankeySvg/     - SVG Sankeyコンポーネント群
+app/lib/sankey-generator.ts      - Sankeyデータ生成（共有）
+```
+
+### /sankey（動的生成版）
+
+```
+app/sankey/page.tsx              - メインUI・状態管理・ノードインタラクション
+app/lib/sankey-generator.ts      - Sankey生成コアロジック
+app/api/sankey/route.ts          - 動的Sankeyデータエンドポイント
+```
+
+### /sankey2（事前計算版）
+
+```
+app/sankey2/page.tsx                          - Canvas描画・ノードインタラクション
+client/components/Sankey2/Sankey2View.tsx      - BFS・パネル・描画メインコンポーネント
+client/components/Sankey2/types.ts             - Sankey2専用型定義
+```
+
 ## タスク
 
-1. 以下のファイルを読み込み、Sankey図システムの全体像を把握する：
-   - [app/lib/sankey-generator.ts](app/lib/sankey-generator.ts) - Sankey生成アルゴリズム（核心ロジック）
-   - [app/sankey/page.tsx](app/sankey/page.tsx) - メインUI・状態管理
-   - [app/api/sankey/route.ts](app/api/sankey/route.ts) - APIエンドポイント
-
-2. ユーザーの指示に従って実装を行う。
+1. 上記から対応するファイルを読み込み、システムの全体像を把握する
+2. ユーザーの指示に従って実装を行う
 
 ## レイヤー設計のルール
 
 | 変更箇所 | 許可される内容 | 禁止される内容 |
 |---------|--------------|--------------|
 | `app/lib/sankey-generator.ts` | Pure TypeScript、データ変換ロジック | HTTPリクエスト、Reactコード |
+| `app/lib/sankey-svg-filter.ts` | Pure TypeScript、フィルタロジック | HTTPリクエスト、Reactコード |
+| `app/lib/sankey-svg-constants.ts` | 定数定義のみ | ロジック・副作用 |
 | `app/api/sankey/route.ts` | リクエスト処理、`sankey-generator.ts` の呼び出し | ビジネスロジックの直書き |
+| `app/sankey-svg/page.tsx` | 状態管理、API呼び出し、レンダリング | 複雑なデータ変換ロジック |
 | `app/sankey/page.tsx` | 状態管理、API呼び出し、レンダリング | 複雑なデータ変換ロジック |
 | `client/components/` | UIパーツ | 直接のAPIコール |
 
 ## 重要な仕様（必ず守ること）
 
 - **金額単位**: データ内の金額はすべて **1円単位**（千円単位ではない）
-  - 総予算 = 146兆円 = 146,000,000,000,000 円
+  - 総予算 = 151兆円 = 151,120,000,000,000 円
 - **「その他」と「その他の支出先」は別ノード**:
   - `その他`: 支出先名が「その他」のもの（~26兆円）
   - `その他の支出先`: TopN以外の集計（~51兆円）
@@ -33,3 +62,4 @@ description: Sankey図関連の実装を行う
 
 - アーキテクチャ全体: [CLAUDE.md](CLAUDE.md)
 - 型定義: [types/structured.ts](types/structured.ts)、[types/preset.ts](types/preset.ts)
+- Sankeyアーキテクチャ詳細: [docs/sankey-architecture-guide.md](docs/sankey-architecture-guide.md)
