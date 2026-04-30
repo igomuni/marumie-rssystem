@@ -12,7 +12,7 @@ description: lint と TypeScript 型チェックを実行する
    npm run lint
    ```
    - エラー（error）がある場合はユーザーに報告して修正を提案する
-   - 警告（warning）のみの場合: `sankey-generator.ts` の既存の未使用変数警告（offset, cumulativeSpendings 等）は無視してよい。それ以外の新規警告はユーザーに報告する
+   - 警告（warning）のみの場合: すべての警告をユーザーに報告する（既存の警告も含む）
 
 2. **TypeScript 型チェック**
    ```

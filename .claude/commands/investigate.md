@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(python3:*), Bash(tsx:*), Bash(ls:*), Bash(find:*), Read
+allowed-tools: Bash(python3:*), Bash(tsx:*), Bash(npm run score-quality:*), Bash(npm run score-quality-2025:*), Bash(ls:*), Bash(find:*), Read
 description: データ分析・調査スクリプトを案内・実行する
 ---
 
