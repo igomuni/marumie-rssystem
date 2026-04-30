@@ -799,13 +799,7 @@ export default function RealDataSankeyPage() {
 
   const layout = useMemo(() => {
     if (!filtered) return null;
-    if (!showLabels) {
-      // OFF: #181 相当 — extra spacing なし、pure NODE_PAD
-      const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
-      layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
-      return result;
-    }
-    // ON: two-pass — column gaps + minNodeGap を fitZoom 基準で算出
+    // Two-pass: fitZoom 基準で列間隔を算出（ON/OFF 共通）
     const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
     const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
     const fitZoom = Math.max(0.1, Math.min(10,
@@ -813,6 +807,7 @@ export default function RealDataSankeyPage() {
     ));
     const extraRecipientGapSVG = 360 / fitZoom;
     const extraMinistryGapSVG  = 310 / fitZoom;
+    // ON: topShift あり、OFF: topShift なし — minNodeGap は両モードとも NODE_PAD
     const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
