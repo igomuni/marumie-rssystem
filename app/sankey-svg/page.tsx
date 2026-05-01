@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback, useDeferredValue } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import type { GraphData, LayoutNode, LayoutLink } from '@/types/sankey-svg';
 import type { ProjectDetail } from '@/types/project-details';
@@ -407,7 +407,6 @@ export default function RealDataSankeyPage() {
 
   // Zoom/Pan state
   const [zoom, setZoom] = useState(1);
-  const deferredZoom = useDeferredValue(zoom);
   // Keep zoomRef current for use in debounce timeouts
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
   useEffect(() => {
@@ -861,20 +860,14 @@ export default function RealDataSankeyPage() {
 
   const layout = useMemo(() => {
     if (!filtered) return null;
-    // Two-pass: fitZoom 基準で列間隔を算出（ON/OFF 共通）
-    const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
-    const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
-    const fitZoom = Math.max(0.1, Math.min(10,
-      Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
-    ));
-    // 画面ピクセル上限を設ける: min(gap_at_fitZoom, gap_at_currentZoom) でズームインしても上限内に収まる
-    const extraRecipientGapSVG = Math.min(MAX_RECIPIENT_GAP_PX / fitZoom, MAX_RECIPIENT_GAP_PX / deferredZoom);
-    const extraMinistryGapSVG  = Math.min(MAX_MINISTRY_GAP_PX  / fitZoom, MAX_MINISTRY_GAP_PX  / deferredZoom);
+    // ギャップは zoom で割ることで画面上の間隔を常に MAX_*_GAP_PX に固定
+    const extraRecipientGapSVG = MAX_RECIPIENT_GAP_PX / zoom;
+    const extraMinistryGapSVG  = MAX_MINISTRY_GAP_PX  / zoom;
     // ON: topShift あり、OFF: topShift なし — minNodeGap は両モードとも NODE_PAD
     const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
-  }, [filtered, svgWidth, svgHeight, deferredZoom]);
+  }, [filtered, svgWidth, svgHeight, zoom]);
 
   // Extra height (data units) added by node shifts — stored in ref for use in zoom/pan callbacks
   const shiftExtraHRef = useRef(0);
