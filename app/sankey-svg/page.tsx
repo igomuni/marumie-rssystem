@@ -1617,15 +1617,17 @@ export default function RealDataSankeyPage() {
     }
   }, [layout, resetView, fitZoomWithShifts]);
 
-  // Safety: reset viewport when content is largely outside the visible area after a layout change.
-  // Triggered by e.g. scaleBudgetToVisible causing a large ky jump on the first offset step.
+  // Safety: reset viewport when content position is off after a layout change.
+  // - Entirely off-screen: always reset
+  // - Any downward overflow while at fit zoom: reset (handles scaleBudgetToVisible ky jumps)
   useEffect(() => {
     if (!layout || !initialCentered.current) return;
     const contentTop = pan.y + MARGIN.top * zoom;
     const contentBottom = pan.y + (MARGIN.top + layout.contentH) * zoom;
-    const totalH = Math.max(contentBottom - contentTop, 1);
-    const visibleH = Math.max(0, Math.min(contentBottom, svgHeight) - Math.max(contentTop, SEARCH_BOX_RESERVE));
-    if (visibleH / totalH < 0.5) {
+    const entirelyOffScreen = contentTop > svgHeight || contentBottom < SEARCH_BOX_RESERVE;
+    const atFitZoom = zoom <= baseZoom * 1.1;
+    const overflowsBelow = contentBottom > svgHeight + 10;
+    if (entirelyOffScreen || (atFitZoom && overflowsBelow)) {
       resetViewport();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
