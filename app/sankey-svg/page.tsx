@@ -532,7 +532,7 @@ export default function RealDataSankeyPage() {
 
   // Prevent overlay control interactions from bubbling into canvas pan/zoom
   const isOverlayControlTarget = (target: EventTarget | null) =>
-    target instanceof HTMLElement &&
+    target instanceof Element &&
     !!target.closest('[data-pan-disabled],button,input,select,textarea,label');
 
   // Debounced zoom URL write — called only on explicit user zoom (wheel / buttons)
@@ -670,8 +670,6 @@ export default function RealDataSankeyPage() {
       const cW = container.clientWidth;
       const availH = container.clientHeight - SEARCH_BOX_RESERVE;
       const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
-      // DEBUG
-      console.log('[resetViewport]', { cW, availH, k: k.toFixed(4), totalH: totalH.toFixed(1), newPanY: (SEARCH_BOX_RESERVE + (availH - totalH * k) / 2).toFixed(1) });
       setZoom(k);
       setBaseZoom(k);
       setPan({ x: (cW - (MARGIN.left + l.contentW) * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
@@ -872,19 +870,14 @@ export default function RealDataSankeyPage() {
     // ON: topShift あり、OFF: topShift なし — minNodeGap は両モードとも NODE_PAD
     const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
-    // DEBUG
-    console.log('[layout] computed', { ky: result.ky.toFixed(6), contentH: result.contentH.toFixed(1), fitZoom: fitZoom.toFixed(4), svgW: svgWidth, svgH: svgHeight });
     return result;
   }, [filtered, svgWidth, svgHeight]);
-
-  // Extra height (data units) added by node shifts — stored in ref for use in zoom/pan callbacks
-  const shiftExtraHRef = useRef(0);
 
   // Cumulative shift per node: { cumShift: slot-level offset, topShift: rect-within-slot offset }
   const nodeShiftInfo = useMemo(() => {
     const LABEL_SLOT = 12;
     const info = new Map<string, { cumShift: number; topShift: number }>();
-    if (!layout || !showLabels) { shiftExtraHRef.current = 0; return info; }
+    if (!layout || !showLabels) return info;
     const nodesByColumn = new Map<number, typeof layout.nodes[0][]>();
     for (const node of layout.nodes) {
       const col = getColumn(node);
@@ -900,7 +893,6 @@ export default function RealDataSankeyPage() {
         spendingH.set('__agg-project-budget', Math.max(1, n.y1 - n.y0));
       }
     }
-    let maxColExtraH = 0;
     for (const nodes of nodesByColumn.values()) {
       const sorted = [...nodes].sort((a, b) => a.y0 - b.y0);
       let cumShift = 0;
@@ -914,11 +906,7 @@ export default function RealDataSankeyPage() {
         info.set(node.id, { cumShift, topShift });
         cumShift += topShift;
       }
-      maxColExtraH = Math.max(maxColExtraH, cumShift);
     }
-    shiftExtraHRef.current = maxColExtraH;
-    // DEBUG
-    console.log('[nodeShiftInfo]', { maxColExtraH: maxColExtraH.toFixed(1), zoom: zoom.toFixed(4), showLabels, nodeCount: layout.nodes.length });
     return info;
   }, [layout, showLabels, zoom]);
 
@@ -1622,38 +1610,6 @@ export default function RealDataSankeyPage() {
       }
     }
   }, [layout, resetView, fitZoomWithShifts]);
-
-  // Safety: reset viewport when content position is off after a layout change.
-  // Uses visual content height = layout.contentH + shiftExtraH (label slots).
-  useEffect(() => {
-    if (!layout || !initialCentered.current) return;
-    const shiftH = shiftExtraHRef.current;
-    const visualContentH = layout.contentH + shiftH;
-    const contentTop = pan.y + MARGIN.top * zoom;
-    const contentBottom = pan.y + (MARGIN.top + visualContentH) * zoom;
-    const entirelyOffScreen = contentTop > svgHeight || contentBottom < SEARCH_BOX_RESERVE;
-    const atFitZoom = zoom <= baseZoom * 1.1;
-    const overflowsBelow = contentBottom > svgHeight + 10;
-    // DEBUG
-    console.log('[safety-check]', {
-      contentTop: contentTop.toFixed(1),
-      contentBottom: contentBottom.toFixed(1),
-      svgHeight,
-      panY: pan.y.toFixed(1),
-      zoom: zoom.toFixed(4),
-      baseZoom: baseZoom.toFixed(4),
-      shiftH: shiftH.toFixed(1),
-      visualContentH: visualContentH.toFixed(1),
-      atFitZoom,
-      overflowsBelow,
-      entirelyOffScreen,
-      willReset: entirelyOffScreen || (atFitZoom && overflowsBelow),
-    });
-    if (entirelyOffScreen || (atFitZoom && overflowsBelow)) {
-      resetViewport();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout]);
 
   // Focus on node after selection — fires when node appears in layout (pinned TopN+1 case)
   // Also watches isPanelCollapsed: when panel opens, recalculate fit with updated panel width
@@ -3051,14 +3007,11 @@ export default function RealDataSankeyPage() {
                     <button key={delta} title={title} aria-label={title}
                       onPointerDown={(e) => {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        e.stopPropagation();
                         e.currentTarget.setPointerCapture(e.pointerId);
-                        let stepCount = 0;
                         const step = () => {
-                          stepCount++;
                           pendingHistoryAction.current = 'replace';
                           pendingFocusId.current = null;
-                          // DEBUG
-                          console.log(`[step #${stepCount}] delta=${delta}`, { zoom: zoomRef.current.toFixed(4), panY: pan.y.toFixed(1), svgH: svgHeight, isFullscreen: !!document.fullscreenElement });
                           if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
                           else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
                         };
@@ -3068,8 +3021,14 @@ export default function RealDataSankeyPage() {
                           offsetRepeatRef.current = setInterval(step, 150);
                         }, 400);
                       }}
-                      onPointerUp={stopOffsetRepeat} onPointerLeave={stopOffsetRepeat} onPointerCancel={stopOffsetRepeat}
-                      onClick={(e) => { if (e.detail === 0) setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta))); }}
+                      onPointerUp={(e) => { e.stopPropagation(); stopOffsetRepeat(); }}
+                      onPointerLeave={stopOffsetRepeat}
+                      onPointerCancel={stopOffsetRepeat}
+                      onClick={(e) => {
+                        if (e.detail === 0) {
+                          setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta)));
+                        }
+                      }}
                       style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
