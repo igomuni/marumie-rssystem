@@ -532,7 +532,7 @@ export default function RealDataSankeyPage() {
 
   // Prevent overlay control interactions from bubbling into canvas pan/zoom
   const isOverlayControlTarget = (target: EventTarget | null) =>
-    target instanceof HTMLElement &&
+    target instanceof Element &&
     !!target.closest('[data-pan-disabled],button,input,select,textarea,label');
 
   // Debounced zoom URL write — called only on explicit user zoom (wheel / buttons)
@@ -873,14 +873,11 @@ export default function RealDataSankeyPage() {
     return result;
   }, [filtered, svgWidth, svgHeight]);
 
-  // Extra height (data units) added by node shifts — stored in ref for use in zoom/pan callbacks
-  const shiftExtraHRef = useRef(0);
-
   // Cumulative shift per node: { cumShift: slot-level offset, topShift: rect-within-slot offset }
   const nodeShiftInfo = useMemo(() => {
     const LABEL_SLOT = 12;
     const info = new Map<string, { cumShift: number; topShift: number }>();
-    if (!layout || !showLabels) { shiftExtraHRef.current = 0; return info; }
+    if (!layout || !showLabels) return info;
     const nodesByColumn = new Map<number, typeof layout.nodes[0][]>();
     for (const node of layout.nodes) {
       const col = getColumn(node);
@@ -896,7 +893,6 @@ export default function RealDataSankeyPage() {
         spendingH.set('__agg-project-budget', Math.max(1, n.y1 - n.y0));
       }
     }
-    let maxColExtraH = 0;
     for (const nodes of nodesByColumn.values()) {
       const sorted = [...nodes].sort((a, b) => a.y0 - b.y0);
       let cumShift = 0;
@@ -910,9 +906,7 @@ export default function RealDataSankeyPage() {
         info.set(node.id, { cumShift, topShift });
         cumShift += topShift;
       }
-      maxColExtraH = Math.max(maxColExtraH, cumShift);
     }
-    shiftExtraHRef.current = maxColExtraH;
     return info;
   }, [layout, showLabels, zoom]);
 
@@ -3003,7 +2997,7 @@ export default function RealDataSankeyPage() {
                   >{activeRangeStart}</button>
                 )}
                 <span style={{ color: '#999', fontSize: 11 }}>〜{activeRangeEnd}</span>
-                <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => setActiveOffset(Number(e.target.value))} style={{ width: 60 }} />
+                <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: 60 }} />
                 <span style={{ color: '#999', fontSize: 11 }}>/{activeTotalCount}件</span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                   {([
@@ -3013,8 +3007,11 @@ export default function RealDataSankeyPage() {
                     <button key={delta} title={title} aria-label={title}
                       onPointerDown={(e) => {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        e.stopPropagation();
+                        e.currentTarget.setPointerCapture(e.pointerId);
                         const step = () => {
                           pendingHistoryAction.current = 'replace';
+                          pendingFocusId.current = null;
                           if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
                           else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
                         };
@@ -3024,8 +3021,14 @@ export default function RealDataSankeyPage() {
                           offsetRepeatRef.current = setInterval(step, 150);
                         }, 400);
                       }}
-                      onPointerUp={stopOffsetRepeat} onPointerLeave={stopOffsetRepeat} onPointerCancel={stopOffsetRepeat}
-                      onClick={(e) => { if (e.detail === 0) setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta))); }}
+                      onPointerUp={(e) => { e.stopPropagation(); stopOffsetRepeat(); }}
+                      onPointerLeave={stopOffsetRepeat}
+                      onPointerCancel={stopOffsetRepeat}
+                      onClick={(e) => {
+                        if (e.detail === 0) {
+                          setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta)));
+                        }
+                      }}
                       style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
@@ -3075,6 +3078,7 @@ export default function RealDataSankeyPage() {
                     <button key={delta} title={title} aria-label={title}
                       onPointerDown={(e) => {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        e.currentTarget.setPointerCapture(e.pointerId);
                         const step = () => { pendingHistoryAction.current = 'replace'; setTopProject(prev => Math.max(1, Math.min(300, prev + delta))); };
                         stopTopNRepeat(); step();
                         topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
@@ -3121,6 +3125,7 @@ export default function RealDataSankeyPage() {
                     <button key={delta} title={title} aria-label={title}
                       onPointerDown={(e) => {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        e.currentTarget.setPointerCapture(e.pointerId);
                         const step = () => { pendingHistoryAction.current = 'replace'; setTopRecipient(prev => Math.max(1, Math.min(300, prev + delta))); };
                         stopTopNRepeat(); step();
                         topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
