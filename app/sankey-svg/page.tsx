@@ -917,6 +917,8 @@ export default function RealDataSankeyPage() {
       maxColExtraH = Math.max(maxColExtraH, cumShift);
     }
     shiftExtraHRef.current = maxColExtraH;
+    // DEBUG
+    console.log('[nodeShiftInfo]', { maxColExtraH: maxColExtraH.toFixed(1), zoom: zoom.toFixed(4), showLabels, nodeCount: layout.nodes.length });
     return info;
   }, [layout, showLabels, zoom]);
 
@@ -1622,12 +1624,13 @@ export default function RealDataSankeyPage() {
   }, [layout, resetView, fitZoomWithShifts]);
 
   // Safety: reset viewport when content position is off after a layout change.
-  // - Entirely off-screen: always reset
-  // - Any downward overflow while at fit zoom: reset (handles scaleBudgetToVisible ky jumps)
+  // Uses visual content height = layout.contentH + shiftExtraH (label slots).
   useEffect(() => {
     if (!layout || !initialCentered.current) return;
+    const shiftH = shiftExtraHRef.current;
+    const visualContentH = layout.contentH + shiftH;
     const contentTop = pan.y + MARGIN.top * zoom;
-    const contentBottom = pan.y + (MARGIN.top + layout.contentH) * zoom;
+    const contentBottom = pan.y + (MARGIN.top + visualContentH) * zoom;
     const entirelyOffScreen = contentTop > svgHeight || contentBottom < SEARCH_BOX_RESERVE;
     const atFitZoom = zoom <= baseZoom * 1.1;
     const overflowsBelow = contentBottom > svgHeight + 10;
@@ -1639,6 +1642,8 @@ export default function RealDataSankeyPage() {
       panY: pan.y.toFixed(1),
       zoom: zoom.toFixed(4),
       baseZoom: baseZoom.toFixed(4),
+      shiftH: shiftH.toFixed(1),
+      visualContentH: visualContentH.toFixed(1),
       atFitZoom,
       overflowsBelow,
       entirelyOffScreen,
