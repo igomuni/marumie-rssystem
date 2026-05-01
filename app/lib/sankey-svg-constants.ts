@@ -29,8 +29,8 @@ export const MARGIN = { top: 30, right: 20, bottom: 10, left: 20 };
 export const NODE_W = 18;
 export const NODE_PAD = 2;
 // 列間隔の画面ピクセル上限（ズームインしても超えない）
-export const MAX_RECIPIENT_GAP_PX = 360;
-export const MAX_MINISTRY_GAP_PX  = 310;
+export const MAX_RECIPIENT_GAP_PX = 930;
+export const MAX_MINISTRY_GAP_PX  = 620;
 
 // ── Colors & Labels ──
 

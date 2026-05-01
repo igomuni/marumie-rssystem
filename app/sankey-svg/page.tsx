@@ -1927,7 +1927,7 @@ export default function RealDataSankeyPage() {
                                 onMouseLeave={() => setHoveredNode(null)}
                                 onMouseDown={(e) => e.preventDefault()}
                                 onClick={(e) => handleNodeClick(node, e)}>
-                                {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
+                                {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                               </text>
                             )}
                           </g>
@@ -1966,7 +1966,7 @@ export default function RealDataSankeyPage() {
                               onMouseLeave={() => setHoveredNode(null)}
                               onMouseDown={(e) => e.preventDefault()}
                               onClick={(e) => handleNodeClick(node, e)}>
-                              {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
+                              {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
                             </text>
                           </>)}
                         </g>
@@ -2022,7 +2022,7 @@ export default function RealDataSankeyPage() {
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={(e) => handleNodeClick(node, e)}
                           >
-                            {node.name.length > 20 ? node.name.slice(0, 20) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
+                            {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                           </text>
                         )}
                       </g>
