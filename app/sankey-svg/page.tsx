@@ -1617,6 +1617,17 @@ export default function RealDataSankeyPage() {
     }
   }, [layout, resetView, fitZoomWithShifts]);
 
+  // Safety: if content is entirely outside the visible area after a layout change, reset viewport
+  useEffect(() => {
+    if (!layout || !initialCentered.current) return;
+    const contentTop = pan.y + MARGIN.top * zoom;
+    const contentBottom = pan.y + (MARGIN.top + layout.contentH) * zoom;
+    if (contentTop > svgHeight || contentBottom < SEARCH_BOX_RESERVE) {
+      resetViewport();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout]);
+
   // Focus on node after selection — fires when node appears in layout (pinned TopN+1 case)
   // Also watches isPanelCollapsed: when panel opens, recalculate fit with updated panel width
   useEffect(() => {
@@ -3003,7 +3014,7 @@ export default function RealDataSankeyPage() {
                   >{activeRangeStart}</button>
                 )}
                 <span style={{ color: '#999', fontSize: 11 }}>〜{activeRangeEnd}</span>
-                <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => setActiveOffset(Number(e.target.value))} style={{ width: 60 }} />
+                <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: 60 }} />
                 <span style={{ color: '#999', fontSize: 11 }}>/{activeTotalCount}件</span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                   {([
@@ -3013,8 +3024,10 @@ export default function RealDataSankeyPage() {
                     <button key={delta} title={title} aria-label={title}
                       onPointerDown={(e) => {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        e.currentTarget.setPointerCapture(e.pointerId);
                         const step = () => {
                           pendingHistoryAction.current = 'replace';
+                          pendingFocusId.current = null;
                           if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
                           else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
                         };
@@ -3075,6 +3088,7 @@ export default function RealDataSankeyPage() {
                     <button key={delta} title={title} aria-label={title}
                       onPointerDown={(e) => {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        e.currentTarget.setPointerCapture(e.pointerId);
                         const step = () => { pendingHistoryAction.current = 'replace'; setTopProject(prev => Math.max(1, Math.min(300, prev + delta))); };
                         stopTopNRepeat(); step();
                         topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
@@ -3121,6 +3135,7 @@ export default function RealDataSankeyPage() {
                     <button key={delta} title={title} aria-label={title}
                       onPointerDown={(e) => {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
+                        e.currentTarget.setPointerCapture(e.pointerId);
                         const step = () => { pendingHistoryAction.current = 'replace'; setTopRecipient(prev => Math.max(1, Math.min(300, prev + delta))); };
                         stopTopNRepeat(); step();
                         topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
