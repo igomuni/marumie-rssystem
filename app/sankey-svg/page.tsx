@@ -860,10 +860,15 @@ export default function RealDataSankeyPage() {
 
   const layout = useMemo(() => {
     if (!filtered) return null;
-    // ギャップは zoom で割ることで画面上の間隔を常に MAX_*_GAP_PX に固定
-    const extraRecipientGapSVG = MAX_RECIPIENT_GAP_PX / zoom;
-    const extraMinistryGapSVG  = MAX_MINISTRY_GAP_PX  / zoom;
-    // ON: topShift あり、OFF: topShift なし — minNodeGap は両モードとも NODE_PAD
+    // fitZoom を求めるための第1パス（ギャップなし）
+    const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
+    const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
+    const fitZoom = Math.max(0.1, Math.min(10,
+      Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
+    ));
+    // ズームアウト時は fitZoom 基準のギャップ（元の挙動）、ズームイン時は上限で固定
+    const extraRecipientGapSVG = Math.min(MAX_RECIPIENT_GAP_PX / fitZoom, MAX_RECIPIENT_GAP_PX / zoom);
+    const extraMinistryGapSVG  = Math.min(MAX_MINISTRY_GAP_PX  / fitZoom, MAX_MINISTRY_GAP_PX  / zoom);
     const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
