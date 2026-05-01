@@ -670,6 +670,8 @@ export default function RealDataSankeyPage() {
       const cW = container.clientWidth;
       const availH = container.clientHeight - SEARCH_BOX_RESERVE;
       const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
+      // DEBUG
+      console.log('[resetViewport]', { cW, availH, k: k.toFixed(4), totalH: totalH.toFixed(1), newPanY: (SEARCH_BOX_RESERVE + (availH - totalH * k) / 2).toFixed(1) });
       setZoom(k);
       setBaseZoom(k);
       setPan({ x: (cW - (MARGIN.left + l.contentW) * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
@@ -870,6 +872,8 @@ export default function RealDataSankeyPage() {
     // ON: topShift あり、OFF: topShift なし — minNodeGap は両モードとも NODE_PAD
     const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
+    // DEBUG
+    console.log('[layout] computed', { ky: result.ky.toFixed(6), contentH: result.contentH.toFixed(1), fitZoom: fitZoom.toFixed(4), svgW: svgWidth, svgH: svgHeight });
     return result;
   }, [filtered, svgWidth, svgHeight]);
 
@@ -1627,6 +1631,19 @@ export default function RealDataSankeyPage() {
     const entirelyOffScreen = contentTop > svgHeight || contentBottom < SEARCH_BOX_RESERVE;
     const atFitZoom = zoom <= baseZoom * 1.1;
     const overflowsBelow = contentBottom > svgHeight + 10;
+    // DEBUG
+    console.log('[safety-check]', {
+      contentTop: contentTop.toFixed(1),
+      contentBottom: contentBottom.toFixed(1),
+      svgHeight,
+      panY: pan.y.toFixed(1),
+      zoom: zoom.toFixed(4),
+      baseZoom: baseZoom.toFixed(4),
+      atFitZoom,
+      overflowsBelow,
+      entirelyOffScreen,
+      willReset: entirelyOffScreen || (atFitZoom && overflowsBelow),
+    });
     if (entirelyOffScreen || (atFitZoom && overflowsBelow)) {
       resetViewport();
     }
@@ -3030,9 +3047,13 @@ export default function RealDataSankeyPage() {
                       onPointerDown={(e) => {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
                         e.currentTarget.setPointerCapture(e.pointerId);
+                        let stepCount = 0;
                         const step = () => {
+                          stepCount++;
                           pendingHistoryAction.current = 'replace';
                           pendingFocusId.current = null;
+                          // DEBUG
+                          console.log(`[step #${stepCount}] delta=${delta}`, { zoom: zoomRef.current.toFixed(4), panY: pan.y.toFixed(1), svgH: svgHeight, isFullscreen: !!document.fullscreenElement });
                           if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
                           else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
                         };
