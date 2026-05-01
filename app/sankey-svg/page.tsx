@@ -1617,12 +1617,15 @@ export default function RealDataSankeyPage() {
     }
   }, [layout, resetView, fitZoomWithShifts]);
 
-  // Safety: if content is entirely outside the visible area after a layout change, reset viewport
+  // Safety: reset viewport when content is largely outside the visible area after a layout change.
+  // Triggered by e.g. scaleBudgetToVisible causing a large ky jump on the first offset step.
   useEffect(() => {
     if (!layout || !initialCentered.current) return;
     const contentTop = pan.y + MARGIN.top * zoom;
     const contentBottom = pan.y + (MARGIN.top + layout.contentH) * zoom;
-    if (contentTop > svgHeight || contentBottom < SEARCH_BOX_RESERVE) {
+    const totalH = Math.max(contentBottom - contentTop, 1);
+    const visibleH = Math.max(0, Math.min(contentBottom, svgHeight) - Math.max(contentTop, SEARCH_BOX_RESERVE));
+    if (visibleH / totalH < 0.5) {
       resetViewport();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
