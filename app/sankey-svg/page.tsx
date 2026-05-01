@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback, useDeferredValue } from 'react';
 import { createPortal } from 'react-dom';
 import type { GraphData, LayoutNode, LayoutLink } from '@/types/sankey-svg';
 import type { ProjectDetail } from '@/types/project-details';
 import {
   COL_LABELS, MARGIN, NODE_W, NODE_PAD,
+  MAX_RECIPIENT_GAP_PX, MAX_MINISTRY_GAP_PX,
   TYPE_COLORS, TYPE_LABELS,
   getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen,
 } from '@/app/lib/sankey-svg-constants';
@@ -406,6 +407,7 @@ export default function RealDataSankeyPage() {
 
   // Zoom/Pan state
   const [zoom, setZoom] = useState(1);
+  const deferredZoom = useDeferredValue(zoom);
   // Keep zoomRef current for use in debounce timeouts
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
   useEffect(() => {
@@ -865,13 +867,14 @@ export default function RealDataSankeyPage() {
     const fitZoom = Math.max(0.1, Math.min(10,
       Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
     ));
-    const extraRecipientGapSVG = 360 / fitZoom;
-    const extraMinistryGapSVG  = 310 / fitZoom;
+    // 画面ピクセル上限を設ける: min(gap_at_fitZoom, gap_at_currentZoom) でズームインしても上限内に収まる
+    const extraRecipientGapSVG = Math.min(MAX_RECIPIENT_GAP_PX / fitZoom, MAX_RECIPIENT_GAP_PX / deferredZoom);
+    const extraMinistryGapSVG  = Math.min(MAX_MINISTRY_GAP_PX  / fitZoom, MAX_MINISTRY_GAP_PX  / deferredZoom);
     // ON: topShift あり、OFF: topShift なし — minNodeGap は両モードとも NODE_PAD
     const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
-  }, [filtered, svgWidth, svgHeight]);
+  }, [filtered, svgWidth, svgHeight, deferredZoom]);
 
   // Extra height (data units) added by node shifts — stored in ref for use in zoom/pan callbacks
   const shiftExtraHRef = useRef(0);
