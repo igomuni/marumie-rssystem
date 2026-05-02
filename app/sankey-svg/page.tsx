@@ -1692,14 +1692,12 @@ export default function RealDataSankeyPage() {
       ctx.fillRect(x, y, w, h);
     }
 
-    // Viewport: what part of the SVG world is visible in the container?
-    // Container shows screen coords (0,0) to (containerW, containerH)
-    // Screen to SVG: svgX = (screenX - pan.x) / zoom
+    // Viewport: x is screen-fixed, y remains zoomed SVG world.
     const cW = container.clientWidth;
     const cH = container.clientHeight;
-    const vpLeft = -pan.x / zoom;
+    const vpLeft = -pan.x;
     const vpTop = -pan.y / zoom;
-    const vpW = cW / zoom;
+    const vpW = cW;
     const vpH = cH / zoom;
 
     // Convert to minimap coords
@@ -1727,10 +1725,10 @@ export default function RealDataSankeyPage() {
     const scaleY = minimapH / svgHeight;
     const svgX = mx / scaleX;
     const svgY = my / scaleY;
-    // Center the container on this SVG coord
+    // Center horizontally in screen space and vertically in zoomed SVG world.
     const cW = container.clientWidth;
     const cH = container.clientHeight;
-    setPan({ x: cW / 2 - svgX * zoom, y: cH / 2 - svgY * zoom });
+    setPan({ x: cW / 2 - svgX, y: cH / 2 - svgY * zoom });
   }, [svgWidth, svgHeight, minimapH, zoom]);
 
   // Escape key: focusRelated ON → フィルターのみOFF、OFF → 選択解除
