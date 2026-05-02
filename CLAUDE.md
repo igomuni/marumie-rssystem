@@ -52,6 +52,11 @@ npx tsc --noEmit         # TypeScript 型チェック
 `main` ブランチへの push → Vercel 自動ビルド（東京リージョン `hnd1`）。
 `prebuild` フックが `.gz` → `.json` を自動展開。
 
+## Agent の行動ルール
+
+- **PR は必ずユーザーの明示的な許可を得てから作成すること。** 実装・修正が完了しても、ユーザーから「PR を出してください」「PR お願いします」などの指示がない限り、自律的に PR を作成・プッシュしてはならない。
+- コミットは実装完了のタイミングで行ってよいが、プッシュ・PR 作成は指示待ちとする。
+
 ## Documentation Standards
 
 - **Task docs**（設計・調査・実装計画）: `docs/tasks/YYYYMMDD_HHMM_タイトル.md`
