@@ -49,40 +49,8 @@ interface SankeyUrlState {
   acNone?: boolean;
 }
 
-type ColumnLayoutKey = 'total' | 'ministry' | 'project' | 'recipient';
-type ColumnOffsets = Record<ColumnLayoutKey, number>;
-
-const COLUMN_LAYOUT_STORAGE_KEY = 'sankey-svg.columnOffsets.v1';
-const DEFAULT_COLUMN_OFFSETS: ColumnOffsets = {
-  total: 0,
-  ministry: 0,
-  project: 0,
-  recipient: 0,
-};
 const SCREEN_LEFT_PADDING_PX = 32;
 const SCREEN_HORIZONTAL_FIT_RATIO = 0.82;
-
-function parseColumnOffsets(value: string | null): ColumnOffsets | null {
-  if (!value) return null;
-  try {
-    const parsed = JSON.parse(value) as Partial<Record<ColumnLayoutKey, unknown>>;
-    return {
-      total: typeof parsed.total === 'number' ? parsed.total : 0,
-      ministry: typeof parsed.ministry === 'number' ? parsed.ministry : 0,
-      project: typeof parsed.project === 'number' ? parsed.project : 0,
-      recipient: typeof parsed.recipient === 'number' ? parsed.recipient : 0,
-    };
-  } catch {
-    return null;
-  }
-}
-
-function getColumnLayoutKey(node: Pick<LayoutNode, 'type'>): ColumnLayoutKey {
-  if (node.type === 'total') return 'total';
-  if (node.type === 'ministry') return 'ministry';
-  if (node.type === 'project-budget' || node.type === 'project-spending') return 'project';
-  return 'recipient';
-}
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
@@ -217,14 +185,6 @@ export default function RealDataSankeyPage() {
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [columnOffsets, setColumnOffsets] = useState<ColumnOffsets>(DEFAULT_COLUMN_OFFSETS);
-  const columnOffsetsLoadedRef = useRef(false);
-  const [draggingColumn, setDraggingColumn] = useState<{
-    key: ColumnLayoutKey;
-    pointerId: number;
-    startClientX: number;
-    startOffsets: ColumnOffsets;
-  } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
@@ -573,17 +533,6 @@ export default function RealDataSankeyPage() {
   }, [topProject, offsetTarget]);
 
   const svgRef = useRef<SVGSVGElement>(null);
-
-  useEffect(() => {
-    const restored = parseColumnOffsets(window.localStorage.getItem(COLUMN_LAYOUT_STORAGE_KEY));
-    if (restored) setColumnOffsets(restored);
-    columnOffsetsLoadedRef.current = true;
-  }, []);
-
-  useEffect(() => {
-    if (!columnOffsetsLoadedRef.current) return;
-    window.localStorage.setItem(COLUMN_LAYOUT_STORAGE_KEY, JSON.stringify(columnOffsets));
-  }, [columnOffsets]);
 
   const layoutRef = useRef<{ contentW: number; contentH: number; nodes: { y0: number; y1: number; id: string; type: string }[] } | null>(null);
   const showLabelsRef = useRef(showLabels);
@@ -1695,63 +1644,21 @@ export default function RealDataSankeyPage() {
   const screenToInnerX = useCallback((screenX: number) => screenX / zoom - MARGIN.left, [zoom]);
   const screenWToInner = useCallback((screenW: number) => screenW / zoom, [zoom]);
   const getNodeScreenX0 = useCallback((node: LayoutNode): number => {
-    const offset = columnOffsets[getColumnLayoutKey(node)];
     const left = MARGIN.left + SCREEN_LEFT_PADDING_PX;
     if (node.type === 'project-spending') {
       const budgetId = node.id === '__agg-project-spending'
         ? '__agg-project-budget'
         : node.projectId != null ? `project-budget-${node.projectId}` : null;
       const budgetNode = budgetId ? nodeByLayoutId.get(budgetId) : null;
-      if (budgetNode) return left + budgetNode.x0 * horizontalScale + screenNodeW + offset;
+      if (budgetNode) return left + budgetNode.x0 * horizontalScale + screenNodeW;
     }
-    return left + node.x0 * horizontalScale + offset;
-  }, [columnOffsets, horizontalScale, nodeByLayoutId, screenNodeW]);
+    return left + node.x0 * horizontalScale;
+  }, [horizontalScale, nodeByLayoutId, screenNodeW]);
   const getNodeScreenX1 = useCallback((node: LayoutNode): number => getNodeScreenX0(node) + screenNodeW, [getNodeScreenX0, screenNodeW]);
   const getNodeInnerX0 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX0(node)), [getNodeScreenX0, screenToInnerX]);
   const getNodeInnerX1 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX1(node)), [getNodeScreenX1, screenToInnerX]);
   const innerNodeW = screenWToInner(screenNodeW);
   const innerLabelGap = screenWToInner(3);
-
-  const clampColumnOffset = useCallback((key: ColumnLayoutKey, rawOffset: number): number => {
-    if (!layout) return rawOffset;
-    const columnNodes = layout.nodes.filter(node => getColumnLayoutKey(node) === key);
-    if (columnNodes.length === 0) return rawOffset;
-    const currentOffset = columnOffsets[key];
-    const baseLeft = Math.min(...columnNodes.map(node => getNodeScreenX0(node) - currentOffset));
-    const minLeft = MARGIN.left + SCREEN_LEFT_PADDING_PX;
-    const maxLeft = Math.max(minLeft, svgWidth - MARGIN.right - screenNodeW);
-    return Math.max(minLeft - baseLeft, Math.min(maxLeft - baseLeft, rawOffset));
-  }, [columnOffsets, getNodeScreenX0, layout, screenNodeW, svgWidth]);
-
-  const handleColumnPointerDown = useCallback((key: ColumnLayoutKey, e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    e.preventDefault();
-    e.stopPropagation();
-    e.currentTarget.setPointerCapture(e.pointerId);
-    setDraggingColumn({
-      key,
-      pointerId: e.pointerId,
-      startClientX: e.clientX,
-      startOffsets: columnOffsets,
-    });
-  }, [columnOffsets]);
-
-  const handleColumnPointerMove = useCallback((key: ColumnLayoutKey, e: React.PointerEvent<HTMLDivElement>) => {
-    if (!draggingColumn || draggingColumn.key !== key || draggingColumn.pointerId !== e.pointerId) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const dx = e.clientX - draggingColumn.startClientX;
-    setColumnOffsets(prev => {
-      const nextOffset = clampColumnOffset(key, draggingColumn.startOffsets[key] + dx);
-      if (prev[key] === nextOffset) return prev;
-      return { ...prev, [key]: nextOffset };
-    });
-  }, [clampColumnOffset, draggingColumn]);
-
-  const stopColumnDrag = useCallback((e?: React.PointerEvent<HTMLDivElement>) => {
-    if (e) e.stopPropagation();
-    setDraggingColumn(null);
-  }, []);
 
   // Draw minimap
   useEffect(() => {
@@ -2155,7 +2062,6 @@ export default function RealDataSankeyPage() {
             {(() => {
               const maxCol = layout.maxCol || 1;
               const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
-              const colLayoutKeys: ColumnLayoutKey[] = ['total', 'ministry', 'project', 'recipient'];
               const colAmounts: (number | null)[] = colNodeTypes.map((t, i) => {
                 const nodes = t === 'total' ? layout.nodes.filter(n => n.type === 'total') : layout.nodes.filter(n => n.type === t);
                 return i === 0 ? (nodes[0]?.value ?? null) : nodes.reduce((s, n) => s + n.value, 0);
@@ -2169,7 +2075,6 @@ export default function RealDataSankeyPage() {
               );
               return COL_LABELS.map((label, i) => {
                 // Use actual node x0 from layout (accounts for extraMinistryGapSVG / extraRecipientGapSVG)
-                const columnKey = colLayoutKeys[i];
                 const colNodes = layout.nodes.filter(n => n.type === colNodeTypes[i]);
                 const screenX = pan.x + (colNodes.length > 0
                   ? Math.min(...colNodes.map(n => getNodeScreenX0(n))) + screenNodeW / 2
@@ -2194,16 +2099,10 @@ export default function RealDataSankeyPage() {
                       position: 'absolute', left: screenX, top,
                       transform: 'translateX(-50%)',
                       textAlign: 'center', fontSize: 13, color: '#999',
-                      whiteSpace: 'nowrap', userSelect: 'none',
-                      cursor: draggingColumn?.key === columnKey ? 'grabbing' : 'grab',
+                      whiteSpace: 'nowrap', userSelect: 'none', cursor: 'default',
                       zIndex: 8, lineHeight: 1.4,
                       background: 'rgba(255,255,255,0.82)', padding: '2px 8px', borderRadius: 4,
                     }}
-                    onPointerDown={(e) => handleColumnPointerDown(columnKey, e)}
-                    onPointerMove={(e) => handleColumnPointerMove(columnKey, e)}
-                    onPointerUp={stopColumnDrag}
-                    onPointerCancel={stopColumnDrag}
-                    onLostPointerCapture={() => setDraggingColumn(null)}
                     onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredColIndex(i); }}
                     onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
                     onMouseLeave={() => setHoveredColIndex(null)}
@@ -3331,14 +3230,6 @@ export default function RealDataSankeyPage() {
                 <input type="checkbox" checked={autoFocusRelated} onChange={e => { pendingHistoryAction.current = 'replace'; setAutoFocusRelated(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>選択時に関連ノードのみ表示</span>
               </label>
-              <button
-                type="button"
-                data-pan-disabled="true"
-                onClick={() => setColumnOffsets(DEFAULT_COLUMN_OFFSETS)}
-                style={{ alignSelf: 'flex-start', fontSize: 12, padding: '4px 8px', borderRadius: 4, border: '1px solid #ddd', background: '#fff', color: '#555', cursor: 'pointer' }}
-              >
-                列位置をリセット
-              </button>
             </div>
           </>
         )}
