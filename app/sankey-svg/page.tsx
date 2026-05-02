@@ -49,6 +49,41 @@ interface SankeyUrlState {
   acNone?: boolean;
 }
 
+type ColumnLayoutKey = 'total' | 'ministry' | 'project' | 'recipient';
+type ColumnOffsets = Record<ColumnLayoutKey, number>;
+
+const COLUMN_LAYOUT_STORAGE_KEY = 'sankey-svg.columnOffsets.v1';
+const DEFAULT_COLUMN_OFFSETS: ColumnOffsets = {
+  total: 0,
+  ministry: 0,
+  project: 0,
+  recipient: 0,
+};
+const SCREEN_LEFT_PADDING_PX = 32;
+const SCREEN_HORIZONTAL_FIT_RATIO = 0.82;
+
+function parseColumnOffsets(value: string | null): ColumnOffsets | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value) as Partial<Record<ColumnLayoutKey, unknown>>;
+    return {
+      total: typeof parsed.total === 'number' ? parsed.total : 0,
+      ministry: typeof parsed.ministry === 'number' ? parsed.ministry : 0,
+      project: typeof parsed.project === 'number' ? parsed.project : 0,
+      recipient: typeof parsed.recipient === 'number' ? parsed.recipient : 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getColumnLayoutKey(node: Pick<LayoutNode, 'type'>): ColumnLayoutKey {
+  if (node.type === 'total') return 'total';
+  if (node.type === 'ministry') return 'ministry';
+  if (node.type === 'project-budget' || node.type === 'project-spending') return 'project';
+  return 'recipient';
+}
+
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
   const result: Partial<SankeyUrlState> = {};
@@ -170,8 +205,8 @@ export default function RealDataSankeyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [topMinistry, setTopMinistry] = useState(37);
-  const [topProject, setTopProject] = useState(40);
-  const [topRecipient, setTopRecipient] = useState(40);
+  const [topProject, setTopProject] = useState(50);
+  const [topRecipient, setTopRecipient] = useState(50);
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [projectOffset, setProjectOffset] = useState(0);
   const [offsetTarget, setOffsetTarget] = useState<'recipient' | 'project'>('recipient');
@@ -182,6 +217,14 @@ export default function RealDataSankeyPage() {
   const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [columnOffsets, setColumnOffsets] = useState<ColumnOffsets>(DEFAULT_COLUMN_OFFSETS);
+  const columnOffsetsLoadedRef = useRef(false);
+  const [draggingColumn, setDraggingColumn] = useState<{
+    key: ColumnLayoutKey;
+    pointerId: number;
+    startClientX: number;
+    startOffsets: ColumnOffsets;
+  } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
@@ -321,7 +364,7 @@ export default function RealDataSankeyPage() {
       // Pre-update prev refs so reset effects don't fire for URL-restored values
       prevOffsetTargetRef.current = parsed.offsetTarget ?? 'recipient';
       prevProjectSortByRef.current = parsed.projectSortBy ?? 'budget';
-      prevTopProjectRef.current = parsed.topProject ?? 40;
+      prevTopProjectRef.current = parsed.topProject ?? 50;
       setSelectedNodeId(parsed.selectedNodeId ?? null);
       setPinnedProjectId(parsed.pinnedProjectId ?? null);
       setPinnedRecipientId(parsed.pinnedRecipientId ?? null);
@@ -330,8 +373,8 @@ export default function RealDataSankeyPage() {
       setOffsetTarget(parsed.offsetTarget ?? 'recipient');
       setProjectOffset(parsed.projectOffset ?? 0);
       setTopMinistry(parsed.topMinistry ?? 37);
-      setTopProject(parsed.topProject ?? 40);
-      setTopRecipient(parsed.topRecipient ?? 40);
+      setTopProject(parsed.topProject ?? 50);
+      setTopRecipient(parsed.topRecipient ?? 50);
       setShowLabels(parsed.showLabels ?? true);
       setShowAggRecipient(parsed.showAggRecipient ?? true);
       setShowAggProject(parsed.showAggProject ?? true);
@@ -372,8 +415,8 @@ export default function RealDataSankeyPage() {
     if (offsetTarget === 'project') p.set('ot', 'p');
     if (projectOffset !== 0) p.set('po', String(projectOffset));
     if (topMinistry !== 37) p.set('tm', String(topMinistry));
-    if (topProject !== 40) p.set('tp', String(topProject));
-    if (topRecipient !== 40) p.set('tr', String(topRecipient));
+    if (topProject !== 50) p.set('tp', String(topProject));
+    if (topRecipient !== 50) p.set('tr', String(topRecipient));
     if (!showLabels) p.set('sl', '0');
     if (!showAggRecipient) p.set('ar', '0');
     if (!showAggProject) p.set('ap', '0');
@@ -531,6 +574,49 @@ export default function RealDataSankeyPage() {
 
   const svgRef = useRef<SVGSVGElement>(null);
 
+  useEffect(() => {
+    const restored = parseColumnOffsets(window.localStorage.getItem(COLUMN_LAYOUT_STORAGE_KEY));
+    if (restored) setColumnOffsets(restored);
+    columnOffsetsLoadedRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!columnOffsetsLoadedRef.current) return;
+    window.localStorage.setItem(COLUMN_LAYOUT_STORAGE_KEY, JSON.stringify(columnOffsets));
+  }, [columnOffsets]);
+
+  const layoutRef = useRef<{ contentW: number; contentH: number; nodes: { y0: number; y1: number; id: string; type: string }[] } | null>(null);
+  const showLabelsRef = useRef(showLabels);
+  showLabelsRef.current = showLabels;
+
+  // Top offset reserved for the search box (top:12 + height:36 + gap:8)
+  const SEARCH_BOX_RESERVE = 56;
+
+  // Compute max extra height from label shifts at a given zoom level (2-pass helper)
+  const calcShiftExtraH = useCallback((nodes: { y0: number; y1: number; id: string; type: string }[], zoomK: number): number => {
+    if (!showLabelsRef.current) return 0;
+    const LABEL_SLOT = 12;
+    const colShifts = new Map<number, number>();
+    for (const node of nodes) {
+      const h = Math.max(1, node.y1 - node.y0);
+      const topShift = h * zoomK < LABEL_SLOT ? Math.max(0, LABEL_SLOT / zoomK - h) : 0;
+      const col = getColumn(node);
+      colShifts.set(col, (colShifts.get(col) ?? 0) + topShift);
+    }
+    return colShifts.size > 0 ? Math.max(...colShifts.values()) : 0;
+  }, []);
+
+  const getZoomAnchoredPanY = useCallback((anchorY: number, nextZoom: number): number => {
+    const l = layoutRef.current;
+    if (!l) return anchorY - (anchorY - pan.y) * (nextZoom / zoom);
+    const currentTotalH = MARGIN.top + l.contentH + calcShiftExtraH(l.nodes, zoom);
+    const nextTotalH = MARGIN.top + l.contentH + calcShiftExtraH(l.nodes, nextZoom);
+    const currentScreenH = Math.max(1, currentTotalH * zoom);
+    const nextScreenH = Math.max(1, nextTotalH * nextZoom);
+    const ratioFromTop = (anchorY - pan.y) / currentScreenH;
+    return anchorY - ratioFromTop * nextScreenH;
+  }, [calcShiftExtraH, pan.y, zoom]);
+
   // Prevent overlay control interactions from bubbling into canvas pan/zoom
   const isOverlayControlTarget = (target: EventTarget | null) =>
     target instanceof Element &&
@@ -557,16 +643,14 @@ export default function RealDataSankeyPage() {
     const el = containerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
 
     const doZoom = (dy: number) => {
       const delta = dy > 0 ? 0.9 : 1.1;
       const newZoom = Math.max(0.2, Math.min(baseZoom * 10, zoom * delta));
-      const newPanX = mx - (mx - pan.x) * (newZoom / zoom);
-      const newPanY = my - (my - pan.y) * (newZoom / zoom);
+      const newPanY = getZoomAnchoredPanY(my, newZoom);
       setZoom(newZoom);
-      setPan({ x: newPanX, y: newPanY });
+      setPan({ x: pan.x, y: newPanY });
       scheduleZoomUrlWrite();
     };
 
@@ -581,7 +665,7 @@ export default function RealDataSankeyPage() {
         setPan(prev => ({ x: prev.x - e.deltaX * speed, y: prev.y - e.deltaY * speed }));
       }
     }
-  }, [zoom, pan, baseZoom, scheduleZoomUrlWrite, scrollMode]);
+  }, [zoom, pan, baseZoom, getZoomAnchoredPanY, scheduleZoomUrlWrite, scrollMode]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || isOverlayControlTarget(e.target)) return; // left click only
@@ -606,39 +690,17 @@ export default function RealDataSankeyPage() {
     setIsPanning(false);
   }, []);
 
-  const layoutRef = useRef<{ contentW: number; contentH: number; nodes: { y0: number; y1: number; id: string; type: string }[] } | null>(null);
-  const showLabelsRef = useRef(showLabels);
-  showLabelsRef.current = showLabels;
-
-  // Top offset reserved for the search box (top:12 + height:36 + gap:8)
-  const SEARCH_BOX_RESERVE = 56;
-
-  // Compute max extra height from label shifts at a given zoom level (2-pass helper)
-  const calcShiftExtraH = useCallback((nodes: { y0: number; y1: number; id: string; type: string }[], zoomK: number): number => {
-    if (!showLabelsRef.current) return 0;
-    const LABEL_SLOT = 12;
-    const colShifts = new Map<number, number>();
-    for (const node of nodes) {
-      const h = Math.max(1, node.y1 - node.y0);
-      const topShift = h * zoomK < LABEL_SLOT ? Math.max(0, LABEL_SLOT / zoomK - h) : 0;
-      const col = getColumn(node);
-      colShifts.set(col, (colShifts.get(col) ?? 0) + topShift);
-    }
-    return colShifts.size > 0 ? Math.max(...colShifts.values()) : 0;
-  }, []);
-
   // Converge on fit zoom accounting for label shifts (shifts grow as zoom shrinks → iterate)
   const fitZoomWithShifts = useCallback((
     nodes: { y0: number; y1: number; id: string; type: string }[],
     contentW: number, contentH: number, cW: number, availH: number
   ): { k: number; totalH: number } => {
-    const totalW = MARGIN.left + contentW;
-    let k = Math.max(0.2, Math.min(10, Math.min(cW / totalW, availH / (MARGIN.top + contentH)) * 0.9));
+    let k = Math.max(0.2, Math.min(10, (availH / (MARGIN.top + contentH)) * 0.9));
     let totalH = MARGIN.top + contentH;
     for (let i = 0; i < 6; i++) {
       const extraH = calcShiftExtraH(nodes, k);
       totalH = MARGIN.top + contentH + extraH;
-      const newK = Math.max(0.2, Math.min(10, Math.min(cW / totalW, availH / totalH) * 0.9));
+      const newK = Math.max(0.2, Math.min(10, (availH / totalH) * 0.9));
       if (Math.abs(newK - k) < 0.0005) { k = newK; break; }
       k = newK;
     }
@@ -655,7 +717,7 @@ export default function RealDataSankeyPage() {
       const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: (cW - (MARGIN.left + l.contentW) * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
+      setPan({ x: 0, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
     } else {
       setZoom(1);
       setBaseZoom(1);
@@ -673,7 +735,7 @@ export default function RealDataSankeyPage() {
       const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: (cW - (MARGIN.left + l.contentW) * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
+      setPan({ x: 0, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
     } else {
       setZoom(1);
       setBaseZoom(1);
@@ -866,13 +928,13 @@ export default function RealDataSankeyPage() {
     const fitZoom = Math.max(0.1, Math.min(10,
       Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
     ));
-    // ズームアウト時は fitZoom 基準のギャップ（元の挙動）、ズームイン時は上限で固定
-    const extraRecipientGapSVG = Math.min(MAX_RECIPIENT_GAP_PX / fitZoom, MAX_RECIPIENT_GAP_PX / zoom);
-    const extraMinistryGapSVG  = Math.min(MAX_MINISTRY_GAP_PX  / fitZoom, MAX_MINISTRY_GAP_PX  / zoom);
+    // Horizontal rendering is screen-fixed; compute x layout once from the fit scale.
+    const extraRecipientGapSVG = MAX_RECIPIENT_GAP_PX / fitZoom;
+    const extraMinistryGapSVG  = MAX_MINISTRY_GAP_PX  / fitZoom;
     const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
-  }, [filtered, svgWidth, svgHeight, zoom]);
+  }, [filtered, svgWidth, svgHeight]);
 
   // Cumulative shift per node: { cumShift: slot-level offset, topShift: rect-within-slot offset }
   const nodeShiftInfo = useMemo(() => {
@@ -1254,24 +1316,19 @@ export default function RealDataSankeyPage() {
   const focusOnNode = useCallback((node: LayoutNode) => {
     const container = containerRef.current;
     if (!container) return;
-    const cW = container.clientWidth;
     const cH = container.clientHeight;
-    const cx = MARGIN.left + node.x0 + NODE_W / 2;
     const cy = MARGIN.top + node.y0 + (node.y1 - node.y0) / 2;
     const h = node.y1 - node.y0;
     const minZoomForLabel = 10 / (h + NODE_PAD);
-    const panelW = isPanelCollapsed ? 0 : 310;
-    const availableW = cW - panelW;
     const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
     setZoom(targetK);
-    setPan({ x: panelW + availableW / 2 - cx * targetK, y: cH / 2 - cy * targetK });
-  }, [zoom, baseZoom, isPanelCollapsed]);
+    setPan(prev => ({ x: prev.x, y: cH / 2 - cy * targetK }));
+  }, [zoom, baseZoom]);
 
   const focusOnNeighborhood = useCallback((nodeOverride?: LayoutNode) => {
     const node = nodeOverride ?? selectedNode;
     if (!node || (!nodeOverride && !selectedNodeInLayout) || !layout || !containerRef.current) return;
     const container = containerRef.current;
-    const cW = container.clientWidth;
     const cH = container.clientHeight;
     // BFS: include all transitively connected nodes (upstream + downstream)
     const neighborIds = new Set<string>();
@@ -1285,21 +1342,15 @@ export default function RealDataSankeyPage() {
     }
     const neighborNodes = layout.nodes.filter(n => neighborIds.has(n.id));
     if (neighborNodes.length === 0) return;
-    const minX = Math.min(...neighborNodes.map(n => n.x0));
     const minY = Math.min(...neighborNodes.map(n => n.y0));
-    const maxX = Math.max(...neighborNodes.map(n => n.x1));
     const maxY = Math.max(...neighborNodes.map(n => n.y1));
     const PADDING = 40;
-    const boxW = (maxX - minX) + PADDING * 2;
     const boxH = (maxY - minY) + PADDING * 2;
-    const panelW = isPanelCollapsed ? 0 : 310;
-    const availableW = cW - panelW;
-    const targetK = Math.max(0.2, Math.min(baseZoom * 10, Math.min(availableW / boxW, cH / boxH) * 0.9));
-    const centerX = MARGIN.left + (minX + maxX) / 2;
+    const targetK = Math.max(0.2, Math.min(baseZoom * 10, (cH / boxH) * 0.9));
     const centerY = MARGIN.top + (minY + maxY) / 2;
     setZoom(targetK);
-    setPan({ x: panelW + availableW / 2 - centerX * targetK, y: cH / 2 - centerY * targetK });
-  }, [selectedNode, selectedNodeInLayout, layout, isPanelCollapsed, baseZoom]);
+    setPan(prev => ({ x: prev.x, y: cH / 2 - centerY * targetK }));
+  }, [selectedNode, selectedNodeInLayout, layout, baseZoom]);
 
   const handleConnectionClick = useCallback((nodeId: string) => {
     // If already in layout, select and focus directly (no effect needed)
@@ -1602,7 +1653,7 @@ export default function RealDataSankeyPage() {
           const { k: fitK, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
           setBaseZoom(fitK);
           setZoom(k);
-          setPan({ x: (cW - (MARGIN.left + l.contentW) * k) / 2, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
+          setPan({ x: 0, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
         } else {
           setZoom(k); setBaseZoom(k); setPan({ x: 0, y: SEARCH_BOX_RESERVE });
         }
@@ -1630,6 +1681,78 @@ export default function RealDataSankeyPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout, focusOnNeighborhood, isPanelCollapsed]);
 
+  const nodeByLayoutId = useMemo(() => {
+    const m = new Map<string, LayoutNode>();
+    for (const node of layout?.nodes ?? []) m.set(node.id, node);
+    return m;
+  }, [layout]);
+
+  const horizontalScale = useMemo(() => {
+    if (!layout) return 1;
+    return Math.max(0.2, Math.min(10, (svgWidth / (MARGIN.left + layout.contentW + SCREEN_LEFT_PADDING_PX)) * SCREEN_HORIZONTAL_FIT_RATIO));
+  }, [layout, svgWidth]);
+  const screenNodeW = NODE_W;
+  const screenToInnerX = useCallback((screenX: number) => screenX / zoom - MARGIN.left, [zoom]);
+  const screenWToInner = useCallback((screenW: number) => screenW / zoom, [zoom]);
+  const getNodeScreenX0 = useCallback((node: LayoutNode): number => {
+    const offset = columnOffsets[getColumnLayoutKey(node)];
+    const left = MARGIN.left + SCREEN_LEFT_PADDING_PX;
+    if (node.type === 'project-spending') {
+      const budgetId = node.id === '__agg-project-spending'
+        ? '__agg-project-budget'
+        : node.projectId != null ? `project-budget-${node.projectId}` : null;
+      const budgetNode = budgetId ? nodeByLayoutId.get(budgetId) : null;
+      if (budgetNode) return left + budgetNode.x0 * horizontalScale + screenNodeW + offset;
+    }
+    return left + node.x0 * horizontalScale + offset;
+  }, [columnOffsets, horizontalScale, nodeByLayoutId, screenNodeW]);
+  const getNodeScreenX1 = useCallback((node: LayoutNode): number => getNodeScreenX0(node) + screenNodeW, [getNodeScreenX0, screenNodeW]);
+  const getNodeInnerX0 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX0(node)), [getNodeScreenX0, screenToInnerX]);
+  const getNodeInnerX1 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX1(node)), [getNodeScreenX1, screenToInnerX]);
+  const innerNodeW = screenWToInner(screenNodeW);
+  const innerLabelGap = screenWToInner(3);
+
+  const clampColumnOffset = useCallback((key: ColumnLayoutKey, rawOffset: number): number => {
+    if (!layout) return rawOffset;
+    const columnNodes = layout.nodes.filter(node => getColumnLayoutKey(node) === key);
+    if (columnNodes.length === 0) return rawOffset;
+    const currentOffset = columnOffsets[key];
+    const baseLeft = Math.min(...columnNodes.map(node => getNodeScreenX0(node) - currentOffset));
+    const minLeft = MARGIN.left + SCREEN_LEFT_PADDING_PX;
+    const maxLeft = Math.max(minLeft, svgWidth - MARGIN.right - screenNodeW);
+    return Math.max(minLeft - baseLeft, Math.min(maxLeft - baseLeft, rawOffset));
+  }, [columnOffsets, getNodeScreenX0, layout, screenNodeW, svgWidth]);
+
+  const handleColumnPointerDown = useCallback((key: ColumnLayoutKey, e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setDraggingColumn({
+      key,
+      pointerId: e.pointerId,
+      startClientX: e.clientX,
+      startOffsets: columnOffsets,
+    });
+  }, [columnOffsets]);
+
+  const handleColumnPointerMove = useCallback((key: ColumnLayoutKey, e: React.PointerEvent<HTMLDivElement>) => {
+    if (!draggingColumn || draggingColumn.key !== key || draggingColumn.pointerId !== e.pointerId) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const dx = e.clientX - draggingColumn.startClientX;
+    setColumnOffsets(prev => {
+      const nextOffset = clampColumnOffset(key, draggingColumn.startOffsets[key] + dx);
+      if (prev[key] === nextOffset) return prev;
+      return { ...prev, [key]: nextOffset };
+    });
+  }, [clampColumnOffset, draggingColumn]);
+
+  const stopColumnDrag = useCallback((e?: React.PointerEvent<HTMLDivElement>) => {
+    if (e) e.stopPropagation();
+    setDraggingColumn(null);
+  }, []);
+
   // Draw minimap
   useEffect(() => {
     if (!showMinimap || !layout) return;
@@ -1654,9 +1777,9 @@ export default function RealDataSankeyPage() {
 
     // Draw nodes (at their SVG-coord positions including MARGIN)
     for (const node of layout.nodes) {
-      const x = (MARGIN.left + node.x0) * scaleX;
+      const x = getNodeScreenX0(node) * scaleX;
       const y = (MARGIN.top + node.y0) * scaleY;
-      const w = Math.max(1, NODE_W * scaleX);
+      const w = Math.max(1, screenNodeW * scaleX);
       const h = Math.max(0.5, (node.y1 - node.y0) * scaleY);
       ctx.fillStyle = getNodeColor(node);
       ctx.fillRect(x, y, w, h);
@@ -1683,7 +1806,7 @@ export default function RealDataSankeyPage() {
     ctx.strokeRect(mX, mY, mW, mH);
     ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
     ctx.fillRect(mX, mY, mW, mH);
-  }, [showMinimap, layout, zoom, pan, svgWidth, minimapH]);
+  }, [showMinimap, layout, zoom, pan, svgWidth, svgHeight, minimapH, getNodeScreenX0, screenNodeW]);
 
   const minimapNavigate = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = minimapRef.current;
@@ -1701,7 +1824,7 @@ export default function RealDataSankeyPage() {
     const cW = container.clientWidth;
     const cH = container.clientHeight;
     setPan({ x: cW / 2 - svgX * zoom, y: cH / 2 - svgY * zoom });
-  }, [svgWidth, minimapH, zoom]);
+  }, [svgWidth, svgHeight, minimapH, zoom]);
 
   // Escape key: focusRelated ON → フィルターのみOFF、OFF → 選択解除
   useEffect(() => {
@@ -1720,10 +1843,10 @@ export default function RealDataSankeyPage() {
 
   const applyZoom = useCallback((factor: number) => {
     const nz = Math.max(0.2, Math.min(baseZoom * 10, zoom * factor));
-    setPan({ x: svgWidth / 2 - (svgWidth / 2 - pan.x) * (nz / zoom), y: svgHeight / 2 - (svgHeight / 2 - pan.y) * (nz / zoom) });
+    setPan({ x: pan.x, y: getZoomAnchoredPanY(svgHeight / 2, nz) });
     setZoom(nz);
     scheduleZoomUrlWrite();
-  }, [zoom, pan, svgWidth, svgHeight, baseZoom, scheduleZoomUrlWrite]);
+  }, [zoom, pan.x, svgHeight, baseZoom, getZoomAnchoredPanY, scheduleZoomUrlWrite]);
 
   // Edge path with per-node cumulative shift applied to y coordinates
   const shiftedRibbonPath = (link: Parameters<typeof ribbonPath>[0]): string => {
@@ -1736,7 +1859,7 @@ export default function RealDataSankeyPage() {
     const tgt = nodeShiftInfo.get(link.target.id) ?? { cumShift: 0, topShift: 0 };
     const srcShift = src.cumShift + src.topShift;
     const tgtShift = tgt.cumShift + tgt.topShift;
-    const sx = link.source.x1, tx = link.target.x0;
+    const sx = getNodeInnerX1(link.source), tx = getNodeInnerX0(link.target);
     const sTop = link.y0 + srcShift, sBot = sTop + link.sourceWidth;
     const tTop = link.y1 + tgtShift, tBot = tTop + link.targetWidth;
     const mx = (sx + tx) / 2;
@@ -1835,7 +1958,7 @@ export default function RealDataSankeyPage() {
                     }}
                     onMouseLeave={() => setHoveredLink(null)}
                     onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'grab', transition: 'fill-opacity 0.2s ease, d 0.3s ease', d: `path("${shiftedRibbonPath(link)}")` } as React.CSSProperties}
+                    style={{ cursor: 'grab', transition: 'fill-opacity 0.16s ease', d: `path("${shiftedRibbonPath(link)}")` } as React.CSSProperties}
                   />
                 ))}
 
@@ -1848,10 +1971,11 @@ export default function RealDataSankeyPage() {
                   for (const node of layout.nodes) {
                     const col = getColumn(node);
                     const cur = colMinX0.get(col);
-                    if (cur === undefined || node.x0 < cur) colMinX0.set(col, node.x0);
+                    const nodeX0 = getNodeInnerX0(node);
+                    if (cur === undefined || nodeX0 < cur) colMinX0.set(col, nodeX0);
                   }
                   return Array.from(cols).filter(c => c < lastCol).map(c => {
-                    const labelStart = (colMinX0.get(c) ?? 0) + NODE_W;
+                    const labelStart = (colMinX0.get(c) ?? 0) + innerNodeW;
                     // Clip end = leftmost x0 of next VISUAL column (skip project-spending)
                     let nextColNodes: typeof layout.nodes = [];
                     for (let nc = c + 1; nc <= lastCol; nc++) {
@@ -1859,8 +1983,8 @@ export default function RealDataSankeyPage() {
                       if (nextColNodes.length > 0) break;
                     }
                     const clipEnd = nextColNodes.length > 0
-                      ? Math.min(...nextColNodes.map(n => n.x0))
-                      : labelStart + layout.colSpacing - NODE_W;
+                      ? Math.min(...nextColNodes.map(n => getNodeInnerX0(n)))
+                      : labelStart + screenWToInner(layout.colSpacing * horizontalScale - screenNodeW);
                     return (
                       <defs key={`clip-col-${c}`}>
                         <clipPath id={`clip-col-${c}`}>
@@ -1905,7 +2029,7 @@ export default function RealDataSankeyPage() {
                         // No paired spending node — render as plain budget rect
                         return (
                           <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
-                            <rect x={node.x0} y={topShift} width={NODE_W} fill={getNodeColor(node)} rx={1}
+                            <rect x={getNodeInnerX0(node)} y={topShift} width={innerNodeW} fill={getNodeColor(node)} rx={1}
                               style={{ height: bH, opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease, height 0.3s ease' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -1913,7 +2037,7 @@ export default function RealDataSankeyPage() {
                               onClick={(e) => handleNodeClick(node, e)}
                             />
                             {labelVisible && (
-                              <text x={node.x1 + 3} y={topShift + bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                              <text x={getNodeInnerX1(node) + innerLabelGap} y={topShift + bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                                 style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                                 onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -1930,7 +2054,7 @@ export default function RealDataSankeyPage() {
                       return (
                         <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
                           <path
-                            d={mergedProjectPath(node.x0, NODE_W, bH, sH)}
+                            d={mergedProjectPath(getNodeInnerX0(node), innerNodeW, bH, sH)}
                             fill={nodeFill}
                             transform={topShift > 0 ? `translate(0, ${topShift})` : undefined}
                             style={{ opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease' }}
@@ -1941,7 +2065,7 @@ export default function RealDataSankeyPage() {
                           />
                           {labelVisible && (<>
                             {/* Left label: budget amount */}
-                            <text x={node.x0 - 3} y={topShift + Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
+                            <text x={getNodeInnerX0(node) - innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -1952,7 +2076,7 @@ export default function RealDataSankeyPage() {
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
                             {/* Right label: project name + spending amount */}
-                            <text x={spendingNode.x1 + 3} y={topShift + Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                            <text x={getNodeInnerX1(spendingNode) + innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -1976,9 +2100,9 @@ export default function RealDataSankeyPage() {
                     return (
                       <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
                         <rect
-                          x={node.x0}
+                          x={getNodeInnerX0(node)}
                           y={topShift}
-                          width={NODE_W}
+                          width={innerNodeW}
                           fill={getNodeColor(node)}
                           rx={1}
                           style={{
@@ -2003,7 +2127,7 @@ export default function RealDataSankeyPage() {
                         />
                         {labelVisible && (
                           <text
-                            x={node.x1 + 3}
+                            x={getNodeInnerX1(node) + innerLabelGap}
                             y={topShift + h / 2}
                             fontSize={11 / zoom}
                             dominantBaseline="middle"
@@ -2030,8 +2154,8 @@ export default function RealDataSankeyPage() {
             {/* Column labels — DOM overlay, positioned from zoom/pan to avoid hiding behind search box */}
             {(() => {
               const maxCol = layout.maxCol || 1;
-              const innerW = svgWidth - MARGIN.left - MARGIN.right;
               const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
+              const colLayoutKeys: ColumnLayoutKey[] = ['total', 'ministry', 'project', 'recipient'];
               const colAmounts: (number | null)[] = colNodeTypes.map((t, i) => {
                 const nodes = t === 'total' ? layout.nodes.filter(n => n.type === 'total') : layout.nodes.filter(n => n.type === t);
                 return i === 0 ? (nodes[0]?.value ?? null) : nodes.reduce((s, n) => s + n.value, 0);
@@ -2045,12 +2169,11 @@ export default function RealDataSankeyPage() {
               );
               return COL_LABELS.map((label, i) => {
                 // Use actual node x0 from layout (accounts for extraMinistryGapSVG / extraRecipientGapSVG)
+                const columnKey = colLayoutKeys[i];
                 const colNodes = layout.nodes.filter(n => n.type === colNodeTypes[i]);
-                const colX0 = colNodes.length > 0
-                  ? Math.min(...colNodes.map(n => n.x0))
-                  : (i / maxCol) * (innerW - NODE_W);
-                const colInnerX = MARGIN.left + colX0 + NODE_W / 2;
-                const screenX = pan.x + colInnerX * zoom;
+                const screenX = pan.x + (colNodes.length > 0
+                  ? Math.min(...colNodes.map(n => getNodeScreenX0(n))) + screenNodeW / 2
+                  : MARGIN.left + SCREEN_LEFT_PADDING_PX + (i / maxCol) * (svgWidth - MARGIN.left - MARGIN.right - SCREEN_LEFT_PADDING_PX - screenNodeW) + screenNodeW / 2);
                 const total = colAmounts[i];
                 const amountLine = i === 2 && total != null
                   ? `${formatYen(total)} / ${formatYen(projectSpendingTotal)}`
@@ -2071,10 +2194,16 @@ export default function RealDataSankeyPage() {
                       position: 'absolute', left: screenX, top,
                       transform: 'translateX(-50%)',
                       textAlign: 'center', fontSize: 13, color: '#999',
-                      whiteSpace: 'nowrap', userSelect: 'none', cursor: 'default',
+                      whiteSpace: 'nowrap', userSelect: 'none',
+                      cursor: draggingColumn?.key === columnKey ? 'grabbing' : 'grab',
                       zIndex: 8, lineHeight: 1.4,
                       background: 'rgba(255,255,255,0.82)', padding: '2px 8px', borderRadius: 4,
                     }}
+                    onPointerDown={(e) => handleColumnPointerDown(columnKey, e)}
+                    onPointerMove={(e) => handleColumnPointerMove(columnKey, e)}
+                    onPointerUp={stopColumnDrag}
+                    onPointerCancel={stopColumnDrag}
+                    onLostPointerCapture={() => setDraggingColumn(null)}
                     onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredColIndex(i); }}
                     onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
                     onMouseLeave={() => setHoveredColIndex(null)}
@@ -2128,7 +2257,7 @@ export default function RealDataSankeyPage() {
             const GAP = 8;
             const tipW = 240;
             const nodeScreenH = (hoveredNode.y1 - hoveredNode.y0) * zoom;
-            const screenCx = pan.x + (MARGIN.left + hoveredNode.x0 + NODE_W / 2) * zoom;
+            const screenCx = pan.x + getNodeScreenX0(hoveredNode) + screenNodeW / 2;
             const screenTop = pan.y + (MARGIN.top + hoveredNode.y0) * zoom;
             const screenBottom = screenTop + nodeScreenH;
             const lx = Math.max(4, Math.min(screenCx - tipW / 2, svgWidth - tipW - 4));
@@ -3180,12 +3309,12 @@ export default function RealDataSankeyPage() {
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={showAggRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggRecipient(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>支出先の集約ノードを表示</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showAggProject} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggProject(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>事業の集約ノードを表示</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={showAggRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggRecipient(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>支出先の集約ノードを表示</span>
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ color: '#555' }}>事業ノードの並び順:</span>
@@ -3202,6 +3331,14 @@ export default function RealDataSankeyPage() {
                 <input type="checkbox" checked={autoFocusRelated} onChange={e => { pendingHistoryAction.current = 'replace'; setAutoFocusRelated(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>選択時に関連ノードのみ表示</span>
               </label>
+              <button
+                type="button"
+                data-pan-disabled="true"
+                onClick={() => setColumnOffsets(DEFAULT_COLUMN_OFFSETS)}
+                style={{ alignSelf: 'flex-start', fontSize: 12, padding: '4px 8px', borderRadius: 4, border: '1px solid #ddd', background: '#fff', color: '#555', cursor: 'pointer' }}
+              >
+                列位置をリセット
+              </button>
             </div>
           </>
         )}
