@@ -12,6 +12,7 @@ import {
 } from '@/app/lib/sankey-svg-constants';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { filterTopN, computeLayout } from '@/app/lib/sankey-svg-filter';
+import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
 
 // ── URL state serialization ──
 
@@ -48,12 +49,6 @@ interface SankeyUrlState {
   acBoth?: boolean;
   acNone?: boolean;
 }
-
-type YearSelectionSnapshot = {
-  type: string;
-  name: string;
-  projectId?: number;
-};
 
 const SCREEN_LEFT_PADDING_PX = 32;
 const SCREEN_HORIZONTAL_FIT_RATIO = 0.82;
@@ -948,18 +943,7 @@ export default function RealDataSankeyPage() {
     const snapshot = pendingYearSelectionRef.current;
     pendingYearSelectionRef.current = null;
 
-    let nextId: string | null = null;
-    if ((snapshot.type === 'project-budget' || snapshot.type === 'project-spending') && snapshot.projectId != null) {
-      nextId = `project-spending-${snapshot.projectId}`;
-    } else if (snapshot.type === 'recipient') {
-      const recipient = graphData.nodes
-        .filter(n => n.type === 'recipient' && n.name === snapshot.name)
-        .sort((a, b) => b.value - a.value)[0];
-      nextId = recipient?.id ?? null;
-    } else {
-      const node = graphData.nodes.find(n => n.type === snapshot.type && n.name === snapshot.name);
-      nextId = node?.id ?? null;
-    }
+    const nextId = resolveYearSelectionSnapshot(snapshot, graphData);
 
     if (nextId !== selectedNodeId) {
       pendingHistoryAction.current = 'replace';
