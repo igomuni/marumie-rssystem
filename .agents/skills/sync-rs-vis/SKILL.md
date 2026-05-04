@@ -45,6 +45,8 @@ git -C "${RS_VIS_ROOT}" checkout -b "${BRANCH_NAME}"
 ```bash
 rsync -av \
   --exclude='.git' --exclude='node_modules' --exclude='.next' \
+  --exclude='.agents' --exclude='tests' --exclude='playwright.config.ts' \
+  --exclude='playwright-report' --exclude='test-results' \
   --exclude='docs' --exclude='public/data/*.json' \
   --exclude='data/' --exclude='README.md' --exclude='walkthrough.md' \
   "${MARUMIE_RS_ROOT}/" \
@@ -101,5 +103,6 @@ PR URL・反映内容サマリー・次回起点コミットを報告する。
 ## 注意事項
 
 - `README.md` は rsync から除外する（rs-vis 側の公開向け記述を保持するため）。
+- `.agents/`, `tests/`, `playwright.config.ts`, `playwright-report/`, `test-results/` は除外する（開発・デバッグ用であり rs-vis へ反映しない）。
 - `.next/` は rsync 除外済み。ビルド時に rs-vis 側で再生成される。
 - ビルド後は差分に含まれるページの動作確認を推奨する。

@@ -79,6 +79,17 @@ gh api repos/igomuni/marumie-rssystem/pulls/<PR_NUMBER>/reviews \
 - Needs decision: explain the tradeoff and ask the user before changing behavior.
 - Already resolved or obsolete: ignore resolved threads; mention if a visible comment is no longer applicable.
 
+When applying reviewer suggestions:
+
+- Treat filenames, timestamps, branch names, command arguments, and placeholder-looking values in comments as examples unless they match the current repository context.
+- Before creating or renaming timestamped docs, compute the actual local timestamp instead of copying example values:
+
+```bash
+TZ=Asia/Tokyo date '+%Y%m%d_%H%M'
+```
+
+- Verify suggested paths and line numbers against the current files. If the exact value cannot be inferred from local context, ask the user or state the assumption clearly.
+
 6. Validate.
 
 Run checks only when relevant to the changes. For source changes, prefer:
@@ -127,3 +138,4 @@ Use this format:
 - Do not make large design changes without user confirmation.
 - Do not overwrite unrelated local changes.
 - Prefer small, review-scoped commits.
+- Do not copy example values from review comments into code, docs, or filenames without resolving them against the actual context first.

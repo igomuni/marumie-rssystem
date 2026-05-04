@@ -108,6 +108,21 @@ npm run dev
 | `npm run build` | プロダクションビルド（prebuildで.gz自動展開） |
 | `npm start` | プロダクションサーバー起動 |
 | `npm run lint` | ESLintによるコードチェック |
+| `npm run test:e2e` | Playwright E2Eテスト |
+| `npm run test:e2e:ui` | Playwright UIモード |
+| `npm run test:e2e:headed` | ブラウザ表示ありでE2Eテスト |
+| `npm run test:e2e:report` | Playwright HTMLレポート表示 |
+
+### Playwright E2E
+
+Playwrightはローカルデバッグと画面状態確認用です。E2E用の `data-testid` は通常のproduction buildでは出力せず、Playwright実行時だけ有効化します。
+
+初回のみChromiumをインストールしてください。
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
 
 ### データ正規化
 

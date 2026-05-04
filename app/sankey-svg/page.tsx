@@ -12,6 +12,7 @@ import {
 } from '@/app/lib/sankey-svg-constants';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { filterTopN, computeLayout } from '@/app/lib/sankey-svg-filter';
+import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
 
 // ── URL state serialization ──
 
@@ -51,6 +52,8 @@ interface SankeyUrlState {
 
 const SCREEN_LEFT_PADDING_PX = 32;
 const SCREEN_HORIZONTAL_FIT_RATIO = 0.82;
+const E2E_TEST_IDS_ENABLED = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_PLAYWRIGHT === '1';
+const testId = (id: string): string | undefined => E2E_TEST_IDS_ENABLED ? id : undefined;
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
@@ -252,6 +255,7 @@ export default function RealDataSankeyPage() {
   const urlRestoredZoomRef = useRef<number | null>(null); // zoom to restore on first layout (no sel= case)
   const zoomRef = useRef(1);                              // always-current zoom for debounce callbacks
   const zoomUrlDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingYearSelectionRef = useRef<YearSelectionSnapshot | null>(null);
 
   // Container size (responsive to window)
   const containerRef = useRef<HTMLDivElement>(null);
@@ -933,6 +937,20 @@ export default function RealDataSankeyPage() {
     if (!rawNode) return null;
     return { ...rawNode, x0: 0, x1: 0, y0: 0, y1: 0, sourceLinks: [], targetLinks: [] } as LayoutNode;
   }, [selectedNodeId, layout, graphData]);
+
+  useEffect(() => {
+    if (!graphData || !pendingYearSelectionRef.current) return;
+    const snapshot = pendingYearSelectionRef.current;
+    pendingYearSelectionRef.current = null;
+
+    const nextId = resolveYearSelectionSnapshot(snapshot, graphData);
+
+    if (nextId !== selectedNodeId) {
+      pendingHistoryAction.current = 'replace';
+      setSelectedNodeId(nextId);
+      if (nextId) pendingFocusId.current = nextId;
+    }
+  }, [graphData, selectedNodeId]);
 
   // The selected node in the current layout (null if not in layout)
   const selectedNodeInLayout = useMemo(
@@ -1775,6 +1793,7 @@ export default function RealDataSankeyPage() {
   return (
     <div
       ref={containerRef}
+      data-testid={testId('sankey-svg-root')}
       style={{ position: 'fixed', inset: 0, overflow: 'hidden', background: '#fff', fontFamily: 'system-ui, sans-serif', cursor: isPanning ? 'grabbing' : 'grab' }}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
@@ -1803,6 +1822,7 @@ export default function RealDataSankeyPage() {
             `}</style>
             <svg
               ref={svgRef}
+              data-testid={testId('sankey-svg-canvas')}
               width={svgWidth}
               height={svgHeight}
               overflow="visible"
@@ -1838,6 +1858,7 @@ export default function RealDataSankeyPage() {
                 {layout.links.filter(link => !(link.source.type === 'project-budget' && link.target.type === 'project-spending')).map((link) => (
                   <path
                     key={`${link.source.id}→${link.target.id}`}
+                    data-testid={testId('sankey-link')}
                     fill={getLinkColor(link)}
                     fillOpacity={
                       connectedNodeIds
@@ -1933,7 +1954,7 @@ export default function RealDataSankeyPage() {
                       if (!spendingNode) {
                         // No paired spending node — render as plain budget rect
                         return (
-                          <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
+                          <g key={node.id} className="snk-node" data-testid={testId('sankey-node')} style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
                             <rect x={getNodeInnerX0(node)} y={topShift} width={innerNodeW} fill={getNodeColor(node)} rx={1}
                               style={{ height: bH, opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease, height 0.3s ease' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -1957,7 +1978,7 @@ export default function RealDataSankeyPage() {
                         );
                       }
                       return (
-                        <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
+                        <g key={node.id} className="snk-node" data-testid={testId('sankey-node')} style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
                           <path
                             d={mergedProjectPath(getNodeInnerX0(node), innerNodeW, bH, sH)}
                             fill={nodeFill}
@@ -2003,7 +2024,7 @@ export default function RealDataSankeyPage() {
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
                     return (
-                      <g key={node.id} className="snk-node" style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
+                      <g key={node.id} className="snk-node" data-testid={testId('sankey-node')} style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
                         <rect
                           x={getNodeInnerX0(node)}
                           y={topShift}
@@ -2635,8 +2656,15 @@ export default function RealDataSankeyPage() {
       {/* Year selector — top center */}
       <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}>
         <select
+          data-testid={testId('year-select')}
           value={year}
-          onChange={e => { pendingHistoryAction.current = 'replace'; setYear(e.target.value as '2024' | '2025'); }}
+          onChange={e => {
+            pendingHistoryAction.current = 'replace';
+            pendingYearSelectionRef.current = selectedNode
+              ? { type: selectedNode.type, name: selectedNode.name, projectId: selectedNode.projectId }
+              : null;
+            setYear(e.target.value as '2024' | '2025');
+          }}
           style={{ fontSize: 13, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
         >
           <option value="2025">2025年度</option>
@@ -2665,6 +2693,7 @@ export default function RealDataSankeyPage() {
               {/* Search/Filter mode toggle icon */}
               <button
                 type="button"
+                data-testid={testId('search-mode-toggle')}
                 title={filterActive ? 'フィルタモード（クリックで検索モードに切替）' : '検索モード（クリックでフィルタモードに切替）'}
                 onClick={() => setFilterActive(f => !f)}
                 style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}
@@ -2682,6 +2711,7 @@ export default function RealDataSankeyPage() {
               {/* Filter target select — フィルタモード時のみ表示、虫眼鏡の隣 */}
               {filterActive && (
                 <select
+                  data-testid={testId('filter-target-select')}
                   value={filterTarget}
                   onChange={e => setFilterTarget(e.target.value as 'project' | 'recipient')}
                   style={{ position: 'absolute', left: 28, top: '50%', transform: 'translateY(-50%)', fontSize: 10, border: '1px solid #ddd', borderRadius: 3, padding: '1px 2px', background: 'rgba(255,255,255,0.9)', color: '#555', cursor: 'pointer', height: 20 }}
@@ -2692,6 +2722,7 @@ export default function RealDataSankeyPage() {
               )}
               <input
                 ref={searchInputRef}
+                data-testid={testId('search-input')}
                 type="text"
                 value={searchQuery}
                 onChange={e => { setSearchQuery(e.target.value); if (!filterActive) setShowSearchResults(true); setSearchCursorIndex(-1); }}
@@ -2929,6 +2960,7 @@ export default function RealDataSankeyPage() {
               {searchPagedResults.map((node, i) => (
                 <button
                   key={node.id}
+                  data-testid={testId('search-result')}
                   type="button"
                   onClick={() => { handleSearchSelect(node.id); setSearchCursorIndex(-1); }}
                   style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: i === searchCursorIndex ? '#e8f0fe' : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
@@ -2996,6 +3028,7 @@ export default function RealDataSankeyPage() {
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}>
               {/* オフセット対象コンボボックス */}
               <select
+                data-testid={testId('offset-target-select')}
                 value={offsetTarget}
                 onChange={e => { pendingHistoryAction.current = 'replace'; setOffsetTarget(e.target.value as 'recipient' | 'project'); }}
                 style={{ fontSize: 11, border: '1px solid #ccc', borderRadius: 3, padding: '1px 2px', background: '#fff', color: '#555', cursor: 'pointer' }}
@@ -3032,6 +3065,7 @@ export default function RealDataSankeyPage() {
                     [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '前へ'],
                   ] as [number, string, string][]).map(([delta, path, title]) => (
                     <button key={delta} title={title} aria-label={title}
+                      data-testid={testId(delta > 0 ? 'recipient-offset-next' : 'recipient-offset-prev')}
                       onPointerDown={(e) => {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
                         e.stopPropagation();
@@ -3249,7 +3283,7 @@ export default function RealDataSankeyPage() {
         {/* + / vertical slider / - */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Material Icons: add */}
-          <button aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
+          <button data-testid={testId('zoom-in')} aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
           </button>
           <div style={{ padding: '4px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid #e5e7eb' }}>
@@ -3266,7 +3300,7 @@ export default function RealDataSankeyPage() {
             />
           </div>
           {/* Material Icons: remove */}
-          <button aria-label="ズームアウト" onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+          <button data-testid={testId('zoom-out')} aria-label="ズームアウト" onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer' }}>
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13H5v-2h14v2z"/></svg>
           </button>
         </div>
@@ -3294,7 +3328,7 @@ export default function RealDataSankeyPage() {
         {/* 全体表示ボタン */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
           {/* fit screen */}
-          <button aria-label="全体表示" onClick={resetViewport} title="全体表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+          <button data-testid={testId('reset-viewport')} aria-label="全体表示" onClick={resetViewport} title="全体表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path d="M792-576v-120H672v-72h120q30 0 51 21.15T864-696v120h-72Zm-696 0v-120q0-30 21.15-51T168-768h120v72H168v120H96Zm576 384v-72h120v-120h72v120q0 30-21.15 51T792-192H672Zm-504 0q-30 0-51-21.15T96-264v-120h72v120h120v72H168Zm72-144v-288h480v288H240Zm72-72h336v-144H312v144Zm0 0v-144 144Z"/></svg>
           </button>
         </div>
@@ -3303,6 +3337,7 @@ export default function RealDataSankeyPage() {
           <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
             {/* Material Icons: account_tree — 関連ノードのみ表示トグル */}
             <button
+              data-testid={testId('focus-related-toggle')}
               aria-label={focusRelated ? '関連ノードのみ表示 ON（クリックでOFF）' : '関連ノードのみ表示 OFF（クリックでON）'}
               title={focusRelated ? '関連ノードのみ表示: ON\nクリックでOFF' : '関連ノードのみ表示: OFF\nクリックでON'}
               onClick={() => {
