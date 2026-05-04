@@ -7,14 +7,15 @@ export const NODE_MIN_H = 90;
 export const NODE_PAD = 16;
 export const COL_GAP = 160;
 export const ROW_PAD = 12;
-export const ROOT_W = 160;
-export const ROOT_H = 60;
+export const ROOT_W = 260;
+export const ROOT_H = 136;
+export const PROJECT_BLOCK_GAP = 120;
 export const SVG_MARGIN = { top: 24, right: 32, bottom: 32, left: 32 };
 
-export const COLOR_DIRECT = '#3b82f6';
-export const COLOR_SUBCONTRACT = '#f97316';
-export const COLOR_ROOT = '#6b7280';
-export const COLOR_EDGE = 'rgba(100,116,139,0.35)';
+export const COLOR_DIRECT = '#d94545';
+export const COLOR_SUBCONTRACT = '#e07040';
+export const COLOR_ROOT = '#3a9a5c';
+export const COLOR_EDGE = 'rgba(217,69,69,0.42)';
 
 // ─── 型 ──────────────────────────────────────────────
 
@@ -166,11 +167,10 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
 
   const maxDepth = depthMap.size > 0 ? Math.max(...depthMap.values()) : 1;
 
-  // X座標: 深さ0=担当組織, 深さ1以降=ブロック
-  // 担当組織 x=0, depth1 x=ROOT_W+COL_GAP, depth2 x=ROOT_W+COL_GAP+NODE_W+COL_GAP ...
+  // X座標: 事業コンテキスト -> depth1以降のブロック
   function depthToX(depth: number): number {
     if (depth === 0) return SVG_MARGIN.left;
-    return SVG_MARGIN.left + ROOT_W + COL_GAP + (depth - 1) * (NODE_W + COL_GAP);
+    return SVG_MARGIN.left + ROOT_W + PROJECT_BLOCK_GAP + (depth - 1) * (NODE_W + COL_GAP);
   }
 
   // Y座標計算 (各深さの列ごとに上から積み上げ)
@@ -198,13 +198,13 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     yNextByDepth.set(depth, y);
   }
 
-  // 担当組織ルートノード（Y中央）
+  // 事業コンテキストノード（Y中央）
   const depth1Nodes = byDepth.get(1) ?? [];
   const depth1TotalHeight = depth1Nodes.reduce((sum, n) => sum + blockHeight(graph, n.totalAmount) + ROW_PAD, 0) - ROW_PAD;
   const rootY = SVG_MARGIN.top + Math.max(0, (depth1TotalHeight - ROOT_H) / 2);
 
   const root: LayoutRoot = {
-    label: graph.ministry,
+    label: graph.projectName,
     x: SVG_MARGIN.left,
     y: rootY,
     w: ROOT_W,
@@ -224,7 +224,7 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     const isSelfLoop = f.sourceBlock === f.targetBlock;
 
     if (f.sourceBlock === null) {
-      // ルート → ブロック（常に順方向）
+      // 事業コンテキスト → ブロック（常に順方向）
       edges.push({
         ...f,
         x1: root.x + root.w,
@@ -279,7 +279,7 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
   }
 
   // SVGサイズ
-  const maxX = SVG_MARGIN.left + ROOT_W + COL_GAP + maxDepth * (NODE_W + COL_GAP) + SVG_MARGIN.right;
+  const maxX = depthToX(maxDepth) + NODE_W + SVG_MARGIN.right;
   const maxY = Math.max(
     ...layoutBlocks.map((lb) => lb.y + lb.h),
     root.y + root.h,

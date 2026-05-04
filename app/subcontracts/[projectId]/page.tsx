@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'rea
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { SubcontractGraph, BlockNode, BlockRecipient } from '@/types/subcontract';
+import type { ProjectDetail } from '@/types/project-details';
 import {
   computeSubcontractLayout,
   squarifiedTreemap,
@@ -19,12 +20,84 @@ import {
   type LayoutBlock,
 } from '@/app/lib/subcontract-layout';
 
-const COLOR_BACK_EDGE = 'rgba(217,119,6,0.65)'; // amber
+const COLOR_BACK_EDGE = 'rgba(217,69,69,0.65)';
+const COLOR_CANVAS = '#fff';
+const COLOR_DIRECT_BODY = '#f8d3d3';
+const COLOR_SUBCONTRACT_BODY = '#f6cbb6';
+const COLOR_DIRECT_BODY_TEXT = '#8f1f1f';
+const COLOR_SUBCONTRACT_BODY_TEXT = '#8b3a1c';
+const COLOR_DIRECT_BODY_SUBTLE = '#b33434';
+const COLOR_SUBCONTRACT_BODY_SUBTLE = '#b45309';
+const COLOR_DIRECT_BODY_STROKE = '#efb0b0';
+const COLOR_SUBCONTRACT_BODY_STROKE = '#eeaa8d';
+const COLOR_DIRECT_EDGE = 'rgba(217,69,69,0.48)';
+const COLOR_SUBCONTRACT_EDGE = 'rgba(224,112,64,0.52)';
+const COLOR_CONTEXT_BODY = '#d8f1df';
+const COLOR_CONTEXT_BODY_TEXT = '#1f6b3a';
+const COLOR_CONTEXT_BODY_SUBTLE = '#2d7d46';
+const COLOR_CONTEXT_BODY_STROKE = 'rgba(77,184,112,0.38)';
 
-// ─── ブロックパネル ──────────────────────────────────────────────
+interface ProjectQualityOrg {
+  pid: string;
+  bureau?: string;
+  division?: string;
+  section?: string;
+  office?: string;
+  team?: string;
+  unit?: string;
+}
 
-function BlockPanel({ block, onClose }: { block: BlockNode; onClose: () => void }) {
+const ORG_LEVEL_LABELS = ['局庁', '部', '課', '室', '班', '係'];
+
+function chooseDefaultBlock(graph: SubcontractGraph): BlockNode | null {
+  const redelegated = graph.blocks
+    .filter((b) => !b.isDirect && b.recipients.length > 0)
+    .sort((a, b) => b.totalAmount - a.totalAmount);
+  if (redelegated[0]) return redelegated[0];
+  return [...graph.blocks].sort((a, b) => b.totalAmount - a.totalAmount)[0] ?? null;
+}
+
+function percentOf(amount: number, total: number): string {
+  if (total <= 0) return '—';
+  return `${((amount / total) * 100).toFixed(1)}%`;
+}
+
+function truncateChars(value: string, maxChars: number): string {
+  const chars = Array.from(value);
+  if (chars.length <= maxChars) return value;
+  return `${chars.slice(0, Math.max(1, maxChars - 1)).join('')}…`;
+}
+
+function labelLines(value: string, maxChars: number, charsPerLine: number): string[] {
+  const trimmed = truncateChars(value, maxChars);
+  const chars = Array.from(trimmed);
+  const lines: string[] = [];
+  for (let i = 0; i < chars.length && lines.length < 2; i += charsPerLine) {
+    lines.push(chars.slice(i, i + charsPerLine).join(''));
+  }
+  return lines;
+}
+
+// ─── ブロック詳細ペイン ──────────────────────────────────────────────
+
+function BlockDetailPane({
+  block,
+  graph,
+  projectDetail,
+  orgChain,
+  onClose,
+}: {
+  block: BlockNode | null;
+  graph: SubcontractGraph;
+  projectDetail: ProjectDetail | null;
+  orgChain: string[];
+  onClose: () => void;
+}) {
   const [expandedRecipients, setExpandedRecipients] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    setExpandedRecipients(new Set());
+  }, [block?.blockId]);
 
   function toggleRecipient(i: number) {
     setExpandedRecipients((prev) => {
@@ -35,16 +108,86 @@ function BlockPanel({ block, onClose }: { block: BlockNode; onClose: () => void 
     });
   }
 
+  if (!block) {
+    const summaryRows = [
+      ['PID', graph.projectId],
+      ['府省庁', graph.ministry],
+      ['担当組織', orgChain.length > 0 ? orgChain.join(' / ') : projectDetail?.bureau ?? '未設定'],
+      ['予算額', graph.budget > 0 ? formatYen(graph.budget) : '未設定'],
+      ['執行額', graph.execution > 0 ? formatYen(graph.execution) : '未設定'],
+    ];
+
+    return (
+      <aside style={{
+        width: 360,
+        minWidth: 360,
+        maxWidth: 420,
+        background: '#fff',
+        borderLeft: '1px solid #e5e7eb',
+        overflowY: 'auto',
+      }}>
+        <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{
+              display: 'inline-block',
+              fontSize: 11,
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: 4,
+              background: '#e7f6ec',
+              color: '#2d7d46',
+              marginBottom: 6,
+            }}>
+              事業・組織
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', lineHeight: 1.45 }}>
+              {graph.projectName}
+            </div>
+            <div style={{ fontSize: 11, color: '#6b7280', marginTop: 4 }}>
+              事業コンテキストノードを選択中
+            </div>
+          </div>
+        </div>
+
+        <div style={{ padding: 12 }}>
+          {summaryRows.map(([label, value]) => (
+            <div key={label} style={{
+              display: 'grid',
+              gridTemplateColumns: '72px 1fr',
+              gap: 10,
+              padding: '9px 0',
+              borderBottom: '1px solid #f1f5f9',
+              fontSize: 12,
+              lineHeight: 1.55,
+            }}>
+              <div style={{ color: '#64748b', fontWeight: 700 }}>{label}</div>
+              <div style={{ color: '#111827', wordBreak: 'break-word' }}>{value}</div>
+            </div>
+          ))}
+          {projectDetail?.majorExpense && (
+            <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 4 }}>主要経費</div>
+              <div style={{ fontSize: 12, color: '#111827', lineHeight: 1.55 }}>{projectDetail.majorExpense}</div>
+            </div>
+          )}
+          <div style={{ marginTop: 12, fontSize: 11, color: '#64748b', lineHeight: 1.6 }}>
+            支出ブロックをクリックすると、支出先内訳と再委託の通過フローを確認できます。
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  const sortedRecipients = [...block.recipients].sort((a, b) => b.amount - a.amount);
+
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0, left: 0,
+    <aside style={{
       width: 360,
-      height: '100vh',
+      minWidth: 360,
+      maxWidth: 420,
       background: '#fff',
-      boxShadow: '4px 0 20px rgba(0,0,0,0.15)',
+      borderLeft: '1px solid #e5e7eb',
       overflowY: 'auto',
-      zIndex: 100,
       display: 'flex',
       flexDirection: 'column',
     }}>
@@ -67,8 +210,8 @@ function BlockPanel({ block, onClose }: { block: BlockNode; onClose: () => void 
             fontWeight: 600,
             padding: '2px 6px',
             borderRadius: 4,
-            background: block.isDirect ? '#dbeafe' : '#ffedd5',
-            color: block.isDirect ? '#1d4ed8' : '#c2410c',
+            background: block.isDirect ? '#f9dddd' : '#fbe3d7',
+            color: block.isDirect ? COLOR_DIRECT_BODY_SUBTLE : COLOR_SUBCONTRACT_BODY_SUBTLE,
             marginBottom: 4,
           }}>
             {block.isDirect ? '直接支出' : '再委託'}
@@ -76,6 +219,9 @@ function BlockPanel({ block, onClose }: { block: BlockNode; onClose: () => void 
           <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{block.blockName}</div>
           <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
             ブロック {block.blockId} ／ {formatYen(block.totalAmount)}
+          </div>
+          <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>
+            表示内訳 {block.recipients.length.toLocaleString()}件 ／ 構成比 {percentOf(block.totalAmount, Math.max(graph.execution, graph.budget, block.totalAmount))}
           </div>
           {block.role && (
             <div style={{ fontSize: 11, color: '#374151', marginTop: 4, padding: '3px 6px', background: '#f3f4f6', borderRadius: 4 }}>
@@ -92,35 +238,43 @@ function BlockPanel({ block, onClose }: { block: BlockNode; onClose: () => void 
 
       {/* 支出先リスト */}
       <div style={{ padding: 12, flex: 1 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
-          支出先 ({block.recipients.length}件)
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>
+            支出先内訳
+          </div>
+          <div style={{ fontSize: 11, color: '#9ca3af' }}>金額順</div>
         </div>
-        {block.recipients.map((r, i) => (
+        {sortedRecipients.map((r, i) => (
           <RecipientCard
             key={i}
             recipient={r}
             index={i}
             expanded={expandedRecipients.has(i)}
             onToggle={() => toggleRecipient(i)}
+            totalAmount={block.totalAmount}
+            barColor={block.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT}
           />
         ))}
         {block.recipients.length === 0 && (
           <p style={{ fontSize: 12, color: '#9ca3af' }}>支出先データなし</p>
         )}
       </div>
-    </div>
+    </aside>
   );
 }
 
 function RecipientCard({
-  recipient, index, expanded, onToggle,
+  recipient, index, expanded, onToggle, totalAmount, barColor,
 }: {
   recipient: BlockRecipient;
   index: number;
   expanded: boolean;
   onToggle: () => void;
+  totalAmount: number;
+  barColor: string;
 }) {
   const hasDetails = recipient.contractSummaries.length > 0 || recipient.expenses.length > 0;
+  const share = totalAmount > 0 ? Math.max(2, Math.min(100, (recipient.amount / totalAmount) * 100)) : 0;
 
   return (
     <div style={{
@@ -143,7 +297,13 @@ function RecipientCard({
       >
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 500, color: '#111827' }}>{recipient.name || '（氏名なし）'}</div>
-          <div style={{ color: '#6b7280', marginTop: 2 }}>{formatYen(recipient.amount)}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+            <div style={{ flex: 1, height: 6, background: '#e5e7eb', borderRadius: 999, overflow: 'hidden' }}>
+              <div style={{ width: `${share}%`, height: '100%', background: barColor }} />
+            </div>
+            <div style={{ color: '#374151', fontWeight: 600, whiteSpace: 'nowrap' }}>{formatYen(recipient.amount)}</div>
+          </div>
+          <div style={{ color: '#9ca3af', fontSize: 10, marginTop: 2 }}>構成比 {percentOf(recipient.amount, totalAmount)}</div>
           {recipient.corporateNumber && (
             <div style={{ color: '#9ca3af', fontSize: 10, marginTop: 1 }}>法人番号: {recipient.corporateNumber}</div>
           )}
@@ -186,6 +346,8 @@ function SubcontractDetailPageInner() {
   const year = parseInt(searchParams.get('year') ?? '2024', 10);
 
   const [graph, setGraph] = useState<SubcontractGraph | null>(null);
+  const [projectDetail, setProjectDetail] = useState<ProjectDetail | null>(null);
+  const [orgChain, setOrgChain] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<BlockNode | null>(null);
@@ -209,6 +371,8 @@ function SubcontractDetailPageInner() {
     setLoading(true);
     setError(null);
     setSelectedBlock(null);
+    setProjectDetail(null);
+    setOrgChain([]);
     setHoveredBlock(null);
     setHoveredRecipient(null);
     currentHoverKey.current = null;
@@ -220,6 +384,7 @@ function SubcontractDetailPageInner() {
       })
       .then((data: SubcontractGraph) => {
         setGraph(data);
+        setSelectedBlock(chooseDefaultBlock(data));
         setLoading(false);
       })
       .catch((e: Error) => {
@@ -227,6 +392,30 @@ function SubcontractDetailPageInner() {
         setLoading(false);
       });
   }, [projectId, year]);
+
+  useEffect(() => {
+    if (!graph) return;
+    fetch(`/api/project-details/${projectId}?year=${year}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: ProjectDetail | null) => setProjectDetail(data))
+      .catch(() => setProjectDetail(null));
+  }, [graph, projectId, year]);
+
+  useEffect(() => {
+    if (!graph) return;
+    fetch(`/data/project-quality-scores-${year}.json`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((items: ProjectQualityOrg[]) => {
+        const item = items.find((v) => String(v.pid) === String(projectId));
+        const chain = item
+          ? [item.bureau, item.division, item.section, item.office, item.team, item.unit]
+              .map((v) => v?.trim() ?? '')
+              .filter(Boolean)
+          : [];
+        setOrgChain(chain);
+      })
+      .catch(() => setOrgChain([]));
+  }, [graph, projectId, year]);
 
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
@@ -260,6 +449,12 @@ function SubcontractDetailPageInner() {
   }, [graph]);
 
   // Hooks はすべて early return より前に呼ぶ必要がある
+  const fallbackOrgChain = useMemo(() => {
+    const bureau = projectDetail?.bureau?.trim();
+    return bureau ? [bureau] : [];
+  }, [projectDetail]);
+  const visibleOrgChain = orgChain.length > 0 ? orgChain : fallbackOrgChain;
+
   const layout = useMemo(() => graph ? computeSubcontractLayout(graph) : null, [graph]);
 
   const applyZoom = useCallback((factor: number) => {
@@ -326,9 +521,17 @@ function SubcontractDetailPageInner() {
 
   // ここに到達した時点で graph は必ず非 null
   const safeLayout = layout!;
+  const directBlocks = graph.blocks.filter((b) => b.isDirect).length;
+  const redelegatedBlocks = graph.blocks.filter((b) => !b.isDirect).length;
+  const firstDirectBlock = safeLayout.blocks.find((b) => b.depth === 1)?.node;
+  const firstRedelegatedBlock = safeLayout.blocks.find((b) => !b.isDirect)?.node;
+  const organizationSummary = visibleOrgChain.length > 0 ? visibleOrgChain.join(' -> ') : '担当組織';
+  const flowSummary = firstDirectBlock && firstRedelegatedBlock
+    ? `${organizationSummary} -> ${graph.projectName} -> ${firstDirectBlock.blockName} -> ${firstRedelegatedBlock.role || firstRedelegatedBlock.blockName}`
+    : `${organizationSummary} -> ${graph.projectName} -> ${firstDirectBlock?.blockName ?? '支出先ブロック'}`;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#f1f5f9', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* ヘッダーバー */}
       <div style={{
         background: '#fff',
@@ -344,18 +547,10 @@ function SubcontractDetailPageInner() {
           ← 一覧
         </Link>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontSize: 11, color: '#9ca3af', marginRight: 6 }}>PID {graph.projectId}</span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: '#111827' }}>{graph.projectName}</span>
-          <span style={{ fontSize: 12, color: '#6b7280', marginLeft: 8 }}>{graph.ministry}</span>
-        </div>
-
-        <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#6b7280', flexWrap: 'wrap' }}>
-          <span>予算: <strong style={{ color: '#111827' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</strong></span>
-          <span>執行: <strong style={{ color: '#111827' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</strong></span>
-          <span>最大{graph.maxDepth}層</span>
-          <span>ブロック {graph.totalBlockCount}</span>
-          <span>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 8, overflow: 'hidden' }}>
+          <span style={{ fontSize: 11, color: '#9ca3af', flexShrink: 0 }}>PID {graph.projectId}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{graph.projectName}</span>
+          <span style={{ fontSize: 12, color: '#6b7280', flexShrink: 0 }}>{graph.ministry}</span>
         </div>
 
         {/* 年度切替 */}
@@ -376,27 +571,33 @@ function SubcontractDetailPageInner() {
         </button>
       </div>
 
-      {/* 凡例 */}
-      <div style={{ padding: '6px 16px', background: '#fff', borderBottom: '1px solid #f3f4f6', display: 'flex', gap: 16, fontSize: 11, color: '#6b7280', flexWrap: 'wrap' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ width: 12, height: 12, borderRadius: 2, background: COLOR_DIRECT, display: 'inline-block' }} />
-          直接支出ブロック
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ width: 12, height: 12, borderRadius: 2, background: COLOR_SUBCONTRACT, display: 'inline-block' }} />
-          再委託ブロック
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <svg width="28" height="10" style={{ flexShrink: 0 }}>
-            <line x1="0" y1="5" x2="28" y2="5" stroke={COLOR_BACK_EDGE} strokeWidth="1.5" strokeDasharray="5 3" />
-          </svg>
-          参照フロー（循環）
-        </span>
-        <span style={{ color: '#9ca3af' }}>ブロックをクリックで詳細表示 ／ ホイールでズーム ／ ドラッグでパン</span>
+      {/* 資金ルート要約 */}
+      <div style={{ padding: '7px 16px', background: '#fafafa', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#111827' }}>資金ルート</div>
+        <div style={{ fontSize: 12, color: '#374151', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+          {flowSummary}
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11, color: '#475569' }}>
+          <span>予算 <strong style={{ color: '#111827' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</strong></span>
+          <span>執行 <strong style={{ color: '#111827' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</strong></span>
+          <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f3f4f6' }}>最大{graph.maxDepth}層</span>
+          <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE }}>直接 {directBlocks}件</span>
+          <span style={{ padding: '3px 7px', borderRadius: 999, background: '#fbe3d7', color: '#b45309' }}>再委託 {redelegatedBlocks}件</span>
+          <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f5f5f5' }}>表示内訳 {graph.totalRecipientCount.toLocaleString()}件</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 2, background: COLOR_DIRECT, display: 'inline-block' }} />
+            直接
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 2, background: COLOR_SUBCONTRACT, display: 'inline-block' }} />
+            再委託
+          </span>
+        </div>
       </div>
 
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
       {/* SVGキャンバス */}
-      <div ref={containerRef} style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+      <div ref={containerRef} style={{ flex: 1, minWidth: 0, overflow: 'hidden', position: 'relative' }}>
         <svg
           ref={svgRef}
           width="100%"
@@ -413,22 +614,60 @@ function SubcontractDetailPageInner() {
               <marker id="arrow-fwd" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
                 <path d="M0,0 L0,6 L6,3 z" fill={COLOR_EDGE} />
               </marker>
+              <marker id="arrow-fwd-direct" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill={COLOR_DIRECT_EDGE} />
+              </marker>
+              <marker id="arrow-fwd-subcontract" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill={COLOR_SUBCONTRACT_EDGE} />
+              </marker>
               <marker id="arrow-back" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
                 <path d="M6,0 L6,6 L0,3 z" fill={COLOR_BACK_EDGE} />
               </marker>
             </defs>
 
             {/* 順方向エッジ */}
-            {safeLayout.edges.filter(e => !e.isBackEdge).map((edge, i) => (
-              <path
-                key={`fwd-${i}`}
-                d={bezierPath(edge.x1, edge.y1, edge.x2, edge.y2)}
-                fill="none"
-                stroke={COLOR_EDGE}
-                strokeWidth={2}
-                markerEnd="url(#arrow-fwd)"
-              />
-            ))}
+            {safeLayout.edges.filter(e => !e.isBackEdge).map((edge, i) => {
+              const target = safeLayout.blocks.find((b) => b.blockId === edge.targetBlock);
+              const amountLabel = target && target.totalAmount > 0 ? formatYen(target.totalAmount) : null;
+              const edgeColor = target?.isDirect ? COLOR_DIRECT_EDGE : COLOR_SUBCONTRACT_EDGE;
+              const markerId = target?.isDirect ? 'arrow-fwd-direct' : 'arrow-fwd-subcontract';
+              const labelX = (edge.x1 + edge.x2) / 2;
+              const labelY = (edge.y1 + edge.y2) / 2 - 10;
+              return (
+                <g key={`fwd-${i}`}>
+                  <path
+                    d={bezierPath(edge.x1, edge.y1, edge.x2, edge.y2)}
+                    fill="none"
+                    stroke={edgeColor}
+                    strokeWidth={2.5}
+                    markerEnd={`url(#${markerId})`}
+                  />
+                  {amountLabel && (
+                    <g style={{ pointerEvents: 'none' }}>
+                      <rect
+                        x={labelX - 34}
+                        y={labelY - 12}
+                        width={68}
+                        height={17}
+                        rx={8}
+                        fill="rgba(255,255,255,0.88)"
+                        stroke="rgba(148,163,184,0.5)"
+                      />
+                      <text
+                        x={labelX}
+                        y={labelY}
+                        textAnchor="middle"
+                        fontSize={9}
+                        fontWeight={700}
+                        fill="#475569"
+                      >
+                        {amountLabel}
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
 
             {/* バックエッジ（循環・参照フロー） */}
             {safeLayout.edges.filter(e => e.isBackEdge).map((edge, i) => (
@@ -466,33 +705,134 @@ function SubcontractDetailPageInner() {
               ) : null
             )}
 
-            {/* 担当組織ルートノード */}
-            <g>
+            {/* 事業コンテキストノード */}
+            <g
+              onClick={() => setSelectedBlock(null)}
+              style={{ cursor: 'pointer' }}
+            >
+              <title>{[graph.projectName, graph.ministry, ...visibleOrgChain].filter(Boolean).join(' / ')}</title>
               <rect
                 x={safeLayout.root.x}
                 y={safeLayout.root.y}
                 width={safeLayout.root.w}
                 height={safeLayout.root.h}
                 rx={6}
+                fill="rgba(255,255,255,0.08)"
+                stroke={COLOR_CONTEXT_BODY_STROKE}
+                strokeWidth={1.5}
+              />
+              <rect
+                x={safeLayout.root.x}
+                y={safeLayout.root.y}
+                width={safeLayout.root.w}
+                height={56}
+                rx={6}
                 fill={COLOR_ROOT}
               />
+              <rect
+                x={safeLayout.root.x}
+                y={safeLayout.root.y + 50}
+                width={safeLayout.root.w}
+                height={6}
+                fill={COLOR_ROOT}
+              />
+              <rect
+                x={safeLayout.root.x + 1}
+                y={safeLayout.root.y + 56}
+                width={safeLayout.root.w - 2}
+                height={safeLayout.root.h - 57}
+                fill={COLOR_CONTEXT_BODY}
+              />
               <text
-                x={safeLayout.root.x + safeLayout.root.w / 2}
-                y={safeLayout.root.y + safeLayout.root.h / 2}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize={11}
-                fontWeight={600}
-                fill="#fff"
+                x={safeLayout.root.x + 14}
+                y={safeLayout.root.y + 18}
+                fontSize={9}
+                fontWeight={700}
+                fill="rgba(255,255,255,0.78)"
+                style={{ userSelect: 'none' }}
               >
-                {graph.ministry}
+                事業 / PID {graph.projectId}
+              </text>
+              <text
+                x={safeLayout.root.x + 14}
+                y={safeLayout.root.y + 34}
+                fontSize={11}
+                fontWeight={700}
+                fill="#fff"
+                style={{ userSelect: 'none' }}
+              >
+                {labelLines(graph.projectName, 40, 20).map((line, i) => (
+                  <tspan key={i} x={safeLayout.root.x + 14} dy={i === 0 ? 0 : 12}>{line}</tspan>
+                ))}
+              </text>
+              <text
+                x={safeLayout.root.x + 14}
+                y={safeLayout.root.y + 75}
+                fontSize={9}
+                fontWeight={700}
+                fill={COLOR_CONTEXT_BODY_SUBTLE}
+                style={{ userSelect: 'none' }}
+              >
+                府省庁
+              </text>
+              <text
+                x={safeLayout.root.x + 70}
+                y={safeLayout.root.y + 75}
+                fontSize={10}
+                fontWeight={700}
+                fill={COLOR_CONTEXT_BODY_TEXT}
+                style={{ userSelect: 'none' }}
+              >
+                {truncateChars(graph.ministry, 18)}
+              </text>
+              {visibleOrgChain.length > 0 && (
+                <>
+                  <text
+                    x={safeLayout.root.x + 14}
+                    y={safeLayout.root.y + 94}
+                    fontSize={9}
+                    fontWeight={700}
+                    fill={COLOR_CONTEXT_BODY_SUBTLE}
+                    style={{ userSelect: 'none' }}
+                  >
+                    担当組織
+                  </text>
+                  <text
+                    x={safeLayout.root.x + 70}
+                    y={safeLayout.root.y + 94}
+                    fontSize={9}
+                    fontWeight={600}
+                    fill={COLOR_CONTEXT_BODY_TEXT}
+                    style={{ userSelect: 'none' }}
+                  >
+                    {labelLines(visibleOrgChain.map((v, i) => `${ORG_LEVEL_LABELS[i] ?? '組織'}:${v}`).join(' / '), 42, 21).map((line, i) => (
+                      <tspan key={i} x={safeLayout.root.x + 70} dy={i === 0 ? 0 : 11}>{line}</tspan>
+                    ))}
+                  </text>
+                </>
+              )}
+              <text
+                x={safeLayout.root.x + safeLayout.root.w - 14}
+                y={safeLayout.root.y + safeLayout.root.h - 24}
+                textAnchor="end"
+                fontSize={9}
+                fontWeight={700}
+                fill={COLOR_CONTEXT_BODY_SUBTLE}
+                style={{ userSelect: 'none' }}
+              >
+                <tspan x={safeLayout.root.x + safeLayout.root.w - 14}>予算 {graph.budget > 0 ? formatYen(graph.budget) : '—'}</tspan>
+                <tspan x={safeLayout.root.x + safeLayout.root.w - 14} dy={12}>支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}</tspan>
               </text>
             </g>
 
             {/* ブロックノード（面積図） */}
             {safeLayout.blocks.map((lb) => {
-              const isAmbiguous = lb.node.recipients.length >= 2 && safeLayout.edges.some((e) => e.sourceBlock === lb.blockId);
+              const isSelected = selectedBlock?.blockId === lb.blockId;
               const nodeColor = lb.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT;
+              const bodyFill = lb.isDirect ? COLOR_DIRECT_BODY : COLOR_SUBCONTRACT_BODY;
+              const bodyTextColor = lb.isDirect ? COLOR_DIRECT_BODY_TEXT : COLOR_SUBCONTRACT_BODY_TEXT;
+              const bodySubtleTextColor = lb.isDirect ? COLOR_DIRECT_BODY_SUBTLE : COLOR_SUBCONTRACT_BODY_SUBTLE;
+              const bodyStrokeColor = lb.isDirect ? COLOR_DIRECT_BODY_STROKE : COLOR_SUBCONTRACT_BODY_STROKE;
               const recipients = lb.node.recipients;
 
               // ─ ヘッダーレイアウト ─
@@ -511,8 +851,8 @@ function SubcontractDetailPageInner() {
               const line1 = `${lb.blockId} ${lb.blockName}`;
               const line1Disp = trunc(line1, 18);
 
-              // 行2: 支出先N社　金額
-              const line2 = `支出先 ${recipients.length}社　${formatYen(lb.totalAmount)}`;
+              // 行2: 表示内訳N件　金額
+              const line2 = `表示内訳 ${recipients.length}件　${formatYen(lb.totalAmount)}`;
 
               // 行3-4: 役割（最大2行、各24文字）
               const roleLines: string[] = [];
@@ -536,9 +876,11 @@ function SubcontractDetailPageInner() {
               // squarified treemap で支出先を面積比例配置
               const bodyH2 = lb.h - HEADER_H;
               const treemapItems = recipients.map(r => ({ key: r.name + '|' + r.corporateNumber, value: r.amount }));
-              const treemapRect = { x: lb.x + 1, y: lb.y + HEADER_H, w: lb.w - 2, h: bodyH2 };
+              const treemapRect = { x: lb.x + 1, y: lb.y + HEADER_H, w: lb.w - 2, h: Math.max(0, bodyH2 - 1) };
               const treemapResults = bodyH2 > 0 ? squarifiedTreemap(treemapItems, treemapRect) : [];
               const recipientByKey = new Map(recipients.map(r => [r.name + '|' + r.corporateNumber, r]));
+              const clipIdBase = `subcontract-node-${String(lb.blockId).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+              const selectedStroke = lb.isDirect ? '#a61f1f' : '#9a3412';
 
               return (
                 <g
@@ -572,6 +914,23 @@ function SubcontractDetailPageInner() {
                   }}
                   style={{ cursor: 'pointer' }}
                 >
+                  <defs>
+                    <clipPath id={`${clipIdBase}-header`}>
+                      <rect x={lb.x} y={lb.y} width={lb.w} height={HEADER_H} rx={5} />
+                    </clipPath>
+                    <clipPath id={`${clipIdBase}-body`}>
+                      <path d={[
+                        `M ${lb.x + 1} ${lb.y + HEADER_H}`,
+                        `H ${lb.x + lb.w - 1}`,
+                        `V ${lb.y + lb.h - 6}`,
+                        `Q ${lb.x + lb.w - 1} ${lb.y + lb.h - 1} ${lb.x + lb.w - 6} ${lb.y + lb.h - 1}`,
+                        `H ${lb.x + 6}`,
+                        `Q ${lb.x + 1} ${lb.y + lb.h - 1} ${lb.x + 1} ${lb.y + lb.h - 6}`,
+                        'Z',
+                      ].join(' ')} />
+                    </clipPath>
+                  </defs>
+
                   {/* 外枠 */}
                   <rect
                     x={lb.x}
@@ -579,10 +938,9 @@ function SubcontractDetailPageInner() {
                     width={lb.w}
                     height={lb.h}
                     rx={5}
-                    fill="rgba(255,255,255,0.08)"
-                    stroke={isAmbiguous ? '#dc2626' : nodeColor}
-                    strokeWidth={isAmbiguous ? 1.5 : 1.5}
-                    strokeDasharray={isAmbiguous ? '4 2' : undefined}
+                    fill={bodyStrokeColor}
+                    stroke={isSelected ? selectedStroke : bodyStrokeColor}
+                    strokeWidth={1.4}
                   />
 
                   {/* ヘッダー背景 */}
@@ -605,7 +963,7 @@ function SubcontractDetailPageInner() {
                   />
 
                   {/* ヘッダーテキスト */}
-                  <g style={{ pointerEvents: 'none' }}>
+                  <g clipPath={`url(#${clipIdBase}-header)`} style={{ pointerEvents: 'none' }}>
                     {/* 行1: ブロック番号 ブロック名 */}
                     <text x={lb.x + NODE_PAD} y={lb.y + H_TOP + H_LINE1 - 1}
                       fontSize={10} fontWeight={700} fill="#fff" style={{ userSelect: 'none' }}>
@@ -619,83 +977,93 @@ function SubcontractDetailPageInner() {
                     {/* 行3-4: 役割 */}
                     {roleLines[0] && (
                       <text x={lb.x + NODE_PAD} y={lb.y + H_TOP + H_LINE1 + H_LINE2 + H_LINE3 - 1}
-                        fontSize={8} fill="rgba(255,255,255,0.72)" style={{ userSelect: 'none' }}>
+                        fontSize={8} fill="rgba(255,255,255,0.82)" style={{ userSelect: 'none' }}>
                         {roleLines[0]}
                       </text>
                     )}
                     {roleLines[1] && (
                       <text x={lb.x + NODE_PAD} y={lb.y + H_TOP + H_LINE1 + H_LINE2 + H_LINE3 + H_LINE4 - 1}
-                        fontSize={8} fill="rgba(255,255,255,0.72)" style={{ userSelect: 'none' }}>
+                        fontSize={8} fill="rgba(255,255,255,0.82)" style={{ userSelect: 'none' }}>
                         {roleLines[1]}
                       </text>
                     )}
                   </g>
 
                   {/* 支出先 squarified treemap */}
-                  {treemapResults.map((tr) => {
-                    const r = recipientByKey.get(tr.key);
-                    if (!r || tr.rect.w < 1 || tr.rect.h < 1) return null;
-                    const showName = tr.rect.h >= 14 && tr.rect.w >= 20;
-                    const showAmount = tr.rect.h >= 24 && tr.rect.w >= 30 && r.amount > 0;
-                    return (
-                      <g key={tr.key} style={{ pointerEvents: 'none' }}>
-                        <rect
-                          data-rkey={tr.key}
-                          x={tr.rect.x}
-                          y={tr.rect.y}
-                          width={tr.rect.w}
-                          height={tr.rect.h}
-                          fill={nodeColor}
-                          fillOpacity={0.55}
-                          stroke="rgba(255,255,255,0.3)"
-                          strokeWidth={0.5}
-                          style={{ pointerEvents: 'all' }}
-                        />
-                        {showName && (
-                          <text
-                            x={tr.rect.x + 4}
-                            y={tr.rect.y + (showAmount ? tr.rect.h / 2 - 4 : tr.rect.h / 2)}
-                            fontSize={9}
-                            fill="rgba(255,255,255,0.95)"
-                            dominantBaseline="middle"
-                            style={{ userSelect: 'none' }}
-                          >
-                            {(() => {
-                              const maxChars = Math.floor((tr.rect.w - 8) / 6);
-                              return r.name.length > maxChars ? r.name.slice(0, Math.max(1, maxChars)) + '…' : r.name;
-                            })()}
-                          </text>
-                        )}
-                        {showAmount && (
-                          <text
-                            x={tr.rect.x + tr.rect.w - 4}
-                            y={tr.rect.y + tr.rect.h / 2 + 6}
-                            fontSize={8}
-                            fill="rgba(255,255,255,0.75)"
-                            textAnchor="end"
-                            dominantBaseline="middle"
-                            style={{ userSelect: 'none' }}
-                          >
-                            {formatYen(r.amount)}
-                          </text>
-                        )}
-                      </g>
-                    );
-                  })}
-
-                  {/* 委託元不特定バッジ */}
-                  {isAmbiguous && (
-                    <text
-                      x={lb.x + lb.w - NODE_PAD}
-                      y={lb.y + lb.h - 4}
-                      textAnchor="end"
-                      fontSize={8}
-                      fill="#fca5a5"
+                  <g clipPath={`url(#${clipIdBase}-body)`}>
+                    <rect
+                      x={treemapRect.x}
+                      y={treemapRect.y}
+                      width={treemapRect.w}
+                      height={treemapRect.h}
+                      fill={bodyStrokeColor}
                       style={{ pointerEvents: 'none' }}
-                    >
-                      委託元不特定
-                    </text>
-                  )}
+                    />
+                    {treemapResults.map((tr) => {
+                      const r = recipientByKey.get(tr.key);
+                      if (!r || tr.rect.w < 1 || tr.rect.h < 1) return null;
+                      const screenW = tr.rect.w * transform.scale;
+                      const screenH = tr.rect.h * transform.scale;
+                      const localCharsPerLine = Math.max(3, Math.min(10, Math.floor((tr.rect.w - 10) / 5.6)));
+                      const localMaxChars = Math.min(20, Math.max(localCharsPerLine, localCharsPerLine * 2));
+                      const nameLines = labelLines(r.name || '（氏名なし）', localMaxChars, localCharsPerLine);
+                      const showName = screenH >= 18 && screenW >= 42 && tr.rect.h >= 12 && tr.rect.w >= 24;
+                      const showTwoNameLines = showName && nameLines.length >= 2 && screenH >= 34 && tr.rect.h >= 24;
+                      const showAmount = screenH >= 48 && screenW >= 72 && tr.rect.h >= 34 && r.amount > 0;
+                      const visibleNameLines = showTwoNameLines ? nameLines : nameLines.slice(0, 1);
+                      const textBlockH = visibleNameLines.length * 9 + (showAmount ? 10 : 0);
+                      const textStartY = tr.rect.y + Math.max(11, (tr.rect.h - textBlockH) / 2 + 7);
+                      return (
+                        <g key={tr.key} style={{ pointerEvents: 'none' }}>
+                          <rect
+                            data-rkey={tr.key}
+                            x={tr.rect.x}
+                            y={tr.rect.y}
+                            width={tr.rect.w}
+                            height={tr.rect.h}
+                            rx={tr.rect.w >= 18 && tr.rect.h >= 18 ? 3 : 0}
+                            fill={bodyFill}
+                            stroke={bodyStrokeColor}
+                            strokeWidth={0.7}
+                            style={{ pointerEvents: 'all' }}
+                          />
+                          {showName && (
+                            <text
+                              x={tr.rect.x + 5}
+                              y={textStartY}
+                              fontSize={8}
+                              fontWeight={600}
+                              fill={bodyTextColor}
+                              style={{ userSelect: 'none' }}
+                            >
+                              {visibleNameLines.map((line, lineIndex) => (
+                                <tspan
+                                  key={lineIndex}
+                                  x={tr.rect.x + 5}
+                                  dy={lineIndex === 0 ? 0 : 9}
+                                >
+                                  {line}
+                                </tspan>
+                              ))}
+                            </text>
+                          )}
+                          {showAmount && (
+                            <text
+                              x={tr.rect.x + tr.rect.w - 5}
+                              y={textStartY + visibleNameLines.length * 9 + 1}
+                              fontSize={7}
+                              fontWeight={700}
+                              fill={bodySubtleTextColor}
+                              textAnchor="end"
+                              style={{ userSelect: 'none' }}
+                            >
+                              {formatYen(r.amount)}
+                            </text>
+                          )}
+                        </g>
+                      );
+                    })}
+                  </g>
                 </g>
               );
             })}
@@ -727,7 +1095,7 @@ function SubcontractDetailPageInner() {
                   wordBreak: 'break-all',
                 }}>
                   <div style={{ fontWeight: 700, marginBottom: 2 }}>{lb.blockId} {lb.blockName}</div>
-                  <div style={{ opacity: 0.88 }}>支出先 {lb.node.recipients.length}社　{formatYen(lb.totalAmount)}</div>
+                  <div style={{ opacity: 0.88 }}>表示内訳 {lb.node.recipients.length}件　{formatYen(lb.totalAmount)}</div>
                   {lb.node.role && <div style={{ opacity: 0.78, marginTop: 3, fontSize: 10 }}>{lb.node.role}</div>}
                 </div>
               </foreignObject>
@@ -825,10 +1193,16 @@ function SubcontractDetailPageInner() {
           </div>
         </div>
 
-        {/* 詳細パネル */}
-        {selectedBlock && (
-          <BlockPanel block={selectedBlock} onClose={() => setSelectedBlock(null)} />
-        )}
+      </div>
+
+        {/* 詳細ペイン */}
+        <BlockDetailPane
+          block={selectedBlock}
+          graph={graph}
+          projectDetail={projectDetail}
+          orgChain={visibleOrgChain}
+          onClose={() => setSelectedBlock(null)}
+        />
       </div>
     </div>
   );
