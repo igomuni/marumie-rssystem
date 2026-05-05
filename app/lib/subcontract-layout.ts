@@ -128,6 +128,12 @@ function mergeParallelFlows(flows: BlockEdge[]): BlockEdge[] {
 
 export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLayout {
   const depthMap = computeDepths(graph.flows);
+  const mergedFlows = mergeParallelFlows(graph.flows);
+
+  function rowWidthForDepth(nodeCount: number): number {
+    const safeCount = Math.max(1, nodeCount);
+    return safeCount * NODE_W + Math.max(0, safeCount - 1) * COL_GAP;
+  }
 
   // ブロックノードをマップ化
   const blockById = new Map<string, BlockNode>();
@@ -147,7 +153,7 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
 
   // 各ブロックの「即時親」リスト（順方向エッジのみ: sourceDepth < targetDepth）
   const immediateParents = new Map<string, string[]>();
-  for (const f of mergeParallelFlows(graph.flows)) {
+  for (const f of mergedFlows) {
     if (f.sourceBlock === null) continue;
     const sd = depthMap.get(f.sourceBlock) ?? -1;
     const td = depthMap.get(f.targetBlock) ?? -1;
@@ -228,7 +234,7 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
 
   // エッジ計算
   const edges: LayoutEdge[] = [];
-  for (const f of mergeParallelFlows(graph.flows)) {
+  for (const f of mergedFlows) {
     const target = layoutById.get(f.targetBlock);
     if (!target) continue;
 
@@ -300,11 +306,6 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     svgWidth: maxX,
     svgHeight: maxY,
   };
-
-  function rowWidthForDepth(nodeCount: number): number {
-    const safeCount = Math.max(1, nodeCount);
-    return safeCount * NODE_W + Math.max(0, safeCount - 1) * COL_GAP;
-  }
 }
 
 // ─── Squarified Treemap ──────────────────────────────────────────────

@@ -429,7 +429,7 @@ function BlockDetailPane({
                 key={b.blockId}
                 block={b}
                 onClick={() => onSelectBlock(b)}
-                selected={selectedBlockId(block) === selectedBlockId(b)}
+                selected={block.blockId === b.blockId}
               />
             ))}
             {relationBlocks.length === 0 && (
@@ -440,10 +440,6 @@ function BlockDetailPane({
       </div>
     </aside>
   );
-}
-
-function selectedBlockId(block: BlockNode): string {
-  return block.blockId;
 }
 
 function BlockListRow({ block, selected, onClick }: { block: BlockNode; selected: boolean; onClick: () => void }) {
@@ -584,41 +580,55 @@ function SubcontractDetailPageInner() {
   const panStart = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
     setSelectedBlock(null);
     setHoveredNode(null);
     setProjectDetail(null);
     setOrgChain([]);
-    fetch(`/api/subcontracts/${projectId}?year=${year}`)
+    fetch(`/api/subcontracts/${projectId}?year=${year}`, { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
       .then((data: SubcontractGraph) => {
+        if (controller.signal.aborted) return;
         setGraph(data);
         setSelectedBlock(chooseDefaultBlock(data));
         setLoading(false);
       })
       .catch((e: Error) => {
+        if (e.name === 'AbortError') return;
         setError(e.message);
         setLoading(false);
       });
+    return () => controller.abort();
   }, [projectId, year]);
 
   useEffect(() => {
     if (!graph) return;
-    fetch(`/api/project-details/${projectId}?year=${year}`)
+    const controller = new AbortController();
+    fetch(`/api/project-details/${projectId}?year=${year}`, { signal: controller.signal })
       .then((r) => r.ok ? r.json() : null)
-      .then((data: ProjectDetail | null) => setProjectDetail(data))
-      .catch(() => setProjectDetail(null));
+      .then((data: ProjectDetail | null) => {
+        if (controller.signal.aborted) return;
+        setProjectDetail(data);
+      })
+      .catch((e: Error) => {
+        if (e.name === 'AbortError') return;
+        setProjectDetail(null);
+      });
+    return () => controller.abort();
   }, [graph, projectId, year]);
 
   useEffect(() => {
     if (!graph) return;
-    fetch(`/data/project-quality-scores-${year}.json`)
+    const controller = new AbortController();
+    fetch(`/data/project-quality-scores-${year}.json`, { signal: controller.signal })
       .then((r) => r.ok ? r.json() : [])
       .then((items: ProjectQualityOrg[]) => {
+        if (controller.signal.aborted) return;
         const item = items.find((v) => String(v.pid) === String(projectId));
         const chain = item
           ? [item.bureau, item.division, item.section, item.office, item.team, item.unit]
@@ -627,7 +637,11 @@ function SubcontractDetailPageInner() {
           : [];
         setOrgChain(chain);
       })
-      .catch(() => setOrgChain([]));
+      .catch((e: Error) => {
+        if (e.name === 'AbortError') return;
+        setOrgChain([]);
+      });
+    return () => controller.abort();
   }, [graph, projectId, year]);
 
   const handleWheel = useCallback((e: WheelEvent) => {
@@ -830,7 +844,6 @@ function SubcontractDetailPageInner() {
               const noteLabel = edge.note ? truncateChars(edge.note, 18) : null;
               const labelX = (edge.x1 + edge.x2) / 2;
               const labelY = (edge.y1 + edge.y2) / 2 - 8;
-              const labelText = amountLabel ?? noteLabel;
               const labelCharCount = Math.max(
                 Array.from(amountLabel ?? '').length,
                 Array.from(noteLabel ?? '').length,
@@ -846,7 +859,7 @@ function SubcontractDetailPageInner() {
                     stroke={edgeColor}
                     strokeWidth={2.5}
                   />
-                  {labelText && (
+                  {(amountLabel || noteLabel) && (
                     <g style={{ pointerEvents: 'none' }}>
                       <rect
                         x={labelX - labelW / 2}
@@ -857,16 +870,18 @@ function SubcontractDetailPageInner() {
                         fill="rgba(255,255,255,0.88)"
                         stroke="rgba(148,163,184,0.5)"
                       />
-                      <text
-                        x={labelX}
-                        y={labelY}
-                        textAnchor="middle"
-                        fontSize={9}
-                        fontWeight={700}
-                        fill="#475569"
-                      >
-                        {amountLabel}
-                      </text>
+                      {amountLabel && (
+                        <text
+                          x={labelX}
+                          y={labelY}
+                          textAnchor="middle"
+                          fontSize={9}
+                          fontWeight={700}
+                          fill="#475569"
+                        >
+                          {amountLabel}
+                        </text>
+                      )}
                       {noteLabel && (
                         <text
                           x={labelX}
