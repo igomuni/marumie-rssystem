@@ -7,15 +7,12 @@ import type { SubcontractGraph, BlockNode, BlockRecipient } from '@/types/subcon
 import type { ProjectDetail } from '@/types/project-details';
 import {
   computeSubcontractLayout,
-  squarifiedTreemap,
-  bezierPath,
   backEdgePath,
   selfLoopPath,
   formatYen,
   COLOR_DIRECT,
   COLOR_SUBCONTRACT,
   COLOR_ROOT,
-  COLOR_EDGE,
   NODE_PAD,
   type LayoutBlock,
 } from '@/app/lib/subcontract-layout';
@@ -28,14 +25,15 @@ const COLOR_DIRECT_BODY_TEXT = '#8f1f1f';
 const COLOR_SUBCONTRACT_BODY_TEXT = '#8b3a1c';
 const COLOR_DIRECT_BODY_SUBTLE = '#b33434';
 const COLOR_SUBCONTRACT_BODY_SUBTLE = '#b45309';
-const COLOR_DIRECT_BODY_STROKE = '#efb0b0';
-const COLOR_SUBCONTRACT_BODY_STROKE = '#eeaa8d';
 const COLOR_DIRECT_EDGE = 'rgba(217,69,69,0.48)';
 const COLOR_SUBCONTRACT_EDGE = 'rgba(224,112,64,0.52)';
 const COLOR_CONTEXT_BODY = '#d8f1df';
 const COLOR_CONTEXT_BODY_TEXT = '#1f6b3a';
 const COLOR_CONTEXT_BODY_SUBTLE = '#2d7d46';
-const COLOR_CONTEXT_BODY_STROKE = 'rgba(77,184,112,0.38)';
+const COLOR_PANEL_BORDER = '#e5e7eb';
+const CARD_HEADER_H = 46;
+const CARD_RADIUS = 6;
+const CARD_BORDER_W = 1;
 
 interface ProjectQualityOrg {
   pid: string;
@@ -78,6 +76,50 @@ function labelLines(value: string, maxChars: number, charsPerLine: number): stri
   return lines;
 }
 
+function verticalBezierPath(x1: number, y1: number, x2: number, y2: number): string {
+  const cy = (y1 + y2) / 2;
+  return `M ${x1} ${y1} C ${x1} ${cy}, ${x2} ${cy}, ${x2} ${y2}`;
+}
+
+function roundedTopPath(x: number, y: number, w: number, h: number, r: number): string {
+  return [
+    `M ${x} ${y + r}`,
+    `Q ${x} ${y} ${x + r} ${y}`,
+    `H ${x + w - r}`,
+    `Q ${x + w} ${y} ${x + w} ${y + r}`,
+    `V ${y + h}`,
+    `H ${x}`,
+    'Z',
+  ].join(' ');
+}
+
+function roundedBottomPath(x: number, y: number, w: number, h: number, r: number): string {
+  return [
+    `M ${x} ${y}`,
+    `H ${x + w}`,
+    `V ${y + h - r}`,
+    `Q ${x + w} ${y + h} ${x + w - r} ${y + h}`,
+    `H ${x + r}`,
+    `Q ${x} ${y + h} ${x} ${y + h - r}`,
+    'Z',
+  ].join(' ');
+}
+
+function sortRecipients(
+  recipients: BlockRecipient[],
+  sortKey: 'amount-desc' | 'amount-asc' | 'name-asc',
+): BlockRecipient[] {
+  return [...recipients].sort((a, b) => {
+    if (sortKey === 'amount-asc') return a.amount - b.amount;
+    if (sortKey === 'name-asc') return (a.name || '').localeCompare(b.name || '', 'ja');
+    return b.amount - a.amount;
+  });
+}
+
+type HoveredNode =
+  | { kind: 'root' }
+  | { kind: 'block'; block: LayoutBlock };
+
 // ─── ブロック詳細ペイン ──────────────────────────────────────────────
 
 function BlockDetailPane({
@@ -86,17 +128,26 @@ function BlockDetailPane({
   projectDetail,
   orgChain,
   onClose,
+  onSelectBlock,
 }: {
   block: BlockNode | null;
   graph: SubcontractGraph;
   projectDetail: ProjectDetail | null;
   orgChain: string[];
   onClose: () => void;
+  onSelectBlock: (block: BlockNode) => void;
 }) {
   const [expandedRecipients, setExpandedRecipients] = useState<Set<number>>(new Set());
+  const [query, setQuery] = useState('');
+  const [recipientSort, setRecipientSort] = useState<'amount-desc' | 'amount-asc' | 'name-asc'>('amount-desc');
+  const [blockFilter, setBlockFilter] = useState<'all' | 'direct' | 'subcontract'>('all');
+  const [blockSort, setBlockSort] = useState<'amount-desc' | 'name-asc'>('amount-desc');
+  const [relationMode, setRelationMode] = useState<'recipients' | 'downstream' | 'upstream'>('recipients');
 
   useEffect(() => {
     setExpandedRecipients(new Set());
+    setQuery('');
+    setRelationMode('recipients');
   }, [block?.blockId]);
 
   function toggleRecipient(i: number) {
@@ -108,6 +159,18 @@ function BlockDetailPane({
     });
   }
 
+  const blockById = useMemo(() => new Map(graph.blocks.map((b) => [b.blockId, b])), [graph.blocks]);
+  const downstreamBlocks = useMemo(() => {
+    if (!block) return [];
+    const ids = graph.flows.filter((f) => f.sourceBlock === block.blockId).map((f) => f.targetBlock);
+    return ids.map((id) => blockById.get(id)).filter(Boolean) as BlockNode[];
+  }, [block, blockById, graph.flows]);
+  const upstreamBlocks = useMemo(() => {
+    if (!block) return [];
+    const ids = graph.flows.filter((f) => f.targetBlock === block.blockId && f.sourceBlock !== null).map((f) => f.sourceBlock as string);
+    return ids.map((id) => blockById.get(id)).filter(Boolean) as BlockNode[];
+  }, [block, blockById, graph.flows]);
+
   if (!block) {
     const summaryRows = [
       ['PID', graph.projectId],
@@ -117,16 +180,27 @@ function BlockDetailPane({
       ['執行額', graph.execution > 0 ? formatYen(graph.execution) : '未設定'],
     ];
 
+    const filteredBlocks = graph.blocks
+      .filter((b) => blockFilter === 'all' || (blockFilter === 'direct' ? b.isDirect : !b.isDirect))
+      .filter((b) => {
+        const q = query.trim().toLowerCase();
+        if (!q) return true;
+        return `${b.blockId} ${b.blockName} ${b.role ?? ''}`.toLowerCase().includes(q);
+      })
+      .sort((a, b) => blockSort === 'name-asc'
+        ? `${a.blockId} ${a.blockName}`.localeCompare(`${b.blockId} ${b.blockName}`, 'ja')
+        : b.totalAmount - a.totalAmount);
+
     return (
       <aside style={{
-        width: 360,
-        minWidth: 360,
-        maxWidth: 420,
+        width: 390,
+        minWidth: 390,
+        maxWidth: 460,
         background: '#fff',
-        borderLeft: '1px solid #e5e7eb',
+        borderLeft: `1px solid ${COLOR_PANEL_BORDER}`,
         overflowY: 'auto',
       }}>
-        <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, position: 'sticky', top: 0, background: '#fff', zIndex: 2 }}>
           <div style={{ flex: 1 }}>
             <div style={{
               display: 'inline-block',
@@ -144,12 +218,12 @@ function BlockDetailPane({
               {graph.projectName}
             </div>
             <div style={{ fontSize: 11, color: '#6b7280', marginTop: 4 }}>
-              事業コンテキストノードを選択中
+              ブロックを選ぶと支出先リストと前後のフローを絞り込めます
             </div>
           </div>
         </div>
 
-        <div style={{ padding: 12 }}>
+        <div style={{ padding: 12, borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
           {summaryRows.map(([label, value]) => (
             <div key={label} style={{
               display: 'grid',
@@ -170,23 +244,70 @@ function BlockDetailPane({
               <div style={{ fontSize: 12, color: '#111827', lineHeight: 1.55 }}>{projectDetail.majorExpense}</div>
             </div>
           )}
-          <div style={{ marginTop: 12, fontSize: 11, color: '#64748b', lineHeight: 1.6 }}>
-            支出ブロックをクリックすると、支出先内訳と再委託の通過フローを確認できます。
+        </div>
+
+        <div style={{ padding: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 112px', gap: 8, marginBottom: 8 }}>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="ブロック名・役割で検索"
+              style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 9px', fontSize: 12 }}
+            />
+            <select
+              value={blockSort}
+              onChange={(e) => setBlockSort(e.target.value as typeof blockSort)}
+              style={{ border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 8px', fontSize: 12, background: '#fff' }}
+            >
+              <option value="amount-desc">金額順</option>
+              <option value="name-asc">名称順</option>
+            </select>
           </div>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+            {([
+              ['all', 'すべて'],
+              ['direct', '直接'],
+              ['subcontract', '再委託'],
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setBlockFilter(key)}
+                style={{
+                  border: `1px solid ${blockFilter === key ? '#94a3b8' : COLOR_PANEL_BORDER}`,
+                  background: blockFilter === key ? '#f1f5f9' : '#fff',
+                  borderRadius: 999,
+                  padding: '5px 10px',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#334155',
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>{filteredBlocks.length.toLocaleString()}件</div>
+          {filteredBlocks.map((b) => (
+            <BlockListRow key={b.blockId} block={b} onClick={() => onSelectBlock(b)} selected={false} />
+          ))}
         </div>
       </aside>
     );
   }
 
-  const sortedRecipients = [...block.recipients].sort((a, b) => b.amount - a.amount);
+  const q = query.trim().toLowerCase();
+  const sortedRecipients = sortRecipients(block.recipients, recipientSort)
+    .filter((r) => !q || `${r.name} ${r.corporateNumber} ${r.contractSummaries.join(' ')}`.toLowerCase().includes(q));
+  const relationBlocks = relationMode === 'downstream' ? downstreamBlocks : upstreamBlocks;
 
   return (
     <aside style={{
-      width: 360,
-      minWidth: 360,
-      maxWidth: 420,
+      width: 390,
+      minWidth: 390,
+      maxWidth: 460,
       background: '#fff',
-      borderLeft: '1px solid #e5e7eb',
+      borderLeft: `1px solid ${COLOR_PANEL_BORDER}`,
       overflowY: 'auto',
       display: 'flex',
       flexDirection: 'column',
@@ -236,30 +357,129 @@ function BlockDetailPane({
         >✕</button>
       </div>
 
-      {/* 支出先リスト */}
       <div style={{ padding: 12, flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>
-            支出先内訳
-          </div>
-          <div style={{ fontSize: 11, color: '#9ca3af' }}>金額順</div>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          {([
+            ['recipients', `支出先 ${block.recipients.length}`],
+            ['downstream', `下流 ${downstreamBlocks.length}`],
+            ['upstream', `上流 ${upstreamBlocks.length}`],
+          ] as const).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setRelationMode(key)}
+              style={{
+                flex: 1,
+                border: `1px solid ${relationMode === key ? '#94a3b8' : COLOR_PANEL_BORDER}`,
+                background: relationMode === key ? '#f1f5f9' : '#fff',
+                borderRadius: 6,
+                padding: '7px 6px',
+                fontSize: 11,
+                fontWeight: 700,
+                color: '#334155',
+                cursor: 'pointer',
+              }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
-        {sortedRecipients.map((r, i) => (
-          <RecipientCard
-            key={i}
-            recipient={r}
-            index={i}
-            expanded={expandedRecipients.has(i)}
-            onToggle={() => toggleRecipient(i)}
-            totalAmount={block.totalAmount}
-            barColor={block.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT}
-          />
-        ))}
-        {block.recipients.length === 0 && (
-          <p style={{ fontSize: 12, color: '#9ca3af' }}>支出先データなし</p>
+
+        {relationMode === 'recipients' ? (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 112px', gap: 8, marginBottom: 8 }}>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="支出先・法人番号・契約概要で検索"
+                style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 9px', fontSize: 12 }}
+              />
+              <select
+                value={recipientSort}
+                onChange={(e) => setRecipientSort(e.target.value as typeof recipientSort)}
+                style={{ border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 8px', fontSize: 12, background: '#fff' }}
+              >
+                <option value="amount-desc">金額大</option>
+                <option value="amount-asc">金額小</option>
+                <option value="name-asc">名称順</option>
+              </select>
+            </div>
+            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>{sortedRecipients.length.toLocaleString()}件</div>
+            {sortedRecipients.map((r, i) => (
+              <RecipientCard
+                key={`${r.name}-${r.corporateNumber}-${i}`}
+                recipient={r}
+                index={i}
+                expanded={expandedRecipients.has(i)}
+                onToggle={() => toggleRecipient(i)}
+                totalAmount={block.totalAmount}
+                barColor={block.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT}
+              />
+            ))}
+            {sortedRecipients.length === 0 && (
+              <p style={{ fontSize: 12, color: '#9ca3af' }}>該当する支出先がありません</p>
+            )}
+          </>
+        ) : (
+          <>
+            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
+              {relationMode === 'downstream' ? 'このブロックから続く支出ブロック' : 'このブロックへ流入する支出ブロック'}
+            </div>
+            {relationBlocks.map((b) => (
+              <BlockListRow
+                key={b.blockId}
+                block={b}
+                onClick={() => onSelectBlock(b)}
+                selected={selectedBlockId(block) === selectedBlockId(b)}
+              />
+            ))}
+            {relationBlocks.length === 0 && (
+              <p style={{ fontSize: 12, color: '#9ca3af' }}>該当するブロックがありません</p>
+            )}
+          </>
         )}
       </div>
     </aside>
+  );
+}
+
+function selectedBlockId(block: BlockNode): string {
+  return block.blockId;
+}
+
+function BlockListRow({ block, selected, onClick }: { block: BlockNode; selected: boolean; onClick: () => void }) {
+  const accent = block.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT;
+
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: '100%',
+        textAlign: 'left',
+        border: `1px solid ${selected ? accent : COLOR_PANEL_BORDER}`,
+        borderLeft: `4px solid ${accent}`,
+        background: selected ? '#fff7ed' : '#fff',
+        borderRadius: 6,
+        padding: '8px 10px',
+        marginBottom: 8,
+        cursor: 'pointer',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', minWidth: 0 }}>
+          {block.blockId} {block.blockName}
+        </div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#334155', whiteSpace: 'nowrap' }}>{formatYen(block.totalAmount)}</div>
+      </div>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 5, fontSize: 10, color: '#64748b' }}>
+        <span style={{ color: accent, fontWeight: 700 }}>{block.isDirect ? '直接' : '再委託'}</span>
+        <span>支出先 {block.recipients.length.toLocaleString()}件</span>
+      </div>
+      {block.role && (
+        <div style={{ fontSize: 11, color: '#475569', marginTop: 4, lineHeight: 1.45 }}>
+          {truncateChars(block.role, 52)}
+        </div>
+      )}
+    </button>
   );
 }
 
@@ -351,32 +571,25 @@ function SubcontractDetailPageInner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<BlockNode | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<HoveredNode | null>(null);
 
   // ズーム/パン
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
-  const [hoveredBlock, setHoveredBlock] = useState<LayoutBlock | null>(null);
-  type HoveredRecipient = { r: BlockRecipient; x: number; y: number; w: number; h: number; color: string };
-  const [hoveredRecipient, setHoveredRecipient] = useState<HoveredRecipient | null>(null);
-  const currentHoverKey = useRef<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isPanning = useRef(false);
   const panStart = useRef({ x: 0, y: 0 });
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
     setSelectedBlock(null);
+    setHoveredNode(null);
     setProjectDetail(null);
     setOrgChain([]);
-    setHoveredBlock(null);
-    setHoveredRecipient(null);
-    currentHoverKey.current = null;
-    if (hoverTimerRef.current) { clearTimeout(hoverTimerRef.current); hoverTimerRef.current = null; }
     fetch(`/api/subcontracts/${projectId}?year=${year}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -609,46 +822,37 @@ function SubcontractDetailPageInner() {
           onMouseLeave={onMouseUp}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
-            {/* 矢印マーカー定義 */}
-            <defs>
-              <marker id="arrow-fwd" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L6,3 z" fill={COLOR_EDGE} />
-              </marker>
-              <marker id="arrow-fwd-direct" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L6,3 z" fill={COLOR_DIRECT_EDGE} />
-              </marker>
-              <marker id="arrow-fwd-subcontract" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L6,3 z" fill={COLOR_SUBCONTRACT_EDGE} />
-              </marker>
-              <marker id="arrow-back" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto">
-                <path d="M6,0 L6,6 L0,3 z" fill={COLOR_BACK_EDGE} />
-              </marker>
-            </defs>
-
             {/* 順方向エッジ */}
             {safeLayout.edges.filter(e => !e.isBackEdge).map((edge, i) => {
               const target = safeLayout.blocks.find((b) => b.blockId === edge.targetBlock);
               const amountLabel = target && target.totalAmount > 0 ? formatYen(target.totalAmount) : null;
               const edgeColor = target?.isDirect ? COLOR_DIRECT_EDGE : COLOR_SUBCONTRACT_EDGE;
-              const markerId = target?.isDirect ? 'arrow-fwd-direct' : 'arrow-fwd-subcontract';
+              const noteLabel = edge.note ? truncateChars(edge.note, 18) : null;
               const labelX = (edge.x1 + edge.x2) / 2;
-              const labelY = (edge.y1 + edge.y2) / 2 - 10;
+              const labelY = (edge.y1 + edge.y2) / 2 - 8;
+              const labelText = amountLabel ?? noteLabel;
+              const labelCharCount = Math.max(
+                Array.from(amountLabel ?? '').length,
+                Array.from(noteLabel ?? '').length,
+                4,
+              );
+              const labelW = Math.min(140, Math.max(54, labelCharCount * 8 + 18));
+              const labelH = amountLabel && noteLabel ? 29 : 18;
               return (
                 <g key={`fwd-${i}`}>
                   <path
-                    d={bezierPath(edge.x1, edge.y1, edge.x2, edge.y2)}
+                    d={verticalBezierPath(edge.x1, edge.y1, edge.x2, edge.y2)}
                     fill="none"
                     stroke={edgeColor}
                     strokeWidth={2.5}
-                    markerEnd={`url(#${markerId})`}
                   />
-                  {amountLabel && (
+                  {labelText && (
                     <g style={{ pointerEvents: 'none' }}>
                       <rect
-                        x={labelX - 34}
-                        y={labelY - 12}
-                        width={68}
-                        height={17}
+                        x={labelX - labelW / 2}
+                        y={labelY - labelH / 2}
+                        width={labelW}
+                        height={labelH}
                         rx={8}
                         fill="rgba(255,255,255,0.88)"
                         stroke="rgba(148,163,184,0.5)"
@@ -663,6 +867,18 @@ function SubcontractDetailPageInner() {
                       >
                         {amountLabel}
                       </text>
+                      {noteLabel && (
+                        <text
+                          x={labelX}
+                          y={amountLabel ? labelY + 10 : labelY}
+                          textAnchor="middle"
+                          fontSize={8}
+                          fontWeight={600}
+                          fill="#64748b"
+                        >
+                          {noteLabel}
+                        </text>
+                      )}
                     </g>
                   )}
                 </g>
@@ -680,34 +896,15 @@ function SubcontractDetailPageInner() {
                   stroke={COLOR_BACK_EDGE}
                   strokeWidth={1.5}
                   strokeDasharray="5 3"
-                  markerEnd="url(#arrow-back)"
                 />
               </g>
             ))}
 
-            {/* エッジラベル */}
-            {safeLayout.edges.map((edge, i) =>
-              edge.note ? (
-                <text
-                  key={`note-${i}`}
-                  x={edge.isSelfLoop ? edge.x1 + 44 : (edge.x1 + edge.x2) / 2}
-                  y={edge.isSelfLoop ? edge.y1 : (
-                    edge.isBackEdge
-                      ? Math.max(edge.y1, edge.y2) + 54
-                      : (edge.y1 + edge.y2) / 2 - 6
-                  )}
-                  textAnchor="middle"
-                  fontSize={9}
-                  fill={edge.isBackEdge ? '#b45309' : '#94a3b8'}
-                >
-                  {edge.note}
-                </text>
-              ) : null
-            )}
-
             {/* 事業コンテキストノード */}
             <g
               onClick={() => setSelectedBlock(null)}
+              onMouseEnter={() => setHoveredNode({ kind: 'root' })}
+              onMouseLeave={() => setHoveredNode(null)}
               style={{ cursor: 'pointer' }}
             >
               <title>{[graph.projectName, graph.ministry, ...visibleOrgChain].filter(Boolean).join(' / ')}</title>
@@ -716,32 +913,37 @@ function SubcontractDetailPageInner() {
                 y={safeLayout.root.y}
                 width={safeLayout.root.w}
                 height={safeLayout.root.h}
-                rx={6}
-                fill="rgba(255,255,255,0.08)"
-                stroke={COLOR_CONTEXT_BODY_STROKE}
-                strokeWidth={1.5}
+                rx={CARD_RADIUS}
+                fill="transparent"
+                style={{ pointerEvents: 'all' }}
               />
-              <rect
-                x={safeLayout.root.x}
-                y={safeLayout.root.y}
-                width={safeLayout.root.w}
-                height={56}
-                rx={6}
+              <path
+                d={roundedTopPath(
+                  safeLayout.root.x,
+                  safeLayout.root.y,
+                  safeLayout.root.w,
+                  56,
+                  CARD_RADIUS,
+                )}
                 fill={COLOR_ROOT}
+                stroke={COLOR_ROOT}
+                strokeWidth={CARD_BORDER_W}
+                vectorEffect="non-scaling-stroke"
+                style={{ pointerEvents: 'none' }}
               />
-              <rect
-                x={safeLayout.root.x}
-                y={safeLayout.root.y + 50}
-                width={safeLayout.root.w}
-                height={6}
-                fill={COLOR_ROOT}
-              />
-              <rect
-                x={safeLayout.root.x + 1}
-                y={safeLayout.root.y + 56}
-                width={safeLayout.root.w - 2}
-                height={safeLayout.root.h - 57}
+              <path
+                d={roundedBottomPath(
+                  safeLayout.root.x,
+                  safeLayout.root.y + 56,
+                  safeLayout.root.w,
+                  safeLayout.root.h - 56,
+                  CARD_RADIUS,
+                )}
                 fill={COLOR_CONTEXT_BODY}
+                stroke={COLOR_ROOT}
+                strokeWidth={CARD_BORDER_W}
+                vectorEffect="non-scaling-stroke"
+                style={{ pointerEvents: 'none' }}
               />
               <text
                 x={safeLayout.root.x + 14}
@@ -761,7 +963,7 @@ function SubcontractDetailPageInner() {
                 fill="#fff"
                 style={{ userSelect: 'none' }}
               >
-                {labelLines(graph.projectName, 40, 20).map((line, i) => (
+                {labelLines(graph.projectName, 32, 16).map((line, i) => (
                   <tspan key={i} x={safeLayout.root.x + 14} dy={i === 0 ? 0 : 12}>{line}</tspan>
                 ))}
               </text>
@@ -805,7 +1007,7 @@ function SubcontractDetailPageInner() {
                     fill={COLOR_CONTEXT_BODY_TEXT}
                     style={{ userSelect: 'none' }}
                   >
-                    {labelLines(visibleOrgChain.map((v, i) => `${ORG_LEVEL_LABELS[i] ?? '組織'}:${v}`).join(' / '), 42, 21).map((line, i) => (
+                    {labelLines(visibleOrgChain.map((v, i) => `${ORG_LEVEL_LABELS[i] ?? '組織'}:${v}`).join(' / '), 34, 17).map((line, i) => (
                       <tspan key={i} x={safeLayout.root.x + 70} dy={i === 0 ? 0 : 11}>{line}</tspan>
                     ))}
                   </text>
@@ -825,315 +1027,181 @@ function SubcontractDetailPageInner() {
               </text>
             </g>
 
-            {/* ブロックノード（面積図） */}
+            {/* ブロックノード（縦型カードフロー） */}
             {safeLayout.blocks.map((lb) => {
               const isSelected = selectedBlock?.blockId === lb.blockId;
               const nodeColor = lb.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT;
               const bodyFill = lb.isDirect ? COLOR_DIRECT_BODY : COLOR_SUBCONTRACT_BODY;
               const bodyTextColor = lb.isDirect ? COLOR_DIRECT_BODY_TEXT : COLOR_SUBCONTRACT_BODY_TEXT;
               const bodySubtleTextColor = lb.isDirect ? COLOR_DIRECT_BODY_SUBTLE : COLOR_SUBCONTRACT_BODY_SUBTLE;
-              const bodyStrokeColor = lb.isDirect ? COLOR_DIRECT_BODY_STROKE : COLOR_SUBCONTRACT_BODY_STROKE;
               const recipients = lb.node.recipients;
-
-              // ─ ヘッダーレイアウト ─
-              // NODE_W=200, NODE_PAD=16 → 使用可能幅 ~168px
-              // 日本語文字: 10px≈9px/char → ~18文字, 8px≈7px/char → ~24文字
-              const H_TOP = 5;
-              const H_LINE1 = 13; // 10px bold
-              const H_LINE2 = 11; // 9px
-              const H_LINE3 = 11; // 8px (役割行1)
-              const H_LINE4 = 10; // 8px (役割行2)
-              const H_BOT = 4;
-
-              const trunc = (s: string, n: number) => s.length > n ? s.slice(0, n - 1) + '…' : s;
-
-              // 行1: ブロック番号 ブロック名
-              const line1 = `${lb.blockId} ${lb.blockName}`;
-              const line1Disp = trunc(line1, 18);
-
-              // 行2: 表示内訳N件　金額
-              const line2 = `表示内訳 ${recipients.length}件　${formatYen(lb.totalAmount)}`;
-
-              // 行3-4: 役割（最大2行、各24文字）
-              const roleLines: string[] = [];
-              if (lb.node.role) {
-                const R = 21; // (NODE_W - NODE_PAD * 2) / ~8px per char
-                const role = lb.node.role;
-                if (role.length <= R) {
-                  roleLines.push(role);
-                } else if (role.length <= R * 2) {
-                  roleLines.push(role.slice(0, R));
-                  roleLines.push(role.slice(R));
-                } else {
-                  roleLines.push(role.slice(0, R));
-                  roleLines.push(role.slice(R, R * 2 - 1) + '…');
-                }
-              }
-
-              const HEADER_H = H_TOP + H_LINE1 + H_LINE2 + (roleLines.length >= 1 ? H_LINE3 : 0) + (roleLines.length >= 2 ? H_LINE4 : 0) + H_BOT;
-
-
-              // squarified treemap で支出先を面積比例配置
-              const bodyH2 = lb.h - HEADER_H;
-              const treemapItems = recipients.map(r => ({ key: r.name + '|' + r.corporateNumber, value: r.amount }));
-              const treemapRect = { x: lb.x + 1, y: lb.y + HEADER_H, w: lb.w - 2, h: Math.max(0, bodyH2 - 1) };
-              const treemapResults = bodyH2 > 0 ? squarifiedTreemap(treemapItems, treemapRect) : [];
-              const recipientByKey = new Map(recipients.map(r => [r.name + '|' + r.corporateNumber, r]));
+              const topRecipients = sortRecipients(recipients, 'amount-desc').slice(0, 3);
               const clipIdBase = `subcontract-node-${String(lb.blockId).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
-              const selectedStroke = lb.isDirect ? '#a61f1f' : '#9a3412';
+              const selectedStroke = lb.isDirect ? '#991b1b' : '#9a3412';
+              const roleLine = lb.node.role ? truncateChars(lb.node.role, 24) : '';
 
               return (
                 <g
                   key={lb.blockId}
                   onClick={() => setSelectedBlock(lb.node)}
-                  onMouseOver={(e) => {
-                    if (hoverTimerRef.current) { clearTimeout(hoverTimerRef.current); hoverTimerRef.current = null; }
-                    const rKey = (e.target as SVGElement).getAttribute('data-rkey');
-                    if (rKey) {
-                      if (currentHoverKey.current === rKey) return;
-                      currentHoverKey.current = rKey;
-                      const r = recipientByKey.get(rKey);
-                      const tr = treemapResults.find(t => t.key === rKey);
-                      if (r && tr) {
-                        setHoveredBlock(null);
-                        setHoveredRecipient({ r, x: tr.rect.x, y: tr.rect.y, w: tr.rect.w, h: tr.rect.h, color: nodeColor });
-                      }
-                    } else {
-                      const bKey = `b:${lb.blockId}`;
-                      if (currentHoverKey.current === bKey) return;
-                      currentHoverKey.current = bKey;
-                      setHoveredRecipient(null);
-                      setHoveredBlock(lb);
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    const related = e.relatedTarget as Node | null;
-                    if (related && (e.currentTarget as SVGGElement).contains(related)) return;
-                    currentHoverKey.current = null;
-                    hoverTimerRef.current = setTimeout(() => { setHoveredBlock(null); setHoveredRecipient(null); }, 120);
-                  }}
+                  onMouseEnter={() => setHoveredNode({ kind: 'block', block: lb })}
+                  onMouseLeave={() => setHoveredNode(null)}
                   style={{ cursor: 'pointer' }}
                 >
                   <defs>
-                    <clipPath id={`${clipIdBase}-header`}>
-                      <rect x={lb.x} y={lb.y} width={lb.w} height={HEADER_H} rx={5} />
-                    </clipPath>
-                    <clipPath id={`${clipIdBase}-body`}>
-                      <path d={[
-                        `M ${lb.x + 1} ${lb.y + HEADER_H}`,
-                        `H ${lb.x + lb.w - 1}`,
-                        `V ${lb.y + lb.h - 6}`,
-                        `Q ${lb.x + lb.w - 1} ${lb.y + lb.h - 1} ${lb.x + lb.w - 6} ${lb.y + lb.h - 1}`,
-                        `H ${lb.x + 6}`,
-                        `Q ${lb.x + 1} ${lb.y + lb.h - 1} ${lb.x + 1} ${lb.y + lb.h - 6}`,
-                        'Z',
-                      ].join(' ')} />
+                    <clipPath id={`${clipIdBase}-card`}>
+                      <rect x={lb.x} y={lb.y} width={lb.w} height={lb.h} rx={CARD_RADIUS} />
                     </clipPath>
                   </defs>
-
-                  {/* 外枠 */}
                   <rect
                     x={lb.x}
                     y={lb.y}
                     width={lb.w}
                     height={lb.h}
-                    rx={5}
-                    fill={bodyStrokeColor}
-                    stroke={isSelected ? selectedStroke : bodyStrokeColor}
-                    strokeWidth={1.4}
+                    rx={CARD_RADIUS}
+                    fill="transparent"
+                    style={{ pointerEvents: 'all' }}
                   />
 
-                  {/* ヘッダー背景 */}
-                  <rect
-                    x={lb.x}
-                    y={lb.y}
-                    width={lb.w}
-                    height={HEADER_H}
-                    rx={5}
+                  <path
+                    d={roundedTopPath(
+                      lb.x,
+                      lb.y,
+                      lb.w,
+                      CARD_HEADER_H,
+                      CARD_RADIUS,
+                    )}
                     fill={nodeColor}
+                    stroke={nodeColor}
+                    strokeWidth={CARD_BORDER_W}
+                    vectorEffect="non-scaling-stroke"
                     style={{ pointerEvents: 'none' }}
                   />
-                  <rect
-                    x={lb.x}
-                    y={lb.y + HEADER_H - 5}
-                    width={lb.w}
-                    height={5}
-                    fill={nodeColor}
+                  <path
+                    d={roundedBottomPath(
+                      lb.x,
+                      lb.y + CARD_HEADER_H,
+                      lb.w,
+                      lb.h - CARD_HEADER_H,
+                      CARD_RADIUS,
+                    )}
+                    fill={bodyFill}
+                    stroke={isSelected ? selectedStroke : nodeColor}
+                    strokeWidth={CARD_BORDER_W}
+                    vectorEffect="non-scaling-stroke"
                     style={{ pointerEvents: 'none' }}
                   />
 
-                  {/* ヘッダーテキスト */}
-                  <g clipPath={`url(#${clipIdBase}-header)`} style={{ pointerEvents: 'none' }}>
-                    {/* 行1: ブロック番号 ブロック名 */}
-                    <text x={lb.x + NODE_PAD} y={lb.y + H_TOP + H_LINE1 - 1}
-                      fontSize={10} fontWeight={700} fill="#fff" style={{ userSelect: 'none' }}>
-                      {line1Disp}
+                  <g clipPath={`url(#${clipIdBase}-card)`} style={{ pointerEvents: 'none' }}>
+                    <text x={lb.x + NODE_PAD} y={lb.y + 17}
+                      fontSize={10} fontWeight={700} fill="rgba(255,255,255,0.86)" style={{ userSelect: 'none' }}>
+                      {lb.isDirect ? '直接支出' : '再委託'} / ブロック {lb.blockId}
                     </text>
-                    {/* 行2: 支出先数　金額 */}
-                    <text x={lb.x + NODE_PAD} y={lb.y + H_TOP + H_LINE1 + H_LINE2 - 1}
-                      fontSize={9} fill="rgba(255,255,255,0.88)" style={{ userSelect: 'none' }}>
-                      {line2}
+                    <text x={lb.x + NODE_PAD} y={lb.y + 34}
+                      fontSize={12} fontWeight={700} fill="#fff" style={{ userSelect: 'none' }}>
+                      {truncateChars(lb.blockName, 18)}
                     </text>
-                    {/* 行3-4: 役割 */}
-                    {roleLines[0] && (
-                      <text x={lb.x + NODE_PAD} y={lb.y + H_TOP + H_LINE1 + H_LINE2 + H_LINE3 - 1}
-                        fontSize={8} fill="rgba(255,255,255,0.82)" style={{ userSelect: 'none' }}>
-                        {roleLines[0]}
-                      </text>
-                    )}
-                    {roleLines[1] && (
-                      <text x={lb.x + NODE_PAD} y={lb.y + H_TOP + H_LINE1 + H_LINE2 + H_LINE3 + H_LINE4 - 1}
-                        fontSize={8} fill="rgba(255,255,255,0.82)" style={{ userSelect: 'none' }}>
-                        {roleLines[1]}
-                      </text>
-                    )}
                   </g>
 
-                  {/* 支出先 squarified treemap */}
-                  <g clipPath={`url(#${clipIdBase}-body)`}>
-                    <rect
-                      x={treemapRect.x}
-                      y={treemapRect.y}
-                      width={treemapRect.w}
-                      height={treemapRect.h}
-                      fill={bodyStrokeColor}
-                      style={{ pointerEvents: 'none' }}
-                    />
-                    {treemapResults.map((tr) => {
-                      const r = recipientByKey.get(tr.key);
-                      if (!r || tr.rect.w < 1 || tr.rect.h < 1) return null;
-                      const screenW = tr.rect.w * transform.scale;
-                      const screenH = tr.rect.h * transform.scale;
-                      const localCharsPerLine = Math.max(3, Math.min(10, Math.floor((tr.rect.w - 10) / 5.6)));
-                      const localMaxChars = Math.min(20, Math.max(localCharsPerLine, localCharsPerLine * 2));
-                      const nameLines = labelLines(r.name || '（氏名なし）', localMaxChars, localCharsPerLine);
-                      const showName = screenH >= 18 && screenW >= 42 && tr.rect.h >= 12 && tr.rect.w >= 24;
-                      const showTwoNameLines = showName && nameLines.length >= 2 && screenH >= 34 && tr.rect.h >= 24;
-                      const showAmount = screenH >= 48 && screenW >= 72 && tr.rect.h >= 34 && r.amount > 0;
-                      const visibleNameLines = showTwoNameLines ? nameLines : nameLines.slice(0, 1);
-                      const textBlockH = visibleNameLines.length * 9 + (showAmount ? 10 : 0);
-                      const textStartY = tr.rect.y + Math.max(11, (tr.rect.h - textBlockH) / 2 + 7);
-                      return (
-                        <g key={tr.key} style={{ pointerEvents: 'none' }}>
-                          <rect
-                            data-rkey={tr.key}
-                            x={tr.rect.x}
-                            y={tr.rect.y}
-                            width={tr.rect.w}
-                            height={tr.rect.h}
-                            rx={tr.rect.w >= 18 && tr.rect.h >= 18 ? 3 : 0}
-                            fill={bodyFill}
-                            stroke={bodyStrokeColor}
-                            strokeWidth={0.7}
-                            style={{ pointerEvents: 'all' }}
-                          />
-                          {showName && (
-                            <text
-                              x={tr.rect.x + 5}
-                              y={textStartY}
-                              fontSize={8}
-                              fontWeight={600}
-                              fill={bodyTextColor}
-                              style={{ userSelect: 'none' }}
-                            >
-                              {visibleNameLines.map((line, lineIndex) => (
-                                <tspan
-                                  key={lineIndex}
-                                  x={tr.rect.x + 5}
-                                  dy={lineIndex === 0 ? 0 : 9}
-                                >
-                                  {line}
-                                </tspan>
-                              ))}
-                            </text>
-                          )}
-                          {showAmount && (
-                            <text
-                              x={tr.rect.x + tr.rect.w - 5}
-                              y={textStartY + visibleNameLines.length * 9 + 1}
-                              fontSize={7}
-                              fontWeight={700}
-                              fill={bodySubtleTextColor}
-                              textAnchor="end"
-                              style={{ userSelect: 'none' }}
-                            >
-                              {formatYen(r.amount)}
-                            </text>
-                          )}
-                        </g>
-                      );
-                    })}
+                  <g clipPath={`url(#${clipIdBase}-card)`} style={{ pointerEvents: 'none' }}>
+                    <text x={lb.x + NODE_PAD} y={lb.y + CARD_HEADER_H + 18}
+                      fontSize={11} fontWeight={700} fill={bodyTextColor} style={{ userSelect: 'none' }}>
+                      {formatYen(lb.totalAmount)} / 支出先 {recipients.length.toLocaleString()}件
+                    </text>
+                    {roleLine && (
+                      <text x={lb.x + NODE_PAD} y={lb.y + CARD_HEADER_H + 35}
+                        fontSize={9} fontWeight={600} fill={bodySubtleTextColor} style={{ userSelect: 'none' }}>
+                        {roleLine}
+                      </text>
+                    )}
+                    {topRecipients.map((r, i) => (
+                      <text
+                        key={`${r.name}-${r.corporateNumber}-${i}`}
+                        x={lb.x + NODE_PAD}
+                        y={lb.y + CARD_HEADER_H + 56 + i * 16}
+                        fontSize={9}
+                        fill={bodyTextColor}
+                        style={{ userSelect: 'none' }}
+                      >
+                        <tspan fontWeight={700}>{i + 1}.</tspan>
+                        <tspan dx={4}>{truncateChars(r.name || '（氏名なし）', 12)}</tspan>
+                        <tspan x={lb.x + lb.w - NODE_PAD} textAnchor="end" fontWeight={700} fill={bodySubtleTextColor}>
+                          {formatYen(r.amount)}
+                        </tspan>
+                      </text>
+                    ))}
                   </g>
                 </g>
               );
             })}
           </g>
 
-          {/* ブロックホバーポップアップ（screen座標で配置） */}
-          {hoveredBlock && (() => {
-            const lb = hoveredBlock;
-            const nodeColor = lb.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT;
-            const TIP_W = 230;
-            const screenLeft = transform.x + lb.x * transform.scale;
-            const screenTop  = transform.y + lb.y * transform.scale;
-            const blockScreenW = lb.w * transform.scale;
-            const tipX = Math.max(4, screenLeft + blockScreenW / 2 - TIP_W / 2);
-            const tipY = screenTop - 8;
-            return (
-              <foreignObject x={tipX} y={tipY} width={TIP_W} height={1} overflow="visible" style={{ pointerEvents: 'none' }}>
-                <div style={{
-                  background: nodeColor,
-                  opacity: 0.95,
-                  borderRadius: 6,
-                  padding: '6px 10px',
-                  color: '#fff',
-                  fontSize: 11,
-                  lineHeight: 1.45,
-                  border: '1.5px solid rgba(255,255,255,0.55)',
-                  boxShadow: '0 3px 10px rgba(0,0,0,0.22)',
-                  transform: 'translateY(-100%)',
-                  wordBreak: 'break-all',
-                }}>
-                  <div style={{ fontWeight: 700, marginBottom: 2 }}>{lb.blockId} {lb.blockName}</div>
-                  <div style={{ opacity: 0.88 }}>表示内訳 {lb.node.recipients.length}件　{formatYen(lb.totalAmount)}</div>
-                  {lb.node.role && <div style={{ opacity: 0.78, marginTop: 3, fontSize: 10 }}>{lb.node.role}</div>}
-                </div>
-              </foreignObject>
-            );
-          })()}
+          {hoveredNode && (() => {
+            const isRoot = hoveredNode.kind === 'root';
+            const lb = hoveredNode.kind === 'block' ? hoveredNode.block : null;
+            const world = isRoot
+              ? safeLayout.root
+              : { x: lb!.x, y: lb!.y, w: lb!.w, h: lb!.h };
+            const tipW = 300;
+            const tipH = isRoot ? 126 : 142;
+            const containerW = containerRef.current?.clientWidth ?? 1000;
+            const screenLeft = transform.x + world.x * transform.scale;
+            const screenTop = transform.y + world.y * transform.scale;
+            const screenW = world.w * transform.scale;
+            const tipX = Math.max(8, Math.min(containerW - tipW - 8, screenLeft + screenW / 2 - tipW / 2));
+            const tipY = Math.max(8, screenTop - tipH - 8);
+            const headerColor = isRoot ? COLOR_ROOT : (lb!.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT);
+            const bodyColor = isRoot ? COLOR_CONTEXT_BODY : (lb!.isDirect ? COLOR_DIRECT_BODY : COLOR_SUBCONTRACT_BODY);
+            const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : (lb!.isDirect ? COLOR_DIRECT_BODY_TEXT : COLOR_SUBCONTRACT_BODY_TEXT);
+            const topRecipients = lb ? sortRecipients(lb.node.recipients, 'amount-desc').slice(0, 3) : [];
 
-          {/* 支出先ホバーポップアップ */}
-          {hoveredRecipient && (() => {
-            const { r, x, y, w, color } = hoveredRecipient;
-            const TIP_W = 240;
-            const screenLeft = transform.x + x * transform.scale;
-            const screenTop  = transform.y + y * transform.scale;
-            const rectScreenW = w * transform.scale;
-            const tipX = Math.max(4, screenLeft + rectScreenW / 2 - TIP_W / 2);
-            const tipY = screenTop - 8;
             return (
-              <foreignObject x={tipX} y={tipY} width={TIP_W} height={1} overflow="visible" style={{ pointerEvents: 'none' }}>
+              <foreignObject x={tipX} y={tipY} width={tipW} height={tipH} style={{ pointerEvents: 'none' }}>
                 <div style={{
-                  background: color,
-                  opacity: 0.95,
+                  width: tipW,
+                  height: tipH,
+                  boxSizing: 'border-box',
+                  border: `1px solid ${headerColor}`,
                   borderRadius: 6,
-                  padding: '6px 10px',
-                  color: '#fff',
-                  fontSize: 11,
-                  lineHeight: 1.45,
-                  border: '1.5px solid rgba(255,255,255,0.55)',
-                  boxShadow: '0 3px 10px rgba(0,0,0,0.22)',
-                  transform: 'translateY(-100%)',
-                  wordBreak: 'break-all',
+                  background: bodyColor,
+                  boxShadow: '0 8px 22px rgba(15,23,42,0.18)',
+                  overflow: 'hidden',
+                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 }}>
-                  <div style={{ fontWeight: 700, marginBottom: 2 }}>{r.name || '（氏名なし）'}</div>
-                  <div style={{ opacity: 0.88 }}>{r.amount > 0 ? formatYen(r.amount) : '金額なし'}</div>
-                  {r.corporateNumber && (
-                    <div style={{ opacity: 0.7, fontSize: 10, marginTop: 2 }}>法人番号: {r.corporateNumber}</div>
-                  )}
-                  {r.contractSummaries.slice(0, 2).map((cs, i) => (
-                    <div key={i} style={{ opacity: 0.78, fontSize: 10, marginTop: 2 }}>{cs}</div>
-                  ))}
+                  <div style={{
+                    background: headerColor,
+                    color: '#fff',
+                    padding: '7px 10px',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    lineHeight: 1.35,
+                  }}>
+                    {isRoot
+                      ? `事業 / PID ${graph.projectId}`
+                      : `${lb!.isDirect ? '直接支出' : '再委託'} / ブロック ${lb!.blockId}`}
+                  </div>
+                  <div style={{ padding: '8px 10px', fontSize: 11, lineHeight: 1.45, color: textColor }}>
+                    {isRoot ? (
+                      <>
+                        <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{graph.projectName}</div>
+                        <div>府省庁: {graph.ministry}</div>
+                        {visibleOrgChain.length > 0 && <div>担当組織: {visibleOrgChain.join(' / ')}</div>}
+                        <div>予算: {graph.budget > 0 ? formatYen(graph.budget) : '—'} / 支出: {graph.execution > 0 ? formatYen(graph.execution) : '—'}</div>
+                      </>
+                    ) : (
+                      <>
+                        <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{lb!.blockName}</div>
+                        <div>{formatYen(lb!.totalAmount)} / 支出先 {lb!.node.recipients.length.toLocaleString()}件</div>
+                        {lb!.node.role && <div>{lb!.node.role}</div>}
+                        {topRecipients.map((r, i) => (
+                          <div key={`${r.name}-${r.corporateNumber}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i + 1}. {r.name || '（氏名なし）'}</span>
+                            <span style={{ flexShrink: 0, fontWeight: 700 }}>{formatYen(r.amount)}</span>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
                 </div>
               </foreignObject>
             );
@@ -1202,6 +1270,7 @@ function SubcontractDetailPageInner() {
           projectDetail={projectDetail}
           orgChain={visibleOrgChain}
           onClose={() => setSelectedBlock(null)}
+          onSelectBlock={(block) => setSelectedBlock(block)}
         />
       </div>
     </div>
