@@ -55,6 +55,29 @@ const SCREEN_HORIZONTAL_FIT_RATIO = 0.82;
 const E2E_TEST_IDS_ENABLED = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_PLAYWRIGHT === '1';
 const testId = (id: string): string | undefined => E2E_TEST_IDS_ENABLED ? id : undefined;
 
+const MAP_LABEL_FONT_PX = 11;
+const MAP_LABEL_SLOT_PX = 12;
+const MAP_LABEL_VISIBLE_MIN_H_PX = 11;
+const ZOOM_MIN_ABS = 0.05;
+const ZOOM_MAX_ABS = 20;
+const ZOOM_MIN_MULTIPLIER = 0.25;
+const ZOOM_MAX_MULTIPLIER = 30;
+const COLUMN_LABEL_FONT_PX = 12;
+const COLUMN_AMOUNT_FONT_PX = 11;
+const SEARCH_FONT_PX = 14;
+const CONTROL_FONT_PX = 13;
+const CONTROL_SMALL_FONT_PX = 12;
+const META_FONT_PX = 11;
+const PANEL_TITLE_FONT_PX = 14;
+const PANEL_PRIMARY_VALUE_FONT_PX = 15;
+const PANEL_LIST_NAME_FONT_PX = 12;
+const PANEL_LIST_VALUE_FONT_PX = 12;
+const PANEL_META_FONT_PX = 12;
+const TOOLTIP_TITLE_FONT_PX = 12;
+const TOOLTIP_VALUE_FONT_PX = 11;
+const TOOLTIP_META_FONT_PX = 10;
+const FIT_TOP_PAD_PX = 24;
+
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
   const result: Partial<SankeyUrlState> = {};
@@ -76,7 +99,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr === '1';
   const afr = p.get('afr'); if (afr !== null) result.autoFocusRelated = afr === '1';
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
-  const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= 0.1 && n <= 10) result.zoom = n; }
+  const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= ZOOM_MIN_ABS && n <= ZOOM_MAX_ABS) result.zoom = n; }
   const f = p.get('f'); if (f === '1') result.filterActive = true;
   const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient';
   const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
@@ -538,21 +561,42 @@ export default function RealDataSankeyPage() {
 
   const svgRef = useRef<SVGSVGElement>(null);
 
-  const layoutRef = useRef<{ contentW: number; contentH: number; nodes: { y0: number; y1: number; id: string; type: string }[] } | null>(null);
+  const layoutRef = useRef<{ contentW: number; contentH: number; nodes: { y0: number; y1: number; id: string; type: string; projectId?: number }[] } | null>(null);
   const showLabelsRef = useRef(showLabels);
   showLabelsRef.current = showLabels;
 
-  // Top offset reserved for the search box (top:12 + height:36 + gap:8)
-  const SEARCH_BOX_RESERVE = 56;
+  // Top offset reserved for search/year/TopN controls. Narrow screens need another row's worth of breathing room.
+  const SEARCH_BOX_RESERVE = svgWidth < 1100 ? 92 : 56;
+  const searchBoxReserveRef = useRef(SEARCH_BOX_RESERVE);
+  searchBoxReserveRef.current = SEARCH_BOX_RESERVE;
+  const mapLabelFontPx = MAP_LABEL_FONT_PX;
+  const mapLabelSlotPx = MAP_LABEL_SLOT_PX;
+  const mapLabelVisibleMinHPx = MAP_LABEL_VISIBLE_MIN_H_PX;
+  const mapLabelMetricsRef = useRef({ fontPx: mapLabelFontPx, slotPx: mapLabelSlotPx, visibleMinHPx: mapLabelVisibleMinHPx });
+  mapLabelMetricsRef.current = { fontPx: mapLabelFontPx, slotPx: mapLabelSlotPx, visibleMinHPx: mapLabelVisibleMinHPx };
+  const fitTopPadPx = FIT_TOP_PAD_PX;
+  const fitTopPadPxRef = useRef(fitTopPadPx);
+  fitTopPadPxRef.current = fitTopPadPx;
 
   // Compute max extra height from label shifts at a given zoom level (2-pass helper)
-  const calcShiftExtraH = useCallback((nodes: { y0: number; y1: number; id: string; type: string }[], zoomK: number): number => {
+  const calcShiftExtraH = useCallback((nodes: { y0: number; y1: number; id: string; type: string; projectId?: number }[], zoomK: number): number => {
     if (!showLabelsRef.current) return 0;
-    const LABEL_SLOT = 12;
     const colShifts = new Map<number, number>();
+    const spendingH = new Map<string, number>();
     for (const node of nodes) {
-      const h = Math.max(1, node.y1 - node.y0);
-      const topShift = h * zoomK < LABEL_SLOT ? Math.max(0, LABEL_SLOT / zoomK - h) : 0;
+      if (node.type === 'project-spending' && node.projectId != null) {
+        spendingH.set(`project-budget-${node.projectId}`, Math.max(1, node.y1 - node.y0));
+      } else if (node.id === '__agg-project-spending') {
+        spendingH.set('__agg-project-budget', Math.max(1, node.y1 - node.y0));
+      }
+    }
+    for (const node of nodes) {
+      const ownH = Math.max(1, node.y1 - node.y0);
+      const h = node.type === 'project-budget' || node.id === '__agg-project-budget'
+        ? Math.max(ownH, spendingH.get(node.id) ?? ownH)
+        : ownH;
+      const slotPx = mapLabelMetricsRef.current.slotPx;
+      const topShift = h * zoomK < slotPx ? Math.max(0, slotPx / zoomK - h) : 0;
       const col = getColumn(node);
       colShifts.set(col, (colShifts.get(col) ?? 0) + topShift);
     }
@@ -600,7 +644,9 @@ export default function RealDataSankeyPage() {
 
     const doZoom = (dy: number) => {
       const delta = dy > 0 ? 0.9 : 1.1;
-      const newZoom = Math.max(0.2, Math.min(baseZoom * 10, zoom * delta));
+      const minZoom = Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER);
+      const maxZoom = Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER);
+      const newZoom = Math.max(minZoom, Math.min(maxZoom, zoom * delta));
       const newPanY = getZoomAnchoredPanY(my, newZoom);
       setZoom(newZoom);
       setPan({ x: pan.x, y: newPanY });
@@ -648,12 +694,12 @@ export default function RealDataSankeyPage() {
     nodes: { y0: number; y1: number; id: string; type: string }[],
     contentW: number, contentH: number, cW: number, availH: number
   ): { k: number; totalH: number } => {
-    let k = Math.max(0.2, Math.min(10, (availH / (MARGIN.top + contentH)) * 0.9));
+    let k = Math.max(ZOOM_MIN_ABS, Math.min(ZOOM_MAX_ABS, (availH / (MARGIN.top + contentH)) * 0.9));
     let totalH = MARGIN.top + contentH;
     for (let i = 0; i < 6; i++) {
       const extraH = calcShiftExtraH(nodes, k);
       totalH = MARGIN.top + contentH + extraH;
-      const newK = Math.max(0.2, Math.min(10, (availH / totalH) * 0.9));
+      const newK = Math.max(ZOOM_MIN_ABS, Math.min(ZOOM_MAX_ABS, (availH / totalH) * 0.9));
       if (Math.abs(newK - k) < 0.0005) { k = newK; break; }
       k = newK;
     }
@@ -666,15 +712,16 @@ export default function RealDataSankeyPage() {
     setRecipientOffset(0);
     if (container && l) {
       const cW = container.clientWidth;
-      const availH = container.clientHeight - SEARCH_BOX_RESERVE;
+      const reserve = searchBoxReserveRef.current;
+      const availH = container.clientHeight - reserve;
       const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: 0, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
+      setPan({ x: 0, y: reserve + Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) });
     } else {
       setZoom(1);
       setBaseZoom(1);
-      setPan({ x: 0, y: SEARCH_BOX_RESERVE });
+      setPan({ x: 0, y: searchBoxReserveRef.current });
     }
   }, [fitZoomWithShifts]);
 
@@ -684,15 +731,16 @@ export default function RealDataSankeyPage() {
     const l = layoutRef.current;
     if (container && l) {
       const cW = container.clientWidth;
-      const availH = container.clientHeight - SEARCH_BOX_RESERVE;
+      const reserve = searchBoxReserveRef.current;
+      const availH = container.clientHeight - reserve;
       const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: 0, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
+      setPan({ x: 0, y: reserve + Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) });
     } else {
       setZoom(1);
       setBaseZoom(1);
-      setPan({ x: 0, y: SEARCH_BOX_RESERVE });
+      setPan({ x: 0, y: searchBoxReserveRef.current });
     }
   }, [fitZoomWithShifts]);
 
@@ -877,7 +925,7 @@ export default function RealDataSankeyPage() {
     if (!filtered) return null;
     // fitZoom を求めるための第1パス（ギャップなし）
     const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
-    const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
+    const availH = Math.max(100, svgHeight - (svgWidth < 1100 ? 92 : 56));
     const fitZoom = Math.max(0.1, Math.min(10,
       Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
     ));
@@ -891,7 +939,6 @@ export default function RealDataSankeyPage() {
 
   // Cumulative shift per node: { cumShift: slot-level offset, topShift: rect-within-slot offset }
   const nodeShiftInfo = useMemo(() => {
-    const LABEL_SLOT = 12;
     const info = new Map<string, { cumShift: number; topShift: number }>();
     if (!layout || !showLabels) return info;
     const nodesByColumn = new Map<number, typeof layout.nodes[0][]>();
@@ -918,13 +965,13 @@ export default function RealDataSankeyPage() {
         const h = node.type === 'project-budget' || node.id === '__agg-project-budget'
           ? Math.max(budgetH, spendingH.get(node.id) ?? budgetH)
           : budgetH;
-        const topShift = h * zoom < LABEL_SLOT ? Math.max(0, LABEL_SLOT / zoom - h) : 0;
+        const topShift = h * zoom < mapLabelSlotPx ? Math.max(0, mapLabelSlotPx / zoom - h) : 0;
         info.set(node.id, { cumShift, topShift });
         cumShift += topShift;
       }
     }
     return info;
-  }, [layout, showLabels, zoom]);
+  }, [layout, showLabels, zoom, mapLabelSlotPx]);
 
   const selectedNode = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -1287,7 +1334,8 @@ export default function RealDataSankeyPage() {
     const cy = MARGIN.top + node.y0 + (node.y1 - node.y0) / 2;
     const h = node.y1 - node.y0;
     const minZoomForLabel = 10 / (h + NODE_PAD);
-    const targetK = Math.max(zoom, Math.min(baseZoom * 10, minZoomForLabel * 1.2));
+    const maxZoom = Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER);
+    const targetK = Math.max(zoom, Math.min(maxZoom, minZoomForLabel * 1.2));
     setZoom(targetK);
     setPan(prev => ({ x: prev.x, y: cH / 2 - cy * targetK }));
   }, [zoom, baseZoom]);
@@ -1313,7 +1361,9 @@ export default function RealDataSankeyPage() {
     const maxY = Math.max(...neighborNodes.map(n => n.y1));
     const PADDING = 40;
     const boxH = (maxY - minY) + PADDING * 2;
-    const targetK = Math.max(0.2, Math.min(baseZoom * 10, (cH / boxH) * 0.9));
+    const minZoom = Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER);
+    const maxZoom = Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER);
+    const targetK = Math.max(minZoom, Math.min(maxZoom, (cH / boxH) * 0.9));
     const centerY = MARGIN.top + (minY + maxY) / 2;
     setZoom(targetK);
     setPan(prev => ({ x: prev.x, y: cH / 2 - centerY * targetK }));
@@ -1616,13 +1666,14 @@ export default function RealDataSankeyPage() {
         setRecipientOffset(0);
         if (container && l) {
           const cW = container.clientWidth;
-          const availH = container.clientHeight - SEARCH_BOX_RESERVE;
+          const reserve = searchBoxReserveRef.current;
+          const availH = container.clientHeight - reserve;
           const { k: fitK, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
           setBaseZoom(fitK);
           setZoom(k);
-          setPan({ x: 0, y: SEARCH_BOX_RESERVE + (availH - totalH * k) / 2 });
+          setPan({ x: 0, y: reserve + Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) });
         } else {
-          setZoom(k); setBaseZoom(k); setPan({ x: 0, y: SEARCH_BOX_RESERVE });
+          setZoom(k); setBaseZoom(k); setPan({ x: 0, y: searchBoxReserveRef.current });
         }
       } else {
         resetView();
@@ -1765,7 +1816,9 @@ export default function RealDataSankeyPage() {
 
 
   const applyZoom = useCallback((factor: number) => {
-    const nz = Math.max(0.2, Math.min(baseZoom * 10, zoom * factor));
+    const minZoom = Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER);
+    const maxZoom = Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER);
+    const nz = Math.max(minZoom, Math.min(maxZoom, zoom * factor));
     setPan({ x: pan.x, y: getZoomAnchoredPanY(svgHeight / 2, nz) });
     setZoom(nz);
     scheduleZoomUrlWrite();
@@ -1946,7 +1999,7 @@ export default function RealDataSankeyPage() {
                       const isSelectedMerged = node.id === selectedNodeId || spendingNode?.id === selectedNodeId;
                       const maxH = Math.max(bH, sH);
                       const { cumShift = 0, topShift = 0 } = nodeShiftInfo.get(node.id) ?? {};
-                      const labelVisible = topShift > 0 || maxH * zoom > 10 || isSelectedMerged;
+                      const labelVisible = topShift > 0 || maxH * zoom > mapLabelVisibleMinHPx || isSelectedMerged;
                       const nodeOpacity = connectedNodeIds
                         ? (isConnected ? 1 : 0.3)
                         : (hoveredNode && hoveredNode !== node ? 0.4 : 1);
@@ -1963,7 +2016,7 @@ export default function RealDataSankeyPage() {
                               onClick={(e) => handleNodeClick(node, e)}
                             />
                             {labelVisible && (
-                              <text x={getNodeInnerX1(node) + innerLabelGap} y={topShift + bH / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                              <text x={getNodeInnerX1(node) + innerLabelGap} y={topShift + bH / 2} fontSize={mapLabelFontPx / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                                 style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                                 onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -1991,7 +2044,7 @@ export default function RealDataSankeyPage() {
                           />
                           {labelVisible && (<>
                             {/* Left label: budget amount */}
-                            <text x={getNodeInnerX0(node) - innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle" textAnchor="end"
+                            <text x={getNodeInnerX0(node) - innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={mapLabelFontPx / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -2002,7 +2055,7 @@ export default function RealDataSankeyPage() {
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
                             {/* Right label: project name + spending amount */}
-                            <text x={getNodeInnerX1(spendingNode) + innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={11 / zoom} dominantBaseline="middle"
+                            <text x={getNodeInnerX1(spendingNode) + innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={mapLabelFontPx / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -2020,7 +2073,7 @@ export default function RealDataSankeyPage() {
                     const h = node.y1 - node.y0;
                     const isSelected = node.id === selectedNodeId;
                     const { cumShift = 0, topShift = 0 } = nodeShiftInfo.get(node.id) ?? {};
-                    const labelVisible = topShift > 0 || (h + NODE_PAD) * zoom > 10 || isSelected;
+                    const labelVisible = topShift > 0 || (h + NODE_PAD) * zoom > mapLabelVisibleMinHPx || isSelected;
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
                     return (
@@ -2055,7 +2108,7 @@ export default function RealDataSankeyPage() {
                           <text
                             x={getNodeInnerX1(node) + innerLabelGap}
                             y={topShift + h / 2}
-                            fontSize={11 / zoom}
+                            fontSize={mapLabelFontPx / zoom}
                             dominantBaseline="middle"
                             fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                             style={{ userSelect: 'none', cursor: 'pointer' }}
@@ -2087,7 +2140,7 @@ export default function RealDataSankeyPage() {
               });
               const projectSpendingTotal = layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + n.value, 0);
               const nodeAreaScreenY = pan.y + MARGIN.top * zoom;
-              const labelFontPx = 11;
+              const labelFontPx = mapLabelFontPx;
               // 列ごとの最上端ノードを取得（ラベル基準位置の計算用）
               const topNodeByCol = colNodeTypes.map(t =>
                 layout.nodes.filter(n => n.type === t).reduce<typeof layout.nodes[0] | null>((top, n) => (top === null || n.y0 < top.y0 ? n : top), null)
@@ -2117,7 +2170,7 @@ export default function RealDataSankeyPage() {
                     style={{
                       position: 'absolute', left: screenX, top,
                       transform: 'translateX(-50%)',
-                      textAlign: 'center', fontSize: 13, color: '#999',
+                      textAlign: 'center', fontSize: COLUMN_LABEL_FONT_PX, color: '#999',
                       whiteSpace: 'nowrap', userSelect: 'none', cursor: 'default',
                       zIndex: 8, lineHeight: 1.4,
                       background: 'rgba(255,255,255,0.82)', padding: '2px 8px', borderRadius: 4,
@@ -2127,7 +2180,7 @@ export default function RealDataSankeyPage() {
                     onMouseLeave={() => setHoveredColIndex(null)}
                   >
                     <div>{label}</div>
-                    {amountLine && <div style={{ fontSize: 11 }}>{amountLine}</div>}
+                    {amountLine && <div style={{ fontSize: COLUMN_AMOUNT_FONT_PX }}>{amountLine}</div>}
                   </div>
                 );
               });
@@ -2149,7 +2202,7 @@ export default function RealDataSankeyPage() {
           {/* DOM tooltip — link hover */}
           {hoveredLink && !hoveredNode && (() => {
             const tipW = 220;
-            const tipH = 58;
+            const tipH = 66;
             const lx = Math.max(4, Math.min(mousePos.x + 12, svgWidth - tipW - 4));
             const ly = Math.max(4, Math.min(mousePos.y - 10, svgHeight - tipH - 4));
             return (
@@ -2160,11 +2213,11 @@ export default function RealDataSankeyPage() {
                 border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 pointerEvents: 'none', zIndex: 20,
               }}>
-                <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 5, textAlign: 'left' }}>{hoveredLink.source.name} → {hoveredLink.target.name}</div>
+                <div style={{ fontWeight: 600, fontSize: TOOLTIP_TITLE_FONT_PX, marginBottom: 5, textAlign: 'left' }}>{hoveredLink.source.name} → {hoveredLink.target.name}</div>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 10, fontWeight: 500, color: '#222' }}>{formatYen(hoveredLink.value)}</div>
-                    <div style={{ fontSize: 9, color: '#555' }}>{Math.round(hoveredLink.value).toLocaleString()}円</div>
+                    <div style={{ fontSize: TOOLTIP_VALUE_FONT_PX, fontWeight: 500, color: '#222' }}>{formatYen(hoveredLink.value)}</div>
+                    <div style={{ fontSize: TOOLTIP_META_FONT_PX, color: '#555' }}>{Math.round(hoveredLink.value).toLocaleString()}円</div>
                   </div>
                 </div>
               </div>
@@ -2217,9 +2270,9 @@ export default function RealDataSankeyPage() {
             }
             // 予算・支出が両方ある場合は2列グリッドで横並び、片方だけなら1列
             const both = budget != null && spending != null;
-            const tipH = (both ? 78 : 68) + (hoveredAcLabel ? 16 : 0);
+            const tipH = (both ? 88 : 76) + (hoveredAcLabel ? 18 : 0);
             // 大ノード: マウスY連動（カーソル上方）/ 小ノード: ラベル上端-GAPにポップアップ底辺を固定
-            const labelFontPx = 11; // SVG font-size = 11/zoom → screen px = 11
+            const labelFontPx = mapLabelFontPx;
             const labelTopScreenY = screenTop + nodeScreenH / 2 - labelFontPx / 2;
             const cursorGap = 12;
             const lyAboveCursor = mousePos.y - tipH - cursorGap;
@@ -2235,10 +2288,10 @@ export default function RealDataSankeyPage() {
             const amtCol = (label: string, val: number) => (
               <div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 3 }}>
-                  <span style={{ fontSize: 9, color: '#888', flexShrink: 0, paddingTop: 1 }}>{label}</span>
-                  <span style={{ fontSize: 10, fontWeight: 500, color: '#222' }}>{formatYen(val)}</span>
+                  <span style={{ fontSize: TOOLTIP_META_FONT_PX, color: '#888', flexShrink: 0, paddingTop: 1 }}>{label}</span>
+                  <span style={{ fontSize: TOOLTIP_VALUE_FONT_PX, fontWeight: 500, color: '#222' }}>{formatYen(val)}</span>
                 </div>
-                <div style={{ fontSize: 9, color: '#555', wordBreak: 'break-all' }}>{Math.round(val).toLocaleString()}円</div>
+                <div style={{ fontSize: TOOLTIP_META_FONT_PX, color: '#555', wordBreak: 'break-all' }}>{Math.round(val).toLocaleString()}円</div>
               </div>
             );
             return (
@@ -2250,10 +2303,10 @@ export default function RealDataSankeyPage() {
                 border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 pointerEvents: 'none', zIndex: 20,
               }}>
-                <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 5, color: '#111', textAlign: 'left' }}>{hoveredNode.name}</div>
+                <div style={{ fontWeight: 600, fontSize: TOOLTIP_TITLE_FONT_PX, marginBottom: 5, color: '#111', textAlign: 'left' }}>{hoveredNode.name}</div>
                 {hoveredAcLabel && (
                   <div style={{ marginBottom: 4, textAlign: 'left' }}>
-                    <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 8, fontWeight: 500, background: '#f0f0f0', color: '#666' }}>{hoveredAcLabel}</span>
+                    <span style={{ fontSize: TOOLTIP_META_FONT_PX, padding: '1px 5px', borderRadius: 8, fontWeight: 500, background: '#f0f0f0', color: '#666' }}>{hoveredAcLabel}</span>
                   </div>
                 )}
                 {both ? (
@@ -2287,12 +2340,12 @@ export default function RealDataSankeyPage() {
               '全エッジ合計（ウィンドウ外流入含む）',
             ];
             return (
-              <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y + 16, background: 'rgba(255,255,255,0.97)', color: '#222', padding: '6px 10px', borderRadius: 6, fontSize: 12, lineHeight: 1.5, pointerEvents: 'none', zIndex: 20, whiteSpace: 'nowrap', border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
-                <div style={{ fontWeight: 600, fontSize: 11, marginBottom: 2 }}>{COL_LABELS[hoveredColIndex]}</div>
-                {count != null && <div style={{ color: '#888', fontSize: 10 }}>{count.toLocaleString()}件</div>}
-                <div style={{ fontWeight: 500, fontSize: 10, color: '#222' }}>{formatYen(total)}</div>
-                <div style={{ color: '#555', fontSize: 9 }}>{Math.round(total).toLocaleString()}円</div>
-                <div style={{ color: '#888', fontSize: 10, marginTop: 4 }}>{colDescs[hoveredColIndex]}</div>
+              <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y + 16, background: 'rgba(255,255,255,0.97)', color: '#222', padding: '6px 10px', borderRadius: 6, fontSize: TOOLTIP_TITLE_FONT_PX, lineHeight: 1.5, pointerEvents: 'none', zIndex: 20, whiteSpace: 'nowrap', border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                <div style={{ fontWeight: 600, fontSize: TOOLTIP_TITLE_FONT_PX, marginBottom: 2 }}>{COL_LABELS[hoveredColIndex]}</div>
+                {count != null && <div style={{ color: '#888', fontSize: TOOLTIP_META_FONT_PX }}>{count.toLocaleString()}件</div>}
+                <div style={{ fontWeight: 500, fontSize: TOOLTIP_VALUE_FONT_PX, color: '#222' }}>{formatYen(total)}</div>
+                <div style={{ color: '#555', fontSize: TOOLTIP_META_FONT_PX }}>{Math.round(total).toLocaleString()}円</div>
+                <div style={{ color: '#888', fontSize: TOOLTIP_META_FONT_PX, marginTop: 4 }}>{colDescs[hoveredColIndex]}</div>
               </div>
             );
           })()}
@@ -2354,7 +2407,7 @@ export default function RealDataSankeyPage() {
               <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', flexShrink: 0, background: '#fff' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
+                    <div style={{ fontWeight: 700, fontSize: PANEL_TITLE_FONT_PX, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
                       {selectedNode.name}
                     </div>
                     {(() => {
@@ -2411,23 +2464,23 @@ export default function RealDataSankeyPage() {
                       const rawMain = selectedNode.isScaled && selectedNode.rawValue != null ? selectedNode.rawValue : null;
                       const rawMainLabel = mainLabel ? `元の${mainLabel}` : '元の値';
                       return (<>
-                        <div style={{ fontSize: 15, fontWeight: 600, color: '#222', marginTop: 3 }}>
-                          {mainLabel && <span style={{ fontSize: 10, color: '#aaa', fontWeight: 400, marginRight: 4 }}>{mainLabel}</span>}
+                        <div style={{ fontSize: PANEL_PRIMARY_VALUE_FONT_PX, fontWeight: 600, color: '#222', marginTop: 3 }}>
+                          {mainLabel && <span style={{ fontSize: META_FONT_PX, color: '#aaa', fontWeight: 400, marginRight: 4 }}>{mainLabel}</span>}
                           {formatYen(mainValue)}
                         </div>
-                        <div style={{ fontSize: 11, color: '#999', marginTop: 1 }}>{Math.round(mainValue).toLocaleString()}円</div>
+                        <div style={{ fontSize: META_FONT_PX, color: '#999', marginTop: 1 }}>{Math.round(mainValue).toLocaleString()}円</div>
                         {rawMain !== null && (
-                          <div style={{ fontSize: 11, color: '#bbb', marginTop: 1 }}>
-                            <span style={{ fontSize: 10, color: '#ccc', marginRight: 4 }}>{rawMainLabel}</span>
+                          <div style={{ fontSize: META_FONT_PX, color: '#bbb', marginTop: 1 }}>
+                            <span style={{ fontSize: META_FONT_PX, color: '#ccc', marginRight: 4 }}>{rawMainLabel}</span>
                             {formatYen(rawMain)}
-                            <span style={{ fontSize: 10, color: '#ccc', marginLeft: 4 }}>{Math.round(rawMain).toLocaleString()}円</span>
+                            <span style={{ fontSize: META_FONT_PX, color: '#ccc', marginLeft: 4 }}>{Math.round(rawMain).toLocaleString()}円</span>
                           </div>
                         )}
                         {subValue !== null && (
-                          <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>
-                            <span style={{ fontSize: 10, color: '#aaa', marginRight: 4 }}>{subLabel}</span>
+                          <div style={{ fontSize: PANEL_META_FONT_PX, color: '#777', marginTop: 4 }}>
+                            <span style={{ fontSize: META_FONT_PX, color: '#aaa', marginRight: 4 }}>{subLabel}</span>
                             {formatYen(subValue)}
-                            <span style={{ fontSize: 10, color: '#bbb', marginLeft: 4 }}>{Math.round(subValue).toLocaleString()}円</span>
+                            <span style={{ fontSize: META_FONT_PX, color: '#bbb', marginLeft: 4 }}>{Math.round(subValue).toLocaleString()}円</span>
                           </div>
                         )}
                       </>);
@@ -2440,17 +2493,17 @@ export default function RealDataSankeyPage() {
                   >✕</button>
                 </div>
                 <div style={{ display: 'flex', gap: 5, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span style={{ background: getNodeColor(selectedNode), color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>
+                  <span style={{ background: getNodeColor(selectedNode), color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: META_FONT_PX, fontWeight: 500 }}>
                     {TYPE_LABELS[selectedNode.type] ?? selectedNode.type}
                   </span>
                   {selectedNode.aggregated && (
-                    <span style={{ background: '#999', color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>集約</span>
+                    <span style={{ background: '#999', color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: META_FONT_PX, fontWeight: 500 }}>集約</span>
                   )}
                   {selectedNode.projectId != null && (
-                    <span style={{ fontSize: 11, color: '#aaa' }}>PID:{selectedNode.projectId}</span>
+                    <span style={{ fontSize: META_FONT_PX, color: '#aaa' }}>PID:{selectedNode.projectId}</span>
                   )}
                   {selectedNode.ministry && selectedNode.type !== 'ministry' && (
-                    <span style={{ fontSize: 11, color: '#666' }}>{selectedNode.ministry}</span>
+                    <span style={{ fontSize: META_FONT_PX, color: '#666' }}>{selectedNode.ministry}</span>
                   )}
                   {(() => {
                     let cat = selectedNode.accountCategory;
@@ -2460,7 +2513,7 @@ export default function RealDataSankeyPage() {
                     if (!cat) return null;
                     const label = cat === 'general' ? '一般会計' : cat === 'special' ? '特別会計' : '一般・特別';
                     return (
-                      <span style={{ background: '#f0f0f0', color: '#666', padding: '2px 7px', borderRadius: 10, fontSize: 11, fontWeight: 500 }}>
+                      <span style={{ background: '#f0f0f0', color: '#666', padding: '2px 7px', borderRadius: 10, fontSize: META_FONT_PX, fontWeight: 500 }}>
                         {label}
                       </span>
                     );
@@ -2481,8 +2534,8 @@ export default function RealDataSankeyPage() {
                       <button type="button" onClick={handleToggle}
                         style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
                       >
-                        <span style={{ fontSize: 11, color: '#888' }}>{isProjectDetailExpanded ? '▼' : '▶'}</span>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: '#555' }}>事業概要</span>
+                        <span style={{ fontSize: META_FONT_PX, color: '#888' }}>{isProjectDetailExpanded ? '▼' : '▶'}</span>
+                        <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>事業概要</span>
                       </button>
                       <a href={rsUrl} target="_blank" rel="noopener noreferrer"
                         title="RSシステムで開く"
@@ -2512,19 +2565,19 @@ export default function RealDataSankeyPage() {
                       </a>
                     </div>
                     {!isProjectDetailExpanded && cachedDetail?.overview && (
-                      <div style={{ padding: '0 14px 8px', fontSize: 11, color: '#888', lineHeight: 1.5,
+                      <div style={{ padding: '0 14px 8px', fontSize: PANEL_META_FONT_PX, color: '#888', lineHeight: 1.5,
                         maxHeight: '4.5em', overflowY: 'auto', wordBreak: 'break-all' }}>
                         {cachedDetail.overview}
                       </div>
                     )}
                     {isProjectDetailExpanded && (
-                      <div style={{ padding: '0 14px 10px', fontSize: 12, color: '#444', maxHeight: 320, overflowY: 'auto' }}>
+                      <div style={{ padding: '0 14px 10px', fontSize: PANEL_META_FONT_PX, color: '#444', maxHeight: 320, overflowY: 'auto' }}>
                         {isLoading && <span style={{ color: '#aaa' }}>読み込み中...</span>}
                         {!isLoading && cachedDetail === null && <span style={{ color: '#aaa' }}>詳細情報が見つかりませんでした</span>}
                         {!isLoading && cachedDetail && (() => {
                           const d = cachedDetail;
                           const fieldStyle: React.CSSProperties = { marginBottom: 8 };
-                          const labelStyle: React.CSSProperties = { fontSize: 10, color: '#aaa', display: 'block', marginBottom: 2 };
+                          const labelStyle: React.CSSProperties = { fontSize: META_FONT_PX, color: '#aaa', display: 'block', marginBottom: 2 };
                           const textStyle: React.CSSProperties = { lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-all' };
                           return (<>
                             {d.category && (
@@ -2559,7 +2612,7 @@ export default function RealDataSankeyPage() {
                             {d.url && (
                               <div style={fieldStyle}>
                                 <a href={d.url} target="_blank" rel="noopener noreferrer"
-                                  style={{ fontSize: 11, color: '#4a90d9', wordBreak: 'break-all' }}>
+                                  style={{ fontSize: META_FONT_PX, color: '#4a90d9', wordBreak: 'break-all' }}>
                                   事業概要URL ↗
                                 </a>
                               </div>
@@ -2574,18 +2627,18 @@ export default function RealDataSankeyPage() {
 
               {/* 府省庁 / 事業 / 支出先 3タブ */}
               {panelSections && (() => {
-                const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: 12, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
+                const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: PANEL_META_FONT_PX, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
                 const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
                 type PanelItem = { id: string; name: string; value: number; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; };
                 const renderFlatList = (items: PanelItem[], getValue?: (item: PanelItem) => number) => {
                   const getVal = getValue ?? ((item: PanelItem) => item.value);
-                  if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
+                  if (items.length === 0) return <p style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
                   return items.map((item) => (
                     <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                     >
-                      <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                      <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(getVal(item))}</span>
+                      <span title={item.name} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                      <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(getVal(item))}</span>
                     </button>
                   ));
                 };
@@ -2594,13 +2647,13 @@ export default function RealDataSankeyPage() {
                     {/* Tab bar */}
                     <div style={{ display: 'flex', borderBottom: '1px solid #eee', flexShrink: 0, background: '#fff' }}>
                       <button type="button" style={panelTab === 'ministry' ? tabBtnActive : tabBtnBase} onClick={() => setPanelTab('ministry')}>
-                        府省庁<span style={{ fontWeight: 400, fontSize: 11 }}>({panelSections.ministries.length})</span>
+                        府省庁<span style={{ fontWeight: 400, fontSize: META_FONT_PX }}>({panelSections.ministries.length})</span>
                       </button>
                       <button type="button" style={panelTab === 'project' ? tabBtnActive : tabBtnBase} onClick={() => setPanelTab('project')}>
-                        事業<span style={{ fontWeight: 400, fontSize: 11 }}>({panelSections.projects.length})</span>
+                        事業<span style={{ fontWeight: 400, fontSize: META_FONT_PX }}>({panelSections.projects.length})</span>
                       </button>
                       <button type="button" style={panelTab === 'recipient' ? tabBtnActive : tabBtnBase} onClick={() => setPanelTab('recipient')}>
-                        支出先<span style={{ fontWeight: 400, fontSize: 11 }}>({panelSections.recipients.length})</span>
+                        支出先<span style={{ fontWeight: 400, fontSize: META_FONT_PX }}>({panelSections.recipients.length})</span>
                       </button>
                     </div>
                     {/* Tab content */}
@@ -2608,13 +2661,13 @@ export default function RealDataSankeyPage() {
                       {/* 府省庁タブ */}
                       {panelTab === 'ministry' && (() => {
                         const items = panelSections.ministries;
-                        if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
+                        if (items.length === 0) return <p style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
                         return items.map((item) => (
                           <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                             style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                           >
-                            <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                            <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                            <span title={item.name} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                            <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
                               {item.budgetValue != null
                                 ? <>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</>
                                 : formatYen(item.value)
@@ -2626,15 +2679,15 @@ export default function RealDataSankeyPage() {
                       {/* 事業タブ */}
                       {panelTab === 'project' && (() => {
                         const items = panelSections.projects;
-                        if (items.length === 0) return <p style={{ fontSize: 12, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
+                        if (items.length === 0) return <p style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
                         return items.map((item) => (
                           <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                             style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
                           >
-                            <span title={item.name} style={{ flex: 1, fontSize: 12, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                            <span title={item.name} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
                             {item.budgetValue != null
-                              ? <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</span>
-                              : <span style={{ fontSize: 11, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
+                              ? <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</span>
+                              : <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
                             }
                           </button>
                         ));
@@ -2665,7 +2718,7 @@ export default function RealDataSankeyPage() {
               : null;
             setYear(e.target.value as '2024' | '2025');
           }}
-          style={{ fontSize: 13, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
+          style={{ fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
         >
           <option value="2025">2025年度</option>
           <option value="2024">2024年度</option>
@@ -2714,7 +2767,7 @@ export default function RealDataSankeyPage() {
                   data-testid={testId('filter-target-select')}
                   value={filterTarget}
                   onChange={e => setFilterTarget(e.target.value as 'project' | 'recipient')}
-                  style={{ position: 'absolute', left: 28, top: '50%', transform: 'translateY(-50%)', fontSize: 10, border: '1px solid #ddd', borderRadius: 3, padding: '1px 2px', background: 'rgba(255,255,255,0.9)', color: '#555', cursor: 'pointer', height: 20 }}
+                  style={{ position: 'absolute', left: 28, top: '50%', transform: 'translateY(-50%)', fontSize: META_FONT_PX, border: '1px solid #ddd', borderRadius: 3, padding: '1px 2px', background: 'rgba(255,255,255,0.9)', color: '#555', cursor: 'pointer', height: 20 }}
                 >
                   <option value="project">事業</option>
                   <option value="recipient">支出先</option>
@@ -2756,7 +2809,7 @@ export default function RealDataSankeyPage() {
                 style={{
                   width: '100%', boxSizing: 'border-box',
                   paddingLeft: filterActive ? 90 : 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
-                  fontSize: 13, border: 'none', borderRadius: 8,
+                  fontSize: SEARCH_FONT_PX, border: 'none', borderRadius: 8,
                   background: 'transparent', outline: 'none', color: '#333',
                 }}
               />
@@ -2772,7 +2825,7 @@ export default function RealDataSankeyPage() {
                   background: searchUseRegex ? '#1a73e8' : 'transparent',
                   border: 'none', borderRadius: 4, cursor: 'pointer',
                   color: searchUseRegex ? '#fff' : '#888',
-                  fontSize: 11, fontFamily: 'monospace', fontWeight: 'bold',
+                  fontSize: META_FONT_PX, fontFamily: 'monospace', fontWeight: 'bold',
                   lineHeight: 1, padding: '2px 4px',
                 }}
               >.*</button>
@@ -2807,7 +2860,7 @@ export default function RealDataSankeyPage() {
                   );
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={accountDropdownRef}>
-                      <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>会計</span>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 26, flexShrink: 0 }}>会計</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
                         <button type="button" ref={accountButtonRef}
                           onClick={() => {
@@ -2817,7 +2870,7 @@ export default function RealDataSankeyPage() {
                             }
                             setShowAccountDropdown(v => !v);
                           }}
-                          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: acAllSelected ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                          style={{ width: '100%', fontSize: CONTROL_SMALL_FONT_PX, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: acAllSelected ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                         >{acLabel}</button>
                         <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>{chevron}</span>
                         {showAccountDropdown && accountDropdownRect && createPortal(
@@ -2827,14 +2880,14 @@ export default function RealDataSankeyPage() {
                               <input type="checkbox" checked={acAllSelected}
                                 onChange={() => { pendingHistoryAction.current = 'replace'; const v = !acAllSelected; setAcGeneral(v); setAcSpecial(v); setAcBoth(v); setAcNone(v); }}
                                 style={{ width: 12, height: 12 }} />
-                              <span style={{ fontSize: 11, color: '#333' }}>すべて選択/解除</span>
+                              <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#333' }}>すべて選択/解除</span>
                             </label>
                             {acOptions.map(({ label, value, setter }) => (
                               <label key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', cursor: 'pointer' }}>
                                 <input type="checkbox" checked={value}
                                   onChange={() => { pendingHistoryAction.current = 'replace'; setter(v => !v); }}
                                   style={{ width: 12, height: 12 }} />
-                                <span style={{ fontSize: 11, color: '#333' }}>{label}</span>
+                                <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#333' }}>{label}</span>
                               </label>
                             ))}
                           </div>,
@@ -2843,7 +2896,7 @@ export default function RealDataSankeyPage() {
                       </div>
                       {!acAllSelected && (
                         <button type="button" onClick={() => { pendingHistoryAction.current = 'replace'; setAcGeneral(true); setAcSpecial(true); setAcBoth(true); setAcNone(true); }}
-                          style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                          style={{ fontSize: META_FONT_PX, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
                       )}
                     </div>
                   );
@@ -2861,7 +2914,7 @@ export default function RealDataSankeyPage() {
                   );
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={ministryDropdownRef}>
-                      <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>省庁</span>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 26, flexShrink: 0 }}>省庁</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
                         <button type="button" ref={ministryButtonRef}
                           onClick={() => {
@@ -2871,7 +2924,7 @@ export default function RealDataSankeyPage() {
                             }
                             setShowMinistryDropdown(v => !v);
                           }}
-                          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: allSelected ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                          style={{ width: '100%', fontSize: CONTROL_SMALL_FONT_PX, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: allSelected ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                         >{label}</button>
                         <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>{chevron}</span>
                         {showMinistryDropdown && ministryDropdownRect && createPortal(
@@ -2879,7 +2932,7 @@ export default function RealDataSankeyPage() {
                             onMouseDown={e => e.stopPropagation()}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
                               <input type="checkbox" checked={allSelected} onChange={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames([]); }} style={{ width: 12, height: 12 }} />
-                              <span style={{ fontSize: 11, color: '#333' }}>すべて選択/解除</span>
+                              <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#333' }}>すべて選択/解除</span>
                             </label>
                             {ministryNodes.map(n => (
                               <label key={n.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', cursor: 'pointer' }}>
@@ -2887,7 +2940,7 @@ export default function RealDataSankeyPage() {
                                   checked={!allSelected && filterMinistryNames.includes(n.name)}
                                   onChange={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames(prev => prev.includes(n.name) ? prev.filter(m => m !== n.name) : [...prev, n.name]); }}
                                   style={{ width: 12, height: 12 }} />
-                                <span style={{ fontSize: 11, color: '#333' }}>{n.name}</span>
+                                <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#333' }}>{n.name}</span>
                               </label>
                             ))}
                           </div>,
@@ -2896,7 +2949,7 @@ export default function RealDataSankeyPage() {
                       </div>
                       {!allSelected && (
                         <button type="button" onClick={() => { pendingHistoryAction.current = 'replace'; setFilterMinistryNames([]); }}
-                          style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                          style={{ fontSize: META_FONT_PX, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
                       )}
                     </div>
                   );
@@ -2907,23 +2960,23 @@ export default function RealDataSankeyPage() {
                   { label: '支出', minText: filterMinSpendingText, maxText: filterMaxSpendingText, setMin: setFilterMinSpendingText, setMax: setFilterMaxSpendingText },
                 ] as const).map(({ label, minText, maxText, setMin, setMax }) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ fontSize: 11, color: '#555', width: 22, flexShrink: 0 }}>{label}</span>
+                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 26, flexShrink: 0 }}>{label}</span>
                     <input type="text" value={minText} onChange={e => setMin(e.target.value)}
                       placeholder="例: 100億、50万円"
-                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                      style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${parseAmountToYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
                     />
-                    <span style={{ fontSize: 11, color: '#aaa', flexShrink: 0 }}>〜</span>
+                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#aaa', flexShrink: 0 }}>〜</span>
                     <input type="text" value={maxText} onChange={e => setMax(e.target.value)}
                       placeholder="例: 1兆、500億"
-                      style={{ flex: 1, minWidth: 0, fontSize: 11, border: `1px solid ${parseAmountToYen(maxText) !== null || !maxText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                      style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${parseAmountToYen(maxText) !== null || !maxText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
                     />
                     {(minText || maxText) && (
                       <button type="button" onClick={() => { setMin(''); setMax(''); }}
-                        style={{ fontSize: 10, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                        style={{ fontSize: META_FONT_PX, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
                     )}
                   </div>
                 ))}
-                <div style={{ fontSize: 10, color: '#bbb', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>例: 1.26億 / 4567万円 / 1兆2000億</div>
+                <div style={{ fontSize: META_FONT_PX, color: '#bbb', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>例: 1.26億 / 4567万円 / 1兆2000億</div>
               </div>
             )}
           </div>{/* end card */}
@@ -2952,7 +3005,7 @@ export default function RealDataSankeyPage() {
         {!filterActive && showSearchResults && searchResults.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
             {/* Count header */}
-            <div style={{ padding: '5px 10px', fontSize: 11, color: '#999', borderBottom: '1px solid #f0f0f0' }}>
+            <div style={{ padding: '5px 10px', fontSize: META_FONT_PX, color: '#999', borderBottom: '1px solid #f0f0f0' }}>
               {searchResults.length}件{searchTotalPages > 1 ? `（${searchPage + 1} / ${searchTotalPages} ページ）` : ''}
             </div>
             {/* Scrollable list */}
@@ -2968,11 +3021,11 @@ export default function RealDataSankeyPage() {
                   onMouseLeave={e => { e.currentTarget.style.background = i === searchCursorIndex ? '#e8f0fe' : 'transparent'; }}
                 >
                   <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: node.budgetValue !== undefined ? `linear-gradient(to right, ${TYPE_COLORS['project-budget']} 44%, ${TYPE_COLORS['project-spending']} 56%)` : getNodeColor(node) }} />
-                  <span title={node.name} style={{ flex: 1, fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
-                  {node.projectId != null && <span style={{ fontSize: 10, color: '#bbb', whiteSpace: 'nowrap', flexShrink: 0 }}>PID:{node.projectId}</span>}
+                  <span title={node.name} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
+                  {node.projectId != null && <span style={{ fontSize: META_FONT_PX, color: '#bbb', whiteSpace: 'nowrap', flexShrink: 0 }}>PID:{node.projectId}</span>}
                   {node.budgetValue !== undefined
-                    ? <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>予{formatYen(node.budgetValue)} / 支{formatYen(node.value)}</span>
-                    : <span style={{ fontSize: 11, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
+                    ? <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>予{formatYen(node.budgetValue)} / 支{formatYen(node.value)}</span>
+                    : <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
                   }
                 </button>
               ))}
@@ -2981,16 +3034,16 @@ export default function RealDataSankeyPage() {
             {searchTotalPages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 8px', borderTop: '1px solid #f0f0f0' }}>
                 <button type="button" onClick={() => { setSearchPage(p => Math.max(p - 1, 0)); setSearchCursorIndex(-1); }} disabled={searchPage === 0}
-                  style={{ fontSize: 11, padding: '2px 8px', border: '1px solid #e0e0e0', borderRadius: 4, background: 'transparent', cursor: searchPage === 0 ? 'default' : 'pointer', color: searchPage === 0 ? '#ccc' : '#555' }}>‹ 前へ</button>
+                  style={{ fontSize: META_FONT_PX, padding: '2px 8px', border: '1px solid #e0e0e0', borderRadius: 4, background: 'transparent', cursor: searchPage === 0 ? 'default' : 'pointer', color: searchPage === 0 ? '#ccc' : '#555' }}>‹ 前へ</button>
                 <button type="button" onClick={() => { setSearchPage(p => Math.min(p + 1, searchTotalPages - 1)); setSearchCursorIndex(-1); }} disabled={searchPage === searchTotalPages - 1}
-                  style={{ fontSize: 11, padding: '2px 8px', border: '1px solid #e0e0e0', borderRadius: 4, background: 'transparent', cursor: searchPage === searchTotalPages - 1 ? 'default' : 'pointer', color: searchPage === searchTotalPages - 1 ? '#ccc' : '#555' }}>次へ ›</button>
+                  style={{ fontSize: META_FONT_PX, padding: '2px 8px', border: '1px solid #e0e0e0', borderRadius: 4, background: 'transparent', cursor: searchPage === searchTotalPages - 1 ? 'default' : 'pointer', color: searchPage === searchTotalPages - 1 ? '#ccc' : '#555' }}>次へ ›</button>
               </div>
             )}
           </div>
         )}
         {/* No results */}
         {!filterActive && showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: 12, color: '#999', zIndex: 20 }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: PANEL_META_FONT_PX, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
         )}
@@ -3023,7 +3076,7 @@ export default function RealDataSankeyPage() {
         };
         return (
           <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
             {/* Row 1: オフセットスライダー（2列スパン） */}
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}>
               {/* オフセット対象コンボボックス */}
@@ -3031,13 +3084,13 @@ export default function RealDataSankeyPage() {
                 data-testid={testId('offset-target-select')}
                 value={offsetTarget}
                 onChange={e => { pendingHistoryAction.current = 'replace'; setOffsetTarget(e.target.value as 'recipient' | 'project'); }}
-                style={{ fontSize: 11, border: '1px solid #ccc', borderRadius: 3, padding: '1px 2px', background: '#fff', color: '#555', cursor: 'pointer' }}
+                style={{ fontSize: META_FONT_PX, border: '1px solid #ccc', borderRadius: 3, padding: '1px 2px', background: '#fff', color: '#555', cursor: 'pointer' }}
               >
                 <option value="recipient">支出先</option>
                 <option value="project">事業</option>
               </select>
               <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ color: '#555', fontSize: 11 }}>Top</span>
+                <span style={{ color: '#555', fontSize: META_FONT_PX }}>Top</span>
                 {isEditingOffset ? (
                   <input
                     type="number"
@@ -3047,18 +3100,18 @@ export default function RealDataSankeyPage() {
                     onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) setActiveOffset(Math.max(0, Math.min(activeMax, v - 1))); }}
                     onBlur={() => setIsEditingOffset(false)}
                     onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingOffset(false); }}
-                    style={{ width: `${Math.max(40, String(activeMaxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 12 }}
+                    style={{ width: `${Math.max(40, String(activeMaxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: CONTROL_SMALL_FONT_PX }}
                   />
                 ) : (
                   <button
                     onClick={() => { setOffsetInputValue(String(activeRangeStart)); setIsEditingOffset(true); }}
                     title="クリックして開始位置を入力"
-                    style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
+                    style={{ color: '#999', fontSize: META_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
                   >{activeRangeStart}</button>
                 )}
-                <span style={{ color: '#999', fontSize: 11 }}>〜{activeRangeEnd}</span>
+                <span style={{ color: '#999', fontSize: META_FONT_PX }}>〜{activeRangeEnd}</span>
                 <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: 60 }} />
-                <span style={{ color: '#999', fontSize: 11 }}>/{activeTotalCount}件</span>
+                <span style={{ color: '#999', fontSize: META_FONT_PX }}>/{activeTotalCount}件</span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                   {([
                     [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '次へ'],
@@ -3107,7 +3160,7 @@ export default function RealDataSankeyPage() {
             {/* Row 2: 事業・支出先 TopN スライダー（各グリッドセル） */}
             {showTopNSliders && <>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-                <span style={{ color: '#555', fontSize: 11, whiteSpace: 'nowrap' }}>事業</span>
+                <span style={{ color: '#555', fontSize: META_FONT_PX, whiteSpace: 'nowrap' }}>事業</span>
                 <input
                   type="range" min={1} max={300} step={1}
                   value={localTopProject ?? topProject}
@@ -3124,11 +3177,11 @@ export default function RealDataSankeyPage() {
                     onChange={e => setTopProjectInputValue(e.target.value)}
                     onBlur={() => { const v = Number(topProjectInputValue); if (!isNaN(v) && v >= 1) { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); } setIsEditingTopProject(false); }}
                     onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
-                    style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 11 }}
+                    style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: META_FONT_PX }}
                   />
                 ) : (
                   <button onClick={() => { setTopProjectInputValue(String(topProject)); setIsEditingTopProject(true); }} title="クリックして直接入力"
-                    style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
+                    style={{ color: '#999', fontSize: META_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
                   >{localTopProject ?? topProject}</button>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
@@ -3154,7 +3207,7 @@ export default function RealDataSankeyPage() {
                 </div>
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-                <span style={{ color: '#555', fontSize: 11, whiteSpace: 'nowrap' }}>支出先</span>
+                <span style={{ color: '#555', fontSize: META_FONT_PX, whiteSpace: 'nowrap' }}>支出先</span>
                 <input
                   type="range" min={1} max={300} step={1}
                   value={localTopRecipient ?? topRecipient}
@@ -3171,11 +3224,11 @@ export default function RealDataSankeyPage() {
                     onChange={e => setTopRecipientInputValue(e.target.value)}
                     onBlur={() => { const v = Number(topRecipientInputValue); if (!isNaN(v) && v >= 1) { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); } setIsEditingTopRecipient(false); }}
                     onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
-                    style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: 11 }}
+                    style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: META_FONT_PX }}
                   />
                 ) : (
                   <button onClick={() => { setTopRecipientInputValue(String(topRecipient)); setIsEditingTopRecipient(true); }} title="クリックして直接入力"
-                    style={{ color: '#999', fontSize: 11, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
+                    style={{ color: '#999', fontSize: META_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
                   >{localTopRecipient ?? topRecipient}</button>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
@@ -3234,7 +3287,7 @@ export default function RealDataSankeyPage() {
         {showSettings && (
           <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: 12, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
+            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
@@ -3249,7 +3302,7 @@ export default function RealDataSankeyPage() {
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ color: '#555' }}>事業ノードの並び順:</span>
-                <select value={projectSortBy} onChange={e => { pendingHistoryAction.current = 'replace'; setProjectSortBy(e.target.value as 'budget' | 'spending'); }} style={{ fontSize: 12, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }} data-pan-disabled>
+                <select value={projectSortBy} onChange={e => { pendingHistoryAction.current = 'replace'; setProjectSortBy(e.target.value as 'budget' | 'spending'); }} style={{ fontSize: CONTROL_SMALL_FONT_PX, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }} data-pan-disabled>
                   <option value="budget">予算額</option>
                   <option value="spending">支出額</option>
                 </select>
@@ -3290,10 +3343,10 @@ export default function RealDataSankeyPage() {
             <input
               type="range"
               aria-label="ズーム倍率"
-              min={Math.log10(0.2)}
-              max={Math.log10(baseZoom * 10)}
+              min={Math.log10(Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER))}
+              max={Math.log10(Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER))}
               step={0.01}
-              value={Math.log10(Math.max(0.2, Math.min(baseZoom * 10, zoom)))}
+              value={Math.log10(Math.max(Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER), Math.min(Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER), zoom)))}
               onChange={e => { const newK = Math.pow(10, parseFloat(e.target.value)); applyZoom(newK / zoom); }}
               style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 16, height: 80 }}
               title={`Zoom: ${Math.round(zoom / baseZoom * 100)}%`}
