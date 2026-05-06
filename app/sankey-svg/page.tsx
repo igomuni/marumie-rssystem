@@ -1921,6 +1921,7 @@ export default function RealDataSankeyPage() {
                   <path
                     key={`${link.source.id}→${link.target.id}`}
                     data-testid={testId('sankey-link')}
+                    d={shiftedRibbonPath(link)}
                     fill={getLinkColor(link)}
                     fillOpacity={
                       connectedNodeIds
@@ -1947,7 +1948,7 @@ export default function RealDataSankeyPage() {
                     onMouseLeave={() => setHoveredLink(null)}
                     onClick={(e) => e.stopPropagation()}
                     className="snk-ribbon"
-                    style={{ cursor: 'grab', d: `path("${shiftedRibbonPath(link)}")` } as React.CSSProperties}
+                    style={{ cursor: 'grab' }}
                   />
                 ))}
 
