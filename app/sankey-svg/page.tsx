@@ -925,7 +925,7 @@ export default function RealDataSankeyPage() {
     if (!filtered) return null;
     // fitZoom を求めるための第1パス（ギャップなし）
     const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
-    const availH = Math.max(100, svgHeight - (svgWidth < 1100 ? 92 : 56));
+    const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
     const fitZoom = Math.max(0.1, Math.min(10,
       Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
     ));
@@ -935,7 +935,7 @@ export default function RealDataSankeyPage() {
     const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
-  }, [filtered, svgWidth, svgHeight]);
+  }, [filtered, svgWidth, svgHeight, SEARCH_BOX_RESERVE]);
 
   // Cumulative shift per node: { cumShift: slot-level offset, topShift: rect-within-slot offset }
   const nodeShiftInfo = useMemo(() => {
