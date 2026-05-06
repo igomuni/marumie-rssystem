@@ -76,7 +76,7 @@ const PANEL_META_FONT_PX = 12;
 const TOOLTIP_TITLE_FONT_PX = 12;
 const TOOLTIP_VALUE_FONT_PX = 11;
 const TOOLTIP_META_FONT_PX = 10;
-const FIT_TOP_PAD_PX = 24;
+const FIT_TOP_PAD_PX = 32;
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
@@ -634,7 +634,7 @@ export default function RealDataSankeyPage() {
     return () => { if (zoomUrlDebounceRef.current) { clearTimeout(zoomUrlDebounceRef.current); zoomUrlDebounceRef.current = null; } };
   }, []);
 
-  const handleWheel = useCallback((e: React.WheelEvent) => {
+  const handleWheel = useCallback((e: WheelEvent) => {
     if (isOverlayControlTarget(e.target)) return;
     e.preventDefault();
     const el = containerRef.current;
@@ -665,6 +665,13 @@ export default function RealDataSankeyPage() {
       }
     }
   }, [zoom, pan, baseZoom, getZoomAnchoredPanY, scheduleZoomUrlWrite, scrollMode]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [handleWheel]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0 || isOverlayControlTarget(e.target)) return; // left click only
@@ -1848,7 +1855,6 @@ export default function RealDataSankeyPage() {
       ref={containerRef}
       data-testid={testId('sankey-svg-root')}
       style={{ position: 'fixed', inset: 0, overflow: 'hidden', background: '#fff', fontFamily: 'system-ui, sans-serif', cursor: isPanning ? 'grabbing' : 'grab' }}
-      onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -1870,8 +1876,11 @@ export default function RealDataSankeyPage() {
       {layout && (
         <>
             <style>{`
-              @keyframes snk-fade-in { from { opacity: 0 } to { opacity: 1 } }
-              .snk-node { animation: snk-fade-in 0.25s ease forwards; }
+              .snk-node,
+              .snk-ribbon {
+                animation: none !important;
+                transition: none !important;
+              }
             `}</style>
             <svg
               ref={svgRef}
@@ -1937,7 +1946,8 @@ export default function RealDataSankeyPage() {
                     }}
                     onMouseLeave={() => setHoveredLink(null)}
                     onClick={(e) => e.stopPropagation()}
-                    style={{ cursor: 'grab', transition: 'fill-opacity 0.16s ease', d: `path("${shiftedRibbonPath(link)}")` } as React.CSSProperties}
+                    className="snk-ribbon"
+                    style={{ cursor: 'grab', d: `path("${shiftedRibbonPath(link)}")` } as React.CSSProperties}
                   />
                 ))}
 
@@ -2007,9 +2017,9 @@ export default function RealDataSankeyPage() {
                       if (!spendingNode) {
                         // No paired spending node — render as plain budget rect
                         return (
-                          <g key={node.id} className="snk-node" data-testid={testId('sankey-node')} style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
+                          <g key={node.id} className="snk-node" data-testid={testId('sankey-node')} style={{ transform: `translateY(${node.y0 + cumShift}px)` }}>
                             <rect x={getNodeInnerX0(node)} y={topShift} width={innerNodeW} fill={getNodeColor(node)} rx={1}
-                              style={{ height: bH, opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease, height 0.3s ease' }}
+                              style={{ height: bH, opacity: nodeOpacity, cursor: 'pointer' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
                               onMouseLeave={() => setHoveredNode(null)}
@@ -2031,12 +2041,12 @@ export default function RealDataSankeyPage() {
                         );
                       }
                       return (
-                        <g key={node.id} className="snk-node" data-testid={testId('sankey-node')} style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
+                        <g key={node.id} className="snk-node" data-testid={testId('sankey-node')} style={{ transform: `translateY(${node.y0 + cumShift}px)` }}>
                           <path
                             d={mergedProjectPath(getNodeInnerX0(node), innerNodeW, bH, sH)}
                             fill={nodeFill}
                             transform={topShift > 0 ? `translate(0, ${topShift})` : undefined}
-                            style={{ opacity: nodeOpacity, cursor: 'pointer', transition: 'opacity 0.2s ease' }}
+                            style={{ opacity: nodeOpacity, cursor: 'pointer' }}
                             onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                             onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
                             onMouseLeave={() => setHoveredNode(null)}
@@ -2077,7 +2087,7 @@ export default function RealDataSankeyPage() {
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
                     return (
-                      <g key={node.id} className="snk-node" data-testid={testId('sankey-node')} style={{ transform: `translateY(${node.y0 + cumShift}px)`, transition: 'transform 0.3s ease' }}>
+                      <g key={node.id} className="snk-node" data-testid={testId('sankey-node')} style={{ transform: `translateY(${node.y0 + cumShift}px)` }}>
                         <rect
                           x={getNodeInnerX0(node)}
                           y={topShift}
@@ -2090,7 +2100,6 @@ export default function RealDataSankeyPage() {
                               ? (connectedNodeIds.has(node.id) ? 1 : 0.3)
                               : (hoveredNode && hoveredNode !== node ? 0.4 : 1),
                             cursor: 'pointer',
-                            transition: 'opacity 0.2s ease, height 0.3s ease',
                           }}
                           onMouseEnter={(e) => {
                             const rect = containerRef.current?.getBoundingClientRect();
@@ -2139,8 +2148,6 @@ export default function RealDataSankeyPage() {
                 return i === 0 ? (nodes[0]?.value ?? null) : nodes.reduce((s, n) => s + n.value, 0);
               });
               const projectSpendingTotal = layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + n.value, 0);
-              const nodeAreaScreenY = pan.y + MARGIN.top * zoom;
-              const labelFontPx = mapLabelFontPx;
               // 列ごとの最上端ノードを取得（ラベル基準位置の計算用）
               const topNodeByCol = colNodeTypes.map(t =>
                 layout.nodes.filter(n => n.type === t).reduce<typeof layout.nodes[0] | null>((top, n) => (top === null || n.y0 < top.y0 ? n : top), null)
@@ -2155,14 +2162,13 @@ export default function RealDataSankeyPage() {
                 const amountLine = i === 2 && total != null
                   ? `${formatYen(total)} / ${formatYen(projectSpendingTotal)}`
                   : total != null ? formatYen(total) : '';
-                const labelBlockH = amountLine ? 34 : 18;
-                // ノード高さがラベル高さ以下のとき、ノードラベルのTop位置を基準にする
+                const labelBlockH = amountLine ? 36 : 20;
                 const topNode = topNodeByCol[i];
-                const nodeScreenH = topNode ? (topNode.y1 - topNode.y0) * zoom : labelFontPx;
-                const refScreenY = nodeScreenH < labelFontPx
-                  ? nodeAreaScreenY + nodeScreenH / 2 - labelFontPx / 2
-                  : nodeAreaScreenY;
-                const top = Math.max(SEARCH_BOX_RESERVE, refScreenY - labelBlockH - 8);
+                const topNodeShift = topNode ? (nodeShiftInfo.get(topNode.id) ?? { cumShift: 0, topShift: 0 }) : null;
+                const topNodeScreenY = topNode
+                  ? pan.y + (MARGIN.top + topNode.y0 + (topNodeShift?.cumShift ?? 0) + (topNodeShift?.topShift ?? 0)) * zoom
+                  : pan.y + MARGIN.top * zoom;
+                const top = Math.max(SEARCH_BOX_RESERVE, topNodeScreenY - labelBlockH - 8);
                 return (
                   <div
                     key={i}
