@@ -344,11 +344,12 @@ export default function RealDataSankeyPage() {
     if (parsed.zoom !== undefined && parsed.selectedNodeId === undefined) {
       urlRestoredZoomRef.current = parsed.zoom;
     }
-    if (parsed.searchQuery !== undefined) setSearchQuery(parsed.searchQuery);
+    // URL 復元時は debounced 値も同時にセットして、~150ms の stale-filter window を回避
+    if (parsed.searchQuery !== undefined) { setSearchQuery(parsed.searchQuery); setDebouncedQuery(parsed.searchQuery); }
     if (parsed.showFilterPanel !== undefined) setShowFilterPanel(parsed.showFilterPanel);
-    if (parsed.filterProjectName !== undefined) setFilterProjectName(parsed.filterProjectName);
+    if (parsed.filterProjectName !== undefined) { setFilterProjectName(parsed.filterProjectName); setDebouncedFilterProjectName(parsed.filterProjectName); }
     if (parsed.filterProjectNameRegex !== undefined) setFilterProjectNameRegex(parsed.filterProjectNameRegex);
-    if (parsed.filterRecipientName !== undefined) setFilterRecipientName(parsed.filterRecipientName);
+    if (parsed.filterRecipientName !== undefined) { setFilterRecipientName(parsed.filterRecipientName); setDebouncedFilterRecipientName(parsed.filterRecipientName); }
     if (parsed.filterRecipientNameRegex !== undefined) setFilterRecipientNameRegex(parsed.filterRecipientNameRegex);
     if (parsed.filterMinistryNames !== undefined) setFilterMinistryNames(parsed.filterMinistryNames);
     if (parsed.filterMinBudgetText !== undefined) setFilterMinBudgetText(parsed.filterMinBudgetText);
@@ -389,11 +390,18 @@ export default function RealDataSankeyPage() {
       setAutoFocusRelated(parsed.autoFocusRelated ?? false);
       setFilterOnMinistryClick(parsed.filterOnMinistryClick ?? true);
       if (parsed.year !== undefined) setYear(parsed.year);
-      setSearchQuery(parsed.searchQuery ?? '');
+      // URL 復元時は debounced 値も同時にセットして、~150ms の stale-filter window を回避
+      const restoredSearchQuery = parsed.searchQuery ?? '';
+      setSearchQuery(restoredSearchQuery);
+      setDebouncedQuery(restoredSearchQuery);
       setShowFilterPanel(parsed.showFilterPanel ?? false);
-      setFilterProjectName(parsed.filterProjectName ?? '');
+      const restoredProjectName = parsed.filterProjectName ?? '';
+      setFilterProjectName(restoredProjectName);
+      setDebouncedFilterProjectName(restoredProjectName);
       setFilterProjectNameRegex(parsed.filterProjectNameRegex ?? false);
-      setFilterRecipientName(parsed.filterRecipientName ?? '');
+      const restoredRecipientName = parsed.filterRecipientName ?? '';
+      setFilterRecipientName(restoredRecipientName);
+      setDebouncedFilterRecipientName(restoredRecipientName);
       setFilterRecipientNameRegex(parsed.filterRecipientNameRegex ?? false);
       setFilterMinistryNames(parsed.filterMinistryNames ?? []);
       setFilterMinBudgetText(parsed.filterMinBudgetText ?? '');
