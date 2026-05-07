@@ -34,6 +34,7 @@ interface SankeyUrlState {
   scaleBudgetToVisible: boolean;
   focusRelated: boolean;
   autoFocusRelated: boolean;
+  filterOnMinistryClick: boolean;
   year: '2024' | '2025';
   zoom?: number;
   filterActive?: boolean;
@@ -98,6 +99,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const sb = p.get('sb'); if (sb !== null) result.scaleBudgetToVisible = sb !== '0';
   const fr = p.get('fr'); if (fr !== null) result.focusRelated = fr === '1';
   const afr = p.get('afr'); if (afr !== null) result.autoFocusRelated = afr === '1';
+  const fmc = p.get('fmc'); if (fmc !== null) result.filterOnMinistryClick = fmc !== '0';
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= ZOOM_MIN_ABS && n <= ZOOM_MAX_ABS) result.zoom = n; }
   const f = p.get('f'); if (f === '1') result.filterActive = true;
@@ -218,7 +220,9 @@ export default function RealDataSankeyPage() {
   const [projectSortBy, setProjectSortBy] = useState<'budget' | 'spending'>('budget');
   const [scaleBudgetToVisible, setScaleBudgetToVisible] = useState(true);
   const [focusRelated, setFocusRelated] = useState(false);
-  const [autoFocusRelated, setAutoFocusRelated] = useState(true);
+  const [autoFocusRelated, setAutoFocusRelated] = useState(false);
+  const [filterOnMinistryClick, setFilterOnMinistryClick] = useState(true);
+  const ministryFilterSnapshotRef = useRef<{ filterMinistryNames: string[]; filterActive: boolean; selectedNodeId: string | null } | null>(null);
   const [year, setYear] = useState<'2024' | '2025'>('2025');
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
@@ -324,6 +328,7 @@ export default function RealDataSankeyPage() {
     if (parsed.scaleBudgetToVisible !== undefined) setScaleBudgetToVisible(parsed.scaleBudgetToVisible);
     if (parsed.focusRelated !== undefined) setFocusRelated(parsed.focusRelated);
     if (parsed.autoFocusRelated !== undefined) setAutoFocusRelated(parsed.autoFocusRelated);
+    if (parsed.filterOnMinistryClick !== undefined) setFilterOnMinistryClick(parsed.filterOnMinistryClick);
     if (parsed.year !== undefined) setYear(parsed.year);
     // Restore zoom only when no sel= (focusOnNeighborhood will handle zoom for sel= case)
     if (parsed.zoom !== undefined && parsed.selectedNodeId === undefined) {
@@ -368,7 +373,8 @@ export default function RealDataSankeyPage() {
       setProjectSortBy(parsed.projectSortBy ?? 'budget');
       setScaleBudgetToVisible(parsed.scaleBudgetToVisible ?? true);
       setFocusRelated(parsed.focusRelated ?? false);
-      setAutoFocusRelated(parsed.autoFocusRelated ?? true);
+      setAutoFocusRelated(parsed.autoFocusRelated ?? false);
+      setFilterOnMinistryClick(parsed.filterOnMinistryClick ?? true);
       if (parsed.year !== undefined) setYear(parsed.year);
       setFilterActive(parsed.filterActive ?? false);
       if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('recipient');
@@ -410,7 +416,8 @@ export default function RealDataSankeyPage() {
     if (projectSortBy === 'spending') p.set('ps', 's');
     if (!scaleBudgetToVisible) p.set('sb', '0');
     if (focusRelated) p.set('fr', '1');
-    if (!autoFocusRelated) p.set('afr', '0');
+    if (autoFocusRelated) p.set('afr', '1');
+    if (!filterOnMinistryClick) p.set('fmc', '0');
     if (year !== '2025') p.set('yr', year);
     if (filterActive) p.set('f', '1');
     if (filterTarget === 'project') p.set('nft', 'p');
@@ -430,7 +437,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, year, filterActive, filterTarget, filterMinistryNames, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, filterActive, filterTarget, filterMinistryNames, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -1507,6 +1514,33 @@ export default function RealDataSankeyPage() {
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
     if (didPanRef.current) return;
+    // 省庁ノード × filterOnMinistryClick 連動: 単独設定 ⇄ 直前スナップショット復元
+    // 「単独設定状態」= フィルタが当該省庁単独で active（選択ノードの状態は問わない）
+    if (filterOnMinistryClick && node.type === 'ministry' && !node.aggregated) {
+      const isSingleFilterMatch = filterActive && filterMinistryNames.length === 1 && filterMinistryNames[0] === node.name;
+      if (isSingleFilterMatch && ministryFilterSnapshotRef.current) {
+        pendingHistoryAction.current = 'push';
+        const snap = ministryFilterSnapshotRef.current;
+        ministryFilterSnapshotRef.current = null;
+        setFilterMinistryNames(snap.filterMinistryNames);
+        setFilterActive(snap.filterActive);
+        setPinnedProjectId(null);
+        setPinnedRecipientId(null);
+        setPinnedMinistryName(null);
+        setFocusRelated(false);
+        selectNode(snap.selectedNodeId);
+        return;
+      }
+      if (!isSingleFilterMatch) {
+        ministryFilterSnapshotRef.current = {
+          filterMinistryNames: [...filterMinistryNames],
+          filterActive,
+          selectedNodeId,
+        };
+        setFilterMinistryNames([node.name]);
+        setFilterActive(true);
+      }
+    }
     const newId = selectedNodeId === node.id ? null : node.id;
     if (newId === null && focusRelated) {
       // Pin中ノードを再クリック → フィルターのみOFF（Pin解除しない）
@@ -1541,7 +1575,7 @@ export default function RealDataSankeyPage() {
       setPinnedMinistryName(null);
     }
     selectNode(newId);
-  }, [selectedNodeId, selectNode, focusRelated, autoFocusRelated, exitFocusRelated, graphData]);
+  }, [selectedNodeId, selectNode, focusRelated, autoFocusRelated, exitFocusRelated, graphData, filterOnMinistryClick, filterMinistryNames, filterActive]);
 
   // focusRelated=ON 中に別ノードをクリックした後、フルレイアウト更新後にオフセット調整
   useEffect(() => {
@@ -3321,6 +3355,10 @@ export default function RealDataSankeyPage() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={autoFocusRelated} onChange={e => { pendingHistoryAction.current = 'replace'; setAutoFocusRelated(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>選択時に関連ノードのみ表示</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input type="checkbox" checked={filterOnMinistryClick} onChange={e => { pendingHistoryAction.current = 'replace'; setFilterOnMinistryClick(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+                <span style={{ color: '#555' }}>省庁ノード選択でフィルタ</span>
               </label>
             </div>
           </>
