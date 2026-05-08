@@ -37,9 +37,12 @@ interface SankeyUrlState {
   filterOnMinistryClick: boolean;
   year: '2024' | '2025';
   zoom?: number;
-  filterActive?: boolean;
-  filterTarget?: 'project' | 'recipient';
-  filterNameQuery?: string;
+  searchQuery?: string;
+  showFilterPanel?: boolean;
+  filterProjectName?: string;
+  filterProjectNameRegex?: boolean;
+  filterRecipientName?: string;
+  filterRecipientNameRegex?: boolean;
   filterMinistryNames?: string[];
   filterMinBudgetText?: string;
   filterMaxBudgetText?: string;
@@ -102,9 +105,12 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const fmc = p.get('fmc'); if (fmc !== null) result.filterOnMinistryClick = fmc !== '0';
   const yr = p.get('yr'); if (yr === '2024' || yr === '2025') result.year = yr;
   const z = p.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n >= ZOOM_MIN_ABS && n <= ZOOM_MAX_ABS) result.zoom = n; }
-  const f = p.get('f'); if (f === '1') result.filterActive = true;
-  const nft = p.get('nft'); if (nft === 'p') result.filterTarget = 'project'; else if (nft === 'r') result.filterTarget = 'recipient';
-  const nf = p.get('nf'); if (nf !== null) result.filterNameQuery = nf;
+  const q = p.get('q'); if (q !== null) result.searchQuery = q;
+  const fp = p.get('fp'); if (fp !== null) result.showFilterPanel = fp === '1';
+  const fnp = p.get('fnp'); if (fnp !== null) result.filterProjectName = fnp;
+  const fnpr = p.get('fnpr'); if (fnpr !== null) result.filterProjectNameRegex = fnpr === '1';
+  const fnr = p.get('fnr'); if (fnr !== null) result.filterRecipientName = fnr;
+  const fnrr = p.get('fnrr'); if (fnrr !== null) result.filterRecipientNameRegex = fnrr === '1';
   const fm = p.getAll('fm'); if (fm.length > 0) result.filterMinistryNames = Array.from(new Set(fm.map(v => v.trim()).filter(Boolean)));
   const fmb = p.get('fmb'); if (fmb !== null) result.filterMinBudgetText = fmb;
   const fxb = p.get('fxb'); if (fxb !== null) result.filterMaxBudgetText = fxb;
@@ -222,7 +228,7 @@ export default function RealDataSankeyPage() {
   const [focusRelated, setFocusRelated] = useState(false);
   const [autoFocusRelated, setAutoFocusRelated] = useState(false);
   const [filterOnMinistryClick, setFilterOnMinistryClick] = useState(true);
-  const ministryFilterSnapshotRef = useRef<{ filterMinistryNames: string[]; filterActive: boolean; selectedNodeId: string | null } | null>(null);
+  const ministryFilterSnapshotRef = useRef<{ filterMinistryNames: string[]; selectedNodeId: string | null } | null>(null);
   const [year, setYear] = useState<'2024' | '2025'>('2025');
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
@@ -246,9 +252,13 @@ export default function RealDataSankeyPage() {
   const [searchUseRegex, setSearchUseRegex] = useState(false);
   const [searchPage, setSearchPage] = useState(0);
   // Filter feature
-  const [filterActive, setFilterActive] = useState(false);
-  const [showAmountSliders, setShowAmountSliders] = useState(false);
-  const [filterTarget, setFilterTarget] = useState<'project' | 'recipient'>('recipient');
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [filterProjectName, setFilterProjectName] = useState('');
+  const [filterProjectNameRegex, setFilterProjectNameRegex] = useState(false);
+  const [debouncedFilterProjectName, setDebouncedFilterProjectName] = useState('');
+  const [filterRecipientName, setFilterRecipientName] = useState('');
+  const [filterRecipientNameRegex, setFilterRecipientNameRegex] = useState(false);
+  const [debouncedFilterRecipientName, setDebouncedFilterRecipientName] = useState('');
   const [filterMinistryNames, setFilterMinistryNames] = useState<string[]>([]);
   const [showMinistryDropdown, setShowMinistryDropdown] = useState(false);
   const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
@@ -334,9 +344,13 @@ export default function RealDataSankeyPage() {
     if (parsed.zoom !== undefined && parsed.selectedNodeId === undefined) {
       urlRestoredZoomRef.current = parsed.zoom;
     }
-    if (parsed.filterActive !== undefined) setFilterActive(parsed.filterActive);
-    if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget);
-    if (parsed.filterNameQuery !== undefined) { setSearchQuery(parsed.filterNameQuery); }
+    // URL 復元時は debounced 値も同時にセットして、~150ms の stale-filter window を回避
+    if (parsed.searchQuery !== undefined) { setSearchQuery(parsed.searchQuery); setDebouncedQuery(parsed.searchQuery); }
+    if (parsed.showFilterPanel !== undefined) setShowFilterPanel(parsed.showFilterPanel);
+    if (parsed.filterProjectName !== undefined) { setFilterProjectName(parsed.filterProjectName); setDebouncedFilterProjectName(parsed.filterProjectName); }
+    if (parsed.filterProjectNameRegex !== undefined) setFilterProjectNameRegex(parsed.filterProjectNameRegex);
+    if (parsed.filterRecipientName !== undefined) { setFilterRecipientName(parsed.filterRecipientName); setDebouncedFilterRecipientName(parsed.filterRecipientName); }
+    if (parsed.filterRecipientNameRegex !== undefined) setFilterRecipientNameRegex(parsed.filterRecipientNameRegex);
     if (parsed.filterMinistryNames !== undefined) setFilterMinistryNames(parsed.filterMinistryNames);
     if (parsed.filterMinBudgetText !== undefined) setFilterMinBudgetText(parsed.filterMinBudgetText);
     if (parsed.filterMaxBudgetText !== undefined) setFilterMaxBudgetText(parsed.filterMaxBudgetText);
@@ -376,9 +390,19 @@ export default function RealDataSankeyPage() {
       setAutoFocusRelated(parsed.autoFocusRelated ?? false);
       setFilterOnMinistryClick(parsed.filterOnMinistryClick ?? true);
       if (parsed.year !== undefined) setYear(parsed.year);
-      setFilterActive(parsed.filterActive ?? false);
-      if (parsed.filterTarget !== undefined) setFilterTarget(parsed.filterTarget); else setFilterTarget('recipient');
-      setSearchQuery(parsed.filterNameQuery ?? '');
+      // URL 復元時は debounced 値も同時にセットして、~150ms の stale-filter window を回避
+      const restoredSearchQuery = parsed.searchQuery ?? '';
+      setSearchQuery(restoredSearchQuery);
+      setDebouncedQuery(restoredSearchQuery);
+      setShowFilterPanel(parsed.showFilterPanel ?? false);
+      const restoredProjectName = parsed.filterProjectName ?? '';
+      setFilterProjectName(restoredProjectName);
+      setDebouncedFilterProjectName(restoredProjectName);
+      setFilterProjectNameRegex(parsed.filterProjectNameRegex ?? false);
+      const restoredRecipientName = parsed.filterRecipientName ?? '';
+      setFilterRecipientName(restoredRecipientName);
+      setDebouncedFilterRecipientName(restoredRecipientName);
+      setFilterRecipientNameRegex(parsed.filterRecipientNameRegex ?? false);
       setFilterMinistryNames(parsed.filterMinistryNames ?? []);
       setFilterMinBudgetText(parsed.filterMinBudgetText ?? '');
       setFilterMaxBudgetText(parsed.filterMaxBudgetText ?? '');
@@ -419,9 +443,12 @@ export default function RealDataSankeyPage() {
     if (autoFocusRelated) p.set('afr', '1');
     if (!filterOnMinistryClick) p.set('fmc', '0');
     if (year !== '2025') p.set('yr', year);
-    if (filterActive) p.set('f', '1');
-    if (filterTarget === 'project') p.set('nft', 'p');
-    if (filterActive && searchQuery) p.set('nf', searchQuery);
+    if (searchQuery) p.set('q', searchQuery);
+    if (showFilterPanel) p.set('fp', '1');
+    if (filterProjectName) p.set('fnp', filterProjectName);
+    if (filterProjectNameRegex) p.set('fnpr', '1');
+    if (filterRecipientName) p.set('fnr', filterRecipientName);
+    if (filterRecipientNameRegex) p.set('fnrr', '1');
     for (const name of filterMinistryNames) p.append('fm', name);
     if (filterMinBudgetText) p.set('fmb', filterMinBudgetText);
     if (filterMaxBudgetText) p.set('fxb', filterMaxBudgetText);
@@ -437,7 +464,7 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, filterActive, filterTarget, filterMinistryNames, searchQuery, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, searchQuery, showFilterPanel, filterProjectName, filterProjectNameRegex, filterRecipientName, filterRecipientNameRegex, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -523,7 +550,7 @@ export default function RealDataSankeyPage() {
     pendingHistoryAction.current = 'replace';
     setRecipientOffset(0);
     setProjectOffset(0);
-  }, [filterActive, filterTarget, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery]);
+  }, [filterMinistryNames, debouncedFilterProjectName, debouncedFilterRecipientName, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
 
   // Sync URL when filter name query changes (separate from above to avoid double reset)
   const filterQueryInitRef = useRef(false);
@@ -784,7 +811,7 @@ export default function RealDataSankeyPage() {
     const ro = new ResizeObserver(measure);
     if (searchBoxRef.current) ro.observe(searchBoxRef.current);
     return () => ro.disconnect();
-  }, [showAmountSliders, filterActive]);
+  }, [showFilterPanel]);
 
   const searchDropdownMaxH = useMemo(() => {
     const obstacleTop = showMinimap
@@ -839,22 +866,28 @@ export default function RealDataSankeyPage() {
     const maxSpendingYen = parseAmountToYen(filterMaxSpendingText);
     const hasBudget = minBudgetYen !== null || maxBudgetYen !== null;
     const hasSpending = minSpendingYen !== null || maxSpendingYen !== null;
-    const trimmedQuery = debouncedQuery.trim();
-    const hasName = filterActive && trimmedQuery.length >= 1;
+    const trimmedProjectName = debouncedFilterProjectName.trim();
+    const trimmedRecipientName = debouncedFilterRecipientName.trim();
+    const hasProjectName = trimmedProjectName.length >= 1;
+    const hasRecipientName = trimmedRecipientName.length >= 1;
     const hasMinistry = filterMinistryNames.length > 0;
     const hasAccountFilter = !acGeneral || !acSpecial || !acBoth || !acNone;
-    if (!hasBudget && !hasSpending && !hasName && !hasMinistry && !hasAccountFilter) return null;
+    if (!hasBudget && !hasSpending && !hasProjectName && !hasRecipientName && !hasMinistry && !hasAccountFilter) return null;
     const selectedMinistrySet = new Set(filterMinistryNames);
     const minBudget = minBudgetYen ?? -Infinity;
     const maxBudget = maxBudgetYen ?? Infinity;
     const minSpending = minSpendingYen ?? 0;
     const maxSpending = maxSpendingYen ?? Infinity;
-    let nameRegex: RegExp | null = null;
-    if (hasName && searchUseRegex) {
-      try { nameRegex = new RegExp(trimmedQuery, 'i'); } catch { /* invalid regex */ }
-    }
-    const trimmedQueryLower = trimmedQuery.toLocaleLowerCase();
-    const matchesName = (name: string) => nameRegex ? nameRegex.test(name) : name.toLocaleLowerCase().includes(trimmedQueryLower);
+    const buildMatcher = (query: string, useRegex: boolean): ((name: string) => boolean) => {
+      if (useRegex) {
+        try { const re = new RegExp(query, 'i'); return name => re.test(name); }
+        catch { return () => false; }
+      }
+      const qLower = query.toLocaleLowerCase();
+      return name => name.toLocaleLowerCase().includes(qLower);
+    };
+    const matchesProject = hasProjectName ? buildMatcher(trimmedProjectName, filterProjectNameRegex) : null;
+    const matchesRecipient = hasRecipientName ? buildMatcher(trimmedRecipientName, filterRecipientNameRegex) : null;
     const excluded = new Set<string>();
     const spendingByPid = new Map(
       graphData.nodes.filter(n => n.type === 'project-spending' && n.projectId != null).map(n => [n.projectId!, n])
@@ -864,7 +897,7 @@ export default function RealDataSankeyPage() {
       if (n.type === 'project-budget' && n.projectId != null) {
         const sn = spendingByPid.get(n.projectId);
         const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
-        const failName = hasName && filterTarget === 'project' && !matchesName(n.name);
+        const failProjectName = matchesProject !== null && !matchesProject(n.name);
         const failMinistry = hasMinistry && !selectedMinistrySet.has(n.ministry ?? '');
         const failAccount = hasAccountFilter && (() => {
           const cat = n.accountCategory;
@@ -873,15 +906,15 @@ export default function RealDataSankeyPage() {
           if (cat === 'both') return !acBoth;
           return !acNone; // undefined → 'none'
         })();
-        if (failBudget || failName || failMinistry || failAccount) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
+        if (failBudget || failProjectName || failMinistry || failAccount) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
       } else if (n.type === 'recipient') {
         const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
-        const failName = hasName && filterTarget === 'recipient' && !matchesName(n.name);
-        if (failSpending || failName) excluded.add(n.id);
+        const failRecipientName = matchesRecipient !== null && !matchesRecipient(n.name);
+        if (failSpending || failRecipientName) excluded.add(n.id);
       }
     }
     // Pass 2: 支出先・予算フィルタが有効な場合、残存支出先のない事業／孤立支出先を除外
-    if (hasSpending || hasBudget || hasMinistry || (hasName && filterTarget === 'recipient')) {
+    if (hasSpending || hasBudget || hasMinistry || hasRecipientName) {
       const projectsWithSurvivingRecipients = new Set(
         graphData.edges
           .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
@@ -919,7 +952,7 @@ export default function RealDataSankeyPage() {
       }
     }
     return excluded.size > 0 ? excluded : null;
-  }, [graphData, filterActive, filterTarget, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedQuery, searchUseRegex, acGeneral, acSpecial, acBoth, acNone]);
+  }, [graphData, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -1515,15 +1548,14 @@ export default function RealDataSankeyPage() {
     e.stopPropagation();
     if (didPanRef.current) return;
     // 省庁ノード × filterOnMinistryClick 連動: 単独設定 ⇄ 直前スナップショット復元
-    // 「単独設定状態」= フィルタが当該省庁単独で active（選択ノードの状態は問わない）
+    // 「単独設定状態」= フィルタが当該省庁単独（選択ノードには依存しない）
     if (filterOnMinistryClick && node.type === 'ministry' && !node.aggregated) {
-      const isSingleFilterMatch = filterActive && filterMinistryNames.length === 1 && filterMinistryNames[0] === node.name;
+      const isSingleFilterMatch = filterMinistryNames.length === 1 && filterMinistryNames[0] === node.name;
       if (isSingleFilterMatch && ministryFilterSnapshotRef.current) {
         pendingHistoryAction.current = 'push';
         const snap = ministryFilterSnapshotRef.current;
         ministryFilterSnapshotRef.current = null;
         setFilterMinistryNames(snap.filterMinistryNames);
-        setFilterActive(snap.filterActive);
         setPinnedProjectId(null);
         setPinnedRecipientId(null);
         setPinnedMinistryName(null);
@@ -1534,11 +1566,9 @@ export default function RealDataSankeyPage() {
       if (!isSingleFilterMatch) {
         ministryFilterSnapshotRef.current = {
           filterMinistryNames: [...filterMinistryNames],
-          filterActive,
           selectedNodeId,
         };
         setFilterMinistryNames([node.name]);
-        setFilterActive(true);
       }
     }
     const newId = selectedNodeId === node.id ? null : node.id;
@@ -1575,7 +1605,7 @@ export default function RealDataSankeyPage() {
       setPinnedMinistryName(null);
     }
     selectNode(newId);
-  }, [selectedNodeId, selectNode, focusRelated, autoFocusRelated, exitFocusRelated, graphData, filterOnMinistryClick, filterMinistryNames, filterActive]);
+  }, [selectedNodeId, selectNode, focusRelated, autoFocusRelated, exitFocusRelated, graphData, filterOnMinistryClick, filterMinistryNames]);
 
   // focusRelated=ON 中に別ノードをクリックした後、フルレイアウト更新後にオフセット調整
   useEffect(() => {
@@ -1591,6 +1621,16 @@ export default function RealDataSankeyPage() {
     const timer = setTimeout(() => setDebouncedQuery(searchQuery), 150);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedFilterProjectName(filterProjectName), 150);
+    return () => clearTimeout(timer);
+  }, [filterProjectName]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedFilterRecipientName(filterRecipientName), 150);
+    return () => clearTimeout(timer);
+  }, [filterRecipientName]);
 
   useEffect(() => { setSearchPage(0); setSearchCursorIndex(-1); }, [debouncedQuery]);
 
@@ -2784,42 +2824,21 @@ export default function RealDataSankeyPage() {
           <div style={{ background: 'rgba(255,255,255,0.95)', border: `1px solid ${searchRegexError ? '#e53935' : '#e0e0e0'}`, borderRadius: '6px 6px 0 6px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
             {/* Input row */}
             <div style={{ position: 'relative' }}>
-              {/* Search/Filter mode toggle icon */}
-              <button
-                type="button"
-                data-testid={testId('search-mode-toggle')}
-                title={filterActive ? 'フィルタモード（クリックで検索モードに切替）' : '検索モード（クリックでフィルタモードに切替）'}
-                onClick={() => setFilterActive(f => !f)}
-                style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20 }}
+              {/* Search icon */}
+              <span
+                aria-hidden="true"
+                style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, pointerEvents: 'none' }}
               >
-                {filterActive ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#1a73e8">
-                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999">
-                    <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                  </svg>
-                )}
-              </button>
-              {/* Filter target select — フィルタモード時のみ表示、虫眼鏡の隣 */}
-              {filterActive && (
-                <select
-                  data-testid={testId('filter-target-select')}
-                  value={filterTarget}
-                  onChange={e => setFilterTarget(e.target.value as 'project' | 'recipient')}
-                  style={{ position: 'absolute', left: 28, top: '50%', transform: 'translateY(-50%)', fontSize: META_FONT_PX, border: '1px solid #ddd', borderRadius: 3, padding: '1px 2px', background: 'rgba(255,255,255,0.9)', color: '#555', cursor: 'pointer', height: 20 }}
-                >
-                  <option value="project">事業</option>
-                  <option value="recipient">支出先</option>
-                </select>
-              )}
+                <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999">
+                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+              </span>
               <input
                 ref={searchInputRef}
                 data-testid={testId('search-input')}
                 type="text"
                 value={searchQuery}
-                onChange={e => { setSearchQuery(e.target.value); if (!filterActive) setShowSearchResults(true); setSearchCursorIndex(-1); }}
+                onChange={e => { setSearchQuery(e.target.value); setShowSearchResults(true); setSearchCursorIndex(-1); }}
                 onFocus={() => { const q = debouncedQuery.trim(); if (meetsSearchMinLength(q)) setShowSearchResults(true); }}
                 onKeyDown={e => {
                   if (e.key === 'Escape') { setShowSearchResults(false); setSearchQuery(''); setDebouncedQuery(''); setSearchCursorIndex(-1); return; }
@@ -2846,10 +2865,10 @@ export default function RealDataSankeyPage() {
                     }
                   }
                 }}
-                placeholder={filterActive ? 'フィルタ' : '検索(2文字以上/PID)'}
+                placeholder="検索(2文字以上/PID)"
                 style={{
                   width: '100%', boxSizing: 'border-box',
-                  paddingLeft: filterActive ? 90 : 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
+                  paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
                   fontSize: SEARCH_FONT_PX, border: 'none', borderRadius: 8,
                   background: 'transparent', outline: 'none', color: '#333',
                 }}
@@ -2879,8 +2898,8 @@ export default function RealDataSankeyPage() {
               )}
             </div>{/* end input row */}
 
-            {/* 金額フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
-            {showAmountSliders && (
+            {/* フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
+            {showFilterPanel && (
               <div style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {/* 会計区分フィルタ（コンボボックス） */}
                 {(() => {
@@ -2901,7 +2920,7 @@ export default function RealDataSankeyPage() {
                   );
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={accountDropdownRef}>
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 26, flexShrink: 0 }}>会計</span>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>会計</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
                         <button type="button" ref={accountButtonRef}
                           onClick={() => {
@@ -2955,7 +2974,7 @@ export default function RealDataSankeyPage() {
                   );
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={ministryDropdownRef}>
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 26, flexShrink: 0 }}>省庁</span>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>省庁</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
                         <button type="button" ref={ministryButtonRef}
                           onClick={() => {
@@ -2995,15 +3014,53 @@ export default function RealDataSankeyPage() {
                     </div>
                   );
                 })()}
+                {/* 事業名・支出先名 テキスト入力（それぞれ独立した正規表現トグル付き） */}
+                {([
+                  { key: 'project', label: '事業', value: filterProjectName, setValue: setFilterProjectName, useRegex: filterProjectNameRegex, setUseRegex: setFilterProjectNameRegex },
+                  { key: 'recipient', label: '支出先', value: filterRecipientName, setValue: setFilterRecipientName, useRegex: filterRecipientNameRegex, setUseRegex: setFilterRecipientNameRegex },
+                ] as const).map(({ key, label, value, setValue, useRegex, setUseRegex }) => {
+                  const trimmed = value.trim();
+                  let regexError = false;
+                  if (useRegex && trimmed.length >= 1) {
+                    if (trimmed.length > SEARCH_REGEX_MAX_LEN) regexError = true;
+                    else { try { new RegExp(trimmed); } catch { regexError = true; } }
+                  }
+                  return (
+                    <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>{label}</span>
+                      <div style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex' }}>
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={e => setValue(e.target.value)}
+                          placeholder={useRegex ? '正規表現' : '部分一致'}
+                          style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${regexError ? '#e53935' : '#ddd'}`, borderRadius: 4, padding: '3px 28px 3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                        />
+                        <button
+                          type="button"
+                          title={useRegex ? '正規表現をオフ' : '正規表現で絞り込み'}
+                          aria-label={useRegex ? '正規表現をオフ' : '正規表現で絞り込み'}
+                          aria-pressed={useRegex}
+                          onClick={() => setUseRegex(v => !v)}
+                          style={{ position: 'absolute', right: 2, top: '50%', transform: 'translateY(-50%)', background: useRegex ? '#1a73e8' : 'transparent', border: 'none', borderRadius: 3, cursor: 'pointer', color: useRegex ? '#fff' : '#888', fontSize: META_FONT_PX, fontFamily: 'monospace', fontWeight: 'bold', lineHeight: 1, padding: '2px 4px' }}
+                        >.*</button>
+                      </div>
+                      {value && (
+                        <button type="button" onClick={() => setValue('')}
+                          style={{ fontSize: META_FONT_PX, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                      )}
+                    </div>
+                  );
+                })}
                 {/* 予算・支出 テキスト入力 */}
                 {([
                   { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
                   { label: '支出', minText: filterMinSpendingText, maxText: filterMaxSpendingText, setMin: setFilterMinSpendingText, setMax: setFilterMaxSpendingText },
                 ] as const).map(({ label, minText, maxText, setMin, setMax }) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 26, flexShrink: 0 }}>{label}</span>
+                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>{label}</span>
                     <input type="text" value={minText} onChange={e => setMin(e.target.value)}
-                      placeholder="例: 100億、50万円"
+                      placeholder="例: 100億、50万"
                       style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${parseAmountToYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
                     />
                     <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#aaa', flexShrink: 0 }}>〜</span>
@@ -3017,7 +3074,6 @@ export default function RealDataSankeyPage() {
                     )}
                   </div>
                 ))}
-                <div style={{ fontSize: META_FONT_PX, color: '#bbb', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>例: 1.26億 / 4567万円 / 1兆2000億</div>
               </div>
             )}
           </div>{/* end card */}
@@ -3027,13 +3083,13 @@ export default function RealDataSankeyPage() {
             return (
               <button
                 type="button"
-                title={showAmountSliders ? '金額フィルタ を隠す' : '金額フィルタ を表示'}
-                aria-pressed={showAmountSliders}
-                onClick={() => setShowAmountSliders(s => !s)}
+                title={showFilterPanel ? 'フィルタ を隠す' : 'フィルタ を表示'}
+                aria-pressed={showFilterPanel}
+                onClick={() => setShowFilterPanel(s => !s)}
                 style={{ alignSelf: 'flex-end', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', borderTop: 'none', borderLeft: '1px solid #e0e0e0', borderRight: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
-                  <path d={showAmountSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
+                  <path d={showFilterPanel ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
                 </svg>
               </button>
             );
@@ -3043,7 +3099,7 @@ export default function RealDataSankeyPage() {
         </div>{/* end Row 1 flex */}
 
         {/* Dropdown */}
-        {!filterActive && showSearchResults && searchResults.length > 0 && (
+        {showSearchResults && searchResults.length > 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
             {/* Count header */}
             <div style={{ padding: '5px 10px', fontSize: META_FONT_PX, color: '#999', borderBottom: '1px solid #f0f0f0' }}>
@@ -3083,7 +3139,7 @@ export default function RealDataSankeyPage() {
           </div>
         )}
         {/* No results */}
-        {!filterActive && showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
+        {showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: PANEL_META_FONT_PX, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
