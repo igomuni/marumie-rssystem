@@ -419,8 +419,8 @@ function SubcontractsPageInner() {
                     PID <SortIndicator k="projectId" />
                   </th>
                   <th style={{ ...thStyle, minWidth: 200 }}>事業名</th>
-                  <th style={thStyle}>府省庁</th>
-                  <th style={thStyle}>部・課・局</th>
+                  <th style={thStyle}>省庁</th>
+                  <th style={thStyle}>担当組織</th>
                   <th style={thStyle}>会計区分</th>
                   <th style={thStyle} onClick={() => toggleSort('budget')}>
                     予算額 <SortIndicator k="budget" />
@@ -429,34 +429,34 @@ function SubcontractsPageInner() {
                     執行額 <SortIndicator k="execution" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('totalBlockCount')}>
-                    ブロック数 <SortIndicator k="totalBlockCount" />
+                    ブロック <SortIndicator k="totalBlockCount" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('directBlockCount')}>
-                    直接支出数 <SortIndicator k="directBlockCount" />
+                    直接支出 <SortIndicator k="directBlockCount" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('subcontractBlockCount')}>
-                    再委託数 <SortIndicator k="subcontractBlockCount" />
+                    再委託 <SortIndicator k="subcontractBlockCount" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('indirectCostCount')}>
-                    間接経費数 <SortIndicator k="indirectCostCount" />
+                    間接経費 <SortIndicator k="indirectCostCount" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('separateOriginCount')}>
-                    別財源数 <SortIndicator k="separateOriginCount" />
+                    別財源 <SortIndicator k="separateOriginCount" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('totalRecipientCount')}>
-                    支出先数 <SortIndicator k="totalRecipientCount" />
+                    支出先 <SortIndicator k="totalRecipientCount" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('maxDepth')}>
-                    階層数 <SortIndicator k="maxDepth" />
+                    階層 <SortIndicator k="maxDepth" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('branchingBlockCount')}>
-                    分岐数 <SortIndicator k="branchingBlockCount" />
+                    分岐 <SortIndicator k="branchingBlockCount" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('maxBranchWidth')}>
                     最大分岐 <SortIndicator k="maxBranchWidth" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('mergeTargetCount')}>
-                    合流数 <SortIndicator k="mergeTargetCount" />
+                    合流 <SortIndicator k="mergeTargetCount" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('maxMergeWidth')}>
                     最大合流 <SortIndicator k="maxMergeWidth" />
@@ -492,9 +492,19 @@ function SubcontractsPageInner() {
                       </Link>
                     </td>
                     <td style={{ padding: '8px 10px', color: '#374151', whiteSpace: 'nowrap' }}>{g.ministry}</td>
-                    <td style={{ padding: '8px 10px', color: '#374151', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={g.bureau}>
-                      {g.bureau || <span style={{ color: '#cbd5e1' }}>—</span>}
-                    </td>
+                    {(() => {
+                      const parts = g.bureau ? g.bureau.split(' / ') : [];
+                      const leaf = parts[parts.length - 1] ?? '';
+                      const fullChain = [g.ministry, ...parts].filter(Boolean).join(' / ');
+                      return (
+                        <td
+                          style={{ padding: '8px 10px', color: '#374151', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                          title={fullChain || undefined}
+                        >
+                          {leaf || <span style={{ color: '#cbd5e1' }}>—</span>}
+                        </td>
+                      );
+                    })()}
                     <td style={{ padding: '8px 10px', color: '#374151', whiteSpace: 'nowrap' }}>
                       {g.accountCategory || <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
