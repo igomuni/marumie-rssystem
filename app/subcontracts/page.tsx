@@ -22,6 +22,8 @@ type SortKey =
 type SortDir = 'asc' | 'desc';
 type StructureFilter = 'all' | 'separate-origin' | 'merge' | 'institutional';
 
+const PAGE_SIZE = 50;
+
 function formatYen(v: number): string {
   if (v >= 1e12) return `${(v / 1e12).toFixed(2)}兆円`;
   if (v >= 1e10) return `${Math.round(v / 1e8).toLocaleString()}億円`;
@@ -44,6 +46,14 @@ function SubcontractsPageInner() {
   const [sortKey, setSortKey] = useState<SortKey>('projectId');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [structureFilter, setStructureFilter] = useState<StructureFilter>('all');
+  const [selectedMinistry, setSelectedMinistry] = useState<string>('');
+  const [page, setPage] = useState(1);
+
+  const ministries = useMemo(() => {
+    const set = new Set<string>();
+    for (const g of graphs) if (g.ministry) set.add(g.ministry);
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'ja'));
+  }, [graphs]);
 
   useEffect(() => {
     setLoading(true);
@@ -66,6 +76,7 @@ function SubcontractsPageInner() {
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase();
     return graphs.filter((g) => {
+      if (selectedMinistry && g.ministry !== selectedMinistry) return false;
       if (structureFilter === 'separate-origin' && !g.hasSeparateOrigin) return false;
       if (structureFilter === 'merge' && !g.hasMerge) return false;
       if (structureFilter === 'institutional' && !g.isInstitutionalFlowOnly) return false;
@@ -81,7 +92,7 @@ function SubcontractsPageInner() {
         )
       );
     });
-  }, [graphs, query, structureFilter]);
+  }, [graphs, query, structureFilter, selectedMinistry]);
 
   function subcontractBlockCount(g: SubcontractGraph): number {
     return g.totalBlockCount - g.directBlockCount - g.separateOriginCount;
@@ -106,6 +117,17 @@ function SubcontractsPageInner() {
       return sortDir === 'asc' ? va - vb : vb - va;
     });
   }, [filtered, sortKey, sortDir]);
+
+  // フィルタ・ソート・年度変更時はページ1へ戻す
+  const filterKey = `${year}|${selectedMinistry}|${structureFilter}|${query}|${sortKey}|${sortDir}`;
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+  if (filterKey !== lastFilterKey) {
+    setLastFilterKey(filterKey);
+    setPage(1);
+  }
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const pageItems = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -133,59 +155,71 @@ function SubcontractsPageInner() {
     userSelect: 'none',
   };
 
+  // 集計
+  const totalSeparateOrigin = graphs.filter(g => g.hasSeparateOrigin).length;
+  const totalMerge = graphs.filter(g => g.hasMerge).length;
+  const totalInstitutional = graphs.filter(g => g.isInstitutionalFlowOnly).length;
+
   return (
-    <div style={{ minHeight: '100vh', background: '#f9fafb', padding: '24px 16px' }}>
-      <div style={{ maxWidth: 1600, margin: '0 auto' }}>
-        {/* ヘッダー */}
-        <div style={{ marginBottom: 24 }}>
-          <Link href="/" style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none' }}>← トップ</Link>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#111827', marginTop: 8, marginBottom: 4 }}>
-            🔗 再委託構造ブラウザ
-          </h1>
-          <p style={{ fontSize: 13, color: '#6b7280' }}>
-            事業ごとのブロック間フロー（再委託構造）を一覧・探索できます。
+    <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+      {/* ヘッダー（白背景） */}
+      <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '16px' }}>
+        <div style={{ maxWidth: 1600, margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <Link href="/" style={{ color: '#2563eb', fontSize: 13, textDecoration: 'none' }}>← トップ</Link>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: 0 }}>
+              再委託構造ブラウザ
+            </h1>
+            <select
+              value={year}
+              onChange={(e) => { const y = Number(e.target.value); setYear(y); router.replace(`/subcontracts?year=${y}`); }}
+              style={{ marginLeft: 8, padding: '4px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, background: '#fff', cursor: 'pointer' }}
+            >
+              <option value={2025}>2025年度</option>
+              <option value={2024}>2024年度</option>
+            </select>
+          </div>
+          <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4, marginBottom: 0 }}>
+            {graphs.length.toLocaleString()}事業 ／ 別財源 {totalSeparateOrigin.toLocaleString()} ／ 合流 {totalMerge.toLocaleString()} ／ 制度フロー {totalInstitutional.toLocaleString()}
           </p>
         </div>
+      </div>
 
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '12px 16px' }}>
         {/* コントロール */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-          <select
-            value={year}
-            onChange={(e) => { const y = Number(e.target.value); setYear(y); router.replace(`/subcontracts?year=${y}`); }}
-            style={{
-              padding: '6px 10px',
-              borderRadius: 6,
-              border: '1px solid #d1d5db',
-              fontSize: 13,
-              background: '#fff',
-            }}
-          >
-            <option value={2024}>2024年度</option>
-            <option value={2025}>2025年度</option>
-          </select>
-
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           <input
             type="text"
-            placeholder="検索（PID・事業名・府省庁・ブロック名・支出先名）"
+            placeholder="事業名・PID・府省庁・ブロック名・支出先名で検索..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             style={{
               flex: 1,
               minWidth: 260,
-              padding: '6px 10px',
-              borderRadius: 6,
+              padding: '6px 12px',
+              borderRadius: 8,
               border: '1px solid #d1d5db',
               fontSize: 13,
+              background: '#fff',
             }}
           />
-
-          <span style={{ fontSize: 13, color: '#6b7280' }}>
-            {filtered.length.toLocaleString()} 件 / {graphs.length.toLocaleString()} 件
+          <select
+            value={selectedMinistry}
+            onChange={(e) => setSelectedMinistry(e.target.value)}
+            style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, background: '#fff', cursor: 'pointer' }}
+          >
+            <option value="">全府省庁</option>
+            {ministries.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+          <span style={{ fontSize: 12, color: '#6b7280' }}>
+            {filtered.length.toLocaleString()}件表示
           </span>
         </div>
 
         {/* 構造フィルタ */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, marginRight: 4 }}>構造:</span>
           {([
             ['all', 'すべて'],
@@ -265,7 +299,7 @@ function SubcontractsPageInner() {
                 </tr>
               </thead>
               <tbody>
-                {sorted.map((g, i) => (
+                {pageItems.map((g, i) => (
                   <tr
                     key={g.projectId}
                     style={{
@@ -337,6 +371,47 @@ function SubcontractsPageInner() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* ページネーション */}
+        {!loading && !error && totalPages > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              style={{
+                padding: '4px 12px',
+                fontSize: 13,
+                borderRadius: 6,
+                border: '1px solid #d1d5db',
+                background: '#fff',
+                color: '#374151',
+                cursor: page === 1 ? 'not-allowed' : 'pointer',
+                opacity: page === 1 ? 0.3 : 1,
+              }}
+            >
+              ← 前へ
+            </button>
+            <span style={{ fontSize: 13, color: '#6b7280' }}>
+              {page} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              style={{
+                padding: '4px 12px',
+                fontSize: 13,
+                borderRadius: 6,
+                border: '1px solid #d1d5db',
+                background: '#fff',
+                color: '#374151',
+                cursor: page === totalPages ? 'not-allowed' : 'pointer',
+                opacity: page === totalPages ? 0.3 : 1,
+              }}
+            >
+              次へ →
+            </button>
           </div>
         )}
       </div>
