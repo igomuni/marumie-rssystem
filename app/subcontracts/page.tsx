@@ -14,6 +14,8 @@ type SortKey =
   | 'accountCategory'
   | 'budget'
   | 'execution'
+  | 'directExpenseTotal'
+  | 'totalExpense'
   | 'maxDepth'
   | 'totalBlockCount'
   | 'directBlockCount'
@@ -76,6 +78,11 @@ function SubcontractsPageInner() {
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [structureFilter, setStructureFilter] = useState<StructureFilter>('all');
   const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
+  // 会計区分フィルタ（sankey-svg と同じ4区分）
+  const [acGeneral, setAcGeneral] = useState(true);
+  const [acSpecial, setAcSpecial] = useState(true);
+  const [acBoth, setAcBoth] = useState(true);
+  const [acNone, setAcNone] = useState(true);
   const [showMinistryDropdown, setShowMinistryDropdown] = useState(false);
   const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
   const ministryButtonRef = useRef<HTMLButtonElement>(null);
@@ -127,6 +134,16 @@ function SubcontractsPageInner() {
     const q = query.trim().toLocaleLowerCase();
     return graphs.filter((g) => {
       if (selectedMinistries.length > 0 && !selectedMinistries.includes(g.ministry)) return false;
+      // 会計区分フィルタ
+      const cat = g.accountCategory;
+      const isGeneral = cat === '一般会計';
+      const isSpecial = cat === '特別会計';
+      const isBoth = cat === '一般会計+特別会計';
+      const isNone = !cat;
+      if (isGeneral && !acGeneral) return false;
+      if (isSpecial && !acSpecial) return false;
+      if (isBoth && !acBoth) return false;
+      if (isNone && !acNone) return false;
       if (structureFilter === 'separate-origin' && !g.hasSeparateOrigin) return false;
       if (structureFilter === 'merge' && !g.hasMerge) return false;
       if (structureFilter === 'institutional' && !g.isInstitutionalFlowOnly) return false;
@@ -142,7 +159,7 @@ function SubcontractsPageInner() {
         )
       );
     });
-  }, [graphs, query, structureFilter, selectedMinistries]);
+  }, [graphs, query, structureFilter, selectedMinistries, acGeneral, acSpecial, acBoth, acNone]);
 
   function subcontractBlockCount(g: SubcontractGraph): number {
     return g.totalBlockCount - g.directBlockCount - g.separateOriginCount;
@@ -170,6 +187,8 @@ function SubcontractsPageInner() {
       if (sortKey === 'projectId') { va = a.projectId; vb = b.projectId; }
       else if (sortKey === 'budget') { va = a.budget; vb = b.budget; }
       else if (sortKey === 'execution') { va = a.execution; vb = b.execution; }
+      else if (sortKey === 'directExpenseTotal') { va = a.directExpenseTotal; vb = b.directExpenseTotal; }
+      else if (sortKey === 'totalExpense') { va = a.totalExpense; vb = b.totalExpense; }
       else if (sortKey === 'maxDepth') { va = a.maxDepth; vb = b.maxDepth; }
       else if (sortKey === 'totalBlockCount') { va = a.totalBlockCount; vb = b.totalBlockCount; }
       else if (sortKey === 'directBlockCount') { va = a.directBlockCount; vb = b.directBlockCount; }
@@ -187,7 +206,8 @@ function SubcontractsPageInner() {
   }, [filtered, sortKey, sortDir]);
 
   // フィルタ・ソート・年度変更時はページ1へ戻す
-  const filterKey = `${year}|${selectedMinistries.join(',')}|${structureFilter}|${query}|${sortKey}|${sortDir}`;
+  const acKey = `${acGeneral ? 'g' : ''}${acSpecial ? 's' : ''}${acBoth ? 'b' : ''}${acNone ? 'n' : ''}`;
+  const filterKey = `${year}|${selectedMinistries.join(',')}|${structureFilter}|${query}|${acKey}|${sortKey}|${sortDir}`;
   const [lastFilterKey, setLastFilterKey] = useState(filterKey);
   if (filterKey !== lastFilterKey) {
     setLastFilterKey(filterKey);
@@ -240,28 +260,33 @@ function SubcontractsPageInner() {
     whiteSpace: 'nowrap',
   };
 
-  // フルHD 70% (≈1344px) 基準の列幅。事業名・担当組織は truncate で吸収。
-  const COL_WIDTHS = [
-    50,   // PID
-    240,  // 事業名
-    88,   // 省庁
-    110,  // 担当組織
-    72,   // 会計区分
-    80,   // 予算額
-    80,   // 執行額
-    60,   // ブロック
-    64,   // 直接支出
-    56,   // 再委託
-    64,   // 間接経費
-    56,   // 別財源
-    64,   // 支出先
-    52,   // 階層
-    52,   // 分岐
-    60,   // 最大分岐
-    52,   // 合流
-    60,   // 最大合流
-    76,   // 構造
+  // 列幅: 事業名(idx 1) と 担当組織(idx 3) は null=auto で残り幅を分配。
+  // ウィンドウ幅に合わせて伸縮し、長文は truncate で吸収。
+  const COL_WIDTHS: (number | null)[] = [
+    50,    // PID
+    null,  // 事業名 (auto, truncate)
+    88,    // 省庁
+    null,  // 担当組織 (auto, truncate)
+    72,    // 会計区分
+    80,    // 予算額
+    80,    // 執行額
+    96,    // 直接支出合計
+    96,    // 支出額合計
+    60,    // ブロック
+    64,    // 直接支出
+    56,    // 再委託
+    64,    // 間接経費
+    56,    // 別財源
+    64,    // 支出先
+    52,    // 階層
+    52,    // 分岐
+    60,    // 最大分岐
+    52,    // 合流
+    60,    // 最大合流
+    76,    // 構造
   ];
+  const FIXED_TOTAL = COL_WIDTHS.filter((w): w is number => w !== null).reduce((s, w) => s + w, 0);
+  const MIN_TABLE_WIDTH = FIXED_TOTAL + 240 * 2; // auto列を最低240pxずつ確保
 
   // 集計
   const totalSeparateOrigin = graphs.filter(g => g.hasSeparateOrigin).length;
@@ -463,32 +488,54 @@ function SubcontractsPageInner() {
           </span>
         </div>
 
-        {/* 構造フィルタ */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-          <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, marginRight: 4 }}>構造:</span>
-          {([
-            ['all', 'すべて'],
-            ['separate-origin', '別財源あり'],
-            ['merge', '合流あり'],
-            ['institutional', '制度フローのみ'],
-          ] as const).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setStructureFilter(key)}
-              style={{
-                border: `1px solid ${structureFilter === key ? '#94a3b8' : '#d1d5db'}`,
-                background: structureFilter === key ? '#f1f5f9' : '#fff',
-                borderRadius: 999,
-                padding: '4px 10px',
-                fontSize: 12,
-                fontWeight: 600,
-                color: '#334155',
-                cursor: 'pointer',
-              }}
-            >
-              {label}
-            </button>
-          ))}
+        {/* 会計区分フィルタ + 構造フィルタ */}
+        <div style={{ display: 'flex', gap: 16, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600 }}>会計区分:</span>
+            {([
+              { label: '一般会計', value: acGeneral, setter: setAcGeneral },
+              { label: '特別会計', value: acSpecial, setter: setAcSpecial },
+              { label: '一般・特別', value: acBoth, setter: setAcBoth },
+              { label: '区分なし', value: acNone, setter: setAcNone },
+            ] as const).map(({ label, value, setter }) => (
+              <label key={label} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#334155', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={value}
+                  onChange={(e) => setter(e.target.checked)}
+                  style={{ width: 13, height: 13 }}
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600 }}>構造:</span>
+            {([
+              ['all', 'すべて'],
+              ['separate-origin', '別財源あり'],
+              ['merge', '合流あり'],
+              ['institutional', '制度フローのみ'],
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setStructureFilter(key)}
+                style={{
+                  border: `1px solid ${structureFilter === key ? '#94a3b8' : '#d1d5db'}`,
+                  background: structureFilter === key ? '#f1f5f9' : '#fff',
+                  borderRadius: 999,
+                  padding: '4px 10px',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: '#334155',
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* テーブル */}
@@ -496,9 +543,11 @@ function SubcontractsPageInner() {
         {error && <p style={{ color: '#ef4444', fontSize: 14 }}>エラー: {error}</p>}
         {!loading && !error && (
           <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <table style={{ width: COL_WIDTHS.reduce((s, w) => s + w, 0), borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
+            <table style={{ width: '100%', minWidth: MIN_TABLE_WIDTH, borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
               <colgroup>
-                {COL_WIDTHS.map((w, i) => <col key={i} style={{ width: w }} />)}
+                {COL_WIDTHS.map((w, i) => (
+                  <col key={i} style={w !== null ? { width: w } : undefined} />
+                ))}
               </colgroup>
               <thead>
                 <tr style={{ background: '#f9fafb' }}>
@@ -509,6 +558,8 @@ function SubcontractsPageInner() {
                   <th style={thStyle} onClick={() => toggleSort('accountCategory')}>会計区分<SortIndicator k="accountCategory" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('budget')}>予算額<SortIndicator k="budget" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('execution')}>執行額<SortIndicator k="execution" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('directExpenseTotal')}>直接支出合計<SortIndicator k="directExpenseTotal" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('totalExpense')}>支出額合計<SortIndicator k="totalExpense" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('totalBlockCount')}>ブロック<SortIndicator k="totalBlockCount" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('directBlockCount')}>直接支出<SortIndicator k="directBlockCount" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('subcontractBlockCount')}>再委託<SortIndicator k="subcontractBlockCount" /></th>
@@ -562,6 +613,12 @@ function SubcontractsPageInner() {
                     </td>
                     <td style={tdNumStyle}>
                       {g.execution > 0 ? formatYen(g.execution) : '—'}
+                    </td>
+                    <td style={tdNumStyle}>
+                      {g.directExpenseTotal > 0 ? formatYen(g.directExpenseTotal) : '—'}
+                    </td>
+                    <td style={tdNumStyle}>
+                      {g.totalExpense > 0 ? formatYen(g.totalExpense) : '—'}
                     </td>
                     <td style={tdNumStyle}>{g.totalBlockCount}</td>
                     <td style={tdNumStyle}>

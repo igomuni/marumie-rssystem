@@ -496,6 +496,12 @@ for (const [projectId, flowEntry] of flowMap) {
   // ブロックを totalAmount 降順でソート（レイアウト用）
   blocks.sort((a, b) => b.totalAmount - a.totalAmount);
 
+  // 5-1 ブロックの集計
+  const directExpenseTotal = blocks
+    .filter((b) => b.originKind === 'direct')
+    .reduce((sum, b) => sum + b.totalAmount, 0);
+  const totalExpense = blocks.reduce((sum, b) => sum + b.totalAmount, 0);
+
   // ── 参考フロー判定: subcontract で下流ブロック金額0 + 制度キーワード → reference ──
   const blockAmountById = new Map(blocks.map(b => [b.blockId, b.totalAmount]));
   for (const flow of flows) {
@@ -534,6 +540,8 @@ for (const [projectId, flowEntry] of flowMap) {
     accountCategory,
     budget: budgetEntry?.budget ?? 0,
     execution: budgetEntry?.execution ?? 0,
+    directExpenseTotal,
+    totalExpense,
     blocks,
     flows,
     maxDepth,

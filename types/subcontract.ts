@@ -71,8 +71,14 @@ export interface SubcontractGraph {
   bureau: string;
   /** '一般会計' | '特別会計' | '一般会計+特別会計' | '' */
   accountCategory: string;
+  /** 2-1 サマリ: 計(歳出予算現額合計) */
   budget: number;
+  /** 2-1 サマリ: 執行額(合計) */
   execution: number;
+  /** 5-1 の direct ブロック totalAmount 合計（直接支出ブロックへの事業からの支出） */
+  directExpenseTotal: number;
+  /** 5-1 の全ブロック totalAmount 合計（事業内のブロック支出の総和。再委託も含む） */
+  totalExpense: number;
   blocks: BlockNode[];
   flows: BlockEdge[];
   maxDepth: number;
