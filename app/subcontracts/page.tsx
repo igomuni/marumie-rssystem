@@ -495,11 +495,10 @@ function SubcontractsPageInner() {
                     {(() => {
                       const parts = g.bureau ? g.bureau.split(' / ') : [];
                       const leaf = parts[parts.length - 1] ?? '';
-                      const fullChain = [g.ministry, ...parts].filter(Boolean).join(' / ');
                       return (
                         <td
                           style={{ padding: '8px 10px', color: '#374151', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                          title={fullChain || undefined}
+                          title={g.bureau || undefined}
                         >
                           {leaf || <span style={{ color: '#cbd5e1' }}>—</span>}
                         </td>
