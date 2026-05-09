@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import type { SubcontractGraph } from '@/types/subcontract';
 
-type SortKey = 'projectId' | 'budget' | 'execution' | 'maxDepth' | 'totalBlockCount' | 'totalRecipientCount' | 'separateOriginCount' | 'separateOriginAmount';
+type SortKey = 'projectId' | 'budget' | 'execution' | 'maxDepth' | 'totalBlockCount' | 'totalRecipientCount' | 'separateOriginCount' | 'separateOriginAmount' | 'maxMergeWidth';
 type SortDir = 'asc' | 'desc';
 type StructureFilter = 'all' | 'separate-origin' | 'merge' | 'institutional';
 
@@ -80,6 +80,7 @@ function SubcontractsPageInner() {
       else if (sortKey === 'totalBlockCount') { va = a.totalBlockCount; vb = b.totalBlockCount; }
       else if (sortKey === 'separateOriginCount') { va = a.separateOriginCount; vb = b.separateOriginCount; }
       else if (sortKey === 'separateOriginAmount') { va = a.separateOriginAmount; vb = b.separateOriginAmount; }
+      else if (sortKey === 'maxMergeWidth') { va = a.maxMergeWidth; vb = b.maxMergeWidth; }
       else { va = a.totalRecipientCount; vb = b.totalRecipientCount; }
       return sortDir === 'asc' ? va - vb : vb - va;
     });
@@ -224,6 +225,9 @@ function SubcontractsPageInner() {
                   <th style={thStyle} onClick={() => toggleSort('separateOriginAmount')}>
                     別財源金額 <SortIndicator k="separateOriginAmount" />
                   </th>
+                  <th style={thStyle} onClick={() => toggleSort('maxMergeWidth')}>
+                    最大合流 <SortIndicator k="maxMergeWidth" />
+                  </th>
                   <th style={thStyle}>構造</th>
                 </tr>
               </thead>
@@ -280,17 +284,20 @@ function SubcontractsPageInner() {
                       {g.separateOriginAmount > 0 ? formatYen(g.separateOriginAmount) : '—'}
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                      {g.hasMerge && (
-                        <span title={`合流先 ${g.mergeTargetCount}・最大${g.maxMergeWidth}本`} style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#fef3c7', color: '#92400e', marginRight: 4 }}>
-                          合流{g.maxMergeWidth}
+                      {g.maxMergeWidth >= 2 ? (
+                        <span title={`合流先 ${g.mergeTargetCount}・最大${g.maxMergeWidth}本`} style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#fef3c7', color: '#92400e' }}>
+                          {g.maxMergeWidth}本
                         </span>
+                      ) : (
+                        <span style={{ color: '#cbd5e1' }}>—</span>
                       )}
-                      {g.isInstitutionalFlowOnly && (
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                      {g.isInstitutionalFlowOnly ? (
                         <span style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#fef2f2', color: '#991b1b' }}>
-                          制度
+                          制度フロー
                         </span>
-                      )}
-                      {!g.hasMerge && !g.isInstitutionalFlowOnly && (
+                      ) : (
                         <span style={{ color: '#cbd5e1' }}>—</span>
                       )}
                     </td>

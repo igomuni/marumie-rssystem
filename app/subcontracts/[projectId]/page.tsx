@@ -1173,6 +1173,18 @@ function SubcontractDetailPageInner() {
               別財源
             </span>
           )}
+          {graph.flows.some((f) => f.origin === 'transfer') && (
+            <span title="補足情報に「移替」を含む府省庁起点フロー" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 12, height: 0, borderTop: `2px dashed ${COLOR_DIRECT_BODY_SUBTLE}`, display: 'inline-block' }} />
+              移替
+            </span>
+          )}
+          {graph.hasReferenceFlow && (
+            <span title="制度上の参考的な資金関係（融資・政府保証借入・利子補給など）" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 12, height: 0, borderTop: '2px dashed #94a3b8', display: 'inline-block' }} />
+              参考
+            </span>
+          )}
         </div>
       </div>
 
@@ -1479,7 +1491,7 @@ function SubcontractDetailPageInner() {
                   <g clipPath={`url(#${clipIdBase}-card)`} style={{ pointerEvents: 'none' }}>
                     <text x={lb.x + NODE_PAD} y={lb.y + CARD_HEADER_H + 18}
                       fontSize={11} fontWeight={700} fill={bodyTextColor} style={{ userSelect: 'none' }}>
-                      {formatYen(lb.totalAmount)} / 支出先 {recipients.length.toLocaleString()}件
+                      {lb.isZeroAmount ? '金額内訳なし' : `${formatYen(lb.totalAmount)} / 支出先 ${recipients.length.toLocaleString()}件`}
                     </text>
                     {roleLine && (
                       <text x={lb.x + NODE_PAD} y={lb.y + CARD_HEADER_H + 35}
@@ -1487,7 +1499,7 @@ function SubcontractDetailPageInner() {
                         {roleLine}
                       </text>
                     )}
-                    {topRecipients.map((r, i) => (
+                    {!lb.isZeroAmount && topRecipients.map((r, i) => (
                       <text
                         key={`${r.name}-${r.corporateNumber}-${i}`}
                         x={lb.x + NODE_PAD}
