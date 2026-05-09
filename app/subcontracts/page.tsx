@@ -9,6 +9,7 @@ type SortKey =
   | 'projectId'
   | 'budget'
   | 'execution'
+  | 'maxDepth'
   | 'totalBlockCount'
   | 'directBlockCount'
   | 'subcontractBlockCount'
@@ -104,6 +105,7 @@ function SubcontractsPageInner() {
       if (sortKey === 'projectId') { va = a.projectId; vb = b.projectId; }
       else if (sortKey === 'budget') { va = a.budget; vb = b.budget; }
       else if (sortKey === 'execution') { va = a.execution; vb = b.execution; }
+      else if (sortKey === 'maxDepth') { va = a.maxDepth; vb = b.maxDepth; }
       else if (sortKey === 'totalBlockCount') { va = a.totalBlockCount; vb = b.totalBlockCount; }
       else if (sortKey === 'directBlockCount') { va = a.directBlockCount; vb = b.directBlockCount; }
       else if (sortKey === 'subcontractBlockCount') { va = subcontractBlockCount(a); vb = subcontractBlockCount(b); }
@@ -170,14 +172,31 @@ function SubcontractsPageInner() {
             <h1 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: 0 }}>
               再委託構造ブラウザ
             </h1>
-            <select
-              value={year}
-              onChange={(e) => { const y = Number(e.target.value); setYear(y); router.replace(`/subcontracts?year=${y}`); }}
-              style={{ marginLeft: 8, padding: '4px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, background: '#fff', cursor: 'pointer' }}
-            >
-              <option value={2025}>2025年度</option>
-              <option value={2024}>2024年度</option>
-            </select>
+            {/* 年度切替（/sankey-svg と同じスタイル） */}
+            <div style={{ position: 'relative', marginLeft: 4 }}>
+              <select
+                value={year}
+                onChange={(e) => { const y = Number(e.target.value); setYear(y); router.replace(`/subcontracts?year=${y}`); }}
+                style={{
+                  fontSize: 13,
+                  border: '1px solid #e0e0e0',
+                  borderRadius: 8,
+                  padding: '6px 28px 6px 10px',
+                  background: 'rgba(255,255,255,0.95)',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                  color: '#333',
+                  cursor: 'pointer',
+                  appearance: 'none',
+                  WebkitAppearance: 'none',
+                }}
+              >
+                <option value={2025}>2025年度</option>
+                <option value={2024}>2024年度</option>
+              </select>
+              <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
+            </div>
           </div>
           <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4, marginBottom: 0 }}>
             {graphs.length.toLocaleString()}事業 ／ 別財源 {totalSeparateOrigin.toLocaleString()} ／ 合流 {totalMerge.toLocaleString()} ／ 制度フロー {totalInstitutional.toLocaleString()}
@@ -186,33 +205,72 @@ function SubcontractsPageInner() {
       </div>
 
       <div style={{ maxWidth: 1600, margin: '0 auto', padding: '12px 16px' }}>
-        {/* コントロール */}
+        {/* コントロール（/sankey-svg と同じトーン） */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input
-            type="text"
-            placeholder="事業名・PID・府省庁・ブロック名・支出先名で検索..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            style={{
-              flex: 1,
-              minWidth: 260,
-              padding: '6px 12px',
-              borderRadius: 8,
-              border: '1px solid #d1d5db',
-              fontSize: 13,
-              background: '#fff',
-            }}
-          />
-          <select
-            value={selectedMinistry}
-            onChange={(e) => setSelectedMinistry(e.target.value)}
-            style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid #d1d5db', fontSize: 13, background: '#fff', cursor: 'pointer' }}
-          >
-            <option value="">全府省庁</option>
-            {ministries.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
+          {/* 検索 */}
+          <div style={{ position: 'relative', flex: 1, minWidth: 260 }}>
+            <span aria-hidden="true" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="事業名・PID・府省庁・ブロック名・支出先名で検索..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                padding: '6px 28px 6px 30px',
+                borderRadius: 8,
+                border: '1px solid #e0e0e0',
+                fontSize: 13,
+                background: 'rgba(255,255,255,0.95)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                color: '#333',
+                outline: 'none',
+              }}
+            />
+            {query && (
+              <button
+                onClick={() => setQuery('')}
+                aria-label="検索クリア"
+                style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#999', cursor: 'pointer', padding: 4, fontSize: 12 }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* 府省庁 */}
+          <div style={{ position: 'relative' }}>
+            <select
+              value={selectedMinistry}
+              onChange={(e) => setSelectedMinistry(e.target.value)}
+              style={{
+                fontSize: 13,
+                border: '1px solid #e0e0e0',
+                borderRadius: 8,
+                padding: '6px 28px 6px 10px',
+                background: 'rgba(255,255,255,0.95)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                color: '#333',
+                cursor: 'pointer',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+              }}
+            >
+              <option value="">全府省庁</option>
+              {ministries.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+              <path d="M7 10l5 5 5-5z"/>
+            </svg>
+          </div>
+
           <span style={{ fontSize: 12, color: '#6b7280' }}>
             {filtered.length.toLocaleString()}件表示
           </span>
@@ -264,6 +322,9 @@ function SubcontractsPageInner() {
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('execution')}>
                     執行額 <SortIndicator k="execution" />
+                  </th>
+                  <th style={thStyle} onClick={() => toggleSort('maxDepth')}>
+                    階層数 <SortIndicator k="maxDepth" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('totalBlockCount')}>
                     ブロック数 <SortIndicator k="totalBlockCount" />
@@ -332,6 +393,7 @@ function SubcontractsPageInner() {
                     <td style={{ padding: '8px 10px', color: '#374151', textAlign: 'right', whiteSpace: 'nowrap' }}>
                       {g.execution > 0 ? formatYen(g.execution) : '—'}
                     </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.maxDepth}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.totalBlockCount}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
                       {g.directBlockCount > 0 ? g.directBlockCount : <span style={{ color: '#cbd5e1' }}>—</span>}
