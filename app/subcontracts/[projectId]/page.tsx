@@ -378,6 +378,65 @@ function SidePane({
             <div style={{ fontSize: 11, color: '#111827', lineHeight: 1.5 }}>{projectDetail.majorExpense}</div>
           </div>
         )}
+
+        {/* 構造バッジ群 */}
+        <div style={{ display: 'flex', gap: 4, marginTop: 8, flexWrap: 'wrap', fontSize: 10, color: '#475569' }}>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6' }}>最大{graph.maxDepth}層</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6' }}>ブロック {graph.totalBlockCount}</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE, fontWeight: 700 }}>直接 {graph.directBlockCount}</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#fbe3d7', color: '#b45309', fontWeight: 700 }}>再委託 {graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount}</span>
+          {graph.separateOriginCount > 0 && (
+            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#e0e7ff', color: COLOR_SEPARATE_ORIGIN_BODY_TEXT, fontWeight: 700 }}>
+              別財源 {graph.separateOriginCount}
+            </span>
+          )}
+          {graph.hasMerge && (
+            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>
+              合流 最大{graph.maxMergeWidth}本
+            </span>
+          )}
+          {graph.isInstitutionalFlowOnly && (
+            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#fef2f2', color: '#991b1b', fontWeight: 700 }}>
+              制度フロー
+            </span>
+          )}
+          {graph.indirectCosts.length > 0 && (
+            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#ecfeff', color: '#0e7490', fontWeight: 700 }}>
+              間接経費 {graph.indirectCosts.length}
+            </span>
+          )}
+        </div>
+
+        {/* 凡例 */}
+        <div style={{ display: 'flex', gap: 10, marginTop: 6, flexWrap: 'wrap', fontSize: 10, color: '#64748b' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <span style={{ width: 9, height: 9, borderRadius: 2, background: COLOR_DIRECT, display: 'inline-block' }} />
+            直接
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <span style={{ width: 9, height: 9, borderRadius: 2, background: COLOR_SUBCONTRACT, display: 'inline-block' }} />
+            再委託
+          </span>
+          {graph.hasSeparateOrigin && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ width: 9, height: 9, borderRadius: 2, background: COLOR_SEPARATE_ORIGIN_STRONG, display: 'inline-block' }} />
+              別財源
+            </span>
+          )}
+          {graph.flows.some((f) => f.origin === 'transfer') && (
+            <span title="補足情報に「移替」を含む府省庁起点フロー" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ width: 12, borderTop: `2px dashed ${COLOR_DIRECT_BODY_SUBTLE}`, display: 'inline-block' }} />
+              移替
+            </span>
+          )}
+          {graph.hasReferenceFlow && (
+            <span title="制度上の参考的な資金関係（融資・政府保証借入・利子補給など）" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span style={{ width: 12, borderTop: '2px dashed #94a3b8', display: 'inline-block' }} />
+              参考
+            </span>
+          )}
+        </div>
       </div>
 
       {/* タブヘッダー */}
@@ -1076,116 +1135,33 @@ function SubcontractDetailPageInner() {
 
   // ここに到達した時点で graph は必ず非 null
   const safeLayout = layout!;
-  const directBlocks = graph.blocks.filter((b) => b.isDirect).length;
-  const redelegatedBlocks = graph.blocks.filter((b) => !b.isDirect).length;
-  const firstDirectBlock = safeLayout.blocks.find((b) => b.depth === 1)?.node;
-  const firstRedelegatedBlock = safeLayout.blocks.find((b) => !b.isDirect)?.node;
-  const organizationSummary = visibleOrgChain.length > 0 ? visibleOrgChain.join(' -> ') : '担当組織';
-  const flowSummary = firstDirectBlock && firstRedelegatedBlock
-    ? `${organizationSummary} -> ${graph.projectName} -> ${firstDirectBlock.blockName} -> ${firstRedelegatedBlock.role || firstRedelegatedBlock.blockName}`
-    : `${organizationSummary} -> ${graph.projectName} -> ${firstDirectBlock?.blockName ?? '支出先ブロック'}`;
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
-      {/* ヘッダーバー */}
+      {/* ヘッダーバー: 左=一覧 / 中央=年度切替 / 右=サイドパネル領域 */}
       <div style={{
         background: '#fff',
         borderBottom: '1px solid #e5e7eb',
         padding: '10px 16px',
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: '1fr auto 1fr',
         alignItems: 'center',
         gap: 12,
-        flexWrap: 'wrap',
         zIndex: 10,
       }}>
-        <Link href={`/subcontracts?year=${year}`} style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+        <Link href={`/subcontracts?year=${year}`} style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap', justifySelf: 'start' }}>
           ← 一覧
         </Link>
 
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 8, overflow: 'hidden' }}>
-          <span style={{ fontSize: 11, color: '#9ca3af', flexShrink: 0 }}>PID {graph.projectId}</span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{graph.projectName}</span>
-          <span style={{ fontSize: 12, color: '#6b7280', flexShrink: 0 }}>{graph.ministry}</span>
-        </div>
-
-        {/* 年度切替 */}
         <select
           value={year}
           onChange={(e) => router.push(`/subcontracts/${projectId}?year=${e.target.value}`)}
-          style={{ padding: '4px 8px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 12, background: '#fff' }}
+          style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 12, background: '#fff', justifySelf: 'center' }}
         >
           <option value={2024}>2024年度</option>
           <option value={2025}>2025年度</option>
         </select>
 
-        <button
-          onClick={resetViewport}
-          style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 12, background: '#fff', cursor: 'pointer' }}
-        >
-          全体表示
-        </button>
-      </div>
-
-      {/* 資金ルート要約 */}
-      <div style={{ padding: '7px 16px', background: '#fafafa', borderBottom: '1px solid #e5e7eb', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: '#111827' }}>資金ルート</div>
-        <div style={{ fontSize: 12, color: '#374151', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-          {flowSummary}
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: 11, color: '#475569' }}>
-          <span>予算 <strong style={{ color: '#111827' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</strong></span>
-          <span>執行 <strong style={{ color: '#111827' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</strong></span>
-          <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f3f4f6' }}>最大{graph.maxDepth}層</span>
-          <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE }}>直接 {directBlocks}件</span>
-          <span style={{ padding: '3px 7px', borderRadius: 999, background: '#fbe3d7', color: '#b45309' }}>再委託 {redelegatedBlocks}件</span>
-          {graph.separateOriginCount > 0 && (
-            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#e0e7ff', color: COLOR_SEPARATE_ORIGIN_BODY_TEXT, fontWeight: 700 }}>
-              別財源 {graph.separateOriginCount}件
-            </span>
-          )}
-          {graph.hasMerge && (
-            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#fef3c7', color: '#92400e' }}>
-              合流 最大{graph.maxMergeWidth}本
-            </span>
-          )}
-          {graph.isInstitutionalFlowOnly && (
-            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#fef2f2', color: '#991b1b', fontWeight: 700 }}>
-              制度フロー
-            </span>
-          )}
-          {graph.indirectCosts.length > 0 && (
-            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#ecfeff', color: '#0e7490' }}>
-              間接経費 {graph.indirectCosts.length}件
-            </span>
-          )}
-          <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f5f5f5' }}>表示内訳 {graph.totalRecipientCount.toLocaleString()}件</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 2, background: COLOR_DIRECT, display: 'inline-block' }} />
-            直接
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 10, height: 10, borderRadius: 2, background: COLOR_SUBCONTRACT, display: 'inline-block' }} />
-            再委託
-          </span>
-          {graph.hasSeparateOrigin && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 10, height: 10, borderRadius: 2, background: COLOR_SEPARATE_ORIGIN_STRONG, display: 'inline-block' }} />
-              別財源
-            </span>
-          )}
-          {graph.flows.some((f) => f.origin === 'transfer') && (
-            <span title="補足情報に「移替」を含む府省庁起点フロー" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 12, height: 0, borderTop: `2px dashed ${COLOR_DIRECT_BODY_SUBTLE}`, display: 'inline-block' }} />
-              移替
-            </span>
-          )}
-          {graph.hasReferenceFlow && (
-            <span title="制度上の参考的な資金関係（融資・政府保証借入・利子補給など）" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 12, height: 0, borderTop: '2px dashed #94a3b8', display: 'inline-block' }} />
-              参考
-            </span>
-          )}
-        </div>
+        <span aria-hidden="true" />
       </div>
 
       <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
