@@ -171,14 +171,6 @@ interface ProjectQualityOrg {
 
 const ORG_LEVEL_LABELS = ['局庁', '部', '課', '室', '班', '係'];
 
-function chooseDefaultBlock(graph: SubcontractGraph): BlockNode | null {
-  const redelegated = graph.blocks
-    .filter((b) => !b.isDirect && b.recipients.length > 0)
-    .sort((a, b) => b.totalAmount - a.totalAmount);
-  if (redelegated[0]) return redelegated[0];
-  return [...graph.blocks].sort((a, b) => b.totalAmount - a.totalAmount)[0] ?? null;
-}
-
 function percentOf(amount: number, total: number): string {
   if (total <= 0) return '—';
   return `${((amount / total) * 100).toFixed(1)}%`;
@@ -244,35 +236,40 @@ type HoveredNode =
   | { kind: 'root' }
   | { kind: 'block'; block: LayoutBlock };
 
-// ─── ブロック詳細ペイン ──────────────────────────────────────────────
+// ─── サイドパネル（タブ式） ──────────────────────────────────────────────
 
-function BlockDetailPane({
+type PaneTab = 'flow' | 'blocks' | 'recipients' | 'indirect-cost';
+
+function SidePane({
   block,
   graph,
   projectDetail,
   orgChain,
-  onClose,
+  activeTab,
+  onChangeTab,
   onSelectBlock,
+  onDeselectBlock,
 }: {
   block: BlockNode | null;
   graph: SubcontractGraph;
   projectDetail: ProjectDetail | null;
   orgChain: string[];
-  onClose: () => void;
+  activeTab: PaneTab;
+  onChangeTab: (tab: PaneTab) => void;
   onSelectBlock: (block: BlockNode) => void;
+  onDeselectBlock: () => void;
 }) {
   const [expandedRecipients, setExpandedRecipients] = useState<Set<number>>(new Set());
-  const [query, setQuery] = useState('');
+  const [recipientQuery, setRecipientQuery] = useState('');
   const [recipientSort, setRecipientSort] = useState<'amount-desc' | 'amount-asc' | 'name-asc'>('amount-desc');
+  const [blockQuery, setBlockQuery] = useState('');
   const [blockFilter, setBlockFilter] = useState<'all' | 'direct' | 'subcontract' | 'separate-origin'>('all');
   const [blockSort, setBlockSort] = useState<'amount-desc' | 'name-asc'>('amount-desc');
   const [flowFilter, setFlowFilter] = useState<'all' | FlowOrigin>('all');
-  const [relationMode, setRelationMode] = useState<'recipients' | 'downstream' | 'upstream'>('recipients');
 
   useEffect(() => {
     setExpandedRecipients(new Set());
-    setQuery('');
-    setRelationMode('recipients');
+    setRecipientQuery('');
   }, [block?.blockId]);
 
   function toggleRecipient(i: number) {
@@ -296,199 +293,47 @@ function BlockDetailPane({
     return ids.map((id) => blockById.get(id)).filter(Boolean) as BlockNode[];
   }, [block, blockById, graph.flows]);
 
-  if (!block) {
-    const summaryRows = [
-      ['PID', graph.projectId],
-      ['府省庁', graph.ministry],
-      ['担当組織', orgChain.length > 0 ? orgChain.join(' / ') : projectDetail?.bureau ?? '未設定'],
-      ['予算額', graph.budget > 0 ? formatYen(graph.budget) : '未設定'],
-      ['執行額', graph.execution > 0 ? formatYen(graph.execution) : '未設定'],
-    ];
+  // ── 集計（フロー / ブロック） ──
+  const filteredBlocks = graph.blocks
+    .filter((b) => {
+      if (blockFilter === 'all') return true;
+      if (blockFilter === 'direct') return b.originKind === 'direct';
+      if (blockFilter === 'subcontract') return b.originKind === 'subcontract';
+      return b.originKind === 'separate-origin-broad' || b.originKind === 'separate-origin-strong';
+    })
+    .filter((b) => {
+      const q = blockQuery.trim().toLowerCase();
+      if (!q) return true;
+      return `${b.blockId} ${b.blockName} ${b.role ?? ''}`.toLowerCase().includes(q);
+    })
+    .sort((a, b) => blockSort === 'name-asc'
+      ? `${a.blockId} ${a.blockName}`.localeCompare(`${b.blockId} ${b.blockName}`, 'ja')
+      : b.totalAmount - a.totalAmount);
 
-    const filteredBlocks = graph.blocks
-      .filter((b) => {
-        if (blockFilter === 'all') return true;
-        if (blockFilter === 'direct') return b.originKind === 'direct';
-        if (blockFilter === 'subcontract') return b.originKind === 'subcontract';
-        return b.originKind === 'separate-origin-broad' || b.originKind === 'separate-origin-strong';
-      })
-      .filter((b) => {
-        const q = query.trim().toLowerCase();
-        if (!q) return true;
-        return `${b.blockId} ${b.blockName} ${b.role ?? ''}`.toLowerCase().includes(q);
-      })
-      .sort((a, b) => blockSort === 'name-asc'
-        ? `${a.blockId} ${a.blockName}`.localeCompare(`${b.blockId} ${b.blockName}`, 'ja')
-        : b.totalAmount - a.totalAmount);
+  const filteredFlows = graph.flows
+    .filter((f) => flowFilter === 'all' || f.origin === flowFilter)
+    .sort((a, b) => {
+      const ar = flowOriginSortRank(a.origin);
+      const br = flowOriginSortRank(b.origin);
+      if (ar !== br) return ar - br;
+      return (a.sourceBlock ?? '').localeCompare(b.sourceBlock ?? '', 'ja');
+    });
 
-    const filteredFlows = graph.flows
-      .filter((f) => flowFilter === 'all' || f.origin === flowFilter)
-      .sort((a, b) => {
-        const ar = flowOriginSortRank(a.origin);
-        const br = flowOriginSortRank(b.origin);
-        if (ar !== br) return ar - br;
-        return (a.sourceBlock ?? '').localeCompare(b.sourceBlock ?? '', 'ja');
-      });
+  const rq = recipientQuery.trim().toLowerCase();
+  const sortedRecipients = block
+    ? sortRecipients(block.recipients, recipientSort)
+        .filter((r) => !rq || `${r.name} ${r.corporateNumber} ${r.contractSummaries.join(' ')}`.toLowerCase().includes(rq))
+    : [];
 
-    return (
-      <aside style={{
-        width: 390,
-        minWidth: 390,
-        maxWidth: 460,
-        background: '#fff',
-        borderLeft: `1px solid ${COLOR_PANEL_BORDER}`,
-        overflowY: 'auto',
-      }}>
-        <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, position: 'sticky', top: 0, background: '#fff', zIndex: 2 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{
-              display: 'inline-block',
-              fontSize: 11,
-              fontWeight: 700,
-              padding: '2px 6px',
-              borderRadius: 4,
-              background: '#e7f6ec',
-              color: '#2d7d46',
-              marginBottom: 6,
-            }}>
-              事業・組織
-            </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', lineHeight: 1.45 }}>
-              {graph.projectName}
-            </div>
-            <div style={{ fontSize: 11, color: '#6b7280', marginTop: 4 }}>
-              ブロックを選ぶと支出先リストと前後のフローを絞り込めます
-            </div>
-          </div>
-        </div>
+  const indirectCount = graph.indirectCosts.length;
 
-        <div style={{ padding: 12, borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
-          {summaryRows.map(([label, value]) => (
-            <div key={label} style={{
-              display: 'grid',
-              gridTemplateColumns: '72px 1fr',
-              gap: 10,
-              padding: '9px 0',
-              borderBottom: '1px solid #f1f5f9',
-              fontSize: 12,
-              lineHeight: 1.55,
-            }}>
-              <div style={{ color: '#64748b', fontWeight: 700 }}>{label}</div>
-              <div style={{ color: '#111827', wordBreak: 'break-word' }}>{value}</div>
-            </div>
-          ))}
-          {projectDetail?.majorExpense && (
-            <div style={{ marginTop: 12, padding: '10px 12px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 4 }}>主要経費</div>
-              <div style={{ fontSize: 12, color: '#111827', lineHeight: 1.55 }}>{projectDetail.majorExpense}</div>
-            </div>
-          )}
-        </div>
-
-        {/* 資金の流れ */}
-        <div style={{ padding: 12, borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#111827' }}>資金の流れ</div>
-            <div style={{ fontSize: 11, color: '#64748b' }}>{filteredFlows.length.toLocaleString()}本 / {graph.flows.length.toLocaleString()}本</div>
-          </div>
-          <div style={{ display: 'flex', gap: 4, marginBottom: 8, flexWrap: 'wrap' }}>
-            {([
-              ['all', 'すべて'],
-              ['direct', '直接'],
-              ['transfer', '移替'],
-              ['separate-origin', '別財源'],
-              ['subcontract', '再委託'],
-              ['reference', '参考'],
-            ] as const).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setFlowFilter(key)}
-                style={{
-                  border: `1px solid ${flowFilter === key ? '#94a3b8' : COLOR_PANEL_BORDER}`,
-                  background: flowFilter === key ? '#f1f5f9' : '#fff',
-                  borderRadius: 999,
-                  padding: '4px 9px',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: '#334155',
-                  cursor: 'pointer',
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          {filteredFlows.length === 0 && (
-            <div style={{ fontSize: 12, color: '#9ca3af' }}>該当するフローがありません</div>
-          )}
-          {filteredFlows.map((flow, i) => (
-            <FlowListRow
-              key={`${flow.sourceBlock ?? 'root'}->${flow.targetBlock}-${i}`}
-              flow={flow}
-              graph={graph}
-              onSelectBlock={onSelectBlock}
-            />
-          ))}
-        </div>
-
-        <div style={{ padding: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#111827' }}>ブロック一覧</div>
-            <div style={{ fontSize: 11, color: '#64748b' }}>{filteredBlocks.length.toLocaleString()}件 / {graph.blocks.length.toLocaleString()}件</div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 112px', gap: 8, marginBottom: 8 }}>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="ブロック名・役割で検索"
-              style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 9px', fontSize: 12 }}
-            />
-            <select
-              value={blockSort}
-              onChange={(e) => setBlockSort(e.target.value as typeof blockSort)}
-              style={{ border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 8px', fontSize: 12, background: '#fff' }}
-            >
-              <option value="amount-desc">金額順</option>
-              <option value="name-asc">名称順</option>
-            </select>
-          </div>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-            {([
-              ['all', 'すべて'],
-              ['direct', '直接'],
-              ['subcontract', '再委託'],
-              ['separate-origin', '別財源'],
-            ] as const).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setBlockFilter(key)}
-                style={{
-                  border: `1px solid ${blockFilter === key ? '#94a3b8' : COLOR_PANEL_BORDER}`,
-                  background: blockFilter === key ? '#f1f5f9' : '#fff',
-                  borderRadius: 999,
-                  padding: '5px 10px',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: '#334155',
-                  cursor: 'pointer',
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          {filteredBlocks.map((b) => (
-            <BlockListRow key={b.blockId} block={b} onClick={() => onSelectBlock(b)} selected={false} />
-          ))}
-        </div>
-      </aside>
-    );
-  }
-
-  const q = query.trim().toLowerCase();
-  const sortedRecipients = sortRecipients(block.recipients, recipientSort)
-    .filter((r) => !q || `${r.name} ${r.corporateNumber} ${r.contractSummaries.join(' ')}`.toLowerCase().includes(q));
-  const relationBlocks = relationMode === 'downstream' ? downstreamBlocks : upstreamBlocks;
+  // タブ定義（無効化判定込み）
+  const tabs: Array<{ key: PaneTab; label: string; count?: number; disabled?: boolean }> = [
+    { key: 'flow', label: '流れ', count: graph.flows.length },
+    { key: 'blocks', label: 'ブロック', count: graph.blocks.length },
+    { key: 'recipients', label: '支出先', count: block?.recipients.length ?? 0 },
+    { key: 'indirect-cost', label: '間接経費', count: indirectCount, disabled: indirectCount === 0 },
+  ];
 
   return (
     <aside style={{
@@ -501,133 +346,305 @@ function BlockDetailPane({
       display: 'flex',
       flexDirection: 'column',
     }}>
-      {/* ヘッダー */}
+      {/* 事業ヘッダー（常時表示） */}
+      <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, position: 'sticky', top: 0, background: '#fff', zIndex: 2 }}>
+        <div style={{
+          display: 'inline-block',
+          fontSize: 11,
+          fontWeight: 700,
+          padding: '2px 6px',
+          borderRadius: 4,
+          background: '#e7f6ec',
+          color: '#2d7d46',
+          marginBottom: 6,
+        }}>
+          事業 / PID {graph.projectId}
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', lineHeight: 1.45 }}>
+          {graph.projectName}
+        </div>
+        <div style={{ fontSize: 11, color: '#6b7280', marginTop: 4, lineHeight: 1.55 }}>
+          {graph.ministry}
+          {orgChain.length > 0 && <> ／ {orgChain.join(' / ')}</>}
+          {!orgChain.length && projectDetail?.bureau && <> ／ {projectDetail.bureau}</>}
+        </div>
+        <div style={{ display: 'flex', gap: 10, marginTop: 6, fontSize: 11, color: '#475569' }}>
+          <span>予算 <strong style={{ color: '#111827' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</strong></span>
+          <span>執行 <strong style={{ color: '#111827' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</strong></span>
+        </div>
+        {projectDetail?.majorExpense && (
+          <div style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: 10, color: '#64748b', fontWeight: 700, marginBottom: 2 }}>主要経費</div>
+            <div style={{ fontSize: 11, color: '#111827', lineHeight: 1.5 }}>{projectDetail.majorExpense}</div>
+          </div>
+        )}
+      </div>
+
+      {/* タブヘッダー */}
       <div style={{
-        padding: '16px 16px 12px',
-        borderBottom: '1px solid #e5e7eb',
         display: 'flex',
-        alignItems: 'flex-start',
-        gap: 8,
+        borderBottom: `1px solid ${COLOR_PANEL_BORDER}`,
         position: 'sticky',
         top: 0,
         background: '#fff',
         zIndex: 1,
       }}>
-        <div style={{ flex: 1 }}>
-          {(() => {
-            const badge = originKindBadgeColor(block.originKind);
-            return (
-              <div style={{
-                display: 'inline-block',
-                fontSize: 11,
-                fontWeight: 700,
-                padding: '2px 6px',
-                borderRadius: 4,
-                background: badge.bg,
-                color: badge.fg,
-                marginBottom: 4,
-              }}>
-                {originKindLabel(block.originKind)}
-              </div>
-            );
-          })()}
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{block.blockName}</div>
-          <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
-            ブロック {block.blockId} ／ {formatYen(block.totalAmount)}
-          </div>
-          <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>
-            表示内訳 {block.recipients.length.toLocaleString()}件 ／ 構成比 {percentOf(block.totalAmount, Math.max(graph.execution, graph.budget, block.totalAmount))}
-          </div>
-          {block.role && (
-            <div style={{ fontSize: 11, color: '#374151', marginTop: 4, padding: '3px 6px', background: '#f3f4f6', borderRadius: 4 }}>
-              {block.role}
-            </div>
-          )}
-        </div>
-        <button
-          onClick={onClose}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#6b7280', fontSize: 18 }}
-          aria-label="閉じる"
-        >✕</button>
-      </div>
-
-      <div style={{ padding: 12, flex: 1 }}>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-          {([
-            ['recipients', `支出先 ${block.recipients.length}`],
-            ['downstream', `下流 ${downstreamBlocks.length}`],
-            ['upstream', `上流 ${upstreamBlocks.length}`],
-          ] as const).map(([key, label]) => (
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.key;
+          const isDisabled = tab.disabled;
+          return (
             <button
-              key={key}
-              onClick={() => setRelationMode(key)}
+              key={tab.key}
+              onClick={() => !isDisabled && onChangeTab(tab.key)}
+              disabled={isDisabled}
               style={{
                 flex: 1,
-                border: `1px solid ${relationMode === key ? '#94a3b8' : COLOR_PANEL_BORDER}`,
-                background: relationMode === key ? '#f1f5f9' : '#fff',
-                borderRadius: 6,
-                padding: '7px 6px',
-                fontSize: 11,
+                background: isActive ? '#f1f5f9' : '#fff',
+                border: 'none',
+                borderBottom: isActive ? '2px solid #6366f1' : '2px solid transparent',
+                padding: '10px 4px 8px',
+                fontSize: 12,
                 fontWeight: 700,
-                color: '#334155',
-                cursor: 'pointer',
+                color: isDisabled ? '#cbd5e1' : (isActive ? '#111827' : '#475569'),
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
               }}
             >
-              {label}
+              {tab.label}
+              {typeof tab.count === 'number' && (
+                <span style={{ marginLeft: 4, fontSize: 10, color: isDisabled ? '#cbd5e1' : '#94a3b8' }}>
+                  {tab.count.toLocaleString()}
+                </span>
+              )}
             </button>
-          ))}
-        </div>
+          );
+        })}
+      </div>
 
-        {relationMode === 'recipients' ? (
+      {/* タブ本体 */}
+      <div style={{ padding: 12, flex: 1, minHeight: 0 }}>
+        {activeTab === 'flow' && (
           <>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+              <div style={{ fontSize: 11, color: '#64748b' }}>{filteredFlows.length.toLocaleString()}本 / {graph.flows.length.toLocaleString()}本</div>
+            </div>
+            <div style={{ display: 'flex', gap: 4, marginBottom: 8, flexWrap: 'wrap' }}>
+              {([
+                ['all', 'すべて'],
+                ['direct', '直接'],
+                ['transfer', '移替'],
+                ['separate-origin', '別財源'],
+                ['subcontract', '再委託'],
+                ['reference', '参考'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setFlowFilter(key)}
+                  style={{
+                    border: `1px solid ${flowFilter === key ? '#94a3b8' : COLOR_PANEL_BORDER}`,
+                    background: flowFilter === key ? '#f1f5f9' : '#fff',
+                    borderRadius: 999,
+                    padding: '4px 9px',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#334155',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {filteredFlows.length === 0 && (
+              <div style={{ fontSize: 12, color: '#9ca3af' }}>該当するフローがありません</div>
+            )}
+            {filteredFlows.map((flow, i) => (
+              <FlowListRow
+                key={`${flow.sourceBlock ?? 'root'}->${flow.targetBlock}-${i}`}
+                flow={flow}
+                graph={graph}
+                onSelectBlock={onSelectBlock}
+              />
+            ))}
+          </>
+        )}
+
+        {activeTab === 'blocks' && (
+          <>
+            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
+              {filteredBlocks.length.toLocaleString()}件 / {graph.blocks.length.toLocaleString()}件
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 112px', gap: 8, marginBottom: 8 }}>
               <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="支出先・法人番号・契約概要で検索"
+                value={blockQuery}
+                onChange={(e) => setBlockQuery(e.target.value)}
+                placeholder="ブロック名・役割で検索"
                 style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 9px', fontSize: 12 }}
               />
               <select
-                value={recipientSort}
-                onChange={(e) => setRecipientSort(e.target.value as typeof recipientSort)}
+                value={blockSort}
+                onChange={(e) => setBlockSort(e.target.value as typeof blockSort)}
                 style={{ border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 8px', fontSize: 12, background: '#fff' }}
               >
-                <option value="amount-desc">金額大</option>
-                <option value="amount-asc">金額小</option>
+                <option value="amount-desc">金額順</option>
                 <option value="name-asc">名称順</option>
               </select>
             </div>
-            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>{sortedRecipients.length.toLocaleString()}件</div>
-            {sortedRecipients.map((r, i) => (
-              <RecipientCard
-                key={`${r.name}-${r.corporateNumber}-${i}`}
-                recipient={r}
-                expanded={expandedRecipients.has(i)}
-                onToggle={() => toggleRecipient(i)}
-                totalAmount={block.totalAmount}
-                barColor={block.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT}
-              />
-            ))}
-            {sortedRecipients.length === 0 && (
-              <p style={{ fontSize: 12, color: '#9ca3af' }}>該当する支出先がありません</p>
-            )}
-          </>
-        ) : (
-          <>
-            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
-              {relationMode === 'downstream' ? 'このブロックから続く支出ブロック' : 'このブロックへ流入する支出ブロック'}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+              {([
+                ['all', 'すべて'],
+                ['direct', '直接'],
+                ['subcontract', '再委託'],
+                ['separate-origin', '別財源'],
+              ] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setBlockFilter(key)}
+                  style={{
+                    border: `1px solid ${blockFilter === key ? '#94a3b8' : COLOR_PANEL_BORDER}`,
+                    background: blockFilter === key ? '#f1f5f9' : '#fff',
+                    borderRadius: 999,
+                    padding: '5px 10px',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#334155',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
-            {relationBlocks.map((b) => (
+            {filteredBlocks.map((b) => (
               <BlockListRow
                 key={b.blockId}
                 block={b}
                 onClick={() => onSelectBlock(b)}
-                selected={block.blockId === b.blockId}
+                selected={block?.blockId === b.blockId}
               />
             ))}
-            {relationBlocks.length === 0 && (
-              <p style={{ fontSize: 12, color: '#9ca3af' }}>該当するブロックがありません</p>
+          </>
+        )}
+
+        {activeTab === 'recipients' && (
+          <>
+            {!block && (
+              <div style={{ fontSize: 12, color: '#9ca3af', padding: '24px 12px', textAlign: 'center', lineHeight: 1.6 }}>
+                フロー図またはブロックタブからブロックを選択すると、<br />
+                その支出先内訳が表示されます。
+              </div>
             )}
+            {block && (
+              <>
+                {/* 選択中ブロックの要約 */}
+                <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                      {(() => {
+                        const badge = originKindBadgeColor(block.originKind);
+                        return (
+                          <span style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: '1px 6px',
+                            borderRadius: 4,
+                            background: badge.bg,
+                            color: badge.fg,
+                            flexShrink: 0,
+                          }}>
+                            {originKindLabel(block.originKind)}
+                          </span>
+                        );
+                      })()}
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {block.blockId} {block.blockName}
+                      </span>
+                    </div>
+                    <button
+                      onClick={onDeselectBlock}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#94a3b8', fontSize: 14 }}
+                      aria-label="選択解除"
+                      title="選択解除"
+                    >✕</button>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#475569', marginTop: 6 }}>
+                    {formatYen(block.totalAmount)} ／ 支出先 {block.recipientCount.toLocaleString()}件
+                    ／ 構成比 {percentOf(block.totalAmount, Math.max(graph.execution, graph.budget, block.totalAmount))}
+                  </div>
+                  {block.role && (
+                    <div style={{ fontSize: 11, color: '#374151', marginTop: 4, padding: '3px 6px', background: '#fff', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+                      {block.role}
+                    </div>
+                  )}
+                  {(downstreamBlocks.length > 0 || upstreamBlocks.length > 0) && (
+                    <div style={{ fontSize: 10, color: '#64748b', marginTop: 6 }}>
+                      上流 {upstreamBlocks.length}件 ／ 下流 {downstreamBlocks.length}件
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 112px', gap: 8, marginBottom: 8 }}>
+                  <input
+                    value={recipientQuery}
+                    onChange={(e) => setRecipientQuery(e.target.value)}
+                    placeholder="支出先・法人番号・契約で検索"
+                    style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 9px', fontSize: 12 }}
+                  />
+                  <select
+                    value={recipientSort}
+                    onChange={(e) => setRecipientSort(e.target.value as typeof recipientSort)}
+                    style={{ border: `1px solid ${COLOR_PANEL_BORDER}`, borderRadius: 6, padding: '7px 8px', fontSize: 12, background: '#fff' }}
+                  >
+                    <option value="amount-desc">金額大</option>
+                    <option value="amount-asc">金額小</option>
+                    <option value="name-asc">名称順</option>
+                  </select>
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>{sortedRecipients.length.toLocaleString()}件</div>
+                {sortedRecipients.map((r, i) => (
+                  <RecipientCard
+                    key={`${r.name}-${r.corporateNumber}-${i}`}
+                    recipient={r}
+                    expanded={expandedRecipients.has(i)}
+                    onToggle={() => toggleRecipient(i)}
+                    totalAmount={block.totalAmount}
+                    barColor={originPalette(block.originKind).header}
+                  />
+                ))}
+                {sortedRecipients.length === 0 && (
+                  <p style={{ fontSize: 12, color: '#9ca3af' }}>該当する支出先がありません</p>
+                )}
+              </>
+            )}
+          </>
+        )}
+
+        {activeTab === 'indirect-cost' && (
+          <>
+            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
+              国自らが支出する間接経費 {indirectCount.toLocaleString()}件
+            </div>
+            {graph.indirectCosts.length === 0 && (
+              <div style={{ fontSize: 12, color: '#9ca3af' }}>間接経費の記録はありません</div>
+            )}
+            {graph.indirectCosts.map((cost, i) => (
+              <div key={i} style={{ borderBottom: '1px solid #f1f5f9', padding: '8px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#111827', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {cost.category || cost.kind || '（項目なし）'}
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    {cost.amount > 0 ? formatYen(cost.amount) : '—'}
+                  </div>
+                </div>
+                <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
+                  {cost.kind && <span style={{ marginRight: 8 }}>{cost.kind}</span>}
+                  {cost.blockHint && <span>{cost.blockHint}</span>}
+                </div>
+                {cost.note && (
+                  <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>{cost.note}</div>
+                )}
+              </div>
+            ))}
           </>
         )}
       </div>
@@ -861,6 +878,22 @@ function SubcontractDetailPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<BlockNode | null>(null);
   const [hoveredNode, setHoveredNode] = useState<HoveredNode | null>(null);
+  const [activeTab, setActiveTab] = useState<PaneTab>('flow');
+
+  // ノードクリック: 同じブロックなら解除、別ブロックなら選択 + 支出先タブへ
+  const handleNodeClick = useCallback((node: BlockNode) => {
+    setSelectedBlock((prev) => {
+      if (prev?.blockId === node.blockId) return null;
+      return node;
+    });
+    setActiveTab((prev) => (selectedBlock?.blockId === node.blockId ? prev : 'recipients'));
+  }, [selectedBlock]);
+
+  // フロー一覧/ブロック一覧の行から選択した場合: 選択 + 支出先タブへ
+  const handleSelectFromList = useCallback((node: BlockNode) => {
+    setSelectedBlock(node);
+    setActiveTab('recipients');
+  }, []);
 
   // ズーム/パン
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
@@ -877,6 +910,7 @@ function SubcontractDetailPageInner() {
     setLoading(true);
     setError(null);
     setSelectedBlock(null);
+    setActiveTab('flow');
     setHoveredNode(null);
     setProjectDetail(null);
     setOrgChain([]);
@@ -888,7 +922,8 @@ function SubcontractDetailPageInner() {
       .then((data: SubcontractGraph) => {
         if (controller.signal.aborted) return;
         setGraph(data);
-        setSelectedBlock(chooseDefaultBlock(data));
+        // 主語は「事業」。ブロック選択はユーザーの明示クリックを起点とする
+        setSelectedBlock(null);
         setLoading(false);
       })
       .catch((e: Error) => {
@@ -1238,7 +1273,7 @@ function SubcontractDetailPageInner() {
 
             {/* 事業コンテキストノード */}
             <g
-              onClick={() => setSelectedBlock(null)}
+              onClick={() => { setSelectedBlock(null); setActiveTab('flow'); }}
               onMouseEnter={() => setHoveredNode({ kind: 'root' })}
               onMouseLeave={() => setHoveredNode(null)}
               style={{ cursor: 'pointer' }}
@@ -1381,7 +1416,7 @@ function SubcontractDetailPageInner() {
               return (
                 <g
                   key={lb.blockId}
-                  onClick={() => setSelectedBlock(lb.node)}
+                  onClick={() => handleNodeClick(lb.node)}
                   onMouseEnter={() => setHoveredNode({ kind: 'block', block: lb })}
                   onMouseLeave={() => setHoveredNode(null)}
                   style={{ cursor: 'pointer' }}
@@ -1602,14 +1637,16 @@ function SubcontractDetailPageInner() {
 
       </div>
 
-        {/* 詳細ペイン */}
-        <BlockDetailPane
+        {/* サイドパネル */}
+        <SidePane
           block={selectedBlock}
           graph={graph}
           projectDetail={projectDetail}
           orgChain={visibleOrgChain}
-          onClose={() => setSelectedBlock(null)}
-          onSelectBlock={(block) => setSelectedBlock(block)}
+          activeTab={activeTab}
+          onChangeTab={setActiveTab}
+          onSelectBlock={handleSelectFromList}
+          onDeselectBlock={() => setSelectedBlock(null)}
         />
       </div>
     </div>
