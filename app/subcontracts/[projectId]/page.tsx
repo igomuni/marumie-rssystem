@@ -34,9 +34,8 @@ const COLOR_DIRECT_BODY_SUBTLE = '#b33434';
 const COLOR_SUBCONTRACT_BODY_SUBTLE = '#b45309';
 const COLOR_DIRECT_EDGE = 'rgba(217,69,69,0.48)';
 const COLOR_SUBCONTRACT_EDGE = 'rgba(224,112,64,0.52)';
-// 別起点ブロック（5-2の構造的に府省庁ルートでは説明できない財投借入・自己収入・利水者等）
-const COLOR_SEPARATE_ORIGIN_STRONG = '#6366f1';        // 強い別起点 (sourceFeedsMerge=true)
-const COLOR_SEPARATE_ORIGIN_BROAD = '#94a3b8';         // 広めの別起点
+// 別財源ブロック（5-2の構造的に府省庁ルートでは説明できない財投借入・自己収入・利水者等）
+const COLOR_SEPARATE_ORIGIN_STRONG = '#6366f1';
 const COLOR_SEPARATE_ORIGIN_BODY = '#eef2ff';
 const COLOR_SEPARATE_ORIGIN_BODY_TEXT = '#3730a3';
 const COLOR_SEPARATE_ORIGIN_BODY_SUBTLE = '#4338ca';
@@ -53,24 +52,15 @@ interface OriginPalette {
 }
 
 function originPalette(originKind: BlockOriginKind): OriginPalette {
-  if (originKind === 'separate-origin-strong') {
+  // 別財源ブロックは broad/strong の内部区別を表示せず一律「別財源」として扱う
+  if (originKind === 'separate-origin-strong' || originKind === 'separate-origin-broad') {
     return {
       header: COLOR_SEPARATE_ORIGIN_STRONG,
       body: COLOR_SEPARATE_ORIGIN_BODY,
       bodyText: COLOR_SEPARATE_ORIGIN_BODY_TEXT,
       bodySubtle: COLOR_SEPARATE_ORIGIN_BODY_SUBTLE,
       selectedStroke: '#312e81',
-      badgeText: '別起点(強)',
-    };
-  }
-  if (originKind === 'separate-origin-broad') {
-    return {
-      header: COLOR_SEPARATE_ORIGIN_BROAD,
-      body: COLOR_SEPARATE_ORIGIN_BODY,
-      bodyText: COLOR_SEPARATE_ORIGIN_BODY_TEXT,
-      bodySubtle: COLOR_SEPARATE_ORIGIN_BODY_SUBTLE,
-      selectedStroke: '#475569',
-      badgeText: '別起点',
+      badgeText: '別財源',
     };
   }
   if (originKind === 'direct') {
@@ -113,7 +103,7 @@ function flowOriginLabel(origin: FlowOrigin): string {
   switch (origin) {
     case 'direct': return '直接';
     case 'transfer': return '移替';
-    case 'separate-origin': return '別起点';
+    case 'separate-origin': return '別財源';
     case 'reference': return '参考';
     case 'subcontract': return '再委託';
   }
@@ -143,8 +133,9 @@ function originKindBadgeColor(kind: BlockOriginKind): { bg: string; fg: string }
   switch (kind) {
     case 'direct': return { bg: '#f9dddd', fg: COLOR_DIRECT_BODY_SUBTLE };
     case 'subcontract': return { bg: '#fbe3d7', fg: COLOR_SUBCONTRACT_BODY_SUBTLE };
-    case 'separate-origin-strong': return { bg: '#e0e7ff', fg: COLOR_SEPARATE_ORIGIN_BODY_TEXT };
-    case 'separate-origin-broad': return { bg: '#f1f5f9', fg: '#475569' };
+    case 'separate-origin-strong':
+    case 'separate-origin-broad':
+      return { bg: '#e0e7ff', fg: COLOR_SEPARATE_ORIGIN_BODY_TEXT };
   }
 }
 
@@ -152,8 +143,9 @@ function originKindLabel(kind: BlockOriginKind): string {
   switch (kind) {
     case 'direct': return '直接';
     case 'subcontract': return '再委託';
-    case 'separate-origin-strong': return '別起点(強)';
-    case 'separate-origin-broad': return '別起点';
+    case 'separate-origin-strong':
+    case 'separate-origin-broad':
+      return '別財源';
   }
 }
 const COLOR_CONTEXT_BODY = '#d8f1df';
@@ -404,7 +396,7 @@ function BlockDetailPane({
               ['all', 'すべて'],
               ['direct', '直接'],
               ['transfer', '移替'],
-              ['separate-origin', '別起点'],
+              ['separate-origin', '別財源'],
               ['subcontract', '再委託'],
               ['reference', '参考'],
             ] as const).map(([key, label]) => (
@@ -465,7 +457,7 @@ function BlockDetailPane({
               ['all', 'すべて'],
               ['direct', '直接'],
               ['subcontract', '再委託'],
-              ['separate-origin', '別起点'],
+              ['separate-origin', '別財源'],
             ] as const).map(([key, label]) => (
               <button
                 key={key}
@@ -1111,14 +1103,9 @@ function SubcontractDetailPageInner() {
           <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f3f4f6' }}>最大{graph.maxDepth}層</span>
           <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE }}>直接 {directBlocks}件</span>
           <span style={{ padding: '3px 7px', borderRadius: 999, background: '#fbe3d7', color: '#b45309' }}>再委託 {redelegatedBlocks}件</span>
-          {graph.strongSeparateOriginCount > 0 && (
+          {graph.separateOriginCount > 0 && (
             <span style={{ padding: '3px 7px', borderRadius: 999, background: '#e0e7ff', color: COLOR_SEPARATE_ORIGIN_BODY_TEXT, fontWeight: 700 }}>
-              別起点(強) {graph.strongSeparateOriginCount}件
-            </span>
-          )}
-          {graph.separateOriginCount > graph.strongSeparateOriginCount && (
-            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f1f5f9', color: '#475569' }}>
-              別起点(広) {graph.separateOriginCount - graph.strongSeparateOriginCount}件
+              別財源 {graph.separateOriginCount}件
             </span>
           )}
           {graph.hasMerge && (
@@ -1148,7 +1135,7 @@ function SubcontractDetailPageInner() {
           {graph.hasSeparateOrigin && (
             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ width: 10, height: 10, borderRadius: 2, background: COLOR_SEPARATE_ORIGIN_STRONG, display: 'inline-block' }} />
-              別起点
+              別財源
             </span>
           )}
         </div>
