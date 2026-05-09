@@ -131,7 +131,7 @@ function SubcontractsPageInner() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f9fafb', padding: '24px 16px' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+      <div style={{ maxWidth: 1600, margin: '0 auto' }}>
         {/* ヘッダー */}
         <div style={{ marginBottom: 24 }}>
           <Link href="/" style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none' }}>← トップ</Link>
