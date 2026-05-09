@@ -8,6 +8,10 @@ import type { SubcontractGraph } from '@/types/subcontract';
 
 type SortKey =
   | 'projectId'
+  | 'projectName'
+  | 'ministry'
+  | 'bureau'
+  | 'accountCategory'
   | 'budget'
   | 'execution'
   | 'maxDepth'
@@ -20,7 +24,15 @@ type SortKey =
   | 'branchingBlockCount'
   | 'maxBranchWidth'
   | 'mergeTargetCount'
-  | 'maxMergeWidth';
+  | 'maxMergeWidth'
+  | 'institutional';
+
+const STRING_SORT_KEYS: ReadonlySet<SortKey> = new Set<SortKey>([
+  'projectName',
+  'ministry',
+  'bureau',
+  'accountCategory',
+]);
 type SortDir = 'asc' | 'desc';
 type StructureFilter = 'all' | 'separate-origin' | 'merge' | 'institutional';
 
@@ -32,6 +44,21 @@ function formatYen(v: number): string {
   if (v >= 1e8) return `${(v / 1e8).toFixed(2)}億円`;
   if (v >= 1e4) return `${Math.round(v / 1e4).toLocaleString()}万円`;
   return `${Math.round(v).toLocaleString()}円`;
+}
+
+/** sankey-svg と同じ会計区分ラベル表記 */
+function accountCategoryLabel(cat: string): string {
+  if (cat === '一般会計+特別会計') return '一般・特別';
+  if (cat === '一般会計') return '一般会計';
+  if (cat === '特別会計') return '特別会計';
+  return cat;
+}
+
+/** 担当組織の末端要素を取り出す */
+function bureauLeaf(bureau: string): string {
+  if (!bureau) return '';
+  const parts = bureau.split(' / ');
+  return parts[parts.length - 1] ?? '';
 }
 
 function SubcontractsPageInner() {
@@ -122,7 +149,23 @@ function SubcontractsPageInner() {
   }
 
   const sorted = useMemo(() => {
+    const dir = sortDir === 'asc' ? 1 : -1;
     return [...filtered].sort((a, b) => {
+      if (STRING_SORT_KEYS.has(sortKey)) {
+        const sa: string =
+          sortKey === 'projectName' ? a.projectName :
+          sortKey === 'ministry' ? a.ministry :
+          sortKey === 'bureau' ? bureauLeaf(a.bureau) :
+          sortKey === 'accountCategory' ? accountCategoryLabel(a.accountCategory) :
+          '';
+        const sb: string =
+          sortKey === 'projectName' ? b.projectName :
+          sortKey === 'ministry' ? b.ministry :
+          sortKey === 'bureau' ? bureauLeaf(b.bureau) :
+          sortKey === 'accountCategory' ? accountCategoryLabel(b.accountCategory) :
+          '';
+        return sa.localeCompare(sb, 'ja') * dir;
+      }
       let va: number, vb: number;
       if (sortKey === 'projectId') { va = a.projectId; vb = b.projectId; }
       else if (sortKey === 'budget') { va = a.budget; vb = b.budget; }
@@ -137,8 +180,9 @@ function SubcontractsPageInner() {
       else if (sortKey === 'maxBranchWidth') { va = a.maxBranchWidth; vb = b.maxBranchWidth; }
       else if (sortKey === 'mergeTargetCount') { va = a.mergeTargetCount; vb = b.mergeTargetCount; }
       else if (sortKey === 'maxMergeWidth') { va = a.maxMergeWidth; vb = b.maxMergeWidth; }
+      else if (sortKey === 'institutional') { va = a.isInstitutionalFlowOnly ? 1 : 0; vb = b.isInstitutionalFlowOnly ? 1 : 0; }
       else { va = a.totalRecipientCount; vb = b.totalRecipientCount; }
-      return sortDir === 'asc' ? va - vb : vb - va;
+      return (va - vb) * dir;
     });
   }, [filtered, sortKey, sortDir]);
 
@@ -168,16 +212,56 @@ function SubcontractsPageInner() {
   }
 
   const thStyle: React.CSSProperties = {
-    padding: '8px 10px',
+    padding: '8px 8px',
     textAlign: 'left',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 600,
     color: '#6b7280',
     borderBottom: '1px solid #e5e7eb',
     whiteSpace: 'nowrap',
     cursor: 'pointer',
     userSelect: 'none',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   };
+  const tdNumStyle: React.CSSProperties = {
+    padding: '8px 8px',
+    textAlign: 'right',
+    color: '#374151',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  };
+  const tdTextStyle: React.CSSProperties = {
+    padding: '8px 8px',
+    color: '#374151',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  };
+
+  // フルHD 70% (≈1344px) 基準の列幅。事業名・担当組織は truncate で吸収。
+  const COL_WIDTHS = [
+    50,   // PID
+    240,  // 事業名
+    88,   // 省庁
+    110,  // 担当組織
+    72,   // 会計区分
+    80,   // 予算額
+    80,   // 執行額
+    60,   // ブロック
+    64,   // 直接支出
+    56,   // 再委託
+    64,   // 間接経費
+    56,   // 別財源
+    64,   // 支出先
+    52,   // 階層
+    52,   // 分岐
+    60,   // 最大分岐
+    52,   // 合流
+    60,   // 最大合流
+    76,   // 構造
+  ];
 
   // 集計
   const totalSeparateOrigin = graphs.filter(g => g.hasSeparateOrigin).length;
@@ -412,56 +496,31 @@ function SubcontractsPageInner() {
         {error && <p style={{ color: '#ef4444', fontSize: 14 }}>エラー: {error}</p>}
         {!loading && !error && (
           <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <table style={{ width: COL_WIDTHS.reduce((s, w) => s + w, 0), borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
+              <colgroup>
+                {COL_WIDTHS.map((w, i) => <col key={i} style={{ width: w }} />)}
+              </colgroup>
               <thead>
                 <tr style={{ background: '#f9fafb' }}>
-                  <th style={{ ...thStyle, cursor: 'pointer' }} onClick={() => toggleSort('projectId')}>
-                    PID <SortIndicator k="projectId" />
-                  </th>
-                  <th style={{ ...thStyle, minWidth: 200 }}>事業名</th>
-                  <th style={thStyle}>省庁</th>
-                  <th style={thStyle}>担当組織</th>
-                  <th style={thStyle}>会計区分</th>
-                  <th style={thStyle} onClick={() => toggleSort('budget')}>
-                    予算額 <SortIndicator k="budget" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('execution')}>
-                    執行額 <SortIndicator k="execution" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('totalBlockCount')}>
-                    ブロック <SortIndicator k="totalBlockCount" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('directBlockCount')}>
-                    直接支出 <SortIndicator k="directBlockCount" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('subcontractBlockCount')}>
-                    再委託 <SortIndicator k="subcontractBlockCount" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('indirectCostCount')}>
-                    間接経費 <SortIndicator k="indirectCostCount" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('separateOriginCount')}>
-                    別財源 <SortIndicator k="separateOriginCount" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('totalRecipientCount')}>
-                    支出先 <SortIndicator k="totalRecipientCount" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('maxDepth')}>
-                    階層 <SortIndicator k="maxDepth" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('branchingBlockCount')}>
-                    分岐 <SortIndicator k="branchingBlockCount" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('maxBranchWidth')}>
-                    最大分岐 <SortIndicator k="maxBranchWidth" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('mergeTargetCount')}>
-                    合流 <SortIndicator k="mergeTargetCount" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('maxMergeWidth')}>
-                    最大合流 <SortIndicator k="maxMergeWidth" />
-                  </th>
-                  <th style={thStyle}>構造</th>
+                  <th style={thStyle} onClick={() => toggleSort('projectId')}>PID<SortIndicator k="projectId" /></th>
+                  <th style={thStyle} onClick={() => toggleSort('projectName')}>事業名<SortIndicator k="projectName" /></th>
+                  <th style={thStyle} onClick={() => toggleSort('ministry')}>省庁<SortIndicator k="ministry" /></th>
+                  <th style={thStyle} onClick={() => toggleSort('bureau')}>担当組織<SortIndicator k="bureau" /></th>
+                  <th style={thStyle} onClick={() => toggleSort('accountCategory')}>会計区分<SortIndicator k="accountCategory" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('budget')}>予算額<SortIndicator k="budget" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('execution')}>執行額<SortIndicator k="execution" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('totalBlockCount')}>ブロック<SortIndicator k="totalBlockCount" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('directBlockCount')}>直接支出<SortIndicator k="directBlockCount" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('subcontractBlockCount')}>再委託<SortIndicator k="subcontractBlockCount" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('indirectCostCount')}>間接経費<SortIndicator k="indirectCostCount" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('separateOriginCount')}>別財源<SortIndicator k="separateOriginCount" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('totalRecipientCount')}>支出先<SortIndicator k="totalRecipientCount" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('maxDepth')}>階層<SortIndicator k="maxDepth" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('branchingBlockCount')}>分岐<SortIndicator k="branchingBlockCount" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('maxBranchWidth')}>最大分岐<SortIndicator k="maxBranchWidth" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('mergeTargetCount')}>合流<SortIndicator k="mergeTargetCount" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('maxMergeWidth')}>最大合流<SortIndicator k="maxMergeWidth" /></th>
+                  <th style={{ ...thStyle, textAlign: 'center' }} onClick={() => toggleSort('institutional')}>構造<SortIndicator k="institutional" /></th>
                 </tr>
               </thead>
               <tbody>
@@ -473,8 +532,8 @@ function SubcontractsPageInner() {
                       borderBottom: '1px solid #f3f4f6',
                     }}
                   >
-                    <td style={{ padding: '8px 10px', color: '#6b7280' }}>{g.projectId}</td>
-                    <td style={{ padding: '8px 10px', maxWidth: 280, minWidth: 200 }}>
+                    <td style={{ ...tdTextStyle, color: '#6b7280' }}>{g.projectId}</td>
+                    <td style={tdTextStyle}>
                       <Link
                         href={`/subcontracts/${g.projectId}?year=${year}`}
                         title={g.projectName}
@@ -491,59 +550,50 @@ function SubcontractsPageInner() {
                         {g.projectName}
                       </Link>
                     </td>
-                    <td style={{ padding: '8px 10px', color: '#374151', whiteSpace: 'nowrap' }}>{g.ministry}</td>
-                    {(() => {
-                      const parts = g.bureau ? g.bureau.split(' / ') : [];
-                      const leaf = parts[parts.length - 1] ?? '';
-                      return (
-                        <td
-                          style={{ padding: '8px 10px', color: '#374151', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                          title={g.bureau || undefined}
-                        >
-                          {leaf || <span style={{ color: '#cbd5e1' }}>—</span>}
-                        </td>
-                      );
-                    })()}
-                    <td style={{ padding: '8px 10px', color: '#374151', whiteSpace: 'nowrap' }}>
-                      {g.accountCategory || <span style={{ color: '#cbd5e1' }}>—</span>}
+                    <td style={tdTextStyle} title={g.ministry}>{g.ministry}</td>
+                    <td style={tdTextStyle} title={g.bureau || undefined}>
+                      {bureauLeaf(g.bureau) || <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
-                    <td style={{ padding: '8px 10px', color: '#374151', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <td style={tdTextStyle}>
+                      {g.accountCategory ? accountCategoryLabel(g.accountCategory) : <span style={{ color: '#cbd5e1' }}>—</span>}
+                    </td>
+                    <td style={tdNumStyle}>
                       {g.budget > 0 ? formatYen(g.budget) : '—'}
                     </td>
-                    <td style={{ padding: '8px 10px', color: '#374151', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <td style={tdNumStyle}>
                       {g.execution > 0 ? formatYen(g.execution) : '—'}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.totalBlockCount}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                    <td style={tdNumStyle}>{g.totalBlockCount}</td>
+                    <td style={tdNumStyle}>
                       {g.directBlockCount > 0 ? g.directBlockCount : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                    <td style={tdNumStyle}>
                       {subcontractBlockCount(g) > 0 ? subcontractBlockCount(g) : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                    <td style={tdNumStyle}>
                       {g.indirectCosts.length > 0 ? g.indirectCosts.length.toLocaleString() : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                    <td style={tdNumStyle}>
                       {g.separateOriginCount > 0 ? g.separateOriginCount : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.totalRecipientCount.toLocaleString()}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.maxDepth}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                    <td style={tdNumStyle}>{g.totalRecipientCount.toLocaleString()}</td>
+                    <td style={tdNumStyle}>{g.maxDepth}</td>
+                    <td style={tdNumStyle}>
                       {g.branchingBlockCount > 0 ? g.branchingBlockCount : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                    <td style={tdNumStyle}>
                       {g.maxBranchWidth >= 2 ? g.maxBranchWidth : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                    <td style={tdNumStyle}>
                       {g.mergeTargetCount > 0 ? g.mergeTargetCount : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                    <td style={tdNumStyle}>
                       {g.maxMergeWidth >= 2 ? g.maxMergeWidth : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    <td style={{ ...tdTextStyle, textAlign: 'center' }}>
                       {g.isInstitutionalFlowOnly ? (
-                        <span style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#fef2f2', color: '#991b1b' }}>
-                          制度フロー
+                        <span style={{ display: 'inline-block', padding: '2px 4px', borderRadius: 999, fontSize: 10, fontWeight: 700, background: '#fef2f2', color: '#991b1b' }}>
+                          制度
                         </span>
                       ) : (
                         <span style={{ color: '#cbd5e1' }}>—</span>
