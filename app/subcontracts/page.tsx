@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import type { SubcontractGraph } from '@/types/subcontract';
@@ -47,14 +48,35 @@ function SubcontractsPageInner() {
   const [sortKey, setSortKey] = useState<SortKey>('projectId');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [structureFilter, setStructureFilter] = useState<StructureFilter>('all');
-  const [selectedMinistry, setSelectedMinistry] = useState<string>('');
+  const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
+  const [showMinistryDropdown, setShowMinistryDropdown] = useState(false);
+  const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
+  const ministryButtonRef = useRef<HTMLButtonElement>(null);
+  const ministryDropdownRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(1);
 
   const ministries = useMemo(() => {
-    const set = new Set<string>();
-    for (const g of graphs) if (g.ministry) set.add(g.ministry);
-    return Array.from(set).sort((a, b) => a.localeCompare(b, 'ja'));
+    const counts = new Map<string, number>();
+    for (const g of graphs) {
+      if (!g.ministry) continue;
+      counts.set(g.ministry, (counts.get(g.ministry) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ja'))
+      .map(([m]) => m);
   }, [graphs]);
+
+  // ドロップダウン外クリックで閉じる
+  useEffect(() => {
+    if (!showMinistryDropdown) return;
+    function onPointerDown(e: MouseEvent) {
+      if (ministryDropdownRef.current?.contains(e.target as Node)) return;
+      if (ministryButtonRef.current?.contains(e.target as Node)) return;
+      setShowMinistryDropdown(false);
+    }
+    document.addEventListener('mousedown', onPointerDown);
+    return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [showMinistryDropdown]);
 
   useEffect(() => {
     setLoading(true);
@@ -77,7 +99,7 @@ function SubcontractsPageInner() {
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase();
     return graphs.filter((g) => {
-      if (selectedMinistry && g.ministry !== selectedMinistry) return false;
+      if (selectedMinistries.length > 0 && !selectedMinistries.includes(g.ministry)) return false;
       if (structureFilter === 'separate-origin' && !g.hasSeparateOrigin) return false;
       if (structureFilter === 'merge' && !g.hasMerge) return false;
       if (structureFilter === 'institutional' && !g.isInstitutionalFlowOnly) return false;
@@ -93,7 +115,7 @@ function SubcontractsPageInner() {
         )
       );
     });
-  }, [graphs, query, structureFilter, selectedMinistry]);
+  }, [graphs, query, structureFilter, selectedMinistries]);
 
   function subcontractBlockCount(g: SubcontractGraph): number {
     return g.totalBlockCount - g.directBlockCount - g.separateOriginCount;
@@ -121,7 +143,7 @@ function SubcontractsPageInner() {
   }, [filtered, sortKey, sortDir]);
 
   // フィルタ・ソート・年度変更時はページ1へ戻す
-  const filterKey = `${year}|${selectedMinistry}|${structureFilter}|${query}|${sortKey}|${sortDir}`;
+  const filterKey = `${year}|${selectedMinistries.join(',')}|${structureFilter}|${query}|${sortKey}|${sortDir}`;
   const [lastFilterKey, setLastFilterKey] = useState(filterKey);
   if (filterKey !== lastFilterKey) {
     setLastFilterKey(filterKey);
@@ -243,33 +265,114 @@ function SubcontractsPageInner() {
             )}
           </div>
 
-          {/* 府省庁 */}
-          <div style={{ position: 'relative' }}>
-            <select
-              value={selectedMinistry}
-              onChange={(e) => setSelectedMinistry(e.target.value)}
-              style={{
-                fontSize: 13,
-                border: '1px solid #e0e0e0',
-                borderRadius: 8,
-                padding: '6px 28px 6px 10px',
-                background: 'rgba(255,255,255,0.95)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                color: '#333',
-                cursor: 'pointer',
-                appearance: 'none',
-                WebkitAppearance: 'none',
-              }}
-            >
-              <option value="">全府省庁</option>
-              {ministries.map((m) => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
-            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-              <path d="M7 10l5 5 5-5z"/>
-            </svg>
-          </div>
+          {/* 府省庁（複数選択ドロップダウン） */}
+          {(() => {
+            const allSelected = selectedMinistries.length === 0;
+            const label = allSelected
+              ? '全府省庁'
+              : selectedMinistries.length === 1
+                ? selectedMinistries[0]
+                : `選択中 (${selectedMinistries.length}/${ministries.length})`;
+            return (
+              <div style={{ position: 'relative', minWidth: 180 }}>
+                <button
+                  type="button"
+                  ref={ministryButtonRef}
+                  onClick={() => {
+                    if (ministryButtonRef.current) {
+                      const r = ministryButtonRef.current.getBoundingClientRect();
+                      setMinistryDropdownRect({
+                        top: r.bottom + 2,
+                        left: r.left,
+                        width: Math.max(r.width, 240),
+                        maxHeight: Math.max(160, window.innerHeight - r.bottom - 24),
+                      });
+                    }
+                    setShowMinistryDropdown((v) => !v);
+                  }}
+                  style={{
+                    width: '100%',
+                    fontSize: 13,
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 8,
+                    padding: '6px 28px 6px 10px',
+                    background: 'rgba(255,255,255,0.95)',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                    color: allSelected ? '#999' : '#333',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {label}
+                </button>
+                <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999"
+                  style={{
+                    position: 'absolute', right: 8, top: '50%', transform: showMinistryDropdown ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)',
+                    transition: 'transform 0.15s', pointerEvents: 'none',
+                  }}>
+                  <path d="M7 10l5 5 5-5z"/>
+                </svg>
+                {!allSelected && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMinistries([])}
+                    aria-label="府省庁フィルタをクリア"
+                    style={{ position: 'absolute', right: 26, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#bbb', cursor: 'pointer', padding: 2, fontSize: 11 }}
+                  >
+                    ✕
+                  </button>
+                )}
+                {showMinistryDropdown && ministryDropdownRect && typeof document !== 'undefined' && createPortal(
+                  <div
+                    ref={ministryDropdownRef}
+                    style={{
+                      position: 'fixed',
+                      top: ministryDropdownRect.top,
+                      left: ministryDropdownRect.left,
+                      width: ministryDropdownRect.width,
+                      maxHeight: ministryDropdownRect.maxHeight,
+                      overflowY: 'auto',
+                      zIndex: 9999,
+                      background: '#fff',
+                      border: '1px solid #ddd',
+                      borderRadius: 6,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={() => setSelectedMinistries([])}
+                        style={{ width: 13, height: 13 }}
+                      />
+                      <span style={{ fontSize: 12, color: '#333' }}>すべて解除</span>
+                    </label>
+                    {ministries.map((m) => (
+                      <label key={m} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedMinistries.includes(m)}
+                          onChange={() =>
+                            setSelectedMinistries((prev) =>
+                              prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]
+                            )
+                          }
+                          style={{ width: 13, height: 13 }}
+                        />
+                        <span style={{ fontSize: 12, color: '#333' }}>{m}</span>
+                      </label>
+                    ))}
+                  </div>,
+                  document.body
+                )}
+              </div>
+            );
+          })()}
 
           <span style={{ fontSize: 12, color: '#6b7280' }}>
             {filtered.length.toLocaleString()}件表示
@@ -317,14 +420,13 @@ function SubcontractsPageInner() {
                   </th>
                   <th style={{ ...thStyle, minWidth: 200 }}>事業名</th>
                   <th style={thStyle}>府省庁</th>
+                  <th style={thStyle}>部・課・局</th>
+                  <th style={thStyle}>会計区分</th>
                   <th style={thStyle} onClick={() => toggleSort('budget')}>
                     予算額 <SortIndicator k="budget" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('execution')}>
                     執行額 <SortIndicator k="execution" />
-                  </th>
-                  <th style={thStyle} onClick={() => toggleSort('maxDepth')}>
-                    階層数 <SortIndicator k="maxDepth" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('totalBlockCount')}>
                     ブロック数 <SortIndicator k="totalBlockCount" />
@@ -343,6 +445,9 @@ function SubcontractsPageInner() {
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('totalRecipientCount')}>
                     支出先数 <SortIndicator k="totalRecipientCount" />
+                  </th>
+                  <th style={thStyle} onClick={() => toggleSort('maxDepth')}>
+                    階層数 <SortIndicator k="maxDepth" />
                   </th>
                   <th style={thStyle} onClick={() => toggleSort('branchingBlockCount')}>
                     分岐数 <SortIndicator k="branchingBlockCount" />
@@ -387,13 +492,18 @@ function SubcontractsPageInner() {
                       </Link>
                     </td>
                     <td style={{ padding: '8px 10px', color: '#374151', whiteSpace: 'nowrap' }}>{g.ministry}</td>
+                    <td style={{ padding: '8px 10px', color: '#374151', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={g.bureau}>
+                      {g.bureau || <span style={{ color: '#cbd5e1' }}>—</span>}
+                    </td>
+                    <td style={{ padding: '8px 10px', color: '#374151', whiteSpace: 'nowrap' }}>
+                      {g.accountCategory || <span style={{ color: '#cbd5e1' }}>—</span>}
+                    </td>
                     <td style={{ padding: '8px 10px', color: '#374151', textAlign: 'right', whiteSpace: 'nowrap' }}>
                       {g.budget > 0 ? formatYen(g.budget) : '—'}
                     </td>
                     <td style={{ padding: '8px 10px', color: '#374151', textAlign: 'right', whiteSpace: 'nowrap' }}>
                       {g.execution > 0 ? formatYen(g.execution) : '—'}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.maxDepth}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.totalBlockCount}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
                       {g.directBlockCount > 0 ? g.directBlockCount : <span style={{ color: '#cbd5e1' }}>—</span>}
@@ -408,6 +518,7 @@ function SubcontractsPageInner() {
                       {g.separateOriginCount > 0 ? g.separateOriginCount : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.totalRecipientCount.toLocaleString()}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.maxDepth}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
                       {g.branchingBlockCount > 0 ? g.branchingBlockCount : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>

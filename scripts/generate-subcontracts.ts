@@ -43,8 +43,16 @@ const TARGET_BUDGET_YEAR = YEAR - 1;
 console.log(`📖 Reading 2-1 (budget/execution, 予算年度=${TARGET_BUDGET_YEAR})...`);
 const csv21 = readShiftJISCSV(path.join(DATA_DIR, `2-1_RS_${YEAR}_予算・執行_サマリ.csv`));
 
-// projectId → { budget, execution, projectName, ministry }
-const budgetMap = new Map<number, { budget: number; execution: number; projectName: string; ministry: string }>();
+// projectId → 集計値
+interface BudgetEntry {
+  budget: number;
+  execution: number;
+  projectName: string;
+  ministry: string;
+  bureau: string;
+  accountCategorySet: Set<string>;
+}
+const budgetMap = new Map<number, BudgetEntry>();
 for (const row of csv21) {
   const projectId = parseInt(row['予算事業ID'] ?? '', 10);
   if (isNaN(projectId)) continue;
@@ -53,18 +61,29 @@ for (const row of csv21) {
   if (fiscalYear !== TARGET_BUDGET_YEAR) continue;
   const budget = parseAmount(row['計(歳出予算現額合計)'] ?? '');
   const execution = parseAmount(row['執行額(合計)'] ?? '');
+  const bureauParts = ['局・庁', '部', '課', '室']
+    .map((k) => (row[k] ?? '').trim())
+    .filter(Boolean);
+  const bureau = bureauParts.join(' / ');
+  const accountCategory = (row['会計区分'] ?? '').trim();
   if (!budgetMap.has(projectId)) {
+    const set = new Set<string>();
+    if (accountCategory) set.add(accountCategory);
     budgetMap.set(projectId, {
       budget,
       execution,
       projectName: row['事業名'] ?? '',
       ministry: row['府省庁'] ?? '',
+      bureau,
+      accountCategorySet: set,
     });
   } else {
     // 同一事業ID・同一予算年度で複数会計がある場合は合算
     const existing = budgetMap.get(projectId)!;
     existing.budget += budget;
     existing.execution += execution;
+    if (accountCategory) existing.accountCategorySet.add(accountCategory);
+    if (!existing.bureau && bureau) existing.bureau = bureau;
   }
 }
 console.log(`  → ${budgetMap.size} projects`);
@@ -500,10 +519,19 @@ for (const [projectId, flowEntry] of flowMap) {
 
   const maxDepth = computeMaxDepth(flows);
 
+  // 会計区分の文字列化（一般会計+特別会計 / 一般会計 / 特別会計 / 空）
+  let accountCategory = '';
+  if (budgetEntry) {
+    const cats = Array.from(budgetEntry.accountCategorySet).sort();
+    accountCategory = cats.join('+');
+  }
+
   const graph: SubcontractGraph = {
     projectId,
     projectName: budgetEntry?.projectName ?? flowEntry.projectName,
     ministry: budgetEntry?.ministry ?? flowEntry.ministry,
+    bureau: budgetEntry?.bureau ?? '',
+    accountCategory,
     budget: budgetEntry?.budget ?? 0,
     execution: budgetEntry?.execution ?? 0,
     blocks,

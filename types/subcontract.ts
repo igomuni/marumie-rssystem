@@ -67,6 +67,10 @@ export interface SubcontractGraph {
   projectId: number;
   projectName: string;
   ministry: string;
+  /** 局・庁 / 部 / 課 を ' / ' で連結した担当組織。空欄は除く */
+  bureau: string;
+  /** '一般会計' | '特別会計' | '一般会計+特別会計' | '' */
+  accountCategory: string;
   budget: number;
   execution: number;
   blocks: BlockNode[];
