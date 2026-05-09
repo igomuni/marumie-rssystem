@@ -16,7 +16,9 @@ type SortKey =
   | 'separateOriginCount'
   | 'totalRecipientCount'
   | 'branchingBlockCount'
-  | 'mergeTargetCount';
+  | 'maxBranchWidth'
+  | 'mergeTargetCount'
+  | 'maxMergeWidth';
 type SortDir = 'asc' | 'desc';
 type StructureFilter = 'all' | 'separate-origin' | 'merge' | 'institutional';
 
@@ -97,7 +99,9 @@ function SubcontractsPageInner() {
       else if (sortKey === 'indirectCostCount') { va = a.indirectCosts.length; vb = b.indirectCosts.length; }
       else if (sortKey === 'separateOriginCount') { va = a.separateOriginCount; vb = b.separateOriginCount; }
       else if (sortKey === 'branchingBlockCount') { va = a.branchingBlockCount; vb = b.branchingBlockCount; }
+      else if (sortKey === 'maxBranchWidth') { va = a.maxBranchWidth; vb = b.maxBranchWidth; }
       else if (sortKey === 'mergeTargetCount') { va = a.mergeTargetCount; vb = b.mergeTargetCount; }
+      else if (sortKey === 'maxMergeWidth') { va = a.maxMergeWidth; vb = b.maxMergeWidth; }
       else { va = a.totalRecipientCount; vb = b.totalRecipientCount; }
       return sortDir === 'asc' ? va - vb : vb - va;
     });
@@ -248,8 +252,14 @@ function SubcontractsPageInner() {
                   <th style={thStyle} onClick={() => toggleSort('branchingBlockCount')}>
                     分岐数 <SortIndicator k="branchingBlockCount" />
                   </th>
+                  <th style={thStyle} onClick={() => toggleSort('maxBranchWidth')}>
+                    最大分岐 <SortIndicator k="maxBranchWidth" />
+                  </th>
                   <th style={thStyle} onClick={() => toggleSort('mergeTargetCount')}>
                     合流数 <SortIndicator k="mergeTargetCount" />
+                  </th>
+                  <th style={thStyle} onClick={() => toggleSort('maxMergeWidth')}>
+                    最大合流 <SortIndicator k="maxMergeWidth" />
                   </th>
                   <th style={thStyle}>構造</th>
                 </tr>
@@ -264,10 +274,19 @@ function SubcontractsPageInner() {
                     }}
                   >
                     <td style={{ padding: '8px 10px', color: '#6b7280' }}>{g.projectId}</td>
-                    <td style={{ padding: '8px 10px', maxWidth: 300 }}>
+                    <td style={{ padding: '8px 10px', maxWidth: 280, minWidth: 200 }}>
                       <Link
                         href={`/subcontracts/${g.projectId}?year=${year}`}
-                        style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500 }}
+                        title={g.projectName}
+                        style={{
+                          color: '#2563eb',
+                          textDecoration: 'none',
+                          fontWeight: 500,
+                          display: 'block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
                       >
                         {g.projectName}
                       </Link>
@@ -280,8 +299,12 @@ function SubcontractsPageInner() {
                       {g.execution > 0 ? formatYen(g.execution) : '—'}
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.totalBlockCount}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.directBlockCount}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{subcontractBlockCount(g)}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                      {g.directBlockCount > 0 ? g.directBlockCount : <span style={{ color: '#cbd5e1' }}>—</span>}
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                      {subcontractBlockCount(g) > 0 ? subcontractBlockCount(g) : <span style={{ color: '#cbd5e1' }}>—</span>}
+                    </td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
                       {g.indirectCosts.length > 0 ? g.indirectCosts.length.toLocaleString() : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
@@ -293,7 +316,13 @@ function SubcontractsPageInner() {
                       {g.branchingBlockCount > 0 ? g.branchingBlockCount : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                      {g.maxBranchWidth >= 2 ? g.maxBranchWidth : <span style={{ color: '#cbd5e1' }}>—</span>}
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
                       {g.mergeTargetCount > 0 ? g.mergeTargetCount : <span style={{ color: '#cbd5e1' }}>—</span>}
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>
+                      {g.maxMergeWidth >= 2 ? g.maxMergeWidth : <span style={{ color: '#cbd5e1' }}>—</span>}
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                       {g.isInstitutionalFlowOnly ? (
