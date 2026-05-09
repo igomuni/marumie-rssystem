@@ -408,35 +408,6 @@ function SidePane({
           )}
         </div>
 
-        {/* 凡例 */}
-        <div style={{ display: 'flex', gap: 10, marginTop: 6, flexWrap: 'wrap', fontSize: 10, color: '#64748b' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <span style={{ width: 9, height: 9, borderRadius: 2, background: COLOR_DIRECT, display: 'inline-block' }} />
-            直接
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <span style={{ width: 9, height: 9, borderRadius: 2, background: COLOR_SUBCONTRACT, display: 'inline-block' }} />
-            再委託
-          </span>
-          {graph.hasSeparateOrigin && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ width: 9, height: 9, borderRadius: 2, background: COLOR_SEPARATE_ORIGIN_STRONG, display: 'inline-block' }} />
-              別財源
-            </span>
-          )}
-          {graph.flows.some((f) => f.origin === 'transfer') && (
-            <span title="補足情報に「移替」を含む府省庁起点フロー" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ width: 12, borderTop: `2px dashed ${COLOR_DIRECT_BODY_SUBTLE}`, display: 'inline-block' }} />
-              移替
-            </span>
-          )}
-          {graph.hasReferenceFlow && (
-            <span title="制度上の参考的な資金関係（融資・政府保証借入・利子補給など）" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ width: 12, borderTop: '2px dashed #94a3b8', display: 'inline-block' }} />
-              参考
-            </span>
-          )}
-        </div>
       </div>
 
       {/* タブヘッダー */}
@@ -1136,37 +1107,57 @@ function SubcontractDetailPageInner() {
   // ここに到達した時点で graph は必ず非 null
   const safeLayout = layout!;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
-      {/* ヘッダーバー: 左=一覧 / 中央=年度切替 / 右=サイドパネル領域 */}
-      <div style={{
-        background: '#fff',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '10px 16px',
-        display: 'grid',
-        gridTemplateColumns: '1fr auto 1fr',
-        alignItems: 'center',
-        gap: 12,
-        zIndex: 10,
-      }}>
-        <Link href={`/subcontracts?year=${year}`} style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap', justifySelf: 'start' }}>
-          ← 一覧
-        </Link>
-
-        <select
-          value={year}
-          onChange={(e) => router.push(`/subcontracts/${projectId}?year=${e.target.value}`)}
-          style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: 12, background: '#fff', justifySelf: 'center' }}
-        >
-          <option value={2024}>2024年度</option>
-          <option value={2025}>2025年度</option>
-        </select>
-
-        <span aria-hidden="true" />
-      </div>
-
-      <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* SVGキャンバス */}
       <div ref={containerRef} style={{ flex: 1, minWidth: 0, overflow: 'hidden', position: 'relative' }}>
+        {/* 一覧へ戻る — 左上 */}
+        <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 15 }}>
+          <Link
+            href={`/subcontracts?year=${year}`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              fontSize: 13,
+              border: '1px solid #e0e0e0',
+              borderRadius: 8,
+              padding: '6px 12px',
+              background: 'rgba(255,255,255,0.95)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              color: '#333',
+              cursor: 'pointer',
+              textDecoration: 'none',
+            }}
+          >
+            ← 一覧
+          </Link>
+        </div>
+
+        {/* 年度切替 — 上部中央 */}
+        <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}>
+          <select
+            value={year}
+            onChange={(e) => router.push(`/subcontracts/${projectId}?year=${e.target.value}`)}
+            style={{
+              fontSize: 13,
+              border: '1px solid #e0e0e0',
+              borderRadius: 8,
+              padding: '6px 28px 6px 10px',
+              background: 'rgba(255,255,255,0.95)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              color: '#333',
+              cursor: 'pointer',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+            }}
+          >
+            <option value={2025}>2025年度</option>
+            <option value={2024}>2024年度</option>
+          </select>
+          <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+            <path d="M7 10l5 5 5-5z"/>
+          </svg>
+        </div>
+
         <svg
           ref={svgRef}
           width="100%"
@@ -1636,7 +1627,6 @@ function SubcontractDetailPageInner() {
           onSelectBlock={handleSelectFromList}
           onDeselectBlock={() => setSelectedBlock(null)}
         />
-      </div>
     </div>
   );
 }
