@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import type { SubcontractGraph } from '@/types/subcontract';
 
-type SortKey = 'projectId' | 'budget' | 'execution' | 'maxDepth' | 'totalBlockCount' | 'totalRecipientCount';
+type SortKey = 'projectId' | 'budget' | 'execution' | 'maxDepth' | 'totalBlockCount' | 'totalRecipientCount' | 'separateOriginCount' | 'separateOriginAmount';
 type SortDir = 'asc' | 'desc';
+type StructureFilter = 'all' | 'separate-origin' | 'strong-separate-origin' | 'merge' | 'institutional';
 
 function formatYen(v: number): string {
   if (v >= 1e12) return `${(v / 1e12).toFixed(2)}兆円`;
@@ -29,6 +30,7 @@ function SubcontractsPageInner() {
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('projectId');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [structureFilter, setStructureFilter] = useState<StructureFilter>('all');
 
   useEffect(() => {
     setLoading(true);
@@ -50,8 +52,12 @@ function SubcontractsPageInner() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase();
-    if (!q) return graphs;
     return graphs.filter((g) => {
+      if (structureFilter === 'separate-origin' && !g.hasSeparateOrigin) return false;
+      if (structureFilter === 'strong-separate-origin' && g.strongSeparateOriginCount === 0) return false;
+      if (structureFilter === 'merge' && !g.hasMerge) return false;
+      if (structureFilter === 'institutional' && !g.isInstitutionalFlowOnly) return false;
+      if (!q) return true;
       return (
         String(g.projectId).includes(q) ||
         g.projectName.toLocaleLowerCase().includes(q) ||
@@ -63,7 +69,7 @@ function SubcontractsPageInner() {
         )
       );
     });
-  }, [graphs, query]);
+  }, [graphs, query, structureFilter]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -73,6 +79,8 @@ function SubcontractsPageInner() {
       else if (sortKey === 'execution') { va = a.execution; vb = b.execution; }
       else if (sortKey === 'maxDepth') { va = a.maxDepth; vb = b.maxDepth; }
       else if (sortKey === 'totalBlockCount') { va = a.totalBlockCount; vb = b.totalBlockCount; }
+      else if (sortKey === 'separateOriginCount') { va = a.separateOriginCount; vb = b.separateOriginCount; }
+      else if (sortKey === 'separateOriginAmount') { va = a.separateOriginAmount; vb = b.separateOriginAmount; }
       else { va = a.totalRecipientCount; vb = b.totalRecipientCount; }
       return sortDir === 'asc' ? va - vb : vb - va;
     });
@@ -155,6 +163,35 @@ function SubcontractsPageInner() {
           </span>
         </div>
 
+        {/* 構造フィルタ */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, marginRight: 4 }}>構造:</span>
+          {([
+            ['all', 'すべて'],
+            ['separate-origin', '別起点あり'],
+            ['strong-separate-origin', '別起点(強)あり'],
+            ['merge', '合流あり'],
+            ['institutional', '制度フローのみ'],
+          ] as const).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setStructureFilter(key)}
+              style={{
+                border: `1px solid ${structureFilter === key ? '#94a3b8' : '#d1d5db'}`,
+                background: structureFilter === key ? '#f1f5f9' : '#fff',
+                borderRadius: 999,
+                padding: '4px 10px',
+                fontSize: 12,
+                fontWeight: 600,
+                color: '#334155',
+                cursor: 'pointer',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         {/* テーブル */}
         {loading && <p style={{ color: '#6b7280', fontSize: 14 }}>読み込み中...</p>}
         {error && <p style={{ color: '#ef4444', fontSize: 14 }}>エラー: {error}</p>}
@@ -183,6 +220,13 @@ function SubcontractsPageInner() {
                   <th style={thStyle} onClick={() => toggleSort('totalRecipientCount')}>
                     総支出先数 <SortIndicator k="totalRecipientCount" />
                   </th>
+                  <th style={thStyle} onClick={() => toggleSort('separateOriginCount')}>
+                    別起点 <SortIndicator k="separateOriginCount" />
+                  </th>
+                  <th style={thStyle} onClick={() => toggleSort('separateOriginAmount')}>
+                    別起点金額 <SortIndicator k="separateOriginAmount" />
+                  </th>
+                  <th style={thStyle}>構造</th>
                 </tr>
               </thead>
               <tbody>
@@ -225,6 +269,39 @@ function SubcontractsPageInner() {
                     </td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.totalBlockCount}</td>
                     <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151' }}>{g.totalRecipientCount.toLocaleString()}</td>
+                    <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                      {g.strongSeparateOriginCount > 0 && (
+                        <span style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#e0e7ff', color: '#3730a3', marginRight: 4 }}>
+                          強{g.strongSeparateOriginCount}
+                        </span>
+                      )}
+                      {g.separateOriginCount - g.strongSeparateOriginCount > 0 && (
+                        <span style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#f1f5f9', color: '#475569' }}>
+                          広{g.separateOriginCount - g.strongSeparateOriginCount}
+                        </span>
+                      )}
+                      {g.separateOriginCount === 0 && (
+                        <span style={{ color: '#cbd5e1' }}>—</span>
+                      )}
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'right', color: '#374151', whiteSpace: 'nowrap' }}>
+                      {g.separateOriginAmount > 0 ? formatYen(g.separateOriginAmount) : '—'}
+                    </td>
+                    <td style={{ padding: '8px 10px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                      {g.hasMerge && (
+                        <span title={`合流先 ${g.mergeTargetCount}・最大${g.maxMergeWidth}本`} style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#fef3c7', color: '#92400e', marginRight: 4 }}>
+                          合流{g.maxMergeWidth}
+                        </span>
+                      )}
+                      {g.isInstitutionalFlowOnly && (
+                        <span style={{ display: 'inline-block', padding: '2px 6px', borderRadius: 999, fontSize: 11, fontWeight: 700, background: '#fef2f2', color: '#991b1b' }}>
+                          制度
+                        </span>
+                      )}
+                      {!g.hasMerge && !g.isInstitutionalFlowOnly && (
+                        <span style={{ color: '#cbd5e1' }}>—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -14,7 +14,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { readShiftJISCSV, parseAmount } from '@/scripts/csv-reader';
-import type { SubcontractGraph, SubcontractIndex, BlockNode, BlockEdge, BlockRecipient } from '@/types/subcontract';
+import type {
+  SubcontractGraph,
+  SubcontractIndex,
+  BlockNode,
+  BlockEdge,
+  BlockRecipient,
+  IndirectCost,
+  BlockOriginKind,
+  FlowOrigin,
+} from '@/types/subcontract';
 
 const YEAR = parseInt(process.argv[2] || '2024', 10);
 if (isNaN(YEAR) || YEAR < 2000 || YEAR > 2100) {
@@ -65,13 +74,29 @@ console.log(`  → ${budgetMap.size} projects`);
 console.log('📖 Reading 5-2 (block flows)...');
 const csv52 = readShiftJISCSV(path.join(DATA_DIR, `5-2_RS_${YEAR}_支出先_支出ブロックのつながり.csv`));
 
-// projectId → { projectName, ministry, flows: BlockEdge[], directBlocks: Set<string> }
-const flowMap = new Map<number, {
+// 内部用フロー一時データ（origin/isReference は集計後に確定）
+interface RawFlow {
+  sourceBlock: string | null;
+  targetBlock: string;
+  note?: string;
+  isDirectRow: boolean;
+  hasTransferNote: boolean;
+  hasReferenceNote: boolean;
+}
+
+interface FlowEntry {
   projectName: string;
   ministry: string;
-  flows: BlockEdge[];
+  rawFlows: RawFlow[];
   directBlocks: Set<string>;
-}>();
+  indirectCosts: IndirectCost[];
+}
+
+const REFERENCE_KEYWORDS = /参考/;
+const TRANSFER_KEYWORDS = /移替/;
+const INSTITUTIONAL_FLOW_KEYWORDS = /融資|政府保証借入|利子補給/;
+
+const flowMap = new Map<number, FlowEntry>();
 
 for (const row of csv52) {
   const projectId = parseInt(row['予算事業ID'] ?? '', 10);
@@ -79,23 +104,63 @@ for (const row of csv52) {
 
   const sourceBlock = (row['支出元の支出先ブロック'] ?? '').trim() || null;
   const targetBlock = (row['支出先の支出先ブロック'] ?? '').trim();
-  const isDirect = (row['担当組織からの支出'] ?? '').trim().toUpperCase() === 'TRUE';
+  const isDirectRow = (row['担当組織からの支出'] ?? '').trim().toUpperCase() === 'TRUE';
   const note = (row['資金の流れの補足情報'] ?? '').trim() || undefined;
-
-  if (!targetBlock) continue;
+  const indirectKindText = (row['国自らが支出する間接経費'] ?? '').trim();
+  const indirectCategory = (row['国自らが支出する間接経費の項目'] ?? '').trim();
+  const indirectAmountStr = (row['国自らが支出する間接経費の金額'] ?? '').trim();
+  // 「国自らが支出する間接経費」列はラベル/分類テキスト（`間接経費` `職員旅費` 等）。
+  // 列が空でない、または項目・金額のいずれかがあれば間接経費行として扱う。
+  const isIndirectCostRow = !!indirectKindText || (!!indirectCategory && !!indirectAmountStr);
 
   if (!flowMap.has(projectId)) {
     flowMap.set(projectId, {
       projectName: row['事業名'] ?? '',
       ministry: row['府省庁'] ?? '',
-      flows: [],
+      rawFlows: [],
       directBlocks: new Set(),
+      indirectCosts: [],
+    });
+  }
+  const entry = flowMap.get(projectId)!;
+
+  // 国自らが支出する間接経費（targetBlock が空のことがある）は flows から分離
+  if (!targetBlock) {
+    if (isIndirectCostRow) {
+      entry.indirectCosts.push({
+        blockHint: (row['支出元の支出先ブロック名'] ?? '').trim() || (row['支出先の支出先ブロック名'] ?? '').trim(),
+        kind: indirectKindText,
+        category: indirectCategory,
+        amount: parseAmount(indirectAmountStr),
+        note,
+      });
+    }
+    continue;
+  }
+
+  // targetBlock があっても間接経費分類が付いている場合は別配列にも寄せる（フローとしても残す）
+  if (isIndirectCostRow) {
+    entry.indirectCosts.push({
+      blockHint: (row['支出先の支出先ブロック名'] ?? '').trim(),
+      kind: indirectKindText,
+      category: indirectCategory,
+      amount: parseAmount(indirectAmountStr),
+      note,
     });
   }
 
-  const entry = flowMap.get(projectId)!;
-  entry.flows.push({ sourceBlock, targetBlock, note });
-  if (isDirect) entry.directBlocks.add(targetBlock);
+  const hasTransferNote = !!note && TRANSFER_KEYWORDS.test(note);
+  const hasReferenceNote = !!note && REFERENCE_KEYWORDS.test(note);
+
+  entry.rawFlows.push({
+    sourceBlock,
+    targetBlock,
+    note,
+    isDirectRow,
+    hasTransferNote,
+    hasReferenceNote,
+  });
+  if (isDirectRow && !sourceBlock) entry.directBlocks.add(targetBlock);
 }
 console.log(`  → ${flowMap.size} projects with flows`);
 
@@ -104,7 +169,7 @@ console.log(`  → ${flowMap.size} projects with flows`);
 console.log('📖 Reading 5-1 (block recipients)...');
 const csv51 = readShiftJISCSV(path.join(DATA_DIR, `5-1_RS_${YEAR}_支出先_支出情報.csv`));
 
-// projectId:blockId → { blockName, totalAmount, recipients: Map<recipientKey, BlockRecipient> }
+// projectId:blockId → BlockAccum
 interface BlockAccum {
   blockName: string;
   totalAmount: number;
@@ -252,6 +317,67 @@ function computeMaxDepth(flows: BlockEdge[]): number {
   return Math.max(...depthMap.values());
 }
 
+// ─── 別起点ブロックの構造判定 ──────────────────────────────────────────────
+
+interface OriginAnalysis {
+  /** sourceBlock が一度も targetBlock として現れず、direct でもない */
+  broadSeparateOriginBlocks: Set<string>;
+  /** broad のうち sourceFeedsMerge=true（下流に他支出元と合流するもの） */
+  strongSeparateOriginBlocks: Set<string>;
+  /** target ごとの流入支出元ブロック数 */
+  incomingBlockCountByTarget: Map<string, number>;
+  /** mergeTargetCount, maxMergeWidth */
+  mergeTargetCount: number;
+  maxMergeWidth: number;
+}
+
+function analyzeOrigins(rawFlows: RawFlow[], directBlocks: Set<string>): OriginAnalysis {
+  const targetBlocks = new Set<string>();
+  const sourceBlocks = new Set<string>();
+  const incomingByTarget = new Map<string, Set<string>>();
+
+  for (const f of rawFlows) {
+    targetBlocks.add(f.targetBlock);
+    if (f.sourceBlock) {
+      sourceBlocks.add(f.sourceBlock);
+      if (!incomingByTarget.has(f.targetBlock)) incomingByTarget.set(f.targetBlock, new Set());
+      incomingByTarget.get(f.targetBlock)!.add(f.sourceBlock);
+    }
+  }
+
+  const broadSeparateOriginBlocks = new Set<string>();
+  for (const sb of sourceBlocks) {
+    if (!targetBlocks.has(sb) && !directBlocks.has(sb)) {
+      broadSeparateOriginBlocks.add(sb);
+    }
+  }
+
+  // strong: broad のうち、その下流ブロックの incoming が 2 以上のもの（合流）
+  const strongSeparateOriginBlocks = new Set<string>();
+  for (const sb of broadSeparateOriginBlocks) {
+    const downstreamTargets = rawFlows.filter(f => f.sourceBlock === sb).map(f => f.targetBlock);
+    const feedsMerge = downstreamTargets.some(tg => (incomingByTarget.get(tg)?.size ?? 0) >= 2);
+    if (feedsMerge) strongSeparateOriginBlocks.add(sb);
+  }
+
+  const incomingBlockCountByTarget = new Map<string, number>();
+  for (const [tg, srcSet] of incomingByTarget) {
+    incomingBlockCountByTarget.set(tg, srcSet.size);
+  }
+
+  const mergeWidths = Array.from(incomingByTarget.values(), s => s.size);
+  const mergeTargetCount = mergeWidths.filter(w => w >= 2).length;
+  const maxMergeWidth = mergeWidths.length > 0 ? Math.max(...mergeWidths) : 0;
+
+  return {
+    broadSeparateOriginBlocks,
+    strongSeparateOriginBlocks,
+    incomingBlockCountByTarget,
+    mergeTargetCount,
+    maxMergeWidth,
+  };
+}
+
 // ─── SubcontractGraph 組み立て ──────────────────────────────────────────────
 
 console.log('🔧 Building SubcontractGraph objects...');
@@ -262,37 +388,107 @@ for (const [projectId, flowEntry] of flowMap) {
   const budgetEntry = budgetMap.get(projectId);
   const allBlockIds = new Set<string>();
 
-  for (const f of flowEntry.flows) {
+  for (const f of flowEntry.rawFlows) {
     if (f.sourceBlock) allBlockIds.add(f.sourceBlock);
     allBlockIds.add(f.targetBlock);
   }
 
-  const blocks: BlockNode[] = [];
+  const origins = analyzeOrigins(flowEntry.rawFlows, flowEntry.directBlocks);
+
+  // 下流ブロック (子ブロック) を持つ blockId のセット → terminal 判定用
+  const sourceBlocksSet = new Set<string>();
+  for (const f of flowEntry.rawFlows) {
+    if (f.sourceBlock) sourceBlocksSet.add(f.sourceBlock);
+  }
+
+  // ── flows[*] の origin 確定 ──
+  const flows: BlockEdge[] = flowEntry.rawFlows.map((rf): BlockEdge => {
+    let origin: FlowOrigin;
+    if (!rf.sourceBlock && rf.isDirectRow) {
+      origin = rf.hasTransferNote ? 'transfer' : 'direct';
+    } else if (rf.sourceBlock && origins.broadSeparateOriginBlocks.has(rf.sourceBlock)) {
+      origin = 'separate-origin';
+    } else {
+      origin = 'subcontract';
+    }
+    const targetIncomingBlockCount = origins.incomingBlockCountByTarget.get(rf.targetBlock) ?? 0;
+    return {
+      sourceBlock: rf.sourceBlock,
+      targetBlock: rf.targetBlock,
+      note: rf.note,
+      origin,
+      isReference: rf.hasReferenceNote,
+      targetIncomingBlockCount,
+    };
+  });
+
+  // ── ブロック組み立て ──
   let totalRecipientCount = 0;
+  const blocks: BlockNode[] = [];
 
   for (const blockId of allBlockIds) {
     const blockKey = `${projectId}:${blockId}`;
     const blockData = blockMap.get(blockKey);
 
-    const recipients = blockData
+    const recipientsArr = blockData
       ? Array.from(blockData.recipients.values()).sort((a, b) => b.amount - a.amount)
       : [];
-    totalRecipientCount += recipients.length;
+    totalRecipientCount += recipientsArr.length;
+
+    const isDirect = flowEntry.directBlocks.has(blockId);
+    let originKind: BlockOriginKind;
+    if (origins.strongSeparateOriginBlocks.has(blockId)) {
+      originKind = 'separate-origin-strong';
+    } else if (origins.broadSeparateOriginBlocks.has(blockId)) {
+      originKind = 'separate-origin-broad';
+    } else if (isDirect) {
+      originKind = 'direct';
+    } else {
+      originKind = 'subcontract';
+    }
+
+    const isTerminal = !sourceBlocksSet.has(blockId);
+    const hasExpenses = recipientsArr.some(r => r.expenses.length > 0);
 
     blocks.push({
       blockId,
       blockName: blockData?.blockName ?? blockId,
       totalAmount: blockData?.totalAmount ?? 0,
-      isDirect: flowEntry.directBlocks.has(blockId),
+      isDirect,
+      originKind,
+      isTerminal,
+      recipientCount: recipientsArr.length,
+      hasExpenses,
       role: blockData?.role || undefined,
-      recipients,
+      recipients: recipientsArr,
     });
   }
 
   // ブロックを totalAmount 降順でソート（レイアウト用）
   blocks.sort((a, b) => b.totalAmount - a.totalAmount);
 
-  const maxDepth = computeMaxDepth(flowEntry.flows);
+  // ── 参考フロー判定: subcontract で下流ブロック金額0 + 制度キーワード → reference ──
+  const blockAmountById = new Map(blocks.map(b => [b.blockId, b.totalAmount]));
+  for (const flow of flows) {
+    if (flow.origin !== 'subcontract') continue;
+    const targetAmount = blockAmountById.get(flow.targetBlock) ?? 0;
+    if (targetAmount > 0) continue;
+    if (flow.note && INSTITUTIONAL_FLOW_KEYWORDS.test(flow.note)) {
+      flow.origin = 'reference';
+    }
+  }
+
+  // ── 集計フィールド ──
+  const separateOriginCount = origins.broadSeparateOriginBlocks.size;
+  const strongSeparateOriginCount = origins.strongSeparateOriginBlocks.size;
+  const separateOriginAmount = blocks
+    .filter(b => b.originKind === 'separate-origin-broad' || b.originKind === 'separate-origin-strong')
+    .reduce((sum, b) => sum + b.totalAmount, 0);
+  const hasReferenceFlow = flows.some(f => f.origin === 'reference' || f.isReference);
+  const isInstitutionalFlowOnly = blocks.length > 0
+    && blocks.every(b => b.totalAmount === 0 && b.recipients.length === 0);
+
+  const maxDepth = computeMaxDepth(flows);
 
   const graph: SubcontractGraph = {
     projectId,
@@ -301,11 +497,21 @@ for (const [projectId, flowEntry] of flowMap) {
     budget: budgetEntry?.budget ?? 0,
     execution: budgetEntry?.execution ?? 0,
     blocks,
-    flows: flowEntry.flows,
+    flows,
     maxDepth,
     directBlockCount: flowEntry.directBlocks.size,
     totalBlockCount: allBlockIds.size,
     totalRecipientCount,
+    indirectCosts: flowEntry.indirectCosts,
+    hasSeparateOrigin: separateOriginCount > 0,
+    separateOriginCount,
+    strongSeparateOriginCount,
+    separateOriginAmount,
+    hasMerge: origins.mergeTargetCount > 0,
+    mergeTargetCount: origins.mergeTargetCount,
+    maxMergeWidth: origins.maxMergeWidth,
+    hasReferenceFlow,
+    isInstitutionalFlowOnly,
   };
 
   index[String(projectId)] = graph;
@@ -313,6 +519,19 @@ for (const [projectId, flowEntry] of flowMap) {
 }
 
 console.log(`  → ${totalProjects} projects`);
+
+// ─── 集計サマリ ──────────────────────────────────────────────
+
+const projectsWithSeparateOrigin = Object.values(index).filter(g => g.hasSeparateOrigin).length;
+const projectsWithStrongSeparateOrigin = Object.values(index).filter(g => g.strongSeparateOriginCount > 0).length;
+const projectsInstitutionalOnly = Object.values(index).filter(g => g.isInstitutionalFlowOnly).length;
+const projectsWithMerge = Object.values(index).filter(g => g.hasMerge).length;
+const projectsWithIndirectCosts = Object.values(index).filter(g => g.indirectCosts.length > 0).length;
+console.log(`  別起点あり(広め): ${projectsWithSeparateOrigin} 事業`);
+console.log(`  別起点あり(強い): ${projectsWithStrongSeparateOrigin} 事業`);
+console.log(`  合流あり        : ${projectsWithMerge} 事業`);
+console.log(`  制度フローのみ  : ${projectsInstitutionalOnly} 事業`);
+console.log(`  間接経費あり    : ${projectsWithIndirectCosts} 事業`);
 
 // ─── 出力 ──────────────────────────────────────────────
 

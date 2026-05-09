@@ -3,7 +3,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { SubcontractGraph, BlockNode, BlockRecipient } from '@/types/subcontract';
+import type {
+  SubcontractGraph,
+  BlockNode,
+  BlockRecipient,
+  BlockEdge,
+  BlockOriginKind,
+  FlowOrigin,
+} from '@/types/subcontract';
 import type { ProjectDetail } from '@/types/project-details';
 import {
   computeSubcontractLayout,
@@ -27,10 +34,135 @@ const COLOR_DIRECT_BODY_SUBTLE = '#b33434';
 const COLOR_SUBCONTRACT_BODY_SUBTLE = '#b45309';
 const COLOR_DIRECT_EDGE = 'rgba(217,69,69,0.48)';
 const COLOR_SUBCONTRACT_EDGE = 'rgba(224,112,64,0.52)';
+// 別起点ブロック（5-2の構造的に府省庁ルートでは説明できない財投借入・自己収入・利水者等）
+const COLOR_SEPARATE_ORIGIN_STRONG = '#6366f1';        // 強い別起点 (sourceFeedsMerge=true)
+const COLOR_SEPARATE_ORIGIN_BROAD = '#94a3b8';         // 広めの別起点
+const COLOR_SEPARATE_ORIGIN_BODY = '#eef2ff';
+const COLOR_SEPARATE_ORIGIN_BODY_TEXT = '#3730a3';
+const COLOR_SEPARATE_ORIGIN_BODY_SUBTLE = '#4338ca';
+const COLOR_SEPARATE_ORIGIN_EDGE = 'rgba(99,102,241,0.55)';
+const COLOR_REFERENCE_EDGE = 'rgba(148,163,184,0.55)';
+
+interface OriginPalette {
+  header: string;
+  body: string;
+  bodyText: string;
+  bodySubtle: string;
+  selectedStroke: string;
+  badgeText: string;
+}
+
+function originPalette(originKind: BlockOriginKind): OriginPalette {
+  if (originKind === 'separate-origin-strong') {
+    return {
+      header: COLOR_SEPARATE_ORIGIN_STRONG,
+      body: COLOR_SEPARATE_ORIGIN_BODY,
+      bodyText: COLOR_SEPARATE_ORIGIN_BODY_TEXT,
+      bodySubtle: COLOR_SEPARATE_ORIGIN_BODY_SUBTLE,
+      selectedStroke: '#312e81',
+      badgeText: '別起点(強)',
+    };
+  }
+  if (originKind === 'separate-origin-broad') {
+    return {
+      header: COLOR_SEPARATE_ORIGIN_BROAD,
+      body: COLOR_SEPARATE_ORIGIN_BODY,
+      bodyText: COLOR_SEPARATE_ORIGIN_BODY_TEXT,
+      bodySubtle: COLOR_SEPARATE_ORIGIN_BODY_SUBTLE,
+      selectedStroke: '#475569',
+      badgeText: '別起点',
+    };
+  }
+  if (originKind === 'direct') {
+    return {
+      header: COLOR_DIRECT,
+      body: COLOR_DIRECT_BODY,
+      bodyText: COLOR_DIRECT_BODY_TEXT,
+      bodySubtle: COLOR_DIRECT_BODY_SUBTLE,
+      selectedStroke: '#991b1b',
+      badgeText: '直接支出',
+    };
+  }
+  return {
+    header: COLOR_SUBCONTRACT,
+    body: COLOR_SUBCONTRACT_BODY,
+    bodyText: COLOR_SUBCONTRACT_BODY_TEXT,
+    bodySubtle: COLOR_SUBCONTRACT_BODY_SUBTLE,
+    selectedStroke: '#9a3412',
+    badgeText: '再委託',
+  };
+}
+
+function flowEdgeStyle(origin: FlowOrigin): { stroke: string; dasharray?: string; width: number } {
+  switch (origin) {
+    case 'direct':
+      return { stroke: COLOR_DIRECT_EDGE, width: 2.5 };
+    case 'transfer':
+      return { stroke: COLOR_DIRECT_EDGE, width: 2.5, dasharray: '6 3' };
+    case 'separate-origin':
+      return { stroke: COLOR_SEPARATE_ORIGIN_EDGE, width: 2.5, dasharray: '5 4' };
+    case 'reference':
+      return { stroke: COLOR_REFERENCE_EDGE, width: 1.5, dasharray: '3 3' };
+    case 'subcontract':
+    default:
+      return { stroke: COLOR_SUBCONTRACT_EDGE, width: 2.5 };
+  }
+}
+
+function flowOriginLabel(origin: FlowOrigin): string {
+  switch (origin) {
+    case 'direct': return '直接';
+    case 'transfer': return '移替';
+    case 'separate-origin': return '別起点';
+    case 'reference': return '参考';
+    case 'subcontract': return '再委託';
+  }
+}
+
+function flowOriginSortRank(origin: FlowOrigin): number {
+  switch (origin) {
+    case 'direct': return 0;
+    case 'transfer': return 1;
+    case 'separate-origin': return 2;
+    case 'subcontract': return 3;
+    case 'reference': return 4;
+  }
+}
+
+function flowOriginBadgeColor(origin: FlowOrigin): { bg: string; fg: string } {
+  switch (origin) {
+    case 'direct': return { bg: '#f9dddd', fg: COLOR_DIRECT_BODY_SUBTLE };
+    case 'transfer': return { bg: '#fef3c7', fg: '#92400e' };
+    case 'separate-origin': return { bg: '#e0e7ff', fg: COLOR_SEPARATE_ORIGIN_BODY_TEXT };
+    case 'subcontract': return { bg: '#fbe3d7', fg: COLOR_SUBCONTRACT_BODY_SUBTLE };
+    case 'reference': return { bg: '#f1f5f9', fg: '#475569' };
+  }
+}
+
+function originKindBadgeColor(kind: BlockOriginKind): { bg: string; fg: string } {
+  switch (kind) {
+    case 'direct': return { bg: '#f9dddd', fg: COLOR_DIRECT_BODY_SUBTLE };
+    case 'subcontract': return { bg: '#fbe3d7', fg: COLOR_SUBCONTRACT_BODY_SUBTLE };
+    case 'separate-origin-strong': return { bg: '#e0e7ff', fg: COLOR_SEPARATE_ORIGIN_BODY_TEXT };
+    case 'separate-origin-broad': return { bg: '#f1f5f9', fg: '#475569' };
+  }
+}
+
+function originKindLabel(kind: BlockOriginKind): string {
+  switch (kind) {
+    case 'direct': return '直接';
+    case 'subcontract': return '再委託';
+    case 'separate-origin-strong': return '別起点(強)';
+    case 'separate-origin-broad': return '別起点';
+  }
+}
 const COLOR_CONTEXT_BODY = '#d8f1df';
 const COLOR_CONTEXT_BODY_TEXT = '#1f6b3a';
 const COLOR_CONTEXT_BODY_SUBTLE = '#2d7d46';
 const COLOR_PANEL_BORDER = '#e5e7eb';
+const PANEL_LIST_NAME_FONT_PX = 12;
+const PANEL_LIST_VALUE_FONT_PX = 12;
+const PANEL_META_FONT_PX = 11;
 const CARD_HEADER_H = 46;
 const CARD_RADIUS = 6;
 const CARD_BORDER_W = 1;
@@ -140,8 +272,9 @@ function BlockDetailPane({
   const [expandedRecipients, setExpandedRecipients] = useState<Set<number>>(new Set());
   const [query, setQuery] = useState('');
   const [recipientSort, setRecipientSort] = useState<'amount-desc' | 'amount-asc' | 'name-asc'>('amount-desc');
-  const [blockFilter, setBlockFilter] = useState<'all' | 'direct' | 'subcontract'>('all');
+  const [blockFilter, setBlockFilter] = useState<'all' | 'direct' | 'subcontract' | 'separate-origin'>('all');
   const [blockSort, setBlockSort] = useState<'amount-desc' | 'name-asc'>('amount-desc');
+  const [flowFilter, setFlowFilter] = useState<'all' | FlowOrigin>('all');
   const [relationMode, setRelationMode] = useState<'recipients' | 'downstream' | 'upstream'>('recipients');
 
   useEffect(() => {
@@ -181,7 +314,12 @@ function BlockDetailPane({
     ];
 
     const filteredBlocks = graph.blocks
-      .filter((b) => blockFilter === 'all' || (blockFilter === 'direct' ? b.isDirect : !b.isDirect))
+      .filter((b) => {
+        if (blockFilter === 'all') return true;
+        if (blockFilter === 'direct') return b.originKind === 'direct';
+        if (blockFilter === 'subcontract') return b.originKind === 'subcontract';
+        return b.originKind === 'separate-origin-broad' || b.originKind === 'separate-origin-strong';
+      })
       .filter((b) => {
         const q = query.trim().toLowerCase();
         if (!q) return true;
@@ -190,6 +328,15 @@ function BlockDetailPane({
       .sort((a, b) => blockSort === 'name-asc'
         ? `${a.blockId} ${a.blockName}`.localeCompare(`${b.blockId} ${b.blockName}`, 'ja')
         : b.totalAmount - a.totalAmount);
+
+    const filteredFlows = graph.flows
+      .filter((f) => flowFilter === 'all' || f.origin === flowFilter)
+      .sort((a, b) => {
+        const ar = flowOriginSortRank(a.origin);
+        const br = flowOriginSortRank(b.origin);
+        if (ar !== br) return ar - br;
+        return (a.sourceBlock ?? '').localeCompare(b.sourceBlock ?? '', 'ja');
+      });
 
     return (
       <aside style={{
@@ -246,7 +393,57 @@ function BlockDetailPane({
           )}
         </div>
 
+        {/* 資金の流れ */}
+        <div style={{ padding: 12, borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#111827' }}>資金の流れ</div>
+            <div style={{ fontSize: 11, color: '#64748b' }}>{filteredFlows.length.toLocaleString()}本 / {graph.flows.length.toLocaleString()}本</div>
+          </div>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 8, flexWrap: 'wrap' }}>
+            {([
+              ['all', 'すべて'],
+              ['direct', '直接'],
+              ['transfer', '移替'],
+              ['separate-origin', '別起点'],
+              ['subcontract', '再委託'],
+              ['reference', '参考'],
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setFlowFilter(key)}
+                style={{
+                  border: `1px solid ${flowFilter === key ? '#94a3b8' : COLOR_PANEL_BORDER}`,
+                  background: flowFilter === key ? '#f1f5f9' : '#fff',
+                  borderRadius: 999,
+                  padding: '4px 9px',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#334155',
+                  cursor: 'pointer',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {filteredFlows.length === 0 && (
+            <div style={{ fontSize: 12, color: '#9ca3af' }}>該当するフローがありません</div>
+          )}
+          {filteredFlows.map((flow, i) => (
+            <FlowListRow
+              key={`${flow.sourceBlock ?? 'root'}->${flow.targetBlock}-${i}`}
+              flow={flow}
+              graph={graph}
+              onSelectBlock={onSelectBlock}
+            />
+          ))}
+        </div>
+
         <div style={{ padding: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#111827' }}>ブロック一覧</div>
+            <div style={{ fontSize: 11, color: '#64748b' }}>{filteredBlocks.length.toLocaleString()}件 / {graph.blocks.length.toLocaleString()}件</div>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 112px', gap: 8, marginBottom: 8 }}>
             <input
               value={query}
@@ -263,11 +460,12 @@ function BlockDetailPane({
               <option value="name-asc">名称順</option>
             </select>
           </div>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
             {([
               ['all', 'すべて'],
               ['direct', '直接'],
               ['subcontract', '再委託'],
+              ['separate-origin', '別起点'],
             ] as const).map(([key, label]) => (
               <button
                 key={key}
@@ -287,7 +485,6 @@ function BlockDetailPane({
               </button>
             ))}
           </div>
-          <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6 }}>{filteredBlocks.length.toLocaleString()}件</div>
           {filteredBlocks.map((b) => (
             <BlockListRow key={b.blockId} block={b} onClick={() => onSelectBlock(b)} selected={false} />
           ))}
@@ -325,18 +522,23 @@ function BlockDetailPane({
         zIndex: 1,
       }}>
         <div style={{ flex: 1 }}>
-          <div style={{
-            display: 'inline-block',
-            fontSize: 11,
-            fontWeight: 600,
-            padding: '2px 6px',
-            borderRadius: 4,
-            background: block.isDirect ? '#f9dddd' : '#fbe3d7',
-            color: block.isDirect ? COLOR_DIRECT_BODY_SUBTLE : COLOR_SUBCONTRACT_BODY_SUBTLE,
-            marginBottom: 4,
-          }}>
-            {block.isDirect ? '直接支出' : '再委託'}
-          </div>
+          {(() => {
+            const badge = originKindBadgeColor(block.originKind);
+            return (
+              <div style={{
+                display: 'inline-block',
+                fontSize: 11,
+                fontWeight: 700,
+                padding: '2px 6px',
+                borderRadius: 4,
+                background: badge.bg,
+                color: badge.fg,
+                marginBottom: 4,
+              }}>
+                {originKindLabel(block.originKind)}
+              </div>
+            );
+          })()}
           <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{block.blockName}</div>
           <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
             ブロック {block.blockId} ／ {formatYen(block.totalAmount)}
@@ -408,7 +610,6 @@ function BlockDetailPane({
               <RecipientCard
                 key={`${r.name}-${r.corporateNumber}-${i}`}
                 recipient={r}
-                index={i}
                 expanded={expandedRecipients.has(i)}
                 onToggle={() => toggleRecipient(i)}
                 totalAmount={block.totalAmount}
@@ -443,47 +644,148 @@ function BlockDetailPane({
 }
 
 function BlockListRow({ block, selected, onClick }: { block: BlockNode; selected: boolean; onClick: () => void }) {
-  const accent = block.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT;
+  const badge = originKindBadgeColor(block.originKind);
+  const badgeText = originKindLabel(block.originKind);
 
   return (
     <button
       onClick={onClick}
       style={{
         width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 3,
         textAlign: 'left',
-        border: `1px solid ${selected ? accent : COLOR_PANEL_BORDER}`,
-        borderLeft: `4px solid ${accent}`,
-        background: selected ? '#fff7ed' : '#fff',
-        borderRadius: 6,
-        padding: '8px 10px',
-        marginBottom: 8,
+        border: 'none',
+        borderBottom: '1px solid #f1f5f9',
+        background: selected ? '#f8fafc' : 'transparent',
+        borderRadius: 0,
+        padding: '7px 0',
+        margin: 0,
         cursor: 'pointer',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: '#111827', minWidth: 0 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline', width: '100%' }}>
+        <div title={`${block.blockId} ${block.blockName}`} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, fontWeight: 600, color: selected ? '#111827' : '#333', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {block.blockId} {block.blockName}
         </div>
-        <div style={{ fontSize: 12, fontWeight: 700, color: '#334155', whiteSpace: 'nowrap' }}>{formatYen(block.totalAmount)}</div>
+        <div style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(block.totalAmount)}</div>
       </div>
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 5, fontSize: 10, color: '#64748b' }}>
-        <span style={{ color: accent, fontWeight: 700 }}>{block.isDirect ? '直接' : '再委託'}</span>
-        <span>支出先 {block.recipients.length.toLocaleString()}件</span>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: PANEL_META_FONT_PX, color: '#888', width: '100%', minWidth: 0 }}>
+        <span style={{
+          padding: '1px 6px',
+          borderRadius: 999,
+          background: badge.bg,
+          color: badge.fg,
+          fontWeight: 700,
+          flexShrink: 0,
+        }}>
+          {badgeText}
+        </span>
+        <span>支出先 {block.recipientCount.toLocaleString()}件</span>
+        {block.hasExpenses && (
+          <span style={{ color: '#0e7490' }}>費目あり</span>
+        )}
+        {block.role && (
+          <span title={block.role} style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {block.role}
+          </span>
+        )}
       </div>
-      {block.role && (
-        <div style={{ fontSize: 11, color: '#475569', marginTop: 4, lineHeight: 1.45 }}>
-          {truncateChars(block.role, 52)}
-        </div>
-      )}
     </button>
   );
 }
 
+function FlowListRow({
+  flow, graph, onSelectBlock,
+}: {
+  flow: BlockEdge;
+  graph: SubcontractGraph;
+  onSelectBlock: (block: BlockNode) => void;
+}) {
+  const blockById = new Map(graph.blocks.map(b => [b.blockId, b]));
+  const sourceBlock = flow.sourceBlock ? blockById.get(flow.sourceBlock) ?? null : null;
+  const targetBlock = blockById.get(flow.targetBlock) ?? null;
+  const sourceLabel = flow.sourceBlock === null
+    ? `${graph.ministry}（直接）`
+    : sourceBlock ? `${sourceBlock.blockId} ${sourceBlock.blockName}` : flow.sourceBlock;
+  const targetLabel = targetBlock ? `${targetBlock.blockId} ${targetBlock.blockName}` : flow.targetBlock;
+  const badge = flowOriginBadgeColor(flow.origin);
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 3,
+        borderBottom: '1px solid #f1f5f9',
+        padding: '6px 0',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: PANEL_META_FONT_PX, color: '#64748b' }}>
+        <span style={{
+          padding: '1px 6px',
+          borderRadius: 999,
+          background: badge.bg,
+          color: badge.fg,
+          fontWeight: 700,
+          flexShrink: 0,
+        }}>
+          {flowOriginLabel(flow.origin)}
+        </span>
+        {flow.targetIncomingBlockCount >= 2 && (
+          <span style={{ padding: '1px 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>
+            合流 {flow.targetIncomingBlockCount}本
+          </span>
+        )}
+        {flow.isReference && (
+          <span style={{ padding: '1px 6px', borderRadius: 999, background: '#f1f5f9', color: '#475569', fontWeight: 700 }}>
+            参考標記
+          </span>
+        )}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#111827', minWidth: 0 }}>
+        {sourceBlock ? (
+          <button
+            onClick={() => onSelectBlock(sourceBlock)}
+            title={sourceLabel}
+            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#2563eb', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          >
+            {sourceLabel}
+          </button>
+        ) : (
+          <span title={sourceLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {sourceLabel}
+          </span>
+        )}
+        <span style={{ color: '#94a3b8', flexShrink: 0 }}>→</span>
+        {targetBlock ? (
+          <button
+            onClick={() => onSelectBlock(targetBlock)}
+            title={targetLabel}
+            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#2563eb', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          >
+            {targetLabel}
+          </button>
+        ) : (
+          <span title={targetLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {targetLabel}
+          </span>
+        )}
+      </div>
+      {flow.note && (
+        <div title={flow.note} style={{ fontSize: PANEL_META_FONT_PX, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {flow.note}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function RecipientCard({
-  recipient, index, expanded, onToggle, totalAmount, barColor,
+  recipient, expanded, onToggle, totalAmount, barColor,
 }: {
   recipient: BlockRecipient;
-  index: number;
   expanded: boolean;
   onToggle: () => void;
   totalAmount: number;
@@ -494,53 +796,52 @@ function RecipientCard({
 
   return (
     <div style={{
-      marginBottom: 8,
-      border: '1px solid #e5e7eb',
-      borderRadius: 6,
-      overflow: 'hidden',
-      fontSize: 12,
+      borderBottom: '1px solid #f1f5f9',
+      fontSize: PANEL_LIST_NAME_FONT_PX,
     }}>
       <div
         style={{
-          padding: '8px 10px',
-          background: index % 2 === 0 ? '#f9fafb' : '#fff',
+          padding: '7px 0',
+          background: 'transparent',
           cursor: hasDetails ? 'pointer' : 'default',
           display: 'flex',
           alignItems: 'flex-start',
-          gap: 6,
+          gap: 8,
         }}
         onClick={hasDetails ? onToggle : undefined}
       >
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 500, color: '#111827' }}>{recipient.name || '（氏名なし）'}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+            <div title={recipient.name || '（氏名なし）'} style={{ flex: 1, minWidth: 0, fontWeight: 600, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{recipient.name || '（氏名なし）'}</div>
+            <div style={{ color: '#555', fontSize: PANEL_LIST_VALUE_FONT_PX, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(recipient.amount)}</div>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-            <div style={{ flex: 1, height: 6, background: '#e5e7eb', borderRadius: 999, overflow: 'hidden' }}>
+            <div style={{ width: 52, height: 3, background: '#eef2f7', borderRadius: 999, overflow: 'hidden', flexShrink: 0 }}>
               <div style={{ width: `${share}%`, height: '100%', background: barColor }} />
             </div>
-            <div style={{ color: '#374151', fontWeight: 600, whiteSpace: 'nowrap' }}>{formatYen(recipient.amount)}</div>
+            <div style={{ color: '#999', fontSize: PANEL_META_FONT_PX, whiteSpace: 'nowrap' }}>構成比 {percentOf(recipient.amount, totalAmount)}</div>
           </div>
-          <div style={{ color: '#9ca3af', fontSize: 10, marginTop: 2 }}>構成比 {percentOf(recipient.amount, totalAmount)}</div>
           {recipient.corporateNumber && (
-            <div style={{ color: '#9ca3af', fontSize: 10, marginTop: 1 }}>法人番号: {recipient.corporateNumber}</div>
+            <div style={{ color: '#aaa', fontSize: PANEL_META_FONT_PX, marginTop: 1 }}>法人番号: {recipient.corporateNumber}</div>
           )}
         </div>
         {hasDetails && (
-          <span style={{ color: '#9ca3af', fontSize: 14, marginTop: 2 }}>{expanded ? '▲' : '▼'}</span>
+          <span style={{ color: '#aaa', fontSize: 12, marginTop: 1, flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
         )}
       </div>
 
       {expanded && (
-        <div style={{ padding: '8px 10px', background: '#f0f9ff', borderTop: '1px solid #e0f2fe' }}>
+        <div style={{ padding: '0 0 8px 60px', background: '#fff' }}>
           {recipient.contractSummaries.map((cs, j) => (
-            <div key={j} style={{ color: '#0c4a6e', marginBottom: 4 }}>{cs}</div>
+            <div key={j} style={{ color: '#555', marginBottom: 4, lineHeight: 1.5 }}>{cs}</div>
           ))}
           {recipient.expenses.length > 0 && (
             <div style={{ marginTop: 6 }}>
-              <div style={{ fontWeight: 600, color: '#374151', marginBottom: 4 }}>費目・使途</div>
+              <div style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#888', marginBottom: 4 }}>費目・使途</div>
               {recipient.expenses.map((e, j) => (
-                <div key={j} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0', color: '#374151', gap: 8 }}>
-                  <span style={{ color: '#6b7280' }}>{e.category} / {e.purpose}</span>
-                  <span style={{ whiteSpace: 'nowrap', fontWeight: 500 }}>{formatYen(e.amount)}</span>
+                <div key={j} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0', color: '#555', gap: 8 }}>
+                  <span style={{ color: '#777', minWidth: 0 }}>{e.category} / {e.purpose}</span>
+                  <span style={{ whiteSpace: 'nowrap', fontWeight: 500, color: '#555' }}>{formatYen(e.amount)}</span>
                 </div>
               ))}
             </div>
@@ -810,6 +1111,31 @@ function SubcontractDetailPageInner() {
           <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f3f4f6' }}>最大{graph.maxDepth}層</span>
           <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE }}>直接 {directBlocks}件</span>
           <span style={{ padding: '3px 7px', borderRadius: 999, background: '#fbe3d7', color: '#b45309' }}>再委託 {redelegatedBlocks}件</span>
+          {graph.strongSeparateOriginCount > 0 && (
+            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#e0e7ff', color: COLOR_SEPARATE_ORIGIN_BODY_TEXT, fontWeight: 700 }}>
+              別起点(強) {graph.strongSeparateOriginCount}件
+            </span>
+          )}
+          {graph.separateOriginCount > graph.strongSeparateOriginCount && (
+            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f1f5f9', color: '#475569' }}>
+              別起点(広) {graph.separateOriginCount - graph.strongSeparateOriginCount}件
+            </span>
+          )}
+          {graph.hasMerge && (
+            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#fef3c7', color: '#92400e' }}>
+              合流 最大{graph.maxMergeWidth}本
+            </span>
+          )}
+          {graph.isInstitutionalFlowOnly && (
+            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#fef2f2', color: '#991b1b', fontWeight: 700 }}>
+              制度フロー
+            </span>
+          )}
+          {graph.indirectCosts.length > 0 && (
+            <span style={{ padding: '3px 7px', borderRadius: 999, background: '#ecfeff', color: '#0e7490' }}>
+              間接経費 {graph.indirectCosts.length}件
+            </span>
+          )}
           <span style={{ padding: '3px 7px', borderRadius: 999, background: '#f5f5f5' }}>表示内訳 {graph.totalRecipientCount.toLocaleString()}件</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ width: 10, height: 10, borderRadius: 2, background: COLOR_DIRECT, display: 'inline-block' }} />
@@ -819,6 +1145,12 @@ function SubcontractDetailPageInner() {
             <span style={{ width: 10, height: 10, borderRadius: 2, background: COLOR_SUBCONTRACT, display: 'inline-block' }} />
             再委託
           </span>
+          {graph.hasSeparateOrigin && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 10, height: 10, borderRadius: 2, background: COLOR_SEPARATE_ORIGIN_STRONG, display: 'inline-block' }} />
+              別起点
+            </span>
+          )}
         </div>
       </div>
 
@@ -840,7 +1172,8 @@ function SubcontractDetailPageInner() {
             {safeLayout.edges.filter(e => !e.isBackEdge).map((edge, i) => {
               const target = safeLayout.blocks.find((b) => b.blockId === edge.targetBlock);
               const amountLabel = target && target.totalAmount > 0 ? formatYen(target.totalAmount) : null;
-              const edgeColor = target?.isDirect ? COLOR_DIRECT_EDGE : COLOR_SUBCONTRACT_EDGE;
+              const edgeStyle = flowEdgeStyle(edge.origin);
+              const edgeColor = edgeStyle.stroke;
               const noteLabel = edge.note ? truncateChars(edge.note, 18) : null;
               const labelX = (edge.x1 + edge.x2) / 2;
               const labelY = (edge.y1 + edge.y2) / 2 - 8;
@@ -857,7 +1190,8 @@ function SubcontractDetailPageInner() {
                     d={verticalBezierPath(edge.x1, edge.y1, edge.x2, edge.y2)}
                     fill="none"
                     stroke={edgeColor}
-                    strokeWidth={2.5}
+                    strokeWidth={edgeStyle.width}
+                    strokeDasharray={edgeStyle.dasharray}
                   />
                   {(amountLabel || noteLabel) && (
                     <g style={{ pointerEvents: 'none' }}>
@@ -1045,15 +1379,17 @@ function SubcontractDetailPageInner() {
             {/* ブロックノード（縦型カードフロー） */}
             {safeLayout.blocks.map((lb) => {
               const isSelected = selectedBlock?.blockId === lb.blockId;
-              const nodeColor = lb.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT;
-              const bodyFill = lb.isDirect ? COLOR_DIRECT_BODY : COLOR_SUBCONTRACT_BODY;
-              const bodyTextColor = lb.isDirect ? COLOR_DIRECT_BODY_TEXT : COLOR_SUBCONTRACT_BODY_TEXT;
-              const bodySubtleTextColor = lb.isDirect ? COLOR_DIRECT_BODY_SUBTLE : COLOR_SUBCONTRACT_BODY_SUBTLE;
+              const palette = originPalette(lb.originKind);
+              const nodeColor = palette.header;
+              const bodyFill = palette.body;
+              const bodyTextColor = palette.bodyText;
+              const bodySubtleTextColor = palette.bodySubtle;
               const recipients = lb.node.recipients;
               const topRecipients = sortRecipients(recipients, 'amount-desc').slice(0, 3);
               const clipIdBase = `subcontract-node-${String(lb.blockId).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
-              const selectedStroke = lb.isDirect ? '#991b1b' : '#9a3412';
+              const selectedStroke = palette.selectedStroke;
               const roleLine = lb.node.role ? truncateChars(lb.node.role, 24) : '';
+              const headerKindLabel = palette.badgeText;
 
               return (
                 <g
@@ -1110,7 +1446,7 @@ function SubcontractDetailPageInner() {
                   <g clipPath={`url(#${clipIdBase}-card)`} style={{ pointerEvents: 'none' }}>
                     <text x={lb.x + NODE_PAD} y={lb.y + 17}
                       fontSize={10} fontWeight={700} fill="rgba(255,255,255,0.86)" style={{ userSelect: 'none' }}>
-                      {lb.isDirect ? '直接支出' : '再委託'} / ブロック {lb.blockId}
+                      {headerKindLabel} / ブロック {lb.blockId}
                     </text>
                     <text x={lb.x + NODE_PAD} y={lb.y + 34}
                       fontSize={12} fontWeight={700} fill="#fff" style={{ userSelect: 'none' }}>
