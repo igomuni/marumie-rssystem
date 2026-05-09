@@ -1488,9 +1488,10 @@ function SubcontractDetailPageInner() {
             const screenW = world.w * transform.scale;
             const tipX = Math.max(8, Math.min(containerW - tipW - 8, screenLeft + screenW / 2 - tipW / 2));
             const tipY = Math.max(8, screenTop - tipH - 8);
-            const headerColor = isRoot ? COLOR_ROOT : (lb!.isDirect ? COLOR_DIRECT : COLOR_SUBCONTRACT);
-            const bodyColor = isRoot ? COLOR_CONTEXT_BODY : (lb!.isDirect ? COLOR_DIRECT_BODY : COLOR_SUBCONTRACT_BODY);
-            const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : (lb!.isDirect ? COLOR_DIRECT_BODY_TEXT : COLOR_SUBCONTRACT_BODY_TEXT);
+            const palette = lb ? originPalette(lb.originKind) : null;
+            const headerColor = isRoot ? COLOR_ROOT : palette!.header;
+            const bodyColor = isRoot ? COLOR_CONTEXT_BODY : palette!.body;
+            const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : palette!.bodyText;
             const topRecipients = lb ? sortRecipients(lb.node.recipients, 'amount-desc').slice(0, 3) : [];
 
             return (
@@ -1516,7 +1517,7 @@ function SubcontractDetailPageInner() {
                   }}>
                     {isRoot
                       ? `事業 / PID ${graph.projectId}`
-                      : `${lb!.isDirect ? '直接支出' : '再委託'} / ブロック ${lb!.blockId}`}
+                      : `${palette!.badgeText} / ブロック ${lb!.blockId}`}
                   </div>
                   <div style={{ padding: '8px 10px', fontSize: 11, lineHeight: 1.45, color: textColor }}>
                     {isRoot ? (
