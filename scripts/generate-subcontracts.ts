@@ -326,15 +326,17 @@ interface OriginAnalysis {
   strongSeparateOriginBlocks: Set<string>;
   /** target ごとの流入支出元ブロック数 */
   incomingBlockCountByTarget: Map<string, number>;
-  /** mergeTargetCount, maxMergeWidth */
   mergeTargetCount: number;
   maxMergeWidth: number;
+  branchingBlockCount: number;
+  maxBranchWidth: number;
 }
 
 function analyzeOrigins(rawFlows: RawFlow[], directBlocks: Set<string>): OriginAnalysis {
   const targetBlocks = new Set<string>();
   const sourceBlocks = new Set<string>();
   const incomingByTarget = new Map<string, Set<string>>();
+  const outgoingBySource = new Map<string, Set<string>>();
 
   for (const f of rawFlows) {
     targetBlocks.add(f.targetBlock);
@@ -342,6 +344,8 @@ function analyzeOrigins(rawFlows: RawFlow[], directBlocks: Set<string>): OriginA
       sourceBlocks.add(f.sourceBlock);
       if (!incomingByTarget.has(f.targetBlock)) incomingByTarget.set(f.targetBlock, new Set());
       incomingByTarget.get(f.targetBlock)!.add(f.sourceBlock);
+      if (!outgoingBySource.has(f.sourceBlock)) outgoingBySource.set(f.sourceBlock, new Set());
+      outgoingBySource.get(f.sourceBlock)!.add(f.targetBlock);
     }
   }
 
@@ -369,12 +373,18 @@ function analyzeOrigins(rawFlows: RawFlow[], directBlocks: Set<string>): OriginA
   const mergeTargetCount = mergeWidths.filter(w => w >= 2).length;
   const maxMergeWidth = mergeWidths.length > 0 ? Math.max(...mergeWidths) : 0;
 
+  const branchWidths = Array.from(outgoingBySource.values(), s => s.size);
+  const branchingBlockCount = branchWidths.filter(w => w >= 2).length;
+  const maxBranchWidth = branchWidths.length > 0 ? Math.max(...branchWidths) : 0;
+
   return {
     broadSeparateOriginBlocks,
     strongSeparateOriginBlocks,
     incomingBlockCountByTarget,
     mergeTargetCount,
     maxMergeWidth,
+    branchingBlockCount,
+    maxBranchWidth,
   };
 }
 
@@ -510,6 +520,8 @@ for (const [projectId, flowEntry] of flowMap) {
     hasMerge: origins.mergeTargetCount > 0,
     mergeTargetCount: origins.mergeTargetCount,
     maxMergeWidth: origins.maxMergeWidth,
+    branchingBlockCount: origins.branchingBlockCount,
+    maxBranchWidth: origins.maxBranchWidth,
     hasReferenceFlow,
     isInstitutionalFlowOnly,
   };

@@ -84,6 +84,10 @@ export interface SubcontractGraph {
   hasMerge: boolean;
   mergeTargetCount: number;
   maxMergeWidth: number;
+  /** 1ブロックから複数下流ブロックを持つ「分岐元」の件数 */
+  branchingBlockCount: number;
+  /** 1ブロックから出る最大分岐幅 */
+  maxBranchWidth: number;
   hasReferenceFlow: boolean;
   /** 全ブロックが totalAmount=0 かつ recipients=0 の制度フロー */
   isInstitutionalFlowOnly: boolean;
