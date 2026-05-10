@@ -13,6 +13,7 @@ import {
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { filterTopN, computeLayout } from '@/app/lib/sankey-svg-filter';
 import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
+import { parseAmountToYen } from '@/app/lib/format/yen';
 
 // ── URL state serialization ──
 
@@ -138,51 +139,6 @@ function mergedProjectPath(x0: number, nodeW: number, bH: number, sH: number): s
 }
 
 /** ノードID → フォーカスピン状態を導出する純粋ヘルパー */
-function parseJapaneseNumeral(s: string): number {
-  const d: Record<string, number> = { 一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9 };
-  let result = 0, cur = 0;
-  for (const c of s) {
-    if (c in d) { cur = d[c]; }
-    else if (c === '十') { result += (cur || 1) * 10; cur = 0; }
-    else if (c === '百') { result += (cur || 1) * 100; cur = 0; }
-    else if (c === '千') { result += (cur || 1) * 1000; cur = 0; }
-  }
-  return result + cur;
-}
-
-function normalizeAmountInput(s: string): string {
-  // 全角数字・小数点・マイナス → 半角
-  let t = s.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFF10 + 0x30));
-  t = t.replace(/[－−‐]/g, '-').replace(/[．]/g, '.').replace(/[，　,\s]/g, '');
-  // 和数字ブロック（一〜千）→ アラビア数字
-  t = t.replace(/[一二三四五六七八九十百千]+/g, m => String(parseJapaneseNumeral(m)));
-  return t;
-}
-
-/** "1.26億", "４５６７万円", "一千二百億", "1兆2000億", "-51000円", "-51000" などを1円単位の数値に変換。解析失敗時 null */
-function parseAmountToYen(s: string): number | null {
-  const t = normalizeAmountInput(s);
-  if (!t) return null;
-  const sign = t.startsWith('-') ? -1 : 1;
-  const abs = sign === -1 ? t.slice(1) : t;
-  const comboMatch = abs.match(/^([\d.]+)兆([\d.]+)億?$/);
-  if (comboMatch) {
-    const cho = parseFloat(comboMatch[1]);
-    const oku = parseFloat(comboMatch[2]);
-    if (!isNaN(cho) && !isNaN(oku)) return sign * (cho * 10000 + oku) * 1e8;
-  }
-  const m = abs.match(/^([\d.]+)\s*(兆円?|億円?|万円?|円)?$/);
-  if (!m) return null;
-  const n = parseFloat(m[1]);
-  if (isNaN(n)) return null;
-  const unit = m[2] ?? '';
-  if (unit.startsWith('兆')) return sign * n * 1e12;
-  if (unit.startsWith('億')) return sign * n * 1e8;
-  if (unit.startsWith('万')) return sign * n * 1e4;
-  if (unit === '円') return sign * n;
-  return sign * n; // 単位なし → 1円単位
-}
-
 function computeFocusPins(
   nodeId: string,
   nodes: Array<{ id: string; name: string }> | undefined,
