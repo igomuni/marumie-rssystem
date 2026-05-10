@@ -133,7 +133,12 @@ function mergeParallelFlows(flows: BlockEdge[]): BlockEdge[] {
   const byPair = new Map<string, BlockEdge & { noteSet: Set<string> }>();
 
   for (const flow of flows) {
-    const key = `${flow.sourceBlock ?? '__root__'}->${flow.targetBlock}`;
+    const key = [
+      flow.sourceBlock ?? '__root__',
+      flow.targetBlock,
+      flow.origin,
+      flow.isReference ? 'ref' : 'plain',
+    ].join('->');
     const existing = byPair.get(key);
     if (!existing) {
       const noteSet = new Set<string>();

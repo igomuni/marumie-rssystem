@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, Suspense, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -99,7 +99,7 @@ interface MultiSelectDropdownProps {
 }
 
 /** sankey-svg 風の label + control + ✕ 行 */
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+function FilterRow({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       <span style={{ fontSize: 11, color: '#555', width: 40, flexShrink: 0, fontWeight: 600 }}>{label}</span>
@@ -154,7 +154,7 @@ function MinMaxInput({
 }) {
   const minOk = !minVal || parseAmountToYen(minVal) !== null;
   const maxOk = !maxVal || parseAmountToYen(maxVal) !== null;
-  const inputStyle = (ok: boolean): React.CSSProperties => ({
+  const inputStyle = (ok: boolean): CSSProperties => ({
     flex: 1,
     minWidth: 0,
     fontSize: 12,
@@ -365,9 +365,10 @@ function SubcontractsPageInner() {
   }, [graphs]);
 
   useEffect(() => {
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
-    fetch(`/data/subcontracts-${year}.json`)
+    fetch(`/data/subcontracts-${year}.json`, { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -377,9 +378,11 @@ function SubcontractsPageInner() {
         setLoading(false);
       })
       .catch((e: Error) => {
+        if (e.name === 'AbortError') return;
         setError(e.message);
         setLoading(false);
       });
+    return () => controller.abort();
   }, [year]);
 
   // 金額フィルタの解析
@@ -517,12 +520,55 @@ function SubcontractsPageInner() {
     }
   }
 
-  function SortIndicator({ k }: { k: SortKey }) {
-    if (sortKey !== k) return <span style={{ color: '#bbb', marginLeft: 4 }}>↕</span>;
-    return <span style={{ color: '#3b82f6', marginLeft: 4 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
+  function sortAria(key: SortKey): 'none' | 'ascending' | 'descending' {
+    if (sortKey !== key) return 'none';
+    return sortDir === 'asc' ? 'ascending' : 'descending';
   }
 
-  const thStyle: React.CSSProperties = {
+  function SortIndicator({ k }: { k: SortKey }) {
+    if (sortKey !== k) return <span aria-hidden="true" style={{ color: '#bbb', marginLeft: 4 }}>↕</span>;
+    return <span aria-hidden="true" style={{ color: '#3b82f6', marginLeft: 4 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
+  }
+
+  function SortHeader({
+    sort,
+    children,
+    align = 'left',
+    title,
+  }: {
+    sort: SortKey;
+    children: ReactNode;
+    align?: 'left' | 'right' | 'center';
+    title?: string;
+  }) {
+    return (
+      <th style={{ ...thStyle, textAlign: align }} title={title} aria-sort={sortAria(sort)}>
+        <button
+          type="button"
+          onClick={() => toggleSort(sort)}
+          style={{
+            width: '100%',
+            display: 'inline-flex',
+            justifyContent: align === 'right' ? 'flex-end' : align === 'center' ? 'center' : 'flex-start',
+            alignItems: 'center',
+            gap: 2,
+            border: 0,
+            background: 'transparent',
+            padding: 0,
+            color: 'inherit',
+            font: 'inherit',
+            fontWeight: 'inherit',
+            cursor: 'pointer',
+          }}
+        >
+          <span>{children}</span>
+          <SortIndicator k={sort} />
+        </button>
+      </th>
+    );
+  }
+
+  const thStyle: CSSProperties = {
     padding: '8px 8px',
     textAlign: 'left',
     fontSize: 11,
@@ -530,14 +576,13 @@ function SubcontractsPageInner() {
     color: '#6b7280',
     borderBottom: '1px solid #e5e7eb',
     whiteSpace: 'nowrap',
-    cursor: 'pointer',
     userSelect: 'none',
     background: '#f9fafb',
     position: 'sticky',
     top: 0,
     zIndex: 2,
   };
-  const tdNumStyle: React.CSSProperties = {
+  const tdNumStyle: CSSProperties = {
     padding: '8px 8px',
     textAlign: 'right',
     color: '#374151',
@@ -545,7 +590,7 @@ function SubcontractsPageInner() {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   };
-  const tdTextStyle: React.CSSProperties = {
+  const tdTextStyle: CSSProperties = {
     padding: '8px 8px',
     color: '#374151',
     overflow: 'hidden',
@@ -802,29 +847,29 @@ function SubcontractsPageInner() {
               </colgroup>
               <thead>
                 <tr style={{ background: '#f9fafb' }}>
-                  <th style={thStyle} onClick={() => toggleSort('projectId')}>PID<SortIndicator k="projectId" /></th>
-                  <th style={thStyle} onClick={() => toggleSort('projectName')}>事業名<SortIndicator k="projectName" /></th>
-                  <th style={thStyle} onClick={() => toggleSort('ministry')}>省庁<SortIndicator k="ministry" /></th>
-                  <th style={thStyle} onClick={() => toggleSort('bureau')}>担当組織<SortIndicator k="bureau" /></th>
-                  <th style={thStyle} onClick={() => toggleSort('accountCategory')}>会計区分<SortIndicator k="accountCategory" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('budget')}>予算額<SortIndicator k="budget" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('execution')}>執行額<SortIndicator k="execution" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('directExpenseTotal')}>直接支出合計<SortIndicator k="directExpenseTotal" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('totalExpense')}>支出額合計<SortIndicator k="totalExpense" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} title="支出額合計 − 直接支出合計（再委託・別財源など下流ブロック分）" onClick={() => toggleSort('totalMinusDirect')}>支出計−直接<SortIndicator k="totalMinusDirect" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} title="執行額(2-1) − 直接支出合計(5-1)。間接経費分とほぼ一致するケースあり" onClick={() => toggleSort('executionMinusDirect')}>執行−直接<SortIndicator k="executionMinusDirect" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('totalBlockCount')}>ブロック<SortIndicator k="totalBlockCount" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('directBlockCount')}>直接支出<SortIndicator k="directBlockCount" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('subcontractBlockCount')}>再委託<SortIndicator k="subcontractBlockCount" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('indirectCostCount')}>間接経費<SortIndicator k="indirectCostCount" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('separateOriginCount')}>別財源<SortIndicator k="separateOriginCount" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('totalRecipientCount')}>支出先<SortIndicator k="totalRecipientCount" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('maxDepth')}>階層<SortIndicator k="maxDepth" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('branchingBlockCount')}>分岐<SortIndicator k="branchingBlockCount" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('maxBranchWidth')}>最大分岐<SortIndicator k="maxBranchWidth" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('mergeTargetCount')}>合流<SortIndicator k="mergeTargetCount" /></th>
-                  <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('maxMergeWidth')}>最大合流<SortIndicator k="maxMergeWidth" /></th>
-                  <th style={{ ...thStyle, textAlign: 'center' }} onClick={() => toggleSort('institutional')}>構造<SortIndicator k="institutional" /></th>
+                  <SortHeader sort="projectId">PID</SortHeader>
+                  <SortHeader sort="projectName">事業名</SortHeader>
+                  <SortHeader sort="ministry">省庁</SortHeader>
+                  <SortHeader sort="bureau">担当組織</SortHeader>
+                  <SortHeader sort="accountCategory">会計区分</SortHeader>
+                  <SortHeader sort="budget" align="right">予算額</SortHeader>
+                  <SortHeader sort="execution" align="right">執行額</SortHeader>
+                  <SortHeader sort="directExpenseTotal" align="right">直接支出合計</SortHeader>
+                  <SortHeader sort="totalExpense" align="right">支出額合計</SortHeader>
+                  <SortHeader sort="totalMinusDirect" align="right" title="支出額合計 − 直接支出合計（再委託・別財源など下流ブロック分）">支出計−直接</SortHeader>
+                  <SortHeader sort="executionMinusDirect" align="right" title="執行額(2-1) − 直接支出合計(5-1)。間接経費分とほぼ一致するケースあり">執行−直接</SortHeader>
+                  <SortHeader sort="totalBlockCount" align="right">ブロック</SortHeader>
+                  <SortHeader sort="directBlockCount" align="right">直接支出</SortHeader>
+                  <SortHeader sort="subcontractBlockCount" align="right">再委託</SortHeader>
+                  <SortHeader sort="indirectCostCount" align="right">間接経費</SortHeader>
+                  <SortHeader sort="separateOriginCount" align="right">別財源</SortHeader>
+                  <SortHeader sort="totalRecipientCount" align="right">支出先</SortHeader>
+                  <SortHeader sort="maxDepth" align="right">階層</SortHeader>
+                  <SortHeader sort="branchingBlockCount" align="right">分岐</SortHeader>
+                  <SortHeader sort="maxBranchWidth" align="right">最大分岐</SortHeader>
+                  <SortHeader sort="mergeTargetCount" align="right">合流</SortHeader>
+                  <SortHeader sort="maxMergeWidth" align="right">最大合流</SortHeader>
+                  <SortHeader sort="institutional" align="center">構造</SortHeader>
                 </tr>
               </thead>
               <tbody>

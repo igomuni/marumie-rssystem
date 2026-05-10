@@ -42,6 +42,7 @@ interface RecipientSummary {
   amount: number;
   names: Set<string>;
   otherFlags: Set<string>;
+  seenRecipients: Set<string>;
 }
 
 interface FundingSourceCandidate {
@@ -131,10 +132,14 @@ function buildRecipientSummaries(rows51: CSVRow[]): Map<string, RecipientSummary
     const key = blockKey(projectId, blockId);
     let entry = recipients.get(key);
     if (!entry) {
-      entry = { amount: 0, names: new Set(), otherFlags: new Set() };
+      entry = { amount: 0, names: new Set(), otherFlags: new Set(), seenRecipients: new Set() };
       recipients.set(key, entry);
     }
-    entry.amount += parseAmount(amountText);
+    const recipientKey = `${recipientName}|${trim(row['法人番号'])}`;
+    if (!entry.seenRecipients.has(recipientKey)) {
+      entry.amount += parseAmount(amountText);
+      entry.seenRecipients.add(recipientKey);
+    }
     entry.names.add(recipientName);
     entry.otherFlags.add(trim(row['その他支出先']));
   }

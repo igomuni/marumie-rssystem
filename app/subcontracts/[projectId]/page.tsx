@@ -346,8 +346,9 @@ function SidePane({
       display: 'flex',
       flexDirection: 'column',
     }}>
+      <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 2 }}>
       {/* 事業ヘッダー（常時表示） */}
-      <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, position: 'sticky', top: 0, background: '#fff', zIndex: 2 }}>
+      <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
         <div style={{
           display: 'inline-block',
           fontSize: 11,
@@ -414,10 +415,7 @@ function SidePane({
       <div style={{
         display: 'flex',
         borderBottom: `1px solid ${COLOR_PANEL_BORDER}`,
-        position: 'sticky',
-        top: 0,
         background: '#fff',
-        zIndex: 1,
       }}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -448,6 +446,7 @@ function SidePane({
             </button>
           );
         })}
+      </div>
       </div>
 
       {/* タブ本体 */}

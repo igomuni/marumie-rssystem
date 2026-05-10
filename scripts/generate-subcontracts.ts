@@ -250,7 +250,7 @@ for (const row of csv51) {
   const recipient = block.recipients.get(recipientKey)!;
 
   if (totalRecipientAmountStr) {
-    recipient.amount += parseAmount(totalRecipientAmountStr);
+    recipient.amount = Math.max(recipient.amount, parseAmount(totalRecipientAmountStr));
   }
   if (contractSummary && !recipient.contractSummaries.includes(contractSummary)) {
     recipient.contractSummaries.push(contractSummary);
@@ -313,13 +313,18 @@ function computeMaxDepth(flows: BlockEdge[]): number {
 
   // adjacency を事前構築して O(n) ルックアップを避ける
   const children = new Map<string, string[]>();
+  const separateOriginRoots = new Set<string>();
   for (const f of flows) {
     if (f.sourceBlock === null) {
       queue.push({ blockId: f.targetBlock, depth: 1 });
     } else {
       if (!children.has(f.sourceBlock)) children.set(f.sourceBlock, []);
       children.get(f.sourceBlock)!.push(f.targetBlock);
+      if (f.origin === 'separate-origin') separateOriginRoots.add(f.sourceBlock);
     }
+  }
+  for (const blockId of separateOriginRoots) {
+    queue.push({ blockId, depth: 1 });
   }
 
   while (queue.length > 0) {
