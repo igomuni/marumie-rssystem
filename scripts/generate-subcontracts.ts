@@ -53,9 +53,19 @@ interface BudgetEntry {
   accountCategorySet: Set<string>;
 }
 const budgetMap = new Map<number, BudgetEntry>();
+const accountCategoryMap = new Map<number, Set<string>>();
 for (const row of csv21) {
   const projectId = parseInt(row['予算事業ID'] ?? '', 10);
   if (isNaN(projectId)) continue;
+  const accountCategory = (row['会計区分'] ?? '').trim();
+  if (accountCategory) {
+    let categories = accountCategoryMap.get(projectId);
+    if (!categories) {
+      categories = new Set<string>();
+      accountCategoryMap.set(projectId, categories);
+    }
+    categories.add(accountCategory);
+  }
   // 複数年度が混在するため対象年度のみ抽出
   const fiscalYear = parseInt(row['予算年度'] ?? '', 10);
   if (fiscalYear !== TARGET_BUDGET_YEAR) continue;
@@ -65,7 +75,6 @@ for (const row of csv21) {
     .map((k) => (row[k] ?? '').trim())
     .filter(Boolean);
   const bureau = bureauParts.join(' / ');
-  const accountCategory = (row['会計区分'] ?? '').trim();
   if (!budgetMap.has(projectId)) {
     const set = new Set<string>();
     if (accountCategory) set.add(accountCategory);
@@ -532,8 +541,9 @@ for (const [projectId, flowEntry] of flowMap) {
 
   // 会計区分の文字列化（一般会計+特別会計 / 一般会計 / 特別会計 / 空）
   let accountCategory = '';
-  if (budgetEntry) {
-    const cats = Array.from(budgetEntry.accountCategorySet).sort();
+  const accountCategorySet = accountCategoryMap.get(projectId) ?? budgetEntry?.accountCategorySet;
+  if (accountCategorySet) {
+    const cats = Array.from(accountCategorySet).sort();
     accountCategory = cats.join('+');
   }
 
