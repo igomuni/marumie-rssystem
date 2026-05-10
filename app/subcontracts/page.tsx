@@ -150,6 +150,7 @@ function SubcontractsPageInner() {
   const [page, setPage] = useState(1);
   const [columnWidths, setColumnWidths] = useState(loadColumnWidths);
   const resizingColumnRef = useRef<{ index: number; startX: number; startWidth: number } | null>(null);
+  const savedColumnWidthsRef = useRef<string | null>(null);
 
   const ministries = useMemo(() => {
     const counts = new Map<string, number>();
@@ -184,7 +185,17 @@ function SubcontractsPageInner() {
   }, [year]);
 
   useEffect(() => {
-    window.localStorage.setItem(COLUMN_WIDTH_STORAGE_KEY, JSON.stringify(columnWidths));
+    const serialized = JSON.stringify(columnWidths);
+    if (savedColumnWidthsRef.current === serialized) return;
+    const timer = window.setTimeout(() => {
+      try {
+        window.localStorage.setItem(COLUMN_WIDTH_STORAGE_KEY, serialized);
+        savedColumnWidthsRef.current = serialized;
+      } catch {
+        // Ignore persistence failures such as private mode, disabled storage, or quota issues.
+      }
+    }, 120);
+    return () => window.clearTimeout(timer);
   }, [columnWidths]);
 
   useEffect(() => {
@@ -409,6 +420,7 @@ function SubcontractsPageInner() {
           title="列幅を変更"
           onClick={(e) => e.stopPropagation()}
           onPointerDown={(e) => {
+            if (e.button !== 0) return;
             e.preventDefault();
             e.stopPropagation();
             resizingColumnRef.current = {

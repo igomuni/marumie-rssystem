@@ -895,7 +895,8 @@ function SubcontractDetailPageInner() {
   const router = useRouter();
 
   const projectId = params.projectId;
-  const year = parseInt(searchParams.get('year') ?? '2024', 10);
+  const parsedYear = Number.parseInt(searchParams.get('year') ?? '2025', 10);
+  const year = parsedYear === 2024 || parsedYear === 2025 ? parsedYear : 2025;
 
   const [graph, setGraph] = useState<SubcontractGraph | null>(null);
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | null>(null);
