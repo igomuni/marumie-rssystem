@@ -16,6 +16,8 @@ type SortKey =
   | 'execution'
   | 'directExpenseTotal'
   | 'totalExpense'
+  | 'totalMinusDirect'
+  | 'executionMinusDirect'
   | 'maxDepth'
   | 'totalBlockCount'
   | 'directBlockCount'
@@ -189,6 +191,8 @@ function SubcontractsPageInner() {
       else if (sortKey === 'execution') { va = a.execution; vb = b.execution; }
       else if (sortKey === 'directExpenseTotal') { va = a.directExpenseTotal; vb = b.directExpenseTotal; }
       else if (sortKey === 'totalExpense') { va = a.totalExpense; vb = b.totalExpense; }
+      else if (sortKey === 'totalMinusDirect') { va = a.totalExpense - a.directExpenseTotal; vb = b.totalExpense - b.directExpenseTotal; }
+      else if (sortKey === 'executionMinusDirect') { va = a.execution - a.directExpenseTotal; vb = b.execution - b.directExpenseTotal; }
       else if (sortKey === 'maxDepth') { va = a.maxDepth; vb = b.maxDepth; }
       else if (sortKey === 'totalBlockCount') { va = a.totalBlockCount; vb = b.totalBlockCount; }
       else if (sortKey === 'directBlockCount') { va = a.directBlockCount; vb = b.directBlockCount; }
@@ -272,6 +276,8 @@ function SubcontractsPageInner() {
     80,    // 執行額
     96,    // 直接支出合計
     96,    // 支出額合計
+    88,    // 支出計−直接
+    88,    // 執行−直接
     60,    // ブロック
     64,    // 直接支出
     56,    // 再委託
@@ -560,6 +566,8 @@ function SubcontractsPageInner() {
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('execution')}>執行額<SortIndicator k="execution" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('directExpenseTotal')}>直接支出合計<SortIndicator k="directExpenseTotal" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('totalExpense')}>支出額合計<SortIndicator k="totalExpense" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} title="支出額合計 − 直接支出合計（再委託・別財源など下流ブロック分）" onClick={() => toggleSort('totalMinusDirect')}>支出計−直接<SortIndicator k="totalMinusDirect" /></th>
+                  <th style={{ ...thStyle, textAlign: 'right' }} title="執行額(2-1) − 直接支出合計(5-1)。間接経費分とほぼ一致するケースあり" onClick={() => toggleSort('executionMinusDirect')}>執行−直接<SortIndicator k="executionMinusDirect" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('totalBlockCount')}>ブロック<SortIndicator k="totalBlockCount" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('directBlockCount')}>直接支出<SortIndicator k="directBlockCount" /></th>
                   <th style={{ ...thStyle, textAlign: 'right' }} onClick={() => toggleSort('subcontractBlockCount')}>再委託<SortIndicator k="subcontractBlockCount" /></th>
@@ -620,6 +628,25 @@ function SubcontractsPageInner() {
                     <td style={tdNumStyle}>
                       {g.totalExpense > 0 ? formatYen(g.totalExpense) : '—'}
                     </td>
+                    {(() => {
+                      const totalMinusDirect = g.totalExpense - g.directExpenseTotal;
+                      const executionMinusDirect = g.execution - g.directExpenseTotal;
+                      const fmtDiff = (v: number, hasBase: boolean) => {
+                        if (!hasBase) return <span style={{ color: '#cbd5e1' }}>—</span>;
+                        if (v === 0) return <span style={{ color: '#cbd5e1' }}>0</span>;
+                        return formatYen(Math.abs(v)).replace(/^/, v < 0 ? '−' : '');
+                      };
+                      return (
+                        <>
+                          <td style={tdNumStyle}>
+                            {fmtDiff(totalMinusDirect, g.totalExpense > 0 || g.directExpenseTotal > 0)}
+                          </td>
+                          <td style={tdNumStyle}>
+                            {fmtDiff(executionMinusDirect, g.execution > 0 || g.directExpenseTotal > 0)}
+                          </td>
+                        </>
+                      );
+                    })()}
                     <td style={tdNumStyle}>{g.totalBlockCount}</td>
                     <td style={tdNumStyle}>
                       {g.directBlockCount > 0 ? g.directBlockCount : <span style={{ color: '#cbd5e1' }}>—</span>}
