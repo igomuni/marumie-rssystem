@@ -332,9 +332,9 @@ function SubcontractsPageInner() {
   const totalInstitutional = graphs.filter(g => g.isInstitutionalFlowOnly).length;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
-      {/* ヘッダー（白背景） */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '16px' }}>
+    <div style={{ height: '100vh', background: '#f9fafb', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* ── 上部: ヘッダー + フィルタ ── */}
+      <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '16px', flexShrink: 0 }}>
         <div style={{ maxWidth: 1600, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Link href="/" style={{ color: '#2563eb', fontSize: 13, textDecoration: 'none' }}>← トップ</Link>
@@ -373,7 +373,8 @@ function SubcontractsPageInner() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '12px 16px' }}>
+      {/* ── 上部: フィルタ群 ── */}
+      <div style={{ flexShrink: 0, padding: '12px 16px', maxWidth: 1600, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         {/* コントロール（/sankey-svg と同じトーン） */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           {/* 検索 */}
@@ -575,20 +576,32 @@ function SubcontractsPageInner() {
             ))}
           </div>
         </div>
+      </div>
 
-        {/* テーブル */}
+      {/* ── 中部: スクロールテーブル ── */}
+      <div style={{ flex: 1, minHeight: 0, padding: '0 16px', maxWidth: 1600, margin: '0 auto', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
         {loading && <p style={{ color: '#6b7280', fontSize: 14 }}>読み込み中...</p>}
         {error && <p style={{ color: '#ef4444', fontSize: 14 }}>エラー: {error}</p>}
         {!loading && !error && (
-          <>
-          {/* 上部横スクロールバー（下のテーブルと同期） */}
-          <div
-            ref={topScrollRef}
-            style={{ overflowX: 'auto', overflowY: 'hidden', marginBottom: 4, borderRadius: 8 }}
-          >
-            <div style={{ minWidth: MIN_TABLE_WIDTH, height: 1 }} />
-          </div>
-          <div ref={bottomScrollRef} style={{ overflowX: 'auto', background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            {/* 上部横スクロールバー（下のテーブルと同期） */}
+            <div
+              ref={topScrollRef}
+              style={{ overflowX: 'auto', overflowY: 'hidden', flexShrink: 0, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
+            >
+              <div style={{ minWidth: MIN_TABLE_WIDTH, height: 1 }} />
+            </div>
+            <div
+              ref={bottomScrollRef}
+              style={{
+                flex: 1,
+                minHeight: 0,
+                overflow: 'auto',
+                background: '#fff',
+                borderRadius: 8,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              }}
+            >
             <table style={{ width: '100%', minWidth: MIN_TABLE_WIDTH, borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
               <colgroup>
                 {COL_WIDTHS.map((w, i) => (
@@ -727,13 +740,15 @@ function SubcontractsPageInner() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
-          </>
         )}
+      </div>
 
-        {/* ページネーション */}
-        {!loading && !error && totalPages > 1 && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+      {/* ── 下部: ページネーション ── */}
+      {!loading && !error && totalPages > 1 && (
+        <div style={{ flexShrink: 0, background: '#fff', borderTop: '1px solid #e5e7eb', padding: '8px 16px' }}>
+          <div style={{ maxWidth: 1600, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
@@ -770,8 +785,8 @@ function SubcontractsPageInner() {
               次へ →
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
