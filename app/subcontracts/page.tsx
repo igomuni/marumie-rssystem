@@ -38,7 +38,6 @@ const STRING_SORT_KEYS: ReadonlySet<SortKey> = new Set<SortKey>([
   'accountCategory',
 ]);
 type SortDir = 'asc' | 'desc';
-type StructureFilter = 'all' | 'separate-origin' | 'merge' | 'institutional';
 
 const PAGE_SIZE = 50;
 
@@ -65,6 +64,260 @@ function bureauLeaf(bureau: string): string {
   return parts[parts.length - 1] ?? '';
 }
 
+/** "1.26億", "100億", "1兆", "1兆2000億", "456789" などを1円単位の数値に変換。解析失敗時 null */
+function parseAmountToYen(input: string): number | null {
+  if (!input) return null;
+  const trimmed = input.trim().replace(/[,，\s]/g, '');
+  if (!trimmed) return null;
+  const combo = trimmed.match(/^([\d.]+)兆([\d.]+)億?$/);
+  if (combo) {
+    const cho = parseFloat(combo[1]);
+    const oku = parseFloat(combo[2]);
+    if (!isNaN(cho) && !isNaN(oku)) return (cho * 10000 + oku) * 1e8;
+  }
+  const m = trimmed.match(/^([\d.]+)\s*(兆|億|万|千)?円?$/);
+  if (!m) return null;
+  const v = parseFloat(m[1]);
+  if (isNaN(v)) return null;
+  switch (m[2]) {
+    case '兆': return v * 1e12;
+    case '億': return v * 1e8;
+    case '万': return v * 1e4;
+    case '千': return v * 1e3;
+    default: return v;
+  }
+}
+
+/** sankey-svg 風の複数選択ドロップダウン */
+interface MultiSelectDropdownProps {
+  options: string[];
+  selected: string[];
+  onChange: (next: string[]) => void;
+  allLabel: string;
+  placeholder?: string;
+  minWidth?: number;
+}
+
+/** sankey-svg 風の label + control + ✕ 行 */
+function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <span style={{ fontSize: 11, color: '#555', width: 40, flexShrink: 0, fontWeight: 600 }}>{label}</span>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** 部分一致テキスト入力（クリアボタン付き） */
+function FilterTextInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  return (
+    <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          width: '100%',
+          boxSizing: 'border-box',
+          fontSize: 12,
+          border: '1px solid #ddd',
+          borderRadius: 4,
+          padding: '3px 22px 3px 6px',
+          background: '#fafafa',
+          color: '#333',
+          outline: 'none',
+        }}
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          aria-label="クリア"
+          style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#bbb', cursor: 'pointer', padding: 2, fontSize: 11 }}
+        >
+          ✕
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Min-Max 金額入力ペア */
+function MinMaxInput({
+  minVal, maxVal, onMinChange, onMaxChange,
+}: {
+  minVal: string; maxVal: string;
+  onMinChange: (v: string) => void; onMaxChange: (v: string) => void;
+}) {
+  const minOk = !minVal || parseAmountToYen(minVal) !== null;
+  const maxOk = !maxVal || parseAmountToYen(maxVal) !== null;
+  const inputStyle = (ok: boolean): React.CSSProperties => ({
+    flex: 1,
+    minWidth: 0,
+    fontSize: 12,
+    border: `1px solid ${ok ? '#ddd' : '#e53935'}`,
+    borderRadius: 4,
+    padding: '3px 6px',
+    background: '#fafafa',
+    color: '#333',
+    outline: 'none',
+  });
+  return (
+    <>
+      <input
+        type="text"
+        value={minVal}
+        onChange={(e) => onMinChange(e.target.value)}
+        placeholder="下限"
+        title="下限 (例: 100億, 1兆)"
+        style={inputStyle(minOk)}
+      />
+      <span style={{ color: '#aaa', fontSize: 11 }}>〜</span>
+      <input
+        type="text"
+        value={maxVal}
+        onChange={(e) => onMaxChange(e.target.value)}
+        placeholder="上限"
+        title="上限 (例: 1兆, 5000億)"
+        style={inputStyle(maxOk)}
+      />
+      {(minVal || maxVal) && (
+        <button
+          type="button"
+          onClick={() => { onMinChange(''); onMaxChange(''); }}
+          aria-label="クリア"
+          style={{ background: 'none', border: 'none', color: '#bbb', cursor: 'pointer', padding: 2, fontSize: 11, flexShrink: 0 }}
+        >
+          ✕
+        </button>
+      )}
+    </>
+  );
+}
+
+function MultiSelectDropdown({ options, selected, onChange, allLabel, minWidth = 160 }: MultiSelectDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const [rect, setRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onPointerDown(e: MouseEvent) {
+      if (dropdownRef.current?.contains(e.target as Node)) return;
+      if (buttonRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    }
+    document.addEventListener('mousedown', onPointerDown);
+    return () => document.removeEventListener('mousedown', onPointerDown);
+  }, [open]);
+
+  const allSelected = selected.length === 0;
+  const label = allSelected
+    ? allLabel
+    : selected.length === 1
+      ? selected[0]
+      : `選択中 (${selected.length}/${options.length})`;
+
+  return (
+    <div style={{ position: 'relative', minWidth, flex: 1 }}>
+      <button
+        type="button"
+        ref={buttonRef}
+        onClick={() => {
+          if (buttonRef.current) {
+            const r = buttonRef.current.getBoundingClientRect();
+            setRect({
+              top: r.bottom + 2,
+              left: r.left,
+              width: Math.max(r.width, 200),
+              maxHeight: Math.max(160, window.innerHeight - r.bottom - 24),
+            });
+          }
+          setOpen((v) => !v);
+        }}
+        style={{
+          width: '100%',
+          fontSize: 12,
+          border: '1px solid #ddd',
+          borderRadius: 4,
+          padding: '3px 22px 3px 6px',
+          background: '#fafafa',
+          color: allSelected ? '#aaa' : '#333',
+          cursor: 'pointer',
+          textAlign: 'left',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          outline: 'none',
+        }}
+      >
+        {label}
+      </button>
+      <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#aaa"
+        style={{ position: 'absolute', right: 6, top: '50%', transform: open ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)', transition: 'transform 0.15s', pointerEvents: 'none' }}>
+        <path d="M7 10l5 5 5-5z"/>
+      </svg>
+      {!allSelected && (
+        <button
+          type="button"
+          onClick={() => onChange([])}
+          aria-label="クリア"
+          style={{ position: 'absolute', right: 22, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#bbb', cursor: 'pointer', padding: 2, fontSize: 11 }}
+        >
+          ✕
+        </button>
+      )}
+      {open && rect && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={dropdownRef}
+          style={{
+            position: 'fixed',
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            maxHeight: rect.maxHeight,
+            overflowY: 'auto',
+            zIndex: 9999,
+            background: '#fff',
+            border: '1px solid #ddd',
+            borderRadius: 4,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={() => onChange([])}
+              style={{ width: 12, height: 12 }}
+            />
+            <span style={{ fontSize: 12, color: '#333' }}>すべて解除</span>
+          </label>
+          {options.map((opt) => (
+            <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={selected.includes(opt)}
+                onChange={() =>
+                  onChange(selected.includes(opt) ? selected.filter((x) => x !== opt) : [...selected, opt])
+                }
+                style={{ width: 12, height: 12 }}
+              />
+              <span style={{ fontSize: 12, color: '#333' }}>{opt}</span>
+            </label>
+          ))}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
 function SubcontractsPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -78,17 +331,26 @@ function SubcontractsPageInner() {
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('projectId');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
-  const [structureFilter, setStructureFilter] = useState<StructureFilter>('all');
+  // 複数選択フィルタ
   const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
-  // 会計区分フィルタ（sankey-svg と同じ4区分）
-  const [acGeneral, setAcGeneral] = useState(true);
-  const [acSpecial, setAcSpecial] = useState(true);
-  const [acBoth, setAcBoth] = useState(true);
-  const [acNone, setAcNone] = useState(true);
-  const [showMinistryDropdown, setShowMinistryDropdown] = useState(false);
-  const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
-  const ministryButtonRef = useRef<HTMLButtonElement>(null);
-  const ministryDropdownRef = useRef<HTMLDivElement>(null);
+  // 会計区分（'一般会計' | '特別会計' | '一般・特別' | '区分なし'）の複数選択
+  const [selectedAccountCategories, setSelectedAccountCategories] = useState<string[]>([]);
+  // 構造（'別財源あり' | '合流あり' | '制度フローのみ'）の複数選択（OR）
+  const [selectedStructures, setSelectedStructures] = useState<string[]>([]);
+  // 名称・組織テキストフィルタ
+  const [filterProjectName, setFilterProjectName] = useState('');
+  const [filterBureau, setFilterBureau] = useState('');
+  // 金額 Min/Max
+  const [filterBudgetMin, setFilterBudgetMin] = useState('');
+  const [filterBudgetMax, setFilterBudgetMax] = useState('');
+  const [filterExecutionMin, setFilterExecutionMin] = useState('');
+  const [filterExecutionMax, setFilterExecutionMax] = useState('');
+  const [filterDirectMin, setFilterDirectMin] = useState('');
+  const [filterDirectMax, setFilterDirectMax] = useState('');
+  const [filterTotalExpenseMin, setFilterTotalExpenseMin] = useState('');
+  const [filterTotalExpenseMax, setFilterTotalExpenseMax] = useState('');
+  // 折りたたみパネル
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [page, setPage] = useState(1);
 
   const ministries = useMemo(() => {
@@ -101,18 +363,6 @@ function SubcontractsPageInner() {
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ja'))
       .map(([m]) => m);
   }, [graphs]);
-
-  // ドロップダウン外クリックで閉じる
-  useEffect(() => {
-    if (!showMinistryDropdown) return;
-    function onPointerDown(e: MouseEvent) {
-      if (ministryDropdownRef.current?.contains(e.target as Node)) return;
-      if (ministryButtonRef.current?.contains(e.target as Node)) return;
-      setShowMinistryDropdown(false);
-    }
-    document.addEventListener('mousedown', onPointerDown);
-    return () => document.removeEventListener('mousedown', onPointerDown);
-  }, [showMinistryDropdown]);
 
   useEffect(() => {
     setLoading(true);
@@ -132,23 +382,50 @@ function SubcontractsPageInner() {
       });
   }, [year]);
 
+  // 金額フィルタの解析
+  const budgetMinYen = parseAmountToYen(filterBudgetMin);
+  const budgetMaxYen = parseAmountToYen(filterBudgetMax);
+  const executionMinYen = parseAmountToYen(filterExecutionMin);
+  const executionMaxYen = parseAmountToYen(filterExecutionMax);
+  const directMinYen = parseAmountToYen(filterDirectMin);
+  const directMaxYen = parseAmountToYen(filterDirectMax);
+  const totalExpenseMinYen = parseAmountToYen(filterTotalExpenseMin);
+  const totalExpenseMaxYen = parseAmountToYen(filterTotalExpenseMax);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase();
+    const projectQ = filterProjectName.trim().toLocaleLowerCase();
+    const bureauQ = filterBureau.trim().toLocaleLowerCase();
     return graphs.filter((g) => {
+      // 府省庁
       if (selectedMinistries.length > 0 && !selectedMinistries.includes(g.ministry)) return false;
-      // 会計区分フィルタ
-      const cat = g.accountCategory;
-      const isGeneral = cat === '一般会計';
-      const isSpecial = cat === '特別会計';
-      const isBoth = cat === '一般会計+特別会計';
-      const isNone = !cat;
-      if (isGeneral && !acGeneral) return false;
-      if (isSpecial && !acSpecial) return false;
-      if (isBoth && !acBoth) return false;
-      if (isNone && !acNone) return false;
-      if (structureFilter === 'separate-origin' && !g.hasSeparateOrigin) return false;
-      if (structureFilter === 'merge' && !g.hasMerge) return false;
-      if (structureFilter === 'institutional' && !g.isInstitutionalFlowOnly) return false;
+      // 会計区分（複数選択 OR）
+      if (selectedAccountCategories.length > 0) {
+        const label = g.accountCategory ? accountCategoryLabel(g.accountCategory) : '区分なし';
+        if (!selectedAccountCategories.includes(label)) return false;
+      }
+      // 事業名
+      if (projectQ && !g.projectName.toLocaleLowerCase().includes(projectQ)) return false;
+      // 担当組織
+      if (bureauQ && !g.bureau.toLocaleLowerCase().includes(bureauQ)) return false;
+      // 金額 Min/Max
+      if (budgetMinYen !== null && g.budget < budgetMinYen) return false;
+      if (budgetMaxYen !== null && g.budget > budgetMaxYen) return false;
+      if (executionMinYen !== null && g.execution < executionMinYen) return false;
+      if (executionMaxYen !== null && g.execution > executionMaxYen) return false;
+      if (directMinYen !== null && g.directExpenseTotal < directMinYen) return false;
+      if (directMaxYen !== null && g.directExpenseTotal > directMaxYen) return false;
+      if (totalExpenseMinYen !== null && g.totalExpense < totalExpenseMinYen) return false;
+      if (totalExpenseMaxYen !== null && g.totalExpense > totalExpenseMaxYen) return false;
+      // 構造（複数選択 OR）
+      if (selectedStructures.length > 0) {
+        const matchAny =
+          (selectedStructures.includes('別財源あり') && g.hasSeparateOrigin) ||
+          (selectedStructures.includes('合流あり') && g.hasMerge) ||
+          (selectedStructures.includes('制度フローのみ') && g.isInstitutionalFlowOnly);
+        if (!matchAny) return false;
+      }
+      // フリーテキスト検索（既存）
       if (!q) return true;
       return (
         String(g.projectId).includes(q) ||
@@ -161,7 +438,12 @@ function SubcontractsPageInner() {
         )
       );
     });
-  }, [graphs, query, structureFilter, selectedMinistries, acGeneral, acSpecial, acBoth, acNone]);
+  }, [
+    graphs, query, selectedMinistries, selectedAccountCategories,
+    filterProjectName, filterBureau, selectedStructures,
+    budgetMinYen, budgetMaxYen, executionMinYen, executionMaxYen,
+    directMinYen, directMaxYen, totalExpenseMinYen, totalExpenseMaxYen,
+  ]);
 
   function subcontractBlockCount(g: SubcontractGraph): number {
     return g.totalBlockCount - g.directBlockCount - g.separateOriginCount;
@@ -210,8 +492,13 @@ function SubcontractsPageInner() {
   }, [filtered, sortKey, sortDir]);
 
   // フィルタ・ソート・年度変更時はページ1へ戻す
-  const acKey = `${acGeneral ? 'g' : ''}${acSpecial ? 's' : ''}${acBoth ? 'b' : ''}${acNone ? 'n' : ''}`;
-  const filterKey = `${year}|${selectedMinistries.join(',')}|${structureFilter}|${query}|${acKey}|${sortKey}|${sortDir}`;
+  const filterKey = [
+    year, query, selectedMinistries.join(','), selectedAccountCategories.join(','),
+    selectedStructures.join(','), filterProjectName, filterBureau,
+    filterBudgetMin, filterBudgetMax, filterExecutionMin, filterExecutionMax,
+    filterDirectMin, filterDirectMax, filterTotalExpenseMin, filterTotalExpenseMax,
+    sortKey, sortDir,
+  ].join('|');
   const [lastFilterKey, setLastFilterKey] = useState(filterKey);
   if (filterKey !== lastFilterKey) {
     setLastFilterKey(filterKey);
@@ -355,7 +642,7 @@ function SubcontractsPageInner() {
           </div>
 
           {/* 検索 */}
-          <div style={{ position: 'relative', flex: 1, minWidth: 260 }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: 240 }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
               <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999">
                 <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
@@ -363,7 +650,7 @@ function SubcontractsPageInner() {
             </span>
             <input
               type="text"
-              placeholder="事業名・PID・府省庁・ブロック名・支出先名で検索..."
+              placeholder="PID・事業名・省庁・ブロック・支出先で検索..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               style={{
@@ -390,169 +677,106 @@ function SubcontractsPageInner() {
             )}
           </div>
 
-          {/* 府省庁（複数選択ドロップダウン） */}
-          {(() => {
-            const allSelected = selectedMinistries.length === 0;
-            const label = allSelected
-              ? '全府省庁'
-              : selectedMinistries.length === 1
-                ? selectedMinistries[0]
-                : `選択中 (${selectedMinistries.length}/${ministries.length})`;
-            return (
-              <div style={{ position: 'relative', minWidth: 180 }}>
-                <button
-                  type="button"
-                  ref={ministryButtonRef}
-                  onClick={() => {
-                    if (ministryButtonRef.current) {
-                      const r = ministryButtonRef.current.getBoundingClientRect();
-                      setMinistryDropdownRect({
-                        top: r.bottom + 2,
-                        left: r.left,
-                        width: Math.max(r.width, 240),
-                        maxHeight: Math.max(160, window.innerHeight - r.bottom - 24),
-                      });
-                    }
-                    setShowMinistryDropdown((v) => !v);
-                  }}
-                  style={{
-                    width: '100%',
-                    fontSize: 13,
-                    border: '1px solid #e0e0e0',
-                    borderRadius: 8,
-                    padding: '6px 28px 6px 10px',
-                    background: 'rgba(255,255,255,0.95)',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                    color: allSelected ? '#999' : '#333',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {label}
-                </button>
-                <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999"
-                  style={{
-                    position: 'absolute', right: 8, top: '50%', transform: showMinistryDropdown ? 'translateY(-50%) rotate(180deg)' : 'translateY(-50%)',
-                    transition: 'transform 0.15s', pointerEvents: 'none',
-                  }}>
-                  <path d="M7 10l5 5 5-5z"/>
-                </svg>
-                {!allSelected && (
-                  <button
-                    type="button"
-                    onClick={() => setSelectedMinistries([])}
-                    aria-label="府省庁フィルタをクリア"
-                    style={{ position: 'absolute', right: 26, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#bbb', cursor: 'pointer', padding: 2, fontSize: 11 }}
-                  >
-                    ✕
-                  </button>
-                )}
-                {showMinistryDropdown && ministryDropdownRect && typeof document !== 'undefined' && createPortal(
-                  <div
-                    ref={ministryDropdownRef}
-                    style={{
-                      position: 'fixed',
-                      top: ministryDropdownRect.top,
-                      left: ministryDropdownRect.left,
-                      width: ministryDropdownRect.width,
-                      maxHeight: ministryDropdownRect.maxHeight,
-                      overflowY: 'auto',
-                      zIndex: 9999,
-                      background: '#fff',
-                      border: '1px solid #ddd',
-                      borderRadius: 6,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-                    }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                  >
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
-                      <input
-                        type="checkbox"
-                        checked={allSelected}
-                        onChange={() => setSelectedMinistries([])}
-                        style={{ width: 13, height: 13 }}
-                      />
-                      <span style={{ fontSize: 12, color: '#333' }}>すべて解除</span>
-                    </label>
-                    {ministries.map((m) => (
-                      <label key={m} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', cursor: 'pointer' }}>
-                        <input
-                          type="checkbox"
-                          checked={selectedMinistries.includes(m)}
-                          onChange={() =>
-                            setSelectedMinistries((prev) =>
-                              prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]
-                            )
-                          }
-                          style={{ width: 13, height: 13 }}
-                        />
-                        <span style={{ fontSize: 12, color: '#333' }}>{m}</span>
-                      </label>
-                    ))}
-                  </div>,
-                  document.body
-                )}
-              </div>
-            );
-          })()}
+          {/* フィルタ展開トグル */}
+          <button
+            type="button"
+            onClick={() => setShowFilterPanel((v) => !v)}
+            title={showFilterPanel ? 'フィルタを閉じる' : 'フィルタを開く'}
+            aria-pressed={showFilterPanel}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              fontSize: 12, fontWeight: 600,
+              border: '1px solid #e0e0e0',
+              borderRadius: 8,
+              padding: '6px 10px',
+              background: showFilterPanel ? '#f1f5f9' : 'rgba(255,255,255,0.95)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              color: '#334155',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            フィルタ
+            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="currentColor"
+              style={{ transform: showFilterPanel ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>
+              <path d="M7 10l5 5 5-5z"/>
+            </svg>
+          </button>
 
-          <span style={{ fontSize: 12, color: '#6b7280' }}>
+          <span style={{ fontSize: 12, color: '#6b7280', flexShrink: 0 }}>
             {filtered.length.toLocaleString()}件表示
           </span>
         </div>
 
-        {/* 会計区分フィルタ + 構造フィルタ */}
-        <div style={{ display: 'flex', gap: 16, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600 }}>会計区分:</span>
-            {([
-              { label: '一般会計', value: acGeneral, setter: setAcGeneral },
-              { label: '特別会計', value: acSpecial, setter: setAcSpecial },
-              { label: '一般・特別', value: acBoth, setter: setAcBoth },
-              { label: '区分なし', value: acNone, setter: setAcNone },
-            ] as const).map(({ label, value, setter }) => (
-              <label key={label} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#334155', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={value}
-                  onChange={(e) => setter(e.target.checked)}
-                  style={{ width: 13, height: 13 }}
-                />
-                {label}
-              </label>
-            ))}
-          </div>
+        {/* 折りたたみフィルタパネル（/sankey-svg ライク） */}
+        {showFilterPanel && (
+          <div style={{
+            border: '1px solid #e0e0e0',
+            borderRadius: 8,
+            padding: '10px 12px',
+            background: 'rgba(255,255,255,0.95)',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            marginBottom: 12,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            columnGap: 16,
+            rowGap: 8,
+          }}>
+            {/* 会計区分 */}
+            <FilterRow label="会計">
+              <MultiSelectDropdown
+                options={['一般会計', '特別会計', '一般・特別', '区分なし']}
+                selected={selectedAccountCategories}
+                onChange={setSelectedAccountCategories}
+                allLabel="全会計区分"
+              />
+            </FilterRow>
 
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600 }}>構造:</span>
-            {([
-              ['all', 'すべて'],
-              ['separate-origin', '別財源あり'],
-              ['merge', '合流あり'],
-              ['institutional', '制度フローのみ'],
-            ] as const).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setStructureFilter(key)}
-                style={{
-                  border: `1px solid ${structureFilter === key ? '#94a3b8' : '#d1d5db'}`,
-                  background: structureFilter === key ? '#f1f5f9' : '#fff',
-                  borderRadius: 999,
-                  padding: '4px 10px',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: '#334155',
-                  cursor: 'pointer',
-                }}
-              >
-                {label}
-              </button>
-            ))}
+            {/* 省庁 */}
+            <FilterRow label="省庁">
+              <MultiSelectDropdown
+                options={ministries}
+                selected={selectedMinistries}
+                onChange={setSelectedMinistries}
+                allLabel="全府省庁"
+              />
+            </FilterRow>
+
+            {/* 事業名 */}
+            <FilterRow label="事業">
+              <FilterTextInput value={filterProjectName} onChange={setFilterProjectName} placeholder="事業名（部分一致）" />
+            </FilterRow>
+
+            {/* 担当組織 */}
+            <FilterRow label="組織">
+              <FilterTextInput value={filterBureau} onChange={setFilterBureau} placeholder="担当組織（局・部・課）" />
+            </FilterRow>
+
+            {/* MinMax 4種 */}
+            <FilterRow label="予算">
+              <MinMaxInput minVal={filterBudgetMin} maxVal={filterBudgetMax} onMinChange={setFilterBudgetMin} onMaxChange={setFilterBudgetMax} />
+            </FilterRow>
+            <FilterRow label="執行">
+              <MinMaxInput minVal={filterExecutionMin} maxVal={filterExecutionMax} onMinChange={setFilterExecutionMin} onMaxChange={setFilterExecutionMax} />
+            </FilterRow>
+            <FilterRow label="直接">
+              <MinMaxInput minVal={filterDirectMin} maxVal={filterDirectMax} onMinChange={setFilterDirectMin} onMaxChange={setFilterDirectMax} />
+            </FilterRow>
+            <FilterRow label="支出計">
+              <MinMaxInput minVal={filterTotalExpenseMin} maxVal={filterTotalExpenseMax} onMinChange={setFilterTotalExpenseMin} onMaxChange={setFilterTotalExpenseMax} />
+            </FilterRow>
+
+            {/* 構造 */}
+            <FilterRow label="構造">
+              <MultiSelectDropdown
+                options={['別財源あり', '合流あり', '制度フローのみ']}
+                selected={selectedStructures}
+                onChange={setSelectedStructures}
+                allLabel="すべて"
+              />
+            </FilterRow>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── 中部: スクロールテーブル ── */}
