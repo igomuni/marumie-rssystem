@@ -89,10 +89,6 @@ function SubcontractsPageInner() {
   const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
   const ministryButtonRef = useRef<HTMLButtonElement>(null);
   const ministryDropdownRef = useRef<HTMLDivElement>(null);
-  // テーブル横スクロール同期用
-  const topScrollRef = useRef<HTMLDivElement>(null);
-  const bottomScrollRef = useRef<HTMLDivElement>(null);
-  const scrollSyncFlag = useRef(false);
   const [page, setPage] = useState(1);
 
   const ministries = useMemo(() => {
@@ -105,31 +101,6 @@ function SubcontractsPageInner() {
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ja'))
       .map(([m]) => m);
   }, [graphs]);
-
-  // 上下の横スクロールバーを同期
-  useEffect(() => {
-    const top = topScrollRef.current;
-    const bottom = bottomScrollRef.current;
-    if (!top || !bottom) return;
-    const onTop = () => {
-      if (scrollSyncFlag.current) return;
-      scrollSyncFlag.current = true;
-      bottom.scrollLeft = top.scrollLeft;
-      requestAnimationFrame(() => { scrollSyncFlag.current = false; });
-    };
-    const onBottom = () => {
-      if (scrollSyncFlag.current) return;
-      scrollSyncFlag.current = true;
-      top.scrollLeft = bottom.scrollLeft;
-      requestAnimationFrame(() => { scrollSyncFlag.current = false; });
-    };
-    top.addEventListener('scroll', onTop);
-    bottom.addEventListener('scroll', onBottom);
-    return () => {
-      top.removeEventListener('scroll', onTop);
-      bottom.removeEventListener('scroll', onBottom);
-    };
-  }, []);
 
   // ドロップダウン外クリックで閉じる
   useEffect(() => {
@@ -326,57 +297,63 @@ function SubcontractsPageInner() {
   const FIXED_TOTAL = COL_WIDTHS.filter((w): w is number => w !== null).reduce((s, w) => s + w, 0);
   const MIN_TABLE_WIDTH = FIXED_TOTAL + 240 * 2; // auto列を最低240pxずつ確保
 
-  // 集計
-  const totalSeparateOrigin = graphs.filter(g => g.hasSeparateOrigin).length;
-  const totalMerge = graphs.filter(g => g.hasMerge).length;
-  const totalInstitutional = graphs.filter(g => g.isInstitutionalFlowOnly).length;
-
   return (
     <div style={{ height: '100vh', background: '#f9fafb', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* ── 上部: ヘッダー + フィルタ ── */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '16px', flexShrink: 0 }}>
-        <div style={{ maxWidth: 1600, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <Link href="/" style={{ color: '#2563eb', fontSize: 13, textDecoration: 'none' }}>← トップ</Link>
-            <h1 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: 0 }}>
-              再委託構造ブラウザ
-            </h1>
-            {/* 年度切替（/sankey-svg と同じスタイル） */}
-            <div style={{ position: 'relative', marginLeft: 4 }}>
-              <select
-                value={year}
-                onChange={(e) => { const y = Number(e.target.value); setYear(y); router.replace(`/subcontracts?year=${y}`); }}
-                style={{
-                  fontSize: 13,
-                  border: '1px solid #e0e0e0',
-                  borderRadius: 8,
-                  padding: '6px 28px 6px 10px',
-                  background: 'rgba(255,255,255,0.95)',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                  color: '#333',
-                  cursor: 'pointer',
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                }}
-              >
-                <option value={2025}>2025年度</option>
-                <option value={2024}>2024年度</option>
-              </select>
-              <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                <path d="M7 10l5 5 5-5z"/>
-              </svg>
-            </div>
-          </div>
-          <p style={{ fontSize: 13, color: '#6b7280', marginTop: 4, marginBottom: 0 }}>
-            {graphs.length.toLocaleString()}事業 ／ 別財源 {totalSeparateOrigin.toLocaleString()} ／ 合流 {totalMerge.toLocaleString()} ／ 制度フロー {totalInstitutional.toLocaleString()}
-          </p>
-        </div>
-      </div>
-
       {/* ── 上部: フィルタ群 ── */}
       <div style={{ flexShrink: 0, padding: '12px 16px', maxWidth: 1600, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
         {/* コントロール（/sankey-svg と同じトーン） */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          {/* トップへ戻る（矢印のみ） */}
+          <Link
+            href="/"
+            aria-label="トップへ戻る"
+            title="トップへ戻る"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              border: '1px solid #e0e0e0',
+              background: 'rgba(255,255,255,0.95)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              color: '#666',
+              textDecoration: 'none',
+              flexShrink: 0,
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+          </Link>
+
+          {/* 年度切替 */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <select
+              value={year}
+              onChange={(e) => { const y = Number(e.target.value); setYear(y); router.replace(`/subcontracts?year=${y}`); }}
+              style={{
+                fontSize: 13,
+                border: '1px solid #e0e0e0',
+                borderRadius: 8,
+                padding: '6px 28px 6px 10px',
+                background: 'rgba(255,255,255,0.95)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                color: '#333',
+                cursor: 'pointer',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+              }}
+            >
+              <option value={2025}>2025年度</option>
+              <option value={2024}>2024年度</option>
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+              <path d="M7 10l5 5 5-5z"/>
+            </svg>
+          </div>
+
           {/* 検索 */}
           <div style={{ position: 'relative', flex: 1, minWidth: 260 }}>
             <span aria-hidden="true" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
@@ -583,25 +560,16 @@ function SubcontractsPageInner() {
         {loading && <p style={{ color: '#6b7280', fontSize: 14 }}>読み込み中...</p>}
         {error && <p style={{ color: '#ef4444', fontSize: 14 }}>エラー: {error}</p>}
         {!loading && !error && (
-          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-            {/* 上部横スクロールバー（下のテーブルと同期） */}
-            <div
-              ref={topScrollRef}
-              style={{ overflowX: 'auto', overflowY: 'hidden', flexShrink: 0, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
-            >
-              <div style={{ minWidth: MIN_TABLE_WIDTH, height: 1 }} />
-            </div>
-            <div
-              ref={bottomScrollRef}
-              style={{
-                flex: 1,
-                minHeight: 0,
-                overflow: 'auto',
-                background: '#fff',
-                borderRadius: 8,
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              }}
-            >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              overflow: 'auto',
+              background: '#fff',
+              borderRadius: 8,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            }}
+          >
             <table style={{ width: '100%', minWidth: MIN_TABLE_WIDTH, borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
               <colgroup>
                 {COL_WIDTHS.map((w, i) => (
@@ -740,7 +708,6 @@ function SubcontractsPageInner() {
                 ))}
               </tbody>
             </table>
-            </div>
           </div>
         )}
       </div>
