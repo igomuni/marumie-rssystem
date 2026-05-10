@@ -89,6 +89,10 @@ function SubcontractsPageInner() {
   const [ministryDropdownRect, setMinistryDropdownRect] = useState<{ top: number; left: number; width: number; maxHeight: number } | null>(null);
   const ministryButtonRef = useRef<HTMLButtonElement>(null);
   const ministryDropdownRef = useRef<HTMLDivElement>(null);
+  // テーブル横スクロール同期用
+  const topScrollRef = useRef<HTMLDivElement>(null);
+  const bottomScrollRef = useRef<HTMLDivElement>(null);
+  const scrollSyncFlag = useRef(false);
   const [page, setPage] = useState(1);
 
   const ministries = useMemo(() => {
@@ -101,6 +105,31 @@ function SubcontractsPageInner() {
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ja'))
       .map(([m]) => m);
   }, [graphs]);
+
+  // 上下の横スクロールバーを同期
+  useEffect(() => {
+    const top = topScrollRef.current;
+    const bottom = bottomScrollRef.current;
+    if (!top || !bottom) return;
+    const onTop = () => {
+      if (scrollSyncFlag.current) return;
+      scrollSyncFlag.current = true;
+      bottom.scrollLeft = top.scrollLeft;
+      requestAnimationFrame(() => { scrollSyncFlag.current = false; });
+    };
+    const onBottom = () => {
+      if (scrollSyncFlag.current) return;
+      scrollSyncFlag.current = true;
+      top.scrollLeft = bottom.scrollLeft;
+      requestAnimationFrame(() => { scrollSyncFlag.current = false; });
+    };
+    top.addEventListener('scroll', onTop);
+    bottom.addEventListener('scroll', onBottom);
+    return () => {
+      top.removeEventListener('scroll', onTop);
+      bottom.removeEventListener('scroll', onBottom);
+    };
+  }, []);
 
   // ドロップダウン外クリックで閉じる
   useEffect(() => {
@@ -245,8 +274,10 @@ function SubcontractsPageInner() {
     whiteSpace: 'nowrap',
     cursor: 'pointer',
     userSelect: 'none',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    background: '#f9fafb',
+    position: 'sticky',
+    top: 0,
+    zIndex: 2,
   };
   const tdNumStyle: React.CSSProperties = {
     padding: '8px 8px',
@@ -266,30 +297,31 @@ function SubcontractsPageInner() {
 
   // 列幅: 事業名(idx 1) と 担当組織(idx 3) は null=auto で残り幅を分配。
   // ウィンドウ幅に合わせて伸縮し、長文は truncate で吸収。
+  // 数値列は列名（fontSize 11 + ↕ アイコン）が切れない最低幅を確保。
   const COL_WIDTHS: (number | null)[] = [
-    50,    // PID
+    56,    // PID
     null,  // 事業名 (auto, truncate)
-    88,    // 省庁
+    72,    // 省庁
     null,  // 担当組織 (auto, truncate)
-    72,    // 会計区分
-    80,    // 予算額
-    80,    // 執行額
-    96,    // 直接支出合計
+    80,    // 会計区分
+    88,    // 予算額
+    88,    // 執行額
+    104,   // 直接支出合計
     96,    // 支出額合計
-    88,    // 支出計−直接
-    88,    // 執行−直接
-    60,    // ブロック
-    64,    // 直接支出
-    56,    // 再委託
-    64,    // 間接経費
-    56,    // 別財源
-    64,    // 支出先
-    52,    // 階層
-    52,    // 分岐
-    60,    // 最大分岐
-    52,    // 合流
-    60,    // 最大合流
-    76,    // 構造
+    100,   // 支出計−直接
+    96,    // 執行−直接
+    76,    // ブロック
+    80,    // 直接支出
+    68,    // 再委託
+    80,    // 間接経費
+    68,    // 別財源
+    68,    // 支出先
+    56,    // 階層
+    56,    // 分岐
+    80,    // 最大分岐
+    56,    // 合流
+    80,    // 最大合流
+    64,    // 構造
   ];
   const FIXED_TOTAL = COL_WIDTHS.filter((w): w is number => w !== null).reduce((s, w) => s + w, 0);
   const MIN_TABLE_WIDTH = FIXED_TOTAL + 240 * 2; // auto列を最低240pxずつ確保
@@ -548,7 +580,15 @@ function SubcontractsPageInner() {
         {loading && <p style={{ color: '#6b7280', fontSize: 14 }}>読み込み中...</p>}
         {error && <p style={{ color: '#ef4444', fontSize: 14 }}>エラー: {error}</p>}
         {!loading && !error && (
-          <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <>
+          {/* 上部横スクロールバー（下のテーブルと同期） */}
+          <div
+            ref={topScrollRef}
+            style={{ overflowX: 'auto', overflowY: 'hidden', marginBottom: 4, borderRadius: 8 }}
+          >
+            <div style={{ minWidth: MIN_TABLE_WIDTH, height: 1 }} />
+          </div>
+          <div ref={bottomScrollRef} style={{ overflowX: 'auto', background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
             <table style={{ width: '100%', minWidth: MIN_TABLE_WIDTH, borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
               <colgroup>
                 {COL_WIDTHS.map((w, i) => (
@@ -688,6 +728,7 @@ function SubcontractsPageInner() {
               </tbody>
             </table>
           </div>
+          </>
         )}
 
         {/* ページネーション */}
