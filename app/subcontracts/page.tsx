@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo, Suspense, type CSSProperties, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, useRef, Suspense, type CSSProperties, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { FilterRow } from '@/components/filters/FilterRow';
 import { FilterTextInput } from '@/components/filters/FilterTextInput';
 import { MinMaxInput } from '@/components/filters/MinMaxInput';
 import { MultiSelectDropdown } from '@/components/filters/MultiSelectDropdown';
+import { ProjectReferenceLinks } from '@/components/subcontracts/ProjectReferenceLinks';
 import { formatYen, parseAmountToYen } from '@/app/lib/format/yen';
 import { accountCategoryLabel, bureauLeaf } from '@/app/lib/subcontracts/labels';
 import type { SubcontractGraph } from '@/types/subcontract';
@@ -45,13 +46,80 @@ const STRING_SORT_KEYS: ReadonlySet<SortKey> = new Set<SortKey>([
 type SortDir = 'asc' | 'desc';
 
 const PAGE_SIZE = 50;
+const COLUMN_WIDTH_STORAGE_KEY = 'subcontracts-column-widths';
+const DEFAULT_COL_WIDTHS = [
+  56,    // PID
+  280,   // 事業名
+  72,    // 省庁
+  240,   // 担当組織
+  80,    // 会計区分
+  88,    // 予算額
+  88,    // 執行額
+  104,   // 直接支出合計
+  96,    // 支出額合計
+  100,   // 支出計−直接
+  96,    // 執行−直接
+  76,    // ブロック
+  80,    // 直接支出
+  68,    // 再委託
+  80,    // 間接経費
+  68,    // 別財源
+  68,    // 支出先
+  56,    // 階層
+  56,    // 分岐
+  80,    // 最大分岐
+  56,    // 合流
+  80,    // 最大合流
+  64,    // 構造
+];
+const MIN_COL_WIDTHS = [
+  48,
+  160,
+  60,
+  160,
+  72,
+  76,
+  76,
+  96,
+  88,
+  92,
+  88,
+  68,
+  72,
+  60,
+  72,
+  60,
+  60,
+  48,
+  48,
+  72,
+  48,
+  72,
+  56,
+];
+
+function loadColumnWidths(): number[] {
+  if (typeof window === 'undefined') return DEFAULT_COL_WIDTHS;
+  try {
+    const saved = window.localStorage.getItem(COLUMN_WIDTH_STORAGE_KEY);
+    if (!saved) return DEFAULT_COL_WIDTHS;
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed) || parsed.length !== DEFAULT_COL_WIDTHS.length) return DEFAULT_COL_WIDTHS;
+    return parsed.map((value, index) => {
+      const width = Number(value);
+      return Number.isFinite(width) ? Math.max(MIN_COL_WIDTHS[index], width) : DEFAULT_COL_WIDTHS[index];
+    });
+  } catch {
+    return DEFAULT_COL_WIDTHS;
+  }
+}
 
 function SubcontractsPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [year, setYear] = useState(() => {
-    const y = parseInt(searchParams.get('year') ?? '2024', 10);
-    return [2024, 2025].includes(y) ? y : 2024;
+    const y = parseInt(searchParams.get('year') ?? '2025', 10);
+    return [2024, 2025].includes(y) ? y : 2025;
   });
   const [graphs, setGraphs] = useState<SubcontractGraph[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,6 +148,9 @@ function SubcontractsPageInner() {
   // 折りたたみパネル
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [page, setPage] = useState(1);
+  const [columnWidths, setColumnWidths] = useState(loadColumnWidths);
+  const resizingColumnRef = useRef<{ index: number; startX: number; startWidth: number } | null>(null);
+  const savedColumnWidthsRef = useRef<string | null>(null);
 
   const ministries = useMemo(() => {
     const counts = new Map<string, number>();
@@ -112,6 +183,55 @@ function SubcontractsPageInner() {
       });
     return () => controller.abort();
   }, [year]);
+
+  useEffect(() => {
+    const serialized = JSON.stringify(columnWidths);
+    if (savedColumnWidthsRef.current === serialized) return;
+    const timer = window.setTimeout(() => {
+      try {
+        window.localStorage.setItem(COLUMN_WIDTH_STORAGE_KEY, serialized);
+        savedColumnWidthsRef.current = serialized;
+      } catch {
+        // Ignore persistence failures such as private mode, disabled storage, or quota issues.
+      }
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [columnWidths]);
+
+  useEffect(() => {
+    function onPointerMove(e: PointerEvent) {
+      const resizing = resizingColumnRef.current;
+      if (!resizing) return;
+      const nextWidth = Math.max(
+        MIN_COL_WIDTHS[resizing.index],
+        Math.round(resizing.startWidth + e.clientX - resizing.startX)
+      );
+      setColumnWidths((prev) => {
+        if (prev[resizing.index] === nextWidth) return prev;
+        const next = [...prev];
+        next[resizing.index] = nextWidth;
+        return next;
+      });
+    }
+
+    function onPointerUp() {
+      if (!resizingColumnRef.current) return;
+      resizingColumnRef.current = null;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, []);
 
   // 金額フィルタの解析
   const budgetMinYen = parseAmountToYen(filterBudgetMin);
@@ -261,11 +381,13 @@ function SubcontractsPageInner() {
   function SortHeader({
     sort,
     children,
+    columnIndex,
     align = 'left',
     title,
   }: {
     sort: SortKey;
     children: ReactNode;
+    columnIndex: number;
     align?: 'left' | 'right' | 'center';
     title?: string;
   }) {
@@ -282,7 +404,7 @@ function SubcontractsPageInner() {
             gap: 2,
             border: 0,
             background: 'transparent',
-            padding: 0,
+            padding: '0 8px 0 0',
             color: 'inherit',
             font: 'inherit',
             fontWeight: 'inherit',
@@ -292,6 +414,45 @@ function SubcontractsPageInner() {
           <span>{children}</span>
           <SortIndicator k={sort} />
         </button>
+        <button
+          type="button"
+          aria-label={`${children}列の幅を変更`}
+          title="列幅を変更"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            e.stopPropagation();
+            resizingColumnRef.current = {
+              index: columnIndex,
+              startX: e.clientX,
+              startWidth: columnWidths[columnIndex],
+            };
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+          }}
+          onDoubleClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setColumnWidths((prev) => {
+              const next = [...prev];
+              next[columnIndex] = DEFAULT_COL_WIDTHS[columnIndex];
+              return next;
+            });
+          }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: 10,
+            height: '100%',
+            border: 0,
+            borderRight: '1px solid transparent',
+            background: 'transparent',
+            cursor: 'col-resize',
+            padding: 0,
+          }}
+        />
       </th>
     );
   }
@@ -309,6 +470,7 @@ function SubcontractsPageInner() {
     position: 'sticky',
     top: 0,
     zIndex: 2,
+    overflow: 'hidden',
   };
   const tdNumStyle: CSSProperties = {
     padding: '8px 8px',
@@ -326,36 +488,7 @@ function SubcontractsPageInner() {
     whiteSpace: 'nowrap',
   };
 
-  // 列幅: 事業名(idx 1) と 担当組織(idx 3) は null=auto で残り幅を分配。
-  // ウィンドウ幅に合わせて伸縮し、長文は truncate で吸収。
-  // 数値列は列名（fontSize 11 + ↕ アイコン）が切れない最低幅を確保。
-  const COL_WIDTHS: (number | null)[] = [
-    56,    // PID
-    null,  // 事業名 (auto, truncate)
-    72,    // 省庁
-    null,  // 担当組織 (auto, truncate)
-    80,    // 会計区分
-    88,    // 予算額
-    88,    // 執行額
-    104,   // 直接支出合計
-    96,    // 支出額合計
-    100,   // 支出計−直接
-    96,    // 執行−直接
-    76,    // ブロック
-    80,    // 直接支出
-    68,    // 再委託
-    80,    // 間接経費
-    68,    // 別財源
-    68,    // 支出先
-    56,    // 階層
-    56,    // 分岐
-    80,    // 最大分岐
-    56,    // 合流
-    80,    // 最大合流
-    64,    // 構造
-  ];
-  const FIXED_TOTAL = COL_WIDTHS.filter((w): w is number => w !== null).reduce((s, w) => s + w, 0);
-  const MIN_TABLE_WIDTH = FIXED_TOTAL + 240 * 2; // auto列を最低240pxずつ確保
+  const tableWidth = columnWidths.reduce((sum, width) => sum + width, 0);
 
   return (
     <div style={{ height: '100vh', background: '#f9fafb', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -479,6 +612,24 @@ function SubcontractsPageInner() {
           <span style={{ fontSize: 12, color: '#6b7280', flexShrink: 0 }}>
             {filtered.length.toLocaleString()}件表示
           </span>
+          <button
+            type="button"
+            onClick={() => setColumnWidths(DEFAULT_COL_WIDTHS)}
+            title="列幅を初期値に戻す"
+            style={{
+              fontSize: 12,
+              border: '1px solid #e0e0e0',
+              borderRadius: 8,
+              padding: '6px 10px',
+              background: 'rgba(255,255,255,0.95)',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+              color: '#334155',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            列幅リセット
+          </button>
         </div>
 
         {/* 折りたたみフィルタパネル（/sankey-svg ライク） */}
@@ -567,37 +718,37 @@ function SubcontractsPageInner() {
               boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
             }}
           >
-            <table style={{ width: '100%', minWidth: MIN_TABLE_WIDTH, borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
+            <table style={{ width: tableWidth, minWidth: '100%', borderCollapse: 'collapse', fontSize: 12, tableLayout: 'fixed' }}>
               <colgroup>
-                {COL_WIDTHS.map((w, i) => (
-                  <col key={i} style={w !== null ? { width: w } : undefined} />
+                {columnWidths.map((width, i) => (
+                  <col key={i} style={{ width }} />
                 ))}
               </colgroup>
               <thead>
                 <tr style={{ background: '#f9fafb' }}>
-                  <SortHeader sort="projectId">PID</SortHeader>
-                  <SortHeader sort="projectName">事業名</SortHeader>
-                  <SortHeader sort="ministry">省庁</SortHeader>
-                  <SortHeader sort="bureau">担当組織</SortHeader>
-                  <SortHeader sort="accountCategory">会計区分</SortHeader>
-                  <SortHeader sort="budget" align="right">予算額</SortHeader>
-                  <SortHeader sort="execution" align="right">執行額</SortHeader>
-                  <SortHeader sort="directExpenseTotal" align="right">直接支出合計</SortHeader>
-                  <SortHeader sort="totalExpense" align="right">支出額合計</SortHeader>
-                  <SortHeader sort="totalMinusDirect" align="right" title="支出額合計 − 直接支出合計（再委託・別財源など下流ブロック分）">支出計−直接</SortHeader>
-                  <SortHeader sort="executionMinusDirect" align="right" title="執行額(2-1) − 直接支出合計(5-1)。間接経費分とほぼ一致するケースあり">執行−直接</SortHeader>
-                  <SortHeader sort="totalBlockCount" align="right">ブロック</SortHeader>
-                  <SortHeader sort="directBlockCount" align="right">直接支出</SortHeader>
-                  <SortHeader sort="subcontractBlockCount" align="right">再委託</SortHeader>
-                  <SortHeader sort="indirectCostCount" align="right">間接経費</SortHeader>
-                  <SortHeader sort="separateOriginCount" align="right">別財源</SortHeader>
-                  <SortHeader sort="totalRecipientCount" align="right">支出先</SortHeader>
-                  <SortHeader sort="maxDepth" align="right">階層</SortHeader>
-                  <SortHeader sort="branchingBlockCount" align="right">分岐</SortHeader>
-                  <SortHeader sort="maxBranchWidth" align="right">最大分岐</SortHeader>
-                  <SortHeader sort="mergeTargetCount" align="right">合流</SortHeader>
-                  <SortHeader sort="maxMergeWidth" align="right">最大合流</SortHeader>
-                  <SortHeader sort="institutional" align="center">構造</SortHeader>
+                  <SortHeader sort="projectId" columnIndex={0}>PID</SortHeader>
+                  <SortHeader sort="projectName" columnIndex={1}>事業名</SortHeader>
+                  <SortHeader sort="ministry" columnIndex={2}>省庁</SortHeader>
+                  <SortHeader sort="bureau" columnIndex={3}>担当組織</SortHeader>
+                  <SortHeader sort="accountCategory" columnIndex={4}>会計区分</SortHeader>
+                  <SortHeader sort="budget" columnIndex={5} align="right">予算額</SortHeader>
+                  <SortHeader sort="execution" columnIndex={6} align="right">執行額</SortHeader>
+                  <SortHeader sort="directExpenseTotal" columnIndex={7} align="right">直接支出合計</SortHeader>
+                  <SortHeader sort="totalExpense" columnIndex={8} align="right">支出額合計</SortHeader>
+                  <SortHeader sort="totalMinusDirect" columnIndex={9} align="right" title="支出額合計 − 直接支出合計（再委託・別財源など下流ブロック分）">支出計−直接</SortHeader>
+                  <SortHeader sort="executionMinusDirect" columnIndex={10} align="right" title="執行額(2-1) − 直接支出合計(5-1)。間接経費分とほぼ一致するケースあり">執行−直接</SortHeader>
+                  <SortHeader sort="totalBlockCount" columnIndex={11} align="right">ブロック</SortHeader>
+                  <SortHeader sort="directBlockCount" columnIndex={12} align="right">直接支出</SortHeader>
+                  <SortHeader sort="subcontractBlockCount" columnIndex={13} align="right">再委託</SortHeader>
+                  <SortHeader sort="indirectCostCount" columnIndex={14} align="right">間接経費</SortHeader>
+                  <SortHeader sort="separateOriginCount" columnIndex={15} align="right">別財源</SortHeader>
+                  <SortHeader sort="totalRecipientCount" columnIndex={16} align="right">支出先</SortHeader>
+                  <SortHeader sort="maxDepth" columnIndex={17} align="right">階層</SortHeader>
+                  <SortHeader sort="branchingBlockCount" columnIndex={18} align="right">分岐</SortHeader>
+                  <SortHeader sort="maxBranchWidth" columnIndex={19} align="right">最大分岐</SortHeader>
+                  <SortHeader sort="mergeTargetCount" columnIndex={20} align="right">合流</SortHeader>
+                  <SortHeader sort="maxMergeWidth" columnIndex={21} align="right">最大合流</SortHeader>
+                  <SortHeader sort="institutional" columnIndex={22} align="center">構造</SortHeader>
                 </tr>
               </thead>
               <tbody>
@@ -611,21 +762,26 @@ function SubcontractsPageInner() {
                   >
                     <td style={{ ...tdTextStyle, color: '#6b7280' }}>{g.projectId}</td>
                     <td style={tdTextStyle}>
-                      <Link
-                        href={`/subcontracts/${g.projectId}?year=${year}`}
-                        title={g.projectName}
-                        style={{
-                          color: '#2563eb',
-                          textDecoration: 'none',
-                          fontWeight: 500,
-                          display: 'block',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {g.projectName}
-                      </Link>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
+                        <Link
+                          href={`/subcontracts/${g.projectId}?year=${year}`}
+                          title={g.projectName}
+                          style={{
+                            color: '#2563eb',
+                            textDecoration: 'none',
+                            fontWeight: 500,
+                            flex: 1,
+                            minWidth: 0,
+                            display: 'block',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {g.projectName}
+                        </Link>
+                        <ProjectReferenceLinks projectId={g.projectId} projectName={g.projectName} year={year} compact />
+                      </div>
                     </td>
                     <td style={tdTextStyle} title={g.ministry}>{g.ministry}</td>
                     <td style={tdTextStyle} title={g.bureau || undefined}>

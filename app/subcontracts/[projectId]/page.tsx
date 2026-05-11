@@ -12,6 +12,7 @@ import type {
   FlowOrigin,
 } from '@/types/subcontract';
 import type { ProjectDetail } from '@/types/project-details';
+import { ProjectReferenceLinks } from '@/components/subcontracts/ProjectReferenceLinks';
 import {
   computeSubcontractLayout,
   backEdgePath,
@@ -245,6 +246,7 @@ function SidePane({
   graph,
   projectDetail,
   orgChain,
+  year,
   activeTab,
   onChangeTab,
   onSelectBlock,
@@ -254,6 +256,7 @@ function SidePane({
   graph: SubcontractGraph;
   projectDetail: ProjectDetail | null;
   orgChain: string[];
+  year: number;
   activeTab: PaneTab;
   onChangeTab: (tab: PaneTab) => void;
   onSelectBlock: (block: BlockNode) => void;
@@ -349,42 +352,30 @@ function SidePane({
       <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 2 }}>
       {/* 事業ヘッダー（常時表示） */}
       <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
-        <div style={{
-          display: 'inline-block',
-          fontSize: 11,
-          fontWeight: 700,
-          padding: '2px 6px',
-          borderRadius: 4,
-          background: '#e7f6ec',
-          color: '#2d7d46',
-          marginBottom: 6,
-        }}>
-          事業 / PID {graph.projectId}
-        </div>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', lineHeight: 1.45 }}>
-          {graph.projectName}
-        </div>
-        <div style={{ fontSize: 11, color: '#6b7280', marginTop: 4, lineHeight: 1.55 }}>
-          {graph.ministry}
-          {orgChain.length > 0 && <> ／ {orgChain.join(' / ')}</>}
-          {!orgChain.length && projectDetail?.bureau && <> ／ {projectDetail.bureau}</>}
-        </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 6, fontSize: 11, color: '#475569' }}>
-          <span>予算 <strong style={{ color: '#111827' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</strong></span>
-          <span>執行 <strong style={{ color: '#111827' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</strong></span>
-        </div>
-        {projectDetail?.majorExpense && (
-          <div style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: 10, color: '#64748b', fontWeight: 700, marginBottom: 2 }}>主要経費</div>
-            <div style={{ fontSize: 11, color: '#111827', lineHeight: 1.5 }}>{projectDetail.majorExpense}</div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
+              {graph.projectName}
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#222', marginTop: 3 }}>
+              <span style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', fontWeight: 400, marginRight: 4 }}>予算</span>
+              {graph.budget > 0 ? formatYen(graph.budget) : '—'}
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 2, fontSize: PANEL_META_FONT_PX, color: '#777' }}>
+              <span>執行 <strong style={{ color: '#111827' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</strong></span>
+            </div>
           </div>
-        )}
-
-        {/* 構造バッジ群 */}
-        <div style={{ display: 'flex', gap: 4, marginTop: 8, flexWrap: 'wrap', fontSize: 10, color: '#475569' }}>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6' }}>最大{graph.maxDepth}層</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6' }}>ブロック {graph.totalBlockCount}</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
+          <ProjectReferenceLinks projectId={graph.projectId} projectName={graph.projectName} year={year} compact />
+        </div>
+        <div style={{ display: 'flex', gap: 5, marginTop: 8, flexWrap: 'wrap', alignItems: 'center', fontSize: PANEL_META_FONT_PX }}>
+          <span style={{ background: '#2d7d46', color: '#fff', padding: '2px 7px', borderRadius: 10, fontWeight: 500 }}>事業</span>
+          <span style={{ color: '#aaa' }}>PID: {graph.projectId}</span>
+          <span style={{ color: '#666' }}>{graph.ministry}</span>
+          {orgChain.length > 0 && <span style={{ color: '#777' }}>{orgChain.join(' / ')}</span>}
+          {!orgChain.length && projectDetail?.bureau && <span style={{ color: '#777' }}>{projectDetail.bureau}</span>}
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>最大{graph.maxDepth}層</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>ブロック {graph.totalBlockCount}</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE, fontWeight: 700 }}>直接 {graph.directBlockCount}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#fbe3d7', color: '#b45309', fontWeight: 700 }}>再委託 {graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount}</span>
           {graph.separateOriginCount > 0 && (
@@ -408,6 +399,12 @@ function SidePane({
             </span>
           )}
         </div>
+        {projectDetail?.majorExpense && (
+          <div style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: 10, color: '#64748b', fontWeight: 700, marginBottom: 2 }}>主要経費</div>
+            <div style={{ fontSize: 11, color: '#111827', lineHeight: 1.5 }}>{projectDetail.majorExpense}</div>
+          </div>
+        )}
 
       </div>
 
@@ -898,7 +895,8 @@ function SubcontractDetailPageInner() {
   const router = useRouter();
 
   const projectId = params.projectId;
-  const year = parseInt(searchParams.get('year') ?? '2024', 10);
+  const parsedYear = Number.parseInt(searchParams.get('year') ?? '2025', 10);
+  const year = parsedYear === 2024 || parsedYear === 2025 ? parsedYear : 2025;
 
   const [graph, setGraph] = useState<SubcontractGraph | null>(null);
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | null>(null);
@@ -1621,6 +1619,7 @@ function SubcontractDetailPageInner() {
           graph={graph}
           projectDetail={projectDetail}
           orgChain={visibleOrgChain}
+          year={year}
           activeTab={activeTab}
           onChangeTab={setActiveTab}
           onSelectBlock={handleSelectFromList}
