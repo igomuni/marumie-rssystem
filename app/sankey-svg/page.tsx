@@ -86,6 +86,14 @@ const FONT_SCALE_REFERENCE_PX = 12;
 const BASE_FONT_PX_DEFAULT = 12;
 const BASE_FONT_PX_MIN = 8;
 const BASE_FONT_PX_MAX = 24;
+const SIDE_PANEL_WIDTH_DEFAULT = 310;
+const SIDE_PANEL_WIDTH_MIN = 200;
+const SIDE_PANEL_WIDTH_MAX = 800;
+const PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT = 72;
+const PROJECT_OVERVIEW_PREVIEW_HEIGHT_MIN = 24;
+const PROJECT_OVERVIEW_PREVIEW_HEIGHT_MAX = 600;
+const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
+const HOVER_ENTER_DELAY_MS = 220;
 const FIT_TOP_PAD_PX = 32;
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
@@ -207,9 +215,10 @@ export default function RealDataSankeyPage() {
   const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-  const [sidePanelWidth, setSidePanelWidth] = useState(310);
+  const [sidePanelWidth, setSidePanelWidth] = useState(SIDE_PANEL_WIDTH_DEFAULT);
   const [isResizingSidePanel, setIsResizingSidePanel] = useState(false);
   const sidePanelResizeRef = useRef<{ startX: number; startW: number } | null>(null);
+  const [isResizingOverview, setIsResizingOverview] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -485,9 +494,9 @@ export default function RealDataSankeyPage() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
-  const [isWheelActive, setIsWheelActive] = useState(false);
-  const wheelTimerRef = useRef<number | null>(null);
-  const suppressHoverPopup = isPanning || isWheelActive;
+  const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
+  const hoverSuppressTimerRef = useRef<number | null>(null);
+  const suppressHoverPopup = isPanning || isHoverSuppressed;
   const [hoveredNodeStable, setHoveredNodeStable] = useState<LayoutNode | null>(null);
   const [hoveredLinkStable, setHoveredLinkStable] = useState<LayoutLink | null>(null);
   const hoverEnterTimerRef = useRef<number | null>(null);
@@ -505,8 +514,61 @@ export default function RealDataSankeyPage() {
     hoverEnterTimerRef.current = window.setTimeout(() => {
       setHoveredNodeStable(hoveredNodeRaw);
       setHoveredLinkStable(hoveredLinkRaw);
-    }, 220);
+    }, HOVER_ENTER_DELAY_MS);
+    return () => {
+      if (hoverEnterTimerRef.current) {
+        window.clearTimeout(hoverEnterTimerRef.current);
+        hoverEnterTimerRef.current = null;
+      }
+    };
   }, [hoveredNodeRaw, hoveredLinkRaw]);
+  // hoverSuppressTimerRef のアンマウントクリア
+  useEffect(() => () => {
+    if (hoverSuppressTimerRef.current) {
+      window.clearTimeout(hoverSuppressTimerRef.current);
+      hoverSuppressTimerRef.current = null;
+    }
+  }, []);
+  // サイドパネル幅ドラッグリスナ — アンマウントやドラッグ終了時に確実に剥がす
+  useEffect(() => {
+    if (!isResizingSidePanel) return;
+    const onMove = (ev: MouseEvent) => {
+      const s = sidePanelResizeRef.current;
+      if (!s) return;
+      const next = Math.max(SIDE_PANEL_WIDTH_MIN, Math.min(SIDE_PANEL_WIDTH_MAX, s.startW + (ev.clientX - s.startX)));
+      setSidePanelWidth(next);
+    };
+    const onUp = () => {
+      sidePanelResizeRef.current = null;
+      setIsResizingSidePanel(false);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [isResizingSidePanel]);
+  // 事業概要プレビュー高さドラッグリスナ
+  useEffect(() => {
+    if (!isResizingOverview) return;
+    const onMove = (ev: MouseEvent) => {
+      const s = overviewResizeRef.current;
+      if (!s) return;
+      const next = Math.max(PROJECT_OVERVIEW_PREVIEW_HEIGHT_MIN, Math.min(PROJECT_OVERVIEW_PREVIEW_HEIGHT_MAX, s.startH + (ev.clientY - s.startY)));
+      setProjectOverviewPreviewHeight(next);
+    };
+    const onUp = () => {
+      overviewResizeRef.current = null;
+      setIsResizingOverview(false);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [isResizingOverview]);
   const hoveredLink = suppressHoverPopup ? null : hoveredLinkStable;
   const hoveredNode = suppressHoverPopup ? null : hoveredNodeStable;
   const panOrigin = useRef({ x: 0, y: 0 });
@@ -679,9 +741,9 @@ export default function RealDataSankeyPage() {
   const handleWheel = useCallback((e: WheelEvent) => {
     if (isOverlayControlTarget(e.target)) return;
     e.preventDefault();
-    setIsWheelActive(true);
-    if (wheelTimerRef.current) window.clearTimeout(wheelTimerRef.current);
-    wheelTimerRef.current = window.setTimeout(() => setIsWheelActive(false), 500);
+    setIsHoverSuppressed(true);
+    if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
+    hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
     const el = containerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -740,9 +802,9 @@ export default function RealDataSankeyPage() {
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
     // パン終了直後のカーソル直下ノードへの瞬間ハイライトを避けるためにクールダウン
-    setIsWheelActive(true);
-    if (wheelTimerRef.current) window.clearTimeout(wheelTimerRef.current);
-    wheelTimerRef.current = window.setTimeout(() => setIsWheelActive(false), 500);
+    setIsHoverSuppressed(true);
+    if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
+    hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
   }, []);
 
   // Converge on fit zoom accounting for label shifts (shifts grow as zoom shrinks → iterate)
@@ -1337,7 +1399,7 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, graphData, filtered, projectRecipientCount]);
 
   const [isProjectDetailExpanded, setIsProjectDetailExpanded] = useState(false);
-  const [projectOverviewPreviewHeight, setProjectOverviewPreviewHeight] = useState(72); // 折りたたみ時プレビュー高さ(px)
+  const [projectOverviewPreviewHeight, setProjectOverviewPreviewHeight] = useState(PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT);
   const overviewResizeRef = useRef<{ startY: number; startH: number } | null>(null);
   const [projectDetailCache, setProjectDetailCache] = useState<Map<string, ProjectDetail | null>>(new Map());
   const [panelTab, setPanelTab] = useState<'ministry' | 'project' | 'recipient'>('ministry');
@@ -2478,22 +2540,8 @@ export default function RealDataSankeyPage() {
                 e.preventDefault();
                 sidePanelResizeRef.current = { startX: e.clientX, startW: sidePanelWidth };
                 setIsResizingSidePanel(true);
-                const onMove = (ev: MouseEvent) => {
-                  const s = sidePanelResizeRef.current;
-                  if (!s) return;
-                  const next = Math.max(200, Math.min(800, s.startW + (ev.clientX - s.startX)));
-                  setSidePanelWidth(next);
-                };
-                const onUp = () => {
-                  sidePanelResizeRef.current = null;
-                  setIsResizingSidePanel(false);
-                  window.removeEventListener('mousemove', onMove);
-                  window.removeEventListener('mouseup', onUp);
-                };
-                window.addEventListener('mousemove', onMove);
-                window.addEventListener('mouseup', onUp);
               }}
-              onDoubleClick={() => setSidePanelWidth(310)}
+              onDoubleClick={() => setSidePanelWidth(SIDE_PANEL_WIDTH_DEFAULT)}
               style={{
                 position: 'absolute', right: -3, top: 0, width: 6, height: '100%',
                 cursor: 'ew-resize', zIndex: 26,
@@ -2714,21 +2762,9 @@ export default function RealDataSankeyPage() {
                           onMouseDown={e => {
                             e.preventDefault();
                             overviewResizeRef.current = { startY: e.clientY, startH: projectOverviewPreviewHeight };
-                            const onMove = (ev: MouseEvent) => {
-                              const s = overviewResizeRef.current;
-                              if (!s) return;
-                              const next = Math.max(24, Math.min(600, s.startH + (ev.clientY - s.startY)));
-                              setProjectOverviewPreviewHeight(next);
-                            };
-                            const onUp = () => {
-                              overviewResizeRef.current = null;
-                              window.removeEventListener('mousemove', onMove);
-                              window.removeEventListener('mouseup', onUp);
-                            };
-                            window.addEventListener('mousemove', onMove);
-                            window.addEventListener('mouseup', onUp);
+                            setIsResizingOverview(true);
                           }}
-                          onDoubleClick={() => setProjectOverviewPreviewHeight(72)}
+                          onDoubleClick={() => setProjectOverviewPreviewHeight(PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT)}
                           style={{
                             height: 10,  cursor: 'ns-resize',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
