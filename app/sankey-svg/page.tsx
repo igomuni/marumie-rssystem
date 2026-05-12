@@ -60,27 +60,40 @@ const SCREEN_HORIZONTAL_FIT_RATIO = 0.82;
 const E2E_TEST_IDS_ENABLED = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_PLAYWRIGHT === '1';
 const testId = (id: string): string | undefined => E2E_TEST_IDS_ENABLED ? id : undefined;
 
-const MAP_LABEL_FONT_PX = 11;
-const MAP_LABEL_SLOT_PX = 12;
-const MAP_LABEL_VISIBLE_MIN_H_PX = 11;
+const MAP_LABEL_FONT_PX_DEFAULT = 11;
+const MAP_LABEL_SLOT_PX_DEFAULT = 12;
+const MAP_LABEL_VISIBLE_MIN_H_PX_DEFAULT = 11;
 const ZOOM_MIN_ABS = 0.05;
 const ZOOM_MAX_ABS = 20;
 const ZOOM_MIN_MULTIPLIER = 0.25;
 const ZOOM_MAX_MULTIPLIER = 30;
-const COLUMN_LABEL_FONT_PX = 12;
-const COLUMN_AMOUNT_FONT_PX = 11;
-const SEARCH_FONT_PX = 14;
-const CONTROL_FONT_PX = 13;
-const CONTROL_SMALL_FONT_PX = 12;
-const META_FONT_PX = 11;
-const PANEL_TITLE_FONT_PX = 14;
-const PANEL_PRIMARY_VALUE_FONT_PX = 15;
-const PANEL_LIST_NAME_FONT_PX = 12;
-const PANEL_LIST_VALUE_FONT_PX = 12;
-const PANEL_META_FONT_PX = 12;
-const TOOLTIP_TITLE_FONT_PX = 12;
-const TOOLTIP_VALUE_FONT_PX = 11;
-const TOOLTIP_META_FONT_PX = 10;
+const COLUMN_LABEL_FONT_PX_DEFAULT = 12;
+const COLUMN_AMOUNT_FONT_PX_DEFAULT = 11;
+const SEARCH_FONT_PX_DEFAULT = 14;
+const CONTROL_FONT_PX_DEFAULT = 13;
+const CONTROL_SMALL_FONT_PX_DEFAULT = 12;
+const META_FONT_PX_DEFAULT = 11;
+const PANEL_TITLE_FONT_PX_DEFAULT = 14;
+const PANEL_PRIMARY_VALUE_FONT_PX_DEFAULT = 15;
+const PANEL_LIST_NAME_FONT_PX_DEFAULT = 12;
+const PANEL_LIST_VALUE_FONT_PX_DEFAULT = 12;
+const PANEL_META_FONT_PX_DEFAULT = 12;
+const TOOLTIP_TITLE_FONT_PX_DEFAULT = 12;
+const TOOLTIP_VALUE_FONT_PX_DEFAULT = 11;
+const TOOLTIP_META_FONT_PX_DEFAULT = 10;
+// フォントスケールの基準値（baseFontPx ÷ FONT_SCALE_REFERENCE_PX で全フォントを比例拡縮）
+const FONT_SCALE_REFERENCE_PX = 12;
+const BASE_FONT_PX_DEFAULT = 12;
+const BASE_FONT_PX_MIN = 8;
+const BASE_FONT_PX_MAX = 24;
+const SIDE_PANEL_WIDTH_DEFAULT = 310;
+const SIDE_PANEL_WIDTH_MIN = 200;
+const SIDE_PANEL_WIDTH_MAX = 800;
+const PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT = 72;
+const PROJECT_OVERVIEW_PREVIEW_HEIGHT_MIN = 24;
+const PROJECT_OVERVIEW_PREVIEW_HEIGHT_MAX = 600;
+const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
+const HOVER_ENTER_DELAY_MS = 220;
 const FIT_TOP_PAD_PX = 32;
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
@@ -171,11 +184,12 @@ export default function RealDataSankeyPage() {
   const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
   const [pinnedRecipientId, setPinnedRecipientId] = useState<string | null>(null);
   const [pinnedMinistryName, setPinnedMinistryName] = useState<string | null>(null);
-  const [hoveredLink, setHoveredLink] = useState<LayoutLink | null>(null);
-  const [hoveredNode, setHoveredNode] = useState<LayoutNode | null>(null);
+  const [hoveredLinkRaw, setHoveredLink] = useState<LayoutLink | null>(null);
+  const [hoveredNodeRaw, setHoveredNode] = useState<LayoutNode | null>(null);
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
+  const [baseFontPx, setBaseFontPx] = useState(BASE_FONT_PX_DEFAULT);
   const [showLabels, setShowLabels] = useState(true);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [showAggProject, setShowAggProject] = useState(true);
@@ -201,6 +215,10 @@ export default function RealDataSankeyPage() {
   const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+  const [sidePanelWidth, setSidePanelWidth] = useState(SIDE_PANEL_WIDTH_DEFAULT);
+  const [isResizingSidePanel, setIsResizingSidePanel] = useState(false);
+  const sidePanelResizeRef = useRef<{ startX: number; startW: number } | null>(null);
+  const [isResizingOverview, setIsResizingOverview] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -476,6 +494,83 @@ export default function RealDataSankeyPage() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
+  const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
+  const hoverSuppressTimerRef = useRef<number | null>(null);
+  const suppressHoverPopup = isPanning || isHoverSuppressed;
+  const [hoveredNodeStable, setHoveredNodeStable] = useState<LayoutNode | null>(null);
+  const [hoveredLinkStable, setHoveredLinkStable] = useState<LayoutLink | null>(null);
+  const hoverEnterTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (hoverEnterTimerRef.current) {
+      window.clearTimeout(hoverEnterTimerRef.current);
+      hoverEnterTimerRef.current = null;
+    }
+    // 離脱は即時、進入は遅延（マウス通過時の意図しないポップアップ抑制）
+    if (hoveredNodeRaw === null && hoveredLinkRaw === null) {
+      setHoveredNodeStable(null);
+      setHoveredLinkStable(null);
+      return;
+    }
+    hoverEnterTimerRef.current = window.setTimeout(() => {
+      setHoveredNodeStable(hoveredNodeRaw);
+      setHoveredLinkStable(hoveredLinkRaw);
+    }, HOVER_ENTER_DELAY_MS);
+    return () => {
+      if (hoverEnterTimerRef.current) {
+        window.clearTimeout(hoverEnterTimerRef.current);
+        hoverEnterTimerRef.current = null;
+      }
+    };
+  }, [hoveredNodeRaw, hoveredLinkRaw]);
+  // hoverSuppressTimerRef のアンマウントクリア
+  useEffect(() => () => {
+    if (hoverSuppressTimerRef.current) {
+      window.clearTimeout(hoverSuppressTimerRef.current);
+      hoverSuppressTimerRef.current = null;
+    }
+  }, []);
+  // サイドパネル幅ドラッグリスナ — アンマウントやドラッグ終了時に確実に剥がす
+  useEffect(() => {
+    if (!isResizingSidePanel) return;
+    const onMove = (ev: MouseEvent) => {
+      const s = sidePanelResizeRef.current;
+      if (!s) return;
+      const next = Math.max(SIDE_PANEL_WIDTH_MIN, Math.min(SIDE_PANEL_WIDTH_MAX, s.startW + (ev.clientX - s.startX)));
+      setSidePanelWidth(next);
+    };
+    const onUp = () => {
+      sidePanelResizeRef.current = null;
+      setIsResizingSidePanel(false);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [isResizingSidePanel]);
+  // 事業概要プレビュー高さドラッグリスナ
+  useEffect(() => {
+    if (!isResizingOverview) return;
+    const onMove = (ev: MouseEvent) => {
+      const s = overviewResizeRef.current;
+      if (!s) return;
+      const next = Math.max(PROJECT_OVERVIEW_PREVIEW_HEIGHT_MIN, Math.min(PROJECT_OVERVIEW_PREVIEW_HEIGHT_MAX, s.startH + (ev.clientY - s.startY)));
+      setProjectOverviewPreviewHeight(next);
+    };
+    const onUp = () => {
+      overviewResizeRef.current = null;
+      setIsResizingOverview(false);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [isResizingOverview]);
+  const hoveredLink = suppressHoverPopup ? null : hoveredLinkStable;
+  const hoveredNode = suppressHoverPopup ? null : hoveredNodeStable;
   const panOrigin = useRef({ x: 0, y: 0 });
   const didPanRef = useRef(false);
   const offsetRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -559,6 +654,25 @@ export default function RealDataSankeyPage() {
   const SEARCH_BOX_RESERVE = svgWidth < 1100 ? 92 : 56;
   const searchBoxReserveRef = useRef(SEARCH_BOX_RESERVE);
   searchBoxReserveRef.current = SEARCH_BOX_RESERVE;
+  const fontScale = baseFontPx / FONT_SCALE_REFERENCE_PX;
+  const scaleFont = (px: number) => Math.max(1, Math.round(px * fontScale));
+  const MAP_LABEL_FONT_PX = scaleFont(MAP_LABEL_FONT_PX_DEFAULT);
+  const MAP_LABEL_SLOT_PX = scaleFont(MAP_LABEL_SLOT_PX_DEFAULT);
+  const MAP_LABEL_VISIBLE_MIN_H_PX = scaleFont(MAP_LABEL_VISIBLE_MIN_H_PX_DEFAULT);
+  const COLUMN_LABEL_FONT_PX = scaleFont(COLUMN_LABEL_FONT_PX_DEFAULT);
+  const COLUMN_AMOUNT_FONT_PX = scaleFont(COLUMN_AMOUNT_FONT_PX_DEFAULT);
+  const SEARCH_FONT_PX = scaleFont(SEARCH_FONT_PX_DEFAULT);
+  const CONTROL_FONT_PX = scaleFont(CONTROL_FONT_PX_DEFAULT);
+  const CONTROL_SMALL_FONT_PX = scaleFont(CONTROL_SMALL_FONT_PX_DEFAULT);
+  const META_FONT_PX = scaleFont(META_FONT_PX_DEFAULT);
+  const PANEL_TITLE_FONT_PX = scaleFont(PANEL_TITLE_FONT_PX_DEFAULT);
+  const PANEL_PRIMARY_VALUE_FONT_PX = scaleFont(PANEL_PRIMARY_VALUE_FONT_PX_DEFAULT);
+  const PANEL_LIST_NAME_FONT_PX = scaleFont(PANEL_LIST_NAME_FONT_PX_DEFAULT);
+  const PANEL_LIST_VALUE_FONT_PX = scaleFont(PANEL_LIST_VALUE_FONT_PX_DEFAULT);
+  const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
+  const TOOLTIP_TITLE_FONT_PX = scaleFont(TOOLTIP_TITLE_FONT_PX_DEFAULT);
+  const TOOLTIP_VALUE_FONT_PX = scaleFont(TOOLTIP_VALUE_FONT_PX_DEFAULT);
+  const TOOLTIP_META_FONT_PX = scaleFont(TOOLTIP_META_FONT_PX_DEFAULT);
   const mapLabelFontPx = MAP_LABEL_FONT_PX;
   const mapLabelSlotPx = MAP_LABEL_SLOT_PX;
   const mapLabelVisibleMinHPx = MAP_LABEL_VISIBLE_MIN_H_PX;
@@ -627,6 +741,9 @@ export default function RealDataSankeyPage() {
   const handleWheel = useCallback((e: WheelEvent) => {
     if (isOverlayControlTarget(e.target)) return;
     e.preventDefault();
+    setIsHoverSuppressed(true);
+    if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
+    hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
     const el = containerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -684,6 +801,11 @@ export default function RealDataSankeyPage() {
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
+    // 実際にパンが発生したときだけクールダウン（単なるクリックでは抑制しない）
+    if (!didPanRef.current) return;
+    setIsHoverSuppressed(true);
+    if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
+    hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
   }, []);
 
   // Converge on fit zoom accounting for label shifts (shifts grow as zoom shrinks → iterate)
@@ -1278,6 +1400,8 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, graphData, filtered, projectRecipientCount]);
 
   const [isProjectDetailExpanded, setIsProjectDetailExpanded] = useState(false);
+  const [projectOverviewPreviewHeight, setProjectOverviewPreviewHeight] = useState(PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT);
+  const overviewResizeRef = useRef<{ startY: number; startH: number } | null>(null);
   const [projectDetailCache, setProjectDetailCache] = useState<Map<string, ProjectDetail | null>>(new Map());
   const [panelTab, setPanelTab] = useState<'ministry' | 'project' | 'recipient'>('ministry');
   // Auto-select panel tab based on selected node type.
@@ -2193,7 +2317,7 @@ export default function RealDataSankeyPage() {
                 const amountLine = i === 2 && total != null
                   ? `${formatYen(total)} / ${formatYen(projectSpendingTotal)}`
                   : total != null ? formatYen(total) : '';
-                const labelBlockH = amountLine ? 36 : 20;
+                const labelBlockH = Math.round((amountLine ? 36 : 20) * fontScale);
                 const topNode = topNodeByCol[i];
                 const topNodeShift = topNode ? (nodeShiftInfo.get(topNode.id) ?? { cumShift: 0, topShift: 0 }) : null;
                 const topNodeScreenY = topNode
@@ -2228,7 +2352,7 @@ export default function RealDataSankeyPage() {
               show={showMinimap}
               onShow={() => setShowMinimap(true)}
               onHide={() => setShowMinimap(false)}
-              left={selectedNodeId !== null ? (isPanelCollapsed ? 26 : 318) : 8}
+              left={selectedNodeId !== null ? (isPanelCollapsed ? 26 : sidePanelWidth + 8) : 8}
               minimapW={MINIMAP_W}
               minimapH={minimapH}
               canvasRef={minimapRef}
@@ -2237,9 +2361,9 @@ export default function RealDataSankeyPage() {
             />
 
           {/* DOM tooltip — link hover */}
-          {hoveredLink && !hoveredNode && (() => {
-            const tipW = 220;
-            const tipH = 66;
+          {hoveredLink && !hoveredNode && !suppressHoverPopup && (() => {
+            const tipW = Math.round(220 * fontScale);
+            const tipH = Math.round(66 * fontScale);
             const lx = Math.max(4, Math.min(mousePos.x + 12, svgWidth - tipW - 4));
             const ly = Math.max(4, Math.min(mousePos.y - 10, svgHeight - tipH - 4));
             return (
@@ -2261,9 +2385,9 @@ export default function RealDataSankeyPage() {
             );
           })()}
           {/* DOM tooltip — node hover (sankey2スタイル: ノード上方・ノード色背景) */}
-          {hoveredNode && layout && (() => {
-            const GAP = 8;
-            const tipW = 240;
+          {hoveredNode && layout && !suppressHoverPopup && (() => {
+            const GAP = Math.round(8 * fontScale);
+            const tipW = Math.round(240 * fontScale);
             const nodeScreenH = (hoveredNode.y1 - hoveredNode.y0) * zoom;
             const screenCx = pan.x + getNodeScreenX0(hoveredNode) + screenNodeW / 2;
             const screenTop = pan.y + (MARGIN.top + hoveredNode.y0) * zoom;
@@ -2307,11 +2431,11 @@ export default function RealDataSankeyPage() {
             }
             // 予算・支出が両方ある場合は2列グリッドで横並び、片方だけなら1列
             const both = budget != null && spending != null;
-            const tipH = (both ? 88 : 76) + (hoveredAcLabel ? 18 : 0);
+            const tipH = Math.round(((both ? 88 : 76) + (hoveredAcLabel ? 18 : 0)) * fontScale);
             // 大ノード: マウスY連動（カーソル上方）/ 小ノード: ラベル上端-GAPにポップアップ底辺を固定
             const labelFontPx = mapLabelFontPx;
             const labelTopScreenY = screenTop + nodeScreenH / 2 - labelFontPx / 2;
-            const cursorGap = 12;
+            const cursorGap = Math.round(12 * fontScale);
             const lyAboveCursor = mousePos.y - tipH - cursorGap;
             const largeNode = nodeScreenH > tipH;
             const showBelow = labelTopScreenY - GAP < 40;
@@ -2395,16 +2519,40 @@ export default function RealDataSankeyPage() {
           data-pan-disabled="true"
           style={{
             position: 'fixed', left: 0, top: 0, height: '100%',
-            width: isPanelCollapsed ? 0 : 310,
+            width: isPanelCollapsed ? 0 : sidePanelWidth,
             background: '#fff',
             borderRight: isPanelCollapsed ? 'none' : '1px solid #e0e0e0',
             boxShadow: isPanelCollapsed ? 'none' : '2px 0 8px rgba(0,0,0,0.1)',
             zIndex: 25,
-            transition: 'width 0.2s ease',
+            transition: isResizingSidePanel ? 'none' : 'width 0.2s ease',
             overflow: 'visible',
             cursor: 'default',
           }}
         >
+          {/* Width resize handle — right edge */}
+          {!isPanelCollapsed && (
+            <div
+              data-pan-disabled="true"
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="サイドパネルの幅を変更"
+              title="ドラッグで幅を変更（ダブルクリックで既定値）"
+              onMouseDown={e => {
+                e.preventDefault();
+                sidePanelResizeRef.current = { startX: e.clientX, startW: sidePanelWidth };
+                setIsResizingSidePanel(true);
+              }}
+              onDoubleClick={() => setSidePanelWidth(SIDE_PANEL_WIDTH_DEFAULT)}
+              style={{
+                position: 'absolute', right: -3, top: 0, width: 6, height: '100%',
+                cursor: 'ew-resize', zIndex: 26,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                userSelect: 'none',
+              }}
+            >
+              <div style={{ width: 3, height: 32, borderRadius: 2, background: isResizingSidePanel ? '#a0a0a0' : 'transparent' }} />
+            </div>
+          )}
           {/* Collapse/expand toggle + close buttons on right edge */}
           <div
             data-pan-disabled="true"
@@ -2602,10 +2750,32 @@ export default function RealDataSankeyPage() {
                       </a>
                     </div>
                     {!isProjectDetailExpanded && cachedDetail?.overview && (
-                      <div style={{ padding: '0 14px 8px', fontSize: PANEL_META_FONT_PX, color: '#888', lineHeight: 1.5,
-                        maxHeight: '4.5em', overflowY: 'auto', wordBreak: 'break-all' }}>
-                        {cachedDetail.overview}
-                      </div>
+                      <>
+                        <div style={{ padding: '0 14px 0', fontSize: PANEL_META_FONT_PX, color: '#888', lineHeight: 1.5,
+                          height: projectOverviewPreviewHeight, overflowY: 'auto', wordBreak: 'break-all' }}>
+                          {cachedDetail.overview}
+                        </div>
+                        <div
+                          role="separator"
+                          aria-orientation="horizontal"
+                          aria-label="事業概要プレビューの高さを変更"
+                          title="ドラッグで高さを変更"
+                          onMouseDown={e => {
+                            e.preventDefault();
+                            overviewResizeRef.current = { startY: e.clientY, startH: projectOverviewPreviewHeight };
+                            setIsResizingOverview(true);
+                          }}
+                          onDoubleClick={() => setProjectOverviewPreviewHeight(PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT)}
+                          style={{
+                            height: 10,  cursor: 'ns-resize',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            userSelect: 'none',
+                          }}
+                          data-pan-disabled
+                        >
+                          <div style={{ width: 32, height: 3, borderRadius: 2, background: '#d0d0d0' }} />
+                        </div>
+                      </>
                     )}
                     {isProjectDetailExpanded && (
                       <div style={{ padding: '0 14px 10px', fontSize: PANEL_META_FONT_PX, color: '#444', maxHeight: 320, overflowY: 'auto' }}>
@@ -2770,7 +2940,7 @@ export default function RealDataSankeyPage() {
       <div
         ref={searchBoxRef}
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 322 : 12, zIndex: 100, width: 296, transition: 'left 0.2s ease' }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: 296, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
       >
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -3340,7 +3510,7 @@ export default function RealDataSankeyPage() {
         {showSettings && (
           <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX, minWidth: 240, display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
+            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX, minWidth: Math.round(240 * fontScale), maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
@@ -3372,6 +3542,47 @@ export default function RealDataSankeyPage() {
                 <input type="checkbox" checked={filterOnMinistryClick} onChange={e => { pendingHistoryAction.current = 'replace'; setFilterOnMinistryClick(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>省庁ノード選択でフィルタ</span>
               </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, borderTop: '1px solid #eee', paddingTop: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                  <span style={{ color: '#555' }}>基準フォントサイズ</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input
+                      type="number"
+                      min={BASE_FONT_PX_MIN}
+                      max={BASE_FONT_PX_MAX}
+                      step={1}
+                      value={baseFontPx}
+                      onChange={e => {
+                        const v = Number(e.target.value);
+                        if (!isNaN(v)) {
+                          pendingHistoryAction.current = 'replace';
+                          setBaseFontPx(Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, v)));
+                        }
+                      }}
+                      style={{ width: 48, fontSize: CONTROL_SMALL_FONT_PX, padding: '2px 4px', border: '1px solid #ccc', borderRadius: 4, textAlign: 'center' }}
+                      data-pan-disabled
+                      aria-label="基準フォントサイズ(数値)"
+                    />
+                    <button
+                      onClick={() => { pendingHistoryAction.current = 'replace'; setBaseFontPx(BASE_FONT_PX_DEFAULT); }}
+                      title="既定値に戻す"
+                      style={{ background: 'transparent', border: '1px solid #ddd', borderRadius: 4, color: '#888', cursor: 'pointer', fontSize: META_FONT_PX, padding: '2px 6px' }}
+                      data-pan-disabled
+                    >既定</button>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min={BASE_FONT_PX_MIN}
+                  max={BASE_FONT_PX_MAX}
+                  step={1}
+                  value={baseFontPx}
+                  onChange={e => { pendingHistoryAction.current = 'replace'; setBaseFontPx(Number(e.target.value)); }}
+                  style={{ width: '100%', boxSizing: 'border-box', margin: 0 }}
+                  data-pan-disabled
+                  aria-label="基準フォントサイズ"
+                />
+              </div>
             </div>
           </>
         )}
