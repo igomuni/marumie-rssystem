@@ -801,7 +801,8 @@ export default function RealDataSankeyPage() {
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
-    // パン終了直後のカーソル直下ノードへの瞬間ハイライトを避けるためにクールダウン
+    // 実際にパンが発生したときだけクールダウン（単なるクリックでは抑制しない）
+    if (!didPanRef.current) return;
     setIsHoverSuppressed(true);
     if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
     hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
@@ -2351,7 +2352,7 @@ export default function RealDataSankeyPage() {
               show={showMinimap}
               onShow={() => setShowMinimap(true)}
               onHide={() => setShowMinimap(false)}
-              left={selectedNodeId !== null ? (isPanelCollapsed ? 26 : 318) : 8}
+              left={selectedNodeId !== null ? (isPanelCollapsed ? 26 : sidePanelWidth + 8) : 8}
               minimapW={MINIMAP_W}
               minimapH={minimapH}
               canvasRef={minimapRef}
@@ -2939,7 +2940,7 @@ export default function RealDataSankeyPage() {
       <div
         ref={searchBoxRef}
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? 322 : 12, zIndex: 100, width: 296, transition: 'left 0.2s ease' }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: 296, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
       >
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
