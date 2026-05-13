@@ -1802,8 +1802,10 @@ export default function RealDataSankeyPage() {
     pendingHistoryAction.current = 'push';
     setFilterMinistryNames([]);
     setFilterProjectName('');
+    setFilterProjectNameRegex(false);
     setDebouncedFilterProjectName('');
     setFilterRecipientName('');
+    setFilterRecipientNameRegex(false);
     setDebouncedFilterRecipientName('');
     setFilterMinBudgetText('');
     setFilterMaxBudgetText('');
