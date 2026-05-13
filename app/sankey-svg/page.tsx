@@ -1789,6 +1789,35 @@ export default function RealDataSankeyPage() {
 
   const pendingSearchResetRef = useRef(false);
 
+  // フィルタが何か掛かっているか（会計区分は全選択が「掛かっていない」状態）
+  const hasActiveFilters =
+    filterMinistryNames.length > 0 ||
+    filterProjectName !== '' ||
+    filterRecipientName !== '' ||
+    filterMinBudgetText !== '' || filterMaxBudgetText !== '' ||
+    filterMinSpendingText !== '' || filterMaxSpendingText !== '' ||
+    !(acGeneral && acSpecial && acBoth && acNone);
+
+  const clearAllFilters = useCallback(() => {
+    pendingHistoryAction.current = 'push';
+    setFilterMinistryNames([]);
+    setFilterProjectName('');
+    setFilterProjectNameRegex(false);
+    setDebouncedFilterProjectName('');
+    setFilterRecipientName('');
+    setFilterRecipientNameRegex(false);
+    setDebouncedFilterRecipientName('');
+    setFilterMinBudgetText('');
+    setFilterMaxBudgetText('');
+    setFilterMinSpendingText('');
+    setFilterMaxSpendingText('');
+    setAcGeneral(true);
+    setAcSpecial(true);
+    setAcBoth(true);
+    setAcNone(true);
+    ministryFilterSnapshotRef.current = null;
+  }, []);
+
   const handleSearchSelect = useCallback((nodeId: string) => {
     setShowSearchResults(false);
     handleConnectionClick(nodeId);
@@ -3221,6 +3250,32 @@ export default function RealDataSankeyPage() {
             );
           })()}
         </div>{/* end 検索セクション */}
+
+        {/* フィルタ解除ボタン（常に同じ幅を占有し、非フィルタ時は非表示） */}
+        <button
+          type="button"
+          onClick={clearAllFilters}
+          title="フィルタを解除"
+          aria-label="フィルタを解除"
+          aria-hidden={!hasActiveFilters}
+          tabIndex={hasActiveFilters ? 0 : -1}
+          data-testid={testId('clear-filters')}
+          data-pan-disabled
+          style={{
+            flexShrink: 0, width: 32, height: 32,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(255,255,255,0.95)', border: '1px solid #e0e0e0',
+            borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            cursor: 'pointer', color: '#666', padding: 0,
+            visibility: hasActiveFilters ? 'visible' : 'hidden',
+            pointerEvents: hasActiveFilters ? 'auto' : 'none',
+          }}
+        >
+            {/* Material Icons: filter_list_off */}
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="currentColor">
+              <path d="M791-55 55-791l57-57 736 736-57 57ZM633-440l-80-80h167v80h-87ZM433-640l-80-80h487v80H433Zm-33 400v-80h160v80H400ZM240-440v-80h166v80H240ZM120-640v-80h86v80h-86Z"/>
+            </svg>
+          </button>
 
         </div>{/* end Row 1 flex */}
 
