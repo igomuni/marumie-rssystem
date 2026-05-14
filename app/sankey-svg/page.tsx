@@ -685,6 +685,9 @@ export default function RealDataSankeyPage() {
   fitTopPadPxRef.current = fitTopPadPx;
 
   // Compute max extra height from label shifts at a given zoom level (2-pass helper)
+  // Uses mapLabelSlotPx (slot-based formula), not colFontPx/zoom. Intentional: this runs for
+  // fitZoomWithShifts (always near fit zoom where zoomedIn=false) and getZoomAnchoredPanY
+  // (sub-pixel drift at zoom-in is acceptable).
   const calcShiftExtraH = useCallback((nodes: { y0: number; y1: number; id: string; type: string; projectId?: number }[], zoomK: number): number => {
     if (!showLabelsRef.current) return 0;
     const colShifts = new Map<number, number>();
@@ -1106,6 +1109,7 @@ export default function RealDataSankeyPage() {
           const distPrev = i > 0 ? (centers[i] - centers[i - 1]) : Infinity;
           const distNext = i < sorted.length - 1 ? (centers[i + 1] - centers[i]) : Infinity;
           const gapMax = Math.min(distPrev, distNext) * zoom * LABEL_FIT_RATIO;
+          // floor at mapLabelFontPx: intentional readability safeguard — labels may still overlap at high density
           colFontPx = Math.max(mapLabelFontPx, Math.min(zoomedMax, gapMax));
           topShift = h < colFontPx / zoom ? Math.max(0, colFontPx / zoom - h) : 0;
         } else {
@@ -2438,7 +2442,7 @@ export default function RealDataSankeyPage() {
           {hoveredNode && layout && !suppressHoverPopup && (() => {
             const GAP = Math.round(8 * fontScale);
             const tipW = Math.round(240 * fontScale);
-            const { cumShift: hoverCumShift = 0, topShift: hoverTopShift = 0 } = nodeShiftInfo.get(hoveredNode.id) ?? {};
+            const { cumShift: hoverCumShift = 0, topShift: hoverTopShift = 0, colFontPx: hoverColFontPx = mapLabelFontPx } = nodeShiftInfo.get(hoveredNode.id) ?? {};
             const nodeScreenH = (hoveredNode.y1 - hoveredNode.y0) * zoom;
             const screenCx = pan.x + getNodeScreenX0(hoveredNode) + screenNodeW / 2;
             const screenTop = pan.y + (MARGIN.top + hoveredNode.y0 + hoverCumShift + hoverTopShift) * zoom;
@@ -2484,7 +2488,7 @@ export default function RealDataSankeyPage() {
             const both = budget != null && spending != null;
             const tipH = Math.round(((both ? 88 : 76) + (hoveredAcLabel ? 18 : 0)) * fontScale);
             // 大ノード: マウスY連動（カーソル上方）/ 小ノード: ラベル上端-GAPにポップアップ底辺を固定
-            const labelFontPx = mapLabelFontPx;
+            const labelFontPx = hoverColFontPx;
             const labelTopScreenY = screenTop + nodeScreenH / 2 - labelFontPx / 2;
             const cursorGap = Math.round(12 * fontScale);
             const lyAboveCursor = mousePos.y - tipH - cursorGap;

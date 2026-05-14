@@ -24,7 +24,7 @@
 
 すべてのノードラベルで固定：
 
-```
+```text
 fontSize = mapLabelFontPx / zoom   (SVG units)
 ```
 
@@ -34,7 +34,7 @@ fontSize = mapLabelFontPx / zoom   (SVG units)
 
 [app/sankey-svg/page.tsx:1093](../../app/sankey-svg/page.tsx#L1093) の `nodeShiftInfo` useMemo 内：
 
-```
+```ts
 topShift = h * zoom < mapLabelSlotPx
          ? Math.max(0, mapLabelSlotPx / zoom - h)
          : 0
@@ -45,7 +45,7 @@ topShift = h * zoom < mapLabelSlotPx
 
 ### ラベルの y 座標
 
-```
+```text
 y = topShift + h / 2
 ```
 
@@ -61,7 +61,7 @@ topShift > 0 のとき（ノード < スロット）→ `topShift = slotH/zoom -
 
 ノードごとに `colFontPx` を計算し、`fontSize = colFontPx / zoom` に変える。
 
-```
+```text
 // zoom ≤ baseZoom: 変更なし
 colFontPx = mapLabelFontPx
 
@@ -83,7 +83,7 @@ colFontPx    = max(mapLabelFontPx, min(zoomedMax, nodeMaxFont))
 
 現状は `mapLabelSlotPx` 基準だが、新しいフォントサイズ（`colFontPx`）基準に変更する：
 
-```
+```ts
 labelHSvg = colFontPx / zoom   // ラベル高さ（SVG units）
 topShift  = h < labelHSvg
           ? Math.max(0, labelHSvg - h)

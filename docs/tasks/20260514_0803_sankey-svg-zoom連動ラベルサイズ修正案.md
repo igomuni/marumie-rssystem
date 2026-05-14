@@ -16,7 +16,7 @@
 
 ## 現状の関係式
 
-```
+```text
 fontScale       = baseFontPx / 12
 mapLabelFontPx  = round(11 × fontScale)   ≈ baseFontPx × 11/12      (screen px)
 mapLabelSlotPx  = round(12 × fontScale)   = baseFontPx              (screen px)
@@ -124,7 +124,7 @@ base=12 のときの screen px ベース最小〜最大: 10 px (Tooltip メタ) 
 
 ズームインしたとき、ラベルもある程度大きくしたい。
 
-```
+```text
 zoomFactor = clamp(zoom / baseZoom, 1, ZOOM_FONT_MAX_RATIO)   // 1〜2 倍程度
 colFontPx_max = mapLabelFontPx × zoomFactor                     // ズームインで成長
 ```
@@ -134,7 +134,7 @@ colFontPx_max = mapLabelFontPx × zoomFactor                     // ズームイ
 
 ### 案 B: Min を相対値に変える
 
-```
+```text
 COLFONT_MIN_RATIO = 0.5   // base の半分
 fontMinPx = max(6, baseFontPx × COLFONT_MIN_RATIO)
 slotPxEffective = clamp(labelBudgetScreen / nShort, fontMinPx, mapLabelSlotPx)
@@ -145,7 +145,7 @@ slotPxEffective = clamp(labelBudgetScreen / nShort, fontMinPx, mapLabelSlotPx)
 
 ### 案 C: Fit ⇄ ズームインの遷移を線形ブレンド
 
-```
+```text
 TRANSITION_END = 1.5            // baseZoom の何倍まででブレンドするか
 t = clamp((zoom − baseZoom) / (baseZoom × (TRANSITION_END − 1)), 0, 1)
 colFontPx = lerp(adaptiveColFontPx, mapLabelFontPx, t)
@@ -158,7 +158,7 @@ colFontPx = lerp(adaptiveColFontPx, mapLabelFontPx, t)
 
 すべての列で最も厳しい列の縮小率に合わせる：
 
-```
+```text
 globalScale = min(列ごとの slotPxEffective / mapLabelSlotPx)
 colFontPx = mapLabelFontPx × globalScale   // 全列同じ
 ```
@@ -170,7 +170,7 @@ colFontPx = mapLabelFontPx × globalScale   // 全列同じ
 
 `0.85` を hard-code でなく、baseFontPx が大きいほど大きめ（labels 専有を許容）にする:
 
-```
+```text
 availHRatio = clamp(0.7 + (baseFontPx − 12) × 0.015, 0.7, 0.9)
 ```
 
