@@ -95,6 +95,8 @@ const PROJECT_OVERVIEW_PREVIEW_HEIGHT_MAX = 600;
 const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
 const HOVER_ENTER_DELAY_MS = 220;
 const FIT_TOP_PAD_PX = 32;
+const ZOOM_FONT_MAX_RATIO = 1.3;   // zoom-in でフォントを最大で元の何倍まで拡大するか
+const LABEL_FIT_RATIO = 0.85;      // ノード表示高さに対してフォントが占める割合の上限
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
@@ -1062,9 +1064,9 @@ export default function RealDataSankeyPage() {
     return result;
   }, [filtered, svgWidth, svgHeight, SEARCH_BOX_RESERVE]);
 
-  // Cumulative shift per node: { cumShift: slot-level offset, topShift: rect-within-slot offset }
+  // Cumulative shift per node: { cumShift: slot-level offset, topShift: rect-within-slot offset, colFontPx: label font px }
   const nodeShiftInfo = useMemo(() => {
-    const info = new Map<string, { cumShift: number; topShift: number }>();
+    const info = new Map<string, { cumShift: number; topShift: number; colFontPx: number }>();
     if (!layout || !showLabels) return info;
     const nodesByColumn = new Map<number, typeof layout.nodes[0][]>();
     for (const node of layout.nodes) {
@@ -1081,22 +1083,41 @@ export default function RealDataSankeyPage() {
         spendingH.set('__agg-project-budget', Math.max(1, n.y1 - n.y0));
       }
     }
+    const zoomedIn = zoom > baseZoom + 0.001;
     for (const nodes of nodesByColumn.values()) {
       const sorted = [...nodes].sort((a, b) => a.y0 - b.y0);
+      // Pre-compute each node's effective height and label center (SVG units) for gap calculation
+      const heights = sorted.map(n => {
+        const bH = Math.max(1, n.y1 - n.y0);
+        return n.type === 'project-budget' || n.id === '__agg-project-budget'
+          ? Math.max(bH, spendingH.get(n.id) ?? bH)
+          : bH;
+      });
+      const centers = sorted.map((n, i) => n.y0 + heights[i] / 2);
       let cumShift = 0;
-      for (const node of sorted) {
-        // For project-budget nodes, base topShift on the larger of budget/spending height
-        const budgetH = Math.max(1, node.y1 - node.y0);
-        const h = node.type === 'project-budget' || node.id === '__agg-project-budget'
-          ? Math.max(budgetH, spendingH.get(node.id) ?? budgetH)
-          : budgetH;
-        const topShift = h * zoom < mapLabelSlotPx ? Math.max(0, mapLabelSlotPx / zoom - h) : 0;
-        info.set(node.id, { cumShift, topShift });
+      for (let i = 0; i < sorted.length; i++) {
+        const node = sorted[i];
+        const h = heights[i];
+        let colFontPx: number;
+        let topShift: number;
+        if (zoomedIn) {
+          const zoomedMax = mapLabelFontPx * Math.min(zoom / baseZoom, ZOOM_FONT_MAX_RATIO);
+          // Limit font by the shorter of the two neighbor center-to-center gaps
+          const distPrev = i > 0 ? (centers[i] - centers[i - 1]) : Infinity;
+          const distNext = i < sorted.length - 1 ? (centers[i + 1] - centers[i]) : Infinity;
+          const gapMax = Math.min(distPrev, distNext) * zoom * LABEL_FIT_RATIO;
+          colFontPx = Math.max(mapLabelFontPx, Math.min(zoomedMax, gapMax));
+          topShift = h < colFontPx / zoom ? Math.max(0, colFontPx / zoom - h) : 0;
+        } else {
+          colFontPx = mapLabelFontPx;
+          topShift = h * zoom < mapLabelSlotPx ? Math.max(0, mapLabelSlotPx / zoom - h) : 0;
+        }
+        info.set(node.id, { cumShift, topShift, colFontPx });
         cumShift += topShift;
       }
     }
     return info;
-  }, [layout, showLabels, zoom, mapLabelSlotPx]);
+  }, [layout, showLabels, zoom, mapLabelSlotPx, mapLabelFontPx, baseZoom]);
 
   const selectedNode = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -2192,7 +2213,7 @@ export default function RealDataSankeyPage() {
                         : null;
                       const isSelectedMerged = node.id === selectedNodeId || spendingNode?.id === selectedNodeId;
                       const maxH = Math.max(bH, sH);
-                      const { cumShift = 0, topShift = 0 } = nodeShiftInfo.get(node.id) ?? {};
+                      const { cumShift = 0, topShift = 0, colFontPx = mapLabelFontPx } = nodeShiftInfo.get(node.id) ?? {};
                       const labelVisible = topShift > 0 || maxH * zoom > mapLabelVisibleMinHPx || isSelectedMerged;
                       const nodeOpacity = connectedNodeIds
                         ? (isConnected ? 1 : 0.3)
@@ -2210,7 +2231,7 @@ export default function RealDataSankeyPage() {
                               onClick={(e) => handleNodeClick(node, e)}
                             />
                             {labelVisible && (
-                              <text x={getNodeInnerX1(node) + innerLabelGap} y={topShift + bH / 2} fontSize={mapLabelFontPx / zoom} dominantBaseline="middle"
+                              <text x={getNodeInnerX1(node) + innerLabelGap} y={topShift + bH / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                                 style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                                 onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -2238,7 +2259,7 @@ export default function RealDataSankeyPage() {
                           />
                           {labelVisible && (<>
                             {/* Left label: budget amount */}
-                            <text x={getNodeInnerX0(node) - innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={mapLabelFontPx / zoom} dominantBaseline="middle" textAnchor="end"
+                            <text x={getNodeInnerX0(node) - innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={colFontPx / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -2249,7 +2270,7 @@ export default function RealDataSankeyPage() {
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
                             {/* Right label: project name + spending amount */}
-                            <text x={getNodeInnerX1(spendingNode) + innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={mapLabelFontPx / zoom} dominantBaseline="middle"
+                            <text x={getNodeInnerX1(spendingNode) + innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
@@ -2266,7 +2287,7 @@ export default function RealDataSankeyPage() {
                     // Regular node (total, ministry, recipient)
                     const h = node.y1 - node.y0;
                     const isSelected = node.id === selectedNodeId;
-                    const { cumShift = 0, topShift = 0 } = nodeShiftInfo.get(node.id) ?? {};
+                    const { cumShift = 0, topShift = 0, colFontPx = mapLabelFontPx } = nodeShiftInfo.get(node.id) ?? {};
                     const labelVisible = topShift > 0 || (h + NODE_PAD) * zoom > mapLabelVisibleMinHPx || isSelected;
                     const col = getColumn(node);
                     const isLastCol = col === lastCol;
@@ -2301,7 +2322,7 @@ export default function RealDataSankeyPage() {
                           <text
                             x={getNodeInnerX1(node) + innerLabelGap}
                             y={topShift + h / 2}
-                            fontSize={mapLabelFontPx / zoom}
+                            fontSize={colFontPx / zoom}
                             dominantBaseline="middle"
                             fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                             style={{ userSelect: 'none', cursor: 'pointer' }}
@@ -2417,9 +2438,10 @@ export default function RealDataSankeyPage() {
           {hoveredNode && layout && !suppressHoverPopup && (() => {
             const GAP = Math.round(8 * fontScale);
             const tipW = Math.round(240 * fontScale);
+            const { cumShift: hoverCumShift = 0, topShift: hoverTopShift = 0 } = nodeShiftInfo.get(hoveredNode.id) ?? {};
             const nodeScreenH = (hoveredNode.y1 - hoveredNode.y0) * zoom;
             const screenCx = pan.x + getNodeScreenX0(hoveredNode) + screenNodeW / 2;
-            const screenTop = pan.y + (MARGIN.top + hoveredNode.y0) * zoom;
+            const screenTop = pan.y + (MARGIN.top + hoveredNode.y0 + hoverCumShift + hoverTopShift) * zoom;
             const screenBottom = screenTop + nodeScreenH;
             const lx = Math.max(4, Math.min(screenCx - tipW / 2, svgWidth - tipW - 4));
             // ノードタイプ別に予算・支出を解決
@@ -3565,7 +3587,7 @@ export default function RealDataSankeyPage() {
         {showSettings && (
           <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX, minWidth: Math.round(240 * fontScale), maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
+            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, minWidth: 240, maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
@@ -3580,7 +3602,7 @@ export default function RealDataSankeyPage() {
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ color: '#555' }}>事業ノードの並び順:</span>
-                <select value={projectSortBy} onChange={e => { pendingHistoryAction.current = 'replace'; setProjectSortBy(e.target.value as 'budget' | 'spending'); }} style={{ fontSize: CONTROL_SMALL_FONT_PX, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }} data-pan-disabled>
+                <select value={projectSortBy} onChange={e => { pendingHistoryAction.current = 'replace'; setProjectSortBy(e.target.value as 'budget' | 'spending'); }} style={{ fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }} data-pan-disabled>
                   <option value="budget">予算額</option>
                   <option value="spending">支出額</option>
                 </select>
@@ -3614,14 +3636,14 @@ export default function RealDataSankeyPage() {
                           setBaseFontPx(Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, v)));
                         }
                       }}
-                      style={{ width: 48, fontSize: CONTROL_SMALL_FONT_PX, padding: '2px 4px', border: '1px solid #ccc', borderRadius: 4, textAlign: 'center' }}
+                      style={{ width: 48, fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, padding: '2px 4px', border: '1px solid #ccc', borderRadius: 4, textAlign: 'center' }}
                       data-pan-disabled
                       aria-label="基準フォントサイズ(数値)"
                     />
                     <button
                       onClick={() => { pendingHistoryAction.current = 'replace'; setBaseFontPx(BASE_FONT_PX_DEFAULT); }}
                       title="既定値に戻す"
-                      style={{ background: 'transparent', border: '1px solid #ddd', borderRadius: 4, color: '#888', cursor: 'pointer', fontSize: META_FONT_PX, padding: '2px 6px' }}
+                      style={{ background: 'transparent', border: '1px solid #ddd', borderRadius: 4, color: '#888', cursor: 'pointer', fontSize: META_FONT_PX_DEFAULT, padding: '2px 6px' }}
                       data-pan-disabled
                     >既定</button>
                   </div>
