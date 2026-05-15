@@ -109,10 +109,17 @@ type ShiftLayoutNode = {
   aggregated?: boolean;
 };
 
+function canonicalSelectableNodeId(id: string | null): string | null {
+  if (id === null) return null;
+  if (id.startsWith('project-spending-')) return id.replace('project-spending-', 'project-budget-');
+  if (id === '__agg-project-spending') return '__agg-project-budget';
+  return id;
+}
+
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
   const result: Partial<SankeyUrlState> = {};
-  const sel = p.get('sel'); if (sel !== null) result.selectedNodeId = sel;
+  const sel = p.get('sel'); if (sel !== null) result.selectedNodeId = canonicalSelectableNodeId(sel);
   const pp = p.get('pp'); if (pp !== null) result.pinnedProjectId = pp;
   const pr = p.get('pr'); if (pr !== null) result.pinnedRecipientId = pr;
   const pm = p.get('pm'); if (pm !== null) result.pinnedMinistryName = pm;
@@ -1196,7 +1203,7 @@ export default function RealDataSankeyPage() {
     const snapshot = pendingYearSelectionRef.current;
     pendingYearSelectionRef.current = null;
 
-    const nextId = resolveYearSelectionSnapshot(snapshot, graphData);
+    const nextId = canonicalSelectableNodeId(resolveYearSelectionSnapshot(snapshot, graphData));
 
     if (nextId !== selectedNodeId) {
       pendingHistoryAction.current = 'replace';
@@ -1465,7 +1472,8 @@ export default function RealDataSankeyPage() {
       const bValue = budgetNode?.value ?? 0;
       const sValue = spendingNode?.value ?? 0;
       const spId = spendingNode?.id ?? (pid != null ? `project-spending-${pid}` : nid);
-      const projects: PanelEntry[] = [{ id: nid, name: selectedNode.name, value: sValue, ministry: ministryName, projectId: selectedNode.projectId, budgetValue: bValue, spendingValue: sValue, recipientCount: projectRecipientCount.get(spId) }];
+      const projectEntryId = budgetNode?.id ?? canonicalSelectableNodeId(nid) ?? nid;
+      const projects: PanelEntry[] = [{ id: projectEntryId, name: budgetNode?.name ?? selectedNode.name, value: sValue, ministry: ministryName, projectId: selectedNode.projectId, budgetValue: bValue, spendingValue: sValue, recipientCount: projectRecipientCount.get(spId) }];
       const recipients: PanelEntry[] = [];
       if (spendingNode) {
         for (const e of graphData.edges) { if (e.source === spendingNode.id && e.target.startsWith('r-')) recipients.push({ id: e.target, name: nodeById.get(e.target)?.name ?? e.target, value: e.value }); }
@@ -1492,7 +1500,12 @@ export default function RealDataSankeyPage() {
     if (ntype === 'recipient' && !selectedNode.aggregated) {
       const pMap = new Map<string, number>();
       for (const e of graphData.edges) { if (e.target === nid) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); }
-      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null; return { id, name: n?.name ?? id, value, ministry: n?.ministry, projectId: n?.projectId, budgetValue: bn?.value, spendingValue: n?.value }; }).sort((a, b) => b.value - a.value);
+      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => {
+        const n = nodeById.get(id);
+        const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null;
+        const budgetId = bn?.id ?? canonicalSelectableNodeId(id) ?? id;
+        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, budgetValue: bn?.value, spendingValue: n?.value };
+      }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value, budgetValue: mn?.value, spendingValue: ministrySpendingTotals.get(name) ?? 0 }; });
@@ -1505,7 +1518,12 @@ export default function RealDataSankeyPage() {
       const aggRcpts = filtered?.aggNodeMembers?.get('__agg-recipient') ?? [];
       const pMap = new Map<string, number>();
       for (const r of aggRcpts) { for (const e of graphData.edges) { if (e.target === r.id) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); } }
-      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null; return { id, name: n?.name ?? id, value, ministry: n?.ministry, projectId: n?.projectId, budgetValue: bn?.value, spendingValue: n?.value }; }).sort((a, b) => b.value - a.value);
+      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => {
+        const n = nodeById.get(id);
+        const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null;
+        const budgetId = bn?.id ?? canonicalSelectableNodeId(id) ?? id;
+        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, budgetValue: bn?.value, spendingValue: n?.value };
+      }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value, budgetValue: mn?.value, spendingValue: ministrySpendingTotals.get(name) ?? 0 }; });
@@ -1554,10 +1572,11 @@ export default function RealDataSankeyPage() {
   const selectNode = useCallback((id: string | null, forceReplace?: boolean) => {
     // User-initiated select/deselect both push to history so back/forward works naturally.
     // Auto-deselect (stale node cleanup) passes forceReplace=true to avoid polluting history.
+    const canonicalId = canonicalSelectableNodeId(id);
     pendingHistoryAction.current = forceReplace ? 'replace' : 'push';
-    setSelectedNodeId(id);
+    setSelectedNodeId(canonicalId);
     setIsProjectDetailExpanded(false);
-    if (id === null) { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); setFocusRelated(false); }
+    if (canonicalId === null) { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); setFocusRelated(false); }
   }, [setPinnedRecipientId, setPinnedMinistryName, setIsProjectDetailExpanded]);
 
   // Auto-clear stale selection when node no longer exists in graphData at all
@@ -1659,6 +1678,7 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, selectedNodeInLayout, layout, baseZoom, getRenderedYBounds]);
 
   const handleConnectionClick = useCallback((nodeId: string) => {
+    const selectionNodeId = canonicalSelectableNodeId(nodeId);
     // If already in layout, select and focus directly (no effect needed)
     const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
     if (inLayoutNode) {
@@ -1685,8 +1705,8 @@ export default function RealDataSankeyPage() {
       if (focusRelated && nextPinnedProjectId) pinnedContextProjectId.current = nextPinnedProjectId;
       const needsDeferredFocus = nextPinnedProjectId !== pinnedProjectId || isPanelCollapsed;
       setPinnedProjectId(nextPinnedProjectId);
-      if (needsDeferredFocus) pendingFocusId.current = nodeId;
-      selectNode(nodeId);
+      if (needsDeferredFocus) pendingFocusId.current = selectionNodeId;
+      selectNode(selectionNodeId);
       if (!needsDeferredFocus) focusOnNeighborhood(inLayoutNode);
       return;
     }
@@ -1754,7 +1774,7 @@ export default function RealDataSankeyPage() {
         const rank = allProjectRanks.get(parentSpendingId);
         if (rank !== undefined) jumpToProjectRank(rank);
         setPinnedProjectId(null);
-        pendingFocusId.current = parentSpendingId;
+        pendingFocusId.current = canonicalSelectableNodeId(parentSpendingId);
         selectNode(parentSpendingId);
         return;
       }
@@ -1775,8 +1795,8 @@ export default function RealDataSankeyPage() {
       setPinnedProjectId(null);
     }
     // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
-    pendingFocusId.current = nodeId;
-    selectNode(nodeId);
+    pendingFocusId.current = selectionNodeId;
+    selectNode(selectionNodeId);
   }, [layout, filtered, allRecipientRanks, allProjectRanks, topRecipient, topProject, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, offsetTarget, setProjectOffset]);
 
   // Step2 → Step1 遷移: 選択ノード (selectedNodeId) は維持し、
@@ -1913,14 +1933,16 @@ export default function RealDataSankeyPage() {
       if (n.type === 'project-budget') continue; // merged into project-spending entry
       if (pidQuery !== null) {
         if (n.type === 'project-spending' && n.projectId === pidQuery) {
-          const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
-          results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
+          const budgetNode = budgetNodeByPid.get(n.projectId);
+          const bv = budgetNode?.value ?? 0;
+          results.push({ id: budgetNode?.id ?? `project-budget-${n.projectId}`, name: budgetNode?.name ?? n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
         }
       } else {
         if (matcher(n.name)) {
           if (n.type === 'project-spending' && n.projectId != null) {
-            const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
-            results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
+            const budgetNode = budgetNodeByPid.get(n.projectId);
+            const bv = budgetNode?.value ?? 0;
+            results.push({ id: budgetNode?.id ?? `project-budget-${n.projectId}`, name: budgetNode?.name ?? n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
           } else {
             results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: n.value });
           }

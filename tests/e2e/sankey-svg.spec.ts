@@ -158,6 +158,23 @@ test.describe('sankey-svg interactions', () => {
     await expect.poll(() => panelProject.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
   });
 
+  test('project side panel uses the unified project badge from graph and search selection', async ({ page }) => {
+    const projectName = '燃料油価格激変緩和対策事業';
+
+    await page.locator('svg text').filter({ hasText: projectName }).first().click();
+    await expect(page.getByText('事業', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('事業（予算）')).toHaveCount(0);
+    await expect(page.getByText('事業（支出）')).toHaveCount(0);
+
+    await page.getByTestId('search-input').fill(projectName);
+    await selectSearchResultByTitle(page, projectName);
+    await expect(page).toHaveURL(/sel=project-budget-/);
+    await expect(page).not.toHaveURL(/sel=project-spending-/);
+    await expect(page.getByText('事業', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('事業（予算）')).toHaveCount(0);
+    await expect(page.getByText('事業（支出）')).toHaveCount(0);
+  });
+
   test('aggregate nodes leave room for the previous TopN label', async ({ page }) => {
     const gaps = await aggregateBoundaryGaps(page);
     expect(gaps.length).toBeGreaterThan(0);
@@ -219,7 +236,7 @@ test.describe('sankey-svg interactions', () => {
 
     await page.getByTestId('search-input').fill(projectName);
     await selectSearchResultByTitle(page, projectName);
-    await expect(page).toHaveURL(/sel=project-spending-3522/);
+    await expect(page).toHaveURL(/sel=project-budget-3522/);
     await expect.poll(() => visibleNodeCount(page)).toBeGreaterThan(0);
 
     await page.getByTestId('search-input').fill(recipientName);
@@ -264,7 +281,7 @@ test.describe('sankey-svg interactions', () => {
     await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBe(0);
     await panelProject.click();
 
-    await expect(page).toHaveURL(/sel=project-spending-7096/);
+    await expect(page).toHaveURL(/sel=project-budget-7096/);
     await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBeGreaterThan(0);
     expect(pageErrors).toEqual([]);
   });
