@@ -8,7 +8,7 @@ import {
   COL_LABELS, MARGIN, NODE_W, NODE_PAD,
   MAX_RECIPIENT_GAP_PX, MAX_MINISTRY_GAP_PX,
   TYPE_COLORS, TYPE_LABELS,
-  getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen,
+  getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen, sortPriority,
 } from '@/app/lib/sankey-svg-constants';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { filterTopN, computeLayout, getTopMinistriesInScope } from '@/app/lib/sankey-svg-filter';
@@ -97,6 +97,17 @@ const HOVER_ENTER_DELAY_MS = 220;
 const FIT_TOP_PAD_PX = 32;
 const ZOOM_FONT_MAX_RATIO = 1.3;   // zoom-in でフォントを最大で元の何倍まで拡大するか
 const LABEL_FIT_RATIO = 0.85;      // ノード表示高さに対してフォントが占める割合の上限
+const AGGREGATE_BOUNDARY_GAP_PX = 6;
+
+type ShiftLayoutNode = {
+  y0: number;
+  y1: number;
+  id: string;
+  type: string;
+  name: string;
+  projectId?: number;
+  aggregated?: boolean;
+};
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
@@ -647,7 +658,7 @@ export default function RealDataSankeyPage() {
 
   const svgRef = useRef<SVGSVGElement>(null);
 
-  const layoutRef = useRef<{ contentW: number; contentH: number; nodes: { y0: number; y1: number; id: string; type: string; projectId?: number }[] } | null>(null);
+  const layoutRef = useRef<{ contentW: number; contentH: number; nodes: ShiftLayoutNode[] } | null>(null);
   const showLabelsRef = useRef(showLabels);
   showLabelsRef.current = showLabels;
 
@@ -687,7 +698,7 @@ export default function RealDataSankeyPage() {
   // Uses mapLabelSlotPx (slot-based formula), not colFontPx/zoom. Intentional: this runs for
   // fitZoomWithShifts (always near fit zoom where zoomedIn=false) and getZoomAnchoredPanY
   // (sub-pixel drift at zoom-in is acceptable).
-  const calcShiftExtraH = useCallback((nodes: { y0: number; y1: number; id: string; type: string; projectId?: number }[], zoomK: number): number => {
+  const calcShiftExtraH = useCallback((nodes: ShiftLayoutNode[], zoomK: number): number => {
     if (!showLabelsRef.current) return 0;
     const colShifts = new Map<number, number>();
     const spendingH = new Map<string, number>();
@@ -698,15 +709,28 @@ export default function RealDataSankeyPage() {
         spendingH.set('__agg-project-budget', Math.max(1, node.y1 - node.y0));
       }
     }
+    const nodesByColumn = new Map<number, ShiftLayoutNode[]>();
     for (const node of nodes) {
-      const ownH = Math.max(1, node.y1 - node.y0);
-      const h = node.type === 'project-budget' || node.id === '__agg-project-budget'
-        ? Math.max(ownH, spendingH.get(node.id) ?? ownH)
-        : ownH;
-      const slotPx = mapLabelMetricsRef.current.slotPx;
-      const topShift = h * zoomK < slotPx ? Math.max(0, slotPx / zoomK - h) : 0;
       const col = getColumn(node);
-      colShifts.set(col, (colShifts.get(col) ?? 0) + topShift);
+      if (!nodesByColumn.has(col)) nodesByColumn.set(col, []);
+      nodesByColumn.get(col)!.push(node);
+    }
+    for (const [col, colNodes] of nodesByColumn) {
+      const sorted = [...colNodes].sort((a, b) => a.y0 - b.y0);
+      let totalShift = 0;
+      for (let i = 0; i < sorted.length; i++) {
+        const node = sorted[i];
+        if (i > 0 && sortPriority(node) > sortPriority(sorted[i - 1])) {
+          totalShift += AGGREGATE_BOUNDARY_GAP_PX / zoomK;
+        }
+        const ownH = Math.max(1, node.y1 - node.y0);
+        const h = node.type === 'project-budget' || node.id === '__agg-project-budget'
+          ? Math.max(ownH, spendingH.get(node.id) ?? ownH)
+          : ownH;
+        const slotPx = mapLabelMetricsRef.current.slotPx;
+        totalShift += h * zoomK < slotPx ? Math.max(0, slotPx / zoomK - h) : 0;
+      }
+      colShifts.set(col, totalShift);
     }
     return colShifts.size > 0 ? Math.max(...colShifts.values()) : 0;
   }, []);
@@ -814,7 +838,7 @@ export default function RealDataSankeyPage() {
 
   // Converge on fit zoom accounting for label shifts (shifts grow as zoom shrinks → iterate)
   const fitZoomWithShifts = useCallback((
-    nodes: { y0: number; y1: number; id: string; type: string }[],
+    nodes: ShiftLayoutNode[],
     contentW: number, contentH: number, cW: number, availH: number
   ): { k: number; totalH: number } => {
     let k = Math.max(ZOOM_MIN_ABS, Math.min(ZOOM_MAX_ABS, (availH / (MARGIN.top + contentH)) * 0.9));
@@ -1113,9 +1137,12 @@ export default function RealDataSankeyPage() {
       let cumShift = 0;
       for (let i = 0; i < sorted.length; i++) {
         const node = sorted[i];
+        if (i > 0 && sortPriority(node) > sortPriority(sorted[i - 1])) {
+          cumShift += AGGREGATE_BOUNDARY_GAP_PX / zoom;
+        }
         const h = heights[i];
         let colFontPx: number;
-        let topShift: number;
+        let slotExtra: number;
         if (zoomedIn) {
           const zoomedMax = mapLabelFontPx * Math.min(zoom / baseZoom, ZOOM_FONT_MAX_RATIO);
           // Limit font by the shorter of the two neighbor center-to-center gaps
@@ -1124,13 +1151,14 @@ export default function RealDataSankeyPage() {
           const gapMax = Math.min(distPrev, distNext) * zoom * LABEL_FIT_RATIO;
           // floor at mapLabelFontPx: intentional readability safeguard — labels may still overlap at high density
           colFontPx = Math.max(mapLabelFontPx, Math.min(zoomedMax, gapMax));
-          topShift = h < colFontPx / zoom ? Math.max(0, colFontPx / zoom - h) : 0;
+          slotExtra = h < colFontPx / zoom ? Math.max(0, colFontPx / zoom - h) : 0;
         } else {
           colFontPx = mapLabelFontPx;
-          topShift = h * zoom < mapLabelSlotPx ? Math.max(0, mapLabelSlotPx / zoom - h) : 0;
+          slotExtra = h * zoom < mapLabelSlotPx ? Math.max(0, mapLabelSlotPx / zoom - h) : 0;
         }
+        const topShift = slotExtra / 2;
         info.set(node.id, { cumShift, topShift, colFontPx });
-        cumShift += topShift;
+        cumShift += slotExtra;
       }
     }
     return info;

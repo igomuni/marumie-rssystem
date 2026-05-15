@@ -45,6 +45,43 @@ async function visibleSvgTextMatching(page: import('@playwright/test').Page, tex
   }, text);
 }
 
+async function aggregateBoundaryGaps(page: import('@playwright/test').Page): Promise<number[]> {
+  return page.locator('g.snk-node').evaluateAll(nodes => {
+    const rows = nodes.map(node => {
+      const texts = Array.from(node.querySelectorAll('text'));
+      const text = texts.at(-1);
+      const shape = node.querySelector('rect,path');
+      if (!text || !shape) return null;
+      const textBox = text.getBoundingClientRect();
+      const shapeBox = shape.getBoundingClientRect();
+      return {
+        text: text.textContent ?? '',
+        x: Math.round(shapeBox.left),
+        textBottom: textBox.bottom,
+        rectTop: shapeBox.top,
+      };
+    }).filter((row): row is NonNullable<typeof row> => row !== null);
+
+    const rowsByColumn = new Map<number, typeof rows>();
+    for (const row of rows) {
+      if (!rowsByColumn.has(row.x)) rowsByColumn.set(row.x, []);
+      rowsByColumn.get(row.x)!.push(row);
+    }
+
+    const gaps: number[] = [];
+    const aggregateLabelPattern = /^(?:[\d,]+(?:事業|支出先|省庁)|その他 \()/;
+    for (const columnRows of rowsByColumn.values()) {
+      columnRows.sort((a, b) => a.rectTop - b.rectTop);
+      for (let i = 1; i < columnRows.length; i++) {
+        if (aggregateLabelPattern.test(columnRows[i].text)) {
+          gaps.push(columnRows[i].rectTop - columnRows[i - 1].textBottom);
+        }
+      }
+    }
+    return gaps;
+  });
+}
+
 test.describe('sankey-svg interactions', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/sankey-svg');
@@ -70,6 +107,12 @@ test.describe('sankey-svg interactions', () => {
 
     await expect(page.getByTestId('sankey-node')).not.toHaveCount(0);
     await expect.poll(() => visibleNodeCount(page)).toBeGreaterThan(0);
+  });
+
+  test('aggregate nodes leave room for the previous TopN label', async ({ page }) => {
+    const gaps = await aggregateBoundaryGaps(page);
+    expect(gaps.length).toBeGreaterThan(0);
+    expect(Math.min(...gaps)).toBeGreaterThanOrEqual(6);
   });
 
   test('year selector can switch fiscal years', async ({ page }) => {
