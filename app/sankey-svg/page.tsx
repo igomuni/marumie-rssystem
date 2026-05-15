@@ -11,7 +11,7 @@ import {
   getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen,
 } from '@/app/lib/sankey-svg-constants';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
-import { filterTopN, computeLayout } from '@/app/lib/sankey-svg-filter';
+import { filterTopN, computeLayout, getTopMinistriesInScope } from '@/app/lib/sankey-svg-filter';
 import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
 import { parseAmountToYen } from '@/app/lib/format/yen';
 
@@ -200,7 +200,6 @@ export default function RealDataSankeyPage() {
   const [focusRelated, setFocusRelated] = useState(false);
   const [autoFocusRelated, setAutoFocusRelated] = useState(false);
   const [filterOnMinistryClick, setFilterOnMinistryClick] = useState(true);
-  const ministryFilterSnapshotRef = useRef<{ filterMinistryNames: string[]; selectedNodeId: string | null } | null>(null);
   const [year, setYear] = useState<'2024' | '2025'>('2025');
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
@@ -1280,10 +1279,9 @@ export default function RealDataSankeyPage() {
         .filter(n => n.type === 'project-budget' && n.projectId != null)
         .map(n => [`project-spending-${n.projectId}`, n.value] as const)
     );
-    const ministries = nodes.filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
-    let topMinistryNodes = ministries.slice(0, topMinistry);
-    const otherMinistries = ministries.slice(topMinistry);
-    if (otherMinistries.length === 1) topMinistryNodes = [...topMinistryNodes, otherMinistries[0]];
+    const recipientFocusMode = focusRelated && pinnedRecipientId != null;
+    const ministryFocusMode = focusRelated && pinnedMinistryName != null && !recipientFocusMode;
+    const { topMinistryNodes } = getTopMinistriesInScope(nodes, topMinistry, ministryFocusMode, pinnedMinistryName);
     const topMinistryNames = new Set(topMinistryNodes.map(n => n.name));
     const ranked = nodes
       .filter(n => n.type === 'project-spending' && topMinistryNames.has(n.ministry || ''))
@@ -1296,7 +1294,7 @@ export default function RealDataSankeyPage() {
         return b.value - a.value;
       });
     return new Map(ranked.map((n, i) => [n.id, i]));
-  }, [graphData, filterExcludedIds, topMinistry, projectSortBy]);
+  }, [graphData, filterExcludedIds, topMinistry, projectSortBy, focusRelated, pinnedRecipientId, pinnedMinistryName]);
 
   // Recipient count per project-spending node (from raw graphData)
   const projectRecipientCount = useMemo(() => {
@@ -1718,10 +1716,6 @@ export default function RealDataSankeyPage() {
     if (filterOnMinistryClick && node.type === 'ministry' && !node.aggregated) {
       const isSingleFilterMatch = filterMinistryNames.length === 1 && filterMinistryNames[0] === node.name;
       if (!isSingleFilterMatch) {
-        ministryFilterSnapshotRef.current = {
-          filterMinistryNames: [...filterMinistryNames],
-          selectedNodeId,
-        };
         setFilterMinistryNames([node.name]);
       }
     }
@@ -1889,7 +1883,6 @@ export default function RealDataSankeyPage() {
     setAcSpecial(true);
     setAcBoth(true);
     setAcNone(true);
-    ministryFilterSnapshotRef.current = null;
   }, []);
 
   const handleSearchSelect = useCallback((nodeId: string) => {

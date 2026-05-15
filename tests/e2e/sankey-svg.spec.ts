@@ -130,6 +130,7 @@ test.describe('sankey-svg interactions', () => {
       has: page.locator(`[title="${projectName}"]`),
     }).first();
     await expect(panelProject).toBeVisible({ timeout: 30_000 });
+    await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBe(0);
     await panelProject.click();
 
     await expect(page).toHaveURL(/sel=project-spending-7096/);
@@ -151,6 +152,7 @@ test.describe('sankey-svg interactions', () => {
     }).first();
     await expect(panelProject).toBeVisible({ timeout: 30_000 });
     await panelProject.scrollIntoViewIfNeeded();
+    await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBe(0);
     await panelProject.click();
 
     await expect(page).toHaveURL(/sel=project-budget-22144/);
@@ -226,7 +228,9 @@ test.describe('sankey-svg interactions', () => {
     await expect(page).toHaveURL(/sel=ministry-%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
     await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
 
-    await page.locator('svg text').filter({ hasText: ministryName }).first().click({ force: true });
+    await page.getByTitle('パネルを折りたたむ').click();
+    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await page.getByTitle('パネルを展開').click();
 
     await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
     await expect(page).toHaveURL(/sel=ministry-%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
