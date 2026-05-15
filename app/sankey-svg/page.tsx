@@ -1196,56 +1196,95 @@ export default function RealDataSankeyPage() {
     [selectedNodeId, layout],
   );
 
-  const connectedNodeIds = useMemo(() => {
-    if (!selectedNodeInLayout) return null;
+  const buildConnectedNodeIds = useCallback((origin: LayoutNode): Set<string> => {
     const ids = new Set<string>();
+    const layoutNodeIds = new Set(layout?.nodes.map(n => n.id) ?? []);
+    const aggProjectMembers = filtered?.aggNodeMembers?.get('__agg-project-spending') ?? [];
+    const aggRecipientIds = new Set((filtered?.aggNodeMembers?.get('__agg-recipient') ?? []).map(r => r.id));
+    const aggMinistryNames = new Set((filtered?.aggNodeMembers?.get('__agg-ministry') ?? []).map(m => m.name));
+
+    const aggProjectTargetsByMinistry = new Map<string, Set<string>>();
+    const getAggProjectTargetsForMinistry = (ministryName: string): Set<string> => {
+      const cached = aggProjectTargetsByMinistry.get(ministryName);
+      if (cached) return cached;
+      const memberProjectIds = new Set(aggProjectMembers.filter(m => m.ministry === ministryName).map(m => m.id));
+      const targets = new Set<string>();
+      for (const edge of graphData?.edges ?? []) {
+        if (!memberProjectIds.has(edge.source)) continue;
+        if (layoutNodeIds.has(edge.target)) targets.add(edge.target);
+        else if (aggRecipientIds.has(edge.target)) targets.add('__agg-recipient');
+      }
+      aggProjectTargetsByMinistry.set(ministryName, targets);
+      return targets;
+    };
+
+    const aggProjectSourcesByRecipient = new Map<string, Set<string>>();
+    const getAggProjectSourcesForRecipient = (recipientId: string): Set<string> => {
+      const cached = aggProjectSourcesByRecipient.get(recipientId);
+      if (cached) return cached;
+      const targetIds = recipientId === '__agg-recipient' ? aggRecipientIds : new Set([recipientId]);
+      const connectedProjectIds = new Set<string>();
+      for (const edge of graphData?.edges ?? []) {
+        if (targetIds.has(edge.target)) connectedProjectIds.add(edge.source);
+      }
+      const sources = new Set<string>();
+      for (const member of aggProjectMembers) {
+        if (!connectedProjectIds.has(member.id) || !member.ministry) continue;
+        const ministryId = `ministry-${member.ministry}`;
+        if (layoutNodeIds.has(ministryId)) sources.add(ministryId);
+        else if (aggMinistryNames.has(member.ministry)) sources.add('__agg-ministry');
+      }
+      aggProjectSourcesByRecipient.set(recipientId, sources);
+      return sources;
+    };
+
+    const canFollowAggregateLink = (current: LayoutNode, next: LayoutNode, direction: 'up' | 'down'): boolean => {
+      if (direction === 'down' && current.id === '__agg-project-spending' && origin.type === 'ministry' && !origin.aggregated) {
+        return getAggProjectTargetsForMinistry(origin.name).has(next.id);
+      }
+      if (direction === 'up' && current.id === '__agg-project-budget' && origin.type === 'recipient') {
+        return getAggProjectSourcesForRecipient(origin.id).has(next.id);
+      }
+      return true;
+    };
+
     // BFS upstream (follow targetLinks → source recursively) — separate visited set
     const uVisited = new Set<string>();
-    const uQueue = [selectedNodeInLayout];
+    const uQueue = [origin];
     while (uQueue.length) {
       const n = uQueue.shift()!;
       if (uVisited.has(n.id)) continue;
       uVisited.add(n.id);
       ids.add(n.id);
-      for (const l of n.targetLinks) if (!uVisited.has(l.source.id)) uQueue.push(l.source);
+      for (const l of n.targetLinks) {
+        if (!uVisited.has(l.source.id) && canFollowAggregateLink(n, l.source, 'up')) uQueue.push(l.source);
+      }
     }
     // BFS downstream (follow sourceLinks → target recursively) — separate visited set
     const dVisited = new Set<string>();
-    const dQueue = [selectedNodeInLayout];
+    const dQueue = [origin];
     while (dQueue.length) {
       const n = dQueue.shift()!;
       if (dVisited.has(n.id)) continue;
       dVisited.add(n.id);
       ids.add(n.id);
-      for (const l of n.sourceLinks) if (!dVisited.has(l.target.id)) dQueue.push(l.target);
+      for (const l of n.sourceLinks) {
+        if (!dVisited.has(l.target.id) && canFollowAggregateLink(n, l.target, 'down')) dQueue.push(l.target);
+      }
     }
     return ids;
-  }, [selectedNodeInLayout]);
+  }, [filtered?.aggNodeMembers, graphData?.edges, layout?.nodes]);
+
+  const connectedNodeIds = useMemo(() => {
+    if (!selectedNodeInLayout) return null;
+    return buildConnectedNodeIds(selectedNodeInLayout);
+  }, [buildConnectedNodeIds, selectedNodeInLayout]);
 
   // Connected node IDs for hovered node (upstream + downstream BFS)
   const hoveredNodeIds = useMemo(() => {
     if (!hoveredNode || selectedNode) return null;
-    const ids = new Set<string>();
-    const uVisited = new Set<string>();
-    const uQueue = [hoveredNode];
-    while (uQueue.length) {
-      const n = uQueue.shift()!;
-      if (uVisited.has(n.id)) continue;
-      uVisited.add(n.id);
-      ids.add(n.id);
-      for (const l of n.targetLinks) if (!uVisited.has(l.source.id)) uQueue.push(l.source);
-    }
-    const dVisited = new Set<string>();
-    const dQueue = [hoveredNode];
-    while (dQueue.length) {
-      const n = dQueue.shift()!;
-      if (dVisited.has(n.id)) continue;
-      dVisited.add(n.id);
-      ids.add(n.id);
-      for (const l of n.sourceLinks) if (!dVisited.has(l.target.id)) dQueue.push(l.target);
-    }
-    return ids;
-  }, [hoveredNode, selectedNode]);
+    return buildConnectedNodeIds(hoveredNode);
+  }, [buildConnectedNodeIds, hoveredNode, selectedNode]);
 
   // Spending partner of the currently hovered merged project node (for link highlight)
   const hoveredPartnerSpendingId = hoveredNode?.type === 'project-budget' && hoveredNode.projectId != null

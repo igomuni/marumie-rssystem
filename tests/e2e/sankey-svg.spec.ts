@@ -82,6 +82,17 @@ async function aggregateBoundaryGaps(page: import('@playwright/test').Page): Pro
   });
 }
 
+async function visibleSvgTextFill(page: import('@playwright/test').Page, text: string): Promise<string | null> {
+  return page.locator('svg text').evaluateAll((nodes, expected) => {
+    const node = nodes.find(candidate => {
+      if (!candidate.textContent?.includes(expected)) return false;
+      const rect = candidate.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+    return node?.getAttribute('fill') ?? null;
+  }, text);
+}
+
 test.describe('sankey-svg interactions', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/sankey-svg');
@@ -113,6 +124,45 @@ test.describe('sankey-svg interactions', () => {
     const gaps = await aggregateBoundaryGaps(page);
     expect(gaps.length).toBeGreaterThan(0);
     expect(Math.min(...gaps)).toBeGreaterThanOrEqual(6);
+  });
+
+  test('hover highlight does not leak through aggregate project nodes', async ({ page }) => {
+    const ministryName = '警察庁';
+    const unrelatedRecipientName = '年金受給者';
+
+    await expect(page.locator('svg text').filter({ hasText: ministryName }).first()).toBeVisible();
+    await expect(page.locator('svg text').filter({ hasText: unrelatedRecipientName }).first()).toBeVisible();
+
+    await page.locator('svg text').filter({ hasText: ministryName }).first().hover();
+    await page.waitForTimeout(300);
+    await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName)).toBe('#bbb');
+
+    await page.locator('svg text').filter({ hasText: unrelatedRecipientName }).first().hover();
+    await page.waitForTimeout(300);
+    await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#bbb');
+  });
+
+  test('selected highlight follows aggregate nodes without leaking to unrelated ministries', async ({ page }) => {
+    const ministryName = '警察庁';
+    const recipientName = '年金受給者';
+    const aggregateProjectLabel = '5,744事業';
+    const aggregateRecipientLabel = '12,741支出先';
+
+    await page.goto('/sankey-svg?fmc=0');
+    await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 30_000 });
+
+    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, aggregateProjectLabel)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, aggregateRecipientLabel)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, recipientName)).toBe('#bbb');
+
+    await page.locator('svg text').filter({ hasText: recipientName }).first().click();
+    await expect.poll(() => visibleSvgTextFill(page, recipientName)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, aggregateProjectLabel)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#bbb');
   });
 
   test('year selector can switch fiscal years', async ({ page }) => {
