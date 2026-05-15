@@ -44,7 +44,7 @@ export const TYPE_COLORS: Record<string, string> = {
 
 export const TYPE_LABELS: Record<string, string> = {
   'total': '予算総計',
-  'ministry': '府省庁',
+  'ministry': '省庁',
   'project-budget': '事業（予算）',
   'project-spending': '事業（支出）',
   'recipient': '支出先',

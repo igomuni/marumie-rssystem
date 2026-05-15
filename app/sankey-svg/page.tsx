@@ -106,7 +106,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const pr = p.get('pr'); if (pr !== null) result.pinnedRecipientId = pr;
   const pm = p.get('pm'); if (pm !== null) result.pinnedMinistryName = pm;
   const ro = p.get('ro'); if (ro !== null) { const n = parseInt(ro, 10); if (!isNaN(n)) result.recipientOffset = Math.max(0, n); }
-  const ot = p.get('ot'); if (ot === 'p') result.offsetTarget = 'project';
+  const ot = p.get('ot'); if (ot === 'p') result.offsetTarget = 'project'; else if (ot === 'r') result.offsetTarget = 'recipient';
   const po = p.get('po'); if (po !== null) { const n = parseInt(po, 10); if (!isNaN(n)) result.projectOffset = Math.max(0, n); }
   const tm = p.get('tm'); if (tm !== null) { const n = parseInt(tm, 10); if (!isNaN(n)) result.topMinistry = Math.max(1, Math.min(37, n)); }
   const tp = p.get('tp'); if (tp !== null) { const n = parseInt(tp, 10); if (!isNaN(n)) result.topProject = Math.max(1, Math.min(300, n)); }
@@ -182,7 +182,7 @@ export default function RealDataSankeyPage() {
   const [topRecipient, setTopRecipient] = useState(50);
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [projectOffset, setProjectOffset] = useState(0);
-  const [offsetTarget, setOffsetTarget] = useState<'recipient' | 'project'>('recipient');
+  const [offsetTarget, setOffsetTarget] = useState<'recipient' | 'project'>('project');
   const [pinnedProjectId, setPinnedProjectId] = useState<string | null>(null);
   const [pinnedRecipientId, setPinnedRecipientId] = useState<string | null>(null);
   const [pinnedMinistryName, setPinnedMinistryName] = useState<string | null>(null);
@@ -344,7 +344,7 @@ export default function RealDataSankeyPage() {
     const handler = () => {
       const parsed = parseSearchParams(window.location.search);
       // Pre-update prev refs so reset effects don't fire for URL-restored values
-      prevOffsetTargetRef.current = parsed.offsetTarget ?? 'recipient';
+      prevOffsetTargetRef.current = parsed.offsetTarget ?? 'project';
       prevProjectSortByRef.current = parsed.projectSortBy ?? 'budget';
       prevTopProjectRef.current = parsed.topProject ?? 50;
       setSelectedNodeId(parsed.selectedNodeId ?? null);
@@ -352,7 +352,7 @@ export default function RealDataSankeyPage() {
       setPinnedRecipientId(parsed.pinnedRecipientId ?? null);
       setPinnedMinistryName(parsed.pinnedMinistryName ?? null);
       setRecipientOffset(parsed.recipientOffset ?? 0);
-      setOffsetTarget(parsed.offsetTarget ?? 'recipient');
+      setOffsetTarget(parsed.offsetTarget ?? 'project');
       setProjectOffset(parsed.projectOffset ?? 0);
       setTopMinistry(parsed.topMinistry ?? 37);
       setTopProject(parsed.topProject ?? 50);
@@ -405,7 +405,7 @@ export default function RealDataSankeyPage() {
     if (pinnedRecipientId !== null) p.set('pr', pinnedRecipientId);
     if (pinnedMinistryName !== null) p.set('pm', pinnedMinistryName);
     if (recipientOffset !== 0) p.set('ro', String(recipientOffset));
-    if (offsetTarget === 'project') p.set('ot', 'p');
+    if (offsetTarget === 'recipient') p.set('ot', 'r');
     if (projectOffset !== 0) p.set('po', String(projectOffset));
     if (topMinistry !== 37) p.set('tm', String(topMinistry));
     if (topProject !== 50) p.set('tp', String(topProject));
@@ -943,6 +943,19 @@ export default function RealDataSankeyPage() {
   // Pre-filter exclusion set: built from filter conditions, applied before filterTopN
   const filterExcludedIds = useMemo(() => {
     if (!graphData) return null;
+    const protectedProjectIds = new Set<string>();
+    const protectProjectNode = (nodeId: string | null) => {
+      if (!nodeId) return;
+      if (nodeId.startsWith('project-spending-')) {
+        protectedProjectIds.add(nodeId);
+        protectedProjectIds.add(nodeId.replace('project-spending-', 'project-budget-'));
+      } else if (nodeId.startsWith('project-budget-')) {
+        protectedProjectIds.add(nodeId);
+        protectedProjectIds.add(nodeId.replace('project-budget-', 'project-spending-'));
+      }
+    };
+    protectProjectNode(selectedNodeId);
+    protectProjectNode(pinnedProjectId);
     const minBudgetYen = parseAmountToYen(filterMinBudgetText);
     const maxBudgetYen = parseAmountToYen(filterMaxBudgetText);
     const minSpendingYen = parseAmountToYen(filterMinSpendingText);
@@ -1004,9 +1017,10 @@ export default function RealDataSankeyPage() {
           .map(e => e.source)
       );
       for (const [pid, sn] of spendingByPid) {
+        const bn = budgetNodeByPid.get(pid);
+        if (protectedProjectIds.has(sn.id) || (bn != null && protectedProjectIds.has(bn.id))) continue;
         if (!excluded.has(sn.id) && !projectsWithSurvivingRecipients.has(sn.id)) {
           excluded.add(sn.id);
-          const bn = budgetNodeByPid.get(pid);
           if (bn) excluded.add(bn.id);
         }
       }
@@ -1035,7 +1049,7 @@ export default function RealDataSankeyPage() {
       }
     }
     return excluded.size > 0 ? excluded : null;
-  }, [graphData, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone]);
+  }, [graphData, selectedNodeId, pinnedProjectId, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -1241,27 +1255,38 @@ export default function RealDataSankeyPage() {
     return stats;
   }, [graphData]);
 
-  // Global recipient rank (0-indexed, value-descending) — for offset jump
+  // Recipient rank in the same pre-filtered scope as recipient-offset mode — for offset jump
   const allRecipientRanks = useMemo(() => {
     if (!graphData) return new Map<string, number>();
+    const edges = filterExcludedIds
+      ? graphData.edges.filter(e => !filterExcludedIds.has(e.source) && !filterExcludedIds.has(e.target))
+      : graphData.edges;
     const amounts = new Map<string, number>();
-    for (const e of graphData.edges) {
+    for (const e of edges) {
       if (e.target.startsWith('r-')) amounts.set(e.target, (amounts.get(e.target) || 0) + e.value);
     }
     const sorted = Array.from(amounts.entries()).sort((a, b) => b[1] - a[1]);
     return new Map(sorted.map(([id], i) => [id, i]));
-  }, [graphData]);
+  }, [graphData, filterExcludedIds]);
 
-  // Global project rank (0-indexed) — for projectOffset jump
+  // Project rank in the same scope as project-offset mode — for projectOffset jump
   const allProjectRanks = useMemo(() => {
     if (!graphData) return new Map<string, number>();
+    const nodes = filterExcludedIds
+      ? graphData.nodes.filter(n => !filterExcludedIds.has(n.id))
+      : graphData.nodes;
     const budgetValues = new Map<string, number>(
-      graphData.nodes
+      nodes
         .filter(n => n.type === 'project-budget' && n.projectId != null)
         .map(n => [`project-spending-${n.projectId}`, n.value] as const)
     );
-    const ranked = graphData.nodes
-      .filter(n => n.type === 'project-spending')
+    const ministries = nodes.filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
+    let topMinistryNodes = ministries.slice(0, topMinistry);
+    const otherMinistries = ministries.slice(topMinistry);
+    if (otherMinistries.length === 1) topMinistryNodes = [...topMinistryNodes, otherMinistries[0]];
+    const topMinistryNames = new Set(topMinistryNodes.map(n => n.name));
+    const ranked = nodes
+      .filter(n => n.type === 'project-spending' && topMinistryNames.has(n.ministry || ''))
       .sort((a, b) => {
         if (projectSortBy === 'budget') {
           const ba = budgetValues.get(a.id) ?? 0;
@@ -1271,7 +1296,7 @@ export default function RealDataSankeyPage() {
         return b.value - a.value;
       });
     return new Map(ranked.map((n, i) => [n.id, i]));
-  }, [graphData, projectSortBy]);
+  }, [graphData, filterExcludedIds, topMinistry, projectSortBy]);
 
   // Recipient count per project-spending node (from raw graphData)
   const projectRecipientCount = useMemo(() => {
@@ -1283,7 +1308,7 @@ export default function RealDataSankeyPage() {
     return countMap;
   }, [graphData]);
 
-  // Panel sections — 3-tab data (府省庁 / 事業 / 支出先)
+  // Panel sections — 3-tab data (省庁 / 事業 / 支出先)
   type PanelEntry = { id: string; name: string; value: number; ministry?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; projectCount?: number; };
   type PanelSections = { ministries: PanelEntry[]; projects: PanelEntry[]; recipients: PanelEntry[]; };
   const panelSections = useMemo((): PanelSections | null => {
@@ -1478,19 +1503,50 @@ export default function RealDataSankeyPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNode?.id, year]);
 
+  const nodeByLayoutId = useMemo(() => {
+    const m = new Map<string, LayoutNode>();
+    for (const node of layout?.nodes ?? []) m.set(node.id, node);
+    return m;
+  }, [layout]);
+
+  const getRenderedYBounds = useCallback((node: LayoutNode): { top: number; bottom: number } => {
+    let renderNode = node;
+    let effectiveHeight = Math.max(1, node.y1 - node.y0);
+    if (node.type === 'project-spending') {
+      const budgetId = node.id === '__agg-project-spending'
+        ? '__agg-project-budget'
+        : node.projectId != null ? `project-budget-${node.projectId}` : null;
+      const budgetNode = budgetId ? nodeByLayoutId.get(budgetId) : null;
+      if (budgetNode) {
+        renderNode = budgetNode;
+        effectiveHeight = Math.max(effectiveHeight, Math.max(1, budgetNode.y1 - budgetNode.y0));
+      }
+    } else if (node.type === 'project-budget' || node.id === '__agg-project-budget') {
+      const spendingId = node.id === '__agg-project-budget'
+        ? '__agg-project-spending'
+        : node.projectId != null ? `project-spending-${node.projectId}` : null;
+      const spendingNode = spendingId ? nodeByLayoutId.get(spendingId) : null;
+      if (spendingNode) effectiveHeight = Math.max(effectiveHeight, Math.max(1, spendingNode.y1 - spendingNode.y0));
+    }
+    const { cumShift = 0, topShift = 0 } = nodeShiftInfo.get(renderNode.id) ?? {};
+    const top = renderNode.y0 + cumShift + topShift;
+    return { top, bottom: top + effectiveHeight };
+  }, [nodeByLayoutId, nodeShiftInfo]);
+
   // Imperatively focus a layout node (direct call + pending effect)
   const focusOnNode = useCallback((node: LayoutNode) => {
     const container = containerRef.current;
     if (!container) return;
     const cH = container.clientHeight;
-    const cy = MARGIN.top + node.y0 + (node.y1 - node.y0) / 2;
-    const h = node.y1 - node.y0;
+    const bounds = getRenderedYBounds(node);
+    const cy = MARGIN.top + (bounds.top + bounds.bottom) / 2;
+    const h = bounds.bottom - bounds.top;
     const minZoomForLabel = 10 / (h + NODE_PAD);
     const maxZoom = Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER);
     const targetK = Math.max(zoom, Math.min(maxZoom, minZoomForLabel * 1.2));
     setZoom(targetK);
     setPan(prev => ({ x: prev.x, y: cH / 2 - cy * targetK }));
-  }, [zoom, baseZoom]);
+  }, [zoom, baseZoom, getRenderedYBounds]);
 
   const focusOnNeighborhood = useCallback((nodeOverride?: LayoutNode) => {
     const node = nodeOverride ?? selectedNode;
@@ -1509,8 +1565,9 @@ export default function RealDataSankeyPage() {
     }
     const neighborNodes = layout.nodes.filter(n => neighborIds.has(n.id));
     if (neighborNodes.length === 0) return;
-    const minY = Math.min(...neighborNodes.map(n => n.y0));
-    const maxY = Math.max(...neighborNodes.map(n => n.y1));
+    const neighborBounds = neighborNodes.map(getRenderedYBounds);
+    const minY = Math.min(...neighborBounds.map(b => b.top));
+    const maxY = Math.max(...neighborBounds.map(b => b.bottom));
     const PADDING = 40;
     const boxH = (maxY - minY) + PADDING * 2;
     const minZoom = Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER);
@@ -1519,7 +1576,7 @@ export default function RealDataSankeyPage() {
     const centerY = MARGIN.top + (minY + maxY) / 2;
     setZoom(targetK);
     setPan(prev => ({ x: prev.x, y: cH / 2 - centerY * targetK }));
-  }, [selectedNode, selectedNodeInLayout, layout, baseZoom]);
+  }, [selectedNode, selectedNodeInLayout, layout, baseZoom, getRenderedYBounds]);
 
   const handleConnectionClick = useCallback((nodeId: string) => {
     // If already in layout, select and focus directly (no effect needed)
@@ -1628,8 +1685,12 @@ export default function RealDataSankeyPage() {
         ? nodeId.replace('project-budget-', 'project-spending-')
         : nodeId;
       const rank = allProjectRanks.get(spendingId);
-      if (rank !== undefined) jumpToProjectRank(rank);
-      setPinnedProjectId(null);
+      if (rank !== undefined) {
+        jumpToProjectRank(rank);
+        setPinnedProjectId(null);
+      } else {
+        setPinnedProjectId(spendingId);
+      }
     } else {
       setPinnedProjectId(null);
     }
@@ -1652,22 +1713,10 @@ export default function RealDataSankeyPage() {
   const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
     e.stopPropagation();
     if (didPanRef.current) return;
-    // 省庁ノード × filterOnMinistryClick 連動: 単独設定 ⇄ 直前スナップショット復元
-    // 「単独設定状態」= フィルタが当該省庁単独（選択ノードには依存しない）
+    // 省庁ノード × filterOnMinistryClick 連動: 未設定時だけ単独フィルタを設定する。
+    // 解除はフィルタ解除ボタンに一本化し、再クリックはサイドパネル表示を優先する。
     if (filterOnMinistryClick && node.type === 'ministry' && !node.aggregated) {
       const isSingleFilterMatch = filterMinistryNames.length === 1 && filterMinistryNames[0] === node.name;
-      if (isSingleFilterMatch && ministryFilterSnapshotRef.current) {
-        pendingHistoryAction.current = 'push';
-        const snap = ministryFilterSnapshotRef.current;
-        ministryFilterSnapshotRef.current = null;
-        setFilterMinistryNames(snap.filterMinistryNames);
-        setPinnedProjectId(null);
-        setPinnedRecipientId(null);
-        setPinnedMinistryName(null);
-        setFocusRelated(false);
-        selectNode(snap.selectedNodeId);
-        return;
-      }
       if (!isSingleFilterMatch) {
         ministryFilterSnapshotRef.current = {
           filterMinistryNames: [...filterMinistryNames],
@@ -1676,7 +1725,7 @@ export default function RealDataSankeyPage() {
         setFilterMinistryNames([node.name]);
       }
     }
-    const newId = selectedNodeId === node.id ? null : node.id;
+    const newId = selectedNodeId === node.id && node.type !== 'ministry' ? null : node.id;
     if (newId === null && focusRelated) {
       // Pin中ノードを再クリック → フィルターのみOFF（Pin解除しない）
       exitFocusRelated(selectedNodeId ?? undefined);
@@ -1763,7 +1812,7 @@ export default function RealDataSankeyPage() {
       const qLower = q.toLocaleLowerCase();
       matcher = name => name.toLocaleLowerCase().includes(qLower);
     }
-    // 府省庁フィルタが設定されている場合、検索対象を選択府省庁の事業・支出先に絞る
+    // 省庁フィルタが設定されている場合、検索対象を選択省庁の事業・支出先に絞る
     const searchMinistrySet = new Set(filterMinistryNames);
     let allowedIds: Set<string> | null = null;
     if (filterMinistryNames.length > 0) {
@@ -1913,12 +1962,6 @@ export default function RealDataSankeyPage() {
     // resetViewport is useCallback(()=>{}, []) — stable, intentionally omitted from deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout, focusOnNeighborhood, isPanelCollapsed]);
-
-  const nodeByLayoutId = useMemo(() => {
-    const m = new Map<string, LayoutNode>();
-    for (const node of layout?.nodes ?? []) m.set(node.id, node);
-    return m;
-  }, [layout]);
 
   const horizontalScale = useMemo(() => {
     if (!layout) return 1;
@@ -2551,7 +2594,7 @@ export default function RealDataSankeyPage() {
             const count = hoveredColIndex === 0 ? null : nodes.length;
             const colDescs = [
               '全事業の予算額合計（予算案ベース）',
-              '各府省庁所管事業の予算額合計',
+              '各省庁所管事業の予算額合計',
               '各事業の予算額（左：予算 / 右：支出）',
               '全エッジ合計（ウィンドウ外流入含む）',
             ];
@@ -2887,7 +2930,7 @@ export default function RealDataSankeyPage() {
                 );
               })()}
 
-              {/* 府省庁 / 事業 / 支出先 3タブ */}
+              {/* 省庁 / 事業 / 支出先 3タブ */}
               {panelSections && (() => {
                 const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: PANEL_META_FONT_PX, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
                 const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
@@ -2909,7 +2952,7 @@ export default function RealDataSankeyPage() {
                     {/* Tab bar */}
                     <div style={{ display: 'flex', borderBottom: '1px solid #eee', flexShrink: 0, background: '#fff' }}>
                       <button type="button" style={panelTab === 'ministry' ? tabBtnActive : tabBtnBase} onClick={() => setPanelTab('ministry')}>
-                        府省庁<span style={{ fontWeight: 400, fontSize: META_FONT_PX }}>({panelSections.ministries.length})</span>
+                        省庁<span style={{ fontWeight: 400, fontSize: META_FONT_PX }}>({panelSections.ministries.length})</span>
                       </button>
                       <button type="button" style={panelTab === 'project' ? tabBtnActive : tabBtnBase} onClick={() => setPanelTab('project')}>
                         事業<span style={{ fontWeight: 400, fontSize: META_FONT_PX }}>({panelSections.projects.length})</span>
@@ -2920,7 +2963,7 @@ export default function RealDataSankeyPage() {
                     </div>
                     {/* Tab content */}
                     <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
-                      {/* 府省庁タブ */}
+                      {/* 省庁タブ */}
                       {panelTab === 'ministry' && (() => {
                         const items = panelSections.ministries;
                         if (items.length === 0) return <p style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
@@ -3142,11 +3185,11 @@ export default function RealDataSankeyPage() {
                     </div>
                   );
                 })()}
-                {/* 府省庁フィルタ（複数選択ドロップダウン） */}
+                {/* 省庁フィルタ（複数選択ドロップダウン） */}
                 {(() => {
                   const ministryNodes = (graphData?.nodes ?? []).filter(n => n.type === 'ministry').sort((a, b) => b.value - a.value);
                   const allSelected = filterMinistryNames.length === 0;
-                  const label = allSelected ? '全府省庁' : filterMinistryNames.length === 1 ? filterMinistryNames[0] : `選択中 (${filterMinistryNames.length}/${ministryNodes.length})`;
+                  const label = allSelected ? '全省庁' : filterMinistryNames.length === 1 ? filterMinistryNames[0] : `選択中 (${filterMinistryNames.length}/${ministryNodes.length})`;
                   const chevron = (
                     <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="#aaa"
                       style={{ transform: showMinistryDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', display: 'block' }}>
@@ -3390,8 +3433,8 @@ export default function RealDataSankeyPage() {
                 onChange={e => { pendingHistoryAction.current = 'replace'; setOffsetTarget(e.target.value as 'recipient' | 'project'); }}
                 style={{ fontSize: META_FONT_PX, border: '1px solid #ccc', borderRadius: 3, padding: '1px 2px', background: '#fff', color: '#555', cursor: 'pointer' }}
               >
-                <option value="recipient">支出先</option>
                 <option value="project">事業</option>
+                <option value="recipient">支出先</option>
               </select>
               <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ color: '#555', fontSize: META_FONT_PX }}>Top</span>

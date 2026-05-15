@@ -101,10 +101,9 @@ export function filterTopN(
 
     // Window projects: [effectiveProjectOffset, effectiveProjectOffset + topProject)
     const windowSlice = ranked.slice(effectiveProjectOffset, effectiveProjectOffset + topProject);
-    // If pinned project is above-window, force it into the window
+    // If pinned project is outside the window, force it in as an extra visible project.
     if (pinnedProjectId) {
-      const aboveWinIds = aboveWindowSpendingIds;
-      if (aboveWinIds.has(pinnedProjectId) && !windowSlice.some(n => n.id === pinnedProjectId)) {
+      if (!windowSlice.some(n => n.id === pinnedProjectId)) {
         const pinned = ranked.find(n => n.id === pinnedProjectId);
         if (pinned) windowSlice.push(pinned);
       }

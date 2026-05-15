@@ -26,6 +26,25 @@ async function selectSearchResultByTitle(page: import('@playwright/test').Page, 
   await result.click();
 }
 
+async function visibleSvgTextMatching(page: import('@playwright/test').Page, text: string): Promise<number> {
+  return page.locator('svg text').evaluateAll((nodes, expected) => {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    return nodes.filter(node => {
+      if (!node.textContent?.includes(expected)) return false;
+      const rect = node.getBoundingClientRect();
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        rect.right > 0 &&
+        rect.bottom > 0 &&
+        rect.left < viewportWidth &&
+        rect.top < viewportHeight
+      );
+    }).length;
+  }, text);
+}
+
 test.describe('sankey-svg interactions', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/sankey-svg');
@@ -94,6 +113,125 @@ test.describe('sankey-svg interactions', () => {
     await expect(page.getByTestId('year-select')).toHaveValue('2025');
     await expect(page).toHaveURL(/sel=r-10/);
     await expect.poll(() => visibleNodeCount(page)).toBeGreaterThan(0);
+    expect(pageErrors).toEqual([]);
+  });
+
+  test('selecting a project from the side panel focuses the rendered project', async ({ page }) => {
+    const recipientName = '国立研究開発法人新エネルギー・産業技術総合開発機構';
+    const projectName = 'GX分野のディープテック・スタートアップ支援事業';
+    const pageErrors: string[] = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+
+    await page.getByTestId('search-input').fill(recipientName);
+    await selectSearchResultByTitle(page, recipientName);
+    await expect(page).toHaveURL(/sel=r-10/);
+
+    const panelProject = page.locator('button').filter({
+      has: page.locator(`[title="${projectName}"]`),
+    }).first();
+    await expect(panelProject).toBeVisible({ timeout: 30_000 });
+    await panelProject.click();
+
+    await expect(page).toHaveURL(/sel=project-spending-7096/);
+    await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBeGreaterThan(0);
+    expect(pageErrors).toEqual([]);
+  });
+
+  test('selecting a zero-value Digital Agency project from the side panel renders and focuses it', async ({ page }) => {
+    const ministryName = 'デジタル庁';
+    const projectName = '電子的な属性証明の活用推進における要件等の策定業務';
+    const pageErrors: string[] = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+
+    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
+
+    const panelProject = page.locator('button').filter({
+      has: page.locator(`[title="${projectName}"]`),
+    }).first();
+    await expect(panelProject).toBeVisible({ timeout: 30_000 });
+    await panelProject.scrollIntoViewIfNeeded();
+    await panelProject.click();
+
+    await expect(page).toHaveURL(/sel=project-budget-22144/);
+    await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBeGreaterThan(0);
+    expect(pageErrors).toEqual([]);
+  });
+
+  test('project offset mode uses the filtered project rank when selecting a Digital Agency project', async ({ page }) => {
+    const ministryName = 'デジタル庁';
+    const projectName = '電子調達システム(情報通信技術調達等適正・効率化推進費)';
+    const pageErrors: string[] = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+
+    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
+
+    await page.getByTestId('offset-target-select').selectOption('project');
+    await expect(page.getByTestId('offset-target-select')).toHaveValue('project');
+
+    const panelProject = page.locator('button').filter({
+      has: page.locator(`[title="${projectName}"]`),
+    }).first();
+    await expect(panelProject).toBeVisible({ timeout: 30_000 });
+    await panelProject.scrollIntoViewIfNeeded();
+    await panelProject.click();
+
+    await expect(page).toHaveURL(/sel=project-budget-5550/);
+    await expect(page.getByTestId('offset-target-select')).toHaveValue('project');
+    await expect(page).not.toHaveURL(/ot=r/);
+    await expect(page).not.toHaveURL(/po=4783/);
+    await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBeGreaterThan(0);
+    expect(pageErrors).toEqual([]);
+  });
+
+  test('recipient offset mode recenters on the filtered representative recipient for a Digital Agency project', async ({ page }) => {
+    const ministryName = 'デジタル庁';
+    const projectName = '電子調達システム(情報通信技術調達等適正・効率化推進費)';
+    const pageErrors: string[] = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+
+    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
+
+    await page.getByTestId('offset-target-select').selectOption('recipient');
+    await expect(page.getByTestId('offset-target-select')).toHaveValue('recipient');
+    for (let i = 0; i < 10; i++) {
+      await page.getByTestId('recipient-offset-next').click();
+    }
+    await expect(page).toHaveURL(/ot=r/);
+    await expect(page).toHaveURL(/ro=10/);
+    await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBe(0);
+
+    const panelProject = page.locator('button').filter({
+      has: page.locator(`[title="${projectName}"]`),
+    }).first();
+    await expect(panelProject).toBeVisible({ timeout: 30_000 });
+    await panelProject.scrollIntoViewIfNeeded();
+    await panelProject.click();
+
+    await expect(page).toHaveURL(/sel=project-budget-5550/);
+    await expect(page).toHaveURL(/pp=project-spending-5550/);
+    await expect(page).not.toHaveURL(/ro=10/);
+    await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBeGreaterThan(0);
+    expect(pageErrors).toEqual([]);
+  });
+
+  test('clicking an already-filtered ministry keeps the ministry filter and shows its side panel', async ({ page }) => {
+    const ministryName = 'デジタル庁';
+    const pageErrors: string[] = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+
+    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await expect(page).toHaveURL(/sel=ministry-%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
+    await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
+
+    await page.locator('svg text').filter({ hasText: ministryName }).first().click({ force: true });
+
+    await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
+    await expect(page).toHaveURL(/sel=ministry-%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
+    await expect(page.getByText(ministryName).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /省庁/ }).first()).toBeVisible();
     expect(pageErrors).toEqual([]);
   });
 });
