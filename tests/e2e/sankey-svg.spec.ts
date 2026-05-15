@@ -120,6 +120,44 @@ test.describe('sankey-svg interactions', () => {
     await expect.poll(() => visibleNodeCount(page)).toBeGreaterThan(0);
   });
 
+  test('search box and results resize with the base font size', async ({ page }) => {
+    const recipientName = '国立研究開発法人新エネルギー・産業技術総合開発機構';
+    const projectName = 'GX分野のディープテック・スタートアップ支援事業';
+    const beforeWidth = await page.getByTestId('search-input').evaluate(input =>
+      input.closest('[data-pan-disabled="true"]')?.getBoundingClientRect().width ?? 0
+    );
+
+    await page.getByLabel('表示設定を開く').click();
+    await page.getByLabel('基準フォントサイズ(数値)').fill('24');
+    await page.getByLabel('基準フォントサイズ(数値)').press('Enter');
+
+    const afterWidth = await page.getByTestId('search-input').evaluate(input =>
+      input.closest('[data-pan-disabled="true"]')?.getBoundingClientRect().width ?? 0
+    );
+    expect(afterWidth).toBeGreaterThan(beforeWidth);
+
+    await page.getByTestId('search-input').fill('年金');
+    const firstResult = page.getByTestId('search-result').first();
+    await expect(firstResult).toBeVisible({ timeout: 30_000 });
+    await expect.poll(() => firstResult.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+
+    await page.getByTestId('search-input').fill(projectName);
+    const projectSearchResult = page.getByTestId('search-result').filter({
+      has: page.locator(`[title="${projectName}"]`),
+    }).first();
+    await expect(projectSearchResult).toBeVisible({ timeout: 30_000 });
+    await expect(projectSearchResult.getByText(/PID:7096/)).toBeVisible();
+
+    await page.getByTestId('search-input').fill(recipientName);
+    await selectSearchResultByTitle(page, recipientName);
+    const panelProject = page.locator('button').filter({
+      has: page.locator(`[title="${projectName}"]`),
+    }).first();
+    await expect(panelProject).toBeVisible({ timeout: 30_000 });
+    await expect(panelProject.getByText(/PID:7096/)).toBeVisible();
+    await expect.poll(() => panelProject.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+  });
+
   test('aggregate nodes leave room for the previous TopN label', async ({ page }) => {
     const gaps = await aggregateBoundaryGaps(page);
     expect(gaps.length).toBeGreaterThan(0);
