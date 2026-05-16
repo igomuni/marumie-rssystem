@@ -110,6 +110,21 @@ type ShiftLayoutNode = {
   aggregated?: boolean;
 };
 
+function getAccountBadgeStyle(category?: string | null): { label: string; background: string } | null {
+  if (!category) return null;
+  const generalColor = '#e45f6f';
+  const specialColor = '#5f8ee8';
+  if (category === 'general') return { label: '一般', background: generalColor };
+  if (category === 'special') return { label: '特別', background: specialColor };
+  if (category === 'both') {
+    return {
+      label: '一般特別',
+      background: `linear-gradient(to right, ${generalColor} 0 50%, ${specialColor} 50% 100%)`,
+    };
+  }
+  return null;
+}
+
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
   const result: Partial<SankeyUrlState> = {};
@@ -2611,19 +2626,17 @@ export default function RealDataSankeyPage() {
               // recipient: 支出のみ
               spending = hoveredNode.value;
             }
-            // 会計区分ラベル（project-budget / project-spending のみ）
-            let hoveredAcLabel: string | null = null;
+            // 会計区分バッジ（project-budget / project-spending のみ）
+            let hoveredAccountBadge: { label: string; background: string } | null = null;
             if (t === 'project-budget' || t === 'project-spending') {
               const cat = t === 'project-budget'
                 ? hoveredNode.accountCategory
                 : hoveredNode.targetLinks.find(l => l.source.type === 'project-budget')?.source.accountCategory;
-              if (cat === 'general') hoveredAcLabel = '一般会計';
-              else if (cat === 'special') hoveredAcLabel = '特別会計';
-              else if (cat === 'both') hoveredAcLabel = '一般・特別';
+              hoveredAccountBadge = getAccountBadgeStyle(cat);
             }
             // 予算・支出が両方ある場合は2列グリッドで横並び、片方だけなら1列
             const both = budget != null && spending != null;
-            const tipH = Math.round(((both ? 88 : 76) + (hoveredAcLabel ? 18 : 0)) * fontScale);
+            const tipH = Math.round(((both ? 88 : 76) + (hoveredAccountBadge ? 18 : 0)) * fontScale);
             // 大ノード: マウスY連動（カーソル上方）/ 小ノード: ラベル上端-GAPにポップアップ底辺を固定
             const labelFontPx = hoverColFontPx;
             const labelTopScreenY = screenTop + nodeScreenH / 2 - labelFontPx / 2;
@@ -2657,9 +2670,9 @@ export default function RealDataSankeyPage() {
                 pointerEvents: 'none', zIndex: 20,
               }}>
                 <div style={{ fontWeight: 600, fontSize: TOOLTIP_TITLE_FONT_PX, marginBottom: 5, color: '#111', textAlign: 'left' }}>{hoveredNode.name}</div>
-                {hoveredAcLabel && (
+                {hoveredAccountBadge && (
                   <div style={{ marginBottom: 4, textAlign: 'left' }}>
-                    <span style={{ fontSize: TOOLTIP_META_FONT_PX, padding: '1px 5px', borderRadius: 8, fontWeight: 500, background: '#f0f0f0', color: '#666' }}>{hoveredAcLabel}</span>
+                    <span style={{ display: 'inline-block', fontSize: Math.max(9, META_FONT_PX - 1), padding: '1px 5px', borderRadius: 8, fontWeight: 600, lineHeight: 1.35, background: hoveredAccountBadge.background, color: '#fff', whiteSpace: 'nowrap' }}>{hoveredAccountBadge.label}</span>
                   </div>
                 )}
                 {both ? (
@@ -2791,19 +2804,11 @@ export default function RealDataSankeyPage() {
                         if (!cat && selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
                           cat = budgetNodeByPid.get(selectedNode.projectId)?.accountCategory;
                         }
-                        if (!cat) return null;
-                        const generalColor = '#e45f6f';
-                        const specialColor = '#5f8ee8';
-                        const label = cat === 'general' ? '一般' : cat === 'special' ? '特別' : cat === 'both' ? '一般特別' : null;
-                        if (!label) return null;
-                        const background = cat === 'general'
-                          ? generalColor
-                          : cat === 'special'
-                            ? specialColor
-                            : `linear-gradient(to right, ${generalColor} 0 50%, ${specialColor} 50% 100%)`;
+                        const badge = getAccountBadgeStyle(cat);
+                        if (!badge) return null;
                         return (
-                          <span style={{ display: 'inline-block', verticalAlign: '0.08em', marginLeft: 6, background, color: '#fff', padding: '1px 5px', borderRadius: 8, fontSize: Math.max(9, META_FONT_PX - 1), fontWeight: 600, lineHeight: 1.35, whiteSpace: 'nowrap' }}>
-                            {label}
+                          <span style={{ display: 'inline-block', verticalAlign: '0.08em', marginLeft: 6, background: badge.background, color: '#fff', padding: '1px 5px', borderRadius: 8, fontSize: Math.max(9, META_FONT_PX - 1), fontWeight: 600, lineHeight: 1.35, whiteSpace: 'nowrap' }}>
+                            {badge.label}
                           </span>
                         );
                       })()}
@@ -3157,19 +3162,11 @@ export default function RealDataSankeyPage() {
                   whiteSpace: 'nowrap',
                 };
                 const renderCompactAccountBadge = (cat?: string) => {
-                  if (!cat) return null;
-                  const generalColor = '#e45f6f';
-                  const specialColor = '#5f8ee8';
-                  const label = cat === 'general' ? '一般' : cat === 'special' ? '特別' : cat === 'both' ? '一般特別' : null;
-                  if (!label) return null;
-                  const background = cat === 'general'
-                    ? generalColor
-                    : cat === 'special'
-                      ? specialColor
-                      : `linear-gradient(to right, ${generalColor} 0 50%, ${specialColor} 50% 100%)`;
+                  const badge = getAccountBadgeStyle(cat);
+                  if (!badge) return null;
                   return (
-                    <span style={{ background, color: '#fff', padding: '1px 5px', borderRadius: 8, fontSize: Math.max(9, META_FONT_PX - 1), fontWeight: 600, lineHeight: 1.35, whiteSpace: 'nowrap' }}>
-                      {label}
+                    <span style={{ background: badge.background, color: '#fff', padding: '1px 5px', borderRadius: 8, fontSize: Math.max(9, META_FONT_PX - 1), fontWeight: 600, lineHeight: 1.35, whiteSpace: 'nowrap' }}>
+                      {badge.label}
                     </span>
                   );
                 };
