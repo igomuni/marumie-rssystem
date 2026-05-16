@@ -3206,6 +3206,11 @@ export default function RealDataSankeyPage() {
                       >
                         <span style={{ fontSize: META_FONT_PX, color: '#888' }}>{isBudgetExecutionExpanded ? '▼' : '▶'}</span>
                         <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>予算・執行</span>
+                        {breakdown.length > 0 && (
+                          <span style={{ fontSize: META_FONT_PX, color: '#999', fontWeight: 500 }}>
+                            {breakdown.length.toLocaleString()}件
+                          </span>
+                        )}
                       </button>
                     </div>
                     {accountBadges.length > 0 && (
