@@ -93,6 +93,9 @@ const SIDE_PANEL_WIDTH_MAX = 800;
 const PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT = 72;
 const PROJECT_OVERVIEW_PREVIEW_HEIGHT_MIN = 24;
 const PROJECT_OVERVIEW_PREVIEW_HEIGHT_MAX = 600;
+const BUDGET_EXECUTION_LIST_HEIGHT_DEFAULT = 260;
+const BUDGET_EXECUTION_LIST_HEIGHT_MIN = 96;
+const BUDGET_EXECUTION_LIST_HEIGHT_MAX = 600;
 const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
 const HOVER_ENTER_DELAY_MS = 220;
 const FIT_TOP_PAD_PX = 32;
@@ -247,6 +250,7 @@ export default function RealDataSankeyPage() {
   const [isResizingSidePanel, setIsResizingSidePanel] = useState(false);
   const sidePanelResizeRef = useRef<{ startX: number; startW: number } | null>(null);
   const [isResizingOverview, setIsResizingOverview] = useState(false);
+  const [isResizingBudgetExecution, setIsResizingBudgetExecution] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -597,6 +601,26 @@ export default function RealDataSankeyPage() {
       window.removeEventListener('mouseup', onUp);
     };
   }, [isResizingOverview]);
+  // 予算・執行カードリスト高さドラッグリスナ
+  useEffect(() => {
+    if (!isResizingBudgetExecution) return;
+    const onMove = (ev: MouseEvent) => {
+      const s = budgetExecutionResizeRef.current;
+      if (!s) return;
+      const next = Math.max(BUDGET_EXECUTION_LIST_HEIGHT_MIN, Math.min(BUDGET_EXECUTION_LIST_HEIGHT_MAX, s.startH + (ev.clientY - s.startY)));
+      setBudgetExecutionListHeight(next);
+    };
+    const onUp = () => {
+      budgetExecutionResizeRef.current = null;
+      setIsResizingBudgetExecution(false);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [isResizingBudgetExecution]);
   const hoveredLink = suppressHoverPopup ? null : hoveredLinkStable;
   const hoveredNode = suppressHoverPopup ? null : hoveredNodeStable;
   const panOrigin = useRef({ x: 0, y: 0 });
@@ -1207,6 +1231,13 @@ export default function RealDataSankeyPage() {
     return { ...rawNode, x0: 0, x1: 0, y0: 0, y1: 0, sourceLinks: [], targetLinks: [] } as LayoutNode;
   }, [selectedNodeId, layout, graphData]);
 
+  const selectedProjectBudgetNode = useMemo(() => {
+    if (!selectedNode || selectedNode.aggregated) return undefined;
+    if (selectedNode.type === 'project-budget') return budgetNodeByPid.get(selectedNode.projectId ?? -1);
+    if (selectedNode.type === 'project-spending' && selectedNode.projectId != null) return budgetNodeByPid.get(selectedNode.projectId);
+    return undefined;
+  }, [selectedNode, budgetNodeByPid]);
+
   useEffect(() => {
     if (!graphData || !pendingYearSelectionRef.current) return;
     const snapshot = pendingYearSelectionRef.current;
@@ -1557,8 +1588,11 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, graphData, filtered, projectRecipientCount]);
 
   const [isProjectDetailExpanded, setIsProjectDetailExpanded] = useState(false);
+  const [isBudgetExecutionExpanded, setIsBudgetExecutionExpanded] = useState(false);
   const [projectOverviewPreviewHeight, setProjectOverviewPreviewHeight] = useState(PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT);
+  const [budgetExecutionListHeight, setBudgetExecutionListHeight] = useState(BUDGET_EXECUTION_LIST_HEIGHT_DEFAULT);
   const overviewResizeRef = useRef<{ startY: number; startH: number } | null>(null);
+  const budgetExecutionResizeRef = useRef<{ startY: number; startH: number } | null>(null);
   const [projectDetailCache, setProjectDetailCache] = useState<Map<string, ProjectDetail | null>>(new Map());
   const [panelTab, setPanelTab] = useState<'ministry' | 'project' | 'recipient'>('ministry');
   // Auto-select panel tab based on selected node type.
@@ -2636,7 +2670,7 @@ export default function RealDataSankeyPage() {
             }
             // 予算・支出が両方ある場合は2列グリッドで横並び、片方だけなら1列
             const both = budget != null && spending != null;
-            const tipH = Math.round(((both ? 88 : 76) + (hoveredAccountBadge ? 18 : 0)) * fontScale);
+            const tipH = Math.round((both ? 88 : 76) * fontScale);
             // 大ノード: マウスY連動（カーソル上方）/ 小ノード: ラベル上端-GAPにポップアップ底辺を固定
             const labelFontPx = hoverColFontPx;
             const labelTopScreenY = screenTop + nodeScreenH / 2 - labelFontPx / 2;
@@ -2669,12 +2703,14 @@ export default function RealDataSankeyPage() {
                 border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 pointerEvents: 'none', zIndex: 20,
               }}>
-                <div style={{ fontWeight: 600, fontSize: TOOLTIP_TITLE_FONT_PX, marginBottom: 5, color: '#111', textAlign: 'left' }}>{hoveredNode.name}</div>
-                {hoveredAccountBadge && (
-                  <div style={{ marginBottom: 4, textAlign: 'left' }}>
-                    <span style={{ display: 'inline-block', fontSize: Math.max(9, META_FONT_PX - 1), padding: '1px 5px', borderRadius: 8, fontWeight: 600, lineHeight: 1.35, background: hoveredAccountBadge.background, color: '#fff', whiteSpace: 'nowrap' }}>{hoveredAccountBadge.label}</span>
-                  </div>
-                )}
+                <div style={{ fontWeight: 600, fontSize: TOOLTIP_TITLE_FONT_PX, marginBottom: 5, color: '#111', textAlign: 'left' }}>
+                  {hoveredNode.name}
+                  {hoveredAccountBadge && (
+                    <span style={{ display: 'inline-block', verticalAlign: '0.08em', marginLeft: 5, fontSize: Math.max(9, META_FONT_PX - 1), padding: '1px 5px', borderRadius: 8, fontWeight: 600, lineHeight: 1.35, background: hoveredAccountBadge.background, color: '#fff', whiteSpace: 'nowrap' }}>
+                      {hoveredAccountBadge.label}
+                    </span>
+                  )}
+                </div>
                 {both ? (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 8px', textAlign: 'left' }}>
                     {amtCol('予算', budget!)}
@@ -2799,19 +2835,6 @@ export default function RealDataSankeyPage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: PANEL_TITLE_FONT_PX, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
                       {selectedNode.name}
-                      {(() => {
-                        let cat = selectedNode.accountCategory;
-                        if (!cat && selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
-                          cat = budgetNodeByPid.get(selectedNode.projectId)?.accountCategory;
-                        }
-                        const badge = getAccountBadgeStyle(cat);
-                        if (!badge) return null;
-                        return (
-                          <span style={{ display: 'inline-block', verticalAlign: '0.08em', marginLeft: 6, background: badge.background, color: '#fff', padding: '1px 5px', borderRadius: 8, fontSize: Math.max(9, META_FONT_PX - 1), fontWeight: 600, lineHeight: 1.35, whiteSpace: 'nowrap' }}>
-                            {badge.label}
-                          </span>
-                        );
-                      })()}
                     </div>
                     {(() => {
                       // Main value (予算額 for budget types, 支出額 for spending type)
@@ -3080,6 +3103,188 @@ export default function RealDataSankeyPage() {
                             )}
                           </>);
                         })()}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* 予算・執行アコーディオン — project-budget / project-spending（非集約）のみ */}
+              {selectedProjectBudgetNode && (() => {
+                const summary = selectedProjectBudgetNode.budgetSummary;
+                const breakdown = selectedProjectBudgetNode.budgetBreakdown ?? [];
+                if (!summary && breakdown.length === 0) return null;
+
+                const formatBreakdownAmount = (value: number) => formatYen(value);
+                const renderText = (value: string) => value.trim() || '-';
+                const accountTotals = breakdown.reduce((m, item) => {
+                  const label = item.accountCategory === '一般会計' ? '一般' : item.accountCategory === '特別会計' ? '特別' : '';
+                  if (label) m.set(label, (m.get(label) ?? 0) + item.amount);
+                  return m;
+                }, new Map<string, number>());
+                const toAccountBadgeKey = (value: string) => {
+                  if (value === '一般会計' || value === '一般') return 'general';
+                  if (value === '特別会計' || value === '特別') return 'special';
+                  return null;
+                };
+                const renderAccountBadge = (value: string) => {
+                  const badge = getAccountBadgeStyle(toAccountBadgeKey(value));
+                  if (!badge) return null;
+                  return (
+                    <span style={{
+                      background: badge.background,
+                      color: '#fff',
+                      padding: '1px 6px',
+                      borderRadius: 8,
+                      fontSize: Math.max(9, META_FONT_PX - 1),
+                      fontWeight: 700,
+                      lineHeight: 1.4,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {badge.label}
+                    </span>
+                  );
+                };
+                const accountBadges = (['一般', '特別'] as const)
+                  .map(label => ({ label, amount: accountTotals.get(label) ?? 0 }))
+                  .filter(item => item.amount > 0);
+                const totalBreakdownAmount = breakdown.reduce((s, item) => s + item.amount, 0);
+                const cardStyle: React.CSSProperties = {
+                  border: '1px solid #e8edf3',
+                  borderRadius: 6,
+                  background: '#fff',
+                  padding: '8px 9px',
+                };
+                const cardHeaderStyle: React.CSSProperties = {
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  gap: 8,
+                  marginBottom: 6,
+                };
+                const cardTitleStyle: React.CSSProperties = {
+                  minWidth: 0,
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  gap: 6,
+                  flexWrap: 'wrap',
+                  color: '#333',
+                  fontSize: PANEL_META_FONT_PX,
+                  fontWeight: 600,
+                };
+                const miniLabelStyle: React.CSSProperties = {
+                  fontSize: META_FONT_PX,
+                  color: '#999',
+                  marginRight: 3,
+                };
+                const metaGridStyle: React.CSSProperties = {
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                  gap: '5px 10px',
+                  fontSize: META_FONT_PX,
+                  lineHeight: 1.45,
+                };
+                const renderMeta = (label: string, value: string) => (
+                  <div style={{ minWidth: 0 }}>
+                    <span style={miniLabelStyle}>{label}</span>
+                    <span style={{ color: '#555', wordBreak: 'break-all' }}>{renderText(value)}</span>
+                  </div>
+                );
+
+                return (
+                  <div style={{ borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', padding: '2px 14px 1px', gap: 4 }}>
+                      <button type="button" onClick={() => setIsBudgetExecutionExpanded(v => !v)}
+                        style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
+                      >
+                        <span style={{ fontSize: META_FONT_PX, color: '#888' }}>{isBudgetExecutionExpanded ? '▼' : '▶'}</span>
+                        <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>予算・執行</span>
+                      </button>
+                    </div>
+                    {accountBadges.length > 0 && (
+                      <div style={{ padding: '0 14px 2px', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', columnGap: 12, rowGap: 4, minWidth: 0 }}>
+                        {accountBadges.map(item => (
+                          <div key={item.label} style={{ flex: '1 1 112px', minWidth: 0 }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 1, minWidth: 0 }}>
+                              {renderAccountBadge(item.label)}
+                              <span style={{ display: 'block', fontSize: PANEL_PRIMARY_VALUE_FONT_PX, fontWeight: 600, color: '#222', whiteSpace: 'nowrap' }}>
+                                {formatBreakdownAmount(item.amount)}
+                              </span>
+                            </span>
+                            <span style={{ display: 'block', fontSize: META_FONT_PX, color: '#999', marginTop: 1, whiteSpace: 'nowrap' }}>
+                              {Math.round(item.amount).toLocaleString()}円
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {isBudgetExecutionExpanded && (
+                      <div style={{ padding: '0 14px 10px', fontSize: PANEL_META_FONT_PX, color: '#444' }}>
+                        {breakdown.length > 0 && summary && totalBreakdownAmount !== summary.totalBudget && (
+                          <div style={{ color: '#b26a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 6, padding: 6, marginBottom: 8, lineHeight: 1.45 }}>
+                            2-1合計と2-2内訳合計に差があります: {formatBreakdownAmount((summary?.totalBudget ?? 0) - totalBreakdownAmount)}
+                          </div>
+                        )}
+                        {breakdown.length === 0 ? (
+                          <p style={{ color: '#aaa', margin: 0 }}>歳出項目内訳がありません</p>
+                        ) : (
+                          <>
+                            <div style={{
+                              display: 'grid',
+                              gap: 7,
+                              ...(breakdown.length > 1 ? { maxHeight: budgetExecutionListHeight, overflowY: 'auto' as const } : { overflowY: 'visible' as const }),
+                              paddingRight: 2,
+                            }}>
+                              {breakdown.map((item, index) => (
+                                <div key={`${item.accountCategory}-${item.account}-${item.subAccount}-${item.budgetType}-${item.item}-${item.subItem}-${index}`} style={cardStyle}>
+                                  <div style={cardHeaderStyle}>
+                                    <div style={cardTitleStyle}>
+                                      {renderAccountBadge(item.accountCategory)}
+                                      <span style={{ color: '#999', fontWeight: 500 }}>{renderText(item.budgetType)}</span>
+                                    </div>
+                                    <div style={{ color: '#222', fontWeight: 700, whiteSpace: 'nowrap', fontSize: PANEL_LIST_VALUE_FONT_PX }}>
+                                      {formatBreakdownAmount(item.amount)}
+                                    </div>
+                                  </div>
+                                  <div style={metaGridStyle}>
+                                    {renderMeta('会計', item.account)}
+                                    {renderMeta('勘定', item.subAccount)}
+                                    {renderMeta('項', item.item)}
+                                    {renderMeta('目', item.subItem)}
+                                  </div>
+                                  {item.note.trim() && (
+                                    <div style={{ marginTop: 5, fontSize: META_FONT_PX, lineHeight: 1.45 }}>
+                                      <span style={miniLabelStyle}>補足</span>
+                                      <span style={{ color: '#555', wordBreak: 'break-all' }}>{item.note}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                            {breakdown.length > 1 && (
+                              <div
+                                role="separator"
+                                aria-orientation="horizontal"
+                                aria-label="予算・執行カードリストの高さを変更"
+                                title="ドラッグで高さを変更"
+                                onMouseDown={e => {
+                                  e.preventDefault();
+                                  budgetExecutionResizeRef.current = { startY: e.clientY, startH: budgetExecutionListHeight };
+                                  setIsResizingBudgetExecution(true);
+                                }}
+                                onDoubleClick={() => setBudgetExecutionListHeight(BUDGET_EXECUTION_LIST_HEIGHT_DEFAULT)}
+                                style={{
+                                  height: 10, cursor: 'ns-resize',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  userSelect: 'none',
+                                }}
+                                data-pan-disabled
+                              >
+                                <div style={{ width: 32, height: 3, borderRadius: 2, background: '#d0d0d0' }} />
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
