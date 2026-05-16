@@ -8,10 +8,11 @@ import {
   COL_LABELS, MARGIN, NODE_W, NODE_PAD,
   MAX_RECIPIENT_GAP_PX, MAX_MINISTRY_GAP_PX,
   TYPE_COLORS, TYPE_LABELS,
-  getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen,
+  getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen, sortPriority,
 } from '@/app/lib/sankey-svg-constants';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { filterTopN, computeLayout, getTopMinistriesInScope } from '@/app/lib/sankey-svg-filter';
+import { canonicalSelectableNodeId } from '@/app/lib/sankey-svg-ids';
 import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
 import { parseAmountToYen } from '@/app/lib/format/yen';
 
@@ -97,11 +98,37 @@ const HOVER_ENTER_DELAY_MS = 220;
 const FIT_TOP_PAD_PX = 32;
 const ZOOM_FONT_MAX_RATIO = 1.3;   // zoom-in でフォントを最大で元の何倍まで拡大するか
 const LABEL_FIT_RATIO = 0.85;      // ノード表示高さに対してフォントが占める割合の上限
+const AGGREGATE_BOUNDARY_GAP_PX = 6;
+
+type ShiftLayoutNode = {
+  y0: number;
+  y1: number;
+  id: string;
+  type: string;
+  name: string;
+  projectId?: number;
+  aggregated?: boolean;
+};
+
+function getAccountBadgeStyle(category?: string | null): { label: string; background: string } | null {
+  if (!category) return null;
+  const generalColor = '#e45f6f';
+  const specialColor = '#5f8ee8';
+  if (category === 'general') return { label: '一般', background: generalColor };
+  if (category === 'special') return { label: '特別', background: specialColor };
+  if (category === 'both') {
+    return {
+      label: '一般特別',
+      background: `linear-gradient(to right, ${generalColor} 0 50%, ${specialColor} 50% 100%)`,
+    };
+  }
+  return null;
+}
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
   const result: Partial<SankeyUrlState> = {};
-  const sel = p.get('sel'); if (sel !== null) result.selectedNodeId = sel;
+  const sel = p.get('sel'); if (sel !== null) result.selectedNodeId = canonicalSelectableNodeId(sel);
   const pp = p.get('pp'); if (pp !== null) result.pinnedProjectId = pp;
   const pr = p.get('pr'); if (pr !== null) result.pinnedRecipientId = pr;
   const pm = p.get('pm'); if (pm !== null) result.pinnedMinistryName = pm;
@@ -647,16 +674,17 @@ export default function RealDataSankeyPage() {
 
   const svgRef = useRef<SVGSVGElement>(null);
 
-  const layoutRef = useRef<{ contentW: number; contentH: number; nodes: { y0: number; y1: number; id: string; type: string; projectId?: number }[] } | null>(null);
+  const layoutRef = useRef<{ contentW: number; contentH: number; nodes: ShiftLayoutNode[] } | null>(null);
   const showLabelsRef = useRef(showLabels);
   showLabelsRef.current = showLabels;
 
-  // Top offset reserved for search/year/TopN controls. Narrow screens need another row's worth of breathing room.
-  const SEARCH_BOX_RESERVE = svgWidth < 1100 ? 92 : 56;
-  const searchBoxReserveRef = useRef(SEARCH_BOX_RESERVE);
-  searchBoxReserveRef.current = SEARCH_BOX_RESERVE;
   const fontScale = baseFontPx / FONT_SCALE_REFERENCE_PX;
   const scaleFont = (px: number) => Math.max(1, Math.round(px * fontScale));
+  const scaleSize = (px: number) => Math.max(1, Math.round(px * fontScale));
+  // Top offset reserved for search/year/TopN controls. Narrow screens need another row's worth of breathing room.
+  const SEARCH_BOX_RESERVE = Math.round((svgWidth < 1100 ? 92 : 56) * Math.max(1, fontScale));
+  const searchBoxReserveRef = useRef(SEARCH_BOX_RESERVE);
+  searchBoxReserveRef.current = SEARCH_BOX_RESERVE;
   const MAP_LABEL_FONT_PX = scaleFont(MAP_LABEL_FONT_PX_DEFAULT);
   const MAP_LABEL_SLOT_PX = scaleFont(MAP_LABEL_SLOT_PX_DEFAULT);
   const MAP_LABEL_VISIBLE_MIN_H_PX = scaleFont(MAP_LABEL_VISIBLE_MIN_H_PX_DEFAULT);
@@ -674,6 +702,20 @@ export default function RealDataSankeyPage() {
   const TOOLTIP_TITLE_FONT_PX = scaleFont(TOOLTIP_TITLE_FONT_PX_DEFAULT);
   const TOOLTIP_VALUE_FONT_PX = scaleFont(TOOLTIP_VALUE_FONT_PX_DEFAULT);
   const TOOLTIP_META_FONT_PX = scaleFont(TOOLTIP_META_FONT_PX_DEFAULT);
+  const SEARCH_BOX_WIDTH_PX = Math.round(Math.max(260, Math.min(440, 296 * fontScale)));
+  const SEARCH_ICON_BOX_PX = scaleSize(20);
+  const SEARCH_ICON_PX = scaleSize(16);
+  const SEARCH_INPUT_PAD_Y_PX = scaleSize(7);
+  const SEARCH_INPUT_PAD_LEFT_PX = scaleSize(30);
+  const SEARCH_INPUT_PAD_RIGHT_PX = searchQuery ? scaleSize(58) : scaleSize(38);
+  const SEARCH_INLINE_BUTTON_PAD_X_PX = scaleSize(4);
+  const SEARCH_INLINE_BUTTON_OFFSET_PX = scaleSize(6);
+  const SEARCH_INLINE_BUTTON_GAP_PX = scaleSize(24);
+  const SEARCH_CLEAR_BUTTON_FONT_PX = scaleFont(14);
+  const SEARCH_RESULT_GAP_PX = scaleSize(8);
+  const SEARCH_RESULT_PAD_Y_PX = scaleSize(7);
+  const SEARCH_RESULT_PAD_X_PX = scaleSize(10);
+  const SEARCH_RESULT_SWATCH_PX = scaleSize(8);
   const mapLabelFontPx = MAP_LABEL_FONT_PX;
   const mapLabelSlotPx = MAP_LABEL_SLOT_PX;
   const mapLabelVisibleMinHPx = MAP_LABEL_VISIBLE_MIN_H_PX;
@@ -687,7 +729,7 @@ export default function RealDataSankeyPage() {
   // Uses mapLabelSlotPx (slot-based formula), not colFontPx/zoom. Intentional: this runs for
   // fitZoomWithShifts (always near fit zoom where zoomedIn=false) and getZoomAnchoredPanY
   // (sub-pixel drift at zoom-in is acceptable).
-  const calcShiftExtraH = useCallback((nodes: { y0: number; y1: number; id: string; type: string; projectId?: number }[], zoomK: number): number => {
+  const calcShiftExtraH = useCallback((nodes: ShiftLayoutNode[], zoomK: number): number => {
     if (!showLabelsRef.current) return 0;
     const colShifts = new Map<number, number>();
     const spendingH = new Map<string, number>();
@@ -698,15 +740,28 @@ export default function RealDataSankeyPage() {
         spendingH.set('__agg-project-budget', Math.max(1, node.y1 - node.y0));
       }
     }
+    const nodesByColumn = new Map<number, ShiftLayoutNode[]>();
     for (const node of nodes) {
-      const ownH = Math.max(1, node.y1 - node.y0);
-      const h = node.type === 'project-budget' || node.id === '__agg-project-budget'
-        ? Math.max(ownH, spendingH.get(node.id) ?? ownH)
-        : ownH;
-      const slotPx = mapLabelMetricsRef.current.slotPx;
-      const topShift = h * zoomK < slotPx ? Math.max(0, slotPx / zoomK - h) : 0;
       const col = getColumn(node);
-      colShifts.set(col, (colShifts.get(col) ?? 0) + topShift);
+      if (!nodesByColumn.has(col)) nodesByColumn.set(col, []);
+      nodesByColumn.get(col)!.push(node);
+    }
+    for (const [col, colNodes] of nodesByColumn) {
+      const sorted = [...colNodes].sort((a, b) => a.y0 - b.y0);
+      let totalShift = 0;
+      for (let i = 0; i < sorted.length; i++) {
+        const node = sorted[i];
+        if (i > 0 && sortPriority(node) > sortPriority(sorted[i - 1])) {
+          totalShift += AGGREGATE_BOUNDARY_GAP_PX / zoomK;
+        }
+        const ownH = Math.max(1, node.y1 - node.y0);
+        const h = node.type === 'project-budget' || node.id === '__agg-project-budget'
+          ? Math.max(ownH, spendingH.get(node.id) ?? ownH)
+          : ownH;
+        const slotPx = mapLabelMetricsRef.current.slotPx;
+        totalShift += h * zoomK < slotPx ? Math.max(0, slotPx / zoomK - h) : 0;
+      }
+      colShifts.set(col, totalShift);
     }
     return colShifts.size > 0 ? Math.max(...colShifts.values()) : 0;
   }, []);
@@ -814,7 +869,7 @@ export default function RealDataSankeyPage() {
 
   // Converge on fit zoom accounting for label shifts (shifts grow as zoom shrinks → iterate)
   const fitZoomWithShifts = useCallback((
-    nodes: { y0: number; y1: number; id: string; type: string }[],
+    nodes: ShiftLayoutNode[],
     contentW: number, contentH: number, cW: number, availH: number
   ): { k: number; totalH: number } => {
     let k = Math.max(ZOOM_MIN_ABS, Math.min(ZOOM_MAX_ABS, (availH / (MARGIN.top + contentH)) * 0.9));
@@ -1113,9 +1168,12 @@ export default function RealDataSankeyPage() {
       let cumShift = 0;
       for (let i = 0; i < sorted.length; i++) {
         const node = sorted[i];
+        if (i > 0 && sortPriority(node) > sortPriority(sorted[i - 1])) {
+          cumShift += AGGREGATE_BOUNDARY_GAP_PX / zoom;
+        }
         const h = heights[i];
         let colFontPx: number;
-        let topShift: number;
+        let slotExtra: number;
         if (zoomedIn) {
           const zoomedMax = mapLabelFontPx * Math.min(zoom / baseZoom, ZOOM_FONT_MAX_RATIO);
           // Limit font by the shorter of the two neighbor center-to-center gaps
@@ -1124,13 +1182,14 @@ export default function RealDataSankeyPage() {
           const gapMax = Math.min(distPrev, distNext) * zoom * LABEL_FIT_RATIO;
           // floor at mapLabelFontPx: intentional readability safeguard — labels may still overlap at high density
           colFontPx = Math.max(mapLabelFontPx, Math.min(zoomedMax, gapMax));
-          topShift = h < colFontPx / zoom ? Math.max(0, colFontPx / zoom - h) : 0;
+          slotExtra = h < colFontPx / zoom ? Math.max(0, colFontPx / zoom - h) : 0;
         } else {
           colFontPx = mapLabelFontPx;
-          topShift = h * zoom < mapLabelSlotPx ? Math.max(0, mapLabelSlotPx / zoom - h) : 0;
+          slotExtra = h * zoom < mapLabelSlotPx ? Math.max(0, mapLabelSlotPx / zoom - h) : 0;
         }
+        const topShift = slotExtra / 2;
         info.set(node.id, { cumShift, topShift, colFontPx });
-        cumShift += topShift;
+        cumShift += slotExtra;
       }
     }
     return info;
@@ -1153,7 +1212,7 @@ export default function RealDataSankeyPage() {
     const snapshot = pendingYearSelectionRef.current;
     pendingYearSelectionRef.current = null;
 
-    const nextId = resolveYearSelectionSnapshot(snapshot, graphData);
+    const nextId = canonicalSelectableNodeId(resolveYearSelectionSnapshot(snapshot, graphData));
 
     if (nextId !== selectedNodeId) {
       pendingHistoryAction.current = 'replace';
@@ -1168,56 +1227,95 @@ export default function RealDataSankeyPage() {
     [selectedNodeId, layout],
   );
 
-  const connectedNodeIds = useMemo(() => {
-    if (!selectedNodeInLayout) return null;
+  const buildConnectedNodeIds = useCallback((origin: LayoutNode): Set<string> => {
     const ids = new Set<string>();
+    const layoutNodeIds = new Set(layout?.nodes.map(n => n.id) ?? []);
+    const aggProjectMembers = filtered?.aggNodeMembers?.get('__agg-project-spending') ?? [];
+    const aggRecipientIds = new Set((filtered?.aggNodeMembers?.get('__agg-recipient') ?? []).map(r => r.id));
+    const aggMinistryNames = new Set((filtered?.aggNodeMembers?.get('__agg-ministry') ?? []).map(m => m.name));
+
+    const aggProjectTargetsByMinistry = new Map<string, Set<string>>();
+    const getAggProjectTargetsForMinistry = (ministryName: string): Set<string> => {
+      const cached = aggProjectTargetsByMinistry.get(ministryName);
+      if (cached) return cached;
+      const memberProjectIds = new Set(aggProjectMembers.filter(m => m.ministry === ministryName).map(m => m.id));
+      const targets = new Set<string>();
+      for (const edge of graphData?.edges ?? []) {
+        if (!memberProjectIds.has(edge.source)) continue;
+        if (layoutNodeIds.has(edge.target)) targets.add(edge.target);
+        else if (aggRecipientIds.has(edge.target)) targets.add('__agg-recipient');
+      }
+      aggProjectTargetsByMinistry.set(ministryName, targets);
+      return targets;
+    };
+
+    const aggProjectSourcesByRecipient = new Map<string, Set<string>>();
+    const getAggProjectSourcesForRecipient = (recipientId: string): Set<string> => {
+      const cached = aggProjectSourcesByRecipient.get(recipientId);
+      if (cached) return cached;
+      const targetIds = recipientId === '__agg-recipient' ? aggRecipientIds : new Set([recipientId]);
+      const connectedProjectIds = new Set<string>();
+      for (const edge of graphData?.edges ?? []) {
+        if (targetIds.has(edge.target)) connectedProjectIds.add(edge.source);
+      }
+      const sources = new Set<string>();
+      for (const member of aggProjectMembers) {
+        if (!connectedProjectIds.has(member.id) || !member.ministry) continue;
+        const ministryId = `ministry-${member.ministry}`;
+        if (layoutNodeIds.has(ministryId)) sources.add(ministryId);
+        else if (aggMinistryNames.has(member.ministry)) sources.add('__agg-ministry');
+      }
+      aggProjectSourcesByRecipient.set(recipientId, sources);
+      return sources;
+    };
+
+    const canFollowAggregateLink = (current: LayoutNode, next: LayoutNode, direction: 'up' | 'down'): boolean => {
+      if (direction === 'down' && current.id === '__agg-project-spending' && origin.type === 'ministry' && !origin.aggregated) {
+        return getAggProjectTargetsForMinistry(origin.name).has(next.id);
+      }
+      if (direction === 'up' && current.id === '__agg-project-budget' && origin.type === 'recipient') {
+        return getAggProjectSourcesForRecipient(origin.id).has(next.id);
+      }
+      return true;
+    };
+
     // BFS upstream (follow targetLinks → source recursively) — separate visited set
     const uVisited = new Set<string>();
-    const uQueue = [selectedNodeInLayout];
+    const uQueue = [origin];
     while (uQueue.length) {
       const n = uQueue.shift()!;
       if (uVisited.has(n.id)) continue;
       uVisited.add(n.id);
       ids.add(n.id);
-      for (const l of n.targetLinks) if (!uVisited.has(l.source.id)) uQueue.push(l.source);
+      for (const l of n.targetLinks) {
+        if (!uVisited.has(l.source.id) && canFollowAggregateLink(n, l.source, 'up')) uQueue.push(l.source);
+      }
     }
     // BFS downstream (follow sourceLinks → target recursively) — separate visited set
     const dVisited = new Set<string>();
-    const dQueue = [selectedNodeInLayout];
+    const dQueue = [origin];
     while (dQueue.length) {
       const n = dQueue.shift()!;
       if (dVisited.has(n.id)) continue;
       dVisited.add(n.id);
       ids.add(n.id);
-      for (const l of n.sourceLinks) if (!dVisited.has(l.target.id)) dQueue.push(l.target);
+      for (const l of n.sourceLinks) {
+        if (!dVisited.has(l.target.id) && canFollowAggregateLink(n, l.target, 'down')) dQueue.push(l.target);
+      }
     }
     return ids;
-  }, [selectedNodeInLayout]);
+  }, [filtered?.aggNodeMembers, graphData?.edges, layout?.nodes]);
+
+  const connectedNodeIds = useMemo(() => {
+    if (!selectedNodeInLayout) return null;
+    return buildConnectedNodeIds(selectedNodeInLayout);
+  }, [buildConnectedNodeIds, selectedNodeInLayout]);
 
   // Connected node IDs for hovered node (upstream + downstream BFS)
   const hoveredNodeIds = useMemo(() => {
     if (!hoveredNode || selectedNode) return null;
-    const ids = new Set<string>();
-    const uVisited = new Set<string>();
-    const uQueue = [hoveredNode];
-    while (uQueue.length) {
-      const n = uQueue.shift()!;
-      if (uVisited.has(n.id)) continue;
-      uVisited.add(n.id);
-      ids.add(n.id);
-      for (const l of n.targetLinks) if (!uVisited.has(l.source.id)) uQueue.push(l.source);
-    }
-    const dVisited = new Set<string>();
-    const dQueue = [hoveredNode];
-    while (dQueue.length) {
-      const n = dQueue.shift()!;
-      if (dVisited.has(n.id)) continue;
-      dVisited.add(n.id);
-      ids.add(n.id);
-      for (const l of n.sourceLinks) if (!dVisited.has(l.target.id)) dQueue.push(l.target);
-    }
-    return ids;
-  }, [hoveredNode, selectedNode]);
+    return buildConnectedNodeIds(hoveredNode);
+  }, [buildConnectedNodeIds, hoveredNode, selectedNode]);
 
   // Spending partner of the currently hovered merged project node (for link highlight)
   const hoveredPartnerSpendingId = hoveredNode?.type === 'project-budget' && hoveredNode.projectId != null
@@ -1307,7 +1405,7 @@ export default function RealDataSankeyPage() {
   }, [graphData]);
 
   // Panel sections — 3-tab data (省庁 / 事業 / 支出先)
-  type PanelEntry = { id: string; name: string; value: number; ministry?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; projectCount?: number; };
+  type PanelEntry = { id: string; name: string; value: number; ministry?: string; projectId?: number; accountCategory?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientFlowValue?: number; recipientCount?: number; projectCount?: number; };
   type PanelSections = { ministries: PanelEntry[]; projects: PanelEntry[]; recipients: PanelEntry[]; };
   const panelSections = useMemo((): PanelSections | null => {
     if (!selectedNode || !graphData) return null;
@@ -1317,10 +1415,10 @@ export default function RealDataSankeyPage() {
         .filter((n): n is typeof n & { projectId: number } => n.type === 'project-spending' && n.projectId != null)
         .map(n => [n.projectId, n] as const)
     );
-    const toProjectEntry = (budgetNode: { id: string; name: string; value: number; projectId?: number; ministry?: string }): PanelEntry => {
+    const toProjectEntry = (budgetNode: { id: string; name: string; value: number; projectId?: number; ministry?: string; accountCategory?: string }): PanelEntry => {
       const sn = budgetNode.projectId != null ? spendingByPid.get(budgetNode.projectId) : undefined;
       const spId = sn?.id ?? (budgetNode.projectId != null ? `project-spending-${budgetNode.projectId}` : budgetNode.id);
-      return { id: budgetNode.id, name: budgetNode.name, value: sn?.value ?? 0, ministry: budgetNode.ministry, budgetValue: budgetNode.value, spendingValue: sn?.value ?? 0, recipientCount: projectRecipientCount.get(spId) };
+      return { id: budgetNode.id, name: budgetNode.name, value: sn?.value ?? 0, ministry: budgetNode.ministry, projectId: budgetNode.projectId, accountCategory: budgetNode.accountCategory, budgetValue: budgetNode.value, spendingValue: sn?.value ?? 0, recipientCount: projectRecipientCount.get(spId) };
     };
 
     const nid = selectedNode.id;
@@ -1383,7 +1481,8 @@ export default function RealDataSankeyPage() {
       const bValue = budgetNode?.value ?? 0;
       const sValue = spendingNode?.value ?? 0;
       const spId = spendingNode?.id ?? (pid != null ? `project-spending-${pid}` : nid);
-      const projects: PanelEntry[] = [{ id: nid, name: selectedNode.name, value: sValue, ministry: ministryName, budgetValue: bValue, spendingValue: sValue, recipientCount: projectRecipientCount.get(spId) }];
+      const projectEntryId = budgetNode?.id ?? canonicalSelectableNodeId(nid) ?? nid;
+      const projects: PanelEntry[] = [{ id: projectEntryId, name: budgetNode?.name ?? selectedNode.name, value: sValue, ministry: ministryName, projectId: selectedNode.projectId, accountCategory: budgetNode?.accountCategory ?? selectedNode.accountCategory, budgetValue: bValue, spendingValue: sValue, recipientCount: projectRecipientCount.get(spId) }];
       const recipients: PanelEntry[] = [];
       if (spendingNode) {
         for (const e of graphData.edges) { if (e.source === spendingNode.id && e.target.startsWith('r-')) recipients.push({ id: e.target, name: nodeById.get(e.target)?.name ?? e.target, value: e.value }); }
@@ -1399,7 +1498,7 @@ export default function RealDataSankeyPage() {
       const mMap = new Map<string, number>();
       for (const m of aggBudgetMembers) { if (m.ministry) mMap.set(m.ministry, (mMap.get(m.ministry) || 0) + m.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value, budgetValue: value, spendingValue: ministrySpendingTotals.get(name) ?? 0 }; });
-      const projects: PanelEntry[] = aggBudgetMembers.map(m => { const bn = nodeById.get(m.id); return bn ? toProjectEntry(bn) : { id: m.id, name: m.name, value: m.value, ministry: m.ministry }; }).sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
+      const projects: PanelEntry[] = aggBudgetMembers.map((m): PanelEntry => { const bn = nodeById.get(m.id); return bn ? toProjectEntry(bn) : { id: m.id, name: m.name, value: m.value, ministry: m.ministry }; }).sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
       const rMap = new Map<string, { name: string; value: number }>();
       for (const sm of aggSpendingMembers) { for (const e of graphData.edges) { if (e.source === sm.id && e.target.startsWith('r-')) { const prev = rMap.get(e.target); if (prev) prev.value += e.value; else rMap.set(e.target, { name: nodeById.get(e.target)?.name ?? e.target, value: e.value }); } } }
       const recipients: PanelEntry[] = Array.from(rMap.entries()).sort((a, b) => b[1].value - a[1].value).map(([id, { name, value }]) => ({ id, name, value }));
@@ -1410,7 +1509,12 @@ export default function RealDataSankeyPage() {
     if (ntype === 'recipient' && !selectedNode.aggregated) {
       const pMap = new Map<string, number>();
       for (const e of graphData.edges) { if (e.target === nid) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); }
-      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null; return { id, name: n?.name ?? id, value, ministry: n?.ministry, budgetValue: bn?.value, spendingValue: n?.value }; }).sort((a, b) => b.value - a.value);
+      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => {
+        const n = nodeById.get(id);
+        const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null;
+        const budgetId = bn?.id ?? canonicalSelectableNodeId(id) ?? id;
+        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, accountCategory: bn?.accountCategory ?? n?.accountCategory, budgetValue: bn?.value, spendingValue: n?.value, recipientFlowValue: value };
+      }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value, budgetValue: mn?.value, spendingValue: ministrySpendingTotals.get(name) ?? 0 }; });
@@ -1423,7 +1527,12 @@ export default function RealDataSankeyPage() {
       const aggRcpts = filtered?.aggNodeMembers?.get('__agg-recipient') ?? [];
       const pMap = new Map<string, number>();
       for (const r of aggRcpts) { for (const e of graphData.edges) { if (e.target === r.id) pMap.set(e.source, (pMap.get(e.source) || 0) + e.value); } }
-      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => { const n = nodeById.get(id); const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null; return { id, name: n?.name ?? id, value, ministry: n?.ministry, budgetValue: bn?.value, spendingValue: n?.value }; }).sort((a, b) => b.value - a.value);
+      const projects: PanelEntry[] = Array.from(pMap.entries()).map(([id, value]) => {
+        const n = nodeById.get(id);
+        const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null;
+        const budgetId = bn?.id ?? canonicalSelectableNodeId(id) ?? id;
+        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, accountCategory: bn?.accountCategory ?? n?.accountCategory, budgetValue: bn?.value, spendingValue: n?.value, recipientFlowValue: value };
+      }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value, budgetValue: mn?.value, spendingValue: ministrySpendingTotals.get(name) ?? 0 }; });
@@ -1472,10 +1581,11 @@ export default function RealDataSankeyPage() {
   const selectNode = useCallback((id: string | null, forceReplace?: boolean) => {
     // User-initiated select/deselect both push to history so back/forward works naturally.
     // Auto-deselect (stale node cleanup) passes forceReplace=true to avoid polluting history.
+    const canonicalId = canonicalSelectableNodeId(id);
     pendingHistoryAction.current = forceReplace ? 'replace' : 'push';
-    setSelectedNodeId(id);
+    setSelectedNodeId(canonicalId);
     setIsProjectDetailExpanded(false);
-    if (id === null) { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); setFocusRelated(false); }
+    if (canonicalId === null) { setPinnedProjectId(null); setPinnedRecipientId(null); setPinnedMinistryName(null); setFocusRelated(false); }
   }, [setPinnedRecipientId, setPinnedMinistryName, setIsProjectDetailExpanded]);
 
   // Auto-clear stale selection when node no longer exists in graphData at all
@@ -1577,6 +1687,7 @@ export default function RealDataSankeyPage() {
   }, [selectedNode, selectedNodeInLayout, layout, baseZoom, getRenderedYBounds]);
 
   const handleConnectionClick = useCallback((nodeId: string) => {
+    const selectionNodeId = canonicalSelectableNodeId(nodeId);
     // If already in layout, select and focus directly (no effect needed)
     const inLayoutNode = layout?.nodes.find(n => n.id === nodeId);
     if (inLayoutNode) {
@@ -1603,8 +1714,8 @@ export default function RealDataSankeyPage() {
       if (focusRelated && nextPinnedProjectId) pinnedContextProjectId.current = nextPinnedProjectId;
       const needsDeferredFocus = nextPinnedProjectId !== pinnedProjectId || isPanelCollapsed;
       setPinnedProjectId(nextPinnedProjectId);
-      if (needsDeferredFocus) pendingFocusId.current = nodeId;
-      selectNode(nodeId);
+      if (needsDeferredFocus) pendingFocusId.current = selectionNodeId;
+      selectNode(selectionNodeId);
       if (!needsDeferredFocus) focusOnNeighborhood(inLayoutNode);
       return;
     }
@@ -1672,7 +1783,7 @@ export default function RealDataSankeyPage() {
         const rank = allProjectRanks.get(parentSpendingId);
         if (rank !== undefined) jumpToProjectRank(rank);
         setPinnedProjectId(null);
-        pendingFocusId.current = parentSpendingId;
+        pendingFocusId.current = canonicalSelectableNodeId(parentSpendingId);
         selectNode(parentSpendingId);
         return;
       }
@@ -1693,8 +1804,8 @@ export default function RealDataSankeyPage() {
       setPinnedProjectId(null);
     }
     // Out-of-layout node: focus via effect once it appears in layout after pin/offset jump
-    pendingFocusId.current = nodeId;
-    selectNode(nodeId);
+    pendingFocusId.current = selectionNodeId;
+    selectNode(selectionNodeId);
   }, [layout, filtered, allRecipientRanks, allProjectRanks, topRecipient, topProject, selectNode, graphData, focusOnNeighborhood, pinnedProjectId, isPanelCollapsed, focusRelated, setPinnedRecipientId, setPinnedMinistryName, offsetTarget, setProjectOffset]);
 
   // Step2 → Step1 遷移: 選択ノード (selectedNodeId) は維持し、
@@ -1831,14 +1942,16 @@ export default function RealDataSankeyPage() {
       if (n.type === 'project-budget') continue; // merged into project-spending entry
       if (pidQuery !== null) {
         if (n.type === 'project-spending' && n.projectId === pidQuery) {
-          const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
-          results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
+          const budgetNode = budgetNodeByPid.get(n.projectId);
+          const bv = budgetNode?.value ?? 0;
+          results.push({ id: budgetNode?.id ?? `project-budget-${n.projectId}`, name: budgetNode?.name ?? n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
         }
       } else {
         if (matcher(n.name)) {
           if (n.type === 'project-spending' && n.projectId != null) {
-            const bv = budgetNodeByPid.get(n.projectId)?.value ?? 0;
-            results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
+            const budgetNode = budgetNodeByPid.get(n.projectId);
+            const bv = budgetNode?.value ?? 0;
+            results.push({ id: budgetNode?.id ?? `project-budget-${n.projectId}`, name: budgetNode?.name ?? n.name, type: n.type, value: n.value, sortValue: Math.max(bv, n.value), projectId: n.projectId, budgetValue: bv });
           } else {
             results.push({ id: n.id, name: n.name, type: n.type, value: n.value, sortValue: n.value });
           }
@@ -2093,6 +2206,9 @@ export default function RealDataSankeyPage() {
     return `M${sx},${sTop}C${mx},${sTop} ${mx},${tTop} ${tx},${tTop}`
       + `L${tx},${tBot}C${mx},${tBot} ${mx},${sBot} ${sx},${sBot}Z`;
   };
+
+  const searchLeftOffset = selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth : 0;
+  const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 24px)`;
 
   return (
     <div
@@ -2510,19 +2626,17 @@ export default function RealDataSankeyPage() {
               // recipient: 支出のみ
               spending = hoveredNode.value;
             }
-            // 会計区分ラベル（project-budget / project-spending のみ）
-            let hoveredAcLabel: string | null = null;
+            // 会計区分バッジ（project-budget / project-spending のみ）
+            let hoveredAccountBadge: { label: string; background: string } | null = null;
             if (t === 'project-budget' || t === 'project-spending') {
               const cat = t === 'project-budget'
                 ? hoveredNode.accountCategory
                 : hoveredNode.targetLinks.find(l => l.source.type === 'project-budget')?.source.accountCategory;
-              if (cat === 'general') hoveredAcLabel = '一般会計';
-              else if (cat === 'special') hoveredAcLabel = '特別会計';
-              else if (cat === 'both') hoveredAcLabel = '一般・特別';
+              hoveredAccountBadge = getAccountBadgeStyle(cat);
             }
             // 予算・支出が両方ある場合は2列グリッドで横並び、片方だけなら1列
             const both = budget != null && spending != null;
-            const tipH = Math.round(((both ? 88 : 76) + (hoveredAcLabel ? 18 : 0)) * fontScale);
+            const tipH = Math.round(((both ? 88 : 76) + (hoveredAccountBadge ? 18 : 0)) * fontScale);
             // 大ノード: マウスY連動（カーソル上方）/ 小ノード: ラベル上端-GAPにポップアップ底辺を固定
             const labelFontPx = hoverColFontPx;
             const labelTopScreenY = screenTop + nodeScreenH / 2 - labelFontPx / 2;
@@ -2556,9 +2670,9 @@ export default function RealDataSankeyPage() {
                 pointerEvents: 'none', zIndex: 20,
               }}>
                 <div style={{ fontWeight: 600, fontSize: TOOLTIP_TITLE_FONT_PX, marginBottom: 5, color: '#111', textAlign: 'left' }}>{hoveredNode.name}</div>
-                {hoveredAcLabel && (
+                {hoveredAccountBadge && (
                   <div style={{ marginBottom: 4, textAlign: 'left' }}>
-                    <span style={{ fontSize: TOOLTIP_META_FONT_PX, padding: '1px 5px', borderRadius: 8, fontWeight: 500, background: '#f0f0f0', color: '#666' }}>{hoveredAcLabel}</span>
+                    <span style={{ display: 'inline-block', fontSize: Math.max(9, META_FONT_PX - 1), padding: '1px 5px', borderRadius: 8, fontWeight: 600, lineHeight: 1.35, background: hoveredAccountBadge.background, color: '#fff', whiteSpace: 'nowrap' }}>{hoveredAccountBadge.label}</span>
                   </div>
                 )}
                 {both ? (
@@ -2685,6 +2799,19 @@ export default function RealDataSankeyPage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: PANEL_TITLE_FONT_PX, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
                       {selectedNode.name}
+                      {(() => {
+                        let cat = selectedNode.accountCategory;
+                        if (!cat && selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
+                          cat = budgetNodeByPid.get(selectedNode.projectId)?.accountCategory;
+                        }
+                        const badge = getAccountBadgeStyle(cat);
+                        if (!badge) return null;
+                        return (
+                          <span style={{ display: 'inline-block', verticalAlign: '0.08em', marginLeft: 6, background: badge.background, color: '#fff', padding: '1px 5px', borderRadius: 8, fontSize: Math.max(9, META_FONT_PX - 1), fontWeight: 600, lineHeight: 1.35, whiteSpace: 'nowrap' }}>
+                            {badge.label}
+                          </span>
+                        );
+                      })()}
                     </div>
                     {(() => {
                       // Main value (予算額 for budget types, 支出額 for spending type)
@@ -2739,6 +2866,55 @@ export default function RealDataSankeyPage() {
                       }
                       const rawMain = selectedNode.isScaled && selectedNode.rawValue != null ? selectedNode.rawValue : null;
                       const rawMainLabel = mainLabel ? `元の${mainLabel}` : '元の値';
+                      const budgetValue = mainLabel === '予算額' ? mainValue : subLabel === '予算額' ? subValue : null;
+                      const spendingValue = mainLabel === '支出額' ? mainValue : subLabel === '支出額' ? subValue : null;
+                      const amountCellStyle: React.CSSProperties = {
+                        flex: '1 1 112px',
+                        minWidth: 0,
+                      };
+                      const amountLabelStyle: React.CSSProperties = {
+                        display: 'block',
+                        fontSize: META_FONT_PX,
+                        color: '#aaa',
+                        fontWeight: 400,
+                        marginBottom: 1,
+                      };
+                      const amountValueStyle: React.CSSProperties = {
+                        display: 'block',
+                        fontSize: PANEL_PRIMARY_VALUE_FONT_PX,
+                        fontWeight: 600,
+                        color: '#222',
+                        whiteSpace: 'nowrap',
+                      };
+                      const exactValueStyle: React.CSSProperties = {
+                        display: 'block',
+                        fontSize: META_FONT_PX,
+                        color: '#999',
+                        marginTop: 1,
+                        whiteSpace: 'nowrap',
+                      };
+                      const renderHeaderAmount = (label: string, value: number) => (
+                        <div style={amountCellStyle}>
+                          <span style={amountLabelStyle}>{label}</span>
+                          <span style={amountValueStyle}>{formatYen(value)}</span>
+                          <span style={exactValueStyle}>{Math.round(value).toLocaleString()}円</span>
+                        </div>
+                      );
+                      if (budgetValue !== null && spendingValue !== null) {
+                        return (<>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', columnGap: 12, rowGap: 4, marginTop: 5 }}>
+                            {renderHeaderAmount('予算額', budgetValue)}
+                            {renderHeaderAmount('支出額', spendingValue)}
+                          </div>
+                          {rawMain !== null && (
+                            <div style={{ fontSize: META_FONT_PX, color: '#bbb', marginTop: 3 }}>
+                              <span style={{ fontSize: META_FONT_PX, color: '#ccc', marginRight: 4 }}>{rawMainLabel}</span>
+                              {formatYen(rawMain)}
+                              <span style={{ fontSize: META_FONT_PX, color: '#ccc', marginLeft: 4 }}>{Math.round(rawMain).toLocaleString()}円</span>
+                            </div>
+                          )}
+                        </>);
+                      }
                       return (<>
                         <div style={{ fontSize: PANEL_PRIMARY_VALUE_FONT_PX, fontWeight: 600, color: '#222', marginTop: 3 }}>
                           {mainLabel && <span style={{ fontSize: META_FONT_PX, color: '#aaa', fontWeight: 400, marginRight: 4 }}>{mainLabel}</span>}
@@ -2781,19 +2957,6 @@ export default function RealDataSankeyPage() {
                   {selectedNode.ministry && selectedNode.type !== 'ministry' && (
                     <span style={{ fontSize: META_FONT_PX, color: '#666' }}>{selectedNode.ministry}</span>
                   )}
-                  {(() => {
-                    let cat = selectedNode.accountCategory;
-                    if (!cat && selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
-                      cat = budgetNodeByPid.get(selectedNode.projectId)?.accountCategory;
-                    }
-                    if (!cat) return null;
-                    const label = cat === 'general' ? '一般会計' : cat === 'special' ? '特別会計' : '一般・特別';
-                    return (
-                      <span style={{ background: '#f0f0f0', color: '#666', padding: '2px 7px', borderRadius: 10, fontSize: META_FONT_PX, fontWeight: 500 }}>
-                        {label}
-                      </span>
-                    );
-                  })()}
                 </div>
               </div>
 
@@ -2927,16 +3090,130 @@ export default function RealDataSankeyPage() {
               {panelSections && (() => {
                 const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: PANEL_META_FONT_PX, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
                 const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
-                type PanelItem = { id: string; name: string; value: number; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; };
+                type PanelItem = { id: string; name: string; value: number; projectId?: number; accountCategory?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientFlowValue?: number; recipientCount?: number; };
+                const listButtonStyle = (item: PanelItem): React.CSSProperties => ({
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  padding: '5px 0',
+                  borderBottom: '1px solid #f5f5f5',
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: item.aggregated ? 'default' : 'pointer',
+                  columnGap: 6,
+                  rowGap: 2,
+                  textAlign: 'left',
+                });
+                const listNameStyle = (item: PanelItem): React.CSSProperties => ({
+                  flex: '1 1 150px',
+                  minWidth: 0,
+                  fontSize: PANEL_LIST_NAME_FONT_PX,
+                  color: item.aggregated ? '#999' : '#333',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                });
+                const listTitleRowStyle: React.CSSProperties = {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  flex: '0 0 100%',
+                  minWidth: 0,
+                };
+                const listValueStyle: React.CSSProperties = {
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-end',
+                  alignItems: 'baseline',
+                  gap: 8,
+                  flex: '0 0 100%',
+                  minWidth: 0,
+                  fontSize: PANEL_LIST_VALUE_FONT_PX,
+                  color: '#777',
+                  whiteSpace: 'normal',
+                  overflowWrap: 'anywhere',
+                  textAlign: 'right',
+                };
+                const listMetaRightStyle: React.CSSProperties = {
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-end',
+                  alignItems: 'baseline',
+                  gap: 8,
+                  marginLeft: 'auto',
+                  minWidth: 0,
+                };
+                const budgetSpendingStyle: React.CSSProperties = {
+                  display: 'inline-flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-end',
+                  alignItems: 'baseline',
+                  gap: 8,
+                  minWidth: 0,
+                };
+                const amountPairLabelStyle: React.CSSProperties = {
+                  color: '#aaa',
+                  marginRight: 2,
+                  whiteSpace: 'nowrap',
+                };
+                const amountPairValueStyle: React.CSSProperties = {
+                  whiteSpace: 'nowrap',
+                };
+                const renderCompactAccountBadge = (cat?: string) => {
+                  const badge = getAccountBadgeStyle(cat);
+                  if (!badge) return null;
+                  return (
+                    <span style={{ background: badge.background, color: '#fff', padding: '1px 5px', borderRadius: 8, fontSize: Math.max(9, META_FONT_PX - 1), fontWeight: 600, lineHeight: 1.35, whiteSpace: 'nowrap' }}>
+                      {badge.label}
+                    </span>
+                  );
+                };
+                const renderListTitle = (item: PanelItem, showAccountBadge = false) => (
+                  <span style={listTitleRowStyle}>
+                    <span title={item.name} style={listNameStyle(item)}>{item.name}</span>
+                    {showAccountBadge && renderCompactAccountBadge(item.accountCategory)}
+                  </span>
+                );
+                const renderListMeta = (item: PanelItem, value: React.ReactNode) => (
+                  <span style={listValueStyle}>
+                    <span style={listMetaRightStyle}>
+                      {item.projectId != null && <span style={{ fontSize: META_FONT_PX, color: '#aaa', whiteSpace: 'nowrap' }}>PID:{item.projectId}</span>}
+                      <span>{value}</span>
+                    </span>
+                  </span>
+                );
+                const renderBudgetSpendingMeta = (item: PanelItem) => (
+                  renderListMeta(
+                    item,
+                    <span style={budgetSpendingStyle}>
+                      {item.recipientFlowValue != null && (
+                        <span>
+                          <span style={amountPairLabelStyle}>対象支出</span>
+                          <span style={amountPairValueStyle}>{formatYen(item.recipientFlowValue)}</span>
+                        </span>
+                      )}
+                      <span>
+                        <span style={amountPairLabelStyle}>予算</span>
+                        <span style={amountPairValueStyle}>{formatYen(item.budgetValue ?? 0)}</span>
+                      </span>
+                      <span>
+                        <span style={amountPairLabelStyle}>支出</span>
+                        <span style={amountPairValueStyle}>{formatYen(item.spendingValue ?? item.value)}</span>
+                      </span>
+                    </span>
+                  )
+                );
                 const renderFlatList = (items: PanelItem[], getValue?: (item: PanelItem) => number) => {
                   const getVal = getValue ?? ((item: PanelItem) => item.value);
                   if (items.length === 0) return <p style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
                   return items.map((item) => (
                     <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                      style={listButtonStyle(item)}
                     >
-                      <span title={item.name} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                      <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(getVal(item))}</span>
+                      {renderListTitle(item)}
+                      {renderListMeta(item, formatYen(getVal(item)))}
                     </button>
                   ));
                 };
@@ -2962,15 +3239,13 @@ export default function RealDataSankeyPage() {
                         if (items.length === 0) return <p style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
                         return items.map((item) => (
                           <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
-                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                            style={listButtonStyle(item)}
                           >
-                            <span title={item.name} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                            <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                              {item.budgetValue != null
-                                ? <>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</>
-                                : formatYen(item.value)
-                              }
-                            </span>
+                            {renderListTitle(item)}
+                            {item.budgetValue != null
+                              ? renderBudgetSpendingMeta(item)
+                              : renderListMeta(item, formatYen(item.value))
+                            }
                           </button>
                         ));
                       })()}
@@ -2980,12 +3255,12 @@ export default function RealDataSankeyPage() {
                         if (items.length === 0) return <p style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', margin: 0, padding: '6px 0' }}>なし</p>;
                         return items.map((item) => (
                           <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
-                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid #f5f5f5', width: '100%', background: 'transparent', border: 'none', cursor: item.aggregated ? 'default' : 'pointer', gap: 6, textAlign: 'left' }}
+                            style={listButtonStyle(item)}
                           >
-                            <span title={item.name} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, color: item.aggregated ? '#999' : '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                            {renderListTitle(item, true)}
                             {item.budgetValue != null
-                              ? <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</span>
-                              : <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#777', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(item.value)}</span>
+                              ? renderBudgetSpendingMeta(item)
+                              : renderListMeta(item, formatYen(item.value))
                             }
                           </button>
                         ));
@@ -3031,7 +3306,7 @@ export default function RealDataSankeyPage() {
       <div
         ref={searchBoxRef}
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: 296, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: SEARCH_BOX_WIDTH_PX, maxWidth: searchMaxWidth, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
       >
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -3044,9 +3319,9 @@ export default function RealDataSankeyPage() {
               {/* Search icon */}
               <span
                 aria-hidden="true"
-                style={{ position: 'absolute', left: 6, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, pointerEvents: 'none' }}
+                style={{ position: 'absolute', left: SEARCH_INLINE_BUTTON_OFFSET_PX, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: SEARCH_ICON_BOX_PX, height: SEARCH_ICON_BOX_PX, pointerEvents: 'none' }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="#999">
+                <svg xmlns="http://www.w3.org/2000/svg" height={SEARCH_ICON_PX} width={SEARCH_ICON_PX} viewBox="0 0 24 24" fill="#999">
                   <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                 </svg>
               </span>
@@ -3085,7 +3360,7 @@ export default function RealDataSankeyPage() {
                 placeholder="検索(2文字以上/PID)"
                 style={{
                   width: '100%', boxSizing: 'border-box',
-                  paddingLeft: 30, paddingRight: searchQuery ? 54 : 34, paddingTop: 7, paddingBottom: 7,
+                  paddingLeft: SEARCH_INPUT_PAD_LEFT_PX, paddingRight: SEARCH_INPUT_PAD_RIGHT_PX, paddingTop: SEARCH_INPUT_PAD_Y_PX, paddingBottom: SEARCH_INPUT_PAD_Y_PX,
                   fontSize: SEARCH_FONT_PX, border: 'none', borderRadius: 8,
                   background: 'transparent', outline: 'none', color: '#333',
                 }}
@@ -3098,19 +3373,19 @@ export default function RealDataSankeyPage() {
                 aria-pressed={searchUseRegex}
                 onClick={() => setSearchUseRegex(v => !v)}
                 style={{
-                  position: 'absolute', right: searchQuery ? 30 : 6, top: '50%', transform: 'translateY(-50%)',
+                  position: 'absolute', right: searchQuery ? SEARCH_INLINE_BUTTON_OFFSET_PX + SEARCH_INLINE_BUTTON_GAP_PX : SEARCH_INLINE_BUTTON_OFFSET_PX, top: '50%', transform: 'translateY(-50%)',
                   background: searchUseRegex ? '#1a73e8' : 'transparent',
                   border: 'none', borderRadius: 4, cursor: 'pointer',
                   color: searchUseRegex ? '#fff' : '#888',
                   fontSize: META_FONT_PX, fontFamily: 'monospace', fontWeight: 'bold',
-                  lineHeight: 1, padding: '2px 4px',
+                  lineHeight: 1, padding: `2px ${SEARCH_INLINE_BUTTON_PAD_X_PX}px`,
                 }}
               >.*</button>
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => { setSearchQuery(''); setDebouncedQuery(''); setShowSearchResults(false); searchInputRef.current?.focus(); }}
-                  style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 14, lineHeight: 1, padding: '2px 4px' }}
+                  style={{ position: 'absolute', right: SEARCH_INLINE_BUTTON_OFFSET_PX, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: SEARCH_CLEAR_BUTTON_FONT_PX, lineHeight: 1, padding: `2px ${SEARCH_INLINE_BUTTON_PAD_X_PX}px` }}
                 >✕</button>
               )}
             </div>{/* end input row */}
@@ -3343,7 +3618,7 @@ export default function RealDataSankeyPage() {
 
         {/* Dropdown */}
         {showSearchResults && searchResults.length > 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, minWidth: 0, maxWidth: searchMaxWidth, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
             {/* Count header */}
             <div style={{ padding: '5px 10px', fontSize: META_FONT_PX, color: '#999', borderBottom: '1px solid #f0f0f0' }}>
               {searchResults.length}件{searchTotalPages > 1 ? `（${searchPage + 1} / ${searchTotalPages} ページ）` : ''}
@@ -3356,17 +3631,21 @@ export default function RealDataSankeyPage() {
                   data-testid={testId('search-result')}
                   type="button"
                   onClick={() => { handleSearchSelect(node.id); setSearchCursorIndex(-1); }}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: i === searchCursorIndex ? '#e8f0fe' : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                  style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: SEARCH_RESULT_GAP_PX, padding: `${SEARCH_RESULT_PAD_Y_PX}px ${SEARCH_RESULT_PAD_X_PX}px`, background: i === searchCursorIndex ? '#e8f0fe' : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                   onMouseEnter={e => { if (i !== searchCursorIndex) e.currentTarget.style.background = '#f5f5f5'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = i === searchCursorIndex ? '#e8f0fe' : 'transparent'; }}
                 >
-                  <span style={{ width: 8, height: 8, borderRadius: 2, flexShrink: 0, background: node.budgetValue !== undefined ? `linear-gradient(to right, ${TYPE_COLORS['project-budget']} 44%, ${TYPE_COLORS['project-spending']} 56%)` : getNodeColor(node) }} />
-                  <span title={node.name} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
-                  {node.projectId != null && <span style={{ fontSize: META_FONT_PX, color: '#bbb', whiteSpace: 'nowrap', flexShrink: 0 }}>PID:{node.projectId}</span>}
-                  {node.budgetValue !== undefined
-                    ? <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>予{formatYen(node.budgetValue)} / 支{formatYen(node.value)}</span>
-                    : <span style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(node.value)}</span>
-                  }
+                  <span style={{ width: SEARCH_RESULT_SWATCH_PX, height: SEARCH_RESULT_SWATCH_PX, marginTop: Math.max(2, Math.round(PANEL_LIST_NAME_FONT_PX * 0.35)), borderRadius: 2, flexShrink: 0, background: node.budgetValue !== undefined ? `linear-gradient(to right, ${TYPE_COLORS['project-budget']} 44%, ${TYPE_COLORS['project-spending']} 56%)` : getNodeColor(node) }} />
+                  <span style={{ flex: '1 1 auto', minWidth: 0, display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', columnGap: SEARCH_RESULT_GAP_PX, rowGap: 2 }}>
+                    <span title={node.name} style={{ flex: '1 1 160px', minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
+                    <span style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'baseline', gap: SEARCH_RESULT_GAP_PX, fontSize: PANEL_LIST_VALUE_FONT_PX, color: '#999', whiteSpace: 'normal', overflowWrap: 'anywhere', flex: '0 0 100%', minWidth: 0, textAlign: 'right' }}>
+                      {node.projectId != null && <span style={{ fontSize: META_FONT_PX, color: '#bbb', whiteSpace: 'nowrap' }}>PID:{node.projectId}</span>}
+                      <span>{node.budgetValue !== undefined
+                        ? <>予{formatYen(node.budgetValue)} / 支{formatYen(node.value)}</>
+                        : formatYen(node.value)
+                      }</span>
+                    </span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -3383,7 +3662,7 @@ export default function RealDataSankeyPage() {
         )}
         {/* No results */}
         {showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: '10px 12px', fontSize: PANEL_META_FONT_PX, color: '#999', zIndex: 20 }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, minWidth: 0, maxWidth: searchMaxWidth, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: `${scaleSize(10)}px ${scaleSize(12)}px`, fontSize: PANEL_META_FONT_PX, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
         )}

@@ -45,6 +45,54 @@ async function visibleSvgTextMatching(page: import('@playwright/test').Page, tex
   }, text);
 }
 
+async function aggregateBoundaryGaps(page: import('@playwright/test').Page): Promise<number[]> {
+  return page.locator('g.snk-node').evaluateAll(nodes => {
+    const rows = nodes.map(node => {
+      const texts = Array.from(node.querySelectorAll('text'));
+      const text = texts.at(-1);
+      const shape = node.querySelector('rect,path');
+      if (!text || !shape) return null;
+      const textBox = text.getBoundingClientRect();
+      const shapeBox = shape.getBoundingClientRect();
+      return {
+        text: text.textContent ?? '',
+        x: Math.round(shapeBox.left),
+        textBottom: textBox.bottom,
+        rectTop: shapeBox.top,
+      };
+    }).filter((row): row is NonNullable<typeof row> => row !== null);
+
+    const rowsByColumn = new Map<number, typeof rows>();
+    for (const row of rows) {
+      if (!rowsByColumn.has(row.x)) rowsByColumn.set(row.x, []);
+      rowsByColumn.get(row.x)!.push(row);
+    }
+
+    const gaps: number[] = [];
+    const aggregateLabelPattern = /^(?:[\d,]+(?:事業|支出先|省庁)|その他 \()/;
+    for (const columnRows of rowsByColumn.values()) {
+      columnRows.sort((a, b) => a.rectTop - b.rectTop);
+      for (let i = 1; i < columnRows.length; i++) {
+        if (aggregateLabelPattern.test(columnRows[i].text)) {
+          gaps.push(columnRows[i].rectTop - columnRows[i - 1].textBottom);
+        }
+      }
+    }
+    return gaps;
+  });
+}
+
+async function visibleSvgTextFill(page: import('@playwright/test').Page, text: string): Promise<string | null> {
+  return page.locator('svg text').evaluateAll((nodes, expected) => {
+    const node = nodes.find(candidate => {
+      if (!candidate.textContent?.includes(expected)) return false;
+      const rect = candidate.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+    return node?.getAttribute('fill') ?? null;
+  }, text);
+}
+
 test.describe('sankey-svg interactions', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/sankey-svg');
@@ -72,6 +120,104 @@ test.describe('sankey-svg interactions', () => {
     await expect.poll(() => visibleNodeCount(page)).toBeGreaterThan(0);
   });
 
+  test('search box and results resize with the base font size', async ({ page }) => {
+    const recipientName = '国立研究開発法人新エネルギー・産業技術総合開発機構';
+    const projectName = 'GX分野のディープテック・スタートアップ支援事業';
+    const beforeWidth = await page.getByTestId('search-input').evaluate(input =>
+      input.closest('[data-pan-disabled="true"]')?.getBoundingClientRect().width ?? 0
+    );
+
+    await page.getByLabel('表示設定を開く').click();
+    await page.getByLabel('基準フォントサイズ(数値)').fill('24');
+    await page.getByLabel('基準フォントサイズ(数値)').press('Enter');
+
+    const afterWidth = await page.getByTestId('search-input').evaluate(input =>
+      input.closest('[data-pan-disabled="true"]')?.getBoundingClientRect().width ?? 0
+    );
+    expect(afterWidth).toBeGreaterThan(beforeWidth);
+
+    await page.getByTestId('search-input').fill('年金');
+    const firstResult = page.getByTestId('search-result').first();
+    await expect(firstResult).toBeVisible({ timeout: 30_000 });
+    await expect.poll(() => firstResult.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+
+    await page.getByTestId('search-input').fill(projectName);
+    const projectSearchResult = page.getByTestId('search-result').filter({
+      has: page.locator(`[title="${projectName}"]`),
+    }).first();
+    await expect(projectSearchResult).toBeVisible({ timeout: 30_000 });
+    await expect(projectSearchResult.getByText(/PID:7096/)).toBeVisible();
+
+    await page.getByTestId('search-input').fill(recipientName);
+    await selectSearchResultByTitle(page, recipientName);
+    const panelProject = page.locator('button').filter({
+      has: page.locator(`[title="${projectName}"]`),
+    }).first();
+    await expect(panelProject).toBeVisible({ timeout: 30_000 });
+    await expect(panelProject.getByText(/PID:7096/)).toBeVisible();
+    await expect.poll(() => panelProject.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+  });
+
+  test('project side panel uses the unified project badge from graph and search selection', async ({ page }) => {
+    const projectName = '燃料油価格激変緩和対策事業';
+
+    await page.locator('svg text').filter({ hasText: projectName }).first().click();
+    await expect(page.getByText('事業', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('事業（予算）')).toHaveCount(0);
+    await expect(page.getByText('事業（支出）')).toHaveCount(0);
+
+    await page.getByTestId('search-input').fill(projectName);
+    await selectSearchResultByTitle(page, projectName);
+    await expect(page).toHaveURL(/sel=project-budget-/);
+    await expect(page).not.toHaveURL(/sel=project-spending-/);
+    await expect(page.getByText('事業', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('事業（予算）')).toHaveCount(0);
+    await expect(page.getByText('事業（支出）')).toHaveCount(0);
+  });
+
+  test('aggregate nodes leave room for the previous TopN label', async ({ page }) => {
+    const gaps = await aggregateBoundaryGaps(page);
+    expect(gaps.length).toBeGreaterThan(0);
+    expect(Math.min(...gaps)).toBeGreaterThanOrEqual(6);
+  });
+
+  test('hover highlight does not leak through aggregate project nodes', async ({ page }) => {
+    const ministryName = '警察庁';
+    const unrelatedRecipientName = '年金受給者';
+
+    await expect(page.locator('svg text').filter({ hasText: ministryName }).first()).toBeVisible();
+    await expect(page.locator('svg text').filter({ hasText: unrelatedRecipientName }).first()).toBeVisible();
+
+    await page.locator('svg text').filter({ hasText: ministryName }).first().hover();
+    await expect.poll(() => visibleSvgTextFill(page, ministryName), { timeout: 5_000, intervals: [100] }).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName), { timeout: 5_000, intervals: [100] }).toBe('#bbb');
+
+    await page.locator('svg text').filter({ hasText: unrelatedRecipientName }).first().hover();
+    await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName), { timeout: 5_000, intervals: [100] }).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, ministryName), { timeout: 5_000, intervals: [100] }).toBe('#bbb');
+  });
+
+  test('selected highlight follows aggregate nodes without leaking to unrelated ministries', async ({ page }) => {
+    const ministryName = '警察庁';
+    const recipientName = '年金受給者';
+    const aggregateProjectLabel = '5,744事業';
+    const aggregateRecipientLabel = '12,741支出先';
+
+    await page.goto('/sankey-svg?fmc=0');
+    await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 30_000 });
+
+    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, aggregateProjectLabel)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, aggregateRecipientLabel)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, recipientName)).toBe('#bbb');
+
+    await page.locator('svg text').filter({ hasText: recipientName }).first().click();
+    await expect.poll(() => visibleSvgTextFill(page, recipientName)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, aggregateProjectLabel)).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#bbb');
+  });
+
   test('year selector can switch fiscal years', async ({ page }) => {
     await page.getByTestId('year-select').selectOption('2024');
 
@@ -88,7 +234,7 @@ test.describe('sankey-svg interactions', () => {
 
     await page.getByTestId('search-input').fill(projectName);
     await selectSearchResultByTitle(page, projectName);
-    await expect(page).toHaveURL(/sel=project-spending-3522/);
+    await expect(page).toHaveURL(/sel=project-budget-3522/);
     await expect.poll(() => visibleNodeCount(page)).toBeGreaterThan(0);
 
     await page.getByTestId('search-input').fill(recipientName);
@@ -130,10 +276,11 @@ test.describe('sankey-svg interactions', () => {
       has: page.locator(`[title="${projectName}"]`),
     }).first();
     await expect(panelProject).toBeVisible({ timeout: 30_000 });
+    await expect(panelProject).toContainText('対象支出');
     await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBe(0);
     await panelProject.click();
 
-    await expect(page).toHaveURL(/sel=project-spending-7096/);
+    await expect(page).toHaveURL(/sel=project-budget-7096/);
     await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBeGreaterThan(0);
     expect(pageErrors).toEqual([]);
   });
