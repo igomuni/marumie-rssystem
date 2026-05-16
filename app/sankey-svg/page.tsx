@@ -3117,11 +3117,18 @@ export default function RealDataSankeyPage() {
 
                 const formatBreakdownAmount = (value: number) => formatYen(value);
                 const renderText = (value: string) => value.trim() || '-';
-                const accountTotals = (summary?.accountSummaries ?? []).reduce((m, item) => {
-                  const label = item.accountCategory === '一般会計' ? '一般' : item.accountCategory === '特別会計' ? '特別' : '';
-                  if (label) m.set(label, (m.get(label) ?? 0) + item.totalBudget);
-                  return m;
-                }, new Map<string, number>());
+                const summaryAccountItems = (summary?.accountSummaries ?? []).filter(item => item.totalBudget > 0);
+                const accountTotals = summaryAccountItems.length > 0
+                  ? summaryAccountItems.reduce((m, item) => {
+                    const label = item.accountCategory === '一般会計' ? '一般' : item.accountCategory === '特別会計' ? '特別' : '';
+                    if (label) m.set(label, (m.get(label) ?? 0) + item.totalBudget);
+                    return m;
+                  }, new Map<string, number>())
+                  : breakdown.reduce((m, item) => {
+                    const label = item.accountCategory === '一般会計' ? '一般' : item.accountCategory === '特別会計' ? '特別' : '';
+                    if (label) m.set(label, (m.get(label) ?? 0) + item.amount);
+                    return m;
+                  }, new Map<string, number>());
                 const toAccountBadgeKey = (value: string) => {
                   if (value === '一般会計' || value === '一般') return 'general';
                   if (value === '特別会計' || value === '特別') return 'special';
