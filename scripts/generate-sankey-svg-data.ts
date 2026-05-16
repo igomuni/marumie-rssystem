@@ -29,6 +29,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { readShiftJISCSV, parseAmount } from '@/scripts/csv-reader';
 import type { CSVRow } from '@/types/rs-system';
+import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
 
 // ─── 年度設定 ──────────────────────────────────────────────
 const YEAR = parseInt(process.argv[2] || '2024', 10);
@@ -82,34 +83,6 @@ interface SankeyGraphData {
   };
   nodes: SankeyNode[];
   edges: SankeyEdge[];
-}
-
-interface BudgetSummary {
-  fiscalYear: number;
-  initialBudget: number;
-  supplementaryBudget: number;
-  carryoverBudget: number;
-  reserveFund: number;
-  totalBudget: number;
-  executedAmount: number;
-  executionRate: number | null;
-  carryoverToNext: number;
-  nextYearRequest: number;
-}
-
-interface BudgetBreakdownItem {
-  fiscalYear: number;
-  accountCategory: string;
-  account: string;
-  subAccount: string;
-  budgetType: string;
-  jurisdiction: string;
-  organizationAccount: string;
-  item: string;
-  subItem: string;
-  note: string;
-  amount: number;
-  nextYearRequestAmount: number;
 }
 
 // ─── CSV読み込み ──────────────────────────────────────────
@@ -183,18 +156,36 @@ function main() {
       executionRate: null,
       carryoverToNext: 0,
       nextYearRequest: 0,
+      accountSummaries: [],
     };
+    const totalBudget = parseAmount(row['計(歳出予算現額合計)']);
+    const executedAmount = parseAmount(row['執行額(合計)']);
     existing.initialBudget += parseAmount(row['当初予算(合計)']);
     existing.supplementaryBudget += parseAmount(row['補正予算(合計)']);
     existing.carryoverBudget += parseAmount(row['前年度からの繰越し(合計)']);
     existing.reserveFund += parseAmount(row['予備費等(合計)']);
-    existing.totalBudget += parseAmount(row['計(歳出予算現額合計)']);
-    existing.executedAmount += parseAmount(row['執行額(合計)']);
+    existing.totalBudget += totalBudget;
+    existing.executedAmount += executedAmount;
     existing.carryoverToNext += parseAmount(row['翌年度への繰越し(合計)']);
     existing.nextYearRequest += parseAmount(row['翌年度要求額(合計)']);
-    const rate = Number((row['執行率'] || '').replace(/,/g, '').trim());
-    if (!isNaN(rate)) existing.executionRate = rate;
+    if (cat === '一般会計' || cat === '特別会計') {
+      const accountTotalBudget = parseAmount(row['歳出予算現額']);
+      const accountExecutedAmount = parseAmount(row['執行額']);
+      let accountSummary = existing.accountSummaries.find(item => item.accountCategory === cat);
+      if (!accountSummary) {
+        accountSummary = { accountCategory: cat, totalBudget: 0, executedAmount: 0 };
+        existing.accountSummaries.push(accountSummary);
+      }
+      accountSummary.totalBudget += accountTotalBudget;
+      accountSummary.executedAmount += accountExecutedAmount;
+    }
     budgetMap.set(pid, existing);
+  }
+  for (const summary of budgetMap.values()) {
+    summary.executionRate = summary.totalBudget > 0
+      ? (summary.executedAmount / summary.totalBudget) * 100
+      : null;
+    summary.accountSummaries.sort((a, b) => b.totalBudget - a.totalBudget);
   }
   console.log(`  予算データ: ${budgetMap.size.toLocaleString()} 事業`);
 

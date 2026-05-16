@@ -37,6 +37,13 @@ export interface BudgetSummary {
   executionRate: number | null;
   carryoverToNext: number;
   nextYearRequest: number;
+  accountSummaries: BudgetAccountSummary[];
+}
+
+export interface BudgetAccountSummary {
+  accountCategory: string;
+  totalBudget: number;
+  executedAmount: number;
 }
 
 export interface BudgetBreakdownItem {

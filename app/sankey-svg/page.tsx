@@ -3117,9 +3117,9 @@ export default function RealDataSankeyPage() {
 
                 const formatBreakdownAmount = (value: number) => formatYen(value);
                 const renderText = (value: string) => value.trim() || '-';
-                const accountTotals = breakdown.reduce((m, item) => {
+                const accountTotals = (summary?.accountSummaries ?? []).reduce((m, item) => {
                   const label = item.accountCategory === '一般会計' ? '一般' : item.accountCategory === '特別会計' ? '特別' : '';
-                  if (label) m.set(label, (m.get(label) ?? 0) + item.amount);
+                  if (label) m.set(label, (m.get(label) ?? 0) + item.totalBudget);
                   return m;
                 }, new Map<string, number>());
                 const toAccountBadgeKey = (value: string) => {
