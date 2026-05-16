@@ -189,14 +189,12 @@ test.describe('sankey-svg interactions', () => {
     await expect(page.locator('svg text').filter({ hasText: unrelatedRecipientName }).first()).toBeVisible();
 
     await page.locator('svg text').filter({ hasText: ministryName }).first().hover();
-    await page.waitForTimeout(300);
-    await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#333');
-    await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName)).toBe('#bbb');
+    await expect.poll(() => visibleSvgTextFill(page, ministryName), { timeout: 5_000, intervals: [100] }).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName), { timeout: 5_000, intervals: [100] }).toBe('#bbb');
 
     await page.locator('svg text').filter({ hasText: unrelatedRecipientName }).first().hover();
-    await page.waitForTimeout(300);
-    await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName)).toBe('#333');
-    await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#bbb');
+    await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName), { timeout: 5_000, intervals: [100] }).toBe('#333');
+    await expect.poll(() => visibleSvgTextFill(page, ministryName), { timeout: 5_000, intervals: [100] }).toBe('#bbb');
   });
 
   test('selected highlight follows aggregate nodes without leaking to unrelated ministries', async ({ page }) => {
@@ -278,6 +276,7 @@ test.describe('sankey-svg interactions', () => {
       has: page.locator(`[title="${projectName}"]`),
     }).first();
     await expect(panelProject).toBeVisible({ timeout: 30_000 });
+    await expect(panelProject).toContainText('対象支出');
     await expect.poll(() => visibleSvgTextMatching(page, projectName)).toBe(0);
     await panelProject.click();
 

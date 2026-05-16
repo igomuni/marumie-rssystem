@@ -12,6 +12,7 @@ import {
 } from '@/app/lib/sankey-svg-constants';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { filterTopN, computeLayout, getTopMinistriesInScope } from '@/app/lib/sankey-svg-filter';
+import { canonicalSelectableNodeId } from '@/app/lib/sankey-svg-ids';
 import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
 import { parseAmountToYen } from '@/app/lib/format/yen';
 
@@ -108,13 +109,6 @@ type ShiftLayoutNode = {
   projectId?: number;
   aggregated?: boolean;
 };
-
-function canonicalSelectableNodeId(id: string | null): string | null {
-  if (id === null) return null;
-  if (id.startsWith('project-spending-')) return id.replace('project-spending-', 'project-budget-');
-  if (id === '__agg-project-spending') return '__agg-project-budget';
-  return id;
-}
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
@@ -1396,7 +1390,7 @@ export default function RealDataSankeyPage() {
   }, [graphData]);
 
   // Panel sections — 3-tab data (省庁 / 事業 / 支出先)
-  type PanelEntry = { id: string; name: string; value: number; ministry?: string; projectId?: number; accountCategory?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; projectCount?: number; };
+  type PanelEntry = { id: string; name: string; value: number; ministry?: string; projectId?: number; accountCategory?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientFlowValue?: number; recipientCount?: number; projectCount?: number; };
   type PanelSections = { ministries: PanelEntry[]; projects: PanelEntry[]; recipients: PanelEntry[]; };
   const panelSections = useMemo((): PanelSections | null => {
     if (!selectedNode || !graphData) return null;
@@ -1504,7 +1498,7 @@ export default function RealDataSankeyPage() {
         const n = nodeById.get(id);
         const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null;
         const budgetId = bn?.id ?? canonicalSelectableNodeId(id) ?? id;
-        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, accountCategory: bn?.accountCategory ?? n?.accountCategory, budgetValue: bn?.value, spendingValue: n?.value };
+        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, accountCategory: bn?.accountCategory ?? n?.accountCategory, budgetValue: bn?.value, spendingValue: n?.value, recipientFlowValue: value };
       }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
@@ -1522,7 +1516,7 @@ export default function RealDataSankeyPage() {
         const n = nodeById.get(id);
         const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null;
         const budgetId = bn?.id ?? canonicalSelectableNodeId(id) ?? id;
-        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, accountCategory: bn?.accountCategory ?? n?.accountCategory, budgetValue: bn?.value, spendingValue: n?.value };
+        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, accountCategory: bn?.accountCategory ?? n?.accountCategory, budgetValue: bn?.value, spendingValue: n?.value, recipientFlowValue: value };
       }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
@@ -2197,6 +2191,9 @@ export default function RealDataSankeyPage() {
     return `M${sx},${sTop}C${mx},${sTop} ${mx},${tTop} ${tx},${tTop}`
       + `L${tx},${tBot}C${mx},${tBot} ${mx},${sBot} ${sx},${sBot}Z`;
   };
+
+  const searchLeftOffset = selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth : 0;
+  const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 24px)`;
 
   return (
     <div
@@ -3088,7 +3085,7 @@ export default function RealDataSankeyPage() {
               {panelSections && (() => {
                 const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: PANEL_META_FONT_PX, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
                 const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
-                type PanelItem = { id: string; name: string; value: number; projectId?: number; accountCategory?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; };
+                type PanelItem = { id: string; name: string; value: number; projectId?: number; accountCategory?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientFlowValue?: number; recipientCount?: number; };
                 const listButtonStyle = (item: PanelItem): React.CSSProperties => ({
                   display: 'flex',
                   flexWrap: 'wrap',
@@ -3194,6 +3191,12 @@ export default function RealDataSankeyPage() {
                   renderListMeta(
                     item,
                     <span style={budgetSpendingStyle}>
+                      {item.recipientFlowValue != null && (
+                        <span>
+                          <span style={amountPairLabelStyle}>対象支出</span>
+                          <span style={amountPairValueStyle}>{formatYen(item.recipientFlowValue)}</span>
+                        </span>
+                      )}
                       <span>
                         <span style={amountPairLabelStyle}>予算</span>
                         <span style={amountPairValueStyle}>{formatYen(item.budgetValue ?? 0)}</span>
@@ -3306,7 +3309,7 @@ export default function RealDataSankeyPage() {
       <div
         ref={searchBoxRef}
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: SEARCH_BOX_WIDTH_PX, maxWidth: 'calc(100vw - 24px)', transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: SEARCH_BOX_WIDTH_PX, maxWidth: searchMaxWidth, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
       >
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -3618,7 +3621,7 @@ export default function RealDataSankeyPage() {
 
         {/* Dropdown */}
         {showSearchResults && searchResults.length > 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, minWidth: SEARCH_BOX_WIDTH_PX, maxWidth: 'calc(100vw - 24px)', background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, minWidth: 0, maxWidth: searchMaxWidth, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 20 }}>
             {/* Count header */}
             <div style={{ padding: '5px 10px', fontSize: META_FONT_PX, color: '#999', borderBottom: '1px solid #f0f0f0' }}>
               {searchResults.length}件{searchTotalPages > 1 ? `（${searchPage + 1} / ${searchTotalPages} ページ）` : ''}
@@ -3662,7 +3665,7 @@ export default function RealDataSankeyPage() {
         )}
         {/* No results */}
         {showSearchResults && meetsSearchMinLength(debouncedQuery.trim()) && searchResults.length === 0 && (
-          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, minWidth: SEARCH_BOX_WIDTH_PX, maxWidth: 'calc(100vw - 24px)', background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: `${scaleSize(10)}px ${scaleSize(12)}px`, fontSize: PANEL_META_FONT_PX, color: '#999', zIndex: 20 }}>
+          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, minWidth: 0, maxWidth: searchMaxWidth, background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', padding: `${scaleSize(10)}px ${scaleSize(12)}px`, fontSize: PANEL_META_FONT_PX, color: '#999', zIndex: 20 }}>
             該当なし
           </div>
         )}
