@@ -1396,7 +1396,7 @@ export default function RealDataSankeyPage() {
   }, [graphData]);
 
   // Panel sections — 3-tab data (省庁 / 事業 / 支出先)
-  type PanelEntry = { id: string; name: string; value: number; ministry?: string; projectId?: number; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; projectCount?: number; };
+  type PanelEntry = { id: string; name: string; value: number; ministry?: string; projectId?: number; accountCategory?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; projectCount?: number; };
   type PanelSections = { ministries: PanelEntry[]; projects: PanelEntry[]; recipients: PanelEntry[]; };
   const panelSections = useMemo((): PanelSections | null => {
     if (!selectedNode || !graphData) return null;
@@ -1406,10 +1406,10 @@ export default function RealDataSankeyPage() {
         .filter((n): n is typeof n & { projectId: number } => n.type === 'project-spending' && n.projectId != null)
         .map(n => [n.projectId, n] as const)
     );
-    const toProjectEntry = (budgetNode: { id: string; name: string; value: number; projectId?: number; ministry?: string }): PanelEntry => {
+    const toProjectEntry = (budgetNode: { id: string; name: string; value: number; projectId?: number; ministry?: string; accountCategory?: string }): PanelEntry => {
       const sn = budgetNode.projectId != null ? spendingByPid.get(budgetNode.projectId) : undefined;
       const spId = sn?.id ?? (budgetNode.projectId != null ? `project-spending-${budgetNode.projectId}` : budgetNode.id);
-      return { id: budgetNode.id, name: budgetNode.name, value: sn?.value ?? 0, ministry: budgetNode.ministry, projectId: budgetNode.projectId, budgetValue: budgetNode.value, spendingValue: sn?.value ?? 0, recipientCount: projectRecipientCount.get(spId) };
+      return { id: budgetNode.id, name: budgetNode.name, value: sn?.value ?? 0, ministry: budgetNode.ministry, projectId: budgetNode.projectId, accountCategory: budgetNode.accountCategory, budgetValue: budgetNode.value, spendingValue: sn?.value ?? 0, recipientCount: projectRecipientCount.get(spId) };
     };
 
     const nid = selectedNode.id;
@@ -1473,7 +1473,7 @@ export default function RealDataSankeyPage() {
       const sValue = spendingNode?.value ?? 0;
       const spId = spendingNode?.id ?? (pid != null ? `project-spending-${pid}` : nid);
       const projectEntryId = budgetNode?.id ?? canonicalSelectableNodeId(nid) ?? nid;
-      const projects: PanelEntry[] = [{ id: projectEntryId, name: budgetNode?.name ?? selectedNode.name, value: sValue, ministry: ministryName, projectId: selectedNode.projectId, budgetValue: bValue, spendingValue: sValue, recipientCount: projectRecipientCount.get(spId) }];
+      const projects: PanelEntry[] = [{ id: projectEntryId, name: budgetNode?.name ?? selectedNode.name, value: sValue, ministry: ministryName, projectId: selectedNode.projectId, accountCategory: budgetNode?.accountCategory ?? selectedNode.accountCategory, budgetValue: bValue, spendingValue: sValue, recipientCount: projectRecipientCount.get(spId) }];
       const recipients: PanelEntry[] = [];
       if (spendingNode) {
         for (const e of graphData.edges) { if (e.source === spendingNode.id && e.target.startsWith('r-')) recipients.push({ id: e.target, name: nodeById.get(e.target)?.name ?? e.target, value: e.value }); }
@@ -1489,7 +1489,7 @@ export default function RealDataSankeyPage() {
       const mMap = new Map<string, number>();
       for (const m of aggBudgetMembers) { if (m.ministry) mMap.set(m.ministry, (mMap.get(m.ministry) || 0) + m.value); }
       const ministries: PanelEntry[] = Array.from(mMap.entries()).sort((a, b) => b[1] - a[1]).map(([name, value]) => { const mn = graphData.nodes.find(n => n.type === 'ministry' && n.name === name); return { id: mn?.id ?? `ministry-${name}`, name, value, budgetValue: value, spendingValue: ministrySpendingTotals.get(name) ?? 0 }; });
-      const projects: PanelEntry[] = aggBudgetMembers.map(m => { const bn = nodeById.get(m.id); return bn ? toProjectEntry(bn) : { id: m.id, name: m.name, value: m.value, ministry: m.ministry }; }).sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
+      const projects: PanelEntry[] = aggBudgetMembers.map((m): PanelEntry => { const bn = nodeById.get(m.id); return bn ? toProjectEntry(bn) : { id: m.id, name: m.name, value: m.value, ministry: m.ministry }; }).sort((a, b) => { const bv = (b.budgetValue ?? 0) - (a.budgetValue ?? 0); return bv !== 0 ? bv : (b.spendingValue ?? b.value) - (a.spendingValue ?? a.value); });
       const rMap = new Map<string, { name: string; value: number }>();
       for (const sm of aggSpendingMembers) { for (const e of graphData.edges) { if (e.source === sm.id && e.target.startsWith('r-')) { const prev = rMap.get(e.target); if (prev) prev.value += e.value; else rMap.set(e.target, { name: nodeById.get(e.target)?.name ?? e.target, value: e.value }); } } }
       const recipients: PanelEntry[] = Array.from(rMap.entries()).sort((a, b) => b[1].value - a[1].value).map(([id, { name, value }]) => ({ id, name, value }));
@@ -1504,7 +1504,7 @@ export default function RealDataSankeyPage() {
         const n = nodeById.get(id);
         const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null;
         const budgetId = bn?.id ?? canonicalSelectableNodeId(id) ?? id;
-        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, budgetValue: bn?.value, spendingValue: n?.value };
+        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, accountCategory: bn?.accountCategory ?? n?.accountCategory, budgetValue: bn?.value, spendingValue: n?.value };
       }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
@@ -1522,7 +1522,7 @@ export default function RealDataSankeyPage() {
         const n = nodeById.get(id);
         const bn = n?.projectId != null ? nodeById.get(`project-budget-${n.projectId}`) : null;
         const budgetId = bn?.id ?? canonicalSelectableNodeId(id) ?? id;
-        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, budgetValue: bn?.value, spendingValue: n?.value };
+        return { id: budgetId, name: bn?.name ?? n?.name ?? id, value, ministry: bn?.ministry ?? n?.ministry, projectId: bn?.projectId ?? n?.projectId, accountCategory: bn?.accountCategory ?? n?.accountCategory, budgetValue: bn?.value, spendingValue: n?.value };
       }).sort((a, b) => b.value - a.value);
       const mMap = new Map<string, number>();
       for (const p of projects) { if (p.ministry) mMap.set(p.ministry, (mMap.get(p.ministry) || 0) + p.value); }
@@ -2789,6 +2789,27 @@ export default function RealDataSankeyPage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: PANEL_TITLE_FONT_PX, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
                       {selectedNode.name}
+                      {(() => {
+                        let cat = selectedNode.accountCategory;
+                        if (!cat && selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
+                          cat = budgetNodeByPid.get(selectedNode.projectId)?.accountCategory;
+                        }
+                        if (!cat) return null;
+                        const generalColor = '#e45f6f';
+                        const specialColor = '#5f8ee8';
+                        const label = cat === 'general' ? '一般' : cat === 'special' ? '特別' : cat === 'both' ? '一般特別' : null;
+                        if (!label) return null;
+                        const background = cat === 'general'
+                          ? generalColor
+                          : cat === 'special'
+                            ? specialColor
+                            : `linear-gradient(to right, ${generalColor} 0 50%, ${specialColor} 50% 100%)`;
+                        return (
+                          <span style={{ display: 'inline-block', verticalAlign: '0.08em', marginLeft: 6, background, color: '#fff', padding: '1px 5px', borderRadius: 8, fontSize: Math.max(9, META_FONT_PX - 1), fontWeight: 600, lineHeight: 1.35, whiteSpace: 'nowrap' }}>
+                            {label}
+                          </span>
+                        );
+                      })()}
                     </div>
                     {(() => {
                       // Main value (予算額 for budget types, 支出額 for spending type)
@@ -2843,6 +2864,55 @@ export default function RealDataSankeyPage() {
                       }
                       const rawMain = selectedNode.isScaled && selectedNode.rawValue != null ? selectedNode.rawValue : null;
                       const rawMainLabel = mainLabel ? `元の${mainLabel}` : '元の値';
+                      const budgetValue = mainLabel === '予算額' ? mainValue : subLabel === '予算額' ? subValue : null;
+                      const spendingValue = mainLabel === '支出額' ? mainValue : subLabel === '支出額' ? subValue : null;
+                      const amountCellStyle: React.CSSProperties = {
+                        flex: '1 1 112px',
+                        minWidth: 0,
+                      };
+                      const amountLabelStyle: React.CSSProperties = {
+                        display: 'block',
+                        fontSize: META_FONT_PX,
+                        color: '#aaa',
+                        fontWeight: 400,
+                        marginBottom: 1,
+                      };
+                      const amountValueStyle: React.CSSProperties = {
+                        display: 'block',
+                        fontSize: PANEL_PRIMARY_VALUE_FONT_PX,
+                        fontWeight: 600,
+                        color: '#222',
+                        whiteSpace: 'nowrap',
+                      };
+                      const exactValueStyle: React.CSSProperties = {
+                        display: 'block',
+                        fontSize: META_FONT_PX,
+                        color: '#999',
+                        marginTop: 1,
+                        whiteSpace: 'nowrap',
+                      };
+                      const renderHeaderAmount = (label: string, value: number) => (
+                        <div style={amountCellStyle}>
+                          <span style={amountLabelStyle}>{label}</span>
+                          <span style={amountValueStyle}>{formatYen(value)}</span>
+                          <span style={exactValueStyle}>{Math.round(value).toLocaleString()}円</span>
+                        </div>
+                      );
+                      if (budgetValue !== null && spendingValue !== null) {
+                        return (<>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', columnGap: 12, rowGap: 4, marginTop: 5 }}>
+                            {renderHeaderAmount('予算額', budgetValue)}
+                            {renderHeaderAmount('支出額', spendingValue)}
+                          </div>
+                          {rawMain !== null && (
+                            <div style={{ fontSize: META_FONT_PX, color: '#bbb', marginTop: 3 }}>
+                              <span style={{ fontSize: META_FONT_PX, color: '#ccc', marginRight: 4 }}>{rawMainLabel}</span>
+                              {formatYen(rawMain)}
+                              <span style={{ fontSize: META_FONT_PX, color: '#ccc', marginLeft: 4 }}>{Math.round(rawMain).toLocaleString()}円</span>
+                            </div>
+                          )}
+                        </>);
+                      }
                       return (<>
                         <div style={{ fontSize: PANEL_PRIMARY_VALUE_FONT_PX, fontWeight: 600, color: '#222', marginTop: 3 }}>
                           {mainLabel && <span style={{ fontSize: META_FONT_PX, color: '#aaa', fontWeight: 400, marginRight: 4 }}>{mainLabel}</span>}
@@ -2885,19 +2955,6 @@ export default function RealDataSankeyPage() {
                   {selectedNode.ministry && selectedNode.type !== 'ministry' && (
                     <span style={{ fontSize: META_FONT_PX, color: '#666' }}>{selectedNode.ministry}</span>
                   )}
-                  {(() => {
-                    let cat = selectedNode.accountCategory;
-                    if (!cat && selectedNode.type === 'project-spending' && selectedNode.projectId != null) {
-                      cat = budgetNodeByPid.get(selectedNode.projectId)?.accountCategory;
-                    }
-                    if (!cat) return null;
-                    const label = cat === 'general' ? '一般会計' : cat === 'special' ? '特別会計' : '一般・特別';
-                    return (
-                      <span style={{ background: '#f0f0f0', color: '#666', padding: '2px 7px', borderRadius: 10, fontSize: META_FONT_PX, fontWeight: 500 }}>
-                        {label}
-                      </span>
-                    );
-                  })()}
                 </div>
               </div>
 
@@ -3031,7 +3088,7 @@ export default function RealDataSankeyPage() {
               {panelSections && (() => {
                 const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: PANEL_META_FONT_PX, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
                 const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
-                type PanelItem = { id: string; name: string; value: number; projectId?: number; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; };
+                type PanelItem = { id: string; name: string; value: number; projectId?: number; accountCategory?: string; aggregated?: boolean; budgetValue?: number; spendingValue?: number; recipientCount?: number; };
                 const listButtonStyle = (item: PanelItem): React.CSSProperties => ({
                   display: 'flex',
                   flexWrap: 'wrap',
@@ -3056,6 +3113,13 @@ export default function RealDataSankeyPage() {
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                 });
+                const listTitleRowStyle: React.CSSProperties = {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  flex: '0 0 100%',
+                  minWidth: 0,
+                };
                 const listValueStyle: React.CSSProperties = {
                   display: 'flex',
                   flexWrap: 'wrap',
@@ -3070,11 +3134,76 @@ export default function RealDataSankeyPage() {
                   overflowWrap: 'anywhere',
                   textAlign: 'right',
                 };
+                const listMetaRightStyle: React.CSSProperties = {
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-end',
+                  alignItems: 'baseline',
+                  gap: 8,
+                  marginLeft: 'auto',
+                  minWidth: 0,
+                };
+                const budgetSpendingStyle: React.CSSProperties = {
+                  display: 'inline-flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-end',
+                  alignItems: 'baseline',
+                  gap: 8,
+                  minWidth: 0,
+                };
+                const amountPairLabelStyle: React.CSSProperties = {
+                  color: '#aaa',
+                  marginRight: 2,
+                  whiteSpace: 'nowrap',
+                };
+                const amountPairValueStyle: React.CSSProperties = {
+                  whiteSpace: 'nowrap',
+                };
+                const renderCompactAccountBadge = (cat?: string) => {
+                  if (!cat) return null;
+                  const generalColor = '#e45f6f';
+                  const specialColor = '#5f8ee8';
+                  const label = cat === 'general' ? '一般' : cat === 'special' ? '特別' : cat === 'both' ? '一般特別' : null;
+                  if (!label) return null;
+                  const background = cat === 'general'
+                    ? generalColor
+                    : cat === 'special'
+                      ? specialColor
+                      : `linear-gradient(to right, ${generalColor} 0 50%, ${specialColor} 50% 100%)`;
+                  return (
+                    <span style={{ background, color: '#fff', padding: '1px 5px', borderRadius: 8, fontSize: Math.max(9, META_FONT_PX - 1), fontWeight: 600, lineHeight: 1.35, whiteSpace: 'nowrap' }}>
+                      {label}
+                    </span>
+                  );
+                };
+                const renderListTitle = (item: PanelItem, showAccountBadge = false) => (
+                  <span style={listTitleRowStyle}>
+                    <span title={item.name} style={listNameStyle(item)}>{item.name}</span>
+                    {showAccountBadge && renderCompactAccountBadge(item.accountCategory)}
+                  </span>
+                );
                 const renderListMeta = (item: PanelItem, value: React.ReactNode) => (
                   <span style={listValueStyle}>
-                    {item.projectId != null && <span style={{ fontSize: META_FONT_PX, color: '#aaa', whiteSpace: 'nowrap' }}>PID:{item.projectId}</span>}
-                    <span>{value}</span>
+                    <span style={listMetaRightStyle}>
+                      {item.projectId != null && <span style={{ fontSize: META_FONT_PX, color: '#aaa', whiteSpace: 'nowrap' }}>PID:{item.projectId}</span>}
+                      <span>{value}</span>
+                    </span>
                   </span>
+                );
+                const renderBudgetSpendingMeta = (item: PanelItem) => (
+                  renderListMeta(
+                    item,
+                    <span style={budgetSpendingStyle}>
+                      <span>
+                        <span style={amountPairLabelStyle}>予算</span>
+                        <span style={amountPairValueStyle}>{formatYen(item.budgetValue ?? 0)}</span>
+                      </span>
+                      <span>
+                        <span style={amountPairLabelStyle}>支出</span>
+                        <span style={amountPairValueStyle}>{formatYen(item.spendingValue ?? item.value)}</span>
+                      </span>
+                    </span>
+                  )
                 );
                 const renderFlatList = (items: PanelItem[], getValue?: (item: PanelItem) => number) => {
                   const getVal = getValue ?? ((item: PanelItem) => item.value);
@@ -3083,7 +3212,7 @@ export default function RealDataSankeyPage() {
                     <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                       style={listButtonStyle(item)}
                     >
-                      <span title={item.name} style={listNameStyle(item)}>{item.name}</span>
+                      {renderListTitle(item)}
                       {renderListMeta(item, formatYen(getVal(item)))}
                     </button>
                   ));
@@ -3112,13 +3241,11 @@ export default function RealDataSankeyPage() {
                           <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                             style={listButtonStyle(item)}
                           >
-                            <span title={item.name} style={listNameStyle(item)}>{item.name}</span>
-                            {renderListMeta(
-                              item,
-                              item.budgetValue != null
-                                ? <>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</>
-                                : formatYen(item.value)
-                            )}
+                            {renderListTitle(item)}
+                            {item.budgetValue != null
+                              ? renderBudgetSpendingMeta(item)
+                              : renderListMeta(item, formatYen(item.value))
+                            }
                           </button>
                         ));
                       })()}
@@ -3130,9 +3257,9 @@ export default function RealDataSankeyPage() {
                           <button key={item.id} type="button" disabled={item.aggregated} onClick={() => handleConnectionClick(item.id)}
                             style={listButtonStyle(item)}
                           >
-                            <span title={item.name} style={listNameStyle(item)}>{item.name}</span>
+                            {renderListTitle(item, true)}
                             {item.budgetValue != null
-                              ? renderListMeta(item, <>予{formatYen(item.budgetValue)} / 支{formatYen(item.spendingValue ?? item.value)}</>)
+                              ? renderBudgetSpendingMeta(item)
                               : renderListMeta(item, formatYen(item.value))
                             }
                           </button>
