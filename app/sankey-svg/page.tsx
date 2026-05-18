@@ -2557,9 +2557,11 @@ export default function RealDataSankeyPage() {
             {(() => {
               const maxCol = layout.maxCol || 1;
               const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
+              const columnAmount = (node: LayoutNode, colIndex: number) =>
+                colIndex === 2 && node.type === 'project-budget' && node.rawValue != null ? node.rawValue : node.value;
               const colAmounts: (number | null)[] = colNodeTypes.map((t, i) => {
                 const nodes = t === 'total' ? layout.nodes.filter(n => n.type === 'total') : layout.nodes.filter(n => n.type === t);
-                return i === 0 ? (nodes[0]?.value ?? null) : nodes.reduce((s, n) => s + n.value, 0);
+                return i === 0 ? (nodes[0]?.value ?? null) : nodes.reduce((s, n) => s + columnAmount(n, i), 0);
               });
               const projectSpendingTotal = layout.nodes.filter(n => n.type === 'project-spending').reduce((s, n) => s + n.value, 0);
               // 列ごとの最上端ノードを取得（ラベル基準位置の計算用）
@@ -2746,13 +2748,17 @@ export default function RealDataSankeyPage() {
           {/* DOM tooltip — column label hover */}
           {hoveredColIndex !== null && layout && (() => {
             const amt = (n: LayoutNode) => n.value;
+            const budgetAmt = (n: LayoutNode) =>
+              n.type === 'project-budget' && n.rawValue != null ? n.rawValue : n.value;
             const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
             const nodes = hoveredColIndex === 0
               ? layout.nodes.filter(n => n.type === 'total')
               : layout.nodes.filter(n => n.type === colNodeTypes[hoveredColIndex]);
             const total = hoveredColIndex === 0
               ? (nodes[0] ? amt(nodes[0]) : 0)
-              : nodes.reduce((s, n) => s + amt(n), 0);
+              : hoveredColIndex === 2
+                ? nodes.reduce((s, n) => s + budgetAmt(n), 0)
+                : nodes.reduce((s, n) => s + amt(n), 0);
             const projectSpendingTotal = layout.nodes
               .filter(n => n.type === 'project-spending')
               .reduce((s, n) => s + amt(n), 0);
