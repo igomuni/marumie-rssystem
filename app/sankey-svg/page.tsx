@@ -2126,6 +2126,24 @@ export default function RealDataSankeyPage() {
   const getNodeInnerX1 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX1(node)), [getNodeScreenX1, screenToInnerX]);
   const innerNodeW = screenWToInner(screenNodeW);
   const innerLabelGap = screenWToInner(3);
+  const getMinimapRenderedYBounds = useCallback((node: LayoutNode): { top: number; bottom: number } => {
+    let shiftNode = node;
+    if (node.type === 'project-spending') {
+      const budgetId = node.id === '__agg-project-spending'
+        ? '__agg-project-budget'
+        : node.projectId != null ? `project-budget-${node.projectId}` : null;
+      const budgetNode = budgetId ? nodeByLayoutId.get(budgetId) : null;
+      if (budgetNode) shiftNode = budgetNode;
+    }
+    const { cumShift = 0, topShift = 0 } = nodeShiftInfo.get(shiftNode.id) ?? {};
+    const top = shiftNode.y0 + cumShift + topShift;
+    return { top, bottom: top + Math.max(1, node.y1 - node.y0) };
+  }, [nodeByLayoutId, nodeShiftInfo]);
+  const minimapWorldH = useMemo(() => {
+    if (!layout || layout.nodes.length === 0) return svgHeight;
+    const renderedBottom = Math.max(...layout.nodes.map(node => getRenderedYBounds(node).bottom));
+    return Math.max(svgHeight, MARGIN.top + renderedBottom + MARGIN.bottom);
+  }, [layout, svgHeight, getRenderedYBounds]);
 
   // Draw minimap
   useEffect(() => {
@@ -2136,12 +2154,12 @@ export default function RealDataSankeyPage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // The "world" that the minimap represents = the full SVG content area
-    // Nodes are at (MARGIN.left + x0, MARGIN.top + y0) in SVG coords
+    // The "world" that the minimap represents = the rendered SVG content area.
+    // Nodes are at (MARGIN.left + x0, MARGIN.top + shiftedY0) in SVG coords.
     // The SVG transform: translate(pan.x, pan.y) scale(zoom) then translate(MARGIN, MARGIN)
-    // So a node at inner (x0,y0) appears at screen (pan.x + (MARGIN.left+x0)*zoom, pan.y + (MARGIN.top+y0)*zoom)
+    // So a node at inner (x0,shiftedY0) appears at screen (pan.x + (MARGIN.left+x0)*zoom, pan.y + (MARGIN.top+shiftedY0)*zoom)
     const worldW = svgWidth;
-    const worldH = svgHeight;
+    const worldH = minimapWorldH;
     const scaleX = MINIMAP_W / worldW;
     const scaleY = minimapH / worldH;
 
@@ -2151,10 +2169,11 @@ export default function RealDataSankeyPage() {
 
     // Draw nodes (at their SVG-coord positions including MARGIN)
     for (const node of layout.nodes) {
+      const bounds = getMinimapRenderedYBounds(node);
       const x = getNodeScreenX0(node) * scaleX;
-      const y = (MARGIN.top + node.y0) * scaleY;
+      const y = (MARGIN.top + bounds.top) * scaleY;
       const w = Math.max(1, screenNodeW * scaleX);
-      const h = Math.max(0.5, (node.y1 - node.y0) * scaleY);
+      const h = Math.max(0.5, (bounds.bottom - bounds.top) * scaleY);
       ctx.fillStyle = getNodeColor(node);
       ctx.fillRect(x, y, w, h);
     }
@@ -2178,7 +2197,7 @@ export default function RealDataSankeyPage() {
     ctx.strokeRect(mX, mY, mW, mH);
     ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
     ctx.fillRect(mX, mY, mW, mH);
-  }, [showMinimap, layout, zoom, pan, svgWidth, svgHeight, minimapH, getNodeScreenX0, screenNodeW]);
+  }, [showMinimap, layout, zoom, pan, svgWidth, minimapWorldH, minimapH, getNodeScreenX0, getMinimapRenderedYBounds, screenNodeW]);
 
   const minimapNavigate = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = minimapRef.current;
@@ -2189,14 +2208,14 @@ export default function RealDataSankeyPage() {
     const my = e.clientY - rect.top;
     // Minimap coord to SVG world coord
     const scaleX = MINIMAP_W / svgWidth;
-    const scaleY = minimapH / svgHeight;
+    const scaleY = minimapH / minimapWorldH;
     const svgX = mx / scaleX;
     const svgY = my / scaleY;
     // Center horizontally in screen space and vertically in zoomed SVG world.
     const cW = container.clientWidth;
     const cH = container.clientHeight;
     setPan({ x: cW / 2 - svgX, y: cH / 2 - svgY * zoom });
-  }, [svgWidth, svgHeight, minimapH, zoom]);
+  }, [svgWidth, minimapWorldH, minimapH, zoom]);
 
   // Escape key: focusRelated ON → フィルターのみOFF、OFF → 選択解除
   useEffect(() => {
@@ -2734,20 +2753,34 @@ export default function RealDataSankeyPage() {
             const total = hoveredColIndex === 0
               ? (nodes[0] ? amt(nodes[0]) : 0)
               : nodes.reduce((s, n) => s + amt(n), 0);
-            const count = hoveredColIndex === 0 ? null : nodes.length;
-            const colDescs = [
-              '全事業の予算額合計（予算案ベース）',
-              '各省庁所管事業の予算額合計',
-              '各事業の予算額（左：予算 / 右：支出）',
-              '全エッジ合計（ウィンドウ外流入含む）',
-            ];
+            const projectSpendingTotal = layout.nodes
+              .filter(n => n.type === 'project-spending')
+              .reduce((s, n) => s + amt(n), 0);
+            const valueLine = (label: string, value: number) => (
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 }}>
+                <span style={{ color: '#888', fontSize: TOOLTIP_META_FONT_PX }}>{label}</span>
+                <span style={{ fontWeight: 500, fontSize: TOOLTIP_VALUE_FONT_PX, color: '#222' }}>{formatYen(value)}</span>
+              </div>
+            );
+            const rawYenLine = (value: number) => (
+              <div style={{ color: '#555', fontSize: TOOLTIP_META_FONT_PX, textAlign: 'right' }}>{Math.round(value).toLocaleString()}円</div>
+            );
             return (
               <div style={{ position: 'absolute', left: mousePos.x + 12, top: mousePos.y + 16, background: 'rgba(255,255,255,0.97)', color: '#222', padding: '6px 10px', borderRadius: 6, fontSize: TOOLTIP_TITLE_FONT_PX, lineHeight: 1.5, pointerEvents: 'none', zIndex: 20, whiteSpace: 'nowrap', border: '1px solid #e0e0e0', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
                 <div style={{ fontWeight: 600, fontSize: TOOLTIP_TITLE_FONT_PX, marginBottom: 2 }}>{COL_LABELS[hoveredColIndex]}</div>
-                {count != null && <div style={{ color: '#888', fontSize: TOOLTIP_META_FONT_PX }}>{count.toLocaleString()}件</div>}
-                <div style={{ fontWeight: 500, fontSize: TOOLTIP_VALUE_FONT_PX, color: '#222' }}>{formatYen(total)}</div>
-                <div style={{ color: '#555', fontSize: TOOLTIP_META_FONT_PX }}>{Math.round(total).toLocaleString()}円</div>
-                <div style={{ color: '#888', fontSize: TOOLTIP_META_FONT_PX, marginTop: 4 }}>{colDescs[hoveredColIndex]}</div>
+                {hoveredColIndex === 2 ? (
+                  <div style={{ display: 'grid', gap: 2 }}>
+                    {valueLine('予算', total)}
+                    {rawYenLine(total)}
+                    {valueLine('支出', projectSpendingTotal)}
+                    {rawYenLine(projectSpendingTotal)}
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ fontWeight: 500, fontSize: TOOLTIP_VALUE_FONT_PX, color: '#222' }}>{formatYen(total)}</div>
+                    <div style={{ color: '#555', fontSize: TOOLTIP_META_FONT_PX }}>{Math.round(total).toLocaleString()}円</div>
+                  </>
+                )}
               </div>
             );
           })()}
