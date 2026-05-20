@@ -227,6 +227,7 @@ export default function RealDataSankeyPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [showFontControls, setShowFontControls] = useState(false);
   const [baseFontPx, setBaseFontPx] = useState(BASE_FONT_PX_DEFAULT);
+  const [baseFontPxInput, setBaseFontPxInput] = useState(String(BASE_FONT_PX_DEFAULT));
   const [showLabels, setShowLabels] = useState(true);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [showAggProject, setShowAggProject] = useState(true);
@@ -538,6 +539,9 @@ export default function RealDataSankeyPage() {
   const [hoveredLinkStable, setHoveredLinkStable] = useState<LayoutLink | null>(null);
   const hoverEnterTimerRef = useRef<number | null>(null);
   useEffect(() => {
+    setBaseFontPxInput(String(baseFontPx));
+  }, [baseFontPx]);
+  useEffect(() => {
     if (hoverEnterTimerRef.current) {
       window.clearTimeout(hoverEnterTimerRef.current);
       hoverEnterTimerRef.current = null;
@@ -759,6 +763,19 @@ export default function RealDataSankeyPage() {
   const fitTopPadPx = FIT_TOP_PAD_PX;
   const fitTopPadPxRef = useRef(fitTopPadPx);
   fitTopPadPxRef.current = fitTopPadPx;
+  const commitBaseFontPxInput = useCallback(() => {
+    const v = Number(baseFontPxInput);
+    if (!Number.isFinite(v)) {
+      setBaseFontPxInput(String(baseFontPx));
+      return;
+    }
+    const next = Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, v));
+    setBaseFontPxInput(String(next));
+    if (next !== baseFontPx) {
+      pendingHistoryAction.current = 'replace';
+      setBaseFontPx(next);
+    }
+  }, [baseFontPx, baseFontPxInput]);
 
   // Compute max extra height from label shifts at a given zoom level (2-pass helper).
   // During fit, pass baseZoomK=zoomK to keep the whole-view baseline unchanged.
@@ -2072,10 +2089,11 @@ export default function RealDataSankeyPage() {
           const cW = container.clientWidth;
           const reserve = searchBoxReserveRef.current;
           const availH = container.clientHeight - reserve;
-          const { k: fitK, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
+          const { k: fitK } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
+          const restoredTotalH = MARGIN.top + l.contentH + calcShiftExtraH(l.nodes, k, fitK);
           setBaseZoom(fitK);
           setZoom(k);
-          setPan({ x: 0, y: reserve + Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) });
+          setPan({ x: 0, y: reserve + Math.min((availH - restoredTotalH * k) / 2, fitTopPadPxRef.current) });
         } else {
           setZoom(k); setBaseZoom(k); setPan({ x: 0, y: searchBoxReserveRef.current });
         }
@@ -2083,7 +2101,7 @@ export default function RealDataSankeyPage() {
         resetView();
       }
     }
-  }, [layout, resetView, fitZoomWithShifts]);
+  }, [calcShiftExtraH, layout, resetView, fitZoomWithShifts]);
 
   // Focus on node after selection — fires when node appears in layout (pinned TopN+1 case)
   // Also watches isPanelCollapsed: when panel opens, recalculate fit with updated panel width
@@ -2697,12 +2715,13 @@ export default function RealDataSankeyPage() {
                       min={BASE_FONT_PX_MIN}
                       max={BASE_FONT_PX_MAX}
                       step={1}
-                      value={baseFontPx}
-                      onChange={e => {
-                        const v = Number(e.target.value);
-                        if (!isNaN(v)) {
-                          pendingHistoryAction.current = 'replace';
-                          setBaseFontPx(Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, v)));
+                      value={baseFontPxInput}
+                      onChange={e => setBaseFontPxInput(e.target.value)}
+                      onBlur={commitBaseFontPxInput}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          commitBaseFontPxInput();
+                          e.currentTarget.blur();
                         }
                       }}
                       style={{ width: 48, fontSize: FONT_CONTROL_FONT_PX, padding: '2px 4px', border: '1px solid #ccc', borderRadius: 4, textAlign: 'center' }}
