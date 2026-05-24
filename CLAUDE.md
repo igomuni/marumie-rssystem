@@ -17,6 +17,8 @@ npx tsc --noEmit         # TypeScript 型チェック
 
 日本の2024年度予算・支出データをインタラクティブなSankey図で可視化する Next.js アプリ。
 
+**公開ページ**: `/sankey-svg`（メイン、`/` からリダイレクト）、`/subcontracts`、`/mof-budget-overview`（URL直打ち）、`/quality`（URL直打ち）
+
 **Key Statistics**: 151.12兆円 総予算 / 5,003事業 / 26,823支出先（予算年度2023実績・再委託先含む）
 
 ### Layer Design Rules
@@ -41,9 +43,8 @@ npx tsc --noEmit         # TypeScript 型チェック
 
 | 作業内容 | 使うスキル |
 |---------|-----------|
-| Sankey図の実装（/sankey・/sankey2・/sankey-svg） | `/sankey` |
+| Sankey図の実装（/sankey-svg） | `/sankey` |
 | データパイプライン・CSV処理・JSON生成 | `/pipeline` |
-| データ分析・調査スクリプト実行 | `/investigate` |
 | lint + TypeScript チェック | `/quality-check` |
 | CSVデータ更新→JSON生成→Git反映 | `/data-update` |
 
@@ -65,4 +66,3 @@ npx tsc --noEmit         # TypeScript 型チェック
 ## Known Bugs / Limitations
 
 - **Multi-block spending**: 支出先が同一事業の複数ブロックに出現する場合、`projects.find()` ではなく `projects.filter().reduce()` で金額を合算すること
-- **Sankey2 再委託エッジ**: 支出先ノードのみでは再委託チェーンの27.3%が表現不可能（ブロックノード層導入で解決予定。詳細: [docs/tasks/archive/20260322_1751_再委託チェーン表現の限界と次のステップ.md](docs/tasks/archive/20260322_1751_再委託チェーン表現の限界と次のステップ.md)）
