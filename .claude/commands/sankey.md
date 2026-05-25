@@ -6,7 +6,7 @@ description: Sankey図関連の実装を行う
 
 `/sankey-svg`（SVGベース直接支出 Sankey、公開メインページ）。
 
-```
+```text
 app/sankey-svg/page.tsx              - SVG Sankey UI・ドリルダウン・サイドパネル・状態管理
 app/lib/sankey-svg-filter.ts         - フィルタロジック（府省庁・事業・支出先・金額）
 app/lib/sankey-svg-constants.ts      - レイアウト定数・ノード幅・列間隔

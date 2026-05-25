@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quick Reference
 
 ```bash
-npm run dev              # Dev server (localhost:3002, Turbopack)
+npm run dev              # Dev server (localhost:3000, Turbopack)
 npm run build            # Production build（prebuildで.gzを自動展開）
 npm run lint             # ESLint チェック
 npx tsc --noEmit         # TypeScript 型チェック

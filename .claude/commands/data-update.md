@@ -56,7 +56,7 @@ RS System（rssystem.go.jp）のデータを更新する手順を実行する。
 11. **コミット・プッシュ**（ユーザーが OK した場合のみ）:
     ```bash
     git add public/data/*.gz
-    git commit -m "chore: RS System {YEAR}データを更新"
+    git commit -m "chore: RS System 2024/2025データを更新"
     git push origin main
     ```
 
