@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>Sankey /sankey-svg — Tablet Portrait Layout (768 × 1024)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F4F1;
+    --ink:#1A1A19;
+    --ink-2:#3F3D38;
+    --ink-3:#7A766E;
+    --line:#E3E0D8;
+    --line-2:#D1CDC2;
+    --surface:#FFFFFF;
+    --surface-2:#FAF9F5;
+    --accent:oklch(0.52 0.14 268);
+    --accent-soft:oklch(0.96 0.02 268);
+    --src:oklch(0.55 0.10 160);
+    --src-soft:oklch(0.92 0.05 160);
+    --dst:oklch(0.66 0.13 38);
+    --dst-soft:oklch(0.93 0.05 38);
+    --rec:oklch(0.60 0.16 25);
+  }
+  html,body{background:var(--bg);}
+  body{font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;color:var(--ink);}
+  .mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;}
+
+  /* iPad-style frame: slim bezel, no notch */
+  .tablet{
+    width:800px;height:1056px;background:#0c0c0c;border-radius:36px;padding:16px;
+    box-shadow:0 1px 0 rgba(0,0,0,.04),0 40px 80px -30px rgba(20,20,20,.22),0 0 0 1px rgba(0,0,0,.05);
+    position:relative;
+  }
+  .tablet-inner{width:100%;height:100%;background:var(--surface);border-radius:22px;overflow:hidden;position:relative;}
+
+  /* status bar (faux iPadOS) */
+  .statusbar{height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:13px;font-weight:600;color:var(--ink);}
+
+  /* toolbar row 1: search + year pill */
+  .row-1{position:absolute;left:0;right:0;top:24px;height:60px;background:#fff;display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--line);}
+  /* toolbar row 2: TopN + font + settings */
+  .row-2{position:absolute;left:0;right:0;top:84px;height:56px;background:#fff;display:flex;align-items:center;gap:14px;padding:6px 16px;border-bottom:1px solid var(--line);}
+
+  .searchfield{
+    flex:1;min-width:0;height:44px;background:var(--surface-2);border:1px solid var(--line);
+    border-radius:14px;display:flex;align-items:center;gap:8px;padding:0 14px;color:var(--ink-3);font-size:14px;
+  }
+  .searchfield > span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .icon-btn{flex-shrink:0;width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;color:var(--ink-2);position:relative;}
+  .year-pill{
+    flex-shrink:0;height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:#fff;
+    display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink);
+  }
+
+  /* TopN compact control */
+  .topn{
+    display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border:1px solid var(--line);background:#fff;border-radius:14px;
+  }
+  .topn .lab{font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:.04em;}
+  .topn .num{font-size:14px;font-weight:700;}
+  .topn .range{width:100px;}
+  .topn-mini-slider{position:relative;width:100px;height:32px;display:flex;align-items:center;}
+  .topn-track{flex:1;height:4px;background:var(--line-2);border-radius:99px;position:relative;}
+  .topn-fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:99px;}
+  .topn-thumb{position:absolute;top:50%;width:18px;height:18px;border-radius:99px;background:#fff;border:2px solid var(--accent);transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(20,20,20,.18);}
+
+  .seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px;}
+  .seg > button{flex:1;height:36px;border-radius:9px;font-size:13px;font-weight:600;color:var(--ink-2);padding:0 10px;white-space:nowrap;}
+  .seg > button.on{background:#fff;color:var(--ink);box-shadow:0 1px 0 rgba(0,0,0,.04),0 2px 6px -2px rgba(0,0,0,.06);}
+
+  /* column ribbon — name-only mode */
+  .col-ribbon{position:absolute;left:0;right:0;top:140px;height:32px;display:flex;align-items:center;padding:0 16px;gap:8px;border-bottom:1px solid var(--line);background:#fff;}
+  .col-tag{flex:1;display:flex;align-items:center;gap:6px;min-width:0;}
+  .col-tag .lbl{font-size:12px;color:var(--ink-2);font-weight:700;letter-spacing:.04em;}
+  .col-tag .ct{font-size:11px;color:var(--ink-3);font-weight:500;}
+
+  /* Sankey canvas */
+  .sankey-wrap{position:absolute;left:0;top:172px;bottom:0;background:var(--surface);}
+  .pan-hint{position:absolute;left:12px;bottom:14px;font-size:11px;color:var(--ink-3);background:rgba(255,255,255,.85);padding:4px 8px;border-radius:6px;border:1px solid var(--line);}
+  .flow-svg{position:absolute;inset:0;width:100%;height:100%;}
+
+  /* FAB cluster (top-right inside Sankey canvas) */
+  .fab-cluster{position:absolute;display:flex;flex-direction:column;gap:8px;z-index:30;}
+  .fab{
+    width:44px;height:44px;border-radius:14px;background:var(--surface);
+    border:1px solid var(--line);
+    box-shadow:0 4px 14px -4px rgba(20,20,20,.15);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-2);
+  }
+
+  /* Docked side panel */
+  .side-panel{
+    position:absolute;top:172px;right:0;bottom:0;width:310px;background:#fff;
+    border-left:1px solid var(--line);display:flex;flex-direction:column;
+  }
+  .panel-header{padding:18px 18px 14px;border-bottom:1px solid var(--line);}
+  .panel-tabs{padding:0 18px 12px;border-bottom:1px solid var(--line);}
+  .panel-list{flex:1;overflow:hidden;}
+  .flowrow{display:grid;grid-template-columns:14px 1fr auto;gap:10px;align-items:center;padding:13px 18px;border-top:1px solid var(--line);}
+  .flowrow:first-child{border-top:none;}
+  .flowrow .swatch{width:6px;height:26px;border-radius:2px;}
+
+  /* Bottom sheet */
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top-left-radius:24px;border-top-right-radius:24px;
+    box-shadow:0 -20px 40px -16px rgba(20,20,20,.18);z-index:40;}
+  .grabber{width:48px;height:5px;border-radius:99px;background:#D6D2C7;margin:10px auto 4px;}
+  .snap-dots{display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:4px;}
+  .snap-dots > span{width:22px;height:3px;border-radius:99px;background:#D6D2C7;}
+  .snap-dots > .on{background:var(--ink);}
+
+  /* Display mode popover (anchored under settings icon) */
+  .popover{
+    position:absolute;background:#fff;border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 20px 50px -16px rgba(20,20,20,.22),0 0 0 1px rgba(0,0,0,.03);
+    padding:14px;width:300px;z-index:100;
+  }
+  .popover::before{
+    content:"";position:absolute;top:-7px;right:24px;width:14px;height:14px;background:#fff;
+    border-top:1px solid var(--line);border-left:1px solid var(--line);transform:rotate(45deg);
+  }
+
+  .chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:var(--surface-2);font-size:12px;color:var(--ink-2);font-weight:500;white-space:nowrap;}
+  .chip.on{background:var(--accent-soft);border-color:transparent;color:var(--accent);}
+
+  .frame-cap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .frame-cap h3{font-weight:700;font-size:14px;letter-spacing:.02em;color:var(--ink);margin-top:22px;}
+  .frame-cap p{font-size:12.5px;color:var(--ink-3);max-width:760px;text-align:center;line-height:1.6;}
+  .legend-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-2);}
+  .legend-sw{width:10px;height:10px;border-radius:2px;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="px-10 py-10">
+
+  <header class="max-w-[1700px] mx-auto mb-10">
+    <div class="flex items-end justify-between gap-6 flex-wrap">
+      <div>
+        <div class="text-[11px] tracking-[.2em] uppercase text-stone-500 font-semibold">/sankey-svg · responsive proposal · compact-tablet</div>
+        <h1 class="text-3xl font-bold mt-2 leading-tight">Tablet Portrait — 768 × 1024</h1>
+        <p class="text-stone-600 mt-2 max-w-[760px] text-[14px] leading-relaxed">
+          設計書 §3〜§6 整合: <span class="font-semibold text-stone-800">2段ツールバー</span>（検索+年度 / TopN+フォント+設定）、
+          列見出しは <span class="font-semibold text-stone-800">name-only</span>。サイドパネルは
+          <span class="font-semibold text-stone-800">docked (310px)</span> と
+          <span class="font-semibold text-stone-800">bottom-sheet (3段)</span> の2案を併記。
+          DisplayMode 切替は <span class="font-semibold text-stone-800">設定アイコンのポップオーバー</span>に格納。
+        </p>
+      </div>
+      <div class="flex gap-5 text-[11px] text-stone-600 flex-wrap">
+        <div class="legend-item"><span class="legend-sw" style="background:var(--src)"></span>財源</div>
+        <div class="legend-item"><span class="legend-sw" style="background:var(--dst)"></span>事業</div>
+        <div class="legend-item"><span class="legend-sw" style="background:var(--rec)"></span>支出先</div>
+        <div class="legend-item"><span class="legend-sw" style="background:var(--accent)"></span>選択 / DisplayMode</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Two tablets side by side -->
+  <div class="flex gap-12 justify-center flex-wrap max-w-[1700px] mx-auto">
+
+    <!-- ============ FRAME A : DOCKED PANEL + DISPLAY-MODE POPOVER ============ -->
+    <div class="frame-cap">
+      <div class="tablet">
+        <div class="tablet-inner">
+
+          <div class="statusbar">
+            <span class="mono">9:41 · 火 5/28</span>
+            <span class="flex items-center gap-2">
+              <svg width="16" height="11" viewBox="0 0 18 12" fill="none"><rect x="0" y="8" width="3" height="4" rx="0.5" fill="#1A1A19"/><rect x="5" y="5" width="3" height="7" rx="0.5" fill="#1A1A19"/><rect x="10" y="2" width="3" height="10" rx="0.5" fill="#1A1A19"/><rect x="15" y="0" width="3" height="12" rx="0.5" fill="#1A1A19"/></svg>
+              <svg width="14" height="10" viewBox="0 0 15 11" fill="none"><path d="M7.5 3.5C9.7 3.5 11.6 4.3 13 5.5L14 4.3C12.3 2.7 10 1.7 7.5 1.7S2.7 2.7 1 4.3L2 5.5C3.4 4.3 5.3 3.5 7.5 3.5Z" fill="#1A1A19"/><circle cx="7.5" cy="9" r="1.5" fill="#1A1A19"/></svg>
+              <svg width="24" height="11" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="22" height="11" rx="2.5" stroke="#1A1A19"/><rect x="2" y="2" width="18" height="8" rx="1.5" fill="#1A1A19"/><rect x="23" y="4" width="2" height="4" rx="1" fill="#1A1A19" opacity=".4"/></svg>
+            </span>
+          </div>
+
+          <!-- Row 1: search + year -->
+          <div class="row-1">
+            <div class="searchfield">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <span>検索（2文字以上 / PID）</span>
+            </div>
+            <button class="year-pill">
+              <span class="mono">2025年度</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+          </div>
+
+          <!-- Row 2: TopN + Font + Settings -->
+          <div class="row-2">
+            <div class="topn">
+              <span class="lab">事業</span>
+              <span class="num mono">50</span>
+              <div class="topn-mini-slider"><div class="topn-track"><div class="topn-fill" style="width:32%"></div><div class="topn-thumb" style="left:32%"></div></div></div>
+              <span class="text-[10px] mono" style="color:var(--ink-3);">/5,794</span>
+            </div>
+            <div class="topn">
+              <span class="lab">支出先</span>
+              <span class="num mono">50</span>
+              <div class="topn-mini-slider"><div class="topn-track"><div class="topn-fill" style="width:18%"></div><div class="topn-thumb" style="left:18%"></div></div></div>
+              <span class="text-[10px] mono" style="color:var(--ink-3);">/12,741</span>
+            </div>
+            <div class="seg" style="width:130px;">
+              <button>S</button><button class="on">M</button><button>L</button>
+            </div>
+            <div style="flex:1;"></div>
+            <button class="icon-btn" style="background:var(--accent-soft);border-color:transparent;color:var(--accent);" aria-label="表示モード">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+          </div>
+
+          <!-- Column ribbon (name-only) — constrained to Sankey area (left of docked panel) -->
+          <div class="col-ribbon" style="right:310px;">
+            <div class="col-tag"><span class="lbl">総計</span></div>
+            <div class="col-tag"><span class="lbl">省庁</span><span class="ct mono">28件</span></div>
+            <div class="col-tag"><span class="lbl">事業</span><span class="ct mono">50/5,794</span></div>
+            <div class="col-tag" style="max-width:60px;"><span class="lbl">支出先</span></div>
+          </div>
+
+          <!-- Sankey canvas — narrower because of docked panel -->
+          <div class="sankey-wrap" style="right:310px;">
+            <span class="pan-hint">パン / ピンチでズーム</span>
+            <svg class="flow-svg sankey"
+                 data-cols="16,90,200,355"
+                 data-right-gutter="452"
+                 data-label-min-h="14"
+                 viewBox="0 0 458 700" preserveAspectRatio="none"></svg>
+
+            <div class="fab-cluster" style="right:12px;bottom:18px;">
+              <button class="fab" aria-label="フォントサイズ">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V5h12v2M10 5v14M7 19h6"/><path d="M14 13v-1h6v1M17 12v7M15 19h4" stroke-width="1.7"/></svg>
+              </button>
+              <button class="fab" aria-label="フィット">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+              </button>
+              <button class="fab" aria-label="ズームイン">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M11 8v6M8 11h6M20 20l-3.5-3.5"/></svg>
+              </button>
+              <button class="fab" aria-label="ズームアウト">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M8 11h6M20 20l-3.5-3.5"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Docked side panel -->
+          <div class="side-panel">
+            <div class="panel-header">
+              <div class="text-[11px] font-semibold tracking-[.05em]" style="color:var(--src);">省庁</div>
+              <div class="text-[20px] font-bold leading-tight">厚生労働省</div>
+              <div class="mono text-[12px] mt-1" style="color:var(--ink-3);">93.33兆円 · 全体の 63.2%</div>
+              <div class="mt-3 h-2 rounded-full" style="background:var(--line);">
+                <div class="h-full rounded-full" style="width:63.2%;background:var(--src);"></div>
+              </div>
+              <div class="mt-3 flex gap-4 text-[11px]" style="color:var(--ink-3);">
+                <span>事業 <span class="mono font-semibold" style="color:var(--ink);">26</span></span>
+                <span>支出先 <span class="mono font-semibold" style="color:var(--ink);">412</span></span>
+                <span>前年比 <span class="mono font-semibold" style="color:oklch(0.55 0.15 145);">+2.1%</span></span>
+              </div>
+            </div>
+            <div class="panel-tabs pt-3">
+              <div class="seg">
+                <button class="on">事業</button>
+                <button>支出先</button>
+                <button>概要</button>
+              </div>
+            </div>
+            <div class="panel-list">
+              <div class="flowrow">
+                <span class="swatch" style="background:var(--dst)"></span>
+                <div class="min-w-0">
+                  <div class="text-[13px] font-medium truncate">基礎年金給付に必要な経費</div>
+                  <div class="text-[11px] mono" style="color:var(--ink-3);">国民年金勘定</div>
+                </div>
+                <div class="text-right">
+                  <div class="mono text-[13px] font-semibold">25.48 <span style="color:var(--ink-3);font-weight:500;">兆円</span></div>
+                  <div class="mono text-[10px]" style="color:var(--ink-3);">27.3%</div>
+                </div>
+              </div>
+              <div class="flowrow">
+                <span class="swatch" style="background:var(--dst)"></span>
+                <div class="min-w-0">
+                  <div class="text-[13px] font-medium truncate">保険給付に必要な経費</div>
+                  <div class="text-[11px] mono" style="color:var(--ink-3);">厚生年金勘定</div>
+                </div>
+                <div class="text-right">
+                  <div class="mono text-[13px] font-semibold">24.22 <span style="color:var(--ink-3);font-weight:500;">兆円</span></div>
+                  <div class="mono text-[10px]" style="color:var(--ink-3);">26.0%</div>
+                </div>
+              </div>
+              <div class="flowrow">
+                <span class="swatch" style="background:oklch(0.68 0.13 38)"></span>
+                <div class="min-w-0">
+                  <div class="text-[13px] font-medium truncate">保険料等交付金</div>
+                  <div class="text-[11px] mono" style="color:var(--ink-3);">健康保険勘定</div>
+                </div>
+                <div class="text-right">
+                  <div class="mono text-[13px] font-semibold">11.31 <span style="color:var(--ink-3);font-weight:500;">兆円</span></div>
+                  <div class="mono text-[10px]" style="color:var(--ink-3);">12.1%</div>
+                </div>
+              </div>
+              <div class="flowrow">
+                <span class="swatch" style="background:oklch(0.70 0.12 38)"></span>
+                <div class="min-w-0">
+                  <div class="text-[13px] font-medium truncate">医療保険給付費国庫負担</div>
+                  <div class="text-[11px] mono" style="color:var(--ink-3);">—</div>
+                </div>
+                <div class="text-right">
+                  <div class="mono text-[13px] font-semibold">10.17 <span style="color:var(--ink-3);font-weight:500;">兆円</span></div>
+                  <div class="mono text-[10px]" style="color:var(--ink-3);">10.9%</div>
+                </div>
+              </div>
+              <div class="flowrow">
+                <span class="swatch" style="background:oklch(0.72 0.12 38)"></span>
+                <div class="min-w-0">
+                  <div class="text-[13px] font-medium truncate">保護費負担金</div>
+                  <div class="text-[11px] mono" style="color:var(--ink-3);">—</div>
+                </div>
+                <div class="text-right">
+                  <div class="mono text-[13px] font-semibold">2.74 <span style="color:var(--ink-3);font-weight:500;">兆円</span></div>
+                  <div class="mono text-[10px]" style="color:var(--ink-3);">2.9%</div>
+                </div>
+              </div>
+              <div class="flowrow">
+                <span class="swatch" style="background:oklch(0.72 0.10 38)"></span>
+                <div class="min-w-0">
+                  <div class="text-[13px] font-medium truncate">介護給付費等負担金</div>
+                  <div class="text-[11px] mono" style="color:var(--ink-3);">—</div>
+                </div>
+                <div class="text-right">
+                  <div class="mono text-[13px] font-semibold">2.14 <span style="color:var(--ink-3);font-weight:500;">兆円</span></div>
+                  <div class="mono text-[10px]" style="color:var(--ink-3);">2.3%</div>
+                </div>
+              </div>
+              <div class="px-[18px] py-3 border-t text-[12px] flex items-center justify-between" style="border-color:var(--line);">
+                <span style="color:var(--ink-3);">残り 20 事業</span>
+                <span style="color:var(--accent);font-weight:600;">全件を見る →</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- DisplayMode popover anchored under settings icon -->
+          <div class="popover" style="top:140px;right:16px;width:320px;">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <div class="text-[11px] font-semibold tracking-[.1em] uppercase" style="color:var(--ink-3);">表示モード</div>
+                <div class="text-[11px]" style="color:var(--ink-3);">幅 + pointer から自動判定</div>
+              </div>
+              <span class="chip on" style="height:24px;font-size:10.5px;">現在: compact-tablet</span>
+            </div>
+            <div class="seg">
+              <button>自動</button>
+              <button class="on">コンパクト</button>
+              <button>標準</button>
+              <button>プレゼン</button>
+            </div>
+            <div class="border-t pt-3 mt-3" style="border-color:var(--line);">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[13px] font-medium">列見出し</div>
+                  <div class="text-[11px]" style="color:var(--ink-3);">幅に応じた粒度</div>
+                </div>
+                <div class="seg" style="width:170px;">
+                  <button>金額付</button>
+                  <button class="on">名のみ</button>
+                  <button>非表示</button>
+                </div>
+              </div>
+            </div>
+            <div class="border-t pt-3 mt-3 flex items-center justify-between" style="border-color:var(--line);">
+              <div>
+                <div class="text-[13px] font-medium">サイドパネル</div>
+                <div class="text-[11px]" style="color:var(--ink-3);">幅 768px は docked が既定</div>
+              </div>
+              <div class="seg" style="width:170px;">
+                <button class="on">docked</button>
+                <button>sheet</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <h3>(A) docked panel + DisplayMode popover</h3>
+      <p>
+        既定。右側 310px に固定パネル。ノード詳細は常時可視で、画面遷移なく Sankey と並べて比較できる。
+        設定アイコン⚙はモーダルではなく <span class="font-semibold">ポップオーバー</span>で展開し、
+        DisplayMode / 列見出し / サイドパネル方式を即時切替。
+      </p>
+    </div>
+
+    <!-- ============ FRAME B : BOTTOM-SHEET HALF OPEN ============ -->
+    <div class="frame-cap">
+      <div class="tablet">
+        <div class="tablet-inner">
+
+          <div class="statusbar">
+            <span class="mono">9:41 · 火 5/28</span>
+            <span class="flex items-center gap-2">
+              <svg width="16" height="11" viewBox="0 0 18 12" fill="none"><rect x="0" y="8" width="3" height="4" rx="0.5" fill="#1A1A19"/><rect x="5" y="5" width="3" height="7" rx="0.5" fill="#1A1A19"/><rect x="10" y="2" width="3" height="10" rx="0.5" fill="#1A1A19"/><rect x="15" y="0" width="3" height="12" rx="0.5" fill="#1A1A19"/></svg>
+              <svg width="14" height="10" viewBox="0 0 15 11" fill="none"><path d="M7.5 3.5C9.7 3.5 11.6 4.3 13 5.5L14 4.3C12.3 2.7 10 1.7 7.5 1.7S2.7 2.7 1 4.3L2 5.5C3.4 4.3 5.3 3.5 7.5 3.5Z" fill="#1A1A19"/><circle cx="7.5" cy="9" r="1.5" fill="#1A1A19"/></svg>
+              <svg width="24" height="11" viewBox="0 0 26 12" fill="none"><rect x="0.5" y="0.5" width="22" height="11" rx="2.5" stroke="#1A1A19"/><rect x="2" y="2" width="18" height="8" rx="1.5" fill="#1A1A19"/><rect x="23" y="4" width="2" height="4" rx="1" fill="#1A1A19" opacity=".4"/></svg>
+            </span>
+          </div>
+
+          <div class="row-1">
+            <div class="searchfield">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <span>検索（2文字以上 / PID）</span>
+            </div>
+            <button class="year-pill">
+              <span class="mono">2025年度</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+          </div>
+
+          <div class="row-2">
+            <div class="topn">
+              <span class="lab">事業</span>
+              <span class="num mono">50</span>
+              <div class="topn-mini-slider"><div class="topn-track"><div class="topn-fill" style="width:32%"></div><div class="topn-thumb" style="left:32%"></div></div></div>
+              <span class="text-[10px] mono" style="color:var(--ink-3);">/5,794</span>
+            </div>
+            <div class="topn">
+              <span class="lab">支出先</span>
+              <span class="num mono">50</span>
+              <div class="topn-mini-slider"><div class="topn-track"><div class="topn-fill" style="width:18%"></div><div class="topn-thumb" style="left:18%"></div></div></div>
+              <span class="text-[10px] mono" style="color:var(--ink-3);">/12,741</span>
+            </div>
+            <div class="seg" style="width:130px;">
+              <button>S</button><button class="on">M</button><button>L</button>
+            </div>
+            <div style="flex:1;"></div>
+            <button class="icon-btn" aria-label="表示モード">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+          </div>
+
+          <div class="col-ribbon">
+            <div class="col-tag"><span class="lbl">総計</span></div>
+            <div class="col-tag"><span class="lbl">省庁 · 選択中</span><span class="ct mono" style="color:var(--accent);">厚労省</span></div>
+            <div class="col-tag"><span class="lbl">事業</span><span class="ct mono">50/5,794</span></div>
+            <div class="col-tag" style="max-width:60px;"><span class="lbl">支出先</span></div>
+          </div>
+
+          <!-- Full-width sankey (no docked panel) — bottom bounded by sheet -->
+          <div class="sankey-wrap" style="right:0;bottom:560px;">
+            <svg class="flow-svg sankey"
+                 data-cols="32,180,440,700"
+                 data-right-gutter="752"
+                 data-focus="0"
+                 viewBox="0 0 768 280" preserveAspectRatio="none"></svg>
+
+            <div class="fab-cluster" style="right:12px;bottom:14px;">
+              <button class="fab" aria-label="フォントサイズ">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V5h12v2M10 5v14M7 19h6"/><path d="M14 13v-1h6v1M17 12v7M15 19h4" stroke-width="1.7"/></svg>
+              </button>
+              <button class="fab" aria-label="フィット">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom sheet half -->
+          <div class="sheet" style="height:560px;">
+            <div class="grabber"></div>
+            <div class="snap-dots">
+              <span></span><span class="on"></span><span></span>
+            </div>
+
+            <div class="grid grid-cols-[1fr_auto] gap-4 items-start px-6 pt-3 pb-4">
+              <div>
+                <div class="text-[11px] font-semibold tracking-[.05em]" style="color:var(--src);">省庁</div>
+                <div class="text-[24px] font-bold leading-tight">厚生労働省</div>
+                <div class="flex items-center gap-4 mt-2">
+                  <span class="mono text-[14px] font-semibold">93.33 <span class="text-[11px]" style="color:var(--ink-3);">兆円</span></span>
+                  <span class="mono text-[12px]" style="color:var(--ink-3);">全体の 63.2%</span>
+                  <span class="mono text-[12px]" style="color:oklch(0.55 0.15 145);font-weight:600;">+2.1% YoY</span>
+                </div>
+              </div>
+              <button class="icon-btn" style="border:none;background:var(--surface-2);" aria-label="閉じる">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M6 18 18 6"/></svg>
+              </button>
+            </div>
+
+            <div class="px-6">
+              <div class="seg" style="max-width:380px;">
+                <button class="on">事業 <span class="mono" style="color:var(--ink-3);">26</span></button>
+                <button>支出先 <span class="mono" style="color:var(--ink-3);">412</span></button>
+                <button>概要</button>
+              </div>
+            </div>
+
+            <!-- 2-column list to use the wider tablet sheet -->
+            <div class="grid grid-cols-2 gap-x-2 mt-3" style="max-height:380px;overflow:hidden;">
+              <div>
+                <div class="flowrow">
+                  <span class="swatch" style="background:var(--dst)"></span>
+                  <div class="min-w-0">
+                    <div class="text-[13px] font-medium truncate">基礎年金給付に必要な経費</div>
+                    <div class="text-[11px] mono" style="color:var(--ink-3);">国民年金勘定</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="mono text-[13px] font-semibold">25.48</div>
+                    <div class="mono text-[10px]" style="color:var(--ink-3);">27.3%</div>
+                  </div>
+                </div>
+                <div class="flowrow">
+                  <span class="swatch" style="background:var(--dst)"></span>
+                  <div class="min-w-0">
+                    <div class="text-[13px] font-medium truncate">保険給付に必要な経費</div>
+                    <div class="text-[11px] mono" style="color:var(--ink-3);">厚生年金勘定</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="mono text-[13px] font-semibold">24.22</div>
+                    <div class="mono text-[10px]" style="color:var(--ink-3);">26.0%</div>
+                  </div>
+                </div>
+                <div class="flowrow">
+                  <span class="swatch" style="background:oklch(0.68 0.13 38)"></span>
+                  <div class="min-w-0">
+                    <div class="text-[13px] font-medium truncate">保険料等交付金</div>
+                    <div class="text-[11px] mono" style="color:var(--ink-3);">健康保険勘定</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="mono text-[13px] font-semibold">11.31</div>
+                    <div class="mono text-[10px]" style="color:var(--ink-3);">12.1%</div>
+                  </div>
+                </div>
+                <div class="flowrow">
+                  <span class="swatch" style="background:oklch(0.70 0.12 38)"></span>
+                  <div class="min-w-0">
+                    <div class="text-[13px] font-medium truncate">医療保険給付費国庫負担</div>
+                    <div class="text-[11px] mono" style="color:var(--ink-3);">—</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="mono text-[13px] font-semibold">10.17</div>
+                    <div class="mono text-[10px]" style="color:var(--ink-3);">10.9%</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="flowrow">
+                  <span class="swatch" style="background:oklch(0.72 0.12 38)"></span>
+                  <div class="min-w-0">
+                    <div class="text-[13px] font-medium truncate">保護費負担金</div>
+                    <div class="text-[11px] mono" style="color:var(--ink-3);">—</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="mono text-[13px] font-semibold">2.74</div>
+                    <div class="mono text-[10px]" style="color:var(--ink-3);">2.9%</div>
+                  </div>
+                </div>
+                <div class="flowrow">
+                  <span class="swatch" style="background:oklch(0.72 0.10 38)"></span>
+                  <div class="min-w-0">
+                    <div class="text-[13px] font-medium truncate">介護給付費等負担金</div>
+                    <div class="text-[11px] mono" style="color:var(--ink-3);">—</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="mono text-[13px] font-semibold">2.14</div>
+                    <div class="mono text-[10px]" style="color:var(--ink-3);">2.3%</div>
+                  </div>
+                </div>
+                <div class="flowrow">
+                  <span class="swatch" style="background:oklch(0.74 0.10 38)"></span>
+                  <div class="min-w-0">
+                    <div class="text-[13px] font-medium truncate">失業等給付費</div>
+                    <div class="text-[11px] mono" style="color:var(--ink-3);">雇用保険勘定</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="mono text-[13px] font-semibold">2.02</div>
+                    <div class="mono text-[10px]" style="color:var(--ink-3);">2.2%</div>
+                  </div>
+                </div>
+                <div class="flowrow">
+                  <span class="swatch" style="background:oklch(0.78 0.06 38)"></span>
+                  <div class="min-w-0">
+                    <div class="text-[13px] font-medium truncate">他 18 事業</div>
+                    <div class="text-[11px] mono" style="color:var(--ink-3);">合計</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="mono text-[13px] font-semibold">5.31</div>
+                    <div class="mono text-[10px]" style="color:var(--ink-3);">5.7%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-6 py-3 border-t flex items-center justify-between" style="border-color:var(--line);">
+              <span class="text-[12px]" style="color:var(--ink-3);">引き上げ ↑ 全件 / 引き下げ ↓ peek</span>
+              <button class="text-[12px] font-semibold" style="color:var(--accent);">CSV エクスポート</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h3>(B) bottom-sheet (half) — alt</h3>
+      <p>
+        ユーザー設定で切替可。Sankey本体が画面いっぱいに広がる代わり、詳細閲覧時は半開きシートで2列リスト表示。
+        横長スペースを活かして事業/支出先を並べて読める。「自動」モード時は 768px 縦は docked が既定。
+      </p>
+    </div>
+
+  </div>
+
+  <!-- ============ ANNOTATIONS ============ -->
+  <section class="max-w-[1480px] mx-auto mt-20 grid grid-cols-3 gap-8 text-[13px] leading-relaxed">
+    <div>
+      <div class="text-[11px] tracking-[.18em] uppercase font-semibold" style="color:var(--ink-3);">01 — Two-row toolbar (§3)</div>
+      <h4 class="font-bold mt-1 mb-2">クラスタを縦に積む</h4>
+      <p style="color:var(--ink-2);">
+        1段目（検索 + 年度）は画面コンテキストの起点、2段目（TopN + フォント + ⚙）は分析パラメータ。
+        モバイルと違い <span class="mono text-[11px]">TopN / フォント</span> は直接配置で1タップで触れる。
+        <span class="mono text-[11px]">searchBoxReservePx</span> は 60+56 = 116px 確保。
+      </p>
+    </div>
+    <div>
+      <div class="text-[11px] tracking-[.18em] uppercase font-semibold" style="color:var(--ink-3);">02 — Side panel (§4)</div>
+      <h4 class="font-bold mt-1 mb-2">docked と sheet を併記</h4>
+      <p style="color:var(--ink-2);">
+        既定は docked (sidePanelWidthPx=310)。Sankey が常に左 458px に収まり、選択ノードと並列比較できる。
+        bottom-sheet 案は本体最大化重視で、2列リストで横幅を活用。⚙ポップオーバーから即時切替。
+      </p>
+    </div>
+    <div>
+      <div class="text-[11px] tracking-[.18em] uppercase font-semibold" style="color:var(--ink-3);">03 — DisplayMode (§1)</div>
+      <h4 class="font-bold mt-1 mb-2">フルシートではなくポップオーバー</h4>
+      <p style="color:var(--ink-2);">
+        モバイルは画面遷移コストが高いのでフルシート、タブレットは <span class="mono text-[11px]">⚙</span> 直下の小ポップオーバーで
+        DisplayMode / 列見出し / パネル方式を切替。閉じても Sankey が見え続け、変更結果を即確認できる。
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-[1480px] mx-auto mt-12 rounded-2xl p-6" style="background:#fff;border:1px solid var(--line);">
+    <div class="grid grid-cols-5 gap-6 text-[12px]">
+      <div>
+        <div class="text-[10px] tracking-[.18em] uppercase font-semibold" style="color:var(--ink-3);">topToolbarLayout</div>
+        <div class="text-[18px] font-bold mt-1 mono">two-row</div>
+        <div style="color:var(--ink-3);">60 + 56 px</div>
+      </div>
+      <div>
+        <div class="text-[10px] tracking-[.18em] uppercase font-semibold" style="color:var(--ink-3);">sidePanelMode</div>
+        <div class="text-[18px] font-bold mt-1 mono">docked / sheet</div>
+        <div style="color:var(--ink-3);">既定 docked, 切替可</div>
+      </div>
+      <div>
+        <div class="text-[10px] tracking-[.18em] uppercase font-semibold" style="color:var(--ink-3);">sidePanelWidthPx</div>
+        <div class="text-[20px] font-bold mt-1 mono">310</div>
+        <div style="color:var(--ink-3);">docked 時</div>
+      </div>
+      <div>
+        <div class="text-[10px] tracking-[.18em] uppercase font-semibold" style="color:var(--ink-3);">columnHeaderMode</div>
+        <div class="text-[18px] font-bold mt-1 mono">name-only</div>
+        <div style="color:var(--ink-3);">合計はパネル側で確認</div>
+      </div>
+      <div>
+        <div class="text-[10px] tracking-[.18em] uppercase font-semibold" style="color:var(--ink-3);">controlIconMinHitPx</div>
+        <div class="text-[20px] font-bold mt-1 mono">44</div>
+        <div style="color:var(--ink-3);">全アイコン / ピル</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="max-w-[1480px] mx-auto mt-10 mb-6 text-[11px]" style="color:var(--ink-3);">
+    静止画モック · HTML+Tailwind · 768 × 1024 · Issue #195 設計書 §1〜§6 整合 · Mobile Sankey Layout と同デザイン言語
+  </footer>
+
+</div>
+
+<!-- ============== SANKEY RENDERER ============== -->
+<script>
+(function(){
+  const ministries = [
+    {key:'kourou', name:'厚生労働省',     short:'厚労省',   amt:93.33, c:'oklch(0.55 0.10 160)'},
+    {key:'kokudo', name:'国土交通省',     short:'国交省',   amt:11.44, c:'oklch(0.58 0.10 160)'},
+    {key:'keisan', name:'経済産業省',     short:'経産省',   amt:8.87,  c:'oklch(0.60 0.10 160)'},
+    {key:'bouei',  name:'防衛省',         short:'防衛省',   amt:7.09,  c:'oklch(0.62 0.10 160)'},
+    {key:'monka',  name:'文部科学省',     short:'文科省',   amt:6.66,  c:'oklch(0.64 0.10 160)'},
+    {key:'kodomo', name:'こども家庭庁',   short:'こども',   amt:5.73,  c:'oklch(0.66 0.10 160)'},
+    {key:'other',  name:'他 22省庁',      short:'他22省',   amt:14.51, c:'oklch(0.72 0.05 160)', isOther:true},
+  ];
+  const events = [
+    {name:'基礎年金給付に必要な経費',         amt:25.48, from:'kourou', toR:0, c:'oklch(0.66 0.13 38)'},
+    {name:'保険給付(厚年)',                   amt:24.22, from:'kourou', toR:1, c:'oklch(0.66 0.13 38)'},
+    {name:'保険料等交付金(健保)',             amt:11.31, from:'kourou', toR:2, c:'oklch(0.68 0.13 38)'},
+    {name:'医療保険給付費国庫負担',           amt:10.17, from:'kourou', toR:3, c:'oklch(0.68 0.13 38)'},
+    {name:'物価高騰対応交付金',               amt:2.79,  from:'kokudo', toR:4, c:'oklch(0.70 0.12 38)'},
+    {name:'保護費負担金',                     amt:2.74,  from:'kourou', toR:5, c:'oklch(0.70 0.12 38)'},
+    {name:'介護給付費等負担金',               amt:2.14,  from:'kourou', toR:6, c:'oklch(0.72 0.12 38)'},
+    {name:'失業等給付費',                     amt:2.02,  from:'kourou', toR:7, c:'oklch(0.72 0.12 38)'},
+    {name:'他 5,738事業',                     amt:66.76, from:'mix',    toR:8, c:'oklch(0.78 0.06 38)', isOther:true},
+  ];
+  const recipients = [
+    {name:'年金受給者',          amt:25.48, c:'oklch(0.60 0.16 25)'},
+    {name:'年金受給者等',        amt:24.22, c:'oklch(0.60 0.16 25)'},
+    {name:'全国健康保険協会',    amt:11.31, c:'oklch(0.62 0.16 25)'},
+    {name:'その他(広域連合)',    amt:10.17, c:'oklch(0.64 0.15 25)'},
+    {name:'総務省',              amt:2.79,  c:'oklch(0.66 0.15 25)'},
+    {name:'求職者等',            amt:2.74,  c:'oklch(0.68 0.14 25)'},
+    {name:'都道府県等',          amt:2.14,  c:'oklch(0.70 0.14 25)'},
+    {name:'独法 NEDO 等',        amt:2.02,  c:'oklch(0.72 0.12 25)'},
+    {name:'他 12,728支出先',     amt:66.76, c:'oklch(0.78 0.07 25)', isOther:true},
+  ];
+
+  const TOTAL = 147.63;
+  const NODE_W = 10;
+  const GAP = 3;
+
+  function layout(viewBoxH){
+    const TOP = 10;
+    const BOT = viewBoxH - 10;
+    const usable = BOT - TOP;
+    const maxNodes = Math.max(ministries.length, events.length, recipients.length);
+    const totalGap = (maxNodes - 1) * GAP;
+    const S = (usable - totalGap) / TOTAL;
+    function place(arr){
+      let y = TOP;
+      arr.forEach(n => { n.h = n.amt * S; n.y = y; y += n.h + GAP; });
+    }
+    place(ministries); place(events); place(recipients);
+    return {TOP, S};
+  }
+  function flowPath(x1, y1, h1, x2, y2, h2){
+    const m1 = x1 + (x2-x1)*0.45;
+    const m2 = x1 + (x2-x1)*0.55;
+    return `M${x1} ${y1.toFixed(2)} C${m1} ${y1.toFixed(2)}, ${m2} ${y2.toFixed(2)}, ${x2} ${y2.toFixed(2)} L${x2} ${(y2+h2).toFixed(2)} C${m2} ${(y2+h2).toFixed(2)}, ${m1} ${(y1+h1).toFixed(2)}, ${x1} ${(y1+h1).toFixed(2)} Z`;
+  }
+  function rect(x,y,w,h,fill,op){
+    return `<rect x="${x}" y="${y.toFixed(2)}" width="${w}" height="${h.toFixed(2)}" fill="${fill}" opacity="${op||1}" rx="1"/>`;
+  }
+
+  function buildFlowPlan(){
+    const minToEvents = [];
+    events.forEach((e, i) => {
+      if (e.isOther) return;
+      minToEvents.push({minKey: e.from, evIdx: i, amt: e.amt});
+    });
+    const others = events[events.length-1];
+    let otherFed = 0;
+    ministries.forEach(m => {
+      const usedAmt = minToEvents.filter(x => x.minKey===m.key).reduce((s,x)=>s+x.amt,0);
+      const leftover = m.amt - usedAmt;
+      if (leftover > 0.01 && otherFed < others.amt - 0.01) {
+        const give = Math.min(leftover, others.amt - otherFed);
+        minToEvents.push({minKey: m.key, evIdx: events.length-1, amt: give, isOther:true});
+        otherFed += give;
+      }
+    });
+    const evToRec = events.map((e,i) => ({evIdx:i, recIdx:e.toR, amt:e.amt}));
+    return {minToEvents, evToRec};
+  }
+
+  function buildSankeySVG(svg) {
+    const vb = svg.getAttribute('viewBox').split(' ').map(Number);
+    const W = vb[2], H = vb[3];
+    const {TOP} = layout(H);
+
+    const COL_X = (svg.dataset.cols || '20,108,250,400').split(',').map(Number);
+    const RIGHT_GUTTER = svg.dataset.rightGutter ? Number(svg.dataset.rightGutter) : W - 4;
+    const minLabelH = svg.dataset.labelMinH ? Number(svg.dataset.labelMinH) : 16;
+
+    const totalSrcTop = ministries[0].y;
+    const totalSrcBot = ministries[ministries.length-1].y + ministries[ministries.length-1].h;
+    const totalSrcH = totalSrcBot - totalSrcTop;
+    const totalSrcY = totalSrcTop;
+
+    const focusMin = svg.dataset.focus !== undefined ? Number(svg.dataset.focus) : null;
+    const dimGlobal = svg.dataset.dim ? Number(svg.dataset.dim) : 1;
+    const isFocus = focusMin !== null;
+    function opFor(isFocused){
+      if (!isFocus) return dimGlobal;
+      return isFocused ? Math.min(1, dimGlobal+0.3) : 0.15 * dimGlobal;
+    }
+
+    const {minToEvents, evToRec} = buildFlowPlan();
+    let html = '';
+
+    // 总计 → 省庁
+    let srcCursor = totalSrcY;
+    ministries.forEach((m, i) => {
+      const focused = isFocus && i === focusMin;
+      const op = opFor(focused) * 0.55;
+      html += `<path d="${flowPath(COL_X[0]+NODE_W, srcCursor, m.h, COL_X[1], m.y, m.h)}" fill="${m.c}" opacity="${op.toFixed(3)}"/>`;
+      srcCursor += m.h;
+    });
+
+    // 省庁 → 事業
+    const minOutCursor = {};
+    ministries.forEach(m => minOutCursor[m.key] = m.y);
+    const evInCursor = events.map(e => e.y);
+
+    const orderedFlows = [...minToEvents].sort((a,b) => {
+      const ma = ministries.find(x=>x.key===a.minKey);
+      const mb = ministries.find(x=>x.key===b.minKey);
+      if (ma.y !== mb.y) return ma.y - mb.y;
+      return events[a.evIdx].y - events[b.evIdx].y;
+    });
+    orderedFlows.forEach(f => {
+      const m = ministries.find(x => x.key === f.minKey);
+      const minIdx = ministries.indexOf(m);
+      const h = f.amt * (m.h / m.amt);
+      const y1 = minOutCursor[f.minKey];
+      const y2 = evInCursor[f.evIdx];
+      const focused = isFocus && minIdx === focusMin && !f.isOther;
+      const op = opFor(focused) * 0.5;
+      html += `<path d="${flowPath(COL_X[1]+NODE_W, y1, h, COL_X[2], y2, h)}" fill="${m.c}" opacity="${op.toFixed(3)}"/>`;
+      minOutCursor[f.minKey] += h;
+      evInCursor[f.evIdx] += h;
+    });
+
+    // 事業 → 支出先
+    const recInCursor = recipients.map(r => r.y);
+    const evOutCursor = events.map(e => e.y);
+    evToRec.forEach(f => {
+      const ev = events[f.evIdx];
+      const h = f.amt * (ev.h / ev.amt);
+      const fromMin = isFocus && events[f.evIdx].from === ministries[focusMin].key && !ev.isOther;
+      const op = opFor(fromMin) * 0.5;
+      html += `<path d="${flowPath(COL_X[2]+NODE_W, evOutCursor[f.evIdx], h, COL_X[3], recInCursor[f.recIdx], h)}" fill="${ev.c}" opacity="${op.toFixed(3)}"/>`;
+      evOutCursor[f.evIdx] += h;
+      recInCursor[f.recIdx] += h;
+    });
+
+    // Node rects
+    const totalOp = (isFocus ? 0.65 : 1) * dimGlobal;
+    html += rect(COL_X[0], totalSrcY, NODE_W, totalSrcH, 'oklch(0.50 0.10 160)', totalOp);
+    ministries.forEach((m, i) => {
+      const focused = isFocus && i === focusMin;
+      html += rect(COL_X[1], m.y, NODE_W, m.h, m.c, opFor(focused));
+      if (focused) {
+        html += `<rect x="${COL_X[1]-4}" y="${(m.y-4).toFixed(2)}" width="${NODE_W+8}" height="${(m.h+8).toFixed(2)}" rx="3" fill="none" stroke="oklch(0.52 0.14 268)" stroke-width="2.5"/>`;
+      }
+    });
+    events.forEach((e, i) => {
+      const linked = isFocus && e.from === ministries[focusMin].key && !e.isOther;
+      html += rect(COL_X[2], e.y, NODE_W, e.h, e.c, opFor(linked));
+    });
+    recipients.forEach((r, i) => {
+      const fromEv = events.find(e => e.toR === i);
+      const linked = isFocus && fromEv && fromEv.from === ministries[focusMin].key && !fromEv.isOther;
+      html += rect(COL_X[3], r.y, NODE_W, r.h, r.c, opFor(linked));
+    });
+
+    // Labels
+    function txt(x, y, text, opts={}){
+      const f = opts.size || 11;
+      const w = opts.weight || 400;
+      const col = opts.color || '#1A1A19';
+      const op = opts.op != null ? opts.op : 1;
+      const anchor = opts.anchor || 'start';
+      const ff = opts.mono ? 'JetBrains Mono, monospace' : 'Hiragino Sans, Noto Sans JP, sans-serif';
+      return `<text x="${x}" y="${y.toFixed(2)}" text-anchor="${anchor}" font-family="${ff}" font-size="${f}" font-weight="${w}" fill="${col}" opacity="${op.toFixed(3)}">${text}</text>`;
+    }
+
+    // 总计 label (in focus mode, hidden)
+    if (!isFocus) {
+      html += txt(COL_X[0]+NODE_W+6, totalSrcY + totalSrcH/2 - 6, '予算総計', {size:12, weight:700});
+      html += txt(COL_X[0]+NODE_W+6, totalSrcY + totalSrcH/2 + 10, '147.63兆円', {size:10, color:'#7A766E', mono:true});
+    }
+
+    ministries.forEach((m, i) => {
+      if (m.h < minLabelH) return;
+      const focused = isFocus && i === focusMin;
+      if (isFocus && !focused) return;
+      const op = opFor(focused);
+      const c = focused ? 'oklch(0.52 0.14 268)' : '#1A1A19';
+      const w = (m.h > 40 || focused) ? 700 : 500;
+      html += txt(COL_X[1]+NODE_W+5, m.y + Math.min(14, m.h/2 + 4), m.short, {size:11.5, weight:w, color:c, op});
+      if (m.h > 30) {
+        html += txt(COL_X[1]+NODE_W+5, m.y + Math.min(28, m.h/2 + 17), m.amt.toFixed(2)+'兆円', {size:9.5, color:focused ? 'oklch(0.52 0.14 268)' : '#7A766E', op, mono:true});
+      }
+    });
+
+    // Available label widths (compute from COL_X to truncate appropriately)
+    const eventLabelMaxPx = (COL_X[3] - (COL_X[2]+NODE_W+5)) - 12; // leave 12px gap before recipient column
+    const recipLabelMaxPx = (RIGHT_GUTTER - (COL_X[3]+NODE_W+4)); // space after recipient bar
+    const evCharCap = Math.max(5, Math.floor(eventLabelMaxPx / 11));
+    const recCharCap = Math.max(4, Math.floor(recipLabelMaxPx / 11));
+
+    events.forEach((e, i) => {
+      if (e.h < minLabelH) return;
+      const linked = isFocus && e.from === ministries[focusMin].key && !e.isOther;
+      if (isFocus && !linked) return;
+      const op = opFor(linked);
+      const truncName = e.name.length > evCharCap ? e.name.slice(0, evCharCap-1)+'…' : e.name;
+      html += txt(COL_X[2]+NODE_W+5, e.y + Math.min(13, e.h/2 + 4), truncName, {size:11, weight:600, op});
+      if (e.h > 28) html += txt(COL_X[2]+NODE_W+5, e.y + Math.min(26, e.h/2 + 16), e.amt.toFixed(2)+'兆円', {size:9.5, color:'#7A766E', op, mono:true});
+    });
+
+    recipients.forEach((r, i) => {
+      if (r.h < minLabelH) return;
+      const fromEv = events.find(e => e.toR === i);
+      const linked = isFocus && fromEv && fromEv.from === ministries[focusMin].key && !fromEv.isOther;
+      if (isFocus && !linked) return;
+      const op = opFor(linked);
+      const truncName = r.name.length > recCharCap ? r.name.slice(0, recCharCap-1)+'…' : r.name;
+      html += txt(RIGHT_GUTTER, r.y + Math.min(13, r.h/2 + 4), truncName, {size:11, weight:600, op, anchor:'end'});
+      if (r.h > 28) html += txt(RIGHT_GUTTER, r.y + Math.min(26, r.h/2 + 16), r.amt.toFixed(2), {size:9.5, color:'#7A766E', op, anchor:'end', mono:true});
+    });
+
+    svg.innerHTML = html;
+  }
+
+  document.querySelectorAll('svg.sankey').forEach(buildSankeySVG);
+})();
+</script>
+
+</body>
+</html>

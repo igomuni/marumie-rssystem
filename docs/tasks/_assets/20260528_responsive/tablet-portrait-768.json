@@ -1,0 +1,27 @@
+{
+  "viewport": {
+    "name": "tablet-portrait-768",
+    "width": 768,
+    "height": 1024
+  },
+  "overlaps": {
+    "viewport": {
+      "w": 768,
+      "h": 1024
+    },
+    "documentSize": {
+      "w": 768,
+      "h": 1024
+    },
+    "horizontalOverflow": false,
+    "header": null,
+    "columnHeader": null,
+    "sankey": {
+      "top": 0,
+      "left": 0,
+      "width": 768,
+      "height": 1024
+    },
+    "sidePanel": null
+  }
+}
