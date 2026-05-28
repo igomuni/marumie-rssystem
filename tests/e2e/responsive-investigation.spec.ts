@@ -34,7 +34,8 @@ for (const vp of VIEWPORTS) {
       const header = find('header') ?? find('[data-testid="top-toolbar"]');
       const columnHeader = document.querySelector('[data-testid="column-header"]');
       const columnHeaderRect = columnHeader?.getBoundingClientRect() ?? null;
-      const sankey = document.querySelector('svg');
+      const sankeyNode = document.querySelector('[data-testid="sankey-node"]') as SVGElement | null;
+      const sankey = sankeyNode?.ownerSVGElement ?? null;
       const sankeyRect = sankey?.getBoundingClientRect() ?? null;
       const sidePanel = document.querySelector('[data-testid="side-panel"]');
       const sidePanelRect = sidePanel?.getBoundingClientRect() ?? null;
