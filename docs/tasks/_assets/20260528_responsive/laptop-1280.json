@@ -1,0 +1,27 @@
+{
+  "viewport": {
+    "name": "laptop-1280",
+    "width": 1280,
+    "height": 800
+  },
+  "overlaps": {
+    "viewport": {
+      "w": 1280,
+      "h": 800
+    },
+    "documentSize": {
+      "w": 1280,
+      "h": 800
+    },
+    "horizontalOverflow": false,
+    "header": null,
+    "columnHeader": null,
+    "sankey": {
+      "top": 0,
+      "left": 0,
+      "width": 1280,
+      "height": 800
+    },
+    "sidePanel": null
+  }
+}

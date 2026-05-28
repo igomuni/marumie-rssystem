@@ -1,0 +1,27 @@
+{
+  "viewport": {
+    "name": "mobile-390",
+    "width": 390,
+    "height": 844
+  },
+  "overlaps": {
+    "viewport": {
+      "w": 390,
+      "h": 844
+    },
+    "documentSize": {
+      "w": 390,
+      "h": 844
+    },
+    "horizontalOverflow": false,
+    "header": null,
+    "columnHeader": null,
+    "sankey": {
+      "top": 0,
+      "left": 0,
+      "width": 390,
+      "height": 844
+    },
+    "sidePanel": null
+  }
+}

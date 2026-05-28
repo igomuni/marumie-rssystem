@@ -1,0 +1,27 @@
+{
+  "viewport": {
+    "name": "tablet-1024",
+    "width": 1024,
+    "height": 768
+  },
+  "overlaps": {
+    "viewport": {
+      "w": 1024,
+      "h": 768
+    },
+    "documentSize": {
+      "w": 1024,
+      "h": 768
+    },
+    "horizontalOverflow": false,
+    "header": null,
+    "columnHeader": null,
+    "sankey": {
+      "top": 0,
+      "left": 0,
+      "width": 1024,
+      "height": 768
+    },
+    "sidePanel": null
+  }
+}
