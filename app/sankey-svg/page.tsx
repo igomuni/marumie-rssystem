@@ -2746,7 +2746,7 @@ export default function RealDataSankeyPage() {
                         title="クリックしてフォントサイズを入力"
                         style={{ color: '#999', fontSize: META_FONT_PX_DEFAULT, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
                         data-pan-disabled
-                        aria-label="基準フォントサイズ(数値)"
+                        aria-label="基準フォントサイズ編集を開始"
                       >{baseFontPx}</button>
                     )}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
