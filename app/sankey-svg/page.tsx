@@ -2414,9 +2414,23 @@ export default function RealDataSankeyPage() {
                       nextColNodes = layout.nodes.filter(n => getColumn(n) === nc && n.type !== 'project-spending');
                       if (nextColNodes.length > 0) break;
                     }
-                    const clipEnd = nextColNodes.length > 0
+                    const nextX0 = nextColNodes.length > 0
                       ? Math.min(...nextColNodes.map(n => getNodeInnerX0(n)))
                       : labelStart + screenWToInner(layout.colSpacing * horizontalScale - screenNodeW);
+                    // 次列ノードが左側ラベル（事業予算金額）を持つ場合、その想定幅分を予約
+                    const leftLabelChars = nextColNodes
+                      .filter(n => n.type === 'project-budget')
+                      .reduce((m, n) => {
+                        const main = formatYen(n.value);
+                        const raw = n.isScaled && n.rawValue != null ? ` / ${formatYen(n.rawValue)}` : '';
+                        return Math.max(m, (main + raw).length);
+                      }, 0);
+                    const labelScale = getZoomLabelScale(zoom, baseZoom);
+                    const innerFontPx = (mapLabelFontPx * labelScale) / zoom;
+                    const leftLabelReserve = leftLabelChars > 0
+                      ? innerLabelGap * 2 + leftLabelChars * innerFontPx * 0.7
+                      : 0;
+                    const clipEnd = nextX0 - leftLabelReserve;
                     return (
                       <defs key={`clip-col-${c}`}>
                         <clipPath id={`clip-col-${c}`}>
