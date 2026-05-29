@@ -272,6 +272,12 @@ export default function RealDataSankeyNextPage() {
   const [sidePanelWidth, setSidePanelWidth] = useState(MODE_TOKENS['standard-desktop'].sidePanelWidthPx);
   const [isResizingSidePanel, setIsResizingSidePanel] = useState(false);
   const sidePanelResizeRef = useRef<{ startX: number; startW: number } | null>(null);
+  // bottom-sheet（compact-mobile）の3段スナップ: 半開き(half) / 全開(full)。閉は selectNode(null)。
+  const [sheetSnap, setSheetSnap] = useState<'half' | 'full'>('half');
+  const [sheetDragDy, setSheetDragDy] = useState(0); // 下方向ドラッグの一時オフセット(px)
+  const sheetDragRef = useRef<{ startY: number } | null>(null);
+  // 新しいノードを選択するたびに半開きへリセット
+  useEffect(() => { setSheetSnap('half'); setSheetDragDy(0); }, [selectedNodeId]);
   const [isResizingOverview, setIsResizingOverview] = useState(false);
   const [isResizingBudgetExecution, setIsResizingBudgetExecution] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -2353,9 +2359,16 @@ export default function RealDataSankeyNextPage() {
       + `L${tx},${tBot}C${mx},${tBot} ${mx},${sBot} ${sx},${sBot}Z`;
   };
 
-  const searchLeftOffset = selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth : 0;
+  // サイドパネルが docked のときだけ、左の占有幅をレイアウト計算に反映する
+  // （bottom-sheet / fullscreen は左を占有しないので 0 扱い）。
+  const isDockedPanel = tokens.sidePanelMode === 'docked';
+  const isBottomSheetPanel = tokens.sidePanelMode === 'bottom-sheet';
+  // bottom-sheet の高さ: half=45% / full=90%。下方向ドラッグ(sheetDragDy>0)で縮む。
+  const sheetBaseH = (sheetSnap === 'full' ? 0.9 : 0.45) * svgHeight;
+  const sheetHeightPx = Math.max(80, Math.min(svgHeight * 0.92, sheetBaseH - sheetDragDy));
+  const searchLeftOffset = isDockedPanel && selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth : 0;
   const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 24px)`;
-  const minimapLeft = selectedNodeId !== null ? (isPanelCollapsed ? 26 : sidePanelWidth + 8) : 8;
+  const minimapLeft = isDockedPanel && selectedNodeId !== null ? (isPanelCollapsed ? 26 : sidePanelWidth + 8) : 8;
   const fontControlLeft = minimapLeft + (showMinimap ? MINIMAP_W + 22 : 48);
 
   return (
@@ -3089,24 +3102,67 @@ export default function RealDataSankeyNextPage() {
         </>
       )}
 
-      {/* Left side panel — node detail */}
+      {/* Side panel — node detail（docked は左固定列 / bottom-sheet は画面下シート） */}
       {selectedNodeId !== null && (
         <div
           data-pan-disabled="true"
-          style={{
-            position: 'fixed', left: 0, top: 0, height: '100%',
-            width: isPanelCollapsed ? 0 : sidePanelWidth,
-            background: '#fff',
-            borderRight: isPanelCollapsed ? 'none' : '1px solid #e0e0e0',
-            boxShadow: isPanelCollapsed ? 'none' : '2px 0 8px rgba(0,0,0,0.1)',
-            zIndex: 25,
-            transition: isResizingSidePanel ? 'none' : 'width 0.2s ease',
-            overflow: 'visible',
-            cursor: 'default',
-          }}
+          style={isBottomSheetPanel
+            ? {
+                position: 'fixed', left: 0, right: 0, bottom: 0, top: 'auto',
+                height: sheetHeightPx,
+                background: '#fff',
+                borderTop: '1px solid #e0e0e0',
+                borderRadius: '14px 14px 0 0',
+                boxShadow: '0 -4px 20px rgba(0,0,0,0.18)',
+                zIndex: 25,
+                transition: sheetDragRef.current ? 'none' : 'height 0.2s ease',
+                overflow: 'hidden',
+                display: 'flex', flexDirection: 'column',
+                cursor: 'default',
+              }
+            : {
+                position: 'fixed', left: 0, top: 0, height: '100%',
+                width: isPanelCollapsed ? 0 : sidePanelWidth,
+                background: '#fff',
+                borderRight: isPanelCollapsed ? 'none' : '1px solid #e0e0e0',
+                boxShadow: isPanelCollapsed ? 'none' : '2px 0 8px rgba(0,0,0,0.1)',
+                zIndex: 25,
+                transition: isResizingSidePanel ? 'none' : 'width 0.2s ease',
+                overflow: 'visible',
+                cursor: 'default',
+              }}
         >
-          {/* Width resize handle — right edge */}
-          {!isPanelCollapsed && (
+          {/* bottom-sheet: ドラッグハンドル（上下スワイプで snap / 下に大きく引くと閉じる） */}
+          {isBottomSheetPanel && (
+            <div
+              data-pan-disabled="true"
+              role="slider"
+              aria-label="詳細シートの高さ"
+              aria-valuetext={sheetSnap === 'full' ? '全開' : '半開き'}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp') { e.preventDefault(); setSheetSnap('full'); }
+                else if (e.key === 'ArrowDown') { e.preventDefault(); if (sheetSnap === 'full') setSheetSnap('half'); else selectNode(null); }
+              }}
+              onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); sheetDragRef.current = { startY: e.clientY }; }}
+              onPointerMove={(e) => { if (sheetDragRef.current) setSheetDragDy(e.clientY - sheetDragRef.current.startY); }}
+              onPointerUp={(e) => {
+                if (!sheetDragRef.current) return;
+                const dy = e.clientY - sheetDragRef.current.startY;
+                sheetDragRef.current = null;
+                setSheetDragDy(0);
+                if (dy > 120) { selectNode(null); return; }      // 大きく下へ → 閉じる
+                if (dy < -60) { setSheetSnap('full'); return; }   // 上へ → 全開
+                if (dy > 60) { setSheetSnap('half'); return; }    // 下へ → 半開き
+                setSheetSnap(s => (s === 'half' ? 'full' : 'half')); // タップ → トグル
+              }}
+              style={{ flex: '0 0 auto', height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'grab', touchAction: 'none' }}
+            >
+              <div style={{ width: 40, height: 4, borderRadius: 2, background: '#ccc' }} />
+            </div>
+          )}
+          {/* Width resize handle — right edge（docked のみ） */}
+          {!isBottomSheetPanel && !isPanelCollapsed && (
             <div
               data-pan-disabled="true"
               role="separator"
@@ -3129,8 +3185,8 @@ export default function RealDataSankeyNextPage() {
               <div style={{ width: 3, height: 32, borderRadius: 2, background: isResizingSidePanel ? '#a0a0a0' : 'transparent' }} />
             </div>
           )}
-          {/* Collapse/expand toggle + close buttons on right edge */}
-          <div
+          {/* Collapse/expand toggle — right edge（docked のみ。bottom-sheet はハンドルで操作） */}
+          {!isBottomSheetPanel && <div
             data-pan-disabled="true"
             style={{
               position: 'absolute', right: -25, top: '50%', transform: 'translateY(-50%)',
@@ -3159,11 +3215,11 @@ export default function RealDataSankeyNextPage() {
                   : <polyline points="15 6 9 12 15 18"/>}
               </svg>
             </button>
-          </div>
+          </div>}
 
-          {/* Panel content */}
-          {!isPanelCollapsed && selectedNode && (
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {/* Panel content（bottom-sheet では常時表示・flex:1 で残り高さを占有） */}
+          {(isBottomSheetPanel || !isPanelCollapsed) && selectedNode && (
+            <div style={{ ...(isBottomSheetPanel ? { flex: 1, minHeight: 0 } : { height: '100%' }), display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {/* Header — fixed, never scrolls */}
               <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', flexShrink: 0, background: '#fff' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
