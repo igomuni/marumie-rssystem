@@ -2664,6 +2664,9 @@ export default function RealDataSankeyNextPage() {
 
             {/* Column labels — DOM overlay, positioned from zoom/pan to avoid hiding behind search box */}
             {(() => {
+              // 列見出しの詳細度（Phase 3-3）。hidden は列見出し自体を描かない。
+              if (tokens.columnHeaderMode === 'hidden') return null;
+              const showColumnAmount = tokens.columnHeaderMode === 'with-amount';
               const maxCol = layout.maxCol || 1;
               const colNodeTypes = ['total', 'ministry', 'project-budget', 'recipient'] as const;
               const columnAmount = (node: LayoutNode, colIndex: number) =>
@@ -2684,7 +2687,8 @@ export default function RealDataSankeyNextPage() {
                   ? Math.min(...colNodes.map(n => getNodeScreenX0(n))) + screenNodeW / 2
                   : MARGIN.left + SCREEN_LEFT_PADDING_PX + (i / maxCol) * (svgWidth - MARGIN.left - MARGIN.right - SCREEN_LEFT_PADDING_PX - screenNodeW) + screenNodeW / 2);
                 const total = colAmounts[i];
-                const amountLine = i === 2 && total != null
+                const amountLine = !showColumnAmount ? ''
+                  : i === 2 && total != null
                   ? `${formatYen(total)} / ${formatYen(projectSpendingTotal)}`
                   : total != null ? formatYen(total) : '';
                 const labelBlockH = Math.round((amountLine ? 36 : 20) * fontScale);
@@ -2698,6 +2702,7 @@ export default function RealDataSankeyNextPage() {
                   <div
                     key={i}
                     data-pan-disabled="true"
+                    data-testid={testId('column-header')}
                     style={{
                       position: 'absolute', left: screenX, top,
                       transform: 'translateX(-50%)',
