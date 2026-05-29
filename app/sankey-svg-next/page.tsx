@@ -813,6 +813,9 @@ export default function RealDataSankeyNextPage() {
   // ── compact-mobile: 上部ツールバーを sheet（全幅の横並びバー）に切替（Phase 3）──
   // [ 検索(flex-1) ][ 年度ピル ][ ⚙ 設定 ] を全 44px ヒットエリアで配置する。
   const isSheetToolbar = tokens.topToolbarLayout === 'sheet';
+  // compact-mobile 専用のラベル衝突回避（Phase 3-6）。フォーカス/ホバー時に非対象の
+  // ノードラベルを非表示にして重なりを解消する。
+  const isCompactMobile = displayMode === 'compact-mobile';
   const SHEET_HIT_PX = Math.max(44, tokens.controlIconMinHitPx);    // タップ最小 44px
   const SHEET_PAD_PX = 8;                                           // バー左右の内側余白
   const SHEET_BAR_H_PX = SHEET_HIT_PX + SHEET_PAD_PX * 2;           // バー全高
@@ -2568,6 +2571,7 @@ export default function RealDataSankeyNextPage() {
                             {labelVisible && (
                               <text x={getNodeInnerX1(node) + innerLabelGap} y={topShift + bH / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
+                                opacity={isCompactMobile && ((connectedNodeIds && !isConnected) || (hoveredNodeIds && !hoveredNodeIds.has(node.id))) ? 0 : 1}
                                 style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                                 onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                                 onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -2596,6 +2600,7 @@ export default function RealDataSankeyNextPage() {
                             {/* Left label: budget amount */}
                             <text x={getNodeInnerX0(node) - innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={colFontPx / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
+                              opacity={isCompactMobile && ((connectedNodeIds && !isConnected) || (hoveredNodeIds && !hoveredNodeIds.has(node.id))) ? 0 : 1}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -2607,6 +2612,7 @@ export default function RealDataSankeyNextPage() {
                             {/* Right label: project name + spending amount */}
                             <text x={getNodeInnerX1(spendingNode) + innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
+                              opacity={isCompactMobile && ((connectedNodeIds && !isConnected) || (hoveredNodeIds && !hoveredNodeIds.has(node.id))) ? 0 : 1}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -2660,6 +2666,7 @@ export default function RealDataSankeyNextPage() {
                             fontSize={colFontPx / zoom}
                             dominantBaseline="middle"
                             fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
+                            opacity={isCompactMobile && ((connectedNodeIds && !connectedNodeIds.has(node.id)) || (hoveredNodeIds && !hoveredNodeIds.has(node.id))) ? 0 : 1}
                             style={{ userSelect: 'none', cursor: 'pointer' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                             onMouseEnter={(e) => { const rect = containerRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); setHoveredNode(node); }}
