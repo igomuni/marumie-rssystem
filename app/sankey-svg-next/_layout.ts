@@ -152,6 +152,22 @@ export function resolveDisplayMode(
   return 'standard-desktop';
 }
 
+// ── サイドパネル方式の幅ベース昇格 ──
+//
+// compact-mobile（bottom-sheet）でも最狭幅（360px級）では全画面オーバーレイに昇格する
+// （設計書 §4 / モック Frame D「360px幅では fullscreen モードへ昇格」）。
+
+/** この幅以下では bottom-sheet を fullscreen に昇格する。 */
+const FULLSCREEN_PROMOTE_MAX_WIDTH = 375;
+
+/** トークンの sidePanelMode を、コンテナ幅に応じて解決する。 */
+export function resolveSidePanelMode(tokens: LayoutTokens, width: number): SidePanelMode {
+  if (tokens.sidePanelMode === 'bottom-sheet' && width <= FULLSCREEN_PROMOTE_MAX_WIDTH) {
+    return 'fullscreen';
+  }
+  return tokens.sidePanelMode;
+}
+
 // ── 手動上書きの永続化（localStorage）──
 //
 // URL クエリに次ぐ優先度。ユーザーが最後に手動選択したモードを次回訪問時に復元する。

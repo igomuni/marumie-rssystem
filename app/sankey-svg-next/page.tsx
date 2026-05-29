@@ -22,6 +22,7 @@ import {
   DISPLAY_MODES,
   isDisplayMode,
   resolveDisplayMode,
+  resolveSidePanelMode,
   readStoredDisplayMode,
   writeStoredDisplayMode,
 } from './_layout';
@@ -2361,8 +2362,11 @@ export default function RealDataSankeyNextPage() {
 
   // サイドパネルが docked のときだけ、左の占有幅をレイアウト計算に反映する
   // （bottom-sheet / fullscreen は左を占有しないので 0 扱い）。
-  const isDockedPanel = tokens.sidePanelMode === 'docked';
-  const isBottomSheetPanel = tokens.sidePanelMode === 'bottom-sheet';
+  // サイドパネル方式（幅で fullscreen 昇格を解決）。
+  const sidePanelMode = resolveSidePanelMode(tokens, svgWidth);
+  const isDockedPanel = sidePanelMode === 'docked';
+  const isBottomSheetPanel = sidePanelMode === 'bottom-sheet';
+  const isFullscreenPanel = sidePanelMode === 'fullscreen';
   // bottom-sheet の高さ: half=45% / full=90%。下方向ドラッグ(sheetDragDy>0)で縮む。
   const sheetBaseH = (sheetSnap === 'full' ? 0.9 : 0.45) * svgHeight;
   const sheetHeightPx = Math.max(80, Math.min(svgHeight * 0.92, sheetBaseH - sheetDragDy));
@@ -3102,11 +3106,20 @@ export default function RealDataSankeyNextPage() {
         </>
       )}
 
-      {/* Side panel — node detail（docked は左固定列 / bottom-sheet は画面下シート） */}
+      {/* Side panel — node detail（docked=左固定列 / bottom-sheet=画面下シート / fullscreen=全画面） */}
       {selectedNodeId !== null && (
         <div
           data-pan-disabled="true"
-          style={isBottomSheetPanel
+          style={isFullscreenPanel
+            ? {
+                position: 'fixed', inset: 0,
+                background: '#fff',
+                zIndex: 250, // 上部ツールバー(検索100/⚙200)を覆う
+                overflow: 'hidden',
+                display: 'flex', flexDirection: 'column',
+                cursor: 'default',
+              }
+            : isBottomSheetPanel
             ? {
                 position: 'fixed', left: 0, right: 0, bottom: 0, top: 'auto',
                 height: sheetHeightPx,
@@ -3132,6 +3145,20 @@ export default function RealDataSankeyNextPage() {
                 cursor: 'default',
               }}
         >
+          {/* fullscreen: 戻るバー（一覧=グラフへ戻る） */}
+          {isFullscreenPanel && (
+            <div data-pan-disabled="true" style={{ flex: '0 0 auto', height: 48, display: 'flex', alignItems: 'center', gap: 6, padding: '0 8px', borderBottom: '1px solid #f0f0f0' }}>
+              <button
+                type="button"
+                onClick={() => selectNode(null)}
+                aria-label="一覧に戻る"
+                style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: '#555' }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              </button>
+              <span style={{ fontWeight: 600, color: '#333', fontSize: CONTROL_FONT_PX }}>戻る</span>
+            </div>
+          )}
           {/* bottom-sheet: ドラッグハンドル（上下スワイプで snap / 下に大きく引くと閉じる） */}
           {isBottomSheetPanel && (
             <div
@@ -3162,7 +3189,7 @@ export default function RealDataSankeyNextPage() {
             </div>
           )}
           {/* Width resize handle — right edge（docked のみ） */}
-          {!isBottomSheetPanel && !isPanelCollapsed && (
+          {isDockedPanel && !isPanelCollapsed && (
             <div
               data-pan-disabled="true"
               role="separator"
@@ -3185,8 +3212,8 @@ export default function RealDataSankeyNextPage() {
               <div style={{ width: 3, height: 32, borderRadius: 2, background: isResizingSidePanel ? '#a0a0a0' : 'transparent' }} />
             </div>
           )}
-          {/* Collapse/expand toggle — right edge（docked のみ。bottom-sheet はハンドルで操作） */}
-          {!isBottomSheetPanel && <div
+          {/* Collapse/expand toggle — right edge（docked のみ。bottom-sheet/fullscreen は別UI） */}
+          {isDockedPanel && <div
             data-pan-disabled="true"
             style={{
               position: 'absolute', right: -25, top: '50%', transform: 'translateY(-50%)',
@@ -3217,9 +3244,9 @@ export default function RealDataSankeyNextPage() {
             </button>
           </div>}
 
-          {/* Panel content（bottom-sheet では常時表示・flex:1 で残り高さを占有） */}
-          {(isBottomSheetPanel || !isPanelCollapsed) && selectedNode && (
-            <div style={{ ...(isBottomSheetPanel ? { flex: 1, minHeight: 0 } : { height: '100%' }), display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {/* Panel content（bottom-sheet / fullscreen は常時表示・flex:1 で残り高さを占有） */}
+          {(isBottomSheetPanel || isFullscreenPanel || !isPanelCollapsed) && selectedNode && (
+            <div style={{ ...(isBottomSheetPanel || isFullscreenPanel ? { flex: 1, minHeight: 0 } : { height: '100%' }), display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {/* Header — fixed, never scrolls */}
               <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', flexShrink: 0, background: '#fff' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
