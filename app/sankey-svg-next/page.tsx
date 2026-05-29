@@ -2730,7 +2730,7 @@ export default function RealDataSankeyNextPage() {
               dragging={minimapDragging}
             />
 
-            {/* Font size controls */}
+            {/* Font size controls（sheet 時は設定シートへ集約するため非表示） */}
             <div
               data-pan-disabled="true"
               style={{
@@ -2738,7 +2738,7 @@ export default function RealDataSankeyNextPage() {
                 left: fontControlLeft,
                 bottom: showMinimap ? 8 : 16,
                 zIndex: 12,
-                display: 'flex',
+                display: isSheetToolbar ? 'none' : 'flex',
                 alignItems: 'flex-end',
                 gap: 6,
                 transition: 'left 0.2s ease',
@@ -4255,7 +4255,7 @@ export default function RealDataSankeyNextPage() {
           if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
         };
         return (
-          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: isSheetToolbar ? 'none' : 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
             {/* Row 1: オフセットスライダー（2列スパン） */}
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -4449,9 +4449,9 @@ export default function RealDataSankeyNextPage() {
         );
       })()}
 
-      {/* Settings button — independent, top right */}
+      {/* Settings button — independent, top right（sheet 時はシートを最前面化するため z を上げる） */}
       <div style={isSheetToolbar
-        ? { position: 'absolute', top: SHEET_PAD_PX, right: SHEET_GEAR_RIGHT_PX, zIndex: 15 }
+        ? { position: 'absolute', top: SHEET_PAD_PX, right: SHEET_GEAR_RIGHT_PX, zIndex: 200 }
         : { position: 'absolute', top: 14, right: 12, zIndex: 15 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
@@ -4470,8 +4470,81 @@ export default function RealDataSankeyNextPage() {
         </button>
         {showSettings && (
           <>
-            <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, minWidth: 240, maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
+            <div
+              data-pan-disabled="true"
+              style={isSheetToolbar
+                ? { position: 'fixed', inset: 0, zIndex: 0, background: 'rgba(0,0,0,0.35)' }
+                : { position: 'fixed', inset: 0, zIndex: 18 }}
+              onMouseDown={() => setShowSettings(false)}
+            />
+            <div
+              id="sankey-topn-settings"
+              data-pan-disabled="true"
+              role="dialog"
+              aria-label="表示設定"
+              tabIndex={-1}
+              onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }}
+              style={isSheetToolbar
+                ? { position: 'fixed', left: 0, right: 0, bottom: 0, top: 'auto', zIndex: 1, background: '#fff', borderRadius: '14px 14px 0 0', padding: '14px 16px calc(14px + env(safe-area-inset-bottom))', boxShadow: '0 -4px 20px rgba(0,0,0,0.18)', fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, maxHeight: '82vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14, colorScheme: 'light', color: '#333' }
+                : { position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, minWidth: 240, maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}
+            >
+              {/* sheet: ヘッダ + フォント + TopN（モバイルでは設定シートに集約） */}
+              {isSheetToolbar && (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontWeight: 700, fontSize: CONTROL_FONT_PX, color: '#333' }}>表示設定</span>
+                    <button type="button" aria-label="表示設定を閉じる" onClick={() => setShowSettings(false)} style={{ width: 36, height: 36, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 22, lineHeight: 1, color: '#888' }}>×</button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <span style={{ color: '#555', fontWeight: 600 }}>フォントサイズ</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <input
+                        type="range" min={BASE_FONT_PX_MIN} max={BASE_FONT_PX_MAX} step={1}
+                        value={baseFontPx}
+                        aria-label="基準フォントサイズ"
+                        onChange={e => { pendingHistoryAction.current = 'replace'; setBaseFontPx(Number(e.target.value)); }}
+                        data-pan-disabled
+                        style={{ flex: 1, minWidth: 0, height: SHEET_HIT_PX, accentColor: '#1a73e8' }}
+                      />
+                      <span style={{ minWidth: 44, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#333' }}>{baseFontPx}px</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <span style={{ color: '#555', fontWeight: 600 }}>表示件数（上位N件）</span>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ width: 44, color: '#555' }}>事業</span>
+                      <input
+                        type="range" min={1} max={300} step={1}
+                        value={localTopProject ?? topProject}
+                        aria-label="事業の表示件数"
+                        onChange={e => setLocalTopProject(Number(e.target.value))}
+                        onPointerUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
+                        onTouchEnd={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
+                        onKeyUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
+                        data-pan-disabled
+                        style={{ flex: 1, minWidth: 0, height: SHEET_HIT_PX, accentColor: '#1a73e8' }}
+                      />
+                      <span style={{ minWidth: 34, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#333' }}>{localTopProject ?? topProject}</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ width: 44, color: '#555' }}>支出先</span>
+                      <input
+                        type="range" min={1} max={300} step={1}
+                        value={localTopRecipient ?? topRecipient}
+                        aria-label="支出先の表示件数"
+                        onChange={e => setLocalTopRecipient(Number(e.target.value))}
+                        onPointerUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
+                        onTouchEnd={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
+                        onKeyUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
+                        data-pan-disabled
+                        style={{ flex: 1, minWidth: 0, height: SHEET_HIT_PX, accentColor: '#1a73e8' }}
+                      />
+                      <span style={{ minWidth: 34, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#333' }}>{localTopRecipient ?? topRecipient}</span>
+                    </label>
+                  </div>
+                  <div style={{ height: 1, background: '#eee', margin: '2px 0' }} />
+                </>
+              )}
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
