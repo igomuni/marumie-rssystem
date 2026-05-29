@@ -16,6 +16,21 @@ export type DisplayMode =
   | 'presentation-tv'
   | 'projection';
 
+/** 全 DisplayMode の一覧（UI セグメント・バリデーション用）。 */
+export const DISPLAY_MODES: readonly DisplayMode[] = [
+  'compact-mobile',
+  'compact-tablet',
+  'standard-desktop',
+  'dense-laptop',
+  'presentation-tv',
+  'projection',
+] as const;
+
+/** 任意の文字列が有効な DisplayMode かを判定する型ガード（URL クエリ・localStorage 検証用）。 */
+export function isDisplayMode(value: string | null | undefined): value is DisplayMode {
+  return value != null && (DISPLAY_MODES as readonly string[]).includes(value);
+}
+
 /** 上部ツールバーの段組み方式。 */
 export type TopToolbarLayout = 'single-row' | 'two-row' | 'sheet';
 
@@ -135,4 +150,32 @@ export function resolveDisplayMode(
   if (width <= COMPACT_TABLET_MAX_WIDTH) return 'compact-tablet';
   if (width <= DENSE_LAPTOP_MAX_WIDTH) return 'dense-laptop';
   return 'standard-desktop';
+}
+
+// ── 手動上書きの永続化（localStorage）──
+//
+// URL クエリに次ぐ優先度。ユーザーが最後に手動選択したモードを次回訪問時に復元する。
+
+const DISPLAY_MODE_STORAGE_KEY = 'sankey-svg:display-mode';
+
+/** 保存済みの手動 DisplayMode を読む（無効値・SSR では null）。 */
+export function readStoredDisplayMode(): DisplayMode | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(DISPLAY_MODE_STORAGE_KEY);
+    return isDisplayMode(raw) ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 手動 DisplayMode を保存する。null は自動判定への復帰（保存を削除）。 */
+export function writeStoredDisplayMode(mode: DisplayMode | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (mode === null) window.localStorage.removeItem(DISPLAY_MODE_STORAGE_KEY);
+    else window.localStorage.setItem(DISPLAY_MODE_STORAGE_KEY, mode);
+  } catch {
+    /* localStorage 不可（プライベートブラウズ等）は無視 */
+  }
 }

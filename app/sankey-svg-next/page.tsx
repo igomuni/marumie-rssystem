@@ -15,7 +15,16 @@ import { filterTopN, computeLayout, getTopMinistriesInScope } from '@/app/lib/sa
 import { canonicalSelectableNodeId } from '@/app/lib/sankey-svg-ids';
 import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
 import { parseAmountToYen } from '@/app/lib/format/yen';
-import { type DisplayMode, type LayoutTokens, MODE_TOKENS } from './_layout';
+import {
+  type DisplayMode,
+  type LayoutTokens,
+  MODE_TOKENS,
+  DISPLAY_MODES,
+  isDisplayMode,
+  resolveDisplayMode,
+  readStoredDisplayMode,
+  writeStoredDisplayMode,
+} from './_layout';
 
 // ── URL state serialization ──
 
@@ -55,6 +64,7 @@ interface SankeyUrlState {
   acSpecial?: boolean;
   acBoth?: boolean;
   acNone?: boolean;
+  displayMode?: DisplayMode;
 }
 
 const SCREEN_LEFT_PADDING_PX = 32;
@@ -172,6 +182,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
     result.acBoth    = ac.includes('b');
     result.acNone    = ac.includes('n');
   }
+  const mode = p.get('mode'); if (isDisplayMode(mode)) result.displayMode = mode;
   return result;
 }
 
@@ -207,11 +218,10 @@ function computeFocusPins(
 }
 
 export default function RealDataSankeyNextPage() {
-  // ── レスポンシブ表示モード（Issue #195 / ロードマップ Phase 0）──
-  // Phase 0 では standard-desktop 固定で、トークンを参照するだけ（挙動は不変）。
-  // Phase 2 で URL クエリ・localStorage・自動判定の3層解決に置き換える。
-  const [displayMode] = useState<DisplayMode>('standard-desktop');
-  const tokens: LayoutTokens = MODE_TOKENS[displayMode];
+  // ── レスポンシブ表示モード（Issue #195 / ロードマップ Phase 2）──
+  // 手動上書き（URL クエリ ?mode= ＞ localStorage ＞ ユーザー選択）。null = 自動判定。
+  // 解決された displayMode / tokens は svgWidth 確定後に算出する（後段の useMemo 参照）。
+  const [displayModeOverride, setDisplayModeOverride] = useState<DisplayMode | null>(null);
 
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -258,7 +268,8 @@ export default function RealDataSankeyNextPage() {
   const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-  const [sidePanelWidth, setSidePanelWidth] = useState(tokens.sidePanelWidthPx);
+  // 初期値は標準デスクトップのトークン値。docked パネル幅は tokens 解決前に一度だけ参照される。
+  const [sidePanelWidth, setSidePanelWidth] = useState(MODE_TOKENS['standard-desktop'].sidePanelWidthPx);
   const [isResizingSidePanel, setIsResizingSidePanel] = useState(false);
   const sidePanelResizeRef = useRef<{ startX: number; startW: number } | null>(null);
   const [isResizingOverview, setIsResizingOverview] = useState(false);
@@ -331,6 +342,41 @@ export default function RealDataSankeyNextPage() {
     return () => { ro.disconnect(); window.removeEventListener('resize', updateSize); };
   }, []);
 
+  // ── DisplayMode 自動判定の入力: ポインタ種別（タッチ環境）──
+  const [pointerCoarse, setPointerCoarse] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(pointer: coarse)');
+    const update = () => setPointerCoarse(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  // ── DisplayMode 手動上書きの初期化（URL クエリ ＞ localStorage）──
+  // URL の ?mode= はマウント時の URL 初期化 effect 側で設定するため、ここでは
+  // URL に mode が無い場合のみ localStorage の保存値を採用する。
+  useEffect(() => {
+    if (isDisplayMode(new URLSearchParams(window.location.search).get('mode'))) return;
+    const stored = readStoredDisplayMode();
+    if (stored) setDisplayModeOverride(stored);
+  }, []);
+
+  // ── 3層解決された DisplayMode と LayoutTokens ──
+  // 優先順位: 手動上書き（override）＞ 自動判定（svgWidth + pointerCoarse）。
+  const displayMode: DisplayMode = useMemo(
+    () => resolveDisplayMode(svgWidth, pointerCoarse, displayModeOverride ?? undefined),
+    [svgWidth, pointerCoarse, displayModeOverride],
+  );
+  const tokens: LayoutTokens = MODE_TOKENS[displayMode];
+
+  // 手動 DisplayMode 選択（設定UIのセグメントから呼ぶ）。null = 自動判定へ復帰。
+  const handleSelectDisplayMode = useCallback((mode: DisplayMode | null) => {
+    pendingHistoryAction.current = 'replace';
+    setDisplayModeOverride(mode);
+    writeStoredDisplayMode(mode);
+  }, []);
+
   // Initialize state from URL on mount
   useEffect(() => {
     const parsed = parseSearchParams(window.location.search);
@@ -378,6 +424,7 @@ export default function RealDataSankeyNextPage() {
     if (parsed.acSpecial !== undefined) setAcSpecial(parsed.acSpecial);
     if (parsed.acBoth    !== undefined) setAcBoth(parsed.acBoth);
     if (parsed.acNone    !== undefined) setAcNone(parsed.acNone);
+    if (parsed.displayMode !== undefined) setDisplayModeOverride(parsed.displayMode);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
 
@@ -430,6 +477,7 @@ export default function RealDataSankeyNextPage() {
       setAcSpecial(parsed.acSpecial ?? true);
       setAcBoth(parsed.acBoth ?? true);
       setAcNone(parsed.acNone ?? true);
+      setDisplayModeOverride(parsed.displayMode ?? null);
       if (parsed.selectedNodeId) pendingResetViewport.current = true;
     };
     window.addEventListener('popstate', handler);
@@ -475,6 +523,7 @@ export default function RealDataSankeyNextPage() {
     if (!acGeneral || !acSpecial || !acBoth || !acNone) {
       p.set('ac', `${acGeneral ? 'g' : ''}${acSpecial ? 's' : ''}${acBoth ? 'b' : ''}${acNone ? 'n' : ''}`);
     }
+    if (displayModeOverride !== null) p.set('mode', displayModeOverride);
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
     if (action === 'push') {
@@ -482,7 +531,7 @@ export default function RealDataSankeyNextPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, searchQuery, showFilterPanel, filterProjectName, filterProjectNameRegex, filterRecipientName, filterRecipientNameRegex, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone]);
+  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, searchQuery, showFilterPanel, filterProjectName, filterProjectNameRegex, filterRecipientName, filterRecipientNameRegex, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone, displayModeOverride]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -4426,6 +4475,20 @@ export default function RealDataSankeyNextPage() {
                 <input type="checkbox" checked={filterOnMinistryClick} onChange={e => { pendingHistoryAction.current = 'replace'; setFilterOnMinistryClick(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>省庁ノード選択でフィルタ</span>
               </label>
+              {/* DisplayMode 切替セグメント（Phase 2: 機能のみ・置き場所。見た目は Phase 3 で作る）。 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} data-testid="display-mode-control">
+                <span style={{ color: '#555' }}>表示モード:</span>
+                <select
+                  value={displayModeOverride ?? 'auto'}
+                  onChange={e => handleSelectDisplayMode(e.target.value === 'auto' ? null : (e.target.value as DisplayMode))}
+                  style={{ fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }}
+                  data-testid="display-mode-select"
+                  data-pan-disabled
+                >
+                  <option value="auto">自動（{displayMode}）</option>
+                  {DISPLAY_MODES.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
             </div>
           </>
         )}
