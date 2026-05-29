@@ -803,6 +803,16 @@ export default function RealDataSankeyNextPage() {
   const TOOLTIP_VALUE_FONT_PX = scaleFont(TOOLTIP_VALUE_FONT_PX_DEFAULT);
   const TOOLTIP_META_FONT_PX = scaleFont(TOOLTIP_META_FONT_PX_DEFAULT);
   const SEARCH_BOX_WIDTH_PX = Math.round(Math.max(260, Math.min(440, 296 * fontScale)));
+  // ── compact-mobile: 上部ツールバーを sheet（全幅の横並びバー）に切替（Phase 3）──
+  // [ 検索(flex-1) ][ 年度ピル ][ ⚙ 設定 ] を全 44px ヒットエリアで配置する。
+  const isSheetToolbar = tokens.topToolbarLayout === 'sheet';
+  const SHEET_HIT_PX = Math.max(44, tokens.controlIconMinHitPx);    // タップ最小 44px
+  const SHEET_PAD_PX = 8;                                           // バー左右の内側余白
+  const SHEET_BAR_H_PX = SHEET_HIT_PX + SHEET_PAD_PX * 2;           // バー全高
+  const SHEET_GEAR_RIGHT_PX = SHEET_PAD_PX;                         // ⚙ 右端
+  const SHEET_YEAR_W_PX = 84;                                       // 年度ピル固定幅
+  const SHEET_YEAR_RIGHT_PX = SHEET_GEAR_RIGHT_PX + SHEET_HIT_PX + 6; // ⚙ の左隣
+  const SHEET_SEARCH_RIGHT_PX = SHEET_YEAR_RIGHT_PX + SHEET_YEAR_W_PX + 6; // 年度の左隣
   const SEARCH_ICON_BOX_PX = scaleSize(20);
   const SEARCH_ICON_PX = scaleSize(16);
   const SEARCH_INPUT_PAD_Y_PX = scaleSize(7);
@@ -3816,8 +3826,18 @@ export default function RealDataSankeyNextPage() {
         </div>
       )}
 
-      {/* Year selector — top center */}
-      <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}>
+      {/* compact-mobile: 上部ツールバーの背景ストリップ（sheet 時のみ） */}
+      {isSheetToolbar && (
+        <div data-pan-disabled="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: SHEET_BAR_H_PX, background: 'rgba(255,255,255,0.96)', boxShadow: '0 1px 6px rgba(0,0,0,0.10)', zIndex: 14 }} />
+      )}
+
+      {/* Year selector — top center（sheet 時は右肩のピル） */}
+      <div
+        data-pan-disabled="true"
+        style={isSheetToolbar
+          ? { position: 'absolute', top: SHEET_PAD_PX, right: SHEET_YEAR_RIGHT_PX, width: SHEET_YEAR_W_PX, height: SHEET_HIT_PX, zIndex: 15 }
+          : { position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}
+      >
         <select
           data-testid={testId('year-select')}
           value={year}
@@ -3828,7 +3848,9 @@ export default function RealDataSankeyNextPage() {
               : null;
             setYear(e.target.value as '2024' | '2025');
           }}
-          style={{ fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
+          style={isSheetToolbar
+            ? { fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 10, padding: '0 24px 0 10px', width: '100%', height: '100%', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }
+            : { fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
         >
           <option value="2025">2025年度</option>
           <option value="2024">2024年度</option>
@@ -3843,7 +3865,9 @@ export default function RealDataSankeyNextPage() {
       <div
         ref={searchBoxRef}
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: SEARCH_BOX_WIDTH_PX, maxWidth: searchMaxWidth, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
+        style={isSheetToolbar
+          ? { position: 'absolute', top: SHEET_PAD_PX, left: SHEET_PAD_PX, right: SHEET_SEARCH_RIGHT_PX, zIndex: 100 }
+          : { position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: SEARCH_BOX_WIDTH_PX, maxWidth: searchMaxWidth, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
       >
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -4426,14 +4450,18 @@ export default function RealDataSankeyNextPage() {
       })()}
 
       {/* Settings button — independent, top right */}
-      <div style={{ position: 'absolute', top: 14, right: 12, zIndex: 15 }}>
+      <div style={isSheetToolbar
+        ? { position: 'absolute', top: SHEET_PAD_PX, right: SHEET_GEAR_RIGHT_PX, zIndex: 15 }
+        : { position: 'absolute', top: 14, right: 12, zIndex: 15 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
           aria-label="表示設定を開く"
           aria-expanded={showSettings}
           aria-controls="sankey-topn-settings"
           aria-haspopup="dialog"
-          style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={isSheetToolbar
+            ? { width: SHEET_HIT_PX, height: SHEET_HIT_PX, border: '1px solid #e0e0e0', borderRadius: 10, background: showSettings ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.85)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }
+            : { width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           {/* Material Icons: more_vert */}
           <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill={showSettings ? '#333' : '#888'}>
