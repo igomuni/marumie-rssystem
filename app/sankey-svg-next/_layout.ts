@@ -95,7 +95,7 @@ export const MODE_TOKENS: Record<DisplayMode, LayoutTokens> = {
   },
   'compact-tablet': {
     topToolbarLayout: 'two-row',
-    searchBoxReservePx: 92,
+    searchBoxReservePx: 150, // 2段ツールバー（検索/年度 + TopN/設定）分を確保
     sidePanelMode: 'bottom-sheet',
     sidePanelWidthPx: 310,
     columnHeaderMode: 'name-only',

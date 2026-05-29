@@ -823,6 +823,16 @@ export default function RealDataSankeyNextPage() {
   const SHEET_YEAR_W_PX = 84;                                       // 年度ピル固定幅
   const SHEET_YEAR_RIGHT_PX = SHEET_GEAR_RIGHT_PX + SHEET_HIT_PX + 6; // ⚙ の左隣
   const SHEET_SEARCH_RIGHT_PX = SHEET_YEAR_RIGHT_PX + SHEET_YEAR_W_PX + 6; // 年度の左隣
+  // ── compact-tablet: 上部ツールバーを2段化（Phase 4）──
+  // 1段目[検索(flex-1) + 年度ピル] / 2段目[TopN・オフセット + ⚙ 設定]。
+  const isTwoRowToolbar = tokens.topToolbarLayout === 'two-row';
+  const TR_ROW1_TOP_PX = SHEET_PAD_PX;                       // 1段目 y
+  const TR_ROW2_TOP_PX = SHEET_PAD_PX + SHEET_HIT_PX + 6;    // 2段目 y
+  const TR_SEARCH_RIGHT_PX = SHEET_PAD_PX + SHEET_YEAR_W_PX + 6; // 1段目: 年度ピルの左
+  const TR_GEAR_RIGHT_PX = SHEET_PAD_PX;                     // 2段目: ⚙ 右端
+  const TR_CLUSTER_RIGHT_PX = TR_GEAR_RIGHT_PX + SHEET_HIT_PX + 6; // 2段目: ⚙ の左
+  // compact-tablet では TopN スライダーを常時表示（設計書「showTopNSliders 常時 true 相当」）。
+  const effectiveShowTopNSliders = isTwoRowToolbar ? true : showTopNSliders;
   const SEARCH_ICON_BOX_PX = scaleSize(20);
   const SEARCH_ICON_PX = scaleSize(16);
   const SEARCH_INPUT_PAD_Y_PX = scaleSize(7);
@@ -3926,11 +3936,13 @@ export default function RealDataSankeyNextPage() {
         <div data-pan-disabled="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: SHEET_BAR_H_PX, background: 'rgba(255,255,255,0.96)', boxShadow: '0 1px 6px rgba(0,0,0,0.10)', zIndex: 14 }} />
       )}
 
-      {/* Year selector — top center（sheet 時は右肩のピル） */}
+      {/* Year selector — top center（sheet/two-row 時は右肩のピル） */}
       <div
         data-pan-disabled="true"
         style={isSheetToolbar
           ? { position: 'absolute', top: SHEET_PAD_PX, right: SHEET_YEAR_RIGHT_PX, width: SHEET_YEAR_W_PX, height: SHEET_HIT_PX, zIndex: 15 }
+          : isTwoRowToolbar
+          ? { position: 'absolute', top: TR_ROW1_TOP_PX, right: SHEET_PAD_PX, width: SHEET_YEAR_W_PX, height: SHEET_HIT_PX, zIndex: 15 }
           : { position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}
       >
         <select
@@ -3943,7 +3955,7 @@ export default function RealDataSankeyNextPage() {
               : null;
             setYear(e.target.value as '2024' | '2025');
           }}
-          style={isSheetToolbar
+          style={isSheetToolbar || isTwoRowToolbar
             ? { fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 10, padding: '0 24px 0 10px', width: '100%', height: '100%', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }
             : { fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
         >
@@ -3962,6 +3974,8 @@ export default function RealDataSankeyNextPage() {
         data-pan-disabled="true"
         style={isSheetToolbar
           ? { position: 'absolute', top: SHEET_PAD_PX, left: SHEET_PAD_PX, right: SHEET_SEARCH_RIGHT_PX, zIndex: 100 }
+          : isTwoRowToolbar
+          ? { position: 'absolute', top: TR_ROW1_TOP_PX, left: SHEET_PAD_PX, right: TR_SEARCH_RIGHT_PX, zIndex: 100 }
           : { position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: SEARCH_BOX_WIDTH_PX, maxWidth: searchMaxWidth, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
       >
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
@@ -4350,7 +4364,9 @@ export default function RealDataSankeyNextPage() {
           if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
         };
         return (
-          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: isSheetToolbar ? 'none' : 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <div style={isTwoRowToolbar
+            ? { position: 'absolute', top: TR_ROW2_TOP_PX - 2, right: TR_CLUSTER_RIGHT_PX, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }
+            : { position: 'absolute', top: 12, right: 52, zIndex: 15, display: isSheetToolbar ? 'none' : 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
             {/* Row 1: オフセットスライダー（2列スパン） */}
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -4433,7 +4449,7 @@ export default function RealDataSankeyNextPage() {
               </label>
             </div>
             {/* Row 2: 事業・支出先 TopN スライダー（各グリッドセル） */}
-            {showTopNSliders && <>
+            {effectiveShowTopNSliders && <>
               <label style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
                 <span style={{ color: '#555', fontSize: META_FONT_PX, whiteSpace: 'nowrap' }}>事業</span>
                 <input
@@ -4530,8 +4546,8 @@ export default function RealDataSankeyNextPage() {
               </label>
             </>}
           </div>
-          {/* トグルボタン（パネル外・下部） */}
-          <button
+          {/* トグルボタン（パネル外・下部）。two-row は常時表示のため非表示 */}
+          {!isTwoRowToolbar && <button
             onClick={() => setShowTopNSliders(s => !s)}
             title={showTopNSliders ? 'TopN設定 を隠す' : 'TopN設定 を表示'}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', borderTop: 'none', borderLeft: '1px solid #e0e0e0', borderRight: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
@@ -4539,7 +4555,7 @@ export default function RealDataSankeyNextPage() {
             <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
               <path d={showTopNSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
             </svg>
-          </button>
+          </button>}
           </div>
         );
       })()}
@@ -4547,6 +4563,8 @@ export default function RealDataSankeyNextPage() {
       {/* Settings button — independent, top right（sheet 時はシートを最前面化するため z を上げる） */}
       <div style={isSheetToolbar
         ? { position: 'absolute', top: SHEET_PAD_PX, right: SHEET_GEAR_RIGHT_PX, zIndex: 200 }
+        : isTwoRowToolbar
+        ? { position: 'absolute', top: TR_ROW2_TOP_PX, right: TR_GEAR_RIGHT_PX, zIndex: 15 }
         : { position: 'absolute', top: 14, right: 12, zIndex: 15 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
@@ -4554,7 +4572,7 @@ export default function RealDataSankeyNextPage() {
           aria-expanded={showSettings}
           aria-controls="sankey-topn-settings"
           aria-haspopup="dialog"
-          style={isSheetToolbar
+          style={isSheetToolbar || isTwoRowToolbar
             ? { width: SHEET_HIT_PX, height: SHEET_HIT_PX, border: '1px solid #e0e0e0', borderRadius: 10, background: showSettings ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.85)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }
             : { width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
