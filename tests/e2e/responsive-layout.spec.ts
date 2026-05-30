@@ -90,3 +90,46 @@ test('compact-mobile: 詳細が bottom-sheet で開き、背景 Sankey をパン
   const after = await page.getByTestId('sankey-node').first().boundingBox();
   expect(Math.abs(after!.x - before!.x)).toBeGreaterThan(20); // 横方向にパンした
 });
+
+// ── 受け入れ条件: タッチ環境で主要ボタンが 44px ヒットエリア / タップ操作可能 ──
+test.describe('compact-mobile touch (pointer: coarse)', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+  test('主要操作が最小 44px のヒットエリアを持つ', async ({ page }) => {
+    await page.goto('/sankey-svg-next');
+    await page.getByTestId('sankey-node').first().waitFor({ timeout: 30_000 });
+    await page.waitForTimeout(500);
+
+    const checks: Array<[string, ReturnType<Page['locator']> | ReturnType<Page['getByTestId']>]> = [
+      ['search-input', page.getByTestId('search-input')],
+      ['year-select', page.getByTestId('year-select')],
+      ['gear', page.getByLabel('表示設定を開く')],
+      ['zoom-in', page.getByTestId('zoom-in')],
+      ['zoom-out', page.getByTestId('zoom-out')],
+      ['reset-viewport', page.getByTestId('reset-viewport')],
+    ];
+    for (const [name, loc] of checks) {
+      const b = await loc.boundingBox();
+      expect(b, `${name} exists`).not.toBeNull();
+      expect(b!.height, `${name} height>=44`).toBeGreaterThanOrEqual(44);
+      expect(b!.width, `${name} width>=44`).toBeGreaterThanOrEqual(44);
+    }
+
+    // 設定シート内
+    await page.getByLabel('表示設定を開く').tap();
+    const close = page.getByLabel('表示設定を閉じる');
+    const cb = await close.boundingBox();
+    expect(cb!.height).toBeGreaterThanOrEqual(44);
+    expect(cb!.width).toBeGreaterThanOrEqual(44);
+  });
+
+  test('タップで ⚙ 設定シートを開閉できる', async ({ page }) => {
+    await page.goto('/sankey-svg-next');
+    await page.getByTestId('sankey-node').first().waitFor({ timeout: 30_000 });
+    await page.getByLabel('表示設定を開く').tap();
+    const sheet = page.locator('#sankey-topn-settings');
+    await expect(sheet).toBeVisible();
+    await page.getByLabel('表示設定を閉じる').tap();
+    await expect(sheet).toBeHidden();
+  });
+});

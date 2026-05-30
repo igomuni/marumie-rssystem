@@ -816,6 +816,9 @@ export default function RealDataSankeyNextPage() {
   // compact-mobile 専用のラベル衝突回避（Phase 3-6）。フォーカス/ホバー時に非対象の
   // ノードラベルを非表示にして重なりを解消する。
   const isCompactMobile = displayMode === 'compact-mobile';
+  // タッチ前提（compact-mobile/tablet）。controlIconMinHitPx>0 のとき主要操作を 44px 化（Phase 6）。
+  const isCompactTouch = tokens.controlIconMinHitPx > 0;
+  const TOUCH_HIT_PX = tokens.controlIconMinHitPx; // 44 (compact) / 0 (desktop)
   const SHEET_HIT_PX = Math.max(44, tokens.controlIconMinHitPx);    // タップ最小 44px
   const SHEET_PAD_PX = 8;                                           // バー左右の内側余白
   const SHEET_BAR_H_PX = SHEET_HIT_PX + SHEET_PAD_PX * 2;           // バー全高
@@ -3200,7 +3203,7 @@ export default function RealDataSankeyNextPage() {
                 if (dy > 60) { setSheetSnap('half'); return; }    // 下へ → 半開き
                 setSheetSnap(s => (s === 'half' ? 'full' : 'half')); // タップ → トグル
               }}
-              style={{ flex: '0 0 auto', height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'grab', touchAction: 'none' }}
+              style={{ flex: '0 0 auto', height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'grab', touchAction: 'none' }}
             >
               <div style={{ width: 40, height: 4, borderRadius: 2, background: '#ccc' }} />
             </div>
@@ -3399,7 +3402,7 @@ export default function RealDataSankeyNextPage() {
                   <button
                     onClick={() => selectNode(null)}
                     title="閉じる（選択解除）"
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 16, lineHeight: 1, padding: '2px 4px', flexShrink: 0 }}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: 16, lineHeight: 1, padding: '2px 4px', flexShrink: 0, ...(isCompactTouch ? { width: TOUCH_HIT_PX, height: TOUCH_HIT_PX } : {}) }}
                   >✕</button>
                 </div>
                 <div style={{ display: 'flex', gap: 5, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -4031,6 +4034,7 @@ export default function RealDataSankeyNextPage() {
                 style={{
                   width: '100%', boxSizing: 'border-box',
                   paddingLeft: SEARCH_INPUT_PAD_LEFT_PX, paddingRight: SEARCH_INPUT_PAD_RIGHT_PX, paddingTop: SEARCH_INPUT_PAD_Y_PX, paddingBottom: SEARCH_INPUT_PAD_Y_PX,
+                  minHeight: isCompactTouch ? TOUCH_HIT_PX : undefined, // タッチ向け 44px（Phase 6）
                   fontSize: SEARCH_FONT_PX, border: 'none', borderRadius: 8,
                   background: 'transparent', outline: 'none', color: '#333',
                 }}
@@ -4606,7 +4610,7 @@ export default function RealDataSankeyNextPage() {
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontWeight: 700, fontSize: CONTROL_FONT_PX, color: '#333' }}>表示設定</span>
-                    <button type="button" aria-label="表示設定を閉じる" onClick={() => setShowSettings(false)} style={{ width: 36, height: 36, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 22, lineHeight: 1, color: '#888' }}>×</button>
+                    <button type="button" aria-label="表示設定を閉じる" onClick={() => setShowSettings(false)} style={{ width: 44, height: 44, border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 22, lineHeight: 1, color: '#888' }}>×</button>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <span style={{ color: '#555', fontWeight: 600 }}>フォントサイズ</span>
@@ -4716,7 +4720,7 @@ export default function RealDataSankeyNextPage() {
             aria-label={scrollMode === 'pan' ? 'スクロール移動モード（クリックでズームモードへ）' : 'スクロール移動モードに切替'}
             title={scrollMode === 'pan' ? 'スクロール: 移動モード\nCtrl/Cmd+スクロール = ズーム\nクリックでズームモードへ' : 'スクロール: ズームモード\nクリックで移動モードへ'}
             onClick={() => setScrollMode(m => m === 'zoom' ? 'pan' : 'zoom')}
-            style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: scrollMode === 'pan' ? '#e8f0fe' : 'transparent', cursor: 'pointer' }}
+            style={{ width: '100%', padding: isCompactTouch ? '13px 0' : '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: scrollMode === 'pan' ? '#e8f0fe' : 'transparent', cursor: 'pointer' }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill={scrollMode === 'pan' ? '#1a73e8' : '#bbb'}><path d="M480-80 310-250l57-57 73 73v-166H274l73 74-57 57L120-440l170-170 57 57-74 73h166v-166l-73 73-57-57 170-170 170 170-57 57-73-73v166h166l-74-73 57-57 170 170-170 170-57-57 74-74H520v166l73-73 57 57L480-80Z"/></svg>
           </button>
@@ -4724,7 +4728,7 @@ export default function RealDataSankeyNextPage() {
         {/* + / vertical slider / - */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Material Icons: add */}
-          <button data-testid={testId('zoom-in')} aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
+          <button data-testid={testId('zoom-in')} aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: isCompactTouch ? '13px 0' : '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
           </button>
           <div style={{ padding: '4px 0', display: 'flex', justifyContent: 'center', borderBottom: '1px solid #e5e7eb' }}>
@@ -4741,7 +4745,7 @@ export default function RealDataSankeyNextPage() {
             />
           </div>
           {/* Material Icons: remove */}
-          <button data-testid={testId('zoom-out')} aria-label="ズームアウト" onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+          <button data-testid={testId('zoom-out')} aria-label="ズームアウト" onClick={() => applyZoom(1 / 1.5)} title="ズームアウト" style={{ width: '100%', padding: isCompactTouch ? '13px 0' : '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer' }}>
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13H5v-2h14v2z"/></svg>
           </button>
         </div>
@@ -4769,7 +4773,7 @@ export default function RealDataSankeyNextPage() {
         {/* 全体表示ボタン */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
           {/* fit screen */}
-          <button data-testid={testId('reset-viewport')} aria-label="全体表示" onClick={resetViewport} title="全体表示" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+          <button data-testid={testId('reset-viewport')} aria-label="全体表示" onClick={resetViewport} title="全体表示" style={{ width: '100%', padding: isCompactTouch ? '13px 0' : '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: 'transparent', cursor: 'pointer' }}>
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path d="M792-576v-120H672v-72h120q30 0 51 21.15T864-696v120h-72Zm-696 0v-120q0-30 21.15-51T168-768h120v72H168v120H96Zm576 384v-72h120v-120h72v120q0 30-21.15 51T792-192H672Zm-504 0q-30 0-51-21.15T96-264v-120h72v120h120v72H168Zm72-144v-288h480v288H240Zm72-72h336v-144H312v144Zm0 0v-144 144Z"/></svg>
           </button>
         </div>
@@ -4800,12 +4804,12 @@ export default function RealDataSankeyNextPage() {
                 }
                 setFocusRelated(next);
               }}
-              style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: focusRelated ? '#e8f0fe' : 'transparent', cursor: 'pointer' }}
+              style={{ width: '100%', padding: isCompactTouch ? '13px 0' : '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: focusRelated ? '#e8f0fe' : 'transparent', cursor: 'pointer' }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill={focusRelated ? '#1a73e8' : '#888'}><path transform="scale(-1, 1) translate(-960, 0)" d="M576-168v-84H444v-192h-60v84H96v-240h288v84h60v-192h132v-84h288v240H576v-84h-60v312h60v-84h288v240H576Zm72-72h144v-96H648v96ZM168-432h144v-96H168v96Zm480-192h144v-96H648v96Zm0 384v-96 96ZM312-432v-96 96Zm336-192v-96 96Z"/></svg>
             </button>
             {/* 選択ノードにフォーカス */}
-            <button aria-label="選択ノードにフォーカス" onClick={focusOnSelectedNode} title="選択ノードにフォーカス" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', borderTop: '1px solid #eee', borderLeft: 'none', borderRight: 'none', borderBottom: 'none', background: 'transparent', cursor: 'pointer' }}>
+            <button aria-label="選択ノードにフォーカス" onClick={focusOnSelectedNode} title="選択ノードにフォーカス" style={{ width: '100%', padding: isCompactTouch ? '13px 0' : '5px 0', display: 'flex', justifyContent: 'center', borderTop: '1px solid #eee', borderLeft: 'none', borderRight: 'none', borderBottom: 'none', background: 'transparent', cursor: 'pointer' }}>
               <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path transform="rotate(180 480 -480)" d="M168-360h240v-240H168v240Zm312 72H96v-384h384v156h384v72H480v156ZM288-480Z"/></svg>
             </button>
           </div>
