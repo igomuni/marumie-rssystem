@@ -80,6 +80,10 @@ const ZOOM_MIN_ABS = 0.05;
 const ZOOM_MAX_ABS = 20;
 const ZOOM_MIN_MULTIPLIER = 0.25;
 const ZOOM_MAX_MULTIPLIER = 30;
+// タッチUI（スマホ/タブレット）では描画キャンバスをウインドウ幅で詰めず、
+// 固定のフルHD領域として描画し zoom/pan で閲覧する。
+const FIXED_CANVAS_WIDTH = 1920;
+const FIXED_CANVAS_HEIGHT = 1080;
 const COLUMN_AMOUNT_FONT_PX_DEFAULT = 11;
 const SEARCH_FONT_PX_DEFAULT = 14;
 const CONTROL_FONT_PX_DEFAULT = 13;
@@ -830,6 +834,14 @@ export default function RealDataSankeyNextPage() {
   // 廃止し、デスクトップと同一描画（ズーム/パンで読む前提）に統一した。
   // タッチ前提（compact-mobile/tablet）。controlIconMinHitPx>0 のとき主要操作を 44px 化（Phase 6）。
   const isCompactTouch = tokens.controlIconMinHitPx > 0;
+  // タッチUIでは描画領域を固定フルHDにし、列詰めをやめて zoom/pan で閲覧する。
+  // 描画ジオメトリは canvasWidth/canvasHeight を使い、UIモード判定・ツールチップ等の
+  // ビューポート系は引き続き svgWidth/svgHeight（コンテナ実寸）を使う。
+  const useFixedCanvas = isCompactTouch;
+  const canvasWidth = useFixedCanvas ? FIXED_CANVAS_WIDTH : svgWidth;
+  const canvasHeight = useFixedCanvas ? FIXED_CANVAS_HEIGHT : svgHeight;
+  const useFixedCanvasRef = useRef(false);
+  useFixedCanvasRef.current = useFixedCanvas;
   const TOUCH_HIT_PX = tokens.controlIconMinHitPx; // 44 (compact) / 0 (desktop)
   const SHEET_HIT_PX = Math.max(44, tokens.controlIconMinHitPx);    // タップ最小 44px
   const SHEET_PAD_PX = 8;                                           // バー左右の内側余白
@@ -1139,7 +1151,8 @@ export default function RealDataSankeyNextPage() {
   // Converge on fit zoom accounting for label shifts (shifts grow as zoom shrinks → iterate)
   const fitZoomWithShifts = useCallback((
     nodes: ShiftLayoutNode[],
-    contentW: number, contentH: number, cW: number, availH: number
+    contentW: number, contentH: number, cW: number, availH: number,
+    fitHorizontal = false,
   ): { k: number; totalH: number } => {
     let k = Math.max(ZOOM_MIN_ABS, Math.min(ZOOM_MAX_ABS, (availH / (MARGIN.top + contentH)) * 0.9));
     let totalH = MARGIN.top + contentH;
@@ -1149,6 +1162,14 @@ export default function RealDataSankeyNextPage() {
       const newK = Math.max(ZOOM_MIN_ABS, Math.min(ZOOM_MAX_ABS, (availH / totalH) * 0.9));
       if (Math.abs(newK - k) < 0.0005) { k = newK; break; }
       k = newK;
+    }
+    // 固定キャンバス時は横方向にも収め、初期表示で全体が見えるようにする
+    if (fitHorizontal) {
+      const kH = Math.max(ZOOM_MIN_ABS, Math.min(ZOOM_MAX_ABS, (cW / (MARGIN.left + contentW + MARGIN.right)) * 0.9));
+      if (kH < k) {
+        k = kH;
+        totalH = MARGIN.top + contentH + calcShiftExtraH(nodes, k);
+      }
     }
     return { k, totalH };
   }, [calcShiftExtraH]);
@@ -1161,7 +1182,7 @@ export default function RealDataSankeyNextPage() {
       const cW = container.clientWidth;
       const reserve = searchBoxReserveRef.current;
       const availH = container.clientHeight - reserve;
-      const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
+      const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH, useFixedCanvasRef.current);
       setZoom(k);
       setBaseZoom(k);
       setPan({ x: 0, y: reserve + Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) });
@@ -1180,7 +1201,7 @@ export default function RealDataSankeyNextPage() {
       const cW = container.clientWidth;
       const reserve = searchBoxReserveRef.current;
       const availH = container.clientHeight - reserve;
-      const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
+      const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH, useFixedCanvasRef.current);
       setZoom(k);
       setBaseZoom(k);
       setPan({ x: 0, y: reserve + Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) });
@@ -1193,7 +1214,7 @@ export default function RealDataSankeyNextPage() {
 
   // Minimap refs (hooks must be unconditional)
   const MINIMAP_W = 200;
-  const minimapH = Math.round(MINIMAP_W * (svgHeight / (svgWidth || 1)));
+  const minimapH = Math.round(MINIMAP_W * (canvasHeight / (canvasWidth || 1)));
   const minimapRef = useRef<HTMLCanvasElement>(null);
   const minimapDragging = useRef(false);
   const [showMinimap, setShowMinimap] = useState(false);
@@ -1391,18 +1412,18 @@ export default function RealDataSankeyNextPage() {
   const layout = useMemo(() => {
     if (!filtered) return null;
     // fitZoom を求めるための第1パス（ギャップなし）
-    const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
-    const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
+    const noGap = computeLayout(filtered.nodes, filtered.edges, canvasWidth, canvasHeight);
+    const availH = Math.max(100, canvasHeight - SEARCH_BOX_RESERVE);
     const fitZoom = Math.max(0.1, Math.min(10,
-      Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
+      Math.min(canvasWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
     ));
-    // Horizontal rendering is screen-fixed; compute x layout once from the fit scale.
+    // Horizontal rendering is canvas-fixed; compute x layout once from the fit scale.
     const extraRecipientGapSVG = MAX_RECIPIENT_GAP_PX / fitZoom;
     const extraMinistryGapSVG  = MAX_MINISTRY_GAP_PX  / fitZoom;
-    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
+    const result = computeLayout(filtered.nodes, filtered.edges, canvasWidth, canvasHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
-  }, [filtered, svgWidth, svgHeight, SEARCH_BOX_RESERVE]);
+  }, [filtered, canvasWidth, canvasHeight, SEARCH_BOX_RESERVE]);
 
   // Cumulative shift per node: { cumShift: slot-level offset, topShift: rect-within-slot offset, colFontPx: label font px }
   const nodeShiftInfo = useMemo(() => {
@@ -2307,7 +2328,7 @@ export default function RealDataSankeyNextPage() {
           const cW = container.clientWidth;
           const reserve = searchBoxReserveRef.current;
           const availH = container.clientHeight - reserve;
-          const { k: fitK } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
+          const { k: fitK } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH, useFixedCanvasRef.current);
           const restoredTotalH = MARGIN.top + l.contentH + calcShiftExtraH(l.nodes, k, fitK);
           setBaseZoom(fitK);
           setZoom(k);
@@ -2341,11 +2362,15 @@ export default function RealDataSankeyNextPage() {
 
   const horizontalScale = useMemo(() => {
     if (!layout) return 1;
+    // 固定キャンバス時は x0 をそのままユーザー座標として使い、zoom と一様に連動させる
+    // （デスクトップは横を画面幅にフィットさせる screen-fixed のまま）。
+    if (useFixedCanvas) return 1;
     return Math.max(0.2, Math.min(10, (svgWidth / (MARGIN.left + layout.contentW + SCREEN_LEFT_PADDING_PX)) * SCREEN_HORIZONTAL_FIT_RATIO));
-  }, [layout, svgWidth]);
+  }, [layout, svgWidth, useFixedCanvas]);
   const screenNodeW = NODE_W;
-  const screenToInnerX = useCallback((screenX: number) => screenX / zoom - MARGIN.left, [zoom]);
-  const screenWToInner = useCallback((screenW: number) => screenW / zoom, [zoom]);
+  // 固定キャンバス時は横も zoom 連動にするため /zoom の打ち消しを行わない。
+  const screenToInnerX = useCallback((screenX: number) => useFixedCanvas ? screenX - MARGIN.left : screenX / zoom - MARGIN.left, [zoom, useFixedCanvas]);
+  const screenWToInner = useCallback((screenW: number) => useFixedCanvas ? screenW : screenW / zoom, [zoom, useFixedCanvas]);
   const getNodeScreenX0 = useCallback((node: LayoutNode): number => {
     const left = MARGIN.left + SCREEN_LEFT_PADDING_PX;
     if (node.type === 'project-spending') {
@@ -2376,10 +2401,10 @@ export default function RealDataSankeyNextPage() {
     return { top, bottom: top + Math.max(1, node.y1 - node.y0) };
   }, [nodeByLayoutId, nodeShiftInfo]);
   const minimapWorldH = useMemo(() => {
-    if (!layout || layout.nodes.length === 0) return svgHeight;
+    if (!layout || layout.nodes.length === 0) return canvasHeight;
     const renderedBottom = Math.max(...layout.nodes.map(node => getRenderedYBounds(node).bottom));
-    return Math.max(svgHeight, MARGIN.top + renderedBottom + MARGIN.bottom);
-  }, [layout, svgHeight, getRenderedYBounds]);
+    return Math.max(canvasHeight, MARGIN.top + renderedBottom + MARGIN.bottom);
+  }, [layout, canvasHeight, getRenderedYBounds]);
 
   // Draw minimap
   useEffect(() => {
@@ -2394,7 +2419,7 @@ export default function RealDataSankeyNextPage() {
     // Nodes are at (MARGIN.left + x0, MARGIN.top + shiftedY0) in SVG coords.
     // The SVG transform: translate(pan.x, pan.y) scale(zoom) then translate(MARGIN, MARGIN)
     // So a node at inner (x0,shiftedY0) appears at screen (pan.x + (MARGIN.left+x0)*zoom, pan.y + (MARGIN.top+shiftedY0)*zoom)
-    const worldW = svgWidth;
+    const worldW = canvasWidth;
     const worldH = minimapWorldH;
     const scaleX = MINIMAP_W / worldW;
     const scaleY = minimapH / worldH;
@@ -2433,7 +2458,7 @@ export default function RealDataSankeyNextPage() {
     ctx.strokeRect(mX, mY, mW, mH);
     ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
     ctx.fillRect(mX, mY, mW, mH);
-  }, [showMinimap, layout, zoom, pan, svgWidth, minimapWorldH, minimapH, getNodeScreenX0, getMinimapRenderedYBounds, screenNodeW]);
+  }, [showMinimap, layout, zoom, pan, canvasWidth, minimapWorldH, minimapH, getNodeScreenX0, getMinimapRenderedYBounds, screenNodeW]);
 
   const minimapNavigate = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = minimapRef.current;
@@ -2443,7 +2468,7 @@ export default function RealDataSankeyNextPage() {
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
     // Minimap coord to SVG world coord
-    const scaleX = MINIMAP_W / svgWidth;
+    const scaleX = MINIMAP_W / canvasWidth;
     const scaleY = minimapH / minimapWorldH;
     const svgX = mx / scaleX;
     const svgY = my / scaleY;
@@ -2451,7 +2476,7 @@ export default function RealDataSankeyNextPage() {
     const cW = container.clientWidth;
     const cH = container.clientHeight;
     setPan({ x: cW / 2 - svgX, y: cH / 2 - svgY * zoom });
-  }, [svgWidth, minimapWorldH, minimapH, zoom]);
+  }, [canvasWidth, minimapWorldH, minimapH, zoom]);
 
   // Escape key: focusRelated ON → フィルターのみOFF、OFF → 選択解除
   useEffect(() => {
@@ -2840,9 +2865,11 @@ export default function RealDataSankeyNextPage() {
               return COL_LABELS.map((label, i) => {
                 // Use actual node x0 from layout (accounts for extraMinistryGapSVG / extraRecipientGapSVG)
                 const colNodes = layout.nodes.filter(n => n.type === colNodeTypes[i]);
-                const screenX = pan.x + (colNodes.length > 0
+                // 固定キャンバス時 getNodeScreenX0 はユーザー座標を返すので zoom を掛けて画面座標へ。
+                const colCanvasX = colNodes.length > 0
                   ? Math.min(...colNodes.map(n => getNodeScreenX0(n))) + screenNodeW / 2
-                  : MARGIN.left + SCREEN_LEFT_PADDING_PX + (i / maxCol) * (svgWidth - MARGIN.left - MARGIN.right - SCREEN_LEFT_PADDING_PX - screenNodeW) + screenNodeW / 2);
+                  : MARGIN.left + SCREEN_LEFT_PADDING_PX + (i / maxCol) * ((useFixedCanvas ? canvasWidth : svgWidth) - MARGIN.left - MARGIN.right - SCREEN_LEFT_PADDING_PX - screenNodeW) + screenNodeW / 2;
+                const screenX = pan.x + (useFixedCanvas ? zoom * colCanvasX : colCanvasX);
                 const total = colAmounts[i];
                 const amountLine = !showColumnAmount ? ''
                   : i === 2 && total != null
@@ -2879,7 +2906,8 @@ export default function RealDataSankeyNextPage() {
               });
             })()}
 
-            {/* Minimap */}
+            {/* Minimap（固定キャンバスのタッチUIでは screen-fixed 前提の座標が合わないため非表示）*/}
+            {!useFixedCanvas && (
             <MinimapOverlay
               show={showMinimap}
               onShow={() => setShowMinimap(true)}
@@ -2891,6 +2919,7 @@ export default function RealDataSankeyNextPage() {
               navigate={minimapNavigate}
               dragging={minimapDragging}
             />
+            )}
 
             {/* Font size controls（sheet 時は設定シートへ集約するため非表示） */}
             <div
@@ -3104,7 +3133,8 @@ export default function RealDataSankeyNextPage() {
             const tipW = Math.round(240 * fontScale);
             const { cumShift: hoverCumShift = 0, topShift: hoverTopShift = 0, colFontPx: hoverColFontPx = mapLabelFontPx } = nodeShiftInfo.get(hoveredNode.id) ?? {};
             const nodeScreenH = (hoveredNode.y1 - hoveredNode.y0) * zoom;
-            const screenCx = pan.x + getNodeScreenX0(hoveredNode) + screenNodeW / 2;
+            // 固定キャンバス時は getNodeScreenX0 がユーザー座標なので zoom を掛ける。
+            const screenCx = pan.x + (useFixedCanvas ? zoom * (getNodeScreenX0(hoveredNode) + screenNodeW / 2) : getNodeScreenX0(hoveredNode) + screenNodeW / 2);
             const screenTop = pan.y + (MARGIN.top + hoveredNode.y0 + hoverCumShift + hoverTopShift) * zoom;
             const screenBottom = screenTop + nodeScreenH;
             const lx = Math.max(4, Math.min(screenCx - tipW / 2, svgWidth - tipW - 4));
