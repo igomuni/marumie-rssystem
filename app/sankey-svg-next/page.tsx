@@ -108,6 +108,8 @@ const BUDGET_EXECUTION_LIST_HEIGHT_MIN = 96;
 const BUDGET_EXECUTION_LIST_HEIGHT_MAX = 600;
 const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
 const HOVER_ENTER_DELAY_MS = 220;
+// タッチの指ブレを pan と誤認しない移動しきい値（タップ選択を成立させるため mouse の 3px より緩める）
+const TOUCH_PAN_SLOP_PX = 10;
 const FIT_TOP_PAD_PX = 32;
 const ZOOM_FONT_MAX_RATIO = 1.8;   // zoom-in でフォントを最大で元の何倍まで拡大するか
 const AGGREGATE_BOUNDARY_GAP_PX = 6;
@@ -1053,7 +1055,8 @@ export default function RealDataSankeyNextPage() {
     if (isOverlayControlTarget(e.target)) return;
     const pts = activePointersRef.current;
     pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* capture 不可なら無視 */ }
+    // setPointerCapture は付けない: 全画面コンテナへバブリングで届くうえ、capture すると
+    // タップで合成される click が capture 先（コンテナ）へ向きノードの onClick が発火しない。
     if (pts.size === 1) {
       // 1本指 pan 開始
       didPanRef.current = false;
@@ -1106,7 +1109,9 @@ export default function RealDataSankeyNextPage() {
       // ── 1本指 pan ──
       const dx = e.clientX - panStart.current.x;
       const dy = e.clientY - panStart.current.y;
-      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didPanRef.current = true;
+      // slop 未満はタップ候補として pan を開始しない（didPanRef を立てず onClick を活かす）
+      if (!didPanRef.current && Math.hypot(dx, dy) < TOUCH_PAN_SLOP_PX) return;
+      didPanRef.current = true;
       const newPan = { x: panOrigin.current.x + dx, y: panOrigin.current.y + dy };
       panRef.current = newPan;
       setPan(newPan);
@@ -1119,7 +1124,6 @@ export default function RealDataSankeyNextPage() {
     const pts = activePointersRef.current;
     if (!pts.has(e.pointerId)) return;
     pts.delete(e.pointerId);
-    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* 解放不可なら無視 */ }
     if (pts.size === 1) {
       // pinch → pan: 残った指の現在位置で基準を取り直しジャンプを防ぐ
       const [only] = Array.from(pts.values());
@@ -4463,8 +4467,8 @@ export default function RealDataSankeyNextPage() {
         )}
       </div>
 
-      {/* Top-right panel: offset slider */}
-      {filtered && (() => {
+      {/* Top-right panel: offset slider（タッチUIでは常時表示が邪魔なので非表示）*/}
+      {filtered && !isCompactTouch && (() => {
         // Recipient offset mode
         const maxRecipOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
         const clampedOffset = Math.min(recipientOffset, maxRecipOffset);
@@ -4835,7 +4839,8 @@ export default function RealDataSankeyNextPage() {
 
       {/* Zoom controls — bottom right (sankey2 style) */}
       <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {/* スクロールモード切替ボタン */}
+        {/* スクロールモード切替ボタン（ホイール前提のためタッチUIでは非表示）*/}
+        {!isCompactTouch && (
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
           <button
             aria-label={scrollMode === 'pan' ? 'スクロール移動モード（クリックでズームモードへ）' : 'スクロール移動モードに切替'}
@@ -4846,6 +4851,7 @@ export default function RealDataSankeyNextPage() {
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill={scrollMode === 'pan' ? '#1a73e8' : '#bbb'}><path d="M480-80 310-250l57-57 73 73v-166H274l73 74-57 57L120-440l170-170 57 57-74 73h166v-166l-73 73-57-57 170-170 170 170-57 57-73-73v166h166l-74-73 57-57 170 170-170 170-57-57 74-74H520v166l73-73 57 57L480-80Z"/></svg>
           </button>
         </div>
+        )}
         {/* + / vertical slider / - */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Material Icons: add */}
