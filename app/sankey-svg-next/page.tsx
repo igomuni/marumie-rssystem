@@ -547,6 +547,8 @@ export default function RealDataSankeyNextPage() {
   const [zoom, setZoom] = useState(1);
   // Keep zoomRef current for use in debounce timeouts
   useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  // Keep baseZoom mirror current for touch-gesture handlers
+  useEffect(() => { baseZoomRef.current = baseZoom; }, [baseZoom]);
   useEffect(() => {
     if (!showMinistryDropdown) return;
     const onMouseDown = (e: MouseEvent) => {
@@ -591,7 +593,16 @@ export default function RealDataSankeyNextPage() {
       window.removeEventListener('scroll', recompute, true);
     };
   }, [showAccountDropdown]);
+  // Live mirrors / pointer tracking for touch-gesture handlers (avoid stale closures across rapid pointermove events)
+  const panRef = useRef({ x: 0, y: 0 });
+  const baseZoomRef = useRef(1);
+  // Active touch/pen pointers keyed by pointerId → current client coords
+  const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  // Distance between the two fingers at the previous pinch frame
+  const pinchLastDistRef = useRef(0);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  // Keep pan mirror current for touch-gesture handlers
+  useEffect(() => { panRef.current = pan; }, [pan]);
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
   const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
@@ -1015,6 +1026,112 @@ export default function RealDataSankeyNextPage() {
     if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
     hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
   }, []);
+
+  // ── Touch gestures: 1本指 pan + 2本指 pinch zoom (Pointer Events) ──
+  // マウスは上の onMouse* ハンドラ継続使用。ここは touch/pen のみ処理する。
+  const beginHoverSuppressCooldown = useCallback(() => {
+    setIsHoverSuppressed(true);
+    if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
+    hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
+  }, []);
+
+  // getZoomAnchoredPanY の ref ベース版（高頻度な pointermove 内でクロージャ陳腐化を避ける）
+  const anchoredPanYFromRefs = useCallback((anchorY: number, fromZoom: number, toZoom: number, fromPanY: number): number => {
+    const l = layoutRef.current;
+    if (!l) return anchorY - (anchorY - fromPanY) * (toZoom / fromZoom);
+    const baseK = baseZoomRef.current;
+    const currentTotalH = MARGIN.top + l.contentH + calcShiftExtraH(l.nodes, fromZoom, baseK);
+    const nextTotalH = MARGIN.top + l.contentH + calcShiftExtraH(l.nodes, toZoom, baseK);
+    const currentScreenH = Math.max(1, currentTotalH * fromZoom);
+    const nextScreenH = Math.max(1, nextTotalH * toZoom);
+    const ratioFromTop = (anchorY - fromPanY) / currentScreenH;
+    return anchorY - ratioFromTop * nextScreenH;
+  }, [calcShiftExtraH]);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse') return; // mouse は onMouse* で処理
+    if (isOverlayControlTarget(e.target)) return;
+    const pts = activePointersRef.current;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* capture 不可なら無視 */ }
+    if (pts.size === 1) {
+      // 1本指 pan 開始
+      didPanRef.current = false;
+      setIsPanning(true);
+      panStart.current = { x: e.clientX, y: e.clientY };
+      panOrigin.current = { ...panRef.current };
+    } else if (pts.size === 2) {
+      // pinch 開始: 基準となる2指間距離を記録
+      const [a, b] = Array.from(pts.values());
+      pinchLastDistRef.current = Math.hypot(a.x - b.x, a.y - b.y);
+      didPanRef.current = true; // pinch はタップ扱いしない
+    }
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse') return;
+    const pts = activePointersRef.current;
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pts.size >= 2) {
+      // ── pinch zoom（2指中点をアンカーに増分ズーム）──
+      const [a, b] = Array.from(pts.values());
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const prevDist = pinchLastDistRef.current;
+      if (prevDist <= 0) { pinchLastDistRef.current = dist; return; }
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const midX = (a.x + b.x) / 2 - rect.left;
+      const midY = (a.y + b.y) / 2 - rect.top;
+      const fromZoom = zoomRef.current;
+      const minZoom = Math.max(ZOOM_MIN_ABS, baseZoomRef.current * ZOOM_MIN_MULTIPLIER);
+      const maxZoom = Math.min(ZOOM_MAX_ABS, baseZoomRef.current * ZOOM_MAX_MULTIPLIER);
+      const newZoom = Math.max(minZoom, Math.min(maxZoom, fromZoom * (dist / prevDist)));
+      pinchLastDistRef.current = dist;
+      if (newZoom === fromZoom) return;
+      const fromPan = panRef.current;
+      const newPanX = midX - (midX - fromPan.x) * (newZoom / fromZoom);
+      const newPanY = anchoredPanYFromRefs(midY, fromZoom, newZoom, fromPan.y);
+      const newPan = { x: newPanX, y: newPanY };
+      zoomRef.current = newZoom;
+      panRef.current = newPan;
+      setZoom(newZoom);
+      setPan(newPan);
+      didPanRef.current = true;
+      beginHoverSuppressCooldown();
+      scheduleZoomUrlWrite();
+    } else if (pts.size === 1) {
+      // ── 1本指 pan ──
+      const dx = e.clientX - panStart.current.x;
+      const dy = e.clientY - panStart.current.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didPanRef.current = true;
+      const newPan = { x: panOrigin.current.x + dx, y: panOrigin.current.y + dy };
+      panRef.current = newPan;
+      setPan(newPan);
+      beginHoverSuppressCooldown();
+    }
+  }, [anchoredPanYFromRefs, beginHoverSuppressCooldown, scheduleZoomUrlWrite]);
+
+  const handlePointerEnd = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse') return;
+    const pts = activePointersRef.current;
+    if (!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch { /* 解放不可なら無視 */ }
+    if (pts.size === 1) {
+      // pinch → pan: 残った指の現在位置で基準を取り直しジャンプを防ぐ
+      const [only] = Array.from(pts.values());
+      panStart.current = { x: only.x, y: only.y };
+      panOrigin.current = { ...panRef.current };
+      pinchLastDistRef.current = 0;
+    } else if (pts.size === 0) {
+      setIsPanning(false);
+      pinchLastDistRef.current = 0;
+      if (didPanRef.current) beginHoverSuppressCooldown();
+    }
+  }, [beginHoverSuppressCooldown]);
 
   // Converge on fit zoom accounting for label shifts (shifts grow as zoom shrinks → iterate)
   const fitZoomWithShifts = useCallback((
@@ -2400,6 +2517,10 @@ export default function RealDataSankeyNextPage() {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
     >
 
 
@@ -2429,7 +2550,7 @@ export default function RealDataSankeyNextPage() {
               width={svgWidth}
               height={svgHeight}
               overflow="visible"
-              style={{ position: 'absolute', inset: 0, display: 'block' }}
+              style={{ position: 'absolute', inset: 0, display: 'block', touchAction: 'none' }}
             >
               {/* Gradient defs for merged project nodes */}
               <defs>
