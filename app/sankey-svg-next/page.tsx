@@ -826,9 +826,8 @@ export default function RealDataSankeyNextPage() {
   // ── compact-mobile: 上部ツールバーを sheet（全幅の横並びバー）に切替（Phase 3）──
   // [ 検索(flex-1) ][ 年度ピル ][ ⚙ 設定 ] を全 44px ヒットエリアで配置する。
   const isSheetToolbar = tokens.topToolbarLayout === 'sheet';
-  // compact-mobile 専用のラベル衝突回避（Phase 3-6）。フォーカス/ホバー時に非対象の
-  // ノードラベルを非表示にして重なりを解消する。
-  const isCompactMobile = displayMode === 'compact-mobile';
+  // 注: compact-mobile 専用のラベル間引き（フォーカス時に非対象ラベルを opacity:0）は
+  // 廃止し、デスクトップと同一描画（ズーム/パンで読む前提）に統一した。
   // タッチ前提（compact-mobile/tablet）。controlIconMinHitPx>0 のとき主要操作を 44px 化（Phase 6）。
   const isCompactTouch = tokens.controlIconMinHitPx > 0;
   const TOUCH_HIT_PX = tokens.controlIconMinHitPx; // 44 (compact) / 0 (desktop)
@@ -2709,7 +2708,6 @@ export default function RealDataSankeyNextPage() {
                             {labelVisible && (
                               <text x={getNodeInnerX1(node) + innerLabelGap} y={topShift + bH / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
-                                opacity={isCompactMobile && ((connectedNodeIds && !isConnected) || (hoveredNodeIds && !hoveredNodeIds.has(node.id))) ? 0 : 1}
                                 style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                                 onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                                 onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -2738,7 +2736,6 @@ export default function RealDataSankeyNextPage() {
                             {/* Left label: budget amount */}
                             <text x={getNodeInnerX0(node) - innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={colFontPx / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
-                              opacity={isCompactMobile && ((connectedNodeIds && !isConnected) || (hoveredNodeIds && !hoveredNodeIds.has(node.id))) ? 0 : 1}
                               style={{ userSelect: 'none', cursor: 'pointer' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -2750,7 +2747,6 @@ export default function RealDataSankeyNextPage() {
                             {/* Right label: project name + spending amount */}
                             <text x={getNodeInnerX1(spendingNode) + innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
-                              opacity={isCompactMobile && ((connectedNodeIds && !isConnected) || (hoveredNodeIds && !hoveredNodeIds.has(node.id))) ? 0 : 1}
                               style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -2804,7 +2800,6 @@ export default function RealDataSankeyNextPage() {
                             fontSize={colFontPx / zoom}
                             dominantBaseline="middle"
                             fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
-                            opacity={isCompactMobile && ((connectedNodeIds && !connectedNodeIds.has(node.id)) || (hoveredNodeIds && !hoveredNodeIds.has(node.id))) ? 0 : 1}
                             style={{ userSelect: 'none', cursor: 'pointer' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                             onMouseEnter={(e) => { const rect = containerRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); setHoveredNode(node); }}
@@ -4852,7 +4847,8 @@ export default function RealDataSankeyNextPage() {
           </button>
         </div>
         )}
-        {/* + / vertical slider / - */}
+        {/* + / vertical slider / -（ピンチズーム前提のためタッチUIでは非表示）*/}
+        {!isCompactTouch && (
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Material Icons: add */}
           <button data-testid={testId('zoom-in')} aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: isCompactTouch ? '13px 0' : '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
@@ -4876,6 +4872,7 @@ export default function RealDataSankeyNextPage() {
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13H5v-2h14v2z"/></svg>
           </button>
         </div>
+        )}
         {/* Zoom% — 非編集時は "N%" 表示、クリックで数値入力 */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
           {isEditingZoom ? (
