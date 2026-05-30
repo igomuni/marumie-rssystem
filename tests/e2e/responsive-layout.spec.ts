@@ -48,9 +48,10 @@ for (const { name, w, h } of [
       expect(intersects(hd, year!), `header vs year @${name}`).toBe(false);
       expect(intersects(hd, gear!), `header vs gear @${name}`).toBe(false);
     }
-    // 検索と年度が水平に重ならない（同段にある狭幅でも）
-    const sx = { x: search!.x, y: 0, width: search!.width, height: 1 };
-    const yx = { x: year!.x, y: 0, width: year!.width, height: 1 };
+    // 検索と年度が水平に重ならない（同段にある狭幅でも）。
+    // height>1 にして oy>1 を成立させ、判定を ox（横方向の重なり）で決まるようにする。
+    const sx = { x: search!.x, y: 0, width: search!.width, height: 2 };
+    const yx = { x: year!.x, y: 0, width: year!.width, height: 2 };
     expect(intersects(sx, yx), `search vs year x-overlap @${name}`).toBe(false);
   });
 }
