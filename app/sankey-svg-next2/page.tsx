@@ -59,6 +59,8 @@ interface SankeyUrlState {
 const SCREEN_LEFT_PADDING_PX = 32;
 const SCREEN_HORIZONTAL_FIT_RATIO = 0.82;
 const SCREEN_MIN_TOTAL_LABEL_GAP_PX = 112;
+const SCREEN_MIN_MINISTRY_LABEL_WIDTH_PX = 128;
+const SCREEN_MAX_MINISTRY_LABEL_GAP_PX = 72;
 const E2E_TEST_IDS_ENABLED = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_PLAYWRIGHT === '1';
 const testId = (id: string): string | undefined => E2E_TEST_IDS_ENABLED ? id : undefined;
 
@@ -2280,6 +2282,25 @@ export default function RealDataSankeyPage() {
     if (!layout) return 0;
     return Math.max(0, SCREEN_MIN_TOTAL_LABEL_GAP_PX - layout.colSpacing * horizontalScale);
   }, [horizontalScale, layout]);
+  const ministryLabelGapPx = useMemo(() => {
+    if (!layout) return 0;
+    const leftLabelChars = layout.nodes
+      .filter(n => n.type === 'project-budget')
+      .reduce((m, n) => {
+        const main = formatYen(n.value);
+        const raw = n.isScaled && n.rawValue != null ? ` / ${formatYen(n.rawValue)}` : '';
+        return Math.max(m, (main + raw).length);
+      }, 0);
+    const labelScale = getZoomLabelScale(zoom, baseZoom);
+    const leftLabelReservePx = leftLabelChars > 0
+      ? 6 + leftLabelChars * mapLabelFontPx * labelScale * 0.7
+      : 0;
+    const ministryLabelWidthPx = layout.colSpacing * horizontalScale - NODE_W - leftLabelReservePx;
+    return Math.min(
+      SCREEN_MAX_MINISTRY_LABEL_GAP_PX,
+      Math.max(0, SCREEN_MIN_MINISTRY_LABEL_WIDTH_PX - ministryLabelWidthPx)
+    );
+  }, [baseZoom, horizontalScale, layout, mapLabelFontPx, zoom]);
   const screenNodeW = NODE_W;
   const screenToInnerX = useCallback((screenX: number) => screenX / zoom - MARGIN.left, [zoom]);
   const screenWToInner = useCallback((screenW: number) => screenW / zoom, [zoom]);
@@ -2290,11 +2311,12 @@ export default function RealDataSankeyPage() {
         ? '__agg-project-budget'
         : node.projectId != null ? `project-budget-${node.projectId}` : null;
       const budgetNode = budgetId ? nodeByLayoutId.get(budgetId) : null;
-      if (budgetNode) return left + budgetNode.x0 * horizontalScale + totalLabelGapPx + screenNodeW;
+      if (budgetNode) return left + budgetNode.x0 * horizontalScale + totalLabelGapPx + ministryLabelGapPx + screenNodeW;
     }
     const totalLabelOffset = node.type === 'total' ? 0 : totalLabelGapPx;
-    return left + node.x0 * horizontalScale + totalLabelOffset;
-  }, [horizontalScale, nodeByLayoutId, screenNodeW, totalLabelGapPx]);
+    const ministryLabelOffset = node.type === 'total' || node.type === 'ministry' ? 0 : ministryLabelGapPx;
+    return left + node.x0 * horizontalScale + totalLabelOffset + ministryLabelOffset;
+  }, [horizontalScale, ministryLabelGapPx, nodeByLayoutId, screenNodeW, totalLabelGapPx]);
   const getNodeScreenX1 = useCallback((node: LayoutNode): number => getNodeScreenX0(node) + screenNodeW, [getNodeScreenX0, screenNodeW]);
   const getNodeInnerX0 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX0(node)), [getNodeScreenX0, screenToInnerX]);
   const getNodeInnerX1 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX1(node)), [getNodeScreenX1, screenToInnerX]);
