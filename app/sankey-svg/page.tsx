@@ -58,6 +58,9 @@ interface SankeyUrlState {
 
 const SCREEN_LEFT_PADDING_PX = 32;
 const SCREEN_HORIZONTAL_FIT_RATIO = 0.82;
+const SCREEN_MIN_TOTAL_LABEL_GAP_PX = 112;
+const SCREEN_MIN_MINISTRY_LABEL_WIDTH_PX = 128;
+const SCREEN_MAX_MINISTRY_LABEL_GAP_PX = 72;
 const E2E_TEST_IDS_ENABLED = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_PLAYWRIGHT === '1';
 const testId = (id: string): string | undefined => E2E_TEST_IDS_ENABLED ? id : undefined;
 
@@ -98,6 +101,7 @@ const BUDGET_EXECUTION_LIST_HEIGHT_MIN = 96;
 const BUDGET_EXECUTION_LIST_HEIGHT_MAX = 600;
 const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
 const HOVER_ENTER_DELAY_MS = 220;
+const TOUCH_PAN_SLOP_PX = 10;
 const FIT_TOP_PAD_PX = 32;
 const ZOOM_FONT_MAX_RATIO = 1.8;   // zoom-in でフォントを最大で元の何倍まで拡大するか
 const AGGREGATE_BOUNDARY_GAP_PX = 6;
@@ -531,8 +535,15 @@ export default function RealDataSankeyPage() {
     };
   }, [showAccountDropdown]);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const panRef = useRef(pan);
+  useEffect(() => { panRef.current = pan; }, [pan]);
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
+  const activePointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const touchPanStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchPanOriginRef = useRef<{ x: number; y: number } | null>(null);
+  const pinchLastDistanceRef = useRef<number | null>(null);
+  const didPinchRef = useRef(false);
   const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
   const hoverSuppressTimerRef = useRef<number | null>(null);
   const suppressHoverPopup = isPanning || isHoverSuppressed;
@@ -842,6 +853,12 @@ export default function RealDataSankeyPage() {
     target instanceof Element &&
     !!target.closest('[data-pan-disabled],button,input,select,textarea,label');
 
+  const beginHoverSuppressCooldown = useCallback(() => {
+    setIsHoverSuppressed(true);
+    if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
+    hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
+  }, []);
+
   // Debounced zoom URL write — called only on explicit user zoom (wheel / buttons)
   const scheduleZoomUrlWrite = useCallback(() => {
     if (zoomUrlDebounceRef.current) clearTimeout(zoomUrlDebounceRef.current);
@@ -922,10 +939,137 @@ export default function RealDataSankeyPage() {
     setIsPanning(false);
     // 実際にパンが発生したときだけクールダウン（単なるクリックでは抑制しない）
     if (!didPanRef.current) return;
-    setIsHoverSuppressed(true);
-    if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
-    hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
+    beginHoverSuppressCooldown();
+  }, [beginHoverSuppressCooldown]);
+
+  const getTouchPoint = useCallback((e: React.PointerEvent): { x: number; y: number } => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    return {
+      x: e.clientX - (rect?.left ?? 0),
+      y: e.clientY - (rect?.top ?? 0),
+    };
   }, []);
+
+  const getPinchState = useCallback((): { distance: number; midpoint: { x: number; y: number } } | null => {
+    const points = Array.from(activePointersRef.current.values());
+    if (points.length < 2) return null;
+    const [a, b] = points;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    return {
+      distance: Math.max(1, Math.hypot(dx, dy)),
+      midpoint: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
+    };
+  }, []);
+
+  const getTouchZoomAnchoredPanY = useCallback((
+    anchorY: number,
+    nextZoom: number,
+    fromZoom: number,
+    fromPanY: number,
+  ): number => {
+    const l = layoutRef.current;
+    if (!l) return anchorY - (anchorY - fromPanY) * (nextZoom / fromZoom);
+    const currentTotalH = MARGIN.top + l.contentH + calcShiftExtraH(l.nodes, fromZoom, baseZoom);
+    const nextTotalH = MARGIN.top + l.contentH + calcShiftExtraH(l.nodes, nextZoom, baseZoom);
+    const currentScreenH = Math.max(1, currentTotalH * fromZoom);
+    const nextScreenH = Math.max(1, nextTotalH * nextZoom);
+    const ratioFromTop = (anchorY - fromPanY) / currentScreenH;
+    return anchorY - ratioFromTop * nextScreenH;
+  }, [baseZoom, calcShiftExtraH]);
+
+  const setTouchViewport = useCallback((nextZoom: number, nextPan: { x: number; y: number }) => {
+    zoomRef.current = nextZoom;
+    panRef.current = nextPan;
+    setZoom(nextZoom);
+    setPan(nextPan);
+  }, []);
+
+  const resetTouchPanOriginToRemainingPointer = useCallback(() => {
+    const remaining = Array.from(activePointersRef.current.values())[0] ?? null;
+    touchPanStartRef.current = remaining;
+    touchPanOriginRef.current = remaining ? { ...panRef.current } : null;
+  }, []);
+
+  const handleTouchPointerDown = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse' || isOverlayControlTarget(e.target)) return;
+    e.preventDefault();
+    const point = getTouchPoint(e);
+    activePointersRef.current.set(e.pointerId, point);
+    setIsPanning(true);
+    setHoveredNode(null);
+    setHoveredLink(null);
+
+    if (activePointersRef.current.size === 1) {
+      didPanRef.current = false;
+      didPinchRef.current = false;
+      pinchLastDistanceRef.current = null;
+      touchPanStartRef.current = point;
+      touchPanOriginRef.current = { ...panRef.current };
+      return;
+    }
+
+    const pinch = getPinchState();
+    if (pinch) {
+      didPanRef.current = true;
+      didPinchRef.current = true;
+      pinchLastDistanceRef.current = pinch.distance;
+      touchPanStartRef.current = null;
+      touchPanOriginRef.current = null;
+    }
+  }, [getPinchState, getTouchPoint]);
+
+  const handleTouchPointerMove = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse' || !activePointersRef.current.has(e.pointerId)) return;
+    e.preventDefault();
+    const point = getTouchPoint(e);
+    activePointersRef.current.set(e.pointerId, point);
+
+    if (activePointersRef.current.size >= 2) {
+      const pinch = getPinchState();
+      if (!pinch) return;
+      const lastDistance = pinchLastDistanceRef.current ?? pinch.distance;
+      const ratio = pinch.distance / Math.max(1, lastDistance);
+      const fromZoom = zoomRef.current;
+      const fromPan = panRef.current;
+      const minZoom = Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER);
+      const maxZoom = Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER);
+      const nextZoom = Math.max(minZoom, Math.min(maxZoom, fromZoom * ratio));
+      const nextPanY = getTouchZoomAnchoredPanY(pinch.midpoint.y, nextZoom, fromZoom, fromPan.y);
+      didPanRef.current = true;
+      didPinchRef.current = true;
+      pinchLastDistanceRef.current = pinch.distance;
+      setTouchViewport(nextZoom, { x: fromPan.x, y: nextPanY });
+      return;
+    }
+
+    const start = touchPanStartRef.current;
+    const origin = touchPanOriginRef.current;
+    if (!start || !origin) return;
+    const dx = point.x - start.x;
+    const dy = point.y - start.y;
+    if (Math.abs(dx) > TOUCH_PAN_SLOP_PX || Math.abs(dy) > TOUCH_PAN_SLOP_PX) didPanRef.current = true;
+    const nextPan = { x: origin.x + dx, y: origin.y + dy };
+    panRef.current = nextPan;
+    setPan(nextPan);
+  }, [baseZoom, getPinchState, getTouchPoint, getTouchZoomAnchoredPanY, setTouchViewport]);
+
+  const handleTouchPointerEnd = useCallback((e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse') return;
+    activePointersRef.current.delete(e.pointerId);
+    pinchLastDistanceRef.current = null;
+
+    if (activePointersRef.current.size === 0) {
+      setIsPanning(false);
+      touchPanStartRef.current = null;
+      touchPanOriginRef.current = null;
+      if (didPinchRef.current) scheduleZoomUrlWrite();
+      if (didPanRef.current) beginHoverSuppressCooldown();
+      return;
+    }
+
+    resetTouchPanOriginToRemainingPointer();
+  }, [beginHoverSuppressCooldown, resetTouchPanOriginToRemainingPointer, scheduleZoomUrlWrite]);
 
   // Converge on fit zoom accounting for label shifts (shifts grow as zoom shrinks → iterate)
   const fitZoomWithShifts = useCallback((
@@ -2134,6 +2278,29 @@ export default function RealDataSankeyPage() {
     if (!layout) return 1;
     return Math.max(0.2, Math.min(10, (svgWidth / (MARGIN.left + layout.contentW + SCREEN_LEFT_PADDING_PX)) * SCREEN_HORIZONTAL_FIT_RATIO));
   }, [layout, svgWidth]);
+  const totalLabelGapPx = useMemo(() => {
+    if (!layout) return 0;
+    return Math.max(0, SCREEN_MIN_TOTAL_LABEL_GAP_PX - layout.colSpacing * horizontalScale);
+  }, [horizontalScale, layout]);
+  const ministryLabelGapPx = useMemo(() => {
+    if (!layout) return 0;
+    const leftLabelChars = layout.nodes
+      .filter(n => n.type === 'project-budget')
+      .reduce((m, n) => {
+        const main = formatYen(n.value);
+        const raw = n.isScaled && n.rawValue != null ? ` / ${formatYen(n.rawValue)}` : '';
+        return Math.max(m, (main + raw).length);
+      }, 0);
+    const labelScale = getZoomLabelScale(zoom, baseZoom);
+    const leftLabelReservePx = leftLabelChars > 0
+      ? 6 + leftLabelChars * mapLabelFontPx * labelScale * 0.7
+      : 0;
+    const ministryLabelWidthPx = layout.colSpacing * horizontalScale - NODE_W - leftLabelReservePx;
+    return Math.min(
+      SCREEN_MAX_MINISTRY_LABEL_GAP_PX,
+      Math.max(0, SCREEN_MIN_MINISTRY_LABEL_WIDTH_PX - ministryLabelWidthPx)
+    );
+  }, [baseZoom, horizontalScale, layout, mapLabelFontPx, zoom]);
   const screenNodeW = NODE_W;
   const screenToInnerX = useCallback((screenX: number) => screenX / zoom - MARGIN.left, [zoom]);
   const screenWToInner = useCallback((screenW: number) => screenW / zoom, [zoom]);
@@ -2144,10 +2311,12 @@ export default function RealDataSankeyPage() {
         ? '__agg-project-budget'
         : node.projectId != null ? `project-budget-${node.projectId}` : null;
       const budgetNode = budgetId ? nodeByLayoutId.get(budgetId) : null;
-      if (budgetNode) return left + budgetNode.x0 * horizontalScale + screenNodeW;
+      if (budgetNode) return left + budgetNode.x0 * horizontalScale + totalLabelGapPx + ministryLabelGapPx + screenNodeW;
     }
-    return left + node.x0 * horizontalScale;
-  }, [horizontalScale, nodeByLayoutId, screenNodeW]);
+    const totalLabelOffset = node.type === 'total' ? 0 : totalLabelGapPx;
+    const ministryLabelOffset = node.type === 'total' || node.type === 'ministry' ? 0 : ministryLabelGapPx;
+    return left + node.x0 * horizontalScale + totalLabelOffset + ministryLabelOffset;
+  }, [horizontalScale, ministryLabelGapPx, nodeByLayoutId, screenNodeW, totalLabelGapPx]);
   const getNodeScreenX1 = useCallback((node: LayoutNode): number => getNodeScreenX0(node) + screenNodeW, [getNodeScreenX0, screenNodeW]);
   const getNodeInnerX0 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX0(node)), [getNodeScreenX0, screenToInnerX]);
   const getNodeInnerX1 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX1(node)), [getNodeScreenX1, screenToInnerX]);
@@ -2330,7 +2499,11 @@ export default function RealDataSankeyPage() {
               width={svgWidth}
               height={svgHeight}
               overflow="visible"
-              style={{ position: 'absolute', inset: 0, display: 'block' }}
+              onPointerDown={handleTouchPointerDown}
+              onPointerMove={handleTouchPointerMove}
+              onPointerUp={handleTouchPointerEnd}
+              onPointerCancel={handleTouchPointerEnd}
+              style={{ position: 'absolute', inset: 0, display: 'block', touchAction: 'none' }}
             >
               {/* Gradient defs for merged project nodes */}
               <defs>
