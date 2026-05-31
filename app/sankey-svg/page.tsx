@@ -993,7 +993,6 @@ export default function RealDataSankeyPage() {
 
   const handleTouchPointerDown = useCallback((e: React.PointerEvent) => {
     if (e.pointerType === 'mouse' || isOverlayControlTarget(e.target)) return;
-    e.preventDefault();
     const point = getTouchPoint(e);
     activePointersRef.current.set(e.pointerId, point);
     setIsPanning(true);
