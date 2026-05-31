@@ -544,6 +544,7 @@ export default function RealDataSankeyPage() {
   const touchPanOriginRef = useRef<{ x: number; y: number } | null>(null);
   const pinchLastDistanceRef = useRef<number | null>(null);
   const didPinchRef = useRef(false);
+  const touchActivatedNodeIdRef = useRef<string | null>(null);
   const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
   const hoverSuppressTimerRef = useRef<number | null>(null);
   const suppressHoverPopup = isPanning || isHoverSuppressed;
@@ -2022,9 +2023,7 @@ export default function RealDataSankeyPage() {
     if (nodeId) pendingConnectionNodeId.current = nodeId;
   }, [setPinnedRecipientId, setPinnedMinistryName]);
 
-  const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (didPanRef.current) return;
+  const activateNode = useCallback((node: LayoutNode) => {
     // 省庁ノード × filterOnMinistryClick 連動: 未設定時だけ単独フィルタを設定する。
     // 解除はフィルタ解除ボタンに一本化し、再クリックはサイドパネル表示を優先する。
     if (filterOnMinistryClick && node.type === 'ministry' && !node.aggregated) {
@@ -2068,6 +2067,29 @@ export default function RealDataSankeyPage() {
     }
     selectNode(newId);
   }, [selectedNodeId, selectNode, focusRelated, autoFocusRelated, exitFocusRelated, graphData, filterOnMinistryClick, filterMinistryNames]);
+
+  const handleNodeClick = useCallback((node: LayoutNode, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (touchActivatedNodeIdRef.current === node.id) {
+      touchActivatedNodeIdRef.current = null;
+      return;
+    }
+    if (didPanRef.current) return;
+    activateNode(node);
+  }, [activateNode]);
+
+  const handleNodeTouchPointerUp = useCallback((node: LayoutNode, e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse') return;
+    e.stopPropagation();
+    const shouldActivate = !didPanRef.current && !didPinchRef.current;
+    handleTouchPointerEnd(e);
+    if (!shouldActivate) return;
+    touchActivatedNodeIdRef.current = node.id;
+    window.setTimeout(() => {
+      if (touchActivatedNodeIdRef.current === node.id) touchActivatedNodeIdRef.current = null;
+    }, 500);
+    activateNode(node);
+  }, [activateNode, handleTouchPointerEnd]);
 
   // focusRelated=ON 中に別ノードをクリックした後、フルレイアウト更新後にオフセット調整
   useEffect(() => {
@@ -2652,16 +2674,18 @@ export default function RealDataSankeyPage() {
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
                               onMouseLeave={() => setHoveredNode(null)}
+                              onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
                               onClick={(e) => handleNodeClick(node, e)}
                             />
                             {labelVisible && (
                               <text x={getNodeInnerX1(node) + innerLabelGap} y={topShift + bH / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
-                                style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
+                                style={{ userSelect: 'none', cursor: 'pointer', pointerEvents: 'all' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                                 onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                                 onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
                                 onMouseLeave={() => setHoveredNode(null)}
                                 onMouseDown={(e) => e.preventDefault()}
+                                onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
                                 onClick={(e) => handleNodeClick(node, e)}>
                                 {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                               </text>
@@ -2679,28 +2703,31 @@ export default function RealDataSankeyPage() {
                             onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                             onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
                             onMouseLeave={() => setHoveredNode(null)}
+                            onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
                             onClick={(e) => handleNodeClick(node, e)}
                           />
                           {labelVisible && (<>
                             {/* Left label: budget amount */}
                             <text x={getNodeInnerX0(node) - innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={colFontPx / zoom} dominantBaseline="middle" textAnchor="end"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
-                              style={{ userSelect: 'none', cursor: 'pointer' }}
+                              style={{ userSelect: 'none', cursor: 'pointer', pointerEvents: 'all' }}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
                               onMouseLeave={() => setHoveredNode(null)}
                               onMouseDown={(e) => e.preventDefault()}
+                              onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
                               onClick={(e) => handleNodeClick(node, e)}>
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
                             {/* Right label: project name + spending amount */}
                             <text x={getNodeInnerX1(spendingNode) + innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
-                              style={{ userSelect: 'none', cursor: 'pointer' }} clipPath={`url(#clip-col-${getColumn(node)})`}
+                              style={{ userSelect: 'none', cursor: 'pointer', pointerEvents: 'all' }} clipPath={`url(#clip-col-${getColumn(node)})`}
                               onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredNode(node); }}
                               onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
                               onMouseLeave={() => setHoveredNode(null)}
                               onMouseDown={(e) => e.preventDefault()}
+                              onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
                               onClick={(e) => handleNodeClick(node, e)}>
                               {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
                             </text>
@@ -2740,6 +2767,7 @@ export default function RealDataSankeyPage() {
                             if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
                           }}
                           onMouseLeave={() => setHoveredNode(null)}
+                          onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
                           onClick={(e) => handleNodeClick(node, e)}
                         />
                         {labelVisible && (
@@ -2749,12 +2777,13 @@ export default function RealDataSankeyPage() {
                             fontSize={colFontPx / zoom}
                             dominantBaseline="middle"
                             fill={connectedNodeIds && !connectedNodeIds.has(node.id) ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
-                            style={{ userSelect: 'none', cursor: 'pointer' }}
+                            style={{ userSelect: 'none', cursor: 'pointer', pointerEvents: 'all' }}
                             clipPath={isLastCol ? undefined : `url(#clip-col-${col})`}
                             onMouseEnter={(e) => { const rect = containerRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); setHoveredNode(node); }}
                             onMouseMove={(e) => { const rect = containerRef.current?.getBoundingClientRect(); if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top }); }}
                             onMouseLeave={() => setHoveredNode(null)}
                             onMouseDown={(e) => e.preventDefault()}
+                            onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
                             onClick={(e) => handleNodeClick(node, e)}
                           >
                             {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
