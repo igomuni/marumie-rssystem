@@ -2343,6 +2343,41 @@ export default function RealDataSankeyPage() {
   const getNodeInnerX1 = useCallback((node: LayoutNode): number => screenToInnerX(getNodeScreenX1(node)), [getNodeScreenX1, screenToInnerX]);
   const innerNodeW = screenWToInner(screenNodeW);
   const innerLabelGap = screenWToInner(3);
+  const innerLabelHitH = screenWToInner(14);
+  const getRightLabelHitW = (col: number, isLastCol: boolean) => screenWToInner(
+    isLastCol ? 220 : col === 0 ? 112 : col === 1 ? 140 : 160
+  );
+  const renderLabelHitRect = (
+    node: LayoutNode,
+    x: number,
+    centerY: number,
+    width: number,
+    anchor: 'start' | 'end' = 'start'
+  ) => {
+    const hitX = anchor === 'end' ? x - width : x;
+    return (
+      <rect
+        x={hitX}
+        y={centerY - innerLabelHitH / 2}
+        width={width}
+        height={innerLabelHitH}
+        fill="transparent"
+        style={{ cursor: 'pointer', pointerEvents: 'all' }}
+        onMouseEnter={(e) => {
+          const rect = containerRef.current?.getBoundingClientRect();
+          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+          setHoveredNode(node);
+        }}
+        onMouseMove={(e) => {
+          const rect = containerRef.current?.getBoundingClientRect();
+          if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        }}
+        onMouseLeave={() => setHoveredNode(null)}
+        onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
+        onClick={(e) => handleNodeClick(node, e)}
+      />
+    );
+  };
   const getMinimapRenderedYBounds = useCallback((node: LayoutNode): { top: number; bottom: number } => {
     let shiftNode = node;
     if (node.type === 'project-spending') {
@@ -2677,7 +2712,7 @@ export default function RealDataSankeyPage() {
                               onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
                               onClick={(e) => handleNodeClick(node, e)}
                             />
-                            {labelVisible && (
+                            {labelVisible && (<>
                               <text x={getNodeInnerX1(node) + innerLabelGap} y={topShift + bH / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                                 fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
                                 style={{ userSelect: 'none', cursor: 'pointer', pointerEvents: 'all' }} clipPath={`url(#clip-col-${getColumn(node)})`}
@@ -2689,7 +2724,8 @@ export default function RealDataSankeyPage() {
                                 onClick={(e) => handleNodeClick(node, e)}>
                                 {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                               </text>
-                            )}
+                              {renderLabelHitRect(node, getNodeInnerX1(node) + innerLabelGap, topShift + bH / 2, getRightLabelHitW(getColumn(node), false))}
+                            </>)}
                           </g>
                         );
                       }
@@ -2719,6 +2755,7 @@ export default function RealDataSankeyPage() {
                               onClick={(e) => handleNodeClick(node, e)}>
                               {formatYen(node.value)}{node.isScaled && node.rawValue != null && <tspan fill="#888"> / {formatYen(node.rawValue)}</tspan>}
                             </text>
+                            {renderLabelHitRect(node, getNodeInnerX0(node) - innerLabelGap, topShift + Math.max(bH, sH) / 2, screenWToInner(96), 'end')}
                             {/* Right label: project name + spending amount */}
                             <text x={getNodeInnerX1(spendingNode) + innerLabelGap} y={topShift + Math.max(bH, sH) / 2} fontSize={colFontPx / zoom} dominantBaseline="middle"
                               fill={connectedNodeIds && !isConnected ? '#bbb' : hoveredNodeIds && !hoveredNodeIds.has(node.id) ? '#bbb' : '#333'}
@@ -2731,6 +2768,7 @@ export default function RealDataSankeyPage() {
                               onClick={(e) => handleNodeClick(node, e)}>
                               {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
                             </text>
+                            {renderLabelHitRect(node, getNodeInnerX1(spendingNode) + innerLabelGap, topShift + Math.max(bH, sH) / 2, getRightLabelHitW(getColumn(node), false))}
                           </>)}
                         </g>
                       );
@@ -2770,7 +2808,7 @@ export default function RealDataSankeyPage() {
                           onPointerUp={(e) => handleNodeTouchPointerUp(node, e)}
                           onClick={(e) => handleNodeClick(node, e)}
                         />
-                        {labelVisible && (
+                        {labelVisible && (<>
                           <text
                             x={getNodeInnerX1(node) + innerLabelGap}
                             y={topShift + h / 2}
@@ -2788,7 +2826,8 @@ export default function RealDataSankeyPage() {
                           >
                             {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                           </text>
-                        )}
+                          {renderLabelHitRect(node, getNodeInnerX1(node) + innerLabelGap, topShift + h / 2, getRightLabelHitW(col, isLastCol))}
+                        </>)}
                       </g>
                     );
                   });
