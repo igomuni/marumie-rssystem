@@ -42,7 +42,7 @@ description: フィーチャーブランチを作成してPRを出す
 
 7. **プッシュ**: リモートにプッシュする（`git push -u origin <branch-name>`）
 
-8. **PR作成**: `gh pr create` でPRを作成する。`--base main` を指定する。PR本文には以下を含める：
+8. **PR作成**: `gh pr create --draft` でPRをdraft（下書き）として作成する。`--base main` を指定する。（CodeRabbitAIのRateLimit対策。ready for review への切り替えはユーザーが任意のタイミングで行う）PR本文には以下を含める：
    - 変更の目的（Why）
    - 変更内容の概要
    - テスト方法（`npm run dev` で動作確認する手順など）

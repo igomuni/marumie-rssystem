@@ -57,6 +57,7 @@ npx tsc --noEmit         # TypeScript 型チェック
 
 - **PR は必ずユーザーの明示的な許可を得てから作成すること。** 実装・修正が完了しても、ユーザーから「PR を出してください」「PR お願いします」などの指示がない限り、自律的に PR を作成・プッシュしてはならない。
 - コミットは実装完了のタイミングで行ってよいが、プッシュ・PR 作成は指示待ちとする。
+- **PR は draft（下書き）で作成すること。** `gh pr create --draft` を使う。CodeRabbitAI のレビューが RateLimit を持つため、ある程度まとめてから ready for review に切り替える運用とする（ready 化はユーザーが任意のタイミングで行う）。
 
 ## Documentation Standards
 
