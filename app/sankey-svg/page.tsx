@@ -67,6 +67,9 @@ const testId = (id: string): string | undefined => E2E_TEST_IDS_ENABLED ? id : u
 const MAP_LABEL_FONT_PX_DEFAULT = 11;
 const MAP_LABEL_SLOT_PX_DEFAULT = 12;
 const MAP_LABEL_VISIBLE_MIN_H_PX_DEFAULT = 11;
+// この幅（px）以下では、タッチ操作で代替できるズーム系コントロールを非表示にする。
+// 767 = 「タブレット未満」境界。iPad縦(768px〜)ではコントロールを残し、スマホ幅でのみ隠す。
+const COMPACT_CONTROL_MAX_WIDTH = 767;
 const ZOOM_MIN_ABS = 0.05;
 const ZOOM_MAX_ABS = 20;
 const ZOOM_MIN_MULTIPLIER = 0.25;
@@ -315,6 +318,11 @@ export default function RealDataSankeyPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svgWidth, setSvgWidth] = useState(1200);
   const [svgHeight, setSvgHeight] = useState(800);
+  // 幅ベースのコンパクト判定。閾値以下では、ピンチズーム/2本指パンで代替できる
+  // ズーム系コントロール（スライダー・±ボタン・スクロールモード切替）を非表示にする。
+  // 入力デバイス（pointer:coarse）ではなく幅で判定することで、タッチ対応ノートPC等の
+  // 誤判定を避け、初期値1200=デスクトップ表示から安全側に倒す。
+  const isCompactWidth = svgWidth <= COMPACT_CONTROL_MAX_WIDTH;
 
   useEffect(() => {
     const updateSize = () => {
@@ -4668,7 +4676,8 @@ export default function RealDataSankeyPage() {
 
       {/* Zoom controls — bottom right (sankey2 style) */}
       <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {/* スクロールモード切替ボタン */}
+        {/* スクロールモード切替ボタン（狭幅では2本指パンで代替できるため非表示） */}
+        {!isCompactWidth && (
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
           <button
             aria-label={scrollMode === 'pan' ? 'スクロール移動モード（クリックでズームモードへ）' : 'スクロール移動モードに切替'}
@@ -4679,7 +4688,9 @@ export default function RealDataSankeyPage() {
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill={scrollMode === 'pan' ? '#1a73e8' : '#bbb'}><path d="M480-80 310-250l57-57 73 73v-166H274l73 74-57 57L120-440l170-170 57 57-74 73h166v-166l-73 73-57-57 170-170 170 170-57 57-73-73v166h166l-74-73 57-57 170 170-170 170-57-57 74-74H520v166l73-73 57 57L480-80Z"/></svg>
           </button>
         </div>
-        {/* + / vertical slider / - */}
+        )}
+        {/* + / vertical slider / -（狭幅ではピンチズームで代替できるため非表示） */}
+        {!isCompactWidth && (
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Material Icons: add */}
           <button data-testid={testId('zoom-in')} aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
@@ -4703,6 +4714,7 @@ export default function RealDataSankeyPage() {
             <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="#555"><path d="M19 13H5v-2h14v2z"/></svg>
           </button>
         </div>
+        )}
         {/* Zoom% — 非編集時は "N%" 表示、クリックで数値入力 */}
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
           {isEditingZoom ? (
