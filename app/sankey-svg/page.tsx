@@ -2352,7 +2352,8 @@ export default function RealDataSankeyPage() {
     x: number,
     centerY: number,
     width: number,
-    anchor: 'start' | 'end' = 'start'
+    anchor: 'start' | 'end' = 'start',
+    clipPath?: string
   ) => {
     const hitX = anchor === 'end' ? x - width : x;
     return (
@@ -2361,6 +2362,7 @@ export default function RealDataSankeyPage() {
         y={centerY - innerLabelHitH / 2}
         width={width}
         height={innerLabelHitH}
+        clipPath={clipPath}
         fill="transparent"
         style={{ cursor: 'pointer', pointerEvents: 'all' }}
         onMouseEnter={(e) => {
@@ -2724,7 +2726,7 @@ export default function RealDataSankeyPage() {
                                 onClick={(e) => handleNodeClick(node, e)}>
                                 {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                               </text>
-                              {renderLabelHitRect(node, getNodeInnerX1(node) + innerLabelGap, topShift + bH / 2, getRightLabelHitW(getColumn(node), false))}
+                              {renderLabelHitRect(node, getNodeInnerX1(node) + innerLabelGap, topShift + bH / 2, getRightLabelHitW(getColumn(node), false), 'start', `url(#clip-col-${getColumn(node)})`)}
                             </>)}
                           </g>
                         );
@@ -2768,7 +2770,7 @@ export default function RealDataSankeyPage() {
                               onClick={(e) => handleNodeClick(node, e)}>
                               {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(spendingNode.value)}){spendingNode.isScaled && spendingNode.rawValue != null && (<tspan fill="#777"> / {formatYen(spendingNode.rawValue)}</tspan>)}
                             </text>
-                            {renderLabelHitRect(node, getNodeInnerX1(spendingNode) + innerLabelGap, topShift + Math.max(bH, sH) / 2, getRightLabelHitW(getColumn(node), false))}
+                            {renderLabelHitRect(node, getNodeInnerX1(spendingNode) + innerLabelGap, topShift + Math.max(bH, sH) / 2, getRightLabelHitW(getColumn(node), false), 'start', `url(#clip-col-${getColumn(node)})`)}
                           </>)}
                         </g>
                       );
@@ -2826,7 +2828,7 @@ export default function RealDataSankeyPage() {
                           >
                             {node.name.length > 40 ? node.name.slice(0, 40) + '…' : node.name} ({formatYen(node.value)}){node.isScaled && node.rawValue != null && (<tspan fill="#777"> / {formatYen(node.rawValue)}</tspan>)}
                           </text>
-                          {renderLabelHitRect(node, getNodeInnerX1(node) + innerLabelGap, topShift + h / 2, getRightLabelHitW(col, isLastCol))}
+                          {renderLabelHitRect(node, getNodeInnerX1(node) + innerLabelGap, topShift + h / 2, getRightLabelHitW(col, isLastCol), 'start', isLastCol ? undefined : `url(#clip-col-${col})`)}
                         </>)}
                       </g>
                     );
