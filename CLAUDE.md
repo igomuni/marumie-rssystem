@@ -55,6 +55,7 @@ npx tsc --noEmit         # TypeScript 型チェック
 
 ## Agent の行動ルール
 
+- **コミットメッセージにセッション URL を含めないこと。** `https://claude.ai/code/session_...` 形式の URL はコミットメッセージに追記しない。
 - **PR は必ずユーザーの明示的な許可を得てから作成すること。** 実装・修正が完了しても、ユーザーから「PR を出してください」「PR お願いします」などの指示がない限り、自律的に PR を作成・プッシュしてはならない。
 - コミットは実装完了のタイミングで行ってよいが、プッシュ・PR 作成は指示待ちとする。
 - **PR は draft（下書き）で作成すること。** 実行手段に関わらず draft を保証する：デスクトップ版は `gh pr create --draft`、Web版（`gh` が無い環境）は GitHub MCP ツール `mcp__github__create_pull_request` に **`draft: true` を明示指定**する（省略すると通常PRになり CodeRabbitAI のレビューが即走るため注意）。CodeRabbitAI のレビューが RateLimit を持つため、ある程度まとめてから ready for review に切り替える運用とする（ready 化はユーザーが任意のタイミングで行う）。
