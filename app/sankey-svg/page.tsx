@@ -323,6 +323,9 @@ export default function RealDataSankeyPage() {
   // 入力デバイス（pointer:coarse）ではなく幅で判定することで、タッチ対応ノートPC等の
   // 誤判定を避け、初期値1200=デスクトップ表示から安全側に倒す。
   const isCompactWidth = svgWidth <= COMPACT_CONTROL_MAX_WIDTH;
+  // 縦長（ポートレート）かつ狭幅のときのみ、オフセットコントロールを画面下部へ逃がす。
+  // 横長（ランドスケープ）は縦の余白が乏しく横に余裕があるため、コンパクト幅でも右上のまま。
+  const isPortraitCompact = isCompactWidth && svgHeight >= svgWidth;
 
   useEffect(() => {
     const updateSize = () => {
@@ -2653,6 +2656,100 @@ export default function RealDataSankeyPage() {
     </>
   );
 
+  // 基準フォントサイズ調整（デスクトップは左下フローティング、スマホ幅では設定ダイアログ内に表示）
+  const fontSizeControlsFragment = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <input
+        type="range"
+        min={BASE_FONT_PX_MIN}
+        max={BASE_FONT_PX_MAX}
+        step={1}
+        value={baseFontPx}
+        onChange={e => { pendingHistoryAction.current = 'replace'; setBaseFontPx(Number(e.target.value)); }}
+        style={{ width: 60, boxSizing: 'border-box', margin: 0 }}
+        data-pan-disabled
+        aria-label="基準フォントサイズ"
+      />
+      {isEditingBaseFont ? (
+        <input
+          type="number"
+          autoFocus
+          min={BASE_FONT_PX_MIN}
+          max={BASE_FONT_PX_MAX}
+          step={1}
+          value={baseFontPxInput}
+          onChange={e => setBaseFontPxInput(e.target.value)}
+          onBlur={() => { commitBaseFontPxInput(); setIsEditingBaseFont(false); }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') { commitBaseFontPxInput(); setIsEditingBaseFont(false); }
+            else if (e.key === 'Escape') { setBaseFontPxInput(String(baseFontPx)); setIsEditingBaseFont(false); }
+          }}
+          style={{ width: `${Math.max(40, String(BASE_FONT_PX_MAX).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: CONTROL_SMALL_FONT_PX }}
+          data-pan-disabled
+          aria-label="基準フォントサイズ(数値)"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => { setBaseFontPxInput(String(baseFontPx)); setIsEditingBaseFont(true); }}
+          title="クリックしてフォントサイズを入力"
+          style={{ color: '#999', fontSize: META_FONT_PX_DEFAULT, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
+          data-pan-disabled
+          aria-label="基準フォントサイズ編集を開始"
+        >{baseFontPx}</button>
+      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
+        {([
+          [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '大きく'],
+          [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '小さく'],
+        ] as [number, string, string][]).map(([delta, path, title]) => (
+          <button key={delta} type="button" title={title} aria-label={title}
+            onPointerDown={(e) => {
+              if (e.pointerType === 'mouse' && e.button !== 0) return;
+              e.stopPropagation();
+              e.currentTarget.setPointerCapture(e.pointerId);
+              const step = () => {
+                pendingHistoryAction.current = 'replace';
+                setBaseFontPx(prev => Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, prev + delta)));
+              };
+              stopFontRepeat();
+              step();
+              fontRepeatRef.current = setTimeout(() => {
+                fontRepeatRef.current = setInterval(step, 150);
+              }, 400);
+            }}
+            onPointerUp={(e) => { e.stopPropagation(); stopFontRepeat(); }}
+            onPointerLeave={stopFontRepeat}
+            onPointerCancel={stopFontRepeat}
+            onClick={(e) => {
+              if (e.detail === 0) {
+                pendingHistoryAction.current = 'replace';
+                setBaseFontPx(prev => Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, prev + delta)));
+              }
+            }}
+            style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
+            data-pan-disabled
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => { pendingHistoryAction.current = 'replace'; setBaseFontPx(BASE_FONT_PX_DEFAULT); }}
+        title="既定値に戻す"
+        aria-label="既定値に戻す"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none', color: '#555' }}
+        data-pan-disabled
+      >
+        {/* Material Icons: reset_settings */}
+        <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="currentColor">
+          <path d="M520-330v-60h160v60H520Zm60 210v-50h-60v-60h60v-50h60v160h-60Zm100-50v-60h160v60H680Zm40-110v-160h60v50h60v60h-60v50h-60Zm111-280h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z" />
+        </svg>
+      </button>
+    </div>
+  );
+
   return (
     <div
       ref={containerRef}
@@ -3040,7 +3137,8 @@ export default function RealDataSankeyPage() {
               dragging={minimapDragging}
             />
 
-            {/* Font size controls */}
+            {/* Font size controls（スマホ幅では設定ダイアログへ移動するため非表示） */}
+            {!isCompactWidth && (
             <div
               data-pan-disabled="true"
               style={{
@@ -3099,96 +3197,7 @@ export default function RealDataSankeyPage() {
                     alignItems: 'center',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <input
-                      type="range"
-                      min={BASE_FONT_PX_MIN}
-                      max={BASE_FONT_PX_MAX}
-                      step={1}
-                      value={baseFontPx}
-                      onChange={e => { pendingHistoryAction.current = 'replace'; setBaseFontPx(Number(e.target.value)); }}
-                      style={{ width: 60, boxSizing: 'border-box', margin: 0 }}
-                      data-pan-disabled
-                      aria-label="基準フォントサイズ"
-                    />
-                    {isEditingBaseFont ? (
-                      <input
-                        type="number"
-                        autoFocus
-                        min={BASE_FONT_PX_MIN}
-                        max={BASE_FONT_PX_MAX}
-                        step={1}
-                        value={baseFontPxInput}
-                        onChange={e => setBaseFontPxInput(e.target.value)}
-                        onBlur={() => { commitBaseFontPxInput(); setIsEditingBaseFont(false); }}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') { commitBaseFontPxInput(); setIsEditingBaseFont(false); }
-                          else if (e.key === 'Escape') { setBaseFontPxInput(String(baseFontPx)); setIsEditingBaseFont(false); }
-                        }}
-                        style={{ width: `${Math.max(40, String(BASE_FONT_PX_MAX).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: CONTROL_SMALL_FONT_PX }}
-                        data-pan-disabled
-                        aria-label="基準フォントサイズ(数値)"
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => { setBaseFontPxInput(String(baseFontPx)); setIsEditingBaseFont(true); }}
-                        title="クリックしてフォントサイズを入力"
-                        style={{ color: '#999', fontSize: META_FONT_PX_DEFAULT, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
-                        data-pan-disabled
-                        aria-label="基準フォントサイズ編集を開始"
-                      >{baseFontPx}</button>
-                    )}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
-                      {([
-                        [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '大きく'],
-                        [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '小さく'],
-                      ] as [number, string, string][]).map(([delta, path, title]) => (
-                        <button key={delta} type="button" title={title} aria-label={title}
-                          onPointerDown={(e) => {
-                            if (e.pointerType === 'mouse' && e.button !== 0) return;
-                            e.stopPropagation();
-                            e.currentTarget.setPointerCapture(e.pointerId);
-                            const step = () => {
-                              pendingHistoryAction.current = 'replace';
-                              setBaseFontPx(prev => Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, prev + delta)));
-                            };
-                            stopFontRepeat();
-                            step();
-                            fontRepeatRef.current = setTimeout(() => {
-                              fontRepeatRef.current = setInterval(step, 150);
-                            }, 400);
-                          }}
-                          onPointerUp={(e) => { e.stopPropagation(); stopFontRepeat(); }}
-                          onPointerLeave={stopFontRepeat}
-                          onPointerCancel={stopFontRepeat}
-                          onClick={(e) => {
-                            if (e.detail === 0) {
-                              pendingHistoryAction.current = 'replace';
-                              setBaseFontPx(prev => Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, prev + delta)));
-                            }
-                          }}
-                          style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
-                          data-pan-disabled
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => { pendingHistoryAction.current = 'replace'; setBaseFontPx(BASE_FONT_PX_DEFAULT); }}
-                      title="既定値に戻す"
-                      aria-label="既定値に戻す"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none', color: '#555' }}
-                      data-pan-disabled
-                    >
-                      {/* Material Icons: reset_settings */}
-                      <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="currentColor">
-                        <path d="M520-330v-60h160v60H520Zm60 210v-50h-60v-60h60v-50h60v160h-60Zm100-50v-60h160v60H680Zm40-110v-160h60v50h60v60h-60v50h-60Zm111-280h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z" />
-                      </svg>
-                    </button>
-                  </div>
+                  {fontSizeControlsFragment}
                   <button
                     type="button"
                     title="フォントサイズ設定を閉じる"
@@ -3221,6 +3230,7 @@ export default function RealDataSankeyPage() {
                 </div>
               )}
             </div>
+            )}
 
           {/* DOM tooltip — link hover */}
           {hoveredLink && !hoveredNode && !suppressHoverPopup && (() => {
@@ -4551,7 +4561,7 @@ export default function RealDataSankeyPage() {
           if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
         };
         return (
-          <div style={ isCompactWidth
+          <div style={ isPortraitCompact
             ? { position: 'absolute', bottom: 12, left: 56, right: 64, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }
             : { position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' } }>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
@@ -4678,6 +4688,13 @@ export default function RealDataSankeyPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
                   <span style={{ color: '#555', fontWeight: 600 }}>表示件数（TopN）</span>
                   {topNSlidersFragment}
+                </div>
+              )}
+              {/* スマホ幅: 左下から移動した基準フォントサイズ調整 */}
+              {isCompactWidth && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
+                  <span style={{ color: '#555', fontWeight: 600 }}>文字サイズ</span>
+                  {fontSizeControlsFragment}
                 </div>
               )}
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
