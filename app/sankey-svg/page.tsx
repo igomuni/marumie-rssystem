@@ -4603,10 +4603,10 @@ export default function RealDataSankeyPage() {
                 <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: 60 }} />
                 {/* 総件数表示は幅を取るためスマホ幅では非表示 */}
                 {!isCompactWidth && <span style={{ color: '#999', fontSize: META_FONT_PX }}>/{activeTotalCount}件</span>}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
+                <div style={{ display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center' }}>
                   {([
-                    [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '次へ'],
-                    [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '前へ'],
+                    [-1, 'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z', '前へ'],
+                    [1,  'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z', '次へ'],
                   ] as [number, string, string][]).map(([delta, path, title]) => (
                     <button key={delta} title={title} aria-label={title}
                       data-testid={testId(delta > 0 ? 'recipient-offset-next' : 'recipient-offset-prev')}
@@ -4634,9 +4634,9 @@ export default function RealDataSankeyPage() {
                           setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta)));
                         }
                       }}
-                      style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
                     </button>
                   ))}
                 </div>
