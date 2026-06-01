@@ -2551,7 +2551,9 @@ export default function RealDataSankeyPage() {
   };
 
   const searchLeftOffset = selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth : 0;
-  const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 24px)`;
+  // 右上の設定(⋮)ボタン領域(幅32+余白)に重ならないよう右側を確保。
+  // これがないと文字拡大時に検索ボックスが設定ボタンを覆い、タップで開けなくなる。
+  const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 64px)`;
   const minimapLeft = selectedNodeId !== null ? (isPanelCollapsed ? 26 : sidePanelWidth + 8) : 8;
   const fontControlLeft = minimapLeft + (showMinimap ? MINIMAP_W + 22 : 48);
 
@@ -2559,7 +2561,7 @@ export default function RealDataSankeyPage() {
   const topNSlidersFragment = (
     <>
       <label style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-        <span style={{ color: '#555', fontSize: META_FONT_PX, whiteSpace: 'nowrap' }}>事業</span>
+        <span style={{ color: '#555', fontSize: META_FONT_PX, whiteSpace: 'nowrap', width: '3.5em', flexShrink: 0 }}>事業</span>
         <input
           type="range" min={1} max={300} step={1}
           value={localTopProject ?? topProject}
@@ -2606,7 +2608,7 @@ export default function RealDataSankeyPage() {
         </div>
       </label>
       <label style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-        <span style={{ color: '#555', fontSize: META_FONT_PX, whiteSpace: 'nowrap' }}>支出先</span>
+        <span style={{ color: '#555', fontSize: META_FONT_PX, whiteSpace: 'nowrap', width: '3.5em', flexShrink: 0 }}>支出先</span>
         <input
           type="range" min={1} max={300} step={1}
           value={localTopRecipient ?? topRecipient}
@@ -2657,7 +2659,9 @@ export default function RealDataSankeyPage() {
 
   // 基準フォントサイズ調整（デスクトップは左下フローティング、スマホ幅では設定ダイアログ内に表示）
   const fontSizeControlsFragment = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: isCompactWidth ? 4 : 8 }}>
+      {/* スマホ幅では設定ダイアログ内でTopNスライダーと左端・幅を揃えるためのスペーサ */}
+      {isCompactWidth && <span aria-hidden style={{ width: '3.5em', flexShrink: 0 }} />}
       <input
         type="range"
         min={BASE_FONT_PX_MIN}
@@ -2665,7 +2669,7 @@ export default function RealDataSankeyPage() {
         step={1}
         value={baseFontPx}
         onChange={e => { pendingHistoryAction.current = 'replace'; setBaseFontPx(Number(e.target.value)); }}
-        style={{ width: 60, boxSizing: 'border-box', margin: 0 }}
+        style={ isCompactWidth ? { flex: 1, minWidth: 0, boxSizing: 'border-box', margin: 0 } : { width: 60, boxSizing: 'border-box', margin: 0 } }
         data-pan-disabled
         aria-label="基準フォントサイズ"
       />
@@ -2692,7 +2696,7 @@ export default function RealDataSankeyPage() {
           type="button"
           onClick={() => { setBaseFontPxInput(String(baseFontPx)); setIsEditingBaseFont(true); }}
           title="クリックしてフォントサイズを入力"
-          style={{ color: '#999', fontSize: META_FONT_PX_DEFAULT, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
+          style={{ color: '#999', fontSize: META_FONT_PX_DEFAULT, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
           data-pan-disabled
           aria-label="基準フォントサイズ編集を開始"
         >{baseFontPx}</button>
@@ -4636,7 +4640,7 @@ export default function RealDataSankeyPage() {
                       }}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" height={scaleSize(14)} width={scaleSize(14)} viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
                     </button>
                   ))}
                 </div>
@@ -4644,7 +4648,7 @@ export default function RealDataSankeyPage() {
                 <button onClick={e => { e.preventDefault(); setActiveOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" height={scaleSize(14)} width={scaleSize(14)} viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
                 </button>
               </label>
             </div>
