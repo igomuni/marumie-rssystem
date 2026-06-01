@@ -2556,6 +2556,14 @@ export default function RealDataSankeyPage() {
   const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 64px)`;
   const minimapLeft = selectedNodeId !== null ? (isPanelCollapsed ? 26 : sidePanelWidth + 8) : 8;
   const fontControlLeft = minimapLeft + (showMinimap ? MINIMAP_W + 22 : 48);
+  // 年度変更（トップ中央セレクトとスマホ幅の設定ダイアログで共用）
+  const handleYearChange = (value: '2024' | '2025') => {
+    pendingHistoryAction.current = 'replace';
+    pendingYearSelectionRef.current = selectedNode
+      ? { type: selectedNode.type, name: selectedNode.name, projectId: selectedNode.projectId }
+      : null;
+    setYear(value);
+  };
 
   // 事業・支出先 TopN スライダー（デスクトップはオフセットパネル内、スマホ幅では設定ダイアログ内に表示）
   const topNSlidersFragment = (
@@ -4151,18 +4159,13 @@ export default function RealDataSankeyPage() {
         </div>
       )}
 
-      {/* Year selector — top center */}
+      {/* Year selector — top center（スマホ幅では検索ボックスに隠れるため設定ダイアログへ移動） */}
+      {!isCompactWidth && (
       <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}>
         <select
           data-testid={testId('year-select')}
           value={year}
-          onChange={e => {
-            pendingHistoryAction.current = 'replace';
-            pendingYearSelectionRef.current = selectedNode
-              ? { type: selectedNode.type, name: selectedNode.name, projectId: selectedNode.projectId }
-              : null;
-            setYear(e.target.value as '2024' | '2025');
-          }}
+          onChange={e => handleYearChange(e.target.value as '2024' | '2025')}
           style={{ fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
         >
           <option value="2025">2025年度</option>
@@ -4173,6 +4176,7 @@ export default function RealDataSankeyPage() {
           <path d="M7 10l5 5 5-5z"/>
         </svg>
       </div>
+      )}
 
       {/* Search box — top left */}
       <div
@@ -4690,6 +4694,22 @@ export default function RealDataSankeyPage() {
           <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
             <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, minWidth: 240, maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
+              {/* スマホ幅: 検索ボックスに隠れるため移動した年度選択 */}
+              {isCompactWidth && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
+                  <span style={{ color: '#555', fontWeight: 600 }}>年度</span>
+                  <select
+                    data-testid={testId('year-select-settings')}
+                    value={year}
+                    onChange={e => handleYearChange(e.target.value as '2024' | '2025')}
+                    style={{ fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }}
+                    data-pan-disabled
+                  >
+                    <option value="2025">2025年度</option>
+                    <option value="2024">2024年度</option>
+                  </select>
+                </div>
+              )}
               {/* スマホ幅: オフセットパネルから移動したTopNスライダー */}
               {isCompactWidth && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
