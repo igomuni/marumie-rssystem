@@ -681,10 +681,27 @@ export default function RealDataSankeyPage() {
   const hoveredNode = suppressHoverPopup ? null : hoveredNodeStable;
   const panOrigin = useRef({ x: 0, y: 0 });
   const didPanRef = useRef(false);
+  // リピートボタン長押し中の意図しないテキスト選択/コールアウト（特にモバイル）を抑止する。
+  const setSelectionSuppressed = useCallback((on: boolean) => {
+    if (typeof document === 'undefined') return;
+    const b = document.body;
+    if (on) {
+      b.style.userSelect = 'none';
+      b.style.setProperty('-webkit-user-select', 'none');
+      b.style.setProperty('-webkit-touch-callout', 'none');
+    } else {
+      b.style.userSelect = '';
+      b.style.removeProperty('-webkit-user-select');
+      b.style.removeProperty('-webkit-touch-callout');
+      const sel = typeof window !== 'undefined' ? window.getSelection?.() : null;
+      sel?.removeAllRanges();
+    }
+  }, []);
   const offsetRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const stopOffsetRepeat = useCallback(() => {
     if (offsetRepeatRef.current !== null) { clearTimeout(offsetRepeatRef.current); clearInterval(offsetRepeatRef.current); offsetRepeatRef.current = null; }
-  }, []);
+    setSelectionSuppressed(false);
+  }, [setSelectionSuppressed]);
   useEffect(() => {
     const onBlur = () => stopOffsetRepeat();
     window.addEventListener('blur', onBlur);
@@ -694,7 +711,8 @@ export default function RealDataSankeyPage() {
   const topNRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const stopTopNRepeat = useCallback(() => {
     if (topNRepeatRef.current !== null) { clearTimeout(topNRepeatRef.current); clearInterval(topNRepeatRef.current); topNRepeatRef.current = null; }
-  }, []);
+    setSelectionSuppressed(false);
+  }, [setSelectionSuppressed]);
   useEffect(() => {
     const onBlur = () => stopTopNRepeat();
     window.addEventListener('blur', onBlur);
@@ -704,7 +722,8 @@ export default function RealDataSankeyPage() {
   const fontRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const stopFontRepeat = useCallback(() => {
     if (fontRepeatRef.current !== null) { clearTimeout(fontRepeatRef.current); clearInterval(fontRepeatRef.current); fontRepeatRef.current = null; }
-  }, []);
+    setSelectionSuppressed(false);
+  }, [setSelectionSuppressed]);
   useEffect(() => {
     const onBlur = () => stopFontRepeat();
     window.addEventListener('blur', onBlur);
@@ -2602,6 +2621,7 @@ export default function RealDataSankeyPage() {
               onPointerDown={(e) => {
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
                 e.currentTarget.setPointerCapture(e.pointerId);
+                setSelectionSuppressed(true);
                 const step = () => { pendingHistoryAction.current = 'replace'; setTopProject(prev => Math.max(1, Math.min(300, prev + delta))); };
                 stopTopNRepeat(); step();
                 topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
@@ -2649,6 +2669,7 @@ export default function RealDataSankeyPage() {
               onPointerDown={(e) => {
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
                 e.currentTarget.setPointerCapture(e.pointerId);
+                setSelectionSuppressed(true);
                 const step = () => { pendingHistoryAction.current = 'replace'; setTopRecipient(prev => Math.max(1, Math.min(300, prev + delta))); };
                 stopTopNRepeat(); step();
                 topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
@@ -2719,6 +2740,7 @@ export default function RealDataSankeyPage() {
               if (e.pointerType === 'mouse' && e.button !== 0) return;
               e.stopPropagation();
               e.currentTarget.setPointerCapture(e.pointerId);
+              setSelectionSuppressed(true);
               const step = () => {
                 pendingHistoryAction.current = 'replace';
                 setBaseFontPx(prev => Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, prev + delta)));
@@ -4625,6 +4647,7 @@ export default function RealDataSankeyPage() {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
                         e.stopPropagation();
                         e.currentTarget.setPointerCapture(e.pointerId);
+                        setSelectionSuppressed(true);
                         const step = () => {
                           pendingHistoryAction.current = 'replace';
                           pendingFocusId.current = null;
