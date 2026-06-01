@@ -1169,6 +1169,8 @@ export default function RealDataSankeyPage() {
   const minimapRef = useRef<HTMLCanvasElement>(null);
   const minimapDragging = useRef(false);
   const [showMinimap, setShowMinimap] = useState(false);
+  // スマホ幅ではミニマップを表示しない（実機の縦横ともに画面が狭く有用性が低いため）
+  const minimapVisible = showMinimap && !isCompactWidth;
   const searchBoxRef = useRef<HTMLDivElement>(null);
 
   // Layout constants for bottom-right widgets the dropdown must clear
@@ -1192,11 +1194,11 @@ export default function RealDataSankeyPage() {
   }, [showFilterPanel]);
 
   const searchDropdownMaxH = useMemo(() => {
-    const obstacleTop = showMinimap
+    const obstacleTop = minimapVisible
       ? svgHeight - MINIMAP_BOTTOM - MINIMAP_BUFFER - minimapH
       : svgHeight - MAP_ICON_BOTTOM - MAP_ICON_HEIGHT - MAP_ICON_GAP;
     return Math.max(120, obstacleTop - searchBoxBottom - DROPDOWN_GAP);
-  }, [svgHeight, minimapH, showMinimap, searchBoxBottom]);
+  }, [svgHeight, minimapH, minimapVisible, searchBoxBottom]);
 
   useEffect(() => {
     setGraphData(null);
@@ -2438,7 +2440,7 @@ export default function RealDataSankeyPage() {
 
   // Draw minimap
   useEffect(() => {
-    if (!showMinimap || !layout) return;
+    if (!minimapVisible || !layout) return;
     const canvas = minimapRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
@@ -2488,7 +2490,7 @@ export default function RealDataSankeyPage() {
     ctx.strokeRect(mX, mY, mW, mH);
     ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
     ctx.fillRect(mX, mY, mW, mH);
-  }, [showMinimap, layout, zoom, pan, svgWidth, minimapWorldH, minimapH, getNodeScreenX0, getMinimapRenderedYBounds, screenNodeW]);
+  }, [minimapVisible, layout, zoom, pan, svgWidth, minimapWorldH, minimapH, getNodeScreenX0, getMinimapRenderedYBounds, screenNodeW]);
 
   const minimapNavigate = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = minimapRef.current;
@@ -3124,7 +3126,8 @@ export default function RealDataSankeyPage() {
               });
             })()}
 
-            {/* Minimap */}
+            {/* Minimap（スマホ幅では非表示） */}
+            {!isCompactWidth && (
             <MinimapOverlay
               show={showMinimap}
               onShow={() => setShowMinimap(true)}
@@ -3136,6 +3139,7 @@ export default function RealDataSankeyPage() {
               navigate={minimapNavigate}
               dragging={minimapDragging}
             />
+            )}
 
             {/* Font size controls（スマホ幅では設定ダイアログへ移動するため非表示） */}
             {!isCompactWidth && (
