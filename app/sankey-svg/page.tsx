@@ -3111,7 +3111,10 @@ export default function RealDataSankeyPage() {
                 const topNodeScreenY = topNode
                   ? pan.y + (MARGIN.top + topNode.y0 + (topNodeShift?.cumShift ?? 0) + (topNodeShift?.topShift ?? 0)) * zoom
                   : pan.y + MARGIN.top * zoom;
-                const top = Math.max(SEARCH_BOX_RESERVE, topNodeScreenY - labelBlockH - 8);
+                // ラベルの上限位置は検索ボックスの実測下端に合わせる。
+                // 静的なSEARCH_BOX_RESERVE(モバイル92/デスクトップ56)だと
+                // モバイルで一律に下げ過ぎるため、実際の検索ボックス高さに追従させる。
+                const top = Math.max(searchBoxBottom + 4, topNodeScreenY - labelBlockH - 8);
                 return (
                   <div
                     key={i}
