@@ -2621,9 +2621,8 @@ export default function RealDataSankeyPage() {
               onPointerDown={(e) => {
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
                 e.currentTarget.setPointerCapture(e.pointerId);
-                setSelectionSuppressed(true);
                 const step = () => { pendingHistoryAction.current = 'replace'; setTopProject(prev => Math.max(1, Math.min(300, prev + delta))); };
-                stopTopNRepeat(); step();
+                stopTopNRepeat(); setSelectionSuppressed(true); step();
                 topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
               }}
               onPointerUp={stopTopNRepeat} onPointerLeave={stopTopNRepeat} onPointerCancel={stopTopNRepeat}
@@ -2670,9 +2669,8 @@ export default function RealDataSankeyPage() {
               onPointerDown={(e) => {
                 if (e.pointerType === 'mouse' && e.button !== 0) return;
                 e.currentTarget.setPointerCapture(e.pointerId);
-                setSelectionSuppressed(true);
                 const step = () => { pendingHistoryAction.current = 'replace'; setTopRecipient(prev => Math.max(1, Math.min(300, prev + delta))); };
-                stopTopNRepeat(); step();
+                stopTopNRepeat(); setSelectionSuppressed(true); step();
                 topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
               }}
               onPointerUp={stopTopNRepeat} onPointerLeave={stopTopNRepeat} onPointerCancel={stopTopNRepeat}
@@ -2742,12 +2740,12 @@ export default function RealDataSankeyPage() {
               if (e.pointerType === 'mouse' && e.button !== 0) return;
               e.stopPropagation();
               e.currentTarget.setPointerCapture(e.pointerId);
-              setSelectionSuppressed(true);
               const step = () => {
                 pendingHistoryAction.current = 'replace';
                 setBaseFontPx(prev => Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, prev + delta)));
               };
               stopFontRepeat();
+              setSelectionSuppressed(true);
               step();
               fontRepeatRef.current = setTimeout(() => {
                 fontRepeatRef.current = setInterval(step, 150);
@@ -4650,7 +4648,6 @@ export default function RealDataSankeyPage() {
                         if (e.pointerType === 'mouse' && e.button !== 0) return;
                         e.stopPropagation();
                         e.currentTarget.setPointerCapture(e.pointerId);
-                        setSelectionSuppressed(true);
                         const step = () => {
                           pendingHistoryAction.current = 'replace';
                           pendingFocusId.current = null;
@@ -4658,6 +4655,7 @@ export default function RealDataSankeyPage() {
                           else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
                         };
                         stopOffsetRepeat();
+                        setSelectionSuppressed(true);
                         step();
                         offsetRepeatRef.current = setTimeout(() => {
                           offsetRepeatRef.current = setInterval(step, 150);
