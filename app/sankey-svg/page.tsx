@@ -4563,7 +4563,7 @@ export default function RealDataSankeyPage() {
         };
         return (
           <div style={ isCompactWidth
-            ? { position: 'absolute', bottom: 12, left: 56, right: 64, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }
+            ? { position: 'absolute', bottom: 12, left: 8, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)' }
             : { position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' } }>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
             {/* Row 1: オフセットスライダー（2列スパン） */}
@@ -4578,8 +4578,9 @@ export default function RealDataSankeyPage() {
                 <option value="project">事業</option>
                 <option value="recipient">支出先</option>
               </select>
-              <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ color: '#555', fontSize: META_FONT_PX }}>Top</span>
+              <label style={{ flex: isCompactWidth ? '0 0 auto' : 1, display: 'flex', alignItems: 'center', gap: 4 }}>
+                {/* スマホ幅では「Top」ラベルを省き数値だけ表示 */}
+                {!isCompactWidth && <span style={{ color: '#555', fontSize: META_FONT_PX }}>Top</span>}
                 {isEditingOffset ? (
                   <input
                     type="number"
