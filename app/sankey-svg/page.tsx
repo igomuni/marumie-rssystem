@@ -323,9 +323,6 @@ export default function RealDataSankeyPage() {
   // 入力デバイス（pointer:coarse）ではなく幅で判定することで、タッチ対応ノートPC等の
   // 誤判定を避け、初期値1200=デスクトップ表示から安全側に倒す。
   const isCompactWidth = svgWidth <= COMPACT_CONTROL_MAX_WIDTH;
-  // 縦長（ポートレート）かつ狭幅のときのみ、オフセットコントロールを画面下部へ逃がす。
-  // 横長（ランドスケープ）は縦の余白が乏しく横に余裕があるため、コンパクト幅でも右上のまま。
-  const isPortraitCompact = isCompactWidth && svgHeight >= svgWidth;
 
   useEffect(() => {
     const updateSize = () => {
@@ -4565,7 +4562,7 @@ export default function RealDataSankeyPage() {
           if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
         };
         return (
-          <div style={ isPortraitCompact
+          <div style={ isCompactWidth
             ? { position: 'absolute', bottom: 12, left: 56, right: 64, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }
             : { position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' } }>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
@@ -4603,7 +4600,8 @@ export default function RealDataSankeyPage() {
                 )}
                 <span style={{ color: '#999', fontSize: META_FONT_PX }}>〜{activeRangeEnd}</span>
                 <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: 60 }} />
-                <span style={{ color: '#999', fontSize: META_FONT_PX }}>/{activeTotalCount}件</span>
+                {/* 総件数表示は幅を取るためスマホ幅では非表示 */}
+                {!isCompactWidth && <span style={{ color: '#999', fontSize: META_FONT_PX }}>/{activeTotalCount}件</span>}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                   {([
                     [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '次へ'],
