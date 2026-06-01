@@ -338,6 +338,32 @@ export default function RealDataSankeyPage() {
     return () => { ro.disconnect(); window.removeEventListener('resize', updateSize); };
   }, []);
 
+  // Restore font size from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem('sankey-base-font-px');
+      if (saved !== null) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed)) {
+          const clamped = Math.min(BASE_FONT_PX_MAX, Math.max(BASE_FONT_PX_MIN, parsed));
+          setBaseFontPx(clamped);
+          setBaseFontPxInput(String(clamped));
+        }
+      }
+    } catch {
+      // localStorage unavailable (private browsing etc.) — ignore
+    }
+  }, []);
+
+  // Persist font size to localStorage on change
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('sankey-base-font-px', String(baseFontPx));
+    } catch {
+      // ignore
+    }
+  }, [baseFontPx]);
+
   // Initialize state from URL on mount
   useEffect(() => {
     const parsed = parseSearchParams(window.location.search);
