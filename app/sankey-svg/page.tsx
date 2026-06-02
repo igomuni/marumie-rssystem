@@ -4453,8 +4453,8 @@ export default function RealDataSankeyPage() {
         );
       })()}
 
-      {/* Settings button — independent, top right */}
-      <div style={{ position: 'absolute', top: 14, right: 12, zIndex: 15 }}>
+      {/* Settings button — independent, top right（ダイアログを最前面にするため高いzIndex） */}
+      <div style={{ position: 'absolute', top: 14, right: 12, zIndex: 200 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
           aria-label="表示設定を開く"
