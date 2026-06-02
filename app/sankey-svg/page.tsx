@@ -11,6 +11,9 @@ import {
   getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen, sortPriority,
 } from '@/app/lib/sankey-svg-constants';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
+import { TopNSliders } from '@/client/components/SankeySvg/TopNSliders';
+import { FontSizeControls } from '@/client/components/SankeySvg/FontSizeControls';
+import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
 import { filterTopN, computeLayout, getTopMinistriesInScope } from '@/app/lib/sankey-svg-filter';
 import { canonicalSelectableNodeId } from '@/app/lib/sankey-svg-ids';
 import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
@@ -234,7 +237,6 @@ export default function RealDataSankeyPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [showFontControls, setShowFontControls] = useState(false);
   const [baseFontPx, setBaseFontPx] = useState(BASE_FONT_PX_DEFAULT);
-  const [baseFontPxInput, setBaseFontPxInput] = useState(String(BASE_FONT_PX_DEFAULT));
   const [showLabels, setShowLabels] = useState(true);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [showAggProject, setShowAggProject] = useState(true);
@@ -248,14 +250,7 @@ export default function RealDataSankeyPage() {
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
   const [isEditingOffset, setIsEditingOffset] = useState(false);
-  const [isEditingBaseFont, setIsEditingBaseFont] = useState(false);
   const [offsetInputValue, setOffsetInputValue] = useState('');
-  const [localTopProject, setLocalTopProject] = useState<number | null>(null);
-  const [localTopRecipient, setLocalTopRecipient] = useState<number | null>(null);
-  const [isEditingTopProject, setIsEditingTopProject] = useState(false);
-  const [isEditingTopRecipient, setIsEditingTopRecipient] = useState(false);
-  const [topProjectInputValue, setTopProjectInputValue] = useState('');
-  const [topRecipientInputValue, setTopRecipientInputValue] = useState('');
   const [showTopNSliders, setShowTopNSliders] = useState(true);
   const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -323,6 +318,8 @@ export default function RealDataSankeyPage() {
   // 入力デバイス（pointer:coarse）ではなく幅で判定することで、タッチ対応ノートPC等の
   // 誤判定を避け、初期値1200=デスクトップ表示から安全側に倒す。
   const isCompactWidth = svgWidth <= COMPACT_CONTROL_MAX_WIDTH;
+  // スマホ横（コンパクト幅かつ横長）: オフセットコントロールをサイドパネルでスライドさせる
+  const isLandscapeCompact = isCompactWidth && svgWidth > svgHeight;
 
   useEffect(() => {
     const updateSize = () => {
@@ -347,7 +344,6 @@ export default function RealDataSankeyPage() {
         if (!isNaN(parsed)) {
           const clamped = Math.min(BASE_FONT_PX_MAX, Math.max(BASE_FONT_PX_MIN, parsed));
           setBaseFontPx(clamped);
-          setBaseFontPxInput(String(clamped));
         }
       }
     } catch {
@@ -586,9 +582,6 @@ export default function RealDataSankeyPage() {
   const [hoveredLinkStable, setHoveredLinkStable] = useState<LayoutLink | null>(null);
   const hoverEnterTimerRef = useRef<number | null>(null);
   useEffect(() => {
-    setBaseFontPxInput(String(baseFontPx));
-  }, [baseFontPx]);
-  useEffect(() => {
     if (hoverEnterTimerRef.current) {
       window.clearTimeout(hoverEnterTimerRef.current);
       hoverEnterTimerRef.current = null;
@@ -681,35 +674,11 @@ export default function RealDataSankeyPage() {
   const hoveredNode = suppressHoverPopup ? null : hoveredNodeStable;
   const panOrigin = useRef({ x: 0, y: 0 });
   const didPanRef = useRef(false);
-  const offsetRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const stopOffsetRepeat = useCallback(() => {
-    if (offsetRepeatRef.current !== null) { clearTimeout(offsetRepeatRef.current); clearInterval(offsetRepeatRef.current); offsetRepeatRef.current = null; }
-  }, []);
-  useEffect(() => {
-    const onBlur = () => stopOffsetRepeat();
-    window.addEventListener('blur', onBlur);
-    return () => { stopOffsetRepeat(); window.removeEventListener('blur', onBlur); };
-  }, [stopOffsetRepeat]);
-
-  const topNRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const stopTopNRepeat = useCallback(() => {
-    if (topNRepeatRef.current !== null) { clearTimeout(topNRepeatRef.current); clearInterval(topNRepeatRef.current); topNRepeatRef.current = null; }
-  }, []);
-  useEffect(() => {
-    const onBlur = () => stopTopNRepeat();
-    window.addEventListener('blur', onBlur);
-    return () => { stopTopNRepeat(); window.removeEventListener('blur', onBlur); };
-  }, [stopTopNRepeat]);
-
-  const fontRepeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const stopFontRepeat = useCallback(() => {
-    if (fontRepeatRef.current !== null) { clearTimeout(fontRepeatRef.current); clearInterval(fontRepeatRef.current); fontRepeatRef.current = null; }
-  }, []);
-  useEffect(() => {
-    const onBlur = () => stopFontRepeat();
-    window.addEventListener('blur', onBlur);
-    return () => { stopFontRepeat(); window.removeEventListener('blur', onBlur); };
-  }, [stopFontRepeat]);
+  // 押し続けで増減するリピートボタン用ハンドラ（オフセットコントロール）。
+  // TopN・フォントサイズのリピートは各コントロールコンポーネント側で同フックを使う。
+  const offsetRepeat = useRepeatPress();
+  // URL履歴を replace で更新するためのマーク（子コンポーネントにも渡す）
+  const markHistoryReplace = useCallback(() => { pendingHistoryAction.current = 'replace'; }, []);
 
   // Reset both offsets when offsetTarget switches
   // Reset offsets and sync URL when filter conditions change
@@ -818,19 +787,6 @@ export default function RealDataSankeyPage() {
   const fitTopPadPx = FIT_TOP_PAD_PX;
   const fitTopPadPxRef = useRef(fitTopPadPx);
   fitTopPadPxRef.current = fitTopPadPx;
-  const commitBaseFontPxInput = useCallback(() => {
-    const v = Number(baseFontPxInput);
-    if (!Number.isFinite(v)) {
-      setBaseFontPxInput(String(baseFontPx));
-      return;
-    }
-    const next = Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, v));
-    setBaseFontPxInput(String(next));
-    if (next !== baseFontPx) {
-      pendingHistoryAction.current = 'replace';
-      setBaseFontPx(next);
-    }
-  }, [baseFontPx, baseFontPxInput]);
 
   // Compute max extra height from label shifts at a given zoom level (2-pass helper).
   // During fit, pass baseZoomK=zoomK to keep the whole-view baseline unchanged.
@@ -1166,6 +1122,8 @@ export default function RealDataSankeyPage() {
   const minimapRef = useRef<HTMLCanvasElement>(null);
   const minimapDragging = useRef(false);
   const [showMinimap, setShowMinimap] = useState(false);
+  // スマホ幅ではミニマップを表示しない（実機の縦横ともに画面が狭く有用性が低いため）
+  const minimapVisible = showMinimap && !isCompactWidth;
   const searchBoxRef = useRef<HTMLDivElement>(null);
 
   // Layout constants for bottom-right widgets the dropdown must clear
@@ -1189,11 +1147,11 @@ export default function RealDataSankeyPage() {
   }, [showFilterPanel]);
 
   const searchDropdownMaxH = useMemo(() => {
-    const obstacleTop = showMinimap
+    const obstacleTop = minimapVisible
       ? svgHeight - MINIMAP_BOTTOM - MINIMAP_BUFFER - minimapH
       : svgHeight - MAP_ICON_BOTTOM - MAP_ICON_HEIGHT - MAP_ICON_GAP;
     return Math.max(120, obstacleTop - searchBoxBottom - DROPDOWN_GAP);
-  }, [svgHeight, minimapH, showMinimap, searchBoxBottom]);
+  }, [svgHeight, minimapH, minimapVisible, searchBoxBottom]);
 
   useEffect(() => {
     setGraphData(null);
@@ -2435,7 +2393,7 @@ export default function RealDataSankeyPage() {
 
   // Draw minimap
   useEffect(() => {
-    if (!showMinimap || !layout) return;
+    if (!minimapVisible || !layout) return;
     const canvas = minimapRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
@@ -2485,7 +2443,7 @@ export default function RealDataSankeyPage() {
     ctx.strokeRect(mX, mY, mW, mH);
     ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
     ctx.fillRect(mX, mY, mW, mH);
-  }, [showMinimap, layout, zoom, pan, svgWidth, minimapWorldH, minimapH, getNodeScreenX0, getMinimapRenderedYBounds, screenNodeW]);
+  }, [minimapVisible, layout, zoom, pan, svgWidth, minimapWorldH, minimapH, getNodeScreenX0, getMinimapRenderedYBounds, screenNodeW]);
 
   const minimapNavigate = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = minimapRef.current;
@@ -2549,9 +2507,46 @@ export default function RealDataSankeyPage() {
   };
 
   const searchLeftOffset = selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth : 0;
-  const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 24px)`;
+  // 右上の設定(⋮)ボタン領域(幅32+余白)に重ならないよう右側を確保。
+  // これがないと文字拡大時に検索ボックスが設定ボタンを覆い、タップで開けなくなる。
+  const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 64px)`;
   const minimapLeft = selectedNodeId !== null ? (isPanelCollapsed ? 26 : sidePanelWidth + 8) : 8;
   const fontControlLeft = minimapLeft + (showMinimap ? MINIMAP_W + 22 : 48);
+  // 年度変更（トップ中央セレクトとスマホ幅の設定ダイアログで共用）
+  const handleYearChange = (value: '2024' | '2025') => {
+    pendingHistoryAction.current = 'replace';
+    pendingYearSelectionRef.current = selectedNode
+      ? { type: selectedNode.type, name: selectedNode.name, projectId: selectedNode.projectId }
+      : null;
+    setYear(value);
+  };
+
+  // 事業・支出先 TopN スライダー（デスクトップはオフセットパネル内、スマホ幅では設定ダイアログ内に表示）
+  const topNSlidersFragment = (
+    <TopNSliders
+      topProject={topProject}
+      topRecipient={topRecipient}
+      setTopProject={setTopProject}
+      setTopRecipient={setTopRecipient}
+      markReplace={markHistoryReplace}
+      metaFontPx={META_FONT_PX}
+    />
+  );
+
+  // 基準フォントサイズ調整（デスクトップは左下フローティング、スマホ幅では設定ダイアログ内に表示）
+  const fontSizeControlsFragment = (
+    <FontSizeControls
+      baseFontPx={baseFontPx}
+      setBaseFontPx={setBaseFontPx}
+      markReplace={markHistoryReplace}
+      isCompactWidth={isCompactWidth}
+      min={BASE_FONT_PX_MIN}
+      max={BASE_FONT_PX_MAX}
+      defaultValue={BASE_FONT_PX_DEFAULT}
+      controlSmallFontPx={CONTROL_SMALL_FONT_PX}
+      numberFontPx={META_FONT_PX_DEFAULT}
+    />
+  );
 
   return (
     <div
@@ -2903,7 +2898,10 @@ export default function RealDataSankeyPage() {
                 const topNodeScreenY = topNode
                   ? pan.y + (MARGIN.top + topNode.y0 + (topNodeShift?.cumShift ?? 0) + (topNodeShift?.topShift ?? 0)) * zoom
                   : pan.y + MARGIN.top * zoom;
-                const top = Math.max(SEARCH_BOX_RESERVE, topNodeScreenY - labelBlockH - 8);
+                // ラベルの上限位置は検索ボックスの実測下端に合わせる。
+                // 静的なSEARCH_BOX_RESERVE(モバイル92/デスクトップ56)だと
+                // モバイルで一律に下げ過ぎるため、実際の検索ボックス高さに追従させる。
+                const top = Math.max(searchBoxBottom + 4, topNodeScreenY - labelBlockH - 8);
                 return (
                   <div
                     key={i}
@@ -2927,7 +2925,8 @@ export default function RealDataSankeyPage() {
               });
             })()}
 
-            {/* Minimap */}
+            {/* Minimap（スマホ幅では非表示） */}
+            {!isCompactWidth && (
             <MinimapOverlay
               show={showMinimap}
               onShow={() => setShowMinimap(true)}
@@ -2939,8 +2938,10 @@ export default function RealDataSankeyPage() {
               navigate={minimapNavigate}
               dragging={minimapDragging}
             />
+            )}
 
-            {/* Font size controls */}
+            {/* Font size controls（スマホ幅では設定ダイアログへ移動するため非表示） */}
+            {!isCompactWidth && (
             <div
               data-pan-disabled="true"
               style={{
@@ -2999,96 +3000,7 @@ export default function RealDataSankeyPage() {
                     alignItems: 'center',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <input
-                      type="range"
-                      min={BASE_FONT_PX_MIN}
-                      max={BASE_FONT_PX_MAX}
-                      step={1}
-                      value={baseFontPx}
-                      onChange={e => { pendingHistoryAction.current = 'replace'; setBaseFontPx(Number(e.target.value)); }}
-                      style={{ width: 60, boxSizing: 'border-box', margin: 0 }}
-                      data-pan-disabled
-                      aria-label="基準フォントサイズ"
-                    />
-                    {isEditingBaseFont ? (
-                      <input
-                        type="number"
-                        autoFocus
-                        min={BASE_FONT_PX_MIN}
-                        max={BASE_FONT_PX_MAX}
-                        step={1}
-                        value={baseFontPxInput}
-                        onChange={e => setBaseFontPxInput(e.target.value)}
-                        onBlur={() => { commitBaseFontPxInput(); setIsEditingBaseFont(false); }}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') { commitBaseFontPxInput(); setIsEditingBaseFont(false); }
-                          else if (e.key === 'Escape') { setBaseFontPxInput(String(baseFontPx)); setIsEditingBaseFont(false); }
-                        }}
-                        style={{ width: `${Math.max(40, String(BASE_FONT_PX_MAX).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: CONTROL_SMALL_FONT_PX }}
-                        data-pan-disabled
-                        aria-label="基準フォントサイズ(数値)"
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => { setBaseFontPxInput(String(baseFontPx)); setIsEditingBaseFont(true); }}
-                        title="クリックしてフォントサイズを入力"
-                        style={{ color: '#999', fontSize: META_FONT_PX_DEFAULT, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
-                        data-pan-disabled
-                        aria-label="基準フォントサイズ編集を開始"
-                      >{baseFontPx}</button>
-                    )}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
-                      {([
-                        [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '大きく'],
-                        [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '小さく'],
-                      ] as [number, string, string][]).map(([delta, path, title]) => (
-                        <button key={delta} type="button" title={title} aria-label={title}
-                          onPointerDown={(e) => {
-                            if (e.pointerType === 'mouse' && e.button !== 0) return;
-                            e.stopPropagation();
-                            e.currentTarget.setPointerCapture(e.pointerId);
-                            const step = () => {
-                              pendingHistoryAction.current = 'replace';
-                              setBaseFontPx(prev => Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, prev + delta)));
-                            };
-                            stopFontRepeat();
-                            step();
-                            fontRepeatRef.current = setTimeout(() => {
-                              fontRepeatRef.current = setInterval(step, 150);
-                            }, 400);
-                          }}
-                          onPointerUp={(e) => { e.stopPropagation(); stopFontRepeat(); }}
-                          onPointerLeave={stopFontRepeat}
-                          onPointerCancel={stopFontRepeat}
-                          onClick={(e) => {
-                            if (e.detail === 0) {
-                              pendingHistoryAction.current = 'replace';
-                              setBaseFontPx(prev => Math.max(BASE_FONT_PX_MIN, Math.min(BASE_FONT_PX_MAX, prev + delta)));
-                            }
-                          }}
-                          style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
-                          data-pan-disabled
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => { pendingHistoryAction.current = 'replace'; setBaseFontPx(BASE_FONT_PX_DEFAULT); }}
-                      title="既定値に戻す"
-                      aria-label="既定値に戻す"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none', color: '#555' }}
-                      data-pan-disabled
-                    >
-                      {/* Material Icons: reset_settings */}
-                      <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="currentColor">
-                        <path d="M520-330v-60h160v60H520Zm60 210v-50h-60v-60h60v-50h60v160h-60Zm100-50v-60h160v60H680Zm40-110v-160h60v50h60v60h-60v50h-60Zm111-280h-83q-26-88-99-144t-169-56q-117 0-198.5 81.5T200-480q0 72 32.5 132t87.5 98v-110h80v240H160v-80h94q-62-50-98-122.5T120-480q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q129 0 226.5 79.5T831-560Z" />
-                      </svg>
-                    </button>
-                  </div>
+                  {fontSizeControlsFragment}
                   <button
                     type="button"
                     title="フォントサイズ設定を閉じる"
@@ -3121,6 +3033,7 @@ export default function RealDataSankeyPage() {
                 </div>
               )}
             </div>
+            )}
 
           {/* DOM tooltip — link hover */}
           {hoveredLink && !hoveredNode && !suppressHoverPopup && (() => {
@@ -4036,18 +3949,13 @@ export default function RealDataSankeyPage() {
         </div>
       )}
 
-      {/* Year selector — top center */}
+      {/* Year selector — top center（スマホ幅では検索ボックスに隠れるため設定ダイアログへ移動） */}
+      {!isCompactWidth && (
       <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}>
         <select
           data-testid={testId('year-select')}
           value={year}
-          onChange={e => {
-            pendingHistoryAction.current = 'replace';
-            pendingYearSelectionRef.current = selectedNode
-              ? { type: selectedNode.type, name: selectedNode.name, projectId: selectedNode.projectId }
-              : null;
-            setYear(e.target.value as '2024' | '2025');
-          }}
+          onChange={e => handleYearChange(e.target.value as '2024' | '2025')}
           style={{ fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
         >
           <option value="2025">2025年度</option>
@@ -4058,6 +3966,7 @@ export default function RealDataSankeyPage() {
           <path d="M7 10l5 5 5-5z"/>
         </svg>
       </div>
+      )}
 
       {/* Search box — top left */}
       <div
@@ -4451,8 +4360,10 @@ export default function RealDataSankeyPage() {
           if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
         };
         return (
-          <div style={{ position: 'absolute', top: 12, right: 52, zIndex: 15, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
+          <div style={ isCompactWidth
+            ? { position: 'absolute', bottom: 12, left: isLandscapeCompact && selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 8 : 8, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)', transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }
+            : { position: 'absolute', top: 12, right: 52, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' } }>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
             {/* Row 1: オフセットスライダー（2列スパン） */}
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}>
               {/* オフセット対象コンボボックス */}
@@ -4465,8 +4376,9 @@ export default function RealDataSankeyPage() {
                 <option value="project">事業</option>
                 <option value="recipient">支出先</option>
               </select>
-              <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ color: '#555', fontSize: META_FONT_PX }}>Top</span>
+              <label style={{ flex: isCompactWidth ? '0 0 auto' : 1, display: 'flex', alignItems: 'center', gap: 4 }}>
+                {/* スマホ幅では「Top」ラベルを省き数値だけ表示 */}
+                {!isCompactWidth && <span style={{ color: '#555', fontSize: META_FONT_PX }}>Top</span>}
                 {isEditingOffset ? (
                   <input
                     type="number"
@@ -4487,151 +4399,46 @@ export default function RealDataSankeyPage() {
                 )}
                 <span style={{ color: '#999', fontSize: META_FONT_PX }}>〜{activeRangeEnd}</span>
                 <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: 60 }} />
-                <span style={{ color: '#999', fontSize: META_FONT_PX }}>/{activeTotalCount}件</span>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
+                {/* 総件数表示は幅を取るためスマホ幅では非表示 */}
+                {!isCompactWidth && <span style={{ color: '#999', fontSize: META_FONT_PX }}>/{activeTotalCount}件</span>}
+                <div style={{ display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center' }}>
                   {([
-                    [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '次へ'],
-                    [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '前へ'],
+                    [-1, 'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z', '前へ'],
+                    [1,  'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z', '次へ'],
                   ] as [number, string, string][]).map(([delta, path, title]) => (
                     <button key={delta} title={title} aria-label={title}
                       data-testid={testId(delta > 0 ? 'recipient-offset-next' : 'recipient-offset-prev')}
-                      onPointerDown={(e) => {
-                        if (e.pointerType === 'mouse' && e.button !== 0) return;
-                        e.stopPropagation();
-                        e.currentTarget.setPointerCapture(e.pointerId);
-                        const step = () => {
-                          pendingHistoryAction.current = 'replace';
-                          pendingFocusId.current = null;
-                          if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
-                          else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
-                        };
-                        stopOffsetRepeat();
-                        step();
-                        offsetRepeatRef.current = setTimeout(() => {
-                          offsetRepeatRef.current = setInterval(step, 150);
-                        }, 400);
-                      }}
-                      onPointerUp={(e) => { e.stopPropagation(); stopOffsetRepeat(); }}
-                      onPointerLeave={stopOffsetRepeat}
-                      onPointerCancel={stopOffsetRepeat}
+                      {...offsetRepeat(() => {
+                        pendingHistoryAction.current = 'replace';
+                        pendingFocusId.current = null;
+                        if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
+                        else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
+                      }, { stopPropagation: true })}
                       onClick={(e) => {
                         if (e.detail === 0) {
                           setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta)));
                         }
                       }}
-                      style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none', touchAction: 'none' }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" height={scaleSize(14)} width={scaleSize(14)} viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
                     </button>
                   ))}
                 </div>
                 {/* Material Icons: vertical_align_top — オフセットリセット */}
                 <button onClick={e => { e.preventDefault(); setActiveOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none', touchAction: 'none' }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" height={scaleSize(14)} width={scaleSize(14)} viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
                 </button>
               </label>
             </div>
-            {/* Row 2: 事業・支出先 TopN スライダー（各グリッドセル） */}
-            {showTopNSliders && <>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-                <span style={{ color: '#555', fontSize: META_FONT_PX, whiteSpace: 'nowrap' }}>事業</span>
-                <input
-                  type="range" min={1} max={300} step={1}
-                  value={localTopProject ?? topProject}
-                  onChange={e => { setLocalTopProject(Number(e.target.value)); }}
-                  onPointerUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
-                  onTouchEnd={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
-                  onKeyUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
-                  onBlur={e => { if (localTopProject === null) return; const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); setLocalTopProject(null); }}
-                  style={{ flex: 1, minWidth: 0, width: 0 }}
-                />
-                {isEditingTopProject ? (
-                  <input type="number" autoFocus min={1} max={300} step={1}
-                    value={topProjectInputValue}
-                    onChange={e => setTopProjectInputValue(e.target.value)}
-                    onBlur={() => { const v = Number(topProjectInputValue); if (!isNaN(v) && v >= 1) { pendingHistoryAction.current = 'replace'; setTopProject(Math.max(1, Math.min(300, v))); } setIsEditingTopProject(false); }}
-                    onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
-                    style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: META_FONT_PX }}
-                  />
-                ) : (
-                  <button onClick={() => { setTopProjectInputValue(String(topProject)); setIsEditingTopProject(true); }} title="クリックして直接入力"
-                    style={{ color: '#999', fontSize: META_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
-                  >{localTopProject ?? topProject}</button>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
-                  {([
-                    [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '増やす'],
-                    [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '減らす'],
-                  ] as [number, string, string][]).map(([delta, path, title]) => (
-                    <button key={delta} title={title} aria-label={title}
-                      onPointerDown={(e) => {
-                        if (e.pointerType === 'mouse' && e.button !== 0) return;
-                        e.currentTarget.setPointerCapture(e.pointerId);
-                        const step = () => { pendingHistoryAction.current = 'replace'; setTopProject(prev => Math.max(1, Math.min(300, prev + delta))); };
-                        stopTopNRepeat(); step();
-                        topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
-                      }}
-                      onPointerUp={stopTopNRepeat} onPointerLeave={stopTopNRepeat} onPointerCancel={stopTopNRepeat}
-                      onClick={(e) => { if (e.detail === 0) { pendingHistoryAction.current = 'replace'; setTopProject(prev => Math.max(1, Math.min(300, prev + delta))); } }}
-                      style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
-                    </button>
-                  ))}
-                </div>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
-                <span style={{ color: '#555', fontSize: META_FONT_PX, whiteSpace: 'nowrap' }}>支出先</span>
-                <input
-                  type="range" min={1} max={300} step={1}
-                  value={localTopRecipient ?? topRecipient}
-                  onChange={e => { setLocalTopRecipient(Number(e.target.value)); }}
-                  onPointerUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
-                  onTouchEnd={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
-                  onKeyUp={e => { const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
-                  onBlur={e => { if (localTopRecipient === null) return; const v = Number((e.target as HTMLInputElement).value); pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); setLocalTopRecipient(null); }}
-                  style={{ flex: 1, minWidth: 0, width: 0 }}
-                />
-                {isEditingTopRecipient ? (
-                  <input type="number" autoFocus min={1} max={300} step={1}
-                    value={topRecipientInputValue}
-                    onChange={e => setTopRecipientInputValue(e.target.value)}
-                    onBlur={() => { const v = Number(topRecipientInputValue); if (!isNaN(v) && v >= 1) { pendingHistoryAction.current = 'replace'; setTopRecipient(Math.max(1, Math.min(300, v))); } setIsEditingTopRecipient(false); }}
-                    onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
-                    style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: META_FONT_PX }}
-                  />
-                ) : (
-                  <button onClick={() => { setTopRecipientInputValue(String(topRecipient)); setIsEditingTopRecipient(true); }} title="クリックして直接入力"
-                    style={{ color: '#999', fontSize: META_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
-                  >{localTopRecipient ?? topRecipient}</button>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
-                  {([
-                    [1,  'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '増やす'],
-                    [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '減らす'],
-                  ] as [number, string, string][]).map(([delta, path, title]) => (
-                    <button key={delta} title={title} aria-label={title}
-                      onPointerDown={(e) => {
-                        if (e.pointerType === 'mouse' && e.button !== 0) return;
-                        e.currentTarget.setPointerCapture(e.pointerId);
-                        const step = () => { pendingHistoryAction.current = 'replace'; setTopRecipient(prev => Math.max(1, Math.min(300, prev + delta))); };
-                        stopTopNRepeat(); step();
-                        topNRepeatRef.current = setTimeout(() => { topNRepeatRef.current = setInterval(step, 150); }, 400);
-                      }}
-                      onPointerUp={stopTopNRepeat} onPointerLeave={stopTopNRepeat} onPointerCancel={stopTopNRepeat}
-                      onClick={(e) => { if (e.detail === 0) { pendingHistoryAction.current = 'replace'; setTopRecipient(prev => Math.max(1, Math.min(300, prev + delta))); } }}
-                      style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none' }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
-                    </button>
-                  ))}
-                </div>
-              </label>
-            </>}
+            {/* Row 2: 事業・支出先 TopN スライダー（スマホ幅では設定ダイアログへ移動） */}
+            {!isCompactWidth && showTopNSliders && topNSlidersFragment}
           </div>
-          {/* トグルボタン（パネル外・下部） */}
+          {/* トグルボタン（パネル外・下部）— スマホ幅では設定ダイアログにTopNを移すため非表示 */}
+          {!isCompactWidth && (
           <button
             onClick={() => setShowTopNSliders(s => !s)}
             title={showTopNSliders ? 'TopN設定 を隠す' : 'TopN設定 を表示'}
@@ -4641,12 +4448,13 @@ export default function RealDataSankeyPage() {
               <path d={showTopNSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
             </svg>
           </button>
+          )}
           </div>
         );
       })()}
 
-      {/* Settings button — independent, top right */}
-      <div style={{ position: 'absolute', top: 14, right: 12, zIndex: 15 }}>
+      {/* Settings button — independent, top right（ダイアログを最前面にするため高いzIndex） */}
+      <div style={{ position: 'absolute', top: 14, right: 12, zIndex: 200 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
           aria-label="表示設定を開く"
@@ -4664,6 +4472,36 @@ export default function RealDataSankeyPage() {
           <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
             <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, minWidth: 240, maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
+              {/* スマホ幅: 検索ボックスに隠れるため移動した年度選択 */}
+              {isCompactWidth && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
+                  <span style={{ color: '#555', fontWeight: 600 }}>年度</span>
+                  <select
+                    data-testid={testId('year-select-settings')}
+                    value={year}
+                    onChange={e => handleYearChange(e.target.value as '2024' | '2025')}
+                    style={{ fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }}
+                    data-pan-disabled
+                  >
+                    <option value="2025">2025年度</option>
+                    <option value="2024">2024年度</option>
+                  </select>
+                </div>
+              )}
+              {/* スマホ幅: オフセットパネルから移動したTopNスライダー */}
+              {isCompactWidth && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
+                  <span style={{ color: '#555', fontWeight: 600 }}>表示件数（TopN）</span>
+                  {topNSlidersFragment}
+                </div>
+              )}
+              {/* スマホ幅: 左下から移動した基準フォントサイズ調整 */}
+              {isCompactWidth && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
+                  <span style={{ color: '#555', fontWeight: 600 }}>文字サイズ</span>
+                  {fontSizeControlsFragment}
+                </div>
+              )}
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                 <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
                 <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
