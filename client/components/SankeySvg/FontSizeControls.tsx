@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import { useRepeatPress } from './useRepeatPress';
+import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
 
 // [delta, SVGパス, ラベル]
 const ARROW_PATHS: [number, string, string][] = [

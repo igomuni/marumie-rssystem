@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import { useRepeatPress } from './useRepeatPress';
+import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
 
 const TOP_MIN = 1;
 const TOP_MAX = 300;
@@ -36,6 +36,8 @@ function TopNSliderRow({ label, value, setValue, markReplace, metaFontPx }: TopN
         value={local ?? value}
         onChange={e => { setLocal(Number(e.target.value)); }}
         onPointerUp={e => { commit(Number((e.target as HTMLInputElement).value)); setLocal(null); }}
+        onPointerCancel={() => { setLocal(null); }}
+        onLostPointerCapture={() => { setLocal(null); }}
         onTouchEnd={e => { commit(Number((e.target as HTMLInputElement).value)); setLocal(null); }}
         onKeyUp={e => { commit(Number((e.target as HTMLInputElement).value)); setLocal(null); }}
         onBlur={e => { if (local === null) return; commit(Number((e.target as HTMLInputElement).value)); setLocal(null); }}

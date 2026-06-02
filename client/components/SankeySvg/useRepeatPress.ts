@@ -3,18 +3,35 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { PointerEvent as ReactPointerEvent, SyntheticEvent } from 'react';
 
+// 複数の useRepeatPress インスタンスが同時に押下される場合に備え、参照カウントで
+// 管理し、最初の抑止開始時に既存の body インラインスタイルを退避、最後の解除時に復元する。
+const selectionSuppressionState = {
+  depth: 0,
+  userSelect: '',
+  webkitUserSelect: '',
+  webkitTouchCallout: '',
+};
+
 /** 押下中だけ全体のテキスト選択/コールアウト（モバイルの長押し）を抑止する */
 function setSelectionSuppressed(on: boolean) {
   if (typeof document === 'undefined') return;
   const b = document.body;
   if (on) {
+    if (selectionSuppressionState.depth++ === 0) {
+      selectionSuppressionState.userSelect = b.style.userSelect;
+      selectionSuppressionState.webkitUserSelect = b.style.getPropertyValue('-webkit-user-select');
+      selectionSuppressionState.webkitTouchCallout = b.style.getPropertyValue('-webkit-touch-callout');
+    }
     b.style.userSelect = 'none';
     b.style.setProperty('-webkit-user-select', 'none');
     b.style.setProperty('-webkit-touch-callout', 'none');
   } else {
-    b.style.userSelect = '';
-    b.style.removeProperty('-webkit-user-select');
-    b.style.removeProperty('-webkit-touch-callout');
+    if (selectionSuppressionState.depth === 0 || --selectionSuppressionState.depth > 0) return;
+    b.style.userSelect = selectionSuppressionState.userSelect;
+    if (selectionSuppressionState.webkitUserSelect) b.style.setProperty('-webkit-user-select', selectionSuppressionState.webkitUserSelect);
+    else b.style.removeProperty('-webkit-user-select');
+    if (selectionSuppressionState.webkitTouchCallout) b.style.setProperty('-webkit-touch-callout', selectionSuppressionState.webkitTouchCallout);
+    else b.style.removeProperty('-webkit-touch-callout');
     (typeof window !== 'undefined' ? window.getSelection?.() : null)?.removeAllRanges();
   }
 }
