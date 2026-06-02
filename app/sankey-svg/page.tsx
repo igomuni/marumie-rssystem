@@ -318,6 +318,8 @@ export default function RealDataSankeyPage() {
   // 入力デバイス（pointer:coarse）ではなく幅で判定することで、タッチ対応ノートPC等の
   // 誤判定を避け、初期値1200=デスクトップ表示から安全側に倒す。
   const isCompactWidth = svgWidth <= COMPACT_CONTROL_MAX_WIDTH;
+  // スマホ横（コンパクト幅かつ横長）: オフセットコントロールをサイドパネルでスライドさせる
+  const isLandscapeCompact = isCompactWidth && svgWidth > svgHeight;
 
   useEffect(() => {
     const updateSize = () => {
@@ -2504,9 +2506,7 @@ export default function RealDataSankeyPage() {
       + `L${tx},${tBot}C${mx},${tBot} ${mx},${sBot} ${sx},${sBot}Z`;
   };
 
-  // スマホ幅では検索ボックスをサイドパネルで横シフトさせず、オフセットコントロールと
-  // 左端(8px)を揃える（どちらも前面表示）。デスクトップは従来どおりパネル分シフト。
-  const searchLeftOffset = !isCompactWidth && selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth : 0;
+  const searchLeftOffset = selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth : 0;
   // 右上の設定(⋮)ボタン領域(幅32+余白)に重ならないよう右側を確保。
   // これがないと文字拡大時に検索ボックスが設定ボタンを覆い、タップで開けなくなる。
   const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 64px)`;
@@ -3972,7 +3972,7 @@ export default function RealDataSankeyPage() {
       <div
         ref={searchBoxRef}
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: isCompactWidth ? 8 : (selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12), zIndex: 100, width: SEARCH_BOX_WIDTH_PX, maxWidth: searchMaxWidth, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: SEARCH_BOX_WIDTH_PX, maxWidth: searchMaxWidth, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
       >
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -4361,7 +4361,7 @@ export default function RealDataSankeyPage() {
         };
         return (
           <div style={ isCompactWidth
-            ? { position: 'absolute', bottom: 12, left: 8, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)' }
+            ? { position: 'absolute', bottom: 12, left: isLandscapeCompact && selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 8 : 8, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)', transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }
             : { position: 'absolute', top: 12, right: 52, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' } }>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
             {/* Row 1: オフセットスライダー（2列スパン） */}
