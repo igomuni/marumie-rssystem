@@ -109,7 +109,7 @@ const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
 const HOVER_ENTER_DELAY_MS = 220;
 const TOUCH_PAN_SLOP_PX = 10;
 const FIT_TOP_PAD_PX = 32;
-const ZOOM_FONT_MAX_RATIO = 1.8;   // zoom-in でフォントを最大で元の何倍まで拡大するか
+const ZOOM_FONT_MAX_RATIO = 2.0;   // zoom-in でフォントを最大で元の何倍まで拡大するか
 const AGGREGATE_BOUNDARY_GAP_PX = 6;
 
 type ShiftLayoutNode = {
@@ -1125,6 +1125,11 @@ export default function RealDataSankeyPage() {
   // スマホ幅ではミニマップを表示しない（実機の縦横ともに画面が狭く有用性が低いため）
   const minimapVisible = showMinimap && !isCompactWidth;
   const searchBoxRef = useRef<HTMLDivElement>(null);
+  const filterPanelRef = useRef<HTMLDivElement>(null);
+  // スマホ縦のとき、サイドパネルのリスト下端がオフセットコントロールに隠れないよう
+  // コントロールの実高を計測してリストの下パディングを確保する。
+  const offsetControlRef = useRef<HTMLDivElement>(null);
+  const [offsetControlHeight, setOffsetControlHeight] = useState(0);
 
   // Layout constants for bottom-right widgets the dropdown must clear
   const MINIMAP_BOTTOM = 8;       // minimap wrapper bottom offset
@@ -1135,14 +1140,19 @@ export default function RealDataSankeyPage() {
   const DROPDOWN_GAP = 12;        // gap between search box bottom and dropdown top
 
   const [searchBoxBottom, setSearchBoxBottom] = useState(52); // 12 (top) + ~40 (approx height)
+  // 展開中のフィルタパネルの実高。列ヘッダーの基準位置を「フィルタ非展開時」に固定するため使う。
+  const [filterPanelHeight, setFilterPanelHeight] = useState(0);
   useLayoutEffect(() => {
     const measure = () => {
       const r = searchBoxRef.current?.getBoundingClientRect();
       if (r) setSearchBoxBottom(r.bottom);
+      const fr = filterPanelRef.current?.getBoundingClientRect();
+      setFilterPanelHeight(fr ? fr.height : 0);
     };
     measure();
     const ro = new ResizeObserver(measure);
     if (searchBoxRef.current) ro.observe(searchBoxRef.current);
+    if (filterPanelRef.current) ro.observe(filterPanelRef.current);
     return () => ro.disconnect();
   }, [showFilterPanel]);
 
@@ -1314,6 +1324,19 @@ export default function RealDataSankeyPage() {
     const clampedOffset = Math.min(recipientOffset, maxOffset);
     return filterTopN(nodes, edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, true, showAggRecipient, showAggProject, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, projectSortBy);
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, filterExcludedIds]);
+
+  // オフセットコントロールの実高を計測（スマホ縦のリスト下パディング用）。
+  // 再購読はコントロールのマウント/アンマウント時のみで十分。サイズ変化は ResizeObserver が拾う。
+  const offsetControlMounted = filtered != null;
+  useLayoutEffect(() => {
+    const el = offsetControlRef.current;
+    if (!el) { setOffsetControlHeight(0); return; }
+    const measure = () => setOffsetControlHeight(el.getBoundingClientRect().height);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [offsetControlMounted]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -2901,7 +2924,10 @@ export default function RealDataSankeyPage() {
                 // ラベルの上限位置は検索ボックスの実測下端に合わせる。
                 // 静的なSEARCH_BOX_RESERVE(モバイル92/デスクトップ56)だと
                 // モバイルで一律に下げ過ぎるため、実際の検索ボックス高さに追従させる。
-                const top = Math.max(searchBoxBottom + 4, topNodeScreenY - labelBlockH - 8);
+                // フィルタ展開時も列ヘッダーの位置を固定する。
+                // searchBoxBottom はフィルタパネル込みの実測値なので、その実高を差し引いて
+                // 「フィルタ非展開時の下端」を基準にする（フィルタパネルは zIndex で前面に重なる）。
+                const top = Math.max(searchBoxBottom - filterPanelHeight + 4, topNodeScreenY - labelBlockH - 8);
                 return (
                   <div
                     key={i}
@@ -3902,7 +3928,8 @@ export default function RealDataSankeyPage() {
                       </button>
                     </div>
                     {/* Tab content */}
-                    <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
+                    {/* スマホ縦では下端のオフセットコントロールに最終行が隠れるため、その実高ぶん下に余白を確保 */}
+                    <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto', paddingBottom: isCompactWidth && !isLandscapeCompact ? offsetControlHeight + 24 : 10 }}>
                       {/* 省庁タブ */}
                       {panelTab === 'ministry' && (() => {
                         const items = panelSections.ministries;
@@ -3969,10 +3996,12 @@ export default function RealDataSankeyPage() {
       )}
 
       {/* Search box — top left */}
+      {/* zIndex は サイドパネル(25) より下。列ヘッダー(8)/年度(15)/設定ダイアログ(19) より上、
+          かつ展開したフィルタを含めてサイドパネルの背面に回す（パネル展開時は横へ退避するため実害は少ない）。 */}
       <div
         ref={searchBoxRef}
         data-pan-disabled="true"
-        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 100, width: SEARCH_BOX_WIDTH_PX, maxWidth: searchMaxWidth, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
+        style={{ position: 'absolute', top: 12, left: selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 12 : 12, zIndex: 20, width: SEARCH_BOX_WIDTH_PX, maxWidth: searchMaxWidth, transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}
       >
         {/* Row 1: 検索セクション（input+sliders+toggle）とフィルタボタン */}
         <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
@@ -4058,7 +4087,7 @@ export default function RealDataSankeyPage() {
 
             {/* フィルタ（card内部 — TopNのshowTopNSliders && <> に相当） */}
             {showFilterPanel && (
-              <div style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div ref={filterPanelRef} style={{ padding: '4px 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {/* 会計区分フィルタ（コンボボックス） */}
                 {(() => {
                   const acOptions = [
@@ -4109,7 +4138,8 @@ export default function RealDataSankeyPage() {
                               </label>
                             ))}
                           </div>,
-                          document.body
+                          // body直下ではなく検索ボックス(zIndex:20)内へportalし、サイドパネル(zIndex:25)の背面に収める
+                          searchBoxRef.current ?? document.body
                         )}
                       </div>
                       {!acAllSelected && (
@@ -4162,7 +4192,8 @@ export default function RealDataSankeyPage() {
                               </label>
                             ))}
                           </div>,
-                          document.body
+                          // body直下ではなく検索ボックス(zIndex:20)内へportalし、サイドパネル(zIndex:25)の背面に収める
+                          searchBoxRef.current ?? document.body
                         )}
                       </div>
                       {!allSelected && (
@@ -4360,7 +4391,7 @@ export default function RealDataSankeyPage() {
           if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
         };
         return (
-          <div style={ isCompactWidth
+          <div ref={offsetControlRef} style={ isCompactWidth
             ? { position: 'absolute', bottom: 12, left: isLandscapeCompact && selectedNodeId !== null && !isPanelCollapsed ? sidePanelWidth + 8 : 8, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)', transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }
             : { position: 'absolute', top: 12, right: 52, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' } }>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
