@@ -1325,7 +1325,9 @@ export default function RealDataSankeyPage() {
     return filterTopN(nodes, edges, topMinistry, topProject, topRecipient, clampedOffset, pinnedProjectId, true, showAggRecipient, showAggProject, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, projectSortBy);
   }, [graphData, topMinistry, topProject, topRecipient, recipientOffset, pinnedProjectId, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, pinnedRecipientId, pinnedMinistryName, offsetTarget, projectOffset, filterExcludedIds]);
 
-  // オフセットコントロールの実高を計測（スマホ縦のリスト下パディング用）
+  // オフセットコントロールの実高を計測（スマホ縦のリスト下パディング用）。
+  // 再購読はコントロールのマウント/アンマウント時のみで十分。サイズ変化は ResizeObserver が拾う。
+  const offsetControlMounted = filtered != null;
   useLayoutEffect(() => {
     const el = offsetControlRef.current;
     if (!el) { setOffsetControlHeight(0); return; }
@@ -1334,7 +1336,7 @@ export default function RealDataSankeyPage() {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [filtered, isCompactWidth, selectedNodeId, offsetTarget, topRecipient, topProject]);
+  }, [offsetControlMounted]);
 
   const layout = useMemo(() => {
     if (!filtered) return null;
@@ -4136,7 +4138,8 @@ export default function RealDataSankeyPage() {
                               </label>
                             ))}
                           </div>,
-                          document.body
+                          // body直下ではなく検索ボックス(zIndex:20)内へportalし、サイドパネル(zIndex:25)の背面に収める
+                          searchBoxRef.current ?? document.body
                         )}
                       </div>
                       {!acAllSelected && (
@@ -4189,7 +4192,8 @@ export default function RealDataSankeyPage() {
                               </label>
                             ))}
                           </div>,
-                          document.body
+                          // body直下ではなく検索ボックス(zIndex:20)内へportalし、サイドパネル(zIndex:25)の背面に収める
+                          searchBoxRef.current ?? document.body
                         )}
                       </div>
                       {!allSelected && (
