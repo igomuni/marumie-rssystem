@@ -13,6 +13,7 @@ import type {
 } from '@/types/subcontract';
 import type { ProjectDetail } from '@/types/project-details';
 import { ProjectReferenceLinks } from '@/components/subcontracts/ProjectReferenceLinks';
+import { buildRecipientKey, isExcludedRecipientName } from '@/app/lib/recipient-key';
 import {
   computeSubcontractLayout,
   backEdgePath,
@@ -634,6 +635,7 @@ function SidePane({
                     onToggle={() => toggleRecipient(i)}
                     totalAmount={block.totalAmount}
                     barColor={originPalette(block.originKind).header}
+                    year={year}
                   />
                 ))}
                 {sortedRecipients.length === 0 && (
@@ -818,15 +820,19 @@ function FlowListRow({
 }
 
 function RecipientCard({
-  recipient, expanded, onToggle, totalAmount, barColor,
+  recipient, expanded, onToggle, totalAmount, barColor, year,
 }: {
   recipient: BlockRecipient;
   expanded: boolean;
   onToggle: () => void;
   totalAmount: number;
   barColor: string;
+  year: number;
 }) {
   const hasDetails = recipient.contractSummaries.length > 0 || recipient.expenses.length > 0;
+  const profileKey = isExcludedRecipientName(recipient.name)
+    ? null
+    : buildRecipientKey(recipient.name, recipient.corporateNumber);
   const share = totalAmount > 0 ? Math.max(2, Math.min(100, (recipient.amount / totalAmount) * 100)) : 0;
 
   return (
@@ -856,9 +862,20 @@ function RecipientCard({
             </div>
             <div style={{ color: '#999', fontSize: PANEL_META_FONT_PX, whiteSpace: 'nowrap' }}>構成比 {percentOf(recipient.amount, totalAmount)}</div>
           </div>
-          {recipient.corporateNumber && (
-            <div style={{ color: '#aaa', fontSize: PANEL_META_FONT_PX, marginTop: 1 }}>法人番号: {recipient.corporateNumber}</div>
-          )}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', marginTop: 1 }}>
+            {recipient.corporateNumber && (
+              <span style={{ color: '#aaa', fontSize: PANEL_META_FONT_PX }}>法人番号: {recipient.corporateNumber}</span>
+            )}
+            {profileKey && (
+              <Link
+                href={`/recipients/${encodeURIComponent(profileKey)}?year=${year}`}
+                onClick={(e) => e.stopPropagation()}
+                style={{ color: '#2563eb', fontSize: PANEL_META_FONT_PX, whiteSpace: 'nowrap' }}
+              >
+                支出先プロフィール →
+              </Link>
+            )}
+          </div>
         </div>
         {hasDetails && (
           <span style={{ color: '#aaa', fontSize: 12, marginTop: 1, flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>

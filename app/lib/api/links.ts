@@ -15,7 +15,7 @@ export function projectLinks(pid: string | number, year?: string): {
     detail: `/api/project-details/${pid}${y}`,
     subcontracts: `/api/subcontracts/${pid}${y}`,
     qualityRecipients: `/api/quality-scores/recipients?pid=${pid}${yAmp}`,
-    web: `/subcontracts/${pid}`,
+    web: `/subcontracts/${pid}${y}`,
   };
 }
 
@@ -27,7 +27,7 @@ export function recipientLinks(key: string, year?: string): {
   const encoded = encodeURIComponent(key);
   return {
     recipient: `/api/recipients/${encoded}${y}`,
-    web: `/recipients/${encoded}`,
+    web: `/recipients/${encoded}${y}`,
   };
 }
 
