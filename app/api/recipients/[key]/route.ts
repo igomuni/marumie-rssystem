@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loadRecipientIndex } from '@/app/lib/api/recipient-index-loader';
+import { resolveRecipient } from '@/app/lib/api/recipient-index-loader';
 import { parseYear, buildMetadata, API_CACHE_CONTROL, RECIPIENT_NOTES } from '@/app/lib/api/api-notes';
 import { projectLinks, externalCorporateLinks } from '@/app/lib/api/links';
 
@@ -22,8 +22,7 @@ export async function GET(
       Math.max(1, parseInt(request.nextUrl.searchParams.get('limit') ?? '', 10) || DEFAULT_LIMIT)
     );
 
-    const index = loadRecipientIndex(year);
-    const entry = index.recipients[key];
+    const entry = resolveRecipient(year, key);
     if (!entry) {
       return NextResponse.json(
         { error: `Recipient not found: ${key}`, hint: '/api/search/recipients?q= で検索できます' },

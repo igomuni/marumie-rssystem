@@ -11,6 +11,7 @@ import {
   getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen, sortPriority,
 } from '@/app/lib/sankey-svg-constants';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
+import { normalizeRecipientName, isExcludedRecipientName } from '@/app/lib/recipient-key';
 import { TopNSliders } from '@/client/components/SankeySvg/TopNSliders';
 import { FontSizeControls } from '@/client/components/SankeySvg/FontSizeControls';
 import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
@@ -3458,6 +3459,19 @@ export default function RealDataSankeyPage() {
                   )}
                   {selectedNode.ministry && selectedNode.type !== 'ministry' && (
                     <span style={{ fontSize: META_FONT_PX, color: '#666' }}>{selectedNode.ministry}</span>
+                  )}
+                  {selectedNode.type === 'recipient' && !selectedNode.aggregated && !isExcludedRecipientName(selectedNode.name) && (
+                    <a
+                      href={`/recipients/${encodeURIComponent(`name:${normalizeRecipientName(selectedNode.name)}`)}?year=${year}`}
+                      target="_blank" rel="noopener noreferrer"
+                      title="支出先プロフィールを見る"
+                      style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#4a90d9', textDecoration: 'none', fontSize: META_FONT_PX, flexShrink: 0 }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#4a90d9">
+                        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H520v-80h320v320h-80v-184L388-332Z"/>
+                      </svg>
+                      プロフィール
+                    </a>
                   )}
                 </div>
               </div>
