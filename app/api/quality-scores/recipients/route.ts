@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import * as fs from 'fs';
 import * as path from 'path';
+import { parseYear, buildMetadata, API_CACHE_CONTROL } from '@/app/lib/api/api-notes';
+import { projectLinks } from '@/app/lib/api/links';
 
 // フィールド名は短縮形（JSONサイズ削減のため）
 // n=name, b=blockNo, s=status, c=cnFilled, o=opaque
@@ -39,6 +41,21 @@ function loadData(year: string): Record<string, RecipientRow[]> {
   return data;
 }
 
+/** 短縮フィールド名の凡例（AI・外部利用者向け） */
+const FIELD_LEGEND = {
+  n: 'name（支出先名）',
+  b: 'blockNo（ブロックNo）',
+  s: 'status（valid|gov|supp|invalid|unknown）',
+  c: 'cnFilled（法人番号充足）',
+  o: 'opaque（不透明支出）',
+  a2: 'amount（個別支出額・1円単位）',
+  r: 'isRoot（ルート行）',
+  chain: 'ブロック委託チェーン（"組織→A→C"）',
+  d: '委託深度',
+  role: '事業を行う上での役割（ブロック単位）',
+  cc: '契約概要',
+} as const;
+
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
@@ -46,10 +63,19 @@ export async function GET(req: Request) {
     if (!pid) {
       return NextResponse.json({ error: 'pid パラメータが必要です' }, { status: 400 });
     }
-    const year = url.searchParams.get('year') ?? '2024';
+    const year = parseYear(url.searchParams.get('year'));
+    if (year === null) {
+      return NextResponse.json({ error: '対応していない年度です（2024 | 2025）' }, { status: 400 });
+    }
 
     const data = loadData(year);
-    return NextResponse.json(data[pid] ?? []);
+    const body = {
+      metadata: buildMetadata(year, { pid }),
+      fieldLegend: FIELD_LEGEND,
+      links: projectLinks(pid, year),
+      rows: data[pid] ?? [],
+    };
+    return NextResponse.json(body, { headers: { 'Cache-Control': API_CACHE_CONTROL } });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : String(e) },
