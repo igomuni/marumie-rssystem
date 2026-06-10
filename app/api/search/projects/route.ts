@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { loadQualityScores } from '@/app/lib/api/quality-scores-loader';
 import { searchProjects } from '@/app/lib/search/project-search';
 import { parseYear, buildMetadata, API_CACHE_CONTROL } from '@/app/lib/api/api-notes';
-import { projectLinks } from '@/app/lib/api/links';
+import { projectLinks, sankeyProjectViewLink } from '@/app/lib/api/links';
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
@@ -39,7 +39,10 @@ export async function GET(req: Request) {
         hasRedelegation: i.hasRedelegation,
         redelegationDepth: i.redelegationDepth,
         totalScore: i.totalScore,
-        links: projectLinks(i.pid, year),
+        links: {
+          ...projectLinks(i.pid, year),
+          sankeyView: sankeyProjectViewLink(i.name, year),
+        },
       })),
       links: {
         next: nextOffset != null

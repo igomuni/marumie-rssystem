@@ -31,6 +31,20 @@ export function recipientLinks(key: string, year?: string): {
   };
 }
 
+/**
+ * /sankey-svg の名前フィルタ（既存機能）へのディープリンク。
+ * fnp=事業名フィルタ, fnr=支出先名フィルタ, fp=1 でフィルタパネルを開く。
+ */
+export function sankeyProjectViewLink(projectName: string, year?: string): string {
+  const yr = year ? `&yr=${year}` : '';
+  return `/sankey-svg?fnp=${encodeURIComponent(projectName)}&fp=1${yr}`;
+}
+
+export function sankeyRecipientViewLink(recipientName: string, year?: string): string {
+  const yr = year ? `&yr=${year}` : '';
+  return `/sankey-svg?fnr=${encodeURIComponent(recipientName)}&fp=1${yr}`;
+}
+
 /** 法人番号から外部サイト（gBizINFO）へのリンク */
 export function externalCorporateLinks(corporateNumber: string): { gbizinfo: string } | undefined {
   if (!/^\d{13}$/.test(corporateNumber)) return undefined;

@@ -101,6 +101,9 @@ function RecipientPageInner() {
           <Link href={`/recipients/${encodeURIComponent(key)}?year=${year === 2024 ? 2025 : 2024}`}>
             {year === 2024 ? 2025 : 2024}年度に切替
           </Link>
+          <Link href={`/sankey-svg?fnr=${encodeURIComponent(r.name)}&fp=1&yr=${year}`}>
+            サンキー図でこの支出先を見る →
+          </Link>
         </div>
         {r.aliases.length > 1 && (
           <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>

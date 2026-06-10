@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { loadRecipientIndex } from '@/app/lib/api/recipient-index-loader';
 import { searchRecipients } from '@/app/lib/search/recipient-search';
 import { parseYear, buildMetadata, API_CACHE_CONTROL, RECIPIENT_NOTES } from '@/app/lib/api/api-notes';
-import { recipientLinks } from '@/app/lib/api/links';
+import { recipientLinks, sankeyRecipientViewLink } from '@/app/lib/api/links';
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
@@ -34,7 +34,10 @@ export async function GET(req: Request) {
         subcontractAmount: e.totals.subcontractAmount,
         subcontractCount: e.totals.subcontractCount,
         projectCount: new Set(e.appearances.map(a => a.pid)).size,
-        links: recipientLinks(e.key, year),
+        links: {
+          ...recipientLinks(e.key, year),
+          sankeyView: sankeyRecipientViewLink(e.name, year),
+        },
       })),
     };
 
