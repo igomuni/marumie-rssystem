@@ -161,9 +161,6 @@ export default function RecipientSankey({ data }: { data: RecipientSankeyData })
                 textAnchor={anchor}
                 fontSize={11}
                 fill="#334155"
-                stroke="#fff"
-                strokeWidth={3}
-                paintOrder="stroke"
               >
                 {truncate(n.label, n.column === 1 ? 22 : 18)}
               </text>
