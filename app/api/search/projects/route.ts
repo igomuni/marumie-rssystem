@@ -38,7 +38,6 @@ export async function GET(req: Request) {
         spendTotal: i.spendTotal,
         hasRedelegation: i.hasRedelegation,
         redelegationDepth: i.redelegationDepth,
-        totalScore: i.totalScore,
         links: {
           ...projectLinks(i.pid, year),
           sankeyView: sankeyProjectViewLink(i.name, year),

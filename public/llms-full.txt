@@ -19,9 +19,8 @@
   metadata: { year, query, totalHits, limit, offset, unit, notes[] },
   items: [{
     pid: string, name, ministry, bureau,
-    budgetAmount, execAmount,          // 1円単位
+    budgetAmount, execAmount, spendTotal,   // 1円単位
     hasRedelegation: boolean, redelegationDepth: number,
-    totalScore: number | null,         // 品質スコア(0-100)
     links: { detail, subcontracts, web }
   }],
   links: { next: string | null }
