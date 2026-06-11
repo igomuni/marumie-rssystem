@@ -10,18 +10,18 @@ import type {
   RecipientSankeyNode,
 } from '@/app/lib/recipient-sankey-generator';
 import { formatYen } from '@/app/lib/format/yen';
+import { TYPE_COLORS, getLinkColor } from '@/app/lib/sankey-svg-constants';
 
-// 色は資金フローの種別にのみ使う（/subcontracts の COLOR_DIRECT / COLOR_SUBCONTRACT と同義）。
-// 発注側（府省庁・事業）は無彩色とし、ノード色は流入エッジの種別と一致させる。
-const COLORS = {
-  direct: '#d94545',
-  subcontract: '#e07040',
-  neutral: '#d4d8dd',
-  sourceNode: '#9ca3af',
-  center: '#333333',
-  downstreamNode: '#e07040',
-  aggregate: '#c4c9d0',
-} as const;
+// 色は本家 /sankey-svg と同一に揃える（単一ソース: TYPE_COLORS / getLinkColor）。
+// 列 → 本家ノードタイプの対応:
+//   0=府省庁→ministry, 1=事業→project-budget, 2=対象企業→recipient, 3=再委託先→recipient
+const COLUMN_TYPE = ['ministry', 'project-budget', 'recipient', 'recipient'] as const;
+const AGGREGATE_COLOR = '#999'; // 本家 getNodeColor の集約ノード色と同じ
+
+function nodeColor(n: RecipientSankeyNode): string {
+  if (n.isAggregate) return AGGREGATE_COLOR;
+  return TYPE_COLORS[COLUMN_TYPE[n.column]];
+}
 
 const VIEW_W = 960;
 const NODE_W = 12;
@@ -103,10 +103,11 @@ export default function RecipientSankey({ data }: { data: RecipientSankeyData })
       const x0 = s.x + NODE_W;
       const x1 = t.x;
       const mx = (x0 + x1) / 2;
+      // エッジ色は本家と同じく「流入先ノードのタイプ」を継承する
       pLinks.push({
         path: `M ${x0} ${sy} C ${mx} ${sy}, ${mx} ${ty}, ${x1} ${ty}`,
         width: w,
-        color: l.kind ? COLORS[l.kind] : COLORS.neutral,
+        color: getLinkColor({ target: { type: COLUMN_TYPE[t.column] } }),
         title: `${s.label} → ${t.label}: ${formatYen(l.value)}${l.kind === 'direct' ? '（直接受注）' : l.kind === 'subcontract' ? '（再委託受注）' : ''}`,
       });
     }
@@ -145,11 +146,7 @@ export default function RecipientSankey({ data }: { data: RecipientSankeyData })
               : n.recipientKey
                 ? `/recipients/${encodeURIComponent(n.recipientKey)}`
                 : undefined;
-          const fill =
-            n.id === 'center' ? COLORS.center
-            : n.isAggregate ? COLORS.aggregate
-            : n.column === 3 ? COLORS.downstreamNode
-            : COLORS.sourceNode;
+          const fill = nodeColor(n);
           const labelX = n.column === 0 ? n.x - 6 : n.x + NODE_W + 6;
           const anchor = n.column === 0 ? 'end' : 'start';
           const rect = (
@@ -183,12 +180,15 @@ export default function RecipientSankey({ data }: { data: RecipientSankeyData })
       </svg>
       <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#64748b', marginTop: 4, flexWrap: 'wrap' }}>
         <span>
-          <span style={{ color: COLORS.direct }}>■</span> 直接受注（事業→対象企業）
+          <span style={{ color: TYPE_COLORS['ministry'] }}>■</span> 府省庁
         </span>
         <span>
-          <span style={{ color: COLORS.subcontract }}>■</span> 再委託（元請経由の受注・対象企業からの委託）
+          <span style={{ color: TYPE_COLORS['project-budget'] }}>■</span> 事業
         </span>
-        <span>※ 左の受注額と右の再委託額は資金の次元が異なるため合算できません</span>
+        <span>
+          <span style={{ color: TYPE_COLORS['recipient'] }}>■</span> 支出先（対象企業・再委託先）
+        </span>
+        <span>※ 直接受注／再委託受注の別は下のサマリと出現事業の表を参照。左の受注額と右の再委託額は合算できません</span>
       </div>
     </div>
   );
