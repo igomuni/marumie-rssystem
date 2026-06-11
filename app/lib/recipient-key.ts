@@ -29,7 +29,8 @@ export function normalizeRecipientName(name: string): string {
 /** インデックス対象外の支出先名（集約行のため個社として扱えない） */
 export function isExcludedRecipientName(name: string): boolean {
   const n = name.normalize('NFKC').trim();
-  return n === '' || n === 'その他';
+  // 「その他」集約行は個社として扱わない。中文表記「其他」も念のため除外（現データには未出現）。
+  return n === '' || n === 'その他' || n === '其他';
 }
 
 /**

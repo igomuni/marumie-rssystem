@@ -21,9 +21,9 @@
     pid: string, name, ministry, bureau,
     budgetAmount, execAmount, spendTotal,   // 1円単位
     hasRedelegation: boolean, redelegationDepth: number,
-    links: { detail, subcontracts, web }
+    links: { detail, subcontracts, qualityRecipients, web, sankeyView }
   }],
-  links: { next: string | null }
+  links: { next: string | null }   // ページネーション用の次ページURL（無ければ null）
 }
 ```
 
@@ -40,7 +40,7 @@
     directAmount, directCount,         // 直接受注（事業からの直接支出）
     subcontractAmount, subcontractCount, // 再委託・別起点での受注
     projectCount: number,
-    links: { recipient, web }
+    links: { recipient, sankeyView }
   }]
 }
 ```

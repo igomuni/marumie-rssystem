@@ -46,8 +46,9 @@ export function sankeyRecipientViewLink(recipientName: string, year?: string): s
 
 /** 法人番号から外部サイト（gBizINFO）へのリンク */
 export function externalCorporateLinks(corporateNumber: string): { gbizinfo: string } | undefined {
-  if (!isValidCorporateNumber(corporateNumber)) return undefined;
+  const cn = corporateNumber.trim();
+  if (!isValidCorporateNumber(cn)) return undefined;
   return {
-    gbizinfo: `https://info.gbiz.go.jp/hojin/ichiran?hojinBango=${corporateNumber}`,
+    gbizinfo: `https://info.gbiz.go.jp/hojin/ichiran?hojinBango=${cn}`,
   };
 }
