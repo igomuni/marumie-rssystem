@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         // 生JSON（最大29MB）のクロールによる帯域消費を防ぐ。
-        // 一括取得は .gz（llms.txt で案内）を利用してもらう。
+        // 一括取得は /data/*.json.gz（gzip圧縮済み）を利用してもらう。
         disallow: ['/data/*.json', '/api/'],
       },
     ],
