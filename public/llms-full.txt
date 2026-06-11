@@ -111,19 +111,6 @@ key: 法人番号13桁 or "name:正規化名"。クエリ: year, limit（appeara
 
 委託チェーンの復元: flows の sourceBlock→targetBlock を辿る。sourceBlock=null は事業（国）起点。
 
-## GET /api/quality-scores
-
-全事業の品質スコア（約4MB）。事業インデックスとして利用可能。
-クエリ: year。応答: { items: [{ pid, name, ministry, budgetAmount, execAmount, hasRedelegation, redelegationDepth, totalScore, axis1..axis5, links }], summary }
-
-axis1=支出先名の有効率, axis2=法人番号充足率, axis3=予算執行整合, axis4=ブロック整合, axis5=不透明支出の少なさ
-
-## GET /api/quality-scores/recipients?pid={pid}
-
-支出行レベルの品質データ。フィールドは短縮名（応答の fieldLegend 参照）:
-n=支出先名, b=ブロックNo, s=状態(valid|gov|supp|invalid|unknown), c=法人番号充足, o=不透明,
-a2=金額, r=ルート行, chain=委託チェーン("組織→A→C"), d=委託深度, role=役割, cc=契約概要
-
 ## GET /api/sankey/mof-overview
 
 財務省予算全体（約556兆円）とRS対象範囲（151.1兆円）の関係を表すサンキーデータ。

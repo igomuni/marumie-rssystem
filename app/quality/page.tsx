@@ -53,7 +53,7 @@ function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreItem; on
     setShowAxisDetail(false);
     fetch(`/api/quality-scores/recipients?pid=${item.pid}&year=${year}`)
       .then(res => res.ok ? res.json() : Promise.reject())
-      .then((json: { rows: RecipientRow[] }) => setRecipients(json.rows))
+      .then((rows: RecipientRow[]) => setRecipients(rows))
       .catch(() => setRecipientsError(true));
   }, [item.pid, year]);
 

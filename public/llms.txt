@@ -39,10 +39,6 @@ year パラメータは 2024（デフォルト）/ 2025 に対応。
   事業の詳細（目的・現状課題・事業概要・予算・支出先ブロック）
 - GET /api/subcontracts/{pid}?year=2024
   事業の再委託ツリー（ブロック構造・法人番号・契約概要・委託フロー sourceBlock→targetBlock）
-- GET /api/quality-scores?year=2024
-  全事業の品質スコア一覧（約4MB。事業インデックスとしても利用可）
-- GET /api/quality-scores/recipients?pid={pid}&year=2024
-  事業内の支出先行レベル品質データ（フィールドは短縮名、応答内の凡例参照）
 - GET /api/sankey/mof-overview
   財務省予算全体とRS対象範囲のサンキーデータ
 
