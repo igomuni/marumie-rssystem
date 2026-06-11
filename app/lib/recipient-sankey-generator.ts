@@ -136,7 +136,8 @@ export function buildRecipientSankey(
   visibleDown.forEach(([blockName, v], i) => {
     const id = `d-${i}`;
     nodes.set(id, { id, label: blockName, column: 3, value: v.amount, recipientKey: v.recipientKey });
-    links.push({ source: centerId, target: id, value: v.amount });
+    // 中央→下流は対象企業からの再委託フロー
+    links.push({ source: centerId, target: id, value: v.amount, kind: 'subcontract' });
   });
   if (aggDown.length > 0) {
     const aggDownTotal = aggDown.reduce((s, [, v]) => s + v.amount, 0);
@@ -148,7 +149,7 @@ export function buildRecipientSankey(
       value: aggDownTotal,
       isAggregate: true,
     });
-    links.push({ source: centerId, target: id, value: aggDownTotal });
+    links.push({ source: centerId, target: id, value: aggDownTotal, kind: 'subcontract' });
   }
 
   // 中央ノードの高さは入金側（受注額）合計。出金（再委託）は別資金次元のため

@@ -11,14 +11,16 @@ import type {
 } from '@/app/lib/recipient-sankey-generator';
 import { formatYen } from '@/app/lib/format/yen';
 
-// /subcontracts と同じ規約色（app/lib/subcontract-layout.ts の COLOR_DIRECT / COLOR_SUBCONTRACT）
+// 色は資金フローの種別にのみ使う（/subcontracts の COLOR_DIRECT / COLOR_SUBCONTRACT と同義）。
+// 発注側（府省庁・事業）は無彩色とし、ノード色は流入エッジの種別と一致させる。
 const COLORS = {
   direct: '#d94545',
   subcontract: '#e07040',
-  neutral: '#cbd5e1',
-  node: '#64748b',
+  neutral: '#d4d8dd',
+  sourceNode: '#9ca3af',
   center: '#333333',
-  aggregate: '#9ca3af',
+  downstreamNode: '#e07040',
+  aggregate: '#c4c9d0',
 } as const;
 
 const VIEW_W = 960;
@@ -144,7 +146,10 @@ export default function RecipientSankey({ data }: { data: RecipientSankeyData })
                 ? `/recipients/${encodeURIComponent(n.recipientKey)}`
                 : undefined;
           const fill =
-            n.id === 'center' ? COLORS.center : n.isAggregate ? COLORS.aggregate : COLORS.node;
+            n.id === 'center' ? COLORS.center
+            : n.isAggregate ? COLORS.aggregate
+            : n.column === 3 ? COLORS.downstreamNode
+            : COLORS.sourceNode;
           const labelX = n.column === 0 ? n.x - 6 : n.x + NODE_W + 6;
           const anchor = n.column === 0 ? 'end' : 'start';
           const rect = (
@@ -159,6 +164,9 @@ export default function RecipientSankey({ data }: { data: RecipientSankeyData })
                 textAnchor={anchor}
                 fontSize={11}
                 fill="#334155"
+                stroke="#fff"
+                strokeWidth={3}
+                paintOrder="stroke"
               >
                 {truncate(n.label, n.column === 1 ? 22 : 18)}
               </text>
@@ -175,10 +183,10 @@ export default function RecipientSankey({ data }: { data: RecipientSankeyData })
       </svg>
       <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#64748b', marginTop: 4, flexWrap: 'wrap' }}>
         <span>
-          <span style={{ color: COLORS.direct }}>■</span> 直接受注
+          <span style={{ color: COLORS.direct }}>■</span> 直接受注（事業→対象企業）
         </span>
         <span>
-          <span style={{ color: COLORS.subcontract }}>■</span> 再委託・別起点での受注
+          <span style={{ color: COLORS.subcontract }}>■</span> 再委託（元請経由の受注・対象企業からの委託）
         </span>
         <span>※ 左の受注額と右の再委託額は資金の次元が異なるため合算できません</span>
       </div>
