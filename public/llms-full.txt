@@ -1,0 +1,125 @@
+# 行政事業レビュー サンキー図システム — API詳細仕様（llms-full）
+
+/llms.txt の詳細版。全APIの応答スキーマとデータモデルを記載する。
+
+## 共通仕様
+
+- 全金額は 1円単位
+- year: 2024（デフォルト）| 2025。事業年度YEARのデータは予算年度YEAR-1の実績
+- 全応答は `metadata`（year, generatedAt, unit:"JPY", notes[]）を含む
+- `links` フィールドは相対URL。続けて呼べるAPIや人間用ページを指す
+- キャッシュ: 全APIは CDN キャッシュされる（データ更新はデプロイ時のみ）
+
+## GET /api/search/projects
+
+クエリ: q（必須・部分一致、NFKC正規化・大小文字無視）, year, limit（≦100, default 20）, offset, sort（budget|spending, default budget）
+
+```
+{
+  metadata: { year, query, totalHits, limit, offset, unit, notes[] },
+  items: [{
+    pid: string, name, ministry, bureau,
+    budgetAmount, execAmount, spendTotal,   // 1円単位
+    hasRedelegation: boolean, redelegationDepth: number,
+    links: { detail, subcontracts, qualityRecipients, web, sankeyView }
+  }],
+  links: { next: string | null }   // ページネーション用の次ページURL（無ければ null）
+}
+```
+
+## GET /api/search/recipients
+
+クエリ: q（必須）, year, limit（≦100, default 20）
+
+```
+{
+  metadata: { ... },
+  items: [{
+    key: string,                       // "1234567890123"(法人番号) or "name:正規化名"
+    name: string, corporateNumber: string,
+    directAmount, directCount,         // 直接受注（事業からの直接支出）
+    subcontractAmount, subcontractCount, // 再委託・別起点での受注
+    projectCount: number,
+    links: { recipient, sankeyView }
+  }]
+}
+```
+
+## GET /api/recipients/{key}
+
+key: 法人番号13桁 or "name:正規化名"。クエリ: year, limit（appearances件数, ≦200, default 50）
+
+```
+{
+  metadata: { ... notes に「直接+再委託の合算は二重計上」の注意を含む },
+  recipient: {
+    key, name, corporateNumber,
+    aliases: string[],                 // 同一キーに名寄せされた表記ゆれ
+    totals: { directAmount, directCount, subcontractAmount, subcontractCount },
+    byMinistry: [{ ministry, directAmount, subcontractAmount, projectCount }],
+    appearances: [{                    // 予算降順、Multi-block は行を分けて全件
+      pid, projectName, ministry,
+      blockId, originKind,             // direct | subcontract | separate-origin-*
+      amount,
+      upstream: { blockName, recipientKey | null } | null,  // 誰から委託されたか
+      downstream: [{ blockName, amount, recipientKeys[] }], // 誰へ再委託したか
+      links: { subcontracts, web }
+    }]
+  },
+  links: { external: { gbizinfo } }    // 法人番号がある場合
+}
+```
+
+## GET /api/project-details/{pid}
+
+事業の詳細テキストと支出ブロック。応答（抜粋）:
+
+```
+{
+  projectId, projectName, ministry, bureau,
+  purpose, currentIssues, overview,    // 事業の目的・現状課題・概要（長文テキスト）
+  budget, execution,
+  blocks: [...],                       // 支出先ブロック
+  links: { subcontracts, qualityRecipients, web }
+}
+```
+
+## GET /api/subcontracts/{pid}
+
+再委託構造グラフ。応答 = SubcontractGraph:
+
+```
+{
+  projectId, projectName, ministry, bureau, accountCategory,
+  budget, execution, directExpenseTotal, totalExpense,
+  blocks: [{
+    blockId, blockName, totalAmount,
+    isDirect, originKind,              // direct=事業からの直接支出 / subcontract=再委託
+    isTerminal, recipientCount, role,
+    recipients: [{
+      name, corporateNumber, amount,
+      contractSummaries[], expenses[],
+      recipientKey, links: { recipient }  // 逆引きAPIへ
+    }]
+  }],
+  flows: [{ sourceBlock, targetBlock, origin, ... }],  // 委託の有向エッジ
+  maxDepth, totalRecipientCount, ...
+  links: { projectDetail, web }
+}
+```
+
+委託チェーンの復元: flows の sourceBlock→targetBlock を辿る。sourceBlock=null は事業（国）起点。
+
+## GET /api/sankey/mof-overview
+
+財務省予算全体（約556兆円）とRS対象範囲（151.1兆円）の関係を表すサンキーデータ。
+metadata.notes に予算書上の重複等の注意あり。
+
+## データモデル補足
+
+- ブロック: 行政事業レビューの「支出先ブロック」。A,B,C... のIDを持ち、direct ブロックは事業からの
+  直接支出、それ以外は上流ブロックからの再委託・外注
+- originKind: direct | subcontract | separate-origin-broad | separate-origin-strong
+- 「その他」(支出先名) は支出先プロフィール・逆引きインデックスの対象外（集約行のため）
+- 法人番号は国税庁法人番号公表サイト・gBizINFO と突合可能:
+  https://info.gbiz.go.jp/hojin/ichiran?hojinBango={13桁}

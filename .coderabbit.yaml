@@ -1,5 +1,7 @@
 reviews:
   path_filters:
-    - "!docs/tasks/archive/**"
+    # 作業用ドキュメント（設計・調査メモ）はレビュー対象外。
+    # docs/tasks/** は archive を含む。Markdown 記法は .claude/CLAUDE.md のルールで担保。
+    - "!docs/tasks/**"
     - "!docs/プロンプトログ*.md"
     - "!docs/logs/**"

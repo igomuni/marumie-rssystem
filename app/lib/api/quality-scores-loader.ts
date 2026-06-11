@@ -1,7 +1,9 @@
-import { NextResponse } from 'next/server';
+/**
+ * project-quality-scores-{YEAR}.json の読み込み・集計・メモリキャッシュ。
+ * /api/quality-scores と /api/search/projects が共用する。
+ */
 import * as fs from 'fs';
 import * as path from 'path';
-import { parseYear, serverErrorResponse } from '@/app/lib/api/api-notes';
 
 export interface QualityScoreItem {
   pid: string;
@@ -55,7 +57,7 @@ export interface QualityScoresResponse {
 
 const cache = new Map<string, QualityScoresResponse>();
 
-function loadData(year: string): QualityScoresResponse {
+export function loadQualityScores(year: string): QualityScoresResponse {
   if (cache.has(year)) return cache.get(year)!;
 
   const jsonPath = path.join(process.cwd(), 'public', 'data', `project-quality-scores-${year}.json`);
@@ -114,18 +116,4 @@ function loadData(year: string): QualityScoresResponse {
   };
   cache.set(year, result);
   return result;
-}
-
-export async function GET(req: Request) {
-  try {
-    const url = new URL(req.url);
-    const year = parseYear(url.searchParams.get('year'));
-    if (year === null) {
-      return NextResponse.json({ error: '対応していない年度です（2024 | 2025）' }, { status: 400 });
-    }
-    const data = loadData(year);
-    return NextResponse.json(data);
-  } catch (e) {
-    return serverErrorResponse('quality-scores', e);
-  }
 }
