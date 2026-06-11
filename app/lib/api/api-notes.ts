@@ -2,6 +2,7 @@
  * API応答に同梱する共通メタ情報（データ留意事項・年度検証）。
  * 全APIで metadata.notes として同じ文言を返し、AIエージェント等の誤読を防ぐ。
  */
+import { NextResponse } from 'next/server';
 
 export const SUPPORTED_YEARS = ['2024', '2025'] as const;
 export type SupportedYear = (typeof SUPPORTED_YEARS)[number];
@@ -50,3 +51,12 @@ export function buildMetadata(
  * データはデプロイ時のみ更新されるため、CDNで1日キャッシュ + 1週間 stale 配信を許容する。
  */
 export const API_CACHE_CONTROL = 'public, s-maxage=86400, stale-while-revalidate=604800';
+
+/**
+ * 予期しない例外を 500 として返す共通ハンドラ。
+ * 詳細はサーバーログにのみ記録し、クライアントには汎用文言を返す（内部情報の漏洩防止）。
+ */
+export function serverErrorResponse(context: string, e: unknown): NextResponse {
+  console.error(`[${context}]`, e);
+  return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+}

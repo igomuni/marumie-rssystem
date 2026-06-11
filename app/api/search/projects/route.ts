@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { loadQualityScores } from '@/app/lib/api/quality-scores-loader';
 import { searchProjects } from '@/app/lib/search/project-search';
-import { parseYear, buildMetadata, API_CACHE_CONTROL } from '@/app/lib/api/api-notes';
+import { parseYear, buildMetadata, API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
 import { projectLinks, sankeyProjectViewLink } from '@/app/lib/api/links';
 
 const MAX_LIMIT = 100;
@@ -53,9 +53,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json(body, { headers: { 'Cache-Control': API_CACHE_CONTROL } });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : String(e) },
-      { status: 500 }
-    );
+    return serverErrorResponse('search/projects', e);
   }
 }

@@ -33,9 +33,14 @@ export function loadRecipientIndex(year: string): RecipientIndex {
  * エントリが併存する場合に、法人番号側（=本体）へ誘導するため
  * （サンキー図など法人番号を持たない画面からのリンクを成立させる）。
  */
+/** 自前プロパティのみ取得（"__proto__"・"constructor" 等のプロトタイプ参照を弾く） */
+function getOwnEntry(recipients: Record<string, RecipientEntry>, key: string): RecipientEntry | null {
+  return Object.prototype.hasOwnProperty.call(recipients, key) ? recipients[key] : null;
+}
+
 export function resolveRecipient(year: string, key: string): RecipientEntry | null {
   const index = loadRecipientIndex(year);
-  if (!key.startsWith('name:')) return index.recipients[key] ?? null;
+  if (!key.startsWith('name:')) return getOwnEntry(index.recipients, key);
 
   let nameMap = nameKeyCache.get(year);
   if (!nameMap) {
@@ -54,6 +59,6 @@ export function resolveRecipient(year: string, key: string): RecipientEntry | nu
   }
 
   const resolvedKey = nameMap.get(key.slice('name:'.length));
-  const resolved = resolvedKey ? index.recipients[resolvedKey] : undefined;
-  return resolved ?? index.recipients[key] ?? null;
+  const resolved = resolvedKey ? getOwnEntry(index.recipients, resolvedKey) : null;
+  return resolved ?? getOwnEntry(index.recipients, key);
 }
