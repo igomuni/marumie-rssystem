@@ -32,8 +32,20 @@ export function isExcludedRecipientName(name: string): boolean {
   return n === '' || n === 'その他';
 }
 
-export function buildRecipientKey(name: string, corporateNumber: string): string {
+/**
+ * 有効な法人番号か。13桁の数字であっても、全桁が同一のもの
+ * （9999999999999=個人・非公表、8888888888888 等のダミー）は無効として扱う。
+ * これらを正規番号とみなすと、個人・職員・自治体など無関係な支出先が
+ * 1つのエントリに誤って合算されてしまう。
+ */
+export function isValidCorporateNumber(corporateNumber: string): boolean {
   const cn = corporateNumber.trim();
-  if (/^\d{13}$/.test(cn)) return cn;
+  if (!/^\d{13}$/.test(cn)) return false;
+  if (/^(\d)\1{12}$/.test(cn)) return false; // 全桁同一のダミー
+  return true;
+}
+
+export function buildRecipientKey(name: string, corporateNumber: string): string {
+  if (isValidCorporateNumber(corporateNumber)) return corporateNumber.trim();
   return `name:${normalizeRecipientName(name)}`;
 }

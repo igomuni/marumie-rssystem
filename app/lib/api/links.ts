@@ -2,6 +2,7 @@
  * API応答に埋め込む関連リンク（HATEOAS）の組み立て。
  * すべて相対URLで返し、ホスト名に依存しない。
  */
+import { isValidCorporateNumber } from '@/app/lib/recipient-key';
 
 export function projectLinks(pid: string | number, year?: string): {
   detail: string;
@@ -47,7 +48,7 @@ export function sankeyRecipientViewLink(recipientName: string, year?: string): s
 
 /** 法人番号から外部サイト（gBizINFO）へのリンク */
 export function externalCorporateLinks(corporateNumber: string): { gbizinfo: string } | undefined {
-  if (!/^\d{13}$/.test(corporateNumber)) return undefined;
+  if (!isValidCorporateNumber(corporateNumber)) return undefined;
   return {
     gbizinfo: `https://info.gbiz.go.jp/hojin/ichiran?hojinBango=${corporateNumber}`,
   };

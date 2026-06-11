@@ -21,7 +21,7 @@ import type {
   RecipientAppearance,
   AppearanceDownstream,
 } from '@/types/recipient-index';
-import { buildRecipientKey, isExcludedRecipientName } from '@/app/lib/recipient-key';
+import { buildRecipientKey, isExcludedRecipientName, isValidCorporateNumber } from '@/app/lib/recipient-key';
 
 const YEAR = parseInt(process.argv[2] || '2024', 10);
 if (isNaN(YEAR) || YEAR < 2000 || YEAR > 2100) {
@@ -58,7 +58,7 @@ function getEntry(key: string, name: string, corporateNumber: string): Recipient
     e = {
       key,
       name,
-      corporateNumber: /^\d{13}$/.test(corporateNumber.trim()) ? corporateNumber.trim() : '',
+      corporateNumber: isValidCorporateNumber(corporateNumber) ? corporateNumber.trim() : '',
       aliases: [],
       totals: { directAmount: 0, directCount: 0, subcontractAmount: 0, subcontractCount: 0 },
       byMinistry: [],
