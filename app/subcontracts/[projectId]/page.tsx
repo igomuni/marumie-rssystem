@@ -870,9 +870,13 @@ function RecipientCard({
               <Link
                 href={`/recipients/${encodeURIComponent(profileKey)}?year=${year}`}
                 onClick={(e) => e.stopPropagation()}
-                style={{ color: '#2563eb', fontSize: PANEL_META_FONT_PX, whiteSpace: 'nowrap' }}
+                title="受注構造を見る（府省庁横断の直接受注・再委託受注）"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: '#2563eb', fontSize: PANEL_META_FONT_PX, whiteSpace: 'nowrap', textDecoration: 'none' }}
               >
-                支出先プロフィール →
+                <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7z"/>
+                </svg>
+                受注構造
               </Link>
             )}
           </div>

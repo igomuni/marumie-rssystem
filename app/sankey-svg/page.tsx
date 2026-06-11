@@ -3464,13 +3464,12 @@ export default function RealDataSankeyPage() {
                     <a
                       href={`/recipients/${encodeURIComponent(`name:${normalizeRecipientName(selectedNode.name)}`)}?year=${year}`}
                       target="_blank" rel="noopener noreferrer"
-                      title="支出先プロフィールを見る"
-                      style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#4a90d9', textDecoration: 'none', fontSize: META_FONT_PX, flexShrink: 0 }}
+                      title="受注構造を見る（府省庁横断の直接受注・再委託受注）"
+                      style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#4a90d9">
-                        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H520v-80h320v320h-80v-184L388-332Z"/>
+                      <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#4a90d9">
+                        <path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7z"/>
                       </svg>
-                      プロフィール
                     </a>
                   )}
                 </div>

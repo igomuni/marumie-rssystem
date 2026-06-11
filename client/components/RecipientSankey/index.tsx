@@ -11,13 +11,14 @@ import type {
 } from '@/app/lib/recipient-sankey-generator';
 import { formatYen } from '@/app/lib/format/yen';
 
+// /subcontracts と同じ規約色（app/lib/subcontract-layout.ts の COLOR_DIRECT / COLOR_SUBCONTRACT）
 const COLORS = {
-  direct: '#3b82f6',
-  subcontract: '#f59e0b',
+  direct: '#d94545',
+  subcontract: '#e07040',
   neutral: '#cbd5e1',
-  node: '#475569',
-  center: '#0f172a',
-  aggregate: '#94a3b8',
+  node: '#64748b',
+  center: '#333333',
+  aggregate: '#9ca3af',
 } as const;
 
 const VIEW_W = 960;
@@ -172,7 +173,7 @@ export default function RecipientSankey({ data }: { data: RecipientSankeyData })
           );
         })}
       </svg>
-      <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#64748b', marginTop: 4 }}>
+      <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#64748b', marginTop: 4, flexWrap: 'wrap' }}>
         <span>
           <span style={{ color: COLORS.direct }}>■</span> 直接受注
         </span>

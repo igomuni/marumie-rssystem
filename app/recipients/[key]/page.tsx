@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { RecipientEntry } from '@/types/recipient-index';
 import { buildRecipientSankey } from '@/app/lib/recipient-sankey-generator';
@@ -14,23 +14,64 @@ interface RecipientApiResponse {
   links?: { external?: { gbizinfo: string } };
 }
 
+// /subcontracts 系と同じ規約色
+const COLOR_DIRECT_SUBTLE = '#b33434';
+const COLOR_SUBCONTRACT_SUBTLE = '#b45309';
+
 const CARD_STYLE: React.CSSProperties = {
-  border: '1px solid #e2e8f0',
+  border: '1px solid #e5e7eb',
   borderRadius: 8,
   padding: '12px 16px',
   background: '#fff',
-  minWidth: 200,
 };
 
-function originKindLabel(kind: string): string {
-  if (kind === 'direct') return '直接';
-  if (kind === 'subcontract') return '再委託';
-  return '別財源';
+const PILL_BUTTON_STYLE: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: 8,
+  border: '1px solid #e0e0e0',
+  background: 'rgba(255,255,255,0.95)',
+  boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+  color: '#666',
+  textDecoration: 'none',
+  flexShrink: 0,
+};
+
+const TH_STYLE: React.CSSProperties = {
+  padding: '6px 8px',
+  fontSize: 11,
+  fontWeight: 700,
+  color: '#64748b',
+  background: '#f9fafb',
+  borderBottom: '1px solid #e5e7eb',
+  whiteSpace: 'nowrap',
+};
+
+function originKindBadge(kind: string) {
+  const isDirect = kind === 'direct';
+  const isSub = kind === 'subcontract';
+  return (
+    <span
+      style={{
+        padding: '2px 6px',
+        borderRadius: 999,
+        fontSize: 10,
+        fontWeight: 700,
+        background: isDirect ? '#f9dddd' : isSub ? '#fbe3d7' : '#e0e7ff',
+        color: isDirect ? COLOR_DIRECT_SUBTLE : isSub ? COLOR_SUBCONTRACT_SUBTLE : '#3730a3',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {isDirect ? '直接' : isSub ? '再委託' : '別財源'}
+    </span>
+  );
 }
 
 function RecipientPageInner() {
   const params = useParams<{ key: string }>();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const key = decodeURIComponent(params.key);
 
   const parsedYear = Number.parseInt(searchParams.get('year') ?? '2024', 10);
@@ -61,171 +102,219 @@ function RecipientPageInner() {
 
   if (error) {
     return (
-      <div style={{ padding: 24 }}>
-        <p style={{ color: '#b91c1c' }}>支出先が見つかりませんでした（{error}）</p>
-        <p style={{ fontSize: 14, color: '#64748b' }}>
+      <div style={{ minHeight: '100vh', background: '#f9fafb', padding: '12px 16px' }}>
+        <p style={{ color: '#991b1b', fontSize: 14 }}>支出先が見つかりませんでした（{error}）</p>
+        <p style={{ fontSize: 13, color: '#64748b' }}>
           年度を切り替えると見つかる場合があります:{' '}
-          <Link href={`/recipients/${encodeURIComponent(key)}?year=${year === 2024 ? 2025 : 2024}`}>
+          <Link href={`/recipients/${encodeURIComponent(key)}?year=${year === 2024 ? 2025 : 2024}`} style={{ color: '#2563eb' }}>
             {year === 2024 ? 2025 : 2024}年度で表示
           </Link>
+          {' / '}
+          <Link href="/subcontracts" style={{ color: '#2563eb' }}>← 一覧に戻る</Link>
         </p>
       </div>
     );
   }
   if (!data || !sankey) {
-    return <div style={{ padding: 24, color: '#6b7280', fontSize: 14 }}>読み込み中...</div>;
+    return <div style={{ minHeight: '100vh', background: '#f9fafb', padding: 24, color: '#6b7280', fontSize: 14 }}>読み込み中...</div>;
   }
 
   const r = data.recipient;
   const gbiz = data.links?.external?.gbizinfo;
 
   return (
-    <div style={{ padding: '20px 24px', maxWidth: 1080, margin: '0 auto', background: '#f8fafc', minHeight: '100vh' }}>
-      <div style={{ fontSize: 13, marginBottom: 8 }}>
-        <Link href="/sankey-svg">サンキー図</Link>
-        {' / '}
-        <Link href="/subcontracts">再委託構造</Link>
-        {' / 支出先プロフィール'}
-      </div>
-
-      <header style={{ marginBottom: 16 }}>
-        <h1 style={{ fontSize: 22, margin: '0 0 4px' }}>{r.name}</h1>
-        <div style={{ fontSize: 13, color: '#64748b', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <span>{year}年度（予算年度{year - 1}実績）</span>
-          {r.corporateNumber && <span>法人番号: {r.corporateNumber}</span>}
+    <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '12px 16px', boxSizing: 'border-box' }}>
+        {/* ── コントロール行（/subcontracts と同じトーン） ── */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Link href="/" aria-label="トップへ戻る" title="トップへ戻る" style={{ ...PILL_BUTTON_STYLE, width: 32, height: 32 }}>
+            <svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+          </Link>
+          <Link href="/subcontracts" title="再委託構造の一覧へ" style={{ ...PILL_BUTTON_STYLE, height: 32, padding: '0 10px', fontSize: 13 }}>
+            再委託構造一覧
+          </Link>
+          {/* 年度切替 */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <select
+              value={year}
+              onChange={(e) => router.replace(`/recipients/${encodeURIComponent(key)}?year=${e.target.value}`)}
+              style={{
+                fontSize: 13,
+                border: '1px solid #e0e0e0',
+                borderRadius: 8,
+                padding: '6px 28px 6px 10px',
+                background: 'rgba(255,255,255,0.95)',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                color: '#333',
+                cursor: 'pointer',
+                appearance: 'none',
+                WebkitAppearance: 'none',
+              }}
+            >
+              <option value={2025}>2025年度</option>
+              <option value={2024}>2024年度</option>
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+              <path d="M7 10l5 5 5-5z"/>
+            </svg>
+          </div>
+          <Link
+            href={`/sankey-svg?fnr=${encodeURIComponent(r.name)}&fp=1&yr=${year}`}
+            title="サンキー図でこの支出先を見る"
+            style={{ ...PILL_BUTTON_STYLE, height: 32, padding: '0 10px', fontSize: 13, gap: 5 }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7z"/>
+            </svg>
+            サンキー図で見る
+          </Link>
           {gbiz && (
-            <a href={gbiz} target="_blank" rel="noopener noreferrer">
-              gBizINFOで見る ↗
+            <a href={gbiz} target="_blank" rel="noopener noreferrer" title="gBizINFOで法人情報を見る"
+              style={{ ...PILL_BUTTON_STYLE, height: 32, padding: '0 10px', fontSize: 13, gap: 5 }}>
+              gBizINFO
+              <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 -960 960 960" fill="currentColor">
+                <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H520v-80h320v320h-80v-184L388-332Z"/>
+              </svg>
             </a>
           )}
-          <Link href={`/recipients/${encodeURIComponent(key)}?year=${year === 2024 ? 2025 : 2024}`}>
-            {year === 2024 ? 2025 : 2024}年度に切替
-          </Link>
-          <Link href={`/sankey-svg?fnr=${encodeURIComponent(r.name)}&fp=1&yr=${year}`}>
-            サンキー図でこの支出先を見る →
-          </Link>
         </div>
-        {r.aliases.length > 1 && (
-          <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>
-            表記ゆれ: {r.aliases.slice(1).join(' / ')}
-          </div>
-        )}
-      </header>
 
-      <section style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
-        <div style={CARD_STYLE}>
-          <div style={{ fontSize: 12, color: '#64748b' }}>直接受注（事業からの直接支出）</div>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>{formatYen(r.totals.directAmount)}</div>
-          <div style={{ fontSize: 12, color: '#64748b' }}>{r.totals.directCount} 件</div>
-        </div>
-        <div style={CARD_STYLE}>
-          <div style={{ fontSize: 12, color: '#64748b' }}>再委託・別起点での受注</div>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>{formatYen(r.totals.subcontractAmount)}</div>
-          <div style={{ fontSize: 12, color: '#64748b' }}>{r.totals.subcontractCount} 件</div>
-        </div>
-        <div style={{ ...CARD_STYLE, background: '#fffbeb', borderColor: '#fde68a' }}>
-          <div style={{ fontSize: 12, color: '#92400e' }}>
-            ※ 直接受注と再委託受注は資金の流れが重なるため
-            <br />
-            合算できません（二重計上になります）
+        {/* ── ヘッダ ── */}
+        <header style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, marginBottom: 2 }}>
+            受注構造（府省庁横断・{year}年度 / 予算年度{year - 1}実績）
           </div>
-        </div>
-      </section>
-
-      <section style={{ ...CARD_STYLE, marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, margin: '0 0 8px' }}>受注の流れ（企業中心サンキー）</h2>
-        <RecipientSankey data={sankey} />
-        {sankey.aggregatedProjectCount > 0 && (
-          <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
-            金額上位10事業のみ表示。残り{sankey.aggregatedProjectCount}事業は「その他の発注元」に集約しています。
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: '#111', margin: 0, wordBreak: 'break-all', lineHeight: 1.4 }}>
+            {r.name}
+          </h1>
+          <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {r.corporateNumber && <span>法人番号: {r.corporateNumber}</span>}
+            {r.aliases.length > 1 && <span>表記ゆれ: {r.aliases.slice(1).join(' / ')}</span>}
           </div>
-        )}
-      </section>
+        </header>
 
-      <section style={{ ...CARD_STYLE, marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, margin: '0 0 8px' }}>府省庁別内訳</h2>
-        <table style={{ borderCollapse: 'collapse', fontSize: 13, width: '100%' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'right' }}>
-              <th style={{ textAlign: 'left', padding: '4px 8px' }}>府省庁</th>
-              <th style={{ padding: '4px 8px' }}>直接受注</th>
-              <th style={{ padding: '4px 8px' }}>再委託受注</th>
-              <th style={{ padding: '4px 8px' }}>事業数</th>
-            </tr>
-          </thead>
-          <tbody>
-            {r.byMinistry.map(m => (
-              <tr key={m.ministry} style={{ borderBottom: '1px solid #f1f5f9', textAlign: 'right' }}>
-                <td style={{ textAlign: 'left', padding: '4px 8px' }}>{m.ministry}</td>
-                <td style={{ padding: '4px 8px' }}>{m.directAmount > 0 ? formatYen(m.directAmount) : '—'}</td>
-                <td style={{ padding: '4px 8px' }}>{m.subcontractAmount > 0 ? formatYen(m.subcontractAmount) : '—'}</td>
-                <td style={{ padding: '4px 8px' }}>{m.projectCount}</td>
+        {/* ── サマリ ── */}
+        <section style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+          <div style={{ ...CARD_STYLE, minWidth: 210 }}>
+            <span style={{ padding: '2px 6px', borderRadius: 999, fontSize: 10, fontWeight: 700, background: '#f9dddd', color: COLOR_DIRECT_SUBTLE }}>
+              直接受注 {r.totals.directCount}件
+            </span>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#111', marginTop: 6 }}>{formatYen(r.totals.directAmount)}</div>
+            <div style={{ fontSize: 11, color: '#64748b' }}>事業からの直接支出</div>
+          </div>
+          <div style={{ ...CARD_STYLE, minWidth: 210 }}>
+            <span style={{ padding: '2px 6px', borderRadius: 999, fontSize: 10, fontWeight: 700, background: '#fbe3d7', color: COLOR_SUBCONTRACT_SUBTLE }}>
+              再委託受注 {r.totals.subcontractCount}件
+            </span>
+            <div style={{ fontSize: 20, fontWeight: 700, color: '#111', marginTop: 6 }}>{formatYen(r.totals.subcontractAmount)}</div>
+            <div style={{ fontSize: 11, color: '#64748b' }}>再委託・別起点での受注</div>
+          </div>
+          <div style={{ ...CARD_STYLE, minWidth: 210, background: '#fffbeb', borderColor: '#fde68a', display: 'flex', alignItems: 'center' }}>
+            <div style={{ fontSize: 11, color: '#92400e', lineHeight: 1.6 }}>
+              ※ 直接受注と再委託受注は資金の流れが重なるため
+              <br />
+              合算できません（二重計上になります）
+            </div>
+          </div>
+        </section>
+
+        {/* ── 企業中心サンキー ── */}
+        <section style={{ ...CARD_STYLE, marginBottom: 12 }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: '#222', margin: '0 0 8px' }}>受注の流れ（企業中心サンキー）</h2>
+          <RecipientSankey data={sankey} />
+          {sankey.aggregatedProjectCount > 0 && (
+            <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+              金額上位10事業のみ表示。残り{sankey.aggregatedProjectCount}事業は「その他の発注元」に集約しています。
+            </div>
+          )}
+        </section>
+
+        {/* ── 府省庁別内訳 ── */}
+        <section style={{ ...CARD_STYLE, marginBottom: 12, padding: 0, overflow: 'hidden' }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: '#222', margin: 0, padding: '10px 16px 8px' }}>府省庁別内訳</h2>
+          <table style={{ borderCollapse: 'collapse', fontSize: 12, width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ ...TH_STYLE, textAlign: 'left' }}>府省庁</th>
+                <th style={{ ...TH_STYLE, textAlign: 'right' }}>直接受注</th>
+                <th style={{ ...TH_STYLE, textAlign: 'right' }}>再委託受注</th>
+                <th style={{ ...TH_STYLE, textAlign: 'right' }}>事業数</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody>
+              {r.byMinistry.map(m => (
+                <tr key={m.ministry} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <td style={{ padding: '5px 8px 5px 16px', color: '#333' }}>{m.ministry}</td>
+                  <td style={{ padding: '5px 8px', textAlign: 'right', color: m.directAmount > 0 ? COLOR_DIRECT_SUBTLE : '#cbd5e1', fontWeight: m.directAmount > 0 ? 600 : 400 }}>
+                    {m.directAmount > 0 ? formatYen(m.directAmount) : '—'}
+                  </td>
+                  <td style={{ padding: '5px 8px', textAlign: 'right', color: m.subcontractAmount > 0 ? COLOR_SUBCONTRACT_SUBTLE : '#cbd5e1', fontWeight: m.subcontractAmount > 0 ? 600 : 400 }}>
+                    {m.subcontractAmount > 0 ? formatYen(m.subcontractAmount) : '—'}
+                  </td>
+                  <td style={{ padding: '5px 16px 5px 8px', textAlign: 'right', color: '#555' }}>{m.projectCount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
 
-      <section style={{ ...CARD_STYLE }}>
-        <h2 style={{ fontSize: 15, margin: '0 0 8px' }}>
-          出現事業（金額降順・最大200件 / 全{data.metadata.appearanceTotal}件）
-        </h2>
-        <table style={{ borderCollapse: 'collapse', fontSize: 13, width: '100%' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
-              <th style={{ textAlign: 'left', padding: '4px 8px' }}>事業</th>
-              <th style={{ textAlign: 'left', padding: '4px 8px' }}>府省庁</th>
-              <th style={{ textAlign: 'center', padding: '4px 8px' }}>区分</th>
-              <th style={{ textAlign: 'left', padding: '4px 8px' }}>委託元</th>
-              <th style={{ textAlign: 'right', padding: '4px 8px' }}>金額</th>
-            </tr>
-          </thead>
-          <tbody>
-            {r.appearances.map((a, i) => (
-              <tr key={`${a.pid}-${a.blockId}-${i}`} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '4px 8px' }}>
-                  <Link href={`/subcontracts/${a.pid}?year=${year}`}>{a.projectName}</Link>
-                </td>
-                <td style={{ padding: '4px 8px', whiteSpace: 'nowrap' }}>{a.ministry}</td>
-                <td style={{ padding: '4px 8px', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                  <span
-                    style={{
-                      padding: '1px 6px',
-                      borderRadius: 4,
-                      fontSize: 11,
-                      background: a.originKind === 'direct' ? '#dbeafe' : '#fef3c7',
-                      color: a.originKind === 'direct' ? '#1d4ed8' : '#b45309',
-                    }}
-                  >
-                    {originKindLabel(a.originKind)}
-                  </span>
-                </td>
-                <td style={{ padding: '4px 8px', fontSize: 12, color: '#64748b' }}>
-                  {a.upstream
-                    ? a.upstream.recipientKey
-                      ? (
-                          <Link href={`/recipients/${encodeURIComponent(a.upstream.recipientKey)}?year=${year}`}>
-                            {a.upstream.blockName}
-                          </Link>
-                        )
-                      : a.upstream.blockName
-                    : '—'}
-                </td>
-                <td style={{ padding: '4px 8px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  {formatYen(a.amount)}
-                </td>
+        {/* ── 出現事業 ── */}
+        <section style={{ ...CARD_STYLE, padding: 0, overflow: 'hidden' }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: '#222', margin: 0, padding: '10px 16px 8px' }}>
+            出現事業
+            <span style={{ fontSize: 11, fontWeight: 400, color: '#64748b', marginLeft: 8 }}>
+              金額降順・最大200件 / 全{data.metadata.appearanceTotal}件
+            </span>
+          </h2>
+          <table style={{ borderCollapse: 'collapse', fontSize: 12, width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ ...TH_STYLE, textAlign: 'left' }}>事業</th>
+                <th style={{ ...TH_STYLE, textAlign: 'left' }}>府省庁</th>
+                <th style={{ ...TH_STYLE, textAlign: 'center' }}>区分</th>
+                <th style={{ ...TH_STYLE, textAlign: 'left' }}>委託元</th>
+                <th style={{ ...TH_STYLE, textAlign: 'right' }}>金額</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody>
+              {r.appearances.map((a, i) => (
+                <tr key={`${a.pid}-${a.blockId}-${i}`} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <td style={{ padding: '5px 8px 5px 16px' }}>
+                    <Link href={`/subcontracts/${a.pid}?year=${year}`} style={{ color: '#2563eb', textDecoration: 'none' }}>
+                      {a.projectName}
+                    </Link>
+                  </td>
+                  <td style={{ padding: '5px 8px', whiteSpace: 'nowrap', color: '#555' }}>{a.ministry}</td>
+                  <td style={{ padding: '5px 8px', textAlign: 'center' }}>{originKindBadge(a.originKind)}</td>
+                  <td style={{ padding: '5px 8px', fontSize: 11, color: '#64748b' }}>
+                    {a.upstream
+                      ? a.upstream.recipientKey
+                        ? (
+                            <Link href={`/recipients/${encodeURIComponent(a.upstream.recipientKey)}?year=${year}`} style={{ color: '#2563eb', textDecoration: 'none' }}>
+                              {a.upstream.blockName}
+                            </Link>
+                          )
+                        : a.upstream.blockName
+                      : '—'}
+                  </td>
+                  <td style={{ padding: '5px 16px 5px 8px', textAlign: 'right', whiteSpace: 'nowrap', color: '#111', fontWeight: 600 }}>
+                    {formatYen(a.amount)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      </div>
     </div>
   );
 }
 
 export default function RecipientPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 24, color: '#6b7280', fontSize: 14 }}>読み込み中...</div>}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#f9fafb', padding: 24, color: '#6b7280', fontSize: 14 }}>読み込み中...</div>}>
       <RecipientPageInner />
     </Suspense>
   );
