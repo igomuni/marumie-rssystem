@@ -2534,9 +2534,13 @@ export default function RealDataSankeyPage() {
   // サイドパネルの実効幅: ユーザー設定値(sidePanelWidth)を保持しつつ、ビューポート幅に収める。
   // スマホ縦などビューポートが狭い場合に、設定済みの広い幅がそのまま適用されて画面を
   // 埋め尽くす（地図が見えなくなる）のを防ぐ。地図を最低 SIDE_PANEL_VIEWPORT_RESERVE_PX 残す。
+  // 極端に狭いビューポート(svgWidth < MIN+RESERVE)では MIN より reserve を優先し、
+  // 実効幅が svgWidth - RESERVE を超えない（地図が完全に消えない）ことを保証する。
+  const maxPanelWidthForViewport = Math.max(0, svgWidth - SIDE_PANEL_VIEWPORT_RESERVE_PX);
+  const minPanelWidthForViewport = Math.min(SIDE_PANEL_WIDTH_MIN, maxPanelWidthForViewport);
   const effectiveSidePanelWidth = Math.min(
-    sidePanelWidth,
-    Math.max(SIDE_PANEL_WIDTH_MIN, svgWidth - SIDE_PANEL_VIEWPORT_RESERVE_PX),
+    maxPanelWidthForViewport,
+    Math.max(minPanelWidthForViewport, sidePanelWidth),
   );
   const searchLeftOffset = selectedNodeId !== null && !isPanelCollapsed ? effectiveSidePanelWidth : 0;
   // 右上の設定(⋮)ボタン領域(幅32+余白)に重ならないよう右側を確保。
