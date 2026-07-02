@@ -18,6 +18,8 @@ import { filterTopN, computeLayout, getTopMinistriesInScope } from '@/app/lib/sa
 import { canonicalSelectableNodeId } from '@/app/lib/sankey-svg-ids';
 import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
 import { parseAmountToYen } from '@/app/lib/format/yen';
+import { buildFilterExcludedIds } from '@/app/lib/sankey-query';
+import type { AccountCategoryKey } from '@/types/sankey-query';
 
 // ── URL state serialization ──
 
@@ -1203,114 +1205,29 @@ export default function RealDataSankeyPage() {
   }, [graphData]);
 
   // Pre-filter exclusion set: built from filter conditions, applied before filterTopN
+  // (除外ロジック本体は app/lib/sankey-query.ts に移設。ここでは UI 状態 → フィルタ条件への変換のみ行う)
   const filterExcludedIds = useMemo(() => {
     if (!graphData) return null;
-    const protectedProjectIds = new Set<string>();
-    const protectProjectNode = (nodeId: string | null) => {
-      if (!nodeId) return;
-      if (nodeId.startsWith('project-spending-')) {
-        protectedProjectIds.add(nodeId);
-        protectedProjectIds.add(nodeId.replace('project-spending-', 'project-budget-'));
-      } else if (nodeId.startsWith('project-budget-')) {
-        protectedProjectIds.add(nodeId);
-        protectedProjectIds.add(nodeId.replace('project-budget-', 'project-spending-'));
-      }
-    };
-    protectProjectNode(selectedNodeId);
-    protectProjectNode(pinnedProjectId);
-    const minBudgetYen = parseAmountToYen(filterMinBudgetText);
-    const maxBudgetYen = parseAmountToYen(filterMaxBudgetText);
-    const minSpendingYen = parseAmountToYen(filterMinSpendingText);
-    const maxSpendingYen = parseAmountToYen(filterMaxSpendingText);
-    const hasBudget = minBudgetYen !== null || maxBudgetYen !== null;
-    const hasSpending = minSpendingYen !== null || maxSpendingYen !== null;
     const trimmedProjectName = debouncedFilterProjectName.trim();
     const trimmedRecipientName = debouncedFilterRecipientName.trim();
-    const hasProjectName = trimmedProjectName.length >= 1;
-    const hasRecipientName = trimmedRecipientName.length >= 1;
-    const hasMinistry = filterMinistryNames.length > 0;
-    const hasAccountFilter = !acGeneral || !acSpecial || !acBoth || !acNone;
-    if (!hasBudget && !hasSpending && !hasProjectName && !hasRecipientName && !hasMinistry && !hasAccountFilter) return null;
-    const selectedMinistrySet = new Set(filterMinistryNames);
-    const minBudget = minBudgetYen ?? -Infinity;
-    const maxBudget = maxBudgetYen ?? Infinity;
-    const minSpending = minSpendingYen ?? 0;
-    const maxSpending = maxSpendingYen ?? Infinity;
-    const buildMatcher = (query: string, useRegex: boolean): ((name: string) => boolean) => {
-      if (useRegex) {
-        try { const re = new RegExp(query, 'i'); return name => re.test(name); }
-        catch { return () => false; }
-      }
-      const qLower = query.toLocaleLowerCase();
-      return name => name.toLocaleLowerCase().includes(qLower);
-    };
-    const matchesProject = hasProjectName ? buildMatcher(trimmedProjectName, filterProjectNameRegex) : null;
-    const matchesRecipient = hasRecipientName ? buildMatcher(trimmedRecipientName, filterRecipientNameRegex) : null;
-    const excluded = new Set<string>();
-    const spendingByPid = new Map(
-      graphData.nodes.filter(n => n.type === 'project-spending' && n.projectId != null).map(n => [n.projectId!, n])
+    const accountCategories: AccountCategoryKey[] = [];
+    if (acGeneral) accountCategories.push('general');
+    if (acSpecial) accountCategories.push('special');
+    if (acBoth) accountCategories.push('both');
+    if (acNone) accountCategories.push('none');
+    return buildFilterExcludedIds(
+      graphData.nodes,
+      graphData.edges,
+      {
+        projectName: trimmedProjectName ? { query: trimmedProjectName, regex: filterProjectNameRegex } : null,
+        recipientName: trimmedRecipientName ? { query: trimmedRecipientName, regex: filterRecipientNameRegex } : null,
+        ministries: filterMinistryNames,
+        budget: { min: parseAmountToYen(filterMinBudgetText), max: parseAmountToYen(filterMaxBudgetText) },
+        spending: { min: parseAmountToYen(filterMinSpendingText), max: parseAmountToYen(filterMaxSpendingText) },
+        accountCategories,
+      },
+      [selectedNodeId, pinnedProjectId],
     );
-    for (const n of graphData.nodes) {
-      if (n.aggregated) continue;
-      if (n.type === 'project-budget' && n.projectId != null) {
-        const sn = spendingByPid.get(n.projectId);
-        const failBudget = hasBudget && (n.value < minBudget || n.value > maxBudget);
-        const failProjectName = matchesProject !== null && !matchesProject(n.name);
-        const failMinistry = hasMinistry && !selectedMinistrySet.has(n.ministry ?? '');
-        const failAccount = hasAccountFilter && (() => {
-          const cat = n.accountCategory;
-          if (cat === 'general') return !acGeneral;
-          if (cat === 'special') return !acSpecial;
-          if (cat === 'both') return !acBoth;
-          return !acNone; // undefined → 'none'
-        })();
-        if (failBudget || failProjectName || failMinistry || failAccount) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
-      } else if (n.type === 'recipient') {
-        const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
-        const failRecipientName = matchesRecipient !== null && !matchesRecipient(n.name);
-        if (failSpending || failRecipientName) excluded.add(n.id);
-      }
-    }
-    // Pass 2: 支出先・予算フィルタが有効な場合、残存支出先のない事業／孤立支出先を除外
-    if (hasSpending || hasBudget || hasMinistry || hasRecipientName) {
-      const projectsWithSurvivingRecipients = new Set(
-        graphData.edges
-          .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
-          .map(e => e.source)
-      );
-      for (const [pid, sn] of spendingByPid) {
-        const bn = budgetNodeByPid.get(pid);
-        if (protectedProjectIds.has(sn.id) || (bn != null && protectedProjectIds.has(bn.id))) continue;
-        if (!excluded.has(sn.id) && !projectsWithSurvivingRecipients.has(sn.id)) {
-          excluded.add(sn.id);
-          if (bn) excluded.add(bn.id);
-        }
-      }
-    }
-    // ゼロ予算事業は graph 生成時に ministry→project-budget エッジを持たないため Pass 3 で
-    // 省庁保護ロジックを切り替える必要がある。minBudget > 0 の場合は failBudget が除外済み。
-    const excludeZeroBudget = hasBudget && minBudget > 0;
-    // Pass 3: 残存事業のない省庁を除外（project → ministry のカスケード）
-    const ministriesWithSurvivingProjects = new Set(
-      graphData.edges
-        .filter(e => !excluded.has(e.source) && !excluded.has(e.target) && e.target.startsWith('project-budget-'))
-        .map(e => e.source)
-    );
-    // ゼロ予算事業がいる可能性がある場合（excludeZeroBudget=false）は、
-    // ministry→project-budgetエッジが存在しないため、生き残ったproject-spendingノードから省庁を保護する。
-    if (!excludeZeroBudget) {
-      for (const n of graphData.nodes) {
-        if (n.type === 'project-spending' && !excluded.has(n.id) && n.value > 0 && n.ministry) {
-          ministriesWithSurvivingProjects.add(`ministry-${n.ministry}`);
-        }
-      }
-    }
-    for (const n of graphData.nodes) {
-      if (n.type === 'ministry' && !n.aggregated && !excluded.has(n.id)) {
-        if (!ministriesWithSurvivingProjects.has(n.id)) excluded.add(n.id);
-      }
-    }
-    return excluded.size > 0 ? excluded : null;
   }, [graphData, selectedNodeId, pinnedProjectId, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone]);
 
   const filtered = useMemo(() => {
