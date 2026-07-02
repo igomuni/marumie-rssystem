@@ -20,6 +20,7 @@ import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/
 import { parseAmountToYen } from '@/app/lib/format/yen';
 import { buildFilterExcludedIds } from '@/app/lib/sankey-query';
 import type { AccountCategoryKey } from '@/types/sankey-query';
+import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 
 // ── URL state serialization ──
 
@@ -1746,6 +1747,23 @@ export default function RealDataSankeyPage() {
       .then(r => r.ok ? r.json() : null)
       .then((data: ProjectDetail | null) => setProjectDetailCache(prev => new Map(prev).set(cacheKey, data)))
       .catch(() => setProjectDetailCache(prev => new Map(prev).set(cacheKey, null)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedNode?.id, year]);
+
+  // Fetch quality score on project node selection (side panel score block)
+  // pid単体API（軽量プロジェクション）を遅延取得。サンキー初期ロードには影響しない。
+  const [qualityScoreCache, setQualityScoreCache] = useState<Map<string, QualityScoreProjection | null>>(new Map());
+  useEffect(() => {
+    if (!selectedNode || selectedNode.aggregated) return;
+    if (selectedNode.type !== 'project-budget' && selectedNode.type !== 'project-spending') return;
+    const pid = selectedNode.projectId;
+    const cacheKey = `${year}-${pid}`;
+    if (pid == null || qualityScoreCache.has(cacheKey)) return;
+    fetch(`/api/quality-scores/${pid}?year=${year}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { score: QualityScoreProjection } | null) =>
+        setQualityScoreCache(prev => new Map(prev).set(cacheKey, data?.score ?? null)))
+      .catch(() => setQualityScoreCache(prev => new Map(prev).set(cacheKey, null)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNode?.id, year]);
 
@@ -3515,6 +3533,60 @@ export default function RealDataSankeyPage() {
                           </>);
                         })()}
                       </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* 品質スコアブロック — project-budget / project-spending（非集約）のみ */}
+              {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (() => {
+                const score = qualityScoreCache.get(`${year}-${selectedNode.projectId}`);
+                if (score === undefined) return null; // fetch中は非表示（パネルのちらつき防止）
+                return (
+                  <div style={{ borderBottom: '1px solid #f0f0f0', padding: '7px 14px 9px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>品質スコア</span>
+                      {score === null || score.totalScore === null ? (
+                        <span style={{ fontSize: META_FONT_PX, color: '#aaa' }}>スコアなし</span>
+                      ) : (
+                        <span style={{
+                          background: score.totalScore >= 90 ? '#2e7d32' : score.totalScore >= 70 ? '#f57c00' : '#c62828',
+                          color: '#fff', padding: '1px 8px', borderRadius: 10, fontSize: PANEL_META_FONT_PX, fontWeight: 700,
+                        }}>
+                          {score.totalScore.toFixed(1)}
+                        </span>
+                      )}
+                      <a href="/quality" target="_blank" rel="noopener noreferrer"
+                        title="品質スコア一覧ページを開く"
+                        style={{ fontSize: META_FONT_PX, color: '#4a90d9', textDecoration: 'none', marginLeft: 'auto', flexShrink: 0 }}
+                      >一覧 ↗</a>
+                    </div>
+                    {score !== null && score.totalScore !== null && (
+                      <>
+                        <div style={{ display: 'flex', gap: 10, marginTop: 5, flexWrap: 'wrap' }}>
+                          {([
+                            ['特定可能性', score.axisIdentify],
+                            ['使途', score.axisPurpose],
+                            ['収支', score.axisBudget],
+                            ['有効性', score.axisEffective],
+                          ] as [string, number | null][]).map(([label, v]) => (
+                            <span key={label} style={{ fontSize: META_FONT_PX, color: '#777' }}>
+                              {label} <span style={{ fontWeight: 600, color: '#555' }}>{v != null ? Math.round(v) : '—'}</span>
+                            </span>
+                          ))}
+                          {score.axisStructure != null && (
+                            <span style={{ fontSize: META_FONT_PX, color: '#bbb' }}>構造 {Math.round(score.axisStructure)}（参考）</span>
+                          )}
+                        </div>
+                        {score.effectiveReason && score.aiSource !== 'heuristic' && (
+                          <div
+                            title={`${score.effectiveReason}\n※実測成果ではなく成果設計の明確さの評価`}
+                            style={{ fontSize: META_FONT_PX, color: '#999', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                          >
+                            有効性根拠: {score.effectiveReason}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 );
