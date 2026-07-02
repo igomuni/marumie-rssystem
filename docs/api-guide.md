@@ -176,10 +176,28 @@
 | パラメータ | 型 | デフォルト | 説明 |
 |-----------|-----|----------|------|
 | `year` | string | `"2024"` | 対象年度（`"2024"` または `"2025"`） |
+| `pids` | string | — | 予算事業IDのカンマ区切り（最大300件）。指定時は該当事業のみの軽量プロジェクションを返す |
+
+**レスポンス**:
+
+- `pids` 未指定: `QualityScoresResponse`（全事業の `items` と `summary`。約7MB、`/quality` ページ用）
+- `pids` 指定: `{ metadata, items }`。`items` は軽量プロジェクション（`pid`/`name`/`ministry`/`totalScore`/AI軸5種/`effectiveLevel`/`effectiveReason`/`aiSource` + `links`）。`metadata.missingPids` に見つからなかったIDを返す。エージェントが数事業のスコアを数KBで取得する用途
+
+**注意**: 品質スコアは報告の**形式品質**（特定可能性・説明性・成果設計の明確さ）を測るもので、資金経路の透明性そのものではない（`metadata.notes` に同梱）。
 
 **データソース**: `public/data/project-quality-scores-{year}.json`
 
-**レスポンス**: `QualityScoresResponse`（`items: QualityScoreItem[]` と `summary` を含む）
+---
+
+## GET /api/quality-scores/[pid]
+
+単一事業の品質スコア（軽量プロジェクション）を返す。サイドパネル表示・エージェント探索用。
+
+**パスパラメータ**: `pid`（予算事業ID）
+
+**クエリパラメータ**: `year`（`"2024"` | `"2025"`、デフォルト `"2024"`）
+
+**レスポンス**: `{ metadata, score, links }`。`score` は上記軽量プロジェクションと同形。存在しない pid は 404 + 検索APIへの hint。
 
 ---
 
