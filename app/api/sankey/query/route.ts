@@ -22,8 +22,28 @@ const SANKEY_QUERY_NOTES: readonly string[] = [
 
 // ローカル実験フェーズのため Cache-Control は付与しない（公開段階で API_CACHE_CONTROL を追加する）
 
+/**
+ * ローカル実験フェーズの本番抑制ガード。
+ * main マージ → Vercel 自動デプロイで本ルートが公開されてしまうため、
+ * production では環境変数 SANKEY_QUERY_API_ENABLED=1 を明示しない限り 403 を返す。
+ * `npm run dev`（development）では常に有効。公開判断時にこのガードを外し、
+ * レートリミット・Cache-Control 等の公開段階対策と入れ替える。
+ */
+function isQueryApiEnabled(): boolean {
+  return process.env.NODE_ENV !== 'production' || process.env.SANKEY_QUERY_API_ENABLED === '1';
+}
+
 export async function GET(req: Request) {
   try {
+    if (!isQueryApiEnabled()) {
+      return NextResponse.json(
+        {
+          error: 'このAPIはローカル実験フェーズのため本番環境では無効です',
+          hint: 'ローカルで npm run dev を起動して http://localhost:3000/api/sankey/query を利用してください',
+        },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
     const url = new URL(req.url);
 
     // detail: summary（既定）= 件数・金額のみ / full = TopN集約後の nodes/edges も返す
