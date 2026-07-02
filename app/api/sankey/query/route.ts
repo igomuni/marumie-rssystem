@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { notFound } from 'next/navigation';
 import { loadSankeyGraph } from '@/app/lib/api/sankey-graph-loader';
 import { parseYear, buildMetadata, serverErrorResponse } from '@/app/lib/api/api-notes';
 import {
@@ -24,26 +25,31 @@ const SANKEY_QUERY_NOTES: readonly string[] = [
 
 /**
  * ローカル実験フェーズの本番抑制ガード。
- * main マージ → Vercel 自動デプロイで本ルートが公開されてしまうため、
- * production では環境変数 SANKEY_QUERY_API_ENABLED=1 を明示しない限り 403 を返す。
+ * main マージ → Vercel 自動デプロイで本ルートが公開されてしまうため、Vercel 上では
+ * 機能・理由を一切明かさない素の 404 を返す（403 だと「存在するが禁止」と教えてしまう）。
+ * ※ 未存在ルートの 404 は HTML ページを返すためボディまでは一致しないが、
+ *   リポジトリが公開されている以上ルートの存在自体は秘密ではなく、
+ *   ここでの目的は「応答から機能・データを一切漏らさない」ことに置く。
+ *
+ * 判定は Host ヘッダではなく環境変数で行う: Host はクライアントが任意に送れる値のため
+ * 検知に使えないが、`VERCEL=1` はプラットフォームがサーバー側に注入する値で偽装不能。
+ * 将来 Vercel 上（preview 等）で試す場合のみ SANKEY_QUERY_API_ENABLED=1 で明示有効化できる。
  * `npm run dev`（development）では常に有効。公開判断時にこのガードを外し、
  * レートリミット・Cache-Control 等の公開段階対策と入れ替える。
  */
 function isQueryApiEnabled(): boolean {
-  return process.env.NODE_ENV !== 'production' || process.env.SANKEY_QUERY_API_ENABLED === '1';
+  if (process.env.SANKEY_QUERY_API_ENABLED === '1') return true;
+  if (process.env.VERCEL === '1') return false; // Vercel 上は常に無効
+  return process.env.NODE_ENV !== 'production'; // ローカルでも production ビルドは既定無効
 }
 
 export async function GET(req: Request) {
+  if (!isQueryApiEnabled()) {
+    // 素の 404（ボディ・理由なし）。notFound() は例外を投げるため、
+    // 下の try/catch（500化）の外で呼ぶこと。
+    notFound();
+  }
   try {
-    if (!isQueryApiEnabled()) {
-      return NextResponse.json(
-        {
-          error: 'このAPIはローカル実験フェーズのため本番環境では無効です',
-          hint: 'ローカルで npm run dev を起動して http://localhost:3000/api/sankey/query を利用してください',
-        },
-        { status: 403, headers: { 'Cache-Control': 'no-store' } },
-      );
-    }
     const url = new URL(req.url);
 
     // detail: summary（既定）= 件数・金額のみ / full = TopN集約後の nodes/edges も返す
