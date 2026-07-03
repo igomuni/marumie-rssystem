@@ -132,6 +132,43 @@ function getZoomLabelScale(zoomK: number, baseZoomK: number): number {
   return Math.min(zoomK / baseZoomK, ZOOM_FONT_MAX_RATIO);
 }
 
+// 品質スコアバッジの色分け閾値（/quality のスコア解釈と揃える）
+const SCORE_BADGE_GOOD_MIN = 90;
+const SCORE_BADGE_WARN_MIN = 70;
+function getScoreBadgeColor(score: number): string {
+  if (score >= SCORE_BADGE_GOOD_MIN) return '#2e7d32';
+  if (score >= SCORE_BADGE_WARN_MIN) return '#f57c00';
+  return '#c62828';
+}
+
+/**
+ * 事業ノード選択時に pid 単位のデータを遅延取得してキャッシュする共通フック
+ * （事業概要プレビュー・品質スコアブロックで共用）。
+ * キーは `${year}-${pid}`。取得失敗・404 は null をキャッシュし再試行しない。
+ */
+function useProjectPidCache<T>(
+  selectedNode: LayoutNode | null | undefined,
+  year: string,
+  urlFor: (pid: number, y: string) => string,
+  extract: (data: unknown) => T | null,
+): Map<string, T | null> {
+  const [cache, setCache] = useState<Map<string, T | null>>(new Map());
+  useEffect(() => {
+    if (!selectedNode || selectedNode.aggregated) return;
+    if (selectedNode.type !== 'project-budget' && selectedNode.type !== 'project-spending') return;
+    const pid = selectedNode.projectId;
+    const cacheKey = `${year}-${pid}`;
+    if (pid == null || cache.has(cacheKey)) return;
+    fetch(urlFor(pid, year))
+      .then(r => r.ok ? r.json() : null)
+      .then((data: unknown) => setCache(prev => new Map(prev).set(cacheKey, data == null ? null : extract(data))))
+      .catch(() => setCache(prev => new Map(prev).set(cacheKey, null)));
+    // urlFor/extract はインライン定義を許容し、再取得は selectedNode.id と year のみで制御する
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedNode?.id, year]);
+  return cache;
+}
+
 function getAccountBadgeStyle(category?: string | null): { label: string; background: string } | null {
   if (!category) return null;
   const generalColor = '#e45f6f';
@@ -1698,7 +1735,6 @@ export default function RealDataSankeyPage() {
   const [budgetExecutionListHeight, setBudgetExecutionListHeight] = useState(BUDGET_EXECUTION_LIST_HEIGHT_DEFAULT);
   const overviewResizeRef = useRef<{ startY: number; startH: number } | null>(null);
   const budgetExecutionResizeRef = useRef<{ startY: number; startH: number } | null>(null);
-  const [projectDetailCache, setProjectDetailCache] = useState<Map<string, ProjectDetail | null>>(new Map());
   const [panelTab, setPanelTab] = useState<'ministry' | 'project' | 'recipient'>('ministry');
   // Auto-select panel tab based on selected node type.
   // selectedNode is derived from selectedNodeId and won't change for the same id
@@ -1736,36 +1772,19 @@ export default function RealDataSankeyPage() {
     }
   }, [selectedNode, selectedNodeId, selectNode, graphData]);
 
+  // 事業ノード選択時の遅延取得キャッシュ（useProjectPidCache で共通化）
   // Pre-fetch project detail on node selection (for collapsed preview)
-  useEffect(() => {
-    if (!selectedNode || selectedNode.aggregated) return;
-    if (selectedNode.type !== 'project-budget' && selectedNode.type !== 'project-spending') return;
-    const pid = selectedNode.projectId;
-    const cacheKey = `${year}-${pid}`;
-    if (pid == null || projectDetailCache.has(cacheKey)) return;
-    fetch(`/api/project-details/${pid}?year=${year}`)
-      .then(r => r.ok ? r.json() : null)
-      .then((data: ProjectDetail | null) => setProjectDetailCache(prev => new Map(prev).set(cacheKey, data)))
-      .catch(() => setProjectDetailCache(prev => new Map(prev).set(cacheKey, null)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNode?.id, year]);
-
+  const projectDetailCache = useProjectPidCache<ProjectDetail>(
+    selectedNode, year,
+    (pid, y) => `/api/project-details/${pid}?year=${y}`,
+    data => data as ProjectDetail,
+  );
   // Fetch quality score on project node selection (side panel score block)
-  // pid単体API（軽量プロジェクション）を遅延取得。サンキー初期ロードには影響しない。
-  const [qualityScoreCache, setQualityScoreCache] = useState<Map<string, QualityScoreProjection | null>>(new Map());
-  useEffect(() => {
-    if (!selectedNode || selectedNode.aggregated) return;
-    if (selectedNode.type !== 'project-budget' && selectedNode.type !== 'project-spending') return;
-    const pid = selectedNode.projectId;
-    const cacheKey = `${year}-${pid}`;
-    if (pid == null || qualityScoreCache.has(cacheKey)) return;
-    fetch(`/api/quality-scores/${pid}?year=${year}`)
-      .then(r => r.ok ? r.json() : null)
-      .then((data: { score: QualityScoreProjection } | null) =>
-        setQualityScoreCache(prev => new Map(prev).set(cacheKey, data?.score ?? null)))
-      .catch(() => setQualityScoreCache(prev => new Map(prev).set(cacheKey, null)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNode?.id, year]);
+  const qualityScoreCache = useProjectPidCache<QualityScoreProjection>(
+    selectedNode, year,
+    (pid, y) => `/api/quality-scores/${pid}?year=${y}`,
+    data => (data as { score?: QualityScoreProjection }).score ?? null,
+  );
 
   const nodeByLayoutId = useMemo(() => {
     const m = new Map<string, LayoutNode>();
@@ -3550,13 +3569,13 @@ export default function RealDataSankeyPage() {
                         <span style={{ fontSize: META_FONT_PX, color: '#aaa' }}>スコアなし</span>
                       ) : (
                         <span style={{
-                          background: score.totalScore >= 90 ? '#2e7d32' : score.totalScore >= 70 ? '#f57c00' : '#c62828',
+                          background: getScoreBadgeColor(score.totalScore),
                           color: '#fff', padding: '1px 8px', borderRadius: 10, fontSize: PANEL_META_FONT_PX, fontWeight: 700,
                         }}>
                           {score.totalScore.toFixed(1)}
                         </span>
                       )}
-                      <a href="/quality" target="_blank" rel="noopener noreferrer"
+                      <a href={`/quality?year=${year}`} target="_blank" rel="noopener noreferrer"
                         title="品質スコア一覧ページを開く"
                         style={{ fontSize: META_FONT_PX, color: '#4a90d9', textDecoration: 'none', marginLeft: 'auto', flexShrink: 0 }}
                       >一覧 ↗</a>

@@ -6,6 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as zlib from 'zlib';
+import type { SupportedYear } from '@/app/lib/api/api-notes';
 
 export interface QualityScoreItem {
   pid: string;
@@ -111,7 +112,7 @@ export function toQualityScoreProjection(i: QualityScoreItem): QualityScoreProje
 const cache = new Map<string, QualityScoresResponse>();
 const pidIndexCache = new Map<string, Map<string, QualityScoreItem>>();
 
-export function loadQualityScores(year: string): QualityScoresResponse {
+export function loadQualityScores(year: SupportedYear): QualityScoresResponse {
   if (cache.has(year)) return cache.get(year)!;
 
   // 展開済み .json を優先。無ければ .gz をその場で展開（prebuild未実行のローカル等でも動く）。
@@ -179,7 +180,7 @@ export function loadQualityScores(year: string): QualityScoresResponse {
 }
 
 /** pid → item の O(1) 取得（全件キャッシュと索引を共有。見つからなければ undefined） */
-export function getQualityScore(year: string, pid: string): QualityScoreItem | undefined {
+export function getQualityScore(year: SupportedYear, pid: string): QualityScoreItem | undefined {
   let index = pidIndexCache.get(year);
   if (!index) {
     index = new Map(loadQualityScores(year).items.map(i => [i.pid, i]));
