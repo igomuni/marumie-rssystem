@@ -542,7 +542,18 @@ export default function QualityPage() {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [dialogItem, setDialogItem] = useState<QualityScoreItem | null>(null);
 
+  // 初回のみ URL の ?year= を年度に反映（/sankey-svg サイドパネル等からの年度付きリンク対応）。
+  // フェッチ効果の先頭で判定することで、パラメータ指定時にデフォルト年度の無駄な全件取得を避ける。
+  const urlYearAppliedRef = useRef(false);
   useEffect(() => {
+    if (!urlYearAppliedRef.current) {
+      urlYearAppliedRef.current = true;
+      const y = new URLSearchParams(window.location.search).get('year');
+      if ((y === '2024' || y === '2025') && y !== year) {
+        setYear(y);
+        return; // setYear で本エフェクトが再実行され、そちらでフェッチする
+      }
+    }
     setData(null);
     setLoading(true);
     setError(null);

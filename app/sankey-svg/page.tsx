@@ -20,6 +20,7 @@ import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/
 import { parseAmountToYen } from '@/app/lib/format/yen';
 import { buildFilterExcludedIds } from '@/app/lib/sankey-query';
 import type { AccountCategoryKey } from '@/types/sankey-query';
+import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 
 // ── URL state serialization ──
 
@@ -129,6 +130,43 @@ type ShiftLayoutNode = {
 function getZoomLabelScale(zoomK: number, baseZoomK: number): number {
   if (baseZoomK <= 0 || zoomK <= baseZoomK + 0.001) return 1;
   return Math.min(zoomK / baseZoomK, ZOOM_FONT_MAX_RATIO);
+}
+
+// 品質スコアバッジの色分け閾値（/quality のスコア解釈と揃える）
+const SCORE_BADGE_GOOD_MIN = 90;
+const SCORE_BADGE_WARN_MIN = 70;
+function getScoreBadgeColor(score: number): string {
+  if (score >= SCORE_BADGE_GOOD_MIN) return '#2e7d32';
+  if (score >= SCORE_BADGE_WARN_MIN) return '#f57c00';
+  return '#c62828';
+}
+
+/**
+ * 事業ノード選択時に pid 単位のデータを遅延取得してキャッシュする共通フック
+ * （事業概要プレビュー・品質スコアブロックで共用）。
+ * キーは `${year}-${pid}`。取得失敗・404 は null をキャッシュし再試行しない。
+ */
+function useProjectPidCache<T>(
+  selectedNode: LayoutNode | null | undefined,
+  year: string,
+  urlFor: (pid: number, y: string) => string,
+  extract: (data: unknown) => T | null,
+): Map<string, T | null> {
+  const [cache, setCache] = useState<Map<string, T | null>>(new Map());
+  useEffect(() => {
+    if (!selectedNode || selectedNode.aggregated) return;
+    if (selectedNode.type !== 'project-budget' && selectedNode.type !== 'project-spending') return;
+    const pid = selectedNode.projectId;
+    const cacheKey = `${year}-${pid}`;
+    if (pid == null || cache.has(cacheKey)) return;
+    fetch(urlFor(pid, year))
+      .then(r => r.ok ? r.json() : null)
+      .then((data: unknown) => setCache(prev => new Map(prev).set(cacheKey, data == null ? null : extract(data))))
+      .catch(() => setCache(prev => new Map(prev).set(cacheKey, null)));
+    // urlFor/extract はインライン定義を許容し、再取得は selectedNode.id と year のみで制御する
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedNode?.id, year]);
+  return cache;
 }
 
 function getAccountBadgeStyle(category?: string | null): { label: string; background: string } | null {
@@ -1697,7 +1735,6 @@ export default function RealDataSankeyPage() {
   const [budgetExecutionListHeight, setBudgetExecutionListHeight] = useState(BUDGET_EXECUTION_LIST_HEIGHT_DEFAULT);
   const overviewResizeRef = useRef<{ startY: number; startH: number } | null>(null);
   const budgetExecutionResizeRef = useRef<{ startY: number; startH: number } | null>(null);
-  const [projectDetailCache, setProjectDetailCache] = useState<Map<string, ProjectDetail | null>>(new Map());
   const [panelTab, setPanelTab] = useState<'ministry' | 'project' | 'recipient'>('ministry');
   // Auto-select panel tab based on selected node type.
   // selectedNode is derived from selectedNodeId and won't change for the same id
@@ -1735,19 +1772,19 @@ export default function RealDataSankeyPage() {
     }
   }, [selectedNode, selectedNodeId, selectNode, graphData]);
 
+  // 事業ノード選択時の遅延取得キャッシュ（useProjectPidCache で共通化）
   // Pre-fetch project detail on node selection (for collapsed preview)
-  useEffect(() => {
-    if (!selectedNode || selectedNode.aggregated) return;
-    if (selectedNode.type !== 'project-budget' && selectedNode.type !== 'project-spending') return;
-    const pid = selectedNode.projectId;
-    const cacheKey = `${year}-${pid}`;
-    if (pid == null || projectDetailCache.has(cacheKey)) return;
-    fetch(`/api/project-details/${pid}?year=${year}`)
-      .then(r => r.ok ? r.json() : null)
-      .then((data: ProjectDetail | null) => setProjectDetailCache(prev => new Map(prev).set(cacheKey, data)))
-      .catch(() => setProjectDetailCache(prev => new Map(prev).set(cacheKey, null)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNode?.id, year]);
+  const projectDetailCache = useProjectPidCache<ProjectDetail>(
+    selectedNode, year,
+    (pid, y) => `/api/project-details/${pid}?year=${y}`,
+    data => data as ProjectDetail,
+  );
+  // Fetch quality score on project node selection (side panel score block)
+  const qualityScoreCache = useProjectPidCache<QualityScoreProjection>(
+    selectedNode, year,
+    (pid, y) => `/api/quality-scores/${pid}?year=${y}`,
+    data => (data as { score?: QualityScoreProjection }).score ?? null,
+  );
 
   const nodeByLayoutId = useMemo(() => {
     const m = new Map<string, LayoutNode>();
@@ -3515,6 +3552,60 @@ export default function RealDataSankeyPage() {
                           </>);
                         })()}
                       </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* 品質スコアブロック — project-budget / project-spending（非集約）のみ */}
+              {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (() => {
+                const score = qualityScoreCache.get(`${year}-${selectedNode.projectId}`);
+                if (score === undefined) return null; // fetch中は非表示（パネルのちらつき防止）
+                return (
+                  <div style={{ borderBottom: '1px solid #f0f0f0', padding: '7px 14px 9px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>品質スコア</span>
+                      {score === null || score.totalScore === null ? (
+                        <span style={{ fontSize: META_FONT_PX, color: '#aaa' }}>スコアなし</span>
+                      ) : (
+                        <span style={{
+                          background: getScoreBadgeColor(score.totalScore),
+                          color: '#fff', padding: '1px 8px', borderRadius: 10, fontSize: PANEL_META_FONT_PX, fontWeight: 700,
+                        }}>
+                          {score.totalScore.toFixed(1)}
+                        </span>
+                      )}
+                      <a href={`/quality?year=${year}`} target="_blank" rel="noopener noreferrer"
+                        title="品質スコア一覧ページを開く"
+                        style={{ fontSize: META_FONT_PX, color: '#4a90d9', textDecoration: 'none', marginLeft: 'auto', flexShrink: 0 }}
+                      >一覧 ↗</a>
+                    </div>
+                    {score !== null && score.totalScore !== null && (
+                      <>
+                        <div style={{ display: 'flex', gap: 10, marginTop: 5, flexWrap: 'wrap' }}>
+                          {([
+                            ['特定可能性', score.axisIdentify],
+                            ['使途', score.axisPurpose],
+                            ['収支', score.axisBudget],
+                            ['有効性', score.axisEffective],
+                          ] as [string, number | null][]).map(([label, v]) => (
+                            <span key={label} style={{ fontSize: META_FONT_PX, color: '#777' }}>
+                              {label} <span style={{ fontWeight: 600, color: '#555' }}>{v != null ? Math.round(v) : '—'}</span>
+                            </span>
+                          ))}
+                          {score.axisStructure != null && (
+                            <span style={{ fontSize: META_FONT_PX, color: '#bbb' }}>構造 {Math.round(score.axisStructure)}（参考）</span>
+                          )}
+                        </div>
+                        {score.effectiveReason && score.aiSource !== 'heuristic' && (
+                          <div
+                            title={`${score.effectiveReason}\n※実測成果ではなく成果設計の明確さの評価`}
+                            style={{ fontSize: META_FONT_PX, color: '#999', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                          >
+                            有効性根拠: {score.effectiveReason}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 );
