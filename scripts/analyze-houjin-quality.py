@@ -56,14 +56,22 @@ for p in (SPEND_CSV, HOUJIN_DB):
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def has_valid_check_digit(cn: str) -> bool:
+    """法人番号のチェックディジット検証。recipient-key.ts の hasValidCheckDigit と同一。
+    検査用数字 = 9 −（Σ[n=1..12] Pn×Qn mod 9）, Pn=基礎番号の下n桁目, Qn=奇数1/偶数2。"""
+    base = cn[1:]
+    s = sum(int(base[12 - n]) * (1 if n % 2 == 1 else 2) for n in range(1, 13))
+    return 9 - (s % 9) == int(cn[0])
+
+
 def is_valid_corporate_number(cn: str) -> bool:
-    """13桁数字かつ全桁同一（ダミー）でない。recipient-key.ts と同一方針。"""
+    """13桁数字・全桁同一でない・チェックディジット整合。recipient-key.ts と同一方針。"""
     cn = cn.strip()
     if len(cn) != 13 or not cn.isdigit():
         return False
     if cn == cn[0] * 13:  # 全桁同一のダミー（9999999999999 等）
         return False
-    return True
+    return has_valid_check_digit(cn)
 
 
 def is_dummy_cn(cn: str) -> bool:
