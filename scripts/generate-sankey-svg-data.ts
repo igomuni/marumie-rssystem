@@ -28,6 +28,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { readShiftJISCSV, parseAmount } from '@/scripts/csv-reader';
+import { isValidCorporateNumber } from '@/app/lib/recipient-key';
 import type { CSVRow } from '@/types/rs-system';
 import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
 
@@ -60,6 +61,8 @@ interface SankeyNode {
   accountCategory?: 'general' | 'special' | 'both'; // project-budget のみ
   budgetSummary?: BudgetSummary; // project-budget のみ
   budgetBreakdown?: BudgetBreakdownItem[]; // project-budget のみ
+  representativeCorporateNumber?: string; // recipient のみ: 内包する有効法人番号のうち最大金額のもの
+  corporateNumberCount?: number; // recipient のみ: 内包する相異なる有効法人番号の件数
 }
 
 interface SankeyEdge {
@@ -261,6 +264,7 @@ function main() {
     name: string;
     totalAmount: number;
     projectAmounts: Map<number, number>; // projectId → amount
+    corpAmounts: Map<string, number>; // 有効法人番号 → amount（名前集約ノードが内包する実体の内訳）
   }
   const recipientMap = new Map<string, RecipientAgg>();
   const projectSpendingMap = new Map<number, number>(); // 事業ごとの直接支出合計
@@ -305,11 +309,16 @@ function main() {
     const recipientKey = spendingName;
     let recipient = recipientMap.get(recipientKey);
     if (!recipient) {
-      recipient = { name: spendingName, totalAmount: 0, projectAmounts: new Map() };
+      recipient = { name: spendingName, totalAmount: 0, projectAmounts: new Map(), corpAmounts: new Map() };
       recipientMap.set(recipientKey, recipient);
     }
     recipient.totalAmount += amount;
     recipient.projectAmounts.set(pid, (recipient.projectAmounts.get(pid) || 0) + amount);
+    // 名前集約ノードが内包する法人番号（有効なもののみ）を金額付きで蓄積
+    const corpNum = (row['法人番号'] || '').trim();
+    if (isValidCorporateNumber(corpNum)) {
+      recipient.corpAmounts.set(corpNum, (recipient.corpAmounts.get(corpNum) || 0) + amount);
+    }
 
     projectSpendingMap.set(pid, (projectSpendingMap.get(pid) || 0) + amount);
   }
@@ -421,7 +430,7 @@ function main() {
     if (budgetAmount > 0 && spendingAmount === 0) {
       let noSpending = recipientMap.get('__no-spending__');
       if (!noSpending) {
-        noSpending = { name: '支出先なし', totalAmount: 0, projectAmounts: new Map() };
+        noSpending = { name: '支出先なし', totalAmount: 0, projectAmounts: new Map(), corpAmounts: new Map() };
         recipientMap.set('__no-spending__', noSpending);
       }
       noSpending.projectAmounts.set(pid, 0);
@@ -437,12 +446,21 @@ function main() {
   for (const [key, recipient] of sortedRecipients) {
     const isNoSpending = key === '__no-spending__';
     const recipientId = isNoSpending ? 'r-no-spending' : `r-${++recipientSeq}`;
+    // 代表法人番号（最大金額の有効番号）と内包件数。内包0件なら未設定（集約行・法人番号なし）
+    let representativeCorporateNumber: string | undefined;
+    let maxCorpAmount = -1;
+    for (const [cn, amt] of recipient.corpAmounts) {
+      if (amt > maxCorpAmount) { maxCorpAmount = amt; representativeCorporateNumber = cn; }
+    }
+    const corporateNumberCount = recipient.corpAmounts.size;
     nodes.push({
       id: recipientId,
       name: recipient.name,
       type: 'recipient',
       value: recipient.totalAmount,
       ...(isNoSpending ? { skipLinkOverride: true } : {}),
+      ...(representativeCorporateNumber ? { representativeCorporateNumber } : {}),
+      ...(corporateNumberCount > 0 ? { corporateNumberCount } : {}),
     });
 
     for (const [pid, amount] of recipient.projectAmounts) {

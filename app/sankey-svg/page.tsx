@@ -3282,6 +3282,21 @@ export default function RealDataSankeyPage() {
                     <div style={{ fontWeight: 700, fontSize: PANEL_TITLE_FONT_PX, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
                       {selectedNode.name}
                     </div>
+                    {selectedNode.type === 'recipient' && selectedNode.representativeCorporateNumber && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: META_FONT_PX, color: '#666' }}>
+                        <span style={{ fontFamily: 'monospace' }} title="法人番号（代表：内包する有効法人番号のうち最大金額のもの）">
+                          法人番号 {selectedNode.representativeCorporateNumber}
+                        </span>
+                        {(selectedNode.corporateNumberCount ?? 0) >= 2 && (
+                          <span
+                            style={{ background: '#fef3c7', color: '#92400e', padding: '0 6px', borderRadius: 8, fontWeight: 600, whiteSpace: 'nowrap' }}
+                            title={`この支出先名には${selectedNode.corporateNumberCount}件の法人番号が紐づいています（表記揺れ・誤記載・複数実体の可能性）`}
+                          >
+                            他{(selectedNode.corporateNumberCount ?? 1) - 1}件
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {(() => {
                       // Main value (予算額 for budget types, 支出額 for spending type)
                       let mainValue = 0;

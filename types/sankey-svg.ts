@@ -24,6 +24,16 @@ export interface RawNode {
   budgetSummary?: BudgetSummary;
   /** 会計区分・歳出項目ごとの予算内訳 — project-budget ノードのみ付与 */
   budgetBreakdown?: BudgetBreakdownItem[];
+  /**
+   * 代表法人番号 — recipient ノードのみ。名前集約されたノードが内包する
+   * 有効法人番号のうち最大金額のもの。内包が0件（集約行・法人番号なし）の場合は未設定。
+   */
+  representativeCorporateNumber?: string;
+  /**
+   * このノードが内包する相異なる有効法人番号の件数 — recipient ノードのみ。
+   * 2以上なら名前集約が複数実体（誤記載分裂含む）にまたがることを示す（サイドパネルで「他N件」表示）。
+   */
+  corporateNumberCount?: number;
 }
 
 export interface BudgetSummary {

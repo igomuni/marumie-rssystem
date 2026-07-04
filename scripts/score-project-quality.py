@@ -366,6 +366,7 @@ with open(SPEND_CSV, encoding='utf-8') as f:
         # per-recipient行を収集（支出先合計行は除外、金額行のみ）
         # 支出先合計行（支出先の合計支出額あり・金額なし）は常に金額行とペアで存在するため除外可能
         # フィールド名は短縮形: n=name, b=blockNo, s=status, c=cnFilled, o=opaque
+        # cn=法人番号の実値（空欄=""）。c(bool)は記入有無、cnは値そのもの（誤記載の可視化に使う）
         # a2=金額（個別支出額、None=空欄,0=明示的ゼロ）
         # role=事業を行う上での役割（ブロック単位）, cc=契約概要
         has_total = bool(r.get('支出先の合計支出額', '').strip())
@@ -377,6 +378,7 @@ with open(SPEND_CSV, encoding='utf-8') as f:
             'b': block_no,
             's': row_status,
             'c': bool(cn),
+            'cn': cn,
             'o': opaque,
             'a2': to_int_or_none(r.get('金額', '')),
             'role': ps.block_roles.get(block_no, ''),
