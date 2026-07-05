@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import type { QualityScoreItem, QualityScoresResponse } from '@/app/api/quality-scores/route';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
+import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
 import { scoreColor, formatAmount, pct } from '@/client/components/quality/score-format';
 
 const PAGE_SIZE = 50;
@@ -77,6 +78,8 @@ export default function QualityPage() {
   const [page, setPage] = useState(1);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [dialogItem, setDialogItem] = useState<QualityScoreItem | null>(null);
+  // ダイアログ用データはページ側で取得し ScoreDetailDialog へ props で渡す（Issue #246）
+  const dialogData = useScoreDetailData(dialogItem?.pid ?? null, year);
 
   // 初回のみ URL の ?year= を年度に反映（/sankey-svg サイドパネル等からの年度付きリンク対応）。
   // フェッチ効果の先頭で判定することで、パラメータ指定時にデフォルト年度の無駄な全件取得を避ける。
@@ -204,7 +207,15 @@ export default function QualityPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {dialogItem && <ScoreDetailDialog item={dialogItem} onClose={() => setDialogItem(null)} year={year} />}
+      {dialogItem && (
+        <ScoreDetailDialog
+          item={dialogItem}
+          onClose={() => setDialogItem(null)}
+          recipients={dialogData.recipients}
+          recipientsError={dialogData.recipientsError}
+          projectInfo={dialogData.projectInfo}
+        />
+      )}
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-4">
         <div className="max-w-[1600px] mx-auto">
