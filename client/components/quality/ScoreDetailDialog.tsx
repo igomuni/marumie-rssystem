@@ -42,6 +42,13 @@ export function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreI
     return () => { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp); };
   }, []);
 
+  // Escape で閉じる（キーボード操作でのダイアログ dismiss）
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
   useEffect(() => {
     setRecipients(null);
     setRecipientsError(false);
@@ -51,14 +58,17 @@ export function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreI
     setShowAxisDetail(false);
     setProjectInfo(undefined);
     setShowProjectInfo(true);
+    // 古い pid/year の fetch が後着で新しい表示を上書きしないようガードする
+    let cancelled = false;
     fetch(`/api/quality-scores/recipients?pid=${item.pid}&year=${year}`)
       .then(res => res.ok ? res.json() : Promise.reject())
-      .then((rows: RecipientRow[]) => setRecipients(rows))
-      .catch(() => setRecipientsError(true));
+      .then((rows: RecipientRow[]) => { if (!cancelled) setRecipients(rows); })
+      .catch(() => { if (!cancelled) setRecipientsError(true); });
     fetch(`/api/project-details/${item.pid}?year=${year}`)
       .then(res => res.ok ? res.json() : Promise.reject())
-      .then((d: ProjectDetail) => setProjectInfo(d))
-      .catch(() => setProjectInfo(null));
+      .then((d: ProjectDetail) => { if (!cancelled) setProjectInfo(d); })
+      .catch(() => { if (!cancelled) setProjectInfo(null); });
+    return () => { cancelled = true; };
   }, [item.pid, year]);
 
   const displayedRecipients = useMemo(() => {
@@ -116,10 +126,18 @@ export function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreI
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       onClick={onClose}
+      role="presentation"
+      // 背面（サンキー図）の React パンハンドラへドラッグ/リサイズが伝播しないよう遮断
+      // （createPortal は DOM を分離するが React 合成イベントは親ツリーへバブリングするため）
+      onMouseDown={e => e.stopPropagation()}
+      onMouseMove={e => e.stopPropagation()}
+      onMouseUp={e => e.stopPropagation()}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-8xl mx-4 max-h-[92vh] flex flex-col"
+        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-7xl mx-4 max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
       >
         {/* Header */}
         <div className="px-3 sm:px-6 py-3 border-b border-gray-200 dark:border-gray-700 flex items-start justify-between gap-3 shrink-0 bg-gray-50 dark:bg-gray-800 rounded-t-2xl">
