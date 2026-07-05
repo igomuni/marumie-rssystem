@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import type { RecipientRow } from '@/app/api/quality-scores/recipients/route';
 import type { ProjectDetail } from '@/types/project-details';
-import { isValidCorporateNumber } from '@/app/lib/recipient-key';
+import { externalCorporateLinks } from '@/app/lib/api/links';
 import { scoreColor, formatAmount, pct } from '@/client/components/quality/score-format';
 
 const STATUS_META: Record<RecipientRow['s'], { label: string; cls: string }> = {
@@ -442,15 +442,15 @@ export function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreI
                           {(() => {
                             const cn = row.cn?.trim() ?? '';
                             if (!cn) return <span className="text-gray-300 dark:text-gray-600">—</span>;
-                            const valid = isValidCorporateNumber(cn);
-                            // 有効な法人番号のみ gBizINFO へリンク（形式不正は検索が無意味なため非リンク）
+                            // 有効な法人番号のみ gBizINFO へリンク（検証・URL構築は共有ヘルパーに集約）
                             // 番号はコピペ用に選択可能なテキストのままにし、リンクジャンプはアイコンクリック時のみ
-                            if (valid) {
+                            const links = externalCorporateLinks(cn);
+                            if (links) {
                               return (
                                 <span className="inline-flex items-center gap-1 font-mono text-[10px] text-gray-600 dark:text-gray-300" title={cn}>
                                   <span className="select-text">{cn}</span>
                                   <a
-                                    href={`https://info.gbiz.go.jp/hojin/ichiran?hojinBango=${cn}`}
+                                    href={links.gbizinfo}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="shrink-0 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"

@@ -129,6 +129,7 @@ def houjin_name(cn: str):
 
 def is_cn_verified(cn: str, recipient_name: str) -> bool:
     """有効な法人番号 かつ houjin.db 公式名が支出先名と一致するか（正規化名で照合）。"""
+    cn = cn.strip()  # 検証と houjin_name の完全一致照合で同じ正規化値を使う
     if not is_valid_corporate_number(cn):
         return False
     hn = houjin_name(cn)
