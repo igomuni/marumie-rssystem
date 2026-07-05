@@ -21,6 +21,8 @@ import { parseAmountToYen } from '@/app/lib/format/yen';
 import { buildFilterExcludedIds } from '@/app/lib/sankey-query';
 import type { AccountCategoryKey } from '@/types/sankey-query';
 import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
+import type { QualityScoreItem } from '@/app/api/quality-scores/route';
+import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
 
 // ── URL state serialization ──
 
@@ -288,6 +290,9 @@ export default function RealDataSankeyPage() {
   const [autoFocusRelated, setAutoFocusRelated] = useState(false);
   const [filterOnMinistryClick, setFilterOnMinistryClick] = useState(true);
   const [year, setYear] = useState<'2024' | '2025'>('2025');
+  // 品質スコア詳細ダイアログ（/quality と共通の ScoreDetailDialog を全項目取得して表示）
+  const [scoreDialogItem, setScoreDialogItem] = useState<QualityScoreItem | null>(null);
+  const [scoreDialogLoading, setScoreDialogLoading] = useState(false);
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -1785,6 +1790,18 @@ export default function RealDataSankeyPage() {
     (pid, y) => `/api/quality-scores/${pid}?year=${y}`,
     data => (data as { score?: QualityScoreProjection }).score ?? null,
   );
+
+  // 品質スコアブロックのクリックで全項目を取得し /quality と同じ詳細ダイアログを開く
+  const openScoreDialog = useCallback((pid: string | number) => {
+    setScoreDialogLoading(true);
+    fetch(`/api/quality-scores/${pid}?year=${year}&full=1`)
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then((data: { score?: QualityScoreItem }) => {
+        if (data.score) setScoreDialogItem(data.score);
+      })
+      .catch(() => { /* スコアなし等は何もしない */ })
+      .finally(() => setScoreDialogLoading(false));
+  }, [year]);
 
   const nodeByLayoutId = useMemo(() => {
     const m = new Map<string, LayoutNode>();
@@ -3576,19 +3593,36 @@ export default function RealDataSankeyPage() {
               {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (() => {
                 const score = qualityScoreCache.get(`${year}-${selectedNode.projectId}`);
                 if (score === undefined) return null; // fetch中は非表示（パネルのちらつき防止）
+                const scorePid = selectedNode.projectId;
+                const hasScore = score !== null && score.totalScore !== null;
                 return (
                   <div style={{ borderBottom: '1px solid #f0f0f0', padding: '7px 14px 9px', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>品質スコア</span>
-                      {score === null || score.totalScore === null ? (
+                      {!hasScore ? (
                         <span style={{ fontSize: META_FONT_PX, color: '#aaa' }}>スコアなし</span>
                       ) : (
-                        <span style={{
-                          background: getScoreBadgeColor(score.totalScore),
-                          color: '#fff', padding: '1px 8px', borderRadius: 10, fontSize: PANEL_META_FONT_PX, fontWeight: 700,
-                        }}>
-                          {score.totalScore.toFixed(1)}
+                        <span
+                          onClick={() => !scoreDialogLoading && openScoreDialog(scorePid)}
+                          title="スコアの計算根拠・支出先一覧を表示"
+                          style={{
+                            background: getScoreBadgeColor(score.totalScore!),
+                            color: '#fff', padding: '1px 8px', borderRadius: 10, fontSize: PANEL_META_FONT_PX, fontWeight: 700,
+                            cursor: scoreDialogLoading ? 'wait' : 'pointer',
+                          }}>
+                          {score.totalScore!.toFixed(1)}
                         </span>
+                      )}
+                      {hasScore && (
+                        <button
+                          onClick={() => !scoreDialogLoading && openScoreDialog(scorePid)}
+                          disabled={scoreDialogLoading}
+                          title="スコアの計算根拠・支出先一覧を表示"
+                          style={{
+                            fontSize: META_FONT_PX, color: '#4a90d9', background: 'none', border: 'none', padding: 0,
+                            cursor: scoreDialogLoading ? 'wait' : 'pointer', flexShrink: 0,
+                          }}
+                        >{scoreDialogLoading ? '読込中…' : '詳細'}</button>
                       )}
                       <a href={`/quality?year=${year}`} target="_blank" rel="noopener noreferrer"
                         title="品質スコア一覧ページを開く"
@@ -4714,6 +4748,18 @@ export default function RealDataSankeyPage() {
           </div>
         )}
       </div>
+
+      {/* 品質スコア詳細ダイアログ（/quality と共通コンポーネント）
+          containerRef 外の document.body に portal で出し、背面サンキー図の wheel/pan ハンドラに
+          イベントが伝播しないようにする（そうしないとダイアログ内スクロールで背面が動く） */}
+      {scoreDialogItem && createPortal(
+        <ScoreDetailDialog
+          item={scoreDialogItem}
+          year={year}
+          onClose={() => setScoreDialogItem(null)}
+        />,
+        document.body,
+      )}
     </div>
   );
 }
