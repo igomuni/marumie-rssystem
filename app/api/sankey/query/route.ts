@@ -140,6 +140,7 @@ export async function GET(req: Request) {
         view.pin.recipientId, view.pin.ministryName,
         view.offset.target, view.offset.project,
         view.projectSortBy,
+        !!query.filter.recipientName?.query,
       );
       body.sankey = {
         nodes: result.nodes,
