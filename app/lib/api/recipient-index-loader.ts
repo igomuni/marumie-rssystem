@@ -40,7 +40,20 @@ function getOwnEntry(recipients: Record<string, RecipientEntry>, key: string): R
 
 export function resolveRecipient(year: string, key: string): RecipientEntry | null {
   const index = loadRecipientIndex(year);
-  if (!key.startsWith('name:')) return getOwnEntry(index.recipients, key);
+
+  // 1. 直接ヒット（実在エントリを最優先）
+  const direct = getOwnEntry(index.recipients, key);
+  if (direct) return direct;
+
+  // 2. キー互換: 解決（誤記載統合・番号補完）で付け替わった旧キー → 現行キー
+  const redirected = index.redirects?.[key];
+  if (redirected) {
+    const r = getOwnEntry(index.recipients, redirected);
+    if (r) return r;
+  }
+
+  // 3. "name:正規化名" キーは表記ゆれ（aliases）から出現数最大のエントリへ解決
+  if (!key.startsWith('name:')) return null;
 
   let nameMap = nameKeyCache.get(year);
   if (!nameMap) {
@@ -59,6 +72,5 @@ export function resolveRecipient(year: string, key: string): RecipientEntry | nu
   }
 
   const resolvedKey = nameMap.get(key.slice('name:'.length));
-  const resolved = resolvedKey ? getOwnEntry(index.recipients, resolvedKey) : null;
-  return resolved ?? getOwnEntry(index.recipients, key);
+  return resolvedKey ? getOwnEntry(index.recipients, resolvedKey) : null;
 }

@@ -5,15 +5,17 @@ import * as zlib from 'zlib';
 import { parseYear, serverErrorResponse } from '@/app/lib/api/api-notes';
 
 // フィールド名は短縮形（JSONサイズ削減のため）
-// n=name, b=blockNo, s=status, c=cnFilled, o=opaque
+// n=name, b=blockNo, s=status, c=cnFilled, cn=法人番号の実値(""=空欄), o=opaque
 // a2=金額（個別支出額）, r=isRoot
 // chain=ブロック委託チェーン("組織→A→B→C"), d=委託深度
 // role=事業を行う上での役割（ブロック単位）, cc=契約概要
+// c(bool)は記入有無、cn(string)は値そのもの。c=true かつ cn が無効な形式なら誤記載の可視化に使える
 export interface RecipientRow {
   n: string;
   b: string;
   s: 'valid' | 'gov' | 'supp' | 'invalid' | 'unknown';
   c: boolean;
+  cn: string;
   o: boolean;
   a2: number | null;
   r: boolean;

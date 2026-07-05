@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { QualityScoreItem, QualityScoresResponse } from '@/app/api/quality-scores/route';
 import type { RecipientRow } from '@/app/api/quality-scores/recipients/route';
 import type { ProjectDetail } from '@/types/project-details';
+import { isValidCorporateNumber } from '@/app/lib/recipient-key';
 
 const PAGE_SIZE = 50;
 
@@ -29,8 +30,8 @@ function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreItem; on
   const [showAxisDetail, setShowAxisDetail] = useState(false);
   const [projectInfo, setProjectInfo] = useState<ProjectDetail | null | undefined>(undefined);
   const [showProjectInfo, setShowProjectInfo] = useState(true);
-  const COL_MAX_WIDTHS = [undefined, 70, 64, 60, 50, undefined, undefined];
-  const [colWidths, setColWidths] = useState<number[]>([200, 70, 64, 60, 50, 200, 200]);
+  const COL_MAX_WIDTHS = [undefined, 70, 130, 60, 50, undefined, undefined];
+  const [colWidths, setColWidths] = useState<number[]>([200, 70, 120, 60, 50, 200, 200]);
   const resizingCol = useRef<{ index: number; startX: number; startW: number } | null>(null);
 
   useEffect(() => {
@@ -385,7 +386,7 @@ function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreItem; on
                     {([
                       { label: '支出先名', align: 'left', sort: null, title: undefined },
                       { label: '委託チェーン', align: 'left', sort: 'chain' as const, title: '委託チェーン（A→B→C）でソート' },
-                      { label: '法人番号', align: 'center', sort: 'c' as const, title: '法人番号(Corporate Number)の記入有無' },
+                      { label: '法人番号', align: 'center', sort: 'c' as const, title: '法人番号(Corporate Number)。記入有無でソート。⚠は形式不正（誤記載の疑い）' },
                       { label: '金額', align: 'right', sort: 'a2' as const, title: '個別支出額（CSVの「金額」列）' },
                       { label: '実支出比', align: 'right', sort: 'pct' as const, title: '実質支出合計に対する割合' },
                       { label: '役割', align: 'left', sort: null, title: '事業を行う上での役割（ブロック単位）' },
@@ -423,11 +424,20 @@ function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreItem; on
                             ? (row.chain.startsWith('組織→') ? row.chain.slice('組織→'.length) : row.chain)
                             : (row.b || '-')}
                         </td>
-                        <td className="px-3 py-1.5 text-center">
-                          {row.c
-                            ? <span className="text-emerald-500 font-bold">✓</span>
-                            : <span className="text-gray-300 dark:text-gray-600">—</span>
-                          }
+                        <td className="px-2 py-1.5 text-center">
+                          {(() => {
+                            const cn = row.cn?.trim() ?? '';
+                            if (!cn) return <span className="text-gray-300 dark:text-gray-600">—</span>;
+                            const valid = isValidCorporateNumber(cn);
+                            return (
+                              <span
+                                className={`font-mono text-[10px] ${valid ? 'text-gray-600 dark:text-gray-300' : 'text-amber-700 dark:text-amber-300 font-semibold'}`}
+                                title={valid ? cn : `法人番号の形式が不正（誤記載の疑い）: ${cn}`}
+                              >
+                                {cn}{!valid && <span className="ml-0.5">⚠</span>}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="px-3 py-1.5 text-right font-mono text-gray-700 dark:text-gray-300 whitespace-nowrap">
                           {row.a2 === null ? <span className="text-gray-300 dark:text-gray-600">—</span> : formatAmount(row.a2)}
