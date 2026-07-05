@@ -3301,8 +3301,20 @@ export default function RealDataSankeyPage() {
                     </div>
                     {selectedNode.type === 'recipient' && selectedNode.representativeCorporateNumber && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: META_FONT_PX, color: '#666' }}>
-                        <span style={{ fontFamily: 'monospace' }} title="法人番号（代表：内包する有効法人番号のうち最大金額のもの）">
-                          法人番号 {selectedNode.representativeCorporateNumber}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'monospace' }} title="法人番号（代表：内包する有効法人番号のうち最大金額のもの）">
+                          <span>法人番号 {selectedNode.representativeCorporateNumber}</span>
+                          <a
+                            href={`https://info.gbiz.go.jp/hojin/ichiran?hojinBango=${selectedNode.representativeCorporateNumber}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={`gBizINFO で法人番号を確認: ${selectedNode.representativeCorporateNumber}`}
+                            style={{ display: 'inline-flex', color: '#2563eb', flexShrink: 0 }}
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" height="13" width="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ display: 'block' }}>
+                              <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
+                            </svg>
+                          </a>
                         </span>
                         {(selectedNode.corporateNumberCount ?? 0) >= 2 && (
                           <span

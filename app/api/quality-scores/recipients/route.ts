@@ -13,7 +13,8 @@ import { parseYear, serverErrorResponse } from '@/app/lib/api/api-notes';
 export interface RecipientRow {
   n: string;
   b: string;
-  s: 'valid' | 'gov' | 'supp' | 'invalid' | 'unknown';
+  // cn = 有効な法人番号 かつ houjin.db 公式名が支出先名と一致（番号一致で特定可能）
+  s: 'valid' | 'gov' | 'supp' | 'cn' | 'invalid' | 'unknown';
   c: boolean;
   cn: string;
   o: boolean;

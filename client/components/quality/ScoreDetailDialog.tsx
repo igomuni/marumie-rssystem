@@ -11,6 +11,8 @@ const STATUS_META: Record<RecipientRow['s'], { label: string; cls: string }> = {
   valid:   { label: 'OK',      cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
   gov:     { label: '行政機関', cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' },
   supp:    { label: '補助辞書', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+  // 番号一致(houjin.db裏取り)も表示上は valid と同格の OK に統合（内部 s='cn' と cnVerifiedCount は集計用に保持）
+  cn:      { label: 'OK',      cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
   invalid: { label: '不一致',  cls: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
   unknown: { label: '未登録',  cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
 };
@@ -441,12 +443,33 @@ export function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreI
                             const cn = row.cn?.trim() ?? '';
                             if (!cn) return <span className="text-gray-300 dark:text-gray-600">—</span>;
                             const valid = isValidCorporateNumber(cn);
+                            // 有効な法人番号のみ gBizINFO へリンク（形式不正は検索が無意味なため非リンク）
+                            // 番号はコピペ用に選択可能なテキストのままにし、リンクジャンプはアイコンクリック時のみ
+                            if (valid) {
+                              return (
+                                <span className="inline-flex items-center gap-1 font-mono text-[10px] text-gray-600 dark:text-gray-300" title={cn}>
+                                  <span className="select-text">{cn}</span>
+                                  <a
+                                    href={`https://info.gbiz.go.jp/hojin/ichiran?hojinBango=${cn}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="shrink-0 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                    title={`gBizINFO で法人番号を確認: ${cn}`}
+                                    onClick={e => e.stopPropagation()}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="currentColor" className="block" aria-hidden="true">
+                                      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
+                                    </svg>
+                                  </a>
+                                </span>
+                              );
+                            }
                             return (
                               <span
-                                className={`font-mono text-[10px] ${valid ? 'text-gray-600 dark:text-gray-300' : 'text-amber-700 dark:text-amber-300 font-semibold'}`}
-                                title={valid ? cn : `法人番号の形式が不正（誤記載の疑い）: ${cn}`}
+                                className="font-mono text-[10px] text-amber-700 dark:text-amber-300 font-semibold"
+                                title={`法人番号の形式が不正（誤記載の疑い）: ${cn}`}
                               >
-                                {cn}{!valid && <span className="ml-0.5">⚠</span>}
+                                {cn}<span className="ml-0.5">⚠</span>
                               </span>
                             );
                           })()}
