@@ -22,9 +22,12 @@ export async function GET(
       );
     }
 
+    // ?full=1 でサイドパネルのスコア詳細ダイアログ用に全項目を返す（既定は軽量プロジェクション）
+    const full = request.nextUrl.searchParams.get('full') === '1';
+
     const body = {
       metadata: buildMetadata(year, { pid }, QUALITY_SCORE_NOTES),
-      score: toQualityScoreProjection(item),
+      score: full ? item : toQualityScoreProjection(item),
       links: {
         ...projectLinks(pid, year),
         qualityWeb: `/quality?year=${year}`,
