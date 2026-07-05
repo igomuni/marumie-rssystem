@@ -28,7 +28,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { readShiftJISCSV, parseAmount } from '@/scripts/csv-reader';
-import { isValidCorporateNumber } from '@/app/lib/recipient-key';
+import { resolveRecipientKey } from '@/app/lib/recipient-key';
+import type { RecipientResolution } from '@/app/lib/recipient-key';
 import type { CSVRow } from '@/types/rs-system';
 import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
 
@@ -44,6 +45,12 @@ const DATA_DIR = path.join(__dirname, `../data/year_${YEAR}`);
 const OUTPUT_DIR = path.join(__dirname, '../public/data');
 const OUTPUT_FILE = `sankey-svg-${YEAR}-graph.json`;
 const TARGET_BUDGET_YEAR = YEAR - 1; // 例: 2025年度事業 → 2024年度予算データを使用
+
+// 法人番号解決マッピング（houjin.db裏取り。無ければ解決なし）
+const RESOLUTION_PATH = path.join(OUTPUT_DIR, `recipient-resolution-${YEAR}.json`);
+const resolution: RecipientResolution | undefined = fs.existsSync(RESOLUTION_PATH)
+  ? JSON.parse(fs.readFileSync(RESOLUTION_PATH, 'utf-8'))
+  : undefined;
 
 // ─── 型定義 ──────────────────────────────────────────────
 
@@ -315,9 +322,11 @@ function main() {
     recipient.totalAmount += amount;
     recipient.projectAmounts.set(pid, (recipient.projectAmounts.get(pid) || 0) + amount);
     // 名前集約ノードが内包する法人番号（有効なもののみ）を金額付きで蓄積
-    const corpNum = (row['法人番号'] || '').trim();
-    if (isValidCorporateNumber(corpNum)) {
-      recipient.corpAmounts.set(corpNum, (recipient.corpAmounts.get(corpNum) || 0) + amount);
+    // 解決（誤記載統合・番号補完）を適用した法人番号で集計。
+    // 13桁cnに解決されたもののみ内訳に加える（name:キーは法人番号なし）。
+    const resolvedKey = resolveRecipientKey(spendingName, row['法人番号'] || '', resolution);
+    if (/^\d{13}$/.test(resolvedKey)) {
+      recipient.corpAmounts.set(resolvedKey, (recipient.corpAmounts.get(resolvedKey) || 0) + amount);
     }
 
     projectSpendingMap.set(pid, (projectSpendingMap.get(pid) || 0) + amount);

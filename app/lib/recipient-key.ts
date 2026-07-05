@@ -68,3 +68,37 @@ export function buildRecipientKey(name: string, corporateNumber: string): string
   if (isValidCorporateNumber(corporateNumber)) return corporateNumber.trim();
   return `name:${normalizeRecipientName(name)}`;
 }
+
+/**
+ * 法人番号解決マッピング（houjin.db 裏取りで確定）。
+ * scripts/generate-recipient-resolution.py が生成し、生成器が resolveRecipientKey に渡す。
+ */
+export interface RecipientResolution {
+  /**
+   * 正規化名 → { 誤記載cn → 正規cn }（同名の複数有効番号のうち houjin公式名が一致する1つへ統合）。
+   * 誤記載cnは別名では正規番号でありうるため、必ず (名前, 番号) の組で判定する。
+   */
+  mergeCn: Record<string, Record<string, string>>;
+  /** 正規化名 → cn（番号欠落/無効を houjin完全一致の一意ヒットで補完） */
+  supplement: Record<string, string>;
+}
+
+/**
+ * 解決マッピングを適用した支出先キー。buildRecipientKey に houjin.db 裏取りの
+ * 誤記載統合(mergeCn)・番号補完(supplement)を上乗せする。
+ * resolution 省略時は buildRecipientKey と同一（解決なし）。
+ */
+export function resolveRecipientKey(
+  name: string,
+  corporateNumber: string,
+  resolution?: RecipientResolution,
+): string {
+  const cn = corporateNumber.trim();
+  const norm = normalizeRecipientName(name);
+  if (isValidCorporateNumber(cn)) {
+    // 有効番号: (名前,番号) の組で誤記載統合を適用（別実体・別名は不変）
+    return resolution?.mergeCn[norm]?.[cn] ?? cn;
+  }
+  // 無効/欠落: 正規化名で補完を試みる
+  return resolution?.supplement[norm] ?? `name:${norm}`;
+}
