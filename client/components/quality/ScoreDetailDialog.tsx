@@ -17,14 +17,25 @@ const STATUS_META: Record<RecipientRow['s'], { label: string; cls: string }> = {
   unknown: { label: '未登録',  cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
 };
 
-export function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreItem; onClose: () => void; year: string }) {
-  const [recipients, setRecipients] = useState<RecipientRow[] | null>(null);
-  const [recipientsError, setRecipientsError] = useState(false);
+// データ（recipients / projectInfo）はページ側が useScoreDetailData で取得して渡す。
+// このコンポーネントは client/components 配下の再利用UIのため直接 API を叩かない（Issue #246）。
+export function ScoreDetailDialog({
+  item,
+  onClose,
+  recipients,
+  recipientsError,
+  projectInfo,
+}: {
+  item: QualityScoreItem;
+  onClose: () => void;
+  recipients: RecipientRow[] | null;
+  recipientsError: boolean;
+  projectInfo: ProjectDetail | null | undefined;
+}) {
   const [recipientSearch, setRecipientSearch] = useState('');
   const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a2' | 'pct'>('chain');
   const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
   const [showAxisDetail, setShowAxisDetail] = useState(false);
-  const [projectInfo, setProjectInfo] = useState<ProjectDetail | null | undefined>(undefined);
   const [showProjectInfo, setShowProjectInfo] = useState(true);
   const COL_MAX_WIDTHS = [undefined, 70, 130, 60, 50, undefined, undefined];
   const [colWidths, setColWidths] = useState<number[]>([200, 70, 120, 60, 50, 200, 200]);
@@ -51,27 +62,15 @@ export function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreI
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onClose]);
 
+  // 事業（pid）が切り替わったら表示状態（検索・ソート・折りたたみ）を初期化する。
+  // データ取得はページ側の useScoreDetailData が担う。
   useEffect(() => {
-    setRecipients(null);
-    setRecipientsError(false);
     setRecipientSearch('');
     setRecipientSortField('chain');
     setRecipientSortDir('asc');
     setShowAxisDetail(false);
-    setProjectInfo(undefined);
     setShowProjectInfo(true);
-    // 古い pid/year の fetch が後着で新しい表示を上書きしないようガードする
-    let cancelled = false;
-    fetch(`/api/quality-scores/recipients?pid=${item.pid}&year=${year}`)
-      .then(res => res.ok ? res.json() : Promise.reject())
-      .then((rows: RecipientRow[]) => { if (!cancelled) setRecipients(rows); })
-      .catch(() => { if (!cancelled) setRecipientsError(true); });
-    fetch(`/api/project-details/${item.pid}?year=${year}`)
-      .then(res => res.ok ? res.json() : Promise.reject())
-      .then((d: ProjectDetail) => { if (!cancelled) setProjectInfo(d); })
-      .catch(() => { if (!cancelled) setProjectInfo(null); });
-    return () => { cancelled = true; };
-  }, [item.pid, year]);
+  }, [item.pid]);
 
   const displayedRecipients = useMemo(() => {
     if (!recipients) return [];
@@ -447,13 +446,13 @@ export function ScoreDetailDialog({ item, onClose, year }: { item: QualityScoreI
                             const links = externalCorporateLinks(cn);
                             if (links) {
                               return (
-                                <span className="inline-flex items-center gap-1 font-mono text-[10px] text-gray-600 dark:text-gray-300" title={cn}>
-                                  <span className="select-text">{cn}</span>
+                                <span className="inline-flex items-center gap-1 font-mono text-[10px] leading-none text-gray-600 dark:text-gray-300" title={cn}>
+                                  <span className="select-text leading-none">{cn}</span>
                                   <a
                                     href={links.gbizinfo}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="shrink-0 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                    className="shrink-0 inline-flex items-center -mt-0.5 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                                     title={`gBizINFO で法人番号を確認: ${cn}`}
                                     onClick={e => e.stopPropagation()}
                                   >

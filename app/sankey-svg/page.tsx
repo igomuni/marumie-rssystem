@@ -24,6 +24,7 @@ import type { AccountCategoryKey } from '@/types/sankey-query';
 import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
+import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
 
 // ── URL state serialization ──
 
@@ -294,6 +295,8 @@ export default function RealDataSankeyPage() {
   // 品質スコア詳細ダイアログ（/quality と共通の ScoreDetailDialog を全項目取得して表示）
   const [scoreDialogItem, setScoreDialogItem] = useState<QualityScoreItem | null>(null);
   const [scoreDialogLoading, setScoreDialogLoading] = useState(false);
+  // ダイアログ用データはページ側で取得し ScoreDetailDialog へ props で渡す（Issue #246）
+  const scoreDialogData = useScoreDetailData(scoreDialogItem?.pid ?? null, year);
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -3302,8 +3305,8 @@ export default function RealDataSankeyPage() {
                     </div>
                     {selectedNode.type === 'recipient' && selectedNode.representativeCorporateNumber && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: META_FONT_PX, color: '#666' }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'monospace' }} title="法人番号（代表：内包する有効法人番号のうち最大金額のもの）">
-                          <span>法人番号 {selectedNode.representativeCorporateNumber}</span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: 'monospace', lineHeight: 1 }} title="法人番号（代表：内包する有効法人番号のうち最大金額のもの）">
+                          <span style={{ lineHeight: 1 }}>法人番号 {selectedNode.representativeCorporateNumber}</span>
                           {(() => {
                             // 有効な法人番号のみ gBizINFO へリンク（検証・URL構築は共有ヘルパーに集約）
                             const links = externalCorporateLinks(selectedNode.representativeCorporateNumber);
@@ -4775,8 +4778,10 @@ export default function RealDataSankeyPage() {
       {scoreDialogItem && createPortal(
         <ScoreDetailDialog
           item={scoreDialogItem}
-          year={year}
           onClose={() => setScoreDialogItem(null)}
+          recipients={scoreDialogData.recipients}
+          recipientsError={scoreDialogData.recipientsError}
+          projectInfo={scoreDialogData.projectInfo}
         />,
         document.body,
       )}
