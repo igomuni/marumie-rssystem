@@ -109,7 +109,7 @@
 | `fms` / `fxs` | `filter.spending.min` / `.max` | 同上 |
 | `ac` | `filter.accountCategories` | `g`/`s`/`b`/`n` の連結（例: `ac=g`） |
 | `tm` / `tp` / `tr` | `view.topMinistry` / `topProject` / `topRecipient` | |
-| `pp` / `pr` / `pm` | `view.pin.projectId` / `recipientId` / `ministryName` | |
+| `pp` / `pr` / `pm` | `view.pin.projectId` / `recipientId` / `ministryName` | `pp` はノードID形式（`project-spending-<pid>`）、`pr` は `r-<支出先名>` |
 | `fr` | `view.focusRelated` | `1` でON |
 | `ro` / `po` / `ot` | `view.offset.recipient` / `.project` / `.target` | `ot=r` or `p` |
 | `ps` | `view.projectSortBy` | `s` = spending |
