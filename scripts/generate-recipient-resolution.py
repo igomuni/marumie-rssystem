@@ -91,19 +91,25 @@ def is_valid_cn(cn: str) -> bool:
 EXCLUDED_NAMES = {'', 'その他', '其他'}
 
 # ── 1. RS集計 ──
+# バケットは正規化名で持つ（merge/supplement は正規化名で解決するため。
+# 生の支出先名で集約すると表記揺れで同一実体が分裂し merge 候補を取りこぼす）。
+# houjin完全一致の照合には生表記が要るため name_variants に生表記も保持する。
 print(f'[1/3] RS集計: {SPEND_CSV.name}')
-name_cns = defaultdict(set)          # 支出先名 → {有効法人番号}
-name_has_missing = defaultdict(bool)  # 支出先名 → 欠落/無効(=ダミー含む)の行があるか
+name_cns = defaultdict(set)           # 正規化名 → {有効法人番号}
+name_has_missing = defaultdict(bool)  # 正規化名 → 欠落/無効(=ダミー含む)の行があるか
+name_variants = defaultdict(set)      # 正規化名 → {生の支出先名}（houjin完全一致照合用）
 with open(SPEND_CSV, encoding='utf-8') as f:
     for r in csv.DictReader(f):
         name = (r.get('支出先名') or '').strip()
         if name in EXCLUDED_NAMES:
             continue
+        nn = normalize_name(name)
+        name_variants[nn].add(name)
         cn = (r.get('法人番号') or '').strip()
         if is_valid_cn(cn):
-            name_cns[name].add(cn)
+            name_cns[nn].add(cn)
         else:
-            name_has_missing[name] = True
+            name_has_missing[nn] = True
 
 # ── 2. houjin.db 突合 ──
 print('[2/3] houjin.db 裏取り')
@@ -116,30 +122,36 @@ def houjin_name(cn: str):
     return row[0] if row else None
 
 
-# mergeCn: 同名に複数有効番号 → houjin公式名が正確に1つ一致するとき、他を正規へ
+def houjin_cns_for(variants: set) -> set:
+    """正規化名バケットの生表記から houjin完全一致する法人番号を集める（表記揺れを横断）。"""
+    found = set()
+    for raw in variants:
+        for (cn,) in cur.execute('SELECT corporate_number FROM houjin WHERE name=?', (raw,)):
+            found.add(cn)
+    return found
+
+
+# mergeCn: 同名(正規化)に複数有効番号 → houjin公式名が正確に1つ一致するとき、他を正規へ
 # 誤記載cnは別名では正規番号でありうるため、(正規化名, 誤記載cn) の組で持つ
 merge_cn = {}
 merge_pairs = 0
-for name, cns in name_cns.items():
+for nn, cns in name_cns.items():
     if len(cns) < 2:
         continue
-    nn = normalize_name(name)
     matches = [cn for cn in cns if (hn := houjin_name(cn)) and normalize_name(hn) == nn]
     if len(matches) == 1:
         canonical = matches[0]
-        others = {cn: canonical for cn in cns if cn != canonical}
-        merge_cn[nn] = {**merge_cn.get(nn, {}), **others}
-        merge_pairs += len(others)
+        merge_cn[nn] = {cn: canonical for cn in cns if cn != canonical}
+        merge_pairs += len(cns) - 1
 
-# supplement: 番号欠落/無効の名前 → houjin完全一致が一意
+# supplement: 番号欠落/無効の名前(正規化) → houjin完全一致が一意
 supplement = {}
-missing_names = [n for n, m in name_has_missing.items() if m]
-for name in missing_names:
-    hits = cur.execute(
-        'SELECT corporate_number FROM houjin WHERE name=?', (name,)
-    ).fetchall()
+for nn, missing in name_has_missing.items():
+    if not missing:
+        continue
+    hits = houjin_cns_for(name_variants[nn])
     if len(hits) == 1:
-        supplement[normalize_name(name)] = hits[0][0]
+        supplement[nn] = next(iter(hits))
 
 conn.close()
 print(f'  mergeCn: {merge_pairs}件（{len(merge_cn)}名の統合）/ supplement: {len(supplement)}件')
