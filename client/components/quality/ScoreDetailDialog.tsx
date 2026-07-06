@@ -248,7 +248,9 @@ export function ScoreDetailDialog({
                 ] as const).map(({ label, text }) => text ? (
                   <div key={label}>
                     <div className="font-semibold text-gray-700 dark:text-gray-300">{label}</div>
-                    <div className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{text.replace(/\//g, '\n')}</div>
+                    {/* 「/」を改行に変換しない（URL・補助率1/2・日付を壊さない）。ソース表記のまま表示。
+                        経緯は docs/tasks/20260706_1731_事業テキストのスラッシュ改行問題.md 参照。 */}
+                    <div className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed break-words">{text}</div>
                   </div>
                 ) : null)}
               </div>
