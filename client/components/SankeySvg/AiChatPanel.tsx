@@ -192,7 +192,8 @@ export function AiChatPanel({
                 </div>
                 <button
                   onClick={() => onApplyResult(m.result!)}
-                  style={{ marginTop: 8, width: '100%', fontSize: 12, fontWeight: 600, color: '#fff', background: m.result.summary.projects.count > 0 ? '#1a73e8' : '#9e9e9e', border: 'none', borderRadius: 6, padding: '7px 0', cursor: 'pointer' }}
+                  disabled={m.result.summary.projects.count === 0}
+                  style={{ marginTop: 8, width: '100%', fontSize: 12, fontWeight: 600, color: '#fff', background: m.result.summary.projects.count > 0 ? '#1a73e8' : '#9e9e9e', border: 'none', borderRadius: 6, padding: '7px 0', cursor: m.result.summary.projects.count > 0 ? 'pointer' : 'default' }}
                 >この条件で図を表示</button>
               </div>
             )}

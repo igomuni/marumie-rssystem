@@ -4,7 +4,7 @@
  * クライアント（/sankey-svg のチャットパネル）とAPIの間で共有する。
  * サーバーはステートレスで、会話履歴はクライアントが毎回全量を送る。
  */
-import type { SankeyQuery, ResolvedSankeyQuery } from './sankey-query';
+import type { SankeyQuery, ResolvedSankeyQuery } from '@/types/sankey-query';
 import type { SankeyQuerySummary } from '@/app/lib/sankey-query';
 
 /** 会話履歴の送信上限（サーバーは超過を400にする。クライアントは送信前に古い履歴を切り捨てる） */
