@@ -1,0 +1,49 @@
+/**
+ * サンキーAIチャット（/api/ai/sankey-chat）の要求・応答型。
+ *
+ * クライアント（/sankey-svg のチャットパネル）とAPIの間で共有する。
+ * サーバーはステートレスで、会話履歴はクライアントが毎回全量を送る。
+ */
+import type { SankeyQuery, ResolvedSankeyQuery } from './sankey-query';
+import type { SankeyQuerySummary } from '@/app/lib/sankey-query';
+
+/** 会話履歴の送信上限（サーバーは超過を400にする。クライアントは送信前に古い履歴を切り捨てる） */
+export const MAX_CHAT_MESSAGES = 20;
+export const MAX_CHAT_TOTAL_CHARS = 8000;
+
+export type SankeyChatRole = 'user' | 'assistant';
+
+export interface SankeyChatMessage {
+  role: SankeyChatRole;
+  content: string;
+}
+
+/** ページの現在状態。差分指示（「今の条件に環境省を追加」等）の解釈に使う */
+export interface SankeyChatContext {
+  year?: '2024' | '2025';
+  /** 現在ページに適用中のクエリ（未フィルタなら省略可） */
+  currentQuery?: SankeyQuery;
+}
+
+export interface SankeyChatRequest {
+  messages: SankeyChatMessage[];
+  context?: SankeyChatContext;
+}
+
+/** AIが構築したフィルタ条件と、その適用結果のサマリ */
+export interface SankeyChatResult {
+  /** resolveSankeyQuery 済みの正規化クエリ（AIの生出力ではない） */
+  query: ResolvedSankeyQuery;
+  summary: SankeyQuerySummary;
+}
+
+export interface SankeyChatResponse {
+  /** ユーザー向けの応答文（結果なしの聞き返し・解釈不能の返答を含む） */
+  message: string;
+  /** フィルタ条件が確定した場合のみ */
+  result?: SankeyChatResult;
+  usage: {
+    model: string;
+    toolCalls: number;
+  };
+}
