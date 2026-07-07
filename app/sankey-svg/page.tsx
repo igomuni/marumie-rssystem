@@ -18,9 +18,11 @@ import { filterTopN, computeLayout, getTopMinistriesInScope } from '@/app/lib/sa
 import { canonicalSelectableNodeId } from '@/app/lib/sankey-svg-ids';
 import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
 import { parseAmountToYen } from '@/app/lib/format/yen';
-import { buildFilterExcludedIds } from '@/app/lib/sankey-query';
+import { buildFilterExcludedIds, sankeyQueryToUrlParams, sankeyQueryFromUrlParams } from '@/app/lib/sankey-query';
 import { externalCorporateLinks } from '@/app/lib/api/links';
 import type { AccountCategoryKey } from '@/types/sankey-query';
+import { AiChatPanel, type AiChatUiMessage } from '@/client/components/SankeySvg/AiChatPanel';
+import { MAX_CHAT_MESSAGES, type SankeyChatResponse, type SankeyChatResult } from '@/types/sankey-ai-chat';
 import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
@@ -309,6 +311,14 @@ export default function RealDataSankeyPage() {
   const [sidePanelWidth, setSidePanelWidth] = useState(SIDE_PANEL_WIDTH_DEFAULT);
   const [isResizingSidePanel, setIsResizingSidePanel] = useState(false);
   const sidePanelResizeRef = useRef<{ startX: number; startW: number } | null>(null);
+  // AIチャットパネル（右側）。available は /api/ai/sankey-chat の疎通で判定（無効環境では出さない）
+  const [aiChatAvailable, setAiChatAvailable] = useState(false);
+  const [showAiChat, setShowAiChat] = useState(false);
+  const [aiChatMessages, setAiChatMessages] = useState<AiChatUiMessage[]>([]);
+  const [aiChatSending, setAiChatSending] = useState(false);
+  const [aiPanelWidth, setAiPanelWidth] = useState(SIDE_PANEL_WIDTH_DEFAULT);
+  const [isResizingAiPanel, setIsResizingAiPanel] = useState(false);
+  const aiPanelResizeRef = useRef<{ startX: number; startW: number } | null>(null);
   const [isResizingOverview, setIsResizingOverview] = useState(false);
   const [isResizingBudgetExecution, setIsResizingBudgetExecution] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -461,10 +471,9 @@ export default function RealDataSankeyPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
 
-  // Restore state on browser back/forward
-  useEffect(() => {
-    const handler = () => {
-      const parsed = parseSearchParams(window.location.search);
+  // URL(パース済み)から全表示状態を復元する。
+  // ブラウザバック/フォワード（popstate）と、AIチャット結果の適用の両方から呼ばれる。
+  const applyUrlState = useCallback((parsed: Partial<SankeyUrlState>) => {
       // Pre-update prev refs so reset effects don't fire for URL-restored values
       prevOffsetTargetRef.current = parsed.offsetTarget ?? 'project';
       prevProjectSortByRef.current = parsed.projectSortBy ?? 'budget';
@@ -511,10 +520,14 @@ export default function RealDataSankeyPage() {
       setAcBoth(parsed.acBoth ?? true);
       setAcNone(parsed.acNone ?? true);
       if (parsed.selectedNodeId) pendingResetViewport.current = true;
-    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Restore state on browser back/forward
+  useEffect(() => {
+    const handler = () => applyUrlState(parseSearchParams(window.location.search));
     window.addEventListener('popstate', handler);
     return () => window.removeEventListener('popstate', handler);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [applyUrlState]);
 
   // Sync URL after user actions (push for node selection, replace for sliders/toggles)
   useEffect(() => {
@@ -681,6 +694,79 @@ export default function RealDataSankeyPage() {
       window.removeEventListener('mouseup', onUp);
     };
   }, [isResizingSidePanel]);
+  // AIチャットパネル幅ドラッグリスナ（右側パネルのため左方向ドラッグで拡大）
+  useEffect(() => {
+    if (!isResizingAiPanel) return;
+    const onMove = (ev: MouseEvent) => {
+      const s = aiPanelResizeRef.current;
+      if (!s) return;
+      const next = Math.max(SIDE_PANEL_WIDTH_MIN, Math.min(SIDE_PANEL_WIDTH_MAX, s.startW - (ev.clientX - s.startX)));
+      setAiPanelWidth(next);
+    };
+    const onUp = () => {
+      aiPanelResizeRef.current = null;
+      setIsResizingAiPanel(false);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [isResizingAiPanel]);
+
+  // AIチャットの疎通確認: 無効環境（キー未設定・Vercel本番）では404が返り、パネル自体を出さない
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/ai/sankey-chat')
+      .then(res => { if (!cancelled && res.ok) setAiChatAvailable(true); })
+      .catch(() => { /* 疎通失敗 = 機能なしとして扱う */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // AIチャット送信: 履歴全量 + 現在のビュー状態（URL由来のSankeyQuery）をステートレスAPIへ送る
+  const handleAiChatSend = useCallback(async (text: string) => {
+    const userMessage: AiChatUiMessage = { role: 'user', content: text };
+    setAiChatMessages(prev => [...prev, userMessage]);
+    setAiChatSending(true);
+    try {
+      // エラーバブルは role/content のみの API 履歴に含めない（isError 付きは表示専用）
+      const history = [...aiChatMessages, userMessage]
+        .filter(m => !m.isError)
+        .map(m => ({ role: m.role, content: m.content }))
+        .slice(-MAX_CHAT_MESSAGES);
+      const currentQuery = sankeyQueryFromUrlParams(new URLSearchParams(window.location.search));
+      const res = await fetch('/api/ai/sankey-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history, context: { year, currentQuery } }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null) as { error?: string } | null;
+        const detail = body?.error ?? `HTTP ${res.status}`;
+        setAiChatMessages(prev => [...prev, { role: 'assistant', content: `エラー: ${detail}`, isError: true }]);
+        return;
+      }
+      const data = await res.json() as SankeyChatResponse;
+      setAiChatMessages(prev => [...prev, { role: 'assistant', content: data.message, result: data.result }]);
+    } catch {
+      setAiChatMessages(prev => [...prev, { role: 'assistant', content: 'エラー: 通信に失敗しました。再度お試しください', isError: true }]);
+    } finally {
+      setAiChatSending(false);
+    }
+  }, [aiChatMessages, year]);
+
+  // AIチャット結果の適用: SankeyQuery → URL変換 → pushState → popstate と同じ復元経路で図を更新。
+  // フルリロードしないためチャット履歴が保持され、ブラウザバックで適用前の図に戻れる
+  const applyAiChatResult = useCallback((result: SankeyChatResult) => {
+    const params = sankeyQueryToUrlParams(result.query);
+    const qs = params.toString();
+    window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
+    applyUrlState(parseSearchParams(window.location.search));
+    // フィルタで図が大きく変わるため、レイアウト確定後に全体表示へフィットさせる
+    pendingResetViewport.current = true;
+  }, [applyUrlState]);
+
   // 事業概要プレビュー高さドラッグリスナ
   useEffect(() => {
     if (!isResizingOverview) return;
@@ -2518,6 +2604,13 @@ export default function RealDataSankeyPage() {
     Math.max(minPanelWidthForViewport, sidePanelWidth),
   );
   const searchLeftOffset = selectedNodeId !== null && !isPanelCollapsed ? effectiveSidePanelWidth : 0;
+  // AIチャットパネル（右側）の実効幅: 左パネルと同じ規則でビューポート幅に収める。
+  // コンパクト幅では全幅オーバーレイになるため右端コントロールの退避は行わない。
+  const effectiveAiPanelWidth = Math.min(
+    maxPanelWidthForViewport,
+    Math.max(minPanelWidthForViewport, aiPanelWidth),
+  );
+  const rightControlsOffset = aiChatAvailable && showAiChat && !isCompactWidth ? effectiveAiPanelWidth : 0;
   // 右上の設定(⋮)ボタン領域(幅32+余白)に重ならないよう右側を確保。
   // これがないと文字拡大時に検索ボックスが設定ボタンを覆い、タップで開けなくなる。
   const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 64px)`;
@@ -4488,7 +4581,7 @@ export default function RealDataSankeyPage() {
         return (
           <div ref={offsetControlRef} style={ isCompactWidth
             ? { position: 'absolute', bottom: 12, left: isLandscapeCompact && selectedNodeId !== null && !isPanelCollapsed ? effectiveSidePanelWidth + 8 : 8, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)', transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }
-            : { position: 'absolute', top: 12, right: 52, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' } }>
+            : { position: 'absolute', top: 12, right: 52 + rightControlsOffset, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', transition: isResizingAiPanel ? 'none' : 'right 0.2s ease' } }>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
             {/* Row 1: オフセットスライダー（2列スパン） */}
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -4580,7 +4673,7 @@ export default function RealDataSankeyPage() {
       })()}
 
       {/* Settings button — independent, top right（ダイアログを最前面にするため高いzIndex） */}
-      <div style={{ position: 'absolute', top: 14, right: 12, zIndex: 200 }}>
+      <div style={{ position: 'absolute', top: 14, right: 12 + rightControlsOffset, zIndex: 200, transition: isResizingAiPanel ? 'none' : 'right 0.2s ease' }}>
         <button
           onClick={() => setShowSettings(s => !s)}
           aria-label="表示設定を開く"
@@ -4665,7 +4758,7 @@ export default function RealDataSankeyPage() {
       </div>
 
       {/* Zoom controls — bottom right (sankey2 style) */}
-      <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ position: 'absolute', bottom: 12, right: 12 + rightControlsOffset, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4, transition: isResizingAiPanel ? 'none' : 'right 0.2s ease' }}>
         {/* スクロールモード切替ボタン（狭幅では2本指パンで代替できるため非表示） */}
         {!isCompactWidth && (
         <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
@@ -4771,6 +4864,27 @@ export default function RealDataSankeyPage() {
           </div>
         )}
       </div>
+
+      {/* AIチャットパネル（右側）— 疎通確認済みの環境でのみ表示 */}
+      {aiChatAvailable && (
+        <AiChatPanel
+          open={showAiChat}
+          onToggle={() => setShowAiChat(v => !v)}
+          messages={aiChatMessages}
+          sending={aiChatSending}
+          onSend={handleAiChatSend}
+          onApplyResult={applyAiChatResult}
+          onClear={() => setAiChatMessages([])}
+          width={effectiveAiPanelWidth}
+          isCompactWidth={isCompactWidth}
+          onResizeStart={e => {
+            aiPanelResizeRef.current = { startX: e.clientX, startW: aiPanelWidth };
+            setIsResizingAiPanel(true);
+          }}
+          isResizing={isResizingAiPanel}
+          onResetWidth={() => setAiPanelWidth(SIDE_PANEL_WIDTH_DEFAULT)}
+        />
+      )}
 
       {/* 品質スコア詳細ダイアログ（/quality と共通コンポーネント）
           containerRef 外の document.body に portal で出し、背面サンキー図の wheel/pan ハンドラに
