@@ -23,9 +23,11 @@ import {
 import { searchProjects } from '@/app/lib/search/project-search';
 import { searchRecipients } from '@/app/lib/search/recipient-search';
 import { loadSankeyGraph } from '@/app/lib/api/sankey-graph-loader';
-import { loadQualityScores } from '@/app/lib/api/quality-scores-loader';
+import { loadQualityScores, getQualityScore, toQualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { SupportedYear } from '@/app/lib/api/api-notes';
-import { loadRecipientIndex } from '@/app/lib/api/recipient-index-loader';
+import { loadRecipientIndex, resolveRecipient } from '@/app/lib/api/recipient-index-loader';
+import { getProjectDetail } from '@/app/lib/api/project-details-loader';
+import { loadSubcontracts } from '@/app/lib/api/subcontracts-loader';
 
 // ── OpenAI 互換の LLM メッセージ・ツール型（OpenRouter の chat.completions と1対1） ──
 
@@ -60,12 +62,20 @@ export interface SankeyChatAgentResult {
   toolCalls: number;
 }
 
-/** LLM 呼び出しの往復上限（1往復で複数ツールが並列に呼ばれうる） */
-const MAX_LLM_ROUNDS = 6;
-/** ツール実行回数の上限（1リクエストあたりのコスト上限を構造的に抑える） */
-const MAX_TOOL_CALLS = 8;
+/** LLM 呼び出しの往復上限（1往復で複数ツールが並列に呼ばれうる。深掘りツール追加により探索が長引きうるため6→8） */
+const MAX_LLM_ROUNDS = 8;
+/** ツール実行回数の上限（1リクエストあたりのコスト上限を構造的に抑える。深掘りモード（search→detail→...）は往復が増えるため8→10） */
+const MAX_TOOL_CALLS = 10;
 /** 検索ツールが返す最大件数 */
 const SEARCH_LIMIT = 10;
+/** get_quality_scores に渡せる pid の上限件数 */
+const QUALITY_SCORES_PID_LIMIT = 10;
+/** get_recipient_detail / get_subcontract_chain が返す上位件数 */
+const DETAIL_TOP_LIMIT = 10;
+/** ツール応答の目安上限文字数（JSON.stringify後）。超過時は配列を段階的に間引く */
+const RESPONSE_CHAR_LIMIT = 4000;
+/** テキストフィールド（目的・概要等）の切り詰め文字数 */
+const TEXT_FIELD_LIMIT = 600;
 
 const GIVE_UP_MESSAGE =
   'ご要望をフィルタ条件として解釈できませんでした。「再エネ関連で予算100億円以上」「経済産業省の事業だけ」のように、事業名・支出先名・府省庁・金額範囲を含めて具体的にお試しください。';
@@ -184,6 +194,64 @@ const TOOLS: LlmToolDef[] = [
   {
     type: 'function',
     function: {
+      name: 'get_project_detail',
+      description:
+        '事業の詳細（品質スコア・予算執行額・目的/現状課題/概要等のレビューシート記載内容）をpid指定で取得する。ユーザーが事業名で聞いてきた場合は先に search_projects でpidを特定すること。',
+      parameters: {
+        type: 'object',
+        properties: { pid: { type: 'string', description: 'search_projects / search_recipients が返す事業ID' } },
+        required: ['pid'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_quality_scores',
+      description:
+        `複数事業の品質スコア（軸別評価・総合値）をまとめて取得する。比較・ランキング的な質問に使う。pidsは最大${QUALITY_SCORES_PID_LIMIT}件。`,
+      parameters: {
+        type: 'object',
+        properties: {
+          pids: {
+            type: 'array',
+            items: { type: 'string' },
+            description: `事業IDの配列（最大${QUALITY_SCORES_PID_LIMIT}件）`,
+          },
+        },
+        required: ['pids'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_recipient_detail',
+      description:
+        '支出先の詳細（直接受領額・再委託受領額・府省庁別内訳・関与事業の上位）をkey指定で取得する。keyは search_recipients が返す corporateNumber、または名称ベースのキーを使う。',
+      parameters: {
+        type: 'object',
+        properties: { key: { type: 'string', description: 'search_recipients が返す corporateNumber、または支出先名' } },
+        required: ['key'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_subcontract_chain',
+      description:
+        '事業内の再委託構造（支出元→支出先の連鎖）を要約する。ブロック数・最大深度・再委託総額・金額上位の連鎖を返す。「この事業は再委託しているか」「委託の階層は深いか」といった質問に使う。',
+      parameters: {
+        type: 'object',
+        properties: { pid: { type: 'string', description: 'search_projects が返す事業ID' } },
+        required: ['pid'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'submit_result',
       description:
         '検証済みの最終フィルタ条件を確定する。run_sankey_query で結果を確認してから呼ぶこと。message にはユーザー向けの短い説明（何をどう絞ったか・何件マッチしたか）を日本語で書く。',
@@ -214,12 +282,24 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     `- filter.ministries は完全一致。実在する府省庁名: ${ministryNames.join('、')}`,
     '',
     '## 手順',
+    'このアシスタントには2つのモードがある。要求の性質を見てどちらかを選ぶ:',
+    '',
+    '### A. フィルタ要求（図の表示条件を変えたい）',
     '1. 要求を SankeyQuery に翻訳し run_sankey_query で実行する',
     '2. 結果を確認する: 0件なら条件を緩める（正規表現 | で類義語を足す、金額条件を外す等）。search_projects / search_recipients で実際の語彙を調べてもよい。多すぎるなら金額下限などで絞る',
     '3. 妥当な結果になったら submit_result で確定する（message に何をどう絞って何件マッチしたかを書く）',
     '- 表示件数や並び順の要望（「上位5件だけ」等）は view で表現できる。ユーザーが言及しない限り view は省略する',
-    '- 要求がこのデータのフィルタ条件として解釈できない場合（雑談・データにない切り口等）は、ツールを呼ばずに、解釈できなかった旨と指定できる条件の例を日本語のテキストで返す',
-    '- 条件が曖昧でも合理的な解釈が1つ選べるなら聞き返さずに進める（ユーザーは適用前に件数を確認できる）',
+    '',
+    '### B. データへの質問（金額・内訳・品質スコア・再委託構造等を知りたい）',
+    '- get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain で調べ、結果をテキストで日本語回答する。submit_result は呼ばない（図の条件は変わらない）',
+    '- 数値・事実は必ずツール応答から転記する。ツールで確認していない数値を推測で書かない',
+    '- pid はユーザーには分からない前提。事業名から聞かれたら、まず search_projects でpidを特定してから深掘りツールを呼ぶ。支出先も同様に search_recipients でキーを特定する',
+    '- 品質スコアについて回答する際の語彙規律: スコアは「事業レビューシートに書かれた説明の質（支出先の特定可能性・使途の説明性・成果設計の明確さ等）」を評価したものであり、事業そのものの善悪・要不要・無駄の有無を判定するものではない。「この事業は無駄」のような断定はせず、「レビューシートの記載としては〜」のように表現する',
+    '- ツール実行に失敗した・データが見つからない場合はその旨を正直に伝える（存在しないふりをしない）',
+    '',
+    '### 共通',
+    '- 要求がこのデータのフィルタ条件にもデータ質問にも該当しない場合（雑談・データにない切り口等）は、ツールを呼ばずに、解釈できなかった旨と指定できる条件・質問の例を日本語のテキストで返す',
+    '- 条件が曖昧でも合理的な解釈が1つ選べるなら聞き返さずに進める（フィルタはユーザーが適用前に件数を確認できる）',
     '- 応答はすべて日本語で書く',
   ];
   if (currentQuery && Object.keys(currentQuery).length > 0) {
@@ -259,6 +339,153 @@ function executeQuery(input: SankeyQuery, defaultYear: SupportedYear): {
   const excludedIds = buildFilterExcludedIds(graph.nodes, graph.edges, query.filter, [query.view.pin.projectId]);
   const summary = summarizeFilteredGraph(graph.nodes, graph.edges, excludedIds);
   return { result: { query, summary } };
+}
+
+/** 長文フィールドを既定文字数で切り詰める（末尾に「…」） */
+function clampText(s: string | null | undefined, limit: number = TEXT_FIELD_LIMIT): string | null {
+  if (s == null) return null;
+  const t = s.trim();
+  if (t.length === 0) return null;
+  return t.length <= limit ? t : `${t.slice(0, limit)}…`;
+}
+
+/**
+ * JSON.stringify後の文字数が目安上限を超える場合、指定した配列フィールドを
+ * 半分ずつ間引いて再試行する安全策（テキスト側は既に clampText 済みの前提）。
+ */
+function clampPayload<T extends Record<string, unknown>>(payload: T, arrayKeys: (keyof T)[]): T {
+  let current = payload;
+  for (let i = 0; i < 5; i++) {
+    if (JSON.stringify(current).length <= RESPONSE_CHAR_LIMIT) return current;
+    let shrunk = false;
+    for (const key of arrayKeys) {
+      const arr = current[key];
+      if (Array.isArray(arr) && arr.length > 1) {
+        current = { ...current, [key]: arr.slice(0, Math.max(1, Math.ceil(arr.length / 2))) };
+        shrunk = true;
+        break;
+      }
+    }
+    if (!shrunk) break;
+  }
+  return current;
+}
+
+function executeGetProjectDetail(year: SupportedYear, pid: string): unknown {
+  const score = getQualityScore(year, pid);
+  const detail = getProjectDetail(year, pid);
+  if (!score && !detail) {
+    return { error: `pid=${pid} の事業が見つかりません`, hint: 'search_projects で事業名からpidを特定してください' };
+  }
+  return {
+    pid,
+    name: score?.name ?? detail?.projectName ?? null,
+    ministry: score?.ministry ?? detail?.ministry ?? null,
+    bureau: score?.bureau ?? detail?.bureau ?? null,
+    budgetAmount: score?.budgetAmount ?? null,
+    execAmount: score?.execAmount ?? null,
+    spendTotal: score?.spendTotal ?? null,
+    totalScore: score?.totalScore ?? null,
+    category: detail?.category ?? null,
+    startYear: detail?.startYear ?? null,
+    endYear: detail?.endYear ?? null,
+    majorExpense: detail?.majorExpense ?? null,
+    implementationMethods: detail?.implementationMethods ?? null,
+    purpose: clampText(detail?.purpose),
+    currentIssues: clampText(detail?.currentIssues),
+    overview: clampText(detail?.overview),
+  };
+}
+
+function executeGetQualityScores(year: SupportedYear, pidsRaw: unknown): unknown {
+  if (!Array.isArray(pidsRaw) || pidsRaw.length === 0) {
+    return { error: 'pids（事業IDの配列）を指定してください' };
+  }
+  const pids = pidsRaw.filter((p): p is string => typeof p === 'string');
+  const truncated = pids.length > QUALITY_SCORES_PID_LIMIT;
+  const targets = pids.slice(0, QUALITY_SCORES_PID_LIMIT);
+  const items = targets.map(pid => {
+    const score = getQualityScore(year, pid);
+    return score ? toQualityScoreProjection(score) : { pid, error: '見つかりません' };
+  });
+  const payload: { items: unknown[]; notice?: string } = { items };
+  if (truncated) {
+    payload.notice = `pidsは最大${QUALITY_SCORES_PID_LIMIT}件です。先頭${QUALITY_SCORES_PID_LIMIT}件のみ処理しました`;
+  }
+  return clampPayload(payload, ['items']);
+}
+
+function executeGetRecipientDetail(year: SupportedYear, key: string): unknown {
+  const entry = resolveRecipient(year, key);
+  if (!entry) {
+    return { error: `key=${key} の支出先が見つかりません`, hint: 'search_recipients で名称からキー（corporateNumber等）を特定してください' };
+  }
+  const topAppearances = [...entry.appearances]
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, DETAIL_TOP_LIMIT)
+    .map(a => ({
+      pid: a.pid,
+      projectName: a.projectName,
+      ministry: a.ministry,
+      blockId: a.blockId,
+      originKind: a.originKind,
+      amount: a.amount,
+    }));
+  return clampPayload(
+    {
+      key: entry.key,
+      name: entry.name,
+      corporateNumber: entry.corporateNumber,
+      totals: entry.totals,
+      byMinistry: entry.byMinistry,
+      appearanceCount: entry.appearances.length,
+      topAppearances,
+    },
+    ['byMinistry', 'topAppearances'],
+  );
+}
+
+function executeGetSubcontractChain(year: SupportedYear, pid: string): unknown {
+  const index = loadSubcontracts(year);
+  const graph = index?.[pid];
+  if (!graph) {
+    return {
+      error: `pid=${pid} の再委託データが見つかりません`,
+      hint: '再委託の記載がない事業（直接支出のみ）の可能性があります。search_projects でpidを確認してください',
+    };
+  }
+  const blockMap = new Map(graph.blocks.map(b => [b.blockId, b]));
+  // 再委託総額: 同一支出先が複数ブロックに出現しうるため（既知の注意事項）find ではなく filter+reduce で合算する
+  const subcontractTotal = graph.blocks
+    .filter(b => b.originKind === 'subcontract')
+    .reduce((sum, b) => sum + b.totalAmount, 0);
+  const topChains = graph.flows
+    .map(flow => {
+      const sourceBlock = flow.sourceBlock ? blockMap.get(flow.sourceBlock) : null;
+      const targetBlock = blockMap.get(flow.targetBlock);
+      return {
+        from: sourceBlock?.blockName ?? '(事業本体)',
+        to: targetBlock?.blockName ?? flow.targetBlock,
+        amount: targetBlock?.totalAmount ?? 0,
+        origin: flow.origin,
+      };
+    })
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, DETAIL_TOP_LIMIT);
+  return clampPayload(
+    {
+      pid,
+      projectName: graph.projectName,
+      totalBlockCount: graph.totalBlockCount,
+      directBlockCount: graph.directBlockCount,
+      maxDepth: graph.maxDepth,
+      totalRecipientCount: graph.totalRecipientCount,
+      subcontractTotal,
+      hasSeparateOrigin: graph.hasSeparateOrigin,
+      topChains,
+    },
+    ['topChains'],
+  );
 }
 
 function executeSearchProjects(year: SupportedYear, q: string): unknown {
@@ -349,6 +576,25 @@ export async function runSankeyChatAgent(
               } else {
                 payload = executeSearchRecipients(year, q);
               }
+              break;
+            }
+            case 'get_project_detail': {
+              const pid = typeof args.pid === 'string' ? args.pid.trim() : '';
+              payload = pid ? executeGetProjectDetail(year, pid) : { error: 'pid（事業ID）を指定してください' };
+              break;
+            }
+            case 'get_quality_scores': {
+              payload = executeGetQualityScores(year, args.pids);
+              break;
+            }
+            case 'get_recipient_detail': {
+              const key = typeof args.key === 'string' ? args.key.trim() : '';
+              payload = key ? executeGetRecipientDetail(year, key) : { error: 'key（支出先キー）を指定してください' };
+              break;
+            }
+            case 'get_subcontract_chain': {
+              const pid = typeof args.pid === 'string' ? args.pid.trim() : '';
+              payload = pid ? executeGetSubcontractChain(year, pid) : { error: 'pid（事業ID）を指定してください' };
               break;
             }
             case 'submit_result': {
