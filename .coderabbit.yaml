@@ -1,4 +1,10 @@
 reviews:
+  # 自動レビューを無効化。PR作成・更新では走らせず、
+  # PRコメントで明示要求したときだけレビューする:
+  #   @coderabbitai review        … 差分（増分）レビュー
+  #   @coderabbitai full review   … 全体を再レビュー
+  auto_review:
+    enabled: false
   path_filters:
     # 作業用ドキュメント（設計・調査メモ）はレビュー対象外。
     # docs/tasks/** は archive を含む。Markdown 記法は .claude/CLAUDE.md のルールで担保。
