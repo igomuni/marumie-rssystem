@@ -7,6 +7,7 @@ description: データパイプライン・CSV処理・JSON生成の実装を行
 
 1. データパイプライン全体像が必要な場合は [docs/data-pipeline-guide.md](docs/data-pipeline-guide.md) を読み込む
 2. ユーザーの指示に従って実装・調査を行う
+3. 生成した JSON の中身確認・集計は `/data-query` スキルの作法で行う（Read で開かない）
 
 ## 公開4ページのデータ生成スクリプト
 
