@@ -38,11 +38,13 @@ description: フィーチャーブランチを作成してPRを出す
    - `docs: ドキュメントのみの変更`
    - `refactor: リファクタリング`
 
-6. **コンフリクト確認**: `git fetch origin` して、mainとのマージ可能性を確認する。コンフリクトがある場合はユーザーに報告し、続行するか確認を取る。
+6. **docs/tasks 索引の同期**: `git diff main --name-only --diff-filter=A -- docs/tasks/` で新規追加された task doc を検出し、`docs/tasks/INDEX.md` に対応する行がなければ追記してコミットに含める（新しいものを上・30字前後の要約・固有名詞優先。索引の書式は INDEX.md 冒頭を参照）。
 
-7. **プッシュ**: リモートにプッシュする（`git push -u origin <branch-name>`）
+7. **コンフリクト確認**: `git fetch origin` して、mainとのマージ可能性を確認する。コンフリクトがある場合はユーザーに報告し、続行するか確認を取る。
 
-8. **PR作成**: PRは**必ずdraft（下書き）として作成する**。`--base main` を指定する。（CodeRabbitAIのRateLimit対策。ready for review への切り替えはユーザーが任意のタイミングで行う）作成手段は環境によって異なるが、**手段に関わらずdraftを保証すること**：
+8. **プッシュ**: リモートにプッシュする（`git push -u origin <branch-name>`）
+
+9. **PR作成**: PRは**必ずdraft（下書き）として作成する**。`--base main` を指定する。（CodeRabbitAIのRateLimit対策。ready for review への切り替えはユーザーが任意のタイミングで行う）作成手段は環境によって異なるが、**手段に関わらずdraftを保証すること**：
    - **デスクトップ版（`gh` CLIが使える場合）**: `gh pr create --draft`
    - **Web版（GitHub MCPツールしか使えない場合）**: `mcp__github__create_pull_request` を呼び、**`draft: true` を明示的に指定する**（省略すると通常PRとして作成され、CodeRabbitAIのレビューが即座に走ってしまうため注意）
 
@@ -51,7 +53,7 @@ description: フィーチャーブランチを作成してPRを出す
    - 変更内容の概要
    - テスト方法（`npm run dev` で動作確認する手順など）
 
-9. **完了報告**: 作成したPRのURLを報告する。
+10. **完了報告**: 作成したPRのURLを報告する。
 
 ## 注意事項
 
