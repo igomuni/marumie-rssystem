@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { notFound } from 'next/navigation';
 import { runSankeyChatAgent, type LlmMessage, type LlmToolDef } from '@/app/lib/ai/sankey-chat-agent';
 import { serverErrorResponse } from '@/app/lib/api/api-notes';
+import { appendUsageLog } from '@/app/lib/api/usage-log';
 import {
   MAX_CHAT_MESSAGES,
   MAX_CHAT_TOTAL_CHARS,
@@ -183,12 +184,22 @@ export async function POST(req: Request) {
       }
     };
 
+    // 利用ログ（dev専用）の共通次元。userText は直近のユーザー発話（未充足需要の観測が主目的）
+    const started = Date.now();
+    const logBase = {
+      kind: 'ai_chat',
+      model,
+      turns: messages.length,
+      userText: messages[messages.length - 1].content.slice(0, 200),
+    };
+
     let agentResult;
     try {
       agentResult = await runSankeyChatAgent(messages, context, callLlm);
     } catch (e) {
       if (e instanceof LlmUpstreamError || (e instanceof Error && e.name === 'TimeoutError')) {
         console.error('[ai/sankey-chat] upstream error:', e);
+        appendUsageLog({ ...logBase, outcome: 'upstream_error', latencyMs: Date.now() - started });
         return NextResponse.json(
           { error: 'AIが応答できませんでした。時間をおいて再度お試しください' },
           { status: 502 },
@@ -196,6 +207,17 @@ export async function POST(req: Request) {
       }
       throw e;
     }
+
+    appendUsageLog({
+      ...logBase,
+      // result なし = 聞き返し・解釈不能（未充足需要のシグナル）。text 行の userText を集計して活用する
+      outcome: agentResult.result ? 'result' : 'text',
+      ...(agentResult.result ? { projectCount: agentResult.result.summary.projects.count } : {}),
+      toolCalls: agentResult.toolCalls,
+      suggestions: agentResult.suggestions?.length ?? 0,
+      interpretation: Boolean(agentResult.result?.interpretation),
+      latencyMs: Date.now() - started,
+    });
 
     const response: SankeyChatResponse = {
       message: agentResult.message,
