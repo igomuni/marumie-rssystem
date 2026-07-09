@@ -17,6 +17,8 @@ export interface AiChatUiMessage {
   content: string;
   /** フィルタ条件が確定した assistant 応答に付く */
   result?: SankeyChatResult;
+  /** 次に聞ける質問の提案（最大3件）。assistant 応答に付く */
+  suggestions?: string[];
   /** 送信失敗などのエラー表示 */
   isError?: boolean;
 }
@@ -62,6 +64,12 @@ export function AiChatPanel({
     const text = input.trim();
     if (!text || sending) return;
     setInput('');
+    onSend(text);
+  };
+
+  // 深掘り提案チップのタップ: そのテキストをそのままユーザーメッセージとして送信する
+  const submitSuggestion = (text: string) => {
+    if (sending) return;
     onSend(text);
   };
 
@@ -186,6 +194,11 @@ export function AiChatPanel({
             </div>
             {m.result && (
               <div style={{ marginTop: 6, maxWidth: '88%', minWidth: '70%', border: '1px solid #dbe6ff', borderRadius: 8, background: '#f9fbff', padding: '8px 11px', fontSize: 12 }}>
+                {m.result.interpretation && (
+                  <div style={{ marginBottom: 6, fontSize: 11, color: '#777' }}>
+                    解釈: {m.result.interpretation}
+                  </div>
+                )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3, color: '#444' }}>
                   <div>マッチ事業: <b>{m.result.summary.projects.count.toLocaleString()}件</b>（予算 {formatYen(m.result.summary.projects.budgetTotal)}）</div>
                   <div>支出先: <b>{m.result.summary.recipients.count.toLocaleString()}件</b> ／ 府省庁: <b>{m.result.summary.ministries.count}</b></div>
@@ -195,6 +208,23 @@ export function AiChatPanel({
                   disabled={m.result.summary.projects.count === 0}
                   style={{ marginTop: 8, width: '100%', fontSize: 12, fontWeight: 600, color: '#fff', background: m.result.summary.projects.count > 0 ? '#1a73e8' : '#9e9e9e', border: 'none', borderRadius: 6, padding: '7px 0', cursor: m.result.summary.projects.count > 0 ? 'pointer' : 'default' }}
                 >この条件で図を表示</button>
+              </div>
+            )}
+            {m.role === 'assistant' && m.suggestions && m.suggestions.length > 0 && (
+              <div style={{ marginTop: 6, maxWidth: '88%', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {m.suggestions.map((s, si) => (
+                  <button
+                    key={si}
+                    onClick={() => submitSuggestion(s)}
+                    disabled={sending}
+                    title={s}
+                    style={{
+                      fontSize: 11.5, color: '#1a73e8', background: '#f5f8ff', border: '1px solid #dbe6ff',
+                      borderRadius: 14, padding: '4px 10px', cursor: sending ? 'default' : 'pointer',
+                      opacity: sending ? 0.6 : 1,
+                    }}
+                  >{s}</button>
+                ))}
               </div>
             )}
           </div>

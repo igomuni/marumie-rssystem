@@ -59,6 +59,8 @@ export type LlmCaller = (messages: LlmMessage[], tools: LlmToolDef[]) => Promise
 export interface SankeyChatAgentResult {
   message: string;
   result?: SankeyChatResult;
+  /** 次に聞ける質問の提案（最大3件）。submit_result 経由のみ（テキスト回答モードは対象外） */
+  suggestions?: string[];
   toolCalls: number;
 }
 
@@ -76,6 +78,12 @@ const DETAIL_TOP_LIMIT = 10;
 const RESPONSE_CHAR_LIMIT = 4000;
 /** テキストフィールド（目的・概要等）の切り詰め文字数 */
 const TEXT_FIELD_LIMIT = 600;
+/** interpretation（解釈宣言）の切り詰め文字数 */
+const INTERPRETATION_LIMIT = 200;
+/** suggestions（深掘り提案チップ）1件あたりの切り詰め文字数 */
+const SUGGESTION_LIMIT = 60;
+/** suggestions の最大件数 */
+const SUGGESTIONS_MAX = 3;
 
 const GIVE_UP_MESSAGE =
   'ご要望をフィルタ条件として解釈できませんでした。「再エネ関連で予算100億円以上」「経済産業省の事業だけ」のように、事業名・支出先名・府省庁・金額範囲を含めて具体的にお試しください。';
@@ -260,6 +268,17 @@ const TOOLS: LlmToolDef[] = [
         properties: {
           query: SANKEY_QUERY_SCHEMA,
           message: { type: 'string', description: 'ユーザー向けの説明文（日本語）' },
+          interpretation: {
+            type: 'string',
+            description:
+              '曖昧語を解釈して条件化した場合のみ指定する1文（200字以内）。書式例:「『子育て』を事業名に『子育て|こども|保育』を含む事業と解釈しました」。曖昧語がない明確な要求では省略する',
+          },
+          suggestions: {
+            type: 'array',
+            items: { type: 'string' },
+            description:
+              `次に聞ける質問の提案（最大${SUGGESTIONS_MAX}件、各${SUGGESTION_LIMIT}字以内）。現在のツール（get_project_detail 等）で実際に答えられる問いのみ。ユーザーがそのまま送信できる短い日本語の質問文にする（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」）。未実装機能（年度比較等）や図の適用と無関係な提案は禁止`,
+          },
         },
         required: ['query', 'message'],
       },
@@ -301,6 +320,16 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     '- 要求がこのデータのフィルタ条件にもデータ質問にも該当しない場合（雑談・データにない切り口等）は、ツールを呼ばずに、解釈できなかった旨と指定できる条件・質問の例を日本語のテキストで返す',
     '- 条件が曖昧でも合理的な解釈が1つ選べるなら聞き返さずに進める（フィルタはユーザーが適用前に件数を確認できる）',
     '- 応答はすべて日本語で書く',
+    '',
+    '## 解釈宣言（submit_result の interpretation）',
+    '「子育て」「大型」「〜っぽい」のような曖昧語をAIが解釈して条件化した場合は、submit_result の interpretation に',
+    '「『子育て』を事業名に『子育て|こども|保育』を含む事業と解釈しました」のような形式で必ず宣言し、ユーザーが解釈のズレを確認・修正できるようにする。',
+    '曖昧語を含まない明確な要求（府省庁名・金額範囲・具体的な事業名等がそのまま条件になる場合）では interpretation は省略してよい。',
+    '',
+    '## 深掘り提案（submit_result の suggestions）',
+    'suggestions には、現在のツール（get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain）で実際に答えられる問いのみを、',
+    'ユーザーがそのまま送信できる短い日本語の質問文として最大3件挙げる（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」）。',
+    '図の適用と無関係な提案や、このアシスタントが答えられない提案（年度比較等の未実装機能）は挙げないこと。',
   ];
   if (currentQuery && Object.keys(currentQuery).length > 0) {
     lines.push(
@@ -347,6 +376,26 @@ function clampText(s: string | null | undefined, limit: number = TEXT_FIELD_LIMI
   const t = s.trim();
   if (t.length === 0) return null;
   return t.length <= limit ? t : `${t.slice(0, limit)}…`;
+}
+
+/** submit_result の interpretation を検証・クランプする（未指定・空文字は undefined） */
+function clampInterpretation(raw: unknown): string | undefined {
+  if (typeof raw !== 'string') return undefined;
+  const t = raw.trim();
+  if (t.length === 0) return undefined;
+  return t.length <= INTERPRETATION_LIMIT ? t : `${t.slice(0, INTERPRETATION_LIMIT)}…`;
+}
+
+/** submit_result の suggestions を検証・クランプする（string以外・空文字は除去、最大3件・各60字） */
+function clampSuggestions(raw: unknown): string[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const items = raw
+    .filter((s): s is string => typeof s === 'string')
+    .map(s => s.trim())
+    .filter(s => s.length > 0)
+    .map(s => (s.length <= SUGGESTION_LIMIT ? s : `${s.slice(0, SUGGESTION_LIMIT)}…`))
+    .slice(0, SUGGESTIONS_MAX);
+  return items.length > 0 ? items : undefined;
 }
 
 /**
@@ -606,7 +655,14 @@ export async function runSankeyChatAgent(
               const message = typeof args.message === 'string' && args.message.trim()
                 ? args.message.trim()
                 : `${result!.summary.projects.count}事業がマッチしました。`;
-              return { message, result: result!, toolCalls };
+              const interpretation = clampInterpretation(args.interpretation);
+              const suggestions = clampSuggestions(args.suggestions);
+              return {
+                message,
+                result: interpretation ? { ...result!, interpretation } : result!,
+                ...(suggestions ? { suggestions } : {}),
+                toolCalls,
+              };
             }
             default:
               payload = { error: `未知のツールです: ${call.function.name}` };

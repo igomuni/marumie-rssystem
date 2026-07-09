@@ -200,6 +200,7 @@ export async function POST(req: Request) {
     const response: SankeyChatResponse = {
       message: agentResult.message,
       ...(agentResult.result ? { result: agentResult.result } : {}),
+      ...(agentResult.suggestions ? { suggestions: agentResult.suggestions } : {}),
       usage: { model, toolCalls: agentResult.toolCalls },
     };
     // チャット応答はキャッシュ不可

@@ -748,7 +748,7 @@ export default function RealDataSankeyPage() {
         return;
       }
       const data = await res.json() as SankeyChatResponse;
-      setAiChatMessages(prev => [...prev, { role: 'assistant', content: data.message, result: data.result }]);
+      setAiChatMessages(prev => [...prev, { role: 'assistant', content: data.message, result: data.result, suggestions: data.suggestions }]);
     } catch {
       setAiChatMessages(prev => [...prev, { role: 'assistant', content: 'エラー: 通信に失敗しました。再度お試しください', isError: true }]);
     } finally {
