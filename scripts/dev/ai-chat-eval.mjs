@@ -82,7 +82,8 @@ async function consumeSseBody(bodyStream, label) {
         settled = parsed;
       } else if (eventName === 'error') {
         console.error(`[ai-chat-eval] ${label} error: ${JSON.stringify(parsed)}`);
-        settled = { message: parsed?.error, error: parsed?.error };
+        // message は設定しない: JSONエラー経路と同様、エラーを assistant 発話として履歴に積まない
+        settled = { error: parsed?.error };
       }
     }
   }
@@ -111,6 +112,7 @@ async function runScenario(baseUrl, scenario, paceMs, stream) {
       if (stream && contentType.includes('text/event-stream') && res.body) {
         body = await consumeSseBody(res.body, `${scenario.id}#${turnIndex + 1}`);
         if (body === null) errorText = 'ストリームが result/error を送らずに終了しました';
+        else if (body.error) errorText = body.error;
       } else {
         const text = await res.text();
         try {

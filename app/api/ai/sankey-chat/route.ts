@@ -141,7 +141,8 @@ export async function POST(req: Request) {
       }
     }
 
-    const callOnce = async (llmMessages: LlmMessage[], tools: LlmToolDef[]): Promise<LlmMessage> => {
+    const callOnce = async (llmMessages: LlmMessage[], tools: LlmToolDef[], abortSignal?: AbortSignal): Promise<LlmMessage> => {
+      const timeoutSignal = AbortSignal.timeout(LLM_TIMEOUT_MS);
       let res: Response;
       try {
         res = await fetch(url, {
@@ -157,7 +158,8 @@ export async function POST(req: Request) {
             tool_choice: 'auto',
             temperature: 0.2,
           }),
-          signal: AbortSignal.timeout(LLM_TIMEOUT_MS),
+          // クライアント切断（abortSignal）でも上流呼び出しを即中断する（従量課金の無駄呼び出し防止）
+          signal: abortSignal ? AbortSignal.any([timeoutSignal, abortSignal]) : timeoutSignal,
         });
       } catch (e) {
         throw new LlmUpstreamError(`LLM API への接続に失敗しました: ${e instanceof Error ? e.message : String(e)}`);
@@ -186,16 +188,24 @@ export async function POST(req: Request) {
       return message;
     };
 
-    /** onRetry はリトライ待機の発生を呼び出し側（ストリーム時のみ）へ通知するフック */
-    const buildCallLlm = (onRetry?: (waitMs: number) => void): LlmCaller => async (llmMessages, tools) => {
+    /**
+     * onRetry はリトライ待機の発生を呼び出し側（ストリーム時のみ）へ通知するフック。
+     * abortSignal はクライアント切断の伝播用（ストリーム時のみ）: LLM fetch とリトライ待機の両方を即中断する
+     */
+    const buildCallLlm = (onRetry?: (waitMs: number) => void, abortSignal?: AbortSignal): LlmCaller => async (llmMessages, tools) => {
       try {
-        return await callOnce(llmMessages, tools);
+        return await callOnce(llmMessages, tools, abortSignal);
       } catch (e) {
         if (!(e instanceof LlmRetryableError)) throw e;
         console.warn(`[ai/sankey-chat] retryable upstream failure, retrying in ${e.waitMs}ms:`, e.message);
         onRetry?.(e.waitMs);
-        await new Promise(resolve => setTimeout(resolve, e.waitMs));
-        return await callOnce(llmMessages, tools); // 2回目の失敗はそのまま上へ（502 に丸まる）
+        await new Promise<void>((resolve, reject) => {
+          const rejectAborted = () => reject(new DOMException('クライアントが切断しました', 'AbortError'));
+          if (abortSignal?.aborted) { rejectAborted(); return; }
+          const timer = setTimeout(() => resolve(), e.waitMs);
+          abortSignal?.addEventListener('abort', () => { clearTimeout(timer); rejectAborted(); }, { once: true });
+        });
+        return await callOnce(llmMessages, tools, abortSignal); // 2回目の失敗はそのまま上へ（502 に丸まる）
       }
     };
 
@@ -209,7 +219,7 @@ export async function POST(req: Request) {
     };
 
     if (streamRequested) {
-      return buildStreamResponse(messages, context, buildCallLlm, model, logBase, started);
+      return buildStreamResponse(messages, context, buildCallLlm, model, logBase, started, req.signal);
     }
 
     let agentResult;
@@ -256,17 +266,23 @@ export async function POST(req: Request) {
  * progress イベント（llm_round/tool はエージェントの onProgress、retry は callLlm の onRetry 経由）を
  * 15秒間隔の ping コメント行と共に逐次配信し、終端は result / error イベントで締める。
  * usage-log の記録・応答形（SankeyChatResponse）は非ストリーミング経路と同一にする。
+ * クライアント切断（reqSignal・ストリーム cancel）は aborter 経由で LLM fetch・リトライ待機に伝播し、
+ * 上流失敗ではなくキャンセル（outcome: client_abort）として扱う。
  */
 function buildStreamResponse(
   messages: SankeyChatMessage[],
   context: SankeyChatContext,
-  buildCallLlm: (onRetry?: (waitMs: number) => void) => LlmCaller,
+  buildCallLlm: (onRetry?: (waitMs: number) => void, abortSignal?: AbortSignal) => LlmCaller,
   model: string,
   logBase: AiChatLogBase,
   started: number,
+  reqSignal: AbortSignal | undefined,
 ): Response {
   const encoder = new TextEncoder();
   let pingTimer: ReturnType<typeof setInterval> | null = null;
+  const aborter = new AbortController();
+  const onReqAbort = () => aborter.abort();
+  reqSignal?.addEventListener('abort', onReqAbort, { once: true });
 
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
@@ -279,6 +295,7 @@ function buildStreamResponse(
       };
       const finish = () => {
         if (pingTimer) clearInterval(pingTimer);
+        reqSignal?.removeEventListener('abort', onReqAbort);
         try {
           controller.close();
         } catch {
@@ -294,7 +311,10 @@ function buildStreamResponse(
       }, 15_000);
 
       (async () => {
-        const callLlm = buildCallLlm(waitMs => send('progress', { kind: 'retry', waitMs } satisfies SankeyChatProgressEvent));
+        const callLlm = buildCallLlm(
+          waitMs => send('progress', { kind: 'retry', waitMs } satisfies SankeyChatProgressEvent),
+          aborter.signal,
+        );
         const onProgress = (ev: SankeyChatProgressEvent) => send('progress', ev);
         try {
           const agentResult = await runSankeyChatAgent(messages, context, callLlm, onProgress);
@@ -315,7 +335,11 @@ function buildStreamResponse(
           };
           send('result', response);
         } catch (e) {
-          if (e instanceof LlmUpstreamError || (e instanceof Error && e.name === 'TimeoutError')) {
+          if (aborter.signal.aborted) {
+            // クライアント切断によるキャンセル: 送信先はもういないためイベントは送らず、上流失敗として数えない
+            console.log('[ai/sankey-chat] client aborted, agent loop stopped');
+            appendUsageLog({ ...logBase, outcome: 'client_abort', latencyMs: Date.now() - started });
+          } else if (e instanceof LlmUpstreamError || (e instanceof Error && e.name === 'TimeoutError')) {
             console.error('[ai/sankey-chat] upstream error (stream):', e);
             appendUsageLog({ ...logBase, outcome: 'upstream_error', latencyMs: Date.now() - started });
             send('error', { error: 'AIが応答できませんでした。時間をおいて再度お試しください' });
@@ -329,7 +353,9 @@ function buildStreamResponse(
       })();
     },
     cancel() {
+      // クライアント切断: ping を止め、実行中のエージェントループ・LLM fetch・リトライ待機を中断する
       if (pingTimer) clearInterval(pingTimer);
+      aborter.abort();
     },
   });
 
