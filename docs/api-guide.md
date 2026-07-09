@@ -74,7 +74,11 @@
       "spendingTotal": 85900000000,
       "top": [{ "id": "project-spending-706", "projectId": 706, "name": "...", "ministry": "...", "budget": 0, "spending": 0 }]
     },
-    "recipients": { "count": 65, "top": [{ "id": "r-...", "name": "...", "inflow": 0 }] },
+    "recipients": {
+      "count": 65,
+      "top": [{ "id": "r-...", "name": "...", "inflow": 0 }],
+      "topShare1": 0.42, "topShare3": 0.71
+    },
     "ministries": { "count": 2, "names": ["環境省", "経済産業省"] }
   },
   "sankey": { "（detail=full のみ）nodes/edges/totalProjectCount/totalRecipientCount": "..." },
@@ -86,6 +90,7 @@
 ```
 
 - `summary` はフィルタ適用後の**全マッチ**の集計（TopN集約前）。`top` は各10件
+- `summary.recipients.topShare1` / `topShare3` = 上位1件・上位3件の受領額シェア（0〜1、小数4桁）。集中度の一次スクリーニング用。「その他の支出先」（表示件数制限からの集計ノード）は除外するが、支出先名「その他」（実データ）は1支出先として含む。分母が0の場合は `null`
 - `summary.projects.spendingTotal` は「残存事業 → 残存支出先」エッジの合計。支出先フィルタ使用時は事業の総支出より小さくなる
 - `detail=full` の `sankey.nodes/edges` は TopN 集約後（= 図に描画される内容そのもの）
 - 不正なクエリ（正規表現エラー・min>max・未知の会計区分等）は 400 で `details: string[]` に修正方法を返す
@@ -127,11 +132,11 @@
 
 ## GET /api/search/projects
 
-事業名の部分一致検索。
+事業名の部分一致検索。`scope=details` で事業詳細テキスト（目的・概要・現状課題）も対象に含められる。名前が抽象的な事業や、計上先の府省庁が実態と異なる事業（例: 国税システム群がデジタル庁に一括計上）を掘り起こす入口。
 
-**クエリパラメータ**: `q`（必須）、`year`、`limit`（デフォルト20・上限100）、`offset`、`sort`（`budget` | `spending`）
+**クエリパラメータ**: `q`（必須）、`year`、`limit`（デフォルト20・上限100）、`offset`、`sort`（`budget` | `spending`）、`scope`（`name`（既定）| `details`。不正値は400）
 
-**レスポンス**: `items[]`（pid・事業名・府省庁・予算/執行額・再委託有無）+ 各itemに `links`（`detail` / `subcontracts` / `sankeyView` 等）、`links.next` でページネーション。
+**レスポンス**: `items[]`（pid・事業名・府省庁・予算/執行額・再委託有無・`matchedIn`）+ 各itemに `links`（`detail` / `subcontracts` / `sankeyView` 等）、`links.next` でページネーション。`matchedIn` は `'name' | 'details'`（`scope=details` 時のみ意味を持つ。事業名にもマッチした場合は `'name'` を優先）。
 
 ---
 

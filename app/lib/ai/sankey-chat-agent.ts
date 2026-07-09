@@ -565,7 +565,7 @@ function executeSearchProjects(year: SupportedYear, q: string): unknown {
   const { totalHits, items } = searchProjects(allItems, q, { limit: SEARCH_LIMIT, offset: 0, sortBy: 'budget' });
   return {
     totalHits,
-    items: items.map(i => ({
+    items: items.map(({ item: i }) => ({
       pid: i.pid,
       name: i.name,
       ministry: i.ministry,

@@ -19,6 +19,7 @@ const SANKEY_QUERY_NOTES: readonly string[] = [
   'グラフの支出先はグラフ生成時に名寄せ・集約済みのため、全支出先件数より少なくなります。ヒットしない支出先は /api/search/recipients で集計データを検索してください',
   'summary.projects.spendingTotal は「残存事業 → 残存支出先」エッジの合計です。支出先フィルタ使用時は事業の総支出より小さくなります',
   'summary はフィルタ適用後の全マッチを集計します（TopN集約前）。detail=full の sankey は表示用にTopN集約された後のノード・エッジです',
+  'summary.recipients.topShare1/topShare3は「その他の支出先」（表示件数制限からの集計ノード）を除いて計算しますが、支出先名「その他」（実データ）は1支出先として含みます',
 ];
 
 // ローカル実験フェーズのため Cache-Control は付与しない（公開段階で API_CACHE_CONTROL を追加する）

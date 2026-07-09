@@ -295,6 +295,15 @@ export interface SankeyQuerySummary {
     /** 残存事業から1円以上の流入がある残存支出先の数 */
     count: number;
     top: { id: string; name: string; inflow: number }[];
+    /**
+     * 上位1件の受領額 ÷ 非集約支出先の受領額合計（0〜1、小数4桁）。
+     * 「その他の支出先」（表示件数制限からの集計ノード）は分母・分子から除外するが、
+     * 支出先名「その他」（報告書にそのまま記載された実データ）は1支出先として含む。
+     * 非集約支出先の合計が0の場合は null。
+     */
+    topShare1: number | null;
+    /** 上位3件合計 ÷ 非集約支出先の受領額合計（topShare1 と同じ対象・丸め・null条件） */
+    topShare3: number | null;
   };
   ministries: {
     count: number;
@@ -357,6 +366,19 @@ export function summarizeFilteredGraph(
     .slice(0, topN)
     .map(([id, inflow]) => ({ id, name: nodeById.get(id)?.name ?? id, inflow }));
 
+  // topShare1/3: 「その他の支出先」（aggregated 集計ノード）を除いた非集約支出先のみを対象にする。
+  // 支出先名「その他」（実データ）は非集約ノードなので対象に含まれる。
+  const nonAggregatedInflows = [...inflowByRecipient.entries()]
+    .filter(([id]) => !(nodeById.get(id)?.aggregated))
+    .map(([, inflow]) => inflow)
+    .sort((a, b) => b - a);
+  const nonAggregatedTotal = nonAggregatedInflows.reduce((sum, v) => sum + v, 0);
+  const round4 = (v: number): number => Math.round(v * 10000) / 10000;
+  const topShare1 = nonAggregatedTotal > 0 ? round4((nonAggregatedInflows[0] ?? 0) / nonAggregatedTotal) : null;
+  const topShare3 = nonAggregatedTotal > 0
+    ? round4(nonAggregatedInflows.slice(0, 3).reduce((sum, v) => sum + v, 0) / nonAggregatedTotal)
+    : null;
+
   const ministryNames = [...new Set(survivingProjects.map(n => n.ministry).filter((m): m is string => !!m))].sort();
 
   return {
@@ -369,6 +391,8 @@ export function summarizeFilteredGraph(
     recipients: {
       count: inflowByRecipient.size,
       top: topRecipients,
+      topShare1,
+      topShare3,
     },
     ministries: {
       count: ministryNames.length,
