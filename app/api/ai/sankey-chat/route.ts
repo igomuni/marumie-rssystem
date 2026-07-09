@@ -15,8 +15,11 @@ import {
 const OPENROUTER_CHAT_COMPLETIONS_URL = 'https://openrouter.ai/api/v1/chat/completions';
 /** 品質スコア（scripts/score-project-quality-ai.py）と同じ既定モデル */
 const DEFAULT_MODEL = 'google/gemini-3.5-flash';
-/** LLM 1呼び出しのタイムアウト */
-const LLM_TIMEOUT_MS = 30_000;
+/**
+ * LLM 1呼び出しのタイムアウト。無料モデル（hy3:free等）は深掘りの長い生成で30秒を超える
+ * ことがあるため既定60秒。SANKEY_AI_CHAT_LLM_TIMEOUT_MS で調整可能
+ */
+const LLM_TIMEOUT_MS = Number(process.env.SANKEY_AI_CHAT_LLM_TIMEOUT_MS) || 60_000;
 /** 429/一過性障害のリトライ待機の既定値（上流が待機時間を提案しない場合） */
 const RETRY_WAIT_MS = 10_000;
 /** リトライ待機の上限。Gemini 無料枠は 10〜50 秒を提案してくるため、これを超える分は諦めて 502 にする */
