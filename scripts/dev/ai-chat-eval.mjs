@@ -75,9 +75,11 @@ async function runScenario(baseUrl, scenario) {
     const hasResult = Boolean(body?.result);
     const projectCount = body?.result?.summary?.projects?.count;
     const toolCalls = body?.usage?.toolCalls ?? '-';
+    const model = body?.usage?.model ?? '-';
 
     rows.push({
       id: scenario.id,
+      model,
       turn: turnIndex + 1,
       userText: truncate(userText, 60),
       message: truncate(message, 200),
@@ -99,10 +101,10 @@ async function runScenario(baseUrl, scenario) {
 }
 
 function toMarkdownTable(rows) {
-  const header = '| id | turn | user | result | count | toolCalls | ms | status | message |';
-  const sep = '|---|---|---|---|---|---|---|---|---|';
+  const header = '| id | model | turn | user | result | count | toolCalls | ms | status | message |';
+  const sep = '|---|---|---|---|---|---|---|---|---|---|';
   const body = rows.map((r) =>
-    `| ${escapeCell(r.id)} | ${r.turn} | ${escapeCell(r.userText)} | ${r.hasResult ? 'yes' : 'no'} | ${r.projectCount} | ${r.toolCalls} | ${r.latencyMs} | ${r.status} | ${escapeCell(r.message)} |`,
+    `| ${escapeCell(r.id)} | ${escapeCell(r.model)} | ${r.turn} | ${escapeCell(r.userText)} | ${r.hasResult ? 'yes' : 'no'} | ${r.projectCount} | ${r.toolCalls} | ${r.latencyMs} | ${r.status} | ${escapeCell(r.message)} |`,
   );
   return [header, sep, ...body].join('\n');
 }
