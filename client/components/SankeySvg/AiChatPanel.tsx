@@ -8,8 +8,16 @@
  * AI の結果は自動適用せず、結果カードの「この条件で図を表示」で明示適用する。
  */
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import type { SankeyChatResult } from '@/types/sankey-ai-chat';
 import { formatYen } from '@/app/lib/sankey-svg-constants';
+
+// Markdown 描画（react-markdown + remark-gfm）は初回メッセージ表示時に遅延ロードし、
+// ページ初期バンドルに含めない。ロード完了までは素のテキストで表示する
+const ChatMarkdown = dynamic(() => import('./ChatMarkdown'), {
+  ssr: false,
+  loading: () => null,
+});
 
 /** ページが保持するチャット表示用メッセージ（API の履歴形式 + 表示用の付加情報） */
 export interface AiChatUiMessage {
@@ -188,9 +196,14 @@ export function AiChatPanel({
               borderRadius: m.role === 'user' ? '12px 12px 3px 12px' : '12px 12px 12px 3px',
               background: m.role === 'user' ? '#e8f0fe' : m.isError ? '#fdecea' : '#f4f4f4',
               color: m.isError ? '#c62828' : '#333',
-              fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+              fontSize: 13, lineHeight: 1.6,
+              // assistant の通常応答は Markdown が段落を扱うため pre-wrap にしない（二重改行を防ぐ）
+              whiteSpace: m.role === 'assistant' && !m.isError ? 'normal' : 'pre-wrap',
+              wordBreak: 'break-word',
             }}>
-              {m.content}
+              {m.role === 'assistant' && !m.isError
+                ? <ChatMarkdown text={m.content} />
+                : m.content}
             </div>
             {m.result && (
               <div style={{ marginTop: 6, maxWidth: '88%', minWidth: '70%', border: '1px solid #dbe6ff', borderRadius: 8, background: '#f9fbff', padding: '8px 11px', fontSize: 12 }}>
