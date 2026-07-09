@@ -80,6 +80,7 @@ async function runScenario(baseUrl, scenario, paceMs) {
     const projectCount = body?.result?.summary?.projects?.count;
     const toolCalls = body?.usage?.toolCalls ?? '-';
     const model = body?.usage?.model ?? '-';
+    const suggestionCount = Array.isArray(body?.suggestions) ? body.suggestions.length : 0;
 
     rows.push({
       id: scenario.id,
@@ -90,6 +91,7 @@ async function runScenario(baseUrl, scenario, paceMs) {
       hasResult,
       projectCount: hasResult && typeof projectCount === 'number' ? projectCount : '-',
       toolCalls,
+      suggestionCount,
       latencyMs,
       status: status ?? 'ERR',
     });
@@ -106,10 +108,10 @@ async function runScenario(baseUrl, scenario, paceMs) {
 }
 
 function toMarkdownTable(rows) {
-  const header = '| id | model | turn | user | result | count | toolCalls | ms | status | message |';
-  const sep = '|---|---|---|---|---|---|---|---|---|---|';
+  const header = '| id | model | turn | user | result | count | toolCalls | sugg | ms | status | message |';
+  const sep = '|---|---|---|---|---|---|---|---|---|---|---|';
   const body = rows.map((r) =>
-    `| ${escapeCell(r.id)} | ${escapeCell(r.model)} | ${r.turn} | ${escapeCell(r.userText)} | ${r.hasResult ? 'yes' : 'no'} | ${r.projectCount} | ${r.toolCalls} | ${r.latencyMs} | ${r.status} | ${escapeCell(r.message)} |`,
+    `| ${escapeCell(r.id)} | ${escapeCell(r.model)} | ${r.turn} | ${escapeCell(r.userText)} | ${r.hasResult ? 'yes' : 'no'} | ${r.projectCount} | ${r.toolCalls} | ${r.suggestionCount} | ${r.latencyMs} | ${r.status} | ${escapeCell(r.message)} |`,
   );
   return [header, sep, ...body].join('\n');
 }

@@ -35,6 +35,8 @@ export interface SankeyChatResult {
   /** resolveSankeyQuery 済みの正規化クエリ（AIの生出力ではない） */
   query: ResolvedSankeyQuery;
   summary: SankeyQuerySummary;
+  /** 曖昧語をどう解釈したかの1文（例:「『子育て』を事業名に『子育て|こども|保育』を含む事業と解釈しました」）。曖昧語がない要求では省略される */
+  interpretation?: string;
 }
 
 export interface SankeyChatResponse {
@@ -42,6 +44,8 @@ export interface SankeyChatResponse {
   message: string;
   /** フィルタ条件が確定した場合のみ */
   result?: SankeyChatResult;
+  /** 次に聞ける質問の提案（最大3件）。現在のツールで実際に答えられる問いのみ */
+  suggestions?: string[];
   usage: {
     model: string;
     toolCalls: number;

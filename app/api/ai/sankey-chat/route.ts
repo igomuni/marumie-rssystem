@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { notFound } from 'next/navigation';
 import { runSankeyChatAgent, type LlmMessage, type LlmToolDef } from '@/app/lib/ai/sankey-chat-agent';
 import { serverErrorResponse } from '@/app/lib/api/api-notes';
+import { appendUsageLog } from '@/app/lib/api/usage-log';
 import {
   MAX_CHAT_MESSAGES,
   MAX_CHAT_TOTAL_CHARS,
@@ -14,8 +15,11 @@ import {
 const OPENROUTER_CHAT_COMPLETIONS_URL = 'https://openrouter.ai/api/v1/chat/completions';
 /** 品質スコア（scripts/score-project-quality-ai.py）と同じ既定モデル */
 const DEFAULT_MODEL = 'google/gemini-3.5-flash';
-/** LLM 1呼び出しのタイムアウト */
-const LLM_TIMEOUT_MS = 30_000;
+/**
+ * LLM 1呼び出しのタイムアウト。無料モデル（hy3:free等）は深掘りの長い生成で30秒を超える
+ * ことがあるため既定60秒。SANKEY_AI_CHAT_LLM_TIMEOUT_MS で調整可能
+ */
+const LLM_TIMEOUT_MS = Number(process.env.SANKEY_AI_CHAT_LLM_TIMEOUT_MS) || 60_000;
 /** 429/一過性障害のリトライ待機の既定値（上流が待機時間を提案しない場合） */
 const RETRY_WAIT_MS = 10_000;
 /** リトライ待機の上限。Gemini 無料枠は 10〜50 秒を提案してくるため、これを超える分は諦めて 502 にする */
@@ -183,12 +187,22 @@ export async function POST(req: Request) {
       }
     };
 
+    // 利用ログ（dev専用）の共通次元。userText は直近のユーザー発話（未充足需要の観測が主目的）
+    const started = Date.now();
+    const logBase = {
+      kind: 'ai_chat',
+      model,
+      turns: messages.length,
+      userText: messages[messages.length - 1].content.slice(0, 200),
+    };
+
     let agentResult;
     try {
       agentResult = await runSankeyChatAgent(messages, context, callLlm);
     } catch (e) {
       if (e instanceof LlmUpstreamError || (e instanceof Error && e.name === 'TimeoutError')) {
         console.error('[ai/sankey-chat] upstream error:', e);
+        appendUsageLog({ ...logBase, outcome: 'upstream_error', latencyMs: Date.now() - started });
         return NextResponse.json(
           { error: 'AIが応答できませんでした。時間をおいて再度お試しください' },
           { status: 502 },
@@ -197,9 +211,21 @@ export async function POST(req: Request) {
       throw e;
     }
 
+    appendUsageLog({
+      ...logBase,
+      // result なし = 聞き返し・解釈不能（未充足需要のシグナル）。text 行の userText を集計して活用する
+      outcome: agentResult.result ? 'result' : 'text',
+      ...(agentResult.result ? { projectCount: agentResult.result.summary.projects.count } : {}),
+      toolCalls: agentResult.toolCalls,
+      suggestions: agentResult.suggestions?.length ?? 0,
+      interpretation: Boolean(agentResult.result?.interpretation),
+      latencyMs: Date.now() - started,
+    });
+
     const response: SankeyChatResponse = {
       message: agentResult.message,
       ...(agentResult.result ? { result: agentResult.result } : {}),
+      ...(agentResult.suggestions ? { suggestions: agentResult.suggestions } : {}),
       usage: { model, toolCalls: agentResult.toolCalls },
     };
     // チャット応答はキャッシュ不可
