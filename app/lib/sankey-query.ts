@@ -311,16 +311,23 @@ export interface SankeyQuerySummary {
   };
 }
 
-/**
- * プレフィルタ適用後のグラフを集計する（TopN集約前の「マッチ全体」のサマリ）。
- * AIエージェントが条件の絞り込み過不足を検証するための情報。
- */
-export function summarizeFilteredGraph(
+/** summarizeFilteredGraph / compareYearsSummary が共有する中間集計結果 */
+interface CollectedFilteredGraph {
+  budgetTotal: number;
+  spendingTotal: number;
+  survivingProjects: RawNode[];
+  budgetByPid: Map<number, number>;
+  spendingByProject: Map<string, number>;
+  inflowByRecipient: Map<string, number>;
+  nodeById: Map<string, RawNode>;
+}
+
+/** フィルタ適用後グラフの中間集計（TopN集約前）。summarizeFilteredGraph / compareYearsSummary の共通処理 */
+function collectFilteredGraph(
   nodes: RawNode[],
   edges: RawEdge[],
   excludedIds: Set<string> | null,
-  topN: number = 10,
-): SankeyQuerySummary {
+): CollectedFilteredGraph {
   const isExcluded = (id: string) => excludedIds?.has(id) ?? false;
 
   const budgetByPid = new Map<number, number>();
@@ -349,6 +356,23 @@ export function summarizeFilteredGraph(
   }
 
   const nodeById = new Map(nodes.map(n => [n.id, n]));
+  return { budgetTotal, spendingTotal, survivingProjects, budgetByPid, spendingByProject, inflowByRecipient, nodeById };
+}
+
+/**
+ * プレフィルタ適用後のグラフを集計する（TopN集約前の「マッチ全体」のサマリ）。
+ * AIエージェントが条件の絞り込み過不足を検証するための情報。
+ */
+export function summarizeFilteredGraph(
+  nodes: RawNode[],
+  edges: RawEdge[],
+  excludedIds: Set<string> | null,
+  topN: number = 10,
+): SankeyQuerySummary {
+  const {
+    budgetTotal, spendingTotal, survivingProjects, budgetByPid, spendingByProject, inflowByRecipient, nodeById,
+  } = collectFilteredGraph(nodes, edges, excludedIds);
+
   const topProjects = [...survivingProjects]
     .map(n => ({
       id: n.id,
@@ -397,6 +421,233 @@ export function summarizeFilteredGraph(
     ministries: {
       count: ministryNames.length,
       names: ministryNames,
+    },
+  };
+}
+
+// ── 年度間比較 ──
+
+const COMPARE_TOP_N = 10;
+
+/**
+ * 両年度に存在する事業の予算・支出比較。
+ *
+ * increased/decreased のランキングは spendingDiff（残存支出先への実支出の差分）で行う。
+ * budgetDiff も同梱するが、デジタル庁一括計上（例: 各府省庁のシステムがデジタル庁予算に計上される）
+ * のように事業単体の project-budget ノードが0円のまま執行額だけ変動するケースがあるため、
+ * budgetDiff だけでは「事業年度Nのデータ内でこの事業が実際にどう動いたか」を見誤る
+ * （20260705_1544 の KSKシステム発見はこのパターン）。
+ */
+export interface SankeyProjectDiffEntry {
+  projectId: number | null;
+  name: string;
+  ministry: string | null;
+  budgetBase: number;
+  budgetCompare: number;
+  budgetDiff: number;
+  /** (budgetCompare - budgetBase) / budgetBase（小数4桁）。budgetBase が0の場合は null */
+  budgetDiffRate: number | null;
+  spendingBase: number;
+  spendingCompare: number;
+  spendingDiff: number;
+  /** (spendingCompare - spendingBase) / spendingBase（小数4桁）。spendingBase が0の場合は null */
+  spendingDiffRate: number | null;
+}
+
+/** 片年度のみに存在する事業（新規/消滅） */
+export interface SankeyProjectPresenceEntry {
+  projectId: number | null;
+  name: string;
+  ministry: string | null;
+  /** 存在した年度の予算額 */
+  budget: number;
+  /** 存在した年度の残存支出先への支出額 */
+  spending: number;
+}
+
+/** 両年度に存在する支出先の受領額比較（増減上位） */
+export interface SankeyRecipientInflowDiffEntry {
+  id: string;
+  name: string;
+  inflowBase: number;
+  inflowCompare: number;
+  diff: number;
+  /** (inflowCompare - inflowBase) / inflowBase（小数4桁）。inflowBase が0の場合は null */
+  diffRate: number | null;
+}
+
+/** 片年度のみに存在する支出先（新規/消滅） */
+export interface SankeyRecipientPresenceEntry {
+  id: string;
+  name: string;
+  /** 存在した年度の受領額 */
+  inflow: number;
+}
+
+export interface SankeyYearsCompareDiff {
+  projects: {
+    /** 支出増加額（spendingDiff）の上位（最大10件） */
+    increased: SankeyProjectDiffEntry[];
+    /** 支出減少額（spendingDiff）の上位（最大10件） */
+    decreased: SankeyProjectDiffEntry[];
+    /** compare 年度のみに存在（支出額降順、最大10件） */
+    added: SankeyProjectPresenceEntry[];
+    /** base 年度のみに存在（支出額降順、最大10件） */
+    removed: SankeyProjectPresenceEntry[];
+  };
+  recipients: {
+    /** 受領額増加の上位（最大10件） */
+    increased: SankeyRecipientInflowDiffEntry[];
+    /** 受領額減少の上位（最大10件） */
+    decreased: SankeyRecipientInflowDiffEntry[];
+    /** compare 年度のみに存在（受領額降順、最大10件） */
+    added: SankeyRecipientPresenceEntry[];
+    /** base 年度のみに存在（受領額降順、最大10件） */
+    removed: SankeyRecipientPresenceEntry[];
+  };
+}
+
+/** compareYearsSummary への入力（1年度分。既に loadSankeyGraph + buildFilterExcludedIds を適用済みのもの） */
+export interface SankeyYearGraphInput {
+  nodes: RawNode[];
+  edges: RawEdge[];
+  excludedIds: Set<string> | null;
+}
+
+export interface SankeyCompareYearsResult {
+  /** base 年度の summary（summarizeFilteredGraph と同一の計算） */
+  base: SankeyQuerySummary;
+  /** compare 年度の summary（summarizeFilteredGraph と同一の計算） */
+  compare: SankeyQuerySummary;
+  diff: SankeyYearsCompareDiff;
+}
+
+function calcDiffRate(base: number, compare: number): number | null {
+  if (base === 0) return null;
+  return Math.round(((compare - base) / base) * 10000) / 10000;
+}
+
+/**
+ * 同一フィルタ条件を2年度に適用した summary + 差分をまとめて返す。
+ * 突き合わせ（pid・支出先IDでのマッチング）はここで行い、呼び出し側（AIエージェント含む）に
+ * 手動突合をさせない（20260705_1544 §3-1・§5-1 の推奨案）。
+ *
+ * - 事業差分は projectId でマッチング。budget（project-budget ノードの value）を比較する
+ * - 支出先差分は recipient ノードIDでマッチング。「その他の支出先」等の集計ノード（aggregated）は除外する
+ * - increased/decreased は差分額の絶対値降順で最大 topN 件、added/removed は存在年度の金額降順で最大 topN 件
+ */
+export function compareYearsSummary(
+  base: SankeyYearGraphInput,
+  compare: SankeyYearGraphInput,
+  topN: number = COMPARE_TOP_N,
+): SankeyCompareYearsResult {
+  const baseSummary = summarizeFilteredGraph(base.nodes, base.edges, base.excludedIds, topN);
+  const compareSummary = summarizeFilteredGraph(compare.nodes, compare.edges, compare.excludedIds, topN);
+
+  const baseData = collectFilteredGraph(base.nodes, base.edges, base.excludedIds);
+  const compareData = collectFilteredGraph(compare.nodes, compare.edges, compare.excludedIds);
+
+  // ── 事業差分（projectId マッチング） ──
+  const baseProjectByPid = new Map(
+    baseData.survivingProjects.filter((n): n is RawNode & { projectId: number } => n.projectId != null)
+      .map(n => [n.projectId, n]),
+  );
+  const compareProjectByPid = new Map(
+    compareData.survivingProjects.filter((n): n is RawNode & { projectId: number } => n.projectId != null)
+      .map(n => [n.projectId, n]),
+  );
+  const allPids = new Set([...baseProjectByPid.keys(), ...compareProjectByPid.keys()]);
+
+  const matchedProjects: SankeyProjectDiffEntry[] = [];
+  const addedProjects: SankeyProjectPresenceEntry[] = [];
+  const removedProjects: SankeyProjectPresenceEntry[] = [];
+  for (const pid of allPids) {
+    const bn = baseProjectByPid.get(pid);
+    const cn = compareProjectByPid.get(pid);
+    if (bn && cn) {
+      const budgetBase = baseData.budgetByPid.get(pid) ?? 0;
+      const budgetCompare = compareData.budgetByPid.get(pid) ?? 0;
+      const spendingBase = baseData.spendingByProject.get(bn.id) ?? 0;
+      const spendingCompare = compareData.spendingByProject.get(cn.id) ?? 0;
+      matchedProjects.push({
+        projectId: pid,
+        name: cn.name,
+        ministry: cn.ministry ?? bn.ministry ?? null,
+        budgetBase,
+        budgetCompare,
+        budgetDiff: budgetCompare - budgetBase,
+        budgetDiffRate: calcDiffRate(budgetBase, budgetCompare),
+        spendingBase,
+        spendingCompare,
+        spendingDiff: spendingCompare - spendingBase,
+        spendingDiffRate: calcDiffRate(spendingBase, spendingCompare),
+      });
+    } else if (cn) {
+      addedProjects.push({
+        projectId: pid,
+        name: cn.name,
+        ministry: cn.ministry ?? null,
+        budget: compareData.budgetByPid.get(pid) ?? 0,
+        spending: compareData.spendingByProject.get(cn.id) ?? 0,
+      });
+    } else if (bn) {
+      removedProjects.push({
+        projectId: pid,
+        name: bn.name,
+        ministry: bn.ministry ?? null,
+        budget: baseData.budgetByPid.get(pid) ?? 0,
+        spending: baseData.spendingByProject.get(bn.id) ?? 0,
+      });
+    }
+  }
+  const projectsIncreased = matchedProjects.filter(m => m.spendingDiff > 0).sort((a, b) => b.spendingDiff - a.spendingDiff).slice(0, topN);
+  const projectsDecreased = matchedProjects.filter(m => m.spendingDiff < 0).sort((a, b) => a.spendingDiff - b.spendingDiff).slice(0, topN);
+  const projectsAdded = [...addedProjects].sort((a, b) => b.spending - a.spending).slice(0, topN);
+  const projectsRemoved = [...removedProjects].sort((a, b) => b.spending - a.spending).slice(0, topN);
+
+  // ── 支出先差分（受領額ベース、集約ノードは除外） ──
+  const baseRecipientMap = new Map(
+    [...baseData.inflowByRecipient.entries()].filter(([id]) => !baseData.nodeById.get(id)?.aggregated),
+  );
+  const compareRecipientMap = new Map(
+    [...compareData.inflowByRecipient.entries()].filter(([id]) => !compareData.nodeById.get(id)?.aggregated),
+  );
+  const allRecipientIds = new Set([...baseRecipientMap.keys(), ...compareRecipientMap.keys()]);
+
+  const matchedRecipients: SankeyRecipientInflowDiffEntry[] = [];
+  const addedRecipients: SankeyRecipientPresenceEntry[] = [];
+  const removedRecipients: SankeyRecipientPresenceEntry[] = [];
+  for (const id of allRecipientIds) {
+    const inBase = baseRecipientMap.has(id);
+    const inCompare = compareRecipientMap.has(id);
+    if (inBase && inCompare) {
+      const inflowBase = baseRecipientMap.get(id)!;
+      const inflowCompare = compareRecipientMap.get(id)!;
+      matchedRecipients.push({
+        id,
+        name: compareData.nodeById.get(id)?.name ?? baseData.nodeById.get(id)?.name ?? id,
+        inflowBase,
+        inflowCompare,
+        diff: inflowCompare - inflowBase,
+        diffRate: calcDiffRate(inflowBase, inflowCompare),
+      });
+    } else if (inCompare) {
+      addedRecipients.push({ id, name: compareData.nodeById.get(id)?.name ?? id, inflow: compareRecipientMap.get(id)! });
+    } else if (inBase) {
+      removedRecipients.push({ id, name: baseData.nodeById.get(id)?.name ?? id, inflow: baseRecipientMap.get(id)! });
+    }
+  }
+  const recipientsIncreased = matchedRecipients.filter(m => m.diff > 0).sort((a, b) => b.diff - a.diff).slice(0, topN);
+  const recipientsDecreased = matchedRecipients.filter(m => m.diff < 0).sort((a, b) => a.diff - b.diff).slice(0, topN);
+  const recipientsAdded = [...addedRecipients].sort((a, b) => b.inflow - a.inflow).slice(0, topN);
+  const recipientsRemoved = [...removedRecipients].sort((a, b) => b.inflow - a.inflow).slice(0, topN);
+
+  return {
+    base: baseSummary,
+    compare: compareSummary,
+    diff: {
+      projects: { increased: projectsIncreased, decreased: projectsDecreased, added: projectsAdded, removed: projectsRemoved },
+      recipients: { increased: recipientsIncreased, decreased: recipientsDecreased, added: recipientsAdded, removed: recipientsRemoved },
     },
   };
 }
