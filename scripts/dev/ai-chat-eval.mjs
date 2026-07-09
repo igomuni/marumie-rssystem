@@ -17,10 +17,12 @@ import path from 'node:path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function parseArgs(argv) {
-  const args = { only: null, out: null };
+  const args = { only: null, out: null, paceMs: 0 };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--only') args.only = argv[++i];
     else if (argv[i] === '--out') args.out = argv[++i];
+    // 無料枠のRPM制限対策: 各ターン送信後の待機ms（例: Gemini free tier は --pace 25000 目安）
+    else if (argv[i] === '--pace') args.paceMs = Number(argv[++i]) || 0;
   }
   return args;
 }
@@ -35,7 +37,9 @@ function escapeCell(s) {
   return String(s ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
 }
 
-async function runScenario(baseUrl, scenario) {
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function runScenario(baseUrl, scenario, paceMs) {
   const history = [];
   const rows = [];
   for (let turnIndex = 0; turnIndex < scenario.turns.length; turnIndex++) {
@@ -96,6 +100,7 @@ async function runScenario(baseUrl, scenario) {
       // これ以降のターンを送っても意味が薄いので打ち切る
       break;
     }
+    if (paceMs > 0) await sleep(paceMs);
   }
   return rows;
 }
@@ -110,7 +115,7 @@ function toMarkdownTable(rows) {
 }
 
 async function main() {
-  const { only, out } = parseArgs(process.argv.slice(2));
+  const { only, out, paceMs } = parseArgs(process.argv.slice(2));
   const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
   const promptsPath = path.join(__dirname, 'ai-chat-eval-prompts.json');
   const scenarios = JSON.parse(readFileSync(promptsPath, 'utf-8'));
@@ -126,7 +131,7 @@ async function main() {
   const allRows = [];
   for (const scenario of targets) {
     try {
-      const rows = await runScenario(baseUrl, scenario);
+      const rows = await runScenario(baseUrl, scenario, paceMs);
       allRows.push(...rows);
     } catch (e) {
       console.error(`[ai-chat-eval] シナリオ "${scenario.id}" でエラー: ${e.message}`);

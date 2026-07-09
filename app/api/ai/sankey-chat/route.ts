@@ -16,18 +16,22 @@ const OPENROUTER_CHAT_COMPLETIONS_URL = 'https://openrouter.ai/api/v1/chat/compl
 const DEFAULT_MODEL = 'google/gemini-3.5-flash';
 /** LLM 1呼び出しのタイムアウト */
 const LLM_TIMEOUT_MS = 30_000;
+/** 429/一過性障害のリトライ待機の既定値（上流が待機時間を提案しない場合） */
+const RETRY_WAIT_MS = 10_000;
+/** リトライ待機の上限。Gemini 無料枠は 10〜50 秒を提案してくるため、これを超える分は諦めて 502 にする */
+const RETRY_WAIT_MAX_MS = 30_000;
 
-/** OpenRouter 側の失敗（HTTPエラー・タイムアウト・応答形式不正）。502 に丸める */
+/** LLM API 側の失敗（HTTPエラー・タイムアウト・応答形式不正）。502 に丸める */
 class LlmUpstreamError extends Error {}
 
 /**
  * ローカル実験フェーズの本番抑制ガード（/api/sankey/query の isQueryApiEnabled と同型）。
  * LLM 呼び出しは従量課金のため、公開時はレートリミット等と入れ替えるまで Vercel 上では
  * 機能・理由を一切明かさない素の 404 を返す。判定は偽装不能な環境変数で行う。
- * 加えて OPENROUTER_API_KEY が無い環境では常に無効（キーなしでは機能しないため）。
+ * 加えて API キーが無い環境では常に無効（キーなしでは機能しないため）。
  */
 function isAiChatEnabled(): boolean {
-  if (!process.env.OPENROUTER_API_KEY) return false;
+  if (!chatApiKey()) return false;
   if (process.env.SANKEY_AI_CHAT_ENABLED === '1') return true;
   if (process.env.VERCEL === '1') return false; // Vercel 上は既定で無効
   return process.env.NODE_ENV !== 'production'; // ローカルでも production ビルドは既定無効
@@ -35,6 +39,21 @@ function isAiChatEnabled(): boolean {
 
 function chatModel(): string {
   return process.env.SANKEY_AI_CHAT_MODEL || DEFAULT_MODEL;
+}
+
+/**
+ * 接続先は OpenAI 互換 chat.completions であれば差し替え可能。
+ * 既定は OpenRouter。Gemini API 直（無料枠）を使う場合の例:
+ *   SANKEY_AI_CHAT_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/chat/completions
+ *   SANKEY_AI_CHAT_API_KEY=<Gemini APIキー>  SANKEY_AI_CHAT_MODEL=gemini-2.5-flash（google/ プレフィックスなし）
+ */
+function chatCompletionsUrl(): string {
+  return process.env.SANKEY_AI_CHAT_BASE_URL || OPENROUTER_CHAT_COMPLETIONS_URL;
+}
+
+/** 接続先用キー。未指定なら OpenRouter のキーを使う（従来互換） */
+function chatApiKey(): string | undefined {
+  return process.env.SANKEY_AI_CHAT_API_KEY || process.env.OPENROUTER_API_KEY;
 }
 
 /** チャットパネルの表示可否をクライアントが判定するための疎通エンドポイント */
@@ -98,11 +117,20 @@ export async function POST(req: Request) {
     const context = validateContext(body?.context);
 
     const model = chatModel();
-    const apiKey = process.env.OPENROUTER_API_KEY!;
-    const callLlm = async (llmMessages: LlmMessage[], tools: LlmToolDef[]): Promise<LlmMessage> => {
+    const url = chatCompletionsUrl();
+    const apiKey = chatApiKey()!;
+
+    /** リトライで回復しうる失敗（429・5xx・choices欠落）。それ以外の LlmUpstreamError と区別する */
+    class LlmRetryableError extends LlmUpstreamError {
+      constructor(message: string, readonly waitMs: number) {
+        super(message);
+      }
+    }
+
+    const callOnce = async (llmMessages: LlmMessage[], tools: LlmToolDef[]): Promise<LlmMessage> => {
       let res: Response;
       try {
-        res = await fetch(OPENROUTER_CHAT_COMPLETIONS_URL, {
+        res = await fetch(url, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${apiKey}`,
@@ -118,16 +146,41 @@ export async function POST(req: Request) {
           signal: AbortSignal.timeout(LLM_TIMEOUT_MS),
         });
       } catch (e) {
-        throw new LlmUpstreamError(`OpenRouter への接続に失敗しました: ${e instanceof Error ? e.message : String(e)}`);
+        throw new LlmUpstreamError(`LLM API への接続に失敗しました: ${e instanceof Error ? e.message : String(e)}`);
       }
       if (!res.ok) {
         const detail = (await res.text().catch(() => '')).slice(0, 500);
-        throw new LlmUpstreamError(`OpenRouter HTTP ${res.status}: ${detail}`);
+        if (res.status === 429 || res.status >= 500) {
+          // 無料枠のレート制限（RPM）や一過性の 5xx。待機時間は Retry-After ヘッダ →
+          // 本文の提案（Gemini は "retry in 28.0s" 形式で返す）→ 既定値、の順で決める（上限あり）
+          const retryAfterSec = Number(res.headers.get('retry-after'));
+          const suggestedSec = Number(/retry in ([0-9.]+)s/.exec(detail)?.[1]);
+          const baseSec = Number.isFinite(retryAfterSec) && retryAfterSec > 0
+            ? retryAfterSec
+            : Number.isFinite(suggestedSec) && suggestedSec > 0
+              ? Math.ceil(suggestedSec) + 1
+              : RETRY_WAIT_MS / 1000;
+          const waitMs = Math.min(baseSec * 1000, RETRY_WAIT_MAX_MS);
+          throw new LlmRetryableError(`LLM API HTTP ${res.status}: ${detail}`, waitMs);
+        }
+        throw new LlmUpstreamError(`LLM API HTTP ${res.status}: ${detail}`);
       }
       const data = await res.json().catch(() => null) as { choices?: { message?: LlmMessage }[] } | null;
       const message = data?.choices?.[0]?.message;
-      if (!message) throw new LlmUpstreamError('OpenRouter 応答に choices[0].message がありません');
+      // HTTP 200 で choices が空になるプロバイダ固有の一過性障害が観測されている（hy3:free/Novita）
+      if (!message) throw new LlmRetryableError('LLM API 応答に choices[0].message がありません', RETRY_WAIT_MS);
       return message;
+    };
+
+    const callLlm = async (llmMessages: LlmMessage[], tools: LlmToolDef[]): Promise<LlmMessage> => {
+      try {
+        return await callOnce(llmMessages, tools);
+      } catch (e) {
+        if (!(e instanceof LlmRetryableError)) throw e;
+        console.warn(`[ai/sankey-chat] retryable upstream failure, retrying in ${e.waitMs}ms:`, e.message);
+        await new Promise(resolve => setTimeout(resolve, e.waitMs));
+        return await callOnce(llmMessages, tools); // 2回目の失敗はそのまま上へ（502 に丸まる）
+      }
     };
 
     let agentResult;
