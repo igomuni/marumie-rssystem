@@ -38,5 +38,9 @@
   {
     "id": "off-topic-chitchat",
     "turns": ["今日の天気は？"]
+  },
+  {
+    "id": "drill-compare-years",
+    "turns": ["マイナンバー関連の事業は去年から増えた？"]
   }
 ]

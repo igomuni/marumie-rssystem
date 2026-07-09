@@ -74,7 +74,11 @@
       "spendingTotal": 85900000000,
       "top": [{ "id": "project-spending-706", "projectId": 706, "name": "...", "ministry": "...", "budget": 0, "spending": 0 }]
     },
-    "recipients": { "count": 65, "top": [{ "id": "r-...", "name": "...", "inflow": 0 }] },
+    "recipients": {
+      "count": 65,
+      "top": [{ "id": "r-...", "name": "...", "inflow": 0 }],
+      "topShare1": 0.42, "topShare3": 0.71
+    },
     "ministries": { "count": 2, "names": ["環境省", "経済産業省"] }
   },
   "sankey": { "（detail=full のみ）nodes/edges/totalProjectCount/totalRecipientCount": "..." },
@@ -86,6 +90,7 @@
 ```
 
 - `summary` はフィルタ適用後の**全マッチ**の集計（TopN集約前）。`top` は各10件
+- `summary.recipients.topShare1` / `topShare3` = 上位1件・上位3件の受領額シェア（0〜1、小数4桁）。集中度の一次スクリーニング用。「その他の支出先」（表示件数制限からの集計ノード）は除外するが、支出先名「その他」（実データ）は1支出先として含む。分母が0の場合は `null`
 - `summary.projects.spendingTotal` は「残存事業 → 残存支出先」エッジの合計。支出先フィルタ使用時は事業の総支出より小さくなる
 - `detail=full` の `sankey.nodes/edges` は TopN 集約後（= 図に描画される内容そのもの）
 - 不正なクエリ（正規表現エラー・min>max・未知の会計区分等）は 400 で `details: string[]` に修正方法を返す
@@ -95,6 +100,50 @@
 1. 要求を `SankeyQuery` に翻訳し `detail=summary` で実行
 2. `summary` の件数・金額で絞り込み過不足を判断し、条件を調整して再実行（0件 → 条件を緩める。語彙探索には `/api/search/projects` / `/api/search/recipients` を併用）
 3. 確定したら `links.webView` の URL をユーザーに提示する
+
+### 年度間比較（`compareYears`）
+
+`compareYears=基準年,比較年`（例: `compareYears=2024,2025`）を指定すると、同一フィルタ条件を2年度に適用した summary と差分を1応答で返す。手動での2回引き・突き合わせによる誤りを避けるため、差分計算は API 側で行う。指定時は通常の `summary` / `sankey` 応答の代わりに `years` / `diff` を返す（`detail` は無視される）。
+
+- 対応年度は2つとも `"2024"` / `"2025"` のいずれかで、かつ異なる年度であること。違反時は 400
+- `filter` / `view` は両年度に同一条件をそのまま適用する（年度別の調整はしない）
+- **年度ズレの罠**: `compareYears=2024,2025` は「事業年度2024 vs 2025」の比較だが、事業年度Nのデータは予算年度N-1の執行実績なので、実質は**予算年度2023 vs 2024** の執行実績比較になる（`metadata.notes` に同注記あり）
+
+```json
+{
+  "metadata": {
+    "year": 2024, "compareYear": 2025, "unit": "JPY", "notes": ["..."],
+    "appliedQuery": { "（既定値補完後の SankeyQuery）": "..." },
+    "filterActive": true
+  },
+  "years": {
+    "2024": { "（summarizeFilteredGraph と同一形式）": "..." },
+    "2025": { "（同上）": "..." }
+  },
+  "diff": {
+    "projects": {
+      "increased": [{ "projectId": 20079, "name": "国税総合管理(KSK)システム(...)", "ministry": "デジタル庁",
+        "budgetBase": 0, "budgetCompare": 0, "budgetDiff": 0, "budgetDiffRate": null,
+        "spendingBase": 43229620000, "spendingCompare": 65268016244, "spendingDiff": 22038396244, "spendingDiffRate": 0.5098 }],
+      "decreased": [{ "（同じ形式。spendingDiff の小さい順）": "..." }],
+      "added": [{ "projectId": 21095, "name": "...", "ministry": "デジタル庁", "budget": 0, "spending": 0 }],
+      "removed": [{ "（added と同形式。base 年度のみ存在）": "..." }]
+    },
+    "recipients": {
+      "increased": [{ "id": "r-...", "name": "...", "inflowBase": 0, "inflowCompare": 0, "diff": 0, "diffRate": null }],
+      "decreased": [ "（同上）" ],
+      "added": [{ "id": "r-...", "name": "...", "inflow": 0 }],
+      "removed": [ "（added と同形式）" ]
+    }
+  }
+}
+```
+
+- `diff.projects` は projectId でマッチングし、`increased` / `decreased` は **`spendingDiff`（残存支出先への実支出の差分）** でランキングする。`budgetDiff`（project-budgetノードの予算額差）も同梱するが、デジタル庁一括計上等で事業単体の予算が0円のまま執行額だけ変動するケースがあるため（例の KSK システム）、budgetDiff だけでは実態を見誤る
+- `diff.recipients` は支出先ノードIDでマッチングし、受領額（inflow）の差分でランキングする。「その他の支出先」等の集計ノードは除外される
+- `added` / `removed` は片年度のみ存在するエントリ（存在した年度の金額降順、各最大10件）
+- `diffRate` は基準年度（1つ目）の値が0の場合 `null`（0除算回避）
+- 使用例: `GET /api/sankey/query?fnp=国税総合管理&compareYears=2024,2025` — 国税総合管理(KSK)システムの支出増減を年度間で比較
 
 ### /sankey-svg URLパラメータ対応表（短縮形）
 
@@ -119,7 +168,7 @@
 
 ### 実装（レイヤー）
 
-- Domain: `app/lib/sankey-query.ts`（クエリ正規化・除外集合構築・サマリ・URL変換。`/sankey-svg` ページと共有）
+- Domain: `app/lib/sankey-query.ts`（クエリ正規化・除外集合構築・サマリ・年度間比較差分（`compareYearsSummary`）・URL変換。`/sankey-svg` ページと共有）
 - Loader: `app/lib/api/sankey-graph-loader.ts`（`sankey-svg-{year}-graph.json` のメモリキャッシュ）
 - TopN集約: `app/lib/sankey-svg-filter.ts` の `filterTopN`（ページと同一関数）
 
@@ -127,11 +176,11 @@
 
 ## GET /api/search/projects
 
-事業名の部分一致検索。
+事業名の部分一致検索。`scope=details` で事業詳細テキスト（目的・概要・現状課題）も対象に含められる。名前が抽象的な事業や、計上先の府省庁が実態と異なる事業（例: 国税システム群がデジタル庁に一括計上）を掘り起こす入口。
 
-**クエリパラメータ**: `q`（必須）、`year`、`limit`（デフォルト20・上限100）、`offset`、`sort`（`budget` | `spending`）
+**クエリパラメータ**: `q`（必須）、`year`、`limit`（デフォルト20・上限100）、`offset`、`sort`（`budget` | `spending`）、`scope`（`name`（既定）| `details`。不正値は400）
 
-**レスポンス**: `items[]`（pid・事業名・府省庁・予算/執行額・再委託有無）+ 各itemに `links`（`detail` / `subcontracts` / `sankeyView` 等）、`links.next` でページネーション。
+**レスポンス**: `items[]`（pid・事業名・府省庁・予算/執行額・再委託有無・`matchedIn`）+ 各itemに `links`（`detail` / `subcontracts` / `sankeyView` 等）、`links.next` でページネーション。`matchedIn` は `'name' | 'details'`（`scope=details` 時のみ意味を持つ。事業名にもマッチした場合は `'name'` を優先）。
 
 ---
 
