@@ -16,17 +16,19 @@ import {
   resolveSankeyQuery,
   buildFilterExcludedIds,
   summarizeFilteredGraph,
+  compareYearsSummary,
   SANKEY_QUERY_DEFAULTS,
   TOP_PROJECT_MAX,
   TOP_RECIPIENT_MAX,
 } from '@/app/lib/sankey-query';
-import { searchProjects } from '@/app/lib/search/project-search';
+import type { SankeyQuerySummary } from '@/app/lib/sankey-query';
+import { searchProjects, type ProjectSearchScope } from '@/app/lib/search/project-search';
 import { searchRecipients } from '@/app/lib/search/recipient-search';
 import { loadSankeyGraph } from '@/app/lib/api/sankey-graph-loader';
 import { loadQualityScores, getQualityScore, toQualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { SupportedYear } from '@/app/lib/api/api-notes';
 import { loadRecipientIndex, resolveRecipient } from '@/app/lib/api/recipient-index-loader';
-import { getProjectDetail } from '@/app/lib/api/project-details-loader';
+import { getProjectDetail, loadProjectDetails } from '@/app/lib/api/project-details-loader';
 import { loadSubcontracts } from '@/app/lib/api/subcontracts-loader';
 
 // ── OpenAI 互換の LLM メッセージ・ツール型（OpenRouter の chat.completions と1対1） ──
@@ -178,10 +180,18 @@ const TOOLS: LlmToolDef[] = [
     function: {
       name: 'search_projects',
       description:
-        '事業名のキーワード検索（正規化部分一致）。フィルタが0件のときや、ユーザーの語彙が実際の事業名とどう対応するか調べるときに使う。',
+        '事業名のキーワード検索（正規化部分一致）。フィルタが0件のときや、ユーザーの語彙が実際の事業名とどう対応するか調べるときに使う。' +
+        '事業名で0件のときは scope=details で概要・目的・現状課題も検索すると、計上のねじれ（別府省庁に計上されたシステム等）も拾える。',
       parameters: {
         type: 'object',
-        properties: { q: { type: 'string', description: '検索キーワード' } },
+        properties: {
+          q: { type: 'string', description: '検索キーワード' },
+          scope: {
+            type: 'string',
+            enum: ['name', 'details'],
+            description: '検索対象。name（既定）=事業名のみ / details=事業名+概要・目的・現状課題も対象',
+          },
+        },
         required: ['q'],
       },
     },
@@ -260,6 +270,26 @@ const TOOLS: LlmToolDef[] = [
   {
     type: 'function',
     function: {
+      name: 'compare_years',
+      description:
+        '同一条件の2年度比較。増減・新規/消滅をAPIが突き合わせ済みで返す。増減ランキングは支出額基準（予算0円のまま執行だけ動く事業があるため）。「去年から増えた?」「年度でどう変わった?」型の質問に使う。',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            ...SANKEY_QUERY_SCHEMA,
+            description: 'フィルタ条件（filter中心）。省略時はフィルタなし全体を比較する',
+          },
+          baseYear: { type: 'string', enum: ['2024', '2025'], description: '基準年度' },
+          compareYear: { type: 'string', enum: ['2024', '2025'], description: '比較対象年度（baseYear と異なる年度）' },
+        },
+        required: ['baseYear', 'compareYear'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'submit_result',
       description:
         '検証済みの最終フィルタ条件を確定する。run_sankey_query で結果を確認してから呼ぶこと。message にはユーザー向けの短い説明（何をどう絞ったか・何件マッチしたか）を日本語で書く。',
@@ -277,7 +307,7 @@ const TOOLS: LlmToolDef[] = [
             type: 'array',
             items: { type: 'string' },
             description:
-              `次に聞ける質問の提案（最大${SUGGESTIONS_MAX}件、各${SUGGESTION_LIMIT}字以内）。現在のツール（get_project_detail 等）で実際に答えられる問いのみ。ユーザーがそのまま送信できる短い日本語の質問文にする（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」）。未実装機能（年度比較等）や図の適用と無関係な提案は禁止`,
+              `次に聞ける質問の提案（最大${SUGGESTIONS_MAX}件、各${SUGGESTION_LIMIT}字以内）。現在のツール（get_project_detail / compare_years 等）で実際に答えられる問いのみ。ユーザーがそのまま送信できる短い日本語の質問文にする（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」「去年から増えた?」）。図の適用と無関係な提案や、このアシスタントが答えられない提案（再委託有無・品質スコア・使途のフィルタ化等）は禁止`,
           },
         },
         required: ['query', 'message'],
@@ -305,12 +335,14 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     '',
     '### A. フィルタ要求（図の表示条件を変えたい）',
     '1. 要求を SankeyQuery に翻訳し run_sankey_query で実行する',
-    '2. 結果を確認する: 0件なら条件を緩める（正規表現 | で類義語を足す、金額条件を外す等）。search_projects / search_recipients で実際の語彙を調べてもよい。多すぎるなら金額下限などで絞る',
+    '2. 結果を確認する: 0件なら条件を緩める（正規表現 | で類義語を足す、金額条件を外す等）。search_projects / search_recipients で実際の語彙を調べてもよい（search_projects は scope=details で概要・目的・現状課題も検索できる。事業名で0件のときに試すと、計上のねじれ（別府省庁に計上されたシステム等）も拾える）。多すぎるなら金額下限などで絞る',
     '3. 妥当な結果になったら submit_result で確定する（message に何をどう絞って何件マッチしたかを書く）',
     '- 表示件数や並び順の要望（「上位5件だけ」等）は view で表現できる。ユーザーが言及しない限り view は省略する',
     '',
-    '### B. データへの質問（金額・内訳・品質スコア・再委託構造等を知りたい）',
-    '- get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain で調べ、結果をテキストで日本語回答する。submit_result は呼ばない（図の条件は変わらない）',
+    '### B. データへの質問（金額・内訳・品質スコア・再委託構造・年度比較等を知りたい）',
+    '- get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain / compare_years で調べ、結果をテキストで日本語回答する。submit_result は呼ばない（図の条件は変わらない）',
+    '- 「去年から増えた?」「年度でどう変わった?」型の質問は compare_years を使う。回答時は「事業年度Nのデータ=予算年度N-1の実績」の注記を必ず添える',
+    '- run_sankey_query の結果にある summary.recipients.topShare1 / topShare3 は支出先集中度（上位1社/3社への集中割合）。「集中度が高い事業を探して」型の質問で使える（compare_years の要約には含まれない）',
     '- 数値・事実は必ずツール応答から転記する。ツールで確認していない数値を推測で書かない',
     '- pid はユーザーには分からない前提。事業名から聞かれたら、まず search_projects でpidを特定してから深掘りツールを呼ぶ。支出先も同様に search_recipients でキーを特定する',
     '- 品質スコアについて回答する際の語彙規律: スコアは「事業レビューシートに書かれた説明の質（支出先の特定可能性・使途の説明性・成果設計の明確さ等）」を評価したものであり、事業そのものの善悪・要不要・無駄の有無を判定するものではない。「この事業は無駄」のような断定はせず、「レビューシートの記載としては〜」のように表現する',
@@ -328,9 +360,9 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     '曖昧語を含まない明確な要求（府省庁名・金額範囲・具体的な事業名等がそのまま条件になる場合）では interpretation は省略してよい。',
     '',
     '## 深掘り提案（submit_result の suggestions）',
-    'suggestions には、現在のツール（get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain）で実際に答えられる問いのみを、',
-    'ユーザーがそのまま送信できる短い日本語の質問文として最大3件挙げる（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」）。',
-    '図の適用と無関係な提案や、このアシスタントが答えられない提案（年度比較等の未実装機能）は挙げないこと。',
+    'suggestions には、現在のツール（get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain / compare_years）で実際に答えられる問いのみを、',
+    'ユーザーがそのまま送信できる短い日本語の質問文として最大3件挙げる（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」「去年から増えた?」）。',
+    '図の適用と無関係な提案や、このアシスタントが答えられない提案（再委託有無・品質スコア・使途のフィルタ化等）は挙げないこと。',
   ];
   const compactQuery = currentQuery ? compactValue(currentQuery) : undefined;
   if (compactQuery !== undefined) {
@@ -560,17 +592,19 @@ function executeGetSubcontractChain(year: SupportedYear, pid: string): unknown {
   );
 }
 
-function executeSearchProjects(year: SupportedYear, q: string): unknown {
+function executeSearchProjects(year: SupportedYear, q: string, scope: ProjectSearchScope): unknown {
   const { items: allItems } = loadQualityScores(year);
-  const { totalHits, items } = searchProjects(allItems, q, { limit: SEARCH_LIMIT, offset: 0, sortBy: 'budget' });
+  const projectDetails = scope === 'details' ? loadProjectDetails(year) : undefined;
+  const { totalHits, items } = searchProjects(allItems, q, { limit: SEARCH_LIMIT, offset: 0, sortBy: 'budget', scope, projectDetails });
   return {
     totalHits,
-    items: items.map(({ item: i }) => ({
+    items: items.map(({ item: i, matchedIn }) => ({
       pid: i.pid,
       name: i.name,
       ministry: i.ministry,
       budgetAmount: i.budgetAmount,
       spendTotal: i.spendTotal,
+      matchedIn,
     })),
   };
 }
@@ -587,6 +621,61 @@ function executeSearchRecipients(year: SupportedYear, q: string): unknown {
       subcontractAmount: e.totals.subcontractAmount,
     })),
   };
+}
+
+/** compare_years の diff リスト（increased/decreased/added/removed）を上位5件に切る */
+const COMPARE_DIFF_TOP_LIMIT = 5;
+function clampDiffList<T>(list: T[]): T[] {
+  return list.slice(0, COMPARE_DIFF_TOP_LIMIT);
+}
+
+/** compare_years の年度summaryを要約（count・budgetTotal・spendingTotalのみ。topリストやtopShareは省く） */
+function clampYearSummary(s: SankeyQuerySummary) {
+  return {
+    projects: { count: s.projects.count, budgetTotal: s.projects.budgetTotal, spendingTotal: s.projects.spendingTotal },
+    recipients: { count: s.recipients.count },
+  };
+}
+
+function executeCompareYears(queryInput: SankeyQuery | undefined, baseYear: SupportedYear, compareYear: SupportedYear): unknown {
+  if (baseYear === compareYear) {
+    return { error: 'baseYear と compareYear には異なる年度を指定してください' };
+  }
+  const withYear: SankeyQuery = { ...(queryInput ?? {}), year: baseYear };
+  const { query, errors } = resolveSankeyQuery(withYear);
+  if (errors.length > 0) return { errors };
+
+  const baseGraph = loadSankeyGraph(baseYear);
+  const compareGraph = loadSankeyGraph(compareYear);
+  const baseExcludedIds = buildFilterExcludedIds(baseGraph.nodes, baseGraph.edges, query.filter, [query.view.pin.projectId]);
+  const compareExcludedIds = buildFilterExcludedIds(compareGraph.nodes, compareGraph.edges, query.filter, [query.view.pin.projectId]);
+  const result = compareYearsSummary(
+    { nodes: baseGraph.nodes, edges: baseGraph.edges, excludedIds: baseExcludedIds },
+    { nodes: compareGraph.nodes, edges: compareGraph.edges, excludedIds: compareExcludedIds },
+  );
+
+  const payload = {
+    baseYear,
+    compareYear,
+    appliedFilter: query.filter,
+    base: clampYearSummary(result.base),
+    compare: clampYearSummary(result.compare),
+    diff: {
+      projects: {
+        increased: clampDiffList(result.diff.projects.increased),
+        decreased: clampDiffList(result.diff.projects.decreased),
+        added: clampDiffList(result.diff.projects.added),
+        removed: clampDiffList(result.diff.projects.removed),
+      },
+      recipients: {
+        increased: clampDiffList(result.diff.recipients.increased),
+        decreased: clampDiffList(result.diff.recipients.decreased),
+        added: clampDiffList(result.diff.recipients.added),
+        removed: clampDiffList(result.diff.recipients.removed),
+      },
+    },
+  };
+  return clampPayload(payload, []);
 }
 
 // ── エージェントループ本体 ──
@@ -644,7 +733,8 @@ export async function runSankeyChatAgent(
               if (!q) {
                 payload = { error: 'q（検索キーワード）を指定してください' };
               } else if (call.function.name === 'search_projects') {
-                payload = executeSearchProjects(year, q);
+                const scope: ProjectSearchScope = args.scope === 'details' ? 'details' : 'name';
+                payload = executeSearchProjects(year, q, scope);
               } else {
                 payload = executeSearchRecipients(year, q);
               }
@@ -667,6 +757,16 @@ export async function runSankeyChatAgent(
             case 'get_subcontract_chain': {
               const pid = typeof args.pid === 'string' ? args.pid.trim() : '';
               payload = pid ? executeGetSubcontractChain(year, pid) : { error: 'pid（事業ID）を指定してください' };
+              break;
+            }
+            case 'compare_years': {
+              const baseYear = args.baseYear === '2024' || args.baseYear === '2025' ? args.baseYear : null;
+              const compareYear = args.compareYear === '2024' || args.compareYear === '2025' ? args.compareYear : null;
+              if (!baseYear || !compareYear) {
+                payload = { error: 'baseYear・compareYear には "2024" または "2025" を指定してください' };
+              } else {
+                payload = executeCompareYears(args.query as SankeyQuery | undefined, baseYear, compareYear);
+              }
               break;
             }
             case 'submit_result': {
