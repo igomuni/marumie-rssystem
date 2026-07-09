@@ -7,7 +7,10 @@
     "deny": [
       "Read(./public/data/**/*.json)",
       "Read(./public/data/**/*.json.gz)",
-      "Read(./data/**)",
+      "Read(./data/download/**)",
+      "Read(./data/result/**)",
+      "Read(./data/cache/**)",
+      "Read(./data/houjin.db*)",
       "Read(./docs/プロンプトログ*.ignore.md)"
     ]
   }
