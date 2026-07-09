@@ -331,15 +331,37 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     'ユーザーがそのまま送信できる短い日本語の質問文として最大3件挙げる（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」）。',
     '図の適用と無関係な提案や、このアシスタントが答えられない提案（年度比較等の未実装機能）は挙げないこと。',
   ];
-  if (currentQuery && Object.keys(currentQuery).length > 0) {
+  const compactQuery = currentQuery ? compactValue(currentQuery) : undefined;
+  if (compactQuery !== undefined) {
     lines.push(
       '',
       '## 現在ページに適用中の条件',
       '「今の条件に追加して」「さらに絞って」のような差分指示はこの条件をベースに組み立てる:',
-      JSON.stringify(currentQuery),
+      JSON.stringify(compactQuery),
     );
   }
   return lines.join('\n');
+}
+
+/**
+ * プロンプト埋め込み用に null / undefined / 空オブジェクト・空配列を再帰的に除去する。
+ * URL復元由来の currentQuery は未指定フィールドを null で持つことがあり（例: view.pin の
+ * projectId: null）、null を含む JSON をシステムプロンプトに埋め込むと一部プロバイダ
+ * （hy3:free/Novita）で応答生成が壊れる事象が再現したため、意味のある値だけを渡す。
+ */
+function compactValue(value: unknown): unknown {
+  if (value === null || value === undefined) return undefined;
+  if (Array.isArray(value)) {
+    const items = value.map(compactValue).filter(v => v !== undefined);
+    return items.length > 0 ? items : undefined;
+  }
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .map(([k, v]) => [k, compactValue(v)] as const)
+      .filter(([, v]) => v !== undefined);
+    return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+  }
+  return value;
 }
 
 // ── ツール実行 ──
