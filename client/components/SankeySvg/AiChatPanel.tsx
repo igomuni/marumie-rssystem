@@ -49,8 +49,8 @@ interface AiChatPanelProps {
 
 const EXAMPLE_PROMPTS = [
   '再エネ関連で予算100億円以上の事業だけ見たい',
-  '経済産業省と環境省の事業に絞って',
-  'NTTデータへの支出がある事業を見たい',
+  'NTTデータはどの事業から受注している？',
+  'マイナンバー関連は去年から増えた？',
 ];
 
 const PANEL_Z_INDEX = 210; // 右上の設定ボタン(200)より前面。ScoreDetailDialog は body へ portal されるため影響しない
@@ -111,8 +111,8 @@ export function AiChatPanel({
       <button
         data-pan-disabled="true"
         onClick={onToggle}
-        title="AIフィルターアシスタントを開く"
-        aria-label="AIフィルターアシスタントを開く"
+        title="AIアシスタントを開く"
+        aria-label="AIアシスタントを開く"
         style={{
           position: 'fixed', right: 0, top: '50%', transform: 'translateY(-50%)',
           width: 28, height: 64, zIndex: PANEL_Z_INDEX,
@@ -170,7 +170,7 @@ export function AiChatPanel({
       {/* ヘッダ */}
       <div style={{ padding: '10px 12px', borderBottom: '1px solid #f0f0f0', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: '#333', flex: 1, minWidth: 0 }}>
-          AIフィルターアシスタント
+          AIアシスタント
         </span>
         {messages.length > 0 && (
           <button
@@ -200,8 +200,9 @@ export function AiChatPanel({
         {messages.length === 0 && (
           <div style={{ fontSize: 12, color: '#777', lineHeight: 1.7 }}>
             <p style={{ margin: '0 0 8px' }}>
-              見たい条件を自然な言葉で伝えると、AIがフィルタ条件を組み立てます。
-              結果は件数を確認してから図に反映できます。
+              見たい条件やデータへの質問を自然な言葉でどうぞ。
+              図の絞り込み条件の組み立てのほか、金額・品質スコア・再委託・年度比較の質問に答えます。
+              絞り込みは件数を確認してから図に反映できます。
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {EXAMPLE_PROMPTS.map(p => (
