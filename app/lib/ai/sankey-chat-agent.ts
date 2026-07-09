@@ -11,7 +11,7 @@
  */
 import type { GraphData } from '@/types/sankey-svg';
 import type { SankeyQuery } from '@/types/sankey-query';
-import type { SankeyChatMessage, SankeyChatContext, SankeyChatResult } from '@/types/sankey-ai-chat';
+import type { SankeyChatMessage, SankeyChatContext, SankeyChatResult, SankeyChatProgressEvent } from '@/types/sankey-ai-chat';
 import {
   resolveSankeyQuery,
   buildFilterExcludedIds,
@@ -678,12 +678,39 @@ function executeCompareYears(queryInput: SankeyQuery | undefined, baseYear: Supp
   return clampPayload(payload, []);
 }
 
+// ── 進行イベント（onProgress は省略可能。コールバックの例外はループを壊さない） ──
+
+/** onProgress を安全に呼ぶ（例外は握りつぶす。ループの継続を優先する） */
+function emitProgress(onProgress: ((ev: SankeyChatProgressEvent) => void) | undefined, ev: SankeyChatProgressEvent): void {
+  if (!onProgress) return;
+  try {
+    onProgress(ev);
+  } catch {
+    // 進行通知の失敗（SSE切断等）でエージェントループを止めない
+  }
+}
+
+/** ツール実行直後の進行イベントを組み立てる（結果要約は判別可能な範囲でベストエフォート） */
+function buildToolProgressEvent(tool: string, payload: unknown): SankeyChatProgressEvent {
+  if ((tool === 'run_sankey_query' || tool === 'submit_result') && payload && typeof payload === 'object') {
+    const summary = (payload as { summary?: { projects?: { count?: number } } }).summary;
+    const matched = summary?.projects?.count;
+    if (typeof matched === 'number') return { kind: 'tool', tool, matched };
+  }
+  if ((tool === 'search_projects' || tool === 'search_recipients') && payload && typeof payload === 'object') {
+    const hits = (payload as { totalHits?: number }).totalHits;
+    if (typeof hits === 'number') return { kind: 'tool', tool, hits };
+  }
+  return { kind: 'tool', tool };
+}
+
 // ── エージェントループ本体 ──
 
 export async function runSankeyChatAgent(
   chatMessages: SankeyChatMessage[],
   context: SankeyChatContext,
   callLlm: LlmCaller,
+  onProgress?: (ev: SankeyChatProgressEvent) => void,
 ): Promise<SankeyChatAgentResult> {
   const year: SupportedYear = context.year ?? SANKEY_QUERY_DEFAULTS.year;
   const graph = loadSankeyGraph(year);
@@ -698,6 +725,7 @@ export async function runSankeyChatAgent(
 
   let toolCalls = 0;
   for (let round = 0; round < MAX_LLM_ROUNDS; round++) {
+    emitProgress(onProgress, { kind: 'llm_round', round: round + 1 });
     const assistant = await callLlm(messages, TOOLS);
     messages.push(assistant);
     const calls = assistant.tool_calls ?? [];
@@ -780,6 +808,7 @@ export async function runSankeyChatAgent(
                 : `${result!.summary.projects.count}事業がマッチしました。`;
               const interpretation = clampInterpretation(args.interpretation);
               const suggestions = clampSuggestions(args.suggestions);
+              emitProgress(onProgress, buildToolProgressEvent('submit_result', { summary: result!.summary }));
               return {
                 message,
                 result: interpretation ? { ...result!, interpretation } : result!,
@@ -793,6 +822,7 @@ export async function runSankeyChatAgent(
         }
       }
 
+      emitProgress(onProgress, buildToolProgressEvent(call.function.name, payload));
       messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(payload) });
     }
   }

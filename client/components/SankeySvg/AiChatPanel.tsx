@@ -8,7 +8,7 @@
  * AI の結果は自動適用せず、結果カードの「この条件で図を表示」で明示適用する。
  */
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
-import type { SankeyChatResult } from '@/types/sankey-ai-chat';
+import type { SankeyChatProgressEvent, SankeyChatResult } from '@/types/sankey-ai-chat';
 import { formatYen } from '@/app/lib/sankey-svg-constants';
 import { CHAT_MARKDOWN_STYLES } from './chat-markdown-styles';
 
@@ -34,6 +34,8 @@ interface AiChatPanelProps {
   onToggle: () => void;
   messages: AiChatUiMessage[];
   sending: boolean;
+  /** ストリーミング応答中の最新進行イベント（stream:true時のみ）。日本語ラベルへの変換はこのファイルで行う */
+  progress?: SankeyChatProgressEvent | null;
   onSend: (text: string) => void;
   onApplyResult: (result: SankeyChatResult) => void;
   onClear: () => void;
@@ -53,8 +55,32 @@ const EXAMPLE_PROMPTS = [
 
 const PANEL_Z_INDEX = 210; // 右上の設定ボタン(200)より前面。ScoreDetailDialog は body へ portal されるため影響しない
 
+/**
+ * 送信中インジケータの日本語ラベル。progress イベント（構造化データ）を人間向け文言へ変換する。
+ * ラベルの対応表は設計ドキュメント（docs/tasks/20260710_0633_...）のとおり
+ */
+function progressLabel(progress: SankeyChatProgressEvent | null | undefined): string {
+  if (!progress) return '条件を組み立てています…';
+  switch (progress.kind) {
+    case 'llm_round':
+      return progress.round <= 1 ? '要求を解釈しています…' : `結果を確認しています…（${progress.round}回目）`;
+    case 'tool':
+      if (progress.tool === 'run_sankey_query' && typeof progress.matched === 'number') {
+        return `クエリを実行しました — ${progress.matched.toLocaleString()}事業がマッチ`;
+      }
+      if (progress.tool === 'search_projects' || progress.tool === 'search_recipients') {
+        return '語彙を検索しています…';
+      }
+      return '詳細データを取得しています…';
+    case 'retry':
+      return '混雑のため待機して再試行します…';
+    default:
+      return '条件を組み立てています…';
+  }
+}
+
 export function AiChatPanel({
-  open, onToggle, messages, sending, onSend, onApplyResult, onClear,
+  open, onToggle, messages, sending, progress, onSend, onApplyResult, onClear,
   width, isCompactWidth, onResizeStart, isResizing, onResetWidth,
 }: AiChatPanelProps) {
   const [input, setInput] = useState('');
@@ -255,7 +281,7 @@ export function AiChatPanel({
               border: '2px solid #d0d0d0', borderTopColor: '#1a73e8',
               animation: 'ai-chat-spin 0.9s linear infinite', display: 'inline-block',
             }} />
-            条件を組み立てています…
+            {progressLabel(progress)}
             <style>{'@keyframes ai-chat-spin { to { transform: rotate(360deg); } }'}</style>
           </div>
         )}
