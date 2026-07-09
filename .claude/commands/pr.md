@@ -38,9 +38,9 @@ description: フィーチャーブランチを作成してPRを出す
    - `docs: ドキュメントのみの変更`
    - `refactor: リファクタリング`
 
-6. **docs/tasks 索引の同期**: `git diff main --name-only --diff-filter=A -- docs/tasks/` で新規追加された task doc を検出し、`docs/tasks/INDEX.md` に対応する行がなければ追記してコミットに含める（新しいものを上・30字前後の要約・固有名詞優先。索引の書式は INDEX.md 冒頭を参照）。
+6. **コンフリクト確認**: `git fetch origin` して、mainとのマージ可能性を確認する。コンフリクトがある場合はユーザーに報告し、続行するか確認を取る。
 
-7. **コンフリクト確認**: `git fetch origin` して、mainとのマージ可能性を確認する。コンフリクトがある場合はユーザーに報告し、続行するか確認を取る。
+7. **docs/tasks 索引の同期**: `git diff origin/main --name-only --diff-filter=A -- docs/tasks/` で新規追加された task doc を検出し、`docs/tasks/INDEX.md` に対応する行がなければ追記してコミットに含める（新しいものを上・30字前後の要約・固有名詞優先。索引の書式は INDEX.md 冒頭を参照）。手順6の fetch 後に実行すること（古いローカル main と比較すると追加分を見落とすため）。
 
 8. **プッシュ**: リモートにプッシュする（`git push -u origin <branch-name>`）
 
