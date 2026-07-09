@@ -7,17 +7,15 @@
  * page.tsx がコールバック経由で行う（client/components は直接APIコール禁止）。
  * AI の結果は自動適用せず、結果カードの「この条件で図を表示」で明示適用する。
  */
-import { useEffect, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import type { SankeyChatResult } from '@/types/sankey-ai-chat';
 import { formatYen } from '@/app/lib/sankey-svg-constants';
+import { CHAT_MARKDOWN_STYLES } from './chat-markdown-styles';
 
 // Markdown 描画（react-markdown + remark-gfm）は初回メッセージ表示時に遅延ロードし、
-// ページ初期バンドルに含めない。ロード完了までは素のテキストで表示する
-const ChatMarkdown = dynamic(() => import('./ChatMarkdown'), {
-  ssr: false,
-  loading: () => null,
-});
+// ページ初期バンドルに含めない。ロード完了までは Suspense fallback で本文を平文表示する
+// （メッセージはユーザー操作後にのみ存在するため、この lazy が SSR で評価されることはない）
+const ChatMarkdown = lazy(() => import('./ChatMarkdown'));
 
 /** ページが保持するチャット表示用メッセージ（API の履歴形式 + 表示用の付加情報） */
 export interface AiChatUiMessage {
@@ -168,6 +166,9 @@ export function AiChatPanel({
         </button>
       </div>
 
+      {/* Markdown 描画用スタイル（メッセージごとではなくパネルで1回だけ描画する） */}
+      <style>{CHAT_MARKDOWN_STYLES}</style>
+
       {/* メッセージリスト */}
       <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: '12px 12px 4px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {messages.length === 0 && (
@@ -202,7 +203,11 @@ export function AiChatPanel({
               wordBreak: 'break-word',
             }}>
               {m.role === 'assistant' && !m.isError
-                ? <ChatMarkdown text={m.content} />
+                ? (
+                  <Suspense fallback={<span style={{ whiteSpace: 'pre-wrap' }}>{m.content}</span>}>
+                    <ChatMarkdown text={m.content} />
+                  </Suspense>
+                )
                 : m.content}
             </div>
             {m.result && (
