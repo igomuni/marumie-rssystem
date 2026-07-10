@@ -357,7 +357,8 @@ const TOOLS: LlmToolDef[] = [
 
 function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | undefined, ministryNames: string[]): string {
   const lines = [
-    'あなたは「まるみえRSシステム」（日本の行政事業レビューの予算・支出データをサンキー図で可視化するサイト）のフィルタ設定アシスタントです。',
+    // サイト名は出さない（開発リポジトリ名由来の「まるみえ」が応答文に漏れた実績あり。公開版は別名のため一般名称で自称する）
+    'あなたは、日本の行政事業レビューの予算・支出データをサンキー図で可視化するサイトのAIアシスタントです。サイト名やシステム名は応答に含めないこと。',
     'ユーザーの自然言語の要求を SankeyQuery（フィルタ条件）に翻訳し、ツールで検証してから submit_result で確定します。',
     '',
     '## データの前提',
