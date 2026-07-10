@@ -42,5 +42,9 @@
   {
     "id": "drill-compare-years",
     "turns": ["マイナンバー関連の事業は去年から増えた？"]
+  },
+  {
+    "id": "drill-spending-search",
+    "turns": ["広報にいくら使われている？"]
   }
 ]

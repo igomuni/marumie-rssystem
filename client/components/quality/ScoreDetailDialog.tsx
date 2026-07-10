@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
-import type { RecipientRow } from '@/app/api/quality-scores/recipients/route';
+import type { RecipientRow } from '@/app/lib/api/quality-recipients-loader';
 import type { ProjectDetail } from '@/types/project-details';
 import { externalCorporateLinks } from '@/app/lib/api/links';
 import { scoreColor, formatAmount, pct } from '@/client/components/quality/score-format';

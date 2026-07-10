@@ -194,6 +194,21 @@
 
 ---
 
+## GET /api/search/spending
+
+支出行の使途テキスト（`role`=事業を行う上での役割、`cc`=契約概要）の横断検索。「広報にいくら使われている？」「システム改修を受注しているのは誰？」のような使途起点の質問に使う。
+
+**クエリパラメータ**: `q`（必須・2文字以上、未満は400）、`year`、`limit`（デフォルト20・上限100）、`offset`
+
+**レスポンス**:
+
+- `aggregate`（マッチ全体の集計。ページングに依存しない）: `hitCount`・`projectCount`・`amountDirect`（直接支出=d0の合計）・`amountSubcontract`（再委託=d>0の合計）・`topProjects`（事業別合計の上位10件、pid・事業名・府省庁・金額）
+- `items[]`（ページング対象のマッチ行）: pid・事業名・支出先名・法人番号・金額・`depth`（委託深度）・`matchedIn`（`'role' | 'cc'`、両方マッチは role 優先）・`excerpt`（マッチ位置の前後を含む約120字の抜粋）・`links`
+- `amountDirect` と `amountSubcontract` の単純合算は資金の通過分の二重計上になるため、常に分離して扱うこと（`metadata.notes` に明記）
+- 検索対象は role / cc のみ（`chain` は経路情報でノイズが多いため対象外）
+
+---
+
 ## GET /api/recipients/[key]
 
 支出先の逆引き詳細（府省庁横断の受注構造）。
