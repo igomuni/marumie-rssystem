@@ -808,6 +808,9 @@ export async function runSankeyChatAgent(
               const q = typeof args.q === 'string' ? args.q.trim() : '';
               if (!q) {
                 payload = { error: 'q（検索キーワード）を指定してください' };
+              } else if (call.function.name === 'search_spending' && q.length < 2) {
+                // API route（/api/search/spending）と同じ下限。1文字は総当たりに近くなるため弾く
+                payload = { error: 'search_spending の q は2文字以上で指定してください' };
               } else if (call.function.name === 'search_projects') {
                 const scope: ProjectSearchScope = args.scope === 'details' ? 'details' : 'name';
                 payload = executeSearchProjects(year, q, scope);

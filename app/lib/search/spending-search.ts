@@ -41,15 +41,29 @@ export interface SpendingSearchResult {
 
 const EXCERPT_RADIUS = 60;
 
-/** マッチ位置の前後（合わせて約120字）を抜き出す。マッチ位置が特定できない場合は先頭120字 */
+/**
+ * マッチ位置の前後（合わせて約120字）を抜き出す。マッチ位置が特定できない場合は先頭120字。
+ * 照合は normalizeQuery と同一規則（NFKC + 小文字化 + 空白除去）で行い、正規化文字ごとに
+ * 元テキストの位置を記録しておくことで、空白や NFKC による長さ変化があっても抜粋位置がずれない。
+ */
 function buildExcerpt(text: string, normalizedQuery: string): string {
-  const norm = text.normalize('NFKC').toLowerCase();
-  const idx = norm.indexOf(normalizedQuery);
-  if (idx === -1) {
+  const normChars: string[] = [];
+  const origIndex: number[] = [];
+  for (let i = 0; i < text.length; i++) {
+    for (const c of text[i].normalize('NFKC').toLowerCase()) {
+      if (/\s/.test(c)) continue;
+      normChars.push(c);
+      origIndex.push(i);
+    }
+  }
+  const idx = normChars.join('').indexOf(normalizedQuery);
+  if (idx === -1 || origIndex.length === 0) {
     return text.length <= 120 ? text : `${text.slice(0, 120)}…`;
   }
-  const start = Math.max(0, idx - EXCERPT_RADIUS);
-  const end = Math.min(text.length, idx + normalizedQuery.length + EXCERPT_RADIUS);
+  const matchStart = origIndex[idx];
+  const matchEnd = origIndex[Math.min(idx + normalizedQuery.length - 1, origIndex.length - 1)] + 1;
+  const start = Math.max(0, matchStart - EXCERPT_RADIUS);
+  const end = Math.min(text.length, matchEnd + EXCERPT_RADIUS);
   const prefix = start > 0 ? '…' : '';
   const suffix = end < text.length ? '…' : '';
   return `${prefix}${text.slice(start, end)}${suffix}`;
