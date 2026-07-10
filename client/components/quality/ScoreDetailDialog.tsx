@@ -25,20 +25,23 @@ export function ScoreDetailDialog({
   recipients,
   recipientsError,
   projectInfo,
+  year,
 }: {
   item: QualityScoreItem;
   onClose: () => void;
   recipients: RecipientRow[] | null;
   recipientsError: boolean;
   projectInfo: ProjectDetail | null | undefined;
+  /** 再委託構造ページ（/subcontracts/[pid]）へのリンク用年度 */
+  year: string;
 }) {
   const [recipientSearch, setRecipientSearch] = useState('');
   const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a2' | 'pct'>('chain');
   const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
   const [showAxisDetail, setShowAxisDetail] = useState(false);
   const [showProjectInfo, setShowProjectInfo] = useState(true);
-  const COL_MAX_WIDTHS = [undefined, 70, 130, 60, 50, undefined, undefined];
-  const [colWidths, setColWidths] = useState<number[]>([200, 70, 120, 60, 50, 200, 200]);
+  const COL_MAX_WIDTHS = [undefined, 60, 70, 130, 60, 50, undefined, undefined];
+  const [colWidths, setColWidths] = useState<number[]>([200, 48, 70, 120, 60, 50, 200, 200]);
   const resizingCol = useRef<{ index: number; startX: number; startW: number } | null>(null);
 
   useEffect(() => {
@@ -146,6 +149,14 @@ export function ScoreDetailDialog({
             <div className="text-sm font-bold text-gray-900 dark:text-white leading-snug">{item.name}</div>
             <div className="flex items-center gap-1.5 flex-wrap mt-1 text-[10px] text-gray-500 dark:text-gray-400">
               <span className="font-mono bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded">PID {item.pid}</span>
+              <a
+                href={`/subcontracts/${item.pid}?year=${year}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                title="この事業の再委託構造（ブロック図）を新しいタブで開く"
+                onClick={e => e.stopPropagation()}
+              >再委託構造 ↗</a>
               {[item.ministry, item.bureau, item.division, item.section, item.office, item.team, item.unit].filter(Boolean).map((org, i) => (
                 <span key={i}>{i > 0 ? '' : ''}<span className={i === 0 ? 'font-medium' : ''}>{org}</span>{i < [item.ministry, item.bureau, item.division, item.section, item.office, item.team, item.unit].filter(Boolean).length - 1 ? <span className="text-gray-300 dark:text-gray-600 mx-0.5">›</span> : null}</span>
               ))}
@@ -392,7 +403,7 @@ export function ScoreDetailDialog({
           )}
           {recipients && recipients.length > 0 && (
             <div className="overflow-auto flex-1">
-              <table className="w-full min-w-[720px] text-xs table-fixed">
+              <table className="w-full min-w-[770px] text-xs table-fixed">
                 <colgroup>
                   {colWidths.map((w, i) => <col key={i} style={{ width: w, maxWidth: COL_MAX_WIDTHS[i] }} />)}
                 </colgroup>
@@ -400,6 +411,7 @@ export function ScoreDetailDialog({
                   <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                     {([
                       { label: '支出先名', align: 'left', sort: null, title: undefined },
+                      { label: 'ブロック', align: 'center', sort: 'b' as const, title: 'ブロック記号（A/B/C…）でソート' },
                       { label: '委託チェーン', align: 'left', sort: 'chain' as const, title: '委託チェーン（A→B→C）でソート' },
                       { label: '法人番号', align: 'center', sort: 'c' as const, title: '法人番号(Corporate Number)。記入有無でソート。⚠は形式不正（誤記載の疑い）' },
                       { label: '金額', align: 'right', sort: 'a2' as const, title: '個別支出額（CSVの「金額」列）' },
@@ -434,6 +446,7 @@ export function ScoreDetailDialog({
                             {row.o && <span className="shrink-0 inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" title="不透明キーワードにマッチ">不透明</span>}
                           </div>
                         </td>
+                        <td className="px-2 py-1.5 text-center font-mono text-gray-600 dark:text-gray-300">{row.b || '-'}</td>
                         <td className="px-3 py-1.5 font-mono text-gray-500 dark:text-gray-400 truncate" title={row.chain}>
                           {row.chain
                             ? (row.chain.startsWith('組織→') ? row.chain.slice('組織→'.length) : row.chain)

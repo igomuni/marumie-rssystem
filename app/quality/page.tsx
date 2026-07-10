@@ -214,6 +214,7 @@ export default function QualityPage() {
           recipients={dialogData.recipients}
           recipientsError={dialogData.recipientsError}
           projectInfo={dialogData.projectInfo}
+          year={year}
         />
       )}
       {/* Header */}

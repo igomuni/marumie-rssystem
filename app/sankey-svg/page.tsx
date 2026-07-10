@@ -4882,6 +4882,7 @@ export default function RealDataSankeyPage() {
           recipients={scoreDialogData.recipients}
           recipientsError={scoreDialogData.recipientsError}
           projectInfo={scoreDialogData.projectInfo}
+          year={year}
         />,
         document.body,
       )}
