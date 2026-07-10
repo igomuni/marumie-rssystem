@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { RecipientRow } from '@/app/api/quality-scores/recipients/route';
+import type { RecipientRow } from '@/app/lib/api/quality-recipients-loader';
 import type { ProjectDetail } from '@/types/project-details';
 
 /**

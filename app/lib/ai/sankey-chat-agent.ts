@@ -24,12 +24,14 @@ import {
 import type { SankeyQuerySummary } from '@/app/lib/sankey-query';
 import { searchProjects, type ProjectSearchScope } from '@/app/lib/search/project-search';
 import { searchRecipients } from '@/app/lib/search/recipient-search';
+import { searchSpending } from '@/app/lib/search/spending-search';
 import { loadSankeyGraph } from '@/app/lib/api/sankey-graph-loader';
 import { loadQualityScores, getQualityScore, toQualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { SupportedYear } from '@/app/lib/api/api-notes';
 import { loadRecipientIndex, resolveRecipient } from '@/app/lib/api/recipient-index-loader';
 import { getProjectDetail, loadProjectDetails } from '@/app/lib/api/project-details-loader';
 import { loadSubcontracts } from '@/app/lib/api/subcontracts-loader';
+import { loadSpendingSearchRows } from '@/app/lib/api/quality-recipients-loader';
 
 // ── OpenAI 互換の LLM メッセージ・ツール型（OpenRouter の chat.completions と1対1） ──
 
@@ -212,6 +214,19 @@ const TOOLS: LlmToolDef[] = [
   {
     type: 'function',
     function: {
+      name: 'search_spending',
+      description:
+        '支出の使途テキスト（role=事業を行う上での役割、cc=契約概要）を横断検索する。「広報にいくら使われている？」「システム改修を受注しているのは誰？」のような使途起点の質問に使う。使途はフィルタとして表現できないため、この種の質問はフィルタを試行錯誤せずこのツールを使うこと。金額集計は直接支出（amountDirect）と再委託（amountSubcontract）を分けて読み、単純合算しないこと（再委託分は通過資金の重複を含みうる）。',
+      parameters: {
+        type: 'object',
+        properties: { q: { type: 'string', description: '検索キーワード（2文字以上）' } },
+        required: ['q'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'get_project_detail',
       description:
         '事業の詳細（品質スコア・予算執行額・目的/現状課題/概要等のレビューシート記載内容）をpid指定で取得する。ユーザーが事業名で聞いてきた場合は先に search_projects でpidを特定すること。',
@@ -339,8 +354,9 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     '3. 妥当な結果になったら submit_result で確定する（message に何をどう絞って何件マッチしたかを書く）',
     '- 表示件数や並び順の要望（「上位5件だけ」等）は view で表現できる。ユーザーが言及しない限り view は省略する',
     '',
-    '### B. データへの質問（金額・内訳・品質スコア・再委託構造・年度比較等を知りたい）',
-    '- get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain / compare_years で調べ、結果をテキストで日本語回答する。submit_result は呼ばない（図の条件は変わらない）',
+    '### B. データへの質問（金額・内訳・品質スコア・再委託構造・年度比較・使途等を知りたい）',
+    '- get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain / compare_years / search_spending で調べ、結果をテキストで日本語回答する。submit_result は呼ばない（図の条件は変わらない）',
+    '- 「〜にいくら使われている？」「〜を受注しているのは誰？」のような使途起点の質問は search_spending を使う。回答時は amountDirect（直接支出）と amountSubcontract（再委託）を必ず分けて述べる',
     '- 「去年から増えた?」「年度でどう変わった?」型の質問は compare_years を使う。回答時は「事業年度Nのデータ=予算年度N-1の実績」の注記を必ず添える',
     '- run_sankey_query の結果にある summary.recipients.topShare1 / topShare3 は支出先集中度（上位1社/3社への集中割合）。「集中度が高い事業を探して」型の質問で使える（compare_years の要約には含まれない）',
     '- 数値・事実は必ずツール応答から転記する。ツールで確認していない数値を推測で書かない',
@@ -350,7 +366,7 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     '',
     '### 共通',
     '- 要求がこのデータのフィルタ条件にもデータ質問にも該当しない場合（雑談・データにない切り口等）は、ツールを呼ばずに、解釈できなかった旨と指定できる条件・質問の例を日本語のテキストで返す',
-    '- **フィルタで表現できない絞り込み条件に注意**: SankeyQuery のフィルタは事業名・支出先名・府省庁・金額範囲・会計区分のみ。「再委託がある事業だけ」「品質スコアが低い事業だけ」「使途が広報の事業だけ」のような条件はフィルタとして表現できない。この場合はツールで試行錯誤せず、フィルタにできない旨と代替（個別事業なら get_subcontract_chain 等で調べられること）をすぐテキストで案内する',
+    '- **フィルタで表現できない絞り込み条件に注意**: SankeyQuery のフィルタは事業名・支出先名・府省庁・金額範囲・会計区分のみ。「再委託がある事業だけ」「品質スコアが低い事業だけ」のような条件はフィルタとして表現できない。この場合はツールで試行錯誤せず、フィルタにできない旨と代替（個別事業なら get_subcontract_chain 等で調べられること）をすぐテキストで案内する。ただし「使途が広報の事業だけ」のような使途起点の質問はフィルタ化はできないが search_spending で横断検索できるため、そちらに誘導する',
     '- 条件が曖昧でも合理的な解釈が1つ選べるなら聞き返さずに進める（フィルタはユーザーが適用前に件数を確認できる）',
     '- 応答はすべて日本語で書く',
     '',
@@ -609,6 +625,37 @@ function executeSearchProjects(year: SupportedYear, q: string, scope: ProjectSea
   };
 }
 
+function executeSearchSpending(year: SupportedYear, q: string): unknown {
+  const rows = loadSpendingSearchRows(year);
+  const { aggregate, totalHits, items } = searchSpending(rows, q, { limit: SEARCH_LIMIT, offset: 0 });
+  const payload = {
+    totalHits,
+    aggregate: {
+      hitCount: aggregate.hitCount,
+      projectCount: aggregate.projectCount,
+      amountDirect: aggregate.amountDirect,
+      amountSubcontract: aggregate.amountSubcontract,
+      topProjects: aggregate.topProjects.map(p => ({
+        pid: p.pid,
+        name: getQualityScore(year, p.pid)?.name ?? null,
+        ministry: getQualityScore(year, p.pid)?.ministry ?? null,
+        amountDirect: p.amountDirect,
+        amountSubcontract: p.amountSubcontract,
+      })),
+    },
+    items: items.map(({ row, matchedIn, excerpt }) => ({
+      pid: row.pid,
+      name: getQualityScore(year, row.pid)?.name ?? null,
+      recipientName: row.n,
+      amount: row.a2,
+      depth: row.d,
+      matchedIn,
+      excerpt,
+    })),
+  };
+  return clampPayload(payload, ['items']);
+}
+
 function executeSearchRecipients(year: SupportedYear, q: string): unknown {
   const index = loadRecipientIndex(year);
   const { totalHits, items } = searchRecipients(index.recipients, q, SEARCH_LIMIT);
@@ -697,7 +744,7 @@ function buildToolProgressEvent(tool: string, payload: unknown): SankeyChatProgr
     const matched = summary?.projects?.count;
     if (typeof matched === 'number') return { kind: 'tool', tool, matched };
   }
-  if ((tool === 'search_projects' || tool === 'search_recipients') && payload && typeof payload === 'object') {
+  if ((tool === 'search_projects' || tool === 'search_recipients' || tool === 'search_spending') && payload && typeof payload === 'object') {
     const hits = (payload as { totalHits?: number }).totalHits;
     if (typeof hits === 'number') return { kind: 'tool', tool, hits };
   }
@@ -756,15 +803,21 @@ export async function runSankeyChatAgent(
               break;
             }
             case 'search_projects':
-            case 'search_recipients': {
+            case 'search_recipients':
+            case 'search_spending': {
               const q = typeof args.q === 'string' ? args.q.trim() : '';
               if (!q) {
                 payload = { error: 'q（検索キーワード）を指定してください' };
+              } else if (call.function.name === 'search_spending' && q.length < 2) {
+                // API route（/api/search/spending）と同じ下限。1文字は総当たりに近くなるため弾く
+                payload = { error: 'search_spending の q は2文字以上で指定してください' };
               } else if (call.function.name === 'search_projects') {
                 const scope: ProjectSearchScope = args.scope === 'details' ? 'details' : 'name';
                 payload = executeSearchProjects(year, q, scope);
-              } else {
+              } else if (call.function.name === 'search_recipients') {
                 payload = executeSearchRecipients(year, q);
+              } else {
+                payload = executeSearchSpending(year, q);
               }
               break;
             }
