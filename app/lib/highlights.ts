@@ -235,12 +235,11 @@ function computeConcentration(
       topShare1: round4(topAmount / s.total),
     });
   }
-  const population = candidates.length > 0
-    ? [...stats.entries()].filter(([pid]) => {
-        const q = qualityByPid.get(String(pid));
-        return q != null && (q.spendTotal ?? 0) >= HIGHLIGHTS_MIN_SPEND_YEN;
-      }).length
-    : 0;
+  // 母集団は「候補が1件でもあるか」と無関係に常に数える（computeOtherRatio と同じ扱い）
+  const population = [...stats.entries()].filter(([pid]) => {
+    const q = qualityByPid.get(String(pid));
+    return q != null && (q.spendTotal ?? 0) >= HIGHLIGHTS_MIN_SPEND_YEN;
+  }).length;
   candidates.sort((a, b) => b.topShare1 - a.topShare1 || b.topRecipientAmount - a.topRecipientAmount);
   return { entries: candidates.slice(0, TOP_N), population };
 }
