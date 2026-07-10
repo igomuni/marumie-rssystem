@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense, type CSSProperties } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type {
@@ -159,6 +159,15 @@ const PANEL_META_FONT_PX = 11;
 const CARD_HEADER_H = 46;
 const CARD_RADIUS = 6;
 const CARD_BORDER_W = 1;
+// サンキー（app/sankey-svg/page.tsx）のホバー流儀に合わせた定数
+const HOVER_ENTER_DELAY_MS = 220;
+const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
+const CLAMP_2_LINES: CSSProperties = {
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+} as CSSProperties;
 
 interface ProjectQualityOrg {
   pid: string;
@@ -175,22 +184,6 @@ const ORG_LEVEL_LABELS = ['局庁', '部', '課', '室', '班', '係'];
 function percentOf(amount: number, total: number): string {
   if (total <= 0) return '—';
   return `${((amount / total) * 100).toFixed(1)}%`;
-}
-
-function truncateChars(value: string, maxChars: number): string {
-  const chars = Array.from(value);
-  if (chars.length <= maxChars) return value;
-  return `${chars.slice(0, Math.max(1, maxChars - 1)).join('')}…`;
-}
-
-function labelLines(value: string, maxChars: number, charsPerLine: number): string[] {
-  const trimmed = truncateChars(value, maxChars);
-  const chars = Array.from(trimmed);
-  const lines: string[] = [];
-  for (let i = 0; i < chars.length && lines.length < 2; i += charsPerLine) {
-    lines.push(chars.slice(i, i + charsPerLine).join(''));
-  }
-  return lines;
 }
 
 function verticalBezierPath(x1: number, y1: number, x2: number, y2: number): string {
@@ -426,7 +419,7 @@ function SidePane({
                 flex: 1,
                 background: isActive ? '#f1f5f9' : '#fff',
                 border: 'none',
-                borderBottom: isActive ? '2px solid #6366f1' : '2px solid transparent',
+                borderBottom: isActive ? '2px solid #4a90d9' : '2px solid transparent',
                 padding: '10px 4px 8px',
                 fontSize: 12,
                 fontWeight: 700,
@@ -784,7 +777,7 @@ function FlowListRow({
           <button
             onClick={() => onSelectBlock(sourceBlock)}
             title={sourceLabel}
-            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#2563eb', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           >
             {sourceLabel}
           </button>
@@ -798,7 +791,7 @@ function FlowListRow({
           <button
             onClick={() => onSelectBlock(targetBlock)}
             title={targetLabel}
-            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#2563eb', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           >
             {targetLabel}
           </button>
@@ -904,8 +897,45 @@ function SubcontractDetailPageInner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<BlockNode | null>(null);
-  const [hoveredNode, setHoveredNode] = useState<HoveredNode | null>(null);
+  // ホバーはサンキーと同じ流儀: 進入は遅延、離脱は即時。パン/ズーム直後は抑制する
+  const [hoveredNodeRaw, setHoveredNodeRaw] = useState<HoveredNode | null>(null);
+  const [hoveredNodeStable, setHoveredNodeStable] = useState<HoveredNode | null>(null);
+  const hoverEnterTimerRef = useRef<number | null>(null);
+  const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
+  const hoverSuppressTimerRef = useRef<number | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [activeTab, setActiveTab] = useState<PaneTab>('flow');
+
+  const beginHoverSuppressCooldown = useCallback(() => {
+    setIsHoverSuppressed(true);
+    if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
+    hoverSuppressTimerRef.current = window.setTimeout(() => setIsHoverSuppressed(false), HOVER_SUPPRESS_AFTER_INTERACTION_MS);
+  }, []);
+
+  useEffect(() => {
+    if (hoverEnterTimerRef.current) {
+      window.clearTimeout(hoverEnterTimerRef.current);
+      hoverEnterTimerRef.current = null;
+    }
+    // 離脱は即時、進入は遅延（マウス通過時の意図しないポップアップ抑制）
+    if (hoveredNodeRaw === null) {
+      setHoveredNodeStable(null);
+      return;
+    }
+    hoverEnterTimerRef.current = window.setTimeout(() => {
+      setHoveredNodeStable(hoveredNodeRaw);
+    }, HOVER_ENTER_DELAY_MS);
+    return () => {
+      if (hoverEnterTimerRef.current) {
+        window.clearTimeout(hoverEnterTimerRef.current);
+        hoverEnterTimerRef.current = null;
+      }
+    };
+  }, [hoveredNodeRaw]);
+
+  useEffect(() => () => {
+    if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
+  }, []);
 
   // ノードクリック: 同じブロックなら解除、別ブロックなら選択 + 支出先タブへ
   const handleNodeClick = useCallback((node: BlockNode) => {
@@ -938,7 +968,7 @@ function SubcontractDetailPageInner() {
     setError(null);
     setSelectedBlock(null);
     setActiveTab('flow');
-    setHoveredNode(null);
+    setHoveredNodeRaw(null);
     setProjectDetail(null);
     setOrgChain([]);
     fetch(`/api/subcontracts/${projectId}?year=${year}`, { signal: controller.signal })
@@ -1001,6 +1031,7 @@ function SubcontractDetailPageInner() {
 
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
+    beginHoverSuppressCooldown();
     setTransform((prev) => {
       const factor = e.deltaY > 0 ? 0.9 : 1.1;
       const newScale = Math.min(10, Math.max(0.1, prev.scale * factor));
@@ -1014,7 +1045,7 @@ function SubcontractDetailPageInner() {
         y: cy - (cy - prev.y) * (newScale / prev.scale),
       };
     });
-  }, []);
+  }, [beginHoverSuppressCooldown]);
 
   useEffect(() => {
     if (!graph) return; // SVGがレンダリングされるまで待つ
@@ -1079,10 +1110,16 @@ function SubcontractDetailPageInner() {
     panStart.current = { x: e.clientX - transform.x, y: e.clientY - transform.y };
   }
   function onMouseMove(e: React.MouseEvent) {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     if (!isPanning.current) return;
+    beginHoverSuppressCooldown();
     setTransform((prev) => ({ ...prev, x: e.clientX - panStart.current.x, y: e.clientY - panStart.current.y }));
   }
-  function onMouseUp() { isPanning.current = false; }
+  function onMouseUp() {
+    if (isPanning.current) beginHoverSuppressCooldown();
+    isPanning.current = false;
+  }
 
   if (loading) {
     return (
@@ -1096,7 +1133,7 @@ function SubcontractDetailPageInner() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f9fafb', gap: 12 }}>
         <p style={{ color: '#ef4444' }}>エラー: {error ?? 'データなし'}</p>
-        <Link href="/subcontracts" style={{ color: '#2563eb', fontSize: 14 }}>← 一覧に戻る</Link>
+        <Link href="/subcontracts" style={{ color: '#4a90d9', fontSize: 14 }}>← 一覧に戻る</Link>
       </div>
     );
   }
@@ -1172,16 +1209,10 @@ function SubcontractDetailPageInner() {
               const amountLabel = target && target.totalAmount > 0 ? formatYen(target.totalAmount) : null;
               const edgeStyle = flowEdgeStyle(edge.origin);
               const edgeColor = edgeStyle.stroke;
-              const noteLabel = edge.note ? truncateChars(edge.note, 18) : null;
               const labelX = (edge.x1 + edge.x2) / 2;
               const labelY = (edge.y1 + edge.y2) / 2 - 8;
-              const labelCharCount = Math.max(
-                Array.from(amountLabel ?? '').length,
-                Array.from(noteLabel ?? '').length,
-                4,
-              );
-              const labelW = Math.min(140, Math.max(54, labelCharCount * 8 + 18));
-              const labelH = amountLabel && noteLabel ? 29 : 18;
+              const labelW = 140;
+              const labelH = amountLabel && edge.note ? 30 : 18;
               return (
                 <g key={`fwd-${i}`}>
                   <path
@@ -1191,42 +1222,40 @@ function SubcontractDetailPageInner() {
                     strokeWidth={edgeStyle.width}
                     strokeDasharray={edgeStyle.dasharray}
                   />
-                  {(amountLabel || noteLabel) && (
-                    <g style={{ pointerEvents: 'none' }}>
-                      <rect
-                        x={labelX - labelW / 2}
-                        y={labelY - labelH / 2}
-                        width={labelW}
-                        height={labelH}
-                        rx={8}
-                        fill="rgba(255,255,255,0.88)"
-                        stroke="rgba(148,163,184,0.5)"
-                      />
-                      {amountLabel && (
-                        <text
-                          x={labelX}
-                          y={labelY}
-                          textAnchor="middle"
-                          fontSize={9}
-                          fontWeight={700}
-                          fill="#475569"
-                        >
-                          {amountLabel}
-                        </text>
-                      )}
-                      {noteLabel && (
-                        <text
-                          x={labelX}
-                          y={amountLabel ? labelY + 10 : labelY}
-                          textAnchor="middle"
-                          fontSize={8}
-                          fontWeight={600}
-                          fill="#64748b"
-                        >
-                          {noteLabel}
-                        </text>
-                      )}
-                    </g>
+                  {(amountLabel || edge.note) && (
+                    <foreignObject
+                      x={labelX - labelW / 2}
+                      y={labelY - labelH / 2}
+                      width={labelW}
+                      height={labelH}
+                      style={{ pointerEvents: 'none' }}
+                    >
+                      <div style={{
+                        width: labelW,
+                        height: labelH,
+                        boxSizing: 'border-box',
+                        background: 'rgba(255,255,255,0.88)',
+                        border: '1px solid rgba(148,163,184,0.5)',
+                        borderRadius: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '1px 6px',
+                        fontFamily: 'inherit',
+                      }}>
+                        {amountLabel && (
+                          <div style={{ fontSize: 9, fontWeight: 700, color: '#475569', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {amountLabel}
+                          </div>
+                        )}
+                        {edge.note && (
+                          <div style={{ fontSize: 8, fontWeight: 600, color: '#64748b', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {edge.note}
+                          </div>
+                        )}
+                      </div>
+                    </foreignObject>
                   )}
                 </g>
               );
@@ -1250,11 +1279,10 @@ function SubcontractDetailPageInner() {
             {/* 事業コンテキストノード */}
             <g
               onClick={() => { setSelectedBlock(null); setActiveTab('flow'); }}
-              onMouseEnter={() => setHoveredNode({ kind: 'root' })}
-              onMouseLeave={() => setHoveredNode(null)}
+              onMouseEnter={() => setHoveredNodeRaw({ kind: 'root' })}
+              onMouseLeave={() => setHoveredNodeRaw(null)}
               style={{ cursor: 'pointer' }}
             >
-              <title>{[graph.projectName, graph.ministry, ...visibleOrgChain].filter(Boolean).join(' / ')}</title>
               <rect
                 x={safeLayout.root.x}
                 y={safeLayout.root.y}
@@ -1292,74 +1320,46 @@ function SubcontractDetailPageInner() {
                 vectorEffect="non-scaling-stroke"
                 style={{ pointerEvents: 'none' }}
               />
-              <text
+              <foreignObject
                 x={safeLayout.root.x + 14}
-                y={safeLayout.root.y + 18}
-                fontSize={9}
-                fontWeight={700}
-                fill="rgba(255,255,255,0.78)"
-                style={{ userSelect: 'none' }}
+                y={safeLayout.root.y + 6}
+                width={safeLayout.root.w - 28}
+                height={44}
+                style={{ pointerEvents: 'none' }}
               >
-                事業 / PID {graph.projectId}
-              </text>
-              <text
+                <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.78)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    事業 / PID {graph.projectId}
+                  </div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: '13px', marginTop: 3, ...CLAMP_2_LINES }}>
+                    {graph.projectName}
+                  </div>
+                </div>
+              </foreignObject>
+              <foreignObject
                 x={safeLayout.root.x + 14}
-                y={safeLayout.root.y + 34}
-                fontSize={11}
-                fontWeight={700}
-                fill="#fff"
-                style={{ userSelect: 'none' }}
+                y={safeLayout.root.y + 60}
+                width={safeLayout.root.w - 28}
+                height={44}
+                style={{ pointerEvents: 'none' }}
               >
-                {labelLines(graph.projectName, 32, 16).map((line, i) => (
-                  <tspan key={i} x={safeLayout.root.x + 14} dy={i === 0 ? 0 : 12}>{line}</tspan>
-                ))}
-              </text>
-              <text
-                x={safeLayout.root.x + 14}
-                y={safeLayout.root.y + 75}
-                fontSize={9}
-                fontWeight={700}
-                fill={COLOR_CONTEXT_BODY_SUBTLE}
-                style={{ userSelect: 'none' }}
-              >
-                府省庁
-              </text>
-              <text
-                x={safeLayout.root.x + 70}
-                y={safeLayout.root.y + 75}
-                fontSize={10}
-                fontWeight={700}
-                fill={COLOR_CONTEXT_BODY_TEXT}
-                style={{ userSelect: 'none' }}
-              >
-                {truncateChars(graph.ministry, 18)}
-              </text>
-              {visibleOrgChain.length > 0 && (
-                <>
-                  <text
-                    x={safeLayout.root.x + 14}
-                    y={safeLayout.root.y + 94}
-                    fontSize={9}
-                    fontWeight={700}
-                    fill={COLOR_CONTEXT_BODY_SUBTLE}
-                    style={{ userSelect: 'none' }}
-                  >
-                    担当組織
-                  </text>
-                  <text
-                    x={safeLayout.root.x + 70}
-                    y={safeLayout.root.y + 94}
-                    fontSize={9}
-                    fontWeight={600}
-                    fill={COLOR_CONTEXT_BODY_TEXT}
-                    style={{ userSelect: 'none' }}
-                  >
-                    {labelLines(visibleOrgChain.map((v, i) => `${ORG_LEVEL_LABELS[i] ?? '組織'}:${v}`).join(' / '), 34, 17).map((line, i) => (
-                      <tspan key={i} x={safeLayout.root.x + 70} dy={i === 0 ? 0 : 11}>{line}</tspan>
-                    ))}
-                  </text>
-                </>
-              )}
+                <div style={{ fontFamily: 'inherit', fontSize: 9, userSelect: 'none' }}>
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'baseline' }}>
+                    <span style={{ fontWeight: 700, color: COLOR_CONTEXT_BODY_SUBTLE, flexShrink: 0, width: 48 }}>府省庁</span>
+                    <span style={{ fontWeight: 700, fontSize: 10, color: COLOR_CONTEXT_BODY_TEXT, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {graph.ministry}
+                    </span>
+                  </div>
+                  {visibleOrgChain.length > 0 && (
+                    <div style={{ display: 'flex', gap: 4, alignItems: 'baseline', marginTop: 4 }}>
+                      <span style={{ fontWeight: 700, color: COLOR_CONTEXT_BODY_SUBTLE, flexShrink: 0, width: 48 }}>担当組織</span>
+                      <span style={{ fontWeight: 600, color: COLOR_CONTEXT_BODY_TEXT, minWidth: 0, flex: 1, lineHeight: '11px', ...CLAMP_2_LINES }}>
+                        {visibleOrgChain.map((v, i) => `${ORG_LEVEL_LABELS[i] ?? '組織'}:${v}`).join(' / ')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </foreignObject>
               <text
                 x={safeLayout.root.x + safeLayout.root.w - 14}
                 y={safeLayout.root.y + safeLayout.root.h - 24}
@@ -1384,24 +1384,17 @@ function SubcontractDetailPageInner() {
               const bodySubtleTextColor = palette.bodySubtle;
               const recipients = lb.node.recipients;
               const topRecipients = sortRecipients(recipients, 'amount-desc').slice(0, 3);
-              const clipIdBase = `subcontract-node-${String(lb.blockId).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
               const selectedStroke = palette.selectedStroke;
-              const roleLine = lb.node.role ? truncateChars(lb.node.role, 24) : '';
               const headerKindLabel = palette.badgeText;
 
               return (
                 <g
                   key={lb.blockId}
                   onClick={() => handleNodeClick(lb.node)}
-                  onMouseEnter={() => setHoveredNode({ kind: 'block', block: lb })}
-                  onMouseLeave={() => setHoveredNode(null)}
+                  onMouseEnter={() => setHoveredNodeRaw({ kind: 'block', block: lb })}
+                  onMouseLeave={() => setHoveredNodeRaw(null)}
                   style={{ cursor: 'pointer' }}
                 >
-                  <defs>
-                    <clipPath id={`${clipIdBase}-card`}>
-                      <rect x={lb.x} y={lb.y} width={lb.w} height={lb.h} rx={CARD_RADIUS} />
-                    </clipPath>
-                  </defs>
                   <rect
                     x={lb.x}
                     y={lb.y}
@@ -1441,122 +1434,138 @@ function SubcontractDetailPageInner() {
                     style={{ pointerEvents: 'none' }}
                   />
 
-                  <g clipPath={`url(#${clipIdBase}-card)`} style={{ pointerEvents: 'none' }}>
-                    <text x={lb.x + NODE_PAD} y={lb.y + 17}
-                      fontSize={10} fontWeight={700} fill="rgba(255,255,255,0.86)" style={{ userSelect: 'none' }}>
-                      {headerKindLabel} / ブロック {lb.blockId}
-                    </text>
-                    <text x={lb.x + NODE_PAD} y={lb.y + 34}
-                      fontSize={12} fontWeight={700} fill="#fff" style={{ userSelect: 'none' }}>
-                      {truncateChars(lb.blockName, 18)}
-                    </text>
-                  </g>
+                  <foreignObject
+                    x={lb.x + NODE_PAD}
+                    y={lb.y + 4}
+                    width={lb.w - NODE_PAD * 2}
+                    height={CARD_HEADER_H - 6}
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.86)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {headerKindLabel} / ブロック {lb.blockId}
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {lb.blockName}
+                      </div>
+                    </div>
+                  </foreignObject>
 
-                  <g clipPath={`url(#${clipIdBase}-card)`} style={{ pointerEvents: 'none' }}>
-                    <text x={lb.x + NODE_PAD} y={lb.y + CARD_HEADER_H + 18}
-                      fontSize={11} fontWeight={700} fill={bodyTextColor} style={{ userSelect: 'none' }}>
-                      {lb.isZeroAmount ? '金額内訳なし' : `${formatYen(lb.totalAmount)} / 支出先 ${recipients.length.toLocaleString()}件`}
-                    </text>
-                    {roleLine && (
-                      <text x={lb.x + NODE_PAD} y={lb.y + CARD_HEADER_H + 35}
-                        fontSize={9} fontWeight={600} fill={bodySubtleTextColor} style={{ userSelect: 'none' }}>
-                        {roleLine}
-                      </text>
-                    )}
-                    {!lb.isZeroAmount && topRecipients.map((r, i) => (
-                      <text
-                        key={`${r.name}-${r.corporateNumber}-${i}`}
-                        x={lb.x + NODE_PAD}
-                        y={lb.y + CARD_HEADER_H + 56 + i * 16}
-                        fontSize={9}
-                        fill={bodyTextColor}
-                        style={{ userSelect: 'none' }}
-                      >
-                        <tspan fontWeight={700}>{i + 1}.</tspan>
-                        <tspan dx={4}>{truncateChars(r.name || '（氏名なし）', 12)}</tspan>
-                        <tspan x={lb.x + lb.w - NODE_PAD} textAnchor="end" fontWeight={700} fill={bodySubtleTextColor}>
-                          {formatYen(r.amount)}
-                        </tspan>
-                      </text>
-                    ))}
-                  </g>
+                  <foreignObject
+                    x={lb.x + NODE_PAD}
+                    y={lb.y + CARD_HEADER_H + 4}
+                    width={lb.w - NODE_PAD * 2}
+                    height={lb.h - CARD_HEADER_H - 8}
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: bodyTextColor, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {lb.isZeroAmount ? '金額内訳なし' : `${formatYen(lb.totalAmount)} / 支出先 ${recipients.length.toLocaleString()}件`}
+                      </div>
+                      {lb.node.role && (
+                        <div style={{ fontSize: 9, fontWeight: 600, color: bodySubtleTextColor, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {lb.node.role}
+                        </div>
+                      )}
+                      {!lb.isZeroAmount && topRecipients.map((r, i) => (
+                        <div
+                          key={`${r.name}-${r.corporateNumber}-${i}`}
+                          style={{ display: 'flex', gap: 4, alignItems: 'baseline', fontSize: 9, color: bodyTextColor, marginTop: i === 0 ? 6 : 3 }}
+                        >
+                          <span style={{ fontWeight: 700, flexShrink: 0 }}>{i + 1}.</span>
+                          <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {r.name || '（氏名なし）'}
+                          </span>
+                          <span style={{ fontWeight: 700, color: bodySubtleTextColor, flexShrink: 0 }}>
+                            {formatYen(r.amount)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </foreignObject>
                 </g>
               );
             })}
           </g>
 
-          {hoveredNode && (() => {
-            const isRoot = hoveredNode.kind === 'root';
-            const lb = hoveredNode.kind === 'block' ? hoveredNode.block : null;
-            const world = isRoot
-              ? safeLayout.root
-              : { x: lb!.x, y: lb!.y, w: lb!.w, h: lb!.h };
-            const tipW = 300;
-            const tipH = isRoot ? 126 : 142;
-            const containerW = containerRef.current?.clientWidth ?? 1000;
-            const screenLeft = transform.x + world.x * transform.scale;
-            const screenTop = transform.y + world.y * transform.scale;
-            const screenW = world.w * transform.scale;
-            const tipX = Math.max(8, Math.min(containerW - tipW - 8, screenLeft + screenW / 2 - tipW / 2));
-            const tipY = Math.max(8, screenTop - tipH - 8);
-            const palette = lb ? originPalette(lb.originKind) : null;
-            const headerColor = isRoot ? COLOR_ROOT : palette!.header;
-            const bodyColor = isRoot ? COLOR_CONTEXT_BODY : palette!.body;
-            const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : palette!.bodyText;
-            const topRecipients = lb ? sortRecipients(lb.node.recipients, 'amount-desc').slice(0, 3) : [];
-
-            return (
-              <foreignObject x={tipX} y={tipY} width={tipW} height={tipH} style={{ pointerEvents: 'none' }}>
-                <div style={{
-                  width: tipW,
-                  height: tipH,
-                  boxSizing: 'border-box',
-                  border: `1px solid ${headerColor}`,
-                  borderRadius: 6,
-                  background: bodyColor,
-                  boxShadow: '0 8px 22px rgba(15,23,42,0.18)',
-                  overflow: 'hidden',
-                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                }}>
-                  <div style={{
-                    background: headerColor,
-                    color: '#fff',
-                    padding: '7px 10px',
-                    fontSize: 11,
-                    fontWeight: 700,
-                    lineHeight: 1.35,
-                  }}>
-                    {isRoot
-                      ? `事業 / PID ${graph.projectId}`
-                      : `${palette!.badgeText} / ブロック ${lb!.blockId}`}
-                  </div>
-                  <div style={{ padding: '8px 10px', fontSize: 11, lineHeight: 1.45, color: textColor }}>
-                    {isRoot ? (
-                      <>
-                        <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{graph.projectName}</div>
-                        <div>府省庁: {graph.ministry}</div>
-                        {visibleOrgChain.length > 0 && <div>担当組織: {visibleOrgChain.join(' / ')}</div>}
-                        <div>予算: {graph.budget > 0 ? formatYen(graph.budget) : '—'} / 支出: {graph.execution > 0 ? formatYen(graph.execution) : '—'}</div>
-                      </>
-                    ) : (
-                      <>
-                        <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{lb!.blockName}</div>
-                        <div>{formatYen(lb!.totalAmount)} / 支出先 {lb!.node.recipients.length.toLocaleString()}件</div>
-                        {lb!.node.role && <div>{lb!.node.role}</div>}
-                        {topRecipients.map((r, i) => (
-                          <div key={`${r.name}-${r.corporateNumber}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i + 1}. {r.name || '（氏名なし）'}</span>
-                            <span style={{ flexShrink: 0, fontWeight: 700 }}>{formatYen(r.amount)}</span>
-                          </div>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </foreignObject>
-            );
-          })()}
         </svg>
+
+        {/* ホバーツールチップ — サンキー流儀のマウス追従 HTML div（220ms遅延・パン/ズーム直後は抑制） */}
+        {hoveredNodeStable && !isPanning.current && !isHoverSuppressed && (() => {
+          const isRoot = hoveredNodeStable.kind === 'root';
+          const lb = hoveredNodeStable.kind === 'block' ? hoveredNodeStable.block : null;
+          const tipW = 300;
+          const palette = lb ? originPalette(lb.originKind) : null;
+          const headerColor = isRoot ? COLOR_ROOT : palette!.header;
+          const bodyColor = isRoot ? COLOR_CONTEXT_BODY : palette!.body;
+          const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : palette!.bodyText;
+          const topRecipients = lb ? sortRecipients(lb.node.recipients, 'amount-desc').slice(0, 3) : [];
+          const tipH = isRoot ? 126 : 96 + (lb!.node.role ? 18 : 0) + topRecipients.length * 18;
+          const containerW = containerRef.current?.clientWidth ?? 1000;
+          const containerH = containerRef.current?.clientHeight ?? 800;
+          const GAP = 12;
+          // 横方向: カーソル右+GAP。画面端で左側に反転クランプ
+          let tipX = mousePos.x + GAP;
+          if (tipX + tipW + 4 > containerW) tipX = mousePos.x - GAP - tipW;
+          tipX = Math.max(4, Math.min(tipX, containerW - tipW - 4));
+          // 縦方向: カーソル上方が基本。上に収まらない場合は下方向へフォールバック
+          let tipY = mousePos.y - tipH - GAP;
+          if (tipY < 4) tipY = mousePos.y + GAP;
+          tipY = Math.max(4, Math.min(tipY, containerH - tipH - 4));
+
+          return (
+            <div style={{
+              position: 'absolute',
+              left: tipX,
+              top: tipY,
+              width: tipW,
+              boxSizing: 'border-box',
+              border: `1px solid ${headerColor}`,
+              borderRadius: 6,
+              background: bodyColor,
+              boxShadow: '0 8px 22px rgba(15,23,42,0.18)',
+              overflow: 'hidden',
+              pointerEvents: 'none',
+              zIndex: 20,
+              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            }}>
+              <div style={{
+                background: headerColor,
+                color: '#fff',
+                padding: '7px 10px',
+                fontSize: 11,
+                fontWeight: 700,
+                lineHeight: 1.35,
+              }}>
+                {isRoot
+                  ? `事業 / PID ${graph.projectId}`
+                  : `${palette!.badgeText} / ブロック ${lb!.blockId}`}
+              </div>
+              <div style={{ padding: '8px 10px', fontSize: 11, lineHeight: 1.45, color: textColor }}>
+                {isRoot ? (
+                  <>
+                    <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{graph.projectName}</div>
+                    <div>府省庁: {graph.ministry}</div>
+                    {visibleOrgChain.length > 0 && <div>担当組織: {visibleOrgChain.join(' / ')}</div>}
+                    <div>予算: {graph.budget > 0 ? formatYen(graph.budget) : '—'} / 支出: {graph.execution > 0 ? formatYen(graph.execution) : '—'}</div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{lb!.blockName}</div>
+                    <div>{formatYen(lb!.totalAmount)} / 支出先 {lb!.node.recipients.length.toLocaleString()}件</div>
+                    {lb!.node.role && <div>{lb!.node.role}</div>}
+                    {topRecipients.map((r, i) => (
+                      <div key={`${r.name}-${r.corporateNumber}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i + 1}. {r.name || '（氏名なし）'}</span>
+                        <span style={{ flexShrink: 0, fontWeight: 700 }}>{formatYen(r.amount)}</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ズームコントロール — 右下（BlockPanel 表示時は左にシフト） */}
         <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
