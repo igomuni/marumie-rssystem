@@ -24,6 +24,11 @@ import {
   NODE_PAD,
   type LayoutBlock,
 } from '@/app/lib/subcontract-layout';
+import { SidePanelChrome } from '@/client/components/SidePanelChrome';
+import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
+
+// サイドパネルの既定幅は現状の SidePane 固定幅(390)を維持。最小/最大はサンキーと共通の値を使う
+const SUBCONTRACT_PANEL_WIDTH_DEFAULT = 390;
 
 const COLOR_BACK_EDGE = 'rgba(217,69,69,0.65)';
 const COLOR_CANVAS = '#fff';
@@ -333,11 +338,9 @@ function SidePane({
 
   return (
     <aside style={{
-      width: 390,
-      minWidth: 390,
-      maxWidth: 460,
+      width: '100%',
+      height: '100%',
       background: '#fff',
-      borderLeft: `1px solid ${COLOR_PANEL_BORDER}`,
       overflowY: 'auto',
       display: 'flex',
       flexDirection: 'column',
@@ -905,6 +908,8 @@ function SubcontractDetailPageInner() {
   const hoverSuppressTimerRef = useRef<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [activeTab, setActiveTab] = useState<PaneTab>('flow');
+  // サイドパネル（右）の chrome 状態。既定幅は現状の SidePane 固定幅(390)を維持
+  const rightSidePanel = useSidePanel({ side: 'right', defaultWidth: SUBCONTRACT_PANEL_WIDTH_DEFAULT });
 
   const beginHoverSuppressCooldown = useCallback(() => {
     setIsHoverSuppressed(true);
@@ -1567,8 +1572,14 @@ function SubcontractDetailPageInner() {
           );
         })()}
 
-        {/* ズームコントロール — 右下（BlockPanel 表示時は左にシフト） */}
-        <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* ズームコントロール — 右下（サイドパネル表示時は左にシフト。パネルは position:fixed のオーバーレイのため、
+            キャンバスは全幅を使う＝このコントロールの座標系はビューポート全体に一致する） */}
+        <div style={{
+          position: 'absolute', bottom: 12,
+          right: !rightSidePanel.collapsed ? rightSidePanel.effectiveWidth + 12 : 12,
+          zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4,
+          transition: rightSidePanel.isResizing ? 'none' : 'right 0.2s ease',
+        }}>
           {/* + / スライダー / - */}
           <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <button aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
@@ -1623,17 +1634,29 @@ function SubcontractDetailPageInner() {
       </div>
 
         {/* サイドパネル */}
-        <SidePane
-          block={selectedBlock}
-          graph={graph}
-          projectDetail={projectDetail}
-          orgChain={visibleOrgChain}
-          year={year}
-          activeTab={activeTab}
-          onChangeTab={setActiveTab}
-          onSelectBlock={handleSelectFromList}
-          onDeselectBlock={() => setSelectedBlock(null)}
-        />
+        <SidePanelChrome
+          side="right"
+          open={!rightSidePanel.collapsed}
+          onToggle={rightSidePanel.toggleCollapsed}
+          width={rightSidePanel.effectiveWidth}
+          minWidth={SIDE_PANEL_WIDTH_MIN}
+          maxWidth={SIDE_PANEL_WIDTH_MAX}
+          onResizeStart={rightSidePanel.onResizeStart}
+          isResizing={rightSidePanel.isResizing}
+          onResetWidth={rightSidePanel.resetWidth}
+        >
+          <SidePane
+            block={selectedBlock}
+            graph={graph}
+            projectDetail={projectDetail}
+            orgChain={visibleOrgChain}
+            year={year}
+            activeTab={activeTab}
+            onChangeTab={setActiveTab}
+            onSelectBlock={handleSelectFromList}
+            onDeselectBlock={() => setSelectedBlock(null)}
+          />
+        </SidePanelChrome>
     </div>
   );
 }

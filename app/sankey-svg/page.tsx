@@ -27,6 +27,14 @@ import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
 import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
+import { SidePanelChrome } from '@/client/components/SidePanelChrome';
+import {
+  useSidePanel,
+  SIDE_PANEL_WIDTH_DEFAULT,
+  SIDE_PANEL_WIDTH_MIN,
+  SIDE_PANEL_WIDTH_MAX,
+  SIDE_PANEL_VIEWPORT_RESERVE_PX,
+} from '@/client/hooks/useSidePanel';
 
 // ── URL state serialization ──
 
@@ -105,11 +113,7 @@ const FONT_SCALE_REFERENCE_PX = 12;
 const BASE_FONT_PX_DEFAULT = 12;
 const BASE_FONT_PX_MIN = 8;
 const BASE_FONT_PX_MAX = 24;
-const SIDE_PANEL_WIDTH_DEFAULT = 400;
-const SIDE_PANEL_WIDTH_MIN = 200;
-const SIDE_PANEL_WIDTH_MAX = 800;
-// 実効幅クランプ時に地図側へ最低限残す余白(px)。狭いビューポートでパネルが全面を覆うのを防ぐ。
-const SIDE_PANEL_VIEWPORT_RESERVE_PX = 48;
+// サイドパネルの幅定数（既定/最小/最大/ビューポート予約）は client/hooks/useSidePanel.ts に一元化
 const PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT = 72;
 const PROJECT_OVERVIEW_PREVIEW_HEIGHT_MIN = 24;
 const PROJECT_OVERVIEW_PREVIEW_HEIGHT_MAX = 600;
@@ -307,10 +311,8 @@ export default function RealDataSankeyPage() {
   const [showTopNSliders, setShowTopNSliders] = useState(true);
   const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-  const [sidePanelWidth, setSidePanelWidth] = useState(SIDE_PANEL_WIDTH_DEFAULT);
-  const [isResizingSidePanel, setIsResizingSidePanel] = useState(false);
-  const sidePanelResizeRef = useRef<{ startX: number; startW: number } | null>(null);
+  // 左サイドパネル（ノード詳細）の chrome 状態は useSidePanel に集約。
+  // isPanelCollapsed/effectiveSidePanelWidth/isResizingSidePanel は下記 svgWidth 定義後にエイリアスする
   // AIチャットパネル（右側）。available は /api/ai/sankey-chat の疎通で判定（無効環境では出さない）
   const [aiChatAvailable, setAiChatAvailable] = useState(false);
   const [showAiChat, setShowAiChat] = useState(false);
@@ -383,6 +385,13 @@ export default function RealDataSankeyPage() {
   const isCompactWidth = svgWidth <= COMPACT_CONTROL_MAX_WIDTH;
   // スマホ横（コンパクト幅かつ横長）: オフセットコントロールをサイドパネルでスライドさせる
   const isLandscapeCompact = isCompactWidth && svgWidth > svgHeight;
+
+  // 左サイドパネル（ノード詳細）の chrome 状態。effectiveWidth は svgWidth に対する
+  // ビューポートクランプ込み（旧: minPanelWidthForViewport/maxPanelWidthForViewport 計算と同一式）
+  const leftSidePanel = useSidePanel({ side: 'left', viewportWidth: svgWidth });
+  const isPanelCollapsed = leftSidePanel.collapsed;
+  const isResizingSidePanel = leftSidePanel.isResizing;
+  const effectiveSidePanelWidth = leftSidePanel.effectiveWidth;
 
   useEffect(() => {
     const updateSize = () => {
@@ -676,26 +685,7 @@ export default function RealDataSankeyPage() {
       hoverSuppressTimerRef.current = null;
     }
   }, []);
-  // サイドパネル幅ドラッグリスナ — アンマウントやドラッグ終了時に確実に剥がす
-  useEffect(() => {
-    if (!isResizingSidePanel) return;
-    const onMove = (ev: MouseEvent) => {
-      const s = sidePanelResizeRef.current;
-      if (!s) return;
-      const next = Math.max(SIDE_PANEL_WIDTH_MIN, Math.min(SIDE_PANEL_WIDTH_MAX, s.startW + (ev.clientX - s.startX)));
-      setSidePanelWidth(next);
-    };
-    const onUp = () => {
-      sidePanelResizeRef.current = null;
-      setIsResizingSidePanel(false);
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-  }, [isResizingSidePanel]);
+  // サイドパネル幅ドラッグリスナは client/hooks/useSidePanel.ts（leftSidePanel）に集約済み
   // AIチャットパネル幅ドラッグリスナ（右側パネルのため左方向ドラッグで拡大）
   useEffect(() => {
     if (!isResizingAiPanel) return;
@@ -2653,17 +2643,10 @@ export default function RealDataSankeyPage() {
       + `L${tx},${tBot}C${mx},${tBot} ${mx},${sBot} ${sx},${sBot}Z`;
   };
 
-  // サイドパネルの実効幅: ユーザー設定値(sidePanelWidth)を保持しつつ、ビューポート幅に収める。
-  // スマホ縦などビューポートが狭い場合に、設定済みの広い幅がそのまま適用されて画面を
-  // 埋め尽くす（地図が見えなくなる）のを防ぐ。地図を最低 SIDE_PANEL_VIEWPORT_RESERVE_PX 残す。
-  // 極端に狭いビューポート(svgWidth < MIN+RESERVE)では MIN より reserve を優先し、
-  // 実効幅が svgWidth - RESERVE を超えない（地図が完全に消えない）ことを保証する。
+  // 左サイドパネルの実効幅（ビューポートクランプ込み）は leftSidePanel（useSidePanel）が算出済み。
+  // AIチャットパネル（右）も同じクランプ規則を使うため、境界値だけここでも算出する。
   const maxPanelWidthForViewport = Math.max(0, svgWidth - SIDE_PANEL_VIEWPORT_RESERVE_PX);
   const minPanelWidthForViewport = Math.min(SIDE_PANEL_WIDTH_MIN, maxPanelWidthForViewport);
-  const effectiveSidePanelWidth = Math.min(
-    maxPanelWidthForViewport,
-    Math.max(minPanelWidthForViewport, sidePanelWidth),
-  );
   const searchLeftOffset = selectedNodeId !== null && !isPanelCollapsed ? effectiveSidePanelWidth : 0;
   // AIチャットパネル（右側）の実効幅: 左パネルと同じ規則でビューポート幅に収める。
   // コンパクト幅では全幅オーバーレイになるため右端コントロールの退避は行わない。
@@ -3377,78 +3360,19 @@ export default function RealDataSankeyPage() {
 
       {/* Left side panel — node detail */}
       {selectedNodeId !== null && (
-        <div
-          data-pan-disabled="true"
-          style={{
-            position: 'fixed', left: 0, top: 0, height: '100%',
-            width: isPanelCollapsed ? 0 : effectiveSidePanelWidth,
-            background: '#fff',
-            borderRight: isPanelCollapsed ? 'none' : '1px solid #e0e0e0',
-            boxShadow: isPanelCollapsed ? 'none' : '2px 0 8px rgba(0,0,0,0.1)',
-            zIndex: 25,
-            transition: isResizingSidePanel ? 'none' : 'width 0.2s ease',
-            overflow: 'visible',
-            cursor: 'default',
-          }}
+        <SidePanelChrome
+          side="left"
+          open={!isPanelCollapsed}
+          onToggle={leftSidePanel.toggleCollapsed}
+          width={effectiveSidePanelWidth}
+          minWidth={SIDE_PANEL_WIDTH_MIN}
+          maxWidth={SIDE_PANEL_WIDTH_MAX}
+          onResizeStart={leftSidePanel.onResizeStart}
+          isResizing={isResizingSidePanel}
+          onResetWidth={leftSidePanel.resetWidth}
         >
-          {/* Width resize handle — right edge */}
-          {!isPanelCollapsed && (
-            <div
-              data-pan-disabled="true"
-              role="separator"
-              aria-orientation="vertical"
-              aria-label="サイドパネルの幅を変更"
-              title="ドラッグで幅を変更（ダブルクリックで既定値）"
-              onMouseDown={e => {
-                e.preventDefault();
-                sidePanelResizeRef.current = { startX: e.clientX, startW: sidePanelWidth };
-                setIsResizingSidePanel(true);
-              }}
-              onDoubleClick={() => setSidePanelWidth(SIDE_PANEL_WIDTH_DEFAULT)}
-              style={{
-                position: 'absolute', right: -3, top: 0, width: 6, height: '100%',
-                cursor: 'ew-resize', zIndex: 26,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                userSelect: 'none',
-              }}
-            >
-              <div style={{ width: 3, height: 32, borderRadius: 2, background: isResizingSidePanel ? '#a0a0a0' : 'transparent' }} />
-            </div>
-          )}
-          {/* Collapse/expand toggle + close buttons on right edge */}
-          <div
-            data-pan-disabled="true"
-            style={{
-              position: 'absolute', right: -25, top: '50%', transform: 'translateY(-50%)',
-              width: 25,
-              background: '#fff', border: '1px solid #e0e0e0', borderLeft: 'none',
-              borderRadius: '0 6px 6px 0',
-              boxShadow: '2px 0 4px rgba(0,0,0,0.08)',
-              display: 'flex', flexDirection: 'column', alignItems: 'center',
-            }}
-          >
-            {/* Collapse/expand button: panel folds, node stays selected */}
-            <button
-              data-pan-disabled="true"
-              onClick={() => setIsPanelCollapsed(c => !c)}
-              title={isPanelCollapsed ? 'パネルを展開' : 'パネルを折りたたむ'}
-              style={{
-                width: 25, height: 56,
-                background: 'transparent', border: 'none',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: 0, borderRadius: '0 6px 6px 0',
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                {isPanelCollapsed
-                  ? <polyline points="9 6 15 12 9 18"/>
-                  : <polyline points="15 6 9 12 15 18"/>}
-              </svg>
-            </button>
-          </div>
-
           {/* Panel content */}
-          {!isPanelCollapsed && selectedNode && (
+          {selectedNode && (
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {/* Header — fixed, never scrolls */}
               <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid #f0f0f0', flexShrink: 0, background: '#fff' }}>
@@ -4222,7 +4146,7 @@ export default function RealDataSankeyPage() {
               })()}
             </div>
           )}
-        </div>
+        </SidePanelChrome>
       )}
 
       {/* Year selector — top center（スマホ幅では検索ボックスに隠れるため設定ダイアログへ移動） */}
