@@ -8,7 +8,7 @@
  * AI の結果は自動適用せず、結果カードの「この条件で図を表示」で明示適用する。
  */
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
-import type { SankeyChatResult } from '@/types/sankey-ai-chat';
+import type { SankeyChatProgressEvent, SankeyChatResult } from '@/types/sankey-ai-chat';
 import { formatYen } from '@/app/lib/sankey-svg-constants';
 import { CHAT_MARKDOWN_STYLES } from './chat-markdown-styles';
 
@@ -34,6 +34,8 @@ interface AiChatPanelProps {
   onToggle: () => void;
   messages: AiChatUiMessage[];
   sending: boolean;
+  /** ストリーミング応答中の最新進行イベント（stream:true時のみ）。日本語ラベルへの変換はこのファイルで行う */
+  progress?: SankeyChatProgressEvent | null;
   onSend: (text: string) => void;
   onApplyResult: (result: SankeyChatResult) => void;
   onClear: () => void;
@@ -47,14 +49,38 @@ interface AiChatPanelProps {
 
 const EXAMPLE_PROMPTS = [
   '再エネ関連で予算100億円以上の事業だけ見たい',
-  '経済産業省と環境省の事業に絞って',
-  'NTTデータへの支出がある事業を見たい',
+  'NTTデータはどの事業から受注している？',
+  'マイナンバー関連は去年から増えた？',
 ];
 
 const PANEL_Z_INDEX = 210; // 右上の設定ボタン(200)より前面。ScoreDetailDialog は body へ portal されるため影響しない
 
+/**
+ * 送信中インジケータの日本語ラベル。progress イベント（構造化データ）を人間向け文言へ変換する。
+ * ラベルの対応表は設計ドキュメント（docs/tasks/20260710_0633_...）のとおり
+ */
+function progressLabel(progress: SankeyChatProgressEvent | null | undefined): string {
+  if (!progress) return '条件を組み立てています…';
+  switch (progress.kind) {
+    case 'llm_round':
+      return progress.round <= 1 ? '要求を解釈しています…' : `結果を確認しています…（${progress.round}回目）`;
+    case 'tool':
+      if (progress.tool === 'run_sankey_query' && typeof progress.matched === 'number') {
+        return `クエリを実行しました — ${progress.matched.toLocaleString()}事業がマッチ`;
+      }
+      if (progress.tool === 'search_projects' || progress.tool === 'search_recipients') {
+        return '語彙を検索しています…';
+      }
+      return '詳細データを取得しています…';
+    case 'retry':
+      return '混雑のため待機して再試行します…';
+    default:
+      return '条件を組み立てています…';
+  }
+}
+
 export function AiChatPanel({
-  open, onToggle, messages, sending, onSend, onApplyResult, onClear,
+  open, onToggle, messages, sending, progress, onSend, onApplyResult, onClear,
   width, isCompactWidth, onResizeStart, isResizing, onResetWidth,
 }: AiChatPanelProps) {
   const [input, setInput] = useState('');
@@ -85,8 +111,8 @@ export function AiChatPanel({
       <button
         data-pan-disabled="true"
         onClick={onToggle}
-        title="AIフィルターアシスタントを開く"
-        aria-label="AIフィルターアシスタントを開く"
+        title="AIアシスタントを開く"
+        aria-label="AIアシスタントを開く"
         style={{
           position: 'fixed', right: 0, top: '50%', transform: 'translateY(-50%)',
           width: 28, height: 64, zIndex: PANEL_Z_INDEX,
@@ -144,7 +170,7 @@ export function AiChatPanel({
       {/* ヘッダ */}
       <div style={{ padding: '10px 12px', borderBottom: '1px solid #f0f0f0', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: '#333', flex: 1, minWidth: 0 }}>
-          AIフィルターアシスタント
+          AIアシスタント
         </span>
         {messages.length > 0 && (
           <button
@@ -174,8 +200,9 @@ export function AiChatPanel({
         {messages.length === 0 && (
           <div style={{ fontSize: 12, color: '#777', lineHeight: 1.7 }}>
             <p style={{ margin: '0 0 8px' }}>
-              見たい条件を自然な言葉で伝えると、AIがフィルタ条件を組み立てます。
-              結果は件数を確認してから図に反映できます。
+              見たい条件やデータへの質問を自然な言葉でどうぞ。
+              図の絞り込み条件の組み立てのほか、金額・品質スコア・再委託・年度比較の質問に答えます。
+              絞り込みは件数を確認してから図に反映できます。
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {EXAMPLE_PROMPTS.map(p => (
@@ -255,7 +282,7 @@ export function AiChatPanel({
               border: '2px solid #d0d0d0', borderTopColor: '#1a73e8',
               animation: 'ai-chat-spin 0.9s linear infinite', display: 'inline-block',
             }} />
-            条件を組み立てています…
+            {progressLabel(progress)}
             <style>{'@keyframes ai-chat-spin { to { transform: rotate(360deg); } }'}</style>
           </div>
         )}

@@ -22,7 +22,7 @@ import { buildFilterExcludedIds, sankeyQueryToUrlParams, sankeyQueryFromUrlParam
 import { externalCorporateLinks } from '@/app/lib/api/links';
 import type { AccountCategoryKey } from '@/types/sankey-query';
 import { AiChatPanel, type AiChatUiMessage } from '@/client/components/SankeySvg/AiChatPanel';
-import { MAX_CHAT_MESSAGES, type SankeyChatResponse, type SankeyChatResult } from '@/types/sankey-ai-chat';
+import { MAX_CHAT_MESSAGES, type SankeyChatProgressEvent, type SankeyChatResponse, type SankeyChatResult } from '@/types/sankey-ai-chat';
 import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
@@ -316,6 +316,8 @@ export default function RealDataSankeyPage() {
   const [showAiChat, setShowAiChat] = useState(false);
   const [aiChatMessages, setAiChatMessages] = useState<AiChatUiMessage[]>([]);
   const [aiChatSending, setAiChatSending] = useState(false);
+  // ストリーミング応答（stream:true）の最新進行イベントのみ保持。result/error 受信で null に戻す
+  const [aiChatProgress, setAiChatProgress] = useState<SankeyChatProgressEvent | null>(null);
   const [aiPanelWidth, setAiPanelWidth] = useState(SIDE_PANEL_WIDTH_DEFAULT);
   const [isResizingAiPanel, setIsResizingAiPanel] = useState(false);
   const aiPanelResizeRef = useRef<{ startX: number; startW: number } | null>(null);
@@ -724,11 +726,63 @@ export default function RealDataSankeyPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // AIチャット送信: 履歴全量 + 現在のビュー状態（URL由来のSankeyQuery）をステートレスAPIへ送る
+  // SSE応答本文をパースし、progress は逐次state更新、result/error で終端メッセージを積む。
+  // 途中切断（result/error を受け取れずストリームが閉じる）は従来のエラー表示に落とす
+  const consumeAiChatStream = useCallback(async (body: ReadableStream<Uint8Array>) => {
+    const reader = body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let settled = false;
+    let sepIndex: number;
+    while (!settled) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      while ((sepIndex = buffer.indexOf('\n\n')) !== -1) {
+        const rawEvent = buffer.slice(0, sepIndex);
+        buffer = buffer.slice(sepIndex + 2);
+        let eventName = 'message';
+        let dataLine = '';
+        for (const line of rawEvent.split('\n')) {
+          if (line.startsWith(':')) continue; // ping コメント行は無視
+          if (line.startsWith('event:')) eventName = line.slice(6).trim();
+          else if (line.startsWith('data:')) dataLine += line.slice(5).trim();
+        }
+        if (!dataLine) continue;
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(dataLine);
+        } catch {
+          continue;
+        }
+        if (eventName === 'progress') {
+          setAiChatProgress(parsed as SankeyChatProgressEvent);
+        } else if (eventName === 'result') {
+          const data = parsed as SankeyChatResponse;
+          setAiChatMessages(prev => [...prev, { role: 'assistant', content: data.message, result: data.result, suggestions: data.suggestions }]);
+          setAiChatProgress(null);
+          settled = true;
+        } else if (eventName === 'error') {
+          const data = parsed as { error?: string };
+          setAiChatMessages(prev => [...prev, { role: 'assistant', content: `エラー: ${data.error ?? '不明なエラー'}`, isError: true }]);
+          setAiChatProgress(null);
+          settled = true;
+        }
+      }
+    }
+    if (!settled) {
+      setAiChatMessages(prev => [...prev, { role: 'assistant', content: 'エラー: 通信に失敗しました。再度お試しください', isError: true }]);
+      setAiChatProgress(null);
+    }
+  }, []);
+
+  // AIチャット送信: 履歴全量 + 現在のビュー状態（URL由来のSankeyQuery）をステートレスAPIへ送る。
+  // stream:true を付け、応答が text/event-stream ならSSEパース、JSONなら従来処理にフォールバックする
   const handleAiChatSend = useCallback(async (text: string) => {
     const userMessage: AiChatUiMessage = { role: 'user', content: text };
     setAiChatMessages(prev => [...prev, userMessage]);
     setAiChatSending(true);
+    setAiChatProgress(null);
     try {
       // エラーバブルは role/content のみの API 履歴に含めない（isError 付きは表示専用）
       const history = [...aiChatMessages, userMessage]
@@ -739,7 +793,7 @@ export default function RealDataSankeyPage() {
       const res = await fetch('/api/ai/sankey-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history, context: { year, currentQuery } }),
+        body: JSON.stringify({ messages: history, context: { year, currentQuery }, stream: true }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null) as { error?: string } | null;
@@ -747,14 +801,21 @@ export default function RealDataSankeyPage() {
         setAiChatMessages(prev => [...prev, { role: 'assistant', content: `エラー: ${detail}`, isError: true }]);
         return;
       }
-      const data = await res.json() as SankeyChatResponse;
-      setAiChatMessages(prev => [...prev, { role: 'assistant', content: data.message, result: data.result, suggestions: data.suggestions }]);
+      const contentType = res.headers.get('content-type') ?? '';
+      if (contentType.includes('text/event-stream') && res.body) {
+        await consumeAiChatStream(res.body);
+      } else {
+        // 従来のJSON応答へのフォールバック（例: SSE非対応の中間層を経由する場合）
+        const data = await res.json() as SankeyChatResponse;
+        setAiChatMessages(prev => [...prev, { role: 'assistant', content: data.message, result: data.result, suggestions: data.suggestions }]);
+      }
     } catch {
       setAiChatMessages(prev => [...prev, { role: 'assistant', content: 'エラー: 通信に失敗しました。再度お試しください', isError: true }]);
     } finally {
       setAiChatSending(false);
+      setAiChatProgress(null);
     }
-  }, [aiChatMessages, year]);
+  }, [aiChatMessages, year, consumeAiChatStream]);
 
   // AIチャット結果の適用: SankeyQuery → URL変換 → pushState → popstate と同じ復元経路で図を更新。
   // フルリロードしないためチャット履歴が保持され、ブラウザバックで適用前の図に戻れる
@@ -4872,6 +4933,7 @@ export default function RealDataSankeyPage() {
           onToggle={() => setShowAiChat(v => !v)}
           messages={aiChatMessages}
           sending={aiChatSending}
+          progress={aiChatProgress}
           onSend={handleAiChatSend}
           onApplyResult={applyAiChatResult}
           onClear={() => setAiChatMessages([])}

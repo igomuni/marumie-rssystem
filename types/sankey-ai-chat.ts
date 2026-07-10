@@ -28,7 +28,18 @@ export interface SankeyChatContext {
 export interface SankeyChatRequest {
   messages: SankeyChatMessage[];
   context?: SankeyChatContext;
+  /** true の場合 SSE で進行イベント（progress）を配信してから終端イベント（result/error）を返す。未指定=従来のJSON応答 */
+  stream?: boolean;
 }
+
+/**
+ * ストリーミング応答（stream: true）中に配信される進行イベント。
+ * 判別可能ユニオン。日本語ラベルへの変換は UI 層（AiChatPanel）で行う。
+ */
+export type SankeyChatProgressEvent =
+  | { kind: 'llm_round'; round: number }
+  | { kind: 'tool'; tool: string; matched?: number; hits?: number }
+  | { kind: 'retry'; waitMs: number };
 
 /** AIが構築したフィルタ条件と、その適用結果のサマリ */
 export interface SankeyChatResult {
