@@ -375,7 +375,7 @@ function SubcontractsPageInner() {
 
   function SortIndicator({ k }: { k: SortKey }) {
     if (sortKey !== k) return <span aria-hidden="true" style={{ color: '#bbb', marginLeft: 4 }}>↕</span>;
-    return <span aria-hidden="true" style={{ color: '#3b82f6', marginLeft: 4 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
+    return <span aria-hidden="true" style={{ color: '#4a90d9', marginLeft: 4 }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
   }
 
   function SortHeader({
@@ -767,7 +767,7 @@ function SubcontractsPageInner() {
                           href={`/subcontracts/${g.projectId}?year=${year}`}
                           title={g.projectName}
                           style={{
-                            color: '#2563eb',
+                            color: '#4a90d9',
                             textDecoration: 'none',
                             fontWeight: 500,
                             flex: 1,
@@ -808,7 +808,7 @@ function SubcontractsPageInner() {
                       const fmtDiff = (v: number, hasBase: boolean) => {
                         if (!hasBase) return <span style={{ color: '#cbd5e1' }}>—</span>;
                         if (v === 0) return <span style={{ color: '#cbd5e1' }}>0</span>;
-                        return formatYen(Math.abs(v)).replace(/^/, v < 0 ? '−' : '');
+                        return formatYen(v);
                       };
                       return (
                         <>

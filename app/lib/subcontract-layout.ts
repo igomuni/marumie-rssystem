@@ -5,6 +5,7 @@ import type {
   BlockOriginKind,
   FlowOrigin,
 } from '@/types/subcontract';
+export { formatYen } from '@/app/lib/sankey-svg-constants';
 
 // ─── 定数 ──────────────────────────────────────────────
 
@@ -75,15 +76,6 @@ export interface SubcontractLayout {
 }
 
 // ─── ヘルパー ──────────────────────────────────────────────
-
-function formatYen(v: number): string {
-  if (v >= 1e12) return `${(v / 1e12).toFixed(2)}兆円`;
-  if (v >= 1e10) return `${Math.round(v / 1e8).toLocaleString()}億円`;
-  if (v >= 1e8) return `${(v / 1e8).toFixed(2)}億円`;
-  if (v >= 1e4) return `${Math.round(v / 1e4).toLocaleString()}万円`;
-  return `${Math.round(v).toLocaleString()}円`;
-}
-export { formatYen };
 
 const MAX_DEPTH_LIMIT = 30;
 
