@@ -32,6 +32,8 @@ import { loadRecipientIndex, resolveRecipient } from '@/app/lib/api/recipient-in
 import { getProjectDetail, loadProjectDetails } from '@/app/lib/api/project-details-loader';
 import { loadSubcontracts } from '@/app/lib/api/subcontracts-loader';
 import { loadSpendingSearchRows } from '@/app/lib/api/quality-recipients-loader';
+import { loadHighlights } from '@/app/lib/api/highlights-loader';
+import { HIGHLIGHT_METRIC_NAMES, type HighlightMetricName, type HighlightsResult } from '@/app/lib/highlights';
 
 // ── OpenAI 互換の LLM メッセージ・ツール型（OpenRouter の chat.completions と1対1） ──
 
@@ -305,6 +307,26 @@ const TOOLS: LlmToolDef[] = [
   {
     type: 'function',
     function: {
+      name: 'get_highlights',
+      description:
+        '過去のレポートが人力で見つけた「発見の型」（支出の急増・急減、支出先「その他」比率、支出先の集中、品質スコアと予算規模の乖離、予算と執行の乖離、再委託の深さ）を全事業スキャンして返す。' +
+        '「無駄遣いっぽいのを教えて」「気になる/面白い事業ない?」型の質問に使う。これは異常・無駄の判定ではなく観測可能なシグナルの列挙であることに注意（回答時も断定しないこと）。' +
+        'metric省略時は複数指標に同時該当した事業（multiSignal）と各指標の上位3件のダイジェストを返す。metric指定時はその指標の上位10件を返す。',
+      parameters: {
+        type: 'object',
+        properties: {
+          metric: {
+            type: 'string',
+            enum: [...HIGHLIGHT_METRIC_NAMES],
+            description: '単一指標に絞り込みたい場合に指定（省略時は全指標のダイジェスト）',
+          },
+        },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'submit_result',
       description:
         '検証済みの最終フィルタ条件を確定する。run_sankey_query で結果を確認してから呼ぶこと。message にはユーザー向けの短い説明（何をどう絞ったか・何件マッチしたか）を日本語で書く。',
@@ -322,7 +344,7 @@ const TOOLS: LlmToolDef[] = [
             type: 'array',
             items: { type: 'string' },
             description:
-              `次に聞ける質問の提案（最大${SUGGESTIONS_MAX}件、各${SUGGESTION_LIMIT}字以内）。現在のツール（get_project_detail / compare_years 等）で実際に答えられる問いのみ。ユーザーがそのまま送信できる短い日本語の質問文にする（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」「去年から増えた?」）。図の適用と無関係な提案や、このアシスタントが答えられない提案（再委託有無・品質スコア・使途のフィルタ化等）は禁止`,
+              `次に聞ける質問の提案（最大${SUGGESTIONS_MAX}件、各${SUGGESTION_LIMIT}字以内）。現在のツール（get_project_detail / compare_years / get_highlights 等）で実際に答えられる問いのみ。ユーザーがそのまま送信できる短い日本語の質問文にする（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」「去年から増えた?」「注目シグナルのある事業は?」）。図の適用と無関係な提案や、このアシスタントが答えられない提案（再委託有無・品質スコア・使途のフィルタ化等）は禁止`,
           },
         },
         required: ['query', 'message'],
@@ -335,7 +357,8 @@ const TOOLS: LlmToolDef[] = [
 
 function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | undefined, ministryNames: string[]): string {
   const lines = [
-    'あなたは「まるみえRSシステム」（日本の行政事業レビューの予算・支出データをサンキー図で可視化するサイト）のフィルタ設定アシスタントです。',
+    // サイト名は出さない（開発リポジトリ名由来の「まるみえ」が応答文に漏れた実績あり。公開版は別名のため一般名称で自称する）
+    'あなたは、日本の行政事業レビューの予算・支出データをサンキー図で可視化するサイトのAIアシスタントです。サイト名やシステム名は応答に含めないこと。',
     'ユーザーの自然言語の要求を SankeyQuery（フィルタ条件）に翻訳し、ツールで検証してから submit_result で確定します。',
     '',
     '## データの前提',
@@ -358,6 +381,7 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     '- get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain / compare_years / search_spending で調べ、結果をテキストで日本語回答する。submit_result は呼ばない（図の条件は変わらない）',
     '- 「〜にいくら使われている？」「〜を受注しているのは誰？」のような使途起点の質問は search_spending を使う。回答時は amountDirect（直接支出）と amountSubcontract（再委託）を必ず分けて述べる',
     '- 「去年から増えた?」「年度でどう変わった?」型の質問は compare_years を使う。回答時は「事業年度Nのデータ=予算年度N-1の実績」の注記を必ず添える',
+    '- 「無駄遣いっぽいのを教えて」「気になる/面白い事業ない?」型の質問は get_highlights を使う。この種の質問はデータで断定できないため、必ず「無駄とは判定できないが、説明の薄さ・支出の急増・支出先の集中などのシグナルが観測された事業」というフレーミングで提示する。「無駄」「異常」という断定表現は使わず、multiSignal（複数シグナルに同時該当）や個々の指標名・数値を根拠として添えて紹介する',
     '- run_sankey_query の結果にある summary.recipients.topShare1 / topShare3 は支出先集中度（上位1社/3社への集中割合）。「集中度が高い事業を探して」型の質問で使える（compare_years の要約には含まれない）',
     '- 数値・事実は必ずツール応答から転記する。ツールで確認していない数値を推測で書かない',
     '- pid はユーザーには分からない前提。事業名から聞かれたら、まず search_projects でpidを特定してから深掘りツールを呼ぶ。支出先も同様に search_recipients でキーを特定する',
@@ -376,8 +400,8 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     '曖昧語を含まない明確な要求（府省庁名・金額範囲・具体的な事業名等がそのまま条件になる場合）では interpretation は省略してよい。',
     '',
     '## 深掘り提案（submit_result の suggestions）',
-    'suggestions には、現在のツール（get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain / compare_years）で実際に答えられる問いのみを、',
-    'ユーザーがそのまま送信できる短い日本語の質問文として最大3件挙げる（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」「去年から増えた?」）。',
+    'suggestions には、現在のツール（get_project_detail / get_quality_scores / get_recipient_detail / get_subcontract_chain / compare_years / get_highlights）で実際に答えられる問いのみを、',
+    'ユーザーがそのまま送信できる短い日本語の質問文として最大3件挙げる（例:「この中で品質スコアが低いのは?」「最大の事業の支出先は?」「再委託はある?」「去年から増えた?」「注目シグナルのある事業は?」）。',
     '図の適用と無関係な提案や、このアシスタントが答えられない提案（再委託有無・品質スコア・使途のフィルタ化等）は挙げないこと。',
   ];
   const compactQuery = currentQuery ? compactValue(currentQuery) : undefined;
@@ -670,6 +694,53 @@ function executeSearchRecipients(year: SupportedYear, q: string): unknown {
   };
 }
 
+/** get_highlights の metric 省略時（ダイジェスト）に各指標から見せる件数 */
+const HIGHLIGHTS_DIGEST_TOP = 3;
+
+/** spendingChange のサブリスト（increased/decreased/added/removed）を指定件数に切る */
+function digestSpendingChange(sc: HighlightsResult['metrics']['spendingChange'], limit: number) {
+  return {
+    priorYear: sc.priorYear,
+    increased: sc.increased.slice(0, limit),
+    decreased: sc.decreased.slice(0, limit),
+    added: sc.added.slice(0, limit),
+    removed: sc.removed.slice(0, limit),
+  };
+}
+
+function executeGetHighlights(year: SupportedYear, metricRaw: unknown): unknown {
+  const result = loadHighlights(year);
+
+  if (metricRaw !== undefined && metricRaw !== null) {
+    if (typeof metricRaw !== 'string' || !(HIGHLIGHT_METRIC_NAMES as readonly string[]).includes(metricRaw)) {
+      return { error: `metric は次のいずれかを指定してください: ${HIGHLIGHT_METRIC_NAMES.join(' | ')}` };
+    }
+    const m = metricRaw as HighlightMetricName;
+    if (m === 'spendingChange') {
+      return clampPayload(
+        { metric: m, ...digestSpendingChange(result.metrics.spendingChange, DETAIL_TOP_LIMIT) },
+        ['increased', 'decreased', 'added', 'removed'],
+      );
+    }
+    return clampPayload({ metric: m, entries: result.metrics[m] }, ['entries']);
+  }
+
+  return clampPayload(
+    {
+      multiSignal: result.multiSignal,
+      metrics: {
+        spendingChange: digestSpendingChange(result.metrics.spendingChange, HIGHLIGHTS_DIGEST_TOP),
+        otherRatio: result.metrics.otherRatio.slice(0, HIGHLIGHTS_DIGEST_TOP),
+        concentration: result.metrics.concentration.slice(0, HIGHLIGHTS_DIGEST_TOP),
+        lowScoreHighBudget: result.metrics.lowScoreHighBudget.slice(0, HIGHLIGHTS_DIGEST_TOP),
+        execBudgetGap: result.metrics.execBudgetGap.slice(0, HIGHLIGHTS_DIGEST_TOP),
+        subcontractDepth: result.metrics.subcontractDepth.slice(0, HIGHLIGHTS_DIGEST_TOP),
+      },
+    },
+    ['multiSignal'],
+  );
+}
+
 /** compare_years の diff リスト（increased/decreased/added/removed）を上位5件に切る */
 const COMPARE_DIFF_TOP_LIMIT = 5;
 function clampDiffList<T>(list: T[]): T[] {
@@ -838,6 +909,10 @@ export async function runSankeyChatAgent(
             case 'get_subcontract_chain': {
               const pid = typeof args.pid === 'string' ? args.pid.trim() : '';
               payload = pid ? executeGetSubcontractChain(year, pid) : { error: 'pid（事業ID）を指定してください' };
+              break;
+            }
+            case 'get_highlights': {
+              payload = executeGetHighlights(year, args.metric);
               break;
             }
             case 'compare_years': {
