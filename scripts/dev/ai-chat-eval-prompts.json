@@ -46,5 +46,9 @@
   {
     "id": "drill-spending-search",
     "turns": ["広報にいくら使われている？"]
+  },
+  {
+    "id": "drill-highlights",
+    "turns": ["無駄遣いっぽい事業を教えて"]
   }
 ]

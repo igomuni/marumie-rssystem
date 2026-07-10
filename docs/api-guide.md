@@ -209,6 +209,36 @@
 
 ---
 
+## GET /api/highlights
+
+過去のレポートが人力で見つけた「発見の型」を6指標として全事業を機械スキャンし、観測可能な「注目シグナル」を列挙する（WP4-1）。**「異常」「無駄」の判定ではない**。設計の正典: `docs/tasks/20260710_2052_highlights異常度指標API設計.md`。
+
+**クエリパラメータ**: `year`（既定2024）、`metric`（省略時は全指標。指定時は次のいずれか1つに絞り込み。不正値は400）
+
+| metric | 観測している事実 | 母集団の下限 |
+|--------|----------------|-------------|
+| `spendingChange` | 前年からの支出の急増・急減、新規/消滅（`compareYearsSummary` をフィルタなしで適用） | なし |
+| `otherRatio` | 支出先「その他」（実データ）への流入比率 | 支出額（`spendTotal`）10億円以上 |
+| `concentration` | 支出先上位1社シェア | 同上 |
+| `lowScoreHighBudget` | 品質スコア下位25%かつ予算額の大きい順 | budgetAmount > 0 |
+| `execBudgetGap` | \|執行額/予算額 − 1\| の大きい順 | budgetAmount > 0 |
+| `subcontractDepth` | 再委託の深さ（`redelegationDepth`）の大きい順 | 支出額10億円以上 |
+
+**レスポンス**:
+
+- `metrics.{metric名}`: 各上位10件（`metric` 指定時はそのキーのみ）。エントリには pid・事業名・府省庁・指標の根拠数値（例: `otherRatio` なら `otherAmount`/`spendTotal`/`otherRatio`）と `links`（`projectLinks` 相当）を含む。`spendingChange` のみ `increased`/`decreased`/`added`/`removed` の4リスト構造（`priorYear` が対応年度なしなら `null` + 各リスト空）
+- `multiSignal`: 2指標以上に同時該当した事業（該当指標名 `signals[]` 付き、上位10件、`links.sankeyView` も付与）
+- `metadata`: `minSpendYen`（母集団下限、1,000,000,000円固定）・`population`（otherRatio/concentration/subcontractDepthの実母集団数）・`lowScoreThreshold`（lowScoreHighBudget の下位25%閾値として使った totalScore）
+- `metadata.notes` に語彙の規律（シグナル列挙であって判定ではない・品質スコアの意味・年度ズレ・「その他」の意味）を明記
+
+**実装（レイヤー）**:
+
+- Domain: `app/lib/highlights.ts`（`computeHighlights`。入力は graph 1〜2年度分・品質スコア items。Pure）
+- Loader: `app/lib/api/highlights-loader.ts`（年度別メモリキャッシュ。パイプライン新設なし、既存の `loadSankeyGraph`/`loadQualityScores` を in-process で使う）
+- AI: `app/lib/ai/sankey-chat-agent.ts` の `get_highlights` ツール（「無駄遣いっぽい」型の質問に使う。metric省略時はダイジェスト）
+
+---
+
 ## GET /api/recipients/[key]
 
 支出先の逆引き詳細（府省庁横断の受注構造）。
