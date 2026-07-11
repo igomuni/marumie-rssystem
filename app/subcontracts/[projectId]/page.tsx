@@ -32,8 +32,13 @@ import {
   COLOR_SUBCONTRACT,
   COLOR_ROOT,
   NODE_PAD,
-  type LayoutBlock,
 } from '@/app/lib/subcontract-layout';
+import {
+  computeSubcontractRibbonLayout,
+  ribbonFlowPath,
+  ribbonBackEdgePath,
+  ribbonSelfLoopPath,
+} from '@/app/lib/subcontract-ribbon-layout';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
 import { useBaseFontPx } from '@/client/hooks/useBaseFontPx';
@@ -267,7 +272,9 @@ function sortRecipients(
 
 type HoveredNode =
   | { kind: 'root' }
-  | { kind: 'block'; block: LayoutBlock };
+  | { kind: 'block'; block: BlockNode };
+
+type ViewMode = 'block' | 'ribbon';
 
 // ─── サイドパネル（タブ式） ──────────────────────────────────────────────
 
@@ -282,9 +289,10 @@ interface DetailUrlState {
   zoom: number;
   tx: number;
   ty: number;
+  view: ViewMode;
 }
 
-/** URL(検索パラメータ文字列)から sel/tab/z/tx/ty を復元する。存在しない・不正な値は省略する */
+/** URL(検索パラメータ文字列)から sel/tab/z/tx/ty/view を復元する。存在しない・不正な値は省略する */
 function parseDetailUrlState(sp: { get(key: string): string | null }): Partial<DetailUrlState> {
   const result: Partial<DetailUrlState> = {};
   const sel = sp.get('sel'); if (sel) result.sel = sel;
@@ -292,6 +300,7 @@ function parseDetailUrlState(sp: { get(key: string): string | null }): Partial<D
   const z = sp.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n > 0) result.zoom = n; }
   const tx = sp.get('tx'); if (tx !== null) { const n = parseFloat(tx); if (!isNaN(n)) result.tx = n; }
   const ty = sp.get('ty'); if (ty !== null) { const n = parseFloat(ty); if (!isNaN(n)) result.ty = n; }
+  const view = sp.get('view'); if (view === 'ribbon') result.view = 'ribbon';
   return result;
 }
 
@@ -302,6 +311,14 @@ function pushSelTabUrl(sel: string | null, tab: PaneTab) {
   if (tab !== 'flow') p.set('tab', TAB_TO_CODE[tab]); else p.delete('tab');
   const qs = p.toString();
   window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
+}
+
+/** ビュー切替を replaceState で反映する（履歴を汚さない）。既定値(block)は省略する */
+function replaceViewUrl(view: ViewMode) {
+  const p = new URLSearchParams(window.location.search);
+  if (view !== 'block') p.set('view', view); else p.delete('view');
+  const qs = p.toString();
+  window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
 }
 
 function SidePane({
@@ -1017,6 +1034,12 @@ function SubcontractDetailPageInner() {
   const hoverSuppressTimerRef = useRef<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [activeTab, setActiveTab] = useState<PaneTab>('flow');
+  // 表示切り替え: A案（縦ブロック図・既定）/ B案（サンキー風横フロー）。URL `view=ribbon` で復元（既定は省略）
+  const [viewMode, setViewModeState] = useState<ViewMode>('block');
+  const setViewMode = useCallback((mode: ViewMode) => {
+    setViewModeState(mode);
+    replaceViewUrl(mode);
+  }, []);
   // サイドパネル（右）の chrome 状態。既定幅は現状の SidePane 固定幅(390)を維持
   const rightSidePanel = useSidePanel({ side: 'right', defaultWidth: SUBCONTRACT_PANEL_WIDTH_DEFAULT });
   // 基準フォントサイズ（サンキーと同じ localStorage 永続化方式。キーはページごとに分離）
@@ -1128,6 +1151,7 @@ function SubcontractDetailPageInner() {
           // 案C1: タブは URL の tab（=最後にユーザーが選んだタブ）をそのまま復元する。
           // tab 省略時は既定の 'flow'（selがあっても recipients へ自動遷移しない）
           setActiveTab(restore?.tab ?? 'flow');
+          setViewModeState(restore?.view ?? 'block');
         } else {
           setSelectedBlock(null);
         }
@@ -1219,11 +1243,18 @@ function SubcontractDetailPageInner() {
   const visibleOrgChain = orgChain.length > 0 ? orgChain : fallbackOrgChain;
 
   const layout = useMemo(() => graph ? computeSubcontractLayout(graph) : null, [graph]);
+  // B案（フロー図）のレイアウト。A案とは独立に計算するが computeDepths/mergeParallelFlows は共通利用
+  const ribbonLayout = useMemo(() => graph ? computeSubcontractRibbonLayout(graph) : null, [graph]);
   // エッジ太さスケールの基準（このグラフ内の最大ブロック金額）
   const maxBlockAmount = useMemo(
     () => layout ? Math.max(0, ...layout.blocks.map((b) => b.totalAmount)) : 0,
     [layout],
   );
+  // ズーム/パンのフィット計算に使う「現在のビューのコンテンツサイズ」（参照安定化のため useMemo で保持）
+  const activeContentSize = useMemo(() => {
+    if (viewMode === 'ribbon') return ribbonLayout ? { w: ribbonLayout.svgWidth, h: ribbonLayout.svgHeight } : null;
+    return layout ? { w: layout.svgWidth, h: layout.svgHeight } : null;
+  }, [viewMode, layout, ribbonLayout]);
 
   const applyZoom = useCallback((factor: number) => {
     setTransform((prev) => {
@@ -1242,21 +1273,21 @@ function SubcontractDetailPageInner() {
 
   const resetViewport = useCallback(() => {
     const container = containerRef.current;
-    if (!container || !layout) return;
+    if (!container || !activeContentSize) return;
     const cW = container.clientWidth;
     const cH = container.clientHeight;
-    const fitZoom = Math.max(0.05, Math.min(10, Math.min(cW / layout.svgWidth, cH / layout.svgHeight) * 0.9));
+    const fitZoom = Math.max(0.05, Math.min(10, Math.min(cW / activeContentSize.w, cH / activeContentSize.h) * 0.9));
     setBaseZoom(fitZoom);
     setTransform({
-      x: (cW - layout.svgWidth * fitZoom) / 2,
-      y: (cH - layout.svgHeight * fitZoom) / 2,
+      x: (cW - activeContentSize.w * fitZoom) / 2,
+      y: (cH - activeContentSize.h * fitZoom) / 2,
       scale: fitZoom,
     });
-  }, [layout]);
+  }, [activeContentSize]);
 
   // グラフ読み込み後に全体表示。ただし最初の1回はURLにz/tx/tyがあればそれを優先復元する
   useEffect(() => {
-    if (!layout) return;
+    if (!activeContentSize) return;
     const container = containerRef.current;
     if (!viewportRestoredRef.current) {
       viewportRestoredRef.current = true;
@@ -1264,7 +1295,7 @@ function SubcontractDetailPageInner() {
       if (container && restore?.zoom !== undefined && restore.tx !== undefined && restore.ty !== undefined) {
         const cW = container.clientWidth;
         const cH = container.clientHeight;
-        const fitZoom = Math.max(0.05, Math.min(10, Math.min(cW / layout.svgWidth, cH / layout.svgHeight) * 0.9));
+        const fitZoom = Math.max(0.05, Math.min(10, Math.min(cW / activeContentSize.w, cH / activeContentSize.h) * 0.9));
         suppressViewportWriteRef.current = true;
         setBaseZoom(fitZoom);
         setTransform({ x: restore.tx, y: restore.ty, scale: restore.zoom });
@@ -1273,12 +1304,12 @@ function SubcontractDetailPageInner() {
     }
     suppressViewportWriteRef.current = true;
     resetViewport();
-  }, [layout]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeContentSize]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ズーム/パンのURL同期。手動操作（ホイール/ボタン/ドラッグ）による変化のみ書き込む
   // （resetViewport起因の自動フィットは suppressViewportWriteRef で抑制）。history.replaceState、debounce後に反映
   useEffect(() => {
-    if (!layout) return;
+    if (!activeContentSize) return;
     if (suppressViewportWriteRef.current) { suppressViewportWriteRef.current = false; return; }
     const timer = window.setTimeout(() => {
       const p = new URLSearchParams(window.location.search);
@@ -1289,7 +1320,7 @@ function SubcontractDetailPageInner() {
       window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
     }, 500);
     return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- layout intentionally excluded; only transform changes should retrigger this write
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- activeContentSize intentionally excluded; only transform changes should retrigger this write
   }, [transform.scale, transform.x, transform.y]);
 
   // ブラウザバック/フォワードで sel/tab を復元する（同一ページ内の履歴移動。z/tx/tyも併せて反映）
@@ -1303,6 +1334,7 @@ function SubcontractDetailPageInner() {
         setSelectedBlock(null);
       }
       setActiveTab(s.tab ?? 'flow');
+      setViewModeState(s.view ?? 'block');
       if (s.zoom !== undefined && s.tx !== undefined && s.ty !== undefined) {
         suppressViewportWriteRef.current = true;
         setTransform({ x: s.tx, y: s.ty, scale: s.zoom });
@@ -1362,6 +1394,7 @@ function SubcontractDetailPageInner() {
 
   // ここに到達した時点で graph は必ず非 null
   const safeLayout = layout!;
+  const safeRibbonLayout = ribbonLayout!;
   return (
     <div style={{ display: 'flex', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* SVGキャンバス */}
@@ -1426,6 +1459,45 @@ function SubcontractDetailPageInner() {
           </svg>
         </div>
 
+        {/* 表示切り替え — 年度ピルの右隣（ブロック図=A案 / フロー図=B案） */}
+        <div
+          data-pan-disabled="true"
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: 'calc(50% + 108px)',
+            zIndex: 15,
+            display: 'flex',
+            border: '1px solid #e0e0e0',
+            borderRadius: 8,
+            background: 'rgba(255,255,255,0.95)',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            overflow: 'hidden',
+          }}
+        >
+          {([
+            ['block', 'ブロック図'],
+            ['ribbon', 'フロー図'],
+          ] as const).map(([mode, label]) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              title={mode === 'block' ? '縦ブロック図（A案）' : 'サンキー風横フロー（B案）'}
+              style={{
+                border: 'none',
+                background: viewMode === mode ? '#eff6ff' : 'transparent',
+                color: viewMode === mode ? '#1e40af' : '#555',
+                fontWeight: viewMode === mode ? 700 : 500,
+                fontSize: 12,
+                padding: '6px 12px',
+                cursor: 'pointer',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <svg
           ref={svgRef}
           width="100%"
@@ -1438,6 +1510,8 @@ function SubcontractDetailPageInner() {
           onClick={onSvgBackgroundClick}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
+          {viewMode === 'block' && (
+          <>
             {/* 順方向エッジ */}
             {safeLayout.edges.filter(e => !e.isBackEdge).map((edge, i) => {
               const target = safeLayout.blocks.find((b) => b.blockId === edge.targetBlock);
@@ -1632,7 +1706,7 @@ function SubcontractDetailPageInner() {
                 <g
                   key={lb.blockId}
                   onClick={() => handleNodeClick(lb.node)}
-                  onMouseEnter={() => { setHoveredNodeRaw({ kind: 'block', block: lb }); setHoveredBlockId(lb.blockId); }}
+                  onMouseEnter={() => { setHoveredNodeRaw({ kind: 'block', block: lb.node }); setHoveredBlockId(lb.blockId); }}
                   onMouseLeave={() => { setHoveredNodeRaw(null); setHoveredBlockId(null); }}
                   style={{ cursor: 'pointer', filter: CARD_SHADOW }}
                 >
@@ -1753,6 +1827,171 @@ function SubcontractDetailPageInner() {
                 </g>
               );
             })}
+          </>
+          )}
+
+          {viewMode === 'ribbon' && (
+          <>
+            {/* 順方向フロー（帯） */}
+            {safeRibbonLayout.flows.map((flow, i) => {
+              const target = safeRibbonLayout.bars.find((b) => b.blockId === flow.targetBlock);
+              const palette = target ? originPalette(target.originKind) : null;
+              const edgeStyle = flowEdgeStyle(flow.origin);
+              const isSeparateOrigin = flow.origin === 'separate-origin';
+              return (
+                <path
+                  key={`rfwd-${i}`}
+                  d={ribbonFlowPath(flow.x1, flow.y1Top, flow.y1Bot, flow.x2, flow.y2Top, flow.y2Bot)}
+                  fill={palette ? palette.header : edgeStyle.stroke}
+                  fillOpacity={0.4}
+                  stroke={isSeparateOrigin ? edgeStyle.stroke : 'none'}
+                  strokeWidth={isSeparateOrigin ? 1.5 : 0}
+                  strokeDasharray={isSeparateOrigin ? '5 4' : undefined}
+                />
+              );
+            })}
+
+            {/* バックエッジ・自己ループ（簡略表現: 細い破線で上方を迂回） */}
+            {safeRibbonLayout.backEdges.map((edge, i) => (
+              <path
+                key={`rback-${i}`}
+                d={edge.isSelfLoop ? ribbonSelfLoopPath(edge.x1, edge.y1) : ribbonBackEdgePath(edge.x1, edge.y1, edge.x2, edge.y2)}
+                fill="none"
+                stroke={COLOR_BACK_EDGE}
+                strokeWidth={1.5}
+                strokeDasharray="5 3"
+              />
+            ))}
+
+            {/* 事業コンテキストノード（ルートバー。見た目・操作はA案の事業カードと共通） */}
+            <g
+              onClick={handleDeselect}
+              onMouseEnter={() => setHoveredNodeRaw({ kind: 'root' })}
+              onMouseLeave={() => setHoveredNodeRaw(null)}
+              style={{ cursor: 'pointer' }}
+            >
+              <rect
+                x={safeRibbonLayout.root.x}
+                y={safeRibbonLayout.root.y}
+                width={safeRibbonLayout.root.w}
+                height={safeRibbonLayout.root.h}
+                rx={CARD_RADIUS}
+                fill="transparent"
+                style={{ pointerEvents: 'all' }}
+              />
+              <path
+                d={roundedTopPath(safeRibbonLayout.root.x, safeRibbonLayout.root.y, safeRibbonLayout.root.w, 56, CARD_RADIUS)}
+                fill={COLOR_ROOT}
+                stroke={COLOR_ROOT}
+                strokeWidth={CARD_BORDER_W}
+                vectorEffect="non-scaling-stroke"
+                style={{ pointerEvents: 'none' }}
+              />
+              <path
+                d={roundedBottomPath(safeRibbonLayout.root.x, safeRibbonLayout.root.y + 56, safeRibbonLayout.root.w, safeRibbonLayout.root.h - 56, CARD_RADIUS)}
+                fill={COLOR_CONTEXT_BODY}
+                stroke={COLOR_ROOT}
+                strokeWidth={CARD_BORDER_W}
+                vectorEffect="non-scaling-stroke"
+                style={{ pointerEvents: 'none' }}
+              />
+              <foreignObject
+                x={safeRibbonLayout.root.x + 14}
+                y={safeRibbonLayout.root.y + 6}
+                width={safeRibbonLayout.root.w - 28}
+                height={44}
+                style={{ pointerEvents: 'none' }}
+              >
+                <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
+                  <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: 'rgba(255,255,255,0.78)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    事業 / PID {graph.projectId}
+                  </div>
+                  <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#fff', lineHeight: `${scaleFont(13)}px`, marginTop: 3, ...CLAMP_2_LINES }}>
+                    {graph.projectName}
+                  </div>
+                </div>
+              </foreignObject>
+              <text
+                x={safeRibbonLayout.root.x + safeRibbonLayout.root.w - 14}
+                y={safeRibbonLayout.root.y + safeRibbonLayout.root.h - 14}
+                textAnchor="end"
+                fontSize={scaleFont(9)}
+                fontWeight={700}
+                fill={COLOR_CONTEXT_BODY_SUBTLE}
+                style={{ userSelect: 'none' }}
+              >
+                <tspan x={safeRibbonLayout.root.x + safeRibbonLayout.root.w - 14}>予算 {graph.budget > 0 ? formatYen(graph.budget) : '—'}</tspan>
+                <tspan x={safeRibbonLayout.root.x + safeRibbonLayout.root.w - 14} dy={scaleFont(12)}>支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}</tspan>
+              </text>
+            </g>
+
+            {/* ブロックバー（縦バー。太さ=金額。ラベルはバー内に白文字） */}
+            {safeRibbonLayout.bars.map((bar) => {
+              const isSelected = selectedBlock?.blockId === bar.blockId;
+              const isHovered = hoveredBlockId === bar.blockId;
+              const palette = originPalette(bar.originKind);
+              const selectedStroke = palette.selectedStroke;
+              const borderColor = isSelected ? selectedStroke : (isHovered ? '#111827' : 'transparent');
+              const borderWidth = isSelected ? 3 : (isHovered ? 2 : 0);
+              const showAmount = bar.h >= 40;
+
+              return (
+                <g
+                  key={bar.blockId}
+                  onClick={() => handleNodeClick(bar.node)}
+                  onMouseEnter={() => { setHoveredNodeRaw({ kind: 'block', block: bar.node }); setHoveredBlockId(bar.blockId); }}
+                  onMouseLeave={() => { setHoveredNodeRaw(null); setHoveredBlockId(null); }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {isSelected && (
+                    <rect
+                      x={bar.x - 3}
+                      y={bar.y - 3}
+                      width={bar.w + 6}
+                      height={bar.h + 6}
+                      rx={5}
+                      fill="none"
+                      stroke={CARD_SELECTED_RING}
+                      strokeWidth={4}
+                      style={{ pointerEvents: 'none' }}
+                    />
+                  )}
+                  <rect
+                    x={bar.x}
+                    y={bar.y}
+                    width={bar.w}
+                    height={bar.h}
+                    rx={4}
+                    fill={palette.header}
+                    stroke={borderColor}
+                    strokeWidth={borderWidth}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <foreignObject x={bar.x + 8} y={bar.y + 2} width={bar.w - 16} height={Math.max(bar.h - 4, 12)} style={{ pointerEvents: 'none' }}>
+                    <div style={{
+                      fontFamily: 'inherit',
+                      userSelect: 'none',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {bar.blockName}
+                      </div>
+                      {showAmount && (
+                        <div style={{ fontSize: scaleFont(9), fontWeight: 600, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>
+                          {bar.isZeroAmount ? '金額内訳なし' : formatYen(bar.totalAmount)}
+                        </div>
+                      )}
+                    </div>
+                  </foreignObject>
+                </g>
+              );
+            })}
+          </>
+          )}
           </g>
 
         </svg>
@@ -1766,8 +2005,8 @@ function SubcontractDetailPageInner() {
           const headerColor = isRoot ? COLOR_ROOT : palette!.header;
           const bodyColor = isRoot ? COLOR_CONTEXT_BODY : palette!.body;
           const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : palette!.bodyText;
-          const topRecipients = lb ? sortRecipients(lb.node.recipients, 'amount-desc').slice(0, 3) : [];
-          const tipH = isRoot ? 126 : 96 + (lb!.node.role ? 18 : 0) + topRecipients.length * 18;
+          const topRecipients = lb ? sortRecipients(lb.recipients, 'amount-desc').slice(0, 3) : [];
+          const tipH = isRoot ? 126 : 96 + (lb!.role ? 18 : 0) + topRecipients.length * 18;
           const containerW = containerRef.current?.clientWidth ?? 1000;
           const containerH = containerRef.current?.clientHeight ?? 800;
           const GAP = 12;
@@ -1819,8 +2058,8 @@ function SubcontractDetailPageInner() {
                 ) : (
                   <>
                     <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{lb!.blockName}</div>
-                    <div>{formatYen(lb!.totalAmount)} / 支出先 {lb!.node.recipients.length.toLocaleString()}件</div>
-                    {lb!.node.role && <div>{lb!.node.role}</div>}
+                    <div>{formatYen(lb!.totalAmount)} / 支出先 {lb!.recipients.length.toLocaleString()}件</div>
+                    {lb!.role && <div>{lb!.role}</div>}
                     {topRecipients.map((r, i) => (
                       <div key={`${r.name}-${r.corporateNumber}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i + 1}. {r.name || '（氏名なし）'}</span>

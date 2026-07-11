@@ -89,7 +89,7 @@ const MAX_DEPTH_LIMIT = 30;
  *
  * いずれも depth=1 から流す。
  */
-function computeDepths(flows: BlockEdge[]): Map<string, number> {
+export function computeDepths(flows: BlockEdge[]): Map<string, number> {
   const depthMap = new Map<string, number>();
   const queue: Array<{ blockId: string; depth: number }> = [];
   const children = new Map<string, string[]>();
@@ -121,7 +121,7 @@ function computeDepths(flows: BlockEdge[]): Map<string, number> {
   return depthMap;
 }
 
-function mergeParallelFlows(flows: BlockEdge[]): BlockEdge[] {
+export function mergeParallelFlows(flows: BlockEdge[]): BlockEdge[] {
   const byPair = new Map<string, BlockEdge & { noteSet: Set<string> }>();
 
   for (const flow of flows) {
