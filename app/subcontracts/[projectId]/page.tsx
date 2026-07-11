@@ -1,5 +1,15 @@
 'use client';
 
+/**
+ * /subcontracts/[projectId]（詳細） URL=状態パラメータ一覧。
+ * 既定値のときは省略する（クリーンなURL維持）。
+ *
+ *   year : 年度（既存、2024|2025。既定2025）
+ *   sel  : 選択中ブロックID（未選択時は省略）。選択・タブ変更は history.pushState（ブラウザバックで戻れる）
+ *   tab  : アクティブタブの短縮コード（fl=流れ/bl=ブロック/rc=支出先/ic=間接経費。既定'fl'は省略）
+ *   z    : ズーム倍率（絶対スケール値、小数第2位）。history.replaceState（debounce後、履歴を汚さない）
+ *   tx/ty: パン位置（transform.x / transform.y、整数px）。z と同じ replaceState 経路で同期
+ */
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense, type CSSProperties } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -238,6 +248,37 @@ type HoveredNode =
 // ─── サイドパネル（タブ式） ──────────────────────────────────────────────
 
 type PaneTab = 'flow' | 'blocks' | 'recipients' | 'indirect-cost';
+
+const TAB_TO_CODE: Record<PaneTab, string> = { flow: 'fl', blocks: 'bl', recipients: 'rc', 'indirect-cost': 'ic' };
+const CODE_TO_TAB: Record<string, PaneTab> = { fl: 'flow', bl: 'blocks', rc: 'recipients', ic: 'indirect-cost' };
+
+interface DetailUrlState {
+  sel: string;
+  tab: PaneTab;
+  zoom: number;
+  tx: number;
+  ty: number;
+}
+
+/** URL(検索パラメータ文字列)から sel/tab/z/tx/ty を復元する。存在しない・不正な値は省略する */
+function parseDetailUrlState(sp: { get(key: string): string | null }): Partial<DetailUrlState> {
+  const result: Partial<DetailUrlState> = {};
+  const sel = sp.get('sel'); if (sel) result.sel = sel;
+  const tab = sp.get('tab'); if (tab && CODE_TO_TAB[tab]) result.tab = CODE_TO_TAB[tab];
+  const z = sp.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n > 0) result.zoom = n; }
+  const tx = sp.get('tx'); if (tx !== null) { const n = parseFloat(tx); if (!isNaN(n)) result.tx = n; }
+  const ty = sp.get('ty'); if (ty !== null) { const n = parseFloat(ty); if (!isNaN(n)) result.ty = n; }
+  return result;
+}
+
+/** 選択・タブ変更を pushState で反映する（ブラウザバックで選択を戻れる）。sel=null は選択解除 */
+function pushSelTabUrl(sel: string | null, tab: PaneTab) {
+  const p = new URLSearchParams(window.location.search);
+  if (sel !== null) p.set('sel', sel); else p.delete('sel');
+  if (tab !== 'flow') p.set('tab', TAB_TO_CODE[tab]); else p.delete('tab');
+  const qs = p.toString();
+  window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
+}
 
 function SidePane({
   block,
@@ -893,6 +934,15 @@ function SubcontractDetailPageInner() {
   const projectId = params.projectId;
   const parsedYear = Number.parseInt(searchParams.get('year') ?? '2025', 10);
   const year = parsedYear === 2024 || parsedYear === 2025 ? parsedYear : 2025;
+  // マウント時のURL(sel/tab/z/tx/ty)を一度だけ捕捉。データ読み込み後の初回復元にのみ使う
+  // （sel/tab の復元先はグラフ読み込み完了時、z/tx/ty の復元先は初回フィット時と別タイミングのため、
+  //   オブジェクト自体は読み取り専用で保持し、消費側は各々の「適用済み」refで一度きりに制御する）
+  const initialUrlStateRef = useRef<Partial<DetailUrlState> | null>(null);
+  if (initialUrlStateRef.current === null) initialUrlStateRef.current = parseDetailUrlState(searchParams);
+  const selRestoredRef = useRef(false);
+  const viewportRestoredRef = useRef(false);
+  // resetViewport() 呼び出しがURL復元由来か（=書き込み抑制すべきか）を伝えるフラグ
+  const suppressViewportWriteRef = useRef(false);
 
   const [graph, setGraph] = useState<SubcontractGraph | null>(null);
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | null>(null);
@@ -944,17 +994,18 @@ function SubcontractDetailPageInner() {
 
   // ノードクリック: 同じブロックなら解除、別ブロックなら選択 + 支出先タブへ
   const handleNodeClick = useCallback((node: BlockNode) => {
-    setSelectedBlock((prev) => {
-      if (prev?.blockId === node.blockId) return null;
-      return node;
-    });
-    setActiveTab((prev) => (selectedBlock?.blockId === node.blockId ? prev : 'recipients'));
-  }, [selectedBlock]);
+    const isDeselect = selectedBlock?.blockId === node.blockId;
+    setSelectedBlock(isDeselect ? null : node);
+    const nextTab = isDeselect ? activeTab : 'recipients';
+    setActiveTab(nextTab);
+    pushSelTabUrl(isDeselect ? null : node.blockId, nextTab);
+  }, [selectedBlock, activeTab]);
 
   // フロー一覧/ブロック一覧の行から選択した場合: 選択 + 支出先タブへ
   const handleSelectFromList = useCallback((node: BlockNode) => {
     setSelectedBlock(node);
     setActiveTab('recipients');
+    pushSelTabUrl(node.blockId, 'recipients');
   }, []);
 
   // ズーム/パン
@@ -984,8 +1035,19 @@ function SubcontractDetailPageInner() {
       .then((data: SubcontractGraph) => {
         if (controller.signal.aborted) return;
         setGraph(data);
-        // 主語は「事業」。ブロック選択はユーザーの明示クリックを起点とする
-        setSelectedBlock(null);
+        // 主語は「事業」。ブロック選択はユーザーの明示クリックを起点とする。
+        // ただしマウント時にURLへ sel/tab があれば復元する（存在しないblockIdは無視）。
+        // この復元は最初の読み込みでのみ行い、以降の年度/事業切替では適用しない
+        if (!selRestoredRef.current) {
+          selRestoredRef.current = true;
+          const restore = initialUrlStateRef.current;
+          const restoredBlock = restore?.sel ? data.blocks.find((b) => b.blockId === restore.sel) ?? null : null;
+          setSelectedBlock(restoredBlock);
+          if (restore?.tab) setActiveTab(restore.tab);
+          else if (restoredBlock) setActiveTab('recipients');
+        } else {
+          setSelectedBlock(null);
+        }
         setLoading(false);
       })
       .catch((e: Error) => {
@@ -1104,10 +1166,63 @@ function SubcontractDetailPageInner() {
     });
   }, [layout]);
 
-  // グラフ読み込み後に全体表示
+  // グラフ読み込み後に全体表示。ただし最初の1回はURLにz/tx/tyがあればそれを優先復元する
   useEffect(() => {
-    if (layout) resetViewport();
+    if (!layout) return;
+    const container = containerRef.current;
+    if (!viewportRestoredRef.current) {
+      viewportRestoredRef.current = true;
+      const restore = initialUrlStateRef.current;
+      if (container && restore?.zoom !== undefined && restore.tx !== undefined && restore.ty !== undefined) {
+        const cW = container.clientWidth;
+        const cH = container.clientHeight;
+        const fitZoom = Math.max(0.05, Math.min(10, Math.min(cW / layout.svgWidth, cH / layout.svgHeight) * 0.9));
+        suppressViewportWriteRef.current = true;
+        setBaseZoom(fitZoom);
+        setTransform({ x: restore.tx, y: restore.ty, scale: restore.zoom });
+        return;
+      }
+    }
+    suppressViewportWriteRef.current = true;
+    resetViewport();
   }, [layout]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ズーム/パンのURL同期。手動操作（ホイール/ボタン/ドラッグ）による変化のみ書き込む
+  // （resetViewport起因の自動フィットは suppressViewportWriteRef で抑制）。history.replaceState、debounce後に反映
+  useEffect(() => {
+    if (!layout) return;
+    if (suppressViewportWriteRef.current) { suppressViewportWriteRef.current = false; return; }
+    const timer = window.setTimeout(() => {
+      const p = new URLSearchParams(window.location.search);
+      p.set('z', transform.scale.toFixed(2));
+      p.set('tx', String(Math.round(transform.x)));
+      p.set('ty', String(Math.round(transform.y)));
+      const qs = p.toString();
+      window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+    }, 500);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- layout intentionally excluded; only transform changes should retrigger this write
+  }, [transform.scale, transform.x, transform.y]);
+
+  // ブラウザバック/フォワードで sel/tab を復元する（同一ページ内の履歴移動。z/tx/tyも併せて反映）
+  useEffect(() => {
+    function onPopState() {
+      const s = parseDetailUrlState(new URLSearchParams(window.location.search));
+      if (s.sel) {
+        const found = graph?.blocks.find((b) => b.blockId === s.sel) ?? null;
+        setSelectedBlock(found);
+      } else {
+        setSelectedBlock(null);
+      }
+      setActiveTab(s.tab ?? 'flow');
+      if (s.zoom !== undefined && s.tx !== undefined && s.ty !== undefined) {
+        suppressViewportWriteRef.current = true;
+        setTransform({ x: s.tx, y: s.ty, scale: s.zoom });
+      }
+    }
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [graph]);
 
   function onMouseDown(e: React.MouseEvent) {
     if (e.button !== 0) return;
@@ -1283,7 +1398,7 @@ function SubcontractDetailPageInner() {
 
             {/* 事業コンテキストノード */}
             <g
-              onClick={() => { setSelectedBlock(null); setActiveTab('flow'); }}
+              onClick={() => { setSelectedBlock(null); setActiveTab('flow'); pushSelTabUrl(null, 'flow'); }}
               onMouseEnter={() => setHoveredNodeRaw({ kind: 'root' })}
               onMouseLeave={() => setHoveredNodeRaw(null)}
               style={{ cursor: 'pointer' }}
@@ -1652,9 +1767,9 @@ function SubcontractDetailPageInner() {
             orgChain={visibleOrgChain}
             year={year}
             activeTab={activeTab}
-            onChangeTab={setActiveTab}
+            onChangeTab={(tab) => { setActiveTab(tab); pushSelTabUrl(selectedBlock?.blockId ?? null, tab); }}
             onSelectBlock={handleSelectFromList}
-            onDeselectBlock={() => setSelectedBlock(null)}
+            onDeselectBlock={() => { setSelectedBlock(null); pushSelTabUrl(null, activeTab); }}
           />
         </SidePanelChrome>
     </div>

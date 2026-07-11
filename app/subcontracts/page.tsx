@@ -1,8 +1,28 @@
 'use client';
 
+/**
+ * /subcontracts（一覧） URL=状態パラメータ一覧。
+ * 既定値のときは省略する（クリーンなURL維持）。すべて history.replaceState で同期（debounce後）。
+ *
+ *   year : 年度（既存、2024|2025。既定2025）
+ *   q    : フリーテキスト検索語
+ *   sort : ソートキー（SortKey のいずれか。既定 'projectId' は省略）
+ *   dir  : ソート方向（'asc'|'desc'。sortKey既定時の既定dirは'asc'、それ以外は'desc'。一致時は省略）
+ *   page : ページ番号（1始まり。既定1は省略）
+ *   fp   : フィルタパネル開閉（'1'で開）
+ *   fm   : 省庁フィルタ（複数選択、複数指定可）
+ *   fac  : 会計区分フィルタ（複数選択、複数指定可）
+ *   fst  : 構造フィルタ（複数選択、複数指定可）
+ *   fnp  : 事業名テキストフィルタ
+ *   fbu  : 担当組織テキストフィルタ
+ *   bmin/bmax : 予算額 Min/Max
+ *   emin/emax : 執行額 Min/Max
+ *   dmin/dmax : 直接支出合計 Min/Max
+ *   tmin/tmax : 支出額合計 Min/Max
+ */
 import { useState, useEffect, useMemo, useRef, Suspense, type CSSProperties, type ReactNode } from 'react';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { FilterRow } from '@/components/filters/FilterRow';
 import { FilterTextInput } from '@/components/filters/FilterTextInput';
 import { MinMaxInput } from '@/components/filters/MinMaxInput';
@@ -44,6 +64,23 @@ const STRING_SORT_KEYS: ReadonlySet<SortKey> = new Set<SortKey>([
   'accountCategory',
 ]);
 type SortDir = 'asc' | 'desc';
+
+const SORT_KEY_SET: ReadonlySet<string> = new Set<SortKey>([
+  'projectId', 'projectName', 'ministry', 'bureau', 'accountCategory',
+  'budget', 'execution', 'directExpenseTotal', 'totalExpense',
+  'totalMinusDirect', 'executionMinusDirect', 'maxDepth',
+  'totalBlockCount', 'directBlockCount', 'subcontractBlockCount',
+  'indirectCostCount', 'separateOriginCount', 'totalRecipientCount',
+  'branchingBlockCount', 'maxBranchWidth', 'mergeTargetCount', 'maxMergeWidth',
+  'institutional',
+]);
+function isSortKey(v: string): v is SortKey {
+  return SORT_KEY_SET.has(v);
+}
+// sortKey切替時の既定方向（toggleSortの既定と一致させ、URL省略時の復元を揃える）
+function defaultSortDir(key: SortKey): SortDir {
+  return key === 'projectId' ? 'asc' : 'desc';
+}
 
 const PAGE_SIZE = 50;
 const COLUMN_WIDTH_STORAGE_KEY = 'subcontracts-column-widths';
@@ -116,7 +153,6 @@ function loadColumnWidths(): number[] {
 
 function SubcontractsPageInner() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [year, setYear] = useState(() => {
     const y = parseInt(searchParams.get('year') ?? '2025', 10);
     return [2024, 2025].includes(y) ? y : 2025;
@@ -124,30 +160,41 @@ function SubcontractsPageInner() {
   const [graphs, setGraphs] = useState<SubcontractGraph[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('projectId');
-  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [query, setQuery] = useState(() => searchParams.get('q') ?? '');
+  const [sortKey, setSortKey] = useState<SortKey>(() => {
+    const s = searchParams.get('sort');
+    return s && isSortKey(s) ? s : 'projectId';
+  });
+  const [sortDir, setSortDir] = useState<SortDir>(() => {
+    const s = searchParams.get('sort');
+    const key: SortKey = s && isSortKey(s) ? s : 'projectId';
+    const d = searchParams.get('dir');
+    return d === 'asc' || d === 'desc' ? d : defaultSortDir(key);
+  });
   // 複数選択フィルタ
-  const [selectedMinistries, setSelectedMinistries] = useState<string[]>([]);
+  const [selectedMinistries, setSelectedMinistries] = useState<string[]>(() => searchParams.getAll('fm'));
   // 会計区分（'一般会計' | '特別会計' | '一般・特別' | '区分なし'）の複数選択
-  const [selectedAccountCategories, setSelectedAccountCategories] = useState<string[]>([]);
+  const [selectedAccountCategories, setSelectedAccountCategories] = useState<string[]>(() => searchParams.getAll('fac'));
   // 構造（'別財源あり' | '合流あり' | '制度フローのみ'）の複数選択（OR）
-  const [selectedStructures, setSelectedStructures] = useState<string[]>([]);
+  const [selectedStructures, setSelectedStructures] = useState<string[]>(() => searchParams.getAll('fst'));
   // 名称・組織テキストフィルタ
-  const [filterProjectName, setFilterProjectName] = useState('');
-  const [filterBureau, setFilterBureau] = useState('');
+  const [filterProjectName, setFilterProjectName] = useState(() => searchParams.get('fnp') ?? '');
+  const [filterBureau, setFilterBureau] = useState(() => searchParams.get('fbu') ?? '');
   // 金額 Min/Max
-  const [filterBudgetMin, setFilterBudgetMin] = useState('');
-  const [filterBudgetMax, setFilterBudgetMax] = useState('');
-  const [filterExecutionMin, setFilterExecutionMin] = useState('');
-  const [filterExecutionMax, setFilterExecutionMax] = useState('');
-  const [filterDirectMin, setFilterDirectMin] = useState('');
-  const [filterDirectMax, setFilterDirectMax] = useState('');
-  const [filterTotalExpenseMin, setFilterTotalExpenseMin] = useState('');
-  const [filterTotalExpenseMax, setFilterTotalExpenseMax] = useState('');
+  const [filterBudgetMin, setFilterBudgetMin] = useState(() => searchParams.get('bmin') ?? '');
+  const [filterBudgetMax, setFilterBudgetMax] = useState(() => searchParams.get('bmax') ?? '');
+  const [filterExecutionMin, setFilterExecutionMin] = useState(() => searchParams.get('emin') ?? '');
+  const [filterExecutionMax, setFilterExecutionMax] = useState(() => searchParams.get('emax') ?? '');
+  const [filterDirectMin, setFilterDirectMin] = useState(() => searchParams.get('dmin') ?? '');
+  const [filterDirectMax, setFilterDirectMax] = useState(() => searchParams.get('dmax') ?? '');
+  const [filterTotalExpenseMin, setFilterTotalExpenseMin] = useState(() => searchParams.get('tmin') ?? '');
+  const [filterTotalExpenseMax, setFilterTotalExpenseMax] = useState(() => searchParams.get('tmax') ?? '');
   // 折りたたみパネル
-  const [showFilterPanel, setShowFilterPanel] = useState(false);
-  const [page, setPage] = useState(1);
+  const [showFilterPanel, setShowFilterPanel] = useState(() => searchParams.get('fp') === '1');
+  const [page, setPage] = useState(() => {
+    const p = Number(searchParams.get('page'));
+    return Number.isInteger(p) && p >= 1 ? p : 1;
+  });
   const [columnWidths, setColumnWidths] = useState(loadColumnWidths);
   const resizingColumnRef = useRef<{ index: number; startX: number; startWidth: number } | null>(null);
   const savedColumnWidthsRef = useRef<string | null>(null);
@@ -232,6 +279,43 @@ function SubcontractsPageInner() {
       document.body.style.userSelect = '';
     };
   }, []);
+
+  // URL=状態同期（検索・ソート・フィルタ・ページ・年度）。history.replaceState、打鍵はdebounce後に反映
+  const listUrlMountedRef = useRef(false);
+  useEffect(() => {
+    if (!listUrlMountedRef.current) { listUrlMountedRef.current = true; return; }
+    const timer = window.setTimeout(() => {
+      const p = new URLSearchParams();
+      if (year !== 2025) p.set('year', String(year));
+      if (query) p.set('q', query);
+      if (sortKey !== 'projectId') p.set('sort', sortKey);
+      if (sortDir !== defaultSortDir(sortKey)) p.set('dir', sortDir);
+      if (page !== 1) p.set('page', String(page));
+      if (showFilterPanel) p.set('fp', '1');
+      for (const m of selectedMinistries) p.append('fm', m);
+      for (const a of selectedAccountCategories) p.append('fac', a);
+      for (const s of selectedStructures) p.append('fst', s);
+      if (filterProjectName) p.set('fnp', filterProjectName);
+      if (filterBureau) p.set('fbu', filterBureau);
+      if (filterBudgetMin) p.set('bmin', filterBudgetMin);
+      if (filterBudgetMax) p.set('bmax', filterBudgetMax);
+      if (filterExecutionMin) p.set('emin', filterExecutionMin);
+      if (filterExecutionMax) p.set('emax', filterExecutionMax);
+      if (filterDirectMin) p.set('dmin', filterDirectMin);
+      if (filterDirectMax) p.set('dmax', filterDirectMax);
+      if (filterTotalExpenseMin) p.set('tmin', filterTotalExpenseMin);
+      if (filterTotalExpenseMax) p.set('tmax', filterTotalExpenseMax);
+      const qs = p.toString();
+      window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+    }, 200);
+    return () => window.clearTimeout(timer);
+  }, [
+    year, query, sortKey, sortDir, page, showFilterPanel,
+    selectedMinistries, selectedAccountCategories, selectedStructures,
+    filterProjectName, filterBureau,
+    filterBudgetMin, filterBudgetMax, filterExecutionMin, filterExecutionMax,
+    filterDirectMin, filterDirectMax, filterTotalExpenseMin, filterTotalExpenseMax,
+  ]);
 
   // 金額フィルタの解析
   const budgetMinYen = parseAmountToYen(filterBudgetMin);
@@ -525,7 +609,7 @@ function SubcontractsPageInner() {
           <div style={{ position: 'relative', flexShrink: 0 }}>
             <select
               value={year}
-              onChange={(e) => { const y = Number(e.target.value); setYear(y); router.replace(`/subcontracts?year=${y}`); }}
+              onChange={(e) => setYear(Number(e.target.value))}
               style={{
                 fontSize: 13,
                 border: '1px solid #e0e0e0',
