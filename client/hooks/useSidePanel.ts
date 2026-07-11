@@ -74,11 +74,20 @@ export function useSidePanel(options: UseSidePanelOptions): UseSidePanelResult {
     return () => window.removeEventListener('resize', onResize);
   }, [viewportWidth]);
 
+  const effectiveViewportWidth = viewportWidth ?? trackedViewportWidth;
+  const effectiveWidth = useMemo(() => {
+    const maxForViewport = Math.max(0, effectiveViewportWidth - SIDE_PANEL_VIEWPORT_RESERVE_PX);
+    const minForViewport = Math.min(minWidth, maxForViewport);
+    return Math.min(maxForViewport, Math.max(minForViewport, width));
+  }, [width, effectiveViewportWidth, minWidth]);
+
   const onResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    resizeRef.current = { startX: e.clientX, startW: width };
+    // アンカーは描画されている実効幅（クランプ後）。生の width を使うと、ビューポートで
+    // クランプされている間は「見えない差分」を跨ぐまでドラッグが効かないデッドゾーンになる
+    resizeRef.current = { startX: e.clientX, startW: effectiveWidth };
     setIsResizing(true);
-  }, [width]);
+  }, [effectiveWidth]);
 
   // ドラッグ中のみ window にリスナを張る。アンマウントやドラッグ終了時に確実に剥がす
   useEffect(() => {
@@ -104,13 +113,6 @@ export function useSidePanel(options: UseSidePanelOptions): UseSidePanelResult {
 
   const resetWidth = useCallback(() => setWidth(defaultWidth), [defaultWidth]);
   const toggleCollapsed = useCallback(() => setCollapsed(c => !c), []);
-
-  const effectiveViewportWidth = viewportWidth ?? trackedViewportWidth;
-  const effectiveWidth = useMemo(() => {
-    const maxForViewport = Math.max(0, effectiveViewportWidth - SIDE_PANEL_VIEWPORT_RESERVE_PX);
-    const minForViewport = Math.min(minWidth, maxForViewport);
-    return Math.min(maxForViewport, Math.max(minForViewport, width));
-  }, [width, effectiveViewportWidth, minWidth]);
 
   return {
     width, setWidth, effectiveWidth,
