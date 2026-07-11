@@ -9,21 +9,37 @@ import { computeDepths, mergeParallelFlows } from '@/app/lib/subcontract-layout'
 /**
  * B案（サンキー風横フロー・リボン表現）のレイアウト計算。
  *
- * 列 = 深度（col0 = ルート、col1 = 深度1、…）。列内はバー（縦長の矩形）を
- * 積み上げて並べ、列間はリボン（帯）で繋ぐ。既存A案（subcontract-layout.ts）の
- * computeDepths / mergeParallelFlows をそのまま再利用し、深度・エッジのマージ規則を
+ * 列 = 深度（col0 = ルート、col1 = 深度1、…）。列内は「縦サブツリー帯（バンド）」で
+ * ノードを配置する。これは A案（subcontract-layout.ts）の横方向バンドアルゴリズム
+ * （subtreeW/placeSubtree）を縦方向に移植したもの: 各ノードは自分の子孫全体が専有する
+ * 縦バンドを持ち、親はバンドの中央に置かれる（単一子の連鎖は真横に一直線になる）。
+ *
+ * 別財源ブロック（separate-origin 起点）は直接系バンド群と混ざらないよう、下に独立した
+ * レーンとして配置する（レーン境界に薄い区切り線・ラベルを描画するための extent を返す）。
+ *
+ * 既存A案の computeDepths / mergeParallelFlows をそのまま再利用し、深度・エッジのマージ規則を
  * 統一する（同じグラフに対して両ビューが矛盾しないことを保証するため）。
  */
 
 // ─── 定数 ──────────────────────────────────────────────
 
-export const RIBBON_COL_W = 300;
-export const RIBBON_COL_GAP = 120;
+// バー幅は sankey ノード風にスリム化（app/sankey-svg の NODE_W=18 に準拠する太さ感）。
+// 列の内容幅（バー + ラベル領域）と列間ギャップは分けて持つ。列ピッチ = COL_W + COL_GAP
+// （sankey の colSpacing = NODE_W + labelSpace 相当の考え方）。
+export const RIBBON_BAR_W = 20;
+export const RIBBON_LABEL_W = 190;
+export const RIBBON_COL_W = RIBBON_BAR_W + RIBBON_LABEL_W;
+export const RIBBON_COL_GAP = 40;
 export const RIBBON_ROW_GAP = 14;
+// 直接系バンド群と別財源レーンの間の追加ギャップ（通常の兄弟間ギャップより大きく取り、
+// 視覚的に「別レーン」であることを示す）
+export const RIBBON_LANE_GAP = 56;
 export const RIBBON_RIBBON_GAP = 2;
 export const RIBBON_BAR_MIN_H = 28;
 export const RIBBON_BAR_MAX_H = 160;
 export const RIBBON_ROOT_H = 120;
+// ルートバーの高さ = 直接系流出リボン太さの合計 + このパディング
+export const RIBBON_ROOT_PADDING = 24;
 export const RIBBON_MARGIN = { top: 28, right: 36, bottom: 40, left: 36 };
 export const RIBBON_MIN_THICKNESS = 3;
 
@@ -84,11 +100,18 @@ export interface RibbonBackEdge {
   isSelfLoop: boolean;
 }
 
+/** 別財源レーンの縦方向の範囲（区切り線・ラベル描画用）。別財源ブロックが無ければ null */
+export interface RibbonSeparateLane {
+  top: number;
+  bottom: number;
+}
+
 export interface SubcontractRibbonLayout {
   root: RibbonRoot;
   bars: RibbonBar[];
   flows: RibbonFlow[];
   backEdges: RibbonBackEdge[];
+  separateLane: RibbonSeparateLane | null;
   svgWidth: number;
   svgHeight: number;
   maxAmount: number;
@@ -150,9 +173,13 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     byDepth.get(depth)!.push(node);
   }
 
+  // 「直接系(direct/subcontract)」か「別財源系」かの判定。別財源レーンを直接系バンド群の
+  // 下に独立配置するための分類に使う（A案の originRank と同じ規則を踏襲）
+  const isSeparateOriginKind = (k: BlockOriginKind): boolean =>
+    k === 'separate-origin-strong' || k === 'separate-origin-broad';
+  const originRank = (k: BlockOriginKind): number => (isSeparateOriginKind(k) ? 1 : 0);
+
   // depth1: 「direct/subcontract 群 → 別起点群」の順、各群内は金額降順（A案と同じ規則）
-  const originRank = (k: BlockOriginKind): number =>
-    k === 'separate-origin-strong' ? 2 : k === 'separate-origin-broad' ? 1 : 0;
   const depth1Nodes = [...(byDepth.get(1) ?? [])].sort((a, b) => {
     const r = originRank(a.originKind) - originRank(b.originKind);
     return r !== 0 ? r : b.totalAmount - a.totalAmount;
@@ -169,15 +196,18 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     immediateParents.get(f.targetBlock)!.push(f.sourceBlock);
   }
 
-  // fan-in は最大金額の親に所属させ、子は親内で金額降順に並べる（A案と同じ規則）
+  // fan-in は最大金額の親に所属させ、子は親内で金額降順に並べる（A案と同じ規則）。
+  // 順方向の親が特定できないノード（バックエッジ経由の到達等）は orphan として
+  // 自分の originKind に応じたグループの末尾に独立バンドで置く
   const maxDepthVal = depthMap.size > 0 ? Math.max(...depthMap.values()) : 1;
   const childrenOf = new Map<string, BlockNode[]>();
-  const orphans: BlockNode[] = [];
+  const directOrphans: BlockNode[] = [];
+  const separateOrphans: BlockNode[] = [];
   for (let depth = 2; depth <= maxDepthVal; depth++) {
     for (const node of byDepth.get(depth) ?? []) {
       const parents = immediateParents.get(node.blockId) ?? [];
       if (parents.length === 0) {
-        orphans.push(node);
+        (isSeparateOriginKind(node.originKind) ? separateOrphans : directOrphans).push(node);
         continue;
       }
       let bestParentId = parents[0];
@@ -192,30 +222,96 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   }
   for (const kids of childrenOf.values()) kids.sort((a, b) => b.totalAmount - a.totalAmount);
 
-  // 列内の並び順: 親のバンド順を踏襲する DFS 事前順序（A案のバンド配置と同じ視覚的一貫性）
-  const orderIndex = new Map<string, number>();
-  let orderCursor = 0;
-  const visit = (node: BlockNode) => {
-    orderIndex.set(node.blockId, orderCursor++);
-    for (const kid of childrenOf.get(node.blockId) ?? []) visit(kid);
-  };
-  for (const node of depth1Nodes) visit(node);
-  for (const node of orphans) visit(node);
-
-  // 全ノード中の最大金額（バー高さ・リボン太さの共通スケール基準）
+  // ─── 縦サブツリー帯（バンド）配置 ──────────────────────────────────
+  // A案のサブツリー帯配置（subtreeW/placeSubtree）を縦方向に移植したもの。
+  // 各トップレベルノード（depth1 または orphan）は、自分の子孫全体が専有する縦バンドを持つ。
+  // 親は自分のバンドの中央に置かれる（単一子の連鎖は真横に一直線になる）。
   const maxAmount = Math.max(0, ...graph.blocks.map((b) => b.totalAmount));
+  const barH = (node: BlockNode): number => ribbonAmountScale(node.totalAmount, maxAmount);
 
-  // 列ごとに y 座標を積み上げ配置
+  const subtreeH = new Map<string, number>();
+  const calcSubtreeH = (node: BlockNode): number => {
+    const kids = childrenOf.get(node.blockId) ?? [];
+    const h = kids.length === 0
+      ? barH(node)
+      : Math.max(barH(node), kids.reduce((sum, k) => sum + calcSubtreeH(k), 0) + RIBBON_ROW_GAP * (kids.length - 1));
+    subtreeH.set(node.blockId, h);
+    return h;
+  };
+
+  const nodeY = new Map<string, number>();
+  const placeSubtree = (node: BlockNode, bandTop: number): void => {
+    const h = subtreeH.get(node.blockId) ?? barH(node);
+    nodeY.set(node.blockId, bandTop + (h - barH(node)) / 2);
+    let cursor = bandTop;
+    for (const kid of childrenOf.get(node.blockId) ?? []) {
+      placeSubtree(kid, cursor);
+      cursor += (subtreeH.get(kid.blockId) ?? barH(kid)) + RIBBON_ROW_GAP;
+    }
+  };
+
+  // 直接系グループ（direct/subcontract の depth1 + orphan）を上から詰める
+  const directTopLevel = [...depth1Nodes.filter((n) => !isSeparateOriginKind(n.originKind)), ...directOrphans];
+  let bandCursor = RIBBON_MARGIN.top;
+  for (const node of directTopLevel) {
+    calcSubtreeH(node);
+    placeSubtree(node, bandCursor);
+    bandCursor += subtreeH.get(node.blockId)! + RIBBON_ROW_GAP;
+  }
+  const directBandTop = RIBBON_MARGIN.top;
+  const directBandBottom = directTopLevel.length > 0 ? bandCursor - RIBBON_ROW_GAP : RIBBON_MARGIN.top;
+
+  // ルート（col0）: 直接系バンド範囲の縦中央に配置。
+  // 高さ = 直接系 depth-1 への流出リボン太さの合計（≒各直接系トップレベルノードの
+  // バー高さの合計）+ パディング（sankey的な保存感。fan-inで複数本に分岐するケースの
+  // 太さ配分は下の flows 計算で個別に扱うため、ここでは近似値でよい）。
+  // 別財源レーンの位置決めより前に計算する必要がある（ルートのパディングにより、
+  // ルート下端が直接系バンドの実バー範囲より下にはみ出すケースがあり、レーンの
+  // ギャップはそのはみ出しも考慮しないと区切り線・ラベルがルートカードと重なる）
+  const hasDirectBand = directTopLevel.length > 0;
+  const directMidY = hasDirectBand ? (directBandTop + directBandBottom) / 2 : RIBBON_MARGIN.top + RIBBON_ROOT_H / 2;
+  const rootH = hasDirectBand
+    ? Math.max(
+        RIBBON_BAR_MIN_H,
+        directTopLevel.reduce((sum, n) => sum + barH(n), 0) + RIBBON_ROW_GAP * Math.max(0, directTopLevel.length - 1) + RIBBON_ROOT_PADDING,
+      )
+    : RIBBON_ROOT_H;
+  const root: RibbonRoot = {
+    label: graph.projectName,
+    x: RIBBON_MARGIN.left,
+    // ルート幅は列内容幅（バー+ラベル領域）と揃える。depth1バーとの間隔が
+    // 通常の列間ギャップ(RIBBON_COL_GAP)と一致し、余計な重なり・空白が出ない
+    w: RIBBON_COL_W,
+    y: Math.max(RIBBON_MARGIN.top, directMidY - rootH / 2),
+    h: rootH,
+  };
+
+  // 別財源グループ（separate-origin の depth1 + orphan）を、直接系グループ（バー・ルート
+  // カードの両方）の下に追加ギャップを空けて独立レーンとして配置する
+  const separateTopLevel = [...depth1Nodes.filter((n) => isSeparateOriginKind(n.originKind)), ...separateOrphans];
+  let separateLane: RibbonSeparateLane | null = null;
+  if (separateTopLevel.length > 0) {
+    const directContentBottom = Math.max(directBandBottom, hasDirectBand ? root.y + root.h : RIBBON_MARGIN.top);
+    bandCursor = directContentBottom + RIBBON_LANE_GAP;
+    const laneTop = bandCursor;
+    for (const node of separateTopLevel) {
+      calcSubtreeH(node);
+      placeSubtree(node, bandCursor);
+      bandCursor += subtreeH.get(node.blockId)! + RIBBON_ROW_GAP;
+    }
+    separateLane = { top: laneTop - RIBBON_LANE_GAP / 2, bottom: bandCursor - RIBBON_ROW_GAP };
+  }
+
+  // 全ノード中の最大金額（バー高さ・リボン太さの共通スケール基準）は上で算出済み（maxAmount）
+
+  // 列ごとに x 座標のみ決定（y は band 配置で決まっている）
   const bars: RibbonBar[] = [];
   const barByBlockId = new Map<string, RibbonBar>();
-  const colExtent = new Map<number, { minY: number; maxY: number }>();
-
   for (const [depth, nodes] of [...byDepth.entries()].sort((a, b) => a[0] - b[0])) {
-    const sorted = [...nodes].sort((a, b) => (orderIndex.get(a.blockId) ?? 0) - (orderIndex.get(b.blockId) ?? 0));
-    let cursor = RIBBON_MARGIN.top;
     const colX = RIBBON_MARGIN.left + depth * (RIBBON_COL_W + RIBBON_COL_GAP);
-    for (const node of sorted) {
-      const h = ribbonAmountScale(node.totalAmount, maxAmount);
+    for (const node of nodes) {
+      const h = barH(node);
+      const y = nodeY.get(node.blockId) ?? RIBBON_MARGIN.top;
       const bar: RibbonBar = {
         blockId: node.blockId,
         blockName: node.blockName,
@@ -225,30 +321,15 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
         isZeroAmount: node.totalAmount === 0 && node.recipientCount === 0,
         depth,
         x: colX,
-        y: cursor,
-        w: RIBBON_COL_W,
+        y,
+        w: RIBBON_BAR_W,
         h,
         node,
       };
       bars.push(bar);
       barByBlockId.set(node.blockId, bar);
-      cursor += h + RIBBON_ROW_GAP;
-    }
-    if (sorted.length > 0) {
-      colExtent.set(depth, { minY: RIBBON_MARGIN.top, maxY: cursor - RIBBON_ROW_GAP });
     }
   }
-
-  // ルート（col0）: depth1 列の垂直方向の中心に配置。depth1 が無ければ上端固定
-  const col1Extent = colExtent.get(1);
-  const rootMidY = col1Extent ? (col1Extent.minY + col1Extent.maxY) / 2 : RIBBON_MARGIN.top + RIBBON_ROOT_H / 2;
-  const root: RibbonRoot = {
-    label: graph.projectName,
-    x: RIBBON_MARGIN.left,
-    y: Math.max(RIBBON_MARGIN.top, rootMidY - RIBBON_ROOT_H / 2),
-    w: RIBBON_COL_W,
-    h: RIBBON_ROOT_H,
-  };
 
   // ─── フロー（順方向・バックエッジ）の分類 ──────────────────────────────────
   const getDepth = (blockId: string | null) => (blockId === null ? 0 : depthMap.get(blockId) ?? -1);
@@ -274,7 +355,8 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     incomingCountByTarget.set(f.targetBlock, (incomingCountByTarget.get(f.targetBlock) ?? 0) + 1);
   }
 
-  // クロッシングを抑えるため、送出元の y → 送出先の y の順で安定ソートしてからカーソルを送る
+  // クロッシングを抑えるため、送出元の y → 送出先の y の順で安定ソートしてからカーソルを送る。
+  // fan-in（合流）は「ターゲットの入口カーソルに source の y 順で積む」ことで実現される
   const sortedForward = [...forwardFlows].sort((a, b) => {
     const say = getBarTop(a.sourceBlock);
     const sby = getBarTop(b.sourceBlock);
@@ -290,7 +372,7 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     const targetBar = barByBlockId.get(f.targetBlock);
     if (!targetBar) continue;
     const sourceKey = f.sourceBlock ?? ROOT_KEY;
-    const sourceRightX = f.sourceBlock === null ? root.x + root.w : (barByBlockId.get(f.sourceBlock)?.x ?? root.x) + RIBBON_COL_W;
+    const sourceRightX = f.sourceBlock === null ? root.x + root.w : (barByBlockId.get(f.sourceBlock)?.x ?? root.x) + RIBBON_BAR_W;
     const sourceTopDefault = f.sourceBlock === null ? root.y : barByBlockId.get(f.sourceBlock)?.y ?? root.y;
 
     const incomingCount = Math.max(1, incomingCountByTarget.get(f.targetBlock) ?? 1);
@@ -323,7 +405,7 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   const backEdges: RibbonBackEdge[] = backFlowsClassified.map(({ flow: f, isSelfLoop }) => {
     const targetBar = barByBlockId.get(f.targetBlock)!;
     if (isSelfLoop) {
-      const x = targetBar.x + RIBBON_COL_W;
+      const x = targetBar.x + RIBBON_BAR_W;
       const y = targetBar.y + targetBar.h / 2;
       return {
         sourceBlock: f.sourceBlock,
@@ -363,6 +445,7 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     bars,
     flows,
     backEdges,
+    separateLane,
     svgWidth: Math.max(maxRight, RIBBON_MARGIN.left + RIBBON_COL_W + RIBBON_MARGIN.right),
     svgHeight: maxBottom,
     maxAmount,

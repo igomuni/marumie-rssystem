@@ -38,6 +38,10 @@ import {
   ribbonFlowPath,
   ribbonBackEdgePath,
   ribbonSelfLoopPath,
+  RIBBON_MARGIN,
+  RIBBON_COL_W,
+  RIBBON_COL_GAP,
+  RIBBON_BAR_W,
 } from '@/app/lib/subcontract-ribbon-layout';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
@@ -1028,6 +1032,8 @@ function SubcontractDetailPageInner() {
   const [hoveredNodeRaw, setHoveredNodeRaw] = useState<HoveredNode | null>(null);
   // カードのホバー枠色は即時反映（ツールチップの表示遅延とは別系統）
   const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
+  // フロー図（B案）のリボンホバー（sankeyの hoveredLink 流儀）。key = `${sourceBlock ?? 'root'}->${targetBlock}-${index}`
+  const [hoveredRibbonFlowKey, setHoveredRibbonFlowKey] = useState<string | null>(null);
   const [hoveredNodeStable, setHoveredNodeStable] = useState<HoveredNode | null>(null);
   const hoverEnterTimerRef = useRef<number | null>(null);
   const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
@@ -1040,8 +1046,14 @@ function SubcontractDetailPageInner() {
     setViewModeState(mode);
     replaceViewUrl(mode);
   }, []);
-  // サイドパネル（右）の chrome 状態。既定幅は現状の SidePane 固定幅(390)を維持
-  const rightSidePanel = useSidePanel({ side: 'right', defaultWidth: SUBCONTRACT_PANEL_WIDTH_DEFAULT });
+  // サイドパネルの chrome 状態。表示位置はビューモードに連動する:
+  // ブロック図(A案)=右（既存の配置を維持）、フロー図(B案)=左（/sankey-svg と同じ配置）。
+  // 幅・折りたたみ状態は useSidePanel が side をまたいで共有するため、ビュー切替をまたいでも保持される
+  const sidePanelSide: 'left' | 'right' = viewMode === 'ribbon' ? 'left' : 'right';
+  const sidePanel = useSidePanel({ side: sidePanelSide, defaultWidth: SUBCONTRACT_PANEL_WIDTH_DEFAULT });
+  // 左下・左上のフローティングUI（一覧リンク・凡例・フォントサイズ操作）は、パネルが左表示の
+  // ときだけ退避オフセットが必要（サンキーの left: selectedNodeId... と同じ流儀）
+  const leftFloatOffset = sidePanelSide === 'left' && !sidePanel.collapsed ? sidePanel.effectiveWidth + 12 : 12;
   // 基準フォントサイズ（サンキーと同じ localStorage 永続化方式。キーはページごとに分離）
   const [baseFontPx, setBaseFontPx] = useBaseFontPx(
     'subcontracts-detail-base-font-px', BASE_FONT_PX_DEFAULT, BASE_FONT_PX_MIN, BASE_FONT_PX_MAX,
@@ -1274,16 +1286,22 @@ function SubcontractDetailPageInner() {
   const resetViewport = useCallback(() => {
     const container = containerRef.current;
     if (!container || !activeContentSize) return;
-    const cW = container.clientWidth;
+    // サイドパネルは position:fixed のオーバーレイで flex レイアウトの外にあるため、
+    // container.clientWidth はパネルを含む全幅になる。フィット計算はパネルが開いている側の
+    // 幅を差し引いた「実際に見える領域」を基準にしないと、コンテンツの端（ルートカード等）が
+    // パネルの下に隠れてしまう（特にリボンビューは既定でパネルが左に開いているため顕著）
+    const reserveLeft = sidePanelSide === 'left' && !sidePanel.collapsed ? sidePanel.effectiveWidth : 0;
+    const reserveRight = sidePanelSide === 'right' && !sidePanel.collapsed ? sidePanel.effectiveWidth : 0;
+    const cW = Math.max(100, container.clientWidth - reserveLeft - reserveRight);
     const cH = container.clientHeight;
     const fitZoom = Math.max(0.05, Math.min(10, Math.min(cW / activeContentSize.w, cH / activeContentSize.h) * 0.9));
     setBaseZoom(fitZoom);
     setTransform({
-      x: (cW - activeContentSize.w * fitZoom) / 2,
+      x: reserveLeft + (cW - activeContentSize.w * fitZoom) / 2,
       y: (cH - activeContentSize.h * fitZoom) / 2,
       scale: fitZoom,
     });
-  }, [activeContentSize]);
+  }, [activeContentSize, sidePanelSide, sidePanel.collapsed, sidePanel.effectiveWidth]);
 
   // グラフ読み込み後に全体表示。ただし最初の1回はURLにz/tx/tyがあればそれを優先復元する
   useEffect(() => {
@@ -1395,6 +1413,10 @@ function SubcontractDetailPageInner() {
   // ここに到達した時点で graph は必ず非 null
   const safeLayout = layout!;
   const safeRibbonLayout = ribbonLayout!;
+  // ラベルが次列のバーへ食い込まないよう、列ごとに clipPath でラベル領域を切り取る
+  // （sankey の clip-col-* と同じ流儀）。最終列だけはラベルが右マージンへ自由に伸びてよい
+  const ribbonMaxDepth = safeRibbonLayout.bars.length > 0 ? Math.max(...safeRibbonLayout.bars.map((b) => b.depth)) : 0;
+  const ribbonColX = (depth: number) => RIBBON_MARGIN.left + depth * (RIBBON_COL_W + RIBBON_COL_GAP);
   return (
     <div style={{ display: 'flex', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* SVGキャンバス */}
@@ -1411,8 +1433,8 @@ function SubcontractDetailPageInner() {
           backgroundPosition: `${transform.x}px ${transform.y}px`,
         }}
       >
-        {/* 一覧へ戻る — 左上 */}
-        <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 15 }}>
+        {/* 一覧へ戻る — 左上（サイドパネルが左表示のときは退避） */}
+        <div style={{ position: 'absolute', top: 12, left: leftFloatOffset, zIndex: 15, transition: sidePanel.isResizing ? 'none' : 'left 0.2s ease' }}>
           <Link
             href={`/subcontracts?year=${year}`}
             style={{
@@ -1832,21 +1854,78 @@ function SubcontractDetailPageInner() {
 
           {viewMode === 'ribbon' && (
           <>
-            {/* 順方向フロー（帯） */}
+            {/* 列ラベルの clipPath（ラベルが次列のバーへ食い込むのを防ぐ。sankeyのclip-col-*と同じ流儀） */}
+            <defs>
+              {Array.from({ length: ribbonMaxDepth }, (_, i) => i + 1).map((d) => (
+                <clipPath id={`ribbon-clip-col-${d}`} key={d}>
+                  <rect
+                    x={ribbonColX(d) + RIBBON_BAR_W}
+                    y={0}
+                    width={Math.max(0, ribbonColX(d + 1) - (ribbonColX(d) + RIBBON_BAR_W))}
+                    height={safeRibbonLayout.svgHeight}
+                  />
+                </clipPath>
+              ))}
+            </defs>
+
+            {/* 別財源レーンの区切り線（薄い破線 + ラベル。直接系バンド群と視覚的に区切る） */}
+            {safeRibbonLayout.separateLane && (
+              <g style={{ pointerEvents: 'none' }}>
+                <line
+                  x1={0}
+                  y1={safeRibbonLayout.separateLane.top}
+                  x2={safeRibbonLayout.svgWidth}
+                  y2={safeRibbonLayout.separateLane.top}
+                  stroke="#cbd5e1"
+                  strokeWidth={1}
+                  strokeDasharray="4 4"
+                />
+                <text
+                  x={RIBBON_MARGIN.left}
+                  y={safeRibbonLayout.separateLane.top - 6}
+                  fontSize={scaleFont(10)}
+                  fontWeight={700}
+                  fill="#6366f1"
+                  style={{ userSelect: 'none' }}
+                >
+                  別財源
+                </text>
+              </g>
+            )}
+
+            {/* 順方向フロー（帯・sankey風のリンク表現） */}
             {safeRibbonLayout.flows.map((flow, i) => {
               const target = safeRibbonLayout.bars.find((b) => b.blockId === flow.targetBlock);
               const palette = target ? originPalette(target.originKind) : null;
               const edgeStyle = flowEdgeStyle(flow.origin);
               const isSeparateOrigin = flow.origin === 'separate-origin';
+              const flowKey = `${flow.sourceBlock ?? 'root'}->${flow.targetBlock}-${i}`;
+              const activeId = selectedBlock?.blockId ?? null;
+              const isFlowHovered = hoveredRibbonFlowKey === flowKey;
+              let fillOpacity: number;
+              if (activeId) {
+                const isConnected = flow.sourceBlock === activeId || flow.targetBlock === activeId;
+                fillOpacity = isConnected ? (isFlowHovered ? 0.55 : 0.42) : 0.08;
+              } else if (isFlowHovered) {
+                fillOpacity = 0.6;
+              } else if (hoveredBlockId) {
+                const isConnected = flow.sourceBlock === hoveredBlockId || flow.targetBlock === hoveredBlockId;
+                fillOpacity = isConnected ? 0.5 : 0.1;
+              } else {
+                fillOpacity = 0.28;
+              }
               return (
                 <path
                   key={`rfwd-${i}`}
                   d={ribbonFlowPath(flow.x1, flow.y1Top, flow.y1Bot, flow.x2, flow.y2Top, flow.y2Bot)}
                   fill={palette ? palette.header : edgeStyle.stroke}
-                  fillOpacity={0.4}
+                  fillOpacity={fillOpacity}
                   stroke={isSeparateOrigin ? edgeStyle.stroke : 'none'}
                   strokeWidth={isSeparateOrigin ? 1.5 : 0}
                   strokeDasharray={isSeparateOrigin ? '5 4' : undefined}
+                  style={{ cursor: 'pointer', transition: 'fill-opacity 0.12s ease' }}
+                  onMouseEnter={() => setHoveredRibbonFlowKey(flowKey)}
+                  onMouseLeave={() => setHoveredRibbonFlowKey((k) => (k === flowKey ? null : k))}
                 />
               );
             })}
@@ -1925,15 +2004,19 @@ function SubcontractDetailPageInner() {
               </text>
             </g>
 
-            {/* ブロックバー（縦バー。太さ=金額。ラベルはバー内に白文字） */}
+            {/* ブロックバー（sankeyノード風の細帯。ラベルはバー右横のテキスト） */}
             {safeRibbonLayout.bars.map((bar) => {
               const isSelected = selectedBlock?.blockId === bar.blockId;
               const isHovered = hoveredBlockId === bar.blockId;
               const palette = originPalette(bar.originKind);
               const selectedStroke = palette.selectedStroke;
-              const borderColor = isSelected ? selectedStroke : (isHovered ? '#111827' : 'transparent');
-              const borderWidth = isSelected ? 3 : (isHovered ? 2 : 0);
-              const showAmount = bar.h >= 40;
+              const activeId = selectedBlock?.blockId ?? null;
+              const isDimmed = activeId !== null && activeId !== bar.blockId && !safeRibbonLayout.flows.some(
+                (f) => (f.sourceBlock === activeId && f.targetBlock === bar.blockId) || (f.targetBlock === activeId && f.sourceBlock === bar.blockId)
+              );
+              const barOpacity = isDimmed ? 0.35 : 1;
+              const labelColor = isDimmed ? '#bbb' : '#333';
+              const amountLabel = bar.isZeroAmount ? '金額内訳なし' : formatYen(bar.totalAmount);
 
               return (
                 <g
@@ -1949,7 +2032,7 @@ function SubcontractDetailPageInner() {
                       y={bar.y - 3}
                       width={bar.w + 6}
                       height={bar.h + 6}
-                      rx={5}
+                      rx={4}
                       fill="none"
                       stroke={CARD_SELECTED_RING}
                       strokeWidth={4}
@@ -1960,33 +2043,27 @@ function SubcontractDetailPageInner() {
                     x={bar.x}
                     y={bar.y}
                     width={bar.w}
-                    height={bar.h}
-                    rx={4}
+                    height={Math.max(1, bar.h)}
+                    rx={1}
                     fill={palette.header}
-                    stroke={borderColor}
-                    strokeWidth={borderWidth}
+                    stroke={isSelected ? selectedStroke : (isHovered ? '#111827' : 'none')}
+                    strokeWidth={isSelected ? 2.5 : (isHovered ? 1.5 : 0)}
                     vectorEffect="non-scaling-stroke"
+                    style={{ opacity: barOpacity, transition: 'opacity 0.12s ease' }}
                   />
-                  <foreignObject x={bar.x + 8} y={bar.y + 2} width={bar.w - 16} height={Math.max(bar.h - 4, 12)} style={{ pointerEvents: 'none' }}>
-                    <div style={{
-                      fontFamily: 'inherit',
-                      userSelect: 'none',
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      overflow: 'hidden',
-                    }}>
-                      <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {bar.blockName}
-                      </div>
-                      {showAmount && (
-                        <div style={{ fontSize: scaleFont(9), fontWeight: 600, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>
-                          {bar.isZeroAmount ? '金額内訳なし' : formatYen(bar.totalAmount)}
-                        </div>
-                      )}
-                    </div>
-                  </foreignObject>
+                  <text
+                    x={bar.x + bar.w + 6}
+                    y={bar.y + bar.h / 2}
+                    dominantBaseline="middle"
+                    fontSize={scaleFont(11)}
+                    fontWeight={isSelected || isHovered ? 700 : 500}
+                    fill={labelColor}
+                    clipPath={bar.depth === ribbonMaxDepth ? undefined : `url(#ribbon-clip-col-${bar.depth})`}
+                    style={{ userSelect: 'none', pointerEvents: 'none' }}
+                  >
+                    {bar.blockName.length > 26 ? `${bar.blockName.slice(0, 26)}…` : bar.blockName}
+                    <tspan fill={isDimmed ? '#ccc' : '#888'} fontWeight={500}> {amountLabel}</tspan>
+                  </text>
                 </g>
               );
             })}
@@ -2073,13 +2150,14 @@ function SubcontractDetailPageInner() {
           );
         })()}
 
-        {/* ズームコントロール — 右下（サイドパネル表示時は左にシフト。パネルは position:fixed のオーバーレイのため、
+        {/* ズームコントロール — 右下（サイドパネルが右表示時のみ左にシフト。パネルが左表示のフロー図ビューでは
+            右側は空くため退避不要。パネルは position:fixed のオーバーレイのため、
             キャンバスは全幅を使う＝このコントロールの座標系はビューポート全体に一致する） */}
         <div style={{
           position: 'absolute', bottom: 12,
-          right: !rightSidePanel.collapsed ? rightSidePanel.effectiveWidth + 12 : 12,
+          right: sidePanelSide === 'right' && !sidePanel.collapsed ? sidePanel.effectiveWidth + 12 : 12,
           zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4,
-          transition: rightSidePanel.isResizing ? 'none' : 'right 0.2s ease',
+          transition: sidePanel.isResizing ? 'none' : 'right 0.2s ease',
         }}>
           {/* + / スライダー / - */}
           <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -2132,12 +2210,13 @@ function SubcontractDetailPageInner() {
           </div>
         </div>
 
-        {/* 凡例 — 左下フローティング（種別チップの色分けをキャンバス上で確認できるように） */}
+        {/* 凡例 — 左下フローティング（種別チップの色分けをキャンバス上で確認できるように。
+            サイドパネルが左表示のときは退避） */}
         <div
           data-pan-disabled="true"
           style={{
             position: 'absolute',
-            left: 12,
+            left: leftFloatOffset,
             bottom: 54,
             zIndex: 15,
             display: 'flex',
@@ -2150,6 +2229,7 @@ function SubcontractDetailPageInner() {
             padding: '5px 10px',
             fontSize: scaleFont(10),
             color: '#475569',
+            transition: sidePanel.isResizing ? 'none' : 'left 0.2s ease',
           }}
         >
           {([
@@ -2164,12 +2244,13 @@ function SubcontractDetailPageInner() {
           ))}
         </div>
 
-        {/* フォントサイズコントロール — 左下フローティング（サンキー流儀と同じ配置・操作感） */}
+        {/* フォントサイズコントロール — 左下フローティング（サンキー流儀と同じ配置・操作感。
+            サイドパネルが左表示のときは退避） */}
         <div
           data-pan-disabled="true"
           style={{
             position: 'absolute',
-            left: 12,
+            left: leftFloatOffset,
             bottom: 12,
             zIndex: 15,
             display: 'flex',
@@ -2179,6 +2260,7 @@ function SubcontractDetailPageInner() {
             borderRadius: 8,
             boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
             padding: '6px 10px',
+            transition: sidePanel.isResizing ? 'none' : 'left 0.2s ease',
           }}
         >
           <FontSizeControls
@@ -2196,17 +2278,17 @@ function SubcontractDetailPageInner() {
 
       </div>
 
-        {/* サイドパネル */}
+        {/* サイドパネル — ブロック図(A案)=右、フロー図(B案)=左（/sankey-svg と同じ配置） */}
         <SidePanelChrome
-          side="right"
-          open={!rightSidePanel.collapsed}
-          onToggle={rightSidePanel.toggleCollapsed}
-          width={rightSidePanel.effectiveWidth}
+          side={sidePanelSide}
+          open={!sidePanel.collapsed}
+          onToggle={sidePanel.toggleCollapsed}
+          width={sidePanel.effectiveWidth}
           minWidth={SIDE_PANEL_WIDTH_MIN}
           maxWidth={SIDE_PANEL_WIDTH_MAX}
-          onResizeStart={rightSidePanel.onResizeStart}
-          isResizing={rightSidePanel.isResizing}
-          onResetWidth={rightSidePanel.resetWidth}
+          onResizeStart={sidePanel.onResizeStart}
+          isResizing={sidePanel.isResizing}
+          onResetWidth={sidePanel.resetWidth}
         >
           <SidePane
             block={selectedBlock}
