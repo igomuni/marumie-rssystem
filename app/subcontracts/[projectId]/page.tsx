@@ -460,6 +460,29 @@ function SidePane({
 
       </div>
 
+      {/* 選択中ブロックバー（案C1: 選択解除の常設導線。タブに関わらず表示） */}
+      {block && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8,
+          padding: '6px 16px',
+          background: '#eff6ff',
+          borderBottom: `1px solid ${COLOR_PANEL_BORDER}`,
+        }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#1e40af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            選択中: {block.blockId} {block.blockName}
+          </span>
+          <button
+            onClick={onDeselectBlock}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#1e40af', fontSize: 14, flexShrink: 0 }}
+            aria-label="選択解除"
+            title="選択解除 (Esc)"
+          >✕</button>
+        </div>
+      )}
+
       {/* タブヘッダー */}
       <div style={{
         display: 'flex',
@@ -617,34 +640,26 @@ function SidePane({
               <>
                 {/* 選択中ブロックの要約 */}
                 <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                      {(() => {
-                        const badge = originKindBadgeColor(block.originKind);
-                        return (
-                          <span style={{
-                            fontSize: 10,
-                            fontWeight: 700,
-                            padding: '1px 6px',
-                            borderRadius: 4,
-                            background: badge.bg,
-                            color: badge.fg,
-                            flexShrink: 0,
-                          }}>
-                            {originKindLabel(block.originKind)}
-                          </span>
-                        );
-                      })()}
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {block.blockId} {block.blockName}
-                      </span>
-                    </div>
-                    <button
-                      onClick={onDeselectBlock}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#94a3b8', fontSize: 14 }}
-                      aria-label="選択解除"
-                      title="選択解除"
-                    >✕</button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                    {(() => {
+                      const badge = originKindBadgeColor(block.originKind);
+                      return (
+                        <span style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          padding: '1px 6px',
+                          borderRadius: 4,
+                          background: badge.bg,
+                          color: badge.fg,
+                          flexShrink: 0,
+                        }}>
+                          {originKindLabel(block.originKind)}
+                        </span>
+                      );
+                    })()}
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {block.blockId} {block.blockName}
+                    </span>
                   </div>
                   <div style={{ fontSize: 11, color: '#475569', marginTop: 6 }}>
                     {formatYen(block.totalAmount)} ／ 支出先 {block.recipientCount.toLocaleString()}件
@@ -1025,21 +1040,38 @@ function SubcontractDetailPageInner() {
     if (hoverSuppressTimerRef.current) window.clearTimeout(hoverSuppressTimerRef.current);
   }, []);
 
-  // ノードクリック: 同じブロックなら解除、別ブロックなら選択 + 支出先タブへ
-  const handleNodeClick = useCallback((node: BlockNode) => {
-    const isDeselect = selectedBlock?.blockId === node.blockId;
-    setSelectedBlock(isDeselect ? null : node);
-    const nextTab = isDeselect ? activeTab : 'recipients';
-    setActiveTab(nextTab);
-    pushSelTabUrl(isDeselect ? null : node.blockId, nextTab);
-  }, [selectedBlock, activeTab]);
+  // 選択解除（案C1）: Esc / パネルヘッダ✕ / キャンバス空白クリック / ルートノードクリックで共通利用。
+  // アクティブタブは変更しない
+  const handleDeselect = useCallback(() => {
+    setSelectedBlock(null);
+    pushSelTabUrl(null, activeTab);
+  }, [activeTab]);
 
-  // フロー一覧/ブロック一覧の行から選択した場合: 選択 + 支出先タブへ
+  // ノードクリック: 選択のみを変更する（案C1）。アクティブタブは動かさない。
+  // 同一ノードの再クリックはトグル解除せず選択を維持する
+  const handleNodeClick = useCallback((node: BlockNode) => {
+    setSelectedBlock(node);
+    pushSelTabUrl(node.blockId, activeTab);
+  }, [activeTab]);
+
+  // フロー一覧/ブロック一覧の行から選択した場合も選択のみを変更する（案C1。タブは動かさない）
   const handleSelectFromList = useCallback((node: BlockNode) => {
     setSelectedBlock(node);
-    setActiveTab('recipients');
-    pushSelTabUrl(node.blockId, 'recipients');
-  }, []);
+    pushSelTabUrl(node.blockId, activeTab);
+  }, [activeTab]);
+
+  // Esc キーで選択解除（input/textarea/select フォーカス中は無視。サンキーの作法に合わせる）
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return;
+      const el = document.activeElement as HTMLElement | null;
+      const tag = el?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el?.isContentEditable) return;
+      handleDeselect();
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleDeselect]);
 
   // ズーム/パン
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
@@ -1050,6 +1082,7 @@ function SubcontractDetailPageInner() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isPanning = useRef(false);
   const panStart = useRef({ x: 0, y: 0 });
+  const bgMouseDownPosRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1076,8 +1109,9 @@ function SubcontractDetailPageInner() {
           const restore = initialUrlStateRef.current;
           const restoredBlock = restore?.sel ? data.blocks.find((b) => b.blockId === restore.sel) ?? null : null;
           setSelectedBlock(restoredBlock);
-          if (restore?.tab) setActiveTab(restore.tab);
-          else if (restoredBlock) setActiveTab('recipients');
+          // 案C1: タブは URL の tab（=最後にユーザーが選んだタブ）をそのまま復元する。
+          // tab 省略時は既定の 'flow'（selがあっても recipients へ自動遷移しない）
+          setActiveTab(restore?.tab ?? 'flow');
         } else {
           setSelectedBlock(null);
         }
@@ -1261,6 +1295,7 @@ function SubcontractDetailPageInner() {
     if (e.button !== 0) return;
     isPanning.current = true;
     panStart.current = { x: e.clientX - transform.x, y: e.clientY - transform.y };
+    bgMouseDownPosRef.current = { x: e.clientX, y: e.clientY };
   }
   function onMouseMove(e: React.MouseEvent) {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -1272,6 +1307,19 @@ function SubcontractDetailPageInner() {
   function onMouseUp() {
     if (isPanning.current) beginHoverSuppressCooldown();
     isPanning.current = false;
+  }
+  // キャンバス空白部のクリックで選択解除（案C1）。ノード上のクリックは e.target !== e.currentTarget で除外し、
+  // パン操作（mousedown→mouseupの間に動いたドラッグ）はしきい値を超えた移動量で除外する
+  const BACKGROUND_CLICK_DRAG_THRESHOLD_PX = 4;
+  function onSvgBackgroundClick(e: React.MouseEvent<SVGSVGElement>) {
+    if (e.target !== e.currentTarget) return;
+    const start = bgMouseDownPosRef.current;
+    if (start) {
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+      if (Math.hypot(dx, dy) > BACKGROUND_CLICK_DRAG_THRESHOLD_PX) return;
+    }
+    handleDeselect();
   }
 
   if (loading) {
@@ -1354,6 +1402,7 @@ function SubcontractDetailPageInner() {
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUp}
           onMouseLeave={onMouseUp}
+          onClick={onSvgBackgroundClick}
         >
           <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
             {/* 順方向エッジ */}
@@ -1431,7 +1480,7 @@ function SubcontractDetailPageInner() {
 
             {/* 事業コンテキストノード */}
             <g
-              onClick={() => { setSelectedBlock(null); setActiveTab('flow'); pushSelTabUrl(null, 'flow'); }}
+              onClick={handleDeselect}
               onMouseEnter={() => setHoveredNodeRaw({ kind: 'root' })}
               onMouseLeave={() => setHoveredNodeRaw(null)}
               style={{ cursor: 'pointer' }}
@@ -1832,7 +1881,7 @@ function SubcontractDetailPageInner() {
             activeTab={activeTab}
             onChangeTab={(tab) => { setActiveTab(tab); pushSelTabUrl(selectedBlock?.blockId ?? null, tab); }}
             onSelectBlock={handleSelectFromList}
-            onDeselectBlock={() => { setSelectedBlock(null); pushSelTabUrl(null, activeTab); }}
+            onDeselectBlock={handleDeselect}
             scaleFont={scaleFont}
           />
         </SidePanelChrome>
