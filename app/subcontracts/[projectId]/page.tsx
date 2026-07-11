@@ -1484,7 +1484,7 @@ function SubcontractDetailPageInner() {
                   <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: 'rgba(255,255,255,0.78)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     事業 / PID {graph.projectId}
                   </div>
-                  <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#fff', lineHeight: '13px', marginTop: 3, ...CLAMP_2_LINES }}>
+                  <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#fff', lineHeight: `${scaleFont(13)}px`, marginTop: 3, ...CLAMP_2_LINES }}>
                     {graph.projectName}
                   </div>
                 </div>
@@ -1506,7 +1506,7 @@ function SubcontractDetailPageInner() {
                   {visibleOrgChain.length > 0 && (
                     <div style={{ display: 'flex', gap: 4, alignItems: 'baseline', marginTop: 4 }}>
                       <span style={{ fontWeight: 700, color: COLOR_CONTEXT_BODY_SUBTLE, flexShrink: 0, width: 48 }}>担当組織</span>
-                      <span style={{ fontWeight: 600, color: COLOR_CONTEXT_BODY_TEXT, minWidth: 0, flex: 1, lineHeight: '11px', ...CLAMP_2_LINES }}>
+                      <span style={{ fontWeight: 600, color: COLOR_CONTEXT_BODY_TEXT, minWidth: 0, flex: 1, lineHeight: `${scaleFont(11)}px`, ...CLAMP_2_LINES }}>
                         {visibleOrgChain.map((v, i) => `${ORG_LEVEL_LABELS[i] ?? '組織'}:${v}`).join(' / ')}
                       </span>
                     </div>
@@ -1523,7 +1523,7 @@ function SubcontractDetailPageInner() {
                 style={{ userSelect: 'none' }}
               >
                 <tspan x={safeLayout.root.x + safeLayout.root.w - 14}>予算 {graph.budget > 0 ? formatYen(graph.budget) : '—'}</tspan>
-                <tspan x={safeLayout.root.x + safeLayout.root.w - 14} dy={12}>支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}</tspan>
+                <tspan x={safeLayout.root.x + safeLayout.root.w - 14} dy={scaleFont(12)}>支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}</tspan>
               </text>
             </g>
 

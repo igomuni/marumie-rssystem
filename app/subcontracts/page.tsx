@@ -441,6 +441,11 @@ function SubcontractsPageInner() {
   }
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  // URL復元由来の page が実ページ数を超えている場合はクランプ（空テーブル+「次へ」有効の防止）。
+  // loading 中はデータ未着で totalPages=1 になるため、確定後にのみ判定する
+  if (!loading && page > totalPages) {
+    setPage(totalPages);
+  }
   const pageItems = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   function toggleSort(key: SortKey) {
