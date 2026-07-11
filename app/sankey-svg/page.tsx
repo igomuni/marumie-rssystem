@@ -14,6 +14,8 @@ import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { TopNSliders } from '@/client/components/SankeySvg/TopNSliders';
 import { FontSizeControls } from '@/client/components/SankeySvg/FontSizeControls';
 import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
+import { useBaseFontPx } from '@/client/hooks/useBaseFontPx';
+import { createScaleFont, FONT_SCALE_REFERENCE_PX } from '@/app/lib/font-scale';
 import { filterTopN, computeLayout, getTopMinistriesInScope } from '@/app/lib/sankey-svg-filter';
 import { canonicalSelectableNodeId } from '@/app/lib/sankey-svg-ids';
 import { resolveYearSelectionSnapshot, type YearSelectionSnapshot } from '@/app/lib/sankey-svg-year-selection';
@@ -108,8 +110,8 @@ const PANEL_META_FONT_PX_DEFAULT = 13;
 const TOOLTIP_TITLE_FONT_PX_DEFAULT = 12;
 const TOOLTIP_VALUE_FONT_PX_DEFAULT = 11;
 const TOOLTIP_META_FONT_PX_DEFAULT = 10;
-// フォントスケールの基準値（baseFontPx ÷ FONT_SCALE_REFERENCE_PX で全フォントを比例拡縮）
-const FONT_SCALE_REFERENCE_PX = 12;
+// フォントスケールの基準値（baseFontPx ÷ FONT_SCALE_REFERENCE_PX で全フォントを比例拡縮）。
+// 実際の scaleFont 生成は app/lib/font-scale.ts（Pure ヘルパー、他ページと共有）に委譲。
 const BASE_FONT_PX_DEFAULT = 12;
 const BASE_FONT_PX_MIN = 8;
 const BASE_FONT_PX_MAX = 24;
@@ -288,7 +290,9 @@ export default function RealDataSankeyPage() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
   const [showFontControls, setShowFontControls] = useState(false);
-  const [baseFontPx, setBaseFontPx] = useState(BASE_FONT_PX_DEFAULT);
+  const [baseFontPx, setBaseFontPx] = useBaseFontPx(
+    'sankey-base-font-px', BASE_FONT_PX_DEFAULT, BASE_FONT_PX_MIN, BASE_FONT_PX_MAX,
+  );
   const [showLabels, setShowLabels] = useState(true);
   const [showAggRecipient, setShowAggRecipient] = useState(true);
   const [showAggProject, setShowAggProject] = useState(true);
@@ -406,31 +410,6 @@ export default function RealDataSankeyPage() {
     window.addEventListener('resize', updateSize);
     return () => { ro.disconnect(); window.removeEventListener('resize', updateSize); };
   }, []);
-
-  // Restore font size from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem('sankey-base-font-px');
-      if (saved !== null) {
-        const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed)) {
-          const clamped = Math.min(BASE_FONT_PX_MAX, Math.max(BASE_FONT_PX_MIN, parsed));
-          setBaseFontPx(clamped);
-        }
-      }
-    } catch {
-      // localStorage unavailable (private browsing etc.) — ignore
-    }
-  }, []);
-
-  // Persist font size to localStorage on change
-  useEffect(() => {
-    try {
-      window.localStorage.setItem('sankey-base-font-px', String(baseFontPx));
-    } catch {
-      // ignore
-    }
-  }, [baseFontPx]);
 
   // Initialize state from URL on mount
   useEffect(() => {
@@ -926,8 +905,8 @@ export default function RealDataSankeyPage() {
   showLabelsRef.current = showLabels;
 
   const fontScale = baseFontPx / FONT_SCALE_REFERENCE_PX;
-  const scaleFont = (px: number) => Math.max(1, Math.round(px * fontScale));
-  const scaleSize = (px: number) => Math.max(1, Math.round(px * fontScale));
+  const scaleFont = useMemo(() => createScaleFont(baseFontPx), [baseFontPx]);
+  const scaleSize = scaleFont;
   // Top offset reserved for search/year/TopN controls. Narrow screens need another row's worth of breathing room.
   const SEARCH_BOX_RESERVE = Math.round((svgWidth < 1100 ? 92 : 56) * Math.max(1, fontScale));
   const searchBoxReserveRef = useRef(SEARCH_BOX_RESERVE);
