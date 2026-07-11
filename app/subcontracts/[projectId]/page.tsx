@@ -36,6 +36,9 @@ import {
 } from '@/app/lib/subcontract-layout';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
+import { useBaseFontPx } from '@/client/hooks/useBaseFontPx';
+import { createScaleFont } from '@/app/lib/font-scale';
+import { FontSizeControls } from '@/client/components/SankeySvg/FontSizeControls';
 
 // サイドパネルの既定幅は現状の SidePane 固定幅(390)を維持。最小/最大はサンキーと共通の値を使う
 const SUBCONTRACT_PANEL_WIDTH_DEFAULT = 390;
@@ -168,9 +171,16 @@ const COLOR_CONTEXT_BODY = '#d8f1df';
 const COLOR_CONTEXT_BODY_TEXT = '#1f6b3a';
 const COLOR_CONTEXT_BODY_SUBTLE = '#2d7d46';
 const COLOR_PANEL_BORDER = '#e5e7eb';
-const PANEL_LIST_NAME_FONT_PX = 12;
-const PANEL_LIST_VALUE_FONT_PX = 12;
-const PANEL_META_FONT_PX = 11;
+// フォントスケール機構（サンキー = app/sankey-svg/page.tsx と共通の app/lib/font-scale.ts + client/hooks/useBaseFontPx.ts を使用）。
+// 以下の "_DEFAULT" 定数は等倍（baseFontPx = BASE_FONT_PX_DEFAULT）時の値。実描画では scaleFont(...) を通す。
+const BASE_FONT_PX_DEFAULT = 12;
+const BASE_FONT_PX_MIN = 8;
+const BASE_FONT_PX_MAX = 24;
+const PANEL_TITLE_FONT_PX_DEFAULT = 14;
+const PANEL_PRIMARY_VALUE_FONT_PX_DEFAULT = 15;
+const PANEL_LIST_NAME_FONT_PX_DEFAULT = 12;
+const PANEL_LIST_VALUE_FONT_PX_DEFAULT = 12;
+const PANEL_META_FONT_PX_DEFAULT = 11;
 const CARD_HEADER_H = 46;
 const CARD_RADIUS = 6;
 const CARD_BORDER_W = 1;
@@ -290,6 +300,7 @@ function SidePane({
   onChangeTab,
   onSelectBlock,
   onDeselectBlock,
+  scaleFont,
 }: {
   block: BlockNode | null;
   graph: SubcontractGraph;
@@ -300,7 +311,11 @@ function SidePane({
   onChangeTab: (tab: PaneTab) => void;
   onSelectBlock: (block: BlockNode) => void;
   onDeselectBlock: () => void;
+  scaleFont: (px: number) => number;
 }) {
+  const PANEL_TITLE_FONT_PX = scaleFont(PANEL_TITLE_FONT_PX_DEFAULT);
+  const PANEL_PRIMARY_VALUE_FONT_PX = scaleFont(PANEL_PRIMARY_VALUE_FONT_PX_DEFAULT);
+  const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
   const [expandedRecipients, setExpandedRecipients] = useState<Set<number>>(new Set());
   const [recipientQuery, setRecipientQuery] = useState('');
   const [recipientSort, setRecipientSort] = useState<'amount-desc' | 'amount-asc' | 'name-asc'>('amount-desc');
@@ -391,10 +406,10 @@ function SidePane({
       <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
+            <div style={{ fontWeight: 700, fontSize: PANEL_TITLE_FONT_PX, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
               {graph.projectName}
             </div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#222', marginTop: 3 }}>
+            <div style={{ fontSize: PANEL_PRIMARY_VALUE_FONT_PX, fontWeight: 600, color: '#222', marginTop: 3 }}>
               <span style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', fontWeight: 400, marginRight: 4 }}>予算</span>
               {graph.budget > 0 ? formatYen(graph.budget) : '—'}
             </div>
@@ -526,6 +541,7 @@ function SidePane({
                 flow={flow}
                 graph={graph}
                 onSelectBlock={onSelectBlock}
+                scaleFont={scaleFont}
               />
             ))}
           </>
@@ -583,6 +599,7 @@ function SidePane({
                 block={b}
                 onClick={() => onSelectBlock(b)}
                 selected={block?.blockId === b.blockId}
+                scaleFont={scaleFont}
               />
             ))}
           </>
@@ -671,6 +688,7 @@ function SidePane({
                     onToggle={() => toggleRecipient(i)}
                     totalAmount={block.totalAmount}
                     barColor={originPalette(block.originKind).header}
+                    scaleFont={scaleFont}
                   />
                 ))}
                 {sortedRecipients.length === 0 && (
@@ -715,9 +733,12 @@ function SidePane({
   );
 }
 
-function BlockListRow({ block, selected, onClick }: { block: BlockNode; selected: boolean; onClick: () => void }) {
+function BlockListRow({ block, selected, onClick, scaleFont }: { block: BlockNode; selected: boolean; onClick: () => void; scaleFont: (px: number) => number }) {
   const badge = originKindBadgeColor(block.originKind);
   const badgeText = originKindLabel(block.originKind);
+  const PANEL_LIST_NAME_FONT_PX = scaleFont(PANEL_LIST_NAME_FONT_PX_DEFAULT);
+  const PANEL_LIST_VALUE_FONT_PX = scaleFont(PANEL_LIST_VALUE_FONT_PX_DEFAULT);
+  const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
 
   return (
     <button
@@ -769,12 +790,15 @@ function BlockListRow({ block, selected, onClick }: { block: BlockNode; selected
 }
 
 function FlowListRow({
-  flow, graph, onSelectBlock,
+  flow, graph, onSelectBlock, scaleFont,
 }: {
   flow: BlockEdge;
   graph: SubcontractGraph;
   onSelectBlock: (block: BlockNode) => void;
+  scaleFont: (px: number) => number;
 }) {
+  const PANEL_LIST_NAME_FONT_PX = scaleFont(PANEL_LIST_NAME_FONT_PX_DEFAULT);
+  const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
   const blockById = new Map(graph.blocks.map(b => [b.blockId, b]));
   const sourceBlock = flow.sourceBlock ? blockById.get(flow.sourceBlock) ?? null : null;
   const targetBlock = blockById.get(flow.targetBlock) ?? null;
@@ -855,16 +879,20 @@ function FlowListRow({
 }
 
 function RecipientCard({
-  recipient, expanded, onToggle, totalAmount, barColor,
+  recipient, expanded, onToggle, totalAmount, barColor, scaleFont,
 }: {
   recipient: BlockRecipient;
   expanded: boolean;
   onToggle: () => void;
   totalAmount: number;
   barColor: string;
+  scaleFont: (px: number) => number;
 }) {
   const hasDetails = recipient.contractSummaries.length > 0 || recipient.expenses.length > 0;
   const share = totalAmount > 0 ? Math.max(2, Math.min(100, (recipient.amount / totalAmount) * 100)) : 0;
+  const PANEL_LIST_NAME_FONT_PX = scaleFont(PANEL_LIST_NAME_FONT_PX_DEFAULT);
+  const PANEL_LIST_VALUE_FONT_PX = scaleFont(PANEL_LIST_VALUE_FONT_PX_DEFAULT);
+  const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
 
   return (
     <div style={{
@@ -960,6 +988,11 @@ function SubcontractDetailPageInner() {
   const [activeTab, setActiveTab] = useState<PaneTab>('flow');
   // サイドパネル（右）の chrome 状態。既定幅は現状の SidePane 固定幅(390)を維持
   const rightSidePanel = useSidePanel({ side: 'right', defaultWidth: SUBCONTRACT_PANEL_WIDTH_DEFAULT });
+  // 基準フォントサイズ（サンキーと同じ localStorage 永続化方式。キーはページごとに分離）
+  const [baseFontPx, setBaseFontPx] = useBaseFontPx(
+    'subcontracts-detail-base-font-px', BASE_FONT_PX_DEFAULT, BASE_FONT_PX_MIN, BASE_FONT_PX_MAX,
+  );
+  const scaleFont = useMemo(() => createScaleFont(baseFontPx), [baseFontPx]);
 
   const beginHoverSuppressCooldown = useCallback(() => {
     setIsHoverSuppressed(true);
@@ -1365,12 +1398,12 @@ function SubcontractDetailPageInner() {
                         fontFamily: 'inherit',
                       }}>
                         {amountLabel && (
-                          <div style={{ fontSize: 9, fontWeight: 700, color: '#475569', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: '#475569', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {amountLabel}
                           </div>
                         )}
                         {edge.note && (
-                          <div style={{ fontSize: 8, fontWeight: 600, color: '#64748b', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontSize: scaleFont(8), fontWeight: 600, color: '#64748b', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {edge.note}
                           </div>
                         )}
@@ -1448,10 +1481,10 @@ function SubcontractDetailPageInner() {
                 style={{ pointerEvents: 'none' }}
               >
                 <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
-                  <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.78)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: 'rgba(255,255,255,0.78)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     事業 / PID {graph.projectId}
                   </div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: '13px', marginTop: 3, ...CLAMP_2_LINES }}>
+                  <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#fff', lineHeight: '13px', marginTop: 3, ...CLAMP_2_LINES }}>
                     {graph.projectName}
                   </div>
                 </div>
@@ -1463,10 +1496,10 @@ function SubcontractDetailPageInner() {
                 height={44}
                 style={{ pointerEvents: 'none' }}
               >
-                <div style={{ fontFamily: 'inherit', fontSize: 9, userSelect: 'none' }}>
+                <div style={{ fontFamily: 'inherit', fontSize: scaleFont(9), userSelect: 'none' }}>
                   <div style={{ display: 'flex', gap: 4, alignItems: 'baseline' }}>
                     <span style={{ fontWeight: 700, color: COLOR_CONTEXT_BODY_SUBTLE, flexShrink: 0, width: 48 }}>府省庁</span>
-                    <span style={{ fontWeight: 700, fontSize: 10, color: COLOR_CONTEXT_BODY_TEXT, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontWeight: 700, fontSize: scaleFont(10), color: COLOR_CONTEXT_BODY_TEXT, minWidth: 0, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {graph.ministry}
                     </span>
                   </div>
@@ -1484,7 +1517,7 @@ function SubcontractDetailPageInner() {
                 x={safeLayout.root.x + safeLayout.root.w - 14}
                 y={safeLayout.root.y + safeLayout.root.h - 24}
                 textAnchor="end"
-                fontSize={9}
+                fontSize={scaleFont(9)}
                 fontWeight={700}
                 fill={COLOR_CONTEXT_BODY_SUBTLE}
                 style={{ userSelect: 'none' }}
@@ -1562,10 +1595,10 @@ function SubcontractDetailPageInner() {
                     style={{ pointerEvents: 'none' }}
                   >
                     <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.86)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: scaleFont(10), fontWeight: 700, color: 'rgba(255,255,255,0.86)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {headerKindLabel} / ブロック {lb.blockId}
                       </div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: scaleFont(12), fontWeight: 700, color: '#fff', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {lb.blockName}
                       </div>
                     </div>
@@ -1579,18 +1612,18 @@ function SubcontractDetailPageInner() {
                     style={{ pointerEvents: 'none' }}
                   >
                     <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: bodyTextColor, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: bodyTextColor, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {lb.isZeroAmount ? '金額内訳なし' : `${formatYen(lb.totalAmount)} / 支出先 ${recipients.length.toLocaleString()}件`}
                       </div>
                       {lb.node.role && (
-                        <div style={{ fontSize: 9, fontWeight: 600, color: bodySubtleTextColor, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: scaleFont(9), fontWeight: 600, color: bodySubtleTextColor, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {lb.node.role}
                         </div>
                       )}
                       {!lb.isZeroAmount && topRecipients.map((r, i) => (
                         <div
                           key={`${r.name}-${r.corporateNumber}-${i}`}
-                          style={{ display: 'flex', gap: 4, alignItems: 'baseline', fontSize: 9, color: bodyTextColor, marginTop: i === 0 ? 6 : 3 }}
+                          style={{ display: 'flex', gap: 4, alignItems: 'baseline', fontSize: scaleFont(9), color: bodyTextColor, marginTop: i === 0 ? 6 : 3 }}
                         >
                           <span style={{ fontWeight: 700, flexShrink: 0 }}>{i + 1}.</span>
                           <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1653,7 +1686,7 @@ function SubcontractDetailPageInner() {
                 background: headerColor,
                 color: '#fff',
                 padding: '7px 10px',
-                fontSize: 11,
+                fontSize: scaleFont(11),
                 fontWeight: 700,
                 lineHeight: 1.35,
               }}>
@@ -1661,7 +1694,7 @@ function SubcontractDetailPageInner() {
                   ? `事業 / PID ${graph.projectId}`
                   : `${palette!.badgeText} / ブロック ${lb!.blockId}`}
               </div>
-              <div style={{ padding: '8px 10px', fontSize: 11, lineHeight: 1.45, color: textColor }}>
+              <div style={{ padding: '8px 10px', fontSize: scaleFont(11), lineHeight: 1.45, color: textColor }}>
                 {isRoot ? (
                   <>
                     <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{graph.projectName}</div>
@@ -1746,6 +1779,36 @@ function SubcontractDetailPageInner() {
           </div>
         </div>
 
+        {/* フォントサイズコントロール — 左下フローティング（サンキー流儀と同じ配置・操作感） */}
+        <div
+          data-pan-disabled="true"
+          style={{
+            position: 'absolute',
+            left: 12,
+            bottom: 12,
+            zIndex: 15,
+            display: 'flex',
+            alignItems: 'center',
+            background: 'rgba(255,255,255,0.95)',
+            border: '1px solid #e0e0e0',
+            borderRadius: 8,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+            padding: '6px 10px',
+          }}
+        >
+          <FontSizeControls
+            baseFontPx={baseFontPx}
+            setBaseFontPx={setBaseFontPx}
+            markReplace={() => {}}
+            isCompactWidth={false}
+            min={BASE_FONT_PX_MIN}
+            max={BASE_FONT_PX_MAX}
+            defaultValue={BASE_FONT_PX_DEFAULT}
+            controlSmallFontPx={scaleFont(12)}
+            numberFontPx={11}
+          />
+        </div>
+
       </div>
 
         {/* サイドパネル */}
@@ -1770,6 +1833,7 @@ function SubcontractDetailPageInner() {
             onChangeTab={(tab) => { setActiveTab(tab); pushSelTabUrl(selectedBlock?.blockId ?? null, tab); }}
             onSelectBlock={handleSelectFromList}
             onDeselectBlock={() => { setSelectedBlock(null); pushSelTabUrl(null, activeTab); }}
+            scaleFont={scaleFont}
           />
         </SidePanelChrome>
     </div>
