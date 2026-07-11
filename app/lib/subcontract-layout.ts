@@ -185,53 +185,69 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     immediateParents.get(f.targetBlock)!.push(f.sourceBlock);
   }
 
-  // ─── 親子アンカー配置 ──────────────────────────────────
-  // 深度1: 現行の並び順のまま左詰め。
-  // 深度2以降: 各ノードの希望xを「最大金額の親ブロックのx」とし、
-  //   行内を希望x昇順（同一希望xの兄弟は金額降順）に並べてから
-  //   左から右送りで衝突解消する。これにより子が親の直下から右へ並ぶ。
+  // ─── サブツリー帯（バンド）配置 ──────────────────────────────────
+  // 各ノードを「最大金額の親」に付けてツリー化し、ノードは自分の子孫全体の幅（バンド）を
+  // 専有する。あるブロックのバンドに他ブロックの子孫が入り込まないため、
+  // 「無関係なブロックの真下に再々委託が来る」ことがない（横伸びは許容する設計判断）。
+  // 親は自分のバンドの中央に置く（単一子の連鎖は真下に一直線になる）。
   const maxDepthVal = depthMap.size > 0 ? Math.max(...depthMap.values()) : 1;
   const nodeX = new Map<string, number>();
 
-  const depth1Nodes = byDepth.get(1) ?? [];
-  depth1Nodes.forEach((node, i) => {
-    nodeX.set(node.blockId, SVG_MARGIN.left + i * (NODE_W + COL_GAP));
-  });
-
+  const childrenOf = new Map<string, BlockNode[]>();
+  const orphans: BlockNode[] = [];
   for (let depth = 2; depth <= maxDepthVal; depth++) {
-    const nodes = byDepth.get(depth);
-    if (!nodes || nodes.length === 0) continue;
-
-    const desiredX = new Map<string, number>();
-    for (const node of nodes) {
+    for (const node of byDepth.get(depth) ?? []) {
       const parents = immediateParents.get(node.blockId) ?? [];
       if (parents.length === 0) {
-        // 親が見つからない場合（バックエッジ経由の到達等）は左端に寄せる
-        desiredX.set(node.blockId, SVG_MARGIN.left);
+        // 順方向の親が特定できない（バックエッジ経由の到達等）→ 独立バンドとして右端に置く
+        orphans.push(node);
         continue;
       }
+      // fan-in（複数親）は最大金額の親のバンドに所属させる。他の親からのエッジは描画のみ
       let bestParentId = parents[0];
       let bestAmount = -Infinity;
       for (const pid of parents) {
         const amt = blockById.get(pid)?.totalAmount ?? -Infinity;
         if (amt > bestAmount) { bestAmount = amt; bestParentId = pid; }
       }
-      desiredX.set(node.blockId, nodeX.get(bestParentId) ?? SVG_MARGIN.left);
+      if (!childrenOf.has(bestParentId)) childrenOf.set(bestParentId, []);
+      childrenOf.get(bestParentId)!.push(node);
     }
+  }
+  for (const kids of childrenOf.values()) kids.sort((a, b) => b.totalAmount - a.totalAmount);
 
-    // 希望xの昇順（同一希望xの兄弟は金額降順）に並べる
-    const ordered = [...nodes].sort((a, b) => {
-      const dx = (desiredX.get(a.blockId) ?? 0) - (desiredX.get(b.blockId) ?? 0);
-      return dx !== 0 ? dx : b.totalAmount - a.totalAmount;
-    });
-
-    let prevX: number | null = null;
-    for (const node of ordered) {
-      const want = desiredX.get(node.blockId) ?? SVG_MARGIN.left;
-      const x: number = prevX === null ? want : Math.max(want, prevX + NODE_W + COL_GAP);
-      nodeX.set(node.blockId, x);
-      prevX = x;
+  // サブツリー幅の再帰計算（childrenOf は各ノード単一親のためforest。循環しない）
+  const subtreeW = new Map<string, number>();
+  const calcSubtreeW = (node: BlockNode): number => {
+    const kids = childrenOf.get(node.blockId) ?? [];
+    const w = kids.length === 0
+      ? NODE_W
+      : Math.max(NODE_W, kids.reduce((sum, k) => sum + calcSubtreeW(k), 0) + COL_GAP * (kids.length - 1));
+    subtreeW.set(node.blockId, w);
+    return w;
+  };
+  // バンド左端を起点にノードをバンド中央へ置き、子へ左から帯を配る
+  const placeSubtree = (node: BlockNode, bandLeft: number): void => {
+    const w = subtreeW.get(node.blockId) ?? NODE_W;
+    nodeX.set(node.blockId, bandLeft + (w - NODE_W) / 2);
+    let cursor = bandLeft;
+    for (const kid of childrenOf.get(node.blockId) ?? []) {
+      placeSubtree(kid, cursor);
+      cursor += (subtreeW.get(kid.blockId) ?? NODE_W) + COL_GAP;
     }
+  };
+
+  const depth1Nodes = byDepth.get(1) ?? [];
+  let bandCursor = SVG_MARGIN.left;
+  for (const node of depth1Nodes) {
+    calcSubtreeW(node);
+    placeSubtree(node, bandCursor);
+    bandCursor += subtreeW.get(node.blockId)! + COL_GAP;
+  }
+  for (const node of orphans) {
+    calcSubtreeW(node);
+    placeSubtree(node, bandCursor);
+    bandCursor += subtreeW.get(node.blockId)! + COL_GAP;
   }
 
   // Y座標計算: depthごとに横一列で並べ、上から下へ流す。
@@ -259,13 +275,10 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     currentY += NODE_MIN_H + DEPTH_GAP;
   }
 
-  // ルート: 深度1行の水平範囲の中央（子が1個ならその真上になる）
-  const depth1MinX = depth1Nodes.length > 0
-    ? Math.min(...depth1Nodes.map((n) => nodeX.get(n.blockId) ?? SVG_MARGIN.left))
-    : SVG_MARGIN.left;
-  const depth1MaxX = depth1Nodes.length > 0
-    ? Math.max(...depth1Nodes.map((n) => (nodeX.get(n.blockId) ?? SVG_MARGIN.left) + NODE_W))
-    : SVG_MARGIN.left + ROOT_W;
+  // ルート: 全バンド（子孫を含む水平範囲全体）の中央（子が1個ならその真上になる）
+  const hasBands = depth1Nodes.length > 0 || orphans.length > 0;
+  const depth1MinX = SVG_MARGIN.left;
+  const depth1MaxX = hasBands ? bandCursor - COL_GAP : SVG_MARGIN.left + ROOT_W;
 
   const root: LayoutRoot = {
     label: graph.projectName,
