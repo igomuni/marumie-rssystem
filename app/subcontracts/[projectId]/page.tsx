@@ -182,8 +182,22 @@ const PANEL_LIST_NAME_FONT_PX_DEFAULT = 12;
 const PANEL_LIST_VALUE_FONT_PX_DEFAULT = 12;
 const PANEL_META_FONT_PX_DEFAULT = 11;
 const CARD_HEADER_H = 46;
-const CARD_RADIUS = 6;
+const CARD_RADIUS = 8;
 const CARD_BORDER_W = 1;
+const CARD_BORDER_NEUTRAL = '#e2e8f0';
+const CARD_SHADOW = 'drop-shadow(0 1px 2px rgba(15,23,42,0.10)) drop-shadow(0 1px 1px rgba(15,23,42,0.06))';
+const CARD_SELECTED_RING = 'rgba(74,144,217,0.28)';
+// エッジ太さスケール（金額に応じて 2〜10px の平方根スケール。線が細すぎ/太すぎにならない範囲）
+const EDGE_WIDTH_MIN = 2;
+const EDGE_WIDTH_MAX = 10;
+function edgeWidthForAmount(amount: number, maxAmount: number): number {
+  if (amount <= 0 || maxAmount <= 0) return EDGE_WIDTH_MIN;
+  const t = Math.sqrt(Math.min(1, amount / maxAmount));
+  return EDGE_WIDTH_MIN + t * (EDGE_WIDTH_MAX - EDGE_WIDTH_MIN);
+}
+// キャンバス背景のドット格子（薄い格子点。パン位置に応じてずらし、キャンバスと一緒に動く見た目にする）
+const CANVAS_DOT_COLOR = 'rgba(15,23,42,0.08)';
+const CANVAS_GRID_SIZE = 26;
 // サンキー（app/sankey-svg/page.tsx）のホバー流儀に合わせた定数
 const HOVER_ENTER_DELAY_MS = 220;
 const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
@@ -995,6 +1009,8 @@ function SubcontractDetailPageInner() {
   const [selectedBlock, setSelectedBlock] = useState<BlockNode | null>(null);
   // ホバーはサンキーと同じ流儀: 進入は遅延、離脱は即時。パン/ズーム直後は抑制する
   const [hoveredNodeRaw, setHoveredNodeRaw] = useState<HoveredNode | null>(null);
+  // カードのホバー枠色は即時反映（ツールチップの表示遅延とは別系統）
+  const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
   const [hoveredNodeStable, setHoveredNodeStable] = useState<HoveredNode | null>(null);
   const hoverEnterTimerRef = useRef<number | null>(null);
   const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
@@ -1203,6 +1219,11 @@ function SubcontractDetailPageInner() {
   const visibleOrgChain = orgChain.length > 0 ? orgChain : fallbackOrgChain;
 
   const layout = useMemo(() => graph ? computeSubcontractLayout(graph) : null, [graph]);
+  // エッジ太さスケールの基準（このグラフ内の最大ブロック金額）
+  const maxBlockAmount = useMemo(
+    () => layout ? Math.max(0, ...layout.blocks.map((b) => b.totalAmount)) : 0,
+    [layout],
+  );
 
   const applyZoom = useCallback((factor: number) => {
     setTransform((prev) => {
@@ -1344,7 +1365,19 @@ function SubcontractDetailPageInner() {
   return (
     <div style={{ display: 'flex', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* SVGキャンバス */}
-      <div ref={containerRef} style={{ flex: 1, minWidth: 0, overflow: 'hidden', position: 'relative' }}>
+      <div
+        ref={containerRef}
+        style={{
+          flex: 1,
+          minWidth: 0,
+          overflow: 'hidden',
+          position: 'relative',
+          backgroundColor: COLOR_CANVAS,
+          backgroundImage: `radial-gradient(circle at 1px 1px, ${CANVAS_DOT_COLOR} 1px, transparent 0)`,
+          backgroundSize: `${CANVAS_GRID_SIZE}px ${CANVAS_GRID_SIZE}px`,
+          backgroundPosition: `${transform.x}px ${transform.y}px`,
+        }}
+      >
         {/* 一覧へ戻る — 左上 */}
         <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 15 }}>
           <Link
@@ -1411,6 +1444,8 @@ function SubcontractDetailPageInner() {
               const amountLabel = target && target.totalAmount > 0 ? formatYen(target.totalAmount) : null;
               const edgeStyle = flowEdgeStyle(edge.origin);
               const edgeColor = edgeStyle.stroke;
+              // 線幅は金額（対象ブロックの totalAmount）に応じてスケール（平方根スケール 2〜10px）
+              const edgeWidth = target ? edgeWidthForAmount(target.totalAmount, maxBlockAmount) : edgeStyle.width;
               const labelX = (edge.x1 + edge.x2) / 2;
               const labelY = (edge.y1 + edge.y2) / 2 - 8;
               const labelW = 140;
@@ -1421,8 +1456,9 @@ function SubcontractDetailPageInner() {
                     d={verticalBezierPath(edge.x1, edge.y1, edge.x2, edge.y2)}
                     fill="none"
                     stroke={edgeColor}
-                    strokeWidth={edgeStyle.width}
+                    strokeWidth={edgeWidth}
                     strokeDasharray={edgeStyle.dasharray}
+                    strokeLinecap="round"
                   />
                   {(amountLabel || edge.note) && (
                     <foreignObject
@@ -1579,6 +1615,7 @@ function SubcontractDetailPageInner() {
             {/* ブロックノード（縦型カードフロー） */}
             {safeLayout.blocks.map((lb) => {
               const isSelected = selectedBlock?.blockId === lb.blockId;
+              const isHovered = hoveredBlockId === lb.blockId;
               const palette = originPalette(lb.originKind);
               const nodeColor = palette.header;
               const bodyFill = palette.body;
@@ -1588,15 +1625,30 @@ function SubcontractDetailPageInner() {
               const topRecipients = sortRecipients(recipients, 'amount-desc').slice(0, 3);
               const selectedStroke = palette.selectedStroke;
               const headerKindLabel = palette.badgeText;
+              // ボディ枠: 既定は控えめなグレー、ホバーでアクセント色、選択時は強調色
+              const bodyBorderColor = isSelected ? selectedStroke : (isHovered ? nodeColor : CARD_BORDER_NEUTRAL);
 
               return (
                 <g
                   key={lb.blockId}
                   onClick={() => handleNodeClick(lb.node)}
-                  onMouseEnter={() => setHoveredNodeRaw({ kind: 'block', block: lb })}
-                  onMouseLeave={() => setHoveredNodeRaw(null)}
-                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={() => { setHoveredNodeRaw({ kind: 'block', block: lb }); setHoveredBlockId(lb.blockId); }}
+                  onMouseLeave={() => { setHoveredNodeRaw(null); setHoveredBlockId(null); }}
+                  style={{ cursor: 'pointer', filter: CARD_SHADOW }}
                 >
+                  {isSelected && (
+                    <rect
+                      x={lb.x - 3}
+                      y={lb.y - 3}
+                      width={lb.w + 6}
+                      height={lb.h + 6}
+                      rx={CARD_RADIUS + 3}
+                      fill="none"
+                      stroke={CARD_SELECTED_RING}
+                      strokeWidth={4}
+                      style={{ pointerEvents: 'none' }}
+                    />
+                  )}
                   <rect
                     x={lb.x}
                     y={lb.y}
@@ -1630,7 +1682,7 @@ function SubcontractDetailPageInner() {
                       CARD_RADIUS,
                     )}
                     fill={bodyFill}
-                    stroke={isSelected ? selectedStroke : nodeColor}
+                    stroke={bodyBorderColor}
                     strokeWidth={CARD_BORDER_W}
                     vectorEffect="non-scaling-stroke"
                     style={{ pointerEvents: 'none' }}
@@ -1644,11 +1696,24 @@ function SubcontractDetailPageInner() {
                     style={{ pointerEvents: 'none' }}
                   >
                     <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
-                      <div style={{ fontSize: scaleFont(10), fontWeight: 700, color: 'rgba(255,255,255,0.86)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {headerKindLabel} / ブロック {lb.blockId}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                        <div style={{ flex: 1, minWidth: 0, fontSize: scaleFont(12), fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {lb.blockName}
+                        </div>
+                        <span style={{
+                          flexShrink: 0,
+                          fontSize: scaleFont(9),
+                          fontWeight: 700,
+                          color: '#fff',
+                          background: 'rgba(255,255,255,0.26)',
+                          borderRadius: 999,
+                          padding: '2px 7px',
+                        }}>
+                          {headerKindLabel}
+                        </span>
                       </div>
-                      <div style={{ fontSize: scaleFont(12), fontWeight: 700, color: '#fff', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {lb.blockName}
+                      <div style={{ fontSize: scaleFont(9), fontWeight: 600, color: 'rgba(255,255,255,0.78)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        ブロック {lb.blockId}
                       </div>
                     </div>
                   </foreignObject>
@@ -1661,14 +1726,14 @@ function SubcontractDetailPageInner() {
                     style={{ pointerEvents: 'none' }}
                   >
                     <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
-                      <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: bodyTextColor, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {lb.isZeroAmount ? '金額内訳なし' : `${formatYen(lb.totalAmount)} / 支出先 ${recipients.length.toLocaleString()}件`}
-                      </div>
                       {lb.node.role && (
-                        <div style={{ fontSize: scaleFont(9), fontWeight: 600, color: bodySubtleTextColor, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: scaleFont(9), fontWeight: 500, color: bodySubtleTextColor, marginBottom: 4, lineHeight: `${scaleFont(12)}px`, ...CLAMP_2_LINES }}>
                           {lb.node.role}
                         </div>
                       )}
+                      <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: bodyTextColor, fontVariantNumeric: 'tabular-nums', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {lb.isZeroAmount ? '金額内訳なし' : `${formatYen(lb.totalAmount)} / 支出先 ${recipients.length.toLocaleString()}件`}
+                      </div>
                       {!lb.isZeroAmount && topRecipients.map((r, i) => (
                         <div
                           key={`${r.name}-${r.corporateNumber}-${i}`}
@@ -1678,7 +1743,7 @@ function SubcontractDetailPageInner() {
                           <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {r.name || '（氏名なし）'}
                           </span>
-                          <span style={{ fontWeight: 700, color: bodySubtleTextColor, flexShrink: 0 }}>
+                          <span style={{ fontWeight: 700, color: bodySubtleTextColor, flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
                             {formatYen(r.amount)}
                           </span>
                         </div>
@@ -1826,6 +1891,38 @@ function SubcontractDetailPageInner() {
               <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="#666"><path d="M792-576v-120H672v-72h120q30 0 51 21.15T864-696v120h-72Zm-696 0v-120q0-30 21.15-51T168-768h120v72H168v120H96Zm576 384v-72h120v-120h72v120q0 30-21.15 51T792-192H672Zm-504 0q-30 0-51-21.15T96-264v-120h72v120h120v72H168Zm72-144v-288h480v288H240Zm72-72h336v-144H312v144Zm0 0v-144 144Z"/></svg>
             </button>
           </div>
+        </div>
+
+        {/* 凡例 — 左下フローティング（種別チップの色分けをキャンバス上で確認できるように） */}
+        <div
+          data-pan-disabled="true"
+          style={{
+            position: 'absolute',
+            left: 12,
+            bottom: 54,
+            zIndex: 15,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            background: 'rgba(255,255,255,0.95)',
+            border: '1px solid #e0e0e0',
+            borderRadius: 8,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+            padding: '5px 10px',
+            fontSize: scaleFont(10),
+            color: '#475569',
+          }}
+        >
+          {([
+            ['direct', '直接', COLOR_DIRECT],
+            ['subcontract', '再委託', COLOR_SUBCONTRACT],
+            ['separate-origin', '別財源', COLOR_SEPARATE_ORIGIN_STRONG],
+          ] as const).map(([key, label, color]) => (
+            <span key={key} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+              {label}
+            </span>
+          ))}
         </div>
 
         {/* フォントサイズコントロール — 左下フローティング（サンキー流儀と同じ配置・操作感） */}

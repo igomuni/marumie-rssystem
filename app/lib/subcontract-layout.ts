@@ -153,11 +153,6 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
   const depthMap = computeDepths(graph.flows);
   const mergedFlows = mergeParallelFlows(graph.flows);
 
-  function rowWidthForDepth(nodeCount: number): number {
-    const safeCount = Math.max(1, nodeCount);
-    return safeCount * NODE_W + Math.max(0, safeCount - 1) * COL_GAP;
-  }
-
   // ブロックノードをマップ化
   const blockById = new Map<string, BlockNode>();
   for (const b of graph.blocks) blockById.set(b.blockId, b);
@@ -190,41 +185,61 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
     immediateParents.get(f.targetBlock)!.push(f.sourceBlock);
   }
 
-  // 各深さを「親の layout 順位」基準で反復ソート
-  // blockPosition: blockId → 当該深さでの順位（0始まり）
-  const blockPosition = new Map<string, number>();
-  (byDepth.get(1) ?? []).forEach((b, i) => blockPosition.set(b.blockId, i));
-
+  // ─── 親子アンカー配置 ──────────────────────────────────
+  // 深度1: 現行の並び順のまま左詰め。
+  // 深度2以降: 各ノードの希望xを「最大金額の親ブロックのx」とし、
+  //   行内を希望x昇順（同一希望xの兄弟は金額降順）に並べてから
+  //   左から右送りで衝突解消する。これにより子が親の直下から右へ並ぶ。
   const maxDepthVal = depthMap.size > 0 ? Math.max(...depthMap.values()) : 1;
+  const nodeX = new Map<string, number>();
+
+  const depth1Nodes = byDepth.get(1) ?? [];
+  depth1Nodes.forEach((node, i) => {
+    nodeX.set(node.blockId, SVG_MARGIN.left + i * (NODE_W + COL_GAP));
+  });
+
   for (let depth = 2; depth <= maxDepthVal; depth++) {
     const nodes = byDepth.get(depth);
-    if (!nodes) continue;
-    nodes.sort((a, b) => {
-      // 親の中の最小順位（fan-in 対応: 最も上にいる親に揃える）
-      const minPos = (id: string) => {
-        const ps = immediateParents.get(id) ?? [];
-        return ps.length > 0 ? Math.min(...ps.map(p => blockPosition.get(p) ?? 9999)) : 9999;
-      };
-      const diff = minPos(a.blockId) - minPos(b.blockId);
-      return diff !== 0 ? diff : b.totalAmount - a.totalAmount;
+    if (!nodes || nodes.length === 0) continue;
+
+    const desiredX = new Map<string, number>();
+    for (const node of nodes) {
+      const parents = immediateParents.get(node.blockId) ?? [];
+      if (parents.length === 0) {
+        // 親が見つからない場合（バックエッジ経由の到達等）は左端に寄せる
+        desiredX.set(node.blockId, SVG_MARGIN.left);
+        continue;
+      }
+      let bestParentId = parents[0];
+      let bestAmount = -Infinity;
+      for (const pid of parents) {
+        const amt = blockById.get(pid)?.totalAmount ?? -Infinity;
+        if (amt > bestAmount) { bestAmount = amt; bestParentId = pid; }
+      }
+      desiredX.set(node.blockId, nodeX.get(bestParentId) ?? SVG_MARGIN.left);
+    }
+
+    // 希望xの昇順（同一希望xの兄弟は金額降順）に並べる
+    const ordered = [...nodes].sort((a, b) => {
+      const dx = (desiredX.get(a.blockId) ?? 0) - (desiredX.get(b.blockId) ?? 0);
+      return dx !== 0 ? dx : b.totalAmount - a.totalAmount;
     });
-    // ソート結果を次の深さの基準として登録
-    nodes.forEach((b, i) => blockPosition.set(b.blockId, i));
+
+    let prevX: number | null = null;
+    for (const node of ordered) {
+      const want = desiredX.get(node.blockId) ?? SVG_MARGIN.left;
+      const x: number = prevX === null ? want : Math.max(want, prevX + NODE_W + COL_GAP);
+      nodeX.set(node.blockId, x);
+      prevX = x;
+    }
   }
 
   // Y座標計算: depthごとに横一列で並べ、上から下へ流す。
-  // 同一階層内で折り返すとリンク矢印が上下に交差して読みにくいため、
-  // 横幅は使うが階層の意味が崩れない配置を優先する。
   const layoutBlocks: LayoutBlock[] = [];
   let currentY = SVG_MARGIN.top + ROOT_H + DEPTH_GAP;
-  let maxRowWidth = ROOT_W;
 
   for (const [depth, nodes] of [...byDepth.entries()].sort((a, b) => a[0] - b[0])) {
-    const cardsPerRow = Math.max(1, nodes.length);
-    const rowWidth = cardsPerRow * NODE_W + Math.max(0, cardsPerRow - 1) * COL_GAP;
-    maxRowWidth = Math.max(maxRowWidth, rowWidth);
-
-    nodes.forEach((node, i) => {
+    for (const node of nodes) {
       layoutBlocks.push({
         blockId: node.blockId,
         blockName: node.blockName,
@@ -234,29 +249,38 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
         isTerminal: node.isTerminal,
         isZeroAmount: node.totalAmount === 0 && node.recipientCount === 0,
         depth,
-        x: SVG_MARGIN.left + i * (NODE_W + COL_GAP),
+        x: nodeX.get(node.blockId) ?? SVG_MARGIN.left,
         y: currentY,
         w: NODE_W,
         h: NODE_MIN_H,
         node,
       });
-    });
-
+    }
     currentY += NODE_MIN_H + DEPTH_GAP;
   }
 
-  const contentWidth = maxRowWidth;
+  // ルート: 深度1行の水平範囲の中央（子が1個ならその真上になる）
+  const depth1MinX = depth1Nodes.length > 0
+    ? Math.min(...depth1Nodes.map((n) => nodeX.get(n.blockId) ?? SVG_MARGIN.left))
+    : SVG_MARGIN.left;
+  const depth1MaxX = depth1Nodes.length > 0
+    ? Math.max(...depth1Nodes.map((n) => (nodeX.get(n.blockId) ?? SVG_MARGIN.left) + NODE_W))
+    : SVG_MARGIN.left + ROOT_W;
 
   const root: LayoutRoot = {
     label: graph.projectName,
-    x: SVG_MARGIN.left + Math.max(0, (contentWidth - ROOT_W) / 2),
+    x: (depth1MinX + depth1MaxX) / 2 - ROOT_W / 2,
     y: SVG_MARGIN.top,
     w: ROOT_W,
     h: ROOT_H,
   };
 
-  for (const lb of layoutBlocks) {
-    lb.x += Math.max(0, (contentWidth - rowWidthForDepth(byDepth.get(lb.depth)?.length ?? 1)) / 2);
+  // ルートが左マージンをはみ出す場合（深度1が単一ブロック等でROOT_Wの方が広いケース）は
+  // 全体を右へシフトして左マージンを維持する
+  const overhang = SVG_MARGIN.left - root.x;
+  if (overhang > 0) {
+    root.x += overhang;
+    for (const lb of layoutBlocks) lb.x += overhang;
   }
 
   // LayoutBlock → マップ
@@ -323,7 +347,12 @@ export function computeSubcontractLayout(graph: SubcontractGraph): SubcontractLa
   }
 
   // SVGサイズ
-  const maxX = SVG_MARGIN.left + contentWidth + SVG_MARGIN.right;
+  const maxRight = Math.max(
+    root.x + root.w,
+    ...layoutBlocks.map((lb) => lb.x + lb.w),
+    SVG_MARGIN.left + 100,
+  );
+  const maxX = maxRight + SVG_MARGIN.right;
   const maxY = Math.max(
     ...layoutBlocks.map((lb) => lb.y + lb.h),
     root.y + root.h,
