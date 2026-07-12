@@ -78,6 +78,9 @@ export interface RibbonFlow {
   isReference: boolean;
   note?: string;
   targetIncomingBlockCount: number;
+  /** 推定流量（円）。target の totalAmount を親間分配した値 — targetThickness と同じ根拠（share）から
+   *  ピクセルスケール(k)を介さずに直接算出するため、床(RIBBON_BAR_MIN_H)による丸め誤差を含まない */
+  amount: number;
   x1: number;
   y1Top: number;
   y1Bot: number;
@@ -170,6 +173,48 @@ export function ribbonBackEdgePath(x1: number, y1: number, x2: number, y2: numbe
 export function ribbonSelfLoopPath(x: number, y: number): string {
   const r = 20;
   return `M ${x - 6} ${y} C ${x - r} ${y - r * 2}, ${x + r} ${y - r * 2}, ${x + 6} ${y}`;
+}
+
+// ─── ラベル文字幅の概算・切り詰め ──────────────────────────────────────────────
+// SVG <text> は実測なしに文字幅がわからないため、全角/半角の概算係数で近似する。
+// 太字（選択・ホバー時）でも崩れないよう、両係数にわずかな安全マージンを乗せてある。
+const LABEL_FULLWIDTH_COEF = 1.05;
+const LABEL_HALFWIDTH_COEF = 0.58;
+
+/** 文字幅の概算合計（px）。全角=fontSize×約1.0 / 半角=fontSize×約0.55 相当（太字向けに少し余裕を持たせた係数） */
+export function estimateLabelWidth(text: string, fontSizePx: number): number {
+  let width = 0;
+  for (const ch of text) {
+    const isFullWidth = ch.charCodeAt(0) > 0xff;
+    width += fontSizePx * (isFullWidth ? LABEL_FULLWIDTH_COEF : LABEL_HALFWIDTH_COEF);
+  }
+  return width;
+}
+
+/**
+ * 「名前 (金額)」形式のラベルで、金額部分（amountText、例: " (1,234億円)"）を必ず収めた上で
+ * 名前部分だけを切り詰める。名前が収まらない場合は末尾を "…" にして詰める。
+ * 金額側は呼び出し側でそのまま描画すること（この関数は名前部分のみ返す）。
+ */
+export function truncateRibbonLabelName(
+  name: string,
+  amountText: string,
+  maxWidth: number,
+  fontSizePx: number,
+): string {
+  const amountWidth = estimateLabelWidth(amountText, fontSizePx);
+  const nameBudget = Math.max(0, maxWidth - amountWidth);
+  if (estimateLabelWidth(name, fontSizePx) <= nameBudget) return name;
+  const ellipsisWidth = estimateLabelWidth('…', fontSizePx);
+  let acc = '';
+  let w = 0;
+  for (const ch of name) {
+    const chWidth = estimateLabelWidth(ch, fontSizePx);
+    if (w + chWidth + ellipsisWidth > nameBudget) break;
+    acc += ch;
+    w += chWidth;
+  }
+  return `${acc}…`;
 }
 
 // ─── メインレイアウト関数 ──────────────────────────────────────────────
@@ -274,6 +319,9 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
 
   const targetThickness = new Map<FlowRef, number>();
   const sourceThickness = new Map<FlowRef, number>();
+  // 推定流量（円）。ピクセル太さ(targetThickness)と同じ share から直接算出（k を介さないため
+  // RIBBON_BAR_MIN_H の床による丸め誤差を含まない、ツールチップ表示用の実額推定）
+  const flowAmountEstimate = new Map<FlowRef, number>();
 
   // 入口側: target バーの高さを、流入元（source）の totalAmount 比で配分。
   // ルートが唯一の流入元の場合は target 自身の totalAmount を重みとして使う（配分比 1）
@@ -292,6 +340,7 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
       const w = Math.max(0, weights[i]);
       const share = totalWeight > 0 ? w / totalWeight : 1 / fs.length;
       targetThickness.set(f, targetH * share);
+      flowAmountEstimate.set(f, targetNode.totalAmount * share);
     });
   }
 
@@ -470,6 +519,7 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
       isReference: f.isReference,
       note: f.note,
       targetIncomingBlockCount: f.targetIncomingBlockCount,
+      amount: flowAmountEstimate.get(f) ?? 0,
       x1: sourceRightX,
       y1Top,
       y1Bot,

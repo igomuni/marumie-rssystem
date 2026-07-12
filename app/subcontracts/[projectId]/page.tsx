@@ -43,6 +43,8 @@ import {
   RIBBON_COL_GAP,
   RIBBON_BAR_W,
   RIBBON_LABEL_W,
+  truncateRibbonLabelName,
+  type RibbonFlow,
 } from '@/app/lib/subcontract-ribbon-layout';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
@@ -281,7 +283,8 @@ function sortRecipients(
 
 type HoveredNode =
   | { kind: 'root' }
-  | { kind: 'block'; block: BlockNode };
+  | { kind: 'block'; block: BlockNode }
+  | { kind: 'ribbonFlow'; flow: RibbonFlow; flowKey: string };
 
 type ViewMode = 'block' | 'ribbon';
 
@@ -1948,8 +1951,14 @@ function SubcontractDetailPageInner() {
                   strokeWidth={isSeparateOrigin ? 1.5 : 0}
                   strokeDasharray={isSeparateOrigin ? '5 4' : undefined}
                   style={{ cursor: 'pointer', transition: 'fill-opacity 0.12s ease' }}
-                  onMouseEnter={() => setHoveredRibbonFlowKey(flowKey)}
-                  onMouseLeave={() => setHoveredRibbonFlowKey((k) => (k === flowKey ? null : k))}
+                  onMouseEnter={() => {
+                    setHoveredRibbonFlowKey(flowKey);
+                    setHoveredNodeRaw({ kind: 'ribbonFlow', flow, flowKey });
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredRibbonFlowKey((k) => (k === flowKey ? null : k));
+                    setHoveredNodeRaw((n) => (n && n.kind === 'ribbonFlow' && n.flowKey === flowKey ? null : n));
+                  }}
                 />
               );
             })}
@@ -2019,6 +2028,11 @@ function SubcontractDetailPageInner() {
               const barOpacity = isDimmed ? 0.35 : 1;
               const labelColor = isDimmed ? '#bbb' : '#333';
               const amountLabel = bar.isZeroAmount ? '金額内訳なし' : formatYen(bar.totalAmount);
+              const barLabelFontPx = scaleFont(11);
+              const amountTspanText = ` (${amountLabel})`;
+              // 金額部分（"(1,234億円)"）を必ず収めた上で名前部分を切り詰める（列幅からはみ出し・
+              // 文字切れを防ぐ。clipPath は保険として残すが、通常ケースではここで収まる）
+              const displayBlockName = truncateRibbonLabelName(bar.blockName, amountTspanText, RIBBON_LABEL_W - 6, barLabelFontPx);
 
               return (
                 <g
@@ -2057,14 +2071,14 @@ function SubcontractDetailPageInner() {
                     x={bar.x + bar.w + 6}
                     y={bar.y + bar.h / 2}
                     dominantBaseline="middle"
-                    fontSize={scaleFont(11)}
+                    fontSize={barLabelFontPx}
                     fontWeight={isSelected || isHovered ? 700 : 500}
                     fill={labelColor}
                     clipPath={bar.depth === ribbonMaxDepth ? undefined : `url(#ribbon-clip-col-${bar.depth})`}
                     style={{ userSelect: 'none', pointerEvents: 'none' }}
                   >
-                    {bar.blockName.length > 40 ? `${bar.blockName.slice(0, 40)}…` : bar.blockName}
-                    <tspan fill={isDimmed ? '#ccc' : '#888'} fontWeight={500}> ({amountLabel})</tspan>
+                    {displayBlockName}
+                    <tspan fill={isDimmed ? '#ccc' : '#888'} fontWeight={500}>{amountTspanText}</tspan>
                   </text>
                 </g>
               );
@@ -2079,13 +2093,27 @@ function SubcontractDetailPageInner() {
         {hoveredNodeStable && !isPanning.current && !isHoverSuppressed && (() => {
           const isRoot = hoveredNodeStable.kind === 'root';
           const lb = hoveredNodeStable.kind === 'block' ? hoveredNodeStable.block : null;
+          const rf = hoveredNodeStable.kind === 'ribbonFlow' ? hoveredNodeStable.flow : null;
           const tipW = 300;
           const palette = lb ? originPalette(lb.originKind) : null;
-          const headerColor = isRoot ? COLOR_ROOT : palette!.header;
-          const bodyColor = isRoot ? COLOR_CONTEXT_BODY : palette!.body;
-          const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : palette!.bodyText;
+          const rfTargetBar = rf ? safeRibbonLayout.bars.find((b) => b.blockId === rf.targetBlock) ?? null : null;
+          const rfPalette = rfTargetBar ? originPalette(rfTargetBar.originKind) : null;
+          const rfEdgeStyle = rf ? flowEdgeStyle(rf.origin) : null;
+          const rfSourceName = rf
+            ? (rf.sourceBlock === null
+              ? graph.projectName
+              : (safeRibbonLayout.bars.find((b) => b.blockId === rf.sourceBlock)?.blockName ?? rf.sourceBlock))
+            : '';
+          const rfTargetName = rfTargetBar?.blockName ?? rf?.targetBlock ?? '';
+          const headerColor = isRoot ? COLOR_ROOT : rf ? (rfPalette?.header ?? rfEdgeStyle!.stroke) : palette!.header;
+          const bodyColor = isRoot ? COLOR_CONTEXT_BODY : rf ? (rfPalette?.body ?? '#f1f5f9') : palette!.body;
+          const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : rf ? (rfPalette?.bodyText ?? '#334155') : palette!.bodyText;
           const topRecipients = lb ? sortRecipients(lb.recipients, 'amount-desc').slice(0, 3) : [];
-          const tipH = isRoot ? 126 : 96 + (lb!.role ? 18 : 0) + topRecipients.length * 18;
+          const tipH = isRoot
+            ? 126
+            : rf
+              ? 88 + (rf.note ? 22 : 0)
+              : 96 + (lb!.role ? 18 : 0) + topRecipients.length * 18;
           const containerW = containerRef.current?.clientWidth ?? 1000;
           const containerH = containerRef.current?.clientHeight ?? 800;
           const GAP = 12;
@@ -2124,7 +2152,9 @@ function SubcontractDetailPageInner() {
               }}>
                 {isRoot
                   ? `事業 / PID ${graph.projectId}`
-                  : `${palette!.badgeText} / ブロック ${lb!.blockId}`}
+                  : rf
+                    ? `フロー / ${flowOriginLabel(rf.origin)}`
+                    : `${palette!.badgeText} / ブロック ${lb!.blockId}`}
               </div>
               <div style={{ padding: '8px 10px', fontSize: scaleFont(11), lineHeight: 1.45, color: textColor }}>
                 {isRoot ? (
@@ -2133,6 +2163,23 @@ function SubcontractDetailPageInner() {
                     <div>府省庁: {graph.ministry}</div>
                     {visibleOrgChain.length > 0 && <div>担当組織: {visibleOrgChain.join(' / ')}</div>}
                     <div>予算: {graph.budget > 0 ? formatYen(graph.budget) : '—'} / 支出: {graph.execution > 0 ? formatYen(graph.execution) : '—'}</div>
+                  </>
+                ) : rf ? (
+                  <>
+                    <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {rfSourceName} → {rfTargetName}
+                    </div>
+                    <div>{formatYen(Math.round(rf.amount))}</div>
+                    <div>
+                      {flowOriginLabel(rf.origin)}
+                      {rf.isReference && '（参考標記）'}
+                      {rf.targetIncomingBlockCount >= 2 && ` ・ 合流 ${rf.targetIncomingBlockCount}本`}
+                    </div>
+                    {rf.note && (
+                      <div style={{ marginTop: 4, paddingTop: 4, borderTop: `1px solid ${headerColor}33` }}>
+                        補足: {rf.note}
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
