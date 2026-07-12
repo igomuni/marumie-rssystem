@@ -305,7 +305,12 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   type FlowRef = (typeof mergedFlows)[number];
   type Classified = { flow: FlowRef; isSelfLoop: boolean; isBackEdge: boolean };
   const classified: Classified[] = mergedFlows
-    .filter((f) => depthMap.has(f.targetBlock) && blockById.has(f.targetBlock)) // バーが必ず存在する対象のみ（bars は byDepth=depthMap∩blockById から構築される）
+    // バーが必ず存在する対象のみ（bars は byDepth=depthMap∩blockById から構築される）。
+    // source 側も同条件で守る: バー未生成の source を持つフローを通すと sd=-1 で順方向扱いになり、
+    // ルート起点のリボンとして誤描画される（target 唯一の流入なら全高を占める）ため除外する
+    .filter((f) =>
+      depthMap.has(f.targetBlock) && blockById.has(f.targetBlock)
+      && (f.sourceBlock === null || (depthMap.has(f.sourceBlock) && blockById.has(f.sourceBlock))))
     .map((f) => {
       const isSelfLoop = f.sourceBlock === f.targetBlock;
       const sd = getDepth(f.sourceBlock);
