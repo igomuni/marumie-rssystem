@@ -586,8 +586,11 @@ function SubcontractsPageInner() {
         {/* コントロール（/sankey-svg と同じトーン） */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           {/* トップへ戻る（矢印のみ） */}
+          {/* href は "/"（リダイレクト元）ではなく実体の /sankey-svg を指す。
+              "/" は 307 リダイレクトのため Link のプリフェッチがキャッシュできず、
+              dev コンソールに GET / 307 が繰り返し出る */}
           <Link
-            href="/"
+            href="/sankey-svg"
             aria-label="トップへ戻る"
             title="トップへ戻る"
             style={{

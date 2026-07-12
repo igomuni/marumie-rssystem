@@ -112,7 +112,11 @@ export function SidePanelChrome({
           top: '50%', transform: 'translateY(-50%)',
           width: 25, zIndex: 1,
           background: '#fff',
-          border: '1px solid #e0e0e0',
+          // ショートハンド border と辺別指定を混在させない（side が切り替わる再レンダーで
+          // React が競合警告を出すため、4辺を明示指定する）
+          borderTop: '1px solid #e0e0e0',
+          borderBottom: '1px solid #e0e0e0',
+          [isLeft ? 'borderRight' : 'borderLeft']: '1px solid #e0e0e0',
           [isLeft ? 'borderLeft' : 'borderRight']: 'none',
           borderRadius: isLeft ? '0 6px 6px 0' : '6px 0 0 6px',
           boxShadow: isLeft ? '2px 0 4px rgba(0,0,0,0.08)' : '-2px 0 4px rgba(0,0,0,0.08)',
