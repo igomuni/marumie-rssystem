@@ -212,8 +212,6 @@ function edgeWidthForAmount(amount: number, maxAmount: number): number {
   return EDGE_WIDTH_MIN + t * (EDGE_WIDTH_MAX - EDGE_WIDTH_MIN);
 }
 // キャンバス背景のドット格子（薄い格子点。パン位置に応じてずらし、キャンバスと一緒に動く見た目にする）
-const CANVAS_DOT_COLOR = 'rgba(15,23,42,0.08)';
-const CANVAS_GRID_SIZE = 26;
 // サンキー（app/sankey-svg/page.tsx）のホバー流儀に合わせた定数
 const HOVER_ENTER_DELAY_MS = 220;
 const HOVER_SUPPRESS_AFTER_INTERACTION_MS = 500;
@@ -1457,9 +1455,6 @@ function SubcontractDetailPageInner() {
           overflow: 'hidden',
           position: 'relative',
           backgroundColor: COLOR_CANVAS,
-          backgroundImage: `radial-gradient(circle at 1px 1px, ${CANVAS_DOT_COLOR} 1px, transparent 0)`,
-          backgroundSize: `${CANVAS_GRID_SIZE}px ${CANVAS_GRID_SIZE}px`,
-          backgroundPosition: `${transform.x}px ${transform.y}px`,
         }}
       >
         {/* 一覧へ戻る — 左上（サイドパネルが左表示のときは退避） */}
