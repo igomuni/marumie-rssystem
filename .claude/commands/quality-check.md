@@ -1,6 +1,6 @@
 ---
-allowed-tools: Bash(npm run lint:*), Bash(npx tsc:*)
-description: lint と TypeScript 型チェックを実行する
+allowed-tools: Bash(npm run lint:*), Bash(npx tsc:*), Bash(npm test:*)
+description: lint と TypeScript 型チェックとユニットテストを実行する
 ---
 
 ## タスク
@@ -21,7 +21,14 @@ description: lint と TypeScript 型チェックを実行する
    - エラーがある場合はユーザーに報告して修正を提案する
    - エラーがない場合は「型チェック OK」と報告する
 
+3. **ユニットテスト**（vitest・app/lib/ の Pure 関数対象・実データ非依存）
+   ```bash
+   npm test
+   ```
+   - 失敗がある場合はユーザーに報告して修正を提案する
+
 ## 完了条件
 
 - lint エラー 0件
 - tsc エラー 0件
+- テスト全件パス
