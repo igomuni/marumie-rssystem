@@ -197,6 +197,12 @@ const CARD_BORDER_W = 1;
 const CARD_BORDER_NEUTRAL = '#e2e8f0';
 const CARD_SHADOW = 'drop-shadow(0 1px 2px rgba(15,23,42,0.10)) drop-shadow(0 1px 1px rgba(15,23,42,0.06))';
 const CARD_SELECTED_RING = 'rgba(74,144,217,0.28)';
+// ズーム倍率レンジ（/sankey-svg の ZOOM_MIN_ABS/MAX_ABS/MULTIPLIER と同じ考え方: 絶対上下限と
+// baseZoom（フィット倍率）からの相対上下限の両方で挟む）
+const ZOOM_MIN_ABS = 0.05;
+const ZOOM_MAX_ABS = 20;
+const ZOOM_MIN_MULTIPLIER = 0.25;
+const ZOOM_MAX_MULTIPLIER = 30;
 // エッジ太さスケール（金額に応じて 2〜10px の平方根スケール。線が細すぎ/太すぎにならない範囲）
 const EDGE_WIDTH_MIN = 2;
 const EDGE_WIDTH_MAX = 10;
@@ -1130,6 +1136,9 @@ function SubcontractDetailPageInner() {
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
+  // スクロールモード: 'zoom' = 素のスクロールでズーム（既定）/ 'pan' = 素のスクロールで移動、
+  // Ctrl/Cmd+スクロールでズーム（/sankey-svg と同じトグル）
+  const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isPanning = useRef(false);
@@ -1219,20 +1228,37 @@ function SubcontractDetailPageInner() {
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
     beginHoverSuppressCooldown();
-    setTransform((prev) => {
-      const factor = e.deltaY > 0 ? 0.9 : 1.1;
-      const newScale = Math.min(10, Math.max(0.1, prev.scale * factor));
-      const rect = svgRef.current?.getBoundingClientRect();
-      if (!rect) return { ...prev, scale: newScale };
-      const cx = e.clientX - rect.left;
-      const cy = e.clientY - rect.top;
-      return {
-        scale: newScale,
-        x: cx - (cx - prev.x) * (newScale / prev.scale),
-        y: cy - (cy - prev.y) * (newScale / prev.scale),
-      };
-    });
-  }, [beginHoverSuppressCooldown]);
+
+    const doZoom = (dy: number, clientX: number, clientY: number) => {
+      setTransform((prev) => {
+        const factor = dy > 0 ? 0.9 : 1.1;
+        const minZoom = Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER);
+        const maxZoom = Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER);
+        const newScale = Math.max(minZoom, Math.min(maxZoom, prev.scale * factor));
+        const rect = svgRef.current?.getBoundingClientRect();
+        if (!rect) return { ...prev, scale: newScale };
+        const cx = clientX - rect.left;
+        const cy = clientY - rect.top;
+        return {
+          scale: newScale,
+          x: cx - (cx - prev.x) * (newScale / prev.scale),
+          y: cy - (cy - prev.y) * (newScale / prev.scale),
+        };
+      });
+    };
+
+    if (scrollMode === 'zoom') {
+      doZoom(e.deltaY, e.clientX, e.clientY);
+    } else {
+      // 移動モード: Ctrl/Cmd+スクロール = ズーム、それ以外 = パン
+      if (e.ctrlKey || e.metaKey) {
+        doZoom(e.deltaY, e.clientX, e.clientY);
+      } else {
+        const speed = 1.2;
+        setTransform((prev) => ({ ...prev, x: prev.x - e.deltaX * speed, y: prev.y - e.deltaY * speed }));
+      }
+    }
+  }, [beginHoverSuppressCooldown, baseZoom, scrollMode]);
 
   useEffect(() => {
     if (!graph) return; // SVGがレンダリングされるまで待つ
@@ -1271,7 +1297,9 @@ function SubcontractDetailPageInner() {
 
   const applyZoom = useCallback((factor: number) => {
     setTransform((prev) => {
-      const newScale = Math.max(0.1, Math.min(10, prev.scale * factor));
+      const minZoom = Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER);
+      const maxZoom = Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER);
+      const newScale = Math.max(minZoom, Math.min(maxZoom, prev.scale * factor));
       const container = containerRef.current;
       if (!container) return { ...prev, scale: newScale };
       const cx = container.clientWidth / 2;
@@ -1282,7 +1310,7 @@ function SubcontractDetailPageInner() {
         y: cy - (cy - prev.y) * (newScale / prev.scale),
       };
     });
-  }, []);
+  }, [baseZoom]);
 
   const resetViewport = useCallback(() => {
     const container = containerRef.current;
@@ -2040,8 +2068,8 @@ function SubcontractDetailPageInner() {
                     clipPath={bar.depth === ribbonMaxDepth ? undefined : `url(#ribbon-clip-col-${bar.depth})`}
                     style={{ userSelect: 'none', pointerEvents: 'none' }}
                   >
-                    {bar.blockName.length > 26 ? `${bar.blockName.slice(0, 26)}…` : bar.blockName}
-                    <tspan fill={isDimmed ? '#ccc' : '#888'} fontWeight={500}> {amountLabel}</tspan>
+                    {bar.blockName.length > 40 ? `${bar.blockName.slice(0, 40)}…` : bar.blockName}
+                    <tspan fill={isDimmed ? '#ccc' : '#888'} fontWeight={500}> ({amountLabel})</tspan>
                   </text>
                 </g>
               );
@@ -2138,6 +2166,17 @@ function SubcontractDetailPageInner() {
           zIndex: 15, display: 'flex', flexDirection: 'column', gap: 4,
           transition: sidePanel.isResizing ? 'none' : 'right 0.2s ease',
         }}>
+          {/* スクロールモード切替ボタン（/sankey-svg と同じ意匠） */}
+          <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44 }}>
+            <button
+              aria-label={scrollMode === 'pan' ? 'スクロール移動モード（クリックでズームモードへ）' : 'スクロール移動モードに切替'}
+              title={scrollMode === 'pan' ? 'スクロール: 移動モード\nCtrl/Cmd+スクロール = ズーム\nクリックでズームモードへ' : 'スクロール: ズームモード\nクリックで移動モードへ'}
+              onClick={() => setScrollMode(m => m === 'zoom' ? 'pan' : 'zoom')}
+              style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', border: 'none', background: scrollMode === 'pan' ? '#e8f0fe' : 'transparent', cursor: 'pointer' }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill={scrollMode === 'pan' ? '#1a73e8' : '#bbb'}><path d="M480-80 310-250l57-57 73 73v-166H274l73 74-57 57L120-440l170-170 57 57-74 73h166v-166l-73 73-57-57 170-170 170 170-57 57-73-73v166h166l-74-73 57-57 170 170-170 170-57-57 74-74H520v166l73-73 57 57L480-80Z"/></svg>
+            </button>
+          </div>
           {/* + / スライダー / - */}
           <div style={{ background: 'rgba(255,255,255,0.9)', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.12)', overflow: 'hidden', width: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <button aria-label="ズームイン" onClick={() => applyZoom(1.5)} title="ズームイン" style={{ width: '100%', padding: '5px 0', display: 'flex', justifyContent: 'center', background: 'transparent', border: 'none', borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }}>
@@ -2147,10 +2186,10 @@ function SubcontractDetailPageInner() {
               <input
                 type="range"
                 aria-label="ズーム倍率"
-                min={Math.log10(0.1)}
-                max={Math.log10(10)}
+                min={Math.log10(Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER))}
+                max={Math.log10(Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER))}
                 step={0.01}
-                value={Math.log10(Math.max(0.1, Math.min(10, transform.scale)))}
+                value={Math.log10(Math.max(Math.max(ZOOM_MIN_ABS, baseZoom * ZOOM_MIN_MULTIPLIER), Math.min(Math.min(ZOOM_MAX_ABS, baseZoom * ZOOM_MAX_MULTIPLIER), transform.scale)))}
                 onChange={e => { const newK = Math.pow(10, parseFloat(e.target.value)); applyZoom(newK / transform.scale); }}
                 style={{ writingMode: 'vertical-lr', direction: 'rtl', width: 16, height: 80 }}
                 title={`Zoom: ${Math.round(transform.scale / baseZoom * 100)}%`}

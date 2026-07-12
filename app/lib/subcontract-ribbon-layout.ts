@@ -34,9 +34,14 @@ export const RIBBON_ROW_GAP = 14;
 // 直接系バンド群と別財源レーンの間の追加ギャップ（通常の兄弟間ギャップより大きく取り、
 // 視覚的に「別レーン」であることを示す）
 export const RIBBON_LANE_GAP = 56;
-export const RIBBON_BAR_MIN_H = 28;
-export const RIBBON_BAR_MAX_H = 160;
+// /sankey-svg の computeLayout に合わせ、最低高さは「読みやすさのための下駄」ではなく
+// 描画上のハード床（1px）とする。金額差はすべて線形スケールの高さ差として表現する。
+export const RIBBON_BAR_MIN_H = 1;
 export const RIBBON_MARGIN = { top: 28, right: 36, bottom: 40, left: 36 };
+// 列（深度）ごとの合計金額のうち最大のものを、この高さ（px, ギャップ除く）に収める形で
+// 線形スケール係数 k を決定する（/sankey-svg の ky 決定＝「最も厳しい列が innerH に収まる
+// ky」という考え方を、固定描画キャンバスに単純化して移植したもの）。
+export const RIBBON_TARGET_COL_H = 640;
 
 const ROOT_KEY = '__root__';
 
@@ -110,18 +115,35 @@ export interface SubcontractRibbonLayout {
   svgWidth: number;
   svgHeight: number;
   maxAmount: number;
+  /** Σ子への流出額推定が親バー高さを超えたため比例圧縮したブロック数（データ不整合の検知用。通常0） */
+  sourceOverflowCount: number;
 }
 
 // ─── スケール関数 ──────────────────────────────────────────────
 
 /**
- * 金額 → バー高さ / リボン太さ（平方根スケール）。
- * 全ノード中の最大金額を RIBBON_BAR_MAX_H に、0円・極小額でも RIBBON_BAR_MIN_H を確保する。
+ * 金額 → バー高さ / リボン太さ（線形スケール）。/sankey-svg の
+ * `Math.max(1, node.value * ky)` と同じ考え方: 金額差はすべて高さの線形比に反映し、
+ * 最低高さは「読みやすさの下駄」ではなくハード床（1px）に留める。
  */
-export function ribbonAmountScale(amount: number, maxAmount: number): number {
-  if (amount <= 0 || maxAmount <= 0) return RIBBON_BAR_MIN_H;
-  const t = Math.sqrt(Math.min(1, amount / maxAmount));
-  return RIBBON_BAR_MIN_H + t * (RIBBON_BAR_MAX_H - RIBBON_BAR_MIN_H);
+export function ribbonAmountScale(amount: number, k: number): number {
+  return Math.max(RIBBON_BAR_MIN_H, Math.max(0, amount) * k);
+}
+
+/**
+ * 線形スケール係数 k の決定。「列（深度）ごとの合計金額が最大の列」が
+ * RIBBON_TARGET_COL_H に収まるように k を選ぶ（/sankey-svg の ky 決定の簡略移植）。
+ * 全ブロックが 0 円（制度フローのみ等）の場合は k=1 にフォールバックする
+ * （その場合は全バーが RIBBON_BAR_MIN_H の床に張り付く）。
+ */
+export function computeRibbonK(byDepth: Map<number, BlockNode[]>): number {
+  let maxColTotal = 0;
+  for (const nodes of byDepth.values()) {
+    const total = nodes.reduce((s, n) => s + Math.max(0, n.totalAmount), 0);
+    if (total > maxColTotal) maxColTotal = total;
+  }
+  if (maxColTotal <= 0) return 1;
+  return RIBBON_TARGET_COL_H / maxColTotal;
 }
 
 // ─── パス生成 ──────────────────────────────────────────────
@@ -222,7 +244,8 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   // 各トップレベルノード（depth1 または orphan）は、自分の子孫全体が専有する縦バンドを持つ。
   // 親は自分のバンドの中央に置かれる（単一子の連鎖は真横に一直線になる）。
   const maxAmount = Math.max(0, ...graph.blocks.map((b) => b.totalAmount));
-  const barH = (node: BlockNode): number => ribbonAmountScale(node.totalAmount, maxAmount);
+  const k = computeRibbonK(byDepth);
+  const barH = (node: BlockNode): number => ribbonAmountScale(node.totalAmount, k);
 
   // ─── フロー分類（順方向 / バックエッジ）とテーパー太さ配分 ──────────────────────
   // バー高さ（平方根スケール）とリボン太さを両端で厳密一致させるため、エッジ太さは
@@ -272,14 +295,20 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     });
   }
 
-  // 出口側: source バーの高さを、送出先（target）の totalAmount 比で配分。
-  // ルート（source===null）は入口側の配分値をそのままパススルー（下でルート高さ算出に使う）
+  // 出口側: リボン太さは「流れる金額」の推定値（= 入口側で計算済みの targetThickness、
+  // 線形スケール下では両端で同じ値になる）をそのまま使う。source バーの高さいっぱいに
+  // 正規化して埋め尽くすことはしない — 直接委託の金額と再委託金額は一致するとは限らない
+  // ため、Σ子への流出額 < 親バー高さのときは親バーの上部からのみリボンが出て、
+  // 下部は空白（= 再委託していない直接執行分）として残るのが正しい表現。
+  // 例外: Σ子への流出額推定 > 親バー高さ（データ不整合）の場合のみ、はみ出しではなく
+  // 比例圧縮でフォールバックする（sourceOverflowCount で件数を計上）。
   const bySource = new Map<string, FlowRef[]>();
   for (const f of forwardFlows) {
     const key = f.sourceBlock ?? ROOT_KEY;
     if (!bySource.has(key)) bySource.set(key, []);
     bySource.get(key)!.push(f);
   }
+  let sourceOverflowCount = 0;
   for (const [sourceKey, fs] of bySource) {
     if (sourceKey === ROOT_KEY) {
       for (const f of fs) sourceThickness.set(f, targetThickness.get(f) ?? 0);
@@ -288,13 +317,15 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     const sourceNode = blockById.get(sourceKey);
     if (!sourceNode) continue;
     const sourceH = barH(sourceNode);
-    const weights = fs.map((f) => blockById.get(f.targetBlock)?.totalAmount ?? 0);
-    const totalWeight = weights.reduce((s, w) => s + Math.max(0, w), 0);
-    fs.forEach((f, i) => {
-      const w = Math.max(0, weights[i]);
-      const share = totalWeight > 0 ? w / totalWeight : 1 / fs.length;
-      sourceThickness.set(f, sourceH * share);
-    });
+    const rawThicknesses = fs.map((f) => Math.max(0, targetThickness.get(f) ?? 0));
+    const sumRaw = rawThicknesses.reduce((s, v) => s + v, 0);
+    if (sumRaw > sourceH && sumRaw > 0) {
+      sourceOverflowCount++;
+      const scale = sourceH / sumRaw;
+      fs.forEach((f, i) => sourceThickness.set(f, rawThicknesses[i] * scale));
+    } else {
+      fs.forEach((f, i) => sourceThickness.set(f, rawThicknesses[i]));
+    }
   }
 
   const subtreeH = new Map<string, number>();
@@ -365,7 +396,7 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     separateLane = { top: laneTop - RIBBON_LANE_GAP / 2, bottom: bandCursor - RIBBON_ROW_GAP };
   }
 
-  // 全ノード中の最大金額（バー高さ・リボン太さの共通スケール基準）は上で算出済み（maxAmount）
+  // 線形スケール係数 k（バー高さ・リボン太さの共通スケール基準）は上で算出済み
 
   // 列ごとに x 座標のみ決定（y は band 配置で決まっている）
   const bars: RibbonBar[] = [];
@@ -495,5 +526,6 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     svgWidth: Math.max(maxRight, RIBBON_MARGIN.left + RIBBON_COL_W + RIBBON_MARGIN.right),
     svgHeight: maxBottom,
     maxAmount,
+    sourceOverflowCount,
   };
 }
