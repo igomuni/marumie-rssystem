@@ -42,6 +42,7 @@ import {
   RIBBON_COL_W,
   RIBBON_COL_GAP,
   RIBBON_BAR_W,
+  RIBBON_LABEL_W,
 } from '@/app/lib/subcontract-ribbon-layout';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
@@ -1942,7 +1943,7 @@ function SubcontractDetailPageInner() {
               />
             ))}
 
-            {/* 事業コンテキストノード（ルートバー。見た目・操作はA案の事業カードと共通） */}
+            {/* 事業コンテキストノード（ルート。他ノードと同じスリムバー + 横のラベル。sankeyノード風） */}
             <g
               onClick={handleDeselect}
               onMouseEnter={() => setHoveredNodeRaw({ kind: 'root' })}
@@ -1953,55 +1954,33 @@ function SubcontractDetailPageInner() {
                 x={safeRibbonLayout.root.x}
                 y={safeRibbonLayout.root.y}
                 width={safeRibbonLayout.root.w}
-                height={safeRibbonLayout.root.h}
-                rx={CARD_RADIUS}
-                fill="transparent"
+                height={Math.max(1, safeRibbonLayout.root.h)}
+                rx={1}
+                fill={COLOR_ROOT}
+                stroke={hoveredNodeRaw?.kind === 'root' ? '#111827' : 'none'}
+                strokeWidth={hoveredNodeRaw?.kind === 'root' ? 1.5 : 0}
+                vectorEffect="non-scaling-stroke"
                 style={{ pointerEvents: 'all' }}
               />
-              <path
-                d={roundedTopPath(safeRibbonLayout.root.x, safeRibbonLayout.root.y, safeRibbonLayout.root.w, 56, CARD_RADIUS)}
-                fill={COLOR_ROOT}
-                stroke={COLOR_ROOT}
-                strokeWidth={CARD_BORDER_W}
-                vectorEffect="non-scaling-stroke"
-                style={{ pointerEvents: 'none' }}
-              />
-              <path
-                d={roundedBottomPath(safeRibbonLayout.root.x, safeRibbonLayout.root.y + 56, safeRibbonLayout.root.w, safeRibbonLayout.root.h - 56, CARD_RADIUS)}
-                fill={COLOR_CONTEXT_BODY}
-                stroke={COLOR_ROOT}
-                strokeWidth={CARD_BORDER_W}
-                vectorEffect="non-scaling-stroke"
-                style={{ pointerEvents: 'none' }}
-              />
               <foreignObject
-                x={safeRibbonLayout.root.x + 14}
-                y={safeRibbonLayout.root.y + 6}
-                width={safeRibbonLayout.root.w - 28}
-                height={44}
+                x={safeRibbonLayout.root.x + safeRibbonLayout.root.w + 6}
+                y={safeRibbonLayout.root.y - 4}
+                width={RIBBON_LABEL_W - 6}
+                height={Math.max(safeRibbonLayout.root.h + 8, 44)}
                 style={{ pointerEvents: 'none' }}
               >
-                <div style={{ fontFamily: 'inherit', userSelect: 'none' }}>
-                  <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: 'rgba(255,255,255,0.78)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontFamily: 'inherit', userSelect: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
+                  <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: '#94a3b8' }}>
                     事業 / PID {graph.projectId}
                   </div>
-                  <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#fff', lineHeight: `${scaleFont(13)}px`, marginTop: 3, ...CLAMP_2_LINES }}>
+                  <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#333', lineHeight: `${scaleFont(13)}px`, marginTop: 2, ...CLAMP_2_LINES }}>
                     {graph.projectName}
+                  </div>
+                  <div style={{ fontSize: scaleFont(9), fontWeight: 500, color: '#888', marginTop: 2 }}>
+                    予算 {graph.budget > 0 ? formatYen(graph.budget) : '—'} ・ 支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}
                   </div>
                 </div>
               </foreignObject>
-              <text
-                x={safeRibbonLayout.root.x + safeRibbonLayout.root.w - 14}
-                y={safeRibbonLayout.root.y + safeRibbonLayout.root.h - 14}
-                textAnchor="end"
-                fontSize={scaleFont(9)}
-                fontWeight={700}
-                fill={COLOR_CONTEXT_BODY_SUBTLE}
-                style={{ userSelect: 'none' }}
-              >
-                <tspan x={safeRibbonLayout.root.x + safeRibbonLayout.root.w - 14}>予算 {graph.budget > 0 ? formatYen(graph.budget) : '—'}</tspan>
-                <tspan x={safeRibbonLayout.root.x + safeRibbonLayout.root.w - 14} dy={scaleFont(12)}>支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}</tspan>
-              </text>
             </g>
 
             {/* ブロックバー（sankeyノード風の細帯。ラベルはバー右横のテキスト） */}

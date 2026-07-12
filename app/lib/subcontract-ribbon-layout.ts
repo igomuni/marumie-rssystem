@@ -34,14 +34,9 @@ export const RIBBON_ROW_GAP = 14;
 // 直接系バンド群と別財源レーンの間の追加ギャップ（通常の兄弟間ギャップより大きく取り、
 // 視覚的に「別レーン」であることを示す）
 export const RIBBON_LANE_GAP = 56;
-export const RIBBON_RIBBON_GAP = 2;
 export const RIBBON_BAR_MIN_H = 28;
 export const RIBBON_BAR_MAX_H = 160;
-export const RIBBON_ROOT_H = 120;
-// ルートバーの高さ = 直接系流出リボン太さの合計 + このパディング
-export const RIBBON_ROOT_PADDING = 24;
 export const RIBBON_MARGIN = { top: 28, right: 36, bottom: 40, left: 36 };
-export const RIBBON_MIN_THICKNESS = 3;
 
 const ROOT_KEY = '__root__';
 
@@ -70,7 +65,7 @@ export interface RibbonRoot {
   h: number;
 }
 
-/** 順方向フロー（col間を繋ぐ帯）。太さは往路・復路とも同じ値で一定（テーパーなし） */
+/** 順方向フロー（col間を繋ぐ帯）。両端の太さは接続先バーの高さから配分され、異なる値を取り得る（テーパー付き） */
 export interface RibbonFlow {
   sourceBlock: string | null;
   targetBlock: string;
@@ -229,6 +224,79 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   const maxAmount = Math.max(0, ...graph.blocks.map((b) => b.totalAmount));
   const barH = (node: BlockNode): number => ribbonAmountScale(node.totalAmount, maxAmount);
 
+  // ─── フロー分類（順方向 / バックエッジ）とテーパー太さ配分 ──────────────────────
+  // バー高さ（平方根スケール）とリボン太さを両端で厳密一致させるため、エッジ太さは
+  // 「出口側は source バーの高さを子の totalAmount 比で配分」「入口側は target バーの
+  // 高さを流入元の totalAmount 比で配分」の2パスで計算する（/sankey-svg の
+  // computeLayout の sy/ty カーソル配分と同じ考え方: proportion = value/total,
+  // nodeHeight * proportion をカーソルに積み上げる。ギャップは入れない）。
+  // ルート（source===null）は自身の高さが未確定のため、出口側は入口側の配分値を
+  // そのまま引き継ぐ（= ルートバー高さは「配分後の出口リボン太さ合計」として事後的に決まる）。
+  const getDepth = (blockId: string | null) => (blockId === null ? 0 : depthMap.get(blockId) ?? -1);
+
+  type FlowRef = (typeof mergedFlows)[number];
+  type Classified = { flow: FlowRef; isSelfLoop: boolean; isBackEdge: boolean };
+  const classified: Classified[] = mergedFlows
+    .filter((f) => depthMap.has(f.targetBlock) && blockById.has(f.targetBlock)) // バーが必ず存在する対象のみ（bars は byDepth=depthMap∩blockById から構築される）
+    .map((f) => {
+      const isSelfLoop = f.sourceBlock === f.targetBlock;
+      const sd = getDepth(f.sourceBlock);
+      const td = getDepth(f.targetBlock);
+      const isBackEdge = isSelfLoop || (f.sourceBlock !== null && sd > td);
+      return { flow: f, isSelfLoop, isBackEdge };
+    });
+
+  const forwardFlows = classified.filter((c) => !c.isBackEdge).map((c) => c.flow);
+  const backFlowsClassified = classified.filter((c) => c.isBackEdge);
+
+  const targetThickness = new Map<FlowRef, number>();
+  const sourceThickness = new Map<FlowRef, number>();
+
+  // 入口側: target バーの高さを、流入元（source）の totalAmount 比で配分。
+  // ルートが唯一の流入元の場合は target 自身の totalAmount を重みとして使う（配分比 1）
+  const byTarget = new Map<string, FlowRef[]>();
+  for (const f of forwardFlows) {
+    if (!byTarget.has(f.targetBlock)) byTarget.set(f.targetBlock, []);
+    byTarget.get(f.targetBlock)!.push(f);
+  }
+  for (const [targetId, fs] of byTarget) {
+    const targetNode = blockById.get(targetId);
+    if (!targetNode) continue;
+    const targetH = barH(targetNode);
+    const weights = fs.map((f) => (f.sourceBlock ? blockById.get(f.sourceBlock)?.totalAmount ?? 0 : targetNode.totalAmount));
+    const totalWeight = weights.reduce((s, w) => s + Math.max(0, w), 0);
+    fs.forEach((f, i) => {
+      const w = Math.max(0, weights[i]);
+      const share = totalWeight > 0 ? w / totalWeight : 1 / fs.length;
+      targetThickness.set(f, targetH * share);
+    });
+  }
+
+  // 出口側: source バーの高さを、送出先（target）の totalAmount 比で配分。
+  // ルート（source===null）は入口側の配分値をそのままパススルー（下でルート高さ算出に使う）
+  const bySource = new Map<string, FlowRef[]>();
+  for (const f of forwardFlows) {
+    const key = f.sourceBlock ?? ROOT_KEY;
+    if (!bySource.has(key)) bySource.set(key, []);
+    bySource.get(key)!.push(f);
+  }
+  for (const [sourceKey, fs] of bySource) {
+    if (sourceKey === ROOT_KEY) {
+      for (const f of fs) sourceThickness.set(f, targetThickness.get(f) ?? 0);
+      continue;
+    }
+    const sourceNode = blockById.get(sourceKey);
+    if (!sourceNode) continue;
+    const sourceH = barH(sourceNode);
+    const weights = fs.map((f) => blockById.get(f.targetBlock)?.totalAmount ?? 0);
+    const totalWeight = weights.reduce((s, w) => s + Math.max(0, w), 0);
+    fs.forEach((f, i) => {
+      const w = Math.max(0, weights[i]);
+      const share = totalWeight > 0 ? w / totalWeight : 1 / fs.length;
+      sourceThickness.set(f, sourceH * share);
+    });
+  }
+
   const subtreeH = new Map<string, number>();
   const calcSubtreeH = (node: BlockNode): number => {
     const kids = childrenOf.get(node.blockId) ?? [];
@@ -261,27 +329,22 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   const directBandTop = RIBBON_MARGIN.top;
   const directBandBottom = directTopLevel.length > 0 ? bandCursor - RIBBON_ROW_GAP : RIBBON_MARGIN.top;
 
-  // ルート（col0）: 直接系バンド範囲の縦中央に配置。
-  // 高さ = 直接系 depth-1 への流出リボン太さの合計（≒各直接系トップレベルノードの
-  // バー高さの合計）+ パディング（sankey的な保存感。fan-inで複数本に分岐するケースの
-  // 太さ配分は下の flows 計算で個別に扱うため、ここでは近似値でよい）。
-  // 別財源レーンの位置決めより前に計算する必要がある（ルートのパディングにより、
-  // ルート下端が直接系バンドの実バー範囲より下にはみ出すケースがあり、レーンの
-  // ギャップはそのはみ出しも考慮しないと区切り線・ラベルがルートカードと重なる）
+  // ルート（col0）: 他ノードと同じスリムバー。高さ = 出口リボン太さの合計（テーパー配分の
+  // パススルー値。上のフロー分類パスで計算済み）。直接系バンド範囲の縦中央に配置する。
+  // 最小高さのみ RIBBON_BAR_MIN_H を確保する（通常は流出フローが必ず1本以上あるため未使用）
   const hasDirectBand = directTopLevel.length > 0;
-  const directMidY = hasDirectBand ? (directBandTop + directBandBottom) / 2 : RIBBON_MARGIN.top + RIBBON_ROOT_H / 2;
-  const rootH = hasDirectBand
-    ? Math.max(
-        RIBBON_BAR_MIN_H,
-        directTopLevel.reduce((sum, n) => sum + barH(n), 0) + RIBBON_ROW_GAP * Math.max(0, directTopLevel.length - 1) + RIBBON_ROOT_PADDING,
-      )
-    : RIBBON_ROOT_H;
+  const directMidY = hasDirectBand ? (directBandTop + directBandBottom) / 2 : RIBBON_MARGIN.top + RIBBON_BAR_MIN_H / 2;
+  const rootOutgoing = bySource.get(ROOT_KEY) ?? [];
+  const rootH = Math.max(
+    RIBBON_BAR_MIN_H,
+    rootOutgoing.reduce((sum, f) => sum + (sourceThickness.get(f) ?? 0), 0),
+  );
   const root: RibbonRoot = {
     label: graph.projectName,
     x: RIBBON_MARGIN.left,
-    // ルート幅は列内容幅（バー+ラベル領域）と揃える。depth1バーとの間隔が
-    // 通常の列間ギャップ(RIBBON_COL_GAP)と一致し、余計な重なり・空白が出ない
-    w: RIBBON_COL_W,
+    // バー幅は他ノードと同じスリム幅（sankeyノード風）。列内容幅(RIBBON_COL_W)は
+    // ラベル領域込みでdepth1列との間隔に使われるため、xの起点は変えない
+    w: RIBBON_BAR_W,
     y: Math.max(RIBBON_MARGIN.top, directMidY - rootH / 2),
     h: rootH,
   };
@@ -331,29 +394,10 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     }
   }
 
-  // ─── フロー（順方向・バックエッジ）の分類 ──────────────────────────────────
-  const getDepth = (blockId: string | null) => (blockId === null ? 0 : depthMap.get(blockId) ?? -1);
+  // ─── フロー（順方向・バックエッジ）の描画用データ組み立て ──────────────────────
+  // 太さ配分（targetThickness/sourceThickness）は上のフロー分類パスで計算済み。
+  // ここでは「各バーの入口・出口カーソルに、両端の配分値でテーパー付き帯を積む」だけを行う。
   const getBarTop = (blockId: string | null) => (blockId === null ? root.y : barByBlockId.get(blockId)?.y ?? 0);
-
-  type Classified = { flow: typeof mergedFlows[number]; isSelfLoop: boolean; isBackEdge: boolean };
-  const classified: Classified[] = mergedFlows
-    .filter((f) => barByBlockId.has(f.targetBlock)) // 対象バーが存在しないフローは描画対象外
-    .map((f) => {
-      const isSelfLoop = f.sourceBlock === f.targetBlock;
-      const sd = getDepth(f.sourceBlock);
-      const td = getDepth(f.targetBlock);
-      const isBackEdge = isSelfLoop || (f.sourceBlock !== null && sd > td);
-      return { flow: f, isSelfLoop, isBackEdge };
-    });
-
-  const forwardFlows = classified.filter((c) => !c.isBackEdge).map((c) => c.flow);
-  const backFlowsClassified = classified.filter((c) => c.isBackEdge);
-
-  // ターゲットへの順方向流入本数（帯太さの等分割に使用）
-  const incomingCountByTarget = new Map<string, number>();
-  for (const f of forwardFlows) {
-    incomingCountByTarget.set(f.targetBlock, (incomingCountByTarget.get(f.targetBlock) ?? 0) + 1);
-  }
 
   // クロッシングを抑えるため、送出元の y → 送出先の y の順で安定ソートしてからカーソルを送る。
   // fan-in（合流）は「ターゲットの入口カーソルに source の y 順で積む」ことで実現される
@@ -375,16 +419,18 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     const sourceRightX = f.sourceBlock === null ? root.x + root.w : (barByBlockId.get(f.sourceBlock)?.x ?? root.x) + RIBBON_BAR_W;
     const sourceTopDefault = f.sourceBlock === null ? root.y : barByBlockId.get(f.sourceBlock)?.y ?? root.y;
 
-    const incomingCount = Math.max(1, incomingCountByTarget.get(f.targetBlock) ?? 1);
-    const thickness = Math.max(RIBBON_MIN_THICKNESS, ribbonAmountScale(targetBar.totalAmount, maxAmount) / incomingCount);
+    // テーパー: 出口側(y1)と入口側(y2)で別々の太さを使う。両端ともバー高さぴったりに
+    // 積み上がるよう配分済み（ギャップなしでカーソルを積む。sankeyのリンク積み方と同じ）
+    const srcThick = Math.max(0, sourceThickness.get(f) ?? 0);
+    const tgtThick = Math.max(0, targetThickness.get(f) ?? 0);
 
     const y1Top = outCursor.get(sourceKey) ?? sourceTopDefault;
-    const y1Bot = y1Top + thickness;
-    outCursor.set(sourceKey, y1Bot + RIBBON_RIBBON_GAP);
+    const y1Bot = y1Top + srcThick;
+    outCursor.set(sourceKey, y1Bot);
 
     const y2Top = inCursor.get(f.targetBlock) ?? targetBar.y;
-    const y2Bot = y2Top + thickness;
-    inCursor.set(f.targetBlock, y2Bot + RIBBON_RIBBON_GAP);
+    const y2Bot = y2Top + tgtThick;
+    inCursor.set(f.targetBlock, y2Bot);
 
     flows.push({
       sourceBlock: f.sourceBlock,
