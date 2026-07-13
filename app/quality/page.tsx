@@ -221,7 +221,7 @@ export default function QualityPage() {
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-4">
         <div className="max-w-[1600px] mx-auto">
           <div className="flex items-center gap-3 mb-1">
-            <Link href="/" className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
+            <Link href="/sankey-svg" className="text-blue-600 dark:text-blue-400 hover:underline text-sm">
               ← トップ
             </Link>
             <h1 className="text-lg font-bold text-gray-900 dark:text-white">

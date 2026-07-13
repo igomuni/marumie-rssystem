@@ -95,7 +95,7 @@ export default function MOFBudgetOverviewPage() {
       {/* 固定ボタン */}
       <div className="fixed top-4 right-4 z-40 flex gap-2">
         <Link
-          href="/"
+          href="/sankey-svg"
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-lg"
         >
           ホームに戻る
