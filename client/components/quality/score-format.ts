@@ -11,7 +11,8 @@ export function scoreColor(score: number | null): string {
   return 'text-red-600 dark:text-red-400';
 }
 
-export function formatAmount(yen: number): string {
+export function formatAmount(yen: number | null): string {
+  if (yen === null) return '-';
   if (yen >= 1e12) return `${(yen / 1e12).toFixed(2)}兆`;
   if (yen >= 1e8)  return `${(yen / 1e8).toFixed(1)}億`;
   if (yen >= 1e4)  return `${(yen / 1e4).toFixed(0)}万`;

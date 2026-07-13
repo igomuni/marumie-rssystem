@@ -29,7 +29,8 @@ export interface QualityScoreItem {
   cnEmpty: number;
   cnFillRatio: number | null;
   budgetAmount: number;
-  execAmount: number;
+  // 生JSONで null になりうる（gapRatio が number|null なのと同源。highlights.ts も null ガード済み）
+  execAmount: number | null;
   spendTotal: number;
   spendNetTotal: number;
   gapRatio: number | null;
