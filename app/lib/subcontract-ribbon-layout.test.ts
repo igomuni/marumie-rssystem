@@ -1,31 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import type { SubcontractGraph, BlockNode, BlockEdge } from '@/types/subcontract';
+import type { SubcontractGraph } from '@/types/subcontract';
 import {
   computeSubcontractRibbonLayout,
   RIBBON_BAR_MIN_H,
 } from '@/app/lib/subcontract-ribbon-layout';
-
-function makeBlock(overrides: Partial<BlockNode> & Pick<BlockNode, 'blockId' | 'blockName' | 'totalAmount'>): BlockNode {
-  return {
-    isDirect: true,
-    originKind: 'direct',
-    isTerminal: true,
-    recipientCount: 1,
-    hasExpenses: false,
-    recipients: [],
-    ...overrides,
-  };
-}
-
-function makeFlow(overrides: Partial<BlockEdge> & Pick<BlockEdge, 'targetBlock'>): BlockEdge {
-  return {
-    sourceBlock: null,
-    origin: 'direct',
-    isReference: false,
-    targetIncomingBlockCount: 1,
-    ...overrides,
-  };
-}
+import { makeBlock, makeFlow } from '@/app/lib/test-utils/subcontract-fixtures';
 
 function baseGraph(overrides: Partial<SubcontractGraph> = {}): SubcontractGraph {
   return {

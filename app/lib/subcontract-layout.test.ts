@@ -1,28 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import type { SubcontractGraph, BlockNode, BlockEdge } from '@/types/subcontract';
+import type { SubcontractGraph, BlockEdge } from '@/types/subcontract';
 import { computeDepths, mergeParallelFlows, computeSubcontractLayout, NODE_W } from '@/app/lib/subcontract-layout';
-
-function makeBlock(overrides: Partial<BlockNode> & Pick<BlockNode, 'blockId' | 'blockName' | 'totalAmount'>): BlockNode {
-  return {
-    isDirect: true,
-    originKind: 'direct',
-    isTerminal: true,
-    recipientCount: 1,
-    hasExpenses: false,
-    recipients: [],
-    ...overrides,
-  };
-}
-
-function makeFlow(overrides: Partial<BlockEdge> & Pick<BlockEdge, 'targetBlock'>): BlockEdge {
-  return {
-    sourceBlock: null,
-    origin: 'direct',
-    isReference: false,
-    targetIncomingBlockCount: 1,
-    ...overrides,
-  };
-}
+import { makeBlock, makeFlow } from '@/app/lib/test-utils/subcontract-fixtures';
 
 describe('computeDepths', () => {
   it('assigns depth 1 to direct roots (sourceBlock === null)', () => {
