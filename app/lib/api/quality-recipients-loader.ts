@@ -3,10 +3,8 @@
  * /api/quality-scores/recipients、/api/search/spending、AIチャットの search_spending ツールが共用する。
  * 型・読み込みロジックの正典はこのファイル（route.ts 側に重複定義を置かないこと）。
  */
-import * as fs from 'fs';
-import * as path from 'path';
-import * as zlib from 'zlib';
 import type { SupportedYear } from '@/app/lib/api/api-notes';
+import { readDataJson } from '@/app/lib/api/data-file';
 import { normalizeQuery } from '@/app/lib/search/project-search';
 
 // フィールド名は短縮形（JSONサイズ削減のため）
@@ -44,20 +42,10 @@ const dataCache = new Map<string, RecipientRowsByPid>();
 const searchRowsCache = new Map<string, SpendingSearchRow[]>();
 
 function loadRaw(year: string): RecipientRowsByPid {
-  // 展開済み .json を優先。無ければ .gz をその場で展開（prebuild未実行のローカル等でも動く）。
-  const base = path.join(process.cwd(), 'public', 'data', `project-quality-recipients-${year}.json`);
-  let raw: string;
-  if (fs.existsSync(base)) {
-    raw = fs.readFileSync(base, 'utf-8');
-  } else if (fs.existsSync(`${base}.gz`)) {
-    raw = zlib.gunzipSync(fs.readFileSync(`${base}.gz`)).toString('utf-8');
-  } else {
-    throw new Error(
-      `project-quality-recipients-${year}.json(.gz) が見つかりません。` +
-      `python3 scripts/score-project-quality.py --year ${year} を実行してください。`
-    );
-  }
-  return JSON.parse(raw);
+  return readDataJson<RecipientRowsByPid>(
+    `project-quality-recipients-${year}.json`,
+    `python3 scripts/score-project-quality.py --year ${year} を実行してください。`
+  );
 }
 
 /** pid → 支出行配列。既存 /api/quality-scores/recipients が使う生データ（応答不変） */
