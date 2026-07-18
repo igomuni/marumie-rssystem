@@ -26,6 +26,7 @@ import type { AccountCategoryKey } from '@/types/sankey-query';
 import { AiChatPanel, type AiChatUiMessage } from '@/client/components/SankeySvg/AiChatPanel';
 import { MAX_CHAT_MESSAGES, type SankeyChatProgressEvent, type SankeyChatResponse, type SankeyChatResult } from '@/types/sankey-ai-chat';
 import { loadByokSettings, saveByokSettings, deleteByokSettings, type ByokSettings } from '@/client/lib/ai/api-key-store';
+import { loadChatHistory, saveChatHistory } from '@/client/lib/ai/chat-history-store';
 import { ExplorationHistory } from '@/client/components/SankeySvg/ExplorationHistory';
 import { recordVisit } from '@/client/lib/exploration-store';
 import { buildExplorationLabel } from '@/app/lib/exploration-label';
@@ -730,6 +731,24 @@ export default function RealDataSankeyPage() {
     loadByokSettings().then(s => { if (!cancelled) setByokSettings(s); });
     return () => { cancelled = true; };
   }, []);
+
+  // チャット会話の復元・永続化（IndexedDB のみ・サーバ送信なし）。
+  // 復元完了前の保存で空上書きしないよう、ロード完了フラグを立ててから保存を始める
+  const chatHistoryLoadedRef = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    loadChatHistory().then(messages => {
+      if (cancelled) return;
+      if (messages.length > 0) setAiChatMessages(messages);
+      chatHistoryLoadedRef.current = true;
+    });
+    return () => { cancelled = true; };
+  }, []);
+  useEffect(() => {
+    if (!chatHistoryLoadedRef.current) return;
+    const timer = setTimeout(() => { saveChatHistory(aiChatMessages); }, 500);
+    return () => clearTimeout(timer);
+  }, [aiChatMessages]);
 
   // 実行モード: キー登録済みなら BYOK を優先、なければサーバモード、どちらも無ければ未設定
   const aiChatMode: 'byok' | 'server' | null = byokSettings ? 'byok' : aiChatAvailable ? 'server' : null;
