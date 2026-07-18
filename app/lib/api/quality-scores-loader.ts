@@ -76,6 +76,12 @@ export interface QualityScoreProjection {
   pid: string;
   name: string;
   ministry: string;
+  bureau: string;
+  // 予算・執行系（BYOKクライアントの get_project_detail がサーバ実装と同形の応答を
+  // 組み立てるために追加。サイドパネル等の既存利用には影響しない追加的フィールド）
+  budgetAmount: number;
+  execAmount: number | null;
+  spendTotal: number;
   totalScore: number | null;
   axisIdentify: number | null;
   axisPurpose: number | null;
@@ -94,6 +100,10 @@ export function toQualityScoreProjection(i: QualityScoreItem): QualityScoreProje
     pid: i.pid,
     name: i.name,
     ministry: i.ministry,
+    bureau: i.bureau,
+    budgetAmount: i.budgetAmount,
+    execAmount: i.execAmount,
+    spendTotal: i.spendTotal,
     totalScore: i.totalScore,
     axisIdentify: i.axisIdentify ?? null,
     axisPurpose: i.axisPurpose ?? null,

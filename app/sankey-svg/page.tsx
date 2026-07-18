@@ -25,6 +25,10 @@ import { externalCorporateLinks } from '@/app/lib/api/links';
 import type { AccountCategoryKey } from '@/types/sankey-query';
 import { AiChatPanel, type AiChatUiMessage } from '@/client/components/SankeySvg/AiChatPanel';
 import { MAX_CHAT_MESSAGES, type SankeyChatProgressEvent, type SankeyChatResponse, type SankeyChatResult } from '@/types/sankey-ai-chat';
+import { loadByokSettings, saveByokSettings, deleteByokSettings, type ByokSettings } from '@/client/lib/ai/api-key-store';
+import { testOpenRouterKey, DEFAULT_BYOK_MODEL } from '@/client/lib/ai/openrouter-caller';
+import { runByokChat, LlmUpstreamError } from '@/client/lib/ai/byok-chat';
+import type { ClientGraphSource } from '@/client/lib/ai/client-tool-executor';
 import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
@@ -317,8 +321,10 @@ export default function RealDataSankeyPage() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   // 左サイドパネル（ノード詳細）の chrome 状態は useSidePanel に集約。
   // isPanelCollapsed/effectiveSidePanelWidth/isResizingSidePanel は下記 svgWidth 定義後にエイリアスする
-  // AIチャットパネル（右側）。available は /api/ai/sankey-chat の疎通で判定（無効環境では出さない）
+  // AIチャットパネル（右側）。サーバモードの可否は /api/ai/sankey-chat の疎通で判定
   const [aiChatAvailable, setAiChatAvailable] = useState(false);
+  // BYOK（使用者キー）設定。登録済みならサーバモードより優先する（設計 20260718_1542 3-1節）
+  const [byokSettings, setByokSettings] = useState<ByokSettings | null>(null);
   const [showAiChat, setShowAiChat] = useState(false);
   const [aiChatMessages, setAiChatMessages] = useState<AiChatUiMessage[]>([]);
   const [aiChatSending, setAiChatSending] = useState(false);
@@ -686,13 +692,56 @@ export default function RealDataSankeyPage() {
     };
   }, [isResizingAiPanel]);
 
-  // AIチャットの疎通確認: 無効環境（キー未設定・Vercel本番）では404が返り、パネル自体を出さない
+  // サーバモードの疎通確認: 無効環境（キー未設定・Vercel本番）では404が返る。
+  // BYOK（使用者キー）はサーバモードと独立に利用可能なため、パネル自体は常に出す
   useEffect(() => {
     let cancelled = false;
     fetch('/api/ai/sankey-chat')
       .then(res => { if (!cancelled && res.ok) setAiChatAvailable(true); })
-      .catch(() => { /* 疎通失敗 = 機能なしとして扱う */ });
+      .catch(() => { /* 疎通失敗 = サーバモードなしとして扱う */ });
     return () => { cancelled = true; };
+  }, []);
+
+  // BYOK設定の復元（IndexedDB。未保存・非対応環境は null のまま）
+  useEffect(() => {
+    let cancelled = false;
+    loadByokSettings().then(s => { if (!cancelled) setByokSettings(s); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // 実行モード: キー登録済みなら BYOK を優先、なければサーバモード、どちらも無ければ未設定
+  const aiChatMode: 'byok' | 'server' | null = byokSettings ? 'byok' : aiChatAvailable ? 'server' : null;
+
+  // BYOKツール実行用の graph 取得: 表示中の年度はページの graph を再利用し、
+  // 他年度（compare_years 等）は /data から fetch してセッション内キャッシュする
+  const byokGraphCacheRef = useRef(new Map<string, GraphData>());
+  const byokGetGraph = useCallback<ClientGraphSource>(async y => {
+    if (y === year && graphData) return graphData;
+    const cached = byokGraphCacheRef.current.get(y);
+    if (cached) return cached;
+    const res = await fetch(`/data/sankey-svg-${y}-graph.json`);
+    if (!res.ok) throw new Error(`${y}年度のグラフデータの取得に失敗しました（HTTP ${res.status}）`);
+    const data = await res.json() as GraphData;
+    byokGraphCacheRef.current.set(y, data);
+    return data;
+  }, [year, graphData]);
+
+  // BYOK設定の保存・削除（AiChatPanel の設定ビューから呼ばれる）。
+  // apiKey が null のときは登録済みキーを維持してモデルだけ更新する
+  const handleSaveByok = useCallback(async (apiKey: string | null, model: string) => {
+    const key = apiKey ?? byokSettings?.apiKey;
+    if (!key) throw new Error('APIキーが未登録です');
+    const settings: ByokSettings = { apiKey: key, model };
+    await saveByokSettings(settings);
+    setByokSettings(settings);
+  }, [byokSettings]);
+  const handleDeleteByok = useCallback(async () => {
+    await deleteByokSettings();
+    setByokSettings(null);
+    // BYOK下の会話をサーバモードへ引き継がない: 残すと次のサーバモード送信で
+    // BYOK中の会話全文が /api/ai/sankey-chat へ送られ、プライバシー境界が変わってしまう
+    setAiChatMessages([]);
+    setAiChatProgress(null);
   }, []);
 
   // SSE応答本文をパースし、progress は逐次state更新、result/error で終端メッセージを積む。
@@ -759,6 +808,37 @@ export default function RealDataSankeyPage() {
         .map(m => ({ role: m.role, content: m.content }))
         .slice(-MAX_CHAT_MESSAGES);
       const currentQuery = sankeyQueryFromUrlParams(new URLSearchParams(window.location.search));
+
+      // BYOKモード: ブラウザ内でエージェントループを実行（LLMはOpenRouter直接、
+      // ツールは公開API fetch + graph ローカル実行）。キー・会話本文は自サイトへ
+      // 送信されない（ツールの検索キーワード等のみ公開データAPIへ送られる）
+      if (byokSettings) {
+        try {
+          const agentResult = await runByokChat({
+            messages: history,
+            context: { year, currentQuery },
+            settings: byokSettings,
+            getGraph: byokGetGraph,
+            onProgress: ev => setAiChatProgress(ev),
+          });
+          setAiChatMessages(prev => [...prev, {
+            role: 'assistant',
+            content: agentResult.message,
+            result: agentResult.result,
+            suggestions: agentResult.suggestions,
+          }]);
+        } catch (e) {
+          // LlmUpstreamError の message はユーザー向け文言（キー拒否・接続失敗等）。キーは含まれない
+          const text = e instanceof LlmUpstreamError
+            ? e.message
+            : e instanceof Error && e.name === 'TimeoutError'
+              ? 'AIの応答がタイムアウトしました。時間をおいて再度お試しください'
+              : 'AIが応答できませんでした。時間をおいて再度お試しください';
+          setAiChatMessages(prev => [...prev, { role: 'assistant', content: `エラー: ${text}`, isError: true }]);
+        }
+        return;
+      }
+
       const res = await fetch('/api/ai/sankey-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -784,7 +864,7 @@ export default function RealDataSankeyPage() {
       setAiChatSending(false);
       setAiChatProgress(null);
     }
-  }, [aiChatMessages, year, consumeAiChatStream]);
+  }, [aiChatMessages, year, consumeAiChatStream, byokSettings, byokGetGraph]);
 
   // AIチャット結果の適用: SankeyQuery → URL変換 → pushState → popstate と同じ復元経路で図を更新。
   // フルリロードしないためチャット履歴が保持され、ブラウザバックで適用前の図に戻れる
@@ -2633,7 +2713,7 @@ export default function RealDataSankeyPage() {
     maxPanelWidthForViewport,
     Math.max(minPanelWidthForViewport, aiPanelWidth),
   );
-  const rightControlsOffset = aiChatAvailable && showAiChat && !isCompactWidth ? effectiveAiPanelWidth : 0;
+  const rightControlsOffset = showAiChat && !isCompactWidth ? effectiveAiPanelWidth : 0;
   // 右上の設定(⋮)ボタン領域(幅32+余白)に重ならないよう右側を確保。
   // これがないと文字拡大時に検索ボックスが設定ボタンを覆い、タップで開けなくなる。
   const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 64px)`;
@@ -4829,27 +4909,32 @@ export default function RealDataSankeyPage() {
         )}
       </div>
 
-      {/* AIチャットパネル（右側）— 疎通確認済みの環境でのみ表示 */}
-      {aiChatAvailable && (
-        <AiChatPanel
-          open={showAiChat}
-          onToggle={() => setShowAiChat(v => !v)}
-          messages={aiChatMessages}
-          sending={aiChatSending}
-          progress={aiChatProgress}
-          onSend={handleAiChatSend}
-          onApplyResult={applyAiChatResult}
-          onClear={() => setAiChatMessages([])}
-          width={effectiveAiPanelWidth}
-          isCompactWidth={isCompactWidth}
-          onResizeStart={e => {
-            aiPanelResizeRef.current = { startX: e.clientX, startW: aiPanelWidth };
-            setIsResizingAiPanel(true);
-          }}
-          isResizing={isResizingAiPanel}
-          onResetWidth={() => setAiPanelWidth(SIDE_PANEL_WIDTH_DEFAULT)}
-        />
-      )}
+      {/* AIチャットパネル（右側）— BYOK（使用者キー）は全環境で使えるため常に表示。
+          モード未設定時はパネル内にキー登録の導線を出す */}
+      <AiChatPanel
+        open={showAiChat}
+        onToggle={() => setShowAiChat(v => !v)}
+        messages={aiChatMessages}
+        sending={aiChatSending}
+        progress={aiChatProgress}
+        onSend={handleAiChatSend}
+        onApplyResult={applyAiChatResult}
+        onClear={() => setAiChatMessages([])}
+        width={effectiveAiPanelWidth}
+        isCompactWidth={isCompactWidth}
+        onResizeStart={e => {
+          aiPanelResizeRef.current = { startX: e.clientX, startW: aiPanelWidth };
+          setIsResizingAiPanel(true);
+        }}
+        isResizing={isResizingAiPanel}
+        onResetWidth={() => setAiPanelWidth(SIDE_PANEL_WIDTH_DEFAULT)}
+        mode={aiChatMode}
+        byokModel={byokSettings?.model ?? null}
+        defaultByokModel={DEFAULT_BYOK_MODEL}
+        onSaveByok={handleSaveByok}
+        onDeleteByok={handleDeleteByok}
+        onTestByok={testOpenRouterKey}
+      />
 
       {/* 品質スコア詳細ダイアログ（/quality と共通コンポーネント）
           containerRef 外の document.body に portal で出し、背面サンキー図の wheel/pan ハンドラに

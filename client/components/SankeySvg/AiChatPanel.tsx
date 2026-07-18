@@ -45,6 +45,21 @@ interface AiChatPanelProps {
   onResizeStart: (e: React.MouseEvent) => void;
   isResizing: boolean;
   onResetWidth: () => void;
+  /**
+   * 実行モード: 'byok'=使用者キー（ブラウザ→OpenRouter直接） / 'server'=サイト提供 /
+   * null=未設定（キー登録の導線を出し、送信は不可）
+   */
+  mode: 'byok' | 'server' | null;
+  /** 登録済み BYOK モデル名（設定ビューの初期値表示用） */
+  byokModel: string | null;
+  /** BYOK の既定モデル名（未登録時のプレースホルダ） */
+  defaultByokModel: string;
+  /** キー・モデルの保存（apiKey が null のときは登録済みキーを維持してモデルだけ更新）。保存後は mode が 'byok' になる */
+  onSaveByok: (apiKey: string | null, model: string) => Promise<void>;
+  /** 登録済みキーの削除 */
+  onDeleteByok: () => Promise<void>;
+  /** キーの接続テスト（保存前検証。キーはOpenRouterへのみ送信される） */
+  onTestByok: (apiKey: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 const EXAMPLE_PROMPTS = [
@@ -82,9 +97,16 @@ function progressLabel(progress: SankeyChatProgressEvent | null | undefined): st
 export function AiChatPanel({
   open, onToggle, messages, sending, progress, onSend, onApplyResult, onClear,
   width, isCompactWidth, onResizeStart, isResizing, onResetWidth,
+  mode, byokModel, defaultByokModel, onSaveByok, onDeleteByok, onTestByok,
 }: AiChatPanelProps) {
   const [input, setInput] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
+  // 設定ビュー（キー登録）。モード未設定でパネルを開いた場合は最初から設定を見せる
+  const [showSettings, setShowSettings] = useState(false);
+  const [keyInput, setKeyInput] = useState('');
+  const [modelInput, setModelInput] = useState('');
+  const [settingsBusy, setSettingsBusy] = useState(false);
+  const [settingsStatus, setSettingsStatus] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
   // 新着メッセージ・送信中インジケータで最下部へ自動スクロール
   useEffect(() => {
@@ -94,9 +116,65 @@ export function AiChatPanel({
 
   const submit = () => {
     const text = input.trim();
-    if (!text || sending) return;
+    if (!text || sending || mode === null) return;
     setInput('');
     onSend(text);
+  };
+
+  const openSettings = () => {
+    setKeyInput('');
+    setModelInput(byokModel ?? '');
+    setSettingsStatus(null);
+    setShowSettings(true);
+  };
+
+  // 新規キー入力があるか、登録済み（=キー未入力ならモデルのみ更新）なら保存できる
+  const canSave = keyInput.trim().length > 0 || mode === 'byok';
+
+  const handleSave = async () => {
+    const apiKey = keyInput.trim() || null;
+    if (!apiKey && mode !== 'byok') return;
+    setSettingsBusy(true);
+    setSettingsStatus(null);
+    try {
+      await onSaveByok(apiKey, modelInput.trim() || defaultByokModel);
+      setKeyInput('');
+      setSettingsStatus({
+        kind: 'ok',
+        text: apiKey
+          ? 'キーを保存しました。チャットは自分のキーで実行されます'
+          : '設定を保存しました（キーは変更していません）',
+      });
+    } catch {
+      setSettingsStatus({ kind: 'error', text: '保存に失敗しました（このブラウザでは IndexedDB が使えない可能性があります）' });
+    } finally {
+      setSettingsBusy(false);
+    }
+  };
+
+  const handleTest = async () => {
+    const apiKey = keyInput.trim();
+    if (!apiKey) return;
+    setSettingsBusy(true);
+    setSettingsStatus(null);
+    const result = await onTestByok(apiKey);
+    setSettingsStatus(result.ok
+      ? { kind: 'ok', text: '接続テストに成功しました' }
+      : { kind: 'error', text: `接続テスト失敗: ${result.error ?? '不明なエラー'}` });
+    setSettingsBusy(false);
+  };
+
+  const handleDelete = async () => {
+    setSettingsBusy(true);
+    setSettingsStatus(null);
+    try {
+      await onDeleteByok();
+      setSettingsStatus({ kind: 'ok', text: 'キーを削除しました（会話履歴もクリアしました）' });
+    } catch {
+      setSettingsStatus({ kind: 'error', text: '削除に失敗しました' });
+    } finally {
+      setSettingsBusy(false);
+    }
   };
 
   // 深掘り提案チップのタップ: そのテキストをそのままユーザーメッセージとして送信する
@@ -169,9 +247,29 @@ export function AiChatPanel({
 
       {/* ヘッダ */}
       <div style={{ padding: '10px 12px', borderBottom: '1px solid #f0f0f0', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: '#333', flex: 1, minWidth: 0 }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: '#333', flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
           AIアシスタント
+          {mode !== null && (
+            <span
+              title={mode === 'byok' ? 'あなたのAPIキーで実行中（ブラウザからOpenRouterへ直接接続）' : 'サイト提供のAIで実行中'}
+              style={{
+                fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 9,
+                color: mode === 'byok' ? '#1b7f37' : '#6b5b95',
+                background: mode === 'byok' ? '#e7f5ec' : '#f1edf9',
+                border: `1px solid ${mode === 'byok' ? '#c2e5cf' : '#ddd3f0'}`,
+                whiteSpace: 'nowrap',
+              }}
+            >{mode === 'byok' ? '自分のキー' : 'サイト提供'}</span>
+          )}
         </span>
+        <button
+          onClick={() => (showSettings ? setShowSettings(false) : openSettings())}
+          title="APIキー設定"
+          aria-label="APIキー設定"
+          style={{ background: showSettings ? '#eef3ff' : 'transparent', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer', padding: '3px 6px', display: 'flex', alignItems: 'center' }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#666"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm112-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z"/></svg>
+        </button>
         {messages.length > 0 && (
           <button
             onClick={onClear}
@@ -195,9 +293,92 @@ export function AiChatPanel({
       {/* Markdown 描画用スタイル（メッセージごとではなくパネルで1回だけ描画する） */}
       <style>{CHAT_MARKDOWN_STYLES}</style>
 
+      {/* APIキー設定ビュー（表示中はメッセージリストを隠す） */}
+      {showSettings && (
+        <div style={{ flex: 1, overflowY: 'auto', padding: '14px 14px 8px', fontSize: 12, color: '#444', lineHeight: 1.7 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#333', marginBottom: 8 }}>あなたのAPIキーで使う</div>
+          <p style={{ margin: '0 0 10px' }}>
+            <a href="https://openrouter.ai/settings/keys" target="_blank" rel="noopener noreferrer" style={{ color: '#1a73e8' }}>OpenRouter</a> のAPIキーを登録すると、AIチャットをあなたのアカウントで実行できます。
+          </p>
+          <ul style={{ margin: '0 0 12px', paddingLeft: 18, color: '#666' }}>
+            <li>キーは<b>このブラウザ（IndexedDB）にのみ保存</b>され、当サイトのサーバーには送信されません（ブラウザからOpenRouterへ直接接続します）</li>
+            <li>会話の本文が当サイトのサーバーへ送られることはありません（データ検索時は<b>検索キーワードのみ</b>公開データAPIに送られます）</li>
+            <li>万一に備え、OpenRouter側で<b>利用上限（クレジット制限）を設定したキー</b>のご利用を推奨します</li>
+          </ul>
+          <label style={{ display: 'block', marginBottom: 10 }}>
+            <span style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 3 }}>APIキー{mode === 'byok' && '（登録済み。変更する場合のみ入力）'}</span>
+            <input
+              type="password"
+              value={keyInput}
+              onChange={e => setKeyInput(e.target.value)}
+              placeholder="sk-or-…"
+              autoComplete="off"
+              disabled={settingsBusy}
+              style={{ width: '100%', boxSizing: 'border-box', fontSize: 12, padding: '7px 10px', border: '1px solid #ddd', borderRadius: 6, outline: 'none', fontFamily: 'inherit', color: '#333', background: '#fff' }}
+            />
+          </label>
+          <label style={{ display: 'block', marginBottom: 12 }}>
+            <span style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 3 }}>モデル（OpenRouterのモデルID）</span>
+            <input
+              type="text"
+              value={modelInput}
+              onChange={e => setModelInput(e.target.value)}
+              placeholder={defaultByokModel}
+              autoComplete="off"
+              disabled={settingsBusy}
+              style={{ width: '100%', boxSizing: 'border-box', fontSize: 12, padding: '7px 10px', border: '1px solid #ddd', borderRadius: 6, outline: 'none', fontFamily: 'inherit', color: '#333', background: '#fff' }}
+            />
+            <span style={{ display: 'block', fontSize: 10.5, color: '#999', marginTop: 3 }}>
+              空欄なら既定（{defaultByokModel}）。ツール呼び出し（function calling）対応モデルが必要です
+            </span>
+          </label>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <button
+              onClick={handleSave}
+              disabled={settingsBusy || !canSave}
+              style={{ flex: 1, fontSize: 12, fontWeight: 600, color: '#fff', background: settingsBusy || !canSave ? '#9e9e9e' : '#1a73e8', border: 'none', borderRadius: 6, padding: '8px 0', cursor: settingsBusy || !canSave ? 'default' : 'pointer' }}
+            >保存</button>
+            <button
+              onClick={handleTest}
+              disabled={settingsBusy || !keyInput.trim()}
+              style={{ fontSize: 12, color: '#1a73e8', background: '#fff', border: '1px solid #1a73e8', borderRadius: 6, padding: '8px 14px', cursor: settingsBusy || !keyInput.trim() ? 'default' : 'pointer', opacity: settingsBusy || !keyInput.trim() ? 0.5 : 1 }}
+            >テスト</button>
+            {mode === 'byok' && (
+              <button
+                onClick={handleDelete}
+                disabled={settingsBusy}
+                style={{ fontSize: 12, color: '#c62828', background: '#fff', border: '1px solid #e5b4b0', borderRadius: 6, padding: '8px 14px', cursor: settingsBusy ? 'default' : 'pointer' }}
+              >削除</button>
+            )}
+          </div>
+          {settingsStatus && (
+            <div style={{ fontSize: 11.5, color: settingsStatus.kind === 'ok' ? '#1b7f37' : '#c62828', marginBottom: 8 }}>
+              {settingsStatus.text}
+            </div>
+          )}
+          <button
+            onClick={() => setShowSettings(false)}
+            style={{ fontSize: 11.5, color: '#777', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', textDecoration: 'underline' }}
+          >チャットに戻る</button>
+        </div>
+      )}
+
       {/* メッセージリスト */}
+      {!showSettings && (
       <div ref={listRef} style={{ flex: 1, overflowY: 'auto', padding: '12px 12px 4px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {messages.length === 0 && (
+        {messages.length === 0 && mode === null && (
+          <div style={{ fontSize: 12, color: '#777', lineHeight: 1.7 }}>
+            <p style={{ margin: '0 0 8px' }}>
+              AIチャットを使うには OpenRouter のAPIキーの登録が必要です。
+              キーはこのブラウザにのみ保存され、当サイトのサーバーには送信されません。
+            </p>
+            <button
+              onClick={openSettings}
+              style={{ fontSize: 12, fontWeight: 600, color: '#fff', background: '#1a73e8', border: 'none', borderRadius: 6, padding: '8px 14px', cursor: 'pointer' }}
+            >APIキーを設定する</button>
+          </div>
+        )}
+        {messages.length === 0 && mode !== null && (
           <div style={{ fontSize: 12, color: '#777', lineHeight: 1.7 }}>
             <p style={{ margin: '0 0 8px' }}>
               見たい条件やデータへの質問を自然な言葉でどうぞ。
@@ -287,6 +468,7 @@ export function AiChatPanel({
           </div>
         )}
       </div>
+      )}
 
       {/* 入力欄 */}
       <div style={{ flexShrink: 0, borderTop: '1px solid #f0f0f0', padding: 10, display: 'flex', gap: 8, alignItems: 'flex-end' }}>
@@ -301,25 +483,25 @@ export function AiChatPanel({
               submit();
             }
           }}
-          placeholder="例: 再エネ関連で予算100億円以上"
+          placeholder={mode === null ? 'APIキーを設定すると利用できます' : '例: 再エネ関連で予算100億円以上'}
           rows={2}
-          disabled={sending}
+          disabled={sending || mode === null}
           style={{
             flex: 1, minWidth: 0, resize: 'none', fontSize: 13, lineHeight: 1.5,
             padding: '7px 10px', border: '1px solid #ddd', borderRadius: 8,
-            outline: 'none', fontFamily: 'inherit', background: sending ? '#fafafa' : '#fff',
+            outline: 'none', fontFamily: 'inherit', background: sending || mode === null ? '#fafafa' : '#fff',
             boxSizing: 'border-box', color: '#333',
           }}
         />
         <button
           onClick={submit}
-          disabled={sending || !input.trim()}
+          disabled={sending || !input.trim() || mode === null}
           title="送信（Enter）"
           aria-label="送信"
           style={{
             width: 36, height: 36, flexShrink: 0, borderRadius: 8, border: 'none',
-            background: sending || !input.trim() ? '#e0e0e0' : '#1a73e8',
-            cursor: sending || !input.trim() ? 'default' : 'pointer',
+            background: sending || !input.trim() || mode === null ? '#e0e0e0' : '#1a73e8',
+            cursor: sending || !input.trim() || mode === null ? 'default' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
