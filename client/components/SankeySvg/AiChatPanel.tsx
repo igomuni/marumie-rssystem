@@ -54,8 +54,8 @@ interface AiChatPanelProps {
   byokModel: string | null;
   /** BYOK の既定モデル名（未登録時のプレースホルダ） */
   defaultByokModel: string;
-  /** キー・モデルの保存（保存後は mode が 'byok' になる） */
-  onSaveByok: (apiKey: string, model: string) => Promise<void>;
+  /** キー・モデルの保存（apiKey が null のときは登録済みキーを維持してモデルだけ更新）。保存後は mode が 'byok' になる */
+  onSaveByok: (apiKey: string | null, model: string) => Promise<void>;
   /** 登録済みキーの削除 */
   onDeleteByok: () => Promise<void>;
   /** キーの接続テスト（保存前検証。キーはOpenRouterへのみ送信される） */
@@ -128,15 +128,23 @@ export function AiChatPanel({
     setShowSettings(true);
   };
 
+  // 新規キー入力があるか、登録済み（=キー未入力ならモデルのみ更新）なら保存できる
+  const canSave = keyInput.trim().length > 0 || mode === 'byok';
+
   const handleSave = async () => {
-    const apiKey = keyInput.trim();
-    if (!apiKey) return;
+    const apiKey = keyInput.trim() || null;
+    if (!apiKey && mode !== 'byok') return;
     setSettingsBusy(true);
     setSettingsStatus(null);
     try {
       await onSaveByok(apiKey, modelInput.trim() || defaultByokModel);
       setKeyInput('');
-      setSettingsStatus({ kind: 'ok', text: 'キーを保存しました。チャットは自分のキーで実行されます' });
+      setSettingsStatus({
+        kind: 'ok',
+        text: apiKey
+          ? 'キーを保存しました。チャットは自分のキーで実行されます'
+          : '設定を保存しました（キーは変更していません）',
+      });
     } catch {
       setSettingsStatus({ kind: 'error', text: '保存に失敗しました（このブラウザでは IndexedDB が使えない可能性があります）' });
     } finally {
@@ -327,8 +335,8 @@ export function AiChatPanel({
           <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
             <button
               onClick={handleSave}
-              disabled={settingsBusy || !keyInput.trim()}
-              style={{ flex: 1, fontSize: 12, fontWeight: 600, color: '#fff', background: settingsBusy || !keyInput.trim() ? '#9e9e9e' : '#1a73e8', border: 'none', borderRadius: 6, padding: '8px 0', cursor: settingsBusy || !keyInput.trim() ? 'default' : 'pointer' }}
+              disabled={settingsBusy || !canSave}
+              style={{ flex: 1, fontSize: 12, fontWeight: 600, color: '#fff', background: settingsBusy || !canSave ? '#9e9e9e' : '#1a73e8', border: 'none', borderRadius: 6, padding: '8px 0', cursor: settingsBusy || !canSave ? 'default' : 'pointer' }}
             >保存</button>
             <button
               onClick={handleTest}

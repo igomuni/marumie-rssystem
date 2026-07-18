@@ -726,12 +726,15 @@ export default function RealDataSankeyPage() {
     return data;
   }, [year, graphData]);
 
-  // BYOK設定の保存・削除（AiChatPanel の設定ビューから呼ばれる）
-  const handleSaveByok = useCallback(async (apiKey: string, model: string) => {
-    const settings: ByokSettings = { apiKey, model };
+  // BYOK設定の保存・削除（AiChatPanel の設定ビューから呼ばれる）。
+  // apiKey が null のときは登録済みキーを維持してモデルだけ更新する
+  const handleSaveByok = useCallback(async (apiKey: string | null, model: string) => {
+    const key = apiKey ?? byokSettings?.apiKey;
+    if (!key) throw new Error('APIキーが未登録です');
+    const settings: ByokSettings = { apiKey: key, model };
     await saveByokSettings(settings);
     setByokSettings(settings);
-  }, []);
+  }, [byokSettings]);
   const handleDeleteByok = useCallback(async () => {
     await deleteByokSettings();
     setByokSettings(null);

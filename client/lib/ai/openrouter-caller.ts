@@ -11,7 +11,8 @@
 import type { LlmCaller, LlmMessage, LlmToolDef } from '@/app/lib/ai/chat-core';
 
 export const OPENROUTER_CHAT_COMPLETIONS_URL = 'https://openrouter.ai/api/v1/chat/completions';
-export const OPENROUTER_MODELS_URL = 'https://openrouter.ai/api/v1/models';
+/** キー情報エンドポイント（認証必須）。/api/v1/models は認証不要の公開APIのため接続テストに使えない（実測: 無効キーでも200） */
+export const OPENROUTER_KEY_INFO_URL = 'https://openrouter.ai/api/v1/key';
 /** サーバモード（route.ts）と同じ既定モデル */
 export const DEFAULT_BYOK_MODEL = 'google/gemini-3.5-flash';
 
@@ -105,11 +106,11 @@ export function createOpenRouterCaller(opts: OpenRouterCallerOptions): LlmCaller
 
 /**
  * キーの接続テスト（設定UIの「テスト」ボタン用）。
- * モデル一覧の取得は無料・軽量で、認証ヘッダの有効性だけを検証できる。
+ * キー情報エンドポイント（認証必須・無料・軽量）でキーの有効性を検証する。
  */
 export async function testOpenRouterKey(apiKey: string): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
-    const res = await fetch(OPENROUTER_MODELS_URL, {
+    const res = await fetch(OPENROUTER_KEY_INFO_URL, {
       headers: { Authorization: `Bearer ${apiKey}` },
       signal: AbortSignal.timeout(15_000),
     });
