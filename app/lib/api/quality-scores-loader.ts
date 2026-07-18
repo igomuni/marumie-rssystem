@@ -3,10 +3,8 @@
  * /api/quality-scores（全件・pids絞り込み）、/api/quality-scores/[pid]、/api/search/projects が共用する。
  * 型・読み込みロジックの正典はこのファイル（route.ts 側に重複定義を置かないこと）。
  */
-import * as fs from 'fs';
-import * as path from 'path';
-import * as zlib from 'zlib';
 import type { SupportedYear } from '@/app/lib/api/api-notes';
+import { readDataJson } from '@/app/lib/api/data-file';
 
 export interface QualityScoreItem {
   pid: string;
@@ -116,21 +114,10 @@ const pidIndexCache = new Map<string, Map<string, QualityScoreItem>>();
 export function loadQualityScores(year: SupportedYear): QualityScoresResponse {
   if (cache.has(year)) return cache.get(year)!;
 
-  // 展開済み .json を優先。無ければ .gz をその場で展開（prebuild未実行のローカル等でも動く）。
-  const base = path.join(process.cwd(), 'public', 'data', `project-quality-scores-${year}.json`);
-  let raw: string;
-  if (fs.existsSync(base)) {
-    raw = fs.readFileSync(base, 'utf-8');
-  } else if (fs.existsSync(`${base}.gz`)) {
-    raw = zlib.gunzipSync(fs.readFileSync(`${base}.gz`)).toString('utf-8');
-  } else {
-    throw new Error(
-      `project-quality-scores-${year}.json(.gz) が見つかりません。` +
-      `python3 scripts/score-project-quality-ai.py --year ${year} を実行してください。`
-    );
-  }
-
-  const items: QualityScoreItem[] = JSON.parse(raw);
+  const items = readDataJson<QualityScoreItem[]>(
+    `project-quality-scores-${year}.json`,
+    `python3 scripts/score-project-quality-ai.py --year ${year} を実行してください。`
+  );
 
   const ministries = [...new Set(items.map(i => i.ministry))].sort();
   const scored = items.filter(i => i.totalScore !== null);
