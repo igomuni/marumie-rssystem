@@ -3,10 +3,15 @@
  * サーバ関数バンドルのデータ同梱検査（Vercel 関数上限 250MB の再燃防止）。
  *
  * npm run build 後に .next/server 配下のファイルトレース結果（*.nft.json）を走査し、
- * 各関数がデータディレクトリから何を同梱するかを検査する:
+ * 各関数の同梱ファイルを全件分類・サイズ集計して検査する:
  *   1. public/data の同梱は一切禁止（生 .json は展開後 96MB 級があり 250MB 超過が再発する）
  *   2. data/server は .gz と mof-budget-overview（.gz を持たない ~4KB）のみ許可
- *   3. includes（next.config.ts）が反映されず data/server 同梱が 0 件なら構成破綻として失敗
+ *   3. data/server 以外の data/・.git・ルート直下の生成物ディレクトリの同梱は禁止
+ *      （パス構築が静的解析できないとトレーサーが「プロジェクトルート全体」を依存に
+ *      するため。houjin.db 1GB 等が同梱され実測 383MB 超過の事故あり — 必ず全件分類で検査）
+ *   4. 関数あたりの合計トレースサイズが上限を超えたら失敗（既定 200MB。閾値は目安 —
+ *      Vercel の計測と厳密一致はしないが、余裕を持って検知する）
+ *   5. includes（next.config.ts）が反映されず data/server 同梱が 0 件なら構成破綻として失敗
  * 経緯: PR #259、docs/tasks/20260718_1421_関数バンドル250MB問題の設計的回避.md
  *
  * 使い方: npm run build && npm run check-traces
@@ -14,7 +19,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const SERVER_DIR = path.join(process.cwd(), '.next', 'server');
+const ROOT = process.cwd();
+const SERVER_DIR = path.join(ROOT, '.next', 'server');
+const SIZE_LIMIT_MB = 200;
 // data/server 内で生 .json のまま同梱を許可するファイル（.gz を持たない小容量ファイル）
 const ALLOWED_RAW = new Set(['mof-budget-overview-2023.json']);
 
@@ -34,8 +41,21 @@ function collectNftFiles(dir) {
   return out;
 }
 
-const PUBLIC_DATA = `public${path.sep}data${path.sep}`;
-const SERVER_DATA = `data${path.sep}server${path.sep}`;
+/** ルート相対パスを分類する */
+function classify(rel) {
+  if (rel.startsWith(`public${path.sep}data${path.sep}`)) return 'public/data';
+  if (rel.startsWith(`data${path.sep}server${path.sep}`)) return 'data/server';
+  // dev 専用の利用ログ（app/lib/api/usage-log.ts）。数KB・Vercel ビルドには存在しない
+  if (rel.startsWith(`data${path.sep}usage${path.sep}`)) return 'data/usage';
+  if (rel.startsWith(`data${path.sep}`)) return 'data/(server以外)';
+  if (rel.startsWith(`.git${path.sep}`)) return '.git';
+  if (rel.startsWith(`node_modules${path.sep}`)) return 'node_modules';
+  if (rel.startsWith(`.next${path.sep}`)) return '.next';
+  if (rel.startsWith('..')) return 'プロジェクト外';
+  return 'その他';
+}
+
+const FORBIDDEN = new Set(['public/data', 'data/(server以外)', '.git']);
 
 let violations = 0;
 let functionsWithBundleData = 0;
@@ -43,24 +63,49 @@ let functionsWithBundleData = 0;
 for (const nftPath of collectNftFiles(SERVER_DIR)) {
   const { files = [] } = JSON.parse(fs.readFileSync(nftPath, 'utf-8'));
   const nftDir = path.dirname(nftPath);
-  const resolved = files.map((f) => path.resolve(nftDir, f));
-
-  const publicHits = resolved.filter((f) => f.includes(PUBLIC_DATA));
-  const serverHits = resolved.filter((f) => f.includes(SERVER_DATA));
-  if (publicHits.length === 0 && serverHits.length === 0) continue;
-
   const fnName = path.relative(SERVER_DIR, nftPath).replace(/\.nft\.json$/, '');
-  const badServer = serverHits.filter(
-    (f) => !f.endsWith('.gz') && !ALLOWED_RAW.has(path.basename(f))
-  );
-  if (serverHits.length > 0) functionsWithBundleData++;
-  console.log(`📦 ${fnName}: data/server ${serverHits.length}件, public/data ${publicHits.length}件`);
-  for (const f of publicHits) {
-    console.log(`   ❌ public/data が同梱されています: ${f.slice(f.indexOf(PUBLIC_DATA))}`);
-    violations++;
+
+  let totalBytes = 0;
+  const byCategory = new Map();
+  const problems = [];
+  let serverDataCount = 0;
+
+  for (const f of files) {
+    const abs = path.resolve(nftDir, f);
+    const rel = path.relative(ROOT, abs);
+    const cat = classify(rel);
+    let size = 0;
+    try {
+      size = fs.statSync(abs).size;
+    } catch {
+      // トレースに載っていても実在しないファイルはサイズ0扱い
+    }
+    totalBytes += size;
+    byCategory.set(cat, (byCategory.get(cat) ?? 0) + size);
+
+    if (FORBIDDEN.has(cat)) {
+      problems.push(`禁止パス（${cat}）: ${rel}`);
+    } else if (cat === 'data/server') {
+      serverDataCount++;
+      if (!rel.endsWith('.gz') && !ALLOWED_RAW.has(path.basename(rel))) {
+        problems.push(`許可外の生 .json: ${rel}`);
+      }
+    }
   }
-  for (const f of badServer) {
-    console.log(`   ❌ 許可外の生 .json が同梱されています: ${f.slice(f.indexOf(SERVER_DATA))}`);
+
+  if (serverDataCount > 0) functionsWithBundleData++;
+  const totalMb = totalBytes / 1e6;
+  if (totalMb > SIZE_LIMIT_MB) {
+    problems.push(`合計トレースサイズ ${totalMb.toFixed(1)}MB > 上限目安 ${SIZE_LIMIT_MB}MB`);
+  }
+
+  const summary = [...byCategory.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${k} ${(v / 1e6).toFixed(1)}MB`)
+    .join(', ');
+  console.log(`📦 ${fnName}: 合計 ${totalMb.toFixed(1)}MB (${summary})`);
+  for (const p of problems) {
+    console.log(`   ❌ ${p}`);
     violations++;
   }
 }
@@ -75,10 +120,10 @@ if (functionsWithBundleData === 0) {
 if (violations > 0) {
   console.error(
     `\n❌ 違反 ${violations}件。next.config.ts の outputFileTracingExcludes/Includes と ` +
-    'ローダの読み込みパス（app/lib/api/data-file.ts）を確認してください。'
+    'ローダの読み込みパス（app/lib/api/data-file.ts のリテラル規約）を確認してください。'
   );
   process.exit(1);
 }
 console.log(
-  `\n✅ 検査完了: data/server 同梱の関数 ${functionsWithBundleData}件、public/data の同梱なし`
+  `\n✅ 検査完了: data/server 同梱の関数 ${functionsWithBundleData}件、違反なし`
 );

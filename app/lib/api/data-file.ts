@@ -17,15 +17,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as zlib from 'zlib';
 
-const DATA_DIRS = [
-  ['public', 'data'],
-  ['data', 'server'],
-] as const;
-
 /** raw 優先・.gz フォールバックで読む。どちらの置き場にも無ければ null */
 export function tryReadDataJson<T>(fileName: string): T | null {
-  for (const dir of DATA_DIRS) {
-    const base = path.join(process.cwd(), ...dir, fileName);
+  // path.join の引数は文字列リテラルで書くこと（配列スプレッド等で組み立てると
+  // ファイルトレーシングがパスを解析できず「プロジェクトルート全体」を依存とみなし、
+  // .git や data/ 配下の GB 級ファイルまで関数に同梱される。実測 383MB 超過の事故あり）。
+  const candidates = [
+    path.join(process.cwd(), 'public', 'data', fileName),
+    path.join(process.cwd(), 'data', 'server', fileName),
+  ];
+  for (const base of candidates) {
     if (fs.existsSync(base)) {
       return JSON.parse(fs.readFileSync(base, 'utf-8')) as T;
     }
