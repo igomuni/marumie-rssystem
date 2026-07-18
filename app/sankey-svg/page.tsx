@@ -26,6 +26,9 @@ import type { AccountCategoryKey } from '@/types/sankey-query';
 import { AiChatPanel, type AiChatUiMessage } from '@/client/components/SankeySvg/AiChatPanel';
 import { MAX_CHAT_MESSAGES, type SankeyChatProgressEvent, type SankeyChatResponse, type SankeyChatResult } from '@/types/sankey-ai-chat';
 import { loadByokSettings, saveByokSettings, deleteByokSettings, type ByokSettings } from '@/client/lib/ai/api-key-store';
+import { ExplorationHistory } from '@/client/components/SankeySvg/ExplorationHistory';
+import { recordVisit } from '@/client/lib/exploration-store';
+import { buildExplorationLabel } from '@/app/lib/exploration-label';
 import { testOpenRouterKey, DEFAULT_BYOK_MODEL } from '@/client/lib/ai/openrouter-caller';
 import { runByokChat, LlmUpstreamError } from '@/client/lib/ai/byok-chat';
 import type { ClientGraphSource } from '@/client/lib/ai/client-tool-executor';
@@ -525,6 +528,24 @@ export default function RealDataSankeyPage() {
     return () => window.removeEventListener('popstate', handler);
   }, [applyUrlState]);
 
+  // 探索履歴の自動記録（URL 同期・状態適用に連動して debounce）。
+  // 既定状態（qs 空）は記録しない。保存先は IndexedDB のみ（exploration-store）
+  const explorationRecordTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleExplorationRecord = useCallback((qs: string) => {
+    if (explorationRecordTimer.current) clearTimeout(explorationRecordTimer.current);
+    if (!qs) return;
+    explorationRecordTimer.current = setTimeout(() => {
+      const query = sankeyQueryFromUrlParams(new URLSearchParams(qs));
+      recordVisit(qs, buildExplorationLabel(query), query.year ?? '2025');
+    }, 1500);
+  }, []);
+
+  // 共有URL等で開いた初期状態も履歴に載せる
+  useEffect(() => {
+    scheduleExplorationRecord(window.location.search.replace(/^\?/, ''));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Sync URL after user actions (push for node selection, replace for sliders/toggles)
   useEffect(() => {
     const action = pendingHistoryAction.current;
@@ -571,7 +592,8 @@ export default function RealDataSankeyPage() {
     } else {
       window.history.replaceState(null, '', url);
     }
-  }, [selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, searchQuery, showFilterPanel, filterProjectName, filterProjectNameRegex, filterRecipientName, filterRecipientNameRegex, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone]);
+    scheduleExplorationRecord(qs);
+  }, [scheduleExplorationRecord, selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, searchQuery, showFilterPanel, filterProjectName, filterProjectNameRegex, filterRecipientName, filterRecipientNameRegex, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -875,7 +897,23 @@ export default function RealDataSankeyPage() {
     applyUrlState(parseSearchParams(window.location.search));
     // フィルタで図が大きく変わるため、レイアウト確定後に全体表示へフィットさせる
     pendingResetViewport.current = true;
-  }, [applyUrlState]);
+    scheduleExplorationRecord(qs);
+  }, [applyUrlState, scheduleExplorationRecord]);
+
+  // 探索履歴・メモの適用: AIチャット結果適用と同じ URL 復元経路を使う
+  const applyExplorationEntry = useCallback((qs: string) => {
+    window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
+    applyUrlState(parseSearchParams(window.location.search));
+    pendingResetViewport.current = true;
+    scheduleExplorationRecord(qs);
+  }, [applyUrlState, scheduleExplorationRecord]);
+
+  // メモ保存用: 現在の URL 状態のスナップショット（ラベルは自動合成）
+  const getExplorationSnapshot = useCallback(() => {
+    const qs = window.location.search.replace(/^\?/, '');
+    const query = sankeyQueryFromUrlParams(new URLSearchParams(qs));
+    return { qs, label: buildExplorationLabel(query), year: query.year ?? '2025' };
+  }, []);
 
   // 事業概要プレビュー高さドラッグリスナ
   useEffect(() => {
@@ -4210,20 +4248,28 @@ export default function RealDataSankeyPage() {
 
       {/* Year selector — top center（スマホ幅では検索ボックスに隠れるため設定ダイアログへ移動） */}
       {!isCompactWidth && (
-      <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15 }}>
-        <select
-          data-testid={testId('year-select')}
-          value={year}
-          onChange={e => handleYearChange(e.target.value as '2024' | '2025')}
-          style={{ fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
-        >
-          <option value="2025">2025年度</option>
-          <option value="2024">2024年度</option>
-        </select>
-        {/* dropdown arrow */}
-        <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-          <path d="M7 10l5 5 5-5z"/>
-        </svg>
+      <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+        <div style={{ position: 'relative' }}>
+          <select
+            data-testid={testId('year-select')}
+            value={year}
+            onChange={e => handleYearChange(e.target.value as '2024' | '2025')}
+            style={{ fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
+          >
+            <option value="2025">2025年度</option>
+            <option value="2024">2024年度</option>
+          </select>
+          {/* dropdown arrow */}
+          <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+            <path d="M7 10l5 5 5-5z"/>
+          </svg>
+        </div>
+        {/* 探索履歴・発見メモ（IndexedDB のみ・サーバ送信なし） */}
+        <ExplorationHistory
+          getSnapshot={getExplorationSnapshot}
+          onApply={applyExplorationEntry}
+          fontPx={CONTROL_FONT_PX}
+        />
       </div>
       )}
 
