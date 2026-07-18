@@ -9,6 +9,8 @@
  */
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import type { SankeyChatProgressEvent, SankeyChatResult } from '@/types/sankey-ai-chat';
+import type { ChatSessionMeta } from '@/client/lib/ai/chat-history-store';
+import { relativeTime } from '@/client/lib/relative-time';
 import { formatYen } from '@/app/lib/sankey-svg-constants';
 import { CHAT_MARKDOWN_STYLES } from './chat-markdown-styles';
 
@@ -38,7 +40,13 @@ interface AiChatPanelProps {
   progress?: SankeyChatProgressEvent | null;
   onSend: (text: string) => void;
   onApplyResult: (result: SankeyChatResult) => void;
+  /** 新しい会話を開始する（以前の会話はセッション一覧に残る） */
   onClear: () => void;
+  /** 保存済みセッションの一覧（新しい順・IndexedDBのみ） */
+  sessions: ChatSessionMeta[];
+  activeSessionId: string | null;
+  onSwitchSession: (id: string) => void;
+  onDeleteSession: (id: string) => void;
   /** 実効パネル幅（ビューポートクランプ済み）。isCompactWidth のときは無視して全幅 */
   width: number;
   isCompactWidth: boolean;
@@ -96,11 +104,23 @@ function progressLabel(progress: SankeyChatProgressEvent | null | undefined): st
 
 export function AiChatPanel({
   open, onToggle, messages, sending, progress, onSend, onApplyResult, onClear,
+  sessions, activeSessionId, onSwitchSession, onDeleteSession,
   width, isCompactWidth, onResizeStart, isResizing, onResetWidth,
   mode, byokModel, defaultByokModel, onSaveByok, onDeleteByok, onTestByok,
 }: AiChatPanelProps) {
   const [input, setInput] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
+  // 会話セッション一覧ドロップダウン
+  const [showSessions, setShowSessions] = useState(false);
+  const sessionsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!showSessions) return;
+    const onMouseDown = (e: MouseEvent) => {
+      if (sessionsRef.current && !sessionsRef.current.contains(e.target as Node)) setShowSessions(false);
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [showSessions]);
   // 設定ビュー（キー登録）。モード未設定でパネルを開いた場合は最初から設定を見せる
   const [showSettings, setShowSettings] = useState(false);
   const [keyInput, setKeyInput] = useState('');
@@ -262,6 +282,53 @@ export function AiChatPanel({
             >{mode === 'byok' ? '自分のキー' : 'サイト提供'}</span>
           )}
         </span>
+        {/* 会話セッション一覧 */}
+        <div ref={sessionsRef} style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowSessions(v => !v)}
+            title="会話の一覧"
+            aria-label="会話の一覧"
+            style={{ background: showSessions ? '#eef3ff' : 'transparent', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer', padding: '3px 6px', display: 'flex', alignItems: 'center' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#666"><path d="M280-240q-17 0-28.5-11.5T240-280v-80h520v-360h80q17 0 28.5 11.5T880-680v600L720-240H280Zm-40-160L80-240v-560q0-17 11.5-28.5T120-840h520q17 0 28.5 11.5T680-800v360q0 17-11.5 28.5T640-400H240Z"/></svg>
+          </button>
+          {showSessions && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 6px)', right: 0, width: 280, maxHeight: '50vh', overflowY: 'auto',
+              background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)', zIndex: 5,
+            }}>
+              <button
+                onClick={() => { onClear(); setShowSessions(false); }}
+                style={{ width: '100%', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#1a73e8', background: '#f5f8ff', border: 'none', borderBottom: '1px solid #eee', padding: '8px 10px', cursor: 'pointer' }}
+              >+ 新しい会話</button>
+              {sessions.length === 0 && (
+                <div style={{ padding: '10px', fontSize: 11.5, color: '#999' }}>保存された会話はまだありません</div>
+              )}
+              {sessions.map(s => (
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', borderBottom: '1px solid #f4f4f4', background: s.id === activeSessionId ? '#f5f8ff' : 'transparent' }}>
+                  <button
+                    onClick={() => { onSwitchSession(s.id); setShowSessions(false); }}
+                    disabled={sending}
+                    title={s.title}
+                    style={{ flex: 1, minWidth: 0, textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: sending ? 'default' : 'pointer' }}
+                  >
+                    <div style={{ fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
+                    <div style={{ fontSize: 10.5, color: '#999' }}>{relativeTime(s.ts)}・{s.messageCount}件</div>
+                  </button>
+                  <button
+                    onClick={() => onDeleteSession(s.id)}
+                    disabled={sending}
+                    title="この会話を削除"
+                    aria-label="この会話を削除"
+                    style={{ background: 'transparent', border: 'none', padding: 2, cursor: sending ? 'default' : 'pointer', color: '#c66', fontSize: 11, flexShrink: 0 }}
+                  >削除</button>
+                </div>
+              ))}
+              <div style={{ padding: '6px 10px', fontSize: 10.5, color: '#aaa' }}>会話はこのブラウザにのみ保存されます</div>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => (showSettings ? setShowSettings(false) : openSettings())}
           title="APIキー設定"
@@ -274,7 +341,7 @@ export function AiChatPanel({
           <button
             onClick={onClear}
             disabled={sending}
-            title="会話をクリア"
+            title="新しい会話を開始（この会話は一覧に残ります）"
             style={{ fontSize: 11, color: '#888', background: 'transparent', border: '1px solid #ddd', borderRadius: 4, padding: '3px 8px', cursor: sending ? 'default' : 'pointer' }}
           >クリア</button>
         )}

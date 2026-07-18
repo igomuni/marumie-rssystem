@@ -26,7 +26,14 @@ import type { AccountCategoryKey } from '@/types/sankey-query';
 import { AiChatPanel, type AiChatUiMessage } from '@/client/components/SankeySvg/AiChatPanel';
 import { MAX_CHAT_MESSAGES, type SankeyChatProgressEvent, type SankeyChatResponse, type SankeyChatResult } from '@/types/sankey-ai-chat';
 import { loadByokSettings, saveByokSettings, deleteByokSettings, type ByokSettings } from '@/client/lib/ai/api-key-store';
-import { loadChatHistory, saveChatHistory } from '@/client/lib/ai/chat-history-store';
+import {
+  listChatSessions,
+  loadChatSession,
+  saveChatSession,
+  deleteChatSession,
+  deleteAllChatSessions,
+  type ChatSessionMeta,
+} from '@/client/lib/ai/chat-history-store';
 import { ExplorationHistory } from '@/client/components/SankeySvg/ExplorationHistory';
 import { recordVisit } from '@/client/lib/exploration-store';
 import { buildExplorationLabel } from '@/app/lib/exploration-label';
@@ -732,23 +739,60 @@ export default function RealDataSankeyPage() {
     return () => { cancelled = true; };
   }, []);
 
-  // チャット会話の復元・永続化（IndexedDB のみ・サーバ送信なし）。
-  // 復元完了前の保存で空上書きしないよう、ロード完了フラグを立ててから保存を始める
+  // チャット会話の復元・永続化（IndexedDB のみ・サーバ送信なし・複数セッション）。
+  // 起動時は最新セッションを復元。復元完了前の保存で空上書きしないようフラグ制御
+  const [chatSessions, setChatSessions] = useState<ChatSessionMeta[]>([]);
+  const [chatSessionId, setChatSessionId] = useState<string | null>(null);
   const chatHistoryLoadedRef = useRef(false);
   useEffect(() => {
     let cancelled = false;
-    loadChatHistory().then(messages => {
+    (async () => {
+      const metas = await listChatSessions();
       if (cancelled) return;
-      if (messages.length > 0) setAiChatMessages(messages);
+      setChatSessions(metas);
+      const latest = metas.length > 0 ? await loadChatSession(metas[0].id) : null;
+      if (cancelled) return;
+      if (latest) {
+        setChatSessionId(latest.id);
+        setAiChatMessages(latest.messages);
+      } else {
+        setChatSessionId(crypto.randomUUID());
+      }
       chatHistoryLoadedRef.current = true;
-    });
+    })();
     return () => { cancelled = true; };
   }, []);
   useEffect(() => {
-    if (!chatHistoryLoadedRef.current) return;
-    const timer = setTimeout(() => { saveChatHistory(aiChatMessages); }, 500);
+    if (!chatHistoryLoadedRef.current || !chatSessionId || aiChatMessages.length === 0) return;
+    const timer = setTimeout(() => {
+      saveChatSession(chatSessionId, aiChatMessages).then(() => listChatSessions().then(setChatSessions));
+    }, 500);
     return () => clearTimeout(timer);
-  }, [aiChatMessages]);
+  }, [aiChatMessages, chatSessionId]);
+
+  // 「クリア」= 新しい会話の開始（以前の会話はセッション一覧に残る）
+  const handleNewChatSession = useCallback(() => {
+    setChatSessionId(crypto.randomUUID());
+    setAiChatMessages([]);
+    setAiChatProgress(null);
+  }, []);
+
+  const handleSwitchChatSession = useCallback(async (id: string) => {
+    const session = await loadChatSession(id);
+    if (!session) return;
+    setChatSessionId(session.id);
+    setAiChatMessages(session.messages);
+    setAiChatProgress(null);
+  }, []);
+
+  const handleDeleteChatSession = useCallback(async (id: string) => {
+    await deleteChatSession(id);
+    setChatSessions(await listChatSessions());
+    if (id === chatSessionId) {
+      setChatSessionId(crypto.randomUUID());
+      setAiChatMessages([]);
+    }
+  }, [chatSessionId]);
 
   // 実行モード: キー登録済みなら BYOK を優先、なければサーバモード、どちらも無ければ未設定
   const aiChatMode: 'byok' | 'server' | null = byokSettings ? 'byok' : aiChatAvailable ? 'server' : null;
@@ -779,8 +823,12 @@ export default function RealDataSankeyPage() {
   const handleDeleteByok = useCallback(async () => {
     await deleteByokSettings();
     setByokSettings(null);
-    // BYOK下の会話をサーバモードへ引き継がない: 残すと次のサーバモード送信で
-    // BYOK中の会話全文が /api/ai/sankey-chat へ送られ、プライバシー境界が変わってしまう
+    // BYOK下の会話をサーバモードへ引き継がない: 残すと後のサーバモード送信で
+    // BYOK中の会話全文が /api/ai/sankey-chat へ送られ、プライバシー境界が変わってしまう。
+    // 保存済みセッションから再開しても同じことが起きるため、全セッションを削除する
+    await deleteAllChatSessions();
+    setChatSessions([]);
+    setChatSessionId(crypto.randomUUID());
     setAiChatMessages([]);
     setAiChatProgress(null);
   }, []);
@@ -4984,7 +5032,11 @@ export default function RealDataSankeyPage() {
         progress={aiChatProgress}
         onSend={handleAiChatSend}
         onApplyResult={applyAiChatResult}
-        onClear={() => setAiChatMessages([])}
+        onClear={handleNewChatSession}
+        sessions={chatSessions}
+        activeSessionId={chatSessionId}
+        onSwitchSession={handleSwitchChatSession}
+        onDeleteSession={handleDeleteChatSession}
         width={effectiveAiPanelWidth}
         isCompactWidth={isCompactWidth}
         onResizeStart={e => {
