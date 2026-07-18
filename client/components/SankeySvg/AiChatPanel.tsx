@@ -169,7 +169,7 @@ export function AiChatPanel({
     setSettingsStatus(null);
     try {
       await onDeleteByok();
-      setSettingsStatus({ kind: 'ok', text: 'キーを削除しました' });
+      setSettingsStatus({ kind: 'ok', text: 'キーを削除しました（会話履歴もクリアしました）' });
     } catch {
       setSettingsStatus({ kind: 'error', text: '削除に失敗しました' });
     } finally {
@@ -302,7 +302,7 @@ export function AiChatPanel({
           </p>
           <ul style={{ margin: '0 0 12px', paddingLeft: 18, color: '#666' }}>
             <li>キーは<b>このブラウザ（IndexedDB）にのみ保存</b>され、当サイトのサーバーには送信されません（ブラウザからOpenRouterへ直接接続します）</li>
-            <li>会話内容もサーバーに保存されません</li>
+            <li>会話の本文が当サイトのサーバーへ送られることはありません（データ検索時は<b>検索キーワードのみ</b>公開データAPIに送られます）</li>
             <li>万一に備え、OpenRouter側で<b>利用上限（クレジット制限）を設定したキー</b>のご利用を推奨します</li>
           </ul>
           <label style={{ display: 'block', marginBottom: 10 }}>

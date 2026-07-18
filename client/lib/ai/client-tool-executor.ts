@@ -5,7 +5,11 @@
  *   ロード済みの graph（または /data からの fetch）を使い**ブラウザ内でローカル実行**する
  *   （/api/sankey/query は本番非公開のため使わない。設計 20260718_1542 の4節）
  * - その他のツールは自サイトの**公開 API** を fetch し、応答をサーバ実装
- *   （tool-executor-server.ts が正典）と同じ payload 形に整形する
+ *   （tool-executor-server.ts が正典）と同じ payload 形に整形する。
+ *   このとき LLM が組み立てた検索キーワード等の最小限のクエリはサーバへ届く
+ *   （会話全文・キーは届かない）— UI・byok-chat.ts のプライバシー文言と整合させること。
+ *   検索のローカル実行化は対象データが大きく（quality-scores 7MB・recipient-index 31MB 等）
+ *   BYOK設計（公開API利用）の採用理由と衝突するため行わない（設計 20260718_1542 2節）
  * - fetch 失敗・404 は { error } payload に変換して LLM に正直に伝える（ループは壊さない）
  */
 import type { GraphData } from '@/types/sankey-svg';
@@ -174,6 +178,12 @@ export function createClientToolExecutor(getGraph: ClientGraphSource): ChatToolE
           }
         : null;
       if (!score && !detail) {
+        // 「見つかりません」と言えるのは両方が明確に 404 のときだけ。
+        // タイムアウト・5xx 等の障害は API エラーとして正直に伝える（偽の not-found を返さない）
+        const hardFailure = [scoreRes, detailRes].find(
+          r => 'fetchError' in r || (r.status !== 200 && r.status !== 404),
+        );
+        if (hardFailure) return apiError(hardFailure);
         return { error: `pid=${pid} の事業が見つかりません`, hint: 'search_projects で事業名からpidを特定してください' };
       }
       return {

@@ -738,6 +738,10 @@ export default function RealDataSankeyPage() {
   const handleDeleteByok = useCallback(async () => {
     await deleteByokSettings();
     setByokSettings(null);
+    // BYOK下の会話をサーバモードへ引き継がない: 残すと次のサーバモード送信で
+    // BYOK中の会話全文が /api/ai/sankey-chat へ送られ、プライバシー境界が変わってしまう
+    setAiChatMessages([]);
+    setAiChatProgress(null);
   }, []);
 
   // SSE応答本文をパースし、progress は逐次state更新、result/error で終端メッセージを積む。
@@ -806,7 +810,8 @@ export default function RealDataSankeyPage() {
       const currentQuery = sankeyQueryFromUrlParams(new URLSearchParams(window.location.search));
 
       // BYOKモード: ブラウザ内でエージェントループを実行（LLMはOpenRouter直接、
-      // ツールは公開API fetch + graph ローカル実行）。会話・キーは自サイトへ送信されない
+      // ツールは公開API fetch + graph ローカル実行）。キー・会話本文は自サイトへ
+      // 送信されない（ツールの検索キーワード等のみ公開データAPIへ送られる）
       if (byokSettings) {
         try {
           const agentResult = await runByokChat({

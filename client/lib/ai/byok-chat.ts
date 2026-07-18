@@ -2,7 +2,11 @@
  * BYOKクライアントモードのチャット実行（page.tsx から呼ぶ組み立て役）。
  *
  * エージェントコア（app/lib/ai/chat-core.ts）に、ブラウザ直接の OpenRouter 呼び出しと
- * 公開 API fetch のツール実行を束ねる。会話・キーは自サイトのサーバへ送信されない。
+ * 公開 API fetch のツール実行を束ねる。
+ *
+ * プライバシー境界（UI文言と一致させること）: APIキーと会話の本文は自サイトの
+ * サーバへ送信されない。ただしツール実行時、LLM が組み立てた検索キーワード等の
+ * 最小限のクエリは匿名の公開データ API へ送られる（会話全文は送られない）。
  */
 import type { SankeyChatMessage, SankeyChatContext, SankeyChatProgressEvent } from '@/types/sankey-ai-chat';
 import { runSankeyChatAgentCore, type SankeyChatAgentResult } from '@/app/lib/ai/chat-core';
