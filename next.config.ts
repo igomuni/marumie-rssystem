@@ -12,7 +12,8 @@ const nextConfig: NextConfig = {
   // サーバ側ローダは public/data → data/server の順で探索する（app/lib/api/data-file.ts）。
   // 検証: npm run build 後に npm run check-traces（scripts/check-function-traces.mjs）。
   outputFileTracingExcludes: {
-    '*': ['./public/data/**'],
+    // data/usage は dev 専用の利用ログ（usage-log.ts が参照するためトレースに載るが同梱不要）
+    '*': ['./public/data/**', './data/usage/**'],
   },
   outputFileTracingIncludes: {
     '*': ['./data/server/**'],

@@ -45,7 +45,8 @@ function collectNftFiles(dir) {
 function classify(rel) {
   if (rel.startsWith(`public${path.sep}data${path.sep}`)) return 'public/data';
   if (rel.startsWith(`data${path.sep}server${path.sep}`)) return 'data/server';
-  // dev 専用の利用ログ（app/lib/api/usage-log.ts）。数KB・Vercel ビルドには存在しない
+  // dev 専用の利用ログ（usage-log.ts）。next.config.ts の excludes で同梱除外済みのため
+  // トレースに現れたら構成の破れとして禁止扱いにする
   if (rel.startsWith(`data${path.sep}usage${path.sep}`)) return 'data/usage';
   if (rel.startsWith(`data${path.sep}`)) return 'data/(server以外)';
   if (rel.startsWith(`.git${path.sep}`)) return '.git';
@@ -55,7 +56,7 @@ function classify(rel) {
   return 'その他';
 }
 
-const FORBIDDEN = new Set(['public/data', 'data/(server以外)', '.git']);
+const FORBIDDEN = new Set(['public/data', 'data/usage', 'data/(server以外)', '.git']);
 
 let violations = 0;
 let functionsWithBundleData = 0;
@@ -87,13 +88,18 @@ for (const nftPath of collectNftFiles(SERVER_DIR)) {
       problems.push(`禁止パス（${cat}）: ${rel}`);
     } else if (cat === 'data/server') {
       serverDataCount++;
-      if (!rel.endsWith('.gz') && !ALLOWED_RAW.has(path.basename(rel))) {
+      if (!rel.endsWith('.json.gz') && !ALLOWED_RAW.has(path.basename(rel))) {
         problems.push(`許可外の生 .json: ${rel}`);
       }
     }
   }
 
-  if (serverDataCount > 0) functionsWithBundleData++;
+  // includes は '*'（全関数対象）なので、どの関数も data/server を同梱していなければ構成の破れ
+  if (serverDataCount === 0) {
+    problems.push('data/server の同梱が 0 件です（outputFileTracingIncludes 未反映の疑い）');
+  } else {
+    functionsWithBundleData++;
+  }
   const totalMb = totalBytes / 1e6;
   if (totalMb > SIZE_LIMIT_MB) {
     problems.push(`合計トレースサイズ ${totalMb.toFixed(1)}MB > 上限目安 ${SIZE_LIMIT_MB}MB`);

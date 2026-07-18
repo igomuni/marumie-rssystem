@@ -19,6 +19,10 @@ import * as zlib from 'zlib';
 
 /** raw 優先・.gz フォールバックで読む。どちらの置き場にも無ければ null */
 export function tryReadDataJson<T>(fileName: string): T | null {
+  // パストラバーサル防止（現状の呼び出し元は固定ファイル名だが、ユーティリティとして防御）
+  if (path.basename(fileName) !== fileName) {
+    throw new Error(`Invalid fileName: directory traversal is not allowed (${fileName})`);
+  }
   // path.join の引数は文字列リテラルで書くこと（配列スプレッド等で組み立てると
   // ファイルトレーシングがパスを解析できず「プロジェクトルート全体」を依存とみなし、
   // .git や data/ 配下の GB 級ファイルまで関数に同梱される。実測 383MB 超過の事故あり）。
