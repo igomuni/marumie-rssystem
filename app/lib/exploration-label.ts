@@ -65,6 +65,10 @@ export function buildExplorationLabel(query: SankeyQuery): string {
     parts.push(accounts.map(a => ACCOUNT_LABELS[a]).join('/'));
   }
 
+  const sub = query.filter?.subcontract;
+  if (sub?.minDepth != null && sub.minDepth >= 2) parts.push(`再委託階層${sub.minDepth}以上`);
+  else if (sub?.hasRedelegation) parts.push('再委託あり');
+
   const hasFilter = parts.length > (query.year ? 1 : 0);
   if (!hasFilter) parts.push('フィルタなし');
   return parts.join('・');

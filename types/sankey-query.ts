@@ -24,6 +24,17 @@ export interface SankeyAmountRange {
 /** 会計区分。'none' = 会計区分情報なしの事業 */
 export type AccountCategoryKey = 'general' | 'special' | 'both' | 'none';
 
+/**
+ * 再委託条件（Issue #270）。グラフの project ノードに埋め込まれた
+ * ブロック階層数（subcontractDepth。1=直接支出のみ・2以上=再委託あり）で判定する
+ */
+export interface SankeySubcontractFilter {
+  /** true = 再委託の記載がある事業（階層2以上）のみ残す */
+  hasRedelegation?: boolean;
+  /** ブロック階層数の下限（2=再委託あり、3=再々委託以深…）。指定時は記載なし事業を除外 */
+  minDepth?: number | null;
+}
+
 /** プレフィルタ条件（どのノードを残すか）。条件は AND で結合される */
 export interface SankeyQueryFilter {
   projectName?: SankeyNameFilter;
@@ -36,6 +47,8 @@ export interface SankeyQueryFilter {
   spending?: SankeyAmountRange;
   /** 含める会計区分。省略 or 全4種指定 = フィルタなし */
   accountCategories?: AccountCategoryKey[];
+  /** 再委託条件。省略 = フィルタなし */
+  subcontract?: SankeySubcontractFilter;
 }
 
 /** 表示条件（TopN集約・ピン・フォーカス等、どう見せるか） */
@@ -79,6 +92,7 @@ export interface ResolvedSankeyQuery {
     budget: { min: number | null; max: number | null };
     spending: { min: number | null; max: number | null };
     accountCategories: AccountCategoryKey[];
+    subcontract: { hasRedelegation: boolean; minDepth: number | null };
   };
   view: {
     topMinistry: number;

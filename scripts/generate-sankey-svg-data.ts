@@ -27,6 +27,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as zlib from 'zlib';
 import { readShiftJISCSV, parseAmount } from '@/scripts/csv-reader';
 import { resolveRecipientKey } from '@/app/lib/recipient-key';
 import type { RecipientResolution } from '@/app/lib/recipient-key';
@@ -68,6 +69,8 @@ interface SankeyNode {
   accountCategory?: 'general' | 'special' | 'both'; // project-budget のみ
   budgetSummary?: BudgetSummary; // project-budget のみ
   budgetBreakdown?: BudgetBreakdownItem[]; // project-budget のみ
+  subcontractDepth?: number; // project-budget のみ・再委託あり（階層2以上）のみ付与
+
   representativeCorporateNumber?: string; // recipient のみ: 内包する有効法人番号のうち最大金額のもの
   corporateNumberCount?: number; // recipient のみ: 内包する相異なる有効法人番号の件数
 }
@@ -96,6 +99,30 @@ interface SankeyGraphData {
 }
 
 // ─── CSV読み込み ──────────────────────────────────────────
+
+/**
+ * subcontracts-{YEAR}.json から pid → 再委託ブロック階層数（maxDepth）を読む。
+ * 2以上（=再委託あり）のみを保持する（1=直接のみはノード未付与で表現し、サイズ増を避ける）。
+ * raw が無ければ .gz をその場で展開。どちらも無ければ警告して空マップ（付与スキップ）。
+ */
+function loadSubcontractDepths(): Map<number, number> {
+  const base = path.join(__dirname, '../public/data', `subcontracts-${YEAR}.json`);
+  let raw: string | null = null;
+  if (fs.existsSync(base)) raw = fs.readFileSync(base, 'utf-8');
+  else if (fs.existsSync(`${base}.gz`)) raw = zlib.gunzipSync(fs.readFileSync(`${base}.gz`)).toString('utf-8');
+  const map = new Map<number, number>();
+  if (raw === null) {
+    console.warn(`  ⚠ subcontracts-${YEAR}.json(.gz) が見つかりません。subcontractDepth は未付与になります（npm run generate-subcontracts を先に実行してください）`);
+    return map;
+  }
+  const index = JSON.parse(raw) as Record<string, { maxDepth?: number }>;
+  for (const [pid, g] of Object.entries(index)) {
+    const n = parseInt(pid, 10);
+    if (!isNaN(n) && typeof g.maxDepth === 'number' && g.maxDepth >= 2) map.set(n, g.maxDepth);
+  }
+  console.log(`  再委託階層データ: ${map.size.toLocaleString()} 事業（階層2以上）`);
+  return map;
+}
 
 function loadCSV(filename: string): CSVRow[] {
   const filePath = path.join(DATA_DIR, filename);
@@ -238,6 +265,11 @@ function main() {
     entries.sort((a, b) => b.amount - a.amount);
   }
   console.log(`  予算内訳データ: ${budgetBreakdownMap.size.toLocaleString()} 事業 / ${budgetItemTargetRows.toLocaleString()} 行 / ${(budgetItemAmountTotal / 1e12).toFixed(2)} 兆円`);
+
+  // 3.5. 再委託ブロック階層数（subcontracts-{YEAR}.json の maxDepth）
+  // filter.subcontract（Issue #270）用に project-budget ノードへ埋め込む。
+  // 生成順の依存: 先に npm run generate-subcontracts を実行しておくこと（無ければ警告して未付与）
+  const subcontractDepthMap = loadSubcontractDepths();
 
   // 4. 再委託ブロックセットの構築（5-2 CSV）
   // 判定方針: 「担当組織からの支出=FALSE」は明示的な再委託（間接）→ 除外
@@ -404,6 +436,7 @@ function main() {
       ...(ac !== undefined ? { accountCategory: ac } : {}),
       ...(budget !== undefined ? { budgetSummary: budget } : {}),
       ...(budgetBreakdownMap.has(pid) ? { budgetBreakdown: budgetBreakdownMap.get(pid) } : {}),
+      ...(subcontractDepthMap.has(pid) ? { subcontractDepth: subcontractDepthMap.get(pid) } : {}),
     });
 
     // 事業(支出)ノード — 直接支出額のみ
