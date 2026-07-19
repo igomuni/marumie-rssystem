@@ -47,6 +47,8 @@ interface AiChatPanelProps {
   activeSessionId: string | null;
   onSwitchSession: (id: string) => void;
   onDeleteSession: (id: string) => void;
+  /** レポート応答を発見メモへ保存する（現在の図の状態に紐づく。page 側で exploration-store に委譲） */
+  onSaveReport: (reportText: string) => Promise<void>;
   /** 実効パネル幅（ビューポートクランプ済み）。isCompactWidth のときは無視して全幅 */
   width: number;
   isCompactWidth: boolean;
@@ -76,6 +78,15 @@ const EXAMPLE_PROMPTS = [
   'マイナンバー関連は去年から増えた？',
 ];
 
+/**
+ * レポート化ボタンの定型プロンプト。実験E2/E3（docs/tasks/20260719_0852 4節）で
+ * 「会話整形の1ターン + 出典付記」の品質が確認できた形をそのまま固定する。
+ * 会話に無い数値の捏造防止を明示するのが要点
+ */
+const REPORT_PROMPT =
+  'ここまでの調査をレポートとしてまとめてください。数値・事実はこの会話に出てきたものだけを使い、会話に無い数値は書かないでください。' +
+  '最後に「再現情報」として、適用したフィルタ条件（SankeyQuery JSON）と、主要な数値がどのツール・条件から得られたかを付記してください。';
+
 const PANEL_Z_INDEX = 210; // 右上の設定ボタン(200)より前面。ScoreDetailDialog は body へ portal されるため影響しない
 
 /**
@@ -104,12 +115,35 @@ function progressLabel(progress: SankeyChatProgressEvent | null | undefined): st
 
 export function AiChatPanel({
   open, onToggle, messages, sending, progress, onSend, onApplyResult, onClear,
-  sessions, activeSessionId, onSwitchSession, onDeleteSession,
+  sessions, activeSessionId, onSwitchSession, onDeleteSession, onSaveReport,
   width, isCompactWidth, onResizeStart, isResizing, onResetWidth,
   mode, byokModel, defaultByokModel, onSaveByok, onDeleteByok, onTestByok,
 }: AiChatPanelProps) {
   const [input, setInput] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
+  // assistant メッセージのコピー・メモ保存の完了表示（メッセージindexで管理）
+  const [copiedMsgIndex, setCopiedMsgIndex] = useState<number | null>(null);
+  const [savedMsgIndex, setSavedMsgIndex] = useState<number | null>(null);
+
+  const handleCopyMessage = async (index: number, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMsgIndex(index);
+      setTimeout(() => setCopiedMsgIndex(prev => (prev === index ? null : prev)), 1500);
+    } catch {
+      // クリップボード不可の環境では何もしない
+    }
+  };
+
+  const handleSaveReport = async (index: number, text: string) => {
+    try {
+      await onSaveReport(text);
+      setSavedMsgIndex(index);
+      setTimeout(() => setSavedMsgIndex(prev => (prev === index ? null : prev)), 1500);
+    } catch {
+      // 保存失敗は表示を変えない（IndexedDB 非対応等）
+    }
+  };
   // 会話セッション一覧ドロップダウン
   const [showSessions, setShowSessions] = useState(false);
   const sessionsRef = useRef<HTMLDivElement>(null);
@@ -485,6 +519,20 @@ export function AiChatPanel({
                 )
                 : m.content}
             </div>
+            {m.role === 'assistant' && !m.isError && (
+              <div style={{ display: 'flex', gap: 10, marginTop: 3, paddingLeft: 4 }}>
+                <button
+                  onClick={() => handleCopyMessage(i, m.content)}
+                  title="この応答をMarkdownでコピー"
+                  style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#999', fontSize: 10.5, textDecoration: 'underline' }}
+                >{copiedMsgIndex === i ? 'コピーしました' : 'コピー'}</button>
+                <button
+                  onClick={() => handleSaveReport(i, m.content)}
+                  title="この応答を発見メモ（履歴パネル）に保存"
+                  style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#999', fontSize: 10.5, textDecoration: 'underline' }}
+                >{savedMsgIndex === i ? '保存しました' : 'メモに保存'}</button>
+              </div>
+            )}
             {m.result && (
               <div style={{ marginTop: 6, maxWidth: '88%', minWidth: '70%', border: '1px solid #dbe6ff', borderRadius: 8, background: '#f9fbff', padding: '8px 11px', fontSize: 12 }}>
                 {m.result.interpretation && (
@@ -535,6 +583,24 @@ export function AiChatPanel({
           </div>
         )}
       </div>
+      )}
+
+      {/* レポート化ボタン — 調査（assistant応答あり）が進んだ会話でのみ表示 */}
+      {!showSettings && mode !== null && !sending && messages.some(m => m.role === 'assistant' && !m.isError) && (
+        <div style={{ flexShrink: 0, padding: '6px 10px 0' }}>
+          <button
+            onClick={() => onSend(REPORT_PROMPT)}
+            title="ここまでの会話を、出典付きのレポートにまとめます"
+            style={{
+              width: '100%', fontSize: 11.5, color: '#1a73e8', background: '#f5f8ff',
+              border: '1px solid #dbe6ff', borderRadius: 6, padding: '6px 10px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="13" width="13" viewBox="0 -960 960 960" fill="#1a73e8"><path d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520Z"/></svg>
+            この会話をレポートにまとめる
+          </button>
+        </div>
       )}
 
       {/* 入力欄 */}

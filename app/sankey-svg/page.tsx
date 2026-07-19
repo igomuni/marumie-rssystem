@@ -35,7 +35,7 @@ import {
   type ChatSessionMeta,
 } from '@/client/lib/ai/chat-history-store';
 import { ExplorationHistory } from '@/client/components/SankeySvg/ExplorationHistory';
-import { recordVisit } from '@/client/lib/exploration-store';
+import { recordVisit, saveMemo } from '@/client/lib/exploration-store';
 import { buildExplorationLabel } from '@/app/lib/exploration-label';
 import { testOpenRouterKey, DEFAULT_BYOK_MODEL } from '@/client/lib/ai/openrouter-caller';
 import { runByokChat, LlmUpstreamError } from '@/client/lib/ai/byok-chat';
@@ -981,6 +981,13 @@ export default function RealDataSankeyPage() {
     const query = sankeyQueryFromUrlParams(new URLSearchParams(qs));
     return { qs, label: buildExplorationLabel(query), year: query.year ?? '2025' };
   }, []);
+
+  // チャットのレポート応答を発見メモとして保存（現在の図の状態に紐づく。
+  // 同一状態の既存メモは上書きされる = 最新のレポートが残る）
+  const handleSaveReportMemo = useCallback(async (reportText: string) => {
+    const snap = getExplorationSnapshot();
+    await saveMemo(snap.qs, snap.label, snap.year, reportText);
+  }, [getExplorationSnapshot]);
 
   // 事業概要プレビュー高さドラッグリスナ
   useEffect(() => {
@@ -4313,9 +4320,10 @@ export default function RealDataSankeyPage() {
         </SidePanelChrome>
       )}
 
-      {/* Year selector — top center（スマホ幅では検索ボックスに隠れるため設定ダイアログへ移動） */}
+      {/* Year selector — top center（スマホ幅では検索ボックスに隠れるため設定ダイアログへ移動）。
+          AIチャットパネル展開時は右上コントロール群が左へ退避して重なるため、中央クラスタも同分の半分だけ左へ寄せる */}
       {!isCompactWidth && (
-      <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 15, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+      <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: `calc(50% - ${rightControlsOffset / 2}px)`, transform: 'translateX(-50%)', zIndex: 15, display: 'flex', gap: 8, alignItems: 'flex-start', transition: isResizingAiPanel ? 'none' : 'left 0.2s ease' }}>
         <div style={{ position: 'relative' }}>
           <select
             data-testid={testId('year-select')}
@@ -5037,6 +5045,7 @@ export default function RealDataSankeyPage() {
         activeSessionId={chatSessionId}
         onSwitchSession={handleSwitchChatSession}
         onDeleteSession={handleDeleteChatSession}
+        onSaveReport={handleSaveReportMemo}
         width={effectiveAiPanelWidth}
         isCompactWidth={isCompactWidth}
         onResizeStart={e => {

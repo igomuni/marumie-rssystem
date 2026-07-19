@@ -32,6 +32,8 @@ export function ExplorationHistory({ getSnapshot, onApply, fontPx }: Exploration
   const [entries, setEntries] = useState<ExplorationEntry[]>([]);
   const [noteInput, setNoteInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  // 長文メモ（チャットのレポート保存等）の展開状態
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const rootRef = useRef<HTMLDivElement>(null);
 
   const refresh = () => { listEntries().then(setEntries); };
@@ -75,9 +77,25 @@ export function ExplorationHistory({ getSnapshot, onApply, fontPx }: Exploration
         title="この状態を図に適用"
         style={{ textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#1a73e8', fontSize: fontPx, lineHeight: 1.5, wordBreak: 'break-word' }}
       >{e.label}</button>
-      {e.note && (
-        <div style={{ fontSize: fontPx - 1, color: '#555', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{e.note}</div>
-      )}
+      {e.note && (() => {
+        const isLong = e.note.length > 160;
+        const expanded = expandedIds.has(e.id);
+        return (
+          <div style={{ fontSize: fontPx - 1, color: '#555', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            {isLong && !expanded ? `${e.note.slice(0, 160)}…` : e.note}
+            {isLong && (
+              <button
+                onClick={() => setExpandedIds(prev => {
+                  const next = new Set(prev);
+                  if (expanded) next.delete(e.id); else next.add(e.id);
+                  return next;
+                })}
+                style={{ display: 'block', background: 'transparent', border: 'none', padding: 0, marginTop: 2, cursor: 'pointer', color: '#1a73e8', fontSize: fontPx - 2, textDecoration: 'underline' }}
+              >{expanded ? '折りたたむ' : '全文を表示'}</button>
+            )}
+          </div>
+        );
+      })()}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: fontPx - 2, color: '#999' }}>
         <span>{relativeTime(e.ts)}</span>
         <button
