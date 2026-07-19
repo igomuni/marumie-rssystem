@@ -18,7 +18,7 @@ describe('resolveSankeyQuery', () => {
       filter: { subcontract: { hasRedelegation: true, minDepth: 3.7 } },
     });
     expect(errors).toEqual([]);
-    expect(query.filter.subcontract).toEqual({ hasRedelegation: true, minDepth: 3, recipientName: null });
+    expect(query.filter.subcontract).toEqual({ hasRedelegation: true, minDepth: 3 });
   });
 
   it('reports an error for subcontract.minDepth below 2', () => {
@@ -280,7 +280,7 @@ describe('buildFilterExcludedIds (subcontract)', () => {
   });
 
   it('hasRedelegation keeps only projects with depth >= 2 (missing depth = no redelegation)', () => {
-    const filter = { ...baseFilter(), subcontract: { hasRedelegation: true, minDepth: null, recipientName: null } };
+    const filter = { ...baseFilter(), subcontract: { hasRedelegation: true, minDepth: null } };
     const excluded = buildFilterExcludedIds(nodes, edges, filter)!;
     expect(excluded.has('project-budget-2')).toBe(true);
     expect(excluded.has('project-spending-2')).toBe(true);
@@ -288,7 +288,7 @@ describe('buildFilterExcludedIds (subcontract)', () => {
   });
 
   it('minDepth takes precedence and excludes shallower projects', () => {
-    const filter = { ...baseFilter(), subcontract: { hasRedelegation: false, minDepth: 4, recipientName: null } };
+    const filter = { ...baseFilter(), subcontract: { hasRedelegation: false, minDepth: 4 } };
     const excluded = buildFilterExcludedIds(nodes, edges, filter)!;
     // 事業1（階層3）も 4 未満なので除外され、A省もカスケード除外される
     expect(excluded.has('project-budget-1')).toBe(true);
@@ -296,14 +296,26 @@ describe('buildFilterExcludedIds (subcontract)', () => {
     expect(excluded.has('ministry-A')).toBe(true);
   });
 
-  it('subcontract.recipientName keeps only projects whose chain contains a matching name', () => {
+  it('recipientName.includeSubcontract matches direct OR subcontract names at project level', () => {
+    // 事業1: 再委託先に WELMA / 事業2: 直接支出先 r-2（受領者B）のみ
     const withNames = nodes.map(n => n.id === 'project-budget-1'
       ? { ...n, subcontractRecipients: ['株式会社WELMA', 'コスモス商事株式会社'] }
       : n);
-    const filter = { ...baseFilter(), subcontract: { hasRedelegation: false, minDepth: null, recipientName: { query: 'welma', regex: false } } };
+    const filter = { ...baseFilter(), recipientName: { query: 'welma', regex: false, includeSubcontract: true } };
     const excluded = buildFilterExcludedIds(withNames, edges, filter)!;
+    // 事業1は再委託先マッチで残る。支出先ノードは隠されない
     expect(excluded.has('project-budget-1')).toBe(false);
-    expect(excluded.has('project-budget-2')).toBe(true); // 名前データなし = 不一致
+    expect(excluded.has('r-1')).toBe(false);
+    // 事業2は直接・再委託ともマッチなし → 除外
+    expect(excluded.has('project-budget-2')).toBe(true);
+
+    // 直接支出先マッチの側も残ることを確認（受領者B → 事業2）
+    const filter2 = { ...baseFilter(), recipientName: { query: '受領者B', regex: false, includeSubcontract: true } };
+    const excluded2 = buildFilterExcludedIds(withNames, edges, filter2)!;
+    expect(excluded2.has('project-budget-2')).toBe(false);
+    expect(excluded2.has('project-budget-1')).toBe(true);
+    // includeSubcontract では支出先ノードを名前で隠さない（r-1 は残存事業の支出先として表示可）
+    expect(excluded2.has('r-2')).toBe(false);
   });
 
   it('URL round trip preserves subcontract (fsd / fsr)', () => {
@@ -317,10 +329,10 @@ describe('buildFilterExcludedIds (subcontract)', () => {
     expect(p2.get('fsr')).toBe('1');
     expect(sankeyQueryFromUrlParams(p2).filter?.subcontract).toEqual({ hasRedelegation: true });
 
-    const withName = resolveSankeyQuery({ filter: { subcontract: { recipientName: { query: 'NEDO', regex: true } } } }).query;
-    const p3 = sankeyQueryToUrlParams(withName);
-    expect(p3.get('fsn')).toBe('NEDO');
-    expect(p3.get('fsnr')).toBe('1');
-    expect(sankeyQueryFromUrlParams(p3).filter?.subcontract).toEqual({ recipientName: { query: 'NEDO', regex: true } });
+    const withInclude = resolveSankeyQuery({ filter: { recipientName: { query: 'NEDO', includeSubcontract: true } } }).query;
+    const p3 = sankeyQueryToUrlParams(withInclude);
+    expect(p3.get('fnr')).toBe('NEDO');
+    expect(p3.get('fnrs')).toBe('1');
+    expect(sankeyQueryFromUrlParams(p3).filter?.recipientName).toEqual({ query: 'NEDO', regex: false, includeSubcontract: true });
   });
 });

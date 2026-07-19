@@ -12,6 +12,12 @@ export interface SankeyNameFilter {
   query: string;
   /** true なら query を正規表現（フラグ i）として解釈 */
   regex?: boolean;
+  /**
+   * recipientName のみ有効: true なら再委託先名にもマッチさせる（直接支出先 OR 再委託先）。
+   * このとき判定は事業単位（支出先ノード自体は隠さない — 再委託側だけがマッチした事業の
+   * 支出先が全滅してカスケード除外されるのを防ぐため）
+   */
+  includeSubcontract?: boolean;
 }
 
 export interface SankeyAmountRange {
@@ -33,8 +39,6 @@ export interface SankeySubcontractFilter {
   hasRedelegation?: boolean;
   /** ブロック階層数の下限（2=再委託あり、3=再々委託以深…）。指定時は記載なし事業を除外 */
   minDepth?: number | null;
-  /** 再委託先名フィルタ（再委託ブロックの支出先名に対する部分一致/正規表現） */
-  recipientName?: SankeyNameFilter;
 }
 
 /** プレフィルタ条件（どのノードを残すか）。条件は AND で結合される */
@@ -94,7 +98,7 @@ export interface ResolvedSankeyQuery {
     budget: { min: number | null; max: number | null };
     spending: { min: number | null; max: number | null };
     accountCategories: AccountCategoryKey[];
-    subcontract: { hasRedelegation: boolean; minDepth: number | null; recipientName: SankeyNameFilter | null };
+    subcontract: { hasRedelegation: boolean; minDepth: number | null };
   };
   view: {
     topMinistry: number;

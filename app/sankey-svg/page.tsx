@@ -92,8 +92,7 @@ interface SankeyUrlState {
   acSpecial?: boolean;
   /** 再委託フィルタ: 階層下限の文字列（'2'=あり〜'9'）。空/未指定 = フィルタなし */
   filterSubcontract?: string;
-  filterSubRecipientName?: string;
-  filterSubRecipientNameRegex?: boolean;
+  filterRecipientIncludeSub?: boolean;
   acBoth?: boolean;
   acNone?: boolean;
 }
@@ -261,8 +260,7 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const fsdNum = fsd !== null ? parseInt(fsd, 10) : NaN;
   if (!isNaN(fsdNum) && fsdNum >= 2) result.filterSubcontract = String(Math.min(fsdNum, 9));
   else if (p.get('fsr') === '1') result.filterSubcontract = '2';
-  const fsn = p.get('fsn'); if (fsn !== null) result.filterSubRecipientName = fsn;
-  const fsnr = p.get('fsnr'); if (fsnr !== null) result.filterSubRecipientNameRegex = fsnr === '1';
+  const fnrs = p.get('fnrs'); if (fnrs !== null) result.filterRecipientIncludeSub = fnrs === '1';
   return result;
 }
 
@@ -390,10 +388,8 @@ export default function RealDataSankeyPage() {
   const [acNone,    setAcNone]    = useState(true);
   // 再委託フィルタ: 階層下限（'2'=あり、'3'=再々委託以深…）。'' = フィルタなし
   const [filterSubcontract, setFilterSubcontract] = useState('');
-  // 再委託先名フィルタ（再委託ブロックの支出先名に対する部分一致/正規表現）
-  const [filterSubRecipientName, setFilterSubRecipientName] = useState('');
-  const [filterSubRecipientNameRegex, setFilterSubRecipientNameRegex] = useState(false);
-  const [debouncedFilterSubRecipientName, setDebouncedFilterSubRecipientName] = useState('');
+  // 支出先名フィルタの「再委託先を含む」（OR判定・事業単位）
+  const [filterRecipientIncludeSub, setFilterRecipientIncludeSub] = useState(false);
   const isPidQuery = (q: string) => /^\d+$/.test(q);
   const meetsSearchMinLength = (q: string) => isPidQuery(q) ? q.length >= 1 : q.length >= 2;
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -493,8 +489,7 @@ export default function RealDataSankeyPage() {
     if (parsed.acBoth    !== undefined) setAcBoth(parsed.acBoth);
     if (parsed.acNone    !== undefined) setAcNone(parsed.acNone);
     if (parsed.filterSubcontract !== undefined) setFilterSubcontract(parsed.filterSubcontract);
-    if (parsed.filterSubRecipientName !== undefined) { setFilterSubRecipientName(parsed.filterSubRecipientName); setDebouncedFilterSubRecipientName(parsed.filterSubRecipientName); }
-    if (parsed.filterSubRecipientNameRegex !== undefined) setFilterSubRecipientNameRegex(parsed.filterSubRecipientNameRegex);
+    if (parsed.filterRecipientIncludeSub !== undefined) setFilterRecipientIncludeSub(parsed.filterRecipientIncludeSub);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
 
@@ -547,10 +542,7 @@ export default function RealDataSankeyPage() {
       setAcBoth(parsed.acBoth ?? true);
       setAcNone(parsed.acNone ?? true);
       setFilterSubcontract(parsed.filterSubcontract ?? '');
-      const restoredSubRecipientName = parsed.filterSubRecipientName ?? '';
-      setFilterSubRecipientName(restoredSubRecipientName);
-      setDebouncedFilterSubRecipientName(restoredSubRecipientName);
-      setFilterSubRecipientNameRegex(parsed.filterSubRecipientNameRegex ?? false);
+      setFilterRecipientIncludeSub(parsed.filterRecipientIncludeSub ?? false);
       if (parsed.selectedNodeId) pendingResetViewport.current = true;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -619,8 +611,7 @@ export default function RealDataSankeyPage() {
       p.set('ac', `${acGeneral ? 'g' : ''}${acSpecial ? 's' : ''}${acBoth ? 'b' : ''}${acNone ? 'n' : ''}`);
     }
     if (filterSubcontract) p.set('fsd', filterSubcontract);
-    if (filterSubRecipientName) p.set('fsn', filterSubRecipientName);
-    if (filterSubRecipientNameRegex) p.set('fsnr', '1');
+    if (filterRecipientName && filterRecipientIncludeSub) p.set('fnrs', '1');
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
     if (action === 'push') {
@@ -629,7 +620,7 @@ export default function RealDataSankeyPage() {
       window.history.replaceState(null, '', url);
     }
     scheduleExplorationRecord(qs);
-  }, [scheduleExplorationRecord, selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, searchQuery, showFilterPanel, filterProjectName, filterProjectNameRegex, filterRecipientName, filterRecipientNameRegex, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone, filterSubcontract, filterSubRecipientName, filterSubRecipientNameRegex]);
+  }, [scheduleExplorationRecord, selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, searchQuery, showFilterPanel, filterProjectName, filterProjectNameRegex, filterRecipientName, filterRecipientNameRegex, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone, filterSubcontract, filterRecipientIncludeSub]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -1095,7 +1086,7 @@ export default function RealDataSankeyPage() {
     pendingHistoryAction.current = 'replace';
     setRecipientOffset(0);
     setProjectOffset(0);
-  }, [filterMinistryNames, debouncedFilterProjectName, debouncedFilterRecipientName, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, filterSubcontract, debouncedFilterSubRecipientName]);
+  }, [filterMinistryNames, debouncedFilterProjectName, debouncedFilterRecipientName, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, filterSubcontract, filterRecipientIncludeSub]);
 
   // Sync URL when filter name query changes (separate from above to avoid double reset)
   const filterQueryInitRef = useRef(false);
@@ -1623,7 +1614,9 @@ export default function RealDataSankeyPage() {
       graphData.edges,
       {
         projectName: trimmedProjectName ? { query: trimmedProjectName, regex: filterProjectNameRegex } : null,
-        recipientName: trimmedRecipientName ? { query: trimmedRecipientName, regex: filterRecipientNameRegex } : null,
+        recipientName: trimmedRecipientName
+          ? { query: trimmedRecipientName, regex: filterRecipientNameRegex, ...(filterRecipientIncludeSub ? { includeSubcontract: true } : {}) }
+          : null,
         ministries: filterMinistryNames,
         budget: { min: parseAmountToYen(filterMinBudgetText), max: parseAmountToYen(filterMaxBudgetText) },
         spending: { min: parseAmountToYen(filterMinSpendingText), max: parseAmountToYen(filterMaxSpendingText) },
@@ -1631,12 +1624,11 @@ export default function RealDataSankeyPage() {
         subcontract: {
           hasRedelegation: false,
           minDepth: filterSubcontract ? parseInt(filterSubcontract, 10) : null,
-          recipientName: debouncedFilterSubRecipientName.trim() ? { query: debouncedFilterSubRecipientName.trim(), regex: filterSubRecipientNameRegex } : null,
         },
       },
       [selectedNodeId, pinnedProjectId],
     );
-  }, [graphData, selectedNodeId, pinnedProjectId, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone, filterSubcontract, debouncedFilterSubRecipientName, filterSubRecipientNameRegex]);
+  }, [graphData, selectedNodeId, pinnedProjectId, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone, filterSubcontract, filterRecipientIncludeSub]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -2469,10 +2461,6 @@ export default function RealDataSankeyPage() {
     return () => clearTimeout(timer);
   }, [filterRecipientName]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedFilterSubRecipientName(filterSubRecipientName), 150);
-    return () => clearTimeout(timer);
-  }, [filterSubRecipientName]);
 
   useEffect(() => { setSearchPage(0); setSearchCursorIndex(-1); }, [debouncedQuery]);
 
@@ -2561,8 +2549,7 @@ export default function RealDataSankeyPage() {
     filterMinBudgetText !== '' || filterMaxBudgetText !== '' ||
     filterMinSpendingText !== '' || filterMaxSpendingText !== '' ||
     !(acGeneral && acSpecial && acBoth && acNone) ||
-    filterSubcontract !== '' ||
-    filterSubRecipientName !== '';
+    filterSubcontract !== '';
 
   const clearAllFilters = useCallback(() => {
     pendingHistoryAction.current = 'push';
@@ -2582,9 +2569,7 @@ export default function RealDataSankeyPage() {
     setAcBoth(true);
     setAcNone(true);
     setFilterSubcontract('');
-    setFilterSubRecipientName('');
-    setDebouncedFilterSubRecipientName('');
-    setFilterSubRecipientNameRegex(false);
+    setFilterRecipientIncludeSub(false);
   }, []);
 
   const handleSearchSelect = useCallback((nodeId: string) => {
@@ -4658,6 +4643,17 @@ export default function RealDataSankeyPage() {
                     </div>
                   );
                 })}
+                {/* 支出先: 再委託先を含む（OR判定・事業単位） */}
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 44, cursor: 'pointer', userSelect: 'none' }}
+                  title="オンにすると、直接支出先または再委託先のどちらかに名前がマッチする事業を残します（支出先ノード自体は隠しません）">
+                  <input
+                    type="checkbox"
+                    checked={filterRecipientIncludeSub}
+                    onChange={e => { pendingHistoryAction.current = 'replace'; setFilterRecipientIncludeSub(e.target.checked); }}
+                    style={{ width: 12, height: 12, flexShrink: 0 }}
+                  />
+                  <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap' }}>再委託先を含む</span>
+                </label>
                 {/* 予算・支出 テキスト入力 */}
                 {([
                   { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
@@ -4727,42 +4723,6 @@ export default function RealDataSankeyPage() {
                           );
                         })}
                       </div>
-                    </div>
-                  );
-                })()}
-                {/* 再委託先名フィルタ（正規表現トグル付き。再委託ブロックの支出先名に対して） */}
-                {(() => {
-                  const trimmed = filterSubRecipientName.trim();
-                  let regexError = false;
-                  if (filterSubRecipientNameRegex && trimmed.length >= 1) {
-                    if (trimmed.length > SEARCH_REGEX_MAX_LEN) regexError = true;
-                    else { try { new RegExp(trimmed); } catch { regexError = true; } }
-                  }
-                  return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>再委託先</span>
-                      <div style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex' }}>
-                        <input
-                          type="text"
-                          value={filterSubRecipientName}
-                          onChange={e => setFilterSubRecipientName(e.target.value)}
-                          placeholder={filterSubRecipientNameRegex ? '正規表現' : '部分一致'}
-                          title="再委託ブロックの支出先名で絞り込み（直接支出先は上の「支出先」を使用）"
-                          style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${regexError ? '#e53935' : '#ddd'}`, borderRadius: 4, padding: '3px 28px 3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
-                        />
-                        <button
-                          type="button"
-                          title={filterSubRecipientNameRegex ? '正規表現をオフ' : '正規表現で絞り込み'}
-                          aria-label={filterSubRecipientNameRegex ? '正規表現をオフ' : '正規表現で絞り込み'}
-                          aria-pressed={filterSubRecipientNameRegex}
-                          onClick={() => setFilterSubRecipientNameRegex(v => !v)}
-                          style={{ position: 'absolute', right: 2, top: '50%', transform: 'translateY(-50%)', background: filterSubRecipientNameRegex ? '#1a73e8' : 'transparent', border: 'none', borderRadius: 3, cursor: 'pointer', color: filterSubRecipientNameRegex ? '#fff' : '#888', fontSize: META_FONT_PX, fontFamily: 'monospace', fontWeight: 'bold', lineHeight: 1, padding: '2px 4px' }}
-                        >.*</button>
-                      </div>
-                      {filterSubRecipientName && (
-                        <button type="button" onClick={() => setFilterSubRecipientName('')}
-                          style={{ fontSize: META_FONT_PX, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
-                      )}
                     </div>
                   );
                 })()}
