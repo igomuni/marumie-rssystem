@@ -989,7 +989,7 @@ export default function RealDataSankeyPage() {
   }, []);
 
   // チャットのレポート応答を発見メモとして保存（現在の図の状態に紐づく。
-  // 同一状態の既存メモは上書きされる = 最新のレポートが残る）。
+  // 常に新規エントリとして追記され、同一状態に複数のレポートを残せる）。
   // タイトルは Markdown の最初の見出し（無ければ先頭行）から自動抽出する
   const handleSaveReportMemo = useCallback(async (reportText: string) => {
     const snap = getExplorationSnapshot();
