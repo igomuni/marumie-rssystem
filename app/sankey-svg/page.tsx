@@ -4727,10 +4727,6 @@ export default function RealDataSankeyPage() {
                           );
                         })}
                       </div>
-                      {filterSubcontract && (
-                        <button type="button" onClick={() => { pendingHistoryAction.current = 'replace'; setFilterSubcontract(''); }}
-                          style={{ fontSize: META_FONT_PX, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
-                      )}
                     </div>
                   );
                 })()}
