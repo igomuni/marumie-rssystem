@@ -52,7 +52,10 @@ export function buildExplorationLabel(query: SankeyQuery): string {
 
   const projectName = nameLabel('事業名', query.filter?.projectName);
   if (projectName) parts.push(projectName);
-  const recipientName = nameLabel('支出先', query.filter?.recipientName);
+  const recipientName = nameLabel(
+    query.filter?.recipientName?.includeSubcontract ? '支出先/再委託先' : '支出先',
+    query.filter?.recipientName,
+  );
   if (recipientName) parts.push(recipientName);
 
   const budget = rangeLabel('予算', query.filter?.budget);
@@ -64,6 +67,11 @@ export function buildExplorationLabel(query: SankeyQuery): string {
   if (accounts && accounts.length > 0 && accounts.length < 4) {
     parts.push(accounts.map(a => ACCOUNT_LABELS[a]).join('/'));
   }
+
+  const sub = query.filter?.subcontract;
+  if (sub?.minDepth != null && sub.minDepth >= 2) parts.push(`再委託階層${sub.minDepth}以上`);
+  else if (sub?.hasRedelegation) parts.push('再委託あり');
+
 
   const hasFilter = parts.length > (query.year ? 1 : 0);
   if (!hasFilter) parts.push('フィルタなし');

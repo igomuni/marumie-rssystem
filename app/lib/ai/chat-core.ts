@@ -115,10 +115,11 @@ const SANKEY_QUERY_SCHEMA: Record<string, unknown> = {
         },
         recipientName: {
           type: 'object',
-          description: '支出先名フィルタ（構造は projectName と同じ）',
+          description: '支出先名フィルタ（構造は projectName と同じ）。includeSubcontract=true で再委託先名にもマッチ（OR・事業単位判定）',
           properties: {
             query: { type: 'string' },
             regex: { type: 'boolean' },
+            includeSubcontract: { type: 'boolean', description: 'true = 直接支出先名 または 再委託先名のどちらかにマッチする事業を残す（「支出先または再委託先が◯◯」の要求に使う）' },
           },
           required: ['query'],
         },
@@ -147,6 +148,14 @@ const SANKEY_QUERY_SCHEMA: Record<string, unknown> = {
           type: 'array',
           items: { type: 'string', enum: ['general', 'special', 'both', 'none'] },
           description: '含める会計区分（general=一般会計, special=特別会計, both=両方, none=区分情報なし）。省略=フィルタなし',
+        },
+        subcontract: {
+          type: 'object',
+          description: '再委託条件。「再委託がある事業だけ」「再々委託まである事業」のような要求に使う',
+          properties: {
+            hasRedelegation: { type: 'boolean', description: 'true = 再委託の記載がある事業（ブロック階層2以上）のみ残す' },
+            minDepth: { type: ['number', 'null'], description: 'ブロック階層数の下限（2=再委託あり、3=再々委託以深、…）。hasRedelegation より優先' },
+          },
         },
       },
     },
@@ -390,7 +399,7 @@ function buildSystemPrompt(year: SupportedYear, currentQuery: SankeyQuery | unde
     '',
     '### 共通',
     '- 要求がこのデータのフィルタ条件にもデータ質問にも該当しない場合（雑談・データにない切り口等）は、ツールを呼ばずに、解釈できなかった旨と指定できる条件・質問の例を日本語のテキストで返す',
-    '- **フィルタで表現できない絞り込み条件に注意**: SankeyQuery のフィルタは事業名・支出先名・府省庁・金額範囲・会計区分のみ。「再委託がある事業だけ」「品質スコアが低い事業だけ」のような条件はフィルタとして表現できない。この場合はツールで試行錯誤せず、フィルタにできない旨と代替（個別事業なら get_subcontract_chain 等で調べられること）をすぐテキストで案内する。ただし「使途が広報の事業だけ」のような使途起点の質問はフィルタ化はできないが search_spending で横断検索できるため、そちらに誘導する',
+    '- **フィルタで表現できない絞り込み条件に注意**: SankeyQuery のフィルタは事業名・支出先名・府省庁・金額範囲・会計区分・再委託（filter.subcontract: 有無・ブロック階層の下限）。「品質スコアが低い事業だけ」のような条件はフィルタとして表現できない。この場合はツールで試行錯誤せず、フィルタにできない旨と代替をすぐテキストで案内する。再委託の有無・深さは filter.subcontract でフィルタ化できる。filter.recipientName は既定で**直接支出先のみ**に掛かるが、includeSubcontract=true を付ければ「支出先または再委託先が◯◯」（OR・事業単位）を表現できる。再委託先だけを厳密に対象とする条件は表現できないため、その場合は includeSubcontract=true での近似か調査ツールへの誘導を提案する。「使途が広報の事業だけ」のような使途起点の質問も search_spending に誘導する',
     '- 条件が曖昧でも合理的な解釈が1つ選べるなら聞き返さずに進める（フィルタはユーザーが適用前に件数を確認できる）',
     '- 応答はすべて日本語で書く',
     '',

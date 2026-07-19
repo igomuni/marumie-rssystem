@@ -108,16 +108,35 @@ export function resolveSankeyQuery(input: SankeyQuery): { query: ResolvedSankeyQ
     return Math.max(min, Math.min(max, Math.floor(v)));
   };
 
+  const subcontract = (() => {
+    const s = input.filter?.subcontract;
+    const hasRedelegation = s?.hasRedelegation === true;
+    let minDepth: number | null = null;
+    if (s?.minDepth != null) {
+      if (typeof s.minDepth !== 'number' || !isFinite(s.minDepth) || Math.floor(s.minDepth) < 2) {
+        errors.push(`filter.subcontract.minDepth は2以上の整数で指定してください（2=再委託あり、3=再々委託以深。受領値: ${JSON.stringify(s.minDepth)}）`);
+      } else {
+        minDepth = Math.floor(s.minDepth);
+      }
+    }
+    return { hasRedelegation, minDepth };
+  })();
+
   const v = input.view;
   const query: ResolvedSankeyQuery = {
     year: year === '2025' ? '2025' : '2024',
     filter: {
       projectName: normalizeName('filter.projectName', input.filter?.projectName),
-      recipientName: normalizeName('filter.recipientName', input.filter?.recipientName),
+      recipientName: (() => {
+        const nf = normalizeName('filter.recipientName', input.filter?.recipientName);
+        if (nf === null) return null;
+        return input.filter?.recipientName?.includeSubcontract === true ? { ...nf, includeSubcontract: true } : nf;
+      })(),
       ministries: [...new Set((input.filter?.ministries ?? []).map(m => String(m).trim()).filter(Boolean))],
       budget: normalizeRange('filter.budget', input.filter?.budget),
       spending: normalizeRange('filter.spending', input.filter?.spending),
       accountCategories,
+      subcontract,
     },
     view: {
       topMinistry: clampInt(v?.topMinistry, SANKEY_QUERY_DEFAULTS.topMinistry, 1, TOP_MINISTRY_MAX),
@@ -152,7 +171,9 @@ export function hasActiveFilter(filter: ResolvedSankeyQuery['filter']): boolean 
     filter.ministries.length > 0 ||
     filter.budget.min != null || filter.budget.max != null ||
     filter.spending.min != null || filter.spending.max != null ||
-    filter.accountCategories.length < ACCOUNT_CATEGORY_KEYS.length
+    filter.accountCategories.length < ACCOUNT_CATEGORY_KEYS.length ||
+    filter.subcontract.hasRedelegation ||
+    filter.subcontract.minDepth != null
   );
 }
 
@@ -198,7 +219,10 @@ export function buildFilterExcludedIds(
   const hasMinistry = filter.ministries.length > 0;
   const accountSet = new Set(filter.accountCategories);
   const hasAccountFilter = accountSet.size < ACCOUNT_CATEGORY_KEYS.length;
-  if (!hasBudget && !hasSpending && !hasProjectName && !hasRecipientName && !hasMinistry && !hasAccountFilter) return null;
+  // 再委託フィルタ: 実効下限（hasRedelegation=2、minDepth 指定時はそちらを優先）
+  const subMinDepth = filter.subcontract.minDepth ?? (filter.subcontract.hasRedelegation ? 2 : null);
+  const hasSubcontract = subMinDepth != null;
+  if (!hasBudget && !hasSpending && !hasProjectName && !hasRecipientName && !hasMinistry && !hasAccountFilter && !hasSubcontract) return null;
 
   const selectedMinistrySet = new Set(filter.ministries);
   const minBudget = minBudgetYen ?? -Infinity;
@@ -215,6 +239,17 @@ export function buildFilterExcludedIds(
   };
   const matchesProject = filter.projectName ? buildMatcher(filter.projectName.query, filter.projectName.regex === true) : null;
   const matchesRecipient = filter.recipientName ? buildMatcher(filter.recipientName.query, filter.recipientName.regex === true) : null;
+  // 支出先名フィルタの「再委託先を含む」モード（OR判定・事業単位。支出先ノードは隠さない）
+  const recipientIncludeSub = filter.recipientName?.includeSubcontract === true;
+  let projectsWithDirectNameMatch: Set<string> | null = null;
+  if (matchesRecipient !== null && recipientIncludeSub) {
+    const recipientNameById = new Map(nodes.filter(n => n.type === 'recipient' && !n.aggregated).map(n => [n.id, n.name] as const));
+    projectsWithDirectNameMatch = new Set<string>();
+    for (const e of edges) {
+      const name = recipientNameById.get(e.target);
+      if (name !== undefined && matchesRecipient(name)) projectsWithDirectNameMatch.add(e.source);
+    }
+  }
 
   const excluded = new Set<string>();
   const spendingByPid = new Map(
@@ -231,15 +266,23 @@ export function buildFilterExcludedIds(
       const failProjectName = matchesProject !== null && !matchesProject(n.name);
       const failMinistry = hasMinistry && !selectedMinistrySet.has(n.ministry ?? '');
       const failAccount = hasAccountFilter && !accountSet.has((n.accountCategory ?? 'none') as AccountCategoryKey);
-      if (failBudget || failProjectName || failMinistry || failAccount) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
+      // subcontractDepth 未設定 = 再委託の記載なし（階層1相当）
+      const failSubcontract = hasSubcontract && (n.subcontractDepth ?? 1) < subMinDepth!;
+      // 「再委託先を含む」モード: 直接支出先 OR 再委託先のどちらかに名前マッチすれば残す
+      const failAnyRecipient = projectsWithDirectNameMatch !== null && !(
+        (sn != null && projectsWithDirectNameMatch.has(sn.id)) ||
+        (n.subcontractRecipients ?? []).some(matchesRecipient!)
+      );
+      if (failBudget || failProjectName || failMinistry || failAccount || failSubcontract || failAnyRecipient) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
     } else if (n.type === 'recipient') {
       const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
-      const failRecipientName = matchesRecipient !== null && !matchesRecipient(n.name);
+      // includeSubcontract モードでは支出先ノードを名前で隠さない（事業単位判定のみ）
+      const failRecipientName = matchesRecipient !== null && !recipientIncludeSub && !matchesRecipient(n.name);
       if (failSpending || failRecipientName) excluded.add(n.id);
     }
   }
   // Pass 2: 支出先・予算フィルタが有効な場合、残存支出先のない事業／孤立支出先を除外
-  if (hasSpending || hasBudget || hasMinistry || hasRecipientName) {
+  if (hasSpending || hasBudget || hasMinistry || hasRecipientName || hasSubcontract) {
     const projectsWithSurvivingRecipients = new Set(
       edges
         .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
@@ -697,6 +740,7 @@ export function sankeyQueryToUrlParams(query: ResolvedSankeyQuery): URLSearchPar
   if (filter.recipientName) {
     p.set('fnr', filter.recipientName.query);
     if (filter.recipientName.regex) p.set('fnrr', '1');
+    if (filter.recipientName.includeSubcontract) p.set('fnrs', '1');
   }
   for (const name of filter.ministries) p.append('fm', name);
   if (filter.budget.min != null) p.set('fmb', formatYenForUrlParam(filter.budget.min));
@@ -707,6 +751,9 @@ export function sankeyQueryToUrlParams(query: ResolvedSankeyQuery): URLSearchPar
   if (acSet.size < ACCOUNT_CATEGORY_KEYS.length) {
     p.set('ac', `${acSet.has('general') ? 'g' : ''}${acSet.has('special') ? 's' : ''}${acSet.has('both') ? 'b' : ''}${acSet.has('none') ? 'n' : ''}`);
   }
+  // 再委託条件: 深さ下限指定は fsd、有無のみは fsr
+  if (filter.subcontract.minDepth != null) p.set('fsd', String(filter.subcontract.minDepth));
+  else if (filter.subcontract.hasRedelegation) p.set('fsr', '1');
   return p;
 }
 
@@ -724,7 +771,10 @@ export function sankeyQueryFromUrlParams(p: URLSearchParams): SankeyQuery {
   const fnp = p.get('fnp');
   if (fnp) filter.projectName = { query: fnp, regex: p.get('fnpr') === '1' };
   const fnr = p.get('fnr');
-  if (fnr) filter.recipientName = { query: fnr, regex: p.get('fnrr') === '1' };
+  if (fnr) {
+    filter.recipientName = { query: fnr, regex: p.get('fnrr') === '1' };
+    if (p.get('fnrs') === '1') filter.recipientName.includeSubcontract = true;
+  }
   const fm = p.getAll('fm').map(v => v.trim()).filter(Boolean);
   if (fm.length > 0) filter.ministries = [...new Set(fm)];
   const amount = (key: string): number | null => {
@@ -744,6 +794,10 @@ export function sankeyQueryFromUrlParams(p: URLSearchParams): SankeyQuery {
     if (ac.includes('n')) cats.push('none');
     filter.accountCategories = cats;
   }
+  const fsd = p.get('fsd');
+  const fsdNum = fsd !== null ? parseInt(fsd, 10) : NaN;
+  if (!isNaN(fsdNum)) filter.subcontract = { minDepth: fsdNum };
+  else if (p.get('fsr') === '1') filter.subcontract = { hasRedelegation: true };
   if (Object.keys(filter).length > 0) query.filter = filter;
 
   const view: SankeyQuery['view'] = {};

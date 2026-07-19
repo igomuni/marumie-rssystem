@@ -33,11 +33,12 @@
   "year": "2024",
   "filter": {
     "projectName": { "query": "再エネ|再生可能エネルギー", "regex": true },
-    "recipientName": { "query": "電力", "regex": false },
+    "recipientName": { "query": "電力", "regex": false, "includeSubcontract": false },
     "ministries": ["経済産業省", "環境省"],
     "budget": { "min": 1000000000, "max": null },
     "spending": { "min": null, "max": null },
-    "accountCategories": ["general", "special", "both", "none"]
+    "accountCategories": ["general", "special", "both", "none"],
+    "subcontract": { "hasRedelegation": false, "minDepth": null }
   },
   "view": {
     "topMinistry": 37, "topProject": 50, "topRecipient": 50,
@@ -56,6 +57,8 @@
 - 金額は1円単位。名前フィルタの `regex: false` は大文字小文字無視の部分一致、`regex: true` は正規表現（フラグ `i`、128文字以内）
 - `ministries` は府省庁名の完全一致リスト
 - `accountCategories`: `general`（一般会計）/ `special`（特別会計）/ `both` / `none`（区分情報なし）。省略 or 全4種 = フィルタなし
+- `subcontract`: 再委託条件（Issue #270）。`hasRedelegation: true` = 再委託の記載がある事業（ブロック階層2以上）のみ。`minDepth` = 階層数の下限（2=再委託あり、3=再々委託以深…。指定時は `hasRedelegation` より優先）。判定はグラフの project ノードに埋め込まれた `subcontractDepth`（`subcontracts-{year}.json` の `maxDepth` 由来）で行う
+- `recipientName.includeSubcontract: true` = 支出先名フィルタを「直接支出先 **または** 再委託先」の OR 判定（事業単位）に拡張する。このとき支出先ノード自体は名前で隠さない（再委託側だけがマッチした事業の表示を保つため）。判定には project ノードの `subcontractRecipients`（再委託ブロックの支出先名一覧）を使う
 - 上限: `topMinistry` ≤ 37、`topProject` / `topRecipient` ≤ 300
 
 ### レスポンス
@@ -152,11 +155,12 @@
 | 短縮キー | SankeyQuery フィールド | 備考 |
 |---------|----------------------|------|
 | `fnp` / `fnpr` | `filter.projectName.query` / `.regex` | `fnpr=1` で正規表現 |
-| `fnr` / `fnrr` | `filter.recipientName.query` / `.regex` | 同上 |
+| `fnr` / `fnrr` / `fnrs` | `filter.recipientName.query` / `.regex` / `.includeSubcontract` | `fnrs=1` で再委託先も含む（OR・事業単位） |
 | `fm`（複数可） | `filter.ministries[]` | 府省庁名 |
 | `fmb` / `fxb` | `filter.budget.min` / `.max` | 金額テキスト（`10億`, `1兆` 等） |
 | `fms` / `fxs` | `filter.spending.min` / `.max` | 同上 |
 | `ac` | `filter.accountCategories` | `g`/`s`/`b`/`n` の連結（例: `ac=g`） |
+| `fsd` / `fsr` | `filter.subcontract.minDepth` / `.hasRedelegation` | `fsd=3` 等（階層下限）/ `fsr=1`（再委託あり） |
 | `tm` / `tp` / `tr` | `view.topMinistry` / `topProject` / `topRecipient` | |
 | `pp` / `pr` / `pm` | `view.pin.projectId` / `recipientId` / `ministryName` | `pp` はノードID形式（`project-spending-<pid>`）、`pr` は `r-<支出先名>` |
 | `fr` | `view.focusRelated` | `1` でON |

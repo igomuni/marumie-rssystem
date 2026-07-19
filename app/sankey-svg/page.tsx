@@ -90,6 +90,9 @@ interface SankeyUrlState {
   filterMaxSpendingText?: string;
   acGeneral?: boolean;
   acSpecial?: boolean;
+  /** 再委託フィルタ: 階層下限の文字列（'2'=あり〜'9'）。空/未指定 = フィルタなし */
+  filterSubcontract?: string;
+  filterRecipientIncludeSub?: boolean;
   acBoth?: boolean;
   acNone?: boolean;
 }
@@ -253,6 +256,12 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
     result.acBoth    = ac.includes('b');
     result.acNone    = ac.includes('n');
   }
+  const fsd = p.get('fsd');
+  const fsdNum = fsd !== null ? parseInt(fsd, 10) : NaN;
+  // 上限クランプはしない（スライダ最大 = データの maxSubcontractDepth。範囲外は clamp effect が是正）
+  if (!isNaN(fsdNum) && fsdNum >= 2) result.filterSubcontract = String(fsdNum);
+  else if (p.get('fsr') === '1') result.filterSubcontract = '2';
+  const fnrs = p.get('fnrs'); if (fnrs !== null) result.filterRecipientIncludeSub = fnrs === '1';
   return result;
 }
 
@@ -378,6 +387,10 @@ export default function RealDataSankeyPage() {
   const [acSpecial, setAcSpecial] = useState(true);
   const [acBoth,    setAcBoth]    = useState(true);
   const [acNone,    setAcNone]    = useState(true);
+  // 再委託フィルタ: 階層下限（'2'=あり、'3'=再々委託以深…）。'' = フィルタなし
+  const [filterSubcontract, setFilterSubcontract] = useState('');
+  // 支出先名フィルタの「再委託先を含む」（OR判定・事業単位）
+  const [filterRecipientIncludeSub, setFilterRecipientIncludeSub] = useState(false);
   const isPidQuery = (q: string) => /^\d+$/.test(q);
   const meetsSearchMinLength = (q: string) => isPidQuery(q) ? q.length >= 1 : q.length >= 2;
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -476,6 +489,8 @@ export default function RealDataSankeyPage() {
     if (parsed.acSpecial !== undefined) setAcSpecial(parsed.acSpecial);
     if (parsed.acBoth    !== undefined) setAcBoth(parsed.acBoth);
     if (parsed.acNone    !== undefined) setAcNone(parsed.acNone);
+    if (parsed.filterSubcontract !== undefined) setFilterSubcontract(parsed.filterSubcontract);
+    if (parsed.filterRecipientIncludeSub !== undefined) setFilterRecipientIncludeSub(parsed.filterRecipientIncludeSub);
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only init; state setters and refs are stable
   }, []);
 
@@ -527,6 +542,8 @@ export default function RealDataSankeyPage() {
       setAcSpecial(parsed.acSpecial ?? true);
       setAcBoth(parsed.acBoth ?? true);
       setAcNone(parsed.acNone ?? true);
+      setFilterSubcontract(parsed.filterSubcontract ?? '');
+      setFilterRecipientIncludeSub(parsed.filterRecipientIncludeSub ?? false);
       if (parsed.selectedNodeId) pendingResetViewport.current = true;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -594,6 +611,8 @@ export default function RealDataSankeyPage() {
     if (!acGeneral || !acSpecial || !acBoth || !acNone) {
       p.set('ac', `${acGeneral ? 'g' : ''}${acSpecial ? 's' : ''}${acBoth ? 'b' : ''}${acNone ? 'n' : ''}`);
     }
+    if (filterSubcontract) p.set('fsd', filterSubcontract);
+    if (filterRecipientName && filterRecipientIncludeSub) p.set('fnrs', '1');
     const qs = p.toString();
     const url = qs ? `?${qs}` : window.location.pathname;
     if (action === 'push') {
@@ -602,7 +621,7 @@ export default function RealDataSankeyPage() {
       window.history.replaceState(null, '', url);
     }
     scheduleExplorationRecord(qs);
-  }, [scheduleExplorationRecord, selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, searchQuery, showFilterPanel, filterProjectName, filterProjectNameRegex, filterRecipientName, filterRecipientNameRegex, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone]);
+  }, [scheduleExplorationRecord, selectedNodeId, pinnedProjectId, pinnedRecipientId, pinnedMinistryName, recipientOffset, offsetTarget, projectOffset, topMinistry, topProject, topRecipient, showLabels, showAggRecipient, showAggProject, projectSortBy, scaleBudgetToVisible, focusRelated, autoFocusRelated, filterOnMinistryClick, year, searchQuery, showFilterPanel, filterProjectName, filterProjectNameRegex, filterRecipientName, filterRecipientNameRegex, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, acGeneral, acSpecial, acBoth, acNone, filterSubcontract, filterRecipientIncludeSub]);
 
   // Keep zoomRef in sync for debounce callbacks
   // (declared before zoom state so the effect below can reference it)
@@ -1047,6 +1066,16 @@ export default function RealDataSankeyPage() {
   // 押し続けで増減するリピートボタン用ハンドラ（オフセットコントロール）。
   // TopN・フォントサイズのリピートは各コントロールコンポーネント側で同フックを使う。
   const offsetRepeat = useRepeatPress();
+  const subDepthRepeat = useRepeatPress();
+  // 再委託階層の数値直接入力（TopNSliderRow と同型のクリック編集）
+  const [subDepthEditing, setSubDepthEditing] = useState(false);
+  const [subDepthInput, setSubDepthInput] = useState('');
+  // 再委託スライダの上限 = グラフ中の最大ブロック階層数（データ無しなら5）
+  const maxSubcontractDepth = useMemo(() => {
+    let m = 5;
+    if (graphData) for (const n of graphData.nodes) if (n.subcontractDepth != null && n.subcontractDepth > m) m = n.subcontractDepth;
+    return m;
+  }, [graphData]);
   // URL履歴を replace で更新するためのマーク（子コンポーネントにも渡す）
   const markHistoryReplace = useCallback(() => { pendingHistoryAction.current = 'replace'; }, []);
 
@@ -1058,7 +1087,7 @@ export default function RealDataSankeyPage() {
     pendingHistoryAction.current = 'replace';
     setRecipientOffset(0);
     setProjectOffset(0);
-  }, [filterMinistryNames, debouncedFilterProjectName, debouncedFilterRecipientName, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText]);
+  }, [filterMinistryNames, debouncedFilterProjectName, debouncedFilterRecipientName, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, filterSubcontract, filterRecipientIncludeSub]);
 
   // Sync URL when filter name query changes (separate from above to avoid double reset)
   const filterQueryInitRef = useRef(false);
@@ -1586,15 +1615,21 @@ export default function RealDataSankeyPage() {
       graphData.edges,
       {
         projectName: trimmedProjectName ? { query: trimmedProjectName, regex: filterProjectNameRegex } : null,
-        recipientName: trimmedRecipientName ? { query: trimmedRecipientName, regex: filterRecipientNameRegex } : null,
+        recipientName: trimmedRecipientName
+          ? { query: trimmedRecipientName, regex: filterRecipientNameRegex, ...(filterRecipientIncludeSub ? { includeSubcontract: true } : {}) }
+          : null,
         ministries: filterMinistryNames,
         budget: { min: parseAmountToYen(filterMinBudgetText), max: parseAmountToYen(filterMaxBudgetText) },
         spending: { min: parseAmountToYen(filterMinSpendingText), max: parseAmountToYen(filterMaxSpendingText) },
         accountCategories,
+        subcontract: {
+          hasRedelegation: false,
+          minDepth: filterSubcontract ? parseInt(filterSubcontract, 10) : null,
+        },
       },
       [selectedNodeId, pinnedProjectId],
     );
-  }, [graphData, selectedNodeId, pinnedProjectId, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone]);
+  }, [graphData, selectedNodeId, pinnedProjectId, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone, filterSubcontract, filterRecipientIncludeSub]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -2427,6 +2462,19 @@ export default function RealDataSankeyPage() {
     return () => clearTimeout(timer);
   }, [filterRecipientName]);
 
+  // 年度切替・URL直接指定で filterSubcontract が現在データの最大階層を超えた場合、
+  // 表示（cur のクランプ）と実フィルタ（buildFilterExcludedIds は生値を受け取る）の
+  // 乖離を防ぐため state 側をクランプして永続化する。クランプ後は条件が false になり再発火しない。
+  // graphData 確定前は maxSubcontractDepth がデフォルト値（5）のため、ロード前にクランプしない
+  useEffect(() => {
+    if (!graphData) return;
+    if (filterSubcontract && parseInt(filterSubcontract, 10) > maxSubcontractDepth) {
+      pendingHistoryAction.current = 'replace';
+      setFilterSubcontract(String(maxSubcontractDepth));
+    }
+  }, [graphData, maxSubcontractDepth, filterSubcontract]);
+
+
   useEffect(() => { setSearchPage(0); setSearchCursorIndex(-1); }, [debouncedQuery]);
 
   const SEARCH_REGEX_MAX_LEN = 100;
@@ -2513,7 +2561,8 @@ export default function RealDataSankeyPage() {
     filterRecipientName !== '' ||
     filterMinBudgetText !== '' || filterMaxBudgetText !== '' ||
     filterMinSpendingText !== '' || filterMaxSpendingText !== '' ||
-    !(acGeneral && acSpecial && acBoth && acNone);
+    !(acGeneral && acSpecial && acBoth && acNone) ||
+    filterSubcontract !== '';
 
   const clearAllFilters = useCallback(() => {
     pendingHistoryAction.current = 'push';
@@ -2532,6 +2581,8 @@ export default function RealDataSankeyPage() {
     setAcSpecial(true);
     setAcBoth(true);
     setAcNone(true);
+    setFilterSubcontract('');
+    setFilterRecipientIncludeSub(false);
   }, []);
 
   const handleSearchSelect = useCallback((nodeId: string) => {
@@ -4605,6 +4656,65 @@ export default function RealDataSankeyPage() {
                     </div>
                   );
                 })}
+                {/* 支出先: 再委託先を含む（OR判定・事業単位）+ 再委託階層（スライダ + 数値 + リピートボタン。） */}
+                {(() => {
+                  const cur = filterSubcontract ? Math.min(parseInt(filterSubcontract, 10), maxSubcontractDepth) : 1;
+                  const commitDepth = (v: number) => {
+                    pendingHistoryAction.current = 'replace';
+                    const c = Math.max(1, Math.min(maxSubcontractDepth, Math.floor(v)));
+                    setFilterSubcontract(c <= 1 ? '' : String(c));
+                  };
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 44 }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', userSelect: 'none', flexShrink: 0 }}
+                        title="オンにすると、直接支出先または再委託先のどちらかに名前がマッチする事業を残します（支出先ノード自体は隠しません）">
+                        <input
+                          type="checkbox"
+                          checked={filterRecipientIncludeSub}
+                          onChange={e => { pendingHistoryAction.current = 'replace'; setFilterRecipientIncludeSub(e.target.checked); }}
+                          style={{ width: 12, height: 12, flexShrink: 0 }}
+                        />
+                        <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap' }}>再委託先</span>
+                      </label>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>階層</span>
+                      <input
+                        type="range" min={1} max={maxSubcontractDepth} step={1}
+                        value={cur}
+                        onChange={e => commitDepth(Number(e.target.value))}
+                        aria-label="再委託ブロック階層の下限"
+                        style={{ flex: 1, minWidth: 0, width: 0 }}
+                      />
+                      {subDepthEditing ? (
+                        <input type="number" autoFocus min={1} max={maxSubcontractDepth} step={1}
+                          value={subDepthInput}
+                          onChange={e => setSubDepthInput(e.target.value)}
+                          onBlur={() => { const v = Number(subDepthInput); if (!isNaN(v) && v >= 1) commitDepth(v); setSubDepthEditing(false); }}
+                          onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
+                          style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: CONTROL_SMALL_FONT_PX }}
+                        />
+                      ) : (
+                        <button type="button" onClick={() => { setSubDepthInput(String(cur)); setSubDepthEditing(true); }}
+                          title="クリックして直接入力"
+                          style={{ color: cur > 1 ? '#333' : '#999', fontSize: CONTROL_SMALL_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}
+                        >{cur}</button>
+                      )}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
+                        {([[1, 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '深くする'], [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '浅くする']] as const).map(([delta, path, title]) => {
+                          const step = () => commitDepth((filterSubcontract ? parseInt(filterSubcontract, 10) : 1) + delta);
+                          return (
+                            <button key={delta} type="button" title={title} aria-label={title}
+                              {...subDepthRepeat(step)}
+                              onClick={(e) => { if (e.detail === 0) step(); }}
+                              style={{ flex: 1, width: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none', touchAction: 'none' }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555"><path d={path} /></svg>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
                 {/* 予算・支出 テキスト入力 */}
                 {([
                   { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },

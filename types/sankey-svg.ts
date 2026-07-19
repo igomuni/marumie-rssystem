@@ -20,6 +20,17 @@ export interface RawNode {
   ministry?: string;
   /** 会計区分 — project-budget ノードのみ付与 */
   accountCategory?: 'general' | 'special' | 'both';
+  /**
+   * 再委託ブロック階層数 — project-budget ノードのみ、かつ2以上（再委託あり）の場合のみ付与。
+   * subcontracts-{year}.json の maxDepth 由来（2=再委託、3=再々委託…）。
+   * 未設定 = 再委託の記載なし（直接支出のみ）。フィルタ（filter.subcontract）が使う
+   */
+  subcontractDepth?: number;
+  /**
+   * 再委託ブロックの支出先名一覧 — project-budget ノードのみ・再委託ありの場合のみ付与。
+   * filter.subcontract.recipientName（再委託先名フィルタ）が参照する
+   */
+  subcontractRecipients?: string[];
   /** 予算・執行サマリ — project-budget ノードのみ付与 */
   budgetSummary?: BudgetSummary;
   /** 会計区分・歳出項目ごとの予算内訳 — project-budget ノードのみ付与 */
