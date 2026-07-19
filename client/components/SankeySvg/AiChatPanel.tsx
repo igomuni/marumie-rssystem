@@ -9,6 +9,8 @@
  */
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import type { SankeyChatProgressEvent, SankeyChatResult } from '@/types/sankey-ai-chat';
+import type { ChatSessionMeta } from '@/client/lib/ai/chat-history-store';
+import { relativeTime } from '@/client/lib/relative-time';
 import { formatYen } from '@/app/lib/sankey-svg-constants';
 import { CHAT_MARKDOWN_STYLES } from './chat-markdown-styles';
 
@@ -38,7 +40,17 @@ interface AiChatPanelProps {
   progress?: SankeyChatProgressEvent | null;
   onSend: (text: string) => void;
   onApplyResult: (result: SankeyChatResult) => void;
+  /** 新しい会話を開始する（以前の会話はセッション一覧に残る） */
   onClear: () => void;
+  /** 保存済みセッションの一覧（新しい順・IndexedDBのみ） */
+  sessions: ChatSessionMeta[];
+  activeSessionId: string | null;
+  onSwitchSession: (id: string) => void;
+  onDeleteSession: (id: string) => void;
+  /** セッションのタイトル変更（空文字は自動合成タイトルへ戻す） */
+  onRenameSession: (id: string, title: string) => void;
+  /** レポート応答を発見メモへ保存する（現在の図の状態に紐づく。page 側で exploration-store に委譲） */
+  onSaveReport: (reportText: string) => Promise<void>;
   /** 実効パネル幅（ビューポートクランプ済み）。isCompactWidth のときは無視して全幅 */
   width: number;
   isCompactWidth: boolean;
@@ -68,6 +80,15 @@ const EXAMPLE_PROMPTS = [
   'マイナンバー関連は去年から増えた？',
 ];
 
+/**
+ * レポート化ボタンの定型プロンプト。実験E2/E3（docs/tasks/20260719_0852 4節）で
+ * 「会話整形の1ターン + 出典付記」の品質が確認できた形をそのまま固定する。
+ * 会話に無い数値の捏造防止を明示するのが要点
+ */
+const REPORT_PROMPT =
+  'ここまでの調査をレポートとしてまとめてください。数値・事実はこの会話に出てきたものだけを使い、会話に無い数値は書かないでください。' +
+  '最後に「再現情報」として、適用したフィルタ条件（SankeyQuery JSON）と、主要な数値がどのツール・条件から得られたかを付記してください。';
+
 const PANEL_Z_INDEX = 210; // 右上の設定ボタン(200)より前面。ScoreDetailDialog は body へ portal されるため影響しない
 
 /**
@@ -96,11 +117,53 @@ function progressLabel(progress: SankeyChatProgressEvent | null | undefined): st
 
 export function AiChatPanel({
   open, onToggle, messages, sending, progress, onSend, onApplyResult, onClear,
+  sessions, activeSessionId, onSwitchSession, onDeleteSession, onRenameSession, onSaveReport,
   width, isCompactWidth, onResizeStart, isResizing, onResetWidth,
   mode, byokModel, defaultByokModel, onSaveByok, onDeleteByok, onTestByok,
 }: AiChatPanelProps) {
   const [input, setInput] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
+  // assistant メッセージのコピー・メモ保存の完了表示（メッセージindexで管理）
+  const [copiedMsgIndex, setCopiedMsgIndex] = useState<number | null>(null);
+  const [savedMsgIndex, setSavedMsgIndex] = useState<number | null>(null);
+
+  const handleCopyMessage = async (index: number, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMsgIndex(index);
+      setTimeout(() => setCopiedMsgIndex(prev => (prev === index ? null : prev)), 1500);
+    } catch {
+      // クリップボード不可の環境では何もしない
+    }
+  };
+
+  const handleSaveReport = async (index: number, text: string) => {
+    try {
+      await onSaveReport(text);
+      setSavedMsgIndex(index);
+      setTimeout(() => setSavedMsgIndex(prev => (prev === index ? null : prev)), 1500);
+    } catch {
+      // 保存失敗は表示を変えない（IndexedDB 非対応等）
+    }
+  };
+  // 会話セッション一覧ドロップダウン
+  const [showSessions, setShowSessions] = useState(false);
+  const sessionsRef = useRef<HTMLDivElement>(null);
+  // セッションタイトルのインライン編集
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [sessionTitleInput, setSessionTitleInput] = useState('');
+  const commitSessionTitle = (id: string) => {
+    onRenameSession(id, sessionTitleInput);
+    setEditingSessionId(null);
+  };
+  useEffect(() => {
+    if (!showSessions) return;
+    const onMouseDown = (e: MouseEvent) => {
+      if (sessionsRef.current && !sessionsRef.current.contains(e.target as Node)) setShowSessions(false);
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [showSessions]);
   // 設定ビュー（キー登録）。モード未設定でパネルを開いた場合は最初から設定を見せる
   const [showSettings, setShowSettings] = useState(false);
   const [keyInput, setKeyInput] = useState('');
@@ -262,6 +325,76 @@ export function AiChatPanel({
             >{mode === 'byok' ? '自分のキー' : 'サイト提供'}</span>
           )}
         </span>
+        {/* 会話セッション一覧 */}
+        <div ref={sessionsRef} style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowSessions(v => !v)}
+            title="会話の一覧"
+            aria-label="会話の一覧"
+            style={{ background: showSessions ? '#eef3ff' : 'transparent', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer', padding: '3px 6px', display: 'flex', alignItems: 'center' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#666"><path d="M280-240q-17 0-28.5-11.5T240-280v-80h520v-360h80q17 0 28.5 11.5T880-680v600L720-240H280Zm-40-160L80-240v-560q0-17 11.5-28.5T120-840h520q17 0 28.5 11.5T680-800v360q0 17-11.5 28.5T640-400H240Z"/></svg>
+          </button>
+          {showSessions && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 6px)', right: 0, width: 280, maxHeight: '50vh', overflowY: 'auto',
+              background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)', zIndex: 5,
+            }}>
+              <button
+                onClick={() => { onClear(); setShowSessions(false); }}
+                style={{ width: '100%', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#1a73e8', background: '#f5f8ff', border: 'none', borderBottom: '1px solid #eee', padding: '8px 10px', cursor: 'pointer' }}
+              >+ 新しい会話</button>
+              {sessions.length === 0 && (
+                <div style={{ padding: '10px', fontSize: 11.5, color: '#999' }}>保存された会話はまだありません</div>
+              )}
+              {sessions.map(s => (
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', borderBottom: '1px solid #f4f4f4', background: s.id === activeSessionId ? '#f5f8ff' : 'transparent' }}>
+                  {editingSessionId === s.id ? (
+                    <input
+                      type="text"
+                      value={sessionTitleInput}
+                      autoFocus
+                      onChange={e => setSessionTitleInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.nativeEvent.isComposing) commitSessionTitle(s.id);
+                        if (e.key === 'Escape') { e.stopPropagation(); setEditingSessionId(null); }
+                      }}
+                      onBlur={() => commitSessionTitle(s.id)}
+                      placeholder="タイトル（空にすると自動）"
+                      style={{ flex: 1, minWidth: 0, fontSize: 12, padding: '4px 8px', border: '1px solid #1a73e8', borderRadius: 4, outline: 'none', fontFamily: 'inherit', color: '#333', background: '#fff' }}
+                    />
+                  ) : (
+                    <button
+                      onClick={() => { onSwitchSession(s.id); setShowSessions(false); }}
+                      disabled={sending}
+                      title={s.title}
+                      style={{ flex: 1, minWidth: 0, textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: sending ? 'default' : 'pointer' }}
+                    >
+                      <div style={{ fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
+                      <div style={{ fontSize: 10.5, color: '#999' }}>{relativeTime(s.ts)}・{s.messageCount}件</div>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setEditingSessionId(s.id); setSessionTitleInput(s.title); }}
+                    disabled={sending}
+                    title="タイトルを変更"
+                    aria-label="タイトルを変更"
+                    style={{ background: 'transparent', border: 'none', padding: 2, cursor: sending ? 'default' : 'pointer', color: '#888', fontSize: 11, flexShrink: 0 }}
+                  >変更</button>
+                  <button
+                    onClick={() => onDeleteSession(s.id)}
+                    disabled={sending}
+                    title="この会話を削除"
+                    aria-label="この会話を削除"
+                    style={{ background: 'transparent', border: 'none', padding: 2, cursor: sending ? 'default' : 'pointer', color: '#c66', fontSize: 11, flexShrink: 0 }}
+                  >削除</button>
+                </div>
+              ))}
+              <div style={{ padding: '6px 10px', fontSize: 10.5, color: '#aaa' }}>会話はこのブラウザにのみ保存されます</div>
+            </div>
+          )}
+        </div>
         <button
           onClick={() => (showSettings ? setShowSettings(false) : openSettings())}
           title="APIキー設定"
@@ -274,7 +407,7 @@ export function AiChatPanel({
           <button
             onClick={onClear}
             disabled={sending}
-            title="会話をクリア"
+            title="新しい会話を開始（この会話は一覧に残ります）"
             style={{ fontSize: 11, color: '#888', background: 'transparent', border: '1px solid #ddd', borderRadius: 4, padding: '3px 8px', cursor: sending ? 'default' : 'pointer' }}
           >クリア</button>
         )}
@@ -418,6 +551,20 @@ export function AiChatPanel({
                 )
                 : m.content}
             </div>
+            {m.role === 'assistant' && !m.isError && (
+              <div style={{ display: 'flex', gap: 10, marginTop: 3, paddingLeft: 4 }}>
+                <button
+                  onClick={() => handleCopyMessage(i, m.content)}
+                  title="この応答をMarkdownでコピー"
+                  style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#999', fontSize: 10.5, textDecoration: 'underline' }}
+                >{copiedMsgIndex === i ? 'コピーしました' : 'コピー'}</button>
+                <button
+                  onClick={() => handleSaveReport(i, m.content)}
+                  title="この応答を発見メモ（履歴パネル）に保存"
+                  style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#999', fontSize: 10.5, textDecoration: 'underline' }}
+                >{savedMsgIndex === i ? '保存しました' : 'メモに保存'}</button>
+              </div>
+            )}
             {m.result && (
               <div style={{ marginTop: 6, maxWidth: '88%', minWidth: '70%', border: '1px solid #dbe6ff', borderRadius: 8, background: '#f9fbff', padding: '8px 11px', fontSize: 12 }}>
                 {m.result.interpretation && (
@@ -468,6 +615,24 @@ export function AiChatPanel({
           </div>
         )}
       </div>
+      )}
+
+      {/* レポート化ボタン — 調査（assistant応答あり）が進んだ会話でのみ表示 */}
+      {!showSettings && mode !== null && !sending && messages.some(m => m.role === 'assistant' && !m.isError) && (
+        <div style={{ flexShrink: 0, padding: '6px 10px 0' }}>
+          <button
+            onClick={() => onSend(REPORT_PROMPT)}
+            title="ここまでの会話を、出典付きのレポートにまとめます"
+            style={{
+              width: '100%', fontSize: 11.5, color: '#1a73e8', background: '#f5f8ff',
+              border: '1px solid #dbe6ff', borderRadius: 6, padding: '6px 10px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="13" width="13" viewBox="0 -960 960 960" fill="#1a73e8"><path d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520Z"/></svg>
+            この会話をレポートにまとめる
+          </button>
+        </div>
       )}
 
       {/* 入力欄 */}
