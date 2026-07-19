@@ -119,7 +119,7 @@ export function resolveSankeyQuery(input: SankeyQuery): { query: ResolvedSankeyQ
         minDepth = Math.floor(s.minDepth);
       }
     }
-    return { hasRedelegation, minDepth };
+    return { hasRedelegation, minDepth, recipientName: normalizeName('filter.subcontract.recipientName', s?.recipientName) };
   })();
 
   const v = input.view;
@@ -169,7 +169,8 @@ export function hasActiveFilter(filter: ResolvedSankeyQuery['filter']): boolean 
     filter.spending.min != null || filter.spending.max != null ||
     filter.accountCategories.length < ACCOUNT_CATEGORY_KEYS.length ||
     filter.subcontract.hasRedelegation ||
-    filter.subcontract.minDepth != null
+    filter.subcontract.minDepth != null ||
+    filter.subcontract.recipientName != null
   );
 }
 
@@ -215,9 +216,10 @@ export function buildFilterExcludedIds(
   const hasMinistry = filter.ministries.length > 0;
   const accountSet = new Set(filter.accountCategories);
   const hasAccountFilter = accountSet.size < ACCOUNT_CATEGORY_KEYS.length;
-  // 再委託フィルタ: 実効下限（hasRedelegation=2、minDepth 指定時はそちらを優先）
+  // 再委託フィルタ: 実効下限（hasRedelegation=2、minDepth 指定時はそちらを優先）+ 再委託先名
   const subMinDepth = filter.subcontract.minDepth ?? (filter.subcontract.hasRedelegation ? 2 : null);
-  const hasSubcontract = subMinDepth != null;
+  const subRecipientNf = filter.subcontract.recipientName;
+  const hasSubcontract = subMinDepth != null || subRecipientNf != null;
   if (!hasBudget && !hasSpending && !hasProjectName && !hasRecipientName && !hasMinistry && !hasAccountFilter && !hasSubcontract) return null;
 
   const selectedMinistrySet = new Set(filter.ministries);
@@ -235,6 +237,7 @@ export function buildFilterExcludedIds(
   };
   const matchesProject = filter.projectName ? buildMatcher(filter.projectName.query, filter.projectName.regex === true) : null;
   const matchesRecipient = filter.recipientName ? buildMatcher(filter.recipientName.query, filter.recipientName.regex === true) : null;
+  const matchesSubRecipient = subRecipientNf ? buildMatcher(subRecipientNf.query, subRecipientNf.regex === true) : null;
 
   const excluded = new Set<string>();
   const spendingByPid = new Map(
@@ -252,7 +255,9 @@ export function buildFilterExcludedIds(
       const failMinistry = hasMinistry && !selectedMinistrySet.has(n.ministry ?? '');
       const failAccount = hasAccountFilter && !accountSet.has((n.accountCategory ?? 'none') as AccountCategoryKey);
       // subcontractDepth 未設定 = 再委託の記載なし（階層1相当）
-      const failSubcontract = hasSubcontract && (n.subcontractDepth ?? 1) < subMinDepth!;
+      const failSubDepth = subMinDepth != null && (n.subcontractDepth ?? 1) < subMinDepth;
+      const failSubRecipient = matchesSubRecipient !== null && !(n.subcontractRecipients ?? []).some(matchesSubRecipient);
+      const failSubcontract = failSubDepth || failSubRecipient;
       if (failBudget || failProjectName || failMinistry || failAccount || failSubcontract) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
     } else if (n.type === 'recipient') {
       const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
@@ -729,9 +734,13 @@ export function sankeyQueryToUrlParams(query: ResolvedSankeyQuery): URLSearchPar
   if (acSet.size < ACCOUNT_CATEGORY_KEYS.length) {
     p.set('ac', `${acSet.has('general') ? 'g' : ''}${acSet.has('special') ? 's' : ''}${acSet.has('both') ? 'b' : ''}${acSet.has('none') ? 'n' : ''}`);
   }
-  // 再委託条件: 深さ下限指定は fsd、有無のみは fsr
+  // 再委託条件: 深さ下限指定は fsd、有無のみは fsr、再委託先名は fsn/fsnr
   if (filter.subcontract.minDepth != null) p.set('fsd', String(filter.subcontract.minDepth));
   else if (filter.subcontract.hasRedelegation) p.set('fsr', '1');
+  if (filter.subcontract.recipientName) {
+    p.set('fsn', filter.subcontract.recipientName.query);
+    if (filter.subcontract.recipientName.regex) p.set('fsnr', '1');
+  }
   return p;
 }
 
@@ -771,8 +780,12 @@ export function sankeyQueryFromUrlParams(p: URLSearchParams): SankeyQuery {
   }
   const fsd = p.get('fsd');
   const fsdNum = fsd !== null ? parseInt(fsd, 10) : NaN;
-  if (!isNaN(fsdNum)) filter.subcontract = { minDepth: fsdNum };
-  else if (p.get('fsr') === '1') filter.subcontract = { hasRedelegation: true };
+  const subcontract: NonNullable<SankeyQuery['filter']>['subcontract'] = {};
+  if (!isNaN(fsdNum)) subcontract.minDepth = fsdNum;
+  else if (p.get('fsr') === '1') subcontract.hasRedelegation = true;
+  const fsn = p.get('fsn');
+  if (fsn) subcontract.recipientName = { query: fsn, regex: p.get('fsnr') === '1' };
+  if (Object.keys(subcontract).length > 0) filter.subcontract = subcontract;
   if (Object.keys(filter).length > 0) query.filter = filter;
 
   const view: SankeyQuery['view'] = {};

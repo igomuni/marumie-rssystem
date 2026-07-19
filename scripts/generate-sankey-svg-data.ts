@@ -70,6 +70,7 @@ interface SankeyNode {
   budgetSummary?: BudgetSummary; // project-budget のみ
   budgetBreakdown?: BudgetBreakdownItem[]; // project-budget のみ
   subcontractDepth?: number; // project-budget のみ・再委託あり（階層2以上）のみ付与
+  subcontractRecipients?: string[]; // project-budget のみ・再委託ブロックの支出先名（filter.subcontract.recipientName 用）
 
   representativeCorporateNumber?: string; // recipient のみ: 内包する有効法人番号のうち最大金額のもの
   corporateNumberCount?: number; // recipient のみ: 内包する相異なる有効法人番号の件数
@@ -100,27 +101,44 @@ interface SankeyGraphData {
 
 // ─── CSV読み込み ──────────────────────────────────────────
 
+interface SubcontractInfo {
+  /** 再委託ブロック階層数（maxDepth。2以上のみ） */
+  depth: number;
+  /** 再委託ブロックの支出先名（重複排除。filter.subcontract.recipientName 用） */
+  names: string[];
+}
+
 /**
- * subcontracts-{YEAR}.json から pid → 再委託ブロック階層数（maxDepth）を読む。
- * 2以上（=再委託あり）のみを保持する（1=直接のみはノード未付与で表現し、サイズ増を避ける）。
+ * subcontracts-{YEAR}.json から pid → 再委託情報（階層数・再委託先名）を読む。
+ * 階層2以上（=再委託あり）のみを保持する（1=直接のみはノード未付与で表現し、サイズ増を避ける）。
  * raw が無ければ .gz をその場で展開。どちらも無ければ警告して空マップ（付与スキップ）。
  */
-function loadSubcontractDepths(): Map<number, number> {
+function loadSubcontractInfo(): Map<number, SubcontractInfo> {
   const base = path.join(__dirname, '../public/data', `subcontracts-${YEAR}.json`);
   let raw: string | null = null;
   if (fs.existsSync(base)) raw = fs.readFileSync(base, 'utf-8');
   else if (fs.existsSync(`${base}.gz`)) raw = zlib.gunzipSync(fs.readFileSync(`${base}.gz`)).toString('utf-8');
-  const map = new Map<number, number>();
+  const map = new Map<number, SubcontractInfo>();
   if (raw === null) {
     console.warn(`  ⚠ subcontracts-${YEAR}.json(.gz) が見つかりません。subcontractDepth は未付与になります（npm run generate-subcontracts を先に実行してください）`);
     return map;
   }
-  const index = JSON.parse(raw) as Record<string, { maxDepth?: number }>;
+  const index = JSON.parse(raw) as Record<string, { maxDepth?: number; blocks?: { originKind?: string; recipients?: { name?: string }[] }[] }>;
+  let nameTotal = 0;
   for (const [pid, g] of Object.entries(index)) {
     const n = parseInt(pid, 10);
-    if (!isNaN(n) && typeof g.maxDepth === 'number' && g.maxDepth >= 2) map.set(n, g.maxDepth);
+    if (isNaN(n) || typeof g.maxDepth !== 'number' || g.maxDepth < 2) continue;
+    const names = new Set<string>();
+    for (const b of g.blocks ?? []) {
+      if (b.originKind !== 'subcontract') continue;
+      for (const r of b.recipients ?? []) {
+        if (r.name) names.add(r.name);
+      }
+    }
+    nameTotal += names.size;
+    map.set(n, { depth: g.maxDepth, names: [...names] });
   }
-  console.log(`  再委託階層データ: ${map.size.toLocaleString()} 事業（階層2以上）`);
+  console.log(`  再委託階層データ: ${map.size.toLocaleString()} 事業（階層2以上）/ 再委託先名 ${nameTotal.toLocaleString()} 件`);
   return map;
 }
 
@@ -269,7 +287,7 @@ function main() {
   // 3.5. 再委託ブロック階層数（subcontracts-{YEAR}.json の maxDepth）
   // filter.subcontract（Issue #270）用に project-budget ノードへ埋め込む。
   // 生成順の依存: 先に npm run generate-subcontracts を実行しておくこと（無ければ警告して未付与）
-  const subcontractDepthMap = loadSubcontractDepths();
+  const subcontractInfoMap = loadSubcontractInfo();
 
   // 4. 再委託ブロックセットの構築（5-2 CSV）
   // 判定方針: 「担当組織からの支出=FALSE」は明示的な再委託（間接）→ 除外
@@ -436,7 +454,10 @@ function main() {
       ...(ac !== undefined ? { accountCategory: ac } : {}),
       ...(budget !== undefined ? { budgetSummary: budget } : {}),
       ...(budgetBreakdownMap.has(pid) ? { budgetBreakdown: budgetBreakdownMap.get(pid) } : {}),
-      ...(subcontractDepthMap.has(pid) ? { subcontractDepth: subcontractDepthMap.get(pid) } : {}),
+      ...(subcontractInfoMap.has(pid) ? {
+        subcontractDepth: subcontractInfoMap.get(pid)!.depth,
+        ...(subcontractInfoMap.get(pid)!.names.length > 0 ? { subcontractRecipients: subcontractInfoMap.get(pid)!.names } : {}),
+      } : {}),
     });
 
     // 事業(支出)ノード — 直接支出額のみ

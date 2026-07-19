@@ -18,7 +18,7 @@ describe('resolveSankeyQuery', () => {
       filter: { subcontract: { hasRedelegation: true, minDepth: 3.7 } },
     });
     expect(errors).toEqual([]);
-    expect(query.filter.subcontract).toEqual({ hasRedelegation: true, minDepth: 3 });
+    expect(query.filter.subcontract).toEqual({ hasRedelegation: true, minDepth: 3, recipientName: null });
   });
 
   it('reports an error for subcontract.minDepth below 2', () => {
@@ -280,7 +280,7 @@ describe('buildFilterExcludedIds (subcontract)', () => {
   });
 
   it('hasRedelegation keeps only projects with depth >= 2 (missing depth = no redelegation)', () => {
-    const filter = { ...baseFilter(), subcontract: { hasRedelegation: true, minDepth: null } };
+    const filter = { ...baseFilter(), subcontract: { hasRedelegation: true, minDepth: null, recipientName: null } };
     const excluded = buildFilterExcludedIds(nodes, edges, filter)!;
     expect(excluded.has('project-budget-2')).toBe(true);
     expect(excluded.has('project-spending-2')).toBe(true);
@@ -288,12 +288,22 @@ describe('buildFilterExcludedIds (subcontract)', () => {
   });
 
   it('minDepth takes precedence and excludes shallower projects', () => {
-    const filter = { ...baseFilter(), subcontract: { hasRedelegation: false, minDepth: 4 } };
+    const filter = { ...baseFilter(), subcontract: { hasRedelegation: false, minDepth: 4, recipientName: null } };
     const excluded = buildFilterExcludedIds(nodes, edges, filter)!;
     // 事業1（階層3）も 4 未満なので除外され、A省もカスケード除外される
     expect(excluded.has('project-budget-1')).toBe(true);
     expect(excluded.has('project-budget-2')).toBe(true);
     expect(excluded.has('ministry-A')).toBe(true);
+  });
+
+  it('subcontract.recipientName keeps only projects whose chain contains a matching name', () => {
+    const withNames = nodes.map(n => n.id === 'project-budget-1'
+      ? { ...n, subcontractRecipients: ['株式会社WELMA', 'コスモス商事株式会社'] }
+      : n);
+    const filter = { ...baseFilter(), subcontract: { hasRedelegation: false, minDepth: null, recipientName: { query: 'welma', regex: false } } };
+    const excluded = buildFilterExcludedIds(withNames, edges, filter)!;
+    expect(excluded.has('project-budget-1')).toBe(false);
+    expect(excluded.has('project-budget-2')).toBe(true); // 名前データなし = 不一致
   });
 
   it('URL round trip preserves subcontract (fsd / fsr)', () => {
@@ -306,5 +316,11 @@ describe('buildFilterExcludedIds (subcontract)', () => {
     const p2 = sankeyQueryToUrlParams(withHas);
     expect(p2.get('fsr')).toBe('1');
     expect(sankeyQueryFromUrlParams(p2).filter?.subcontract).toEqual({ hasRedelegation: true });
+
+    const withName = resolveSankeyQuery({ filter: { subcontract: { recipientName: { query: 'NEDO', regex: true } } } }).query;
+    const p3 = sankeyQueryToUrlParams(withName);
+    expect(p3.get('fsn')).toBe('NEDO');
+    expect(p3.get('fsnr')).toBe('1');
+    expect(sankeyQueryFromUrlParams(p3).filter?.subcontract).toEqual({ recipientName: { query: 'NEDO', regex: true } });
   });
 });

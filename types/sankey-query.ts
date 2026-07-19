@@ -33,6 +33,8 @@ export interface SankeySubcontractFilter {
   hasRedelegation?: boolean;
   /** ブロック階層数の下限（2=再委託あり、3=再々委託以深…）。指定時は記載なし事業を除外 */
   minDepth?: number | null;
+  /** 再委託先名フィルタ（再委託ブロックの支出先名に対する部分一致/正規表現） */
+  recipientName?: SankeyNameFilter;
 }
 
 /** プレフィルタ条件（どのノードを残すか）。条件は AND で結合される */
@@ -92,7 +94,7 @@ export interface ResolvedSankeyQuery {
     budget: { min: number | null; max: number | null };
     spending: { min: number | null; max: number | null };
     accountCategories: AccountCategoryKey[];
-    subcontract: { hasRedelegation: boolean; minDepth: number | null };
+    subcontract: { hasRedelegation: boolean; minDepth: number | null; recipientName: SankeyNameFilter | null };
   };
   view: {
     topMinistry: number;
