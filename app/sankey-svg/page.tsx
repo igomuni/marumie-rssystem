@@ -32,6 +32,7 @@ import {
   saveChatSession,
   deleteChatSession,
   deleteAllChatSessions,
+  renameChatSession,
   type ChatSessionMeta,
 } from '@/client/lib/ai/chat-history-store';
 import { ExplorationHistory } from '@/client/components/SankeySvg/ExplorationHistory';
@@ -783,6 +784,11 @@ export default function RealDataSankeyPage() {
     setChatSessionId(session.id);
     setAiChatMessages(session.messages);
     setAiChatProgress(null);
+  }, []);
+
+  const handleRenameChatSession = useCallback(async (id: string, title: string) => {
+    await renameChatSession(id, title);
+    setChatSessions(await listChatSessions());
   }, []);
 
   const handleDeleteChatSession = useCallback(async (id: string) => {
@@ -5050,6 +5056,7 @@ export default function RealDataSankeyPage() {
         activeSessionId={chatSessionId}
         onSwitchSession={handleSwitchChatSession}
         onDeleteSession={handleDeleteChatSession}
+        onRenameSession={handleRenameChatSession}
         onSaveReport={handleSaveReportMemo}
         width={effectiveAiPanelWidth}
         isCompactWidth={isCompactWidth}

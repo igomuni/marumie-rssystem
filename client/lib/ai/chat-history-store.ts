@@ -26,6 +26,8 @@ const TITLE_MAX = 30;
 export interface ChatSession {
   id: string;
   title: string;
+  /** true ならユーザーが手動でタイトルを変更済み（保存時の自動再合成で上書きしない） */
+  titleEdited?: boolean;
   messages: AiChatUiMessage[];
   /** 最終更新時刻（epoch ms） */
   ts: number;
@@ -123,9 +125,12 @@ export async function loadChatSession(id: string): Promise<ChatSession | null> {
 export async function saveChatSession(id: string, messages: AiChatUiMessage[]): Promise<void> {
   try {
     await withStore('readwrite', async store => {
+      // 手動変更済みタイトルは自動再合成で上書きしない
+      const existing = await requestAsPromise(store.get(id) as IDBRequest<ChatSession | undefined>);
       store.put({
         id,
-        title: buildSessionTitle(messages),
+        title: existing?.titleEdited ? existing.title : buildSessionTitle(messages),
+        ...(existing?.titleEdited ? { titleEdited: true } : {}),
         messages: messages.slice(-MAX_SAVED_MESSAGES),
         ts: Date.now(),
       } satisfies ChatSession);
@@ -142,6 +147,18 @@ export async function saveChatSession(id: string, messages: AiChatUiMessage[]): 
 
 export async function deleteChatSession(id: string): Promise<void> {
   await withStore('readwrite', store => { store.delete(id); });
+}
+
+/** セッションのタイトルを変更する（以後の保存で自動再合成しない）。空文字は自動合成へ戻す */
+export async function renameChatSession(id: string, title: string): Promise<void> {
+  await withStore('readwrite', async store => {
+    const session = await requestAsPromise(store.get(id) as IDBRequest<ChatSession | undefined>);
+    if (!session) return;
+    const trimmed = title.trim();
+    store.put(trimmed
+      ? { ...session, title: trimmed, titleEdited: true }
+      : { ...session, title: buildSessionTitle(session.messages), titleEdited: undefined });
+  });
 }
 
 /** 全セッション削除（BYOKキー削除時のプライバシー境界維持に使う） */

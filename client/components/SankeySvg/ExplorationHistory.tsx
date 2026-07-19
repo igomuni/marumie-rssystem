@@ -18,6 +18,7 @@ import {
   saveMemo,
   deleteEntry,
   clearAutoHistory,
+  updateEntryTitle,
   type ExplorationEntry,
 } from '@/client/lib/exploration-store';
 import { relativeTime } from '@/client/lib/relative-time';
@@ -38,6 +39,15 @@ export function ExplorationHistory({ getSnapshot, onApply, fontPx }: Exploration
   const [copiedId, setCopiedId] = useState<string | null>(null);
   // 長文メモ（チャットのレポート保存等）の展開状態
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  // タイトルのインライン編集
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [titleInput, setTitleInput] = useState('');
+
+  const commitTitle = async (id: string) => {
+    await updateEntryTitle(id, titleInput);
+    setEditingId(null);
+    refresh();
+  };
   const rootRef = useRef<HTMLDivElement>(null);
 
   const refresh = () => { listEntries().then(setEntries); };
@@ -77,29 +87,47 @@ export function ExplorationHistory({ getSnapshot, onApply, fontPx }: Exploration
 
   const renderEntry = (e: ExplorationEntry) => (
     <div key={e.id} style={{ padding: '6px 10px', borderBottom: '1px solid #f4f4f4', display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <button
-        onClick={() => { onApply(e.qs); setOpen(false); }}
-        title="この状態を図に適用"
-        style={{ textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: e.title ? '#333' : '#1a73e8', fontSize: fontPx, lineHeight: 1.5, wordBreak: 'break-word' }}
-      >
-        {e.title ? <b>{e.title}</b> : e.label}
-        {e.title && <span style={{ display: 'block', fontWeight: 400, fontSize: fontPx - 2, color: '#1a73e8' }}>{e.label}</span>}
-      </button>
+      {editingId === e.id ? (
+        <input
+          type="text"
+          value={titleInput}
+          autoFocus
+          onChange={ev => setTitleInput(ev.target.value)}
+          onKeyDown={ev => {
+            if (ev.key === 'Enter' && !ev.nativeEvent.isComposing) commitTitle(e.id);
+            if (ev.key === 'Escape') { ev.stopPropagation(); setEditingId(null); }
+          }}
+          onBlur={() => commitTitle(e.id)}
+          placeholder="タイトル（空にすると自動ラベル表示）"
+          style={{ fontSize: fontPx, padding: '4px 8px', border: '1px solid #1a73e8', borderRadius: 4, outline: 'none', fontFamily: 'inherit', color: '#333', background: '#fff' }}
+        />
+      ) : (
+        <button
+          onClick={() => { onApply(e.qs); setOpen(false); }}
+          title="この状態を図に適用"
+          style={{ textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: e.title ? '#333' : '#1a73e8', fontSize: fontPx, lineHeight: 1.5, wordBreak: 'break-word' }}
+        >
+          {e.title ? <b>{e.title}</b> : e.label}
+          {e.title && <span style={{ display: 'block', fontWeight: 400, fontSize: fontPx - 2, color: '#1a73e8' }}>{e.label}</span>}
+        </button>
+      )}
       {e.note && (() => {
         const isLong = e.note.length > 160;
         const expanded = expandedIds.has(e.id);
         return (
           <div style={{ fontSize: fontPx - 1, color: '#555', wordBreak: 'break-word' }}>
-            {expanded ? (
-              // 展開時は Markdown プレビュー（チャットと同じレンダラ・スタイル）
-              <div className="ai-chat-md" style={{ background: '#fafafa', border: '1px solid #eee', borderRadius: 6, padding: '6px 9px' }}>
-                <Suspense fallback={<span style={{ whiteSpace: 'pre-wrap' }}>{e.note}</span>}>
-                  <ChatMarkdown text={e.note} />
-                </Suspense>
-              </div>
-            ) : (
-              <span style={{ whiteSpace: 'pre-wrap' }}>{isLong ? `${e.note.slice(0, 160)}…` : e.note}</span>
-            )}
+            {/* 省略時も Markdown で描画し、高さクランプで抑える（途中で切ると表等が壊れるため全文を描画して隠す） */}
+            <div
+              className="ai-chat-md"
+              style={{
+                background: '#fafafa', border: '1px solid #eee', borderRadius: 6, padding: '6px 9px',
+                ...(expanded ? {} : { maxHeight: 76, overflow: 'hidden', maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)' }),
+              }}
+            >
+              <Suspense fallback={<span style={{ whiteSpace: 'pre-wrap' }}>{expanded ? e.note : `${e.note.slice(0, 160)}${isLong ? '…' : ''}`}</span>}>
+                <ChatMarkdown text={e.note} />
+              </Suspense>
+            </div>
             {isLong && (
               <button
                 onClick={() => setExpandedIds(prev => {
@@ -115,6 +143,10 @@ export function ExplorationHistory({ getSnapshot, onApply, fontPx }: Exploration
       })()}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: fontPx - 2, color: '#999' }}>
         <span>{relativeTime(e.ts)}</span>
+        <button
+          onClick={() => { setEditingId(e.id); setTitleInput(e.title ?? ''); }}
+          style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#888', fontSize: fontPx - 2, textDecoration: 'underline' }}
+        >名前変更</button>
         <button
           onClick={() => handleCopy(e)}
           style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#888', fontSize: fontPx - 2, textDecoration: 'underline' }}

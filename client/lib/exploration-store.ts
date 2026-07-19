@@ -94,16 +94,19 @@ export async function recordVisit(qs: string, label: string, year: string): Prom
   }
 }
 
-/** メモとして保存する。同一 qs のメモがあれば title/note/ts を上書き */
+/** メモとして保存する（常に新規エントリ。同じ図の状態に複数のメモ・レポートを残せる） */
 export async function saveMemo(qs: string, label: string, year: string, note: string, title?: string): Promise<void> {
+  await withStore('readwrite', store => {
+    store.put({ id: crypto.randomUUID(), qs, label, title, note, pinned: true, ts: Date.now(), year } satisfies ExplorationEntry);
+  });
+}
+
+/** エントリのタイトルを変更する（空文字はタイトル削除 = 自動ラベル表示に戻る） */
+export async function updateEntryTitle(id: string, title: string): Promise<void> {
   await withStore('readwrite', async store => {
-    const all = await requestAsPromise(store.getAll() as IDBRequest<ExplorationEntry[]>);
-    const existing = all.find(e => e.pinned && e.qs === qs);
-    if (existing) {
-      store.put({ ...existing, label, year, note, title, ts: Date.now() });
-    } else {
-      store.put({ id: crypto.randomUUID(), qs, label, title, note, pinned: true, ts: Date.now(), year } satisfies ExplorationEntry);
-    }
+    const entry = await requestAsPromise(store.get(id) as IDBRequest<ExplorationEntry | undefined>);
+    if (!entry) return;
+    store.put({ ...entry, title: title.trim() || undefined });
   });
 }
 

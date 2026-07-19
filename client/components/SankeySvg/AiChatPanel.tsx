@@ -47,6 +47,8 @@ interface AiChatPanelProps {
   activeSessionId: string | null;
   onSwitchSession: (id: string) => void;
   onDeleteSession: (id: string) => void;
+  /** セッションのタイトル変更（空文字は自動合成タイトルへ戻す） */
+  onRenameSession: (id: string, title: string) => void;
   /** レポート応答を発見メモへ保存する（現在の図の状態に紐づく。page 側で exploration-store に委譲） */
   onSaveReport: (reportText: string) => Promise<void>;
   /** 実効パネル幅（ビューポートクランプ済み）。isCompactWidth のときは無視して全幅 */
@@ -115,7 +117,7 @@ function progressLabel(progress: SankeyChatProgressEvent | null | undefined): st
 
 export function AiChatPanel({
   open, onToggle, messages, sending, progress, onSend, onApplyResult, onClear,
-  sessions, activeSessionId, onSwitchSession, onDeleteSession, onSaveReport,
+  sessions, activeSessionId, onSwitchSession, onDeleteSession, onRenameSession, onSaveReport,
   width, isCompactWidth, onResizeStart, isResizing, onResetWidth,
   mode, byokModel, defaultByokModel, onSaveByok, onDeleteByok, onTestByok,
 }: AiChatPanelProps) {
@@ -147,6 +149,13 @@ export function AiChatPanel({
   // 会話セッション一覧ドロップダウン
   const [showSessions, setShowSessions] = useState(false);
   const sessionsRef = useRef<HTMLDivElement>(null);
+  // セッションタイトルのインライン編集
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [sessionTitleInput, setSessionTitleInput] = useState('');
+  const commitSessionTitle = (id: string) => {
+    onRenameSession(id, sessionTitleInput);
+    setEditingSessionId(null);
+  };
   useEffect(() => {
     if (!showSessions) return;
     const onMouseDown = (e: MouseEvent) => {
@@ -341,15 +350,38 @@ export function AiChatPanel({
               )}
               {sessions.map(s => (
                 <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px', borderBottom: '1px solid #f4f4f4', background: s.id === activeSessionId ? '#f5f8ff' : 'transparent' }}>
+                  {editingSessionId === s.id ? (
+                    <input
+                      type="text"
+                      value={sessionTitleInput}
+                      autoFocus
+                      onChange={e => setSessionTitleInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.nativeEvent.isComposing) commitSessionTitle(s.id);
+                        if (e.key === 'Escape') { e.stopPropagation(); setEditingSessionId(null); }
+                      }}
+                      onBlur={() => commitSessionTitle(s.id)}
+                      placeholder="タイトル（空にすると自動）"
+                      style={{ flex: 1, minWidth: 0, fontSize: 12, padding: '4px 8px', border: '1px solid #1a73e8', borderRadius: 4, outline: 'none', fontFamily: 'inherit', color: '#333', background: '#fff' }}
+                    />
+                  ) : (
+                    <button
+                      onClick={() => { onSwitchSession(s.id); setShowSessions(false); }}
+                      disabled={sending}
+                      title={s.title}
+                      style={{ flex: 1, minWidth: 0, textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: sending ? 'default' : 'pointer' }}
+                    >
+                      <div style={{ fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
+                      <div style={{ fontSize: 10.5, color: '#999' }}>{relativeTime(s.ts)}・{s.messageCount}件</div>
+                    </button>
+                  )}
                   <button
-                    onClick={() => { onSwitchSession(s.id); setShowSessions(false); }}
+                    onClick={() => { setEditingSessionId(s.id); setSessionTitleInput(s.title); }}
                     disabled={sending}
-                    title={s.title}
-                    style={{ flex: 1, minWidth: 0, textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: sending ? 'default' : 'pointer' }}
-                  >
-                    <div style={{ fontSize: 12, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
-                    <div style={{ fontSize: 10.5, color: '#999' }}>{relativeTime(s.ts)}・{s.messageCount}件</div>
-                  </button>
+                    title="タイトルを変更"
+                    aria-label="タイトルを変更"
+                    style={{ background: 'transparent', border: 'none', padding: 2, cursor: sending ? 'default' : 'pointer', color: '#888', fontSize: 11, flexShrink: 0 }}
+                  >変更</button>
                   <button
                     onClick={() => onDeleteSession(s.id)}
                     disabled={sending}
