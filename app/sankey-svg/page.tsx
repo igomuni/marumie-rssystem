@@ -4643,40 +4643,7 @@ export default function RealDataSankeyPage() {
                     </div>
                   );
                 })}
-                {/* 支出先: 再委託先を含む（OR判定・事業単位） */}
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 44, cursor: 'pointer', userSelect: 'none' }}
-                  title="オンにすると、直接支出先または再委託先のどちらかに名前がマッチする事業を残します（支出先ノード自体は隠しません）">
-                  <input
-                    type="checkbox"
-                    checked={filterRecipientIncludeSub}
-                    onChange={e => { pendingHistoryAction.current = 'replace'; setFilterRecipientIncludeSub(e.target.checked); }}
-                    style={{ width: 12, height: 12, flexShrink: 0 }}
-                  />
-                  <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap' }}>再委託先を含む</span>
-                </label>
-                {/* 予算・支出 テキスト入力 */}
-                {([
-                  { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
-                  { label: '支出', minText: filterMinSpendingText, maxText: filterMaxSpendingText, setMin: setFilterMinSpendingText, setMax: setFilterMaxSpendingText },
-                ] as const).map(({ label, minText, maxText, setMin, setMax }) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>{label}</span>
-                    <input type="text" value={minText} onChange={e => setMin(e.target.value)}
-                      placeholder="例: 100億、50万"
-                      style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${parseAmountToYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
-                    />
-                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#aaa', flexShrink: 0 }}>〜</span>
-                    <input type="text" value={maxText} onChange={e => setMax(e.target.value)}
-                      placeholder="例: 1兆、500億"
-                      style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${parseAmountToYen(maxText) !== null || !maxText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
-                    />
-                    {(minText || maxText) && (
-                      <button type="button" onClick={() => { setMin(''); setMax(''); }}
-                        style={{ fontSize: META_FONT_PX, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
-                    )}
-                  </div>
-                ))}
-                {/* 再委託フィルタ: ブロック階層下限（スライダ + 数値 + リピートボタン。1=フィルタなし） */}
+                {/* 支出先: 再委託先を含む（OR判定・事業単位）+ 再委託階層（スライダ + 数値 + リピートボタン。1=フィルタなし） */}
                 {(() => {
                   const cur = filterSubcontract ? Math.min(parseInt(filterSubcontract, 10), maxSubcontractDepth) : 1;
                   const commitDepth = (v: number) => {
@@ -4685,8 +4652,18 @@ export default function RealDataSankeyPage() {
                     setFilterSubcontract(c <= 1 ? '' : String(c));
                   };
                   return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>再委託階層</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 44 }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', userSelect: 'none', flexShrink: 0 }}
+                        title="オンにすると、直接支出先または再委託先のどちらかに名前がマッチする事業を残します（支出先ノード自体は隠しません）">
+                        <input
+                          type="checkbox"
+                          checked={filterRecipientIncludeSub}
+                          onChange={e => { pendingHistoryAction.current = 'replace'; setFilterRecipientIncludeSub(e.target.checked); }}
+                          style={{ width: 12, height: 12, flexShrink: 0 }}
+                        />
+                        <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap' }}>再委託先</span>
+                      </label>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>階層</span>
                       <input
                         type="range" min={1} max={maxSubcontractDepth} step={1}
                         value={cur}
@@ -4726,6 +4703,28 @@ export default function RealDataSankeyPage() {
                     </div>
                   );
                 })()}
+                {/* 予算・支出 テキスト入力 */}
+                {([
+                  { label: '予算', minText: filterMinBudgetText, maxText: filterMaxBudgetText, setMin: setFilterMinBudgetText, setMax: setFilterMaxBudgetText },
+                  { label: '支出', minText: filterMinSpendingText, maxText: filterMaxSpendingText, setMin: setFilterMinSpendingText, setMax: setFilterMaxSpendingText },
+                ] as const).map(({ label, minText, maxText, setMin, setMax }) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>{label}</span>
+                    <input type="text" value={minText} onChange={e => setMin(e.target.value)}
+                      placeholder="例: 100億、50万"
+                      style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${parseAmountToYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                    />
+                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#aaa', flexShrink: 0 }}>〜</span>
+                    <input type="text" value={maxText} onChange={e => setMax(e.target.value)}
+                      placeholder="例: 1兆、500億"
+                      style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${parseAmountToYen(maxText) !== null || !maxText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
+                    />
+                    {(minText || maxText) && (
+                      <button type="button" onClick={() => { setMin(''); setMax(''); }}
+                        style={{ fontSize: META_FONT_PX, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}>×</button>
+                    )}
+                  </div>
+                ))}
               </div>
             )}
           </div>{/* end card */}
