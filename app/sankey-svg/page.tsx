@@ -983,10 +983,15 @@ export default function RealDataSankeyPage() {
   }, []);
 
   // チャットのレポート応答を発見メモとして保存（現在の図の状態に紐づく。
-  // 同一状態の既存メモは上書きされる = 最新のレポートが残る）
+  // 同一状態の既存メモは上書きされる = 最新のレポートが残る）。
+  // タイトルは Markdown の最初の見出し（無ければ先頭行）から自動抽出する
   const handleSaveReportMemo = useCallback(async (reportText: string) => {
     const snap = getExplorationSnapshot();
-    await saveMemo(snap.qs, snap.label, snap.year, reportText);
+    const headingLine = reportText.split('\n').map(l => l.trim()).find(l => /^#{1,3}\s+\S/.test(l));
+    const firstLine = reportText.split('\n').map(l => l.trim()).find(l => l.length > 0) ?? '';
+    const rawTitle = (headingLine ?? firstLine).replace(/^#{1,3}\s+/, '').replace(/\*\*/g, '');
+    const title = rawTitle.length > 40 ? `${rawTitle.slice(0, 40)}…` : rawTitle;
+    await saveMemo(snap.qs, snap.label, snap.year, reportText, title || undefined);
   }, [getExplorationSnapshot]);
 
   // 事業概要プレビュー高さドラッグリスナ

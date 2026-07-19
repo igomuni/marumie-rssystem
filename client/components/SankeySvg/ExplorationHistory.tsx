@@ -8,7 +8,11 @@
  * 一覧・メモ保存・適用・削除の操作面を担う。適用（onApply）は AI チャット結果適用と
  * 同じ URL 復元経路を page 側で使う。
  */
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import { CHAT_MARKDOWN_STYLES } from './chat-markdown-styles';
+
+// Markdown 描画（チャットと同じ遅延ロード。展開表示時にのみ評価される）
+const ChatMarkdown = lazy(() => import('./ChatMarkdown'));
 import {
   listEntries,
   saveMemo,
@@ -51,7 +55,8 @@ export function ExplorationHistory({ getSnapshot, onApply, fontPx }: Exploration
 
   const handleSaveMemo = async () => {
     const snap = getSnapshot();
-    await saveMemo(snap.qs, snap.label, snap.year, noteInput.trim());
+    // 手動保存の入力はタイトルとして扱う（本文はチャットの「メモに保存」由来のみ）
+    await saveMemo(snap.qs, snap.label, snap.year, '', noteInput.trim() || undefined);
     setNoteInput('');
     refresh();
   };
@@ -75,14 +80,26 @@ export function ExplorationHistory({ getSnapshot, onApply, fontPx }: Exploration
       <button
         onClick={() => { onApply(e.qs); setOpen(false); }}
         title="この状態を図に適用"
-        style={{ textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#1a73e8', fontSize: fontPx, lineHeight: 1.5, wordBreak: 'break-word' }}
-      >{e.label}</button>
+        style={{ textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: e.title ? '#333' : '#1a73e8', fontSize: fontPx, lineHeight: 1.5, wordBreak: 'break-word' }}
+      >
+        {e.title ? <b>{e.title}</b> : e.label}
+        {e.title && <span style={{ display: 'block', fontWeight: 400, fontSize: fontPx - 2, color: '#1a73e8' }}>{e.label}</span>}
+      </button>
       {e.note && (() => {
         const isLong = e.note.length > 160;
         const expanded = expandedIds.has(e.id);
         return (
-          <div style={{ fontSize: fontPx - 1, color: '#555', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-            {isLong && !expanded ? `${e.note.slice(0, 160)}…` : e.note}
+          <div style={{ fontSize: fontPx - 1, color: '#555', wordBreak: 'break-word' }}>
+            {expanded ? (
+              // 展開時は Markdown プレビュー（チャットと同じレンダラ・スタイル）
+              <div className="ai-chat-md" style={{ background: '#fafafa', border: '1px solid #eee', borderRadius: 6, padding: '6px 9px' }}>
+                <Suspense fallback={<span style={{ whiteSpace: 'pre-wrap' }}>{e.note}</span>}>
+                  <ChatMarkdown text={e.note} />
+                </Suspense>
+              </div>
+            ) : (
+              <span style={{ whiteSpace: 'pre-wrap' }}>{isLong ? `${e.note.slice(0, 160)}…` : e.note}</span>
+            )}
             {isLong && (
               <button
                 onClick={() => setExpandedIds(prev => {
@@ -133,6 +150,8 @@ export function ExplorationHistory({ getSnapshot, onApply, fontPx }: Exploration
           background: '#fff', border: '1px solid #e0e0e0', borderRadius: 8,
           boxShadow: '0 4px 16px rgba(0,0,0,0.15)', zIndex: 30, colorScheme: 'light',
         }}>
+          {/* Markdown プレビュー用スタイル（チャットと共用。ドロップダウン内で1回だけ描画） */}
+          <style>{CHAT_MARKDOWN_STYLES}</style>
           {/* 現在の図をメモとして保存 */}
           <div style={{ padding: '8px 10px', borderBottom: '1px solid #eee', background: '#fafbff' }}>
             <div style={{ fontSize: fontPx - 1, color: '#777', marginBottom: 4 }}>現在の図をメモとして保存</div>
@@ -142,7 +161,7 @@ export function ExplorationHistory({ getSnapshot, onApply, fontPx }: Exploration
                 value={noteInput}
                 onChange={e => setNoteInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSaveMemo(); if (e.key === 'Escape') e.stopPropagation(); }}
-                placeholder="一言メモ（省略可）"
+                placeholder="タイトル（省略可）"
                 style={{ flex: 1, minWidth: 0, fontSize: fontPx, padding: '5px 8px', border: '1px solid #ddd', borderRadius: 6, outline: 'none', fontFamily: 'inherit', color: '#333', background: '#fff' }}
               />
               <button

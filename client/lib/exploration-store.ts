@@ -15,7 +15,9 @@ export interface ExplorationEntry {
   qs: string;
   /** 自動合成ラベル（app/lib/exploration-label.ts） */
   label: string;
-  /** ユーザーのメモ本文（pinned=true のみ） */
+  /** メモのタイトル（手動保存の入力値 / レポート保存時は見出しから自動抽出。pinned=true のみ） */
+  title?: string;
+  /** メモ本文（チャットのレポート保存等の長文 Markdown。pinned=true のみ） */
   note?: string;
   /** true=メモ（明示保存） / false=自動履歴 */
   pinned: boolean;
@@ -92,15 +94,15 @@ export async function recordVisit(qs: string, label: string, year: string): Prom
   }
 }
 
-/** メモとして保存する。同一 qs のメモがあれば note/ts を上書き */
-export async function saveMemo(qs: string, label: string, year: string, note: string): Promise<void> {
+/** メモとして保存する。同一 qs のメモがあれば title/note/ts を上書き */
+export async function saveMemo(qs: string, label: string, year: string, note: string, title?: string): Promise<void> {
   await withStore('readwrite', async store => {
     const all = await requestAsPromise(store.getAll() as IDBRequest<ExplorationEntry[]>);
     const existing = all.find(e => e.pinned && e.qs === qs);
     if (existing) {
-      store.put({ ...existing, label, year, note, ts: Date.now() });
+      store.put({ ...existing, label, year, note, title, ts: Date.now() });
     } else {
-      store.put({ id: crypto.randomUUID(), qs, label, note, pinned: true, ts: Date.now(), year } satisfies ExplorationEntry);
+      store.put({ id: crypto.randomUUID(), qs, label, title, note, pinned: true, ts: Date.now(), year } satisfies ExplorationEntry);
     }
   });
 }
