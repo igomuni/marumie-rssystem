@@ -1075,6 +1075,9 @@ export default function RealDataSankeyPage() {
   // TopN・フォントサイズのリピートは各コントロールコンポーネント側で同フックを使う。
   const offsetRepeat = useRepeatPress();
   const subDepthRepeat = useRepeatPress();
+  // 再委託階層の数値直接入力（TopNSliderRow と同型のクリック編集）
+  const [subDepthEditing, setSubDepthEditing] = useState(false);
+  const [subDepthInput, setSubDepthInput] = useState('');
   // 再委託スライダの上限 = グラフ中の最大ブロック階層数（データ無しなら5）
   const maxSubcontractDepth = useMemo(() => {
     let m = 5;
@@ -4687,7 +4690,7 @@ export default function RealDataSankeyPage() {
                   };
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>再委託</span>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>再委託階層</span>
                       <input
                         type="range" min={1} max={maxSubcontractDepth} step={1}
                         value={cur}
@@ -4696,9 +4699,20 @@ export default function RealDataSankeyPage() {
                         title="1=フィルタなし、2=再委託あり、3=再々委託以深…"
                         style={{ flex: 1, minWidth: 0, width: 0 }}
                       />
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: cur > 1 ? '#333' : '#aaa', width: '4em', textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-                        {cur > 1 ? `階層${cur}〜` : 'なし'}
-                      </span>
+                      {subDepthEditing ? (
+                        <input type="number" autoFocus min={1} max={maxSubcontractDepth} step={1}
+                          value={subDepthInput}
+                          onChange={e => setSubDepthInput(e.target.value)}
+                          onBlur={() => { const v = Number(subDepthInput); if (!isNaN(v) && v >= 1) commitDepth(v); setSubDepthEditing(false); }}
+                          onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur(); }}
+                          style={{ width: 36, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: CONTROL_SMALL_FONT_PX }}
+                        />
+                      ) : (
+                        <button type="button" onClick={() => { setSubDepthInput(String(cur)); setSubDepthEditing(true); }}
+                          title="クリックして直接入力（1=フィルタなし）"
+                          style={{ color: cur > 1 ? '#333' : '#999', fontSize: CONTROL_SMALL_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}
+                        >{cur}</button>
+                      )}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'stretch' }}>
                         {([[1, 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z', '深くする'], [-1, 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z', '浅くする']] as const).map(([delta, path, title]) => {
                           const step = () => commitDepth((filterSubcontract ? parseInt(filterSubcontract, 10) : 1) + delta);
@@ -4730,7 +4744,7 @@ export default function RealDataSankeyPage() {
                   }
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>再委託先</span>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>再委託先</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex' }}>
                         <input
                           type="text"
