@@ -258,7 +258,8 @@ function parseSearchParams(search: string): Partial<SankeyUrlState> {
   }
   const fsd = p.get('fsd');
   const fsdNum = fsd !== null ? parseInt(fsd, 10) : NaN;
-  if (!isNaN(fsdNum) && fsdNum >= 2) result.filterSubcontract = String(Math.min(fsdNum, 9));
+  // 上限クランプはしない（スライダ最大 = データの maxSubcontractDepth。範囲外は clamp effect が是正）
+  if (!isNaN(fsdNum) && fsdNum >= 2) result.filterSubcontract = String(fsdNum);
   else if (p.get('fsr') === '1') result.filterSubcontract = '2';
   const fnrs = p.get('fnrs'); if (fnrs !== null) result.filterRecipientIncludeSub = fnrs === '1';
   return result;
@@ -2460,6 +2461,18 @@ export default function RealDataSankeyPage() {
     const timer = setTimeout(() => setDebouncedFilterRecipientName(filterRecipientName), 150);
     return () => clearTimeout(timer);
   }, [filterRecipientName]);
+
+  // 年度切替・URL直接指定で filterSubcontract が現在データの最大階層を超えた場合、
+  // 表示（cur のクランプ）と実フィルタ（buildFilterExcludedIds は生値を受け取る）の
+  // 乖離を防ぐため state 側をクランプして永続化する。クランプ後は条件が false になり再発火しない。
+  // graphData 確定前は maxSubcontractDepth がデフォルト値（5）のため、ロード前にクランプしない
+  useEffect(() => {
+    if (!graphData) return;
+    if (filterSubcontract && parseInt(filterSubcontract, 10) > maxSubcontractDepth) {
+      pendingHistoryAction.current = 'replace';
+      setFilterSubcontract(String(maxSubcontractDepth));
+    }
+  }, [graphData, maxSubcontractDepth, filterSubcontract]);
 
 
   useEffect(() => { setSearchPage(0); setSearchCursorIndex(-1); }, [debouncedQuery]);
