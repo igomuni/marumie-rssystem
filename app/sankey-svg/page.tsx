@@ -4643,7 +4643,7 @@ export default function RealDataSankeyPage() {
                     </div>
                   );
                 })}
-                {/* 支出先: 再委託先を含む（OR判定・事業単位）+ 再委託階層（スライダ + 数値 + リピートボタン。1=フィルタなし） */}
+                {/* 支出先: 再委託先を含む（OR判定・事業単位）+ 再委託階層（スライダ + 数値 + リピートボタン。） */}
                 {(() => {
                   const cur = filterSubcontract ? Math.min(parseInt(filterSubcontract, 10), maxSubcontractDepth) : 1;
                   const commitDepth = (v: number) => {
@@ -4668,8 +4668,7 @@ export default function RealDataSankeyPage() {
                         type="range" min={1} max={maxSubcontractDepth} step={1}
                         value={cur}
                         onChange={e => commitDepth(Number(e.target.value))}
-                        aria-label="再委託ブロック階層の下限（1=フィルタなし）"
-                        title="1=フィルタなし、2=再委託あり、3=再々委託以深…"
+                        aria-label="再委託ブロック階層の下限"
                         style={{ flex: 1, minWidth: 0, width: 0 }}
                       />
                       {subDepthEditing ? (
@@ -4682,7 +4681,7 @@ export default function RealDataSankeyPage() {
                         />
                       ) : (
                         <button type="button" onClick={() => { setSubDepthInput(String(cur)); setSubDepthEditing(true); }}
-                          title="クリックして直接入力（1=フィルタなし）"
+                          title="クリックして直接入力"
                           style={{ color: cur > 1 ? '#333' : '#999', fontSize: CONTROL_SMALL_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0, minWidth: 20, textAlign: 'right', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}
                         >{cur}</button>
                       )}
