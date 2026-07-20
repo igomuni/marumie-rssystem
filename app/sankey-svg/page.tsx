@@ -829,7 +829,9 @@ export default function RealDataSankeyPage() {
     if (y === year && graphData) return graphData;
     const cached = byokGraphCacheRef.current.get(y);
     if (cached) return cached;
-    const res = await fetch(`/data/sankey-svg-${y}-graph.json`);
+    // no-cache: 必ず ETag 再検証（更新時のみ本体取得・未更新は304）。データ構造更新後の
+    // 古いキャッシュ配信を防ぐ（graph はフィルタ機能追加でフィールドが増えるため）
+    const res = await fetch(`/data/sankey-svg-${y}-graph.json`, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`${y}年度のグラフデータの取得に失敗しました（HTTP ${res.status}）`);
     const data = await res.json() as GraphData;
     byokGraphCacheRef.current.set(y, data);
@@ -1566,7 +1568,9 @@ export default function RealDataSankeyPage() {
     setGraphData(null);
     setLoading(true);
     setError(null);
-    fetch(`/data/sankey-svg-${year}-graph.json`)
+    // no-cache: 必ず ETag 再検証（未更新は304・帯域ゼロ、更新時のみ本体取得）。
+    // データ構造更新後に古いキャッシュ版を掴み続ける問題（再委託フィルタで顕在化）の対策
+    fetch(`/data/sankey-svg-${year}-graph.json`, { cache: 'no-cache' })
       .then(res => {
         if (!res.ok) throw new Error(`Fetch error: ${res.status}`);
         return res.json();
