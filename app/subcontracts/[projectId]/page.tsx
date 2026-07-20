@@ -33,6 +33,7 @@ import {
   COLOR_ROOT,
   NODE_PAD,
 } from '@/app/lib/subcontract-layout';
+import { SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
 import {
   computeSubcontractRibbonLayout,
   ribbonFlowPath,
@@ -58,19 +59,20 @@ const SUBCONTRACT_PANEL_WIDTH_DEFAULT = 390;
 const COLOR_BACK_EDGE = 'rgba(217,69,69,0.65)';
 const COLOR_CANVAS = '#fff';
 const COLOR_DIRECT_BODY = '#f8d3d3';
-const COLOR_SUBCONTRACT_BODY = '#f6cbb6';
+const COLOR_SUBCONTRACT_BODY = '#f5e3c0';
 const COLOR_DIRECT_BODY_TEXT = '#8f1f1f';
-const COLOR_SUBCONTRACT_BODY_TEXT = '#8b3a1c';
+const COLOR_SUBCONTRACT_BODY_TEXT = '#7a5312';
 const COLOR_DIRECT_BODY_SUBTLE = '#b33434';
-const COLOR_SUBCONTRACT_BODY_SUBTLE = '#b45309';
+const COLOR_SUBCONTRACT_BODY_SUBTLE = '#a06c14';
 const COLOR_DIRECT_EDGE = 'rgba(217,69,69,0.48)';
-const COLOR_SUBCONTRACT_EDGE = 'rgba(224,112,64,0.52)';
+const COLOR_SUBCONTRACT_EDGE = 'rgba(217,149,43,0.55)';
 // 別財源ブロック（5-2の構造的に府省庁ルートでは説明できない財投借入・自己収入・利水者等）
-const COLOR_SEPARATE_ORIGIN_STRONG = '#6366f1';
-const COLOR_SEPARATE_ORIGIN_BODY = '#eef2ff';
-const COLOR_SEPARATE_ORIGIN_BODY_TEXT = '#3730a3';
-const COLOR_SEPARATE_ORIGIN_BODY_SUBTLE = '#4338ca';
-const COLOR_SEPARATE_ORIGIN_EDGE = 'rgba(99,102,241,0.55)';
+// 色は紫（旧インディゴ #6366f1 はリンク青と衝突するため semantic-colors.ts に合わせて変更）
+const COLOR_SEPARATE_ORIGIN_STRONG = SEMANTIC_SEPARATE_ORIGIN;
+const COLOR_SEPARATE_ORIGIN_BODY = '#f2edf8';
+const COLOR_SEPARATE_ORIGIN_BODY_TEXT = '#5b4483';
+const COLOR_SEPARATE_ORIGIN_BODY_SUBTLE = '#6b4fa0';
+const COLOR_SEPARATE_ORIGIN_EDGE = 'rgba(123,94,167,0.55)';
 const COLOR_REFERENCE_EDGE = 'rgba(148,163,184,0.55)';
 
 interface OriginPalette {
@@ -153,9 +155,10 @@ function flowOriginSortRank(origin: FlowOrigin): number {
 function flowOriginBadgeColor(origin: FlowOrigin): { bg: string; fg: string } {
   switch (origin) {
     case 'direct': return { bg: '#f9dddd', fg: COLOR_DIRECT_BODY_SUBTLE };
-    case 'transfer': return { bg: '#fef3c7', fg: '#92400e' };
-    case 'separate-origin': return { bg: '#e0e7ff', fg: COLOR_SEPARATE_ORIGIN_BODY_TEXT };
-    case 'subcontract': return { bg: '#fbe3d7', fg: COLOR_SUBCONTRACT_BODY_SUBTLE };
+    // 移替・参考は意味色を持たせずグレー系（意味色は直接/再委託/別財源のみ）
+    case 'transfer': return { bg: '#eceff2', fg: '#475569' };
+    case 'separate-origin': return { bg: '#ece5f5', fg: COLOR_SEPARATE_ORIGIN_BODY_TEXT };
+    case 'subcontract': return { bg: '#faedcf', fg: COLOR_SUBCONTRACT_BODY_SUBTLE };
     case 'reference': return { bg: '#f1f5f9', fg: '#475569' };
   }
 }
@@ -163,10 +166,10 @@ function flowOriginBadgeColor(origin: FlowOrigin): { bg: string; fg: string } {
 function originKindBadgeColor(kind: BlockOriginKind): { bg: string; fg: string } {
   switch (kind) {
     case 'direct': return { bg: '#f9dddd', fg: COLOR_DIRECT_BODY_SUBTLE };
-    case 'subcontract': return { bg: '#fbe3d7', fg: COLOR_SUBCONTRACT_BODY_SUBTLE };
+    case 'subcontract': return { bg: '#faedcf', fg: COLOR_SUBCONTRACT_BODY_SUBTLE };
     case 'separate-origin-strong':
     case 'separate-origin-broad':
-      return { bg: '#e0e7ff', fg: COLOR_SEPARATE_ORIGIN_BODY_TEXT };
+      return { bg: '#ece5f5', fg: COLOR_SEPARATE_ORIGIN_BODY_TEXT };
   }
 }
 
@@ -468,13 +471,13 @@ function SidePane({
           <span style={{ color: '#666' }}>{graph.ministry}</span>
           {orgChain.length > 0 && <span style={{ color: '#777' }}>{orgChain.join(' / ')}</span>}
           {!orgChain.length && projectDetail?.bureau && <span style={{ color: '#777' }}>{projectDetail.bureau}</span>}
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>最大{graph.maxDepth}層</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>階層 {graph.maxDepth}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>ブロック {graph.totalBlockCount}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE, fontWeight: 700 }}>直接 {graph.directBlockCount}</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#fbe3d7', color: '#b45309', fontWeight: 700 }}>再委託 {graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount}</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#faedcf', color: COLOR_SUBCONTRACT_BODY_SUBTLE, fontWeight: 700 }}>再委託 {graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount}</span>
           {graph.separateOriginCount > 0 && (
-            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#e0e7ff', color: COLOR_SEPARATE_ORIGIN_BODY_TEXT, fontWeight: 700 }}>
+            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#ece5f5', color: COLOR_SEPARATE_ORIGIN_BODY_TEXT, fontWeight: 700 }}>
               別財源 {graph.separateOriginCount}
             </span>
           )}
@@ -1912,7 +1915,7 @@ function SubcontractDetailPageInner() {
                   y={safeRibbonLayout.separateLane.top - 6}
                   fontSize={scaleFont(10)}
                   fontWeight={700}
-                  fill="#6366f1"
+                  fill={COLOR_SEPARATE_ORIGIN_STRONG}
                   style={{ userSelect: 'none' }}
                 >
                   別財源
