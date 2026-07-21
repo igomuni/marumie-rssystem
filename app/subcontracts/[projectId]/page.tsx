@@ -9,6 +9,7 @@
  *   tab  : アクティブタブの短縮コード（fl=流れ/bl=ブロック/rc=支出先/ic=間接経費。既定'fl'は省略）
  *   z    : ズーム倍率（絶対スケール値、小数第2位）。history.replaceState（debounce後、履歴を汚さない）
  *   tx/ty: パン位置（transform.x / transform.y、整数px）。z と同じ replaceState 経路で同期
+ *   view : 表示モード（block=ブロック図。既定のフロー図(ribbon)は省略）。replaceState で同期
  */
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense, type CSSProperties } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
@@ -315,7 +316,8 @@ function parseDetailUrlState(sp: { get(key: string): string | null }): Partial<D
   const z = sp.get('z'); if (z !== null) { const n = parseFloat(z); if (!isNaN(n) && n > 0) result.zoom = n; }
   const tx = sp.get('tx'); if (tx !== null) { const n = parseFloat(tx); if (!isNaN(n)) result.tx = n; }
   const ty = sp.get('ty'); if (ty !== null) { const n = parseFloat(ty); if (!isNaN(n)) result.ty = n; }
-  const view = sp.get('view'); if (view === 'ribbon') result.view = 'ribbon';
+  // 既定は 'ribbon'（フロー図）。旧リンクの view=ribbon もそのまま解決する
+  const view = sp.get('view'); if (view === 'ribbon' || view === 'block') result.view = view;
   return result;
 }
 
@@ -328,10 +330,10 @@ function pushSelTabUrl(sel: string | null, tab: PaneTab) {
   window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
 }
 
-/** ビュー切替を replaceState で反映する（履歴を汚さない）。既定値(block)は省略する */
+/** ビュー切替を replaceState で反映する（履歴を汚さない）。既定値(ribbon)は省略する */
 function replaceViewUrl(view: ViewMode) {
   const p = new URLSearchParams(window.location.search);
-  if (view !== 'block') p.set('view', view); else p.delete('view');
+  if (view !== 'ribbon') p.set('view', view); else p.delete('view');
   const qs = p.toString();
   window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
 }
@@ -1051,8 +1053,10 @@ function SubcontractDetailPageInner() {
   const hoverSuppressTimerRef = useRef<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [activeTab, setActiveTab] = useState<PaneTab>('flow');
-  // 表示切り替え: A案（縦ブロック図・既定）/ B案（サンキー風横フロー）。URL `view=ribbon` で復元（既定は省略）
-  const [viewMode, setViewModeState] = useState<ViewMode>('block');
+  // 表示切り替え: フロー図（サンキー風横フロー・既定）/ ブロック図（縦ブロック図）。
+  // 既定をフロー図にすることで、初期表示が /sankey-svg と同じ「左パネル＋横フロー」になる。
+  // URL `view=block` でブロック図を復元（既定は省略）
+  const [viewMode, setViewModeState] = useState<ViewMode>('ribbon');
   const setViewMode = useCallback((mode: ViewMode) => {
     setViewModeState(mode);
     replaceViewUrl(mode);
@@ -1177,7 +1181,7 @@ function SubcontractDetailPageInner() {
           // 案C1: タブは URL の tab（=最後にユーザーが選んだタブ）をそのまま復元する。
           // tab 省略時は既定の 'flow'（selがあっても recipients へ自動遷移しない）
           setActiveTab(restore?.tab ?? 'flow');
-          setViewModeState(restore?.view ?? 'block');
+          setViewModeState(restore?.view ?? 'ribbon');
         } else {
           setSelectedBlock(null);
         }
@@ -1385,7 +1389,7 @@ function SubcontractDetailPageInner() {
         setSelectedBlock(null);
       }
       setActiveTab(s.tab ?? 'flow');
-      setViewModeState(s.view ?? 'block');
+      setViewModeState(s.view ?? 'ribbon');
       if (s.zoom !== undefined && s.tx !== undefined && s.ty !== undefined) {
         suppressViewportWriteRef.current = true;
         setTransform({ x: s.tx, y: s.ty, scale: s.zoom });
@@ -1511,7 +1515,7 @@ function SubcontractDetailPageInner() {
           </svg>
         </div>
 
-        {/* 表示切り替え — 年度ピルの右隣（ブロック図=A案 / フロー図=B案） */}
+        {/* 表示切り替え — 年度ピルの右隣（フロー図=既定 / ブロック図） */}
         <div
           data-pan-disabled="true"
           style={{
@@ -1528,13 +1532,13 @@ function SubcontractDetailPageInner() {
           }}
         >
           {([
-            ['block', 'ブロック図'],
             ['ribbon', 'フロー図'],
+            ['block', 'ブロック図'],
           ] as const).map(([mode, label]) => (
             <button
               key={mode}
               onClick={() => setViewMode(mode)}
-              title={mode === 'block' ? '縦ブロック図（A案）' : 'サンキー風横フロー（B案）'}
+              title={mode === 'block' ? '縦ブロック図' : 'サンキー風横フロー（既定）'}
               style={{
                 border: 'none',
                 background: viewMode === mode ? '#eff6ff' : 'transparent',
