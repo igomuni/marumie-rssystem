@@ -475,7 +475,7 @@ function SidePane({
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>ブロック {graph.totalBlockCount}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE, fontWeight: 700 }}>直接 {graph.directBlockCount}</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#faedcf', color: COLOR_SUBCONTRACT_BODY_SUBTLE, fontWeight: 700 }}>再委託 {graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount}</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#faedcf', color: COLOR_SUBCONTRACT_BODY_SUBTLE, fontWeight: 700 }}>再委託 {Math.max(0, graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount)}</span>
           {graph.separateOriginCount > 0 && (
             <span style={{ padding: '2px 6px', borderRadius: 999, background: '#ece5f5', color: COLOR_SEPARATE_ORIGIN_BODY_TEXT, fontWeight: 700 }}>
               別財源 {graph.separateOriginCount}
