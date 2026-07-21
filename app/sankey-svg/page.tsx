@@ -43,6 +43,7 @@ import { runByokChat, LlmUpstreamError } from '@/client/lib/ai/byok-chat';
 import type { ClientGraphSource } from '@/client/lib/ai/client-tool-executor';
 import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
+import { SEMANTIC_DIRECT, SEMANTIC_SUBCONTRACT, SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
 import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
@@ -170,6 +171,20 @@ function getScoreBadgeColor(score: number): string {
   if (score >= SCORE_BADGE_GOOD_MIN) return '#2e7d32';
   if (score >= SCORE_BADGE_WARN_MIN) return '#f57c00';
   return '#c62828';
+}
+
+/**
+ * サイドパネルの再委託サマリ用。/api/subcontracts の全グラフから件数のみ抽出して保持する
+ * （全グラフはメイングラフに載せず、事業選択時に遅延取得する）。
+ */
+interface SubcontractSummary {
+  maxDepth: number;
+  totalBlockCount: number;
+  totalRecipientCount: number;
+  directBlockCount: number;
+  separateOriginCount: number;
+  /** 再委託ブロック数 = 全 − 直接 − 別財源 */
+  subcontractBlockCount: number;
 }
 
 /**
@@ -2152,6 +2167,29 @@ export default function RealDataSankeyPage() {
     (pid, y) => `/api/quality-scores/${pid}?year=${y}`,
     data => (data as { score?: QualityScoreProjection }).score ?? null,
   );
+  // Fetch subcontract summary on project node selection (side panel 再委託 block)
+  const subcontractSummaryCache = useProjectPidCache<SubcontractSummary>(
+    selectedNode, year,
+    (pid, y) => `/api/subcontracts/${pid}?year=${y}`,
+    (data) => {
+      const g = data as {
+        maxDepth?: number; totalBlockCount?: number; totalRecipientCount?: number;
+        directBlockCount?: number; separateOriginCount?: number;
+      };
+      if (g?.totalBlockCount == null) return null;
+      const totalBlockCount = g.totalBlockCount;
+      const directBlockCount = g.directBlockCount ?? 0;
+      const separateOriginCount = g.separateOriginCount ?? 0;
+      return {
+        maxDepth: g.maxDepth ?? 0,
+        totalBlockCount,
+        totalRecipientCount: g.totalRecipientCount ?? 0,
+        directBlockCount,
+        separateOriginCount,
+        subcontractBlockCount: Math.max(0, totalBlockCount - directBlockCount - separateOriginCount),
+      };
+    },
+  );
 
   // 品質スコアブロックのクリックで全項目を取得し /quality と同じ詳細ダイアログを開く
   const openScoreDialog = useCallback((pid: string | number) => {
@@ -3835,8 +3873,8 @@ export default function RealDataSankeyPage() {
                           </svg>
                         </a>
                       )}
-                      <a href={`/subcontracts/${pid}?year=${year}`} target="_blank" rel="noopener noreferrer"
-                        title="再委託構造を見る"
+                      <a href={`/subcontracts/${pid}?year=${year}`}
+                        title="再委託構造を見る（同じタブで開きます）"
                         style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#4a90d9">
@@ -3994,6 +4032,43 @@ export default function RealDataSankeyPage() {
                         )}
                       </>
                     )}
+                  </div>
+                );
+              })()}
+
+              {/* 再委託サマリ — project-budget / project-spending（非集約）のみ。/api/subcontracts から遅延取得 */}
+              {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (() => {
+                const sub = subcontractSummaryCache.get(`${year}-${selectedNode.projectId}`);
+                if (sub === undefined) return null; // fetch中は非表示（パネルのちらつき防止）
+                if (sub === null || sub.totalBlockCount === 0) return null; // 再委託データなし
+                const subPid = selectedNode.projectId;
+                const statChip: React.CSSProperties = {
+                  border: '1px solid #e0e0e0', borderRadius: 4, padding: '1px 7px',
+                  fontSize: META_FONT_PX, color: '#555', whiteSpace: 'nowrap',
+                };
+                const tag = (label: string, bg: string) => (
+                  <span style={{ background: bg, color: '#fff', borderRadius: 10, padding: '1px 8px',
+                    fontSize: META_FONT_PX, fontWeight: 700, whiteSpace: 'nowrap' }}>{label}</span>
+                );
+                return (
+                  <div style={{ borderBottom: '1px solid #f0f0f0', padding: '7px 14px 9px', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>再委託</span>
+                      <a href={`/subcontracts/${subPid}?year=${year}`}
+                        title="再委託フローを見る（同じタブで開きます）"
+                        style={{ fontSize: META_FONT_PX, color: '#4a90d9', textDecoration: 'none', marginLeft: 'auto', flexShrink: 0 }}
+                      >フロー ↗</a>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
+                      <span style={statChip}>ブロック {sub.totalBlockCount}</span>
+                      <span style={statChip}>支出先 {sub.totalRecipientCount.toLocaleString()}</span>
+                      <span style={statChip}>階層 {sub.maxDepth}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 5, marginTop: 6, flexWrap: 'wrap' }}>
+                      {tag(`直接 ${sub.directBlockCount}`, SEMANTIC_DIRECT)}
+                      {sub.subcontractBlockCount > 0 && tag(`再委託 ${sub.subcontractBlockCount}`, SEMANTIC_SUBCONTRACT)}
+                      {sub.separateOriginCount > 0 && tag(`別財源 ${sub.separateOriginCount}`, SEMANTIC_SEPARATE_ORIGIN)}
+                    </div>
                   </div>
                 );
               })()}

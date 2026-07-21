@@ -6,6 +6,7 @@ import type {
   FlowOrigin,
 } from '@/types/subcontract';
 export { formatYen } from '@/app/lib/sankey-svg-constants';
+import { SEMANTIC_DIRECT, SEMANTIC_SUBCONTRACT, SEMANTIC_PROJECT_DEEP } from '@/app/lib/semantic-colors';
 
 // ─── 定数 ──────────────────────────────────────────────
 
@@ -19,9 +20,9 @@ export const ROOT_W = 300;
 export const ROOT_H = 136;
 export const SVG_MARGIN = { top: 28, right: 36, bottom: 40, left: 36 };
 
-export const COLOR_DIRECT = '#d94545';
-export const COLOR_SUBCONTRACT = '#e07040';
-export const COLOR_ROOT = '#3a9a5c';
+export const COLOR_DIRECT = SEMANTIC_DIRECT;
+export const COLOR_SUBCONTRACT = SEMANTIC_SUBCONTRACT;
+export const COLOR_ROOT = SEMANTIC_PROJECT_DEEP;
 export const COLOR_EDGE = 'rgba(217,69,69,0.42)';
 
 // ─── 型 ──────────────────────────────────────────────
