@@ -397,6 +397,16 @@ function SidePane({
   }
 
   const blockById = useMemo(() => new Map(graph.blocks.map((b) => [b.blockId, b])), [graph.blocks]);
+
+  // 選択中ブロックの入出フロー（ブロックインスペクターの「このブロックの流れ」用）。
+  // 受入元 = このブロックへ流入するフロー、再委託先 = このブロックから流出するフロー。
+  const selectedBlockFlows = useMemo(() => {
+    if (!block) return { incoming: [] as BlockEdge[], outgoing: [] as BlockEdge[] };
+    return {
+      incoming: graph.flows.filter((f) => f.targetBlock === block.blockId),
+      outgoing: graph.flows.filter((f) => f.sourceBlock === block.blockId),
+    };
+  }, [block, graph.flows]);
   const downstreamBlocks = useMemo(() => {
     if (!block) return [];
     const ids = graph.flows.filter((f) => f.sourceBlock === block.blockId).map((f) => f.targetBlock);
@@ -531,28 +541,75 @@ function SidePane({
 
       </div>
 
-      {/* 選択中ブロックバー（案C1: 選択解除の常設導線。タブに関わらず表示） */}
-      {block && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8,
-          padding: '6px 16px',
-          background: '#eff6ff',
-          borderBottom: `1px solid ${COLOR_PANEL_BORDER}`,
-        }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#1e40af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            選択中: {block.blockId} {block.blockName}
-          </span>
-          <button
-            onClick={onDeselectBlock}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#1e40af', fontSize: 14, flexShrink: 0 }}
-            aria-label="選択解除"
-            title="選択解除 (Esc)"
-          >✕</button>
-        </div>
-      )}
+      {/* ブロックインスペクター（Phase 4: 図中ノード選択でこのブロックの詳細に切り替わる。
+          パンくずで事業へ戻る。タブに関わらず常設表示） */}
+      {block && (() => {
+        const badge = originKindBadgeColor(block.originKind);
+        const FlowLine = ({ label, otherId, note }: { label: string; otherId: string | null; note?: string }) => {
+          const other = otherId ? blockById.get(otherId) : null;
+          return (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, padding: '2px 0', minWidth: 0 }}>
+              <span style={{ fontSize: 10, color: '#94a3b8', flexShrink: 0, width: 44 }}>{label}</span>
+              {other ? (
+                <button
+                  onClick={() => onSelectBlock(other)}
+                  title={`${other.blockId} ${other.blockName} を選択`}
+                  style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer',
+                    fontSize: 11, color: '#1d4ed8', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                >
+                  {other.blockId} {other.blockName}
+                </button>
+              ) : (
+                <span style={{ fontSize: 11, color: '#475569', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {note || '事業（直接支出）'}
+                </span>
+              )}
+            </div>
+          );
+        };
+        return (
+          <div style={{ padding: '9px 16px 11px', background: '#f8fafc', borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <button
+                onClick={onDeselectBlock}
+                title="事業の全体表示に戻る (Esc)"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#1d4ed8', fontSize: 11, fontWeight: 600, flexShrink: 0 }}
+              >← 事業に戻る</button>
+              <button
+                onClick={onDeselectBlock}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#64748b', fontSize: 14, flexShrink: 0 }}
+                aria-label="選択解除" title="選択解除 (Esc)"
+              >✕</button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 5 }}>
+              <span style={{ padding: '1px 7px', borderRadius: 999, background: badge.bg, color: badge.fg, fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
+                {originKindLabel(block.originKind)}
+              </span>
+              <span title={`${block.blockId} ${block.blockName}`} style={{ fontSize: 13, fontWeight: 700, color: '#111827', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ color: '#94a3b8', marginRight: 3 }}>{block.blockId}</span>{block.blockName}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 12, marginTop: 4, fontSize: 11, color: '#475569', flexWrap: 'wrap' }}>
+              <span>支出額 <b style={{ color: '#111827' }}>{block.totalAmount > 0 ? formatYen(block.totalAmount) : '金額内訳なし'}</b></span>
+              <span>支出先 <b style={{ color: '#111827' }}>{block.recipientCount.toLocaleString()}件</b></span>
+              {block.isTerminal && <span style={{ color: '#94a3b8' }}>終端（再委託なし）</span>}
+            </div>
+            {block.role && (
+              <div style={{ fontSize: 10.5, color: '#64748b', marginTop: 3, lineHeight: 1.45 }}>役割: {block.role}</div>
+            )}
+            {(selectedBlockFlows.incoming.length > 0 || selectedBlockFlows.outgoing.length > 0) && (
+              <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px dashed #e2e8f0' }}>
+                {selectedBlockFlows.incoming.map((f, i) => (
+                  <FlowLine key={`in-${i}`} label="受入元" otherId={f.sourceBlock} note={f.origin === 'direct' ? '事業（直接支出）' : undefined} />
+                ))}
+                {selectedBlockFlows.outgoing.map((f, i) => (
+                  <FlowLine key={`out-${i}`} label={f.origin === 'separate-origin' ? '別財源へ' : '再委託先'} otherId={f.targetBlock} />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* タブヘッダー */}
       <div style={{
@@ -1249,12 +1306,16 @@ function SubcontractDetailPageInner() {
 
   // ノードクリック: 選択のみを変更する（案C1）。アクティブタブは動かさない。
   // 同一ノードの再クリックはトグル解除せず選択を維持する
+  // 図中ノード（フロー図バー/ブロック図カード）クリック（Phase 4）。
+  // 選択すると同時に支出先タブへ切り替え、そのブロックの支出先内訳（深掘り）を即表示する。
+  // ブロックインスペクター（左パネル上部）＋支出先タブ内訳で「ノードのインスペクター」を構成する。
   const handleNodeClick = useCallback((node: BlockNode) => {
     setSelectedBlock(node);
-    pushSelTabUrl(node.blockId, activeTab);
-  }, [activeTab]);
+    setActiveTab('recipients');
+    pushSelTabUrl(node.blockId, 'recipients');
+  }, []);
 
-  // フロー一覧/ブロック一覧の行から選択した場合も選択のみを変更する（案C1。タブは動かさない）
+  // フロー一覧/ブロック一覧の行から選択した場合は選択のみを変更する（タブは動かさない）
   const handleSelectFromList = useCallback((node: BlockNode) => {
     setSelectedBlock(node);
     pushSelTabUrl(node.blockId, activeTab);
