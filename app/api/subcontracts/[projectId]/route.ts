@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { buildMetadata, API_CACHE_CONTROL, RECIPIENT_NOTES, SUPPORTED_YEARS } from '@/app/lib/api/api-notes';
 import { projectLinks, recipientLinks } from '@/app/lib/api/links';
 import { buildRecipientKey, isExcludedRecipientName } from '@/app/lib/recipient-key';
-import { loadSubcontracts } from '@/app/lib/api/subcontracts-loader';
-import { loadSankeyGraph } from '@/app/lib/api/sankey-graph-loader';
+import { loadSubcontracts, loadProjectBudgetComposition } from '@/app/lib/api/subcontracts-loader';
 
 type SupportedYear = typeof SUPPORTED_YEARS[number];
 
@@ -32,17 +31,14 @@ export async function GET(
     return NextResponse.json({ error: `Project ${projectId} not found` }, { status: 404 });
   }
 
-  // 予算・執行は再委託データ側に持たないため、サンキーグラフの project-budget ノードから合成する
-  // （loadSankeyGraph は年度単位のメモリキャッシュ付き。再委託ページのタブ表示に使う）
-  const budgetNode = loadSankeyGraph(year).nodes.find(
-    n => n.type === 'project-budget' && String(n.projectId) === String(projectId)
-  );
+  // 予算・執行は再委託データ側に持たないため app/lib で合成する（サンキーグラフから）
+  const { budgetSummary, budgetBreakdown } = loadProjectBudgetComposition(year, projectId);
 
   // 既存フィールドはそのまま、各支出先に逆引きキーと関連リンクを追加
   const body = {
     ...graph,
-    budgetSummary: budgetNode?.budgetSummary ?? null,
-    budgetBreakdown: budgetNode?.budgetBreakdown ?? [],
+    budgetSummary,
+    budgetBreakdown,
     metadata: buildMetadata(year, { projectId: graph.projectId }, RECIPIENT_NOTES),
     blocks: graph.blocks.map(block => ({
       ...block,

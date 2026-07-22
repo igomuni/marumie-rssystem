@@ -456,7 +456,7 @@ function SidePane({
   // 支出先はブロック未選択なら事業全体、選択中はそのブロック内訳を出す
   const budgetBreakdown = graph.budgetBreakdown ?? [];
   const tabs: Array<{ key: PaneTab; label: string; count?: number; disabled?: boolean }> = [
-    { key: 'budget', label: '予算・執行', count: budgetBreakdown.length, disabled: budgetBreakdown.length === 0 },
+    { key: 'budget', label: '予算・執行', count: budgetBreakdown.length, disabled: budgetBreakdown.length === 0 && !graph.budgetSummary },
     { key: 'blocks', label: 'ブロック', count: graph.blocks.length },
     { key: 'recipients', label: '支出先', count: block ? block.recipients.length : graph.totalRecipientCount },
     { key: 'flow', label: '流れ', count: graph.flows.length },
@@ -1314,7 +1314,7 @@ function SubcontractDetailPageInner() {
           setSelectedBlock(restoredBlock);
           // 案C1: タブは URL の tab（=最後にユーザーが選んだタブ）をそのまま復元する。
           // tab 省略時は既定の 'flow'（selがあっても recipients へ自動遷移しない）
-          setActiveTab(restore?.tab ?? 'flow');
+          setActiveTab(restore?.tab ?? 'blocks');
           setViewModeState(restore?.view ?? 'ribbon');
         } else {
           setSelectedBlock(null);
@@ -1522,7 +1522,7 @@ function SubcontractDetailPageInner() {
       } else {
         setSelectedBlock(null);
       }
-      setActiveTab(s.tab ?? 'flow');
+      setActiveTab(s.tab ?? 'blocks');
       setViewModeState(s.view ?? 'ribbon');
       if (s.zoom !== undefined && s.tx !== undefined && s.ty !== undefined) {
         suppressViewportWriteRef.current = true;
