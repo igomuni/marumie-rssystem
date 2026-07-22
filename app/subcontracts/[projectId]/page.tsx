@@ -36,6 +36,7 @@ import {
   NODE_PAD,
 } from '@/app/lib/subcontract-layout';
 import { SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
+import { TagChip, type TagKind } from '@/client/components/TagChip';
 import {
   computeSubcontractRibbonLayout,
   ribbonFlowPath,
@@ -183,6 +184,11 @@ function originKindLabel(kind: BlockOriginKind): string {
     case 'separate-origin-broad':
       return '別財源';
   }
+}
+
+/** ブロックの originKind を共有 TagChip の kind に変換する（別財源の broad/strong は一律 separate-origin） */
+function originKindToTagKind(kind: BlockOriginKind): TagKind {
+  return kind === 'direct' ? 'direct' : kind === 'subcontract' ? 'subcontract' : 'separate-origin';
 }
 const COLOR_CONTEXT_BODY = '#d8f1df';
 const COLOR_CONTEXT_BODY_TEXT = '#1f6b3a';
@@ -478,11 +484,12 @@ function SidePane({
       width: '100%',
       height: '100%',
       background: '#fff',
-      overflowY: 'auto',
+      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
     }}>
-      <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 2 }}>
+      {/* ヘッダー・インスペクター・タブは固定（/sankey-svg と同様に、スクロールはリスト部のみ） */}
+      <div style={{ flexShrink: 0, background: '#fff' }}>
       {/* 事業ヘッダー（常時表示） */}
       <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
@@ -509,12 +516,10 @@ function SidePane({
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>階層 {graph.maxDepth}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>ブロック {graph.totalBlockCount}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE, fontWeight: 700 }}>直接 {graph.directBlockCount}</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#faedcf', color: COLOR_SUBCONTRACT_BODY_SUBTLE, fontWeight: 700 }}>再委託 {Math.max(0, graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount)}</span>
+          <TagChip kind="direct" fontSize={PANEL_META_FONT_PX}>直接 {graph.directBlockCount}</TagChip>
+          <TagChip kind="subcontract" fontSize={PANEL_META_FONT_PX}>再委託 {Math.max(0, graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount)}</TagChip>
           {graph.separateOriginCount > 0 && (
-            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#ece5f5', color: COLOR_SEPARATE_ORIGIN_BODY_TEXT, fontWeight: 700 }}>
-              別財源 {graph.separateOriginCount}
-            </span>
+            <TagChip kind="separate-origin" fontSize={PANEL_META_FONT_PX}>別財源 {graph.separateOriginCount}</TagChip>
           )}
           {graph.hasMerge && (
             <span style={{ padding: '2px 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>
@@ -544,7 +549,6 @@ function SidePane({
       {/* ブロックインスペクター（Phase 4: 図中ノード選択でこのブロックの詳細に切り替わる。
           パンくずで事業へ戻る。タブに関わらず常設表示） */}
       {block && (() => {
-        const badge = originKindBadgeColor(block.originKind);
         const FlowLine = ({ label, otherId, note }: { label: string; otherId: string | null; note?: string }) => {
           const other = otherId ? blockById.get(otherId) : null;
           return (
@@ -582,9 +586,7 @@ function SidePane({
               >✕</button>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 5 }}>
-              <span style={{ padding: '1px 7px', borderRadius: 999, background: badge.bg, color: badge.fg, fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
-                {originKindLabel(block.originKind)}
-              </span>
+              <TagChip kind={originKindToTagKind(block.originKind)}>{originKindLabel(block.originKind)}</TagChip>
               <span title={`${block.blockId} ${block.blockName}`} style={{ fontSize: 13, fontWeight: 700, color: '#111827', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 <span style={{ color: '#94a3b8', marginRight: 3 }}>{block.blockId}</span>{block.blockName}
               </span>
@@ -649,8 +651,8 @@ function SidePane({
       </div>
       </div>
 
-      {/* タブ本体 */}
-      <div style={{ padding: 12, flex: 1, minHeight: 0 }}>
+      {/* タブ本体 — ここだけがスクロールする（ヘッダ・タブは固定） */}
+      <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto' }}>
         {activeTab === 'flow' && (
           <>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -1943,7 +1945,8 @@ function SubcontractDetailPageInner() {
               const isHovered = hoveredBlockId === lb.blockId;
               const palette = originPalette(lb.originKind);
               const nodeColor = palette.header;
-              const bodyFill = palette.body;
+              // カード本体は白背景（意味色はヘッダ帯・ボーダーで表現。メイン画面のフラットな作法に統一）
+              const bodyFill = '#fff';
               const bodyTextColor = palette.bodyText;
               const bodySubtleTextColor = palette.bodySubtle;
               const recipients = lb.node.recipients;

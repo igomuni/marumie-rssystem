@@ -43,7 +43,7 @@ import { runByokChat, LlmUpstreamError } from '@/client/lib/ai/byok-chat';
 import type { ClientGraphSource } from '@/client/lib/ai/client-tool-executor';
 import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
-import { SEMANTIC_DIRECT, SEMANTIC_SUBCONTRACT, SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
+import { TagChip } from '@/client/components/TagChip';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
 import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
@@ -4046,10 +4046,6 @@ export default function RealDataSankeyPage() {
                   border: '1px solid #e0e0e0', borderRadius: 4, padding: '1px 7px',
                   fontSize: META_FONT_PX, color: '#555', whiteSpace: 'nowrap',
                 };
-                const tag = (label: string, bg: string) => (
-                  <span style={{ background: bg, color: '#fff', borderRadius: 10, padding: '1px 8px',
-                    fontSize: META_FONT_PX, fontWeight: 700, whiteSpace: 'nowrap' }}>{label}</span>
-                );
                 return (
                   <div style={{ borderBottom: '1px solid #f0f0f0', padding: '7px 14px 9px', flexShrink: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -4065,9 +4061,9 @@ export default function RealDataSankeyPage() {
                       <span style={statChip}>階層 {sub.maxDepth}</span>
                     </div>
                     <div style={{ display: 'flex', gap: 5, marginTop: 6, flexWrap: 'wrap' }}>
-                      {tag(`直接 ${sub.directBlockCount}`, SEMANTIC_DIRECT)}
-                      {sub.subcontractBlockCount > 0 && tag(`再委託 ${sub.subcontractBlockCount}`, SEMANTIC_SUBCONTRACT)}
-                      {sub.separateOriginCount > 0 && tag(`別財源 ${sub.separateOriginCount}`, SEMANTIC_SEPARATE_ORIGIN)}
+                      <TagChip kind="direct" fontSize={META_FONT_PX}>直接 {sub.directBlockCount}</TagChip>
+                      {sub.subcontractBlockCount > 0 && <TagChip kind="subcontract" fontSize={META_FONT_PX}>再委託 {sub.subcontractBlockCount}</TagChip>}
+                      {sub.separateOriginCount > 0 && <TagChip kind="separate-origin" fontSize={META_FONT_PX}>別財源 {sub.separateOriginCount}</TagChip>}
                     </div>
                   </div>
                 );
