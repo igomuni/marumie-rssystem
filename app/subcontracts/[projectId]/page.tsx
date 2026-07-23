@@ -37,7 +37,7 @@ import {
 } from '@/app/lib/subcontract-layout';
 import { SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
 import { TagChip } from '@/client/components/TagChip';
-import { originKindLabel } from '@/client/components/subcontract/origin-kind';
+import { originKindLabel, originKindToTagKind, flowOriginToTagKind } from '@/client/components/subcontract/origin-kind';
 import { BlockInspector } from '@/client/components/subcontract/BlockInspector';
 import {
   computeSubcontractRibbonLayout,
@@ -2233,19 +2233,13 @@ function SubcontractDetailPageInner() {
           const lb = hoveredNodeStable.kind === 'block' ? hoveredNodeStable.block : null;
           const rf = hoveredNodeStable.kind === 'ribbonFlow' ? hoveredNodeStable.flow : null;
           const tipW = 300;
-          const palette = lb ? originPalette(lb.originKind) : null;
           const rfTargetBar = rf ? safeRibbonLayout.bars.find((b) => b.blockId === rf.targetBlock) ?? null : null;
-          const rfPalette = rfTargetBar ? originPalette(rfTargetBar.originKind) : null;
-          const rfEdgeStyle = rf ? flowEdgeStyle(rf.origin) : null;
           const rfSourceName = rf
             ? (rf.sourceBlock === null
               ? graph.projectName
               : (safeRibbonLayout.bars.find((b) => b.blockId === rf.sourceBlock)?.blockName ?? rf.sourceBlock))
             : '';
           const rfTargetName = rfTargetBar?.blockName ?? rf?.targetBlock ?? '';
-          const headerColor = isRoot ? COLOR_ROOT : rf ? (rfPalette?.header ?? rfEdgeStyle!.stroke) : palette!.header;
-          const bodyColor = isRoot ? COLOR_CONTEXT_BODY : rf ? (rfPalette?.body ?? '#f1f5f9') : palette!.body;
-          const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : rf ? (rfPalette?.bodyText ?? '#334155') : palette!.bodyText;
           const topRecipients = lb ? sortRecipients(lb.recipients, 'amount-desc').slice(0, 3) : [];
           const tipH = isRoot
             ? 126
@@ -2264,6 +2258,13 @@ function SubcontractDetailPageInner() {
           if (tipY < 4) tipY = mousePos.y + GAP;
           tipY = Math.max(4, Math.min(tipY, containerH - tipH - 4));
 
+          // タイトル横に出す意味タグ（メイン画面のツールチップと同じフラット白背景＋小タグの流儀）
+          const titleTag = isRoot
+            ? <TagChip kind="project" fontSize={scaleFont(9)}>事業</TagChip>
+            : rf
+              ? <TagChip kind={flowOriginToTagKind(rf.origin)} fontSize={scaleFont(9)}>{flowOriginLabel(rf.origin)}</TagChip>
+              : <TagChip kind={originKindToTagKind(lb!.originKind)} fontSize={scaleFont(9)}>{originKindLabel(lb!.originKind)}</TagChip>;
+          const titleText = isRoot ? graph.projectName : rf ? `${rfSourceName} → ${rfTargetName}` : lb!.blockName;
           return (
             <div style={{
               position: 'absolute',
@@ -2271,63 +2272,49 @@ function SubcontractDetailPageInner() {
               top: tipY,
               width: tipW,
               boxSizing: 'border-box',
-              border: `1px solid ${headerColor}`,
+              background: 'rgba(255,255,255,0.97)',
               borderRadius: 6,
-              background: bodyColor,
-              boxShadow: '0 8px 22px rgba(15,23,42,0.18)',
-              overflow: 'hidden',
+              padding: '6px 10px',
+              color: '#222',
+              lineHeight: 1.3,
+              wordBreak: 'break-word',
+              border: '1px solid #e0e0e0',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
               pointerEvents: 'none',
               zIndex: 20,
               fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             }}>
-              <div style={{
-                background: headerColor,
-                color: '#fff',
-                padding: '7px 10px',
-                fontSize: scaleFont(11),
-                fontWeight: 700,
-                lineHeight: 1.35,
-              }}>
-                {isRoot
-                  ? `事業 / PID ${graph.projectId}`
-                  : rf
-                    ? `フロー / ${flowOriginLabel(rf.origin)}`
-                    : `${palette!.badgeText} / ブロック ${lb!.blockId}`}
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 5 }}>
+                <span title={titleText} style={{ fontWeight: 600, fontSize: scaleFont(12), color: '#111', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {titleText}
+                </span>
+                <span style={{ flexShrink: 0 }}>{titleTag}</span>
               </div>
-              <div style={{ padding: '8px 10px', fontSize: scaleFont(11), lineHeight: 1.45, color: textColor }}>
+              <div style={{ fontSize: scaleFont(11), lineHeight: 1.45, color: '#555' }}>
                 {isRoot ? (
                   <>
-                    <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{graph.projectName}</div>
-                    <div>府省庁: {graph.ministry}</div>
-                    {visibleOrgChain.length > 0 && <div>担当組織: {visibleOrgChain.join(' / ')}</div>}
-                    <div>予算: {graph.budget > 0 ? formatYen(graph.budget) : '—'} / 支出: {graph.execution > 0 ? formatYen(graph.execution) : '—'}</div>
+                    <div>PID {graph.projectId} ・ {graph.ministry}</div>
+                    {visibleOrgChain.length > 0 && <div>{visibleOrgChain.join(' / ')}</div>}
+                    <div>予算 <b style={{ color: '#222' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</b> ・ 支出 <b style={{ color: '#222' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</b></div>
                   </>
                 ) : rf ? (
                   <>
-                    <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {rfSourceName} → {rfTargetName}
-                    </div>
-                    <div>{formatYen(Math.round(rf.amount))}</div>
-                    <div>
-                      {flowOriginLabel(rf.origin)}
-                      {rf.isReference && '（参考標記）'}
+                    <div><b style={{ color: '#222' }}>{formatYen(Math.round(rf.amount))}</b>
+                      {rf.isReference && ' ・ 参考標記'}
                       {rf.targetIncomingBlockCount >= 2 && ` ・ 合流 ${rf.targetIncomingBlockCount}本`}
                     </div>
                     {rf.note && (
-                      <div style={{ marginTop: 4, paddingTop: 4, borderTop: `1px solid ${headerColor}33` }}>
-                        補足: {rf.note}
-                      </div>
+                      <div style={{ marginTop: 4, paddingTop: 4, borderTop: '1px solid #eee' }}>補足: {rf.note}</div>
                     )}
                   </>
                 ) : (
                   <>
-                    <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{lb!.blockName}</div>
-                    <div>{formatYen(lb!.totalAmount)} / 支出先 {lb!.recipients.length.toLocaleString()}件</div>
-                    {lb!.role && <div>{lb!.role}</div>}
+                    <div><b style={{ color: '#222' }}>{formatYen(lb!.totalAmount)}</b> ・ 支出先 {lb!.recipients.length.toLocaleString()}件</div>
+                    {lb!.role && <div style={{ color: '#777' }}>{lb!.role}</div>}
                     {topRecipients.map((r, i) => (
-                      <div key={`${r.name}-${r.corporateNumber}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                      <div key={`${r.name}-${r.corporateNumber}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 1 }}>
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i + 1}. {r.name || '（氏名なし）'}</span>
-                        <span style={{ flexShrink: 0, fontWeight: 700 }}>{formatYen(r.amount)}</span>
+                        <span style={{ flexShrink: 0, color: '#222' }}>{formatYen(r.amount)}</span>
                       </div>
                     ))}
                   </>
