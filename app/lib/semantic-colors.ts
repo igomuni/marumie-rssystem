@@ -22,6 +22,11 @@
 export const SEMANTIC_PROJECT = '#4db870';
 /** 事業・予算側の濃色（総計・省庁・見出し用） */
 export const SEMANTIC_PROJECT_DEEP = '#3a9a5c';
+/**
+ * 事業側の濃緑ソリッド。白文字を載せる面（「事業」タグ・総計ノード）用で、
+ * 白文字とのコントラストが WCAG 4.5:1 を満たす（#3a9a5c は満たさないので白文字面には使わない）。
+ */
+export const SEMANTIC_PROJECT_SOLID = '#2d7d46';
 /** 直接支出（赤）。メインSankeyの recipient と同一 */
 export const SEMANTIC_DIRECT = '#d94545';
 /** 再委託（アンバー） */

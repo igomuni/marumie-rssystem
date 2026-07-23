@@ -36,7 +36,9 @@ import {
   NODE_PAD,
 } from '@/app/lib/subcontract-layout';
 import { SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
-import { TagChip, type TagKind } from '@/client/components/TagChip';
+import { TagChip } from '@/client/components/TagChip';
+import { originKindLabel } from '@/client/components/subcontract/origin-kind';
+import { BlockInspector } from '@/client/components/subcontract/BlockInspector';
 import {
   computeSubcontractRibbonLayout,
   ribbonFlowPath,
@@ -66,7 +68,7 @@ const COLOR_SUBCONTRACT_BODY = '#f5e3c0';
 const COLOR_DIRECT_BODY_TEXT = '#8f1f1f';
 const COLOR_SUBCONTRACT_BODY_TEXT = '#7a5312';
 const COLOR_DIRECT_BODY_SUBTLE = '#b33434';
-const COLOR_SUBCONTRACT_BODY_SUBTLE = '#a06c14';
+const COLOR_SUBCONTRACT_BODY_SUBTLE = '#855a0f'; // 淡アンバー背景で 4.5:1 を満たす濃さ（TagChip と共通）
 const COLOR_DIRECT_EDGE = 'rgba(217,69,69,0.48)';
 const COLOR_SUBCONTRACT_EDGE = 'rgba(217,149,43,0.55)';
 // 別財源ブロック（5-2の構造的に府省庁ルートでは説明できない財投借入・自己収入・利水者等）
@@ -176,20 +178,6 @@ function originKindBadgeColor(kind: BlockOriginKind): { bg: string; fg: string }
   }
 }
 
-function originKindLabel(kind: BlockOriginKind): string {
-  switch (kind) {
-    case 'direct': return '直接';
-    case 'subcontract': return '再委託';
-    case 'separate-origin-strong':
-    case 'separate-origin-broad':
-      return '別財源';
-  }
-}
-
-/** ブロックの originKind を共有 TagChip の kind に変換する（別財源の broad/strong は一律 separate-origin） */
-function originKindToTagKind(kind: BlockOriginKind): TagKind {
-  return kind === 'direct' ? 'direct' : kind === 'subcontract' ? 'subcontract' : 'separate-origin';
-}
 const COLOR_CONTEXT_BODY = '#d8f1df';
 const COLOR_CONTEXT_BODY_TEXT = '#1f6b3a';
 const COLOR_CONTEXT_BODY_SUBTLE = '#2d7d46';
@@ -546,72 +534,17 @@ function SidePane({
 
       </div>
 
-      {/* ブロックインスペクター（Phase 4: 図中ノード選択でこのブロックの詳細に切り替わる。
-          パンくずで事業へ戻る。タブに関わらず常設表示） */}
-      {block && (() => {
-        const FlowLine = ({ label, otherId, note }: { label: string; otherId: string | null; note?: string }) => {
-          const other = otherId ? blockById.get(otherId) : null;
-          return (
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, padding: '2px 0', minWidth: 0 }}>
-              <span style={{ fontSize: 10, color: '#94a3b8', flexShrink: 0, width: 44 }}>{label}</span>
-              {other ? (
-                <button
-                  onClick={() => onSelectBlock(other)}
-                  title={`${other.blockId} ${other.blockName} を選択`}
-                  style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer',
-                    fontSize: 11, color: '#1d4ed8', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  {other.blockId} {other.blockName}
-                </button>
-              ) : (
-                <span style={{ fontSize: 11, color: '#475569', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {note || '事業（直接支出）'}
-                </span>
-              )}
-            </div>
-          );
-        };
-        return (
-          <div style={{ padding: '9px 16px 11px', background: '#f8fafc', borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-              <button
-                onClick={onDeselectBlock}
-                title="事業の全体表示に戻る (Esc)"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#1d4ed8', fontSize: 11, fontWeight: 600, flexShrink: 0 }}
-              >← 事業に戻る</button>
-              <button
-                onClick={onDeselectBlock}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#64748b', fontSize: 14, flexShrink: 0 }}
-                aria-label="選択解除" title="選択解除 (Esc)"
-              >✕</button>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 5 }}>
-              <TagChip kind={originKindToTagKind(block.originKind)}>{originKindLabel(block.originKind)}</TagChip>
-              <span title={`${block.blockId} ${block.blockName}`} style={{ fontSize: 13, fontWeight: 700, color: '#111827', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                <span style={{ color: '#94a3b8', marginRight: 3 }}>{block.blockId}</span>{block.blockName}
-              </span>
-            </div>
-            <div style={{ display: 'flex', gap: 12, marginTop: 4, fontSize: 11, color: '#475569', flexWrap: 'wrap' }}>
-              <span>支出額 <b style={{ color: '#111827' }}>{block.totalAmount > 0 ? formatYen(block.totalAmount) : '金額内訳なし'}</b></span>
-              <span>支出先 <b style={{ color: '#111827' }}>{block.recipientCount.toLocaleString()}件</b></span>
-              {block.isTerminal && <span style={{ color: '#94a3b8' }}>終端（再委託なし）</span>}
-            </div>
-            {block.role && (
-              <div style={{ fontSize: 10.5, color: '#64748b', marginTop: 3, lineHeight: 1.45 }}>役割: {block.role}</div>
-            )}
-            {(selectedBlockFlows.incoming.length > 0 || selectedBlockFlows.outgoing.length > 0) && (
-              <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px dashed #e2e8f0' }}>
-                {selectedBlockFlows.incoming.map((f, i) => (
-                  <FlowLine key={`in-${i}`} label="受入元" otherId={f.sourceBlock} note={f.origin === 'direct' ? '事業（直接支出）' : undefined} />
-                ))}
-                {selectedBlockFlows.outgoing.map((f, i) => (
-                  <FlowLine key={`out-${i}`} label={f.origin === 'separate-origin' ? '別財源へ' : '再委託先'} otherId={f.targetBlock} />
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })()}
+      {/* ブロックインスペクター（Phase 4: 図中ノード選択でこのブロックの詳細に切り替わる） */}
+      {block && (
+        <BlockInspector
+          block={block}
+          incoming={selectedBlockFlows.incoming}
+          outgoing={selectedBlockFlows.outgoing}
+          blockById={blockById}
+          onSelectBlock={onSelectBlock}
+          onDeselect={onDeselectBlock}
+        />
+      )}
 
       {/* タブヘッダー */}
       <div style={{
