@@ -36,6 +36,9 @@ import {
   NODE_PAD,
 } from '@/app/lib/subcontract-layout';
 import { SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
+import { TagChip } from '@/client/components/TagChip';
+import { originKindLabel } from '@/client/components/subcontract/origin-kind';
+import { BlockInspector } from '@/client/components/subcontract/BlockInspector';
 import {
   computeSubcontractRibbonLayout,
   ribbonFlowPath,
@@ -65,7 +68,7 @@ const COLOR_SUBCONTRACT_BODY = '#f5e3c0';
 const COLOR_DIRECT_BODY_TEXT = '#8f1f1f';
 const COLOR_SUBCONTRACT_BODY_TEXT = '#7a5312';
 const COLOR_DIRECT_BODY_SUBTLE = '#b33434';
-const COLOR_SUBCONTRACT_BODY_SUBTLE = '#a06c14';
+const COLOR_SUBCONTRACT_BODY_SUBTLE = '#855a0f'; // 淡アンバー背景で 4.5:1 を満たす濃さ（TagChip と共通）
 const COLOR_DIRECT_EDGE = 'rgba(217,69,69,0.48)';
 const COLOR_SUBCONTRACT_EDGE = 'rgba(217,149,43,0.55)';
 // 別財源ブロック（5-2の構造的に府省庁ルートでは説明できない財投借入・自己収入・利水者等）
@@ -175,15 +178,6 @@ function originKindBadgeColor(kind: BlockOriginKind): { bg: string; fg: string }
   }
 }
 
-function originKindLabel(kind: BlockOriginKind): string {
-  switch (kind) {
-    case 'direct': return '直接';
-    case 'subcontract': return '再委託';
-    case 'separate-origin-strong':
-    case 'separate-origin-broad':
-      return '別財源';
-  }
-}
 const COLOR_CONTEXT_BODY = '#d8f1df';
 const COLOR_CONTEXT_BODY_TEXT = '#1f6b3a';
 const COLOR_CONTEXT_BODY_SUBTLE = '#2d7d46';
@@ -397,6 +391,16 @@ function SidePane({
   }
 
   const blockById = useMemo(() => new Map(graph.blocks.map((b) => [b.blockId, b])), [graph.blocks]);
+
+  // 選択中ブロックの入出フロー（ブロックインスペクターの「このブロックの流れ」用）。
+  // 受入元 = このブロックへ流入するフロー、再委託先 = このブロックから流出するフロー。
+  const selectedBlockFlows = useMemo(() => {
+    if (!block) return { incoming: [] as BlockEdge[], outgoing: [] as BlockEdge[] };
+    return {
+      incoming: graph.flows.filter((f) => f.targetBlock === block.blockId),
+      outgoing: graph.flows.filter((f) => f.sourceBlock === block.blockId),
+    };
+  }, [block, graph.flows]);
   const downstreamBlocks = useMemo(() => {
     if (!block) return [];
     const ids = graph.flows.filter((f) => f.sourceBlock === block.blockId).map((f) => f.targetBlock);
@@ -468,11 +472,12 @@ function SidePane({
       width: '100%',
       height: '100%',
       background: '#fff',
-      overflowY: 'auto',
+      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
     }}>
-      <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 2 }}>
+      {/* ヘッダー・インスペクター・タブは固定（/sankey-svg と同様に、スクロールはリスト部のみ） */}
+      <div style={{ flexShrink: 0, background: '#fff' }}>
       {/* 事業ヘッダー（常時表示） */}
       <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
@@ -499,12 +504,10 @@ function SidePane({
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>階層 {graph.maxDepth}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>ブロック {graph.totalBlockCount}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f9dddd', color: COLOR_DIRECT_BODY_SUBTLE, fontWeight: 700 }}>直接 {graph.directBlockCount}</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#faedcf', color: COLOR_SUBCONTRACT_BODY_SUBTLE, fontWeight: 700 }}>再委託 {Math.max(0, graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount)}</span>
+          <TagChip kind="direct" fontSize={PANEL_META_FONT_PX}>直接 {graph.directBlockCount}</TagChip>
+          <TagChip kind="subcontract" fontSize={PANEL_META_FONT_PX}>再委託 {Math.max(0, graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount)}</TagChip>
           {graph.separateOriginCount > 0 && (
-            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#ece5f5', color: COLOR_SEPARATE_ORIGIN_BODY_TEXT, fontWeight: 700 }}>
-              別財源 {graph.separateOriginCount}
-            </span>
+            <TagChip kind="separate-origin" fontSize={PANEL_META_FONT_PX}>別財源 {graph.separateOriginCount}</TagChip>
           )}
           {graph.hasMerge && (
             <span style={{ padding: '2px 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>
@@ -531,27 +534,16 @@ function SidePane({
 
       </div>
 
-      {/* 選択中ブロックバー（案C1: 選択解除の常設導線。タブに関わらず表示） */}
+      {/* ブロックインスペクター（Phase 4: 図中ノード選択でこのブロックの詳細に切り替わる） */}
       {block && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8,
-          padding: '6px 16px',
-          background: '#eff6ff',
-          borderBottom: `1px solid ${COLOR_PANEL_BORDER}`,
-        }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#1e40af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            選択中: {block.blockId} {block.blockName}
-          </span>
-          <button
-            onClick={onDeselectBlock}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#1e40af', fontSize: 14, flexShrink: 0 }}
-            aria-label="選択解除"
-            title="選択解除 (Esc)"
-          >✕</button>
-        </div>
+        <BlockInspector
+          block={block}
+          incoming={selectedBlockFlows.incoming}
+          outgoing={selectedBlockFlows.outgoing}
+          blockById={blockById}
+          onSelectBlock={onSelectBlock}
+          onDeselect={onDeselectBlock}
+        />
       )}
 
       {/* タブヘッダー */}
@@ -592,8 +584,8 @@ function SidePane({
       </div>
       </div>
 
-      {/* タブ本体 */}
-      <div style={{ padding: 12, flex: 1, minHeight: 0 }}>
+      {/* タブ本体 — ここだけがスクロールする（ヘッダ・タブは固定） */}
+      <div style={{ padding: 12, flex: 1, minHeight: 0, overflowY: 'auto' }}>
         {activeTab === 'flow' && (
           <>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -1249,12 +1241,16 @@ function SubcontractDetailPageInner() {
 
   // ノードクリック: 選択のみを変更する（案C1）。アクティブタブは動かさない。
   // 同一ノードの再クリックはトグル解除せず選択を維持する
+  // 図中ノード（フロー図バー/ブロック図カード）クリック（Phase 4）。
+  // 選択すると同時に支出先タブへ切り替え、そのブロックの支出先内訳（深掘り）を即表示する。
+  // ブロックインスペクター（左パネル上部）＋支出先タブ内訳で「ノードのインスペクター」を構成する。
   const handleNodeClick = useCallback((node: BlockNode) => {
     setSelectedBlock(node);
-    pushSelTabUrl(node.blockId, activeTab);
-  }, [activeTab]);
+    setActiveTab('recipients');
+    pushSelTabUrl(node.blockId, 'recipients');
+  }, []);
 
-  // フロー一覧/ブロック一覧の行から選択した場合も選択のみを変更する（案C1。タブは動かさない）
+  // フロー一覧/ブロック一覧の行から選択した場合は選択のみを変更する（タブは動かさない）
   const handleSelectFromList = useCallback((node: BlockNode) => {
     setSelectedBlock(node);
     pushSelTabUrl(node.blockId, activeTab);
@@ -1882,7 +1878,8 @@ function SubcontractDetailPageInner() {
               const isHovered = hoveredBlockId === lb.blockId;
               const palette = originPalette(lb.originKind);
               const nodeColor = palette.header;
-              const bodyFill = palette.body;
+              // カード本体は白背景（意味色はヘッダ帯・ボーダーで表現。メイン画面のフラットな作法に統一）
+              const bodyFill = '#fff';
               const bodyTextColor = palette.bodyText;
               const bodySubtleTextColor = palette.bodySubtle;
               const recipients = lb.node.recipients;
