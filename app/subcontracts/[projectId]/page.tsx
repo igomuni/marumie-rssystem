@@ -6,7 +6,7 @@
  *
  *   year : 年度（既存、2024|2025。既定2025）
  *   sel  : 選択中ブロックID（未選択時は省略）。選択・タブ変更は history.pushState（ブラウザバックで戻れる）
- *   tab  : アクティブタブの短縮コード（bg=予算・執行/bl=ブロック/rc=支出先/fl=流れ/ic=間接経費。既定'bl'は省略）
+ *   tab  : アクティブタブの短縮コード（fl=フロー/bl=ブロック/rc=支出先/ic=間接経費。既定'fl'は省略）
  *   z    : ズーム倍率（絶対スケール値、小数第2位）。history.replaceState（debounce後、履歴を汚さない）
  *   tx/ty: パン位置（transform.x / transform.y、整数px）。z と同じ replaceState 経路で同期
  *   view : 表示モード（block=ブロック図。既定のフロー図(ribbon)は省略）。replaceState で同期
@@ -289,10 +289,10 @@ type ViewMode = 'block' | 'ribbon';
 
 // ─── サイドパネル（タブ式） ──────────────────────────────────────────────
 
-type PaneTab = 'budget' | 'blocks' | 'recipients' | 'flow' | 'indirect-cost';
+type PaneTab = 'flow' | 'blocks' | 'recipients' | 'indirect-cost';
 
-const TAB_TO_CODE: Record<PaneTab, string> = { budget: 'bg', blocks: 'bl', recipients: 'rc', flow: 'fl', 'indirect-cost': 'ic' };
-const CODE_TO_TAB: Record<string, PaneTab> = { bg: 'budget', bl: 'blocks', rc: 'recipients', fl: 'flow', ic: 'indirect-cost' };
+const TAB_TO_CODE: Record<PaneTab, string> = { flow: 'fl', blocks: 'bl', recipients: 'rc', 'indirect-cost': 'ic' };
+const CODE_TO_TAB: Record<string, PaneTab> = { fl: 'flow', bl: 'blocks', rc: 'recipients', ic: 'indirect-cost' };
 
 /**
  * API が返す再委託グラフ（+ サンキーグラフから合成した予算・執行）。
@@ -329,7 +329,7 @@ function parseDetailUrlState(sp: { get(key: string): string | null }): Partial<D
 function pushSelTabUrl(sel: string | null, tab: PaneTab) {
   const p = new URLSearchParams(window.location.search);
   if (sel !== null) p.set('sel', sel); else p.delete('sel');
-  if (tab !== 'blocks') p.set('tab', TAB_TO_CODE[tab]); else p.delete('tab');
+  if (tab !== 'flow') p.set('tab', TAB_TO_CODE[tab]); else p.delete('tab');
   const qs = p.toString();
   window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
 }
@@ -455,12 +455,11 @@ function SidePane({
 
   const indirectCount = graph.indirectCosts.length;
 
-  // タブ定義（無効化判定込み）。メイン画面の「省庁/事業/支出先」と同型に
-  // 予算・執行/ブロック/支出先 を先頭3つに置き、流れ・間接経費を後続に残す。
-  // 支出先はブロック未選択なら事業全体、選択中はそのブロック内訳を出す
-  const budgetBreakdown = graph.budgetBreakdown ?? [];
+  // タブ定義（無効化判定込み）。フローを入口（初期選択）に置く。
+  // 支出先はブロック未選択なら事業全体、選択中はそのブロック内訳を出す。
+  // 予算・執行タブは一旦廃止（S1 でメイン画面と同型のパネル表示に統合予定。
+  // データ（graph.budgetSummary/budgetBreakdown）は API 側で保持済み）。
   const tabs: Array<{ key: PaneTab; label: string; count?: number; disabled?: boolean }> = [
-    { key: 'budget', label: '予算・執行', count: budgetBreakdown.length, disabled: budgetBreakdown.length === 0 && !graph.budgetSummary },
     { key: 'flow', label: 'フロー', count: graph.flows.length },
     { key: 'blocks', label: 'ブロック', count: graph.blocks.length },
     { key: 'recipients', label: '支出先', count: block ? block.recipients.length : graph.totalRecipientCount },
@@ -652,59 +651,6 @@ function SidePane({
                 />
               ));
             })()}
-          </>
-        )}
-
-        {activeTab === 'budget' && (
-          <>
-            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
-              {budgetBreakdown.length.toLocaleString()}件（歳出予算項目）
-            </div>
-            {graph.budgetSummary && (
-              <div style={{ display: 'flex', gap: 14, marginBottom: 10, flexWrap: 'wrap', fontSize: 11, color: '#555' }}>
-                <span>予算額 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.totalBudget)}</b></span>
-                <span>執行額 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.executedAmount)}</b></span>
-                {graph.budgetSummary.nextYearRequest > 0 && (
-                  <span>翌年度要求 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.nextYearRequest)}</b></span>
-                )}
-              </div>
-            )}
-            {budgetBreakdown.length === 0 && (
-              <div style={{ fontSize: 12, color: '#9ca3af', padding: '24px 12px', textAlign: 'center' }}>
-                予算・執行の内訳データがありません。
-              </div>
-            )}
-            {budgetBreakdown.map((bi, i) => {
-              // 歳出予算項目は 項/事項 の粒度差があるため、埋まっている方を主表示にする
-              const itemLabel = [bi.item, bi.subItem].filter(s => s && s.trim()).join(' / ');
-              const meta = [
-                bi.accountCategory,
-                itemLabel || null,
-                bi.note && bi.note.trim() ? `備考: ${bi.note}` : null,
-              ].filter(Boolean).join(' ・ ');
-              return (
-                <div key={`${bi.budgetType}-${i}`} style={{ borderBottom: '1px solid #f1f5f9', padding: '7px 0' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#333', minWidth: 0 }}>
-                      {bi.budgetType || '—'}
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                      {formatYen(bi.amount)}
-                    </span>
-                  </div>
-                  {meta && (
-                    <div title={meta} style={{ fontSize: 10.5, color: '#888', marginTop: 1, lineHeight: 1.45, wordBreak: 'break-all' }}>
-                      {meta}
-                    </div>
-                  )}
-                  {bi.nextYearRequestAmount > 0 && (
-                    <div style={{ fontSize: 10.5, color: '#888', marginTop: 1 }}>
-                      翌年度要求額 {formatYen(bi.nextYearRequestAmount)}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
           </>
         )}
 
@@ -1208,7 +1154,7 @@ function SubcontractDetailPageInner() {
   const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
   const hoverSuppressTimerRef = useRef<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [activeTab, setActiveTab] = useState<PaneTab>('blocks');
+  const [activeTab, setActiveTab] = useState<PaneTab>('flow');
   // 表示切り替え: フロー図（サンキー風横フロー・既定）/ ブロック図（縦ブロック図）。
   // 既定をフロー図にすることで、初期表示が /sankey-svg と同じ「左パネル＋横フロー」になる。
   // URL `view=block` でブロック図を復元（既定は省略）
@@ -1318,7 +1264,7 @@ function SubcontractDetailPageInner() {
     setLoading(true);
     setError(null);
     setSelectedBlock(null);
-    setActiveTab('blocks');
+    setActiveTab('flow');
     setHoveredNodeRaw(null);
     setProjectDetail(null);
     setOrgChain([]);
@@ -1340,7 +1286,7 @@ function SubcontractDetailPageInner() {
           setSelectedBlock(restoredBlock);
           // 案C1: タブは URL の tab（=最後にユーザーが選んだタブ）をそのまま復元する。
           // tab 省略時は既定の 'flow'（selがあっても recipients へ自動遷移しない）
-          setActiveTab(restore?.tab ?? 'blocks');
+          setActiveTab(restore?.tab ?? 'flow');
           setViewModeState(restore?.view ?? 'ribbon');
         } else {
           setSelectedBlock(null);
@@ -1548,7 +1494,7 @@ function SubcontractDetailPageInner() {
       } else {
         setSelectedBlock(null);
       }
-      setActiveTab(s.tab ?? 'blocks');
+      setActiveTab(s.tab ?? 'flow');
       setViewModeState(s.view ?? 'ribbon');
       if (s.zoom !== undefined && s.tx !== undefined && s.ty !== undefined) {
         suppressViewportWriteRef.current = true;
