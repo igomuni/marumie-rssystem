@@ -461,7 +461,7 @@ function SidePane({
   const budgetBreakdown = graph.budgetBreakdown ?? [];
   const tabs: Array<{ key: PaneTab; label: string; count?: number; disabled?: boolean }> = [
     { key: 'budget', label: '予算・執行', count: budgetBreakdown.length, disabled: budgetBreakdown.length === 0 && !graph.budgetSummary },
-    { key: 'flow', label: '流れ', count: graph.flows.length },
+    { key: 'flow', label: 'フロー', count: graph.flows.length },
     { key: 'blocks', label: 'ブロック', count: graph.blocks.length },
     { key: 'recipients', label: '支出先', count: block ? block.recipients.length : graph.totalRecipientCount },
     { key: 'indirect-cost', label: '間接経費', count: indirectCount, disabled: indirectCount === 0 },
@@ -621,15 +621,37 @@ function SidePane({
             {filteredFlows.length === 0 && (
               <div style={{ fontSize: 12, color: '#9ca3af' }}>該当するフローがありません</div>
             )}
-            {filteredFlows.map((flow, i) => (
-              <FlowListRow
-                key={`${flow.sourceBlock ?? 'root'}->${flow.targetBlock}-${i}`}
-                flow={flow}
-                graph={graph}
-                onSelectBlock={onSelectBlock}
-                scaleFont={scaleFont}
-              />
-            ))}
+            {/* 対象ブロックでグルーピング（合流は同一対象への複数流入を1グループに集約）。
+                並びはフロー図に合わせ金額順。ただし群は 直接→再委託→別財源 の順にし、
+                直接を再委託より上位に置く（移替の対象ブロックは originKind=direct のため直接群に入る）。 */}
+            {(() => {
+              const groups: { targetBlockId: string; incoming: BlockEdge[] }[] = [];
+              const idx = new Map<string, number>();
+              for (const f of filteredFlows) {
+                let gi = idx.get(f.targetBlock);
+                if (gi === undefined) { gi = groups.length; idx.set(f.targetBlock, gi); groups.push({ targetBlockId: f.targetBlock, incoming: [] }); }
+                groups[gi].incoming.push(f);
+              }
+              const tierOf = (blockId: string): number => {
+                const k = blockById.get(blockId)?.originKind;
+                return k === 'direct' ? 0 : k === 'subcontract' ? 1 : 2; // 別財源(separate-origin)は最後
+              };
+              const amountOf = (blockId: string): number => blockById.get(blockId)?.totalAmount ?? 0;
+              groups.sort((a, b) => {
+                const t = tierOf(a.targetBlockId) - tierOf(b.targetBlockId);
+                return t !== 0 ? t : amountOf(b.targetBlockId) - amountOf(a.targetBlockId);
+              });
+              return groups.map((g) => (
+                <FlowGroupRow
+                  key={g.targetBlockId}
+                  targetBlockId={g.targetBlockId}
+                  incoming={g.incoming}
+                  graph={graph}
+                  onSelectBlock={onSelectBlock}
+                  scaleFont={scaleFont}
+                />
+              ));
+            })()}
           </>
         )}
 
@@ -978,91 +1000,99 @@ function BlockListRow({ block, selected, onClick, scaleFont }: { block: BlockNod
   );
 }
 
-function FlowListRow({
-  flow, graph, onSelectBlock, scaleFont,
+/**
+ * 流れタブの1グループ = 1つの対象ブロックへの流入。
+ * 上段に「対象ブロック＋流入額（対象ブロックの totalAmount）」、下段に起点（上流）を列挙する。
+ * 合流（対象へ複数ブロックから流入）のときは起点が複数行になり、視認性を高める。
+ */
+function FlowGroupRow({
+  targetBlockId, incoming, graph, onSelectBlock, scaleFont,
 }: {
-  flow: BlockEdge;
+  targetBlockId: string;
+  incoming: BlockEdge[];
   graph: SubcontractGraph;
   onSelectBlock: (block: BlockNode) => void;
   scaleFont: (px: number) => number;
 }) {
-  const PANEL_LIST_NAME_FONT_PX = scaleFont(PANEL_LIST_NAME_FONT_PX_DEFAULT);
-  const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
+  const NAME_PX = scaleFont(PANEL_LIST_NAME_FONT_PX_DEFAULT);
+  const META_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
+  const VALUE_PX = scaleFont(PANEL_LIST_VALUE_FONT_PX_DEFAULT);
   const blockById = new Map(graph.blocks.map(b => [b.blockId, b]));
-  const sourceBlock = flow.sourceBlock ? blockById.get(flow.sourceBlock) ?? null : null;
-  const targetBlock = blockById.get(flow.targetBlock) ?? null;
-  const sourceLabel = flow.sourceBlock === null
-    ? `${graph.ministry}（直接）`
-    : sourceBlock ? `${sourceBlock.blockId} ${sourceBlock.blockName}` : flow.sourceBlock;
-  const targetLabel = targetBlock ? `${targetBlock.blockId} ${targetBlock.blockName}` : flow.targetBlock;
-  const badge = flowOriginBadgeColor(flow.origin);
+  const target = blockById.get(targetBlockId) ?? null;
+  const targetLabel = target ? `${target.blockId} ${target.blockName}` : targetBlockId;
+  const inflow = target ? target.totalAmount : 0;
+  const mergeCount = incoming[0]?.targetIncomingBlockCount ?? incoming.length;
+  const isMerge = mergeCount >= 2;
 
+  const notes = incoming.filter(f => f.note);
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 3,
-        borderBottom: '1px solid #f1f5f9',
-        padding: '6px 0',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: PANEL_META_FONT_PX, color: '#64748b' }}>
-        <span style={{
-          padding: '1px 6px',
-          borderRadius: 999,
-          background: badge.bg,
-          color: badge.fg,
-          fontWeight: 700,
-          flexShrink: 0,
-        }}>
-          {flowOriginLabel(flow.origin)}
-        </span>
-        {flow.targetIncomingBlockCount >= 2 && (
-          <span style={{ padding: '1px 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>
-            合流 {flow.targetIncomingBlockCount}本
-          </span>
-        )}
-        {flow.isReference && (
-          <span style={{ padding: '1px 6px', borderRadius: 999, background: '#f1f5f9', color: '#475569', fontWeight: 700 }}>
-            参考標記
-          </span>
-        )}
+    <div style={{ borderBottom: '1px solid #f1f5f9', padding: '7px 0' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+      {/* 上流（起点）: 左。合流時は複数行になる */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {incoming.map((f, i) => {
+          const src = f.sourceBlock ? blockById.get(f.sourceBlock) ?? null : null;
+          const srcLabel = f.sourceBlock === null
+            ? `${graph.ministry}（直接）`
+            : src ? `${src.blockId} ${src.blockName}` : f.sourceBlock;
+          const badge = flowOriginBadgeColor(f.origin);
+          return (
+            <div key={`${f.sourceBlock ?? 'root'}-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: META_PX, color: '#64748b', minWidth: 0 }}>
+              <span style={{ padding: '0 6px', borderRadius: 999, background: badge.bg, color: badge.fg, fontWeight: 700, flexShrink: 0, fontSize: Math.max(9, META_PX - 1) }}>
+                {flowOriginLabel(f.origin)}
+              </span>
+              {src ? (
+                <button
+                  onClick={() => onSelectBlock(src)}
+                  title={srcLabel}
+                  style={{ flex: 1, minWidth: 0, fontSize: META_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                >
+                  {srcLabel}
+                </button>
+              ) : (
+                <span title={srcLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {srcLabel}
+                </span>
+              )}
+              {f.isReference && <span style={{ color: '#94a3b8', flexShrink: 0 }}>参考</span>}
+            </div>
+          );
+        })}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#111827', minWidth: 0 }}>
-        {sourceBlock ? (
-          <button
-            onClick={() => onSelectBlock(sourceBlock)}
-            title={sourceLabel}
-            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-          >
-            {sourceLabel}
-          </button>
-        ) : (
-          <span title={sourceLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {sourceLabel}
+      {/* 矢印（上流→下流） */}
+      <span style={{ color: '#94a3b8', flexShrink: 0, fontSize: NAME_PX }}>→</span>
+      {/* 下流（対象ブロック）: 中央。合流バッジ＋対象名 */}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+        {isMerge && (
+          <span style={{ padding: '0 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700, fontSize: Math.max(9, META_PX - 1), flexShrink: 0 }}>
+            合流 {mergeCount}本
           </span>
         )}
-        <span style={{ color: '#94a3b8', flexShrink: 0 }}>→</span>
-        {targetBlock ? (
+        {target ? (
           <button
-            onClick={() => onSelectBlock(targetBlock)}
+            onClick={() => onSelectBlock(target)}
             title={targetLabel}
-            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            style={{ flex: 1, minWidth: 0, fontSize: NAME_PX, fontWeight: 600, color: '#111827', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           >
             {targetLabel}
           </button>
         ) : (
-          <span title={targetLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span title={targetLabel} style={{ flex: 1, minWidth: 0, fontSize: NAME_PX, fontWeight: 600, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {targetLabel}
           </span>
         )}
       </div>
-      {flow.note && (
-        <div title={flow.note} style={{ fontSize: PANEL_META_FONT_PX, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {flow.note}
-        </div>
-      )}
+      {/* 流入額（対象ブロックの合計）: 他タブと同様に行の右端へ右寄せ */}
+      <div title="対象ブロックへの流入額（合計）" style={{ fontSize: VALUE_PX, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>
+        {inflow > 0 ? formatYen(inflow) : '—'}
+      </div>
+    </div>
+    {/* 補足（note を持つ辺があれば列挙） */}
+    {notes.map((f, i) => (
+      <div key={`note-${i}`} title={f.note} style={{ fontSize: META_PX, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>
+        補足: {f.note}
+      </div>
+    ))}
     </div>
   );
 }
