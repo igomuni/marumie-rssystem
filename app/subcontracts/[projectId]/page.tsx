@@ -461,9 +461,9 @@ function SidePane({
   const budgetBreakdown = graph.budgetBreakdown ?? [];
   const tabs: Array<{ key: PaneTab; label: string; count?: number; disabled?: boolean }> = [
     { key: 'budget', label: '予算・執行', count: budgetBreakdown.length, disabled: budgetBreakdown.length === 0 && !graph.budgetSummary },
+    { key: 'flow', label: '流れ', count: graph.flows.length },
     { key: 'blocks', label: 'ブロック', count: graph.blocks.length },
     { key: 'recipients', label: '支出先', count: block ? block.recipients.length : graph.totalRecipientCount },
-    { key: 'flow', label: '流れ', count: graph.flows.length },
     { key: 'indirect-cost', label: '間接経費', count: indirectCount, disabled: indirectCount === 0 },
   ];
 
