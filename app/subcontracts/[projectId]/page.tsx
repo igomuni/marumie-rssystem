@@ -544,7 +544,7 @@ function SidePane({
             <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>事業概要</span>
           </button>
           {overviewOpen && (
-            <div style={{ fontSize: PANEL_META_FONT_PX, color: '#444', lineHeight: 1.55, marginTop: 6, wordBreak: 'break-all' }}>
+            <div style={{ fontSize: PANEL_META_FONT_PX, color: '#444', lineHeight: 1.55, marginTop: 6, maxHeight: 180, overflowY: 'auto', wordBreak: 'break-all' }}>
               {projectDetail.overview}
             </div>
           )}
