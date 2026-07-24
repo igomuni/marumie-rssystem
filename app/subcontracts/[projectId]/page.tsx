@@ -967,7 +967,9 @@ function FlowGroupRow({
   const target = blockById.get(targetBlockId) ?? null;
   const targetLabel = target ? `${target.blockId} ${target.blockName}` : targetBlockId;
   const inflow = target ? target.totalAmount : 0;
-  const mergeCount = incoming[0]?.targetIncomingBlockCount ?? incoming.length;
+  // 合流数は表示中（フィルタ後）の起点行数から導出する。構造的な targetIncomingBlockCount を
+  // 使うと、フィルタで一部の起点が除かれても「合流 N本」が全数のままになり行数と食い違うため。
+  const mergeCount = incoming.length;
   const isMerge = mergeCount >= 2;
 
   const notes = incoming.filter(f => f.note);
