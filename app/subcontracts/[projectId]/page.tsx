@@ -42,7 +42,6 @@ import {
 import { SEMANTIC_SEPARATE_ORIGIN, SEMANTIC_PROJECT } from '@/app/lib/semantic-colors';
 import { TagChip } from '@/client/components/TagChip';
 import { originKindLabel, originKindToTagKind, flowOriginToTagKind } from '@/client/components/subcontract/origin-kind';
-import { BlockInspector } from '@/client/components/subcontract/BlockInspector';
 import { getScoreBadgeColor } from '@/app/lib/quality-score-color';
 import {
   computeSubcontractRibbonLayout,
@@ -370,7 +369,6 @@ function SidePane({
   activeTab,
   onChangeTab,
   onSelectBlock,
-  onDeselectBlock,
   scaleFont,
 }: {
   block: BlockNode | null;
@@ -382,7 +380,6 @@ function SidePane({
   activeTab: PaneTab;
   onChangeTab: (tab: PaneTab) => void;
   onSelectBlock: (block: BlockNode) => void;
-  onDeselectBlock: () => void;
   scaleFont: (px: number) => number;
 }) {
   const PANEL_TITLE_FONT_PX = scaleFont(PANEL_TITLE_FONT_PX_DEFAULT);
@@ -426,15 +423,6 @@ function SidePane({
 
   const blockById = useMemo(() => new Map(graph.blocks.map((b) => [b.blockId, b])), [graph.blocks]);
 
-  // 選択中ブロックの入出フロー（ブロックインスペクターの「このブロックの流れ」用）。
-  // 受入元 = このブロックへ流入するフロー、再委託先 = このブロックから流出するフロー。
-  const selectedBlockFlows = useMemo(() => {
-    if (!block) return { incoming: [] as BlockEdge[], outgoing: [] as BlockEdge[] };
-    return {
-      incoming: graph.flows.filter((f) => f.targetBlock === block.blockId),
-      outgoing: graph.flows.filter((f) => f.sourceBlock === block.blockId),
-    };
-  }, [block, graph.flows]);
   const downstreamBlocks = useMemo(() => {
     if (!block) return [];
     const ids = graph.flows.filter((f) => f.sourceBlock === block.blockId).map((f) => f.targetBlock);
@@ -510,11 +498,8 @@ function SidePane({
       flexDirection: 'column',
     }}>
       {/* ヘッダー・インスペクター・タブは固定（/sankey-svg と同様に、スクロールはリスト部のみ） */}
-      <div style={{ flexShrink: 0, background: '#fff', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-      {/* 事業情報（ヘッダ＋品質スコア＋事業概要＋予算・執行）。
-          アコーディオン展開でタブを画面外へ押し出さないよう、この区画に上限高さ＋内部スクロールを持たせる */}
-      <div style={{ overflowY: 'auto', maxHeight: '52vh', flexShrink: 1, minHeight: 0 }}>
-      {/* 事業ヘッダー（常時表示） */}
+      <div style={{ flexShrink: 0, background: '#fff' }}>
+      {/* 事業ヘッダー（常時表示）。セクション並びはメイン画面と同じ 概要→品質→再委託→予算・執行 */}
       <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -548,22 +533,23 @@ function SidePane({
         </div>
       </div>
 
-      {/* 再委託（構造サマリ）— メイン画面の「再委託」節と同型。当ページはフロー詳細なので フロー↗ は出さない */}
-      <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
-        <div style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>再委託</div>
-        <div style={{ display: 'flex', gap: 6, marginTop: 5, flexWrap: 'wrap', fontSize: PANEL_META_FONT_PX }}>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>ブロック {graph.totalBlockCount}</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>階層 {graph.maxDepth}</span>
-        </div>
-        <div style={{ display: 'flex', gap: 5, marginTop: 6, flexWrap: 'wrap' }}>
-          <TagChip kind="direct" fontSize={PANEL_META_FONT_PX}>直接 {graph.directBlockCount}</TagChip>
-          <TagChip kind="subcontract" fontSize={PANEL_META_FONT_PX}>再委託 {Math.max(0, graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount)}</TagChip>
-          {graph.separateOriginCount > 0 && (
-            <TagChip kind="separate-origin" fontSize={PANEL_META_FONT_PX}>別財源 {graph.separateOriginCount}</TagChip>
+      {/* 事業概要（折りたたみ。メイン画面の事業概要アコーディオンと同型・並びも同じ先頭） */}
+      {projectDetail?.overview && (
+        <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
+          <button
+            onClick={() => setOverviewOpen(o => !o)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+          >
+            <span style={{ color: '#94a3b8', fontSize: 10 }}>{overviewOpen ? '▼' : '▶'}</span>
+            <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>事業概要</span>
+          </button>
+          {overviewOpen && (
+            <div style={{ fontSize: PANEL_META_FONT_PX, color: '#444', lineHeight: 1.55, marginTop: 6, wordBreak: 'break-all' }}>
+              {projectDetail.overview}
+            </div>
           )}
         </div>
-      </div>
+      )}
 
       {/* 品質スコアブロック（メイン画面と同型。既取得の /data/project-quality-scores から表示） */}
       {qualityScore && qualityScore.totalScore != null && (
@@ -613,23 +599,22 @@ function SidePane({
         </div>
       )}
 
-      {/* 事業概要（折りたたみ。メイン画面の事業概要アコーディオンと同型） */}
-      {projectDetail?.overview && (
-        <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
-          <button
-            onClick={() => setOverviewOpen(o => !o)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
-          >
-            <span style={{ color: '#94a3b8', fontSize: 10 }}>{overviewOpen ? '▼' : '▶'}</span>
-            <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>事業概要</span>
-          </button>
-          {overviewOpen && (
-            <div style={{ fontSize: PANEL_META_FONT_PX, color: '#444', lineHeight: 1.55, marginTop: 6, maxHeight: 220, overflowY: 'auto', wordBreak: 'break-all' }}>
-              {projectDetail.overview}
-            </div>
+      {/* 再委託（構造サマリ）— メイン画面の「再委託」節と同型。当ページはフロー詳細なので フロー↗ は出さない */}
+      <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
+        <div style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>再委託</div>
+        <div style={{ display: 'flex', gap: 6, marginTop: 5, flexWrap: 'wrap', fontSize: PANEL_META_FONT_PX }}>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>ブロック {graph.totalBlockCount}</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>階層 {graph.maxDepth}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 5, marginTop: 6, flexWrap: 'wrap' }}>
+          <TagChip kind="direct" fontSize={PANEL_META_FONT_PX}>直接 {graph.directBlockCount}</TagChip>
+          <TagChip kind="subcontract" fontSize={PANEL_META_FONT_PX}>再委託 {Math.max(0, graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount)}</TagChip>
+          {graph.separateOriginCount > 0 && (
+            <TagChip kind="separate-origin" fontSize={PANEL_META_FONT_PX}>別財源 {graph.separateOriginCount}</TagChip>
           )}
         </div>
-      )}
+      </div>
 
       {/* 予算・執行（折りたたみ。旧タブの内容を再統合。API 合成の budgetBreakdown を表示） */}
       {(graph.budgetSummary || (graph.budgetBreakdown?.length ?? 0) > 0) && (
@@ -658,7 +643,7 @@ function SidePane({
             })()}
           </button>
           {budgetOpen && (
-            <div style={{ marginTop: 6 }}>
+            <div style={{ marginTop: 6, maxHeight: 260, overflowY: 'auto' }}>
               {graph.budgetSummary && (
                 <div style={{ display: 'flex', gap: 14, marginBottom: 8, flexWrap: 'wrap', fontSize: PANEL_META_FONT_PX, color: '#555' }}>
                   <span>予算額 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.totalBudget)}</b></span>
@@ -686,19 +671,10 @@ function SidePane({
           )}
         </div>
       )}
-      </div>{/* 事業情報スクロール区画おわり */}
 
-      {/* ブロックインスペクター（Phase 4: 図中ノード選択でこのブロックの詳細に切り替わる） */}
-      {block && (
-        <BlockInspector
-          block={block}
-          incoming={selectedBlockFlows.incoming}
-          outgoing={selectedBlockFlows.outgoing}
-          blockById={blockById}
-          onSelectBlock={onSelectBlock}
-          onDeselect={onDeselectBlock}
-        />
-      )}
+      {/* ブロックインスペクター（Phase 4）は一旦非表示（ユーザー要望）。選択自体は
+          タブ内容（支出先＝ブロック内訳）とフロー図のハイライトに反映される。復活時は
+          BlockInspector と selectedBlockFlows を戻す。 */}
 
       {/* タブヘッダー */}
       <div style={{
@@ -2632,7 +2608,6 @@ function SubcontractDetailPageInner() {
             activeTab={activeTab}
             onChangeTab={(tab) => { setActiveTab(tab); pushSelTabUrl(selectedBlock?.blockId ?? null, tab); }}
             onSelectBlock={handleSelectFromList}
-            onDeselectBlock={handleDeselect}
             scaleFont={scaleFont}
           />
         </SidePanelChrome>
