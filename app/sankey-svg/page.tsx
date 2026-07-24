@@ -44,6 +44,7 @@ import type { ClientGraphSource } from '@/client/lib/ai/client-tool-executor';
 import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { TagChip } from '@/client/components/TagChip';
+import { getScoreBadgeColor } from '@/app/lib/quality-score-color';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
 import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
@@ -162,15 +163,6 @@ type ShiftLayoutNode = {
 function getZoomLabelScale(zoomK: number, baseZoomK: number): number {
   if (baseZoomK <= 0 || zoomK <= baseZoomK + 0.001) return 1;
   return Math.min(zoomK / baseZoomK, ZOOM_FONT_MAX_RATIO);
-}
-
-// 品質スコアバッジの色分け閾値（/quality のスコア解釈と揃える）
-const SCORE_BADGE_GOOD_MIN = 90;
-const SCORE_BADGE_WARN_MIN = 70;
-function getScoreBadgeColor(score: number): string {
-  if (score >= SCORE_BADGE_GOOD_MIN) return '#2e7d32';
-  if (score >= SCORE_BADGE_WARN_MIN) return '#f57c00';
-  return '#c62828';
 }
 
 /**

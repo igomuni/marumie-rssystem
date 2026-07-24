@@ -39,6 +39,7 @@ import { SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
 import { TagChip } from '@/client/components/TagChip';
 import { originKindLabel, originKindToTagKind, flowOriginToTagKind } from '@/client/components/subcontract/origin-kind';
 import { BlockInspector } from '@/client/components/subcontract/BlockInspector';
+import { getScoreBadgeColor } from '@/app/lib/quality-score-color';
 import {
   computeSubcontractRibbonLayout,
   ribbonFlowPath,
@@ -231,7 +232,20 @@ interface ProjectQualityOrg {
   office?: string;
   team?: string;
   unit?: string;
+  // 品質スコア本体（同ファイルに含まれる。メイン画面の品質スコアブロックと同項目）
+  totalScore?: number | null;
+  axisIdentify?: number | null;
+  axisPurpose?: number | null;
+  axisBudget?: number | null;
+  axisEffective?: number | null;
+  axisStructure?: number | null;
+  effectiveReason?: string | null;
+  aiSource?: string | null;
 }
+
+/** 品質スコア表示に使う項目だけ抜き出したもの */
+type QualityScore = Pick<ProjectQualityOrg,
+  'totalScore' | 'axisIdentify' | 'axisPurpose' | 'axisBudget' | 'axisEffective' | 'axisStructure' | 'effectiveReason' | 'aiSource'>;
 
 const ORG_LEVEL_LABELS = ['局庁', '部', '課', '室', '班', '係'];
 
@@ -346,6 +360,7 @@ function SidePane({
   block,
   graph,
   projectDetail,
+  qualityScore,
   orgChain,
   year,
   activeTab,
@@ -357,6 +372,7 @@ function SidePane({
   block: BlockNode | null;
   graph: SubcontractGraphWithBudget;
   projectDetail: ProjectDetail | null;
+  qualityScore: QualityScore | null;
   orgChain: string[];
   year: number;
   activeTab: PaneTab;
@@ -369,6 +385,8 @@ function SidePane({
   const PANEL_PRIMARY_VALUE_FONT_PX = scaleFont(PANEL_PRIMARY_VALUE_FONT_PX_DEFAULT);
   const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
   const [expandedRecipients, setExpandedRecipients] = useState<Set<number>>(new Set());
+  const [overviewOpen, setOverviewOpen] = useState(false);
+  const [budgetOpen, setBudgetOpen] = useState(false);
   const [recipientQuery, setRecipientQuery] = useState('');
   const [recipientSort, setRecipientSort] = useState<'amount-desc' | 'amount-asc' | 'name-asc'>('amount-desc');
   const [blockQuery, setBlockQuery] = useState('');
@@ -476,7 +494,10 @@ function SidePane({
       flexDirection: 'column',
     }}>
       {/* ヘッダー・インスペクター・タブは固定（/sankey-svg と同様に、スクロールはリスト部のみ） */}
-      <div style={{ flexShrink: 0, background: '#fff' }}>
+      <div style={{ flexShrink: 0, background: '#fff', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      {/* 事業情報（ヘッダ＋品質スコア＋事業概要＋予算・執行）。
+          アコーディオン展開でタブを画面外へ押し出さないよう、この区画に上限高さ＋内部スクロールを持たせる */}
+      <div style={{ overflowY: 'auto', maxHeight: '52vh', flexShrink: 1, minHeight: 0 }}>
       {/* 事業ヘッダー（常時表示） */}
       <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${COLOR_PANEL_BORDER}` }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
@@ -484,12 +505,19 @@ function SidePane({
             <div style={{ fontWeight: 700, fontSize: PANEL_TITLE_FONT_PX, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
               {graph.projectName}
             </div>
-            <div style={{ fontSize: PANEL_PRIMARY_VALUE_FONT_PX, fontWeight: 600, color: '#222', marginTop: 3 }}>
-              <span style={{ fontSize: PANEL_META_FONT_PX, color: '#aaa', fontWeight: 400, marginRight: 4 }}>予算</span>
-              {graph.budget > 0 ? formatYen(graph.budget) : '—'}
-            </div>
-            <div style={{ display: 'flex', gap: 10, marginTop: 2, fontSize: PANEL_META_FONT_PX, color: '#777' }}>
-              <span>執行 <strong style={{ color: '#111827' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</strong></span>
+            {/* 予算額 / 執行額（メイン画面と同じ2列＋1円単位のサブ表記） */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', columnGap: 12, rowGap: 4, marginTop: 5 }}>
+              {([['予算額', graph.budget], ['執行額', graph.execution]] as [string, number][]).map(([label, value]) => (
+                <div key={label} style={{ flex: `1 1 ${scaleFont(112)}px`, minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: PANEL_META_FONT_PX, color: '#aaa', fontWeight: 400, marginBottom: 1 }}>{label}</span>
+                  <span style={{ display: 'block', fontSize: PANEL_PRIMARY_VALUE_FONT_PX, fontWeight: 600, color: '#222', whiteSpace: 'nowrap' }}>
+                    {value > 0 ? formatYen(value) : '—'}
+                  </span>
+                  <span style={{ display: 'block', fontSize: PANEL_META_FONT_PX, color: '#999', marginTop: 1, whiteSpace: 'nowrap' }}>
+                    {value > 0 ? `${Math.round(value).toLocaleString()}円` : ''}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
           <ProjectReferenceLinks projectId={graph.projectId} projectName={graph.projectName} year={year} compact />
@@ -530,8 +558,110 @@ function SidePane({
             <div style={{ fontSize: 11, color: '#111827', lineHeight: 1.5 }}>{projectDetail.majorExpense}</div>
           </div>
         )}
-
       </div>
+
+      {/* 品質スコアブロック（メイン画面と同型。既取得の /data/project-quality-scores から表示） */}
+      {qualityScore && qualityScore.totalScore != null && (
+        <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>品質スコア</span>
+            <span
+              title="スコアの詳細は品質スコア一覧ページを参照"
+              style={{ background: getScoreBadgeColor(qualityScore.totalScore), color: '#fff', padding: '1px 8px', borderRadius: 10, fontSize: PANEL_META_FONT_PX, fontWeight: 700 }}>
+              {qualityScore.totalScore.toFixed(1)}
+            </span>
+            <a href={`/quality?year=${year}`} target="_blank" rel="noopener noreferrer"
+              title="品質スコア一覧ページを開く"
+              style={{ fontSize: PANEL_META_FONT_PX, color: '#4a90d9', textDecoration: 'none', marginLeft: 'auto', flexShrink: 0 }}
+            >一覧 ↗</a>
+          </div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 5, flexWrap: 'wrap' }}>
+            {([
+              ['特定可能性', qualityScore.axisIdentify],
+              ['使途', qualityScore.axisPurpose],
+              ['収支', qualityScore.axisBudget],
+              ['有効性', qualityScore.axisEffective],
+            ] as [string, number | null | undefined][]).map(([label, v]) => (
+              <span key={label} style={{ fontSize: PANEL_META_FONT_PX, color: '#777' }}>
+                {label} <span style={{ fontWeight: 600, color: '#555' }}>{v != null ? Math.round(v) : '—'}</span>
+              </span>
+            ))}
+            {qualityScore.axisStructure != null && (
+              <span style={{ fontSize: PANEL_META_FONT_PX, color: '#bbb' }}>構造 {Math.round(qualityScore.axisStructure)}（参考）</span>
+            )}
+          </div>
+          {qualityScore.effectiveReason && qualityScore.aiSource !== 'heuristic' && (
+            <div
+              title={`${qualityScore.effectiveReason}\n※実測成果ではなく成果設計の明確さの評価`}
+              style={{ fontSize: PANEL_META_FONT_PX, color: '#999', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              有効性根拠: {qualityScore.effectiveReason}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 事業概要（折りたたみ。メイン画面の事業概要アコーディオンと同型） */}
+      {projectDetail?.overview && (
+        <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
+          <button
+            onClick={() => setOverviewOpen(o => !o)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+          >
+            <span style={{ color: '#94a3b8', fontSize: 10 }}>{overviewOpen ? '▼' : '▶'}</span>
+            <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>事業概要</span>
+          </button>
+          {overviewOpen && (
+            <div style={{ fontSize: PANEL_META_FONT_PX, color: '#444', lineHeight: 1.55, marginTop: 6, maxHeight: 220, overflowY: 'auto', wordBreak: 'break-all' }}>
+              {projectDetail.overview}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 予算・執行（折りたたみ。旧タブの内容を再統合。API 合成の budgetBreakdown を表示） */}
+      {(graph.budgetSummary || (graph.budgetBreakdown?.length ?? 0) > 0) && (
+        <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
+          <button
+            onClick={() => setBudgetOpen(o => !o)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+          >
+            <span style={{ color: '#94a3b8', fontSize: 10 }}>{budgetOpen ? '▼' : '▶'}</span>
+            <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>予算・執行</span>
+            {(graph.budgetBreakdown?.length ?? 0) > 0 && (
+              <span style={{ fontSize: 10.5, color: '#aaa' }}>{graph.budgetBreakdown!.length}件</span>
+            )}
+          </button>
+          {budgetOpen && (
+            <div style={{ marginTop: 6 }}>
+              {graph.budgetSummary && (
+                <div style={{ display: 'flex', gap: 14, marginBottom: 8, flexWrap: 'wrap', fontSize: PANEL_META_FONT_PX, color: '#555' }}>
+                  <span>予算額 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.totalBudget)}</b></span>
+                  <span>執行額 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.executedAmount)}</b></span>
+                  {graph.budgetSummary.nextYearRequest > 0 && (
+                    <span>翌年度要求 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.nextYearRequest)}</b></span>
+                  )}
+                </div>
+              )}
+              {(graph.budgetBreakdown ?? []).map((bi, i) => {
+                const itemLabel = [bi.item, bi.subItem].filter(s => s && s.trim()).join(' / ');
+                const meta = [bi.accountCategory, itemLabel || null, bi.note?.trim() ? `備考: ${bi.note}` : null].filter(Boolean).join(' ・ ');
+                return (
+                  <div key={`${bi.budgetType}-${i}`} style={{ borderBottom: '1px solid #f1f5f9', padding: '6px 0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
+                      <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#333', minWidth: 0 }}>{bi.budgetType || '—'}</span>
+                      <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(bi.amount)}</span>
+                    </div>
+                    {meta && <div title={meta} style={{ fontSize: 10.5, color: '#888', marginTop: 1, lineHeight: 1.45, wordBreak: 'break-all' }}>{meta}</div>}
+                    {bi.nextYearRequestAmount > 0 && <div style={{ fontSize: 10.5, color: '#888', marginTop: 1 }}>翌年度要求額 {formatYen(bi.nextYearRequestAmount)}</div>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+      </div>{/* 事業情報スクロール区画おわり */}
 
       {/* ブロックインスペクター（Phase 4: 図中ノード選択でこのブロックの詳細に切り替わる） */}
       {block && (
@@ -1138,6 +1268,7 @@ function SubcontractDetailPageInner() {
   const [graph, setGraph] = useState<SubcontractGraph | null>(null);
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | null>(null);
   const [orgChain, setOrgChain] = useState<string[]>([]);
+  const [qualityScore, setQualityScore] = useState<QualityScore | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<BlockNode | null>(null);
@@ -1329,10 +1460,16 @@ function SubcontractDetailPageInner() {
               .filter(Boolean)
           : [];
         setOrgChain(chain);
+        setQualityScore(item ? {
+          totalScore: item.totalScore, axisIdentify: item.axisIdentify, axisPurpose: item.axisPurpose,
+          axisBudget: item.axisBudget, axisEffective: item.axisEffective, axisStructure: item.axisStructure,
+          effectiveReason: item.effectiveReason, aiSource: item.aiSource,
+        } : null);
       })
       .catch((e: Error) => {
         if (e.name === 'AbortError') return;
         setOrgChain([]);
+        setQualityScore(null);
       });
     return () => controller.abort();
   }, [graph, projectId, year]);
@@ -2453,6 +2590,7 @@ function SubcontractDetailPageInner() {
             block={selectedBlock}
             graph={graph}
             projectDetail={projectDetail}
+            qualityScore={qualityScore}
             orgChain={visibleOrgChain}
             year={year}
             activeTab={activeTab}
