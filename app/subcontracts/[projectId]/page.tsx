@@ -12,6 +12,10 @@
  *   view : 表示モード（block=ブロック図。既定のフロー図(ribbon)は省略）。replaceState で同期
  */
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
+import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
+import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
+import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type {
@@ -35,7 +39,7 @@ import {
   COLOR_ROOT,
   NODE_PAD,
 } from '@/app/lib/subcontract-layout';
-import { SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
+import { SEMANTIC_SEPARATE_ORIGIN, SEMANTIC_PROJECT } from '@/app/lib/semantic-colors';
 import { TagChip } from '@/client/components/TagChip';
 import { originKindLabel, originKindToTagKind, flowOriginToTagKind } from '@/client/components/subcontract/origin-kind';
 import { BlockInspector } from '@/client/components/subcontract/BlockInspector';
@@ -385,8 +389,20 @@ function SidePane({
   const PANEL_PRIMARY_VALUE_FONT_PX = scaleFont(PANEL_PRIMARY_VALUE_FONT_PX_DEFAULT);
   const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
   const [expandedRecipients, setExpandedRecipients] = useState<Set<number>>(new Set());
-  const [overviewOpen, setOverviewOpen] = useState(false);
+  const [overviewOpen, setOverviewOpen] = useState(true); // メイン同様、事業概要は既定で開く
   const [budgetOpen, setBudgetOpen] = useState(false);
+  // 品質スコア詳細ダイアログ（/quality と共通の ScoreDetailDialog。メイン画面と同型）
+  const [scoreDialogItem, setScoreDialogItem] = useState<QualityScoreItem | null>(null);
+  const [scoreDialogLoading, setScoreDialogLoading] = useState(false);
+  const scoreDialogData = useScoreDetailData(scoreDialogItem?.pid ?? null, String(year));
+  const openScoreDialog = useCallback((pid: string | number) => {
+    setScoreDialogLoading(true);
+    fetch(`/api/quality-scores/${pid}?year=${year}&full=1`)
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then((data: { score?: QualityScoreItem }) => { if (data.score) setScoreDialogItem(data.score); })
+      .catch(() => { /* スコアなし等は何もしない */ })
+      .finally(() => setScoreDialogLoading(false));
+  }, [year]);
   const [recipientQuery, setRecipientQuery] = useState('');
   const [recipientSort, setRecipientSort] = useState<'amount-desc' | 'amount-asc' | 'name-asc'>('amount-desc');
   const [blockQuery, setBlockQuery] = useState('');
@@ -522,42 +538,31 @@ function SidePane({
           </div>
           <ProjectReferenceLinks projectId={graph.projectId} projectName={graph.projectName} year={year} compact />
         </div>
+        {/* メイン画面と同型: 事業タグ＋PID＋省庁＋組織のみ（構造サマリは下の「再委託」節へ） */}
         <div style={{ display: 'flex', gap: 5, marginTop: 8, flexWrap: 'wrap', alignItems: 'center', fontSize: PANEL_META_FONT_PX }}>
-          <span style={{ background: '#2d7d46', color: '#fff', padding: '2px 7px', borderRadius: 10, fontWeight: 500 }}>事業</span>
-          <span style={{ color: '#aaa' }}>PID: {graph.projectId}</span>
+          <span style={{ background: SEMANTIC_PROJECT, color: '#fff', padding: '2px 7px', borderRadius: 10, fontWeight: 500 }}>事業</span>
+          <span style={{ color: '#aaa' }}>PID:{graph.projectId}</span>
           <span style={{ color: '#666' }}>{graph.ministry}</span>
           {orgChain.length > 0 && <span style={{ color: '#777' }}>{orgChain.join(' / ')}</span>}
           {!orgChain.length && projectDetail?.bureau && <span style={{ color: '#777' }}>{projectDetail.bureau}</span>}
-          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>階層 {graph.maxDepth}</span>
+        </div>
+      </div>
+
+      {/* 再委託（構造サマリ）— メイン画面の「再委託」節と同型。当ページはフロー詳細なので フロー↗ は出さない */}
+      <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
+        <div style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>再委託</div>
+        <div style={{ display: 'flex', gap: 6, marginTop: 5, flexWrap: 'wrap', fontSize: PANEL_META_FONT_PX }}>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>ブロック {graph.totalBlockCount}</span>
           <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>支出先 {graph.totalRecipientCount.toLocaleString()}</span>
+          <span style={{ padding: '2px 6px', borderRadius: 999, background: '#f3f4f6', color: '#475569' }}>階層 {graph.maxDepth}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 5, marginTop: 6, flexWrap: 'wrap' }}>
           <TagChip kind="direct" fontSize={PANEL_META_FONT_PX}>直接 {graph.directBlockCount}</TagChip>
           <TagChip kind="subcontract" fontSize={PANEL_META_FONT_PX}>再委託 {Math.max(0, graph.totalBlockCount - graph.directBlockCount - graph.separateOriginCount)}</TagChip>
           {graph.separateOriginCount > 0 && (
             <TagChip kind="separate-origin" fontSize={PANEL_META_FONT_PX}>別財源 {graph.separateOriginCount}</TagChip>
           )}
-          {graph.hasMerge && (
-            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>
-              合流 最大{graph.maxMergeWidth}本
-            </span>
-          )}
-          {graph.isInstitutionalFlowOnly && (
-            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#fef2f2', color: '#991b1b', fontWeight: 700 }}>
-              制度フロー
-            </span>
-          )}
-          {graph.indirectCosts.length > 0 && (
-            <span style={{ padding: '2px 6px', borderRadius: 999, background: '#ecfeff', color: '#0e7490', fontWeight: 700 }}>
-              間接経費 {graph.indirectCosts.length}
-            </span>
-          )}
         </div>
-        {projectDetail?.majorExpense && (
-          <div style={{ marginTop: 8, padding: '8px 10px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: 10, color: '#64748b', fontWeight: 700, marginBottom: 2 }}>主要経費</div>
-            <div style={{ fontSize: 11, color: '#111827', lineHeight: 1.5 }}>{projectDetail.majorExpense}</div>
-          </div>
-        )}
       </div>
 
       {/* 品質スコアブロック（メイン画面と同型。既取得の /data/project-quality-scores から表示） */}
@@ -566,10 +571,17 @@ function SidePane({
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>品質スコア</span>
             <span
-              title="スコアの詳細は品質スコア一覧ページを参照"
-              style={{ background: getScoreBadgeColor(qualityScore.totalScore), color: '#fff', padding: '1px 8px', borderRadius: 10, fontSize: PANEL_META_FONT_PX, fontWeight: 700 }}>
+              onClick={() => !scoreDialogLoading && openScoreDialog(graph.projectId)}
+              title="スコアの計算根拠・支出先一覧を表示"
+              style={{ background: getScoreBadgeColor(qualityScore.totalScore), color: '#fff', padding: '1px 8px', borderRadius: 10, fontSize: PANEL_META_FONT_PX, fontWeight: 700, cursor: scoreDialogLoading ? 'wait' : 'pointer' }}>
               {qualityScore.totalScore.toFixed(1)}
             </span>
+            <button
+              onClick={() => !scoreDialogLoading && openScoreDialog(graph.projectId)}
+              disabled={scoreDialogLoading}
+              title="スコアの計算根拠・支出先一覧を表示"
+              style={{ fontSize: PANEL_META_FONT_PX, color: '#4a90d9', background: 'none', border: 'none', padding: 0, cursor: scoreDialogLoading ? 'wait' : 'pointer', flexShrink: 0 }}
+            >{scoreDialogLoading ? '読込中…' : '詳細'}</button>
             <a href={`/quality?year=${year}`} target="_blank" rel="noopener noreferrer"
               title="品質スコア一覧ページを開く"
               style={{ fontSize: PANEL_META_FONT_PX, color: '#4a90d9', textDecoration: 'none', marginLeft: 'auto', flexShrink: 0 }}
@@ -631,6 +643,19 @@ function SidePane({
             {(graph.budgetBreakdown?.length ?? 0) > 0 && (
               <span style={{ fontSize: 10.5, color: '#aaa' }}>{graph.budgetBreakdown!.length}件</span>
             )}
+            {/* 折りたたみ時も会計区分バッジ＋予算額を出す（メイン画面と同型） */}
+            {(() => {
+              const cat = graph.accountCategory;
+              const badge = cat.includes('特別') && cat.includes('一般') ? { label: '一般特別', bg: '#8b5cf6' }
+                : cat.includes('特別') ? { label: '特別', bg: '#5f8ee8' }
+                : cat.includes('一般') ? { label: '一般', bg: '#e45f6f' } : null;
+              return (
+                <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'baseline', gap: 6, flexShrink: 0 }}>
+                  {badge && <span style={{ background: badge.bg, color: '#fff', padding: '1px 6px', borderRadius: 8, fontSize: 10, fontWeight: 600 }}>{badge.label}</span>}
+                  <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#222' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</span>
+                </span>
+              );
+            })()}
           </button>
           {budgetOpen && (
             <div style={{ marginTop: 6 }}>
@@ -889,7 +914,7 @@ function SidePane({
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline', width: '100%' }}>
-                        <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 400, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           <span style={{ color: '#94a3b8', marginRight: 4 }}>{blockId}</span>
                           {r.name}
                         </span>
@@ -997,7 +1022,7 @@ function SidePane({
             {graph.indirectCosts.map((cost, i) => (
               <div key={i} style={{ borderBottom: '1px solid #f1f5f9', padding: '8px 0' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#111827', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontSize: 12, fontWeight: 400, color: '#333', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {cost.category || cost.kind || '（項目なし）'}
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -1016,6 +1041,17 @@ function SidePane({
           </>
         )}
       </div>
+      {scoreDialogItem && createPortal(
+        <ScoreDetailDialog
+          item={scoreDialogItem}
+          onClose={() => setScoreDialogItem(null)}
+          recipients={scoreDialogData.recipients}
+          recipientsError={scoreDialogData.recipientsError}
+          projectInfo={scoreDialogData.projectInfo}
+          year={String(year)}
+        />,
+        document.body,
+      )}
     </aside>
   );
 }
@@ -1148,12 +1184,12 @@ function FlowGroupRow({
           <button
             onClick={() => onSelectBlock(target)}
             title={targetLabel}
-            style={{ flex: 1, minWidth: 0, fontSize: NAME_PX, fontWeight: 600, color: '#111827', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            style={{ flex: 1, minWidth: 0, fontSize: NAME_PX, fontWeight: 400, color: '#333', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           >
             {targetLabel}
           </button>
         ) : (
-          <span title={targetLabel} style={{ flex: 1, minWidth: 0, fontSize: NAME_PX, fontWeight: 600, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span title={targetLabel} style={{ flex: 1, minWidth: 0, fontSize: NAME_PX, fontWeight: 400, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {targetLabel}
           </span>
         )}
@@ -1205,7 +1241,7 @@ function RecipientCard({
       >
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-            <div title={recipient.name || '（氏名なし）'} style={{ flex: 1, minWidth: 0, fontWeight: 600, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{recipient.name || '（氏名なし）'}</div>
+            <div title={recipient.name || '（氏名なし）'} style={{ flex: 1, minWidth: 0, fontWeight: 400, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{recipient.name || '（氏名なし）'}</div>
             <div style={{ color: '#555', fontSize: PANEL_LIST_VALUE_FONT_PX, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(recipient.amount)}</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
