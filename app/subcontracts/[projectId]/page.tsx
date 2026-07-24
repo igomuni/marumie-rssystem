@@ -6,7 +6,7 @@
  *
  *   year : 年度（既存、2024|2025。既定2025）
  *   sel  : 選択中ブロックID（未選択時は省略）。選択・タブ変更は history.pushState（ブラウザバックで戻れる）
- *   tab  : アクティブタブの短縮コード（bg=予算・執行/bl=ブロック/rc=支出先/fl=流れ/ic=間接経費。既定'bl'は省略）
+ *   tab  : アクティブタブの短縮コード（fl=フロー/bl=ブロック/rc=支出先/ic=間接経費。既定'fl'は省略）
  *   z    : ズーム倍率（絶対スケール値、小数第2位）。history.replaceState（debounce後、履歴を汚さない）
  *   tx/ty: パン位置（transform.x / transform.y、整数px）。z と同じ replaceState 経路で同期
  *   view : 表示モード（block=ブロック図。既定のフロー図(ribbon)は省略）。replaceState で同期
@@ -37,7 +37,7 @@ import {
 } from '@/app/lib/subcontract-layout';
 import { SEMANTIC_SEPARATE_ORIGIN } from '@/app/lib/semantic-colors';
 import { TagChip } from '@/client/components/TagChip';
-import { originKindLabel } from '@/client/components/subcontract/origin-kind';
+import { originKindLabel, originKindToTagKind, flowOriginToTagKind } from '@/client/components/subcontract/origin-kind';
 import { BlockInspector } from '@/client/components/subcontract/BlockInspector';
 import {
   computeSubcontractRibbonLayout,
@@ -289,10 +289,10 @@ type ViewMode = 'block' | 'ribbon';
 
 // ─── サイドパネル（タブ式） ──────────────────────────────────────────────
 
-type PaneTab = 'budget' | 'blocks' | 'recipients' | 'flow' | 'indirect-cost';
+type PaneTab = 'flow' | 'blocks' | 'recipients' | 'indirect-cost';
 
-const TAB_TO_CODE: Record<PaneTab, string> = { budget: 'bg', blocks: 'bl', recipients: 'rc', flow: 'fl', 'indirect-cost': 'ic' };
-const CODE_TO_TAB: Record<string, PaneTab> = { bg: 'budget', bl: 'blocks', rc: 'recipients', fl: 'flow', ic: 'indirect-cost' };
+const TAB_TO_CODE: Record<PaneTab, string> = { flow: 'fl', blocks: 'bl', recipients: 'rc', 'indirect-cost': 'ic' };
+const CODE_TO_TAB: Record<string, PaneTab> = { fl: 'flow', bl: 'blocks', rc: 'recipients', ic: 'indirect-cost' };
 
 /**
  * API が返す再委託グラフ（+ サンキーグラフから合成した予算・執行）。
@@ -329,7 +329,7 @@ function parseDetailUrlState(sp: { get(key: string): string | null }): Partial<D
 function pushSelTabUrl(sel: string | null, tab: PaneTab) {
   const p = new URLSearchParams(window.location.search);
   if (sel !== null) p.set('sel', sel); else p.delete('sel');
-  if (tab !== 'blocks') p.set('tab', TAB_TO_CODE[tab]); else p.delete('tab');
+  if (tab !== 'flow') p.set('tab', TAB_TO_CODE[tab]); else p.delete('tab');
   const qs = p.toString();
   window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname);
 }
@@ -455,15 +455,14 @@ function SidePane({
 
   const indirectCount = graph.indirectCosts.length;
 
-  // タブ定義（無効化判定込み）。メイン画面の「省庁/事業/支出先」と同型に
-  // 予算・執行/ブロック/支出先 を先頭3つに置き、流れ・間接経費を後続に残す。
-  // 支出先はブロック未選択なら事業全体、選択中はそのブロック内訳を出す
-  const budgetBreakdown = graph.budgetBreakdown ?? [];
+  // タブ定義（無効化判定込み）。フローを入口（初期選択）に置く。
+  // 支出先はブロック未選択なら事業全体、選択中はそのブロック内訳を出す。
+  // 予算・執行タブは一旦廃止（S1 でメイン画面と同型のパネル表示に統合予定。
+  // データ（graph.budgetSummary/budgetBreakdown）は API 側で保持済み）。
   const tabs: Array<{ key: PaneTab; label: string; count?: number; disabled?: boolean }> = [
-    { key: 'budget', label: '予算・執行', count: budgetBreakdown.length, disabled: budgetBreakdown.length === 0 && !graph.budgetSummary },
+    { key: 'flow', label: 'フロー', count: graph.flows.length },
     { key: 'blocks', label: 'ブロック', count: graph.blocks.length },
     { key: 'recipients', label: '支出先', count: block ? block.recipients.length : graph.totalRecipientCount },
-    { key: 'flow', label: '流れ', count: graph.flows.length },
     { key: 'indirect-cost', label: '間接経費', count: indirectCount, disabled: indirectCount === 0 },
   ];
 
@@ -621,68 +620,37 @@ function SidePane({
             {filteredFlows.length === 0 && (
               <div style={{ fontSize: 12, color: '#9ca3af' }}>該当するフローがありません</div>
             )}
-            {filteredFlows.map((flow, i) => (
-              <FlowListRow
-                key={`${flow.sourceBlock ?? 'root'}->${flow.targetBlock}-${i}`}
-                flow={flow}
-                graph={graph}
-                onSelectBlock={onSelectBlock}
-                scaleFont={scaleFont}
-              />
-            ))}
-          </>
-        )}
-
-        {activeTab === 'budget' && (
-          <>
-            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
-              {budgetBreakdown.length.toLocaleString()}件（歳出予算項目）
-            </div>
-            {graph.budgetSummary && (
-              <div style={{ display: 'flex', gap: 14, marginBottom: 10, flexWrap: 'wrap', fontSize: 11, color: '#555' }}>
-                <span>予算額 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.totalBudget)}</b></span>
-                <span>執行額 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.executedAmount)}</b></span>
-                {graph.budgetSummary.nextYearRequest > 0 && (
-                  <span>翌年度要求 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.nextYearRequest)}</b></span>
-                )}
-              </div>
-            )}
-            {budgetBreakdown.length === 0 && (
-              <div style={{ fontSize: 12, color: '#9ca3af', padding: '24px 12px', textAlign: 'center' }}>
-                予算・執行の内訳データがありません。
-              </div>
-            )}
-            {budgetBreakdown.map((bi, i) => {
-              // 歳出予算項目は 項/事項 の粒度差があるため、埋まっている方を主表示にする
-              const itemLabel = [bi.item, bi.subItem].filter(s => s && s.trim()).join(' / ');
-              const meta = [
-                bi.accountCategory,
-                itemLabel || null,
-                bi.note && bi.note.trim() ? `備考: ${bi.note}` : null,
-              ].filter(Boolean).join(' ・ ');
-              return (
-                <div key={`${bi.budgetType}-${i}`} style={{ borderBottom: '1px solid #f1f5f9', padding: '7px 0' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#333', minWidth: 0 }}>
-                      {bi.budgetType || '—'}
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                      {formatYen(bi.amount)}
-                    </span>
-                  </div>
-                  {meta && (
-                    <div title={meta} style={{ fontSize: 10.5, color: '#888', marginTop: 1, lineHeight: 1.45, wordBreak: 'break-all' }}>
-                      {meta}
-                    </div>
-                  )}
-                  {bi.nextYearRequestAmount > 0 && (
-                    <div style={{ fontSize: 10.5, color: '#888', marginTop: 1 }}>
-                      翌年度要求額 {formatYen(bi.nextYearRequestAmount)}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {/* 対象ブロックでグルーピング（合流は同一対象への複数流入を1グループに集約）。
+                並びはフロー図に合わせ金額順。ただし群は 直接→再委託→別財源 の順にし、
+                直接を再委託より上位に置く（移替の対象ブロックは originKind=direct のため直接群に入る）。 */}
+            {(() => {
+              const groups: { targetBlockId: string; incoming: BlockEdge[] }[] = [];
+              const idx = new Map<string, number>();
+              for (const f of filteredFlows) {
+                let gi = idx.get(f.targetBlock);
+                if (gi === undefined) { gi = groups.length; idx.set(f.targetBlock, gi); groups.push({ targetBlockId: f.targetBlock, incoming: [] }); }
+                groups[gi].incoming.push(f);
+              }
+              const tierOf = (blockId: string): number => {
+                const k = blockById.get(blockId)?.originKind;
+                return k === 'direct' ? 0 : k === 'subcontract' ? 1 : 2; // 別財源(separate-origin)は最後
+              };
+              const amountOf = (blockId: string): number => blockById.get(blockId)?.totalAmount ?? 0;
+              groups.sort((a, b) => {
+                const t = tierOf(a.targetBlockId) - tierOf(b.targetBlockId);
+                return t !== 0 ? t : amountOf(b.targetBlockId) - amountOf(a.targetBlockId);
+              });
+              return groups.map((g) => (
+                <FlowGroupRow
+                  key={g.targetBlockId}
+                  targetBlockId={g.targetBlockId}
+                  incoming={g.incoming}
+                  graph={graph}
+                  onSelectBlock={onSelectBlock}
+                  scaleFont={scaleFont}
+                />
+              ));
+            })()}
           </>
         )}
 
@@ -978,91 +946,97 @@ function BlockListRow({ block, selected, onClick, scaleFont }: { block: BlockNod
   );
 }
 
-function FlowListRow({
-  flow, graph, onSelectBlock, scaleFont,
+/**
+ * 流れタブの1グループ = 1つの対象ブロックへの流入。
+ * 上段に「対象ブロック＋流入額（対象ブロックの totalAmount）」、下段に起点（上流）を列挙する。
+ * 合流（対象へ複数ブロックから流入）のときは起点が複数行になり、視認性を高める。
+ */
+function FlowGroupRow({
+  targetBlockId, incoming, graph, onSelectBlock, scaleFont,
 }: {
-  flow: BlockEdge;
+  targetBlockId: string;
+  incoming: BlockEdge[];
   graph: SubcontractGraph;
   onSelectBlock: (block: BlockNode) => void;
   scaleFont: (px: number) => number;
 }) {
-  const PANEL_LIST_NAME_FONT_PX = scaleFont(PANEL_LIST_NAME_FONT_PX_DEFAULT);
-  const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
+  const NAME_PX = scaleFont(PANEL_LIST_NAME_FONT_PX_DEFAULT);
+  const META_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
+  const VALUE_PX = scaleFont(PANEL_LIST_VALUE_FONT_PX_DEFAULT);
   const blockById = new Map(graph.blocks.map(b => [b.blockId, b]));
-  const sourceBlock = flow.sourceBlock ? blockById.get(flow.sourceBlock) ?? null : null;
-  const targetBlock = blockById.get(flow.targetBlock) ?? null;
-  const sourceLabel = flow.sourceBlock === null
-    ? `${graph.ministry}（直接）`
-    : sourceBlock ? `${sourceBlock.blockId} ${sourceBlock.blockName}` : flow.sourceBlock;
-  const targetLabel = targetBlock ? `${targetBlock.blockId} ${targetBlock.blockName}` : flow.targetBlock;
-  const badge = flowOriginBadgeColor(flow.origin);
+  const target = blockById.get(targetBlockId) ?? null;
+  const targetLabel = target ? `${target.blockId} ${target.blockName}` : targetBlockId;
+  const inflow = target ? target.totalAmount : 0;
+  // 合流数は表示中（フィルタ後）の起点行数から導出する。構造的な targetIncomingBlockCount を
+  // 使うと、フィルタで一部の起点が除かれても「合流 N本」が全数のままになり行数と食い違うため。
+  const mergeCount = incoming.length;
+  const isMerge = mergeCount >= 2;
 
+  const notes = incoming.filter(f => f.note);
+  // 他タブと同じ2行構成に合わせる。上流→下流を縦方向で表現し、
+  // 上段=起点（上流。合流時は複数行）、下段=「→ 対象ブロック」＋流入額（右寄せ）。
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 3,
-        borderBottom: '1px solid #f1f5f9',
-        padding: '6px 0',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: PANEL_META_FONT_PX, color: '#64748b' }}>
-        <span style={{
-          padding: '1px 6px',
-          borderRadius: 999,
-          background: badge.bg,
-          color: badge.fg,
-          fontWeight: 700,
-          flexShrink: 0,
-        }}>
-          {flowOriginLabel(flow.origin)}
-        </span>
-        {flow.targetIncomingBlockCount >= 2 && (
-          <span style={{ padding: '1px 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>
-            合流 {flow.targetIncomingBlockCount}本
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, borderBottom: '1px solid #f1f5f9', padding: '7px 0', minWidth: 0 }}>
+      {/* 上段: 起点（上流）。合流時は複数行になる */}
+      {incoming.map((f, i) => {
+        const src = f.sourceBlock ? blockById.get(f.sourceBlock) ?? null : null;
+        const srcLabel = f.sourceBlock === null
+          ? `${graph.ministry}（直接）`
+          : src ? `${src.blockId} ${src.blockName}` : f.sourceBlock;
+        const badge = flowOriginBadgeColor(f.origin);
+        return (
+          <div key={`${f.sourceBlock ?? 'root'}-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: META_PX, color: '#64748b', minWidth: 0 }}>
+            <span style={{ padding: '0 6px', borderRadius: 999, background: badge.bg, color: badge.fg, fontWeight: 700, flexShrink: 0, fontSize: Math.max(9, META_PX - 1) }}>
+              {flowOriginLabel(f.origin)}
+            </span>
+            {src ? (
+              <button
+                onClick={() => onSelectBlock(src)}
+                title={srcLabel}
+                style={{ flex: 1, minWidth: 0, fontSize: META_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >
+                {srcLabel}
+              </button>
+            ) : (
+              <span title={srcLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {srcLabel}
+              </span>
+            )}
+            {f.isReference && <span style={{ color: '#94a3b8', flexShrink: 0 }}>参考</span>}
+          </div>
+        );
+      })}
+      {/* 下段: → 対象ブロック（下流）＋流入額（右寄せ・他タブと同様） */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, minWidth: 0, marginTop: 1 }}>
+        <span style={{ color: '#94a3b8', flexShrink: 0, fontSize: NAME_PX }}>→</span>
+        {isMerge && (
+          <span style={{ padding: '0 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700, fontSize: Math.max(9, META_PX - 1), flexShrink: 0 }}>
+            合流 {mergeCount}本
           </span>
         )}
-        {flow.isReference && (
-          <span style={{ padding: '1px 6px', borderRadius: 999, background: '#f1f5f9', color: '#475569', fontWeight: 700 }}>
-            参考標記
-          </span>
-        )}
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#111827', minWidth: 0 }}>
-        {sourceBlock ? (
+        {target ? (
           <button
-            onClick={() => onSelectBlock(sourceBlock)}
-            title={sourceLabel}
-            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-          >
-            {sourceLabel}
-          </button>
-        ) : (
-          <span title={sourceLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {sourceLabel}
-          </span>
-        )}
-        <span style={{ color: '#94a3b8', flexShrink: 0 }}>→</span>
-        {targetBlock ? (
-          <button
-            onClick={() => onSelectBlock(targetBlock)}
+            onClick={() => onSelectBlock(target)}
             title={targetLabel}
-            style={{ flex: 1, minWidth: 0, fontSize: PANEL_LIST_NAME_FONT_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            style={{ flex: 1, minWidth: 0, fontSize: NAME_PX, fontWeight: 600, color: '#111827', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           >
             {targetLabel}
           </button>
         ) : (
-          <span title={targetLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span title={targetLabel} style={{ flex: 1, minWidth: 0, fontSize: NAME_PX, fontWeight: 600, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {targetLabel}
           </span>
         )}
+        <span title="対象ブロックへの流入額（合計）" style={{ fontSize: VALUE_PX, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          {inflow > 0 ? formatYen(inflow) : '—'}
+        </span>
       </div>
-      {flow.note && (
-        <div title={flow.note} style={{ fontSize: PANEL_META_FONT_PX, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {flow.note}
+      {/* 補足（note を持つ辺があれば列挙） */}
+      {notes.map((f, i) => (
+        <div key={`note-${i}`} title={f.note} style={{ fontSize: META_PX, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 14 }}>
+          補足: {f.note}
         </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -1178,7 +1152,7 @@ function SubcontractDetailPageInner() {
   const [isHoverSuppressed, setIsHoverSuppressed] = useState(false);
   const hoverSuppressTimerRef = useRef<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [activeTab, setActiveTab] = useState<PaneTab>('blocks');
+  const [activeTab, setActiveTab] = useState<PaneTab>('flow');
   // 表示切り替え: フロー図（サンキー風横フロー・既定）/ ブロック図（縦ブロック図）。
   // 既定をフロー図にすることで、初期表示が /sankey-svg と同じ「左パネル＋横フロー」になる。
   // URL `view=block` でブロック図を復元（既定は省略）
@@ -1288,7 +1262,7 @@ function SubcontractDetailPageInner() {
     setLoading(true);
     setError(null);
     setSelectedBlock(null);
-    setActiveTab('blocks');
+    setActiveTab('flow');
     setHoveredNodeRaw(null);
     setProjectDetail(null);
     setOrgChain([]);
@@ -1310,7 +1284,7 @@ function SubcontractDetailPageInner() {
           setSelectedBlock(restoredBlock);
           // 案C1: タブは URL の tab（=最後にユーザーが選んだタブ）をそのまま復元する。
           // tab 省略時は既定の 'flow'（selがあっても recipients へ自動遷移しない）
-          setActiveTab(restore?.tab ?? 'blocks');
+          setActiveTab(restore?.tab ?? 'flow');
           setViewModeState(restore?.view ?? 'ribbon');
         } else {
           setSelectedBlock(null);
@@ -1518,7 +1492,7 @@ function SubcontractDetailPageInner() {
       } else {
         setSelectedBlock(null);
       }
-      setActiveTab(s.tab ?? 'blocks');
+      setActiveTab(s.tab ?? 'flow');
       setViewModeState(s.view ?? 'ribbon');
       if (s.zoom !== undefined && s.tx !== undefined && s.ty !== undefined) {
         suppressViewportWriteRef.current = true;
@@ -2233,19 +2207,13 @@ function SubcontractDetailPageInner() {
           const lb = hoveredNodeStable.kind === 'block' ? hoveredNodeStable.block : null;
           const rf = hoveredNodeStable.kind === 'ribbonFlow' ? hoveredNodeStable.flow : null;
           const tipW = 300;
-          const palette = lb ? originPalette(lb.originKind) : null;
           const rfTargetBar = rf ? safeRibbonLayout.bars.find((b) => b.blockId === rf.targetBlock) ?? null : null;
-          const rfPalette = rfTargetBar ? originPalette(rfTargetBar.originKind) : null;
-          const rfEdgeStyle = rf ? flowEdgeStyle(rf.origin) : null;
           const rfSourceName = rf
             ? (rf.sourceBlock === null
               ? graph.projectName
               : (safeRibbonLayout.bars.find((b) => b.blockId === rf.sourceBlock)?.blockName ?? rf.sourceBlock))
             : '';
           const rfTargetName = rfTargetBar?.blockName ?? rf?.targetBlock ?? '';
-          const headerColor = isRoot ? COLOR_ROOT : rf ? (rfPalette?.header ?? rfEdgeStyle!.stroke) : palette!.header;
-          const bodyColor = isRoot ? COLOR_CONTEXT_BODY : rf ? (rfPalette?.body ?? '#f1f5f9') : palette!.body;
-          const textColor = isRoot ? COLOR_CONTEXT_BODY_TEXT : rf ? (rfPalette?.bodyText ?? '#334155') : palette!.bodyText;
           const topRecipients = lb ? sortRecipients(lb.recipients, 'amount-desc').slice(0, 3) : [];
           const tipH = isRoot
             ? 126
@@ -2264,6 +2232,13 @@ function SubcontractDetailPageInner() {
           if (tipY < 4) tipY = mousePos.y + GAP;
           tipY = Math.max(4, Math.min(tipY, containerH - tipH - 4));
 
+          // タイトル横に出す意味タグ（メイン画面のツールチップと同じフラット白背景＋小タグの流儀）
+          const titleTag = isRoot
+            ? <TagChip kind="project" fontSize={scaleFont(9)}>事業</TagChip>
+            : rf
+              ? <TagChip kind={flowOriginToTagKind(rf.origin)} fontSize={scaleFont(9)}>{flowOriginLabel(rf.origin)}</TagChip>
+              : <TagChip kind={originKindToTagKind(lb!.originKind)} fontSize={scaleFont(9)}>{originKindLabel(lb!.originKind)}</TagChip>;
+          const titleText = isRoot ? graph.projectName : rf ? `${rfSourceName} → ${rfTargetName}` : lb!.blockName;
           return (
             <div style={{
               position: 'absolute',
@@ -2271,63 +2246,49 @@ function SubcontractDetailPageInner() {
               top: tipY,
               width: tipW,
               boxSizing: 'border-box',
-              border: `1px solid ${headerColor}`,
+              background: 'rgba(255,255,255,0.97)',
               borderRadius: 6,
-              background: bodyColor,
-              boxShadow: '0 8px 22px rgba(15,23,42,0.18)',
-              overflow: 'hidden',
+              padding: '6px 10px',
+              color: '#222',
+              lineHeight: 1.3,
+              wordBreak: 'break-word',
+              border: '1px solid #e0e0e0',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
               pointerEvents: 'none',
               zIndex: 20,
               fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             }}>
-              <div style={{
-                background: headerColor,
-                color: '#fff',
-                padding: '7px 10px',
-                fontSize: scaleFont(11),
-                fontWeight: 700,
-                lineHeight: 1.35,
-              }}>
-                {isRoot
-                  ? `事業 / PID ${graph.projectId}`
-                  : rf
-                    ? `フロー / ${flowOriginLabel(rf.origin)}`
-                    : `${palette!.badgeText} / ブロック ${lb!.blockId}`}
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 5 }}>
+                <span title={titleText} style={{ fontWeight: 600, fontSize: scaleFont(12), color: '#111', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {titleText}
+                </span>
+                <span style={{ flexShrink: 0 }}>{titleTag}</span>
               </div>
-              <div style={{ padding: '8px 10px', fontSize: scaleFont(11), lineHeight: 1.45, color: textColor }}>
+              <div style={{ fontSize: scaleFont(11), lineHeight: 1.45, color: '#555' }}>
                 {isRoot ? (
                   <>
-                    <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{graph.projectName}</div>
-                    <div>府省庁: {graph.ministry}</div>
-                    {visibleOrgChain.length > 0 && <div>担当組織: {visibleOrgChain.join(' / ')}</div>}
-                    <div>予算: {graph.budget > 0 ? formatYen(graph.budget) : '—'} / 支出: {graph.execution > 0 ? formatYen(graph.execution) : '—'}</div>
+                    <div>PID {graph.projectId} ・ {graph.ministry}</div>
+                    {visibleOrgChain.length > 0 && <div>{visibleOrgChain.join(' / ')}</div>}
+                    <div>予算 <b style={{ color: '#222' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</b> ・ 支出 <b style={{ color: '#222' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</b></div>
                   </>
                 ) : rf ? (
                   <>
-                    <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {rfSourceName} → {rfTargetName}
-                    </div>
-                    <div>{formatYen(Math.round(rf.amount))}</div>
-                    <div>
-                      {flowOriginLabel(rf.origin)}
-                      {rf.isReference && '（参考標記）'}
+                    <div><b style={{ color: '#222' }}>{formatYen(Math.round(rf.amount))}</b>
+                      {rf.isReference && ' ・ 参考標記'}
                       {rf.targetIncomingBlockCount >= 2 && ` ・ 合流 ${rf.targetIncomingBlockCount}本`}
                     </div>
                     {rf.note && (
-                      <div style={{ marginTop: 4, paddingTop: 4, borderTop: `1px solid ${headerColor}33` }}>
-                        補足: {rf.note}
-                      </div>
+                      <div style={{ marginTop: 4, paddingTop: 4, borderTop: '1px solid #eee' }}>補足: {rf.note}</div>
                     )}
                   </>
                 ) : (
                   <>
-                    <div style={{ fontWeight: 700, color: '#111827', marginBottom: 4 }}>{lb!.blockName}</div>
-                    <div>{formatYen(lb!.totalAmount)} / 支出先 {lb!.recipients.length.toLocaleString()}件</div>
-                    {lb!.role && <div>{lb!.role}</div>}
+                    <div><b style={{ color: '#222' }}>{formatYen(lb!.totalAmount)}</b> ・ 支出先 {lb!.recipients.length.toLocaleString()}件</div>
+                    {lb!.role && <div style={{ color: '#777' }}>{lb!.role}</div>}
                     {topRecipients.map((r, i) => (
-                      <div key={`${r.name}-${r.corporateNumber}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                      <div key={`${r.name}-${r.corporateNumber}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 1 }}>
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i + 1}. {r.name || '（氏名なし）'}</span>
-                        <span style={{ flexShrink: 0, fontWeight: 700 }}>{formatYen(r.amount)}</span>
+                        <span style={{ flexShrink: 0, color: '#222' }}>{formatYen(r.amount)}</span>
                       </div>
                     ))}
                   </>
