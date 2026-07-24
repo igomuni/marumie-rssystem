@@ -42,7 +42,7 @@ import {
 import { SEMANTIC_SEPARATE_ORIGIN, SEMANTIC_PROJECT } from '@/app/lib/semantic-colors';
 import { TagChip } from '@/client/components/TagChip';
 import { originKindLabel, originKindToTagKind, flowOriginToTagKind } from '@/client/components/subcontract/origin-kind';
-import { getScoreBadgeColor } from '@/app/lib/quality-score-color';
+import { QualityScoreBlock } from '@/client/components/quality/QualityScoreBlock';
 import {
   computeSubcontractRibbonLayout,
   ribbonFlowPath,
@@ -551,53 +551,14 @@ function SidePane({
         </div>
       )}
 
-      {/* 品質スコアブロック（メイン画面と同型。既取得の /data/project-quality-scores から表示） */}
-      {qualityScore && qualityScore.totalScore != null && (
-        <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>品質スコア</span>
-            <span
-              onClick={() => !scoreDialogLoading && openScoreDialog(graph.projectId)}
-              title="スコアの計算根拠・支出先一覧を表示"
-              style={{ background: getScoreBadgeColor(qualityScore.totalScore), color: '#fff', padding: '1px 8px', borderRadius: 10, fontSize: PANEL_META_FONT_PX, fontWeight: 700, cursor: scoreDialogLoading ? 'wait' : 'pointer' }}>
-              {qualityScore.totalScore.toFixed(1)}
-            </span>
-            <button
-              onClick={() => !scoreDialogLoading && openScoreDialog(graph.projectId)}
-              disabled={scoreDialogLoading}
-              title="スコアの計算根拠・支出先一覧を表示"
-              style={{ fontSize: PANEL_META_FONT_PX, color: '#4a90d9', background: 'none', border: 'none', padding: 0, cursor: scoreDialogLoading ? 'wait' : 'pointer', flexShrink: 0 }}
-            >{scoreDialogLoading ? '読込中…' : '詳細'}</button>
-            <a href={`/quality?year=${year}`} target="_blank" rel="noopener noreferrer"
-              title="品質スコア一覧ページを開く"
-              style={{ fontSize: PANEL_META_FONT_PX, color: '#4a90d9', textDecoration: 'none', marginLeft: 'auto', flexShrink: 0 }}
-            >一覧 ↗</a>
-          </div>
-          <div style={{ display: 'flex', gap: 10, marginTop: 5, flexWrap: 'wrap' }}>
-            {([
-              ['特定可能性', qualityScore.axisIdentify],
-              ['使途', qualityScore.axisPurpose],
-              ['収支', qualityScore.axisBudget],
-              ['有効性', qualityScore.axisEffective],
-            ] as [string, number | null | undefined][]).map(([label, v]) => (
-              <span key={label} style={{ fontSize: PANEL_META_FONT_PX, color: '#777' }}>
-                {label} <span style={{ fontWeight: 600, color: '#555' }}>{v != null ? Math.round(v) : '—'}</span>
-              </span>
-            ))}
-            {qualityScore.axisStructure != null && (
-              <span style={{ fontSize: PANEL_META_FONT_PX, color: '#bbb' }}>構造 {Math.round(qualityScore.axisStructure)}（参考）</span>
-            )}
-          </div>
-          {qualityScore.effectiveReason && qualityScore.aiSource !== 'heuristic' && (
-            <div
-              title={`${qualityScore.effectiveReason}\n※実測成果ではなく成果設計の明確さの評価`}
-              style={{ fontSize: PANEL_META_FONT_PX, color: '#999', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-            >
-              有効性根拠: {qualityScore.effectiveReason}
-            </div>
-          )}
-        </div>
-      )}
+      {/* 品質スコアブロック（メイン画面と共有コンポーネント。既取得の /data/project-quality-scores を渡す） */}
+      <QualityScoreBlock
+        score={qualityScore}
+        year={year}
+        scaleFont={scaleFont}
+        onOpenDetail={() => openScoreDialog(graph.projectId)}
+        detailLoading={scoreDialogLoading}
+      />
 
       {/* 再委託（構造サマリ）— メイン画面の「再委託」節と同型。当ページはフロー詳細なので フロー↗ は出さない */}
       <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
