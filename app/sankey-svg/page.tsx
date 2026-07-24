@@ -45,6 +45,8 @@ import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { TagChip } from '@/client/components/TagChip';
 import { QualityScoreBlock } from '@/client/components/quality/QualityScoreBlock';
+import { getAccountBadgeStyle } from '@/app/lib/account-badge';
+import { BudgetExecutionSection } from '@/client/components/BudgetExecutionSection';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
 import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
@@ -207,20 +209,6 @@ function useProjectPidCache<T>(
   return cache;
 }
 
-function getAccountBadgeStyle(category?: string | null): { label: string; background: string } | null {
-  if (!category) return null;
-  const generalColor = '#e45f6f';
-  const specialColor = '#5f8ee8';
-  if (category === 'general') return { label: '一般', background: generalColor };
-  if (category === 'special') return { label: '特別', background: specialColor };
-  if (category === 'both') {
-    return {
-      label: '一般特別',
-      background: `linear-gradient(to right, ${generalColor} 0 50%, ${specialColor} 50% 100%)`,
-    };
-  }
-  return null;
-}
 
 function parseSearchParams(search: string): Partial<SankeyUrlState> {
   const p = new URLSearchParams(search);
@@ -4001,199 +3989,19 @@ export default function RealDataSankeyPage() {
                 );
               })()}
 
-              {/* 予算・執行アコーディオン — project-budget / project-spending（非集約）のみ */}
-              {selectedProjectBudgetNode && (() => {
-                const summary = selectedProjectBudgetNode.budgetSummary;
-                const breakdown = selectedProjectBudgetNode.budgetBreakdown ?? [];
-                if (!summary && breakdown.length === 0) return null;
-
-                const formatBreakdownAmount = (value: number) => formatYen(value);
-                const renderText = (value: string) => value.trim() || '-';
-                const summaryAccountItems = (summary?.accountSummaries ?? []).filter(item => item.totalBudget > 0);
-                const accountTotals = summaryAccountItems.length > 0
-                  ? summaryAccountItems.reduce((m, item) => {
-                    const label = item.accountCategory === '一般会計' ? '一般' : item.accountCategory === '特別会計' ? '特別' : '';
-                    if (label) m.set(label, (m.get(label) ?? 0) + item.totalBudget);
-                    return m;
-                  }, new Map<string, number>())
-                  : breakdown.reduce((m, item) => {
-                    const label = item.accountCategory === '一般会計' ? '一般' : item.accountCategory === '特別会計' ? '特別' : '';
-                    if (label) m.set(label, (m.get(label) ?? 0) + item.amount);
-                    return m;
-                  }, new Map<string, number>());
-                const toAccountBadgeKey = (value: string) => {
-                  if (value === '一般会計' || value === '一般') return 'general';
-                  if (value === '特別会計' || value === '特別') return 'special';
-                  return null;
-                };
-                const renderAccountBadge = (value: string) => {
-                  const badge = getAccountBadgeStyle(toAccountBadgeKey(value));
-                  if (!badge) return null;
-                  return (
-                    <span style={{
-                      background: badge.background,
-                      color: '#fff',
-                      padding: '1px 6px',
-                      borderRadius: 8,
-                      fontSize: Math.max(9, META_FONT_PX - 1),
-                      fontWeight: 700,
-                      lineHeight: 1.4,
-                      whiteSpace: 'nowrap',
-                    }}>
-                      {badge.label}
-                    </span>
-                  );
-                };
-                const accountBadges = (['一般', '特別'] as const)
-                  .map(label => ({ label, amount: accountTotals.get(label) ?? 0 }))
-                  .filter(item => item.amount > 0);
-                const totalBreakdownAmount = breakdown.reduce((s, item) => s + item.amount, 0);
-                const cardStyle: React.CSSProperties = {
-                  border: '1px solid #e8edf3',
-                  borderRadius: 6,
-                  background: '#fff',
-                  padding: '8px 9px',
-                };
-                const cardHeaderStyle: React.CSSProperties = {
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  justifyContent: 'space-between',
-                  gap: 8,
-                  marginBottom: 6,
-                };
-                const cardTitleStyle: React.CSSProperties = {
-                  minWidth: 0,
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  gap: 6,
-                  flexWrap: 'wrap',
-                  color: '#333',
-                  fontSize: PANEL_META_FONT_PX,
-                  fontWeight: 600,
-                };
-                const miniLabelStyle: React.CSSProperties = {
-                  fontSize: META_FONT_PX,
-                  color: '#999',
-                  marginRight: 3,
-                };
-                const metaGridStyle: React.CSSProperties = {
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                  gap: '5px 10px',
-                  fontSize: META_FONT_PX,
-                  lineHeight: 1.45,
-                };
-                const renderMeta = (label: string, value: string) => (
-                  <div style={{ minWidth: 0 }}>
-                    <span style={miniLabelStyle}>{label}</span>
-                    <span style={{ color: '#555', wordBreak: 'break-all' }}>{renderText(value)}</span>
-                  </div>
-                );
-
-                return (
-                  <div style={{ borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', padding: '2px 14px 1px', gap: 4 }}>
-                      <button type="button" onClick={() => setIsBudgetExecutionExpanded(v => !v)}
-                        style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
-                      >
-                        <span style={{ fontSize: META_FONT_PX, color: '#888' }}>{isBudgetExecutionExpanded ? '▼' : '▶'}</span>
-                        <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>予算・執行</span>
-                        {breakdown.length > 0 && (
-                          <span style={{ fontSize: META_FONT_PX, color: '#999', fontWeight: 500 }}>
-                            {breakdown.length.toLocaleString()}件
-                          </span>
-                        )}
-                      </button>
-                    </div>
-                    {accountBadges.length > 0 && (
-                      <div style={{ padding: '0 14px 2px', display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', columnGap: 12, rowGap: 4, minWidth: 0 }}>
-                        {accountBadges.map(item => (
-                          <div key={item.label} style={{ flex: `1 1 ${scaleSize(112)}px`, minWidth: 0 }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 1, minWidth: 0 }}>
-                              {renderAccountBadge(item.label)}
-                              <span style={{ display: 'block', fontSize: PANEL_PRIMARY_VALUE_FONT_PX, fontWeight: 600, color: '#222', whiteSpace: 'nowrap' }}>
-                                {formatBreakdownAmount(item.amount)}
-                              </span>
-                            </span>
-                            <span style={{ display: 'block', fontSize: META_FONT_PX, color: '#999', marginTop: 1, whiteSpace: 'nowrap' }}>
-                              {Math.round(item.amount).toLocaleString()}円
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {isBudgetExecutionExpanded && (
-                      <div style={{ padding: '0 14px 10px', fontSize: PANEL_META_FONT_PX, color: '#444' }}>
-                        {breakdown.length > 0 && summary && totalBreakdownAmount !== summary.totalBudget && (
-                          <div style={{ color: '#b26a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 6, padding: 6, marginBottom: 8, lineHeight: 1.45 }}>
-                            2-1合計と2-2内訳合計に差があります: {formatBreakdownAmount((summary?.totalBudget ?? 0) - totalBreakdownAmount)}
-                          </div>
-                        )}
-                        {breakdown.length === 0 ? (
-                          <p style={{ color: '#aaa', margin: 0 }}>歳出項目内訳がありません</p>
-                        ) : (
-                          <>
-                            <div style={{
-                              display: 'grid',
-                              gap: 7,
-                              ...(breakdown.length > 1 ? { maxHeight: budgetExecutionListHeight, overflowY: 'auto' as const } : { overflowY: 'visible' as const }),
-                              paddingRight: 2,
-                            }}>
-                              {breakdown.map((item, index) => (
-                                <div key={`${item.accountCategory}-${item.account}-${item.subAccount}-${item.budgetType}-${item.item}-${item.subItem}-${index}`} style={cardStyle}>
-                                  <div style={cardHeaderStyle}>
-                                    <div style={cardTitleStyle}>
-                                      {renderAccountBadge(item.accountCategory)}
-                                      <span style={{ color: '#999', fontWeight: 500 }}>{renderText(item.budgetType)}</span>
-                                    </div>
-                                    <div style={{ color: '#222', fontWeight: 700, whiteSpace: 'nowrap', fontSize: PANEL_LIST_VALUE_FONT_PX }}>
-                                      {formatBreakdownAmount(item.amount)}
-                                    </div>
-                                  </div>
-                                  <div style={metaGridStyle}>
-                                    {renderMeta('会計', item.account)}
-                                    {renderMeta('勘定', item.subAccount)}
-                                    {renderMeta('項', item.item)}
-                                    {renderMeta('目', item.subItem)}
-                                  </div>
-                                  {item.note.trim() && (
-                                    <div style={{ marginTop: 5, fontSize: META_FONT_PX, lineHeight: 1.45 }}>
-                                      <span style={miniLabelStyle}>補足</span>
-                                      <span style={{ color: '#555', wordBreak: 'break-all' }}>{item.note}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                            {breakdown.length > 1 && (
-                              <div
-                                role="separator"
-                                aria-orientation="horizontal"
-                                aria-label="予算・執行カードリストの高さを変更"
-                                title="ドラッグで高さを変更"
-                                onMouseDown={e => {
-                                  e.preventDefault();
-                                  budgetExecutionResizeRef.current = { startY: e.clientY, startH: budgetExecutionListHeight };
-                                  setIsResizingBudgetExecution(true);
-                                }}
-                                onDoubleClick={() => setBudgetExecutionListHeight(BUDGET_EXECUTION_LIST_HEIGHT_DEFAULT)}
-                                style={{
-                                  height: 10, cursor: 'ns-resize',
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  userSelect: 'none',
-                                }}
-                                data-pan-disabled
-                              >
-                                <div style={{ width: 32, height: 3, borderRadius: 2, background: '#d0d0d0' }} />
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+              {/* 予算・執行アコーディオン — project-budget / project-spending（非集約）のみ。共有コンポーネント */}
+              {selectedProjectBudgetNode && (
+                <BudgetExecutionSection
+                  budgetSummary={selectedProjectBudgetNode.budgetSummary}
+                  budgetBreakdown={selectedProjectBudgetNode.budgetBreakdown ?? []}
+                  scaleFont={scaleFont}
+                  expanded={isBudgetExecutionExpanded}
+                  onToggleExpanded={() => setIsBudgetExecutionExpanded(v => !v)}
+                  listHeight={budgetExecutionListHeight}
+                  onResizeStart={(e) => { e.preventDefault(); budgetExecutionResizeRef.current = { startY: e.clientY, startH: budgetExecutionListHeight }; setIsResizingBudgetExecution(true); }}
+                  onResizeReset={() => setBudgetExecutionListHeight(BUDGET_EXECUTION_LIST_HEIGHT_DEFAULT)}
+                />
+              )}
 
               {/* 省庁 / 事業 / 支出先 3タブ */}
               {panelSections && (() => {

@@ -26,7 +26,8 @@ import type {
   BlockOriginKind,
   FlowOrigin,
 } from '@/types/subcontract';
-import type { BudgetBreakdownItem } from '@/types/sankey-svg';
+import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
+import { BudgetExecutionSection } from '@/client/components/BudgetExecutionSection';
 import type { ProjectDetail } from '@/types/project-details';
 import { ProjectReferenceLinks } from '@/components/subcontracts/ProjectReferenceLinks';
 import {
@@ -317,7 +318,7 @@ const CODE_TO_TAB: Record<string, PaneTab> = { fl: 'flow', bl: 'blocks', rc: 're
  */
 type SubcontractGraphWithBudget = SubcontractGraph & {
   budgetBreakdown?: BudgetBreakdownItem[];
-  budgetSummary?: { totalBudget: number; executedAmount: number; nextYearRequest: number } | null;
+  budgetSummary?: BudgetSummary | null;
 };
 
 interface DetailUrlState {
@@ -577,61 +578,15 @@ function SidePane({
         </div>
       </div>
 
-      {/* 予算・執行（折りたたみ。旧タブの内容を再統合。API 合成の budgetBreakdown を表示） */}
-      {(graph.budgetSummary || (graph.budgetBreakdown?.length ?? 0) > 0) && (
-        <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
-          <button
-            onClick={() => setBudgetOpen(o => !o)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
-          >
-            <span style={{ color: '#94a3b8', fontSize: 10 }}>{budgetOpen ? '▼' : '▶'}</span>
-            <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>予算・執行</span>
-            {(graph.budgetBreakdown?.length ?? 0) > 0 && (
-              <span style={{ fontSize: 10.5, color: '#aaa' }}>{graph.budgetBreakdown!.length}件</span>
-            )}
-            {/* 折りたたみ時も会計区分バッジ＋予算額を出す（メイン画面と同型） */}
-            {(() => {
-              const cat = graph.accountCategory;
-              const badge = cat.includes('特別') && cat.includes('一般') ? { label: '一般特別', bg: '#8b5cf6' }
-                : cat.includes('特別') ? { label: '特別', bg: '#5f8ee8' }
-                : cat.includes('一般') ? { label: '一般', bg: '#e45f6f' } : null;
-              return (
-                <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'baseline', gap: 6, flexShrink: 0 }}>
-                  {badge && <span style={{ background: badge.bg, color: '#fff', padding: '1px 6px', borderRadius: 8, fontSize: 10, fontWeight: 600 }}>{badge.label}</span>}
-                  <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#222' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</span>
-                </span>
-              );
-            })()}
-          </button>
-          {budgetOpen && (
-            <div style={{ marginTop: 6, maxHeight: 260, overflowY: 'auto' }}>
-              {graph.budgetSummary && (
-                <div style={{ display: 'flex', gap: 14, marginBottom: 8, flexWrap: 'wrap', fontSize: PANEL_META_FONT_PX, color: '#555' }}>
-                  <span>予算額 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.totalBudget)}</b></span>
-                  <span>執行額 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.executedAmount)}</b></span>
-                  {graph.budgetSummary.nextYearRequest > 0 && (
-                    <span>翌年度要求 <b style={{ color: '#222' }}>{formatYen(graph.budgetSummary.nextYearRequest)}</b></span>
-                  )}
-                </div>
-              )}
-              {(graph.budgetBreakdown ?? []).map((bi, i) => {
-                const itemLabel = [bi.item, bi.subItem].filter(s => s && s.trim()).join(' / ');
-                const meta = [bi.accountCategory, itemLabel || null, bi.note?.trim() ? `備考: ${bi.note}` : null].filter(Boolean).join(' ・ ');
-                return (
-                  <div key={`${bi.budgetType}-${i}`} style={{ borderBottom: '1px solid #f1f5f9', padding: '6px 0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
-                      <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#333', minWidth: 0 }}>{bi.budgetType || '—'}</span>
-                      <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(bi.amount)}</span>
-                    </div>
-                    {meta && <div title={meta} style={{ fontSize: 10.5, color: '#888', marginTop: 1, lineHeight: 1.45, wordBreak: 'break-all' }}>{meta}</div>}
-                    {bi.nextYearRequestAmount > 0 && <div style={{ fontSize: 10.5, color: '#888', marginTop: 1 }}>翌年度要求額 {formatYen(bi.nextYearRequestAmount)}</div>}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+      {/* 予算・執行（共有コンポーネント。メイン画面と同一の会計集計・歳出項目カード表示） */}
+      <BudgetExecutionSection
+        budgetSummary={graph.budgetSummary}
+        budgetBreakdown={graph.budgetBreakdown ?? []}
+        scaleFont={scaleFont}
+        expanded={budgetOpen}
+        onToggleExpanded={() => setBudgetOpen(o => !o)}
+        listHeight={260}
+      />
 
       {/* ブロックインスペクター（Phase 4）は一旦非表示（ユーザー要望）。選択自体は
           タブ内容（支出先＝ブロック内訳）とフロー図のハイライトに反映される。復活時は
