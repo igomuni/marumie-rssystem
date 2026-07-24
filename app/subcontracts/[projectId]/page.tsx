@@ -971,44 +971,42 @@ function FlowGroupRow({
   const isMerge = mergeCount >= 2;
 
   const notes = incoming.filter(f => f.note);
+  // 他タブと同じ2行構成に合わせる。上流→下流を縦方向で表現し、
+  // 上段=起点（上流。合流時は複数行）、下段=「→ 対象ブロック」＋流入額（右寄せ）。
   return (
-    <div style={{ borderBottom: '1px solid #f1f5f9', padding: '7px 0' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-      {/* 上流（起点）: 左。合流時は複数行になる */}
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {incoming.map((f, i) => {
-          const src = f.sourceBlock ? blockById.get(f.sourceBlock) ?? null : null;
-          const srcLabel = f.sourceBlock === null
-            ? `${graph.ministry}（直接）`
-            : src ? `${src.blockId} ${src.blockName}` : f.sourceBlock;
-          const badge = flowOriginBadgeColor(f.origin);
-          return (
-            <div key={`${f.sourceBlock ?? 'root'}-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: META_PX, color: '#64748b', minWidth: 0 }}>
-              <span style={{ padding: '0 6px', borderRadius: 999, background: badge.bg, color: badge.fg, fontWeight: 700, flexShrink: 0, fontSize: Math.max(9, META_PX - 1) }}>
-                {flowOriginLabel(f.origin)}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, borderBottom: '1px solid #f1f5f9', padding: '7px 0', minWidth: 0 }}>
+      {/* 上段: 起点（上流）。合流時は複数行になる */}
+      {incoming.map((f, i) => {
+        const src = f.sourceBlock ? blockById.get(f.sourceBlock) ?? null : null;
+        const srcLabel = f.sourceBlock === null
+          ? `${graph.ministry}（直接）`
+          : src ? `${src.blockId} ${src.blockName}` : f.sourceBlock;
+        const badge = flowOriginBadgeColor(f.origin);
+        return (
+          <div key={`${f.sourceBlock ?? 'root'}-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: META_PX, color: '#64748b', minWidth: 0 }}>
+            <span style={{ padding: '0 6px', borderRadius: 999, background: badge.bg, color: badge.fg, fontWeight: 700, flexShrink: 0, fontSize: Math.max(9, META_PX - 1) }}>
+              {flowOriginLabel(f.origin)}
+            </span>
+            {src ? (
+              <button
+                onClick={() => onSelectBlock(src)}
+                title={srcLabel}
+                style={{ flex: 1, minWidth: 0, fontSize: META_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              >
+                {srcLabel}
+              </button>
+            ) : (
+              <span title={srcLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {srcLabel}
               </span>
-              {src ? (
-                <button
-                  onClick={() => onSelectBlock(src)}
-                  title={srcLabel}
-                  style={{ flex: 1, minWidth: 0, fontSize: META_PX, color: '#4a90d9', background: 'none', border: 'none', textAlign: 'left', padding: 0, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                >
-                  {srcLabel}
-                </button>
-              ) : (
-                <span title={srcLabel} style={{ flex: 1, minWidth: 0, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {srcLabel}
-                </span>
-              )}
-              {f.isReference && <span style={{ color: '#94a3b8', flexShrink: 0 }}>参考</span>}
-            </div>
-          );
-        })}
-      </div>
-      {/* 矢印（上流→下流） */}
-      <span style={{ color: '#94a3b8', flexShrink: 0, fontSize: NAME_PX }}>→</span>
-      {/* 下流（対象ブロック）: 中央。合流バッジ＋対象名 */}
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+            )}
+            {f.isReference && <span style={{ color: '#94a3b8', flexShrink: 0 }}>参考</span>}
+          </div>
+        );
+      })}
+      {/* 下段: → 対象ブロック（下流）＋流入額（右寄せ・他タブと同様） */}
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, minWidth: 0, marginTop: 1 }}>
+        <span style={{ color: '#94a3b8', flexShrink: 0, fontSize: NAME_PX }}>→</span>
         {isMerge && (
           <span style={{ padding: '0 6px', borderRadius: 999, background: '#fef3c7', color: '#92400e', fontWeight: 700, fontSize: Math.max(9, META_PX - 1), flexShrink: 0 }}>
             合流 {mergeCount}本
@@ -1027,18 +1025,16 @@ function FlowGroupRow({
             {targetLabel}
           </span>
         )}
+        <span title="対象ブロックへの流入額（合計）" style={{ fontSize: VALUE_PX, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          {inflow > 0 ? formatYen(inflow) : '—'}
+        </span>
       </div>
-      {/* 流入額（対象ブロックの合計）: 他タブと同様に行の右端へ右寄せ */}
-      <div title="対象ブロックへの流入額（合計）" style={{ fontSize: VALUE_PX, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>
-        {inflow > 0 ? formatYen(inflow) : '—'}
-      </div>
-    </div>
-    {/* 補足（note を持つ辺があれば列挙） */}
-    {notes.map((f, i) => (
-      <div key={`note-${i}`} title={f.note} style={{ fontSize: META_PX, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>
-        補足: {f.note}
-      </div>
-    ))}
+      {/* 補足（note を持つ辺があれば列挙） */}
+      {notes.map((f, i) => (
+        <div key={`note-${i}`} title={f.note} style={{ fontSize: META_PX, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingLeft: 14 }}>
+          補足: {f.note}
+        </div>
+      ))}
     </div>
   );
 }
