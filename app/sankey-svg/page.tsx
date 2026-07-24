@@ -45,6 +45,7 @@ import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { TagChip } from '@/client/components/TagChip';
 import { QualityScoreBlock } from '@/client/components/quality/QualityScoreBlock';
+import { ProjectOverviewSection } from '@/client/components/subcontract/ProjectOverviewSection';
 import { getAccountBadgeStyle } from '@/app/lib/account-badge';
 import { BudgetExecutionSection } from '@/client/components/BudgetExecutionSection';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
@@ -3819,131 +3820,22 @@ export default function RealDataSankeyPage() {
                 </div>
               </div>
 
-              {/* 事業概要アコーディオン — project-budget / project-spending（非集約）のみ */}
-              {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (() => {
-                const pid = selectedNode.projectId;
-                const cachedDetail = projectDetailCache.get(`${year}-${pid}`);
-                const isLoading = isProjectDetailExpanded && cachedDetail === undefined;
-                const rsUrl = `https://rssystem.go.jp/project?q=${encodeURIComponent(selectedNode.name.replace(/\//g, ''))}&fiscalYear=${year}&isSearchTargetProjectName=true`;
-                const handleToggle = () => setIsProjectDetailExpanded(v => !v);
-                return (
-                  <div style={{ borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', padding: '7px 14px', gap: 4 }}>
-                      <button type="button" onClick={handleToggle}
-                        style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}
-                      >
-                        <span style={{ fontSize: META_FONT_PX, color: '#888' }}>{isProjectDetailExpanded ? '▼' : '▶'}</span>
-                        <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>事業概要</span>
-                      </button>
-                      <a href={rsUrl} target="_blank" rel="noopener noreferrer"
-                        title="RSシステムで開く"
-                        style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" height="14" width="18" viewBox="0 0 24 20" fill="none">
-                          <text x="12" y="16" textAnchor="middle" fontSize="14" fontWeight="700" fontFamily="sans-serif" fill="#4a90d9">RS</text>
-                        </svg>
-                      </a>
-                      {cachedDetail?.url && /^https?:\/\//.test(cachedDetail.url) && (
-                        <a href={cachedDetail.url} target="_blank" rel="noopener noreferrer"
-                          title="事業概要URL"
-                          style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#4a90d9">
-                            <path d="M320-440h320v-80H320v80Zm0 120h320v-80H320v80Zm0 120h200v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z"/>
-                          </svg>
-                        </a>
-                      )}
-                      <a href={`/subcontracts/${pid}?year=${year}`}
-                        title="再委託構造を見る（同じタブで開きます）"
-                        style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#4a90d9">
-                          <path d="M760-120q-39 0-70-22.5T647-200H440q-66 0-113-47t-47-113q0-66 47-113t113-47h80q33 0 56.5-23.5T600-600q0-33-23.5-56.5T520-680H313q-13 35-43.5 57.5T200-600q-50 0-85-35t-35-85q0-50 35-85t85-35q39 0 69.5 22.5T313-760h207q66 0 113 47t47 113q0 66-47 113t-113 47h-80q-33 0-56.5 23.5T360-360q0 33 23.5 56.5T440-280h207q13-35 43.5-57.5T760-360q50 0 85 35t35 85q0 50-35 85t-85 35ZM228.5-691.5Q240-703 240-720t-11.5-28.5Q217-760 200-760t-28.5 11.5Q160-737 160-720t11.5 28.5Q183-680 200-680t28.5-11.5Z"/>
-                        </svg>
-                      </a>
-                    </div>
-                    {!isProjectDetailExpanded && cachedDetail?.overview && (
-                      <>
-                        <div style={{ padding: '0 14px 0', fontSize: PANEL_META_FONT_PX, color: '#888', lineHeight: 1.5,
-                          height: projectOverviewPreviewHeight, overflowY: 'auto', wordBreak: 'break-all' }}>
-                          {cachedDetail.overview}
-                        </div>
-                        <div
-                          role="separator"
-                          aria-orientation="horizontal"
-                          aria-label="事業概要プレビューの高さを変更"
-                          title="ドラッグで高さを変更"
-                          onMouseDown={e => {
-                            e.preventDefault();
-                            overviewResizeRef.current = { startY: e.clientY, startH: projectOverviewPreviewHeight };
-                            setIsResizingOverview(true);
-                          }}
-                          onDoubleClick={() => setProjectOverviewPreviewHeight(PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT)}
-                          style={{
-                            height: 10,  cursor: 'ns-resize',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            userSelect: 'none',
-                          }}
-                          data-pan-disabled
-                        >
-                          <div style={{ width: 32, height: 3, borderRadius: 2, background: '#d0d0d0' }} />
-                        </div>
-                      </>
-                    )}
-                    {isProjectDetailExpanded && (
-                      <div style={{ padding: '0 14px 10px', fontSize: PANEL_META_FONT_PX, color: '#444', maxHeight: 320, overflowY: 'auto' }}>
-                        {isLoading && <span style={{ color: '#aaa' }}>読み込み中...</span>}
-                        {!isLoading && cachedDetail === null && <span style={{ color: '#aaa' }}>詳細情報が見つかりませんでした</span>}
-                        {!isLoading && cachedDetail && (() => {
-                          const d = cachedDetail;
-                          const fieldStyle: React.CSSProperties = { marginBottom: 8 };
-                          const labelStyle: React.CSSProperties = { fontSize: META_FONT_PX, color: '#aaa', display: 'block', marginBottom: 2 };
-                          const textStyle: React.CSSProperties = { lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-all' };
-                          return (<>
-                            {d.category && (
-                              <div style={fieldStyle}>
-                                <span style={labelStyle}>事業区分</span>
-                                <span>{d.category}</span>
-                                {(d.startYear || d.endYear || d.noEndDate) && (
-                                  <span style={{ marginLeft: 8, color: '#888' }}>
-                                    {d.startYear ?? (d.startYearUnknown ? '不明' : '?')}年度〜{d.noEndDate ? '終了予定なし' : (d.endYear ? `${d.endYear}年度` : '?')}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                            {d.implementationMethods.length > 0 && (
-                              <div style={fieldStyle}>
-                                <span style={labelStyle}>実施方法</span>
-                                <span>{d.implementationMethods.join('・')}</span>
-                              </div>
-                            )}
-                            {d.overview && (
-                              <div style={fieldStyle}>
-                                <span style={labelStyle}>概要</span>
-                                <span style={textStyle}>{d.overview}</span>
-                              </div>
-                            )}
-                            {d.purpose && (
-                              <div style={fieldStyle}>
-                                <span style={labelStyle}>目的</span>
-                                <span style={textStyle}>{d.purpose}</span>
-                              </div>
-                            )}
-                            {d.url && (
-                              <div style={fieldStyle}>
-                                <a href={d.url} target="_blank" rel="noopener noreferrer"
-                                  style={{ fontSize: META_FONT_PX, color: '#4a90d9', wordBreak: 'break-all' }}>
-                                  事業概要URL ↗
-                                </a>
-                              </div>
-                            )}
-                          </>);
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+              {/* 事業概要アコーディオン — project-budget / project-spending（非集約）のみ。共有コンポーネント */}
+              {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (
+                <ProjectOverviewSection
+                  detail={projectDetailCache.get(`${year}-${selectedNode.projectId}`)}
+                  projectName={selectedNode.name}
+                  year={year}
+                  subcontractHref={`/subcontracts/${selectedNode.projectId}?year=${year}`}
+                  scaleFont={scaleFont}
+                  expanded={isProjectDetailExpanded}
+                  onToggle={() => setIsProjectDetailExpanded(v => !v)}
+                  previewHeight={projectOverviewPreviewHeight}
+                  onResizeStart={(e) => { e.preventDefault(); overviewResizeRef.current = { startY: e.clientY, startH: projectOverviewPreviewHeight }; setIsResizingOverview(true); }}
+                  onResizeReset={() => setProjectOverviewPreviewHeight(PROJECT_OVERVIEW_PREVIEW_HEIGHT_DEFAULT)}
+                  isLoading={isProjectDetailExpanded && projectDetailCache.get(`${year}-${selectedNode.projectId}`) === undefined}
+                />
+              )}
 
               {/* 品質スコアブロック — project-budget / project-spending（非集約）のみ。共有コンポーネント */}
               {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (

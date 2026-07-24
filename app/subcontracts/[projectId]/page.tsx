@@ -28,6 +28,7 @@ import type {
 } from '@/types/subcontract';
 import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
 import { BudgetExecutionSection } from '@/client/components/BudgetExecutionSection';
+import { ProjectOverviewSection } from '@/client/components/subcontract/ProjectOverviewSection';
 import type { ProjectDetail } from '@/types/project-details';
 import { ProjectReferenceLinks } from '@/components/subcontracts/ProjectReferenceLinks';
 import {
@@ -387,7 +388,7 @@ function SidePane({
   const PANEL_PRIMARY_VALUE_FONT_PX = scaleFont(PANEL_PRIMARY_VALUE_FONT_PX_DEFAULT);
   const PANEL_META_FONT_PX = scaleFont(PANEL_META_FONT_PX_DEFAULT);
   const [expandedRecipients, setExpandedRecipients] = useState<Set<number>>(new Set());
-  const [overviewOpen, setOverviewOpen] = useState(true); // メイン同様、事業概要は既定で開く
+  const [overviewOpen, setOverviewOpen] = useState(false); // 既定は折りたたみ＝プレビュー表示（メイン同様）
   const [budgetOpen, setBudgetOpen] = useState(false);
   // 品質スコア詳細ダイアログ（/quality と共通の ScoreDetailDialog。メイン画面と同型）
   const [scoreDialogItem, setScoreDialogItem] = useState<QualityScoreItem | null>(null);
@@ -534,22 +535,17 @@ function SidePane({
         </div>
       </div>
 
-      {/* 事業概要（折りたたみ。メイン画面の事業概要アコーディオンと同型・並びも同じ先頭） */}
-      {projectDetail?.overview && (
-        <div style={{ borderBottom: `1px solid ${COLOR_PANEL_BORDER}`, padding: '7px 16px 9px' }}>
-          <button
-            onClick={() => setOverviewOpen(o => !o)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
-          >
-            <span style={{ color: '#94a3b8', fontSize: 10 }}>{overviewOpen ? '▼' : '▶'}</span>
-            <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>事業概要</span>
-          </button>
-          {overviewOpen && (
-            <div style={{ fontSize: PANEL_META_FONT_PX, color: '#444', lineHeight: 1.55, marginTop: 6, maxHeight: 180, overflowY: 'auto', wordBreak: 'break-all' }}>
-              {projectDetail.overview}
-            </div>
-          )}
-        </div>
+      {/* 事業概要（共有コンポーネント。メイン画面と同一のプレビュー＋展開詳細） */}
+      {projectDetail && (
+        <ProjectOverviewSection
+          detail={projectDetail}
+          projectName={graph.projectName}
+          year={year}
+          scaleFont={scaleFont}
+          expanded={overviewOpen}
+          onToggle={() => setOverviewOpen(o => !o)}
+          previewHeight={72}
+        />
       )}
 
       {/* 品質スコアブロック（メイン画面と共有コンポーネント。既取得の /data/project-quality-scores を渡す） */}
