@@ -970,7 +970,7 @@ function BlockListRow({ block, selected, onClick, scaleFont }: { block: BlockNod
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline', width: '100%' }}>
-        <div title={`${block.blockId} ${block.blockName}`} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, fontWeight: 600, color: selected ? '#111827' : '#333', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div title={`${block.blockId} ${block.blockName}`} style={{ flex: 1, fontSize: PANEL_LIST_NAME_FONT_PX, fontWeight: 400, color: '#333', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {block.blockId} {block.blockName}
         </div>
         <div style={{ fontSize: PANEL_LIST_VALUE_FONT_PX, fontWeight: 600, color: '#555', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatYen(block.totalAmount)}</div>
@@ -987,9 +987,6 @@ function BlockListRow({ block, selected, onClick, scaleFont }: { block: BlockNod
           {badgeText}
         </span>
         <span>支出先 {block.recipientCount.toLocaleString()}件</span>
-        {block.hasExpenses && (
-          <span style={{ color: '#0e7490' }}>費目あり</span>
-        )}
         {block.role && (
           <span title={block.role} style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {block.role}
