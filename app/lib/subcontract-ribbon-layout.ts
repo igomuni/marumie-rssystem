@@ -47,10 +47,11 @@ export const RIBBON_BAR_W = 20;
 export const RIBBON_LABEL_W = 190;
 export const RIBBON_COL_W = RIBBON_BAR_W + RIBBON_LABEL_W;
 export const RIBBON_COL_GAP = 40;
-export const RIBBON_ROW_GAP = 14;
+// ノード縦間隔は /sankey-svg（NODE_PAD=2）の密な詰め方を参考に小さめに取る
+export const RIBBON_ROW_GAP = 6;
 // 直接系バンド群と別財源レーンの間の追加ギャップ（通常の兄弟間ギャップより大きく取り、
 // 視覚的に「別レーン」であることを示す）
-export const RIBBON_LANE_GAP = 56;
+export const RIBBON_LANE_GAP = 28;
 // /sankey-svg の computeLayout に合わせ、最低高さは「読みやすさのための下駄」ではなく
 // 描画上のハード床（1px）とする。金額差はすべて線形スケールの高さ差として表現する。
 export const RIBBON_BAR_MIN_H = 1;
