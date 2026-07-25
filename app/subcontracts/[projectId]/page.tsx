@@ -2315,6 +2315,72 @@ function SubcontractDetailPageInner() {
 
         </svg>
 
+        {/* 列見出し（メイン /sankey-svg の列ラベル方式）。列ごとの合計金額を列の上に
+            Sticky 表示する。pan/zoom に追従しつつ、スクロールで列頭が上に隠れても
+            上部ツールバーの直下に張り付く（top を max でクランプ）。 */}
+        {viewMode === 'ribbon' && (() => {
+          const L = safeRibbonLayout;
+          const scale = transform.scale;
+          const HEADER_TOP_RESERVE = 52; // 上部ツールバー（一覧/年度/タブ）の下端目安
+          const labelPx = scaleFont(11);
+          const amountPx = scaleFont(10);
+          type Col = { key: string; label: string; amountLines: string[]; xCenter: number; topY: number };
+          const cols: Col[] = [];
+          if (L.budgetItems.length > 0) {
+            const budgetTotal = L.root.budgetAmount ?? L.budgetItems.reduce((s, b) => s + b.amount, 0);
+            cols.push({
+              key: 'budget', label: '予算・執行', amountLines: [formatYen(budgetTotal)],
+              xCenter: L.budgetItems[0].x + L.budgetItems[0].w / 2,
+              topY: Math.min(...L.budgetItems.map((b) => b.y)),
+            });
+          }
+          cols.push({
+            key: 'root', label: '事業',
+            amountLines: L.root.budgetH != null
+              ? [`${formatYen(L.root.budgetAmount ?? 0)} / ${formatYen(L.root.spendingAmount ?? graph.execution)}`]
+              : [formatYen(graph.execution)],
+            xCenter: L.root.x + L.root.w / 2,
+            topY: L.root.y,
+          });
+          const depths = [...new Set(L.bars.map((b) => b.depth))].sort((a, b) => a - b);
+          for (const d of depths) {
+            const barsAtD = L.bars.filter((b) => b.depth === d);
+            if (barsAtD.length === 0) continue;
+            const total = barsAtD.reduce((s, b) => s + b.totalAmount, 0);
+            cols.push({
+              key: `d${d}`,
+              label: d === 1 ? '支出先' : d === 2 ? '再委託先' : `再委託先${d - 1}`,
+              amountLines: [formatYen(total)],
+              xCenter: barsAtD[0].x + barsAtD[0].w / 2,
+              topY: Math.min(...barsAtD.map((b) => b.y)),
+            });
+          }
+          return cols.map((col) => {
+            const screenX = transform.x + col.xCenter * scale;
+            const colTopScreenY = transform.y + col.topY * scale;
+            const blockH = Math.round(labelPx * 1.4 + col.amountLines.length * amountPx * 1.4 + 6);
+            const top = Math.max(HEADER_TOP_RESERVE, colTopScreenY - blockH - 6);
+            return (
+              <div
+                key={col.key}
+                style={{
+                  position: 'absolute', left: screenX, top,
+                  transform: 'translateX(-50%)', textAlign: 'center',
+                  fontSize: labelPx, color: '#999', whiteSpace: 'nowrap',
+                  userSelect: 'none', cursor: 'default', pointerEvents: 'none',
+                  zIndex: 6, lineHeight: 1.4,
+                  background: 'rgba(255,255,255,0.82)', padding: '2px 8px', borderRadius: 4,
+                }}
+              >
+                <div>{col.label}</div>
+                {col.amountLines.map((a, i) => (
+                  <div key={i} style={{ fontSize: amountPx }}>{a}</div>
+                ))}
+              </div>
+            );
+          });
+        })()}
+
         {/* ホバーツールチップ — サンキー流儀のマウス追従 HTML div（220ms遅延・パン/ズーム直後は抑制） */}
         {hoveredNodeStable && !isPanning.current && !isHoverSuppressed && (() => {
           const isRoot = hoveredNodeStable.kind === 'root';
