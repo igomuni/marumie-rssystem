@@ -476,13 +476,20 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
   const budgetItems: RibbonBudgetItem[] = [];
   const budgetFlows: SubcontractRibbonLayout['budgetFlows'] = [];
   if (hasBudgetCol) {
+    // ブロック列と同じ RIBBON_ROW_GAP を予算内訳ノード間にも入れて詰め方を揃える。
+    // ノード群は事業ノードの緑側(高さ budgetH)より縦に広がるため、フローは金額按分で
+    // 緑側へ収束（ファネル）させる（メインの sankey と同じ流儀）。
     let cursor = rootY;
+    let cumAmount = 0;
     for (const bi of budgetBreakdown) {
       const h = Math.max(RIBBON_BAR_MIN_H, bi.amount * k);
       budgetItems.push({ label: bi.budgetType || '—', amount: bi.amount, x: RIBBON_MARGIN.left, y: cursor, w: RIBBON_BAR_W, h });
-      // 予算内訳ノード右端 → 事業(予算側=左端 root.x) へ水平の帯
-      budgetFlows.push({ x1: RIBBON_MARGIN.left + RIBBON_BAR_W, y1Top: cursor, y1Bot: cursor + h, x2: root.x, y2Top: cursor, y2Bot: cursor + h });
-      cursor += h;
+      // 予算内訳ノード右端 → 事業(予算側=左端 root.x)。事業側の着地は金額按分位置に収束
+      const y2Top = rootY + (cumAmount / budgetTotal) * budgetH;
+      const y2Bot = rootY + ((cumAmount + bi.amount) / budgetTotal) * budgetH;
+      budgetFlows.push({ x1: RIBBON_MARGIN.left + RIBBON_BAR_W, y1Top: cursor, y1Bot: cursor + h, x2: root.x, y2Top, y2Bot });
+      cursor += h + RIBBON_ROW_GAP;
+      cumAmount += bi.amount;
     }
   }
 
