@@ -4,7 +4,24 @@ import type {
   BlockOriginKind,
   FlowOrigin,
 } from '@/types/subcontract';
+import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
 import { computeDepths, mergeParallelFlows } from '@/app/lib/subcontract-layout';
+
+/** レイアウト入力: 再委託グラフ ＋ API 合成の予算内訳（予算・執行列の描画に使う） */
+export type RibbonLayoutInput = SubcontractGraph & {
+  budgetBreakdown?: BudgetBreakdownItem[];
+  budgetSummary?: BudgetSummary | null;
+};
+
+/** 予算・執行列の1ノード（歳出予算項目＝budgetType 単位。緑） */
+export interface RibbonBudgetItem {
+  label: string;
+  amount: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
 
 /**
  * B案（サンキー風横フロー・リボン表現）のレイアウト計算。
@@ -67,7 +84,13 @@ export interface RibbonRoot {
   x: number;
   y: number;
   w: number;
+  /** 事業ノードでは支出側(右・オレンジ)の高さ。予算内訳ノードでは通常の高さ */
   h: number;
+  /** 事業ノードのみ: 予算側(左・緑)の高さ。h(支出) と別（メインの mergedProjectPath 相当のドッキング） */
+  budgetH?: number;
+  /** 事業ノードのみ: 予算総額・支出額（左右のラベル用） */
+  budgetAmount?: number;
+  spendingAmount?: number;
 }
 
 /** 順方向フロー（col間を繋ぐ帯）。両端の太さは接続先バーの高さから配分され、異なる値を取り得る（テーパー付き） */
@@ -110,8 +133,10 @@ export interface RibbonSeparateLane {
 }
 
 export interface SubcontractRibbonLayout {
-  /** 予算・執行ノード（事業ノードの左・最左列）。メイン画面の 総計→事業 に相当する足場 */
-  budgetNode: RibbonRoot;
+  /** 予算・執行列（最左）。歳出予算項目ごとの緑ノード。事業ノードの予算側へ流入する */
+  budgetItems: RibbonBudgetItem[];
+  /** 予算→事業(予算側) のリボン。budgetItems[i] に対応 */
+  budgetFlows: { x1: number; y1Top: number; y1Bot: number; x2: number; y2Top: number; y2Bot: number }[];
   root: RibbonRoot;
   bars: RibbonBar[];
   flows: RibbonFlow[];
@@ -141,8 +166,8 @@ export function ribbonAmountScale(amount: number, k: number): number {
  * 全ブロックが 0 円（制度フローのみ等）の場合は k=1 にフォールバックする
  * （その場合は全バーが RIBBON_BAR_MIN_H の床に張り付く）。
  */
-export function computeRibbonK(byDepth: Map<number, BlockNode[]>): number {
-  let maxColTotal = 0;
+export function computeRibbonK(byDepth: Map<number, BlockNode[]>, extraColTotal = 0): number {
+  let maxColTotal = Math.max(0, extraColTotal); // 予算・執行列（予算総額）も列合計の最大候補に含める
   for (const nodes of byDepth.values()) {
     const total = nodes.reduce((s, n) => s + Math.max(0, n.totalAmount), 0);
     if (total > maxColTotal) maxColTotal = total;
@@ -221,8 +246,11 @@ export function truncateRibbonLabelName(
 
 // ─── メインレイアウト関数 ──────────────────────────────────────────────
 
-export function computeSubcontractRibbonLayout(graph: SubcontractGraph): SubcontractRibbonLayout {
+export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): SubcontractRibbonLayout {
   const depthMap = computeDepths(graph.flows); // blockId -> depth(>=1)。root は depth 0 相当（別管理）
+  // 予算・執行列（最左）: 歳出予算項目を金額降順で緑ノードに。予算総額は事業ノードの予算側の高さになる
+  const budgetBreakdown = [...(graph.budgetBreakdown ?? [])].filter((b) => b.amount > 0).sort((a, b) => b.amount - a.amount);
+  const budgetTotal = graph.budgetSummary?.totalBudget ?? budgetBreakdown.reduce((s, b) => s + b.amount, 0);
   const mergedFlows = mergeParallelFlows(graph.flows);
 
   const blockById = new Map<string, BlockNode>();
@@ -291,7 +319,7 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   // 各トップレベルノード（depth1 または orphan）は、自分の子孫全体が専有する縦バンドを持つ。
   // 親は自分のバンドの中央に置かれる（単一子の連鎖は真横に一直線になる）。
   const maxAmount = Math.max(0, ...graph.blocks.map((b) => b.totalAmount));
-  const k = computeRibbonK(byDepth);
+  const k = computeRibbonK(byDepth, budgetTotal);
   const barH = (node: BlockNode): number => ribbonAmountScale(node.totalAmount, k);
 
   // ─── フロー分類（順方向 / バックエッジ）とテーパー太さ配分 ──────────────────────
@@ -428,22 +456,34 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   );
   // 予算・執行ノードを最左（col0）に置くため、事業(root)以降を1列右へずらす基準x
   const CONTENT_BASE_X = RIBBON_MARGIN.left + RIBBON_COL_W + RIBBON_COL_GAP;
+  const hasBudgetCol = budgetBreakdown.length > 0 && budgetTotal > 0;
+  const budgetH = hasBudgetCol ? Math.max(rootH, budgetTotal * k) : 0;
+  const rootY = Math.max(RIBBON_MARGIN.top, directMidY - rootH / 2);
+  // 事業ノード: メインの mergedProjectPath 相当。予算(左・緑, budgetH)＋支出(右・オレンジ, rootH)の結合。
+  // 幅は 2*RIBBON_BAR_W（左半分=予算, 右半分=支出）。支出側(右)から blocks へ流出する
   const root: RibbonRoot = {
     label: graph.projectName,
     x: CONTENT_BASE_X,
-    // バー幅は他ノードと同じスリム幅（sankeyノード風）
-    w: RIBBON_BAR_W,
-    y: Math.max(RIBBON_MARGIN.top, directMidY - rootH / 2),
+    w: hasBudgetCol ? RIBBON_BAR_W * 2 : RIBBON_BAR_W,
+    y: rootY,
     h: rootH,
+    budgetH: hasBudgetCol ? budgetH : undefined,
+    budgetAmount: hasBudgetCol ? budgetTotal : undefined,
+    spendingAmount: hasBudgetCol ? graph.execution : undefined,
   };
-  // 予算・執行ノード（最左）。事業への流出総額(rootH)と同じ高さで、予算→事業リボンを一定太さにする
-  const budgetNode: RibbonRoot = {
-    label: '予算・執行',
-    x: RIBBON_MARGIN.left,
-    w: RIBBON_BAR_W,
-    y: root.y,
-    h: rootH,
-  };
+  // 予算・執行列（最左・緑）: 歳出予算項目を上から積む（合計高さ = budgetH = budgetTotal*k）
+  const budgetItems: RibbonBudgetItem[] = [];
+  const budgetFlows: SubcontractRibbonLayout['budgetFlows'] = [];
+  if (hasBudgetCol) {
+    let cursor = rootY;
+    for (const bi of budgetBreakdown) {
+      const h = Math.max(RIBBON_BAR_MIN_H, bi.amount * k);
+      budgetItems.push({ label: bi.budgetType || '—', amount: bi.amount, x: RIBBON_MARGIN.left, y: cursor, w: RIBBON_BAR_W, h });
+      // 予算内訳ノード右端 → 事業(予算側=左端 root.x) へ水平の帯
+      budgetFlows.push({ x1: RIBBON_MARGIN.left + RIBBON_BAR_W, y1Top: cursor, y1Bot: cursor + h, x2: root.x, y2Top: cursor, y2Bot: cursor + h });
+      cursor += h;
+    }
+  }
 
   // 別財源グループ（separate-origin の depth1 + orphan）を、直接系グループ（バー・ルート
   // カードの両方）の下に追加ギャップを空けて独立レーンとして配置する
@@ -581,10 +621,12 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   const maxColDepth = byDepth.size > 0 ? Math.max(...byDepth.keys()) : 0;
   const maxRight = CONTENT_BASE_X + (maxColDepth + 1) * (RIBBON_COL_W + RIBBON_COL_GAP) - RIBBON_COL_GAP + RIBBON_MARGIN.right;
   const maxBottomBars = bars.length > 0 ? Math.max(...bars.map((b) => b.y + b.h)) : 0;
-  const maxBottom = Math.max(maxBottomBars, root.y + root.h, RIBBON_MARGIN.top + 100) + RIBBON_MARGIN.bottom;
+  const maxBudgetBottom = budgetItems.length > 0 ? Math.max(...budgetItems.map((b) => b.y + b.h)) : 0;
+  const maxBottom = Math.max(maxBottomBars, maxBudgetBottom, root.y + Math.max(root.h, root.budgetH ?? 0), RIBBON_MARGIN.top + 100) + RIBBON_MARGIN.bottom;
 
   return {
-    budgetNode,
+    budgetItems,
+    budgetFlows,
     root,
     bars,
     flows,
