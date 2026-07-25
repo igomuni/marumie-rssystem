@@ -1617,7 +1617,8 @@ function SubcontractDetailPageInner() {
   // ラベルが次列のバーへ食い込まないよう、列ごとに clipPath でラベル領域を切り取る
   // （sankey の clip-col-* と同じ流儀）。最終列だけはラベルが右マージンへ自由に伸びてよい
   const ribbonMaxDepth = safeRibbonLayout.bars.length > 0 ? Math.max(...safeRibbonLayout.bars.map((b) => b.depth)) : 0;
-  const ribbonColX = (depth: number) => RIBBON_MARGIN.left + depth * (RIBBON_COL_W + RIBBON_COL_GAP);
+  // 予算・執行ノードを最左に置くため、事業(depth0相当)以降は1列右。depth d のブロック列 x。
+  const ribbonColX = (depth: number) => RIBBON_MARGIN.left + (depth + 1) * (RIBBON_COL_W + RIBBON_COL_GAP);
   return (
     <div style={{ display: 'flex', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* SVGキャンバス */}
@@ -2055,6 +2056,11 @@ function SubcontractDetailPageInner() {
           <>
             {/* 列ラベルの clipPath（ラベルが次列のバーへ食い込むのを防ぐ。sankeyのclip-col-*と同じ流儀） */}
             <defs>
+              {/* 予算(緑)→事業/執行(オレンジ) のリボン用グラデーション（メインの 予算→執行 に対応） */}
+              <linearGradient id="budget-exec-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={SEMANTIC_PROJECT} />
+                <stop offset="100%" stopColor="#e07040" />
+              </linearGradient>
               {Array.from({ length: ribbonMaxDepth }, (_, i) => i + 1).map((d) => (
                 <clipPath id={`ribbon-clip-col-${d}`} key={d}>
                   <rect
@@ -2147,6 +2153,51 @@ function SubcontractDetailPageInner() {
               />
             ))}
 
+            {/* 予算・執行 → 事業リボン（緑→オレンジ。メインの 予算→執行 の流れに対応） */}
+            <path
+              d={ribbonFlowPath(
+                safeRibbonLayout.budgetNode.x + safeRibbonLayout.budgetNode.w,
+                safeRibbonLayout.budgetNode.y,
+                safeRibbonLayout.budgetNode.y + safeRibbonLayout.budgetNode.h,
+                safeRibbonLayout.root.x,
+                safeRibbonLayout.root.y,
+                safeRibbonLayout.root.y + safeRibbonLayout.root.h,
+              )}
+              fill="url(#budget-exec-grad)"
+              fillOpacity={0.28}
+              style={{ pointerEvents: 'none' }}
+            />
+
+            {/* 予算・執行ノード（最左・緑。メインの project-budget 相当） */}
+            <g style={{ cursor: 'default' }}>
+              <rect
+                x={safeRibbonLayout.budgetNode.x}
+                y={safeRibbonLayout.budgetNode.y}
+                width={safeRibbonLayout.budgetNode.w}
+                height={Math.max(1, safeRibbonLayout.budgetNode.h)}
+                rx={1}
+                fill={SEMANTIC_PROJECT}
+                vectorEffect="non-scaling-stroke"
+              />
+              <foreignObject
+                x={safeRibbonLayout.budgetNode.x + safeRibbonLayout.budgetNode.w + 6}
+                y={safeRibbonLayout.budgetNode.y - 4}
+                width={RIBBON_LABEL_W - 6}
+                height={Math.max(safeRibbonLayout.budgetNode.h + 8, 44)}
+                style={{ pointerEvents: 'none' }}
+              >
+                <div style={{ fontFamily: 'inherit', userSelect: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
+                  <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: '#94a3b8' }}>予算・執行</div>
+                  <div style={{ fontSize: scaleFont(10), fontWeight: 600, color: '#333', marginTop: 2 }}>
+                    予算 {graph.budget > 0 ? formatYen(graph.budget) : '—'}
+                  </div>
+                  <div style={{ fontSize: scaleFont(9), fontWeight: 500, color: '#888', marginTop: 1 }}>
+                    執行 {graph.execution > 0 ? formatYen(graph.execution) : '—'}
+                  </div>
+                </div>
+              </foreignObject>
+            </g>
+
             {/* 事業コンテキストノード（ルート。他ノードと同じスリムバー + 横のラベル。sankeyノード風） */}
             <g
               onClick={handleDeselect}
@@ -2160,7 +2211,7 @@ function SubcontractDetailPageInner() {
                 width={safeRibbonLayout.root.w}
                 height={Math.max(1, safeRibbonLayout.root.h)}
                 rx={1}
-                fill={COLOR_ROOT}
+                fill="#e07040"
                 stroke={hoveredNodeRaw?.kind === 'root' ? '#111827' : 'none'}
                 strokeWidth={hoveredNodeRaw?.kind === 'root' ? 1.5 : 0}
                 vectorEffect="non-scaling-stroke"
@@ -2180,9 +2231,7 @@ function SubcontractDetailPageInner() {
                   <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#333', lineHeight: `${scaleFont(13)}px`, marginTop: 2, ...CLAMP_2_LINES }}>
                     {graph.projectName}
                   </div>
-                  <div style={{ fontSize: scaleFont(9), fontWeight: 500, color: '#888', marginTop: 2 }}>
-                    予算 {graph.budget > 0 ? formatYen(graph.budget) : '—'} ・ 支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}
-                  </div>
+                  {/* 予算・支出額は左の「予算・執行」ノードに表示するためここでは省略 */}
                 </div>
               </foreignObject>
             </g>

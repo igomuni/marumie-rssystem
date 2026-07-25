@@ -110,6 +110,8 @@ export interface RibbonSeparateLane {
 }
 
 export interface SubcontractRibbonLayout {
+  /** 予算・執行ノード（事業ノードの左・最左列）。メイン画面の 総計→事業 に相当する足場 */
+  budgetNode: RibbonRoot;
   root: RibbonRoot;
   bars: RibbonBar[];
   flows: RibbonFlow[];
@@ -424,13 +426,22 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
     RIBBON_BAR_MIN_H,
     rootOutgoing.reduce((sum, f) => sum + (sourceThickness.get(f) ?? 0), 0),
   );
+  // 予算・執行ノードを最左（col0）に置くため、事業(root)以降を1列右へずらす基準x
+  const CONTENT_BASE_X = RIBBON_MARGIN.left + RIBBON_COL_W + RIBBON_COL_GAP;
   const root: RibbonRoot = {
     label: graph.projectName,
-    x: RIBBON_MARGIN.left,
-    // バー幅は他ノードと同じスリム幅（sankeyノード風）。列内容幅(RIBBON_COL_W)は
-    // ラベル領域込みでdepth1列との間隔に使われるため、xの起点は変えない
+    x: CONTENT_BASE_X,
+    // バー幅は他ノードと同じスリム幅（sankeyノード風）
     w: RIBBON_BAR_W,
     y: Math.max(RIBBON_MARGIN.top, directMidY - rootH / 2),
+    h: rootH,
+  };
+  // 予算・執行ノード（最左）。事業への流出総額(rootH)と同じ高さで、予算→事業リボンを一定太さにする
+  const budgetNode: RibbonRoot = {
+    label: '予算・執行',
+    x: RIBBON_MARGIN.left,
+    w: RIBBON_BAR_W,
+    y: root.y,
     h: rootH,
   };
 
@@ -456,7 +467,7 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
   const bars: RibbonBar[] = [];
   const barByBlockId = new Map<string, RibbonBar>();
   for (const [depth, nodes] of [...byDepth.entries()].sort((a, b) => a[0] - b[0])) {
-    const colX = RIBBON_MARGIN.left + depth * (RIBBON_COL_W + RIBBON_COL_GAP);
+    const colX = CONTENT_BASE_X + depth * (RIBBON_COL_W + RIBBON_COL_GAP);
     for (const node of nodes) {
       const h = barH(node);
       const y = nodeY.get(node.blockId) ?? RIBBON_MARGIN.top;
@@ -568,11 +579,12 @@ export function computeSubcontractRibbonLayout(graph: SubcontractGraph): Subcont
 
   // SVGサイズ
   const maxColDepth = byDepth.size > 0 ? Math.max(...byDepth.keys()) : 0;
-  const maxRight = RIBBON_MARGIN.left + (maxColDepth + 1) * (RIBBON_COL_W + RIBBON_COL_GAP) - RIBBON_COL_GAP + RIBBON_MARGIN.right;
+  const maxRight = CONTENT_BASE_X + (maxColDepth + 1) * (RIBBON_COL_W + RIBBON_COL_GAP) - RIBBON_COL_GAP + RIBBON_MARGIN.right;
   const maxBottomBars = bars.length > 0 ? Math.max(...bars.map((b) => b.y + b.h)) : 0;
   const maxBottom = Math.max(maxBottomBars, root.y + root.h, RIBBON_MARGIN.top + 100) + RIBBON_MARGIN.bottom;
 
   return {
+    budgetNode,
     root,
     bars,
     flows,
