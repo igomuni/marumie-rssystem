@@ -376,7 +376,7 @@ function SidePane({
   block: BlockNode | null;
   graph: SubcontractGraphWithBudget;
   projectDetail: ProjectDetail | null;
-  qualityScore: QualityScore | null;
+  qualityScore: QualityScore | null | undefined;
   orgChain: string[];
   year: number;
   activeTab: PaneTab;
@@ -1189,7 +1189,8 @@ function SubcontractDetailPageInner() {
   const [graph, setGraph] = useState<SubcontractGraph | null>(null);
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | null>(null);
   const [orgChain, setOrgChain] = useState<string[]>([]);
-  const [qualityScore, setQualityScore] = useState<QualityScore | null>(null);
+  // undefined = fetch中（QualityScoreBlock は非表示）、null = スコアなし確定。メイン画面と同じ作法
+  const [qualityScore, setQualityScore] = useState<QualityScore | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<BlockNode | null>(null);
@@ -1369,6 +1370,7 @@ function SubcontractDetailPageInner() {
 
   useEffect(() => {
     if (!graph) return;
+    setQualityScore(undefined); // 事業/年度切替時は fetch中（非表示）に戻す
     const controller = new AbortController();
     fetch(`/data/project-quality-scores-${year}.json`, { signal: controller.signal })
       .then((r) => r.ok ? r.json() : [])
