@@ -210,6 +210,14 @@ const ZOOM_MIN_ABS = 0.05;
 const ZOOM_MAX_ABS = 20;
 const ZOOM_MIN_MULTIPLIER = 0.25;
 const ZOOM_MAX_MULTIPLIER = 30;
+// ズーム連動フォント拡大の上限（/sankey-svg の ZOOM_FONT_MAX_RATIO と同値）。
+const ZOOM_FONT_MAX_RATIO = 2.0;
+// フロー図ラベルを「画面上ほぼ一定サイズ（baseZoom 超のズームインで最大 ZOOM_FONT_MAX_RATIO 倍まで拡大）」
+// にするための係数。scaled <g> 内の fontSize に scale を打ち消す形で掛ける（/sankey-svg の getZoomLabelScale 相当）。
+function getZoomLabelScale(zoomK: number, baseZoomK: number): number {
+  if (baseZoomK <= 0 || zoomK <= baseZoomK + 0.001) return 1;
+  return Math.min(zoomK / baseZoomK, ZOOM_FONT_MAX_RATIO);
+}
 // エッジ太さスケール（金額に応じて 2〜10px の平方根スケール。線が細すぎ/太すぎにならない範囲）
 const EDGE_WIDTH_MIN = 2;
 const EDGE_WIDTH_MAX = 10;
@@ -1631,6 +1639,11 @@ function SubcontractDetailPageInner() {
   // 予算データが無い事業ではオフセットせず、レイアウト側 CONTENT_BASE_X と整合させる。
   const ribbonHasBudgetCol = safeRibbonLayout.root.budgetH != null;
   const ribbonColX = (depth: number) => RIBBON_MARGIN.left + (depth + (ribbonHasBudgetCol ? 1 : 0)) * (RIBBON_COL_W + RIBBON_COL_GAP);
+  // フロー図ラベルはメイン流儀で画面上ほぼ一定サイズにする。scaled <g> 内なので
+  // fontSize を transform.scale で割って群のスケールを打ち消し、getZoomLabelScale で
+  // baseZoom 超のズームイン時に最大 ZOOM_FONT_MAX_RATIO 倍まで拡大する。
+  const ribbonZoomLabelScale = getZoomLabelScale(transform.scale, baseZoom);
+  const ribbonLabelFont = (px: number) => scaleFont(px) * ribbonZoomLabelScale / transform.scale;
   return (
     <div style={{ display: 'flex', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* SVGキャンバス */}
@@ -2102,7 +2115,7 @@ function SubcontractDetailPageInner() {
                 <text
                   x={RIBBON_MARGIN.left}
                   y={safeRibbonLayout.separateLane.top - 6}
-                  fontSize={scaleFont(10)}
+                  fontSize={ribbonLabelFont(10)}
                   fontWeight={700}
                   fill={COLOR_SEPARATE_ORIGIN_STRONG}
                   style={{ userSelect: 'none' }}
@@ -2186,7 +2199,7 @@ function SubcontractDetailPageInner() {
                   x={bi.x + bi.w + 6}
                   y={bi.y + bi.h / 2}
                   dominantBaseline="middle"
-                  fontSize={scaleFont(10)}
+                  fontSize={ribbonLabelFont(10)}
                   fill="#333"
                   style={{ userSelect: 'none', pointerEvents: 'none' }}
                 >
@@ -2234,8 +2247,8 @@ function SubcontractDetailPageInner() {
                 style={{ pointerEvents: 'none' }}
               >
                 <div style={{ fontFamily: 'inherit', userSelect: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-                  <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: '#94a3b8' }}>事業 / PID {graph.projectId}</div>
-                  <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#333', lineHeight: `${scaleFont(13)}px`, marginTop: 2, ...CLAMP_2_LINES }}>
+                  <div style={{ fontSize: ribbonLabelFont(9), fontWeight: 700, color: '#94a3b8' }}>事業 / PID {graph.projectId}</div>
+                  <div style={{ fontSize: ribbonLabelFont(11), fontWeight: 700, color: '#333', lineHeight: `${ribbonLabelFont(13)}px`, marginTop: 2, ...CLAMP_2_LINES }}>
                     {graph.projectName}
                     <span style={{ fontWeight: 500, color: '#888' }}> （支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}）</span>
                   </div>
@@ -2256,7 +2269,7 @@ function SubcontractDetailPageInner() {
               const barOpacity = isDimmed ? 0.35 : 1;
               const labelColor = isDimmed ? '#bbb' : '#333';
               const amountLabel = bar.isZeroAmount ? '金額内訳なし' : formatYen(bar.totalAmount);
-              const barLabelFontPx = scaleFont(11);
+              const barLabelFontPx = ribbonLabelFont(11);
               const amountTspanText = ` (${amountLabel})`;
               // 金額部分（"(1,234億円)"）を必ず収めた上で名前部分を切り詰める（列幅からはみ出し・
               // 文字切れを防ぐ。clipPath は保険として残すが、通常ケースではここで収まる）
