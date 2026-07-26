@@ -212,6 +212,10 @@ const ZOOM_MIN_MULTIPLIER = 0.25;
 const ZOOM_MAX_MULTIPLIER = 30;
 // ズーム連動フォント拡大の上限（/sankey-svg の ZOOM_FONT_MAX_RATIO と同値）。
 const ZOOM_FONT_MAX_RATIO = 2.0;
+// フロー図の横方向は「可視幅に収める列数」を固定にする（メイン画面の横幅に4列が収まる
+// 制約に合わせる）。再委託階層が深く5列以上になる場合は圧縮せず横へオーバーフローさせる。
+// 4列 = 予算・執行 / 事業 / 支出先(depth1) / 再委託先(depth2)。
+const RIBBON_VISIBLE_COLS = 4;
 // フロー図ラベルを「画面上ほぼ一定サイズ（baseZoom 超のズームインで最大 ZOOM_FONT_MAX_RATIO 倍まで拡大）」
 // にするための係数。scaled <g> 内の fontSize に scale を打ち消す形で掛ける（/sankey-svg の getZoomLabelScale 相当）。
 function getZoomLabelScale(zoomK: number, baseZoomK: number): number {
@@ -1317,6 +1321,9 @@ function SubcontractDetailPageInner() {
   // ズーム/パン
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
   const [baseZoom, setBaseZoom] = useState(1);
+  // フロー図の横スケール（zoom非依存・4列固定ピッチ）。resetViewport / URL復元時に可視幅から算出して保持。
+  // 縦は transform.scale(zoom) が担い、横はこの値で「画面上の列位置」を zoom不変に固定する。
+  const [horizontalScale, setHorizontalScale] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
   // スクロールモード: 'zoom' = 素のスクロールでズーム（既定）/ 'pan' = 素のスクロールで移動、
@@ -1427,11 +1434,12 @@ function SubcontractDetailPageInner() {
         const newScale = Math.max(minZoom, Math.min(maxZoom, prev.scale * factor));
         const rect = svgRef.current?.getBoundingClientRect();
         if (!rect) return { ...prev, scale: newScale };
-        const cx = clientX - rect.left;
         const cy = clientY - rect.top;
+        // 横は zoom不変（横スケールは transform.scale に依存しないため pan.x は据え置き）。
+        // 縦のみカーソル位置をアンカーにズーム。
         return {
           scale: newScale,
-          x: cx - (cx - prev.x) * (newScale / prev.scale),
+          x: prev.x,
           y: cy - (cy - prev.y) * (newScale / prev.scale),
         };
       });
@@ -1492,11 +1500,11 @@ function SubcontractDetailPageInner() {
       const newScale = Math.max(minZoom, Math.min(maxZoom, prev.scale * factor));
       const container = containerRef.current;
       if (!container) return { ...prev, scale: newScale };
-      const cx = container.clientWidth / 2;
       const cy = container.clientHeight / 2;
+      // 横は zoom不変（pan.x 据え置き）、縦のみ中央アンカーでズーム。
       return {
         scale: newScale,
-        x: cx - (cx - prev.x) * (newScale / prev.scale),
+        x: prev.x,
         y: cy - (cy - prev.y) * (newScale / prev.scale),
       };
     });
@@ -1513,14 +1521,30 @@ function SubcontractDetailPageInner() {
     const reserveRight = sidePanelSide === 'right' && !sidePanel.collapsed ? sidePanel.effectiveWidth : 0;
     const cW = Math.max(100, container.clientWidth - reserveLeft - reserveRight);
     const cH = container.clientHeight;
+    if (viewMode === 'ribbon') {
+      // 横縦分離: 横は「可視幅に4列」の固定ピッチ（zoom非依存）、縦のみ高さフィットで baseZoom を決める。
+      // pan.x は可視領域左端に左寄せ（予算・執行列が左端）。横フィットはしない（5列以上はオーバーフロー）。
+      const hScale = (cW / RIBBON_VISIBLE_COLS) / (RIBBON_COL_W + RIBBON_COL_GAP);
+      const fitZoomV = Math.max(0.05, Math.min(10, (cH / activeContentSize.h) * 0.9));
+      setHorizontalScale(hScale);
+      setBaseZoom(fitZoomV);
+      setTransform({
+        x: reserveLeft,
+        y: (cH - activeContentSize.h * fitZoomV) / 2,
+        scale: fitZoomV,
+      });
+      return;
+    }
+    // ブロック図（別経路）は従来どおり一様フィット。
     const fitZoom = Math.max(0.05, Math.min(10, Math.min(cW / activeContentSize.w, cH / activeContentSize.h) * 0.9));
+    setHorizontalScale(1);
     setBaseZoom(fitZoom);
     setTransform({
       x: reserveLeft + (cW - activeContentSize.w * fitZoom) / 2,
       y: (cH - activeContentSize.h * fitZoom) / 2,
       scale: fitZoom,
     });
-  }, [activeContentSize, sidePanelSide, sidePanel.collapsed, sidePanel.effectiveWidth]);
+  }, [activeContentSize, sidePanelSide, sidePanel.collapsed, sidePanel.effectiveWidth, viewMode]);
 
   // グラフ読み込み後に全体表示。ただし最初の1回はURLにz/tx/tyがあればそれを優先復元する
   useEffect(() => {
@@ -1532,9 +1556,15 @@ function SubcontractDetailPageInner() {
       if (container && restore?.zoom !== undefined && restore.tx !== undefined && restore.ty !== undefined) {
         const cW = container.clientWidth;
         const cH = container.clientHeight;
-        const fitZoom = Math.max(0.05, Math.min(10, Math.min(cW / activeContentSize.w, cH / activeContentSize.h) * 0.9));
         suppressViewportWriteRef.current = true;
-        setBaseZoom(fitZoom);
+        if (viewMode === 'ribbon') {
+          // 横スケールは可視幅から再算出（URLには保存しない）。縦の baseZoom は高さフィット基準。
+          setHorizontalScale((cW / RIBBON_VISIBLE_COLS) / (RIBBON_COL_W + RIBBON_COL_GAP));
+          setBaseZoom(Math.max(0.05, Math.min(10, (cH / activeContentSize.h) * 0.9)));
+        } else {
+          setHorizontalScale(1);
+          setBaseZoom(Math.max(0.05, Math.min(10, Math.min(cW / activeContentSize.w, cH / activeContentSize.h) * 0.9)));
+        }
         setTransform({ x: restore.tx, y: restore.ty, scale: restore.zoom });
         return;
       }
@@ -1644,6 +1674,12 @@ function SubcontractDetailPageInner() {
   // baseZoom 超のズームイン時に最大 ZOOM_FONT_MAX_RATIO 倍まで拡大する。
   const ribbonZoomLabelScale = getZoomLabelScale(transform.scale, baseZoom);
   const ribbonLabelFont = (px: number) => scaleFont(px) * ribbonZoomLabelScale / transform.scale;
+  // 横縦分離の座標変換（メインの screenToInnerX / screenWToInner 相当）。
+  // 群は translate(pan) scale(transform.scale) されるので、横座標/幅を横スケール倍して
+  // transform.scale で割り戻すと、群の scale(zoom) を打ち消して「画面上の横位置は zoom不変」
+  // になる。縦(y・高さ)は素のレイアウト座標のまま群の scale(zoom) で拡大させる。
+  const ix = (x: number) => (x * horizontalScale) / transform.scale;
+  const iw = (w: number) => (w * horizontalScale) / transform.scale;
   return (
     <div style={{ display: 'flex', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* SVGキャンバス */}
@@ -2091,9 +2127,9 @@ function SubcontractDetailPageInner() {
               {Array.from({ length: ribbonMaxDepth }, (_, i) => i + 1).map((d) => (
                 <clipPath id={`ribbon-clip-col-${d}`} key={d}>
                   <rect
-                    x={ribbonColX(d) + RIBBON_BAR_W}
+                    x={ix(ribbonColX(d) + RIBBON_BAR_W)}
                     y={0}
-                    width={Math.max(0, ribbonColX(d + 1) - (ribbonColX(d) + RIBBON_BAR_W))}
+                    width={iw(Math.max(0, ribbonColX(d + 1) - (ribbonColX(d) + RIBBON_BAR_W)))}
                     height={safeRibbonLayout.svgHeight}
                   />
                 </clipPath>
@@ -2104,16 +2140,16 @@ function SubcontractDetailPageInner() {
             {safeRibbonLayout.separateLane && (
               <g style={{ pointerEvents: 'none' }}>
                 <line
-                  x1={0}
+                  x1={ix(0)}
                   y1={safeRibbonLayout.separateLane.top}
-                  x2={safeRibbonLayout.svgWidth}
+                  x2={ix(safeRibbonLayout.svgWidth)}
                   y2={safeRibbonLayout.separateLane.top}
                   stroke="#cbd5e1"
                   strokeWidth={1}
                   strokeDasharray="4 4"
                 />
                 <text
-                  x={RIBBON_MARGIN.left}
+                  x={ix(RIBBON_MARGIN.left)}
                   y={safeRibbonLayout.separateLane.top - 6}
                   fontSize={ribbonLabelFont(10)}
                   fontWeight={700}
@@ -2149,7 +2185,7 @@ function SubcontractDetailPageInner() {
               return (
                 <path
                   key={`rfwd-${i}`}
-                  d={ribbonFlowPath(flow.x1, flow.y1Top, flow.y1Bot, flow.x2, flow.y2Top, flow.y2Bot)}
+                  d={ribbonFlowPath(ix(flow.x1), flow.y1Top, flow.y1Bot, ix(flow.x2), flow.y2Top, flow.y2Bot)}
                   fill={palette ? palette.header : edgeStyle.stroke}
                   fillOpacity={fillOpacity}
                   stroke={isSeparateOrigin ? edgeStyle.stroke : 'none'}
@@ -2172,7 +2208,7 @@ function SubcontractDetailPageInner() {
             {safeRibbonLayout.backEdges.map((edge, i) => (
               <path
                 key={`rback-${i}`}
-                d={edge.isSelfLoop ? ribbonSelfLoopPath(edge.x1, edge.y1) : ribbonBackEdgePath(edge.x1, edge.y1, edge.x2, edge.y2)}
+                d={edge.isSelfLoop ? ribbonSelfLoopPath(ix(edge.x1), edge.y1) : ribbonBackEdgePath(ix(edge.x1), edge.y1, ix(edge.x2), edge.y2)}
                 fill="none"
                 stroke={COLOR_BACK_EDGE}
                 strokeWidth={1.5}
@@ -2184,7 +2220,7 @@ function SubcontractDetailPageInner() {
             {safeRibbonLayout.budgetFlows.map((bf, i) => (
               <path
                 key={`bflow-${i}`}
-                d={ribbonFlowPath(bf.x1, bf.y1Top, bf.y1Bot, bf.x2, bf.y2Top, bf.y2Bot)}
+                d={ribbonFlowPath(ix(bf.x1), bf.y1Top, bf.y1Bot, ix(bf.x2), bf.y2Top, bf.y2Bot)}
                 fill={SEMANTIC_PROJECT}
                 fillOpacity={0.22}
                 style={{ pointerEvents: 'none' }}
@@ -2194,9 +2230,9 @@ function SubcontractDetailPageInner() {
             {/* 予算・執行ノード列（最左・緑）。ラベルは 名前(金額) */}
             {safeRibbonLayout.budgetItems.map((bi, i) => (
               <g key={`bnode-${i}`}>
-                <rect x={bi.x} y={bi.y} width={bi.w} height={Math.max(1, bi.h)} rx={1} fill={SEMANTIC_PROJECT} vectorEffect="non-scaling-stroke" />
+                <rect x={ix(bi.x)} y={bi.y} width={iw(bi.w)} height={Math.max(1, bi.h)} rx={1} fill={SEMANTIC_PROJECT} vectorEffect="non-scaling-stroke" />
                 <text
-                  x={bi.x + bi.w + 6}
+                  x={ix(bi.x + bi.w + 6)}
                   y={bi.y + bi.h / 2}
                   dominantBaseline="middle"
                   fontSize={ribbonLabelFont(10)}
@@ -2218,7 +2254,7 @@ function SubcontractDetailPageInner() {
             >
               {safeRibbonLayout.root.budgetH != null ? (
                 <path
-                  d={mergedProjectPath(safeRibbonLayout.root.x, safeRibbonLayout.root.y, RIBBON_BAR_W, safeRibbonLayout.root.budgetH, safeRibbonLayout.root.h)}
+                  d={mergedProjectPath(ix(safeRibbonLayout.root.x), safeRibbonLayout.root.y, iw(RIBBON_BAR_W), safeRibbonLayout.root.budgetH, safeRibbonLayout.root.h)}
                   fill="url(#budget-exec-grad)"
                   stroke={hoveredNodeRaw?.kind === 'root' ? '#111827' : 'none'}
                   strokeWidth={hoveredNodeRaw?.kind === 'root' ? 1.5 : 0}
@@ -2227,9 +2263,9 @@ function SubcontractDetailPageInner() {
                 />
               ) : (
                 <rect
-                  x={safeRibbonLayout.root.x}
+                  x={ix(safeRibbonLayout.root.x)}
                   y={safeRibbonLayout.root.y}
-                  width={safeRibbonLayout.root.w}
+                  width={iw(safeRibbonLayout.root.w)}
                   height={Math.max(1, safeRibbonLayout.root.h)}
                   rx={1}
                   fill="#e07040"
@@ -2240,9 +2276,9 @@ function SubcontractDetailPageInner() {
                 />
               )}
               <foreignObject
-                x={safeRibbonLayout.root.x + safeRibbonLayout.root.w + 6}
+                x={ix(safeRibbonLayout.root.x + safeRibbonLayout.root.w + 6)}
                 y={safeRibbonLayout.root.y - 4}
-                width={RIBBON_LABEL_W - 6}
+                width={iw(RIBBON_LABEL_W - 6)}
                 height={Math.max(safeRibbonLayout.root.h + 8, 44)}
                 style={{ pointerEvents: 'none' }}
               >
@@ -2273,7 +2309,7 @@ function SubcontractDetailPageInner() {
               const amountTspanText = ` (${amountLabel})`;
               // 金額部分（"(1,234億円)"）を必ず収めた上で名前部分を切り詰める（列幅からはみ出し・
               // 文字切れを防ぐ。clipPath は保険として残すが、通常ケースではここで収まる）
-              const displayBlockName = truncateRibbonLabelName(bar.blockName, amountTspanText, RIBBON_LABEL_W - 6, barLabelFontPx);
+              const displayBlockName = truncateRibbonLabelName(bar.blockName, amountTspanText, iw(RIBBON_LABEL_W - 6), barLabelFontPx);
 
               return (
                 <g
@@ -2285,9 +2321,9 @@ function SubcontractDetailPageInner() {
                 >
                   {isSelected && (
                     <rect
-                      x={bar.x - 3}
+                      x={ix(bar.x - 3)}
                       y={bar.y - 3}
-                      width={bar.w + 6}
+                      width={iw(bar.w + 6)}
                       height={bar.h + 6}
                       rx={4}
                       fill="none"
@@ -2297,9 +2333,9 @@ function SubcontractDetailPageInner() {
                     />
                   )}
                   <rect
-                    x={bar.x}
+                    x={ix(bar.x)}
                     y={bar.y}
-                    width={bar.w}
+                    width={iw(bar.w)}
                     height={Math.max(1, bar.h)}
                     rx={1}
                     fill={palette.header}
@@ -2309,7 +2345,7 @@ function SubcontractDetailPageInner() {
                     style={{ opacity: barOpacity, transition: 'opacity 0.12s ease' }}
                   />
                   <text
-                    x={bar.x + bar.w + 6}
+                    x={ix(bar.x + bar.w + 6)}
                     y={bar.y + bar.h / 2}
                     dominantBaseline="middle"
                     fontSize={barLabelFontPx}
@@ -2372,7 +2408,8 @@ function SubcontractDetailPageInner() {
             });
           }
           return cols.map((col) => {
-            const screenX = transform.x + col.xCenter * scale;
+            // 横は zoom不変（horizontalScale）、縦は zoom連動（scale）で列位置を出す。
+            const screenX = transform.x + col.xCenter * horizontalScale;
             const colTopScreenY = transform.y + col.topY * scale;
             const blockH = Math.round(labelPx * 1.4 + col.amountLines.length * amountPx * 1.4 + 6);
             const top = Math.max(HEADER_TOP_RESERVE, colTopScreenY - blockH - 6);
