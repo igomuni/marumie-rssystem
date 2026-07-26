@@ -2297,7 +2297,7 @@ function SubcontractDetailPageInner() {
                   style={{ userSelect: 'none', pointerEvents: 'none' }}
                 >
                   {bi.label.length > 16 ? bi.label.slice(0, 15) + '…' : bi.label}
-                  <tspan fill="#888"> ({formatYen(bi.amount)})</tspan>
+                  <tspan> ({formatYen(bi.amount)})</tspan>
                 </text>
               </g>
               );
@@ -2344,10 +2344,25 @@ function SubcontractDetailPageInner() {
                   <div style={{ fontSize: ribbonLabelFont(9), fontWeight: 700, color: '#94a3b8' }}>事業 / PID {graph.projectId}</div>
                   <div style={{ fontSize: ribbonLabelFont(11), fontWeight: 700, color: '#333', lineHeight: `${ribbonLabelFont(13)}px`, marginTop: 2, ...CLAMP_2_LINES }}>
                     {graph.projectName}
-                    <span style={{ fontWeight: 500, color: '#888' }}> （支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}）</span>
+                    <span style={{ fontWeight: 500 }}> （支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}）</span>
                   </div>
                 </div>
               </foreignObject>
+              {/* メイン画面同様、緑（予算）側に予算額を表示。緑側は橙（支出）より下へ伸びるため、
+                  橙より下の緑専有域（root.h〜budgetH）の中央にラベルを置き、事業名ラベルと重ねない */}
+              {safeRibbonLayout.root.budgetH != null && safeRibbonLayout.root.budgetAmount != null && (
+                <text
+                  x={ix(safeRibbonLayout.root.x + safeRibbonLayout.root.w + 6)}
+                  y={safeRibbonLayout.root.y + (safeRibbonLayout.root.h + safeRibbonLayout.root.budgetH) / 2}
+                  dominantBaseline="middle"
+                  fontSize={ribbonLabelFont(11)}
+                  fontWeight={600}
+                  fill="#333"
+                  style={{ userSelect: 'none', pointerEvents: 'none' }}
+                >
+                  予算 {formatYen(safeRibbonLayout.root.budgetAmount)}
+                </text>
+              )}
             </g>
 
             {/* ブロックバー（sankeyノード風の細帯。ラベルはバー右横のテキスト） */}
@@ -2414,7 +2429,7 @@ function SubcontractDetailPageInner() {
                     style={{ userSelect: 'none', pointerEvents: 'none' }}
                   >
                     {displayBlockName}
-                    <tspan fill={isDimmed ? '#ccc' : '#888'} fontWeight={500}>{amountTspanText}</tspan>
+                    <tspan>{amountTspanText}</tspan>
                   </text>
                 </g>
               );
