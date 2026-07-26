@@ -35,9 +35,19 @@ description: lint と TypeScript 型チェックとユニットテストを実�
      経緯: docs/tasks/20260718_1421_関数バンドル250MB問題の設計的回避.md）
    - 違反がある場合はユーザーに報告して修正を提案する
 
+5. **ドキュメント参照検査**（コード・`docs/*.md` を変更した場合のみ）
+   ```bash
+   grep -rn "docs/tasks/" app scripts client docs types \
+     --include='*.ts' --include='*.tsx' --include='*.py' --include='*.mjs' --include='*.md' \
+     | grep -v "docs/プロンプトログ"
+   ```
+   - task doc は rs-vis へ展開されないため、コード・公開ドキュメントからの参照はリンク切れになる。
+     ヒットしたら恒久ガイド（`docs/*.md`）への参照に置き換える（`.claude/` 配下は対象外）
+
 ## 完了条件
 
 - lint エラー 0件
 - tsc エラー 0件
 - テスト全件パス
 - （対象変更時のみ）check-traces 違反 0件
+- （対象変更時のみ）`docs/tasks/` 参照 0件

@@ -81,9 +81,9 @@ const EXAMPLE_PROMPTS = [
 ];
 
 /**
- * レポート化ボタンの定型プロンプト。実験E2/E3（docs/tasks/20260719_0852 4節）で
- * 「会話整形の1ターン + 出典付記」の品質が確認できた形をそのまま固定する。
- * 会話に無い数値の捏造防止を明示するのが要点
+ * レポート化ボタンの定型プロンプト。「会話整形の1ターン + 出典付記」の品質が確認できた形を
+ * そのまま固定する。会話に無い数値の捏造防止を明示するのが要点
+ * （要件: docs/ai-chat-architecture-guide.md 5節）
  */
 const REPORT_PROMPT =
   'ここまでの調査をレポートとしてまとめてください。数値・事実はこの会話に出てきたものだけを使い、会話に無い数値は書かないでください。' +
@@ -93,7 +93,7 @@ const PANEL_Z_INDEX = 210; // 右上の設定ボタン(200)より前面。ScoreD
 
 /**
  * 送信中インジケータの日本語ラベル。progress イベント（構造化データ）を人間向け文言へ変換する。
- * ラベルの対応表は設計ドキュメント（docs/tasks/20260710_0633_...）のとおり
+ * ラベルの対応表は docs/ai-chat-architecture-guide.md 3節のとおり
  */
 function progressLabel(progress: SankeyChatProgressEvent | null | undefined): string {
   if (!progress) return '条件を組み立てています…';

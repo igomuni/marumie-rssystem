@@ -5,7 +5,10 @@
 > 1. `scripts/score-project-quality.py` … 生CSV→per-recipient行＋機械signal（旧5軸の素材）を生成
 > 2. `scripts/score-project-quality-ai.py` … per-recipient文脈をAI判定し、新4軸＋総合を再計算して `project-quality-scores-{year}.json` を上書き（**これが最終・UI表示用**）
 >
-> 設計の全体像と旧5軸の問題点診断: `docs/tasks/20260616_1749_AI支出先データ品質スコアリング再設計.md`
+> **旧5軸から移行した理由**: 旧5軸は辞書の完全一致に依存していたため、辞書に載らない支出先が
+> 一律で低評価になり（辞書鮮度の問題）、また軸4「ブロック構造」が全事業ほぼ満点で弁別しなかった。
+> 「支出先が特定できるか」「何に使ったか説明できるか」という本来の問いをAI判定に委ね、
+> 機械計算は客観的に決まる収支整合のみに絞った。旧5軸は機械signalの素材として保持している。
 >
 > ### スコア軸
 > | 軸 | 種別 | 重み | 測るもの |
@@ -24,6 +27,26 @@
 > ---
 >
 > 以下は **旧5軸（現在は機械signalの素材として保持）** の詳細。
+
+## AI評価スクリプトの構成（本番版と Google 検証版）
+
+AI評価フェーズには2本のスクリプトがある。
+
+| スクリプト | 位置づけ | 経路 | `aiSource` |
+|-----------|---------|------|-----------|
+| `scripts/score-project-quality-ai.py` | **本番** | OpenRouter（OpenAI互換） | `openrouter:<model>` |
+| `scripts/score-project-quality-ai-google.py` | 検証・深掘り用の派生 | Google AI Studio の OpenAI互換エンドポイント（実 Gemini） | `google:<model>` |
+
+**同期規約（重要）**: 派生版の差分は **API 接続まわり（キー / base-url / model / thinking /
+`aiSource` ラベル / キャッシュ名）に限定する**。採点ロジック — プロンプト・レベル定義・
+金額加重集計・軸C/Dの機械計算・総合重み・出力スキーマ — は本番と完全一致を保つこと。
+**本番側を変更したら派生版にも同期する。**
+
+派生版が存在する理由は、OpenRouter 経由の Gemini と Google 直の Gemini で判定が一致するかを
+検証するため（プロバイダ差の切り分け）。どちらもキー未設定時は決定的ヒューリスティックで完走し
+`aiSource="heuristic"` を付与する。
+
+---
 
 スクリプト: `scripts/score-project-quality.py`
 

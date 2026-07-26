@@ -12,7 +12,7 @@
  *   4. 関数あたりの合計トレースサイズが上限を超えたら失敗（既定 200MB。閾値は目安 —
  *      Vercel の計測と厳密一致はしないが、余裕を持って検知する）
  *   5. includes（next.config.ts）が反映されず data/server 同梱が 0 件なら構成破綻として失敗
- * 経緯: PR #259、docs/tasks/20260718_1421_関数バンドル250MB問題の設計的回避.md
+ * 設計ルール R1〜R4: docs/data-pipeline-guide.md「サーバ関数バンドル 250MB 制約」（経緯は PR #259）
  *
  * 使い方: npm run build && npm run check-traces
  */

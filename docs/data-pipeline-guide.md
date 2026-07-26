@@ -294,6 +294,30 @@ marumie-rssystem/
 
 **重要**: Vercel へのデプロイには `.gz` ファイルが Git にコミットされていること必須。ローカルの非圧縮 JSON は `.gitignore` 対象のため、`compress-data` → `git add *.gz` → `git push` が必要。
 
+### サーバ関数バンドル 250MB 制約（設計ルール）
+
+Vercel のサーバ関数には展開後 250MB の上限がある。Next.js のファイルトレーシングは
+「ルートが import したモジュールが読むファイル」を自動で同梱するため、**データファイルの置き場と
+読み方を誤ると簡単に上限を超える**（実測 383MB 超過の事故あり）。次の4ルールで構造的に回避する。
+
+- **R1: サーバ専用データを `public/` から分離する** — サーバ API しか読まないデータ
+  （recipient-index・rs-project-details・project-quality-recipients 等）は非公開の `data/server/` に置く。
+  Git 上の物理移動ではなく **prebuild での同期**で実現している。副次効果として bulk `.gz` の
+  URL 直ダウンロード経路（帯域ベクタ）も塞がる
+- **R2: サーバは `.gz` を正として実行時に gunzip する**（効果が最大）— `prebuild` の
+  `.gz` → `.json` 展開は**クライアント配信ファイルだけに限定**し、サーバローダは常に `.gz` を読む。
+  同梱データが raw 96MB級 → gz 十数MB に縮む。gunzip コストは初回コールドスタートのみ
+- **R3: ルートは自分が使うローダだけ import する** — バレルファイルや「全ローダのレジストリ」を
+  作らない。**handler 内の dynamic import でもトレーサーは追跡する**ため、分離は
+  「参照しないこと」でしか担保できない
+- **R4: トレース検証をビルドフローに組み込む** — `npm run build && npm run check-traces`
+  （`scripts/check-function-traces.mjs`）が `.next/server` のトレース結果を全件分類し、
+  `public/data` の同梱禁止・`data/server` は `.gz` のみ・関数あたり合計200MB 上限を検査する。
+  `/quality-check` の手順に含まれている
+
+**パス構築が静的解析できないと、トレーサーはプロジェクトルート全体を依存とみなす**
+（`data/houjin.db` 1GB 等が丸ごと同梱される）。ローダのパスは定数で組み立てること。
+
 ---
 
 ## 7. トラブルシューティング
