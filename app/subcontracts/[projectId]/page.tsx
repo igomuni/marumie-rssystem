@@ -2348,13 +2348,15 @@ function SubcontractDetailPageInner() {
                   </div>
                 </div>
               </foreignObject>
-              {/* メイン画面同様、緑（予算）側に予算額を表示。緑側は橙（支出）より下へ伸びるため、
-                  橙より下の緑専有域（root.h〜budgetH）の中央にラベルを置き、事業名ラベルと重ねない */}
+              {/* メイン画面同様、予算額は緑（予算）側の左隣・ノード縦中央に表示（textAnchor=end）。
+                  縦位置は max(支出,予算) の中央にし、予算=支出で緑=橙のときも中央に出る（右の事業名とは
+                  左右に分かれるため重ならない）。 */}
               {safeRibbonLayout.root.budgetH != null && safeRibbonLayout.root.budgetAmount != null && (
                 <text
-                  x={ix(safeRibbonLayout.root.x + safeRibbonLayout.root.w + 6)}
-                  y={safeRibbonLayout.root.y + (safeRibbonLayout.root.h + safeRibbonLayout.root.budgetH) / 2}
+                  x={ix(safeRibbonLayout.root.x) - iw(6)}
+                  y={safeRibbonLayout.root.y + Math.max(safeRibbonLayout.root.h, safeRibbonLayout.root.budgetH) / 2}
                   dominantBaseline="middle"
+                  textAnchor="end"
                   fontSize={ribbonLabelFont(11)}
                   fontWeight={600}
                   fill="#333"
