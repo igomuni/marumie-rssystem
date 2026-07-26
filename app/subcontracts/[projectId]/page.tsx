@@ -43,7 +43,8 @@ import {
 } from '@/app/lib/subcontract-layout';
 import { SEMANTIC_SEPARATE_ORIGIN, SEMANTIC_PROJECT } from '@/app/lib/semantic-colors';
 import { TagChip } from '@/client/components/TagChip';
-import { originKindLabel, originKindToTagKind, flowOriginToTagKind } from '@/client/components/subcontract/origin-kind';
+import { getAccountBadgeStyle } from '@/app/lib/account-badge';
+import { originKindLabel } from '@/client/components/subcontract/origin-kind';
 import { QualityScoreBlock } from '@/client/components/quality/QualityScoreBlock';
 import {
   computeSubcontractRibbonLayout,
@@ -2525,14 +2526,34 @@ function SubcontractDetailPageInner() {
           if (tipY < 4) tipY = mousePos.y + GAP;
           tipY = Math.max(4, Math.min(tipY, containerH - tipH - 4));
 
-          // タイトル横に出す意味タグ（メイン画面のツールチップと同じフラット白背景＋小タグの流儀）
+          // タイトル横のバッジ。種別（事業/予算/直接/再委託…）バッジは廃止し、
+          // 予算・執行ノードと事業ノードには会計区分（一般/特別）バッジを出す。
+          const toAccountKey = (cat: string): 'general' | 'special' | null =>
+            cat.includes('一般') ? 'general' : cat.includes('特別') ? 'special' : null;
+          const renderAccountBadge = (key: 'general' | 'special' | 'both' | null) => {
+            const badge = getAccountBadgeStyle(key);
+            if (!badge) return null;
+            return (
+              <span style={{ background: badge.background, color: '#fff', padding: '1px 6px', borderRadius: 8, fontSize: scaleFont(9), fontWeight: 700, lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                {badge.label}
+              </span>
+            );
+          };
+          // 事業(root)の会計区分は予算内訳ノードの一般/特別の有無から判定（両方あれば both）
+          const rootAccountKey: 'general' | 'special' | 'both' | null = (() => {
+            if (!isRoot) return null;
+            let hasGeneral = false, hasSpecial = false;
+            for (const bi of safeRibbonLayout.budgetItems) {
+              const k = toAccountKey(bi.accountCategory);
+              if (k === 'general') hasGeneral = true; else if (k === 'special') hasSpecial = true;
+            }
+            return hasGeneral && hasSpecial ? 'both' : hasGeneral ? 'general' : hasSpecial ? 'special' : null;
+          })();
           const titleTag = isRoot
-            ? <TagChip kind="project" fontSize={scaleFont(9)}>事業</TagChip>
+            ? renderAccountBadge(rootAccountKey)
             : bud
-              ? <TagChip kind="project" fontSize={scaleFont(9)}>予算</TagChip>
-              : rf
-                ? <TagChip kind={flowOriginToTagKind(rf.origin)} fontSize={scaleFont(9)}>{flowOriginLabel(rf.origin)}</TagChip>
-                : <TagChip kind={originKindToTagKind(lb!.originKind)} fontSize={scaleFont(9)}>{originKindLabel(lb!.originKind)}</TagChip>;
+              ? renderAccountBadge(toAccountKey(bud.accountCategory))
+              : null;
           const titleText = isRoot ? graph.projectName : bud ? bud.label : rf ? `${rfSourceName} → ${rfTargetName}` : lb!.blockName;
           return (
             <div style={{
@@ -2571,7 +2592,6 @@ function SubcontractDetailPageInner() {
                     <div>予算額 <b style={{ color: '#222' }}>{formatYen(bud.amount)}</b>
                       {bud.nextYearRequestAmount > 0 && <> ・ 翌年度要求 <b style={{ color: '#222' }}>{formatYen(bud.nextYearRequestAmount)}</b></>}
                     </div>
-                    {bud.accountCategory.trim() && <div style={{ color: '#777' }}>{bud.accountCategory}</div>}
                     {(bud.item.trim() || bud.subItem.trim()) && (
                       <div style={{ color: '#777' }}>
                         {bud.item.trim() && <>項: {bud.item}</>}
