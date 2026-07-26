@@ -43,7 +43,7 @@ import {
 } from '@/app/lib/subcontract-layout';
 import { SEMANTIC_SEPARATE_ORIGIN, SEMANTIC_PROJECT } from '@/app/lib/semantic-colors';
 import { TagChip } from '@/client/components/TagChip';
-import { getAccountBadgeStyle } from '@/app/lib/account-badge';
+import { getAccountBadgeStyle, classifyAccountCategory } from '@/app/lib/account-badge';
 import { originKindLabel } from '@/client/components/subcontract/origin-kind';
 import { QualityScoreBlock } from '@/client/components/quality/QualityScoreBlock';
 import {
@@ -220,6 +220,17 @@ const RIBBON_LABEL_SLOT_PX_BASE = 12;
 // 制約に合わせる）。再委託階層が深く5列以上になる場合は圧縮せず横へオーバーフローさせる。
 // 4列 = 予算・執行 / 事業 / 支出先(depth1) / 再委託先(depth2)。
 const RIBBON_VISIBLE_COLS = 4;
+
+/**
+ * ribbon図のフィット値を算出。横は「可視幅に4列」の固定ピッチ（zoom非依存）、
+ * 縦は高さフィット（baseZoom）。resetViewport と URL復元の両方から使い、式の二重化を防ぐ。
+ */
+function computeRibbonFit(cW: number, cH: number, contentH: number): { horizontalScale: number; baseZoom: number } {
+  return {
+    horizontalScale: (cW / RIBBON_VISIBLE_COLS) / (RIBBON_COL_W + RIBBON_COL_GAP),
+    baseZoom: Math.max(0.05, Math.min(10, (cH / contentH) * 0.9)),
+  };
+}
 // フロー図ラベルを「画面上ほぼ一定サイズ（baseZoom 超のズームインで最大 ZOOM_FONT_MAX_RATIO 倍まで拡大）」
 // にするための係数。scaled <g> 内の fontSize に scale を打ち消す形で掛ける（/sankey-svg の getZoomLabelScale 相当）。
 function getZoomLabelScale(zoomK: number, baseZoomK: number): number {
@@ -1440,11 +1451,12 @@ function SubcontractDetailPageInner() {
         const rect = svgRef.current?.getBoundingClientRect();
         if (!rect) return { ...prev, scale: newScale };
         const cy = clientY - rect.top;
-        // 横は zoom不変（横スケールは transform.scale に依存しないため pan.x は据え置き）。
-        // 縦のみカーソル位置をアンカーにズーム。
+        const cx = clientX - rect.left;
+        // ribbon図は横スケールが transform.scale に依存しない（ix/iw で打ち消す）ため pan.x を据え置き、
+        // 縦のみカーソルアンカー。block図は生座標を一様スケールで描くため、横もカーソルに再アンカーする。
         return {
           scale: newScale,
-          x: prev.x,
+          x: viewMode === 'ribbon' ? prev.x : cx - (cx - prev.x) * (newScale / prev.scale),
           y: cy - (cy - prev.y) * (newScale / prev.scale),
         };
       });
@@ -1461,7 +1473,7 @@ function SubcontractDetailPageInner() {
         setTransform((prev) => ({ ...prev, x: prev.x - e.deltaX * speed, y: prev.y - e.deltaY * speed }));
       }
     }
-  }, [beginHoverSuppressCooldown, baseZoom, scrollMode]);
+  }, [beginHoverSuppressCooldown, baseZoom, scrollMode, viewMode]);
 
   useEffect(() => {
     if (!graph) return; // SVGがレンダリングされるまで待つ
@@ -1506,14 +1518,15 @@ function SubcontractDetailPageInner() {
       const container = containerRef.current;
       if (!container) return { ...prev, scale: newScale };
       const cy = container.clientHeight / 2;
-      // 横は zoom不変（pan.x 据え置き）、縦のみ中央アンカーでズーム。
+      const cx = container.clientWidth / 2;
+      // ribbon図は横 zoom不変（pan.x 据え置き）、block図は生座標のため横も中央アンカーで再計算。縦は共通で中央アンカー。
       return {
         scale: newScale,
-        x: prev.x,
+        x: viewMode === 'ribbon' ? prev.x : cx - (cx - prev.x) * (newScale / prev.scale),
         y: cy - (cy - prev.y) * (newScale / prev.scale),
       };
     });
-  }, [baseZoom]);
+  }, [baseZoom, viewMode]);
 
   const resetViewport = useCallback(() => {
     const container = containerRef.current;
@@ -1529,8 +1542,7 @@ function SubcontractDetailPageInner() {
     if (viewMode === 'ribbon') {
       // 横縦分離: 横は「可視幅に4列」の固定ピッチ（zoom非依存）、縦のみ高さフィットで baseZoom を決める。
       // pan.x は可視領域左端に左寄せ（予算・執行列が左端）。横フィットはしない（5列以上はオーバーフロー）。
-      const hScale = (cW / RIBBON_VISIBLE_COLS) / (RIBBON_COL_W + RIBBON_COL_GAP);
-      const fitZoomV = Math.max(0.05, Math.min(10, (cH / activeContentSize.h) * 0.9));
+      const { horizontalScale: hScale, baseZoom: fitZoomV } = computeRibbonFit(cW, cH, activeContentSize.h);
       setHorizontalScale(hScale);
       setBaseZoom(fitZoomV);
       setTransform({
@@ -1564,8 +1576,9 @@ function SubcontractDetailPageInner() {
         suppressViewportWriteRef.current = true;
         if (viewMode === 'ribbon') {
           // 横スケールは可視幅から再算出（URLには保存しない）。縦の baseZoom は高さフィット基準。
-          setHorizontalScale((cW / RIBBON_VISIBLE_COLS) / (RIBBON_COL_W + RIBBON_COL_GAP));
-          setBaseZoom(Math.max(0.05, Math.min(10, (cH / activeContentSize.h) * 0.9)));
+          const fit = computeRibbonFit(cW, cH, activeContentSize.h);
+          setHorizontalScale(fit.horizontalScale);
+          setBaseZoom(fit.baseZoom);
         } else {
           setHorizontalScale(1);
           setBaseZoom(Math.max(0.05, Math.min(10, Math.min(cW / activeContentSize.w, cH / activeContentSize.h) * 0.9)));
@@ -2545,8 +2558,6 @@ function SubcontractDetailPageInner() {
 
           // タイトル横のバッジ。種別（事業/予算/直接/再委託…）バッジは廃止し、
           // 予算・執行ノードと事業ノードには会計区分（一般/特別）バッジを出す。
-          const toAccountKey = (cat: string): 'general' | 'special' | null =>
-            cat.includes('一般') ? 'general' : cat.includes('特別') ? 'special' : null;
           const renderAccountBadge = (key: 'general' | 'special' | 'both' | null) => {
             const badge = getAccountBadgeStyle(key);
             if (!badge) return null;
@@ -2561,7 +2572,7 @@ function SubcontractDetailPageInner() {
             if (!isRoot) return null;
             let hasGeneral = false, hasSpecial = false;
             for (const bi of safeRibbonLayout.budgetItems) {
-              const k = toAccountKey(bi.accountCategory);
+              const k = classifyAccountCategory(bi.accountCategory);
               if (k === 'general') hasGeneral = true; else if (k === 'special') hasSpecial = true;
             }
             return hasGeneral && hasSpecial ? 'both' : hasGeneral ? 'general' : hasSpecial ? 'special' : null;
@@ -2569,7 +2580,7 @@ function SubcontractDetailPageInner() {
           const titleTag = isRoot
             ? renderAccountBadge(rootAccountKey)
             : bud
-              ? renderAccountBadge(toAccountKey(bud.accountCategory))
+              ? renderAccountBadge(classifyAccountCategory(bud.accountCategory))
               : null;
           const titleText = isRoot ? graph.projectName : bud ? bud.label : rf ? `${rfSourceName} → ${rfTargetName}` : lb!.blockName;
           return (
