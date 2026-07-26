@@ -3,6 +3,7 @@ import type { SubcontractGraph } from '@/types/subcontract';
 import {
   computeSubcontractRibbonLayout,
   RIBBON_BAR_MIN_H,
+  RIBBON_TARGET_COL_H,
 } from '@/app/lib/subcontract-ribbon-layout';
 import { makeBlock, makeFlow } from '@/app/lib/test-utils/subcontract-fixtures';
 
@@ -119,5 +120,84 @@ describe('computeSubcontractRibbonLayout', () => {
     const layout = computeSubcontractRibbonLayout(graph);
     expect(layout.root.h).toBeGreaterThanOrEqual(RIBBON_BAR_MIN_H);
     expect(layout.bars).toEqual([]);
+  });
+
+  describe('間接経費の終端ノード', () => {
+    const indirectGraph = (costs: SubcontractGraph['indirectCosts']) => baseGraph({
+      blocks: [
+        makeBlock({ blockId: 'b1', blockName: '支出先ブロック', totalAmount: 900 }),
+      ],
+      flows: [makeFlow({ targetBlock: 'b1' })],
+      indirectCosts: costs,
+    });
+    const cost = (amount: number, over: Partial<SubcontractGraph['indirectCosts'][number]> = {}) => ({
+      blockHint: '', kind: '間接経費', category: '講師謝金', amount, ...over,
+    });
+
+    it('事業ノードの支出側 = ブロック流出 + 間接経費 になり、リボンはブロック流出の下に積まれる', () => {
+      const layout = computeSubcontractRibbonLayout(indirectGraph([cost(100)]));
+      const node = layout.indirectNode!;
+      const flow = layout.indirectFlow!;
+      expect(node.amount).toBe(100);
+      const blockOut = layout.flows
+        .filter(f => f.sourceBlock === null)
+        .reduce((s, f) => s + (f.y1Bot - f.y1Top), 0);
+      // 出口の開始位置がブロック流出の直下 ＝ 事業ノードの支出側が両者の合計で閉じる
+      expect(Math.abs(flow.y1Top - (layout.root.y + blockOut))).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(layout.root.h - (blockOut + node.h))).toBeLessThanOrEqual(0.5);
+      // 入口はノード本体に一致
+      expect(flow.y2Top).toBe(node.y);
+      expect(Math.abs((flow.y2Bot - flow.y2Top) - node.h)).toBeLessThanOrEqual(0.5);
+    });
+
+    it('直接系ブロックより下・別財源レーンより上に置かれる', () => {
+      const graph = baseGraph({
+        blocks: [
+          makeBlock({ blockId: 'b1', blockName: '直接', totalAmount: 900 }),
+          makeBlock({ blockId: 's1', blockName: '別財源', totalAmount: 300, isDirect: false, originKind: 'separate-origin-strong' }),
+        ],
+        flows: [
+          makeFlow({ targetBlock: 'b1' }),
+          makeFlow({ targetBlock: 's1', origin: 'separate-origin' }),
+        ],
+        indirectCosts: [cost(100)],
+      });
+      const layout = computeSubcontractRibbonLayout(graph);
+      const node = layout.indirectNode!;
+      const directBar = layout.bars.find(b => b.blockId === 'b1')!;
+      expect(node.y).toBeGreaterThanOrEqual(directBar.y + directBar.h);
+      expect(node.y + node.h).toBeLessThanOrEqual(layout.separateLane!.top);
+    });
+
+    it('ブロックが1件も無くても深度1列に置かれ、SVG幅がその列を含む', () => {
+      const layout = computeSubcontractRibbonLayout(baseGraph({ indirectCosts: [cost(500)] }));
+      const node = layout.indirectNode!;
+      expect(layout.bars).toEqual([]);
+      expect(node.x).toBeGreaterThan(layout.root.x);
+      expect(layout.svgWidth).toBeGreaterThanOrEqual(node.x + node.w);
+      expect(layout.svgHeight).toBeGreaterThanOrEqual(node.y + node.h);
+    });
+
+    it('金額が0のみ・記録なしならノードを作らない', () => {
+      expect(computeSubcontractRibbonLayout(indirectGraph([cost(0)])).indirectNode).toBeNull();
+      expect(computeSubcontractRibbonLayout(indirectGraph([])).indirectNode).toBeNull();
+      expect(computeSubcontractRibbonLayout(indirectGraph([])).indirectFlow).toBeNull();
+    });
+
+    it('支出先ブロックを持つ間接経費（attachedToBlock）は合計から除外する', () => {
+      const layout = computeSubcontractRibbonLayout(indirectGraph([
+        cost(100),
+        cost(400, { attachedToBlock: true }),
+      ]));
+      expect(layout.indirectNode!.amount).toBe(100);
+      expect(layout.indirectNode!.count).toBe(1);
+    });
+
+    it('深度1列の合計に間接経費を含めてスケールを決める（列が目標高さに収まる）', () => {
+      const layout = computeSubcontractRibbonLayout(indirectGraph([cost(1100)]));
+      const colH = layout.bars.filter(b => b.depth === 1).reduce((s, b) => s + b.h, 0)
+        + layout.indirectNode!.h;
+      expect(colH).toBeLessThanOrEqual(RIBBON_TARGET_COL_H + 0.5);
+    });
   });
 });
