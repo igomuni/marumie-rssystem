@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { BudgetSummary, BudgetBreakdownItem } from '@/types/sankey-svg';
 import { formatYen } from '@/app/lib/sankey-svg-constants';
-import { getAccountBadgeStyle } from '@/app/lib/account-badge';
+import { getAccountBadgeStyle, classifyAccountCategory } from '@/app/lib/account-badge';
 
 /**
  * 予算・執行アコーディオンの共有コンポーネント。メインSankey（/sankey-svg）と
@@ -53,13 +53,8 @@ export function BudgetExecutionSection({
       if (label) m.set(label, (m.get(label) ?? 0) + item.amount);
       return m;
     }, new Map<string, number>());
-  const toAccountBadgeKey = (value: string) => {
-    if (value === '一般会計' || value === '一般') return 'general';
-    if (value === '特別会計' || value === '特別') return 'special';
-    return null;
-  };
   const renderAccountBadge = (value: string) => {
-    const badge = getAccountBadgeStyle(toAccountBadgeKey(value));
+    const badge = getAccountBadgeStyle(classifyAccountCategory(value));
     if (!badge) return null;
     return (
       <span style={{ background: badge.background, color: '#fff', padding: '1px 6px', borderRadius: 8, fontSize: Math.max(9, META_PX - 1), fontWeight: 700, lineHeight: 1.4, whiteSpace: 'nowrap' }}>

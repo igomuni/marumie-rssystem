@@ -21,6 +21,12 @@ export interface RibbonBudgetItem {
   y: number;
   w: number;
   h: number;
+  // ホバーツールチップ表示用の会計内訳（本家RSシステムの「予算・執行額」相当）
+  accountCategory: string;
+  item: string;
+  subItem: string;
+  note: string;
+  nextYearRequestAmount: number;
 }
 
 /**
@@ -249,8 +255,9 @@ export function truncateRibbonLabelName(
 
 export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): SubcontractRibbonLayout {
   const depthMap = computeDepths(graph.flows); // blockId -> depth(>=1)。root は depth 0 相当（別管理）
-  // 予算・執行列（最左）: 歳出予算項目を金額降順で緑ノードに。予算総額は事業ノードの予算側の高さになる
-  const budgetBreakdown = [...(graph.budgetBreakdown ?? [])].filter((b) => b.amount > 0).sort((a, b) => b.amount - a.amount);
+  // 予算・執行列（最左）: 歳出予算項目を緑ノードに。並びは本家RSシステムの「予算・執行額」表と
+  // 同じくレコード順（データ登録順）を尊重し、金額でのソートはしない。予算総額は事業ノードの予算側の高さになる
+  const budgetBreakdown = (graph.budgetBreakdown ?? []).filter((b) => b.amount > 0);
   // 予算総額は「実際に描画する予算内訳ノードの合計」を採用する（budgetSummary.totalBudget を
   // 優先すると、公式合計と内訳合計がズレる事業で funnel が root.budgetH まで届かず緑側に隙間が
   // できたり、逆にはみ出したりする）。公式合計との差分は側パネル側で別途警告表示している。
@@ -428,8 +435,9 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
 
   const nodeY = new Map<string, number>();
   const placeSubtree = (node: BlockNode, bandTop: number): void => {
-    const h = subtreeH.get(node.blockId) ?? barH(node);
-    nodeY.set(node.blockId, bandTop + (h - barH(node)) / 2);
+    // メイン画面（/sankey-svg）と同じく列ごとに上端（bandTop）から Top揃えで積む。
+    // 親を子サブツリーの縦中央に寄せる方式はやめ、親も子も各自のバンド上端に置く。
+    nodeY.set(node.blockId, bandTop);
     let cursor = bandTop;
     for (const kid of childrenOf.get(node.blockId) ?? []) {
       placeSubtree(kid, cursor);
@@ -445,14 +453,12 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
     placeSubtree(node, bandCursor);
     bandCursor += subtreeH.get(node.blockId)! + RIBBON_ROW_GAP;
   }
-  const directBandTop = RIBBON_MARGIN.top;
   const directBandBottom = directTopLevel.length > 0 ? bandCursor - RIBBON_ROW_GAP : RIBBON_MARGIN.top;
 
   // ルート（col0）: 他ノードと同じスリムバー。高さ = 出口リボン太さの合計（テーパー配分の
-  // パススルー値。上のフロー分類パスで計算済み）。直接系バンド範囲の縦中央に配置する。
+  // パススルー値。上のフロー分類パスで計算済み）。列ごとTop揃えのため上端に配置する。
   // 最小高さのみ RIBBON_BAR_MIN_H を確保する（通常は流出フローが必ず1本以上あるため未使用）
   const hasDirectBand = directTopLevel.length > 0;
-  const directMidY = hasDirectBand ? (directBandTop + directBandBottom) / 2 : RIBBON_MARGIN.top + RIBBON_BAR_MIN_H / 2;
   const rootOutgoing = bySource.get(ROOT_KEY) ?? [];
   const rootH = Math.max(
     RIBBON_BAR_MIN_H,
@@ -463,7 +469,8 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
   // 予算データが無い事業では左端に余分な空列を作らず root を最左に置く。
   const CONTENT_BASE_X = hasBudgetCol ? RIBBON_MARGIN.left + RIBBON_COL_W + RIBBON_COL_GAP : RIBBON_MARGIN.left;
   const budgetH = hasBudgetCol ? Math.max(rootH, budgetTotal * k) : 0;
-  const rootY = Math.max(RIBBON_MARGIN.top, directMidY - rootH / 2);
+  // 事業(root)・予算列も列ごとTop揃えに合わせ、上端から配置する（中央寄せしない）。
+  const rootY = RIBBON_MARGIN.top;
   // 事業ノード: メインの mergedProjectPath 相当。予算(左・緑, budgetH)＋支出(右・オレンジ, rootH)の結合。
   // 幅は 2*RIBBON_BAR_W（左半分=予算, 右半分=支出）。支出側(右)から blocks へ流出する
   const root: RibbonRoot = {
@@ -487,7 +494,10 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
     let cumAmount = 0;
     for (const bi of budgetBreakdown) {
       const h = Math.max(RIBBON_BAR_MIN_H, bi.amount * k);
-      budgetItems.push({ label: bi.budgetType || '—', amount: bi.amount, x: RIBBON_MARGIN.left, y: cursor, w: RIBBON_BAR_W, h });
+      budgetItems.push({
+        label: bi.budgetType || '—', amount: bi.amount, x: RIBBON_MARGIN.left, y: cursor, w: RIBBON_BAR_W, h,
+        accountCategory: bi.accountCategory, item: bi.item, subItem: bi.subItem, note: bi.note, nextYearRequestAmount: bi.nextYearRequestAmount,
+      });
       // 予算内訳ノード右端 → 事業(予算側=左端 root.x)。事業側の着地は金額按分位置に収束
       const y2Top = rootY + (cumAmount / budgetTotal) * budgetH;
       const y2Bot = rootY + ((cumAmount + bi.amount) / budgetTotal) * budgetH;
