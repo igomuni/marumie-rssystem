@@ -5,7 +5,7 @@
 本スクリプトは per-recipient 行と機械signal（旧5軸・収支・構造の素材）を生成し、
 続いて AI評価フェーズが新5軸（特定可能性/使途説明性/収支整合性/構造整合性/有効性）と
 総合スコアを再計算して project-quality-scores-{year}.json を上書きする。
-設計: docs/tasks/20260616_1749_AI支出先データ品質スコアリング再設計.md
+設計: docs/quality-scoring-guide.md
 
 旧5軸評価（機械signalとして保持）:
   1. 支出先名の品質 (valid_ratio)       重み 40%

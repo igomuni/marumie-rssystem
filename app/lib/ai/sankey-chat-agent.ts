@@ -1,7 +1,7 @@
 /**
  * サンキーAIチャットのサーバモード・エントリポイント。
  *
- * BYOK対応（docs/tasks/20260718_1542）でエージェント本体は3層に分割された:
+ * BYOK対応（docs/ai-chat-architecture-guide.md）でエージェント本体は3層に分割された:
  * - chat-core.ts …… ループ・プロンプト・ツール定義（実行環境非依存の Pure 層）
  * - tool-shaping.ts …… ツール応答の整形・クランプ（両モード共有の Pure 層）
  * - tool-executor-server.ts …… サーバ実装（ローダ直呼び）

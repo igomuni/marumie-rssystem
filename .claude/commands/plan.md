@@ -31,13 +31,9 @@ description: 設計ドキュメントを作成する
    - ファイル名: `YYYYMMDD_HHMM_{日本語の作業内容}.md`
    - 日時は `TZ=Asia/Tokyo date +%Y%m%d_%H%M` で取得する
    - 例: `docs/tasks/20260214_1430_歳入列実装計画.md`
+   - **設計は CLAUDE.md の「Layer Design Rules」表を満たすこと**（正典はその表）: `scripts/` はCSV処理のみ（UI・APIロジック禁止）、`app/lib/` はPure（HTTP・React禁止）、`app/api/` はロジックを `app/lib/` に委譲、`client/components/` は直接APIコール禁止、`app/*/page.tsx` は状態管理・API呼び出し・レイアウトのみ
 
-5. **整合性チェック**: 作成したドキュメントが CLAUDE.md のレイヤー設計ルールと矛盾していないかダブルチェックする。特に以下を確認する：
-   - `scripts/` にUIロジックが含まれていないか
-   - `app/lib/` にHTTPやReactのコードが含まれていないか
-   - `client/components/` に直接APIコールが含まれていないか
-
-6. **完了報告**: 作成した設計ドキュメントのパスを報告し、ユーザーのレビューを待つ。**そのまま実装に進んではならない。**
+5. **完了報告**: 作成した設計ドキュメントのパスを報告し、ユーザーのレビューを待つ。**そのまま実装に進んではならない。**
 
 ## 注意事項
 

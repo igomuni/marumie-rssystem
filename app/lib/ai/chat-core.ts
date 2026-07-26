@@ -13,7 +13,7 @@
  *   （tool-executor-server.ts）、クライアント=公開 API fetch + graph ローカル実行
  *   （client/lib/ai/client-tool-executor.ts））
  * 両モードの応答同一性はツール応答（payload）の形を揃えることで担保する
- * （設計: docs/tasks/20260718_1542_AIチャットBYOK設計_使用者APIキー外部化.md）。
+ * （設計: docs/ai-chat-architecture-guide.md）。
  */
 import type { SankeyQuery } from '@/types/sankey-query';
 import type { SankeyChatMessage, SankeyChatContext, SankeyChatResult, SankeyChatProgressEvent } from '@/types/sankey-ai-chat';
