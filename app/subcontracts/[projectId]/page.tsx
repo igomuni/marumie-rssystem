@@ -2602,40 +2602,6 @@ function SubcontractDetailPageInner() {
           </div>
         </div>
 
-        {/* 凡例 — 左下フローティング（種別チップの色分けをキャンバス上で確認できるように。
-            サイドパネルが左表示のときは退避） */}
-        <div
-          data-pan-disabled="true"
-          style={{
-            position: 'absolute',
-            left: leftFloatOffset,
-            bottom: 54,
-            zIndex: 15,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            background: 'rgba(255,255,255,0.95)',
-            border: '1px solid #e0e0e0',
-            borderRadius: 8,
-            boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-            padding: '5px 10px',
-            fontSize: scaleFont(10),
-            color: '#475569',
-            transition: sidePanel.isResizing ? 'none' : 'left 0.2s ease',
-          }}
-        >
-          {([
-            ['direct', '直接', COLOR_DIRECT],
-            ['subcontract', '再委託', COLOR_SUBCONTRACT],
-            ['separate-origin', '別財源', COLOR_SEPARATE_ORIGIN_STRONG],
-          ] as const).map(([key, label, color]) => (
-            <span key={key} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
-              {label}
-            </span>
-          ))}
-        </div>
-
         {/* フォントサイズコントロール — 左下フローティング（サンキー流儀と同じ配置・操作感。
             サイドパネルが左表示のときは退避） */}
         <div
