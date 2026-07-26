@@ -72,3 +72,4 @@ __pycache__/
 
 # --- IGNORE ---
 docs/*ignore*
+docs/image*.png
