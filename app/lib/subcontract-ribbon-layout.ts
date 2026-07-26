@@ -6,6 +6,7 @@ import type {
 } from '@/types/subcontract';
 import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
 import { computeDepths, mergeParallelFlows } from '@/app/lib/subcontract-layout';
+import { INDIRECT_COST_NODE_LABEL, summarizeOffFlowIndirectCosts } from '@/app/lib/subcontracts/indirect-costs';
 
 /** レイアウト入力: 再委託グラフ ＋ API 合成の予算内訳（予算・執行列の描画に使う） */
 export type RibbonLayoutInput = SubcontractGraph & {
@@ -68,6 +69,8 @@ export const RIBBON_MARGIN = { top: 28, right: 36, bottom: 40, left: 36 };
 export const RIBBON_TARGET_COL_H = 640;
 
 const ROOT_KEY = '__root__';
+/** 間接経費ノードの合成キー（ブロックIDと衝突しない前提の予約語） */
+export const INDIRECT_NODE_KEY = '__indirect__';
 
 // ─── 型 ──────────────────────────────────────────────
 
@@ -133,6 +136,22 @@ export interface RibbonBackEdge {
   isSelfLoop: boolean;
 }
 
+/**
+ * 間接経費の終端ノード（支出先を持たない支出。深度1列の最下段・グレー）。
+ * ブロックではないため bars/flows とは別枠で返す（blockId を持つ前提のロジックを汚さない）
+ */
+export interface RibbonIndirectNode {
+  /** ラベル衝突回避シフト等でブロックIDと同じ Map に載せるための合成キー */
+  key: string;
+  label: string;
+  amount: number;
+  count: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 /** 別財源レーンの縦方向の範囲（区切り線・ラベル描画用）。別財源ブロックが無ければ null */
 export interface RibbonSeparateLane {
   top: number;
@@ -147,6 +166,10 @@ export interface SubcontractRibbonLayout {
   root: RibbonRoot;
   bars: RibbonBar[];
   flows: RibbonFlow[];
+  /** 間接経費の終端ノード（金額0・記録なしなら null） */
+  indirectNode: RibbonIndirectNode | null;
+  /** 事業ノード(支出側) → 間接経費ノード のリボン。indirectNode が null なら null */
+  indirectFlow: { x1: number; y1Top: number; y1Bot: number; x2: number; y2Top: number; y2Bot: number } | null;
   backEdges: RibbonBackEdge[];
   separateLane: RibbonSeparateLane | null;
   svgWidth: number;
@@ -173,12 +196,16 @@ export function ribbonAmountScale(amount: number, k: number): number {
  * 全ブロックが 0 円（制度フローのみ等）の場合は k=1 にフォールバックする
  * （その場合は全バーが RIBBON_BAR_MIN_H の床に張り付く）。
  */
-export function computeRibbonK(byDepth: Map<number, BlockNode[]>, extraColTotal = 0): number {
+export function computeRibbonK(byDepth: Map<number, BlockNode[]>, extraColTotal = 0, depth1Extra = 0): number {
   let maxColTotal = Math.max(0, extraColTotal); // 予算・執行列（予算総額）も列合計の最大候補に含める
-  for (const nodes of byDepth.values()) {
-    const total = nodes.reduce((s, n) => s + Math.max(0, n.totalAmount), 0);
+  // depth1Extra: 深度1列に置く非ブロックノード（間接経費の終端ノード）の金額。
+  // 加算しないと深度1列の実描画高さが RIBBON_TARGET_COL_H を超える
+  for (const [depth, nodes] of byDepth) {
+    const total = nodes.reduce((s, n) => s + Math.max(0, n.totalAmount), 0)
+      + (depth === 1 ? Math.max(0, depth1Extra) : 0);
     if (total > maxColTotal) maxColTotal = total;
   }
+  if (byDepth.size === 0 && depth1Extra > 0 && depth1Extra > maxColTotal) maxColTotal = depth1Extra;
   if (maxColTotal <= 0) return 1;
   return RIBBON_TARGET_COL_H / maxColTotal;
 }
@@ -330,7 +357,10 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
   // 各トップレベルノード（depth1 または orphan）は、自分の子孫全体が専有する縦バンドを持つ。
   // 親は自分のバンドの中央に置かれる（単一子の連鎖は真横に一直線になる）。
   const maxAmount = Math.max(0, ...graph.blocks.map((b) => b.totalAmount));
-  const k = computeRibbonK(byDepth, budgetTotal);
+  // 間接経費（支出先ブロックを持たない＝フローに現れない支出）。深度1列の最下段に終端ノードとして置く
+  const indirect = summarizeOffFlowIndirectCosts(graph.indirectCosts);
+  const hasIndirectNode = indirect.total > 0;
+  const k = computeRibbonK(byDepth, budgetTotal, hasIndirectNode ? indirect.total : 0);
   const barH = (node: BlockNode): number => ribbonAmountScale(node.totalAmount, k);
 
   // ─── フロー分類（順方向 / バックエッジ）とテーパー太さ配分 ──────────────────────
@@ -453,17 +483,23 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
     placeSubtree(node, bandCursor);
     bandCursor += subtreeH.get(node.blockId)! + RIBBON_ROW_GAP;
   }
-  const directBandBottom = directTopLevel.length > 0 ? bandCursor - RIBBON_ROW_GAP : RIBBON_MARGIN.top;
+  // 間接経費ノードは直接系バンド群の最下段（別財源レーンより上）。x は CONTENT_BASE_X 確定後に決める
+  const indirectH = hasIndirectNode ? ribbonAmountScale(indirect.total, k) : 0;
+  const indirectY = bandCursor;
+  if (hasIndirectNode) bandCursor += indirectH + RIBBON_ROW_GAP;
+  const directBandBottom = directTopLevel.length > 0 || hasIndirectNode
+    ? bandCursor - RIBBON_ROW_GAP
+    : RIBBON_MARGIN.top;
 
   // ルート（col0）: 他ノードと同じスリムバー。高さ = 出口リボン太さの合計（テーパー配分の
   // パススルー値。上のフロー分類パスで計算済み）。列ごとTop揃えのため上端に配置する。
   // 最小高さのみ RIBBON_BAR_MIN_H を確保する（通常は流出フローが必ず1本以上あるため未使用）
-  const hasDirectBand = directTopLevel.length > 0;
+  const hasDirectBand = directTopLevel.length > 0 || hasIndirectNode;
   const rootOutgoing = bySource.get(ROOT_KEY) ?? [];
-  const rootH = Math.max(
-    RIBBON_BAR_MIN_H,
-    rootOutgoing.reduce((sum, f) => sum + (sourceThickness.get(f) ?? 0), 0),
-  );
+  // ブロック向け流出の合計。間接経費リボンはこの下に積むため、開始位置の基準にもなる
+  const rootBlockOutH = rootOutgoing.reduce((sum, f) => sum + (sourceThickness.get(f) ?? 0), 0);
+  // 事業ノードの支出側は「支出先ブロックへの流出 ＋ 間接経費」= 図として金が閉じる高さ
+  const rootH = Math.max(RIBBON_BAR_MIN_H, rootBlockOutH + indirectH);
   const hasBudgetCol = budgetBreakdown.length > 0 && budgetTotal > 0;
   // 予算・執行ノード列がある場合のみ、事業(root)以降を1列右へずらす基準x。
   // 予算データが無い事業では左端に余分な空列を作らず root を最左に置く。
@@ -506,6 +542,32 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
       cumAmount += bi.amount;
     }
   }
+
+  // 間接経費の終端ノード（深度1列・最下段）と、事業ノード支出側からのリボン。
+  // リボンはブロック向け流出をすべて積んだ「後」に置く（ノード縦位置と出口順を揃える）
+  const depth1ColX = CONTENT_BASE_X + (RIBBON_COL_W + RIBBON_COL_GAP);
+  const indirectNode: RibbonIndirectNode | null = hasIndirectNode
+    ? {
+        key: INDIRECT_NODE_KEY,
+        label: INDIRECT_COST_NODE_LABEL,
+        amount: indirect.total,
+        count: indirect.count,
+        x: depth1ColX,
+        y: indirectY,
+        w: RIBBON_BAR_W,
+        h: indirectH,
+      }
+    : null;
+  const indirectFlow = indirectNode
+    ? {
+        x1: root.x + root.w,
+        y1Top: root.y + rootBlockOutH,
+        y1Bot: root.y + rootBlockOutH + indirectH,
+        x2: indirectNode.x,
+        y2Top: indirectNode.y,
+        y2Bot: indirectNode.y + indirectH,
+      }
+    : null;
 
   // 別財源グループ（separate-origin の depth1 + orphan）を、直接系グループ（バー・ルート
   // カードの両方）の下に追加ギャップを空けて独立レーンとして配置する
@@ -642,11 +704,16 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
   });
 
   // SVGサイズ
-  const maxColDepth = byDepth.size > 0 ? Math.max(...byDepth.keys()) : 0;
+  // 間接経費ノードのみでブロックが1件も無い事業でも、深度1列を含む幅を確保する
+  const maxColDepth = Math.max(
+    byDepth.size > 0 ? Math.max(...byDepth.keys()) : 0,
+    indirectNode ? 1 : 0,
+  );
   const maxRight = CONTENT_BASE_X + (maxColDepth + 1) * (RIBBON_COL_W + RIBBON_COL_GAP) - RIBBON_COL_GAP + RIBBON_MARGIN.right;
   const maxBottomBars = bars.length > 0 ? Math.max(...bars.map((b) => b.y + b.h)) : 0;
   const maxBudgetBottom = budgetItems.length > 0 ? Math.max(...budgetItems.map((b) => b.y + b.h)) : 0;
-  const maxBottom = Math.max(maxBottomBars, maxBudgetBottom, root.y + Math.max(root.h, root.budgetH ?? 0), RIBBON_MARGIN.top + 100) + RIBBON_MARGIN.bottom;
+  const maxIndirectBottom = indirectNode ? indirectNode.y + indirectNode.h : 0;
+  const maxBottom = Math.max(maxBottomBars, maxBudgetBottom, maxIndirectBottom, root.y + Math.max(root.h, root.budgetH ?? 0), RIBBON_MARGIN.top + 100) + RIBBON_MARGIN.bottom;
 
   return {
     budgetItems,
@@ -654,6 +721,8 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
     root,
     bars,
     flows,
+    indirectNode,
+    indirectFlow,
     backEdges,
     separateLane,
     svgWidth: Math.max(maxRight, RIBBON_MARGIN.left + RIBBON_COL_W + RIBBON_MARGIN.right),

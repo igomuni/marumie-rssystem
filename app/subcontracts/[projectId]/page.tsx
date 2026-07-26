@@ -60,6 +60,7 @@ import {
   type RibbonFlow,
   type RibbonBudgetItem,
 } from '@/app/lib/subcontract-ribbon-layout';
+import { summarizeOffFlowIndirectCosts, INDIRECT_COST_NODE_LABEL, type IndirectCostSummary } from '@/app/lib/subcontracts/indirect-costs';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
 import { useBaseFontPx } from '@/client/hooks/useBaseFontPx';
@@ -87,6 +88,9 @@ const COLOR_SEPARATE_ORIGIN_BODY_TEXT = '#5b4483';
 const COLOR_SEPARATE_ORIGIN_BODY_SUBTLE = '#6b4fa0';
 const COLOR_SEPARATE_ORIGIN_EDGE = 'rgba(123,94,167,0.55)';
 const COLOR_REFERENCE_EDGE = 'rgba(148,163,184,0.55)';
+// 間接経費（国が直接支出・支出先ノードを持たない終端）。赤=直接/橙=再委託/紫=別財源/緑=予算 と
+// 意味色が埋まっているため、「受け手がいない支出」は無彩色のグレーで表す
+const COLOR_INDIRECT_COST = '#94a3b8';
 
 interface OriginPalette {
   header: string;
@@ -340,7 +344,8 @@ type HoveredNode =
   | { kind: 'root' }
   | { kind: 'block'; block: BlockNode }
   | { kind: 'ribbonFlow'; flow: RibbonFlow; flowKey: string }
-  | { kind: 'budget'; item: RibbonBudgetItem };
+  | { kind: 'budget'; item: RibbonBudgetItem }
+  | { kind: 'indirect' };
 
 type ViewMode = 'block' | 'ribbon';
 
@@ -407,6 +412,7 @@ function SidePane({
   orgChain,
   year,
   activeTab,
+  indirect,
   onChangeTab,
   onSelectBlock,
   scaleFont,
@@ -418,6 +424,8 @@ function SidePane({
   orgChain: string[];
   year: number;
   activeTab: PaneTab;
+  /** 間接経費の集計（フロー図と同じ値を使うため親から受け取る） */
+  indirect: IndirectCostSummary;
   onChangeTab: (tab: PaneTab) => void;
   onSelectBlock: (block: BlockNode) => void;
   scaleFont: (px: number) => number;
@@ -515,17 +523,19 @@ function SidePane({
     .map((r) => allRecipients.find((x) => x.r === r)!)
     .filter(({ r, blockId }) => !rq || `${blockId} ${r.name} ${r.corporateNumber} ${r.contractSummaries.join(' ')}`.toLowerCase().includes(rq));
 
-  const indirectCount = graph.indirectCosts.length;
+  // 間接経費（支出先ブロックを持たない＝フロー図の終端ノードに載る分）は親から受け取る
+  const indirectCount = indirect.count;
 
-  // タブ定義（無効化判定込み）。フローを入口（初期選択）に置く。
+  // タブ定義。フローを入口（初期選択）に置く。
   // 支出先はブロック未選択なら事業全体、選択中はそのブロック内訳を出す。
-  // 予算・執行タブは一旦廃止（S1 でメイン画面と同型のパネル表示に統合予定。
-  // データ（graph.budgetSummary/budgetBreakdown）は API 側で保持済み）。
+  // 間接経費は0件でも押せるようにする（「無い」ことも情報。図に現れない支出の唯一の受け皿）。
+  // 予算・執行タブは一旦廃止（S1 でメイン画面と同型のパネル表示に統合済み。
+  // データ（graph.budgetSummary/budgetBreakdown）は API 側で保持）。
   const tabs: Array<{ key: PaneTab; label: string; count?: number; disabled?: boolean }> = [
     { key: 'flow', label: 'フロー', count: graph.flows.length },
     { key: 'blocks', label: 'ブロック', count: graph.blocks.length },
     { key: 'recipients', label: '支出先', count: block ? block.recipients.length : graph.totalRecipientCount },
-    { key: 'indirect-cost', label: '間接経費', count: indirectCount, disabled: indirectCount === 0 },
+    { key: 'indirect-cost', label: '間接経費', count: indirectCount },
   ];
 
   return (
@@ -560,6 +570,15 @@ function SidePane({
                 </div>
               ))}
             </div>
+            {/* 支出の内訳。図に現れる分（支出先ブロック）と現れない分（間接経費）を明示する。
+                出典が別（5-1 ブロック支出 / 2-1 執行額）で合計は支出額に一致しないため、
+                式ではなく併記に留める */}
+            {(graph.directExpenseTotal > 0 || indirect.total > 0) && (
+              <div style={{ fontSize: PANEL_META_FONT_PX, color: '#888', marginTop: 4 }}>
+                支出先 {graph.directExpenseTotal > 0 ? formatYen(graph.directExpenseTotal) : '—'}
+                {indirect.total > 0 && <> ／ 間接経費 {formatYen(indirect.total)}</>}
+              </div>
+            )}
           </div>
           <ProjectReferenceLinks projectId={graph.projectId} projectName={graph.projectName} year={year} compact />
         </div>
@@ -941,11 +960,12 @@ function SidePane({
           <>
             <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>
               国自らが支出する間接経費 {indirectCount.toLocaleString()}件
+              {indirect.total > 0 && <> ・ 合計 {formatYen(indirect.total)}</>}
             </div>
-            {graph.indirectCosts.length === 0 && (
+            {indirectCount === 0 && (
               <div style={{ fontSize: 12, color: '#9ca3af' }}>間接経費の記録はありません</div>
             )}
-            {graph.indirectCosts.map((cost, i) => (
+            {indirect.items.map((cost, i) => (
               <div key={i} style={{ borderBottom: '1px solid #f1f5f9', padding: '8px 0' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
                   <div style={{ fontSize: 12, fontWeight: 400, color: '#333', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1315,6 +1335,13 @@ function SubcontractDetailPageInner() {
     pushSelTabUrl(node.blockId, 'recipients');
   }, []);
 
+  // 間接経費ノード（支出先を持たない終端）クリック: ブロック選択を解除し、間接経費タブへ切り替える
+  const handleIndirectClick = useCallback(() => {
+    setSelectedBlock(null);
+    setActiveTab('indirect-cost');
+    pushSelTabUrl(null, 'indirect-cost');
+  }, []);
+
   // フロー一覧/ブロック一覧の行から選択した場合は選択のみを変更する（タブは動かさない）
   const handleSelectFromList = useCallback((node: BlockNode) => {
     setSelectedBlock(node);
@@ -1499,6 +1526,9 @@ function SubcontractDetailPageInner() {
   const layout = useMemo(() => graph ? computeSubcontractLayout(graph) : null, [graph]);
   // B案（フロー図）のレイアウト。A案とは独立に計算するが computeDepths/mergeParallelFlows は共通利用
   const ribbonLayout = useMemo(() => graph ? computeSubcontractRibbonLayout(graph) : null, [graph]);
+  // 間接経費の集計。フロー図（終端ノードのツールチップ）と側パネルで同じ値を使い、
+  // マウス移動によるツールチップ再描画のたびに再計算されないよう memo 化する
+  const indirectSummary = useMemo(() => summarizeOffFlowIndirectCosts(graph?.indirectCosts), [graph]);
   // エッジ太さスケールの基準（このグラフ内の最大ブロック金額）
   const maxBlockAmount = useMemo(
     () => layout ? Math.max(0, ...layout.blocks.map((b) => b.totalAmount)) : 0,
@@ -1719,17 +1749,26 @@ function SubcontractDetailPageInner() {
   // ブロックバー: 深度（＝視覚的な列）ごとに y昇順で衝突回避シフトを算出
   const ribbonBarShift = new Map<string, number>();
   {
-    const byDepth = new Map<number, typeof safeRibbonLayout.bars>();
-    for (const bar of safeRibbonLayout.bars) {
-      const arr = byDepth.get(bar.depth);
-      if (arr) arr.push(bar); else byDepth.set(bar.depth, [bar]);
+    // 間接経費ノード（深度1列の最下段）も同じ列の衝突回避に含める。含めないと、
+    // 少額ブロックの下方シフト分だけ終端ノードと重なる
+    type ShiftItem = { key: string; depth: number; y: number; h: number };
+    const items: ShiftItem[] = safeRibbonLayout.bars.map((b) => ({ key: b.blockId, depth: b.depth, y: b.y, h: b.h }));
+    const iNode = safeRibbonLayout.indirectNode;
+    if (iNode) items.push({ key: iNode.key, depth: 1, y: iNode.y, h: iNode.h });
+    const byDepth = new Map<number, ShiftItem[]>();
+    for (const item of items) {
+      const arr = byDepth.get(item.depth);
+      if (arr) arr.push(item); else byDepth.set(item.depth, [item]);
     }
-    for (const bars of byDepth.values()) {
-      const sorted = [...bars].sort((a, b) => a.y - b.y);
+    for (const group of byDepth.values()) {
+      const sorted = [...group].sort((a, b) => a.y - b.y);
       const shifts = ribbonColShifts(sorted.map((b) => ({ y: b.y, h: b.h })));
-      sorted.forEach((b, i) => ribbonBarShift.set(b.blockId, shifts[i]));
+      sorted.forEach((b, i) => ribbonBarShift.set(b.key, shifts[i]));
     }
   }
+  const ribbonIndirectShift = safeRibbonLayout.indirectNode
+    ? ribbonBarShift.get(safeRibbonLayout.indirectNode.key) ?? 0
+    : 0;
   // 予算・執行列（上から積まれているので配列順＝y昇順）
   const ribbonBudgetShifts = ribbonColShifts(safeRibbonLayout.budgetItems.map((b) => ({ y: b.y, h: b.h })));
   // フロー端点用: ブロックID→シフト（root=null はシフト0）
@@ -2215,6 +2254,19 @@ function SubcontractDetailPageInner() {
               </g>
             )}
 
+            {/* 間接経費リボン（事業ノード支出側 → 支出先を持たない終端ノード。グレー） */}
+            {safeRibbonLayout.indirectFlow && (
+              <path
+                d={ribbonFlowPath(
+                  ix(safeRibbonLayout.indirectFlow.x1), safeRibbonLayout.indirectFlow.y1Top, safeRibbonLayout.indirectFlow.y1Bot,
+                  ix(safeRibbonLayout.indirectFlow.x2), safeRibbonLayout.indirectFlow.y2Top + ribbonIndirectShift, safeRibbonLayout.indirectFlow.y2Bot + ribbonIndirectShift,
+                )}
+                fill={COLOR_INDIRECT_COST}
+                fillOpacity={selectedBlock ? 0.1 : (hoveredNodeRaw?.kind === 'indirect' ? 0.55 : (hoveredBlockId ? 0.12 : 0.3))}
+                style={{ pointerEvents: 'none' }}
+              />
+            )}
+
             {/* 順方向フロー（帯・sankey風のリンク表現） */}
             {safeRibbonLayout.flows.map((flow, i) => {
               const target = safeRibbonLayout.bars.find((b) => b.blockId === flow.targetBlock);
@@ -2449,6 +2501,51 @@ function SubcontractDetailPageInner() {
                 </g>
               );
             })}
+
+            {/* 間接経費の終端ノード（支出先を持たない支出。深度1列の最下段・グレー）。
+                クリックで側パネルの間接経費タブへ */}
+            {safeRibbonLayout.indirectNode && (() => {
+              const iNode = safeRibbonLayout.indirectNode;
+              const iY = iNode.y + ribbonIndirectShift;
+              const isDimmed = selectedBlock !== null; // どのブロックとも関係を持たないため選択中は常に減光
+              const iHovered = hoveredNodeRaw?.kind === 'indirect';
+              const iFontPx = ribbonLabelFont(11);
+              const iAmountText = ` (${formatYen(iNode.amount)})`;
+              return (
+                <g
+                  onClick={handleIndirectClick}
+                  onMouseEnter={() => setHoveredNodeRaw({ kind: 'indirect' })}
+                  onMouseLeave={() => setHoveredNodeRaw((n) => (n?.kind === 'indirect' ? null : n))}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <rect
+                    x={ix(iNode.x)}
+                    y={iY}
+                    width={iw(iNode.w)}
+                    height={Math.max(1, iNode.h)}
+                    rx={1}
+                    fill={COLOR_INDIRECT_COST}
+                    stroke={iHovered ? '#111827' : 'none'}
+                    strokeWidth={iHovered ? 1.5 : 0}
+                    vectorEffect="non-scaling-stroke"
+                    style={{ opacity: isDimmed ? 0.35 : 1, transition: 'opacity 0.12s ease' }}
+                  />
+                  <text
+                    x={ix(iNode.x + iNode.w + 6)}
+                    y={iY + iNode.h / 2}
+                    dominantBaseline="middle"
+                    fontSize={iFontPx}
+                    fontWeight={iHovered ? 700 : 500}
+                    fill={isDimmed ? '#bbb' : '#333'}
+                    clipPath={ribbonMaxDepth > 1 ? 'url(#ribbon-clip-col-1)' : undefined}
+                    style={{ userSelect: 'none', pointerEvents: 'none' }}
+                  >
+                    {truncateRibbonLabelName(iNode.label, iAmountText, iw(RIBBON_LABEL_W - 6), iFontPx)}
+                    <tspan>{iAmountText}</tspan>
+                  </text>
+                </g>
+              );
+            })()}
           </>
           )}
           </g>
@@ -2481,16 +2578,20 @@ function SubcontractDetailPageInner() {
               : [formatYen(graph.execution)],
             xCenter: L.root.x + L.root.w / 2,
           });
-          const depths = [...new Set(L.bars.map((b) => b.depth))].sort((a, b) => a - b);
+          // 深度1列は間接経費ノード（ブロックではない）を含めた合計を見出しに出す。
+          // ブロックが1件も無く間接経費のみの事業でも列見出しを出す
+          const depths = [...new Set([...L.bars.map((b) => b.depth), ...(L.indirectNode ? [1] : [])])].sort((a, b) => a - b);
           for (const d of depths) {
             const barsAtD = L.bars.filter((b) => b.depth === d);
-            if (barsAtD.length === 0) continue;
-            const total = barsAtD.reduce((s, b) => s + b.totalAmount, 0);
+            const indirectAtD = d === 1 ? L.indirectNode : null;
+            if (barsAtD.length === 0 && !indirectAtD) continue;
+            const total = barsAtD.reduce((s, b) => s + b.totalAmount, 0) + (indirectAtD?.amount ?? 0);
+            const anchor = barsAtD[0] ?? indirectAtD!;
             cols.push({
               key: `d${d}`,
               label: d === 1 ? '支出先' : d === 2 ? '再委託先' : `再委託先${d - 1}`,
               amountLines: [formatYen(total)],
-              xCenter: barsAtD[0].x + barsAtD[0].w / 2,
+              xCenter: anchor.x + anchor.w / 2,
             });
           }
           // 全列で共通の Top 位置に見出しを揃える（列ごとの最上端ノードYではなく、Top揃えの
@@ -2528,6 +2629,8 @@ function SubcontractDetailPageInner() {
           const lb = hoveredNodeStable.kind === 'block' ? hoveredNodeStable.block : null;
           const rf = hoveredNodeStable.kind === 'ribbonFlow' ? hoveredNodeStable.flow : null;
           const bud = hoveredNodeStable.kind === 'budget' ? hoveredNodeStable.item : null;
+          const isIndirect = hoveredNodeStable.kind === 'indirect';
+          const indirectTopItems = isIndirect ? indirectSummary.items.slice(0, 3) : [];
           const tipW = 300;
           const rfTargetBar = rf ? safeRibbonLayout.bars.find((b) => b.blockId === rf.targetBlock) ?? null : null;
           const rfSourceName = rf
@@ -2539,6 +2642,8 @@ function SubcontractDetailPageInner() {
           const topRecipients = lb ? sortRecipients(lb.recipients, 'amount-desc').slice(0, 3) : [];
           const tipH = isRoot
             ? 126
+            : isIndirect
+            ? 92 + indirectTopItems.length * 18
             : bud
               ? 92 + ((bud.item || bud.subItem) ? 18 : 0) + (bud.note.trim() ? 22 : 0)
               : rf
@@ -2582,7 +2687,7 @@ function SubcontractDetailPageInner() {
             : bud
               ? renderAccountBadge(classifyAccountCategory(bud.accountCategory))
               : null;
-          const titleText = isRoot ? graph.projectName : bud ? bud.label : rf ? `${rfSourceName} → ${rfTargetName}` : lb!.blockName;
+          const titleText = isRoot ? graph.projectName : isIndirect ? INDIRECT_COST_NODE_LABEL : bud ? bud.label : rf ? `${rfSourceName} → ${rfTargetName}` : lb!.blockName;
           return (
             <div style={{
               position: 'absolute',
@@ -2614,6 +2719,17 @@ function SubcontractDetailPageInner() {
                     <div>PID {graph.projectId} ・ {graph.ministry}</div>
                     {visibleOrgChain.length > 0 && <div>{visibleOrgChain.join(' / ')}</div>}
                     <div>予算 <b style={{ color: '#222' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</b> ・ 支出 <b style={{ color: '#222' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</b></div>
+                  </>
+                ) : isIndirect ? (
+                  <>
+                    <div><b style={{ color: '#222' }}>{formatYen(indirectSummary.total)}</b> ・ {indirectSummary.count.toLocaleString()}件</div>
+                    <div style={{ color: '#777' }}>支出先ブロックを持たない支出（クリックで一覧）</div>
+                    {indirectTopItems.map((c, i) => (
+                      <div key={`${c.category}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 1 }}>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{i + 1}. {c.category || c.kind || '（項目なし）'}</span>
+                        <span style={{ flexShrink: 0, color: '#222' }}>{formatYen(c.amount)}</span>
+                      </div>
+                    ))}
                   </>
                 ) : bud ? (
                   <>
@@ -2782,6 +2898,7 @@ function SubcontractDetailPageInner() {
             orgChain={visibleOrgChain}
             year={year}
             activeTab={activeTab}
+            indirect={indirectSummary}
             onChangeTab={(tab) => { setActiveTab(tab); pushSelTabUrl(selectedBlock?.blockId ?? null, tab); }}
             onSelectBlock={handleSelectFromList}
             scaleFont={scaleFont}
