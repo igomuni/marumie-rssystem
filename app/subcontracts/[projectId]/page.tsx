@@ -229,6 +229,16 @@ const CLAMP_2_LINES: CSSProperties = {
   overflow: 'hidden',
 } as CSSProperties;
 
+/**
+ * 事業ノードの結合シェイプ（予算=左・緑・高さbH / 支出=右・オレンジ・高さsH。上端揃え）。
+ * メイン /sankey-svg の mergedProjectPath と同型（絶対座標版）。幅は barW*2。
+ */
+function mergedProjectPath(x0: number, yTop: number, barW: number, bH: number, sH: number): string {
+  const x2 = x0 + barW * 2;
+  const mx = (x0 + x2) / 2;
+  return `M${x0},${yTop} L${x2},${yTop} L${x2},${yTop + sH} C${mx},${yTop + sH} ${mx},${yTop + bH} ${x0},${yTop + bH} Z`;
+}
+
 interface ProjectQualityOrg {
   pid: string;
   bureau?: string;
@@ -508,9 +518,9 @@ function SidePane({
             <div style={{ fontWeight: 700, fontSize: PANEL_TITLE_FONT_PX, color: '#111', wordBreak: 'break-all', lineHeight: 1.4 }}>
               {graph.projectName}
             </div>
-            {/* 予算額 / 執行額（メイン画面と同じ2列＋1円単位のサブ表記） */}
+            {/* 予算額 / 支出額（メイン画面と同じ2列＋1円単位のサブ表記。予算vs支出で用語統一） */}
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', columnGap: 12, rowGap: 4, marginTop: 5 }}>
-              {([['予算額', graph.budget], ['執行額', graph.execution]] as [string, number][]).map(([label, value]) => (
+              {([['予算額', graph.budget], ['支出額', graph.execution]] as [string, number][]).map(([label, value]) => (
                 <div key={label} style={{ flex: `1 1 ${scaleFont(112)}px`, minWidth: 0 }}>
                   <span style={{ display: 'block', fontSize: PANEL_META_FONT_PX, color: '#aaa', fontWeight: 400, marginBottom: 1 }}>{label}</span>
                   <span style={{ display: 'block', fontSize: PANEL_PRIMARY_VALUE_FONT_PX, fontWeight: 600, color: '#222', whiteSpace: 'nowrap' }}>
@@ -1617,7 +1627,10 @@ function SubcontractDetailPageInner() {
   // ラベルが次列のバーへ食い込まないよう、列ごとに clipPath でラベル領域を切り取る
   // （sankey の clip-col-* と同じ流儀）。最終列だけはラベルが右マージンへ自由に伸びてよい
   const ribbonMaxDepth = safeRibbonLayout.bars.length > 0 ? Math.max(...safeRibbonLayout.bars.map((b) => b.depth)) : 0;
-  const ribbonColX = (depth: number) => RIBBON_MARGIN.left + depth * (RIBBON_COL_W + RIBBON_COL_GAP);
+  // 予算・執行ノード列がある場合のみ、事業(depth0相当)以降を1列右へずらす。
+  // 予算データが無い事業ではオフセットせず、レイアウト側 CONTENT_BASE_X と整合させる。
+  const ribbonHasBudgetCol = safeRibbonLayout.root.budgetH != null;
+  const ribbonColX = (depth: number) => RIBBON_MARGIN.left + (depth + (ribbonHasBudgetCol ? 1 : 0)) * (RIBBON_COL_W + RIBBON_COL_GAP);
   return (
     <div style={{ display: 'flex', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* SVGキャンバス */}
@@ -2055,6 +2068,13 @@ function SubcontractDetailPageInner() {
           <>
             {/* 列ラベルの clipPath（ラベルが次列のバーへ食い込むのを防ぐ。sankeyのclip-col-*と同じ流儀） */}
             <defs>
+              {/* 事業ノードの 予算(緑)｜支出(オレンジ) ドッキング用グラデ（メインの proj-node-grad と同じ 44/56 分割） */}
+              <linearGradient id="budget-exec-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor={SEMANTIC_PROJECT} />
+                <stop offset="44%" stopColor={SEMANTIC_PROJECT} />
+                <stop offset="56%" stopColor="#e07040" />
+                <stop offset="100%" stopColor="#e07040" />
+              </linearGradient>
               {Array.from({ length: ribbonMaxDepth }, (_, i) => i + 1).map((d) => (
                 <clipPath id={`ribbon-clip-col-${d}`} key={d}>
                   <rect
@@ -2147,25 +2167,65 @@ function SubcontractDetailPageInner() {
               />
             ))}
 
-            {/* 事業コンテキストノード（ルート。他ノードと同じスリムバー + 横のラベル。sankeyノード風） */}
+            {/* 予算・執行列 → 事業(予算側) のリボン（緑） */}
+            {safeRibbonLayout.budgetFlows.map((bf, i) => (
+              <path
+                key={`bflow-${i}`}
+                d={ribbonFlowPath(bf.x1, bf.y1Top, bf.y1Bot, bf.x2, bf.y2Top, bf.y2Bot)}
+                fill={SEMANTIC_PROJECT}
+                fillOpacity={0.22}
+                style={{ pointerEvents: 'none' }}
+              />
+            ))}
+
+            {/* 予算・執行ノード列（最左・緑）。ラベルは 名前(金額) */}
+            {safeRibbonLayout.budgetItems.map((bi, i) => (
+              <g key={`bnode-${i}`}>
+                <rect x={bi.x} y={bi.y} width={bi.w} height={Math.max(1, bi.h)} rx={1} fill={SEMANTIC_PROJECT} vectorEffect="non-scaling-stroke" />
+                <text
+                  x={bi.x + bi.w + 6}
+                  y={bi.y + bi.h / 2}
+                  dominantBaseline="middle"
+                  fontSize={scaleFont(10)}
+                  fill="#333"
+                  style={{ userSelect: 'none', pointerEvents: 'none' }}
+                >
+                  {bi.label.length > 16 ? bi.label.slice(0, 15) + '…' : bi.label}
+                  <tspan fill="#888"> ({formatYen(bi.amount)})</tspan>
+                </text>
+              </g>
+            ))}
+
+            {/* 事業ノード（予算=緑 / 支出=オレンジ の結合ドッキング。メインの mergedProjectPath 相当） */}
             <g
               onClick={handleDeselect}
               onMouseEnter={() => setHoveredNodeRaw({ kind: 'root' })}
               onMouseLeave={() => setHoveredNodeRaw(null)}
               style={{ cursor: 'pointer' }}
             >
-              <rect
-                x={safeRibbonLayout.root.x}
-                y={safeRibbonLayout.root.y}
-                width={safeRibbonLayout.root.w}
-                height={Math.max(1, safeRibbonLayout.root.h)}
-                rx={1}
-                fill={COLOR_ROOT}
-                stroke={hoveredNodeRaw?.kind === 'root' ? '#111827' : 'none'}
-                strokeWidth={hoveredNodeRaw?.kind === 'root' ? 1.5 : 0}
-                vectorEffect="non-scaling-stroke"
-                style={{ pointerEvents: 'all' }}
-              />
+              {safeRibbonLayout.root.budgetH != null ? (
+                <path
+                  d={mergedProjectPath(safeRibbonLayout.root.x, safeRibbonLayout.root.y, RIBBON_BAR_W, safeRibbonLayout.root.budgetH, safeRibbonLayout.root.h)}
+                  fill="url(#budget-exec-grad)"
+                  stroke={hoveredNodeRaw?.kind === 'root' ? '#111827' : 'none'}
+                  strokeWidth={hoveredNodeRaw?.kind === 'root' ? 1.5 : 0}
+                  vectorEffect="non-scaling-stroke"
+                  style={{ pointerEvents: 'all' }}
+                />
+              ) : (
+                <rect
+                  x={safeRibbonLayout.root.x}
+                  y={safeRibbonLayout.root.y}
+                  width={safeRibbonLayout.root.w}
+                  height={Math.max(1, safeRibbonLayout.root.h)}
+                  rx={1}
+                  fill="#e07040"
+                  stroke={hoveredNodeRaw?.kind === 'root' ? '#111827' : 'none'}
+                  strokeWidth={hoveredNodeRaw?.kind === 'root' ? 1.5 : 0}
+                  vectorEffect="non-scaling-stroke"
+                  style={{ pointerEvents: 'all' }}
+                />
+              )}
               <foreignObject
                 x={safeRibbonLayout.root.x + safeRibbonLayout.root.w + 6}
                 y={safeRibbonLayout.root.y - 4}
@@ -2174,14 +2234,10 @@ function SubcontractDetailPageInner() {
                 style={{ pointerEvents: 'none' }}
               >
                 <div style={{ fontFamily: 'inherit', userSelect: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-                  <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: '#94a3b8' }}>
-                    事業 / PID {graph.projectId}
-                  </div>
+                  <div style={{ fontSize: scaleFont(9), fontWeight: 700, color: '#94a3b8' }}>事業 / PID {graph.projectId}</div>
                   <div style={{ fontSize: scaleFont(11), fontWeight: 700, color: '#333', lineHeight: `${scaleFont(13)}px`, marginTop: 2, ...CLAMP_2_LINES }}>
                     {graph.projectName}
-                  </div>
-                  <div style={{ fontSize: scaleFont(9), fontWeight: 500, color: '#888', marginTop: 2 }}>
-                    予算 {graph.budget > 0 ? formatYen(graph.budget) : '—'} ・ 支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}
+                    <span style={{ fontWeight: 500, color: '#888' }}> （支出 {graph.execution > 0 ? formatYen(graph.execution) : '—'}）</span>
                   </div>
                 </div>
               </foreignObject>
@@ -2260,6 +2316,73 @@ function SubcontractDetailPageInner() {
           </g>
 
         </svg>
+
+        {/* 列見出し（メイン /sankey-svg の列ラベル方式）。列ごとの合計金額を列の上に
+            Sticky 表示する。pan/zoom に追従しつつ、スクロールで列頭が上に隠れても
+            上部ツールバーの直下に張り付く（top を max でクランプ）。 */}
+        {viewMode === 'ribbon' && (() => {
+          const L = safeRibbonLayout;
+          const scale = transform.scale;
+          const HEADER_TOP_RESERVE = 52; // 上部ツールバー（一覧/年度/タブ）の下端目安
+          const labelPx = scaleFont(11);
+          const amountPx = scaleFont(10);
+          type Col = { key: string; label: string; amountLines: string[]; xCenter: number; topY: number };
+          const cols: Col[] = [];
+          if (L.budgetItems.length > 0) {
+            // 実際に描画している予算内訳ノードの合計を見出しに出す（レイアウトの funnel と一致）
+            const budgetTotal = L.budgetItems.reduce((s, b) => s + b.amount, 0);
+            cols.push({
+              key: 'budget', label: '予算・執行', amountLines: [formatYen(budgetTotal)],
+              xCenter: L.budgetItems[0].x + L.budgetItems[0].w / 2,
+              topY: Math.min(...L.budgetItems.map((b) => b.y)),
+            });
+          }
+          cols.push({
+            key: 'root', label: '事業',
+            amountLines: L.root.budgetH != null
+              ? [`${formatYen(L.root.budgetAmount ?? 0)} / ${formatYen(L.root.spendingAmount ?? graph.execution)}`]
+              : [formatYen(graph.execution)],
+            xCenter: L.root.x + L.root.w / 2,
+            topY: L.root.y,
+          });
+          const depths = [...new Set(L.bars.map((b) => b.depth))].sort((a, b) => a - b);
+          for (const d of depths) {
+            const barsAtD = L.bars.filter((b) => b.depth === d);
+            if (barsAtD.length === 0) continue;
+            const total = barsAtD.reduce((s, b) => s + b.totalAmount, 0);
+            cols.push({
+              key: `d${d}`,
+              label: d === 1 ? '支出先' : d === 2 ? '再委託先' : `再委託先${d - 1}`,
+              amountLines: [formatYen(total)],
+              xCenter: barsAtD[0].x + barsAtD[0].w / 2,
+              topY: Math.min(...barsAtD.map((b) => b.y)),
+            });
+          }
+          return cols.map((col) => {
+            const screenX = transform.x + col.xCenter * scale;
+            const colTopScreenY = transform.y + col.topY * scale;
+            const blockH = Math.round(labelPx * 1.4 + col.amountLines.length * amountPx * 1.4 + 6);
+            const top = Math.max(HEADER_TOP_RESERVE, colTopScreenY - blockH - 6);
+            return (
+              <div
+                key={col.key}
+                style={{
+                  position: 'absolute', left: screenX, top,
+                  transform: 'translateX(-50%)', textAlign: 'center',
+                  fontSize: labelPx, color: '#999', whiteSpace: 'nowrap',
+                  userSelect: 'none', cursor: 'default', pointerEvents: 'none',
+                  zIndex: 6, lineHeight: 1.4,
+                  background: 'rgba(255,255,255,0.82)', padding: '2px 8px', borderRadius: 4,
+                }}
+              >
+                <div>{col.label}</div>
+                {col.amountLines.map((a, i) => (
+                  <div key={i} style={{ fontSize: amountPx }}>{a}</div>
+                ))}
+              </div>
+            );
+          });
+        })()}
 
         {/* ホバーツールチップ — サンキー流儀のマウス追従 HTML div（220ms遅延・パン/ズーム直後は抑制） */}
         {hoveredNodeStable && !isPanning.current && !isHoverSuppressed && (() => {
