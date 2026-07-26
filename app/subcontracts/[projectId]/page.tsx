@@ -60,7 +60,7 @@ import {
   type RibbonFlow,
   type RibbonBudgetItem,
 } from '@/app/lib/subcontract-ribbon-layout';
-import { summarizeOffFlowIndirectCosts, INDIRECT_COST_NODE_LABEL } from '@/app/lib/subcontracts/indirect-costs';
+import { summarizeOffFlowIndirectCosts, INDIRECT_COST_NODE_LABEL, type IndirectCostSummary } from '@/app/lib/subcontracts/indirect-costs';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
 import { useBaseFontPx } from '@/client/hooks/useBaseFontPx';
@@ -412,6 +412,7 @@ function SidePane({
   orgChain,
   year,
   activeTab,
+  indirect,
   onChangeTab,
   onSelectBlock,
   scaleFont,
@@ -423,6 +424,8 @@ function SidePane({
   orgChain: string[];
   year: number;
   activeTab: PaneTab;
+  /** 間接経費の集計（フロー図と同じ値を使うため親から受け取る） */
+  indirect: IndirectCostSummary;
   onChangeTab: (tab: PaneTab) => void;
   onSelectBlock: (block: BlockNode) => void;
   scaleFont: (px: number) => number;
@@ -520,8 +523,7 @@ function SidePane({
     .map((r) => allRecipients.find((x) => x.r === r)!)
     .filter(({ r, blockId }) => !rq || `${blockId} ${r.name} ${r.corporateNumber} ${r.contractSummaries.join(' ')}`.toLowerCase().includes(rq));
 
-  // 間接経費（支出先ブロックを持たない＝フロー図の終端ノードに載る分）
-  const indirect = summarizeOffFlowIndirectCosts(graph.indirectCosts);
+  // 間接経費（支出先ブロックを持たない＝フロー図の終端ノードに載る分）は親から受け取る
   const indirectCount = indirect.count;
 
   // タブ定義。フローを入口（初期選択）に置く。
@@ -1524,6 +1526,9 @@ function SubcontractDetailPageInner() {
   const layout = useMemo(() => graph ? computeSubcontractLayout(graph) : null, [graph]);
   // B案（フロー図）のレイアウト。A案とは独立に計算するが computeDepths/mergeParallelFlows は共通利用
   const ribbonLayout = useMemo(() => graph ? computeSubcontractRibbonLayout(graph) : null, [graph]);
+  // 間接経費の集計。フロー図（終端ノードのツールチップ）と側パネルで同じ値を使い、
+  // マウス移動によるツールチップ再描画のたびに再計算されないよう memo 化する
+  const indirectSummary = useMemo(() => summarizeOffFlowIndirectCosts(graph?.indirectCosts), [graph]);
   // エッジ太さスケールの基準（このグラフ内の最大ブロック金額）
   const maxBlockAmount = useMemo(
     () => layout ? Math.max(0, ...layout.blocks.map((b) => b.totalAmount)) : 0,
@@ -1764,7 +1769,6 @@ function SubcontractDetailPageInner() {
   const ribbonIndirectShift = safeRibbonLayout.indirectNode
     ? ribbonBarShift.get(safeRibbonLayout.indirectNode.key) ?? 0
     : 0;
-  const indirectSummary = summarizeOffFlowIndirectCosts(graph.indirectCosts);
   // 予算・執行列（上から積まれているので配列順＝y昇順）
   const ribbonBudgetShifts = ribbonColShifts(safeRibbonLayout.budgetItems.map((b) => ({ y: b.y, h: b.h })));
   // フロー端点用: ブロックID→シフト（root=null はシフト0）
@@ -2894,6 +2898,7 @@ function SubcontractDetailPageInner() {
             orgChain={visibleOrgChain}
             year={year}
             activeTab={activeTab}
+            indirect={indirectSummary}
             onChangeTab={(tab) => { setActiveTab(tab); pushSelTabUrl(selectedBlock?.blockId ?? null, tab); }}
             onSelectBlock={handleSelectFromList}
             scaleFont={scaleFont}
