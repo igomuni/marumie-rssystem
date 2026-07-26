@@ -57,6 +57,7 @@ import {
   RIBBON_LABEL_W,
   truncateRibbonLabelName,
   type RibbonFlow,
+  type RibbonBudgetItem,
 } from '@/app/lib/subcontract-ribbon-layout';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
@@ -326,7 +327,8 @@ function sortRecipients(
 type HoveredNode =
   | { kind: 'root' }
   | { kind: 'block'; block: BlockNode }
-  | { kind: 'ribbonFlow'; flow: RibbonFlow; flowKey: string };
+  | { kind: 'ribbonFlow'; flow: RibbonFlow; flowKey: string }
+  | { kind: 'budget'; item: RibbonBudgetItem };
 
 type ViewMode = 'block' | 'ribbon';
 
@@ -2278,7 +2280,12 @@ function SubcontractDetailPageInner() {
             {safeRibbonLayout.budgetItems.map((bi, i) => {
               const biY = bi.y + (ribbonBudgetShifts[i] ?? 0);
               return (
-              <g key={`bnode-${i}`}>
+              <g
+                key={`bnode-${i}`}
+                onMouseEnter={() => setHoveredNodeRaw({ kind: 'budget', item: bi })}
+                onMouseLeave={() => setHoveredNodeRaw(null)}
+                style={{ cursor: 'default' }}
+              >
                 <rect x={ix(bi.x)} y={biY} width={iw(bi.w)} height={Math.max(1, bi.h)} rx={1} fill={SEMANTIC_PROJECT} vectorEffect="non-scaling-stroke" />
                 <text
                   x={ix(bi.x + bi.w + 6)}
@@ -2426,7 +2433,7 @@ function SubcontractDetailPageInner() {
           const HEADER_TOP_RESERVE = 52; // 上部ツールバー（一覧/年度/タブ）の下端目安
           const labelPx = scaleFont(11);
           const amountPx = scaleFont(10);
-          type Col = { key: string; label: string; amountLines: string[]; xCenter: number; topY: number };
+          type Col = { key: string; label: string; amountLines: string[]; xCenter: number };
           const cols: Col[] = [];
           if (L.budgetItems.length > 0) {
             // 実際に描画している予算内訳ノードの合計を見出しに出す（レイアウトの funnel と一致）
@@ -2434,7 +2441,6 @@ function SubcontractDetailPageInner() {
             cols.push({
               key: 'budget', label: '予算・執行', amountLines: [formatYen(budgetTotal)],
               xCenter: L.budgetItems[0].x + L.budgetItems[0].w / 2,
-              topY: Math.min(...L.budgetItems.map((b) => b.y)),
             });
           }
           cols.push({
@@ -2443,7 +2449,6 @@ function SubcontractDetailPageInner() {
               ? [`${formatYen(L.root.budgetAmount ?? 0)} / ${formatYen(L.root.spendingAmount ?? graph.execution)}`]
               : [formatYen(graph.execution)],
             xCenter: L.root.x + L.root.w / 2,
-            topY: L.root.y,
           });
           const depths = [...new Set(L.bars.map((b) => b.depth))].sort((a, b) => a - b);
           for (const d of depths) {
@@ -2455,13 +2460,14 @@ function SubcontractDetailPageInner() {
               label: d === 1 ? '支出先' : d === 2 ? '再委託先' : `再委託先${d - 1}`,
               amountLines: [formatYen(total)],
               xCenter: barsAtD[0].x + barsAtD[0].w / 2,
-              topY: Math.min(...barsAtD.map((b) => b.y)),
             });
           }
+          // 全列で共通の Top 位置に見出しを揃える（列ごとの最上端ノードYではなく、Top揃えの
+          // 基準 RIBBON_MARGIN.top を使う。再委託先2 など深い列も 支出先/再委託先 と同じ高さになる）。
+          const colTopScreenY = transform.y + RIBBON_MARGIN.top * scale;
           return cols.map((col) => {
             // 横は zoom不変（horizontalScale）、縦は zoom連動（scale）で列位置を出す。
             const screenX = transform.x + col.xCenter * horizontalScale;
-            const colTopScreenY = transform.y + col.topY * scale;
             const blockH = Math.round(labelPx * 1.4 + col.amountLines.length * amountPx * 1.4 + 6);
             const top = Math.max(HEADER_TOP_RESERVE, colTopScreenY - blockH - 6);
             return (
@@ -2490,6 +2496,7 @@ function SubcontractDetailPageInner() {
           const isRoot = hoveredNodeStable.kind === 'root';
           const lb = hoveredNodeStable.kind === 'block' ? hoveredNodeStable.block : null;
           const rf = hoveredNodeStable.kind === 'ribbonFlow' ? hoveredNodeStable.flow : null;
+          const bud = hoveredNodeStable.kind === 'budget' ? hoveredNodeStable.item : null;
           const tipW = 300;
           const rfTargetBar = rf ? safeRibbonLayout.bars.find((b) => b.blockId === rf.targetBlock) ?? null : null;
           const rfSourceName = rf
@@ -2501,9 +2508,11 @@ function SubcontractDetailPageInner() {
           const topRecipients = lb ? sortRecipients(lb.recipients, 'amount-desc').slice(0, 3) : [];
           const tipH = isRoot
             ? 126
-            : rf
-              ? 88 + (rf.note ? 22 : 0)
-              : 96 + (lb!.role ? 18 : 0) + topRecipients.length * 18;
+            : bud
+              ? 92 + ((bud.item || bud.subItem) ? 18 : 0) + (bud.note.trim() ? 22 : 0)
+              : rf
+                ? 88 + (rf.note ? 22 : 0)
+                : 96 + (lb!.role ? 18 : 0) + topRecipients.length * 18;
           const containerW = containerRef.current?.clientWidth ?? 1000;
           const containerH = containerRef.current?.clientHeight ?? 800;
           const GAP = 12;
@@ -2519,10 +2528,12 @@ function SubcontractDetailPageInner() {
           // タイトル横に出す意味タグ（メイン画面のツールチップと同じフラット白背景＋小タグの流儀）
           const titleTag = isRoot
             ? <TagChip kind="project" fontSize={scaleFont(9)}>事業</TagChip>
-            : rf
-              ? <TagChip kind={flowOriginToTagKind(rf.origin)} fontSize={scaleFont(9)}>{flowOriginLabel(rf.origin)}</TagChip>
-              : <TagChip kind={originKindToTagKind(lb!.originKind)} fontSize={scaleFont(9)}>{originKindLabel(lb!.originKind)}</TagChip>;
-          const titleText = isRoot ? graph.projectName : rf ? `${rfSourceName} → ${rfTargetName}` : lb!.blockName;
+            : bud
+              ? <TagChip kind="project" fontSize={scaleFont(9)}>予算</TagChip>
+              : rf
+                ? <TagChip kind={flowOriginToTagKind(rf.origin)} fontSize={scaleFont(9)}>{flowOriginLabel(rf.origin)}</TagChip>
+                : <TagChip kind={originKindToTagKind(lb!.originKind)} fontSize={scaleFont(9)}>{originKindLabel(lb!.originKind)}</TagChip>;
+          const titleText = isRoot ? graph.projectName : bud ? bud.label : rf ? `${rfSourceName} → ${rfTargetName}` : lb!.blockName;
           return (
             <div style={{
               position: 'absolute',
@@ -2554,6 +2565,22 @@ function SubcontractDetailPageInner() {
                     <div>PID {graph.projectId} ・ {graph.ministry}</div>
                     {visibleOrgChain.length > 0 && <div>{visibleOrgChain.join(' / ')}</div>}
                     <div>予算 <b style={{ color: '#222' }}>{graph.budget > 0 ? formatYen(graph.budget) : '—'}</b> ・ 支出 <b style={{ color: '#222' }}>{graph.execution > 0 ? formatYen(graph.execution) : '—'}</b></div>
+                  </>
+                ) : bud ? (
+                  <>
+                    <div>予算額 <b style={{ color: '#222' }}>{formatYen(bud.amount)}</b>
+                      {bud.nextYearRequestAmount > 0 && <> ・ 翌年度要求 <b style={{ color: '#222' }}>{formatYen(bud.nextYearRequestAmount)}</b></>}
+                    </div>
+                    {bud.accountCategory.trim() && <div style={{ color: '#777' }}>{bud.accountCategory}</div>}
+                    {(bud.item.trim() || bud.subItem.trim()) && (
+                      <div style={{ color: '#777' }}>
+                        {bud.item.trim() && <>項: {bud.item}</>}
+                        {bud.subItem.trim() && <>{bud.item.trim() ? ' ・ ' : ''}目: {bud.subItem}</>}
+                      </div>
+                    )}
+                    {bud.note.trim() && (
+                      <div style={{ marginTop: 4, paddingTop: 4, borderTop: '1px solid #eee' }}>補足: {bud.note}</div>
+                    )}
                   </>
                 ) : rf ? (
                   <>
