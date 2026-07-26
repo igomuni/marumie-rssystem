@@ -11,7 +11,7 @@ export interface IndirectCostSummary {
 }
 
 /** フロー図の終端ノードに載せる表示名（ラベル・ツールチップ・タブで共通） */
-export const INDIRECT_COST_NODE_LABEL = '間接経費（国が直接支出）';
+export const INDIRECT_COST_NODE_LABEL = '間接経費';
 
 /**
  * 「サンキーに乗らない間接経費」を集計する。
