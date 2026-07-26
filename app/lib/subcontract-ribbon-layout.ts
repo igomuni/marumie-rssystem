@@ -251,7 +251,10 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
   const depthMap = computeDepths(graph.flows); // blockId -> depth(>=1)。root は depth 0 相当（別管理）
   // 予算・執行列（最左）: 歳出予算項目を金額降順で緑ノードに。予算総額は事業ノードの予算側の高さになる
   const budgetBreakdown = [...(graph.budgetBreakdown ?? [])].filter((b) => b.amount > 0).sort((a, b) => b.amount - a.amount);
-  const budgetTotal = graph.budgetSummary?.totalBudget ?? budgetBreakdown.reduce((s, b) => s + b.amount, 0);
+  // 予算総額は「実際に描画する予算内訳ノードの合計」を採用する（budgetSummary.totalBudget を
+  // 優先すると、公式合計と内訳合計がズレる事業で funnel が root.budgetH まで届かず緑側に隙間が
+  // できたり、逆にはみ出したりする）。公式合計との差分は側パネル側で別途警告表示している。
+  const budgetTotal = budgetBreakdown.reduce((s, b) => s + b.amount, 0);
   const mergedFlows = mergeParallelFlows(graph.flows);
 
   const blockById = new Map<string, BlockNode>();
@@ -455,9 +458,10 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
     RIBBON_BAR_MIN_H,
     rootOutgoing.reduce((sum, f) => sum + (sourceThickness.get(f) ?? 0), 0),
   );
-  // 予算・執行ノードを最左（col0）に置くため、事業(root)以降を1列右へずらす基準x
-  const CONTENT_BASE_X = RIBBON_MARGIN.left + RIBBON_COL_W + RIBBON_COL_GAP;
   const hasBudgetCol = budgetBreakdown.length > 0 && budgetTotal > 0;
+  // 予算・執行ノード列がある場合のみ、事業(root)以降を1列右へずらす基準x。
+  // 予算データが無い事業では左端に余分な空列を作らず root を最左に置く。
+  const CONTENT_BASE_X = hasBudgetCol ? RIBBON_MARGIN.left + RIBBON_COL_W + RIBBON_COL_GAP : RIBBON_MARGIN.left;
   const budgetH = hasBudgetCol ? Math.max(rootH, budgetTotal * k) : 0;
   const rootY = Math.max(RIBBON_MARGIN.top, directMidY - rootH / 2);
   // 事業ノード: メインの mergedProjectPath 相当。予算(左・緑, budgetH)＋支出(右・オレンジ, rootH)の結合。
@@ -498,7 +502,9 @@ export function computeSubcontractRibbonLayout(graph: RibbonLayoutInput): Subcon
   const separateTopLevel = [...depth1Nodes.filter((n) => isSeparateOriginKind(n.originKind)), ...separateOrphans];
   let separateLane: RibbonSeparateLane | null = null;
   if (separateTopLevel.length > 0) {
-    const directContentBottom = Math.max(directBandBottom, hasDirectBand ? root.y + root.h : RIBBON_MARGIN.top);
+    // 事業ノードは top 揃えの結合形状で、緑側(budgetH)が支出側(h)より下へ伸び得るため、
+    // 別財源レーンは root.h ではなく max(h, budgetH) の下端を基準に配置して重なりを防ぐ。
+    const directContentBottom = Math.max(directBandBottom, hasDirectBand ? root.y + Math.max(root.h, root.budgetH ?? 0) : RIBBON_MARGIN.top);
     bandCursor = directContentBottom + RIBBON_LANE_GAP;
     const laneTop = bandCursor;
     for (const node of separateTopLevel) {

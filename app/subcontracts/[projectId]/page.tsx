@@ -1627,8 +1627,10 @@ function SubcontractDetailPageInner() {
   // ラベルが次列のバーへ食い込まないよう、列ごとに clipPath でラベル領域を切り取る
   // （sankey の clip-col-* と同じ流儀）。最終列だけはラベルが右マージンへ自由に伸びてよい
   const ribbonMaxDepth = safeRibbonLayout.bars.length > 0 ? Math.max(...safeRibbonLayout.bars.map((b) => b.depth)) : 0;
-  // 予算・執行ノードを最左に置くため、事業(depth0相当)以降は1列右。depth d のブロック列 x。
-  const ribbonColX = (depth: number) => RIBBON_MARGIN.left + (depth + 1) * (RIBBON_COL_W + RIBBON_COL_GAP);
+  // 予算・執行ノード列がある場合のみ、事業(depth0相当)以降を1列右へずらす。
+  // 予算データが無い事業ではオフセットせず、レイアウト側 CONTENT_BASE_X と整合させる。
+  const ribbonHasBudgetCol = safeRibbonLayout.root.budgetH != null;
+  const ribbonColX = (depth: number) => RIBBON_MARGIN.left + (depth + (ribbonHasBudgetCol ? 1 : 0)) * (RIBBON_COL_W + RIBBON_COL_GAP);
   return (
     <div style={{ display: 'flex', height: '100vh', background: COLOR_CANVAS, overflow: 'hidden' }}>
       {/* SVGキャンバス */}
@@ -2327,7 +2329,8 @@ function SubcontractDetailPageInner() {
           type Col = { key: string; label: string; amountLines: string[]; xCenter: number; topY: number };
           const cols: Col[] = [];
           if (L.budgetItems.length > 0) {
-            const budgetTotal = L.root.budgetAmount ?? L.budgetItems.reduce((s, b) => s + b.amount, 0);
+            // 実際に描画している予算内訳ノードの合計を見出しに出す（レイアウトの funnel と一致）
+            const budgetTotal = L.budgetItems.reduce((s, b) => s + b.amount, 0);
             cols.push({
               key: 'budget', label: '予算・執行', amountLines: [formatYen(budgetTotal)],
               xCenter: L.budgetItems[0].x + L.budgetItems[0].w / 2,
