@@ -37,12 +37,18 @@ description: lint と TypeScript 型チェックとユニットテストを実�
 
 5. **ドキュメント参照検査**（コード・`docs/*.md` を変更した場合のみ）
    ```bash
-   grep -rn "docs/tasks/" app scripts client docs types \
+   grep -rnE "docs/tasks/[0-9]{8}_" app scripts client tests docs types \
+     --exclude-dir=tasks --exclude-dir=.ignore \
      --include='*.ts' --include='*.tsx' --include='*.py' --include='*.mjs' --include='*.md' \
      | grep -v "docs/プロンプトログ"
    ```
    - task doc は rs-vis へ展開されないため、コード・公開ドキュメントからの参照はリンク切れになる。
-     ヒットしたら恒久ガイド（`docs/*.md`）への参照に置き換える（`.claude/` 配下は対象外）
+     ヒットしたら恒久ガイド（`docs/*.md`）への参照に置き換える
+   - 検査対象外: `.claude/` 配下（rs-vis へ展開されない）、`docs/tasks/` 内の doc 同士の参照、
+     git 管理外の `docs/.ignore/`・`docs/プロンプトログ*.ignore.md`
+   - パターンが日付接頭辞（`YYYYMMDD_`）なのは、task doc への参照だけを拾うため。
+     `docs/tasks/_assets/` への出力パス（`tests/e2e/responsive-investigation.spec.ts`）は
+     リンクではないので対象外
 
 ## 完了条件
 
