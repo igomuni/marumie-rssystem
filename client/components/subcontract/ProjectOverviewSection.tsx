@@ -8,13 +8,15 @@ import type { ProjectDetail } from '@/types/project-details';
  *
  * 折りたたみ時プレビューの高さドラッグ変更はページ側の状態を props で受ける
  * （onResizeStart 指定時のみハンドル表示）。subcontractHref を渡すと再委託アイコンを出す
- * （再委託ページ自身では自己参照になるため渡さない）。
+ * （再委託ページ自身では自己参照になるため渡さない）。逆に再委託ページからは sankeyHref を
+ * 渡してメイン画面（/sankey-svg）へのアイコンを出す。どちらも同じタブで遷移する。
  */
 export function ProjectOverviewSection({
   detail,
   projectName,
   year,
   subcontractHref,
+  sankeyHref,
   scaleFont,
   expanded,
   onToggle,
@@ -27,6 +29,7 @@ export function ProjectOverviewSection({
   projectName: string;
   year: string | number;
   subcontractHref?: string;
+  sankeyHref?: string;
   scaleFont: (px: number) => number;
   expanded: boolean;
   onToggle: () => void;
@@ -69,6 +72,16 @@ export function ProjectOverviewSection({
         {subcontractHref && (
           <a href={subcontractHref}
             title="再委託構造を見る（同じタブで開きます）"
+            style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#4a90d9">
+              <path d="M760-120q-39 0-70-22.5T647-200H440q-66 0-113-47t-47-113q0-66 47-113t113-47h80q33 0 56.5-23.5T600-600q0-33-23.5-56.5T520-680H313q-13 35-43.5 57.5T200-600q-50 0-85-35t-35-85q0-50 35-85t85-35q39 0 69.5 22.5T313-760h207q66 0 113 47t47 113q0 66-47 113t-113 47h-80q-33 0-56.5 23.5T360-360q0 33 23.5 56.5T440-280h207q13-35 43.5-57.5T760-360q50 0 85 35t35 85q0 50-35 85t-85 35ZM228.5-691.5Q240-703 240-720t-11.5-28.5Q217-760 200-760t-28.5 11.5Q160-737 160-720t11.5 28.5Q183-680 200-680t28.5-11.5Z"/>
+            </svg>
+          </a>
+        )}
+        {sankeyHref && (
+          <a href={sankeyHref}
+            title="メイン画面でこの事業を表示（同じタブで開きます）"
             style={{ display: 'flex', alignItems: 'center', color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 -960 960 960" fill="#4a90d9">
