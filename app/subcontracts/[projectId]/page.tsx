@@ -30,7 +30,7 @@ import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
 import { BudgetExecutionSection } from '@/client/components/BudgetExecutionSection';
 import { ProjectOverviewSection } from '@/client/components/subcontract/ProjectOverviewSection';
 import type { ProjectDetail } from '@/types/project-details';
-import { ProjectReferenceLinks } from '@/components/subcontracts/ProjectReferenceLinks';
+import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import {
   computeSubcontractLayout,
   backEdgePath,
@@ -580,7 +580,6 @@ function SidePane({
               </div>
             )}
           </div>
-          <ProjectReferenceLinks projectId={graph.projectId} projectName={graph.projectName} year={year} compact />
         </div>
         {/* メイン画面と同型: 事業タグ＋PID＋省庁＋組織のみ（構造サマリは下の「再委託」節へ） */}
         <div style={{ display: 'flex', gap: 5, marginTop: 8, flexWrap: 'wrap', alignItems: 'center', fontSize: PANEL_META_FONT_PX }}>
@@ -598,6 +597,7 @@ function SidePane({
           detail={projectDetail}
           projectName={graph.projectName}
           year={year}
+          sankeyHref={sankeySvgProjectUrl(graph.projectId, graph.projectName, year)}
           scaleFont={scaleFont}
           expanded={overviewOpen}
           onToggle={() => setOverviewOpen(o => !o)}

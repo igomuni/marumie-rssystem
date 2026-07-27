@@ -399,6 +399,10 @@ export default function RealDataSankeyPage() {
   // focusRelated ON中に事業をピンしたときのコンテキスト事業ID
   // projectOffsetMode + r-* 選択後にfocusRelated=OFFしたとき、親事業の特定に使う
   const pinnedContextProjectId = useRef<string | null>(null);
+  // 事業ピン付きディープリンク（/subcontracts からの遷移など）で po= 未指定のとき、
+  // グラフ読込後に一度だけ projectOffset をその事業の順位へ中央寄せするための保留ID。
+  // 順位は graphData がないと決まらないため、リンク側では po を計算せずここで解決する。
+  const pendingProjectOffsetPinId = useRef<string | null>(null);
   // Zoom URL state
   const urlRestoredZoomRef = useRef<number | null>(null); // zoom to restore on first layout (no sel= case)
   const zoomRef = useRef(1);                              // always-current zoom for debounce callbacks
@@ -448,6 +452,13 @@ export default function RealDataSankeyPage() {
     if (parsed.topProject !== undefined) prevTopProjectRef.current = parsed.topProject;
     if (parsed.selectedNodeId !== undefined) { setSelectedNodeId(parsed.selectedNodeId); pendingFocusId.current = parsed.selectedNodeId; }
     if (parsed.pinnedProjectId !== undefined) setPinnedProjectId(parsed.pinnedProjectId);
+    // po= 明示がない事業ピン付きリンクは、グラフ読込後に順位へ中央寄せする（下の useEffect）。
+    // 初回マウント限定なのは意図的。popstate・探索履歴・AI結果の復元（applyUrlState）は
+    // 「記録された表示状態をそのまま戻す」経路であり、po 非出力＝当時 offset 0 を意味する。
+    // そこで中央寄せすると戻り先が記録時と別のウィンドウになり、URL も書き換わってしまう。
+    if (parsed.pinnedProjectId && parsed.projectOffset === undefined && parsed.offsetTarget !== 'recipient') {
+      pendingProjectOffsetPinId.current = parsed.pinnedProjectId;
+    }
     if (parsed.pinnedRecipientId !== undefined) setPinnedRecipientId(parsed.pinnedRecipientId);
     if (parsed.pinnedMinistryName !== undefined) setPinnedMinistryName(parsed.pinnedMinistryName);
     if (parsed.recipientOffset !== undefined) setRecipientOffset(parsed.recipientOffset);
@@ -1929,6 +1940,24 @@ export default function RealDataSankeyPage() {
       });
     return new Map(ranked.map((n, i) => [n.id, i]));
   }, [graphData, filterExcludedIds, topMinistry, projectSortBy, focusRelated, pinnedRecipientId, pinnedMinistryName]);
+
+  // 事業ピン付きディープリンク（po= 未指定）の projectOffset 中央寄せ。
+  // ピン事業は TopN 圏外でも表示されるが、関連ノードのみを解除した瞬間に
+  // 先頭50事業へ飛んでしまうため、順位が判明した時点で一度だけウィンドウを合わせる。
+  // 計算は事業クリック時の jumpToProjectRank と同一。
+  useEffect(() => {
+    const pinId = pendingProjectOffsetPinId.current;
+    if (!pinId || allProjectRanks.size === 0) return;
+    pendingProjectOffsetPinId.current = null;
+    const rank = allProjectRanks.get(pinId);
+    if (rank === undefined) return;
+    const maxOffset = Math.max(0, allProjectRanks.size - topProject);
+    const newOffset = Math.max(0, Math.min(rank - Math.floor(topProject / 2), maxOffset));
+    if (newOffset > 0) {
+      pendingHistoryAction.current = 'replace';
+      setProjectOffset(newOffset);
+    }
+  }, [allProjectRanks, topProject]);
 
   // Recipient count per project-spending node (from raw graphData)
   const projectRecipientCount = useMemo(() => {
