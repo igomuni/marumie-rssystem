@@ -296,15 +296,17 @@ def main():
     ).fit_transform(norm)
     xy = np.asarray(xy, dtype=np.float64)
 
-    print(f'[4/4] クラスタリング（KMeans k={args.clusters}）')
+    # --limit 指定や事業数の少ない年度では行数がクラスタ数を下回りうる
+    k = min(args.clusters, len(rows))
+    print(f'[4/4] クラスタリング（KMeans k={k}）')
     # クラスタは2Dではなく高次元側で切る。UMAPは局所構造を優先して
     # 大域の距離を歪めるので、2Dで切ると見た目の塊と意味の塊がずれる
-    km = KMeans(n_clusters=args.clusters, random_state=args.seed, n_init=10).fit(norm)
+    km = KMeans(n_clusters=k, random_state=args.seed, n_init=10).fit(norm)
     labels = km.labels_
     ari = adjusted_rand_score([r['category'] for r in rows], labels)
     print(f'  policyCategoryとの一致度 ARI={ari:.3f}')
 
-    clusters = label_clusters(rows, labels, xy, mat, args.clusters)
+    clusters = label_clusters(rows, labels, xy, mat, k)
 
     out = {
         'year': year,

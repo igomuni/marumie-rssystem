@@ -95,6 +95,9 @@ function pickScore(row: ResultRow): number | null {
       : axis === 'evidenceReadiness'
         ? row.evidenceReadiness
         : (row as unknown as Record<string, unknown>)[axis];
+  // Number(null) は 0 になる。ベンチマーク結果には evidenceReadiness が全件 null の
+  // ランがあり、そのまま通すと「全件0点」という実在しない分布として統計に混ざる
+  if (raw === null || raw === undefined || raw === '') return null;
   const value = Number(raw);
   return Number.isFinite(value) ? value : null;
 }

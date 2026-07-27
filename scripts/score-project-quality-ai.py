@@ -41,6 +41,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor
@@ -237,6 +238,9 @@ def make_client():
 # ベンチマーク30件の実績をそのまま全件へ比例換算してはいけない。政策評価とは分けて集計する。
 USAGE_BY_PHASE = {}
 _USAGE_PHASE = 'other'
+# _record_usage は _run_batches の ThreadPoolExecutor から呼ばれる。
+# setdefault と += の read-modify-write が競合するとトークン数・コストを取りこぼす
+_USAGE_LOCK = threading.Lock()
 
 
 def set_usage_phase(name):
@@ -245,13 +249,14 @@ def set_usage_phase(name):
 
 
 def _record_usage(u):
-    d = USAGE_BY_PHASE.setdefault(_USAGE_PHASE,
-                                  {'prompt_tokens': 0, 'completion_tokens': 0, 'cost': 0.0, 'calls': 0})
-    if u is not None:
-        d['prompt_tokens'] += getattr(u, 'prompt_tokens', 0) or 0
-        d['completion_tokens'] += getattr(u, 'completion_tokens', 0) or 0
-        d['cost'] += float(getattr(u, 'cost', 0) or 0)
-    d['calls'] += 1
+    with _USAGE_LOCK:
+        d = USAGE_BY_PHASE.setdefault(_USAGE_PHASE,
+                                      {'prompt_tokens': 0, 'completion_tokens': 0, 'cost': 0.0, 'calls': 0})
+        if u is not None:
+            d['prompt_tokens'] += getattr(u, 'prompt_tokens', 0) or 0
+            d['completion_tokens'] += getattr(u, 'completion_tokens', 0) or 0
+            d['cost'] += float(getattr(u, 'cost', 0) or 0)
+        d['calls'] += 1
 
 
 def llm_json(client, model, system, prompt):
@@ -391,8 +396,8 @@ def _run_batches(client, uniques, model, bs, chunk_fn, fill_fn, label,
 
 
 def judge_uniques_sync(client, uniques, model, batch_size, cache=None, cache_path=None):
-    set_usage_phase('recipient')
     """支出先（軸A/B）の判定。"""
+    set_usage_phase('recipient')
     return _run_batches(client, uniques, model, batch_size,
                         judge_chunk, heuristic_judge, 'AI判定', cache, cache_path)
 
@@ -1104,8 +1109,6 @@ def main():
                 'indicators': oc.get('indicators', []),
                 'indicatorCounts': oc.get('indicatorCounts', {}),
                 'review': oc.get('review'),
-                'logicModel': oc.get('logicModel'),
-                'relatedProjects': oc.get('relatedProjects', []),
                 'logicModel': oc.get('logicModel'),
                 'relatedProjects': oc.get('relatedProjects', []),
                 'projectName': d.get('projectName', it.get('name', '')),

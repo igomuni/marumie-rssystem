@@ -224,6 +224,10 @@ export function BubbleCanvas(props: BubbleCanvasProps) {
    */
   const regions = useMemo(() => {
     if (!showRegions || regionPoints.length === 0 || regionEntries.length === 0) return null;
+    // ImageData / document.createElement をレンダー中に触るので、サーバでは組まない。
+    // 現状 /project-bubble はフェッチ解決後にしかこの木を積まないため到達しないが、
+    // 他ページで先に描画される使い方をされたときに落ちないようにしておく
+    if (typeof document === 'undefined') return null;
 
     const padX = (bounds.maxX - bounds.minX) * 0.05;
     const padY = (bounds.maxY - bounds.minY) * 0.05;

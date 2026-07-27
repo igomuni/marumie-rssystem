@@ -51,7 +51,9 @@ const headers = [
 ];
 
 const quote = (value: string | number) => {
-  const text = String(value);
+  let text = String(value);
+  // 表計算ソフトの数式実行を無効化（export-luna-scores.ts と同じ扱い）
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 

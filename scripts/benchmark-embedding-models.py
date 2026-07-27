@@ -165,6 +165,10 @@ def call_api(model_id: str, inputs: list[str], api_key: str, retries: int = 5):
                 raise RuntimeError(json.dumps(d['error'], ensure_ascii=False)[:200])
             # data の order 保証は仕様上あるが、index が来ていれば従う
             items = sorted(d['data'], key=lambda x: x.get('index', 0))
+            # 部分応答をそのまま返すと、呼び出し側の zip(chunk, vecs) が
+            # 黙って切り詰められ、別の事業のベクトルが紐づいてしまう
+            if len(items) != len(inputs):
+                raise RuntimeError(f'埋め込み数が不一致: 要求{len(inputs)} 応答{len(items)}')
             usage = d.get('usage') or {}
             return [np.asarray(i['embedding'], dtype=np.float32) for i in items], usage
         except Exception as e:  # noqa: BLE001 — レート制限も一時障害も同じ扱いで良い

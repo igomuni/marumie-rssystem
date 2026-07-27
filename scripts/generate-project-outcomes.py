@@ -10,6 +10,7 @@
 
 入力:
   data/year_{YEAR}/3-1_RS_{YEAR}_効果発現経路_目標・実績.csv   （long format・約13万行）
+  data/year_{YEAR}/3-2_RS_{YEAR}_効果発現経路_目標のつながり.csv
   data/year_{YEAR}/4-1_RS_{YEAR}_点検・評価.csv
   data/year_{YEAR}/1-5_RS_{YEAR}_基本情報_関連事業.csv
 
@@ -64,6 +65,28 @@ def read_csv(path):
         rd = csv.reader(f)
         header = next(rd)
         return header, list(rd)
+
+
+def make_col(idx, source):
+    """列名を引く関数を作る。列名は完全一致で照合する。
+
+    RSシステムのヘッダには `ー`（長音）と `－`（全角ハイフン）のように紛らわしい
+    区切り文字が混在しており、1文字違うだけで値が黙って空になる。実際に
+    `効果測定に関する評価` は全角ハイフンで書かれていて全件空になっていた。
+    引けなかった列名はファイルごとに一度だけ警告する。
+    """
+    warned = set()
+
+    def col(r, name):
+        i = idx.get(name)
+        if i is None:
+            if name not in warned:
+                warned.add(name)
+                print(f'  [warn] {source}: 列 "{name}" がヘッダに無い（全件空になる）', file=sys.stderr)
+            return ''
+        return r[i].strip() if i < len(r) else ''
+
+    return col
 
 
 def num(v):
@@ -159,10 +182,7 @@ def build_reviews():
     if header is None:
         return {}
     idx = {name: i for i, name in enumerate(header)}
-
-    def col(r, name):
-        i = idx.get(name)
-        return r[i].strip() if (i is not None and i < len(r)) else ''
+    col = make_col(idx, REVIEW_CSV.name)
 
     out = {}
     for r in rows:
@@ -172,7 +192,7 @@ def build_reviews():
         out[pid] = {
             'selfCheck': col(r, '事業所管部局による点検・改善ー点検結果'),
             'improvementDirection': col(r, '事業所管部局による点検・改善ー改善の方向性'),
-            'effectAssessment': col(r, '事業所管部局による点検・改善－目標年度における効果測定に関する評価'),
+            'effectAssessment': col(r, '事業所管部局による点検・改善ー目標年度における効果測定に関する評価'),
             'expertYear': col(r, '外部有識者による点検ー最終実施年度'),
             'expertTarget': col(r, '外部有識者による点検ー点検対象'),
             'expertReason': col(r, '外部有識者による点検ー対象の理由'),
@@ -215,10 +235,7 @@ def build_links():
     if header is None:
         return {}
     idx = {name: i for i, name in enumerate(header)}
-
-    def col(r, name):
-        i = idx.get(name)
-        return r[i].strip() if (i is not None and i < len(r)) else ''
+    col = make_col(idx, LINKS_CSV.name)
 
     out = defaultdict(lambda: {'links': [], 'noMultiStageReason': ''})
     for r in rows:

@@ -63,7 +63,10 @@ const statusLabels: Record<string, string> = {
 };
 
 function csvCell(value: string | number) {
-  const text = String(value);
+  let text = String(value);
+  // 表計算ソフトは = + - @ で始まるセルを数式として実行する。判定理由には
+  // AI が生成した任意の文字列が入るため、引用符で囲むだけでは防げない
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 

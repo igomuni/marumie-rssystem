@@ -100,5 +100,6 @@ for (const { label } of VARIANTS) {
 }
 
 // ── 収支の一致を外しても「不一致」の検出力が落ちないことの確認 ──
-// 判定ルール側は axisBudget < 60 を直接見ているため、加重平均から外しても信号は残る。
-console.log(`\n収支不一致フラグ（軸C<60）: ${low}件。加重平均から外しても chooseRecommendation / chooseImprovementAction は同じ件数を拾う。`);
+// chooseImprovementAction が axisBudget < 60 を直接見ているため、加重平均から外しても
+// 改善アクション側の信号は残る（chooseRecommendation はこの軸を読んでいない）。
+console.log(`\n収支不一致フラグ（軸C<60）: ${low}件。加重平均から外しても chooseImprovementAction は同じ件数を拾う。`);

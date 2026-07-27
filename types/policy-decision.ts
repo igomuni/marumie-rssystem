@@ -91,7 +91,10 @@ export function calculatePolicyDecision(
     policyValueScore === null ||
     input.decision.alternativeAvailability === null ||
     input.decision.duplication === null ||
-    input.decision.obsolescence === null
+    input.decision.obsolescence === null ||
+    // null は「未判定」であって「法的義務なし」ではない。false と同一視すると、
+    // 義務の有無を確認しないまま廃止候補へ流れる
+    input.decision.legalObligation === null
   ) {
     return {
       policyEffectScore,

@@ -138,6 +138,9 @@ export default function ProjectMapPage() {
   }, []);
 
   useEffect(() => {
+    // URL の yr= を読む前に走らせると、?yr=2024 のリンクを開いたとき
+    // 2025 を取りに行ってから 2024 を取り直す（二重フェッチ＋一瞬の誤年度表示）
+    if (!urlHydrated) return;
     setData(null);
     setLoading(true);
     setError(null);
@@ -153,7 +156,7 @@ export default function ProjectMapPage() {
       .then(json => { if (json) setData(json); })
       .catch(e => setError(String(e)))
       .finally(() => setLoading(false));
-  }, [year]);
+  }, [year, urlHydrated]);
 
   // 空配列を毎レンダー作り直すと、下流の useMemo が全部無効化されて5,794点を毎回引き直す
   const EMPTY: ProjectMapPoint[] = useMemo(() => [], []);
