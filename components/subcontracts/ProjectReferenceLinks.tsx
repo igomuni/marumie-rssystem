@@ -74,7 +74,7 @@ export function ProjectReferenceLinks({
       </a>
       <Link
         href={sankeySvgProjectUrl(projectId, projectName, year)}
-        aria-label="メイン画面でこの事業を表示"
+        aria-label="メイン画面でこの事業を表示（同じタブで開きます）"
         title="メイン画面でこの事業を表示（同じタブで開きます）"
         style={itemStyle}
       >

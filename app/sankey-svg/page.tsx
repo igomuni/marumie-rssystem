@@ -452,7 +452,10 @@ export default function RealDataSankeyPage() {
     if (parsed.topProject !== undefined) prevTopProjectRef.current = parsed.topProject;
     if (parsed.selectedNodeId !== undefined) { setSelectedNodeId(parsed.selectedNodeId); pendingFocusId.current = parsed.selectedNodeId; }
     if (parsed.pinnedProjectId !== undefined) setPinnedProjectId(parsed.pinnedProjectId);
-    // po= 明示がない事業ピン付きリンクは、グラフ読込後に順位へ中央寄せする（下の useEffect）
+    // po= 明示がない事業ピン付きリンクは、グラフ読込後に順位へ中央寄せする（下の useEffect）。
+    // 初回マウント限定なのは意図的。popstate・探索履歴・AI結果の復元（applyUrlState）は
+    // 「記録された表示状態をそのまま戻す」経路であり、po 非出力＝当時 offset 0 を意味する。
+    // そこで中央寄せすると戻り先が記録時と別のウィンドウになり、URL も書き換わってしまう。
     if (parsed.pinnedProjectId && parsed.projectOffset === undefined && parsed.offsetTarget !== 'recipient') {
       pendingProjectOffsetPinId.current = parsed.pinnedProjectId;
     }
