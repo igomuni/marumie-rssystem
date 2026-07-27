@@ -41,6 +41,10 @@ decompress_if_needed "subcontracts-2024.json" optional
 decompress_if_needed "subcontracts-2025.json" optional
 decompress_if_needed "project-quality-scores-2024.json" optional
 decompress_if_needed "project-quality-scores-2025.json" optional
+decompress_if_needed "rs2025-project-outcomes.json" optional
+decompress_if_needed "rs2024-project-outcomes.json" optional
+decompress_if_needed "project-map-2025.json" optional
+decompress_if_needed "project-map-2024.json" optional
 
 # --- サーバ関数バンドル用データの同期 ---
 # Vercel の関数には public/data を一切同梱しない（生 .json 込みだと 250MB 上限を
@@ -55,6 +59,10 @@ mkdir -p "$BUNDLE_DIR"
 rm -f "$BUNDLE_DIR"/*.json "$BUNDLE_DIR"/*.json.gz
 cp "$DATA_DIR"/*.json.gz "$BUNDLE_DIR/"
 cp "$DATA_DIR/mof-budget-overview-2023.json" "$BUNDLE_DIR/"
+# パイプライン専用の入力はサーバ関数から一切読まないので同梱しない。
+# rs{YEAR}-project-outcomes は AI採点スクリプトの入力のみで 8MB 超あり、
+# 全関数のバンドルに乗せると 250MB 上限への余裕を無駄に食う。
+rm -f "$BUNDLE_DIR"/rs*-project-outcomes.json.gz
 echo "✅ Server bundle data ready ($(du -sh "$BUNDLE_DIR" | cut -f1))"
 
 echo "✅ All data files ready"
