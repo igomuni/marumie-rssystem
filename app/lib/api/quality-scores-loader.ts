@@ -4,7 +4,7 @@
  * 型・読み込みロジックの正典はこのファイル（route.ts 側に重複定義を置かないこと）。
  */
 import type { SupportedYear } from '@/app/lib/api/api-notes';
-import { readDataJson } from '@/app/lib/api/data-file';
+import { readDataJson, tryReadDataJson } from '@/app/lib/api/data-file';
 
 export interface QualityScoreItem {
   pid: string;
@@ -54,6 +54,12 @@ export interface QualityScoreItem {
   effectiveReason?: string;        // 有効性判定の根拠（AI時）
   aiSource?: string;               // "openrouter:<model>" | "heuristic"
   totalScore: number | null;
+  // 事業期間（rs<year>-project-details.json から結合）。長期化した事業の洗い出しに使う
+  startYear?: number | null;
+  endYear?: number | null;
+  noEndDate?: boolean;
+  /** 継続年数（対象年度 − 開始年度 + 1）。開始年度が無い事業は null */
+  yearsRunning?: number | null;
 }
 
 export interface QualityScoresResponse {
@@ -121,6 +127,29 @@ export function toQualityScoreProjection(i: QualityScoreItem): QualityScoreProje
 const cache = new Map<string, QualityScoresResponse>();
 const pidIndexCache = new Map<string, Map<string, QualityScoreItem>>();
 
+type DetailPeriod = { startYear?: number | null; endYear?: number | null; noEndDate?: boolean };
+
+/**
+ * 事業期間を品質スコアへ結合する。
+ * 開始年度は事業詳細（rs<year>-project-details.json）にしか無く、品質スコア側には入っていない。
+ * 「何年続いているか」は見直しの判断材料になるので、一覧で並べ替えできるようにする。
+ */
+function attachDuration(items: QualityScoreItem[], year: SupportedYear): void {
+  // 詳細が無い年度は継続年数を出さないだけで、一覧自体は表示する
+  const details = tryReadDataJson<Record<string, DetailPeriod>>(`rs${year}-project-details.json`);
+  if (!details) return;
+
+  const target = Number(year);
+  for (const it of items) {
+    const d = details[it.pid] ?? details[String(it.pid)];
+    if (!d) continue;
+    it.startYear = d.startYear ?? null;
+    it.endYear = d.endYear ?? null;
+    it.noEndDate = d.noEndDate ?? false;
+    it.yearsRunning = d.startYear ? Math.max(1, target - d.startYear + 1) : null;
+  }
+}
+
 export function loadQualityScores(year: SupportedYear): QualityScoresResponse {
   if (cache.has(year)) return cache.get(year)!;
 
@@ -128,6 +157,7 @@ export function loadQualityScores(year: SupportedYear): QualityScoresResponse {
     `project-quality-scores-${year}.json`,
     `python3 scripts/score-project-quality-ai.py --year ${year} を実行してください。`
   );
+  attachDuration(items, year);
 
   const ministries = [...new Set(items.map(i => i.ministry))].sort();
   const scored = items.filter(i => i.totalScore !== null);
