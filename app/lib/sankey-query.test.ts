@@ -336,3 +336,45 @@ describe('buildFilterExcludedIds (subcontract)', () => {
     expect(sankeyQueryFromUrlParams(p3).filter?.recipientName).toEqual({ query: 'NEDO', regex: false, includeSubcontract: true });
   });
 });
+
+// ── buildFilterExcludedIds: excludeProject（政策評価スコアの足きり用フック） ──
+
+describe('buildFilterExcludedIds (excludeProject)', () => {
+  const nodes: RawNode[] = [
+    makeNode({ id: 'ministry-A', name: 'A省', type: 'ministry', value: 100 }),
+    makeNode({ id: 'project-budget-1', name: '事業1', type: 'project-budget', value: 1000, projectId: 1, ministry: 'A省' }),
+    makeNode({ id: 'project-spending-1', name: '事業1', type: 'project-spending', value: 900, projectId: 1, ministry: 'A省' }),
+    makeNode({ id: 'project-budget-2', name: '事業2', type: 'project-budget', value: 500, projectId: 2, ministry: 'A省' }),
+    makeNode({ id: 'project-spending-2', name: '事業2', type: 'project-spending', value: 400, projectId: 2, ministry: 'A省' }),
+    makeNode({ id: 'r-1', name: '受領者A', type: 'recipient', value: 600 }),
+    makeNode({ id: 'r-2', name: '受領者B', type: 'recipient', value: 300 }),
+  ];
+  const edges: RawEdge[] = [
+    { source: 'ministry-A', target: 'project-budget-1', value: 1000 },
+    { source: 'ministry-A', target: 'project-budget-2', value: 500 },
+    { source: 'project-spending-1', target: 'r-1', value: 600 },
+    { source: 'project-spending-2', target: 'r-2', value: 300 },
+  ];
+  const baseFilter = () => resolveSankeyQuery({}).query.filter;
+
+  it('returns null when no filter and no excludeProject is given', () => {
+    expect(buildFilterExcludedIds(nodes, edges, baseFilter(), [], null)).toBeNull();
+  });
+
+  it('excludes the project budget/spending pair the predicate rejects', () => {
+    const excluded = buildFilterExcludedIds(nodes, edges, baseFilter(), [], pid => pid === 2)!;
+    expect(excluded.has('project-budget-2')).toBe(true);
+    expect(excluded.has('project-spending-2')).toBe(true);
+    expect(excluded.has('project-budget-1')).toBe(false);
+  });
+
+  it('cascades to the ministry when every project is rejected', () => {
+    const excluded = buildFilterExcludedIds(nodes, edges, baseFilter(), [], () => true)!;
+    expect(excluded.has('ministry-A')).toBe(true);
+  });
+
+  it('returns null when the predicate rejects nothing', () => {
+    // 足きりが有効でも全事業が通れば除外セットは空＝null（呼び出し側でフィルタ無しと同じ扱いになる）
+    expect(buildFilterExcludedIds(nodes, edges, baseFilter(), [], () => false)).toBeNull();
+  });
+});
