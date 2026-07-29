@@ -195,6 +195,12 @@ export function buildFilterExcludedIds(
   edges: RawEdge[],
   filter: ResolvedSankeyQuery['filter'],
   protectedNodeIds: readonly (string | null)[] = [],
+  /**
+   * 事業単位の追加除外。true を返した事業は予算・執行ノードごと落ちる。
+   * 政策評価スコアの足きりのように、クエリスキーマに載せず画面側でしか
+   * 材料を持てない条件を差し込むための口。
+   */
+  excludeProject?: ((projectId: number) => boolean) | null,
 ): Set<string> | null {
   const protectedProjectIds = new Set<string>();
   for (const nodeId of protectedNodeIds) {
@@ -222,7 +228,8 @@ export function buildFilterExcludedIds(
   // 再委託フィルタ: 実効下限（hasRedelegation=2、minDepth 指定時はそちらを優先）
   const subMinDepth = filter.subcontract.minDepth ?? (filter.subcontract.hasRedelegation ? 2 : null);
   const hasSubcontract = subMinDepth != null;
-  if (!hasBudget && !hasSpending && !hasProjectName && !hasRecipientName && !hasMinistry && !hasAccountFilter && !hasSubcontract) return null;
+  const hasExtraProject = excludeProject != null;
+  if (!hasBudget && !hasSpending && !hasProjectName && !hasRecipientName && !hasMinistry && !hasAccountFilter && !hasSubcontract && !hasExtraProject) return null;
 
   const selectedMinistrySet = new Set(filter.ministries);
   const minBudget = minBudgetYen ?? -Infinity;
@@ -273,7 +280,8 @@ export function buildFilterExcludedIds(
         (sn != null && projectsWithDirectNameMatch.has(sn.id)) ||
         (n.subcontractRecipients ?? []).some(matchesRecipient!)
       );
-      if (failBudget || failProjectName || failMinistry || failAccount || failSubcontract || failAnyRecipient) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
+      const failExtra = hasExtraProject && excludeProject!(n.projectId);
+      if (failBudget || failProjectName || failMinistry || failAccount || failSubcontract || failAnyRecipient || failExtra) { excluded.add(n.id); if (sn) excluded.add(sn.id); }
     } else if (n.type === 'recipient') {
       const failSpending = hasSpending && (n.value < minSpending || n.value > maxSpending);
       // includeSubcontract モードでは支出先ノードを名前で隠さない（事業単位判定のみ）
@@ -282,7 +290,7 @@ export function buildFilterExcludedIds(
     }
   }
   // Pass 2: 支出先・予算フィルタが有効な場合、残存支出先のない事業／孤立支出先を除外
-  if (hasSpending || hasBudget || hasMinistry || hasRecipientName || hasSubcontract) {
+  if (hasSpending || hasBudget || hasMinistry || hasRecipientName || hasSubcontract || hasExtraProject) {
     const projectsWithSurvivingRecipients = new Set(
       edges
         .filter(e => e.target.startsWith('r-') && !excluded.has(e.target))
