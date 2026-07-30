@@ -6,6 +6,7 @@ import type { QualityScoreItem, QualityScoresResponse } from '@/app/api/quality-
 import type { RecipientRow } from '@/app/lib/api/quality-recipients-loader';
 import type { ExecutionHistoryResponse } from '@/app/api/execution-history/route';
 import type { ProjectDetail } from '@/types/project-details';
+import { externalCorporateLinks } from '@/app/lib/api/links';
 import {
   buildPolicyEvaluations,
   POLICY_CATEGORY_GROUPS,
@@ -285,8 +286,9 @@ function ScoreDetailDialog({ item, policy, onClose, year }: { item: QualityScore
   const [showPolicy, setShowPolicy] = useState(true);
   const [projectInfo, setProjectInfo] = useState<ProjectDetail | null | undefined>(undefined);
   const [showProjectInfo, setShowProjectInfo] = useState(true);
-  const COL_MAX_WIDTHS = [undefined, 70, 64, 60, 50, undefined, undefined];
-  const [colWidths, setColWidths] = useState<number[]>([200, 70, 64, 60, 50, 200, 200]);
+  // 法人番号列（index 2）は13桁＋gBizINFOアイコンが入るため 130 まで広げる（旧ダイアログと同じ）
+  const COL_MAX_WIDTHS = [undefined, 70, 130, 60, 50, undefined, undefined];
+  const [colWidths, setColWidths] = useState<number[]>([200, 70, 130, 60, 50, 200, 200]);
   const resizingCol = useRef<{ index: number; startX: number; startW: number } | null>(null);
 
   useEffect(() => {
@@ -848,7 +850,7 @@ ${a.desc}`}>
                     {([
                       { label: '支出先名', align: 'left', sort: null, title: undefined },
                       { label: '委託チェーン', align: 'left', sort: 'chain' as const, title: '委託チェーン（A→B→C）でソート' },
-                      { label: '法人番号', align: 'center', sort: 'c' as const, title: '法人番号(Corporate Number)の記入有無' },
+                      { label: '法人番号', align: 'center', sort: 'c' as const, title: '法人番号(Corporate Number)。記入有無でソート。⚠は形式不正（誤記載の疑い）' },
                       { label: '金額', align: 'right', sort: 'a2' as const, title: '個別支出額（CSVの「金額」列）' },
                       { label: '実支出比', align: 'right', sort: 'pct' as const, title: '実質支出合計に対する割合' },
                       { label: '役割', align: 'left', sort: null, title: '事業を行う上での役割（ブロック単位）' },
@@ -886,11 +888,41 @@ ${a.desc}`}>
                             ? (row.chain.startsWith('組織→') ? row.chain.slice('組織→'.length) : row.chain)
                             : (row.b || '-')}
                         </td>
-                        <td className="px-3 py-1.5 text-center">
-                          {row.c
-                            ? <span className="text-emerald-500 font-bold">✓</span>
-                            : <span className="text-gray-300 dark:text-gray-600">—</span>
-                          }
+                        <td className="px-2 py-1.5 text-center">
+                          {(() => {
+                            const cn = row.cn?.trim() ?? '';
+                            if (!cn) return <span className="text-gray-300 dark:text-gray-600">—</span>;
+                            // 有効な法人番号のみ gBizINFO へリンク（検証・URL構築は共有ヘルパーに集約）
+                            // 番号はコピペ用に選択可能なテキストのままにし、リンクジャンプはアイコンクリック時のみ
+                            const links = externalCorporateLinks(cn);
+                            if (links) {
+                              return (
+                                <span className="inline-flex items-center gap-1 font-mono text-[10px] leading-none text-gray-600 dark:text-gray-300" title={cn}>
+                                  <span className="select-text leading-none">{cn}</span>
+                                  <a
+                                    href={links.gbizinfo}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="shrink-0 inline-flex items-center -mt-0.5 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                                    title={`gBizINFO で法人番号を確認: ${cn}`}
+                                    onClick={e => e.stopPropagation()}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="currentColor" className="block" aria-hidden="true">
+                                      <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
+                                    </svg>
+                                  </a>
+                                </span>
+                              );
+                            }
+                            return (
+                              <span
+                                className="font-mono text-[10px] text-amber-700 dark:text-amber-300 font-semibold"
+                                title={`法人番号の形式が不正（誤記載の疑い）: ${cn}`}
+                              >
+                                {cn}<span className="ml-0.5">⚠</span>
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td className="px-3 py-1.5 text-right font-mono text-gray-700 dark:text-gray-300 whitespace-nowrap">
                           {row.a2 === null ? <span className="text-gray-300 dark:text-gray-600">—</span> : formatAmount(row.a2)}
