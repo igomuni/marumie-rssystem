@@ -344,7 +344,14 @@ function ScoreDetailDialog({ item, policy, onClose, year }: { item: QualityScore
       if (recipientSortField === 'chain') cmp = (a.chain ?? a.b).localeCompare(b.chain ?? b.b) || (b.a2 ?? -1) - (a.a2 ?? -1);
       else if (recipientSortField === 'b') cmp = a.b.localeCompare(b.b) || (b.a2 ?? -1) - (a.a2 ?? -1);
       else if (recipientSortField === 's') cmp = a.s.localeCompare(b.s);
-      else if (recipientSortField === 'c') cmp = (b.c ? 1 : 0) - (a.c ? 1 : 0);
+      else if (recipientSortField === 'c') {
+        // 法人番号そのもので並べる（有効な番号は13桁固定なので文字列比較＝数値順）。
+        // 未記入は値が無いだけで大小を持たないため、昇順・降順どちらでも末尾に固定する。
+        const acn = (a.cn ?? '').trim();
+        const bcn = (b.cn ?? '').trim();
+        if (!acn || !bcn) return (acn ? 0 : 1) - (bcn ? 0 : 1) || (b.a2 ?? -1) - (a.a2 ?? -1);
+        cmp = acn.localeCompare(bcn) || (b.a2 ?? -1) - (a.a2 ?? -1);
+      }
       else if (recipientSortField === 'o') cmp = (b.o ? 1 : 0) - (a.o ? 1 : 0);
       else if (recipientSortField === 'a2') cmp = (b.a2 ?? -1) - (a.a2 ?? -1);
       else if (recipientSortField === 'pct') {
@@ -850,7 +857,7 @@ ${a.desc}`}>
                     {([
                       { label: '支出先名', align: 'left', sort: null, title: undefined },
                       { label: '委託チェーン', align: 'left', sort: 'chain' as const, title: '委託チェーン（A→B→C）でソート' },
-                      { label: '法人番号', align: 'center', sort: 'c' as const, title: '法人番号(Corporate Number)。記入有無でソート。⚠は形式不正（誤記載の疑い）' },
+                      { label: '法人番号', align: 'center', sort: 'c' as const, title: '法人番号(Corporate Number)。番号順でソート（未記入は末尾）。⚠は形式不正（誤記載の疑い）' },
                       { label: '金額', align: 'right', sort: 'a2' as const, title: '個別支出額（CSVの「金額」列）' },
                       { label: '実支出比', align: 'right', sort: 'pct' as const, title: '実質支出合計に対する割合' },
                       { label: '役割', align: 'left', sort: null, title: '事業を行う上での役割（ブロック単位）' },
