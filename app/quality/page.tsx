@@ -346,11 +346,16 @@ function ScoreDetailDialog({ item, policy, onClose, year }: { item: QualityScore
       else if (recipientSortField === 's') cmp = a.s.localeCompare(b.s);
       else if (recipientSortField === 'c') {
         // 法人番号そのもので並べる（有効な番号は13桁固定なので文字列比較＝数値順）。
-        // 未記入は値が無いだけで大小を持たないため、昇順・降順どちらでも末尾に固定する。
+        // 番号の大小だけを方向に従わせ、それ以外は方向で反転させたくないので、
+        // この分岐は最後の一括反転（recipientSortDir）を通さず自前で return する。
         const acn = (a.cn ?? '').trim();
         const bcn = (b.cn ?? '').trim();
+        // 未記入は値が無いだけで大小を持たないため、昇順・降順どちらでも末尾に固定する
         if (!acn || !bcn) return (acn ? 0 : 1) - (bcn ? 0 : 1) || (b.a2 ?? -1) - (a.a2 ?? -1);
-        cmp = acn.localeCompare(bcn) || (b.a2 ?? -1) - (a.a2 ?? -1);
+        const cnCmp = acn.localeCompare(bcn);
+        if (cnCmp !== 0) return recipientSortDir === 'desc' ? -cnCmp : cnCmp;
+        // 同一番号内は常に金額降順（方向に応じて昇順へ反転させない）
+        return (b.a2 ?? -1) - (a.a2 ?? -1);
       }
       else if (recipientSortField === 'o') cmp = (b.o ? 1 : 0) - (a.o ? 1 : 0);
       else if (recipientSortField === 'a2') cmp = (b.a2 ?? -1) - (a.a2 ?? -1);
