@@ -1,47 +1,102 @@
 'use client';
 
+/**
+ * 品質スコアの詳細ダイアログ。/quality・/sankey-svg・/subcontracts/[projectId] で共用する。
+ *
+ * 支出先・事業詳細・政策評価はダイアログを開いたときだけ取得し、モジュールスコープで
+ * キャッシュする（同一事業への同時リクエストは1本にまとめる）。
+ */
+
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import type { QualityScoreItem } from '@/app/api/quality-scores/route';
+import type { QualityScoreItem } from '@/app/lib/api/quality-scores-loader';
 import type { RecipientRow } from '@/app/lib/api/quality-recipients-loader';
 import type { ProjectDetail } from '@/types/project-details';
+import type { PolicyEvaluation } from '@/app/lib/policy-evaluation';
 import { externalCorporateLinks } from '@/app/lib/api/links';
 import { scoreColor, formatAmount, pct } from '@/client/components/quality/score-format';
+import {
+  AXIS_META, COL_DESC, UNUSED_TREND_META, WEIGHT_BY_KEY, STATUS_META,
+  RecommendationBadge, ActionBadge, PersistentUnusedMark, fmtRaw,
+} from '@/client/components/quality/score-meta';
 
-const STATUS_META: Record<RecipientRow['s'], { label: string; cls: string }> = {
-  valid:   { label: 'OK',      cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-  gov:     { label: '行政機関', cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' },
-  supp:    { label: '補助辞書', cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-  // 番号一致(houjin.db裏取り)も表示上は valid と同格の OK に統合（内部 s='cn' と cnVerifiedCount は集計用に保持）
-  cn:      { label: 'OK',      cls: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
-  invalid: { label: '不一致',  cls: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-  unknown: { label: '未登録',  cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
-};
+/**
+ * モーダルで引く支出先・事業内容のクライアントキャッシュ。
+ * 同じ事業を開き直すたびに再取得していたため、モジュールスコープで保持する。
+ * 進行中の Promise も入れて、同一事業への同時リクエストを1本にまとめる
+ * （React StrictMode の二重実行や、閉じてすぐ開き直した場合の重複を防ぐ）。
+ */
+const recipientsCache = new Map<string, Promise<RecipientRow[]>>();
+const projectInfoCache = new Map<string, Promise<ProjectDetail | null>>();
 
-// データ（recipients / projectInfo）はページ側が useScoreDetailData で取得して渡す。
-// このコンポーネントは client/components 配下の再利用UIのため直接 API を叩かない（Issue #246）。
-export function ScoreDetailDialog({
-  item,
-  onClose,
-  recipients,
-  recipientsError,
-  projectInfo,
-  year,
-}: {
+function fetchRecipients(pid: string, year: string): Promise<RecipientRow[]> {
+  const key = `${year}-${pid}`;
+  const hit = recipientsCache.get(key);
+  if (hit) return hit;
+  const req = fetch(`/api/quality-scores/recipients?pid=${pid}&year=${year}`)
+    .then(res => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+    .catch(e => { recipientsCache.delete(key); throw e; });  // 失敗は残さず再試行可能にする
+  recipientsCache.set(key, req);
+  return req;
+}
+
+function fetchProjectInfo(pid: string, year: string): Promise<ProjectDetail | null> {
+  const key = `${year}-${pid}`;
+  const hit = projectInfoCache.get(key);
+  if (hit) return hit;
+  const req = fetch(`/api/project-details/${pid}?year=${year}`)
+    .then(res => (res.ok ? res.json() : null))
+    .catch(() => null);
+  projectInfoCache.set(key, req);
+  return req;
+}
+
+/** 政策評価（1事業）。母集団の計算はサーバ側で1回だけ行われる */
+const policyCache = new Map<string, Promise<PolicyEvaluation | null>>();
+
+function fetchPolicyEvaluation(pid: string, year: string): Promise<PolicyEvaluation | null> {
+  const key = `${year}-${pid}`;
+  const hit = policyCache.get(key);
+  if (hit) return hit;
+  const req = fetch(`/api/policy-summary?year=${year}&pid=${pid}`)
+    .then(res => (res.ok ? res.json() : null))
+    .then((json: { evaluation: PolicyEvaluation } | null) => json?.evaluation ?? null)
+    .catch(() => null);
+  policyCache.set(key, req);
+  return req;
+}
+
+export function ScoreDetailDialog({ item, policy: policyProp, onClose, year }: {
   item: QualityScoreItem;
+  /**
+   * 政策評価。母集団のパーセンタイル・分位点から決まるため1事業だけでは算出できない。
+   * /quality は全件から組み立て済みのものを渡す。渡されない場合（サンキー図・再委託ビュー）は
+   * /api/policy-summary?pid= から取得する。
+   */
+  policy?: PolicyEvaluation;
   onClose: () => void;
-  recipients: RecipientRow[] | null;
-  recipientsError: boolean;
-  projectInfo: ProjectDetail | null | undefined;
-  /** 再委託構造ページ（/subcontracts/[pid]）へのリンク用年度 */
   year: string;
 }) {
+  const [fetchedPolicy, setFetchedPolicy] = useState<PolicyEvaluation | undefined>(undefined);
+  const policy = policyProp ?? fetchedPolicy;
+  useEffect(() => {
+    if (policyProp) return;   // ページ側が持っているなら取りに行かない
+    let aborted = false;
+    fetchPolicyEvaluation(item.pid, year).then(p => { if (!aborted) setFetchedPolicy(p ?? undefined); });
+    return () => { aborted = true; };
+  }, [policyProp, item.pid, year]);
+
+  const [recipients, setRecipients] = useState<RecipientRow[] | null>(null);
+  const [recipientsError, setRecipientsError] = useState(false);
   const [recipientSearch, setRecipientSearch] = useState('');
   const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a2' | 'pct'>('chain');
   const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
   const [showAxisDetail, setShowAxisDetail] = useState(false);
+  const [showPolicy, setShowPolicy] = useState(true);
+  const [projectInfo, setProjectInfo] = useState<ProjectDetail | null | undefined>(undefined);
   const [showProjectInfo, setShowProjectInfo] = useState(true);
-  const COL_MAX_WIDTHS = [undefined, 60, 70, 130, 60, 50, undefined, undefined];
-  const [colWidths, setColWidths] = useState<number[]>([200, 48, 70, 120, 60, 50, 200, 200]);
+  // 法人番号列（index 2）は13桁＋gBizINFOアイコンが入るため 130 まで広げる（旧ダイアログと同じ）
+  const COL_MAX_WIDTHS = [undefined, 70, 130, 60, 50, undefined, undefined];
+  const [colWidths, setColWidths] = useState<number[]>([200, 70, 130, 60, 50, 200, 200]);
   const resizingCol = useRef<{ index: number; startX: number; startW: number } | null>(null);
 
   useEffect(() => {
@@ -58,22 +113,32 @@ export function ScoreDetailDialog({
     return () => { window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp); };
   }, []);
 
-  // Escape で閉じる（キーボード操作でのダイアログ dismiss）
+  // Escape で閉じる（モーダルとしての基本挙動）
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onClose]);
 
-  // 事業（pid）が切り替わったら表示状態（検索・ソート・折りたたみ）を初期化する。
-  // データ取得はページ側の useScoreDetailData が担う。
   useEffect(() => {
+    setRecipients(null);
+    setRecipientsError(false);
     setRecipientSearch('');
     setRecipientSortField('chain');
     setRecipientSortDir('asc');
     setShowAxisDetail(false);
+    setShowPolicy(true);
+    setProjectInfo(undefined);
     setShowProjectInfo(true);
-  }, [item.pid]);
+    // 表示中の事業が切り替わった後に古い応答が届いても反映しない
+    let stale = false;
+    fetchRecipients(item.pid, year)
+      .then(rows => { if (!stale) setRecipients(rows); })
+      .catch(() => { if (!stale) setRecipientsError(true); });
+    fetchProjectInfo(item.pid, year)
+      .then(d => { if (!stale) setProjectInfo(d); });
+    return () => { stale = true; };
+  }, [item.pid, year]);
 
   const displayedRecipients = useMemo(() => {
     if (!recipients) return [];
@@ -87,7 +152,19 @@ export function ScoreDetailDialog({
       if (recipientSortField === 'chain') cmp = (a.chain ?? a.b).localeCompare(b.chain ?? b.b) || (b.a2 ?? -1) - (a.a2 ?? -1);
       else if (recipientSortField === 'b') cmp = a.b.localeCompare(b.b) || (b.a2 ?? -1) - (a.a2 ?? -1);
       else if (recipientSortField === 's') cmp = a.s.localeCompare(b.s);
-      else if (recipientSortField === 'c') cmp = (b.c ? 1 : 0) - (a.c ? 1 : 0);
+      else if (recipientSortField === 'c') {
+        // 法人番号そのもので並べる（有効な番号は13桁固定なので文字列比較＝数値順）。
+        // 番号の大小だけを方向に従わせ、それ以外は方向で反転させたくないので、
+        // この分岐は最後の一括反転（recipientSortDir）を通さず自前で return する。
+        const acn = (a.cn ?? '').trim();
+        const bcn = (b.cn ?? '').trim();
+        // 未記入は値が無いだけで大小を持たないため、昇順・降順どちらでも末尾に固定する
+        if (!acn || !bcn) return (acn ? 0 : 1) - (bcn ? 0 : 1) || (b.a2 ?? -1) - (a.a2 ?? -1);
+        const cnCmp = acn.localeCompare(bcn);
+        if (cnCmp !== 0) return recipientSortDir === 'desc' ? -cnCmp : cnCmp;
+        // 同一番号内は常に金額降順（方向に応じて昇順へ反転させない）
+        return (b.a2 ?? -1) - (a.a2 ?? -1);
+      }
       else if (recipientSortField === 'o') cmp = (b.o ? 1 : 0) - (a.o ? 1 : 0);
       else if (recipientSortField === 'a2') cmp = (b.a2 ?? -1) - (a.a2 ?? -1);
       else if (recipientSortField === 'pct') {
@@ -109,13 +186,6 @@ export function ScoreDetailDialog({
     }
   }
 
-  const axes = [
-    { key: 'axisIdentify', label: 'A: 特定可能性', weight: 28, score: item.axisIdentify ?? null },
-    { key: 'axisPurpose', label: 'B: 使途の説明性', weight: 22, score: item.axisPurpose ?? null },
-    { key: 'axisBudget', label: 'C: 収支の整合性', weight: 15, score: item.axisBudget ?? null },
-    { key: 'axisEffective', label: 'E: 有効性', weight: 35, score: item.axisEffective ?? null },
-    { key: 'axisStructure', label: 'D: 構造(参考)', weight: 0, score: item.axisStructure ?? null },
-  ] as const;
   const isAi = !!item.aiSource && item.aiSource !== 'heuristic';
 
   const axis1Total = item.validCount + item.govAgencyCount + item.suppValidCount + item.invalidCount;
@@ -130,71 +200,59 @@ export function ScoreDetailDialog({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       onClick={onClose}
-      role="presentation"
-      // 背面（サンキー図）の React パンハンドラへドラッグ/リサイズが伝播しないよう遮断
-      // （createPortal は DOM を分離するが React 合成イベントは親ツリーへバブリングするため）
-      onMouseDown={e => e.stopPropagation()}
-      onMouseMove={e => e.stopPropagation()}
-      onMouseUp={e => e.stopPropagation()}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-7xl mx-4 max-h-[92vh] flex flex-col"
-        onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
+        aria-label={`${item.name} の詳細`}
+        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-8xl mx-4 max-h-[92vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-3 sm:px-6 py-3 border-b border-gray-200 dark:border-gray-700 flex items-start justify-between gap-3 shrink-0 bg-gray-50 dark:bg-gray-800 rounded-t-2xl">
+        <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 flex items-start justify-between gap-3 shrink-0 bg-gray-50 dark:bg-gray-800 rounded-t-2xl">
           <div className="flex-1 min-w-0">
             <div className="text-sm font-bold text-gray-900 dark:text-white leading-snug">{item.name}</div>
             <div className="flex items-center gap-1.5 flex-wrap mt-1 text-[10px] text-gray-500 dark:text-gray-400">
               <span className="font-mono bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded">PID {item.pid}</span>
-              <a
-                href={`/subcontracts/${item.pid}?year=${year}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                title="この事業の再委託構造（ブロック図）を新しいタブで開く"
-                onClick={e => e.stopPropagation()}
-              >再委託構造 ↗</a>
               {[item.ministry, item.bureau, item.division, item.section, item.office, item.team, item.unit].filter(Boolean).map((org, i) => (
                 <span key={i}>{i > 0 ? '' : ''}<span className={i === 0 ? 'font-medium' : ''}>{org}</span>{i < [item.ministry, item.bureau, item.division, item.section, item.office, item.team, item.unit].filter(Boolean).length - 1 ? <span className="text-gray-300 dark:text-gray-600 mx-0.5">›</span> : null}</span>
               ))}
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">×</button>
+          <button onClick={onClose} aria-label="閉じる（Esc）" title="閉じる（Esc）" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none shrink-0 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">×</button>
         </div>
 
         {/* Score summary — single compact row */}
-        <div className="px-3 sm:px-6 py-2.5 border-b border-gray-200 dark:border-gray-700 shrink-0">
-          <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-            {/* Score badge */}
+        <div className="px-6 py-2.5 border-b border-gray-200 dark:border-gray-700 shrink-0">
+          <div className="flex items-center gap-4">
             <div className="shrink-0 text-center">
-              <div className={`text-2xl font-bold font-mono leading-none ${scoreColor(item.totalScore)}`}>
-                {item.totalScore !== null ? item.totalScore.toFixed(1) : '-'}
+              <div className={`text-2xl font-bold font-mono leading-none cursor-help ${scoreColor(policy?.overallScore ?? null)}`} title={COL_DESC.総合点}>
+                {policy?.overallScore ?? '—'}
               </div>
-              <div className="text-[9px] text-gray-400 dark:text-gray-500 mt-0.5">総合</div>
+              <div className="text-[9px] text-gray-400 dark:text-gray-500 mt-0.5">総合点</div>
             </div>
-            {/* Divider */}
-            <div className="hidden sm:block w-px h-8 bg-gray-200 dark:bg-gray-700 shrink-0" />
-            {/* Axis scores — horizontal row */}
             <div className="flex items-center gap-3 shrink-0">
-              {axes.map(a => (
-                <div key={a.key} className="text-center">
-                  <div className={`text-xs font-bold font-mono leading-none ${scoreColor(a.score)}`}>
-                    {a.score !== null ? a.score.toFixed(0) : '-'}
+              {AXIS_META.map(a => {
+                const score = policy?.[a.key] ?? null;
+                return (
+                  <div key={a.key} className="text-center cursor-help" title={`${a.label}（総合点への重み ${a.weight}）
+
+${a.desc}`}>
+                    <div className={`text-sm font-bold font-mono leading-none ${scoreColor(score)}`}>
+                      {score ?? '—'}
+                    </div>
+                    <div className="text-[9px] text-gray-400 mt-0.5 whitespace-nowrap">{a.label}</div>
                   </div>
-                  <div className="text-[8px] text-gray-400 mt-0.5 whitespace-nowrap">{a.label.replace(/^[A-D]: /, '')}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             {/* Divider */}
-            <div className="hidden sm:block w-px h-8 bg-gray-200 dark:bg-gray-700 shrink-0" />
-            {/* Key metrics — 3 lines inline（モバイルでは独立行に折り返す） */}
-            <div className="basis-full sm:basis-0 sm:flex-1 min-w-0 text-[10px] text-gray-700 dark:text-gray-200 space-y-0.5">
+            <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 shrink-0" />
+            {/* Key metrics — 3 lines inline */}
+            <div className="flex-1 min-w-0 text-[10px] text-gray-700 dark:text-gray-200 space-y-0.5">
               <div className="flex flex-wrap gap-x-3">
                 <span><span className="text-gray-400">予算:</span><span className="font-mono">{formatAmount(item.budgetAmount)}</span></span>
-                <span><span className="text-gray-400">執行:</span><span className="font-mono">{formatAmount(item.execAmount)}</span></span>
+                <span><span className="text-gray-400">執行:</span><span className="font-mono">{formatAmount(item.execAmount ?? 0)}</span></span>
                 <span><span className="text-gray-400">実質支出:</span><span className="font-mono">{formatAmount(item.spendNetTotal)}</span></span>
                 <span><span className="text-gray-400">乖離率:</span><span className="font-mono">{pct(item.gapRatio)}</span></span>
               </div>
@@ -217,6 +275,7 @@ export function ScoreDetailDialog({
               </div>
             </div>
           </div>
+          {/* 何を評価した結果なのかを先に読めるよう、事業内容 → 政策評価 → 計算根拠 の順に並べる */}
           <div className="mt-1 flex items-center gap-4">
             <button
               onClick={() => setShowProjectInfo(d => !d)}
@@ -224,6 +283,14 @@ export function ScoreDetailDialog({
             >
               {showProjectInfo ? '▲ 事業内容を閉じる' : '▼ 事業内容'}
             </button>
+            {policy && (
+              <button
+                onClick={() => setShowPolicy(d => !d)}
+                className="text-[11px] text-blue-500 hover:text-blue-700 dark:hover:text-blue-300"
+              >
+                {showPolicy ? '▲ 政策評価を閉じる' : '▼ 政策評価'}
+              </button>
+            )}
             <button
               onClick={() => setShowAxisDetail(d => !d)}
               className="text-[11px] text-blue-500 hover:text-blue-700 dark:hover:text-blue-300"
@@ -233,9 +300,16 @@ export function ScoreDetailDialog({
           </div>
         </div>
 
-        {/* 事業内容（目的・現状課題・概要）— 有効性軸の判定材料 */}
+        {/*
+          ここから下はモーダル内で唯一のスクロール領域。
+          以前は各セクションが個別に max-h + overflow-y-auto を持っていて、
+          モーダル自身のスクロールと二重になり、どこを掴んでいるのか分からなくなっていた。
+        */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+
+        {/* 事業内容（目的・現状課題・概要）— 成果設計の判定材料 */}
         {showProjectInfo && (
-          <div className="px-3 sm:px-6 py-3 border-b border-gray-200 dark:border-gray-700 shrink-0 overflow-y-auto max-h-60 bg-gray-50/60 dark:bg-gray-800/40">
+          <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40">
             {projectInfo === undefined && (
               <div className="flex items-center gap-2 text-xs text-gray-400">
                 <div className="animate-spin h-3 w-3 border border-gray-400 border-t-transparent rounded-full" />
@@ -259,8 +333,7 @@ export function ScoreDetailDialog({
                 ] as const).map(({ label, text }) => text ? (
                   <div key={label}>
                     <div className="font-semibold text-gray-700 dark:text-gray-300">{label}</div>
-                    {/* 「/」を改行に変換しない（URL・補助率1/2・日付を壊さない）。ソース表記のまま表示 */}
-                    <div className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed break-words">{text}</div>
+                    <div className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{text.replace(/\//g, '\n')}</div>
                   </div>
                 ) : null)}
               </div>
@@ -268,101 +341,287 @@ export function ScoreDetailDialog({
           </div>
         )}
 
-        {/* Axis detail (collapsible) */}
-        {showAxisDetail && (
-          <div className="border-b border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800 shrink-0 overflow-y-auto max-h-72">
-            <div className="px-5 py-1.5 bg-violet-50/60 dark:bg-violet-900/20 text-[11px] text-gray-500 dark:text-gray-400">
-              軸A・Bは{isAi ? 'AIが' : 'ヒューリスティックが'}支出先ごとに特定可能性・使途を判定し金額加重で集計。軸C・Dは機械計算。
-            </div>
-
-            {/* Axis A: 特定可能性 */}
-            <div className="px-5 py-2.5">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">A: 支出先の特定可能性（重み28%・{isAi ? 'AI' : 'ヒューリスティック'}判定）</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-                <div>支出先が具体的に誰で、第三者が実在を確認できるか（名称・法人番号有無・契約概要を総合判定）</div>
-                <div className="flex gap-3 flex-wrap font-mono text-gray-400">
-                  {item.identifyLevelAvg != null && <span>平均レベル: {item.identifyLevelAvg.toFixed(2)}/3</span>}
-                  <span className="text-green-600 dark:text-green-400">valid: {item.validCount}</span>
-                  {item.govAgencyCount > 0 && <span className="text-emerald-500">行政機関: {item.govAgencyCount}</span>}
-                  {item.suppValidCount > 0 && <span className="text-blue-500">補助: {item.suppValidCount}</span>}
-                  <span className="text-red-500">invalid: {item.invalidCount}</span>
-                  {item.opaqueRatio != null && item.opaqueRatio > 0 && <span className="text-amber-500">不透明: {pct(item.opaqueRatio)}</span>}
-                  <span>= {item.axisIdentify != null ? item.axisIdentify.toFixed(1) : '-'}点</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Axis B: 使途の説明性 */}
-            <div className="px-5 py-2.5">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">B: 使途の説明性（重み22%・{isAi ? 'AI' : 'ヒューリスティック'}判定）</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-                <div>役割・契約概要から「何にいくら使ったか」が理解・検証できるか</div>
-                <div className="flex gap-3 flex-wrap font-mono text-gray-400">
-                  {item.purposeLevelAvg != null && <span>平均レベル: {item.purposeLevelAvg.toFixed(2)}/3</span>}
-                  <span>= {item.axisPurpose != null ? item.axisPurpose.toFixed(1) : '-'}点</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Axis C: 収支整合性 */}
-            <div className="px-5 py-2.5">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">C: 収支の整合性（重み15%・機械計算）</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-                <div className="flex gap-3 flex-wrap">
-                  <span>予算額: {formatAmount(item.budgetAmount)}</span>
-                  <span>執行額: {formatAmount(item.execAmount)}</span>
-                  <span>実質支出: {formatAmount(item.spendNetTotal)}</span>
-                </div>
-                <div className="font-mono text-gray-400">
-                  執行 vs 実質支出 乖離 {pct(item.gapRatio)}（10%まで満点の許容バンド）→ {item.axisBudget != null ? item.axisBudget.toFixed(1) : '-'}点
-                </div>
-              </div>
-            </div>
-
-            {/* Axis D: 構造整合性 */}
-            <div className="px-5 py-2.5">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">D: 構造の整合性（参考・総合に不算入・機械計算）</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-                <div className="flex gap-3 flex-wrap">
-                  <span>ブロック数: {item.blockCount}</span>
-                  {item.orphanBlockCount > 0 && <span className="text-orange-500">孤立: {item.orphanBlockCount}</span>}
-                  {item.hasRedelegation && <span className="text-gray-400">再委託深度: {item.redelegationDepth}（減点せず参考）</span>}
-                </div>
-                <div className="flex gap-2 flex-wrap font-mono text-gray-400">
-                  <span>基礎100 − ブロック金額不整合 − 孤立ブロック</span>
-                  <span>= {item.axisStructure != null ? item.axisStructure.toFixed(1) : '-'}点</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Axis E: 有効性 */}
-            <div className="px-5 py-2.5">
-              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">E: 有効性／成果設計の明確さ（重み35%・{isAi ? 'AI' : 'ヒューリスティック'}判定）</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
-                <div>事業の目的・現状課題・概要から、国民生活への寄与がどれだけ明確・妥当に説明されているか（※実測成果ではなく成果設計の明確さ）</div>
-                <div className="flex gap-3 flex-wrap font-mono text-gray-400">
-                  {item.effectiveLevel != null && <span>レベル: {item.effectiveLevel}/10</span>}
-                  <span>= {item.axisEffective != null ? item.axisEffective.toFixed(1) : '-'}点</span>
-                </div>
-                {item.effectiveReason && item.effectiveReason !== 'heuristic' && (
-                  <div className="text-gray-500 dark:text-gray-400">根拠: {item.effectiveReason}</div>
+        {/* 政策評価 — 推奨判断・改善アクションとその根拠 */}
+        {policy && showPolicy && (
+          <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-violet-50/50 dark:bg-violet-900/10">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <RecommendationBadge policy={policy} />
+                {policy.improvementAction && <ActionBadge action={policy.improvementAction} />}
+                {policy.policyCategoryLabel && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                    {policy.policyCategoryLabel}
+                  </span>
+                )}
+                {policy.overallPercentile != null && (
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                    母集団内 上位{(100 - policy.overallPercentile).toFixed(0)}%
+                  </span>
                 )}
               </div>
             </div>
 
-            {/* Weighted sum */}
-            <div className="px-5 py-2 bg-gray-50 dark:bg-gray-800">
+            <div className="mt-2 grid gap-3 sm:grid-cols-3 text-xs">
+              <div>
+                <div className="font-semibold text-gray-700 dark:text-gray-300">AI評価の生値（0-10）</div>
+                <div className="mt-0.5 space-y-0.5 text-gray-600 dark:text-gray-400 font-mono text-[11px]">
+                  <div>成果設計: {fmtRaw(policy.designClarity)}/10</div>
+                  <div>検証可能性: {policy.evidenceReadiness != null ? `${fmtRaw(policy.evidenceReadiness)}/10` : '未評価'}</div>
+                  <div>費用対内容: {policy.budgetProportionality != null ? `${fmtRaw(policy.budgetProportionality)}/10` : '未評価'}</div>
+                  <div>必要性: {policy.necessity != null ? `${fmtRaw(policy.necessity)}/10` : '未評価'}</div>
+                </div>
+              </div>
+              <div>
+                <div className="font-semibold text-gray-700 dark:text-gray-300">執行透明性の内訳</div>
+                <div className="mt-0.5 space-y-0.5 text-gray-600 dark:text-gray-400 font-mono text-[11px]">
+                  <div>支出先の明確さ: {policy.identifiability ?? '—'}</div>
+                  <div>使途の説明: {policy.purposeExplainability ?? '—'}</div>
+                  <div className="text-gray-400">
+                    収支の一致: {policy.budgetConsistency ?? '—'}（不算入・不一致フラグ）
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="font-semibold text-gray-700 dark:text-gray-300">
+                  予算と執行
+                  <span className="ml-1 font-normal text-gray-400">（総合点には不算入）</span>
+                </div>
+                <div className="mt-0.5 space-y-0.5 text-gray-600 dark:text-gray-400 font-mono text-[11px]">
+                  {policy.executionRate != null ? (
+                    <>
+                      <div>執行率: {Math.round(policy.executionRate * 100)}%</div>
+                      <div>
+                        不用額: {policy.unusedAmount ? formatAmount(policy.unusedAmount) : '0'}
+                        {policy.unusedRatio != null && `（${Math.round(policy.unusedRatio * 100)}%）`}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-gray-400">執行実績なし（予備的経費・未着手のため評価対象外）</div>
+                  )}
+                  {policy.priorExecutionRate != null ? (
+                    <div className="text-gray-500 dark:text-gray-400">
+                      前年度: 執行率 {Math.round(policy.priorExecutionRate * 100)}%・
+                      不用率 {Math.round((policy.priorUnusedRatio ?? 0) * 100)}%
+                    </div>
+                  ) : (
+                    <div className="text-gray-400">前年度: 実績なし（傾向は判定不能）</div>
+                  )}
+                  <div className={`font-sans ${UNUSED_TREND_META[policy.unusedTrend].cls}`}>
+                    {UNUSED_TREND_META[policy.unusedTrend].label}
+                  </div>
+                  {policy.spendDownRisk && (
+                    <div className="text-amber-600 dark:text-amber-400 font-sans">
+                      ほぼ消化済だが支出先が不透明
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-2 space-y-1.5 text-xs">
+              {/* 軸ごとの判定理由。総合点だけでは「なぜ低いのか」が追えないため4軸を並べる */}
+              {([
+                { label: '成果設計', text: policy.findings.design },
+                { label: '検証可能性', text: policy.findings.evidence },
+                { label: '費用対内容', text: policy.findings.proportionality },
+                { label: '必要性', text: policy.findings.necessity },
+              ] as const).map(({ label, text }) => text ? (
+                <div key={label}>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{label}: </span>
+                  <span className="text-gray-600 dark:text-gray-300 leading-relaxed">{text}</span>
+                </div>
+              ) : null)}
+              {policy.recommendationReason && (
+                <div>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">推奨理由: </span>
+                  <span className="text-gray-600 dark:text-gray-300 leading-relaxed">{policy.recommendationReason}</span>
+                </div>
+              )}
+              <div className="text-[10px] leading-4 text-amber-700 dark:text-amber-300/80">{policy.provisionalReason}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Axis detail (collapsible) */}
+        {showAxisDetail && (
+          <div className="border-b border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="px-5 py-1.5 bg-violet-50/60 dark:bg-violet-900/20 text-[11px] text-gray-500 dark:text-gray-400">
+              欠測した項目は重みごと除外して再正規化します（0点扱いにはしません）。
+            </div>
+
+            {/* AI が判定する4軸 */}
+            <div className="px-5 py-2.5">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                AI が判定する4軸（0-10 → 10倍して0-100点）
+                {isAi ? "" : <span className="ml-2 font-normal text-amber-600 dark:text-amber-400">この事業はヒューリスティック判定です</span>}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">成果設計</span>
+                  <span className="ml-1 text-gray-400">重み{WEIGHT_BY_KEY.designClarityScore}</span>:
+                  誰のどんな課題をどの活動でどう改善するかが、概要文と登録されたロジックモデルの両方から特定できるか（実測成果ではない）
+                  <div className="font-mono text-gray-400">
+                    {fmtRaw(policy?.designClarity)}/10 → {policy?.designClarityScore ?? "—"}点
+                  </div>
+                  {policy?.findings.design && <div className="leading-relaxed">{policy.findings.design}</div>}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">検証可能性</span>
+                  <span className="ml-1 text-gray-400">重み{WEIGHT_BY_KEY.evidenceScore}</span>:
+                  成果を第三者が後から検証できるか。登録された成果指標（目標値・実績値・出典）と概要文の数値記述の両方を見る
+                  <div className="font-mono text-gray-400">
+                    {policy?.evidenceReadiness != null
+                      ? `${fmtRaw(policy.evidenceReadiness)}/10 → ${policy.evidenceScore}点`
+                      : "未評価（重みごと除外して再正規化。0点扱いにはしない）"}
+                  </div>
+                  {policy?.findings.evidence && <div className="leading-relaxed">{policy.findings.evidence}</div>}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">費用対内容</span>
+                  <span className="ml-1 text-gray-400">重み{WEIGHT_BY_KEY.proportionalityScore}</span>:
+                  金額が活動の規模に見合い、金が受益者に届いているか。支出先・再委託の実データを判定材料にするため、
+                  所管庁の作文では動かしにくい軸として最も重く置いている
+                  <div className="font-mono text-gray-400">
+                    {policy?.budgetProportionality != null
+                      ? `${fmtRaw(policy.budgetProportionality)}/10 → ${policy.proportionalityScore}点`
+                      : "未評価（予算額が0の事業などは判定対象外）"}
+                  </div>
+                  {policy?.findings.proportionality && <div className="leading-relaxed">{policy.findings.proportionality}</div>}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">必要性</span>
+                  <span className="ml-1 text-gray-400">重み{WEIGHT_BY_KEY.necessityScore}</span>:
+                  廃止したら誰が具体的に困るか、その手当てを他の手段で代替できるか。設計の巧拙とは独立に「そもそも要るのか」を問う
+                  <div className="font-mono text-gray-400">
+                    {policy?.necessity != null ? `${fmtRaw(policy.necessity)}/10 → ${policy.necessityScore}点` : "未評価"}
+                  </div>
+                  {policy?.findings.necessity && <div className="leading-relaxed">{policy.findings.necessity}</div>}
+                </div>
+              </div>
+            </div>
+
+            {/* 執行透明性 */}
+            <div className="px-5 py-2.5">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                執行透明性 = 支出先の明確さ×55 + 使途の説明×45
+                <span className="ml-1 font-normal text-gray-400">（総合点への重み{WEIGHT_BY_KEY.executionTransparency}）</span>
+                <span className="ml-2 font-mono font-normal text-gray-400">= {policy?.executionTransparency ?? "—"}点</span>
+                {policy && policy.executionTransparency === null && (
+                  <span className="ml-2 font-normal text-amber-600 dark:text-amber-400">
+                    支出先データが1行も無いため未評価（0点扱いにはしません）
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">支出先の明確さ</span>
+                  {isAi ? "（AI判定）" : "（ヒューリスティック）"}: 支出先が具体的に誰で、第三者が実在を確認できるか
+                  <div className="flex gap-3 flex-wrap font-mono text-gray-400">
+                    {item.identifyLevelAvg != null && <span>平均Lv {item.identifyLevelAvg.toFixed(2)}/3</span>}
+                    <span className="text-green-600 dark:text-green-400">valid {item.validCount}</span>
+                    {item.govAgencyCount > 0 && <span className="text-emerald-500">行政機関 {item.govAgencyCount}</span>}
+                    {item.suppValidCount > 0 && <span className="text-blue-500">補助 {item.suppValidCount}</span>}
+                    <span className="text-red-500">invalid {item.invalidCount}</span>
+                    {item.opaqueRatio != null && item.opaqueRatio > 0 && <span className="text-amber-500">不透明 {pct(item.opaqueRatio)}</span>}
+                    <span>= {item.axisIdentify != null ? item.axisIdentify.toFixed(0) : "—"}点</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">使途の説明</span>: 役割・契約概要から「何にいくら使ったか」が理解・検証できるか
+                  <div className="font-mono text-gray-400">
+                    {item.purposeLevelAvg != null && <span className="mr-3">平均Lv {item.purposeLevelAvg.toFixed(2)}/3</span>}
+                    <span>= {item.axisPurpose != null ? item.axisPurpose.toFixed(0) : "—"}点</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="font-medium text-gray-600 dark:text-gray-300">収支の一致</span>（機械計算・
+                  <span className="text-amber-600 dark:text-amber-400">執行透明性には不算入</span>）:
+                  執行額と実質支出が一致しているか。実測で9割の事業が満点になりほぼ定数だったため、
+                  加重平均から外して「不一致フラグ」（60点未満）として判定ルールが直接見る形に降格した。
+                  <div className="font-mono text-gray-400">
+                    執行 {formatAmount(item.execAmount ?? 0)} vs 実質支出 {formatAmount(item.spendNetTotal)}
+                    ／乖離 {pct(item.gapRatio)}（10%まで満点）
+                    = {item.axisBudget != null ? item.axisBudget.toFixed(0) : "—"}点
+                    {item.axisBudget != null && item.axisBudget < 60 && (
+                      <span className="ml-2 text-red-500 font-sans">収支不一致</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 総合点 */}
+            <div className="px-5 py-2.5 bg-gray-50 dark:bg-gray-800/60">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                総合点 = {AXIS_META.map(a => `${a.label}×${a.weight}`).join(" + ")}
+              </div>
               <div className="text-xs font-mono text-gray-400">
-                {axes.filter(a => a.score !== null && a.weight > 0).map(a => `${a.score!.toFixed(1)}×${a.weight}`).join(' + ')}
-                {' '}= <span className={`font-bold ${scoreColor(item.totalScore)}`}>{item.totalScore?.toFixed(1)}</span>点
+                {AXIS_META.map(a => {
+                  const v = policy?.[a.key];
+                  return (
+                    <span key={a.key} className={v == null ? "text-amber-600 dark:text-amber-400" : undefined}>
+                      {v == null ? `（${a.label}は未評価のため除外）` : `${v}×${a.weight}`}
+                      {a.key === "necessityScore" ? "" : " + "}
+                    </span>
+                  );
+                })}
+                {" "}= <span className={`font-bold ${scoreColor(policy?.overallScore ?? null)}`}>{policy?.overallScore ?? "—"}</span>点
+                {policy?.overallPercentile != null && (
+                  <span className="ml-2">／母集団内 上位{(100 - policy.overallPercentile).toFixed(0)}%（推奨はこの順位帯で判定）</span>
+                )}
+              </div>
+              <div className="mt-1 text-[11px] leading-4 text-gray-500 dark:text-gray-400">
+                費用対内容と必要性を厚くしているのは、この2軸だけが所管庁の作文が支配できない証拠
+                （支出先の実績・予算執行）に基づくためです。よく書けた事業計画だけで上位に来ないようにしています。
+              </div>
+            </div>
+
+            {/* 予算と執行（総合点に不算入） */}
+            <div className="px-5 py-2.5">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                予算と執行（総合点に不算入・縮小判定にのみ使用）
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                <div className="font-mono text-gray-400">
+                  予算 {formatAmount(item.budgetAmount)} → 執行 {formatAmount(item.execAmount ?? 0)}
+                  {policy?.executionRate != null
+                    ? `／執行率 ${Math.round(policy.executionRate * 100)}%・不用額 ${policy.unusedAmount ? formatAmount(policy.unusedAmount) : "0"}`
+                    : "／執行実績なし（予備的経費・未着手のため評価対象外）"}
+                </div>
+                <div className="font-mono text-gray-400">
+                  前年度: {policy?.priorExecutionRate != null
+                    ? `執行率 ${Math.round(policy.priorExecutionRate * 100)}%・不用率 ${Math.round((policy.priorUnusedRatio ?? 0) * 100)}%`
+                    : "実績なし（判定不能）"}
+                  {policy && (
+                    <span className={`ml-2 font-sans ${UNUSED_TREND_META[policy.unusedTrend].cls}`}>
+                      {UNUSED_TREND_META[policy.unusedTrend].label}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  不用額の返納は適切な行動のため減点しません。見直すのは事業ではなく翌年度の計上額です。
+                  単年度の不用は入札差金でも発生するため、「縮小」は2年連続で不用率が上位帯にある場合に限っています。
+                  前年度の実績が無い事業は判定不能として扱い、欠測を不利には扱いません。
+                </div>
+              </div>
+            </div>
+
+            {/* 参考: ブロック構造 */}
+            <div className="px-5 py-2.5">
+              <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">ブロック構造（参考・スコアに不算入）</div>
+              <div className="flex gap-3 flex-wrap text-xs font-mono text-gray-400">
+                <span>ブロック数 {item.blockCount}</span>
+                {item.orphanBlockCount > 0 && <span className="text-orange-500">孤立 {item.orphanBlockCount}</span>}
+                {item.hasRedelegation && <span>再委託深度 {item.redelegationDepth}</span>}
+                <span>整合スコア {item.axisStructure != null ? item.axisStructure.toFixed(0) : "—"}</span>
               </div>
             </div>
           </div>
         )}
 
         {/* Recipients */}
-        <div className="flex flex-col flex-1 min-h-0">
-          <div className="px-3 sm:px-6 py-2.5 border-b border-gray-200 dark:border-gray-700 shrink-0 bg-gray-50 dark:bg-gray-800/50">
+        <div className="flex flex-col">
+          <div className="px-6 py-2.5 border-b border-gray-200 dark:border-gray-700 shrink-0 bg-gray-50 dark:bg-gray-800/50">
             <div className="flex items-center gap-3">
               <div className="text-xs font-semibold text-gray-700 dark:text-gray-300 shrink-0">
                 支出先一覧
@@ -401,8 +660,8 @@ export function ScoreDetailDialog({
             <div className="px-6 py-4 text-xs text-gray-400">支出先データなし</div>
           )}
           {recipients && recipients.length > 0 && (
-            <div className="overflow-auto flex-1">
-              <table className="w-full min-w-[770px] text-xs table-fixed">
+            <div>
+              <table className="w-full text-xs table-fixed">
                 <colgroup>
                   {colWidths.map((w, i) => <col key={i} style={{ width: w, maxWidth: COL_MAX_WIDTHS[i] }} />)}
                 </colgroup>
@@ -410,9 +669,8 @@ export function ScoreDetailDialog({
                   <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                     {([
                       { label: '支出先名', align: 'left', sort: null, title: undefined },
-                      { label: 'ブロック', align: 'center', sort: 'b' as const, title: 'ブロック記号（A/B/C…）でソート' },
                       { label: '委託チェーン', align: 'left', sort: 'chain' as const, title: '委託チェーン（A→B→C）でソート' },
-                      { label: '法人番号', align: 'center', sort: 'c' as const, title: '法人番号(Corporate Number)。記入有無でソート。⚠は形式不正（誤記載の疑い）' },
+                      { label: '法人番号', align: 'center', sort: 'c' as const, title: '法人番号(Corporate Number)。番号順でソート（未記入は末尾）。⚠は形式不正（誤記載の疑い）' },
                       { label: '金額', align: 'right', sort: 'a2' as const, title: '個別支出額（CSVの「金額」列）' },
                       { label: '実支出比', align: 'right', sort: 'pct' as const, title: '実質支出合計に対する割合' },
                       { label: '役割', align: 'left', sort: null, title: '事業を行う上での役割（ブロック単位）' },
@@ -445,7 +703,6 @@ export function ScoreDetailDialog({
                             {row.o && <span className="shrink-0 inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" title="不透明キーワードにマッチ">不透明</span>}
                           </div>
                         </td>
-                        <td className="px-2 py-1.5 text-center font-mono text-gray-600 dark:text-gray-300">{row.b || '-'}</td>
                         <td className="px-3 py-1.5 font-mono text-gray-500 dark:text-gray-400 truncate" title={row.chain}>
                           {row.chain
                             ? (row.chain.startsWith('組織→') ? row.chain.slice('組織→'.length) : row.chain)
@@ -508,6 +765,7 @@ export function ScoreDetailDialog({
               </table>
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>

@@ -51,7 +51,6 @@ import { ProjectOverviewSection } from '@/client/components/subcontract/ProjectO
 import { getAccountBadgeStyle } from '@/app/lib/account-badge';
 import { BudgetExecutionSection } from '@/client/components/BudgetExecutionSection';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
-import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import {
   useSidePanel,
@@ -347,8 +346,6 @@ export default function RealDataSankeyPage() {
   // 品質スコア詳細ダイアログ（/quality と共通の ScoreDetailDialog を全項目取得して表示）
   const [scoreDialogItem, setScoreDialogItem] = useState<QualityScoreItem | null>(null);
   const [scoreDialogLoading, setScoreDialogLoading] = useState(false);
-  // ダイアログ用データはページ側で取得し ScoreDetailDialog へ props で渡す（Issue #246）
-  const scoreDialogData = useScoreDetailData(scoreDialogItem?.pid ?? null, year);
   const [baseZoom, setBaseZoom] = useState(1);
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -5238,9 +5235,6 @@ export default function RealDataSankeyPage() {
         <ScoreDetailDialog
           item={scoreDialogItem}
           onClose={() => setScoreDialogItem(null)}
-          recipients={scoreDialogData.recipients}
-          recipientsError={scoreDialogData.recipientsError}
-          projectInfo={scoreDialogData.projectInfo}
           year={year}
         />,
         document.body,

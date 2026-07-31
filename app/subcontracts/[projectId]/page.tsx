@@ -14,7 +14,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, Suspense, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
-import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -439,7 +438,6 @@ function SidePane({
   // 品質スコア詳細ダイアログ（/quality と共通の ScoreDetailDialog。メイン画面と同型）
   const [scoreDialogItem, setScoreDialogItem] = useState<QualityScoreItem | null>(null);
   const [scoreDialogLoading, setScoreDialogLoading] = useState(false);
-  const scoreDialogData = useScoreDetailData(scoreDialogItem?.pid ?? null, String(year));
   const openScoreDialog = useCallback((pid: string | number) => {
     setScoreDialogLoading(true);
     fetch(`/api/quality-scores/${pid}?year=${year}&full=1`)
@@ -991,9 +989,6 @@ function SidePane({
         <ScoreDetailDialog
           item={scoreDialogItem}
           onClose={() => setScoreDialogItem(null)}
-          recipients={scoreDialogData.recipients}
-          recipientsError={scoreDialogData.recipientsError}
-          projectInfo={scoreDialogData.projectInfo}
           year={String(year)}
         />,
         document.body,

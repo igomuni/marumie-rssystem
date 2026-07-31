@@ -7,6 +7,7 @@ import {
   POLICY_CATEGORY_LABELS,
   RECOMMENDATION_ORDER,
   IMPROVEMENT_ACTION_ORDER,
+  type PolicyEvaluation,
   type PolicyQualityInput,
 } from '@/app/lib/policy-evaluation';
 import { API_CACHE_CONTROL, parseYear, serverErrorResponse } from '@/app/lib/api/api-notes';
@@ -38,6 +39,14 @@ export interface PolicySummaryEntry {
   a: number;
   /** 政策類型の id。未分類は省略 */
   c?: string;
+}
+
+/** `?pid=` 指定時の応答。1事業の完全な政策評価を返す */
+export interface PolicyEvaluationResponse {
+  year: number;
+  /** 政策類型 id → 表示名 */
+  categories: Record<string, string>;
+  evaluation: PolicyEvaluation;
 }
 
 export interface PolicySummaryResponse {
@@ -90,14 +99,31 @@ function loadPriorExecutionRates(year: string): Record<string, number> {
   return rates;
 }
 
-function build(year: string): PolicySummaryResponse {
-  const cached = cache.get(year);
+/**
+ * 全事業の政策評価。母集団のパーセンタイル・分位点から閾値を決めるため、
+ * 1事業だけを切り出して計算することはできない（必ず全件を通す）。
+ * 年度ごとに1回だけ組み立ててキャッシュし、サマリと pid 単体の両方で使い回す。
+ */
+const evalCache = new Map<string, Map<string, PolicyEvaluation>>();
+
+function buildEvaluations(year: string): Map<string, PolicyEvaluation> {
+  const cached = evalCache.get(year);
   if (cached) return cached;
 
   const rates = loadPriorExecutionRates(year);
   const rows = buildPolicyEvaluations(
     loadQuality(year).map((i) => ({ ...i, priorExecutionRate: rates[i.pid] ?? null })),
   );
+  const index = new Map(rows.map((row) => [row.pid, row]));
+  evalCache.set(year, index);
+  return index;
+}
+
+function build(year: string): PolicySummaryResponse {
+  const cached = cache.get(year);
+  if (cached) return cached;
+
+  const rows = [...buildEvaluations(year).values()];
   const items: Record<string, PolicySummaryEntry> = {};
   for (const row of rows) {
     items[row.pid] = {
@@ -131,6 +157,25 @@ export async function GET(req: Request) {
     if (year === null) {
       return NextResponse.json({ error: '対応していない年度です（2024 | 2025）' }, { status: 400 });
     }
+    // pid 指定は「サイドパネル等から1事業だけ引きたい」用途。サマリの圧縮形では
+    // 判定理由（recommendationReason・findings）まで返せないため、完全な
+    // PolicyEvaluation をそのまま返す。母集団の計算はサーバ側で1回だけ行う。
+    const pid = url.searchParams.get('pid');
+    if (pid !== null) {
+      const evaluation = buildEvaluations(year).get(pid);
+      if (!evaluation) {
+        return NextResponse.json({ error: `事業が見つかりません（pid=${pid}）` }, { status: 404 });
+      }
+      return NextResponse.json(
+        {
+          year: Number(year),
+          categories: POLICY_CATEGORY_LABELS,
+          evaluation,
+        } satisfies PolicyEvaluationResponse,
+        { headers: { 'Cache-Control': API_CACHE_CONTROL } },
+      );
+    }
+
     return NextResponse.json(build(year), {
       headers: { 'Cache-Control': API_CACHE_CONTROL },
     });
