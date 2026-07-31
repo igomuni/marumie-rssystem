@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20260731_0533_S1_cn検証の成果物化_対応案.md](20260731_0533_S1_cn検証の成果物化_対応案.md) — houjin.db依存を`generate-recipient-resolution.py`に閉じ込め、`recipient-verified-{YEAR}.json.gz`（gzip307KB・18,423件）を新設して`score-project-quality.py`から参照。設計書の案を2点変更（配列不要・別ファイル化）＋フォールバックをやめ環境差を排除（対応案）
 - [20260730_0816_cn検証のhoujin-db非依存化と支出先名寄せの設計.md](20260730_0816_cn検証のhoujin-db非依存化と支出先名寄せの設計.md) — cn は「検証」がhoujin.db直依存で成果物化されておらず rs-vis で再現不能（「解決」は.gz化済み）。検証結果を recipient-resolution へ追加して非依存化し、支出先キーを resolveRecipientKey に1本化してサンキー図の名寄せもcn対応にする（設計）
 - [20260730_0618_rs-vis76c6f09のファイルに対するmarumie側修正の有無.md](20260730_0618_rs-vis76c6f09のファイルに対するmarumie側修正の有無.md) — `76c6f09` の64ファイルを marumie↔rs-vis で照合。53件は完全一致、取り込み時に手を入れたのは4件（sankey-svg・quality-scores/route・quality/page・subcontracts/page）、残る6件は 76c6f09 と無関係な既存差分（比較）
 - [20260729_2027_marumieとrs-visの差分比較.md](20260729_2027_marumieとrs-visの差分比較.md) — 逆流は完了（rs-visのみのファイルは0件）。残るは片方向の未反映47コミット。marumie独自コード87件（AIチャット一式・探索履歴・再委託UI部品・層分離）と内容差41件を整理。反映手順は `.agents/skills/sync-rs-vis`、起点は `7411ff0`（比較）
