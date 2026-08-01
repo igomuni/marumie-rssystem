@@ -1,7 +1,4 @@
 import { NextResponse } from 'next/server';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as zlib from 'zlib';
 import {
   buildPolicyEvaluations,
   POLICY_CATEGORY_LABELS,
@@ -11,6 +8,7 @@ import {
   type PolicyQualityInput,
 } from '@/app/lib/policy-evaluation';
 import { API_CACHE_CONTROL, parseYear, serverErrorResponse } from '@/app/lib/api/api-notes';
+import { readDataJson, tryReadDataJson } from '@/app/lib/api/data-file';
 
 /**
  * Sankey 図に重ねるための、事業ごとの政策評価サマリ。
@@ -62,13 +60,13 @@ export interface PolicySummaryResponse {
 
 const cache = new Map<string, PolicySummaryResponse>();
 
+// Vercel の関数バンドルに public/data は同梱されない（data/server の .gz だけ）。
+// パス解決は data-file.ts に一元化する（直に public/data を読むと本番で必ず落ちる）。
 function loadQuality(year: string): PolicyQualityInput[] {
-  const base = path.join(process.cwd(), 'public', 'data', `project-quality-scores-${year}.json`);
-  if (fs.existsSync(base)) return JSON.parse(fs.readFileSync(base, 'utf-8'));
-  if (fs.existsSync(`${base}.gz`)) {
-    return JSON.parse(zlib.gunzipSync(fs.readFileSync(`${base}.gz`)).toString('utf-8'));
-  }
-  throw new Error(`project-quality-scores-${year}.json(.gz) が見つかりません。`);
+  return readDataJson<PolicyQualityInput[]>(
+    `project-quality-scores-${year}.json`,
+    `python3 scripts/score-project-quality-ai.py --year ${year} を実行してください。`,
+  );
 }
 
 function invert(order: Record<string, number>): Record<number, string> {
