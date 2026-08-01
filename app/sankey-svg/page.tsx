@@ -43,10 +43,9 @@ import { buildExplorationLabel } from '@/app/lib/exploration-label';
 import { testOpenRouterKey, DEFAULT_BYOK_MODEL } from '@/client/lib/ai/openrouter-caller';
 import { runByokChat, LlmUpstreamError } from '@/client/lib/ai/byok-chat';
 import type { ClientGraphSource } from '@/client/lib/ai/client-tool-executor';
-import type { QualityScoreProjection } from '@/app/lib/api/quality-scores-loader';
 import type { QualityScoreItem } from '@/app/api/quality-scores/route';
 import { TagChip } from '@/client/components/TagChip';
-import { QualityScoreBlock } from '@/client/components/quality/QualityScoreBlock';
+import { PolicyEvaluationBlock } from '@/client/components/quality/PolicyEvaluationBlock';
 import { ProjectOverviewSection } from '@/client/components/subcontract/ProjectOverviewSection';
 import { getAccountBadgeStyle } from '@/app/lib/account-badge';
 import { BudgetExecutionSection } from '@/client/components/BudgetExecutionSection';
@@ -2248,12 +2247,6 @@ export default function RealDataSankeyPage() {
     (pid, y) => `/api/project-details/${pid}?year=${y}`,
     data => data as ProjectDetail,
   );
-  // Fetch quality score on project node selection (side panel score block)
-  const qualityScoreCache = useProjectPidCache<QualityScoreProjection>(
-    selectedNode, year,
-    (pid, y) => `/api/quality-scores/${pid}?year=${y}`,
-    data => (data as { score?: QualityScoreProjection }).score ?? null,
-  );
   // Fetch subcontract summary on project node selection (side panel 再委託 block)
   const subcontractSummaryCache = useProjectPidCache<SubcontractSummary>(
     selectedNode, year,
@@ -4051,67 +4044,25 @@ export default function RealDataSankeyPage() {
                 </div>
               </div>
 
-              {/* 政策評価 — 事業ノード（非集約）でスコアが取得できているときのみ */}
+              {/* 政策評価 — 事業ノード（非集約）のみ。共有コンポーネント（再委託ビューと同型） */}
               {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending')
-                && !selectedNode.aggregated && selectedNode.projectId != null && policyError && (
-                <div style={{ borderBottom: '1px solid #f0f0f0', flexShrink: 0, padding: '7px 14px' }}>
-                  <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>政策評価</span>
-                  <span style={{ marginLeft: 8, fontSize: META_FONT_PX, color: '#c0392b' }}>
-                    読み込めませんでした（{policyError}）
-                  </span>
-                </div>
-              )}
-              {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending')
-                && !selectedNode.aggregated && selectedNode.projectId != null && policySummary && (() => {
-                const entry = policySummary.items[String(selectedNode.projectId)];
-                if (!entry) return null;
-                const rec = entry.r ? policySummary.recommendations[entry.r] : null;
-                const act = entry.a ? policySummary.actions[entry.a] : null;
-                // /quality と同じ配色。判断の強さで色を変える
-                const recColor = !rec ? '#999'
-                  : rec === '継続' ? '#2d7d46'
-                  : rec === '要改善' ? '#3b82f6'
-                  : rec === '再設計' || rec === '終了・廃止候補' ? '#d94545'
-                  : '#d98a20';
-                const scoreColor = (v: number | null) => v == null ? '#999'
-                  : v >= 90 ? '#2d7d46' : v >= 70 ? '#3b82f6' : v >= 50 ? '#d98a20' : '#d94545';
-                const category = entry.c ? policySummary.categories[entry.c] : null;
-                // 5軸のうち、総合点への寄与が最も大きく所管庁の作文が支配しにくい2軸を並べる。
-                // 残り3軸（成果設計・検証可能性・執行透明性）は /quality 側で確認する。
-                const cells: Array<[string, number | null]> = [
-                  ['総合点', entry.o], ['費用対内容', entry.x], ['必要性', entry.n],
-                ];
+                && !selectedNode.aggregated && selectedNode.projectId != null && (() => {
+                const entry = policySummary?.items[String(selectedNode.projectId)];
                 return (
-                  <div style={{ borderBottom: '1px solid #f0f0f0', flexShrink: 0, padding: '8px 14px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                      <span style={{ fontSize: PANEL_META_FONT_PX, fontWeight: 600, color: '#555' }}>政策評価</span>
-                      <span style={{ fontSize: META_FONT_PX, color: '#aaa' }}>暫定</span>
-                      {category && (
-                        <span style={{ background: '#f0f0f0', color: '#666', padding: '1px 6px', borderRadius: 9, fontSize: META_FONT_PX, whiteSpace: 'nowrap' }}>{category}</span>
-                      )}
-                      <a href={`/quality?pid=${selectedNode.projectId}`} target="_blank" rel="noopener noreferrer"
-                        style={{ marginLeft: 'auto', fontSize: META_FONT_PX, color: '#4a90d9', textDecoration: 'none' }}
-                      >一覧で見る →</a>
-                    </div>
-                    <div style={{ display: 'flex', gap: 14, alignItems: 'flex-end' }}>
-                      {cells.map(([label, value]) => (
-                        <div key={label} style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: PANEL_META_FONT_PX + 4, fontWeight: 700, lineHeight: 1, color: scoreColor(value), fontFamily: 'monospace' }}>
-                            {value ?? '—'}
-                          </div>
-                          <div style={{ fontSize: META_FONT_PX, color: '#999', marginTop: 3 }}>{label}</div>
-                        </div>
-                      ))}
-                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginLeft: 'auto', justifyContent: 'flex-end' }}>
-                        {rec && (
-                          <span style={{ background: recColor, color: '#fff', padding: '2px 7px', borderRadius: 10, fontSize: META_FONT_PX, fontWeight: 600, whiteSpace: 'nowrap' }}>{rec}</span>
-                        )}
-                        {act && (
-                          <span style={{ background: '#e8f1fb', color: '#2b6cb0', padding: '2px 7px', borderRadius: 10, fontSize: META_FONT_PX, fontWeight: 600, whiteSpace: 'nowrap' }}>{act}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <PolicyEvaluationBlock
+                    pid={selectedNode.projectId}
+                    error={policyError}
+                    view={entry ? {
+                      overall: entry.o, proportionality: entry.x, necessity: entry.n,
+                      recommendation: entry.r ? policySummary!.recommendations[entry.r] : null,
+                      improvementAction: entry.a ? policySummary!.actions[entry.a] : null,
+                      categoryLabel: entry.c ? policySummary!.categories[entry.c] : null,
+                    } : null}
+                    labelPx={PANEL_META_FONT_PX}
+                    metaPx={META_FONT_PX}
+                    onOpenDetail={() => openScoreDialog(selectedNode.projectId!)}
+                    detailLoading={scoreDialogLoading}
+                  />
                 );
               })()}
 
@@ -4132,16 +4083,6 @@ export default function RealDataSankeyPage() {
                 />
               )}
 
-              {/* 品質スコアブロック — project-budget / project-spending（非集約）のみ。共有コンポーネント */}
-              {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (
-                <QualityScoreBlock
-                  score={qualityScoreCache.get(`${year}-${selectedNode.projectId}`)}
-                  year={year}
-                  scaleFont={scaleFont}
-                  onOpenDetail={() => openScoreDialog(selectedNode.projectId!)}
-                  detailLoading={scoreDialogLoading}
-                />
-              )}
 
               {/* 再委託サマリ — project-budget / project-spending（非集約）のみ。/api/subcontracts から遅延取得 */}
               {selectedNode && (selectedNode.type === 'project-budget' || selectedNode.type === 'project-spending') && !selectedNode.aggregated && selectedNode.projectId != null && (() => {

@@ -44,7 +44,8 @@ import { SEMANTIC_SEPARATE_ORIGIN, SEMANTIC_PROJECT } from '@/app/lib/semantic-c
 import { TagChip } from '@/client/components/TagChip';
 import { getAccountBadgeStyle, classifyAccountCategory } from '@/app/lib/account-badge';
 import { originKindLabel } from '@/client/components/subcontract/origin-kind';
-import { QualityScoreBlock } from '@/client/components/quality/QualityScoreBlock';
+import { PolicyEvaluationBlock, type PolicyEvaluationView } from '@/client/components/quality/PolicyEvaluationBlock';
+import type { PolicyEvaluation } from '@/app/lib/policy-evaluation';
 import {
   computeSubcontractRibbonLayout,
   ribbonFlowPath,
@@ -277,20 +278,9 @@ interface ProjectQualityOrg {
   office?: string;
   team?: string;
   unit?: string;
-  // 品質スコア本体（同ファイルに含まれる。メイン画面の品質スコアブロックと同項目）
-  totalScore?: number | null;
-  axisIdentify?: number | null;
-  axisPurpose?: number | null;
-  axisBudget?: number | null;
-  axisEffective?: number | null;
-  axisStructure?: number | null;
-  effectiveReason?: string | null;
-  aiSource?: string | null;
 }
 
 /** 品質スコア表示に使う項目だけ抜き出したもの */
-type QualityScore = Pick<ProjectQualityOrg,
-  'totalScore' | 'axisIdentify' | 'axisPurpose' | 'axisBudget' | 'axisEffective' | 'axisStructure' | 'effectiveReason' | 'aiSource'>;
 
 const ORG_LEVEL_LABELS = ['局庁', '部', '課', '室', '班', '係'];
 
@@ -407,7 +397,7 @@ function SidePane({
   block,
   graph,
   projectDetail,
-  qualityScore,
+  policyView,
   orgChain,
   year,
   activeTab,
@@ -419,7 +409,7 @@ function SidePane({
   block: BlockNode | null;
   graph: SubcontractGraphWithBudget;
   projectDetail: ProjectDetail | null;
-  qualityScore: QualityScore | null | undefined;
+  policyView: PolicyEvaluationView | null | undefined;
   orgChain: string[];
   year: number;
   activeTab: PaneTab;
@@ -603,11 +593,12 @@ function SidePane({
         />
       )}
 
-      {/* 品質スコアブロック（メイン画面と共有コンポーネント。既取得の /data/project-quality-scores を渡す） */}
-      <QualityScoreBlock
-        score={qualityScore}
-        year={year}
-        scaleFont={scaleFont}
+      {/* 政策評価ブロック（メイン画面と共有コンポーネント） */}
+      <PolicyEvaluationBlock
+        view={policyView}
+        pid={graph.projectId}
+        labelPx={scaleFont(12)}
+        metaPx={scaleFont(10)}
         onOpenDetail={() => openScoreDialog(graph.projectId)}
         detailLoading={scoreDialogLoading}
       />
@@ -1242,8 +1233,8 @@ function SubcontractDetailPageInner() {
   const [graph, setGraph] = useState<SubcontractGraph | null>(null);
   const [projectDetail, setProjectDetail] = useState<ProjectDetail | null>(null);
   const [orgChain, setOrgChain] = useState<string[]>([]);
-  // undefined = fetch中（QualityScoreBlock は非表示）、null = スコアなし確定。メイン画面と同じ作法
-  const [qualityScore, setQualityScore] = useState<QualityScore | null | undefined>(undefined);
+  // undefined = fetch中（ブロックは非表示）、null = スコアなし確定。メイン画面と同じ作法
+  const [policyView, setPolicyView] = useState<PolicyEvaluationView | null | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<BlockNode | null>(null);
@@ -1433,30 +1424,37 @@ function SubcontractDetailPageInner() {
 
   useEffect(() => {
     if (!graph) return;
-    setQualityScore(undefined); // 事業/年度切替時は fetch中（非表示）に戻す
+    setPolicyView(undefined);   // 事業/年度切替時は fetch中（非表示）に戻す
     const controller = new AbortController();
-    fetch(`/data/project-quality-scores-${year}.json`, { signal: controller.signal })
-      .then((r) => r.ok ? r.json() : [])
-      .then((items: ProjectQualityOrg[]) => {
+    // 組織階層は品質スコアの1事業分から取る（従来は全件 9MB を落としていた）
+    fetch(`/api/quality-scores/${projectId}?year=${year}&full=1`, { signal: controller.signal })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { score?: ProjectQualityOrg } | null) => {
         if (controller.signal.aborted) return;
-        const item = items.find((v) => String(v.pid) === String(projectId));
-        const chain = item
+        const item = data?.score;
+        setOrgChain(item
           ? [item.bureau, item.division, item.section, item.office, item.team, item.unit]
               .map((v) => v?.trim() ?? '')
               .filter(Boolean)
-          : [];
-        setOrgChain(chain);
-        setQualityScore(item ? {
-          totalScore: item.totalScore, axisIdentify: item.axisIdentify, axisPurpose: item.axisPurpose,
-          axisBudget: item.axisBudget, axisEffective: item.axisEffective, axisStructure: item.axisStructure,
-          effectiveReason: item.effectiveReason, aiSource: item.aiSource,
+          : []);
+      })
+      .catch((e: Error) => { if (e.name !== 'AbortError') setOrgChain([]); });
+    // 政策評価は母集団依存のためサーバ側で全件計算した結果を1事業だけ引く
+    fetch(`/api/policy-summary?year=${year}&pid=${projectId}`, { signal: controller.signal })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data: { evaluation?: PolicyEvaluation } | null) => {
+        if (controller.signal.aborted) return;
+        const e = data?.evaluation;
+        setPolicyView(e ? {
+          overall: e.overallScore,
+          proportionality: e.proportionalityScore,
+          necessity: e.necessityScore,
+          recommendation: e.recommendation,
+          improvementAction: e.improvementAction,
+          categoryLabel: e.policyCategoryLabel,
         } : null);
       })
-      .catch((e: Error) => {
-        if (e.name === 'AbortError') return;
-        setOrgChain([]);
-        setQualityScore(null);
-      });
+      .catch((err: Error) => { if (err.name !== 'AbortError') setPolicyView(null); });
     return () => controller.abort();
   }, [graph, projectId, year]);
 
@@ -2889,7 +2887,7 @@ function SubcontractDetailPageInner() {
             block={selectedBlock}
             graph={graph}
             projectDetail={projectDetail}
-            qualityScore={qualityScore}
+            policyView={policyView}
             orgChain={visibleOrgChain}
             year={year}
             activeTab={activeTab}
