@@ -398,6 +398,7 @@ function SidePane({
   graph,
   projectDetail,
   policyView,
+  policyError,
   orgChain,
   year,
   activeTab,
@@ -410,6 +411,7 @@ function SidePane({
   graph: SubcontractGraphWithBudget;
   projectDetail: ProjectDetail | null;
   policyView: PolicyEvaluationView | null | undefined;
+  policyError: string | null;
   orgChain: string[];
   year: number;
   activeTab: PaneTab;
@@ -596,6 +598,7 @@ function SidePane({
       {/* 政策評価ブロック（メイン画面と共有コンポーネント） */}
       <PolicyEvaluationBlock
         view={policyView}
+        error={policyError}
         pid={graph.projectId}
         labelPx={scaleFont(12)}
         metaPx={scaleFont(10)}
@@ -1235,6 +1238,8 @@ function SubcontractDetailPageInner() {
   const [orgChain, setOrgChain] = useState<string[]>([]);
   // undefined = fetch中（ブロックは非表示）、null = スコアなし確定。メイン画面と同じ作法
   const [policyView, setPolicyView] = useState<PolicyEvaluationView | null | undefined>(undefined);
+  // 取得失敗を黙って隠さない（サンキー図と同じ扱い）
+  const [policyError, setPolicyError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedBlock, setSelectedBlock] = useState<BlockNode | null>(null);
@@ -1425,6 +1430,7 @@ function SubcontractDetailPageInner() {
   useEffect(() => {
     if (!graph) return;
     setPolicyView(undefined);   // 事業/年度切替時は fetch中（非表示）に戻す
+    setPolicyError(null);
     const controller = new AbortController();
     // 組織階層は品質スコアの1事業分から取る（従来は全件 9MB を落としていた）
     fetch(`/api/quality-scores/${projectId}?year=${year}&full=1`, { signal: controller.signal })
@@ -1441,7 +1447,12 @@ function SubcontractDetailPageInner() {
       .catch((e: Error) => { if (e.name !== 'AbortError') setOrgChain([]); });
     // 政策評価は母集団依存のためサーバ側で全件計算した結果を1事業だけ引く
     fetch(`/api/policy-summary?year=${year}&pid=${projectId}`, { signal: controller.signal })
-      .then((r) => r.ok ? r.json() : null)
+      .then((r) => {
+        if (r.ok) return r.json();
+        // 404 =「その事業の評価が無い」＝確定。それ以外は失敗として表示する
+        if (r.status === 404) return null;
+        throw new Error(String(r.status));
+      })
       .then((data: { evaluation?: PolicyEvaluation } | null) => {
         if (controller.signal.aborted) return;
         const e = data?.evaluation;
@@ -1454,7 +1465,11 @@ function SubcontractDetailPageInner() {
           categoryLabel: e.policyCategoryLabel,
         } : null);
       })
-      .catch((err: Error) => { if (err.name !== 'AbortError') setPolicyView(null); });
+      .catch((err: Error) => {
+        if (err.name === 'AbortError') return;
+        setPolicyError(err.message || '取得失敗');
+        setPolicyView(null);
+      });
     return () => controller.abort();
   }, [graph, projectId, year]);
 
@@ -2888,6 +2903,7 @@ function SubcontractDetailPageInner() {
             graph={graph}
             projectDetail={projectDetail}
             policyView={policyView}
+            policyError={policyError}
             orgChain={visibleOrgChain}
             year={year}
             activeTab={activeTab}

@@ -13,6 +13,7 @@ import type { RecipientRow } from '@/app/lib/api/quality-recipients-loader';
 import type { ProjectDetail } from '@/types/project-details';
 import type { PolicyEvaluation } from '@/app/lib/policy-evaluation';
 import { externalCorporateLinks } from '@/app/lib/api/links';
+import { useScoreDetailData } from '@/client/hooks/useScoreDetailData';
 import { scoreColor, formatAmount, pct } from '@/client/components/quality/score-format';
 import {
   AXIS_META, COL_DESC, UNUSED_TREND_META, WEIGHT_BY_KEY, STATUS_META,
@@ -20,49 +21,15 @@ import {
 } from '@/client/components/quality/score-meta';
 
 /**
- * モーダルで引く支出先・事業内容のクライアントキャッシュ。
- * 同じ事業を開き直すたびに再取得していたため、モジュールスコープで保持する。
- * 進行中の Promise も入れて、同一事業への同時リクエストを1本にまとめる
- * （React StrictMode の二重実行や、閉じてすぐ開き直した場合の重複を防ぐ）。
+ * 事業概要の「/」区切りを改行にする。
+ * 元データは「目的/現状課題/概要」のように / で節を区切るが、本文には URL・日付(2024/4/1)・
+ * 分数(1/2) も混ざる。URL はまるごと保護し、数字に挟まれた / は区切りとみなさない。
  */
-const recipientsCache = new Map<string, Promise<RecipientRow[]>>();
-const projectInfoCache = new Map<string, Promise<ProjectDetail | null>>();
-
-function fetchRecipients(pid: string, year: string): Promise<RecipientRow[]> {
-  const key = `${year}-${pid}`;
-  const hit = recipientsCache.get(key);
-  if (hit) return hit;
-  const req = fetch(`/api/quality-scores/recipients?pid=${pid}&year=${year}`)
-    .then(res => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
-    .catch(e => { recipientsCache.delete(key); throw e; });  // 失敗は残さず再試行可能にする
-  recipientsCache.set(key, req);
-  return req;
-}
-
-function fetchProjectInfo(pid: string, year: string): Promise<ProjectDetail | null> {
-  const key = `${year}-${pid}`;
-  const hit = projectInfoCache.get(key);
-  if (hit) return hit;
-  const req = fetch(`/api/project-details/${pid}?year=${year}`)
-    .then(res => (res.ok ? res.json() : null))
-    .catch(() => null);
-  projectInfoCache.set(key, req);
-  return req;
-}
-
-/** 政策評価（1事業）。母集団の計算はサーバ側で1回だけ行われる */
-const policyCache = new Map<string, Promise<PolicyEvaluation | null>>();
-
-function fetchPolicyEvaluation(pid: string, year: string): Promise<PolicyEvaluation | null> {
-  const key = `${year}-${pid}`;
-  const hit = policyCache.get(key);
-  if (hit) return hit;
-  const req = fetch(`/api/policy-summary?year=${year}&pid=${pid}`)
-    .then(res => (res.ok ? res.json() : null))
-    .then((json: { evaluation: PolicyEvaluation } | null) => json?.evaluation ?? null)
-    .catch(() => null);
-  policyCache.set(key, req);
-  return req;
+function breakOnSeparators(text: string): string {
+  return text
+    .split(/(https?:\/\/\S+)/g)
+    .map((part, i) => (i % 2 === 1 ? part : part.replace(/(?<![0-9])\/(?![0-9])/g, '\n')))
+    .join('');
 }
 
 export function ScoreDetailDialog({ item, policy: policyProp, onClose, year }: {
@@ -76,23 +43,16 @@ export function ScoreDetailDialog({ item, policy: policyProp, onClose, year }: {
   onClose: () => void;
   year: string;
 }) {
-  const [fetchedPolicy, setFetchedPolicy] = useState<PolicyEvaluation | undefined>(undefined);
-  const policy = policyProp ?? fetchedPolicy;
-  useEffect(() => {
-    if (policyProp) return;   // ページ側が持っているなら取りに行かない
-    let aborted = false;
-    fetchPolicyEvaluation(item.pid, year).then(p => { if (!aborted) setFetchedPolicy(p ?? undefined); });
-    return () => { aborted = true; };
-  }, [policyProp, item.pid, year]);
+  // 取得はフックに閉じる（再利用可能UIから直接APIを叩かない）
+  const data = useScoreDetailData(item.pid, year, policyProp != null);
+  const { recipients, recipientsError, projectInfo, policyError } = data;
+  const policy = policyProp ?? data.policy ?? undefined;
 
-  const [recipients, setRecipients] = useState<RecipientRow[] | null>(null);
-  const [recipientsError, setRecipientsError] = useState(false);
   const [recipientSearch, setRecipientSearch] = useState('');
   const [recipientSortField, setRecipientSortField] = useState<'chain' | 'b' | 's' | 'c' | 'o' | 'a2' | 'pct'>('chain');
   const [recipientSortDir, setRecipientSortDir] = useState<'asc' | 'desc'>('asc');
   const [showAxisDetail, setShowAxisDetail] = useState(false);
   const [showPolicy, setShowPolicy] = useState(true);
-  const [projectInfo, setProjectInfo] = useState<ProjectDetail | null | undefined>(undefined);
   const [showProjectInfo, setShowProjectInfo] = useState(true);
   // 法人番号列（index 2）は13桁＋gBizINFOアイコンが入るため 130 まで広げる（旧ダイアログと同じ）
   const COL_MAX_WIDTHS = [undefined, 70, 130, 60, 50, undefined, undefined];
@@ -120,24 +80,14 @@ export function ScoreDetailDialog({ item, policy: policyProp, onClose, year }: {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onClose]);
 
+  // 事業が切り替わったら表示状態だけ初期化する（データ取得はフック側）
   useEffect(() => {
-    setRecipients(null);
-    setRecipientsError(false);
     setRecipientSearch('');
     setRecipientSortField('chain');
     setRecipientSortDir('asc');
     setShowAxisDetail(false);
     setShowPolicy(true);
-    setProjectInfo(undefined);
     setShowProjectInfo(true);
-    // 表示中の事業が切り替わった後に古い応答が届いても反映しない
-    let stale = false;
-    fetchRecipients(item.pid, year)
-      .then(rows => { if (!stale) setRecipients(rows); })
-      .catch(() => { if (!stale) setRecipientsError(true); });
-    fetchProjectInfo(item.pid, year)
-      .then(d => { if (!stale) setProjectInfo(d); });
-    return () => { stale = true; };
   }, [item.pid, year]);
 
   const displayedRecipients = useMemo(() => {
@@ -333,11 +283,18 @@ ${a.desc}`}>
                 ] as const).map(({ label, text }) => text ? (
                   <div key={label}>
                     <div className="font-semibold text-gray-700 dark:text-gray-300">{label}</div>
-                    <div className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{text.replace(/\//g, '\n')}</div>
+                    <div className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">{breakOnSeparators(text)}</div>
                   </div>
                 ) : null)}
               </div>
             )}
+          </div>
+        )}
+
+        {/* 政策評価の取得に失敗したときは黙って消さず、失敗したと分かるようにする */}
+        {policyError && !policy && (
+          <div className="px-6 py-2 border-b border-gray-200 dark:border-gray-700 text-xs text-red-600 dark:text-red-400">
+            政策評価を読み込めませんでした（{policyError}）
           </div>
         )}
 
