@@ -583,7 +583,7 @@ function SubcontractsPageInner() {
   return (
     <div style={{ height: '100vh', background: '#f9fafb', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* ── 上部: フィルタ群 ── */}
-      <div style={{ flexShrink: 0, padding: '12px 16px', maxWidth: 1600, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ flexShrink: 0, padding: '12px 16px', width: '100%', boxSizing: 'border-box' }}>
         {/* コントロール（/sankey-svg と同じトーン） */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
 
@@ -774,7 +774,7 @@ function SubcontractsPageInner() {
       </div>
 
       {/* ── 中部: スクロールテーブル ── */}
-      <div style={{ flex: 1, minHeight: 0, padding: '0 16px', maxWidth: 1600, margin: '0 auto', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, minHeight: 0, padding: '0 16px', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
         {loading && <p style={{ color: '#6b7280', fontSize: 14 }}>読み込み中...</p>}
         {error && <p style={{ color: '#ef4444', fontSize: 14 }}>エラー: {error}</p>}
         {!loading && !error && (
@@ -938,7 +938,7 @@ function SubcontractsPageInner() {
       {/* ── 下部: ページネーション ── */}
       {!loading && !error && totalPages > 1 && (
         <div style={{ flexShrink: 0, background: '#fff', borderTop: '1px solid #e5e7eb', padding: '8px 16px' }}>
-          <div style={{ maxWidth: 1600, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}

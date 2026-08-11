@@ -408,7 +408,7 @@ export default function QualityPage() {
       {dialogItem && <ScoreDetailDialog item={dialogItem} policy={policyByPid?.get(dialogItem.pid)} onClose={() => setDialogItem(null)} year={year} />}
       {/* Header */}
       <div className="shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-4">
-        <div className="max-w-[1600px] mx-auto">
+        <div>
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-lg font-bold text-gray-900 dark:text-white">
               事業別 政策評価・執行透明性スコア
@@ -469,7 +469,7 @@ export default function QualityPage() {
       </div>
 
       {/* Score distribution summary (10-point bins) + histogram */}
-      <div className="relative shrink-0 w-full max-w-[1600px] mx-auto px-4 py-3">
+      <div className="relative shrink-0 w-full px-4 py-3">
         {(() => {
           const binRanges: { label: string; range: ScoreRange; lo: number; hi: number }[] = [
             { label: '100', range: '100-100', lo: 100, hi: 100 },
@@ -731,7 +731,7 @@ ${a.desc}` })),
       </div>
 
       {/* Table */}
-      <div className="flex-1 min-h-0 flex flex-col w-full max-w-[1600px] mx-auto px-4 pb-4">
+      <div className="flex-1 min-h-0 flex flex-col w-full px-4 pb-4">
         {/*
           外枠（枠線・角丸）と、スクロールする内箱を分ける。
           ページャを枠の中のフッタとして固定したいので、枠自体はスクロールさせない。
