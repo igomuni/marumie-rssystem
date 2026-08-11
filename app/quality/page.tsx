@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
+import { YearSelect } from '@/components/navigation/YearSelect';
 import type { QualityScoreItem, QualityScoresResponse } from '@/app/api/quality-scores/route';
 import type { RecipientRow } from '@/app/lib/api/quality-recipients-loader';
 import type { ExecutionHistoryResponse } from '@/app/api/execution-history/route';
@@ -154,7 +155,14 @@ const EMPTY_SCORE_FILTERS = (): Record<PolicyMetric, { min: string; max: string 
   ) as Record<PolicyMetric, { min: string; max: string }>;
 
 export default function QualityPage() {
-  const [year, setYear] = useState<'2024' | '2025'>('2025');
+  // ?year= を初期年度に反映する。サンキー図・再委託ビューの「一覧で見る →」や
+  // /api/quality-scores/[pid] が返す qualityWeb が year 付きで来るため、
+  // 読まないと 2024 を見ていたのに 2025 の一覧が開いてしまう。
+  const [year, setYear] = useState<'2024' | '2025'>(() => {
+    if (typeof window === 'undefined') return '2025';
+    const y = new URLSearchParams(window.location.search).get('year');
+    return y === '2024' || y === '2025' ? y : '2025';
+  });
   const [data, setData] = useState<QualityScoresResponse | null>(null);
   const [history, setHistory] = useState<ExecutionHistoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -407,22 +415,15 @@ export default function QualityPage() {
     <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       {dialogItem && <ScoreDetailDialog item={dialogItem} policy={policyByPid?.get(dialogItem.pid)} onClose={() => setDialogItem(null)} year={year} />}
       {/* Header */}
-      <div className="shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-4">
-        <div className="max-w-[1600px] mx-auto">
-          <div className="flex items-center gap-3 mb-1">
+      <div className="shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
             <h1 className="text-lg font-bold text-gray-900 dark:text-white">
               事業別 政策評価・執行透明性スコア
             </h1>
             {/* 年度とページ切替。全ページ共通で右上に置く */}
-            <select
-              value={year}
-              onChange={e => setYear(e.target.value as '2024' | '2025')}
-              aria-label="年度"
-              className="ml-auto h-9 rounded-lg border border-black/10 bg-white px-2 text-xs text-gray-700 shadow-sm cursor-pointer dark:border-white/10 dark:bg-gray-700 dark:text-gray-200"
-            >
-              <option value="2025">2025年度</option>
-              <option value="2024">2024年度</option>
-            </select>
+            <div className="ml-auto" />
+            <YearSelect value={year} onChange={y => setYear(y as '2024' | '2025')} years={[2025, 2024]} />
             <PageNavMenu current="/quality" />
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -469,7 +470,7 @@ export default function QualityPage() {
       </div>
 
       {/* Score distribution summary (10-point bins) + histogram */}
-      <div className="relative shrink-0 w-full max-w-[1600px] mx-auto px-4 py-3">
+      <div className="relative shrink-0 w-full px-3 py-3">
         {(() => {
           const binRanges: { label: string; range: ScoreRange; lo: number; hi: number }[] = [
             { label: '100', range: '100-100', lo: 100, hi: 100 },
@@ -731,7 +732,7 @@ ${a.desc}` })),
       </div>
 
       {/* Table */}
-      <div className="flex-1 min-h-0 flex flex-col w-full max-w-[1600px] mx-auto px-4 pb-4">
+      <div className="flex-1 min-h-0 flex flex-col w-full px-3 pb-4">
         {/*
           外枠（枠線・角丸）と、スクロールする内箱を分ける。
           ページャを枠の中のフッタとして固定したいので、枠自体はスクロールさせない。

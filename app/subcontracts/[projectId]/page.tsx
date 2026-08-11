@@ -600,6 +600,7 @@ function SidePane({
         view={policyView}
         error={policyError}
         pid={graph.projectId}
+        year={year}
         labelPx={scaleFont(12)}
         metaPx={scaleFont(10)}
         onOpenDetail={() => openScoreDialog(graph.projectId)}

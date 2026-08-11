@@ -12,6 +12,7 @@ import {
   getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen, sortPriority,
 } from '@/app/lib/sankey-svg-constants';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
+import { YearSelect } from '@/components/navigation/YearSelect';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { TopNSliders } from '@/client/components/SankeySvg/TopNSliders';
 import { FontSizeControls } from '@/client/components/SankeySvg/FontSizeControls';
@@ -1716,7 +1717,7 @@ export default function RealDataSankeyPage() {
       // 政策評価スコアの足きり。事業単位フックとして差し込む（policySummary は画面側にしか無い）
       scoreExcludeProject,
     );
-  }, [graphData, selectedNodeId, pinnedProjectId, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone, filterSubcontract, filterRecipientIncludeSub, filterScoreO, filterScoreX, filterScoreN, scoreExcludeProject]);
+  }, [graphData, selectedNodeId, pinnedProjectId, filterMinistryNames, filterMinBudgetText, filterMaxBudgetText, filterMinSpendingText, filterMaxSpendingText, debouncedFilterProjectName, debouncedFilterRecipientName, filterProjectNameRegex, filterRecipientNameRegex, acGeneral, acSpecial, acBoth, acNone, filterSubcontract, filterRecipientIncludeSub, scoreExcludeProject]);
 
   const filtered = useMemo(() => {
     if (!graphData) return null;
@@ -3057,7 +3058,10 @@ export default function RealDataSankeyPage() {
     />
   );
 
-  // 右上クラスタに入れるツール群（TopN・オフセット操作）。スマホ幅では従来どおり左下に絶対配置
+  /**
+   * TopN・オフセットの操作パネル。狭幅では画面下部、通常は右上クラスタの左端に置く。
+   * 右上は［ツール - 表示設定 - 年度 - メニュー］の並びで rs-vis と揃える。
+   */
   const offsetControlsBlock = filtered ? (() => {
         // Recipient offset mode
         const maxRecipOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
@@ -3085,6 +3089,7 @@ export default function RealDataSankeyPage() {
         return (
           <div ref={offsetControlRef} style={ isCompactWidth
             ? { position: 'absolute', bottom: 12, left: isLandscapeCompact && selectedNodeId !== null && !isPanelCollapsed ? effectiveSidePanelWidth + 8 : 8, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)', transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }
+            // 通常幅では右上クラスタの子として並べる（位置はクラスタ側が持つ）
             : { display: 'flex', flexDirection: 'column', alignItems: 'flex-end' } }>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
             {/* Row 1: オフセットスライダー（2列スパン） */}
@@ -3120,7 +3125,7 @@ export default function RealDataSankeyPage() {
                     style={{ color: '#999', fontSize: META_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
                   >{activeRangeStart}</button>
                 )}
-                <span style={{ color: '#999', fontSize: META_FONT_PX }}>~{activeRangeEnd}</span>
+                <span style={{ color: '#999', fontSize: META_FONT_PX }}>〜{activeRangeEnd}</span>
                 <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: 60 }} />
                 {/* 総件数表示は幅を取るためスマホ幅では非表示 */}
                 {!isCompactWidth && <span style={{ color: '#999', fontSize: META_FONT_PX }}>/{activeTotalCount}件</span>}
@@ -3174,7 +3179,7 @@ export default function RealDataSankeyPage() {
           )}
           </div>
         );
-  })() : null;
+      })() : null;
 
   return (
     <div
@@ -4051,6 +4056,7 @@ export default function RealDataSankeyPage() {
                 return (
                   <PolicyEvaluationBlock
                     pid={selectedNode.projectId}
+                    year={year}
                     error={policyError}
                     view={entry ? {
                       overall: entry.o, proportionality: entry.x, necessity: entry.n,
@@ -4325,33 +4331,6 @@ export default function RealDataSankeyPage() {
         </SidePanelChrome>
       )}
 
-      {/* Year selector — top center（スマホ幅では検索ボックスに隠れるため設定ダイアログへ移動）。
-          AIチャットパネル展開時は右上コントロール群が左へ退避して重なるため、中央クラスタも同分の半分だけ左へ寄せる */}
-      {!isCompactWidth && (
-      <div data-pan-disabled="true" style={{ position: 'absolute', top: 12, left: `calc(50% - ${rightControlsOffset / 2}px)`, transform: 'translateX(-50%)', zIndex: 15, display: 'flex', gap: 8, alignItems: 'flex-start', transition: isResizingAiPanel ? 'none' : 'left 0.2s ease' }}>
-        <div style={{ position: 'relative' }}>
-          <select
-            data-testid={testId('year-select')}
-            value={year}
-            onChange={e => handleYearChange(e.target.value as '2024' | '2025')}
-            style={{ fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
-          >
-            <option value="2025">2025年度</option>
-            <option value="2024">2024年度</option>
-          </select>
-          {/* dropdown arrow */}
-          <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-            <path d="M7 10l5 5 5-5z"/>
-          </svg>
-        </div>
-        {/* 探索履歴・発見メモ（IndexedDB のみ・サーバ送信なし） */}
-        <ExplorationHistory
-          getSnapshot={getExplorationSnapshot}
-          onApply={applyExplorationEntry}
-          fontPx={CONTROL_FONT_PX}
-        />
-      </div>
-      )}
 
       {/* Search box — top left */}
       {/* zIndex は サイドパネル(25) より下。列ヘッダー(8)/年度(15)/設定ダイアログ(19) より上、
@@ -4816,135 +4795,38 @@ export default function RealDataSankeyPage() {
         )}
       </div>
 
-      {/* Top-right panel: offset slider */}
-      {filtered && (() => {
-        // Recipient offset mode
-        const maxRecipOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
-        const clampedOffset = Math.min(recipientOffset, maxRecipOffset);
-        const recipRangeStart = clampedOffset + 1;
-        const recipRangeEnd = Math.min(clampedOffset + topRecipient, filtered.totalRecipientCount);
-        const recipMaxStartRank = maxRecipOffset + 1;
-        // Project offset mode
-        const maxProjOffset = Math.max(0, filtered.totalProjectCount - topProject);
-        const clampedProjOffset = Math.min(projectOffset, maxProjOffset);
-        const projRangeStart = clampedProjOffset + 1;
-        const projRangeEnd = Math.min(clampedProjOffset + topProject, filtered.totalProjectCount);
-        // Active values for shared controls
-        const isProjectMode = offsetTarget === 'project';
-        const activeOffset = isProjectMode ? clampedProjOffset : clampedOffset;
-        const activeMax = isProjectMode ? maxProjOffset : maxRecipOffset;
-        const activeTotalCount = isProjectMode ? filtered.totalProjectCount : filtered.totalRecipientCount;
-        const activeRangeStart = isProjectMode ? projRangeStart : recipRangeStart;
-        const activeRangeEnd = isProjectMode ? projRangeEnd : recipRangeEnd;
-        const activeMaxStartRank = isProjectMode ? maxProjOffset + 1 : recipMaxStartRank;
-        const setActiveOffset = (v: number) => {
-          pendingHistoryAction.current = 'replace';
-          if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
-        };
-        return (
-          <div ref={offsetControlRef} style={ isCompactWidth
-            ? { position: 'absolute', bottom: 12, left: isLandscapeCompact && selectedNodeId !== null && !isPanelCollapsed ? effectiveSidePanelWidth + 8 : 8, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)', transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }
-            : { position: 'absolute', top: 12, right: 52 + rightControlsOffset, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', transition: isResizingAiPanel ? 'none' : 'right 0.2s ease' } }>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
-            {/* Row 1: オフセットスライダー（2列スパン） */}
-            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}>
-              {/* オフセット対象コンボボックス */}
-              <select
-                data-testid={testId('offset-target-select')}
-                value={offsetTarget}
-                onChange={e => { pendingHistoryAction.current = 'replace'; setOffsetTarget(e.target.value as 'recipient' | 'project'); }}
-                style={{ fontSize: META_FONT_PX, border: '1px solid #ccc', borderRadius: 3, padding: '1px 2px', background: '#fff', color: '#555', cursor: 'pointer' }}
-              >
-                <option value="project">事業</option>
-                <option value="recipient">支出先</option>
-              </select>
-              <label style={{ flex: isCompactWidth ? '0 0 auto' : 1, display: 'flex', alignItems: 'center', gap: 4 }}>
-                {/* スマホ幅では「Top」ラベルを省き数値だけ表示 */}
-                {!isCompactWidth && <span style={{ color: '#555', fontSize: META_FONT_PX }}>Top</span>}
-                {isEditingOffset ? (
-                  <input
-                    type="number"
-                    autoFocus
-                    min={1} max={activeMaxStartRank} step={1}
-                    value={offsetInputValue}
-                    onChange={e => { setOffsetInputValue(e.target.value); const v = Number(e.target.value); if (!isNaN(v) && v >= 1) setActiveOffset(Math.max(0, Math.min(activeMax, v - 1))); }}
-                    onBlur={() => setIsEditingOffset(false)}
-                    onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsEditingOffset(false); }}
-                    style={{ width: `${Math.max(40, String(activeMaxStartRank).length * 8 + 20)}px`, textAlign: 'center', border: '1px solid #ccc', borderRadius: 3, fontSize: CONTROL_SMALL_FONT_PX }}
-                  />
-                ) : (
-                  <button
-                    onClick={() => { setOffsetInputValue(String(activeRangeStart)); setIsEditingOffset(true); }}
-                    title="クリックして開始位置を入力"
-                    style={{ color: '#999', fontSize: META_FONT_PX, background: 'transparent', border: 'none', cursor: 'text', padding: 0 }}
-                  >{activeRangeStart}</button>
-                )}
-                <span style={{ color: '#999', fontSize: META_FONT_PX }}>〜{activeRangeEnd}</span>
-                <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: 60 }} />
-                {/* 総件数表示は幅を取るためスマホ幅では非表示 */}
-                {!isCompactWidth && <span style={{ color: '#999', fontSize: META_FONT_PX }}>/{activeTotalCount}件</span>}
-                <div style={{ display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center' }}>
-                  {([
-                    [-1, 'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z', '前へ'],
-                    [1,  'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z', '次へ'],
-                  ] as [number, string, string][]).map(([delta, path, title]) => (
-                    <button key={delta} title={title} aria-label={title}
-                      data-testid={testId(delta > 0 ? 'recipient-offset-next' : 'recipient-offset-prev')}
-                      {...offsetRepeat(() => {
-                        pendingHistoryAction.current = 'replace';
-                        pendingFocusId.current = null;
-                        if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
-                        else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
-                      }, { stopPropagation: true })}
-                      onClick={(e) => {
-                        if (e.detail === 0) {
-                          setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta)));
-                        }
-                      }}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none', touchAction: 'none' }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" height={scaleSize(14)} width={scaleSize(14)} viewBox="0 0 24 24" fill="#555"><path d={path}/></svg>
-                    </button>
-                  ))}
-                </div>
-                {/* Material Icons: vertical_align_top — オフセットリセット */}
-                <button onClick={e => { e.preventDefault(); setActiveOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
-                  onContextMenu={(e) => e.preventDefault()}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none', touchAction: 'none' }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" height={scaleSize(14)} width={scaleSize(14)} viewBox="0 0 24 24" fill="#555" style={{ transform: 'rotate(-90deg)' }}><path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z"/></svg>
-                </button>
-              </label>
-            </div>
-            {/* Row 2: 事業・支出先 TopN スライダー（スマホ幅では設定ダイアログへ移動） */}
-            {!isCompactWidth && showTopNSliders && topNSlidersFragment}
-          </div>
-          {/* トグルボタン（パネル外・下部）— スマホ幅では設定ダイアログにTopNを移すため非表示 */}
-          {!isCompactWidth && (
-          <button
-            onClick={() => setShowTopNSliders(s => !s)}
-            title={showTopNSliders ? 'TopN設定 を隠す' : 'TopN設定 を表示'}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', borderTop: 'none', borderLeft: '1px solid #e0e0e0', borderRight: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
-              <path d={showTopNSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
-            </svg>
-          </button>
-          )}
-          </div>
-        );
-      })()}
 
-      {/* ページ切替メニュー — 表示設定(⋮)の左隣。
-          rs-vis は右上を［ツール - 年度 - メニュー］に組み替えているが、marumie の右上は
-          AIチャットパネル展開時に rightControlsOffset ぶん左へ退避する制御を持つため、
-          現行の配置を保ったままメニューだけを足している（配置の見直しは別途）。 */}
-      <div style={{ position: 'absolute', top: 14, right: 52 + rightControlsOffset, zIndex: 200, transition: isResizingAiPanel ? 'none' : 'right 0.2s ease' }}>
-        <PageNavMenu current="/sankey-svg" theme="light" />
-      </div>
+      {/* 狭幅では TopN・オフセット操作を画面下部へ（クラスタには入れない） */}
+      {isCompactWidth && offsetControlsBlock}
 
-      {/* Settings button — independent, top right（ダイアログを最前面にするため高いzIndex） */}
-      <div style={{ position: 'absolute', top: 14, right: 12 + rightControlsOffset, zIndex: 200, transition: isResizingAiPanel ? 'none' : 'right 0.2s ease' }}>
+      {/* 右上クラスタ: ［ツール - 探索履歴 - 表示設定 - 年度 - ページ切替］。
+          rs-vis の並び（ツール → 年度 → メニュー）に合わせつつ、marumie 固有の
+          探索履歴と表示設定(⋮)を年度コンボの左に置く。
+          AIチャットパネル展開時は rightControlsOffset ぶん左へ退避する。
+          スマホ幅では表示設定とページ切替だけを残す（ツール・履歴・年度は
+          それぞれ画面下部と設定ダイアログへ移す）。 */}
+      <div
+        data-pan-disabled="true"
+        style={{
+          position: 'absolute', top: 12, right: 12 + rightControlsOffset, zIndex: 200,
+          display: 'flex', gap: 8, alignItems: 'flex-start',
+          transition: isResizingAiPanel ? 'none' : 'right 0.2s ease',
+        }}
+      >
+        {!isCompactWidth && offsetControlsBlock}
+
+        {/* 探索履歴・発見メモ（IndexedDB のみ・サーバ送信なし） */}
+        {!isCompactWidth && (
+          <ExplorationHistory
+            getSnapshot={getExplorationSnapshot}
+            onApply={applyExplorationEntry}
+            // 他ページは text-xs(12px)。フォントスケール機能があるので倍率だけ合わせる
+            fontPx={scaleFont(12)}
+          />
+        )}
+
+        {/* 表示設定(⋮)。ダイアログはこの要素を基準に開く */}
+        <div style={{ position: 'relative', flexShrink: 0 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
           aria-label="表示設定を開く"
@@ -5026,6 +4908,23 @@ export default function RealDataSankeyPage() {
             </div>
           </>
         )}
+        </div>
+
+        {/* 年度切替（rs-vis の並びに合わせて、ツール類の右・メニューの左）。
+            スマホ幅では検索ボックスに隠れるため設定ダイアログ側に置く */}
+        {!isCompactWidth && (
+          <YearSelect
+            value={year}
+            onChange={y => handleYearChange(y as '2024' | '2025')}
+            years={[2025, 2024]}
+            theme="light"
+            // 他ページは text-xs(12px)。フォントスケール機能があるので倍率だけ合わせる
+            fontPx={scaleFont(12)}
+            testId={testId('year-select')}
+          />
+        )}
+
+        <PageNavMenu current="/sankey-svg" theme="light" />
       </div>
 
       {/* Zoom controls — bottom right (sankey2 style) */}
