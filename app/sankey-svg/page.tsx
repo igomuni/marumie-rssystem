@@ -4056,6 +4056,7 @@ export default function RealDataSankeyPage() {
                 return (
                   <PolicyEvaluationBlock
                     pid={selectedNode.projectId}
+                    year={year}
                     error={policyError}
                     view={entry ? {
                       overall: entry.o, proportionality: entry.x, necessity: entry.n,

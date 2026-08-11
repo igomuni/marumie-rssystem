@@ -155,7 +155,14 @@ const EMPTY_SCORE_FILTERS = (): Record<PolicyMetric, { min: string; max: string 
   ) as Record<PolicyMetric, { min: string; max: string }>;
 
 export default function QualityPage() {
-  const [year, setYear] = useState<'2024' | '2025'>('2025');
+  // ?year= を初期年度に反映する。サンキー図・再委託ビューの「一覧で見る →」や
+  // /api/quality-scores/[pid] が返す qualityWeb が year 付きで来るため、
+  // 読まないと 2024 を見ていたのに 2025 の一覧が開いてしまう。
+  const [year, setYear] = useState<'2024' | '2025'>(() => {
+    if (typeof window === 'undefined') return '2025';
+    const y = new URLSearchParams(window.location.search).get('year');
+    return y === '2024' || y === '2025' ? y : '2025';
+  });
   const [data, setData] = useState<QualityScoresResponse | null>(null);
   const [history, setHistory] = useState<ExecutionHistoryResponse | null>(null);
   const [loading, setLoading] = useState(true);

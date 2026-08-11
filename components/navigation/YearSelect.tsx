@@ -37,7 +37,7 @@ export function YearSelect({
         onChange={e => onChange(e.target.value)}
         aria-label="年度"
         style={fontPx ? { fontSize: fontPx } : undefined}
-        className={`h-9 cursor-pointer appearance-none rounded-lg border border-black/10 bg-white/90 pl-2.5 pr-7 text-xs text-neutral-700 shadow-md backdrop-blur focus:outline-none ${
+        className={`h-9 cursor-pointer appearance-none rounded-lg border border-black/10 bg-white/90 pl-2.5 pr-7 text-xs text-neutral-700 shadow-md backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 ${
           dark ? 'dark:border-white/10 dark:bg-neutral-900/90 dark:text-neutral-200' : ''
         }`}
       >

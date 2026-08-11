@@ -44,6 +44,7 @@ function scoreColor(v: number | null): string {
 export function PolicyEvaluationBlock({
   view,
   pid,
+  year,
   error,
   labelPx,
   metaPx,
@@ -53,6 +54,8 @@ export function PolicyEvaluationBlock({
   /** null = スコアなし（何も描かない）。undefined = 取得中 */
   view: PolicyEvaluationView | null | undefined;
   pid: string | number;
+  /** 「一覧で見る →」に付ける年度。付けないと /quality が既定年度で開く */
+  year: string | number;
   /** 取得に失敗したときのメッセージ。表示だけ落として本体の動作は妨げない */
   error?: string | null;
   labelPx: number;
@@ -102,7 +105,7 @@ export function PolicyEvaluationBlock({
           >{detailLoading ? '読込中…' : '詳細'}</button>
         )}
         <a
-          href={`/quality?pid=${pid}`}
+          href={`/quality?pid=${pid}&year=${year}`}
           target="_blank"
           rel="noopener noreferrer"
           style={{ marginLeft: onOpenDetail ? 8 : 'auto', fontSize: metaPx, color: '#4a90d9', textDecoration: 'none', flexShrink: 0 }}
