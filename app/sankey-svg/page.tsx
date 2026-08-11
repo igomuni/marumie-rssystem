@@ -12,6 +12,7 @@ import {
   getColumn, getNodeColor, getLinkColor, ribbonPath, formatYen, sortPriority,
 } from '@/app/lib/sankey-svg-constants';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
+import { YearSelect } from '@/components/navigation/YearSelect';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { TopNSliders } from '@/client/components/SankeySvg/TopNSliders';
 import { FontSizeControls } from '@/client/components/SankeySvg/FontSizeControls';
@@ -4818,7 +4819,8 @@ export default function RealDataSankeyPage() {
           <ExplorationHistory
             getSnapshot={getExplorationSnapshot}
             onApply={applyExplorationEntry}
-            fontPx={CONTROL_FONT_PX}
+            // 他ページは text-xs(12px)。フォントスケール機能があるので倍率だけ合わせる
+            fontPx={scaleFont(12)}
           />
         )}
 
@@ -4910,21 +4912,15 @@ export default function RealDataSankeyPage() {
         {/* 年度切替（rs-vis の並びに合わせて、ツール類の右・メニューの左）。
             スマホ幅では検索ボックスに隠れるため設定ダイアログ側に置く */}
         {!isCompactWidth && (
-        <div data-pan-disabled="true" style={{ position: 'relative', flexShrink: 0 }}>
-          <select
-            data-testid={testId('year-select')}
+          <YearSelect
             value={year}
-            onChange={e => handleYearChange(e.target.value as '2024' | '2025')}
-            style={{ fontSize: CONTROL_FONT_PX, border: '1px solid #e0e0e0', borderRadius: 8, padding: '6px 28px 6px 10px', background: 'rgba(255,255,255,0.95)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', color: '#333', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
-          >
-            <option value="2025">2025年度</option>
-            <option value="2024">2024年度</option>
-          </select>
-          {/* dropdown arrow */}
-          <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-            <path d="M7 10l5 5 5-5z"/>
-          </svg>
-        </div>
+            onChange={y => handleYearChange(y as '2024' | '2025')}
+            years={[2025, 2024]}
+            theme="light"
+            // 他ページは text-xs(12px)。フォントスケール機能があるので倍率だけ合わせる
+            fontPx={scaleFont(12)}
+            testId={testId('year-select')}
+          />
         )}
 
         <PageNavMenu current="/sankey-svg" theme="light" />

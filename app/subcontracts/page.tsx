@@ -28,6 +28,7 @@ import { FilterTextInput } from '@/components/filters/FilterTextInput';
 import { MinMaxInput } from '@/components/filters/MinMaxInput';
 import { MultiSelectDropdown } from '@/components/filters/MultiSelectDropdown';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
+import { YearSelect } from '@/components/navigation/YearSelect';
 import { ProjectReferenceLinks } from '@/components/subcontracts/ProjectReferenceLinks';
 import { formatYen, parseAmountToYen } from '@/app/lib/format/yen';
 import { accountCategoryLabel, bureauLeaf } from '@/app/lib/subcontracts/labels';
@@ -583,7 +584,7 @@ function SubcontractsPageInner() {
   return (
     <div style={{ height: '100vh', background: '#f9fafb', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* ── 上部: フィルタ群 ── */}
-      <div style={{ flexShrink: 0, padding: '12px 16px', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ flexShrink: 0, padding: '12px', width: '100%', boxSizing: 'border-box' }}>
         {/* コントロール（/sankey-svg と同じトーン） */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
 
@@ -673,31 +674,7 @@ function SubcontractsPageInner() {
 
           {/* 年度とページ切替。全ページ共通で右上に置く */}
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            <div style={{ position: 'relative' }}>
-              <select
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                aria-label="年度"
-                style={{
-                  fontSize: 13,
-                  border: '1px solid #e0e0e0',
-                  borderRadius: 8,
-                  padding: '8px 28px 8px 10px',
-                  background: 'rgba(255,255,255,0.95)',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                  color: '#333',
-                  cursor: 'pointer',
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                }}
-              >
-                <option value={2025}>2025年度</option>
-                <option value={2024}>2024年度</option>
-              </select>
-              <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#999" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                <path d="M7 10l5 5 5-5z"/>
-              </svg>
-            </div>
+            <YearSelect value={String(year)} onChange={y => setYear(Number(y))} years={[2025, 2024]} theme="light" />
             <PageNavMenu current="/subcontracts" theme="light" />
           </div>
         </div>
@@ -774,7 +751,7 @@ function SubcontractsPageInner() {
       </div>
 
       {/* ── 中部: スクロールテーブル ── */}
-      <div style={{ flex: 1, minHeight: 0, padding: '0 16px', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, minHeight: 0, padding: '0 12px', width: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
         {loading && <p style={{ color: '#6b7280', fontSize: 14 }}>読み込み中...</p>}
         {error && <p style={{ color: '#ef4444', fontSize: 14 }}>エラー: {error}</p>}
         {!loading && !error && (
