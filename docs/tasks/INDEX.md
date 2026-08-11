@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20260811_2226_rs-vis反映対応案.md](20260811_2226_rs-vis反映対応案.md) — marumie `7411ff0`〜`7180566`（52コミット）を rs-vis へ片方向反映する案。対象約170ファイル＋差分.gz10本。反映前の課題4件（依存3件・check-traces・環境変数を設定しないこと・既知不具合18件）と確認項目を整理（対応案）
 - [20260731_0533_S1_cn検証の成果物化_対応案.md](20260731_0533_S1_cn検証の成果物化_対応案.md) — houjin.db依存を`generate-recipient-resolution.py`に閉じ込め、`recipient-verified-{YEAR}.json.gz`（gzip307KB・18,423件）を新設して`score-project-quality.py`から参照。設計書の案を2点変更（配列不要・別ファイル化）＋フォールバックをやめ環境差を排除（対応案）
 - [20260730_0816_cn検証のhoujin-db非依存化と支出先名寄せの設計.md](20260730_0816_cn検証のhoujin-db非依存化と支出先名寄せの設計.md) — cn は「検証」がhoujin.db直依存で成果物化されておらず rs-vis で再現不能（「解決」は.gz化済み）。検証結果を recipient-resolution へ追加して非依存化し、支出先キーを resolveRecipientKey に1本化してサンキー図の名寄せもcn対応にする（設計）
 - [20260730_0618_rs-vis76c6f09のファイルに対するmarumie側修正の有無.md](20260730_0618_rs-vis76c6f09のファイルに対するmarumie側修正の有無.md) — `76c6f09` の64ファイルを marumie↔rs-vis で照合。53件は完全一致、取り込み時に手を入れたのは4件（sankey-svg・quality-scores/route・quality/page・subcontracts/page）、残る6件は 76c6f09 と無関係な既存差分（比較）
