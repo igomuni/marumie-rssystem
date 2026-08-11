@@ -39,6 +39,7 @@ import {
   type ChatSessionMeta,
 } from '@/client/lib/ai/chat-history-store';
 import { ExplorationHistory } from '@/client/components/SankeySvg/ExplorationHistory';
+import { FEATURE_AI_CHAT, FEATURE_EXPLORATION_HISTORY } from '@/app/lib/feature-flags';
 import { recordVisit, saveMemo } from '@/client/lib/exploration-store';
 import { buildExplorationLabel } from '@/app/lib/exploration-label';
 import { testOpenRouterKey, DEFAULT_BYOK_MODEL } from '@/client/lib/ai/openrouter-caller';
@@ -4815,8 +4816,9 @@ export default function RealDataSankeyPage() {
       >
         {!isCompactWidth && offsetControlsBlock}
 
-        {/* 探索履歴・発見メモ（IndexedDB のみ・サーバ送信なし） */}
-        {!isCompactWidth && (
+        {/* 探索履歴・発見メモ（IndexedDB のみ・サーバ送信なし）。
+            公開ミラーでは NEXT_PUBLIC_FEATURE_EXPLORATION_HISTORY 未設定で非表示 */}
+        {FEATURE_EXPLORATION_HISTORY && !isCompactWidth && (
           <ExplorationHistory
             getSnapshot={getExplorationSnapshot}
             onApply={applyExplorationEntry}
@@ -5035,8 +5037,10 @@ export default function RealDataSankeyPage() {
         )}
       </div>
 
-      {/* AIチャットパネル（右側）— BYOK（使用者キー）は全環境で使えるため常に表示。
-          モード未設定時はパネル内にキー登録の導線を出す */}
+      {/* AIチャットパネル（右側）— BYOK（使用者キー）は全環境で使える。
+          モード未設定時はパネル内にキー登録の導線を出す。
+          公開ミラーでは NEXT_PUBLIC_FEATURE_AI_CHAT 未設定で非表示 */}
+      {FEATURE_AI_CHAT && (
       <AiChatPanel
         open={showAiChat}
         onToggle={() => setShowAiChat(v => !v)}
@@ -5067,6 +5071,7 @@ export default function RealDataSankeyPage() {
         onDeleteByok={handleDeleteByok}
         onTestByok={testOpenRouterKey}
       />
+      )}
 
       {/* 品質スコア詳細ダイアログ（/quality と共通コンポーネント）
           containerRef 外の document.body に portal で出し、背面サンキー図の wheel/pan ハンドラに

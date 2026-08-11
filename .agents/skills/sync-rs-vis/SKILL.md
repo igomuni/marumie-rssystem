@@ -106,3 +106,4 @@ PR URL・反映内容サマリー・次回起点コミットを報告する。
 - `.agents/`, `tests/`, `playwright.config.ts`, `playwright-report/`, `test-results/` は除外する（開発・デバッグ用であり rs-vis へ反映しない）。
 - `.next/` は rsync 除外済み。ビルド時に rs-vis 側で再生成される。
 - ビルド後は差分に含まれるページの動作確認を推奨する。
+- **rs-vis では `NEXT_PUBLIC_FEATURE_AI_CHAT` と `NEXT_PUBLIC_FEATURE_EXPLORATION_HISTORY` を設定しない**（未設定＝AIチャットと探索履歴の UI が出ない）。コードは反映するが表示だけ落とす運用。詳細は `docs/ai-chat-architecture-guide.md`。
