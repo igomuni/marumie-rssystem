@@ -49,6 +49,9 @@ rsync -av \
   --exclude='playwright-report' --exclude='test-results' \
   --exclude='docs' --exclude='public/data/*.json' \
   --exclude='data/' --exclude='README.md' --exclude='walkthrough.md' \
+  --exclude='LICENSE' --exclude='.claude/settings.json' --exclude='.coderabbit.yaml' \
+  --exclude='*.test.ts' --exclude='*.test.tsx' --exclude='vitest.config.ts' \
+  --exclude='app/lib/test-utils' --exclude='.env*' \
   "${MARUMIE_RS_ROOT}/" \
   "${RS_VIS_ROOT}/"
 ```
@@ -103,7 +106,12 @@ PR URL・反映内容サマリー・次回起点コミットを報告する。
 ## 注意事項
 
 - `README.md` は rsync から除外する（rs-vis 側の公開向け記述を保持するため）。
+- **`LICENSE` は必ず除外する。rs-vis は AGPL-3.0、marumie-rssystem は MIT。** 上書きするとライセンスを勝手に変えてしまう。
+- `.claude/settings.json`・`.coderabbit.yaml` は開発元の作業用設定なので除外する（`.claude/commands/` は反映してよい）。
+- ユニットテスト（`*.test.ts`・`vitest.config.ts`・`app/lib/test-utils`）と `package.json` の `vitest` 依存・`test` スクリプトは反映しない。`tests/` を除外する運用と揃える。rsync 後に `package.json` から手で落とす。
+- `--exclude='data/'` は先頭スラッシュが無いため **`public/data/` にも一致する**（rsync のパターンは任意階層に一致）。データは手順5で `.gz` を個別コピーすること。
 - `.agents/`, `tests/`, `playwright.config.ts`, `playwright-report/`, `test-results/` は除外する（開発・デバッグ用であり rs-vis へ反映しない）。
 - `.next/` は rsync 除外済み。ビルド時に rs-vis 側で再生成される。
 - ビルド後は差分に含まれるページの動作確認を推奨する。
+- **rs-vis の `public/data` に古い展開済み `.json` が残っていると、`app/lib/api/data-file.ts` が `.gz` より raw を優先するため新しいデータが反映されて見えない。** `.gz` をコピーしたら `public/data/*.json`（`mof-budget-overview-*.json` を除く）を削除して `bash scripts/decompress-data.sh` を回し直す。本番は `data/server` のみ参照するので影響はローカル検証だけ。
 - **rs-vis では `NEXT_PUBLIC_FEATURE_AI_CHAT` と `NEXT_PUBLIC_FEATURE_EXPLORATION_HISTORY` を設定しない**（未設定＝AIチャットと探索履歴の UI が出ない）。コードは反映するが表示だけ落とす運用。詳細は `docs/ai-chat-architecture-guide.md`。
