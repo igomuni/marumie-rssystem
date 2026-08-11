@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { notFound } from 'next/navigation';
 import { loadSankeyGraph } from '@/app/lib/api/sankey-graph-loader';
 import { parseYear, buildMetadata, serverErrorResponse, SUPPORTED_YEARS } from '@/app/lib/api/api-notes';
+import { apiDocsLink } from '@/app/lib/api/links';
 import type { SupportedYear } from '@/app/lib/api/api-notes';
 import {
   resolveSankeyQuery,
@@ -166,7 +167,7 @@ export async function GET(req: Request) {
       summary,
       links: {
         webView: `/sankey-svg?${params.toString()}`,
-        docs: 'https://github.com/igomuni/marumie-rssystem/blob/main/docs/api-guide.md',
+        ...(apiDocsLink() ? { docs: apiDocsLink() } : {}),
       },
     };
 

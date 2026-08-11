@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 /**
  * CSP（Content-Security-Policy）。目的は XSS 成立時の被害限定、特に BYOK の
- * APIキー（IndexedDB保存）の外部送信遮断（設計: docs/tasks/20260718_1542 9節バックログ）。
+ * APIキー（IndexedDB保存）の外部送信遮断（docs/ai-chat-architecture-guide.md「2. API キーの取り扱い規律」）。
  *
  * - connect-src: 自オリジン + OpenRouter（BYOKチャットのブラウザ直接呼び出し）のみ。
  *   XSS が成立しても fetch/XHR/sendBeacon での任意ホストへの送出を遮断する（本命の効果）
