@@ -49,7 +49,7 @@ rsync -av \
   --exclude='playwright-report' --exclude='test-results' \
   --exclude='docs' --exclude='public/data/*.json' \
   --exclude='data/' --exclude='README.md' --exclude='walkthrough.md' \
-  --exclude='LICENSE' --exclude='.claude/settings.json' --exclude='.coderabbit.yaml' \
+  --exclude='LICENSE' --exclude='CLAUDE.md' --exclude='.claude' --exclude='.coderabbit.yaml' \
   --exclude='*.test.ts' --exclude='*.test.tsx' --exclude='vitest.config.ts' \
   --exclude='app/lib/test-utils' --exclude='.env*' \
   "${MARUMIE_RS_ROOT}/" \
@@ -107,7 +107,7 @@ PR URL・反映内容サマリー・次回起点コミットを報告する。
 
 - `README.md` は rsync から除外する（rs-vis 側の公開向け記述を保持するため）。
 - **`LICENSE` は必ず除外する。rs-vis は AGPL-3.0、marumie-rssystem は MIT。** 上書きするとライセンスを勝手に変えてしまう。
-- `.claude/settings.json`・`.coderabbit.yaml` は開発元の作業用設定なので除外する（`.claude/commands/` は反映してよい）。
+- **`.claude/` 一式と `CLAUDE.md` は除外する。** 開発元のエージェント向け指示・作業用設定であり、rs-vis 側の内容を上書きしない。`.coderabbit.yaml` も同様。
 - ユニットテスト（`*.test.ts`・`vitest.config.ts`・`app/lib/test-utils`）と `package.json` の `vitest` 依存・`test` スクリプトは反映しない。`tests/` を除外する運用と揃える。rsync 後に `package.json` から手で落とす。
 - `--exclude='data/'` は先頭スラッシュが無いため **`public/data/` にも一致する**（rsync のパターンは任意階層に一致）。データは手順5で `.gz` を個別コピーすること。
 - `.agents/`, `tests/`, `playwright.config.ts`, `playwright-report/`, `test-results/` は除外する（開発・デバッグ用であり rs-vis へ反映しない）。
