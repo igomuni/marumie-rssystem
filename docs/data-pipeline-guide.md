@@ -235,7 +235,7 @@ public/data/mof-funding-2024.json（Git管理、~56KB）
 ```text
 財務省 予算書データベース（Web の XML を直接スクレイピング）
   ↓ npm run generate-mof-jikou
-public/data/mof-jikou-2026.json（1.1MB / .gz 121KB を Git 管理）
+public/data/mof-jikou-2026.json（2.3MB / .gz 204KB を Git 管理）
 ```
 
 | コマンド | スクリプト | 入力 |
@@ -244,6 +244,16 @@ public/data/mof-jikou-2026.json（1.1MB / .gz 121KB を Git 管理）
 
 年度を変えるときは引数で指定する（`tsx scripts/generate-mof-jikou-data.ts 2024`）。
 
+取り込む帳票はスクリプト内の `DOCUMENTS` で定義する。令和8年度は8帳票・2,685事項:
+
+| 予算種別 | 一般会計 | 特別会計 | 政府関係機関 |
+|---|---|---|---|
+| 当初予算 | `11001` | `12001` | `13001` |
+| 暫定予算 | `31001` | `32001` | `33001` |
+| 補正予算 | `21001` | `22001`（事項なし） | — |
+
+帳票が存在しない年度・種別は警告を出してスキップする。
+
 **なぜ ZIP の CSV を使わないか**: 予算書 ZIP に入るのは科目別内訳（目レベル）だけで、
 事項名と説明文を含まない。事項は MOF 側で唯一「事業らしい」名前と説明を持つ粒度のため、
 Web 帳票から取得している。帳票構造は [mof-budget-data-guide.md](mof-budget-data-guide.md) 3節を参照。
@@ -251,8 +261,10 @@ Web 帳票から取得している。帳票構造は [mof-budget-data-guide.md](
 XML は `data/download/mof-{YEAR}/xml/` にキャッシュされる（Git 管理外）。
 キャッシュがあれば再実行時にネットワークアクセスは発生しない。
 
-**検証**: 生成結果の合計は同年度の CSV（`DL{YEAR}11001b.csv` / `DL{YEAR}12001b.csv`）と
-1円単位で一致すること。令和8年度は一般会計 122,309,247,035千円・特別会計 441,726,012,445千円。
+**検証**: 生成結果の帳票別合計は、同じ帳票IDの CSV（`DL{帳票ID}b.csv`）と1円単位で一致すること。
+補正予算だけは事項別内訳に補正対象の事項しか載らないため、`difference` の合計を CSV の
+`補正要求差引額(千円)` と突き合わせる。帳票別の期待値は
+[mof-budget-data-guide.md](mof-budget-data-guide.md) 3-1節の表を参照。
 
 ---
 
