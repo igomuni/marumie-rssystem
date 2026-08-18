@@ -271,6 +271,48 @@
 
 ---
 
+## GET /api/mof-jikou
+
+財務省 予算書の「事項」一覧を返す。行政事業レビューのデータとは接続していない、MOF 単独のデータセット。
+
+**クエリパラメータ**: なし（全件を返し、絞り込みはクライアント側で行う）
+
+**データソース**: `public/data/mof-jikou-2026.json(.gz)`（令和8年度当初予算。プロセス内キャッシュ、TTL なし）
+
+**レスポンス**: `MOFJikouData`（型定義: `types/mof-jikou.ts`）
+
+```json
+{
+  "metadata": { "fiscalYear": 2026, "eraLabel": "令和8年度", "unit": "thousand_yen", "notes": ["..."] },
+  "summary": { "count": 1664, "amount": 564035259480, "byAccountType": [], "byMinistry": [], "byMajorExpense": [] },
+  "items": [
+    {
+      "id": "general-273-6",
+      "accountType": "general",
+      "ministry": "皇室費",
+      "organization": "皇室費",
+      "sectionCode": "003",
+      "sectionName": "皇族費",
+      "majorExpenseCode": "95",
+      "majorExpenseName": "その他の事項経費",
+      "name": "皇族に必要な経費",
+      "amount": 255285,
+      "previousAmount": 235765,
+      "difference": 19520,
+      "description": "「日本国憲法」及び「皇室経済法」に基づく皇族費",
+      "page": 273,
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2026/xml/202611001000273b.xml"
+    }
+  ]
+}
+```
+
+> **単位に注意**: 本エンドポイントの金額は**千円単位**。他の API（行政事業レビュー由来）は円単位なので混同しないこと。
+
+> **合算に注意**: 一般会計と特別会計を単純合算すると会計間の繰入が二重計上される。
+
+---
+
 ## GET /api/quality-scores
 
 事業別品質スコア一覧を返す。
