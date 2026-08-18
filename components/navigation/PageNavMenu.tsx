@@ -15,6 +15,7 @@ const PAGES = [
   { href: '/project-bubble', label: 'バブルチャート' },
   { href: '/subcontracts', label: '委託構造' },
   { href: '/mof-budget-overview', label: '予算全体（MOF）' },
+  { href: '/mof-jikou', label: '予算書 事項（MOF）' },
 ] as const;
 
 export type NavPageHref = (typeof PAGES)[number]['href'];

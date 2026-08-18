@@ -271,6 +271,76 @@
 
 ---
 
+## GET /api/mof-jikou
+
+財務省 予算書の「事項」一覧を返す。行政事業レビューのデータとは接続していない、MOF 単独のデータセット。
+
+**クエリパラメータ**: なし（全件を返し、絞り込みはクライアント側で行う）
+
+**データソース**: `public/data/mof-jikou-2026.json(.gz)`（令和8年度。当初予算・暫定予算・補正予算の8帳票、2,685事項。プロセス内キャッシュ、TTL なし）
+
+**レスポンス**: `MOFJikouData`（型定義: `types/mof-jikou.ts`）
+
+```json
+{
+  "metadata": {
+    "fiscalYear": 2026,
+    "eraLabel": "令和8年度",
+    "budgetTypes": ["当初予算", "暫定予算", "補正予算（第1号）"],
+    "documents": [
+      {
+        "documentId": "202611001",
+        "accountType": "general",
+        "budgetType": "当初予算",
+        "title": "一般会計予算（当初予算）",
+        "url": "https://www.bb.mof.go.jp/server/2026/html/202611001Main.html",
+        "pages": 96,
+        "count": 1303
+      }
+    ],
+    "unit": "yen",
+    "generatedAt": "2026-08-18T13:01:43.464Z",
+    "notes": ["..."]
+  },
+  "summary": { "count": 2685, "byAccountType": [], "byBudgetType": [], "byMinistry": [], "byMajorExpense": [] },
+  "items": [
+    {
+      "id": "general-202611001-273-6",
+      "key": "general|当初予算|皇室費|皇室費||||003|皇族に必要な経費",
+      "accountType": "general",
+      "budgetType": "当初予算",
+      "documentId": "202611001",
+      "ministry": "皇室費",
+      "organization": "皇室費",
+      "specialAccount": "",
+      "subAccount": "",
+      "agency": "",
+      "sectionCode": "003",
+      "sectionName": "皇族費",
+      "majorExpenseCode": "95",
+      "majorExpenseName": "その他の事項経費",
+      "name": "皇族に必要な経費",
+      "amount": 255285000,
+      "previousAmount": 235765000,
+      "difference": 19520000,
+      "description": "「日本国憲法」及び「皇室経済法」に基づく皇族費",
+      "page": 273,
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2026/xml/202611001000273b.xml"
+    }
+  ]
+}
+```
+
+> **識別子**: MOF は事項に公式なIDを振っていない。`id` は掲載位置ベース（改版でずれる）、`key` は内容ベースの合成キー（年度をまたいだ追跡用）。
+>
+> **null の意味**: 暫定予算には比較欄が無いため `previousAmount` と `difference` は null。補正予算では `amount`=改予算額 / `previousAmount`=補正前の成立予算額 / `difference`=差引額。
+>
+> **単位に注意**: 金額は**円単位**。予算書の印字は千円単位だが、リポジトリ全体の金額規約に合わせて生成時に1000倍している。CSV と突き合わせるときは1000で割ること。
+>
+> **合算に注意**: 会計区分をまたぐと会計間の繰入が二重計上される。予算種別（当初・暫定・補正）をまたいだ合算も意味を持たない。`summary` は内訳のみを持ち、全体の総額は提供しない。
+
+---
+
 ## GET /api/quality-scores
 
 事業別品質スコア一覧を返す。

@@ -219,12 +219,53 @@ public/data/mof-funding-2024.json（Git管理、~56KB）
 | `DL202311001b.csv` | 一般会計歳出（項・目別） |
 | `DL202312001a.csv` | 特別会計歳入（一般会計からの繰入等） |
 
-取得元: 財務省「財政統計」CSVダウンロードページ（[bb.mof.go.jp/archive](https://www.bb.mof.go.jp/archive/)）  
-ファイル命名規則: `DL{YYYY}{会計区分}{連番}a/b.csv`（`11`=一般会計歳出、`12`=特別会計歳入）
+取得元: 財務省「予算書・決算書データベース」（[bb.mof.go.jp/archive](https://www.bb.mof.go.jp/archive/)）  
+ファイル命名規則: `DL{YYYY}{区分}{連番}a/b.csv`（`11`=一般会計、`12`=特別会計、`13`=政府関係機関）
 
+> **列構造・コード表・RSとの結合キーは [mof-budget-data-guide.md](mof-budget-data-guide.md) を参照。**
+>
 > **重要**: `generate-mof-budget-overview-data.ts` は CSV から完全自動生成ではなく、年金特別会計・地方交付税・国債整理基金等の金額詳細はスクリプト内にハードコードされている。データ年度を変更する場合は手動でのコード編集が必要。
-
+>
 > **通常は再生成不要**: `mof-budget-overview-2023.json` と `mof-funding-2024.json` はどちらも Git 管理済みで小サイズ。財務省の年度が変わらない限り更新不要。
+
+---
+
+### 2-8. `/mof-jikou`（予算書「事項」一覧）
+
+```text
+財務省 予算書データベース（Web の XML を直接スクレイピング）
+  ↓ npm run generate-mof-jikou
+public/data/mof-jikou-2026.json（2.3MB / .gz 204KB を Git 管理）
+```
+
+| コマンド | スクリプト | 入力 |
+|---------|-----------|------|
+| `npm run generate-mof-jikou` | `scripts/generate-mof-jikou-data.ts` | `https://www.bb.mof.go.jp/server/2026/` の目次 HTML と本文 XML |
+
+年度を変えるときは引数で指定する（`tsx scripts/generate-mof-jikou-data.ts 2024`）。
+
+取り込む帳票はスクリプト内の `DOCUMENTS` で定義する。令和8年度は8帳票・2,685事項:
+
+| 予算種別 | 一般会計 | 特別会計 | 政府関係機関 |
+|---|---|---|---|
+| 当初予算 | `11001` | `12001` | `13001` |
+| 暫定予算 | `31001` | `32001` | `33001` |
+| 補正予算 | `21001` | `22001`（事項なし） | — |
+
+帳票が存在しない年度・種別は警告を出してスキップする。
+
+**なぜ ZIP の CSV を使わないか**: 予算書 ZIP に入るのは科目別内訳（目レベル）だけで、
+事項名と説明文を含まない。事項は MOF 側で唯一「事業らしい」名前と説明を持つ粒度のため、
+Web 帳票から取得している。帳票構造は [mof-budget-data-guide.md](mof-budget-data-guide.md) 3節を参照。
+
+XML は `data/download/mof-{YEAR}/xml/` にキャッシュされる（Git 管理外）。
+キャッシュがあれば再実行時にネットワークアクセスは発生しない。
+
+**検証**: 生成結果の帳票別合計は、同じ帳票IDの CSV（`DL{帳票ID}b.csv`）と1円単位で一致すること。
+JSON は円単位・CSV は千円単位なので、比較時は1000で割る。
+補正予算だけは事項別内訳に補正対象の事項しか載らないため、`difference` の合計を CSV の
+`補正要求差引額(千円)` と突き合わせる。帳票別の期待値は
+[mof-budget-data-guide.md](mof-budget-data-guide.md) 3-1節の表を参照。
 
 ---
 
