@@ -6,9 +6,11 @@
  * 行政事業レビューのデータとは接続せず、MOF 単独で何が見えるかを確認するためのページ。
  * データは /api/mof-jikou（npm run generate-mof-jikou で生成）。
  * 予算書のデータ構造そのものを確認する用途なので、列は省略せず全部出す。
+ *
+ * レイアウトは /quality に合わせている（画面高さいっぱいの表＋枠内フッタのページャ）。
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import type { MOFAccountType, MOFJikouData, MOFJikouItem } from '@/types/mof-jikou';
 import {
@@ -46,26 +48,41 @@ type SortDir = 'asc' | 'desc';
 interface ColumnSpec {
   key: SortKey;
   label: string;
+  /** table-fixed の列幅（px）。ソートで中身が変わっても幅が動かないようにする */
+  width: number;
   /** 数値列は右寄せ・降順スタート */
   numeric?: boolean;
-  headerNote?: string;
+  note?: string;
 }
 
 const COLUMNS: ColumnSpec[] = [
-  { key: 'budgetType', label: '予算種別' },
-  { key: 'accountType', label: '会計区分' },
-  { key: 'ministry', label: '所管' },
-  { key: 'organization', label: '組織／特別会計', headerNote: '一般会計は組織、特別会計は会計名、政府関係機関は機関名' },
-  { key: 'subAccount', label: '勘定／業務' },
-  { key: 'sectionCode', label: '項コード' },
-  { key: 'sectionName', label: '項名' },
-  { key: 'majorExpenseName', label: '主要経費' },
-  { key: 'name', label: '事項名' },
-  { key: 'amount', label: '本年度額', numeric: true },
-  { key: 'previousAmount', label: '比較対象額', numeric: true, headerNote: '当初は前年度予算額、補正は補正前の成立予算額、暫定は欄なし' },
-  { key: 'difference', label: '増減額', numeric: true },
-  { key: 'rate', label: '増減率', numeric: true },
+  { key: 'budgetType', label: '予算種別', width: 124 },
+  { key: 'accountType', label: '会計区分', width: 92 },
+  { key: 'ministry', label: '所管', width: 150 },
+  {
+    key: 'organization',
+    label: '組織／特会',
+    width: 160,
+    note: '一般会計は組織、特別会計は会計名、政府関係機関は機関名',
+  },
+  { key: 'subAccount', label: '勘定／業務', width: 130 },
+  { key: 'sectionCode', label: '項', width: 48, note: '項コード（組織・勘定内の連番）' },
+  { key: 'sectionName', label: '項名', width: 190 },
+  { key: 'majorExpenseName', label: '主要経費', width: 130, note: '政府関係機関の帳票には主要経費の列が無い' },
+  { key: 'name', label: '事項名', width: 340 },
+  { key: 'amount', label: '本年度額', width: 100, numeric: true },
+  {
+    key: 'previousAmount',
+    label: '比較対象額',
+    width: 100,
+    numeric: true,
+    note: '当初は前年度予算額、補正は補正前の成立予算額、暫定は欄なし',
+  },
+  { key: 'difference', label: '増減額', width: 100, numeric: true },
+  { key: 'rate', label: '増減率', width: 84, numeric: true },
 ];
+
+const TABLE_MIN_WIDTH = COLUMNS.reduce((sum, c) => sum + c.width, 0);
 
 /** 一般会計は組織、特別会計は会計名、政府関係機関は機関名 */
 function orgColumn(item: MOFJikouItem): string {
@@ -101,8 +118,9 @@ export default function MOFJikouPage() {
   const [keyword, setKeyword] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
-  const [limit, setLimit] = useState(PAGE_SIZE);
+  const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch('/api/mof-jikou')
@@ -114,9 +132,9 @@ export default function MOFJikouPage() {
       .catch((e: Error) => setError(e.message));
   }, []);
 
-  // フィルタ条件が変わったら表示件数を戻す
+  // フィルタ条件が変わったら1ページ目に戻す
   useEffect(() => {
-    setLimit(PAGE_SIZE);
+    setPage(1);
   }, [account, budgetType, ministry, majorExpense, keyword]);
 
   const ministries = useMemo(() => {
@@ -163,6 +181,15 @@ export default function MOFJikouPage() {
     [filtered]
   );
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  /** ページを送ったら表の先頭に戻す */
+  function goToPage(next: number) {
+    setPage(next);
+    scrollRef.current?.scrollTo({ top: 0 });
+  }
+
   function toggleSort(column: ColumnSpec) {
     if (sortKey === column.key) {
       setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
@@ -170,7 +197,7 @@ export default function MOFJikouPage() {
       setSortKey(column.key);
       setSortDir(column.numeric ? 'desc' : 'asc');
     }
-    setLimit(PAGE_SIZE);
+    goToPage(1);
   }
 
   if (error) {
@@ -194,41 +221,38 @@ export default function MOFJikouPage() {
   }
 
   return (
-    <main className="w-full px-3 py-4 sm:px-5">
-      <header className="mb-4 flex items-start justify-between gap-4">
+    <div className="flex h-screen flex-col bg-neutral-50 dark:bg-neutral-900">
+      <header className="flex shrink-0 items-start justify-between gap-4 px-3 pb-2 pt-3">
         <div>
-          <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <h1 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
             予算書「事項」一覧
           </h1>
-          <p className="mt-1 text-xs text-neutral-500">
-            {data.metadata.eraLabel}（{data.metadata.budgetTypes.join('・')}）／財務省
-            予算書・決算書データベース
+          {/* 集計はカードにすると縦を食うので1行に畳む */}
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
+            <span>
+              {data.metadata.eraLabel}／財務省 予算書・決算書データベース
+            </span>
+            <span className="text-neutral-300 dark:text-neutral-700">|</span>
+            <span>
+              全 <b className="font-semibold text-neutral-700 dark:text-neutral-300">{data.summary.count.toLocaleString()}</b> 事項
+            </span>
+            {data.summary.byBudgetType.map(g => (
+              <span key={g.key}>
+                {g.key} {g.count.toLocaleString()}件 / {formatThousandYen(g.amount)}
+              </span>
+            ))}
+            <span className="text-neutral-300 dark:text-neutral-700">|</span>
+            {data.summary.byAccountType.map(g => (
+              <span key={g.key}>
+                {g.key} {g.count.toLocaleString()}件 / {formatThousandYen(g.amount)}
+              </span>
+            ))}
           </p>
         </div>
         <PageNavMenu current="/mof-jikou" />
       </header>
 
-      <section className="mb-4 grid grid-cols-2 gap-2 text-xs md:grid-cols-4 lg:grid-cols-6">
-        <SummaryCard label="事項数" value={`${data.summary.count.toLocaleString()} 件`} />
-        {data.summary.byBudgetType.map(g => (
-          <SummaryCard
-            key={g.key}
-            label={g.key}
-            value={formatThousandYen(g.amount)}
-            note={`${g.count.toLocaleString()} 件`}
-          />
-        ))}
-        {data.summary.byAccountType.map(g => (
-          <SummaryCard
-            key={g.key}
-            label={g.key}
-            value={formatThousandYen(g.amount)}
-            note={`${g.count.toLocaleString()} 件`}
-          />
-        ))}
-      </section>
-
-      <section className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+      <section className="flex shrink-0 flex-wrap items-center gap-2 px-3 pb-2 text-xs">
         <div className="flex overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700">
           {(
             [
@@ -245,7 +269,7 @@ export default function MOFJikouPage() {
                 setAccount(value);
                 setMinistry('');
               }}
-              className={`px-3 py-1.5 ${
+              className={`px-2.5 py-1 ${
                 account === value
                   ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
                   : 'bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
@@ -259,7 +283,7 @@ export default function MOFJikouPage() {
         <select
           value={budgetType}
           onChange={e => setBudgetType(e.target.value)}
-          className="rounded-lg border border-neutral-300 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
+          className="rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
         >
           <option value="">予算種別: すべて</option>
           {data.metadata.budgetTypes.map(b => (
@@ -272,7 +296,7 @@ export default function MOFJikouPage() {
         <select
           value={ministry}
           onChange={e => setMinistry(e.target.value)}
-          className="max-w-[16rem] truncate rounded-lg border border-neutral-300 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
+          className="max-w-[15rem] truncate rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
         >
           <option value="">所管・機関: すべて</option>
           {ministries.map(m => (
@@ -285,7 +309,7 @@ export default function MOFJikouPage() {
         <select
           value={majorExpense}
           onChange={e => setMajorExpense(e.target.value)}
-          className="max-w-[16rem] truncate rounded-lg border border-neutral-300 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
+          className="max-w-[15rem] truncate rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
         >
           <option value="">主要経費: すべて</option>
           {data.summary.byMajorExpense.map(g => (
@@ -300,200 +324,223 @@ export default function MOFJikouPage() {
           value={keyword}
           onChange={e => setKeyword(e.target.value)}
           placeholder="事項名・項名・説明を検索"
-          className="min-w-[12rem] flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
+          className="min-w-[12rem] flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-1 dark:border-neutral-700 dark:bg-neutral-900"
         />
 
         <span className="whitespace-nowrap text-neutral-500">
-          {filtered.length.toLocaleString()} 件 / {formatThousandYen(filteredTotal)}
+          該当 {filtered.length.toLocaleString()} 件 / {formatThousandYen(filteredTotal)}
         </span>
       </section>
 
-      <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-800">
-        <table className="w-full border-collapse text-xs">
-          <thead className="bg-neutral-50 text-left text-neutral-500 dark:bg-neutral-900">
-            <tr>
-              {COLUMNS.map(col => {
-                const active = sortKey === col.key;
-                return (
-                  <th
-                    key={col.key}
-                    title={col.headerNote}
-                    onClick={() => toggleSort(col)}
-                    className={`cursor-pointer select-none whitespace-nowrap px-2 py-2 font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 ${
-                      col.numeric ? 'text-right' : 'text-left'
-                    } ${active ? 'text-neutral-900 dark:text-neutral-100' : ''}`}
-                  >
-                    {col.label}
-                    <span className="ml-1 text-[10px]">
-                      {active ? (sortDir === 'asc' ? '▲' : '▼') : '　'}
-                    </span>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.slice(0, limit).map(item => {
-              const rate = changeRate(item.amount, item.previousAmount);
-              const isOpen = expanded === item.id;
-              return (
-                <tr
-                  key={item.id}
-                  onClick={() => setExpanded(isOpen ? null : item.id)}
-                  className="cursor-pointer border-t border-neutral-100 align-top hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
-                >
-                  <td className="whitespace-nowrap px-2 py-2 text-neutral-500">
-                    {item.budgetType}
-                  </td>
-                  <td className="whitespace-nowrap px-2 py-2 text-neutral-500">
-                    {ACCOUNT_LABEL[item.accountType]}
-                  </td>
-                  <td className="px-2 py-2 text-neutral-600 dark:text-neutral-400">
-                    {item.ministry || '—'}
-                  </td>
-                  <td className="px-2 py-2 text-neutral-600 dark:text-neutral-400">
-                    {orgColumn(item) || '—'}
-                  </td>
-                  <td className="px-2 py-2 text-neutral-600 dark:text-neutral-400">
-                    {item.subAccount || '—'}
-                  </td>
-                  <td className="whitespace-nowrap px-2 py-2 tabular-nums text-neutral-500">
-                    {item.sectionCode}
-                  </td>
-                  <td className="px-2 py-2 text-neutral-600 dark:text-neutral-400">
-                    {item.sectionName}
-                  </td>
-                  <td className="px-2 py-2 text-neutral-600 dark:text-neutral-400">
-                    {item.majorExpenseName || (item.majorExpenseCode ? `(${item.majorExpenseCode})` : '—')}
-                  </td>
-                  <td className="px-2 py-2">
-                    <div className="font-medium text-neutral-900 dark:text-neutral-100">
-                      {item.name}
-                    </div>
-                    {isOpen && (
-                      <div className="mt-2 max-w-[48rem] space-y-2 font-normal text-neutral-600 dark:text-neutral-400">
-                        <p className="whitespace-pre-wrap leading-relaxed">
-                          {item.description || '（説明なし）'}
-                        </p>
-                        <dl className="grid grid-cols-[7rem_1fr] gap-x-2 gap-y-0.5 text-[11px] text-neutral-400">
-                          <dt>合成キー</dt>
-                          <dd className="break-all font-mono">{item.key}</dd>
-                          <dt>行ID</dt>
-                          <dd className="font-mono">{item.id}</dd>
-                          <dt>主要経費コード</dt>
-                          <dd>{item.majorExpenseCode}</dd>
-                          <dt>帳票・ページ</dt>
-                          <dd>
-                            {item.documentId} p.{item.page}{' '}
-                            <a
-                              href={item.sourceUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={e => e.stopPropagation()}
-                              className="underline hover:text-neutral-600"
-                            >
-                              出典XML
-                            </a>
-                          </dd>
-                        </dl>
-                      </div>
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
-                    {formatThousandYen(item.amount)}
-                  </td>
-                  <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums text-neutral-500">
-                    {formatThousandYen(item.previousAmount)}
-                  </td>
-                  <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums text-neutral-500">
-                    {formatThousandYen(item.difference)}
-                  </td>
-                  <td
-                    className={`whitespace-nowrap px-2 py-2 text-right tabular-nums ${
-                      rate === null
-                        ? 'text-neutral-400'
-                        : rate === 'new'
-                          ? 'text-blue-600'
-                          : rate > 0
-                            ? 'text-emerald-700 dark:text-emerald-500'
-                            : rate < 0
-                              ? 'text-red-600 dark:text-red-400'
-                              : 'text-neutral-400'
-                    }`}
-                  >
-                    {formatChangeRate(rate)}
-                  </td>
+      {/*
+        外枠（枠線・角丸）とスクロールする内箱を分ける。ページャを枠内フッタに固定するため、
+        枠自体はスクロールさせない。内箱を縦にもスクロールさせるのは thead の sticky を効かせるため。
+      */}
+      <div className="flex min-h-0 flex-1 flex-col px-3 pb-3">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
+            {/* table-fixed + colgroup: ソートで中身が変わっても列幅が動かないようにする */}
+            <table
+              className="w-full table-fixed border-collapse text-xs"
+              style={{ minWidth: TABLE_MIN_WIDTH }}
+            >
+              <colgroup>
+                {COLUMNS.map(c => (
+                  <col key={c.key} style={{ width: c.width }} />
+                ))}
+              </colgroup>
+              <thead className="sticky top-0 z-10 bg-neutral-100 text-left text-neutral-500 dark:bg-neutral-800">
+                <tr>
+                  {COLUMNS.map(col => {
+                    const active = sortKey === col.key;
+                    return (
+                      <th
+                        key={col.key}
+                        title={col.note}
+                        onClick={() => toggleSort(col)}
+                        className={`cursor-pointer select-none px-2 py-2 font-medium hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
+                          col.numeric ? 'text-right' : 'text-left'
+                        } ${active ? 'text-neutral-900 dark:text-neutral-100' : ''}`}
+                      >
+                        <span className="truncate align-middle">{col.label}</span>
+                        {/* ソート記号は常に同じ幅を占有させ、切替で列幅も文字位置も動かさない */}
+                        <span className="ml-0.5 inline-block w-2.5 text-[9px] align-middle">
+                          {active ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                        </span>
+                      </th>
+                    );
+                  })}
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {pageItems.map(item => {
+                  const rate = changeRate(item.amount, item.previousAmount);
+                  const isOpen = expanded === item.id;
+                  return (
+                    <tr
+                      key={item.id}
+                      onClick={() => setExpanded(isOpen ? null : item.id)}
+                      className="cursor-pointer border-t border-neutral-100 align-top hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
+                    >
+                      <td className="truncate px-2 py-1.5 text-neutral-500">{item.budgetType}</td>
+                      <td className="truncate px-2 py-1.5 text-neutral-500">
+                        {ACCOUNT_LABEL[item.accountType]}
+                      </td>
+                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                        <span className={isOpen ? '' : 'line-clamp-2'}>{item.ministry || '—'}</span>
+                      </td>
+                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                        <span className={isOpen ? '' : 'line-clamp-2'}>{orgColumn(item) || '—'}</span>
+                      </td>
+                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                        <span className={isOpen ? '' : 'line-clamp-2'}>{item.subAccount || '—'}</span>
+                      </td>
+                      <td className="truncate px-2 py-1.5 tabular-nums text-neutral-500">
+                        {item.sectionCode}
+                      </td>
+                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                        <span className={isOpen ? '' : 'line-clamp-2'}>{item.sectionName}</span>
+                      </td>
+                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                        <span className={isOpen ? '' : 'line-clamp-2'}>
+                          {item.majorExpenseName ||
+                            (item.majorExpenseCode ? `(${item.majorExpenseCode})` : '—')}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1.5">
+                        <div
+                          className={`font-medium text-neutral-900 dark:text-neutral-100 ${
+                            isOpen ? '' : 'line-clamp-2'
+                          }`}
+                        >
+                          {item.name}
+                        </div>
+                        {isOpen && (
+                          <div className="mt-2 space-y-2 font-normal text-neutral-600 dark:text-neutral-400">
+                            <p className="whitespace-pre-wrap leading-relaxed">
+                              {item.description || '（説明なし）'}
+                            </p>
+                            <dl className="grid grid-cols-[6rem_1fr] gap-x-2 gap-y-0.5 text-[11px] text-neutral-400">
+                              <dt>合成キー</dt>
+                              <dd className="break-all font-mono">{item.key}</dd>
+                              <dt>行ID</dt>
+                              <dd className="font-mono">{item.id}</dd>
+                              <dt>主要経費コード</dt>
+                              <dd>{item.majorExpenseCode || '—'}</dd>
+                              <dt>帳票・ページ</dt>
+                              <dd>
+                                {item.documentId} p.{item.page}{' '}
+                                <a
+                                  href={item.sourceUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={e => e.stopPropagation()}
+                                  className="underline hover:text-neutral-600"
+                                >
+                                  出典XML
+                                </a>
+                              </dd>
+                            </dl>
+                          </div>
+                        )}
+                      </td>
+                      <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
+                        {formatThousandYen(item.amount)}
+                      </td>
+                      <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                        {formatThousandYen(item.previousAmount)}
+                      </td>
+                      <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                        {formatThousandYen(item.difference)}
+                      </td>
+                      <td
+                        className={`truncate px-2 py-1.5 text-right tabular-nums ${
+                          rate === null
+                            ? 'text-neutral-400'
+                            : rate === 'new'
+                              ? 'text-blue-600'
+                              : rate > 0
+                                ? 'text-emerald-700 dark:text-emerald-500'
+                                : rate < 0
+                                  ? 'text-red-600 dark:text-red-400'
+                                  : 'text-neutral-400'
+                        }`}
+                      >
+                        {formatChangeRate(rate)}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={COLUMNS.length}
+                      className="px-3 py-10 text-center text-neutral-500"
+                    >
+                      条件に合う事項がありません。
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      {filtered.length === 0 && (
-        <p className="py-8 text-center text-xs text-neutral-500">
-          条件に合う事項がありません。
-        </p>
-      )}
-
-      {limit < filtered.length && (
-        <div className="mt-4 text-center">
-          <button
-            type="button"
-            onClick={() => setLimit(l => l + PAGE_SIZE)}
-            className="rounded-lg border border-neutral-300 px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
-            さらに表示（残り {(filtered.length - limit).toLocaleString()} 件）
-          </button>
+          {/* ページャは表の枠内フッタ。表とページ番号が離れて見えないようにする */}
+          <div className="flex shrink-0 items-center justify-between gap-2 border-t border-neutral-200 bg-neutral-50 px-3 py-1.5 dark:border-neutral-800 dark:bg-neutral-900">
+            <button
+              type="button"
+              onClick={() => goToPage(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className="rounded border border-neutral-300 px-2.5 py-1 text-xs hover:bg-neutral-100 disabled:opacity-30 dark:border-neutral-600 dark:hover:bg-neutral-800"
+            >
+              前へ
+            </button>
+            <span className="font-mono text-xs text-neutral-500">
+              {page} / {totalPages}
+              <span className="ml-2 text-neutral-400">
+                {filtered.length === 0
+                  ? '0 件'
+                  : `${((page - 1) * PAGE_SIZE + 1).toLocaleString()}–${Math.min(page * PAGE_SIZE, filtered.length).toLocaleString()} 件目`}
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => goToPage(Math.min(totalPages, page + 1))}
+              disabled={page === totalPages}
+              className="rounded border border-neutral-300 px-2.5 py-1 text-xs hover:bg-neutral-100 disabled:opacity-30 dark:border-neutral-600 dark:hover:bg-neutral-800"
+            >
+              次へ
+            </button>
+          </div>
         </div>
-      )}
 
-      <footer className="mt-8 space-y-2 border-t border-neutral-200 pt-4 text-[11px] text-neutral-500 dark:border-neutral-800">
-        <div className="space-y-1">
-          {data.metadata.notes.map(note => (
-            <p key={note}>・{note}</p>
-          ))}
-        </div>
-        <details>
-          <summary className="cursor-pointer">取り込み元の帳票（{data.metadata.documents.length}件）</summary>
-          <ul className="mt-1 space-y-0.5 pl-4">
-            {data.metadata.documents.map(doc => (
-              <li key={doc.documentId}>
-                <a
-                  href={doc.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-neutral-700"
-                >
-                  {doc.documentId} {doc.title}
-                </a>
-                {' — '}
-                {doc.pages} ページ / {doc.count.toLocaleString()} 件
-              </li>
+        <details className="mt-1.5 shrink-0 text-[11px] text-neutral-500">
+          <summary className="cursor-pointer">
+            データの読み方と取り込み元（{data.metadata.documents.length}帳票）
+          </summary>
+          <div className="mt-1 space-y-1 pl-4">
+            {data.metadata.notes.map(note => (
+              <p key={note}>・{note}</p>
             ))}
-          </ul>
+            <ul className="mt-1 space-y-0.5">
+              {data.metadata.documents.map(doc => (
+                <li key={doc.documentId}>
+                  <a
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-neutral-700"
+                  >
+                    {doc.documentId} {doc.title}
+                  </a>
+                  {' — '}
+                  {doc.pages} ページ / {doc.count.toLocaleString()} 件
+                </li>
+              ))}
+            </ul>
+          </div>
         </details>
-      </footer>
-    </main>
-  );
-}
-
-function SummaryCard({
-  label,
-  value,
-  note,
-}: {
-  label: string;
-  value: string;
-  note?: string;
-}) {
-  return (
-    <div className="rounded-lg border border-neutral-200 bg-white px-3 py-2 dark:border-neutral-800 dark:bg-neutral-900">
-      <div className="truncate text-[11px] text-neutral-500">{label}</div>
-      <div className="text-sm font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">
-        {value}
       </div>
-      {note && <div className="text-[11px] text-neutral-400">{note}</div>}
     </div>
   );
 }

@@ -304,11 +304,17 @@ function extractStandard(
   let currentSectionName = '';
 
   for (const row of rows) {
-    // 項は最初の行にだけ印字され、以降の事項行は空欄で継続する
+    // 項は最初の行にだけ印字され、以降の事項行は空欄で継続する。
+    // ただし「説明」欄には数量の内訳表（種別／千トン等）が埋め込まれることがあり、
+    // その行も同じ列番号を使うため、項コードが数字であることを条件に取り違えを防ぐ
+    // （例: 食料安定供給特別会計 食糧管理勘定 p.348 の「大麦等 172」）。
+    // 項コードと項名は必ずセットで印字されるので、両方揃った行でだけ更新する。
     const code = textAt(row, colSectionCode);
     const section = textAt(row, colSectionName);
-    if (code) currentSectionCode = code;
-    if (section) currentSectionName = section;
+    if (/^\d+$/.test(code) && section) {
+      currentSectionCode = code;
+      currentSectionName = section;
+    }
 
     const name = textAt(row, colName);
     const amount = numberAt(row, colAmount);
