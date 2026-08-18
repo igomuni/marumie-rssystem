@@ -258,7 +258,7 @@ public/data/mof-jikou-2026.json（2.3MB / .gz 204KB を Git 管理）
 事項名と説明文を含まない。事項は MOF 側で唯一「事業らしい」名前と説明を持つ粒度のため、
 Web 帳票から取得している。帳票構造は [mof-budget-data-guide.md](mof-budget-data-guide.md) 3節を参照。
 
-XML は `data/download/mof-{YEAR}/xml/` にキャッシュされる（Git 管理外）。
+XML は `data/download/mof_{YEAR}/xml/` にキャッシュされる（Git 管理外）。
 キャッシュがあれば再実行時にネットワークアクセスは発生しない。
 
 **検証**: 生成結果の帳票別合計は、同じ帳票IDの CSV（`DL{帳票ID}b.csv`）と1円単位で一致すること。
