@@ -10,7 +10,7 @@
  * レイアウトは /quality に合わせている（画面高さいっぱいの表＋枠内フッタのページャ）。
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import type { MOFAccountType, MOFJikouData, MOFJikouItem } from '@/types/mof-jikou';
 import {
@@ -48,7 +48,7 @@ type SortDir = 'asc' | 'desc';
 interface ColumnSpec {
   key: SortKey;
   label: string;
-  /** table-fixed の列幅（px）。ソートで中身が変わっても幅が動かないようにする */
+  /** 既定の列幅（px）。table-fixed なのでソートで中身が変わっても幅は動かない */
   width: number;
   /** 数値列は右寄せ・降順スタート */
   numeric?: boolean;
@@ -68,7 +68,12 @@ const COLUMNS: ColumnSpec[] = [
   { key: 'subAccount', label: '勘定／業務', width: 130 },
   { key: 'sectionCode', label: '項', width: 48, note: '項コード（組織・勘定内の連番）' },
   { key: 'sectionName', label: '項名', width: 190 },
-  { key: 'majorExpenseName', label: '主要経費', width: 130, note: '政府関係機関の帳票には主要経費の列が無い' },
+  {
+    key: 'majorExpenseName',
+    label: '主要経費',
+    width: 130,
+    note: '政府関係機関の帳票には主要経費の列が無い',
+  },
   { key: 'name', label: '事項名', width: 340 },
   { key: 'amount', label: '本年度額', width: 100, numeric: true },
   {
@@ -82,7 +87,12 @@ const COLUMNS: ColumnSpec[] = [
   { key: 'rate', label: '増減率', width: 84, numeric: true },
 ];
 
-const TABLE_MIN_WIDTH = COLUMNS.reduce((sum, c) => sum + c.width, 0);
+const DEFAULT_WIDTHS: Record<string, number> = Object.fromEntries(
+  COLUMNS.map(c => [c.key, c.width])
+);
+
+/** リサイズで潰しすぎないための下限 */
+const MIN_COLUMN_WIDTH = 40;
 
 /** 一般会計は組織、特別会計は会計名、政府関係機関は機関名 */
 function orgColumn(item: MOFJikouItem): string {
@@ -91,7 +101,7 @@ function orgColumn(item: MOFJikouItem): string {
   return item.agency;
 }
 
-/** ソート用の値を取り出す */
+/** ソート用の値を取り出す。sectionCode だけは呼び出し側で数値化を判定する */
 function sortValue(item: MOFJikouItem, key: SortKey): string | number | null {
   switch (key) {
     case 'accountType':
@@ -114,12 +124,15 @@ export default function MOFJikouPage() {
   const [account, setAccount] = useState<'all' | MOFAccountType>('all');
   const [budgetType, setBudgetType] = useState('');
   const [ministry, setMinistry] = useState('');
+  const [organization, setOrganization] = useState('');
+  const [subAccount, setSubAccount] = useState('');
   const [majorExpense, setMajorExpense] = useState('');
   const [keyword, setKeyword] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -135,26 +148,59 @@ export default function MOFJikouPage() {
   // フィルタ条件が変わったら1ページ目に戻す
   useEffect(() => {
     setPage(1);
-  }, [account, budgetType, ministry, majorExpense, keyword]);
+  }, [account, budgetType, ministry, organization, subAccount, majorExpense, keyword]);
 
-  const ministries = useMemo(() => {
+  /**
+   * 絞り込みの選択肢は上位の条件で連鎖させる。
+   * 所管を選んだあとに他省庁の組織が候補に残っていると選べてしまい0件になるため。
+   */
+  const baseRows = useMemo(() => {
     if (!data) return [];
-    const set = new Set(
-      data.items
-        .filter(i => account === 'all' || i.accountType === account)
-        .map(i => i.ministry || i.agency)
-        .filter(Boolean)
-    );
-    return [...set].sort();
-  }, [data, account]);
+    return data.items.filter(i => {
+      if (account !== 'all' && i.accountType !== account) return false;
+      if (budgetType && i.budgetType !== budgetType) return false;
+      return true;
+    });
+  }, [data, account, budgetType]);
+
+  const ministries = useMemo(
+    () => [...new Set(baseRows.map(i => i.ministry || i.agency).filter(Boolean))].sort(),
+    [baseRows]
+  );
+
+  const organizations = useMemo(
+    () =>
+      [
+        ...new Set(
+          baseRows
+            .filter(i => !ministry || (i.ministry || i.agency) === ministry)
+            .map(orgColumn)
+            .filter(Boolean)
+        ),
+      ].sort(),
+    [baseRows, ministry]
+  );
+
+  const subAccounts = useMemo(
+    () =>
+      [
+        ...new Set(
+          baseRows
+            .filter(i => !ministry || (i.ministry || i.agency) === ministry)
+            .filter(i => !organization || orgColumn(i) === organization)
+            .map(i => i.subAccount)
+            .filter(Boolean)
+        ),
+      ].sort(),
+    [baseRows, ministry, organization]
+  );
 
   const filtered = useMemo(() => {
-    if (!data) return [];
     const kw = keyword.trim();
-    const rows = data.items.filter(item => {
-      if (account !== 'all' && item.accountType !== account) return false;
-      if (budgetType && item.budgetType !== budgetType) return false;
+    const rows = baseRows.filter(item => {
       if (ministry && (item.ministry || item.agency) !== ministry) return false;
+      if (organization && orgColumn(item) !== organization) return false;
+      if (subAccount && item.subAccount !== subAccount) return false;
       if (majorExpense && item.majorExpenseName !== majorExpense) return false;
       if (kw) {
         const haystack = `${item.name}\n${item.sectionName}\n${item.description}\n${item.ministry}\n${orgColumn(item)}`;
@@ -162,10 +208,16 @@ export default function MOFJikouPage() {
       }
       return true;
     });
+
+    // 項コードは会計により2桁/3桁が混在する。すべて数字なら数値として比較する
+    // （文字列比較だと "01" と "001" のようなゼロ埋めの差で順序が崩れる）
+    const numericSectionCode =
+      sortKey === 'sectionCode' && rows.every(r => /^\d+$/.test(r.sectionCode));
+
     const factor = sortDir === 'asc' ? 1 : -1;
     rows.sort((a, b) => {
-      const va = sortValue(a, sortKey);
-      const vb = sortValue(b, sortKey);
+      const va = numericSectionCode ? Number(a.sectionCode) : sortValue(a, sortKey);
+      const vb = numericSectionCode ? Number(b.sectionCode) : sortValue(b, sortKey);
       // null（該当欄なし）は方向によらず末尾へ
       if (va === null && vb === null) return 0;
       if (va === null) return 1;
@@ -174,7 +226,7 @@ export default function MOFJikouPage() {
       return String(va).localeCompare(String(vb), 'ja') * factor;
     });
     return rows;
-  }, [data, account, budgetType, ministry, majorExpense, keyword, sortKey, sortDir]);
+  }, [baseRows, ministry, organization, subAccount, majorExpense, keyword, sortKey, sortDir]);
 
   const filteredTotal = useMemo(
     () => filtered.reduce((sum, i) => sum + i.amount, 0),
@@ -183,6 +235,8 @@ export default function MOFJikouPage() {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const tableWidth = COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0);
+  const widthsChanged = COLUMNS.some(c => (widths[c.key] ?? c.width) !== c.width);
 
   /** ページを送ったら表の先頭に戻す */
   function goToPage(next: number) {
@@ -198,6 +252,28 @@ export default function MOFJikouPage() {
       setSortDir(column.numeric ? 'desc' : 'asc');
     }
     goToPage(1);
+  }
+
+  /** 列境界のドラッグで幅を変える。mousedown 時にだけ window へリスナを張る */
+  function startResize(event: React.MouseEvent, key: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    const startX = event.clientX;
+    const startWidth = widths[key] ?? DEFAULT_WIDTHS[key];
+    const onMove = (e: MouseEvent) => {
+      const next = Math.max(MIN_COLUMN_WIDTH, startWidth + e.clientX - startX);
+      setWidths(w => ({ ...w, [key]: next }));
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
   }
 
   if (error) {
@@ -220,6 +296,9 @@ export default function MOFJikouPage() {
     );
   }
 
+  const selectClass =
+    'max-w-[13rem] truncate rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900';
+
   return (
     <div className="flex h-screen flex-col bg-neutral-50 dark:bg-neutral-900">
       <header className="flex shrink-0 items-start justify-between gap-4 px-3 pb-2 pt-3">
@@ -229,12 +308,14 @@ export default function MOFJikouPage() {
           </h1>
           {/* 集計はカードにすると縦を食うので1行に畳む */}
           <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
-            <span>
-              {data.metadata.eraLabel}／財務省 予算書・決算書データベース
-            </span>
+            <span>{data.metadata.eraLabel}／財務省 予算書・決算書データベース</span>
             <span className="text-neutral-300 dark:text-neutral-700">|</span>
             <span>
-              全 <b className="font-semibold text-neutral-700 dark:text-neutral-300">{data.summary.count.toLocaleString()}</b> 事項
+              全{' '}
+              <b className="font-semibold text-neutral-700 dark:text-neutral-300">
+                {data.summary.count.toLocaleString()}
+              </b>{' '}
+              事項
             </span>
             {data.summary.byBudgetType.map(g => (
               <span key={g.key}>
@@ -268,6 +349,8 @@ export default function MOFJikouPage() {
               onClick={() => {
                 setAccount(value);
                 setMinistry('');
+                setOrganization('');
+                setSubAccount('');
               }}
               className={`px-2.5 py-1 ${
                 account === value
@@ -295,10 +378,14 @@ export default function MOFJikouPage() {
 
         <select
           value={ministry}
-          onChange={e => setMinistry(e.target.value)}
-          className="max-w-[15rem] truncate rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
+          onChange={e => {
+            setMinistry(e.target.value);
+            setOrganization('');
+            setSubAccount('');
+          }}
+          className={selectClass}
         >
-          <option value="">所管・機関: すべて</option>
+          <option value="">所管: すべて</option>
           {ministries.map(m => (
             <option key={m} value={m}>
               {m}
@@ -307,9 +394,39 @@ export default function MOFJikouPage() {
         </select>
 
         <select
+          value={organization}
+          onChange={e => {
+            setOrganization(e.target.value);
+            setSubAccount('');
+          }}
+          className={selectClass}
+        >
+          <option value="">組織: すべて（{organizations.length}）</option>
+          {organizations.map(o => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={subAccount}
+          onChange={e => setSubAccount(e.target.value)}
+          disabled={subAccounts.length === 0}
+          className={`${selectClass} disabled:opacity-40`}
+        >
+          <option value="">勘定: すべて（{subAccounts.length}）</option>
+          {subAccounts.map(s => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+
+        <select
           value={majorExpense}
           onChange={e => setMajorExpense(e.target.value)}
-          className="max-w-[15rem] truncate rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
+          className={selectClass}
         >
           <option value="">主要経費: すべて</option>
           {data.summary.byMajorExpense.map(g => (
@@ -324,12 +441,22 @@ export default function MOFJikouPage() {
           value={keyword}
           onChange={e => setKeyword(e.target.value)}
           placeholder="事項名・項名・説明を検索"
-          className="min-w-[12rem] flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-1 dark:border-neutral-700 dark:bg-neutral-900"
+          className="min-w-[10rem] flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-1 dark:border-neutral-700 dark:bg-neutral-900"
         />
 
         <span className="whitespace-nowrap text-neutral-500">
           該当 {filtered.length.toLocaleString()} 件 / {formatThousandYen(filteredTotal)}
         </span>
+
+        {widthsChanged && (
+          <button
+            type="button"
+            onClick={() => setWidths(DEFAULT_WIDTHS)}
+            className="whitespace-nowrap rounded border border-neutral-300 px-2 py-1 text-neutral-500 hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+          >
+            列幅をリセット
+          </button>
+        )}
       </section>
 
       {/*
@@ -342,11 +469,11 @@ export default function MOFJikouPage() {
             {/* table-fixed + colgroup: ソートで中身が変わっても列幅が動かないようにする */}
             <table
               className="w-full table-fixed border-collapse text-xs"
-              style={{ minWidth: TABLE_MIN_WIDTH }}
+              style={{ minWidth: tableWidth }}
             >
               <colgroup>
                 {COLUMNS.map(c => (
-                  <col key={c.key} style={{ width: c.width }} />
+                  <col key={c.key} style={{ width: widths[c.key] ?? c.width }} />
                 ))}
               </colgroup>
               <thead className="sticky top-0 z-10 bg-neutral-100 text-left text-neutral-500 dark:bg-neutral-800">
@@ -358,15 +485,24 @@ export default function MOFJikouPage() {
                         key={col.key}
                         title={col.note}
                         onClick={() => toggleSort(col)}
-                        className={`cursor-pointer select-none px-2 py-2 font-medium hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
+                        className={`relative cursor-pointer select-none px-2 py-2 font-medium hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
                           col.numeric ? 'text-right' : 'text-left'
                         } ${active ? 'text-neutral-900 dark:text-neutral-100' : ''}`}
                       >
                         <span className="truncate align-middle">{col.label}</span>
                         {/* ソート記号は常に同じ幅を占有させ、切替で列幅も文字位置も動かさない */}
-                        <span className="ml-0.5 inline-block w-2.5 text-[9px] align-middle">
+                        <span className="ml-0.5 inline-block w-2.5 align-middle text-[9px]">
                           {active ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                         </span>
+                        {/* 列境界のドラッグハンドル。クリックがソートに伝播しないよう止める */}
+                        <span
+                          role="separator"
+                          aria-orientation="vertical"
+                          aria-label={`${col.label}の列幅を変更`}
+                          onMouseDown={e => startResize(e, col.key)}
+                          onClick={e => e.stopPropagation()}
+                          className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-neutral-400/60"
+                        />
                       </th>
                     );
                   })}
@@ -377,98 +513,112 @@ export default function MOFJikouPage() {
                   const rate = changeRate(item.amount, item.previousAmount);
                   const isOpen = expanded === item.id;
                   return (
-                    <tr
-                      key={item.id}
-                      onClick={() => setExpanded(isOpen ? null : item.id)}
-                      className="cursor-pointer border-t border-neutral-100 align-top hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
-                    >
-                      <td className="truncate px-2 py-1.5 text-neutral-500">{item.budgetType}</td>
-                      <td className="truncate px-2 py-1.5 text-neutral-500">
-                        {ACCOUNT_LABEL[item.accountType]}
-                      </td>
-                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
-                        <span className={isOpen ? '' : 'line-clamp-2'}>{item.ministry || '—'}</span>
-                      </td>
-                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
-                        <span className={isOpen ? '' : 'line-clamp-2'}>{orgColumn(item) || '—'}</span>
-                      </td>
-                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
-                        <span className={isOpen ? '' : 'line-clamp-2'}>{item.subAccount || '—'}</span>
-                      </td>
-                      <td className="truncate px-2 py-1.5 tabular-nums text-neutral-500">
-                        {item.sectionCode}
-                      </td>
-                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
-                        <span className={isOpen ? '' : 'line-clamp-2'}>{item.sectionName}</span>
-                      </td>
-                      <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
-                        <span className={isOpen ? '' : 'line-clamp-2'}>
-                          {item.majorExpenseName ||
-                            (item.majorExpenseCode ? `(${item.majorExpenseCode})` : '—')}
-                        </span>
-                      </td>
-                      <td className="px-2 py-1.5">
-                        <div
-                          className={`font-medium text-neutral-900 dark:text-neutral-100 ${
-                            isOpen ? '' : 'line-clamp-2'
-                          }`}
-                        >
-                          {item.name}
-                        </div>
-                        {isOpen && (
-                          <div className="mt-2 space-y-2 font-normal text-neutral-600 dark:text-neutral-400">
-                            <p className="whitespace-pre-wrap leading-relaxed">
-                              {item.description || '（説明なし）'}
-                            </p>
-                            <dl className="grid grid-cols-[6rem_1fr] gap-x-2 gap-y-0.5 text-[11px] text-neutral-400">
-                              <dt>合成キー</dt>
-                              <dd className="break-all font-mono">{item.key}</dd>
-                              <dt>行ID</dt>
-                              <dd className="font-mono">{item.id}</dd>
-                              <dt>主要経費コード</dt>
-                              <dd>{item.majorExpenseCode || '—'}</dd>
-                              <dt>帳票・ページ</dt>
-                              <dd>
-                                {item.documentId} p.{item.page}{' '}
-                                <a
-                                  href={item.sourceUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={e => e.stopPropagation()}
-                                  className="underline hover:text-neutral-600"
-                                >
-                                  出典XML
-                                </a>
-                              </dd>
-                            </dl>
-                          </div>
-                        )}
-                      </td>
-                      <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
-                        {formatThousandYen(item.amount)}
-                      </td>
-                      <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
-                        {formatThousandYen(item.previousAmount)}
-                      </td>
-                      <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
-                        {formatThousandYen(item.difference)}
-                      </td>
-                      <td
-                        className={`truncate px-2 py-1.5 text-right tabular-nums ${
-                          rate === null
-                            ? 'text-neutral-400'
-                            : rate === 'new'
-                              ? 'text-blue-600'
-                              : rate > 0
-                                ? 'text-emerald-700 dark:text-emerald-500'
-                                : rate < 0
-                                  ? 'text-red-600 dark:text-red-400'
-                                  : 'text-neutral-400'
+                    <Fragment key={item.id}>
+                      <tr
+                        onClick={() => setExpanded(isOpen ? null : item.id)}
+                        className={`cursor-pointer border-t border-neutral-100 align-top hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900 ${
+                          isOpen ? 'bg-neutral-50 dark:bg-neutral-900' : ''
                         }`}
                       >
-                        {formatChangeRate(rate)}
-                      </td>
-                    </tr>
+                        <td className="truncate px-2 py-1.5 text-neutral-500">
+                          {item.budgetType}
+                        </td>
+                        <td className="truncate px-2 py-1.5 text-neutral-500">
+                          {ACCOUNT_LABEL[item.accountType]}
+                        </td>
+                        <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                          <span className="line-clamp-2">{item.ministry || '—'}</span>
+                        </td>
+                        <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                          <span className="line-clamp-2">{orgColumn(item) || '—'}</span>
+                        </td>
+                        <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                          <span className="line-clamp-2">{item.subAccount || '—'}</span>
+                        </td>
+                        <td className="truncate px-2 py-1.5 tabular-nums text-neutral-500">
+                          {item.sectionCode}
+                        </td>
+                        <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                          <span className="line-clamp-2">{item.sectionName}</span>
+                        </td>
+                        <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                          <span className="line-clamp-2">
+                            {item.majorExpenseName ||
+                              (item.majorExpenseCode ? `(${item.majorExpenseCode})` : '—')}
+                          </span>
+                        </td>
+                        <td className="px-2 py-1.5 font-medium text-neutral-900 dark:text-neutral-100">
+                          <span className="line-clamp-2">{item.name}</span>
+                        </td>
+                        <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
+                          {formatThousandYen(item.amount)}
+                        </td>
+                        <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                          {formatThousandYen(item.previousAmount)}
+                        </td>
+                        <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                          {formatThousandYen(item.difference)}
+                        </td>
+                        <td
+                          className={`truncate px-2 py-1.5 text-right tabular-nums ${
+                            rate === null
+                              ? 'text-neutral-400'
+                              : rate === 'new'
+                                ? 'text-blue-600'
+                                : rate > 0
+                                  ? 'text-emerald-700 dark:text-emerald-500'
+                                  : rate < 0
+                                    ? 'text-red-600 dark:text-red-400'
+                                    : 'text-neutral-400'
+                          }`}
+                        >
+                          {formatChangeRate(rate)}
+                        </td>
+                      </tr>
+                      {/* 詳細は行全体を使う。狭い列の中に押し込むと説明文が読めないため */}
+                      {isOpen && (
+                        <tr className="bg-neutral-50 dark:bg-neutral-900">
+                          <td
+                            colSpan={COLUMNS.length}
+                            className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-800"
+                          >
+                            <div className="flex flex-wrap gap-x-10 gap-y-3">
+                              <div className="min-w-[24rem] max-w-3xl flex-1">
+                                <div className="mb-1 text-[11px] font-medium text-neutral-400">
+                                  説明
+                                </div>
+                                <p className="whitespace-pre-wrap leading-relaxed text-neutral-700 dark:text-neutral-300">
+                                  {item.description || '（説明なし）'}
+                                </p>
+                              </div>
+                              <dl className="grid shrink-0 grid-cols-[6.5rem_auto] gap-x-3 gap-y-1 text-[11px] text-neutral-500">
+                                <dt className="text-neutral-400">合成キー</dt>
+                                <dd className="max-w-[34rem] break-all font-mono">{item.key}</dd>
+                                <dt className="text-neutral-400">行ID</dt>
+                                <dd className="font-mono">{item.id}</dd>
+                                <dt className="text-neutral-400">項コード</dt>
+                                <dd className="font-mono">{item.sectionCode}</dd>
+                                <dt className="text-neutral-400">主要経費コード</dt>
+                                <dd className="font-mono">{item.majorExpenseCode || '—'}</dd>
+                                <dt className="text-neutral-400">帳票・ページ</dt>
+                                <dd>
+                                  {item.documentId} p.{item.page}{' '}
+                                  <a
+                                    href={item.sourceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={e => e.stopPropagation()}
+                                    className="underline hover:text-neutral-700"
+                                  >
+                                    出典XML
+                                  </a>
+                                </dd>
+                              </dl>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
                   );
                 })}
                 {filtered.length === 0 && (
