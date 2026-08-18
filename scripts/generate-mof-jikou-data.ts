@@ -10,7 +10,7 @@
  *   デフォルト: 2026
  *
  * 出力: public/data/mof-jikou-{FISCAL_YEAR}.json
- * XMLキャッシュ: data/download/mof-{FISCAL_YEAR}/xml/
+ * XMLキャッシュ: data/download/mof_{FISCAL_YEAR}/xml/
  *
  * 取り込む帳票（DOCUMENTS 参照）:
  *   当初予算 一般会計(11001) / 特別会計(12001) / 政府関係機関(13001)
@@ -38,7 +38,7 @@ if (isNaN(FISCAL_YEAR) || FISCAL_YEAR < 2000 || FISCAL_YEAR > 2100) {
 }
 
 const BASE = `https://www.bb.mof.go.jp/server/${FISCAL_YEAR}`;
-const CACHE_DIR = path.join(process.cwd(), 'data', 'download', `mof-${FISCAL_YEAR}`, 'xml');
+const CACHE_DIR = path.join(process.cwd(), 'data', 'download', `mof_${FISCAL_YEAR}`, 'xml');
 const OUTPUT_FILE = path.join(process.cwd(), 'public', 'data', `mof-jikou-${FISCAL_YEAR}.json`);
 
 /**

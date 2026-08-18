@@ -212,12 +212,15 @@ public/data/mof-funding-2024.json（Git管理、~56KB）
 |---------|-----------|------|
 | `npm run generate-mof-data` | `scripts/generate-mof-budget-overview-data.ts` | `parse-mof-transfer-data.ts` 経由で `data/download/mof_2023/` を読む |
 
-**入力 CSV（`data/download/mof_2023/` に配置）**:
+**入力（`data/download/mof_2023/` に ZIP のまま配置）**:
 
-| ファイル名 | 内容 |
-|-----------|------|
-| `DL202311001b.csv` | 一般会計歳出（項・目別） |
-| `DL202312001a.csv` | 特別会計歳入（一般会計からの繰入等） |
+| ZIP | 読むエントリ | 内容 |
+|-----|------------|------|
+| `DL202311001.zip` | `DL202311001b.csv` | 一般会計歳出（項・目別） |
+| `DL202312001.zip` | `DL202312001a.csv` | 特別会計歳入（一般会計からの繰入等） |
+
+ZIP から直接読む（`scripts/zip-reader.ts`）。展開したファイルは置かない
+——同じ内容が二重に残るうえ、どちらが正か分からなくなるため。
 
 取得元: 財務省「予算書・決算書データベース」（[bb.mof.go.jp/archive](https://www.bb.mof.go.jp/archive/)）  
 ファイル命名規則: `DL{YYYY}{区分}{連番}a/b.csv`（`11`=一般会計、`12`=特別会計、`13`=政府関係機関）
@@ -258,7 +261,7 @@ public/data/mof-jikou-2026.json（2.3MB / .gz 204KB を Git 管理）
 事項名と説明文を含まない。事項は MOF 側で唯一「事業らしい」名前と説明を持つ粒度のため、
 Web 帳票から取得している。帳票構造は [mof-budget-data-guide.md](mof-budget-data-guide.md) 3節を参照。
 
-XML は `data/download/mof-{YEAR}/xml/` にキャッシュされる（Git 管理外）。
+XML は `data/download/mof_{YEAR}/xml/` にキャッシュされる（Git 管理外）。
 キャッシュがあれば再実行時にネットワークアクセスは発生しない。
 
 **検証**: 生成結果の帳票別合計は、同じ帳票IDの CSV（`DL{帳票ID}b.csv`）と1円単位で一致すること。
