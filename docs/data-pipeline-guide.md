@@ -223,9 +223,9 @@ public/data/mof-funding-2024.json（Git管理、~56KB）
 ファイル命名規則: `DL{YYYY}{区分}{連番}a/b.csv`（`11`=一般会計、`12`=特別会計、`13`=政府関係機関）
 
 > **列構造・コード表・RSとの結合キーは [mof-budget-data-guide.md](mof-budget-data-guide.md) を参照。**
-
+>
 > **重要**: `generate-mof-budget-overview-data.ts` は CSV から完全自動生成ではなく、年金特別会計・地方交付税・国債整理基金等の金額詳細はスクリプト内にハードコードされている。データ年度を変更する場合は手動でのコード編集が必要。
-
+>
 > **通常は再生成不要**: `mof-budget-overview-2023.json` と `mof-funding-2024.json` はどちらも Git 管理済みで小サイズ。財務省の年度が変わらない限り更新不要。
 
 ---

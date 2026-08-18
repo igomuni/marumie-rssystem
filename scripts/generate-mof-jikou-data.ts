@@ -115,6 +115,17 @@ const MAJOR_EXPENSE: Record<string, string> = {
   '98': '予備費',
 };
 
+/** 1リクエストの上限。応答が止まったまま生成コマンドが固まるのを防ぐ */
+const FETCH_TIMEOUT_MS = 30_000;
+
+/** HTTP エラー。ステータスで「帳票が無い(404)」と障害を区別するために持つ */
+class HttpError extends Error {
+  constructor(readonly status: number, url: string) {
+    super(`HTTP ${status}: ${url}`);
+    this.name = 'HttpError';
+  }
+}
+
 /** 指定エンコーディングでテキストを取得する（XMLはキャッシュする） */
 async function fetchText(url: string, encoding: string, cacheName?: string): Promise<string> {
   if (cacheName) {
@@ -123,8 +134,8 @@ async function fetchText(url: string, encoding: string, cacheName?: string): Pro
       return new TextDecoder(encoding).decode(fs.readFileSync(cached));
     }
   }
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+  const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+  if (!res.ok) throw new HttpError(res.status, url);
   const buf = Buffer.from(await res.arrayBuffer());
   if (cacheName) {
     fs.mkdirSync(CACHE_DIR, { recursive: true });
@@ -145,7 +156,10 @@ function extractXmlNames(menuHtml: string): string[] {
   let m: RegExpExecArray | null;
   while ((m = re.exec(menuHtml)) !== null) {
     const link = m[1].split('#')[0];
-    if (link.endsWith('.xml')) names.add(link);
+    // リンクはリモートの HTML 由来。そのままキャッシュのファイル名にすると
+    // "../../outside.xml" のような値で CACHE_DIR の外を読み書きできてしまうため、
+    // ディレクトリ要素を含まない予算書のファイル名だけを通す。
+    if (/^\d{9}[0-9a-z]*\.xml$/.test(link)) names.add(link);
   }
   return [...names];
 }
@@ -463,8 +477,14 @@ async function main() {
         count: docItems.length,
       });
     } catch (error) {
-      // 年度によっては暫定予算・補正予算が存在しない
-      console.warn(`[${documentId}] スキップ: ${(error as Error).message}`);
+      // 年度によっては暫定予算・補正予算が存在しない。その 404 だけを欠番として飛ばし、
+      // 通信障害・サーバエラー・パーサの退行は握り潰さずに失敗させる
+      // （部分的な JSON が正常終了で出力されるのを防ぐ）。
+      if (error instanceof HttpError && error.status === 404) {
+        console.warn(`[${documentId}] 帳票なし（404）としてスキップ`);
+        continue;
+      }
+      throw error;
     }
   }
 
@@ -497,7 +517,8 @@ async function main() {
     },
     summary: {
       count: items.length,
-      amount: items.reduce((sum, i) => sum + i.amount, 0),
+      // 予算種別・会計区分をまたいだ総額は出さない。当初/暫定/補正は同じ予算の別断面で、
+      // 会計間の繰入も重複するため、単一の合計値は意味を持たない（内訳だけを出す）。
       byAccountType: groupBy(items, (i) => ACCOUNT_LABEL[i.accountType]),
       byBudgetType: groupBy(items, (i) => i.budgetType),
       byMinistry: groupBy(items, (i) => i.ministry || i.agency),

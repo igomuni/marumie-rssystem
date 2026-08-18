@@ -23,9 +23,11 @@ export interface MOFJikouItem {
    */
   id: string;
   /**
-   * 内容ベースの合成キー: 会計区分・所管・組織・特別会計・勘定・機関・項コード・事項名を連結したもの。
+   * 内容ベースの合成キー。次の順に `|` で連結する:
+   * 会計区分・予算種別・所管・組織・特別会計・勘定・機関・項コード・事項名。
    * MOF は事項に公式なIDを振っていないため、これが実質的な識別子になる。
-   * 令和8年度・当初予算の全1,664件で重複なし。
+   * 予算種別を含めないと当初・暫定・補正で同じ事項が衝突する。
+   * 令和8年度の全2,685件で重複なし。
    */
   key: string;
   accountType: MOFAccountType;
@@ -103,7 +105,10 @@ export interface MOFJikouData {
   };
   summary: {
     count: number;
-    amount: number;
+    /**
+     * 総額は持たない。当初・暫定・補正は同じ予算の別断面であり、会計間の繰入も
+     * 重複するため、全件を足した1つの数字は意味を持たない。内訳だけを提供する。
+     */
     byAccountType: MOFJikouGroupSummary[];
     byBudgetType: MOFJikouGroupSummary[];
     byMinistry: MOFJikouGroupSummary[];

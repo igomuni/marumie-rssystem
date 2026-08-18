@@ -181,6 +181,20 @@ export default function MOFJikouPage() {
     [baseRows, ministry]
   );
 
+  const majorExpenses = useMemo(
+    () =>
+      [
+        ...new Set(
+          baseRows
+            .filter(i => !ministry || (i.ministry || i.agency) === ministry)
+            .filter(i => !organization || orgColumn(i) === organization)
+            .map(i => i.majorExpenseName)
+            .filter(Boolean)
+        ),
+      ].sort(),
+    [baseRows, ministry, organization]
+  );
+
   const subAccounts = useMemo(
     () =>
       [
@@ -228,10 +242,19 @@ export default function MOFJikouPage() {
     return rows;
   }, [baseRows, ministry, organization, subAccount, majorExpense, keyword, sortKey, sortDir]);
 
-  const filteredTotal = useMemo(
-    () => filtered.reduce((sum, i) => sum + i.amount, 0),
-    [filtered]
-  );
+  /**
+   * 絞り込み結果の合計。
+   * 当初・暫定・補正は同じ予算の別断面で、会計区分をまたぐと会計間の繰入も重なる。
+   * 種別や会計が混ざったまま足した数字は意味を持たないので、
+   * どちらも1つに絞られているときだけ合計を出す。
+   */
+  const filteredTotal = useMemo(() => {
+    if (filtered.length === 0) return null;
+    const budgetTypes = new Set(filtered.map(i => i.budgetType));
+    const accountTypes = new Set(filtered.map(i => i.accountType));
+    if (budgetTypes.size > 1 || accountTypes.size > 1) return null;
+    return filtered.reduce((sum, i) => sum + i.amount, 0);
+  }, [filtered]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -351,6 +374,7 @@ export default function MOFJikouPage() {
                 setMinistry('');
                 setOrganization('');
                 setSubAccount('');
+                setMajorExpense('');
               }}
               className={`px-2.5 py-1 ${
                 account === value
@@ -365,7 +389,10 @@ export default function MOFJikouPage() {
 
         <select
           value={budgetType}
-          onChange={e => setBudgetType(e.target.value)}
+          onChange={e => {
+            setBudgetType(e.target.value);
+            setMajorExpense('');
+          }}
           className="rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
         >
           <option value="">予算種別: すべて</option>
@@ -382,6 +409,7 @@ export default function MOFJikouPage() {
             setMinistry(e.target.value);
             setOrganization('');
             setSubAccount('');
+            setMajorExpense('');
           }}
           className={selectClass}
         >
@@ -398,6 +426,7 @@ export default function MOFJikouPage() {
           onChange={e => {
             setOrganization(e.target.value);
             setSubAccount('');
+            setMajorExpense('');
           }}
           className={selectClass}
         >
@@ -428,10 +457,10 @@ export default function MOFJikouPage() {
           onChange={e => setMajorExpense(e.target.value)}
           className={selectClass}
         >
-          <option value="">主要経費: すべて</option>
-          {data.summary.byMajorExpense.map(g => (
-            <option key={g.key} value={g.key}>
-              {g.key}
+          <option value="">主要経費: すべて（{majorExpenses.length}）</option>
+          {majorExpenses.map(m => (
+            <option key={m} value={m}>
+              {m}
             </option>
           ))}
         </select>
@@ -445,7 +474,19 @@ export default function MOFJikouPage() {
         />
 
         <span className="whitespace-nowrap text-neutral-500">
-          該当 {filtered.length.toLocaleString()} 件 / {formatThousandYen(filteredTotal)}
+          該当 {filtered.length.toLocaleString()} 件
+          {filteredTotal === null ? (
+            filtered.length > 0 && (
+              <span
+                className="ml-1 text-neutral-400"
+                title="当初・暫定・補正は同じ予算の別断面で、会計区分をまたぐと会計間の繰入も重なります。予算種別と会計区分を1つに絞ると合計を表示します。"
+              >
+                （合計は種別・会計が混在のため非表示）
+              </span>
+            )
+          ) : (
+            <> / {formatThousandYen(filteredTotal)}</>
+          )}
         </span>
 
         {widthsChanged && (
@@ -483,17 +524,29 @@ export default function MOFJikouPage() {
                     return (
                       <th
                         key={col.key}
+                        scope="col"
                         title={col.note}
-                        onClick={() => toggleSort(col)}
-                        className={`relative cursor-pointer select-none px-2 py-2 font-medium hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
-                          col.numeric ? 'text-right' : 'text-left'
-                        } ${active ? 'text-neutral-900 dark:text-neutral-100' : ''}`}
+                        aria-sort={
+                          active ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'
+                        }
+                        className={`relative select-none p-0 font-medium ${
+                          active ? 'text-neutral-900 dark:text-neutral-100' : ''
+                        }`}
                       >
-                        <span className="truncate align-middle">{col.label}</span>
-                        {/* ソート記号は常に同じ幅を占有させ、切替で列幅も文字位置も動かさない */}
-                        <span className="ml-0.5 inline-block w-2.5 align-middle text-[9px]">
-                          {active ? (sortDir === 'asc' ? '▲' : '▼') : ''}
-                        </span>
+                        {/* 並べ替えはキーボードでも操作できるよう button にする */}
+                        <button
+                          type="button"
+                          onClick={() => toggleSort(col)}
+                          className={`w-full px-2 py-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
+                            col.numeric ? 'text-right' : 'text-left'
+                          }`}
+                        >
+                          <span className="truncate align-middle">{col.label}</span>
+                          {/* ソート記号は常に同じ幅を占有させ、切替で列幅も文字位置も動かさない */}
+                          <span className="ml-0.5 inline-block w-2.5 align-middle text-[9px]">
+                            {active ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                          </span>
+                        </button>
                         {/* 列境界のドラッグハンドル。クリックがソートに伝播しないよう止める */}
                         <span
                           role="separator"
@@ -521,6 +574,19 @@ export default function MOFJikouPage() {
                         }`}
                       >
                         <td className="truncate px-2 py-1.5 text-neutral-500">
+                          {/* 行全体の onClick と併存させつつ、キーボードでも展開できるようにする */}
+                          <button
+                            type="button"
+                            aria-expanded={isOpen}
+                            aria-label={`${item.name} の詳細`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              setExpanded(isOpen ? null : item.id);
+                            }}
+                            className="mr-1 align-middle text-[9px] text-neutral-400"
+                          >
+                            {isOpen ? '▼' : '▶'}
+                          </button>
                           {item.budgetType}
                         </td>
                         <td className="truncate px-2 py-1.5 text-neutral-500">
