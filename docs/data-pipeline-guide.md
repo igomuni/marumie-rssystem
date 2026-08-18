@@ -212,12 +212,15 @@ public/data/mof-funding-2024.json（Git管理、~56KB）
 |---------|-----------|------|
 | `npm run generate-mof-data` | `scripts/generate-mof-budget-overview-data.ts` | `parse-mof-transfer-data.ts` 経由で `data/download/mof_2023/` を読む |
 
-**入力 CSV（`data/download/mof_2023/` に配置）**:
+**入力（`data/download/mof_2023/` に ZIP のまま配置）**:
 
-| ファイル名 | 内容 |
-|-----------|------|
-| `DL202311001b.csv` | 一般会計歳出（項・目別） |
-| `DL202312001a.csv` | 特別会計歳入（一般会計からの繰入等） |
+| ZIP | 読むエントリ | 内容 |
+|-----|------------|------|
+| `DL202311001.zip` | `DL202311001b.csv` | 一般会計歳出（項・目別） |
+| `DL202312001.zip` | `DL202312001a.csv` | 特別会計歳入（一般会計からの繰入等） |
+
+ZIP から直接読む（`scripts/zip-reader.ts`）。展開したファイルは置かない
+——同じ内容が二重に残るうえ、どちらが正か分からなくなるため。
 
 取得元: 財務省「予算書・決算書データベース」（[bb.mof.go.jp/archive](https://www.bb.mof.go.jp/archive/)）  
 ファイル命名規則: `DL{YYYY}{区分}{連番}a/b.csv`（`11`=一般会計、`12`=特別会計、`13`=政府関係機関）

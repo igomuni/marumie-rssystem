@@ -2,15 +2,19 @@
 /**
  * MOF特別会計繰入データパーサー
  *
- * 一般会計から特別会計への繰入詳細をMOF CSVから抽出する
+ * 一般会計から特別会計への繰入詳細をMOF CSVから抽出する。
+ * CSV は財務省の配布 ZIP から直接読む（展開したファイルを併存させない）。
  */
 
-import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { readZipEntryText } from '@/scripts/zip-reader';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/** 予算書 ZIP の置き場 */
+const MOF_DIR = path.join(__dirname, '../data/download/mof_2023');
 
 /**
  * 一般会計から特別会計への繰入レコード
@@ -42,15 +46,14 @@ export interface MOFTransferData {
 }
 
 /**
- * CSVファイルを読み込んでパースする
+ * 予算書 ZIP 内の CSV を読み込んでパースする。
+ *
+ * ZIP や中の CSV が欠けていたら例外にする。以前はファイルが無いと警告だけ出して
+ * 空配列を返していたため、入力が揃っていないまま中身の欠けた JSON が
+ * 生成される事故が起きうる状態だった。
  */
-function parseCSV(filePath: string): string[][] {
-  if (!fs.existsSync(filePath)) {
-    console.warn(`⚠️  CSVファイルが見つかりません: ${filePath}`);
-    return [];
-  }
-
-  const content = fs.readFileSync(filePath, 'utf-8');
+function parseCSVFromZip(zipName: string, entryName: string): string[][] {
+  const content = readZipEntryText(path.join(MOF_DIR, zipName), entryName);
   const lines = content.split('\n').filter(line => line.trim());
 
   return lines.map(line => {
@@ -63,8 +66,7 @@ function parseCSV(filePath: string): string[][] {
  * 一般会計歳出から特別会計繰入を抽出
  */
 function parseGeneralAccountTransfers(): GeneralToSpecialTransfer[] {
-  const csvPath = path.join(__dirname, '../data/download/mof_2023/DL202311001b.csv');
-  const rows = parseCSV(csvPath);
+  const rows = parseCSVFromZip('DL202311001.zip', 'DL202311001b.csv');
 
   if (rows.length === 0) {
     console.warn('⚠️  一般会計歳出CSVが空です');
@@ -138,8 +140,7 @@ function parseGeneralAccountTransfers(): GeneralToSpecialTransfer[] {
  * 特別会計歳入から一般会計繰入を抽出（検証用）
  */
 function parseSpecialAccountRevenue(): GeneralToSpecialTransfer[] {
-  const csvPath = path.join(__dirname, '../data/download/mof_2023/DL202312001a.csv');
-  const rows = parseCSV(csvPath);
+  const rows = parseCSVFromZip('DL202312001.zip', 'DL202312001a.csv');
 
   if (rows.length === 0) {
     console.warn('⚠️  特別会計歳入CSVが空です');
@@ -181,8 +182,7 @@ function parseSpecialAccountRevenue(): GeneralToSpecialTransfer[] {
  * 特別会計間の繰入を抽出
  */
 function parseSpecialToSpecialTransfers(): SpecialToSpecialTransfer[] {
-  const csvPath = path.join(__dirname, '../data/download/mof_2023/DL202312001a.csv');
-  const rows = parseCSV(csvPath);
+  const rows = parseCSVFromZip('DL202312001.zip', 'DL202312001a.csv');
 
   if (rows.length === 0) {
     return [];
