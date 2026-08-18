@@ -262,6 +262,7 @@ XML は `data/download/mof-{YEAR}/xml/` にキャッシュされる（Git 管理
 キャッシュがあれば再実行時にネットワークアクセスは発生しない。
 
 **検証**: 生成結果の帳票別合計は、同じ帳票IDの CSV（`DL{帳票ID}b.csv`）と1円単位で一致すること。
+JSON は円単位・CSV は千円単位なので、比較時は1000で割る。
 補正予算だけは事項別内訳に補正対象の事項しか載らないため、`difference` の合計を CSV の
 `補正要求差引額(千円)` と突き合わせる。帳票別の期待値は
 [mof-budget-data-guide.md](mof-budget-data-guide.md) 3-1節の表を参照。

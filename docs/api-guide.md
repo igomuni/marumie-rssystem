@@ -298,7 +298,7 @@
         "count": 1303
       }
     ],
-    "unit": "thousand_yen",
+    "unit": "yen",
     "generatedAt": "2026-08-18T13:01:43.464Z",
     "notes": ["..."]
   },
@@ -320,9 +320,9 @@
       "majorExpenseCode": "95",
       "majorExpenseName": "その他の事項経費",
       "name": "皇族に必要な経費",
-      "amount": 255285,
-      "previousAmount": 235765,
-      "difference": 19520,
+      "amount": 255285000,
+      "previousAmount": 235765000,
+      "difference": 19520000,
       "description": "「日本国憲法」及び「皇室経済法」に基づく皇族費",
       "page": 273,
       "sourceUrl": "https://www.bb.mof.go.jp/server/2026/xml/202611001000273b.xml"
@@ -335,7 +335,7 @@
 >
 > **null の意味**: 暫定予算には比較欄が無いため `previousAmount` と `difference` は null。補正予算では `amount`=改予算額 / `previousAmount`=補正前の成立予算額 / `difference`=差引額。
 >
-> **単位に注意**: 本エンドポイントの金額は**千円単位**。他の API（行政事業レビュー由来）は円単位なので混同しないこと。
+> **単位に注意**: 金額は**円単位**。予算書の印字は千円単位だが、リポジトリ全体の金額規約に合わせて生成時に1000倍している。CSV と突き合わせるときは1000で割ること。
 >
 > **合算に注意**: 会計区分をまたぐと会計間の繰入が二重計上される。予算種別（当初・暫定・補正）をまたいだ合算も意味を持たない。`summary` は内訳のみを持ち、全体の総額は提供しない。
 

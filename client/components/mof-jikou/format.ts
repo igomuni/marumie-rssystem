@@ -1,12 +1,11 @@
 /**
  * 事項一覧の表示整形ヘルパ。
- * MOF の金額は千円単位なので、円単位を前提にした既存の整形関数とは共用しない。
+ * 金額は円単位（予算書の印字は千円単位だが、生成時に1000倍して正規化している）。
  */
 
-/** 千円単位の金額を「1.23兆円」「345.6億円」等に整形する。null は「—」 */
-export function formatThousandYen(thousandYen: number | null): string {
-  if (thousandYen === null) return '—';
-  const yen = thousandYen * 1000;
+/** 円単位の金額を「1.23兆円」「345.6億円」等に整形する。null は「—」 */
+export function formatYen(yen: number | null): string {
+  if (yen === null) return '—';
   const abs = Math.abs(yen);
   if (abs >= 1e12) return `${(yen / 1e12).toFixed(2)}兆円`;
   if (abs >= 1e8) return `${(yen / 1e8).toFixed(1)}億円`;

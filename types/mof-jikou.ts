@@ -54,14 +54,18 @@ export interface MOFJikouItem {
   majorExpenseName: string;
   /** 事項名 */
   name: string;
-  /** 本年度額（千円）。補正予算では補正後（改）予算額 */
+  /**
+   * 本年度額（円）。補正予算では補正後（改）予算額。
+   * 予算書の印字は千円単位だが、リポジトリ全体の金額規約（1円単位）に合わせて
+   * 生成時に1000倍している。CSV と突き合わせるときは1000で割ること。
+   */
   amount: number;
   /**
-   * 比較対象額（千円）。当初予算では前年度予算額、補正予算では補正前の成立予算額。
+   * 比較対象額（円）。当初予算では前年度予算額、補正予算では補正前の成立予算額。
    * 暫定予算のように帳票に比較欄が無い場合は null。
    */
   previousAmount: number | null;
-  /** 増減額（千円。減額は負値）。比較欄が無い帳票では null */
+  /** 増減額（円。減額は負値）。比較欄が無い帳票では null */
   difference: number | null;
   /** 説明（所掌事務・根拠法等。予算書の「説明」欄の全文） */
   description: string;
@@ -97,8 +101,8 @@ export interface MOFJikouData {
       pages: number;
       count: number;
     }>;
-    /** 金額の単位 */
-    unit: 'thousand_yen';
+    /** 金額の単位。予算書は千円単位だが、生成時に円へ正規化している */
+    unit: 'yen';
     /** 生成日時（ISO8601） */
     generatedAt: string;
     notes: string[];

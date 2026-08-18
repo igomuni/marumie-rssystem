@@ -227,14 +227,19 @@ function textAt(row: ParsedRow, col: number | undefined): string {
   return (row.cols.get(col) ?? []).join('').trim();
 }
 
-/** 金額として読む（先頭の候補のみ。連結すると桁が壊れる） */
+/**
+ * 金額として読む（先頭の候補のみ。連結すると桁が壊れる）。
+ *
+ * 予算書の印字は千円単位だが、リポジトリ全体の金額規約が1円単位なので
+ * ここで1000倍して返す。RS 側のデータと混ぜたときの1000倍ずれを防ぐため。
+ */
 function numberAt(row: ParsedRow, col: number | undefined): number | null {
   if (col === undefined) return null;
   const first = (row.cols.get(col) ?? [])[0]?.trim() ?? '';
   const negative = first.includes('△');
   const digits = first.replace(/[△\s,]/g, '');
   if (!/^\d+$/.test(digits)) return null;
-  const value = parseInt(digits, 10);
+  const value = parseInt(digits, 10) * 1000;
   return negative ? -value : value;
 }
 
@@ -452,7 +457,7 @@ async function collect(spec: DocumentSpec): Promise<{ items: MOFJikouItem[]; pag
   }
   console.log(
     `[${documentId}] ${spec.title}: ${pages} ページ / 事項 ${items.length} 件 ` +
-      `/ ${(items.reduce((s, i) => s + i.amount, 0) / 1e9).toFixed(1)} 兆円`
+      `/ ${(items.reduce((s, i) => s + i.amount, 0) / 1e12).toFixed(1)} 兆円`
   );
   return { items, pages };
 }
@@ -503,10 +508,10 @@ async function main() {
       eraLabel: `令和${eraYear}年度`,
       budgetTypes: [...new Set(documents.filter((d) => d.count > 0).map((d) => d.budgetType))],
       documents,
-      unit: 'thousand_yen',
+      unit: 'yen',
       generatedAt: new Date().toISOString(),
       notes: [
-        '全金額は千円単位です（行政事業レビュー側のデータは円単位なので混同しないこと）',
+        '全金額は円単位です（予算書の印字は千円単位ですが、生成時に1000倍しています。CSVと突き合わせるときは1000で割ってください）',
         '事項は「項の下に置かれた経費のまとまり」で、行政事業レビューの事業とは1対1に対応しません（1事項あたり平均4事業）',
         '当初予算・暫定予算・補正予算は別々の帳票です。予算種別をまたいで合算しないでください',
         '一般会計・特別会計・政府関係機関の金額を単純合算すると会計間の繰入が二重計上されます',
@@ -536,7 +541,7 @@ async function main() {
   console.log(`\n出力: ${OUTPUT_FILE} (${sizeKB} KB)`);
   console.log(`事項 ${data.summary.count} 件`);
   for (const g of data.summary.byBudgetType) {
-    console.log(`  ${g.key}: ${g.count} 件 / ${(g.amount / 1e9).toFixed(1)} 兆円`);
+    console.log(`  ${g.key}: ${g.count} 件 / ${(g.amount / 1e12).toFixed(1)} 兆円`);
   }
 }
 
