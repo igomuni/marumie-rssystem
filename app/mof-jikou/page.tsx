@@ -13,6 +13,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
+import { YearSelect } from '@/components/navigation/YearSelect';
 import type { MOFAccountType, MOFJikouData } from '@/types/mof-jikou';
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { JikouTable } from '@/client/components/mof-jikou/JikouTable';
@@ -237,22 +238,18 @@ export default function MOFJikouPage() {
             ))}
           </p>
         </div>
-        <PageNavMenu current="/mof-jikou" />
+        {/* 年度とページ切替。全ページ共通で右上に置く */}
+        <div className="flex shrink-0 items-center gap-2">
+          <YearSelect
+            value={String(data.metadata.fiscalYear)}
+            onChange={y => changeYear(Number(y))}
+            years={data.metadata.availableYears ?? [data.metadata.fiscalYear]}
+          />
+          <PageNavMenu current="/mof-jikou" />
+        </div>
       </header>
 
       <section className="flex shrink-0 flex-wrap items-center gap-2 px-3 pb-2 text-xs">
-        <select
-          value={data.metadata.fiscalYear}
-          onChange={e => changeYear(Number(e.target.value))}
-          className="rounded-lg border border-neutral-300 bg-white px-2 py-1 font-medium dark:border-neutral-700 dark:bg-neutral-900"
-        >
-          {(data.metadata.availableYears ?? [data.metadata.fiscalYear]).map(y => (
-            <option key={y} value={y}>
-              令和{y - 2018}年度（{y}）
-            </option>
-          ))}
-        </select>
-
         <div className="flex overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700">
           {(
             [
