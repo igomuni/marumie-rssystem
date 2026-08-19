@@ -7,6 +7,7 @@
 
 import { Fragment } from 'react';
 import type { MOFJikouItem } from '@/types/mof-jikou';
+import { JikouHistory } from './JikouHistory';
 import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from './format';
 import {
   ACCOUNT_LABEL,
@@ -228,13 +229,24 @@ export function JikouTable({
                 <tr className="bg-neutral-50 dark:bg-neutral-900">
                   <td
                     colSpan={COLUMNS.length}
-                    className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-800"
+                    className="border-b border-neutral-200 p-0 dark:border-neutral-800"
                   >
-                    <div className="flex flex-wrap gap-x-10 gap-y-3">
+                    {/*
+                      表は画面より広く横スクロールするので、詳細を素直に置くと
+                      右へスクロールしたときに左端の内容が見切れる。
+                      sticky left-0 ＋ 画面幅で、横位置に関わらず常に見えるようにする。
+                    */}
+                    <div className="sticky left-0 w-[calc(100vw-3rem)] px-4 py-3">
+                      <div className="flex flex-wrap gap-x-10 gap-y-4">
+                      {/* 年度推移は全年度を横断するのでAPIから取り直す */}
+                      <JikouHistory itemKey={item.key} />
                       <div className="min-w-[24rem] max-w-3xl flex-1">
                         <div className="mb-1 text-[11px] font-medium text-neutral-400">説明</div>
                         <p className="whitespace-pre-wrap leading-relaxed text-neutral-700 dark:text-neutral-300">
-                          {item.description || '（説明なし）'}
+                          {item.description ||
+                            (item.budgetType === '決算'
+                              ? '（決算の帳票に説明欄はありません。予算の年度・種別を開くと表示されます）'
+                              : '（説明なし）')}
                         </p>
                       </div>
                       <dl className="grid shrink-0 grid-cols-[6.5rem_auto] gap-x-3 gap-y-1 text-[11px] text-neutral-500">
@@ -266,6 +278,7 @@ export function JikouTable({
                           </a>
                         </dd>
                       </dl>
+                      </div>
                     </div>
                   </td>
                 </tr>

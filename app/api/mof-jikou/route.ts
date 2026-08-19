@@ -6,26 +6,8 @@
  */
 
 import { NextResponse } from 'next/server';
-import type { MOFJikouData } from '@/types/mof-jikou';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
-import { dataFileExists, readDataJson } from '@/app/lib/api/data-file';
-
-/**
- * 収録候補の会計年度（新しい順）。
- * 実際に返せるのは JSON が生成済みの年度だけで、availableYears で通知する。
- */
-const CANDIDATE_YEARS = [2026, 2025, 2024, 2023] as const;
-
-const fileName = (year: number) => `mof-jikou-${year}.json`;
-
-/** プロセス内キャッシュ。年度ごとに保持する */
-const cache = new Map<number, MOFJikouData>();
-let cachedYears: number[] | null = null;
-
-function availableYears(): number[] {
-  if (!cachedYears) cachedYears = CANDIDATE_YEARS.filter(y => dataFileExists(fileName(y)));
-  return cachedYears;
-}
+import { availableYears, loadYear } from '@/app/lib/api/mof-jikou-loader';
 
 /**
  * GET /api/mof-jikou
@@ -52,14 +34,7 @@ export async function GET(request: Request) {
       );
     }
 
-    let data = cache.get(year);
-    if (!data) {
-      data = readDataJson<MOFJikouData>(
-        fileName(year),
-        `npm run generate-mof-jikou を実行してください（対象年度: ${year}）。`
-      );
-      cache.set(year, data);
-    }
+    const data = loadYear(year);
 
     // 年度切替の選択肢はクライアントが持たないので、応答に同梱する
     return NextResponse.json(
