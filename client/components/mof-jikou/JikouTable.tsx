@@ -7,7 +7,7 @@
 
 import { Fragment } from 'react';
 import type { MOFJikouItem } from '@/types/mof-jikou';
-import { changeRate, formatChangeRate, formatYen } from './format';
+import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from './format';
 import {
   ACCOUNT_LABEL,
   COLUMNS,
@@ -133,6 +133,7 @@ export function JikouTable({
       <tbody>
         {items.map(item => {
           const rate = changeRate(item.amount, item.previousAmount);
+          const exec = executionRate(item);
           const isOpen = expandedId === item.id;
           return (
             <Fragment key={item.id}>
@@ -199,6 +200,28 @@ export function JikouTable({
                 >
                   {formatChangeRate(rate)}
                 </td>
+                <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                  {formatYen(item.currentAmount)}
+                </td>
+                <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
+                  {formatYen(item.spent)}
+                </td>
+                <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                  {formatYen(item.unused)}
+                </td>
+                <td
+                  className={`truncate px-2 py-1.5 text-right tabular-nums ${
+                    exec === null
+                      ? 'text-neutral-400'
+                      : exec < 0.5
+                        ? 'text-red-600 dark:text-red-400'
+                        : exec < 0.9
+                          ? 'text-amber-700 dark:text-amber-500'
+                          : 'text-neutral-600 dark:text-neutral-400'
+                  }`}
+                >
+                  {formatRate(exec)}
+                </td>
               </tr>
               {/* 詳細は行全体を使う。狭い列の中に押し込むと説明文が読めないため */}
               {isOpen && (
@@ -223,6 +246,12 @@ export function JikouTable({
                         <dd className="font-mono">{item.sectionCode}</dd>
                         <dt className="text-neutral-400">主要経費コード</dt>
                         <dd className="font-mono">{item.majorExpenseCode || '—'}</dd>
+                        {item.carriedOver !== null && (
+                          <>
+                            <dt className="text-neutral-400">翌年度繰越額</dt>
+                            <dd className="tabular-nums">{formatYen(item.carriedOver)}</dd>
+                          </>
+                        )}
                         <dt className="text-neutral-400">帳票・ページ</dt>
                         <dd>
                           {item.documentId} p.{item.page}{' '}

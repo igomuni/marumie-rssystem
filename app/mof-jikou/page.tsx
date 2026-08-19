@@ -32,6 +32,8 @@ const PAGE_SIZE = 100;
 export default function MOFJikouPage() {
   const [data, setData] = useState<MOFJikouData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /** 選択中の会計年度。null は「収録済みの最新年度」をAPIに任せる */
+  const [year, setYear] = useState<number | null>(null);
 
   const [account, setAccount] = useState<'all' | MOFAccountType>('all');
   const [budgetType, setBudgetType] = useState('');
@@ -48,14 +50,36 @@ export default function MOFJikouPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch('/api/mof-jikou')
+    let cancelled = false;
+    setError(null);
+    fetch(year === null ? '/api/mof-jikou' : `/api/mof-jikou?year=${year}`)
       .then(res => {
         if (!res.ok) throw new Error(`API error: ${res.status}`);
         return res.json();
       })
-      .then((json: MOFJikouData) => setData(json))
-      .catch((e: Error) => setError(e.message));
-  }, []);
+      .then((json: MOFJikouData) => {
+        if (cancelled) return;
+        setData(json);
+        setYear(json.metadata.fiscalYear);
+      })
+      .catch((e: Error) => !cancelled && setError(e.message));
+    return () => {
+      cancelled = true;
+    };
+  }, [year]);
+
+  // 年度を変えると収録帳票が変わるので、絞り込みも初期化する
+  function changeYear(next: number) {
+    setYear(next);
+    setData(null);
+    setAccount('all');
+    setBudgetType('');
+    setMinistry('');
+    setOrganization('');
+    setSubAccount('');
+    setMajorExpense('');
+    setExpanded(null);
+  }
 
   // フィルタ条件が変わったら1ページ目に戻す
   useEffect(() => {
@@ -217,6 +241,18 @@ export default function MOFJikouPage() {
       </header>
 
       <section className="flex shrink-0 flex-wrap items-center gap-2 px-3 pb-2 text-xs">
+        <select
+          value={data.metadata.fiscalYear}
+          onChange={e => changeYear(Number(e.target.value))}
+          className="rounded-lg border border-neutral-300 bg-white px-2 py-1 font-medium dark:border-neutral-700 dark:bg-neutral-900"
+        >
+          {(data.metadata.availableYears ?? [data.metadata.fiscalYear]).map(y => (
+            <option key={y} value={y}>
+              令和{y - 2018}年度（{y}）
+            </option>
+          ))}
+        </select>
+
         <div className="flex overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700">
           {(
             [

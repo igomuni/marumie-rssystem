@@ -4,7 +4,7 @@
  */
 
 import type { MOFAccountType, MOFJikouItem } from '@/types/mof-jikou';
-import { changeRate } from './format';
+import { changeRate, executionRate } from './format';
 
 export const ACCOUNT_LABEL: Record<MOFAccountType, string> = {
   general: '一般会計',
@@ -26,7 +26,11 @@ export type SortKey =
   | 'amount'
   | 'previousAmount'
   | 'difference'
-  | 'rate';
+  | 'rate'
+  | 'currentAmount'
+  | 'spent'
+  | 'unused'
+  | 'executionRate';
 
 export type SortDir = 'asc' | 'desc';
 
@@ -70,6 +74,23 @@ export const COLUMNS: ColumnSpec[] = [
   },
   { key: 'difference', label: '増減額', width: 100, numeric: true },
   { key: 'rate', label: '増減率', width: 84, numeric: true },
+  // 以下は決算の帳票にだけ値が入る
+  {
+    key: 'currentAmount',
+    label: '現額',
+    width: 100,
+    numeric: true,
+    note: '歳出予算現額（決算のみ）。歳出予算額＋前年度繰越＋予備費使用＋流用等＋移替',
+  },
+  { key: 'spent', label: '支出済', width: 100, numeric: true, note: '支出済歳出額（決算のみ）' },
+  { key: 'unused', label: '不用額', width: 100, numeric: true, note: '決算のみ' },
+  {
+    key: 'executionRate',
+    label: '執行率',
+    width: 78,
+    numeric: true,
+    note: '支出済歳出額 ÷ 歳出予算現額（決算のみ）',
+  },
 ];
 
 export const DEFAULT_WIDTHS: Record<string, number> = Object.fromEntries(
@@ -97,6 +118,8 @@ function sortValue(item: MOFJikouItem, key: SortKey): string | number | null {
       const r = changeRate(item.amount, item.previousAmount);
       return r === null || r === 'new' ? null : r;
     }
+    case 'executionRate':
+      return executionRate(item);
     default:
       return item[key];
   }
