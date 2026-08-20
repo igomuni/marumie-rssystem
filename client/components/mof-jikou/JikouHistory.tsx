@@ -3,13 +3,12 @@
 /**
  * 事項の経年推移。行を展開したときに詳細の中へ出す。
  *
- * 年度ごとに JSON が分かれているのでクライアントでは横断できない。
- * /api/mof-jikou/history に問い合わせ、同じ事項の全年度分を受け取る。
+ * データ取得はページ層の責務（client/components/ は API を直接叩かない）。
+ * 年度ごとに JSON が分かれているためクライアントでは横断できず、
+ * ページが /api/mof-jikou/history から受け取ったものを props で渡す。
  */
 
-import { useEffect, useState } from 'react';
-import type { MOFJikouHistory } from '@/app/lib/api/mof-jikou-loader';
-import type { MOFBudgetType, MOFJikouItem } from '@/types/mof-jikou';
+import type { MOFBudgetType, MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
 import { executionRate, formatRate, formatYen } from './format';
 
 /** 表示順。左から時系列に見えるよう予算→決算の順に並べる */
@@ -20,30 +19,27 @@ const BUDGET_TYPE_ORDER: MOFBudgetType[] = [
   '決算',
 ];
 
-/** 決算の行だけ実績の列を出す */
+/** 見出しの表記。長い種別名は詰める */
+const TYPE_LABEL: Partial<Record<MOFBudgetType, string>> = {
+  '補正予算（第1号）': '補正後',
+  決算: '決算(予算額)',
+};
+
 function pick(items: MOFJikouItem[], type: MOFBudgetType): MOFJikouItem | undefined {
   return items.find(i => i.budgetType === type);
 }
 
-export function JikouHistory({ itemKey }: { itemKey: string }) {
-  const [history, setHistory] = useState<MOFJikouHistory | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    setHistory(null);
-    setError(null);
-    fetch(`/api/mof-jikou/history?key=${encodeURIComponent(itemKey)}`)
-      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
-      .then((json: MOFJikouHistory) => !cancelled && setHistory(json))
-      .catch((e: Error) => !cancelled && setError(e.message));
-    return () => {
-      cancelled = true;
-    };
-  }, [itemKey]);
-
+export function JikouHistory({
+  history,
+  loading,
+  error,
+}: {
+  history: MOFJikouHistory | null;
+  loading: boolean;
+  error: string | null;
+}) {
   if (error) return <p className="text-[11px] text-red-600">推移の取得に失敗しました: {error}</p>;
-  if (!history) return <p className="text-[11px] text-neutral-400">推移を読み込み中…</p>;
+  if (loading || !history) return <p className="text-[11px] text-neutral-400">推移を読み込み中…</p>;
 
   // その事項に実際に現れた予算種別だけを列にする
   const types = BUDGET_TYPE_ORDER.filter(t =>
@@ -62,7 +58,7 @@ export function JikouHistory({ itemKey }: { itemKey: string }) {
             <th className="whitespace-nowrap px-2 py-1 text-left font-medium">年度</th>
             {types.map(t => (
               <th key={t} className="whitespace-nowrap px-2 py-1 text-right font-medium">
-                {t === '補正予算（第1号）' ? '補正後' : t === '決算' ? '決算(予算額)' : t}
+                {TYPE_LABEL[t] ?? t}
               </th>
             ))}
             {hasSettlement && (

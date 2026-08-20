@@ -14,7 +14,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
-import type { MOFAccountType, MOFJikouData } from '@/types/mof-jikou';
+import type { MOFAccountType, MOFJikouData, MOFJikouHistory } from '@/types/mof-jikou';
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { JikouTable } from '@/client/components/mof-jikou/JikouTable';
 import {
@@ -48,6 +48,9 @@ export default function MOFJikouPage() {
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
+  const [history, setHistory] = useState<MOFJikouHistory | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,16 +61,40 @@ export default function MOFJikouPage() {
         if (!res.ok) throw new Error(`API error: ${res.status}`);
         return res.json();
       })
-      .then((json: MOFJikouData) => {
-        if (cancelled) return;
-        setData(json);
-        setYear(json.metadata.fiscalYear);
-      })
+      // ここで setYear すると year が null から数値へ変わって effect が再実行され、
+      // 同じ年度をもう一度取りに行ってしまう。選択中の年度は data から読む。
+      .then((json: MOFJikouData) => !cancelled && setData(json))
       .catch((e: Error) => !cancelled && setError(e.message));
     return () => {
       cancelled = true;
     };
   }, [year]);
+
+  /**
+   * 展開した事項の経年推移を取る。
+   * 再利用コンポーネントから直接APIを叩かないよう、取得はページ層に置く。
+   */
+  const expandedKey = data?.items.find(i => i.id === expanded)?.key ?? null;
+  useEffect(() => {
+    if (!expandedKey) {
+      setHistory(null);
+      setHistoryError(null);
+      setHistoryLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setHistory(null);
+    setHistoryError(null);
+    setHistoryLoading(true);
+    fetch(`/api/mof-jikou/history?key=${encodeURIComponent(expandedKey)}`)
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
+      .then((json: MOFJikouHistory) => !cancelled && setHistory(json))
+      .catch((e: Error) => !cancelled && setHistoryError(e.message))
+      .finally(() => !cancelled && setHistoryLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [expandedKey]);
 
   // 年度を変えると収録帳票が変わるので、絞り込みも初期化する
   function changeYear(next: number) {
@@ -410,6 +437,9 @@ export default function MOFJikouPage() {
               onWidthsChange={setWidths}
               expandedId={expanded}
               onToggleExpand={setExpanded}
+              history={history}
+              historyLoading={historyLoading}
+              historyError={historyError}
             />
           </div>
 

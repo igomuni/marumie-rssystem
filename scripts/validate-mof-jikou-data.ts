@@ -16,7 +16,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { readZipEntryText } from '@/scripts/zip-reader';
+import { listZipEntries, readZipEntryText } from '@/scripts/zip-reader';
 import type { MOFJikouData, MOFJikouItem } from '@/types/mof-jikou';
 
 /** 帳票ごとに「JSONのどの値」と「CSVのどの列」を突き合わせるか */
@@ -60,15 +60,29 @@ function parseCsv(content: string): Array<Record<string, string>> {
   });
 }
 
-/** 歳出側の CSV（`b.csv`）を読む。a/b が入れ替わっている帳票があるので中身で判定する */
+/**
+ * 歳出側の CSV を読む。
+ *
+ * 通常は `b.csv` だが a/b が入れ替わっている帳票があるので中身で判定する
+ * （docs/mof-budget-data-guide.md 2-5節）。エントリ構成も帳票により違うため、
+ * 決め打ちで開かず ZIP に実在する CSV を順に見る。
+ */
 function readExpenditureCsv(zipPath: string, documentId: string): Array<Record<string, string>> {
-  for (const suffix of ['b', 'a']) {
-    const rows = parseCsv(readZipEntryText(zipPath, `DL${documentId}${suffix}.csv`));
+  const entries = listZipEntries(zipPath).filter(e => e.toLowerCase().endsWith('.csv'));
+  // b → a の順に見たいので、b で終わるものを先に
+  const ordered = [
+    ...entries.filter(e => e.includes(`${documentId}b.`)),
+    ...entries.filter(e => !e.includes(`${documentId}b.`)),
+  ];
+  for (const entry of ordered) {
+    const rows = parseCsv(readZipEntryText(zipPath, entry));
     const headers = Object.keys(rows[0] ?? {});
     // 歳出側は主要経費別分類コードか使途別分類コードを持つ
     if (headers.some(h => h.includes('主要経費別分類') || h.includes('使途別分類'))) return rows;
   }
-  throw new Error(`歳出側のCSVが見つかりません: ${zipPath}`);
+  throw new Error(
+    `歳出側のCSVが見つかりません: ${zipPath}（収録: ${entries.join(', ') || 'なし'}）`
+  );
 }
 
 function sumColumn(rows: Array<Record<string, string>>, prefix: string, scale: number): number {
@@ -132,6 +146,10 @@ function validateYear(year: number): { ok: boolean; checked: number } {
 
 function main() {
   const args = process.argv.slice(2).map(v => parseInt(v, 10));
+  if (args.some(y => isNaN(y) || y < 2000 || y > 2100)) {
+    console.error(`Invalid fiscal year: ${process.argv.slice(2).join(' ')}`);
+    process.exit(1);
+  }
   const years = args.length
     ? args
     : fs

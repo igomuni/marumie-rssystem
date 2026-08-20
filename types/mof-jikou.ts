@@ -136,3 +136,30 @@ export interface MOFJikouData {
   };
   items: MOFJikouItem[];
 }
+
+/** 事項の経年推移: ある年度に現れた同一事項 */
+export interface MOFJikouHistoryYear {
+  fiscalYear: number;
+  eraLabel: string;
+  /** その年度に現れた全予算種別の事項（当初・暫定・補正・決算） */
+  items: MOFJikouItem[];
+}
+
+/**
+ * 事項の経年推移（GET /api/mof-jikou/history のレスポンス）。
+ *
+ * 同一事項の判定は key から予算種別を除いた識別子で行う。
+ * 事項名が改称されると別の事項として扱われるため、実態が継続でも欠けて見えることがある。
+ */
+export interface MOFJikouHistory {
+  /** 問い合わせに使われた key */
+  key: string;
+  /** 予算種別を除いた識別子 */
+  identity: string;
+  /** 事項名（見つかった中で最初のもの） */
+  name: string;
+  /** 収録済みの全年度（新しい順）。推移の横軸 */
+  availableYears: number[];
+  /** 事項が現れた年度（古い順）。計上のない年度は要素ごと現れない */
+  years: MOFJikouHistoryYear[];
+}

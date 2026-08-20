@@ -5,7 +5,12 @@
  * 全年度を横断する必要がある。ここでプロセス内にキャッシュし、API 層は薄く保つ。
  */
 
-import type { MOFJikouData, MOFJikouItem } from '@/types/mof-jikou';
+import type {
+  MOFJikouData,
+  MOFJikouHistory,
+  MOFJikouHistoryYear,
+  MOFJikouItem,
+} from '@/types/mof-jikou';
 import { dataFileExists, readDataJson } from './data-file';
 
 /**
@@ -62,26 +67,6 @@ function identityFromKey(key: string): string {
   const parts = key.split('|');
   // key の並びは 会計区分 | 予算種別 | 所管 | … なので2番目を取り除く
   return [parts[0], ...parts.slice(2)].join('|');
-}
-
-/** ある年度に現れた同一事項 */
-export interface MOFJikouHistoryYear {
-  fiscalYear: number;
-  eraLabel: string;
-  items: MOFJikouItem[];
-}
-
-export interface MOFJikouHistory {
-  /** 問い合わせに使われた key */
-  key: string;
-  /** 予算種別を除いた識別子 */
-  identity: string;
-  /** 事項名（見つかった中で最初のもの） */
-  name: string;
-  /** 収録済みの全年度（新しい順）。推移の横軸 */
-  availableYears: number[];
-  /** 事項が現れた年度（古い順） */
-  years: MOFJikouHistoryYear[];
 }
 
 /**

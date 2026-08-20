@@ -6,7 +6,7 @@
  */
 
 import { Fragment } from 'react';
-import type { MOFJikouItem } from '@/types/mof-jikou';
+import type { MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
 import { JikouHistory } from './JikouHistory';
 import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from './format';
 import {
@@ -30,6 +30,10 @@ interface Props {
   onWidthsChange: (next: Record<string, number>) => void;
   expandedId: string | null;
   onToggleExpand: (id: string | null) => void;
+  /** 展開中の行の経年推移。取得はページ層の責務 */
+  history: MOFJikouHistory | null;
+  historyLoading: boolean;
+  historyError: string | null;
   /** 絞り込み結果が0件のときに表の中へ出す文言 */
   emptyMessage?: string;
 }
@@ -52,6 +56,9 @@ export function JikouTable({
   onWidthsChange,
   expandedId,
   onToggleExpand,
+  history,
+  historyLoading,
+  historyError,
   emptyMessage = '条件に合う事項がありません。',
 }: Props) {
   const tableWidth = COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0);
@@ -238,8 +245,12 @@ export function JikouTable({
                     */}
                     <div className="sticky left-0 w-[calc(100vw-3rem)] px-4 py-3">
                       <div className="flex flex-wrap gap-x-10 gap-y-4">
-                      {/* 年度推移は全年度を横断するのでAPIから取り直す */}
-                      <JikouHistory itemKey={item.key} />
+                      {/* 年度推移は全年度を横断するのでページ層が取得したものを受け取る */}
+                      <JikouHistory
+                        history={history}
+                        loading={historyLoading}
+                        error={historyError}
+                      />
                       <div className="min-w-[24rem] max-w-3xl flex-1">
                         <div className="mb-1 text-[11px] font-medium text-neutral-400">説明</div>
                         <p className="whitespace-pre-wrap leading-relaxed text-neutral-700 dark:text-neutral-300">
