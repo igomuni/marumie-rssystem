@@ -6,8 +6,9 @@
  */
 
 import { Fragment } from 'react';
-import type { MOFJikouItem } from '@/types/mof-jikou';
-import { changeRate, formatChangeRate, formatYen } from './format';
+import type { MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
+import { JikouHistory } from './JikouHistory';
+import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from './format';
 import {
   ACCOUNT_LABEL,
   COLUMNS,
@@ -29,6 +30,10 @@ interface Props {
   onWidthsChange: (next: Record<string, number>) => void;
   expandedId: string | null;
   onToggleExpand: (id: string | null) => void;
+  /** 展開中の行の経年推移。取得はページ層の責務 */
+  history: MOFJikouHistory | null;
+  historyLoading: boolean;
+  historyError: string | null;
   /** 絞り込み結果が0件のときに表の中へ出す文言 */
   emptyMessage?: string;
 }
@@ -51,6 +56,9 @@ export function JikouTable({
   onWidthsChange,
   expandedId,
   onToggleExpand,
+  history,
+  historyLoading,
+  historyError,
   emptyMessage = '条件に合う事項がありません。',
 }: Props) {
   const tableWidth = COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0);
@@ -133,6 +141,7 @@ export function JikouTable({
       <tbody>
         {items.map(item => {
           const rate = changeRate(item.amount, item.previousAmount);
+          const exec = executionRate(item);
           const isOpen = expandedId === item.id;
           return (
             <Fragment key={item.id}>
@@ -199,19 +208,56 @@ export function JikouTable({
                 >
                   {formatChangeRate(rate)}
                 </td>
+                <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                  {formatYen(item.currentAmount)}
+                </td>
+                <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
+                  {formatYen(item.spent)}
+                </td>
+                <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                  {formatYen(item.unused)}
+                </td>
+                <td
+                  className={`truncate px-2 py-1.5 text-right tabular-nums ${
+                    exec === null
+                      ? 'text-neutral-400'
+                      : exec < 0.5
+                        ? 'text-red-600 dark:text-red-400'
+                        : exec < 0.9
+                          ? 'text-amber-700 dark:text-amber-500'
+                          : 'text-neutral-600 dark:text-neutral-400'
+                  }`}
+                >
+                  {formatRate(exec)}
+                </td>
               </tr>
               {/* 詳細は行全体を使う。狭い列の中に押し込むと説明文が読めないため */}
               {isOpen && (
                 <tr className="bg-neutral-50 dark:bg-neutral-900">
                   <td
                     colSpan={COLUMNS.length}
-                    className="border-b border-neutral-200 px-4 py-3 dark:border-neutral-800"
+                    className="border-b border-neutral-200 p-0 dark:border-neutral-800"
                   >
-                    <div className="flex flex-wrap gap-x-10 gap-y-3">
+                    {/*
+                      表は画面より広く横スクロールするので、詳細を素直に置くと
+                      右へスクロールしたときに左端の内容が見切れる。
+                      sticky left-0 ＋ 画面幅で、横位置に関わらず常に見えるようにする。
+                    */}
+                    <div className="sticky left-0 w-[calc(100vw-3rem)] px-4 py-3">
+                      <div className="flex flex-wrap gap-x-10 gap-y-4">
+                      {/* 年度推移は全年度を横断するのでページ層が取得したものを受け取る */}
+                      <JikouHistory
+                        history={history}
+                        loading={historyLoading}
+                        error={historyError}
+                      />
                       <div className="min-w-[24rem] max-w-3xl flex-1">
                         <div className="mb-1 text-[11px] font-medium text-neutral-400">説明</div>
                         <p className="whitespace-pre-wrap leading-relaxed text-neutral-700 dark:text-neutral-300">
-                          {item.description || '（説明なし）'}
+                          {item.description ||
+                            (item.budgetType === '決算'
+                              ? '（決算の帳票に説明欄はありません。予算の年度・種別を開くと表示されます）'
+                              : '（説明なし）')}
                         </p>
                       </div>
                       <dl className="grid shrink-0 grid-cols-[6.5rem_auto] gap-x-3 gap-y-1 text-[11px] text-neutral-500">
@@ -223,6 +269,12 @@ export function JikouTable({
                         <dd className="font-mono">{item.sectionCode}</dd>
                         <dt className="text-neutral-400">主要経費コード</dt>
                         <dd className="font-mono">{item.majorExpenseCode || '—'}</dd>
+                        {item.carriedOver !== null && (
+                          <>
+                            <dt className="text-neutral-400">翌年度繰越額</dt>
+                            <dd className="tabular-nums">{formatYen(item.carriedOver)}</dd>
+                          </>
+                        )}
                         <dt className="text-neutral-400">帳票・ページ</dt>
                         <dd>
                           {item.documentId} p.{item.page}{' '}
@@ -237,6 +289,7 @@ export function JikouTable({
                           </a>
                         </dd>
                       </dl>
+                      </div>
                     </div>
                   </td>
                 </tr>

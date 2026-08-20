@@ -12,7 +12,7 @@
 export type MOFAccountType = 'general' | 'special' | 'agency';
 
 /** 予算の種別 */
-export type MOFBudgetType = '当初予算' | '暫定予算' | '補正予算（第1号）';
+export type MOFBudgetType = '当初予算' | '暫定予算' | '補正予算（第1号）' | '決算';
 
 /** 事項1件 */
 export interface MOFJikouItem {
@@ -55,9 +55,9 @@ export interface MOFJikouItem {
   /** 事項名 */
   name: string;
   /**
-   * 本年度額（円）。補正予算では補正後（改）予算額。
-   * 予算書の印字は千円単位だが、リポジトリ全体の金額規約（1円単位）に合わせて
-   * 生成時に1000倍している。CSV と突き合わせるときは1000で割ること。
+   * 本年度額（円）。補正予算では補正後（改）予算額、決算では歳出予算額。
+   * 予算書の印字は千円単位（決算書は円単位）だが、リポジトリ全体の金額規約に
+   * 合わせて生成時に円へ揃えている。予算書の CSV と突き合わせるときは1000で割ること。
    */
   amount: number;
   /**
@@ -67,6 +67,17 @@ export interface MOFJikouItem {
   previousAmount: number | null;
   /** 増減額（円。減額は負値）。比較欄が無い帳票では null */
   difference: number | null;
+  /**
+   * 以下は決算の帳票にだけ入る。予算の帳票では null。
+   * 歳出予算現額（歳出予算額＋前年度繰越＋予備費使用＋流用等＋移替）。
+   */
+  currentAmount: number | null;
+  /** 支出済歳出額（円） */
+  spent: number | null;
+  /** 翌年度繰越額（円） */
+  carriedOver: number | null;
+  /** 不用額（円。決算報告書では「差引額」） */
+  unused: number | null;
   /** 説明（所掌事務・根拠法等。予算書の「説明」欄の全文） */
   description: string;
   /** 予算書のページ番号 */
@@ -101,10 +112,15 @@ export interface MOFJikouData {
       pages: number;
       count: number;
     }>;
-    /** 金額の単位。予算書は千円単位だが、生成時に円へ正規化している */
+    /** 金額の単位。予算書は千円・決算書は円だが、生成時に円へ揃えている */
     unit: 'yen';
     /** 生成日時（ISO8601） */
     generatedAt: string;
+    /**
+     * 収録済みの会計年度一覧（新しい順）。API が応答時に付与する。
+     * 生成した JSON ファイル自体は自年度しか知らないので、ここは省略されうる。
+     */
+    availableYears?: number[];
     notes: string[];
   };
   summary: {
@@ -119,4 +135,31 @@ export interface MOFJikouData {
     byMajorExpense: MOFJikouGroupSummary[];
   };
   items: MOFJikouItem[];
+}
+
+/** 事項の経年推移: ある年度に現れた同一事項 */
+export interface MOFJikouHistoryYear {
+  fiscalYear: number;
+  eraLabel: string;
+  /** その年度に現れた全予算種別の事項（当初・暫定・補正・決算） */
+  items: MOFJikouItem[];
+}
+
+/**
+ * 事項の経年推移（GET /api/mof-jikou/history のレスポンス）。
+ *
+ * 同一事項の判定は key から予算種別を除いた識別子で行う。
+ * 事項名が改称されると別の事項として扱われるため、実態が継続でも欠けて見えることがある。
+ */
+export interface MOFJikouHistory {
+  /** 問い合わせに使われた key */
+  key: string;
+  /** 予算種別を除いた識別子 */
+  identity: string;
+  /** 事項名（見つかった中で最初のもの） */
+  name: string;
+  /** 収録済みの全年度（新しい順）。推移の横軸 */
+  availableYears: number[];
+  /** 事項が現れた年度（古い順）。計上のない年度は要素ごと現れない */
+  years: MOFJikouHistoryYear[];
 }

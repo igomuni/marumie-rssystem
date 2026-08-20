@@ -13,7 +13,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
-import type { MOFAccountType, MOFJikouData } from '@/types/mof-jikou';
+import { YearSelect } from '@/components/navigation/YearSelect';
+import type { MOFAccountType, MOFJikouData, MOFJikouHistory } from '@/types/mof-jikou';
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { JikouTable } from '@/client/components/mof-jikou/JikouTable';
 import {
@@ -32,6 +33,8 @@ const PAGE_SIZE = 100;
 export default function MOFJikouPage() {
   const [data, setData] = useState<MOFJikouData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /** 選択中の会計年度。null は「収録済みの最新年度」をAPIに任せる */
+  const [year, setYear] = useState<number | null>(null);
 
   const [account, setAccount] = useState<'all' | MOFAccountType>('all');
   const [budgetType, setBudgetType] = useState('');
@@ -45,17 +48,66 @@ export default function MOFJikouPage() {
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
+  const [history, setHistory] = useState<MOFJikouHistory | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch('/api/mof-jikou')
+    let cancelled = false;
+    setError(null);
+    fetch(year === null ? '/api/mof-jikou' : `/api/mof-jikou?year=${year}`)
       .then(res => {
         if (!res.ok) throw new Error(`API error: ${res.status}`);
         return res.json();
       })
-      .then((json: MOFJikouData) => setData(json))
-      .catch((e: Error) => setError(e.message));
-  }, []);
+      // ここで setYear すると year が null から数値へ変わって effect が再実行され、
+      // 同じ年度をもう一度取りに行ってしまう。選択中の年度は data から読む。
+      .then((json: MOFJikouData) => !cancelled && setData(json))
+      .catch((e: Error) => !cancelled && setError(e.message));
+    return () => {
+      cancelled = true;
+    };
+  }, [year]);
+
+  /**
+   * 展開した事項の経年推移を取る。
+   * 再利用コンポーネントから直接APIを叩かないよう、取得はページ層に置く。
+   */
+  const expandedKey = data?.items.find(i => i.id === expanded)?.key ?? null;
+  useEffect(() => {
+    if (!expandedKey) {
+      setHistory(null);
+      setHistoryError(null);
+      setHistoryLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setHistory(null);
+    setHistoryError(null);
+    setHistoryLoading(true);
+    fetch(`/api/mof-jikou/history?key=${encodeURIComponent(expandedKey)}`)
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
+      .then((json: MOFJikouHistory) => !cancelled && setHistory(json))
+      .catch((e: Error) => !cancelled && setHistoryError(e.message))
+      .finally(() => !cancelled && setHistoryLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [expandedKey]);
+
+  // 年度を変えると収録帳票が変わるので、絞り込みも初期化する
+  function changeYear(next: number) {
+    setYear(next);
+    setData(null);
+    setAccount('all');
+    setBudgetType('');
+    setMinistry('');
+    setOrganization('');
+    setSubAccount('');
+    setMajorExpense('');
+    setExpanded(null);
+  }
 
   // フィルタ条件が変わったら1ページ目に戻す
   useEffect(() => {
@@ -213,7 +265,15 @@ export default function MOFJikouPage() {
             ))}
           </p>
         </div>
-        <PageNavMenu current="/mof-jikou" />
+        {/* 年度とページ切替。全ページ共通で右上に置く */}
+        <div className="flex shrink-0 items-center gap-2">
+          <YearSelect
+            value={String(data.metadata.fiscalYear)}
+            onChange={y => changeYear(Number(y))}
+            years={data.metadata.availableYears ?? [data.metadata.fiscalYear]}
+          />
+          <PageNavMenu current="/mof-jikou" />
+        </div>
       </header>
 
       <section className="flex shrink-0 flex-wrap items-center gap-2 px-3 pb-2 text-xs">
@@ -377,6 +437,9 @@ export default function MOFJikouPage() {
               onWidthsChange={setWidths}
               expandedId={expanded}
               onToggleExpand={setExpanded}
+              history={history}
+              historyLoading={historyLoading}
+              historyError={historyError}
             />
           </div>
 
