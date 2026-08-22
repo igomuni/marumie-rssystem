@@ -8,7 +8,7 @@
  *   tsx scripts/generate-mof-jikou-data.ts [FISCAL_YEAR...]
  *   例: tsx scripts/generate-mof-jikou-data.ts 2026
  *       tsx scripts/generate-mof-jikou-data.ts 2023 2024 2025 2026
- *   デフォルト: 2023 2024 2025 2026
+ *   デフォルト: 2017〜2026（10年度分）
  *
  * 出力: public/data/mof-jikou-{FISCAL_YEAR}.json（年度ごとに1ファイル）
  * XMLキャッシュ: data/download/mof_{FISCAL_YEAR}/xml/
@@ -24,16 +24,18 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import type {
-  MOFAccountType,
-  MOFBudgetType,
-  MOFJikouData,
-  MOFJikouGroupSummary,
-  MOFJikouItem,
+import {
+  MOF_REVISION_NUMBERS,
+  revisedBudgetType,
+  type MOFAccountType,
+  type MOFBudgetType,
+  type MOFJikouData,
+  type MOFJikouGroupSummary,
+  type MOFJikouItem,
 } from '@/types/mof-jikou';
 
 /** 対象年度。引数が無ければ収録済みの全年度 */
-const DEFAULT_YEARS = [2023, 2024, 2025, 2026];
+const DEFAULT_YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
 const FISCAL_YEARS = (
   process.argv.length > 2 ? process.argv.slice(2).map(v => parseInt(v, 10)) : DEFAULT_YEARS
 ).sort((a, b) => a - b);
@@ -94,10 +96,43 @@ const DOCUMENTS: DocumentSpec[] = [
   { suffix: '31001', accountType: 'general', budgetType: '暫定予算', listTitle: '〔組織別事項別内訳〕', layout: 'standard', unitScale: 1000, title: '一般会計予算（暫定予算）' },
   { suffix: '32001', accountType: 'special', budgetType: '暫定予算', listTitle: '歳出 事項別内訳', layout: 'standard', unitScale: 1000, title: '特別会計予算（暫定予算）' },
   { suffix: '33001', accountType: 'agency', budgetType: '暫定予算', listTitle: '支出 事項別内訳', layout: 'standard', unitScale: 1000, title: '政府関係機関予算（暫定予算）' },
-  { suffix: '21001', accountType: 'general', budgetType: '補正予算（第1号）', listTitle: '〔組織別事項別内訳〕', layout: 'revised', unitScale: 1000, title: '一般会計予算（補正予算第1号）' },
-  { suffix: '22001', accountType: 'special', budgetType: '補正予算（第1号）', listTitle: '歳出 事項別内訳', layout: 'revised', unitScale: 1000, title: '特別会計予算（補正予算特第1号）' },
+  ...revisedDocuments(),
   { suffix: '77001', accountType: 'general', budgetType: '決算', listTitle: '', layout: 'settlement', unitScale: 1, title: '一般会計 歳出決算報告書' },
 ];
+
+/**
+ * 補正予算の帳票を号数ぶん並べる。
+ *
+ * 帳票IDの連番が号数（`21001`=第1号、`21002`=第2号）。年度により成立回数が違い、
+ * 10年度分では平成30年度・令和2年度・令和4年度に第2号以降がある。
+ * 存在しない号数は 404 になり、呼び出し側が欠番として飛ばす。
+ */
+function revisedDocuments(): DocumentSpec[] {
+  const specs: DocumentSpec[] = [];
+  for (const revision of MOF_REVISION_NUMBERS) {
+    const seq = String(revision).padStart(3, '0');
+    specs.push({
+      suffix: `21${seq}`,
+      accountType: 'general',
+      budgetType: revisedBudgetType(revision),
+      listTitle: '〔組織別事項別内訳〕',
+      layout: 'revised',
+      unitScale: 1000,
+      title: `一般会計予算（補正予算第${revision}号）`,
+    });
+    specs.push({
+      suffix: `22${seq}`,
+      accountType: 'special',
+      budgetType: revisedBudgetType(revision),
+      listTitle: '歳出 事項別内訳',
+      layout: 'revised',
+      unitScale: 1000,
+      // 特別会計の帳票名は「特第N号」表記
+      title: `特別会計予算（補正予算特第${revision}号）`,
+    });
+  }
+  return specs;
+}
 
 /** 主要経費別分類コード表（docs/mof-budget-data-guide.md 4-2節） */
 const MAJOR_EXPENSE: Record<string, string> = {
@@ -141,6 +176,19 @@ const MAJOR_EXPENSE: Record<string, string> = {
   '98': '予備費',
 };
 
+/**
+ * 金額列の見出しに現れる年度表記。
+ * 平成年度の帳票（平成29年度〜）と令和元年度（「令和1年度」ではなく「令和元年度」）を含む。
+ */
+const ERA_YEAR_PREFIX = /^(令和|平成)(元|\d+)年度/;
+
+/** 会計年度（西暦）を元号表記に直す。2019年度は改元年で「令和元年度」 */
+function toEraLabel(fiscalYear: number): string {
+  if (fiscalYear <= 2018) return `平成${fiscalYear - 1988}年度`;
+  if (fiscalYear === 2019) return '令和元年度';
+  return `令和${fiscalYear - 2018}年度`;
+}
+
 /** 1リクエストの上限。応答が止まったまま生成コマンドが固まるのを防ぐ */
 const FETCH_TIMEOUT_MS = 30_000;
 
@@ -148,8 +196,15 @@ const FETCH_TIMEOUT_MS = 30_000;
  * 連続取得の間隔。1年度あたり250ページ超を取りに行くので、
  * 間を空けないと配信側に一時的に弾かれる（実測で 404 が返るようになった）。
  * キャッシュが効いている場合は待たない。
+ *
+ * 300ms では複数年度を続けて回すと数分でブロックされた（2026-08 実測）ため 1 秒にしている。
  */
-const FETCH_INTERVAL_MS = 300;
+const FETCH_INTERVAL_MS = 1_000;
+
+/**
+ * ブロック判定に使う常設ページ。帳票と無関係に常に 200 を返す。
+ */
+const SENTINEL_URL = 'https://www.bb.mof.go.jp/hdocs/bxsselect.html';
 let lastFetchAt = 0;
 
 async function throttle(): Promise<void> {
@@ -163,6 +218,23 @@ class HttpError extends Error {
   constructor(readonly status: number, url: string) {
     super(`HTTP ${status}: ${url}`);
     this.name = 'HttpError';
+  }
+}
+
+/**
+ * 配信側が生きているかを確かめる。
+ *
+ * このサーバは過剰なアクセスを 429 ではなく 404 で弾く。404 をそのまま「帳票なし」と
+ * 解釈すると、ブロックされている間は全帳票が欠番に見え、空の JSON が正常終了で出力される。
+ * 本当の欠番と区別するために、常設ページを引けるかどうかで判定する。
+ */
+async function isServerReachable(): Promise<boolean> {
+  await throttle();
+  try {
+    const res = await fetch(SENTINEL_URL, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+    return res.ok;
+  } catch {
+    return false;
   }
 }
 
@@ -407,8 +479,9 @@ function extractStandard(
   const colMajorExpense = hasMajorExpense ? jikouHeaderCol : undefined;
   const colSectionName = jikouHeaderCol - 1;
   const colSectionCode = jikouHeaderCol - 2;
-  // 当初は「令和8年度」、暫定は「令和8年度暫定予算」。前方一致で拾う
-  const colAmount = [...headerCols.entries()].find(([k]) => /^令和\d+年度/.test(k))?.[1];
+  // 当初は「令和8年度」、暫定は「令和8年度暫定予算」。前方一致で拾う。
+  // 平成年度の帳票と令和元年度（「令和元年度」表記）も拾えるよう元号と「元」を許容する
+  const colAmount = [...headerCols.entries()].find(([k]) => ERA_YEAR_PREFIX.test(k))?.[1];
   const colPrev = headerCols.get('前年度予算額') ?? headerCols.get('前年度');
   const colDiff = [...headerCols.entries()].find(([k]) => k.startsWith('比較増'))?.[1];
   const colDescription = headerCols.get('説明');
@@ -479,7 +552,7 @@ function extractRevised(
     [...header.cols.keys()].sort((a, b) => a - b).find(c => match(label(c)));
   const colSettled = findCol(s => s.includes('成立予算額'));
   const colDiff = findCol(s => s.includes('差引額'));
-  const colRevised = findCol(s => s.includes('改令和'));
+  const colRevised = findCol(s => /^改(令和|平成)(元|\d+)年度/.test(s));
   const colDescription = findCol(s => s === '説明');
   if (colRevised === undefined) return [];
 
@@ -659,8 +732,8 @@ async function collect(
 
 async function generateYear(fiscalYear: number): Promise<boolean> {
   const ctx = createContext(fiscalYear);
-  const eraYear = fiscalYear - 2018; // 2019年 = 令和元年
-  console.log(`\n=== 令和${eraYear}年度（${fiscalYear}） ===`);
+  const eraLabel = toEraLabel(fiscalYear);
+  console.log(`\n=== ${eraLabel}（${fiscalYear}） ===`);
 
   const items: MOFJikouItem[] = [];
   const documents: MOFJikouData['metadata']['documents'] = [];
@@ -684,6 +757,14 @@ async function generateYear(fiscalYear: number): Promise<boolean> {
       // 通信障害・サーバエラー・パーサの退行は握り潰さずに失敗させる
       // （部分的な JSON が正常終了で出力されるのを防ぐ）。
       if (error instanceof HttpError && error.status === 404) {
+        // 404 は「帳票なし」とアクセス制限の両方で返る。常設ページで切り分ける
+        if (!(await isServerReachable())) {
+          throw new Error(
+            `[${documentId}] が 404 になり、常設ページ（${SENTINEL_URL}）も引けません。` +
+              'アクセスを制限されている可能性が高いため中断します。' +
+              `時間を空けてから再実行してください（現在の取得間隔 ${FETCH_INTERVAL_MS}ms）。`
+          );
+        }
         console.log(`  [${documentId}] 帳票なし（404）`);
         continue;
       }
@@ -702,7 +783,7 @@ async function generateYear(fiscalYear: number): Promise<boolean> {
   const data: MOFJikouData = {
     metadata: {
       fiscalYear,
-      eraLabel: `令和${eraYear}年度`,
+      eraLabel,
       budgetTypes: [...new Set(documents.filter(d => d.count > 0).map(d => d.budgetType))],
       documents,
       unit: 'yen',

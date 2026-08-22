@@ -17,7 +17,7 @@ import { dataFileExists, readDataJson } from './data-file';
  * 収録候補の会計年度（新しい順）。
  * 実際に返せるのは JSON が生成済みの年度だけ。
  */
-const CANDIDATE_YEARS = [2026, 2025, 2024, 2023] as const;
+const CANDIDATE_YEARS = [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017] as const;
 
 const fileName = (year: number) => `mof-jikou-${year}.json`;
 

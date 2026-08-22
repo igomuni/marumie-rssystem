@@ -8,20 +8,31 @@
  * ページが /api/mof-jikou/history から受け取ったものを props で渡す。
  */
 
-import type { MOFBudgetType, MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
+import {
+  MOF_REVISION_NUMBERS,
+  revisedBudgetType,
+  type MOFBudgetType,
+  type MOFJikouHistory,
+  type MOFJikouItem,
+} from '@/types/mof-jikou';
 import { executionRate, formatRate, formatYen } from './format';
 
-/** 表示順。左から時系列に見えるよう予算→決算の順に並べる */
+/** 表示順。左から時系列に見えるよう予算→補正（号数順）→決算の順に並べる */
 const BUDGET_TYPE_ORDER: MOFBudgetType[] = [
   '当初予算',
   '暫定予算',
-  '補正予算（第1号）',
+  ...MOF_REVISION_NUMBERS.map(revisedBudgetType),
   '決算',
 ];
 
-/** 見出しの表記。長い種別名は詰める */
+/**
+ * 見出しの表記。長い種別名は詰める。
+ * 補正の金額は改予算額（その号の成立後の姿）なので「補正後」と呼ぶ。
+ */
 const TYPE_LABEL: Partial<Record<MOFBudgetType, string>> = {
-  '補正予算（第1号）': '補正後',
+  ...Object.fromEntries(
+    MOF_REVISION_NUMBERS.map(n => [revisedBudgetType(n), `補正後(第${n}号)`])
+  ),
   決算: '決算(予算額)',
 };
 

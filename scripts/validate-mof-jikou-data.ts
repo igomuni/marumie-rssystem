@@ -17,30 +17,33 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { listZipEntries, readZipEntryText } from '@/scripts/zip-reader';
-import type { MOFJikouData, MOFJikouItem } from '@/types/mof-jikou';
+import { MOF_REVISION_NUMBERS, type MOFJikouData, type MOFJikouItem } from '@/types/mof-jikou';
 
 /** 帳票ごとに「JSONのどの値」と「CSVのどの列」を突き合わせるか */
 interface Check {
   /** JSON 側の集計対象。null を含む項目は無視する */
   field: 'amount' | 'currentAmount' | 'spent' | 'carriedOver' | 'unused' | 'difference';
-  /** CSV の列名。前方一致で探す（年度が名前に入る列があるため） */
-  column: string;
+  /** CSV の列名。文字列なら前方一致、正規表現ならその一致で探す（年度が名前に入る列があるため） */
+  column: string | RegExp;
   /** CSV の値を円に直す倍率 */
   scale: number;
 }
 
+/**
+ * 本年度額の列。見出しに元号年が入る（例: 令和8年度要求額(千円)／平成29年度予定額(千円)）。
+ * 平成年度の帳票と令和元年度（「令和元年度」表記）も拾えるよう元号と「元」を許容する。
+ */
+const ERA_AMOUNT_COLUMN = /^(令和|平成)(元|\d+)年度/;
+
 /** 帳票IDの末尾5桁 → 検証内容 */
 const CHECKS: Record<string, Check[]> = {
-  '11001': [{ field: 'amount', column: '令和', scale: 1000 }],
-  '12001': [{ field: 'amount', column: '令和', scale: 1000 }],
-  '13001': [{ field: 'amount', column: '令和', scale: 1000 }],
-  '31001': [{ field: 'amount', column: '令和', scale: 1000 }],
-  '32001': [{ field: 'amount', column: '令和', scale: 1000 }],
-  '33001': [{ field: 'amount', column: '令和', scale: 1000 }],
-  // 補正は事項別内訳に補正対象の事項しか載らないため、改予算額の合計は一致しない。
-  // 増減（差引額）だけが全事項ぶんそろう。
-  '21001': [{ field: 'difference', column: '補正要求差引額', scale: 1000 }],
-  '22001': [{ field: 'difference', column: '補正予定差引額', scale: 1000 }],
+  '11001': [{ field: 'amount', column: ERA_AMOUNT_COLUMN, scale: 1000 }],
+  '12001': [{ field: 'amount', column: ERA_AMOUNT_COLUMN, scale: 1000 }],
+  '13001': [{ field: 'amount', column: ERA_AMOUNT_COLUMN, scale: 1000 }],
+  '31001': [{ field: 'amount', column: ERA_AMOUNT_COLUMN, scale: 1000 }],
+  '32001': [{ field: 'amount', column: ERA_AMOUNT_COLUMN, scale: 1000 }],
+  '33001': [{ field: 'amount', column: ERA_AMOUNT_COLUMN, scale: 1000 }],
+  // 補正は号数ぶん（21001〜21004 / 22001〜22004）を同じ内容で検証する。CHECKS の初期化で展開する。
   '77001': [
     { field: 'amount', column: '歳出予算額(円)', scale: 1 },
     { field: 'currentAmount', column: '歳出予算現額(円)', scale: 1 },
@@ -49,6 +52,15 @@ const CHECKS: Record<string, Check[]> = {
     { field: 'unused', column: '不用額(円)', scale: 1 },
   ],
 };
+
+// 補正予算は事項別内訳に補正対象の事項しか載らないため、改予算額の合計は一致しない。
+// 増減（差引額）だけが全事項ぶんそろう。差引額の列名は会計で違う（一般会計は「補正要求」、
+// 特別会計は「補正予定」）。号数ぶん（第1号〜第4号）を同じ内容で検証する。
+for (const revision of MOF_REVISION_NUMBERS) {
+  const seq = String(revision).padStart(3, '0');
+  CHECKS[`21${seq}`] = [{ field: 'difference', column: '補正要求差引額', scale: 1000 }];
+  CHECKS[`22${seq}`] = [{ field: 'difference', column: '補正予定差引額', scale: 1000 }];
+}
 
 /** CSV を行の配列にする（値にカンマを含まない単純な配布物なので分割で足りる） */
 function parseCsv(content: string): Array<Record<string, string>> {
@@ -85,9 +97,14 @@ function readExpenditureCsv(zipPath: string, documentId: string): Array<Record<s
   );
 }
 
-function sumColumn(rows: Array<Record<string, string>>, prefix: string, scale: number): number {
-  const header = Object.keys(rows[0] ?? {}).find(h => h.startsWith(prefix));
-  if (!header) throw new Error(`列が見つかりません: ${prefix}`);
+function sumColumn(
+  rows: Array<Record<string, string>>,
+  column: string | RegExp,
+  scale: number
+): number {
+  const match = (h: string) => (typeof column === 'string' ? h.startsWith(column) : column.test(h));
+  const header = Object.keys(rows[0] ?? {}).find(match);
+  if (!header) throw new Error(`列が見つかりません: ${column}`);
   return rows.reduce((sum, r) => sum + (parseInt(r[header] || '0', 10) || 0), 0) * scale;
 }
 
