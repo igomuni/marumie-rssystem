@@ -52,14 +52,20 @@ export function SankeyChart({
   height?: number;
   labelMax?: number;
 }) {
-  const [hovered, setHovered] = useState<MOFLayoutNode | null>(null);
+  const [hovered, setHovered] = useState<MOFLayoutNode<MOFBudgetNodeDetails> | null>(null);
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
 
   const layout = useMemo(
     () =>
       computeMOFSankeyLayout(
         { nodes, links },
-        { width, height, ...MOF_SANKEY_LAYOUT }
+        {
+          width,
+          height,
+          ...MOF_SANKEY_LAYOUT,
+          // 会計ノードは同じ列に揃える（政府関係機関が一般会計の隣に並ぶのを防ぐ）
+          alignToSameColumn: node => node.type === 'account',
+        }
       ),
     [nodes, links, width, height]
   );

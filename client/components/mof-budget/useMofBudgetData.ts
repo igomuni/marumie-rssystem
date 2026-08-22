@@ -22,11 +22,18 @@ export function useMofBudgetData<T extends { metadata: { fiscalYear: number } }>
   const [error, setError] = useState<string | null>(null);
   /** 最後に投げた取得の世代。応答が古ければ捨てる */
   const generation = useRef(0);
+  /**
+   * 最後に要求した年度。
+   * `buildUrl` が変わった（絞り込み条件を変えた）ときの取り直しで、
+   * URL の初期値ではなく画面で選んでいる年度を使うために持つ。
+   */
+  const requestedYear = useRef<number | null>(initialYear);
 
   const fetchData = useCallback(
     async (target: number | null) => {
       const current = generation.current + 1;
       generation.current = current;
+      requestedYear.current = target;
       setLoading(true);
       try {
         const response = await fetch(buildUrl(target));
@@ -47,8 +54,14 @@ export function useMofBudgetData<T extends { metadata: { fiscalYear: number } }>
     [buildUrl]
   );
 
+  // URL の年度が変わったら、それを現在の年度として扱う
   useEffect(() => {
-    fetchData(initialYear);
+    requestedYear.current = initialYear;
+  }, [initialYear]);
+
+  // 初回と、URL の年度・絞り込み条件が変わったときに取り直す
+  useEffect(() => {
+    fetchData(requestedYear.current);
   }, [fetchData, initialYear]);
 
   return { data, year, loading, error, fetchData };

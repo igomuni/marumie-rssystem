@@ -1,0 +1,110 @@
+import { describe, it, expect } from 'vitest';
+import { computeMOFSankeyLayout } from '@/app/lib/mof-sankey-layout';
+import type { SankeyLink, SankeyNode } from '@/types/sankey';
+
+type Node = SankeyNode & { name?: string; details?: { passThrough?: boolean } };
+
+const OPTIONS = {
+  width: 1000,
+  height: 600,
+  margin: { top: 20, right: 100, bottom: 20, left: 100 },
+  nodeWidth: 10,
+  nodePadding: 4,
+};
+
+/** 列を type で明示する（階層図と同じ使い方） */
+const columnOf = (node: { type?: string }) => Number(node.type ?? 0);
+
+describe('computeMOFSankeyLayout', () => {
+  it('列は指定した番号に置かれる', () => {
+    const nodes: Node[] = [
+      { id: 'a', name: 'a', value: 100, type: '0' },
+      { id: 'b', name: 'b', value: 100, type: '2' },
+    ];
+    const links: SankeyLink[] = [{ source: 'a', target: 'b', value: 100 }];
+    const layout = computeMOFSankeyLayout({ nodes, links }, { ...OPTIONS, columnOf });
+    expect(layout.columnCount).toBe(3);
+    expect(layout.nodes.find(n => n.id === 'b')?.column).toBe(2);
+  });
+
+  it('ラベルスロットを指定すると、小さいノードもその高さを確保する', () => {
+    const nodes: Node[] = [
+      { id: 'big', name: 'big', value: 1000, type: '0' },
+      { id: 'tiny', name: 'tiny', value: 1, type: '0' },
+    ];
+    const layout = computeMOFSankeyLayout(
+      { nodes, links: [] },
+      { ...OPTIONS, columnOf, minNodeSlot: 20, align: 'top' }
+    );
+    const tiny = layout.nodes.find(n => n.id === 'tiny');
+    const big = layout.nodes.find(n => n.id === 'big');
+    // 箱自体は値どおり小さいが、次のノードとの間隔がスロットぶん空く
+    expect(tiny && big && tiny.y - big.y).toBeGreaterThanOrEqual(20);
+  });
+
+  it('スロットで膨らんでも列は指定した高さに収まる', () => {
+    // 小さいノードを多く含めると、素朴な按分ではスロット分だけ列がはみ出す
+    const nodes: Node[] = [
+      { id: 'big', name: 'big', value: 10000, type: '0' },
+      ...Array.from({ length: 20 }, (_, i) => ({
+        id: `small-${i}`,
+        name: `small-${i}`,
+        value: 1,
+        type: '0',
+      })),
+    ];
+    const layout = computeMOFSankeyLayout(
+      { nodes, links: [] },
+      { ...OPTIONS, columnOf, minNodeSlot: 13, align: 'top' }
+    );
+    expect(layout.contentHeight).toBeLessThanOrEqual(OPTIONS.height + 1);
+  });
+
+  it('通過ノードはスロットも余白も取らない', () => {
+    const withPass: Node[] = [
+      { id: 'p', name: '', value: 100, type: '0', details: { passThrough: true } },
+      { id: 'q', name: '', value: 100, type: '0', details: { passThrough: true } },
+    ];
+    const withReal: Node[] = [
+      { id: 'p', name: 'p', value: 100, type: '0' },
+      { id: 'q', name: 'q', value: 100, type: '0' },
+    ];
+    const passLayout = computeMOFSankeyLayout(
+      { nodes: withPass, links: [] },
+      { ...OPTIONS, columnOf, minNodeSlot: 40, align: 'top' }
+    );
+    const realLayout = computeMOFSankeyLayout(
+      { nodes: withReal, links: [] },
+      { ...OPTIONS, columnOf, minNodeSlot: 40, align: 'top' }
+    );
+    // 実ノードはスロットで間隔が空くが、通過ノードは詰まる
+    const passGap = passLayout.nodes[1].y - passLayout.nodes[0].y;
+    const realGap = realLayout.nodes[1].y - realLayout.nodes[0].y;
+    expect(passGap).toBeLessThan(realGap);
+  });
+
+  it('帯はノードの上端から順に積まれ、幅は値に比例する', () => {
+    const nodes: Node[] = [
+      { id: 'src', name: 'src', value: 300, type: '0' },
+      { id: 'a', name: 'a', value: 200, type: '1' },
+      { id: 'b', name: 'b', value: 100, type: '1' },
+    ];
+    const links: SankeyLink[] = [
+      { source: 'src', target: 'a', value: 200 },
+      { source: 'src', target: 'b', value: 100 },
+    ];
+    const layout = computeMOFSankeyLayout({ nodes, links }, { ...OPTIONS, columnOf });
+    const [first, second] = layout.links;
+    expect(second.y0).toBeCloseTo(first.y0 + first.width, 5);
+    expect(first.width / second.width).toBeCloseTo(2, 1);
+  });
+
+  it('align: top は列を上端から積む', () => {
+    const nodes: Node[] = [{ id: 'a', name: 'a', value: 1, type: '0' }];
+    const top = computeMOFSankeyLayout(
+      { nodes, links: [] },
+      { ...OPTIONS, columnOf, align: 'top' }
+    );
+    expect(top.nodes[0].y).toBe(OPTIONS.margin.top);
+  });
+});
