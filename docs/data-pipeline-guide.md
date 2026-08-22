@@ -15,7 +15,7 @@ RS System CSV → 各種JSON → 各ページ表示 までのデータパイプ�
 | `/recipients/[key]` | `recipient-index-{YEAR}.json.gz` | `generate-subcontracts` → `generate-recipient-index` → `compress-data`（CSVではなく subcontracts JSON から導出） | （subcontracts-{YEAR}.json） |
 | `/quality` | `project-quality-scores-{YEAR}.json`, `project-quality-recipients-{YEAR}.json.gz` | `normalize` → `score-quality` → `compress-data` | 2-1, 5-1, 5-2 ＋ dictionaries/ |
 | `/entities`, `/entities-v2` | `rs{YEAR}-project-details.json.gz`, `entity-labels-csv.json`, `entity-normalization.json`, `houjin-lookup.json` | `normalize` → `generate-project-details`（+ 別途entity生成） | 1-2 |
-| `/mof-budget-overview` | `mof-budget-overview-{2017..2026}.json`（Git管理済み） | `generate-mof-data` → `compress-data` | 財務省 予算書ZIP（別途DL） |
+| `/mof-budget-overview` | `mof-budget-overview-{2017..2026}.json.gz`（.gzのみGit管理） | `generate-mof-data` → `compress-data` | 財務省 予算書ZIP（別途DL） |
 
 > **Note**: `/sankey2` は現状 2024年度データのみ対応（スクリプト内ハードコード）。
 
@@ -204,7 +204,7 @@ public/data/rs{YEAR}-project-details.json.gz（Git管理）
 ```text
 data/download/mof_{YEAR}/（財務省の配布 ZIP をそのまま配置）
   ↓ npm run generate-mof-data
-public/data/mof-budget-overview-{2017..2026}.json（計0.29MB / .gz 計0.05MB を Git 管理）
+public/data/mof-budget-overview-{2017..2026}.json.gz（計0.05MB。**.gz のみ Git 管理**、生 JSON は再生成物）
 ```
 
 | コマンド | スクリプト | 入力 |
@@ -240,7 +240,7 @@ ZIP から直接読む（`scripts/zip-reader.ts`）。展開したファイル�
 > 年金特別会計の10〜13兆円を毎年取りこぼす。**
 >
 > **検証**: `npm run validate-mof-data` が生成物と配布 CSV を1円単位で突き合わせる
-> （10年度で130項目）。歳入歳出合計・繰入の送受に加え、`単純合計 − 受入 = 一次純計` と
+> （10年度で140項目）。歳入歳出合計・繰入の送受に加え、`単純合計 − 受入 = 一次純計` と
 > 会計別の積み上げが総額に一致することも確認する。
 >
 > **対象は当初予算のみ**（補正予算・決算は含まない）。RS 対象範囲の区分は持たない
@@ -348,7 +348,7 @@ marumie-rssystem/
 │   ├── entity-labels-csv.json  # Git管理（手動生成後コミット）
 │   ├── entity-normalization.json  # Git管理
 │   ├── houjin-lookup.json      # Git管理（任意）
-│   ├── mof-budget-overview-{2017..2026}.json  # Git管理（10年度分）
+│   ├── mof-budget-overview-{2017..2026}.json.gz  # .gzのみGit管理（10年度分）
 │   └── dictionaries/*.csv      # Git管理（辞書ファイル）
 └── scripts/                    # データ生成スクリプト
 ```

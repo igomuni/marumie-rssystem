@@ -8,12 +8,10 @@
 
 import type {
   MOFAccountFunding,
+  MOFTransferDetailData,
   MOFTransferFlow,
 } from '@/types/mof-transfer';
-import type {
-  MOFBudgetNodeDetails,
-  MOFBudgetOverview,
-} from '@/types/mof-budget-overview';
+import type { MOFBudgetNodeDetails, MOFBudgetOverview } from '@/types/mof-budget-overview';
 import type { SankeyNode, SankeyLink } from '@/types/sankey';
 
 type Node = SankeyNode & { details?: MOFBudgetNodeDetails };
@@ -22,21 +20,6 @@ type Node = SankeyNode & { details?: MOFBudgetNodeDetails };
 const SOURCE_GENERAL = 'fund-from-general';
 const SOURCE_OTHER = 'fund-from-other';
 const SOURCE_OWN = 'fund-own';
-
-export interface MOFTransferDetailData {
-  metadata: MOFBudgetOverview['metadata'] & {
-    /** 特別会計が他会計から受け入れた総額（円） */
-    receivedTotal: number;
-  };
-  sankey: {
-    nodes: Node[];
-    links: SankeyLink[];
-  };
-  /** 会計別の財源内訳（歳入の大きい順） */
-  funding: MOFAccountFunding[];
-  /** 一般会計からの繰入の宛先別内訳 */
-  flows: MOFTransferFlow[];
-}
 
 /** 集計 JSON から特別会計の財源内訳を組み立てる */
 export function generateTransferDetailSankey(

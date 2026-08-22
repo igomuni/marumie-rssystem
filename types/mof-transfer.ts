@@ -6,7 +6,12 @@
  * 捕捉ロジックは docs/mof-budget-data-guide.md 6節。
  */
 
-import type { MOFAmountGroup } from './mof-budget-overview';
+import type {
+  MOFAmountGroup,
+  MOFBudgetNodeDetails,
+  MOFBudgetOverview,
+} from './mof-budget-overview';
+import type { SankeyNode, SankeyLink } from './sankey';
 
 /** 繰入の1本 */
 export interface MOFTransferFlow {
@@ -33,4 +38,25 @@ export interface MOFAccountFunding {
   ownRevenueRate: number;
   /** 款別の歳入内訳 */
   byCategory: MOFAmountGroup[];
+}
+
+/**
+ * 特別会計の財源内訳ビューの API レスポンス。
+ *
+ * `MOFBudgetOverviewData` と同じくレイヤをまたぐ契約なので `types/` に置く
+ * （生成は `app/lib/mof-transfer-sankey-generator.ts`）。
+ */
+export interface MOFTransferDetailData {
+  metadata: MOFBudgetOverview['metadata'] & {
+    /** 特別会計が他会計から受け入れた総額（円） */
+    receivedTotal: number;
+  };
+  sankey: {
+    nodes: (SankeyNode & { details?: MOFBudgetNodeDetails })[];
+    links: SankeyLink[];
+  };
+  /** 会計別の財源内訳（歳入の大きい順） */
+  funding: MOFAccountFunding[];
+  /** 一般会計からの繰入の宛先別内訳 */
+  flows: MOFTransferFlow[];
 }

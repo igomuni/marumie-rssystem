@@ -31,6 +31,9 @@ const SOURCE_MIN_RATIO = 0.01;
  */
 const SOURCE_MAX_NODES = 8;
 
+/** 特別会計からの受入が計上される款。目名から款を特定できないときの寄せ先 */
+const MISC_CATEGORY = '諸収入';
+
 /** 会計ノードのID */
 const ACCOUNT_IDS = {
   general: 'account-general',
@@ -100,15 +103,29 @@ function generalSources(data: MOFBudgetOverview): { nodes: Node[]; links: Sankey
     description: '一般会計の租税（少額の税目をまとめたもの）',
   });
 
-  // 租税以外の款
+  // 租税以外の款。
+  //
+  // 特別会計からの受入は款「諸収入」等に含まれるので、**分割前に**差し引いておく。
+  // 分割後に major の中だけで引くと、その款が少額で「その他」に落ちたときに
+  // 受入が二重に数えられ、一般会計への流入が歳入合計を超える。
   const fromSpecialTotal = data.transfers.specialToGeneral;
-  const others = revenue.byCategory.filter(c => c.name !== '租税');
+  const fromSpecialByCategory = new Map<string, number>();
+  for (const item of revenue.fromSpecialAccounts) {
+    const category = revenue.byCategory.find(c => c.name === item.name);
+    // fromSpecialAccounts は目名なので、款は「諸収入」等に含まれる想定。
+    // 款名と一致しない限りは諸収入に寄せる（款別の内訳を持たないため）
+    const key = category ? category.name : MISC_CATEGORY;
+    fromSpecialByCategory.set(key, (fromSpecialByCategory.get(key) ?? 0) + item.amount);
+  }
+  const others = revenue.byCategory
+    .filter(c => c.name !== '租税')
+    .map(c => ({
+      name: c.name,
+      amount: Math.max(c.amount - (fromSpecialByCategory.get(c.name) ?? 0), 0),
+    }));
   const { major, othersAmount } = splitByRatio(others, revenue.total);
   for (const category of major) {
-    // 諸収入には特別会計からの受入が含まれるので、その分を切り出して別ノードにする
-    const isMisc = category.name === '諸収入';
-    const amount = isMisc ? category.amount - fromSpecialTotal : category.amount;
-    push(`src-general-${category.name}`, category.name, amount, {
+    push(`src-general-${category.name}`, category.name, category.amount, {
       nodeType: 'source',
       accountKind: 'general',
       description: `一般会計の歳入（款: ${category.name}）`,

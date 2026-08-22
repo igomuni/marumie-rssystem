@@ -37,7 +37,13 @@ const DEFAULT_YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 202
 /** 他会計へ繰入を表す使途別分類コード（docs/mof-budget-data-guide.md 4-6節） */
 const TRANSFER_PURPOSE_CODE = '6';
 
-/** 使途別分類コード表 */
+/**
+ * 使途別分類コード表（docs/mof-budget-data-guide.md 4-6節）。
+ *
+ * 表に無いコードは `その他` に混ぜず `UNKNOWN_PURPOSE` に分ける。コード9が
+ * 既に `その他` なので、混ぜると新設・空欄のコードが黙って埋もれ、
+ * 内訳が静かに壊れる（検証は byPurpose を見ない）。
+ */
 const PURPOSE_NAMES: Record<string, string> = {
   '1': '人件費',
   '2': '旅費',
@@ -47,6 +53,9 @@ const PURPOSE_NAMES: Record<string, string> = {
   '6': '他会計へ繰入',
   '9': 'その他',
 };
+
+/** 表に無い使途別分類コードの表示名。コード9の「その他」とは別枠にする */
+const UNKNOWN_PURPOSE = '分類不明';
 
 /**
  * 特別会計が一般会計へ回した額を、一般会計歳入側で拾うための目名の条件。
@@ -77,9 +86,14 @@ function isInternalReceipt(row: CsvRow): boolean {
   return isTransferIn(row) || row['款名'] === '他勘定より受入';
 }
 
-/** 繰入の目名から宛先の特別会計を特定する。会計名の一覧は CSV から作るので固定表を持たない */
-function resolveDestination(itemName: string, accountNames: string[]): string | null {
-  return accountNames.find(name => itemName.includes(`${name}特別会計`)) ?? null;
+/**
+ * 繰入の目名から宛先の特別会計を特定する。会計名の一覧は CSV から作るので固定表を持たない。
+ *
+ * 候補は**長い名前から**照合する。ある会計名が別の会計名の部分文字列だった場合、
+ * CSV の行順に依存して短い方が先に当たると宛先を取り違えるため。
+ */
+function resolveDestination(itemName: string, sortedAccountNames: string[]): string | null {
+  return sortedAccountNames.find(name => itemName.includes(`${name}特別会計`)) ?? null;
 }
 
 function sum(rows: CsvRow[], column: string): number {
@@ -103,6 +117,8 @@ function generateYear(fiscalYear: number): void {
 
   // 特別会計の一覧は歳出表から作る（年度により増減するため固定表を持たない）
   const accountNames = [...new Set(special.expenditure.map(r => r['特別会計']).filter(Boolean))];
+  // 宛先の照合は長い名前を優先する（部分一致の取り違えを防ぐ）
+  const accountNamesByLength = [...accountNames].sort((a, b) => b.length - a.length);
 
   // --- 一般会計 ---
   const generalTransfers = general.expenditure.filter(
@@ -153,7 +169,7 @@ function generateYear(fiscalYear: number): void {
   // 宛先別の突合（送り手＝一般会計の繰入 / 受け手＝特会の受入）
   const fromGeneralByAccount = new Map<string, number>();
   for (const row of generalTransfers) {
-    const dest = resolveDestination(row['目名'] ?? '', accountNames);
+    const dest = resolveDestination(row['目名'] ?? '', accountNamesByLength);
     if (dest) fromGeneralByAccount.set(dest, (fromGeneralByAccount.get(dest) ?? 0) + yen(row, gExp));
   }
   const reconciliation: MOFTransferReconciliation[] = accounts
@@ -170,7 +186,7 @@ function generateYear(fiscalYear: number): void {
   const specialToGeneral = sum(fromSpecialRows, gRev);
 
   const byPurpose = (rows: CsvRow[], column: string): MOFAmountGroup[] =>
-    groupByName(rows, column, r => PURPOSE_NAMES[r['使途別分類コード']] ?? 'その他');
+    groupByName(rows, column, r => PURPOSE_NAMES[r['使途別分類コード']] ?? UNKNOWN_PURPOSE);
 
   const data: MOFBudgetOverview = {
     metadata: {

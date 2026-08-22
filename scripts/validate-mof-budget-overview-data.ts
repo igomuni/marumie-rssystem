@@ -118,6 +118,14 @@ function validateYear(year: number): { ok: boolean; checked: number } {
       expected: sum(special.revenue.filter(isTransferIn), sRev),
     },
     {
+      label: '特別会計 勘定間の受入',
+      actual: data.transfers.receivedBetweenSubAccounts,
+      expected: sum(
+        special.revenue.filter(r => r['款名'] === '他勘定より受入'),
+        sRev
+      ),
+    },
+    {
       label: '政府関係機関 収入合計',
       actual: data.agencies.revenue.total,
       expected: sum(agency.revenue, aRev),
@@ -139,7 +147,9 @@ function validateYear(year: number): { ok: boolean; checked: number } {
     );
   }
 
-  // 構造的な整合。実測で成立が確認できているもの
+  // 構造的な整合。実測で成立が確認できているもの。
+  // 一次純計は生成物どうしの引き算なので、控除の元になる値は上の CSV 突合で押さえる
+  // （そうしないと誤った款名フィルタが素通りして総額がずれる）
   const grossExpected =
     data.generalAccount.expenditure.total +
     data.specialAccounts.expenditure.total +

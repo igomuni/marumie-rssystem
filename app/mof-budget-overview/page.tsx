@@ -9,6 +9,7 @@
 
 import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useMofBudgetData } from '@/client/components/mof-budget/useMofBudgetData';
 import type { MOFBudgetOverviewData } from '@/types/mof-budget-overview';
 import LoadingSpinner from '@/client/components/LoadingSpinner';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
@@ -35,10 +36,6 @@ export default function MOFBudgetOverviewPage() {
 
 function MOFBudgetOverviewContent() {
   const searchParams = useSearchParams();
-  const [data, setData] = useState<MOFBudgetOverviewData | null>(null);
-  const [year, setYear] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -48,28 +45,15 @@ function MOFBudgetOverviewContent() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const fetchData = useCallback(async (target: number | null) => {
-    try {
-      setLoading(true);
-      const query = target ? `?year=${target}` : '';
-      const response = await fetch(`/api/sankey/mof-overview${query}`);
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
-      const result: MOFBudgetOverviewData = await response.json();
-      setData(result);
-      setYear(result.metadata.fiscalYear);
-      setError(null);
-    } catch (err) {
-      console.error('Failed to fetch data:', err);
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const raw = searchParams.get('year');
-    fetchData(raw ? Number(raw) : null);
-  }, [fetchData, searchParams]);
+  const rawYear = searchParams.get('year');
+  const buildUrl = useCallback(
+    (target: number | null) => `/api/sankey/mof-overview${target ? `?year=${target}` : ''}`,
+    []
+  );
+  const { data, year, loading, error, fetchData } = useMofBudgetData<MOFBudgetOverviewData>(
+    buildUrl,
+    rawYear ? Number(rawYear) : null
+  );
 
   if (loading && !data) {
     return (

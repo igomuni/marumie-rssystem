@@ -7,9 +7,10 @@
  * 通しているだけなのか」を会計ごとに示す。
  */
 
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { MOFTransferDetailData } from '@/app/lib/mof-transfer-sankey-generator';
+import { useMofBudgetData } from '@/client/components/mof-budget/useMofBudgetData';
+import type { MOFTransferDetailData } from '@/types/mof-transfer';
 import LoadingSpinner from '@/client/components/LoadingSpinner';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
@@ -33,33 +34,16 @@ export default function TransferDetailPage() {
 
 function TransferDetailContent() {
   const searchParams = useSearchParams();
-  const [data, setData] = useState<MOFTransferDetailData | null>(null);
-  const [year, setYear] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async (target: number | null) => {
-    try {
-      setLoading(true);
-      const query = target ? `&year=${target}` : '';
-      const response = await fetch(`/api/sankey/mof-overview?view=transfer${query}`);
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
-      const result: MOFTransferDetailData = await response.json();
-      setData(result);
-      setYear(result.metadata.fiscalYear);
-      setError(null);
-    } catch (err) {
-      console.error('Failed to fetch data:', err);
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const raw = searchParams.get('year');
-    fetchData(raw ? Number(raw) : null);
-  }, [fetchData, searchParams]);
+  const rawYear = searchParams.get('year');
+  const buildUrl = useCallback(
+    (target: number | null) =>
+      `/api/sankey/mof-overview?view=transfer${target ? `&year=${target}` : ''}`,
+    []
+  );
+  const { data, year, loading, error, fetchData } = useMofBudgetData<MOFTransferDetailData>(
+    buildUrl,
+    rawYear ? Number(rawYear) : null
+  );
 
   if (loading && !data) {
     return (
