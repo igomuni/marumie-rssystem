@@ -29,6 +29,7 @@ import type { SankeyLink } from '@/types/sankey';
 import { focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchySearch } from './HierarchySearch';
+import { testId } from '@/client/lib/testId';
 
 /** ラベルどうしの最小間隔（px）。これを割ると文字が重なる */
 const LABEL_SLOT = 13;
@@ -381,6 +382,7 @@ export function HierarchyChart({
       }}
     >
       <svg
+        data-testid={testId('hierarchy-canvas')}
         width={width}
         height={layout.contentHeight}
         style={{ position: 'absolute', left: pan.x, top: pan.y, display: 'block' }}
@@ -464,6 +466,9 @@ export function HierarchyChart({
             return (
               <g
                 key={node.id}
+                data-testid={testId('hierarchy-node')}
+                // 「値の無い列も畳まない」をテストから確かめられるよう列名を出す
+                data-column={testId(details?.column ?? '')}
                 onMouseEnter={e => {
                   setHovered(node);
                   setPointer({ x: e.clientX, y: e.clientY });
@@ -493,6 +498,7 @@ export function HierarchyChart({
                   strokeWidth={isSelected ? 1.5 : undefined}
                 />
                 <text
+                  data-testid={testId('hierarchy-label')}
                   x={labelX}
                   y={textY}
                   textAnchor={labelLeft ? 'end' : 'start'}

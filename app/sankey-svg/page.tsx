@@ -53,6 +53,7 @@ import { getAccountBadgeStyle } from '@/app/lib/account-badge';
 import { BudgetExecutionSection } from '@/client/components/BudgetExecutionSection';
 import { ScoreDetailDialog } from '@/client/components/quality/ScoreDetailDialog';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
+import { testId } from '@/client/lib/testId';
 import {
   useSidePanel,
   SIDE_PANEL_WIDTH_DEFAULT,
@@ -125,8 +126,7 @@ const SCREEN_HORIZONTAL_FIT_RATIO = 0.82;
 const SCREEN_MIN_TOTAL_LABEL_GAP_PX = 112;
 const SCREEN_MIN_MINISTRY_LABEL_WIDTH_PX = 128;
 const SCREEN_MAX_MINISTRY_LABEL_GAP_PX = 72;
-const E2E_TEST_IDS_ENABLED = process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_PLAYWRIGHT === '1';
-const testId = (id: string): string | undefined => E2E_TEST_IDS_ENABLED ? id : undefined;
+
 
 const MAP_LABEL_FONT_PX_DEFAULT = 11;
 const MAP_LABEL_SLOT_PX_DEFAULT = 12;
