@@ -22,11 +22,18 @@ export function useMofBudgetData<T extends { metadata: { fiscalYear: number } }>
   const [error, setError] = useState<string | null>(null);
   /** 最後に投げた取得の世代。応答が古ければ捨てる */
   const generation = useRef(0);
+  /**
+   * 最後に要求した年度。
+   * `buildUrl` が変わった（絞り込み条件を変えた）ときの取り直しで、
+   * URL の初期値ではなく画面で選んでいる年度を使うために持つ。
+   */
+  const requestedYear = useRef<number | null>(initialYear);
 
   const fetchData = useCallback(
     async (target: number | null) => {
       const current = generation.current + 1;
       generation.current = current;
+      requestedYear.current = target;
       setLoading(true);
       try {
         const response = await fetch(buildUrl(target));
@@ -47,8 +54,23 @@ export function useMofBudgetData<T extends { metadata: { fiscalYear: number } }>
     [buildUrl]
   );
 
+  // URL の年度が変わったら、それを現在の年度として扱う
   useEffect(() => {
-    fetchData(initialYear);
+    requestedYear.current = initialYear;
+  }, [initialYear]);
+
+  // 初回と、URL の年度・絞り込み条件が変わったときに取り直す。
+  //
+  // 年度の指定が無いと既定年度を読み、その結果を URL に書き戻す。すると
+  // `initialYear` が変わって同じ年度をもう一度取りに行ってしまうので、
+  // 既に読み終えている年度と同じなら取得しない。
+  const loadedYear = data?.metadata.fiscalYear;
+  useEffect(() => {
+    if (initialYear !== null && initialYear === loadedYear) return;
+    fetchData(requestedYear.current);
+    // loadedYear は「同じ年度の取り直しを避ける」ためだけに見る。
+    // 依存に入れると取得のたびに再実行されるので入れない
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData, initialYear]);
 
   return { data, year, loading, error, fetchData };

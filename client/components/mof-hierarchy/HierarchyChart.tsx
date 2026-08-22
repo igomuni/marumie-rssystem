@@ -1,0 +1,667 @@
+'use client';
+
+/**
+ * 階層サンキーの描画（自前 SVG）。
+ *
+ * 列が6つあり1列あたりのノードが多いので、`/mof-budget-overview` の描画とは
+ * ラベルの出し方が違う（列見出しを上に置き、ラベルはノードの右に短く出す）。
+ * 配置計算は `app/lib/mof-sankey-layout.ts` を共有する。
+ */
+
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  computeMOFSankeyLayout,
+  mofRibbonPath,
+  type MOFLayoutNode,
+} from '@/app/lib/mof-sankey-layout';
+import {
+  HIERARCHY_COLUMN_INDEX,
+  MOF_HIERARCHY_LAYOUT,
+  hierarchyNodeColor,
+} from '@/app/lib/mof-hierarchy-constants';
+import {
+  MOF_HIERARCHY_COLUMNS,
+  MOF_HIERARCHY_COLUMN_LABELS,
+  type MOFHierarchyColumn,
+  type MOFHierarchyNode,
+} from '@/types/mof-hierarchy';
+import type { SankeyLink } from '@/types/sankey';
+import { focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
+import { formatBudgetFromYen } from '@/client/lib/formatBudget';
+import { HierarchySearch } from './HierarchySearch';
+
+/** ラベルどうしの最小間隔（px）。これを割ると文字が重なる */
+const LABEL_SLOT = 13;
+
+/** 集約ノードの手前に空ける余白（px）。実体のあるノードと視覚的に切り離す */
+const AGGREGATE_GAP = 14;
+
+/** ズームの範囲。/sankey-svg と同じ操作感に合わせる */
+const ZOOM_MIN = 0.3;
+const ZOOM_MAX = 4;
+const ZOOM_STEP = 1.2;
+
+/** ラベル欄に収まらない名前は詰める。全文はツールチップに出る */
+function shorten(name: string, max: number): string {
+  return name.length > max ? `${name.slice(0, max - 1)}…` : name;
+}
+
+export function HierarchyChart({
+  nodes,
+  links,
+  selectedId,
+  onSelect,
+  focusRelated = true,
+}: {
+  nodes: MOFHierarchyNode[];
+  links: SankeyLink[];
+  /** 選択中のノード。URL と同期させるためページ層が持つ */
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
+  /** 選択したときに関連ノードだけを表示するか */
+  focusRelated?: boolean;
+}) {
+  // 画面いっぱいに描くため、実際の表示領域を測る
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [viewport, setViewport] = useState({ width: 1900, height: 900 });
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () =>
+      setViewport({ width: el.clientWidth, height: el.clientHeight });
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // ズームとパン。/sankey-svg と同じくドラッグで動かし、ホイールで拡大縮小する。
+  // 縦だけを伸縮させ、横は画面固定にする（列の位置が動くと読み進められないため）
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const panStart = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
+  const [isPanning, setIsPanning] = useState(false);
+  /** タッチ中の指。2本になったらピンチとして扱う */
+  const touches = useRef(new Map<number, { x: number; y: number }>());
+  const pinchStart = useRef<{ distance: number; zoom: number; centerY: number } | null>(null);
+  /**
+   * 図の設計幅。
+   *
+   * 列が6つあり各列にラベルを出すので、狭い画面に合わせて詰めると
+   * 隣の列と文字が重なる。最低幅を確保し、狭い画面は横パンで見てもらう
+   * （縦は画面に合わせるので、横だけがはみ出す）。
+   */
+  const width = Math.max(viewport.width, 1500);
+  const [hovered, setHovered] = useState<MOFLayoutNode | null>(null);
+  const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
+  /** ドラッグと区別するため、押した位置からの移動量を見る */
+  const dragged = useRef(false);
+
+  /** 選択したノードに連なる集合。薄暗くする判定に使う */
+  const related = useMemo(
+    () => (selectedId ? relatedNodeIds(links, selectedId) : null),
+    [selectedId, links]
+  );
+
+  /**
+   * 配置に渡すノードとリンク。
+   * 絞り込みが有効なら、関連だけを取り出して金額を付け替えたものを使う。
+   */
+  const visible = useMemo(() => {
+    if (!focusRelated || !selectedId || !related) return { nodes, links };
+    return focusHierarchy(nodes, links, selectedId);
+  }, [nodes, links, related, focusRelated, selectedId]);
+
+  const layout = useMemo(
+    () =>
+      computeMOFSankeyLayout(
+        // 詳細型は配置計算では素通しなので、そのまま渡す
+        { nodes: visible.nodes as Array<(typeof visible.nodes)[number]>, links: visible.links },
+        {
+          width,
+          // ズームは縦の縮尺を変えて表現する。CSS で拡大すると文字まで伸びるため
+          height: viewport.height * zoom,
+          ...MOF_HIERARCHY_LAYOUT,
+          // 狭い画面ではコントロールが2段になり、列見出しに被る
+          margin: {
+            ...MOF_HIERARCHY_LAYOUT.margin,
+            top: viewport.width < 1200
+              ? MOF_HIERARCHY_LAYOUT.margin.top + 40
+              : MOF_HIERARCHY_LAYOUT.margin.top,
+          },
+          // ノード自体をずらしてラベル1行分の場所を確保する（/sankey-svg と同じ方式）。
+          // ラベルだけをずらすと箱から離れ、引き出し線だらけになる
+          minNodeSlot: LABEL_SLOT,
+          // 集約ノードの手前を空けて、実体のあるノードと切り離す
+          gapBefore: node => (node.id.startsWith('__others__') ? AGGREGATE_GAP : 0),
+          // 階層は固定なので列を明示する。値の無い列を素通りした枝も正しい列に載る
+          columnOf: node =>
+            HIERARCHY_COLUMN_INDEX[node.type as MOFHierarchyColumn] ?? undefined,
+        }
+      ),
+    [visible, width, viewport.height, viewport.width, zoom]
+  );
+
+  /** 図に実際に出ている列。値の無い列は見出しも出さない */
+  const visibleColumns = useMemo(() => {
+    const present = new Set(
+      layout.nodes
+        .filter(n => !(n.details as MOFHierarchyNode['details'] | undefined)?.passThrough)
+        .map(n => n.column)
+    );
+    return MOF_HIERARCHY_COLUMNS.map((column, index) => ({ column, index })).filter(c =>
+      present.has(c.index)
+    );
+  }, [layout]);
+
+  const columnX = useMemo(() => {
+    const map = new Map<number, number>();
+    for (const node of layout.nodes) map.set(node.column, node.x);
+    return map;
+  }, [layout]);
+
+  /** 列見出しの位置。ノードの上端の少し上に置く */
+  const headerY = useMemo(
+    () => Math.min(...layout.nodes.map(n => n.y), Number.POSITIVE_INFINITY) - 10,
+    [layout.nodes]
+  );
+
+  /** 列ごとの合計。/sankey-svg と同じく見出しの下に出す */
+  const columnTotal = useMemo(() => {
+    const map = new Map<number, number>();
+    for (const node of layout.nodes) {
+      // 通過ノードはその列の実体ではないので合計に入れない
+      if ((node.details as MOFHierarchyNode['details'] | undefined)?.passThrough) continue;
+      map.set(node.column, (map.get(node.column) ?? 0) + node.value);
+    }
+    return map;
+  }, [layout]);
+
+  // 年度や予算種別を変えると、選んでいたノードが無くなることがある。
+  // そのままだと関連が自分1つだけになり、ほぼ空の図になる
+  useEffect(() => {
+    if (selectedId && !nodes.some(n => n.id === selectedId)) onSelect(null);
+  }, [selectedId, nodes, onSelect]);
+
+  const selectedNode = useMemo(
+    () => layout.nodes.find(n => n.id === selectedId) ?? null,
+    [layout.nodes, selectedId]
+  );
+  const selectedDetails = selectedNode?.details as
+    | MOFHierarchyNode['details']
+    | undefined;
+
+  /**
+   * ズームはカーソル位置を基準にする。
+   * 中心固定だと見ていた場所が画面外へ逃げ、拡大するたびに探し直しになる。
+   */
+  // React は更新関数を複数回評価することがある（開発時の StrictMode など）。
+  // その中で setPan を呼ぶと移動が二重に効いて、見ていた場所からずれる。
+  // 次のズームを外で求めてから両方を更新する。
+  const zoomRef = useRef(1);
+  useLayoutEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
+
+  const zoomAt = useCallback((factor: number, anchorY: number) => {
+    const prev = zoomRef.current;
+    const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, prev * factor));
+    if (next === prev) return;
+    zoomRef.current = next;
+    setZoom(next);
+    setPan(p => ({ ...p, y: anchorY - (anchorY - p.y) * (next / prev) }));
+  }, []);
+
+  const handleWheel = useCallback(
+    (e: React.WheelEvent) => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      const anchorY = rect ? e.clientY - rect.top : 0;
+      zoomAt(e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP, anchorY);
+    },
+    [zoomAt]
+  );
+
+  /** ボタンからのズームは画面中央を基準にする */
+  const zoomFromButton = useCallback(
+    (factor: number) => zoomAt(factor, (containerRef.current?.clientHeight ?? 0) / 2),
+    [zoomAt]
+  );
+
+  /**
+   * パンの可動域。図を画面外へ飛ばすと戻す手段が分からなくなるので、
+   * 上下は「図がはみ出す分」だけ、横は少しの遊びに留める。
+   */
+  const clampPan = useCallback(
+    (next: { x: number; y: number }) => {
+      const overflowY = Math.max(layout.contentHeight - viewport.height, 0);
+      // 狭い画面では図が画面より広くなる。その分だけ横にも動かせるようにする
+      const overflowX = Math.max(width - viewport.width, 0);
+      return {
+        x: Math.min(0, Math.max(-overflowX, next.x)),
+        y: Math.min(0, Math.max(-overflowY, next.y)),
+      };
+    },
+    [layout.contentHeight, viewport.height, width, viewport.width]
+  );
+
+  // ズームや絞り込みで図の高さが変わると、いまの位置が可動域の外に出ることがある
+  useLayoutEffect(() => {
+    setPan(p => {
+      const fixed = clampPan(p);
+      return fixed.x === p.x && fixed.y === p.y ? p : fixed;
+    });
+  }, [clampPan]);
+
+  // 検索から選んだノードが画面の外にあることがあるので、見える位置まで寄せる
+  useLayoutEffect(() => {
+    if (!selectedNode || viewport.height <= 0) return;
+    setPan(p => {
+      const screenY = selectedNode.y + p.y;
+      const edge = 80;
+      if (screenY >= edge && screenY <= viewport.height - edge) return p;
+      return clampPan({ ...p, y: viewport.height / 2 - selectedNode.y });
+    });
+  }, [selectedNode, viewport.height, clampPan]);
+
+  // Esc で選択解除。図の外をクリックしなくても戻せるようにする
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onSelect(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onSelect]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="absolute inset-0 overflow-hidden"
+      onWheel={handleWheel}
+      onPointerDown={e => {
+        if (e.pointerType !== 'touch') return;
+        touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (touches.current.size === 1) {
+          // 1本指はドラッグと同じ扱い。touchAction を切っているので自前で動かす
+          panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+          dragged.current = false;
+        }
+        if (touches.current.size === 2) {
+          const [a, b2] = [...touches.current.values()];
+          const rect = containerRef.current?.getBoundingClientRect();
+          pinchStart.current = {
+            distance: Math.hypot(a.x - b2.x, a.y - b2.y),
+            zoom,
+            centerY: (a.y + b2.y) / 2 - (rect?.top ?? 0),
+          };
+          // 2本指の間はドラッグ扱いにしない
+          panStart.current = null;
+        }
+      }}
+      onPointerMove={e => {
+        if (e.pointerType !== 'touch') return;
+        if (!touches.current.has(e.pointerId)) return;
+        touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (touches.current.size === 1 && panStart.current) {
+          if (
+            Math.abs(e.clientX - panStart.current.x) > 3 ||
+            Math.abs(e.clientY - panStart.current.y) > 3
+          ) {
+            dragged.current = true;
+          }
+          setPan(
+            clampPan({
+              x: panStart.current.panX + (e.clientX - panStart.current.x),
+              y: panStart.current.panY + (e.clientY - panStart.current.y),
+            })
+          );
+          return;
+        }
+        if (touches.current.size === 2 && pinchStart.current) {
+          const [a, b2] = [...touches.current.values()];
+          const distance = Math.hypot(a.x - b2.x, a.y - b2.y);
+          if (pinchStart.current.distance > 0) {
+            const next = Math.min(
+              ZOOM_MAX,
+              Math.max(ZOOM_MIN, pinchStart.current.zoom * (distance / pinchStart.current.distance))
+            );
+            const prev = zoomRef.current;
+            if (next !== prev) {
+              const anchorY = pinchStart.current.centerY;
+              zoomRef.current = next;
+              setZoom(next);
+              setPan(p => ({ ...p, y: anchorY - (anchorY - p.y) * (next / prev) }));
+            }
+          }
+          dragged.current = true;
+        }
+      }}
+      onPointerUp={e => {
+        if (e.pointerType !== 'touch') return;
+        touches.current.delete(e.pointerId);
+        if (touches.current.size < 2) pinchStart.current = null;
+        if (touches.current.size === 0) panStart.current = null;
+      }}
+      onPointerCancel={e => {
+        touches.current.delete(e.pointerId);
+        if (touches.current.size < 2) pinchStart.current = null;
+      }}
+      style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
+      onMouseDown={e => {
+        panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+        dragged.current = false;
+        setIsPanning(true);
+      }}
+      onMouseMove={e => {
+        if (!panStart.current) return;
+        if (
+          Math.abs(e.clientX - panStart.current.x) > 3 ||
+          Math.abs(e.clientY - panStart.current.y) > 3
+        ) {
+          dragged.current = true;
+        }
+        setPan(
+          clampPan({
+            x: panStart.current.panX + (e.clientX - panStart.current.x),
+            y: panStart.current.panY + (e.clientY - panStart.current.y),
+          })
+        );
+      }}
+      onMouseUp={() => {
+        panStart.current = null;
+        setIsPanning(false);
+      }}
+      onClick={() => {
+        // 背景クリックで選択解除（ドラッグの終わりは無視する）
+        if (!dragged.current) onSelect(null);
+      }}
+      onMouseLeave={() => {
+        panStart.current = null;
+        setIsPanning(false);
+        setHovered(null);
+      }}
+    >
+      <svg
+        width={width}
+        height={layout.contentHeight}
+        style={{ position: 'absolute', left: pan.x, top: pan.y, display: 'block' }}
+        role="img"
+        aria-label="所管から事項までの予算の流れ"
+      >
+        {/* 列見出し */}
+        <g>
+          {visibleColumns.map(({ column, index }) => (
+            <g key={column}>
+              {/* 列見出しはノードの真上に置く。上に浮かせたコントロールと重ならない高さ */}
+              <text
+                x={columnX.get(index) ?? 0}
+                y={headerY - 16}
+                fontSize={12}
+                fontWeight={600}
+                fill="#374151"
+              >
+                {MOF_HIERARCHY_COLUMN_LABELS[column]}
+              </text>
+              <text
+                x={columnX.get(index) ?? 0}
+                y={headerY}
+                fontSize={11}
+                fill="#9ca3af"
+              >
+                {formatBudgetFromYen(columnTotal.get(index) ?? 0)}
+              </text>
+            </g>
+          ))}
+        </g>
+
+        <g>
+          {layout.links.map((link, i) => {
+            const offSelection =
+              !focusRelated &&
+              related !== null &&
+              !(related.has(link.source.id) && related.has(link.target.id));
+            const dim =
+              offSelection ||
+              ((related === null || focusRelated) &&
+                hovered !== null &&
+                hovered.id !== link.source.id &&
+                hovered.id !== link.target.id);
+            return (
+              <path
+                key={`${link.source.id}-${link.target.id}-${i}`}
+                d={mofRibbonPath(link)}
+                fill={hierarchyNodeColor({
+                  column: link.target.details?.column as MOFHierarchyColumn | undefined,
+                  aggregated: link.target.details?.aggregated,
+                })}
+                opacity={dim ? 0.06 : 0.28}
+              />
+            );
+          })}
+        </g>
+
+        <g>
+          {layout.nodes.map(node => {
+            const details = node.details as MOFHierarchyNode['details'] | undefined;
+            // 通過ノードは場所を確保するだけ。箱もラベルも出さない
+            if (details?.passThrough) return null;
+            const color = hierarchyNodeColor({
+              column: details?.column,
+              aggregated: details?.aggregated,
+            });
+            // 根だけ左、それ以外はノードの右にラベルを出す
+            const labelLeft = node.column === 0;
+            const labelX = labelLeft ? node.x - 6 : node.x + node.width + 6;
+            const centerY = node.y + node.height / 2;
+            const textY = centerY;
+            const offSelection =
+              !focusRelated && related !== null && !related.has(node.id);
+            const dim =
+              offSelection ||
+              ((related === null || focusRelated) &&
+                hovered !== null &&
+                hovered.id !== node.id);
+            const isSelected = selectedId === node.id;
+            return (
+              <g
+                key={node.id}
+                onMouseEnter={e => {
+                  setHovered(node);
+                  setPointer({ x: e.clientX, y: e.clientY });
+                }}
+                onMouseMove={e => setPointer({ x: e.clientX, y: e.clientY })}
+                onMouseLeave={() => {
+                  setHovered(null);
+                  setPointer(null);
+                }}
+                onClick={e => {
+                  // パン操作の終わりとクリックを取り違えないよう、動かしていたら無視する
+                  if (dragged.current) return;
+                  e.stopPropagation();
+                  onSelect(selectedId === node.id ? null : node.id);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <rect
+                  x={node.x}
+                  y={node.y}
+                  width={node.width}
+                  height={node.height}
+                  rx={2}
+                  fill={color}
+                  opacity={dim ? 0.25 : 1}
+                  stroke={isSelected ? '#1f2937' : undefined}
+                  strokeWidth={isSelected ? 1.5 : undefined}
+                />
+                <text
+                  x={labelX}
+                  y={textY}
+                  textAnchor={labelLeft ? 'end' : 'start'}
+                  dominantBaseline="middle"
+                  fontSize={11}
+                  fontWeight={isSelected ? 700 : details?.aggregated ? 400 : 500}
+                  fill={details?.aggregated ? '#6b7280' : '#1f2937'}
+                  stroke="#ffffff"
+                  strokeWidth={3}
+                  paintOrder="stroke"
+                  opacity={dim ? 0.35 : 1}
+                >
+                  {`${shorten(node.name, labelLeft ? 24 : 18)} (${formatBudgetFromYen(node.value)})`}
+                </text>
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+
+      {hovered && pointer && (
+        <HierarchyTooltip node={hovered} x={pointer.x} y={pointer.y} />
+      )}
+
+      {/* 検索。/sankey-svg と同じく左上に置く（見出しの下） */}
+      <div className="absolute left-3 top-3 z-30">
+        <HierarchySearch nodes={nodes} onSelect={onSelect} />
+      </div>
+
+      {/* 選択したノードの詳細。/sankey-svg と同じく左下に置く */}
+      {selectedNode && (
+        <div className="absolute bottom-3 left-3 z-30 max-w-sm rounded-lg border border-black/10 bg-white/95 p-3 shadow-lg backdrop-blur">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-[11px] font-medium text-gray-400">
+                {selectedDetails?.column
+                  ? MOF_HIERARCHY_COLUMN_LABELS[selectedDetails.column]
+                  : ''}
+              </div>
+              <div className="text-sm font-semibold text-gray-900">{selectedNode.name}</div>
+              <div className="text-lg font-bold text-gray-800">
+                {formatBudgetFromYen(selectedNode.value)}
+              </div>
+            </div>
+            <button
+              type="button"
+              title="選択を解除"
+              aria-label="選択を解除"
+              onMouseDown={e => e.stopPropagation()}
+              onClick={e => {
+                e.stopPropagation();
+                onSelect(null);
+              }}
+              className="rounded px-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            >
+              ×
+            </button>
+          </div>
+          {selectedDetails?.aggregated && (
+            <div className="mt-1 text-xs text-gray-600">
+              表示数から溢れた {selectedDetails.aggregatedCount?.toLocaleString()} 件
+            </div>
+          )}
+          {selectedDetails?.majorExpenseName && (
+            <div className="mt-1 text-xs text-gray-500">
+              {selectedDetails.majorExpenseName}
+            </div>
+          )}
+          {selectedDetails?.description && (
+            <div className="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-gray-600">
+              {selectedDetails.description}
+            </div>
+          )}
+          {focusRelated && (
+            <div className="mt-2 text-[11px] text-gray-400">
+              この筋に連なるノードだけを表示しています
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ズーム操作。/sankey-svg と同じく右下に置く */}
+      <div className="absolute bottom-3 right-3 z-30 flex flex-col gap-1">
+        <ZoomButton
+          label="＋"
+          title="拡大"
+          onClick={() => zoomFromButton(ZOOM_STEP)}
+        />
+        <ZoomButton
+          label="－"
+          title="縮小"
+          onClick={() => zoomFromButton(1 / ZOOM_STEP)}
+        />
+        <ZoomButton
+          label="⤢"
+          title="全体を表示"
+          onClick={() => {
+            setZoom(1);
+            setPan({ x: 0, y: 0 });
+          }}
+        />
+        <div className="rounded border border-black/10 bg-white/90 px-1 py-0.5 text-center text-[10px] text-gray-500 shadow">
+          {Math.round(zoom * 100)}%
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ZoomButton({
+  label,
+  title,
+  onClick,
+}: {
+  label: string;
+  title: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      onMouseDown={e => e.stopPropagation()}
+      onClick={onClick}
+      className="h-7 w-7 rounded border border-black/10 bg-white/90 text-sm text-gray-600 shadow hover:bg-white"
+    >
+      {label}
+    </button>
+  );
+}
+
+function HierarchyTooltip({
+  node,
+  x,
+  y,
+}: {
+  node: MOFLayoutNode;
+  x: number;
+  y: number;
+}) {
+  const details = node.details as MOFHierarchyNode['details'] | undefined;
+  return (
+    <div
+      className="pointer-events-none fixed z-50 max-w-md rounded border border-gray-200 bg-white px-3 py-2 shadow-lg"
+      style={{ left: x + 12, top: y + 12 }}
+    >
+      {details?.column && (
+        <div className="text-[11px] font-medium text-gray-400">
+          {MOF_HIERARCHY_COLUMN_LABELS[details.column]}
+        </div>
+      )}
+      <div className="font-semibold text-gray-900">{node.name}</div>
+      <div className="text-lg font-bold text-gray-800">
+        {formatBudgetFromYen(node.value)}
+      </div>
+      {details?.aggregated && (
+        <div className="mt-1 text-xs text-gray-600">
+          TopN から溢れた {details.aggregatedCount} 件をまとめたもの
+        </div>
+      )}
+      {details?.majorExpenseName && (
+        <div className="mt-1 text-xs text-gray-500">{details.majorExpenseName}</div>
+      )}
+      {details?.description && (
+        <div className="mt-1 max-h-32 overflow-hidden text-xs leading-relaxed text-gray-600">
+          {details.description}
+        </div>
+      )}
+    </div>
+  );
+}
