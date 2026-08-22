@@ -65,4 +65,25 @@ test.describe('mof-hierarchy', () => {
   test('labels do not overlap at the default font size', async ({ page }) => {
     await expect(page.getByTestId('hierarchy-label-overlap')).toHaveCount(0);
   });
+
+  test('label density can be switched between major nodes and all nodes', async ({ page }) => {
+    const labels = page.getByTestId('hierarchy-label');
+    const density = page.getByLabel('ラベル表示');
+
+    await density.selectOption('major');
+    const few = await labels.count();
+    expect(few).toBeGreaterThan(0);
+
+    await density.selectOption('all');
+    await expect.poll(() => labels.count()).toBeGreaterThan(few);
+
+    // 間引いても、名前が出ていないノード自体は消えない
+    const nodes = await page.getByTestId('hierarchy-node').count();
+    await density.selectOption('major');
+    await expect(page.getByTestId('hierarchy-node')).toHaveCount(nodes);
+
+    // major は1行分の場所を確保せず値どおりに詰めるので、
+    // 出したラベルが重なっていないことを別に確かめる
+    await expect(page.getByTestId('hierarchy-label-overlap')).toHaveCount(0);
+  });
 });

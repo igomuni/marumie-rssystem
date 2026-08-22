@@ -31,6 +31,13 @@ import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchySearch } from './HierarchySearch';
 import { E2E_TEST_IDS_ENABLED, testId } from '@/client/lib/testId';
 
+/**
+ * ラベルをどこまで出すか。
+ * all  = すべてのノードに名前を出す。読み落としは無いが図は縦に長くなる
+ * major = 名前が収まる大きさのノードだけに出す。詰めて全体を見渡せる
+ */
+export type LabelDensity = 'major' | 'all';
+
 /** ラベルの既定サイズ（px） */
 export const LABEL_FONT_PX_DEFAULT = 11;
 
@@ -61,6 +68,7 @@ export function HierarchyChart({
   onSelect,
   focusRelated = true,
   fontPx = LABEL_FONT_PX_DEFAULT,
+  labelDensity = 'all',
 }: {
   nodes: MOFHierarchyNode[];
   links: SankeyLink[];
@@ -71,6 +79,8 @@ export function HierarchyChart({
   focusRelated?: boolean;
   /** ラベルの文字サイズ（px） */
   fontPx?: number;
+  /** ラベルをどこまで出すか */
+  labelDensity?: LabelDensity;
 }) {
   // 画面いっぱいに描くため、実際の表示領域を測る
   const containerRef = useRef<HTMLDivElement>(null);
@@ -142,7 +152,9 @@ export function HierarchyChart({
           },
           // ノード自体をずらしてラベル1行分の場所を確保する（/sankey-svg と同じ方式）。
           // ラベルだけをずらすと箱から離れ、引き出し線だらけになる
-          minNodeSlot: labelSlot(fontPx),
+          // すべてに名前を出すときだけ1行分の場所を確保する。
+          // major は詰めて見渡すのが目的なので、値どおりの高さのまま置く
+          minNodeSlot: labelDensity === 'all' ? labelSlot(fontPx) : 0,
           // 集約ノードの手前を空けて、実体のあるノードと切り離す
           gapBefore: node => (node.id.startsWith('__others__') ? AGGREGATE_GAP : 0),
           // 階層は固定なので列を明示する。値の無い列を素通りした枝も正しい列に載る
@@ -150,7 +162,7 @@ export function HierarchyChart({
             HIERARCHY_COLUMN_INDEX[node.type as MOFHierarchyColumn] ?? undefined,
         }
       ),
-    [visible, width, viewport.height, viewport.width, zoom, fontPx]
+    [visible, width, viewport.height, viewport.width, zoom, fontPx, labelDensity]
   );
 
   /** 図に実際に出ている列。値の無い列は見出しも出さない */
@@ -188,12 +200,22 @@ export function HierarchyChart({
    * 判定はラベルの縦位置だけで行う。横幅は文字ごとに違い、詰めた名前は
    * 「…」で終わるので、幅まで見ようとすると近似が当たらない。
    */
+  const showsLabel = useCallback(
+    (node: MOFLayoutNode) => {
+      const details = node.details as MOFHierarchyNode['details'] | undefined;
+      if (details?.passThrough) return false;
+      // major では名前が収まらない高さのノードを飛ばす。
+      // ツールチップと検索から辿れるので、名前が消えても行き止まりにはならない
+      return labelDensity === 'all' || node.height >= labelSlot(fontPx);
+    },
+    [labelDensity, fontPx]
+  );
+
   const labelOverlaps = useMemo(() => {
     if (!E2E_TEST_IDS_ENABLED) return [];
     const byColumn = new Map<number, Array<{ id: string; y: number }>>();
     for (const node of layout.nodes) {
-      const details = node.details as MOFHierarchyNode['details'] | undefined;
-      if (details?.passThrough) continue;
+      if (!showsLabel(node)) continue;
       const list = byColumn.get(node.column) ?? [];
       list.push({ id: node.id, y: node.y + node.height / 2 });
       byColumn.set(node.column, list);
@@ -206,7 +228,7 @@ export function HierarchyChart({
       }
     }
     return found;
-  }, [layout, fontPx]);
+  }, [layout, fontPx, showsLabel]);
 
   /** 列ごとの合計。/sankey-svg と同じく見出しの下に出す */
   const columnTotal = useMemo(() => {
@@ -538,6 +560,7 @@ export function HierarchyChart({
                   stroke={isSelected ? '#1f2937' : undefined}
                   strokeWidth={isSelected ? 1.5 : undefined}
                 />
+                {showsLabel(node) && (
                 <text
                   data-testid={testId('hierarchy-label')}
                   x={labelX}
@@ -554,6 +577,7 @@ export function HierarchyChart({
                 >
                   {`${shorten(node.name, labelLeft ? 24 : 18)} (${formatBudgetFromYen(node.value)})`}
                 </text>
+                )}
               </g>
             );
           })}

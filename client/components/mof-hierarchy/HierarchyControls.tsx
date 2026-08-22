@@ -10,6 +10,7 @@
 import { DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
 import type { MOFHierarchyTopN } from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
+import type { LabelDensity } from './HierarchyChart';
 
 const SELECT_CLASS =
   'h-8 cursor-pointer rounded border border-gray-300 bg-white px-2 text-xs text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';
@@ -32,6 +33,8 @@ export function HierarchyControls({
   onFocusRelatedChange,
   fontPx,
   onFontPxChange,
+  labelDensity,
+  onLabelDensityChange,
 }: {
   budgetType: MOFBudgetType;
   budgetTypes: MOFBudgetType[];
@@ -46,6 +49,9 @@ export function HierarchyControls({
   /** ラベルの文字サイズ（px） */
   fontPx: number;
   onFontPxChange: (value: number) => void;
+  /** ラベルをどこまで出すか */
+  labelDensity: LabelDensity;
+  onLabelDensityChange: (value: LabelDensity) => void;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-gray-600">
@@ -110,6 +116,19 @@ export function HierarchyControls({
               {n}px
             </option>
           ))}
+        </select>
+      </label>
+
+      <label className="flex items-center gap-2">
+        <span className="font-medium">ラベル表示</span>
+        <select
+          aria-label="ラベル表示"
+          value={labelDensity}
+          onChange={e => onLabelDensityChange(e.target.value as LabelDensity)}
+          className={SELECT_CLASS}
+        >
+          <option value="all">すべて</option>
+          <option value="major">主要なノードのみ</option>
         </select>
       </label>
 

@@ -19,6 +19,7 @@ import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchyChart, LABEL_FONT_PX_DEFAULT } from '@/client/components/mof-hierarchy/HierarchyChart';
+import type { LabelDensity } from '@/client/components/mof-hierarchy/HierarchyChart';
 import { HierarchyControls } from '@/client/components/mof-hierarchy/HierarchyControls';
 import { useMofBudgetData } from '@/client/components/mof-budget/useMofBudgetData';
 
@@ -55,6 +56,9 @@ function MOFHierarchyContent() {
   const [fontPx, setFontPx] = useState(
     () => Number(searchParams.get('fs')) || LABEL_FONT_PX_DEFAULT
   );
+  const [labelDensity, setLabelDensity] = useState<LabelDensity>(
+    () => (searchParams.get('ld') === 'major' ? 'major' : 'all')
+  );
 
   const buildUrl = useCallback(
     (target: number | null) => {
@@ -89,11 +93,12 @@ function MOFHierarchyContent() {
     if (selectedId) params.set('sel', selectedId);
     if (!focusRelated) params.set('fr', '0');
     if (fontPx !== LABEL_FONT_PX_DEFAULT) params.set('fs', String(fontPx));
+    if (labelDensity !== 'all') params.set('ld', labelDensity);
     const next = `?${params.toString()}`;
     if (next !== window.location.search) {
       window.history.replaceState(null, '', next);
     }
-  }, [data, selectedId, focusRelated, fontPx]);
+  }, [data, selectedId, focusRelated, fontPx, labelDensity]);
 
   // ブラウザの戻る／進むで選択を辿れるようにする
   useEffect(() => {
@@ -102,6 +107,7 @@ function MOFHierarchyContent() {
       setSelectedId(params.get('sel'));
       setFocusRelated(params.get('fr') !== '0');
       setFontPx(Number(params.get('fs')) || LABEL_FONT_PX_DEFAULT);
+      setLabelDensity(params.get('ld') === 'major' ? 'major' : 'all');
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
@@ -156,6 +162,7 @@ function MOFHierarchyContent() {
         onSelect={selectNode}
         focusRelated={focusRelated}
         fontPx={fontPx}
+        labelDensity={labelDensity}
       />
 
       {/* コントロール・年度・ページ切替。/sankey-svg と同じく右上に並べる */}
@@ -173,6 +180,8 @@ function MOFHierarchyContent() {
             onFocusRelatedChange={setFocusRelated}
             fontPx={fontPx}
             onFontPxChange={setFontPx}
+            labelDensity={labelDensity}
+            onLabelDensityChange={setLabelDensity}
           />
         </div>
         <YearSelect
