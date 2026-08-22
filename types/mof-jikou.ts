@@ -11,8 +11,26 @@
 /** 会計区分 */
 export type MOFAccountType = 'general' | 'special' | 'agency';
 
+/**
+ * 補正予算の号数。実績上の最大は平成23年度の第4号。
+ * 号数は会計ごとに独立採番なので、同じ号数でも会計により成立した国会が違うことがある
+ * （docs/mof-budget-data-guide.md 1節）。
+ */
+export type MOFRevisionNumber = 1 | 2 | 3 | 4;
+
+/** 補正予算の種別（号数つき） */
+export type MOFRevisedBudgetType = `補正予算（第${MOFRevisionNumber}号）`;
+
+/** 補正予算の号数の一覧（若い順） */
+export const MOF_REVISION_NUMBERS: readonly MOFRevisionNumber[] = [1, 2, 3, 4];
+
+/** 号数から予算種別名を作る */
+export function revisedBudgetType(revision: MOFRevisionNumber): MOFRevisedBudgetType {
+  return `補正予算（第${revision}号）`;
+}
+
 /** 予算の種別 */
-export type MOFBudgetType = '当初予算' | '暫定予算' | '補正予算（第1号）' | '決算';
+export type MOFBudgetType = '当初予算' | '暫定予算' | MOFRevisedBudgetType | '決算';
 
 /** 事項1件 */
 export interface MOFJikouItem {

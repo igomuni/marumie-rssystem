@@ -238,14 +238,19 @@ ZIP から直接読む（`scripts/zip-reader.ts`）。展開したファイル�
 ```text
 財務省 予算書データベース（Web の XML を直接スクレイピング）
   ↓ npm run generate-mof-jikou
-public/data/mof-jikou-2026.json（2.3MB / .gz 204KB を Git 管理）
+public/data/mof-jikou-{2017..2026}.json（計34.3MB / .gz 計2.91MB を Git 管理）
 ```
 
 | コマンド | スクリプト | 入力 |
 |---------|-----------|------|
-| `npm run generate-mof-jikou` | `scripts/generate-mof-jikou-data.ts` | `https://www.bb.mof.go.jp/server/2026/` の目次 HTML と本文 XML |
+| `npm run generate-mof-jikou` | `scripts/generate-mof-jikou-data.ts` | `https://www.bb.mof.go.jp/server/{YEAR}/` の目次 HTML と本文 XML |
 
-年度を変えるときは引数で指定する（`tsx scripts/generate-mof-jikou-data.ts 2024`）。
+引数なしで 2017〜2026 の10年度分を回す。年度を絞るときは引数で指定する
+（`tsx scripts/generate-mof-jikou-data.ts 2024`）。
+
+**取得は1リクエスト1秒。数年度をまとめて回すと数十分かかる**ので、1〜2年度ずつに分けるとよい。
+配信側は過剰なアクセスを 429 ではなく **404** で弾くため、スクリプトは 404 のときに常設ページで
+疎通を確認し、引けなければブロックと判断して中断する（空の JSON を出さないため）。
 
 取り込む帳票はスクリプト内の `DOCUMENTS` で定義する。令和8年度は8帳票・2,685事項:
 
@@ -253,9 +258,13 @@ public/data/mof-jikou-2026.json（2.3MB / .gz 204KB を Git 管理）
 |---|---|---|---|
 | 当初予算 | `11001` | `12001` | `13001` |
 | 暫定予算 | `31001` | `32001` | `33001` |
-| 補正予算 | `21001` | `22001`（事項なし） | — |
+| 補正予算 | `21001`〜`21004` | `22001`〜`22004` | 未対応（区分 `23`） |
 
 帳票が存在しない年度・種別は警告を出してスキップする。
+
+**補正は号数ぶん（第1号〜第4号）を取り込む。** 連番が号数（`21002`=第2号）で、
+予算種別は `補正予算（第N号）` に分かれる。`amount` は改予算額なので**号数をまたいで合算しない**こと。
+年度別の収録状況は [mof-budget-data-guide.md](mof-budget-data-guide.md) 3-1節を参照。
 
 **なぜ ZIP の CSV を使わないか**: 予算書 ZIP に入るのは科目別内訳（目レベル）だけで、
 事項名と説明文を含まない。事項は MOF 側で唯一「事業らしい」名前と説明を持つ粒度のため、
@@ -264,12 +273,16 @@ Web 帳票から取得している。帳票構造は [mof-budget-data-guide.md](
 XML は `data/download/mof_{YEAR}/xml/` にキャッシュされる（Git 管理外）。
 キャッシュがあれば再実行時にネットワークアクセスは発生しない。
 
-**検証**: 生成結果の帳票別合計は、同じ帳票IDの CSV（`DL{帳票ID}b.csv`）と1円単位で一致すること。
-JSON は円単位・予算書CSVは千円単位なので、比較時は1000倍して揃える（決算CSVは円単位）。
+**検証**: `npm run validate-mof-jikou`。生成結果の帳票別合計は、同じ帳票IDの CSV
+（`DL{帳票ID}b.csv`）と1円単位で一致すること。JSON は円単位・予算書CSVは千円単位なので、
+比較時は1000倍して揃える（決算CSVは円単位）。
+
+検証には `data/download/mof_{YEAR}/DL{帳票ID}.zip` が要る。**無い年度は黙ってスキップされる**ので、
+OK の並びではなく末尾の検証項目数を確認すること（10年度で100項目）。
 
 | 帳票 | 突き合わせる値 |
 |---|---|
-| 当初予算・暫定予算 | `amount` の合計 ↔ その年度の金額列 |
+| 当初予算・暫定予算 | `amount` の合計 ↔ その年度の金額列（見出しは `平成29年度…`／`令和8年度…`） |
 | 補正予算 | `difference` の合計 ↔ `補正要求差引額` |
 | 決算 | `amount` / `currentAmount` / `spent` / `carriedOver` / `unused` ↔ 対応する各列 |
 
