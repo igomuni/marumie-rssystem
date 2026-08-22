@@ -47,7 +47,10 @@ export function loadYear(year: number): MOFJikouData {
  *
  * `item.key` は予算種別を含むため、当初と決算を同じ事項として辿れない。
  * ここでは種別だけを落とし、会計区分・所管・組織・特会・勘定・機関・項コード・事項名で識別する。
- * 令和5〜8年度のいずれの年度でも「識別子 × 予算種別」に重複は無い。
+ * 平成29〜令和8年度（10年度）のいずれの年度でも「識別子 × 予算種別」に重複は無い。
+ *
+ * MOF は事項にも項にも公式な ID を振っていない。主要経費別分類コード等は静的な分類で
+ * （1コードが最大696事項を束ねる）識別には使えない。詳細は docs/mof-budget-data-guide.md 3-1-1節。
  */
 export function identityKey(item: MOFJikouItem): string {
   return [
@@ -72,9 +75,14 @@ function identityFromKey(key: string): string {
 /**
  * 事項の経年推移を組み立てる。
  *
- * 事項名が改称されると別の事項として扱われる（識別子に名前を含むため）。
- * 実態としては継続でも「新規」に見えるケースがあることに注意
- * （docs/tasks/20260819_1920_複数年度にわたる予算の判別方法.md）。
+ * 実態としては継続でも「新規」に見えるケースがある。原因は2系統あり、いずれも識別子由来:
+ *
+ * - 事項名の改称。識別子に名前を含むため別の事項になる（10年度で156件）
+ * - 項コードの移動。項コードは組織内の連番で、項が増減すると以降が総ずれする
+ *   （項名が同じままコードが変わったものが10年度で96件・6.4%）
+ *
+ * 項コードを外せば追跡は伸びるが、事項名は項をまたいで重複するため金額が合算されてしまう。
+ * 詳細と実測値は docs/mof-budget-data-guide.md 3-1-2節。
  */
 export function buildHistory(key: string): MOFJikouHistory {
   const identity = identityFromKey(key);

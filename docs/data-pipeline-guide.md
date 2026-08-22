@@ -15,7 +15,7 @@ RS System CSV → 各種JSON → 各ページ表示 までのデータパイプ�
 | `/recipients/[key]` | `recipient-index-{YEAR}.json.gz` | `generate-subcontracts` → `generate-recipient-index` → `compress-data`（CSVではなく subcontracts JSON から導出） | （subcontracts-{YEAR}.json） |
 | `/quality` | `project-quality-scores-{YEAR}.json`, `project-quality-recipients-{YEAR}.json.gz` | `normalize` → `score-quality` → `compress-data` | 2-1, 5-1, 5-2 ＋ dictionaries/ |
 | `/entities`, `/entities-v2` | `rs{YEAR}-project-details.json.gz`, `entity-labels-csv.json`, `entity-normalization.json`, `houjin-lookup.json` | `normalize` → `generate-project-details`（+ 別途entity生成） | 1-2 |
-| `/mof-budget-overview` | `mof-budget-overview-2023.json`（Git管理済み） | `generate-mof-data`（通常再生成不要） | 財務省CSV（別途DL） |
+| `/mof-budget-overview` | `mof-budget-overview-{2017..2026}.json`（Git管理済み） | `generate-mof-data` → `compress-data` | 財務省 予算書ZIP（別途DL） |
 
 > **Note**: `/sankey2` は現状 2024年度データのみ対応（スクリプト内ハードコード）。
 
@@ -201,35 +201,50 @@ public/data/rs{YEAR}-project-details.json.gz（Git管理）
 
 ### 2-7. `/mof-budget-overview`（財務省予算全体ビュー）
 
-```
-data/download/mof_2023/（財務省CSVを手動ダウンロード・配置）
+```text
+data/download/mof_{YEAR}/（財務省の配布 ZIP をそのまま配置）
   ↓ npm run generate-mof-data
-public/data/mof-budget-overview-2023.json（Git管理、~4KB）
-public/data/mof-funding-2024.json（Git管理、~56KB）
+public/data/mof-budget-overview-{2017..2026}.json（計0.29MB / .gz 計0.05MB を Git 管理）
 ```
 
 | コマンド | スクリプト | 入力 |
 |---------|-----------|------|
-| `npm run generate-mof-data` | `scripts/generate-mof-budget-overview-data.ts` | `parse-mof-transfer-data.ts` 経由で `data/download/mof_2023/` を読む |
+| `npm run generate-mof-data` | `scripts/generate-mof-budget-overview-data.ts` | `data/download/mof_{YEAR}/` の ZIP（`scripts/mof-budget-csv.ts` 経由） |
+| `npm run validate-mof-data` | `scripts/validate-mof-budget-overview-data.ts` | 同上。生成物と CSV を突合 |
 
-**入力（`data/download/mof_2023/` に ZIP のまま配置）**:
+引数なしで 2017〜2026 の10年度分を回す。年度を絞るときは引数で指定する。
 
-| ZIP | 読むエントリ | 内容 |
-|-----|------------|------|
-| `DL202311001.zip` | `DL202311001b.csv` | 一般会計歳出（項・目別） |
-| `DL202312001.zip` | `DL202312001a.csv` | 特別会計歳入（一般会計からの繰入等） |
+**入力（`data/download/mof_{YEAR}/` に ZIP のまま配置）**:
+
+| ZIP | 内容 |
+|-----|------|
+| `DL{YYYY}11001.zip` | 一般会計（歳入・歳出） |
+| `DL{YYYY}12001.zip` | 特別会計（歳入・歳出） |
+| `DL{YYYY}13001.zip` | 政府関係機関（収入・支出） |
 
 ZIP から直接読む（`scripts/zip-reader.ts`）。展開したファイルは置かない
 ——同じ内容が二重に残るうえ、どちらが正か分からなくなるため。
+**a/b は役割が入れ替わる帳票があるためファイル名で決め打ちせず、ヘッダの列で判定する**
+（`scripts/mof-budget-csv.ts` の `readBudgetTables`）。金額列の見出しも年度で揺れるので
+`/^(令和|平成)(元|\d+)年度/` で解決する。
 
-取得元: 財務省「予算書・決算書データベース」（[bb.mof.go.jp/archive](https://www.bb.mof.go.jp/archive/)）  
-ファイル命名規則: `DL{YYYY}{区分}{連番}a/b.csv`（`11`=一般会計、`12`=特別会計、`13`=政府関係機関）
+**出力は集計値だけ**で、サンキーのノード・リンクは持たない。可視化を変えても
+データを作り直さずに済むよう分離している（組み立ては `app/lib/mof-sankey-generator.ts`）。
 
-> **列構造・コード表・RSとの結合キーは [mof-budget-data-guide.md](mof-budget-data-guide.md) を参照。**
+保持する軸: 会計区分・款別（租税は目別）・歳出の使途別・繰入の送受・特別会計別の要約・純計。
+
+取得元: 財務省「予算書・決算書データベース」（[bb.mof.go.jp/archive](https://www.bb.mof.go.jp/archive/)）
+
+> **列構造・コード表・繰入の捕捉ロジックは [mof-budget-data-guide.md](mof-budget-data-guide.md) を参照。**
+> とくに繰入は6節に実測で確定した規則がある。**受け手側を款名だけで拾うと
+> 年金特別会計の10〜13兆円を毎年取りこぼす。**
 >
-> **重要**: `generate-mof-budget-overview-data.ts` は CSV から完全自動生成ではなく、年金特別会計・地方交付税・国債整理基金等の金額詳細はスクリプト内にハードコードされている。データ年度を変更する場合は手動でのコード編集が必要。
+> **検証**: `npm run validate-mof-data` が生成物と配布 CSV を1円単位で突き合わせる
+> （10年度で130項目）。歳入歳出合計・繰入の送受に加え、`単純合計 − 受入 = 一次純計` と
+> 会計別の積み上げが総額に一致することも確認する。
 >
-> **通常は再生成不要**: `mof-budget-overview-2023.json` と `mof-funding-2024.json` はどちらも Git 管理済みで小サイズ。財務省の年度が変わらない限り更新不要。
+> **対象は当初予算のみ**（補正予算・決算は含まない）。RS 対象範囲の区分は持たない
+> （RS の現形式は2024年度シート以降で、10年度のうち2年度しか対応年度が無いため）。
 
 ---
 
@@ -333,7 +348,7 @@ marumie-rssystem/
 │   ├── entity-labels-csv.json  # Git管理（手動生成後コミット）
 │   ├── entity-normalization.json  # Git管理
 │   ├── houjin-lookup.json      # Git管理（任意）
-│   ├── mof-budget-overview-2023.json  # Git管理（静的）
+│   ├── mof-budget-overview-{2017..2026}.json  # Git管理（10年度分）
 │   └── dictionaries/*.csv      # Git管理（辞書ファイル）
 └── scripts/                    # データ生成スクリプト
 ```
