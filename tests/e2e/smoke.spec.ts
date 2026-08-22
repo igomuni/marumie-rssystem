@@ -1,14 +1,14 @@
 import { expect, test } from '@playwright/test';
 
-test('home exposes the main navigation targets', async ({ page }) => {
+test('root redirects to the sankey view', async ({ page }) => {
   const pageErrors: string[] = [];
   page.on('pageerror', error => pageErrors.push(error.message));
 
   await page.goto('/');
 
-  await expect(page.getByRole('heading', { name: '行政事業レビュー サンキー図' })).toBeVisible();
-  await expect(page.getByRole('link', { name: /直接支出サンキー図/ })).toBeVisible();
-  await expect(page.getByRole('link', { name: /支出先ブラウザ/ })).toBeVisible();
+  // `/` は入口を持たず /sankey-svg へ送る。到達先が描けていることまで見る
+  await expect(page).toHaveURL(/\/sankey-svg/);
+  await expect(page.getByTestId('sankey-svg-canvas')).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
 

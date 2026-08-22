@@ -2850,6 +2850,9 @@ export default function RealDataSankeyPage() {
     const hitX = anchor === 'end' ? x - width : x;
     return (
       <rect
+        // ラベル文字より広いクリック領域。text の上に重なるので、
+        // e2e から「ラベルを押す」を指すときはこちらを掴む
+        data-testid={testId('node-label-hit')}
         x={hitX}
         y={centerY - innerLabelHitH / 2}
         width={width}
@@ -4557,6 +4560,7 @@ export default function RealDataSankeyPage() {
                       <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>{label}</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex' }}>
                         <input
+                          data-testid={testId(`filter-${key}-name`)}
                           type="text"
                           value={value}
                           onChange={e => setValue(e.target.value)}
