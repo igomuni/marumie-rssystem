@@ -59,9 +59,18 @@ export function useMofBudgetData<T extends { metadata: { fiscalYear: number } }>
     requestedYear.current = initialYear;
   }, [initialYear]);
 
-  // 初回と、URL の年度・絞り込み条件が変わったときに取り直す
+  // 初回と、URL の年度・絞り込み条件が変わったときに取り直す。
+  //
+  // 年度の指定が無いと既定年度を読み、その結果を URL に書き戻す。すると
+  // `initialYear` が変わって同じ年度をもう一度取りに行ってしまうので、
+  // 既に読み終えている年度と同じなら取得しない。
+  const loadedYear = data?.metadata.fiscalYear;
   useEffect(() => {
+    if (initialYear !== null && initialYear === loadedYear) return;
     fetchData(requestedYear.current);
+    // loadedYear は「同じ年度の取り直しを避ける」ためだけに見る。
+    // 依存に入れると取得のたびに再実行されるので入れない
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData, initialYear]);
 
   return { data, year, loading, error, fetchData };

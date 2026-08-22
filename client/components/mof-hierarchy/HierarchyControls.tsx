@@ -7,6 +7,7 @@
  * データ取得はページ層の責務なので、ここでは選択の通知だけを行う。
  */
 
+import { DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
 import type { MOFHierarchyTopN } from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
 
@@ -59,7 +60,7 @@ export function HierarchyControls({
       <label className="flex items-center gap-2">
         <span className="font-medium">項の表示数</span>
         <select
-          value={topN.section ?? 12}
+          value={topN.section ?? DEFAULT_TOP_N.section}
           disabled={disabled}
           onChange={e => onTopNChange({ ...topN, section: Number(e.target.value) })}
           className={SELECT_CLASS}
@@ -75,7 +76,7 @@ export function HierarchyControls({
       <label className="flex items-center gap-2">
         <span className="font-medium">事項の表示数</span>
         <select
-          value={topN.item ?? 12}
+          value={topN.item ?? DEFAULT_TOP_N.item}
           disabled={disabled}
           onChange={e => onTopNChange({ ...topN, item: Number(e.target.value) })}
           className={SELECT_CLASS}

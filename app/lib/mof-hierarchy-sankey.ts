@@ -291,8 +291,13 @@ export function buildMOFHierarchySankey(
         parentId: null,
       });
     }
-    // 親が残っていればそこから、外れていれば親の列の集約から流す
-    const parent = node.parentId ? nodes.get(node.parentId) : null;
+    // 親が残っていればそこから、外れていれば親の列の集約から流す。
+    // ただし通過ノードの列には集約を作らないので、その場合はさらに上へ遡る。
+    // 遡らないと、存在しないノードを指すリンクができる
+    let parent = node.parentId ? nodes.get(node.parentId) : null;
+    while (parent && !kept.has(parent.id) && parent.details.passThrough) {
+      parent = parent.parentId ? nodes.get(parent.parentId) : null;
+    }
     if (!parent) continue;
     const source = kept.has(parent.id) ? parent.id : othersId(parent.column);
     const key = `${source}\u0000${target}`;

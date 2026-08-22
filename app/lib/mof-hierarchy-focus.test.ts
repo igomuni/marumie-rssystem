@@ -97,6 +97,28 @@ describe('focusHierarchy', () => {
     }
   });
 
+  it('複数の親を持つ集約を選ぶと、どの親の枝も残る', () => {
+    const result = focusHierarchy(NODES, LINKS, 'others-section');
+    expect(result.nodes.map(n => n.id).sort()).toEqual(
+      ['A', 'B', 'others-item', 'others-section', 'root'].sort()
+    );
+    // 各親の実際の寄与がそのまま残る（35 と 40）
+    expect(result.links.find(l => l.source === 'A')?.value).toBe(35);
+    expect(result.links.find(l => l.source === 'B')?.value).toBe(40);
+    // 根はその合計
+    expect(result.nodes.find(n => n.id === 'root')?.value).toBe(75);
+  });
+
+  it('リンクの順序が変わっても結果は同じ', () => {
+    const reversed = [...LINKS].reverse();
+    const a = focusHierarchy(NODES, LINKS, 'others-section');
+    const b = focusHierarchy(NODES, reversed, 'others-section');
+    const value = (r: typeof a, id: string) => r.nodes.find(n => n.id === id)?.value;
+    for (const id of ['root', 'A', 'B', 'others-section', 'others-item']) {
+      expect(value(b, id)).toBe(value(a, id));
+    }
+  });
+
   it('元の配列を書き換えない', () => {
     const before = LINKS.map(l => l.value);
     focusHierarchy(NODES, LINKS, 'A');

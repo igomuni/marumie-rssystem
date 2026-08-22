@@ -37,8 +37,23 @@ export function HierarchySearch({
       .slice(0, MAX_RESULTS);
   }, [nodes, query]);
 
+  /** 選択して一覧を閉じる。マウスとキーボードの両方から呼ぶ */
+  const choose = (id: string) => {
+    onSelect(id);
+    setOpen(false);
+  };
+
   return (
-    <div className="relative w-72" onMouseDown={e => e.stopPropagation()}>
+    <div
+      className="relative w-72"
+      onMouseDown={e => e.stopPropagation()}
+      // 一覧の中へフォーカスが移ったときは閉じない。
+      // input の blur だけで閉じると、Tab で候補へ移った瞬間に消えて
+      // キーボードでは選べなくなる
+      onBlur={e => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
+      }}
+    >
       <input
         type="search"
         value={query}
@@ -48,7 +63,6 @@ export function HierarchySearch({
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        onBlur={() => window.setTimeout(() => setOpen(false), 150)}
         className="h-9 w-full rounded-lg border border-black/10 bg-white/90 px-3 text-xs text-neutral-700 shadow-md backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       />
       {open && results.length > 0 && (
@@ -63,9 +77,10 @@ export function HierarchySearch({
               onMouseDown={e => {
                 // blur より先に拾う。blur が走ると一覧が閉じてクリックが届かない
                 e.preventDefault();
-                onSelect(node.id);
-                setOpen(false);
+                choose(node.id);
               }}
+              // キーボード操作では onMouseDown が発火しないので、こちらでも拾う
+              onClick={() => choose(node.id)}
               className="block w-full px-3 py-1.5 text-left hover:bg-gray-50"
             >
               <div className="text-[10px] text-gray-400">

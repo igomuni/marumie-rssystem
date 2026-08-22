@@ -119,6 +119,7 @@ function assignColumns<D>(
     if (!changed) break;
   }
   // 出口の無いノードは最終列に寄せる（実支出などが中途半端な列に残らないように）
+  if (column.size === 0) return column;
   const maxColumn = Math.max(...column.values());
   for (const node of nodes) {
     if (!outgoing.has(node.id)) column.set(node.id, maxColumn);
@@ -159,7 +160,9 @@ export function computeMOFSankeyLayout<D>(
         input.nodes.map(n => [n.id, options.columnOf?.({ id: n.id, type: n.type }) ?? 0])
       )
     : assignColumns(input.nodes, input.links, options.alignToSameColumn);
-  const columnCount = Math.max(...column.values()) + 1;
+  // ノードが無いと Math.max(...[]) が -Infinity になり、そのまま返ってしまう。
+  // 絞り込みで何も残らない場面があるので明示的に0にする
+  const columnCount = column.size > 0 ? Math.max(...column.values()) + 1 : 0;
 
   // 値 → 高さの倍率。いちばん詰まっている列に合わせる
   const byColumn = new Map<number, InputNode<D>[]>();

@@ -53,6 +53,14 @@ export async function GET(request: Request) {
 
     const data = loadYear(year);
     const budgetTypes = data.metadata.budgetTypes;
+    // 種別が1つも無いと、以降の絞り込みが全件を落として「空の図」を正常応答してしまう。
+    // 本当に事項が無い年度と区別が付かないので、ここで異常として返す
+    if (budgetTypes.length === 0) {
+      return NextResponse.json(
+        { error: `${year}年度に収録されている予算種別がありません。` },
+        { status: 503 }
+      );
+    }
     const requested = params.get('budgetType') as MOFBudgetType | null;
     // 年度を変えたときに前の種別が無いことがあるので、無ければ当初予算に落とす
     const budgetType =

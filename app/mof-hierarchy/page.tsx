@@ -129,7 +129,15 @@ function MOFHierarchyContent() {
   );
 
   if (loading && !data) return <CenterMessage text="読み込み中…" />;
-  if (error || !data) return <CenterMessage text={`読み込みに失敗しました: ${error}`} error />;
+  if (error || !data) {
+    // data だけが無い場合もここに来る。error が null のまま埋め込むと "null" と出る
+    return (
+      <CenterMessage
+        text={error ? `読み込みに失敗しました: ${error}` : 'データを取得できませんでした'}
+        error
+      />
+    );
+  }
 
   const { metadata } = data;
 

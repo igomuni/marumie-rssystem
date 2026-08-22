@@ -195,13 +195,21 @@ export function HierarchyChart({
    * ズームはカーソル位置を基準にする。
    * 中心固定だと見ていた場所が画面外へ逃げ、拡大するたびに探し直しになる。
    */
+  // React は更新関数を複数回評価することがある（開発時の StrictMode など）。
+  // その中で setPan を呼ぶと移動が二重に効いて、見ていた場所からずれる。
+  // 次のズームを外で求めてから両方を更新する。
+  const zoomRef = useRef(1);
+  useLayoutEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
+
   const zoomAt = useCallback((factor: number, anchorY: number) => {
-    setZoom(prev => {
-      const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, prev * factor));
-      if (next === prev) return prev;
-      setPan(p => ({ ...p, y: anchorY - (anchorY - p.y) * (next / prev) }));
-      return next;
-    });
+    const prev = zoomRef.current;
+    const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, prev * factor));
+    if (next === prev) return;
+    zoomRef.current = next;
+    setZoom(next);
+    setPan(p => ({ ...p, y: anchorY - (anchorY - p.y) * (next / prev) }));
   }, []);
 
   const handleWheel = useCallback(
@@ -272,6 +280,11 @@ export function HierarchyChart({
       onPointerDown={e => {
         if (e.pointerType !== 'touch') return;
         touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (touches.current.size === 1) {
+          // 1本指はドラッグと同じ扱い。touchAction を切っているので自前で動かす
+          panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+          dragged.current = false;
+        }
         if (touches.current.size === 2) {
           const [a, b2] = [...touches.current.values()];
           const rect = containerRef.current?.getBoundingClientRect();
@@ -288,6 +301,21 @@ export function HierarchyChart({
         if (e.pointerType !== 'touch') return;
         if (!touches.current.has(e.pointerId)) return;
         touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (touches.current.size === 1 && panStart.current) {
+          if (
+            Math.abs(e.clientX - panStart.current.x) > 3 ||
+            Math.abs(e.clientY - panStart.current.y) > 3
+          ) {
+            dragged.current = true;
+          }
+          setPan(
+            clampPan({
+              x: panStart.current.panX + (e.clientX - panStart.current.x),
+              y: panStart.current.panY + (e.clientY - panStart.current.y),
+            })
+          );
+          return;
+        }
         if (touches.current.size === 2 && pinchStart.current) {
           const [a, b2] = [...touches.current.values()];
           const distance = Math.hypot(a.x - b2.x, a.y - b2.y);
@@ -296,12 +324,13 @@ export function HierarchyChart({
               ZOOM_MAX,
               Math.max(ZOOM_MIN, pinchStart.current.zoom * (distance / pinchStart.current.distance))
             );
-            const anchorY = pinchStart.current.centerY;
-            setZoom(prev => {
-              if (next === prev) return prev;
+            const prev = zoomRef.current;
+            if (next !== prev) {
+              const anchorY = pinchStart.current.centerY;
+              zoomRef.current = next;
+              setZoom(next);
               setPan(p => ({ ...p, y: anchorY - (anchorY - p.y) * (next / prev) }));
-              return next;
-            });
+            }
           }
           dragged.current = true;
         }
@@ -310,6 +339,7 @@ export function HierarchyChart({
         if (e.pointerType !== 'touch') return;
         touches.current.delete(e.pointerId);
         if (touches.current.size < 2) pinchStart.current = null;
+        if (touches.current.size === 0) panStart.current = null;
       }}
       onPointerCancel={e => {
         touches.current.delete(e.pointerId);
@@ -536,9 +566,11 @@ export function HierarchyChart({
               {selectedDetails.description}
             </div>
           )}
-          <div className="mt-2 text-[11px] text-gray-400">
-            この筋に連なるノードだけを表示しています
-          </div>
+          {focusRelated && (
+            <div className="mt-2 text-[11px] text-gray-400">
+              この筋に連なるノードだけを表示しています
+            </div>
+          )}
         </div>
       )}
 
