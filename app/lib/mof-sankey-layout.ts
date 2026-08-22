@@ -221,20 +221,31 @@ export function computeMOFSankeyLayout<D>(
       options.align === 'top'
         ? margin.top
         : margin.top + Math.max((innerH - used) / 2, 0);
-    for (const node of list) {
-      const isPassThrough = (node.details as { passThrough?: boolean } | undefined)
-        ?.passThrough;
+    const heightOf = (n: (typeof list)[number]) => Math.max((n.value ?? 0) * scale, 1);
+    const isPassThroughNode = (n: (typeof list)[number]) =>
+      (n.details as { passThrough?: boolean } | undefined)?.passThrough === true;
+    for (let i = 0; i < list.length; i += 1) {
+      const node = list[i];
+      const isPassThrough = isPassThroughNode(node);
       if (!isPassThrough) {
         y += options.gapBefore?.({ id: node.id, type: node.type }) ?? 0;
       }
-      const h = Math.max((node.value ?? 0) * scale, 1);
+      const h = heightOf(node);
       // 通過ノードはラベルも箱も出さないので、スロットも余白も取らない。
       // 取ると素通りの多い列（勘定など）が余白だけで間延びする
-      const slot = isPassThrough
+      let slot = isPassThrough
         ? h
         : options.minNodeSlot
           ? Math.max(h + nodePadding, options.minNodeSlot)
           : h + nodePadding;
+      // ラベルはノードの中心に出るのに、スロットは上端から測る。
+      // 高さが不揃いだと「箱は離れているのにラベルは重なる」が起きるので、
+      // 次のノードとの中心間隔が1行分に届くところまでスロットを広げる。
+      //   center_next - center_cur = slot - h/2 + h_next/2
+      const next = list[i + 1];
+      if (!isPassThrough && options.minNodeSlot && next && !isPassThroughNode(next)) {
+        slot = Math.max(slot, options.minNodeSlot + h / 2 - heightOf(next) / 2);
+      }
       const placed: MOFLayoutNode<D> = {
         id: node.id,
         name: node.name ?? node.id,

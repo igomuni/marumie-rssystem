@@ -17,6 +17,9 @@ const SELECT_CLASS =
 /** TopN の選択肢。多すぎるとラベルが潰れるので上限を設ける */
 const TOP_N_OPTIONS = [5, 8, 12, 16, 20, 30, 40];
 
+/** 文字サイズの選択肢（px）。大きくするとノード間隔も広がり、縦に長くなる */
+const FONT_PX_OPTIONS = [9, 10, 11, 12, 14, 16, 18];
+
 export function HierarchyControls({
   budgetType,
   budgetTypes,
@@ -27,6 +30,8 @@ export function HierarchyControls({
   summary,
   focusRelated,
   onFocusRelatedChange,
+  fontPx,
+  onFontPxChange,
 }: {
   budgetType: MOFBudgetType;
   budgetTypes: MOFBudgetType[];
@@ -38,6 +43,9 @@ export function HierarchyControls({
   summary?: string;
   focusRelated: boolean;
   onFocusRelatedChange: (value: boolean) => void;
+  /** ラベルの文字サイズ（px） */
+  fontPx: number;
+  onFontPxChange: (value: number) => void;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-gray-600">
@@ -84,6 +92,22 @@ export function HierarchyControls({
           {TOP_N_OPTIONS.map(n => (
             <option key={n} value={n}>
               上位{n}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="flex items-center gap-2">
+        <span className="font-medium">文字サイズ</span>
+        <select
+          aria-label="文字サイズ"
+          value={fontPx}
+          onChange={e => onFontPxChange(Number(e.target.value))}
+          className={SELECT_CLASS}
+        >
+          {FONT_PX_OPTIONS.map(n => (
+            <option key={n} value={n}>
+              {n}px
             </option>
           ))}
         </select>

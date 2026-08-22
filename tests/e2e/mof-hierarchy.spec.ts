@@ -47,4 +47,22 @@ test.describe('mof-hierarchy', () => {
     await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId('hierarchy-node')).not.toHaveCount(0);
   });
+
+  test('label font size can be enlarged without labels overlapping', async ({ page }) => {
+    const label = page.getByTestId('hierarchy-label').first();
+    const before = await label.evaluate(el => parseFloat(getComputedStyle(el).fontSize));
+
+    await page.getByLabel('文字サイズ').selectOption('16');
+
+    await expect
+      .poll(() => label.evaluate(el => parseFloat(getComputedStyle(el).fontSize)))
+      .toBeGreaterThan(before);
+
+    // 大きくしてもラベル同士が重ならない。重なりは描画側が検出して印を出す
+    await expect(page.getByTestId('hierarchy-label-overlap')).toHaveCount(0);
+  });
+
+  test('labels do not overlap at the default font size', async ({ page }) => {
+    await expect(page.getByTestId('hierarchy-label-overlap')).toHaveCount(0);
+  });
 });

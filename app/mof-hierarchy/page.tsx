@@ -18,7 +18,7 @@ import type { MOFBudgetType } from '@/types/mof-jikou';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
-import { HierarchyChart } from '@/client/components/mof-hierarchy/HierarchyChart';
+import { HierarchyChart, LABEL_FONT_PX_DEFAULT } from '@/client/components/mof-hierarchy/HierarchyChart';
 import { HierarchyControls } from '@/client/components/mof-hierarchy/HierarchyControls';
 import { useMofBudgetData } from '@/client/components/mof-budget/useMofBudgetData';
 
@@ -52,6 +52,9 @@ function MOFHierarchyContent() {
     searchParams.get('sel')
   );
   const [focusRelated, setFocusRelated] = useState(searchParams.get('fr') !== '0');
+  const [fontPx, setFontPx] = useState(
+    () => Number(searchParams.get('fs')) || LABEL_FONT_PX_DEFAULT
+  );
 
   const buildUrl = useCallback(
     (target: number | null) => {
@@ -85,11 +88,12 @@ function MOFHierarchyContent() {
     if (data.metadata.topN.item) params.set('ti', String(data.metadata.topN.item));
     if (selectedId) params.set('sel', selectedId);
     if (!focusRelated) params.set('fr', '0');
+    if (fontPx !== LABEL_FONT_PX_DEFAULT) params.set('fs', String(fontPx));
     const next = `?${params.toString()}`;
     if (next !== window.location.search) {
       window.history.replaceState(null, '', next);
     }
-  }, [data, selectedId, focusRelated]);
+  }, [data, selectedId, focusRelated, fontPx]);
 
   // ブラウザの戻る／進むで選択を辿れるようにする
   useEffect(() => {
@@ -97,6 +101,7 @@ function MOFHierarchyContent() {
       const params = new URLSearchParams(window.location.search);
       setSelectedId(params.get('sel'));
       setFocusRelated(params.get('fr') !== '0');
+      setFontPx(Number(params.get('fs')) || LABEL_FONT_PX_DEFAULT);
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
@@ -150,6 +155,7 @@ function MOFHierarchyContent() {
         selectedId={selectedId}
         onSelect={selectNode}
         focusRelated={focusRelated}
+        fontPx={fontPx}
       />
 
       {/* コントロール・年度・ページ切替。/sankey-svg と同じく右上に並べる */}
@@ -165,6 +171,8 @@ function MOFHierarchyContent() {
             summary={`${metadata.itemCount.toLocaleString()}事項 / ${accountsLabel}`}
             focusRelated={focusRelated}
             onFocusRelatedChange={setFocusRelated}
+            fontPx={fontPx}
+            onFontPxChange={setFontPx}
           />
         </div>
         <YearSelect
