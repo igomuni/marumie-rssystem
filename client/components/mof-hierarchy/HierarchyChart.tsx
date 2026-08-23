@@ -633,7 +633,10 @@ export function HierarchyChart({
             const offHover =
               hoveredRelated !== null &&
               !(hoveredRelated.has(link.source.id) && hoveredRelated.has(link.target.id));
-            const dim = offSelection || (related === null && offHover);
+            // hoveredRelated 自体が「絞り込んでいないときだけ計算する」条件を
+            // 既に内包しているので、ここで related の有無を重ねて見る必要はない。
+            // 重ねると絞り込み中（related は常に非null）はホバーが常に無効化されていた
+            const dim = offSelection || offHover;
             const isHovered = hoveredLink === link;
             return (
               <path
@@ -677,7 +680,7 @@ export function HierarchyChart({
             const offSelection =
               !focusRelated && related !== null && !related.has(node.id);
             const offHover = hoveredRelated !== null && !hoveredRelated.has(node.id);
-            const dim = offSelection || (related === null && offHover);
+            const dim = offSelection || offHover;
             const isSelected = selectedId === node.id;
             return (
               <g
@@ -993,7 +996,16 @@ export function HierarchyChart({
               setIsEditingZoom(false);
             }}
             onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur();
+              if (e.key === 'Enter') {
+                (e.target as HTMLInputElement).blur();
+                return;
+              }
+              if (e.key === 'Escape') {
+                // 入力を確定させずに閉じる。stopPropagation しないと、この
+                // キー入力が window の Escape ハンドラにも届いて選択まで消える
+                e.stopPropagation();
+                setIsEditingZoom(false);
+              }
             }}
             className="w-full rounded border border-black/10 bg-white px-1 py-0.5 text-center text-[10px] text-gray-700 shadow"
           />

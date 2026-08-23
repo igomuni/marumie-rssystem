@@ -401,6 +401,35 @@ test.describe('mof-hierarchy', () => {
     expect(ministryOpacities.some(o => o < 1)).toBe(true);
   });
 
+  test('hovering still highlights within a focus-filtered view', async ({ page }) => {
+    // 絞り込み中（選択時に関連のみ表示=ON）でも、その中でさらにホバーの筋を
+    // 強調するはずだった。related（選択の関連集合）で offHover を無効化して
+    // いたため、選択中は常に dim=false になりホバーが一切効かなくなっていた
+    const ministry = page.locator('[data-testid="hierarchy-node"][data-column="ministry"]').first();
+    await ministry.click();
+    await page.getByLabel('表示設定').click();
+    await page.getByLabel('選択時に関連のみ表示').check();
+    await page.waitForTimeout(200);
+
+    const orgOpacities = () =>
+      page.evaluate(() => {
+        const orgs = [...document.querySelectorAll('[data-testid="hierarchy-node"][data-column="organization"]')];
+        return orgs.map(n => Number(getComputedStyle(n.querySelector('rect')!).opacity));
+      });
+    const before = await orgOpacities();
+    test.skip(before.length < 2, 'この所管の組織が1件しかない');
+
+    const target = page.locator('[data-testid="hierarchy-node"][data-column="organization"]').first();
+    const box = (await target.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(150);
+
+    const after = await orgOpacities();
+    // ホバーした1件は明るいまま、絞り込み内の他の組織は薄暗くなる
+    expect(after[0]).toBe(1);
+    expect(after.some(o => o < 1)).toBe(true);
+  });
+
   test('the minimap shows the current viewport and can jump to a clicked spot', async ({ page }) => {
     // パンを制限していないので、表示数を増やすと迷子になりやすい。
     // /sankey-svg と同じミニマップで、全体の中の現在位置を把握しつつ飛べるようにする
@@ -536,8 +565,8 @@ test.describe('mof-hierarchy', () => {
     // /sankey-svg のサイドパネルはタブ（省庁/事業/支出先）で下の階層を辿れる。
     // 静的な内訳だけでは選び直すたびに図をクリックし直す必要があった
     const ministry = page.locator('[data-testid="hierarchy-node"][data-column="ministry"]').first();
-    const ministryName = await ministry.locator('text').textContent();
     await ministry.click();
+    const ministrySel = new URL(page.url()).searchParams.get('sel');
 
     const panel = page.getByTestId('hierarchy-side-panel');
     const orgTab = panel.getByRole('tab', { name: /組織/ });
@@ -548,12 +577,14 @@ test.describe('mof-hierarchy', () => {
     await itemTab.click();
     await expect(panel.getByRole('tabpanel')).toBeVisible();
 
-    // タブの中の項目を押すと、その子ノードへ選択が移る
+    // タブの中の項目を押すと、その子ノードへ選択が移る。
+    // panel ヘッダーは名前のみ（金額を含まない）を表示するので、
+    // svg ラベル（金額付き）とは比較せず、選択の実体である URL の sel で確かめる
     const firstEntry = panel.getByRole('tabpanel').getByRole('button').first();
     const entryName = await firstEntry.textContent();
     await firstEntry.click();
 
-    await expect(panel.locator('.text-sm.font-semibold')).not.toHaveText(ministryName ?? '');
+    await expect.poll(() => new URL(page.url()).searchParams.get('sel')).not.toBe(ministrySel);
     expect(entryName?.length).toBeGreaterThan(0);
   });
 
@@ -657,5 +688,22 @@ test.describe('mof-hierarchy', () => {
 
     const tabTopAfter = (await tab.boundingBox())!.y;
     expect(tabTopAfter).toBe(tabTopBefore);
+  });
+
+  test('Escape while editing the zoom percentage cancels the edit without clearing the selection', async ({ page }) => {
+    // Escape は本来「入力の取り消し」のはずが、確定と同じ扱いで blur() されて
+    // 値が適用され、さらに window の Escape ハンドラにまで伝播して選択も
+    // 消えていた（Escapeを押しただけでズーム値が変わり、選択も解けてしまう）
+    await page.getByTestId('hierarchy-node').first().click();
+    await expect(page).toHaveURL(/sel=/);
+
+    await page.getByTitle('クリックしてズーム率を入力').click();
+    await page.getByLabel('ズーム率(数値)').fill('250');
+    await page.getByLabel('ズーム率(数値)').press('Escape');
+
+    // 編集前の100%のまま（適用されない）
+    await expect(page.getByTitle('クリックしてズーム率を入力')).toHaveText('100%');
+    // 選択も消えない
+    await expect(page).toHaveURL(/sel=/);
   });
 });
