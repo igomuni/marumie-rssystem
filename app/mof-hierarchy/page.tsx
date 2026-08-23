@@ -229,6 +229,8 @@ function MOFHierarchyContent() {
       <HierarchyChart
         nodes={data.sankey.nodes}
         links={data.sankey.links}
+        browseNodes={data.browse.nodes}
+        browseLinks={data.browse.links}
         selectedId={selectedId}
         onSelect={selectNode}
         focusRelated={focusRelated}

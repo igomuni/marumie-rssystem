@@ -557,16 +557,43 @@ test.describe('mof-hierarchy', () => {
     expect(entryName?.length).toBeGreaterThan(0);
   });
 
-  test('the aggregate row is always last in the tab list, matching the diagram', async ({ page }) => {
-    // 図は集約ノードを常に列の末尾に描く。パネルの一覧が金額だけで並ぶと、
-    // 集約が実額次第で中段に埋もれ、図で見た手がかりと食い違って探しにくい
+  test('the side panel fully expands descendants instead of showing an aggregate row', async ({ page }) => {
+    // /sankey-svg のサイドパネルは常にフルデータを見るので、図で集約されている
+    // 分もタブでは個々の実ノードとして展開される。集約ノード（41組織 のような
+    // 「N件+単位」の行）は一切出ない
     const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
     await total.click();
     const panel = page.getByTestId('hierarchy-side-panel');
     await panel.getByRole('tab', { name: /^組織/ }).click();
 
+    const orgTab = panel.getByRole('tab', { name: /^組織/ });
+    // 図では TopN で41件（うち集約1件）に絞られるが、パネルは全件を展開する
+    await expect(orgTab).toHaveText(/組織\/特会\(114\)/);
+
     const rows = await panel.getByRole('tabpanel').getByRole('button').allTextContents();
-    expect(rows.length).toBeGreaterThan(1);
-    expect(rows.at(-1)).toMatch(/^[\d,]+組織/);
+    expect(rows).toHaveLength(114);
+    expect(rows.some(r => /^[\d,]+組織/.test(r))).toBe(false);
+  });
+
+  test('selecting a fully-expanded node outside the diagram TopN still works', async ({ page }) => {
+    // 図のTopNから外れた実ノードをタブから選んでも、パネルは詳細を表示できる。
+    // 図には出ていない旨も伝える（座標が無いのでハイライト・自動スクロールはできない）
+    const errors: string[] = [];
+    page.on('pageerror', e => errors.push(e.message));
+
+    const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
+    await total.click();
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await panel.getByRole('tab', { name: /^組織/ }).click();
+
+    // 図のTopN（40）より後ろの行を選ぶ
+    const target = panel.getByRole('tabpanel').getByRole('button').nth(41);
+    const name = (await target.textContent())?.split(/\d/)[0];
+    await target.click();
+
+    await expect(page).toHaveURL(/sel=/);
+    await expect(panel).toContainText('表示数の上限から溢れているため図には出ていません');
+    if (name) await expect(panel).toContainText(name);
+    expect(errors).toEqual([]);
   });
 });

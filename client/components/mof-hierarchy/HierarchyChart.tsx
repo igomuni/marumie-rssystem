@@ -62,14 +62,24 @@ function shorten(name: string, max: number): string {
 export function HierarchyChart({
   nodes,
   links,
+  browseNodes,
+  browseLinks,
   selectedId,
   onSelect,
   focusRelated = true,
   fontPx = LABEL_FONT_PX_DEFAULT,
   labelDensity = 'all',
 }: {
+  /** 図の描画用（TopNで絞ってある） */
   nodes: MOFHierarchyNode[];
   links: SankeyLink[];
+  /**
+   * サイドパネル用の全ノード（TopNで絞る前）。
+   * /sankey-svg のパネルが常にフルデータを見るのと同じで、図の集約とは
+   * 独立してタブから個々のノードを選べるようにする
+   */
+  browseNodes: MOFHierarchyNode[];
+  browseLinks: SankeyLink[];
   /** 選択中のノード。URL と同期させるためページ層が持つ */
   selectedId: string | null;
   onSelect: (id: string | null) => void;
@@ -349,16 +359,31 @@ export function HierarchyChart({
   }, [layout]);
 
   // 年度や予算種別を変えると、選んでいたノードが無くなることがある。
-  // そのままだと関連が自分1つだけになり、ほぼ空の図になる
+  // 図（集約ノードを含む）と browseNodes（TopNで絞る前の全件）の両方を見る。
+  // 集約ノードの id は browseNodes には無いので、図側だけを見て消してしまうと
+  // パネルのタブから選んだノードまで、こちらは nodes だけを見ると消えてしまう
   useEffect(() => {
-    if (selectedId && !nodes.some(n => n.id === selectedId)) onSelect(null);
-  }, [selectedId, nodes, onSelect]);
+    if (!selectedId) return;
+    const exists = nodes.some(n => n.id === selectedId) || browseNodes.some(n => n.id === selectedId);
+    if (!exists) onSelect(null);
+  }, [selectedId, nodes, browseNodes, onSelect]);
 
   const selectedNode = useMemo(
     () => layout.nodes.find(n => n.id === selectedId) ?? null,
     [layout.nodes, selectedId]
   );
-  const selectedDetails = selectedNode?.details as
+  /**
+   * サイドパネル表示専用の選択ノード。
+   *
+   * /sankey-svg はパネルが常にフルデータを見るので、TopN で図から外れた
+   * ノードでも選んで詳細を見られる。座標を持たないので図のハイライトや
+   * 自動スクロールには使わない（selectedNode の方を使う）。
+   */
+  const selectedPanelNode = useMemo(
+    () => selectedNode ?? browseNodes.find(n => n.id === selectedId) ?? null,
+    [selectedNode, browseNodes, selectedId]
+  );
+  const selectedDetails = selectedPanelNode?.details as
     | MOFHierarchyNode['details']
     | undefined;
 
@@ -366,16 +391,16 @@ export function HierarchyChart({
    * 選択したノードの子孫を列ごとにまとめたもの（サイドパネルのタブに使う）。
    *
    * /sankey-svg のサイドパネルは省庁／事業／支出先タブで下の階層へ辿れる。
-   * 静的な内訳だけだと、選び直すたびに図をクリックし直す必要があった。
-   * TopN で絞り込む前の全ノード（nodes/links props）を使う。focusRelated で
-   * 図を絞り込んでいるときも、パネルの中では絞り込んでいない階層まで辿れる
+   * 図はTopNで絞ってあるので、そちらを使うと集約ノードに畳まれた分が
+   * 個々に選べない。browseNodes/browseLinks（絞る前の全件）を使うことで、
+   * 集約せず実ノードとして全件を辿れるようにする（/sankey-svg と同じ）
    */
   const descendantColumns = useMemo(
     () =>
       selectedId
-        ? descendantsByColumn(nodes, links, selectedId)
+        ? descendantsByColumn(browseNodes, browseLinks, selectedId)
         : new Map<MOFHierarchyColumn, MOFHierarchyNode[]>(),
-    [nodes, links, selectedId]
+    [browseNodes, browseLinks, selectedId]
   );
   const descendantColumnList = useMemo(
     () =>
@@ -746,21 +771,26 @@ export function HierarchyChart({
         onResetWidth={sidePanel.resetWidth}
         testId={testId('hierarchy-side-panel')}
       >
-        {selectedNode && (
+        {selectedPanelNode && (
           <div className="flex h-full flex-col overflow-hidden">
             {/* ヘッダー。/sankey-svg と同じくスクロールしても常に見える */}
             <div className="flex-shrink-0 border-b border-gray-100 p-4 pb-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="break-all text-sm font-semibold text-gray-900">
-                    {selectedNode.name}
+                    {selectedPanelNode.name}
                   </div>
                   <div className="mt-0.5 text-lg font-bold text-gray-800">
-                    {formatBudgetFromYen(selectedNode.value)}
+                    {formatBudgetFromYen(selectedPanelNode.value ?? 0)}
                   </div>
                   <div className="text-[11px] text-gray-400">
-                    {Math.round(selectedNode.value).toLocaleString()}円
+                    {Math.round(selectedPanelNode.value ?? 0).toLocaleString()}円
                   </div>
+                  {!selectedNode && (
+                    <div className="mt-1 text-[11px] text-amber-600">
+                      表示数の上限から溢れているため図には出ていません
+                    </div>
+                  )}
                 </div>
                 <button
                   type="button"

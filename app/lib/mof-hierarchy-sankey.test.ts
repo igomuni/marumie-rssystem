@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { MOFJikouItem } from '@/types/mof-jikou';
-import { buildMOFHierarchySankey, DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
+import { buildMOFHierarchyBrowseTree, buildMOFHierarchySankey, DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
 
 /** 検証に必要なフィールドだけ指定できるようにする */
 function item(overrides: Partial<MOFJikouItem>): MOFJikouItem {
@@ -382,5 +382,79 @@ describe('TopN のオフセット', () => {
     });
     expect(result.metadata.columnCounts.section).toBe(10);
     expect(result.metadata.columnCounts.ministry).toBe(1);
+  });
+});
+
+describe('buildMOFHierarchyBrowseTree', () => {
+  const branch = (ministry: string, section: string, amount: number) =>
+    item({
+      ministry,
+      organization: `${ministry}本省`,
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: `事項${section}`,
+      amount,
+    });
+
+  it('TopN で溢れる件数でも、集約せず全件を実ノードとして返す', () => {
+    const count = (DEFAULT_TOP_N.section ?? 40) + 10;
+    const items = Array.from({ length: count }, (_, i) => branch('A', `s${i}`, count - i));
+    const result = buildMOFHierarchyBrowseTree(items, '当初予算');
+    const sections = result.nodes.filter(n => n.details.column === 'section');
+    expect(sections).toHaveLength(count);
+    expect(sections.every(n => !n.details.aggregated)).toBe(true);
+  });
+
+  it('通過ノードは出力せず、帯は実ノード同士を直結する', () => {
+    const result = buildMOFHierarchyBrowseTree([item({})], '当初予算');
+    const passIds = new Set(
+      result.nodes.filter(n => n.details.passThrough).map(n => n.id)
+    );
+    expect(passIds.size).toBe(0);
+    for (const link of result.links) {
+      const ids = new Set(result.nodes.map(n => n.id));
+      expect(ids.has(link.source)).toBe(true);
+      expect(ids.has(link.target)).toBe(true);
+    }
+  });
+
+  it('選んだ予算種別の事項だけを対象にする', () => {
+    const result = buildMOFHierarchyBrowseTree(
+      [item({ amount: 100 }), item({ budgetType: '暫定予算', amount: 999, name: '事項B' })],
+      '当初予算'
+    );
+    const items = result.nodes.filter(n => n.details.column === 'item');
+    expect(items).toHaveLength(1);
+  });
+
+  it('各ノードで流入と流出が一致する（根と葉を除く・保存則）', () => {
+    const items = Array.from({ length: 5 }, (_, i) =>
+      branch(`省庁${i}`, `s${i}`, 10 * (i + 1))
+    );
+    const result = buildMOFHierarchyBrowseTree(items, '当初予算');
+    const inflow = new Map<string, number>();
+    const outflow = new Map<string, number>();
+    for (const link of result.links) {
+      inflow.set(link.target, (inflow.get(link.target) ?? 0) + link.value);
+      outflow.set(link.source, (outflow.get(link.source) ?? 0) + link.value);
+    }
+    for (const node of result.nodes) {
+      const inValue = inflow.get(node.id);
+      if (inValue !== undefined) expect(inValue).toBeCloseTo(node.value ?? 0, 5);
+    }
+  });
+
+  it('sankey が TopN で集約していても、browse は同じ全ノードを持つ', () => {
+    const count = (DEFAULT_TOP_N.section ?? 40) + 5;
+    const items = Array.from({ length: count }, (_, i) =>
+      item({ sectionCode: `s${i}`, sectionName: `項${i}`, name: `事項${i}`, amount: count - i })
+    );
+    const result = buildMOFHierarchySankey(items, options);
+    const sankeySections = result.sankey.nodes.filter(n => n.details.column === 'section');
+    const browseSections = result.browse.nodes.filter(n => n.details.column === 'section');
+    // sankey 側は集約1件を含む上限件数、browse は集約せず全件
+    expect(sankeySections.some(n => n.details.aggregated)).toBe(true);
+    expect(browseSections).toHaveLength(count);
+    expect(browseSections.every(n => !n.details.aggregated)).toBe(true);
   });
 });
