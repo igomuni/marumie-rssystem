@@ -129,9 +129,18 @@ describe('focusHierarchy', () => {
 
 describe('descendantsByColumn', () => {
   it('列ごとに子孫を金額の大きい順で返す', () => {
+    const result = descendantsByColumn(NODES, LINKS, 'B');
+    // B の直下は others-section のみ（A1 は A の子）。並び順の検証は次のテストで行う
+    expect(result.get('section')?.map(n => n.id)).toEqual(['others-section']);
+  });
+
+  it('集約ノードは金額に関わらず列の末尾に置く（図の並び方と揃える）', () => {
+    // 図（mof-hierarchy-sankey.ts の alive.sort）は集約ノードを常に列の末尾に描く。
+    // パネルの一覧を金額だけで並べると、集約が実額次第で中段に埋もれ、
+    // 図で見た「末尾にある」という手がかりと食い違って探しにくくなる
     const result = descendantsByColumn(NODES, LINKS, 'A');
-    expect(result.get('section')?.map(n => n.id)).toEqual(['others-section', 'A1']);
-    expect(result.get('item')?.map(n => n.id)).toEqual(['others-item']);
+    // others-section(75) は A1(25) より金額が大きいが、集約なので後ろに来る
+    expect(result.get('section')?.map(n => n.id)).toEqual(['A1', 'others-section']);
   });
 
   it('値の無い列（子孫がいない列）は含まない', () => {

@@ -84,7 +84,16 @@ export function descendantsByColumn(
     for (const child of childrenOf.get(id) ?? []) queue.push(child);
   }
 
-  for (const list of result.values()) list.sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+  // 図（mof-hierarchy-sankey.ts の alive.sort）は集約ノードを列の末尾に固定して描く。
+  // ここも同じ並びにしないと、金額次第で集約が一覧の中段に埋もれ、
+  // 図で見た「末尾にある」という手がかりと食い違って探しにくくなる
+  for (const list of result.values()) {
+    list.sort((a, b) => {
+      const byAggregated = (a.details.aggregated ? 1 : 0) - (b.details.aggregated ? 1 : 0);
+      if (byAggregated !== 0) return byAggregated;
+      return (b.value ?? 0) - (a.value ?? 0);
+    });
+  }
   return result;
 }
 

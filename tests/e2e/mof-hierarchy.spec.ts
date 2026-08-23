@@ -556,4 +556,17 @@ test.describe('mof-hierarchy', () => {
     await expect(panel.locator('.text-sm.font-semibold')).not.toHaveText(ministryName ?? '');
     expect(entryName?.length).toBeGreaterThan(0);
   });
+
+  test('the aggregate row is always last in the tab list, matching the diagram', async ({ page }) => {
+    // 図は集約ノードを常に列の末尾に描く。パネルの一覧が金額だけで並ぶと、
+    // 集約が実額次第で中段に埋もれ、図で見た手がかりと食い違って探しにくい
+    const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
+    await total.click();
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await panel.getByRole('tab', { name: /^組織/ }).click();
+
+    const rows = await panel.getByRole('tabpanel').getByRole('button').allTextContents();
+    expect(rows.length).toBeGreaterThan(1);
+    expect(rows.at(-1)).toMatch(/^[\d,]+組織/);
+  });
 });
