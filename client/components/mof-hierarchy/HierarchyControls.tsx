@@ -13,6 +13,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { TopNSliderRow } from '@/client/components/SankeySvg/TopNSliders';
 import { DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
 import {
   MOF_HIERARCHY_COLUMNS,
@@ -27,11 +29,10 @@ const SELECT_CLASS =
   'h-8 cursor-pointer rounded border border-gray-300 bg-white px-2 text-xs text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';
 
 /**
- * TopN の選択肢。
- * 多いほどラベルが潰れるが、上限を 40 で止めると「もっと出したい」に応えられない。
- * 60 以上は文字が読めなくなるので、そこまでを刻む。
+ * TopN スライダーの上限。
+ * 事項は実測1,712件あるが、200を超えると1ノードが1px未満になって読めない。
  */
-const TOP_N_OPTIONS = [5, 8, 12, 16, 20, 30, 40, 60, 80];
+const TOP_N_MAX = 200;
 
 /** TopN を出す列。根（予算合計）は1件しかないので対象外 */
 const TOP_N_COLUMNS = MOF_HIERARCHY_COLUMNS.filter(
@@ -128,29 +129,33 @@ export function HierarchyControls({
       {open && (
         <div className="absolute right-0 top-full z-40 mt-1 w-72 rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
           <div className="flex flex-col gap-2 text-xs text-gray-600">
-            {/* 列ごとの表示件数。溢れた分はその列の集約ノードにまとまる */}
-            {TOP_N_COLUMNS.map(column => {
-              const label = `${MOF_HIERARCHY_COLUMN_LABELS[column]}の表示数`;
-              return (
-                <Row key={column} label={label}>
-                  <select
-                    aria-label={label}
-                    value={topN[column] ?? DEFAULT_TOP_N[column]}
-                    disabled={disabled}
-                    onChange={e =>
-                      onTopNChange({ ...topN, [column]: Number(e.target.value) })
-                    }
-                    className={SELECT_CLASS}
-                  >
-                    {TOP_N_OPTIONS.map(n => (
-                      <option key={n} value={n}>
-                        上位{n}
-                      </option>
-                    ))}
-                  </select>
-                </Row>
-              );
-            })}
+            {/* 列ごとの表示件数。溢れた分はその列の集約ノードにまとまる。
+                読み込み中も掴めるようにする（disabled にすると連続で動かせない） */}
+            <div className="flex flex-col gap-1">
+              <span className="font-medium">表示数（列ごと）</span>
+              {TOP_N_COLUMNS.map(column => {
+                const label = MOF_HIERARCHY_COLUMN_LABELS[column];
+                const value = topN[column] ?? DEFAULT_TOP_N[column] ?? TOP_N_MAX;
+                // 増減ボタンは更新関数の形で呼ぶので、それを受けられるようにする
+                const setValue: Dispatch<SetStateAction<number>> = next =>
+                  onTopNChange({
+                    ...topN,
+                    [column]: typeof next === 'function' ? next(value) : next,
+                  });
+                return (
+                  <TopNSliderRow
+                    key={column}
+                    label={label}
+                    inputLabel={`${label}の表示数`}
+                    value={value}
+                    setValue={setValue}
+                    markReplace={() => {}}
+                    metaFontPx={11}
+                    max={TOP_N_MAX}
+                  />
+                );
+              })}
+            </div>
 
             <Row label="文字サイズ">
               <select

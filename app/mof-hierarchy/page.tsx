@@ -115,8 +115,10 @@ function MOFHierarchyContent() {
     const params = new URLSearchParams();
     params.set('year', String(data.metadata.fiscalYear));
     params.set('bt', data.metadata.budgetType);
+    // 表示数は画面で選んでいる値を正とする。
+    // 応答（metadata）を待つと、選んだ直後に古い値へ戻って見える
     for (const { column, urlKey } of TOP_N_KEYS) {
-      const value = data.metadata.topN[column];
+      const value = topN[column];
       if (value) params.set(urlKey, String(value));
     }
     if (selectedId) params.set('sel', selectedId);
@@ -127,7 +129,7 @@ function MOFHierarchyContent() {
     if (next !== window.location.search) {
       window.history.replaceState(null, '', next);
     }
-  }, [data, selectedId, focusRelated, fontPx, labelDensity]);
+  }, [data, selectedId, focusRelated, fontPx, labelDensity, topN]);
 
   // ブラウザの戻る／進むで選択を辿れるようにする
   useEffect(() => {
@@ -137,6 +139,14 @@ function MOFHierarchyContent() {
       setFocusRelated(params.get('fr') !== '0');
       setFontPx(Number(params.get('fs')) || LABEL_FONT_PX_DEFAULT);
       setLabelDensity(params.get('ld') === 'major' ? 'major' : 'all');
+      setTopN(
+        Object.fromEntries(
+          TOP_N_KEYS.map(({ column, urlKey }) => [
+            column,
+            Number(params.get(urlKey)) || undefined,
+          ])
+        )
+      );
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
@@ -200,7 +210,7 @@ function MOFHierarchyContent() {
           <HierarchyControls
             budgetType={metadata.budgetType}
             budgetTypes={metadata.budgetTypes}
-            topN={metadata.topN}
+            topN={topN}
             disabled={loading}
             onBudgetTypeChange={setBudgetType}
             onTopNChange={setTopN}

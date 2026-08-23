@@ -168,13 +168,30 @@ test.describe('mof-hierarchy', () => {
     const before = await itemNodes();
     expect(before).toBeGreaterThan(10);
 
-    await page.getByLabel('事項の表示数').selectOption('8');
+    // スライダーの数値をクリックして直接入力する
+    await page.getByLabel('事項の表示数を直接入力').click();
+    await page.getByLabel('事項の表示数(数値)').fill('8');
+    await page.getByLabel('事項の表示数(数値)').press('Enter');
 
+    // 表示は画面で選んだ値を即座に映す（応答を待って古い値に戻らない）
+    await expect(page.getByLabel('事項の表示数', { exact: true })).toHaveValue('8');
     await expect(page).toHaveURL(/tit=8/);
-    // セレクタの値は応答の metadata.topN を映すので、サーバまで往復した証拠になる
-    await expect(page.getByLabel('事項の表示数')).toHaveValue('8', { timeout: 30_000 });
     // 上位8件＋集約1件
     await expect.poll(itemNodes, { timeout: 30_000 }).toBe(9);
+  });
+
+  test('TopN controls stay usable while the graph reloads', async ({ page }) => {
+    // 読み込み中に触れないと、続けて2つの列を絞れない
+    await page.getByLabel('表示設定').click();
+
+    await page.getByLabel('事項の表示数を減らす', { exact: true }).click();
+    // 応答を待たずに別の列を動かす
+    await page.getByLabel('項の表示数を減らす', { exact: true }).click();
+
+    await expect(page.getByLabel('事項の表示数', { exact: true })).toHaveValue('39');
+    await expect(page.getByLabel('項の表示数', { exact: true })).toHaveValue('39');
+    await expect(page).toHaveURL(/tse=39/);
+    await expect(page).toHaveURL(/tit=39/);
   });
 
   test('aggregate nodes are named by count and unit, not その他', async ({ page }) => {
