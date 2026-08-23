@@ -107,6 +107,9 @@ export function HierarchyChart({
   const [showMinimap, setShowMinimap] = useState(false);
   const minimapRef = useRef<HTMLCanvasElement>(null);
   const minimapDragging = useRef(false);
+  /** ズーム率のクリック編集。ボタンの連打だけでは狙った倍率に合わせにくい */
+  const [isEditingZoom, setIsEditingZoom] = useState(false);
+  const [zoomInputValue, setZoomInputValue] = useState('');
   const panStart = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
   const [isPanning, setIsPanning] = useState(false);
   /** タッチ中の指。2本になったらピンチとして扱う */
@@ -798,9 +801,41 @@ export function HierarchyChart({
             setPan({ x: 0, y: 0 });
           }}
         />
-        <div className="rounded border border-black/10 bg-white/90 px-1 py-0.5 text-center text-[10px] text-gray-500 shadow">
-          {Math.round(zoom * 100)}%
-        </div>
+        {isEditingZoom ? (
+          <input
+            type="number"
+            autoFocus
+            min={Math.round(ZOOM_MIN * 100)}
+            max={Math.round(ZOOM_MAX * 100)}
+            step={1}
+            aria-label="ズーム率(数値)"
+            value={zoomInputValue}
+            onChange={e => setZoomInputValue(e.target.value)}
+            onBlur={() => {
+              const v = Number(zoomInputValue);
+              if (!Number.isNaN(v) && v > 0) {
+                setZoom(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, v / 100)));
+              }
+              setIsEditingZoom(false);
+            }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === 'Escape') (e.target as HTMLInputElement).blur();
+            }}
+            className="w-full rounded border border-black/10 bg-white px-1 py-0.5 text-center text-[10px] text-gray-700 shadow"
+          />
+        ) : (
+          <button
+            type="button"
+            title="クリックしてズーム率を入力"
+            onClick={() => {
+              setZoomInputValue(String(Math.round(zoom * 100)));
+              setIsEditingZoom(true);
+            }}
+            className="w-full cursor-text rounded border border-black/10 bg-white/90 px-1 py-0.5 text-center text-[10px] text-gray-500 shadow"
+          >
+            {Math.round(zoom * 100)}%
+          </button>
+        )}
       </div>
     </div>
   );

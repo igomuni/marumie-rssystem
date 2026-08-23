@@ -448,4 +448,14 @@ test.describe('mof-hierarchy', () => {
 
     await expect(page.getByTestId('hierarchy-link-tooltip')).toBeVisible({ timeout: 5_000 });
   });
+
+  test('zoom percentage can be typed directly', async ({ page }) => {
+    // /sankey-svg はズーム率をクリックして数値入力できる。
+    // ここではボタンの連打でしか目的の倍率に合わせられなかった
+    await page.getByTitle('クリックしてズーム率を入力').click();
+    await page.getByLabel('ズーム率(数値)').fill('250');
+    await page.getByLabel('ズーム率(数値)').press('Enter');
+
+    await expect(page.getByTitle('クリックしてズーム率を入力')).toHaveText('250%');
+  });
 });
