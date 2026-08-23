@@ -24,17 +24,21 @@ import {
 } from '@/types/mof-hierarchy';
 import { DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
 
-/**
- * TopN スライダーの上限。
- * 事項は実測1,712件あるが、200を超えると1ノードが1px未満になって読めない。
- */
-const TOP_N_MAX = 200;
+/** TopN スライダーの上限。/sankey-svg と同じ */
+const TOP_N_MAX = 300;
 
-/** TopN を出す列。根（予算合計）は1件しかないので対象外 */
+/**
+ * 表示数を出す列。
+ *
+ * 根（予算合計）は1件しかないので対象外。所管も省庁の数（実測25件）で
+ * どの年度でも収まるため、上限を掛けても何も起きない。
+ * 表示位置の対象には残す（列の候補件数を読めるようにするため）。
+ */
 type RankableColumn = Exclude<MOFHierarchyColumn, 'total'>;
-const TOP_N_COLUMNS = MOF_HIERARCHY_COLUMNS.filter(
+const OFFSET_COLUMNS = MOF_HIERARCHY_COLUMNS.filter(
   (c): c is RankableColumn => c !== 'total'
 );
+const TOP_N_COLUMNS = OFFSET_COLUMNS.filter(c => c !== 'ministry');
 
 // [delta, SVGパス, ラベル]
 const ARROW_PATHS: [number, string, string][] = [
@@ -67,8 +71,9 @@ export function HierarchyControls({
   const [input, setInput] = useState('');
   const repeat = useRepeatPress();
 
+  /** その列の窓幅。上限を掛けていない列は候補件数そのもの */
   const limitOf = (column: RankableColumn) =>
-    topN[column] ?? DEFAULT_TOP_N[column] ?? TOP_N_MAX;
+    topN[column] ?? DEFAULT_TOP_N[column] ?? columnCounts[column] ?? 0;
 
   const targetLabel = MOF_HIERARCHY_COLUMN_LABELS[target];
   const limit = limitOf(target);
@@ -91,7 +96,7 @@ export function HierarchyControls({
             onChange={e => setTarget(e.target.value as RankableColumn)}
             className={SELECT_CLASS}
           >
-            {TOP_N_COLUMNS.map(column => (
+            {OFFSET_COLUMNS.map(column => (
               <option key={column} value={column}>
                 {MOF_HIERARCHY_COLUMN_LABELS[column]}
               </option>

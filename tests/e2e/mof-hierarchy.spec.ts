@@ -283,4 +283,46 @@ test.describe('mof-hierarchy', () => {
     await page.getByLabel('表示数 を表示').click();
     await expect(page.getByLabel('事項の表示数', { exact: true })).toBeVisible();
   });
+
+  test('TopN above 40 is not silently capped', async ({ page }) => {
+    // API 側が 40 で切っていた。スライダーは 300 まで動くのに
+    // 40 を超えた分が黙って落ちていた
+    const itemNodes = () =>
+      page
+        .getByTestId('hierarchy-node')
+        .evaluateAll(els => els.filter(el => el.getAttribute('data-column') === 'item').length);
+
+    await page.goto('/mof-hierarchy?tit=40');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+    const at40 = await itemNodes();
+
+    await page.goto('/mof-hierarchy?tit=100');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+    await expect.poll(itemNodes, { timeout: 30_000 }).toBeGreaterThan(at40);
+  });
+
+  test('the canvas grows taller than the viewport and pans freely', async ({ page }) => {
+    // 表示数を増やすと図は縦に伸びる。可動域を図の内側に閉じると
+    // 見たい場所へ寄せられなくなるので、パンは制限しない（/sankey-svg と同じ）
+    await page.goto('/mof-hierarchy?tit=100');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+
+    const canvas = page.getByTestId('hierarchy-canvas');
+    const height = await canvas.evaluate(el => Number(el.getAttribute('height')));
+    expect(height).toBeGreaterThan(await page.evaluate(() => window.innerHeight));
+
+    const top = () => canvas.evaluate(el => Math.round(el.getBoundingClientRect().top));
+    expect(await top()).toBe(0);
+
+    // 下方向へ。可動域を閉じているとここが 0 のまま動かない
+    await page.mouse.move(700, 400);
+    await page.mouse.down();
+    await page.mouse.move(700, 600, { steps: 10 });
+    await page.mouse.up();
+    await expect.poll(top).toBeGreaterThan(100);
+
+    // 行き過ぎても戻せる
+    await page.getByTitle('全体を表示').click();
+    await expect.poll(top).toBe(0);
+  });
 });

@@ -286,29 +286,11 @@ export function HierarchyChart({
   );
 
   /**
-   * パンの可動域。図を画面外へ飛ばすと戻す手段が分からなくなるので、
-   * 上下は「図がはみ出す分」だけ、横は少しの遊びに留める。
+   * パンは制限しない（/sankey-svg と同じ）。
+   *
+   * 可動域を「図がはみ出す分」に閉じると、表示数を増やして図が縦に伸びたときに
+   * 見たい場所へ寄せられなくなる。行き過ぎても右下の「全体を表示」で戻せる。
    */
-  const clampPan = useCallback(
-    (next: { x: number; y: number }) => {
-      const overflowY = Math.max(layout.contentHeight - viewport.height, 0);
-      // 狭い画面では図が画面より広くなる。その分だけ横にも動かせるようにする
-      const overflowX = Math.max(width - viewport.width, 0);
-      return {
-        x: Math.min(0, Math.max(-overflowX, next.x)),
-        y: Math.min(0, Math.max(-overflowY, next.y)),
-      };
-    },
-    [layout.contentHeight, viewport.height, width, viewport.width]
-  );
-
-  // ズームや絞り込みで図の高さが変わると、いまの位置が可動域の外に出ることがある
-  useLayoutEffect(() => {
-    setPan(p => {
-      const fixed = clampPan(p);
-      return fixed.x === p.x && fixed.y === p.y ? p : fixed;
-    });
-  }, [clampPan]);
 
   // 検索から選んだノードが画面の外にあることがあるので、見える位置まで寄せる
   useLayoutEffect(() => {
@@ -317,9 +299,9 @@ export function HierarchyChart({
       const screenY = selectedNode.y + p.y;
       const edge = 80;
       if (screenY >= edge && screenY <= viewport.height - edge) return p;
-      return clampPan({ ...p, y: viewport.height / 2 - selectedNode.y });
+      return { ...p, y: viewport.height / 2 - selectedNode.y };
     });
-  }, [selectedNode, viewport.height, clampPan]);
+  }, [selectedNode, viewport.height]);
 
   // Esc で選択解除。図の外をクリックしなくても戻せるようにする
   useEffect(() => {
@@ -366,12 +348,10 @@ export function HierarchyChart({
           ) {
             dragged.current = true;
           }
-          setPan(
-            clampPan({
-              x: panStart.current.panX + (e.clientX - panStart.current.x),
-              y: panStart.current.panY + (e.clientY - panStart.current.y),
-            })
-          );
+          setPan({
+            x: panStart.current.panX + (e.clientX - panStart.current.x),
+            y: panStart.current.panY + (e.clientY - panStart.current.y),
+          });
           return;
         }
         if (touches.current.size === 2 && pinchStart.current) {
@@ -417,12 +397,10 @@ export function HierarchyChart({
         ) {
           dragged.current = true;
         }
-        setPan(
-          clampPan({
-            x: panStart.current.panX + (e.clientX - panStart.current.x),
-            y: panStart.current.panY + (e.clientY - panStart.current.y),
-          })
-        );
+        setPan({
+          x: panStart.current.panX + (e.clientX - panStart.current.x),
+          y: panStart.current.panY + (e.clientY - panStart.current.y),
+        });
       }}
       onMouseUp={() => {
         panStart.current = null;
