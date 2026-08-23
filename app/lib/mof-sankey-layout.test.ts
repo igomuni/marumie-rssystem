@@ -180,4 +180,33 @@ describe('computeMOFSankeyLayout', () => {
     const big = layout.nodes.find(n => n.id === 'big')!;
     expect(pass.y).toBeCloseTo(big.y + big.height + OPTIONS.nodePadding, 5);
   });
+
+  it('多数の細い帯が集まっても、帯の合計幅がノードの高さを超えない', () => {
+    // 帯1本ごとに「最低1px」の下限を掛けると、集約ノードのように
+    // 大量の細い流れが1点に集まる箱では、帯の合計がノード自身の箱より
+    // はみ出して見える（「集合がノードよりも大きい」という不具合）。
+    // 個々の帯を極細で見せるより、ノードの高さという不変量を優先する
+    // 列全体の尺度は、この列にある一番大きいノード（huge）が決める。
+    // agg は列全体からすればごく僅かな取り分しか持たないので、
+    // 個々の帯（1件あたり value=1）は尺度をかけても1pxに届かない
+    const huge: Node = { id: 'huge', name: 'huge', value: 1_000_000, type: '0' };
+    const parents: Node[] = Array.from({ length: 80 }, (_, i) => ({
+      id: `p${i}`,
+      name: `p${i}`,
+      value: 1,
+      type: '0',
+    }));
+    const agg: Node = { id: 'agg', name: 'agg', value: 80, type: '1' };
+    const nodes = [huge, ...parents, agg];
+    const links: SankeyLink[] = parents.map(p => ({ source: p.id, target: 'agg', value: 1 }));
+    const layout = computeMOFSankeyLayout(
+      { nodes, links },
+      { ...OPTIONS, columnOf, align: 'top' }
+    );
+    const aggNode = layout.nodes.find(n => n.id === 'agg')!;
+    const totalLinkWidth = layout.links
+      .filter(l => l.target.id === 'agg')
+      .reduce((sum, l) => sum + l.width, 0);
+    expect(totalLinkWidth).toBeLessThanOrEqual(aggNode.height + 1e-6);
+  });
 });

@@ -281,7 +281,15 @@ export function computeMOFSankeyLayout<D>(
     contentHeight = Math.max(contentHeight, y - nodePadding + margin.bottom);
   }
 
-  // 帯の位置。ノードの上端から順に積む
+  // 帯の位置。ノードの上端から順に積む。
+  //
+  // 帯1本ごとに「最低1px」の下限は掛けない。集約ノードのように大量の
+  // 細い流れが1点に集まる箱では、本数ぶんの下限がノード自身の高さを
+  // 超えてしまい、「帯の集合がノードよりも大きい」という見た目になる
+  // （実測: 57本の帯が1pxずつ床上げされ、高さ1pxのノードに57px流れ込む）。
+  // 下限を掛けるのはノードの高さだけにして、帯はそこから機械的に
+  // 割り付ける。極端に細い帯は見えなくなるが、面積が正しい代わりに
+  // 描画が消えるほうが、ノードより帯の集合が膨らむよりまだ誠実である
   const outOffset = new Map<string, number>();
   const inOffset = new Map<string, number>();
   const links: MOFLayoutLink<D>[] = [];
@@ -289,7 +297,7 @@ export function computeMOFSankeyLayout<D>(
     const source = byId.get(link.source);
     const target = byId.get(link.target);
     if (!source || !target) continue;
-    const w = Math.max(link.value * scale, 1);
+    const w = link.value * scale;
     const y0 = source.y + (outOffset.get(source.id) ?? 0);
     const y1 = target.y + (inOffset.get(target.id) ?? 0);
     outOffset.set(source.id, (outOffset.get(source.id) ?? 0) + w);

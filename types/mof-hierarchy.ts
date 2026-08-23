@@ -136,6 +136,17 @@ export interface MOFHierarchyData {
     nodes: MOFHierarchyNode[];
     links: SankeyLink[];
   };
+  /**
+   * サイドパネルの一覧・タブ専用の全ノード（TopNで絞る前）。
+   *
+   * /sankey-svg は常にフルデータをパネル用に保持し、図の集約とは独立して
+   * 全件を辿れる。sankey（図の表示用）は TopN で絞ってあるが、パネルは
+   * こちらを見るので集約ノードとして畳まれることなく個々に選べる
+   */
+  browse: {
+    nodes: MOFHierarchyNode[];
+    links: SankeyLink[];
+  };
 }
 
 /** 組み立てに使う入力。ローダから渡す */

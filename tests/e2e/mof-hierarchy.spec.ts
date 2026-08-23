@@ -372,4 +372,338 @@ test.describe('mof-hierarchy', () => {
     await expect(page.getByText('内訳（金額の大きい順）')).toBeVisible();
     expect(consoleErrors.filter(t => /same key|duplicate key/i.test(t))).toEqual([]);
   });
+
+  test('hovering a node highlights its whole ancestor chain, not just direct links', async ({ page }) => {
+    // /sankey-svg はホバーで上流〜下流の連なり全体を明るくする。
+    // 直接つながる隣のノードだけを明るくすると、2列以上離れた祖先が
+    // 薄暗いままになり「この事項はどの所管か」が見た目から追えない
+    const opacities = async () =>
+      page.evaluate(() => {
+        const nodes = [...document.querySelectorAll('[data-testid="hierarchy-node"]')];
+        const item = nodes.find(n => n.getAttribute('data-column') === 'item')!;
+        const rect = item.getBoundingClientRect();
+        const ministries = nodes.filter(n => n.getAttribute('data-column') === 'ministry');
+        return {
+          itemCenter: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
+          ministryOpacities: ministries.map(
+            n => Number(getComputedStyle(n.querySelector('rect')!).opacity)
+          ),
+        };
+      });
+
+    const { itemCenter } = await opacities();
+    await page.mouse.move(itemCenter.x, itemCenter.y);
+    await page.waitForTimeout(150);
+
+    const { ministryOpacities } = await opacities();
+    // 直接つながる祖先（1件）は明るいまま、他の所管は薄暗くなる
+    expect(ministryOpacities.filter(o => o === 1).length).toBe(1);
+    expect(ministryOpacities.some(o => o < 1)).toBe(true);
+  });
+
+  test('hovering still highlights within a focus-filtered view', async ({ page }) => {
+    // 絞り込み中（選択時に関連のみ表示=ON）でも、その中でさらにホバーの筋を
+    // 強調するはずだった。related（選択の関連集合）で offHover を無効化して
+    // いたため、選択中は常に dim=false になりホバーが一切効かなくなっていた
+    const ministry = page.locator('[data-testid="hierarchy-node"][data-column="ministry"]').first();
+    await ministry.click();
+    await page.getByLabel('表示設定').click();
+    await page.getByLabel('選択時に関連のみ表示').check();
+    await page.waitForTimeout(200);
+
+    const orgOpacities = () =>
+      page.evaluate(() => {
+        const orgs = [...document.querySelectorAll('[data-testid="hierarchy-node"][data-column="organization"]')];
+        return orgs.map(n => Number(getComputedStyle(n.querySelector('rect')!).opacity));
+      });
+    const before = await orgOpacities();
+    test.skip(before.length < 2, 'この所管の組織が1件しかない');
+
+    const target = page.locator('[data-testid="hierarchy-node"][data-column="organization"]').first();
+    const box = (await target.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(150);
+
+    const after = await orgOpacities();
+    // ホバーした1件は明るいまま、絞り込み内の他の組織は薄暗くなる
+    expect(after[0]).toBe(1);
+    expect(after.some(o => o < 1)).toBe(true);
+  });
+
+  test('the minimap shows the current viewport and can jump to a clicked spot', async ({ page }) => {
+    // パンを制限していないので、表示数を増やすと迷子になりやすい。
+    // /sankey-svg と同じミニマップで、全体の中の現在位置を把握しつつ飛べるようにする
+    await page.goto('/mof-hierarchy?tit=100');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+
+    await expect(page.locator('canvas')).toHaveCount(0);
+    await page.getByTitle('ミニマップを表示').click();
+    const minimap = page.locator('canvas');
+    await expect(minimap).toBeVisible();
+
+    const top = () =>
+      page.getByTestId('hierarchy-canvas').evaluate(el => Math.round(el.getBoundingClientRect().top));
+    const before = await top();
+
+    const box = (await minimap.boundingBox())!;
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.9);
+
+    await expect.poll(top).not.toBe(before);
+
+    await page.getByTitle('ミニマップを隠す').click();
+    await expect(page.locator('canvas')).toHaveCount(0);
+  });
+
+  test('search results can be chosen with the keyboard', async ({ page }) => {
+    // マウスでしか候補を選べないと、キーボードだけでは検索が完結しない
+    await page.getByPlaceholder(/検索/).fill('財務');
+    const results = page.getByTestId('hierarchy-search-result');
+    await expect(results.first()).toBeVisible({ timeout: 10_000 });
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+
+    await expect(page).toHaveURL(/sel=/);
+  });
+
+  test('hovering a link (ribbon) shows a tooltip with the flow amount', async ({ page }) => {
+    // ノードだけでなく帯にもホバーできないと、太さの差から金額を確かめる
+    // 手段が無い（/sankey-svg は帯にホバーすると source → target と金額を出す）
+    const link = page.getByTestId('hierarchy-link').first();
+    await expect(link).toBeAttached();
+    const box = (await link.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+
+    await expect(page.getByTestId('hierarchy-link-tooltip')).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('zoom percentage can be typed directly', async ({ page }) => {
+    // /sankey-svg はズーム率をクリックして数値入力できる。
+    // ここではボタンの連打でしか目的の倍率に合わせられなかった
+    await page.getByTitle('クリックしてズーム率を入力').click();
+    await page.getByLabel('ズーム率(数値)').fill('250');
+    await page.getByLabel('ズーム率(数値)').press('Enter');
+
+    await expect(page.getByTitle('クリックしてズーム率を入力')).toHaveText('250%');
+  });
+
+  test('selecting a node docks a resizable, collapsible side panel like /sankey-svg', async ({ page }) => {
+    // 左下に浮かせた小さなカードではなく、/sankey-svg と同じ左ドックの
+    // サイドパネルにする。折りたたみタブと幅リサイズを持つ
+    await page.getByTestId('hierarchy-node').first().click();
+
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await expect(panel).toBeVisible();
+    const openBox = (await panel.boundingBox())!;
+    // ドック: 左端に張り付き、高さは画面いっぱい
+    expect(openBox.x).toBeCloseTo(0, 0);
+    expect(openBox.height).toBeGreaterThan(600);
+
+    // 折りたたみ: タブで隠せて、選択自体は保たれる
+    await page.getByTitle('パネルを折りたたむ').click();
+    await expect(panel).toBeHidden();
+    await expect(page).toHaveURL(/sel=/);
+
+    await page.getByTitle('パネルを展開').click();
+    await expect(panel).toBeVisible();
+  });
+
+  test('the side panel pushes the search box aside instead of overlapping it', async ({ page }) => {
+    // /sankey-svg は選択中は検索ボックスをパネル幅ぶん右へ退避させる
+    const search = page.getByPlaceholder(/検索/);
+    const before = (await search.boundingBox())!;
+
+    await page.getByTestId('hierarchy-node').first().click();
+    await expect(page.getByTestId('hierarchy-side-panel')).toBeVisible();
+
+    const after = (await search.boundingBox())!;
+    expect(after.x).toBeGreaterThan(before.x);
+  });
+
+  test('the panel header shows a type badge colored like the node, and 集約 for aggregate nodes', async ({ page }) => {
+    // /sankey-svg のバッジ表示に合わせる。表示数を絞って集約ノードを
+    // 画面の低い位置（ズーム操作クラスタの裏）に追いやらないようにする
+    await page.goto('/mof-hierarchy?tit=5');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+    const aggregate = page
+      .getByTestId('hierarchy-node')
+      .filter({ hasText: /^[\d,]+事項 \(/ })
+      .first();
+    await aggregate.click();
+
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await expect(panel.getByText('集約')).toBeVisible();
+  });
+
+  test('clicking floating controls does not clear the selection', async ({ page }) => {
+    // 浮かせた部品（ズームボタン等）は data-pan-disabled 付きなのに、
+    // 背景クリックでの選択解除がそれを見ずに発火し、押すたびに選択が消えていた
+    await page.getByTestId('hierarchy-node').first().click();
+    await expect(page).toHaveURL(/sel=/);
+
+    await page.getByTitle('拡大').click();
+    await expect(page).toHaveURL(/sel=/);
+  });
+
+  test('選択時に関連のみ表示 defaults to off, matching /sankey-svg', async ({ page }) => {
+    // ONが既定だと選択のたびに図が絞り込まれ、隣接の事項を見比べる
+    // 探索の邪魔になる。/sankey-svg も既定OFF。
+    // 根ノードを選ぶと全ノードが関連になり違いが見えないので、末端の事項で確かめる
+    const item = page.locator('[data-testid="hierarchy-node"][data-column="item"]').first();
+    await item.click();
+    await expect(page).not.toHaveURL(/fr=1/);
+
+    const before = await page.getByTestId('hierarchy-node').count();
+    await page.getByLabel('表示設定').click();
+    await page.getByLabel('選択時に関連のみ表示').check();
+    await expect(page).toHaveURL(/fr=1/);
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(before);
+  });
+
+  test('the side panel drills down through descendant columns via tabs, like /sankey-svg', async ({ page }) => {
+    // /sankey-svg のサイドパネルはタブ（省庁/事業/支出先）で下の階層を辿れる。
+    // 静的な内訳だけでは選び直すたびに図をクリックし直す必要があった
+    const ministry = page.locator('[data-testid="hierarchy-node"][data-column="ministry"]').first();
+    await ministry.click();
+    const ministrySel = new URL(page.url()).searchParams.get('sel');
+
+    const panel = page.getByTestId('hierarchy-side-panel');
+    const orgTab = panel.getByRole('tab', { name: /組織/ });
+    await expect(orgTab).toBeVisible();
+
+    // 別のタブに切り替えると中身が変わる
+    const itemTab = panel.getByRole('tab', { name: /事項/ });
+    await itemTab.click();
+    await expect(panel.getByRole('tabpanel')).toBeVisible();
+
+    // タブの中の項目を押すと、その子ノードへ選択が移る。
+    // panel ヘッダーは名前のみ（金額を含まない）を表示するので、
+    // svg ラベル（金額付き）とは比較せず、選択の実体である URL の sel で確かめる
+    const firstEntry = panel.getByRole('tabpanel').getByRole('button').first();
+    const entryName = await firstEntry.textContent();
+    await firstEntry.click();
+
+    await expect.poll(() => new URL(page.url()).searchParams.get('sel')).not.toBe(ministrySel);
+    expect(entryName?.length).toBeGreaterThan(0);
+  });
+
+  test('the side panel fully expands descendants instead of showing an aggregate row', async ({ page }) => {
+    // /sankey-svg のサイドパネルは常にフルデータを見るので、図で集約されている
+    // 分もタブでは個々の実ノードとして展開される。集約ノード（41組織 のような
+    // 「N件+単位」の行）は一切出ない
+    const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
+    await total.click();
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await panel.getByRole('tab', { name: /^組織/ }).click();
+
+    const orgTab = panel.getByRole('tab', { name: /^組織/ });
+    // 図では TopN で41件（うち集約1件）に絞られるが、パネルは全件を展開する
+    await expect(orgTab).toHaveText(/組織\/特会\(114\)/);
+
+    const rows = await panel.getByRole('tabpanel').getByRole('button').allTextContents();
+    expect(rows).toHaveLength(114);
+    expect(rows.some(r => /^[\d,]+組織/.test(r))).toBe(false);
+  });
+
+  test('selecting a fully-expanded node outside the diagram TopN still works', async ({ page }) => {
+    // 図のTopNから外れた実ノードをタブから選んでも、パネルは詳細を表示できる。
+    // 図には出ていない旨も伝える（座標が無いのでハイライト・自動スクロールはできない）
+    const errors: string[] = [];
+    page.on('pageerror', e => errors.push(e.message));
+
+    const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
+    await total.click();
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await panel.getByRole('tab', { name: /^組織/ }).click();
+
+    // 図のTopN（40）より後ろの行を選ぶ
+    const target = panel.getByRole('tabpanel').getByRole('button').nth(41);
+    const name = (await target.textContent())?.split(/\d/)[0];
+    await target.click();
+
+    await expect(page).toHaveURL(/sel=/);
+    await expect(panel).toContainText('表示数の上限から溢れているため図には出ていません');
+    if (name) await expect(panel).toContainText(name);
+    expect(errors).toEqual([]);
+  });
+
+  test('the side panel and its toggle tab are absent until a node is selected', async ({ page }) => {
+    // /sankey-svg は選択が無いとき SidePanelChrome ごとマウントしない。
+    // トグルタブだけが理由なく残っていると、押しても何も起きない部品になる
+    await expect(page.getByTestId('hierarchy-side-panel')).toHaveCount(0);
+    await expect(page.getByTitle('パネルを展開')).toHaveCount(0);
+    await expect(page.getByTitle('パネルを折りたたむ')).toHaveCount(0);
+
+    await page.getByTestId('hierarchy-node').first().click();
+    await expect(page.getByTestId('hierarchy-side-panel')).toBeVisible();
+  });
+
+  test('scrolling the side panel list does not pan or zoom the diagram', async ({ page }) => {
+    // パネルの一覧の上でホイールすると、その下の図までズーム・パンしていた。
+    // 一覧のスクロールは一覧だけで完結させる
+    const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
+    await total.click();
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await panel.getByRole('tab', { name: /^事項/ }).click();
+
+    const canvasTop = () =>
+      page.getByTestId('hierarchy-canvas').evaluate(el => (el as SVGSVGElement).style.top);
+    const before = await canvasTop();
+
+    const box = (await panel.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.7);
+    await page.mouse.wheel(0, 500);
+    await page.waitForTimeout(200);
+
+    await expect(await canvasTop()).toBe(before);
+
+    // 一覧自体はスクロールできる
+    const scrollTop = await panel
+      .getByRole('tabpanel')
+      .evaluate(el => el.closest('.overflow-y-auto')?.scrollTop ?? 0);
+    expect(scrollTop).toBeGreaterThan(0);
+  });
+
+  test('the tab bar stays fixed while only the row list scrolls', async ({ page }) => {
+    // タブと一覧が1つのスクロール領域にまとまっていると、長い一覧を
+    // スクロールするたびにタブごと流れて見えなくなってしまう
+    const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
+    await total.click();
+    const panel = page.getByTestId('hierarchy-side-panel');
+    const tab = panel.getByRole('tab', { name: /^事項/ });
+    await tab.click();
+
+    const tabTopBefore = (await tab.boundingBox())!.y;
+
+    const box = (await panel.getByRole('tabpanel').boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 800);
+    await page.waitForTimeout(200);
+
+    const scrollTop = await panel
+      .getByRole('tabpanel')
+      .evaluate(el => el.closest('.overflow-y-auto')?.scrollTop ?? 0);
+    expect(scrollTop).toBeGreaterThan(0);
+
+    const tabTopAfter = (await tab.boundingBox())!.y;
+    expect(tabTopAfter).toBe(tabTopBefore);
+  });
+
+  test('Escape while editing the zoom percentage cancels the edit without clearing the selection', async ({ page }) => {
+    // Escape は本来「入力の取り消し」のはずが、確定と同じ扱いで blur() されて
+    // 値が適用され、さらに window の Escape ハンドラにまで伝播して選択も
+    // 消えていた（Escapeを押しただけでズーム値が変わり、選択も解けてしまう）
+    await page.getByTestId('hierarchy-node').first().click();
+    await expect(page).toHaveURL(/sel=/);
+
+    await page.getByTitle('クリックしてズーム率を入力').click();
+    await page.getByLabel('ズーム率(数値)').fill('250');
+    await page.getByLabel('ズーム率(数値)').press('Escape');
+
+    // 編集前の100%のまま（適用されない）
+    await expect(page.getByTitle('クリックしてズーム率を入力')).toHaveText('100%');
+    // 選択も消えない
+    await expect(page).toHaveURL(/sel=/);
+  });
 });

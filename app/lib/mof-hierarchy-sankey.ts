@@ -92,26 +92,28 @@ interface Building {
  *
  * @param items その年度・予算種別の事項（絞り込みは呼び出し側で行わない）
  */
-export function buildMOFHierarchySankey(
-  items: MOFJikouItem[],
-  options: {
-    fiscalYear: number;
-    eraLabel: string;
-    budgetType: MOFBudgetType;
-    budgetTypes: MOFBudgetType[];
-    availableYears: number[];
-    /** 列ごとの表示件数の上限。指定の無い列は既定値 */
-    topN?: MOFHierarchyTopN;
-    /** 列ごとの表示開始位置（0始まり）。範囲外は丸める */
-    offset?: MOFHierarchyOffset;
-  }
-): MOFHierarchyData {
-  const topN = { ...DEFAULT_TOP_N, ...options.topN };
-  const offset: MOFHierarchyOffset = { ...options.offset };
-  const target = items.filter(i => i.budgetType === options.budgetType);
+/** 6列の順序。予算合計は根なので含まない */
+const HIERARCHY_COLUMNS_EXCEPT_TOTAL: Array<Exclude<MOFHierarchyColumn, 'total'>> = [
+  'ministry',
+  'organization',
+  'subAccount',
+  'section',
+  'item',
+];
 
-  // --- 階層を辿ってノードを作る ---
-  // ノードIDは根からのパス。事項名は項をまたいで重複するため、名前だけでは合流してしまう
+/**
+ * 事項別内訳から、階層をたどった全ノード（実ノードのみ・TopNで絞る前）を作る。
+ *
+ * buildMOFHierarchySankey（図の表示用、TopNで絞る）と
+ * buildMOFHierarchyBrowseTree（サイドパネル用、絞らず全件）の両方が
+ * この結果を土台にする。値の無い列は透明な通過ノードで場所だけ確保する
+ * （描画では素通りさせ、帯の端点にはしない）。
+ */
+function buildFullNodeMap(target: MOFJikouItem[]): {
+  nodes: Map<string, Building>;
+  childrenOf: Map<string, Set<string>>;
+  total: number;
+} {
   const nodes = new Map<string, Building>();
   const childrenOf = new Map<string, Set<string>>();
 
@@ -125,19 +127,11 @@ export function buildMOFHierarchySankey(
     parentId: null,
   });
 
-  const columns: Array<Exclude<MOFHierarchyColumn, 'total'>> = [
-    'ministry',
-    'organization',
-    'subAccount',
-    'section',
-    'item',
-  ];
-
   for (const item of target) {
     const levels = levelsOf(item);
     let parentId = ROOT_ID;
     let path = ROOT_ID;
-    for (const column of columns) {
+    for (const column of HIERARCHY_COLUMNS_EXCEPT_TOTAL) {
       const label = levels[column];
       // 値の無い列は素通りさせる（勘定を持たない特別会計・一般会計など）。
       // ただし何も置かないと帯がその列の実ノードを横切って重なるので、
@@ -195,6 +189,88 @@ export function buildMOFHierarchySankey(
     }
   }
 
+  return { nodes, childrenOf, total };
+}
+
+/**
+ * 通過ノードを飛び越えて、実在する直近の祖先を返す（buildMOFHierarchySankey の
+ * realAncestorId と同じ考え方。ノード集合を引数で受け取れるようにして両関数で共有する）。
+ */
+function skipPassThroughAncestors(
+  nodeMap: Map<string, Building>,
+  parentId: string
+): string {
+  let cur = nodeMap.get(parentId);
+  while (cur && cur.details.passThrough && cur.parentId) {
+    cur = nodeMap.get(cur.parentId);
+  }
+  return cur ? cur.id : parentId;
+}
+
+/**
+ * サイドパネルの一覧・タブ用に、階層の全ノードを TopN で絞らずそのまま返す。
+ *
+ * /sankey-svg は常にフルデータ（graphData）をパネル用に保持し、図の集約とは
+ * 独立して全件を辿れる。ここも同じにする。図の TopN は表示だけの都合なので、
+ * それでパネルの情報まで削るべきではない。
+ *
+ * 通過ノードは出力しない。帯は実ノード同士を直結する
+ * （buildMOFHierarchySankey が集約ノードの帯を実ノード直結にしているのと同じ理由）。
+ */
+function nodeMapToBrowseTree(
+  nodes: Map<string, Building>
+): { nodes: MOFHierarchyNode[]; links: SankeyLink[] } {
+  const real = [...nodes.values()].filter(n => !n.details.passThrough);
+  const sankeyNodes: MOFHierarchyNode[] = real.map(n => ({
+    id: n.id,
+    name: n.name,
+    value: n.amount,
+    type: n.column,
+    details: n.details,
+  }));
+  const links: SankeyLink[] = real
+    .filter(n => n.parentId !== null)
+    .map(n => ({
+      source: skipPassThroughAncestors(nodes, n.parentId as string),
+      target: n.id,
+      value: n.amount,
+    }));
+
+  return { nodes: sankeyNodes, links };
+}
+
+export function buildMOFHierarchyBrowseTree(
+  items: MOFJikouItem[],
+  budgetType: MOFBudgetType
+): { nodes: MOFHierarchyNode[]; links: SankeyLink[] } {
+  const target = items.filter(i => i.budgetType === budgetType);
+  const { nodes } = buildFullNodeMap(target);
+  return nodeMapToBrowseTree(nodes);
+}
+
+export function buildMOFHierarchySankey(
+  items: MOFJikouItem[],
+  options: {
+    fiscalYear: number;
+    eraLabel: string;
+    budgetType: MOFBudgetType;
+    budgetTypes: MOFBudgetType[];
+    availableYears: number[];
+    /** 列ごとの表示件数の上限。指定の無い列は既定値 */
+    topN?: MOFHierarchyTopN;
+    /** 列ごとの表示開始位置（0始まり）。範囲外は丸める */
+    offset?: MOFHierarchyOffset;
+  }
+): MOFHierarchyData {
+  const topN = { ...DEFAULT_TOP_N, ...options.topN };
+  const offset: MOFHierarchyOffset = { ...options.offset };
+  const target = items.filter(i => i.budgetType === options.budgetType);
+
+  // --- 階層を辿ってノードを作る ---
+  // ノードIDは根からのパス。事項名は項をまたいで重複するため、名前だけでは合流してしまう
+  const { nodes, childrenOf, total } = buildFullNodeMap(target);
+  const columns = HIERARCHY_COLUMNS_EXCEPT_TOTAL;
+
   // --- 残すノードを決める ---
   //
   // TopN は列全体の表示件数の上限として効かせる（/sankey-svg と同じ）。
@@ -234,6 +310,16 @@ export function buildMOFHierarchySankey(
   // 親ごとに「その他」を作ると灰色の細い行が延々と並び、/sankey-svg のように
   // 1本の太い集約ノードにならない。列で1つにまとめ、集約どうしを繋いで流れを保つ。
   const othersId = (column: MOFHierarchyColumn) => `__others__${column}`;
+
+  /**
+   * 通過ノードを飛び越えて、実在する直近の祖先を返す。
+   *
+   * 通過ノードは箱もラベルも出ない透明な存在なので、帯の端点にすると
+   * 「実在しない位置で収束・分岐している」ように見え、見た目に理由の
+   * 分からないくびれになる。帯は実ノード同士を直結し、通過ノードは
+   * 列の場所を確保するためだけに使う（ラベルの縦位置合わせに利く）
+   */
+  const realAncestorId = (parentId: string): string => skipPassThroughAncestors(nodes, parentId);
   const others = new Map<MOFHierarchyColumn, Building>();
   const othersLinks = new Map<string, number>();
 
@@ -271,7 +357,10 @@ export function buildMOFHierarchySankey(
       parent = parent.parentId ? nodes.get(parent.parentId) : null;
     }
     if (!parent) continue;
-    const source = kept.has(parent.id) ? parent.id : othersId(parent.column);
+    // 親が残っていても通過ノードなら、さらにその先の実ノードから流す
+    const source = kept.has(parent.id)
+      ? realAncestorId(parent.id)
+      : othersId(parent.column);
     const key = `${source}\u0000${target}`;
     othersLinks.set(key, (othersLinks.get(key) ?? 0) + node.amount);
   }
@@ -318,8 +407,8 @@ export function buildMOFHierarchySankey(
 
   const links: SankeyLink[] = [
     ...alive
-      .filter(n => n.parentId !== null && kept.has(n.parentId))
-      .map(n => ({ source: n.parentId as string, target: n.id, value: n.amount })),
+      .filter(n => n.parentId !== null && kept.has(n.parentId) && !n.details.passThrough)
+      .map(n => ({ source: realAncestorId(n.parentId as string), target: n.id, value: n.amount })),
     ...[...othersLinks.entries()].map(([key, value]) => {
       const [source, target] = key.split('\u0000');
       return { source, target, value };
@@ -343,6 +432,7 @@ export function buildMOFHierarchySankey(
     .sort((a, b) => b.amount - a.amount);
 
   return {
+    browse: nodeMapToBrowseTree(nodes),
     metadata: {
       fiscalYear: options.fiscalYear,
       eraLabel: options.eraLabel,

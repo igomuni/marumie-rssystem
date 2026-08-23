@@ -93,7 +93,9 @@ function MOFHierarchyContent() {
   const [selectedId, setSelectedId] = useState<string | null>(
     searchParams.get('sel')
   );
-  const [focusRelated, setFocusRelated] = useState(searchParams.get('fr') !== '0');
+  // /sankey-svg に合わせ既定OFF。ONだと選択のたびに図が絞り込まれ、
+  // 隣接の事項を見比べたい探索の邪魔になりやすい
+  const [focusRelated, setFocusRelated] = useState(searchParams.get('fr') === '1');
   const [fontPx, setFontPx] = useState(
     () => Number(searchParams.get('fs')) || LABEL_FONT_PX_DEFAULT
   );
@@ -144,7 +146,7 @@ function MOFHierarchyContent() {
       if (start) params.set(offsetUrlKey, String(start));
     }
     if (selectedId) params.set('sel', selectedId);
-    if (!focusRelated) params.set('fr', '0');
+    if (focusRelated) params.set('fr', '1');
     if (fontPx !== LABEL_FONT_PX_DEFAULT) params.set('fs', String(fontPx));
     if (labelDensity !== 'all') params.set('ld', labelDensity);
     const next = `?${params.toString()}`;
@@ -158,7 +160,7 @@ function MOFHierarchyContent() {
     const onPopState = () => {
       const params = new URLSearchParams(window.location.search);
       setSelectedId(params.get('sel'));
-      setFocusRelated(params.get('fr') !== '0');
+      setFocusRelated(params.get('fr') === '1');
       setFontPx(Number(params.get('fs')) || LABEL_FONT_PX_DEFAULT);
       setLabelDensity(params.get('ld') === 'major' ? 'major' : 'all');
       setTopN(
@@ -227,6 +229,8 @@ function MOFHierarchyContent() {
       <HierarchyChart
         nodes={data.sankey.nodes}
         links={data.sankey.links}
+        browseNodes={data.browse.nodes}
+        browseLinks={data.browse.links}
         selectedId={selectedId}
         onSelect={selectNode}
         focusRelated={focusRelated}
