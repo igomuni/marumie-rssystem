@@ -596,4 +596,66 @@ test.describe('mof-hierarchy', () => {
     if (name) await expect(panel).toContainText(name);
     expect(errors).toEqual([]);
   });
+
+  test('the side panel and its toggle tab are absent until a node is selected', async ({ page }) => {
+    // /sankey-svg は選択が無いとき SidePanelChrome ごとマウントしない。
+    // トグルタブだけが理由なく残っていると、押しても何も起きない部品になる
+    await expect(page.getByTestId('hierarchy-side-panel')).toHaveCount(0);
+    await expect(page.getByTitle('パネルを展開')).toHaveCount(0);
+    await expect(page.getByTitle('パネルを折りたたむ')).toHaveCount(0);
+
+    await page.getByTestId('hierarchy-node').first().click();
+    await expect(page.getByTestId('hierarchy-side-panel')).toBeVisible();
+  });
+
+  test('scrolling the side panel list does not pan or zoom the diagram', async ({ page }) => {
+    // パネルの一覧の上でホイールすると、その下の図までズーム・パンしていた。
+    // 一覧のスクロールは一覧だけで完結させる
+    const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
+    await total.click();
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await panel.getByRole('tab', { name: /^事項/ }).click();
+
+    const canvasTop = () =>
+      page.getByTestId('hierarchy-canvas').evaluate(el => (el as SVGSVGElement).style.top);
+    const before = await canvasTop();
+
+    const box = (await panel.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.7);
+    await page.mouse.wheel(0, 500);
+    await page.waitForTimeout(200);
+
+    await expect(await canvasTop()).toBe(before);
+
+    // 一覧自体はスクロールできる
+    const scrollTop = await panel
+      .getByRole('tabpanel')
+      .evaluate(el => el.closest('.overflow-y-auto')?.scrollTop ?? 0);
+    expect(scrollTop).toBeGreaterThan(0);
+  });
+
+  test('the tab bar stays fixed while only the row list scrolls', async ({ page }) => {
+    // タブと一覧が1つのスクロール領域にまとまっていると、長い一覧を
+    // スクロールするたびにタブごと流れて見えなくなってしまう
+    const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
+    await total.click();
+    const panel = page.getByTestId('hierarchy-side-panel');
+    const tab = panel.getByRole('tab', { name: /^事項/ });
+    await tab.click();
+
+    const tabTopBefore = (await tab.boundingBox())!.y;
+
+    const box = (await panel.getByRole('tabpanel').boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 800);
+    await page.waitForTimeout(200);
+
+    const scrollTop = await panel
+      .getByRole('tabpanel')
+      .evaluate(el => el.closest('.overflow-y-auto')?.scrollTop ?? 0);
+    expect(scrollTop).toBeGreaterThan(0);
+
+    const tabTopAfter = (await tab.boundingBox())!.y;
+    expect(tabTopAfter).toBe(tabTopBefore);
+  });
 });

@@ -438,6 +438,9 @@ export function HierarchyChart({
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
+      // サイドパネルの一覧など、浮かせた部品の上でのホイールは図に効かせない。
+      // 一覧をスクロールしようとしただけで、下の図までズーム・パンしていた
+      if ((e.target as HTMLElement).closest('[data-pan-disabled="true"]')) return;
       const rect = containerRef.current?.getBoundingClientRect();
       const anchorY = rect ? e.clientY - rect.top : 0;
       zoomAt(e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP, anchorY);
@@ -758,10 +761,13 @@ export function HierarchyChart({
       </div>
 
       {/* 選択したノードの詳細。/sankey-svg と同じ左ドックのサイドパネルにする。
-          小さく浮かせたカードだと、内訳が長い集約ノードなどで中身が窮屈だった */}
+          小さく浮かせたカードだと、内訳が長い集約ノードなどで中身が窮屈だった。
+          選択が無いときはトグルタブごとマウントしない（/sankey-svg と同じ）。
+          常時マウントすると、押しても何も起きないタブが残ってしまう */}
+      {selectedId !== null && (
       <SidePanelChrome
         side="left"
-        open={selectedId !== null && !sidePanel.collapsed}
+        open={!sidePanel.collapsed}
         onToggle={sidePanel.toggleCollapsed}
         width={sidePanel.effectiveWidth}
         minWidth={200}
@@ -827,103 +833,113 @@ export function HierarchyChart({
               </div>
             </div>
 
-            {/* スクロールする本文 */}
-            <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-3">
-              {selectedDetails?.aggregated && (
-                <div className="text-xs text-gray-600">
-                  表示数から溢れた {selectedDetails.aggregatedCount?.toLocaleString()} 件
-                </div>
-              )}
-              {/* 集約の中身。件数だけだと何が隠れているのか分からない */}
-              {selectedDetails?.aggregatedTop && selectedDetails.aggregatedTop.length > 0 && (
-                <div className="mt-2 border-t border-gray-100 pt-2">
-                  <div className="mb-1 text-[11px] text-gray-400">内訳（金額の大きい順）</div>
-                  {/* 事項名は項をまたいで重複するので、名前だけだと鍵が衝突する */}
-                  {selectedDetails.aggregatedTop.map((member, index) => (
-                    <div
-                      key={`${index}-${member.name}`}
-                      className="flex justify-between gap-3 text-xs text-gray-700"
-                    >
-                      <span className="truncate">{member.name}</span>
-                      <span className="shrink-0 tabular-nums text-gray-500">
-                        {formatBudgetFromYen(member.amount)}
-                      </span>
-                    </div>
-                  ))}
-                  {(selectedDetails.aggregatedCount ?? 0) >
-                    selectedDetails.aggregatedTop.length && (
-                    <div className="text-[11px] text-gray-400">
-                      ほか{' '}
-                      {(
-                        (selectedDetails.aggregatedCount ?? 0) -
-                        selectedDetails.aggregatedTop.length
-                      ).toLocaleString()}{' '}
-                      件
-                    </div>
-                  )}
-                </div>
-              )}
-              {selectedDetails?.majorExpenseName && (
-                <div className="mt-1 text-xs text-gray-500">
-                  {selectedDetails.majorExpenseName}
-                </div>
-              )}
-              {selectedDetails?.description && (
-                <div className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-gray-600">
-                  {selectedDetails.description}
-                </div>
-              )}
-              {focusRelated && (
-                <div className="mt-2 text-[11px] text-gray-400">
-                  この筋に連なるノードだけを表示しています
-                </div>
-              )}
-
-              {/* 下の階層をタブで辿る。/sankey-svg のサイドパネルと同じ考え方 */}
-              {descendantColumnList.length > 0 && (
-                <div className="mt-3 border-t border-gray-100 pt-2">
-                  <div role="tablist" className="-mx-4 flex border-b border-gray-100 px-2">
-                    {descendantColumnList.map(({ column, items }) => (
-                      <button
-                        key={column}
-                        type="button"
-                        role="tab"
-                        aria-selected={activeTab === column}
-                        onClick={() => setPanelTab(column)}
-                        className={`flex-1 border-b-2 px-1 py-1.5 text-[11px] font-semibold ${
-                          activeTab === column
-                            ? 'border-blue-500 text-gray-800'
-                            : 'border-transparent text-gray-400 hover:text-gray-600'
-                        }`}
+            {/* 情報部分。ここは固定で、伸ばした分だけタブの一覧が縮む
+                （/sankey-svg も政策評価などの固定ブロックはこの位置に並ぶ） */}
+            {(selectedDetails?.aggregated ||
+              selectedDetails?.majorExpenseName ||
+              selectedDetails?.description ||
+              focusRelated) && (
+              <div className="flex-shrink-0 overflow-y-auto p-4 pb-0" style={{ maxHeight: '40%' }}>
+                {selectedDetails?.aggregated && (
+                  <div className="text-xs text-gray-600">
+                    表示数から溢れた {selectedDetails.aggregatedCount?.toLocaleString()} 件
+                  </div>
+                )}
+                {/* 集約の中身。件数だけだと何が隠れているのか分からない */}
+                {selectedDetails?.aggregatedTop && selectedDetails.aggregatedTop.length > 0 && (
+                  <div className="mt-2 border-t border-gray-100 pt-2">
+                    <div className="mb-1 text-[11px] text-gray-400">内訳（金額の大きい順）</div>
+                    {/* 事項名は項をまたいで重複するので、名前だけだと鍵が衝突する */}
+                    {selectedDetails.aggregatedTop.map((member, index) => (
+                      <div
+                        key={`${index}-${member.name}`}
+                        className="flex justify-between gap-3 text-xs text-gray-700"
                       >
-                        {MOF_HIERARCHY_COLUMN_LABELS[column]}
-                        <span className="ml-0.5 font-normal">({items.length.toLocaleString()})</span>
+                        <span className="truncate">{member.name}</span>
+                        <span className="shrink-0 tabular-nums text-gray-500">
+                          {formatBudgetFromYen(member.amount)}
+                        </span>
+                      </div>
+                    ))}
+                    {(selectedDetails.aggregatedCount ?? 0) >
+                      selectedDetails.aggregatedTop.length && (
+                      <div className="text-[11px] text-gray-400">
+                        ほか{' '}
+                        {(
+                          (selectedDetails.aggregatedCount ?? 0) -
+                          selectedDetails.aggregatedTop.length
+                        ).toLocaleString()}{' '}
+                        件
+                      </div>
+                    )}
+                  </div>
+                )}
+                {selectedDetails?.majorExpenseName && (
+                  <div className="mt-1 text-xs text-gray-500">
+                    {selectedDetails.majorExpenseName}
+                  </div>
+                )}
+                {selectedDetails?.description && (
+                  <div className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-gray-600">
+                    {selectedDetails.description}
+                  </div>
+                )}
+                {focusRelated && (
+                  <div className="mt-2 text-[11px] text-gray-400">
+                    この筋に連なるノードだけを表示しています
+                  </div>
+                )}
+                <div className="h-3" />
+              </div>
+            )}
+
+            {/* 下の階層をタブで辿る。/sankey-svg のサイドパネルと同じ考え方。
+                タブは固定し、一覧だけを独立してスクロールさせる
+                （長い一覧をスクロールするたびにタブが流れて見えなくなるのを防ぐ） */}
+            {descendantColumnList.length > 0 && (
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t border-gray-100">
+                <div role="tablist" className="flex flex-shrink-0 border-b border-gray-100 px-2">
+                  {descendantColumnList.map(({ column, items }) => (
+                    <button
+                      key={column}
+                      type="button"
+                      role="tab"
+                      aria-selected={activeTab === column}
+                      onClick={() => setPanelTab(column)}
+                      className={`flex-1 border-b-2 px-1 py-1.5 text-[11px] font-semibold ${
+                        activeTab === column
+                          ? 'border-blue-500 text-gray-800'
+                          : 'border-transparent text-gray-400 hover:text-gray-600'
+                      }`}
+                    >
+                      {MOF_HIERARCHY_COLUMN_LABELS[column]}
+                      <span className="ml-0.5 font-normal">({items.length.toLocaleString()})</span>
+                    </button>
+                  ))}
+                </div>
+                <div role="tabpanel" className="min-h-0 flex-1 overflow-y-auto p-4 pt-1">
+                  {descendantColumnList
+                    .find(t => t.column === activeTab)
+                    ?.items.map(item => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => onSelect(item.id)}
+                        className="flex w-full items-baseline justify-between gap-3 border-b border-gray-50 py-1.5 text-left hover:bg-gray-50"
+                      >
+                        <span className="truncate text-xs text-gray-700">{item.name}</span>
+                        <span className="shrink-0 text-[11px] tabular-nums text-gray-500">
+                          {formatBudgetFromYen(item.value ?? 0)}
+                        </span>
                       </button>
                     ))}
-                  </div>
-                  <div role="tabpanel" className="pt-1">
-                    {descendantColumnList
-                      .find(t => t.column === activeTab)
-                      ?.items.map(item => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => onSelect(item.id)}
-                          className="flex w-full items-baseline justify-between gap-3 border-b border-gray-50 py-1.5 text-left hover:bg-gray-50"
-                        >
-                          <span className="truncate text-xs text-gray-700">{item.name}</span>
-                          <span className="shrink-0 text-[11px] tabular-nums text-gray-500">
-                            {formatBudgetFromYen(item.value ?? 0)}
-                          </span>
-                        </button>
-                      ))}
-                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </SidePanelChrome>
+      )}
 
       {/* ミニマップ。/sankey-svg と同じく左下に置く。
           パンを制限していないので、全体の中の現在位置を示す手段が要る */}
