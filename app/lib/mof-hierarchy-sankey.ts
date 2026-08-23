@@ -9,6 +9,7 @@
  */
 
 import type { MOFAccountType, MOFBudgetType, MOFJikouItem } from '@/types/mof-jikou';
+import { MOF_HIERARCHY_AGGREGATE_UNITS } from '@/types/mof-hierarchy';
 import type {
   MOFHierarchyAccountSummary,
   MOFHierarchyColumn,
@@ -32,25 +33,25 @@ const ACCOUNT_LABELS: Record<MOFAccountType, string> = {
 /**
  * 列ごとの TopN の既定値。
  *
- * 所管25・組織114・勘定32 に対して項1,104・事項1,712 と後ろ2列だけ桁が違うので、
- * 集約するのはその2列だけでよい（令和8年度・当初予算での実測）。
+ * TopN は列全体の表示件数の上限で、親ごとの件数ではない（/sankey-svg と同じ）。
+ * 親ごとに N 件ずつ残すと、親の数だけ掛け算で増えて列の総数を抑えられず、
+ * 実測で項730・事項1,184になり1ノードが1px未満になった。
+ *
+ * 40 は「ラベルが読める上限」として実測で決めた値。令和8年度・当初予算では
+ * 所管25・勘定32 は全件が収まり、組織114・項1,104・事項1,712 が集約される。
  */
+export const DEFAULT_TOP_N_VALUE = 40;
+
 export const DEFAULT_TOP_N: MOFHierarchyTopN = {
-  section: 12,
-  item: 12,
+  ministry: DEFAULT_TOP_N_VALUE,
+  organization: DEFAULT_TOP_N_VALUE,
+  subAccount: DEFAULT_TOP_N_VALUE,
+  section: DEFAULT_TOP_N_VALUE,
+  item: DEFAULT_TOP_N_VALUE,
 };
 
-/**
- * 列ごとのノード数の上限。
- *
- * 親ごとの TopN だけでは列の総数を抑えられない。組織114 × 項の TopN のように
- * 掛け算で増えるため、実測で項730・事項1,184になり1ノードが1px未満になる。
- * 上限を超えた分は、それぞれの親の「その他」に畳んで列の本数を抑える。
- */
-export const DEFAULT_MAX_PER_COLUMN = 40;
-
-/** 集約ノードの名前 */
-const OTHERS_NAME = 'その他';
+/** 集約ノードに載せる内訳の件数 */
+const AGGREGATED_TOP_COUNT = 8;
 
 /**
  * 事項1件が通る階層のラベル。
@@ -82,40 +83,6 @@ interface Building {
   parentId: string | null;
 }
 
-/** 親ごとに子を TopN に絞り、溢れた分を「その他」にまとめる */
-function applyTopN(
-  children: Building[],
-  limit: number | undefined,
-  parentId: string,
-  column: MOFHierarchyColumn,
-  accountType: MOFAccountType | undefined
-): { kept: Building[]; aggregated: Building | null; droppedIds: Set<string> } {
-  const sorted = [...children].sort((a, b) => b.amount - a.amount);
-  if (!limit || sorted.length <= limit) {
-    return { kept: sorted, aggregated: null, droppedIds: new Set() };
-  }
-  const kept = sorted.slice(0, limit);
-  const dropped = sorted.slice(limit);
-  const aggregated: Building = {
-    id: `${parentId}>__others__`,
-    name: OTHERS_NAME,
-    column,
-    amount: dropped.reduce((s, n) => s + n.amount, 0),
-    details: {
-      column,
-      aggregated: true,
-      aggregatedCount: dropped.length,
-      accountType,
-    },
-    parentId,
-  };
-  return {
-    kept,
-    aggregated,
-    droppedIds: new Set(dropped.map(n => n.id)),
-  };
-}
-
 /**
  * 事項別内訳から階層サンキーを組む。
  *
@@ -129,9 +96,8 @@ export function buildMOFHierarchySankey(
     budgetType: MOFBudgetType;
     budgetTypes: MOFBudgetType[];
     availableYears: number[];
+    /** 列ごとの表示件数の上限。指定の無い列は既定値 */
     topN?: MOFHierarchyTopN;
-    /** 列ごとのノード数の上限 */
-    maxPerColumn?: number;
   }
 ): MOFHierarchyData {
   const topN = { ...DEFAULT_TOP_N, ...options.topN };
@@ -222,46 +188,26 @@ export function buildMOFHierarchySankey(
     }
   }
 
-  // --- TopN と列上限で残すノードを決める ---
+  // --- 残すノードを決める ---
   //
-  // 親ごとの TopN だけでは列の総数を抑えられない（組織114 × 項12 のように掛け算で増える）。
-  // 実測で項730・事項1,184になり1ノードが1px未満になった。列単位の上限も併せて掛ける。
-  const maxPerColumn = options.maxPerColumn ?? DEFAULT_MAX_PER_COLUMN;
+  // TopN は列全体の表示件数の上限として効かせる（/sankey-svg と同じ）。
+  // 親ごとに N 件ずつ残すと親の数だけ掛け算で増え、列の総数を抑えられない。
+  //
+  // 左の列から順に決め、候補は「親が残っている枝」に限る。こうすると
+  // 集約された所管の下から事項が単独で顔を出すことがなくなり、
+  // 図の左から右へ辿れる形が保たれる。
   const kept = new Set<string>([ROOT_ID]);
-  const queue: string[] = [ROOT_ID];
-  while (queue.length > 0) {
-    const parentId = queue.shift() as string;
-    const children = [...(childrenOf.get(parentId) ?? [])]
-      .map(id => nodes.get(id))
-      .filter((n): n is Building => Boolean(n))
-      .sort((a, b) => b.amount - a.amount);
-    if (children.length === 0) continue;
-    // 通過ノードは枝の骨格なので TopN の対象にしない
-    const structural = children.filter(c => c.details.passThrough);
-    const rankable = children.filter(c => !c.details.passThrough);
-    const limit = topN[rankable[0]?.column ?? children[0].column];
-    for (const child of [
-      ...structural,
-      ...(limit ? rankable.slice(0, limit) : rankable),
-    ]) {
-      kept.add(child.id);
-      queue.push(child.id);
-    }
-  }
-  // 列単位の上限。残った中から金額の大きい順に切る
   for (const column of columns) {
-    const inColumn = [...nodes.values()]
-      .filter(n => n.column === column && kept.has(n.id) && !n.details.passThrough)
+    const candidates = [...nodes.values()].filter(
+      n => n.column === column && n.parentId !== null && kept.has(n.parentId)
+    );
+    // 通過ノードは枝の骨格なので順位付けの対象にしない（ラベルも箱も出ない）
+    for (const node of candidates.filter(n => n.details.passThrough)) kept.add(node.id);
+    const rankable = candidates
+      .filter(n => !n.details.passThrough)
       .sort((a, b) => b.amount - a.amount);
-    for (const node of inColumn.slice(maxPerColumn)) {
-      // 子孫ごと外す
-      const stack = [node.id];
-      while (stack.length > 0) {
-        const id = stack.pop() as string;
-        kept.delete(id);
-        for (const child of childrenOf.get(id) ?? []) stack.push(child);
-      }
-    }
+    const limit = topN[column];
+    for (const node of limit ? rankable.slice(0, limit) : rankable) kept.add(node.id);
   }
 
   // --- 集約ノードは列ごとに1つ ---
@@ -281,13 +227,20 @@ export function buildMOFHierarchySankey(
     if (existing) {
       existing.amount += node.amount;
       existing.details.aggregatedCount = (existing.details.aggregatedCount ?? 0) + 1;
+      existing.details.aggregatedTop?.push({ name: node.name, amount: node.amount });
     } else {
       others.set(node.column, {
         id: target,
-        name: OTHERS_NAME,
+        // 名前は出力時に件数から作る
+        name: '',
         column: node.column,
         amount: node.amount,
-        details: { column: node.column, aggregated: true, aggregatedCount: 1 },
+        details: {
+          column: node.column,
+          aggregated: true,
+          aggregatedCount: 1,
+          aggregatedTop: [{ name: node.name, amount: node.amount }],
+        },
         parentId: null,
       });
     }
@@ -323,11 +276,21 @@ export function buildMOFHierarchySankey(
     return b.amount - a.amount;
   });
 
+  // 集約ノードの内訳は金額の大きい順に絞る。全件持つと応答が膨らむ
+  for (const node of others.values()) {
+    const top = node.details.aggregatedTop ?? [];
+    top.sort((a, b) => b.amount - a.amount);
+    node.details.aggregatedTop = top.slice(0, AGGREGATED_TOP_COUNT);
+  }
+
   const sankeyNodes: MOFHierarchyNode[] = alive.map(n => ({
     id: n.id,
-    // 集約ノードは件数を名前に出す（/sankey-svg の「5,744事業」と同じ考え方）
+    // 集約ノードは件数を名前に出す（/sankey-svg の「5,744事業」と同じ考え方）。
+    // 「その他」だと何件が図の外にあるのか読めない
     name: n.details.aggregated
-      ? `${OTHERS_NAME} ${(n.details.aggregatedCount ?? 0).toLocaleString()}件`
+      ? `${(n.details.aggregatedCount ?? 0).toLocaleString()}${
+          MOF_HIERARCHY_AGGREGATE_UNITS[n.column]
+        }`
       : n.name,
     value: n.amount,
     type: n.column,
@@ -370,14 +333,13 @@ export function buildMOFHierarchySankey(
       total,
       itemCount: target.length,
       topN,
-      maxPerColumn,
       unit: 'yen',
       notes: [
         '会計区分をまたいだ単純合計です。会計間の繰入がある分は二重に数えられています',
         '収録されていない会計区分は図に現れません（決算の事項別内訳は一般会計にしかありません）',
         '補正予算の金額は改予算額です。号数をまたいで合算しないでください',
         '項コードは組織内の連番で、単独では一意になりません',
-        '「その他」は表示数の上限から溢れた分をまとめたものです。金額は保たれています',
+        '「41組織」のような灰色のノードは、表示数から溢れた分をまとめたものです。金額は保たれています',
       ],
     },
     accounts,

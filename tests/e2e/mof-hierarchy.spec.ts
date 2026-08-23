@@ -154,22 +154,66 @@ test.describe('mof-hierarchy', () => {
     }
   });
 
-  test('changing TopN refetches with the new value', async ({ page }) => {
+  test('changing TopN refetches and shrinks the column', async ({ page }) => {
     // 予算種別と同じ経路（buildUrl の変化）で取り直す。
     // 年度が確定したあとの取り直しが効かないと、ここも黙って無反応になる。
     //
-    // セレクタの値は応答の metadata.topN を映すので、5 に変わったことが
-    // 「サーバまで往復して適用された」証拠になる（選んだ値をそのまま
-    // 表示しているのではない）。
-    //
-    // 図の中身は見ない。列の上限（maxPerColumn=40）が先に効くため、
-    // 既定の年度では TopN を変えても描画結果が変わらない。
+    // TopN は列全体の表示件数の上限なので、減らせばその列のノードが減る。
+    const itemNodes = () =>
+      page
+        .getByTestId('hierarchy-node')
+        .evaluateAll(els => els.filter(el => el.getAttribute('data-column') === 'item').length);
+
+    await page.getByLabel('表示設定').click();
+    const before = await itemNodes();
+    expect(before).toBeGreaterThan(10);
+
+    await page.getByLabel('事項の表示数').selectOption('8');
+
+    await expect(page).toHaveURL(/tit=8/);
+    // セレクタの値は応答の metadata.topN を映すので、サーバまで往復した証拠になる
+    await expect(page.getByLabel('事項の表示数')).toHaveValue('8', { timeout: 30_000 });
+    // 上位8件＋集約1件
+    await expect.poll(itemNodes, { timeout: 30_000 }).toBe(9);
+  });
+
+  test('aggregate nodes are named by count and unit, not その他', async ({ page }) => {
+    // /sankey-svg の「5,744事業」と同じ作法。「その他」だと何件が図の外に
+    // あるのか読めない
+    const names = await page
+      .getByTestId('hierarchy-node')
+      .evaluateAll(els => els.map(el => el.querySelector('text')?.textContent ?? ''));
+
+    const aggregates = names.filter(n => /^[\d,]+(所管|組織|勘定|項|事項) \(/.test(n));
+    expect(aggregates.length).toBeGreaterThan(0);
+    expect(names.filter(n => n.startsWith('その他'))).toHaveLength(0);
+  });
+
+  test('the open settings panel fits on screen and clears the search box', async ({ page }) => {
+    // TopN を全列ぶん並べたことで縦に伸びた。畳んだ状態だけ見ても足りない
     await page.getByLabel('表示設定').click();
 
-    await page.getByLabel('事項の表示数').selectOption('5');
+    const fits = await page.evaluate(() => {
+      const panel = document
+        .querySelector('[aria-label="事項の表示数"]')!
+        .closest('div.absolute')!
+        .getBoundingClientRect();
+      const search = document.querySelector('input[type="search"]')!.getBoundingClientRect();
+      return {
+        inside:
+          panel.top >= 0 &&
+          panel.left >= 0 &&
+          panel.bottom <= window.innerHeight &&
+          panel.right <= window.innerWidth,
+        overlapsSearch:
+          search.left < panel.right &&
+          panel.left < search.right &&
+          search.top < panel.bottom &&
+          panel.top < search.bottom,
+      };
+    });
 
-    await expect(page).toHaveURL(/ti=5/);
-    await expect(page.getByLabel('事項の表示数')).toHaveValue('5', { timeout: 30_000 });
-    await expect(page.getByTestId('hierarchy-node')).not.toHaveCount(0);
+    expect(fits.inside).toBe(true);
+    expect(fits.overlapsSearch).toBe(false);
   });
 });

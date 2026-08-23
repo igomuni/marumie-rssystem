@@ -13,7 +13,13 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { LabelDensity, MOFHierarchyData, MOFHierarchyTopN } from '@/types/mof-hierarchy';
+import {
+  MOF_HIERARCHY_COLUMNS,
+  type LabelDensity,
+  type MOFHierarchyColumn,
+  type MOFHierarchyData,
+  type MOFHierarchyTopN,
+} from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
@@ -21,6 +27,22 @@ import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchyChart, LABEL_FONT_PX_DEFAULT } from '@/client/components/mof-hierarchy/HierarchyChart';
 import { HierarchyControls } from '@/client/components/mof-hierarchy/HierarchyControls';
 import { useMofBudgetData } from '@/client/components/mof-budget/useMofBudgetData';
+
+/**
+ * TopN の列と、URL・API のパラメータ名の対応。
+ * 列を増やしたときに3箇所を直す必要がないよう1本にまとめる。
+ */
+const TOP_N_KEYS: Array<{
+  column: Exclude<MOFHierarchyColumn, 'total'>;
+  /** ブラウザの URL に載せる短い名前 */
+  urlKey: string;
+  /** API に渡す名前 */
+  apiKey: string;
+}> = MOF_HIERARCHY_COLUMNS.filter(c => c !== 'total').map(column => ({
+  column: column as Exclude<MOFHierarchyColumn, 'total'>,
+  urlKey: `t${column.slice(0, 2)}`,
+  apiKey: `top${column[0].toUpperCase()}${column.slice(1)}`,
+}));
 
 export default function MOFHierarchyPage() {
   return (
@@ -44,10 +66,14 @@ function MOFHierarchyContent() {
   const [budgetType, setBudgetType] = useState<MOFBudgetType | null>(
     (searchParams.get('bt') as MOFBudgetType | null) ?? null
   );
-  const [topN, setTopN] = useState<MOFHierarchyTopN>(() => ({
-    section: Number(searchParams.get('ts')) || undefined,
-    item: Number(searchParams.get('ti')) || undefined,
-  }));
+  const [topN, setTopN] = useState<MOFHierarchyTopN>(() =>
+    Object.fromEntries(
+      TOP_N_KEYS.map(({ column, urlKey }) => [
+        column,
+        Number(searchParams.get(urlKey)) || undefined,
+      ])
+    )
+  );
   const [selectedId, setSelectedId] = useState<string | null>(
     searchParams.get('sel')
   );
@@ -64,8 +90,10 @@ function MOFHierarchyContent() {
       const params = new URLSearchParams();
       if (target) params.set('year', String(target));
       if (budgetType) params.set('budgetType', budgetType);
-      if (topN.section) params.set('topSection', String(topN.section));
-      if (topN.item) params.set('topItem', String(topN.item));
+      for (const { column, apiKey } of TOP_N_KEYS) {
+        const value = topN[column];
+        if (value) params.set(apiKey, String(value));
+      }
       const query = params.toString();
       return `/api/mof-hierarchy${query ? `?${query}` : ''}`;
     },
@@ -87,8 +115,10 @@ function MOFHierarchyContent() {
     const params = new URLSearchParams();
     params.set('year', String(data.metadata.fiscalYear));
     params.set('bt', data.metadata.budgetType);
-    if (data.metadata.topN.section) params.set('ts', String(data.metadata.topN.section));
-    if (data.metadata.topN.item) params.set('ti', String(data.metadata.topN.item));
+    for (const { column, urlKey } of TOP_N_KEYS) {
+      const value = data.metadata.topN[column];
+      if (value) params.set(urlKey, String(value));
+    }
     if (selectedId) params.set('sel', selectedId);
     if (!focusRelated) params.set('fr', '0');
     if (fontPx !== LABEL_FONT_PX_DEFAULT) params.set('fs', String(fontPx));

@@ -626,6 +626,34 @@ export function HierarchyChart({
               表示数から溢れた {selectedDetails.aggregatedCount?.toLocaleString()} 件
             </div>
           )}
+          {/* 集約の中身。件数だけだと何が隠れているのか分からない */}
+          {selectedDetails?.aggregatedTop && selectedDetails.aggregatedTop.length > 0 && (
+            <div className="mt-2 border-t border-gray-100 pt-2">
+              <div className="mb-1 text-[11px] text-gray-400">内訳（金額の大きい順）</div>
+              {selectedDetails.aggregatedTop.map(member => (
+                <div
+                  key={member.name}
+                  className="flex justify-between gap-3 text-xs text-gray-700"
+                >
+                  <span className="truncate">{member.name}</span>
+                  <span className="shrink-0 tabular-nums text-gray-500">
+                    {formatBudgetFromYen(member.amount)}
+                  </span>
+                </div>
+              ))}
+              {(selectedDetails.aggregatedCount ?? 0) >
+                selectedDetails.aggregatedTop.length && (
+                <div className="text-[11px] text-gray-400">
+                  ほか{' '}
+                  {(
+                    (selectedDetails.aggregatedCount ?? 0) -
+                    selectedDetails.aggregatedTop.length
+                  ).toLocaleString()}{' '}
+                  件
+                </div>
+              )}
+            </div>
+          )}
           {selectedDetails?.majorExpenseName && (
             <div className="mt-1 text-xs text-gray-500">
               {selectedDetails.majorExpenseName}

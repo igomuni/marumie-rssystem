@@ -9,11 +9,23 @@ import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
 import { availableYears, loadYear } from '@/app/lib/api/mof-jikou-loader';
 import { buildMOFHierarchySankey, DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
-import type { MOFHierarchyTopN } from '@/types/mof-hierarchy';
+import type { MOFHierarchyColumn, MOFHierarchyTopN } from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
 
 /** TopN の上限。これを超えるとラベルが潰れて読めなくなる */
 const TOP_N_MAX = 40;
+
+/**
+ * TopN のクエリパラメータ名。列ごとに1つ持つ。
+ * URL を短く保ちたいので列名そのままではなく短縮形を使う。
+ */
+const TOP_N_PARAMS: Array<[Exclude<MOFHierarchyColumn, 'total'>, string]> = [
+  ['ministry', 'topMinistry'],
+  ['organization', 'topOrganization'],
+  ['subAccount', 'topSubAccount'],
+  ['section', 'topSection'],
+  ['item', 'topItem'],
+];
 
 function parseTopN(raw: string | null, fallback: number | undefined): number | undefined {
   if (!raw) return fallback;
@@ -68,10 +80,13 @@ export async function GET(request: Request) {
         ? requested
         : (budgetTypes.find(t => t === '当初予算') ?? budgetTypes[0]);
 
-    const topN: MOFHierarchyTopN = {
-      section: parseTopN(params.get('topSection'), DEFAULT_TOP_N.section),
-      item: parseTopN(params.get('topItem'), DEFAULT_TOP_N.item),
-    };
+    // TopN は列ごとに指定できる。指定の無い列は既定値
+    const topN: MOFHierarchyTopN = Object.fromEntries(
+      TOP_N_PARAMS.map(([column, param]) => [
+        column,
+        parseTopN(params.get(param), DEFAULT_TOP_N[column]),
+      ])
+    );
 
     const result = buildMOFHierarchySankey(data.items, {
       fiscalYear: year,

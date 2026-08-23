@@ -31,6 +31,22 @@ export const MOF_HIERARCHY_COLUMN_LABELS: Record<MOFHierarchyColumn, string> = {
   item: '事項',
 };
 
+/**
+ * 集約ノードの名前に使う単位。
+ *
+ * 「その他」ではなく「41組織」「1,672事項」と件数で出す（/sankey-svg の作法）。
+ * 溢れた分だと分かるだけの「その他」より、何件をまとめたのかが読めるほうが
+ * 図の外に出ている量を把握しやすい。
+ */
+export const MOF_HIERARCHY_AGGREGATE_UNITS: Record<MOFHierarchyColumn, string> = {
+  total: '件',
+  ministry: '所管',
+  organization: '組織',
+  subAccount: '勘定',
+  section: '項',
+  item: '事項',
+};
+
 /** ノードに添える詳細 */
 export interface MOFHierarchyNodeDetails {
   column: MOFHierarchyColumn;
@@ -45,6 +61,8 @@ export interface MOFHierarchyNodeDetails {
   passThrough?: boolean;
   /** まとめた元の件数（集約ノードのみ） */
   aggregatedCount?: number;
+  /** まとめた中身の上位（集約ノードのみ・金額の大きい順） */
+  aggregatedTop?: Array<{ name: string; amount: number }>;
   /** 会計区分。所管より下の列では枝ごとに1つに定まる */
   accountType?: MOFAccountType;
   /** 事項ノードの説明（所掌事務・根拠法）。予算書の「説明」欄 */
@@ -92,10 +110,8 @@ export interface MOFHierarchyData {
     total: number;
     /** 図に出ている事項の件数 */
     itemCount: number;
-    /** 適用した TopN */
+    /** 適用した TopN（列ごとの表示件数の上限） */
     topN: MOFHierarchyTopN;
-    /** 適用した列ごとのノード数上限 */
-    maxPerColumn: number;
     unit: 'yen';
     notes: string[];
   };

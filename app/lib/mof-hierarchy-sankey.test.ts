@@ -183,3 +183,101 @@ describe('buildMOFHierarchySankey', () => {
     expect(result.accounts.map(a => a.accountType)).toEqual(['general']);
   });
 });
+
+describe('TopN は列単位で効く', () => {
+  /**
+   * 所管 → 項 → 事項 の枝を作る（1事項＝1枝）。
+   * 項の表示名は「コード 名称」で組まれるので、照合は部分一致で行う
+   */
+  const branch = (ministry: string, section: string, name: string, amount: number) =>
+    item({
+      ministry,
+      organization: `${ministry}本省`,
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name,
+      amount,
+    });
+
+  it('親ごとではなく列全体で上位N件を残す', () => {
+    // 所管Aに小さい項が5本、所管Bに大きい項が1本。
+    // 親ごとの TopN だと A から5本すべて残るが、列単位なら大きい順に切られる
+    const items = [
+      ...Array.from({ length: 5 }, (_, i) => branch('A', `a${i}`, `事項a${i}`, 10)),
+      branch('B', 'b0', '事項b0', 1000),
+    ];
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 2 },
+    });
+    const sections = result.sankey.nodes.filter(
+      n => n.details.column === 'section' && !n.details.aggregated
+    );
+    expect(sections).toHaveLength(2);
+    // 残るのは金額の大きい順。所管をまたいで比べる
+    expect(sections.some(n => n.name.includes('b0'))).toBe(true);
+    expect(sections.every(n => n.value === 1000 || n.value === 10)).toBe(true);
+  });
+
+  it('集約ノードの名前は「件数＋単位」で、「その他」とは書かない', () => {
+    const items = Array.from({ length: 6 }, (_, i) =>
+      branch('A', `s${i}`, `事項${i}`, 100 - i)
+    );
+    const result = buildMOFHierarchySankey(items, { ...options, topN: { section: 2 } });
+    const agg = result.sankey.nodes.find(
+      n => n.details.column === 'section' && n.details.aggregated
+    );
+    expect(agg).toBeDefined();
+    expect(agg!.name).toBe('4項');
+    expect(agg!.name).not.toContain('その他');
+  });
+
+  it('集約ノードは中身の上位を持つ', () => {
+    const items = Array.from({ length: 6 }, (_, i) =>
+      branch('A', `s${i}`, `事項${i}`, 100 - i)
+    );
+    const result = buildMOFHierarchySankey(items, { ...options, topN: { section: 2 } });
+    const agg = result.sankey.nodes.find(
+      n => n.details.column === 'section' && n.details.aggregated
+    )!;
+    expect(agg.details.aggregatedTop?.[0].amount).toBe(98);
+    expect(agg.details.aggregatedTop?.[0].name).toContain('s2');
+    // 大きい順に並ぶ
+    const amounts = agg.details.aggregatedTop!.map(m => m.amount);
+    expect([...amounts].sort((a, b) => b - a)).toEqual(amounts);
+  });
+
+  it('すべての列に TopN を指定できる', () => {
+    const items = Array.from({ length: 6 }, (_, i) =>
+      branch(`省庁${i}`, `s${i}`, `事項${i}`, 100 - i)
+    );
+    const result = buildMOFHierarchySankey(items, { ...options, topN: { ministry: 2 } });
+    const ministries = result.sankey.nodes.filter(
+      n => n.details.column === 'ministry' && !n.details.aggregated
+    );
+    expect(ministries).toHaveLength(2);
+    const agg = result.sankey.nodes.find(
+      n => n.details.column === 'ministry' && n.details.aggregated
+    );
+    expect(agg!.name).toBe('4所管');
+  });
+
+  it('集約された所管の下の項は個別に出さず、下の列の集約に流す', () => {
+    const items = Array.from({ length: 6 }, (_, i) =>
+      branch(`省庁${i}`, `s${i}`, `事項${i}`, 100 - i)
+    );
+    const result = buildMOFHierarchySankey(items, { ...options, topN: { ministry: 2 } });
+    const sections = result.sankey.nodes.filter(
+      n => n.details.column === 'section' && !n.details.aggregated
+    );
+    // 残った2所管の項だけが個別に立つ
+    expect(sections).toHaveLength(2);
+    expect(sections.some(n => n.name.includes('s0'))).toBe(true);
+    expect(sections.some(n => n.name.includes('s1'))).toBe(true);
+    // 合計は保たれる
+    const columnTotal = result.sankey.nodes
+      .filter(n => n.details.column === 'section')
+      .reduce((sum, n) => sum + (n.value ?? 0), 0);
+    expect(columnTotal).toBe(result.metadata.total);
+  });
+});
