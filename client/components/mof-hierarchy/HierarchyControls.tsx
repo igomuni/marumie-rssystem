@@ -1,34 +1,28 @@
 'use client';
 
 /**
- * 階層サンキーのコントロール。
+ * TopN と表示位置のパネル。
  *
- * 年度とページ切替は全ページ共通で右上に置くので、ここには含めない。
- * データ取得はページ層の責務なので、ここでは選択の通知だけを行う。
+ * /sankey-svg の TopN／オフセットパネルと同じ作りにしてある。
+ * 探索しながら何度も動かす操作なので、ダイアログに畳まず右上に常時出し、
+ * 邪魔なときだけパネル外のトグルで隠せるようにする。
  *
- * 常に出すのは予算種別だけで、残りは「表示設定」に畳む。
- * 横に並べ続けると、コントロールを1つ足すたびに右上の帯が左へ伸び、
- * 左上の検索ボックスを覆って「見えているのに押せない」状態になる
- * （実際に文字サイズとラベル表示を足した時点で起きた）。
+ * 表示位置は対象を1列だけ選んで動かす（/sankey-svg の「事業／支出先」と同じ）。
+ * 列ごとに行を並べるとパネルが縦に伸びて図を覆うため。
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { TopNSliderRow } from '@/client/components/SankeySvg/TopNSliders';
-import { OffsetRow } from './OffsetRow';
-import { DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
+import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
 import {
   MOF_HIERARCHY_COLUMNS,
   MOF_HIERARCHY_COLUMN_LABELS,
-  type LabelDensity,
   type MOFHierarchyColumn,
   type MOFHierarchyOffset,
   type MOFHierarchyTopN,
 } from '@/types/mof-hierarchy';
-import type { MOFBudgetType } from '@/types/mof-jikou';
-
-const SELECT_CLASS =
-  'h-8 cursor-pointer rounded border border-gray-300 bg-white px-2 text-xs text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';
+import { DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
 
 /**
  * TopN スライダーの上限。
@@ -37,201 +31,213 @@ const SELECT_CLASS =
 const TOP_N_MAX = 200;
 
 /** TopN を出す列。根（予算合計）は1件しかないので対象外 */
+type RankableColumn = Exclude<MOFHierarchyColumn, 'total'>;
 const TOP_N_COLUMNS = MOF_HIERARCHY_COLUMNS.filter(
-  (c): c is Exclude<MOFHierarchyColumn, 'total'> => c !== 'total'
+  (c): c is RankableColumn => c !== 'total'
 );
 
-/** 文字サイズの選択肢（px）。大きくするとノード間隔も広がり、縦に長くなる */
-const FONT_PX_OPTIONS = [9, 10, 11, 12, 14, 16, 18];
+// [delta, SVGパス, ラベル]
+const ARROW_PATHS: [number, string, string][] = [
+  [-1, 'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z', '前へ'],
+  [1, 'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z', '次へ'],
+];
+
+const SELECT_CLASS =
+  'h-6 cursor-pointer rounded border border-gray-300 bg-white px-1 text-[11px] text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';
 
 export function HierarchyControls({
-  budgetType,
-  budgetTypes,
   topN,
   offset,
   columnCounts,
-  disabled,
-  onBudgetTypeChange,
   onTopNChange,
   onOffsetChange,
-  summary,
-  focusRelated,
-  onFocusRelatedChange,
-  fontPx,
-  onFontPxChange,
-  labelDensity,
-  onLabelDensityChange,
 }: {
-  budgetType: MOFBudgetType;
-  budgetTypes: MOFBudgetType[];
   topN: MOFHierarchyTopN;
   /** 列ごとの表示開始位置 */
   offset: MOFHierarchyOffset;
-  /** 列ごとの候補件数。開始位置の上限を出すのに使う */
+  /** 列ごとの候補件数。表示位置の上限を出すのに使う */
   columnCounts: Partial<Record<MOFHierarchyColumn, number>>;
-  disabled?: boolean;
-  onBudgetTypeChange: (value: MOFBudgetType) => void;
   onTopNChange: (next: MOFHierarchyTopN) => void;
   onOffsetChange: (next: MOFHierarchyOffset) => void;
-  /** 図の外に出す補足（事項数・会計区分の内訳） */
-  summary?: string;
-  focusRelated: boolean;
-  onFocusRelatedChange: (value: boolean) => void;
-  /** ラベルの文字サイズ（px） */
-  fontPx: number;
-  onFontPxChange: (value: number) => void;
-  /** ラベルをどこまで出すか */
-  labelDensity: LabelDensity;
-  onLabelDensityChange: (value: LabelDensity) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(true);
+  /** 表示位置を動かす対象の列 */
+  const [target, setTarget] = useState<RankableColumn>('item');
+  const [isEditing, setIsEditing] = useState(false);
+  const [input, setInput] = useState('');
+  const repeat = useRepeatPress();
 
-  // 外側を押したら閉じる。開いたままだと図のクリックを奪う
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    window.addEventListener('mousedown', onDown);
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('mousedown', onDown);
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
+  const limitOf = (column: RankableColumn) =>
+    topN[column] ?? DEFAULT_TOP_N[column] ?? TOP_N_MAX;
+
+  const targetLabel = MOF_HIERARCHY_COLUMN_LABELS[target];
+  const limit = limitOf(target);
+  const total = columnCounts[target] ?? 0;
+  const max = Math.max(0, total - limit);
+  const current = Math.min(offset[target] ?? 0, max);
+  const rangeStart = total === 0 ? 0 : current + 1;
+  const rangeEnd = Math.min(current + limit, total);
+  const commitOffset = (next: number) =>
+    onOffsetChange({ ...offset, [target]: Math.max(0, Math.min(max, next)) });
 
   return (
-    <div ref={rootRef} className="relative flex items-center gap-2">
-      <label className="flex items-center gap-1.5 text-xs text-gray-600">
-        <span className="font-medium">予算種別</span>
-        <select
-          aria-label="予算種別"
-          value={budgetType}
-          disabled={disabled}
-          onChange={e => onBudgetTypeChange(e.target.value as MOFBudgetType)}
-          className={SELECT_CLASS}
-        >
-          {budgetTypes.map(type => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
-      </label>
+    <div className="flex flex-col items-end" data-pan-disabled="true">
+      <div className="rounded-t-md rounded-bl-md border border-gray-200 bg-white/95 px-2.5 py-1.5 shadow-md backdrop-blur">
+        {/* 1行目: 表示位置。対象を1列選んで窓をずらす */}
+        <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+          <select
+            aria-label="表示位置の対象"
+            value={target}
+            onChange={e => setTarget(e.target.value as RankableColumn)}
+            className={SELECT_CLASS}
+          >
+            {TOP_N_COLUMNS.map(column => (
+              <option key={column} value={column}>
+                {MOF_HIERARCHY_COLUMN_LABELS[column]}
+              </option>
+            ))}
+          </select>
+          <span className="shrink-0">Top</span>
+          {isEditing ? (
+            <input
+              type="number"
+              autoFocus
+              min={1}
+              max={max + 1}
+              step={1}
+              aria-label={`${targetLabel}の開始位置(数値)`}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onBlur={() => {
+                const value = Number(input);
+                if (!Number.isNaN(value) && value >= 1) commitOffset(value - 1);
+                setIsEditing(false);
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === 'Escape')
+                  (e.target as HTMLInputElement).blur();
+              }}
+              className="w-14 rounded border border-gray-300 text-center text-[11px]"
+            />
+          ) : (
+            <button
+              type="button"
+              title="クリックして開始位置を入力"
+              aria-label={`${targetLabel}の開始位置を直接入力`}
+              onClick={() => {
+                setInput(String(rangeStart));
+                setIsEditing(true);
+              }}
+              className="cursor-text tabular-nums"
+            >
+              {rangeStart.toLocaleString()}
+            </button>
+          )}
+          <span className="shrink-0 tabular-nums">〜{rangeEnd.toLocaleString()}</span>
+          <input
+            type="range"
+            min={0}
+            max={max}
+            step={1}
+            disabled={max === 0}
+            aria-label={`${targetLabel}の開始位置`}
+            value={current}
+            onChange={e => commitOffset(Number(e.target.value))}
+            className="w-16 min-w-0"
+          />
+          <span className="shrink-0 tabular-nums text-gray-400">
+            /{total.toLocaleString()}件
+          </span>
+          {ARROW_PATHS.map(([delta, path, title]) => {
+            // 1ページぶん送る。1件ずつだと41位から先へ行くのに40回押すことになる
+            const step = () => commitOffset(current + delta * limit);
+            return (
+              <button
+                key={delta}
+                type="button"
+                title={title}
+                aria-label={`${targetLabel}の表示位置を${title}`}
+                {...repeat(step)}
+                onClick={e => {
+                  if (e.detail === 0) step();
+                }}
+                className="flex w-4 shrink-0 items-center justify-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555">
+                  <path d={path} />
+                </svg>
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            title="先頭に戻す"
+            aria-label={`${targetLabel}の表示位置を先頭に戻す`}
+            onClick={() => commitOffset(0)}
+            className="flex w-4 shrink-0 items-center justify-center"
+          >
+            {/* Material Icons: vertical_align_top を横向きに */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="12"
+              width="12"
+              viewBox="0 0 24 24"
+              fill="#555"
+              style={{ transform: 'rotate(-90deg)' }}
+            >
+              <path d="M8 11h3v10h2V11h3l-4-4-4 4zM4 3v2h16V3H4z" />
+            </svg>
+          </button>
+        </div>
 
+        {/* 2行目以降: 列ごとの表示数。2列に並べて縦に伸びるのを抑える */}
+        {open && (
+          <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 border-t border-gray-100 pt-1">
+            {TOP_N_COLUMNS.map(column => {
+              const label = MOF_HIERARCHY_COLUMN_LABELS[column];
+              const value = limitOf(column);
+              // 増減ボタンは更新関数の形で呼ぶので、それを受けられるようにする
+              const setValue: Dispatch<SetStateAction<number>> = next =>
+                onTopNChange({
+                  ...topN,
+                  [column]: typeof next === 'function' ? next(value) : next,
+                });
+              return (
+                <TopNSliderRow
+                  key={column}
+                  label={label}
+                  inputLabel={`${label}の表示数`}
+                  value={value}
+                  setValue={setValue}
+                  markReplace={() => {}}
+                  metaFontPx={11}
+                  max={TOP_N_MAX}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* トグル（パネル外・下部）。/sankey-svg の TopN パネルと同じ作法 */}
       <button
         type="button"
-        aria-label="表示設定"
+        title={open ? '表示数 を隠す' : '表示数 を表示'}
+        aria-label={open ? '表示数 を隠す' : '表示数 を表示'}
         aria-expanded={open}
         onClick={() => setOpen(o => !o)}
-        className="flex h-8 items-center gap-1 rounded border border-gray-300 bg-white px-2 text-xs text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="-mt-px flex items-center justify-center rounded-b border border-t-0 border-gray-200 bg-white/95 px-1"
       >
-        表示設定
-        <span aria-hidden="true" className="text-[10px] text-gray-400">
-          {open ? '▲' : '▼'}
-        </span>
+        <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
+          <path
+            d={
+              open
+                ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z'
+                : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'
+            }
+          />
+        </svg>
       </button>
-
-      {open && (
-        <div className="absolute right-0 top-full z-40 mt-1 w-72 rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
-          <div className="flex flex-col gap-2 text-xs text-gray-600">
-            {/* 列ごとの表示件数。溢れた分はその列の集約ノードにまとまる。
-                読み込み中も掴めるようにする（disabled にすると連続で動かせない） */}
-            <div className="flex flex-col gap-1">
-              <span className="font-medium">表示数（列ごと）</span>
-              {TOP_N_COLUMNS.map(column => {
-                const label = MOF_HIERARCHY_COLUMN_LABELS[column];
-                const value = topN[column] ?? DEFAULT_TOP_N[column] ?? TOP_N_MAX;
-                // 増減ボタンは更新関数の形で呼ぶので、それを受けられるようにする
-                const setValue: Dispatch<SetStateAction<number>> = next =>
-                  onTopNChange({
-                    ...topN,
-                    [column]: typeof next === 'function' ? next(value) : next,
-                  });
-                const total = columnCounts[column] ?? 0;
-                return (
-                  <div key={column} className="flex flex-col">
-                    <TopNSliderRow
-                      label={label}
-                      inputLabel={`${label}の表示数`}
-                      value={value}
-                      setValue={setValue}
-                      markReplace={() => {}}
-                      metaFontPx={11}
-                      max={TOP_N_MAX}
-                    />
-                    {/* 丸ごと収まっている列にはずらす先が無いので出さない */}
-                    {total > value && (
-                      <OffsetRow
-                        label={label}
-                        offset={offset[column] ?? 0}
-                        limit={value}
-                        total={total}
-                        onChange={next => onOffsetChange({ ...offset, [column]: next })}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <Row label="文字サイズ">
-              <select
-                aria-label="文字サイズ"
-                value={fontPx}
-                onChange={e => onFontPxChange(Number(e.target.value))}
-                className={SELECT_CLASS}
-              >
-                {FONT_PX_OPTIONS.map(n => (
-                  <option key={n} value={n}>
-                    {n}px
-                  </option>
-                ))}
-              </select>
-            </Row>
-
-            <Row label="ラベル表示">
-              <select
-                aria-label="ラベル表示"
-                value={labelDensity}
-                onChange={e => onLabelDensityChange(e.target.value as LabelDensity)}
-                className={SELECT_CLASS}
-              >
-                <option value="all">すべて</option>
-                <option value="major">主要なノードのみ</option>
-              </select>
-            </Row>
-
-            <label className="flex cursor-pointer items-center gap-1.5 pt-1">
-              <input
-                type="checkbox"
-                checked={focusRelated}
-                onChange={e => onFocusRelatedChange(e.target.checked)}
-                className="h-3.5 w-3.5 cursor-pointer"
-              />
-              <span>選択時に関連のみ表示</span>
-            </label>
-
-            <p className="border-t border-gray-100 pt-2 text-[11px] text-gray-400">
-              表示数を超えた分は、灰色の集約ノード（「41組織」など）にまとまります
-            </p>
-            {summary && <p className="text-[11px] text-gray-500">{summary}</p>}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <span className="font-medium">{label}</span>
-      {children}
     </div>
   );
 }

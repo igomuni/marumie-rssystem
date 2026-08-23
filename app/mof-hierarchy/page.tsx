@@ -27,6 +27,7 @@ import { YearSelect } from '@/components/navigation/YearSelect';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchyChart, LABEL_FONT_PX_DEFAULT } from '@/client/components/mof-hierarchy/HierarchyChart';
 import { HierarchyControls } from '@/client/components/mof-hierarchy/HierarchyControls';
+import { HierarchySettings } from '@/client/components/mof-hierarchy/HierarchySettings';
 import { useMofBudgetData } from '@/client/components/mof-budget/useMofBudgetData';
 
 /**
@@ -233,28 +234,44 @@ function MOFHierarchyContent() {
         labelDensity={labelDensity}
       />
 
-      {/* コントロール・年度・ページ切替。/sankey-svg と同じく右上に並べる */}
+      {/* 右上クラスタ: ［表示数/表示位置 - 予算種別 - 表示設定 - 年度 - ページ切替］。
+          /sankey-svg の並び（ツール → 表示設定 → 年度 → メニュー）に合わせる */}
       <div className="absolute right-3 top-3 z-30 flex items-start gap-2">
-        <div className="rounded-lg border border-black/10 bg-white/90 px-3 py-2 shadow-md backdrop-blur">
-          <HierarchyControls
-            budgetType={metadata.budgetType}
-            budgetTypes={metadata.budgetTypes}
-            topN={topN}
-            offset={offset}
-            columnCounts={metadata.columnCounts}
-            onOffsetChange={setOffset}
+        <HierarchyControls
+          topN={topN}
+          offset={offset}
+          columnCounts={metadata.columnCounts}
+          onTopNChange={setTopN}
+          onOffsetChange={setOffset}
+        />
+
+        <label className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-black/10 bg-white/90 px-2 text-xs text-gray-600 shadow-md backdrop-blur">
+          <span className="font-medium">予算種別</span>
+          <select
+            aria-label="予算種別"
+            value={metadata.budgetType}
             disabled={loading}
-            onBudgetTypeChange={setBudgetType}
-            onTopNChange={setTopN}
-            summary={`${metadata.itemCount.toLocaleString()}事項 / ${accountsLabel}`}
-            focusRelated={focusRelated}
-            onFocusRelatedChange={setFocusRelated}
-            fontPx={fontPx}
-            onFontPxChange={setFontPx}
-            labelDensity={labelDensity}
-            onLabelDensityChange={setLabelDensity}
-          />
-        </div>
+            onChange={e => setBudgetType(e.target.value as MOFBudgetType)}
+            className="h-6 cursor-pointer rounded border border-gray-300 bg-white px-1 text-xs text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            {metadata.budgetTypes.map(type => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <HierarchySettings
+          fontPx={fontPx}
+          onFontPxChange={setFontPx}
+          labelDensity={labelDensity}
+          onLabelDensityChange={setLabelDensity}
+          focusRelated={focusRelated}
+          onFocusRelatedChange={setFocusRelated}
+          summary={`${metadata.itemCount.toLocaleString()}事項 / ${accountsLabel}`}
+        />
+
         <YearSelect
           value={String(year ?? metadata.fiscalYear)}
           onChange={y => fetchData(Number(y))}

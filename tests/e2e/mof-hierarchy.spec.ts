@@ -130,6 +130,7 @@ test.describe('mof-hierarchy', () => {
     const boxes = await page.evaluate(() => {
       const targets = [
         ['検索', 'input[type="search"]'],
+        ['表示数パネル', 'select[aria-label="表示位置の対象"]'],
         ['予算種別', 'select[aria-label="予算種別"]'],
         ['表示設定', '[aria-label="表示設定"]'],
         ['年度', 'select[aria-label="年度"]'],
@@ -141,7 +142,7 @@ test.describe('mof-hierarchy', () => {
         return [{ name, left: r.left, right: r.right, top: r.top, bottom: r.bottom }];
       });
     });
-    expect(boxes.length).toBe(4);
+    expect(boxes.length).toBe(5);
 
     for (let i = 0; i < boxes.length; i += 1) {
       for (let j = i + 1; j < boxes.length; j += 1) {
@@ -164,7 +165,6 @@ test.describe('mof-hierarchy', () => {
         .getByTestId('hierarchy-node')
         .evaluateAll(els => els.filter(el => el.getAttribute('data-column') === 'item').length);
 
-    await page.getByLabel('表示設定').click();
     const before = await itemNodes();
     expect(before).toBeGreaterThan(10);
 
@@ -182,8 +182,6 @@ test.describe('mof-hierarchy', () => {
 
   test('TopN controls stay usable while the graph reloads', async ({ page }) => {
     // 読み込み中に触れないと、続けて2つの列を絞れない
-    await page.getByLabel('表示設定').click();
-
     await page.getByLabel('事項の表示数を減らす', { exact: true }).click();
     // 応答を待たずに別の列を動かす
     await page.getByLabel('項の表示数を減らす', { exact: true }).click();
@@ -212,7 +210,7 @@ test.describe('mof-hierarchy', () => {
 
     const fits = await page.evaluate(() => {
       const panel = document
-        .querySelector('[aria-label="事項の表示数"]')!
+        .querySelector('[aria-label="文字サイズ"]')!
         .closest('div.absolute')!
         .getBoundingClientRect();
       const search = document.querySelector('input[type="search"]')!.getBoundingClientRect();
@@ -247,7 +245,7 @@ test.describe('mof-hierarchy', () => {
 
     await page.goto('/mof-hierarchy?tit=5');
     await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
-    await page.getByLabel('表示設定').click();
+    await page.getByLabel('表示位置の対象').selectOption('item');
     const first = await itemNames();
 
     await page.getByLabel('事項の表示位置を次へ', { exact: true }).click();
@@ -258,15 +256,31 @@ test.describe('mof-hierarchy', () => {
     await expect.poll(itemNames, { timeout: 30_000 }).not.toEqual(first);
   });
 
-  test('columns that fit entirely have no offset control', async ({ page }) => {
-    // ずらす先が無い列に操作を出すと、押しても何も起きない部品になる
+  test('the offset control is inert for a column that fits entirely', async ({ page }) => {
+    // ずらす先が無い列では動かせないことを示す。押せてしまうと
+    // 「押したのに何も起きない」になる
     await page.goto('/mof-hierarchy?tmi=200');
     await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
-    await page.getByLabel('表示設定').click();
 
-    await expect(page.getByLabel('所管の表示数', { exact: true })).toBeVisible();
-    await expect(page.getByLabel('所管の開始位置', { exact: true })).toHaveCount(0);
-    // 収まりきらない列には出る
-    await expect(page.getByLabel('事項の開始位置', { exact: true })).toHaveCount(1);
+    await page.getByLabel('表示位置の対象').selectOption('ministry');
+    await expect(page.getByLabel('所管の開始位置', { exact: true })).toBeDisabled();
+
+    // 収まりきらない列に切り替えれば動かせる
+    await page.getByLabel('表示位置の対象').selectOption('item');
+    await expect(page.getByLabel('事項の開始位置', { exact: true })).toBeEnabled();
+  });
+
+  test('the TopN panel can be collapsed without losing the offset row', async ({ page }) => {
+    // 図を広く見たいときに畳める。畳んでも表示位置は動かせる
+    // （/sankey-svg の TopN パネルと同じ作法）
+    await expect(page.getByLabel('事項の表示数', { exact: true })).toBeVisible();
+
+    await page.getByLabel('表示数 を隠す').click();
+
+    await expect(page.getByLabel('事項の表示数', { exact: true })).toHaveCount(0);
+    await expect(page.getByLabel('表示位置の対象')).toBeVisible();
+
+    await page.getByLabel('表示数 を表示').click();
+    await expect(page.getByLabel('事項の表示数', { exact: true })).toBeVisible();
   });
 });
