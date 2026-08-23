@@ -11,7 +11,7 @@
  * 列ごとに行を並べるとパネルが縦に伸びて図を覆うため。
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { TopNSliderRow } from '@/client/components/SankeySvg/TopNSliders';
 import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
@@ -85,6 +85,22 @@ export function HierarchyControls({
   const commitOffset = (next: number) =>
     onOffsetChange({ ...offset, [target]: Math.max(0, Math.min(max, next)) });
 
+  /**
+   * 長押しで送るための最新値。
+   *
+   * useRepeatPress は pointerdown 時点の関数を setInterval で呼び直すので、
+   * その関数が当時の開始位置を握っていると、押し続けても同じ位置を
+   * 何度も指定するだけで先へ進まない。毎描画で更新する ref から読む。
+   */
+  const latest = useRef({ offset, target, limit, max, current });
+  latest.current = { offset, target, limit, max, current };
+  const pageBy = (delta: number) => {
+    const now = latest.current;
+    // 1ページぶん送る。1件ずつだと41位から先へ行くのに40回押すことになる
+    const next = Math.max(0, Math.min(now.max, now.current + delta * now.limit));
+    onOffsetChange({ ...now.offset, [now.target]: next });
+  };
+
   return (
     <div className="flex flex-col items-end" data-pan-disabled="true">
       <div className="rounded-t-md rounded-bl-md border border-gray-200 bg-white/95 px-2.5 py-1.5 shadow-md backdrop-blur">
@@ -154,8 +170,7 @@ export function HierarchyControls({
             /{total.toLocaleString()}件
           </span>
           {ARROW_PATHS.map(([delta, path, title]) => {
-            // 1ページぶん送る。1件ずつだと41位から先へ行くのに40回押すことになる
-            const step = () => commitOffset(current + delta * limit);
+            const step = () => pageBy(delta);
             return (
               <button
                 key={delta}

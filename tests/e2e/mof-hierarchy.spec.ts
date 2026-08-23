@@ -325,4 +325,51 @@ test.describe('mof-hierarchy', () => {
     await page.getByTitle('全体を表示').click();
     await expect.poll(top).toBe(0);
   });
+
+  test('holding 次へ keeps paging past the first page', async ({ page }) => {
+    // useRepeatPress は pointerdown 時点の関数を setInterval で呼び直す。
+    // その関数が当時の開始位置を握っていると、押し続けても同じ位置を
+    // 何度も指定するだけで先へ進まない
+    await page.goto('/mof-hierarchy?tit=10');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+    await page.getByLabel('表示位置の対象').selectOption('item');
+
+    const start = page.getByLabel('事項の開始位置を直接入力');
+    await expect(start).toHaveText('1');
+
+    const next = page.getByLabel('事項の表示位置を次へ', { exact: true });
+    const box = (await next.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    // 400ms で連続実行に入り、150ms 間隔で送られる
+    await page.waitForTimeout(1200);
+    await page.mouse.up();
+
+    // 1ページ（10件）ぶんしか進まないなら 11 のまま
+    await expect
+      .poll(async () => Number((await start.textContent()) ?? '0'), { timeout: 10_000 })
+      .toBeGreaterThan(11);
+  });
+
+  test('the aggregate breakdown renders without duplicate React keys', async ({ page }) => {
+    // 事項名は項をまたいで重複する。実データでも集約の上位8件に
+    // 同名が2件入る（国債整理基金特別会計へ繰入れに必要な経費）
+    const consoleErrors: string[] = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') consoleErrors.push(msg.text());
+    });
+
+    await page.goto('/mof-hierarchy?tse=8&tit=8');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+
+    // 事項列の集約ノードを選ぶと、詳細パネルに内訳が並ぶ
+    const aggregate = page
+      .getByTestId('hierarchy-node')
+      .filter({ hasText: /^[\d,]+事項 \(/ })
+      .first();
+    await aggregate.click();
+
+    await expect(page.getByText('内訳（金額の大きい順）')).toBeVisible();
+    expect(consoleErrors.filter(t => /same key|duplicate key/i.test(t))).toEqual([]);
+  });
 });

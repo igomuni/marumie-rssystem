@@ -608,9 +608,10 @@ export function HierarchyChart({
           {selectedDetails?.aggregatedTop && selectedDetails.aggregatedTop.length > 0 && (
             <div className="mt-2 border-t border-gray-100 pt-2">
               <div className="mb-1 text-[11px] text-gray-400">内訳（金額の大きい順）</div>
-              {selectedDetails.aggregatedTop.map(member => (
+              {/* 事項名は項をまたいで重複するので、名前だけだと鍵が衝突する */}
+              {selectedDetails.aggregatedTop.map((member, index) => (
                 <div
-                  key={member.name}
+                  key={`${index}-${member.name}`}
                   className="flex justify-between gap-3 text-xs text-gray-700"
                 >
                   <span className="truncate">{member.name}</span>
