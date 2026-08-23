@@ -74,6 +74,39 @@ describe('buildMOFHierarchySankey', () => {
     expect(pass[0].details.aggregated).toBeUndefined();
   });
 
+  it('通過ノードはリンクの端点にならない（帯は実ノードから実ノードへ直結する）', () => {
+    // 通過ノードは箱もラベルも出ない透明な存在なので、そこに帯が収束・分岐すると
+    // 見た目には理由の分からない「くびれ」になる。帯は実在するノード同士を
+    // 直接つなぎ、通過ノードは場所の確保だけに使う
+    const result = buildMOFHierarchySankey([item({})], options);
+    const passIds = new Set(
+      result.sankey.nodes.filter(n => n.details.passThrough).map(n => n.id)
+    );
+    expect(passIds.size).toBeGreaterThan(0);
+    for (const link of result.sankey.links) {
+      expect(passIds.has(link.source)).toBe(false);
+      expect(passIds.has(link.target)).toBe(false);
+    }
+  });
+
+  it('通過ノードの子が集約されても、集約への帯は通過ノードを経由しない', () => {
+    // 集約（その他）への流れを作る別経路（othersLinks）にも同じ穴があった。
+    // 一般会計（勘定なし＝通過）の下で項が TopN から溢れると、
+    // 「集約への帯」の起点が通過ノードのままになっていた
+    const items = Array.from({ length: 6 }, (_, i) =>
+      item({ sectionCode: `s${i}`, sectionName: `項${i}`, name: `事項${i}`, amount: 100 - i })
+    );
+    const result = buildMOFHierarchySankey(items, { ...options, topN: { section: 2 } });
+    const passIds = new Set(
+      result.sankey.nodes.filter(n => n.details.passThrough).map(n => n.id)
+    );
+    expect(passIds.size).toBeGreaterThan(0);
+    for (const link of result.sankey.links) {
+      expect(passIds.has(link.source)).toBe(false);
+      expect(passIds.has(link.target)).toBe(false);
+    }
+  });
+
   it('勘定を持つ特別会計では勘定列が立つ', () => {
     const result = buildMOFHierarchySankey(
       [
