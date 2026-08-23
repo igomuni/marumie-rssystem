@@ -88,6 +88,13 @@ export type LabelDensity = 'major' | 'all';
 /** 列ごとの TopN。指定の無い列は集約しない */
 export type MOFHierarchyTopN = Partial<Record<MOFHierarchyColumn, number>>;
 
+/**
+ * 列ごとの表示開始位置（0始まり）。
+ * TopN だけだと上位しか見られず、41位以降は集約の中に消えたまま辿れない。
+ * 窓をずらして下位も見られるようにする（/sankey-svg のオフセットと同じ）。
+ */
+export type MOFHierarchyOffset = Partial<Record<MOFHierarchyColumn, number>>;
+
 /** 会計区分ごとの内訳。何が収録されているかを見出しに出すために持つ */
 export interface MOFHierarchyAccountSummary {
   accountType: MOFAccountType;
@@ -112,6 +119,14 @@ export interface MOFHierarchyData {
     itemCount: number;
     /** 適用した TopN（列ごとの表示件数の上限） */
     topN: MOFHierarchyTopN;
+    /** 適用した表示開始位置。行き過ぎた指定は丸めた後の値が入る */
+    offset: MOFHierarchyOffset;
+    /**
+     * 列ごとの候補件数。
+     * 上流の列を絞ると下流の候補も減るので、画面が出す「◯〜◯ / 全◯件」は
+     * この値を使う。集約ノードと通過ノードは数えない
+     */
+    columnCounts: Partial<Record<MOFHierarchyColumn, number>>;
     unit: 'yen';
     notes: string[];
   };

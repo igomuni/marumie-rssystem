@@ -9,7 +9,11 @@ import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
 import { availableYears, loadYear } from '@/app/lib/api/mof-jikou-loader';
 import { buildMOFHierarchySankey, DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
-import type { MOFHierarchyColumn, MOFHierarchyTopN } from '@/types/mof-hierarchy';
+import type {
+  MOFHierarchyColumn,
+  MOFHierarchyOffset,
+  MOFHierarchyTopN,
+} from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
 
 /** TopN の上限。これを超えるとラベルが潰れて読めなくなる */
@@ -26,6 +30,23 @@ const TOP_N_PARAMS: Array<[Exclude<MOFHierarchyColumn, 'total'>, string]> = [
   ['section', 'topSection'],
   ['item', 'topItem'],
 ];
+
+/** 表示開始位置のクエリパラメータ名。列ごとに1つ持つ */
+const OFFSET_PARAMS: Array<[Exclude<MOFHierarchyColumn, 'total'>, string]> = [
+  ['ministry', 'offsetMinistry'],
+  ['organization', 'offsetOrganization'],
+  ['subAccount', 'offsetSubAccount'],
+  ['section', 'offsetSection'],
+  ['item', 'offsetItem'],
+];
+
+/** 開始位置は0以上の整数。範囲外の丸めは組み立て側が持つ */
+function parseOffset(raw: string | null): number | undefined {
+  if (raw === null) return undefined;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0) return undefined;
+  return Math.floor(value);
+}
 
 function parseTopN(raw: string | null, fallback: number | undefined): number | undefined {
   if (!raw) return fallback;
@@ -88,6 +109,10 @@ export async function GET(request: Request) {
       ])
     );
 
+    const offset: MOFHierarchyOffset = Object.fromEntries(
+      OFFSET_PARAMS.map(([column, param]) => [column, parseOffset(params.get(param))])
+    );
+
     const result = buildMOFHierarchySankey(data.items, {
       fiscalYear: year,
       eraLabel: data.metadata.eraLabel,
@@ -95,6 +120,7 @@ export async function GET(request: Request) {
       budgetTypes,
       availableYears: years,
       topN,
+      offset,
     });
 
     return NextResponse.json(result, {

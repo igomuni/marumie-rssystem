@@ -233,4 +233,40 @@ test.describe('mof-hierarchy', () => {
     expect(fits.inside).toBe(true);
     expect(fits.overlapsSearch).toBe(false);
   });
+
+  test('the offset window pages through ranks below TopN', async ({ page }) => {
+    // TopN だけだと上位しか見られず、41位以降は集約に消えたまま辿れない
+    const itemNames = () =>
+      page
+        .getByTestId('hierarchy-node')
+        .evaluateAll(els =>
+          els
+            .filter(el => el.getAttribute('data-column') === 'item')
+            .map(el => (el.querySelector('text')?.textContent ?? '').split(' (')[0])
+        );
+
+    await page.goto('/mof-hierarchy?tit=5');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+    await page.getByLabel('表示設定').click();
+    const first = await itemNames();
+
+    await page.getByLabel('事項の表示位置を次へ', { exact: true }).click();
+
+    // 表示は待たずに切り替わる（1ページ＝TopN件ぶん送る）
+    await expect(page.getByLabel('事項の開始位置を直接入力')).toHaveText('6');
+    await expect(page).toHaveURL(/oit=5/);
+    await expect.poll(itemNames, { timeout: 30_000 }).not.toEqual(first);
+  });
+
+  test('columns that fit entirely have no offset control', async ({ page }) => {
+    // ずらす先が無い列に操作を出すと、押しても何も起きない部品になる
+    await page.goto('/mof-hierarchy?tmi=200');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+    await page.getByLabel('表示設定').click();
+
+    await expect(page.getByLabel('所管の表示数', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('所管の開始位置', { exact: true })).toHaveCount(0);
+    // 収まりきらない列には出る
+    await expect(page.getByLabel('事項の開始位置', { exact: true })).toHaveCount(1);
+  });
 });

@@ -15,12 +15,14 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { TopNSliderRow } from '@/client/components/SankeySvg/TopNSliders';
+import { OffsetRow } from './OffsetRow';
 import { DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
 import {
   MOF_HIERARCHY_COLUMNS,
   MOF_HIERARCHY_COLUMN_LABELS,
   type LabelDensity,
   type MOFHierarchyColumn,
+  type MOFHierarchyOffset,
   type MOFHierarchyTopN,
 } from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
@@ -46,9 +48,12 @@ export function HierarchyControls({
   budgetType,
   budgetTypes,
   topN,
+  offset,
+  columnCounts,
   disabled,
   onBudgetTypeChange,
   onTopNChange,
+  onOffsetChange,
   summary,
   focusRelated,
   onFocusRelatedChange,
@@ -60,9 +65,14 @@ export function HierarchyControls({
   budgetType: MOFBudgetType;
   budgetTypes: MOFBudgetType[];
   topN: MOFHierarchyTopN;
+  /** 列ごとの表示開始位置 */
+  offset: MOFHierarchyOffset;
+  /** 列ごとの候補件数。開始位置の上限を出すのに使う */
+  columnCounts: Partial<Record<MOFHierarchyColumn, number>>;
   disabled?: boolean;
   onBudgetTypeChange: (value: MOFBudgetType) => void;
   onTopNChange: (next: MOFHierarchyTopN) => void;
+  onOffsetChange: (next: MOFHierarchyOffset) => void;
   /** 図の外に出す補足（事項数・会計区分の内訳） */
   summary?: string;
   focusRelated: boolean;
@@ -142,17 +152,29 @@ export function HierarchyControls({
                     ...topN,
                     [column]: typeof next === 'function' ? next(value) : next,
                   });
+                const total = columnCounts[column] ?? 0;
                 return (
-                  <TopNSliderRow
-                    key={column}
-                    label={label}
-                    inputLabel={`${label}の表示数`}
-                    value={value}
-                    setValue={setValue}
-                    markReplace={() => {}}
-                    metaFontPx={11}
-                    max={TOP_N_MAX}
-                  />
+                  <div key={column} className="flex flex-col">
+                    <TopNSliderRow
+                      label={label}
+                      inputLabel={`${label}の表示数`}
+                      value={value}
+                      setValue={setValue}
+                      markReplace={() => {}}
+                      metaFontPx={11}
+                      max={TOP_N_MAX}
+                    />
+                    {/* 丸ごと収まっている列にはずらす先が無いので出さない */}
+                    {total > value && (
+                      <OffsetRow
+                        label={label}
+                        offset={offset[column] ?? 0}
+                        limit={value}
+                        total={total}
+                        onChange={next => onOffsetChange({ ...offset, [column]: next })}
+                      />
+                    )}
+                  </div>
                 );
               })}
             </div>

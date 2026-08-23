@@ -18,6 +18,7 @@ import {
   type LabelDensity,
   type MOFHierarchyColumn,
   type MOFHierarchyData,
+  type MOFHierarchyOffset,
   type MOFHierarchyTopN,
 } from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
@@ -38,10 +39,16 @@ const TOP_N_KEYS: Array<{
   urlKey: string;
   /** API に渡す名前 */
   apiKey: string;
+  /** 表示開始位置の URL 名 */
+  offsetUrlKey: string;
+  /** 表示開始位置の API 名 */
+  offsetApiKey: string;
 }> = MOF_HIERARCHY_COLUMNS.filter(c => c !== 'total').map(column => ({
   column: column as Exclude<MOFHierarchyColumn, 'total'>,
   urlKey: `t${column.slice(0, 2)}`,
   apiKey: `top${column[0].toUpperCase()}${column.slice(1)}`,
+  offsetUrlKey: `o${column.slice(0, 2)}`,
+  offsetApiKey: `offset${column[0].toUpperCase()}${column.slice(1)}`,
 }));
 
 export default function MOFHierarchyPage() {
@@ -74,6 +81,14 @@ function MOFHierarchyContent() {
       ])
     )
   );
+  const [offset, setOffset] = useState<MOFHierarchyOffset>(() =>
+    Object.fromEntries(
+      TOP_N_KEYS.map(({ column, offsetUrlKey }) => [
+        column,
+        Number(searchParams.get(offsetUrlKey)) || undefined,
+      ])
+    )
+  );
   const [selectedId, setSelectedId] = useState<string | null>(
     searchParams.get('sel')
   );
@@ -90,14 +105,16 @@ function MOFHierarchyContent() {
       const params = new URLSearchParams();
       if (target) params.set('year', String(target));
       if (budgetType) params.set('budgetType', budgetType);
-      for (const { column, apiKey } of TOP_N_KEYS) {
+      for (const { column, apiKey, offsetApiKey } of TOP_N_KEYS) {
         const value = topN[column];
         if (value) params.set(apiKey, String(value));
+        const start = offset[column];
+        if (start) params.set(offsetApiKey, String(start));
       }
       const query = params.toString();
       return `/api/mof-hierarchy${query ? `?${query}` : ''}`;
     },
-    [budgetType, topN]
+    [budgetType, topN, offset]
   );
 
   const { data, year, loading, error, fetchData } = useMofBudgetData<MOFHierarchyData>(
@@ -117,9 +134,13 @@ function MOFHierarchyContent() {
     params.set('bt', data.metadata.budgetType);
     // 表示数は画面で選んでいる値を正とする。
     // 応答（metadata）を待つと、選んだ直後に古い値へ戻って見える
-    for (const { column, urlKey } of TOP_N_KEYS) {
+    for (const { column, urlKey, offsetUrlKey } of TOP_N_KEYS) {
       const value = topN[column];
       if (value) params.set(urlKey, String(value));
+      // 開始位置は行き過ぎを丸めた後の値（応答）を載せる。
+      // 生の値だと、末尾で「次へ」を押し続けたときに URL だけが伸び続ける
+      const start = data.metadata.offset[column];
+      if (start) params.set(offsetUrlKey, String(start));
     }
     if (selectedId) params.set('sel', selectedId);
     if (!focusRelated) params.set('fr', '0');
@@ -144,6 +165,14 @@ function MOFHierarchyContent() {
           TOP_N_KEYS.map(({ column, urlKey }) => [
             column,
             Number(params.get(urlKey)) || undefined,
+          ])
+        )
+      );
+      setOffset(
+        Object.fromEntries(
+          TOP_N_KEYS.map(({ column, offsetUrlKey }) => [
+            column,
+            Number(params.get(offsetUrlKey)) || undefined,
           ])
         )
       );
@@ -211,6 +240,9 @@ function MOFHierarchyContent() {
             budgetType={metadata.budgetType}
             budgetTypes={metadata.budgetTypes}
             topN={topN}
+            offset={offset}
+            columnCounts={metadata.columnCounts}
+            onOffsetChange={setOffset}
             disabled={loading}
             onBudgetTypeChange={setBudgetType}
             onTopNChange={setTopN}

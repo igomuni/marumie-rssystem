@@ -281,3 +281,73 @@ describe('TopN は列単位で効く', () => {
     expect(columnTotal).toBe(result.metadata.total);
   });
 });
+
+describe('TopN のオフセット', () => {
+  const branch = (ministry: string, section: string, amount: number) =>
+    item({
+      ministry,
+      organization: `${ministry}本省`,
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: `事項${section}`,
+      amount,
+    });
+
+  /** 金額 100, 99, 98, ... の項を n 本作る */
+  const ranked = (n: number) =>
+    Array.from({ length: n }, (_, i) => branch('A', `s${i}`, 100 - i));
+
+  it('オフセットの分だけ順位をずらして切り出す', () => {
+    const result = buildMOFHierarchySankey(ranked(10), {
+      ...options,
+      topN: { section: 3 },
+      offset: { section: 3 },
+    });
+    const sections = result.sankey.nodes.filter(
+      n => n.details.column === 'section' && !n.details.aggregated
+    );
+    // 4〜6位（金額 97, 96, 95）
+    expect(sections.map(n => n.value).sort((a, b) => (b ?? 0) - (a ?? 0))).toEqual([97, 96, 95]);
+  });
+
+  it('窓の外は上位側も含めて集約に入る', () => {
+    const result = buildMOFHierarchySankey(ranked(10), {
+      ...options,
+      topN: { section: 3 },
+      offset: { section: 3 },
+    });
+    const agg = result.sankey.nodes.find(
+      n => n.details.column === 'section' && n.details.aggregated
+    )!;
+    // 10件中3件を残したので7件が集約。上位3件もここに入る
+    expect(agg.details.aggregatedCount).toBe(7);
+    // 合計は保たれる
+    const columnTotal = result.sankey.nodes
+      .filter(n => n.details.column === 'section')
+      .reduce((sum, n) => sum + (n.value ?? 0), 0);
+    expect(columnTotal).toBe(result.metadata.total);
+  });
+
+  it('行き過ぎたオフセットは末尾に丸め、丸めた値を返す', () => {
+    const result = buildMOFHierarchySankey(ranked(10), {
+      ...options,
+      topN: { section: 3 },
+      offset: { section: 999 },
+    });
+    const sections = result.sankey.nodes.filter(
+      n => n.details.column === 'section' && !n.details.aggregated
+    );
+    // 末尾3件（金額 93, 92, 91）
+    expect(sections.map(n => n.value).sort((a, b) => (b ?? 0) - (a ?? 0))).toEqual([93, 92, 91]);
+    expect(result.metadata.offset.section).toBe(7);
+  });
+
+  it('列ごとの候補件数を返す（オフセットの上限を画面が出すため）', () => {
+    const result = buildMOFHierarchySankey(ranked(10), {
+      ...options,
+      topN: { section: 3 },
+    });
+    expect(result.metadata.columnCounts.section).toBe(10);
+    expect(result.metadata.columnCounts.ministry).toBe(1);
+  });
+});

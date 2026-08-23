@@ -16,6 +16,7 @@ import type {
   MOFHierarchyData,
   MOFHierarchyNode,
   MOFHierarchyNodeDetails,
+  MOFHierarchyOffset,
   MOFHierarchyTopN,
 } from '@/types/mof-hierarchy';
 import type { SankeyLink } from '@/types/sankey';
@@ -98,9 +99,12 @@ export function buildMOFHierarchySankey(
     availableYears: number[];
     /** 列ごとの表示件数の上限。指定の無い列は既定値 */
     topN?: MOFHierarchyTopN;
+    /** 列ごとの表示開始位置（0始まり）。範囲外は丸める */
+    offset?: MOFHierarchyOffset;
   }
 ): MOFHierarchyData {
   const topN = { ...DEFAULT_TOP_N, ...options.topN };
+  const offset: MOFHierarchyOffset = { ...options.offset };
   const target = items.filter(i => i.budgetType === options.budgetType);
 
   // --- 階層を辿ってノードを作る ---
@@ -197,6 +201,8 @@ export function buildMOFHierarchySankey(
   // 集約された所管の下から事項が単独で顔を出すことがなくなり、
   // 図の左から右へ辿れる形が保たれる。
   const kept = new Set<string>([ROOT_ID]);
+  const columnCounts: Partial<Record<MOFHierarchyColumn, number>> = {};
+  const appliedOffset: MOFHierarchyOffset = {};
   for (const column of columns) {
     const candidates = [...nodes.values()].filter(
       n => n.column === column && n.parentId !== null && kept.has(n.parentId)
@@ -206,8 +212,18 @@ export function buildMOFHierarchySankey(
     const rankable = candidates
       .filter(n => !n.details.passThrough)
       .sort((a, b) => b.amount - a.amount);
+    columnCounts[column] = rankable.length;
+
     const limit = topN[column];
-    for (const node of limit ? rankable.slice(0, limit) : rankable) kept.add(node.id);
+    if (!limit) {
+      appliedOffset[column] = 0;
+      for (const node of rankable) kept.add(node.id);
+      continue;
+    }
+    // 行き過ぎた指定は末尾に丸める。空の窓を返すと図が消えて操作不能になる
+    const start = Math.max(0, Math.min(offset[column] ?? 0, Math.max(0, rankable.length - limit)));
+    appliedOffset[column] = start;
+    for (const node of rankable.slice(start, start + limit)) kept.add(node.id);
   }
 
   // --- 集約ノードは列ごとに1つ ---
@@ -333,13 +349,16 @@ export function buildMOFHierarchySankey(
       total,
       itemCount: target.length,
       topN,
+      offset: appliedOffset,
+      columnCounts,
       unit: 'yen',
       notes: [
         '会計区分をまたいだ単純合計です。会計間の繰入がある分は二重に数えられています',
         '収録されていない会計区分は図に現れません（決算の事項別内訳は一般会計にしかありません）',
         '補正予算の金額は改予算額です。号数をまたいで合算しないでください',
         '項コードは組織内の連番で、単独では一意になりません',
-        '「41組織」のような灰色のノードは、表示数から溢れた分をまとめたものです。金額は保たれています',
+        '「41組織」のような灰色のノードは、表示の窓から外れた分をまとめたものです。金額は保たれています',
+      '表示開始位置をずらすと、窓の外にあった下位の順位も辿れます',
       ],
     },
     accounts,
