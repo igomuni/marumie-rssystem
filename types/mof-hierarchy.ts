@@ -60,6 +60,13 @@ export type MOFHierarchyNode = SankeyNode & {
   details: MOFHierarchyNodeDetails;
 };
 
+/**
+ * ラベルをどこまで出すか。
+ * all   = すべてのノードに名前を出す。読み落としは無いが図は縦に長くなる
+ * major = 名前が収まる大きさのノードだけに出す。詰めて全体を見渡せる
+ */
+export type LabelDensity = 'major' | 'all';
+
 /** 列ごとの TopN。指定の無い列は集約しない */
 export type MOFHierarchyTopN = Partial<Record<MOFHierarchyColumn, number>>;
 

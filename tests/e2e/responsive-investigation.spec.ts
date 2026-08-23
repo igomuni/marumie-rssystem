@@ -23,7 +23,9 @@ const VIEWPORTS = [
  *
  *   CAPTURE_SCREENSHOTS=1 npx playwright test tests/e2e/responsive-investigation.spec.ts
  */
-test.skip(!process.env.CAPTURE_SCREENSHOTS, 'CAPTURE_SCREENSHOTS=1 のときだけ採取する');
+// 真偽で見ると CAPTURE_SCREENSHOTS=0 でも走ってしまい、
+// 「止めたつもりで上書きされる」が起きるので、値を 1 に限定する
+test.skip(process.env.CAPTURE_SCREENSHOTS !== '1', 'CAPTURE_SCREENSHOTS=1 のときだけ採取する');
 
 test.beforeAll(() => {
   fs.mkdirSync(OUT_DIR, { recursive: true });

@@ -22,6 +22,7 @@ import {
 import {
   MOF_HIERARCHY_COLUMNS,
   MOF_HIERARCHY_COLUMN_LABELS,
+  type LabelDensity,
   type MOFHierarchyColumn,
   type MOFHierarchyNode,
 } from '@/types/mof-hierarchy';
@@ -30,13 +31,6 @@ import { focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchySearch } from './HierarchySearch';
 import { E2E_TEST_IDS_ENABLED, testId } from '@/client/lib/testId';
-
-/**
- * ラベルをどこまで出すか。
- * all  = すべてのノードに名前を出す。読み落としは無いが図は縦に長くなる
- * major = 名前が収まる大きさのノードだけに出す。詰めて全体を見渡せる
- */
-export type LabelDensity = 'major' | 'all';
 
 /** ラベルの既定サイズ（px） */
 export const LABEL_FONT_PX_DEFAULT = 11;

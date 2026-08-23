@@ -14,9 +14,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
-import type { MOFHierarchyTopN } from '@/types/mof-hierarchy';
+import type { LabelDensity, MOFHierarchyTopN } from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
-import type { LabelDensity } from './HierarchyChart';
 
 const SELECT_CLASS =
   'h-8 cursor-pointer rounded border border-gray-300 bg-white px-2 text-xs text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';

@@ -36,16 +36,34 @@ test.describe('mof-hierarchy', () => {
   });
 
   test('switching the budget type reloads the graph', async ({ page }) => {
-    const before = await page.getByTestId('hierarchy-node').count();
-    expect(before).toBeGreaterThan(0);
-
     const select = page.getByLabel('予算種別');
     const options = await select.locator('option').allTextContents();
     test.skip(options.length < 2, '当該年度に予算種別が1つしかない');
 
-    await select.selectOption(options[1]);
+    const current = await select.inputValue();
+    const next = options.find(o => o !== current);
+    expect(next).toBeTruthy();
+
+    // 「ノードが0でない」だけだと、取得が走らなくても通ってしまう。
+    // 選択・URL・図の中身の3つが揃って変わったことを見る
+    const before = await page
+      .getByTestId('hierarchy-node')
+      .evaluateAll(els => els.map(el => el.textContent).join('|'));
+
+    await select.selectOption(next!);
+
+    await expect(select).toHaveValue(next!);
+    await expect(page).toHaveURL(new RegExp(`bt=${encodeURIComponent(next!)}`));
     await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByTestId('hierarchy-node')).not.toHaveCount(0);
+    await expect
+      .poll(
+        () =>
+          page
+            .getByTestId('hierarchy-node')
+            .evaluateAll(els => els.map(el => el.textContent).join('|')),
+        { timeout: 30_000 }
+      )
+      .not.toBe(before);
   });
 
   test('label font size can be enlarged without labels overlapping', async ({ page }) => {
@@ -112,8 +130,9 @@ test.describe('mof-hierarchy', () => {
     const boxes = await page.evaluate(() => {
       const targets = [
         ['検索', 'input[type="search"]'],
-        ['コントロール', '[aria-label="表示設定"]'],
-        ['年度', 'select[aria-label="予算種別"]'],
+        ['予算種別', 'select[aria-label="予算種別"]'],
+        ['表示設定', '[aria-label="表示設定"]'],
+        ['年度', 'select[aria-label="年度"]'],
       ] as const;
       return targets.flatMap(([name, sel]) => {
         const el = document.querySelector(sel);
@@ -122,7 +141,7 @@ test.describe('mof-hierarchy', () => {
         return [{ name, left: r.left, right: r.right, top: r.top, bottom: r.bottom }];
       });
     });
-    expect(boxes.length).toBe(3);
+    expect(boxes.length).toBe(4);
 
     for (let i = 0; i < boxes.length; i += 1) {
       for (let j = i + 1; j < boxes.length; j += 1) {
@@ -133,5 +152,24 @@ test.describe('mof-hierarchy', () => {
         expect(overlaps, `${a.name} と ${b.name} が重なっている`).toBe(false);
       }
     }
+  });
+
+  test('changing TopN refetches with the new value', async ({ page }) => {
+    // 予算種別と同じ経路（buildUrl の変化）で取り直す。
+    // 年度が確定したあとの取り直しが効かないと、ここも黙って無反応になる。
+    //
+    // セレクタの値は応答の metadata.topN を映すので、5 に変わったことが
+    // 「サーバまで往復して適用された」証拠になる（選んだ値をそのまま
+    // 表示しているのではない）。
+    //
+    // 図の中身は見ない。列の上限（maxPerColumn=40）が先に効くため、
+    // 既定の年度では TopN を変えても描画結果が変わらない。
+    await page.getByLabel('表示設定').click();
+
+    await page.getByLabel('事項の表示数').selectOption('5');
+
+    await expect(page).toHaveURL(/ti=5/);
+    await expect(page.getByLabel('事項の表示数')).toHaveValue('5', { timeout: 30_000 });
+    await expect(page.getByTestId('hierarchy-node')).not.toHaveCount(0);
   });
 });

@@ -13,13 +13,12 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { MOFHierarchyData, MOFHierarchyTopN } from '@/types/mof-hierarchy';
+import type { LabelDensity, MOFHierarchyData, MOFHierarchyTopN } from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchyChart, LABEL_FONT_PX_DEFAULT } from '@/client/components/mof-hierarchy/HierarchyChart';
-import type { LabelDensity } from '@/client/components/mof-hierarchy/HierarchyChart';
 import { HierarchyControls } from '@/client/components/mof-hierarchy/HierarchyControls';
 import { useMofBudgetData } from '@/client/components/mof-budget/useMofBudgetData';
 

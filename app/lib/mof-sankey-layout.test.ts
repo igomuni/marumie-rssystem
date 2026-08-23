@@ -136,6 +136,35 @@ describe('computeMOFSankeyLayout', () => {
     }
   });
 
+  it('通過ノードを挟んでも、ラベル中心の間隔が minNodeSlot を下回らない', () => {
+    // 隣（list[i+1]）だけを見ると、間に通過ノードが挟まった並びで
+    // スロットが広がらず、見えているラベル同士が近づいてしまう
+    const nodes: Node[] = [
+      { id: 'filler', name: 'filler', value: 27000, type: '0' },
+      { id: 'mid', name: 'mid', value: 1000, type: '0' },
+      { id: 'pass', name: '', value: 10, type: '0', details: { passThrough: true } },
+      { id: 'tiny', name: 'tiny', value: 10, type: '0' },
+    ];
+    const slot = 18;
+    const layout = computeMOFSankeyLayout(
+      { nodes, links: [] },
+      { ...OPTIONS, columnOf, align: 'top', minNodeSlot: slot }
+    );
+    // 前提が崩れていないこと（この高さでないとテストが素通りする）
+    const mid = layout.nodes.find(n => n.id === 'mid')!;
+    expect(mid.height).toBeGreaterThan(slot);
+    expect(mid.height).toBeLessThan(slot * 2);
+
+    // ラベルを出すノードだけで中心間隔を見る
+    const centers = layout.nodes
+      .filter(n => !(n.details as { passThrough?: boolean } | undefined)?.passThrough)
+      .map(n => n.y + n.height / 2)
+      .sort((a, b) => a - b);
+    for (let i = 1; i < centers.length; i += 1) {
+      expect(centers[i] - centers[i - 1]).toBeGreaterThanOrEqual(slot - 1e-9);
+    }
+  });
+
   it('通過ノードはラベルを持たないので中心間隔の対象にしない', () => {
     const nodes: Node[] = [
       { id: 'big', name: 'big', value: 1000, type: '0' },
