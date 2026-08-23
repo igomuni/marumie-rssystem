@@ -18,6 +18,23 @@ async function visibleNodeCount(page: import('@playwright/test').Page): Promise<
   });
 }
 
+/**
+ * ラベルを押す。
+ *
+ * `svg text` を直接クリックしてはいけない。文字より広いクリック領域として
+ * 透明な rect がラベルの上に重ねてあり、text へのクリックはそれに遮られる
+ * （Playwright は "intercepts pointer events" で待ち続ける）。
+ * 実際にハンドラを持つのはヒット領域の方なので、そちらを掴む。
+ */
+function nodeLabel(page: import('@playwright/test').Page, name: string) {
+  return page
+    .getByTestId('sankey-node')
+    .filter({ hasText: name })
+    .first()
+    .getByTestId('node-label-hit')
+    .first();
+}
+
 async function selectSearchResultByTitle(page: import('@playwright/test').Page, title: string): Promise<void> {
   const result = page.getByTestId('search-result').filter({
     has: page.locator(`[title="${title}"]`),
@@ -127,7 +144,9 @@ test.describe('sankey-svg interactions', () => {
       input.closest('[data-pan-disabled="true"]')?.getBoundingClientRect().width ?? 0
     );
 
-    await page.getByLabel('表示設定を開く').click();
+    // 文字サイズは表示設定ダイアログではなく左下のフローティングに出る。
+    // ダイアログに入るのはスマホ幅のときだけ（isCompactWidth）
+    await page.getByLabel('フォントサイズ設定').click();
     await page.getByLabel('基準フォントサイズ編集を開始').click();
     await page.getByLabel('基準フォントサイズ(数値)').fill('24');
     await page.getByLabel('基準フォントサイズ(数値)').press('Enter');
@@ -162,7 +181,7 @@ test.describe('sankey-svg interactions', () => {
   test('project side panel uses the unified project badge from graph and search selection', async ({ page }) => {
     const projectName = '燃料油価格激変緩和対策事業';
 
-    await page.locator('svg text').filter({ hasText: projectName }).first().click();
+    await nodeLabel(page, projectName).click();
     await expect(page.getByText('事業', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('事業（予算）')).toHaveCount(0);
     await expect(page.getByText('事業（支出）')).toHaveCount(0);
@@ -189,11 +208,11 @@ test.describe('sankey-svg interactions', () => {
     await expect(page.locator('svg text').filter({ hasText: ministryName }).first()).toBeVisible();
     await expect(page.locator('svg text').filter({ hasText: unrelatedRecipientName }).first()).toBeVisible();
 
-    await page.locator('svg text').filter({ hasText: ministryName }).first().hover();
+    await nodeLabel(page, ministryName).hover();
     await expect.poll(() => visibleSvgTextFill(page, ministryName), { timeout: 5_000, intervals: [100] }).toBe('#333');
     await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName), { timeout: 5_000, intervals: [100] }).toBe('#bbb');
 
-    await page.locator('svg text').filter({ hasText: unrelatedRecipientName }).first().hover();
+    await nodeLabel(page, unrelatedRecipientName).hover();
     await expect.poll(() => visibleSvgTextFill(page, unrelatedRecipientName), { timeout: 5_000, intervals: [100] }).toBe('#333');
     await expect.poll(() => visibleSvgTextFill(page, ministryName), { timeout: 5_000, intervals: [100] }).toBe('#bbb');
   });
@@ -207,13 +226,13 @@ test.describe('sankey-svg interactions', () => {
     await page.goto('/sankey-svg?fmc=0');
     await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 30_000 });
 
-    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await nodeLabel(page, ministryName).click();
     await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#333');
     await expect.poll(() => visibleSvgTextFill(page, aggregateProjectLabel)).toBe('#333');
     await expect.poll(() => visibleSvgTextFill(page, aggregateRecipientLabel)).toBe('#333');
     await expect.poll(() => visibleSvgTextFill(page, recipientName)).toBe('#bbb');
 
-    await page.locator('svg text').filter({ hasText: recipientName }).first().click();
+    await nodeLabel(page, recipientName).click();
     await expect.poll(() => visibleSvgTextFill(page, recipientName)).toBe('#333');
     await expect.poll(() => visibleSvgTextFill(page, aggregateProjectLabel)).toBe('#333');
     await expect.poll(() => visibleSvgTextFill(page, ministryName)).toBe('#bbb');
@@ -243,13 +262,13 @@ test.describe('sankey-svg interactions', () => {
     await expect(page).toHaveURL(/sel=r-10/);
     await expect.poll(() => visibleNodeCount(page)).toBeGreaterThan(0);
 
-    await page.getByTestId('search-input').fill('ポスト');
-    await page.getByTestId('search-mode-toggle').click();
-    await page.getByTestId('filter-target-select').selectOption('project');
+    // 検索と絞り込みは別のUI。事業名での絞り込みはフィルタパネルの「事業」に入れる
+    await page.getByTitle('フィルタ を表示').click();
+    await page.getByTestId('filter-project-name').fill('ポスト');
     await page.getByTestId('year-select').selectOption('2024');
 
-    await expect(page.getByTestId('search-input')).toHaveValue('ポスト');
-    await expect(page.getByTestId('filter-target-select')).toHaveValue('project');
+    await expect(page.getByTestId('filter-project-name')).toHaveValue('ポスト');
+    await expect(page).toHaveURL(/fnp=/);
     await expect(page.getByTestId('year-select')).toHaveValue('2024');
     await expect(page).toHaveURL(/yr=2024/);
     await expect(page).toHaveURL(/sel=r-6/);
@@ -292,7 +311,7 @@ test.describe('sankey-svg interactions', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', error => pageErrors.push(error.message));
 
-    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await nodeLabel(page, ministryName).click();
     await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
 
     const panelProject = page.locator('button').filter({
@@ -314,7 +333,7 @@ test.describe('sankey-svg interactions', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', error => pageErrors.push(error.message));
 
-    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await nodeLabel(page, ministryName).click();
     await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
 
     await page.getByTestId('offset-target-select').selectOption('project');
@@ -341,7 +360,7 @@ test.describe('sankey-svg interactions', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', error => pageErrors.push(error.message));
 
-    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await nodeLabel(page, ministryName).click();
     await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
 
     await page.getByTestId('offset-target-select').selectOption('recipient');
@@ -372,12 +391,12 @@ test.describe('sankey-svg interactions', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', error => pageErrors.push(error.message));
 
-    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await nodeLabel(page, ministryName).click();
     await expect(page).toHaveURL(/sel=ministry-%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
     await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
 
     await page.getByTitle('パネルを折りたたむ').click();
-    await page.locator('svg text').filter({ hasText: ministryName }).first().click();
+    await nodeLabel(page, ministryName).click();
     await page.getByTitle('パネルを展開').click();
 
     await expect(page).toHaveURL(/fm=%E3%83%87%E3%82%B8%E3%82%BF%E3%83%AB%E5%BA%81/);
@@ -394,11 +413,11 @@ test.describe('sankey-svg deep links', () => {
     const pageErrors: string[] = [];
     page.on('pageerror', error => pageErrors.push(error.message));
 
-    await page.goto('/sankey-svg?yr=2024&f=1&nft=p&nf=%E3%83%9D%E3%82%B9%E3%83%88&sel=r-6');
+    // fp=フィルタパネルを開く / fnp=事業名で絞り込む
+    await page.goto('/sankey-svg?yr=2024&fp=1&fnp=%E3%83%9D%E3%82%B9%E3%83%88&sel=r-6');
 
     await expect(page.getByTestId('year-select')).toHaveValue('2024');
-    await expect(page.getByTestId('search-input')).toHaveValue('ポスト');
-    await expect(page.getByTestId('filter-target-select')).toHaveValue('project');
+    await expect(page.getByTestId('filter-project-name')).toHaveValue('ポスト');
     await expect(page).toHaveURL(/sel=r-6/);
     await expect(page.getByText(recipientName).first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId('sankey-node')).not.toHaveCount(0);

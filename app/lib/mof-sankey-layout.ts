@@ -221,20 +221,48 @@ export function computeMOFSankeyLayout<D>(
       options.align === 'top'
         ? margin.top
         : margin.top + Math.max((innerH - used) / 2, 0);
-    for (const node of list) {
-      const isPassThrough = (node.details as { passThrough?: boolean } | undefined)
-        ?.passThrough;
+    const heightOf = (n: (typeof list)[number]) => Math.max((n.value ?? 0) * scale, 1);
+    const isPassThroughNode = (n: (typeof list)[number]) =>
+      (n.details as { passThrough?: boolean } | undefined)?.passThrough === true;
+    for (let i = 0; i < list.length; i += 1) {
+      const node = list[i];
+      const isPassThrough = isPassThroughNode(node);
       if (!isPassThrough) {
         y += options.gapBefore?.({ id: node.id, type: node.type }) ?? 0;
       }
-      const h = Math.max((node.value ?? 0) * scale, 1);
+      const h = heightOf(node);
       // 通過ノードはラベルも箱も出さないので、スロットも余白も取らない。
       // 取ると素通りの多い列（勘定など）が余白だけで間延びする
-      const slot = isPassThrough
+      let slot = isPassThrough
         ? h
         : options.minNodeSlot
           ? Math.max(h + nodePadding, options.minNodeSlot)
           : h + nodePadding;
+      // ラベルはノードの中心に出るのに、スロットは上端から測る。
+      // 高さが不揃いだと「箱は離れているのにラベルは重なる」が起きるので、
+      // 次にラベルを出すノードとの中心間隔が1行分に届くまでスロットを広げる。
+      //
+      //   center_next - center_cur = slot + Σ(間にある通過ノードの高さ) - h/2 + h_next/2
+      //
+      // 通過ノードはラベルを持たないので飛ばすが、場所は取るのでその分は差し引く。
+      // 隣だけを見ると、間に通過ノードが挟まった並びで間隔が足りなくなる。
+      if (!isPassThrough && options.minNodeSlot) {
+        let passedHeight = 0;
+        let next: (typeof list)[number] | undefined;
+        for (let k = i + 1; k < list.length; k += 1) {
+          if (!isPassThroughNode(list[k])) {
+            next = list[k];
+            break;
+          }
+          passedHeight += heightOf(list[k]);
+        }
+        if (next) {
+          slot = Math.max(
+            slot,
+            options.minNodeSlot + h / 2 - heightOf(next) / 2 - passedHeight
+          );
+        }
+      }
       const placed: MOFLayoutNode<D> = {
         id: node.id,
         name: node.name ?? node.id,

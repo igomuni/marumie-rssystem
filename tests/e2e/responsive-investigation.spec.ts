@@ -13,6 +13,20 @@ const VIEWPORTS = [
   { name: 'mobile-360', width: 360, height: 800 },
 ];
 
+/**
+ * これは回帰テストではなく、スクリーンショットを採取するための調査用スペック。
+ * expect を1つも持たず、走らせると docs/tasks/_assets 配下の PNG/JSON を上書きする。
+ *
+ * 既定の `npx playwright test` に含めると、検証チェーンを流すたびに
+ * コミット済みの画像が書き換わって作業ツリーが汚れ、「緑ならコミット」が
+ * 無関係な差分を巻き込む。採取したいときだけ明示的に有効化する。
+ *
+ *   CAPTURE_SCREENSHOTS=1 npx playwright test tests/e2e/responsive-investigation.spec.ts
+ */
+// 真偽で見ると CAPTURE_SCREENSHOTS=0 でも走ってしまい、
+// 「止めたつもりで上書きされる」が起きるので、値を 1 に限定する
+test.skip(process.env.CAPTURE_SCREENSHOTS !== '1', 'CAPTURE_SCREENSHOTS=1 のときだけ採取する');
+
 test.beforeAll(() => {
   fs.mkdirSync(OUT_DIR, { recursive: true });
 });

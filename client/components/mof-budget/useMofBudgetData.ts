@@ -28,18 +28,31 @@ export function useMofBudgetData<T extends { metadata: { fiscalYear: number } }>
    * URL の初期値ではなく画面で選んでいる年度を使うために持つ。
    */
   const requestedYear = useRef<number | null>(initialYear);
+  /**
+   * 最後に取りに行った URL。
+   *
+   * 「同じものを二度取りに行かない」の判定にこれを使う。年度だけで見ると、
+   * 年度が確定したあとに予算種別や TopN を変えても取り直しが起きない
+   * （年度は同じままなので「読み込み済み」と判定されてしまう）。
+   */
+  const lastUrl = useRef<string | null>(null);
 
   const fetchData = useCallback(
     async (target: number | null) => {
       const current = generation.current + 1;
       generation.current = current;
       requestedYear.current = target;
+      const url = buildUrl(target);
+      lastUrl.current = url;
       setLoading(true);
       try {
-        const response = await fetch(buildUrl(target));
+        const response = await fetch(url);
         if (!response.ok) throw new Error(`API error: ${response.status}`);
         const result: T = await response.json();
         if (generation.current !== current) return; // 後発の取得に追い越された
+        // 年度を省いて投げた場合、応答で確定した年度を含む形を「取得済み」とする。
+        // これをしないと、確定した年度が URL に書き戻された直後に同じものを取り直す
+        lastUrl.current = buildUrl(result.metadata.fiscalYear);
         setData(result);
         setYear(result.metadata.fiscalYear);
         setError(null);
@@ -62,16 +75,13 @@ export function useMofBudgetData<T extends { metadata: { fiscalYear: number } }>
   // 初回と、URL の年度・絞り込み条件が変わったときに取り直す。
   //
   // 年度の指定が無いと既定年度を読み、その結果を URL に書き戻す。すると
-  // `initialYear` が変わって同じ年度をもう一度取りに行ってしまうので、
-  // 既に読み終えている年度と同じなら取得しない。
-  const loadedYear = data?.metadata.fiscalYear;
+  // `initialYear` が変わって同じものをもう一度取りに行くので、
+  // これから投げる URL が最後に投げたものと同じなら取得しない。
   useEffect(() => {
-    if (initialYear !== null && initialYear === loadedYear) return;
-    fetchData(requestedYear.current);
-    // loadedYear は「同じ年度の取り直しを避ける」ためだけに見る。
-    // 依存に入れると取得のたびに再実行されるので入れない
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchData, initialYear]);
+    const target = initialYear ?? requestedYear.current;
+    if (buildUrl(target) === lastUrl.current) return;
+    fetchData(target);
+  }, [buildUrl, fetchData, initialYear]);
 
   return { data, year, loading, error, fetchData };
 }
