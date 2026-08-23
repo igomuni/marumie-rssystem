@@ -9,11 +9,51 @@ import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
 import { availableYears, loadYear } from '@/app/lib/api/mof-jikou-loader';
 import { buildMOFHierarchySankey, DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
-import type { MOFHierarchyTopN } from '@/types/mof-hierarchy';
+import type {
+  MOFHierarchyColumn,
+  MOFHierarchyOffset,
+  MOFHierarchyTopN,
+} from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
 
 /** TopN の上限。これを超えるとラベルが潰れて読めなくなる */
-const TOP_N_MAX = 40;
+/**
+ * TopN の上限。画面の見やすさではなく、応答が膨らみすぎないための歯止め。
+ *
+ * 40 に閉じていたときは、スライダーを動かしても40を超えた分が黙って
+ * 切られていた。図は縦に伸びてパンで辿れるので、画面の高さで縛らない。
+ * /sankey-svg のスライダー上限と同じ値にしてある。
+ */
+const TOP_N_MAX = 300;
+
+/**
+ * TopN のクエリパラメータ名。列ごとに1つ持つ。
+ * URL を短く保ちたいので列名そのままではなく短縮形を使う。
+ */
+const TOP_N_PARAMS: Array<[Exclude<MOFHierarchyColumn, 'total'>, string]> = [
+  ['ministry', 'topMinistry'],
+  ['organization', 'topOrganization'],
+  ['subAccount', 'topSubAccount'],
+  ['section', 'topSection'],
+  ['item', 'topItem'],
+];
+
+/** 表示開始位置のクエリパラメータ名。列ごとに1つ持つ */
+const OFFSET_PARAMS: Array<[Exclude<MOFHierarchyColumn, 'total'>, string]> = [
+  ['ministry', 'offsetMinistry'],
+  ['organization', 'offsetOrganization'],
+  ['subAccount', 'offsetSubAccount'],
+  ['section', 'offsetSection'],
+  ['item', 'offsetItem'],
+];
+
+/** 開始位置は0以上の整数。範囲外の丸めは組み立て側が持つ */
+function parseOffset(raw: string | null): number | undefined {
+  if (raw === null) return undefined;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0) return undefined;
+  return Math.floor(value);
+}
 
 function parseTopN(raw: string | null, fallback: number | undefined): number | undefined {
   if (!raw) return fallback;
@@ -68,10 +108,17 @@ export async function GET(request: Request) {
         ? requested
         : (budgetTypes.find(t => t === '当初予算') ?? budgetTypes[0]);
 
-    const topN: MOFHierarchyTopN = {
-      section: parseTopN(params.get('topSection'), DEFAULT_TOP_N.section),
-      item: parseTopN(params.get('topItem'), DEFAULT_TOP_N.item),
-    };
+    // TopN は列ごとに指定できる。指定の無い列は既定値
+    const topN: MOFHierarchyTopN = Object.fromEntries(
+      TOP_N_PARAMS.map(([column, param]) => [
+        column,
+        parseTopN(params.get(param), DEFAULT_TOP_N[column]),
+      ])
+    );
+
+    const offset: MOFHierarchyOffset = Object.fromEntries(
+      OFFSET_PARAMS.map(([column, param]) => [column, parseOffset(params.get(param))])
+    );
 
     const result = buildMOFHierarchySankey(data.items, {
       fiscalYear: year,
@@ -80,6 +127,7 @@ export async function GET(request: Request) {
       budgetTypes,
       availableYears: years,
       topN,
+      offset,
     });
 
     return NextResponse.json(result, {

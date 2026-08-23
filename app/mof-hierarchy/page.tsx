@@ -13,14 +13,44 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { LabelDensity, MOFHierarchyData, MOFHierarchyTopN } from '@/types/mof-hierarchy';
+import {
+  MOF_HIERARCHY_COLUMNS,
+  type LabelDensity,
+  type MOFHierarchyColumn,
+  type MOFHierarchyData,
+  type MOFHierarchyOffset,
+  type MOFHierarchyTopN,
+} from '@/types/mof-hierarchy';
 import type { MOFBudgetType } from '@/types/mof-jikou';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchyChart, LABEL_FONT_PX_DEFAULT } from '@/client/components/mof-hierarchy/HierarchyChart';
 import { HierarchyControls } from '@/client/components/mof-hierarchy/HierarchyControls';
+import { HierarchySettings } from '@/client/components/mof-hierarchy/HierarchySettings';
 import { useMofBudgetData } from '@/client/components/mof-budget/useMofBudgetData';
+
+/**
+ * TopN の列と、URL・API のパラメータ名の対応。
+ * 列を増やしたときに3箇所を直す必要がないよう1本にまとめる。
+ */
+const TOP_N_KEYS: Array<{
+  column: Exclude<MOFHierarchyColumn, 'total'>;
+  /** ブラウザの URL に載せる短い名前 */
+  urlKey: string;
+  /** API に渡す名前 */
+  apiKey: string;
+  /** 表示開始位置の URL 名 */
+  offsetUrlKey: string;
+  /** 表示開始位置の API 名 */
+  offsetApiKey: string;
+}> = MOF_HIERARCHY_COLUMNS.filter(c => c !== 'total').map(column => ({
+  column: column as Exclude<MOFHierarchyColumn, 'total'>,
+  urlKey: `t${column.slice(0, 2)}`,
+  apiKey: `top${column[0].toUpperCase()}${column.slice(1)}`,
+  offsetUrlKey: `o${column.slice(0, 2)}`,
+  offsetApiKey: `offset${column[0].toUpperCase()}${column.slice(1)}`,
+}));
 
 export default function MOFHierarchyPage() {
   return (
@@ -44,10 +74,22 @@ function MOFHierarchyContent() {
   const [budgetType, setBudgetType] = useState<MOFBudgetType | null>(
     (searchParams.get('bt') as MOFBudgetType | null) ?? null
   );
-  const [topN, setTopN] = useState<MOFHierarchyTopN>(() => ({
-    section: Number(searchParams.get('ts')) || undefined,
-    item: Number(searchParams.get('ti')) || undefined,
-  }));
+  const [topN, setTopN] = useState<MOFHierarchyTopN>(() =>
+    Object.fromEntries(
+      TOP_N_KEYS.map(({ column, urlKey }) => [
+        column,
+        Number(searchParams.get(urlKey)) || undefined,
+      ])
+    )
+  );
+  const [offset, setOffset] = useState<MOFHierarchyOffset>(() =>
+    Object.fromEntries(
+      TOP_N_KEYS.map(({ column, offsetUrlKey }) => [
+        column,
+        Number(searchParams.get(offsetUrlKey)) || undefined,
+      ])
+    )
+  );
   const [selectedId, setSelectedId] = useState<string | null>(
     searchParams.get('sel')
   );
@@ -64,12 +106,16 @@ function MOFHierarchyContent() {
       const params = new URLSearchParams();
       if (target) params.set('year', String(target));
       if (budgetType) params.set('budgetType', budgetType);
-      if (topN.section) params.set('topSection', String(topN.section));
-      if (topN.item) params.set('topItem', String(topN.item));
+      for (const { column, apiKey, offsetApiKey } of TOP_N_KEYS) {
+        const value = topN[column];
+        if (value) params.set(apiKey, String(value));
+        const start = offset[column];
+        if (start) params.set(offsetApiKey, String(start));
+      }
       const query = params.toString();
       return `/api/mof-hierarchy${query ? `?${query}` : ''}`;
     },
-    [budgetType, topN]
+    [budgetType, topN, offset]
   );
 
   const { data, year, loading, error, fetchData } = useMofBudgetData<MOFHierarchyData>(
@@ -87,8 +133,16 @@ function MOFHierarchyContent() {
     const params = new URLSearchParams();
     params.set('year', String(data.metadata.fiscalYear));
     params.set('bt', data.metadata.budgetType);
-    if (data.metadata.topN.section) params.set('ts', String(data.metadata.topN.section));
-    if (data.metadata.topN.item) params.set('ti', String(data.metadata.topN.item));
+    // 表示数は画面で選んでいる値を正とする。
+    // 応答（metadata）を待つと、選んだ直後に古い値へ戻って見える
+    for (const { column, urlKey, offsetUrlKey } of TOP_N_KEYS) {
+      const value = topN[column];
+      if (value) params.set(urlKey, String(value));
+      // 開始位置は行き過ぎを丸めた後の値（応答）を載せる。
+      // 生の値だと、末尾で「次へ」を押し続けたときに URL だけが伸び続ける
+      const start = data.metadata.offset[column];
+      if (start) params.set(offsetUrlKey, String(start));
+    }
     if (selectedId) params.set('sel', selectedId);
     if (!focusRelated) params.set('fr', '0');
     if (fontPx !== LABEL_FONT_PX_DEFAULT) params.set('fs', String(fontPx));
@@ -97,7 +151,7 @@ function MOFHierarchyContent() {
     if (next !== window.location.search) {
       window.history.replaceState(null, '', next);
     }
-  }, [data, selectedId, focusRelated, fontPx, labelDensity]);
+  }, [data, selectedId, focusRelated, fontPx, labelDensity, topN]);
 
   // ブラウザの戻る／進むで選択を辿れるようにする
   useEffect(() => {
@@ -107,6 +161,22 @@ function MOFHierarchyContent() {
       setFocusRelated(params.get('fr') !== '0');
       setFontPx(Number(params.get('fs')) || LABEL_FONT_PX_DEFAULT);
       setLabelDensity(params.get('ld') === 'major' ? 'major' : 'all');
+      setTopN(
+        Object.fromEntries(
+          TOP_N_KEYS.map(({ column, urlKey }) => [
+            column,
+            Number(params.get(urlKey)) || undefined,
+          ])
+        )
+      );
+      setOffset(
+        Object.fromEntries(
+          TOP_N_KEYS.map(({ column, offsetUrlKey }) => [
+            column,
+            Number(params.get(offsetUrlKey)) || undefined,
+          ])
+        )
+      );
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
@@ -164,25 +234,44 @@ function MOFHierarchyContent() {
         labelDensity={labelDensity}
       />
 
-      {/* コントロール・年度・ページ切替。/sankey-svg と同じく右上に並べる */}
+      {/* 右上クラスタ: ［表示数/表示位置 - 予算種別 - 表示設定 - 年度 - ページ切替］。
+          /sankey-svg の並び（ツール → 表示設定 → 年度 → メニュー）に合わせる */}
       <div className="absolute right-3 top-3 z-30 flex items-start gap-2">
-        <div className="rounded-lg border border-black/10 bg-white/90 px-3 py-2 shadow-md backdrop-blur">
-          <HierarchyControls
-            budgetType={metadata.budgetType}
-            budgetTypes={metadata.budgetTypes}
-            topN={metadata.topN}
+        <HierarchyControls
+          topN={topN}
+          offset={offset}
+          columnCounts={metadata.columnCounts}
+          onTopNChange={setTopN}
+          onOffsetChange={setOffset}
+        />
+
+        <label className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-black/10 bg-white/90 px-2 text-xs text-gray-600 shadow-md backdrop-blur">
+          <span className="font-medium">予算種別</span>
+          <select
+            aria-label="予算種別"
+            value={metadata.budgetType}
             disabled={loading}
-            onBudgetTypeChange={setBudgetType}
-            onTopNChange={setTopN}
-            summary={`${metadata.itemCount.toLocaleString()}事項 / ${accountsLabel}`}
-            focusRelated={focusRelated}
-            onFocusRelatedChange={setFocusRelated}
-            fontPx={fontPx}
-            onFontPxChange={setFontPx}
-            labelDensity={labelDensity}
-            onLabelDensityChange={setLabelDensity}
-          />
-        </div>
+            onChange={e => setBudgetType(e.target.value as MOFBudgetType)}
+            className="h-6 cursor-pointer rounded border border-gray-300 bg-white px-1 text-xs text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          >
+            {metadata.budgetTypes.map(type => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <HierarchySettings
+          fontPx={fontPx}
+          onFontPxChange={setFontPx}
+          labelDensity={labelDensity}
+          onLabelDensityChange={setLabelDensity}
+          focusRelated={focusRelated}
+          onFocusRelatedChange={setFocusRelated}
+          summary={`${metadata.itemCount.toLocaleString()}事項 / ${accountsLabel}`}
+        />
+
         <YearSelect
           value={String(year ?? metadata.fiscalYear)}
           onChange={y => fetchData(Number(y))}
