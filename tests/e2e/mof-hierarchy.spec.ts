@@ -458,4 +458,62 @@ test.describe('mof-hierarchy', () => {
 
     await expect(page.getByTitle('クリックしてズーム率を入力')).toHaveText('250%');
   });
+
+  test('selecting a node docks a resizable, collapsible side panel like /sankey-svg', async ({ page }) => {
+    // 左下に浮かせた小さなカードではなく、/sankey-svg と同じ左ドックの
+    // サイドパネルにする。折りたたみタブと幅リサイズを持つ
+    await page.getByTestId('hierarchy-node').first().click();
+
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await expect(panel).toBeVisible();
+    const openBox = (await panel.boundingBox())!;
+    // ドック: 左端に張り付き、高さは画面いっぱい
+    expect(openBox.x).toBeCloseTo(0, 0);
+    expect(openBox.height).toBeGreaterThan(600);
+
+    // 折りたたみ: タブで隠せて、選択自体は保たれる
+    await page.getByTitle('パネルを折りたたむ').click();
+    await expect(panel).toBeHidden();
+    await expect(page).toHaveURL(/sel=/);
+
+    await page.getByTitle('パネルを展開').click();
+    await expect(panel).toBeVisible();
+  });
+
+  test('the side panel pushes the search box aside instead of overlapping it', async ({ page }) => {
+    // /sankey-svg は選択中は検索ボックスをパネル幅ぶん右へ退避させる
+    const search = page.getByPlaceholder(/検索/);
+    const before = (await search.boundingBox())!;
+
+    await page.getByTestId('hierarchy-node').first().click();
+    await expect(page.getByTestId('hierarchy-side-panel')).toBeVisible();
+
+    const after = (await search.boundingBox())!;
+    expect(after.x).toBeGreaterThan(before.x);
+  });
+
+  test('the panel header shows a type badge colored like the node, and 集約 for aggregate nodes', async ({ page }) => {
+    // /sankey-svg のバッジ表示に合わせる。表示数を絞って集約ノードを
+    // 画面の低い位置（ズーム操作クラスタの裏）に追いやらないようにする
+    await page.goto('/mof-hierarchy?tit=5');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+    const aggregate = page
+      .getByTestId('hierarchy-node')
+      .filter({ hasText: /^[\d,]+事項 \(/ })
+      .first();
+    await aggregate.click();
+
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await expect(panel.getByText('集約')).toBeVisible();
+  });
+
+  test('clicking floating controls does not clear the selection', async ({ page }) => {
+    // 浮かせた部品（ズームボタン等）は data-pan-disabled 付きなのに、
+    // 背景クリックでの選択解除がそれを見ずに発火し、押すたびに選択が消えていた
+    await page.getByTestId('hierarchy-node').first().click();
+    await expect(page).toHaveURL(/sel=/);
+
+    await page.getByTitle('拡大').click();
+    await expect(page).toHaveURL(/sel=/);
+  });
 });

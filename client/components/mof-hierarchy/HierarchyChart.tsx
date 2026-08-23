@@ -32,6 +32,8 @@ import { focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchySearch } from './HierarchySearch';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
+import { SidePanelChrome } from '@/client/components/SidePanelChrome';
+import { useSidePanel } from '@/client/hooks/useSidePanel';
 import { E2E_TEST_IDS_ENABLED, testId } from '@/client/lib/testId';
 
 /** ラベルの既定サイズ（px） */
@@ -107,6 +109,13 @@ export function HierarchyChart({
   const [showMinimap, setShowMinimap] = useState(false);
   const minimapRef = useRef<HTMLCanvasElement>(null);
   const minimapDragging = useRef(false);
+  /**
+   * サイドパネル。左下に浮かせた小さなカードではなく、/sankey-svg と同じ
+   * 左ドックにする。折りたたみ・幅リサイズは共通の chrome にそのまま委譲できる
+   */
+  const sidePanel = useSidePanel({ side: 'left', viewportWidth: viewport.width });
+  const panelOpenWidth =
+    selectedId !== null && !sidePanel.collapsed ? sidePanel.effectiveWidth : 0;
   /** ズーム率のクリック編集。ボタンの連打だけでは狙った倍率に合わせにくい */
   const [isEditingZoom, setIsEditingZoom] = useState(false);
   const [zoomInputValue, setZoomInputValue] = useState('');
@@ -510,9 +519,14 @@ export function HierarchyChart({
         panStart.current = null;
         setIsPanning(false);
       }}
-      onClick={() => {
-        // 背景クリックで選択解除（ドラッグの終わりは無視する）
-        if (!dragged.current) onSelect(null);
+      onClick={e => {
+        // 背景クリックで選択解除。ドラッグの終わりと、検索・パネル・ズーム等の
+        // 浮かせた部品（data-pan-disabled）の上のクリックは無視する。
+        // /sankey-svg はパネルが SVG の外（兄弟要素）にあるためこの問題が
+        // 起きないが、ここではパネルも同じコンテナの内側にある
+        if (dragged.current) return;
+        if ((e.target as HTMLElement).closest('[data-pan-disabled="true"]')) return;
+        onSelect(null);
       }}
       onMouseLeave={() => {
         panStart.current = null;
@@ -682,90 +696,128 @@ export function HierarchyChart({
       )}
 
       {/* 検索。/sankey-svg と同じく左上に置く（見出しの下） */}
-      <div className="absolute left-3 top-3 z-30">
+      <div
+        data-pan-disabled="true"
+        className="absolute top-3 z-30 transition-[left] duration-200"
+        style={{ left: panelOpenWidth + 12 }}
+      >
         <HierarchySearch nodes={nodes} onSelect={onSelect} />
       </div>
 
-      {/* 選択したノードの詳細。/sankey-svg と同じく左下に置く */}
-      {selectedNode && (
-        <div className="absolute bottom-3 left-3 z-30 max-w-sm rounded-lg border border-black/10 bg-white/95 p-3 shadow-lg backdrop-blur">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="text-[11px] font-medium text-gray-400">
-                {selectedDetails?.column
-                  ? MOF_HIERARCHY_COLUMN_LABELS[selectedDetails.column]
-                  : ''}
+      {/* 選択したノードの詳細。/sankey-svg と同じ左ドックのサイドパネルにする。
+          小さく浮かせたカードだと、内訳が長い集約ノードなどで中身が窮屈だった */}
+      <SidePanelChrome
+        side="left"
+        open={selectedId !== null && !sidePanel.collapsed}
+        onToggle={sidePanel.toggleCollapsed}
+        width={sidePanel.effectiveWidth}
+        minWidth={200}
+        maxWidth={800}
+        onResizeStart={sidePanel.onResizeStart}
+        isResizing={sidePanel.isResizing}
+        onResetWidth={sidePanel.resetWidth}
+        testId={testId('hierarchy-side-panel')}
+      >
+        {selectedNode && (
+          <div className="flex h-full flex-col overflow-y-auto p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[11px] font-medium text-gray-400">
+                  {selectedDetails?.column
+                    ? MOF_HIERARCHY_COLUMN_LABELS[selectedDetails.column]
+                    : ''}
+                </div>
+                <div className="text-sm font-semibold text-gray-900">{selectedNode.name}</div>
+                <div className="text-lg font-bold text-gray-800">
+                  {formatBudgetFromYen(selectedNode.value)}
+                </div>
               </div>
-              <div className="text-sm font-semibold text-gray-900">{selectedNode.name}</div>
-              <div className="text-lg font-bold text-gray-800">
-                {formatBudgetFromYen(selectedNode.value)}
-              </div>
+              <button
+                type="button"
+                title="選択を解除"
+                aria-label="選択を解除"
+                onClick={() => onSelect(null)}
+                className="rounded px-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                ×
+              </button>
             </div>
-            <button
-              type="button"
-              title="選択を解除"
-              aria-label="選択を解除"
-              onMouseDown={e => e.stopPropagation()}
-              onClick={e => {
-                e.stopPropagation();
-                onSelect(null);
-              }}
-              className="rounded px-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-            >
-              ×
-            </button>
-          </div>
-          {selectedDetails?.aggregated && (
-            <div className="mt-1 text-xs text-gray-600">
-              表示数から溢れた {selectedDetails.aggregatedCount?.toLocaleString()} 件
-            </div>
-          )}
-          {/* 集約の中身。件数だけだと何が隠れているのか分からない */}
-          {selectedDetails?.aggregatedTop && selectedDetails.aggregatedTop.length > 0 && (
-            <div className="mt-2 border-t border-gray-100 pt-2">
-              <div className="mb-1 text-[11px] text-gray-400">内訳（金額の大きい順）</div>
-              {/* 事項名は項をまたいで重複するので、名前だけだと鍵が衝突する */}
-              {selectedDetails.aggregatedTop.map((member, index) => (
-                <div
-                  key={`${index}-${member.name}`}
-                  className="flex justify-between gap-3 text-xs text-gray-700"
+
+            {/* 種別バッジ。/sankey-svg のノード種別バッジと同じ考え方で、
+                色は図のノードの塗りと揃える */}
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              {selectedDetails?.column && (
+                <span
+                  className="rounded-full px-2 py-0.5 text-[11px] font-medium text-white"
+                  style={{
+                    backgroundColor: hierarchyNodeColor({
+                      column: selectedDetails.column,
+                      aggregated: false,
+                    }),
+                  }}
                 >
-                  <span className="truncate">{member.name}</span>
-                  <span className="shrink-0 tabular-nums text-gray-500">
-                    {formatBudgetFromYen(member.amount)}
-                  </span>
-                </div>
-              ))}
-              {(selectedDetails.aggregatedCount ?? 0) >
-                selectedDetails.aggregatedTop.length && (
-                <div className="text-[11px] text-gray-400">
-                  ほか{' '}
-                  {(
-                    (selectedDetails.aggregatedCount ?? 0) -
-                    selectedDetails.aggregatedTop.length
-                  ).toLocaleString()}{' '}
-                  件
-                </div>
+                  {MOF_HIERARCHY_COLUMN_LABELS[selectedDetails.column]}
+                </span>
+              )}
+              {selectedDetails?.aggregated && (
+                <span className="rounded-full bg-gray-400 px-2 py-0.5 text-[11px] font-medium text-white">
+                  集約
+                </span>
               )}
             </div>
-          )}
-          {selectedDetails?.majorExpenseName && (
-            <div className="mt-1 text-xs text-gray-500">
-              {selectedDetails.majorExpenseName}
-            </div>
-          )}
-          {selectedDetails?.description && (
-            <div className="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-gray-600">
-              {selectedDetails.description}
-            </div>
-          )}
-          {focusRelated && (
-            <div className="mt-2 text-[11px] text-gray-400">
-              この筋に連なるノードだけを表示しています
-            </div>
-          )}
-        </div>
-      )}
+
+            {selectedDetails?.aggregated && (
+              <div className="mt-2 text-xs text-gray-600">
+                表示数から溢れた {selectedDetails.aggregatedCount?.toLocaleString()} 件
+              </div>
+            )}
+            {/* 集約の中身。件数だけだと何が隠れているのか分からない */}
+            {selectedDetails?.aggregatedTop && selectedDetails.aggregatedTop.length > 0 && (
+              <div className="mt-2 border-t border-gray-100 pt-2">
+                <div className="mb-1 text-[11px] text-gray-400">内訳（金額の大きい順）</div>
+                {/* 事項名は項をまたいで重複するので、名前だけだと鍵が衝突する */}
+                {selectedDetails.aggregatedTop.map((member, index) => (
+                  <div
+                    key={`${index}-${member.name}`}
+                    className="flex justify-between gap-3 text-xs text-gray-700"
+                  >
+                    <span className="truncate">{member.name}</span>
+                    <span className="shrink-0 tabular-nums text-gray-500">
+                      {formatBudgetFromYen(member.amount)}
+                    </span>
+                  </div>
+                ))}
+                {(selectedDetails.aggregatedCount ?? 0) >
+                  selectedDetails.aggregatedTop.length && (
+                  <div className="text-[11px] text-gray-400">
+                    ほか{' '}
+                    {(
+                      (selectedDetails.aggregatedCount ?? 0) -
+                      selectedDetails.aggregatedTop.length
+                    ).toLocaleString()}{' '}
+                    件
+                  </div>
+                )}
+              </div>
+            )}
+            {selectedDetails?.majorExpenseName && (
+              <div className="mt-1 text-xs text-gray-500">
+                {selectedDetails.majorExpenseName}
+              </div>
+            )}
+            {selectedDetails?.description && (
+              <div className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-gray-600">
+                {selectedDetails.description}
+              </div>
+            )}
+            {focusRelated && (
+              <div className="mt-2 text-[11px] text-gray-400">
+                この筋に連なるノードだけを表示しています
+              </div>
+            )}
+          </div>
+        )}
+      </SidePanelChrome>
 
       {/* ミニマップ。/sankey-svg と同じく左下に置く。
           パンを制限していないので、全体の中の現在位置を示す手段が要る */}
@@ -773,7 +825,7 @@ export function HierarchyChart({
         show={showMinimap}
         onShow={() => setShowMinimap(true)}
         onHide={() => setShowMinimap(false)}
-        left={12}
+        left={panelOpenWidth + 12}
         minimapW={MINIMAP_W}
         minimapH={minimapH}
         canvasRef={minimapRef}
@@ -782,7 +834,7 @@ export function HierarchyChart({
       />
 
       {/* ズーム操作。/sankey-svg と同じく右下に置く */}
-      <div className="absolute bottom-3 right-3 z-30 flex flex-col gap-1">
+      <div data-pan-disabled="true" className="absolute bottom-3 right-3 z-30 flex flex-col gap-1">
         <ZoomButton
           label="＋"
           title="拡大"
