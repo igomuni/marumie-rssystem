@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
+import { descendantsByColumn, focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
 import type { MOFHierarchyColumn, MOFHierarchyNode } from '@/types/mof-hierarchy';
 import type { SankeyLink } from '@/types/sankey';
 
@@ -124,5 +124,30 @@ describe('focusHierarchy', () => {
     focusHierarchy(NODES, LINKS, 'A');
     expect(LINKS.map(l => l.value)).toEqual(before);
     expect(NODES.find(n => n.id === 'root')?.value).toBe(100);
+  });
+});
+
+describe('descendantsByColumn', () => {
+  it('列ごとに子孫を金額の大きい順で返す', () => {
+    const result = descendantsByColumn(NODES, LINKS, 'A');
+    expect(result.get('section')?.map(n => n.id)).toEqual(['others-section', 'A1']);
+    expect(result.get('item')?.map(n => n.id)).toEqual(['others-item']);
+  });
+
+  it('値の無い列（子孫がいない列）は含まない', () => {
+    const result = descendantsByColumn(NODES, LINKS, 'A');
+    expect(result.has('ministry')).toBe(false);
+    expect(result.has('subAccount')).toBe(false);
+  });
+
+  it('自分自身は子孫に含めない', () => {
+    const result = descendantsByColumn(NODES, LINKS, 'A');
+    const allIds = [...result.values()].flat().map(n => n.id);
+    expect(allIds).not.toContain('A');
+  });
+
+  it('葉ノード（事項）を選ぶと空になる', () => {
+    const result = descendantsByColumn(NODES, LINKS, 'others-item');
+    expect(result.size).toBe(0);
   });
 });

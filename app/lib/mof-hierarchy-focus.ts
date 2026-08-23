@@ -9,7 +9,7 @@
  * 祖先をたどる処理も金額の按分も、枝が分かれる前提で書く必要がある。
  */
 
-import type { MOFHierarchyNode } from '@/types/mof-hierarchy';
+import type { MOFHierarchyColumn, MOFHierarchyNode } from '@/types/mof-hierarchy';
 import { MOF_HIERARCHY_COLUMNS } from '@/types/mof-hierarchy';
 import type { SankeyLink } from '@/types/sankey';
 
@@ -51,6 +51,41 @@ export function relatedNodeIds(links: SankeyLink[], selectedId: string): Set<str
     }
   }
   return set;
+}
+
+/**
+ * 選択したノードの子孫を、列ごとに金額の大きい順でまとめる。
+ *
+ * サイドパネルのタブ（/sankey-svg の「省庁／事業／支出先」タブと同じ考え方）に使う。
+ * 選ぶたびに絞り込まなくても、パネルの中だけで下の階層を辿れるようにする。
+ * 通過ノードは実体が無いので飛ばし、その子をこの列の子孫として直接数える。
+ */
+export function descendantsByColumn(
+  nodes: MOFHierarchyNode[],
+  links: SankeyLink[],
+  selectedId: string
+): Map<MOFHierarchyColumn, MOFHierarchyNode[]> {
+  const { childrenOf } = buildAdjacency(links);
+  const nodeById = new Map(nodes.map(n => [n.id, n]));
+  const result = new Map<MOFHierarchyColumn, MOFHierarchyNode[]>();
+
+  const visited = new Set<string>([selectedId]);
+  const queue = [...(childrenOf.get(selectedId) ?? [])];
+  while (queue.length > 0) {
+    const id = queue.shift() as string;
+    if (visited.has(id)) continue;
+    visited.add(id);
+    const node = nodeById.get(id);
+    if (node && !node.details.passThrough) {
+      const list = result.get(node.details.column) ?? [];
+      list.push(node);
+      result.set(node.details.column, list);
+    }
+    for (const child of childrenOf.get(id) ?? []) queue.push(child);
+  }
+
+  for (const list of result.values()) list.sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+  return result;
 }
 
 /**

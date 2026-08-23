@@ -516,4 +516,44 @@ test.describe('mof-hierarchy', () => {
     await page.getByTitle('拡大').click();
     await expect(page).toHaveURL(/sel=/);
   });
+
+  test('選択時に関連のみ表示 defaults to off, matching /sankey-svg', async ({ page }) => {
+    // ONが既定だと選択のたびに図が絞り込まれ、隣接の事項を見比べる
+    // 探索の邪魔になる。/sankey-svg も既定OFF。
+    // 根ノードを選ぶと全ノードが関連になり違いが見えないので、末端の事項で確かめる
+    const item = page.locator('[data-testid="hierarchy-node"][data-column="item"]').first();
+    await item.click();
+    await expect(page).not.toHaveURL(/fr=1/);
+
+    const before = await page.getByTestId('hierarchy-node').count();
+    await page.getByLabel('表示設定').click();
+    await page.getByLabel('選択時に関連のみ表示').check();
+    await expect(page).toHaveURL(/fr=1/);
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(before);
+  });
+
+  test('the side panel drills down through descendant columns via tabs, like /sankey-svg', async ({ page }) => {
+    // /sankey-svg のサイドパネルはタブ（省庁/事業/支出先）で下の階層を辿れる。
+    // 静的な内訳だけでは選び直すたびに図をクリックし直す必要があった
+    const ministry = page.locator('[data-testid="hierarchy-node"][data-column="ministry"]').first();
+    const ministryName = await ministry.locator('text').textContent();
+    await ministry.click();
+
+    const panel = page.getByTestId('hierarchy-side-panel');
+    const orgTab = panel.getByRole('tab', { name: /組織/ });
+    await expect(orgTab).toBeVisible();
+
+    // 別のタブに切り替えると中身が変わる
+    const itemTab = panel.getByRole('tab', { name: /事項/ });
+    await itemTab.click();
+    await expect(panel.getByRole('tabpanel')).toBeVisible();
+
+    // タブの中の項目を押すと、その子ノードへ選択が移る
+    const firstEntry = panel.getByRole('tabpanel').getByRole('button').first();
+    const entryName = await firstEntry.textContent();
+    await firstEntry.click();
+
+    await expect(panel.locator('.text-sm.font-semibold')).not.toHaveText(ministryName ?? '');
+    expect(entryName?.length).toBeGreaterThan(0);
+  });
 });
