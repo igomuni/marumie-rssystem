@@ -12,6 +12,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import {
   computeMOFSankeyLayout,
   mofRibbonPath,
+  type MOFLayoutLink,
   type MOFLayoutNode,
 } from '@/app/lib/mof-sankey-layout';
 import {
@@ -120,6 +121,7 @@ export function HierarchyChart({
    */
   const width = Math.max(viewport.width, 1500);
   const [hovered, setHovered] = useState<MOFLayoutNode | null>(null);
+  const [hoveredLink, setHoveredLink] = useState<MOFLayoutLink | null>(null);
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   /** ドラッグと区別するため、押した位置からの移動量を見る */
   const dragged = useRef(false);
@@ -559,15 +561,27 @@ export function HierarchyChart({
               hoveredRelated !== null &&
               !(hoveredRelated.has(link.source.id) && hoveredRelated.has(link.target.id));
             const dim = offSelection || (related === null && offHover);
+            const isHovered = hoveredLink === link;
             return (
               <path
                 key={`${link.source.id}-${link.target.id}-${i}`}
+                data-testid={testId('hierarchy-link')}
                 d={mofRibbonPath(link)}
                 fill={hierarchyNodeColor({
                   column: link.target.details?.column as MOFHierarchyColumn | undefined,
                   aggregated: link.target.details?.aggregated,
                 })}
-                opacity={dim ? 0.06 : 0.28}
+                opacity={dim ? 0.06 : isHovered ? 0.5 : 0.28}
+                style={{ cursor: 'default' }}
+                onMouseEnter={e => {
+                  setHoveredLink(link);
+                  setPointer({ x: e.clientX, y: e.clientY });
+                }}
+                onMouseMove={e => setPointer({ x: e.clientX, y: e.clientY })}
+                onMouseLeave={() => {
+                  setHoveredLink(null);
+                  setPointer(null);
+                }}
               />
             );
           })}
@@ -657,6 +671,11 @@ export function HierarchyChart({
 
       {hovered && pointer && (
         <HierarchyTooltip node={hovered} x={pointer.x} y={pointer.y} />
+      )}
+      {/* ノードにホバー中でなければ帯のツールチップを出す。両方は同時に出ない
+          （ノードにマウスがあるとき、帯の onMouseLeave は既に発火済み） */}
+      {!hovered && hoveredLink && pointer && (
+        <HierarchyLinkTooltip link={hoveredLink} x={pointer.x} y={pointer.y} />
       )}
 
       {/* 検索。/sankey-svg と同じく左上に置く（見出しの下） */}
@@ -847,6 +866,31 @@ function HierarchyTooltip({
           {details.description}
         </div>
       )}
+    </div>
+  );
+}
+
+function HierarchyLinkTooltip({
+  link,
+  x,
+  y,
+}: {
+  link: MOFLayoutLink;
+  x: number;
+  y: number;
+}) {
+  return (
+    <div
+      data-testid={testId('hierarchy-link-tooltip')}
+      className="pointer-events-none fixed z-50 max-w-md rounded border border-gray-200 bg-white px-3 py-2 shadow-lg"
+      style={{ left: x + 12, top: y + 12 }}
+    >
+      <div className="text-xs text-gray-600">
+        {link.source.name} → {link.target.name}
+      </div>
+      <div className="text-lg font-bold text-gray-800">
+        {formatBudgetFromYen(link.value)}
+      </div>
     </div>
   );
 }

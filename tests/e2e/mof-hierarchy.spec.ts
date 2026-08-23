@@ -437,4 +437,15 @@ test.describe('mof-hierarchy', () => {
 
     await expect(page).toHaveURL(/sel=/);
   });
+
+  test('hovering a link (ribbon) shows a tooltip with the flow amount', async ({ page }) => {
+    // ノードだけでなく帯にもホバーできないと、太さの差から金額を確かめる
+    // 手段が無い（/sankey-svg は帯にホバーすると source → target と金額を出す）
+    const link = page.getByTestId('hierarchy-link').first();
+    await expect(link).toBeAttached();
+    const box = (await link.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+
+    await expect(page.getByTestId('hierarchy-link-tooltip')).toBeVisible({ timeout: 5_000 });
+  });
 });
