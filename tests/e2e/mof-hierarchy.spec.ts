@@ -372,4 +372,69 @@ test.describe('mof-hierarchy', () => {
     await expect(page.getByText('内訳（金額の大きい順）')).toBeVisible();
     expect(consoleErrors.filter(t => /same key|duplicate key/i.test(t))).toEqual([]);
   });
+
+  test('hovering a node highlights its whole ancestor chain, not just direct links', async ({ page }) => {
+    // /sankey-svg はホバーで上流〜下流の連なり全体を明るくする。
+    // 直接つながる隣のノードだけを明るくすると、2列以上離れた祖先が
+    // 薄暗いままになり「この事項はどの所管か」が見た目から追えない
+    const opacities = async () =>
+      page.evaluate(() => {
+        const nodes = [...document.querySelectorAll('[data-testid="hierarchy-node"]')];
+        const item = nodes.find(n => n.getAttribute('data-column') === 'item')!;
+        const rect = item.getBoundingClientRect();
+        const ministries = nodes.filter(n => n.getAttribute('data-column') === 'ministry');
+        return {
+          itemCenter: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
+          ministryOpacities: ministries.map(
+            n => Number(getComputedStyle(n.querySelector('rect')!).opacity)
+          ),
+        };
+      });
+
+    const { itemCenter } = await opacities();
+    await page.mouse.move(itemCenter.x, itemCenter.y);
+    await page.waitForTimeout(150);
+
+    const { ministryOpacities } = await opacities();
+    // 直接つながる祖先（1件）は明るいまま、他の所管は薄暗くなる
+    expect(ministryOpacities.filter(o => o === 1).length).toBe(1);
+    expect(ministryOpacities.some(o => o < 1)).toBe(true);
+  });
+
+  test('the minimap shows the current viewport and can jump to a clicked spot', async ({ page }) => {
+    // パンを制限していないので、表示数を増やすと迷子になりやすい。
+    // /sankey-svg と同じミニマップで、全体の中の現在位置を把握しつつ飛べるようにする
+    await page.goto('/mof-hierarchy?tit=100');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+
+    await expect(page.locator('canvas')).toHaveCount(0);
+    await page.getByTitle('ミニマップを表示').click();
+    const minimap = page.locator('canvas');
+    await expect(minimap).toBeVisible();
+
+    const top = () =>
+      page.getByTestId('hierarchy-canvas').evaluate(el => Math.round(el.getBoundingClientRect().top));
+    const before = await top();
+
+    const box = (await minimap.boundingBox())!;
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.9);
+
+    await expect.poll(top).not.toBe(before);
+
+    await page.getByTitle('ミニマップを隠す').click();
+    await expect(page.locator('canvas')).toHaveCount(0);
+  });
+
+  test('search results can be chosen with the keyboard', async ({ page }) => {
+    // マウスでしか候補を選べないと、キーボードだけでは検索が完結しない
+    await page.getByPlaceholder(/検索/).fill('財務');
+    const results = page.getByTestId('hierarchy-search-result');
+    await expect(results.first()).toBeVisible({ timeout: 10_000 });
+
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+
+    await expect(page).toHaveURL(/sel=/);
+  });
 });

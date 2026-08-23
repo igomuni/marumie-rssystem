@@ -30,6 +30,7 @@ import type { SankeyLink } from '@/types/sankey';
 import { focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchySearch } from './HierarchySearch';
+import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { E2E_TEST_IDS_ENABLED, testId } from '@/client/lib/testId';
 
 /** ラベルの既定サイズ（px） */
@@ -94,6 +95,17 @@ export function HierarchyChart({
   // 縦だけを伸縮させ、横は画面固定にする（列の位置が動くと読み進められないため）
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  /**
+   * ミニマップ。/sankey-svg と同じ MinimapOverlay を使う。
+   *
+   * パンを制限しないことにしたので、表示数を増やして図が伸びると
+   * 今どこを見ているのか分からなくなりやすい。全体の中の現在位置を
+   * 示す手段が要る
+   */
+  const MINIMAP_W = 200;
+  const [showMinimap, setShowMinimap] = useState(false);
+  const minimapRef = useRef<HTMLCanvasElement>(null);
+  const minimapDragging = useRef(false);
   const panStart = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
   const [isPanning, setIsPanning] = useState(false);
   /** タッチ中の指。2本になったらピンチとして扱う */
@@ -116,6 +128,22 @@ export function HierarchyChart({
   const related = useMemo(
     () => (selectedId ? relatedNodeIds(links, selectedId) : null),
     [selectedId, links]
+  );
+
+  /**
+   * ホバー中のノードに連なる集合。
+   *
+   * 直接つながる隣だけを明るくすると、2列以上離れた祖先が薄暗いままになり
+   * 「この事項はどの所管か」が見た目から追えない。選択と同じ relatedNodeIds を使い、
+   * 上流〜下流の連なり全体を対象にする（/sankey-svg のホバーと同じ考え方）。
+   *
+   * 選択して絞り込んでいない（focusRelated=false）ときは選択のハイライトを
+   * 優先し、ここでは計算しない。絞り込み中は表示自体が既に選択の筋だけなので、
+   * その中でさらにホバーの筋を強調する意味がある
+   */
+  const hoveredRelated = useMemo(
+    () => (hovered && (!selectedId || focusRelated) ? relatedNodeIds(links, hovered.id) : null),
+    [hovered, selectedId, focusRelated, links]
   );
 
   /**
@@ -157,6 +185,77 @@ export function HierarchyChart({
         }
       ),
     [visible, width, viewport.height, viewport.width, zoom, fontPx, labelDensity]
+  );
+
+  /**
+   * ミニマップの高さ。図の縦横比に合わせる。
+   * `width`（SVGの実幅）・`layout.contentHeight`（同・実高）をそのまま使えるのは、
+   * この図が CSS の left/top だけでパンし、内部に scale の transform を持たないため
+   */
+  const minimapH = Math.round(MINIMAP_W * (layout.contentHeight / (width || 1)));
+
+  // ミニマップを描く
+  useEffect(() => {
+    if (!showMinimap) return;
+    const canvas = minimapRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const scaleX = MINIMAP_W / width;
+    const scaleY = minimapH / layout.contentHeight;
+
+    ctx.clearRect(0, 0, MINIMAP_W, minimapH);
+    ctx.fillStyle = 'rgba(245,245,245,0.95)';
+    ctx.fillRect(0, 0, MINIMAP_W, minimapH);
+
+    for (const node of layout.nodes) {
+      const details = node.details as MOFHierarchyNode['details'] | undefined;
+      if (details?.passThrough) continue;
+      ctx.fillStyle = hierarchyNodeColor({
+        column: details?.column,
+        aggregated: details?.aggregated,
+      });
+      ctx.fillRect(
+        node.x * scaleX,
+        node.y * scaleY,
+        Math.max(1, node.width * scaleX),
+        Math.max(0.5, node.height * scaleY)
+      );
+    }
+
+    // 現在の表示範囲。CSS の left/top(=pan) だけでパンしているので、
+    // 見えている世界座標はそのまま [-pan.x, -pan.x+画面幅] になる
+    const mX = -pan.x * scaleX;
+    const mY = -pan.y * scaleY;
+    const mW = container.clientWidth * scaleX;
+    const mH = container.clientHeight * scaleY;
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(mX, mY, mW, mH);
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
+    ctx.fillRect(mX, mY, mW, mH);
+  }, [showMinimap, layout, width, minimapH, pan]);
+
+  const minimapNavigate = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const canvas = minimapRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const scaleX = MINIMAP_W / width;
+      const scaleY = minimapH / layout.contentHeight;
+      const worldX = mx / scaleX;
+      const worldY = my / scaleY;
+      setPan({
+        x: container.clientWidth / 2 - worldX,
+        y: container.clientHeight / 2 - worldY,
+      });
+    },
+    [width, minimapH, layout.contentHeight]
   );
 
   /** 図に実際に出ている列。値の無い列は見出しも出さない */
@@ -456,12 +555,10 @@ export function HierarchyChart({
               !focusRelated &&
               related !== null &&
               !(related.has(link.source.id) && related.has(link.target.id));
-            const dim =
-              offSelection ||
-              ((related === null || focusRelated) &&
-                hovered !== null &&
-                hovered.id !== link.source.id &&
-                hovered.id !== link.target.id);
+            const offHover =
+              hoveredRelated !== null &&
+              !(hoveredRelated.has(link.source.id) && hoveredRelated.has(link.target.id));
+            const dim = offSelection || (related === null && offHover);
             return (
               <path
                 key={`${link.source.id}-${link.target.id}-${i}`}
@@ -492,11 +589,8 @@ export function HierarchyChart({
             const textY = centerY;
             const offSelection =
               !focusRelated && related !== null && !related.has(node.id);
-            const dim =
-              offSelection ||
-              ((related === null || focusRelated) &&
-                hovered !== null &&
-                hovered.id !== node.id);
+            const offHover = hoveredRelated !== null && !hoveredRelated.has(node.id);
+            const dim = offSelection || (related === null && offHover);
             const isSelected = selectedId === node.id;
             return (
               <g
@@ -650,6 +744,20 @@ export function HierarchyChart({
           )}
         </div>
       )}
+
+      {/* ミニマップ。/sankey-svg と同じく左下に置く。
+          パンを制限していないので、全体の中の現在位置を示す手段が要る */}
+      <MinimapOverlay
+        show={showMinimap}
+        onShow={() => setShowMinimap(true)}
+        onHide={() => setShowMinimap(false)}
+        left={12}
+        minimapW={MINIMAP_W}
+        minimapH={minimapH}
+        canvasRef={minimapRef}
+        navigate={minimapNavigate}
+        dragging={minimapDragging}
+      />
 
       {/* ズーム操作。/sankey-svg と同じく右下に置く */}
       <div className="absolute bottom-3 right-3 z-30 flex flex-col gap-1">
