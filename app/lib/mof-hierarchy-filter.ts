@@ -9,29 +9,9 @@
  * 生き残った事項だけから木を作るため）。
  */
 
-import type { MOFAccountType, MOFJikouItem } from '@/types/mof-jikou';
+import type { MOFJikouItem } from '@/types/mof-jikou';
+import type { MOFHierarchyFilter, MOFHierarchyNameFilter } from '@/types/mof-hierarchy';
 import { ACCOUNT_LABELS, levelsOf } from './mof-hierarchy-sankey';
-
-export interface MOFHierarchyNameFilter {
-  query: string;
-  /** 正規表現として解釈するか。既定は部分一致 */
-  regex?: boolean;
-}
-
-export interface MOFHierarchyFilter {
-  /** 所管名（政府関係機関は機関名）。空配列・未指定は絞らない */
-  ministries?: string[];
-  /** 会計区分。空配列・未指定は絞らない */
-  accountTypes?: MOFAccountType[];
-  /** 項名 */
-  sectionName?: MOFHierarchyNameFilter;
-  /** 事項名 */
-  itemName?: MOFHierarchyNameFilter;
-  /** 事項の金額（円）の下限 */
-  minAmount?: number | null;
-  /** 事項の金額（円）の上限 */
-  maxAmount?: number | null;
-}
 
 /** 何か1つでも条件が指定されているか。空配列・空文字・null は「条件無し」に数える */
 export function hasActiveMOFHierarchyFilter(filter: MOFHierarchyFilter): boolean {

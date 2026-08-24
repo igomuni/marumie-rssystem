@@ -9,7 +9,8 @@ import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
 import { availableYears, loadYear } from '@/app/lib/api/mof-jikou-loader';
 import { buildMOFHierarchySankey, DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
-import { filterMOFJikouItems, type MOFHierarchyFilter } from '@/app/lib/mof-hierarchy-filter';
+import { filterMOFJikouItems } from '@/app/lib/mof-hierarchy-filter';
+import type { MOFHierarchyFilter } from '@/types/mof-hierarchy';
 import type {
   MOFHierarchyColumn,
   MOFHierarchyOffset,
@@ -161,6 +162,7 @@ export async function GET(request: Request) {
       availableYears: years,
       topN,
       offset,
+      allItems: data.items,
     });
 
     return NextResponse.json(result, {

@@ -260,6 +260,11 @@ export function buildMOFHierarchySankey(
     topN?: MOFHierarchyTopN;
     /** 列ごとの表示開始位置（0始まり）。範囲外は丸める */
     offset?: MOFHierarchyOffset;
+    /**
+     * 所管一覧を作る元データ。絞り込みフィルタ適用前の全件を渡す。
+     * 省略時は `items`（呼び出し側で既に絞り込み済みのことがある）から作る
+     */
+    allItems?: MOFJikouItem[];
   }
 ): MOFHierarchyData {
   const topN = { ...DEFAULT_TOP_N, ...options.topN };
@@ -431,6 +436,14 @@ export function buildMOFHierarchySankey(
     .filter(a => a.count > 0)
     .sort((a, b) => b.amount - a.amount);
 
+  const ministries = Array.from(
+    new Set(
+      (options.allItems ?? items)
+        .filter(i => i.budgetType === options.budgetType)
+        .map(i => levelsOf(i).ministry)
+    )
+  ).sort((a, b) => a.localeCompare(b, 'ja'));
+
   return {
     browse: nodeMapToBrowseTree(nodes),
     metadata: {
@@ -444,6 +457,7 @@ export function buildMOFHierarchySankey(
       topN,
       offset: appliedOffset,
       columnCounts,
+      ministries,
       unit: 'yen',
       notes: [
         '会計区分をまたいだ単純合計です。会計間の繰入がある分は二重に数えられています',

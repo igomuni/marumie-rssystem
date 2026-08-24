@@ -286,6 +286,7 @@ function MOFHierarchyContent() {
         links={data.sankey.links}
         browseNodes={data.browse.nodes}
         browseLinks={data.browse.links}
+        ministries={data.metadata.ministries}
         selectedId={selectedId}
         onSelect={selectNode}
         focusRelated={focusRelated}

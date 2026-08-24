@@ -18,7 +18,7 @@
  * 大きく移動したいときは開始位置を直接入力する。
  */
 
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { TopNSliderRow } from '@/client/components/SankeySvg/TopNSliders';
 import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
@@ -100,7 +100,9 @@ export function HierarchyControls({
    * 何度も指定するだけで先へ進まない。毎描画で更新する ref から読む。
    */
   const latest = useRef({ offset, target, max, current });
-  latest.current = { offset, target, max, current };
+  useLayoutEffect(() => {
+    latest.current = { offset, target, max, current };
+  });
   /** /sankey-svg の前へ/次へと同じく1件だけ送る */
   const stepBy = (delta: number) => {
     const now = latest.current;

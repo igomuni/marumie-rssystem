@@ -781,6 +781,29 @@ test.describe('mof-hierarchy', () => {
       .toBe(1);
   });
 
+  test('selecting one ministry does not remove the others from the filter list', async ({ page }) => {
+    // 所管一覧をフィルタ後の browseNodes から作ると、1つ選んだ時点で
+    // 他の所管が候補から消え、追加で選べなくなっていた
+    await page.getByTitle('フィルタ を表示').click();
+    const before = await page.getByRole('checkbox').count();
+
+    await page.getByText('財務省', { exact: true }).click();
+    await expect(page).toHaveURL(/fmi=/);
+
+    // 絞り込みが実際に反映されるまで待ってから確認する
+    // （反映前に見ると、候補が減る前の一瞬をたまたま捉えて素通りしてしまう）
+    await expect
+      .poll(() =>
+        page
+          .getByTestId('hierarchy-node')
+          .evaluateAll(els => els.filter(el => el.getAttribute('data-column') === 'ministry').length)
+      )
+      .toBe(1);
+
+    await expect(page.getByRole('checkbox')).toHaveCount(before);
+    await expect(page.getByText('厚生労働省', { exact: true })).toBeVisible();
+  });
+
   test('filtering by amount range narrows the diagram', async ({ page }) => {
     // 「100億」のような単位付きテキストのまま URL に残り、API へは円に
     // 解決してから渡す

@@ -69,6 +69,7 @@ export function HierarchyChart({
   links,
   browseNodes,
   browseLinks,
+  ministries,
   selectedId,
   onSelect,
   focusRelated = true,
@@ -89,6 +90,12 @@ export function HierarchyChart({
    */
   browseNodes: MOFHierarchyNode[];
   browseLinks: SankeyLink[];
+  /**
+   * 絞り込みパネルの所管一覧（フィルタ適用前の全件）。
+   * browseNodes はサーバ側フィルタの適用後なので、絞り込み中に使うと
+   * 選んだ所管以外の候補が消えてしまう
+   */
+  ministries: string[];
   /** 選択中のノード。URL と同期させるためページ層が持つ */
   selectedId: string | null;
   onSelect: (id: string | null) => void;
@@ -383,15 +390,11 @@ export function HierarchyChart({
     if (!exists) onSelect(null);
   }, [selectedId, nodes, browseNodes, onSelect]);
 
-  /** 絞り込みパネルの所管一覧。browseNodes（TopN前の全件）から作るので、
+  /** 絞り込みパネルの所管一覧。フィルタ適用前の全件（ministries prop）から作るので、
       絞り込み中でも常に全省庁を選べる */
   const ministryOptions = useMemo(
-    () =>
-      browseNodes
-        .filter(n => n.details.column === 'ministry')
-        .map(n => n.name)
-        .sort((a, b) => a.localeCompare(b, 'ja')),
-    [browseNodes]
+    () => [...ministries].sort((a, b) => a.localeCompare(b, 'ja')),
+    [ministries]
   );
 
   const selectedNode = useMemo(
@@ -514,6 +517,7 @@ export function HierarchyChart({
       onWheel={handleWheel}
       onPointerDown={e => {
         if (e.pointerType !== 'touch') return;
+        if ((e.target as HTMLElement).closest('[data-pan-disabled="true"]')) return;
         touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
         if (touches.current.size === 1) {
           // 1本指はドラッグと同じ扱い。touchAction を切っているので自前で動かす

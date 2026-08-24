@@ -67,18 +67,21 @@ export function HierarchySearch({
   };
 
   return (
-    <div className="relative w-72" data-pan-disabled="true">
+    <div
+      className="relative w-72"
+      data-pan-disabled="true"
+      // 検索結果一覧だけを閉じる。フィルタの開閉はここでは触らない。
+      // 一覧は絶対配置でこの外枠の子（カードの兄弟）なので、ここに付けないと
+      // Tab で入力欄から候補へ移った瞬間に一覧側へフォーカスが渡る前に閉じてしまう
+      onBlur={e => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
+      }}
+    >
       <div className="flex flex-col">
         {/* カード。検索欄とフィルタ本文を同じ枠の中に収める（/sankey-svg と同じ） */}
         <div
           className="rounded-t-lg rounded-bl-lg border border-black/10 bg-white/90 shadow backdrop-blur"
           onMouseDown={e => e.stopPropagation()}
-          // 検索結果一覧だけを閉じる。フィルタの開閉はここでは触らない。
-          // 一覧の中へフォーカスが移ったときは閉じない（Tab で候補へ移った瞬間に
-          // 消えるとキーボードでは選べなくなる）
-          onBlur={e => {
-            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
-          }}
         >
           <input
             type="search"
