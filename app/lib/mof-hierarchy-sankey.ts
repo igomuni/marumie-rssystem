@@ -321,8 +321,8 @@ export function buildMOFHierarchySankey(
     // それ以外の列は今までどおり「親が残っている枝」に限る
     const isLeaf = column === 'item';
     const candidates = [...nodes.values()].filter(n => {
-      if (n.column !== column || n.parentId === null) return false;
-      if (isLeaf) return !hidden.has(n.id);
+      if (n.column !== column || n.parentId === null || hidden.has(n.id)) return false;
+      if (isLeaf) return true;
       return kept.has(n.parentId);
     });
     // 通過ノードは枝の骨格なので順位付けの対象にしない（ラベルも箱も出ない）
@@ -365,6 +365,26 @@ export function buildMOFHierarchySankey(
         if (kept.has(id)) continue;
         hidden.add(id);
         for (const childId of childrenOf.get(id) ?? []) stack.push(childId);
+      }
+    }
+
+    // 項は必ず1件以上の事項を持つ（buildFullNodeMap が事項から項を組むため、
+    // 事項ゼロの項はそもそも作られない）。事項を項より先に決めているので、
+    // ここで「配下の事項が全件 hidden になった項」が分かる——そういう項には
+    // もう表示すべき中身が無いので、項自身も隠す（/sankey-svg が可視流入ゼロの
+    // 事業をTopN候補からそもそも除くのと同じ）
+    if (column === 'item') {
+      for (const section of nodes.values()) {
+        if (section.column !== 'section' || hidden.has(section.id) || kept.has(section.id)) continue;
+        const children = childrenOf.get(section.id);
+        if (!children || children.size === 0) continue;
+        if (![...children].every(id => hidden.has(id))) continue;
+        let ancestor = section.parentId ? nodes.get(section.parentId) : undefined;
+        while (ancestor) {
+          ancestor.amount -= section.amount;
+          ancestor = ancestor.parentId ? nodes.get(ancestor.parentId) : undefined;
+        }
+        hidden.add(section.id);
       }
     }
   }

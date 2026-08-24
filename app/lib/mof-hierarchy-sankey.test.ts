@@ -610,6 +610,77 @@ describe('項のTopN選抜は事項オフセットで見えている額に連動
   });
 });
 
+describe('配下の事項が全件隠れた項は、項自身も隠す', () => {
+  // 項は必ず1件以上の事項を持つ（buildFullNodeMap が事項から項を組むため、
+  // 事項ゼロの項は仕組み上作られない）。事項オフセットで、ある項の配下の
+  // 事項が「全件」窓の手前に隠れると、その項には表示すべき中身が無くなる。
+  // 集約にも kept にも入れず、項自身も隠す（/sankey-svg が可視流入ゼロの
+  // 事業をTopN候補からそもそも除くのと同じ考え方）
+  const leaf = (section: string, itemName: string, itemAmount: number) =>
+    item({
+      ministry: 'A',
+      organization: 'A本省',
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: itemName,
+      amount: itemAmount,
+    });
+
+  // 全事項を金額順に並べると 事項P1(900) > 事項P2(800) > 事項Q1(100)。
+  // 事項のTopN=1・オフセット=2で、上位2件（項Pの事項2件すべて）が
+  // 窓の手前に隠れる。項Qの事項Q1（3位）だけが窓に残る
+  const items = [
+    leaf('P', '事項P1', 900),
+    leaf('P', '事項P2', 800),
+    leaf('Q', '事項Q1', 100),
+  ];
+
+  it('配下の事項が全件隠れた項は、kept にも集約にも現れない', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { item: 1 },
+      offset: { item: 2 },
+    });
+    const sectionNames = result.sankey.nodes
+      .filter(n => n.details.column === 'section')
+      .map(n => n.name);
+    expect(sectionNames.some(n => n.includes('P'))).toBe(false);
+    expect(sectionNames.some(n => n.includes('Q'))).toBe(true);
+  });
+
+  it('項が集約に回る設定でも、配下の事項が全件隠れた項は集約のaggregatedTopに出ない', () => {
+    const items6 = [
+      ...items,
+      leaf('R', '事項R1', 50),
+      leaf('S', '事項S1', 40),
+      leaf('T', '事項T1', 30),
+    ];
+    const result = buildMOFHierarchySankey(items6, {
+      ...options,
+      topN: { section: 1, item: 1 },
+      offset: { item: 2 },
+    });
+    const agg = result.sankey.nodes.find(
+      n => n.details.column === 'section' && n.details.aggregated
+    );
+    const aggNames = agg?.details.aggregatedTop?.map(t => t.name) ?? [];
+    expect(aggNames.some(n => n.includes('P'))).toBe(false);
+  });
+
+  it('保存則は保たれる（項列の合計＝予算合計＝窓に残った事項Q1の金額）', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { item: 1 },
+      offset: { item: 2 },
+    });
+    expect(result.metadata.total).toBe(100);
+    const columnTotal = result.sankey.nodes
+      .filter(n => n.details.column === 'section')
+      .reduce((sum, n) => sum + (n.value ?? 0), 0);
+    expect(columnTotal).toBe(result.metadata.total);
+  });
+});
+
 describe('buildMOFHierarchyBrowseTree', () => {
   const branch = (ministry: string, section: string, amount: number) =>
     item({
