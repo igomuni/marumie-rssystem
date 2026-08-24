@@ -580,6 +580,9 @@ export function HierarchyChart({
       }}
       style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
       onMouseDown={e => {
+        // 検索・パネル・ズームボタンなど浮かせた部品の上で押しても図をパンさせない。
+        // ここが抜けていて、サイドパネル内でドラッグすると図まで一緒に動いていた
+        if ((e.target as HTMLElement).closest('[data-pan-disabled="true"]')) return;
         panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
         dragged.current = false;
         setIsPanning(true);
