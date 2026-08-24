@@ -250,9 +250,10 @@ test.describe('mof-hierarchy', () => {
 
     await page.getByLabel('事項の表示位置を次へ', { exact: true }).click();
 
-    // 表示は待たずに切り替わる（1ページ＝TopN件ぶん送る）
-    await expect(page.getByLabel('事項の開始位置を直接入力')).toHaveText('6');
-    await expect(page).toHaveURL(/oit=5/);
+    // /sankey-svg の前へ/次へと同じく1件ずつ送る（ページ単位ではない）。
+    // 大きく移動したいときは開始位置を直接入力する
+    await expect(page.getByLabel('事項の開始位置を直接入力')).toHaveText('2');
+    await expect(page).toHaveURL(/oit=1(?!\d)/);
     await expect.poll(itemNames, { timeout: 30_000 }).not.toEqual(first);
   });
 
@@ -345,10 +346,10 @@ test.describe('mof-hierarchy', () => {
     await page.waitForTimeout(1200);
     await page.mouse.up();
 
-    // 1ページ（10件）ぶんしか進まないなら 11 のまま
+    // 1クリックぶん（2）だけで止まっていないなら、押し続けている間も送られている
     await expect
       .poll(async () => Number((await start.textContent()) ?? '0'), { timeout: 10_000 })
-      .toBeGreaterThan(11);
+      .toBeGreaterThan(2);
   });
 
   test('the aggregate breakdown renders without duplicate React keys', async ({ page }) => {
