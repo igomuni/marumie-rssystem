@@ -25,7 +25,7 @@ import type { SankeyLink } from '@/types/sankey';
 const ROOT_ID = 'total';
 
 /** 会計区分の表示名 */
-const ACCOUNT_LABELS: Record<MOFAccountType, string> = {
+export const ACCOUNT_LABELS: Record<MOFAccountType, string> = {
   general: '一般会計',
   special: '特別会計',
   agency: '政府関係機関',
@@ -64,7 +64,7 @@ const AGGREGATED_TOP_COUNT = 8;
  * 政府関係機関は機関名＋業務）。空文字はその列を持たないことを表し、
  * 呼び出し側で列を素通りさせる。
  */
-function levelsOf(item: MOFJikouItem): Record<Exclude<MOFHierarchyColumn, 'total'>, string> {
+export function levelsOf(item: MOFJikouItem): Record<Exclude<MOFHierarchyColumn, 'total'>, string> {
   return {
     // 政府関係機関は所管が空なので会計区分名を置く
     ministry: item.ministry || ACCOUNT_LABELS[item.accountType],
@@ -260,6 +260,11 @@ export function buildMOFHierarchySankey(
     topN?: MOFHierarchyTopN;
     /** 列ごとの表示開始位置（0始まり）。範囲外は丸める */
     offset?: MOFHierarchyOffset;
+    /**
+     * 所管一覧を作る元データ。絞り込みフィルタ適用前の全件を渡す。
+     * 省略時は `items`（呼び出し側で既に絞り込み済みのことがある）から作る
+     */
+    allItems?: MOFJikouItem[];
   }
 ): MOFHierarchyData {
   const topN = { ...DEFAULT_TOP_N, ...options.topN };
@@ -431,6 +436,14 @@ export function buildMOFHierarchySankey(
     .filter(a => a.count > 0)
     .sort((a, b) => b.amount - a.amount);
 
+  const ministries = Array.from(
+    new Set(
+      (options.allItems ?? items)
+        .filter(i => i.budgetType === options.budgetType)
+        .map(i => levelsOf(i).ministry)
+    )
+  ).sort((a, b) => a.localeCompare(b, 'ja'));
+
   return {
     browse: nodeMapToBrowseTree(nodes),
     metadata: {
@@ -444,6 +457,7 @@ export function buildMOFHierarchySankey(
       topN,
       offset: appliedOffset,
       columnCounts,
+      ministries,
       unit: 'yen',
       notes: [
         '会計区分をまたいだ単純合計です。会計間の繰入がある分は二重に数えられています',

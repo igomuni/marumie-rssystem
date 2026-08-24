@@ -7,11 +7,18 @@
  * 探索しながら何度も動かす操作なので、ダイアログに畳まず右上に常時出し、
  * 邪魔なときだけパネル外のトグルで隠せるようにする。
  *
+ * レイアウトは /sankey-svg のパネル div と同じ「1fr 1fr の CSS Grid」を
+ * そのまま使う。1行目（表示位置）は2列にまたがせ、2行目以降の表示数
+ * スライダーは列の1マスずつに自然に流し込む（内側に別のグリッドを
+ * 入れ子にしない）。
+ *
  * 表示位置は対象を1列だけ選んで動かす（/sankey-svg の「事業／支出先」と同じ）。
  * 列ごとに行を並べるとパネルが縦に伸びて図を覆うため。
+ * 前へ／次へは /sankey-svg と同じく1件ずつ送る（ページ単位ではない）。
+ * 大きく移動したいときは開始位置を直接入力する。
  */
 
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { TopNSliderRow } from '@/client/components/SankeySvg/TopNSliders';
 import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
@@ -47,7 +54,7 @@ const ARROW_PATHS: [number, string, string][] = [
 ];
 
 const SELECT_CLASS =
-  'h-6 cursor-pointer rounded border border-gray-300 bg-white px-1 text-[11px] text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';
+  'h-[19px] cursor-pointer rounded border border-gray-300 bg-white px-1 text-[11px] text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';
 
 export function HierarchyControls({
   topN,
@@ -92,20 +99,22 @@ export function HierarchyControls({
    * その関数が当時の開始位置を握っていると、押し続けても同じ位置を
    * 何度も指定するだけで先へ進まない。毎描画で更新する ref から読む。
    */
-  const latest = useRef({ offset, target, limit, max, current });
-  latest.current = { offset, target, limit, max, current };
-  const pageBy = (delta: number) => {
+  const latest = useRef({ offset, target, max, current });
+  useLayoutEffect(() => {
+    latest.current = { offset, target, max, current };
+  });
+  /** /sankey-svg の前へ/次へと同じく1件だけ送る */
+  const stepBy = (delta: number) => {
     const now = latest.current;
-    // 1ページぶん送る。1件ずつだと41位から先へ行くのに40回押すことになる
-    const next = Math.max(0, Math.min(now.max, now.current + delta * now.limit));
+    const next = Math.max(0, Math.min(now.max, now.current + delta));
     onOffsetChange({ ...now.offset, [now.target]: next });
   };
 
   return (
     <div className="flex flex-col items-end" data-pan-disabled="true">
-      <div className="rounded-t-md rounded-bl-md border border-gray-200 bg-white/95 px-2.5 py-1.5 shadow-md backdrop-blur">
-        {/* 1行目: 表示位置。対象を1列選んで窓をずらす */}
-        <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-1 rounded-t-md rounded-bl-md border border-gray-200 bg-white/95 px-2.5 py-[5px] text-xs backdrop-blur">
+        {/* 1行目: 表示位置。対象を1列選んで窓をずらす（2列にまたがる） */}
+        <div className="col-span-2 flex items-center gap-1.5">
           <select
             aria-label="表示位置の対象"
             value={target}
@@ -118,7 +127,7 @@ export function HierarchyControls({
               </option>
             ))}
           </select>
-          <span className="shrink-0">Top</span>
+          <span className="shrink-0 text-[11px] text-gray-500">Top</span>
           {isEditing ? (
             <input
               type="number"
@@ -135,10 +144,16 @@ export function HierarchyControls({
                 setIsEditing(false);
               }}
               onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === 'Escape')
+                if (e.key === 'Enter') {
                   (e.target as HTMLInputElement).blur();
+                  return;
+                }
+                if (e.key === 'Escape') {
+                  e.stopPropagation();
+                  setIsEditing(false);
+                }
               }}
-              className="w-14 rounded border border-gray-300 text-center text-[11px]"
+              className="w-10 rounded border border-gray-300 text-center text-[11px]"
             />
           ) : (
             <button
@@ -149,12 +164,14 @@ export function HierarchyControls({
                 setInput(String(rangeStart));
                 setIsEditing(true);
               }}
-              className="cursor-text tabular-nums"
+              className="cursor-text text-[11px] tabular-nums text-gray-500"
             >
               {rangeStart.toLocaleString()}
             </button>
           )}
-          <span className="shrink-0 tabular-nums">〜{rangeEnd.toLocaleString()}</span>
+          <span className="shrink-0 text-[11px] tabular-nums text-gray-500">
+            〜{rangeEnd.toLocaleString()}
+          </span>
           <input
             type="range"
             min={0}
@@ -164,43 +181,45 @@ export function HierarchyControls({
             aria-label={`${targetLabel}の開始位置`}
             value={current}
             onChange={e => commitOffset(Number(e.target.value))}
-            className="w-16 min-w-0"
+            className="w-[60px] min-w-0"
           />
-          <span className="shrink-0 tabular-nums text-gray-400">
+          <span className="shrink-0 text-[11px] tabular-nums text-gray-500">
             /{total.toLocaleString()}件
           </span>
-          {ARROW_PATHS.map(([delta, path, title]) => {
-            const step = () => pageBy(delta);
-            return (
-              <button
-                key={delta}
-                type="button"
-                title={title}
-                aria-label={`${targetLabel}の表示位置を${title}`}
-                {...repeat(step)}
-                onClick={e => {
-                  if (e.detail === 0) step();
-                }}
-                className="flex w-4 shrink-0 items-center justify-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" height="12" width="12" viewBox="0 0 24 24" fill="#555">
-                  <path d={path} />
-                </svg>
-              </button>
-            );
-          })}
+          <div className="flex shrink-0 items-center gap-0.5">
+            {ARROW_PATHS.map(([delta, path, title]) => {
+              const step = () => stepBy(delta);
+              return (
+                <button
+                  key={delta}
+                  type="button"
+                  title={title}
+                  aria-label={`${targetLabel}の表示位置を${title}`}
+                  {...repeat(step)}
+                  onClick={e => {
+                    if (e.detail === 0) step();
+                  }}
+                  className="flex items-center justify-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#555">
+                    <path d={path} />
+                  </svg>
+                </button>
+              );
+            })}
+          </div>
+          {/* Material Icons: vertical_align_top — オフセットリセット */}
           <button
             type="button"
-            title="先頭に戻す"
-            aria-label={`${targetLabel}の表示位置を先頭に戻す`}
+            title="先頭へリセット"
+            aria-label={`${targetLabel}の表示位置を先頭へリセット`}
             onClick={() => commitOffset(0)}
-            className="flex w-4 shrink-0 items-center justify-center"
+            className="flex shrink-0 items-center justify-center"
           >
-            {/* Material Icons: vertical_align_top を横向きに */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              height="12"
-              width="12"
+              height="14"
+              width="14"
               viewBox="0 0 24 24"
               fill="#555"
               style={{ transform: 'rotate(-90deg)' }}
@@ -210,33 +229,32 @@ export function HierarchyControls({
           </button>
         </div>
 
-        {/* 2行目以降: 列ごとの表示数。2列に並べて縦に伸びるのを抑える */}
-        {open && (
-          <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 border-t border-gray-100 pt-1">
-            {TOP_N_COLUMNS.map(column => {
-              const label = MOF_HIERARCHY_COLUMN_LABELS[column];
-              const value = limitOf(column);
-              // 増減ボタンは更新関数の形で呼ぶので、それを受けられるようにする
-              const setValue: Dispatch<SetStateAction<number>> = next =>
-                onTopNChange({
-                  ...topN,
-                  [column]: typeof next === 'function' ? next(value) : next,
-                });
-              return (
-                <TopNSliderRow
-                  key={column}
-                  label={label}
-                  inputLabel={`${label}の表示数`}
-                  value={value}
-                  setValue={setValue}
-                  markReplace={() => {}}
-                  metaFontPx={11}
-                  max={TOP_N_MAX}
-                />
-              );
-            })}
-          </div>
-        )}
+        {/* 2行目以降: 列ごとの表示数。/sankey-svg と同じく外側の grid に
+            直接流し込む（内側に別のグリッドを入れ子にしない）。
+            対象列が4つで2列グリッドにきれいに収まる（2行×2列） */}
+        {open &&
+          TOP_N_COLUMNS.map(column => {
+            const label = MOF_HIERARCHY_COLUMN_LABELS[column];
+            const value = limitOf(column);
+            // 増減ボタンは更新関数の形で呼ぶので、それを受けられるようにする
+            const setValue: Dispatch<SetStateAction<number>> = next =>
+              onTopNChange({
+                ...topN,
+                [column]: typeof next === 'function' ? next(value) : next,
+              });
+            return (
+              <TopNSliderRow
+                key={column}
+                label={label}
+                inputLabel={`${label}の表示数`}
+                value={value}
+                setValue={setValue}
+                markReplace={() => {}}
+                metaFontPx={11}
+                max={TOP_N_MAX}
+              />
+            );
+          })}
       </div>
 
       {/* トグル（パネル外・下部）。/sankey-svg の TopN パネルと同じ作法 */}
@@ -246,7 +264,7 @@ export function HierarchyControls({
         aria-label={open ? '表示数 を隠す' : '表示数 を表示'}
         aria-expanded={open}
         onClick={() => setOpen(o => !o)}
-        className="-mt-px flex items-center justify-center rounded-b border border-t-0 border-gray-200 bg-white/95 px-1"
+        className="-mt-px flex items-center justify-center rounded-b border border-t-0 border-gray-200 bg-white/95 px-1 backdrop-blur"
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
           <path

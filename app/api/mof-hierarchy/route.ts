@@ -9,12 +9,14 @@ import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
 import { availableYears, loadYear } from '@/app/lib/api/mof-jikou-loader';
 import { buildMOFHierarchySankey, DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
+import { filterMOFJikouItems } from '@/app/lib/mof-hierarchy-filter';
+import type { MOFHierarchyFilter } from '@/types/mof-hierarchy';
 import type {
   MOFHierarchyColumn,
   MOFHierarchyOffset,
   MOFHierarchyTopN,
 } from '@/types/mof-hierarchy';
-import type { MOFBudgetType } from '@/types/mof-jikou';
+import type { MOFAccountType, MOFBudgetType } from '@/types/mof-jikou';
 
 /** TopN の上限。これを超えるとラベルが潰れて読めなくなる */
 /**
@@ -46,6 +48,35 @@ const OFFSET_PARAMS: Array<[Exclude<MOFHierarchyColumn, 'total'>, string]> = [
   ['section', 'offsetSection'],
   ['item', 'offsetItem'],
 ];
+
+const ACCOUNT_TYPES: readonly MOFAccountType[] = ['general', 'special', 'agency'];
+
+/** 金額の下限・上限。円単位の非負整数のみ受け付ける */
+function parseAmount(raw: string | null): number | null {
+  if (!raw) return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return n;
+}
+
+/** 絞り込みのクエリパラメータを読む。/sankey-svg のフィルタパネルと同じ発想の条件セット */
+function parseFilter(params: URLSearchParams): MOFHierarchyFilter {
+  const accountTypes = params
+    .getAll('filterAccount')
+    .filter((v): v is MOFAccountType => ACCOUNT_TYPES.includes(v as MOFAccountType));
+  return {
+    ministries: params.getAll('filterMinistry'),
+    accountTypes,
+    sectionName: params.get('filterSection')
+      ? { query: params.get('filterSection') as string, regex: params.get('filterSectionRegex') === '1' }
+      : undefined,
+    itemName: params.get('filterItem')
+      ? { query: params.get('filterItem') as string, regex: params.get('filterItemRegex') === '1' }
+      : undefined,
+    minAmount: parseAmount(params.get('filterMinAmount')),
+    maxAmount: parseAmount(params.get('filterMaxAmount')),
+  };
+}
 
 /** 開始位置は0以上の整数。範囲外の丸めは組み立て側が持つ */
 function parseOffset(raw: string | null): number | undefined {
@@ -120,7 +151,10 @@ export async function GET(request: Request) {
       OFFSET_PARAMS.map(([column, param]) => [column, parseOffset(params.get(param))])
     );
 
-    const result = buildMOFHierarchySankey(data.items, {
+    const filter = parseFilter(params);
+    const items = filterMOFJikouItems(data.items, filter);
+
+    const result = buildMOFHierarchySankey(items, {
       fiscalYear: year,
       eraLabel: data.metadata.eraLabel,
       budgetType,
@@ -128,6 +162,7 @@ export async function GET(request: Request) {
       availableYears: years,
       topN,
       offset,
+      allItems: data.items,
     });
 
     return NextResponse.json(result, {

@@ -250,9 +250,10 @@ test.describe('mof-hierarchy', () => {
 
     await page.getByLabel('事項の表示位置を次へ', { exact: true }).click();
 
-    // 表示は待たずに切り替わる（1ページ＝TopN件ぶん送る）
-    await expect(page.getByLabel('事項の開始位置を直接入力')).toHaveText('6');
-    await expect(page).toHaveURL(/oit=5/);
+    // /sankey-svg の前へ/次へと同じく1件ずつ送る（ページ単位ではない）。
+    // 大きく移動したいときは開始位置を直接入力する
+    await expect(page.getByLabel('事項の開始位置を直接入力')).toHaveText('2');
+    await expect(page).toHaveURL(/oit=1(?!\d)/);
     await expect.poll(itemNames, { timeout: 30_000 }).not.toEqual(first);
   });
 
@@ -345,10 +346,10 @@ test.describe('mof-hierarchy', () => {
     await page.waitForTimeout(1200);
     await page.mouse.up();
 
-    // 1ページ（10件）ぶんしか進まないなら 11 のまま
+    // 1クリックぶん（2）だけで止まっていないなら、押し続けている間も送られている
     await expect
       .poll(async () => Number((await start.textContent()) ?? '0'), { timeout: 10_000 })
-      .toBeGreaterThan(11);
+      .toBeGreaterThan(2);
   });
 
   test('the aggregate breakdown renders without duplicate React keys', async ({ page }) => {
@@ -665,6 +666,28 @@ test.describe('mof-hierarchy', () => {
     expect(scrollTop).toBeGreaterThan(0);
   });
 
+  test('dragging inside the side panel does not pan the diagram', async ({ page }) => {
+    // パネルの一覧の上でマウスダウンしたままドラッグすると、その下の図まで
+    // 一緒にパンしていた。一覧内のドラッグは一覧だけで完結させる
+    const total = page.locator('[data-testid="hierarchy-node"][data-column="total"]').first();
+    await total.click();
+    const panel = page.getByTestId('hierarchy-side-panel');
+    await panel.getByRole('tab', { name: /^事項/ }).click();
+
+    const canvasTop = () =>
+      page.getByTestId('hierarchy-canvas').evaluate(el => (el as SVGSVGElement).style.top);
+    const before = await canvasTop();
+
+    const box = (await panel.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.3);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height * 0.7, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(200);
+
+    await expect(await canvasTop()).toBe(before);
+  });
+
   test('the tab bar stays fixed while only the row list scrolls', async ({ page }) => {
     // タブと一覧が1つのスクロール領域にまとまっていると、長い一覧を
     // スクロールするたびにタブごと流れて見えなくなってしまう
@@ -705,5 +728,125 @@ test.describe('mof-hierarchy', () => {
     await expect(page.getByTitle('クリックしてズーム率を入力')).toHaveText('100%');
     // 選択も消えない
     await expect(page).toHaveURL(/sel=/);
+  });
+
+  test('the filter toggle expands the panel inside the search card, like /sankey-svg', async ({ page }) => {
+    // /sankey-svg は独立したポップオーバーではなく、検索カードの内側に
+    // フィルタ本文を展開し、カード外下部の山形タブで開閉する（TopNパネルと同じ構造）。
+    // 開閉に「外側クリックで閉じる」は無い（TopNパネルと同じく、押すまで開いたまま）
+    const toggle = page.getByTitle('フィルタ を表示');
+    await expect(toggle).toBeVisible();
+
+    // フィルタ本文は検索欄と同じカードの内側に現れる
+    const card = page.locator('input[type="search"]').locator('..').locator('..');
+    await toggle.click();
+    await expect(card.getByText('会計', { exact: true })).toBeVisible();
+
+    // 中の項目を操作しても閉じない
+    await page.getByLabel('特別会計').check();
+    await expect(card.getByText('会計', { exact: true })).toBeVisible();
+
+    // 外側をクリックしても閉じない（TopNパネルと同じ挙動）
+    await page.mouse.click(700, 500);
+    await expect(card.getByText('会計', { exact: true })).toBeVisible();
+
+    // タブをもう一度押すと閉じる。ラベルも「隠す」に変わる
+    await page.getByTitle('フィルタ を隠す').click();
+    await expect(card.getByText('会計', { exact: true })).toBeHidden();
+  });
+
+  test('filtering by account type narrows the diagram and is reflected in the URL', async ({ page }) => {
+    // /sankey-svg の会計フィルタと同じ発想。事項単位ではなく生データの
+    // 段階で絞るので、絞り込むと所管・組織まで実際に消える
+    const before = await page.getByTestId('hierarchy-node').count();
+
+    await page.getByTitle('フィルタ を表示').click();
+    await page.getByLabel('特別会計').check();
+
+    await expect(page).toHaveURL(/fac=special/);
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(before);
+  });
+
+  test('filtering by ministry narrows the diagram to that ministry only', async ({ page }) => {
+    await page.getByTitle('フィルタ を表示').click();
+    await page.getByText('財務省', { exact: true }).click();
+
+    await expect(page).toHaveURL(/fmi=/);
+    await expect
+      .poll(() =>
+        page
+          .getByTestId('hierarchy-node')
+          .evaluateAll(els => els.filter(el => el.getAttribute('data-column') === 'ministry').length)
+      )
+      .toBe(1);
+  });
+
+  test('selecting one ministry does not remove the others from the filter list', async ({ page }) => {
+    // 所管一覧をフィルタ後の browseNodes から作ると、1つ選んだ時点で
+    // 他の所管が候補から消え、追加で選べなくなっていた
+    await page.getByTitle('フィルタ を表示').click();
+    const before = await page.getByRole('checkbox').count();
+
+    await page.getByText('財務省', { exact: true }).click();
+    await expect(page).toHaveURL(/fmi=/);
+
+    // 絞り込みが実際に反映されるまで待ってから確認する
+    // （反映前に見ると、候補が減る前の一瞬をたまたま捉えて素通りしてしまう）
+    await expect
+      .poll(() =>
+        page
+          .getByTestId('hierarchy-node')
+          .evaluateAll(els => els.filter(el => el.getAttribute('data-column') === 'ministry').length)
+      )
+      .toBe(1);
+
+    await expect(page.getByRole('checkbox')).toHaveCount(before);
+    await expect(page.getByText('厚生労働省', { exact: true })).toBeVisible();
+  });
+
+  test('filtering by amount range narrows the diagram', async ({ page }) => {
+    // 「100億」のような単位付きテキストのまま URL に残り、API へは円に
+    // 解決してから渡す
+    const before = await page.getByTestId('hierarchy-node').count();
+
+    await page.getByTitle('フィルタ を表示').click();
+    await page.getByPlaceholder('例: 100億').fill('1兆');
+
+    await expect(page).toHaveURL(/famn=1%E5%85%86/);
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(before);
+  });
+
+  test('a separate clear-filters button appears only while a filter is active, like /sankey-svg', async ({ page }) => {
+    // /sankey-svg は「フィルタを解除」を検索セクションの外側に常に置き、
+    // 幅は確保したまま非アクティブ時は非表示にする（レイアウトのガタつきを防ぐ）
+    const clearButton = page.getByTitle('フィルタを解除');
+    // 幅は確保したまま非表示（visibility:hidden）。無条件時は真の意味では
+    // 見えていないので toBeAttached（DOM に居る）で確かめる
+    await expect(clearButton).toBeAttached();
+    await expect(clearButton).toHaveCSS('visibility', 'hidden');
+
+    const fullCount = await page.getByTestId('hierarchy-node').count();
+    await page.getByTitle('フィルタ を表示').click();
+    await page.getByLabel('特別会計').check();
+
+    await expect(clearButton).toBeVisible();
+    await expect(clearButton).toHaveCSS('visibility', 'visible');
+    // 絞り込みが実際に効いたことを確認してから解除に進む
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(fullCount);
+
+    await clearButton.click();
+
+    await expect(page).not.toHaveURL(/fac=/);
+    await expect(clearButton).toHaveCSS('visibility', 'hidden');
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBe(fullCount);
+  });
+
+  test('a deep link with filter params restores the filtered state and opens the panel', async ({ page }) => {
+    // フィルタが効いた状態で来訪したら、何が効いているか見えないと気付けない
+    await page.goto('/mof-hierarchy?fac=special&ffp=1');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+
+    await expect(page.getByLabel('特別会計')).toBeChecked();
+    await expect(page.getByLabel('一般会計')).not.toBeChecked();
   });
 });

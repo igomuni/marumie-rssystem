@@ -23,14 +23,19 @@ import {
 import {
   MOF_HIERARCHY_COLUMNS,
   MOF_HIERARCHY_COLUMN_LABELS,
+  MOF_HIERARCHY_FILTER_DEFAULT,
+  hasActiveMOFHierarchyFilterState,
   type LabelDensity,
   type MOFHierarchyColumn,
+  type MOFHierarchyFilterState,
   type MOFHierarchyNode,
 } from '@/types/mof-hierarchy';
 import type { SankeyLink } from '@/types/sankey';
 import { descendantsByColumn, focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchySearch } from './HierarchySearch';
+import { HierarchyFilterFields } from './HierarchyFilterFields';
+import { HierarchyFilterClearButton } from './HierarchyFilterClearButton';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel } from '@/client/hooks/useSidePanel';
@@ -64,9 +69,14 @@ export function HierarchyChart({
   links,
   browseNodes,
   browseLinks,
+  ministries,
   selectedId,
   onSelect,
   focusRelated = true,
+  filter,
+  onFilterChange,
+  filterOpen,
+  onToggleFilterOpen,
   fontPx = LABEL_FONT_PX_DEFAULT,
   labelDensity = 'all',
 }: {
@@ -80,11 +90,23 @@ export function HierarchyChart({
    */
   browseNodes: MOFHierarchyNode[];
   browseLinks: SankeyLink[];
+  /**
+   * 絞り込みパネルの所管一覧（フィルタ適用前の全件）。
+   * browseNodes はサーバ側フィルタの適用後なので、絞り込み中に使うと
+   * 選んだ所管以外の候補が消えてしまう
+   */
+  ministries: string[];
   /** 選択中のノード。URL と同期させるためページ層が持つ */
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   /** 選択したときに関連ノードだけを表示するか */
   focusRelated?: boolean;
+  /** 絞り込みの状態。実際の絞り込みはサーバ側なので、ここは入力欄の値を持ち回すだけ */
+  filter: MOFHierarchyFilterState;
+  onFilterChange: (next: MOFHierarchyFilterState) => void;
+  /** フィルタ本文の開閉。/sankey-svg と同じく URL に残すのでページ層が持つ */
+  filterOpen: boolean;
+  onToggleFilterOpen: () => void;
   /** ラベルの文字サイズ（px） */
   fontPx?: number;
   /** ラベルをどこまで出すか */
@@ -368,6 +390,13 @@ export function HierarchyChart({
     if (!exists) onSelect(null);
   }, [selectedId, nodes, browseNodes, onSelect]);
 
+  /** 絞り込みパネルの所管一覧。フィルタ適用前の全件（ministries prop）から作るので、
+      絞り込み中でも常に全省庁を選べる */
+  const ministryOptions = useMemo(
+    () => [...ministries].sort((a, b) => a.localeCompare(b, 'ja')),
+    [ministries]
+  );
+
   const selectedNode = useMemo(
     () => layout.nodes.find(n => n.id === selectedId) ?? null,
     [layout.nodes, selectedId]
@@ -488,6 +517,7 @@ export function HierarchyChart({
       onWheel={handleWheel}
       onPointerDown={e => {
         if (e.pointerType !== 'touch') return;
+        if ((e.target as HTMLElement).closest('[data-pan-disabled="true"]')) return;
         touches.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
         if (touches.current.size === 1) {
           // 1本指はドラッグと同じ扱い。touchAction を切っているので自前で動かす
@@ -554,6 +584,9 @@ export function HierarchyChart({
       }}
       style={{ cursor: isPanning ? 'grabbing' : 'grab', touchAction: 'none' }}
       onMouseDown={e => {
+        // 検索・パネル・ズームボタンなど浮かせた部品の上で押しても図をパンさせない。
+        // ここが抜けていて、サイドパネル内でドラッグすると図まで一緒に動いていた
+        if ((e.target as HTMLElement).closest('[data-pan-disabled="true"]')) return;
         panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
         dragged.current = false;
         setIsPanning(true);
@@ -754,13 +787,29 @@ export function HierarchyChart({
         <HierarchyLinkTooltip link={hoveredLink} x={pointer.x} y={pointer.y} />
       )}
 
-      {/* 検索。/sankey-svg と同じく左上に置く（見出しの下） */}
+      {/* 検索とフィルタ。/sankey-svg と同じく左上に置く（見出しの下） */}
       <div
         data-pan-disabled="true"
-        className="absolute top-3 z-30 transition-[left] duration-200"
+        className="absolute top-3 z-30 flex items-start gap-1.5 transition-[left] duration-200"
         style={{ left: panelOpenWidth + 12 }}
       >
-        <HierarchySearch nodes={nodes} onSelect={onSelect} />
+        <HierarchySearch
+          nodes={nodes}
+          onSelect={onSelect}
+          filterOpen={filterOpen}
+          onToggleFilter={onToggleFilterOpen}
+          filterFields={
+            <HierarchyFilterFields
+              filter={filter}
+              onFilterChange={onFilterChange}
+              ministryOptions={ministryOptions}
+            />
+          }
+        />
+        <HierarchyFilterClearButton
+          active={hasActiveMOFHierarchyFilterState(filter)}
+          onClear={() => onFilterChange(MOF_HIERARCHY_FILTER_DEFAULT)}
+        />
       </div>
 
       {/* 選択したノードの詳細。/sankey-svg と同じ左ドックのサイドパネルにする。

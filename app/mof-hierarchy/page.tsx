@@ -18,10 +18,12 @@ import {
   type LabelDensity,
   type MOFHierarchyColumn,
   type MOFHierarchyData,
+  type MOFHierarchyFilterState,
   type MOFHierarchyOffset,
   type MOFHierarchyTopN,
 } from '@/types/mof-hierarchy';
-import type { MOFBudgetType } from '@/types/mof-jikou';
+import type { MOFAccountType, MOFBudgetType } from '@/types/mof-jikou';
+import { parseAmountToYen } from '@/app/lib/format/yen';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
@@ -102,6 +104,21 @@ function MOFHierarchyContent() {
   const [labelDensity, setLabelDensity] = useState<LabelDensity>(
     () => (searchParams.get('ld') === 'major' ? 'major' : 'all')
   );
+  // /sankey-svg と同じく URL に残す（fp 相当）。フィルタが効いた状態を
+  // 共有されたとき、何が効いているか見えないと気付けないため
+  const [filterOpen, setFilterOpen] = useState(searchParams.get('ffp') === '1');
+  const [filter, setFilter] = useState<MOFHierarchyFilterState>(() => ({
+    ministries: searchParams.getAll('fmi'),
+    accountTypes: searchParams
+      .getAll('fac')
+      .filter((v): v is MOFAccountType => (['general', 'special', 'agency'] as const).includes(v as MOFAccountType)),
+    sectionQuery: searchParams.get('fsn') ?? '',
+    sectionRegex: searchParams.get('fsnx') === '1',
+    itemQuery: searchParams.get('fin') ?? '',
+    itemRegex: searchParams.get('finx') === '1',
+    minAmountText: searchParams.get('famn') ?? '',
+    maxAmountText: searchParams.get('famx') ?? '',
+  }));
 
   const buildUrl = useCallback(
     (target: number | null) => {
@@ -114,10 +131,26 @@ function MOFHierarchyContent() {
         const start = offset[column];
         if (start) params.set(offsetApiKey, String(start));
       }
+      for (const m of filter.ministries) params.append('filterMinistry', m);
+      for (const a of filter.accountTypes) params.append('filterAccount', a);
+      if (filter.sectionQuery.trim()) {
+        params.set('filterSection', filter.sectionQuery.trim());
+        if (filter.sectionRegex) params.set('filterSectionRegex', '1');
+      }
+      if (filter.itemQuery.trim()) {
+        params.set('filterItem', filter.itemQuery.trim());
+        if (filter.itemRegex) params.set('filterItemRegex', '1');
+      }
+      // 「100億」のような単位付き文字列は API に渡す前に円へ解決する。
+      // 解決できない入力（変換中の途中状態）は無条件のまま無視する
+      const minYen = parseAmountToYen(filter.minAmountText);
+      if (minYen !== null) params.set('filterMinAmount', String(minYen));
+      const maxYen = parseAmountToYen(filter.maxAmountText);
+      if (maxYen !== null) params.set('filterMaxAmount', String(maxYen));
       const query = params.toString();
       return `/api/mof-hierarchy${query ? `?${query}` : ''}`;
     },
-    [budgetType, topN, offset]
+    [budgetType, topN, offset, filter]
   );
 
   const { data, year, loading, error, fetchData } = useMofBudgetData<MOFHierarchyData>(
@@ -149,11 +182,20 @@ function MOFHierarchyContent() {
     if (focusRelated) params.set('fr', '1');
     if (fontPx !== LABEL_FONT_PX_DEFAULT) params.set('fs', String(fontPx));
     if (labelDensity !== 'all') params.set('ld', labelDensity);
+    for (const m of filter.ministries) params.append('fmi', m);
+    for (const a of filter.accountTypes) params.append('fac', a);
+    if (filter.sectionQuery.trim()) params.set('fsn', filter.sectionQuery.trim());
+    if (filter.sectionRegex) params.set('fsnx', '1');
+    if (filter.itemQuery.trim()) params.set('fin', filter.itemQuery.trim());
+    if (filter.itemRegex) params.set('finx', '1');
+    if (filter.minAmountText.trim()) params.set('famn', filter.minAmountText.trim());
+    if (filter.maxAmountText.trim()) params.set('famx', filter.maxAmountText.trim());
+    if (filterOpen) params.set('ffp', '1');
     const next = `?${params.toString()}`;
     if (next !== window.location.search) {
       window.history.replaceState(null, '', next);
     }
-  }, [data, selectedId, focusRelated, fontPx, labelDensity, topN]);
+  }, [data, selectedId, focusRelated, fontPx, labelDensity, topN, filter, filterOpen]);
 
   // ブラウザの戻る／進むで選択を辿れるようにする
   useEffect(() => {
@@ -163,6 +205,19 @@ function MOFHierarchyContent() {
       setFocusRelated(params.get('fr') === '1');
       setFontPx(Number(params.get('fs')) || LABEL_FONT_PX_DEFAULT);
       setLabelDensity(params.get('ld') === 'major' ? 'major' : 'all');
+      setFilter({
+        ministries: params.getAll('fmi'),
+        accountTypes: params
+          .getAll('fac')
+          .filter((v): v is MOFAccountType => (['general', 'special', 'agency'] as const).includes(v as MOFAccountType)),
+        sectionQuery: params.get('fsn') ?? '',
+        sectionRegex: params.get('fsnx') === '1',
+        itemQuery: params.get('fin') ?? '',
+        itemRegex: params.get('finx') === '1',
+        minAmountText: params.get('famn') ?? '',
+        maxAmountText: params.get('famx') ?? '',
+      });
+      setFilterOpen(params.get('ffp') === '1');
       setTopN(
         Object.fromEntries(
           TOP_N_KEYS.map(({ column, urlKey }) => [
@@ -231,9 +286,14 @@ function MOFHierarchyContent() {
         links={data.sankey.links}
         browseNodes={data.browse.nodes}
         browseLinks={data.browse.links}
+        ministries={data.metadata.ministries}
         selectedId={selectedId}
         onSelect={selectNode}
         focusRelated={focusRelated}
+        filter={filter}
+        onFilterChange={setFilter}
+        filterOpen={filterOpen}
+        onToggleFilterOpen={() => setFilterOpen(v => !v)}
         fontPx={fontPx}
         labelDensity={labelDensity}
       />

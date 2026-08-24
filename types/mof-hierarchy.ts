@@ -85,6 +85,49 @@ export type MOFHierarchyNode = SankeyNode & {
  */
 export type LabelDensity = 'major' | 'all';
 
+/**
+ * 絞り込みパネルの UI 状態。
+ *
+ * /sankey-svg のフィルタパネルと同じ発想の条件セット（事業名/支出先名 →
+ * 項名/事項名、省庁 → 所管、会計、予算額の範囲）。金額はテキストで持つ
+ * （「100億」のような単位付き入力を許すため）。API へ渡す前に yen へ解決する。
+ */
+export interface MOFHierarchyFilterState {
+  /** 所管名（政府関係機関は「政府関係機関」等の会計区分ラベル） */
+  ministries: string[];
+  accountTypes: MOFAccountType[];
+  sectionQuery: string;
+  sectionRegex: boolean;
+  itemQuery: string;
+  itemRegex: boolean;
+  /** 単位付きテキスト入力（例: 「100億」）。未確定時は空文字 */
+  minAmountText: string;
+  maxAmountText: string;
+}
+
+export const MOF_HIERARCHY_FILTER_DEFAULT: MOFHierarchyFilterState = {
+  ministries: [],
+  accountTypes: [],
+  sectionQuery: '',
+  sectionRegex: false,
+  itemQuery: '',
+  itemRegex: false,
+  minAmountText: '',
+  maxAmountText: '',
+};
+
+/** 何か1つでも条件が指定されているか */
+export function hasActiveMOFHierarchyFilterState(state: MOFHierarchyFilterState): boolean {
+  return (
+    state.ministries.length > 0 ||
+    state.accountTypes.length > 0 ||
+    state.sectionQuery.trim() !== '' ||
+    state.itemQuery.trim() !== '' ||
+    state.minAmountText.trim() !== '' ||
+    state.maxAmountText.trim() !== ''
+  );
+}
+
 /** 列ごとの TopN。指定の無い列は集約しない */
 export type MOFHierarchyTopN = Partial<Record<MOFHierarchyColumn, number>>;
 
@@ -127,6 +170,13 @@ export interface MOFHierarchyData {
      * この値を使う。集約ノードと通過ノードは数えない
      */
     columnCounts: Partial<Record<MOFHierarchyColumn, number>>;
+    /**
+     * 所管名の全件（フィルタ適用前）。
+     * 絞り込みパネルの所管選択は、フィルタ後の browse から作ると
+     * 選んだ所管以外が候補から消えてしまう（他の所管を追加で選べなくなる）ため、
+     * フィルタとは独立にこちらを使う
+     */
+    ministries: string[];
     unit: 'yen';
     notes: string[];
   };
@@ -151,3 +201,26 @@ export interface MOFHierarchyData {
 
 /** 組み立てに使う入力。ローダから渡す */
 export type MOFHierarchyInput = Pick<MOFJikouItem, never> & MOFJikouItem;
+
+/** 項名／事項名の絞り込み条件（サーバ側フィルタ用） */
+export interface MOFHierarchyNameFilter {
+  query: string;
+  /** 正規表現として解釈するか。既定は部分一致 */
+  regex?: boolean;
+}
+
+/** サーバ側フィルタの条件（`filterMOFJikouItems` の入力） */
+export interface MOFHierarchyFilter {
+  /** 所管名（政府関係機関は機関名）。空配列・未指定は絞らない */
+  ministries?: string[];
+  /** 会計区分。空配列・未指定は絞らない */
+  accountTypes?: MOFAccountType[];
+  /** 項名 */
+  sectionName?: MOFHierarchyNameFilter;
+  /** 事項名 */
+  itemName?: MOFHierarchyNameFilter;
+  /** 事項の金額（円）の下限 */
+  minAmount?: number | null;
+  /** 事項の金額（円）の上限 */
+  maxAmount?: number | null;
+}
