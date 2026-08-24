@@ -295,6 +295,19 @@ test.describe('mof-hierarchy', () => {
     await expect.poll(totalValue).not.toBe(totalBefore);
   });
 
+  test('the item offset denominator counts all items, not just those under TopN-kept sections', async ({ page }) => {
+    // 項のTopN（既定40）に従属した候補件数だと「93件」止まりで、
+    // 残り1,600件超の事項に表示位置ではたどり着けなかった。
+    // /sankey-svg の事業→支出先と同じく、事項は項の絞り込みと無関係に全件を分母にする
+    await page.getByLabel('表示位置の対象').selectOption('item');
+    const denominatorText = await page
+      .locator('span', { hasText: /^\/[\d,]+件$/ })
+      .last()
+      .textContent();
+    const denominator = Number(denominatorText?.replace(/[^\d]/g, ''));
+    expect(denominator).toBeGreaterThan(500);
+  });
+
   test('the offset control is inert for a column that fits entirely', async ({ page }) => {
     // ずらす先が無い列では動かせないことを示す。押せてしまうと
     // 「押したのに何も起きない」になる

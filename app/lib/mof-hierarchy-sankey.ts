@@ -298,9 +298,16 @@ export function buildMOFHierarchySankey(
   const columnCounts: Partial<Record<MOFHierarchyColumn, number>> = {};
   const appliedOffset: MOFHierarchyOffset = {};
   for (const column of columns) {
-    const candidates = [...nodes.values()].filter(
-      n => n.column === column && n.parentId !== null && kept.has(n.parentId)
-    );
+    // 葉（事項）だけは /sankey-svg の「事業→支出先」と同じく、親（項）の
+    // kept 状態と無関係に全件を候補にする（事業→支出先はTopMinistryに
+    // 従属させず allEdges から直接ランキングしている：sankey-svg-filter.ts:136-143）。
+    // それ以外の列は今までどおり「親が残っている枝」に限る
+    const isLeaf = column === 'item';
+    const candidates = [...nodes.values()].filter(n => {
+      if (n.column !== column || n.parentId === null) return false;
+      if (isLeaf) return !hidden.has(n.id);
+      return kept.has(n.parentId);
+    });
     // 通過ノードは枝の骨格なので順位付けの対象にしない（ラベルも箱も出ない）
     for (const node of candidates.filter(n => n.details.passThrough)) kept.add(node.id);
     const rankable = candidates
@@ -347,14 +354,20 @@ export function buildMOFHierarchySankey(
   const othersId = (column: MOFHierarchyColumn) => `__others__${column}`;
 
   /**
-   * 通過ノードを飛び越えて、実在する直近の祖先を返す。
+   * 帯の起点を解決する。親が残っていればそこから、外れていれば親の列の
+   * 集約から流す（通過ノードの列には集約を作らないので、そこはさらに上へ遡る）。
    *
-   * 通過ノードは箱もラベルも出ない透明な存在なので、帯の端点にすると
-   * 「実在しない位置で収束・分岐している」ように見え、見た目に理由の
-   * 分からないくびれになる。帯は実ノード同士を直結し、通過ノードは
-   * 列の場所を確保するためだけに使う（ラベルの縦位置合わせに利く）
+   * 通常はどの列も親が必ず kept だが、葉（事項）だけは親（項）が集約されて
+   * いても事項単体で TopN の窓に残ることがある（/sankey-svg の「事業→支出先」
+   * が上流の TopMinistry と無関係にグローバルランキングするのと同じ）。
+   * その場合はここで親の列の集約ノードへ繋ぐ。
    */
-  const realAncestorId = (parentId: string): string => skipPassThroughAncestors(nodes, parentId);
+  const resolveSource = (parentId: string): string => {
+    const realId = skipPassThroughAncestors(nodes, parentId);
+    if (kept.has(realId)) return realId;
+    const real = nodes.get(realId);
+    return real ? othersId(real.column) : ROOT_ID;
+  };
   const others = new Map<MOFHierarchyColumn, Building>();
   const othersLinks = new Map<string, number>();
 
@@ -387,18 +400,8 @@ export function buildMOFHierarchySankey(
         parentId: null,
       });
     }
-    // 親が残っていればそこから、外れていれば親の列の集約から流す。
-    // ただし通過ノードの列には集約を作らないので、その場合はさらに上へ遡る。
-    // 遡らないと、存在しないノードを指すリンクができる
-    let parent = node.parentId ? nodes.get(node.parentId) : null;
-    while (parent && !kept.has(parent.id) && parent.details.passThrough) {
-      parent = parent.parentId ? nodes.get(parent.parentId) : null;
-    }
-    if (!parent) continue;
-    // 親が残っていても通過ノードなら、さらにその先の実ノードから流す
-    const source = kept.has(parent.id)
-      ? realAncestorId(parent.id)
-      : othersId(parent.column);
+    if (node.parentId === null) continue;
+    const source = resolveSource(node.parentId);
     const key = `${source}\u0000${target}`;
     othersLinks.set(key, (othersLinks.get(key) ?? 0) + node.amount);
   }
@@ -445,8 +448,8 @@ export function buildMOFHierarchySankey(
 
   const links: SankeyLink[] = [
     ...alive
-      .filter(n => n.parentId !== null && kept.has(n.parentId) && !n.details.passThrough)
-      .map(n => ({ source: realAncestorId(n.parentId as string), target: n.id, value: n.amount })),
+      .filter(n => n.parentId !== null && !n.details.passThrough)
+      .map(n => ({ source: resolveSource(n.parentId as string), target: n.id, value: n.amount })),
     ...[...othersLinks.entries()].map(([key, value]) => {
       const [source, target] = key.split('\u0000');
       return { source, target, value };

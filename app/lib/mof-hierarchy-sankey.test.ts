@@ -454,6 +454,78 @@ describe('TopN のオフセット', () => {
   });
 });
 
+describe('事項（葉）の候補は上流の列のTopNと無関係にグローバル', () => {
+  // /sankey-svg は 所管→事業 は事業側を上流のTopNに従属させるが、
+  // 事業→支出先（葉）だけは allEdges から上流と無関係にグローバルランキングする
+  // （app/lib/sankey-svg-filter.ts:136-143）。事項（葉）も同じ扱いにする。
+  const leaf = (section: string, itemName: string, itemAmount: number) =>
+    item({
+      ministry: 'A',
+      organization: 'A本省',
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: itemName,
+      amount: itemAmount,
+    });
+
+  it('項がTopNで集約されても、その配下の事項は候補件数に数える', () => {
+    // 項を6本作り、項のTopNを2に絞る（4本が集約に回る）。
+    // それでも事項の候補件数は6件のまま（項の集約状態と無関係）
+    const items = Array.from({ length: 6 }, (_, i) => leaf(`s${i}`, `事項s${i}`, 100 - i));
+    const result = buildMOFHierarchySankey(items, { ...options, topN: { section: 2 } });
+    expect(result.metadata.columnCounts.item).toBe(6);
+  });
+
+  // 項sAは3事項の合計10,000で1位（kept）。項sBは単独事項9,999で2位（TopN=1なので集約に回る）。
+  // 事項単体で見ると、sB配下の1件（9,999）が全事項中で最大なので、
+  // 項が集約された配下からでも事項のTopN窓には入るはず
+  const items = [
+    leaf('sA', '事項sA-1', 3334),
+    leaf('sA', '事項sA-2', 3333),
+    leaf('sA', '事項sA-3', 3333),
+    leaf('sB', '事項sB-1', 9999),
+  ];
+
+  it('項が集約された配下からでも、事項単体でTopNの窓に入れば個別に出る', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 1, item: 1 },
+    });
+    const itemNodes = result.sankey.nodes.filter(
+      n => n.details.column === 'item' && !n.details.aggregated
+    );
+    expect(itemNodes).toHaveLength(1);
+    expect(itemNodes[0].value).toBe(9999);
+    expect(itemNodes[0].name).toBe('事項sB-1');
+  });
+
+  it('項が集約された配下から個別に出た事項は、項の集約ノードから帯が伸びる', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 1, item: 1 },
+    });
+    const soloItem = result.sankey.nodes.find(
+      n => n.details.column === 'item' && n.value === 9999
+    )!;
+    const sectionAgg = result.sankey.nodes.find(
+      n => n.details.column === 'section' && n.details.aggregated
+    )!;
+    const link = result.sankey.links.find(l => l.target === soloItem.id)!;
+    expect(link.source).toBe(sectionAgg.id);
+  });
+
+  it('保存則は保たれる（事項列の合計 = 予算合計）', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 1, item: 1 },
+    });
+    const columnTotal = result.sankey.nodes
+      .filter(n => n.details.column === 'item')
+      .reduce((sum, n) => sum + (n.value ?? 0), 0);
+    expect(columnTotal).toBe(result.metadata.total);
+  });
+});
+
 describe('buildMOFHierarchyBrowseTree', () => {
   const branch = (ministry: string, section: string, amount: number) =>
     item({
