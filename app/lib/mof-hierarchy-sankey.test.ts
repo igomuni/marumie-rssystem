@@ -295,7 +295,10 @@ describe('TopN は列単位で効く', () => {
     expect(agg!.name).toBe('4所管');
   });
 
-  it('集約された所管の下の項は個別に出さず、下の列の集約に流す', () => {
+  it('集約された所管の下の項も、項自身のTopNに収まれば個別に出る', () => {
+    // 項・事項は表示位置の対象として上流の列と無関係にグローバル候補になる。
+    // 所管がTopNで集約されても、その配下の項が項自身のTopN（既定40）に
+    // 収まっていれば個別に出る——所管の集約ノードから帯が伸びる
     const items = Array.from({ length: 6 }, (_, i) =>
       branch(`省庁${i}`, `s${i}`, `事項${i}`, 100 - i)
     );
@@ -303,10 +306,19 @@ describe('TopN は列単位で効く', () => {
     const sections = result.sankey.nodes.filter(
       n => n.details.column === 'section' && !n.details.aggregated
     );
-    // 残った2所管の項だけが個別に立つ
-    expect(sections).toHaveLength(2);
+    expect(sections).toHaveLength(6);
     expect(sections.some(n => n.name.includes('s0'))).toBe(true);
-    expect(sections.some(n => n.name.includes('s1'))).toBe(true);
+    expect(sections.some(n => n.name.includes('s5'))).toBe(true);
+
+    // 集約された所管（省庁2〜5）の下の項は、直近の実祖先（組織）の
+    // 集約ノードから帯が伸びる（組織自身も所管の集約に含まれて実体を持たない）
+    const orgAgg = result.sankey.nodes.find(
+      n => n.details.column === 'organization' && n.details.aggregated
+    )!;
+    const s5 = sections.find(n => n.name.includes('s5'))!;
+    const link = result.sankey.links.find(l => l.target === s5.id)!;
+    expect(link.source).toBe(orgAgg.id);
+
     // 合計は保たれる
     const columnTotal = result.sankey.nodes
       .filter(n => n.details.column === 'section')
@@ -775,6 +787,60 @@ describe('項オフセットで道連れに隠れた事項の分だけ、事項�
     });
     const columnTotal = result.sankey.nodes
       .filter(n => n.details.column === 'item')
+      .reduce((sum, n) => sum + (n.value ?? 0), 0);
+    expect(columnTotal).toBe(result.metadata.total);
+  });
+});
+
+describe('項の候補も組織のTopNと無関係にグローバル（項は事項と並ぶ表示位置の対象のため）', () => {
+  // 項・事項だけが表示位置（オフセット）の対象なので、項側も事項と同じく
+  // 上流（組織）のTopNで候補が絞られてしまうと、組織のTopNに収まらない
+  // 項までは表示位置で辿り着けない。事項（葉）と同じ扱いにする
+  const leaf = (organization: string, section: string, itemAmount: number) =>
+    item({
+      ministry: 'A',
+      organization,
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: `事項${section}`,
+      amount: itemAmount,
+    });
+
+  // 組織Aは大きく（TopN=1で残る）、組織Bは小さく（集約に回る）。
+  // 組織Bの項SBも、項の候補としては数えられるはず
+  const items = [leaf('組織A', 'SA', 1000), leaf('組織B', 'SB', 10)];
+
+  it('組織がTopNで集約されても、その配下の項は候補件数に数える', () => {
+    const result = buildMOFHierarchySankey(items, { ...options, topN: { organization: 1 } });
+    expect(result.metadata.columnCounts.section).toBe(2);
+  });
+
+  it('組織が集約された配下からでも、項単体でTopNの窓に入れば個別に出る', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { organization: 1, section: 1 },
+      offset: { section: 1 }, // SA(1000)を手前に飛ばし、SB(10)を窓に残す
+    });
+    const sections = result.sankey.nodes.filter(
+      n => n.details.column === 'section' && !n.details.aggregated
+    );
+    expect(sections.map(n => n.name)).toEqual(['SB 項SB']);
+    // 帯は組織の集約ノードから伸びる
+    const orgAgg = result.sankey.nodes.find(
+      n => n.details.column === 'organization' && n.details.aggregated
+    )!;
+    const link = result.sankey.links.find(l => l.target === sections[0].id)!;
+    expect(link.source).toBe(orgAgg.id);
+  });
+
+  it('保存則は保たれる（項列の合計＝予算合計）', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { organization: 1, section: 1 },
+      offset: { section: 1 },
+    });
+    const columnTotal = result.sankey.nodes
+      .filter(n => n.details.column === 'section')
       .reduce((sum, n) => sum + (n.value ?? 0), 0);
     expect(columnTotal).toBe(result.metadata.total);
   });

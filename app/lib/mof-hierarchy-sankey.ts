@@ -322,14 +322,16 @@ export function buildMOFHierarchySankey(
   let itemRankable: Building[] = [];
   let itemLimit: number | undefined;
   for (const column of columns) {
-    // 葉（事項）だけは /sankey-svg の「事業→支出先」と同じく、親（項）の
-    // kept 状態と無関係に全件を候補にする（事業→支出先はTopMinistryに
-    // 従属させず allEdges から直接ランキングしている：sankey-svg-filter.ts:136-143）。
-    // それ以外の列は今までどおり「親が残っている枝」に限る
-    const isLeaf = column === 'item';
+    // 項・事項は表示位置（オフセット）の対象として並ぶ2列なので、どちらも
+    // 親の kept 状態と無関係に全件を候補にする。/sankey-svg の「事業→支出先」
+    // が所属所管のTopNと無関係に allEdges から直接ランキングするのと同じ
+    // （sankey-svg-filter.ts:136-143）。組織のTopNで項の候補まで絞られると、
+    // 組織のTopNに収まらない項へは表示位置で辿り着けなくなるため。
+    // それ以外の列（所管・組織・勘定）は今までどおり「親が残っている枝」に限る
+    const isDecoupled = column === 'item' || column === 'section';
     const candidates = [...nodes.values()].filter(n => {
       if (n.column !== column || n.parentId === null || hidden.has(n.id)) return false;
-      if (isLeaf) return true;
+      if (isDecoupled) return true;
       return kept.has(n.parentId);
     });
     // 通過ノードは枝の骨格なので順位付けの対象にしない（ラベルも箱も出ない）
