@@ -315,12 +315,12 @@ export function buildMOFHierarchySankey(
   const columnCounts: Partial<Record<MOFHierarchyColumn, number>> = {};
   const appliedOffset: MOFHierarchyOffset = {};
   /**
-   * 事項の候補一覧（金額順）と窓の上限。項がオフセットで明示的に隠れると、
-   * 既に窓に勝っていた事項も道連れで消えることがある（このループ内、後述）。
+   * 列ごとの候補一覧（金額順）と窓の上限。オフセットや配下の消滅で
+   * 既に窓に勝っていたノードが道連れで欠けることがある。
    * ループが終わったあとに、欠けた分だけ次点を繰り上げて埋め戻すために使う
    */
-  let itemRankable: Building[] = [];
-  let itemLimit: number | undefined;
+  const columnRankable = new Map<Exclude<MOFHierarchyColumn, 'total'>, Building[]>();
+  const columnLimit = new Map<Exclude<MOFHierarchyColumn, 'total'>, number | undefined>();
   for (const column of columns) {
     // 項・事項は表示位置（オフセット）の対象として並ぶ2列なので、どちらも
     // 親の kept 状態と無関係に全件を候補にする。/sankey-svg の「事業→支出先」
@@ -340,10 +340,8 @@ export function buildMOFHierarchySankey(
       .filter(n => !n.details.passThrough)
       .sort((a, b) => b.amount - a.amount);
     columnCounts[column] = rankable.length;
-    if (column === 'item') {
-      itemRankable = rankable;
-      itemLimit = topN[column];
-    }
+    columnRankable.set(column, rankable);
+    columnLimit.set(column, topN[column]);
 
     const limit = topN[column];
     if (!limit) {
@@ -405,14 +403,47 @@ export function buildMOFHierarchySankey(
     }
   }
 
-  // 項オフセットで項が明示的に隠れると、その配下の事項も道連れで隠れる
-  // （上のループ内）。既に事項の窓（TopN）に勝っていた事項が道連れで
-  // 欠けることがあるので、欠けた分だけ次点（集約に回っていた事項）を
-  // 繰り上げて埋め戻し、「上位N件を表示する」という約束を保つ
-  if (itemLimit) {
-    let keptCount = itemRankable.reduce((n, node) => n + (kept.has(node.id) ? 1 : 0), 0);
-    for (const node of itemRankable) {
-      if (keptCount >= itemLimit) break;
+  /**
+   * 配下（通過ノードは透過的に辿る）に実体がまったく残っていないか。
+   * 項が「配下の事項が全件 hidden」で隠れるのと同じ判定を、勘定・組織・
+   * 所管にも一般化して使う。
+   */
+  const isFullyEmpty = (id: string): boolean => {
+    const children = childrenOf.get(id);
+    if (!children || children.size === 0) return false;
+    return [...children].every(childId => {
+      if (hidden.has(childId)) return true;
+      return nodes.get(childId)?.details.passThrough ? isFullyEmpty(childId) : false;
+    });
+  };
+  // 項の下は隠れても項自身は集約や kept に残らない設計だが、その上（勘定・
+  // 組織・所管）は最初のループで既に kept/tail が決まっている。項・事項の
+  // 消滅で配下が空になったものが後から出てくるので、下（勘定）から上
+  // （所管）へ順に見て、空になったノードを道連れで隠す
+  for (const column of ['subAccount', 'organization', 'ministry'] as const) {
+    for (const node of nodes.values()) {
+      if (node.column !== column || hidden.has(node.id) || node.details.passThrough) continue;
+      if (!isFullyEmpty(node.id)) continue;
+      let ancestor = node.parentId ? nodes.get(node.parentId) : undefined;
+      while (ancestor) {
+        ancestor.amount -= node.amount;
+        ancestor = ancestor.parentId ? nodes.get(ancestor.parentId) : undefined;
+      }
+      hidden.add(node.id);
+      kept.delete(node.id);
+    }
+  }
+
+  // オフセットや配下の消滅で道連れに欠けたノードがあれば、欠けた分だけ
+  // 次点（集約に回っていたノード）を繰り上げて埋め戻し、「上位N件を表示する」
+  // という約束を保つ（/sankey-svg のTopN選抜と同じ）
+  for (const column of ['ministry', 'organization', 'subAccount', 'item'] as const) {
+    const limit = columnLimit.get(column);
+    const rankable = columnRankable.get(column);
+    if (!limit || !rankable) continue;
+    let keptCount = rankable.reduce((n, node) => n + (kept.has(node.id) ? 1 : 0), 0);
+    for (const node of rankable) {
+      if (keptCount >= limit) break;
       if (kept.has(node.id) || hidden.has(node.id)) continue;
       kept.add(node.id);
       keptCount++;
