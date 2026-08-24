@@ -103,7 +103,7 @@ export function HierarchyControls({
 
   return (
     <div className="flex flex-col items-end" data-pan-disabled="true">
-      <div className="rounded-t-md rounded-bl-md border border-gray-200 bg-white/95 px-2.5 py-1.5 shadow-md backdrop-blur">
+      <div className="rounded-t-md rounded-bl-md border border-gray-200 bg-white/95 px-2.5 py-1.5 backdrop-blur">
         {/* 1行目: 表示位置。対象を1列選んで窓をずらす */}
         <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
           <select

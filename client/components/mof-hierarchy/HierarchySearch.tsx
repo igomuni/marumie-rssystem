@@ -71,7 +71,7 @@ export function HierarchySearch({
       <div className="flex flex-col">
         {/* カード。検索欄とフィルタ本文を同じ枠の中に収める（/sankey-svg と同じ） */}
         <div
-          className="rounded-t-lg rounded-bl-lg border border-black/10 bg-white/90 shadow-md backdrop-blur"
+          className="rounded-t-lg rounded-bl-lg border border-black/10 bg-white/90 shadow backdrop-blur"
           onMouseDown={e => e.stopPropagation()}
           // 検索結果一覧だけを閉じる。フィルタの開閉はここでは触らない。
           // 一覧の中へフォーカスが移ったときは閉じない（Tab で候補へ移った瞬間に
@@ -124,7 +124,7 @@ export function HierarchySearch({
           aria-expanded={filterOpen}
           onMouseDown={e => e.stopPropagation()}
           onClick={onToggleFilter}
-          className="-mt-px flex h-4 w-6 self-end items-center justify-center rounded-b border border-t-0 border-black/10 bg-white/90 text-gray-400 shadow backdrop-blur hover:bg-white"
+          className="-mt-px flex h-4 w-6 self-end items-center justify-center rounded-b border border-t-0 border-black/10 bg-white/90 text-gray-400 backdrop-blur hover:bg-white"
         >
           <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="currentColor">
             <path
