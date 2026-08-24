@@ -707,12 +707,37 @@ test.describe('mof-hierarchy', () => {
     await expect(page).toHaveURL(/sel=/);
   });
 
+  test('the filter toggle expands the panel inside the search card, like /sankey-svg', async ({ page }) => {
+    // /sankey-svg は独立したポップオーバーではなく、検索カードの内側に
+    // フィルタ本文を展開し、カード外下部の山形タブで開閉する（TopNパネルと同じ構造）。
+    // 開閉に「外側クリックで閉じる」は無い（TopNパネルと同じく、押すまで開いたまま）
+    const toggle = page.getByTitle('フィルタ を表示');
+    await expect(toggle).toBeVisible();
+
+    // フィルタ本文は検索欄と同じカードの内側に現れる
+    const card = page.locator('input[type="search"]').locator('..').locator('..');
+    await toggle.click();
+    await expect(card.getByText('会計', { exact: true })).toBeVisible();
+
+    // 中の項目を操作しても閉じない
+    await page.getByLabel('特別会計').check();
+    await expect(card.getByText('会計', { exact: true })).toBeVisible();
+
+    // 外側をクリックしても閉じない（TopNパネルと同じ挙動）
+    await page.mouse.click(700, 500);
+    await expect(card.getByText('会計', { exact: true })).toBeVisible();
+
+    // タブをもう一度押すと閉じる。ラベルも「隠す」に変わる
+    await page.getByTitle('フィルタ を隠す').click();
+    await expect(card.getByText('会計', { exact: true })).toBeHidden();
+  });
+
   test('filtering by account type narrows the diagram and is reflected in the URL', async ({ page }) => {
     // /sankey-svg の会計フィルタと同じ発想。事項単位ではなく生データの
     // 段階で絞るので、絞り込むと所管・組織まで実際に消える
     const before = await page.getByTestId('hierarchy-node').count();
 
-    await page.getByLabel('フィルタを表示').click();
+    await page.getByTitle('フィルタ を表示').click();
     await page.getByLabel('特別会計').check();
 
     await expect(page).toHaveURL(/fac=special/);
@@ -720,7 +745,7 @@ test.describe('mof-hierarchy', () => {
   });
 
   test('filtering by ministry narrows the diagram to that ministry only', async ({ page }) => {
-    await page.getByLabel('フィルタを表示').click();
+    await page.getByTitle('フィルタ を表示').click();
     await page.getByText('財務省', { exact: true }).click();
 
     await expect(page).toHaveURL(/fmi=/);
@@ -738,47 +763,43 @@ test.describe('mof-hierarchy', () => {
     // 解決してから渡す
     const before = await page.getByTestId('hierarchy-node').count();
 
-    await page.getByLabel('フィルタを表示').click();
+    await page.getByTitle('フィルタ を表示').click();
     await page.getByPlaceholder('例: 100億').fill('1兆');
 
     await expect(page).toHaveURL(/famn=1%E5%85%86/);
     await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(before);
   });
 
-  test('the filter button shows a badge while any condition is active, and 全て解除 clears it', async ({ page }) => {
-    // フィルタボタン自体に付く青いドット。開閉状態に関わらず「絞り込み中」を示す
-    const badge = page.locator('span.bg-blue-500');
-    await expect(badge).toHaveCount(0);
+  test('a separate clear-filters button appears only while a filter is active, like /sankey-svg', async ({ page }) => {
+    // /sankey-svg は「フィルタを解除」を検索セクションの外側に常に置き、
+    // 幅は確保したまま非アクティブ時は非表示にする（レイアウトのガタつきを防ぐ）
+    const clearButton = page.getByTitle('フィルタを解除');
+    // 幅は確保したまま非表示（visibility:hidden）。無条件時は真の意味では
+    // 見えていないので toBeAttached（DOM に居る）で確かめる
+    await expect(clearButton).toBeAttached();
+    await expect(clearButton).toHaveCSS('visibility', 'hidden');
 
-    await page.getByLabel('フィルタを表示').click();
+    const fullCount = await page.getByTestId('hierarchy-node').count();
+    await page.getByTitle('フィルタ を表示').click();
     await page.getByLabel('特別会計').check();
-    await expect(badge).toHaveCount(1);
 
-    const beforeAll = await page.getByTestId('hierarchy-node').count();
-    await page.getByLabel('特別会計').check();
-    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(beforeAll);
+    await expect(clearButton).toBeVisible();
+    await expect(clearButton).toHaveCSS('visibility', 'visible');
+    // 絞り込みが実際に効いたことを確認してから解除に進む
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(fullCount);
 
-    await page.getByText('すべて解除').click();
+    await clearButton.click();
 
     await expect(page).not.toHaveURL(/fac=/);
-    await expect(badge).toHaveCount(0);
-    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBe(beforeAll);
+    await expect(clearButton).toHaveCSS('visibility', 'hidden');
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBe(fullCount);
   });
 
-  test('the filter popover closes when clicking outside it', async ({ page }) => {
-    await page.getByLabel('フィルタを表示').click();
-    await expect(page.getByText('会計', { exact: true })).toBeVisible();
-
-    await page.mouse.click(700, 500);
-
-    await expect(page.getByText('会計', { exact: true })).toBeHidden();
-  });
-
-  test('a deep link with filter params restores the filtered state', async ({ page }) => {
-    await page.goto('/mof-hierarchy?fac=special');
+  test('a deep link with filter params restores the filtered state and opens the panel', async ({ page }) => {
+    // フィルタが効いた状態で来訪したら、何が効いているか見えないと気付けない
+    await page.goto('/mof-hierarchy?fac=special&ffp=1');
     await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
 
-    await page.getByLabel('フィルタを表示').click();
     await expect(page.getByLabel('特別会計')).toBeChecked();
     await expect(page.getByLabel('一般会計')).not.toBeChecked();
   });

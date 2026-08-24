@@ -23,6 +23,8 @@ import {
 import {
   MOF_HIERARCHY_COLUMNS,
   MOF_HIERARCHY_COLUMN_LABELS,
+  MOF_HIERARCHY_FILTER_DEFAULT,
+  hasActiveMOFHierarchyFilterState,
   type LabelDensity,
   type MOFHierarchyColumn,
   type MOFHierarchyFilterState,
@@ -32,7 +34,8 @@ import type { SankeyLink } from '@/types/sankey';
 import { descendantsByColumn, focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchySearch } from './HierarchySearch';
-import { HierarchyFilters } from './HierarchyFilters';
+import { HierarchyFilterFields } from './HierarchyFilterFields';
+import { HierarchyFilterClearButton } from './HierarchyFilterClearButton';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel } from '@/client/hooks/useSidePanel';
@@ -71,6 +74,8 @@ export function HierarchyChart({
   focusRelated = true,
   filter,
   onFilterChange,
+  filterOpen,
+  onToggleFilterOpen,
   fontPx = LABEL_FONT_PX_DEFAULT,
   labelDensity = 'all',
 }: {
@@ -92,6 +97,9 @@ export function HierarchyChart({
   /** 絞り込みの状態。実際の絞り込みはサーバ側なので、ここは入力欄の値を持ち回すだけ */
   filter: MOFHierarchyFilterState;
   onFilterChange: (next: MOFHierarchyFilterState) => void;
+  /** フィルタ本文の開閉。/sankey-svg と同じく URL に残すのでページ層が持つ */
+  filterOpen: boolean;
+  onToggleFilterOpen: () => void;
   /** ラベルの文字サイズ（px） */
   fontPx?: number;
   /** ラベルをどこまで出すか */
@@ -778,11 +786,22 @@ export function HierarchyChart({
         className="absolute top-3 z-30 flex items-start gap-1.5 transition-[left] duration-200"
         style={{ left: panelOpenWidth + 12 }}
       >
-        <HierarchySearch nodes={nodes} onSelect={onSelect} />
-        <HierarchyFilters
-          filter={filter}
-          onFilterChange={onFilterChange}
-          ministryOptions={ministryOptions}
+        <HierarchySearch
+          nodes={nodes}
+          onSelect={onSelect}
+          filterOpen={filterOpen}
+          onToggleFilter={onToggleFilterOpen}
+          filterFields={
+            <HierarchyFilterFields
+              filter={filter}
+              onFilterChange={onFilterChange}
+              ministryOptions={ministryOptions}
+            />
+          }
+        />
+        <HierarchyFilterClearButton
+          active={hasActiveMOFHierarchyFilterState(filter)}
+          onClear={() => onFilterChange(MOF_HIERARCHY_FILTER_DEFAULT)}
         />
       </div>
 

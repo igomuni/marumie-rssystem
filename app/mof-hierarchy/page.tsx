@@ -104,6 +104,9 @@ function MOFHierarchyContent() {
   const [labelDensity, setLabelDensity] = useState<LabelDensity>(
     () => (searchParams.get('ld') === 'major' ? 'major' : 'all')
   );
+  // /sankey-svg と同じく URL に残す（fp 相当）。フィルタが効いた状態を
+  // 共有されたとき、何が効いているか見えないと気付けないため
+  const [filterOpen, setFilterOpen] = useState(searchParams.get('ffp') === '1');
   const [filter, setFilter] = useState<MOFHierarchyFilterState>(() => ({
     ministries: searchParams.getAll('fmi'),
     accountTypes: searchParams
@@ -187,11 +190,12 @@ function MOFHierarchyContent() {
     if (filter.itemRegex) params.set('finx', '1');
     if (filter.minAmountText.trim()) params.set('famn', filter.minAmountText.trim());
     if (filter.maxAmountText.trim()) params.set('famx', filter.maxAmountText.trim());
+    if (filterOpen) params.set('ffp', '1');
     const next = `?${params.toString()}`;
     if (next !== window.location.search) {
       window.history.replaceState(null, '', next);
     }
-  }, [data, selectedId, focusRelated, fontPx, labelDensity, topN, filter]);
+  }, [data, selectedId, focusRelated, fontPx, labelDensity, topN, filter, filterOpen]);
 
   // ブラウザの戻る／進むで選択を辿れるようにする
   useEffect(() => {
@@ -213,6 +217,7 @@ function MOFHierarchyContent() {
         minAmountText: params.get('famn') ?? '',
         maxAmountText: params.get('famx') ?? '',
       });
+      setFilterOpen(params.get('ffp') === '1');
       setTopN(
         Object.fromEntries(
           TOP_N_KEYS.map(({ column, urlKey }) => [
@@ -286,6 +291,8 @@ function MOFHierarchyContent() {
         focusRelated={focusRelated}
         filter={filter}
         onFilterChange={setFilter}
+        filterOpen={filterOpen}
+        onToggleFilterOpen={() => setFilterOpen(v => !v)}
         fontPx={fontPx}
         labelDensity={labelDensity}
       />
