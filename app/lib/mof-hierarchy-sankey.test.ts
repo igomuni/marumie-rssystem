@@ -526,6 +526,90 @@ describe('事項（葉）の候補は上流の列のTopNと無関係にグロー
   });
 });
 
+describe('項のTopN選抜は事項オフセットで見えている額に連動して再ランキングされる', () => {
+  // /sankey-svg は事業のTopN選抜を「所属所管のTopN」ではなく「現在窓に入っている
+  // 支出先からの流入額」で毎回再計算する（sankey-svg-filter.ts:261-284）。
+  // mof-hierarchy でも、項の直下の事項オフセットで一部の事項が窓の手前に
+  // 隠れると、項どうしの順位（TopNに残るかどうか）もそれに応じて入れ替わるべき
+  // （所管・組織・勘定は/sankey-svgのミニストリと同じくこの再ランキングの対象外）。
+  const leaf = (ministry: string, section: string, itemName: string, itemAmount: number) =>
+    item({
+      ministry,
+      organization: `${ministry}本省`,
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: itemName,
+      amount: itemAmount,
+    });
+
+  // 項P: 事項1件1000（真の合計では項Qより大きく、通常はPがTopN=1に残る）
+  // 項Q: 事項2件550+449=999（真の合計はPよりわずかに小さい）
+  const items = [
+    leaf('A', 'P', '事項P1', 1000),
+    leaf('A', 'Q', '事項Q1', 550),
+    leaf('A', 'Q', '事項Q2', 449),
+  ];
+
+  it('事項オフセット無しでは、真の合計どおり項Pが残る', () => {
+    const result = buildMOFHierarchySankey(items, { ...options, topN: { section: 1 } });
+    const sections = result.sankey.nodes.filter(
+      n => n.details.column === 'section' && !n.details.aggregated
+    );
+    expect(sections.map(n => n.name)).toEqual(['P 項P']);
+  });
+
+  it('事項P1（項Pの唯一の事項・全事項中1位）が窓の手前に隠れると、項の順位が入れ替わる', () => {
+    // 全事項を金額順に並べると 事項P1(1000) > 事項Q1(550) > 事項Q2(449)。
+    // 事項のTopN=1・オフセット=1で1位（事項P1）を手前に隠すと、
+    // 項Pの見えている額は 1000-1000=0 に、項Qは 999 のまま
+    // （項Qの2件は窓+集約でどちらも「見えている」扱い）。
+    // 真の合計では項Pの方が大きいが、見えている額では項Qが上回り、
+    // TopNに残る項が入れ替わるはず
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 1, item: 1 },
+      offset: { item: 1 },
+    });
+    const sections = result.sankey.nodes.filter(
+      n => n.details.column === 'section' && !n.details.aggregated
+    );
+    expect(sections.map(n => n.name)).toEqual(['Q 項Q']);
+  });
+
+  it('入れ替わった後も保存則は保たれる（項列の合計＝予算合計）', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 1, item: 1 },
+      offset: { item: 1 },
+    });
+    const columnTotal = result.sankey.nodes
+      .filter(n => n.details.column === 'section')
+      .reduce((sum, n) => sum + (n.value ?? 0), 0);
+    expect(columnTotal).toBe(result.metadata.total);
+  });
+
+  it('所管・組織・勘定は事項オフセットによる再ランキングの対象外（/sankey-svg の所管と同じ）', () => {
+    // 所管を2つにして、それぞれの真の合計の大小関係が
+    // 事項オフセットの前後で変わらないことを確認する
+    const twoMinistries = [
+      leaf('A', 'P', '事項P1', 1000),
+      leaf('A', 'Q', '事項Q1', 550),
+      leaf('A', 'Q', '事項Q2', 449),
+      leaf('B', 'R', '事項R1', 100), // 所管Bは所管Aよりずっと小さいまま
+    ];
+    const before = buildMOFHierarchySankey(twoMinistries, { ...options, topN: { ministry: 1 } });
+    const after = buildMOFHierarchySankey(twoMinistries, {
+      ...options,
+      topN: { ministry: 1, item: 1 },
+      offset: { item: 1 },
+    });
+    const ministryName = (r: typeof before) =>
+      r.sankey.nodes.find(n => n.details.column === 'ministry' && !n.details.aggregated)!.name;
+    expect(ministryName(before)).toBe('A');
+    expect(ministryName(after)).toBe('A');
+  });
+});
+
 describe('buildMOFHierarchyBrowseTree', () => {
   const branch = (ministry: string, section: string, amount: number) =>
     item({

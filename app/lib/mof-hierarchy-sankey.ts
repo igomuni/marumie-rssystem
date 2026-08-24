@@ -274,7 +274,24 @@ export function buildMOFHierarchySankey(
   // --- 階層を辿ってノードを作る ---
   // ノードIDは根からのパス。事項名は項をまたいで重複するため、名前だけでは合流してしまう
   const { nodes, childrenOf, total } = buildFullNodeMap(target);
-  const columns = HIERARCHY_COLUMNS_EXCEPT_TOTAL;
+  /**
+   * 残すノードを決める処理順序。木を辿る順序（HIERARCHY_COLUMNS_EXCEPT_TOTAL）とは
+   * あえてずらしてあり、事項を項より先に決める。
+   *
+   * /sankey-svg は事業のTopN選抜を「所属所管のTopN」ではなく「現在窓に入っている
+   * 支出先からの流入額」で毎回再計算する（sankey-svg-filter.ts:261-284）。事項を
+   * 先に決めて祖先の amount を縮めておけば、その次に決める項のランキングが
+   * 自然にこの「見えている額」を使うことになり、同じ効果を専用のロジック無しで得られる。
+   * 組織・勘定・所管は /sankey-svg の所管と同じくこの再ランキングの対象外なので、
+   * 事項より前のまま動かさない。
+   */
+  const columns: Array<Exclude<MOFHierarchyColumn, 'total'>> = [
+    'ministry',
+    'organization',
+    'subAccount',
+    'item',
+    'section',
+  ];
 
   // サイドパネル用のフルツリーは、窓の手前を隠す処理で `nodes` の amount を
   // 書き換える前に作る。browse は TopN・オフセットと無関係な全量であるべきなので
@@ -338,9 +355,14 @@ export function buildMOFHierarchySankey(
         ancestor.amount -= node.amount;
         ancestor = ancestor.parentId ? nodes.get(ancestor.parentId) : undefined;
       }
+      // 子孫を丸ごと隠す。ただし既に kept の子孫（事項が項より先に決まった結果、
+      // 項が後から手前に隠れても、その事項は単独で TopN の窓に残ったままにする
+      // ——/sankey-svg で支出先が完全に集約された所管の下からでも個別に
+      // 出られるのと同じ）は隠さず、その配下も辿らない
       const stack = [node.id];
       while (stack.length > 0) {
         const id = stack.pop() as string;
+        if (kept.has(id)) continue;
         hidden.add(id);
         for (const childId of childrenOf.get(id) ?? []) stack.push(childId);
       }
@@ -363,10 +385,20 @@ export function buildMOFHierarchySankey(
    * その場合はここで親の列の集約ノードへ繋ぐ。
    */
   const resolveSource = (parentId: string): string => {
-    const realId = skipPassThroughAncestors(nodes, parentId);
-    if (kept.has(realId)) return realId;
-    const real = nodes.get(realId);
-    return real ? othersId(real.column) : ROOT_ID;
+    let cur = nodes.get(parentId);
+    while (cur) {
+      if (cur.details.passThrough) {
+        cur = cur.parentId ? nodes.get(cur.parentId) : undefined;
+        continue;
+      }
+      if (kept.has(cur.id)) return cur.id;
+      // 窓の手前で隠されたノードには集約が無い（others ループが素通りする）ので、
+      // さらに上の祖先へ遡る（事項が項より先に決まり、項が後から手前に
+      // 隠れても事項は kept のまま残ることがあるための保険）
+      if (!hidden.has(cur.id)) return othersId(cur.column);
+      cur = cur.parentId ? nodes.get(cur.parentId) : undefined;
+    }
+    return ROOT_ID;
   };
   const others = new Map<MOFHierarchyColumn, Building>();
   const othersLinks = new Map<string, number>();
