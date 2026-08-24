@@ -276,6 +276,10 @@ export function buildMOFHierarchySankey(
   const { nodes, childrenOf, total } = buildFullNodeMap(target);
   const columns = HIERARCHY_COLUMNS_EXCEPT_TOTAL;
 
+  // サイドパネル用のフルツリーは、窓の手前を隠す処理で `nodes` の amount を
+  // 書き換える前に作る。browse は TopN・オフセットと無関係な全量であるべきなので
+  const browse = nodeMapToBrowseTree(nodes);
+
   // --- 残すノードを決める ---
   //
   // TopN は列全体の表示件数の上限として効かせる（/sankey-svg と同じ）。
@@ -285,6 +289,12 @@ export function buildMOFHierarchySankey(
   // 集約された所管の下から事項が単独で顔を出すことがなくなり、
   // 図の左から右へ辿れる形が保たれる。
   const kept = new Set<string>([ROOT_ID]);
+  /**
+   * 窓の手前（1..start位）で完全に隠すノード。集約にも入れない（/sankey-svg と同じ）。
+   * 隠した分の金額は祖先（予算合計まで）から引くので、`nodes` 側の `amount` は
+   * ここで直接書き換える。以降の出力はこの縮めた値をそのまま使う。
+   */
+  const hidden = new Set<string>();
   const columnCounts: Partial<Record<MOFHierarchyColumn, number>> = {};
   const appliedOffset: MOFHierarchyOffset = {};
   for (const column of columns) {
@@ -308,6 +318,26 @@ export function buildMOFHierarchySankey(
     const start = Math.max(0, Math.min(offset[column] ?? 0, Math.max(0, rankable.length - limit)));
     appliedOffset[column] = start;
     for (const node of rankable.slice(start, start + limit)) kept.add(node.id);
+
+    // 窓の手前（0..start-1位）は隠す。この列はまだ左から右への処理途中で、
+    // 祖先（親より上）はすでに決定済みなので、ここで祖先の amount を直接
+    // 縮めても後続の列のランキングには影響しない。
+    // 子孫（まだ辿っていない下流の列）も丸ごと隠す。そうしないと、隠した
+    // ノードの金額は祖先から引いたのに、子孫だけ下流の列の集約に個別に
+    // 現れてしまい、その列の合計が metadata.total と合わなくなる
+    for (const node of rankable.slice(0, start)) {
+      let ancestor = node.parentId ? nodes.get(node.parentId) : undefined;
+      while (ancestor) {
+        ancestor.amount -= node.amount;
+        ancestor = ancestor.parentId ? nodes.get(ancestor.parentId) : undefined;
+      }
+      const stack = [node.id];
+      while (stack.length > 0) {
+        const id = stack.pop() as string;
+        hidden.add(id);
+        for (const childId of childrenOf.get(id) ?? []) stack.push(childId);
+      }
+    }
   }
 
   // --- 集約ノードは列ごとに1つ ---
@@ -332,6 +362,9 @@ export function buildMOFHierarchySankey(
     if (node.id === ROOT_ID || kept.has(node.id)) continue;
     // 通過ノードは実体が無いので件数に数えない。金額は子孫側で拾われる
     if (node.details.passThrough) continue;
+    // 窓の手前で隠したノードは集約にも入れない（/sankey-svg と同じ）。
+    // 金額はすでに祖先の amount から引いてある
+    if (hidden.has(node.id)) continue;
     const target = othersId(node.column);
     const existing = others.get(node.column);
     if (existing) {
@@ -445,14 +478,16 @@ export function buildMOFHierarchySankey(
   ).sort((a, b) => a.localeCompare(b, 'ja'));
 
   return {
-    browse: nodeMapToBrowseTree(nodes),
+    browse,
     metadata: {
       fiscalYear: options.fiscalYear,
       eraLabel: options.eraLabel,
       budgetType: options.budgetType,
       budgetTypes: options.budgetTypes,
       availableYears: options.availableYears,
-      total,
+      // 窓の手前を隠した分だけ根ノードの amount が縮んでいるので、その値を使う
+      // （既定表示ではオフセットが無いので `total` と一致する）
+      total: nodes.get(ROOT_ID)?.amount ?? total,
       itemCount: target.length,
       topN,
       offset: appliedOffset,
@@ -464,8 +499,9 @@ export function buildMOFHierarchySankey(
         '収録されていない会計区分は図に現れません（決算の事項別内訳は一般会計にしかありません）',
         '補正予算の金額は改予算額です。号数をまたいで合算しないでください',
         '項コードは組織内の連番で、単独では一意になりません',
-        '「41組織」のような灰色のノードは、表示の窓から外れた分をまとめたものです。金額は保たれています',
-      '表示開始位置をずらすと、窓の外にあった下位の順位も辿れます',
+        '「41組織」のような灰色のノードは、表示の窓より下位の分をまとめたものです',
+        '表示開始位置をずらすと、窓の外にあった下位の順位も辿れます',
+        '表示位置をずらして窓の手前に外れた分は、集約にも合計にも含みません（/sankey-svg と同じ扱いです）',
       ],
     },
     accounts,

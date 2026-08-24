@@ -257,6 +257,44 @@ test.describe('mof-hierarchy', () => {
     await expect.poll(itemNames, { timeout: 30_000 }).not.toEqual(first);
   });
 
+  test('offsetting past a node hides it entirely instead of folding it into the aggregate', async ({ page }) => {
+    // 窓の手前に外れたノードが集約ノードの件数・金額に混ざってしまうバグの回帰テスト。
+    // /sankey-svg と同じく、手前に外れた分はどこにも表示せず、予算合計・所管の
+    // 合計からも実際に引く（集約ノードには入れない）
+    const itemAggregateText = () =>
+      page
+        .locator('[data-testid="hierarchy-node"][data-column="item"]')
+        .filter({ hasText: '事項 (' })
+        .first()
+        .locator('text')
+        .textContent();
+    const totalValue = () =>
+      page
+        .locator('[data-testid="hierarchy-node"][data-column="total"]')
+        .first()
+        .locator('text')
+        .textContent();
+
+    await page.getByLabel('表示位置の対象').selectOption('item');
+    const aggBefore = await itemAggregateText();
+    const totalBefore = await totalValue();
+
+    await page.getByLabel('事項の表示位置を次へ', { exact: true }).click();
+    await expect(page).toHaveURL(/oit=1(?!\d)/);
+
+    // 窓を1件分ずらすと、手前に外れた1件ぶん集約の件数は「減る」（増えたり
+    // 変わらなかったりしたら、手前に外れた分が集約に混ざっているバグ）
+    await expect.poll(itemAggregateText).not.toBe(aggBefore);
+    const aggAfterMatch = (await itemAggregateText())?.match(/^([\d,]+)事項/);
+    const aggBeforeMatch = aggBefore?.match(/^([\d,]+)事項/);
+    const before = Number(aggBeforeMatch?.[1]?.replace(/,/g, ''));
+    const after = Number(aggAfterMatch?.[1]?.replace(/,/g, ''));
+    expect(before - after).toBe(1);
+
+    // 予算合計の表示金額が実際に減る
+    await expect.poll(totalValue).not.toBe(totalBefore);
+  });
+
   test('the offset control is inert for a column that fits entirely', async ({ page }) => {
     // ずらす先が無い列では動かせないことを示す。押せてしまうと
     // 「押したのに何も起きない」になる

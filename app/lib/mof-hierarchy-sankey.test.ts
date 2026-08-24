@@ -343,7 +343,7 @@ describe('TopN のオフセット', () => {
     expect(sections.map(n => n.value).sort((a, b) => (b ?? 0) - (a ?? 0))).toEqual([97, 96, 95]);
   });
 
-  it('窓の外は上位側も含めて集約に入る', () => {
+  it('窓の末尾だけが集約に入る。手前（上位側）は集約にも含めない（/sankey-svg と同じ）', () => {
     const result = buildMOFHierarchySankey(ranked(10), {
       ...options,
       topN: { section: 3 },
@@ -352,13 +352,82 @@ describe('TopN のオフセット', () => {
     const agg = result.sankey.nodes.find(
       n => n.details.column === 'section' && n.details.aggregated
     )!;
-    // 10件中3件を残したので7件が集約。上位3件もここに入る
-    expect(agg.details.aggregatedCount).toBe(7);
-    // 合計は保たれる
+    // 10件中、窓（4〜6位）の3件を残し、末尾（7〜10位）の4件だけが集約に入る。
+    // 手前（1〜3位）はどこにも現れない
+    expect(agg.details.aggregatedCount).toBe(4);
+    const aggNames = agg.details.aggregatedTop?.map(t => t.name) ?? [];
+    expect(aggNames.some(n => n.includes('s0'))).toBe(false);
+    expect(aggNames.some(n => n.includes('s1'))).toBe(false);
+    expect(aggNames.some(n => n.includes('s2'))).toBe(false);
+    // 手前で隠した分（100+99+98=297）だけ合計が縮むので、
+    // 列の合計と metadata.total は一致し続ける（保存則は保たれる）
     const columnTotal = result.sankey.nodes
       .filter(n => n.details.column === 'section')
       .reduce((sum, n) => sum + (n.value ?? 0), 0);
     expect(columnTotal).toBe(result.metadata.total);
+  });
+
+  it('窓の手前のノードは sankey.nodes に一切現れない', () => {
+    const result = buildMOFHierarchySankey(ranked(10), {
+      ...options,
+      topN: { section: 3 },
+      offset: { section: 3 },
+    });
+    const sectionNames = result.sankey.nodes
+      .filter(n => n.details.column === 'section')
+      .map(n => n.name);
+    expect(sectionNames.some(n => n.includes('s0'))).toBe(false);
+    expect(sectionNames.some(n => n.includes('s1'))).toBe(false);
+    expect(sectionNames.some(n => n.includes('s2'))).toBe(false);
+  });
+
+  it('窓の手前で隠した分は、組織・所管・予算合計からそれぞれ引かれる（/sankey-svg と同じ挙動）', () => {
+    const before = buildMOFHierarchySankey(ranked(10), { ...options, topN: { section: 3 } });
+    const after = buildMOFHierarchySankey(ranked(10), {
+      ...options,
+      topN: { section: 3 },
+      offset: { section: 3 },
+    });
+    // 手前で隠れた1〜3位（100+99+98=297）
+    const hidden = 297;
+
+    const orgBefore = before.sankey.nodes.find(n => n.details.column === 'organization')!.value;
+    const orgAfter = after.sankey.nodes.find(n => n.details.column === 'organization')!.value;
+    expect((orgBefore ?? 0) - (orgAfter ?? 0)).toBe(hidden);
+
+    const ministryBefore = before.sankey.nodes.find(n => n.details.column === 'ministry')!.value;
+    const ministryAfter = after.sankey.nodes.find(n => n.details.column === 'ministry')!.value;
+    expect((ministryBefore ?? 0) - (ministryAfter ?? 0)).toBe(hidden);
+
+    expect(before.metadata.total - after.metadata.total).toBe(hidden);
+  });
+
+  it('複数の列に同時にオフセットをかけても、縮小が二重に効かず筋が通る', () => {
+    // 所管を4つ用意し、所管側にもオフセットをかけて1つを手前へ追いやる。
+    // 残った所管の中でも、項側の窓の手前をさらに1件隠す。
+    // 所管が手前で消えた分の項は、そもそも項の候補にすら入らないので
+    // 二重に引かれることは無いはず
+    const items = [
+      branch('A', 'sa', 1000), // 所管の中で1位。オフセットで手前に追いやられ、丸ごと消える
+      ...ranked(6), // 所管X: 項s0..s5、金額100..95（branch のデフォルト所管 'A' を上書き）
+    ].map((i, idx) => (idx === 0 ? i : { ...i, ministry: 'X', organization: 'X本省' }));
+
+    const before = buildMOFHierarchySankey(items, { ...options, topN: { section: 2 } });
+    const after = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { ministry: 1, section: 2 },
+      offset: { ministry: 1, section: 1 }, // 所管Aを手前へ、所管X内の項も1件手前へ
+    });
+
+    // 所管Aの1000 + 項s0の100（所管Xの項の1位）が手前で隠れる
+    expect(before.metadata.total - after.metadata.total).toBe(1000 + 100);
+
+    // 残った項の窓は、所管Aの消滅や項s0の手前送りと無関係に、
+    // 所管Xの中で2〜3位（99, 98）のまま
+    const sections = after.sankey.nodes.filter(
+      n => n.details.column === 'section' && !n.details.aggregated
+    );
+    expect(sections.map(n => n.value).sort((a, b) => (b ?? 0) - (a ?? 0))).toEqual([99, 98]);
   });
 
   it('行き過ぎたオフセットは末尾に丸め、丸めた値を返す', () => {
