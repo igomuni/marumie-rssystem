@@ -706,4 +706,80 @@ test.describe('mof-hierarchy', () => {
     // 選択も消えない
     await expect(page).toHaveURL(/sel=/);
   });
+
+  test('filtering by account type narrows the diagram and is reflected in the URL', async ({ page }) => {
+    // /sankey-svg の会計フィルタと同じ発想。事項単位ではなく生データの
+    // 段階で絞るので、絞り込むと所管・組織まで実際に消える
+    const before = await page.getByTestId('hierarchy-node').count();
+
+    await page.getByLabel('フィルタを表示').click();
+    await page.getByLabel('特別会計').check();
+
+    await expect(page).toHaveURL(/fac=special/);
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(before);
+  });
+
+  test('filtering by ministry narrows the diagram to that ministry only', async ({ page }) => {
+    await page.getByLabel('フィルタを表示').click();
+    await page.getByText('財務省', { exact: true }).click();
+
+    await expect(page).toHaveURL(/fmi=/);
+    await expect
+      .poll(() =>
+        page
+          .getByTestId('hierarchy-node')
+          .evaluateAll(els => els.filter(el => el.getAttribute('data-column') === 'ministry').length)
+      )
+      .toBe(1);
+  });
+
+  test('filtering by amount range narrows the diagram', async ({ page }) => {
+    // 「100億」のような単位付きテキストのまま URL に残り、API へは円に
+    // 解決してから渡す
+    const before = await page.getByTestId('hierarchy-node').count();
+
+    await page.getByLabel('フィルタを表示').click();
+    await page.getByPlaceholder('例: 100億').fill('1兆');
+
+    await expect(page).toHaveURL(/famn=1%E5%85%86/);
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(before);
+  });
+
+  test('the filter button shows a badge while any condition is active, and 全て解除 clears it', async ({ page }) => {
+    // フィルタボタン自体に付く青いドット。開閉状態に関わらず「絞り込み中」を示す
+    const badge = page.locator('span.bg-blue-500');
+    await expect(badge).toHaveCount(0);
+
+    await page.getByLabel('フィルタを表示').click();
+    await page.getByLabel('特別会計').check();
+    await expect(badge).toHaveCount(1);
+
+    const beforeAll = await page.getByTestId('hierarchy-node').count();
+    await page.getByLabel('特別会計').check();
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBeLessThan(beforeAll);
+
+    await page.getByText('すべて解除').click();
+
+    await expect(page).not.toHaveURL(/fac=/);
+    await expect(badge).toHaveCount(0);
+    await expect.poll(() => page.getByTestId('hierarchy-node').count()).toBe(beforeAll);
+  });
+
+  test('the filter popover closes when clicking outside it', async ({ page }) => {
+    await page.getByLabel('フィルタを表示').click();
+    await expect(page.getByText('会計', { exact: true })).toBeVisible();
+
+    await page.mouse.click(700, 500);
+
+    await expect(page.getByText('会計', { exact: true })).toBeHidden();
+  });
+
+  test('a deep link with filter params restores the filtered state', async ({ page }) => {
+    await page.goto('/mof-hierarchy?fac=special');
+    await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
+
+    await page.getByLabel('フィルタを表示').click();
+    await expect(page.getByLabel('特別会計')).toBeChecked();
+    await expect(page.getByLabel('一般会計')).not.toBeChecked();
+  });
 });

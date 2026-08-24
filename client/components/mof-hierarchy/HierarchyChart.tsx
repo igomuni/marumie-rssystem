@@ -25,12 +25,14 @@ import {
   MOF_HIERARCHY_COLUMN_LABELS,
   type LabelDensity,
   type MOFHierarchyColumn,
+  type MOFHierarchyFilterState,
   type MOFHierarchyNode,
 } from '@/types/mof-hierarchy';
 import type { SankeyLink } from '@/types/sankey';
 import { descendantsByColumn, focusHierarchy, relatedNodeIds } from '@/app/lib/mof-hierarchy-focus';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { HierarchySearch } from './HierarchySearch';
+import { HierarchyFilters } from './HierarchyFilters';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel } from '@/client/hooks/useSidePanel';
@@ -67,6 +69,8 @@ export function HierarchyChart({
   selectedId,
   onSelect,
   focusRelated = true,
+  filter,
+  onFilterChange,
   fontPx = LABEL_FONT_PX_DEFAULT,
   labelDensity = 'all',
 }: {
@@ -85,6 +89,9 @@ export function HierarchyChart({
   onSelect: (id: string | null) => void;
   /** 選択したときに関連ノードだけを表示するか */
   focusRelated?: boolean;
+  /** 絞り込みの状態。実際の絞り込みはサーバ側なので、ここは入力欄の値を持ち回すだけ */
+  filter: MOFHierarchyFilterState;
+  onFilterChange: (next: MOFHierarchyFilterState) => void;
   /** ラベルの文字サイズ（px） */
   fontPx?: number;
   /** ラベルをどこまで出すか */
@@ -367,6 +374,17 @@ export function HierarchyChart({
     const exists = nodes.some(n => n.id === selectedId) || browseNodes.some(n => n.id === selectedId);
     if (!exists) onSelect(null);
   }, [selectedId, nodes, browseNodes, onSelect]);
+
+  /** 絞り込みパネルの所管一覧。browseNodes（TopN前の全件）から作るので、
+      絞り込み中でも常に全省庁を選べる */
+  const ministryOptions = useMemo(
+    () =>
+      browseNodes
+        .filter(n => n.details.column === 'ministry')
+        .map(n => n.name)
+        .sort((a, b) => a.localeCompare(b, 'ja')),
+    [browseNodes]
+  );
 
   const selectedNode = useMemo(
     () => layout.nodes.find(n => n.id === selectedId) ?? null,
@@ -754,13 +772,18 @@ export function HierarchyChart({
         <HierarchyLinkTooltip link={hoveredLink} x={pointer.x} y={pointer.y} />
       )}
 
-      {/* 検索。/sankey-svg と同じく左上に置く（見出しの下） */}
+      {/* 検索とフィルタ。/sankey-svg と同じく左上に置く（見出しの下） */}
       <div
         data-pan-disabled="true"
-        className="absolute top-3 z-30 transition-[left] duration-200"
+        className="absolute top-3 z-30 flex items-start gap-1.5 transition-[left] duration-200"
         style={{ left: panelOpenWidth + 12 }}
       >
         <HierarchySearch nodes={nodes} onSelect={onSelect} />
+        <HierarchyFilters
+          filter={filter}
+          onFilterChange={onFilterChange}
+          ministryOptions={ministryOptions}
+        />
       </div>
 
       {/* 選択したノードの詳細。/sankey-svg と同じ左ドックのサイドパネルにする。

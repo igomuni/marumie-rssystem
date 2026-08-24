@@ -85,6 +85,49 @@ export type MOFHierarchyNode = SankeyNode & {
  */
 export type LabelDensity = 'major' | 'all';
 
+/**
+ * 絞り込みパネルの UI 状態。
+ *
+ * /sankey-svg のフィルタパネルと同じ発想の条件セット（事業名/支出先名 →
+ * 項名/事項名、省庁 → 所管、会計、予算額の範囲）。金額はテキストで持つ
+ * （「100億」のような単位付き入力を許すため）。API へ渡す前に yen へ解決する。
+ */
+export interface MOFHierarchyFilterState {
+  /** 所管名（政府関係機関は「政府関係機関」等の会計区分ラベル） */
+  ministries: string[];
+  accountTypes: MOFAccountType[];
+  sectionQuery: string;
+  sectionRegex: boolean;
+  itemQuery: string;
+  itemRegex: boolean;
+  /** 単位付きテキスト入力（例: 「100億」）。未確定時は空文字 */
+  minAmountText: string;
+  maxAmountText: string;
+}
+
+export const MOF_HIERARCHY_FILTER_DEFAULT: MOFHierarchyFilterState = {
+  ministries: [],
+  accountTypes: [],
+  sectionQuery: '',
+  sectionRegex: false,
+  itemQuery: '',
+  itemRegex: false,
+  minAmountText: '',
+  maxAmountText: '',
+};
+
+/** 何か1つでも条件が指定されているか */
+export function hasActiveMOFHierarchyFilterState(state: MOFHierarchyFilterState): boolean {
+  return (
+    state.ministries.length > 0 ||
+    state.accountTypes.length > 0 ||
+    state.sectionQuery.trim() !== '' ||
+    state.itemQuery.trim() !== '' ||
+    state.minAmountText.trim() !== '' ||
+    state.maxAmountText.trim() !== ''
+  );
+}
+
 /** 列ごとの TopN。指定の無い列は集約しない */
 export type MOFHierarchyTopN = Partial<Record<MOFHierarchyColumn, number>>;
 
