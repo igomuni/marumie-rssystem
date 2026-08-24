@@ -257,6 +257,85 @@ test.describe('mof-hierarchy', () => {
     await expect.poll(itemNames, { timeout: 30_000 }).not.toEqual(first);
   });
 
+  test('offsetting past a node hides it entirely instead of folding it into the aggregate', async ({ page }) => {
+    // 窓の手前に外れたノードが集約ノードの件数・金額に混ざってしまうバグの回帰テスト。
+    // /sankey-svg と同じく、手前に外れた分はどこにも表示せず、予算合計・所管の
+    // 合計からも実際に引く（集約ノードには入れない）
+    const itemAggregateText = () =>
+      page
+        .locator('[data-testid="hierarchy-node"][data-column="item"]')
+        .filter({ hasText: '事項 (' })
+        .first()
+        .locator('text')
+        .textContent();
+    const totalValue = () =>
+      page
+        .locator('[data-testid="hierarchy-node"][data-column="total"]')
+        .first()
+        .locator('text')
+        .textContent();
+
+    await page.getByLabel('表示位置の対象').selectOption('item');
+    const aggBefore = await itemAggregateText();
+    const totalBefore = await totalValue();
+
+    await page.getByLabel('事項の表示位置を次へ', { exact: true }).click();
+    await expect(page).toHaveURL(/oit=1(?!\d)/);
+
+    // 窓を1件分ずらすと、手前に外れた1件ぶん集約の件数は「減る」（増えたり
+    // 変わらなかったりしたら、手前に外れた分が集約に混ざっているバグ）
+    await expect.poll(itemAggregateText).not.toBe(aggBefore);
+    const aggAfterMatch = (await itemAggregateText())?.match(/^([\d,]+)事項/);
+    const aggBeforeMatch = aggBefore?.match(/^([\d,]+)事項/);
+    const before = Number(aggBeforeMatch?.[1]?.replace(/,/g, ''));
+    const after = Number(aggAfterMatch?.[1]?.replace(/,/g, ''));
+    expect(before - after).toBe(1);
+
+    // 予算合計の表示金額が実際に減る
+    await expect.poll(totalValue).not.toBe(totalBefore);
+  });
+
+  test('the item offset denominator counts all items, not just those under TopN-kept sections', async ({ page }) => {
+    // 項のTopN（既定40）に従属した候補件数だと「93件」止まりで、
+    // 残り1,600件超の事項に表示位置ではたどり着けなかった。
+    // /sankey-svg の事業→支出先と同じく、事項は項の絞り込みと無関係に全件を分母にする
+    await page.getByLabel('表示位置の対象').selectOption('item');
+    const denominatorText = await page
+      .locator('span', { hasText: /^\/[\d,]+件$/ })
+      .last()
+      .textContent();
+    const denominator = Number(denominatorText?.replace(/[^\d]/g, ''));
+    expect(denominator).toBeGreaterThan(500);
+  });
+
+  test('paging the item offset re-ranks which sections are aggregated, like /sankey-svg re-ranks projects', async ({ page }) => {
+    // /sankey-svg は事業のTopN選抜を「現在窓に入っている支出先からの流入額」で
+    // 毎回再計算する。項のTopN選抜も、事項オフセットで見えている額に応じて
+    // 中身が入れ替わるはず（件数の1,066のような数字自体は項自身のTopN次第で
+    // 変わらないが、集約に入っている項の顔ぶれは変わる）
+    const sectionAggregate = () =>
+      page
+        .getByTestId('hierarchy-node')
+        .filter({ hasText: /^[\d,]+項 \(/ })
+        .first();
+
+    const breakdownText = () => page.getByText('内訳（金額の大きい順）').locator('..').textContent();
+
+    await sectionAggregate().click();
+    await expect(page.getByText('内訳（金額の大きい順）')).toBeVisible();
+    const before = await breakdownText();
+
+    await page.getByLabel('表示位置の対象').selectOption('item');
+    await page.getByLabel('事項の開始位置を直接入力').click();
+    await page.getByLabel('事項の開始位置(数値)').fill('11');
+    await page.getByLabel('事項の開始位置(数値)').press('Enter');
+    await expect(page).toHaveURL(/oit=10(?!\d)/);
+
+    // 選択は保ったまま（再クリックすると選択解除のトグルになる）、
+    // 応答が更新されて内訳が自然に入れ替わることを見る
+    await expect.poll(breakdownText).not.toBe(before);
+  });
+
   test('the offset control is inert for a column that fits entirely', async ({ page }) => {
     // ずらす先が無い列では動かせないことを示す。押せてしまうと
     // 「押したのに何も起きない」になる

@@ -274,7 +274,28 @@ export function buildMOFHierarchySankey(
   // --- 階層を辿ってノードを作る ---
   // ノードIDは根からのパス。事項名は項をまたいで重複するため、名前だけでは合流してしまう
   const { nodes, childrenOf, total } = buildFullNodeMap(target);
-  const columns = HIERARCHY_COLUMNS_EXCEPT_TOTAL;
+  /**
+   * 残すノードを決める処理順序。木を辿る順序（HIERARCHY_COLUMNS_EXCEPT_TOTAL）とは
+   * あえてずらしてあり、事項を項より先に決める。
+   *
+   * /sankey-svg は事業のTopN選抜を「所属所管のTopN」ではなく「現在窓に入っている
+   * 支出先からの流入額」で毎回再計算する（sankey-svg-filter.ts:261-284）。事項を
+   * 先に決めて祖先の amount を縮めておけば、その次に決める項のランキングが
+   * 自然にこの「見えている額」を使うことになり、同じ効果を専用のロジック無しで得られる。
+   * 組織・勘定・所管は /sankey-svg の所管と同じくこの再ランキングの対象外なので、
+   * 事項より前のまま動かさない。
+   */
+  const columns: Array<Exclude<MOFHierarchyColumn, 'total'>> = [
+    'ministry',
+    'organization',
+    'subAccount',
+    'item',
+    'section',
+  ];
+
+  // サイドパネル用のフルツリーは、窓の手前を隠す処理で `nodes` の amount を
+  // 書き換える前に作る。browse は TopN・オフセットと無関係な全量であるべきなので
+  const browse = nodeMapToBrowseTree(nodes);
 
   // --- 残すノードを決める ---
   //
@@ -285,18 +306,42 @@ export function buildMOFHierarchySankey(
   // 集約された所管の下から事項が単独で顔を出すことがなくなり、
   // 図の左から右へ辿れる形が保たれる。
   const kept = new Set<string>([ROOT_ID]);
+  /**
+   * 窓の手前（1..start位）で完全に隠すノード。集約にも入れない（/sankey-svg と同じ）。
+   * 隠した分の金額は祖先（予算合計まで）から引くので、`nodes` 側の `amount` は
+   * ここで直接書き換える。以降の出力はこの縮めた値をそのまま使う。
+   */
+  const hidden = new Set<string>();
   const columnCounts: Partial<Record<MOFHierarchyColumn, number>> = {};
   const appliedOffset: MOFHierarchyOffset = {};
+  /**
+   * 事項の候補一覧（金額順）と窓の上限。項がオフセットで明示的に隠れると、
+   * 既に窓に勝っていた事項も道連れで消えることがある（このループ内、後述）。
+   * ループが終わったあとに、欠けた分だけ次点を繰り上げて埋め戻すために使う
+   */
+  let itemRankable: Building[] = [];
+  let itemLimit: number | undefined;
   for (const column of columns) {
-    const candidates = [...nodes.values()].filter(
-      n => n.column === column && n.parentId !== null && kept.has(n.parentId)
-    );
+    // 葉（事項）だけは /sankey-svg の「事業→支出先」と同じく、親（項）の
+    // kept 状態と無関係に全件を候補にする（事業→支出先はTopMinistryに
+    // 従属させず allEdges から直接ランキングしている：sankey-svg-filter.ts:136-143）。
+    // それ以外の列は今までどおり「親が残っている枝」に限る
+    const isLeaf = column === 'item';
+    const candidates = [...nodes.values()].filter(n => {
+      if (n.column !== column || n.parentId === null || hidden.has(n.id)) return false;
+      if (isLeaf) return true;
+      return kept.has(n.parentId);
+    });
     // 通過ノードは枝の骨格なので順位付けの対象にしない（ラベルも箱も出ない）
     for (const node of candidates.filter(n => n.details.passThrough)) kept.add(node.id);
     const rankable = candidates
       .filter(n => !n.details.passThrough)
       .sort((a, b) => b.amount - a.amount);
     columnCounts[column] = rankable.length;
+    if (column === 'item') {
+      itemRankable = rankable;
+      itemLimit = topN[column];
+    }
 
     const limit = topN[column];
     if (!limit) {
@@ -308,6 +353,68 @@ export function buildMOFHierarchySankey(
     const start = Math.max(0, Math.min(offset[column] ?? 0, Math.max(0, rankable.length - limit)));
     appliedOffset[column] = start;
     for (const node of rankable.slice(start, start + limit)) kept.add(node.id);
+
+    // 窓の手前（0..start-1位）は隠す。この列はまだ左から右への処理途中で、
+    // 祖先（親より上）はすでに決定済みなので、ここで祖先の amount を直接
+    // 縮めても後続の列のランキングには影響しない。
+    // 子孫（まだ辿っていない下流の列）も丸ごと隠す。そうしないと、隠した
+    // ノードの金額は祖先から引いたのに、子孫だけ下流の列の集約に個別に
+    // 現れてしまい、その列の合計が metadata.total と合わなくなる
+    for (const node of rankable.slice(0, start)) {
+      let ancestor = node.parentId ? nodes.get(node.parentId) : undefined;
+      while (ancestor) {
+        ancestor.amount -= node.amount;
+        ancestor = ancestor.parentId ? nodes.get(ancestor.parentId) : undefined;
+      }
+      // 子孫を丸ごと隠す。事項は項より先に決まるため、既に kept な事項が
+      // 混ざっていることがあるが、項自身がオフセットで窓の手前へ明示的に
+      // 押し出された以上、その配下は道連れで隠す（kept からも外す）。
+      // 項の TopN 選抜が可視額で再ランキングされた結果「集約」に回った
+      // だけ（= 明示的な hidden ではない）場合はこの経路を通らないので、
+      // 事項が集約ノードから個別に顔を出す挙動には影響しない
+      const stack = [node.id];
+      while (stack.length > 0) {
+        const id = stack.pop() as string;
+        if (hidden.has(id)) continue;
+        hidden.add(id);
+        kept.delete(id);
+        for (const childId of childrenOf.get(id) ?? []) stack.push(childId);
+      }
+    }
+
+    // 項は必ず1件以上の事項を持つ（buildFullNodeMap が事項から項を組むため、
+    // 事項ゼロの項はそもそも作られない）。事項を項より先に決めているので、
+    // ここで「配下の事項が全件 hidden になった項」が分かる——そういう項には
+    // もう表示すべき中身が無いので、項自身も隠す（/sankey-svg が可視流入ゼロの
+    // 事業をTopN候補からそもそも除くのと同じ）
+    if (column === 'item') {
+      for (const section of nodes.values()) {
+        if (section.column !== 'section' || hidden.has(section.id) || kept.has(section.id)) continue;
+        const children = childrenOf.get(section.id);
+        if (!children || children.size === 0) continue;
+        if (![...children].every(id => hidden.has(id))) continue;
+        let ancestor = section.parentId ? nodes.get(section.parentId) : undefined;
+        while (ancestor) {
+          ancestor.amount -= section.amount;
+          ancestor = ancestor.parentId ? nodes.get(ancestor.parentId) : undefined;
+        }
+        hidden.add(section.id);
+      }
+    }
+  }
+
+  // 項オフセットで項が明示的に隠れると、その配下の事項も道連れで隠れる
+  // （上のループ内）。既に事項の窓（TopN）に勝っていた事項が道連れで
+  // 欠けることがあるので、欠けた分だけ次点（集約に回っていた事項）を
+  // 繰り上げて埋め戻し、「上位N件を表示する」という約束を保つ
+  if (itemLimit) {
+    let keptCount = itemRankable.reduce((n, node) => n + (kept.has(node.id) ? 1 : 0), 0);
+    for (const node of itemRankable) {
+      if (keptCount >= itemLimit) break;
+      if (kept.has(node.id) || hidden.has(node.id)) continue;
+      kept.add(node.id);
+      keptCount++;
+    }
   }
 
   // --- 集約ノードは列ごとに1つ ---
@@ -317,14 +424,30 @@ export function buildMOFHierarchySankey(
   const othersId = (column: MOFHierarchyColumn) => `__others__${column}`;
 
   /**
-   * 通過ノードを飛び越えて、実在する直近の祖先を返す。
+   * 帯の起点を解決する。親が残っていればそこから、外れていれば親の列の
+   * 集約から流す（通過ノードの列には集約を作らないので、そこはさらに上へ遡る）。
    *
-   * 通過ノードは箱もラベルも出ない透明な存在なので、帯の端点にすると
-   * 「実在しない位置で収束・分岐している」ように見え、見た目に理由の
-   * 分からないくびれになる。帯は実ノード同士を直結し、通過ノードは
-   * 列の場所を確保するためだけに使う（ラベルの縦位置合わせに利く）
+   * 通常はどの列も親が必ず kept だが、葉（事項）だけは親（項）が集約されて
+   * いても事項単体で TopN の窓に残ることがある（/sankey-svg の「事業→支出先」
+   * が上流の TopMinistry と無関係にグローバルランキングするのと同じ）。
+   * その場合はここで親の列の集約ノードへ繋ぐ。
    */
-  const realAncestorId = (parentId: string): string => skipPassThroughAncestors(nodes, parentId);
+  const resolveSource = (parentId: string): string => {
+    let cur = nodes.get(parentId);
+    while (cur) {
+      if (cur.details.passThrough) {
+        cur = cur.parentId ? nodes.get(cur.parentId) : undefined;
+        continue;
+      }
+      if (kept.has(cur.id)) return cur.id;
+      // 窓の手前で隠されたノードには集約が無い（others ループが素通りする）ので、
+      // さらに上の祖先へ遡る（事項が項より先に決まり、項が後から手前に
+      // 隠れても事項は kept のまま残ることがあるための保険）
+      if (!hidden.has(cur.id)) return othersId(cur.column);
+      cur = cur.parentId ? nodes.get(cur.parentId) : undefined;
+    }
+    return ROOT_ID;
+  };
   const others = new Map<MOFHierarchyColumn, Building>();
   const othersLinks = new Map<string, number>();
 
@@ -332,6 +455,9 @@ export function buildMOFHierarchySankey(
     if (node.id === ROOT_ID || kept.has(node.id)) continue;
     // 通過ノードは実体が無いので件数に数えない。金額は子孫側で拾われる
     if (node.details.passThrough) continue;
+    // 窓の手前で隠したノードは集約にも入れない（/sankey-svg と同じ）。
+    // 金額はすでに祖先の amount から引いてある
+    if (hidden.has(node.id)) continue;
     const target = othersId(node.column);
     const existing = others.get(node.column);
     if (existing) {
@@ -354,18 +480,8 @@ export function buildMOFHierarchySankey(
         parentId: null,
       });
     }
-    // 親が残っていればそこから、外れていれば親の列の集約から流す。
-    // ただし通過ノードの列には集約を作らないので、その場合はさらに上へ遡る。
-    // 遡らないと、存在しないノードを指すリンクができる
-    let parent = node.parentId ? nodes.get(node.parentId) : null;
-    while (parent && !kept.has(parent.id) && parent.details.passThrough) {
-      parent = parent.parentId ? nodes.get(parent.parentId) : null;
-    }
-    if (!parent) continue;
-    // 親が残っていても通過ノードなら、さらにその先の実ノードから流す
-    const source = kept.has(parent.id)
-      ? realAncestorId(parent.id)
-      : othersId(parent.column);
+    if (node.parentId === null) continue;
+    const source = resolveSource(node.parentId);
     const key = `${source}\u0000${target}`;
     othersLinks.set(key, (othersLinks.get(key) ?? 0) + node.amount);
   }
@@ -412,8 +528,8 @@ export function buildMOFHierarchySankey(
 
   const links: SankeyLink[] = [
     ...alive
-      .filter(n => n.parentId !== null && kept.has(n.parentId) && !n.details.passThrough)
-      .map(n => ({ source: realAncestorId(n.parentId as string), target: n.id, value: n.amount })),
+      .filter(n => n.parentId !== null && !n.details.passThrough)
+      .map(n => ({ source: resolveSource(n.parentId as string), target: n.id, value: n.amount })),
     ...[...othersLinks.entries()].map(([key, value]) => {
       const [source, target] = key.split('\u0000');
       return { source, target, value };
@@ -445,14 +561,16 @@ export function buildMOFHierarchySankey(
   ).sort((a, b) => a.localeCompare(b, 'ja'));
 
   return {
-    browse: nodeMapToBrowseTree(nodes),
+    browse,
     metadata: {
       fiscalYear: options.fiscalYear,
       eraLabel: options.eraLabel,
       budgetType: options.budgetType,
       budgetTypes: options.budgetTypes,
       availableYears: options.availableYears,
-      total,
+      // 窓の手前を隠した分だけ根ノードの amount が縮んでいるので、その値を使う
+      // （既定表示ではオフセットが無いので `total` と一致する）
+      total: nodes.get(ROOT_ID)?.amount ?? total,
       itemCount: target.length,
       topN,
       offset: appliedOffset,
@@ -464,8 +582,9 @@ export function buildMOFHierarchySankey(
         '収録されていない会計区分は図に現れません（決算の事項別内訳は一般会計にしかありません）',
         '補正予算の金額は改予算額です。号数をまたいで合算しないでください',
         '項コードは組織内の連番で、単独では一意になりません',
-        '「41組織」のような灰色のノードは、表示の窓から外れた分をまとめたものです。金額は保たれています',
-      '表示開始位置をずらすと、窓の外にあった下位の順位も辿れます',
+        '「41組織」のような灰色のノードは、表示の窓より下位の分をまとめたものです',
+        '表示開始位置をずらすと、窓の外にあった下位の順位も辿れます',
+        '表示位置をずらして窓の手前に外れた分は、集約にも合計にも含みません（/sankey-svg と同じ扱いです）',
       ],
     },
     accounts,
