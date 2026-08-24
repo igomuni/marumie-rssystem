@@ -262,7 +262,7 @@ export function HierarchyControls({
         aria-label={open ? '表示数 を隠す' : '表示数 を表示'}
         aria-expanded={open}
         onClick={() => setOpen(o => !o)}
-        className="-mt-px flex items-center justify-center rounded-b border border-t-0 border-gray-200 bg-white/95 px-1"
+        className="-mt-px flex items-center justify-center rounded-b border border-t-0 border-gray-200 bg-white/95 px-1 backdrop-blur"
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
           <path
