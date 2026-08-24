@@ -44,12 +44,12 @@ export const ACCOUNT_LABELS: Record<MOFAccountType, string> = {
 export const DEFAULT_TOP_N_VALUE = 40;
 
 /**
- * 所管は省庁の数なので上限を掛けない（実測25件で、どの年度でも収まる）。
- * 常に全件が出る列にスライダーを置くと、動かしても何も起きない操作になる。
+ * 所管・勘定は候補件数が少ないので上限を掛けない（実測: 所管25・勘定33で、
+ * どの年度でも収まる）。常に全件が出る列にスライダーを置くと、動かしても
+ * 何も起きない操作になる。
  */
 export const DEFAULT_TOP_N: MOFHierarchyTopN = {
   organization: DEFAULT_TOP_N_VALUE,
-  subAccount: DEFAULT_TOP_N_VALUE,
   section: DEFAULT_TOP_N_VALUE,
   item: DEFAULT_TOP_N_VALUE,
 };

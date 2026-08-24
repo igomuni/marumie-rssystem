@@ -309,8 +309,7 @@ function MOFHierarchyContent() {
           onOffsetChange={setOffset}
         />
 
-        <label className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-black/10 bg-white/90 px-2 text-xs text-gray-600 shadow-md backdrop-blur">
-          <span className="font-medium">予算種別</span>
+        <label className="flex h-8 shrink-0 items-center rounded-lg border border-black/10 bg-white/90 px-2 text-xs text-gray-600 shadow-md backdrop-blur">
           <select
             aria-label="予算種別"
             value={metadata.budgetType}

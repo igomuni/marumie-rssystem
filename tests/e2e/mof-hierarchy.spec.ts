@@ -339,11 +339,11 @@ test.describe('mof-hierarchy', () => {
   test('the offset control is inert for a column that fits entirely', async ({ page }) => {
     // ずらす先が無い列では動かせないことを示す。押せてしまうと
     // 「押したのに何も起きない」になる
-    await page.goto('/mof-hierarchy?tmi=200');
+    await page.goto('/mof-hierarchy?tse=2000');
     await expect(page.getByTestId('hierarchy-node').first()).toBeVisible({ timeout: 30_000 });
 
-    await page.getByLabel('表示位置の対象').selectOption('ministry');
-    await expect(page.getByLabel('所管の開始位置', { exact: true })).toBeDisabled();
+    await page.getByLabel('表示位置の対象').selectOption('section');
+    await expect(page.getByLabel('項の開始位置', { exact: true })).toBeDisabled();
 
     // 収まりきらない列に切り替えれば動かせる
     await page.getByLabel('表示位置の対象').selectOption('item');
