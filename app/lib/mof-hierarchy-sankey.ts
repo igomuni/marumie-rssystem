@@ -355,15 +355,18 @@ export function buildMOFHierarchySankey(
         ancestor.amount -= node.amount;
         ancestor = ancestor.parentId ? nodes.get(ancestor.parentId) : undefined;
       }
-      // 子孫を丸ごと隠す。ただし既に kept の子孫（事項が項より先に決まった結果、
-      // 項が後から手前に隠れても、その事項は単独で TopN の窓に残ったままにする
-      // ——/sankey-svg で支出先が完全に集約された所管の下からでも個別に
-      // 出られるのと同じ）は隠さず、その配下も辿らない
+      // 子孫を丸ごと隠す。事項は項より先に決まるため、既に kept な事項が
+      // 混ざっていることがあるが、項自身がオフセットで窓の手前へ明示的に
+      // 押し出された以上、その配下は道連れで隠す（kept からも外す）。
+      // 項の TopN 選抜が可視額で再ランキングされた結果「集約」に回った
+      // だけ（= 明示的な hidden ではない）場合はこの経路を通らないので、
+      // 事項が集約ノードから個別に顔を出す挙動には影響しない
       const stack = [node.id];
       while (stack.length > 0) {
         const id = stack.pop() as string;
-        if (kept.has(id)) continue;
+        if (hidden.has(id)) continue;
         hidden.add(id);
+        kept.delete(id);
         for (const childId of childrenOf.get(id) ?? []) stack.push(childId);
       }
     }

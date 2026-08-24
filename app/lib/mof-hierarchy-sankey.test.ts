@@ -681,6 +681,50 @@ describe('配下の事項が全件隠れた項は、項自身も隠す', () => {
   });
 });
 
+describe('項オフセットで窓の手前に隠れた項は、配下の事項も道連れで隠す', () => {
+  // 事項は項より先に処理されるため、項側のTopNに制限が無ければ全事項が
+  // 一旦 kept になる。そのあとで項自身が「項の」オフセットにより窓の手前へ
+  // 明示的に隠れる場合、配下の事項が既に kept でも道連れで隠す
+  // ——ユーザーが項オフセットで明示的に押し出した項の中身が、
+  // 事項側の独立ランキングだけで居残ってしまうのは直感に反するため
+  const leaf = (section: string, itemName: string, itemAmount: number) =>
+    item({
+      ministry: 'A',
+      organization: 'A本省',
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: itemName,
+      amount: itemAmount,
+    });
+
+  // 項Q(事項Q1=1000)が項P(事項P1=500)より大きいので、
+  // 項のTopN=1・オフセット=1で項Qが窓の手前に明示的に隠れ、項Pが残る
+  const items = [leaf('P', '事項P1', 500), leaf('Q', '事項Q1', 1000)];
+
+  it('項が窓の手前で明示的に隠れたら、配下の事項も隠す（kept のまま残さない）', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 1 },
+      offset: { section: 1 },
+    });
+    const itemNames = result.sankey.nodes
+      .filter(n => n.details.column === 'item')
+      .map(n => n.name);
+    expect(itemNames).not.toContain('事項Q1');
+    expect(itemNames).toContain('事項P1');
+  });
+
+  it('隠れた項の事項の金額は、祖先からも予算合計からも引かれている', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 1 },
+      offset: { section: 1 },
+    });
+    // 残っているのは項Pの事項P1（500）だけ
+    expect(result.metadata.total).toBe(500);
+  });
+});
+
 describe('buildMOFHierarchyBrowseTree', () => {
   const branch = (ministry: string, section: string, amount: number) =>
     item({
