@@ -314,6 +314,13 @@ export function buildMOFHierarchySankey(
   const hidden = new Set<string>();
   const columnCounts: Partial<Record<MOFHierarchyColumn, number>> = {};
   const appliedOffset: MOFHierarchyOffset = {};
+  /**
+   * 事項の候補一覧（金額順）と窓の上限。項がオフセットで明示的に隠れると、
+   * 既に窓に勝っていた事項も道連れで消えることがある（このループ内、後述）。
+   * ループが終わったあとに、欠けた分だけ次点を繰り上げて埋め戻すために使う
+   */
+  let itemRankable: Building[] = [];
+  let itemLimit: number | undefined;
   for (const column of columns) {
     // 葉（事項）だけは /sankey-svg の「事業→支出先」と同じく、親（項）の
     // kept 状態と無関係に全件を候補にする（事業→支出先はTopMinistryに
@@ -331,6 +338,10 @@ export function buildMOFHierarchySankey(
       .filter(n => !n.details.passThrough)
       .sort((a, b) => b.amount - a.amount);
     columnCounts[column] = rankable.length;
+    if (column === 'item') {
+      itemRankable = rankable;
+      itemLimit = topN[column];
+    }
 
     const limit = topN[column];
     if (!limit) {
@@ -389,6 +400,20 @@ export function buildMOFHierarchySankey(
         }
         hidden.add(section.id);
       }
+    }
+  }
+
+  // 項オフセットで項が明示的に隠れると、その配下の事項も道連れで隠れる
+  // （上のループ内）。既に事項の窓（TopN）に勝っていた事項が道連れで
+  // 欠けることがあるので、欠けた分だけ次点（集約に回っていた事項）を
+  // 繰り上げて埋め戻し、「上位N件を表示する」という約束を保つ
+  if (itemLimit) {
+    let keptCount = itemRankable.reduce((n, node) => n + (kept.has(node.id) ? 1 : 0), 0);
+    for (const node of itemRankable) {
+      if (keptCount >= itemLimit) break;
+      if (kept.has(node.id) || hidden.has(node.id)) continue;
+      kept.add(node.id);
+      keptCount++;
     }
   }
 

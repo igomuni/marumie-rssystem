@@ -725,6 +725,61 @@ describe('項オフセットで窓の手前に隠れた項は、配下の事項�
   });
 });
 
+describe('項オフセットで道連れに隠れた事項の分だけ、事項の窓を次点で埋め戻す', () => {
+  // 項オフセットで項が明示的に隠れると、その配下で既に事項の窓（TopN）に
+  // 勝っていた事項も道連れで消える。放置すると、事項の表示件数が
+  // 設定したTopNより少なくなってしまう。/sankey-svg のTopN選抜と同じく
+  // 「上位N件を表示する」という約束を守るため、道連れで欠けた分だけ
+  // 次点（集約に回っていた事項）を繰り上げて埋め戻す
+  const leaf = (section: string, itemName: string, itemAmount: number) =>
+    item({
+      ministry: 'A',
+      organization: 'A本省',
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: itemName,
+      amount: itemAmount,
+    });
+
+  // 事項ランキング: 事項P1(1000) > 事項Q1(900) > 事項R1(200) > 事項S1(50)。
+  // 事項TopN=2 なので通常は 事項P1・事項Q1 が窓に残るはず。
+  // 項TopN=1・オフセット=1 で、項ランキング1位の項P（事項P1のみ）が
+  // 窓の手前へ明示的に隠れ、事項P1も道連れで消える。
+  // 埋め戻しが無ければ事項Q1の1件だけになるが、次点の事項R1を繰り上げて
+  // 2件に戻すはず
+  const items = [
+    leaf('P', '事項P1', 1000),
+    leaf('Q', '事項Q1', 900),
+    leaf('R', '事項R1', 200),
+    leaf('S', '事項S1', 50),
+  ];
+
+  it('道連れで欠けた分だけ次点の事項を繰り上げ、TopN件数を維持する', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 1, item: 2 },
+      offset: { section: 1 },
+    });
+    const itemNames = result.sankey.nodes
+      .filter(n => n.details.column === 'item' && !n.details.aggregated)
+      .map(n => n.name)
+      .sort();
+    expect(itemNames).toEqual(['事項Q1', '事項R1']);
+  });
+
+  it('保存則は保たれる（事項列の合計＝予算合計）', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { section: 1, item: 2 },
+      offset: { section: 1 },
+    });
+    const columnTotal = result.sankey.nodes
+      .filter(n => n.details.column === 'item')
+      .reduce((sum, n) => sum + (n.value ?? 0), 0);
+    expect(columnTotal).toBe(result.metadata.total);
+  });
+});
+
 describe('buildMOFHierarchyBrowseTree', () => {
   const branch = (ministry: string, section: string, amount: number) =>
     item({
