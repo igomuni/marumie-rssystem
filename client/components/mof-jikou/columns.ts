@@ -4,6 +4,7 @@
  */
 
 import type { MOFAccountType, MOFJikouItem } from '@/types/mof-jikou';
+import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { changeRate, executionRate } from './format';
 
 export const ACCOUNT_LABEL: Record<MOFAccountType, string> = {
@@ -154,4 +155,32 @@ export function sortItems(
 /** その列を新たに選んだときの既定の並び順 */
 export function defaultDirFor(column: ColumnSpec): SortDir {
   return column.numeric ? 'desc' : 'asc';
+}
+
+/**
+ * 事項の年度横断識別子。予算種別を除いた8要素の連結で、
+ * `MofRsLinkageRecord.jikouIdentity`（scripts/generate-mof-rs-linkage.ts の `jikouIdentity()`、
+ * app/lib/api/mof-jikou-loader.ts の `identityKey()`）と同じ構成にすること。
+ * このファイルは client 側なので、fs に依存する mof-jikou-loader は import できず重複させている。
+ */
+export function identityFromItem(item: MOFJikouItem): string {
+  return [
+    item.accountType,
+    item.ministry,
+    item.organization,
+    item.specialAccount,
+    item.subAccount,
+    item.agency,
+    item.sectionCode,
+    item.name,
+  ].join('|');
+}
+
+/** 複数リンクがある場合に列・詳細パネルの代表として使う1件（confirmed優先・金額降順） */
+export function bestLink(links: MofRsLinkageRecord[]): MofRsLinkageRecord | null {
+  if (links.length === 0) return null;
+  return [...links].sort((a, b) => {
+    if (a.status !== b.status) return a.status === 'confirmed' ? -1 : 1;
+    return b.rsAmount - a.rsAmount;
+  })[0];
 }

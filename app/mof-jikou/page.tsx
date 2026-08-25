@@ -52,8 +52,9 @@ export default function MOFJikouPage() {
   const [history, setHistory] = useState<MOFJikouHistory | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
-  const [linkage, setLinkage] = useState<MofRsLinkageRecord[] | null>(null);
+  const [linkageLinks, setLinkageLinks] = useState<MofRsLinkageRecord[] | null>(null);
   const [linkageAvailable, setLinkageAvailable] = useState(false);
+  const [linkageRsYear, setLinkageRsYear] = useState<number | null>(null);
   const [linkageLoading, setLinkageLoading] = useState(false);
   const [linkageError, setLinkageError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -102,35 +103,49 @@ export default function MOFJikouPage() {
   }, [expandedKey]);
 
   /**
-   * 展開した事項に紐づく RS 事業を取る（自動突合。v1は一般会計・当初予算のみ対応）。
-   * 年度は表示中の会計年度（= 紐づけファイルの予算年度）に合わせる。
+   * その年度の RS 事業との紐づけを一括で取る（自動突合。v1は一般会計・当初予算のみ対応）。
+   * 237件・184KB程度と小さいため、行の展開ごとではなく年度が決まった時点で1回だけ取得し、
+   * 一覧の列表示・詳細パネルの両方をクライアント側の Map で賄う。
    */
   const linkageYear = data?.metadata.fiscalYear ?? null;
   useEffect(() => {
-    if (!expandedKey || linkageYear === null) {
-      setLinkage(null);
+    if (linkageYear === null) {
+      setLinkageLinks(null);
       setLinkageAvailable(false);
+      setLinkageRsYear(null);
       setLinkageError(null);
       setLinkageLoading(false);
       return;
     }
     let cancelled = false;
-    setLinkage(null);
+    setLinkageLinks(null);
     setLinkageError(null);
     setLinkageLoading(true);
-    fetch(`/api/mof-jikou/linkage?key=${encodeURIComponent(expandedKey)}&year=${linkageYear}`)
+    fetch(`/api/mof-jikou/linkage?year=${linkageYear}`)
       .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
-      .then((json: { available: boolean; links: MofRsLinkageRecord[] }) => {
+      .then((json: { available: boolean; rsYear: number | null; links: MofRsLinkageRecord[] }) => {
         if (cancelled) return;
         setLinkageAvailable(json.available);
-        setLinkage(json.links);
+        setLinkageRsYear(json.rsYear);
+        setLinkageLinks(json.links);
       })
       .catch((e: Error) => !cancelled && setLinkageError(e.message))
       .finally(() => !cancelled && setLinkageLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [expandedKey, linkageYear]);
+  }, [linkageYear]);
+
+  /** identity → その事項に紐づく RS 事業のリスト。列表示・詳細パネルの両方から引く */
+  const linkageByIdentity = useMemo(() => {
+    const map = new Map<string, MofRsLinkageRecord[]>();
+    for (const link of linkageLinks ?? []) {
+      const list = map.get(link.jikouIdentity) ?? [];
+      list.push(link);
+      map.set(link.jikouIdentity, list);
+    }
+    return map;
+  }, [linkageLinks]);
 
   // 年度を変えると収録帳票が変わるので、絞り込みも初期化する
   function changeYear(next: number) {
@@ -476,8 +491,9 @@ export default function MOFJikouPage() {
               history={history}
               historyLoading={historyLoading}
               historyError={historyError}
-              linkage={linkage}
+              linkageByIdentity={linkageByIdentity}
               linkageAvailable={linkageAvailable}
+              linkageRsYear={linkageRsYear}
               linkageLoading={linkageLoading}
               linkageError={linkageError}
             />

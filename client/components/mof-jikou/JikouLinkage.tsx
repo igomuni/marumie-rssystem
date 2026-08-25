@@ -9,6 +9,7 @@
  * 詳細: docs/tasks/20260825_2112_MOFとRSの名寄せに必要な情報の洗い出し.md
  */
 
+import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { formatYen } from './format';
 
@@ -25,11 +26,14 @@ const STATUS_CLASS: Record<MofRsLinkageRecord['status'], string> = {
 export function JikouLinkage({
   links,
   available,
+  rsYear,
   loading,
   error,
 }: {
   links: MofRsLinkageRecord[] | null;
   available: boolean;
+  /** /sankey-svg へのリンクに使うRS事業年度。紐づけデータ未生成なら null */
+  rsYear: number | null;
   loading: boolean;
   error: string | null;
 }) {
@@ -67,7 +71,18 @@ export function JikouLinkage({
                 {STATUS_LABEL[l.status]}
               </span>
               <span className="flex-1">
-                <span className="text-neutral-700 dark:text-neutral-300">{l.projectName}</span>
+                {rsYear !== null ? (
+                  <a
+                    href={sankeySvgProjectUrl(l.projectId, l.projectName, rsYear)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+                  >
+                    {l.projectName}
+                  </a>
+                ) : (
+                  <span className="text-neutral-700 dark:text-neutral-300">{l.projectName}</span>
+                )}
                 <span className="ml-1 text-neutral-400">
                   （{l.projectMinistry}・{formatYen(l.rsAmount)}）
                 </span>

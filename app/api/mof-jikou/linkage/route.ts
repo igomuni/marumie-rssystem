@@ -7,22 +7,28 @@
 
 import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
-import { findLinksByKey, linkageAvailable } from '@/app/lib/api/mof-rs-linkage-loader';
+import {
+  allLinks,
+  findLinksByKey,
+  linkageAvailable,
+  linkageRsYear,
+} from '@/app/lib/api/mof-rs-linkage-loader';
 
 /**
  * GET /api/mof-jikou/linkage
  *
  * クエリ:
- *   key  — 事項の合成キー（`MOFJikouItem.key`）
- *   year — 予算年度（= mof-jikou の会計年度、西暦）
+ *   year — 予算年度（= mof-jikou の会計年度、西暦）。必須
+ *   key  — 事項の合成キー（`MOFJikouItem.key`）。省略時はその年度の全リンクを返す
+ *          （一覧側の列表示・詳細パネルを1回のフェッチで賄うため）
  */
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const key = url.searchParams.get('key');
     const yearRaw = url.searchParams.get('year');
-    if (!key || !yearRaw) {
-      return NextResponse.json({ error: 'key と year を指定してください' }, { status: 400 });
+    if (!yearRaw) {
+      return NextResponse.json({ error: 'year を指定してください' }, { status: 400 });
     }
     const year = Number(yearRaw);
     if (isNaN(year)) {
@@ -30,9 +36,13 @@ export async function GET(request: Request) {
     }
 
     const available = linkageAvailable(year);
-    const links = available ? findLinksByKey(year, key) : [];
+    const links = available ? (key ? findLinksByKey(year, key) : allLinks(year)) : [];
+    const rsYear = linkageRsYear(year);
 
-    return NextResponse.json({ available, links }, { headers: { 'Cache-Control': API_CACHE_CONTROL } });
+    return NextResponse.json(
+      { available, rsYear, links },
+      { headers: { 'Cache-Control': API_CACHE_CONTROL } }
+    );
   } catch (error) {
     return serverErrorResponse('mof-jikou/linkage', error);
   }

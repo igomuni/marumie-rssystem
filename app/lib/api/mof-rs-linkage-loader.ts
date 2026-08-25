@@ -40,3 +40,19 @@ export function findLinksByKey(budgetYear: number, key: string): MofRsLinkageRec
   const identity = identityFromKey(key);
   return loadYear(budgetYear).links.filter(l => l.jikouIdentity === identity);
 }
+
+/**
+ * その年度の紐づけ全件。一覧側での列表示・詳細パネルの両方をクライアント側の
+ * 1回のフェッチで賄うために使う（237件・184KB程度で行ごとの個別取得より軽い）。
+ * 未生成の年度では空配列を返す。
+ */
+export function allLinks(budgetYear: number): MofRsLinkageRecord[] {
+  if (!linkageAvailable(budgetYear)) return [];
+  return loadYear(budgetYear).links;
+}
+
+/** その年度の紐づけデータの RS 事業年度（/sankey-svg の yr パラメータに使う） */
+export function linkageRsYear(budgetYear: number): number | null {
+  if (!linkageAvailable(budgetYear)) return null;
+  return loadYear(budgetYear).metadata.rsYear;
+}
