@@ -15,6 +15,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import type { MOFAccountType, MOFJikouData, MOFJikouHistory } from '@/types/mof-jikou';
+import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { JikouTable } from '@/client/components/mof-jikou/JikouTable';
 import {
@@ -51,6 +52,10 @@ export default function MOFJikouPage() {
   const [history, setHistory] = useState<MOFJikouHistory | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [linkage, setLinkage] = useState<MofRsLinkageRecord[] | null>(null);
+  const [linkageAvailable, setLinkageAvailable] = useState(false);
+  const [linkageLoading, setLinkageLoading] = useState(false);
+  const [linkageError, setLinkageError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,6 +100,37 @@ export default function MOFJikouPage() {
       cancelled = true;
     };
   }, [expandedKey]);
+
+  /**
+   * 展開した事項に紐づく RS 事業を取る（自動突合。v1は一般会計・当初予算のみ対応）。
+   * 年度は表示中の会計年度（= 紐づけファイルの予算年度）に合わせる。
+   */
+  const linkageYear = data?.metadata.fiscalYear ?? null;
+  useEffect(() => {
+    if (!expandedKey || linkageYear === null) {
+      setLinkage(null);
+      setLinkageAvailable(false);
+      setLinkageError(null);
+      setLinkageLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setLinkage(null);
+    setLinkageError(null);
+    setLinkageLoading(true);
+    fetch(`/api/mof-jikou/linkage?key=${encodeURIComponent(expandedKey)}&year=${linkageYear}`)
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
+      .then((json: { available: boolean; links: MofRsLinkageRecord[] }) => {
+        if (cancelled) return;
+        setLinkageAvailable(json.available);
+        setLinkage(json.links);
+      })
+      .catch((e: Error) => !cancelled && setLinkageError(e.message))
+      .finally(() => !cancelled && setLinkageLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [expandedKey, linkageYear]);
 
   // 年度を変えると収録帳票が変わるので、絞り込みも初期化する
   function changeYear(next: number) {
@@ -440,6 +476,10 @@ export default function MOFJikouPage() {
               history={history}
               historyLoading={historyLoading}
               historyError={historyError}
+              linkage={linkage}
+              linkageAvailable={linkageAvailable}
+              linkageLoading={linkageLoading}
+              linkageError={linkageError}
             />
           </div>
 

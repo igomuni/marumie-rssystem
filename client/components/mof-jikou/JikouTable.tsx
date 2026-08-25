@@ -7,7 +7,9 @@
 
 import { Fragment } from 'react';
 import type { MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
+import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { JikouHistory } from './JikouHistory';
+import { JikouLinkage } from './JikouLinkage';
 import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from './format';
 import {
   ACCOUNT_LABEL,
@@ -34,6 +36,11 @@ interface Props {
   history: MOFJikouHistory | null;
   historyLoading: boolean;
   historyError: string | null;
+  /** 展開中の行に紐づくRS事業。取得はページ層の責務 */
+  linkage: MofRsLinkageRecord[] | null;
+  linkageAvailable: boolean;
+  linkageLoading: boolean;
+  linkageError: string | null;
   /** 絞り込み結果が0件のときに表の中へ出す文言 */
   emptyMessage?: string;
 }
@@ -59,6 +66,10 @@ export function JikouTable({
   history,
   historyLoading,
   historyError,
+  linkage,
+  linkageAvailable,
+  linkageLoading,
+  linkageError,
   emptyMessage = '条件に合う事項がありません。',
 }: Props) {
   const tableWidth = COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0);
@@ -250,6 +261,12 @@ export function JikouTable({
                         history={history}
                         loading={historyLoading}
                         error={historyError}
+                      />
+                      <JikouLinkage
+                        links={linkage}
+                        available={linkageAvailable}
+                        loading={linkageLoading}
+                        error={linkageError}
                       />
                       <div className="min-w-[24rem] max-w-3xl flex-1">
                         <div className="mb-1 text-[11px] font-medium text-neutral-400">説明</div>
