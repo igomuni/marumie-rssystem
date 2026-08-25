@@ -22,12 +22,16 @@ import {
   COLUMNS,
   DEFAULT_WIDTHS,
   defaultDirFor,
+  identityFromItem,
   orgColumn,
   sortItems,
   type ColumnSpec,
   type SortDir,
   type SortKey,
 } from '@/client/components/mof-jikou/columns';
+
+/** RS事業との紐づけの有無で絞り込む */
+type RsFilter = 'all' | 'linked' | 'unlinked';
 
 const PAGE_SIZE = 100;
 
@@ -43,6 +47,7 @@ export default function MOFJikouPage() {
   const [organization, setOrganization] = useState('');
   const [subAccount, setSubAccount] = useState('');
   const [majorExpense, setMajorExpense] = useState('');
+  const [rsFilter, setRsFilter] = useState<RsFilter>('all');
   const [keyword, setKeyword] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -157,13 +162,14 @@ export default function MOFJikouPage() {
     setOrganization('');
     setSubAccount('');
     setMajorExpense('');
+    setRsFilter('all');
     setExpanded(null);
   }
 
   // フィルタ条件が変わったら1ページ目に戻す
   useEffect(() => {
     setPage(1);
-  }, [account, budgetType, ministry, organization, subAccount, majorExpense, keyword]);
+  }, [account, budgetType, ministry, organization, subAccount, majorExpense, rsFilter, keyword]);
 
   /**
    * 絞り込みの選択肢は上位の条件で連鎖させる。
@@ -219,6 +225,11 @@ export default function MOFJikouPage() {
     const rows = scopedRows.filter(item => {
       if (subAccount && item.subAccount !== subAccount) return false;
       if (majorExpense && item.majorExpenseName !== majorExpense) return false;
+      if (rsFilter !== 'all') {
+        const linked = (linkageByIdentity.get(identityFromItem(item))?.length ?? 0) > 0;
+        if (rsFilter === 'linked' && !linked) return false;
+        if (rsFilter === 'unlinked' && linked) return false;
+      }
       if (kw) {
         const haystack = `${item.name}\n${item.sectionName}\n${item.description}\n${item.ministry}\n${orgColumn(item)}`;
         if (!haystack.includes(kw)) return false;
@@ -226,7 +237,7 @@ export default function MOFJikouPage() {
       return true;
     });
     return sortItems(rows, sortKey, sortDir);
-  }, [scopedRows, subAccount, majorExpense, keyword, sortKey, sortDir]);
+  }, [scopedRows, subAccount, majorExpense, rsFilter, linkageByIdentity, keyword, sortKey, sortDir]);
 
   /**
    * 絞り込み結果の合計。
@@ -436,6 +447,37 @@ export default function MOFJikouPage() {
             </option>
           ))}
         </select>
+
+        <div
+          className="flex overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700"
+          title={
+            linkageAvailable
+              ? 'RS事業との紐づけ（自動突合）で絞り込みます'
+              : 'この年度は紐づけデータが未生成です'
+          }
+        >
+          {(
+            [
+              ['all', 'RS: すべて'],
+              ['linked', 'RSあり'],
+              ['unlinked', 'RSなし'],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              disabled={!linkageAvailable}
+              onClick={() => setRsFilter(value)}
+              className={`px-2.5 py-1 disabled:cursor-not-allowed disabled:opacity-40 ${
+                rsFilter === value
+                  ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
+                  : 'bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         <input
           type="search"
