@@ -5,7 +5,8 @@
  * N対N の紐づけレコードを生成する。事項と事業を直結する公式キーは存在しないため
  * （docs/mof-budget-data-guide.md 参照）、紐づけは判定方法つきの3値で管理する:
  *
- *   - confirmed: 構造キー（所管×組織×項）が一致したうえで名前が完全一致、または手動確定
+ *   - confirmed: 構造キー（所管×組織×項）が一致したうえで名前が完全一致、
+ *     構造キー内の事項が1件だけ（=会計構造上その事項に確定。名前は問わない）、または手動確定
  *   - candidate: 語幹一致（「〜に必要な経費」除去後の包含）など、誤検出がありうる自動判定
  *   - （rejected は手動オーバーライドで除外され、出力には残らない）
  *
@@ -191,8 +192,9 @@ function main() {
   // pid|identity → record（同一ペアの重複判定は精度の高い方を残す）
   const linkMap = new Map<string, MofRsLinkageRecord>();
   const methodRank: Record<MofRsLinkageMethod, number> = {
-    'manual': 3,
-    'exact-name': 2,
+    'manual': 4,
+    'exact-name': 3,
+    'section-unique': 2,
     'stem-in-name': 1,
     'exact-name-cross-section': 0,
   };
@@ -253,6 +255,23 @@ function main() {
   const structLinked = linkMap.size;
   console.log(`  構造キー一致内の名前突合: ${structLinked.toLocaleString()} ペア`);
 
+  /**
+   * 3a-2. 単独事項構造リンク: 項（構造キー）に事項が1件しかなければ、名前の一致・不一致に
+   * 関わらずその項に計上されたRS事業は構造的にその事項に属する（MOF一般会計歳出は100%が
+   * 何らかの事項に属するため、項に事項が1件だけなら消去法でその事項に確定する）。
+   * 実測: docs/tasks/20260826_0809_項の単独事項構造による紐づけ拡張の調査.md
+   */
+  for (const [structKey, perPid] of rsByStruct) {
+    const jikous = jikouByStruct.get(structKey);
+    if (!jikous || jikous.length !== 1) continue;
+    const jikou = jikous[0];
+    for (const [pid, rsAmount] of perPid) {
+      addLink(pid, jikou, 'confirmed', 'section-unique', true, rsAmount);
+    }
+  }
+  const sectionUniqueLinked = linkMap.size;
+  console.log(`  単独事項構造リンク: +${(sectionUniqueLinked - structLinked).toLocaleString()} ペア（計 ${sectionUniqueLinked.toLocaleString()}）`);
+
   // 3b. フォールバック: 同一所管内での完全一致（項が違っても名前が同じ場合の拾い上げ）
   const jikouByMinistry = new Map<string, MOFJikouItem[]>();
   for (const it of jikouItems) {
@@ -281,7 +300,7 @@ function main() {
       }
     }
   }
-  console.log(`  所管内完全一致フォールバック: +${(linkMap.size - structLinked).toLocaleString()} ペア`);
+  console.log(`  所管内完全一致フォールバック: +${(linkMap.size - sectionUniqueLinked).toLocaleString()} ペア`);
 
   // 4. 手動オーバーライド適用
   console.log('\n[4/5] 手動オーバーライド適用');
