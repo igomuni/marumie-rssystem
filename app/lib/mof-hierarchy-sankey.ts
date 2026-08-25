@@ -44,12 +44,12 @@ export const ACCOUNT_LABELS: Record<MOFAccountType, string> = {
 export const DEFAULT_TOP_N_VALUE = 40;
 
 /**
- * 所管は省庁の数なので上限を掛けない（実測25件で、どの年度でも収まる）。
- * 常に全件が出る列にスライダーを置くと、動かしても何も起きない操作になる。
+ * 所管・勘定は候補件数が少ないので上限を掛けない（実測: 所管25・勘定33で、
+ * どの年度でも収まる）。常に全件が出る列にスライダーを置くと、動かしても
+ * 何も起きない操作になる。
  */
 export const DEFAULT_TOP_N: MOFHierarchyTopN = {
   organization: DEFAULT_TOP_N_VALUE,
-  subAccount: DEFAULT_TOP_N_VALUE,
   section: DEFAULT_TOP_N_VALUE,
   item: DEFAULT_TOP_N_VALUE,
 };
@@ -315,21 +315,23 @@ export function buildMOFHierarchySankey(
   const columnCounts: Partial<Record<MOFHierarchyColumn, number>> = {};
   const appliedOffset: MOFHierarchyOffset = {};
   /**
-   * 事項の候補一覧（金額順）と窓の上限。項がオフセットで明示的に隠れると、
-   * 既に窓に勝っていた事項も道連れで消えることがある（このループ内、後述）。
+   * 列ごとの候補一覧（金額順）と窓の上限。オフセットや配下の消滅で
+   * 既に窓に勝っていたノードが道連れで欠けることがある。
    * ループが終わったあとに、欠けた分だけ次点を繰り上げて埋め戻すために使う
    */
-  let itemRankable: Building[] = [];
-  let itemLimit: number | undefined;
+  const columnRankable = new Map<Exclude<MOFHierarchyColumn, 'total'>, Building[]>();
+  const columnLimit = new Map<Exclude<MOFHierarchyColumn, 'total'>, number | undefined>();
   for (const column of columns) {
-    // 葉（事項）だけは /sankey-svg の「事業→支出先」と同じく、親（項）の
-    // kept 状態と無関係に全件を候補にする（事業→支出先はTopMinistryに
-    // 従属させず allEdges から直接ランキングしている：sankey-svg-filter.ts:136-143）。
-    // それ以外の列は今までどおり「親が残っている枝」に限る
-    const isLeaf = column === 'item';
+    // 項・事項は表示位置（オフセット）の対象として並ぶ2列なので、どちらも
+    // 親の kept 状態と無関係に全件を候補にする。/sankey-svg の「事業→支出先」
+    // が所属所管のTopNと無関係に allEdges から直接ランキングするのと同じ
+    // （sankey-svg-filter.ts:136-143）。組織のTopNで項の候補まで絞られると、
+    // 組織のTopNに収まらない項へは表示位置で辿り着けなくなるため。
+    // それ以外の列（所管・組織・勘定）は今までどおり「親が残っている枝」に限る
+    const isDecoupled = column === 'item' || column === 'section';
     const candidates = [...nodes.values()].filter(n => {
       if (n.column !== column || n.parentId === null || hidden.has(n.id)) return false;
-      if (isLeaf) return true;
+      if (isDecoupled) return true;
       return kept.has(n.parentId);
     });
     // 通過ノードは枝の骨格なので順位付けの対象にしない（ラベルも箱も出ない）
@@ -338,10 +340,8 @@ export function buildMOFHierarchySankey(
       .filter(n => !n.details.passThrough)
       .sort((a, b) => b.amount - a.amount);
     columnCounts[column] = rankable.length;
-    if (column === 'item') {
-      itemRankable = rankable;
-      itemLimit = topN[column];
-    }
+    columnRankable.set(column, rankable);
+    columnLimit.set(column, topN[column]);
 
     const limit = topN[column];
     if (!limit) {
@@ -403,14 +403,47 @@ export function buildMOFHierarchySankey(
     }
   }
 
-  // 項オフセットで項が明示的に隠れると、その配下の事項も道連れで隠れる
-  // （上のループ内）。既に事項の窓（TopN）に勝っていた事項が道連れで
-  // 欠けることがあるので、欠けた分だけ次点（集約に回っていた事項）を
-  // 繰り上げて埋め戻し、「上位N件を表示する」という約束を保つ
-  if (itemLimit) {
-    let keptCount = itemRankable.reduce((n, node) => n + (kept.has(node.id) ? 1 : 0), 0);
-    for (const node of itemRankable) {
-      if (keptCount >= itemLimit) break;
+  /**
+   * 配下（通過ノードは透過的に辿る）に実体がまったく残っていないか。
+   * 項が「配下の事項が全件 hidden」で隠れるのと同じ判定を、勘定・組織・
+   * 所管にも一般化して使う。
+   */
+  const isFullyEmpty = (id: string): boolean => {
+    const children = childrenOf.get(id);
+    if (!children || children.size === 0) return false;
+    return [...children].every(childId => {
+      if (hidden.has(childId)) return true;
+      return nodes.get(childId)?.details.passThrough ? isFullyEmpty(childId) : false;
+    });
+  };
+  // 項の下は隠れても項自身は集約や kept に残らない設計だが、その上（勘定・
+  // 組織・所管）は最初のループで既に kept/tail が決まっている。項・事項の
+  // 消滅で配下が空になったものが後から出てくるので、下（勘定）から上
+  // （所管）へ順に見て、空になったノードを道連れで隠す
+  for (const column of ['subAccount', 'organization', 'ministry'] as const) {
+    for (const node of nodes.values()) {
+      if (node.column !== column || hidden.has(node.id) || node.details.passThrough) continue;
+      if (!isFullyEmpty(node.id)) continue;
+      let ancestor = node.parentId ? nodes.get(node.parentId) : undefined;
+      while (ancestor) {
+        ancestor.amount -= node.amount;
+        ancestor = ancestor.parentId ? nodes.get(ancestor.parentId) : undefined;
+      }
+      hidden.add(node.id);
+      kept.delete(node.id);
+    }
+  }
+
+  // オフセットや配下の消滅で道連れに欠けたノードがあれば、欠けた分だけ
+  // 次点（集約に回っていたノード）を繰り上げて埋め戻し、「上位N件を表示する」
+  // という約束を保つ（/sankey-svg のTopN選抜と同じ）
+  for (const column of ['ministry', 'organization', 'subAccount', 'item'] as const) {
+    const limit = columnLimit.get(column);
+    const rankable = columnRankable.get(column);
+    if (!limit || !rankable) continue;
+    let keptCount = rankable.reduce((n, node) => n + (kept.has(node.id) ? 1 : 0), 0);
+    for (const node of rankable) {
+      if (keptCount >= limit) break;
       if (kept.has(node.id) || hidden.has(node.id)) continue;
       kept.add(node.id);
       keptCount++;

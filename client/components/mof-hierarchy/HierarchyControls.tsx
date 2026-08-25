@@ -34,18 +34,27 @@ import { DEFAULT_TOP_N } from '@/app/lib/mof-hierarchy-sankey';
 /** TopN スライダーの上限。/sankey-svg と同じ */
 const TOP_N_MAX = 300;
 
-/**
- * 表示数を出す列。
- *
- * 根（予算合計）は1件しかないので対象外。所管も省庁の数（実測25件）で
- * どの年度でも収まるため、上限を掛けても何も起きない。
- * 表示位置の対象には残す（列の候補件数を読めるようにするため）。
- */
 type RankableColumn = Exclude<MOFHierarchyColumn, 'total'>;
-const OFFSET_COLUMNS = MOF_HIERARCHY_COLUMNS.filter(
-  (c): c is RankableColumn => c !== 'total'
+
+/**
+ * 表示位置（オフセット）を動かせる対象列。
+ *
+ * 所管・組織・勘定は候補件数が少なく（実測: 所管25・組織114・勘定33）、
+ * 位置をずらす操作自体があまり意味を持たない。項・事項だけに絞る。
+ */
+const OFFSET_COLUMNS: readonly RankableColumn[] = MOF_HIERARCHY_COLUMNS.filter(
+  (c): c is RankableColumn => c === 'section' || c === 'item'
 );
-const TOP_N_COLUMNS = OFFSET_COLUMNS.filter(c => c !== 'ministry');
+
+/**
+ * 表示数（TopN）を設定できる列。
+ *
+ * 根（予算合計）は1件しかないので対象外。所管・勘定は候補件数が少なく
+ * （実測: 所管25・勘定33）、どの年度でも上限を掛けても何も起きないため対象外。
+ */
+const TOP_N_COLUMNS: readonly RankableColumn[] = MOF_HIERARCHY_COLUMNS.filter(
+  (c): c is RankableColumn => c === 'organization' || c === 'section' || c === 'item'
+);
 
 // [delta, SVGパス, ラベル]
 const ARROW_PATHS: [number, string, string][] = [
@@ -230,8 +239,7 @@ export function HierarchyControls({
         </div>
 
         {/* 2行目以降: 列ごとの表示数。/sankey-svg と同じく外側の grid に
-            直接流し込む（内側に別のグリッドを入れ子にしない）。
-            対象列が4つで2列グリッドにきれいに収まる（2行×2列） */}
+            直接流し込む（内側に別のグリッドを入れ子にしない） */}
         {open &&
           TOP_N_COLUMNS.map(column => {
             const label = MOF_HIERARCHY_COLUMN_LABELS[column];

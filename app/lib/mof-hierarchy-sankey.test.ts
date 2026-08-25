@@ -295,7 +295,10 @@ describe('TopN は列単位で効く', () => {
     expect(agg!.name).toBe('4所管');
   });
 
-  it('集約された所管の下の項は個別に出さず、下の列の集約に流す', () => {
+  it('集約された所管の下の項も、項自身のTopNに収まれば個別に出る', () => {
+    // 項・事項は表示位置の対象として上流の列と無関係にグローバル候補になる。
+    // 所管がTopNで集約されても、その配下の項が項自身のTopN（既定40）に
+    // 収まっていれば個別に出る——所管の集約ノードから帯が伸びる
     const items = Array.from({ length: 6 }, (_, i) =>
       branch(`省庁${i}`, `s${i}`, `事項${i}`, 100 - i)
     );
@@ -303,10 +306,19 @@ describe('TopN は列単位で効く', () => {
     const sections = result.sankey.nodes.filter(
       n => n.details.column === 'section' && !n.details.aggregated
     );
-    // 残った2所管の項だけが個別に立つ
-    expect(sections).toHaveLength(2);
+    expect(sections).toHaveLength(6);
     expect(sections.some(n => n.name.includes('s0'))).toBe(true);
-    expect(sections.some(n => n.name.includes('s1'))).toBe(true);
+    expect(sections.some(n => n.name.includes('s5'))).toBe(true);
+
+    // 集約された所管（省庁2〜5）の下の項は、直近の実祖先（組織）の
+    // 集約ノードから帯が伸びる（組織自身も所管の集約に含まれて実体を持たない）
+    const orgAgg = result.sankey.nodes.find(
+      n => n.details.column === 'organization' && n.details.aggregated
+    )!;
+    const s5 = sections.find(n => n.name.includes('s5'))!;
+    const link = result.sankey.links.find(l => l.target === s5.id)!;
+    expect(link.source).toBe(orgAgg.id);
+
     // 合計は保たれる
     const columnTotal = result.sankey.nodes
       .filter(n => n.details.column === 'section')
@@ -775,6 +787,135 @@ describe('項オフセットで道連れに隠れた事項の分だけ、事項�
     });
     const columnTotal = result.sankey.nodes
       .filter(n => n.details.column === 'item')
+      .reduce((sum, n) => sum + (n.value ?? 0), 0);
+    expect(columnTotal).toBe(result.metadata.total);
+  });
+});
+
+describe('項の候補も組織のTopNと無関係にグローバル（項は事項と並ぶ表示位置の対象のため）', () => {
+  // 項・事項だけが表示位置（オフセット）の対象なので、項側も事項と同じく
+  // 上流（組織）のTopNで候補が絞られてしまうと、組織のTopNに収まらない
+  // 項までは表示位置で辿り着けない。事項（葉）と同じ扱いにする
+  const leaf = (organization: string, section: string, itemAmount: number) =>
+    item({
+      ministry: 'A',
+      organization,
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: `事項${section}`,
+      amount: itemAmount,
+    });
+
+  // 組織Aは大きく（TopN=1で残る）、項を2つ持つ（SA1・SA2）ので
+  // 一方が窓の手前で隠れても組織A自身は空にならない。
+  // 組織Bは小さく（集約に回る）、項SB1つだけを持つ
+  const items = [
+    leaf('組織A', 'SA1', 1000),
+    leaf('組織A', 'SA2', 2),
+    leaf('組織B', 'SB', 10),
+  ];
+
+  it('組織がTopNで集約されても、その配下の項は候補件数に数える', () => {
+    const result = buildMOFHierarchySankey(items, { ...options, topN: { organization: 1 } });
+    expect(result.metadata.columnCounts.section).toBe(3);
+  });
+
+  it('組織が集約された配下からでも、項単体でTopNの窓に入れば個別に出る', () => {
+    // 全項を金額順に並べると SA1(1000) > SB(10) > SA2(2)。
+    // 項TopN=1・オフセット=1で、1位（組織AのSA1）が窓の手前へ隠れ、
+    // 2位（組織BのSB）が窓に残る。組織AはSA2がまだ残っているので
+    // 組織A自身は空にならず、組織Bは元々集約（tail）のまま
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { organization: 1, section: 1 },
+      offset: { section: 1 },
+    });
+    const sections = result.sankey.nodes.filter(
+      n => n.details.column === 'section' && !n.details.aggregated
+    );
+    expect(sections.map(n => n.name)).toEqual(['SB 項SB']);
+    // 帯は組織の集約ノードから伸びる
+    const orgAgg = result.sankey.nodes.find(
+      n => n.details.column === 'organization' && n.details.aggregated
+    )!;
+    const link = result.sankey.links.find(l => l.target === sections[0].id)!;
+    expect(link.source).toBe(orgAgg.id);
+  });
+
+  it('保存則は保たれる（項列の合計＝予算合計）', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { organization: 1, section: 1 },
+      offset: { section: 1 },
+    });
+    const columnTotal = result.sankey.nodes
+      .filter(n => n.details.column === 'section')
+      .reduce((sum, n) => sum + (n.value ?? 0), 0);
+    expect(columnTotal).toBe(result.metadata.total);
+  });
+});
+
+describe('項・事項の非表示で配下が空になった祖先（組織・勘定・所管）も非表示にする', () => {
+  // 項が配下の事項が全件hiddenで自身もhiddenになるのと同じ考え方
+  // （/sankey-svg が可視流入ゼロの事業をTopN候補からそもそも除くのと同じ）を、
+  // その上の祖先（組織・勘定・所管）にも及ぼす。配下がまるごと消えたのに
+  // 箱だけ残る（0円や空の集約）のを防ぐ
+  const leaf = (organization: string, section: string, itemAmount: number) =>
+    item({
+      ministry: 'M',
+      organization,
+      sectionCode: section,
+      sectionName: `項${section}`,
+      name: `事項${section}`,
+      amount: itemAmount,
+    });
+
+  // 組織X: 事項IX1=1000（項SXのみ）。組織Y: 事項IY1=900。組織Z: 事項IZ1=50。
+  // 組織のTopN=2なので通常はX・Yが残り、Zは集約に回る
+  const items = [
+    leaf('組織X', 'SX', 1000),
+    leaf('組織Y', 'SY', 900),
+    leaf('組織Z', 'SZ', 50),
+  ];
+
+  it('事項オフセットで項の配下が全件消えたら、項の親（組織）も非表示になる', () => {
+    // 全事項を金額順に並べると 事項SX(1000) > 事項SY(900) > 事項SZ(50)。
+    // 事項TopN=1・オフセット=1で、1位（組織Xの唯一の事項）が窓の手前へ隠れる。
+    // 項SXは配下の事項が全件消えるので隠れ、その親の組織Xも配下が空になるので隠れる
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { organization: 2, item: 1 },
+      offset: { item: 1 },
+    });
+    const orgNames = result.sankey.nodes
+      .filter(n => n.details.column === 'organization')
+      .flatMap(n => (n.details.aggregated ? [] : [n.name]));
+    expect(orgNames).not.toContain('組織X');
+  });
+
+  it('組織が非表示で欠けた分だけ、集約に回っていた組織を繰り上げて埋め戻す', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { organization: 2, item: 1 },
+      offset: { item: 1 },
+    });
+    const orgNames = result.sankey.nodes
+      .filter(n => n.details.column === 'organization' && !n.details.aggregated)
+      .map(n => n.name)
+      .sort();
+    // 組織Xが消えた分、集約に回っていた組織Zが繰り上がり、
+    // 組織Y・組織Zの2件（TopN=2どおり）になるはず
+    expect(orgNames).toEqual(['組織Y', '組織Z']);
+  });
+
+  it('保存則は保たれる（組織列の合計＝予算合計）', () => {
+    const result = buildMOFHierarchySankey(items, {
+      ...options,
+      topN: { organization: 2, item: 1 },
+      offset: { item: 1 },
+    });
+    const columnTotal = result.sankey.nodes
+      .filter(n => n.details.column === 'organization')
       .reduce((sum, n) => sum + (n.value ?? 0), 0);
     expect(columnTotal).toBe(result.metadata.total);
   });
