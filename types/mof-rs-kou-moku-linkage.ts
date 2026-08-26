@@ -11,7 +11,7 @@
  * 生成: scripts/generate-mof-rs-kou-moku-linkage.ts
  */
 
-import type { MOFKouMokuAccountType } from './mof-kou-moku';
+import type { MOFBudgetType, MOFKouMokuAccountType } from './mof-kou-moku';
 
 /** 紐づけ1件（事業×目のペア。1つの目に複数のRS事業が計上されることがある） */
 export interface MofRsKouMokuLinkageRecord {
@@ -21,6 +21,11 @@ export interface MofRsKouMokuLinkageRecord {
   /** MOF目の合成キー（`MOFKouMokuItem.key`） */
   kouMokuKey: string;
   mofAccountType: MOFKouMokuAccountType;
+  /**
+   * MOF側の予算種別。RS側は「第N次補正予算」表記だが、ここはMOF側の
+   * 「補正予算（第N号）」表記（対応関係は generate-mof-rs-kou-moku-linkage.ts 参照）。
+   */
+  mofBudgetType: MOFBudgetType;
   mofMinistry: string;
   /** 組織（一般会計）または特別会計名（特別会計） */
   mofOrganization: string;
