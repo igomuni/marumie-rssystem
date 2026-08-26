@@ -35,10 +35,21 @@ export interface MofRsKouMokuLinkageRecord {
   sectionName: string;
   subItemCode: string;
   subItemName: string;
-  /** MOF目の本年度額（円） */
+  /** MOF目の本年度額（円）。決算では決算額（歳出予算額） */
   kouMokuAmount: number;
-  /** 当該事業・当該目に計上されたRS予算額（円）。同一キーに複数行あれば合算 */
+  /**
+   * 当該事業・当該目に計上されたRS予算額（円）。同一キーに複数行あれば合算。
+   * `carriedOverFrom` がある場合は元の予算側リンクのRS予算額をそのまま引き継いだもので、
+   * この決算目に対応するRS側の実行額ではない（RSは項目別の決算・執行額を持たないため）。
+   */
   rsAmount: number;
+  /**
+   * この決算目へのリンクが、同一識別子（会計区分・所管・組織/特会・勘定・項コード・
+   * 目分類コード・目名。予算種別を除く）を持つ予算側（当初予算／補正予算）のリンクから
+   * 引き継がれたものである場合、その元の予算種別。直接キー一致したリンクでは undefined。
+   * RSは決算・執行実績を目単位で持たないため、決算目への紐づけは常にこの引き継ぎ経由になる。
+   */
+  carriedOverFrom?: MOFBudgetType;
 }
 
 /** 出力 JSON 全体 */

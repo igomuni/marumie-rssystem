@@ -179,9 +179,9 @@ export function KouMokuTable({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={e => e.stopPropagation()}
-                      title={`/sankey-svg で「${rowBestLink.projectName}」を開く（完全一致${
-                        rowLinks.length > 1 ? `・他${rowLinks.length - 1}件` : ''
-                      }）`}
+                      title={`/sankey-svg で「${rowBestLink.projectName}」を開く（${
+                        rowBestLink.carriedOverFrom ? `${rowBestLink.carriedOverFrom}から引継ぎ` : '完全一致'
+                      }${rowLinks.length > 1 ? `・他${rowLinks.length - 1}件` : ''}）`}
                       className="inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 hover:underline dark:bg-emerald-900/40 dark:text-emerald-300"
                     >
                       RS↗
@@ -279,7 +279,8 @@ export function KouMokuTable({
                         <KouMokuHistory history={history} loading={historyLoading} error={historyError} />
                         <div className="min-w-[20rem] max-w-2xl">
                           <div className="mb-1 text-[11px] font-medium text-neutral-400">
-                            紐づく RS 事業（完全一致・
+                            紐づく RS 事業（
+                            {item.budgetType === '決算' ? '予算側から引継ぎ・' : '完全一致・'}
                             {linkageLoading ? '読込中…' : `${rowLinks.length} 件`}）
                           </div>
                           {linkageError ? (
@@ -313,7 +314,8 @@ export function KouMokuTable({
                                         </span>
                                       )}
                                       <span className="ml-1 text-neutral-400">
-                                        （{l.projectMinistry}・{formatYen(l.rsAmount)}）
+                                        （{l.projectMinistry}・{formatYen(l.rsAmount)}
+                                        {l.carriedOverFrom ? `・${l.carriedOverFrom}から引継ぎ` : ''}）
                                       </span>
                                     </span>
                                   </li>

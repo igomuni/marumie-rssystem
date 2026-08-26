@@ -212,6 +212,90 @@ function main() {
   console.log(`  対象外（前年度繰越・予備費等など突合不可能な予算種別）: ${skippedNoBudgetTypeMapping.toLocaleString()} 行`);
   console.log(`  完全一致: ${linkedRows.toLocaleString()} 行 → ${linkMap.size.toLocaleString()} ペア（事業×目）`);
 
+  // 3.5. 決算目への引き継ぎ
+  //
+  // RSは決算・執行実績を目単位で持たない（2-2 CSVの予算種別は当初/補正/繰越/予備費のみ）ため、
+  // 決算目を直接キー一致させることはできない。一方で決算目と予算側（当初・補正）の目は
+  // 同一の識別子（会計区分・所管・組織/特会・勘定・項コード・目分類コード・目名。予算種別を
+  // 除く）を共有することが多い（`/mof-kou-moku` の年度推移機能と同じ前提）。この識別子で
+  // 予算側の既存リンクを決算目に引き継ぐ。
+  console.log('\n[3.5/4] 決算目への引き継ぎ');
+
+  /** 予算種別を除いた識別子（引き継ぎ専用。既存リンクのmof*フィールドから作る） */
+  function carryoverIdentity(
+    accountType: string,
+    ministry: string,
+    orgOrSpecial: string,
+    subAccount: string,
+    sectionCode: string,
+    subItemCode: string,
+    subItemName: string
+  ): string {
+    return [accountType, norm(ministry), norm(orgOrSpecial), norm(subAccount), sectionCode, subItemCode, norm(subItemName)].join(
+      '|'
+    );
+  }
+
+  // 識別子 → 予算側リンクのうち代表1件/pid（同一pidが当初・補正の両方にリンクしていれば金額の大きい方を採用）
+  const budgetLinksByIdentity = new Map<string, Map<number, MofRsKouMokuLinkageRecord>>();
+  for (const link of linkMap.values()) {
+    const identity = carryoverIdentity(
+      link.mofAccountType,
+      link.mofMinistry,
+      link.mofOrganization,
+      link.mofSubAccount,
+      link.sectionCode,
+      link.subItemCode,
+      link.subItemName
+    );
+    const byPid = budgetLinksByIdentity.get(identity) ?? new Map<number, MofRsKouMokuLinkageRecord>();
+    const existing = byPid.get(link.projectId);
+    if (!existing || link.rsAmount > existing.rsAmount) byPid.set(link.projectId, link);
+    budgetLinksByIdentity.set(identity, byPid);
+  }
+
+  const settlementItems = kouMokuData.items.filter(
+    it => (it.accountType === 'general' || it.accountType === 'special') && it.budgetType === '決算'
+  );
+  let carriedOverCount = 0;
+  for (const it of settlementItems) {
+    const identity = carryoverIdentity(
+      it.accountType,
+      it.ministry,
+      it.accountType === 'special' ? it.specialAccount : it.organization,
+      it.subAccount,
+      it.sectionCode,
+      it.subItemCode,
+      it.subItemName
+    );
+    const byPid = budgetLinksByIdentity.get(identity);
+    if (!byPid) continue;
+    for (const source of byPid.values()) {
+      const pairKey = `${source.projectId}|${it.key}`;
+      if (linkMap.has(pairKey)) continue; // 決算目自体が万一直接一致していれば上書きしない
+      linkMap.set(pairKey, {
+        projectId: source.projectId,
+        projectName: source.projectName,
+        projectMinistry: source.projectMinistry,
+        kouMokuKey: it.key,
+        mofAccountType: it.accountType,
+        mofBudgetType: it.budgetType,
+        mofMinistry: it.ministry,
+        mofOrganization: it.accountType === 'special' ? it.specialAccount : it.organization,
+        mofSubAccount: it.subAccount,
+        sectionCode: it.sectionCode,
+        sectionName: it.sectionName,
+        subItemCode: it.subItemCode,
+        subItemName: it.subItemName,
+        kouMokuAmount: it.amount,
+        rsAmount: source.rsAmount,
+        carriedOverFrom: source.mofBudgetType,
+      });
+      carriedOverCount++;
+    }
+  }
+  console.log(`  決算目: ${settlementItems.length.toLocaleString()} 件中 ${carriedOverCount.toLocaleString()} 件に予算側リンクを引き継ぎ`);
+
   // 4. 出力
   console.log('\n[4/4] 出力');
   const links = [...linkMap.values()].sort((a, b) => b.rsAmount - a.rsAmount);
@@ -223,12 +307,12 @@ function main() {
       budgetYear: BUDGET_YEAR,
       rsYear: RS_YEAR,
       mofEraLabel: kouMokuData.metadata.eraLabel,
-      scope: '一般会計・特別会計・当初予算＋補正予算',
+      scope: '一般会計・特別会計・当初予算＋補正予算（決算は同一識別子で予算側から引き継ぎ）',
       unit: 'yen',
       generatedAt: new Date().toISOString(),
       counts: {
         links: links.length,
-        kouMokuTotal: kouMokuItems.length,
+        kouMokuTotal: kouMokuItems.length + settlementItems.length,
         kouMokuLinked: linkedKouMoku.size,
         projectTotal: totalProjects.size,
         projectLinked: linkedProjects.size,
@@ -247,6 +331,7 @@ function main() {
         '1つの目に複数のRS事業が計上されることがある（N対N）。rsAmountは同一事業・同一目内の合算',
         '政府関係機関はRSの会計区分に該当値が無いため対象外',
         '一致しない行（金額の数%）は主に組織名・目名の表記差やRS側の独自科目が原因（要精査）',
+        `決算目はRSが項目別の決算・執行額を持たないため直接一致できず、同一識別子（会計区分・所管・組織/特会・勘定・項コード・目分類コード・目名。予算種別を除く）を持つ当初/補正予算側リンクから rsAmount をそのまま引き継いでいる（carriedOverFrom で判別可能・${carriedOverCount.toLocaleString()}件）。この rsAmount は決算額に対する実際のRS計上額ではなく推定である点に注意`,
       ],
     },
     links,
