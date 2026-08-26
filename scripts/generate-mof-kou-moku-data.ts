@@ -190,12 +190,17 @@ function pageMapKey(budgetType: string, ministry: string, organization: string, 
  * （スクレイピングはページURLの精度を上げる付加機能で、失敗しても本体データの
  * 生成は止めない）。
  */
+interface PageEntry {
+  sourceUrl: string;
+  page: number;
+}
+
 async function buildGeneralPageMap(
   fiscalYear: number,
   suffix: string,
   budgetType: MOFBudgetType
-): Promise<Map<string, string>> {
-  const map = new Map<string, string>();
+): Promise<Map<string, PageEntry>> {
+  const map = new Map<string, PageEntry>();
   const cacheDir = scrapeCacheDir(fiscalYear);
   const base = scrapeBase(fiscalYear);
   const documentId = `${fiscalYear}${suffix}`;
@@ -225,6 +230,7 @@ async function buildGeneralPageMap(
     let sectionCode = '';
     let sectionName = '';
     for (const row of rows) {
+      const entry: PageEntry = { sourceUrl, page: row.page };
       // 項に目が1件しかない行は、同じ(page,row)に項コード(colSub=1)と
       // プレースホルダの合成コード(colSub=2)の2セルが同居し、textAt()は両方を
       // 連結してしまう（例: "001(95011-2129-‥)"）。項コードの判定は
@@ -238,13 +244,13 @@ async function buildGeneralPageMap(
         // 項に目が1件しかない場合、目の行自体が無い。CSVでのプレースホルダ表現は
         // レイアウトにより異なる（当初/暫定=「(項名)」、補正=空文字）ため両方登録しておく。
         // 先に登録しておき、実際に目の行があれば下で正しい目名のキーが別途登録される。
-        map.set(pageMapKey(budgetType, ministry, organization, sectionCode, `(${sectionName})`), sourceUrl);
-        map.set(pageMapKey(budgetType, ministry, organization, sectionCode, ''), sourceUrl);
+        map.set(pageMapKey(budgetType, ministry, organization, sectionCode, `(${sectionName})`), entry);
+        map.set(pageMapKey(budgetType, ministry, organization, sectionCode, ''), entry);
         continue;
       }
       const subItemName = textAt(row, 3);
       if (subItemName && sectionCode) {
-        map.set(pageMapKey(budgetType, ministry, organization, sectionCode, subItemName), sourceUrl);
+        map.set(pageMapKey(budgetType, ministry, organization, sectionCode, subItemName), entry);
       }
     }
   }
@@ -275,6 +281,7 @@ function extractStandard(
   fiscalYear: number
 ): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
   const col = amountColumn(rows);
+  const documentId = `${fiscalYear}${spec.suffix}`;
   const sourceUrl = documentUrl(fiscalYear, spec.suffix);
   return rows.map((row, i) => {
     const f = rowFields(row, spec.accountType, spec.layout);
@@ -290,6 +297,8 @@ function extractStandard(
       spent: null,
       carriedOver: null,
       unused: null,
+      documentId,
+      page: null,
       sourceUrl,
     };
   });
@@ -306,6 +315,7 @@ function extractRevised(
   const colSettled = findColumn(headers, h => h.includes('成立予算額'));
   const colDiff = findColumn(headers, h => h.includes('差引額'));
   if (!colRevised) return [];
+  const documentId = `${fiscalYear}${spec.suffix}`;
   const sourceUrl = documentUrl(fiscalYear, spec.suffix);
   return rows.map((row, i) => {
     const f = rowFields(row, spec.accountType, spec.layout);
@@ -321,6 +331,8 @@ function extractRevised(
       spent: null,
       carriedOver: null,
       unused: null,
+      documentId,
+      page: null,
       sourceUrl,
     };
   });
@@ -331,6 +343,7 @@ function extractSettlement(
   spec: DocumentSpec,
   fiscalYear: number
 ): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
+  const documentId = `${fiscalYear}${spec.suffix}`;
   const sourceUrl = documentUrl(fiscalYear, spec.suffix);
   return rows.map((row, i) => {
     const f = rowFields(row, spec.accountType, spec.layout);
@@ -348,6 +361,8 @@ function extractSettlement(
       spent: yenAsIs(row, findColumn(Object.keys(row), h => /^(支出済歳出額|支出済額)\(円\)$/.test(h))),
       carriedOver: yenAsIs(row, '翌年度繰越額(円)'),
       unused: yenAsIs(row, '不用額(円)'),
+      documentId,
+      page: null,
       sourceUrl,
     };
   });
@@ -383,7 +398,7 @@ async function generateYear(fiscalYear: number): Promise<void> {
   // 一般会計は科目別内訳のWebページを走査して、行単位の正確な出典URLに差し替える
   // （standard/revisedレイアウトのみ対象。決算は別調査が必要なため対象外・帳票単位のまま）。
   const generalSpecs = documents.filter(s => s.accountType === 'general' && s.layout !== 'settlement');
-  const pageMap = new Map<string, string>();
+  const pageMap = new Map<string, PageEntry>();
   for (const spec of generalSpecs) {
     const specMap = await buildGeneralPageMap(fiscalYear, spec.suffix, spec.budgetType);
     for (const [k, v] of specMap) pageMap.set(k, v);
@@ -392,9 +407,10 @@ async function generateYear(fiscalYear: number): Promise<void> {
   for (const item of items) {
     if (item.accountType !== 'general') continue;
     const key = pageMapKey(item.budgetType, item.ministry, item.organization, item.sectionCode, item.subItemName);
-    const url = pageMap.get(key);
-    if (url) {
-      item.sourceUrl = url;
+    const entry = pageMap.get(key);
+    if (entry) {
+      item.sourceUrl = entry.sourceUrl;
+      item.page = entry.page;
       pageMatched++;
     }
   }

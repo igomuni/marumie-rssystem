@@ -81,13 +81,17 @@ export interface MOFKouMokuItem {
   carriedOver: number | null;
   /** 不用額（円） */
   unused: number | null;
+  /** 帳票ID（例: 202611001 = 令和6年度一般会計当初予算） */
+  documentId: string;
   /**
-   * 出典URL。一般会計（決算を除く）は科目別内訳のWebページ（事項別内訳と並列の
-   * 同じ帳票ファミリー）を走査して、行単位で正確なページのXMLを特定している
+   * 出典URLのページ番号。一般会計（決算を除く）は科目別内訳のWebページ（事項別内訳と
+   * 並列の同じ帳票ファミリー）を走査して、行単位で正確なページを特定している
    * （実測一致率99.98%。generate-mof-kou-moku-data.ts の buildGeneralPageMap 参照）。
-   * 特別会計・政府関係機関・決算はまだページ特定ロジックが無く、帳票トップページ
-   * （Main.html）へのフォールバックリンクに留まる。
+   * 特別会計・政府関係機関・決算はまだページ特定ロジックが無いため null（帳票トップページの
+   * リンクのみ）。
    */
+  page: number | null;
+  /** 出典URL。page が null のときは帳票トップページ（Main.html）を指す */
   sourceUrl: string;
 }
 
@@ -131,4 +135,32 @@ export interface MOFKouMokuData {
     byPurpose: MOFKouMokuGroupSummary[];
   };
   items: MOFKouMokuItem[];
+}
+
+/** 目の経年推移: ある年度に現れた同一の目 */
+export interface MOFKouMokuHistoryYear {
+  fiscalYear: number;
+  eraLabel: string;
+  /** その年度に現れた全予算種別の目（当初・暫定・補正・決算） */
+  items: MOFKouMokuItem[];
+}
+
+/**
+ * 目の経年推移（GET /api/mof-kou-moku/history のレスポンス）。
+ *
+ * 同一の目の判定は key から予算種別を除いた識別子で行う。
+ * 目名が改称されたり目別分類コードが振り直されたりすると別の目として扱われるため、
+ * 実態が継続でも欠けて見えることがある（`/mof-jikou` の事項と同じ限界）。
+ */
+export interface MOFKouMokuHistory {
+  /** 問い合わせに使われた key */
+  key: string;
+  /** 予算種別を除いた識別子 */
+  identity: string;
+  /** 目名（見つかった中で最初のもの） */
+  name: string;
+  /** 収録済みの全年度（新しい順）。推移の横軸 */
+  availableYears: number[];
+  /** 目が現れた年度（古い順）。計上のない年度は要素ごと現れない */
+  years: MOFKouMokuHistoryYear[];
 }

@@ -14,7 +14,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
-import type { MOFKouMokuAccountType, MOFKouMokuData } from '@/types/mof-kou-moku';
+import type { MOFKouMokuAccountType, MOFKouMokuData, MOFKouMokuHistory } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { KouMokuTable } from '@/client/components/mof-kou-moku/KouMokuTable';
@@ -53,6 +53,9 @@ export default function MOFKouMokuPage() {
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
+  const [history, setHistory] = useState<MOFKouMokuHistory | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const [linkageLinks, setLinkageLinks] = useState<MofRsKouMokuLinkageRecord[] | null>(null);
   const [linkageAvailable, setLinkageAvailable] = useState(false);
   const [linkageRsYear, setLinkageRsYear] = useState<number | null>(null);
@@ -87,6 +90,32 @@ export default function MOFKouMokuPage() {
     setRsFilter('all');
     setExpanded(null);
   }
+
+  /**
+   * 展開した目の経年推移を取る。
+   * 再利用コンポーネントから直接APIを叩かないよう、取得はページ層に置く。
+   */
+  const expandedKey = data?.items.find(i => i.id === expanded)?.key ?? null;
+  useEffect(() => {
+    if (!expandedKey) {
+      setHistory(null);
+      setHistoryError(null);
+      setHistoryLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setHistory(null);
+    setHistoryError(null);
+    setHistoryLoading(true);
+    fetch(`/api/mof-kou-moku/history?key=${encodeURIComponent(expandedKey)}`)
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
+      .then((json: MOFKouMokuHistory) => !cancelled && setHistory(json))
+      .catch((e: Error) => !cancelled && setHistoryError(e.message))
+      .finally(() => !cancelled && setHistoryLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [expandedKey]);
 
   useEffect(() => {
     setPage(1);
@@ -481,6 +510,9 @@ export default function MOFKouMokuPage() {
               onWidthsChange={setWidths}
               expandedId={expanded}
               onToggleExpand={setExpanded}
+              history={history}
+              historyLoading={historyLoading}
+              historyError={historyError}
               linkageByKey={linkageByKey}
               linkageAvailable={linkageAvailable}
               linkageRsYear={linkageRsYear}

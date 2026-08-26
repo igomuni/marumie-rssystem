@@ -7,9 +7,10 @@
 
 import { Fragment } from 'react';
 import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
-import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
+import type { MOFKouMokuHistory, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from '@/client/components/mof-jikou/format';
+import { KouMokuHistory } from './KouMokuHistory';
 import {
   ACCOUNT_LABEL,
   bestLink,
@@ -32,6 +33,10 @@ interface Props {
   onWidthsChange: (next: Record<string, number>) => void;
   expandedId: string | null;
   onToggleExpand: (id: string | null) => void;
+  /** 展開中の行の経年推移。取得はページ層の責務 */
+  history: MOFKouMokuHistory | null;
+  historyLoading: boolean;
+  historyError: string | null;
   /**
    * kouMokuKey → 紐づくRS事業。年度分を一括取得したもの（取得はページ層の責務）。
    * 一覧の列と詳細パネルの両方をここから引く。
@@ -62,6 +67,9 @@ export function KouMokuTable({
   onWidthsChange,
   expandedId,
   onToggleExpand,
+  history,
+  historyLoading,
+  historyError,
   linkageByKey,
   linkageAvailable,
   linkageRsYear,
@@ -268,6 +276,7 @@ export function KouMokuTable({
                   >
                     <div className="sticky left-0 w-[calc(100vw-3rem)] px-4 py-3">
                       <div className="flex flex-wrap gap-x-10 gap-y-4">
+                        <KouMokuHistory history={history} loading={historyLoading} error={historyError} />
                         <div className="min-w-[20rem] max-w-2xl">
                           <div className="mb-1 text-[11px] font-medium text-neutral-400">
                             紐づく RS 事業（完全一致・
@@ -331,17 +340,32 @@ export function KouMokuTable({
                           </dd>
                           <dt className="text-neutral-400">主要経費コード</dt>
                           <dd className="font-mono">{item.majorExpenseCode || '—'}</dd>
-                          <dt className="text-neutral-400">出典</dt>
+                          <dt className="text-neutral-400">帳票・ページ</dt>
                           <dd>
-                            <a
-                              href={item.sourceUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={e => e.stopPropagation()}
-                              className="underline hover:text-neutral-700"
-                            >
-                              {item.sourceUrl.includes('/xml/') ? '出典XML（該当ページ）' : '出典（帳票トップ）'}
-                            </a>
+                            {item.page !== null ? (
+                              <>
+                                {item.documentId} p.{item.page}{' '}
+                                <a
+                                  href={item.sourceUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={e => e.stopPropagation()}
+                                  className="underline hover:text-neutral-700"
+                                >
+                                  出典XML
+                                </a>
+                              </>
+                            ) : (
+                              <a
+                                href={item.sourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={e => e.stopPropagation()}
+                                className="underline hover:text-neutral-700"
+                              >
+                                出典なし（帳票トップ）
+                              </a>
+                            )}
                           </dd>
                         </dl>
                       </div>
