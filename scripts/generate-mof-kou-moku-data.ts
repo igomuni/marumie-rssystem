@@ -38,6 +38,17 @@ import type {
 import { MOF_REVISION_NUMBERS, revisedBudgetType } from '@/types/mof-jikou';
 import { amountColumn, readBudgetTables, toEraLabel, yen, zipPath, type CsvRow } from '@/scripts/mof-budget-csv';
 import { MAJOR_EXPENSE } from '@/scripts/mof-major-expense';
+import {
+  createThrottle,
+  extractXmlNames,
+  fetchText,
+  HttpError,
+  listTitle,
+  parseTable,
+  splitRunningTitle,
+  subAt,
+  textAt,
+} from '@/scripts/mof-budget-xml';
 
 const DEFAULT_YEARS = [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
@@ -127,11 +138,117 @@ function findColumn(headers: string[], match: (h: string) => boolean): string | 
 }
 
 /**
- * 出典帳票トップページのURL。科目別内訳は事項別内訳と同じ帳票ファミリーのWeb帳票としても
- * 公開されている（未スクレイピング）が、ページ番号までは特定できないため帳票単位のリンクに留める。
+ * 出典帳票トップページのURL（フォールバック）。ページ番号までは特定できない場合に使う。
+ * 一般会計は `buildGeneralPageMap` で行単位のページURLに差し替えられる。
  */
 function documentUrl(fiscalYear: number, suffix: string): string {
   return `https://www.bb.mof.go.jp/server/${fiscalYear}/html/${fiscalYear}${suffix}Main.html`;
+}
+
+// ─── 科目別内訳Webページの行単位スキャン（一般会計のみ） ────────────────────
+//
+// 科目別内訳はZIP同梱CSVとは別に、事項別内訳と同じ帳票ファミリーのWeb帳票
+// （XML）としても公開されている（title_for_list=「科目別内訳」）。/mof-jikou の
+// スクレイピングで data/download/mof_{年度}/xml/ に大半のページが既にキャッシュ
+// されているため、一般会計はネットワーク要求なしでページ単位のURLを特定できる
+// （docs/tasks/20260826_0809_項の単独事項構造による紐づけ拡張の調査.md 参照）。
+//
+// 表の列位置（一般会計・当初/暫定/補正で共通、複数所管で実測確認済み）:
+//   col1(sub=1) = 項コード（項の行にだけ印字）／col1(sub=2,3) = 主要経費等の合成コード（目の行）
+//   col2        = 項名（項の行にだけ印字）
+//   col3        = 目名（目の行にだけ印字。項に目が1件しかない場合は目の行自体が無い）
+//   col4以降    = 金額（ここでは使わない。金額はCSVを正とする）
+
+const throttle = createThrottle();
+const scrapeCacheDir = (fiscalYear: number) =>
+  path.join(process.cwd(), 'data', 'download', `mof_${fiscalYear}`, 'xml');
+const scrapeBase = (fiscalYear: number) => `https://www.bb.mof.go.jp/server/${fiscalYear}`;
+
+/** 突合用の文字列正規化: NFKC + 空白除去 */
+function norm(s: string): string {
+  return s.normalize('NFKC').replace(/\s+/g, '');
+}
+
+/** 一般会計の running_title「内閣府所管  内閣本府」から所管・組織を割り当てる（jikou と同じ規約） */
+function resolveGeneralScope(parts: string[]): { ministry: string; organization: string } {
+  const first = (parts[0] ?? '').replace(/所管$/, '');
+  const second = parts[1] ?? '';
+  // 皇室費のように組織が印字されない帳票は、所管をそのまま組織名とする（CSV も同じ扱い）
+  return { ministry: first, organization: second || first };
+}
+
+/** 突合キー（budgetType|所管|組織|項コード|目名） */
+function pageMapKey(budgetType: string, ministry: string, organization: string, sectionCode: string, subItemName: string): string {
+  return [budgetType, norm(ministry), norm(organization), sectionCode, norm(subItemName)].join('|');
+}
+
+/**
+ * 1年度・1帳票（suffix）ぶんの科目別内訳ページを走査し、突合キー→出典URLの
+ * マップを作る。メニュー・XMLともキャッシュ優先（`fetchText`）で、jikou が
+ * 既に取得済みの年度・帳票ならネットワークアクセスは発生しない。
+ * 404（帳票なし）は空マップを返す。それ以外の通信エラーは警告して空マップにする
+ * （スクレイピングはページURLの精度を上げる付加機能で、失敗しても本体データの
+ * 生成は止めない）。
+ */
+async function buildGeneralPageMap(
+  fiscalYear: number,
+  suffix: string,
+  budgetType: MOFBudgetType
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const cacheDir = scrapeCacheDir(fiscalYear);
+  const base = scrapeBase(fiscalYear);
+  const documentId = `${fiscalYear}${suffix}`;
+  let menu: string;
+  try {
+    menu = await fetchText(cacheDir, `${base}/html/${documentId}menu.html`, 'euc-jp', throttle, `${documentId}menu.html`);
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) return map;
+    console.warn(`  ⚠ [${documentId}] 目次の取得に失敗（ページ単位リンクは帳票単位にフォールバック）: ${(error as Error).message}`);
+    return map;
+  }
+
+  for (const name of extractXmlNames(menu)) {
+    let xml: string;
+    try {
+      xml = await fetchText(cacheDir, `${base}/xml/${name}`, 'shift_jis', throttle, name);
+    } catch (error) {
+      if (error instanceof HttpError) continue; // 個別ページの欠番はスキップ
+      console.warn(`  ⚠ [${documentId}] ${name} の取得に失敗: ${(error as Error).message}`);
+      continue;
+    }
+    if (listTitle(xml) !== '科目別内訳') continue;
+
+    const { ministry, organization } = resolveGeneralScope(splitRunningTitle(xml));
+    const { rows } = parseTable(xml);
+    const sourceUrl = `${base}/xml/${name}`;
+    let sectionCode = '';
+    let sectionName = '';
+    for (const row of rows) {
+      // 項に目が1件しかない行は、同じ(page,row)に項コード(colSub=1)と
+      // プレースホルダの合成コード(colSub=2)の2セルが同居し、textAt()は両方を
+      // 連結してしまう（例: "001(95011-2129-‥)"）。項コードの判定は
+      // 先頭セル（colSub=1）のテキストだけを見る必要がある。
+      const code = (row.cols.get(1) ?? [])[0]?.text.trim() ?? '';
+      const section = textAt(row, 2);
+      // 項の行（col1が項コード・col2に項名）。目の行はcol1が合成コード文字列で数字のみにならない
+      if (/^\d+$/.test(code) && section && subAt(row, 1) === 1) {
+        sectionCode = code;
+        sectionName = section;
+        // 項に目が1件しかない場合、目の行自体が無い。CSVでのプレースホルダ表現は
+        // レイアウトにより異なる（当初/暫定=「(項名)」、補正=空文字）ため両方登録しておく。
+        // 先に登録しておき、実際に目の行があれば下で正しい目名のキーが別途登録される。
+        map.set(pageMapKey(budgetType, ministry, organization, sectionCode, `(${sectionName})`), sourceUrl);
+        map.set(pageMapKey(budgetType, ministry, organization, sectionCode, ''), sourceUrl);
+        continue;
+      }
+      const subItemName = textAt(row, 3);
+      if (subItemName && sectionCode) {
+        map.set(pageMapKey(budgetType, ministry, organization, sectionCode, subItemName), sourceUrl);
+      }
+    }
+  }
+  return map;
 }
 
 /** 会計区分ごとの列名の違いを吸収する */
@@ -236,7 +353,7 @@ function extractSettlement(
   });
 }
 
-function generateYear(fiscalYear: number): void {
+async function generateYear(fiscalYear: number): Promise<void> {
   const eraLabel = toEraLabel(fiscalYear);
   console.log(`\n=== ${eraLabel}（${fiscalYear}） 科目別内訳 ===`);
 
@@ -261,6 +378,31 @@ function generateYear(fiscalYear: number): void {
       url: documentUrl(fiscalYear, spec.suffix),
     });
     console.log(`  ${spec.title}: ${extracted.length.toLocaleString()} 件`);
+  }
+
+  // 一般会計は科目別内訳のWebページを走査して、行単位の正確な出典URLに差し替える
+  // （standard/revisedレイアウトのみ対象。決算は別調査が必要なため対象外・帳票単位のまま）。
+  const generalSpecs = documents.filter(s => s.accountType === 'general' && s.layout !== 'settlement');
+  const pageMap = new Map<string, string>();
+  for (const spec of generalSpecs) {
+    const specMap = await buildGeneralPageMap(fiscalYear, spec.suffix, spec.budgetType);
+    for (const [k, v] of specMap) pageMap.set(k, v);
+  }
+  let pageMatched = 0;
+  for (const item of items) {
+    if (item.accountType !== 'general') continue;
+    const key = pageMapKey(item.budgetType, item.ministry, item.organization, item.sectionCode, item.subItemName);
+    const url = pageMap.get(key);
+    if (url) {
+      item.sourceUrl = url;
+      pageMatched++;
+    }
+  }
+  const generalCount = items.filter(i => i.accountType === 'general').length;
+  if (generalCount > 0) {
+    console.log(
+      `  科目別内訳ページ走査: 一般会計 ${generalCount.toLocaleString()} 件中 ${pageMatched.toLocaleString()} 件で行単位のURLを特定`
+    );
   }
 
   const fullItems: MOFKouMokuItem[] = items.map(item => ({
@@ -320,15 +462,18 @@ function generateYear(fiscalYear: number): void {
   console.log(`  出力: ${path.basename(outputFile)}`);
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const years = process.argv.length > 2 ? process.argv.slice(2).map(v => parseInt(v, 10)) : DEFAULT_YEARS;
   if (years.some(y => isNaN(y) || y < 2000 || y > 2100)) {
     console.error(`Invalid fiscal year: ${process.argv.slice(2).join(' ')}`);
     process.exit(1);
   }
   console.log(`=== MOF 科目別内訳（項・目）生成（対象: ${years.join(', ')}） ===`);
-  for (const year of years) generateYear(year);
+  for (const year of years) await generateYear(year);
   console.log(`\n完了: ${years.length} 年度分を生成しました。`);
 }
 
-main();
+main().catch(error => {
+  console.error(error);
+  process.exit(1);
+});
