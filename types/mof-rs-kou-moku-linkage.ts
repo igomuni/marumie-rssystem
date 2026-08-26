@@ -3,11 +3,15 @@
  *
  * `types/mof-rs-linkage.ts`（MOF事項＝目的別の内訳 ↔ RS事業）と対になる、
  * MOF目＝性質別の内訳 ↔ RS事業 の紐づけ。RS の `2-2_予算・執行_予算種別・歳出予算項目` は
- * 所管/組織・勘定/項/目 を MOF の科目別内訳CSVと同じ語彙で持つため、事項と違って
- * **名前照合ではなく完全一致キーで直接突き合わせられる**（実測: 一般会計・当初予算で
- * RS行の92.7%・金額の97.9%が一致。docs/tasks/参照）。
+ * 一般会計なら 所管/組織・勘定/項/目、特別会計なら 所管/会計/勘定/項/目 を MOF の
+ * 科目別内訳CSVと同じ語彙で持つため、事項と違って**名前照合ではなく完全一致キーで
+ * 直接突き合わせられる**（実測: 一般会計・当初予算でRS行の92.7%・金額の97.9%、
+ * 特別会計・当初予算で行の86.6%・金額の98.9%が一致。docs/tasks/参照）。
+ * 政府関係機関はRSの `会計区分` に該当値が無く対象外。
  * 生成: scripts/generate-mof-rs-kou-moku-linkage.ts
  */
+
+import type { MOFKouMokuAccountType } from './mof-kou-moku';
 
 /** 紐づけ1件（事業×目のペア。1つの目に複数のRS事業が計上されることがある） */
 export interface MofRsKouMokuLinkageRecord {
@@ -16,8 +20,12 @@ export interface MofRsKouMokuLinkageRecord {
   projectMinistry: string;
   /** MOF目の合成キー（`MOFKouMokuItem.key`） */
   kouMokuKey: string;
+  mofAccountType: MOFKouMokuAccountType;
   mofMinistry: string;
+  /** 組織（一般会計）または特別会計名（特別会計） */
   mofOrganization: string;
+  /** 勘定名（特別会計のみ。一般会計は空） */
+  mofSubAccount: string;
   sectionCode: string;
   sectionName: string;
   subItemCode: string;
