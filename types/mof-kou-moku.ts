@@ -8,24 +8,30 @@
  * `2-2_予算・執行_予算種別・歳出予算項目` も 所管/組織・勘定/項/目 を同じ語彙で持つため、
  * 目レベルはMOFとRSを構造的に直接突き合わせられる。
  *
- * ZIP は当初予算のみをローカル保有（暫定・補正・決算のZIPは未取得）のため、
- * 現状は当初予算のみを収録する。
+ * 当初・暫定・補正・決算のZIPをすべて収録する（`/mof-jikou` と同じ予算種別の粒度）。
+ * ただし暫定・補正は年度により存在しない（暫定は令和8年度のみ、補正は号数が年度で変わる）。
  */
+
+import type { MOFBudgetType } from './mof-jikou';
+
+export type { MOFBudgetType } from './mof-jikou';
 
 /** 会計区分 */
 export type MOFKouMokuAccountType = 'general' | 'special' | 'agency';
 
 /** 目1件（科目別内訳の1行） */
 export interface MOFKouMokuItem {
-  /** 行ID。同一年度・会計区分内で一意（CSV内の出現順） */
+  /** 行ID。同一年度・会計区分・予算種別内で一意（CSV内の出現順） */
   id: string;
   /**
-   * 内容ベースの合成キー。会計区分・所管・組織／特別会計／機関・勘定・項コード・
-   * 目分類コード・目名を `|` で連結したもの。MOFは目にも公式なIDを振っていないため、
-   * これが実質的な識別子になる（年度をまたぐ追跡は事項以上に不安定なため現状は未対応）。
+   * 内容ベースの合成キー。会計区分・予算種別・所管・組織／特別会計／機関・勘定・
+   * 項コード・目分類コード・目名を `|` で連結したもの。MOFは目にも公式なIDを
+   * 振っていないため、これが実質的な識別子になる
+   * （年度をまたぐ追跡は事項以上に不安定なため現状は未対応）。
    */
   key: string;
   accountType: MOFKouMokuAccountType;
+  budgetType: MOFBudgetType;
   /** 所管（一般会計は単独省庁、特別会計は共管グループ名。政府関係機関は空） */
   ministry: string;
   /** 組織（一般会計のみ。例: 内閣本府） */
@@ -44,7 +50,7 @@ export interface MOFKouMokuItem {
   majorExpenseCode: string;
   /** 主要経費別分類名（コード表から解決。未知コード・無い帳票は空文字） */
   majorExpenseName: string;
-  /** 目別分類コード（政府関係機関は「目コード」列） */
+  /** 目別分類コード（政府関係機関は「目コード」列、決算は「目番号」列） */
   subItemCode: string;
   /** 目名 */
   subItemName: string;
@@ -52,12 +58,29 @@ export interface MOFKouMokuItem {
   purposeCode: string;
   /** 使途別分類名（コード表から解決。未知コードは空文字） */
   purposeName: string;
-  /** 本年度額（円）。予算書の印字は千円単位だが、生成時に円へ揃えている */
+  /**
+   * 本年度額（円）。予算書の印字は千円単位（決算は円単位）だが、生成時に円へ揃えている。
+   * 補正予算では改予算額（その号の成立後の姿）、決算では歳出予算額。
+   */
   amount: number;
-  /** 前年度予算額（円） */
-  previousAmount: number;
-  /** 増減額（円。減額は負値） */
-  difference: number;
+  /**
+   * 比較対象額（円）。当初・暫定は前年度予算額、補正は補正前の成立予算額。
+   * 決算の帳票には比較欄が無いため null。
+   */
+  previousAmount: number | null;
+  /** 増減額（円。減額は負値）。決算の帳票には比較欄が無いため null */
+  difference: number | null;
+  /**
+   * 以下は決算の帳票にだけ入る。予算の帳票では null。
+   * 歳出予算現額（歳出予算額＋前年度繰越＋予備費使用＋流用等＋移替）。
+   */
+  currentAmount: number | null;
+  /** 支出済歳出額（円） */
+  spent: number | null;
+  /** 翌年度繰越額（円） */
+  carriedOver: number | null;
+  /** 不用額（円） */
+  unused: number | null;
 }
 
 /** 集計の1要素 */
@@ -74,11 +97,12 @@ export interface MOFKouMokuData {
     fiscalYear: number;
     /** 元号表記（例: 令和8年度） */
     eraLabel: string;
-    /** 当初予算のみ収録（ZIPが当初予算しか無いため） */
-    budgetType: '当初予算';
+    /** 収録した予算種別（年度により暫定・補正が無いことがある） */
+    budgetTypes: MOFBudgetType[];
     /** 取り込んだ帳票の一覧 */
     documents: Array<{
       accountType: MOFKouMokuAccountType;
+      budgetType: MOFBudgetType;
       title: string;
       count: number;
     }>;
@@ -91,6 +115,7 @@ export interface MOFKouMokuData {
   summary: {
     count: number;
     byAccountType: MOFKouMokuGroupSummary[];
+    byBudgetType: MOFKouMokuGroupSummary[];
     byMinistry: MOFKouMokuGroupSummary[];
     byMajorExpense: MOFKouMokuGroupSummary[];
     byPurpose: MOFKouMokuGroupSummary[];

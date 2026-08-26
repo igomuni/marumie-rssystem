@@ -9,7 +9,7 @@ import { Fragment } from 'react';
 import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
-import { changeRate, formatChangeRate, formatYen } from '@/client/components/mof-jikou/format';
+import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from '@/client/components/mof-jikou/format';
 import {
   ACCOUNT_LABEL,
   bestLink,
@@ -152,6 +152,7 @@ export function KouMokuTable({
       <tbody>
         {items.map(item => {
           const rate = changeRate(item.amount, item.previousAmount);
+          const exec = executionRate(item);
           const isOpen = expandedId === item.id;
           const rowLinks = linkageByKey.get(item.key) ?? [];
           const rowBestLink = bestLink(rowLinks);
@@ -194,8 +195,9 @@ export function KouMokuTable({
                   >
                     {isOpen ? '▼' : '▶'}
                   </button>
-                  {ACCOUNT_LABEL[item.accountType]}
+                  {item.budgetType}
                 </td>
+                <td className="truncate px-2 py-1.5 text-neutral-500">{ACCOUNT_LABEL[item.accountType]}</td>
                 <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
                   <span className="line-clamp-2">{item.ministry || '—'}</span>
                 </td>
@@ -234,6 +236,28 @@ export function KouMokuTable({
                 </td>
                 <td className={`truncate px-2 py-1.5 text-right tabular-nums ${rateClass(rate)}`}>
                   {formatChangeRate(rate)}
+                </td>
+                <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                  {formatYen(item.currentAmount)}
+                </td>
+                <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
+                  {formatYen(item.spent)}
+                </td>
+                <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                  {formatYen(item.unused)}
+                </td>
+                <td
+                  className={`truncate px-2 py-1.5 text-right tabular-nums ${
+                    exec === null
+                      ? 'text-neutral-400'
+                      : exec < 0.5
+                        ? 'text-red-600 dark:text-red-400'
+                        : exec < 0.9
+                          ? 'text-amber-700 dark:text-amber-500'
+                          : 'text-neutral-600 dark:text-neutral-400'
+                  }`}
+                >
+                  {formatRate(exec)}
                 </td>
               </tr>
               {isOpen && (

@@ -4,7 +4,7 @@
  */
 
 import type { MOFKouMokuAccountType, MOFKouMokuItem } from '@/types/mof-kou-moku';
-import { changeRate } from '@/client/components/mof-jikou/format';
+import { changeRate, executionRate } from '@/client/components/mof-jikou/format';
 
 export const ACCOUNT_LABEL: Record<MOFKouMokuAccountType, string> = {
   general: '一般会計',
@@ -14,6 +14,7 @@ export const ACCOUNT_LABEL: Record<MOFKouMokuAccountType, string> = {
 
 /** ソート可能な列 */
 export type SortKey =
+  | 'budgetType'
   | 'accountType'
   | 'ministry'
   | 'organization'
@@ -27,7 +28,11 @@ export type SortKey =
   | 'amount'
   | 'previousAmount'
   | 'difference'
-  | 'rate';
+  | 'rate'
+  | 'currentAmount'
+  | 'spent'
+  | 'unused'
+  | 'executionRate';
 
 export type SortDir = 'asc' | 'desc';
 
@@ -40,6 +45,7 @@ export interface ColumnSpec {
 }
 
 export const COLUMNS: ColumnSpec[] = [
+  { key: 'budgetType', label: '予算種別', width: 124 },
   { key: 'accountType', label: '会計区分', width: 92 },
   { key: 'ministry', label: '所管', width: 150, note: '政府関係機関の帳票には所管の欄が無い' },
   {
@@ -60,10 +66,33 @@ export const COLUMNS: ColumnSpec[] = [
   { key: 'subItemCode', label: '目コード', width: 64 },
   { key: 'subItemName', label: '目名', width: 220, note: '支出の性質による分類（事項＝目的による分類とは別系統）' },
   { key: 'purposeName', label: '使途別', width: 110 },
-  { key: 'amount', label: '本年度額', width: 100, numeric: true },
-  { key: 'previousAmount', label: '前年度予算額', width: 100, numeric: true },
+  { key: 'amount', label: '本年度額', width: 100, numeric: true, note: '補正は改予算額、決算は歳出予算額' },
+  {
+    key: 'previousAmount',
+    label: '比較対象額',
+    width: 100,
+    numeric: true,
+    note: '当初・暫定は前年度予算額、補正は補正前の成立予算額、決算は欄なし',
+  },
   { key: 'difference', label: '増減額', width: 100, numeric: true },
   { key: 'rate', label: '増減率', width: 84, numeric: true },
+  // 以下は決算の帳票にだけ値が入る
+  {
+    key: 'currentAmount',
+    label: '現額',
+    width: 100,
+    numeric: true,
+    note: '歳出予算現額（決算のみ）。歳出予算額＋前年度繰越＋予備費使用＋流用等＋移替',
+  },
+  { key: 'spent', label: '支出済', width: 100, numeric: true, note: '支出済歳出額（決算のみ）' },
+  { key: 'unused', label: '不用額', width: 100, numeric: true, note: '決算のみ' },
+  {
+    key: 'executionRate',
+    label: '執行率',
+    width: 78,
+    numeric: true,
+    note: '支出済 ÷ 歳出予算現額（決算のみ）',
+  },
 ];
 
 export const DEFAULT_WIDTHS: Record<string, number> = Object.fromEntries(
@@ -90,6 +119,8 @@ function sortValue(item: MOFKouMokuItem, key: SortKey): string | number | null {
       const r = changeRate(item.amount, item.previousAmount);
       return r === null || r === 'new' ? null : r;
     }
+    case 'executionRate':
+      return executionRate(item);
     default:
       return item[key];
   }

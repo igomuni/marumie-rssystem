@@ -5,7 +5,8 @@
  *
  * `/mof-jikou`（事項＝目的別の内訳）と対になる、目＝性質別の内訳。
  * データは /api/mof-kou-moku（npm run generate-mof-kou-moku で生成）。
- * ZIPがローカルに当初予算しか無いため、当初予算のみを扱う（年度切替のみ、種別切替は無い）。
+ * 当初・暫定・補正・決算を収録する（`/mof-jikou` と同じ予算種別の粒度）。
+ * ただし RS 事業との紐づけ（自動突合）は一般会計・当初予算のみ対応。
  *
  * レイアウトは /mof-jikou に合わせている。
  */
@@ -40,6 +41,7 @@ export default function MOFKouMokuPage() {
   const [year, setYear] = useState<number | null>(null);
 
   const [account, setAccount] = useState<'all' | MOFKouMokuAccountType>('all');
+  const [budgetType, setBudgetType] = useState('');
   const [ministry, setMinistry] = useState('');
   const [organization, setOrganization] = useState('');
   const [subAccount, setSubAccount] = useState('');
@@ -77,6 +79,7 @@ export default function MOFKouMokuPage() {
     setYear(next);
     setData(null);
     setAccount('all');
+    setBudgetType('');
     setMinistry('');
     setOrganization('');
     setSubAccount('');
@@ -87,7 +90,7 @@ export default function MOFKouMokuPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [account, ministry, organization, subAccount, majorExpense, rsFilter, keyword]);
+  }, [account, budgetType, ministry, organization, subAccount, majorExpense, rsFilter, keyword]);
 
   /**
    * その年度の RS 事業との紐づけを一括で取る（完全一致キーによる自動突合。
@@ -136,8 +139,12 @@ export default function MOFKouMokuPage() {
 
   const baseRows = useMemo(() => {
     if (!data) return [];
-    return data.items.filter(i => account === 'all' || i.accountType === account);
-  }, [data, account]);
+    return data.items.filter(i => {
+      if (account !== 'all' && i.accountType !== account) return false;
+      if (budgetType && i.budgetType !== budgetType) return false;
+      return true;
+    });
+  }, [data, account, budgetType]);
 
   const ministries = useMemo(
     () => [...new Set(baseRows.map(i => i.ministry || i.agency).filter(Boolean))].sort(),
@@ -191,11 +198,17 @@ export default function MOFKouMokuPage() {
     return sortItems(rows, sortKey, sortDir);
   }, [scopedRows, subAccount, majorExpense, rsFilter, linkageByKey, keyword, sortKey, sortDir]);
 
+  /**
+   * 絞り込み結果の合計。
+   * 当初・暫定・補正は同じ予算の別断面で、会計区分をまたぐと会計間の繰入も重なる。
+   * 種別や会計が混ざったまま足した数字は意味を持たないので、どちらも1つに絞られているときだけ出す。
+   */
   const filteredTotal = useMemo(() => {
     if (filtered.length === 0) return null;
-    if (account === 'all' && new Set(filtered.map(i => i.accountType)).size > 1) return null;
+    if (new Set(filtered.map(i => i.accountType)).size > 1) return null;
+    if (new Set(filtered.map(i => i.budgetType)).size > 1) return null;
     return filtered.reduce((sum, i) => sum + i.amount, 0);
-  }, [filtered, account]);
+  }, [filtered]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -247,7 +260,7 @@ export default function MOFKouMokuPage() {
             予算書「科目別内訳」（項・目）一覧
           </h1>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
-            <span>{data.metadata.eraLabel}・{data.metadata.budgetType}／財務省 予算書データベース</span>
+            <span>{data.metadata.eraLabel}／財務省 予算書データベース</span>
             <span className="text-neutral-300 dark:text-neutral-700">|</span>
             <span>
               全{' '}
@@ -256,6 +269,11 @@ export default function MOFKouMokuPage() {
               </b>{' '}
               目
             </span>
+            {data.summary.byBudgetType.map(g => (
+              <span key={g.key}>
+                {g.key} {g.count.toLocaleString()}件 / {formatYen(g.amount)}
+              </span>
+            ))}
             <span className="text-neutral-300 dark:text-neutral-700">|</span>
             {data.summary.byAccountType.map(g => (
               <span key={g.key}>
@@ -305,6 +323,22 @@ export default function MOFKouMokuPage() {
             </button>
           ))}
         </div>
+
+        <select
+          value={budgetType}
+          onChange={e => {
+            setBudgetType(e.target.value);
+            setMajorExpense('');
+          }}
+          className="rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
+        >
+          <option value="">予算種別: すべて</option>
+          {data.metadata.budgetTypes.map(b => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
 
         <select
           value={ministry}
@@ -414,9 +448,9 @@ export default function MOFKouMokuPage() {
             filtered.length > 0 && (
               <span
                 className="ml-1 text-neutral-400"
-                title="会計区分をまたぐと会計間の繰入も重なります。会計区分を1つに絞ると合計を表示します。"
+                title="当初・暫定・補正は同じ予算の別断面で、会計区分をまたぐと会計間の繰入も重なります。予算種別と会計区分を1つに絞ると合計を表示します。"
               >
-                （合計は会計区分が混在のため非表示）
+                （合計は予算種別・会計区分が混在のため非表示）
               </span>
             )
           ) : (
@@ -491,7 +525,7 @@ export default function MOFKouMokuPage() {
             ))}
             <ul className="mt-1 space-y-0.5">
               {data.metadata.documents.map(doc => (
-                <li key={doc.accountType}>
+                <li key={`${doc.accountType}-${doc.budgetType}`}>
                   {doc.title} — {doc.count.toLocaleString()} 件
                 </li>
               ))}

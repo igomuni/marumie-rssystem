@@ -65,8 +65,10 @@ function main() {
     process.exit(1);
   }
   const kouMokuData: MOFKouMokuData = JSON.parse(fs.readFileSync(KOU_MOKU_FILE, 'utf-8'));
-  const kouMokuItems = kouMokuData.items.filter(it => it.accountType === 'general');
-  console.log(`  一般会計の目: ${kouMokuItems.length.toLocaleString()} 件`);
+  const kouMokuItems = kouMokuData.items.filter(
+    it => it.accountType === 'general' && it.budgetType === '当初予算'
+  );
+  console.log(`  一般会計・当初予算の目: ${kouMokuItems.length.toLocaleString()} 件`);
 
   // 完全一致キー（所管|組織|項名|目名） → 目
   const kouMokuByKey = new Map<string, (typeof kouMokuItems)[number]>();
