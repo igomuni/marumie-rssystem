@@ -117,3 +117,9 @@ export function sortItems(rows: MOFKouMokuItem[], sortKey: SortKey, sortDir: Sor
 export function defaultDirFor(column: ColumnSpec): SortDir {
   return column.numeric ? 'desc' : 'asc';
 }
+
+/** 複数リンクがある場合に列・詳細パネルの代表として使う1件（金額降順） */
+export function bestLink<T extends { rsAmount: number }>(links: T[]): T | null {
+  if (links.length === 0) return null;
+  return [...links].sort((a, b) => b.rsAmount - a.rsAmount)[0];
+}

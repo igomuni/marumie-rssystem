@@ -1,0 +1,67 @@
+/**
+ * MOF目（科目別内訳） ↔ RS事業 紐づけデータの型定義。
+ *
+ * `types/mof-rs-linkage.ts`（MOF事項＝目的別の内訳 ↔ RS事業）と対になる、
+ * MOF目＝性質別の内訳 ↔ RS事業 の紐づけ。RS の `2-2_予算・執行_予算種別・歳出予算項目` は
+ * 所管/組織・勘定/項/目 を MOF の科目別内訳CSVと同じ語彙で持つため、事項と違って
+ * **名前照合ではなく完全一致キーで直接突き合わせられる**（実測: 一般会計・当初予算で
+ * RS行の92.7%・金額の97.9%が一致。docs/tasks/参照）。
+ * 生成: scripts/generate-mof-rs-kou-moku-linkage.ts
+ */
+
+/** 紐づけ1件（事業×目のペア。1つの目に複数のRS事業が計上されることがある） */
+export interface MofRsKouMokuLinkageRecord {
+  projectId: number;
+  projectName: string;
+  projectMinistry: string;
+  /** MOF目の合成キー（`MOFKouMokuItem.key`） */
+  kouMokuKey: string;
+  mofMinistry: string;
+  mofOrganization: string;
+  sectionCode: string;
+  sectionName: string;
+  subItemCode: string;
+  subItemName: string;
+  /** MOF目の本年度額（円） */
+  kouMokuAmount: number;
+  /** 当該事業・当該目に計上されたRS予算額（円）。同一キーに複数行あれば合算 */
+  rsAmount: number;
+}
+
+/** 出力 JSON 全体 */
+export interface MofRsKouMokuLinkageData {
+  metadata: {
+    /** 予算年度 = MOF会計年度（西暦） */
+    budgetYear: number;
+    /** RS事業年度（シート年度） */
+    rsYear: number;
+    mofEraLabel: string;
+    /** 突合範囲（現状は一般会計・当初予算のみ） */
+    scope: string;
+    unit: 'yen';
+    generatedAt: string;
+    counts: {
+      links: number;
+      /** 突合範囲内のMOF目総数 */
+      kouMokuTotal: number;
+      /** 1件以上の事業に紐づいた目数 */
+      kouMokuLinked: number;
+      /** 突合範囲内のRS事業総数 */
+      projectTotal: number;
+      /** 1件以上の目に紐づいた事業数 */
+      projectLinked: number;
+      /** 突合範囲内のRS予算行総数 */
+      rowsTotal: number;
+      /** 完全一致キーで紐づいた行数 */
+      rowsLinked: number;
+    };
+    coverage: {
+      /** 突合範囲内のRS予算総額（円） */
+      rsAmountTotal: number;
+      /** 紐づいた予算額合計（円） */
+      rsAmountLinked: number;
+    };
+    notes: string[];
+  };
+  links: MofRsKouMokuLinkageRecord[];
+}

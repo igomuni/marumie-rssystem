@@ -6,10 +6,13 @@
  */
 
 import { Fragment } from 'react';
+import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
+import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import { changeRate, formatChangeRate, formatYen } from '@/client/components/mof-jikou/format';
 import {
   ACCOUNT_LABEL,
+  bestLink,
   COLUMNS,
   DEFAULT_WIDTHS,
   MIN_COLUMN_WIDTH,
@@ -29,6 +32,16 @@ interface Props {
   onWidthsChange: (next: Record<string, number>) => void;
   expandedId: string | null;
   onToggleExpand: (id: string | null) => void;
+  /**
+   * kouMokuKey → 紐づくRS事業。年度分を一括取得したもの（取得はページ層の責務）。
+   * 一覧の列と詳細パネルの両方をここから引く。
+   */
+  linkageByKey: Map<string, MofRsKouMokuLinkageRecord[]>;
+  linkageAvailable: boolean;
+  /** /sankey-svg へのリンクに使うRS事業年度。紐づけデータ未生成なら null */
+  linkageRsYear: number | null;
+  linkageLoading: boolean;
+  linkageError: string | null;
   emptyMessage?: string;
 }
 
@@ -49,9 +62,17 @@ export function KouMokuTable({
   onWidthsChange,
   expandedId,
   onToggleExpand,
+  linkageByKey,
+  linkageAvailable,
+  linkageRsYear,
+  linkageLoading,
+  linkageError,
   emptyMessage = '条件に合う目がありません。',
 }: Props) {
-  const tableWidth = COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0);
+  const RS_COLUMN_WIDTH = 52;
+  const tableWidth =
+    COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0) + RS_COLUMN_WIDTH;
+  const totalColumnCount = COLUMNS.length + 1;
 
   function startResize(event: React.MouseEvent, key: string) {
     event.preventDefault();
@@ -77,12 +98,20 @@ export function KouMokuTable({
   return (
     <table className="w-full table-fixed border-collapse text-xs" style={{ minWidth: tableWidth }}>
       <colgroup>
+        <col style={{ width: RS_COLUMN_WIDTH }} />
         {COLUMNS.map(c => (
           <col key={c.key} style={{ width: widths[c.key] ?? c.width }} />
         ))}
       </colgroup>
       <thead className="sticky top-0 z-10 bg-neutral-100 text-left text-neutral-500 dark:bg-neutral-800">
         <tr>
+          <th
+            scope="col"
+            title="紐づく RS 事業があれば /sankey-svg へ移動できます（所管×組織×項×目の完全一致）"
+            className="p-0 text-center font-medium"
+          >
+            <span className="block px-1 py-2">RS</span>
+          </th>
           {COLUMNS.map(col => {
             const active = sortKey === col.key;
             return (
@@ -124,6 +153,8 @@ export function KouMokuTable({
         {items.map(item => {
           const rate = changeRate(item.amount, item.previousAmount);
           const isOpen = expandedId === item.id;
+          const rowLinks = linkageByKey.get(item.key) ?? [];
+          const rowBestLink = bestLink(rowLinks);
           return (
             <Fragment key={item.id}>
               <tr
@@ -132,6 +163,24 @@ export function KouMokuTable({
                   isOpen ? 'bg-neutral-50 dark:bg-neutral-900' : ''
                 }`}
               >
+                <td className="px-1 py-1.5 text-center">
+                  {rowBestLink && linkageRsYear !== null ? (
+                    <a
+                      href={sankeySvgProjectUrl(rowBestLink.projectId, rowBestLink.projectName, linkageRsYear)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      title={`/sankey-svg で「${rowBestLink.projectName}」を開く（完全一致${
+                        rowLinks.length > 1 ? `・他${rowLinks.length - 1}件` : ''
+                      }）`}
+                      className="inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 hover:underline dark:bg-emerald-900/40 dark:text-emerald-300"
+                    >
+                      RS↗
+                    </a>
+                  ) : (
+                    <span className="text-neutral-300 dark:text-neutral-700">—</span>
+                  )}
+                </td>
                 <td className="truncate px-2 py-1.5 text-neutral-500">
                   <button
                     type="button"
@@ -189,23 +238,77 @@ export function KouMokuTable({
               </tr>
               {isOpen && (
                 <tr className="bg-neutral-50 dark:bg-neutral-900">
-                  <td colSpan={COLUMNS.length} className="border-b border-neutral-200 p-0 dark:border-neutral-800">
+                  <td
+                    colSpan={totalColumnCount}
+                    className="border-b border-neutral-200 p-0 dark:border-neutral-800"
+                  >
                     <div className="sticky left-0 w-[calc(100vw-3rem)] px-4 py-3">
-                      <dl className="grid grid-cols-[8rem_auto] gap-x-3 gap-y-1 text-[11px] text-neutral-500">
-                        <dt className="text-neutral-400">合成キー</dt>
-                        <dd className="max-w-[40rem] break-all font-mono">{item.key}</dd>
-                        <dt className="text-neutral-400">行ID</dt>
-                        <dd className="font-mono">{item.id}</dd>
-                        <dt className="text-neutral-400">目分類コード</dt>
-                        <dd className="font-mono">{item.subItemCode || '—'}</dd>
-                        <dt className="text-neutral-400">使途別分類コード</dt>
-                        <dd className="font-mono">
-                          {item.purposeCode || '—'}
-                          {item.purposeName ? `（${item.purposeName}）` : ''}
-                        </dd>
-                        <dt className="text-neutral-400">主要経費コード</dt>
-                        <dd className="font-mono">{item.majorExpenseCode || '—'}</dd>
-                      </dl>
+                      <div className="flex flex-wrap gap-x-10 gap-y-4">
+                        <div className="min-w-[20rem] max-w-2xl">
+                          <div className="mb-1 text-[11px] font-medium text-neutral-400">
+                            紐づく RS 事業（完全一致・
+                            {linkageLoading ? '読込中…' : `${rowLinks.length} 件`}）
+                          </div>
+                          {linkageError ? (
+                            <p className="text-[11px] text-red-600">紐づけの取得に失敗しました: {linkageError}</p>
+                          ) : !linkageAvailable ? (
+                            <p className="max-w-[18rem] text-[11px] text-neutral-400">
+                              この年度は RS 事業との紐づけデータが未生成です。
+                            </p>
+                          ) : rowLinks.length === 0 ? (
+                            <p className="text-[11px] text-neutral-400">
+                              紐づく RS 事業は見つかりませんでした。RS 側で使われていない目、または科目名の表記差の可能性があります。
+                            </p>
+                          ) : (
+                            <>
+                              <ul className="space-y-1 text-[11px]">
+                                {rowLinks.map(l => (
+                                  <li key={l.projectId} className="flex items-start gap-1.5">
+                                    <span className="flex-1">
+                                      {linkageRsYear !== null ? (
+                                        <a
+                                          href={sankeySvgProjectUrl(l.projectId, l.projectName, linkageRsYear)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+                                        >
+                                          {l.projectName}
+                                        </a>
+                                      ) : (
+                                        <span className="text-neutral-700 dark:text-neutral-300">
+                                          {l.projectName}
+                                        </span>
+                                      )}
+                                      <span className="ml-1 text-neutral-400">
+                                        （{l.projectMinistry}・{formatYen(l.rsAmount)}）
+                                      </span>
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                              <p className="mt-1.5 text-[10px] leading-relaxed text-neutral-400">
+                                所管×組織×項×目の完全一致キーによる紐づけです（RSの `2-2` CSV が
+                                MOFの科目別内訳と同じ語彙を持つため、名前照合は行っていません）。
+                              </p>
+                            </>
+                          )}
+                        </div>
+                        <dl className="grid shrink-0 grid-cols-[8rem_auto] gap-x-3 gap-y-1 text-[11px] text-neutral-500">
+                          <dt className="text-neutral-400">合成キー</dt>
+                          <dd className="max-w-[34rem] break-all font-mono">{item.key}</dd>
+                          <dt className="text-neutral-400">行ID</dt>
+                          <dd className="font-mono">{item.id}</dd>
+                          <dt className="text-neutral-400">目分類コード</dt>
+                          <dd className="font-mono">{item.subItemCode || '—'}</dd>
+                          <dt className="text-neutral-400">使途別分類コード</dt>
+                          <dd className="font-mono">
+                            {item.purposeCode || '—'}
+                            {item.purposeName ? `（${item.purposeName}）` : ''}
+                          </dd>
+                          <dt className="text-neutral-400">主要経費コード</dt>
+                          <dd className="font-mono">{item.majorExpenseCode || '—'}</dd>
+                        </dl>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -215,7 +318,7 @@ export function KouMokuTable({
         })}
         {items.length === 0 && (
           <tr>
-            <td colSpan={COLUMNS.length} className="px-3 py-10 text-center text-neutral-500">
+            <td colSpan={totalColumnCount} className="px-3 py-10 text-center text-neutral-500">
               {emptyMessage}
             </td>
           </tr>

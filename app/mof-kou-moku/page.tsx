@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import type { MOFKouMokuAccountType, MOFKouMokuData } from '@/types/mof-kou-moku';
+import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { KouMokuTable } from '@/client/components/mof-kou-moku/KouMokuTable';
 import {
@@ -29,6 +30,9 @@ import {
 
 const PAGE_SIZE = 100;
 
+/** RS事業との紐づけの有無で絞り込む */
+type RsFilter = 'all' | 'linked' | 'unlinked';
+
 export default function MOFKouMokuPage() {
   const [data, setData] = useState<MOFKouMokuData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,12 +44,18 @@ export default function MOFKouMokuPage() {
   const [organization, setOrganization] = useState('');
   const [subAccount, setSubAccount] = useState('');
   const [majorExpense, setMajorExpense] = useState('');
+  const [rsFilter, setRsFilter] = useState<RsFilter>('all');
   const [keyword, setKeyword] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
+  const [linkageLinks, setLinkageLinks] = useState<MofRsKouMokuLinkageRecord[] | null>(null);
+  const [linkageAvailable, setLinkageAvailable] = useState(false);
+  const [linkageRsYear, setLinkageRsYear] = useState<number | null>(null);
+  const [linkageLoading, setLinkageLoading] = useState(false);
+  const [linkageError, setLinkageError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,12 +81,58 @@ export default function MOFKouMokuPage() {
     setOrganization('');
     setSubAccount('');
     setMajorExpense('');
+    setRsFilter('all');
     setExpanded(null);
   }
 
   useEffect(() => {
     setPage(1);
-  }, [account, ministry, organization, subAccount, majorExpense, keyword]);
+  }, [account, ministry, organization, subAccount, majorExpense, rsFilter, keyword]);
+
+  /**
+   * その年度の RS 事業との紐づけを一括で取る（完全一致キーによる自動突合。
+   * v1は一般会計・当初予算のみ対応）。一覧の列表示・詳細パネルの両方をクライアント側の
+   * Map で賄う（1回のフェッチで済ませる）。
+   */
+  const linkageYear = data?.metadata.fiscalYear ?? null;
+  useEffect(() => {
+    if (linkageYear === null) {
+      setLinkageLinks(null);
+      setLinkageAvailable(false);
+      setLinkageRsYear(null);
+      setLinkageError(null);
+      setLinkageLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setLinkageLinks(null);
+    setLinkageError(null);
+    setLinkageLoading(true);
+    fetch(`/api/mof-kou-moku/linkage?year=${linkageYear}`)
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
+      .then((json: { available: boolean; rsYear: number | null; links: MofRsKouMokuLinkageRecord[] }) => {
+        if (cancelled) return;
+        setLinkageAvailable(json.available);
+        setLinkageRsYear(json.rsYear);
+        setLinkageLinks(json.links);
+      })
+      .catch((e: Error) => !cancelled && setLinkageError(e.message))
+      .finally(() => !cancelled && setLinkageLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [linkageYear]);
+
+  /** kouMokuKey → その目に紐づくRS事業のリスト。列表示・詳細パネルの両方から引く */
+  const linkageByKey = useMemo(() => {
+    const map = new Map<string, MofRsKouMokuLinkageRecord[]>();
+    for (const link of linkageLinks ?? []) {
+      const list = map.get(link.kouMokuKey) ?? [];
+      list.push(link);
+      map.set(link.kouMokuKey, list);
+    }
+    return map;
+  }, [linkageLinks]);
 
   const baseRows = useMemo(() => {
     if (!data) return [];
@@ -121,6 +177,11 @@ export default function MOFKouMokuPage() {
     const rows = scopedRows.filter(item => {
       if (subAccount && item.subAccount !== subAccount) return false;
       if (majorExpense && item.majorExpenseName !== majorExpense) return false;
+      if (rsFilter !== 'all') {
+        const linked = (linkageByKey.get(item.key)?.length ?? 0) > 0;
+        if (rsFilter === 'linked' && !linked) return false;
+        if (rsFilter === 'unlinked' && linked) return false;
+      }
       if (kw) {
         const haystack = `${item.sectionName}\n${item.subItemName}\n${item.ministry}\n${orgColumn(item)}`;
         if (!haystack.includes(kw)) return false;
@@ -128,7 +189,7 @@ export default function MOFKouMokuPage() {
       return true;
     });
     return sortItems(rows, sortKey, sortDir);
-  }, [scopedRows, subAccount, majorExpense, keyword, sortKey, sortDir]);
+  }, [scopedRows, subAccount, majorExpense, rsFilter, linkageByKey, keyword, sortKey, sortDir]);
 
   const filteredTotal = useMemo(() => {
     if (filtered.length === 0) return null;
@@ -308,6 +369,37 @@ export default function MOFKouMokuPage() {
           ))}
         </select>
 
+        <div
+          className="flex overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700"
+          title={
+            linkageAvailable
+              ? 'RS事業との紐づけ（所管×組織×項×目の完全一致）で絞り込みます'
+              : 'この年度は紐づけデータが未生成です'
+          }
+        >
+          {(
+            [
+              ['all', 'RS: すべて'],
+              ['linked', 'RSあり'],
+              ['unlinked', 'RSなし'],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              disabled={!linkageAvailable}
+              onClick={() => setRsFilter(value)}
+              className={`px-2.5 py-1 disabled:cursor-not-allowed disabled:opacity-40 ${
+                rsFilter === value
+                  ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
+                  : 'bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <input
           type="search"
           value={keyword}
@@ -355,6 +447,11 @@ export default function MOFKouMokuPage() {
               onWidthsChange={setWidths}
               expandedId={expanded}
               onToggleExpand={setExpanded}
+              linkageByKey={linkageByKey}
+              linkageAvailable={linkageAvailable}
+              linkageRsYear={linkageRsYear}
+              linkageLoading={linkageLoading}
+              linkageError={linkageError}
             />
           </div>
 
