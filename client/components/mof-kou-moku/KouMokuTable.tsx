@@ -331,6 +331,18 @@ export function KouMokuTable({
                           </dd>
                           <dt className="text-neutral-400">主要経費コード</dt>
                           <dd className="font-mono">{item.majorExpenseCode || '—'}</dd>
+                          <dt className="text-neutral-400">出典帳票</dt>
+                          <dd>
+                            <a
+                              href={item.sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              className="underline hover:text-neutral-700"
+                            >
+                              出典（帳票トップ）
+                            </a>
+                          </dd>
                         </dl>
                       </div>
                     </div>

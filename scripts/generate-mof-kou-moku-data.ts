@@ -126,6 +126,14 @@ function findColumn(headers: string[], match: (h: string) => boolean): string | 
   return headers.find(match);
 }
 
+/**
+ * 出典帳票トップページのURL。科目別内訳は事項別内訳と同じ帳票ファミリーのWeb帳票としても
+ * 公開されている（未スクレイピング）が、ページ番号までは特定できないため帳票単位のリンクに留める。
+ */
+function documentUrl(fiscalYear: number, suffix: string): string {
+  return `https://www.bb.mof.go.jp/server/${fiscalYear}/html/${fiscalYear}${suffix}Main.html`;
+}
+
 /** 会計区分ごとの列名の違いを吸収する */
 function rowFields(row: CsvRow, accountType: MOFKouMokuAccountType, layout: Layout) {
   const subItemCodeCol = layout === 'settlement' ? '目番号' : accountType === 'agency' ? '目コード' : '目別分類コード';
@@ -146,9 +154,11 @@ function rowFields(row: CsvRow, accountType: MOFKouMokuAccountType, layout: Layo
 
 function extractStandard(
   rows: CsvRow[],
-  spec: DocumentSpec
+  spec: DocumentSpec,
+  fiscalYear: number
 ): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
   const col = amountColumn(rows);
+  const sourceUrl = documentUrl(fiscalYear, spec.suffix);
   return rows.map((row, i) => {
     const f = rowFields(row, spec.accountType, spec.layout);
     return {
@@ -163,13 +173,15 @@ function extractStandard(
       spent: null,
       carriedOver: null,
       unused: null,
+      sourceUrl,
     };
   });
 }
 
 function extractRevised(
   rows: CsvRow[],
-  spec: DocumentSpec
+  spec: DocumentSpec,
+  fiscalYear: number
 ): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
   if (rows.length === 0) return [];
   const headers = Object.keys(rows[0]);
@@ -177,6 +189,7 @@ function extractRevised(
   const colSettled = findColumn(headers, h => h.includes('成立予算額'));
   const colDiff = findColumn(headers, h => h.includes('差引額'));
   if (!colRevised) return [];
+  const sourceUrl = documentUrl(fiscalYear, spec.suffix);
   return rows.map((row, i) => {
     const f = rowFields(row, spec.accountType, spec.layout);
     return {
@@ -191,14 +204,17 @@ function extractRevised(
       spent: null,
       carriedOver: null,
       unused: null,
+      sourceUrl,
     };
   });
 }
 
 function extractSettlement(
   rows: CsvRow[],
-  spec: DocumentSpec
+  spec: DocumentSpec,
+  fiscalYear: number
 ): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
+  const sourceUrl = documentUrl(fiscalYear, spec.suffix);
   return rows.map((row, i) => {
     const f = rowFields(row, spec.accountType, spec.layout);
     // 決算の「歳出予算額」列は会計区分により語尾が違う（歳出/支出）
@@ -215,6 +231,7 @@ function extractSettlement(
       spent: yenAsIs(row, findColumn(Object.keys(row), h => /^(支出済歳出額|支出済額)\(円\)$/.test(h))),
       carriedOver: yenAsIs(row, '翌年度繰越額(円)'),
       unused: yenAsIs(row, '不用額(円)'),
+      sourceUrl,
     };
   });
 }
@@ -231,16 +248,17 @@ function generateYear(fiscalYear: number): void {
     const { expenditure } = readBudgetTables(fiscalYear, spec.suffix);
     const extracted =
       spec.layout === 'standard'
-        ? extractStandard(expenditure, spec)
+        ? extractStandard(expenditure, spec, fiscalYear)
         : spec.layout === 'revised'
-          ? extractRevised(expenditure, spec)
-          : extractSettlement(expenditure, spec);
+          ? extractRevised(expenditure, spec, fiscalYear)
+          : extractSettlement(expenditure, spec, fiscalYear);
     items.push(...extracted);
     documentSummaries.push({
       accountType: spec.accountType,
       budgetType: spec.budgetType,
       title: spec.title,
       count: extracted.length,
+      url: documentUrl(fiscalYear, spec.suffix),
     });
     console.log(`  ${spec.title}: ${extracted.length.toLocaleString()} 件`);
   }

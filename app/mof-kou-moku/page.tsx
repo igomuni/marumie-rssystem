@@ -526,7 +526,16 @@ export default function MOFKouMokuPage() {
             <ul className="mt-1 space-y-0.5">
               {data.metadata.documents.map(doc => (
                 <li key={`${doc.accountType}-${doc.budgetType}`}>
-                  {doc.title} — {doc.count.toLocaleString()} 件
+                  <a
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-neutral-700"
+                  >
+                    {doc.title}
+                  </a>
+                  {' — '}
+                  {doc.count.toLocaleString()} 件
                 </li>
               ))}
             </ul>

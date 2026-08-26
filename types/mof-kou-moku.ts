@@ -81,6 +81,14 @@ export interface MOFKouMokuItem {
   carriedOver: number | null;
   /** 不用額（円） */
   unused: number | null;
+  /**
+   * 出典帳票のURL（財務省 予算書データベースの当該帳票トップページ）。
+   * `/mof-jikou` の `sourceUrl` と違い、この帳票はWebページではなくZIP同梱CSVから
+   * 生成しているためページ番号までは特定できない（帳票単位のリンクに留まる）。
+   * 科目別内訳は事項別内訳と並列の同じ帳票ファミリーのWeb帳票としても公開されている
+   * （未スクレイピング。docs/tasks/参照）。
+   */
+  sourceUrl: string;
 }
 
 /** 集計の1要素 */
@@ -105,6 +113,8 @@ export interface MOFKouMokuData {
       budgetType: MOFBudgetType;
       title: string;
       count: number;
+      /** 出典帳票トップページのURL */
+      url: string;
     }>;
     unit: 'yen';
     generatedAt: string;
