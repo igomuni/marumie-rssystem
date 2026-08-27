@@ -108,6 +108,7 @@ function main() {
    * 再利用されることがあるため、budgetTypeを先頭に含めて衝突を避ける）。
    */
   const kouMokuByKey = new Map<string, MOFKouMokuItem>();
+  let keyCollisions = 0;
   for (const it of kouMokuItems) {
     const key =
       it.accountType === 'general'
@@ -120,7 +121,15 @@ function main() {
             norm(it.sectionName),
             norm(it.subItemName),
           ].join('|');
-    kouMokuByKey.set(key, it); // 同一キーの重複は無い前提（予算種別×項×目はCSVの主キー）
+    const existing = kouMokuByKey.get(key);
+    if (existing && (existing.sectionCode !== it.sectionCode || existing.subItemCode !== it.subItemCode)) {
+      keyCollisions++;
+      console.warn(`  ⚠ 突合キーの衝突（項・目コードが異なるのに名前一致キーが同じ）: ${key}`);
+    }
+    kouMokuByKey.set(key, it); // 同一キーが複数ある場合は最後の1件のみRS突合の対象になる
+  }
+  if (keyCollisions > 0) {
+    console.log(`  突合キー衝突: ${keyCollisions.toLocaleString()} 件（コード相違・要確認）`);
   }
 
   // 2. RS側: 事業マスタ + 歳出予算科目

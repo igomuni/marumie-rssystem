@@ -324,7 +324,19 @@ function main() {
       console.warn(`  ⚠ オーバーライドの予算事業IDが見つかりません: ${ov.pid}`);
       continue;
     }
-    addLink(ov.pid, jikou, 'confirmed', 'manual', false, rsProjectAmount.get(ov.pid) ?? 0, ov.note);
+    // 既存リンクがあれば structMatched・rsAmount（項スコープの額）を引き継ぐ。
+    // manualは常に最優先で既存レコードを上書きするため、無条件に false・事業全体額を
+    // 入れると自動突合で確認済みの値を失ってしまう。
+    const prior = linkMap.get(pairKey);
+    addLink(
+      ov.pid,
+      jikou,
+      'confirmed',
+      'manual',
+      prior?.structMatched ?? false,
+      prior?.rsAmount ?? rsProjectAmount.get(ov.pid) ?? 0,
+      ov.note
+    );
     applied++;
   }
   console.log(`  適用: ${applied} 件`);

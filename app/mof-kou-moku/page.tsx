@@ -81,6 +81,7 @@ export default function MOFKouMokuPage() {
   function changeYear(next: number) {
     setYear(next);
     setData(null);
+    setPage(1);
     setAccount('all');
     setBudgetType('');
     setMinistry('');
@@ -138,6 +139,8 @@ export default function MOFKouMokuPage() {
     }
     let cancelled = false;
     setLinkageLinks(null);
+    setLinkageAvailable(false);
+    setLinkageRsYear(null);
     setLinkageError(null);
     setLinkageLoading(true);
     fetch(`/api/mof-kou-moku/linkage?year=${linkageYear}`)

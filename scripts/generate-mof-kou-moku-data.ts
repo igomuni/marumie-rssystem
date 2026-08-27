@@ -283,6 +283,10 @@ function extractStandard(
   const col = amountColumn(rows);
   const documentId = `${fiscalYear}${spec.suffix}`;
   const sourceUrl = documentUrl(fiscalYear, spec.suffix);
+  // 暫定予算のCSVには前年度比較列が無い。列自体が無い場合はyen()の0円ではなくnull（未取得）にする
+  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const hasPreviousAmount = headers.includes('前年度予算額(千円)');
+  const hasDifference = headers.includes('比較増△減額(千円)');
   return rows.map((row, i) => {
     const f = rowFields(row, spec.accountType, spec.layout);
     return {
@@ -291,8 +295,8 @@ function extractStandard(
       budgetType: spec.budgetType,
       ...f,
       amount: yen(row, col),
-      previousAmount: yen(row, '前年度予算額(千円)'),
-      difference: yen(row, '比較増△減額(千円)'),
+      previousAmount: hasPreviousAmount ? yen(row, '前年度予算額(千円)') : null,
+      difference: hasDifference ? yen(row, '比較増△減額(千円)') : null,
       currentAmount: null,
       spent: null,
       carriedOver: null,
@@ -373,6 +377,10 @@ async function generateYear(fiscalYear: number): Promise<void> {
   console.log(`\n=== ${eraLabel}（${fiscalYear}） 科目別内訳 ===`);
 
   const documents = buildDocuments(fiscalYear);
+  if (documents.length === 0) {
+    console.warn(`  ⚠️  ${fiscalYear}年度はローカルにZIPがありません。スキップします。`);
+    return;
+  }
   const items: Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> = [];
   const documentSummaries: MOFKouMokuData['metadata']['documents'] = [];
 
