@@ -8,7 +8,7 @@
 
 import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
-import { allLinks, linkageAvailable, linkageRsYear } from '@/app/lib/api/mof-rs-kou-moku-linkage-loader';
+import { linkageRsYear, resolveLinks } from '@/app/lib/api/mof-rs-kou-moku-linkage-loader';
 
 /**
  * GET /api/mof-kou-moku/linkage
@@ -27,12 +27,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: `不正な year です: ${yearRaw}` }, { status: 400 });
     }
 
-    const available = linkageAvailable(year);
-    const links = available ? allLinks(year) : [];
-    const rsYear = linkageRsYear(year);
+    const resolution = resolveLinks(year);
+    const available = resolution.sourceBudgetYear !== null;
+    const rsYear = resolution.sourceBudgetYear !== null ? linkageRsYear(resolution.sourceBudgetYear) : null;
 
     return NextResponse.json(
-      { available, rsYear, links },
+      {
+        available,
+        rsYear,
+        links: resolution.links,
+        isCarriedOver: resolution.isCarriedOver,
+        sourceBudgetYear: resolution.sourceBudgetYear,
+      },
       { headers: { 'Cache-Control': API_CACHE_CONTROL } }
     );
   } catch (error) {
