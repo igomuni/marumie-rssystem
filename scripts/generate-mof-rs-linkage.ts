@@ -71,11 +71,14 @@ function jikouStem(name: string): string {
   return stem.length >= 4 ? stem : '';
 }
 
-/** 事項の年度横断識別子（key から予算種別を除いたものと同じ構成） */
+/**
+ * 事項の年度横断識別子（`app/lib/api/mof-jikou-loader.ts` の identityKey と同じ構成）。
+ * 所管（ministry）は含めない。共管の追加・解消で表記が変わることがあるため
+ * （例: 「内閣府及び厚生労働省」→「厚生労働省」、令和6→7年度）。
+ */
 function jikouIdentity(item: MOFJikouItem): string {
   return [
     item.accountType,
-    item.ministry,
     item.organization,
     item.specialAccount,
     item.subAccount,
