@@ -113,13 +113,13 @@ export function DataGrid<T>({
                   type="button"
                   onClick={() => toggleSort(col)}
                   disabled={!col.sortValue}
-                  className={`w-full px-2 py-1.5 ${
+                  className={`flex w-full items-center gap-0.5 overflow-hidden px-2 py-1.5 ${
                     col.sortValue ? 'hover:bg-neutral-200 dark:hover:bg-neutral-700' : 'cursor-default'
-                  } ${col.numeric ? 'text-right' : 'text-left'} ${active ? 'text-neutral-900 dark:text-neutral-100' : ''}`}
+                  } ${col.numeric ? 'justify-end' : 'justify-start'} ${active ? 'text-neutral-900 dark:text-neutral-100' : ''}`}
                 >
-                  <span className="truncate align-middle">{col.label}</span>
+                  <span className="min-w-0 truncate">{col.label}</span>
                   {col.sortValue && (
-                    <span className="ml-0.5 inline-block w-2 align-middle text-[9px]">
+                    <span className="w-2 shrink-0 text-[9px]">
                       {active ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                     </span>
                   )}
