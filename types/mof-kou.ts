@@ -33,6 +33,14 @@ export interface MOFKouSectionSummary {
   agency: string;
   sectionCode: string;
   sectionName: string;
+  /**
+   * 主要経費（金額最大のもの）。項と主要経費は1対1ではなく、複数の主要経費が
+   * 混在する項が実際にある（2024年度実測: kou-mokuで3,321項中302項）。
+   * `majorExpenseMixed` が true のときは、この項内で最大シェアの主要経費を代表値として示す。
+   */
+  majorExpenseName: string;
+  /** true のときこの項には2種類以上の主要経費が混在する（金額最大のものを majorExpenseName に採用） */
+  majorExpenseMixed: boolean;
   /** この項に属する事項（目的別内訳）の件数 */
   jikouCount: number;
   /** この項に属する目（性質別内訳）の件数 */
