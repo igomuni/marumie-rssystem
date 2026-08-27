@@ -53,6 +53,7 @@ export default function MOFKouPage() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selected, setSelected] = useState<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
+  const [panelWidth, setPanelWidth] = useState(420);
   const [detail, setDetail] = useState<MOFKouSectionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -487,6 +488,8 @@ export default function MOFKouPage() {
             linkageRsYear={data.metadata.linkage.rsYear}
             linkageIsCarriedOver={data.metadata.linkage.isCarriedOver}
             linkageSourceBudgetYear={data.metadata.linkage.sourceBudgetYear}
+            width={panelWidth}
+            onWidthChange={setPanelWidth}
           />
         )}
       </div>

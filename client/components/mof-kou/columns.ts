@@ -20,8 +20,6 @@ export type SortKey =
   | 'subAccount'
   | 'sectionCode'
   | 'sectionName'
-  | 'majorExpenseName'
-  | 'purposeName'
   | 'jikouCount'
   | 'kouMokuCount'
   | 'rsProjectCount'
@@ -52,19 +50,7 @@ export const COLUMNS: ColumnSpec[] = [
   },
   { key: 'subAccount', label: '勘定／業務', width: 110, note: '特別会計は勘定、政府関係機関は業務区分' },
   { key: 'sectionCode', label: '項', width: 48, note: '項コード（組織・勘定内の連番）' },
-  { key: 'sectionName', label: '項名', width: 190 },
-  {
-    key: 'majorExpenseName',
-    label: '主要経費',
-    width: 130,
-    note: '項と主要経費は1対1ではない（実測: 2024年度で項の1割弱が複数混在）。金額最大のものを代表値として表示',
-  },
-  {
-    key: 'purposeName',
-    label: '使途別',
-    width: 110,
-    note: '項と1対1ではない（主要経費と同様）。目にしか無い分類のため事項側からは算出していない。金額最大のものを代表値として表示',
-  },
+  { key: 'sectionName', label: '項名', width: 220 },
   { key: 'jikouCount', label: '事項数', width: 80, numeric: true, note: '目的別内訳（/mof-jikou）での件数' },
   { key: 'kouMokuCount', label: '目数', width: 72, numeric: true, note: '性質別内訳（/mof-kou-moku）での件数' },
   {

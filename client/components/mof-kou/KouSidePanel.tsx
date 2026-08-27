@@ -2,9 +2,11 @@
 
 /**
  * 項の詳細サイドパネル。行クリックで開く。タブで「年度推移・事項・目・RS」を切り替える。
+ * 各タブの一覧は列見出し付きのグリッド（DataGrid）で表示する。
  * データ取得（詳細・経年推移）はページ層の責務（client/components/ は API を直接叩かない）。
  */
 
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import { useState } from 'react';
 import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
@@ -25,6 +27,8 @@ interface Props {
   linkageRsYear: number | null;
   linkageIsCarriedOver: boolean;
   linkageSourceBudgetYear: number | null;
+  width: number;
+  onWidthChange: (width: number) => void;
 }
 
 const TABS: { key: Tab; label: string }[] = [
@@ -33,6 +37,9 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'koumoku', label: '目' },
   { key: 'rs', label: 'RS' },
 ];
+
+const MIN_WIDTH = 320;
+const MAX_WIDTH = 900;
 
 function rateClass(rate: number | null | 'new'): string {
   if (rate === null) return 'text-neutral-400';
@@ -54,12 +61,45 @@ export function KouSidePanel({
   linkageRsYear,
   linkageIsCarriedOver,
   linkageSourceBudgetYear,
+  width,
+  onWidthChange,
 }: Props) {
   const [tab, setTab] = useState<Tab>('history');
 
+  function startResize(event: ReactMouseEvent) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = width;
+    const onMove = (e: MouseEvent) => {
+      // パネルは画面右側に置くため、ハンドルを左へ引くほど広がる
+      const next = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth - (e.clientX - startX)));
+      onWidthChange(next);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+
   return (
-    <aside className="flex w-[26rem] shrink-0 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
-      <div className="shrink-0 border-b border-neutral-200 px-3 py-2 dark:border-neutral-800">
+    <aside
+      className="relative flex shrink-0 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+      style={{ width }}
+    >
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="サイドパネルの幅を変更"
+        onMouseDown={startResize}
+        className="absolute left-0 top-0 z-10 h-full w-1.5 cursor-col-resize hover:bg-neutral-400/60"
+      />
+      <div className="shrink-0 border-b border-neutral-200 px-3 py-2 pl-4 dark:border-neutral-800">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">{row.sectionName}</p>
@@ -83,7 +123,7 @@ export function KouSidePanel({
         </p>
       </div>
 
-      <div className="flex shrink-0 border-b border-neutral-200 text-xs dark:border-neutral-800">
+      <div className="flex shrink-0 border-b border-neutral-200 pl-1 text-xs dark:border-neutral-800">
         {TABS.map(t => (
           <button
             key={t.key}
@@ -104,10 +144,8 @@ export function KouSidePanel({
         ))}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-3 text-xs">
-        {tab === 'history' && (
-          <HistoryTab history={history} loading={historyLoading} error={historyError} />
-        )}
+      <div className="min-h-0 flex-1 overflow-auto pl-1 text-xs">
+        {tab === 'history' && <HistoryTab history={history} loading={historyLoading} error={historyError} />}
         {tab === 'jikou' && <JikouTab detail={detail} loading={detailLoading} error={detailError} />}
         {tab === 'koumoku' && <KouMokuTab detail={detail} loading={detailLoading} error={detailError} />}
         {tab === 'rs' && (
@@ -125,6 +163,11 @@ export function KouSidePanel({
   );
 }
 
+/** タブ共通のグリッド見出しスタイル */
+const gridHeadClass = 'sticky top-0 z-10 bg-neutral-50 text-left text-[11px] font-medium text-neutral-400 dark:bg-neutral-900';
+const gridCellClass = 'truncate px-2 py-1.5';
+const gridRowClass = 'border-t border-neutral-100 hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900';
+
 function HistoryTab({
   history,
   loading,
@@ -134,8 +177,8 @@ function HistoryTab({
   loading: boolean;
   error: string | null;
 }) {
-  if (error) return <p className="text-red-600">推移の取得に失敗しました: {error}</p>;
-  if (loading || !history) return <p className="text-neutral-400">読み込み中…</p>;
+  if (error) return <p className="p-3 text-red-600">推移の取得に失敗しました: {error}</p>;
+  if (loading || !history) return <p className="p-3 text-neutral-400">読み込み中…</p>;
 
   const flatRows = history.years.flatMap(y =>
     y.rows.map(r => ({ fiscalYear: y.fiscalYear, eraLabel: y.eraLabel, row: r }))
@@ -143,38 +186,38 @@ function HistoryTab({
 
   return (
     <div>
-      <div className="mb-1.5 text-[11px] font-medium text-neutral-400">
+      <div className="px-2 pb-1 pt-2 text-[11px] font-medium text-neutral-400">
         年度推移（{history.years.length} / {history.availableYears.length} 年度に計上）
       </div>
       {flatRows.length === 0 ? (
-        <p className="text-neutral-400">推移データがありません。</p>
+        <p className="px-2 pb-2 text-neutral-400">推移データがありません。</p>
       ) : (
         <table className="w-full border-collapse text-[11px]">
-          <thead className="text-neutral-400">
+          <thead className={gridHeadClass}>
             <tr>
-              <th className="whitespace-nowrap px-1.5 py-1 text-left font-medium">年度</th>
-              <th className="whitespace-nowrap px-1.5 py-1 text-left font-medium">予算種別</th>
-              <th className="whitespace-nowrap px-1.5 py-1 text-right font-medium">事項</th>
-              <th className="whitespace-nowrap px-1.5 py-1 text-right font-medium">目</th>
-              <th className="whitespace-nowrap px-1.5 py-1 text-right font-medium">RS</th>
-              <th className="whitespace-nowrap px-1.5 py-1 text-right font-medium">本年度額</th>
-              <th className="whitespace-nowrap px-1.5 py-1 text-right font-medium">増減率</th>
+              <th className={gridCellClass}>年度</th>
+              <th className={gridCellClass}>予算種別</th>
+              <th className={`${gridCellClass} text-right`}>事項</th>
+              <th className={`${gridCellClass} text-right`}>目</th>
+              <th className={`${gridCellClass} text-right`}>RS</th>
+              <th className={`${gridCellClass} text-right`}>本年度額</th>
+              <th className={`${gridCellClass} text-right`}>増減率</th>
             </tr>
           </thead>
           <tbody className="text-neutral-600 dark:text-neutral-400">
             {flatRows.map(({ fiscalYear, eraLabel, row }) => {
               const rate = changeRate(row.amount, row.previousAmount);
               return (
-                <tr key={`${fiscalYear}-${row.budgetType}`} className="border-t border-neutral-200 dark:border-neutral-800">
-                  <td className="whitespace-nowrap px-1.5 py-1">{eraLabel}</td>
-                  <td className="whitespace-nowrap px-1.5 py-1">{row.budgetType}</td>
-                  <td className="whitespace-nowrap px-1.5 py-1 text-right tabular-nums">{row.jikouCount}</td>
-                  <td className="whitespace-nowrap px-1.5 py-1 text-right tabular-nums">{row.kouMokuCount}</td>
-                  <td className="whitespace-nowrap px-1.5 py-1 text-right tabular-nums">{row.rsProjectCount || '—'}</td>
-                  <td className="whitespace-nowrap px-1.5 py-1 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
+                <tr key={`${fiscalYear}-${row.budgetType}`} className={gridRowClass}>
+                  <td className={gridCellClass}>{eraLabel}</td>
+                  <td className={gridCellClass}>{row.budgetType}</td>
+                  <td className={`${gridCellClass} text-right tabular-nums`}>{row.jikouCount}</td>
+                  <td className={`${gridCellClass} text-right tabular-nums`}>{row.kouMokuCount}</td>
+                  <td className={`${gridCellClass} text-right tabular-nums`}>{row.rsProjectCount || '—'}</td>
+                  <td className={`${gridCellClass} text-right tabular-nums text-neutral-900 dark:text-neutral-100`}>
                     {formatYen(row.amount)}
                   </td>
-                  <td className={`whitespace-nowrap px-1.5 py-1 text-right tabular-nums ${rateClass(rate)}`}>
+                  <td className={`${gridCellClass} text-right tabular-nums ${rateClass(rate)}`}>
                     {formatChangeRate(rate)}
                   </td>
                 </tr>
@@ -184,7 +227,7 @@ function HistoryTab({
         </table>
       )}
       {history.years.length < history.availableYears.length && (
-        <p className="mt-1.5 text-neutral-400">
+        <p className="px-2 pb-2 pt-1.5 text-neutral-400">
           計上のない年度は行がありません。所管表記の変更や項コードの振り直しがあると、実態としては継続でも別の項として扱われ欠けて見えることがあります。
         </p>
       )}
@@ -201,27 +244,50 @@ function JikouTab({
   loading: boolean;
   error: string | null;
 }) {
-  if (error) return <p className="text-red-600">取得に失敗しました: {error}</p>;
-  if (loading || !detail) return <p className="text-neutral-400">読み込み中…</p>;
-  if (detail.jikouItems.length === 0) return <p className="text-neutral-400">この項に事項はありません。</p>;
+  if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
+  if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+  if (detail.jikouItems.length === 0) return <p className="p-3 text-neutral-400">この項に事項はありません。</p>;
   return (
-    <ul className="space-y-1.5">
-      {[...detail.jikouItems]
-        .sort((a, b) => b.amount - a.amount)
-        .map(it => (
-          <li key={it.id} className="flex items-start justify-between gap-2">
-            <a
-              href={it.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
-            >
-              {it.name}
-            </a>
-            <span className="shrink-0 tabular-nums text-neutral-400">{formatYen(it.amount)}</span>
-          </li>
-        ))}
-    </ul>
+    <table className="w-full border-collapse text-[11px]">
+      <thead className={gridHeadClass}>
+        <tr>
+          <th className={gridCellClass}>事項名</th>
+          <th className={gridCellClass}>主要経費</th>
+          <th className={`${gridCellClass} text-right`}>本年度額</th>
+          <th className={`${gridCellClass} text-right`}>前年度額</th>
+          <th className={`${gridCellClass} text-right`}>増減率</th>
+        </tr>
+      </thead>
+      <tbody className="text-neutral-600 dark:text-neutral-400">
+        {[...detail.jikouItems]
+          .sort((a, b) => b.amount - a.amount)
+          .map(it => {
+            const rate = changeRate(it.amount, it.previousAmount);
+            return (
+              <tr key={it.id} className={gridRowClass}>
+                <td className={gridCellClass}>
+                  <a
+                    href={it.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+                  >
+                    {it.name}
+                  </a>
+                </td>
+                <td className={gridCellClass}>{it.majorExpenseName || '—'}</td>
+                <td className={`${gridCellClass} text-right tabular-nums text-neutral-900 dark:text-neutral-100`}>
+                  {formatYen(it.amount)}
+                </td>
+                <td className={`${gridCellClass} text-right tabular-nums`}>{formatYen(it.previousAmount)}</td>
+                <td className={`${gridCellClass} text-right tabular-nums ${rateClass(rate)}`}>
+                  {formatChangeRate(rate)}
+                </td>
+              </tr>
+            );
+          })}
+      </tbody>
+    </table>
   );
 }
 
@@ -234,27 +300,52 @@ function KouMokuTab({
   loading: boolean;
   error: string | null;
 }) {
-  if (error) return <p className="text-red-600">取得に失敗しました: {error}</p>;
-  if (loading || !detail) return <p className="text-neutral-400">読み込み中…</p>;
-  if (detail.kouMokuItems.length === 0) return <p className="text-neutral-400">この項に目はありません。</p>;
+  if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
+  if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+  if (detail.kouMokuItems.length === 0) return <p className="p-3 text-neutral-400">この項に目はありません。</p>;
   return (
-    <ul className="space-y-1.5">
-      {[...detail.kouMokuItems]
-        .sort((a, b) => b.amount - a.amount)
-        .map(it => (
-          <li key={it.id} className="flex items-start justify-between gap-2">
-            <a
-              href={it.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
-            >
-              {it.subItemName}
-            </a>
-            <span className="shrink-0 tabular-nums text-neutral-400">{formatYen(it.amount)}</span>
-          </li>
-        ))}
-    </ul>
+    <table className="w-full border-collapse text-[11px]">
+      <thead className={gridHeadClass}>
+        <tr>
+          <th className={gridCellClass}>目名</th>
+          <th className={gridCellClass}>主要経費</th>
+          <th className={gridCellClass}>使途別</th>
+          <th className={`${gridCellClass} text-right`}>本年度額</th>
+          <th className={`${gridCellClass} text-right`}>前年度額</th>
+          <th className={`${gridCellClass} text-right`}>増減率</th>
+        </tr>
+      </thead>
+      <tbody className="text-neutral-600 dark:text-neutral-400">
+        {[...detail.kouMokuItems]
+          .sort((a, b) => b.amount - a.amount)
+          .map(it => {
+            const rate = changeRate(it.amount, it.previousAmount);
+            return (
+              <tr key={it.id} className={gridRowClass}>
+                <td className={gridCellClass}>
+                  <a
+                    href={it.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+                  >
+                    {it.subItemName}
+                  </a>
+                </td>
+                <td className={gridCellClass}>{it.majorExpenseName || '—'}</td>
+                <td className={gridCellClass}>{it.purposeName || '—'}</td>
+                <td className={`${gridCellClass} text-right tabular-nums text-neutral-900 dark:text-neutral-100`}>
+                  {formatYen(it.amount)}
+                </td>
+                <td className={`${gridCellClass} text-right tabular-nums`}>{formatYen(it.previousAmount)}</td>
+                <td className={`${gridCellClass} text-right tabular-nums ${rateClass(rate)}`}>
+                  {formatChangeRate(rate)}
+                </td>
+              </tr>
+            );
+          })}
+      </tbody>
+    </table>
   );
 }
 
@@ -273,46 +364,56 @@ function RsTab({
   linkageIsCarriedOver: boolean;
   linkageSourceBudgetYear: number | null;
 }) {
-  if (error) return <p className="text-red-600">取得に失敗しました: {error}</p>;
-  if (loading || !detail) return <p className="text-neutral-400">読み込み中…</p>;
+  if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
+  if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
   if (detail.rsLinks.length === 0) {
-    return <p className="text-neutral-400">紐づく RS 事業は見つかりませんでした。</p>;
+    return <p className="p-3 text-neutral-400">紐づく RS 事業は見つかりませんでした。</p>;
   }
   return (
     <div>
       {linkageIsCarriedOver && (
-        <p className="mb-2 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+        <p className="mx-2 mt-2 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
           この年度自体のRS紐づけデータはまだ無いため、{linkageSourceBudgetYear}
           年度時点の紐づけを識別子で参考表示しています。
         </p>
       )}
-      <ul className="space-y-1.5">
-        {[...detail.rsLinks]
-          .sort((a, b) => b.rsAmount - a.rsAmount)
-          .map(l => (
-            <li key={`${l.projectId}-${l.kouMokuKey}`} className="flex items-start justify-between gap-2">
-              <span className="min-w-0">
-                {linkageRsYear !== null ? (
-                  <a
-                    href={sankeySvgProjectUrl(l.projectId, l.projectName, linkageRsYear)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
-                  >
-                    {l.projectName}
-                  </a>
-                ) : (
-                  <span className="text-neutral-700 dark:text-neutral-300">{l.projectName}</span>
-                )}
-                <span className="block text-[10px] text-neutral-400">{l.subItemName}</span>
-              </span>
-              <span className="shrink-0 tabular-nums text-neutral-400">
-                {formatYen(l.rsAmount)}
-                {l.carriedOverFrom ? `（${l.carriedOverFrom}）` : ''}
-              </span>
-            </li>
-          ))}
-      </ul>
+      <table className="w-full border-collapse text-[11px]">
+        <thead className={gridHeadClass}>
+          <tr>
+            <th className={gridCellClass}>事業名</th>
+            <th className={gridCellClass}>目名</th>
+            <th className={`${gridCellClass} text-right`}>RS計上額</th>
+            <th className={gridCellClass}>引継ぎ</th>
+          </tr>
+        </thead>
+        <tbody className="text-neutral-600 dark:text-neutral-400">
+          {[...detail.rsLinks]
+            .sort((a, b) => b.rsAmount - a.rsAmount)
+            .map(l => (
+              <tr key={`${l.projectId}-${l.kouMokuKey}`} className={gridRowClass}>
+                <td className={gridCellClass}>
+                  {linkageRsYear !== null ? (
+                    <a
+                      href={sankeySvgProjectUrl(l.projectId, l.projectName, linkageRsYear)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+                    >
+                      {l.projectName}
+                    </a>
+                  ) : (
+                    l.projectName
+                  )}
+                </td>
+                <td className={gridCellClass}>{l.subItemName}</td>
+                <td className={`${gridCellClass} text-right tabular-nums text-neutral-900 dark:text-neutral-100`}>
+                  {formatYen(l.rsAmount)}
+                </td>
+                <td className={gridCellClass}>{l.carriedOverFrom || '—'}</td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
     </div>
   );
 }
