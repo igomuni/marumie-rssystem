@@ -458,13 +458,6 @@ export default function MOFKouPage() {
         )}
       </section>
 
-      {data.metadata.linkage.isCarriedOver && (
-        <div className="mx-3 mb-2 shrink-0 rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-          この年度自体のRS紐づけデータはまだ無いため、{data.metadata.linkage.sourceBudgetYear}
-          年度時点の紐づけを識別子（項・目コード等）で参考表示しています。
-        </div>
-      )}
-
       <div className="flex min-h-0 flex-1 gap-3 px-3 pb-3">
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
           <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
