@@ -1,13 +1,12 @@
 /**
- * 事項一覧の列定義と並べ替えロジック。
- * ページ側は状態管理とレイアウトに専念させ、表の構造はここに閉じる。
+ * 科目別内訳（項・目）一覧の列定義と並べ替えロジック。
+ * `/mof-jikou` の columns.ts と同じ構成。ページ側は状態管理とレイアウトに専念させる。
  */
 
-import type { MOFAccountType, MOFJikouItem } from '@/types/mof-jikou';
-import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
-import { changeRate, executionRate } from './format';
+import type { MOFKouMokuAccountType, MOFKouMokuItem } from '@/types/mof-kou-moku';
+import { changeRate, executionRate } from '@/client/components/mof-jikou/format';
 
-export const ACCOUNT_LABEL: Record<MOFAccountType, string> = {
+export const ACCOUNT_LABEL: Record<MOFKouMokuAccountType, string> = {
   general: '一般会計',
   special: '特別会計',
   agency: '政府関係機関',
@@ -23,7 +22,9 @@ export type SortKey =
   | 'sectionCode'
   | 'sectionName'
   | 'majorExpenseName'
-  | 'name'
+  | 'subItemCode'
+  | 'subItemName'
+  | 'purposeName'
   | 'amount'
   | 'previousAmount'
   | 'difference'
@@ -38,9 +39,7 @@ export type SortDir = 'asc' | 'desc';
 export interface ColumnSpec {
   key: SortKey;
   label: string;
-  /** 既定の列幅（px）。table-fixed なのでソートで中身が変わっても幅は動かない */
   width: number;
-  /** 数値列は右寄せ・降順スタート */
   numeric?: boolean;
   note?: string;
 }
@@ -48,30 +47,32 @@ export interface ColumnSpec {
 export const COLUMNS: ColumnSpec[] = [
   { key: 'budgetType', label: '予算種別', width: 124 },
   { key: 'accountType', label: '会計区分', width: 92 },
-  { key: 'ministry', label: '所管', width: 150 },
+  { key: 'ministry', label: '所管', width: 150, note: '政府関係機関の帳票には所管の欄が無い' },
   {
     key: 'organization',
-    label: '組織／特会',
+    label: '組織／特会／機関',
     width: 160,
-    note: '一般会計は組織、特別会計は会計名、政府関係機関は機関名',
+    note: '一般会計は組織、特別会計は特別会計名、政府関係機関は機関名',
   },
-  { key: 'subAccount', label: '勘定／業務', width: 130 },
+  { key: 'subAccount', label: '勘定／業務', width: 110, note: '特別会計は勘定、政府関係機関は業務区分' },
   { key: 'sectionCode', label: '項', width: 48, note: '項コード（組織・勘定内の連番）' },
   { key: 'sectionName', label: '項名', width: 190 },
   {
     key: 'majorExpenseName',
     label: '主要経費',
-    width: 130,
-    note: '政府関係機関の帳票には主要経費の列が無い',
+    width: 120,
+    note: '特別会計・政府関係機関の帳票には無いことがある',
   },
-  { key: 'name', label: '事項名', width: 340 },
-  { key: 'amount', label: '本年度額', width: 100, numeric: true },
+  { key: 'subItemCode', label: '目コード', width: 64 },
+  { key: 'subItemName', label: '目名', width: 220, note: '支出の性質による分類（事項＝目的による分類とは別系統）' },
+  { key: 'purposeName', label: '使途別', width: 110 },
+  { key: 'amount', label: '本年度額', width: 100, numeric: true, note: '補正は改予算額、決算は歳出予算額' },
   {
     key: 'previousAmount',
     label: '比較対象額',
     width: 100,
     numeric: true,
-    note: '当初は前年度予算額、補正は補正前の成立予算額、暫定は欄なし',
+    note: '当初・暫定は前年度予算額、補正は補正前の成立予算額、決算は欄なし',
   },
   { key: 'difference', label: '増減額', width: 100, numeric: true },
   { key: 'rate', label: '増減率', width: 84, numeric: true },
@@ -90,7 +91,7 @@ export const COLUMNS: ColumnSpec[] = [
     label: '執行率',
     width: 78,
     numeric: true,
-    note: '支出済歳出額 ÷ 歳出予算現額（決算のみ）',
+    note: '支出済 ÷ 歳出予算現額（決算のみ）',
   },
 ];
 
@@ -101,15 +102,14 @@ export const DEFAULT_WIDTHS: Record<string, number> = Object.fromEntries(
 /** リサイズで潰しすぎないための下限 */
 export const MIN_COLUMN_WIDTH = 40;
 
-/** 一般会計は組織、特別会計は会計名、政府関係機関は機関名 */
-export function orgColumn(item: MOFJikouItem): string {
+/** 一般会計は組織、特別会計は特別会計名、政府関係機関は機関名 */
+export function orgColumn(item: MOFKouMokuItem): string {
   if (item.accountType === 'general') return item.organization;
   if (item.accountType === 'special') return item.specialAccount;
   return item.agency;
 }
 
-/** ソート用の値を取り出す。sectionCode の数値化は sortItems 側で判定する */
-function sortValue(item: MOFJikouItem, key: SortKey): string | number | null {
+function sortValue(item: MOFKouMokuItem, key: SortKey): string | number | null {
   switch (key) {
     case 'accountType':
       return ACCOUNT_LABEL[item.accountType];
@@ -128,18 +128,10 @@ function sortValue(item: MOFJikouItem, key: SortKey): string | number | null {
 
 /**
  * 並べ替え。渡された配列を破壊的にソートして返す。
- *
- * 項コードは会計により2桁/3桁が混在するため、対象がすべて数字のときだけ数値比較にする
- * （文字列比較だと "01" と "001" のようなゼロ埋めの差で順序が崩れる）。
- * null（該当欄が無い帳票）は方向によらず末尾へ送る。
+ * 項コードは会計により2桁/3桁が混在するため、対象がすべて数字のときだけ数値比較にする。
  */
-export function sortItems(
-  rows: MOFJikouItem[],
-  sortKey: SortKey,
-  sortDir: SortDir
-): MOFJikouItem[] {
-  const numericSectionCode =
-    sortKey === 'sectionCode' && rows.every(r => /^\d+$/.test(r.sectionCode));
+export function sortItems(rows: MOFKouMokuItem[], sortKey: SortKey, sortDir: SortDir): MOFKouMokuItem[] {
+  const numericSectionCode = sortKey === 'sectionCode' && rows.every(r => /^\d+$/.test(r.sectionCode));
   const factor = sortDir === 'asc' ? 1 : -1;
   return rows.sort((a, b) => {
     const va = numericSectionCode ? Number(a.sectionCode) : sortValue(a, sortKey);
@@ -157,30 +149,8 @@ export function defaultDirFor(column: ColumnSpec): SortDir {
   return column.numeric ? 'desc' : 'asc';
 }
 
-/**
- * 事項の年度横断識別子。予算種別を除いた8要素の連結で、
- * `MofRsLinkageRecord.jikouIdentity`（scripts/generate-mof-rs-linkage.ts の `jikouIdentity()`、
- * app/lib/api/mof-jikou-loader.ts の `identityKey()`）と同じ構成にすること。
- * このファイルは client 側なので、fs に依存する mof-jikou-loader は import できず重複させている。
- */
-export function identityFromItem(item: MOFJikouItem): string {
-  return [
-    item.accountType,
-    item.ministry,
-    item.organization,
-    item.specialAccount,
-    item.subAccount,
-    item.agency,
-    item.sectionCode,
-    item.name,
-  ].join('|');
-}
-
-/** 複数リンクがある場合に列・詳細パネルの代表として使う1件（confirmed優先・金額降順） */
-export function bestLink(links: MofRsLinkageRecord[]): MofRsLinkageRecord | null {
+/** 複数リンクがある場合に列・詳細パネルの代表として使う1件（金額降順） */
+export function bestLink<T extends { rsAmount: number }>(links: T[]): T | null {
   if (links.length === 0) return null;
-  return [...links].sort((a, b) => {
-    if (a.status !== b.status) return a.status === 'confirmed' ? -1 : 1;
-    return b.rsAmount - a.rsAmount;
-  })[0];
+  return [...links].sort((a, b) => b.rsAmount - a.rsAmount)[0];
 }

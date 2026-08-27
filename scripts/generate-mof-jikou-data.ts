@@ -24,6 +24,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { MAJOR_EXPENSE as MOF_MAJOR_EXPENSE } from '@/scripts/mof-major-expense';
 import {
   MOF_REVISION_NUMBERS,
   revisedBudgetType,
@@ -134,47 +135,7 @@ function revisedDocuments(): DocumentSpec[] {
   return specs;
 }
 
-/** 主要経費別分類コード表（docs/mof-budget-data-guide.md 4-2節） */
-const MAJOR_EXPENSE: Record<string, string> = {
-  '01': '社会保障関係費',
-  '02': '年金給付費',
-  '03': '医療給付費',
-  '04': '介護給付費',
-  '05': '少子化対策費',
-  '06': '生活扶助等社会福祉費',
-  '07': '保健衛生対策費',
-  '08': '雇用労災対策費',
-  '10': '文教及び科学振興費',
-  '11': '義務教育費国庫負担金',
-  '13': '科学技術振興費',
-  '14': '文教施設費',
-  '15': '教育振興助成費',
-  '16': '育英事業費',
-  '20': '国債費',
-  '25': '恩給関係費',
-  '31': '地方交付税交付金',
-  '32': '地方特例交付金',
-  '33': '地方譲与税譲与金',
-  '35': '防衛関係費',
-  '40': '公共事業関係費',
-  '41': '治山治水対策事業費',
-  '42': '道路整備事業費',
-  '43': '港湾空港鉄道等整備事業費',
-  '44': '住宅都市環境整備事業費',
-  '45': '公園水道廃棄物処理等施設整備費',
-  '46': '農林水産基盤整備事業費',
-  '47': '社会資本総合整備事業費',
-  '48': '推進費等',
-  '49': '災害復旧等事業費',
-  '50': '経済協力費',
-  '60': '中小企業対策費',
-  '63': 'エネルギー対策費',
-  '65': '食料安定供給関係費',
-  '95': 'その他の事項経費',
-  '96': '中東情勢等対応予備費', // 令和8年度補正予算（第1号）で追加
-  '97': '復興加速化・福島再生予備費',
-  '98': '予備費',
-};
+const MAJOR_EXPENSE = MOF_MAJOR_EXPENSE;
 
 /**
  * 金額列の見出しに現れる年度表記。
@@ -189,205 +150,41 @@ function toEraLabel(fiscalYear: number): string {
   return `令和${fiscalYear - 2018}年度`;
 }
 
-/** 1リクエストの上限。応答が止まったまま生成コマンドが固まるのを防ぐ */
-const FETCH_TIMEOUT_MS = 30_000;
+/**
+ * ネットワーク取得・キャッシュ・XMLテーブル復元は scripts/mof-budget-xml.ts に集約されている
+ * （generate-mof-kou-moku-data.ts の科目別内訳ページ特定と共用するため）。
+ */
+import {
+  createThrottle,
+  extractXmlNames,
+  fetchText as fetchTextRaw,
+  HttpError,
+  isServerReachable as isServerReachableRaw,
+  listTitle,
+  numberAt,
+  parseTable,
+  SENTINEL_URL,
+  splitRunningTitle,
+  subAt,
+  textAt,
+  type ParsedRow,
+} from '@/scripts/mof-budget-xml';
 
 /**
  * 連続取得の間隔。1年度あたり250ページ超を取りに行くので、
  * 間を空けないと配信側に一時的に弾かれる（実測で 404 が返るようになった）。
- * キャッシュが効いている場合は待たない。
- *
  * 300ms では複数年度を続けて回すと数分でブロックされた（2026-08 実測）ため 1 秒にしている。
  */
 const FETCH_INTERVAL_MS = 1_000;
-
-/**
- * ブロック判定に使う常設ページ。帳票と無関係に常に 200 を返す。
- */
-const SENTINEL_URL = 'https://www.bb.mof.go.jp/hdocs/bxsselect.html';
-let lastFetchAt = 0;
-
-async function throttle(): Promise<void> {
-  const wait = lastFetchAt + FETCH_INTERVAL_MS - Date.now();
-  if (wait > 0) await new Promise(resolve => setTimeout(resolve, wait));
-  lastFetchAt = Date.now();
-}
-
-/** HTTP エラー。ステータスで「帳票が無い(404)」と障害を区別するために持つ */
-class HttpError extends Error {
-  constructor(readonly status: number, url: string) {
-    super(`HTTP ${status}: ${url}`);
-    this.name = 'HttpError';
-  }
-}
-
-/**
- * 配信側が生きているかを確かめる。
- *
- * このサーバは過剰なアクセスを 429 ではなく 404 で弾く。404 をそのまま「帳票なし」と
- * 解釈すると、ブロックされている間は全帳票が欠番に見え、空の JSON が正常終了で出力される。
- * 本当の欠番と区別するために、常設ページを引けるかどうかで判定する。
- */
-async function isServerReachable(): Promise<boolean> {
-  await throttle();
-  try {
-    const res = await fetch(SENTINEL_URL, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
+const throttle = createThrottle(FETCH_INTERVAL_MS);
 
 /** 指定エンコーディングでテキストを取得する（XMLはキャッシュする） */
-async function fetchText(
-  ctx: YearContext,
-  url: string,
-  encoding: string,
-  cacheName?: string
-): Promise<string> {
-  if (cacheName) {
-    const cached = path.join(ctx.cacheDir, cacheName);
-    if (fs.existsSync(cached)) {
-      return new TextDecoder(encoding).decode(fs.readFileSync(cached));
-    }
-  }
-  await throttle();
-  const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
-  if (!res.ok) throw new HttpError(res.status, url);
-  const buf = Buffer.from(await res.arrayBuffer());
-  if (cacheName) {
-    fs.mkdirSync(ctx.cacheDir, { recursive: true });
-    fs.writeFileSync(path.join(ctx.cacheDir, cacheName), buf);
-  }
-  return new TextDecoder(encoding).decode(buf);
+async function fetchText(ctx: YearContext, url: string, encoding: string, cacheName?: string): Promise<string> {
+  return fetchTextRaw(ctx.cacheDir, url, encoding, throttle, cacheName);
 }
 
-/**
- * 目次 HTML（EUC-JP）から XML ファイル名を抽出する。
- * 目次は LineOut(階層, 子有無, 表題, リンク, 頁) を並べた JavaScript。
- * ここでは絞り込まず全リンクを返し、帳票の判別は XML の中身で行う
- * （一般会計では事項別内訳ページの目次表題が組織名になっており、表題では絞れない）。
- */
-function extractXmlNames(menuHtml: string): string[] {
-  const names = new Set<string>();
-  const re = /LineOut\(\d+,\d+,"(?:.*?)","(.*?)","(?:.*?)"\)/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(menuHtml)) !== null) {
-    const link = m[1].split('#')[0];
-    // リンクはリモートの HTML 由来。そのままキャッシュのファイル名にすると
-    // "../../outside.xml" のような値で cacheDir の外を読み書きできてしまうため、
-    // ディレクトリ要素を含まない予算書のファイル名だけを通す。
-    if (/^\d{9}[0-9a-z]*\.xml$/.test(link)) names.add(link);
-  }
-  return [...names];
-}
-
-/**
- * 表の1行。同じ列に複数のセルが現れうるため配列で持つ。
- * sub は clm の id 末尾の列内連番で、補正予算では階層（項=1 / 事項=2）を表す。
- */
-interface Cell {
-  sub: number;
-  text: string;
-}
-
-interface ParsedRow {
-  page: number;
-  row: number;
-  cols: Map<number, Cell[]>;
-}
-
-/** CDATA を連結してセルのテキストを得る（原文の折り返しごとに l 要素が分かれる） */
-function cellText(body: string): string {
-  return [...body.matchAll(/CDATA\[([\s\S]*?)\]\]/g)].map(m => m[1]).join('');
-}
-
-/**
- * 本文 XML を表として復元する。
- *
- * セルは clm 要素の id="p{頁}-{行}.{行内連番}-{列}.{列内連番}" から位置が復元でき、
- * XSL を適用しなくても表を組み立てられる。
- *
- * 同じ (頁,行,列) に複数のセルが現れることがある（折り返し・「うち」書き）。
- * テキスト列は連結しないと名前が途中で切れるが、金額列を連結すると別の金額と
- * 繋がって桁が壊れる。そのため値は配列のまま保持し、textAt()（連結）と
- * numberAt()（先頭のみ）で使い分ける。
- */
-function parseTable(xml: string): { rows: ParsedRow[]; headerCols: Map<string, number> } {
-  const rowMap = new Map<string, ParsedRow>();
-  const re = /<clm id="p(\d+)-(\d+)\.(\d+)-(\d+)\.(\d+)">([\s\S]*?)<\/clm>/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(xml)) !== null) {
-    const page = parseInt(m[1], 10);
-    const row = parseInt(m[2], 10);
-    const col = parseInt(m[4], 10);
-    const key = `${page}:${row}`;
-    let entry = rowMap.get(key);
-    if (!entry) {
-      entry = { page, row, cols: new Map() };
-      rowMap.set(key, entry);
-    }
-    const cell: Cell = { sub: parseInt(m[5], 10), text: cellText(m[6]) };
-    const values = entry.cols.get(col);
-    if (values) values.push(cell);
-    else entry.cols.set(col, [cell]);
-  }
-  const rows = [...rowMap.values()].sort((a, b) => a.page - b.page || a.row - b.row);
-
-  // ヘッダ行の列位置（見出し文字列 -> 列番号）
-  const headerCols = new Map<string, number>();
-  const headerMatch = xml.match(/<header>([\s\S]*?)<\/header>/);
-  if (headerMatch) {
-    const hre = /<clm id="p\d+-\d+\.\d+-(\d+)\.\d+">([\s\S]*?)<\/clm>/g;
-    let h: RegExpExecArray | null;
-    while ((h = hre.exec(headerMatch[1])) !== null) {
-      const label = cellText(h[2]).trim();
-      if (label && !headerCols.has(label)) headerCols.set(label, parseInt(h[1], 10));
-    }
-  }
-  return { rows, headerCols };
-}
-
-/** テキストとして読む（同一セルの複数候補を連結） */
-function textAt(row: ParsedRow, col: number | undefined): string {
-  if (col === undefined) return '';
-  return (row.cols.get(col) ?? []).map(c => c.text).join('').trim();
-}
-
-/** そのセルの列内連番。補正予算では階層（項=1 / 事項=2）を表す */
-function subAt(row: ParsedRow, col: number): number | null {
-  return (row.cols.get(col) ?? [])[0]?.sub ?? null;
-}
-
-/**
- * 金額として読む（先頭の候補のみ。連結すると桁が壊れる）。
- * scale は帳票の単位を円に直す倍率（予算書は千円単位なので 1000、決算書は 1）。
- */
-function numberAt(row: ParsedRow, col: number | undefined, scale: number): number | null {
-  if (col === undefined) return null;
-  const first = (row.cols.get(col) ?? [])[0]?.text.trim() ?? '';
-  const negative = first.includes('△');
-  const digits = first.replace(/[△\s,]/g, '');
-  if (!/^\d+$/.test(digits)) return null;
-  const value = parseInt(digits, 10) * scale;
-  return negative ? -value : value;
-}
-
-/** running_title「内閣府所管  内閣本府」を階層に分解する */
-function splitRunningTitle(xml: string): string[] {
-  const m = xml.match(/<running_title>\s*<!\[CDATA\[([\s\S]*?)\]\]>/);
-  if (!m) return [];
-  return m[1]
-    .trim()
-    .split(/[ \t　]{2,}|　/)
-    .map(s => s.trim())
-    .filter(Boolean);
-}
-
-/** title_for_list を取り出す（帳票の判別に使う） */
-function listTitle(xml: string): string {
-  const m = xml.match(/<title_for_list>\s*<!\[CDATA\[([\s\S]*?)\]\]>/);
-  return m ? m[1].trim() : '';
+async function isServerReachable(): Promise<boolean> {
+  return isServerReachableRaw(throttle);
 }
 
 interface Scope {
