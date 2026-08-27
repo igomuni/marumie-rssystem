@@ -41,6 +41,13 @@ export interface MOFKouSectionSummary {
   majorExpenseName: string;
   /** true のときこの項には2種類以上の主要経費が混在する（金額最大のものを majorExpenseName に採用） */
   majorExpenseMixed: boolean;
+  /**
+   * 使途別分類（金額最大のもの）。主要経費と同じ理由で項と1対1ではない。
+   * 使途別分類コードは目（kou-moku）にしか無いフィールドのため、事項側からは算出しない。
+   */
+  purposeName: string;
+  /** true のときこの項には2種類以上の使途別分類が混在する（金額最大のものを purposeName に採用） */
+  purposeMixed: boolean;
   /** この項に属する事項（目的別内訳）の件数 */
   jikouCount: number;
   /** この項に属する目（性質別内訳）の件数 */

@@ -180,14 +180,19 @@ export function availableYears(): number[] {
   return kouMokuAvailableYears().filter(y => jSet.has(y));
 }
 
-/** 項内で金額最大の主要経費を代表値として選ぶ。項と主要経費は1対1ではない（実測: 2024年度kou-mokuで3,321項中302項が複数混在） */
-function representativeMajorExpense(items: MOFKouMokuItem[]): { name: string; mixed: boolean } {
+/** 項内で金額最大の値を代表値として選ぶ汎用ヘルパ（主要経費・使途別分類で共用） */
+function representativeClassification(
+  items: MOFKouMokuItem[],
+  codeOf: (item: MOFKouMokuItem) => string,
+  nameOf: (item: MOFKouMokuItem) => string
+): { name: string; mixed: boolean } {
   const byCode = new Map<string, { name: string; amount: number }>();
   for (const it of items) {
-    if (!it.majorExpenseCode) continue;
-    const existing = byCode.get(it.majorExpenseCode) ?? { name: it.majorExpenseName, amount: 0 };
+    const code = codeOf(it);
+    if (!code) continue;
+    const existing = byCode.get(code) ?? { name: nameOf(it), amount: 0 };
     existing.amount += it.amount;
-    byCode.set(it.majorExpenseCode, existing);
+    byCode.set(code, existing);
   }
   if (byCode.size === 0) return { name: '', mixed: false };
   const top = [...byCode.values()].sort((a, b) => b.amount - a.amount)[0];
@@ -201,7 +206,16 @@ function toSummary(row: SectionAgg): MOFKouSectionSummary {
     ? row.kouMokuItems.reduce((sum, i) => sum + (i.previousAmount ?? 0), 0)
     : null;
   const difference = previousAmount === null ? null : amount - previousAmount;
-  const majorExpense = representativeMajorExpense(row.kouMokuItems);
+  const majorExpense = representativeClassification(
+    row.kouMokuItems,
+    i => i.majorExpenseCode,
+    i => i.majorExpenseName
+  );
+  const purpose = representativeClassification(
+    row.kouMokuItems,
+    i => i.purposeCode,
+    i => i.purposeName
+  );
   return {
     id: row.id,
     accountType: row.accountType,
@@ -215,6 +229,8 @@ function toSummary(row: SectionAgg): MOFKouSectionSummary {
     sectionName: row.sectionName,
     majorExpenseName: majorExpense.name,
     majorExpenseMixed: majorExpense.mixed,
+    purposeName: purpose.name,
+    purposeMixed: purpose.mixed,
     jikouCount: row.jikouItems.length,
     kouMokuCount: row.kouMokuItems.length,
     rsProjectCount: new Set(row.rsLinks.map(l => l.projectId)).size,
@@ -247,7 +263,8 @@ export function listSections(fiscalYear: number): MOFKouData {
         'RS紐づけ事業数は、目単位の完全一致キー突合（mof-rs-kou-moku-linkage）で紐づいたRS事業の実数（重複除き）です。政府関係機関はRSの会計区分に該当値が無く対象外です',
         '本年度額・前年度額・増減額は目（kou-moku）側の合計です（事項側の合計と一致することを確認済み）',
         '前年度額は項内のいずれかの目で比較対象額が無い場合（決算・暫定予算等）null にしています',
-        '主要経費は項と1対1ではありません（実測: 2024年度でkou-mokuの項の約9%が複数の主要経費を含む）。表示は項内で金額最大のもので、複数混在する場合は「他」を付けています',
+        '主要経費・使途別分類はいずれも項と1対1ではありません（実測: 2024年度でkou-mokuの項の約9%が複数の主要経費を含む）。表示は項内で金額最大のもので、複数混在する場合は「他」を付けています',
+        '使途別分類コードは目（kou-moku）にしか無いフィールドのため、事項側の内訳からは算出していません',
       ],
     },
     summary: {

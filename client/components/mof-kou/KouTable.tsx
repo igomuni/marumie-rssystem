@@ -182,6 +182,19 @@ export function KouTable({
                     )}
                   </span>
                 </td>
+                <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                  <span className="line-clamp-2">
+                    {row.purposeName || '—'}
+                    {row.purposeMixed && (
+                      <span
+                        className="ml-1 text-amber-600 dark:text-amber-400"
+                        title="この項には複数の使途別分類が混在します。表示は金額最大のもの"
+                      >
+                        他
+                      </span>
+                    )}
+                  </span>
+                </td>
                 <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-600 dark:text-neutral-400">
                   {row.jikouCount.toLocaleString()}
                 </td>
