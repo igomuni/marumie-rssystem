@@ -22,7 +22,6 @@ type Tab = 'history' | 'jikou' | 'koumoku' | 'rs';
 
 interface Props {
   row: MOFKouSectionSummary;
-  fiscalYear: number;
   onClose: () => void;
   detail: MOFKouSectionDetail | null;
   detailLoading: boolean;
@@ -55,7 +54,6 @@ function rateClass(rate: number | null | 'new'): string {
 
 export function KouSidePanel({
   row,
-  fiscalYear,
   onClose,
   detail,
   detailLoading,
@@ -149,9 +147,7 @@ export function KouSidePanel({
 
       <div className="min-h-0 flex-1 overflow-auto pl-1 text-xs">
         {tab === 'history' && <HistoryTab history={history} loading={historyLoading} error={historyError} />}
-        {tab === 'jikou' && (
-          <JikouTab detail={detail} loading={detailLoading} error={detailError} fiscalYear={fiscalYear} />
-        )}
+        {tab === 'jikou' && <JikouTab detail={detail} loading={detailLoading} error={detailError} />}
         {tab === 'koumoku' && <KouMokuTab detail={detail} loading={detailLoading} error={detailError} />}
         {tab === 'rs' && <RsTab detail={detail} loading={detailLoading} error={detailError} linkageRsYear={linkageRsYear} />}
       </div>
@@ -255,12 +251,10 @@ function JikouTab({
   detail,
   loading,
   error,
-  fiscalYear,
 }: {
   detail: MOFKouSectionDetail | null;
   loading: boolean;
   error: string | null;
-  fiscalYear: number;
 }) {
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
@@ -271,7 +265,6 @@ function JikouTab({
     list.push(l);
     rsByJikouKey.set(l.jikouKey, list);
   }
-  const isCarriedOver = detail.jikouRsLinkYear !== null && detail.jikouRsLinkYear !== fiscalYear;
 
   const columns: GridColumn<MOFJikouItem>[] = [
     {
@@ -349,20 +342,13 @@ function JikouTab({
   ];
 
   return (
-    <div>
-      {isCarriedOver && (
-        <p className="mx-2 mt-2 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-          事項単位のRS紐づけはこの年度のデータが無いため、{detail.jikouRsLinkYear}年度時点の識別子で参考表示しています。
-        </p>
-      )}
-      <DataGrid
-        rows={detail.jikouItems}
-        columns={columns}
-        rowKey={it => it.id}
-        defaultSortKey="amount"
-        emptyMessage="この項に事項はありません。"
-      />
-    </div>
+    <DataGrid
+      rows={detail.jikouItems}
+      columns={columns}
+      rowKey={it => it.id}
+      defaultSortKey="amount"
+      emptyMessage="この項に事項はありません。"
+    />
   );
 }
 

@@ -478,7 +478,6 @@ export default function MOFKouPage() {
         {selectedRow && (
           <KouSidePanel
             row={selectedRow}
-            fiscalYear={data.metadata.fiscalYear}
             onClose={() => setSelected(null)}
             detail={detail}
             detailLoading={detailLoading}
