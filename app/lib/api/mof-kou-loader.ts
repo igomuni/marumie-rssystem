@@ -9,7 +9,7 @@ import type { MOFBudgetType } from '@/types/mof-jikou';
 import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuAccountType, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
-import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionSummary } from '@/types/mof-kou';
+import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionHistoryYear, MOFKouSectionSummary } from '@/types/mof-kou';
 import { availableYears as jikouAvailableYears, loadYear as loadJikouYear } from './mof-jikou-loader';
 import { availableYears as kouMokuAvailableYears, loadYear as loadKouMokuYear } from './mof-kou-moku-loader';
 import { resolveLinks } from './mof-rs-kou-moku-linkage-loader';
@@ -282,6 +282,48 @@ export function sectionDetail(fiscalYear: number, id: string): MOFKouSectionDeta
   const row = built.sections.get(id);
   if (!row) return null;
   return { id, jikouItems: row.jikouItems, kouMokuItems: row.kouMokuItems, rsLinks: row.rsLinks };
+}
+
+/** 予算種別・所管を除いた「同じ項」の識別子。所管表記の変更をまたいで継続扱いにする（jikou/kou-mokuのidentityKeyと同じ考え方） */
+function sectionIdentity(row: {
+  accountType: MOFKouMokuAccountType;
+  organization: string;
+  specialAccount: string;
+  agency: string;
+  subAccount: string;
+  sectionCode: string;
+}): string {
+  const org =
+    row.accountType === 'general'
+      ? row.organization
+      : row.accountType === 'special'
+        ? normSpecialAccount(row.specialAccount)
+        : row.agency;
+  return [row.accountType, org, row.subAccount, row.sectionCode].join('|');
+}
+
+/**
+ * 項の経年推移を組み立てる。
+ * `id`（会計区分・予算種別・所管・組織/特会/機関・勘定・項コード）から予算種別・所管を
+ * 除いた識別子に落とし、全年度を横断して同じ識別子を持つ行を集める。
+ */
+export function sectionHistory(fiscalYear: number, id: string): MOFKouSectionHistory | null {
+  const built = buildYear(fiscalYear);
+  const startRow = built.sections.get(id);
+  if (!startRow) return null;
+  const identity = sectionIdentity(startRow);
+
+  const years: MOFKouSectionHistoryYear[] = [];
+  let sectionName = '';
+  for (const year of [...availableYears()].sort((a, b) => a - b)) {
+    const y = buildYear(year);
+    const matches = [...y.sections.values()].filter(r => sectionIdentity(r) === identity).map(toSummary);
+    if (matches.length === 0) continue;
+    if (!sectionName) sectionName = matches[0].sectionName;
+    years.push({ fiscalYear: year, eraLabel: y.eraLabel, rows: matches });
+  }
+
+  return { id, identity, sectionName, availableYears: availableYears(), years };
 }
 
 function groupBy<T>(

@@ -95,3 +95,32 @@ export interface MOFKouData {
   };
   sections: MOFKouSectionSummary[];
 }
+
+/** 項の経年推移: ある年度に現れた同一の項（予算種別ごとに複数行になりうる） */
+export interface MOFKouSectionHistoryYear {
+  fiscalYear: number;
+  eraLabel: string;
+  /** その年度にこの項で現れた予算種別ごとの集計行（当初・暫定・補正・決算） */
+  rows: MOFKouSectionSummary[];
+}
+
+/**
+ * 項の経年推移（GET /api/mof-kou/history のレスポンス）。
+ *
+ * 同一の項の判定は所管（ministry）・予算種別を除いた識別子（会計区分・組織/特会/機関・
+ * 勘定・項コード）で行う。所管表記の変更（共管の追加・解消）や項コードの振り直しがあると
+ * 別の項として扱われ、実態が継続でも欠けて見えることがある（`/mof-jikou`・`/mof-kou-moku`の
+ * 経年推移と同じ限界）。
+ */
+export interface MOFKouSectionHistory {
+  /** 問い合わせに使われた項の合成キー（sections[].id） */
+  id: string;
+  /** 予算種別・所管を除いた識別子 */
+  identity: string;
+  /** 項名（見つかった中で最初のもの） */
+  sectionName: string;
+  /** 収録済みの全年度（新しい順）。推移の横軸 */
+  availableYears: number[];
+  /** 項が現れた年度（古い順）。計上のない年度は要素ごと現れない */
+  years: MOFKouSectionHistoryYear[];
+}
