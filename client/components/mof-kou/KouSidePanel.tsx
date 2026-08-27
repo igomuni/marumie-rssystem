@@ -13,6 +13,7 @@ import type { MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } 
 import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
+import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { changeRate, formatChangeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { ACCOUNT_LABEL, orgColumn } from './columns';
 import { DataGrid, type GridColumn } from './DataGrid';
@@ -21,6 +22,7 @@ type Tab = 'history' | 'jikou' | 'koumoku' | 'rs';
 
 interface Props {
   row: MOFKouSectionSummary;
+  fiscalYear: number;
   onClose: () => void;
   detail: MOFKouSectionDetail | null;
   detailLoading: boolean;
@@ -29,8 +31,6 @@ interface Props {
   historyLoading: boolean;
   historyError: string | null;
   linkageRsYear: number | null;
-  linkageIsCarriedOver: boolean;
-  linkageSourceBudgetYear: number | null;
   width: number;
   onWidthChange: (width: number) => void;
 }
@@ -55,6 +55,7 @@ function rateClass(rate: number | null | 'new'): string {
 
 export function KouSidePanel({
   row,
+  fiscalYear,
   onClose,
   detail,
   detailLoading,
@@ -63,8 +64,6 @@ export function KouSidePanel({
   historyLoading,
   historyError,
   linkageRsYear,
-  linkageIsCarriedOver,
-  linkageSourceBudgetYear,
   width,
   onWidthChange,
 }: Props) {
@@ -150,18 +149,11 @@ export function KouSidePanel({
 
       <div className="min-h-0 flex-1 overflow-auto pl-1 text-xs">
         {tab === 'history' && <HistoryTab history={history} loading={historyLoading} error={historyError} />}
-        {tab === 'jikou' && <JikouTab detail={detail} loading={detailLoading} error={detailError} />}
-        {tab === 'koumoku' && <KouMokuTab detail={detail} loading={detailLoading} error={detailError} />}
-        {tab === 'rs' && (
-          <RsTab
-            detail={detail}
-            loading={detailLoading}
-            error={detailError}
-            linkageRsYear={linkageRsYear}
-            linkageIsCarriedOver={linkageIsCarriedOver}
-            linkageSourceBudgetYear={linkageSourceBudgetYear}
-          />
+        {tab === 'jikou' && (
+          <JikouTab detail={detail} loading={detailLoading} error={detailError} fiscalYear={fiscalYear} />
         )}
+        {tab === 'koumoku' && <KouMokuTab detail={detail} loading={detailLoading} error={detailError} />}
+        {tab === 'rs' && <RsTab detail={detail} loading={detailLoading} error={detailError} linkageRsYear={linkageRsYear} />}
       </div>
     </aside>
   );
@@ -263,19 +255,29 @@ function JikouTab({
   detail,
   loading,
   error,
+  fiscalYear,
 }: {
   detail: MOFKouSectionDetail | null;
   loading: boolean;
   error: string | null;
+  fiscalYear: number;
 }) {
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+
+  const rsByJikouKey = new Map<string, MofRsLinkageRecord[]>();
+  for (const l of detail.jikouRsLinks) {
+    const list = rsByJikouKey.get(l.jikouKey) ?? [];
+    list.push(l);
+    rsByJikouKey.set(l.jikouKey, list);
+  }
+  const isCarriedOver = detail.jikouRsLinkYear !== null && detail.jikouRsLinkYear !== fiscalYear;
 
   const columns: GridColumn<MOFJikouItem>[] = [
     {
       key: 'name',
       label: '事項名',
-      width: 220,
+      width: 200,
       sortValue: it => it.name,
       render: it => (
         <a
@@ -291,9 +293,28 @@ function JikouTab({
     {
       key: 'majorExpense',
       label: '主要経費',
-      width: 120,
+      width: 110,
       sortValue: it => it.majorExpenseName,
       render: it => it.majorExpenseName || '—',
+    },
+    {
+      key: 'rs',
+      label: 'RS',
+      width: 60,
+      numeric: true,
+      sortValue: it => new Set((rsByJikouKey.get(it.key) ?? []).map(l => l.projectId)).size,
+      render: it => {
+        const links = rsByJikouKey.get(it.key) ?? [];
+        const count = new Set(links.map(l => l.projectId)).size;
+        return (
+          <span
+            className={count > 0 ? 'font-medium text-emerald-700 dark:text-emerald-400' : 'text-neutral-300 dark:text-neutral-700'}
+            title={links.map(l => l.projectName).join('\n') || undefined}
+          >
+            {count || '—'}
+          </span>
+        );
+      },
     },
     {
       key: 'amount',
@@ -328,13 +349,20 @@ function JikouTab({
   ];
 
   return (
-    <DataGrid
-      rows={detail.jikouItems}
-      columns={columns}
-      rowKey={it => it.id}
-      defaultSortKey="amount"
-      emptyMessage="この項に事項はありません。"
-    />
+    <div>
+      {isCarriedOver && (
+        <p className="mx-2 mt-2 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+          事項単位のRS紐づけはこの年度のデータが無いため、{detail.jikouRsLinkYear}年度時点の識別子で参考表示しています。
+        </p>
+      )}
+      <DataGrid
+        rows={detail.jikouItems}
+        columns={columns}
+        rowKey={it => it.id}
+        defaultSortKey="amount"
+        emptyMessage="この項に事項はありません。"
+      />
+    </div>
   );
 }
 
@@ -350,11 +378,18 @@ function KouMokuTab({
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
 
+  const rsByKouMokuKey = new Map<string, MofRsKouMokuLinkageRecord[]>();
+  for (const l of detail.rsLinks) {
+    const list = rsByKouMokuKey.get(l.kouMokuKey) ?? [];
+    list.push(l);
+    rsByKouMokuKey.set(l.kouMokuKey, list);
+  }
+
   const columns: GridColumn<MOFKouMokuItem>[] = [
     {
       key: 'name',
       label: '目名',
-      width: 200,
+      width: 190,
       sortValue: it => it.subItemName,
       render: it => (
         <a
@@ -380,6 +415,25 @@ function KouMokuTab({
       width: 100,
       sortValue: it => it.purposeName,
       render: it => it.purposeName || '—',
+    },
+    {
+      key: 'rs',
+      label: 'RS',
+      width: 60,
+      numeric: true,
+      sortValue: it => new Set((rsByKouMokuKey.get(it.key) ?? []).map(l => l.projectId)).size,
+      render: it => {
+        const links = rsByKouMokuKey.get(it.key) ?? [];
+        const count = new Set(links.map(l => l.projectId)).size;
+        return (
+          <span
+            className={count > 0 ? 'font-medium text-emerald-700 dark:text-emerald-400' : 'text-neutral-300 dark:text-neutral-700'}
+            title={links.map(l => l.projectName).join('\n') || undefined}
+          >
+            {count || '—'}
+          </span>
+        );
+      },
     },
     {
       key: 'amount',
@@ -429,15 +483,11 @@ function RsTab({
   loading,
   error,
   linkageRsYear,
-  linkageIsCarriedOver,
-  linkageSourceBudgetYear,
 }: {
   detail: MOFKouSectionDetail | null;
   loading: boolean;
   error: string | null;
   linkageRsYear: number | null;
-  linkageIsCarriedOver: boolean;
-  linkageSourceBudgetYear: number | null;
 }) {
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
@@ -481,20 +531,12 @@ function RsTab({
   ];
 
   return (
-    <div>
-      {linkageIsCarriedOver && (
-        <p className="mx-2 mt-2 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-          この年度自体のRS紐づけデータはまだ無いため、{linkageSourceBudgetYear}
-          年度時点の紐づけを識別子で参考表示しています。
-        </p>
-      )}
-      <DataGrid
-        rows={detail.rsLinks}
-        columns={columns}
-        rowKey={l => `${l.projectId}-${l.kouMokuKey}`}
-        defaultSortKey="rsAmount"
-        emptyMessage="紐づく RS 事業は見つかりませんでした。"
-      />
-    </div>
+    <DataGrid
+      rows={detail.rsLinks}
+      columns={columns}
+      rowKey={l => `${l.projectId}-${l.kouMokuKey}`}
+      defaultSortKey="rsAmount"
+      emptyMessage="紐づく RS 事業は見つかりませんでした。"
+    />
   );
 }

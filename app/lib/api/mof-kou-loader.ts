@@ -9,10 +9,12 @@ import type { MOFBudgetType } from '@/types/mof-jikou';
 import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuAccountType, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
+import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionHistoryYear, MOFKouSectionSummary } from '@/types/mof-kou';
 import { availableYears as jikouAvailableYears, loadYear as loadJikouYear } from './mof-jikou-loader';
 import { availableYears as kouMokuAvailableYears, loadYear as loadKouMokuYear } from './mof-kou-moku-loader';
 import { resolveLinks } from './mof-rs-kou-moku-linkage-loader';
+import { findLinksByKey as findJikouLinksByKey, linkageAvailable as jikouLinkageAvailable } from './mof-rs-linkage-loader';
 
 /** 特別会計名の接尾辞を外す。事項別内訳（Web帳票）は「〜特別会計」付き、科目別内訳（CSV）は無し */
 function normSpecialAccount(s: string): string {
@@ -281,7 +283,24 @@ export function sectionDetail(fiscalYear: number, id: string): MOFKouSectionDeta
   const built = buildYear(fiscalYear);
   const row = built.sections.get(id);
   if (!row) return null;
-  return { id, jikouItems: row.jikouItems, kouMokuItems: row.kouMokuItems, rsLinks: row.rsLinks };
+
+  // 事項単位のRS紐づけ（mof-rs-linkage）はkou-mokuの目単位紐づけと違い年度をまたぐ引き継ぎを
+  // 持たないため、ここで直近の過去年度にフォールバックする（identityFromKeyが予算種別・所管を
+  // 落とすので、そのままの年度のitem.keyで別年度のファイルを引いても一致する）
+  const jikouRsLinkYear = jikouLinkageAvailable(fiscalYear)
+    ? fiscalYear
+    : (availableYears().filter(y => y < fiscalYear && jikouLinkageAvailable(y)).sort((a, b) => b - a)[0] ?? null);
+  const jikouRsLinks: MofRsLinkageRecord[] =
+    jikouRsLinkYear !== null ? row.jikouItems.flatMap(it => findJikouLinksByKey(jikouRsLinkYear, it.key)) : [];
+
+  return {
+    id,
+    jikouItems: row.jikouItems,
+    kouMokuItems: row.kouMokuItems,
+    rsLinks: row.rsLinks,
+    jikouRsLinks,
+    jikouRsLinkYear,
+  };
 }
 
 /** 予算種別・所管を除いた「同じ項」の識別子。所管表記の変更をまたいで継続扱いにする（jikou/kou-mokuのidentityKeyと同じ考え方） */

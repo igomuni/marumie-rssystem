@@ -478,6 +478,7 @@ export default function MOFKouPage() {
         {selectedRow && (
           <KouSidePanel
             row={selectedRow}
+            fiscalYear={data.metadata.fiscalYear}
             onClose={() => setSelected(null)}
             detail={detail}
             detailLoading={detailLoading}
@@ -486,8 +487,6 @@ export default function MOFKouPage() {
             historyLoading={historyLoading}
             historyError={historyError}
             linkageRsYear={data.metadata.linkage.rsYear}
-            linkageIsCarriedOver={data.metadata.linkage.isCarriedOver}
-            linkageSourceBudgetYear={data.metadata.linkage.sourceBudgetYear}
             width={panelWidth}
             onWidthChange={setPanelWidth}
           />
