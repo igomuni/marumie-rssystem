@@ -8,9 +8,14 @@
  * そのため予算種別は「白背景＋色付き枠線＋黒系文字」に変更し、コントラスト制約なしで
  * Material Design 2 の色相をそのまま使えるようにしている。
  *
- * 配色はMaterial Design 2 のカラーシステム（m2.material.io/design/color）の500〜700番台:
- *   当初=Green 500 #4caf50、暫定=Deep Orange 600 #f4511e、補正=Amber 700 #ffa000、
- *   決算=Deep Purple 500 #673ab7
+ * 配色はMaterial Design 2 のカラーシステム（m2.material.io/design/color）から選んだもの:
+ *   当初=Green 500 #4caf50、暫定=Deep Orange 500 #ff5722、補正=Amber 700 #ffa000、
+ *   決算=Purple 400 #ab47bc
+ *
+ * Badge（塗りつぶし・枠線なし）とOutlineBadge（白背景・border-2）は、同じ行内で高さが
+ * 揃うように調整してある。OutlineBadgeはborder-2の分だけ上下パディングを持たせず
+ * （py指定なし）、Badge側のpy-0.5との合計高さが一致するようにしている。どちらかの
+ * パディング・ボーダーを変えるときはもう片方も見て高さのつり合いを確認すること。
  */
 
 import { getAccountBadgeStyle } from '@/app/lib/account-badge';
@@ -20,8 +25,7 @@ import type { MOFKouMokuAccountType } from '@/types/mof-kou-moku';
 export function Badge({ label, background }: { label: string; background: string }) {
   return (
     <span
-      // OutlineBadge（border-2）と高さを揃えるため、見えないborder-2を持たせて箱の大きさを一致させる
-      className="inline-block whitespace-nowrap rounded border-2 border-transparent px-1.5 py-0.5 text-[10px] font-semibold leading-snug text-white"
+      className="inline-block whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold leading-snug text-white"
       style={{ background }}
     >
       {label}
@@ -33,7 +37,7 @@ export function Badge({ label, background }: { label: string; background: string
 export function OutlineBadge({ label, color }: { label: string; color: string }) {
   return (
     <span
-      className="inline-block whitespace-nowrap rounded border-2 bg-white px-1.5 py-0.5 text-[10px] font-semibold leading-snug text-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+      className="inline-block whitespace-nowrap rounded border-2 bg-white px-1.5 text-[10px] font-semibold leading-snug text-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
       style={{ borderColor: color }}
     >
       {label}
@@ -56,8 +60,8 @@ function budgetTypeLabel(budgetType: MOFBudgetType): string {
 
 const BUDGET_TYPE_COLOR: Record<string, string> = {
   当初: '#4caf50',
-  暫定: '#f4511e',
-  決算: '#673ab7',
+  暫定: '#FF5722',
+  決算: '#AB47BC',
 };
 const REVISED_COLOR = '#ffa000';
 
