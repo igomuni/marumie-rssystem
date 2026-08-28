@@ -10,12 +10,16 @@
  * コンボ・検索欄・スライダーの見た目と挙動は `/sankey-svg` のフィルタパネルに揃えている。
  */
 
+import { useState } from 'react';
 import type { MOFBudgetType } from '@/types/mof-jikou';
 import { ACCOUNT_LABEL } from '@/client/components/mof-kou/columns';
 import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
 import { RangeSlider } from '@/client/components/mof-kou/RangeSlider';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { formatYen } from '@/client/components/mof-jikou/format';
+
+/** 複数選択コンボのうちどれか1つだけを開けるようにするフィールド名 */
+type ComboField = 'budgetType' | 'account' | 'ministry' | 'organization' | 'subAccount';
 
 export type NumRange = [number | null, number | null];
 
@@ -92,6 +96,12 @@ export function FilterSidebar({
   onReset,
   width,
 }: FilterSidebarProps) {
+  const [openField, setOpenField] = useState<ComboField | null>(null);
+  const comboProps = (field: ComboField) => ({
+    open: openField === field,
+    onOpenChange: (v: boolean) => setOpenField(v ? field : null),
+  });
+
   return (
     <div
       className="flex h-full shrink-0 flex-col overflow-y-auto rounded-lg border border-neutral-200 bg-white p-3 text-xs dark:border-neutral-800 dark:bg-neutral-950"
@@ -111,12 +121,18 @@ export function FilterSidebar({
       </div>
 
       <div className="space-y-3">
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">予算種別</span>
-          <MultiSelectCombo label="予算種別" options={budgetTypes} selected={state.budgetType} onChange={v => onChange('budgetType', v)} />
-        </label>
+          <MultiSelectCombo
+            label="予算種別"
+            options={budgetTypes}
+            selected={state.budgetType}
+            onChange={v => onChange('budgetType', v)}
+            {...comboProps('budgetType')}
+          />
+        </div>
 
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">会計区分</span>
           <MultiSelectCombo
             label="会計区分"
@@ -128,10 +144,11 @@ export function FilterSidebar({
               onChange('organization', pruneToOptions(state.organization, organizations));
               onChange('subAccount', pruneToOptions(state.subAccount, subAccounts));
             }}
+            {...comboProps('account')}
           />
-        </label>
+        </div>
 
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">所管</span>
           <MultiSelectCombo
             label="所管"
@@ -142,10 +159,11 @@ export function FilterSidebar({
               onChange('organization', pruneToOptions(state.organization, organizations));
               onChange('subAccount', pruneToOptions(state.subAccount, subAccounts));
             }}
+            {...comboProps('ministry')}
           />
-        </label>
+        </div>
 
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">組織／特会／機関</span>
           <MultiSelectCombo
             label="組織／特会／機関"
@@ -155,10 +173,11 @@ export function FilterSidebar({
               onChange('organization', v);
               onChange('subAccount', pruneToOptions(state.subAccount, subAccounts));
             }}
+            {...comboProps('organization')}
           />
-        </label>
+        </div>
 
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">勘定／業務</span>
           <MultiSelectCombo
             label="勘定／業務"
@@ -166,8 +185,9 @@ export function FilterSidebar({
             selected={state.subAccount}
             onChange={v => onChange('subAccount', v)}
             disabled={subAccounts.length === 0}
+            {...comboProps('subAccount')}
           />
-        </label>
+        </div>
 
         <hr className="border-neutral-200 dark:border-neutral-800" />
 

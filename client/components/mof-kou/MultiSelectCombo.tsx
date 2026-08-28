@@ -5,6 +5,12 @@
  * 同じ見た目・挙動（ボタン→ドロップダウンportal→クリック外で閉じる）を踏襲する。
  * 空配列 = 絞り込みなし（すべて通す）。1件でもチェックすると、それ以降はチェックした
  * ものだけを通すホワイトリストになる（他のチェックボックスは見た目上チェックが付かない）。
+ *
+ * 開閉状態は呼び出し側（FilterSidebar）が controlled で持つ。同時に複数のコンボを
+ * 独立してuseStateで開閉させると、片方が「外側クリック」の判定でもう片方のトリガー
+ * ボタンをまたぐ際に、閉じたつもりが別のコンボが開いて紛らわしい・チラつくことが
+ * あったため、どのフィールドが開いているかをFilterSidebar側で一元管理し、開くときに
+ * 他を必ず閉じるようにしている。
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -17,6 +23,8 @@ export interface MultiSelectComboProps {
   selected: string[];
   onChange: (next: string[]) => void;
   disabled?: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 interface Rect {
@@ -26,8 +34,7 @@ interface Rect {
   maxHeight: number;
 }
 
-export function MultiSelectCombo({ label, options, selected, onChange, disabled }: MultiSelectComboProps) {
-  const [open, setOpen] = useState(false);
+export function MultiSelectCombo({ label, options, selected, onChange, disabled, open, onOpenChange }: MultiSelectComboProps) {
   const [rect, setRect] = useState<Rect | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -38,10 +45,10 @@ export function MultiSelectCombo({ label, options, selected, onChange, disabled 
   useEffect(() => {
     if (!open) return;
     const onMouseDown = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) onOpenChange(false);
     };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') onOpenChange(false);
     };
     const recompute = () => {
       if (buttonRef.current) {
@@ -59,7 +66,7 @@ export function MultiSelectCombo({ label, options, selected, onChange, disabled 
       window.removeEventListener('resize', recompute);
       window.removeEventListener('scroll', recompute, true);
     };
-  }, [open]);
+  }, [open, onOpenChange]);
 
   function toggle(option: string) {
     onChange(selected.includes(option) ? selected.filter(o => o !== option) : [...selected, option]);
@@ -71,14 +78,15 @@ export function MultiSelectCombo({ label, options, selected, onChange, disabled 
         ref={buttonRef}
         type="button"
         disabled={disabled}
+        aria-label={label}
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => {
-          if (buttonRef.current) {
+          if (!open && buttonRef.current) {
             const r = buttonRef.current.getBoundingClientRect();
             setRect({ top: r.bottom + 2, left: r.left, width: r.width, maxHeight: Math.max(120, window.innerHeight - r.bottom - 16) });
           }
-          setOpen(v => !v);
+          onOpenChange(!open);
         }}
         className={`flex w-full items-center justify-between gap-1 truncate rounded border border-neutral-300 bg-white px-2 py-1 text-xs disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-900 ${
           allSelected ? 'text-neutral-400' : 'text-neutral-800 dark:text-neutral-200'

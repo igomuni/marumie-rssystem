@@ -8,7 +8,8 @@
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { changeRate, formatChangeRate } from '@/client/components/mof-jikou/format';
 import type { MOFKouSectionSummary } from '@/types/mof-kou';
-import { ACCOUNT_LABEL, COLUMNS, DEFAULT_WIDTHS, MIN_COLUMN_WIDTH, orgColumn, type ColumnSpec, type SortDir, type SortKey } from './columns';
+import { AccountBadge, BudgetTypeBadge } from './Badge';
+import { COLUMNS, DEFAULT_WIDTHS, MIN_COLUMN_WIDTH, orgColumn, type ColumnSpec, type SortDir, type SortKey } from './columns';
 
 interface Props {
   items: MOFKouSectionSummary[];
@@ -132,8 +133,12 @@ export function KouTable({
                 isSelected ? 'bg-blue-50 dark:bg-blue-950/40' : ''
               }`}
             >
-              <td className="truncate px-2 py-1.5 text-neutral-500">{row.budgetType}</td>
-              <td className="truncate px-2 py-1.5 text-neutral-500">{ACCOUNT_LABEL[row.accountType]}</td>
+              <td className="truncate px-2 py-1.5">
+                <BudgetTypeBadge budgetType={row.budgetType} />
+              </td>
+              <td className="truncate px-2 py-1.5">
+                <AccountBadge accountType={row.accountType} />
+              </td>
               <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
                 <span className="line-clamp-2">{row.ministry || '—'}</span>
               </td>
