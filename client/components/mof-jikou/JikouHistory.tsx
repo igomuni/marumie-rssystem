@@ -89,7 +89,7 @@ export function JikouHistory({
             const section = y.items[0];
             return (
               <tr key={y.fiscalYear} className="border-t border-neutral-200 dark:border-neutral-800">
-                <td className="whitespace-nowrap px-2 py-1">{y.eraLabel}</td>
+                <td className="whitespace-nowrap px-2 py-1">{y.eraLabel}（{y.fiscalYear}）</td>
                 {types.map(t => (
                   <td key={t} className="whitespace-nowrap px-2 py-1 text-right tabular-nums">
                     {formatYen(pick(y.items, t)?.amount ?? null)}

@@ -178,7 +178,13 @@ function HistoryTab({
   );
 
   const columns: GridColumn<HistoryRow>[] = [
-    { key: 'year', label: '年度', width: 90, sortValue: r => r.fiscalYear, render: r => r.eraLabel },
+    {
+      key: 'year',
+      label: '年度',
+      width: 130,
+      sortValue: r => r.fiscalYear,
+      render: r => `${r.eraLabel}（${r.fiscalYear}）`,
+    },
     { key: 'budgetType', label: '予算種別', width: 100, sortValue: r => r.row.budgetType, render: r => r.row.budgetType },
     {
       key: 'jikou',
