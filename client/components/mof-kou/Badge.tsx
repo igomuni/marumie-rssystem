@@ -17,7 +17,7 @@ import type { MOFKouMokuAccountType } from '@/types/mof-kou-moku';
 export function Badge({ label, background }: { label: string; background: string }) {
   return (
     <span
-      className="inline-block whitespace-nowrap rounded-full px-1.5 py-px text-[10px] font-semibold leading-snug text-white"
+      className="inline-block whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold leading-snug text-white"
       style={{ background }}
     >
       {label}
