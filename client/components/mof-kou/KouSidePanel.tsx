@@ -6,7 +6,6 @@
  * データ取得（詳細・経年推移）はページ層の責務（client/components/ は API を直接叩かない）。
  */
 
-import type { MouseEvent as ReactMouseEvent } from 'react';
 import { useState } from 'react';
 import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
@@ -30,8 +29,6 @@ interface Props {
   historyLoading: boolean;
   historyError: string | null;
   linkageRsYear: number | null;
-  width: number;
-  onWidthChange: (width: number) => void;
 }
 
 const TABS: { key: Tab; label: string }[] = [
@@ -40,9 +37,6 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'koumoku', label: '目' },
   { key: 'rs', label: 'RS' },
 ];
-
-const MIN_WIDTH = 320;
-const MAX_WIDTH = 900;
 
 function rateClass(rate: number | null | 'new'): string {
   if (rate === null) return 'text-neutral-400';
@@ -62,45 +56,12 @@ export function KouSidePanel({
   historyLoading,
   historyError,
   linkageRsYear,
-  width,
-  onWidthChange,
 }: Props) {
   const [tab, setTab] = useState<Tab>('history');
 
-  function startResize(event: ReactMouseEvent) {
-    event.preventDefault();
-    const startX = event.clientX;
-    const startWidth = width;
-    const onMove = (e: MouseEvent) => {
-      // パネルは画面右側に置くため、ハンドルを左へ引くほど広がる
-      const next = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth - (e.clientX - startX)));
-      onWidthChange(next);
-    };
-    const onUp = () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  }
-
   return (
-    <aside
-      className="relative flex shrink-0 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
-      style={{ width }}
-    >
-      <div
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="サイドパネルの幅を変更"
-        onMouseDown={startResize}
-        className="absolute left-0 top-0 z-10 h-full w-1.5 cursor-col-resize hover:bg-neutral-400/60"
-      />
-      <div className="shrink-0 border-b border-neutral-200 px-3 py-2 pl-4 dark:border-neutral-800">
+    <div className="flex h-full flex-col overflow-hidden text-xs">
+      <div className="shrink-0 border-b border-neutral-200 px-3 py-2 dark:border-neutral-800">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">{row.sectionName}</p>
@@ -137,7 +98,7 @@ export function KouSidePanel({
         </p>
       </div>
 
-      <div className="flex shrink-0 border-b border-neutral-200 pl-1 text-xs dark:border-neutral-800">
+      <div className="flex shrink-0 border-b border-neutral-200 text-xs dark:border-neutral-800">
         {TABS.map(t => (
           <button
             key={t.key}
@@ -158,13 +119,13 @@ export function KouSidePanel({
         ))}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto pl-1 text-xs">
+      <div className="min-h-0 flex-1 overflow-auto text-xs">
         {tab === 'history' && <HistoryTab history={history} loading={historyLoading} error={historyError} />}
         {tab === 'jikou' && <JikouTab detail={detail} loading={detailLoading} error={detailError} />}
         {tab === 'koumoku' && <KouMokuTab detail={detail} loading={detailLoading} error={detailError} />}
         {tab === 'rs' && <RsTab detail={detail} loading={detailLoading} error={detailError} linkageRsYear={linkageRsYear} />}
       </div>
-    </aside>
+    </div>
   );
 }
 

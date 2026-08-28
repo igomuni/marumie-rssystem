@@ -14,10 +14,11 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
-import { useSidePanel, SIDE_PANEL_WIDTH_MIN as PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX as PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
+import { useSidePanel } from '@/client/hooks/useSidePanel';
 import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
 import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { KouTable } from '@/client/components/mof-kou/KouTable';
@@ -57,7 +58,9 @@ const INITIAL_FILTERS: FilterSidebarState = {
   rateRange: EMPTY_RANGE,
 };
 
-const FILTER_PANEL_WIDTH_DEFAULT = 280;
+const SIDEBAR_MIN_WIDTH = 200;
+const SIDEBAR_MAX_WIDTH = 480;
+const SIDEBAR_DEFAULT_WIDTH = 256;
 
 function inRange(value: number | null, range: NumRange): boolean {
   const [min, max] = range;
@@ -79,12 +82,13 @@ export default function MOFKouPage() {
   const [year, setYear] = useState<number | null>(null);
 
   const [filters, setFilters] = useState<FilterSidebarState>(INITIAL_FILTERS);
-  const filterPanel = useSidePanel({ side: 'left', defaultWidth: FILTER_PANEL_WIDTH_DEFAULT });
+  const [showFilters, setShowFilters] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selected, setSelected] = useState<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
-  const [panelWidth, setPanelWidth] = useState(420);
+  const detailPanel = useSidePanel({ side: 'right', defaultWidth: 420, minWidth: 320, maxWidth: 900 });
   const [detail, setDetail] = useState<MOFKouSectionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -278,6 +282,26 @@ export default function MOFKouPage() {
     }
   }
 
+  function startSidebarResize(event: ReactMouseEvent) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = sidebarWidth;
+    const onMove = (e: MouseEvent) => {
+      const next = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, startWidth + (e.clientX - startX)));
+      setSidebarWidth(next);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+
   const selectedRow = selected ? (filtered.find(r => r.id === selected) ?? data?.sections.find(r => r.id === selected)) : undefined;
 
   if (error) {
@@ -340,10 +364,10 @@ export default function MOFKouPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => filterPanel.setCollapsed(v => !v)}
-            aria-expanded={!filterPanel.collapsed}
+            onClick={() => setShowFilters(v => !v)}
+            aria-expanded={showFilters}
             className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 ${
-              !filterPanel.collapsed || activeFilterCount > 0
+              showFilters || activeFilterCount > 0
                 ? 'border-neutral-800 bg-neutral-800 text-white dark:border-neutral-200 dark:bg-neutral-200 dark:text-neutral-900'
                 : 'border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
             }`}
@@ -385,45 +409,42 @@ export default function MOFKouPage() {
         </div>
       </section>
 
-      <div className="relative min-h-0 flex-1">
-        {/* フィルタパネル: /sankey-svg の左ノード詳細パネルと同じ chrome（画面端の開閉タブ・
-            マージン部分で反応する幅調整ハンドル）。position="absolute" でヘッダー分の高さを避ける */}
-        <SidePanelChrome
-          side="left"
-          position="absolute"
-          open={!filterPanel.collapsed}
-          onToggle={filterPanel.toggleCollapsed}
-          width={filterPanel.effectiveWidth}
-          minWidth={PANEL_WIDTH_MIN}
-          maxWidth={PANEL_WIDTH_MAX}
-          onResizeStart={filterPanel.onResizeStart}
-          isResizing={filterPanel.isResizing}
-          onResetWidth={filterPanel.resetWidth}
-          expandLabel="フィルタを表示"
-          collapseLabel="フィルタを隠す"
-          zIndex={5}
-        >
-          <FilterSidebar
-            state={filters}
-            onChange={setFilter}
-            budgetTypes={data.metadata.budgetTypes}
-            ministries={ministries}
-            organizations={organizations}
-            subAccounts={subAccounts}
-            domains={domains}
-            activeCount={activeFilterCount}
-            onReset={() => setFilters(INITIAL_FILTERS)}
-          />
-        </SidePanelChrome>
+      <div className="flex min-h-0 flex-1 px-3 pb-3">
+        {showFilters && (
+          <>
+            <FilterSidebar
+              state={filters}
+              onChange={setFilter}
+              budgetTypes={data.metadata.budgetTypes}
+              ministries={ministries}
+              organizations={organizations}
+              subAccounts={subAccounts}
+              domains={domains}
+              activeCount={activeFilterCount}
+              onReset={() => setFilters(INITIAL_FILTERS)}
+              width={sidebarWidth}
+            />
+            {/* 幅調整ハンドル: サイドパネルと一覧の間のマージン全体で反応させる */}
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="フィルタパネルの幅を変更"
+              onMouseDown={startSidebarResize}
+              className="flex w-3 shrink-0 cursor-col-resize items-stretch justify-center"
+            >
+              <div className="w-1 rounded-full transition-colors hover:bg-neutral-300 dark:hover:bg-neutral-700" />
+            </div>
+          </>
+        )}
 
-        <div
-          className="flex h-full gap-3 pb-3 pr-3"
-          style={{
-            paddingLeft: (filterPanel.collapsed ? 0 : filterPanel.effectiveWidth) + 25 + 12,
-            transition: filterPanel.isResizing ? 'none' : 'padding-left 0.2s ease',
-          }}
-        >
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+        <div className="relative flex min-h-0 min-w-0 flex-1">
+          <div
+            className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+            style={{
+              marginRight: selectedRow ? detailPanel.effectiveWidth + 25 + 12 : 0,
+              transition: detailPanel.isResizing ? 'none' : 'margin-right 0.2s ease',
+            }}
+          >
             <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
               <KouTable
                 items={filtered}
@@ -439,19 +460,33 @@ export default function MOFKouPage() {
           </div>
 
           {selectedRow && (
-            <KouSidePanel
-              row={selectedRow}
-              onClose={() => setSelected(null)}
-              detail={detail}
-              detailLoading={detailLoading}
-              detailError={detailError}
-              history={history}
-              historyLoading={historyLoading}
-              historyError={historyError}
-              linkageRsYear={data.metadata.linkage.rsYear}
-              width={panelWidth}
-              onWidthChange={setPanelWidth}
-            />
+            <SidePanelChrome
+              side="right"
+              position="absolute"
+              open
+              onToggle={() => setSelected(null)}
+              width={detailPanel.effectiveWidth}
+              minWidth={320}
+              maxWidth={900}
+              onResizeStart={detailPanel.onResizeStart}
+              isResizing={detailPanel.isResizing}
+              onResetWidth={detailPanel.resetWidth}
+              expandLabel="詳細を表示"
+              collapseLabel="詳細を隠す"
+              zIndex={5}
+            >
+              <KouSidePanel
+                row={selectedRow}
+                onClose={() => setSelected(null)}
+                detail={detail}
+                detailLoading={detailLoading}
+                detailError={detailError}
+                history={history}
+                historyLoading={historyLoading}
+                historyError={historyError}
+                linkageRsYear={data.metadata.linkage.rsYear}
+              />
+            </SidePanelChrome>
           )}
         </div>
       </div>
