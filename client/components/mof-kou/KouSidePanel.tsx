@@ -14,7 +14,8 @@ import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { changeRate, formatChangeRate, formatYen } from '@/client/components/mof-jikou/format';
-import { ACCOUNT_LABEL, orgColumn } from './columns';
+import { AccountBadge, BudgetTypeBadge } from './Badge';
+import { orgColumn } from './columns';
 import { DataGrid, type GridColumn } from './DataGrid';
 
 type Tab = 'history' | 'jikou' | 'koumoku' | 'rs';
@@ -69,9 +70,13 @@ export function KouSidePanel({
       <div className="shrink-0 border-b border-neutral-200 px-3 py-2 dark:border-neutral-800">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">{row.sectionName}</p>
+            <div className="flex items-center gap-1.5">
+              <BudgetTypeBadge budgetType={row.budgetType} />
+              <AccountBadge accountType={row.accountType} />
+            </div>
+            <p className="mt-1 truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">{row.sectionName}</p>
             <p className="mt-0.5 truncate text-[11px] text-neutral-500">
-              {row.budgetType} ・ {ACCOUNT_LABEL[row.accountType]} ・ {row.ministry || '—'} ・ {orgColumn(row) || '—'}
+              {row.ministry || '—'} ・ {orgColumn(row) || '—'}
               {row.subAccount ? ` ・ ${row.subAccount}` : ''} ・ 項{row.sectionCode}
             </p>
           </div>
@@ -164,7 +169,13 @@ function HistoryTab({
       sortValue: r => r.fiscalYear,
       render: r => `${r.eraLabel}（${r.fiscalYear}）`,
     },
-    { key: 'budgetType', label: '予算種別', width: 100, sortValue: r => r.row.budgetType, render: r => r.row.budgetType },
+    {
+      key: 'budgetType',
+      label: '予算種別',
+      width: 68,
+      sortValue: r => r.row.budgetType,
+      render: r => <BudgetTypeBadge budgetType={r.row.budgetType} />,
+    },
     {
       key: 'jikou',
       label: '事項',
