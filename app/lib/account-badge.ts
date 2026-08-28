@@ -19,7 +19,8 @@ export function getAccountBadgeStyle(category?: string | null): { label: string;
   if (!category) return null;
   const generalColor = '#e45f6f';
   const specialColor = '#5f8ee8';
-  const agencyColor = '#2e9e6f';
+  // 白文字とのコントラスト比 4.5:1（WCAG AA、小さいラベル向け）を確保できる濃さにする
+  const agencyColor = '#18794e';
   if (category === 'general') return { label: '一般', background: generalColor };
   if (category === 'special') return { label: '特別', background: specialColor };
   if (category === 'agency') return { label: '機関', background: agencyColor };

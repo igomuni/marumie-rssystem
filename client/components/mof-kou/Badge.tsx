@@ -15,7 +15,9 @@
  * Badge（塗りつぶし・枠線なし）とOutlineBadge（白背景・border-2）は、同じ行内で高さが
  * 揃うように調整してある。OutlineBadgeはborder-2の分だけ上下パディングを持たせず
  * （py指定なし）、Badge側のpy-0.5との合計高さが一致するようにしている。どちらかの
- * パディング・ボーダーを変えるときはもう片方も見て高さのつり合いを確認すること。
+ * パディング・ボーダーを変えるときはもう片方も見て高さのつり合いを確認すること
+ * （py-0.4のようなTailwindのデフォルトspacingスケールに無い値は無音でCSSが生成されず、
+ * 何も効かないので使わないこと）。
  */
 
 import { getAccountBadgeStyle } from '@/app/lib/account-badge';
@@ -25,7 +27,7 @@ import type { MOFKouMokuAccountType } from '@/types/mof-kou-moku';
 export function Badge({ label, background }: { label: string; background: string }) {
   return (
     <span
-      className="inline-block whitespace-nowrap rounded px-1.5 py-0.4 text-[10px] font-semibold leading-snug text-white"
+      className="inline-block whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold leading-snug text-white"
       style={{ background }}
     >
       {label}
@@ -37,7 +39,7 @@ export function Badge({ label, background }: { label: string; background: string
 export function OutlineBadge({ label, color }: { label: string; color: string }) {
   return (
     <span
-      className="inline-block whitespace-nowrap rounded border-2 bg-white px-1.5 py-0.4 text-[10px] font-semibold leading-snug text-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+      className="inline-block whitespace-nowrap rounded border-2 bg-white px-1.5 text-[10px] font-semibold leading-snug text-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
       style={{ borderColor: color }}
     >
       {label}

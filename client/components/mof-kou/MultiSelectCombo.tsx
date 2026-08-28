@@ -78,6 +78,7 @@ export function MultiSelectCombo({ label, options, selected, onChange, disabled,
         ref={buttonRef}
         type="button"
         disabled={disabled}
+        aria-label={label}
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => {
