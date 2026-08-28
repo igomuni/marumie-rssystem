@@ -61,7 +61,6 @@ interface FilterSidebarProps {
   domains: FilterDomains;
   activeCount: number;
   onReset: () => void;
-  width: number;
 }
 
 function formatRate(v: number): string {
@@ -90,13 +89,9 @@ export function FilterSidebar({
   domains,
   activeCount,
   onReset,
-  width,
 }: FilterSidebarProps) {
   return (
-    <div
-      className="flex h-full shrink-0 flex-col overflow-y-auto rounded-lg border border-neutral-200 bg-white p-3 text-xs dark:border-neutral-800 dark:bg-neutral-950"
-      style={{ width }}
-    >
+    <div className="flex h-full flex-col overflow-y-auto p-3 text-xs">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="font-semibold text-neutral-700 dark:text-neutral-300">フィルタ</h2>
         {activeCount > 0 && (

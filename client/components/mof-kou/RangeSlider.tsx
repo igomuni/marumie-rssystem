@@ -42,16 +42,19 @@ export interface RangeSliderProps {
   scale?: 'linear' | 'log';
 }
 
+// input自体の高さはコンテナ(h-4)いっぱいに取る。Thumb(14px)より箱が小さいと、ブラウザが
+// Thumbを箱の中央ではなく上端基準で描画し縦がズレるため、箱の高さをThumb以上に確保する。
+// トラックの細い線・選択範囲のハイライトは別の<div>で下に敷き、input自身のトラックは透明にする
 const trackClass =
-  'pointer-events-none absolute inset-x-0 top-1/2 h-1.5 w-full -translate-y-1/2 appearance-none bg-transparent ' +
-  '[&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-transparent ' +
+  'pointer-events-none absolute inset-0 h-full w-full appearance-none bg-transparent ' +
+  '[&::-webkit-slider-runnable-track]:h-full [&::-webkit-slider-runnable-track]:bg-transparent ' +
   '[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:z-10 ' +
-  '[&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full ' +
-  '[&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-neutral-500 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow ' +
-  'dark:[&::-webkit-slider-thumb]:border-neutral-400 dark:[&::-webkit-slider-thumb]:bg-neutral-200 ' +
-  '[&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-transparent ' +
+  '[&::-webkit-slider-thumb]:mt-0 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full ' +
+  '[&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-neutral-400 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow ' +
+  'dark:[&::-webkit-slider-thumb]:border-neutral-500 dark:[&::-webkit-slider-thumb]:bg-neutral-200 ' +
+  '[&::-moz-range-track]:h-full [&::-moz-range-track]:bg-transparent [&::-moz-range-track]:border-0 ' +
   '[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-3.5 [&::-moz-range-thumb]:w-3.5 [&::-moz-range-thumb]:rounded-full ' +
-  '[&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-neutral-500 [&::-moz-range-thumb]:bg-white';
+  '[&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-neutral-400 [&::-moz-range-thumb]:bg-white';
 
 /** 項一覧の数値列を絞り込むレンジスライダー（下ハンドル・上ハンドルの2本＋直接入力） */
 export function RangeSlider({ label, note, domainMin, domainMax, value, onChange, formatValue, scale = 'linear' }: RangeSliderProps) {
@@ -126,9 +129,9 @@ export function RangeSlider({ label, note, domainMin, domainMax, value, onChange
       ) : (
         <>
           <div className="relative h-4">
-            <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+            <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-neutral-200 dark:bg-neutral-700" />
             <div
-              className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-neutral-500 dark:bg-neutral-400"
+              className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-blue-500"
               style={{ left: `${(posMin / STEPS) * 100}%`, right: `${100 - (posMax / STEPS) * 100}%` }}
             />
             <input

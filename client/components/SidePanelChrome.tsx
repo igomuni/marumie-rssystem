@@ -32,6 +32,12 @@ export interface SidePanelChromeProps {
   zIndex?: number;
   /** ルート要素に付与する data-testid 等の識別用途 */
   testId?: string;
+  /**
+   * ルート要素の position。既定は 'fixed'（ビューポート全体を覆うキャンバス型ページ向け、
+   * サンキー・subcontracts）。ヘッダー等の通常のドキュメントフローを持つページでは
+   * 'absolute' を指定し、`position: relative` な親要素の中に収める（/mof-kou 等）。
+   */
+  position?: 'fixed' | 'absolute';
   children: ReactNode;
 }
 
@@ -52,6 +58,7 @@ export function SidePanelChrome({
   collapseLabel = 'パネルを折りたたむ',
   zIndex = 25,
   testId,
+  position = 'fixed',
   children,
 }: SidePanelChromeProps) {
   const isLeft = side === 'left';
@@ -61,7 +68,7 @@ export function SidePanelChrome({
     : (isLeft ? RIGHT_ARROW : LEFT_ARROW);
 
   const rootStyle: CSSProperties = {
-    position: 'fixed',
+    position,
     [isLeft ? 'left' : 'right']: 0,
     top: 0,
     height: '100%',
