@@ -38,6 +38,7 @@ import type {
 import { MOF_REVISION_NUMBERS, revisedBudgetType } from '@/types/mof-jikou';
 import { amountColumn, readBudgetTables, toEraLabel, yen, zipPath, type CsvRow } from '@/scripts/mof-budget-csv';
 import { MAJOR_EXPENSE } from '@/scripts/mof-major-expense';
+import { ECONOMIC_NATURE, FISCAL_LAW, OBJECTIVE } from '@/scripts/mof-classification-tables';
 import {
   createThrottle,
   extractXmlNames,
@@ -182,6 +183,27 @@ function pageMapKey(budgetType: string, ministry: string, organization: string, 
   return [budgetType, norm(ministry), norm(organization), sectionCode, norm(subItemName)].join('|');
 }
 
+/** 突合キー（budgetType|所管|特別会計|勘定|項コード|目名） */
+function specialPageMapKey(
+  budgetType: string,
+  ministry: string,
+  specialAccount: string,
+  subAccount: string,
+  sectionCode: string,
+  subItemName: string
+): string {
+  return [budgetType, norm(ministry), norm(specialAccount), norm(subAccount), sectionCode, norm(subItemName)].join('|');
+}
+
+/** 特別会計の running_title「財務省所管  地震再保険特別会計」「内閣府及び厚生労働省所管  年金特別会計  基礎年金勘定」を割り当てる（jikou と同じ規約） */
+function resolveSpecialScope(parts: string[]): { ministry: string; specialAccount: string; subAccount: string } {
+  const first = (parts[0] ?? '').replace(/所管$/, '');
+  // CSV（科目別内訳）の特別会計名には「特別会計」接尾辞が無いため、突合のためここで外す
+  const second = (parts[1] ?? '').replace(/特別会計$/, '');
+  const third = parts[2] ?? '';
+  return { ministry: first, specialAccount: second, subAccount: third };
+}
+
 /**
  * 1年度・1帳票（suffix）ぶんの科目別内訳ページを走査し、突合キー→出典URLの
  * マップを作る。メニュー・XMLともキャッシュ優先（`fetchText`）で、jikou が
@@ -257,6 +279,117 @@ async function buildGeneralPageMap(
   return map;
 }
 
+/**
+ * 1年度・1帳票（suffix）ぶんの「歳入歳出予定額科目別表」（特別会計・勘定ごとの
+ * 項/目内訳）を走査し、突合キー→出典URLのマップを作る。一般会計の科目別内訳とは
+ * 別の帳票（title_for_list）・列構成なので専用に実装する。歳出区分のみ対象。
+ *
+ * 行構成（歳出区分）:
+ *   項の行: col1(colSub=2)=項コード, col2(colSub=1)=項名。複数目を持つ項は
+ *           このままだが、col6(colSub=1)に金額が乗る場合もある（項の小計）。
+ *   目の行: col1(colSub=3)=合成分類コード, col5(colSub=2)=目名, col6(colSub=1)=金額
+ *   項に目が1件も続かない場合（例: 予備費）は項の行自体に金額が乗り、
+ *   そのまま項名を目名とみなして登録する（次の項行 or 歳出合計で確定させる）。
+ */
+async function buildSpecialPageMap(
+  fiscalYear: number,
+  suffix: string,
+  budgetType: MOFBudgetType
+): Promise<Map<string, PageEntry>> {
+  const map = new Map<string, PageEntry>();
+  const cacheDir = scrapeCacheDir(fiscalYear);
+  const base = scrapeBase(fiscalYear);
+  const documentId = `${fiscalYear}${suffix}`;
+  let menu: string;
+  try {
+    menu = await fetchText(cacheDir, `${base}/html/${documentId}menu.html`, 'euc-jp', throttle, `${documentId}menu.html`);
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 404) return map;
+    console.warn(`  ⚠ [${documentId}] 目次の取得に失敗（特別会計の行単位リンクは帳票単位にフォールバック）: ${(error as Error).message}`);
+    return map;
+  }
+
+  for (const name of extractXmlNames(menu)) {
+    let xml: string;
+    try {
+      xml = await fetchText(cacheDir, `${base}/xml/${name}`, 'shift_jis', throttle, name);
+    } catch (error) {
+      if (error instanceof HttpError) continue;
+      console.warn(`  ⚠ [${documentId}] ${name} の取得に失敗: ${(error as Error).message}`);
+      continue;
+    }
+    // 補正は「歳入歳出予算補正予定額科目別表」という別帳票で列構成（colSub配置）も異なるため対象外
+    // （呼び出し側で layout === 'standard' のみに絞っている）
+    if (listTitle(xml) !== '歳入歳出予定額科目別表') continue;
+
+    const { ministry, specialAccount, subAccount } = resolveSpecialScope(splitRunningTitle(xml));
+    const { rows } = parseTable(xml);
+    const sourceUrl = `${base}/xml/${name}`;
+
+    let inExpenditure = false;
+    let sectionCode = '';
+    let sectionName = '';
+    let sectionPage = 0;
+    let sectionHasChild = false;
+    const flushSection = () => {
+      if (sectionCode && !sectionHasChild && sectionName) {
+        const entry: PageEntry = { sourceUrl, page: sectionPage };
+        // 項に目が1件も続かない場合、CSVの目名は「(項名)」というプレースホルダになる
+        // （一般会計の科目別内訳と同じ規約）。生の項名でも念のため登録しておく
+        map.set(specialPageMapKey(budgetType, ministry, specialAccount, subAccount, sectionCode, `(${sectionName})`), entry);
+        map.set(specialPageMapKey(budgetType, ministry, specialAccount, subAccount, sectionCode, ''), entry);
+        map.set(specialPageMapKey(budgetType, ministry, specialAccount, subAccount, sectionCode, sectionName), entry);
+      }
+    };
+
+    for (const row of rows) {
+      const col1Text = textAt(row, 1);
+      if (col1Text === '歳出') {
+        inExpenditure = true;
+        continue;
+      }
+      if (col1Text === '歳出合計') {
+        flushSection();
+        inExpenditure = false;
+        sectionCode = '';
+        continue;
+      }
+      if (!inExpenditure) continue;
+
+      const firstCell = (row.cols.get(1) ?? [])[0];
+      if (!firstCell) continue;
+      const cellText = firstCell.text.trim();
+
+      // 目の行は分類コードがハイフン区切りの合成コード（例: "02081-509-21"）。
+      // 項の行は数字のみ（プレースホルダが付く場合あり: "09(98110-959-‥)"）。
+      // colSubの割り当ては年度により変わる（2024はcol1=sub2/3、2017はsub2/4など）ため
+      // sub番号には依存せず、コードの見た目だけで判定する。
+      if (cellText.includes('-')) {
+        const subItemName = textAt(row, 5);
+        if (subItemName && sectionCode) {
+          map.set(specialPageMapKey(budgetType, ministry, specialAccount, subAccount, sectionCode, subItemName), {
+            sourceUrl,
+            page: row.page,
+          });
+          sectionHasChild = true;
+        }
+        continue;
+      }
+
+      const code = /^(\d+)/.exec(cellText)?.[1] ?? '';
+      if (code) {
+        flushSection();
+        sectionCode = code;
+        sectionName = textAt(row, 2);
+        sectionPage = row.page;
+        sectionHasChild = false;
+      }
+    }
+    flushSection();
+  }
+  return map;
+}
+
 /** 会計区分ごとの列名の違いを吸収する */
 function rowFields(row: CsvRow, accountType: MOFKouMokuAccountType, layout: Layout) {
   const subItemCodeCol = layout === 'settlement' ? '目番号' : accountType === 'agency' ? '目コード' : '目別分類コード';
@@ -269,6 +402,11 @@ function rowFields(row: CsvRow, accountType: MOFKouMokuAccountType, layout: Layo
     sectionCode: row['項コード'] ?? '',
     sectionName: row['項名'] ?? '',
     majorExpenseCode: row['主要経費別分類コード'] ?? '',
+    // 目的別・財政法公債金対象非対象別・経済性質別の3分類は政府関係機関の帳票に無い。
+    // 財政法公債金対象非対象別はさらに特別会計にも無い（複合コードが1桁少ない理由）
+    objectiveCode: row['目的別分類コード'] ?? '',
+    fiscalLawCode: row['財政法公債金対象非対象別分類コード'] ?? '',
+    economicNatureCode: row['経済性質別分類コード'] ?? '',
     subItemCode: row[subItemCodeCol] ?? '',
     subItemName: row['目名'] ?? '',
     purposeCode: row['使途別分類コード'] ?? '',
@@ -279,7 +417,7 @@ function extractStandard(
   rows: CsvRow[],
   spec: DocumentSpec,
   fiscalYear: number
-): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
+): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'objectiveName' | 'fiscalLawName' | 'economicNatureName' | 'purposeName'>> {
   const col = amountColumn(rows);
   const documentId = `${fiscalYear}${spec.suffix}`;
   const sourceUrl = documentUrl(fiscalYear, spec.suffix);
@@ -312,7 +450,7 @@ function extractRevised(
   rows: CsvRow[],
   spec: DocumentSpec,
   fiscalYear: number
-): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
+): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'objectiveName' | 'fiscalLawName' | 'economicNatureName' | 'purposeName'>> {
   if (rows.length === 0) return [];
   const headers = Object.keys(rows[0]);
   const colRevised = findColumn(headers, h => /^改(令和|平成)(元|\d+)年度/.test(h));
@@ -346,7 +484,7 @@ function extractSettlement(
   rows: CsvRow[],
   spec: DocumentSpec,
   fiscalYear: number
-): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
+): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'objectiveName' | 'fiscalLawName' | 'economicNatureName' | 'purposeName'>> {
   const documentId = `${fiscalYear}${spec.suffix}`;
   const sourceUrl = documentUrl(fiscalYear, spec.suffix);
   return rows.map((row, i) => {
@@ -381,7 +519,7 @@ async function generateYear(fiscalYear: number): Promise<void> {
     console.warn(`  ⚠️  ${fiscalYear}年度はローカルにZIPがありません。スキップします。`);
     return;
   }
-  const items: Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> = [];
+  const items: Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'objectiveName' | 'fiscalLawName' | 'economicNatureName' | 'purposeName'>> = [];
   const documentSummaries: MOFKouMokuData['metadata']['documents'] = [];
 
   for (const spec of documents) {
@@ -429,6 +567,32 @@ async function generateYear(fiscalYear: number): Promise<void> {
     );
   }
 
+  // 特別会計は「歳入歳出予定額科目別表」（勘定ごと）を走査して行単位のURLに差し替える
+  // （standardレイアウトのみ対象。補正は列構成が異なる別帳票のため対象外・帳票単位のまま）
+  const specialSpecs = documents.filter(s => s.accountType === 'special' && s.layout === 'standard');
+  const specialPageMap = new Map<string, PageEntry>();
+  for (const spec of specialSpecs) {
+    const specMap = await buildSpecialPageMap(fiscalYear, spec.suffix, spec.budgetType);
+    for (const [k, v] of specMap) specialPageMap.set(k, v);
+  }
+  let specialPageMatched = 0;
+  for (const item of items) {
+    if (item.accountType !== 'special') continue;
+    const key = specialPageMapKey(item.budgetType, item.ministry, item.specialAccount, item.subAccount, item.sectionCode, item.subItemName);
+    const entry = specialPageMap.get(key);
+    if (entry) {
+      item.sourceUrl = entry.sourceUrl;
+      item.page = entry.page;
+      specialPageMatched++;
+    }
+  }
+  const specialCount = items.filter(i => i.accountType === 'special').length;
+  if (specialCount > 0) {
+    console.log(
+      `  科目別内訳ページ走査: 特別会計 ${specialCount.toLocaleString()} 件中 ${specialPageMatched.toLocaleString()} 件で行単位のURLを特定`
+    );
+  }
+
   const fullItems: MOFKouMokuItem[] = items.map(item => ({
     ...item,
     key: [
@@ -444,6 +608,9 @@ async function generateYear(fiscalYear: number): Promise<void> {
       item.subItemName,
     ].join('|'),
     majorExpenseName: item.majorExpenseCode ? MAJOR_EXPENSE[item.majorExpenseCode] ?? '' : '',
+    objectiveName: item.objectiveCode ? OBJECTIVE[item.objectiveCode] ?? '' : '',
+    fiscalLawName: item.fiscalLawCode ? FISCAL_LAW[item.fiscalLawCode] ?? '' : '',
+    economicNatureName: item.economicNatureCode ? ECONOMIC_NATURE[item.economicNatureCode] ?? '' : '',
     purposeName: PURPOSE_NAMES[item.purposeCode] ?? '',
   }));
 

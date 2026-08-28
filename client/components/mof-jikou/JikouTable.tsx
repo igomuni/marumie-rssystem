@@ -150,13 +150,13 @@ export function JikouTable({
                 <button
                   type="button"
                   onClick={() => onToggleSort(col)}
-                  className={`w-full px-2 py-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
-                    col.numeric ? 'text-right' : 'text-left'
+                  className={`flex w-full items-center gap-0.5 overflow-hidden px-2 py-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
+                    col.numeric ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  <span className="truncate align-middle">{col.label}</span>
+                  <span className="min-w-0 truncate">{col.label}</span>
                   {/* ソート記号は常に同じ幅を占有させ、切替で列幅も文字位置も動かさない */}
-                  <span className="ml-0.5 inline-block w-2.5 align-middle text-[9px]">
+                  <span className="w-2.5 shrink-0 text-[9px]">
                     {active ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                   </span>
                 </button>

@@ -17,7 +17,7 @@ npx tsc --noEmit         # TypeScript 型チェック
 
 日本の2024年度予算・支出データをインタラクティブなSankey図で可視化する Next.js アプリ。
 
-**公開ページ**: `/sankey-svg`（メイン、`/` からリダイレクト）、`/subcontracts`、`/mof-budget-overview`（URL直打ち）、`/mof-jikou`（URL直打ち・予算書の事項一覧）、`/mof-hierarchy`（URL直打ち・事項の階層サンキー）、`/quality`（URL直打ち）、`/project-bubble`（URL直打ち・事業バブルチャート＝意味的2次元配置）
+**公開ページ**: `/sankey-svg`（メイン、`/` からリダイレクト）、`/subcontracts`、`/mof-budget-overview`（URL直打ち）、`/mof-jikou`（URL直打ち・予算書の事項一覧）、`/mof-kou-moku`（URL直打ち・予算書の目一覧）、`/mof-kou`（URL直打ち・予算書の項一覧）、`/mof-hierarchy`（URL直打ち・事項の階層サンキー）、`/quality`（URL直打ち）、`/project-bubble`（URL直打ち・事業バブルチャート＝意味的2次元配置）
 
 **Key Statistics**: 151.12兆円 総予算 / 5,003事業 / 26,823支出先（予算年度2023実績・再委託先含む）
 
@@ -25,7 +25,7 @@ npx tsc --noEmit         # TypeScript 型チェック
 
 | Layer | Directory | 役割 |
 |-------|-----------|------|
-| Data Pipeline | `scripts/` | CSV処理のみ。UIやAPIロジック禁止 |
+| Data Pipeline | `scripts/` | ソースデータの取得・変換（CSV処理に加え、MOF予算書Web帳票のXML取得も含む。`generate-mof-jikou-data.ts`・`generate-mof-kou-moku-data.ts`等）。UIやAPIロジック禁止 |
 | Domain Logic | `app/lib/` | Pure Sankey生成。HTTP・React禁止 |
 | API Layer | `app/api/` | HTTPハンドラ。ロジックは `app/lib/` に委譲 |
 | UI Components | `client/components/` | 再利用可能UI。直接APIコール禁止 |

@@ -15,7 +15,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import type { MOFKouMokuAccountType, MOFKouMokuData, MOFKouMokuHistory } from '@/types/mof-kou-moku';
-import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
+import type { MofRsKouMokuLinkageRecord, MofRsKouMokuLinkageResponse } from '@/types/mof-rs-kou-moku-linkage';
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { KouMokuTable } from '@/client/components/mof-kou-moku/KouMokuTable';
 import {
@@ -59,6 +59,8 @@ export default function MOFKouMokuPage() {
   const [linkageLinks, setLinkageLinks] = useState<MofRsKouMokuLinkageRecord[] | null>(null);
   const [linkageAvailable, setLinkageAvailable] = useState(false);
   const [linkageRsYear, setLinkageRsYear] = useState<number | null>(null);
+  const [linkageIsCarriedOver, setLinkageIsCarriedOver] = useState(false);
+  const [linkageSourceBudgetYear, setLinkageSourceBudgetYear] = useState<number | null>(null);
   const [linkageLoading, setLinkageLoading] = useState(false);
   const [linkageError, setLinkageError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -133,6 +135,8 @@ export default function MOFKouMokuPage() {
       setLinkageLinks(null);
       setLinkageAvailable(false);
       setLinkageRsYear(null);
+      setLinkageIsCarriedOver(false);
+      setLinkageSourceBudgetYear(null);
       setLinkageError(null);
       setLinkageLoading(false);
       return;
@@ -141,16 +145,22 @@ export default function MOFKouMokuPage() {
     setLinkageLinks(null);
     setLinkageAvailable(false);
     setLinkageRsYear(null);
+    setLinkageIsCarriedOver(false);
+    setLinkageSourceBudgetYear(null);
     setLinkageError(null);
     setLinkageLoading(true);
     fetch(`/api/mof-kou-moku/linkage?year=${linkageYear}`)
       .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
-      .then((json: { available: boolean; rsYear: number | null; links: MofRsKouMokuLinkageRecord[] }) => {
-        if (cancelled) return;
-        setLinkageAvailable(json.available);
-        setLinkageRsYear(json.rsYear);
-        setLinkageLinks(json.links);
-      })
+      .then(
+        (json: MofRsKouMokuLinkageResponse) => {
+          if (cancelled) return;
+          setLinkageAvailable(json.available);
+          setLinkageRsYear(json.rsYear);
+          setLinkageLinks(json.links);
+          setLinkageIsCarriedOver(json.isCarriedOver);
+          setLinkageSourceBudgetYear(json.sourceBudgetYear);
+        }
+      )
       .catch((e: Error) => !cancelled && setLinkageError(e.message))
       .finally(() => !cancelled && setLinkageLoading(false));
     return () => {
@@ -519,6 +529,8 @@ export default function MOFKouMokuPage() {
               linkageByKey={linkageByKey}
               linkageAvailable={linkageAvailable}
               linkageRsYear={linkageRsYear}
+              linkageIsCarriedOver={linkageIsCarriedOver}
+              linkageSourceBudgetYear={linkageSourceBudgetYear}
               linkageLoading={linkageLoading}
               linkageError={linkageError}
             />

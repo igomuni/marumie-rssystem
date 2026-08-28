@@ -38,13 +38,16 @@ export function loadYear(year: number): MOFKouMokuData {
 /**
  * 予算種別を除いた「同じ目」の識別子。
  * `item.key` は予算種別を含むため、当初と決算を同じ目として辿れない。
- * ここでは種別だけを落とし、会計区分・所管・組織・特会・勘定・機関・項コード・
+ * ここでは種別だけを落とし、会計区分・組織・特会・勘定・機関・項コード・
  * 目分類コード・目名で識別する（`/mof-jikou` の identityKey と同じ考え方）。
+ *
+ * 所管（ministry）は含めない。共管の追加・解消で表記が変わることがあり（例:
+ * 「内閣府及び厚生労働省」→「厚生労働省」、令和6→7年度）、含めるとその境目で
+ * 実態としては継続の目が別物として扱われてしまう。
  */
 export function identityKey(item: MOFKouMokuItem): string {
   return [
     item.accountType,
-    item.ministry,
     item.organization,
     item.specialAccount,
     item.subAccount,
@@ -58,8 +61,8 @@ export function identityKey(item: MOFKouMokuItem): string {
 /** `item.key`（予算種別を含む）から識別子に落とす */
 function identityFromKey(key: string): string {
   const parts = key.split('|');
-  // key の並びは 会計区分 | 予算種別 | 所管 | … なので2番目を取り除く
-  return [parts[0], ...parts.slice(2)].join('|');
+  // key の並びは 会計区分 | 予算種別 | 所管 | 組織 | … なので予算種別・所管（1・2番目）を取り除く
+  return [parts[0], ...parts.slice(3)].join('|');
 }
 
 /**

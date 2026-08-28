@@ -17,6 +17,7 @@ const PAGES = [
   { href: '/mof-budget-overview', label: '予算全体（MOF）' },
   { href: '/mof-jikou', label: '予算書 事項（MOF）' },
   { href: '/mof-kou-moku', label: '予算書 科目別内訳（MOF）' },
+  { href: '/mof-kou', label: '予算書 項一覧（MOF）' },
   { href: '/mof-hierarchy', label: '予算書 階層フロー（MOF）' },
 ] as const;
 

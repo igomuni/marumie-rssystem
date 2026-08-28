@@ -45,6 +45,10 @@ interface Props {
   linkageAvailable: boolean;
   /** /sankey-svg へのリンクに使うRS事業年度。紐づけデータ未生成なら null */
   linkageRsYear: number | null;
+  /** 表示中の年度自体には紐づけデータが無く、過去年度から識別子で引き継いだ参考値の場合 true */
+  linkageIsCarriedOver: boolean;
+  /** 引き継ぎ元の予算年度（isCarriedOverがtrueのときのみ意味を持つ） */
+  linkageSourceBudgetYear: number | null;
   linkageLoading: boolean;
   linkageError: string | null;
   emptyMessage?: string;
@@ -73,6 +77,8 @@ export function KouMokuTable({
   linkageByKey,
   linkageAvailable,
   linkageRsYear,
+  linkageIsCarriedOver,
+  linkageSourceBudgetYear,
   linkageLoading,
   linkageError,
   emptyMessage = '条件に合う目がありません。',
@@ -135,12 +141,12 @@ export function KouMokuTable({
                 <button
                   type="button"
                   onClick={() => onToggleSort(col)}
-                  className={`w-full px-2 py-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
-                    col.numeric ? 'text-right' : 'text-left'
+                  className={`flex w-full items-center gap-0.5 overflow-hidden px-2 py-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 ${
+                    col.numeric ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  <span className="truncate align-middle">{col.label}</span>
-                  <span className="ml-0.5 inline-block w-2.5 align-middle text-[9px]">
+                  <span className="min-w-0 truncate">{col.label}</span>
+                  <span className="w-2.5 shrink-0 text-[9px]">
                     {active ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                   </span>
                 </button>
@@ -181,8 +187,14 @@ export function KouMokuTable({
                       onClick={e => e.stopPropagation()}
                       title={`/sankey-svg で「${rowBestLink.projectName}」を開く（${
                         rowBestLink.carriedOverFrom ? `${rowBestLink.carriedOverFrom}から引継ぎ` : '完全一致'
-                      }${rowLinks.length > 1 ? `・他${rowLinks.length - 1}件` : ''}）`}
-                      className="inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 hover:underline dark:bg-emerald-900/40 dark:text-emerald-300"
+                      }${linkageIsCarriedOver ? `・${linkageSourceBudgetYear}年度からの参考値` : ''}${
+                        rowLinks.length > 1 ? `・他${rowLinks.length - 1}件` : ''
+                      }）`}
+                      className={
+                        linkageIsCarriedOver
+                          ? 'inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 hover:underline dark:bg-amber-900/40 dark:text-amber-300'
+                          : 'inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 hover:underline dark:bg-emerald-900/40 dark:text-emerald-300'
+                      }
                     >
                       RS↗
                     </a>
@@ -280,9 +292,19 @@ export function KouMokuTable({
                         <div className="min-w-[20rem] max-w-2xl">
                           <div className="mb-1 text-[11px] font-medium text-neutral-400">
                             紐づく RS 事業（
-                            {item.budgetType === '決算' ? '予算側から引継ぎ・' : '完全一致・'}
+                            {linkageIsCarriedOver
+                              ? `${linkageSourceBudgetYear}年度から引継ぎ・`
+                              : item.budgetType === '決算'
+                                ? '予算側から引継ぎ・'
+                                : '完全一致・'}
                             {linkageLoading ? '読込中…' : `${rowLinks.length} 件`}）
                           </div>
+                          {linkageIsCarriedOver && (
+                            <p className="mb-1.5 max-w-[18rem] text-[11px] text-amber-700 dark:text-amber-400">
+                              この年度自体のRS紐づけデータはまだ無いため、
+                              {linkageSourceBudgetYear}年度時点の紐づけを識別子（項・目コード等）で参考表示しています。
+                            </p>
+                          )}
                           {linkageError ? (
                             <p className="text-[11px] text-red-600">紐づけの取得に失敗しました: {linkageError}</p>
                           ) : !linkageAvailable ? (
