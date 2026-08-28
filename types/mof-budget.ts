@@ -24,6 +24,11 @@ export interface MOFJikouLeaf {
   amount: number;
   previousAmount: number | null;
   difference: number | null;
+  /** 以下4つは決算のみ。予算の帳票では null */
+  currentAmount: number | null;
+  spent: number | null;
+  carriedOver: number | null;
+  unused: number | null;
   documentId: string;
   page: number;
   sourceUrl: string;

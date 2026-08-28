@@ -1,8 +1,9 @@
 /**
- * 項レベルの集計。`/mof-jikou`（事項）・`/mof-kou-moku`（目）・`mof-rs-kou-moku-linkage`
- * （目↔RS事業の紐づけ）の読み込み結果を、リクエスト時に項単位へ束ねる。
- * 3系統とも既にプロセス内キャッシュされているデータを読むだけなので、
- * このモジュール専用の生成JSONファイルは持たない。
+ * 項レベルの集計。正準データ `mof-budget-{年度}.json`（項を頂点に事項・目を子として持つ
+ * 統合JSON。generate-mof-budget-data.ts が事項別内訳・科目別内訳・項の出典ページを
+ * 事前に結合したもの）を読み、RS紐づけ（`mof-rs-kou-moku-linkage`）だけをリクエスト時に
+ * 上乗せする。RS紐づけは更新サイクルがMOFデータと独立しているため、静的ファイルには
+ * 焼き込まず実行時オーバーレイのままにしている。
  */
 
 import type { MOFBudgetType } from '@/types/mof-jikou';
@@ -10,64 +11,16 @@ import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuAccountType, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
-import type { MOFSectionPageData } from '@/types/mof-section-pages';
+import type { MOFBudgetData, MOFDescriptionData, MOFJikouLeaf, MOFKouMokuLeaf, MOFSection } from '@/types/mof-budget';
 import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionHistoryYear, MOFKouSectionSummary } from '@/types/mof-kou';
-import { availableYears as jikouAvailableYears, loadYear as loadJikouYear } from './mof-jikou-loader';
-import { availableYears as kouMokuAvailableYears, loadYear as loadKouMokuYear } from './mof-kou-moku-loader';
 import { resolveLinks } from './mof-rs-kou-moku-linkage-loader';
 import { findLinksByKey as findJikouLinksByKey, linkageAvailable as jikouLinkageAvailable } from './mof-rs-linkage-loader';
-import { tryReadDataJson } from './data-file';
+import { dataFileExists, readDataJson, tryReadDataJson } from './data-file';
 
 /** 特別会計名の接尾辞を外す。事項別内訳（Web帳票）は「〜特別会計」付き、科目別内訳（CSV）は無し */
 function normSpecialAccount(s: string): string {
   return s.replace(/特別会計$/, '');
 }
-
-/** 突合用の文字列正規化: NFKC + 空白除去 */
-function norm(s: string): string {
-  return s.normalize('NFKC').replace(/\s+/g, '');
-}
-
-/** 項の出典ページ突合キー（項コードを持たない別帳票のため名前一致で結ぶ） */
-function pageLookupKey(
-  accountType: string,
-  budgetType: string,
-  ministry: string,
-  org: string,
-  subAccount: string,
-  sectionName: string
-): string {
-  return [accountType, budgetType, norm(ministry), norm(org), norm(subAccount), norm(sectionName)].join('|');
-}
-
-interface SectionAgg {
-  id: string;
-  accountType: MOFKouMokuAccountType;
-  budgetType: MOFBudgetType;
-  ministry: string;
-  organization: string;
-  specialAccount: string;
-  subAccount: string;
-  agency: string;
-  sectionCode: string;
-  sectionName: string;
-  /** 項自体の出典ページ（甲号歳入歳出予算等から名前一致で突合。無ければ null） */
-  page: number | null;
-  sourceUrl: string;
-  jikouItems: MOFJikouItem[];
-  kouMokuItems: MOFKouMokuItem[];
-  rsLinks: MofRsKouMokuLinkageRecord[];
-}
-
-interface BuiltYear {
-  fiscalYear: number;
-  eraLabel: string;
-  budgetTypes: MOFBudgetType[];
-  linkage: MOFKouData['metadata']['linkage'];
-  sections: Map<string, SectionAgg>;
-}
-
-const cache = new Map<number, BuiltYear>();
 
 function sectionKey(
   accountType: string,
@@ -80,97 +33,41 @@ function sectionKey(
   return [accountType, budgetType, ministry, org, subAccount, sectionCode].join('|');
 }
 
-function ensureSection(
-  sections: Map<string, SectionAgg>,
-  accountType: MOFKouMokuAccountType,
-  budgetType: MOFBudgetType,
-  ministry: string,
-  org: string,
-  subAccount: string,
-  sectionCode: string,
-  sectionName: string,
-  organization: string,
-  specialAccount: string,
-  agency: string
-): SectionAgg {
-  const key = sectionKey(accountType, budgetType, ministry, org, subAccount, sectionCode);
-  const existing = sections.get(key);
-  if (existing) return existing;
-  const row: SectionAgg = {
-    id: key,
-    accountType,
-    budgetType,
-    ministry,
-    organization,
-    specialAccount,
-    subAccount,
-    agency,
-    sectionCode,
-    sectionName,
-    page: null,
-    sourceUrl: '',
-    jikouItems: [],
-    kouMokuItems: [],
-    rsLinks: [],
-  };
-  sections.set(key, row);
-  return row;
+interface SectionAgg extends MOFSection {
+  rsLinks: MofRsKouMokuLinkageRecord[];
+}
+
+interface BuiltYear {
+  fiscalYear: number;
+  eraLabel: string;
+  budgetTypes: MOFBudgetType[];
+  linkage: MOFKouData['metadata']['linkage'];
+  sections: Map<string, SectionAgg>;
+}
+
+const cache = new Map<number, BuiltYear>();
+const CANDIDATE_YEARS = [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017] as const;
+let cachedYears: number[] | null = null;
+
+/** 生成済みの年度（新しい順） */
+export function availableYears(): number[] {
+  if (!cachedYears) cachedYears = CANDIDATE_YEARS.filter(y => dataFileExists(`mof-budget-${y}.json`));
+  return cachedYears;
 }
 
 function buildYear(fiscalYear: number): BuiltYear {
   const cached = cache.get(fiscalYear);
   if (cached) return cached;
 
-  const jikou = loadJikouYear(fiscalYear);
-  const kouMoku = loadKouMokuYear(fiscalYear);
+  const budgetData = readDataJson<MOFBudgetData>(
+    `mof-budget-${fiscalYear}.json`,
+    `npm run generate-mof-budget を実行してください（対象年度: ${fiscalYear}）。`
+  );
   const linkage = resolveLinks(fiscalYear);
 
   const sections = new Map<string, SectionAgg>();
-
-  for (const it of jikou.items) {
-    const org =
-      it.accountType === 'general'
-        ? it.organization
-        : it.accountType === 'special'
-          ? normSpecialAccount(it.specialAccount)
-          : it.agency;
-    const row = ensureSection(
-      sections,
-      it.accountType,
-      it.budgetType,
-      it.ministry,
-      org,
-      it.subAccount,
-      it.sectionCode,
-      it.sectionName,
-      it.accountType === 'general' ? it.organization : '',
-      it.accountType === 'special' ? it.specialAccount : '',
-      it.accountType === 'agency' ? it.agency : ''
-    );
-    row.jikouItems.push(it);
-  }
-
-  for (const it of kouMoku.items) {
-    const org =
-      it.accountType === 'general'
-        ? it.organization
-        : it.accountType === 'special'
-          ? normSpecialAccount(it.specialAccount)
-          : it.agency;
-    const row = ensureSection(
-      sections,
-      it.accountType,
-      it.budgetType,
-      it.ministry,
-      org,
-      it.subAccount,
-      it.sectionCode,
-      it.sectionName,
-      it.accountType === 'general' ? it.organization : '',
-      it.accountType === 'special' ? it.specialAccount : '',
-      it.accountType === 'agency' ? it.agency : ''
-    );
-    row.kouMokuItems.push(it);
+  for (const s of budgetData.sections) {
+    sections.set(s.id, { ...s, rsLinks: [] });
   }
 
   // RS紐づけは一般会計・特別会計のみ（政府関係機関はRSの会計区分に該当値が無く対象外）
@@ -178,47 +75,14 @@ function buildYear(fiscalYear: number): BuiltYear {
     const org = link.mofAccountType === 'special' ? normSpecialAccount(link.mofOrganization) : link.mofOrganization;
     const key = sectionKey(link.mofAccountType, link.mofBudgetType, link.mofMinistry, org, link.mofSubAccount, link.sectionCode);
     const row = sections.get(key);
-    // 対応する目が必ずkouMoku側に存在するはずだが、無ければ黙って捨てる（不整合を握りつぶさず件数として見えなくするだけ）
+    // 対応する目が必ずmof-budget側に存在するはずだが、無ければ黙って捨てる（不整合を握りつぶさず件数として見えなくするだけ）
     if (row) row.rsLinks.push(link);
   }
 
-  // 項自体の出典ページ（甲号歳入歳出予算等）。項コードを持たない別帳票のため名前一致でのみ突合する
-  const sectionPages = tryReadDataJson<MOFSectionPageData>(`mof-section-pages-${fiscalYear}.json`);
-  if (sectionPages) {
-    const pageLookup = new Map<string, SectionAgg>();
-    for (const row of sections.values()) {
-      const org =
-        row.accountType === 'general'
-          ? row.organization
-          : row.accountType === 'special'
-            ? normSpecialAccount(row.specialAccount)
-            : row.agency;
-      const key = pageLookupKey(row.accountType, row.budgetType, row.ministry, org, row.subAccount, row.sectionName);
-      // 同名の項が複数あると突合先が曖昧になるため、最初の1件だけを対象にする（無言の上書きを避ける）
-      if (!pageLookup.has(key)) pageLookup.set(key, row);
-    }
-    for (const entry of sectionPages.entries) {
-      const org =
-        entry.accountType === 'general'
-          ? entry.organization
-          : entry.accountType === 'special'
-            ? normSpecialAccount(entry.specialAccount)
-            : entry.agency;
-      const key = pageLookupKey(entry.accountType, entry.budgetType, entry.ministry, org, entry.subAccount, entry.sectionName);
-      const row = pageLookup.get(key);
-      if (row && row.page === null) {
-        row.page = entry.page;
-        row.sourceUrl = entry.sourceUrl;
-      }
-    }
-  }
-
-  const budgetTypes = [...new Set([...jikou.metadata.budgetTypes, ...kouMoku.metadata.budgetTypes])];
-
   const built: BuiltYear = {
     fiscalYear,
-    eraLabel: kouMoku.metadata.eraLabel,
-    budgetTypes,
+    eraLabel: budgetData.metadata.eraLabel,
+    budgetTypes: budgetData.metadata.budgetTypes,
     linkage: {
       available: linkage.sourceBudgetYear !== null,
       isCarriedOver: linkage.isCarriedOver,
@@ -231,17 +95,11 @@ function buildYear(fiscalYear: number): BuiltYear {
   return built;
 }
 
-/** 生成済みの年度（新しい順）。jikou・kou-moku 双方にデータがある年度だけ対象 */
-export function availableYears(): number[] {
-  const jSet = new Set(jikouAvailableYears());
-  return kouMokuAvailableYears().filter(y => jSet.has(y));
-}
-
 /** 項内で金額最大の値を代表値として選ぶ汎用ヘルパ（主要経費・使途別分類で共用） */
 function representativeClassification(
-  items: MOFKouMokuItem[],
-  codeOf: (item: MOFKouMokuItem) => string,
-  nameOf: (item: MOFKouMokuItem) => string
+  items: MOFKouMokuLeaf[],
+  codeOf: (item: MOFKouMokuLeaf) => string,
+  nameOf: (item: MOFKouMokuLeaf) => string
 ): { name: string; mixed: boolean } {
   const byCode = new Map<string, { name: string; amount: number }>();
   for (const it of items) {
@@ -257,22 +115,8 @@ function representativeClassification(
 }
 
 function toSummary(row: SectionAgg): MOFKouSectionSummary {
-  const amount = row.kouMokuItems.reduce((sum, i) => sum + i.amount, 0);
-  const hasAllPrevious = row.kouMokuItems.length > 0 && row.kouMokuItems.every(i => i.previousAmount !== null);
-  const previousAmount = hasAllPrevious
-    ? row.kouMokuItems.reduce((sum, i) => sum + (i.previousAmount ?? 0), 0)
-    : null;
-  const difference = previousAmount === null ? null : amount - previousAmount;
-  const majorExpense = representativeClassification(
-    row.kouMokuItems,
-    i => i.majorExpenseCode,
-    i => i.majorExpenseName
-  );
-  const purpose = representativeClassification(
-    row.kouMokuItems,
-    i => i.purposeCode,
-    i => i.purposeName
-  );
+  const majorExpense = representativeClassification(row.koumoku, i => i.majorExpenseCode, i => i.majorExpenseName);
+  const purpose = representativeClassification(row.koumoku, i => i.purposeCode, i => i.purposeName);
   return {
     id: row.id,
     accountType: row.accountType,
@@ -290,12 +134,12 @@ function toSummary(row: SectionAgg): MOFKouSectionSummary {
     majorExpenseMixed: majorExpense.mixed,
     purposeName: purpose.name,
     purposeMixed: purpose.mixed,
-    jikouCount: row.jikouItems.length,
-    kouMokuCount: row.kouMokuItems.length,
+    jikouCount: row.jikou.length,
+    kouMokuCount: row.koumoku.length,
     rsProjectCount: new Set(row.rsLinks.map(l => l.projectId)).size,
-    amount,
-    previousAmount,
-    difference,
+    amount: row.amount,
+    previousAmount: row.previousAmount,
+    difference: row.difference,
   };
 }
 
@@ -336,11 +180,111 @@ export function listSections(fiscalYear: number): MOFKouData {
   };
 }
 
+/** MOFJikouLeaf（項の子要素）から、既存の /mof-jikou と同じ形の MOFJikouItem を復元する */
+function hydrateJikou(section: SectionAgg, leaf: MOFJikouLeaf, description: string): MOFJikouItem {
+  return {
+    id: leaf.id,
+    key: [
+      section.accountType,
+      section.budgetType,
+      section.ministry,
+      section.organization,
+      section.specialAccount,
+      section.subAccount,
+      section.agency,
+      section.sectionCode,
+      leaf.name,
+    ].join('|'),
+    accountType: section.accountType,
+    budgetType: section.budgetType,
+    documentId: leaf.documentId,
+    ministry: section.ministry,
+    organization: section.organization,
+    specialAccount: section.specialAccount,
+    subAccount: section.subAccount,
+    agency: section.agency,
+    sectionCode: section.sectionCode,
+    sectionName: section.sectionName,
+    majorExpenseCode: leaf.majorExpenseCode,
+    majorExpenseName: leaf.majorExpenseName,
+    name: leaf.name,
+    amount: leaf.amount,
+    previousAmount: leaf.previousAmount,
+    difference: leaf.difference,
+    currentAmount: leaf.currentAmount,
+    spent: leaf.spent,
+    carriedOver: leaf.carriedOver,
+    unused: leaf.unused,
+    description,
+    page: leaf.page,
+    sourceUrl: leaf.sourceUrl,
+  };
+}
+
+/** MOFKouMokuLeaf（項の子要素）から、既存の /mof-kou-moku と同じ形の MOFKouMokuItem を復元する */
+function hydrateKouMoku(section: SectionAgg, leaf: MOFKouMokuLeaf): MOFKouMokuItem {
+  // section.specialAccount は「先に登場したソース（事項・目のどちらか）の生値」を持つため、
+  // 事項側が先に登場した項では「〜特別会計」付きになっている（事項別内訳＝Web帳票の慣習）。
+  // kou-mokuの元データ（CSVには接尾辞が無い）・RS紐づけのkouMokuKeyと一致させるため、
+  // ここでは正規化（接尾辞除去）した値を使う。特別会計名以外に両ソース間の表記差は無い
+  const specialAccount = normSpecialAccount(section.specialAccount);
+  return {
+    id: leaf.id,
+    key: [
+      section.accountType,
+      section.budgetType,
+      section.ministry,
+      section.organization,
+      specialAccount,
+      section.subAccount,
+      section.agency,
+      section.sectionCode,
+      leaf.subItemCode,
+      leaf.subItemName,
+    ].join('|'),
+    accountType: section.accountType as MOFKouMokuAccountType,
+    budgetType: section.budgetType,
+    ministry: section.ministry,
+    organization: section.organization,
+    specialAccount,
+    subAccount: section.subAccount,
+    agency: section.agency,
+    sectionCode: section.sectionCode,
+    sectionName: section.sectionName,
+    majorExpenseCode: leaf.majorExpenseCode,
+    majorExpenseName: leaf.majorExpenseName,
+    objectiveCode: leaf.objectiveCode,
+    objectiveName: leaf.objectiveName,
+    fiscalLawCode: leaf.fiscalLawCode,
+    fiscalLawName: leaf.fiscalLawName,
+    economicNatureCode: leaf.economicNatureCode,
+    economicNatureName: leaf.economicNatureName,
+    subItemCode: leaf.subItemCode,
+    subItemName: leaf.subItemName,
+    purposeCode: leaf.purposeCode,
+    purposeName: leaf.purposeName,
+    amount: leaf.amount,
+    previousAmount: leaf.previousAmount,
+    difference: leaf.difference,
+    currentAmount: leaf.currentAmount,
+    spent: leaf.spent,
+    carriedOver: leaf.carriedOver,
+    unused: leaf.unused,
+    documentId: leaf.documentId,
+    page: leaf.page,
+    sourceUrl: leaf.sourceUrl,
+  };
+}
+
 /** 1項ぶんの詳細（行の展開時に取得） */
 export function sectionDetail(fiscalYear: number, id: string): MOFKouSectionDetail | null {
   const built = buildYear(fiscalYear);
   const row = built.sections.get(id);
   if (!row) return null;
+
+  const descriptions = tryReadDataJson<MOFDescriptionData>(`mof-budget-descriptions-${fiscalYear}.json`) ?? {};
+  const jikouItems = row.jikou.map(leaf => hydrateJikou(row, leaf, descriptions[leaf.id] ?? ''));
+  const kouMokuItems = row.koumoku.map(leaf => hydrateKouMoku(row, leaf));
 
   // 事項単位のRS紐づけ（mof-rs-linkage）はkou-mokuの目単位紐づけと違い年度をまたぐ引き継ぎを
   // 持たないため、ここで直近の過去年度にフォールバックする（identityFromKeyが予算種別・所管を
@@ -349,12 +293,12 @@ export function sectionDetail(fiscalYear: number, id: string): MOFKouSectionDeta
     ? fiscalYear
     : (availableYears().filter(y => y < fiscalYear && jikouLinkageAvailable(y)).sort((a, b) => b - a)[0] ?? null);
   const jikouRsLinks: MofRsLinkageRecord[] =
-    jikouRsLinkYear !== null ? row.jikouItems.flatMap(it => findJikouLinksByKey(jikouRsLinkYear, it.key)) : [];
+    jikouRsLinkYear !== null ? jikouItems.flatMap(it => findJikouLinksByKey(jikouRsLinkYear, it.key)) : [];
 
   return {
     id,
-    jikouItems: row.jikouItems,
-    kouMokuItems: row.kouMokuItems,
+    jikouItems,
+    kouMokuItems,
     rsLinks: row.rsLinks,
     jikouRsLinks,
     jikouRsLinkYear,
