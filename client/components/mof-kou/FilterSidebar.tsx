@@ -121,7 +121,7 @@ export function FilterSidebar({
       </div>
 
       <div className="space-y-3">
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">予算種別</span>
           <MultiSelectCombo
             label="予算種別"
@@ -130,9 +130,9 @@ export function FilterSidebar({
             onChange={v => onChange('budgetType', v)}
             {...comboProps('budgetType')}
           />
-        </label>
+        </div>
 
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">会計区分</span>
           <MultiSelectCombo
             label="会計区分"
@@ -146,9 +146,9 @@ export function FilterSidebar({
             }}
             {...comboProps('account')}
           />
-        </label>
+        </div>
 
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">所管</span>
           <MultiSelectCombo
             label="所管"
@@ -161,9 +161,9 @@ export function FilterSidebar({
             }}
             {...comboProps('ministry')}
           />
-        </label>
+        </div>
 
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">組織／特会／機関</span>
           <MultiSelectCombo
             label="組織／特会／機関"
@@ -175,9 +175,9 @@ export function FilterSidebar({
             }}
             {...comboProps('organization')}
           />
-        </label>
+        </div>
 
-        <label className="block space-y-1">
+        <div className="block space-y-1">
           <span className="text-neutral-500">勘定／業務</span>
           <MultiSelectCombo
             label="勘定／業務"
@@ -187,7 +187,7 @@ export function FilterSidebar({
             disabled={subAccounts.length === 0}
             {...comboProps('subAccount')}
           />
-        </label>
+        </div>
 
         <hr className="border-neutral-200 dark:border-neutral-800" />
 
