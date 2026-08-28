@@ -20,7 +20,8 @@ import type { MOFKouMokuAccountType } from '@/types/mof-kou-moku';
 export function Badge({ label, background }: { label: string; background: string }) {
   return (
     <span
-      className="inline-block whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold leading-snug text-white"
+      // OutlineBadge（border-2）と高さを揃えるため、見えないborder-2を持たせて箱の大きさを一致させる
+      className="inline-block whitespace-nowrap rounded border-2 border-transparent px-1.5 py-0.5 text-[10px] font-semibold leading-snug text-white"
       style={{ background }}
     >
       {label}
