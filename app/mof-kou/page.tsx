@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
@@ -23,6 +24,7 @@ import { KouSidePanel } from '@/client/components/mof-kou/KouSidePanel';
 import { FilterSidebar, type FilterDomains, type FilterSidebarState, type NumRange } from '@/client/components/mof-kou/FilterSidebar';
 import { textMatches } from '@/client/components/mof-kou/RegexTextFilter';
 import {
+  ACCOUNT_LABEL,
   COLUMNS,
   DEFAULT_WIDTHS,
   defaultDirFor,
@@ -36,11 +38,11 @@ import {
 const EMPTY_RANGE: NumRange = [null, null];
 
 const INITIAL_FILTERS: FilterSidebarState = {
-  account: 'all',
-  budgetType: '',
-  ministry: '',
-  organization: '',
-  subAccount: '',
+  account: [],
+  budgetType: [],
+  ministry: [],
+  organization: [],
+  subAccount: [],
   sectionNameQuery: '',
   sectionNameRegex: false,
   detailQuery: '',
@@ -53,6 +55,10 @@ const INITIAL_FILTERS: FilterSidebarState = {
   differenceRange: EMPTY_RANGE,
   rateRange: EMPTY_RANGE,
 };
+
+const SIDEBAR_MIN_WIDTH = 200;
+const SIDEBAR_MAX_WIDTH = 480;
+const SIDEBAR_DEFAULT_WIDTH = 256;
 
 function inRange(value: number | null, range: NumRange): boolean {
   const [min, max] = range;
@@ -75,6 +81,7 @@ export default function MOFKouPage() {
 
   const [filters, setFilters] = useState<FilterSidebarState>(INITIAL_FILTERS);
   const [showFilters, setShowFilters] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selected, setSelected] = useState<string | null>(null);
@@ -163,8 +170,8 @@ export default function MOFKouPage() {
   const baseRows = useMemo(() => {
     if (!data) return [];
     return data.sections.filter(s => {
-      if (account !== 'all' && s.accountType !== account) return false;
-      if (budgetType && s.budgetType !== budgetType) return false;
+      if (account.length > 0 && !account.includes(ACCOUNT_LABEL[s.accountType])) return false;
+      if (budgetType.length > 0 && !budgetType.includes(s.budgetType)) return false;
       return true;
     });
   }, [data, account, budgetType]);
@@ -176,15 +183,19 @@ export default function MOFKouPage() {
 
   const organizations = useMemo(
     () =>
-      [...new Set(baseRows.filter(s => !ministry || (s.ministry || s.agency) === ministry).map(orgColumn).filter(Boolean))].sort(),
+      [
+        ...new Set(
+          baseRows.filter(s => ministry.length === 0 || ministry.includes(s.ministry || s.agency)).map(orgColumn).filter(Boolean)
+        ),
+      ].sort(),
     [baseRows, ministry]
   );
 
   const scopedRows = useMemo(
     () =>
       baseRows
-        .filter(s => !ministry || (s.ministry || s.agency) === ministry)
-        .filter(s => !organization || orgColumn(s) === organization),
+        .filter(s => ministry.length === 0 || ministry.includes(s.ministry || s.agency))
+        .filter(s => organization.length === 0 || organization.includes(orgColumn(s))),
     [baseRows, ministry, organization]
   );
 
@@ -214,7 +225,7 @@ export default function MOFKouPage() {
       return typeof r === 'number' ? r : null;
     }
     const rows = scopedRows.filter(row => {
-      if (filters.subAccount && row.subAccount !== filters.subAccount) return false;
+      if (filters.subAccount.length > 0 && !filters.subAccount.includes(row.subAccount)) return false;
       if (!textMatches(row.sectionName, filters.sectionNameQuery.trim(), filters.sectionNameRegex)) return false;
       const detailQuery = filters.detailQuery.trim();
       if (detailQuery && !row.detailNames.some(name => textMatches(name, detailQuery, filters.detailRegex))) return false;
@@ -244,11 +255,11 @@ export default function MOFKouPage() {
 
   const widthsChanged = COLUMNS.some(c => (widths[c.key] ?? c.width) !== c.width);
   const activeFilterCount = [
-    account !== 'all',
-    budgetType !== '',
-    ministry !== '',
-    organization !== '',
-    subAccount !== '',
+    account.length > 0,
+    budgetType.length > 0,
+    ministry.length > 0,
+    organization.length > 0,
+    subAccount.length > 0,
     filters.sectionNameQuery !== '',
     filters.detailQuery !== '',
     filters.jikouCountRange[0] !== null || filters.jikouCountRange[1] !== null,
@@ -267,6 +278,26 @@ export default function MOFKouPage() {
       setSortKey(column.key);
       setSortDir(defaultDirFor(column));
     }
+  }
+
+  function startSidebarResize(event: ReactMouseEvent) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = sidebarWidth;
+    const onMove = (e: MouseEvent) => {
+      const next = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, startWidth + (e.clientX - startX)));
+      setSidebarWidth(next);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
   }
 
   const selectedRow = selected ? (filtered.find(r => r.id === selected) ?? data?.sections.find(r => r.id === selected)) : undefined;
@@ -376,19 +407,32 @@ export default function MOFKouPage() {
         </div>
       </section>
 
-      <div className="flex min-h-0 flex-1 gap-3 px-3 pb-3">
+      <div className="flex min-h-0 flex-1 px-3 pb-3">
         {showFilters && (
-          <FilterSidebar
-            state={filters}
-            onChange={setFilter}
-            budgetTypes={data.metadata.budgetTypes}
-            ministries={ministries}
-            organizations={organizations}
-            subAccounts={subAccounts}
-            domains={domains}
-            activeCount={activeFilterCount}
-            onReset={() => setFilters(INITIAL_FILTERS)}
-          />
+          <>
+            <FilterSidebar
+              state={filters}
+              onChange={setFilter}
+              budgetTypes={data.metadata.budgetTypes}
+              ministries={ministries}
+              organizations={organizations}
+              subAccounts={subAccounts}
+              domains={domains}
+              activeCount={activeFilterCount}
+              onReset={() => setFilters(INITIAL_FILTERS)}
+              width={sidebarWidth}
+            />
+            {/* 幅調整ハンドル: サイドパネルと一覧の間のマージン全体で反応させる */}
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="フィルタパネルの幅を変更"
+              onMouseDown={startSidebarResize}
+              className="flex w-3 shrink-0 cursor-col-resize items-stretch justify-center"
+            >
+              <div className="w-1 rounded-full transition-colors hover:bg-neutral-300 dark:hover:bg-neutral-700" />
+            </div>
+          </>
         )}
 
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
@@ -405,6 +449,8 @@ export default function MOFKouPage() {
             />
           </div>
         </div>
+
+        {selectedRow && <div className="w-3 shrink-0" />}
 
         {selectedRow && (
           <KouSidePanel

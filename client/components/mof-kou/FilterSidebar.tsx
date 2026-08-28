@@ -2,27 +2,32 @@
 
 /**
  * 項一覧の絞り込みを左サイドパネルにまとめたもの。列の値のタイプごとに操作方法を変える:
- *   - 選択肢が有限な列（予算種別・会計区分・所管・組織/特会/機関・勘定/業務）→ コンボ（select）
+ *   - 選択肢が有限な列（予算種別・会計区分・所管・組織/特会/機関・勘定/業務）→ チェックボックス付き複数選択コンボ
  *   - 文字列の列（項名）と、一覧には出ない事項・目の名前 → 正規表現トグル付きテキスト検索
  *   - 数値の列（事項数・目数・RS事業数・本年度額・前年度額・増減額・増減率）→ 範囲スライダー
  *   - 項（コード）は絞り込み対象にしない
+ *
+ * コンボ・検索欄・スライダーの見た目と挙動は `/sankey-svg` のフィルタパネルに揃えている。
  */
 
 import type { MOFBudgetType } from '@/types/mof-jikou';
-import type { MOFKouMokuAccountType } from '@/types/mof-kou-moku';
 import { ACCOUNT_LABEL } from '@/client/components/mof-kou/columns';
+import { MultiSelectCombo } from '@/client/components/mof-kou/MultiSelectCombo';
 import { RangeSlider } from '@/client/components/mof-kou/RangeSlider';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { formatYen } from '@/client/components/mof-jikou/format';
 
 export type NumRange = [number | null, number | null];
 
+const ACCOUNT_OPTIONS = [ACCOUNT_LABEL.general, ACCOUNT_LABEL.special, ACCOUNT_LABEL.agency];
+
 export interface FilterSidebarState {
-  account: 'all' | MOFKouMokuAccountType;
-  budgetType: string;
-  ministry: string;
-  organization: string;
-  subAccount: string;
+  /** 表示ラベル（ACCOUNT_LABELの値）の集合。空 = すべて */
+  account: string[];
+  budgetType: string[];
+  ministry: string[];
+  organization: string[];
+  subAccount: string[];
   sectionNameQuery: string;
   sectionNameRegex: boolean;
   detailQuery: string;
@@ -56,9 +61,8 @@ interface FilterSidebarProps {
   domains: FilterDomains;
   activeCount: number;
   onReset: () => void;
+  width: number;
 }
-
-const selectClass = 'w-full truncate rounded border border-neutral-300 bg-white px-2 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-900';
 
 function formatRate(v: number): string {
   const sign = v > 0 ? '+' : '';
@@ -67,6 +71,13 @@ function formatRate(v: number): string {
 
 function formatCount(v: number): string {
   return `${Math.round(v).toLocaleString()}件`;
+}
+
+/** 上位の選択がまだ有効な選択肢だけに絞る（無効化されたものは黙って落とす） */
+function pruneToOptions(selected: string[], options: string[]): string[] {
+  if (selected.length === 0) return selected;
+  const next = selected.filter(s => options.includes(s));
+  return next.length === selected.length ? selected : next;
 }
 
 export function FilterSidebar({
@@ -79,9 +90,13 @@ export function FilterSidebar({
   domains,
   activeCount,
   onReset,
+  width,
 }: FilterSidebarProps) {
   return (
-    <div className="flex h-full w-64 shrink-0 flex-col overflow-y-auto rounded-lg border border-neutral-200 bg-white p-3 text-xs dark:border-neutral-800 dark:bg-neutral-950">
+    <div
+      className="flex h-full shrink-0 flex-col overflow-y-auto rounded-lg border border-neutral-200 bg-white p-3 text-xs dark:border-neutral-800 dark:bg-neutral-950"
+      style={{ width }}
+    >
       <div className="mb-2 flex items-center justify-between">
         <h2 className="font-semibold text-neutral-700 dark:text-neutral-300">フィルタ</h2>
         {activeCount > 0 && (
@@ -98,91 +113,60 @@ export function FilterSidebar({
       <div className="space-y-3">
         <label className="block space-y-1">
           <span className="text-neutral-500">予算種別</span>
-          <select value={state.budgetType} onChange={e => onChange('budgetType', e.target.value)} className={selectClass}>
-            <option value="">すべて</option>
-            {budgetTypes.map(b => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
+          <MultiSelectCombo label="予算種別" options={budgetTypes} selected={state.budgetType} onChange={v => onChange('budgetType', v)} />
         </label>
 
         <label className="block space-y-1">
           <span className="text-neutral-500">会計区分</span>
-          <select
-            value={state.account}
-            onChange={e => {
-              onChange('account', e.target.value as 'all' | MOFKouMokuAccountType);
-              onChange('ministry', '');
-              onChange('organization', '');
-              onChange('subAccount', '');
+          <MultiSelectCombo
+            label="会計区分"
+            options={ACCOUNT_OPTIONS}
+            selected={state.account}
+            onChange={v => {
+              onChange('account', v);
+              onChange('ministry', pruneToOptions(state.ministry, ministries));
+              onChange('organization', pruneToOptions(state.organization, organizations));
+              onChange('subAccount', pruneToOptions(state.subAccount, subAccounts));
             }}
-            className={selectClass}
-          >
-            <option value="all">すべて</option>
-            {(['general', 'special', 'agency'] as const).map(a => (
-              <option key={a} value={a}>
-                {ACCOUNT_LABEL[a]}
-              </option>
-            ))}
-          </select>
+          />
         </label>
 
         <label className="block space-y-1">
           <span className="text-neutral-500">所管</span>
-          <select
-            value={state.ministry}
-            onChange={e => {
-              onChange('ministry', e.target.value);
-              onChange('organization', '');
-              onChange('subAccount', '');
+          <MultiSelectCombo
+            label="所管"
+            options={ministries}
+            selected={state.ministry}
+            onChange={v => {
+              onChange('ministry', v);
+              onChange('organization', pruneToOptions(state.organization, organizations));
+              onChange('subAccount', pruneToOptions(state.subAccount, subAccounts));
             }}
-            className={selectClass}
-          >
-            <option value="">すべて（{ministries.length}）</option>
-            {ministries.map(m => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
+          />
         </label>
 
         <label className="block space-y-1">
           <span className="text-neutral-500">組織／特会／機関</span>
-          <select
-            value={state.organization}
-            onChange={e => {
-              onChange('organization', e.target.value);
-              onChange('subAccount', '');
+          <MultiSelectCombo
+            label="組織／特会／機関"
+            options={organizations}
+            selected={state.organization}
+            onChange={v => {
+              onChange('organization', v);
+              onChange('subAccount', pruneToOptions(state.subAccount, subAccounts));
             }}
-            className={selectClass}
-          >
-            <option value="">すべて（{organizations.length}）</option>
-            {organizations.map(o => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
-          </select>
+          />
         </label>
 
         <label className="block space-y-1">
           <span className="text-neutral-500">勘定／業務</span>
-          <select
-            value={state.subAccount}
-            onChange={e => onChange('subAccount', e.target.value)}
+          <MultiSelectCombo
+            label="勘定／業務"
+            options={subAccounts}
+            selected={state.subAccount}
+            onChange={v => onChange('subAccount', v)}
             disabled={subAccounts.length === 0}
-            className={`${selectClass} disabled:opacity-40`}
-          >
-            <option value="">すべて（{subAccounts.length}）</option>
-            {subAccounts.map(s => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          />
         </label>
 
         <hr className="border-neutral-200 dark:border-neutral-800" />
@@ -193,7 +177,6 @@ export function FilterSidebar({
           onChange={v => onChange('sectionNameQuery', v)}
           useRegex={state.sectionNameRegex}
           onToggleRegex={v => onChange('sectionNameRegex', v)}
-          placeholder="項名で検索"
         />
 
         <RegexTextFilter
@@ -203,7 +186,6 @@ export function FilterSidebar({
           onChange={v => onChange('detailQuery', v)}
           useRegex={state.detailRegex}
           onToggleRegex={v => onChange('detailRegex', v)}
-          placeholder="事項名・目名で検索"
         />
 
         <hr className="border-neutral-200 dark:border-neutral-800" />
