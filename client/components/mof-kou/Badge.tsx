@@ -9,7 +9,7 @@
  * Material Design 2 の色相をそのまま使えるようにしている。
  *
  * 配色はMaterial Design 2 のカラーシステム（m2.material.io/design/color）の500〜700番台:
- *   当初=Green 500 #4caf50、暫定=Amber 700 #ffa000、補正=Deep Orange 600 #f4511e、
+ *   当初=Green 500 #4caf50、暫定=Deep Orange 600 #f4511e、補正=Amber 700 #ffa000、
  *   決算=Deep Purple 500 #673ab7
  */
 
@@ -32,7 +32,7 @@ export function Badge({ label, background }: { label: string; background: string
 export function OutlineBadge({ label, color }: { label: string; color: string }) {
   return (
     <span
-      className="inline-block whitespace-nowrap rounded border bg-white px-1.5 py-0.5 text-[10px] font-semibold leading-snug text-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+      className="inline-block whitespace-nowrap rounded border-2 bg-white px-1.5 py-0.5 text-[10px] font-semibold leading-snug text-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
       style={{ borderColor: color }}
     >
       {label}
@@ -55,10 +55,10 @@ function budgetTypeLabel(budgetType: MOFBudgetType): string {
 
 const BUDGET_TYPE_COLOR: Record<string, string> = {
   当初: '#4caf50',
-  暫定: '#ffa000',
+  暫定: '#f4511e',
   決算: '#673ab7',
 };
-const REVISED_COLOR = '#f4511e';
+const REVISED_COLOR = '#ffa000';
 
 /** 予算種別バッジ（当初/暫定/補正N/決算） */
 export function BudgetTypeBadge({ budgetType }: { budgetType: MOFBudgetType }) {
