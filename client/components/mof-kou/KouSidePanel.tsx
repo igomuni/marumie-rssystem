@@ -260,7 +260,7 @@ function JikouTab({
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
 
   const rsByJikouKey = new Map<string, MofRsLinkageRecord[]>();
-  for (const l of detail.jikouRsLinks) {
+  for (const l of detail.jikouRsLinks ?? []) {
     const list = rsByJikouKey.get(l.jikouKey) ?? [];
     list.push(l);
     rsByJikouKey.set(l.jikouKey, list);
