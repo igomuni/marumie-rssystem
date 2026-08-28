@@ -4,10 +4,15 @@
  * サイドパネルの各タブ（年度推移・事項・目・RS）で使う汎用グリッド。
  * ソート・列幅リサイズを持つ。データの整形・リンクの組み立ては呼び出し側の責務
  * （このコンポーネントは表示だけを持つ）。
+ *
+ * ソート・列幅は呼び出し側（KouSidePanel経由でapp/mof-kou/page.tsx）が状態を持つ
+ * controlled コンポーネント。タブの切り替えでこのコンポーネント自体がアンマウント
+ * されても（年度切替時の一時的なパネル消失を含む）、ソート・列幅がリセットされない
+ * ようにするため。
  */
 
 import type { ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 export interface GridColumn<T> {
   key: string;
@@ -19,28 +24,30 @@ export interface GridColumn<T> {
   render: (row: T) => ReactNode;
 }
 
+export interface GridViewState {
+  sortKey: string | null;
+  sortDir: 'asc' | 'desc';
+  widths: Record<string, number>;
+}
+
 const MIN_COLUMN_WIDTH = 40;
 
 export function DataGrid<T>({
   rows,
   columns,
   rowKey,
-  defaultSortKey,
-  defaultSortDir = 'desc',
+  state,
+  onStateChange,
   emptyMessage = 'データがありません。',
 }: {
   rows: T[];
   columns: GridColumn<T>[];
   rowKey: (row: T) => string;
-  defaultSortKey?: string;
-  defaultSortDir?: 'asc' | 'desc';
+  state: GridViewState;
+  onStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
   emptyMessage?: string;
 }) {
-  const [sortKey, setSortKey] = useState<string | null>(defaultSortKey ?? null);
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(defaultSortDir);
-  const [widths, setWidths] = useState<Record<string, number>>(() =>
-    Object.fromEntries(columns.map(c => [c.key, c.width]))
-  );
+  const { sortKey, sortDir, widths } = state;
 
   const sorted = useMemo(() => {
     const col = columns.find(c => c.key === sortKey);
@@ -61,12 +68,11 @@ export function DataGrid<T>({
 
   function toggleSort(col: GridColumn<T>) {
     if (!col.sortValue) return;
-    if (sortKey === col.key) {
-      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortKey(col.key);
-      setSortDir(col.numeric ? 'desc' : 'asc');
-    }
+    onStateChange(s =>
+      s.sortKey === col.key
+        ? { ...s, sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' }
+        : { ...s, sortKey: col.key, sortDir: col.numeric ? 'desc' : 'asc' }
+    );
   }
 
   function startResize(event: React.MouseEvent, key: string) {
@@ -77,7 +83,7 @@ export function DataGrid<T>({
     const startWidth = widths[key] ?? col?.width ?? MIN_COLUMN_WIDTH;
     const onMove = (e: MouseEvent) => {
       const next = Math.max(MIN_COLUMN_WIDTH, startWidth + e.clientX - startX);
-      setWidths(w => ({ ...w, [key]: next }));
+      onStateChange(s => ({ ...s, widths: { ...s.widths, [key]: next } }));
     };
     const onUp = () => {
       window.removeEventListener('mousemove', onMove);

@@ -20,7 +20,8 @@ import { YearSelect } from '@/components/navigation/YearSelect';
 import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
 import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { KouTable } from '@/client/components/mof-kou/KouTable';
-import { KouSidePanel } from '@/client/components/mof-kou/KouSidePanel';
+import { KouSidePanel, createDefaultPanelGridStates, type PanelGridStates, type Tab } from '@/client/components/mof-kou/KouSidePanel';
+import type { GridViewState } from '@/client/components/mof-kou/DataGrid';
 import { FilterSidebar, type FilterDomains, type FilterSidebarState, type NumRange } from '@/client/components/mof-kou/FilterSidebar';
 import { textMatches } from '@/client/components/mof-kou/RegexTextFilter';
 import {
@@ -90,6 +91,8 @@ export default function MOFKouPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
   const [panelWidth, setPanelWidth] = useState(420);
+  const [panelTab, setPanelTab] = useState<Tab>('history');
+  const [panelGridStates, setPanelGridStates] = useState<PanelGridStates>(createDefaultPanelGridStates);
   const [detail, setDetail] = useState<MOFKouSectionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -120,6 +123,10 @@ export default function MOFKouPage() {
 
   function setFilter<K extends keyof FilterSidebarState>(key: K, value: FilterSidebarState[K]) {
     setFilters(prev => ({ ...prev, [key]: value }));
+  }
+
+  function updatePanelGridState(tab: Tab, updater: (prev: GridViewState) => GridViewState) {
+    setPanelGridStates(prev => ({ ...prev, [tab]: updater(prev[tab]) }));
   }
 
   /** 選択中の項の詳細（事項一覧・目一覧・RS事業一覧）を取る */
@@ -494,6 +501,10 @@ export default function MOFKouPage() {
               historyError={historyError}
               linkageRsYear={data.metadata.linkage.rsYear}
               width={panelWidth}
+              tab={panelTab}
+              onTabChange={setPanelTab}
+              gridStates={panelGridStates}
+              onGridStateChange={updatePanelGridState}
             />
           </>
         )}
