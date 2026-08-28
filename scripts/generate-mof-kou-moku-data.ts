@@ -38,6 +38,7 @@ import type {
 import { MOF_REVISION_NUMBERS, revisedBudgetType } from '@/types/mof-jikou';
 import { amountColumn, readBudgetTables, toEraLabel, yen, zipPath, type CsvRow } from '@/scripts/mof-budget-csv';
 import { MAJOR_EXPENSE } from '@/scripts/mof-major-expense';
+import { ECONOMIC_NATURE, FISCAL_LAW, OBJECTIVE } from '@/scripts/mof-classification-tables';
 import {
   createThrottle,
   extractXmlNames,
@@ -269,6 +270,11 @@ function rowFields(row: CsvRow, accountType: MOFKouMokuAccountType, layout: Layo
     sectionCode: row['項コード'] ?? '',
     sectionName: row['項名'] ?? '',
     majorExpenseCode: row['主要経費別分類コード'] ?? '',
+    // 目的別・財政法公債金対象非対象別・経済性質別の3分類は政府関係機関の帳票に無い。
+    // 財政法公債金対象非対象別はさらに特別会計にも無い（複合コードが1桁少ない理由）
+    objectiveCode: row['目的別分類コード'] ?? '',
+    fiscalLawCode: row['財政法公債金対象非対象別分類コード'] ?? '',
+    economicNatureCode: row['経済性質別分類コード'] ?? '',
     subItemCode: row[subItemCodeCol] ?? '',
     subItemName: row['目名'] ?? '',
     purposeCode: row['使途別分類コード'] ?? '',
@@ -279,7 +285,7 @@ function extractStandard(
   rows: CsvRow[],
   spec: DocumentSpec,
   fiscalYear: number
-): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
+): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'objectiveName' | 'fiscalLawName' | 'economicNatureName' | 'purposeName'>> {
   const col = amountColumn(rows);
   const documentId = `${fiscalYear}${spec.suffix}`;
   const sourceUrl = documentUrl(fiscalYear, spec.suffix);
@@ -312,7 +318,7 @@ function extractRevised(
   rows: CsvRow[],
   spec: DocumentSpec,
   fiscalYear: number
-): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
+): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'objectiveName' | 'fiscalLawName' | 'economicNatureName' | 'purposeName'>> {
   if (rows.length === 0) return [];
   const headers = Object.keys(rows[0]);
   const colRevised = findColumn(headers, h => /^改(令和|平成)(元|\d+)年度/.test(h));
@@ -346,7 +352,7 @@ function extractSettlement(
   rows: CsvRow[],
   spec: DocumentSpec,
   fiscalYear: number
-): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> {
+): Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'objectiveName' | 'fiscalLawName' | 'economicNatureName' | 'purposeName'>> {
   const documentId = `${fiscalYear}${spec.suffix}`;
   const sourceUrl = documentUrl(fiscalYear, spec.suffix);
   return rows.map((row, i) => {
@@ -381,7 +387,7 @@ async function generateYear(fiscalYear: number): Promise<void> {
     console.warn(`  ⚠️  ${fiscalYear}年度はローカルにZIPがありません。スキップします。`);
     return;
   }
-  const items: Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'purposeName'>> = [];
+  const items: Array<Omit<MOFKouMokuItem, 'key' | 'majorExpenseName' | 'objectiveName' | 'fiscalLawName' | 'economicNatureName' | 'purposeName'>> = [];
   const documentSummaries: MOFKouMokuData['metadata']['documents'] = [];
 
   for (const spec of documents) {
@@ -444,6 +450,9 @@ async function generateYear(fiscalYear: number): Promise<void> {
       item.subItemName,
     ].join('|'),
     majorExpenseName: item.majorExpenseCode ? MAJOR_EXPENSE[item.majorExpenseCode] ?? '' : '',
+    objectiveName: item.objectiveCode ? OBJECTIVE[item.objectiveCode] ?? '' : '',
+    fiscalLawName: item.fiscalLawCode ? FISCAL_LAW[item.fiscalLawCode] ?? '' : '',
+    economicNatureName: item.economicNatureCode ? ECONOMIC_NATURE[item.economicNatureCode] ?? '' : '',
     purposeName: PURPOSE_NAMES[item.purposeCode] ?? '',
   }));
 

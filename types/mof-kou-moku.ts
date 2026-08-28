@@ -50,6 +50,18 @@ export interface MOFKouMokuItem {
   majorExpenseCode: string;
   /** 主要経費別分類名（コード表から解決。未知コード・無い帳票は空文字） */
   majorExpenseName: string;
+  /** 目的別分類コード（3桁。政府関係機関の帳票には無い） */
+  objectiveCode: string;
+  /** 目的別分類名（コード表から解決。未知コード・無い帳票は空文字） */
+  objectiveName: string;
+  /** 財政法公債金対象非対象別分類コード（1桁。一般会計にしか無い） */
+  fiscalLawCode: string;
+  /** 財政法公債金対象非対象別分類名（コード表から解決。無い帳票は空文字） */
+  fiscalLawName: string;
+  /** 経済性質別分類コード（2桁。政府関係機関の帳票には無い） */
+  economicNatureCode: string;
+  /** 経済性質別分類名（コード表から解決。未知コード・無い帳票は空文字） */
+  economicNatureName: string;
   /** 目別分類コード（政府関係機関は「目コード」列、決算は「目番号」列） */
   subItemCode: string;
   /** 目名 */
