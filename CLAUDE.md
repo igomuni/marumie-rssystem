@@ -25,7 +25,7 @@ npx tsc --noEmit         # TypeScript 型チェック
 
 | Layer | Directory | 役割 |
 |-------|-----------|------|
-| Data Pipeline | `scripts/` | CSV処理のみ。UIやAPIロジック禁止 |
+| Data Pipeline | `scripts/` | ソースデータの取得・変換（CSV処理に加え、MOF予算書Web帳票のXML取得も含む。`generate-mof-jikou-data.ts`・`generate-mof-kou-moku-data.ts`等）。UIやAPIロジック禁止 |
 | Domain Logic | `app/lib/` | Pure Sankey生成。HTTP・React禁止 |
 | API Layer | `app/api/` | HTTPハンドラ。ロジックは `app/lib/` に委譲 |
 | UI Components | `client/components/` | 再利用可能UI。直接APIコール禁止 |
