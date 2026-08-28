@@ -67,18 +67,12 @@ export function KouSidePanel({
       className="flex h-full shrink-0 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white text-xs dark:border-neutral-800 dark:bg-neutral-950"
       style={{ width }}
     >
-      <div className="shrink-0 border-b border-neutral-200 px-3 py-2 dark:border-neutral-800">
+      <div className="shrink-0 border-b border-neutral-200 px-3 py-2.5 dark:border-neutral-800">
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <BudgetTypeBadge budgetType={row.budgetType} />
-              <AccountBadge accountType={row.accountType} />
-            </div>
-            <p className="mt-1 truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">{row.sectionName}</p>
-            <p className="mt-0.5 truncate text-[11px] text-neutral-500">
-              {row.ministry || '—'} ・ {orgColumn(row) || '—'}
-              {row.subAccount ? ` ・ ${row.subAccount}` : ''} ・ 項{row.sectionCode}
-            </p>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <p className="truncate text-base font-semibold text-neutral-900 dark:text-neutral-100">{row.sectionName}</p>
+            <BudgetTypeBadge budgetType={row.budgetType} />
+            <AccountBadge accountType={row.accountType} />
           </div>
           <button
             type="button"
@@ -89,9 +83,10 @@ export function KouSidePanel({
             ✕
           </button>
         </div>
-        <p className="mt-1.5 text-[11px] text-neutral-500">
-          本年度額 <b className="font-medium text-neutral-800 dark:text-neutral-200">{formatYen(row.amount)}</b>
-          {' ・ '}事項{row.jikouCount}件 ・ 目{row.kouMokuCount}件 ・ RS事業{row.rsProjectCount}件
+
+        <p className="mt-1 truncate text-xs text-neutral-500">
+          {row.ministry || '—'} ・ {orgColumn(row) || '—'}
+          {row.subAccount ? ` ・ ${row.subAccount}` : ''}
           {row.page !== null && (
             <>
               {' ・ '}
@@ -106,6 +101,14 @@ export function KouSidePanel({
             </>
           )}
         </p>
+
+        <div className="mt-2 flex items-baseline gap-3">
+          <span className="text-lg font-semibold tabular-nums text-neutral-900 dark:text-neutral-100">{formatYen(row.amount)}</span>
+          <span className="text-xs text-neutral-500">前年度 {formatYen(row.previousAmount)}</span>
+          <span className={`text-xs font-medium ${rateClass(changeRate(row.amount, row.previousAmount))}`}>
+            {formatChangeRate(changeRate(row.amount, row.previousAmount))}
+          </span>
+        </div>
       </div>
 
       <div className="flex shrink-0 border-b border-neutral-200 text-xs dark:border-neutral-800">

@@ -116,8 +116,6 @@ export default function MOFKouPage() {
   function changeYear(next: number) {
     setYear(next);
     setData(null);
-    setFilters(INITIAL_FILTERS);
-    setSelected(null);
   }
 
   function setFilter<K extends keyof FilterSidebarState>(key: K, value: FilterSidebarState[K]) {
