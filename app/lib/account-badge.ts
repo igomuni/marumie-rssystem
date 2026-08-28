@@ -19,7 +19,7 @@ export function getAccountBadgeStyle(category?: string | null): { label: string;
   if (!category) return null;
   const generalColor = '#e45f6f';
   const specialColor = '#5f8ee8';
-  const agencyColor = '#8b6fd6';
+  const agencyColor = '#2e9e6f';
   if (category === 'general') return { label: '一般', background: generalColor };
   if (category === 'special') return { label: '特別', background: specialColor };
   if (category === 'agency') return { label: '機関', background: agencyColor };
