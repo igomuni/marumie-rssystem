@@ -2,6 +2,10 @@
  * 予算種別・会計区分の表示バッジ。`/sankey-svg` の会計区分バッジ（app/lib/account-badge.ts）
  * と同じ見た目（小さな色付きピル・白文字）に揃える。会計区分は同じヘルパーをそのまま使い、
  * 予算種別（当初/暫定/補正N号/決算）はMOF予算書ページ固有のため、ここで色分けを定義する。
+ *
+ * 予算種別の配色はGitHub Primerの状態色（bgColor-*-emphasis, light theme）を流用:
+ *   当初=open/success #1f883d、暫定=attention #9a6700、補正=severe #bc4c00、決算=done #8250df
+ * https://unpkg.com/@primer/primitives/dist/css/functional/themes/light.css
  */
 
 import { getAccountBadgeStyle } from '@/app/lib/account-badge';
@@ -33,14 +37,14 @@ function budgetTypeLabel(budgetType: MOFBudgetType): string {
 }
 
 const BUDGET_TYPE_COLOR: Record<string, string> = {
-  当初: '#4b5563',
-  暫定: '#d97706',
-  決算: '#7c3aed',
+  当初: '#1f883d',
+  暫定: '#9a6700',
+  決算: '#8250df',
 };
 
 /** 予算種別バッジ（当初/暫定/補正N/決算）。補正は号数に関わらず同色 */
 export function BudgetTypeBadge({ budgetType }: { budgetType: MOFBudgetType }) {
   const label = budgetTypeLabel(budgetType);
-  const background = BUDGET_TYPE_COLOR[label] ?? (label.startsWith('補正') ? '#ea580c' : '#4b5563');
+  const background = BUDGET_TYPE_COLOR[label] ?? (label.startsWith('補正') ? '#bc4c00' : '#1f883d');
   return <Badge label={label} background={background} />;
 }
