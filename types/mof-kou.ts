@@ -61,6 +61,8 @@ export interface MOFKouSectionSummary {
   jikouCount: number;
   /** この項に属する目（性質別内訳）の件数 */
   kouMokuCount: number;
+  /** この項に属する事項名・目名（重複除き）。一覧の検索フィルタが事項・目の中身まで見るために持つ */
+  detailNames: string[];
   /** 目の完全一致で紐づいたRS事業の実数（重複除き） */
   rsProjectCount: number;
   /** 項の本年度額（円）。目（kou-moku）側の合計 */

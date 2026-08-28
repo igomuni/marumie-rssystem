@@ -136,6 +136,7 @@ function toSummary(row: SectionAgg): MOFKouSectionSummary {
     purposeMixed: purpose.mixed,
     jikouCount: row.jikou.length,
     kouMokuCount: row.koumoku.length,
+    detailNames: [...new Set([...row.jikou.map(i => i.name), ...row.koumoku.map(i => i.subItemName)])],
     rsProjectCount: new Set(row.rsLinks.map(l => l.projectId)).size,
     amount: row.amount,
     previousAmount: row.previousAmount,
