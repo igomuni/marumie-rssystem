@@ -35,6 +35,14 @@ export interface MOFKouSectionSummary {
   sectionCode: string;
   sectionName: string;
   /**
+   * 項自体の出典ページ番号。「甲号歳入歳出予算」（一般会計）・「歳入歳出予算」（特別会計）・
+   * 「収入支出予算」（政府関係機関）という、事項・目とは独立した別帳票から項名一致で突合する
+   * （項コードを持たない帳票のため名前一致のみ）。突合できない場合は null
+   */
+  page: number | null;
+  /** page が null のときは空文字列（詳細は page と同じ） */
+  sourceUrl: string;
+  /**
    * 主要経費（金額最大のもの）。項と主要経費は1対1ではなく、複数の主要経費が
    * 混在する項が実際にある（2024年度実測: kou-mokuで3,321項中302項）。
    * `majorExpenseMixed` が true のときは、この項内で最大シェアの主要経費を代表値として示す。

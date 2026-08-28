@@ -10,15 +10,34 @@ import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuAccountType, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
+import type { MOFSectionPageData } from '@/types/mof-section-pages';
 import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionHistoryYear, MOFKouSectionSummary } from '@/types/mof-kou';
 import { availableYears as jikouAvailableYears, loadYear as loadJikouYear } from './mof-jikou-loader';
 import { availableYears as kouMokuAvailableYears, loadYear as loadKouMokuYear } from './mof-kou-moku-loader';
 import { resolveLinks } from './mof-rs-kou-moku-linkage-loader';
 import { findLinksByKey as findJikouLinksByKey, linkageAvailable as jikouLinkageAvailable } from './mof-rs-linkage-loader';
+import { tryReadDataJson } from './data-file';
 
 /** 特別会計名の接尾辞を外す。事項別内訳（Web帳票）は「〜特別会計」付き、科目別内訳（CSV）は無し */
 function normSpecialAccount(s: string): string {
   return s.replace(/特別会計$/, '');
+}
+
+/** 突合用の文字列正規化: NFKC + 空白除去 */
+function norm(s: string): string {
+  return s.normalize('NFKC').replace(/\s+/g, '');
+}
+
+/** 項の出典ページ突合キー（項コードを持たない別帳票のため名前一致で結ぶ） */
+function pageLookupKey(
+  accountType: string,
+  budgetType: string,
+  ministry: string,
+  org: string,
+  subAccount: string,
+  sectionName: string
+): string {
+  return [accountType, budgetType, norm(ministry), norm(org), norm(subAccount), norm(sectionName)].join('|');
 }
 
 interface SectionAgg {
@@ -32,6 +51,9 @@ interface SectionAgg {
   agency: string;
   sectionCode: string;
   sectionName: string;
+  /** 項自体の出典ページ（甲号歳入歳出予算等から名前一致で突合。無ければ null） */
+  page: number | null;
+  sourceUrl: string;
   jikouItems: MOFJikouItem[];
   kouMokuItems: MOFKouMokuItem[];
   rsLinks: MofRsKouMokuLinkageRecord[];
@@ -85,6 +107,8 @@ function ensureSection(
     agency,
     sectionCode,
     sectionName,
+    page: null,
+    sourceUrl: '',
     jikouItems: [],
     kouMokuItems: [],
     rsLinks: [],
@@ -158,6 +182,37 @@ function buildYear(fiscalYear: number): BuiltYear {
     if (row) row.rsLinks.push(link);
   }
 
+  // 項自体の出典ページ（甲号歳入歳出予算等）。項コードを持たない別帳票のため名前一致でのみ突合する
+  const sectionPages = tryReadDataJson<MOFSectionPageData>(`mof-section-pages-${fiscalYear}.json`);
+  if (sectionPages) {
+    const pageLookup = new Map<string, SectionAgg>();
+    for (const row of sections.values()) {
+      const org =
+        row.accountType === 'general'
+          ? row.organization
+          : row.accountType === 'special'
+            ? normSpecialAccount(row.specialAccount)
+            : row.agency;
+      const key = pageLookupKey(row.accountType, row.budgetType, row.ministry, org, row.subAccount, row.sectionName);
+      // 同名の項が複数あると突合先が曖昧になるため、最初の1件だけを対象にする（無言の上書きを避ける）
+      if (!pageLookup.has(key)) pageLookup.set(key, row);
+    }
+    for (const entry of sectionPages.entries) {
+      const org =
+        entry.accountType === 'general'
+          ? entry.organization
+          : entry.accountType === 'special'
+            ? normSpecialAccount(entry.specialAccount)
+            : entry.agency;
+      const key = pageLookupKey(entry.accountType, entry.budgetType, entry.ministry, org, entry.subAccount, entry.sectionName);
+      const row = pageLookup.get(key);
+      if (row && row.page === null) {
+        row.page = entry.page;
+        row.sourceUrl = entry.sourceUrl;
+      }
+    }
+  }
+
   const budgetTypes = [...new Set([...jikou.metadata.budgetTypes, ...kouMoku.metadata.budgetTypes])];
 
   const built: BuiltYear = {
@@ -229,6 +284,8 @@ function toSummary(row: SectionAgg): MOFKouSectionSummary {
     agency: row.agency,
     sectionCode: row.sectionCode,
     sectionName: row.sectionName,
+    page: row.page,
+    sourceUrl: row.sourceUrl,
     majorExpenseName: majorExpense.name,
     majorExpenseMixed: majorExpense.mixed,
     purposeName: purpose.name,
@@ -267,6 +324,7 @@ export function listSections(fiscalYear: number): MOFKouData {
         '前年度額は項内のいずれかの目で比較対象額が無い場合（決算・暫定予算等）null にしています',
         '主要経費・使途別分類はいずれも項と1対1ではありません（実測: 2024年度でkou-mokuの項の約9%が複数の主要経費を含む）。表示は項内で金額最大のもので、複数混在する場合は「他」を付けています',
         '使途別分類コードは目（kou-moku）にしか無いフィールドのため、事項側の内訳からは算出していません',
+        '項自体の出典ページは「甲号歳入歳出予算」等の別帳票（項コードを持たないため名前一致でのみ突合）から取得しています。突合できない項はpage=nullです',
       ],
     },
     summary: {

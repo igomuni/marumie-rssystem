@@ -121,6 +121,19 @@ export function KouSidePanel({
         <p className="mt-1.5 text-[11px] text-neutral-500">
           本年度額 <b className="font-medium text-neutral-800 dark:text-neutral-200">{formatYen(row.amount)}</b>
           {' ・ '}事項{row.jikouCount}件 ・ 目{row.kouMokuCount}件 ・ RS事業{row.rsProjectCount}件
+          {row.page !== null && (
+            <>
+              {' ・ '}
+              <a
+                href={row.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-neutral-700 dark:hover:text-neutral-300"
+              >
+                出典 p.{row.page}
+              </a>
+            </>
+          )}
         </p>
       </div>
 
