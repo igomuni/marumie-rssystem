@@ -29,6 +29,7 @@ interface Props {
   historyLoading: boolean;
   historyError: string | null;
   linkageRsYear: number | null;
+  width: number;
 }
 
 const TABS: { key: Tab; label: string }[] = [
@@ -56,11 +57,15 @@ export function KouSidePanel({
   historyLoading,
   historyError,
   linkageRsYear,
+  width,
 }: Props) {
   const [tab, setTab] = useState<Tab>('history');
 
   return (
-    <div className="flex h-full flex-col overflow-hidden text-xs">
+    <aside
+      className="flex h-full shrink-0 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white text-xs dark:border-neutral-800 dark:bg-neutral-950"
+      style={{ width }}
+    >
       <div className="shrink-0 border-b border-neutral-200 px-3 py-2 dark:border-neutral-800">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -125,7 +130,7 @@ export function KouSidePanel({
         {tab === 'koumoku' && <KouMokuTab detail={detail} loading={detailLoading} error={detailError} />}
         {tab === 'rs' && <RsTab detail={detail} loading={detailLoading} error={detailError} linkageRsYear={linkageRsYear} />}
       </div>
-    </div>
+    </aside>
   );
 }
 

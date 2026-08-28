@@ -17,8 +17,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
-import { SidePanelChrome } from '@/client/components/SidePanelChrome';
-import { useSidePanel } from '@/client/hooks/useSidePanel';
 import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
 import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { KouTable } from '@/client/components/mof-kou/KouTable';
@@ -62,6 +60,9 @@ const SIDEBAR_MIN_WIDTH = 200;
 const SIDEBAR_MAX_WIDTH = 480;
 const SIDEBAR_DEFAULT_WIDTH = 256;
 
+const PANEL_MIN_WIDTH = 320;
+const PANEL_MAX_WIDTH = 900;
+
 function inRange(value: number | null, range: NumRange): boolean {
   const [min, max] = range;
   if (min === null && max === null) return true;
@@ -88,7 +89,7 @@ export default function MOFKouPage() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [selected, setSelected] = useState<string | null>(null);
   const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
-  const detailPanel = useSidePanel({ side: 'right', defaultWidth: 420, minWidth: 320, maxWidth: 900 });
+  const [panelWidth, setPanelWidth] = useState(420);
   const [detail, setDetail] = useState<MOFKouSectionDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
@@ -302,6 +303,27 @@ export default function MOFKouPage() {
     document.body.style.userSelect = 'none';
   }
 
+  function startPanelResize(event: ReactMouseEvent) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = panelWidth;
+    const onMove = (e: MouseEvent) => {
+      // パネルは画面右側に置くため、ハンドルを左へ引くほど広がる
+      const next = Math.min(PANEL_MAX_WIDTH, Math.max(PANEL_MIN_WIDTH, startWidth - (e.clientX - startX)));
+      setPanelWidth(next);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+
   const selectedRow = selected ? (filtered.find(r => r.id === selected) ?? data?.sections.find(r => r.id === selected)) : undefined;
 
   if (error) {
@@ -437,58 +459,47 @@ export default function MOFKouPage() {
           </>
         )}
 
-        <div className="relative flex min-h-0 min-w-0 flex-1">
-          <div
-            className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950"
-            style={{
-              marginRight: selectedRow ? detailPanel.effectiveWidth + 25 + 12 : 0,
-              transition: detailPanel.isResizing ? 'none' : 'margin-right 0.2s ease',
-            }}
-          >
-            <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
-              <KouTable
-                items={filtered}
-                sortKey={sortKey}
-                sortDir={sortDir}
-                onToggleSort={toggleSort}
-                widths={widths}
-                onWidthsChange={setWidths}
-                selectedId={selected}
-                onSelectRow={id => setSelected(cur => (cur === id ? null : id))}
-              />
-            </div>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
+            <KouTable
+              items={filtered}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              onToggleSort={toggleSort}
+              widths={widths}
+              onWidthsChange={setWidths}
+              selectedId={selected}
+              onSelectRow={id => setSelected(cur => (cur === id ? null : id))}
+            />
           </div>
-
-          {selectedRow && (
-            <SidePanelChrome
-              side="right"
-              position="absolute"
-              open
-              onToggle={() => setSelected(null)}
-              width={detailPanel.effectiveWidth}
-              minWidth={320}
-              maxWidth={900}
-              onResizeStart={detailPanel.onResizeStart}
-              isResizing={detailPanel.isResizing}
-              onResetWidth={detailPanel.resetWidth}
-              expandLabel="詳細を表示"
-              collapseLabel="詳細を隠す"
-              zIndex={5}
-            >
-              <KouSidePanel
-                row={selectedRow}
-                onClose={() => setSelected(null)}
-                detail={detail}
-                detailLoading={detailLoading}
-                detailError={detailError}
-                history={history}
-                historyLoading={historyLoading}
-                historyError={historyError}
-                linkageRsYear={data.metadata.linkage.rsYear}
-              />
-            </SidePanelChrome>
-          )}
         </div>
+
+        {selectedRow && (
+          <>
+            {/* 幅調整ハンドル: 一覧とサイドパネルの間のマージン全体で反応させる */}
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="詳細パネルの幅を変更"
+              onMouseDown={startPanelResize}
+              className="flex w-3 shrink-0 cursor-col-resize items-stretch justify-center"
+            >
+              <div className="w-1 rounded-full transition-colors hover:bg-neutral-300 dark:hover:bg-neutral-700" />
+            </div>
+            <KouSidePanel
+              row={selectedRow}
+              onClose={() => setSelected(null)}
+              detail={detail}
+              detailLoading={detailLoading}
+              detailError={detailError}
+              history={history}
+              historyLoading={historyLoading}
+              historyError={historyError}
+              linkageRsYear={data.metadata.linkage.rsYear}
+              width={panelWidth}
+            />
+          </>
+        )}
       </div>
 
       <div className="shrink-0 px-3 pb-3">
