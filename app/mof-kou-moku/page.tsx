@@ -15,7 +15,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import type { MOFKouMokuAccountType, MOFKouMokuData, MOFKouMokuHistory } from '@/types/mof-kou-moku';
-import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
+import type { MofRsKouMokuLinkageRecord, MofRsKouMokuLinkageResponse } from '@/types/mof-rs-kou-moku-linkage';
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { KouMokuTable } from '@/client/components/mof-kou-moku/KouMokuTable';
 import {
@@ -152,13 +152,7 @@ export default function MOFKouMokuPage() {
     fetch(`/api/mof-kou-moku/linkage?year=${linkageYear}`)
       .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
       .then(
-        (json: {
-          available: boolean;
-          rsYear: number | null;
-          links: MofRsKouMokuLinkageRecord[];
-          isCarriedOver: boolean;
-          sourceBudgetYear: number | null;
-        }) => {
+        (json: MofRsKouMokuLinkageResponse) => {
           if (cancelled) return;
           setLinkageAvailable(json.available);
           setLinkageRsYear(json.rsYear);

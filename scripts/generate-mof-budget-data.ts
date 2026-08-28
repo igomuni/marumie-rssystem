@@ -137,7 +137,7 @@ function generateYear(fiscalYear: number): void {
       it.sectionCode,
       it.sectionName,
       it.accountType === 'general' ? it.organization : '',
-      it.accountType === 'special' ? it.specialAccount : '',
+      it.accountType === 'special' ? normSpecialAccount(it.specialAccount) : '',
       it.accountType === 'agency' ? it.agency : ''
     );
     row.jikou.push({
@@ -171,7 +171,7 @@ function generateYear(fiscalYear: number): void {
       it.sectionCode,
       it.sectionName,
       it.accountType === 'general' ? it.organization : '',
-      it.accountType === 'special' ? it.specialAccount : '',
+      it.accountType === 'special' ? normSpecialAccount(it.specialAccount) : '',
       it.accountType === 'agency' ? it.agency : ''
     );
     row.koumoku.push({
@@ -223,11 +223,15 @@ function generateYear(fiscalYear: number): void {
     }
   }
 
-  // 項の金額は目側合計（事項側合計とほぼ一致することを実測済み。docs/tasks参照）
+  // 項の金額は目側合計（事項側合計とほぼ一致することを実測済み。docs/tasks参照）。
+  // 目が1件も無い項（事項側にしか計上が無い項。年度によって少数存在）は目側合計が0に
+  // なってしまうため、事項側合計にフォールバックする
   for (const row of sections.values()) {
-    row.amount = row.koumoku.reduce((sum, i) => sum + i.amount, 0);
-    const hasAllPrevious = row.koumoku.length > 0 && row.koumoku.every(i => i.previousAmount !== null);
-    row.previousAmount = hasAllPrevious ? row.koumoku.reduce((sum, i) => sum + (i.previousAmount ?? 0), 0) : null;
+    const useJikou = row.koumoku.length === 0 && row.jikou.length > 0;
+    const breakdown = useJikou ? row.jikou : row.koumoku;
+    row.amount = breakdown.reduce((sum, i) => sum + i.amount, 0);
+    const hasAllPrevious = breakdown.length > 0 && breakdown.every(i => i.previousAmount !== null);
+    row.previousAmount = hasAllPrevious ? breakdown.reduce((sum, i) => sum + (i.previousAmount ?? 0), 0) : null;
     row.difference = row.previousAmount === null ? null : row.amount - row.previousAmount;
   }
 

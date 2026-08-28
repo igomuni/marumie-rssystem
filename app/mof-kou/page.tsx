@@ -6,8 +6,8 @@
  * `/mof-jikou`（事項＝目的別内訳）と `/mof-kou-moku`（目＝性質別内訳）を、共通の親である
  * 「項」の粒度まで引いて見る。1行=1項×1予算種別で、その項に事項が何件・目が何件あり、
  * 目の完全一致でRS事業に何件紐づいているかを一覧できる。
- * データは /api/mof-kou（app/lib/api/mof-kou-loader.ts がリクエスト時に集計。専用の
- * 生成JSONファイルは持たない）。
+ * データは /api/mof-kou（app/lib/api/mof-kou-loader.ts が正準データ mof-budget-{年度}.json
+ * を直接読み、RS紐づけだけをリクエスト時に上乗せする）。
  *
  * 事項・目一覧と違い、行クリックの詳細は右のサイドパネルに出す（インライン展開ではない）。
  * 項単位に集約したことで件数が大きく減ったため、ページングは無い。
@@ -332,8 +332,7 @@ export default function MOFKouPage() {
         <p className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800">
           データの読み込みに失敗しました: {error}
           <br />
-          <code className="text-xs">npm run generate-mof-jikou</code> と{' '}
-          <code className="text-xs">npm run generate-mof-kou-moku</code> を実行してください。
+          <code className="text-xs">npm run generate-mof-budget</code> を実行してください。
         </p>
       </main>
     );

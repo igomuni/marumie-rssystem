@@ -62,6 +62,11 @@ export function resolveLinks(budgetYear: number): LinkageResolution {
   if (linkageAvailable(budgetYear)) {
     return { sourceBudgetYear: budgetYear, isCarriedOver: false, links: allLinks(budgetYear) };
   }
+  // 対象年度自体のmof-kou-mokuデータが無ければ、この先の識別子突合そのものが行えない
+  // （未対応年度でloadKouMokuYearを呼ぶと該当ファイルが無く例外になる）
+  if (!kouMokuAvailableYears().includes(budgetYear)) {
+    return { sourceBudgetYear: null, isCarriedOver: false, links: [] };
+  }
 
   const candidateYear = kouMokuAvailableYears()
     .filter(y => y < budgetYear && linkageAvailable(y))
@@ -73,9 +78,14 @@ export function resolveLinks(budgetYear: number): LinkageResolution {
   const scoped = (items: ReturnType<typeof loadKouMokuYear>['items']) =>
     items.filter(it => it.accountType === 'general' || it.accountType === 'special');
 
+  // 同一識別子でも予算種別（当初・暫定・補正・決算）ごとに別行があり得るため、
+  // 予算種別込みのキーを優先して引く。無ければ決算→識別子のみ（従来どおり最後に見つかった行）の順にフォールバックする
+  const pastKeyByIdentityAndType = new Map<string, string>();
   const pastKeyByIdentity = new Map<string, string>();
   for (const it of scoped(loadKouMokuYear(candidateYear).items)) {
-    pastKeyByIdentity.set(identityKey(it), it.key);
+    const identity = identityKey(it);
+    pastKeyByIdentityAndType.set(`${identity}|${it.budgetType}`, it.key);
+    pastKeyByIdentity.set(identity, it.key);
   }
   const pastLinksByKey = new Map<string, MofRsKouMokuLinkageRecord[]>();
   for (const link of allLinks(candidateYear)) {
@@ -86,7 +96,11 @@ export function resolveLinks(budgetYear: number): LinkageResolution {
 
   const carried: MofRsKouMokuLinkageRecord[] = [];
   for (const item of scoped(loadKouMokuYear(budgetYear).items)) {
-    const pastKey = pastKeyByIdentity.get(identityKey(item));
+    const identity = identityKey(item);
+    const pastKey =
+      pastKeyByIdentityAndType.get(`${identity}|${item.budgetType}`) ??
+      pastKeyByIdentityAndType.get(`${identity}|決算`) ??
+      pastKeyByIdentity.get(identity);
     if (!pastKey) continue;
     for (const pastLink of pastLinksByKey.get(pastKey) ?? []) {
       carried.push({

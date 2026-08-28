@@ -120,6 +120,13 @@ export function KouTable({
             <tr
               key={row.id}
               onClick={() => onSelectRow(row.id)}
+              tabIndex={0}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelectRow(row.id);
+                }
+              }}
               aria-selected={isSelected}
               className={`cursor-pointer border-t border-neutral-100 align-top hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900 ${
                 isSelected ? 'bg-blue-50 dark:bg-blue-950/40' : ''

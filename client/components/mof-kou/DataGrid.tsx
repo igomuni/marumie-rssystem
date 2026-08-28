@@ -73,7 +73,8 @@ export function DataGrid<T>({
     event.preventDefault();
     event.stopPropagation();
     const startX = event.clientX;
-    const startWidth = widths[key];
+    const col = columns.find(c => c.key === key);
+    const startWidth = widths[key] ?? col?.width ?? MIN_COLUMN_WIDTH;
     const onMove = (e: MouseEvent) => {
       const next = Math.max(MIN_COLUMN_WIDTH, startWidth + e.clientX - startX);
       setWidths(w => ({ ...w, [key]: next }));

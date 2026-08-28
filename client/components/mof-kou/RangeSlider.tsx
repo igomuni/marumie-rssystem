@@ -111,8 +111,8 @@ export function RangeSlider({ label, note, domainMin, domainMax, value, onChange
           <input
             type="number"
             aria-label={`${label}の下限`}
-            value={min === null ? '' : Math.round(min)}
-            placeholder={String(Math.round(domainMin))}
+            value={min ?? ''}
+            placeholder={String(domainMin)}
             onChange={e => onChange([e.target.value === '' ? null : Number(e.target.value), max])}
             className="w-full min-w-0 rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-xs dark:border-neutral-700 dark:bg-neutral-900"
           />
@@ -120,8 +120,8 @@ export function RangeSlider({ label, note, domainMin, domainMax, value, onChange
           <input
             type="number"
             aria-label={`${label}の上限`}
-            value={max === null ? '' : Math.round(max)}
-            placeholder={String(Math.round(domainMax))}
+            value={max ?? ''}
+            placeholder={String(domainMax)}
             onChange={e => onChange([min, e.target.value === '' ? null : Number(e.target.value)])}
             className="w-full min-w-0 rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-xs dark:border-neutral-700 dark:bg-neutral-900"
           />

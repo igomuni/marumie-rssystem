@@ -5,7 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
-import { sectionHistory } from '@/app/lib/api/mof-kou-loader';
+import { availableYears, sectionHistory } from '@/app/lib/api/mof-kou-loader';
 
 /**
  * GET /api/mof-kou/history
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'year と id を指定してください' }, { status: 400 });
     }
     const year = Number(yearRaw);
-    if (isNaN(year)) {
+    if (isNaN(year) || !availableYears().includes(year)) {
       return NextResponse.json({ error: `不正な year です: ${yearRaw}` }, { status: 400 });
     }
 

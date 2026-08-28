@@ -6,9 +6,9 @@
  * 項ごとに「事項が何件、目が何件あり、そのうち目の完全一致でRS事業に何件紐づいているか」
  * という関係性だけを見る。
  *
- * 集計は app/lib/api/mof-kou-loader.ts が、既存の mof-jikou・mof-kou-moku・
- * mof-rs-kou-moku-linkage の読み込み結果からリクエスト時に組み立てる
- * （このページ専用の生成JSONファイルは持たない）。
+ * 集計は app/lib/api/mof-kou-loader.ts が、正準データ mof-budget-{年度}.json
+ * （項を頂点に事項・目を子として持つ統合JSON）を直接読み、RS紐づけ
+ * （mof-rs-kou-moku-linkage）だけをリクエスト時に上乗せする。
  */
 
 import type { MOFBudgetType } from './mof-jikou';

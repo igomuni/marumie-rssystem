@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const years = availableYears();
     if (years.length === 0) {
       return NextResponse.json(
-        { error: 'データが生成されていません。npm run generate-mof-jikou / generate-mof-kou-moku を実行してください。' },
+        { error: 'データが生成されていません。npm run generate-mof-budget を実行してください。' },
         { status: 503 }
       );
     }

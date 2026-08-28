@@ -7,11 +7,10 @@
  * mof-kou-moku-{年度}.json・mof-section-pages-{年度}.json を統合するだけで、
  * スクレイピング・CSV解析自体は行わない）。
  *
- * 設計の経緯: docs/tasks/20260828_1719_MOF予算データの階層JSONスキーマ案.md
- *
- * 注意: 2026-08-28時点では正準データとして生成・検証のみ行っており、
- * /mof-jikou・/mof-kou-moku・/mof-kou の各ページはまだ従来の3ファイルを
- * 直接読んでいる（ローダーの移行は別途）。
+ * 注意: /mof-kou は app/lib/api/mof-kou-loader.ts がこの正準データを直接読む
+ * （RS紐づけのみ実行時オーバーレイ）。/mof-jikou・/mof-kou-moku はまだ従来の
+ * 個別ファイル（mof-jikou-{年度}.json・mof-kou-moku-{年度}.json）を直接読んでおり、
+ * この統合ファイルへの移行は別途（ローダーの移行状況は各ページ側の実装を参照）。
  */
 
 import type { MOFAccountType, MOFBudgetType } from './mof-jikou';

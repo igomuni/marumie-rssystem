@@ -89,3 +89,12 @@ export interface MofRsKouMokuLinkageData {
   };
   links: MofRsKouMokuLinkageRecord[];
 }
+
+/** GET /api/mof-kou-moku/linkage のレスポンス */
+export interface MofRsKouMokuLinkageResponse {
+  available: boolean;
+  rsYear: number | null;
+  links: MofRsKouMokuLinkageRecord[];
+  isCarriedOver: boolean;
+  sourceBudgetYear: number | null;
+}

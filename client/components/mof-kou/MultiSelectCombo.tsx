@@ -40,6 +40,9 @@ export function MultiSelectCombo({ label, options, selected, onChange, disabled 
     const onMouseDown = (e: MouseEvent) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
     };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
     const recompute = () => {
       if (buttonRef.current) {
         const r = buttonRef.current.getBoundingClientRect();
@@ -47,10 +50,12 @@ export function MultiSelectCombo({ label, options, selected, onChange, disabled 
       }
     };
     document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('keydown', onKeyDown);
     window.addEventListener('resize', recompute);
     window.addEventListener('scroll', recompute, true);
     return () => {
       document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', recompute);
       window.removeEventListener('scroll', recompute, true);
     };
@@ -66,6 +71,8 @@ export function MultiSelectCombo({ label, options, selected, onChange, disabled 
         ref={buttonRef}
         type="button"
         disabled={disabled}
+        aria-expanded={open}
+        aria-haspopup="listbox"
         onClick={() => {
           if (buttonRef.current) {
             const r = buttonRef.current.getBoundingClientRect();

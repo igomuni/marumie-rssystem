@@ -9,6 +9,8 @@
 import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
 import { linkageRsYear, resolveLinks } from '@/app/lib/api/mof-rs-kou-moku-linkage-loader';
+import { availableYears as kouMokuAvailableYears } from '@/app/lib/api/mof-kou-moku-loader';
+import type { MofRsKouMokuLinkageResponse } from '@/types/mof-rs-kou-moku-linkage';
 
 /**
  * GET /api/mof-kou-moku/linkage
@@ -23,7 +25,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'year を指定してください' }, { status: 400 });
     }
     const year = Number(yearRaw);
-    if (isNaN(year)) {
+    if (isNaN(year) || !kouMokuAvailableYears().includes(year)) {
       return NextResponse.json({ error: `不正な year です: ${yearRaw}` }, { status: 400 });
     }
 
@@ -31,14 +33,15 @@ export async function GET(request: Request) {
     const available = resolution.sourceBudgetYear !== null;
     const rsYear = resolution.sourceBudgetYear !== null ? linkageRsYear(resolution.sourceBudgetYear) : null;
 
+    const body: MofRsKouMokuLinkageResponse = {
+      available,
+      rsYear,
+      links: resolution.links,
+      isCarriedOver: resolution.isCarriedOver,
+      sourceBudgetYear: resolution.sourceBudgetYear,
+    };
     return NextResponse.json(
-      {
-        available,
-        rsYear,
-        links: resolution.links,
-        isCarriedOver: resolution.isCarriedOver,
-        sourceBudgetYear: resolution.sourceBudgetYear,
-      },
+      body,
       { headers: { 'Cache-Control': API_CACHE_CONTROL } }
     );
   } catch (error) {
