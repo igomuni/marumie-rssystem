@@ -133,10 +133,10 @@ export function KouTable({
                 isSelected ? 'bg-blue-50 dark:bg-blue-950/40' : ''
               }`}
             >
-              <td className="truncate px-2 py-1.5">
+              <td className="truncate px-2 py-1.5 align-middle">
                 <BudgetTypeBadge budgetType={row.budgetType} />
               </td>
-              <td className="truncate px-2 py-1.5">
+              <td className="truncate px-2 py-1.5 align-middle">
                 <AccountBadge accountType={row.accountType} />
               </td>
               <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
