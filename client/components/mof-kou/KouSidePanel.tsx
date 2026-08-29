@@ -473,16 +473,19 @@ function KouMokuTab({
       label: '目名',
       width: 190,
       sortValue: it => it.subItemName,
-      render: it => (
-        <a
-          href={it.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
-        >
-          {it.subItemName}
-        </a>
-      ),
+      render: it =>
+        it.sourceUrl ? (
+          <a
+            href={it.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+          >
+            {it.subItemName}
+          </a>
+        ) : (
+          <span title="出典ページ不明">{it.subItemName}</span>
+        ),
     },
     {
       key: 'majorExpense',
