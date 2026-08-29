@@ -84,9 +84,7 @@ function buildYear(fiscalYear: number): BuiltYear {
     eraLabel: budgetData.metadata.eraLabel,
     budgetTypes: budgetData.metadata.budgetTypes,
     linkage: {
-      available: linkage.sourceBudgetYear !== null,
-      isCarriedOver: linkage.isCarriedOver,
-      sourceBudgetYear: linkage.sourceBudgetYear,
+      available: linkage.available,
       rsYear: null, // ルート層で linkageRsYear() を使って埋める
     },
     sections,
@@ -146,8 +144,8 @@ function toSummary(row: SectionAgg): MOFKouSectionSummary {
 
 /**
  * その年度の項一覧（一覧表示用の集計行のみ。事項・目・RS事業の内訳は含まない）。
- * `metadata.linkage.rsYear` はここでは常に null。`linkage.sourceBudgetYear` を使って
- * 呼び出し側（route.ts）が mof-rs-kou-moku-linkage-loader.linkageRsYear() で埋める。
+ * `metadata.linkage.rsYear` はここでは常に null。呼び出し側（route.ts）が
+ * mof-rs-kou-moku-linkage-loader.linkageRsYear() で埋める。
  */
 export function listSections(fiscalYear: number): MOFKouData {
   const built = buildYear(fiscalYear);
@@ -287,14 +285,9 @@ export function sectionDetail(fiscalYear: number, id: string): MOFKouSectionDeta
   const jikouItems = row.jikou.map(leaf => hydrateJikou(row, leaf, descriptions[leaf.id] ?? ''));
   const kouMokuItems = row.koumoku.map(leaf => hydrateKouMoku(row, leaf));
 
-  // 事項単位のRS紐づけ（mof-rs-linkage）はkou-mokuの目単位紐づけと違い年度をまたぐ引き継ぎを
-  // 持たないため、ここで直近の過去年度にフォールバックする（identityFromKeyが予算種別・所管を
-  // 落とすので、そのままの年度のitem.keyで別年度のファイルを引いても一致する）
-  const jikouRsLinkYear = jikouLinkageAvailable(fiscalYear)
-    ? fiscalYear
-    : (availableYears().filter(y => y < fiscalYear && jikouLinkageAvailable(y)).sort((a, b) => b - a)[0] ?? null);
-  const jikouRsLinks: MofRsLinkageRecord[] =
-    jikouRsLinkYear !== null ? jikouItems.flatMap(it => findJikouLinksByKey(jikouRsLinkYear, it.key)) : [];
+  const jikouRsLinks: MofRsLinkageRecord[] = jikouLinkageAvailable(fiscalYear)
+    ? jikouItems.flatMap(it => findJikouLinksByKey(fiscalYear, it.key))
+    : [];
 
   return {
     id,
@@ -302,7 +295,6 @@ export function sectionDetail(fiscalYear: number, id: string): MOFKouSectionDeta
     kouMokuItems,
     rsLinks: row.rsLinks,
     jikouRsLinks,
-    jikouRsLinkYear,
   };
 }
 

@@ -9,7 +9,6 @@
 
 import type { MofRsKouMokuLinkageData, MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import { dataFileExists, readDataJson } from './data-file';
-import { availableYears as kouMokuAvailableYears, identityKey, loadYear as loadKouMokuYear } from './mof-kou-moku-loader';
 
 const fileName = (budgetYear: number) => `mof-rs-kou-moku-linkage-${budgetYear}.json`;
 
@@ -44,81 +43,14 @@ export function linkageRsYear(budgetYear: number): number | null {
 }
 
 export interface LinkageResolution {
-  /** 実際にリンクを取得した予算年度。データが全く無ければ null */
-  sourceBudgetYear: number | null;
-  /** 要求年度自体の紐づけデータが無く、過去年度から識別子で引き継いだ場合 true */
-  isCarriedOver: boolean;
+  available: boolean;
   links: MofRsKouMokuLinkageRecord[];
 }
 
-/**
- * 指定年度の紐づけを解決する。RSシステムのデータ公開はMOF予算より遅れるため、
- * 最新の予算年度は自前の紐づけデータを持たないのが通常。その場合、識別子
- * （会計区分・所管・組織/特会・勘定・項コード・目分類コード・目名。予算種別を除く。
- * `mof-kou-moku-loader.ts` の identityKey と同じ）が一致する直近の過去年度の紐づけを
- * 参考値として引き継ぐ（決算目の予算種別間引き継ぎと同じ発想を年度間に広げたもの）。
- */
+/** 指定年度の紐づけを解決する。その年度自体の紐づけデータが無ければ「対象外」として空を返す */
 export function resolveLinks(budgetYear: number): LinkageResolution {
-  if (linkageAvailable(budgetYear)) {
-    return { sourceBudgetYear: budgetYear, isCarriedOver: false, links: allLinks(budgetYear) };
+  if (!linkageAvailable(budgetYear)) {
+    return { available: false, links: [] };
   }
-  // 対象年度自体のmof-kou-mokuデータが無ければ、この先の識別子突合そのものが行えない
-  // （未対応年度でloadKouMokuYearを呼ぶと該当ファイルが無く例外になる）
-  if (!kouMokuAvailableYears().includes(budgetYear)) {
-    return { sourceBudgetYear: null, isCarriedOver: false, links: [] };
-  }
-
-  const candidateYear = kouMokuAvailableYears()
-    .filter(y => y < budgetYear && linkageAvailable(y))
-    .sort((a, b) => b - a)[0];
-  if (candidateYear === undefined) {
-    return { sourceBudgetYear: null, isCarriedOver: false, links: [] };
-  }
-
-  const scoped = (items: ReturnType<typeof loadKouMokuYear>['items']) =>
-    items.filter(it => it.accountType === 'general' || it.accountType === 'special');
-
-  // 同一識別子でも予算種別（当初・暫定・補正・決算）ごとに別行があり得るため、
-  // 予算種別込みのキーを優先して引く。無ければ決算→識別子のみ（従来どおり最後に見つかった行）の順にフォールバックする
-  const pastKeyByIdentityAndType = new Map<string, string>();
-  const pastKeyByIdentity = new Map<string, string>();
-  for (const it of scoped(loadKouMokuYear(candidateYear).items)) {
-    const identity = identityKey(it);
-    pastKeyByIdentityAndType.set(`${identity}|${it.budgetType}`, it.key);
-    pastKeyByIdentity.set(identity, it.key);
-  }
-  const pastLinksByKey = new Map<string, MofRsKouMokuLinkageRecord[]>();
-  for (const link of allLinks(candidateYear)) {
-    const list = pastLinksByKey.get(link.kouMokuKey) ?? [];
-    list.push(link);
-    pastLinksByKey.set(link.kouMokuKey, list);
-  }
-
-  const carried: MofRsKouMokuLinkageRecord[] = [];
-  for (const item of scoped(loadKouMokuYear(budgetYear).items)) {
-    const identity = identityKey(item);
-    const pastKey =
-      pastKeyByIdentityAndType.get(`${identity}|${item.budgetType}`) ??
-      pastKeyByIdentityAndType.get(`${identity}|決算`) ??
-      pastKeyByIdentity.get(identity);
-    if (!pastKey) continue;
-    for (const pastLink of pastLinksByKey.get(pastKey) ?? []) {
-      carried.push({
-        ...pastLink,
-        kouMokuKey: item.key,
-        mofAccountType: item.accountType,
-        mofBudgetType: item.budgetType,
-        mofMinistry: item.ministry,
-        mofOrganization: item.accountType === 'special' ? item.specialAccount : item.organization,
-        mofSubAccount: item.subAccount,
-        sectionCode: item.sectionCode,
-        sectionName: item.sectionName,
-        subItemCode: item.subItemCode,
-        subItemName: item.subItemName,
-        kouMokuAmount: item.amount,
-      });
-    }
-  }
-
-  return { sourceBudgetYear: candidateYear, isCarriedOver: true, links: carried };
+  return { available: true, links: allLinks(budgetYear) };
 }

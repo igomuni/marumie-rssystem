@@ -59,8 +59,6 @@ export default function MOFKouMokuPage() {
   const [linkageLinks, setLinkageLinks] = useState<MofRsKouMokuLinkageRecord[] | null>(null);
   const [linkageAvailable, setLinkageAvailable] = useState(false);
   const [linkageRsYear, setLinkageRsYear] = useState<number | null>(null);
-  const [linkageIsCarriedOver, setLinkageIsCarriedOver] = useState(false);
-  const [linkageSourceBudgetYear, setLinkageSourceBudgetYear] = useState<number | null>(null);
   const [linkageLoading, setLinkageLoading] = useState(false);
   const [linkageError, setLinkageError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -135,8 +133,6 @@ export default function MOFKouMokuPage() {
       setLinkageLinks(null);
       setLinkageAvailable(false);
       setLinkageRsYear(null);
-      setLinkageIsCarriedOver(false);
-      setLinkageSourceBudgetYear(null);
       setLinkageError(null);
       setLinkageLoading(false);
       return;
@@ -145,8 +141,6 @@ export default function MOFKouMokuPage() {
     setLinkageLinks(null);
     setLinkageAvailable(false);
     setLinkageRsYear(null);
-    setLinkageIsCarriedOver(false);
-    setLinkageSourceBudgetYear(null);
     setLinkageError(null);
     setLinkageLoading(true);
     fetch(`/api/mof-kou-moku/linkage?year=${linkageYear}`)
@@ -157,8 +151,6 @@ export default function MOFKouMokuPage() {
           setLinkageAvailable(json.available);
           setLinkageRsYear(json.rsYear);
           setLinkageLinks(json.links);
-          setLinkageIsCarriedOver(json.isCarriedOver);
-          setLinkageSourceBudgetYear(json.sourceBudgetYear);
         }
       )
       .catch((e: Error) => !cancelled && setLinkageError(e.message))
@@ -529,8 +521,6 @@ export default function MOFKouMokuPage() {
               linkageByKey={linkageByKey}
               linkageAvailable={linkageAvailable}
               linkageRsYear={linkageRsYear}
-              linkageIsCarriedOver={linkageIsCarriedOver}
-              linkageSourceBudgetYear={linkageSourceBudgetYear}
               linkageLoading={linkageLoading}
               linkageError={linkageError}
             />

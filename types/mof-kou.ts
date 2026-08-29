@@ -81,12 +81,9 @@ export interface MOFKouSectionDetail {
   rsLinks: MofRsKouMokuLinkageRecord[];
   /**
    * 事項単位のRS紐づけ（mof-rs-linkage。別系統で、名前照合・構造推定を含みカバレッジは狭い）。
-   * jikouKeyで各事項に対応づく。データが無い年度は過去の直近年度から識別子で参考値を引く
-   * （`jikouRsLinkYear` が要求年度と異なればその印）
+   * jikouKeyで各事項に対応づく。この年度自体の紐づけデータが無ければ空配列
    */
   jikouRsLinks: MofRsLinkageRecord[];
-  /** jikouRsLinksの実際の出所年度。データが全く無ければ null */
-  jikouRsLinkYear: number | null;
 }
 
 /** 出力（一覧API）全体 */
@@ -102,8 +99,6 @@ export interface MOFKouData {
     /** その年度のRS紐づけ状況（mof-rs-kou-moku-linkage-loader.resolveLinks と同じ意味） */
     linkage: {
       available: boolean;
-      isCarriedOver: boolean;
-      sourceBudgetYear: number | null;
       rsYear: number | null;
     };
     notes: string[];

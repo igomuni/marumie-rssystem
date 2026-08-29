@@ -95,6 +95,4 @@ export interface MofRsKouMokuLinkageResponse {
   available: boolean;
   rsYear: number | null;
   links: MofRsKouMokuLinkageRecord[];
-  isCarriedOver: boolean;
-  sourceBudgetYear: number | null;
 }
