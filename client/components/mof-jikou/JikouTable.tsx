@@ -6,18 +6,13 @@
  */
 
 import { Fragment } from 'react';
-import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
-import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { JikouHistory } from './JikouHistory';
-import { JikouLinkage } from './JikouLinkage';
 import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from './format';
 import {
   ACCOUNT_LABEL,
-  bestLink,
   COLUMNS,
   DEFAULT_WIDTHS,
-  identityFromItem,
   MIN_COLUMN_WIDTH,
   orgColumn,
   type ColumnSpec,
@@ -39,16 +34,6 @@ interface Props {
   history: MOFJikouHistory | null;
   historyLoading: boolean;
   historyError: string | null;
-  /**
-   * identity → 紐づくRS事業。年度分を一括取得したもの（取得はページ層の責務）。
-   * 一覧の列と詳細パネルの両方をここから引く。
-   */
-  linkageByIdentity: Map<string, MofRsLinkageRecord[]>;
-  linkageAvailable: boolean;
-  /** /sankey-svg へのリンクに使うRS事業年度。紐づけデータ未生成なら null */
-  linkageRsYear: number | null;
-  linkageLoading: boolean;
-  linkageError: string | null;
   /** 絞り込み結果が0件のときに表の中へ出す文言 */
   emptyMessage?: string;
 }
@@ -74,22 +59,10 @@ export function JikouTable({
   history,
   historyLoading,
   historyError,
-  linkageByIdentity,
-  linkageAvailable,
-  linkageRsYear,
-  linkageLoading,
-  linkageError,
   emptyMessage = '条件に合う事項がありません。',
 }: Props) {
-  /**
-   * RS事業への紐づけ列。COLUMNS（並べ替え可能な列定義）とは別枠で扱う固定幅・非ソートの列。
-   * ColumnSpec.key は SortKey 型でヘッダのソート操作にひもづくため、
-   * 紐づけの有無というデータ由来でない列は COLUMNS に混ぜず単独で描画する。
-   */
-  const RS_COLUMN_WIDTH = 52;
-  const tableWidth =
-    COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0) + RS_COLUMN_WIDTH;
-  const totalColumnCount = COLUMNS.length + 1;
+  const tableWidth = COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0);
+  const totalColumnCount = COLUMNS.length;
 
   /** 列境界のドラッグで幅を変える。mousedown 時にだけ window へリスナを張る */
   function startResize(event: React.MouseEvent, key: string) {
@@ -120,20 +93,12 @@ export function JikouTable({
       style={{ minWidth: tableWidth }}
     >
       <colgroup>
-        <col style={{ width: RS_COLUMN_WIDTH }} />
         {COLUMNS.map(c => (
           <col key={c.key} style={{ width: widths[c.key] ?? c.width }} />
         ))}
       </colgroup>
       <thead className="sticky top-0 z-10 bg-neutral-100 text-left text-neutral-500 dark:bg-neutral-800">
         <tr>
-          <th
-            scope="col"
-            title="紐づく RS 事業があれば /sankey-svg へ移動できます（自動突合・参考情報）"
-            className="p-0 text-center font-medium"
-          >
-            <span className="block px-1 py-2">RS</span>
-          </th>
           {COLUMNS.map(col => {
             const active = sortKey === col.key;
             return (
@@ -179,8 +144,6 @@ export function JikouTable({
           const rate = changeRate(item.amount, item.previousAmount);
           const exec = executionRate(item);
           const isOpen = expandedId === item.id;
-          const rowLinks = linkageByIdentity.get(identityFromItem(item)) ?? [];
-          const rowBestLink = bestLink(rowLinks);
           return (
             <Fragment key={item.id}>
               <tr
@@ -189,32 +152,6 @@ export function JikouTable({
                   isOpen ? 'bg-neutral-50 dark:bg-neutral-900' : ''
                 }`}
               >
-                <td className="px-1 py-1.5 text-center">
-                  {rowBestLink && linkageRsYear !== null ? (
-                    <a
-                      href={sankeySvgProjectUrl(
-                        rowBestLink.projectId,
-                        rowBestLink.projectName,
-                        linkageRsYear
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={e => e.stopPropagation()}
-                      title={`/sankey-svg で「${rowBestLink.projectName}」を開く（${
-                        rowLinks.length > 1 ? `他${rowLinks.length - 1}件の候補あり・` : ''
-                      }${rowBestLink.status === 'confirmed' ? '確定' : '候補'}）`}
-                      className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-medium hover:underline ${
-                        rowBestLink.status === 'confirmed'
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
-                          : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
-                      }`}
-                    >
-                      RS↗
-                    </a>
-                  ) : (
-                    <span className="text-neutral-300 dark:text-neutral-700">—</span>
-                  )}
-                </td>
                 <td className="truncate px-2 py-1.5 text-neutral-500">
                   {/* 行全体の onClick と併存させつつ、キーボードでも展開できるようにする */}
                   <button
@@ -314,13 +251,6 @@ export function JikouTable({
                         history={history}
                         loading={historyLoading}
                         error={historyError}
-                      />
-                      <JikouLinkage
-                        links={linkageLoading ? null : rowLinks}
-                        available={linkageAvailable}
-                        rsYear={linkageRsYear}
-                        loading={linkageLoading}
-                        error={linkageError}
                       />
                       <div className="min-w-[24rem] max-w-3xl flex-1">
                         <div className="mb-1 text-[11px] font-medium text-neutral-400">説明</div>

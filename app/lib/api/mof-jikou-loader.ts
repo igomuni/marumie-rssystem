@@ -69,11 +69,7 @@ export function identityKey(item: MOFJikouItem): string {
   ].join('|');
 }
 
-/**
- * `item.key`（予算種別を含む）から識別子に落とす。
- * mof-rs-linkage（scripts/generate-mof-rs-linkage.ts）の `jikouIdentity` と同じ構成なので、
- * MOF事項↔RS事業の紐づけ検索にもそのまま使う。
- */
+/** `item.key`（予算種別を含む）から識別子に落とす。 */
 export function identityFromKey(key: string): string {
   const parts = key.split('|');
   // key の並びは 会計区分 | 予算種別 | 所管 | 組織 | … なので予算種別・所管（1・2番目）を取り除く

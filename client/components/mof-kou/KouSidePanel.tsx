@@ -16,7 +16,6 @@ import type { MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } 
 import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
-import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { changeRate, formatChangeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { AccountBadge, BudgetTypeBadge } from './Badge';
 import { orgColumn } from './columns';
@@ -328,13 +327,6 @@ function JikouTab({
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
 
-  const rsByJikouKey = new Map<string, MofRsLinkageRecord[]>();
-  for (const l of detail.jikouRsLinks ?? []) {
-    const list = rsByJikouKey.get(l.jikouKey) ?? [];
-    list.push(l);
-    rsByJikouKey.set(l.jikouKey, list);
-  }
-
   const columns: GridColumn<MOFJikouItem>[] = [
     {
       key: 'name',
@@ -376,25 +368,6 @@ function JikouTab({
       width: 110,
       sortValue: it => it.majorExpenseName,
       render: it => it.majorExpenseName || '—',
-    },
-    {
-      key: 'rs',
-      label: 'RS',
-      width: 60,
-      numeric: true,
-      sortValue: it => new Set((rsByJikouKey.get(it.key) ?? []).map(l => l.projectId)).size,
-      render: it => {
-        const links = rsByJikouKey.get(it.key) ?? [];
-        const count = new Set(links.map(l => l.projectId)).size;
-        return (
-          <span
-            className={count > 0 ? 'font-medium text-emerald-700 dark:text-emerald-400' : 'text-neutral-300 dark:text-neutral-700'}
-            title={links.map(l => l.projectName).join('\n') || undefined}
-          >
-            {count || '—'}
-          </span>
-        );
-      },
     },
     {
       key: 'amount',

@@ -10,11 +10,9 @@ import type { MOFBudgetType } from '@/types/mof-jikou';
 import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuAccountType, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
-import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import type { MOFBudgetData, MOFDescriptionData, MOFJikouLeaf, MOFKouMokuLeaf, MOFSection } from '@/types/mof-budget';
 import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionHistoryYear, MOFKouSectionSummary } from '@/types/mof-kou';
 import { resolveLinks } from './mof-rs-kou-moku-linkage-loader';
-import { findLinksByKey as findJikouLinksByKey, linkageAvailable as jikouLinkageAvailable } from './mof-rs-linkage-loader';
 import { dataFileExists, readDataJson, tryReadDataJson } from './data-file';
 
 /** 特別会計名の接尾辞を外す。事項別内訳（Web帳票）は「〜特別会計」付き、科目別内訳（CSV）は無し */
@@ -285,16 +283,11 @@ export function sectionDetail(fiscalYear: number, id: string): MOFKouSectionDeta
   const jikouItems = row.jikou.map(leaf => hydrateJikou(row, leaf, descriptions[leaf.id] ?? ''));
   const kouMokuItems = row.koumoku.map(leaf => hydrateKouMoku(row, leaf));
 
-  const jikouRsLinks: MofRsLinkageRecord[] = jikouLinkageAvailable(fiscalYear)
-    ? jikouItems.flatMap(it => findJikouLinksByKey(fiscalYear, it.key))
-    : [];
-
   return {
     id,
     jikouItems,
     kouMokuItems,
     rsLinks: row.rsLinks,
-    jikouRsLinks,
   };
 }
 

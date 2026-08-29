@@ -15,23 +15,18 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import type { MOFAccountType, MOFJikouData, MOFJikouHistory } from '@/types/mof-jikou';
-import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { formatYen } from '@/client/components/mof-jikou/format';
 import { JikouTable } from '@/client/components/mof-jikou/JikouTable';
 import {
   COLUMNS,
   DEFAULT_WIDTHS,
   defaultDirFor,
-  identityFromItem,
   orgColumn,
   sortItems,
   type ColumnSpec,
   type SortDir,
   type SortKey,
 } from '@/client/components/mof-jikou/columns';
-
-/** RS事業との紐づけの有無で絞り込む */
-type RsFilter = 'all' | 'linked' | 'unlinked';
 
 const PAGE_SIZE = 100;
 
@@ -47,7 +42,6 @@ export default function MOFJikouPage() {
   const [organization, setOrganization] = useState('');
   const [subAccount, setSubAccount] = useState('');
   const [majorExpense, setMajorExpense] = useState('');
-  const [rsFilter, setRsFilter] = useState<RsFilter>('all');
   const [keyword, setKeyword] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -57,11 +51,6 @@ export default function MOFJikouPage() {
   const [history, setHistory] = useState<MOFJikouHistory | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
-  const [linkageLinks, setLinkageLinks] = useState<MofRsLinkageRecord[] | null>(null);
-  const [linkageAvailable, setLinkageAvailable] = useState(false);
-  const [linkageRsYear, setLinkageRsYear] = useState<number | null>(null);
-  const [linkageLoading, setLinkageLoading] = useState(false);
-  const [linkageError, setLinkageError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -107,51 +96,6 @@ export default function MOFJikouPage() {
     };
   }, [expandedKey]);
 
-  /**
-   * その年度の RS 事業との紐づけを一括で取る（自動突合。v1は一般会計・当初予算のみ対応）。
-   * 237件・184KB程度と小さいため、行の展開ごとではなく年度が決まった時点で1回だけ取得し、
-   * 一覧の列表示・詳細パネルの両方をクライアント側の Map で賄う。
-   */
-  const linkageYear = data?.metadata.fiscalYear ?? null;
-  useEffect(() => {
-    if (linkageYear === null) {
-      setLinkageLinks(null);
-      setLinkageAvailable(false);
-      setLinkageRsYear(null);
-      setLinkageError(null);
-      setLinkageLoading(false);
-      return;
-    }
-    let cancelled = false;
-    setLinkageLinks(null);
-    setLinkageError(null);
-    setLinkageLoading(true);
-    fetch(`/api/mof-jikou/linkage?year=${linkageYear}`)
-      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
-      .then((json: { available: boolean; rsYear: number | null; links: MofRsLinkageRecord[] }) => {
-        if (cancelled) return;
-        setLinkageAvailable(json.available);
-        setLinkageRsYear(json.rsYear);
-        setLinkageLinks(json.links);
-      })
-      .catch((e: Error) => !cancelled && setLinkageError(e.message))
-      .finally(() => !cancelled && setLinkageLoading(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [linkageYear]);
-
-  /** identity → その事項に紐づく RS 事業のリスト。列表示・詳細パネルの両方から引く */
-  const linkageByIdentity = useMemo(() => {
-    const map = new Map<string, MofRsLinkageRecord[]>();
-    for (const link of linkageLinks ?? []) {
-      const list = map.get(link.jikouIdentity) ?? [];
-      list.push(link);
-      map.set(link.jikouIdentity, list);
-    }
-    return map;
-  }, [linkageLinks]);
-
   // 年度を変えると収録帳票が変わるので、絞り込みも初期化する
   function changeYear(next: number) {
     setYear(next);
@@ -162,14 +106,13 @@ export default function MOFJikouPage() {
     setOrganization('');
     setSubAccount('');
     setMajorExpense('');
-    setRsFilter('all');
     setExpanded(null);
   }
 
   // フィルタ条件が変わったら1ページ目に戻す
   useEffect(() => {
     setPage(1);
-  }, [account, budgetType, ministry, organization, subAccount, majorExpense, rsFilter, keyword]);
+  }, [account, budgetType, ministry, organization, subAccount, majorExpense, keyword]);
 
   /**
    * 絞り込みの選択肢は上位の条件で連鎖させる。
@@ -225,11 +168,6 @@ export default function MOFJikouPage() {
     const rows = scopedRows.filter(item => {
       if (subAccount && item.subAccount !== subAccount) return false;
       if (majorExpense && item.majorExpenseName !== majorExpense) return false;
-      if (rsFilter !== 'all') {
-        const linked = (linkageByIdentity.get(identityFromItem(item))?.length ?? 0) > 0;
-        if (rsFilter === 'linked' && !linked) return false;
-        if (rsFilter === 'unlinked' && linked) return false;
-      }
       if (kw) {
         const haystack = `${item.name}\n${item.sectionName}\n${item.description}\n${item.ministry}\n${orgColumn(item)}`;
         if (!haystack.includes(kw)) return false;
@@ -237,7 +175,7 @@ export default function MOFJikouPage() {
       return true;
     });
     return sortItems(rows, sortKey, sortDir);
-  }, [scopedRows, subAccount, majorExpense, rsFilter, linkageByIdentity, keyword, sortKey, sortDir]);
+  }, [scopedRows, subAccount, majorExpense, keyword, sortKey, sortDir]);
 
   /**
    * 絞り込み結果の合計。
@@ -448,37 +386,6 @@ export default function MOFJikouPage() {
           ))}
         </select>
 
-        <div
-          className="flex overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700"
-          title={
-            linkageAvailable
-              ? 'RS事業との紐づけ（自動突合）で絞り込みます'
-              : 'この年度は紐づけデータが未生成です'
-          }
-        >
-          {(
-            [
-              ['all', 'RS: すべて'],
-              ['linked', 'RSあり'],
-              ['unlinked', 'RSなし'],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              disabled={!linkageAvailable}
-              onClick={() => setRsFilter(value)}
-              className={`px-2.5 py-1 disabled:cursor-not-allowed disabled:opacity-40 ${
-                rsFilter === value
-                  ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
-                  : 'bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
         <input
           type="search"
           value={keyword}
@@ -533,11 +440,6 @@ export default function MOFJikouPage() {
               history={history}
               historyLoading={historyLoading}
               historyError={historyError}
-              linkageByIdentity={linkageByIdentity}
-              linkageAvailable={linkageAvailable}
-              linkageRsYear={linkageRsYear}
-              linkageLoading={linkageLoading}
-              linkageError={linkageError}
             />
           </div>
 

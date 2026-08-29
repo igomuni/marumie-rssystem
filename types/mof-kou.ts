@@ -16,7 +16,6 @@ import type { MOFKouMokuAccountType, MOFKouMokuGroupSummary } from './mof-kou-mo
 import type { MOFJikouItem } from './mof-jikou';
 import type { MOFKouMokuItem } from './mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from './mof-rs-kou-moku-linkage';
-import type { MofRsLinkageRecord } from './mof-rs-linkage';
 
 /** 項1件ぶんの集計行（一覧表示用。詳細な内訳は含まない） */
 export interface MOFKouSectionSummary {
@@ -79,11 +78,6 @@ export interface MOFKouSectionDetail {
   kouMokuItems: MOFKouMokuItem[];
   /** 目単位のRS紐づけ（mof-rs-kou-moku-linkage。完全一致・カバレッジが広い）。kouMokuKeyで各目に対応づく */
   rsLinks: MofRsKouMokuLinkageRecord[];
-  /**
-   * 事項単位のRS紐づけ（mof-rs-linkage。別系統で、名前照合・構造推定を含みカバレッジは狭い）。
-   * jikouKeyで各事項に対応づく。この年度自体の紐づけデータが無ければ空配列
-   */
-  jikouRsLinks: MofRsLinkageRecord[];
 }
 
 /** 出力（一覧API）全体 */
