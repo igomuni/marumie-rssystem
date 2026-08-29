@@ -10,6 +10,7 @@
  * アンマウントされるため、このコンポーネント内部のuseStateに置くと毎回リセットされてしまう。
  */
 
+import { useState } from 'react';
 import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
 import type { MOFJikouItem } from '@/types/mof-jikou';
@@ -322,6 +323,8 @@ function JikouTab({
   gridState: GridViewState;
   onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
 }) {
+  const [descriptionItem, setDescriptionItem] = useState<MOFJikouItem | null>(null);
+
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
 
@@ -339,14 +342,32 @@ function JikouTab({
       width: 200,
       sortValue: it => it.name,
       render: it => (
-        <a
-          href={it.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
-        >
-          {it.name}
-        </a>
+        <span className="inline-flex min-w-0 items-center gap-1">
+          <a
+            href={it.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="truncate text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+          >
+            {it.name}
+          </a>
+          {it.description && (
+            <button
+              type="button"
+              aria-label={`${it.name} の説明を表示`}
+              title="説明を表示"
+              onClick={e => {
+                e.stopPropagation();
+                setDescriptionItem(it);
+              }}
+              className="shrink-0 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+            >
+              <svg width="14" height="14" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
+                <path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z" />
+              </svg>
+            </button>
+          )}
+        </span>
       ),
     },
     {
@@ -408,14 +429,45 @@ function JikouTab({
   ];
 
   return (
-    <DataGrid
-      rows={detail.jikouItems}
-      columns={columns}
-      rowKey={it => it.id}
-      state={gridState}
-      onStateChange={onGridStateChange}
-      emptyMessage="この項に事項はありません。"
-    />
+    <>
+      <DataGrid
+        rows={detail.jikouItems}
+        columns={columns}
+        rowKey={it => it.id}
+        state={gridState}
+        onStateChange={onGridStateChange}
+        emptyMessage="この項に事項はありません。"
+      />
+      {descriptionItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setDescriptionItem(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${descriptionItem.name} の説明`}
+            className="mx-4 max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-4 shadow-2xl dark:bg-neutral-900"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="mb-2 flex items-start justify-between gap-3">
+              <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{descriptionItem.name}</h3>
+              <button
+                type="button"
+                aria-label="閉じる"
+                onClick={() => setDescriptionItem(null)}
+                className="shrink-0 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+              >
+                ×
+              </button>
+            </div>
+            <p className="whitespace-pre-wrap text-xs leading-relaxed text-neutral-700 dark:text-neutral-300">
+              {descriptionItem.description}
+            </p>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
