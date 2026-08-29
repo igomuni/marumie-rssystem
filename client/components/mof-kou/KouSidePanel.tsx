@@ -574,6 +574,7 @@ function RsTab({
           l.projectName
         ),
     },
+    { key: 'projectMinistry', label: '府省庁', width: 110, sortValue: l => l.projectMinistry, render: l => l.projectMinistry },
     { key: 'subItemName', label: '目名', width: 150, sortValue: l => l.subItemName, render: l => l.subItemName },
     {
       key: 'rsAmount',

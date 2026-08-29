@@ -253,15 +253,9 @@ export default function MOFKouPage() {
     return sortItems(rows, sortKey, sortDir);
   }, [scopedRows, filters, sortKey, sortDir]);
 
-  /**
-   * 絞り込み結果の合計。
-   * 当初・暫定・補正は同じ予算の別断面で、会計区分をまたぐと会計間の繰入も重なる。
-   * 種別や会計が混ざったまま足した数字は意味を持たないので、どちらも1つに絞られているときだけ出す。
-   */
+  /** 絞り込み結果の合計 */
   const filteredTotal = useMemo(() => {
     if (filtered.length === 0) return null;
-    if (new Set(filtered.map(s => s.accountType)).size > 1) return null;
-    if (new Set(filtered.map(s => s.budgetType)).size > 1) return null;
     return filtered.reduce((sum, s) => sum + s.amount, 0);
   }, [filtered]);
 
@@ -413,18 +407,7 @@ export default function MOFKouPage() {
 
           <span className="whitespace-nowrap text-neutral-500">
             該当 {filtered.length.toLocaleString()} 件
-            {filteredTotal === null ? (
-              filtered.length > 0 && (
-                <span
-                  className="ml-1 text-neutral-400"
-                  title="当初・暫定・補正は同じ予算の別断面で、会計区分をまたぐと会計間の繰入も重なります。予算種別と会計区分を1つに絞ると合計を表示します。"
-                >
-                  （合計は予算種別・会計区分が混在のため非表示）
-                </span>
-              )
-            ) : (
-              <> / {formatYen(filteredTotal)}</>
-            )}
+            {filteredTotal !== null && <> / {formatYen(filteredTotal)}</>}
           </span>
 
           {widthsChanged && (
