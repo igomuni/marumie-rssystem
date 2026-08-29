@@ -342,12 +342,12 @@ function JikouTab({
       width: 200,
       sortValue: it => it.name,
       render: it => (
-        <span className="inline-flex min-w-0 items-center gap-1">
+        <span className="flex w-full min-w-0 items-center gap-1">
           <a
             href={it.sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="truncate text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+            className="min-w-0 truncate text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
           >
             {it.name}
           </a>
@@ -360,7 +360,7 @@ function JikouTab({
                 e.stopPropagation();
                 setDescriptionItem(it);
               }}
-              className="shrink-0 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+              className="ml-auto shrink-0 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
             >
               <svg width="14" height="14" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
                 <path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z" />
