@@ -57,6 +57,9 @@ const INITIAL_FILTERS: FilterSidebarState = {
   subAccount: [],
   majorExpense: [],
   purpose: [],
+  objective: [],
+  fiscalLaw: [],
+  economicNature: [],
   nameQuery: '',
   nameRegex: false,
   amountRange: EMPTY_RANGE,
@@ -219,7 +222,7 @@ export default function MOFKouMokuPage() {
     return map;
   }, [linkageLinks]);
 
-  const { account, budgetType, ministry, organization, subAccount, majorExpense, purpose } = filters;
+  const { account, budgetType, ministry, organization, subAccount, majorExpense, purpose, objective, fiscalLaw, economicNature } = filters;
 
   const baseRows = useMemo(() => {
     if (!data) return [];
@@ -269,6 +272,21 @@ export default function MOFKouMokuPage() {
     [scopedRows]
   );
 
+  const objectives = useMemo(
+    () => [...new Set(scopedRows.map(i => i.objectiveName).filter(Boolean))].sort(),
+    [scopedRows]
+  );
+
+  const fiscalLaws = useMemo(
+    () => [...new Set(scopedRows.map(i => i.fiscalLawName).filter(Boolean))].sort(),
+    [scopedRows]
+  );
+
+  const economicNatures = useMemo(
+    () => [...new Set(scopedRows.map(i => i.economicNatureName).filter(Boolean))].sort(),
+    [scopedRows]
+  );
+
   /** 数値スライダーの可動域は年度全体（他の絞り込みの影響を受けない）から求める */
   const domains: FilterDomains = useMemo(() => {
     const rows = data?.items ?? [];
@@ -290,6 +308,9 @@ export default function MOFKouMokuPage() {
       if (filters.subAccount.length > 0 && !filters.subAccount.includes(item.subAccount)) return false;
       if (filters.majorExpense.length > 0 && !filters.majorExpense.includes(item.majorExpenseName)) return false;
       if (filters.purpose.length > 0 && !filters.purpose.includes(item.purposeName)) return false;
+      if (filters.objective.length > 0 && !filters.objective.includes(item.objectiveName)) return false;
+      if (filters.fiscalLaw.length > 0 && !filters.fiscalLaw.includes(item.fiscalLawName)) return false;
+      if (filters.economicNature.length > 0 && !filters.economicNature.includes(item.economicNatureName)) return false;
       const haystack = `${item.sectionName}\n${item.subItemName}`;
       if (!textMatches(haystack, filters.nameQuery.trim(), filters.nameRegex)) return false;
       if (!inRange(item.amount, filters.amountRange)) return false;
@@ -318,6 +339,9 @@ export default function MOFKouMokuPage() {
     subAccount.length > 0,
     majorExpense.length > 0,
     purpose.length > 0,
+    objective.length > 0,
+    fiscalLaw.length > 0,
+    economicNature.length > 0,
     filters.nameQuery !== '',
     filters.amountRange[0] !== null || filters.amountRange[1] !== null,
     filters.previousAmountRange[0] !== null || filters.previousAmountRange[1] !== null,
@@ -500,6 +524,9 @@ export default function MOFKouMokuPage() {
               subAccounts={subAccounts}
               majorExpenses={majorExpenses}
               purposes={purposes}
+              objectives={objectives}
+              fiscalLaws={fiscalLaws}
+              economicNatures={economicNatures}
               domains={domains}
               activeCount={activeFilterCount}
               onReset={() => setFilters(INITIAL_FILTERS)}

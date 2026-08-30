@@ -2,9 +2,9 @@
 
 /**
  * 目一覧の絞り込みを左サイドパネルにまとめたもの。`/mof-kou`（項一覧）・`/mof-jikou`
- * （事項一覧）の FilterSidebar と同じ構成・挙動に揃える。目だけが持つ「使途別分類」
- * （予定経費要求書の科目別内訳の各目に付したコード番号の1桁目。人件費・旅費・物件費・
- * 施設費・補助費及委託費・他会計へ繰入・その他）もここで絞り込める。
+ * （事項一覧）の FilterSidebar と同じ構成・挙動に揃える。目の複合コード（例:
+ * `95016-2111-02`）に由来する4分類（使途別・目的別・財政法公債金対象非対象別・
+ * 経済性質別。docs/mof-budget-data-guide.md 4-3〜4-6節）もここで絞り込める。
  */
 
 import { useState } from 'react';
@@ -15,7 +15,17 @@ import { RangeSlider } from '@/client/components/mof-kou/RangeSlider';
 import { RegexTextFilter } from '@/client/components/mof-kou/RegexTextFilter';
 import { formatYen } from '@/client/components/mof-jikou/format';
 
-type ComboField = 'budgetType' | 'account' | 'ministry' | 'organization' | 'subAccount' | 'majorExpense' | 'purpose';
+type ComboField =
+  | 'budgetType'
+  | 'account'
+  | 'ministry'
+  | 'organization'
+  | 'subAccount'
+  | 'majorExpense'
+  | 'purpose'
+  | 'objective'
+  | 'fiscalLaw'
+  | 'economicNature';
 
 export type NumRange = [number | null, number | null];
 
@@ -29,6 +39,9 @@ export interface FilterSidebarState {
   subAccount: string[];
   majorExpense: string[];
   purpose: string[];
+  objective: string[];
+  fiscalLaw: string[];
+  economicNature: string[];
   nameQuery: string;
   nameRegex: boolean;
   amountRange: NumRange;
@@ -53,6 +66,9 @@ interface FilterSidebarProps {
   subAccounts: string[];
   majorExpenses: string[];
   purposes: string[];
+  objectives: string[];
+  fiscalLaws: string[];
+  economicNatures: string[];
   domains: FilterDomains;
   activeCount: number;
   onReset: () => void;
@@ -80,6 +96,9 @@ export function FilterSidebar({
   subAccounts,
   majorExpenses,
   purposes,
+  objectives,
+  fiscalLaws,
+  economicNatures,
   domains,
   activeCount,
   onReset,
@@ -207,6 +226,48 @@ export function FilterSidebar({
             onChange={v => onChange('purpose', v)}
             disabled={purposes.length === 0}
             {...comboProps('purpose')}
+          />
+        </div>
+
+        <div className="block space-y-1">
+          <span className="text-neutral-500" title="目分類コードの目的別分類（3桁）。政府関係機関の帳票には無い">
+            目的別
+          </span>
+          <MultiSelectCombo
+            label="目的別"
+            options={objectives}
+            selected={state.objective}
+            onChange={v => onChange('objective', v)}
+            disabled={objectives.length === 0}
+            {...comboProps('objective')}
+          />
+        </div>
+
+        <div className="block space-y-1">
+          <span className="text-neutral-500" title="目分類コードの財政法公債金対象非対象別分類（1桁）。一般会計にしか無い">
+            財政法公債金対象
+          </span>
+          <MultiSelectCombo
+            label="財政法公債金対象非対象別"
+            options={fiscalLaws}
+            selected={state.fiscalLaw}
+            onChange={v => onChange('fiscalLaw', v)}
+            disabled={fiscalLaws.length === 0}
+            {...comboProps('fiscalLaw')}
+          />
+        </div>
+
+        <div className="block space-y-1">
+          <span className="text-neutral-500" title="目分類コードの経済性質別分類（2桁）。政府関係機関の帳票には無い">
+            経済性質別
+          </span>
+          <MultiSelectCombo
+            label="経済性質別"
+            options={economicNatures}
+            selected={state.economicNature}
+            onChange={v => onChange('economicNature', v)}
+            disabled={economicNatures.length === 0}
+            {...comboProps('economicNature')}
           />
         </div>
 
