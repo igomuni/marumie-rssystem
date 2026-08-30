@@ -9,11 +9,12 @@
  * ただし RS 事業との紐づけ（自動突合）は一般会計・当初予算のみ対応。
  *
  * フィルタは `/mof-kou`（項一覧）・`/mof-jikou`（事項一覧）と同じ左サイドパネル構成に揃えている。
- * RSあり/なしの絞り込みだけは目特有の状態（紐づけ未生成の年度は無効化）のため、
- * ツールバーのトグルボタンとして残す。
+ * 行クリックの詳細も `/mof-kou` と同じく右のサイドパネル（年度推移・RS事業タブ）に出す
+ * （インライン展開はしない）。
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
@@ -21,6 +22,13 @@ import type { MOFKouMokuData, MOFKouMokuHistory, MOFKouMokuItem } from '@/types/
 import type { MofRsKouMokuLinkageRecord, MofRsKouMokuLinkageResponse } from '@/types/mof-rs-kou-moku-linkage';
 import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { KouMokuTable } from '@/client/components/mof-kou-moku/KouMokuTable';
+import {
+  KouMokuSidePanel,
+  createDefaultPanelGridStates,
+  type PanelGridStates,
+  type Tab,
+} from '@/client/components/mof-kou-moku/KouMokuSidePanel';
+import type { GridViewState } from '@/client/components/mof-kou/DataGrid';
 import { FilterSidebar, type FilterDomains, type FilterSidebarState, type NumRange } from '@/client/components/mof-kou-moku/FilterSidebar';
 import { textMatches } from '@/client/components/mof-kou/RegexTextFilter';
 import {
@@ -38,8 +46,8 @@ import {
 const PAGE_SIZE = 100;
 const EMPTY_RANGE: NumRange = [null, null];
 
-/** RS事業との紐づけの有無で絞り込む */
-type RsFilter = 'all' | 'linked' | 'unlinked';
+const PANEL_MIN_WIDTH = 320;
+const PANEL_MAX_WIDTH = 900;
 
 const INITIAL_FILTERS: FilterSidebarState = {
   account: [],
@@ -83,11 +91,13 @@ export default function MOFKouMokuPage() {
   const [filters, setFilters] = useState<FilterSidebarState>(INITIAL_FILTERS);
   const [showFilters, setShowFilters] = useState(true);
   const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
-  const [rsFilter, setRsFilter] = useState<RsFilter>('all');
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [panelWidth, setPanelWidth] = useState(420);
+  const [panelTab, setPanelTab] = useState<Tab>('history');
+  const [panelGridStates, setPanelGridStates] = useState<PanelGridStates>(createDefaultPanelGridStates());
   const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
   const [history, setHistory] = useState<MOFKouMokuHistory | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -119,21 +129,24 @@ export default function MOFKouMokuPage() {
     setData(null);
     setPage(1);
     setFilters(INITIAL_FILTERS);
-    setRsFilter('all');
-    setExpanded(null);
+    setSelected(null);
   }
 
   function setFilter<K extends keyof FilterSidebarState>(key: K, value: FilterSidebarState[K]) {
     setFilters(prev => ({ ...prev, [key]: value }));
   }
 
+  function updatePanelGridState(tab: keyof PanelGridStates, updater: (prev: GridViewState) => GridViewState) {
+    setPanelGridStates(prev => ({ ...prev, [tab]: updater(prev[tab]) }));
+  }
+
   /**
-   * 展開した目の経年推移を取る。
+   * 選択中の目の経年推移を取る。
    * 再利用コンポーネントから直接APIを叩かないよう、取得はページ層に置く。
    */
-  const expandedKey = data?.items.find(i => i.id === expanded)?.key ?? null;
+  const selectedKey = data?.items.find(i => i.id === selected)?.key ?? null;
   useEffect(() => {
-    if (!expandedKey) {
+    if (!selectedKey) {
       setHistory(null);
       setHistoryError(null);
       setHistoryLoading(false);
@@ -143,7 +156,7 @@ export default function MOFKouMokuPage() {
     setHistory(null);
     setHistoryError(null);
     setHistoryLoading(true);
-    fetch(`/api/mof-kou-moku/history?key=${encodeURIComponent(expandedKey)}`)
+    fetch(`/api/mof-kou-moku/history?key=${encodeURIComponent(selectedKey)}`)
       .then(res => (res.ok ? res.json() : Promise.reject(new Error(`API error: ${res.status}`))))
       .then((json: MOFKouMokuHistory) => !cancelled && setHistory(json))
       .catch((e: Error) => !cancelled && setHistoryError(e.message))
@@ -151,11 +164,11 @@ export default function MOFKouMokuPage() {
     return () => {
       cancelled = true;
     };
-  }, [expandedKey]);
+  }, [selectedKey]);
 
   useEffect(() => {
     setPage(1);
-  }, [filters, rsFilter]);
+  }, [filters]);
 
   /**
    * その年度の RS 事業との紐づけを一括で取る（完全一致キーによる自動突合。
@@ -277,11 +290,6 @@ export default function MOFKouMokuPage() {
       if (filters.subAccount.length > 0 && !filters.subAccount.includes(item.subAccount)) return false;
       if (filters.majorExpense.length > 0 && !filters.majorExpense.includes(item.majorExpenseName)) return false;
       if (filters.purpose.length > 0 && !filters.purpose.includes(item.purposeName)) return false;
-      if (rsFilter !== 'all') {
-        const linked = (linkageByKey.get(item.key)?.length ?? 0) > 0;
-        if (rsFilter === 'linked' && !linked) return false;
-        if (rsFilter === 'unlinked' && linked) return false;
-      }
       const haystack = `${item.sectionName}\n${item.subItemName}`;
       if (!textMatches(haystack, filters.nameQuery.trim(), filters.nameRegex)) return false;
       if (!inRange(item.amount, filters.amountRange)) return false;
@@ -291,17 +299,11 @@ export default function MOFKouMokuPage() {
       return true;
     });
     return sortItems(rows, sortKey, sortDir);
-  }, [scopedRows, filters, rsFilter, linkageByKey, sortKey, sortDir]);
+  }, [scopedRows, filters, sortKey, sortDir]);
 
-  /**
-   * 絞り込み結果の合計。
-   * 当初・暫定・補正は同じ予算の別断面で、会計区分をまたぐと会計間の繰入も重なる。
-   * 種別や会計が混ざったまま足した数字は意味を持たないので、どちらも1つに絞られているときだけ出す。
-   */
+  /** 絞り込み結果の合計 */
   const filteredTotal = useMemo(() => {
     if (filtered.length === 0) return null;
-    if (new Set(filtered.map(i => i.accountType)).size > 1) return null;
-    if (new Set(filtered.map(i => i.budgetType)).size > 1) return null;
     return filtered.reduce((sum, i) => sum + i.amount, 0);
   }, [filtered]);
 
@@ -321,7 +323,6 @@ export default function MOFKouMokuPage() {
     filters.previousAmountRange[0] !== null || filters.previousAmountRange[1] !== null,
     filters.differenceRange[0] !== null || filters.differenceRange[1] !== null,
     filters.rateRange[0] !== null || filters.rateRange[1] !== null,
-    rsFilter !== 'all',
   ].filter(Boolean).length;
 
   function goToPage(next: number) {
@@ -339,7 +340,7 @@ export default function MOFKouMokuPage() {
     goToPage(1);
   }
 
-  function startSidebarResize(event: React.MouseEvent) {
+  function startSidebarResize(event: ReactMouseEvent) {
     event.preventDefault();
     const startX = event.clientX;
     const startWidth = sidebarWidth;
@@ -358,6 +359,30 @@ export default function MOFKouMokuPage() {
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
   }
+
+  function startPanelResize(event: ReactMouseEvent) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = panelWidth;
+    const onMove = (e: MouseEvent) => {
+      // パネルは画面右側に置くため、ハンドルを左へ引くほど広がる
+      const next = Math.min(PANEL_MAX_WIDTH, Math.max(PANEL_MIN_WIDTH, startWidth - (e.clientX - startX)));
+      setPanelWidth(next);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+
+  const selectedRow = selected ? (filtered.find(r => r.id === selected) ?? data?.items.find(r => r.id === selected)) : undefined;
+  const rsLinksForSelected = selectedRow ? (linkageByKey.get(selectedRow.key) ?? []) : [];
 
   if (error) {
     return (
@@ -447,51 +472,9 @@ export default function MOFKouMokuPage() {
           )}
         </button>
 
-        <div
-          className="flex overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700"
-          title={
-            linkageAvailable
-              ? 'RS事業との紐づけ（所管×組織×項×目の完全一致）で絞り込みます'
-              : 'この年度は紐づけデータが未生成です'
-          }
-        >
-          {(
-            [
-              ['all', 'RS: すべて'],
-              ['linked', 'RSあり'],
-              ['unlinked', 'RSなし'],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              disabled={!linkageAvailable}
-              onClick={() => setRsFilter(value)}
-              className={`px-2.5 py-1 disabled:cursor-not-allowed disabled:opacity-40 ${
-                rsFilter === value
-                  ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
-                  : 'bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
         <span className="whitespace-nowrap text-neutral-500">
           該当 {filtered.length.toLocaleString()} 件
-          {filteredTotal === null ? (
-            filtered.length > 0 && (
-              <span
-                className="ml-1 text-neutral-400"
-                title="当初・暫定・補正は同じ予算の別断面で、会計区分をまたぐと会計間の繰入も重なります。予算種別と会計区分を1つに絞ると合計を表示します。"
-              >
-                （合計は予算種別・会計区分が混在のため非表示）
-              </span>
-            )
-          ) : (
-            <> / {formatYen(filteredTotal)}</>
-          )}
+          {filteredTotal !== null && <> / {formatYen(filteredTotal)}</>}
         </span>
 
         {widthsChanged && (
@@ -543,16 +526,9 @@ export default function MOFKouMokuPage() {
               onToggleSort={toggleSort}
               widths={widths}
               onWidthsChange={setWidths}
-              expandedId={expanded}
-              onToggleExpand={setExpanded}
-              history={history}
-              historyLoading={historyLoading}
-              historyError={historyError}
+              selectedId={selected}
+              onSelectRow={id => setSelected(cur => (cur === id ? null : id))}
               linkageByKey={linkageByKey}
-              linkageAvailable={linkageAvailable}
-              linkageRsYear={linkageRsYear}
-              linkageLoading={linkageLoading}
-              linkageError={linkageError}
             />
           </div>
 
@@ -583,6 +559,37 @@ export default function MOFKouMokuPage() {
             </button>
           </div>
         </div>
+
+        {selectedRow && (
+          <>
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="詳細パネルの幅を変更"
+              onMouseDown={startPanelResize}
+              className="flex w-3 shrink-0 cursor-col-resize items-stretch justify-center"
+            >
+              <div className="w-1 rounded-full transition-colors hover:bg-neutral-300 dark:hover:bg-neutral-700" />
+            </div>
+            <KouMokuSidePanel
+              row={selectedRow}
+              onClose={() => setSelected(null)}
+              history={history}
+              historyLoading={historyLoading}
+              historyError={historyError}
+              rsLinks={rsLinksForSelected}
+              linkageAvailable={linkageAvailable}
+              linkageRsYear={linkageRsYear}
+              linkageLoading={linkageLoading}
+              linkageError={linkageError}
+              width={panelWidth}
+              tab={panelTab}
+              onTabChange={setPanelTab}
+              gridStates={panelGridStates}
+              onGridStateChange={updatePanelGridState}
+            />
+          </>
+        )}
       </div>
 
       <div className="shrink-0 px-3 pb-3">
