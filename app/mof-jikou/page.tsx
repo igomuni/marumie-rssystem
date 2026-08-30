@@ -15,7 +15,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
-import { MAJOR_EXPENSE_ORDER, MINISTRY_ORDER, sortByCodeOrder } from '@/app/lib/mof-classification-order';
+import { MAJOR_EXPENSE_ORDER, MINISTRY_ORDER, sortBudgetTypes, sortByCodeOrder } from '@/app/lib/mof-classification-order';
 import type { MOFJikouData, MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
 import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { JikouTable } from '@/client/components/mof-jikou/JikouTable';
@@ -428,7 +428,7 @@ export default function MOFJikouPage() {
             <FilterSidebar
               state={filters}
               onChange={setFilter}
-              budgetTypes={data.metadata.budgetTypes}
+              budgetTypes={sortBudgetTypes(data.metadata.budgetTypes)}
               ministries={ministries}
               organizations={organizations}
               subAccounts={subAccounts}

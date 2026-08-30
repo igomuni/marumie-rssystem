@@ -25,6 +25,7 @@ import {
   MINISTRY_ORDER,
   OBJECTIVE_ORDER,
   PURPOSE_ORDER,
+  sortBudgetTypes,
   sortByCodeOrder,
 } from '@/app/lib/mof-classification-order';
 import type { MOFKouMokuData, MOFKouMokuHistory, MOFKouMokuItem } from '@/types/mof-kou-moku';
@@ -545,7 +546,7 @@ export default function MOFKouMokuPage() {
             <FilterSidebar
               state={filters}
               onChange={setFilter}
-              budgetTypes={data.metadata.budgetTypes}
+              budgetTypes={sortBudgetTypes(data.metadata.budgetTypes)}
               ministries={ministries}
               organizations={organizations}
               subAccounts={subAccounts}

@@ -25,7 +25,7 @@ import { KouSidePanel, createDefaultPanelGridStates, type PanelGridStates, type 
 import type { GridViewState } from '@/client/components/mof-kou/DataGrid';
 import { FilterSidebar, type FilterDomains, type FilterSidebarState, type NumRange } from '@/client/components/mof-kou/FilterSidebar';
 import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
-import { MINISTRY_ORDER, sortByCodeOrder } from '@/app/lib/mof-classification-order';
+import { MINISTRY_ORDER, sortBudgetTypes, sortByCodeOrder } from '@/app/lib/mof-classification-order';
 import { textMatches } from '@/client/components/mof-kou/RegexTextFilter';
 import {
   ACCOUNT_LABEL,
@@ -437,7 +437,7 @@ export default function MOFKouPage() {
             <FilterSidebar
               state={filters}
               onChange={setFilter}
-              budgetTypes={data.metadata.budgetTypes}
+              budgetTypes={sortBudgetTypes(data.metadata.budgetTypes)}
               ministries={ministries}
               organizations={organizations}
               subAccounts={subAccounts}

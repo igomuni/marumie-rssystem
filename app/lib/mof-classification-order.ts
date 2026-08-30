@@ -6,6 +6,18 @@
  * 名称のうち最も番号の若いものでランク付けする。
  */
 
+import { MOF_REVISION_NUMBERS, revisedBudgetType, type MOFBudgetType } from '@/types/mof-jikou';
+
+/**
+ * 予算種別の並び順（当初→暫定→補正[号数順]→決算）。metadata.budgetTypesは
+ * 生成スクリプトの帳票走査順（当初→暫定→決算→補正）のままだと決算が補正より
+ * 前に来てしまうため、フィルタ表示用にこの順へ並べ替える。
+ */
+export function sortBudgetTypes(values: MOFBudgetType[]): MOFBudgetType[] {
+  const order: MOFBudgetType[] = ['当初予算', '暫定予算', ...MOF_REVISION_NUMBERS.map(revisedBudgetType), '決算'];
+  return [...values].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+}
+
 /** 所管コード順（4-1節） */
 export const MINISTRY_ORDER = [
   '皇室費',
