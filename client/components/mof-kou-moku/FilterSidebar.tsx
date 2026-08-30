@@ -216,20 +216,6 @@ export function FilterSidebar({
         </div>
 
         <div className="block space-y-1">
-          <span className="text-neutral-500" title="予定経費要求書の科目別内訳の各目に付したコード番号の読み方に基づく分類">
-            使途別
-          </span>
-          <MultiSelectCombo
-            label="使途別"
-            options={purposes}
-            selected={state.purpose}
-            onChange={v => onChange('purpose', v)}
-            disabled={purposes.length === 0}
-            {...comboProps('purpose')}
-          />
-        </div>
-
-        <div className="block space-y-1">
           <span className="text-neutral-500" title="目分類コードの目的別分類（3桁）。政府関係機関の帳票には無い">
             目的別
           </span>
@@ -268,6 +254,20 @@ export function FilterSidebar({
             onChange={v => onChange('economicNature', v)}
             disabled={economicNatures.length === 0}
             {...comboProps('economicNature')}
+          />
+        </div>
+
+        <div className="block space-y-1">
+          <span className="text-neutral-500" title="予定経費要求書の科目別内訳の各目に付したコード番号の読み方に基づく分類">
+            使途別
+          </span>
+          <MultiSelectCombo
+            label="使途別"
+            options={purposes}
+            selected={state.purpose}
+            onChange={v => onChange('purpose', v)}
+            disabled={purposes.length === 0}
+            {...comboProps('purpose')}
           />
         </div>
 

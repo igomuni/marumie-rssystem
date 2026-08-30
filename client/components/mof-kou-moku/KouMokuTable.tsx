@@ -177,14 +177,29 @@ export function KouMokuTable({
                   {item.majorExpenseName || (item.majorExpenseCode ? `(${item.majorExpenseCode})` : '—')}
                 </span>
               </td>
-              <td className="truncate px-2 py-1.5 tabular-nums text-neutral-500">{item.subItemCode}</td>
-              <td className="px-2 py-1.5 font-medium text-neutral-900 dark:text-neutral-100">
-                <span className="line-clamp-2">{item.subItemName}</span>
+              <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                <span className="line-clamp-2">
+                  {item.objectiveName || (item.objectiveCode ? `(${item.objectiveCode})` : '—')}
+                </span>
+              </td>
+              <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                <span className="line-clamp-2">
+                  {item.fiscalLawName || (item.fiscalLawCode ? `(${item.fiscalLawCode})` : '—')}
+                </span>
+              </td>
+              <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
+                <span className="line-clamp-2">
+                  {item.economicNatureName || (item.economicNatureCode ? `(${item.economicNatureCode})` : '—')}
+                </span>
               </td>
               <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
                 <span className="line-clamp-2">
                   {item.purposeName || (item.purposeCode ? `(${item.purposeCode})` : '—')}
                 </span>
+              </td>
+              <td className="truncate px-2 py-1.5 tabular-nums text-neutral-500">{item.subItemCode}</td>
+              <td className="px-2 py-1.5 font-medium text-neutral-900 dark:text-neutral-100">
+                <span className="line-clamp-2">{item.subItemName}</span>
               </td>
               <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
                 {formatYen(item.amount)}
