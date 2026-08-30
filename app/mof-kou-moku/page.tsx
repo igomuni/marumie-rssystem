@@ -17,6 +17,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
+import { usePersistedState } from '@/client/hooks/usePersistedState';
 import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
 import {
   ECONOMIC_NATURE_ORDER,
@@ -105,15 +106,18 @@ export default function MOFKouMokuPage() {
 
   const [filters, setFilters] = useState<FilterSidebarState>(INITIAL_FILTERS);
   const [showFilters, setShowFilters] = useState(true);
-  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
+  const [sidebarWidth, setSidebarWidth] = usePersistedState('mof-kou-moku:sidebarWidth', SIDEBAR_DEFAULT_WIDTH);
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string | null>(null);
-  const [panelWidth, setPanelWidth] = useState(420);
-  const [panelTab, setPanelTab] = useState<Tab>('history');
-  const [panelGridStates, setPanelGridStates] = useState<PanelGridStates>(createDefaultPanelGridStates());
-  const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
+  const [panelWidth, setPanelWidth] = usePersistedState('mof-kou-moku:panelWidth', 420);
+  const [panelTab, setPanelTab] = usePersistedState<Tab>('mof-kou-moku:panelTab', 'history');
+  const [panelGridStates, setPanelGridStates] = usePersistedState<PanelGridStates>(
+    'mof-kou-moku:panelGridStates',
+    createDefaultPanelGridStates()
+  );
+  const [widths, setWidths] = usePersistedState<Record<string, number>>('mof-kou-moku:widths', DEFAULT_WIDTHS);
   const [history, setHistory] = useState<MOFKouMokuHistory | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);

@@ -50,8 +50,8 @@ export interface ColumnSpec {
 }
 
 export const COLUMNS: ColumnSpec[] = [
-  { key: 'budgetType', label: '予算種別', width: 124 },
-  { key: 'accountType', label: '会計区分', width: 92 },
+  { key: 'budgetType', label: '予算種別', width: 76 },
+  { key: 'accountType', label: '会計区分', width: 64 },
   { key: 'ministry', label: '所管', width: 150, note: '政府関係機関の帳票には所管の欄が無い' },
   {
     key: 'organization',
