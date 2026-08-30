@@ -44,6 +44,7 @@ export interface FilterSidebarState {
   economicNature: string[];
   nameQuery: string;
   nameRegex: boolean;
+  rsCountRange: NumRange;
   amountRange: NumRange;
   previousAmountRange: NumRange;
   differenceRange: NumRange;
@@ -51,6 +52,7 @@ export interface FilterSidebarState {
 }
 
 export interface FilterDomains {
+  rsCount: [number, number];
   amount: [number, number];
   previousAmount: [number, number];
   difference: [number, number];
@@ -78,6 +80,10 @@ interface FilterSidebarProps {
 function formatRate(v: number): string {
   const sign = v > 0 ? '+' : '';
   return `${sign}${(v * 100).toFixed(0)}%`;
+}
+
+function formatCount(v: number): string {
+  return `${Math.round(v).toLocaleString()}件`;
 }
 
 /** 上位の選択がまだ有効な選択肢だけに絞る（無効化されたものは黙って落とす） */
@@ -283,6 +289,15 @@ export function FilterSidebar({
 
         <hr className="border-neutral-200 dark:border-neutral-800" />
 
+        <RangeSlider
+          label="RS事業数"
+          note="紐づくRS事業数（所管×組織×項×目の完全一致）"
+          domainMin={domains.rsCount[0]}
+          domainMax={domains.rsCount[1]}
+          value={state.rsCountRange}
+          onChange={v => onChange('rsCountRange', v)}
+          formatValue={formatCount}
+        />
         <RangeSlider
           label="本年度額"
           domainMin={domains.amount[0]}

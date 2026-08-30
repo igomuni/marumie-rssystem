@@ -35,7 +35,9 @@ export type SortKey =
   | 'currentAmount'
   | 'spent'
   | 'unused'
-  | 'executionRate';
+  | 'executionRate'
+  /** 紐づくRS事業数。COLUMNSには含まれない特殊列（値がitem自体には無く、呼び出し側のlinkageByKeyから計算する） */
+  | 'rs';
 
 export type SortDir = 'asc' | 'desc';
 
@@ -127,6 +129,9 @@ function sortValue(item: MOFKouMokuItem, key: SortKey): string | number | null {
     }
     case 'executionRate':
       return executionRate(item);
+    case 'rs':
+      // 呼び出し側（page.tsx）がlinkageByKeyを使って別途ソートするため、ここには来ない
+      return null;
     default:
       return item[key];
   }

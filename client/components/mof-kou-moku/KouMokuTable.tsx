@@ -87,9 +87,18 @@ export function KouMokuTable({
           <th
             scope="col"
             title="紐づく RS 事業数（所管×組織×項×目の完全一致）"
-            className="p-0 text-center font-medium"
+            aria-sort={sortKey === 'rs' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+            className={`relative select-none p-0 font-medium ${sortKey === 'rs' ? 'text-neutral-900 dark:text-neutral-100' : ''}`}
+            style={{ width: RS_COLUMN_WIDTH }}
           >
-            <span className="block px-1 py-2">RS</span>
+            <button
+              type="button"
+              onClick={() => onToggleSort({ key: 'rs', label: 'RS', width: RS_COLUMN_WIDTH, numeric: true })}
+              className="flex w-full items-center justify-end gap-0.5 overflow-hidden px-1 py-2 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+            >
+              <span className="min-w-0 truncate">RS</span>
+              <span className="w-2.5 shrink-0 text-[9px]">{sortKey === 'rs' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+            </button>
           </th>
           {COLUMNS.map(col => {
             const active = sortKey === col.key;

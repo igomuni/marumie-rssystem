@@ -15,6 +15,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
+import { MAJOR_EXPENSE_ORDER, MINISTRY_ORDER, sortByCodeOrder } from '@/app/lib/mof-classification-order';
 import type { MOFJikouData, MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
 import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { JikouTable } from '@/client/components/mof-jikou/JikouTable';
@@ -164,7 +165,7 @@ export default function MOFJikouPage() {
   }, [data, account, budgetType]);
 
   const ministries = useMemo(
-    () => [...new Set(baseRows.map(i => i.ministry || i.agency).filter(Boolean))].sort(),
+    () => sortByCodeOrder([...new Set(baseRows.map(i => i.ministry || i.agency).filter(Boolean))], MINISTRY_ORDER),
     [baseRows]
   );
 
@@ -193,7 +194,10 @@ export default function MOFJikouPage() {
 
   const majorExpenses = useMemo(
     () =>
-      [...new Set(scopedRows.filter(i => subAccount.length === 0 || subAccount.includes(i.subAccount)).map(i => i.majorExpenseName).filter(Boolean))].sort(),
+      sortByCodeOrder(
+        [...new Set(scopedRows.filter(i => subAccount.length === 0 || subAccount.includes(i.subAccount)).map(i => i.majorExpenseName).filter(Boolean))],
+        MAJOR_EXPENSE_ORDER
+      ),
     [scopedRows, subAccount]
   );
 

@@ -18,6 +18,15 @@ import type { MouseEvent as ReactMouseEvent } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
+import {
+  ECONOMIC_NATURE_ORDER,
+  FISCAL_LAW_ORDER,
+  MAJOR_EXPENSE_ORDER,
+  MINISTRY_ORDER,
+  OBJECTIVE_ORDER,
+  PURPOSE_ORDER,
+  sortByCodeOrder,
+} from '@/app/lib/mof-classification-order';
 import type { MOFKouMokuData, MOFKouMokuHistory, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord, MofRsKouMokuLinkageResponse } from '@/types/mof-rs-kou-moku-linkage';
 import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
@@ -62,6 +71,7 @@ const INITIAL_FILTERS: FilterSidebarState = {
   economicNature: [],
   nameQuery: '',
   nameRegex: false,
+  rsCountRange: EMPTY_RANGE,
   amountRange: EMPTY_RANGE,
   previousAmountRange: EMPTY_RANGE,
   differenceRange: EMPTY_RANGE,
@@ -234,7 +244,7 @@ export default function MOFKouMokuPage() {
   }, [data, account, budgetType]);
 
   const ministries = useMemo(
-    () => [...new Set(baseRows.map(i => i.ministry || i.agency).filter(Boolean))].sort(),
+    () => sortByCodeOrder([...new Set(baseRows.map(i => i.ministry || i.agency).filter(Boolean))], MINISTRY_ORDER),
     [baseRows]
   );
 
@@ -263,41 +273,51 @@ export default function MOFKouMokuPage() {
 
   const majorExpenses = useMemo(
     () =>
-      [...new Set(scopedRows.filter(i => subAccount.length === 0 || subAccount.includes(i.subAccount)).map(i => i.majorExpenseName).filter(Boolean))].sort(),
+      sortByCodeOrder(
+        [...new Set(scopedRows.filter(i => subAccount.length === 0 || subAccount.includes(i.subAccount)).map(i => i.majorExpenseName).filter(Boolean))],
+        MAJOR_EXPENSE_ORDER
+      ),
     [scopedRows, subAccount]
   );
 
   const purposes = useMemo(
-    () => [...new Set(scopedRows.map(i => i.purposeName).filter(Boolean))].sort(),
+    () => sortByCodeOrder([...new Set(scopedRows.map(i => i.purposeName).filter(Boolean))], PURPOSE_ORDER),
     [scopedRows]
   );
 
   const objectives = useMemo(
-    () => [...new Set(scopedRows.map(i => i.objectiveName).filter(Boolean))].sort(),
+    () => sortByCodeOrder([...new Set(scopedRows.map(i => i.objectiveName).filter(Boolean))], OBJECTIVE_ORDER),
     [scopedRows]
   );
 
   const fiscalLaws = useMemo(
-    () => [...new Set(scopedRows.map(i => i.fiscalLawName).filter(Boolean))].sort(),
+    () => sortByCodeOrder([...new Set(scopedRows.map(i => i.fiscalLawName).filter(Boolean))], FISCAL_LAW_ORDER),
     [scopedRows]
   );
 
   const economicNatures = useMemo(
-    () => [...new Set(scopedRows.map(i => i.economicNatureName).filter(Boolean))].sort(),
+    () => sortByCodeOrder([...new Set(scopedRows.map(i => i.economicNatureName).filter(Boolean))], ECONOMIC_NATURE_ORDER),
     [scopedRows]
   );
+
+  /** その目に紐づくRS事業数（事業IDの重複除去件数） */
+  function rsCountOf(item: MOFKouMokuItem): number {
+    return new Set((linkageByKey.get(item.key) ?? []).map(l => l.projectId)).size;
+  }
 
   /** 数値スライダーの可動域は年度全体（他の絞り込みの影響を受けない）から求める */
   const domains: FilterDomains = useMemo(() => {
     const rows = data?.items ?? [];
     const rates = rows.map(i => changeRate(i.amount, i.previousAmount)).filter((v): v is number => typeof v === 'number');
     return {
+      rsCount: boundsOf(rows.map(i => rsCountOf(i))),
       amount: boundsOf(rows.map(i => i.amount)),
       previousAmount: boundsOf(rows.map(i => i.previousAmount).filter((v): v is number => v !== null)),
       difference: boundsOf(rows.map(i => i.difference).filter((v): v is number => v !== null)),
       rate: boundsOf(rates),
     };
-  }, [data]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, linkageByKey]);
 
   const filtered = useMemo(() => {
     function rateOf(item: MOFKouMokuItem): number | null {
@@ -313,14 +333,20 @@ export default function MOFKouMokuPage() {
       if (filters.economicNature.length > 0 && !filters.economicNature.includes(item.economicNatureName)) return false;
       const haystack = `${item.sectionName}\n${item.subItemName}`;
       if (!textMatches(haystack, filters.nameQuery.trim(), filters.nameRegex)) return false;
+      if (!inRange(rsCountOf(item), filters.rsCountRange)) return false;
       if (!inRange(item.amount, filters.amountRange)) return false;
       if (!inRange(item.previousAmount, filters.previousAmountRange)) return false;
       if (!inRange(item.difference, filters.differenceRange)) return false;
       if (!inRange(rateOf(item), filters.rateRange)) return false;
       return true;
     });
+    if (sortKey === 'rs') {
+      const factor = sortDir === 'asc' ? 1 : -1;
+      return rows.sort((a, b) => (rsCountOf(a) - rsCountOf(b)) * factor);
+    }
     return sortItems(rows, sortKey, sortDir);
-  }, [scopedRows, filters, sortKey, sortDir]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scopedRows, filters, sortKey, sortDir, linkageByKey]);
 
   /** 絞り込み結果の合計 */
   const filteredTotal = useMemo(() => {
@@ -343,6 +369,7 @@ export default function MOFKouMokuPage() {
     fiscalLaw.length > 0,
     economicNature.length > 0,
     filters.nameQuery !== '',
+    filters.rsCountRange[0] !== null || filters.rsCountRange[1] !== null,
     filters.amountRange[0] !== null || filters.amountRange[1] !== null,
     filters.previousAmountRange[0] !== null || filters.previousAmountRange[1] !== null,
     filters.differenceRange[0] !== null || filters.differenceRange[1] !== null,
