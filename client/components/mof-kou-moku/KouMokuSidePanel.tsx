@@ -11,21 +11,22 @@
 import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFKouMokuHistory, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
-import { changeRate, formatChangeRate, formatYen } from '@/client/components/mof-jikou/format';
+import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from '@/client/components/mof-jikou/format';
 import { AccountBadge, BudgetTypeBadge } from '@/client/components/mof-kou/Badge';
 import { DataGrid, type GridColumn, type GridViewState } from '@/client/components/mof-kou/DataGrid';
 import { orgColumn } from './columns';
-import { KouMokuHistory } from './KouMokuHistory';
 
 export type Tab = 'history' | 'rs';
 
 export interface PanelGridStates {
+  history: GridViewState;
   rs: GridViewState;
 }
 
 /** タブのグリッドのソート/列幅の既定値 */
 export function createDefaultPanelGridStates(): PanelGridStates {
   return {
+    history: { sortKey: 'year', sortDir: 'asc', widths: {} },
     rs: { sortKey: 'rsAmount', sortDir: 'desc', widths: {} },
   };
 }
@@ -148,8 +149,16 @@ export function KouMokuSidePanel({
         ))}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto p-3 text-xs">
-        {tab === 'history' && <KouMokuHistory history={history} loading={historyLoading} error={historyError} />}
+      <div className="min-h-0 flex-1 overflow-auto text-xs">
+        {tab === 'history' && (
+          <HistoryTab
+            history={history}
+            loading={historyLoading}
+            error={historyError}
+            gridState={gridStates.history}
+            onGridStateChange={updater => onGridStateChange('history', updater)}
+          />
+        )}
         {tab === 'rs' && (
           <RsTab
             links={rsLinks}
@@ -163,6 +172,150 @@ export function KouMokuSidePanel({
         )}
       </div>
     </aside>
+  );
+}
+
+interface HistoryRow {
+  fiscalYear: number;
+  eraLabel: string;
+  item: MOFKouMokuItem;
+}
+
+function HistoryTab({
+  history,
+  loading,
+  error,
+  gridState,
+  onGridStateChange,
+}: {
+  history: MOFKouMokuHistory | null;
+  loading: boolean;
+  error: string | null;
+  gridState: GridViewState;
+  onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
+}) {
+  if (error) return <p className="p-3 text-red-600">推移の取得に失敗しました: {error}</p>;
+  if (loading || !history) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+
+  const flatRows: HistoryRow[] = history.years.flatMap(y =>
+    y.items.map(item => ({ fiscalYear: y.fiscalYear, eraLabel: y.eraLabel, item }))
+  );
+
+  const columns: GridColumn<HistoryRow>[] = [
+    {
+      key: 'year',
+      label: '年度',
+      width: 110,
+      sortValue: r => r.fiscalYear,
+      render: r => `${r.eraLabel}（${r.fiscalYear}）`,
+    },
+    {
+      key: 'budgetType',
+      label: '予算種別',
+      width: 68,
+      sortValue: r => r.item.budgetType,
+      render: r => <BudgetTypeBadge budgetType={r.item.budgetType} />,
+    },
+    {
+      key: 'amount',
+      label: '本年度額',
+      width: 100,
+      numeric: true,
+      sortValue: r => r.item.amount,
+      render: r => <span className="text-neutral-900 dark:text-neutral-100">{formatYen(r.item.amount)}</span>,
+    },
+    {
+      key: 'previousAmount',
+      label: '前年度額',
+      width: 100,
+      numeric: true,
+      sortValue: r => r.item.previousAmount,
+      render: r => formatYen(r.item.previousAmount),
+    },
+    {
+      key: 'rate',
+      label: '増減率',
+      width: 80,
+      numeric: true,
+      sortValue: r => {
+        const rate = changeRate(r.item.amount, r.item.previousAmount);
+        return rate === null || rate === 'new' ? null : rate;
+      },
+      render: r => {
+        const rate = changeRate(r.item.amount, r.item.previousAmount);
+        return <span className={rateClass(rate)}>{formatChangeRate(rate)}</span>;
+      },
+    },
+    {
+      key: 'spent',
+      label: '支出済',
+      width: 100,
+      numeric: true,
+      sortValue: r => r.item.spent,
+      render: r => formatYen(r.item.spent),
+    },
+    {
+      key: 'unused',
+      label: '不用額',
+      width: 100,
+      numeric: true,
+      sortValue: r => r.item.unused,
+      render: r => formatYen(r.item.unused),
+    },
+    {
+      key: 'executionRate',
+      label: '執行率',
+      width: 78,
+      numeric: true,
+      sortValue: r => executionRate(r.item),
+      render: r => {
+        const exec = executionRate(r.item);
+        return (
+          <span
+            className={
+              exec === null
+                ? 'text-neutral-400'
+                : exec < 0.5
+                  ? 'text-red-600 dark:text-red-400'
+                  : exec < 0.9
+                    ? 'text-amber-700 dark:text-amber-500'
+                    : 'text-neutral-600 dark:text-neutral-400'
+            }
+          >
+            {formatRate(exec)}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'section',
+      label: '項',
+      width: 150,
+      sortValue: r => r.item.sectionName,
+      render: r => (
+        <span className="text-neutral-400">
+          {r.item.sectionCode} {r.item.sectionName}
+        </span>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <DataGrid
+        rows={flatRows}
+        columns={columns}
+        rowKey={r => `${r.fiscalYear}-${r.item.budgetType}`}
+        state={gridState}
+        onStateChange={onGridStateChange}
+        emptyMessage="推移データがありません。"
+      />
+      {history.years.length < history.availableYears.length && (
+        <p className="px-2 pb-2 pt-1.5 text-[11px] text-neutral-400">
+          計上のない年度は行がありません。目名や目分類コードが変わると別の目として扱われるため、実態としては継続でも欠けて見えることがあります。
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -183,9 +336,9 @@ function RsTab({
   gridState: GridViewState;
   onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
 }) {
-  if (error) return <p className="text-red-600">紐づけの取得に失敗しました: {error}</p>;
-  if (loading) return <p className="text-neutral-400">読み込み中…</p>;
-  if (!linkageAvailable) return <p className="text-neutral-400">この年度は RS 事業との紐づけデータが未生成です。</p>;
+  if (error) return <p className="p-3 text-red-600">紐づけの取得に失敗しました: {error}</p>;
+  if (loading) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+  if (!linkageAvailable) return <p className="p-3 text-neutral-400">この年度は RS 事業との紐づけデータが未生成です。</p>;
 
   const columns: GridColumn<MofRsKouMokuLinkageRecord>[] = [
     {
