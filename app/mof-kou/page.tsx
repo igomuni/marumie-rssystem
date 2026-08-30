@@ -24,6 +24,7 @@ import { KouTable } from '@/client/components/mof-kou/KouTable';
 import { KouSidePanel, createDefaultPanelGridStates, type PanelGridStates, type Tab } from '@/client/components/mof-kou/KouSidePanel';
 import type { GridViewState } from '@/client/components/mof-kou/DataGrid';
 import { FilterSidebar, type FilterDomains, type FilterSidebarState, type NumRange } from '@/client/components/mof-kou/FilterSidebar';
+import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
 import { textMatches } from '@/client/components/mof-kou/RegexTextFilter';
 import {
   ACCOUNT_LABEL,
@@ -355,7 +356,14 @@ export default function MOFKouPage() {
         <div>
           <h1 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">予算書「項」一覧</h1>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
-            <span>{data.metadata.eraLabel}／財務省 予算書データベース</span>
+            <a
+              href={mofArchiveUrl(data.metadata.fiscalYear)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-neutral-700 dark:hover:text-neutral-300"
+            >
+              {data.metadata.eraLabel}／財務省 予算書データベース
+            </a>
             <span className="text-neutral-300 dark:text-neutral-700">|</span>
             <span>
               全 <b className="font-semibold text-neutral-700 dark:text-neutral-300">{data.summary.count.toLocaleString()}</b> 項

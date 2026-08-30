@@ -8,17 +8,23 @@
  * 当初・暫定・補正・決算を収録する（`/mof-jikou` と同じ予算種別の粒度）。
  * ただし RS 事業との紐づけ（自動突合）は一般会計・当初予算のみ対応。
  *
- * レイアウトは /mof-jikou に合わせている。
+ * フィルタは `/mof-kou`（項一覧）・`/mof-jikou`（事項一覧）と同じ左サイドパネル構成に揃えている。
+ * RSあり/なしの絞り込みだけは目特有の状態（紐づけ未生成の年度は無効化）のため、
+ * ツールバーのトグルボタンとして残す。
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
-import type { MOFKouMokuAccountType, MOFKouMokuData, MOFKouMokuHistory } from '@/types/mof-kou-moku';
+import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
+import type { MOFKouMokuData, MOFKouMokuHistory, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord, MofRsKouMokuLinkageResponse } from '@/types/mof-rs-kou-moku-linkage';
-import { formatYen } from '@/client/components/mof-jikou/format';
+import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { KouMokuTable } from '@/client/components/mof-kou-moku/KouMokuTable';
+import { FilterSidebar, type FilterDomains, type FilterSidebarState, type NumRange } from '@/client/components/mof-kou-moku/FilterSidebar';
+import { textMatches } from '@/client/components/mof-kou/RegexTextFilter';
 import {
+  ACCOUNT_LABEL,
   COLUMNS,
   DEFAULT_WIDTHS,
   defaultDirFor,
@@ -30,9 +36,43 @@ import {
 } from '@/client/components/mof-kou-moku/columns';
 
 const PAGE_SIZE = 100;
+const EMPTY_RANGE: NumRange = [null, null];
 
 /** RS事業との紐づけの有無で絞り込む */
 type RsFilter = 'all' | 'linked' | 'unlinked';
+
+const INITIAL_FILTERS: FilterSidebarState = {
+  account: [],
+  budgetType: [],
+  ministry: [],
+  organization: [],
+  subAccount: [],
+  majorExpense: [],
+  purpose: [],
+  nameQuery: '',
+  nameRegex: false,
+  amountRange: EMPTY_RANGE,
+  previousAmountRange: EMPTY_RANGE,
+  differenceRange: EMPTY_RANGE,
+  rateRange: EMPTY_RANGE,
+};
+
+const SIDEBAR_MIN_WIDTH = 200;
+const SIDEBAR_MAX_WIDTH = 480;
+const SIDEBAR_DEFAULT_WIDTH = 256;
+
+function inRange(value: number | null, range: NumRange): boolean {
+  const [min, max] = range;
+  if (min === null && max === null) return true;
+  if (value === null) return false;
+  if (min !== null && value < min) return false;
+  if (max !== null && value > max) return false;
+  return true;
+}
+
+function boundsOf(values: number[]): [number, number] {
+  return values.length ? [Math.min(...values), Math.max(...values)] : [0, 0];
+}
 
 export default function MOFKouMokuPage() {
   const [data, setData] = useState<MOFKouMokuData | null>(null);
@@ -40,14 +80,10 @@ export default function MOFKouMokuPage() {
   /** 選択中の会計年度。null は「収録済みの最新年度」をAPIに任せる */
   const [year, setYear] = useState<number | null>(null);
 
-  const [account, setAccount] = useState<'all' | MOFKouMokuAccountType>('all');
-  const [budgetType, setBudgetType] = useState('');
-  const [ministry, setMinistry] = useState('');
-  const [organization, setOrganization] = useState('');
-  const [subAccount, setSubAccount] = useState('');
-  const [majorExpense, setMajorExpense] = useState('');
+  const [filters, setFilters] = useState<FilterSidebarState>(INITIAL_FILTERS);
+  const [showFilters, setShowFilters] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
   const [rsFilter, setRsFilter] = useState<RsFilter>('all');
-  const [keyword, setKeyword] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
@@ -82,14 +118,13 @@ export default function MOFKouMokuPage() {
     setYear(next);
     setData(null);
     setPage(1);
-    setAccount('all');
-    setBudgetType('');
-    setMinistry('');
-    setOrganization('');
-    setSubAccount('');
-    setMajorExpense('');
+    setFilters(INITIAL_FILTERS);
     setRsFilter('all');
     setExpanded(null);
+  }
+
+  function setFilter<K extends keyof FilterSidebarState>(key: K, value: FilterSidebarState[K]) {
+    setFilters(prev => ({ ...prev, [key]: value }));
   }
 
   /**
@@ -120,7 +155,7 @@ export default function MOFKouMokuPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [account, budgetType, ministry, organization, subAccount, majorExpense, rsFilter, keyword]);
+  }, [filters, rsFilter]);
 
   /**
    * その年度の RS 事業との紐づけを一括で取る（完全一致キーによる自動突合。
@@ -171,11 +206,13 @@ export default function MOFKouMokuPage() {
     return map;
   }, [linkageLinks]);
 
+  const { account, budgetType, ministry, organization, subAccount, majorExpense, purpose } = filters;
+
   const baseRows = useMemo(() => {
     if (!data) return [];
     return data.items.filter(i => {
-      if (account !== 'all' && i.accountType !== account) return false;
-      if (budgetType && i.budgetType !== budgetType) return false;
+      if (account.length > 0 && !account.includes(ACCOUNT_LABEL[i.accountType])) return false;
+      if (budgetType.length > 0 && !budgetType.includes(i.budgetType)) return false;
       return true;
     });
   }, [data, account, budgetType]);
@@ -189,7 +226,7 @@ export default function MOFKouMokuPage() {
     () =>
       [
         ...new Set(
-          baseRows.filter(i => !ministry || (i.ministry || i.agency) === ministry).map(orgColumn).filter(Boolean)
+          baseRows.filter(i => ministry.length === 0 || ministry.includes(i.ministry || i.agency)).map(orgColumn).filter(Boolean)
         ),
       ].sort(),
     [baseRows, ministry]
@@ -198,8 +235,8 @@ export default function MOFKouMokuPage() {
   const scopedRows = useMemo(
     () =>
       baseRows
-        .filter(i => !ministry || (i.ministry || i.agency) === ministry)
-        .filter(i => !organization || orgColumn(i) === organization),
+        .filter(i => ministry.length === 0 || ministry.includes(i.ministry || i.agency))
+        .filter(i => organization.length === 0 || organization.includes(orgColumn(i))),
     [baseRows, ministry, organization]
   );
 
@@ -209,28 +246,52 @@ export default function MOFKouMokuPage() {
   );
 
   const majorExpenses = useMemo(
-    () => [...new Set(scopedRows.map(i => i.majorExpenseName).filter(Boolean))].sort(),
+    () =>
+      [...new Set(scopedRows.filter(i => subAccount.length === 0 || subAccount.includes(i.subAccount)).map(i => i.majorExpenseName).filter(Boolean))].sort(),
+    [scopedRows, subAccount]
+  );
+
+  const purposes = useMemo(
+    () => [...new Set(scopedRows.map(i => i.purposeName).filter(Boolean))].sort(),
     [scopedRows]
   );
 
+  /** 数値スライダーの可動域は年度全体（他の絞り込みの影響を受けない）から求める */
+  const domains: FilterDomains = useMemo(() => {
+    const rows = data?.items ?? [];
+    const rates = rows.map(i => changeRate(i.amount, i.previousAmount)).filter((v): v is number => typeof v === 'number');
+    return {
+      amount: boundsOf(rows.map(i => i.amount)),
+      previousAmount: boundsOf(rows.map(i => i.previousAmount).filter((v): v is number => v !== null)),
+      difference: boundsOf(rows.map(i => i.difference).filter((v): v is number => v !== null)),
+      rate: boundsOf(rates),
+    };
+  }, [data]);
+
   const filtered = useMemo(() => {
-    const kw = keyword.trim();
+    function rateOf(item: MOFKouMokuItem): number | null {
+      const r = changeRate(item.amount, item.previousAmount);
+      return typeof r === 'number' ? r : null;
+    }
     const rows = scopedRows.filter(item => {
-      if (subAccount && item.subAccount !== subAccount) return false;
-      if (majorExpense && item.majorExpenseName !== majorExpense) return false;
+      if (filters.subAccount.length > 0 && !filters.subAccount.includes(item.subAccount)) return false;
+      if (filters.majorExpense.length > 0 && !filters.majorExpense.includes(item.majorExpenseName)) return false;
+      if (filters.purpose.length > 0 && !filters.purpose.includes(item.purposeName)) return false;
       if (rsFilter !== 'all') {
         const linked = (linkageByKey.get(item.key)?.length ?? 0) > 0;
         if (rsFilter === 'linked' && !linked) return false;
         if (rsFilter === 'unlinked' && linked) return false;
       }
-      if (kw) {
-        const haystack = `${item.sectionName}\n${item.subItemName}\n${item.ministry}\n${orgColumn(item)}`;
-        if (!haystack.includes(kw)) return false;
-      }
+      const haystack = `${item.sectionName}\n${item.subItemName}`;
+      if (!textMatches(haystack, filters.nameQuery.trim(), filters.nameRegex)) return false;
+      if (!inRange(item.amount, filters.amountRange)) return false;
+      if (!inRange(item.previousAmount, filters.previousAmountRange)) return false;
+      if (!inRange(item.difference, filters.differenceRange)) return false;
+      if (!inRange(rateOf(item), filters.rateRange)) return false;
       return true;
     });
     return sortItems(rows, sortKey, sortDir);
-  }, [scopedRows, subAccount, majorExpense, rsFilter, linkageByKey, keyword, sortKey, sortDir]);
+  }, [scopedRows, filters, rsFilter, linkageByKey, sortKey, sortDir]);
 
   /**
    * 絞り込み結果の合計。
@@ -247,6 +308,21 @@ export default function MOFKouMokuPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const widthsChanged = COLUMNS.some(c => (widths[c.key] ?? c.width) !== c.width);
+  const activeFilterCount = [
+    account.length > 0,
+    budgetType.length > 0,
+    ministry.length > 0,
+    organization.length > 0,
+    subAccount.length > 0,
+    majorExpense.length > 0,
+    purpose.length > 0,
+    filters.nameQuery !== '',
+    filters.amountRange[0] !== null || filters.amountRange[1] !== null,
+    filters.previousAmountRange[0] !== null || filters.previousAmountRange[1] !== null,
+    filters.differenceRange[0] !== null || filters.differenceRange[1] !== null,
+    filters.rateRange[0] !== null || filters.rateRange[1] !== null,
+    rsFilter !== 'all',
+  ].filter(Boolean).length;
 
   function goToPage(next: number) {
     setPage(next);
@@ -261,6 +337,26 @@ export default function MOFKouMokuPage() {
       setSortDir(defaultDirFor(column));
     }
     goToPage(1);
+  }
+
+  function startSidebarResize(event: React.MouseEvent) {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = sidebarWidth;
+    const onMove = (e: MouseEvent) => {
+      const next = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, startWidth + (e.clientX - startX)));
+      setSidebarWidth(next);
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
   }
 
   if (error) {
@@ -283,9 +379,6 @@ export default function MOFKouMokuPage() {
     );
   }
 
-  const selectClass =
-    'max-w-[13rem] truncate rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900';
-
   return (
     <div className="flex h-screen flex-col bg-neutral-50 dark:bg-neutral-900">
       <header className="flex shrink-0 items-start justify-between gap-4 px-3 pb-2 pt-3">
@@ -294,7 +387,14 @@ export default function MOFKouMokuPage() {
             予算書「科目別内訳」（項・目）一覧
           </h1>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
-            <span>{data.metadata.eraLabel}／財務省 予算書データベース</span>
+            <a
+              href={mofArchiveUrl(data.metadata.fiscalYear)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-neutral-700 dark:hover:text-neutral-300"
+            >
+              {data.metadata.eraLabel}／財務省 予算書データベース
+            </a>
             <span className="text-neutral-300 dark:text-neutral-700">|</span>
             <span>
               全{' '}
@@ -328,114 +428,24 @@ export default function MOFKouMokuPage() {
       </header>
 
       <section className="flex shrink-0 flex-wrap items-center gap-2 px-3 pb-2 text-xs">
-        <div className="flex overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700">
-          {(
-            [
-              ['all', 'すべて'],
-              ['general', '一般会計'],
-              ['special', '特別会計'],
-              ['agency', '政府関係機関'],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => {
-                setAccount(value);
-                setMinistry('');
-                setOrganization('');
-                setSubAccount('');
-                setMajorExpense('');
-              }}
-              className={`px-2.5 py-1 ${
-                account === value
-                  ? 'bg-neutral-800 text-white dark:bg-neutral-200 dark:text-neutral-900'
-                  : 'bg-white text-neutral-600 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <select
-          value={budgetType}
-          onChange={e => {
-            setBudgetType(e.target.value);
-            setMajorExpense('');
-          }}
-          className="rounded-lg border border-neutral-300 bg-white px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900"
+        <button
+          type="button"
+          onClick={() => setShowFilters(v => !v)}
+          aria-expanded={showFilters}
+          className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 ${
+            showFilters || activeFilterCount > 0
+              ? 'border-neutral-800 bg-neutral-800 text-white dark:border-neutral-200 dark:bg-neutral-200 dark:text-neutral-900'
+              : 'border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
+          }`}
         >
-          <option value="">予算種別: すべて</option>
-          {data.metadata.budgetTypes.map(b => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={ministry}
-          onChange={e => {
-            setMinistry(e.target.value);
-            setOrganization('');
-            setSubAccount('');
-            setMajorExpense('');
-          }}
-          className={selectClass}
-        >
-          <option value="">所管: すべて</option>
-          {ministries.map(m => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={organization}
-          onChange={e => {
-            setOrganization(e.target.value);
-            setSubAccount('');
-            setMajorExpense('');
-          }}
-          className={selectClass}
-        >
-          <option value="">組織: すべて（{organizations.length}）</option>
-          {organizations.map(o => (
-            <option key={o} value={o}>
-              {o}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={subAccount}
-          onChange={e => setSubAccount(e.target.value)}
-          disabled={subAccounts.length === 0}
-          className={`${selectClass} disabled:opacity-40`}
-        >
-          <option value="">勘定／業務: すべて（{subAccounts.length}）</option>
-          {subAccounts.map(s => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={majorExpense}
-          onChange={e => setMajorExpense(e.target.value)}
-          disabled={majorExpenses.length === 0}
-          className={`${selectClass} disabled:opacity-40`}
-        >
-          <option value="">主要経費: すべて（{majorExpenses.length}）</option>
-          {majorExpenses.map(m => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 3h12M4 8h8M6.5 13h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          フィルタ
+          {activeFilterCount > 0 && (
+            <span className="rounded-full bg-white/20 px-1.5 text-[10px]">{activeFilterCount}</span>
+          )}
+        </button>
 
         <div
           className="flex overflow-hidden rounded-lg border border-neutral-300 dark:border-neutral-700"
@@ -468,14 +478,6 @@ export default function MOFKouMokuPage() {
           ))}
         </div>
 
-        <input
-          type="search"
-          value={keyword}
-          onChange={e => setKeyword(e.target.value)}
-          placeholder="項名・目名を検索"
-          className="min-w-[10rem] flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-1 dark:border-neutral-700 dark:bg-neutral-900"
-        />
-
         <span className="whitespace-nowrap text-neutral-500">
           該当 {filtered.length.toLocaleString()} 件
           {filteredTotal === null ? (
@@ -503,8 +505,36 @@ export default function MOFKouMokuPage() {
         )}
       </section>
 
-      <div className="flex min-h-0 flex-1 flex-col px-3 pb-3">
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+      <div className="flex min-h-0 flex-1 px-3 pb-3">
+        {showFilters && (
+          <>
+            <FilterSidebar
+              state={filters}
+              onChange={setFilter}
+              budgetTypes={data.metadata.budgetTypes}
+              ministries={ministries}
+              organizations={organizations}
+              subAccounts={subAccounts}
+              majorExpenses={majorExpenses}
+              purposes={purposes}
+              domains={domains}
+              activeCount={activeFilterCount}
+              onReset={() => setFilters(INITIAL_FILTERS)}
+              width={sidebarWidth}
+            />
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="フィルタパネルの幅を変更"
+              onMouseDown={startSidebarResize}
+              className="flex w-3 shrink-0 cursor-col-resize items-stretch justify-center"
+            >
+              <div className="w-1 rounded-full transition-colors hover:bg-neutral-300 dark:hover:bg-neutral-700" />
+            </div>
+          </>
+        )}
+
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
           <div ref={scrollRef} className="min-h-0 flex-1 overflow-auto">
             <KouMokuTable
               items={pageItems}
@@ -553,8 +583,10 @@ export default function MOFKouMokuPage() {
             </button>
           </div>
         </div>
+      </div>
 
-        <details className="mt-1.5 shrink-0 text-[11px] text-neutral-500">
+      <div className="shrink-0 px-3 pb-3">
+        <details className="text-[11px] text-neutral-500">
           <summary className="cursor-pointer">データの読み方（{data.metadata.documents.length}帳票）</summary>
           <div className="mt-1 space-y-1 pl-4">
             {data.metadata.notes.map(note => (
