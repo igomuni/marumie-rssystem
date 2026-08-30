@@ -22,9 +22,12 @@ export type SortKey =
   | 'sectionCode'
   | 'sectionName'
   | 'majorExpenseName'
+  | 'objectiveName'
+  | 'fiscalLawName'
+  | 'economicNatureName'
+  | 'purposeName'
   | 'subItemCode'
   | 'subItemName'
-  | 'purposeName'
   | 'amount'
   | 'previousAmount'
   | 'difference'
@@ -32,7 +35,9 @@ export type SortKey =
   | 'currentAmount'
   | 'spent'
   | 'unused'
-  | 'executionRate';
+  | 'executionRate'
+  /** 紐づくRS事業数。COLUMNSには含まれない特殊列（値がitem自体には無く、呼び出し側のlinkageByKeyから計算する） */
+  | 'rs';
 
 export type SortDir = 'asc' | 'desc';
 
@@ -63,9 +68,12 @@ export const COLUMNS: ColumnSpec[] = [
     width: 120,
     note: '特別会計・政府関係機関の帳票には無いことがある',
   },
+  { key: 'objectiveName', label: '目的別', width: 110, note: '政府関係機関の帳票には無い' },
+  { key: 'fiscalLawName', label: '財政法公債金対象', width: 110, note: '一般会計にしか無い' },
+  { key: 'economicNatureName', label: '経済性質別', width: 110, note: '政府関係機関の帳票には無い' },
+  { key: 'purposeName', label: '使途別', width: 110 },
   { key: 'subItemCode', label: '目コード', width: 64 },
   { key: 'subItemName', label: '目名', width: 220, note: '支出の性質による分類（事項＝目的による分類とは別系統）' },
-  { key: 'purposeName', label: '使途別', width: 110 },
   { key: 'amount', label: '本年度額', width: 100, numeric: true, note: '補正は改予算額、決算は歳出予算額' },
   {
     key: 'previousAmount',
@@ -121,6 +129,9 @@ function sortValue(item: MOFKouMokuItem, key: SortKey): string | number | null {
     }
     case 'executionRate':
       return executionRate(item);
+    case 'rs':
+      // 呼び出し側（page.tsx）がlinkageByKeyを使って別途ソートするため、ここには来ない
+      return null;
     default:
       return item[key];
   }

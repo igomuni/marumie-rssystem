@@ -30,15 +30,12 @@ export async function GET(request: Request) {
     }
 
     const resolution = resolveLinks(year);
-    const available = resolution.sourceBudgetYear !== null;
-    const rsYear = resolution.sourceBudgetYear !== null ? linkageRsYear(resolution.sourceBudgetYear) : null;
+    const rsYear = resolution.available ? linkageRsYear(year) : null;
 
     const body: MofRsKouMokuLinkageResponse = {
-      available,
+      available: resolution.available,
       rsYear,
       links: resolution.links,
-      isCarriedOver: resolution.isCarriedOver,
-      sourceBudgetYear: resolution.sourceBudgetYear,
     };
     return NextResponse.json(
       body,

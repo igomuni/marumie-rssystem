@@ -10,11 +10,9 @@ import type { MOFBudgetType } from '@/types/mof-jikou';
 import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuAccountType, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
-import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import type { MOFBudgetData, MOFDescriptionData, MOFJikouLeaf, MOFKouMokuLeaf, MOFSection } from '@/types/mof-budget';
 import type { MOFKouData, MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionHistoryYear, MOFKouSectionSummary } from '@/types/mof-kou';
 import { resolveLinks } from './mof-rs-kou-moku-linkage-loader';
-import { findLinksByKey as findJikouLinksByKey, linkageAvailable as jikouLinkageAvailable } from './mof-rs-linkage-loader';
 import { dataFileExists, readDataJson, tryReadDataJson } from './data-file';
 
 /** 特別会計名の接尾辞を外す。事項別内訳（Web帳票）は「〜特別会計」付き、科目別内訳（CSV）は無し */
@@ -84,9 +82,7 @@ function buildYear(fiscalYear: number): BuiltYear {
     eraLabel: budgetData.metadata.eraLabel,
     budgetTypes: budgetData.metadata.budgetTypes,
     linkage: {
-      available: linkage.sourceBudgetYear !== null,
-      isCarriedOver: linkage.isCarriedOver,
-      sourceBudgetYear: linkage.sourceBudgetYear,
+      available: linkage.available,
       rsYear: null, // ルート層で linkageRsYear() を使って埋める
     },
     sections,
@@ -146,8 +142,8 @@ function toSummary(row: SectionAgg): MOFKouSectionSummary {
 
 /**
  * その年度の項一覧（一覧表示用の集計行のみ。事項・目・RS事業の内訳は含まない）。
- * `metadata.linkage.rsYear` はここでは常に null。`linkage.sourceBudgetYear` を使って
- * 呼び出し側（route.ts）が mof-rs-kou-moku-linkage-loader.linkageRsYear() で埋める。
+ * `metadata.linkage.rsYear` はここでは常に null。呼び出し側（route.ts）が
+ * mof-rs-kou-moku-linkage-loader.linkageRsYear() で埋める。
  */
 export function listSections(fiscalYear: number): MOFKouData {
   const built = buildYear(fiscalYear);
@@ -287,22 +283,11 @@ export function sectionDetail(fiscalYear: number, id: string): MOFKouSectionDeta
   const jikouItems = row.jikou.map(leaf => hydrateJikou(row, leaf, descriptions[leaf.id] ?? ''));
   const kouMokuItems = row.koumoku.map(leaf => hydrateKouMoku(row, leaf));
 
-  // 事項単位のRS紐づけ（mof-rs-linkage）はkou-mokuの目単位紐づけと違い年度をまたぐ引き継ぎを
-  // 持たないため、ここで直近の過去年度にフォールバックする（identityFromKeyが予算種別・所管を
-  // 落とすので、そのままの年度のitem.keyで別年度のファイルを引いても一致する）
-  const jikouRsLinkYear = jikouLinkageAvailable(fiscalYear)
-    ? fiscalYear
-    : (availableYears().filter(y => y < fiscalYear && jikouLinkageAvailable(y)).sort((a, b) => b - a)[0] ?? null);
-  const jikouRsLinks: MofRsLinkageRecord[] =
-    jikouRsLinkYear !== null ? jikouItems.flatMap(it => findJikouLinksByKey(jikouRsLinkYear, it.key)) : [];
-
   return {
     id,
     jikouItems,
     kouMokuItems,
     rsLinks: row.rsLinks,
-    jikouRsLinks,
-    jikouRsLinkYear,
   };
 }
 

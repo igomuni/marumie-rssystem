@@ -10,12 +10,12 @@
  * アンマウントされるため、このコンポーネント内部のuseStateに置くと毎回リセットされてしまう。
  */
 
+import { useEffect, useRef, useState } from 'react';
 import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
 import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
-import type { MofRsLinkageRecord } from '@/types/mof-rs-linkage';
 import { changeRate, formatChangeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { AccountBadge, BudgetTypeBadge } from './Badge';
 import { orgColumn } from './columns';
@@ -322,15 +322,44 @@ function JikouTab({
   gridState: GridViewState;
   onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
 }) {
+  const [descriptionItem, setDescriptionItem] = useState<MOFJikouItem | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  // ダイアログを開いたらフォーカスを中に移し、Tabで背後の一覧へ抜けないよう閉じ込める。
+  // 閉じたら開く前にフォーカスしていた要素（説明アイコン）へ戻す。
+  useEffect(() => {
+    if (!descriptionItem) return;
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialogRef.current?.focus();
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setDescriptionItem(null);
+        return;
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusables = dialogRef.current.querySelectorAll<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])');
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocusRef.current?.focus();
+    };
+  }, [descriptionItem]);
+
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
-
-  const rsByJikouKey = new Map<string, MofRsLinkageRecord[]>();
-  for (const l of detail.jikouRsLinks ?? []) {
-    const list = rsByJikouKey.get(l.jikouKey) ?? [];
-    list.push(l);
-    rsByJikouKey.set(l.jikouKey, list);
-  }
 
   const columns: GridColumn<MOFJikouItem>[] = [
     {
@@ -339,14 +368,32 @@ function JikouTab({
       width: 200,
       sortValue: it => it.name,
       render: it => (
-        <a
-          href={it.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
-        >
-          {it.name}
-        </a>
+        <span className="flex w-full min-w-0 items-center gap-1">
+          <a
+            href={it.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="min-w-0 truncate text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+          >
+            {it.name}
+          </a>
+          {it.description && (
+            <button
+              type="button"
+              aria-label={`${it.name} の説明を表示`}
+              title="説明を表示"
+              onClick={e => {
+                e.stopPropagation();
+                setDescriptionItem(it);
+              }}
+              className="ml-auto shrink-0 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+            >
+              <svg width="14" height="14" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true">
+                <path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z" />
+              </svg>
+            </button>
+          )}
+        </span>
       ),
     },
     {
@@ -355,25 +402,6 @@ function JikouTab({
       width: 110,
       sortValue: it => it.majorExpenseName,
       render: it => it.majorExpenseName || '—',
-    },
-    {
-      key: 'rs',
-      label: 'RS',
-      width: 60,
-      numeric: true,
-      sortValue: it => new Set((rsByJikouKey.get(it.key) ?? []).map(l => l.projectId)).size,
-      render: it => {
-        const links = rsByJikouKey.get(it.key) ?? [];
-        const count = new Set(links.map(l => l.projectId)).size;
-        return (
-          <span
-            className={count > 0 ? 'font-medium text-emerald-700 dark:text-emerald-400' : 'text-neutral-300 dark:text-neutral-700'}
-            title={links.map(l => l.projectName).join('\n') || undefined}
-          >
-            {count || '—'}
-          </span>
-        );
-      },
     },
     {
       key: 'amount',
@@ -408,14 +436,47 @@ function JikouTab({
   ];
 
   return (
-    <DataGrid
-      rows={detail.jikouItems}
-      columns={columns}
-      rowKey={it => it.id}
-      state={gridState}
-      onStateChange={onGridStateChange}
-      emptyMessage="この項に事項はありません。"
-    />
+    <>
+      <DataGrid
+        rows={detail.jikouItems}
+        columns={columns}
+        rowKey={it => it.id}
+        state={gridState}
+        onStateChange={onGridStateChange}
+        emptyMessage="この項に事項はありません。"
+      />
+      {descriptionItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setDescriptionItem(null)}
+        >
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${descriptionItem.name} の説明`}
+            tabIndex={-1}
+            className="mx-4 max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-4 shadow-2xl outline-none dark:bg-neutral-900"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="mb-2 flex items-start justify-between gap-3">
+              <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{descriptionItem.name}</h3>
+              <button
+                type="button"
+                aria-label="閉じる"
+                onClick={() => setDescriptionItem(null)}
+                className="shrink-0 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+              >
+                ×
+              </button>
+            </div>
+            <p className="whitespace-pre-wrap text-xs leading-relaxed text-neutral-700 dark:text-neutral-300">
+              {descriptionItem.description}
+            </p>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -448,16 +509,19 @@ function KouMokuTab({
       label: '目名',
       width: 190,
       sortValue: it => it.subItemName,
-      render: it => (
-        <a
-          href={it.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
-        >
-          {it.subItemName}
-        </a>
-      ),
+      render: it =>
+        it.sourceUrl ? (
+          <a
+            href={it.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
+          >
+            {it.subItemName}
+          </a>
+        ) : (
+          <span title="出典ページ不明">{it.subItemName}</span>
+        ),
     },
     {
       key: 'majorExpense',
@@ -574,6 +638,7 @@ function RsTab({
           l.projectName
         ),
     },
+    { key: 'projectMinistry', label: '府省庁', width: 110, sortValue: l => l.projectMinistry, render: l => l.projectMinistry },
     { key: 'subItemName', label: '目名', width: 150, sortValue: l => l.subItemName, render: l => l.subItemName },
     {
       key: 'rsAmount',

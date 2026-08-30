@@ -36,11 +36,8 @@ export async function GET(request: Request) {
       );
     }
 
-    // resolveLinks は「引き継ぎ元の予算年度」を返すことがあるため、rsYear もその年度で引く
     const data = listSections(year);
-    const rsYear = data.metadata.linkage.sourceBudgetYear !== null
-      ? linkageRsYear(data.metadata.linkage.sourceBudgetYear)
-      : null;
+    const rsYear = data.metadata.linkage.available ? linkageRsYear(year) : null;
 
     return NextResponse.json(
       {

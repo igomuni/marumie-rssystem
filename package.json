@@ -21,7 +21,6 @@
     "generate-mof-kou-moku": "tsx scripts/generate-mof-kou-moku-data.ts",
     "generate-mof-section-pages": "tsx scripts/generate-mof-section-page-data.ts",
     "generate-mof-budget": "tsx scripts/generate-mof-budget-data.ts",
-    "generate-mof-rs-linkage": "tsx scripts/generate-mof-rs-linkage.ts 2025",
     "generate-mof-rs-kou-moku-linkage": "tsx scripts/generate-mof-rs-kou-moku-linkage.ts 2025",
     "validate-mof-jikou": "tsx scripts/validate-mof-jikou-data.ts",
     "score-quality": "python3 scripts/score-project-quality.py",
