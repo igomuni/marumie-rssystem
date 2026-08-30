@@ -8,8 +8,9 @@
 
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
+import { AccountBadge, BudgetTypeBadge } from '@/client/components/mof-kou/Badge';
 import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from '@/client/components/mof-jikou/format';
-import { ACCOUNT_LABEL, COLUMNS, DEFAULT_WIDTHS, MIN_COLUMN_WIDTH, orgColumn, type ColumnSpec, type SortDir, type SortKey } from './columns';
+import { COLUMNS, DEFAULT_WIDTHS, MIN_COLUMN_WIDTH, orgColumn, type ColumnSpec, type SortDir, type SortKey } from './columns';
 
 interface Props {
   /** 表示するページ分の目 */
@@ -166,8 +167,12 @@ export function KouMokuTable({
               >
                 {rsCount || '—'}
               </td>
-              <td className="truncate px-2 py-1.5 text-neutral-500">{item.budgetType}</td>
-              <td className="truncate px-2 py-1.5 text-neutral-500">{ACCOUNT_LABEL[item.accountType]}</td>
+              <td className="truncate px-2 py-1.5 align-middle text-neutral-500">
+                <BudgetTypeBadge budgetType={item.budgetType} />
+              </td>
+              <td className="truncate px-2 py-1.5 align-middle text-neutral-500">
+                <AccountBadge accountType={item.accountType} />
+              </td>
               <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
                 <span className="line-clamp-2">{item.ministry || '—'}</span>
               </td>

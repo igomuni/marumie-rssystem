@@ -7,18 +7,10 @@
 
 import { Fragment } from 'react';
 import type { MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
+import { AccountBadge, BudgetTypeBadge } from '@/client/components/mof-kou/Badge';
 import { JikouHistory } from './JikouHistory';
 import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from './format';
-import {
-  ACCOUNT_LABEL,
-  COLUMNS,
-  DEFAULT_WIDTHS,
-  MIN_COLUMN_WIDTH,
-  orgColumn,
-  type ColumnSpec,
-  type SortDir,
-  type SortKey,
-} from './columns';
+import { COLUMNS, DEFAULT_WIDTHS, MIN_COLUMN_WIDTH, orgColumn, type ColumnSpec, type SortDir, type SortKey } from './columns';
 
 interface Props {
   /** 表示するページ分の事項 */
@@ -152,7 +144,7 @@ export function JikouTable({
                   isOpen ? 'bg-neutral-50 dark:bg-neutral-900' : ''
                 }`}
               >
-                <td className="truncate px-2 py-1.5 text-neutral-500">
+                <td className="truncate px-2 py-1.5 align-middle text-neutral-500">
                   {/* 行全体の onClick と併存させつつ、キーボードでも展開できるようにする */}
                   <button
                     type="button"
@@ -166,10 +158,10 @@ export function JikouTable({
                   >
                     {isOpen ? '▼' : '▶'}
                   </button>
-                  {item.budgetType}
+                  <BudgetTypeBadge budgetType={item.budgetType} />
                 </td>
-                <td className="truncate px-2 py-1.5 text-neutral-500">
-                  {ACCOUNT_LABEL[item.accountType]}
+                <td className="truncate px-2 py-1.5 align-middle text-neutral-500">
+                  <AccountBadge accountType={item.accountType} />
                 </td>
                 <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
                   <span className="line-clamp-2">{item.ministry || '—'}</span>
