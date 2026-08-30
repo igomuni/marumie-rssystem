@@ -16,6 +16,7 @@ import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
 import { MAJOR_EXPENSE_ORDER, MINISTRY_ORDER, sortBudgetTypes, sortByCodeOrder } from '@/app/lib/mof-classification-order';
+import { pruneInvalidSelections } from '@/app/lib/filter-selection';
 import type { MOFJikouData, MOFJikouHistory, MOFJikouItem } from '@/types/mof-jikou';
 import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
 import { JikouTable } from '@/client/components/mof-jikou/JikouTable';
@@ -136,6 +137,7 @@ export default function MOFJikouPage() {
   function changeYear(next: number) {
     setYear(next);
     setData(null);
+    setPage(1);
     setFilters(INITIAL_FILTERS);
     setExpanded(null);
   }
@@ -200,6 +202,20 @@ export default function MOFJikouPage() {
       ),
     [scopedRows, subAccount]
   );
+
+  // 上位の絞り込みで選択肢が再計算されるたびに、無効になった選択を落とす
+  // （FilterSidebar側での即時プルーンだと1テンポ古い選択肢を参照してしまうため）
+  useEffect(() => {
+    setFilters(
+      prev =>
+        pruneInvalidSelections(prev, [
+          ['ministry', ministries],
+          ['organization', organizations],
+          ['subAccount', subAccounts],
+          ['majorExpense', majorExpenses],
+        ]) ?? prev
+    );
+  }, [ministries, organizations, subAccounts, majorExpenses]);
 
   /** 数値スライダーの可動域は年度全体（他の絞り込みの影響を受けない）から求める */
   const domains: FilterDomains = useMemo(() => {

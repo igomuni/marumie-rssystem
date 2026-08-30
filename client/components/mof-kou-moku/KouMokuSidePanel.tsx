@@ -106,7 +106,7 @@ export function KouMokuSidePanel({
           {row.subAccount ? ` ・ ${row.subAccount}` : ''}
           {' ・ '}
           {row.sectionCode} {row.sectionName}
-          {row.page !== null && (
+          {row.sourceUrl && (
             <>
               {' ・ '}
               <a
@@ -115,7 +115,7 @@ export function KouMokuSidePanel({
                 rel="noopener noreferrer"
                 className="underline hover:text-neutral-700 dark:hover:text-neutral-300"
               >
-                出典 p.{row.page}
+                {row.page !== null ? `出典 p.${row.page}` : '出典'}
               </a>
             </>
           )}

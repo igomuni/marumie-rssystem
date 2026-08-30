@@ -28,6 +28,7 @@ import {
   sortBudgetTypes,
   sortByCodeOrder,
 } from '@/app/lib/mof-classification-order';
+import { pruneInvalidSelections } from '@/app/lib/filter-selection';
 import type { MOFKouMokuData, MOFKouMokuHistory, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord, MofRsKouMokuLinkageResponse } from '@/types/mof-rs-kou-moku-linkage';
 import { changeRate, formatYen } from '@/client/components/mof-jikou/format';
@@ -300,6 +301,24 @@ export default function MOFKouMokuPage() {
     () => sortByCodeOrder([...new Set(scopedRows.map(i => i.economicNatureName).filter(Boolean))], ECONOMIC_NATURE_ORDER),
     [scopedRows]
   );
+
+  // 上位の絞り込みで選択肢が再計算されるたびに、無効になった選択を落とす
+  // （FilterSidebar側での即時プルーンだと1テンポ古い選択肢を参照してしまうため）
+  useEffect(() => {
+    setFilters(
+      prev =>
+        pruneInvalidSelections(prev, [
+          ['ministry', ministries],
+          ['organization', organizations],
+          ['subAccount', subAccounts],
+          ['majorExpense', majorExpenses],
+          ['purpose', purposes],
+          ['objective', objectives],
+          ['fiscalLaw', fiscalLaws],
+          ['economicNature', economicNatures],
+        ]) ?? prev
+    );
+  }, [ministries, organizations, subAccounts, majorExpenses, purposes, objectives, fiscalLaws, economicNatures]);
 
   /** その目に紐づくRS事業数（事業IDの重複除去件数） */
   function rsCountOf(item: MOFKouMokuItem): number {

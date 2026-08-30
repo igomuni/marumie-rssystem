@@ -10,7 +10,7 @@
  * アンマウントされるため、このコンポーネント内部のuseStateに置くと毎回リセットされてしまう。
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
 import type { MOFJikouItem } from '@/types/mof-jikou';
@@ -323,6 +323,40 @@ function JikouTab({
   onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
 }) {
   const [descriptionItem, setDescriptionItem] = useState<MOFJikouItem | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  // ダイアログを開いたらフォーカスを中に移し、Tabで背後の一覧へ抜けないよう閉じ込める。
+  // 閉じたら開く前にフォーカスしていた要素（説明アイコン）へ戻す。
+  useEffect(() => {
+    if (!descriptionItem) return;
+    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialogRef.current?.focus();
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setDescriptionItem(null);
+        return;
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusables = dialogRef.current.querySelectorAll<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])');
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocusRef.current?.focus();
+    };
+  }, [descriptionItem]);
 
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
@@ -417,10 +451,12 @@ function JikouTab({
           onClick={() => setDescriptionItem(null)}
         >
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label={`${descriptionItem.name} の説明`}
-            className="mx-4 max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-4 shadow-2xl dark:bg-neutral-900"
+            tabIndex={-1}
+            className="mx-4 max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-4 shadow-2xl outline-none dark:bg-neutral-900"
             onClick={e => e.stopPropagation()}
           >
             <div className="mb-2 flex items-start justify-between gap-3">

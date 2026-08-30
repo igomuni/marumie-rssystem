@@ -66,13 +66,6 @@ function formatRate(v: number): string {
   return `${sign}${(v * 100).toFixed(0)}%`;
 }
 
-/** 上位の選択がまだ有効な選択肢だけに絞る（無効化されたものは黙って落とす） */
-function pruneToOptions(selected: string[], options: string[]): string[] {
-  if (selected.length === 0) return selected;
-  const next = selected.filter(s => options.includes(s));
-  return next.length === selected.length ? selected : next;
-}
-
 export function FilterSidebar({
   state,
   onChange,
@@ -128,13 +121,7 @@ export function FilterSidebar({
             label="会計区分"
             options={ACCOUNT_OPTIONS}
             selected={state.account}
-            onChange={v => {
-              onChange('account', v);
-              onChange('ministry', pruneToOptions(state.ministry, ministries));
-              onChange('organization', pruneToOptions(state.organization, organizations));
-              onChange('subAccount', pruneToOptions(state.subAccount, subAccounts));
-              onChange('majorExpense', pruneToOptions(state.majorExpense, majorExpenses));
-            }}
+            onChange={v => onChange('account', v)}
             {...comboProps('account')}
           />
         </div>
@@ -145,12 +132,7 @@ export function FilterSidebar({
             label="所管"
             options={ministries}
             selected={state.ministry}
-            onChange={v => {
-              onChange('ministry', v);
-              onChange('organization', pruneToOptions(state.organization, organizations));
-              onChange('subAccount', pruneToOptions(state.subAccount, subAccounts));
-              onChange('majorExpense', pruneToOptions(state.majorExpense, majorExpenses));
-            }}
+            onChange={v => onChange('ministry', v)}
             {...comboProps('ministry')}
           />
         </div>
@@ -161,11 +143,7 @@ export function FilterSidebar({
             label="組織／特会／機関"
             options={organizations}
             selected={state.organization}
-            onChange={v => {
-              onChange('organization', v);
-              onChange('subAccount', pruneToOptions(state.subAccount, subAccounts));
-              onChange('majorExpense', pruneToOptions(state.majorExpense, majorExpenses));
-            }}
+            onChange={v => onChange('organization', v)}
             {...comboProps('organization')}
           />
         </div>
@@ -176,10 +154,7 @@ export function FilterSidebar({
             label="勘定／業務"
             options={subAccounts}
             selected={state.subAccount}
-            onChange={v => {
-              onChange('subAccount', v);
-              onChange('majorExpense', pruneToOptions(state.majorExpense, majorExpenses));
-            }}
+            onChange={v => onChange('subAccount', v)}
             disabled={subAccounts.length === 0}
             {...comboProps('subAccount')}
           />
