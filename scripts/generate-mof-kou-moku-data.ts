@@ -280,21 +280,28 @@ async function buildGeneralPageMap(
 }
 
 /**
- * 1年度・1帳票（suffix）ぶんの「歳入歳出予定額科目別表」（特別会計・勘定ごとの
- * 項/目内訳）を走査し、突合キー→出典URLのマップを作る。一般会計の科目別内訳とは
- * 別の帳票（title_for_list）・列構成なので専用に実装する。歳出区分のみ対象。
+ * 1年度・1帳票（suffix）ぶんの特別会計・勘定ごとの項/目内訳を走査し、突合キー→
+ * 出典URLのマップを作る。一般会計の科目別内訳とは別の帳票（title_for_list）・
+ * 列構成なので専用に実装する。歳出区分のみ対象。
+ *
+ * 当初・暫定（`歳入歳出予定額科目別表`）と補正（`歳入歳出予算補正予定額科目別表`）は
+ * 別帳票で列数が異なる（補正は金額列が5本: 成立予算額/追加額/修正減少額/差引額/予定額）
+ * ため、`listTitleMatch`（帳票判別用のtitle_for_list）と`subItemNameCol`（目名の列番号。
+ * 当初・暫定は5、補正は6）を呼び出し側で切り替える。
  *
  * 行構成（歳出区分）:
  *   項の行: col1(colSub=2)=項コード, col2(colSub=1)=項名。複数目を持つ項は
- *           このままだが、col6(colSub=1)に金額が乗る場合もある（項の小計）。
- *   目の行: col1(colSub=3)=合成分類コード, col5(colSub=2)=目名, col6(colSub=1)=金額
+ *           このままだが、末尾の金額列に項の小計が乗る場合もある。
+ *   目の行: col1(colSub=3)=合成分類コード, subItemNameCol(colSub=2)=目名
  *   項に目が1件も続かない場合（例: 予備費）は項の行自体に金額が乗り、
  *   そのまま項名を目名とみなして登録する（次の項行 or 歳出合計で確定させる）。
  */
 async function buildSpecialPageMap(
   fiscalYear: number,
   suffix: string,
-  budgetType: MOFBudgetType
+  budgetType: MOFBudgetType,
+  listTitleMatch: string,
+  subItemNameCol: number
 ): Promise<Map<string, PageEntry>> {
   const map = new Map<string, PageEntry>();
   const cacheDir = scrapeCacheDir(fiscalYear);
@@ -318,9 +325,7 @@ async function buildSpecialPageMap(
       console.warn(`  ⚠ [${documentId}] ${name} の取得に失敗: ${(error as Error).message}`);
       continue;
     }
-    // 補正は「歳入歳出予算補正予定額科目別表」という別帳票で列構成（colSub配置）も異なるため対象外
-    // （呼び出し側で layout === 'standard' のみに絞っている）
-    if (listTitle(xml) !== '歳入歳出予定額科目別表') continue;
+    if (listTitle(xml) !== listTitleMatch) continue;
 
     const { ministry, specialAccount, subAccount } = resolveSpecialScope(splitRunningTitle(xml));
     const { rows } = parseTable(xml);
@@ -365,7 +370,7 @@ async function buildSpecialPageMap(
       // colSubの割り当ては年度により変わる（2024はcol1=sub2/3、2017はsub2/4など）ため
       // sub番号には依存せず、コードの見た目だけで判定する。
       if (cellText.includes('-')) {
-        const subItemName = textAt(row, 5);
+        const subItemName = textAt(row, subItemNameCol);
         if (subItemName && sectionCode) {
           map.set(specialPageMapKey(budgetType, ministry, specialAccount, subAccount, sectionCode, subItemName), {
             sourceUrl,
@@ -567,12 +572,14 @@ async function generateYear(fiscalYear: number): Promise<void> {
     );
   }
 
-  // 特別会計は「歳入歳出予定額科目別表」（勘定ごと）を走査して行単位のURLに差し替える
-  // （standardレイアウトのみ対象。補正は列構成が異なる別帳票のため対象外・帳票単位のまま）
-  const specialSpecs = documents.filter(s => s.accountType === 'special' && s.layout === 'standard');
+  // 特別会計は勘定ごとの科目別表を走査して行単位のURLに差し替える
+  // （決算は事項レベルの歳出報告書しか無く目レベルの科目別表が存在しないため対象外・帳票単位のまま）
+  const specialSpecs = documents.filter(s => s.accountType === 'special' && s.layout !== 'settlement');
   const specialPageMap = new Map<string, PageEntry>();
   for (const spec of specialSpecs) {
-    const specMap = await buildSpecialPageMap(fiscalYear, spec.suffix, spec.budgetType);
+    const [listTitleMatch, subItemNameCol] =
+      spec.layout === 'standard' ? (['歳入歳出予定額科目別表', 5] as const) : (['歳入歳出予算補正予定額科目別表', 6] as const);
+    const specMap = await buildSpecialPageMap(fiscalYear, spec.suffix, spec.budgetType, listTitleMatch, subItemNameCol);
     for (const [k, v] of specMap) specialPageMap.set(k, v);
   }
   let specialPageMatched = 0;
