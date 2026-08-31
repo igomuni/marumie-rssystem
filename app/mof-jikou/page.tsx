@@ -14,6 +14,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
+import { usePersistedState } from '@/client/hooks/usePersistedState';
 import { mofArchiveUrl } from '@/app/lib/mof-archive-url';
 import { MAJOR_EXPENSE_ORDER, MINISTRY_ORDER, sortBudgetTypes, sortByCodeOrder } from '@/app/lib/mof-classification-order';
 import { pruneInvalidSelections } from '@/app/lib/filter-selection';
@@ -79,12 +80,12 @@ export default function MOFJikouPage() {
 
   const [filters, setFilters] = useState<FilterSidebarState>(INITIAL_FILTERS);
   const [showFilters, setShowFilters] = useState(true);
-  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT_WIDTH);
+  const [sidebarWidth, setSidebarWidth] = usePersistedState('mof-jikou:sidebarWidth', SIDEBAR_DEFAULT_WIDTH);
   const [sortKey, setSortKey] = useState<SortKey>('amount');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [widths, setWidths] = useState<Record<string, number>>(DEFAULT_WIDTHS);
+  const [widths, setWidths] = usePersistedState<Record<string, number>>('mof-jikou:widths', DEFAULT_WIDTHS);
   const [history, setHistory] = useState<MOFJikouHistory | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);

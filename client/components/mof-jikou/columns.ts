@@ -45,8 +45,8 @@ export interface ColumnSpec {
 }
 
 export const COLUMNS: ColumnSpec[] = [
-  { key: 'budgetType', label: '予算種別', width: 124 },
-  { key: 'accountType', label: '会計区分', width: 92 },
+  { key: 'budgetType', label: '予算種別', width: 96, note: '行頭の▶で年度推移を展開' },
+  { key: 'accountType', label: '会計区分', width: 64 },
   { key: 'ministry', label: '所管', width: 150 },
   {
     key: 'organization',

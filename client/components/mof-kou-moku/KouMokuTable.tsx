@@ -156,7 +156,7 @@ export function KouMokuTable({
                 }
               }}
               aria-selected={isSelected}
-              className={`cursor-pointer border-t border-neutral-100 align-top hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900 ${
+              className={`cursor-pointer border-t border-neutral-100 align-middle hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900 ${
                 isSelected ? 'bg-blue-50 dark:bg-blue-950/40' : ''
               }`}
             >
@@ -167,10 +167,10 @@ export function KouMokuTable({
               >
                 {rsCount || '—'}
               </td>
-              <td className="truncate px-2 py-1.5 align-middle text-neutral-500">
+              <td className="truncate px-2 py-1.5 text-neutral-500">
                 <BudgetTypeBadge budgetType={item.budgetType} />
               </td>
-              <td className="truncate px-2 py-1.5 align-middle text-neutral-500">
+              <td className="truncate px-2 py-1.5 text-neutral-500">
                 <AccountBadge accountType={item.accountType} />
               </td>
               <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
