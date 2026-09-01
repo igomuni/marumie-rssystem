@@ -42,6 +42,12 @@ export function linkageRsYear(budgetYear: number): number | null {
   return loadYear(budgetYear).metadata.rsYear;
 }
 
+/** その年度の紐づけデータの突合範囲の説明 */
+export function linkageScope(budgetYear: number): string | null {
+  if (!linkageAvailable(budgetYear)) return null;
+  return loadYear(budgetYear).metadata.scope;
+}
+
 export interface LinkageResolution {
   available: boolean;
   links: MofRsKouMokuLinkageRecord[];
