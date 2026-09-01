@@ -64,6 +64,11 @@ export interface MOFSectionRsNodeDetails {
   accountType?: MOFAccountType;
   /** 項ノードの項コード */
   sectionCode?: string;
+  /**
+   * 項の合成キー（`MOFKouSectionSummary.id`）。section列のノードのみ持つ。
+   * /api/mof-kou/detail?id= に渡すと、その項の目一覧・RS紐づけの詳細を取得できる
+   */
+  mofKouSectionId?: string;
   /** 項ノード配下にRS紐づく目が1件でもあるか。section列のノードのみ持つ */
   rsLinked?: boolean;
   /**

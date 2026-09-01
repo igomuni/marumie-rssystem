@@ -226,6 +226,8 @@ function MOFSectionRsSankeyContent() {
         onToggleFilterOpen={() => setFilterOpen(v => !v)}
         fontPx={fontPx}
         labelDensity={labelDensity}
+        fiscalYear={metadata.fiscalYear}
+        budgetType={metadata.budgetType}
       />
 
       <div className="absolute right-3 top-3 z-30 flex items-start gap-2">

@@ -36,6 +36,7 @@ import { descendantsByColumn, focusHierarchy, relatedNodeIds } from '@/app/lib/m
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { SankeyChartSearch } from './SankeyChartSearch';
 import { FilterFields } from './FilterFields';
+import { KouMokuTab } from './KouMokuTab';
 import { HierarchyFilterClearButton } from '@/client/components/mof-hierarchy/HierarchyFilterClearButton';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
@@ -69,6 +70,8 @@ export function SankeyChart({
   onToggleFilterOpen,
   fontPx = LABEL_FONT_PX_DEFAULT,
   labelDensity = 'all',
+  fiscalYear,
+  budgetType,
 }: {
   /** 図の描画用（TopNで絞ってある） */
   nodes: MOFSectionRsNode[];
@@ -86,6 +89,9 @@ export function SankeyChart({
   onToggleFilterOpen: () => void;
   fontPx?: number;
   labelDensity?: LabelDensity;
+  /** 「目」タブの詳細取得（/api/mof-kou/detail, /api/mof-sankey/rs-project）に使う */
+  fiscalYear: number;
+  budgetType: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewport, setViewport] = useState({ width: 1900, height: 900 });
@@ -321,8 +327,31 @@ export function SankeyChart({
     }));
     return rsRelatedTab ? [...list, rsRelatedTab] : list;
   }, [descendantColumns, rsRelatedTab]);
-  const [panelTab, setPanelTab] = useState<MOFSectionRsColumn | null>(null);
-  const activeTab = descendantColumnList.some(t => t.column === panelTab) ? panelTab : (descendantColumnList[0]?.column ?? null);
+
+  /**
+   * 「目」タブ。項ノードならその項の目一覧、RS事業ノード（個別）ならその事業が
+   * 計上されている目一覧を、選んだときに遅延取得する（KouMokuTab側で fetch する）
+   */
+  const koumokuTabInfo = useMemo(() => {
+    if (!selectedDetails) return null;
+    if (selectedDetails.column === 'section' && selectedDetails.mofKouSectionId) {
+      return { mode: 'section' as const, sectionId: selectedDetails.mofKouSectionId };
+    }
+    if (selectedDetails.column === 'rsStatus' && selectedDetails.rsStatus === 'linked' && selectedDetails.projectId !== undefined) {
+      return { mode: 'project' as const, projectId: selectedDetails.projectId };
+    }
+    return null;
+  }, [selectedDetails]);
+
+  const tabs = useMemo(
+    () => [
+      ...descendantColumnList.map(t => ({ id: t.column as string, label: MOF_SECTION_RS_COLUMN_LABELS[t.column], count: t.items.length })),
+      ...(koumokuTabInfo ? [{ id: 'koumoku', label: '目', count: undefined }] : []),
+    ],
+    [descendantColumnList, koumokuTabInfo]
+  );
+  const [panelTab, setPanelTab] = useState<string | null>(null);
+  const activeTab = tabs.some(t => t.id === panelTab) ? panelTab : (tabs[0]?.id ?? null);
 
   const zoomRef = useRef(1);
   useLayoutEffect(() => {
@@ -712,39 +741,50 @@ export function SankeyChart({
                 </div>
               )}
 
-              {descendantColumnList.length > 0 && (
+              {tabs.length > 0 && (
                 <div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t border-gray-100">
                   <div role="tablist" className="flex flex-shrink-0 border-b border-gray-100 px-2">
-                    {descendantColumnList.map(({ column, items }) => (
+                    {tabs.map(({ id, label, count }) => (
                       <button
-                        key={column}
+                        key={id}
                         type="button"
                         role="tab"
-                        aria-selected={activeTab === column}
-                        onClick={() => setPanelTab(column)}
+                        aria-selected={activeTab === id}
+                        onClick={() => setPanelTab(id)}
                         className={`flex-1 border-b-2 px-1 py-1.5 text-[11px] font-semibold ${
-                          activeTab === column ? 'border-blue-500 text-gray-800' : 'border-transparent text-gray-400 hover:text-gray-600'
+                          activeTab === id ? 'border-blue-500 text-gray-800' : 'border-transparent text-gray-400 hover:text-gray-600'
                         }`}
                       >
-                        {MOF_SECTION_RS_COLUMN_LABELS[column]}
-                        <span className="ml-0.5 font-normal">({items.length.toLocaleString()})</span>
+                        {label}
+                        {count !== undefined && <span className="ml-0.5 font-normal">({count.toLocaleString()})</span>}
                       </button>
                     ))}
                   </div>
-                  <div role="tabpanel" className="min-h-0 flex-1 overflow-y-auto p-4 pt-1">
-                    {descendantColumnList
-                      .find(t => t.column === activeTab)
-                      ?.items.map(item => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => onSelect(item.id)}
-                          className="flex w-full items-baseline justify-between gap-3 border-b border-gray-50 py-1.5 text-left hover:bg-gray-50"
-                        >
-                          <span className="truncate text-xs text-gray-700">{item.name}</span>
-                          <span className="shrink-0 text-[11px] tabular-nums text-gray-500">{formatBudgetFromYen(item.value ?? 0)}</span>
-                        </button>
-                      ))}
+                  <div role="tabpanel" className="min-h-0 flex-1 overflow-y-auto">
+                    {activeTab === 'koumoku' && koumokuTabInfo && (
+                      <KouMokuTab
+                        {...(koumokuTabInfo.mode === 'section'
+                          ? { mode: 'section', fiscalYear, sectionId: koumokuTabInfo.sectionId }
+                          : { mode: 'project', fiscalYear, budgetType, projectId: koumokuTabInfo.projectId })}
+                      />
+                    )}
+                    {activeTab !== 'koumoku' && (
+                      <div className="p-4 pt-1">
+                        {descendantColumnList
+                          .find(t => t.column === activeTab)
+                          ?.items.map(item => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => onSelect(item.id)}
+                              className="flex w-full items-baseline justify-between gap-3 border-b border-gray-50 py-1.5 text-left hover:bg-gray-50"
+                            >
+                              <span className="truncate text-xs text-gray-700">{item.name}</span>
+                              <span className="shrink-0 text-[11px] tabular-nums text-gray-500">{formatBudgetFromYen(item.value ?? 0)}</span>
+                            </button>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
