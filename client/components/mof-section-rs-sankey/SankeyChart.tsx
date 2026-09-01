@@ -289,14 +289,35 @@ export function SankeyChart({
     () => (selectedId ? descendantsByColumn(browseNodes, browseLinks, selectedId) : new Map<MOFSectionRsColumn, MOFSectionRsNode[]>()),
     [browseNodes, browseLinks, selectedId]
   );
-  const descendantColumnList = useMemo(
-    () =>
-      MOF_SECTION_RS_COLUMNS.filter(c => descendantColumns.has(c)).map(column => ({
-        column,
-        items: descendantColumns.get(column) ?? [],
-      })),
-    [descendantColumns]
-  );
+  /**
+   * rsStatus列は browse（TopNで絞る前の全項ツリー）に含まれない（RS事業の個別・集約は
+   * 表示のTopNに依存する構成のため）。項ノード選択時は表示グラフ（nodes/links）から
+   * 直接その項が繋がるRS事業/RS対象外を、RS事業ノード選択時は逆に繋がっている項を
+   * 拾う（他の列と同じ「関連ノードのタブ一覧」にするため）
+   */
+  const rsRelatedTab = useMemo(() => {
+    if (!selectedId) return null;
+    const column = (nodes.find(n => n.id === selectedId) ?? browseNodes.find(n => n.id === selectedId))?.details.column;
+    if (column !== 'section' && column !== 'rsStatus') return null;
+    const nodeById = new Map(nodes.map(n => [n.id, n]));
+    const relatedIds =
+      column === 'section'
+        ? links.filter(l => l.source === selectedId).map(l => l.target)
+        : links.filter(l => l.target === selectedId).map(l => l.source);
+    const items = relatedIds
+      .map(id => nodeById.get(id))
+      .filter((n): n is MOFSectionRsNode => n !== undefined)
+      .sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+    if (items.length === 0) return null;
+    return { column: (column === 'section' ? 'rsStatus' : 'section') as MOFSectionRsColumn, items };
+  }, [selectedId, nodes, links, browseNodes]);
+  const descendantColumnList = useMemo(() => {
+    const list = MOF_SECTION_RS_COLUMNS.filter(c => descendantColumns.has(c)).map(column => ({
+      column,
+      items: descendantColumns.get(column) ?? [],
+    }));
+    return rsRelatedTab ? [...list, rsRelatedTab] : list;
+  }, [descendantColumns, rsRelatedTab]);
   const [panelTab, setPanelTab] = useState<MOFSectionRsColumn | null>(null);
   const activeTab = descendantColumnList.some(t => t.column === panelTab) ? panelTab : (descendantColumnList[0]?.column ?? null);
 
