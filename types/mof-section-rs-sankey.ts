@@ -181,6 +181,7 @@ export function hasActiveMOFSectionRsFilterState(state: MOFSectionRsFilterState)
     state.ministries.length > 0 ||
     state.accountTypes.length > 0 ||
     state.sectionQuery.trim() !== '' ||
-    state.minAmountText.trim() !== ''
+    state.minAmountText.trim() !== '' ||
+    state.maxAmountText.trim() !== ''
   );
 }

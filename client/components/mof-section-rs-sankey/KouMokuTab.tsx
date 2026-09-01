@@ -11,108 +11,25 @@
  *
  * main API（/api/mof-sankey）には目単位の明細までは含めていないため、
  * タブを開いたときに遅延取得する（/mof-kou の行展開と同じ方針）。
+ * fetch 自体は useKouMokuDetail に閉じ、ここは表示に専念する（Layer Design Rules）。
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
+import { useKouMokuDetail, type KouMokuDetailParams } from '@/client/hooks/useKouMokuDetail';
 
-interface Row {
-  sectionName?: string;
-  subItemName: string;
-  amount: number;
-  rsProjectNames?: string[];
-}
-
-interface KouMokuLeafLike {
-  key: string;
-  subItemName: string;
-  amount: number;
-}
-
-interface RsLinkLike {
-  kouMokuKey: string;
-  projectName: string;
-}
-
-interface SectionDetailResponse {
-  kouMokuItems?: KouMokuLeafLike[];
-  rsLinks?: RsLinkLike[];
-}
-
-interface RsProjectLinkRow {
-  sectionName: string;
-  subItemName: string;
-  rsAmount: number;
-}
-
-interface RsProjectResponse {
-  rows?: RsProjectLinkRow[];
-}
-
-type Props = (
-  | { mode: 'section'; fiscalYear: number; sectionId: string }
-  | { mode: 'project'; fiscalYear: number; budgetType: string; projectId: number }
-) & {
+type Props = KouMokuDetailParams & {
   /** 取得できた件数。他のタブと同じく見出しに件数を出すため、親へ伝える */
   onCount?: (count: number) => void;
 };
 
-export function KouMokuTab(props: Props) {
-  const [rows, setRows] = useState<Row[] | null>(null);
-  const [error, setError] = useState(false);
+export function KouMokuTab({ onCount, ...params }: Props) {
+  const { rows, error } = useKouMokuDetail(params);
 
   useEffect(() => {
-    let cancelled = false;
-    setRows(null);
-    setError(false);
-
-    const url =
-      props.mode === 'section'
-        ? `/api/mof-kou/detail?year=${props.fiscalYear}&id=${encodeURIComponent(props.sectionId)}`
-        : `/api/mof-sankey/rs-project?year=${props.fiscalYear}&projectId=${props.projectId}&budgetType=${encodeURIComponent(props.budgetType)}`;
-
-    fetch(url)
-      .then(r => {
-        if (!r.ok) throw new Error(String(r.status));
-        return r.json();
-      })
-      .then((data: SectionDetailResponse | RsProjectResponse) => {
-        if (cancelled) return;
-        if (props.mode === 'section') {
-          const { kouMokuItems = [], rsLinks = [] } = data as SectionDetailResponse;
-          const rsByKey = new Map<string, string[]>();
-          for (const link of rsLinks) {
-            const list = rsByKey.get(link.kouMokuKey) ?? [];
-            list.push(link.projectName);
-            rsByKey.set(link.kouMokuKey, list);
-          }
-          const items: Row[] = kouMokuItems
-            .map(k => ({
-              subItemName: k.subItemName,
-              amount: k.amount,
-              rsProjectNames: rsByKey.get(k.key),
-            }))
-            .sort((a, b) => b.amount - a.amount);
-          setRows(items);
-          props.onCount?.(items.length);
-        } else {
-          const { rows: linkRows = [] } = data as RsProjectResponse;
-          const items: Row[] = linkRows
-            .map(l => ({ sectionName: l.sectionName, subItemName: l.subItemName, amount: l.rsAmount }))
-            .sort((a, b) => b.amount - a.amount);
-          setRows(items);
-          props.onCount?.(items.length);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setError(true);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.mode, props.fiscalYear, props.mode === 'section' ? props.sectionId : props.projectId]);
+    if (rows) onCount?.(rows.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- onCount は親のsetStateで安定しているため対象外
+  }, [rows]);
 
   if (error) return <div className="p-4 text-xs text-red-600">目の取得に失敗しました</div>;
   if (!rows) return <div className="p-4 text-xs text-gray-400">読み込み中…</div>;

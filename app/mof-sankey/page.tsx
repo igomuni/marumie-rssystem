@@ -161,6 +161,7 @@ function MOFSectionRsSankeyContent() {
   useEffect(() => {
     const onPopState = () => {
       const params = new URLSearchParams(window.location.search);
+      setBudgetType((params.get('bt') as MOFBudgetType | null) ?? null);
       setSelectedId(params.get('sel'));
       setFocusRelated(params.get('fr') === '1');
       setFontPx(Number(params.get('fs')) || LABEL_FONT_PX_DEFAULT);
