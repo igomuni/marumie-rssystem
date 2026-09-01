@@ -34,7 +34,7 @@ export const MOF_SECTION_RS_COLUMN_LABELS: Record<MOFSectionRsColumn, string> = 
   organization: '組織/特会',
   subAccount: '勘定/業務',
   section: '項',
-  rsStatus: 'RS紐づけ',
+  rsStatus: 'RS事業',
 };
 
 /** 集約ノードの名前に使う単位（「41組織」のように件数で出す。/mof-hierarchy と同じ作法） */

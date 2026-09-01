@@ -19,7 +19,7 @@ const PAGES = [
   { href: '/mof-kou-moku', label: '予算書 科目別内訳（MOF）' },
   { href: '/mof-kou', label: '予算書 項一覧（MOF）' },
   { href: '/mof-hierarchy', label: '予算書 階層フロー（MOF）' },
-  { href: '/mof-sankey', label: '予算書 項×RS紐づけ（MOF）' },
+  { href: '/mof-sankey', label: '予算書 項×RS事業（MOF）' },
 ] as const;
 
 export type NavPageHref = (typeof PAGES)[number]['href'];
