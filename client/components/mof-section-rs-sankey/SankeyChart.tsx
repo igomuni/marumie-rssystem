@@ -132,10 +132,29 @@ export function SankeyChart({
    * relatedNodeIds が「自分だけ」を返して、本来関連のはずの集約ノード・帯まで
    * すべて非活性（ダーク→薄暗い）に見えてしまう
    */
-  const related = useMemo(
-    () => (selectedId && nodes.some(n => n.id === selectedId) ? relatedNodeIds(links, selectedId) : null),
-    [selectedId, links, nodes]
-  );
+  const related = useMemo(() => {
+    if (!selectedId) return null;
+    const selected = nodes.find(n => n.id === selectedId);
+    if (!selected) return null;
+    const set = relatedNodeIds(links, selectedId);
+    /**
+     * 個別のRS事業/RS対象外は、真の親項（browseで分かる）のうち一部が項のTopNに
+     * 収まらず「N項」集約に畳まれていることがある。畳まれた項からこのノードへの
+     * 寄与は、表示グラフ上は集約の総額に紛れて個別の帯を持たないため、
+     * relatedNodeIds だけでは「N項」集約ノードが関連扱いにならない。browseで
+     * 畳まれた真の親が実際にあると分かる場合だけ、集約ノード（とその祖先）を
+     * 関連に足す（集約からRS事業へのエッジが無くても、集約が持つ額の一部が
+     * このノードに由来するのは事実のため）
+     */
+    if (selected.details.column === 'rsStatus') {
+      const displayIds = new Set(nodes.map(n => n.id));
+      const hasCollapsedParent = browseLinks.some(l => l.target === selectedId && !displayIds.has(l.source));
+      if (hasCollapsedParent) {
+        for (const id of relatedNodeIds(links, '__others__section')) set.add(id);
+      }
+    }
+    return set;
+  }, [selectedId, links, nodes, browseLinks]);
 
   const hoveredRelated = useMemo(
     () => (hovered && (!selectedId || focusRelated) ? relatedNodeIds(links, hovered.id) : null),
@@ -776,13 +795,17 @@ export function SankeyChart({
                     ))}
                   </div>
                   <div role="tabpanel" className="min-h-0 flex-1 overflow-y-auto">
-                    {activeTab === 'koumoku' && koumokuTabInfo && (
-                      <KouMokuTab
-                        {...(koumokuTabInfo.mode === 'section'
-                          ? { mode: 'section', fiscalYear, sectionId: koumokuTabInfo.sectionId }
-                          : { mode: 'project', fiscalYear, budgetType, projectId: koumokuTabInfo.projectId })}
-                        onCount={setKoumokuCount}
-                      />
+                    {/* 目タブが選ばれていなくても、件数を見出しに出すため常時マウントして
+                        取得だけは進めておく（表示だけ hidden で切り替える） */}
+                    {koumokuTabInfo && (
+                      <div hidden={activeTab !== 'koumoku'}>
+                        <KouMokuTab
+                          {...(koumokuTabInfo.mode === 'section'
+                            ? { mode: 'section', fiscalYear, sectionId: koumokuTabInfo.sectionId }
+                            : { mode: 'project', fiscalYear, budgetType, projectId: koumokuTabInfo.projectId })}
+                          onCount={setKoumokuCount}
+                        />
+                      </div>
                     )}
                     {activeTab !== 'koumoku' && (
                       <div className="p-4 pt-1">
