@@ -32,7 +32,7 @@ import {
 } from '@/types/mof-section-rs-sankey';
 import type { LabelDensity } from '@/types/mof-hierarchy';
 import type { SankeyLink } from '@/types/sankey';
-import { descendantsByColumn, focusHierarchy, relatedNodeIds } from '@/app/lib/mof-section-rs-focus';
+import { ancestorsByColumn, descendantsByColumn, focusHierarchy, relatedNodeIds, rsStatusBreakdown } from '@/app/lib/mof-section-rs-focus';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { SankeyChartSearch } from './SankeyChartSearch';
 import { FilterFields } from './FilterFields';
@@ -141,20 +141,29 @@ export function SankeyChart({
      * 個別のRS事業/RS対象外は、真の親項（browseで分かる）のうち一部が項のTopNに
      * 収まらず「N項」集約に畳まれていることがある。畳まれた項からこのノードへの
      * 寄与は、表示グラフ上は集約の総額に紛れて個別の帯を持たないため、
-     * relatedNodeIds だけでは「N項」集約ノードが関連扱いにならない。browseで
-     * 畳まれた真の親が実際にあると分かる場合だけ、集約ノード（とその祖先）を
-     * 関連に足す（集約からRS事業へのエッジが無くても、集約が持つ額の一部が
-     * このノードに由来するのは事実のため）
+     * relatedNodeIds だけでは「N項」集約ノードが関連扱いにならない。
+     *
+     * 「N項」集約ノードは全所管の畳まれた項が合流する共有バケツ（1個のみ）なので、
+     * その ancestors・descendants を丸ごと足すと無関係な所管・組織まで活性化してしまう
+     * （実際に起きたバグ）。畳まれた真の親項の実際の祖先（所管/組織/勘定。browseで
+     * ancestorsByColumn を使えば按分込みで正しく辿れる）だけを、表示グラフに実在する
+     * ノードに限って足す。集約ノード自体は、選択RS事業への窓口として実際に帯を
+     * 持つ場合だけ足す
      */
     if (selected.details.column === 'rsStatus') {
       const displayIds = new Set(nodes.map(n => n.id));
       const hasCollapsedParent = browseLinks.some(l => l.target === selectedId && !displayIds.has(l.source));
       if (hasCollapsedParent) {
-        for (const id of relatedNodeIds(links, '__others__section')) set.add(id);
+        for (const ancestorNodes of ancestorsByColumn(browseNodes, browseLinks, selectedId).values()) {
+          for (const ancestor of ancestorNodes) {
+            if (displayIds.has(ancestor.id)) set.add(ancestor.id);
+          }
+        }
+        if (displayIds.has('__others__section')) set.add('__others__section');
       }
     }
     return set;
-  }, [selectedId, links, nodes, browseLinks]);
+  }, [selectedId, links, nodes, browseNodes, browseLinks]);
 
   const hoveredRelated = useMemo(
     () => (hovered && (!selectedId || focusRelated) ? relatedNodeIds(links, hovered.id) : null),
@@ -325,37 +334,49 @@ export function SankeyChart({
     [browseNodes, browseLinks, selectedId]
   );
   /**
-   * rsStatus列（項→RS事業）は、他の列と違って同じRS事業ノードが複数の項から
-   * 共有されることがある（1つの事業が複数の項に計上されるため）。browse上の
-   * ノード自身の value は「browseに最初に登場した項からの寄与額」でしかなく
-   * 複数項の合算ではないので、descendantsByColumn（ノードの value をそのまま使う）
-   * には任せられない。ここではエッジの value（=選択した項からの寄与額、または
-   * 選択したRS事業へのその項からの寄与額）を直接使い、図の集約ノード（「N事業」）を
-   * 経由せず browse（TopNで絞る前の全件）から実際の個別RS事業・項を展開して出す
+   * 選択ノードより左の列（祖先）。木構造（親は1つ）の列は ancestorsByColumn が
+   * 選択ノードの値をそのまま伝播するので正しい。rsStatus列を選んだ場合の項列だけは
+   * ancestorsByColumn 内部でエッジの value による按分に切り替わる
+   * （1つのRS事業が複数の項から計上されうるため）。
+   */
+  const ancestorColumns = useMemo(
+    () => (selectedId ? ancestorsByColumn(browseNodes, browseLinks, selectedId) : new Map<MOFSectionRsColumn, MOFSectionRsNode[]>()),
+    [browseNodes, browseLinks, selectedId]
+  );
+  /**
+   * 「RS事業」タブは descendantsByColumn に任せられない。rsStatus列（項→RS事業）は、
+   * 他の列と違って同じRS事業ノードが複数の項から共有されることがある（1つの事業が
+   * 複数の項に計上されるため）。browse上のノード自身の value は「browseに最初に
+   * 登場した項からの寄与額」でしかなく複数項の合算ではないので、descendantsByColumn
+   * （ノードの value をそのまま使う）には任せられない。
+   *
+   * 項ノードを選んだときは自分自身、それより左の列（所管・組織・勘定）を選んだときは
+   * 配下の項すべてを対象に、rsStatusBreakdown でエッジの value を事業ごとに合算する
+   * （逆方向＝RS事業を選んだときの祖先タブは ancestorsByColumn が同じ考え方で面倒を見る）
    */
   const rsRelatedTab = useMemo(() => {
     if (!selectedId) return null;
     const column = (nodes.find(n => n.id === selectedId) ?? browseNodes.find(n => n.id === selectedId))?.details.column;
-    if (column !== 'section' && column !== 'rsStatus') return null;
-    const nodeById = new Map(browseNodes.map(n => [n.id, n]));
-    const relatedLinks =
-      column === 'section' ? browseLinks.filter(l => l.source === selectedId) : browseLinks.filter(l => l.target === selectedId);
-    const items: MOFSectionRsNode[] = [];
-    for (const l of relatedLinks) {
-      const node = nodeById.get(column === 'section' ? l.target : l.source);
-      if (node) items.push({ ...node, value: l.value });
-    }
-    items.sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+    if (!column || column === 'total' || column === 'rsStatus') return null;
+    const sectionIds = column === 'section' ? [selectedId] : (descendantColumns.get('section') ?? []).map(n => n.id);
+    if (sectionIds.length === 0) return null;
+    const items = rsStatusBreakdown(browseNodes, browseLinks, sectionIds);
     if (items.length === 0) return null;
-    return { column: (column === 'section' ? 'rsStatus' : 'section') as MOFSectionRsColumn, items };
-  }, [selectedId, nodes, browseNodes, browseLinks]);
-  const descendantColumnList = useMemo(() => {
-    const list = MOF_SECTION_RS_COLUMNS.filter(c => c !== 'rsStatus' && descendantColumns.has(c)).map(column => ({
+    return { column: 'rsStatus' as MOFSectionRsColumn, items };
+  }, [selectedId, nodes, browseNodes, browseLinks, descendantColumns]);
+  /** サイドパネルのタブ一覧。選択ノードから見て左右どちらの列も、自然な列順で並べる */
+  const relatedColumnList = useMemo(() => {
+    const merged = new Map<MOFSectionRsColumn, MOFSectionRsNode[]>();
+    for (const [column, items] of ancestorColumns) merged.set(column, items);
+    for (const [column, items] of descendantColumns) {
+      if (column !== 'rsStatus') merged.set(column, items);
+    }
+    if (rsRelatedTab) merged.set(rsRelatedTab.column, rsRelatedTab.items);
+    return MOF_SECTION_RS_COLUMNS.filter(c => c !== 'total' && merged.has(c)).map(column => ({
       column,
-      items: descendantColumns.get(column) ?? [],
+      items: merged.get(column) ?? [],
     }));
-    return rsRelatedTab ? [...list, rsRelatedTab] : list;
-  }, [descendantColumns, rsRelatedTab]);
+  }, [ancestorColumns, descendantColumns, rsRelatedTab]);
 
   /**
    * 「目」タブ。項ノードならその項の目一覧、RS事業ノード（個別）ならその事業が
@@ -369,21 +390,42 @@ export function SankeyChart({
     if (selectedDetails.column === 'rsStatus' && selectedDetails.rsStatus === 'linked' && selectedDetails.projectId !== undefined) {
       return { mode: 'project' as const, projectId: selectedDetails.projectId };
     }
+    if (
+      selectedDetails.column === 'ministry' ||
+      selectedDetails.column === 'organization' ||
+      selectedDetails.column === 'subAccount'
+    ) {
+      const sectionIds = (descendantColumns.get('section') ?? [])
+        .map(n => n.details.mofKouSectionId)
+        .filter((id): id is string => Boolean(id));
+      if (sectionIds.length === 0) return null;
+      return { mode: 'sections' as const, sectionIds };
+    }
     return null;
-  }, [selectedDetails]);
+  }, [selectedDetails, descendantColumns]);
   /** 「目」タブの件数。他のタブと同じく見出しに件数を出すため、KouMokuTab側の取得結果を持ち回す */
   const [koumokuCount, setKoumokuCount] = useState<number | null>(null);
   useEffect(() => {
     setKoumokuCount(null);
   }, [koumokuTabInfo]);
 
-  const tabs = useMemo(
-    () => [
-      ...descendantColumnList.map(t => ({ id: t.column as string, label: MOF_SECTION_RS_COLUMN_LABELS[t.column], count: t.items.length })),
-      ...(koumokuTabInfo ? [{ id: 'koumoku', label: '目', count: koumokuCount ?? undefined }] : []),
-    ],
-    [descendantColumnList, koumokuTabInfo, koumokuCount]
-  );
+  /**
+   * 「目」タブを「RS事業」タブの直前に差し込む（項→目→RS事業の順で読みたいため）。
+   * 項ノードそのものを選んだときは「項」タブ自体が無い（自分自身のため）ので、
+   * 「RS事業」タブの位置を基準にする（無ければ末尾）
+   */
+  const tabs = useMemo(() => {
+    const columnTabs = relatedColumnList.map(t => ({
+      id: t.column as string,
+      label: MOF_SECTION_RS_COLUMN_LABELS[t.column],
+      count: t.items.length,
+    }));
+    if (!koumokuTabInfo) return columnTabs;
+    const koumokuTab = { id: 'koumoku', label: '目', count: koumokuCount ?? undefined };
+    const rsStatusIndex = columnTabs.findIndex(t => t.id === 'rsStatus');
+    if (rsStatusIndex === -1) return [...columnTabs, koumokuTab];
+    return [...columnTabs.slice(0, rsStatusIndex), koumokuTab, ...columnTabs.slice(rsStatusIndex)];
+  }, [relatedColumnList, koumokuTabInfo, koumokuCount]);
   const [panelTab, setPanelTab] = useState<string | null>(null);
   const activeTab = tabs.some(t => t.id === panelTab) ? panelTab : (tabs[0]?.id ?? null);
 
@@ -802,14 +844,16 @@ export function SankeyChart({
                         <KouMokuTab
                           {...(koumokuTabInfo.mode === 'section'
                             ? { mode: 'section', fiscalYear, sectionId: koumokuTabInfo.sectionId }
-                            : { mode: 'project', fiscalYear, budgetType, projectId: koumokuTabInfo.projectId })}
+                            : koumokuTabInfo.mode === 'sections'
+                              ? { mode: 'sections', fiscalYear, sectionIds: koumokuTabInfo.sectionIds }
+                              : { mode: 'project', fiscalYear, budgetType, projectId: koumokuTabInfo.projectId })}
                           onCount={setKoumokuCount}
                         />
                       </div>
                     )}
                     {activeTab !== 'koumoku' && (
                       <div className="p-4 pt-1">
-                        {descendantColumnList
+                        {relatedColumnList
                           .find(t => t.column === activeTab)
                           ?.items.map(item => (
                             <button
