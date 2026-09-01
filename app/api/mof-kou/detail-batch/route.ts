@@ -1,24 +1,16 @@
 /**
  * 複数項ぶんの目一覧をまとめて返す。/mof-sankey のサイドパネルで所管・組織/特会・
  * 勘定/業務ノードを選んだときの「目」タブ用（配下の項すべてを合算して見せる）。
- *
- * sectionDetail が呼ぶ buildYear（mof-kou-loader.ts）は年度ごとに一度読み込んだ
- * 結果をキャッシュして使い回すため、項の数だけ繰り返し呼んでも実質1回の読み込みで済む。
+ * 集計（sectionDetail の呼び出し・RS事業の突き合わせ・並べ替え）は app/lib/ に委譲し、
+ * ここではHTTPの受け取り・検証・レスポンス変換だけを行う。
  */
 
 import { NextResponse } from 'next/server';
 import { API_CACHE_CONTROL, serverErrorResponse } from '@/app/lib/api/api-notes';
-import { availableYears, sectionDetail } from '@/app/lib/api/mof-kou-loader';
+import { availableYears, sectionDetailBatchRows } from '@/app/lib/api/mof-kou-loader';
 
 /** 所管丸ごと選択時などに項数が際限なく膨らまないよう、安全弁として上限を設ける */
 const MAX_IDS = 1000;
-
-interface BatchRow {
-  sectionName: string;
-  subItemName: string;
-  amount: number;
-  rsProjectNames?: string[];
-}
 
 /**
  * POST /api/mof-kou/detail-batch
@@ -45,26 +37,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `項の指定が多すぎます（上限${MAX_IDS}件）` }, { status: 400 });
     }
 
-    const rows: BatchRow[] = [];
-    for (const id of ids) {
-      const detail = sectionDetail(year, id);
-      if (!detail) continue;
-      const rsByKey = new Map<string, string[]>();
-      for (const link of detail.rsLinks) {
-        const list = rsByKey.get(link.kouMokuKey) ?? [];
-        list.push(link.projectName);
-        rsByKey.set(link.kouMokuKey, list);
-      }
-      for (const item of detail.kouMokuItems) {
-        rows.push({
-          sectionName: item.sectionName,
-          subItemName: item.subItemName,
-          amount: item.amount,
-          rsProjectNames: rsByKey.get(item.key),
-        });
-      }
-    }
-    rows.sort((a, b) => b.amount - a.amount);
+    const rows = sectionDetailBatchRows(year, ids);
 
     return NextResponse.json({ rows }, { headers: { 'Cache-Control': API_CACHE_CONTROL } });
   } catch (error) {

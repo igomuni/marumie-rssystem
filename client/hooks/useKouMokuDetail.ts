@@ -105,8 +105,10 @@ export function useKouMokuDetail(params: KouMokuDetailParams): { rows: KouMokuRo
   const sectionId = params.mode === 'section' ? params.sectionId : undefined;
   const projectId = params.mode === 'project' ? params.projectId : undefined;
   const budgetType = params.mode === 'project' ? params.budgetType : undefined;
+  const sectionIds = params.mode === 'sections' ? params.sectionIds : undefined;
   // 配列を依存に直接使うと参照が毎レンダー変わりうるため、内容で比較できる文字列に落とす
-  const sectionIdsKey = params.mode === 'sections' ? params.sectionIds.join(',') : undefined;
+  // （IDにカンマを含みうる・配列の境界を保つため join ではなく JSON.stringify を使う）
+  const sectionIdsKey = sectionIds ? JSON.stringify(sectionIds) : undefined;
 
   useEffect(() => {
     let cancelled = false;
@@ -116,8 +118,8 @@ export function useKouMokuDetail(params: KouMokuDetailParams): { rows: KouMokuRo
     const request =
       mode === 'section' && sectionId !== undefined
         ? fetchSectionRows(fiscalYear, sectionId)
-        : mode === 'sections' && sectionIdsKey !== undefined
-          ? fetchSectionsRows(fiscalYear, sectionIdsKey ? sectionIdsKey.split(',') : [])
+        : mode === 'sections' && sectionIds !== undefined
+          ? fetchSectionsRows(fiscalYear, sectionIds)
           : projectId !== undefined && budgetType !== undefined
             ? fetchProjectRows(fiscalYear, projectId, budgetType)
             : null;

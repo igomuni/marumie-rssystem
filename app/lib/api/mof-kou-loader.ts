@@ -291,6 +291,45 @@ export function sectionDetail(fiscalYear: number, id: string): MOFKouSectionDeta
   };
 }
 
+/** 複数項ぶんの目一覧をまとめた1行（/api/mof-kou/detail-batch のレスポンス用） */
+export interface MOFKouSectionBatchRow {
+  sectionName: string;
+  subItemName: string;
+  amount: number;
+  rsProjectNames?: string[];
+}
+
+/**
+ * 複数項ぶんの目一覧をまとめて、金額の大きい順に返す。
+ * /mof-sankey のサイドパネルで所管・組織/特会・勘定/業務ノードを選んだときの
+ * 「目」タブ用（配下の項すべてを合算して見せる）。sectionDetail が呼ぶ buildYear は
+ * 年度ごとに一度読み込んだ結果をキャッシュして使い回すため、項の数だけ繰り返し
+ * 呼んでも実質1回の読み込みで済む。
+ */
+export function sectionDetailBatchRows(fiscalYear: number, ids: string[]): MOFKouSectionBatchRow[] {
+  const rows: MOFKouSectionBatchRow[] = [];
+  for (const id of ids) {
+    const detail = sectionDetail(fiscalYear, id);
+    if (!detail) continue;
+    const rsByKey = new Map<string, string[]>();
+    for (const link of detail.rsLinks) {
+      const list = rsByKey.get(link.kouMokuKey) ?? [];
+      list.push(link.projectName);
+      rsByKey.set(link.kouMokuKey, list);
+    }
+    for (const item of detail.kouMokuItems) {
+      rows.push({
+        sectionName: item.sectionName,
+        subItemName: item.subItemName,
+        amount: item.amount,
+        rsProjectNames: rsByKey.get(item.key),
+      });
+    }
+  }
+  rows.sort((a, b) => b.amount - a.amount);
+  return rows;
+}
+
 /** 予算種別・所管を除いた「同じ項」の識別子。所管表記の変更をまたいで継続扱いにする（jikou/kou-mokuのidentityKeyと同じ考え方） */
 function sectionIdentity(row: {
   accountType: MOFKouMokuAccountType;
