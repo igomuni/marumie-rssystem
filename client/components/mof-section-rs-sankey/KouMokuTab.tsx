@@ -49,9 +49,13 @@ interface RsProjectResponse {
   rows?: RsProjectLinkRow[];
 }
 
-type Props =
+type Props = (
   | { mode: 'section'; fiscalYear: number; sectionId: string }
-  | { mode: 'project'; fiscalYear: number; budgetType: string; projectId: number };
+  | { mode: 'project'; fiscalYear: number; budgetType: string; projectId: number }
+) & {
+  /** 取得できた件数。他のタブと同じく見出しに件数を出すため、親へ伝える */
+  onCount?: (count: number) => void;
+};
 
 export function KouMokuTab(props: Props) {
   const [rows, setRows] = useState<Row[] | null>(null);
@@ -90,12 +94,14 @@ export function KouMokuTab(props: Props) {
             }))
             .sort((a, b) => b.amount - a.amount);
           setRows(items);
+          props.onCount?.(items.length);
         } else {
           const { rows: linkRows = [] } = data as RsProjectResponse;
           const items: Row[] = linkRows
             .map(l => ({ sectionName: l.sectionName, subItemName: l.subItemName, amount: l.rsAmount }))
             .sort((a, b) => b.amount - a.amount);
           setRows(items);
+          props.onCount?.(items.length);
         }
       })
       .catch(() => {

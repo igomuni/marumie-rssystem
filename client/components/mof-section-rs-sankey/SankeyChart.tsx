@@ -125,7 +125,17 @@ export function SankeyChart({
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   const dragged = useRef(false);
 
-  const related = useMemo(() => (selectedId ? relatedNodeIds(links, selectedId) : null), [selectedId, links]);
+  /**
+   * 選択が表示グラフ（nodes/links）に無いノード（TopN外の集約に畳まれ、
+   * サイドパネルの「目」タブ等からbrowse経由で選んだだけの実項・実RS事業）の
+   * ときは related を作らない。作ると selectedId が links 上で孤立ノード扱いになり、
+   * relatedNodeIds が「自分だけ」を返して、本来関連のはずの集約ノード・帯まで
+   * すべて非活性（ダーク→薄暗い）に見えてしまう
+   */
+  const related = useMemo(
+    () => (selectedId && nodes.some(n => n.id === selectedId) ? relatedNodeIds(links, selectedId) : null),
+    [selectedId, links, nodes]
+  );
 
   const hoveredRelated = useMemo(
     () => (hovered && (!selectedId || focusRelated) ? relatedNodeIds(links, hovered.id) : null),
@@ -342,13 +352,18 @@ export function SankeyChart({
     }
     return null;
   }, [selectedDetails]);
+  /** 「目」タブの件数。他のタブと同じく見出しに件数を出すため、KouMokuTab側の取得結果を持ち回す */
+  const [koumokuCount, setKoumokuCount] = useState<number | null>(null);
+  useEffect(() => {
+    setKoumokuCount(null);
+  }, [koumokuTabInfo]);
 
   const tabs = useMemo(
     () => [
       ...descendantColumnList.map(t => ({ id: t.column as string, label: MOF_SECTION_RS_COLUMN_LABELS[t.column], count: t.items.length })),
-      ...(koumokuTabInfo ? [{ id: 'koumoku', label: '目', count: undefined }] : []),
+      ...(koumokuTabInfo ? [{ id: 'koumoku', label: '目', count: koumokuCount ?? undefined }] : []),
     ],
-    [descendantColumnList, koumokuTabInfo]
+    [descendantColumnList, koumokuTabInfo, koumokuCount]
   );
   const [panelTab, setPanelTab] = useState<string | null>(null);
   const activeTab = tabs.some(t => t.id === panelTab) ? panelTab : (tabs[0]?.id ?? null);
@@ -766,6 +781,7 @@ export function SankeyChart({
                         {...(koumokuTabInfo.mode === 'section'
                           ? { mode: 'section', fiscalYear, sectionId: koumokuTabInfo.sectionId }
                           : { mode: 'project', fiscalYear, budgetType, projectId: koumokuTabInfo.projectId })}
+                        onCount={setKoumokuCount}
                       />
                     )}
                     {activeTab !== 'koumoku' && (
