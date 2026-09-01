@@ -290,29 +290,32 @@ export function SankeyChart({
     [browseNodes, browseLinks, selectedId]
   );
   /**
-   * rsStatus列は browse（TopNで絞る前の全項ツリー）に含まれない（RS事業の個別・集約は
-   * 表示のTopNに依存する構成のため）。項ノード選択時は表示グラフ（nodes/links）から
-   * 直接その項が繋がるRS事業/RS対象外を、RS事業ノード選択時は逆に繋がっている項を
-   * 拾う（他の列と同じ「関連ノードのタブ一覧」にするため）
+   * rsStatus列（項→RS事業）は、他の列と違って同じRS事業ノードが複数の項から
+   * 共有されることがある（1つの事業が複数の項に計上されるため）。browse上の
+   * ノード自身の value は「browseに最初に登場した項からの寄与額」でしかなく
+   * 複数項の合算ではないので、descendantsByColumn（ノードの value をそのまま使う）
+   * には任せられない。ここではエッジの value（=選択した項からの寄与額、または
+   * 選択したRS事業へのその項からの寄与額）を直接使い、図の集約ノード（「N事業」）を
+   * 経由せず browse（TopNで絞る前の全件）から実際の個別RS事業・項を展開して出す
    */
   const rsRelatedTab = useMemo(() => {
     if (!selectedId) return null;
     const column = (nodes.find(n => n.id === selectedId) ?? browseNodes.find(n => n.id === selectedId))?.details.column;
     if (column !== 'section' && column !== 'rsStatus') return null;
-    const nodeById = new Map(nodes.map(n => [n.id, n]));
-    const relatedIds =
-      column === 'section'
-        ? links.filter(l => l.source === selectedId).map(l => l.target)
-        : links.filter(l => l.target === selectedId).map(l => l.source);
-    const items = relatedIds
-      .map(id => nodeById.get(id))
-      .filter((n): n is MOFSectionRsNode => n !== undefined)
-      .sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+    const nodeById = new Map(browseNodes.map(n => [n.id, n]));
+    const relatedLinks =
+      column === 'section' ? browseLinks.filter(l => l.source === selectedId) : browseLinks.filter(l => l.target === selectedId);
+    const items: MOFSectionRsNode[] = [];
+    for (const l of relatedLinks) {
+      const node = nodeById.get(column === 'section' ? l.target : l.source);
+      if (node) items.push({ ...node, value: l.value });
+    }
+    items.sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
     if (items.length === 0) return null;
     return { column: (column === 'section' ? 'rsStatus' : 'section') as MOFSectionRsColumn, items };
-  }, [selectedId, nodes, links, browseNodes]);
+  }, [selectedId, nodes, browseNodes, browseLinks]);
   const descendantColumnList = useMemo(() => {
-    const list = MOF_SECTION_RS_COLUMNS.filter(c => descendantColumns.has(c)).map(column => ({
+    const list = MOF_SECTION_RS_COLUMNS.filter(c => c !== 'rsStatus' && descendantColumns.has(c)).map(column => ({
       column,
       items: descendantColumns.get(column) ?? [],
     }));
