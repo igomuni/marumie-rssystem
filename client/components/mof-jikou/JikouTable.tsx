@@ -140,11 +140,11 @@ export function JikouTable({
             <Fragment key={item.id}>
               <tr
                 onClick={() => onToggleExpand(isOpen ? null : item.id)}
-                className={`cursor-pointer border-t border-neutral-100 align-top hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900 ${
+                className={`cursor-pointer border-t border-neutral-100 align-middle hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900 ${
                   isOpen ? 'bg-neutral-50 dark:bg-neutral-900' : ''
                 }`}
               >
-                <td className="truncate px-2 py-1.5 align-middle text-neutral-500">
+                <td className="truncate px-2 py-1.5 text-neutral-500">
                   {/* 行全体の onClick と併存させつつ、キーボードでも展開できるようにする */}
                   <button
                     type="button"
@@ -160,7 +160,7 @@ export function JikouTable({
                   </button>
                   <BudgetTypeBadge budgetType={item.budgetType} />
                 </td>
-                <td className="truncate px-2 py-1.5 align-middle text-neutral-500">
+                <td className="truncate px-2 py-1.5 text-neutral-500">
                   <AccountBadge accountType={item.accountType} />
                 </td>
                 <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">

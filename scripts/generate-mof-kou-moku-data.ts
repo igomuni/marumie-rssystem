@@ -24,6 +24,11 @@
  *   デフォルト: 2017〜2026（10年度分）
  *
  * 出力: public/data/mof-kou-moku-{FISCAL_YEAR}.json（年度ごとに1ファイル）
+ *
+ * 目レベルの出典ページ番号は主データ（CSV）には無いため、別途Web帳票のXMLを
+ * スクレイピングして行単位で突合する（buildGeneralPageMap/buildSpecialPageMap）。
+ * CLAUDE.mdのレイヤー規約でscripts/はCSV処理に加えXML取得を明示的に許容している
+ * （generate-mof-jikou-data.ts と同じ位置づけ）ため、このファイルに置いている。
  */
 
 import * as fs from 'fs';
