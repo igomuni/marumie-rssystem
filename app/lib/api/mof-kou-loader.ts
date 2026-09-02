@@ -297,6 +297,10 @@ export interface MOFKouSectionBatchRow {
   subItemName: string;
   amount: number;
   rsProjectNames?: string[];
+  /** 目の出典ページ番号。突合できない場合は null */
+  page: number | null;
+  /** page が null のときは空文字列 */
+  sourceUrl: string;
 }
 
 /**
@@ -323,6 +327,8 @@ export function sectionDetailBatchRows(fiscalYear: number, ids: string[]): MOFKo
         subItemName: item.subItemName,
         amount: item.amount,
         rsProjectNames: rsByKey.get(item.key),
+        page: item.page,
+        sourceUrl: item.sourceUrl,
       });
     }
   }

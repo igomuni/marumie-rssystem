@@ -141,7 +141,9 @@ export function cellText(body: string): string {
  */
 export function parseTable(xml: string): { rows: ParsedRow[]; headerCols: Map<string, number> } {
   const rowMap = new Map<string, ParsedRow>();
-  const re = /<clm id="p(\d+)-(\d+)\.(\d+)-(\d+)\.(\d+)">([\s\S]*?)<\/clm>/g;
+  // id 属性の後に href 等の別属性が付くセルがある（決算帳票の所管・小計行が他ページへの
+  // リンクを持つ等）。id="..." の直後に他属性が来ても拾えるよう `[^>]*` で許容する
+  const re = /<clm id="p(\d+)-(\d+)\.(\d+)-(\d+)\.(\d+)"[^>]*>([\s\S]*?)<\/clm>/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(xml)) !== null) {
     const page = parseInt(m[1], 10);
@@ -164,7 +166,7 @@ export function parseTable(xml: string): { rows: ParsedRow[]; headerCols: Map<st
   const headerCols = new Map<string, number>();
   const headerMatch = xml.match(/<header>([\s\S]*?)<\/header>/);
   if (headerMatch) {
-    const hre = /<clm id="p\d+-\d+\.\d+-(\d+)\.\d+">([\s\S]*?)<\/clm>/g;
+    const hre = /<clm id="p\d+-\d+\.\d+-(\d+)\.\d+"[^>]*>([\s\S]*?)<\/clm>/g;
     let h: RegExpExecArray | null;
     while ((h = hre.exec(headerMatch[1])) !== null) {
       const label = cellText(h[2]).trim();

@@ -33,6 +33,7 @@ import {
 import type { LabelDensity } from '@/types/mof-hierarchy';
 import type { SankeyLink } from '@/types/sankey';
 import { ancestorsByColumn, descendantsByColumn, focusHierarchy, relatedNodeIds, rsStatusBreakdown } from '@/app/lib/mof-section-rs-focus';
+import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import { formatBudgetFromYen } from '@/client/lib/formatBudget';
 import { SankeyChartSearch } from './SankeyChartSearch';
 import { FilterFields } from './FilterFields';
@@ -72,6 +73,7 @@ export function SankeyChart({
   labelDensity = 'all',
   fiscalYear,
   budgetType,
+  rsYear,
 }: {
   /** 図の描画用（TopNで絞ってある） */
   nodes: MOFSectionRsNode[];
@@ -92,6 +94,8 @@ export function SankeyChart({
   /** 「目」タブの詳細取得（/api/mof-kou/detail, /api/mof-sankey/rs-project）に使う */
   fiscalYear: number;
   budgetType: string;
+  /** RS事業一覧の /sankey-svg リンクに使う（RS紐づけデータの対象年度。未生成の年度は null） */
+  rsYear: number | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewport, setViewport] = useState({ width: 1900, height: 900 });
@@ -712,7 +716,7 @@ export function SankeyChart({
         style={{ left: panelOpenWidth + 12 }}
       >
         <SankeyChartSearch
-          nodes={nodes}
+          nodes={browseNodes}
           onSelect={onSelect}
           filterOpen={filterOpen}
           onToggleFilter={onToggleFilterOpen}
@@ -788,6 +792,16 @@ export function SankeyChart({
                       {MOF_SECTION_RS_STATUS_LABELS[selectedDetails.rsLinked ? 'linked' : 'unlinked']}
                     </span>
                   )}
+                  {selectedDetails?.column === 'section' && selectedDetails.page != null && (
+                    <a
+                      href={selectedDetails.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-blue-600 underline hover:text-blue-800"
+                    >
+                      出典 p.{selectedDetails.page}
+                    </a>
+                  )}
                 </div>
               </div>
 
@@ -855,17 +869,38 @@ export function SankeyChart({
                       <div className="p-4 pt-1">
                         {relatedColumnList
                           .find(t => t.column === activeTab)
-                          ?.items.map(item => (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => onSelect(item.id)}
-                              className="flex w-full items-baseline justify-between gap-3 border-b border-gray-50 py-1.5 text-left hover:bg-gray-50"
-                            >
-                              <span className="truncate text-xs text-gray-700">{item.name}</span>
-                              <span className="shrink-0 text-[11px] tabular-nums text-gray-500">{formatBudgetFromYen(item.value ?? 0)}</span>
-                            </button>
-                          ))}
+                          ?.items.map(item => {
+                            const rsLink =
+                              activeTab === 'rsStatus' && rsYear !== null && item.details.projectId !== undefined
+                                ? sankeySvgProjectUrl(item.details.projectId, item.name ?? '', rsYear)
+                                : null;
+                            return (
+                              <div key={item.id} className="flex w-full items-baseline gap-1 border-b border-gray-50 py-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => onSelect(item.id)}
+                                  className="flex min-w-0 flex-1 items-baseline justify-between gap-3 text-left hover:bg-gray-50"
+                                >
+                                  <span className="truncate text-xs text-gray-700">{item.name}</span>
+                                  <span className="shrink-0 text-[11px] tabular-nums text-gray-500">
+                                    {formatBudgetFromYen(item.value ?? 0)}
+                                  </span>
+                                </button>
+                                {rsLink && (
+                                  <a
+                                    href={rsLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="/sankey-svgで開く"
+                                    onClick={e => e.stopPropagation()}
+                                    className="shrink-0 px-0.5 text-gray-400 hover:text-blue-600"
+                                  >
+                                    ↗
+                                  </a>
+                                )}
+                              </div>
+                            );
+                          })}
                       </div>
                     )}
                   </div>
