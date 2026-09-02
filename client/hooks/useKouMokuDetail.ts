@@ -26,6 +26,7 @@ export interface KouMokuRow {
 
 interface KouMokuLeafLike {
   key: string;
+  sectionName: string;
   subItemName: string;
   amount: number;
   page: number | null;
@@ -72,7 +73,10 @@ function fetchSectionRows(fiscalYear: number, sectionId: string): Promise<KouMok
       }
       return kouMokuItems
         .map(k => ({
-          subItemName: k.subItemName,
+          // 目名が空欄の項（予備費のように目を細分しない項が実データに存在する）は
+          // 項名にフォールバックする。項自体は既にサイドパネルのヘッダーに出ているが、
+          // フォールバックしないと一覧の行が空白のまま金額しか見えなくなるため
+          subItemName: k.subItemName || k.sectionName,
           amount: k.amount,
           rsProjectNames: rsByKey.get(k.key),
           page: k.page,
