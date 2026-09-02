@@ -229,6 +229,7 @@ function MOFSectionRsSankeyContent() {
         labelDensity={labelDensity}
         fiscalYear={metadata.fiscalYear}
         budgetType={metadata.budgetType}
+        rsYear={metadata.rsYear}
       />
 
       <div className="absolute right-3 top-3 z-30 flex items-start gap-2">

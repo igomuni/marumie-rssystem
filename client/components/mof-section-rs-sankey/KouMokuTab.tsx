@@ -41,7 +41,20 @@ export function KouMokuTab({ onCount, ...params }: Props) {
         <div key={`${i}-${r.subItemName}`} className="flex items-baseline justify-between gap-3 border-b border-gray-50 py-1.5">
           <div className="min-w-0">
             {r.sectionName && <div className="truncate text-[10px] text-gray-400">{r.sectionName}</div>}
-            <div className="truncate text-xs text-gray-700">{r.subItemName}</div>
+            {r.sourceUrl ? (
+              <a
+                href={r.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block truncate text-xs text-gray-700 underline hover:text-gray-900"
+              >
+                {r.subItemName}
+              </a>
+            ) : (
+              <div className="truncate text-xs text-gray-700" title={r.page === undefined ? undefined : '出典ページ不明'}>
+                {r.subItemName}
+              </div>
+            )}
             {r.rsProjectNames && r.rsProjectNames.length > 0 && (
               <div className="truncate text-[10px] text-emerald-600">→ {r.rsProjectNames.join('、')}</div>
             )}

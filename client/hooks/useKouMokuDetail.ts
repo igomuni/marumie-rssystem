@@ -18,12 +18,18 @@ export interface KouMokuRow {
   subItemName: string;
   amount: number;
   rsProjectNames?: string[];
+  /** 目の出典ページ番号。突合できない場合は null・無い場合は undefined（RS事業選択時の目一覧は未対応） */
+  page?: number | null;
+  /** page が無いときは空文字列・undefined */
+  sourceUrl?: string;
 }
 
 interface KouMokuLeafLike {
   key: string;
   subItemName: string;
   amount: number;
+  page: number | null;
+  sourceUrl: string;
 }
 
 interface RsLinkLike {
@@ -65,7 +71,13 @@ function fetchSectionRows(fiscalYear: number, sectionId: string): Promise<KouMok
         rsByKey.set(link.kouMokuKey, list);
       }
       return kouMokuItems
-        .map(k => ({ subItemName: k.subItemName, amount: k.amount, rsProjectNames: rsByKey.get(k.key) }))
+        .map(k => ({
+          subItemName: k.subItemName,
+          amount: k.amount,
+          rsProjectNames: rsByKey.get(k.key),
+          page: k.page,
+          sourceUrl: k.sourceUrl,
+        }))
         .sort((a, b) => b.amount - a.amount);
     });
 }

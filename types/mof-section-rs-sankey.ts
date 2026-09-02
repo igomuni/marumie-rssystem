@@ -71,6 +71,10 @@ export interface MOFSectionRsNodeDetails {
   mofKouSectionId?: string;
   /** 項ノード配下にRS紐づく目が1件でもあるか。section列のノードのみ持つ */
   rsLinked?: boolean;
+  /** 項自体の出典ページ番号（`MOFKouSectionSummary.page`）。section列のノードのみ持つ。突合できない場合は null */
+  page?: number | null;
+  /** page が null のときは空文字列。section列のノードのみ持つ */
+  sourceUrl?: string;
   /**
    * rsStatus列のノードの種別。'linked' は個別のRS事業ノード、'unlinked' は
    * RS対象外（紐づく目が無い分・紐づく目はあるが本年度額に届かない分）
