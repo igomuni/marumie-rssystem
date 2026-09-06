@@ -223,8 +223,16 @@ export function SankeyChart({
             return (
               <g
                 key={node.id}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isSelected}
                 data-testid={testId('mof-kou-sankey-node')}
                 data-pan-disabled="true"
+                onKeyDown={e => {
+                  if (e.key !== 'Enter' && e.key !== ' ') return;
+                  e.preventDefault();
+                  onSelect(selectedId === node.id ? null : node.id);
+                }}
                 onClick={e => {
                   if (dragged.current) return;
                   e.stopPropagation();

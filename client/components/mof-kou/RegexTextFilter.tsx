@@ -28,6 +28,7 @@ export function RegexTextFilter({ label, note, value, onChange, useRegex, onTogg
             value={value}
             onChange={e => onChange(e.target.value)}
             placeholder={useRegex ? '正規表現' : '部分一致'}
+            aria-label={label}
             aria-invalid={invalid}
             className={`w-full rounded border bg-white py-1 pl-2 pr-7 text-xs outline-none dark:bg-neutral-900 ${
               invalid ? 'border-red-400' : 'border-neutral-300 dark:border-neutral-700'

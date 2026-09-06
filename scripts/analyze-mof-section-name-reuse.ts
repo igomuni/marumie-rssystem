@@ -143,7 +143,11 @@ function main() {
     if (hasGap) {
       gapCount++;
       if (gapSamples.length < 15) {
-        const [orgScope, sectionName] = key.split('|', 2);
+        // orgScope自体が「|」区切り（accountType|ministry|org|subAccount）なので、
+        // 最後の区切りで分割しないとorgScopeが途中で切れる
+        const sep = key.lastIndexOf('|');
+        const orgScope = key.slice(0, sep);
+        const sectionName = key.slice(sep + 1);
         gapSamples.push(`  ${sectionName} [${orgScope}] 出現年=${sorted.join(',')}`);
       }
     }
