@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { sankeySvgProjectUrl } from '@/app/lib/subcontracts/links';
 import type { MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } from '@/types/mof-kou';
 import type { MOFJikouItem } from '@/types/mof-jikou';
@@ -42,6 +43,8 @@ export function createDefaultPanelGridStates(): PanelGridStates {
 
 interface Props {
   row: MOFKouSectionSummary;
+  /** 項単位サンキー（/mof-kou/[id]）へのリンクに使う会計年度 */
+  fiscalYear: number;
   onClose: () => void;
   detail: MOFKouSectionDetail | null;
   detailLoading: boolean;
@@ -74,6 +77,7 @@ function rateClass(rate: number | null | 'new'): string {
 
 export function KouSidePanel({
   row,
+  fiscalYear,
   onClose,
   detail,
   detailLoading,
@@ -126,6 +130,13 @@ export function KouSidePanel({
               </a>
             </>
           )}
+          {' ・ '}
+          <Link
+            href={`/mof-kou/${encodeURIComponent(row.id)}?year=${fiscalYear}`}
+            className="underline hover:text-neutral-700 dark:hover:text-neutral-300"
+          >
+            サンキーで見る
+          </Link>
         </p>
 
         <div className="mt-2 flex items-baseline gap-3">
