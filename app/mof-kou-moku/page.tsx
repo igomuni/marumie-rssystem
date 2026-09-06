@@ -72,8 +72,10 @@ const INITIAL_FILTERS: FilterSidebarState = {
   objective: [],
   fiscalLaw: [],
   economicNature: [],
-  nameQuery: '',
-  nameRegex: false,
+  sectionNameQuery: '',
+  sectionNameRegex: false,
+  itemNameQuery: '',
+  itemNameRegex: false,
   rsCountRange: EMPTY_RANGE,
   amountRange: EMPTY_RANGE,
   previousAmountRange: EMPTY_RANGE,
@@ -147,7 +149,6 @@ export default function MOFKouMokuPage() {
     setYear(next);
     setData(null);
     setPage(1);
-    setFilters(INITIAL_FILTERS);
     setSelected(null);
   }
 
@@ -307,8 +308,11 @@ export default function MOFKouMokuPage() {
   );
 
   // 上位の絞り込みで選択肢が再計算されるたびに、無効になった選択を落とす
-  // （FilterSidebar側での即時プルーンだと1テンポ古い選択肢を参照してしまうため）
+  // （FilterSidebar側での即時プルーンだと1テンポ古い選択肢を参照してしまうため）。
+  // 年度切り替え直後はdataが一瞬nullになり選択肢が空になるため、その間はプルーンしない
+  // （フィルタを年度をまたいで保持するため。空のまま実行すると全選択が誤って落ちる）
   useEffect(() => {
+    if (!data) return;
     setFilters(
       prev =>
         pruneInvalidSelections(prev, [
@@ -322,7 +326,7 @@ export default function MOFKouMokuPage() {
           ['economicNature', economicNatures],
         ]) ?? prev
     );
-  }, [ministries, organizations, subAccounts, majorExpenses, purposes, objectives, fiscalLaws, economicNatures]);
+  }, [data, ministries, organizations, subAccounts, majorExpenses, purposes, objectives, fiscalLaws, economicNatures]);
 
   /** その目に紐づくRS事業数（事業IDの重複除去件数） */
   function rsCountOf(item: MOFKouMokuItem): number {
@@ -355,8 +359,8 @@ export default function MOFKouMokuPage() {
       if (filters.objective.length > 0 && !filters.objective.includes(item.objectiveName)) return false;
       if (filters.fiscalLaw.length > 0 && !filters.fiscalLaw.includes(item.fiscalLawName)) return false;
       if (filters.economicNature.length > 0 && !filters.economicNature.includes(item.economicNatureName)) return false;
-      const haystack = `${item.sectionName}\n${item.subItemName}`;
-      if (!textMatches(haystack, filters.nameQuery.trim(), filters.nameRegex)) return false;
+      if (!textMatches(item.sectionName, filters.sectionNameQuery.trim(), filters.sectionNameRegex)) return false;
+      if (!textMatches(item.subItemName, filters.itemNameQuery.trim(), filters.itemNameRegex)) return false;
       if (!inRange(rsCountOf(item), filters.rsCountRange)) return false;
       if (!inRange(item.amount, filters.amountRange)) return false;
       if (!inRange(item.previousAmount, filters.previousAmountRange)) return false;
@@ -392,7 +396,8 @@ export default function MOFKouMokuPage() {
     objective.length > 0,
     fiscalLaw.length > 0,
     economicNature.length > 0,
-    filters.nameQuery !== '',
+    filters.sectionNameQuery !== '',
+    filters.itemNameQuery !== '',
     filters.rsCountRange[0] !== null || filters.rsCountRange[1] !== null,
     filters.amountRange[0] !== null || filters.amountRange[1] !== null,
     filters.previousAmountRange[0] !== null || filters.previousAmountRange[1] !== null,

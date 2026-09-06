@@ -83,8 +83,21 @@ function boundsOf(values: number[]): [number, number] {
 export default function MOFKouPage() {
   const [data, setData] = useState<MOFKouData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  /** 選択中の会計年度。null は「収録済みの最新年度」をAPIに任せる */
-  const [year, setYear] = useState<number | null>(null);
+  /**
+   * 選択中の会計年度。null は「収録済みの最新年度」をAPIに任せる。
+   * localStorageから同期的に読む（`usePersistedState`はハイドレーション後に反映されるため
+   * 使うと初回マウント時にnullで一度APIを叩いてしまう。年度はフェッチを起動する値なので
+   * 二重フェッチを避けるためここだけ自前にする）
+   */
+  const [year, setYear] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem('mof-kou:year');
+      return raw !== null ? (JSON.parse(raw) as number) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const [filters, setFilters] = useState<FilterSidebarState>(INITIAL_FILTERS);
   const [showFilters, setShowFilters] = useState(true);
@@ -121,6 +134,17 @@ export default function MOFKouPage() {
       cancelled = true;
     };
   }, [year]);
+
+  // 選んだ年度を覚えておく（項の詳細サンキーから戻ったときなどに初期値へ戻らないように）。
+  // year=null（初回マウント時、APIが最新年度を選ぶ）でも、確定した年度を保存しておく
+  useEffect(() => {
+    if (!data) return;
+    try {
+      localStorage.setItem('mof-kou:year', JSON.stringify(data.metadata.fiscalYear));
+    } catch {
+      // 保存できなくても致命的ではないので無視
+    }
+  }, [data]);
 
   function changeYear(next: number) {
     setYear(next);
@@ -488,6 +512,7 @@ export default function MOFKouPage() {
             </div>
             <KouSidePanel
               row={selectedRow}
+              fiscalYear={data.metadata.fiscalYear}
               onClose={() => setSelected(null)}
               detail={detail}
               detailLoading={detailLoading}
