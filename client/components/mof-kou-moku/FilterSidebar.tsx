@@ -42,8 +42,10 @@ export interface FilterSidebarState {
   objective: string[];
   fiscalLaw: string[];
   economicNature: string[];
-  nameQuery: string;
-  nameRegex: boolean;
+  sectionNameQuery: string;
+  sectionNameRegex: boolean;
+  itemNameQuery: string;
+  itemNameRegex: boolean;
   rsCountRange: NumRange;
   amountRange: NumRange;
   previousAmountRange: NumRange;
@@ -255,11 +257,19 @@ export function FilterSidebar({
         <hr className="border-neutral-200 dark:border-neutral-800" />
 
         <RegexTextFilter
-          label="項名・目名"
-          value={state.nameQuery}
-          onChange={v => onChange('nameQuery', v)}
-          useRegex={state.nameRegex}
-          onToggleRegex={v => onChange('nameRegex', v)}
+          label="項名"
+          value={state.sectionNameQuery}
+          onChange={v => onChange('sectionNameQuery', v)}
+          useRegex={state.sectionNameRegex}
+          onToggleRegex={v => onChange('sectionNameRegex', v)}
+        />
+
+        <RegexTextFilter
+          label="目名"
+          value={state.itemNameQuery}
+          onChange={v => onChange('itemNameQuery', v)}
+          useRegex={state.itemNameRegex}
+          onToggleRegex={v => onChange('itemNameRegex', v)}
         />
 
         <hr className="border-neutral-200 dark:border-neutral-800" />
