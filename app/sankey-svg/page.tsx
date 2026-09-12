@@ -14,7 +14,7 @@ import {
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { MinimapOverlay } from '@/client/components/SankeySvg/MinimapOverlay';
-import { TopNSliders } from '@/client/components/SankeySvg/TopNSliders';
+import { RangeWindowRow } from '@/client/components/SankeySvg/RangeWindowRows';
 import { FontSizeControls } from '@/client/components/SankeySvg/FontSizeControls';
 import { useRepeatPress } from '@/client/components/SankeySvg/useRepeatPress';
 import { useBaseFontPx } from '@/client/hooks/useBaseFontPx';
@@ -155,6 +155,13 @@ const TOOLTIP_META_FONT_PX_DEFAULT = 10;
 // フォントスケールの基準値（baseFontPx ÷ FONT_SCALE_REFERENCE_PX で全フォントを比例拡縮）。
 // 実際の scaleFont 生成は app/lib/font-scale.ts（Pure ヘルパー、他ページと共有）に委譲。
 const BASE_FONT_PX_DEFAULT = 12;
+// 事業・支出先の既定表示件数。50だと下位が1〜5pxに潰れて太さ（金額比例）が読めないため30に絞る
+const TOP_N_DEFAULT = 30;
+// レイアウトの縦予算の倍率。1より大きくすると図が縦に伸びてバーが太くなり（比率は線形のまま）、
+// 初期表示は幅基準で上端アンカー、はみ出しはパン/スクロールで見る。1で従来の全体フィット。
+// 1.5だと下部の集約ノード（その他の事業・支出先）が既定ビューで完全に見切れて規模感を失うため、
+// 集約の上部が視界に入る 1.3 に抑える
+const THICKNESS_BOOST = 1.3;
 const BASE_FONT_PX_MIN = 8;
 const BASE_FONT_PX_MAX = 24;
 // サイドパネルの幅定数（既定/最小/最大/ビューポート予約）は client/hooks/useSidePanel.ts に一元化
@@ -318,8 +325,8 @@ export default function RealDataSankeyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [topMinistry, setTopMinistry] = useState(37);
-  const [topProject, setTopProject] = useState(50);
-  const [topRecipient, setTopRecipient] = useState(50);
+  const [topProject, setTopProject] = useState(TOP_N_DEFAULT);
+  const [topRecipient, setTopRecipient] = useState(TOP_N_DEFAULT);
   const [recipientOffset, setRecipientOffset] = useState(0);
   const [projectOffset, setProjectOffset] = useState(0);
   const [offsetTarget, setOffsetTarget] = useState<'recipient' | 'project'>('project');
@@ -331,7 +338,6 @@ export default function RealDataSankeyPage() {
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showSettings, setShowSettings] = useState(false);
-  const [showFontControls, setShowFontControls] = useState(false);
   const [baseFontPx, setBaseFontPx] = useBaseFontPx(
     // 旧実装が既定値も無条件保存していたため、v2 キーへ移行（明示設定のみ引き継ぐ）
     'sankey-base-font-px-v2', BASE_FONT_PX_DEFAULT, BASE_FONT_PX_MIN, BASE_FONT_PX_MAX,
@@ -356,7 +362,9 @@ export default function RealDataSankeyPage() {
   const [zoomInputValue, setZoomInputValue] = useState('');
   const [isEditingOffset, setIsEditingOffset] = useState(false);
   const [offsetInputValue, setOffsetInputValue] = useState('');
-  const [showTopNSliders, setShowTopNSliders] = useState(true);
+  // 設定パネルを開いたらパネル自体へフォーカスし、Escape で確実に閉じられるようにする
+  const settingsPanelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => { if (showSettings) settingsPanelRef.current?.focus(); }, [showSettings]);
   const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   // 左サイドパネル（ノード詳細）の chrome 状態は useSidePanel に集約。
@@ -448,6 +456,19 @@ export default function RealDataSankeyPage() {
   // スマホ横（コンパクト幅かつ横長）: オフセットコントロールをサイドパネルでスライドさせる
   const isLandscapeCompact = isCompactWidth && svgWidth > svgHeight;
 
+  // デスクトップの統合パネルはバックドロップを置かず、外側 mousedown で閉じる
+  // （開いたままでも前後ページング等を操作できるようにするため。狭幅⋮はバックドロップ方式のまま）
+  useEffect(() => {
+    if (!showSettings || isCompactWidth) return;
+    const onDown = (e: MouseEvent) => {
+      if (offsetControlRef.current && !offsetControlRef.current.contains(e.target as Node)) {
+        setShowSettings(false);
+      }
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [showSettings, isCompactWidth]);
+
   // 左サイドパネル（ノード詳細）の chrome 状態。effectiveWidth は svgWidth に対する
   // ビューポートクランプ込み（旧: minPanelWidthForViewport/maxPanelWidthForViewport 計算と同一式）
   const leftSidePanel = useSidePanel({ side: 'left', viewportWidth: svgWidth });
@@ -537,7 +558,7 @@ export default function RealDataSankeyPage() {
       // Pre-update prev refs so reset effects don't fire for URL-restored values
       prevOffsetTargetRef.current = parsed.offsetTarget ?? 'project';
       prevProjectSortByRef.current = parsed.projectSortBy ?? 'budget';
-      prevTopProjectRef.current = parsed.topProject ?? 50;
+      prevTopProjectRef.current = parsed.topProject ?? TOP_N_DEFAULT;
       setSelectedNodeId(parsed.selectedNodeId ?? null);
       setPinnedProjectId(parsed.pinnedProjectId ?? null);
       setPinnedRecipientId(parsed.pinnedRecipientId ?? null);
@@ -546,8 +567,8 @@ export default function RealDataSankeyPage() {
       setOffsetTarget(parsed.offsetTarget ?? 'project');
       setProjectOffset(parsed.projectOffset ?? 0);
       setTopMinistry(parsed.topMinistry ?? 37);
-      setTopProject(parsed.topProject ?? 50);
-      setTopRecipient(parsed.topRecipient ?? 50);
+      setTopProject(parsed.topProject ?? TOP_N_DEFAULT);
+      setTopRecipient(parsed.topRecipient ?? TOP_N_DEFAULT);
       setShowLabels(parsed.showLabels ?? true);
       setShowAggRecipient(parsed.showAggRecipient ?? true);
       setShowAggProject(parsed.showAggProject ?? true);
@@ -626,8 +647,8 @@ export default function RealDataSankeyPage() {
     if (offsetTarget === 'recipient') p.set('ot', 'r');
     if (projectOffset !== 0) p.set('po', String(projectOffset));
     if (topMinistry !== 37) p.set('tm', String(topMinistry));
-    if (topProject !== 50) p.set('tp', String(topProject));
-    if (topRecipient !== 50) p.set('tr', String(topRecipient));
+    if (topProject !== TOP_N_DEFAULT) p.set('tp', String(topProject));
+    if (topRecipient !== TOP_N_DEFAULT) p.set('tr', String(topRecipient));
     if (!showLabels) p.set('sl', '0');
     if (!showAggRecipient) p.set('ar', '0');
     if (!showAggProject) p.set('ap', '0');
@@ -1141,11 +1162,18 @@ export default function RealDataSankeyPage() {
     pendingHistoryAction.current = 'replace';
   }, [searchQuery]);
 
+  // 表示範囲行のスライダー操作でモードを自動切替するとき、切替に伴うオフセットリセットで
+  // いま設定した値が消えないように1回だけ抑制するフラグ
+  const skipOffsetResetRef = useRef(false);
   const prevOffsetTargetRef = useRef(offsetTarget);
   useEffect(() => {
     if (prevOffsetTargetRef.current !== offsetTarget) {
       prevOffsetTargetRef.current = offsetTarget;
       pendingHistoryAction.current = 'replace';
+      if (skipOffsetResetRef.current) {
+        skipOffsetResetRef.current = false;
+        return;
+      }
       setRecipientOffset(0);
       setProjectOffset(0);
     }
@@ -1221,8 +1249,6 @@ export default function RealDataSankeyPage() {
   const SEARCH_RESULT_SWATCH_PX = scaleSize(8);
   const FILTER_CLEAR_BUTTON_PX = scaleSize(32);
   const FILTER_CLEAR_ICON_PX = scaleSize(18);
-  const FONT_CONTROL_BUTTON_PX = 32;
-  const FONT_CONTROL_ICON_PX = 18;
   const mapLabelFontPx = MAP_LABEL_FONT_PX;
   const mapLabelSlotPx = MAP_LABEL_SLOT_PX;
   const mapLabelVisibleMinHPx = MAP_LABEL_VISIBLE_MIN_H_PX;
@@ -1530,10 +1556,14 @@ export default function RealDataSankeyPage() {
       const cW = container.clientWidth;
       const reserve = searchBoxReserveRef.current;
       const availH = container.clientHeight - reserve;
-      const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
+      // 縦予算ブースト時は「1画面の THICKNESS_BOOST 倍」を基準にフィットさせる
+      // （ズーム値は従来と同水準に保たれ、横幅は不変。縦のはみ出しはパンで見る）
+      const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH * THICKNESS_BOOST);
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: 0, y: reserve + Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) });
+      // 収まるときは従来どおり中央寄せ（上限 FIT_TOP_PAD_PX）、縦にはみ出すときも
+      // 列ヘッダーぶんの上パディングを確保する
+      setPan({ x: 0, y: reserve + ((availH - totalH * k) >= 0 ? Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) : fitTopPadPxRef.current) });
     } else {
       setZoom(1);
       setBaseZoom(1);
@@ -1549,10 +1579,14 @@ export default function RealDataSankeyPage() {
       const cW = container.clientWidth;
       const reserve = searchBoxReserveRef.current;
       const availH = container.clientHeight - reserve;
-      const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
+      // 縦予算ブースト時は「1画面の THICKNESS_BOOST 倍」を基準にフィットさせる
+      // （ズーム値は従来と同水準に保たれ、横幅は不変。縦のはみ出しはパンで見る）
+      const { k, totalH } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH * THICKNESS_BOOST);
       setZoom(k);
       setBaseZoom(k);
-      setPan({ x: 0, y: reserve + Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) });
+      // 収まるときは従来どおり中央寄せ（上限 FIT_TOP_PAD_PX）、縦にはみ出すときも
+      // 列ヘッダーぶんの上パディングを確保する
+      setPan({ x: 0, y: reserve + ((availH - totalH * k) >= 0 ? Math.min((availH - totalH * k) / 2, fitTopPadPxRef.current) : fitTopPadPxRef.current) });
     } else {
       setZoom(1);
       setBaseZoom(1);
@@ -1753,16 +1787,18 @@ export default function RealDataSankeyPage() {
 
   const layout = useMemo(() => {
     if (!filtered) return null;
+    // 縦予算を THICKNESS_BOOST 倍して高さ配分（ky）を増やす＝バーを太くする。横は不変
+    const boostedH = MARGIN.top + MARGIN.bottom + (svgHeight - MARGIN.top - MARGIN.bottom) * THICKNESS_BOOST;
     // fitZoom を求めるための第1パス（ギャップなし）
-    const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight);
-    const availH = Math.max(100, svgHeight - SEARCH_BOX_RESERVE);
+    const noGap = computeLayout(filtered.nodes, filtered.edges, svgWidth, boostedH);
+    const availH = Math.max(100, (svgHeight - SEARCH_BOX_RESERVE) * THICKNESS_BOOST);
     const fitZoom = Math.max(0.1, Math.min(10,
       Math.min(svgWidth / (MARGIN.left + noGap.contentW), availH / (MARGIN.top + noGap.contentH)) * 0.9
     ));
     // Horizontal rendering is screen-fixed; compute x layout once from the fit scale.
     const extraRecipientGapSVG = MAX_RECIPIENT_GAP_PX / fitZoom;
     const extraMinistryGapSVG  = MAX_MINISTRY_GAP_PX  / fitZoom;
-    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, svgHeight, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
+    const result = computeLayout(filtered.nodes, filtered.edges, svgWidth, boostedH, NODE_PAD, extraRecipientGapSVG, extraMinistryGapSVG);
     layoutRef.current = { contentW: result.contentW, contentH: result.contentH, nodes: result.nodes };
     return result;
   }, [filtered, svgWidth, svgHeight, SEARCH_BOX_RESERVE]);
@@ -2759,11 +2795,12 @@ export default function RealDataSankeyPage() {
           const cW = container.clientWidth;
           const reserve = searchBoxReserveRef.current;
           const availH = container.clientHeight - reserve;
-          const { k: fitK } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH);
+          // 縦予算ブースト時は「1画面の THICKNESS_BOOST 倍」を基準にフィットさせる（他の fitZoom 呼び出しと同様）
+          const { k: fitK } = fitZoomWithShifts(l.nodes, l.contentW, l.contentH, cW, availH * THICKNESS_BOOST);
           const restoredTotalH = MARGIN.top + l.contentH + calcShiftExtraH(l.nodes, k, fitK);
           setBaseZoom(fitK);
           setZoom(k);
-          setPan({ x: 0, y: reserve + Math.min((availH - restoredTotalH * k) / 2, fitTopPadPxRef.current) });
+          setPan({ x: 0, y: reserve + ((availH - restoredTotalH * k) >= 0 ? Math.min((availH - restoredTotalH * k) / 2, fitTopPadPxRef.current) : fitTopPadPxRef.current) });
         } else {
           setZoom(k); setBaseZoom(k); setPan({ x: 0, y: searchBoxReserveRef.current });
         }
@@ -3029,7 +3066,6 @@ export default function RealDataSankeyPage() {
   // これがないと文字拡大時に検索ボックスが設定ボタンを覆い、タップで開けなくなる。
   const searchMaxWidth = `calc(100vw - ${searchLeftOffset}px - 64px)`;
   const minimapLeft = selectedNodeId !== null ? (isPanelCollapsed ? 26 : effectiveSidePanelWidth + 8) : 8;
-  const fontControlLeft = minimapLeft + (showMinimap ? MINIMAP_W + 22 : 48);
   // 年度変更（トップ中央セレクトとスマホ幅の設定ダイアログで共用）
   const handleYearChange = (value: '2024' | '2025') => {
     pendingHistoryAction.current = 'replace';
@@ -3038,18 +3074,6 @@ export default function RealDataSankeyPage() {
       : null;
     setYear(value);
   };
-
-  // 事業・支出先 TopN スライダー（デスクトップはオフセットパネル内、スマホ幅では設定ダイアログ内に表示）
-  const topNSlidersFragment = (
-    <TopNSliders
-      topProject={topProject}
-      topRecipient={topRecipient}
-      setTopProject={setTopProject}
-      setTopRecipient={setTopRecipient}
-      markReplace={markHistoryReplace}
-      metaFontPx={META_FONT_PX}
-    />
-  );
 
   // 基準フォントサイズ調整（デスクトップは左下フローティング、スマホ幅では設定ダイアログ内に表示）
   const fontSizeControlsFragment = (
@@ -3066,11 +3090,65 @@ export default function RealDataSankeyPage() {
     />
   );
 
+  // 表示オプション（チェックボックス群・並び順）。デスクトップの統合パネルと狭幅の⋮ダイアログで共有
+  const displayOptionsFragment = (
+    <>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+        <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+        <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
+      </label>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+        <input type="checkbox" checked={showAggProject} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggProject(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+        <span style={{ color: '#555' }}>事業の集約ノードを表示</span>
+      </label>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+        <input type="checkbox" checked={showAggRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggRecipient(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+        <span style={{ color: '#555' }}>支出先の集約ノードを表示</span>
+      </label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ color: '#555' }}>事業ノードの並び順:</span>
+        <select value={projectSortBy} onChange={e => { pendingHistoryAction.current = 'replace'; setProjectSortBy(e.target.value as 'budget' | 'spending'); }} style={{ fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }} data-pan-disabled>
+          <option value="budget">予算額</option>
+          <option value="spending">支出額</option>
+        </select>
+      </div>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+        <input type="checkbox" checked={scaleBudgetToVisible} onChange={e => { pendingHistoryAction.current = 'replace'; setScaleBudgetToVisible(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+        <span style={{ color: '#555' }}>事業の予算額を支出額に合わせて調整</span>
+      </label>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+        <input type="checkbox" checked={autoFocusRelated} onChange={e => { pendingHistoryAction.current = 'replace'; setAutoFocusRelated(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+        <span style={{ color: '#555' }}>選択時に関連ノードのみ表示</span>
+      </label>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+        <input type="checkbox" checked={filterOnMinistryClick} onChange={e => { pendingHistoryAction.current = 'replace'; setFilterOnMinistryClick(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
+        <span style={{ color: '#555' }}>省庁ノード選択でフィルタ</span>
+      </label>
+    </>
+  );
+
+  // 右上クラスタ共通のボタン外観。YearSelect / PageNavMenu（h-9・rounded-lg・border-black/10・shadow-md）に揃える
+  const clusterButtonStyle = {
+    height: 36,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    border: '1px solid rgba(0,0,0,0.1)',
+    background: 'rgba(255,255,255,0.9)',
+    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+    cursor: 'pointer',
+  } as const;
+
   /**
-   * TopN・オフセットの操作パネル。狭幅では画面下部、通常は右上クラスタの左端に置く。
-   * 右上は［ツール - 表示設定 - 年度 - メニュー］の並びで rs-vis と揃える。
+   * 表示範囲・設定まわりのUI一式。
+   * - cornerBlock: 通常幅の左下に置く［‹｜対象セレクト＋状態表示｜›］ブロック。状態表示クリックで
+   *   統合設定パネル（表示範囲・文字サイズ・表示オプション）が上方向に開く。
+   *   右上は他ページと同じ［年度・ページ切替］だけにするため、設定の入口を左下（ズーム群の対角）に集約した。
+   * - bottomBar: 狭幅の画面下部クイック操作（従来どおり）
+   * - rangeRows: 「表示範囲」行（窓の位置スライダー＋件数の上下矢印）。パネルと狭幅⋮ダイアログで共有
    */
-  const offsetControlsBlock = filtered ? (() => {
+  const rangeUI = filtered ? (() => {
         // Recipient offset mode
         const maxRecipOffset = Math.max(0, filtered.totalRecipientCount - topRecipient);
         const clampedOffset = Math.min(recipientOffset, maxRecipOffset);
@@ -3094,14 +3172,21 @@ export default function RealDataSankeyPage() {
           pendingHistoryAction.current = 'replace';
           if (isProjectMode) setProjectOffset(v); else setRecipientOffset(v);
         };
-        return (
-          <div ref={offsetControlRef} style={ isCompactWidth
-            ? { position: 'absolute', bottom: 12, left: isLandscapeCompact && selectedNodeId !== null && !isPanelCollapsed ? effectiveSidePanelWidth + 8 : 8, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)', transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }
-            // 通常幅では右上クラスタの子として並べる（位置はクラスタ側が持つ）
-            : { display: 'flex', flexDirection: 'column', alignItems: 'flex-end' } }>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 8, rowGap: 4, background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: isCompactWidth ? 6 : '6px 6px 0 6px', border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
-            {/* Row 1: オフセットスライダー（2列スパン） */}
-            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}>
+        const stepOffset = (delta: number) => {
+          pendingHistoryAction.current = 'replace';
+          pendingFocusId.current = null;
+          if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
+          else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
+        };
+        const PAGING_DEFS = [
+          [-1, 'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z', '前へ'],
+          [1,  'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z', '次へ'],
+        ] as [number, string, string][];
+        // オフセット操作の1行（対象コンボ・開始位置・スライダー・件数・リセット）。
+        // 狭幅カードとデスクトップのパネルで共有する。ページングは狭幅のみ行内に含める
+        // （デスクトップはパネル外の常駐ボタンが担う。testId の重複を避ける意図もある）
+        const renderOffsetRow = (withPaging: boolean, sliderWidth: number) => (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               {/* オフセット対象コンボボックス */}
               <select
                 data-testid={testId('offset-target-select')}
@@ -3134,22 +3219,15 @@ export default function RealDataSankeyPage() {
                   >{activeRangeStart}</button>
                 )}
                 <span style={{ color: '#999', fontSize: META_FONT_PX }}>〜{activeRangeEnd}</span>
-                <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: 60 }} />
+                <input type="range" min={0} max={activeMax} value={activeOffset} onChange={e => { pendingFocusId.current = null; setActiveOffset(Number(e.target.value)); }} style={{ width: sliderWidth }} />
                 {/* 総件数表示は幅を取るためスマホ幅では非表示 */}
                 {!isCompactWidth && <span style={{ color: '#999', fontSize: META_FONT_PX }}>/{activeTotalCount}件</span>}
+                {withPaging && (
                 <div style={{ display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center' }}>
-                  {([
-                    [-1, 'M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z', '前へ'],
-                    [1,  'M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z', '次へ'],
-                  ] as [number, string, string][]).map(([delta, path, title]) => (
+                  {PAGING_DEFS.map(([delta, path, title]) => (
                     <button key={delta} title={title} aria-label={title}
                       data-testid={testId(delta > 0 ? 'recipient-offset-next' : 'recipient-offset-prev')}
-                      {...offsetRepeat(() => {
-                        pendingHistoryAction.current = 'replace';
-                        pendingFocusId.current = null;
-                        if (isProjectMode) setProjectOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
-                        else setRecipientOffset(prev => Math.max(0, Math.min(activeMax, prev + delta)));
-                      }, { stopPropagation: true })}
+                      {...offsetRepeat(() => stepOffset(delta), { stopPropagation: true })}
                       onClick={(e) => {
                         if (e.detail === 0) {
                           setActiveOffset(Math.max(0, Math.min(activeMax, activeOffset + delta)));
@@ -3161,6 +3239,7 @@ export default function RealDataSankeyPage() {
                     </button>
                   ))}
                 </div>
+                )}
                 {/* Material Icons: vertical_align_top — オフセットリセット */}
                 <button onClick={e => { e.preventDefault(); setActiveOffset(0); }} title="先頭へリセット" aria-label="先頭へリセット"
                   onContextMenu={(e) => e.preventDefault()}
@@ -3170,24 +3249,98 @@ export default function RealDataSankeyPage() {
                 </button>
               </label>
             </div>
-            {/* Row 2: 事業・支出先 TopN スライダー（スマホ幅では設定ダイアログへ移動） */}
-            {!isCompactWidth && showTopNSliders && topNSlidersFragment}
-          </div>
-          {/* トグルボタン（パネル外・下部）— スマホ幅では設定ダイアログにTopNを移すため非表示 */}
-          {!isCompactWidth && (
-          <button
-            onClick={() => setShowTopNSliders(s => !s)}
-            title={showTopNSliders ? 'TopN設定 を隠す' : 'TopN設定 を表示'}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.92)', borderTop: 'none', borderLeft: '1px solid #e0e0e0', borderRight: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', borderRadius: '0 0 4px 4px', cursor: 'pointer', padding: '0 2px', marginTop: -1, userSelect: 'none' }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 24 24" fill="#bbb">
-              <path d={showTopNSliders ? 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z' : 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'} />
-            </svg>
-          </button>
-          )}
+        );
+
+        // 「表示範囲」行（窓の位置スライダー＋件数の上下矢印）。1行で位置と件数の両方を操作できる
+        const rangeRows = (
+          <>
+            <RangeWindowRow
+              label="事業" total={filtered.totalProjectCount}
+              topN={topProject} setTopN={setTopProject}
+              offset={clampedProjOffset} maxOffset={maxProjOffset}
+              onOffsetChange={v => {
+                pendingHistoryAction.current = 'replace';
+                pendingFocusId.current = null;
+                // 触った行にモードを自動追従（対象コンボの代替）。切替時のリセットは1回抑制する
+                if (offsetTarget !== 'project') { skipOffsetResetRef.current = true; setOffsetTarget('project'); }
+                setProjectOffset(v);
+              }}
+              markReplace={markHistoryReplace} metaFontPx={META_FONT_PX}
+            />
+            <RangeWindowRow
+              // 母集合はモード非依存の recipientUniverseCount（支出先モードでの総数）に固定し、
+              // 事業モードとの往復でスライダーが伸び縮みしないようにする
+              label="支出先" total={filtered.recipientUniverseCount}
+              topN={topRecipient} setTopN={setTopRecipient}
+              offset={Math.min(recipientOffset, Math.max(0, filtered.recipientUniverseCount - topRecipient))}
+              maxOffset={Math.max(0, filtered.recipientUniverseCount - topRecipient)}
+              onOffsetChange={v => {
+                pendingHistoryAction.current = 'replace';
+                pendingFocusId.current = null;
+                if (offsetTarget !== 'recipient') { skipOffsetResetRef.current = true; setOffsetTarget('recipient'); }
+                setRecipientOffset(v);
+              }}
+              markReplace={markHistoryReplace} metaFontPx={META_FONT_PX}
+            />
+          </>
+        );
+
+        // 狭幅: 従来どおり画面下部のクイック操作カード（アクティブ対象のページング込み）
+        const bottomBar = (
+          <div ref={offsetControlRef} style={{ position: 'absolute', bottom: 12, left: isLandscapeCompact && selectedNodeId !== null && !isPanelCollapsed ? effectiveSidePanelWidth + 8 : 8, zIndex: 30, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', maxWidth: 'calc(100vw - 16px)', transition: isResizingSidePanel ? 'none' : 'left 0.2s ease' }}>
+            <div style={{ background: 'rgba(255,255,255,0.92)', padding: '5px 10px', borderRadius: 6, border: '1px solid #e0e0e0', fontSize: CONTROL_SMALL_FONT_PX }}>
+              {renderOffsetRow(true, 60)}
+            </div>
           </div>
         );
+
+        // 通常幅: 右上に常設する表示範囲カード（操作系）。設定は左下の settingsCorner に分離する
+        const rangeCard = (
+          <div
+            data-pan-disabled="true"
+            style={{ ...clusterButtonStyle, height: 'auto', cursor: 'default', flexDirection: 'column', alignItems: 'stretch', justifyContent: 'flex-start', gap: 2, padding: '3px 8px', width: 280, fontSize: CONTROL_SMALL_FONT_PX }}
+          >
+            {rangeRows}
+          </div>
+        );
+
+        return { rangeRows, bottomBar, rangeCard };
       })() : null;
+
+  // 設定（文字サイズ・表示オプション）の入口。左下（ズーム群の対角）に置き、
+  // 操作系（右上の表示範囲カード）と分離する
+  const settingsCorner = (
+    <div
+      ref={offsetControlRef}
+      data-pan-disabled="true"
+      style={{ position: 'absolute', left: minimapLeft + (showMinimap ? MINIMAP_W + 22 : 48), bottom: showMinimap ? 8 : 16, zIndex: 30, display: 'flex', alignItems: 'flex-end', transition: 'left 0.2s ease' }}
+    >
+      <button
+        data-testid={testId('range-panel-toggle')}
+        onClick={() => setShowSettings(s => !s)}
+        aria-label="表示設定を開く"
+        aria-expanded={showSettings}
+        aria-haspopup="dialog"
+        aria-controls="sankey-topn-settings"
+        title="表示設定（文字サイズ・表示オプション）"
+        style={{ ...clusterButtonStyle, width: 36, padding: 0, background: showSettings ? '#fff' : 'rgba(255,255,255,0.9)' }}
+      >
+        {/* Material Icons: settings */}
+        <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill={showSettings ? '#333' : '#666'}><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm112-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z"/></svg>
+      </button>
+      {showSettings && (
+        <div id="sankey-topn-settings" ref={settingsPanelRef} role="dialog" aria-label="表示設定" tabIndex={-1}
+          onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setShowSettings(false); } }}
+          style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX, minWidth: 300, maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333', outline: 'none' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
+            <span style={{ color: '#555', fontWeight: 600 }}>文字サイズ</span>
+            {fontSizeControlsFragment}
+          </div>
+          {displayOptionsFragment}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div
@@ -3533,19 +3686,16 @@ export default function RealDataSankeyPage() {
                 const amountLine = i === 2 && total != null
                   ? `${formatYen(total)} / ${formatYen(projectSpendingTotal)}`
                   : total != null ? formatYen(total) : '';
-                const labelBlockH = Math.round((amountLine ? 36 : 20) * fontScale);
+                const labelBlockH = Math.round((amountLine ? 31 : 17) * fontScale);
                 const topNode = topNodeByCol[i];
                 const topNodeShift = topNode ? (nodeShiftInfo.get(topNode.id) ?? { cumShift: 0, topShift: 0 }) : null;
                 const topNodeScreenY = topNode
                   ? pan.y + (MARGIN.top + topNode.y0 + (topNodeShift?.cumShift ?? 0) + (topNodeShift?.topShift ?? 0)) * zoom
                   : pan.y + MARGIN.top * zoom;
-                // ラベルの上限位置は検索ボックスの実測下端に合わせる。
-                // 静的なSEARCH_BOX_RESERVE(モバイル92/デスクトップ56)だと
-                // モバイルで一律に下げ過ぎるため、実際の検索ボックス高さに追従させる。
-                // フィルタ展開時も列ヘッダーの位置を固定する。
-                // searchBoxBottom はフィルタパネル込みの実測値なので、その実高を差し引いて
-                // 「フィルタ非展開時の下端」を基準にする（フィルタパネルは zIndex で前面に重なる）。
-                const top = Math.max(searchBoxBottom - filterPanelHeight + 4, topNodeScreenY - labelBlockH - 8);
+                // ラベルは常に図の上端（列の最上ノードの少し上）に追随する。上限では止めず、
+                // 図を上へドラッグしたときは他のノードと同じように検索ボックスの下・画面外へ
+                // 潜り込ませる（検索ボックス等の前面UIより低い zIndex なので自然に隠れる）
+                const top = topNodeScreenY - labelBlockH - 2;
                 return (
                   <div
                     key={i}
@@ -3555,8 +3705,8 @@ export default function RealDataSankeyPage() {
                       transform: 'translateX(-50%)',
                       textAlign: 'center', fontSize: COLUMN_LABEL_FONT_PX, color: '#999',
                       whiteSpace: 'nowrap', userSelect: 'none', cursor: 'default',
-                      zIndex: 8, lineHeight: 1.4,
-                      background: 'rgba(255,255,255,0.82)', padding: '2px 8px', borderRadius: 4,
+                      zIndex: 8, lineHeight: 1.2,
+                      background: 'rgba(255,255,255,0.82)', padding: '1px 6px', borderRadius: 4,
                     }}
                     onMouseEnter={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); setHoveredColIndex(i); }}
                     onMouseMove={(e) => { const r = containerRef.current?.getBoundingClientRect(); if (r) setMousePos({ x: e.clientX - r.left, y: e.clientY - r.top }); }}
@@ -3584,100 +3734,8 @@ export default function RealDataSankeyPage() {
             />
             )}
 
-            {/* Font size controls（スマホ幅では設定ダイアログへ移動するため非表示） */}
-            {!isCompactWidth && (
-            <div
-              data-pan-disabled="true"
-              style={{
-                position: 'absolute',
-                left: fontControlLeft,
-                bottom: showMinimap ? 8 : 16,
-                zIndex: 12,
-                display: 'flex',
-                alignItems: 'flex-end',
-                gap: 6,
-                transition: 'left 0.2s ease',
-              }}
-            >
-              {!showFontControls && (
-                <button
-                  type="button"
-                  title="フォントサイズ設定"
-                  aria-label="フォントサイズ設定"
-                  aria-expanded={showFontControls}
-                  onClick={(e) => { e.stopPropagation(); setShowFontControls(true); }}
-                  style={{
-                    width: FONT_CONTROL_BUTTON_PX,
-                    height: FONT_CONTROL_BUTTON_PX,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: 'none',
-                    borderRadius: 6,
-                    background: 'rgba(255,255,255,0.7)',
-                    color: '#888',
-                    cursor: 'pointer',
-                    padding: 0,
-                  }}
-                >
-                  {/* Material Icons: format_size */}
-                  <svg xmlns="http://www.w3.org/2000/svg" height={FONT_CONTROL_ICON_PX} width={FONT_CONTROL_ICON_PX} viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 4v3h5v12h3V7h5V4H9Zm-6 8h3v7h3v-7h3V9H3v3Z" />
-                  </svg>
-                </button>
-              )}
-              {showFontControls && (
-                <div
-                  role="group"
-                  aria-label="基準フォントサイズ"
-                  style={{
-                    position: 'relative',
-                    boxSizing: 'border-box',
-                    background: 'rgba(255,255,255,0.95)',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '6px 6px 0 6px',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
-                    padding: '6px 10px',
-                    color: '#333',
-                    minHeight: FONT_CONTROL_BUTTON_PX,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {fontSizeControlsFragment}
-                  <button
-                    type="button"
-                    title="フォントサイズ設定を閉じる"
-                    aria-label="フォントサイズ設定を閉じる"
-                    onClick={(e) => { e.stopPropagation(); setShowFontControls(false); }}
-                    style={{
-                      position: 'absolute',
-                      bottom: -1,
-                      right: -13,
-                      zIndex: 12,
-                      background: 'rgba(255,255,255,0.92)',
-                      borderTop: '1px solid #e0e0e0',
-                      borderRight: '1px solid #e0e0e0',
-                      borderBottom: '1px solid #e0e0e0',
-                      borderLeft: 'none',
-                      borderRadius: '0 4px 4px 0',
-                      width: 14,
-                      height: 20,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      padding: 0,
-                    }}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px" fill="#aaa">
-                      <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z" />
-                    </svg>
-                  </button>
-                </div>
-              )}
-            </div>
-            )}
+            {/* 設定（文字サイズ・表示オプション）の入口（左下・ズーム群の対角） */}
+            {!isCompactWidth && settingsCorner}
 
           {/* DOM tooltip — link hover */}
           {hoveredLink && !hoveredNode && !suppressHoverPopup && (() => {
@@ -4452,7 +4510,7 @@ export default function RealDataSankeyPage() {
                   );
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={accountDropdownRef}>
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>会計</span>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: '3.5em', whiteSpace: 'nowrap', flexShrink: 0 }}>会計</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
                         <button type="button" ref={accountButtonRef}
                           onClick={() => {
@@ -4507,7 +4565,7 @@ export default function RealDataSankeyPage() {
                   );
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} ref={ministryDropdownRef}>
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>省庁</span>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: '3.5em', whiteSpace: 'nowrap', flexShrink: 0 }}>省庁</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
                         <button type="button" ref={ministryButtonRef}
                           onClick={() => {
@@ -4561,7 +4619,7 @@ export default function RealDataSankeyPage() {
                   }
                   return (
                     <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>{label}</span>
+                      <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: '3.5em', whiteSpace: 'nowrap', flexShrink: 0 }}>{label}</span>
                       <div style={{ flex: 1, minWidth: 0, position: 'relative', display: 'flex' }}>
                         <input
                           data-testid={testId(`filter-${key}-name`)}
@@ -4596,7 +4654,7 @@ export default function RealDataSankeyPage() {
                     setFilterSubcontract(c <= 1 ? '' : String(c));
                   };
                   return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 44 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 'calc(3.5em + 4px)' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', userSelect: 'none', flexShrink: 0 }}
                         title="オンにすると、直接支出先または再委託先のどちらかに名前がマッチする事業を残します（支出先ノード自体は隠しません）">
                         <input
@@ -4652,7 +4710,7 @@ export default function RealDataSankeyPage() {
                   { label: '支出', minText: filterMinSpendingText, maxText: filterMaxSpendingText, setMin: setFilterMinSpendingText, setMax: setFilterMaxSpendingText },
                 ] as const).map(({ label, minText, maxText, setMin, setMax }) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0 }}>{label}</span>
+                    <span style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: '3.5em', whiteSpace: 'nowrap', flexShrink: 0 }}>{label}</span>
                     <input type="text" value={minText} onChange={e => setMin(e.target.value)}
                       placeholder="例: 100億、50万"
                       style={{ flex: 1, minWidth: 0, fontSize: CONTROL_SMALL_FONT_PX, border: `1px solid ${parseAmountToYen(minText) !== null || !minText ? '#ddd' : '#e53935'}`, borderRadius: 4, padding: '3px 5px', background: '#fafafa', color: '#333', outline: 'none' }}
@@ -4683,7 +4741,7 @@ export default function RealDataSankeyPage() {
                   };
                   return (
                     <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span title={title} style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: 40, flexShrink: 0, cursor: 'help' }}>{label}</span>
+                      <span title={title} style={{ fontSize: CONTROL_SMALL_FONT_PX, color: '#555', width: '3.5em', whiteSpace: 'nowrap', flexShrink: 0, cursor: 'help' }}>{label}</span>
                       <input type="text" inputMode="numeric" value={range.min}
                         onChange={e => { pendingHistoryAction.current = 'replace'; set({ ...range, min: e.target.value }); }}
                         placeholder="下限 0"
@@ -4805,15 +4863,12 @@ export default function RealDataSankeyPage() {
       </div>
 
 
-      {/* 狭幅では TopN・オフセット操作を画面下部へ（クラスタには入れない） */}
-      {isCompactWidth && offsetControlsBlock}
+      {/* 狭幅では表示範囲のクイック操作を画面下部へ（クラスタには入れない） */}
+      {isCompactWidth && rangeUI?.bottomBar}
 
-      {/* 右上クラスタ: ［ツール - 探索履歴 - 表示設定 - 年度 - ページ切替］。
-          rs-vis の並び（ツール → 年度 → メニュー）に合わせつつ、marumie 固有の
-          探索履歴と表示設定(⋮)を年度コンボの左に置く。
-          AIチャットパネル展開時は rightControlsOffset ぶん左へ退避する。
-          スマホ幅では表示設定とページ切替だけを残す（ツール・履歴・年度は
-          それぞれ画面下部と設定ダイアログへ移す）。 */}
+      {/* 右上クラスタ: ［表示範囲カード（操作系） - 年度 - ページ切替］。
+          設定（文字サイズ・表示オプション）は左下の settingsCorner に分離。狭幅のみ⋮を設定の入口として残す。
+          AIチャットパネル展開時は rightControlsOffset ぶん左へ退避する。 */}
       <div
         data-pan-disabled="true"
         style={{
@@ -4822,7 +4877,7 @@ export default function RealDataSankeyPage() {
           transition: isResizingAiPanel ? 'none' : 'right 0.2s ease',
         }}
       >
-        {!isCompactWidth && offsetControlsBlock}
+        {!isCompactWidth && rangeUI?.rangeCard}
 
         {/* 探索履歴・発見メモ（IndexedDB のみ・サーバ送信なし）。
             公開ミラーでは NEXT_PUBLIC_FEATURE_EXPLORATION_HISTORY 未設定で非表示 */}
@@ -4835,7 +4890,8 @@ export default function RealDataSankeyPage() {
           />
         )}
 
-        {/* 表示設定(⋮)。ダイアログはこの要素を基準に開く */}
+        {/* 表示設定(⋮)。狭幅のみ（通常幅は表示範囲ブロックの統合パネルに集約） */}
+        {isCompactWidth && (
         <div style={{ position: 'relative', flexShrink: 0 }}>
         <button
           onClick={() => setShowSettings(s => !s)}
@@ -4843,17 +4899,17 @@ export default function RealDataSankeyPage() {
           aria-expanded={showSettings}
           aria-controls="sankey-topn-settings"
           aria-haspopup="dialog"
-          style={{ width: 32, height: 32, border: 'none', borderRadius: 6, background: showSettings ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ ...clusterButtonStyle, width: 36, padding: 0, background: showSettings ? '#fff' : 'rgba(255,255,255,0.9)' }}
         >
           {/* Material Icons: more_vert */}
-          <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill={showSettings ? '#333' : '#888'}>
+          <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill={showSettings ? '#333' : '#666'}>
             <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
           </svg>
         </button>
         {showSettings && (
           <>
             <div style={{ position: 'fixed', inset: 0, zIndex: 18 }} onMouseDown={() => setShowSettings(false)} />
-            <div id="sankey-topn-settings" role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') setShowSettings(false); }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, minWidth: 240, maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333' }}>
+            <div id="sankey-topn-settings" ref={settingsPanelRef} role="dialog" aria-label="表示設定" tabIndex={-1} onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setShowSettings(false); } }} style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, zIndex: 19, background: '#fff', border: '1px solid #ddd', borderRadius: 6, padding: '12px 16px', boxShadow: '0 4px 12px rgba(0,0,0,0.12)', fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, minWidth: 240, maxWidth: 'calc(100vw - 24px)', display: 'flex', flexDirection: 'column', gap: 10, colorScheme: 'light', color: '#333', outline: 'none' }}>
               {/* スマホ幅: 検索ボックスに隠れるため移動した年度選択 */}
               {isCompactWidth && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
@@ -4870,11 +4926,11 @@ export default function RealDataSankeyPage() {
                   </select>
                 </div>
               )}
-              {/* スマホ幅: オフセットパネルから移動したTopNスライダー */}
+              {/* スマホ幅: 表示範囲（窓の位置スライダー＋件数の上下矢印） */}
               {isCompactWidth && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
-                  <span style={{ color: '#555', fontWeight: 600 }}>表示件数（TopN）</span>
-                  {topNSlidersFragment}
+                  <span style={{ color: '#555', fontWeight: 600 }}>表示範囲（スライダー＝位置、矢印＝件数）</span>
+                  {rangeUI?.rangeRows}
                 </div>
               )}
               {/* スマホ幅: 左下から移動した基準フォントサイズ調整 */}
@@ -4884,41 +4940,12 @@ export default function RealDataSankeyPage() {
                   {fontSizeControlsFragment}
                 </div>
               )}
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={showLabels} onChange={e => { pendingHistoryAction.current = 'replace'; setShowLabels(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>すべてのノードラベルを表示</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={showAggProject} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggProject(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>事業の集約ノードを表示</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={showAggRecipient} onChange={e => { pendingHistoryAction.current = 'replace'; setShowAggRecipient(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>支出先の集約ノードを表示</span>
-              </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ color: '#555' }}>事業ノードの並び順:</span>
-                <select value={projectSortBy} onChange={e => { pendingHistoryAction.current = 'replace'; setProjectSortBy(e.target.value as 'budget' | 'spending'); }} style={{ fontSize: CONTROL_SMALL_FONT_PX_DEFAULT, padding: '2px 4px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }} data-pan-disabled>
-                  <option value="budget">予算額</option>
-                  <option value="spending">支出額</option>
-                </select>
-              </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={scaleBudgetToVisible} onChange={e => { pendingHistoryAction.current = 'replace'; setScaleBudgetToVisible(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>事業の予算額を支出額に合わせて調整</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={autoFocusRelated} onChange={e => { pendingHistoryAction.current = 'replace'; setAutoFocusRelated(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>選択時に関連ノードのみ表示</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                <input type="checkbox" checked={filterOnMinistryClick} onChange={e => { pendingHistoryAction.current = 'replace'; setFilterOnMinistryClick(e.target.checked); }} style={{ width: 14, height: 14, cursor: 'pointer' }} />
-                <span style={{ color: '#555' }}>省庁ノード選択でフィルタ</span>
-              </label>
+              {displayOptionsFragment}
             </div>
           </>
         )}
         </div>
+        )}
 
         {/* 年度切替（rs-vis の並びに合わせて、ツール類の右・メニューの左）。
             スマホ幅では検索ボックスに隠れるため設定ダイアログ側に置く */}
