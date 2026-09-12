@@ -332,6 +332,13 @@ export function SankeyChart({
     [selectedNode, browseNodes, selectedId]
   );
   const selectedDetails = selectedPanelNode?.details as MOFSectionRsNode['details'] | undefined;
+  /** RS事業ノードの/sankey-svgリンク（RS事業一覧の行と同じヘルパー・同じ年度で該当事業をピンする） */
+  const selectedRsSvgUrl = useMemo(() => {
+    if (selectedDetails?.column !== 'rsStatus' || selectedDetails.projectId === undefined || rsYear === null || !selectedPanelNode?.name) {
+      return null;
+    }
+    return sankeySvgProjectUrl(selectedDetails.projectId, selectedPanelNode.name, rsYear);
+  }, [selectedDetails, selectedPanelNode, rsYear]);
 
   const descendantColumns = useMemo(
     () => (selectedId ? descendantsByColumn(browseNodes, browseLinks, selectedId) : new Map<MOFSectionRsColumn, MOFSectionRsNode[]>()),
@@ -800,6 +807,16 @@ export function SankeyChart({
                       className="text-[11px] text-blue-600 underline hover:text-blue-800"
                     >
                       出典 p.{selectedDetails.page}
+                    </a>
+                  )}
+                  {selectedRsSvgUrl && (
+                    <a
+                      href={selectedRsSvgUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-blue-600 underline hover:text-blue-800"
+                    >
+                      /sankey-svgで開く
                     </a>
                   )}
                 </div>
