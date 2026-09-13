@@ -60,10 +60,16 @@ const ZOOM_MAX_MULTIPLIER = 30;
 
 const NODE_COLORS = { general: '#2d7d46', special: '#8ec9a8', project: '#4db870', aggregate: '#9aa0a6' } as const;
 
-const money = (v: number) =>
-  v >= 1e12 ? `${(v / 1e12).toFixed(2)}兆円`
-    : v >= 1e8 ? `${(v / 1e8).toFixed(1)}億円`
-      : `${Math.round(v / 1e4).toLocaleString()}万円`;
+// マイナス額は符号を保ったまま億/兆判定する（絶対値で閾値比較しないと万円表示に
+// 落ちてしまう）。1万円未満は0万円に丸めて消えるのを避け、素の円で表示する
+// （client/components/mof-jikou/format.ts の formatYen と同じ考え方）
+const money = (v: number) => {
+  const abs = Math.abs(v);
+  if (abs >= 1e12) return `${(v / 1e12).toFixed(2)}兆円`;
+  if (abs >= 1e8) return `${(v / 1e8).toFixed(1)}億円`;
+  if (abs >= 1e4) return `${Math.round(v / 1e4).toLocaleString()}万円`;
+  return `${v.toLocaleString()}円`;
+};
 // /sankey-svg の `name.length > 40 ? slice(0,40)+'…' : name` と同じ考え方
 const trim = (s: string, n = NAME_MAX_CHARS) => (s.length > n ? `${s.slice(0, n)}…` : s);
 
@@ -109,7 +115,16 @@ export interface RangeWindow { topN: number; offset: number }
 function windowSlice<T>(ranked: T[], w: RangeWindow) {
   const maxOffset = Math.max(0, ranked.length - w.topN);
   const offset = Math.max(0, Math.min(w.offset, maxOffset));
-  return { shown: ranked.slice(offset, offset + w.topN), offset, maxOffset, total: ranked.length };
+  // 集約対象は窓より後ろ（値が小さい側）の tail のみ。窓より前（オフセットで
+  // 飛ばした値が大きい側）は単純に非表示にする（集約しない）。/sankey-svg の
+  // tailRecipients = sortedRecips.slice(offset + topN) と同じ設計。ここを
+  // 「窓に含まれない全件」にすると、オフセットを進めるたびに元々見えていた
+  // 大きい値の項目まで集約ノードに巻き込まれ、値が跳ね上がって見える不具合になる
+  return {
+    shown: ranked.slice(offset, offset + w.topN),
+    tail: ranked.slice(offset + w.topN),
+    offset, maxOffset, total: ranked.length,
+  };
 }
 
 interface Filters {
@@ -147,7 +162,7 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
   const rankedSections = [...keptSections].sort((a, b) => b.amount - a.amount);
   const sectionRange = windowSlice(rankedSections, sectionWindow);
   const sectionsTotal = rankedSections.reduce((a, s) => a + s.amount, 0);
-  const sectionShownTotal = sectionRange.shown.reduce((a, s) => a + s.amount, 0);
+  const sectionTailTotal = sectionRange.tail.reduce((a, s) => a + s.amount, 0);
 
   const keptProjects = data.projects.filter(p =>
     projectNameMatch(p.name) &&
@@ -156,23 +171,23 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
   const rankedProjects = [...keptProjects].sort((a, b) => b.initialBudget - a.initialBudget);
   const projectRange = windowSlice(rankedProjects, projectWindow);
   const projectsTotal = rankedProjects.reduce((a, p) => a + p.initialBudget, 0);
-  const projectShownTotal = projectRange.shown.reduce((a, p) => a + p.initialBudget, 0);
+  const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.initialBudget, 0);
 
   const left: DisplayNode[] = sectionRange.shown
     .map((s): DisplayNode => ({ id: s.id, name: s.name, value: s.amount, side: 'left', kind: 'section', section: s }));
-  if (sectionRange.total > sectionRange.shown.length) {
-    left.push({ id: OTHER_SECTIONS, name: `その他の項（${sectionRange.total - sectionRange.shown.length}件）`, value: sectionsTotal - sectionShownTotal, side: 'left', kind: 'other-sections' });
+  if (sectionRange.tail.length > 0) {
+    left.push({ id: OTHER_SECTIONS, name: `その他の項（${sectionRange.tail.length}件）`, value: sectionTailTotal, side: 'left', kind: 'other-sections' });
   }
   const right: DisplayNode[] = projectRange.shown
     .map((p): DisplayNode => ({ id: p.id, name: p.name, value: p.initialBudget, side: 'right', kind: 'project', project: p }));
-  if (projectRange.total > projectRange.shown.length) {
-    right.push({ id: OTHER_PROJECTS, name: `その他のRS事業（${projectRange.total - projectRange.shown.length}件）`, value: projectsTotal - projectShownTotal, side: 'right', kind: 'other-projects' });
+  if (projectRange.tail.length > 0) {
+    right.push({ id: OTHER_PROJECTS, name: `その他のRS事業（${projectRange.tail.length}件）`, value: projectTailTotal, side: 'right', kind: 'other-projects' });
   }
 
-  // 「その他」集約ノードの詳細パネル用: 表示ウィンドウの外に出た項・事業そのもの
-  // （窓の前後どちらに位置していたかを問わず、シンプルに「表示されなかったもの」として列挙する）
-  const hiddenSections = rankedSections.filter(s => !sectionRange.shown.includes(s)).map(s => ({ name: s.name, value: s.amount }));
-  const hiddenProjects = rankedProjects.filter(p => !projectRange.shown.includes(p)).map(p => ({ name: p.name, value: p.initialBudget }));
+  // 「その他」集約ノードの詳細パネル用: 窓より後ろ（tail）に出た項・事業そのもの。
+  // 窓より前（オフセットで飛ばした側）は集約に含めない（windowSlice参照）
+  const hiddenSections = sectionRange.tail.map(s => ({ name: s.name, value: s.amount }));
+  const hiddenProjects = projectRange.tail.map(p => ({ name: p.name, value: p.initialBudget }));
 
   return {
     left, right, hiddenSections, hiddenProjects,
