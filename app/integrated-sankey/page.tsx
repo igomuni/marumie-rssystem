@@ -23,6 +23,8 @@ import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/clie
 import { RangeWindowRow } from '@/client/components/SankeySvg/RangeWindowRows';
 import { parseAmountToYen } from '@/app/lib/format/yen';
 import { getAccountBadgeStyle } from '@/app/lib/account-badge';
+import { BudgetTypeBadge } from '@/client/components/mof-kou/Badge';
+import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
 import type {
   IntegratedGraph,
   IntegratedItemEdge,
@@ -72,6 +74,16 @@ const money = (v: number) => {
 };
 // /sankey-svg の `name.length > 40 ? slice(0,40)+'…' : name` と同じ考え方
 const trim = (s: string, n = NAME_MAX_CHARS) => (s.length > n ? `${s.slice(0, n)}…` : s);
+
+/** RS側の予算種別表記（「第N次補正予算」）をMOF側表記（「補正予算（第N号）」）へ変換する。
+ * `BudgetTypeBadge`（mof-kou-moku等と共有）がMOF表記前提のため（対応関係は
+ * scripts/generate-mof-rs-kou-moku-linkage.ts の resolveMofBudgetType と同じ） */
+function toMofBudgetType(rsBudgetType: string): MOFBudgetType {
+  const m = /^第(\d+)次補正予算$/.exec(rsBudgetType);
+  if (m) { const n = Number(m[1]); if (n >= 1 && n <= 4) return revisedBudgetType(n as MOFRevisionNumber); }
+  if (rsBudgetType === '当初予算' || rsBudgetType === '暫定予算' || rsBudgetType === '決算') return rsBudgetType;
+  return '当初予算';
+}
 
 const SUPPORTED_YEARS = [2025, 2024] as const;
 type SupportedYear = (typeof SUPPORTED_YEARS)[number];
@@ -847,7 +859,7 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
           <span style={{ fontSize: 11, color: '#666' }}>{section.ministry}{section.organization ? ` / ${section.organization}` : ''}{section.subAccount ? ` / ${section.subAccount}` : ''}</span>
         </>}
       />
-      <DetailTabs tabs={[{ label: '目一覧', count: itemEdges.length }, { label: 'RS事業一覧', count: projectTotals.size }]} active={tab} onChange={setTab} />
+      <DetailTabs tabs={[{ label: '目', count: itemEdges.length }, { label: 'RS事業', count: projectTotals.size }]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
           [...itemEdges].sort((a, b) => b.value - a.value).slice(0, 200).map(e => (
@@ -902,9 +914,9 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
         </>}
       />
       <DetailTabs tabs={[
-        { label: '予算執行一覧', count: project.budgetBreakdown.length },
+        { label: '予算執行', count: project.budgetBreakdown.length },
         { label: '予算サマリ' },
-        { label: '目一覧', count: project.budgetItems.length },
+        { label: '目', count: project.budgetItems.length },
       ]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
@@ -913,7 +925,11 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
           project.budgetBreakdown.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>予算執行レコードがありません</p> : (
             project.budgetBreakdown.map((i, n) => (
               <div key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`} style={listButtonStyle}>
-                <span style={listNameStyle}>{i.subItem || i.item}<span style={{ color: '#aaa' }}> / {i.budgetType}（{i.fiscalYear}年度）</span></span>
+                <span style={{ ...listNameStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />
+                  {i.subItem || i.item}
+                  <span style={{ color: '#aaa' }}>（{i.fiscalYear}年度）</span>
+                </span>
                 <span style={listValueStyle}>{i.accountCategory} / {i.account} / {i.item} / {money(i.amount)}</span>
               </div>
             ))

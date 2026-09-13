@@ -84,7 +84,7 @@ test('列見出しに列ごとの合計金額が表示される', async ({ page 
   await expect(canvas.getByText('548.61兆円', { exact: true })).toBeVisible();
 });
 
-test('MOF項を選択すると左パネルに目一覧・RS事業一覧タブとバッジ付きヘッダーが出る', async ({ page }) => {
+test('MOF項を選択すると左パネルに目・RS事業タブとバッジ付きヘッダーが出る', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/integrated-sankey');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
@@ -99,14 +99,14 @@ test('MOF項を選択すると左パネルに目一覧・RS事業一覧タブと
   await expect(detail.getByText('本年度額', { exact: true })).toBeVisible();
   await expect(detail.getByText('前年度額', { exact: true })).toBeVisible();
   await expect(detail.getByText('項', { exact: true })).toBeVisible();
-  await expect(detail.getByRole('button', { name: '目一覧' })).toBeVisible();
-  await expect(detail.getByRole('button', { name: 'RS事業一覧' })).toBeVisible();
+  await expect(detail.getByRole('button', { name: '目', exact: false }).first()).toBeVisible();
+  await expect(detail.getByRole('button', { name: 'RS事業', exact: false })).toBeVisible();
 
   await detail.getByLabel('閉じる（選択解除）').click();
   await expect(detail).toBeHidden();
 });
 
-test('RS事業を選択すると予算執行一覧・目一覧タブが出て、MOF未接続項目も確認できる', async ({ page, request }) => {
+test('RS事業を選択すると予算執行・目タブが出て、MOF未接続項目も確認できる', async ({ page, request }) => {
   const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
   const withUnlinked = graph.projects.find((p: { budgetItems: { connected: boolean }[] }) => p.budgetItems.some(i => !i.connected));
   expect(withUnlinked, 'MOF未接続の歳出予算項目を持つRS事業が見つからない').toBeTruthy();
@@ -121,9 +121,10 @@ test('RS事業を選択すると予算執行一覧・目一覧タブが出て、
   await expect(detail.getByText('予算額', { exact: true })).toBeVisible();
   await expect(detail.getByText('支出額', { exact: true })).toBeVisible();
   await expect(detail.getByText('事業', { exact: true })).toBeVisible();
-  await expect(detail.getByRole('button', { name: '予算執行一覧' })).toBeVisible();
-  await expect(detail.getByRole('button', { name: '目一覧' })).toBeVisible();
-  await detail.getByRole('button', { name: '目一覧' }).click();
+  await expect(detail.getByRole('button', { name: '予算執行', exact: false })).toBeVisible();
+  await expect(detail.getByRole('button', { name: '予算サマリ', exact: false })).toBeVisible();
+  await expect(detail.getByRole('button', { name: '目', exact: false })).toBeVisible();
+  await detail.getByRole('button', { name: '目', exact: false }).click();
   await expect(detail.getByText('MOF接続済み', { exact: true }).first()).toBeVisible();
 });
 
