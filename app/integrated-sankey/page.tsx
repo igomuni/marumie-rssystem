@@ -24,7 +24,7 @@ import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/clie
 import { RangeWindowRow } from '@/client/components/SankeySvg/RangeWindowRows';
 import { parseAmountToYen } from '@/app/lib/format/yen';
 import { getAccountBadgeStyle } from '@/app/lib/account-badge';
-import { BudgetTypeBadge, Badge as MofBadge } from '@/client/components/mof-kou/Badge';
+import { BudgetTypeBadge, Badge as MofBadge, OutlineBadge } from '@/client/components/mof-kou/Badge';
 import { classifyAccountCategory } from '@/app/lib/account-badge';
 import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
 import {
@@ -95,6 +95,18 @@ function toMofBudgetType(rsBudgetType: string): MOFBudgetType {
   if (m) { const n = Number(m[1]); if (n >= 1 && n <= 4) return revisedBudgetType(n as MOFRevisionNumber); }
   if (rsBudgetType === '当初予算' || rsBudgetType === '暫定予算' || rsBudgetType === '決算') return rsBudgetType;
   return '当初予算';
+}
+
+/** RS側の予算種別のうち「前年度から繰越し」「予備費等N」はMOFの予算種別
+ * （当初/補正/暫定/決算）に対応しない値なので `toMofBudgetType` で丸めず、
+ * 独自の色でバッジ表示する（MOFの配色空間と混同しないよう別の色を使う）。
+ * 対応が無い理由: これらの行は所管・項・目が空でMOF側と突合できない
+ * （scripts/generate-mof-rs-kou-moku-linkage.ts の resolveMofBudgetType 参照） */
+function rsOnlyBudgetTypeBadge(rsBudgetType: string): { label: string; color: string } | null {
+  if (rsBudgetType === '前年度から繰越し') return { label: '繰越', color: '#2196f3' };
+  const m = /^予備費等(\d+)$/.exec(rsBudgetType);
+  if (m) return { label: `予備費${m[1]}`, color: '#009688' };
+  return null;
 }
 
 const SUPPORTED_YEARS = [2025, 2024] as const;
@@ -936,16 +948,21 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
               const accBadge = getAccountBadgeStyle(category);
               // 会計区分が一般のときは「会計」列が常に「一般会計」で自明なので表示しない
               const accountText = category === 'general' ? null : i.account;
+              // 前年度から繰越し・予備費等Nは所管・項・目が空のことが多い
+              // （MOF側と突合できない行のため）。名前が取れない場合は予算種別を代わりに出す
+              const rsOnlyBadge = rsOnlyBudgetTypeBadge(i.budgetType);
               return (
                 <ListRow key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`}
                   badges={<>
-                    <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />
+                    {rsOnlyBadge
+                      ? <OutlineBadge label={rsOnlyBadge.label} color={rsOnlyBadge.color} />
+                      : <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />}
                     {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
                   </>}
-                  name={i.subItem || i.item} amount={money(i.amount)}
+                  name={i.subItem || i.item || i.note || i.budgetType || '（内訳なし）'} amount={money(i.amount)}
                   meta={<>
                     <div>{[accountText, i.item].filter(Boolean).join(' / ')}</div>
-                    {i.note.trim() && <div>補足: {i.note}</div>}
+                    {i.note.trim() && (i.subItem || i.item) && <div>補足: {i.note}</div>}
                   </>}
                 />
               );
