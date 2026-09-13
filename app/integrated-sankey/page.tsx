@@ -6,8 +6,8 @@
  * 描画の約束（docs/integrated-sankey-graph-model.md）:
  * - 帯の太さとノード高は金額に線形比例する。平方根スケールを使わない
  * - 帯はノードの縦方向へ順に積み上げる。ノード中心へ集約しない
- * - viewBox は内容の実寸に合わせる。初期表示で必ず全体が収まる
- * - 左右の列は同じ帯集合を共有するので、列の合計高は必ず一致する
+ * - 横幅は固定し、Zoom は金額に比例する縦寸法だけを変える
+ * - 左右の帯の合計高は一致する。ラベル用の余白は列ごとに確保する
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -30,10 +30,9 @@ const LABEL_GUTTER = 300;
 const COL_LEFT_X = LABEL_GUTTER + 20;
 const COL_RIGHT_X = CANVAS_W - LABEL_GUTTER - 20 - NODE_W;
 const COL_H = 860;
-const PAD_TOP = 110; // 左上カード・右上クラスタの下に列見出しが出るだけの余白
+const PAD_TOP = 110; // 操作クラスタの下に列見出しを置く余白
 const PAD_BOTTOM = 28;
-const MIN_NODE_H = 1.5; // 0だと消えてしまうので下限だけ置く。比例関係は保つ
-const LABEL_MIN_H = 9; // これ未満のノードはラベルを省く（重なり防止）
+const LABEL_MIN_H = 0; // 小さいノードも縦間隔を確保してラベルを表示する
 const VALUE_LABEL_MIN_H = 15;
 
 // ── 配色 ──
@@ -69,7 +68,7 @@ type DisplayNode = {
   project?: IntegratedProjectNode;
 };
 type PlacedNode = DisplayNode & { x: number; y: number; h: number };
-/** 描画上の1本の帯。同じ項・同じ相手・同じ状態の目エッジを束ねる（内訳は members に残す） */
+/** 描画上の1本の帯。目の接続を一件ずつ保持する。 */
 type RenderEdge = {
   id: string;
   source: string;
@@ -154,22 +153,11 @@ function buildView(
   const targetOf = (e: IntegratedItemEdge) =>
     !e.target.startsWith('project:') ? e.target : shownProjectIds.has(e.target) ? e.target : OTHER_PROJECTS;
 
-  // 同じ (source, target, status) の目エッジを1本の帯へ束ねる
-  const bundles = new Map<string, RenderEdge>();
-  for (const e of data.edges) {
+  // 目ごとの配線を保持する。表示外ノードへ接続する場合も束ねない。
+  const edges: RenderEdge[] = data.edges.flatMap(e => {
     const source = sourceOf(e);
-    if (!source) continue;
-    const target = targetOf(e);
-    const id = `${source}|${target}|${e.status}`;
-    const found = bundles.get(id);
-    if (found) {
-      found.value += e.value;
-      found.members.push(e);
-    } else {
-      bundles.set(id, { id, source, target, value: e.value, status: e.status, members: [e] });
-    }
-  }
-  const edges = [...bundles.values()];
+    return source ? [{ id: e.id, source, target: targetOf(e), value: e.value, status: e.status, members: [e] }] : [];
+  });
 
   const outTotals = new Map<string, number>();
   const inTotals = new Map<string, number>();
@@ -221,7 +209,18 @@ function buildView(
 
 type ViewModel = ReturnType<typeof buildView>;
 
-function buildLayout(view: ViewModel) {
+function fitZoom(view: ViewModel) {
+  let low = 0.1;
+  let high = 1;
+  for (let i = 0; i < 24; i++) {
+    const mid = (low + high) / 2;
+    if (buildLayout(view, mid).contentH <= 1070) low = mid;
+    else high = mid;
+  }
+  return low;
+}
+
+function buildLayout(view: ViewModel, zoom: number) {
   const total = view.left.reduce((a, n) => a + n.value, 0) || 1;
   const availLeft = COL_H - Math.max(0, view.left.length - 1) * NODE_GAP;
   const availRight = COL_H - Math.max(0, view.right.length - 1) * NODE_GAP;
@@ -231,9 +230,11 @@ function buildLayout(view: ViewModel) {
   const place = (nodes: DisplayNode[], x: number): PlacedNode[] => {
     let y = PAD_TOP;
     return nodes.map(n => {
-      const h = Math.max(MIN_NODE_H, n.value * ky);
+      const h = n.value * ky * zoom;
+      const slot = Math.max(18, h);
+      y += (slot - h) / 2;
       const placed: PlacedNode = { ...n, x, y, h };
-      y += h + NODE_GAP;
+      y += h + (slot - h) / 2 + NODE_GAP;
       return placed;
     });
   };
@@ -251,7 +252,7 @@ function buildLayout(view: ViewModel) {
     .map(e => {
       const s = byId.get(e.source)!;
       const t = byId.get(e.target)!;
-      const w = Math.max(0.6, e.value * ky);
+      const w = e.value * ky * zoom;
       const sy = s.y + (outAcc.get(s.id) ?? 0);
       const ty = t.y + (inAcc.get(t.id) ?? 0);
       outAcc.set(s.id, (outAcc.get(s.id) ?? 0) + w);
@@ -285,6 +286,11 @@ function App() {
   const [hover, setHover] = useState<RenderEdge | null>(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
+  const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [accounts, setAccounts] = useState<string[]>(['general', 'special']);
+  const [ministries, setMinistries] = useState<string[]>([]);
+  const [itemQuery, setItemQuery] = useState('');
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
   // 詳細パネルの幅・折りたたみ・リサイズは /sankey-svg・/subcontracts と同じ共有フックに委ねる
@@ -297,11 +303,25 @@ function App() {
       .catch(e => setError(e.message));
   }, []);
 
+  const filteredData = useMemo(() => {
+    if (!data) return null;
+    const sections = data.sections.filter(s => accounts.includes(s.accountType) && (!ministries.length || ministries.includes(s.ministry)));
+    const ids = new Set(sections.map(s => s.id));
+    return { ...data, sections, edges: data.edges.filter(e => ids.has(e.source) && (!itemQuery || e.itemName.includes(itemQuery))) };
+  }, [data, accounts, ministries, itemQuery]);
+  useEffect(() => { setSectionOffset(0); setProjectOffset(0); }, [accounts, ministries, itemQuery]);
   const view = useMemo(
-    () => (data ? buildView(data, { topN: topSection, offset: sectionOffset }, { topN: topProject, offset: projectOffset }, query) : null),
-    [data, topSection, sectionOffset, topProject, projectOffset, query],
+    () => (filteredData ? buildView(filteredData, { topN: topSection, offset: sectionOffset }, { topN: topProject, offset: projectOffset }, query) : null),
+    [filteredData, topSection, sectionOffset, topProject, projectOffset, query],
   );
-  const layout = useMemo(() => (view ? buildLayout(view) : null), [view]);
+  const layout = useMemo(() => (view ? buildLayout(view, scale) : null), [view, scale]);
+  const initiallyFitted = useRef(false);
+  useEffect(() => {
+    if (view && !initiallyFitted.current) {
+      initiallyFitted.current = true;
+      setScale(fitZoom(view));
+    }
+  }, [view]);
 
   // /sankey-svg の「Reset offset when topN changes」「Reset offsets when filter changes」に倣う。
   // 窓の大きさを変えた・絞り込みを変えたときは先頭へ戻し、母集合が縮んで今の窓が指す範囲の
@@ -325,9 +345,13 @@ function App() {
   const isRelated = (e: RenderEdge) => !selected || e.source === selected || e.target === selected;
   const nodeActive = (n: PlacedNode) =>
     !selected || n.id === selected || view.edges.some(e => isRelated(e) && (e.source === n.id || e.target === n.id));
-  const cx = CANVAS_W / 2;
-  const cy = layout.contentH / 2;
-  const reset = () => { setScale(1); setPan({ x: 0, y: 0 }); };
+  const zoomAt = (next: number, anchor: number) => {
+    const z = Math.max(0.1, Math.min(50, next));
+    setPan(p => ({ ...p, y: anchor - (anchor - p.y) * buildLayout(view, z).contentH / layout.contentH }));
+    setScale(z);
+    setHover(null);
+  };
+  const reset = () => { setScale(fitZoom(view)); setPan({ x: 0, y: 0 }); };
   // /sankey-svg の rightControlsOffset と同じ方式。パネルの実効幅だけ図と右上クラスタを退避させる
   const rightControlsOffset = selected && !detailPanel.collapsed ? detailPanel.effectiveWidth : 0;
 
@@ -341,18 +365,27 @@ function App() {
           <svg
             data-testid="integrated-canvas"
             className="h-full w-full cursor-grab"
-            viewBox={`0 0 ${CANVAS_W} ${layout.contentH}`}
+            viewBox={`0 0 ${CANVAS_W} 1100`}
             preserveAspectRatio="xMidYMid meet"
-            onWheel={e => setScale(s => Math.max(0.5, Math.min(6, s * (e.deltaY > 0 ? 0.9 : 1.1))))}
+            onWheel={e => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const unit = Math.min(rect.width / CANVAS_W, rect.height / 1100);
+              if (scrollMode === 'pan' && !e.ctrlKey && !e.metaKey) setPan(p => ({ x: p.x - e.deltaX * 1.2 / unit, y: p.y - e.deltaY * 1.2 / unit }));
+              else zoomAt(scale * (e.deltaY > 0 ? 0.9 : 1.1), (e.clientY - rect.top - (rect.height - 1100 * unit) / 2) / unit);
+            }}
             onMouseDown={e => { drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y }; }}
             onMouseMove={e => {
               setCursor({ x: e.clientX, y: e.clientY });
-              if (drag.current) setPan({ x: drag.current.px + e.clientX - drag.current.x, y: drag.current.py + e.clientY - drag.current.y });
+              if (drag.current) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const unit = Math.min(rect.width / CANVAS_W, rect.height / 1100);
+                setPan({ x: drag.current.px + (e.clientX - drag.current.x) / unit, y: drag.current.py + (e.clientY - drag.current.y) / unit });
+              }
             }}
             onMouseUp={() => { drag.current = null; }}
             onMouseLeave={() => { drag.current = null; setHover(null); }}
           >
-            <g transform={`translate(${pan.x} ${pan.y}) translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`}>
+            <g transform={`translate(${pan.x} ${pan.y})`}>
               <text x={COL_LEFT_X + NODE_W + 8} y={PAD_TOP - 22} fontSize="13" fontWeight="700" fill="#555">MOFの項</text>
               <text x={COL_RIGHT_X} y={PAD_TOP - 22} fontSize="13" fontWeight="700" fill="#555">RSの事業</text>
 
@@ -364,6 +397,8 @@ function App() {
                       key={edge.id}
                       data-testid="integrated-edge"
                       data-status={edge.status}
+                      data-edge-id={edge.id}
+                      data-item-count={edge.members.length}
                       d={ribbonPath(COL_LEFT_X + NODE_W, sy, COL_RIGHT_X, ty, w)}
                       fill={EDGE_COLORS[edge.status]}
                       fillOpacity={active ? (hover?.id === edge.id ? 0.85 : 0.45) : 0.06}
@@ -395,7 +430,7 @@ function App() {
                         x={n.x}
                         y={n.y}
                         width={NODE_W}
-                        height={n.h}
+                        height={Math.max(0.3, n.h)}
                         rx="2"
                         fill={nodeColor(n)}
                         stroke={selected === n.id ? '#111' : 'none'}
@@ -421,40 +456,6 @@ function App() {
             </g>
           </svg>
 
-
-          {/* 左上: 表題と集計。図の上端に重ならないよう幅を抑える */}
-          <div className="absolute left-3 top-3 z-30 w-[430px] rounded-xl border border-black/10 bg-white/95 px-3 py-2 shadow-md backdrop-blur">
-            <h1 className="text-sm font-bold leading-tight">MOF項 × RS事業</h1>
-            <p className="text-[11px] leading-tight text-neutral-500">目をエッジとして結ぶファーストカット（2024年度当初予算）</p>
-            <div className="mt-1.5 flex flex-col gap-0.5 text-[11px]">
-              <div className="flex flex-wrap gap-x-3">
-                <span className="text-neutral-400">全体</span>
-                <span>MOF {money(data.metadata.mofAmount)}</span>
-                <span className="text-emerald-700">接続 {money(data.metadata.connectedAmount)}</span>
-                <span className="text-neutral-500">未接続 {money(data.metadata.unconnectedAmount)}</span>
-                {data.metadata.excessAmount > 0 && <span className="text-rose-600">超過 {money(data.metadata.excessAmount)}</span>}
-              </div>
-              <div className="flex flex-wrap gap-x-3">
-                <span className="text-neutral-400">描画</span>
-                <span title="接続 + 未接続 + 超過。超過を独立した流出として描くため、MOF総額とは2×超過だけずれる">
-                  帯 {money(view.totals.all)}
-                </span>
-                <span className="text-emerald-700">接続 {money(view.totals.connected)}</span>
-                <span className="text-neutral-500">未接続 {money(view.totals.unconnected)}</span>
-                {view.totals.excess > 0 && <span className="text-rose-600">超過 {money(view.totals.excess)}</span>}
-                <span className="text-neutral-400">項 {view.left.length}／事業 {view.right.length}</span>
-              </div>
-            </div>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 border-t border-black/5 pt-1.5 text-[11px]">
-              <Swatch color={NODE_COLORS.general} label="一般会計の項" />
-              <Swatch color={NODE_COLORS.special} label="特別会計の項" />
-              <Swatch color={NODE_COLORS.project} label="RS事業／接続した目" />
-              <Swatch color={EDGE_COLORS.unconnected} label="RS未接続の残差" />
-              <Swatch color={NODE_COLORS.excess} label="超過・要確認" />
-              <Swatch color={NODE_COLORS.aggregate} label="その他（集約）" />
-              <span className="text-neutral-400">帯の太さ＝金額（線形）</span>
-            </div>
-          </div>
 
           {hover && (
             <div
@@ -511,11 +512,31 @@ function App() {
               onOffsetChange={setProjectOffset} markReplace={() => {}} metaFontPx={11}
             />
           </div>
-          <button data-testid="zoom-out" onClick={() => setScale(v => Math.max(0.5, v - 0.2))} className="h-9 w-9 rounded-lg border border-black/10 bg-white/90 shadow-md backdrop-blur hover:bg-white">−</button>
-          <button data-testid="zoom-in" onClick={() => setScale(v => Math.min(6, v + 0.2))} className="h-9 w-9 rounded-lg border border-black/10 bg-white/90 shadow-md backdrop-blur hover:bg-white">＋</button>
-          <button onClick={reset} className="h-9 rounded-lg border border-black/10 bg-white/90 px-3 text-xs shadow-md backdrop-blur hover:bg-white">全体</button>
+          <button aria-label="フィルタ を表示" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(v => !v)} className="h-9 rounded-lg border bg-white px-2 text-xs">フィルタ ▾</button>
+          <button aria-label="フィルタを解除" onClick={() => { setQuery(''); setAccounts(['general', 'special']); setMinistries([]); setItemQuery(''); }} className="h-9 rounded-lg border bg-white px-2 text-xs">解除</button>
+          {filtersOpen && <div className="absolute right-12 top-20 flex w-72 flex-col gap-3 rounded-xl border bg-white p-4 text-xs shadow-lg">
+            <details><summary className="cursor-pointer">会計区分（{accounts.length}件）</summary>
+              <button onClick={() => setAccounts(accounts.length === 2 ? [] : ['general', 'special'])}>すべて選択 / 解除</button>
+              {(['general', 'special'] as const).map(a => <label key={a} className="flex gap-2 p-1"><input type="checkbox" checked={accounts.includes(a)} onChange={() => setAccounts(v => v.includes(a) ? v.filter(x => x !== a) : [...v, a])} />{a === 'general' ? '一般会計' : '特別会計'}</label>)}
+            </details>
+            <details><summary className="cursor-pointer">所管（{ministries.length ? ministries.length + '件' : 'すべて'}）</summary>
+              <button onClick={() => setMinistries([])}>選択解除</button>
+              <div className="max-h-60 overflow-auto">{[...new Set(data.sections.map(s => s.ministry))].sort().map(m => <label key={m} className="flex gap-2 p-1"><input type="checkbox" checked={ministries.includes(m)} onChange={() => setMinistries(v => v.includes(m) ? v.filter(x => x !== m) : [...v, m])} />{m}</label>)}</div>
+            </details>
+            <label>目名 <input aria-label="目名" value={itemQuery} onChange={e => setItemQuery(e.target.value)} className="border rounded px-2" /></label>
+          </div>}
           <PageNavMenu current="/integrated-sankey" theme="light" />
         </div>
+
+      <div data-testid="zoom-controls" className="absolute bottom-6 z-30 flex w-12 flex-col items-center gap-2 rounded-xl border bg-white/95 p-2 shadow-md" style={{ right: 16 + rightControlsOffset }}>
+        <button aria-label="スクロール移動モードに切替" aria-pressed={scrollMode === 'pan'} onClick={() => setScrollMode(m => m === 'zoom' ? 'pan' : 'zoom')} className="text-xs">{scrollMode === 'pan' ? '移動' : 'ズーム'}</button>
+        <button data-testid="zoom-in" aria-label="拡大" onClick={() => zoomAt(scale * 1.5, 550)}>＋</button>
+        <input aria-label="ズーム倍率" type="range" min={Math.log(0.1)} max={Math.log(50)} step="0.01" value={Math.log(scale)} onChange={e => zoomAt(Math.exp(Number(e.target.value)), 550)} style={{ writingMode: 'vertical-lr', direction: 'rtl', height: 120, width: 20 }} />
+        <button data-testid="zoom-out" aria-label="縮小" onClick={() => zoomAt(scale / 1.5, 550)}>−</button>
+        <input aria-label="ズーム率" type="number" min={10} max={5000} value={Math.round(scale * 100)} onChange={e => { if (e.target.value) zoomAt(Number(e.target.value) / 100, 550); }} className="w-10 text-center text-[10px]" />
+        <span className="text-[10px]">%</span>
+        <button onClick={reset} className="text-xs">全体</button>
+      </div>
 
       {selected && (
         <SidePanelChrome
@@ -551,15 +572,6 @@ function App() {
         </SidePanelChrome>
       )}
     </main>
-  );
-}
-
-function Swatch({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5">
-      <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: color }} />
-      {label}
-    </span>
   );
 }
 

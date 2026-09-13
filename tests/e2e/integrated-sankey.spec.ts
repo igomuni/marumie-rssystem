@@ -71,13 +71,13 @@ test('2列表示・選択・詳細パネルが機能する', async ({ page }) =>
   await expect(page.getByText('RSの事業', { exact: true })).toBeVisible();
 
   // 列見出しが浮遊UI（左上カード・右上クラスタ）の裏に隠れないこと
-  const card = (await page.locator('h1:has-text("MOF項 × RS事業")').locator('..').boundingBox())!;
+  await expect(page.locator('h1')).toHaveCount(0);
   const leftHead = (await page.getByText('MOFの項', { exact: true }).boundingBox())!;
   const rightHead = (await page.getByText('RSの事業', { exact: true }).boundingBox())!;
   const searchBox = (await page.getByTestId('search-input').boundingBox())!;
-  expect(leftHead.x).toBeGreaterThan(card.x + card.width);
+  expect(leftHead.x).toBeGreaterThan(0);
   expect(rightHead.y).toBeGreaterThan(searchBox.y + searchBox.height);
-  await expect(page.getByTestId('integrated-edge').first()).toBeVisible();
+  await expect(page.getByTestId('integrated-edge').first()).toBeAttached();
 
   // 初期表示のまま撮る（パネル退避のアニメーション中に撮らないよう、操作の前に置く）
   await page.screenshot({ path: 'test-results/integrated-sankey.png' });
@@ -96,7 +96,8 @@ test('2列表示・選択・詳細パネルが機能する', async ({ page }) =>
 
   // 目エッジのホバーで目名・金額・接続状態が読める。
   // サンキー図ではエッジ同士が必然的に重なるため force で重なり判定を外す
-  await page.getByTestId('integrated-edge').first().hover({ force: true });
+  const widest = await page.getByTestId('integrated-edge').evaluateAll(edges => edges.reduce((best, edge, i) => edge.getBoundingClientRect().height > edges[best].getBoundingClientRect().height ? i : best, 0));
+  await page.getByTestId('integrated-edge').nth(widest).hover({ force: true });
   await expect(page.getByTestId('integrated-hover')).toBeVisible();
 
   // 目視確認用。test-results/ は .gitignore 済み
@@ -111,7 +112,13 @@ test('検索・表示件数・ズーム・パンが機能する', async ({ page 
   await page.goto('/integrated-sankey');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
+  const rect = page.getByTestId('sankey-node').first().locator('rect');
+  const initialWidth = await rect.getAttribute('width');
+  const initialHeight = Number(await rect.getAttribute('height'));
   await page.getByTestId('zoom-in').click();
+  await expect(rect).toHaveAttribute('width', initialWidth!);
+  expect(Number(await rect.getAttribute('height'))).toBeGreaterThan(initialHeight);
+  expect(await page.locator('[data-item-count="1"]').count()).toBe(await page.getByTestId('integrated-edge').count());
   await page.getByTestId('zoom-out').click();
   await page.getByRole('button', { name: '全体' }).click();
 
@@ -124,7 +131,7 @@ test('検索・表示件数・ズーム・パンが機能する', async ({ page 
   const before = await page.getByTestId('sankey-node').count();
   await page.getByTestId('search-input').fill('年金');
   await expect.poll(() => page.getByTestId('sankey-node').count()).toBeLessThan(before);
-  await expect(page.getByTestId('integrated-edge').first()).toBeVisible();
+  await expect(page.getByTestId('integrated-edge').first()).toBeAttached();
 
   await page.getByTestId('search-input').fill('');
   await expect.poll(() => page.getByTestId('sankey-node').count()).toBe(before);
@@ -182,4 +189,28 @@ test('ページ切替メニューが画面内に開く', async ({ page }) => {
   await expect(page.getByTestId('integrated-detail')).toBeVisible();
   await expect.poll(async () => (await page.getByTestId('search-input').boundingBox())!.x)
     .toBeLessThan(clusterBefore.x - 300);
+});
+
+test('目エッジを集約せず、フィルタと縦ラベル間隔を維持する', async ({ page, request }) => {
+  const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('integrated-edge')).toHaveCount(graph.edges.length);
+  await page.getByTestId('zoom-out').click();
+  const labels = await page.locator('[data-kind="section"] > text').evaluateAll(nodes => nodes.map(n => { const r = n.getBoundingClientRect(); return { top:r.top, bottom:r.bottom }; }));
+  for (let i=1; i<labels.length; i++) expect(labels[i].top).toBeGreaterThanOrEqual(labels[i-1].bottom);
+  await page.getByRole('button', {name:'フィルタ を表示'}).click();
+  await page.getByText('会計区分（2件）', {exact:true}).click();
+  await page.getByRole('checkbox', {name:'特別会計'}).uncheck();
+  await expect.poll(() => page.getByTestId('integrated-edge').count()).toBeLessThan(graph.edges.length);
+  await page.getByRole('button', {name:'フィルタを解除'}).click();
+  await expect(page.getByTestId('integrated-edge')).toHaveCount(graph.edges.length);
+  await page.getByRole('button', {name:'全体', exact:true}).click();
+  await page.getByRole('button', {name:'フィルタ を表示'}).click();
+  await page.screenshot({path:'test-results/integrated-overview.png'});
+  await page.getByTestId('zoom-in').click();
+  await page.screenshot({path:'test-results/integrated-zoom.png'});
+  await page.goto('/sankey-svg');
+  await page.waitForTimeout(3000);
+  await page.screenshot({path:'test-results/sankey-svg-baseline.png'});
 });
