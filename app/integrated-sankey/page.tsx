@@ -912,7 +912,10 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
   const sectionById = new Map(sections.map(s => [s.id, s]));
   // 部課局は代表値（目内訳の先頭行）。事業内で複数組織にまたがる場合は近似
   const rep = project.budgetItems[0];
-  const accountBadge = getAccountBadgeStyle(project.accountType === 'mixed' ? 'both' : project.accountType);
+  // 'unknown'（予算執行データもMOF紐づけも無く判定材料が無い事業）はバッジを出さない
+  const accountBadge = getAccountBadgeStyle(
+    project.accountType === 'mixed' ? 'both' : project.accountType === 'unknown' ? null : project.accountType,
+  );
   const bySection = new Map<string, number>();
   for (const e of itemEdges) bySection.set(e.source, (bySection.get(e.source) ?? 0) + e.value);
   return (

@@ -11,8 +11,10 @@ export interface IntegratedSectionNode {
   /** 前年度額・増減率。項配下の目を合算する（目単位が null の場合は0として扱う） */
   previousAmount: number; difference: number;
 }
-/** 'mixed' = 一般会計・特別会計の両方から接続する目を持つ事業 */
-export type IntegratedProjectAccountType = IntegratedAccountType | 'mixed';
+/** 'mixed' = 一般会計・特別会計の両方から接続する目を持つ事業。
+ * 'unknown' = 予算執行データ（budgetSummary.accountSummaries）もMOF紐づけも
+ * 無く、会計区分を判定する材料が無い事業（'general'へ根拠なく決め打ちしない） */
+export type IntegratedProjectAccountType = IntegratedAccountType | 'mixed' | 'unknown';
 export interface IntegratedProjectNode {
   id: string; projectId: number; name: string; ministry: string; linkedAmount: number;
   /** RS事業の予算額。budgetSummary.totalBudget（予算現額合計＝当初＋補正＋繰越＋予備費使用等を
@@ -168,8 +170,10 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
       rows.map(r => r.mofAccountType).filter((t): t is IntegratedAccountType => t === 'general' || t === 'special'),
     );
     const accountTypes = accountTypesFromSummary.size > 0 ? accountTypesFromSummary : accountTypesFromLinks;
+    // 予算執行データ（budgetSummary）もMOF紐づけも無い事業（実測554件）は判定材料が
+    // 無いため、根拠なく'general'に決め打ちせず'unknown'にする
     const accountType: IntegratedProjectAccountType =
-      accountTypes.size > 1 ? 'mixed' : accountTypes.size === 1 ? [...accountTypes][0] : 'general';
+      accountTypes.size > 1 ? 'mixed' : accountTypes.size === 1 ? [...accountTypes][0] : 'unknown';
     projects.push({ id: `project:${projectId}`, projectId,
       name: rows[0]?.projectName ?? source?.name ?? `事業${projectId}`,
       ministry: rows[0]?.projectMinistry ?? source?.ministry ?? '',

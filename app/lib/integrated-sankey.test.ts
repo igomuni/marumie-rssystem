@@ -92,4 +92,9 @@ describe('integrated sankey first cut', () => {
     const g=buildIntegratedGraph([item()],[link()],[]);
     expect(g.projects[0].accountType).toBe('general');
   });
+
+  it('reports unknown account type for a project with no budget data or MOF linkage', () => {
+    const g=buildIntegratedGraph([item()],[],[{projectId:9,name:'事業Z',ministry:'省'}]);
+    expect(g.projects.find(p=>p.projectId===9)?.accountType).toBe('unknown');
+  });
 });

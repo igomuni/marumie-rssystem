@@ -146,7 +146,7 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 | MOF項の前年度額・増減率 | 配下の目の `previousAmount`/`difference` を合算（null は0扱い） |
 | RS事業の予算額 | `budgetAmount`＝`budgetSummary.totalBudget`（予算現額合計） |
 | RS事業の支出額 | `budgetSummary.executedAmount` |
-| RS事業の会計区分 | `budgetSummary.accountSummaries`（RS事業自身の予算・執行データ）から集計。単一なら一般/特別、複数にまたがれば `mixed`。無ければMOF紐づけ（`rows`）から代替集計 |
+| RS事業の会計区分 | `budgetSummary.accountSummaries`（RS事業自身の予算・執行データ）から集計。単一なら一般/特別、複数にまたがれば `mixed`。無ければMOF紐づけ（`rows`）から代替集計。どちらも無ければ `unknown`（バッジ非表示） |
 
 **RS事業の会計区分はMOF紐づけ（`rows`）ではなく `budgetSummary.accountSummaries`
 （RS事業自身の予算・執行データ）を優先して判定する。** MOF紐づけだけで判定すると、
@@ -155,6 +155,13 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 「一般特別」ではなく「一般」または「特別」単独）になる不具合になる（実測: 42事業が
 該当。2026-09-14指摘）。`accountSummaries` が無い事業（`budgetSummary` 自体が
 無い等）のみ、従来通りMOF紐づけから代替集計する。
+
+**判定材料が一切無い事業（実測1,079件）は `'general'` に決め打ちせず `'unknown'`
+にする。** `budgetSummary.accountSummaries` も `rows`（MOF紐づけ）も無い事業を
+以前は根拠なく `'general'` としていたため、サイドパネルヘッダーに実際とは限らない
+「一般」バッジが出ていた（2026-09-14指摘）。`accountType: 'unknown'` のときは
+`getAccountBadgeStyle` に `null` を渡し、バッジそのものを出さない。予算執行タブの
+各行のバッジは影響を受けない（行単位は `accountCategory` を直接使うため）。
 
 **RS事業の予算額は `initialBudget`（当初予算）ではなく `totalBudget`（予算現額合計＝
 当初＋補正＋繰越＋予備費使用等を含む現在の総額）を使う。** `/sankey-svg` の事業ノード
