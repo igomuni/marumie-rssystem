@@ -111,9 +111,17 @@ MOF項・RS事業という2ノード型は、`/sankey-svg` の4列（総計/省�
 | --- | --- |
 | MOF項の総額 | 配下にあるMOF目の `amount` 合計 |
 | MOF項の前年度額・増減率 | 配下の目の `previousAmount`/`difference` を合算（null は0扱い） |
-| RS事業の予算額 | `initialBudget`（当初予算） |
+| RS事業の予算額 | `budgetAmount`＝`budgetSummary.totalBudget`（予算現額合計） |
 | RS事業の支出額 | `budgetSummary.executedAmount` |
 | RS事業の会計区分 | 接続する目の `mofAccountType` から集計。単一なら一般/特別、複数にまたがれば `mixed` |
+
+**RS事業の予算額は `initialBudget`（当初予算）ではなく `totalBudget`（予算現額合計＝
+当初＋補正＋繰越＋予備費使用等を含む現在の総額）を使う。** `/sankey-svg` の事業ノード
+（`project-budget`、`scripts/generate-sankey-svg-data.ts` の `budget?.totalBudget`）と
+同じ定義に揃えるため（2026-09-13、ユーザーから「RS事業の予算額はRS事業の予算額を
+使っていないのですか」と指摘を受けて修正）。当初は `initialBudget` を使っていたが、
+補正予算のみで成立した事業（当初予算が0円）が `/sankey-svg` では実額で表示される
+のに本ページでは0円になる不整合があった。
 
 項の一覧・事業の一覧は互いに独立してフィルタ・並べ替えする（片方の絞り込みが
 もう片方の母集合に影響しない）。帯を描かないため、旧設計にあった

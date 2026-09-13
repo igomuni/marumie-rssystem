@@ -14,7 +14,13 @@ export interface IntegratedSectionNode {
 export type IntegratedProjectAccountType = IntegratedAccountType | 'mixed';
 export interface IntegratedProjectNode {
   id: string; projectId: number; name: string; ministry: string; linkedAmount: number;
-  initialBudget: number; mofUnlinkedAmount: number; accountType: IntegratedProjectAccountType;
+  /** RS事業の予算額。budgetSummary.totalBudget（予算現額合計＝当初＋補正＋繰越＋予備費使用等を
+   * 含む現在の総額）を使う。`/sankey-svg` の事業ノードの予算額（project-budget、
+   * scripts/generate-sankey-svg-data.ts）と同じ定義に揃えている。budgetSummary.initialBudget
+   * （当初予算のみ）ではない点に注意——補正予算のみで成立した事業はinitialBudgetが0円になり、
+   * それを使うと `/sankey-svg` では表示される事業が0円扱いになってしまう */
+  budgetAmount: number;
+  mofUnlinkedAmount: number; accountType: IntegratedProjectAccountType;
   budgetSummary?: BudgetSummary;
   /** 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来の全レコード（年度・予算種別で絞らない） */
   budgetBreakdown: BudgetBreakdownItem[];
@@ -114,7 +120,7 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
   const projects: IntegratedProjectNode[] = [];
   for (const [projectId, rows] of projectLinks) {
     const source = sourceMap.get(projectId); const linkedAmount = rows.reduce((sum, link) => sum + link.rsAmount, 0);
-    const initialBudget = source?.budgetSummary?.initialBudget ?? linkedAmount;
+    const budgetAmount = source?.budgetSummary?.totalBudget ?? linkedAmount;
     // 政府関係機関(agency)はRSに対応する会計区分が無く対象外のはずだが、型上は
     // 除外しきれないため念のためフィルタする（実データでは一般・特別のみのはず）
     const accountTypes = new Set(
@@ -123,7 +129,7 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     const accountType: IntegratedProjectAccountType =
       accountTypes.size > 1 ? 'mixed' : accountTypes.size === 1 ? [...accountTypes][0] : 'general';
     projects.push({ id: `project:${projectId}`, projectId, name: rows[0].projectName, ministry: rows[0].projectMinistry,
-      linkedAmount, initialBudget, mofUnlinkedAmount: Math.max(0, initialBudget - linkedAmount), accountType,
+      linkedAmount, budgetAmount, mofUnlinkedAmount: Math.max(0, budgetAmount - linkedAmount), accountType,
       budgetSummary: source?.budgetSummary,
       budgetBreakdown: source?.budgetBreakdown ?? [],
       budgetItems: (source?.budgetBreakdown ?? []).filter(item => item.fiscalYear === budgetYear && item.budgetType === '当初予算')

@@ -178,12 +178,12 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
 
   const keptProjects = data.projects.filter(p =>
     projectNameMatch(p.name) &&
-    (rsMin === null || p.initialBudget >= rsMin) &&
-    (rsMax === null || p.initialBudget <= rsMax));
-  const rankedProjects = [...keptProjects].sort((a, b) => b.initialBudget - a.initialBudget);
+    (rsMin === null || p.budgetAmount >= rsMin) &&
+    (rsMax === null || p.budgetAmount <= rsMax));
+  const rankedProjects = [...keptProjects].sort((a, b) => b.budgetAmount - a.budgetAmount);
   const projectRange = windowSlice(rankedProjects, projectWindow);
-  const projectsTotal = rankedProjects.reduce((a, p) => a + p.initialBudget, 0);
-  const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.initialBudget, 0);
+  const projectsTotal = rankedProjects.reduce((a, p) => a + p.budgetAmount, 0);
+  const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.budgetAmount, 0);
 
   const left: DisplayNode[] = sectionRange.shown
     .map((s): DisplayNode => ({ id: s.id, name: s.name, value: s.amount, side: 'left', kind: 'section', section: s }));
@@ -191,7 +191,7 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
     left.push({ id: OTHER_SECTIONS, name: `その他の項（${sectionRange.tail.length}件）`, value: sectionTailTotal, side: 'left', kind: 'other-sections' });
   }
   const right: DisplayNode[] = projectRange.shown
-    .map((p): DisplayNode => ({ id: p.id, name: p.name, value: p.initialBudget, side: 'right', kind: 'project', project: p }));
+    .map((p): DisplayNode => ({ id: p.id, name: p.name, value: p.budgetAmount, side: 'right', kind: 'project', project: p }));
   if (projectRange.tail.length > 0) {
     right.push({ id: OTHER_PROJECTS, name: `その他のRS事業（${projectRange.tail.length}件）`, value: projectTailTotal, side: 'right', kind: 'other-projects' });
   }
@@ -199,7 +199,7 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
   // 「その他」集約ノードの詳細パネル用: 窓より後ろ（tail）に出た項・事業そのもの。
   // 窓より前（オフセットで飛ばした側）は集約に含めない（windowSlice参照）
   const hiddenSections = sectionRange.tail.map(s => ({ name: s.name, value: s.amount }));
-  const hiddenProjects = projectRange.tail.map(p => ({ name: p.name, value: p.initialBudget }));
+  const hiddenProjects = projectRange.tail.map(p => ({ name: p.name, value: p.budgetAmount }));
 
   return {
     left, right, hiddenSections, hiddenProjects,
@@ -565,7 +565,7 @@ function App() {
     const sectionHits = data.sections.filter(s => match(s.name))
       .map((s): SearchHit => ({ id: s.id, name: s.name, sub: s.ministry, value: s.amount, kind: 'section' }));
     const projectHits = data.projects.filter(p => match(p.name))
-      .map((p): SearchHit => ({ id: p.id, name: p.name, sub: `PID:${p.projectId}`, value: p.initialBudget, kind: 'project' }));
+      .map((p): SearchHit => ({ id: p.id, name: p.name, sub: `PID:${p.projectId}`, value: p.budgetAmount, kind: 'project' }));
     return [...sectionHits, ...projectHits].sort((a, b) => b.value - a.value);
   }, [data, query, useRegex]);
 
@@ -578,7 +578,7 @@ function App() {
       const idx = ranked.findIndex(s => s.id === hit.id);
       if (idx >= 0) setSectionOffset(Math.max(0, idx - Math.floor(topSection / 2)));
     } else {
-      const ranked = [...data.projects].sort((a, b) => b.initialBudget - a.initialBudget);
+      const ranked = [...data.projects].sort((a, b) => b.budgetAmount - a.budgetAmount);
       const idx = ranked.findIndex(p => p.id === hit.id);
       if (idx >= 0) setProjectOffset(Math.max(0, idx - Math.floor(topProject / 2)));
     }
@@ -902,7 +902,7 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
         onClose={onClose}
         amountBlock={
           <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 12, rowGap: 4, marginTop: 5 }}>
-            <AmountCell label="予算額" value={project.initialBudget} />
+            <AmountCell label="予算額" value={project.budgetAmount} />
             <AmountCell label="支出額" value={project.budgetSummary?.executedAmount ?? 0} />
           </div>
         }
