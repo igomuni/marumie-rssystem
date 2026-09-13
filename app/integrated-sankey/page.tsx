@@ -15,7 +15,7 @@
  * 横断する（/sankey-svg の検索が事業名・支出先名を1本で横断するのと同じ考え方）。
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
@@ -31,15 +31,18 @@ import type {
 } from '@/app/lib/integrated-sankey';
 
 // ── 寸法 ──
-const CANVAS_W = 1200;
-const CANVAS_H = 1100;
+// viewBox はコンテナの実測ピクセルサイズに合わせる（SVG単位=CSSピクセル）。/sankey-svg も
+// 同じ考え方で、固定サイズをpreserveAspectRatioで引き伸ばす方式は使わない。固定サイズだと
+// ウィンドウが小さいときにラベルの文字まで縮小され読めなくなるため
+const DEFAULT_DIMS = { w: 1400, h: 900 };
+interface Dims { w: number; h: number }
 const NODE_W = 18; // /sankey-svg の NODE_W と揃える
 const NODE_GAP = 3;
 const NODE_MIN_SLOT = 18;
 const LABEL_GUTTER = 260;
 const COL_LEFT_X = LABEL_GUTTER + 20;
-const COL_RIGHT_X = CANVAS_W - LABEL_GUTTER - 20 - NODE_W;
-const COL_H = 880;
+const colRightX = (dims: Dims) => dims.w - LABEL_GUTTER - 20 - NODE_W;
+const colH = (dims: Dims) => Math.max(200, dims.h - PAD_TOP - PAD_BOTTOM);
 const PAD_TOP = 110;
 const PAD_BOTTOM = 28;
 const LABEL_MIN_PX = 9; // これ未満のノード高ではラベル（名前＋金額）ごと隠す
@@ -103,12 +106,18 @@ function windowSlice<T>(ranked: T[], w: RangeWindow) {
 }
 
 interface Filters {
-  accounts: string[]; ministries: string[];
-  sectionNameQuery: string; projectNameQuery: string;
+  // null = 未選択（絞り込みなし＝すべて含む）。一度でも操作すると配列になり、
+  // 空配列は「すべて解除（0件）」を明示的に表す。/sankey-svg の acGeneral/acSpecial/...
+  // のような「個々の値が独立してon/offできる」挙動を、空配列=フィルタなしに
+  // 圧縮してしまわないための表現
+  accounts: string[] | null; ministries: string[] | null;
+  sectionNameQuery: string; sectionNameRegex: boolean;
+  projectNameQuery: string; projectNameRegex: boolean;
   mofMinText: string; mofMaxText: string; rsMinText: string; rsMaxText: string;
 }
 const EMPTY_FILTERS: Filters = {
-  accounts: [], ministries: [], sectionNameQuery: '', projectNameQuery: '',
+  accounts: null, ministries: null, sectionNameQuery: '', sectionNameRegex: false,
+  projectNameQuery: '', projectNameRegex: false,
   mofMinText: '', mofMaxText: '', rsMinText: '', rsMaxText: '',
 };
 
@@ -117,14 +126,14 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
   const mofMax = parseAmountToYen(filters.mofMaxText);
   const rsMin = parseAmountToYen(filters.rsMinText);
   const rsMax = parseAmountToYen(filters.rsMaxText);
-  const sectionNameMatch = buildMatcher(filters.sectionNameQuery, false).match;
-  const projectNameMatch = buildMatcher(filters.projectNameQuery, false).match;
+  const sectionNameMatch = buildMatcher(filters.sectionNameQuery, filters.sectionNameRegex).match;
+  const projectNameMatch = buildMatcher(filters.projectNameQuery, filters.projectNameRegex).match;
   // 共管（所管が「A及びB」のような複合表記）を分解して複数値として扱う
   const ministriesOf = (m: string) => m.split(/及び|・|、/).map(s => s.trim()).filter(Boolean);
 
   const keptSections = data.sections.filter(s =>
-    (filters.accounts.length === 0 || filters.accounts.includes(s.accountType)) &&
-    (filters.ministries.length === 0 || ministriesOf(s.ministry).some(m => filters.ministries.includes(m))) &&
+    (filters.accounts === null || filters.accounts.includes(s.accountType)) &&
+    (filters.ministries === null || ministriesOf(s.ministry).some(m => filters.ministries!.includes(m))) &&
     sectionNameMatch(s.name) &&
     (mofMin === null || s.amount >= mofMin) &&
     (mofMax === null || s.amount <= mofMax));
@@ -168,20 +177,27 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
 
 type ViewModel = ReturnType<typeof buildView>;
 
-function fitZoom(view: ViewModel) {
+function fitZoom(view: ViewModel, dims: Dims) {
   let low = 0.1, high = 1;
   for (let i = 0; i < 24; i++) {
     const mid = (low + high) / 2;
-    if (buildLayout(view, mid).contentH <= CANVAS_H - 30) low = mid; else high = mid;
+    if (buildLayout(view, mid, dims).contentH <= dims.h - 30) low = mid; else high = mid;
   }
   return low;
 }
 
-function buildLayout(view: ViewModel, zoom: number) {
+function buildLayout(view: ViewModel, zoom: number, dims: Dims) {
+  const rightX = colRightX(dims);
+  const availH = colH(dims);
+  // 金額→高さの縮尺（ky）は項・事業の両列で共有する。列ごとに別のkyを使うと、
+  // 同じ高さのバーが列によって違う金額を表すことになり、見た目で比較できなくなる
+  const leftTotal = view.left.reduce((a, n) => a + n.value, 0) || 1;
+  const rightTotal = view.right.reduce((a, n) => a + n.value, 0) || 1;
+  const availLeft = availH - Math.max(0, view.left.length - 1) * NODE_GAP;
+  const availRight = availH - Math.max(0, view.right.length - 1) * NODE_GAP;
+  const ky = Math.min(availLeft / leftTotal, availRight / rightTotal);
+
   const place = (nodes: DisplayNode[], x: number): PlacedNode[] => {
-    const colTotal = nodes.reduce((a, n) => a + n.value, 0) || 1;
-    const avail = COL_H - Math.max(0, nodes.length - 1) * NODE_GAP;
-    const ky = avail / colTotal;
     let y = PAD_TOP;
     return nodes.map(n => {
       const h = n.value * ky * zoom;
@@ -193,11 +209,11 @@ function buildLayout(view: ViewModel, zoom: number) {
     });
   };
   const left = place(view.left, COL_LEFT_X);
-  const right = place(view.right, COL_RIGHT_X);
+  const right = place(view.right, rightX);
   const byId = new Map<string, PlacedNode>([...left, ...right].map(n => [n.id, n]));
   const bottom = (nodes: PlacedNode[]) => (nodes.length ? nodes[nodes.length - 1].y + nodes[nodes.length - 1].h : PAD_TOP);
   const contentH = Math.max(bottom(left), bottom(right)) + PAD_BOTTOM;
-  return { left, right, byId, contentH };
+  return { left, right, byId, contentH, rightX };
 }
 
 // ────────────────────────────────────────────────────────────
@@ -205,7 +221,9 @@ function buildLayout(view: ViewModel, zoom: number) {
 // ────────────────────────────────────────────────────────────
 
 function CheckboxCombobox({ label, options, selected, onChange }: {
-  label: string; options: { value: string; label: string }[]; selected: string[]; onChange: (next: string[]) => void;
+  label: string; options: { value: string; label: string }[];
+  /** null = 未操作（すべて含む）。一度でも触ると配列になり、空配列＝すべて解除を表せる */
+  selected: string[] | null; onChange: (next: string[] | null) => void;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -218,22 +236,28 @@ function CheckboxCombobox({ label, options, selected, onChange }: {
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
-  const allSelected = selected.length === 0;
-  const summary = allSelected ? 'すべて'
-    : selected.length === 1 ? (options.find(o => o.value === selected[0])?.label ?? selected[0])
-      : `選択中 (${selected.length}/${options.length})`;
-  const isChecked = (v: string) => allSelected || selected.includes(v);
+  const effective = selected ?? options.map(o => o.value);
+  const allChecked = effective.length === options.length;
+  const noneChecked = effective.length === 0;
+  const summary = selected === null ? 'すべて'
+    : allChecked ? 'すべて'
+      : noneChecked ? 'なし（0件）'
+        : effective.length === 1 ? (options.find(o => o.value === effective[0])?.label ?? effective[0])
+          : `選択中 (${effective.length}/${options.length})`;
+  const isChecked = (v: string) => effective.includes(v);
   const toggle = (v: string) => {
-    const base = allSelected ? options.map(o => o.value) : selected;
-    const next = base.includes(v) ? base.filter(x => x !== v) : [...base, v];
-    onChange(next.length === options.length ? [] : next);
+    const next = effective.includes(v) ? effective.filter(x => x !== v) : [...effective, v];
+    onChange(next);
   };
+  // /sankey-svg の「すべて選択/解除」チェックボックスと同じ: 全選択済みなら全解除、
+  // それ以外（一部・ゼロ）なら全選択、の単純トグル。空配列=フィルタなしに圧縮しない
+  const toggleAll = () => onChange(allChecked ? [] : options.map(o => o.value));
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <span style={{ fontSize: 11, color: '#555', width: '3.5em', whiteSpace: 'nowrap', flexShrink: 0 }}>{label}</span>
       <div ref={rootRef} style={{ flex: 1, minWidth: 0, position: 'relative' }}>
         <button type="button" aria-haspopup="listbox" aria-expanded={open} aria-label={label} onClick={() => setOpen(v => !v)}
-          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: allSelected ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: (selected === null || allChecked) ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         >{summary}</button>
         <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
           <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="#aaa"
@@ -243,10 +267,10 @@ function CheckboxCombobox({ label, options, selected, onChange }: {
         </span>
         {open && (
           <div role="listbox" aria-label={label}
-            style={{ position: 'absolute', top: '100%', left: 0, marginTop: 2, zIndex: 50, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 220, overflowY: 'auto', minWidth: '100%', width: 'max-content' }}
+            style={{ position: 'absolute', top: '100%', left: 0, marginTop: 2, zIndex: 50, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 'min(320px, 60vh)', overflowY: 'auto', minWidth: '100%', width: 'max-content' }}
           >
             <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
-              <input type="checkbox" checked={allSelected} onChange={() => onChange([])} style={{ width: 12, height: 12 }} />
+              <input type="checkbox" checked={allChecked} onChange={toggleAll} style={{ width: 12, height: 12 }} />
               <span style={{ fontSize: 11, color: '#333' }}>すべて選択/解除</span>
             </label>
             {options.map(o => (
@@ -268,6 +292,29 @@ function FilterRow({ label, children }: { label: string; children: React.ReactNo
       <span style={{ fontSize: 11, color: '#555', width: '3.5em', whiteSpace: 'nowrap', flexShrink: 0 }}>{label}</span>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>{children}</div>
     </div>
+  );
+}
+
+/** フィルタパネル内の項名・事業名テキスト絞り込み。検索ボックスと同じく正規表現トグルを持つ
+ * （/sankey-svg の filterProjectNameRegex/filterRecipientNameRegex と同じ、フィルタ側にも
+ * 独立した正規表現切り替えがある） */
+function TextFilterRow({ label, ariaLabel, value, onChange, useRegex, onToggleRegex }: {
+  label: string; ariaLabel: string; value: string; onChange: (v: string) => void;
+  useRegex: boolean; onToggleRegex: () => void;
+}) {
+  const { error } = buildMatcher(value, useRegex);
+  return (
+    <FilterRow label={label}>
+      <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+        <input aria-label={ariaLabel} value={value} onChange={e => onChange(e.target.value)}
+          placeholder="部分一致"
+          style={{ width: '100%', boxSizing: 'border-box', fontSize: 11, border: `1px solid ${error ? '#e53935' : '#ddd'}`, borderRadius: 4, padding: '3px 22px 3px 5px', background: '#fafafa' }} />
+        <button type="button" aria-label={useRegex ? `${label}の正規表現検索をオフ` : `${label}を正規表現で検索`} aria-pressed={useRegex}
+          title={useRegex ? '正規表現検索をオフ' : '正規表現で検索'} onClick={onToggleRegex}
+          style={{ position: 'absolute', right: 2, top: '50%', transform: 'translateY(-50%)', background: useRegex ? '#1a73e8' : 'transparent', border: 'none', borderRadius: 3, cursor: 'pointer', color: useRegex ? '#fff' : '#888', fontSize: 10, fontFamily: 'monospace', fontWeight: 'bold', lineHeight: 1, padding: '2px 3px' }}
+        >.*</button>
+      </div>
+    </FilterRow>
   );
 }
 
@@ -429,6 +476,25 @@ function App() {
   // サイドパネルは /sankey-svg のノード詳細と同じ左側（AIチャット等の右パネルは今回無い）
   const detailPanel = useSidePanel({ side: 'left' });
 
+  // viewBoxをコンテナの実測ピクセルサイズに合わせる（/sankey-svg と同じ考え方）。
+  // ウィンドウが縮んでもラベルの文字サイズが一緒に縮まないようにするため。
+  // データ読込中はcontainer未マウントのため、useRefではなくcallback refで
+  // 実際にマウントされたタイミングでobserverを張り直す
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const containerRef = useCallback((el: HTMLDivElement | null) => { setContainer(el); }, []);
+  const [dims, setDims] = useState<Dims>(DEFAULT_DIMS);
+  const measuredOnce = useRef(false);
+  useEffect(() => {
+    const el = container;
+    if (!el) return;
+    const ro = new ResizeObserver(entries => {
+      const { width, height } = entries[0].contentRect;
+      if (width > 0 && height > 0) { measuredOnce.current = true; setDims({ w: Math.round(width), h: Math.round(height) }); }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [container]);
+
   useEffect(() => {
     setData(null); setError(''); setSelected(null);
     fetch(`/api/integrated-sankey?year=${year}`)
@@ -441,11 +507,14 @@ function App() {
     () => (data ? buildView(data, filters, { topN: topSection, offset: sectionOffset }, { topN: topProject, offset: projectOffset }) : null),
     [data, filters, topSection, sectionOffset, topProject, projectOffset],
   );
-  const layout = useMemo(() => (view ? buildLayout(view, scale) : null), [view, scale]);
+  const layout = useMemo(() => (view ? buildLayout(view, scale, dims) : null), [view, scale, dims]);
   const initiallyFitted = useRef(false);
   useEffect(() => {
-    if (view && !initiallyFitted.current) { initiallyFitted.current = true; const k = fitZoom(view); setBaseZoom(k); setScale(k); }
-  }, [view]);
+    if (view && measuredOnce.current && !initiallyFitted.current) {
+      initiallyFitted.current = true;
+      const k = fitZoom(view, dims); setBaseZoom(k); setScale(k);
+    }
+  }, [view, dims]);
 
   const prevTopSection = useRef(topSection);
   useEffect(() => { if (prevTopSection.current !== topSection) { prevTopSection.current = topSection; setSectionOffset(0); } }, [topSection]);
@@ -469,7 +538,7 @@ function App() {
   const jumpTo = (hit: SearchHit) => {
     if (!data) return;
     if (hit.kind === 'section') {
-      const kept = data.sections.filter(s => filters.accounts.length === 0 || filters.accounts.includes(s.accountType));
+      const kept = data.sections.filter(s => filters.accounts === null || filters.accounts.includes(s.accountType));
       const ranked = [...kept].sort((a, b) => b.amount - a.amount);
       const idx = ranked.findIndex(s => s.id === hit.id);
       if (idx >= 0) setSectionOffset(Math.max(0, idx - Math.floor(topSection / 2)));
@@ -503,7 +572,7 @@ function App() {
   const nodeActive = (n: PlacedNode) => !selected || n.id === selected || (relatedIds?.has(n.id) ?? false);
   const zoomAt = (next: number, anchor: number) => {
     const z = Math.max(0.02, Math.min(60, next));
-    setPan(p => ({ ...p, y: anchor - (anchor - p.y) * buildLayout(view, z).contentH / layout.contentH }));
+    setPan(p => ({ ...p, y: anchor - (anchor - p.y) * buildLayout(view, z, dims).contentH / layout.contentH }));
     setScale(z);
   };
   const reset = () => { setScale(baseZoom); setPan({ x: 0, y: 0 }); };
@@ -513,23 +582,19 @@ function App() {
 
   return (
     <main className="fixed inset-0 overflow-hidden bg-[#f7f8f5] text-neutral-800">
-      <div className="absolute inset-y-0 right-0" style={{ left: leftControlsOffset, transition: 'left 0.2s ease' }}>
+      <div ref={containerRef} className="absolute inset-y-0 right-0" style={{ left: leftControlsOffset, transition: 'left 0.2s ease' }}>
         <svg
           data-testid="integrated-canvas"
           className="h-full w-full cursor-grab"
-          viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
-          preserveAspectRatio="xMidYMid meet"
+          viewBox={`0 0 ${dims.w} ${dims.h}`}
           onWheel={e => {
             const rect = e.currentTarget.getBoundingClientRect();
-            const unit = Math.min(rect.width / CANVAS_W, rect.height / CANVAS_H);
-            zoomAt(scale * (e.deltaY > 0 ? 0.9 : 1.1), (e.clientY - rect.top - (rect.height - CANVAS_H * unit) / 2) / unit);
+            zoomAt(scale * (e.deltaY > 0 ? 0.9 : 1.1), e.clientY - rect.top);
           }}
           onMouseDown={e => { drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y }; }}
           onMouseMove={e => {
             if (drag.current) {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const unit = Math.min(rect.width / CANVAS_W, rect.height / CANVAS_H);
-              setPan({ x: drag.current.px + (e.clientX - drag.current.x) / unit, y: drag.current.py + (e.clientY - drag.current.y) / unit });
+              setPan({ x: drag.current.px + (e.clientX - drag.current.x), y: drag.current.py + (e.clientY - drag.current.y) });
             }
           }}
           onMouseUp={() => { drag.current = null; }}
@@ -538,8 +603,8 @@ function App() {
           <g transform={`translate(${pan.x} ${pan.y})`}>
             <text x={COL_LEFT_X + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">MOFの項</text>
             <text x={COL_LEFT_X + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999">{money(view.sectionColumnTotal)}</text>
-            <text x={COL_RIGHT_X + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="end">RSの事業</text>
-            <text x={COL_RIGHT_X + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="end">{money(view.projectColumnTotal)}</text>
+            <text x={layout.rightX + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="end">RSの事業</text>
+            <text x={layout.rightX + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="end">{money(view.projectColumnTotal)}</text>
             <g>
               {[...layout.left, ...layout.right].map(n => {
                 const active = nodeActive(n); const isLeft = n.side === 'left';
@@ -567,7 +632,9 @@ function App() {
       {/* 左上：検索（ジャンプ）・フィルタ（絞り込み）。左パネル展開時は右へ退避する */}
       <div style={{ position: 'absolute', left: 12 + leftControlsOffset, top: 12, zIndex: 30, display: 'flex', alignItems: 'flex-start', gap: 4, transition: 'left 0.2s ease' }}>
         <div style={{ display: 'flex', flexDirection: 'column', width: 300 }}>
-          <div style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid #e0e0e0', borderRadius: '6px 6px 0 6px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          {/* overflow:hidden にしない。検索結果・コンボボックスのドロップダウンが
+              親のこの角丸カードで見切れてしまうため（角丸は子要素に個別に持たせてある） */}
+          <div style={{ background: 'rgba(255,255,255,0.95)', border: '1px solid #e0e0e0', borderRadius: '6px 6px 0 6px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
             <div style={{ padding: 8 }}>
               <SearchJumpBox results={searchResults} query={query} setQuery={setQuery} useRegex={useRegex} setUseRegex={setUseRegex}
                 onSelect={jumpTo} />
@@ -578,14 +645,12 @@ function App() {
                   options={[{ value: 'general', label: '一般会計' }, { value: 'special', label: '特別会計' }]} />
                 <CheckboxCombobox label="所管" selected={filters.ministries} onChange={v => setFilter('ministries', v)}
                   options={allMinistries.map(m => ({ value: m, label: m }))} />
-                <FilterRow label="項">
-                  <input aria-label="項名で絞り込み" value={filters.sectionNameQuery} onChange={e => setFilter('sectionNameQuery', e.target.value)}
-                    placeholder="部分一致" style={{ flex: 1, minWidth: 0, fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 5px', background: '#fafafa' }} />
-                </FilterRow>
-                <FilterRow label="事業">
-                  <input aria-label="事業名で絞り込み" value={filters.projectNameQuery} onChange={e => setFilter('projectNameQuery', e.target.value)}
-                    placeholder="部分一致" style={{ flex: 1, minWidth: 0, fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 5px', background: '#fafafa' }} />
-                </FilterRow>
+                <TextFilterRow label="項" ariaLabel="項名で絞り込み" value={filters.sectionNameQuery}
+                  onChange={v => setFilter('sectionNameQuery', v)} useRegex={filters.sectionNameRegex}
+                  onToggleRegex={() => setFilter('sectionNameRegex', !filters.sectionNameRegex)} />
+                <TextFilterRow label="事業" ariaLabel="事業名で絞り込み" value={filters.projectNameQuery}
+                  onChange={v => setFilter('projectNameQuery', v)} useRegex={filters.projectNameRegex}
+                  onToggleRegex={() => setFilter('projectNameRegex', !filters.projectNameRegex)} />
                 <AmountRangeRow label="項予算" minText={filters.mofMinText} maxText={filters.mofMaxText}
                   setMin={v => setFilter('mofMinText', v)} setMax={v => setFilter('mofMaxText', v)} />
                 <AmountRangeRow label="事業予算" minText={filters.rsMinText} maxText={filters.rsMaxText}
@@ -621,7 +686,7 @@ function App() {
 
       {/* 紐づけ率。年度によって大きく異なるため隠さず出す（誇張の注記は付けない） */}
       {data.linkageQuality && (
-        <div style={{ position: 'absolute', top: 100, right: 12, zIndex: 20, background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.1)', borderRadius: 8, padding: '5px 10px', fontSize: 11, color: '#777', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
+        <div style={{ position: 'absolute', top: 100, right: 12, zIndex: 20, pointerEvents: 'none', background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(0,0,0,0.1)', borderRadius: 8, padding: '5px 10px', fontSize: 11, color: '#777', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}>
           紐づけ率：事業 {(data.linkageQuality.counts.projectLinked / data.linkageQuality.counts.projectTotal * 100).toFixed(1)}%
           ／金額 {(data.linkageQuality.coverage.rsAmountLinked / data.linkageQuality.coverage.rsAmountTotal * 100).toFixed(1)}%
         </div>

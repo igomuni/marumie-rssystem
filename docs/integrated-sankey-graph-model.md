@@ -45,9 +45,14 @@ MOF項・RS事業という2ノード型は、`/sankey-svg` の4列（総計/省�
   として扱う（`buildMatcher` に集約）
 - **フィルタ（絞り込み）**：検索ボックスの下に開閉する `filtersOpen` パネル。実際に
   グラフから項・事業を除外する。会計区分・所管はチェックボックス付きコンボボックス
-  （`CheckboxCombobox`。選択が空＝絞り込みなし）、項名・事業名は部分一致テキスト
-  （検索ボックスとは別の入力欄）、項予算・事業予算はそれぞれ独立した金額レンジ
-  （`parseAmountToYen` で解釈）
+  （`CheckboxCombobox`）、項名・事業名は部分一致テキスト＋正規表現トグル
+  （検索ボックスとは別の入力欄、`TextFilterRow`）、項予算・事業予算はそれぞれ
+  独立した金額レンジ（`parseAmountToYen` で解釈）
+
+`CheckboxCombobox` の選択状態は `string[] | null`（`null` ＝未操作＝すべて含む、
+配列は空配列も含めユーザーが明示的に選んだ状態）で持つ。`.length === 0` を
+「絞り込みなし」として扱う設計だと「すべて解除」と「未操作」を区別できず、
+「すべて選択/解除」チェックボックスで解除ができない不具合になる。
 
 検索・フィルタのドロップダウンは、全画面の透明レイヤーではなく**外側クリック検知**
 （`document.addEventListener('mousedown', ...)` ＋ ルート要素への `ref`）で閉じる。
@@ -67,6 +72,21 @@ MOF項・RS事業という2ノード型は、`/sankey-svg` の4列（総計/省�
 `/sankey-svg` の列ヘッダー（ラベル＋合計金額の2行）と同じ構造。各列見出しの下に、
 その列の**フィルタ後の全件合計**（表示ウィンドウの外に出た分も含む）を表示する
 （`view.sectionColumnTotal`/`projectColumnTotal`）。
+
+## 金額→高さの縮尺・実測ピクセルでの描画
+
+- 金額→高さの縮尺（`ky`）は項・事業の**両列で共有**する（`buildLayout` 内で
+  `Math.min(availLeft/leftTotal, availRight/rightTotal)` として算出）。列ごとに
+  別の縮尺を使うと、同じ高さのバーが列によって違う金額を表すことになり、
+  見た目で比較できなくなるため
+- SVGの `viewBox` は固定値ではなく、`ResizeObserver` でコンテナの実測ピクセル
+  サイズ（`Dims {w,h}`）を測り、それをそのまま使う（`preserveAspectRatio` に
+  よる縮小拡大はしない）。ウィンドウの高さを縮めてもラベルの文字サイズが
+  一緒に縮まないようにするため（`/sankey-svg` と同じ考え方）。`ResizeObserver`
+  はコンテナ要素の**callback ref**（`useState` + `useCallback`）で張る。
+  データ読込中はコンテナ未マウントのため、`useRef` + 空配列 `useEffect` では
+  初回マウント時に `current` が `null` のまま observer が張られず、以後
+  再実行もされないため `dims` が既定値に固定される不具合があった
 
 ## 金額定義
 
@@ -93,7 +113,9 @@ MOF項・RS事業という2ノード型は、`/sankey-svg` の4列（総計/省�
 の `SUPPORTED_RS_YEARS`）。**紐づけ品質は年度で大きく異なる**（実測: RS2025×MOF2024は
 事業紐づけ率92.7%、RS2024×MOF2023は21.3%）。API は `linkageQuality`
 （`app/lib/api/mof-rs-kou-moku-linkage-loader.ts` の `linkageQuality()`）を常に返し、
-画面右上に隠さず数値で表示する（誇張した注記は付けない）。
+画面右上に隠さず数値で表示する（誇張した注記は付けない）。この紐づけ率バッジは
+`pointerEvents: 'none'`（情報表示のみでクリック対象を持たないため、下に重なる
+RS事業列上部のノードへのクリックを奪わないようにする）。
 
 紐づけ生成ロジック（`scripts/generate-mof-rs-kou-moku-linkage.ts`）自体の精度改善は
 別task doc（未着手）。今回は既存の生成済みデータをそのまま両年度分出している。
