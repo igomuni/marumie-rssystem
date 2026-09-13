@@ -39,16 +39,16 @@ interface Dims { w: number; h: number }
 const NODE_W = 18; // /sankey-svg の NODE_W と揃える
 const NODE_GAP = 3;
 const NODE_MIN_SLOT = 18;
-// 列間隔: /sankey-svg の「事業→支出先」間（両列のラベルが内側＝互いの方向へ伸びる、
-// 帯を持たない今回のページと同じ構図）を実測（1920px幅で約620px）した値を基準にする。
-// 左右の余白は/sankey-svgのMARGIN(20px)相当まで削り、ラベルは列の内側（中央寄り）へ
-// 伸ばす。以前は左右の外側にラベル用の大きな余白(260px)を確保し列間が間延びしていた
+// 列(バー)は左のノードは左側に・右のノードは右側にラベルを伸ばす（帯を持たないため、
+// バー自体は中央で寄せ合わせ、ラベルは左右の外側へ広く使える幅を確保する構図）。
+// MID_GAPは2本のバーの間の余白のみ（帯もラベルも通らないため広い間隔は不要）
 const MARGIN_X = 24;
-const TARGET_MID_GAP = 620;
+const MID_GAP = 60;
 function colGeometry(dims: Dims) {
-  const contentW = NODE_W * 2 + TARGET_MID_GAP;
-  const startX = Math.max(MARGIN_X, (dims.w - contentW) / 2);
-  return { leftX: startX, rightX: dims.w - startX - NODE_W };
+  const midX = dims.w / 2;
+  const leftX = Math.max(MARGIN_X, midX - MID_GAP / 2 - NODE_W);
+  const rightX = midX + MID_GAP / 2;
+  return { leftX, rightX };
 }
 const colH = (dims: Dims) => Math.max(200, dims.h - PAD_TOP - PAD_BOTTOM);
 const PAD_TOP = 110;
@@ -609,10 +609,10 @@ function App() {
           onMouseLeave={() => { drag.current = null; }}
         >
           <g transform={`translate(${pan.x} ${pan.y})`}>
-            <text x={layout.leftX + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">MOFの項</text>
-            <text x={layout.leftX + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999">{money(view.sectionColumnTotal)}</text>
-            <text x={layout.rightX + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="end">RSの事業</text>
-            <text x={layout.rightX + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="end">{money(view.projectColumnTotal)}</text>
+            <text x={layout.leftX} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="end">MOFの項</text>
+            <text x={layout.leftX} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="end">{money(view.sectionColumnTotal)}</text>
+            <text x={layout.rightX + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">RSの事業</text>
+            <text x={layout.rightX + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999">{money(view.projectColumnTotal)}</text>
             <g>
               {[...layout.left, ...layout.right].map(n => {
                 const active = nodeActive(n); const isLeft = n.side === 'left';
@@ -622,11 +622,10 @@ function App() {
                   >
                     <rect x={n.x} y={n.y} width={NODE_W} height={Math.max(0.6, n.h)} rx="2" fill={nodeColor(n)}
                       stroke={selected === n.id ? '#111' : 'none'} strokeWidth={selected === n.id ? 2 : 0} />
-                    {/* ラベルは列の内側（中央の列間ギャップ）へ向けて伸ばす。/sankey-svg の
-                        事業→支出先と同じ構図（両列のラベルが同じ隙間を挟んで向き合う）。
+                    {/* ラベルは列の外側へ向けて伸ばす（左列は左側、右列は右側）。
                         NODE_MIN_SLOTで各ノードに最低限の枠を確保しているため、高さでの
                         非表示判定はしない（/sankey-svgが間隔を空けて表示する方式と同じ考え方） */}
-                    <text x={isLeft ? n.x + NODE_W + 8 : n.x - 8} y={n.y + n.h / 2 + 4} textAnchor={isLeft ? 'start' : 'end'} fontSize="12" fill="#333">
+                    <text x={isLeft ? n.x - 8 : n.x + NODE_W + 8} y={n.y + n.h / 2 + 4} textAnchor={isLeft ? 'end' : 'start'} fontSize="12" fill="#333">
                       {trim(n.name)} <tspan fill="#8a8f8a">（{money(n.value)}）</tspan>
                     </text>
                     <title>{n.name}｜{money(n.value)}</title>
