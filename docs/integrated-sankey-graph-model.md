@@ -308,11 +308,11 @@ MOF予算書には「目」（性質別）とは別に「事項」（目的別�
   対象年度以外の年度の行は、そもそもMOF側の同一年度突き合わせの対象外なので
   含まない——`scripts/generate-sankey-svg-data.ts` の `TARGET_BUDGET_YEAR` で
   生成時点から絞られている）。集計値ではなく生レコードの一覧である点が
-  「目」タブとの違い。各行の先頭に予算種別バッジ（`BudgetTypeBadge`、
-  `client/components/mof-kou/Badge.tsx`。`/mof-kou-moku` 等と共有し、
-  当初=緑・補正=橙・決算=紫の白背景アウトラインピル）、その右に会計区分バッジ
-  （`getAccountBadgeStyle(classifyAccountCategory(...))` を共有 `Badge` で描画）を
-  並べる。年度の併記（「（N年度）」）はノイズなので付けない。目名（`subItem`）は
+  「目」タブとの違い。各行の先頭に会計区分バッジ（`getAccountBadgeStyle(
+  classifyAccountCategory(...))` を共有 `Badge` で描画）、その右に予算種別バッジ
+  （`BudgetTypeBadge`、`client/components/mof-kou/Badge.tsx`。`/mof-kou-moku` 等と
+  共有し、当初=緑・補正=橙・決算=紫の白背景アウトラインピル）を並べる。年度の併記
+  （「（N年度）」）はノイズなので付けない。目名（`subItem`）は
   同じ行の右側に金額を右寄せで表示するため `trim()` で切り詰め、`overflow:hidden`
   で折り返さずellipsis表示にする。名前側のflexアイテムは `flex: '1 1 0%'`
   （`flex-basis: 0`）にする必要がある——`flex: '1 1 auto'` だと折り返し判定が

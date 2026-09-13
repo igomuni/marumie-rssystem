@@ -954,10 +954,10 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
               return (
                 <ListRow key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`}
                   badges={<>
+                    {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
                     {rsOnlyBadge
                       ? <OutlineBadge label={rsOnlyBadge.label} color={rsOnlyBadge.color} />
                       : <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />}
-                    {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
                   </>}
                   name={i.subItem || i.item || i.note || i.budgetType || '（内訳なし）'} amount={money(i.amount)}
                   meta={<>
