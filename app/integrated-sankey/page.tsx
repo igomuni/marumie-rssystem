@@ -901,6 +901,22 @@ const listButtonStyle: React.CSSProperties = { display: 'flex', flexWrap: 'wrap'
 const listNameStyle: React.CSSProperties = { flex: '1 1 150px', minWidth: 0, fontSize: 13, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 const listValueStyle: React.CSSProperties = { flex: '0 0 100%', minWidth: 0, fontSize: 12, color: '#777', textAlign: 'right' };
 
+/** サイドパネルの一覧行の共通レイアウト。1行目＝バッジ＋名前（trimして省略）＋金額の
+ * 右寄せ併記、2行目以降＝補足情報を左寄せで表示する。詳細パネルの全タブの一覧で
+ * この構造に統一する */
+function ListRow({ badges, name, amount, meta }: { badges?: React.ReactNode; name: string; amount: React.ReactNode; meta?: React.ReactNode }) {
+  return (
+    <div style={listButtonStyle}>
+      <span style={{ ...listNameStyle, flex: '1 1 0%', display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+        {badges}
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(name)}</span>
+      </span>
+      <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{amount}</span>
+      {meta && <div style={{ flex: '0 0 100%', fontSize: 11, color: '#999', textAlign: 'left' }}>{meta}</div>}
+    </div>
+  );
+}
+
 function SectionDetail({ section, itemEdges, projects, onClose }: {
   section: IntegratedSectionNode; itemEdges: IntegratedItemEdge[]; projects: IntegratedProjectNode[]; onClose: () => void;
 }) {
@@ -938,20 +954,13 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
           [...itemEdges].sort((a, b) => b.value - a.value).slice(0, 200).map(e => (
-            <div key={e.id} style={listButtonStyle}>
-              <span style={listNameStyle}>{e.itemName}</span>
-              <span style={listValueStyle}>
-                {money(e.value)}・{e.status === 'connected' ? `RS接続済み${e.target.startsWith('project:') ? `（${projectById.get(e.target)?.name ?? ''}）` : ''}` : e.status === 'excess' ? '超過・要確認' : 'RS未接続'}
-              </span>
-            </div>
+            <ListRow key={e.id} name={e.itemName} amount={money(e.value)}
+              meta={e.status === 'connected' ? `RS接続済み${e.target.startsWith('project:') ? `（${projectById.get(e.target)?.name ?? ''}）` : ''}` : e.status === 'excess' ? '超過・要確認' : 'RS未接続'} />
           ))
         ) : (
           projectTotals.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているRS事業がありません</p> : (
             [...projectTotals.entries()].sort((a, b) => b[1] - a[1]).map(([pid, value]) => (
-              <div key={pid} style={listButtonStyle}>
-                <span style={listNameStyle}>{projectById.get(pid)?.name ?? pid}</span>
-                <span style={listValueStyle}>{money(value)}</span>
-              </div>
+              <ListRow key={pid} name={projectById.get(pid)?.name ?? pid} amount={money(value)} />
             ))
           )
         )}
@@ -999,21 +1008,22 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
           // （集計値ではなく生のレコード。集計サマリは別タブ）
           project.budgetBreakdown.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>予算執行レコードがありません</p> : (
             project.budgetBreakdown.map((i, n) => {
-              const accBadge = getAccountBadgeStyle(classifyAccountCategory(i.accountCategory));
+              const category = classifyAccountCategory(i.accountCategory);
+              const accBadge = getAccountBadgeStyle(category);
+              // 会計区分が一般のときは「会計」列が常に「一般会計」で自明なので表示しない
+              const accountText = category === 'general' ? null : i.account;
               return (
-                <div key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`} style={listButtonStyle}>
-                  {/* 目名の行に金額を右寄せで併記する。名前は折り返さずtruncする */}
-                  <span style={{ ...listNameStyle, flex: '1 1 0%', display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+                <ListRow key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`}
+                  badges={<>
                     <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />
                     {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(i.subItem || i.item)}</span>
-                  </span>
-                  <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{money(i.amount)}</span>
-                  <span style={listValueStyle}>{i.account} / {i.item}</span>
-                  {i.note.trim() && (
-                    <span style={{ flex: '0 0 100%', fontSize: 11, color: '#999' }}>補足: {i.note}</span>
-                  )}
-                </div>
+                  </>}
+                  name={i.subItem || i.item} amount={money(i.amount)}
+                  meta={<>
+                    <div>{[accountText, i.item].filter(Boolean).join(' / ')}</div>
+                    {i.note.trim() && <div>補足: {i.note}</div>}
+                  </>}
+                />
               );
             })
           )
@@ -1037,25 +1047,22 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
             <h3 style={{ fontSize: 13, fontWeight: 700, margin: '10px 0 4px' }}>MOF項からの接続</h3>
             {bySection.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているMOF項がありません</p> : (
               [...bySection.entries()].sort((a, b) => b[1] - a[1]).map(([sid, value]) => (
-                <div key={sid} style={listButtonStyle}>
-                  <span style={listNameStyle}>{sectionById.get(sid)?.name ?? sid}</span>
-                  <span style={listValueStyle}>{money(value)}</span>
-                </div>
+                <ListRow key={sid} name={sectionById.get(sid)?.name ?? sid} amount={money(value)} />
               ))
             )}
           </>
         ) : (
           project.budgetItems.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>目内訳がありません</p> : (
             project.budgetItems.map((i, n) => (
-              <div key={`${i.item}-${i.subItem}-${n}`} style={listButtonStyle}>
-                <span style={{ ...listNameStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <ListRow key={`${i.item}-${i.subItem}-${n}`}
+                badges={
                   <span style={{ background: i.connected ? '#d1fae5' : '#e5e5e5', color: i.connected ? '#065f46' : '#555', padding: '1px 5px', borderRadius: 8, fontSize: 10, fontWeight: 600, flexShrink: 0 }}>
                     {i.connected ? 'MOF接続済み' : 'MOF未接続'}
                   </span>
-                  {i.subItem || i.item}
-                </span>
-                <span style={listValueStyle}>{i.accountCategory} / {i.item} / {money(i.amount)}</span>
-              </div>
+                }
+                name={i.subItem || i.item} amount={money(i.amount)}
+                meta={`${i.accountCategory} / ${i.item}`}
+              />
             ))
           )
         )}
@@ -1082,10 +1089,7 @@ function AggregateDetail({ name, items, onClose }: { name: string; items: { name
       />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {items.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>内訳はありません</p> : items.map((it, i) => (
-          <div key={i} style={listButtonStyle}>
-            <span style={listNameStyle}>{it.name}</span>
-            <span style={listValueStyle}>{money(it.value)}</span>
-          </div>
+          <ListRow key={i} name={it.name} amount={money(it.value)} />
         ))}
       </div>
     </PanelShell>
