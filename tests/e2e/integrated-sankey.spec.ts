@@ -115,7 +115,10 @@ test('検索・表示件数・ズーム・パンが機能する', async ({ page 
   await page.getByTestId('zoom-out').click();
   await page.getByRole('button', { name: '全体' }).click();
 
-  await page.getByLabel('表示件数').selectOption('25');
+  // 表示範囲は /sankey-svg と同じ RangeWindowRow（クリックで件数を直接入力）
+  await page.getByRole('button', { name: 'MOF項の表示件数' }).click();
+  await page.getByRole('spinbutton').first().fill('25');
+  await page.getByRole('spinbutton').first().press('Enter');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible();
 
   const before = await page.getByTestId('sankey-node').count();

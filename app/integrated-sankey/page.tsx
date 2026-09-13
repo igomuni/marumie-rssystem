@@ -14,6 +14,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
+import { RangeWindowRow } from '@/client/components/SankeySvg/RangeWindowRows';
 import type {
   IntegratedGraph,
   IntegratedItemEdge,
@@ -88,7 +89,25 @@ function nodeColor(n: DisplayNode) {
   return NODE_COLORS.aggregate;
 }
 
-function buildView(data: IntegratedGraph, limit: number, query: string) {
+export interface RangeWindow {
+  /** 表示件数（窓の大きさ） */
+  topN: number;
+  /** 表示開始オフセット（0始まり） */
+  offset: number;
+}
+
+function windowSlice<T>(ranked: T[], w: RangeWindow) {
+  const maxOffset = Math.max(0, ranked.length - w.topN);
+  const offset = Math.max(0, Math.min(w.offset, maxOffset));
+  return { shown: ranked.slice(offset, offset + w.topN), offset, maxOffset, total: ranked.length };
+}
+
+function buildView(
+  data: IntegratedGraph,
+  sectionWindow: RangeWindow,
+  projectWindow: RangeWindow,
+  query: string,
+) {
   const q = query.trim().toLowerCase();
   const matchSection = (s: IntegratedSectionNode) =>
     !q || `${s.name} ${s.ministry} ${s.organization}`.toLowerCase().includes(q);
@@ -107,26 +126,30 @@ function buildView(data: IntegratedGraph, limit: number, query: string) {
   for (const e of data.edges) {
     if (keptIds.has(e.source)) sectionDrawn.set(e.source, (sectionDrawn.get(e.source) ?? 0) + e.value);
   }
-  const ranked = [...kept].sort((a, b) => (sectionDrawn.get(b.id) ?? 0) - (sectionDrawn.get(a.id) ?? 0));
-  const shown = ranked.slice(0, limit);
+  const rankedSections = [...kept].sort((a, b) => (sectionDrawn.get(b.id) ?? 0) - (sectionDrawn.get(a.id) ?? 0));
+  const sectionRange = windowSlice(rankedSections, sectionWindow);
+  const shown = sectionRange.shown;
   const shownIds = new Set(shown.map(s => s.id));
-  const hasOtherSections = ranked.length > shown.length;
+  const hasOtherSections = sectionRange.total > shown.length;
 
   // 表示外の項は捨てずに「その他の項」へ束ねる（内訳へ到達できるようにする）
   const sourceOf = (e: IntegratedItemEdge) =>
     shownIds.has(e.source) ? e.source : keptIds.has(e.source) ? OTHER_SECTIONS : null;
 
-  const inflow = new Map<string, number>();
+  // 右列（RS事業）の母集合は、いま窓に入っている項だけでなく「絞り込みで残った項全体」から
+  // 流入する事業とする。左の窓を動かしても右の総件数・並び順が揺れ動かないようにするため
+  // （/sankey-svg の recipientUniverseCount と同じ考え方）
+  const inflowAll = new Map<string, number>();
   for (const e of data.edges) {
-    if (!sourceOf(e) || !e.target.startsWith('project:')) continue;
-    inflow.set(e.target, (inflow.get(e.target) ?? 0) + e.value);
+    if (!keptIds.has(e.source) || !e.target.startsWith('project:')) continue;
+    inflowAll.set(e.target, (inflowAll.get(e.target) ?? 0) + e.value);
   }
-  // 絞り込みは左列（項）で効かせる。残った項から流入する事業はすべて右列の候補にする
-  const projectPool = data.projects.filter(p => inflow.has(p.id));
-  const rankedProjects = [...projectPool].sort((a, b) => (inflow.get(b.id) ?? 0) - (inflow.get(a.id) ?? 0));
-  const shownProjects = rankedProjects.slice(0, limit);
+  const projectPool = data.projects.filter(p => inflowAll.has(p.id));
+  const rankedProjects = [...projectPool].sort((a, b) => (inflowAll.get(b.id) ?? 0) - (inflowAll.get(a.id) ?? 0));
+  const projectRange = windowSlice(rankedProjects, projectWindow);
+  const shownProjects = projectRange.shown;
   const shownProjectIds = new Set(shownProjects.map(p => p.id));
-  const hasOtherProjects = rankedProjects.length > shownProjects.length;
+  const hasOtherProjects = projectRange.total > shownProjects.length;
 
   const targetOf = (e: IntegratedItemEdge) =>
     !e.target.startsWith('project:') ? e.target : shownProjectIds.has(e.target) ? e.target : OTHER_PROJECTS;
@@ -160,7 +183,7 @@ function buildView(data: IntegratedGraph, limit: number, query: string) {
     .filter(n => n.value > 0)
     .sort((a, b) => b.value - a.value);
   if (hasOtherSections && (outTotals.get(OTHER_SECTIONS) ?? 0) > 0) {
-    left.push({ id: OTHER_SECTIONS, name: `その他の項（${ranked.length - shown.length}件）`, value: outTotals.get(OTHER_SECTIONS)!, side: 'left', kind: 'other-sections' });
+    left.push({ id: OTHER_SECTIONS, name: `その他の項（${sectionRange.total - shown.length}件）`, value: outTotals.get(OTHER_SECTIONS)!, side: 'left', kind: 'other-sections' });
   }
 
   const right: DisplayNode[] = shownProjects
@@ -176,7 +199,7 @@ function buildView(data: IntegratedGraph, limit: number, query: string) {
   }
   right.sort((a, b) => b.value - a.value);
   if (hasOtherProjects && (inTotals.get(OTHER_PROJECTS) ?? 0) > 0) {
-    right.push({ id: OTHER_PROJECTS, name: `その他のRS事業（${rankedProjects.length - shownProjects.length}件）`, value: inTotals.get(OTHER_PROJECTS)!, side: 'right', kind: 'other-projects' });
+    right.push({ id: OTHER_PROJECTS, name: `その他のRS事業（${projectRange.total - shownProjects.length}件）`, value: inTotals.get(OTHER_PROJECTS)!, side: 'right', kind: 'other-projects' });
   }
 
   const sumOf = (status: IntegratedItemEdge['status']) =>
@@ -189,7 +212,11 @@ function buildView(data: IntegratedGraph, limit: number, query: string) {
     unconnected: sumOf('unconnected'),
     excess: sumOf('excess'),
   };
-  return { left, right, edges, totals, sectionCount: ranked.length, projectCount: rankedProjects.length };
+  return {
+    left, right, edges, totals,
+    sectionUniverse: sectionRange.total, sectionMaxOffset: sectionRange.maxOffset, sectionOffset: sectionRange.offset,
+    projectUniverse: projectRange.total, projectMaxOffset: projectRange.maxOffset, projectOffset: projectRange.offset,
+  };
 }
 
 type ViewModel = ReturnType<typeof buildView>;
@@ -247,7 +274,12 @@ function ribbonPath(x0: number, sy: number, x1: number, ty: number, w: number) {
 function App() {
   const [data, setData] = useState<IntegratedGraph | null>(null);
   const [error, setError] = useState('');
-  const [limit, setLimit] = useState(35);
+  // 表示範囲。/sankey-svg の RangeWindowRow と同じ「件数＋開始オフセット」の2軸を、
+  // MOF項（左列）・RS事業（右列）それぞれに独立して持つ
+  const [topSection, setTopSection] = useState(35);
+  const [sectionOffset, setSectionOffset] = useState(0);
+  const [topProject, setTopProject] = useState(35);
+  const [projectOffset, setProjectOffset] = useState(0);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [hover, setHover] = useState<RenderEdge | null>(null);
@@ -265,8 +297,21 @@ function App() {
       .catch(e => setError(e.message));
   }, []);
 
-  const view = useMemo(() => (data ? buildView(data, limit, query) : null), [data, limit, query]);
+  const view = useMemo(
+    () => (data ? buildView(data, { topN: topSection, offset: sectionOffset }, { topN: topProject, offset: projectOffset }, query) : null),
+    [data, topSection, sectionOffset, topProject, projectOffset, query],
+  );
   const layout = useMemo(() => (view ? buildLayout(view) : null), [view]);
+
+  // /sankey-svg の「Reset offset when topN changes」「Reset offsets when filter changes」に倣う。
+  // 窓の大きさを変えた・絞り込みを変えたときは先頭へ戻し、母集合が縮んで今の窓が指す範囲の
+  // 外に出た場合の混乱を避ける
+  const prevTopSection = useRef(topSection);
+  useEffect(() => { if (prevTopSection.current !== topSection) { prevTopSection.current = topSection; setSectionOffset(0); } }, [topSection]);
+  const prevTopProject = useRef(topProject);
+  useEffect(() => { if (prevTopProject.current !== topProject) { prevTopProject.current = topProject; setProjectOffset(0); } }, [topProject]);
+  const prevQuery = useRef(query);
+  useEffect(() => { if (prevQuery.current !== query) { prevQuery.current = query; setSectionOffset(0); setProjectOffset(0); } }, [query]);
 
   const selectedNode = layout?.byId.get(selected ?? '') ?? null;
   const selectedEdges = useMemo(
@@ -450,16 +495,22 @@ function App() {
             placeholder="項・事業を検索"
             className="h-9 w-52 rounded-lg border border-black/10 bg-white/90 px-3 text-sm shadow-md backdrop-blur"
           />
-          <select
-            aria-label="表示件数"
-            value={limit}
-            onChange={e => setLimit(Number(e.target.value))}
-            className="h-9 rounded-lg border border-black/10 bg-white/90 px-2 text-sm shadow-md backdrop-blur"
-          >
-            <option value={25}>上位25</option>
-            <option value={35}>上位35</option>
-            <option value={50}>上位50</option>
-          </select>
+          {/* 表示範囲。/sankey-svg の rangeCard と同じ「スライダー＝窓の位置、矢印＝件数」の
+              RangeWindowRow を、MOF項・RS事業それぞれの軸に独立して1行ずつ並べる */}
+          <div className="flex w-[300px] flex-col gap-1 rounded-lg border border-black/10 bg-white/90 px-2 py-1.5 shadow-md backdrop-blur">
+            <RangeWindowRow
+              label="MOF項" total={view.sectionUniverse}
+              topN={topSection} setTopN={setTopSection}
+              offset={view.sectionOffset} maxOffset={view.sectionMaxOffset}
+              onOffsetChange={setSectionOffset} markReplace={() => {}} metaFontPx={11}
+            />
+            <RangeWindowRow
+              label="RS事業" total={view.projectUniverse}
+              topN={topProject} setTopN={setTopProject}
+              offset={view.projectOffset} maxOffset={view.projectMaxOffset}
+              onOffsetChange={setProjectOffset} markReplace={() => {}} metaFontPx={11}
+            />
+          </div>
           <button data-testid="zoom-out" onClick={() => setScale(v => Math.max(0.5, v - 0.2))} className="h-9 w-9 rounded-lg border border-black/10 bg-white/90 shadow-md backdrop-blur hover:bg-white">−</button>
           <button data-testid="zoom-in" onClick={() => setScale(v => Math.min(6, v + 0.2))} className="h-9 w-9 rounded-lg border border-black/10 bg-white/90 shadow-md backdrop-blur hover:bg-white">＋</button>
           <button onClick={reset} className="h-9 rounded-lg border border-black/10 bg-white/90 px-3 text-xs shadow-md backdrop-blur hover:bg-white">全体</button>
