@@ -106,19 +106,19 @@ function buildView(
   data: IntegratedGraph,
   sectionWindow: RangeWindow,
   projectWindow: RangeWindow,
-  /** 部分一致・正規表現の切り替えは呼び出し側（App）が担う。ここは述語を適用するだけ */
-  matchText: (haystack: string) => boolean,
+  /** MOF項・RS事業それぞれ独立した検索ボックスの述語。部分一致・正規表現の切り替えは
+   * 呼び出し側（App）が担う。ここは述語を適用するだけ */
+  matchSectionText: (haystack: string) => boolean,
+  matchProjectText: (haystack: string) => boolean,
 ) {
   const matchSection = (s: IntegratedSectionNode) =>
-    matchText(`${s.name} ${s.ministry} ${s.organization} ${s.accountType === 'general' ? '一般会計' : '特別会計'}`);
+    matchSectionText(`${s.name} ${s.ministry} ${s.organization} ${s.accountType === 'general' ? '一般会計' : '特別会計'}`);
   const matchProject = (p: IntegratedProjectNode) =>
-    matchText(`${p.name} ${p.ministry} ${p.projectId}`);
+    matchProjectText(`${p.name} ${p.ministry} ${p.projectId}`);
 
-  const matchedProjectIds = new Set(data.projects.filter(matchProject).map(p => p.id));
-  // 項そのものが一致するか、一致した事業へ繋がる項を残す
-  const kept = data.sections.filter(
-    s => matchSection(s) || data.edges.some(e => e.source === s.id && matchedProjectIds.has(e.target)),
-  );
+  // MOF項・RS事業の検索は互いに独立。項の絞り込みはこの列自身の一致だけで決める
+  // （RS事業側の検索語で項を引っ張り出す、といった相互連携はしない）
+  const kept = data.sections.filter(matchSection);
   const keptIds = new Set(kept.map(s => s.id));
 
   // 並び順は描画に使う合計（＝その項から出る帯の合計）で決める。高さと順序をずらさない
@@ -144,7 +144,7 @@ function buildView(
     if (!keptIds.has(e.source) || !e.target.startsWith('project:')) continue;
     inflowAll.set(e.target, (inflowAll.get(e.target) ?? 0) + e.value);
   }
-  const projectPool = data.projects.filter(p => inflowAll.has(p.id));
+  const projectPool = data.projects.filter(p => inflowAll.has(p.id) && matchProject(p));
   const rankedProjects = [...projectPool].sort((a, b) => (inflowAll.get(b.id) ?? 0) - (inflowAll.get(a.id) ?? 0));
   const projectRange = windowSlice(rankedProjects, projectWindow);
   const shownProjects = projectRange.shown;
@@ -266,6 +266,122 @@ function buildLayout(view: ViewModel, zoom: number) {
   return { left, right, byId, bands, contentH };
 }
 
+/** 部分一致・正規表現の切り替えを1箇所に集約する。不正な正規表現は例外を投げず、
+ * 「該当なし」として扱う（/sankey-svg の searchRegexError と同じ考え方）。
+ * MOF項用・RS事業用のそれぞれ独立した検索ボックスから同じ形で呼ぶ */
+function buildMatcher(query: string, useRegex: boolean): { match: (haystack: string) => boolean; error: boolean } {
+  const q = query.trim();
+  if (!q) return { match: () => true, error: false };
+  if (useRegex) {
+    try { const re = new RegExp(q, 'i'); return { match: s => re.test(s), error: false }; }
+    catch { return { match: () => false, error: true }; }
+  }
+  const qLower = q.toLowerCase();
+  return { match: s => s.toLowerCase().includes(qLower), error: false };
+}
+
+/** /sankey-svg と同じ「入力＋.*トグル＋クリア」の検索ボックス。MOF項・RS事業で1つずつ使う */
+function SearchInput({ testId, label, placeholder, value, onChange, useRegex, onToggleRegex, error }: {
+  testId: string; label: string; placeholder: string; value: string; onChange: (v: string) => void;
+  useRegex: boolean; onToggleRegex: () => void; error: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-14 shrink-0 text-xs text-neutral-500">{label}</span>
+      <div className="relative flex-1 min-w-0">
+        <input
+          data-testid={testId}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="h-8 w-full rounded border bg-neutral-50 pl-2 pr-14 text-sm outline-none"
+          style={{ borderColor: error ? '#e53935' : '#d4d4d4' }}
+        />
+        <button
+          type="button"
+          aria-label={useRegex ? `${label}の正規表現検索をオフ` : `${label}を正規表現で検索`}
+          aria-pressed={useRegex}
+          title={useRegex ? '正規表現検索をオフ' : '正規表現で検索'}
+          onClick={onToggleRegex}
+          className={`absolute right-1.5 top-1/2 -translate-y-1/2 rounded px-1.5 py-0.5 font-mono text-xs font-bold ${useRegex ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-neutral-600'}`}
+        >.*</button>
+        {value && (
+          <button
+            type="button"
+            aria-label={`${label}の検索語をクリア`}
+            onClick={() => onChange('')}
+            className={`absolute top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 ${useRegex ? 'right-8' : 'right-1.5'}`}
+          >✕</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** /sankey-svg の会計区分・省庁フィルタと同じ「チェックボックス付きコンボボックス」。
+ * ボタンに選択状態の要約を出し、クリックで直下にチェックボックス一覧を開く。
+ * selected が空配列＝未絞り込み（すべて含む）という約束はこのページの他フィルタと揃える */
+function CheckboxCombobox({ label, options, selected, onChange }: {
+  label: string; options: { value: string; label: string }[]; selected: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const allSelected = selected.length === 0;
+  const summary = allSelected ? 'すべて'
+    : selected.length === 1 ? (options.find(o => o.value === selected[0])?.label ?? selected[0])
+      : `選択中 (${selected.length}/${options.length})`;
+  const isChecked = (v: string) => allSelected || selected.includes(v);
+  const toggle = (v: string) => {
+    const base = allSelected ? options.map(o => o.value) : selected;
+    const next = base.includes(v) ? base.filter(x => x !== v) : [...base, v];
+    onChange(next.length === options.length ? [] : next);
+  };
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-14 shrink-0 text-neutral-500">{label}</span>
+      <div className="relative flex-1 min-w-0">
+        <button
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label={label}
+          onClick={() => setOpen(v => !v)}
+          className="flex w-full items-center justify-between gap-1 rounded border border-neutral-300 bg-neutral-50 px-1.5 py-0.5 text-left"
+        >
+          <span className={`truncate ${allSelected ? 'text-neutral-400' : 'text-neutral-800'}`}>{summary}</span>
+          <svg xmlns="http://www.w3.org/2000/svg" height="12" viewBox="0 -960 960 960" width="12" fill="#aaa"
+            style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }}>
+            <path d="M480-360 280-560h400L480-360Z" />
+          </svg>
+        </button>
+        {open && (
+          <>
+            {/* 外クリックで閉じる。PageNavMenu と同じ全画面透明レイヤーの作法 */}
+            <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden="true" />
+            <div
+              role="listbox"
+              aria-label={label}
+              className="absolute left-0 top-full z-50 mt-1 max-h-56 w-max min-w-full overflow-auto rounded border border-neutral-200 bg-white shadow-lg"
+              onMouseDown={e => e.stopPropagation()}
+            >
+              <label className="flex cursor-pointer items-center gap-2 border-b border-neutral-100 px-2 py-1 font-semibold">
+                <input type="checkbox" checked={allSelected} onChange={() => onChange([])} />
+                すべて選択/解除
+              </label>
+              {options.map(o => (
+                <label key={o.value} className="flex cursor-pointer items-center gap-2 whitespace-nowrap px-2 py-1 hover:bg-neutral-50">
+                  <input type="checkbox" checked={isChecked(o.value)} onChange={() => toggle(o.value)} />
+                  {o.label}
+                </label>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2">
@@ -314,18 +430,22 @@ function App() {
   const [sectionOffset, setSectionOffset] = useState(0);
   const [topProject, setTopProject] = useState(35);
   const [projectOffset, setProjectOffset] = useState(0);
-  const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [hover, setHover] = useState<RenderEdge | null>(null);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
   const [scrollMode, setScrollMode] = useState<'zoom' | 'pan'>('zoom');
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [accounts, setAccounts] = useState<string[]>(['general', 'special']);
+  // 会計区分・所管は「空配列＝絞り込みなし（すべて含む）」の約束で統一する
+  const [accounts, setAccounts] = useState<string[]>([]);
   const [ministries, setMinistries] = useState<string[]>([]);
   const [itemQuery, setItemQuery] = useState('');
-  // 検索: /sankey-svg と同じく通常の部分一致・正規表現の2モードを切り替える
-  const [useRegex, setUseRegex] = useState(false);
+  // 検索: /sankey-svg と同じく部分一致・正規表現の2モードを切り替える。
+  // MOF項・RS事業はそれぞれ独立した検索ボックスを持つ（相互に連携しない）
+  const [sectionQuery, setSectionQuery] = useState('');
+  const [sectionUseRegex, setSectionUseRegex] = useState(false);
+  const [projectQuery, setProjectQuery] = useState('');
+  const [projectUseRegex, setProjectUseRegex] = useState(false);
   // 金額レンジ。MOF項の総額とRS事業の当初予算は別々の軸として独立に指定できる
   const [filterMofMinText, setFilterMofMinText] = useState('');
   const [filterMofMaxText, setFilterMofMaxText] = useState('');
@@ -343,23 +463,8 @@ function App() {
       .catch(e => setError(e.message));
   }, []);
 
-  // 正規表現が不正な場合はページをクラッシュさせず、該当なし（常にfalse）として扱う。
-  // /sankey-svg の searchRegexError と同じ考え方
-  const regexError = useMemo(() => {
-    if (!useRegex || !query.trim()) return false;
-    try { new RegExp(query.trim(), 'i'); return false; } catch { return true; }
-  }, [useRegex, query]);
-  const matchText = useMemo(() => {
-    const q = query.trim();
-    if (!q) return () => true;
-    if (useRegex) {
-      let re: RegExp | null = null;
-      try { re = new RegExp(q, 'i'); } catch { /* regexError 側で表示。ここは全件不一致にする */ }
-      return (s: string) => (re ? re.test(s) : false);
-    }
-    const qLower = q.toLowerCase();
-    return (s: string) => s.toLowerCase().includes(qLower);
-  }, [query, useRegex]);
+  const sectionMatcher = useMemo(() => buildMatcher(sectionQuery, sectionUseRegex), [sectionQuery, sectionUseRegex]);
+  const projectMatcher = useMemo(() => buildMatcher(projectQuery, projectUseRegex), [projectQuery, projectUseRegex]);
 
   const filteredData = useMemo(() => {
     if (!data) return null;
@@ -368,8 +473,8 @@ function App() {
     const rsMin = parseAmountToYen(filterRsMinText);
     const rsMax = parseAmountToYen(filterRsMaxText);
     const sections = data.sections.filter(s =>
-      accounts.includes(s.accountType) &&
-      (!ministries.length || ministries.includes(s.ministry)) &&
+      (accounts.length === 0 || accounts.includes(s.accountType)) &&
+      (ministries.length === 0 || ministries.includes(s.ministry)) &&
       (mofMin === null || s.amount >= mofMin) &&
       (mofMax === null || s.amount <= mofMax));
     const projects = data.projects.filter(p =>
@@ -382,8 +487,12 @@ function App() {
   useEffect(() => { setSectionOffset(0); setProjectOffset(0); },
     [accounts, ministries, itemQuery, filterMofMinText, filterMofMaxText, filterRsMinText, filterRsMaxText]);
   const view = useMemo(
-    () => (filteredData ? buildView(filteredData, { topN: topSection, offset: sectionOffset }, { topN: topProject, offset: projectOffset }, matchText) : null),
-    [filteredData, topSection, sectionOffset, topProject, projectOffset, matchText],
+    () => (filteredData ? buildView(
+      filteredData,
+      { topN: topSection, offset: sectionOffset }, { topN: topProject, offset: projectOffset },
+      sectionMatcher.match, projectMatcher.match,
+    ) : null),
+    [filteredData, topSection, sectionOffset, topProject, projectOffset, sectionMatcher, projectMatcher],
   );
   const layout = useMemo(() => (view ? buildLayout(view, scale) : null), [view, scale]);
   const initiallyFitted = useRef(false);
@@ -401,8 +510,10 @@ function App() {
   useEffect(() => { if (prevTopSection.current !== topSection) { prevTopSection.current = topSection; setSectionOffset(0); } }, [topSection]);
   const prevTopProject = useRef(topProject);
   useEffect(() => { if (prevTopProject.current !== topProject) { prevTopProject.current = topProject; setProjectOffset(0); } }, [topProject]);
-  const prevQuery = useRef(query);
-  useEffect(() => { if (prevQuery.current !== query) { prevQuery.current = query; setSectionOffset(0); setProjectOffset(0); } }, [query]);
+  const prevSectionQuery = useRef(sectionQuery);
+  useEffect(() => { if (prevSectionQuery.current !== sectionQuery) { prevSectionQuery.current = sectionQuery; setSectionOffset(0); } }, [sectionQuery]);
+  const prevProjectQuery = useRef(projectQuery);
+  useEffect(() => { if (prevProjectQuery.current !== projectQuery) { prevProjectQuery.current = projectQuery; setProjectOffset(0); } }, [projectQuery]);
 
   const selectedNode = layout?.byId.get(selected ?? '') ?? null;
   const selectedEdges = useMemo(
@@ -551,67 +662,37 @@ function App() {
           )}
       </div>
 
-        {/* 検索・フィルタ: /sankey-svg と同じく画面左上に置く。カード（入力＋開閉式フィルタ）＋
-            解除ボタンの構成、開閉トグルもsankey-svgと同じ位置（カード外・右下の小さな矢印）にする */}
+        {/* 検索・フィルタ: /sankey-svg と同じく画面左上に置く。MOF項・RS事業それぞれ独立した
+            検索ボックスを常時表示し、会計区分・所管はチェックボックス付きコンボボックス
+            （/sankey-svg の会計・省庁フィルタと同じ部品）にする。開閉式の詳細フィルタに
+            金額レンジ・目名を収める */}
         <div className="absolute left-3 top-3 z-30 flex items-start gap-1">
-          <div className="flex flex-col" style={{ width: 288 }}>
-            <div
-              className="overflow-hidden rounded-lg rounded-br-none border bg-white/95 shadow-md backdrop-blur"
-              style={{ borderColor: regexError ? '#e53935' : 'rgba(0,0,0,0.1)' }}
-            >
-              <div className="relative">
-                <input
-                  data-testid="search-input"
-                  value={query}
-                  onChange={e => { setQuery(e.target.value); setSelected(null); }}
-                  placeholder="会計・省庁・項・RS事業を検索"
-                  className="h-9 w-full bg-transparent pl-3 pr-16 text-sm outline-none"
+          <div className="flex flex-col" style={{ width: 340 }}>
+            <div className="overflow-hidden rounded-lg rounded-br-none border border-black/10 bg-white/95 shadow-md backdrop-blur">
+              <div className="flex flex-col gap-1.5 p-2">
+                <SearchInput
+                  testId="search-input-section" label="MOFの項" placeholder="項名・所管で検索"
+                  value={sectionQuery} onChange={v => { setSectionQuery(v); setSelected(null); }}
+                  useRegex={sectionUseRegex} onToggleRegex={() => setSectionUseRegex(v => !v)}
+                  error={sectionMatcher.error}
                 />
-                {/* 正規表現トグル。/sankey-svg の .* ボタンと同じ */}
-                <button
-                  type="button"
-                  aria-label={useRegex ? '正規表現検索をオフ' : '正規表現で検索'}
-                  aria-pressed={useRegex}
-                  title={useRegex ? '正規表現検索をオフ' : '正規表現で検索'}
-                  onClick={() => setUseRegex(v => !v)}
-                  className={`absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 py-0.5 font-mono text-xs font-bold ${useRegex ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-neutral-600'}`}
-                >.*</button>
-                {query && (
-                  <button
-                    type="button"
-                    aria-label="検索語をクリア"
-                    onClick={() => setQuery('')}
-                    className={`absolute top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 ${useRegex ? 'right-9' : 'right-2'}`}
-                  >✕</button>
-                )}
+                <SearchInput
+                  testId="search-input-project" label="RSの事業" placeholder="事業名・PIDで検索"
+                  value={projectQuery} onChange={v => { setProjectQuery(v); setSelected(null); }}
+                  useRegex={projectUseRegex} onToggleRegex={() => setProjectUseRegex(v => !v)}
+                  error={projectMatcher.error}
+                />
               </div>
               {filtersOpen && (
                 <div className="flex flex-col gap-2.5 border-t border-black/5 px-3 py-2.5 text-xs">
-                  <FilterRow label="会計">
-                    {(['general', 'special'] as const).map(a => (
-                      <label key={a} className="flex items-center gap-1">
-                        <input type="checkbox" checked={accounts.includes(a)}
-                          onChange={() => setAccounts(v => v.includes(a) ? v.filter(x => x !== a) : [...v, a])} />
-                        {a === 'general' ? '一般会計' : '特別会計'}
-                      </label>
-                    ))}
-                  </FilterRow>
-                  <FilterRow label="所管">
-                    <details className="w-full">
-                      <summary className="cursor-pointer text-neutral-600">
-                        {ministries.length === 0 ? 'すべて' : `選択中 (${ministries.length})`}
-                      </summary>
-                      <div className="mt-1 max-h-40 overflow-auto rounded border bg-neutral-50 p-1">
-                        {[...new Set(data.sections.map(s => s.ministry))].sort().map(m => (
-                          <label key={m} className="flex items-center gap-1 p-0.5">
-                            <input type="checkbox" checked={ministries.includes(m)}
-                              onChange={() => setMinistries(v => v.includes(m) ? v.filter(x => x !== m) : [...v, m])} />
-                            {m}
-                          </label>
-                        ))}
-                      </div>
-                    </details>
-                  </FilterRow>
+                  <CheckboxCombobox
+                    label="会計" selected={accounts} onChange={setAccounts}
+                    options={[{ value: 'general', label: '一般会計' }, { value: 'special', label: '特別会計' }]}
+                  />
+                  <CheckboxCombobox
+                    label="所管" selected={ministries} onChange={setMinistries}
+                    options={[...new Set(data.sections.map(s => s.ministry))].sort().map(m => ({ value: m, label: m }))}
+                  />
                   <FilterRow label="目名">
                     <input aria-label="目名" value={itemQuery} onChange={e => setItemQuery(e.target.value)}
                       placeholder="部分一致" className="w-full rounded border border-neutral-300 bg-neutral-50 px-1.5 py-0.5" />
@@ -637,8 +718,9 @@ function App() {
             type="button"
             aria-label="フィルタを解除"
             onClick={() => {
-              setQuery(''); setUseRegex(false);
-              setAccounts(['general', 'special']); setMinistries([]); setItemQuery('');
+              setSectionQuery(''); setSectionUseRegex(false);
+              setProjectQuery(''); setProjectUseRegex(false);
+              setAccounts([]); setMinistries([]); setItemQuery('');
               setFilterMofMinText(''); setFilterMofMaxText(''); setFilterRsMinText(''); setFilterRsMaxText('');
             }}
             className="h-9 rounded-lg border border-black/10 bg-white/90 px-2 text-xs shadow-md backdrop-blur hover:bg-white"
