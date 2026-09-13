@@ -69,7 +69,18 @@ test('2列表示・選択・詳細パネルが機能する', async ({ page }) =>
   // 左列＝MOF項、右列＝RS事業の2列だと読み取れる
   await expect(page.getByText('MOFの項', { exact: true })).toBeVisible();
   await expect(page.getByText('RSの事業', { exact: true })).toBeVisible();
+
+  // 列見出しが浮遊UI（左上カード・右上クラスタ）の裏に隠れないこと
+  const card = (await page.locator('h1:has-text("MOF項 × RS事業")').locator('..').boundingBox())!;
+  const leftHead = (await page.getByText('MOFの項', { exact: true }).boundingBox())!;
+  const rightHead = (await page.getByText('RSの事業', { exact: true }).boundingBox())!;
+  const searchBox = (await page.getByTestId('search-input').boundingBox())!;
+  expect(leftHead.x).toBeGreaterThan(card.x + card.width);
+  expect(rightHead.y).toBeGreaterThan(searchBox.y + searchBox.height);
   await expect(page.getByTestId('integrated-edge').first()).toBeVisible();
+
+  // 初期表示のまま撮る（パネル退避のアニメーション中に撮らないよう、操作の前に置く）
+  await page.screenshot({ path: 'test-results/integrated-sankey.png' });
 
   // RS未接続ノードがRS事業とは別に存在する
   await expect(page.locator('title', { hasText: 'RS未接続' }).first()).toBeAttached();
@@ -145,4 +156,27 @@ test('RS事業の詳細でMOF未接続の歳出予算項目を確認できる', 
   await expect(detail.getByText('RS予算事業', { exact: true })).toBeVisible();
   await expect(detail.getByText('MOF接続済み', { exact: true }).first()).toBeVisible();
   await expect(detail.getByRole('heading', { name: '目' })).toBeVisible();
+});
+
+test('ページ切替メニューが画面内に開く', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  // ドロップダウンは右端基準で開くので、ボタンが左端にあると画面外へ出る
+  await page.getByRole('button', { name: 'ページ切替メニュー' }).click();
+  const menu = page.getByRole('link', { name: 'サンキー図' });
+  await expect(menu).toBeVisible();
+  const box = (await menu.boundingBox())!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(1920);
+
+  // 詳細パネルを開くと、右上クラスタはパネル幅ぶん左へ退避する
+  await page.keyboard.press('Escape');
+  await page.mouse.click(10, 600);
+  const clusterBefore = (await page.getByTestId('search-input').boundingBox())!;
+  await page.getByTestId('sankey-node').first().click({ force: true });
+  await expect(page.getByTestId('integrated-detail')).toBeVisible();
+  await expect.poll(async () => (await page.getByTestId('search-input').boundingBox())!.x)
+    .toBeLessThan(clusterBefore.x - 300);
 });

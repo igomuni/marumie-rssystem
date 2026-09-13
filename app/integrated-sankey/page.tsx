@@ -27,11 +27,12 @@ const LABEL_GUTTER = 300;
 const COL_LEFT_X = LABEL_GUTTER + 20;
 const COL_RIGHT_X = CANVAS_W - LABEL_GUTTER - 20 - NODE_W;
 const COL_H = 860;
-const PAD_TOP = 56;
+const PAD_TOP = 110; // 左上カード・右上クラスタの下に列見出しが出るだけの余白
 const PAD_BOTTOM = 28;
 const MIN_NODE_H = 1.5; // 0だと消えてしまうので下限だけ置く。比例関係は保つ
 const LABEL_MIN_H = 9; // これ未満のノードはラベルを省く（重なり防止）
 const VALUE_LABEL_MIN_H = 15;
+const PANEL_W = 420; // 詳細パネル幅。右上クラスタの退避量と共用する
 
 // ── 配色 ──
 // /sankey-svg の意味づけ（緑＝予算側、灰＝集約、赤＝要注意）に合わせる。
@@ -279,73 +280,16 @@ function App() {
   const cx = CANVAS_W / 2;
   const cy = layout.contentH / 2;
   const reset = () => { setScale(1); setPan({ x: 0, y: 0 }); };
+  // /sankey-svg の rightControlsOffset と同じ方式。右パネルの幅だけ図と右上クラスタを退避させる
+  const rightControlsOffset = selected ? PANEL_W : 0;
 
   return (
-    <main className="fixed inset-0 flex flex-col overflow-hidden bg-[#f7f8f5] text-neutral-800">
-      <header className="z-20 flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-black/10 bg-white px-4 py-2 shadow-sm">
-        <div className="flex items-center gap-3">
-          <PageNavMenu current="/integrated-sankey" theme="light" />
-          <div>
-            <h1 className="text-base font-bold leading-tight">MOF項 × RS事業</h1>
-            <p className="text-[11px] leading-tight text-neutral-500">目をエッジとして結ぶファーストカット（2024年度当初予算）</p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-0.5 text-[11px]">
-          <div className="flex flex-wrap gap-3">
-            <span className="text-neutral-400">全体</span>
-            <span>MOF {money(data.metadata.mofAmount)}</span>
-            <span className="text-emerald-700">接続 {money(data.metadata.connectedAmount)}</span>
-            <span className="text-neutral-500">RS未接続 {money(data.metadata.unconnectedAmount)}</span>
-            {data.metadata.excessAmount > 0 && <span className="text-rose-600">超過 {money(data.metadata.excessAmount)}</span>}
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <span className="text-neutral-400">描画</span>
-            <span title="接続 + 未接続 + 超過。超過を独立した流出として描くため、MOF総額とは2×超過だけずれる">
-              帯の合計 {money(view.totals.all)}
-            </span>
-            <span className="text-emerald-700">接続 {money(view.totals.connected)}</span>
-            <span className="text-neutral-500">RS未接続 {money(view.totals.unconnected)}</span>
-            {view.totals.excess > 0 && <span className="text-rose-600">超過 {money(view.totals.excess)}</span>}
-            <span className="text-neutral-400">項 {view.left.length} ／ 事業 {view.right.length} を表示</span>
-          </div>
-        </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          <input
-            data-testid="search-input"
-            value={query}
-            onChange={e => { setQuery(e.target.value); setSelected(null); }}
-            placeholder="項・事業を検索"
-            className="w-52 rounded-lg border px-3 py-1.5 text-sm"
-          />
-          <select
-            aria-label="表示件数"
-            value={limit}
-            onChange={e => setLimit(Number(e.target.value))}
-            className="rounded-lg border px-2 py-1.5 text-sm"
-          >
-            <option value={25}>上位25</option>
-            <option value={35}>上位35</option>
-            <option value={50}>上位50</option>
-          </select>
-          <button data-testid="zoom-out" onClick={() => setScale(s => Math.max(0.5, s - 0.2))} className="h-8 w-8 rounded-lg border">−</button>
-          <button data-testid="zoom-in" onClick={() => setScale(s => Math.min(6, s + 0.2))} className="h-8 w-8 rounded-lg border">＋</button>
-          <button onClick={reset} className="rounded-lg border px-3 py-1.5 text-xs">全体</button>
-        </div>
-        <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 border-t border-black/5 pt-1.5 text-[11px]">
-          <Swatch color={NODE_COLORS.general} label="MOF項（一般会計）" />
-          <Swatch color={NODE_COLORS.special} label="MOF項（特別会計）" />
-          <Swatch color={NODE_COLORS.project} label="RS事業／接続した目" />
-          <Swatch color={EDGE_COLORS.unconnected} label="RS未接続の残差" />
-          <Swatch color={NODE_COLORS.excess} label="超過・要確認" />
-          <Swatch color={NODE_COLORS.aggregate} label="その他（集約）" />
-          <span className="text-neutral-400">帯の太さ＝金額（線形）／ ノード高＝接続する帯の合計</span>
-        </div>
-      </header>
-
-      <div className="flex min-h-0 flex-1">
-        <div className="relative min-w-0 flex-1">
+    <main className="fixed inset-0 overflow-hidden bg-[#f7f8f5] text-neutral-800">
+      {/* 図の領域。詳細パネル展開時はその幅ぶん狭める。viewBox の fit で図が描き直される */}
+      <div
+        className="absolute inset-y-0 left-0"
+        style={{ right: rightControlsOffset, transition: 'right 0.2s ease' }}
+      >
           <svg
             data-testid="integrated-canvas"
             className="h-full w-full cursor-grab"
@@ -361,7 +305,7 @@ function App() {
             onMouseLeave={() => { drag.current = null; setHover(null); }}
           >
             <g transform={`translate(${pan.x} ${pan.y}) translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`}>
-              <text x={COL_LEFT_X + NODE_W} y={PAD_TOP - 22} textAnchor="end" fontSize="13" fontWeight="700" fill="#555">MOFの項</text>
+              <text x={COL_LEFT_X + NODE_W + 8} y={PAD_TOP - 22} fontSize="13" fontWeight="700" fill="#555">MOFの項</text>
               <text x={COL_RIGHT_X} y={PAD_TOP - 22} fontSize="13" fontWeight="700" fill="#555">RSの事業</text>
 
               <g>
@@ -430,6 +374,40 @@ function App() {
           </svg>
 
 
+          {/* 左上: 表題と集計。図の上端に重ならないよう幅を抑える */}
+          <div className="absolute left-3 top-3 z-30 w-[430px] rounded-xl border border-black/10 bg-white/95 px-3 py-2 shadow-md backdrop-blur">
+            <h1 className="text-sm font-bold leading-tight">MOF項 × RS事業</h1>
+            <p className="text-[11px] leading-tight text-neutral-500">目をエッジとして結ぶファーストカット（2024年度当初予算）</p>
+            <div className="mt-1.5 flex flex-col gap-0.5 text-[11px]">
+              <div className="flex flex-wrap gap-x-3">
+                <span className="text-neutral-400">全体</span>
+                <span>MOF {money(data.metadata.mofAmount)}</span>
+                <span className="text-emerald-700">接続 {money(data.metadata.connectedAmount)}</span>
+                <span className="text-neutral-500">未接続 {money(data.metadata.unconnectedAmount)}</span>
+                {data.metadata.excessAmount > 0 && <span className="text-rose-600">超過 {money(data.metadata.excessAmount)}</span>}
+              </div>
+              <div className="flex flex-wrap gap-x-3">
+                <span className="text-neutral-400">描画</span>
+                <span title="接続 + 未接続 + 超過。超過を独立した流出として描くため、MOF総額とは2×超過だけずれる">
+                  帯 {money(view.totals.all)}
+                </span>
+                <span className="text-emerald-700">接続 {money(view.totals.connected)}</span>
+                <span className="text-neutral-500">未接続 {money(view.totals.unconnected)}</span>
+                {view.totals.excess > 0 && <span className="text-rose-600">超過 {money(view.totals.excess)}</span>}
+                <span className="text-neutral-400">項 {view.left.length}／事業 {view.right.length}</span>
+              </div>
+            </div>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 border-t border-black/5 pt-1.5 text-[11px]">
+              <Swatch color={NODE_COLORS.general} label="一般会計の項" />
+              <Swatch color={NODE_COLORS.special} label="特別会計の項" />
+              <Swatch color={NODE_COLORS.project} label="RS事業／接続した目" />
+              <Swatch color={EDGE_COLORS.unconnected} label="RS未接続の残差" />
+              <Swatch color={NODE_COLORS.excess} label="超過・要確認" />
+              <Swatch color={NODE_COLORS.aggregate} label="その他（集約）" />
+              <span className="text-neutral-400">帯の太さ＝金額（線形）</span>
+            </div>
+          </div>
+
           {hover && (
             <div
               data-testid="integrated-hover"
@@ -451,29 +429,64 @@ function App() {
               )}
             </div>
           )}
+      </div>
+
+        {/* 右上クラスタ: ［検索 - 表示件数 - ズーム - ページ切替］。/sankey-svg と同じく
+            右パネル展開時は rightControlsOffset ぶん左へ退避する。ページ切替メニューは
+            ドロップダウンが右端基準で開くため、必ずクラスタの右端に置く */}
+        <div
+          style={{
+            position: 'absolute', top: 12, right: 12 + rightControlsOffset, zIndex: 200,
+            display: 'flex', gap: 8, alignItems: 'flex-start', transition: 'right 0.2s ease',
+          }}
+        >
+          <input
+            data-testid="search-input"
+            value={query}
+            onChange={e => { setQuery(e.target.value); setSelected(null); }}
+            placeholder="項・事業を検索"
+            className="h-9 w-52 rounded-lg border border-black/10 bg-white/90 px-3 text-sm shadow-md backdrop-blur"
+          />
+          <select
+            aria-label="表示件数"
+            value={limit}
+            onChange={e => setLimit(Number(e.target.value))}
+            className="h-9 rounded-lg border border-black/10 bg-white/90 px-2 text-sm shadow-md backdrop-blur"
+          >
+            <option value={25}>上位25</option>
+            <option value={35}>上位35</option>
+            <option value={50}>上位50</option>
+          </select>
+          <button data-testid="zoom-out" onClick={() => setScale(v => Math.max(0.5, v - 0.2))} className="h-9 w-9 rounded-lg border border-black/10 bg-white/90 shadow-md backdrop-blur hover:bg-white">−</button>
+          <button data-testid="zoom-in" onClick={() => setScale(v => Math.min(6, v + 0.2))} className="h-9 w-9 rounded-lg border border-black/10 bg-white/90 shadow-md backdrop-blur hover:bg-white">＋</button>
+          <button onClick={reset} className="h-9 rounded-lg border border-black/10 bg-white/90 px-3 text-xs shadow-md backdrop-blur hover:bg-white">全体</button>
+          <PageNavMenu current="/integrated-sankey" theme="light" />
         </div>
 
-        {selected && (
-          <aside data-testid="integrated-detail" className="z-20 w-[420px] shrink-0 overflow-auto border-l border-black/10 bg-white p-5">
-            <button onClick={() => setSelected(null)} className="float-right rounded border px-2 py-1 text-xs">閉じる</button>
-            {selectedNode?.section ? (
-              <>
-                <p className="text-xs font-semibold text-neutral-500">MOF項</p>
-                <h2 className="mt-1 pr-10 text-lg font-bold">{selectedNode.name}</h2>
-                <SectionDetail section={selectedNode.section} edges={selectedEdges} />
-              </>
-            ) : selectedNode?.project ? (
-              <>
-                <p className="text-xs font-semibold text-neutral-500">RS予算事業</p>
-                <h2 className="mt-1 pr-10 text-lg font-bold">{selectedNode.name}</h2>
-                <ProjectDetail project={selectedNode.project} />
-              </>
-            ) : (
-              <SpecialDetail id={selected} name={selectedNode?.name ?? ''} edges={selectedEdges} />
-            )}
-          </aside>
-        )}
-      </div>
+      {selected && (
+        <aside
+          data-testid="integrated-detail"
+          className="absolute inset-y-0 right-0 z-20 overflow-auto border-l border-black/10 bg-white p-5"
+          style={{ width: PANEL_W }}
+        >
+          <button onClick={() => setSelected(null)} className="float-right rounded border px-2 py-1 text-xs">閉じる</button>
+          {selectedNode?.section ? (
+            <>
+              <p className="text-xs font-semibold text-neutral-500">MOF項</p>
+              <h2 className="mt-1 pr-10 text-lg font-bold">{selectedNode.name}</h2>
+              <SectionDetail section={selectedNode.section} edges={selectedEdges} />
+            </>
+          ) : selectedNode?.project ? (
+            <>
+              <p className="text-xs font-semibold text-neutral-500">RS予算事業</p>
+              <h2 className="mt-1 pr-10 text-lg font-bold">{selectedNode.name}</h2>
+              <ProjectDetail project={selectedNode.project} />
+            </>
+          ) : (
+            <SpecialDetail id={selected} name={selectedNode?.name ?? ''} edges={selectedEdges} />
+          )}
+        </aside>
+      )}
     </main>
   );
 }
