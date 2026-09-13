@@ -12,6 +12,7 @@ import Link from 'next/link';
 const PAGES = [
   { href: '/quality', label: '評価' },
   { href: '/sankey-svg', label: 'サンキー図' },
+  { href: '/integrated-sankey', label: '統合サンキー（実験）' },
   { href: '/project-bubble', label: 'バブルチャート' },
   { href: '/subcontracts', label: '委託構造' },
   { href: '/mof-budget-overview', label: '予算全体（MOF）' },

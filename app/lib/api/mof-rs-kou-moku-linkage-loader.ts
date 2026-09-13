@@ -48,6 +48,17 @@ export function linkageScope(budgetYear: number): string | null {
   return loadYear(budgetYear).metadata.scope;
 }
 
+/**
+ * その年度の紐づけ品質（事業・目・金額の紐づけ率）。年度によって大きく異なるため
+ * （docs/tasks/20260913_1555_統合サンキー再構築の確定仕様.md 実測）、
+ * 画面側に隠さず出す前提で公開する。
+ */
+export function linkageQuality(budgetYear: number) {
+  if (!linkageAvailable(budgetYear)) return null;
+  const { counts, coverage } = loadYear(budgetYear).metadata;
+  return { counts, coverage };
+}
+
 export interface LinkageResolution {
   available: boolean;
   links: MofRsKouMokuLinkageRecord[];
