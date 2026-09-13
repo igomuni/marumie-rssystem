@@ -148,11 +148,26 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     const source = sourceMap.get(projectId);
     const linkedAmount = rows.reduce((sum, link) => sum + link.rsAmount, 0);
     const budgetAmount = source?.budgetSummary?.totalBudget ?? linkedAmount;
+    // 会計区分は budgetSummary.accountSummaries（RS事業自身の予算・執行データ、
+    // MOF紐づけの成否に関係なく常に正しい）を優先して使う。MOF側とのリンク（rows）
+    // だけで判定すると、会計区分の一方がMOFと未紐づけの場合にその会計区分が
+    // 抜け落ち、実際は一般・特別両方の目を持つ事業が片方だけの表示になる不具合に
+    // なる（例: PID3522は一般会計8325.6億円＋特別会計1576.2億円を持つが、一般会計側は
+    // MOFと未紐づけのため rows だけ見ると「特別」単独に誤判定される）
+    const toAccountType = (category: string): IntegratedAccountType | null =>
+      category === '一般会計' ? 'general' : category === '特別会計' ? 'special' : null;
+    const accountTypesFromSummary = new Set(
+      (source?.budgetSummary?.accountSummaries ?? [])
+        .filter(a => a.totalBudget > 0)
+        .map(a => toAccountType(a.accountCategory))
+        .filter((t): t is IntegratedAccountType => t !== null),
+    );
     // 政府関係機関(agency)はRSに対応する会計区分が無く対象外のはずだが、型上は
     // 除外しきれないため念のためフィルタする（実データでは一般・特別のみのはず）
-    const accountTypes = new Set(
+    const accountTypesFromLinks = new Set(
       rows.map(r => r.mofAccountType).filter((t): t is IntegratedAccountType => t === 'general' || t === 'special'),
     );
+    const accountTypes = accountTypesFromSummary.size > 0 ? accountTypesFromSummary : accountTypesFromLinks;
     const accountType: IntegratedProjectAccountType =
       accountTypes.size > 1 ? 'mixed' : accountTypes.size === 1 ? [...accountTypes][0] : 'general';
     projects.push({ id: `project:${projectId}`, projectId,

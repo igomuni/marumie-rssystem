@@ -146,7 +146,15 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 | MOF項の前年度額・増減率 | 配下の目の `previousAmount`/`difference` を合算（null は0扱い） |
 | RS事業の予算額 | `budgetAmount`＝`budgetSummary.totalBudget`（予算現額合計） |
 | RS事業の支出額 | `budgetSummary.executedAmount` |
-| RS事業の会計区分 | 接続する目の `mofAccountType` から集計。単一なら一般/特別、複数にまたがれば `mixed` |
+| RS事業の会計区分 | `budgetSummary.accountSummaries`（RS事業自身の予算・執行データ）から集計。単一なら一般/特別、複数にまたがれば `mixed`。無ければMOF紐づけ（`rows`）から代替集計 |
+
+**RS事業の会計区分はMOF紐づけ（`rows`）ではなく `budgetSummary.accountSummaries`
+（RS事業自身の予算・執行データ）を優先して判定する。** MOF紐づけだけで判定すると、
+一般・特別のどちらか一方がMOF側と未紐づけの場合にその会計区分が集計から抜け落ち、
+実際は両方の目を持つ事業が片方だけの表示（サイドパネルヘッダーの会計区分バッジが
+「一般特別」ではなく「一般」または「特別」単独）になる不具合になる（実測: 42事業が
+該当。2026-09-14指摘）。`accountSummaries` が無い事業（`budgetSummary` 自体が
+無い等）のみ、従来通りMOF紐づけから代替集計する。
 
 **RS事業の予算額は `initialBudget`（当初予算）ではなく `totalBudget`（予算現額合計＝
 当初＋補正＋繰越＋予備費使用等を含む現在の総額）を使う。** `/sankey-svg` の事業ノード
