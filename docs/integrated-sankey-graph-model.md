@@ -148,6 +148,12 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 | RS事業の支出額 | `spendingAmount`＝`/sankey-svg`の`project-spending`ノードの`value`（支出先データ由来の直接支出額合計） |
 | RS事業の会計区分 | `budgetBreakdown`（予算執行タブに出すRS事業自身のレコード）の`accountCategory`から集計。単一なら一般/特別、複数にまたがれば`mixed`。1件も無ければMOF紐づけ（`rows`）から代替集計。どちらも無ければ`unknown`（バッジ非表示） |
 
+**RS事業ノードの並び順は `budgetAmount` の降順を第一キー、`spendingAmount` の降順を
+第二キー（タイブレーク）とする（`buildView` の `rankedProjects`）。** 予算額が
+同額（0円同士を含む）の事業が多数あるとき、支出額を無視するとその中の並びが
+不定・実質ランダムになるため、支出額が大きい事業を上位に来るようにする
+（2026-09-14指摘）。
+
 **RS事業の会計区分はMOF紐づけ（`rows`）ではなく `budgetBreakdown`（予算執行タブの
 レコード）を優先して判定する。金額が0円の行も会計区分としては有効に扱う
 （`totalBudget` 等の金額では絞らない）。** MOF紐づけだけで判定すると、一般・特別の

@@ -283,7 +283,8 @@ export function buildView(data: IntegratedGraph, filters: Filters, sectionWindow
     projectNameMatch(p.name) &&
     (rsMin === null || p.budgetAmount >= rsMin) &&
     (rsMax === null || p.budgetAmount <= rsMax));
-  const rankedProjects = [...keptProjects].sort((a, b) => b.budgetAmount - a.budgetAmount);
+  // 予算額が同額（0円同士含む）の場合は支出額の降順で並べる
+  const rankedProjects = [...keptProjects].sort((a, b) => b.budgetAmount - a.budgetAmount || b.spendingAmount - a.spendingAmount);
   const projectRange = windowSlice(rankedProjects, projectWindow);
   const projectsTotal = rankedProjects.reduce((a, p) => a + p.budgetAmount, 0);
   const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.budgetAmount, 0);
