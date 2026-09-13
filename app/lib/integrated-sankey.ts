@@ -50,11 +50,23 @@ function budgetItemMatchesLink(item: BudgetBreakdownItem, link: MofRsKouMokuLink
     norm(item.subItem) === norm(link.subItemName);
 }
 
+// MOF項一覧（items）は当初予算のみに限定する。補正予算のamountは「改予算額」＝
+// その号成立後の累計額であり当初予算額を包含するため、当初予算と単純合算すると
+// 二重計上になる（実測: 単純に対象を広げるとmofAmountが548.6兆円→1002.3兆円まで
+// 膨らんだ。実際の国の予算総額は約151兆円）。
+//
+// 一方 RS事業側の紐づけ（links、projectLinksの元）は補正予算経由も含める。
+// 紐づけが補正予算経由のみのRS事業（772件・最大3.47兆円規模、2026-09-13実測）が
+// 当初予算限定だと画面から丸ごと消える不具合があったため。この場合、その事業の
+// 詳細パネルには「接続しているMOF項がありません」と出る（当初予算のMOF項との
+// 目単位の対応が無いため、itemEdgesには含まれない。正しい挙動）
+const isPrimaryBudgetType = (t: string) => t === '当初予算' || t.startsWith('補正予算');
+
 export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRsKouMokuLinkageRecord[],
   projectSources: IntegratedProjectSource[], budgetYear = 2024, rsYear = 2025): IntegratedGraph {
   const items = allItems.filter((item): item is MOFKouMokuItem & { accountType: IntegratedAccountType } =>
     item.budgetType === '当初予算' && (item.accountType === 'general' || item.accountType === 'special'));
-  const links = allLinks.filter(link => link.mofBudgetType === '当初予算' && !link.carriedOverFrom && link.rsAmount > 0);
+  const links = allLinks.filter(link => isPrimaryBudgetType(link.mofBudgetType) && !link.carriedOverFrom && link.rsAmount > 0);
   const linksByItem = new Map<string, MofRsKouMokuLinkageRecord[]>();
   for (const link of links) linksByItem.set(link.kouMokuKey, [...(linksByItem.get(link.kouMokuKey) ?? []), link]);
   const lastItemByKey = new Map<string, MOFKouMokuItem>();
