@@ -7,10 +7,15 @@ export type IntegratedAccountType = 'general' | 'special';
 export interface IntegratedSectionNode {
   id: string; name: string; accountType: IntegratedAccountType; ministry: string;
   organization: string; subAccount: string; amount: number; itemCount: number;
+  /** 前年度額・増減率。項配下の目を合算する（目単位が null の場合は0として扱う） */
+  previousAmount: number; difference: number;
 }
+/** 'mixed' = 一般会計・特別会計の両方から接続する目を持つ事業 */
+export type IntegratedProjectAccountType = IntegratedAccountType | 'mixed';
 export interface IntegratedProjectNode {
   id: string; projectId: number; name: string; ministry: string; linkedAmount: number;
-  initialBudget: number; mofUnlinkedAmount: number; budgetSummary?: BudgetSummary;
+  initialBudget: number; mofUnlinkedAmount: number; accountType: IntegratedProjectAccountType;
+  budgetSummary?: BudgetSummary;
   budgetItems: Array<BudgetBreakdownItem & { connected: boolean }>;
 }
 export interface IntegratedItemEdge {
@@ -59,8 +64,10 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     const source = itemSectionKey(item);
     const section = sections.get(source) ?? { id: source, name: item.sectionName, accountType: item.accountType,
       ministry: item.ministry, organization: item.accountType === 'special' ? item.specialAccount : item.organization,
-      subAccount: item.subAccount, amount: 0, itemCount: 0 };
-    section.amount += item.amount; section.itemCount += 1; sections.set(source, section);
+      subAccount: item.subAccount, amount: 0, itemCount: 0, previousAmount: 0, difference: 0 };
+    section.amount += item.amount; section.itemCount += 1;
+    section.previousAmount += item.previousAmount ?? 0; section.difference += item.difference ?? 0;
+    sections.set(source, section);
     const itemLinks = lastItemByKey.get(item.key) === item ? linksByItem.get(item.key) ?? [] : [];
     const linked = itemLinks.reduce((sum, link) => sum + link.rsAmount, 0);
     for (const link of itemLinks) {
@@ -93,8 +100,15 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
   for (const [projectId, rows] of projectLinks) {
     const source = sourceMap.get(projectId); const linkedAmount = rows.reduce((sum, link) => sum + link.rsAmount, 0);
     const initialBudget = source?.budgetSummary?.initialBudget ?? linkedAmount;
+    // 政府関係機関(agency)はRSに対応する会計区分が無く対象外のはずだが、型上は
+    // 除外しきれないため念のためフィルタする（実データでは一般・特別のみのはず）
+    const accountTypes = new Set(
+      rows.map(r => r.mofAccountType).filter((t): t is IntegratedAccountType => t === 'general' || t === 'special'),
+    );
+    const accountType: IntegratedProjectAccountType =
+      accountTypes.size > 1 ? 'mixed' : accountTypes.size === 1 ? [...accountTypes][0] : 'general';
     projects.push({ id: `project:${projectId}`, projectId, name: rows[0].projectName, ministry: rows[0].projectMinistry,
-      linkedAmount, initialBudget, mofUnlinkedAmount: Math.max(0, initialBudget - linkedAmount),
+      linkedAmount, initialBudget, mofUnlinkedAmount: Math.max(0, initialBudget - linkedAmount), accountType,
       budgetSummary: source?.budgetSummary,
       budgetItems: (source?.budgetBreakdown ?? []).filter(item => item.fiscalYear === budgetYear && item.budgetType === '当初予算')
         .map(item => ({ connected: rows.some(link => budgetItemMatchesLink(item, link)), ...item })) });

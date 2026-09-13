@@ -64,4 +64,32 @@ describe('integrated sankey first cut', () => {
     expect(g.sections.map(s=>s.accountType).sort()).toEqual(['general','special']);
     expect(g.projects[0].linkedAmount).toBe(210);
   });
+
+  it('aggregates previousAmount/difference per section across its items', () => {
+    const g=buildIntegratedGraph(
+      [item({previousAmount:80,difference:20}),
+       item({id:'i2',key:'k2',subItemCode:'02',subItemName:'目b',amount:50,previousAmount:40,difference:10})],
+      [link()],[]);
+    expect(g.sections[0].previousAmount).toBe(120);
+    expect(g.sections[0].difference).toBe(30);
+  });
+
+  it('treats null previousAmount/difference as zero rather than NaN', () => {
+    const g=buildIntegratedGraph([item({previousAmount:null,difference:null})],[],[]);
+    expect(g.sections[0].previousAmount).toBe(0);
+    expect(g.sections[0].difference).toBe(0);
+  });
+
+  it('marks a project as mixed when it receives from both account types', () => {
+    const g=buildIntegratedGraph(
+      [item(),item({id:'i2',key:'k2',accountType:'special',specialAccount:'特会',sectionName:'項S',amount:200})],
+      [link(),link({kouMokuKey:'k2',mofAccountType:'special',mofOrganization:'特会',sectionName:'項S',rsAmount:150})],
+      []);
+    expect(g.projects[0].accountType).toBe('mixed');
+  });
+
+  it('reports a single account type when a project receives from only one', () => {
+    const g=buildIntegratedGraph([item()],[link()],[]);
+    expect(g.projects[0].accountType).toBe('general');
+  });
 });
