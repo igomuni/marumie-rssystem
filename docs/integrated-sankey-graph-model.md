@@ -242,7 +242,10 @@ MOF予算書には「目」（性質別）とは別に「事項」（目的別�
 
 - **予算執行**：「2-2_予算・執行_予算種別・歳出予算項目」CSV由来の
   レコードをそのまま一覧にする（`IntegratedProjectNode.budgetBreakdown`、
-  年度・予算種別で絞らない全件）。集計値ではなく生レコードの一覧である点が
+  **対象年度（budgetYear）内**で予算種別（当初予算・補正予算等）は絞らず全件。
+  対象年度以外の年度の行は、そもそもMOF側の同一年度突き合わせの対象外なので
+  含まない——`scripts/generate-sankey-svg-data.ts` の `TARGET_BUDGET_YEAR` で
+  生成時点から絞られている）。集計値ではなく生レコードの一覧である点が
   「目」タブとの違い。各行の先頭に予算種別バッジ（`BudgetTypeBadge`、
   `client/components/mof-kou/Badge.tsx`。`/mof-kou-moku` 等と共有し、
   当初=緑・補正=橙・決算=紫の白背景アウトラインピル）、その右に会計区分バッジ

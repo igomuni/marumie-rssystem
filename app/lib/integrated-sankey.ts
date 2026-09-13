@@ -22,7 +22,10 @@ export interface IntegratedProjectNode {
   budgetAmount: number;
   mofUnlinkedAmount: number; accountType: IntegratedProjectAccountType;
   budgetSummary?: BudgetSummary;
-  /** 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来の全レコード（年度・予算種別で絞らない） */
+  /** 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来のレコード。対象年度（budgetYear、
+   * scripts/generate-sankey-svg-data.ts の TARGET_BUDGET_YEAR）に絞った上で、予算種別
+   * （当初予算・補正予算等）は絞らず全件。対象年度以外の年度の行は元データの生成時点で
+   * 除かれる（他の年度はこのページの突き合わせ対象＝MOF側の同一年度と対応しないため） */
   budgetBreakdown: BudgetBreakdownItem[];
   /** budgetBreakdown を当年度・当初予算のみに絞り、MOF紐づけ状況を付与したもの（目一覧タブ用） */
   budgetItems: Array<BudgetBreakdownItem & { connected: boolean }>;
