@@ -250,10 +250,15 @@ MOF予算書には「目」（性質別）とは別に「事項」（目的別�
   `client/components/mof-kou/Badge.tsx`。`/mof-kou-moku` 等と共有し、
   当初=緑・補正=橙・決算=紫の白背景アウトラインピル）、その右に会計区分バッジ
   （`getAccountBadgeStyle(classifyAccountCategory(...))` を共有 `Badge` で描画）を
-  並べる。年度の併記（「（N年度）」）はノイズなので付けない。`note`（2-2 CSVの
-  補足情報）が空でなければ、行の下にセカンダリ行として表示する。
-  `BudgetBreakdownItem.budgetType` はRS側表記（「第N次補正予算」）なので、
-  `toMofBudgetType()` でMOF側表記（「補正予算（第N号）」）へ変換してから渡す
+  並べる。年度の併記（「（N年度）」）はノイズなので付けない。目名（`subItem`）は
+  同じ行の右側に金額を右寄せで表示するため `trim()` で切り詰め、`overflow:hidden`
+  で折り返さずellipsis表示にする。名前側のflexアイテムは `flex: '1 1 0%'`
+  （`flex-basis: 0`）にする必要がある——`flex: '1 1 auto'` だと折り返し判定が
+  トリミング前のフル文字列の幅で行われ、長い名前のときに金額が次の行へ
+  押し出されてしまう不具合があった。`note`（2-2 CSVの補足情報）が空でなければ、
+  行の下にセカンダリ行として表示する。`BudgetBreakdownItem.budgetType` はRS側
+  表記（「第N次補正予算」）なので、`toMofBudgetType()` でMOF側表記
+  （「補正予算（第N号）」）へ変換してから渡す
 - **予算サマリ**：`budgetSummary` の当初・補正・繰越・予備費・執行率等の
   集計表示、接続するMOF項一覧。一覧ではなく集計値なのでタブに件数を付けない
 - **目**：`budgetItems`（`budgetBreakdown` を当年度・当初予算のみに絞り
