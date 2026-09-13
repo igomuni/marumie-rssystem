@@ -137,11 +137,9 @@ test('RS事業の詳細でMOF未接続の歳出予算項目を確認できる', 
   await page.goto('/integrated-sankey');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
-  // 右列のRS事業（オレンジ）を選ぶ。上位事業は接続額が大きく、目の内訳を持つ
+  // 右列のRS事業を選ぶ。上位事業は接続額が大きく、目の内訳を持つ
   await page.getByTestId('search-input').fill(String(graph.projects[0].name).slice(0, 6));
-  // ノードはラベル用の text が rect を覆うので、g ごと force でクリックする
-  await page.locator('[data-testid="sankey-node"]:has(rect[fill="#d8873b"])').first()
-    .click({ force: true });
+  await page.locator('[data-testid="sankey-node"][data-kind="project"]').first().click({ force: true });
   const detail = page.getByTestId('integrated-detail');
   await expect(detail).toBeVisible();
   await expect(detail.getByText('RS予算事業', { exact: true })).toBeVisible();
