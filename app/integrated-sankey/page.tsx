@@ -23,7 +23,8 @@ import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/clie
 import { RangeWindowRow } from '@/client/components/SankeySvg/RangeWindowRows';
 import { parseAmountToYen } from '@/app/lib/format/yen';
 import { getAccountBadgeStyle } from '@/app/lib/account-badge';
-import { BudgetTypeBadge } from '@/client/components/mof-kou/Badge';
+import { BudgetTypeBadge, Badge as MofBadge } from '@/client/components/mof-kou/Badge';
+import { classifyAccountCategory } from '@/app/lib/account-badge';
 import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
 import type {
   IntegratedGraph,
@@ -39,13 +40,15 @@ import type {
 const DEFAULT_DIMS = { w: 1400, h: 900 };
 interface Dims { w: number; h: number }
 const NODE_W = 18; // /sankey-svg の NODE_W と揃える
+const NODE_W2 = NODE_W * 2; // RS事業（予算＋支出の統合ノード）の幅。/sankey-svg と同じく単位幅の2倍
 const NODE_GAP = 3;
 const NODE_MIN_SLOT = 18;
 // 列(バー)は左のノードは左側に・右のノードは右側にラベルを伸ばす（帯を持たないため、
 // バー自体は中央で寄せ合わせ、ラベルは左右の外側へ広く使える幅を確保する構図）。
-// MID_GAPは2本のバーの間の余白のみ（帯もラベルも通らないため広い間隔は不要）
+// RS事業ノードが予算(左半分・緑)＋支出(右半分・橙)の統合ノードになったため、
+// 中央の隙間には予算額ラベル（統合ノードの左側）も入る。MID_GAPはそのぶんの余白を含めて広げた
 const MARGIN_X = 24;
-const MID_GAP = 60;
+const MID_GAP = 240;
 function colGeometry(dims: Dims) {
   const midX = dims.w / 2;
   const leftX = Math.max(MARGIN_X, midX - MID_GAP / 2 - NODE_W);
@@ -98,8 +101,13 @@ type NodeKind = 'section' | 'project' | 'other-sections' | 'other-projects';
 type DisplayNode = {
   id: string; name: string; value: number; side: 'left' | 'right'; kind: NodeKind;
   section?: IntegratedSectionNode; project?: IntegratedProjectNode;
+  /** RS事業（project/other-projects）のみ: 支出額。/sankey-svg の予算(緑)・支出(橙)の
+   * 統合ノードと同じ構図でRS事業ノードを描くために使う */
+  spendValue?: number;
 };
-type PlacedNode = DisplayNode & { x: number; y: number; h: number };
+/** h = 予算高さ・支出高さのうち大きい方（スロット確保・縦位置決めに使う）。
+ * RS事業ノードは budgetH/spendH を別々に持ち、統合ノードの形状描画に使う */
+type PlacedNode = DisplayNode & { x: number; y: number; h: number; budgetH?: number; spendH?: number };
 
 const OTHER_SECTIONS = 'other-sections';
 const OTHER_PROJECTS = 'other-projects';
@@ -108,6 +116,20 @@ function nodeColor(n: DisplayNode) {
   if (n.kind === 'section') return n.section?.accountType === 'general' ? NODE_COLORS.general : NODE_COLORS.special;
   if (n.kind === 'project') return NODE_COLORS.project;
   return NODE_COLORS.aggregate;
+}
+
+/** RS事業（project/other-projects）の統合ノード塗り。/sankey-svg の proj-node-grad /
+ * proj-agg-grad と同じ、予算(緑)→支出(橙)のグラデーション（集約ノードはグレー階調） */
+const projectNodeFill = (n: DisplayNode) => (n.kind === 'other-projects' ? 'url(#proj-agg-grad)' : 'url(#proj-node-grad)');
+
+/** RS事業の統合ノード（予算＋支出）のパス。/sankey-svg の mergedProjectPath と同じ構図:
+ * 上辺は直線、下辺は予算下端↔支出下端をベジェ曲線で結ぶ。左半分=予算(緑)、右半分=支出(橙) */
+function mergedProjectPath(x0: number, y0: number, budgetH: number, spendH: number): string {
+  const xEnd = x0 + NODE_W2;
+  const mx = x0 + NODE_W;
+  const yBudgetBottom = y0 + Math.max(0.6, budgetH);
+  const ySpendBottom = y0 + Math.max(0.6, spendH);
+  return `M${x0},${y0} L${xEnd},${y0} L${xEnd},${ySpendBottom} C${mx},${ySpendBottom} ${mx},${yBudgetBottom} ${x0},${yBudgetBottom} Z`;
 }
 
 /** 部分一致・正規表現の切り替えを1箇所に集約する。不正な正規表現は例外を投げず
@@ -184,6 +206,8 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
   const projectRange = windowSlice(rankedProjects, projectWindow);
   const projectsTotal = rankedProjects.reduce((a, p) => a + p.budgetAmount, 0);
   const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.budgetAmount, 0);
+  const spendOf = (p: IntegratedProjectNode) => p.budgetSummary?.executedAmount ?? 0;
+  const projectTailSpendTotal = projectRange.tail.reduce((a, p) => a + spendOf(p), 0);
 
   const left: DisplayNode[] = sectionRange.shown
     .map((s): DisplayNode => ({ id: s.id, name: s.name, value: s.amount, side: 'left', kind: 'section', section: s }));
@@ -191,9 +215,9 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
     left.push({ id: OTHER_SECTIONS, name: `その他の項（${sectionRange.tail.length}件）`, value: sectionTailTotal, side: 'left', kind: 'other-sections' });
   }
   const right: DisplayNode[] = projectRange.shown
-    .map((p): DisplayNode => ({ id: p.id, name: p.name, value: p.budgetAmount, side: 'right', kind: 'project', project: p }));
+    .map((p): DisplayNode => ({ id: p.id, name: p.name, value: p.budgetAmount, spendValue: spendOf(p), side: 'right', kind: 'project', project: p }));
   if (projectRange.tail.length > 0) {
-    right.push({ id: OTHER_PROJECTS, name: `その他のRS事業（${projectRange.tail.length}件）`, value: projectTailTotal, side: 'right', kind: 'other-projects' });
+    right.push({ id: OTHER_PROJECTS, name: `その他のRS事業（${projectRange.tail.length}件）`, value: projectTailTotal, spendValue: projectTailSpendTotal, side: 'right', kind: 'other-projects' });
   }
 
   // 「その他」集約ノードの詳細パネル用: 窓より後ろ（tail）に出た項・事業そのもの。
@@ -234,10 +258,13 @@ function buildLayout(view: ViewModel, zoom: number, dims: Dims) {
   const place = (nodes: DisplayNode[], x: number): PlacedNode[] => {
     let y = PAD_TOP;
     return nodes.map(n => {
-      const h = n.value * ky * zoom;
+      const budgetH = n.value * ky * zoom;
+      // RS事業（予算＋支出の統合ノード）は/sankey-svgと同じく高い方に合わせてスロットを確保する
+      const spendH = n.spendValue !== undefined ? n.spendValue * ky * zoom : undefined;
+      const h = spendH !== undefined ? Math.max(budgetH, spendH) : budgetH;
       const slot = Math.max(NODE_MIN_SLOT, h);
       y += (slot - h) / 2;
-      const placed: PlacedNode = { ...n, x, y, h };
+      const placed: PlacedNode = { ...n, x, y, h, budgetH: spendH !== undefined ? budgetH : undefined, spendH };
       y += h + (slot - h) / 2 + NODE_GAP;
       return placed;
     });
@@ -635,27 +662,68 @@ function App() {
           onMouseUp={() => { drag.current = null; }}
           onMouseLeave={() => { drag.current = null; }}
         >
+          <defs>
+            {/* RS事業の統合ノード（予算=緑・支出=橙）のグラデーション。/sankey-svg の
+                proj-node-grad/proj-agg-grad と同じ配色 */}
+            <linearGradient id="proj-node-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#4db870" />
+              <stop offset="44%" stopColor="#4db870" />
+              <stop offset="56%" stopColor="#e07040" />
+              <stop offset="100%" stopColor="#e07040" />
+            </linearGradient>
+            <linearGradient id="proj-agg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#999" />
+              <stop offset="44%" stopColor="#999" />
+              <stop offset="56%" stopColor="#777" />
+              <stop offset="100%" stopColor="#777" />
+            </linearGradient>
+          </defs>
           <g transform={`translate(${pan.x} ${pan.y})`}>
             <text x={layout.leftX} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="end">MOF項</text>
             <text x={layout.leftX} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="end">{money(view.sectionColumnTotal)}</text>
-            <text x={layout.rightX + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">RS事業</text>
-            <text x={layout.rightX + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999">{money(view.projectColumnTotal)}</text>
+            <text x={layout.rightX + NODE_W2} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">RS事業（予算・支出）</text>
+            <text x={layout.rightX + NODE_W2} y={PAD_TOP - 22} fontSize="12" fill="#999">{money(view.projectColumnTotal)}</text>
             <g>
-              {[...layout.left, ...layout.right].map(n => {
-                const active = nodeActive(n); const isLeft = n.side === 'left';
+              {layout.left.map(n => {
+                const active = nodeActive(n);
                 return (
                   <g key={n.id} data-testid="sankey-node" data-kind={n.kind} className="cursor-pointer" opacity={active ? 1 : 0.25}
                     onClick={() => setSelected(selected === n.id ? null : n.id)}
                   >
                     <rect x={n.x} y={n.y} width={NODE_W} height={Math.max(0.6, n.h)} rx="2" fill={nodeColor(n)}
                       stroke={selected === n.id ? '#111' : 'none'} strokeWidth={selected === n.id ? 2 : 0} />
-                    {/* ラベルは列の外側へ向けて伸ばす（左列は左側、右列は右側）。
-                        NODE_MIN_SLOTで各ノードに最低限の枠を確保しているため、高さでの
-                        非表示判定はしない（/sankey-svgが間隔を空けて表示する方式と同じ考え方） */}
-                    <text x={isLeft ? n.x - 8 : n.x + NODE_W + 8} y={n.y + n.h / 2 + 4} textAnchor={isLeft ? 'end' : 'start'} fontSize="12" fill="#333">
+                    {/* ラベルは列の外側（左）へ向けて伸ばす。NODE_MIN_SLOTで各ノードに最低限の
+                        枠を確保しているため、高さでの非表示判定はしない
+                        （/sankey-svgが間隔を空けて表示する方式と同じ考え方） */}
+                    <text x={n.x - 8} y={n.y + n.h / 2 + 4} textAnchor="end" fontSize="12" fill="#333">
                       {trim(n.name)} <tspan fill="#8a8f8a">（{money(n.value)}）</tspan>
                     </text>
                     <title>{n.name}｜{money(n.value)}</title>
+                  </g>
+                );
+              })}
+              {layout.right.map(n => {
+                const active = nodeActive(n);
+                const budgetH = n.budgetH ?? n.h;
+                const spendH = n.spendH ?? n.h;
+                const spendValue = n.spendValue ?? 0;
+                return (
+                  <g key={n.id} data-testid="sankey-node" data-kind={n.kind} className="cursor-pointer" opacity={active ? 1 : 0.25}
+                    onClick={() => setSelected(selected === n.id ? null : n.id)}
+                  >
+                    {/* /sankey-svg と同じ予算(緑・左半分)＋支出(橙・右半分)の統合ノード。
+                        上辺は直線、下辺は予算下端↔支出下端をベジェ曲線で結ぶ */}
+                    <path d={mergedProjectPath(n.x, n.y, budgetH, spendH)} fill={projectNodeFill(n)}
+                      stroke={selected === n.id ? '#111' : 'none'} strokeWidth={selected === n.id ? 2 : 0} />
+                    {/* 予算額ラベルは統合ノードの左側（列の内側）、名前＋支出額ラベルは
+                        右側（列の外側）。/sankey-svg の統合ノードと同じ配置 */}
+                    <text x={n.x - 8} y={n.y + Math.max(budgetH, spendH) / 2 + 4} textAnchor="end" fontSize="12" fill="#333">
+                      {money(n.value)}
+                    </text>
+                    <text x={n.x + NODE_W2 + 8} y={n.y + Math.max(budgetH, spendH) / 2 + 4} textAnchor="start" fontSize="12" fill="#333">
+                      {trim(n.name)} <tspan fill="#8a8f8a">（{money(spendValue)}）</tspan>
+                    </text>
+                    <title>{n.name}｜予算 {money(n.value)}｜支出 {money(spendValue)}</title>
                   </g>
                 );
               })}
@@ -855,7 +923,7 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
         </>}
         badges={<>
           <Badge background={section.accountType === 'general' ? '#2d7d46' : '#8ec9a8'}>項</Badge>
-          {accountBadge && <Badge background={accountBadge.background}>{accountBadge.label}</Badge>}
+          {accountBadge && <MofBadge label={accountBadge.label} background={accountBadge.background} />}
           <span style={{ fontSize: 11, color: '#666' }}>{section.ministry}{section.organization ? ` / ${section.organization}` : ''}{section.subAccount ? ` / ${section.subAccount}` : ''}</span>
         </>}
       />
@@ -908,7 +976,7 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
         }
         badges={<>
           <Badge background="#4db870">事業</Badge>
-          {accountBadge && <Badge background={accountBadge.background}>{accountBadge.label}</Badge>}
+          {accountBadge && <MofBadge label={accountBadge.label} background={accountBadge.background} />}
           <span style={{ fontSize: 11, color: '#aaa' }}>PID:{project.projectId}</span>
           <span style={{ fontSize: 11, color: '#666' }}>{project.ministry}{rep ? ` / ${rep.organizationAccount}` : ''}</span>
         </>}
@@ -923,16 +991,22 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
           // 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来のレコードをそのまま一覧にする
           // （集計値ではなく生のレコード。集計サマリは別タブ）
           project.budgetBreakdown.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>予算執行レコードがありません</p> : (
-            project.budgetBreakdown.map((i, n) => (
-              <div key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`} style={listButtonStyle}>
-                <span style={{ ...listNameStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />
-                  {i.subItem || i.item}
-                  <span style={{ color: '#aaa' }}>（{i.fiscalYear}年度）</span>
-                </span>
-                <span style={listValueStyle}>{i.accountCategory} / {i.account} / {i.item} / {money(i.amount)}</span>
-              </div>
-            ))
+            project.budgetBreakdown.map((i, n) => {
+              const accBadge = getAccountBadgeStyle(classifyAccountCategory(i.accountCategory));
+              return (
+                <div key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`} style={listButtonStyle}>
+                  <span style={{ ...listNameStyle, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />
+                    {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
+                    {i.subItem || i.item}
+                  </span>
+                  <span style={listValueStyle}>{i.account} / {i.item} / {money(i.amount)}</span>
+                  {i.note.trim() && (
+                    <span style={{ flex: '0 0 100%', fontSize: 11, color: '#999' }}>補足: {i.note}</span>
+                  )}
+                </div>
+              );
+            })
           )
         ) : tab === 1 ? (
           <>

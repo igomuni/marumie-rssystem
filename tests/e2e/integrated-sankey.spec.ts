@@ -57,10 +57,10 @@ test('2列のノード一覧が表示され、帯（エッジ）は描かれな�
 
   const canvas = page.getByTestId('integrated-canvas');
   await expect(canvas.getByText('MOF項', { exact: true })).toBeVisible();
-  await expect(canvas.getByText('RS事業', { exact: true })).toBeVisible();
-  // 項と事業を結ぶ帯は存在しない。ノードはrectで描くのでcanvas内にpathは無い
+  await expect(canvas.getByText('RS事業（予算・支出）', { exact: true })).toBeVisible();
+  // 項と事業を結ぶ帯は存在しない（RS事業ノード自体は予算/支出の統合ノードとしてpathで
+  // 描くため、pathの有無ではなく専用のtestidで判定する）
   await expect(page.locator('[data-testid="integrated-edge"]')).toHaveCount(0);
-  await expect(canvas.locator('path')).toHaveCount(0);
 
   await page.screenshot({ path: 'test-results/integrated-sankey.png' });
   expect(errors).toEqual([]);
