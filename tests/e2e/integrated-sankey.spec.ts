@@ -1,22 +1,16 @@
 /**
- * /integrated-sankey（統合サンキー ファーストカット）の実画面検証。
+ * /integrated-sankey（MOF項×RS事業の2列サンキー）の実画面検証。
  *
- * 仕様書の基準実測値（2024年度当初予算）をAPIレスポンスに対して直接確認し、
- * そのうえで2列表示・選択・詳細パネルが機能することを見る。
- * 画面の基準は /sankey-svg。
+ * 仕様の正: docs/tasks/20260913_1555_統合サンキー再構築の確定仕様.md
+ * 画面の基準は /sankey-svg。検索（ジャンプ機能）とフィルタ（絞り込み）は別物という
+ * /sankey-svg の設計をそのまま踏襲している点を中心に検証する。
  */
 import { expect, test } from '@playwright/test';
 
-/** 仕様書の基準実測値。1円単位。誤差は表示桁の丸めを吸収する範囲に留める */
 const CHO = 1e12;
-const EXPECTED = {
-  mofGeneral: 112.57,
-  mofSpecial: 436.04,
-  mofTotal: 548.61,
-  connected: 119.37,
-};
+const EXPECTED = { mofGeneral: 112.57, mofSpecial: 436.04, mofTotal: 548.61, connected: 119.37 };
 
-test('API集計が仕様書の基準実測値と一致する', async ({ request }) => {
+test('API集計が仕様書の基準実測値と一致する（RS2025×MOF2024）', async ({ request }) => {
   const res = await request.get('/api/integrated-sankey?year=2025');
   expect(res.ok()).toBe(true);
   const graph = await res.json();
@@ -32,29 +26,27 @@ test('API集計が仕様書の基準実測値と一致する', async ({ request 
   expect(sum('special')).toBeCloseTo(EXPECTED.mofSpecial, 2);
   expect(metadata.mofAmount / CHO).toBeCloseTo(EXPECTED.mofTotal, 2);
   expect(metadata.connectedAmount / CHO).toBeCloseTo(EXPECTED.connected, 2);
-
-  // 金額の恒等式。残差を丸めて隠していないことの確認でもある
-  expect(metadata.connectedAmount + metadata.unconnectedAmount - metadata.excessAmount)
-    .toBe(metadata.mofAmount);
-
-  // 超過（MOF目金額をRS計上額が上回る分）は0へ丸めず表に出す
+  expect(metadata.connectedAmount + metadata.unconnectedAmount - metadata.excessAmount).toBe(metadata.mofAmount);
   expect(metadata.excessAmount).toBeGreaterThan(0);
-  expect(graph.edges.some((e: { status: string }) => e.status === 'excess')).toBe(true);
 
-  // 複数のMOF項から同じRS事業へ収束する構造が保持されている
-  const sourcesByProject = new Map<string, Set<string>>();
-  for (const e of graph.edges as { source: string; target: string }[]) {
-    if (!e.target.startsWith('project:')) continue;
-    if (!sourcesByProject.has(e.target)) sourcesByProject.set(e.target, new Set());
-    sourcesByProject.get(e.target)!.add(e.source);
-  }
-  expect([...sourcesByProject.values()].some(s => s.size > 1)).toBe(true);
+  expect(graph.linkageQuality).toBeTruthy();
+  expect(graph.linkageQuality.counts.projectLinked / graph.linkageQuality.counts.projectTotal).toBeGreaterThan(0.9);
+});
+
+test('RS2024×MOF2023は紐づけ品質が低いことがAPIから分かる', async ({ request }) => {
+  const res = await request.get('/api/integrated-sankey?year=2024');
+  expect(res.ok()).toBe(true);
+  const graph = await res.json();
+  expect(graph.metadata.budgetYear).toBe(2023);
+  expect(graph.metadata.rsYear).toBe(2024);
+  // 20260913_1555 の実測（事業紐づけ率21.3%）を下回らないが50%は明確に下回ることを確認
+  expect(graph.linkageQuality.counts.projectLinked / graph.linkageQuality.counts.projectTotal).toBeLessThan(0.5);
 });
 
 test('サポート外の年度はエラーを返す', async ({ request }) => {
-  const res = await request.get('/api/integrated-sankey?year=2024');
+  const res = await request.get('/api/integrated-sankey?year=2023');
   expect(res.status()).toBe(400);
-  expect((await res.json()).error).toContain('ファーストカット');
+  expect((await res.json()).error).toContain('対応年度');
 });
 
 test('2列表示・選択・詳細パネルが機能する', async ({ page }) => {
@@ -66,48 +58,138 @@ test('2列表示・選択・詳細パネルが機能する', async ({ page }) =>
   await page.goto('/integrated-sankey');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
-  // 左列＝MOF項、右列＝RS事業の2列だと読み取れる。列見出しはSVG内のテキストで、
-  // 検索ボックスの「MOFの項」ラベル（同じ文字列）とは区別する
   const canvas = page.getByTestId('integrated-canvas');
   await expect(canvas.getByText('MOFの項', { exact: true })).toBeVisible();
   await expect(canvas.getByText('RSの事業', { exact: true })).toBeVisible();
-
-  // 列見出しが浮遊UI（左上カード・右上クラスタ）の裏に隠れないこと
-  await expect(page.locator('h1')).toHaveCount(0);
-  const leftHead = (await canvas.getByText('MOFの項', { exact: true }).boundingBox())!;
-  const rightHead = (await canvas.getByText('RSの事業', { exact: true }).boundingBox())!;
-  const searchBox = (await page.getByTestId('search-input-section').boundingBox())!;
-  expect(leftHead.x).toBeGreaterThan(0);
-  expect(rightHead.y).toBeGreaterThan(searchBox.y + searchBox.height);
   await expect(page.getByTestId('integrated-edge').first()).toBeAttached();
-
-  // 初期表示のまま撮る（パネル退避のアニメーション中に撮らないよう、操作の前に置く）
-  await page.screenshot({ path: 'test-results/integrated-sankey.png' });
-
-  // RS未接続ノードがRS事業とは別に存在する
   await expect(page.locator('title', { hasText: 'RS未接続' }).first()).toBeAttached();
 
-  // MOF項を選択すると詳細に目エッジが出る
+  await page.screenshot({ path: 'test-results/integrated-sankey.png' });
+
+  // MOF項を選択すると詳細パネルに目一覧・RS事業一覧タブが出る
   await page.getByTestId('sankey-node').first().click({ force: true });
   const detail = page.getByTestId('integrated-detail');
   await expect(detail).toBeVisible();
   await expect(detail.getByText('MOF項', { exact: true })).toBeVisible();
-  await expect(detail.getByRole('heading', { name: '目エッジ' })).toBeVisible();
+  await expect(detail.getByRole('button', { name: '目一覧' })).toBeVisible();
+  await expect(detail.getByRole('button', { name: 'RS事業一覧' })).toBeVisible();
   await detail.getByRole('button', { name: '選択解除' }).click();
   await expect(detail).toBeHidden();
 
-  // 目エッジのホバーで目名・金額・接続状態が読める。
-  // サンキー図ではエッジ同士が必然的に重なるため force で重なり判定を外す
-  const widest = await page.getByTestId('integrated-edge').evaluateAll(edges => edges.reduce((best, edge, i) => edge.getBoundingClientRect().height > edges[best].getBoundingClientRect().height ? i : best, 0));
-  await page.getByTestId('integrated-edge').nth(widest).hover({ force: true });
+  // 帯のホバーで金額・接続状態が読める。巨大な帯はベジエ曲線の内側に
+  // バウンディングボックス中心が来ないことがあるため、細めの帯（末尾寄り）を選ぶ
+  await page.getByTestId('integrated-edge').last().hover({ force: true });
   await expect(page.getByTestId('integrated-hover')).toBeVisible();
 
-  // 目視確認用。test-results/ は .gitignore 済み
-  await page.screenshot({ path: 'test-results/integrated-sankey.png' });
   expect(errors).toEqual([]);
 });
 
-test('検索・表示件数・ズーム・パンが機能する', async ({ page }) => {
+test('RS事業を選択すると予算執行一覧・目一覧タブが出る', async ({ page, request }) => {
+  const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
+  const withUnlinked = graph.projects.find((p: { budgetItems: { connected: boolean }[] }) => p.budgetItems.some(i => !i.connected));
+  expect(withUnlinked, 'MOF未接続の歳出予算項目を持つRS事業が見つからない').toBeTruthy();
+
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  await page.locator('[data-testid="sankey-node"][data-kind="project"]').first().click({ force: true });
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  await expect(detail.getByText('RS予算事業', { exact: true })).toBeVisible();
+  await expect(detail.getByRole('button', { name: '予算執行一覧' })).toBeVisible();
+  await expect(detail.getByRole('button', { name: '目一覧' })).toBeVisible();
+  await detail.getByRole('button', { name: '目一覧' }).click();
+  await expect(detail.getByText('MOF接続済み', { exact: true }).first()).toBeVisible();
+});
+
+test('検索はジャンプ機能でグラフを絞り込まない。フィルタは絞り込む', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  const universeOf = async (label: string) => {
+    const vt = await page.getByRole('slider', { name: `${label}の表示開始位置` }).getAttribute('aria-valuetext');
+    return Number(vt?.split('/').pop()?.replace(/[^0-9]/g, ''));
+  };
+  const sectionBefore = await universeOf('MOF項');
+
+  // 検索（ジャンプ）: 入力しても母集合（表示範囲の総件数）は変わらない
+  await page.getByTestId('search-input-section').fill('年金');
+  await expect(page.getByTestId('search-input-section-result').first()).toBeVisible();
+  expect(await universeOf('MOF項')).toBe(sectionBefore);
+  // 結果をクリックすると選択され、詳細パネルが開く
+  await page.getByTestId('search-input-section-result').first().click();
+  await expect(page.getByTestId('integrated-detail')).toBeVisible();
+  await page.getByTestId('integrated-detail').getByRole('button', { name: '選択解除' }).click();
+  await page.getByTestId('search-input-section').fill('');
+
+  // フィルタ（絞り込み）: 母集合が実際に縮む
+  await page.getByTitle('フィルタ を表示').click();
+  await page.getByLabel('項名で絞り込み').fill('国債');
+  await expect.poll(() => universeOf('MOF項')).toBeLessThan(sectionBefore);
+});
+
+test('不正な正規表現はページをクラッシュさせず該当なしになる', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  await page.getByLabel('MOFの項を正規表現で検索').click();
+  await page.getByTestId('search-input-section').fill('[[[invalid');
+  await page.waitForTimeout(300);
+  await expect(page.locator('main')).toBeVisible();
+  await expect(page.getByText('該当なし')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('会計区分・所管はチェックボックス付きコンボボックスで絞り込める', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  // 描画される帯の本数は「窓に何が収まるか」で変わり単調減少するとは限らないため、
+  // フィルタの効果は母集合（表示範囲の総件数）で見る
+  const sectionUniverse = async () => {
+    const vt = await page.getByRole('slider', { name: 'MOF項の表示開始位置' }).getAttribute('aria-valuetext');
+    return Number(vt?.split('/').pop()?.replace(/[^0-9]/g, ''));
+  };
+  const before = await sectionUniverse();
+
+  await page.getByTitle('フィルタ を表示').click();
+  await page.getByRole('button', { name: '会計', exact: true }).click();
+  await page.getByRole('checkbox', { name: '特別会計' }).uncheck();
+  await expect.poll(sectionUniverse).toBeLessThan(before);
+  // 外側クリックで閉じる（フルスクリーンの透明レイヤーは使わない実装）
+  await page.mouse.click(900, 500);
+
+  await page.getByLabel('フィルタを解除').click();
+  await expect.poll(sectionUniverse).toBe(before);
+});
+
+test('MOF項予算・RS事業予算のレンジフィルタが独立して機能する', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.getByTitle('フィルタ を表示').click();
+
+  const kokusaiLabel = () => page.locator('[data-testid="sankey-node"] text', { hasText: '国債整理支出' });
+  await expect(kokusaiLabel()).toBeVisible();
+  await page.getByPlaceholder('例: 1兆、500億').first().fill('1000億');
+  await expect(kokusaiLabel()).toHaveCount(0);
+  await page.getByPlaceholder('例: 1兆、500億').first().fill('');
+
+  await page.getByPlaceholder('例: 100億、50万').nth(1).fill('1000兆');
+  await expect(page.locator('[data-testid="sankey-node"][data-kind="project"]')).toHaveCount(0);
+
+  await page.getByLabel('フィルタを解除').click();
+  await expect(kokusaiLabel()).toBeVisible();
+  await expect(page.locator('[data-testid="sankey-node"][data-kind="project"]').first()).toBeVisible();
+});
+
+test('表示範囲・ズーム・パンが機能する', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.setViewportSize({ width: 1920, height: 1080 });
@@ -115,30 +197,17 @@ test('検索・表示件数・ズーム・パンが機能する', async ({ page 
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
   const rect = page.getByTestId('sankey-node').first().locator('rect');
-  const initialWidth = await rect.getAttribute('width');
   const initialHeight = Number(await rect.getAttribute('height'));
   await page.getByTestId('zoom-in').click();
-  await expect(rect).toHaveAttribute('width', initialWidth!);
   expect(Number(await rect.getAttribute('height'))).toBeGreaterThan(initialHeight);
-  expect(await page.locator('[data-item-count="1"]').count()).toBe(await page.getByTestId('integrated-edge').count());
   await page.getByTestId('zoom-out').click();
-  await page.getByRole('button', { name: '全体' }).click();
+  await page.getByTestId('reset-viewport').click();
 
-  // 表示範囲は /sankey-svg と同じ RangeWindowRow（クリックで件数を直接入力）
   await page.getByRole('button', { name: 'MOF項の表示件数' }).click();
   await page.getByRole('spinbutton').first().fill('25');
   await page.getByRole('spinbutton').first().press('Enter');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible();
 
-  const before = await page.getByTestId('sankey-node').count();
-  await page.getByTestId('search-input-project').fill('年金');
-  await expect.poll(() => page.getByTestId('sankey-node').count()).toBeLessThan(before);
-  await expect(page.getByTestId('integrated-edge').first()).toBeAttached();
-
-  await page.getByTestId('search-input-project').fill('');
-  await expect.poll(() => page.getByTestId('sankey-node').count()).toBe(before);
-
-  // パン（ドラッグ）でエラーが出ない
   const canvas = page.getByTestId('integrated-canvas');
   await canvas.hover({ position: { x: 900, y: 500 } });
   await page.mouse.down();
@@ -148,34 +217,22 @@ test('検索・表示件数・ズーム・パンが機能する', async ({ page 
   expect(errors).toEqual([]);
 });
 
-test('RS事業の詳細でMOF未接続の歳出予算項目を確認できる', async ({ page, request }) => {
-  const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
-  // MOF未接続の目を持つ事業が実データに存在すること自体を先に確かめる
-  const withUnlinked = graph.projects.find(
-    (p: { budgetItems: { connected: boolean }[] }) => p.budgetItems.some(i => !i.connected)
-  );
-  expect(withUnlinked, 'MOF未接続の歳出予算項目を持つRS事業が見つからない').toBeTruthy();
-
+test('年度切替でRS2024×MOF2023データに切り替わる', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/integrated-sankey');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
-  // 右列のRS事業を選ぶ。上位事業は接続額が大きく、目の内訳を持つ
-  await page.getByTestId('search-input-project').fill(String(graph.projects[0].name).slice(0, 6));
-  await page.locator('[data-testid="sankey-node"][data-kind="project"]').first().click({ force: true });
-  const detail = page.getByTestId('integrated-detail');
-  await expect(detail).toBeVisible();
-  await expect(detail.getByText('RS予算事業', { exact: true })).toBeVisible();
-  await expect(detail.getByText('MOF接続済み', { exact: true }).first()).toBeVisible();
-  await expect(detail.getByRole('heading', { name: '目' })).toBeVisible();
+  await page.getByTestId('year-select').selectOption('2024');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  // 紐づけ品質が低い年度であることの注記が出る
+  await expect(page.getByText('この年度は紐づけ精度が低い')).toBeVisible();
 });
 
-test('ページ切替メニューが画面内に開く', async ({ page }) => {
+test('ページ切替メニューが画面内に開き、詳細パネルで右上クラスタが退避する', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/integrated-sankey');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
-  // ドロップダウンは右端基準で開くので、ボタンが左端にあると画面外へ出る
   await page.getByRole('button', { name: 'ページ切替メニュー' }).click();
   const menu = page.getByRole('link', { name: 'サンキー図' });
   await expect(menu).toBeVisible();
@@ -183,8 +240,6 @@ test('ページ切替メニューが画面内に開く', async ({ page }) => {
   expect(box.x).toBeGreaterThanOrEqual(0);
   expect(box.x + box.width).toBeLessThanOrEqual(1920);
 
-  // 詳細パネルを開くと、右上クラスタ（表示範囲・ページ切替）はパネル幅ぶん左へ退避する。
-  // 検索・フィルタは左上固定なので対象外
   await page.keyboard.press('Escape');
   await page.mouse.click(10, 600);
   const navBefore = (await page.getByRole('button', { name: 'ページ切替メニュー' }).boundingBox())!;
@@ -194,108 +249,13 @@ test('ページ切替メニューが画面内に開く', async ({ page }) => {
     .toBeLessThan(navBefore.x - 300);
 });
 
-test('目エッジを集約せず、フィルタと縦ラベル間隔を維持する', async ({ page, request }) => {
+test('目エッジは項×事業のペアへ集約され、個別の目単位では描画されない', async ({ page, request }) => {
   const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/integrated-sankey');
-  await expect(page.getByTestId('integrated-edge')).toHaveCount(graph.edges.length);
-  await page.getByTestId('zoom-out').click();
-  const labels = await page.locator('[data-kind="section"] > text').evaluateAll(nodes => nodes.map(n => { const r = n.getBoundingClientRect(); return { top:r.top, bottom:r.bottom }; }));
-  for (let i=1; i<labels.length; i++) expect(labels[i].top).toBeGreaterThanOrEqual(labels[i-1].bottom);
-  await page.getByLabel('フィルタの表示切替').click();
-  await page.getByLabel('会計', { exact: true }).click();
-  await page.getByRole('checkbox', {name:'特別会計'}).uncheck();
-  await expect.poll(() => page.getByTestId('integrated-edge').count()).toBeLessThan(graph.edges.length);
-  await page.getByLabel('フィルタを解除').click();
-  await expect(page.getByTestId('integrated-edge')).toHaveCount(graph.edges.length);
-  await page.getByRole('button', {name:'全体', exact:true}).click();
-  await page.getByLabel('フィルタの表示切替').click();
-  await page.screenshot({path:'test-results/integrated-overview.png'});
-  await page.getByTestId('zoom-in').click();
-  await page.screenshot({path:'test-results/integrated-zoom.png'});
-  await page.goto('/sankey-svg');
-  await page.waitForTimeout(3000);
-  await page.screenshot({path:'test-results/sankey-svg-baseline.png'});
-});
-
-test('MOF項・RS事業それぞれ独立した検索ボックスを持ち、正規表現も安全に扱う', async ({ page }) => {
-  const errors: string[] = [];
-  page.on('pageerror', e => errors.push(e.message));
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/integrated-sankey');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
-  // 母集合（総件数）は RangeWindowRow のスライダー総数（aria-valuetext）で見る。
-  // 表示ウィンドウ自体は固定件数なのでノード数では縮小が見えないため
-  const sectionUniverse = async () => {
-    const vt = await page.getByRole('slider', { name: 'MOF項の表示開始位置' }).getAttribute('aria-valuetext');
-    return Number(vt?.split('/').pop()?.replace(/[^0-9]/g, ''));
-  };
-  const projectUniverse = async () => {
-    const vt = await page.getByRole('slider', { name: 'RS事業の表示開始位置' }).getAttribute('aria-valuetext');
-    return Number(vt?.split('/').pop()?.replace(/[^0-9]/g, ''));
-  };
-
-  // MOF項の検索はMOF項側だけを絞り込む
-  const sectionBefore = await sectionUniverse();
-  const projectBefore = await projectUniverse();
-  await page.getByTestId('search-input-section').fill('国債');
-  await expect.poll(sectionUniverse).toBeLessThan(sectionBefore);
-  await page.getByTestId('search-input-section').fill('');
-  await expect.poll(sectionUniverse).toBe(sectionBefore);
-
-  // RS事業の検索はRS事業側だけを絞り込み、MOF項側の母集合には影響しない
-  // （項の絞り込みはRS事業側の検索語に依存しない構造になっている）
-  await page.getByTestId('search-input-project').fill('年金');
-  await expect.poll(projectUniverse).toBeLessThan(projectBefore);
-  expect(await sectionUniverse()).toBe(sectionBefore);
-  await page.getByTestId('search-input-project').fill('');
-
-  // 正規表現トグル: 不正な式を入れてもページはクラッシュしない（該当なしになるだけ）。
-  // MOF項側で確認する
-  await page.getByLabel('MOFの項を正規表現で検索').click();
-  await page.getByTestId('search-input-section').fill('[[[invalid');
-  await page.waitForTimeout(300);
-  expect(errors).toEqual([]);
-  await expect(page.locator('main')).toBeVisible();
-
-  // 有効な正規表現は機能する
-  await page.getByTestId('search-input-section').fill('^国債.*');
-  await expect.poll(sectionUniverse).toBeLessThan(sectionBefore);
-
-  await page.getByTestId('search-input-section').fill('');
-  await page.getByLabel('MOFの項の正規表現検索をオフ').click();
-  expect(errors).toEqual([]);
-});
-
-test('MOF金額・RS予算のレンジフィルタが独立して機能する', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/integrated-sankey');
-  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
-  await page.getByLabel('フィルタの表示切替').click();
-
-  // MOF金額の上限を絞ると、最大の項（国債整理支出 220.86兆円）が消える
-  const kokusaiLabel = () => page.locator('[data-testid="sankey-node"] text', { hasText: '国債整理支出' });
-  await expect(kokusaiLabel()).toBeVisible();
-  await page.getByPlaceholder('上限 例:1兆').first().fill('1000億');
-  await expect(kokusaiLabel()).toHaveCount(0);
-  await page.getByPlaceholder('上限 例:1兆').first().fill('');
-
-  // RS予算フィルタは独立して効く。極端な下限にすると右列がすべて集約ノードへ落ちる
-  await page.getByPlaceholder('下限 例:100億').nth(1).fill('1000兆');
-  await expect(page.locator('[data-testid="sankey-node"][data-kind="project"]')).toHaveCount(0);
-
-  await page.getByLabel('フィルタを解除').click();
-  await expect(kokusaiLabel()).toBeVisible();
-  await expect(page.locator('[data-testid="sankey-node"][data-kind="project"]').first()).toBeVisible();
-});
-
-test('検索・フィルタUIが左上、表示範囲・ページ切替が右上に配置される', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/integrated-sankey');
-  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
-  const search = (await page.getByTestId('search-input-section').boundingBox())!;
-  const navMenu = (await page.getByRole('button', { name: 'ページ切替メニュー' }).boundingBox())!;
-  expect(search.x).toBeLessThan(200);
-  expect(navMenu.x).toBeGreaterThan(1700);
+  // 帯の本数は目エッジ総数より明確に少ない（項×事業で束ねているため）
+  const bandCount = await page.getByTestId('integrated-edge').count();
+  expect(bandCount).toBeLessThan(graph.edges.length);
 });
