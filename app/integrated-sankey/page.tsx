@@ -208,6 +208,7 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
   const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.budgetAmount, 0);
   const spendOf = (p: IntegratedProjectNode) => p.budgetSummary?.executedAmount ?? 0;
   const projectTailSpendTotal = projectRange.tail.reduce((a, p) => a + spendOf(p), 0);
+  const projectsSpendTotal = rankedProjects.reduce((a, p) => a + spendOf(p), 0);
 
   const left: DisplayNode[] = sectionRange.shown
     .map((s): DisplayNode => ({ id: s.id, name: s.name, value: s.amount, side: 'left', kind: 'section', section: s }));
@@ -227,7 +228,7 @@ function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: Range
 
   return {
     left, right, hiddenSections, hiddenProjects,
-    sectionColumnTotal: sectionsTotal, projectColumnTotal: projectsTotal,
+    sectionColumnTotal: sectionsTotal, projectColumnTotal: projectsTotal, projectSpendColumnTotal: projectsSpendTotal,
     sectionUniverse: sectionRange.total, sectionMaxOffset: sectionRange.maxOffset, sectionOffset: sectionRange.offset,
     projectUniverse: projectRange.total, projectMaxOffset: projectRange.maxOffset, projectOffset: projectRange.offset,
   };
@@ -679,10 +680,15 @@ function App() {
             </linearGradient>
           </defs>
           <g transform={`translate(${pan.x} ${pan.y})`}>
-            <text x={layout.leftX} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="end">MOF項</text>
-            <text x={layout.leftX} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="end">{money(view.sectionColumnTotal)}</text>
-            <text x={layout.rightX + NODE_W2} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">RS事業（予算・支出）</text>
-            <text x={layout.rightX + NODE_W2} y={PAD_TOP - 22} fontSize="12" fill="#999">{money(view.projectColumnTotal)}</text>
+            {/* 列見出しはノード中心の真上に中央揃えで置く（/sankey-svg と同じ、
+                screenX = ノードX0 + 幅/2 に text-align:center を合わせる考え方） */}
+            <text x={layout.leftX + NODE_W / 2} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="middle">MOF項</text>
+            <text x={layout.leftX + NODE_W / 2} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="middle">{money(view.sectionColumnTotal)}</text>
+            <text x={layout.rightX + NODE_W2 / 2} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="middle">RS事業</text>
+            {/* 予算/支出の合計を/区切りで併記する（/sankey-svg の事業列見出しと同じ書式） */}
+            <text x={layout.rightX + NODE_W2 / 2} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="middle">
+              {money(view.projectColumnTotal)} / {money(view.projectSpendColumnTotal)}
+            </text>
             <g>
               {layout.left.map(n => {
                 const active = nodeActive(n);
@@ -690,8 +696,9 @@ function App() {
                   <g key={n.id} data-testid="sankey-node" data-kind={n.kind} className="cursor-pointer" opacity={active ? 1 : 0.25}
                     onClick={() => setSelected(selected === n.id ? null : n.id)}
                   >
-                    <rect x={n.x} y={n.y} width={NODE_W} height={Math.max(0.6, n.h)} rx="2" fill={nodeColor(n)}
-                      stroke={selected === n.id ? '#111' : 'none'} strokeWidth={selected === n.id ? 2 : 0} />
+                    {/* 選択時のボーダーは付けない。NODE_W=18の細いバーだと枠線がFillを
+                        潰してしまうため（選択状態はopacity/相手列の強調のみで示す） */}
+                    <rect x={n.x} y={n.y} width={NODE_W} height={Math.max(0.6, n.h)} rx="2" fill={nodeColor(n)} />
                     {/* ラベルは列の外側（左）へ向けて伸ばす。NODE_MIN_SLOTで各ノードに最低限の
                         枠を確保しているため、高さでの非表示判定はしない
                         （/sankey-svgが間隔を空けて表示する方式と同じ考え方） */}
@@ -712,9 +719,9 @@ function App() {
                     onClick={() => setSelected(selected === n.id ? null : n.id)}
                   >
                     {/* /sankey-svg と同じ予算(緑・左半分)＋支出(橙・右半分)の統合ノード。
-                        上辺は直線、下辺は予算下端↔支出下端をベジェ曲線で結ぶ */}
-                    <path d={mergedProjectPath(n.x, n.y, budgetH, spendH)} fill={projectNodeFill(n)}
-                      stroke={selected === n.id ? '#111' : 'none'} strokeWidth={selected === n.id ? 2 : 0} />
+                        上辺は直線、下辺は予算下端↔支出下端をベジェ曲線で結ぶ。
+                        選択時のボーダーは付けない（細い形状だとFillを潰すため） */}
+                    <path d={mergedProjectPath(n.x, n.y, budgetH, spendH)} fill={projectNodeFill(n)} />
                     {/* 予算額ラベルは統合ノードの左側（列の内側）、名前＋支出額ラベルは
                         右側（列の外側）。/sankey-svg の統合ノードと同じ配置 */}
                     <text x={n.x - 8} y={n.y + Math.max(budgetH, spendH) / 2 + 4} textAnchor="end" fontSize="12" fill="#333">
