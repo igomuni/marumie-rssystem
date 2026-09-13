@@ -39,13 +39,20 @@ interface Dims { w: number; h: number }
 const NODE_W = 18; // /sankey-svg の NODE_W と揃える
 const NODE_GAP = 3;
 const NODE_MIN_SLOT = 18;
-const LABEL_GUTTER = 260;
-const COL_LEFT_X = LABEL_GUTTER + 20;
-const colRightX = (dims: Dims) => dims.w - LABEL_GUTTER - 20 - NODE_W;
+// 列間隔: /sankey-svg の「事業→支出先」間（両列のラベルが内側＝互いの方向へ伸びる、
+// 帯を持たない今回のページと同じ構図）を実測（1920px幅で約620px）した値を基準にする。
+// 左右の余白は/sankey-svgのMARGIN(20px)相当まで削り、ラベルは列の内側（中央寄り）へ
+// 伸ばす。以前は左右の外側にラベル用の大きな余白(260px)を確保し列間が間延びしていた
+const MARGIN_X = 24;
+const TARGET_MID_GAP = 620;
+function colGeometry(dims: Dims) {
+  const contentW = NODE_W * 2 + TARGET_MID_GAP;
+  const startX = Math.max(MARGIN_X, (dims.w - contentW) / 2);
+  return { leftX: startX, rightX: dims.w - startX - NODE_W };
+}
 const colH = (dims: Dims) => Math.max(200, dims.h - PAD_TOP - PAD_BOTTOM);
 const PAD_TOP = 110;
 const PAD_BOTTOM = 28;
-const LABEL_MIN_PX = 9; // これ未満のノード高ではラベル（名前＋金額）ごと隠す
 const NAME_MAX_CHARS = 26; // /sankey-svg のノードラベル(40文字)相当を、狭いガター幅に合わせて縮小
 
 const ZOOM_MIN_MULTIPLIER = 0.25;
@@ -187,7 +194,7 @@ function fitZoom(view: ViewModel, dims: Dims) {
 }
 
 function buildLayout(view: ViewModel, zoom: number, dims: Dims) {
-  const rightX = colRightX(dims);
+  const { leftX, rightX } = colGeometry(dims);
   const availH = colH(dims);
   // 金額→高さの縮尺（ky）は項・事業の両列で共有する。列ごとに別のkyを使うと、
   // 同じ高さのバーが列によって違う金額を表すことになり、見た目で比較できなくなる
@@ -208,12 +215,12 @@ function buildLayout(view: ViewModel, zoom: number, dims: Dims) {
       return placed;
     });
   };
-  const left = place(view.left, COL_LEFT_X);
+  const left = place(view.left, leftX);
   const right = place(view.right, rightX);
   const byId = new Map<string, PlacedNode>([...left, ...right].map(n => [n.id, n]));
   const bottom = (nodes: PlacedNode[]) => (nodes.length ? nodes[nodes.length - 1].y + nodes[nodes.length - 1].h : PAD_TOP);
   const contentH = Math.max(bottom(left), bottom(right)) + PAD_BOTTOM;
-  return { left, right, byId, contentH, rightX };
+  return { left, right, byId, contentH, leftX, rightX };
 }
 
 // ────────────────────────────────────────────────────────────
@@ -469,6 +476,7 @@ function App() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const setFilter = <K extends keyof Filters>(k: K, v: Filters[K]) => setFilters(f => ({ ...f, [k]: v }));
+  const hasActiveFilters = Object.entries(filters).some(([k, v]) => v !== EMPTY_FILTERS[k as keyof Filters]);
 
   const [query, setQuery] = useState('');
   const [useRegex, setUseRegex] = useState(false);
@@ -601,25 +609,26 @@ function App() {
           onMouseLeave={() => { drag.current = null; }}
         >
           <g transform={`translate(${pan.x} ${pan.y})`}>
-            <text x={COL_LEFT_X + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">MOFの項</text>
-            <text x={COL_LEFT_X + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999">{money(view.sectionColumnTotal)}</text>
+            <text x={layout.leftX + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">MOFの項</text>
+            <text x={layout.leftX + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999">{money(view.sectionColumnTotal)}</text>
             <text x={layout.rightX + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="end">RSの事業</text>
             <text x={layout.rightX + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="end">{money(view.projectColumnTotal)}</text>
             <g>
               {[...layout.left, ...layout.right].map(n => {
                 const active = nodeActive(n); const isLeft = n.side === 'left';
-                const showLabel = n.h >= LABEL_MIN_PX;
                 return (
                   <g key={n.id} data-testid="sankey-node" data-kind={n.kind} className="cursor-pointer" opacity={active ? 1 : 0.25}
                     onClick={() => setSelected(selected === n.id ? null : n.id)}
                   >
                     <rect x={n.x} y={n.y} width={NODE_W} height={Math.max(0.6, n.h)} rx="2" fill={nodeColor(n)}
                       stroke={selected === n.id ? '#111' : 'none'} strokeWidth={selected === n.id ? 2 : 0} />
-                    {showLabel && (
-                      <text x={isLeft ? n.x - 8 : n.x + NODE_W + 8} y={n.y + n.h / 2 + 4} textAnchor={isLeft ? 'end' : 'start'} fontSize="12" fill="#333">
-                        {trim(n.name)} <tspan fill="#8a8f8a">（{money(n.value)}）</tspan>
-                      </text>
-                    )}
+                    {/* ラベルは列の内側（中央の列間ギャップ）へ向けて伸ばす。/sankey-svg の
+                        事業→支出先と同じ構図（両列のラベルが同じ隙間を挟んで向き合う）。
+                        NODE_MIN_SLOTで各ノードに最低限の枠を確保しているため、高さでの
+                        非表示判定はしない（/sankey-svgが間隔を空けて表示する方式と同じ考え方） */}
+                    <text x={isLeft ? n.x + NODE_W + 8 : n.x - 8} y={n.y + n.h / 2 + 4} textAnchor={isLeft ? 'start' : 'end'} fontSize="12" fill="#333">
+                      {trim(n.name)} <tspan fill="#8a8f8a">（{money(n.value)}）</tspan>
+                    </text>
                     <title>{n.name}｜{money(n.value)}</title>
                   </g>
                 );
@@ -667,9 +676,21 @@ function App() {
             </svg>
           </button>
         </div>
-        <button type="button" aria-label="フィルタを解除" onClick={() => setFilters(EMPTY_FILTERS)}
-          style={{ height: 34, borderRadius: 6, border: '1px solid #e0e0e0', background: 'rgba(255,255,255,0.92)', padding: '0 10px', fontSize: 12, color: '#666', cursor: 'pointer' }}
-        >解除</button>
+        {/* /sankey-svg のフィルタ解除ボタンと同じ（Material Icons: filter_list_off）。
+            常に同じ幅を占有し、絞り込み未設定時は非表示にする */}
+        <button type="button" onClick={() => setFilters(EMPTY_FILTERS)}
+          title="フィルタを解除" aria-label="フィルタを解除" aria-hidden={!hasActiveFilters} tabIndex={hasActiveFilters ? 0 : -1}
+          style={{
+            flexShrink: 0, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(255,255,255,0.95)', border: '1px solid #e0e0e0', borderRadius: 6,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.1)', cursor: 'pointer', color: '#666', padding: 0,
+            visibility: hasActiveFilters ? 'visible' : 'hidden', pointerEvents: hasActiveFilters ? 'auto' : 'none',
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 -960 960 960" fill="currentColor">
+            <path d="M791-55 55-791l57-57 736 736-57 57ZM633-440l-80-80h167v80h-87ZM433-640l-80-80h487v80H433Zm-33 400v-80h160v80H400ZM240-440v-80h166v80H240ZM120-640v-80h86v80h-86Z" />
+          </svg>
+        </button>
       </div>
 
       {/* 右上：表示範囲（項・事業）・年度切替・ページ切替 */}
