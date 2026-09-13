@@ -91,7 +91,7 @@ test('2列表示・選択・詳細パネルが機能する', async ({ page }) =>
   await expect(detail).toBeVisible();
   await expect(detail.getByText('MOF項', { exact: true })).toBeVisible();
   await expect(detail.getByRole('heading', { name: '目エッジ' })).toBeVisible();
-  await detail.getByRole('button', { name: '閉じる' }).click();
+  await detail.getByRole('button', { name: '選択解除' }).click();
   await expect(detail).toBeHidden();
 
   // 目エッジのホバーで目名・金額・接続状態が読める。

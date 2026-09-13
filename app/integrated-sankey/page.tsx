@@ -12,6 +12,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
+import { SidePanelChrome } from '@/client/components/SidePanelChrome';
+import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
 import type {
   IntegratedGraph,
   IntegratedItemEdge,
@@ -32,7 +34,6 @@ const PAD_BOTTOM = 28;
 const MIN_NODE_H = 1.5; // 0だと消えてしまうので下限だけ置く。比例関係は保つ
 const LABEL_MIN_H = 9; // これ未満のノードはラベルを省く（重なり防止）
 const VALUE_LABEL_MIN_H = 15;
-const PANEL_W = 420; // 詳細パネル幅。右上クラスタの退避量と共用する
 
 // ── 配色 ──
 // /sankey-svg の意味づけ（緑＝予算側、灰＝集約、赤＝要注意）に合わせる。
@@ -254,6 +255,8 @@ function App() {
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
+  // 詳細パネルの幅・折りたたみ・リサイズは /sankey-svg・/subcontracts と同じ共有フックに委ねる
+  const detailPanel = useSidePanel({ side: 'right' });
 
   useEffect(() => {
     fetch('/api/integrated-sankey?year=2025')
@@ -280,8 +283,8 @@ function App() {
   const cx = CANVAS_W / 2;
   const cy = layout.contentH / 2;
   const reset = () => { setScale(1); setPan({ x: 0, y: 0 }); };
-  // /sankey-svg の rightControlsOffset と同じ方式。右パネルの幅だけ図と右上クラスタを退避させる
-  const rightControlsOffset = selected ? PANEL_W : 0;
+  // /sankey-svg の rightControlsOffset と同じ方式。パネルの実効幅だけ図と右上クラスタを退避させる
+  const rightControlsOffset = selected && !detailPanel.collapsed ? detailPanel.effectiveWidth : 0;
 
   return (
     <main className="fixed inset-0 overflow-hidden bg-[#f7f8f5] text-neutral-800">
@@ -464,28 +467,37 @@ function App() {
         </div>
 
       {selected && (
-        <aside
-          data-testid="integrated-detail"
-          className="absolute inset-y-0 right-0 z-20 overflow-auto border-l border-black/10 bg-white p-5"
-          style={{ width: PANEL_W }}
+        <SidePanelChrome
+          side="right"
+          open={!detailPanel.collapsed}
+          onToggle={detailPanel.toggleCollapsed}
+          width={detailPanel.effectiveWidth}
+          minWidth={SIDE_PANEL_WIDTH_MIN}
+          maxWidth={SIDE_PANEL_WIDTH_MAX}
+          onResizeStart={detailPanel.onResizeStart}
+          isResizing={detailPanel.isResizing}
+          onResetWidth={detailPanel.resetWidth}
+          testId="integrated-detail"
         >
-          <button onClick={() => setSelected(null)} className="float-right rounded border px-2 py-1 text-xs">閉じる</button>
-          {selectedNode?.section ? (
-            <>
-              <p className="text-xs font-semibold text-neutral-500">MOF項</p>
-              <h2 className="mt-1 pr-10 text-lg font-bold">{selectedNode.name}</h2>
-              <SectionDetail section={selectedNode.section} edges={selectedEdges} />
-            </>
-          ) : selectedNode?.project ? (
-            <>
-              <p className="text-xs font-semibold text-neutral-500">RS予算事業</p>
-              <h2 className="mt-1 pr-10 text-lg font-bold">{selectedNode.name}</h2>
-              <ProjectDetail project={selectedNode.project} />
-            </>
-          ) : (
-            <SpecialDetail id={selected} name={selectedNode?.name ?? ''} edges={selectedEdges} />
-          )}
-        </aside>
+          <div className="overflow-auto p-5">
+            <button onClick={() => setSelected(null)} className="float-right rounded border px-2 py-1 text-xs">選択解除</button>
+            {selectedNode?.section ? (
+              <>
+                <p className="text-xs font-semibold text-neutral-500">MOF項</p>
+                <h2 className="mt-1 pr-10 text-lg font-bold">{selectedNode.name}</h2>
+                <SectionDetail section={selectedNode.section} edges={selectedEdges} />
+              </>
+            ) : selectedNode?.project ? (
+              <>
+                <p className="text-xs font-semibold text-neutral-500">RS予算事業</p>
+                <h2 className="mt-1 pr-10 text-lg font-bold">{selectedNode.name}</h2>
+                <ProjectDetail project={selectedNode.project} />
+              </>
+            ) : (
+              <SpecialDetail id={selected} name={selectedNode?.name ?? ''} edges={selectedEdges} />
+            )}
+          </div>
+        </SidePanelChrome>
       )}
     </main>
   );

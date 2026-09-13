@@ -17,6 +17,10 @@
 - 右パネル展開時は `right: 12 + rightControlsOffset` で左へ退避させる
   （`/sankey-svg` の `rightControlsOffset` と同じ方式）。図の領域も同じ幅だけ狭め、
   viewBox の fit で図を描き直すので、パネルが図を覆わない
+- 詳細パネルの幅管理そのものも独自実装しない。`/sankey-svg`・`/subcontracts` と同じ
+  `client/hooks/useSidePanel.ts`（幅・折りたたみ・リサイズドラッグ・実効幅クランプ）と
+  `client/components/SidePanelChrome.tsx`（枠・リサイズハンドル・開閉タブ）を使う。
+  `rightControlsOffset` は `detailPanel.effectiveWidth`（折りたたみ時は0）から算出する
 - 浮遊UIと列見出しが重ならないよう `PAD_TOP` で上部の余白を確保する。
   重なりは e2e で回帰検証している（左上カードの右端 < 見出しx、右上クラスタの下端 < 見出しy）
 
