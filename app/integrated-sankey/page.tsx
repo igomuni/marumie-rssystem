@@ -1003,13 +1003,13 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
               return (
                 <div key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`} style={listButtonStyle}>
                   {/* 目名の行に金額を右寄せで併記する。名前は折り返さずtruncする */}
-                  <span style={{ flex: '1 1 0%', minWidth: 0, display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
+                  <span style={{ ...listNameStyle, flex: '1 1 0%', display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
                     <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />
                     {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(i.subItem || i.item)}</span>
                   </span>
-                  <span style={{ flex: '0 0 auto', fontSize: 12, color: '#777', textAlign: 'right', marginLeft: 8 }}>{money(i.amount)}</span>
-                  <span style={{ flex: '0 0 100%', fontSize: 11, color: '#999' }}>{i.account} / {i.item}</span>
+                  <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{money(i.amount)}</span>
+                  <span style={listValueStyle}>{i.account} / {i.item}</span>
                   {i.note.trim() && (
                     <span style={{ flex: '0 0 100%', fontSize: 11, color: '#999' }}>補足: {i.note}</span>
                   )}

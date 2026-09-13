@@ -27,7 +27,9 @@ export interface IntegratedProjectNode {
    * （当初予算・補正予算等）は絞らず全件。対象年度以外の年度の行は元データの生成時点で
    * 除かれる（他の年度はこのページの突き合わせ対象＝MOF側の同一年度と対応しないため） */
   budgetBreakdown: BudgetBreakdownItem[];
-  /** budgetBreakdown を当年度・当初予算のみに絞り、MOF紐づけ状況を付与したもの（目一覧タブ用） */
+  /** budgetBreakdown を当年度・当初予算＋補正予算（決算等は除く）に絞り、MOF紐づけ状況を
+   * 付与したもの（目一覧タブ用）。当初予算のみだと補正予算経由でしか紐づかない項目が
+   * 一覧から丸ごと消えるため（isRsPrimaryBudgetType参照） */
   budgetItems: Array<BudgetBreakdownItem & { connected: boolean }>;
 }
 export interface IntegratedItemEdge {
@@ -52,10 +54,16 @@ export const itemSectionKey = (item: MOFKouMokuItem) =>
     item.subAccount, item.sectionCode].join('|');
 
 const norm = (value: string) => value.normalize('NFKC').replace(/[\s　]+/g, '');
+// RS側の予算種別表記。「当初予算」に加え「第N次補正予算」も対象にする
+// （MOF側の「補正予算（第N号）」に対応。generate-mof-rs-kou-moku-linkage.ts の
+// resolveMofBudgetType と同じ判定）。当初予算のみだと、紐づけが補正予算経由
+// しかないRS側の歳出予算項目が budgetItems（目一覧タブ）に一切現れず、
+// 実際は接続しているのに確認しようが無くなる不具合になる
+const isRsPrimaryBudgetType = (t: string) => t === '当初予算' || /^第\d+次補正予算$/.test(t);
 function budgetItemMatchesLink(item: BudgetBreakdownItem, link: MofRsKouMokuLinkageRecord): boolean {
   const accountMatches = (link.mofAccountType === 'general' && item.accountCategory === '一般会計') ||
     (link.mofAccountType === 'special' && item.accountCategory === '特別会計');
-  return accountMatches && item.budgetType === '当初予算' && norm(item.item) === norm(link.sectionName) &&
+  return accountMatches && isRsPrimaryBudgetType(item.budgetType) && norm(item.item) === norm(link.sectionName) &&
     norm(item.subItem) === norm(link.subItemName);
 }
 
@@ -135,7 +143,7 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
       linkedAmount, budgetAmount, mofUnlinkedAmount: Math.max(0, budgetAmount - linkedAmount), accountType,
       budgetSummary: source?.budgetSummary,
       budgetBreakdown: source?.budgetBreakdown ?? [],
-      budgetItems: (source?.budgetBreakdown ?? []).filter(item => item.fiscalYear === budgetYear && item.budgetType === '当初予算')
+      budgetItems: (source?.budgetBreakdown ?? []).filter(item => item.fiscalYear === budgetYear && isRsPrimaryBudgetType(item.budgetType))
         .map(item => ({ connected: rows.some(link => budgetItemMatchesLink(item, link)), ...item })) });
   }
   return { metadata: { budgetYear, rsYear, mofAmount: items.reduce((sum, item) => sum + item.amount, 0),
