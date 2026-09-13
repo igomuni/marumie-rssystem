@@ -15,7 +15,8 @@
  * 横断する（/sankey-svg の検索が事業名・支出先名を1本で横断するのと同じ考え方）。
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
@@ -26,11 +27,19 @@ import { getAccountBadgeStyle } from '@/app/lib/account-badge';
 import { BudgetTypeBadge, Badge as MofBadge } from '@/client/components/mof-kou/Badge';
 import { classifyAccountCategory } from '@/app/lib/account-badge';
 import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
-import type {
-  IntegratedGraph,
-  IntegratedItemEdge,
-  IntegratedProjectNode,
-  IntegratedSectionNode,
+import {
+  buildMatcher,
+  buildView,
+  EMPTY_FILTERS,
+  OTHER_PROJECTS,
+  OTHER_SECTIONS,
+  type DisplayNode,
+  type Filters,
+  type IntegratedGraph,
+  type IntegratedItemEdge,
+  type IntegratedProjectNode,
+  type IntegratedSectionNode,
+  type ViewModel,
 } from '@/app/lib/integrated-sankey';
 
 // ── 寸法 ──
@@ -97,20 +106,9 @@ interface LinkageQuality {
 }
 interface ApiResponse extends IntegratedGraph { linkageQuality: LinkageQuality | null }
 
-type NodeKind = 'section' | 'project' | 'other-sections' | 'other-projects';
-type DisplayNode = {
-  id: string; name: string; value: number; side: 'left' | 'right'; kind: NodeKind;
-  section?: IntegratedSectionNode; project?: IntegratedProjectNode;
-  /** RS事業（project/other-projects）のみ: 支出額。/sankey-svg の予算(緑)・支出(橙)の
-   * 統合ノードと同じ構図でRS事業ノードを描くために使う */
-  spendValue?: number;
-};
 /** h = 予算高さ・支出高さのうち大きい方（スロット確保・縦位置決めに使う）。
  * RS事業ノードは budgetH/spendH を別々に持ち、統合ノードの形状描画に使う */
 type PlacedNode = DisplayNode & { x: number; y: number; h: number; budgetH?: number; spendH?: number };
-
-const OTHER_SECTIONS = 'other-sections';
-const OTHER_PROJECTS = 'other-projects';
 
 function nodeColor(n: DisplayNode) {
   if (n.kind === 'section') return n.section?.accountType === 'general' ? NODE_COLORS.general : NODE_COLORS.special;
@@ -131,110 +129,6 @@ function mergedProjectPath(x0: number, y0: number, budgetH: number, spendH: numb
   const ySpendBottom = y0 + Math.max(0.6, spendH);
   return `M${x0},${y0} L${xEnd},${y0} L${xEnd},${ySpendBottom} C${mx},${ySpendBottom} ${mx},${yBudgetBottom} ${x0},${yBudgetBottom} Z`;
 }
-
-/** 部分一致・正規表現の切り替えを1箇所に集約する。不正な正規表現は例外を投げず
- * 「該当なし」として扱う（/sankey-svg の searchRegexError と同じ考え方） */
-function buildMatcher(query: string, useRegex: boolean): { match: (haystack: string) => boolean; error: boolean } {
-  const q = query.trim();
-  if (!q) return { match: () => true, error: false };
-  if (useRegex) {
-    try { const re = new RegExp(q, 'i'); return { match: s => re.test(s), error: false }; }
-    catch { return { match: () => false, error: true }; }
-  }
-  const qLower = q.toLowerCase();
-  return { match: s => s.toLowerCase().includes(qLower), error: false };
-}
-
-export interface RangeWindow { topN: number; offset: number }
-function windowSlice<T>(ranked: T[], w: RangeWindow) {
-  const maxOffset = Math.max(0, ranked.length - w.topN);
-  const offset = Math.max(0, Math.min(w.offset, maxOffset));
-  // 集約対象は窓より後ろ（値が小さい側）の tail のみ。窓より前（オフセットで
-  // 飛ばした値が大きい側）は単純に非表示にする（集約しない）。/sankey-svg の
-  // tailRecipients = sortedRecips.slice(offset + topN) と同じ設計。ここを
-  // 「窓に含まれない全件」にすると、オフセットを進めるたびに元々見えていた
-  // 大きい値の項目まで集約ノードに巻き込まれ、値が跳ね上がって見える不具合になる
-  return {
-    shown: ranked.slice(offset, offset + w.topN),
-    tail: ranked.slice(offset + w.topN),
-    offset, maxOffset, total: ranked.length,
-  };
-}
-
-interface Filters {
-  // null = 未選択（絞り込みなし＝すべて含む）。一度でも操作すると配列になり、
-  // 空配列は「すべて解除（0件）」を明示的に表す。/sankey-svg の acGeneral/acSpecial/...
-  // のような「個々の値が独立してon/offできる」挙動を、空配列=フィルタなしに
-  // 圧縮してしまわないための表現
-  accounts: string[] | null; ministries: string[] | null;
-  sectionNameQuery: string; sectionNameRegex: boolean;
-  projectNameQuery: string; projectNameRegex: boolean;
-  mofMinText: string; mofMaxText: string; rsMinText: string; rsMaxText: string;
-}
-const EMPTY_FILTERS: Filters = {
-  accounts: null, ministries: null, sectionNameQuery: '', sectionNameRegex: false,
-  projectNameQuery: '', projectNameRegex: false,
-  mofMinText: '', mofMaxText: '', rsMinText: '', rsMaxText: '',
-};
-
-function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: RangeWindow, projectWindow: RangeWindow) {
-  const mofMin = parseAmountToYen(filters.mofMinText);
-  const mofMax = parseAmountToYen(filters.mofMaxText);
-  const rsMin = parseAmountToYen(filters.rsMinText);
-  const rsMax = parseAmountToYen(filters.rsMaxText);
-  const sectionNameMatch = buildMatcher(filters.sectionNameQuery, filters.sectionNameRegex).match;
-  const projectNameMatch = buildMatcher(filters.projectNameQuery, filters.projectNameRegex).match;
-  // 共管（所管が「A及びB」のような複合表記）を分解して複数値として扱う
-  const ministriesOf = (m: string) => m.split(/及び|・|、/).map(s => s.trim()).filter(Boolean);
-
-  const keptSections = data.sections.filter(s =>
-    (filters.accounts === null || filters.accounts.includes(s.accountType)) &&
-    (filters.ministries === null || ministriesOf(s.ministry).some(m => filters.ministries!.includes(m))) &&
-    sectionNameMatch(s.name) &&
-    (mofMin === null || s.amount >= mofMin) &&
-    (mofMax === null || s.amount <= mofMax));
-  const rankedSections = [...keptSections].sort((a, b) => b.amount - a.amount);
-  const sectionRange = windowSlice(rankedSections, sectionWindow);
-  const sectionsTotal = rankedSections.reduce((a, s) => a + s.amount, 0);
-  const sectionTailTotal = sectionRange.tail.reduce((a, s) => a + s.amount, 0);
-
-  const keptProjects = data.projects.filter(p =>
-    projectNameMatch(p.name) &&
-    (rsMin === null || p.budgetAmount >= rsMin) &&
-    (rsMax === null || p.budgetAmount <= rsMax));
-  const rankedProjects = [...keptProjects].sort((a, b) => b.budgetAmount - a.budgetAmount);
-  const projectRange = windowSlice(rankedProjects, projectWindow);
-  const projectsTotal = rankedProjects.reduce((a, p) => a + p.budgetAmount, 0);
-  const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.budgetAmount, 0);
-  const spendOf = (p: IntegratedProjectNode) => p.budgetSummary?.executedAmount ?? 0;
-  const projectTailSpendTotal = projectRange.tail.reduce((a, p) => a + spendOf(p), 0);
-  const projectsSpendTotal = rankedProjects.reduce((a, p) => a + spendOf(p), 0);
-
-  const left: DisplayNode[] = sectionRange.shown
-    .map((s): DisplayNode => ({ id: s.id, name: s.name, value: s.amount, side: 'left', kind: 'section', section: s }));
-  if (sectionRange.tail.length > 0) {
-    left.push({ id: OTHER_SECTIONS, name: `その他の項（${sectionRange.tail.length}件）`, value: sectionTailTotal, side: 'left', kind: 'other-sections' });
-  }
-  const right: DisplayNode[] = projectRange.shown
-    .map((p): DisplayNode => ({ id: p.id, name: p.name, value: p.budgetAmount, spendValue: spendOf(p), side: 'right', kind: 'project', project: p }));
-  if (projectRange.tail.length > 0) {
-    right.push({ id: OTHER_PROJECTS, name: `その他のRS事業（${projectRange.tail.length}件）`, value: projectTailTotal, spendValue: projectTailSpendTotal, side: 'right', kind: 'other-projects' });
-  }
-
-  // 「その他」集約ノードの詳細パネル用: 窓より後ろ（tail）に出た項・事業そのもの。
-  // 窓より前（オフセットで飛ばした側）は集約に含めない（windowSlice参照）
-  const hiddenSections = sectionRange.tail.map(s => ({ name: s.name, value: s.amount }));
-  const hiddenProjects = projectRange.tail.map(p => ({ name: p.name, value: p.budgetAmount }));
-
-  return {
-    left, right, hiddenSections, hiddenProjects,
-    sectionColumnTotal: sectionsTotal, projectColumnTotal: projectsTotal, projectSpendColumnTotal: projectsSpendTotal,
-    sectionUniverse: sectionRange.total, sectionMaxOffset: sectionRange.maxOffset, sectionOffset: sectionRange.offset,
-    projectUniverse: projectRange.total, projectMaxOffset: projectRange.maxOffset, projectOffset: projectRange.offset,
-  };
-}
-
-type ViewModel = ReturnType<typeof buildView>;
 
 function fitZoom(view: ViewModel, dims: Dims) {
   let low = 0.1, high = 1;
@@ -513,7 +407,21 @@ function ZoomControls({ scale, baseZoom, onZoomBy, onZoomTo, onReset, right }: {
 }
 
 function App() {
-  const [year, setYear] = useState<SupportedYear>(2025);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // URLのyearクエリパラメータを初期状態に反映し、YearSelectの変更をURLへ書き戻す。
+  // 未指定・不正値（対応年度以外）は既定の2025へフォールバックする
+  const initialYear = (() => {
+    const n = Number(searchParams.get('year'));
+    return (SUPPORTED_YEARS as readonly number[]).includes(n) ? (n as SupportedYear) : 2025;
+  })();
+  const [year, setYearState] = useState<SupportedYear>(initialYear);
+  const setYear = (y: SupportedYear) => {
+    setYearState(y);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('year', String(y));
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
   const [data, setData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState('');
 
@@ -559,11 +467,19 @@ function App() {
   }, [container]);
 
   useEffect(() => {
+    // 年度を短時間で連続切替すると複数の fetch が走る。古いリクエストが後から
+    // 完了すると選択年度と異なるデータで data/error を上書きしてしまうため、
+    // effect のクリーンアップで中止する（CodeRabbit指摘）
+    const controller = new AbortController();
     setData(null); setError(''); setSelected(null);
-    fetch(`/api/integrated-sankey?year=${year}`)
+    fetch(`/api/integrated-sankey?year=${year}`, { signal: controller.signal })
       .then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; })
       .then(setData)
-      .catch(e => setError(e.message));
+      .catch(e => {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+        setError(e instanceof Error ? e.message : String(e));
+      });
+    return () => controller.abort();
   }, [year]);
 
   const view = useMemo(
@@ -597,12 +513,20 @@ function App() {
     return [...sectionHits, ...projectHits].sort((a, b) => b.value - a.value);
   }, [data, query, useRegex]);
 
-  // ジャンプ選択: 対象ノードが現在の表示ウィンドウの外なら、窓を動かして中に入れる
+  // ジャンプ選択: 対象ノードが現在の表示ウィンドウの外なら、窓を動かして中に入れる。
+  // 検索は絞り込みを無視して全件から探す設計（グラフを絞り込まない）なので、
+  // 選択対象がアクティブなフィルタで除外されている場合は先にフィルタを解除する。
+  // 解除しないと buildView の母集合に対象が存在せず、オフセットを動かしても
+  // layout.byId に無いノードを選んだことになり詳細パネルが空になる不具合になる
   const jumpTo = (hit: SearchHit) => {
-    if (!data) return;
+    if (!data || !view) return;
+    const isFilteredOut = hit.kind === 'section'
+      ? !view.rankedSections.some(s => s.id === hit.id)
+      : !view.rankedProjects.some(p => p.id === hit.id);
+    if (isFilteredOut) setFilters(EMPTY_FILTERS);
+
     if (hit.kind === 'section') {
-      const kept = data.sections.filter(s => filters.accounts === null || filters.accounts.includes(s.accountType));
-      const ranked = [...kept].sort((a, b) => b.amount - a.amount);
+      const ranked = [...data.sections].sort((a, b) => b.amount - a.amount);
       const idx = ranked.findIndex(s => s.id === hit.id);
       if (idx >= 0) setSectionOffset(Math.max(0, idx - Math.floor(topSection / 2)));
     } else {
@@ -1097,5 +1021,9 @@ function AggregateDetail({ name, items, onClose }: { name: string; items: { name
 }
 
 export default function IntegratedSankeyPage() {
-  return <App />;
+  return (
+    <Suspense fallback={null}>
+      <App />
+    </Suspense>
+  );
 }

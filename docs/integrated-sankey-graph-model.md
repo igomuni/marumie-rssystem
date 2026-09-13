@@ -37,7 +37,12 @@ MOF項ノードは単色の単一バー。RS事業ノードは `/sankey-svg` の
 
 MOF項・RS事業という2ノード型は、`/sankey-svg` の4列（総計/省庁/事業/支出先）レイアウト
 エンジン（`app/lib/sankey-svg-filter.ts` の `filterTopN`/`computeLayout`）が前提とする
-ノード型と根本的に異なるため、**データ・レイアウトのロジックは `page.tsx` 内に新規で持つ**。
+ノード型と根本的に異なるため、レイアウト・描画ロジックは新規で持つ。ただし、
+レイヤー規約（`app/*/page.tsx`＝状態管理・API呼び出し・レイアウトのみ、`app/lib/**`＝
+Pure・HTTP/React禁止）に従い、**フィルタ・表示ウィンドウのデータ変換（`buildView`・
+`windowSlice`・`buildMatcher` 等）は `app/lib/integrated-sankey.ts` に置く**。ピクセル
+座標を扱うレイアウト計算（`buildLayout`・`fitZoom`・`colGeometry` 等）はReact状態
+（`dims`・`zoom`・`pan`）と一体で使うため `page.tsx` 側に残す。
 一方、検索ボックス・フィルタパネル・ズームコントロール・サイドパネルヘッダーの
 **UI構造とスタイル値は `/sankey-svg` の実装からそのまま移植**する（近似で書き直さない）。
 
@@ -75,6 +80,13 @@ MOF項・RS事業という2ノード型は、`/sankey-svg` の4列（総計/省�
 （`document.addEventListener('mousedown', ...)` ＋ ルート要素への `ref`）で閉じる。
 全画面レイヤーだとトリガーボタン自身もレイヤーの下敷きになり、再クリックで
 閉じようとした操作が奪われるため使わない。
+
+**検索結果のクリック（`jumpTo`）は、対象がアクティブなフィルタで除外されている場合、
+選択前にフィルタを解除する。** 検索はフィルタを無視して全件から探す設計のため、
+フィルタで絞り込まれた状態のままジャンプ先のオフセットを計算すると、
+`buildView` の母集合に対象が存在せず（`view.rankedSections`/`rankedProjects` で判定）、
+`layout.byId` にも現れないため詳細パネルが空になる不具合になる（PRレビュー指摘、
+2026-09-14）。
 
 ## ノードのラベル
 
@@ -165,6 +177,21 @@ MOF項一覧からしか作られないため、当初予算側の対応する�
 紐づけ生成データ自体（`linkageQuality` の値）は当初予算＋補正予算を対象に生成されている
 ため、この変更後も画面右上の紐づけ率バッジの数値とは齟齬が無い。
 
+**`projects` は `projectLinks`（紐づけレコードを持つ事業）と `projectSources`
+（route.ts経由で渡される全RS事業）の和集合で作る。** `projectLinks` だけを回すと、
+MOFとの紐づけが1件も無いRS事業（実測356件）が `projects` 配列・検索・フィルタ・
+列合計から丸ごと消える（PRレビュー指摘、2026-09-14）。`IntegratedProjectSource` に
+`name`/`ministry` を追加し、紐づけレコードが無いソースのみの事業は `linkedAmount: 0`・
+`budgetSummary.totalBudget` ベースの `budgetAmount`・空の紐づけ状況で表示する。
+
+**MOF↔RSの目単位の紐づけ判定（`budgetItemMatchesLink`）は項目名だけでなく識別子まで
+一致させる。** 所管（`jurisdiction`/`mofMinistry`）＋一般会計なら組織・勘定
+（`organizationAccount`/`mofOrganization`）、特別会計なら会計・勘定
+（`account`/`mofOrganization`、`subAccount`/`mofSubAccount`）を項目名と併せて比較する
+（`scripts/generate-mof-rs-kou-moku-linkage.ts` の突合キーと同じ識別子）。項・目名の
+一致だけだと、同じ項目名が別の所管・会計に存在する場合に誤って接続扱いになりうる
+（PRレビュー指摘、2026-09-14）。
+
 `money()` は正負を問わず絶対値で兆/億/万の閾値判定する（`Math.abs` を挟まないと
 負の大きい額が「万円」表示に落ちる）。1万円未満は0万円へ丸めて消さず、素の円で
 表示する（`client/components/mof-jikou/format.ts` の `formatYen` と同じ考え方）。
@@ -196,6 +223,17 @@ RS事業列上部のノードへのクリックを奪わないようにする）
 
 紐づけ生成ロジック（`scripts/generate-mof-rs-kou-moku-linkage.ts`）自体の精度改善は
 別task doc（未着手）。今回は既存の生成済みデータをそのまま両年度分出している。
+
+**年度はURLの `year` クエリパラメータに同期する。** `useSearchParams`/`useRouter`
+（`next/navigation`、`Suspense` でラップが必要）で初期化・書き戻しする。未指定・
+対応年度以外の値は既定の2025へフォールバックする（`/sankey-svg` のURL状態同期を
+簡略化して引き継いだもの。`YearSelect` の変更時に `router.replace` でURLへ反映する
+だけで、`/sankey-svg` のような他の状態の同期は今回のスコープに含めない）。
+
+**年度切替のデータ取得は `AbortController` で古いリクエストを中止する。**
+年度を短時間で連続切替すると複数の `fetch` が走り、古いリクエストが後から完了すると
+選択年度と異なるデータで上書きしてしまうため、`useEffect` のクリーンアップで
+中止する。
 
 ## 事項データ（未統合）
 

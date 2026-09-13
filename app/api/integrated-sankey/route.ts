@@ -21,7 +21,8 @@ export async function GET(request: Request) {
   const mof = loadYear(budgetYear);
   const graph = loadSankeyGraph(String(rsYear));
   const projects = graph.nodes.filter(n => n.type === 'project-budget' && n.projectId !== undefined)
-    .map(n => ({ projectId:n.projectId!, budgetSummary:n.budgetSummary, budgetBreakdown:n.budgetBreakdown }));
+    .map(n => ({ projectId: n.projectId!, name: n.name, ministry: n.ministry ?? '',
+      budgetSummary: n.budgetSummary, budgetBreakdown: n.budgetBreakdown }));
   const integrated = buildIntegratedGraph(mof.items, resolveLinks(budgetYear).links, projects, budgetYear, rsYear);
   return NextResponse.json({ ...integrated, linkageQuality: linkageQuality(budgetYear) });
 }

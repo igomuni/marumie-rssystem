@@ -49,7 +49,7 @@ describe('integrated sankey first cut', () => {
 
   it('marks RS budget items that no MOF item matched', () => {
     const g=buildIntegratedGraph([item()],[link()],
-      [{projectId:1,budgetBreakdown:[budgetItem(),budgetItem({subItem:'目z',amount:10})]}]);
+      [{projectId:1,name:'事業X',ministry:'省',budgetBreakdown:[budgetItem(),budgetItem({subItem:'目z',amount:10})]}]);
     const items=g.projects[0].budgetItems;
     expect(items.map(i=>[i.subItem,i.connected])).toEqual([['目a',true],['目z',false]]);
   });

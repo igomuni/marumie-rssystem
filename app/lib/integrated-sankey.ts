@@ -1,6 +1,7 @@
 import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
+import { parseAmountToYen } from '@/app/lib/format/yen';
 
 export type IntegratedAccountType = 'general' | 'special';
 
@@ -43,7 +44,8 @@ export interface IntegratedGraph {
   sections: IntegratedSectionNode[]; projects: IntegratedProjectNode[]; edges: IntegratedItemEdge[];
 }
 export interface IntegratedProjectSource {
-  projectId: number; budgetSummary?: BudgetSummary; budgetBreakdown?: BudgetBreakdownItem[];
+  projectId: number; name: string; ministry: string;
+  budgetSummary?: BudgetSummary; budgetBreakdown?: BudgetBreakdownItem[];
 }
 
 export const sectionKey = (l: MofRsKouMokuLinkageRecord) =>
@@ -60,11 +62,19 @@ const norm = (value: string) => value.normalize('NFKC').replace(/[\s　]+/g, '')
 // しかないRS側の歳出予算項目が budgetItems（目一覧タブ）に一切現れず、
 // 実際は接続しているのに確認しようが無くなる不具合になる
 const isRsPrimaryBudgetType = (t: string) => t === '当初予算' || /^第\d+次補正予算$/.test(t);
+// 所管・組織／会計・勘定まで一致させる（項・目名だけの一致だと、同じ項目名が別の
+// 所管・会計に存在する場合に誤って接続扱いになる可能性がある）。
+// scripts/generate-mof-rs-kou-moku-linkage.ts の突合キー（一般会計: 所管|組織・勘定、
+// 特別会計: 所管|会計|勘定）と同じ識別子を使う
 function budgetItemMatchesLink(item: BudgetBreakdownItem, link: MofRsKouMokuLinkageRecord): boolean {
   const accountMatches = (link.mofAccountType === 'general' && item.accountCategory === '一般会計') ||
     (link.mofAccountType === 'special' && item.accountCategory === '特別会計');
-  return accountMatches && isRsPrimaryBudgetType(item.budgetType) && norm(item.item) === norm(link.sectionName) &&
-    norm(item.subItem) === norm(link.subItemName);
+  if (!accountMatches || !isRsPrimaryBudgetType(item.budgetType)) return false;
+  const identityMatches = link.mofAccountType === 'general'
+    ? norm(item.jurisdiction) === norm(link.mofMinistry) && norm(item.organizationAccount) === norm(link.mofOrganization)
+    : norm(item.jurisdiction) === norm(link.mofMinistry) && norm(item.account) === norm(link.mofOrganization) &&
+      norm(item.subAccount) === norm(link.mofSubAccount);
+  return identityMatches && norm(item.item) === norm(link.sectionName) && norm(item.subItem) === norm(link.subItemName);
 }
 
 // MOF項一覧（items）は当初予算のみに限定する。補正予算のamountは「改予算額」＝
@@ -128,9 +138,15 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
   const projectLinks = new Map<number, MofRsKouMokuLinkageRecord[]>();
   for (const link of links) projectLinks.set(link.projectId, [...(projectLinks.get(link.projectId) ?? []), link]);
   const sourceMap = new Map(projectSources.map(source => [source.projectId, source]));
+  // projectLinksだけ（紐づけレコードを持つ事業）を回すと、紐づけが1件も無いRS事業が
+  // projects配列・検索・フィルタ・列合計から丸ごと消える。projectSources（route.ts経由で
+  // 渡される全project-budgetノード）との和集合で回す
+  const allProjectIds = new Set<number>([...sourceMap.keys(), ...projectLinks.keys()]);
   const projects: IntegratedProjectNode[] = [];
-  for (const [projectId, rows] of projectLinks) {
-    const source = sourceMap.get(projectId); const linkedAmount = rows.reduce((sum, link) => sum + link.rsAmount, 0);
+  for (const projectId of allProjectIds) {
+    const rows = projectLinks.get(projectId) ?? [];
+    const source = sourceMap.get(projectId);
+    const linkedAmount = rows.reduce((sum, link) => sum + link.rsAmount, 0);
     const budgetAmount = source?.budgetSummary?.totalBudget ?? linkedAmount;
     // 政府関係機関(agency)はRSに対応する会計区分が無く対象外のはずだが、型上は
     // 除外しきれないため念のためフィルタする（実データでは一般・特別のみのはず）
@@ -139,7 +155,9 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     );
     const accountType: IntegratedProjectAccountType =
       accountTypes.size > 1 ? 'mixed' : accountTypes.size === 1 ? [...accountTypes][0] : 'general';
-    projects.push({ id: `project:${projectId}`, projectId, name: rows[0].projectName, ministry: rows[0].projectMinistry,
+    projects.push({ id: `project:${projectId}`, projectId,
+      name: rows[0]?.projectName ?? source?.name ?? `事業${projectId}`,
+      ministry: rows[0]?.projectMinistry ?? source?.ministry ?? '',
       linkedAmount, budgetAmount, mofUnlinkedAmount: Math.max(0, budgetAmount - linkedAmount), accountType,
       budgetSummary: source?.budgetSummary,
       budgetBreakdown: source?.budgetBreakdown ?? [],
@@ -151,3 +169,129 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     itemCount: items.length }, sections: [...sections.values()].sort((a, b) => b.amount - a.amount),
     projects: projects.sort((a, b) => b.linkedAmount - a.linkedAmount), edges: [...edges.values()] };
 }
+
+// ────────────────────────────────────────────────────────────
+// ビュー（フィルタ・表示ウィンドウ）: app/integrated-sankey/page.tsx から移設。
+// UIレイヤーの状態管理・レイアウト計算とは独立した純粋なデータ変換のため、
+// レイヤー規約（app/lib/ = Pure、React/HTTP禁止）に合わせてこちらに置く
+// ────────────────────────────────────────────────────────────
+
+/** 部分一致・正規表現の切り替えを1箇所に集約する。不正な正規表現は例外を投げず
+ * 「該当なし」として扱う（/sankey-svg の searchRegexError と同じ考え方） */
+export function buildMatcher(query: string, useRegex: boolean): { match: (haystack: string) => boolean; error: boolean } {
+  const q = query.trim();
+  if (!q) return { match: () => true, error: false };
+  if (useRegex) {
+    try { const re = new RegExp(q, 'i'); return { match: s => re.test(s), error: false }; }
+    catch { return { match: () => false, error: true }; }
+  }
+  const qLower = q.toLowerCase();
+  return { match: s => s.toLowerCase().includes(qLower), error: false };
+}
+
+export interface RangeWindow { topN: number; offset: number }
+export function windowSlice<T>(ranked: T[], w: RangeWindow) {
+  const maxOffset = Math.max(0, ranked.length - w.topN);
+  const offset = Math.max(0, Math.min(w.offset, maxOffset));
+  // 集約対象は窓より後ろ（値が小さい側）の tail のみ。窓より前（オフセットで
+  // 飛ばした値が大きい側）は単純に非表示にする（集約しない）。/sankey-svg の
+  // tailRecipients = sortedRecips.slice(offset + topN) と同じ設計。ここを
+  // 「窓に含まれない全件」にすると、オフセットを進めるたびに元々見えていた
+  // 大きい値の項目まで集約ノードに巻き込まれ、値が跳ね上がって見える不具合になる
+  return {
+    shown: ranked.slice(offset, offset + w.topN),
+    tail: ranked.slice(offset + w.topN),
+    offset, maxOffset, total: ranked.length,
+  };
+}
+
+export interface Filters {
+  // null = 未選択（絞り込みなし＝すべて含む）。一度でも操作すると配列になり、
+  // 空配列は「すべて解除（0件）」を明示的に表す。/sankey-svg の acGeneral/acSpecial/...
+  // のような「個々の値が独立してon/offできる」挙動を、空配列=フィルタなしに
+  // 圧縮してしまわないための表現
+  accounts: string[] | null; ministries: string[] | null;
+  sectionNameQuery: string; sectionNameRegex: boolean;
+  projectNameQuery: string; projectNameRegex: boolean;
+  mofMinText: string; mofMaxText: string; rsMinText: string; rsMaxText: string;
+}
+export const EMPTY_FILTERS: Filters = {
+  accounts: null, ministries: null, sectionNameQuery: '', sectionNameRegex: false,
+  projectNameQuery: '', projectNameRegex: false,
+  mofMinText: '', mofMaxText: '', rsMinText: '', rsMaxText: '',
+};
+
+export const OTHER_SECTIONS = 'other-sections';
+export const OTHER_PROJECTS = 'other-projects';
+
+export type NodeKind = 'section' | 'project' | 'other-sections' | 'other-projects';
+export type DisplayNode = {
+  id: string; name: string; value: number; side: 'left' | 'right'; kind: NodeKind;
+  section?: IntegratedSectionNode; project?: IntegratedProjectNode;
+  /** RS事業（project/other-projects）のみ: 支出額。/sankey-svg の予算(緑)・支出(橙)の
+   * 統合ノードと同じ構図でRS事業ノードを描くために使う */
+  spendValue?: number;
+};
+
+export function buildView(data: IntegratedGraph, filters: Filters, sectionWindow: RangeWindow, projectWindow: RangeWindow) {
+  const mofMin = parseAmountToYen(filters.mofMinText);
+  const mofMax = parseAmountToYen(filters.mofMaxText);
+  const rsMin = parseAmountToYen(filters.rsMinText);
+  const rsMax = parseAmountToYen(filters.rsMaxText);
+  const sectionNameMatch = buildMatcher(filters.sectionNameQuery, filters.sectionNameRegex).match;
+  const projectNameMatch = buildMatcher(filters.projectNameQuery, filters.projectNameRegex).match;
+  // 共管（所管が「A及びB」のような複合表記）を分解して複数値として扱う
+  const ministriesOf = (m: string) => m.split(/及び|・|、/).map(s => s.trim()).filter(Boolean);
+
+  const keptSections = data.sections.filter(s =>
+    (filters.accounts === null || filters.accounts.includes(s.accountType)) &&
+    (filters.ministries === null || ministriesOf(s.ministry).some(m => filters.ministries!.includes(m))) &&
+    sectionNameMatch(s.name) &&
+    (mofMin === null || s.amount >= mofMin) &&
+    (mofMax === null || s.amount <= mofMax));
+  const rankedSections = [...keptSections].sort((a, b) => b.amount - a.amount);
+  const sectionRange = windowSlice(rankedSections, sectionWindow);
+  const sectionsTotal = rankedSections.reduce((a, s) => a + s.amount, 0);
+  const sectionTailTotal = sectionRange.tail.reduce((a, s) => a + s.amount, 0);
+
+  const keptProjects = data.projects.filter(p =>
+    projectNameMatch(p.name) &&
+    (rsMin === null || p.budgetAmount >= rsMin) &&
+    (rsMax === null || p.budgetAmount <= rsMax));
+  const rankedProjects = [...keptProjects].sort((a, b) => b.budgetAmount - a.budgetAmount);
+  const projectRange = windowSlice(rankedProjects, projectWindow);
+  const projectsTotal = rankedProjects.reduce((a, p) => a + p.budgetAmount, 0);
+  const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.budgetAmount, 0);
+  const spendOf = (p: IntegratedProjectNode) => p.budgetSummary?.executedAmount ?? 0;
+  const projectTailSpendTotal = projectRange.tail.reduce((a, p) => a + spendOf(p), 0);
+  const projectsSpendTotal = rankedProjects.reduce((a, p) => a + spendOf(p), 0);
+
+  const left: DisplayNode[] = sectionRange.shown
+    .map((s): DisplayNode => ({ id: s.id, name: s.name, value: s.amount, side: 'left', kind: 'section', section: s }));
+  if (sectionRange.tail.length > 0) {
+    left.push({ id: OTHER_SECTIONS, name: `その他の項（${sectionRange.tail.length}件）`, value: sectionTailTotal, side: 'left', kind: 'other-sections' });
+  }
+  const right: DisplayNode[] = projectRange.shown
+    .map((p): DisplayNode => ({ id: p.id, name: p.name, value: p.budgetAmount, spendValue: spendOf(p), side: 'right', kind: 'project', project: p }));
+  if (projectRange.tail.length > 0) {
+    right.push({ id: OTHER_PROJECTS, name: `その他のRS事業（${projectRange.tail.length}件）`, value: projectTailTotal, spendValue: projectTailSpendTotal, side: 'right', kind: 'other-projects' });
+  }
+
+  // 「その他」集約ノードの詳細パネル用: 窓より後ろ（tail）に出た項・事業そのもの。
+  // 窓より前（オフセットで飛ばした側）は集約に含めない（windowSlice参照）
+  const hiddenSections = sectionRange.tail.map(s => ({ name: s.name, value: s.amount }));
+  const hiddenProjects = projectRange.tail.map(p => ({ name: p.name, value: p.budgetAmount }));
+
+  return {
+    left, right, hiddenSections, hiddenProjects,
+    // フィルタ後・ランキング済みの母集合。検索ジャンプ（jumpTo）が buildView と
+    // 異なる母集合を使うと、フィルタで除外されたノードを選択してしまい詳細パネルが
+    // 空になる不具合になるため、ジャンプ側もこの配列をそのまま使う
+    rankedSections, rankedProjects,
+    sectionColumnTotal: sectionsTotal, projectColumnTotal: projectsTotal, projectSpendColumnTotal: projectsSpendTotal,
+    sectionUniverse: sectionRange.total, sectionMaxOffset: sectionRange.maxOffset, sectionOffset: sectionRange.offset,
+    projectUniverse: projectRange.total, projectMaxOffset: projectRange.maxOffset, projectOffset: projectRange.offset,
+  };
+}
+
+export type ViewModel = ReturnType<typeof buildView>;
