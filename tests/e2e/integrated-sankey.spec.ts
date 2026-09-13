@@ -56,8 +56,8 @@ test('2列のノード一覧が表示され、帯（エッジ）は描かれな�
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
   const canvas = page.getByTestId('integrated-canvas');
-  await expect(canvas.getByText('MOFの項', { exact: true })).toBeVisible();
-  await expect(canvas.getByText('RSの事業', { exact: true })).toBeVisible();
+  await expect(canvas.getByText('MOF項', { exact: true })).toBeVisible();
+  await expect(canvas.getByText('RS事業', { exact: true })).toBeVisible();
   // 項と事業を結ぶ帯は存在しない。ノードはrectで描くのでcanvas内にpathは無い
   await expect(page.locator('[data-testid="integrated-edge"]')).toHaveCount(0);
   await expect(canvas.locator('path')).toHaveCount(0);

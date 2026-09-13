@@ -624,9 +624,9 @@ function App() {
           onMouseLeave={() => { drag.current = null; }}
         >
           <g transform={`translate(${pan.x} ${pan.y})`}>
-            <text x={layout.leftX} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="end">MOFの項</text>
+            <text x={layout.leftX} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555" textAnchor="end">MOF項</text>
             <text x={layout.leftX} y={PAD_TOP - 22} fontSize="12" fill="#999" textAnchor="end">{money(view.sectionColumnTotal)}</text>
-            <text x={layout.rightX + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">RSの事業</text>
+            <text x={layout.rightX + NODE_W} y={PAD_TOP - 40} fontSize="13" fontWeight="700" fill="#555">RS事業</text>
             <text x={layout.rightX + NODE_W} y={PAD_TOP - 22} fontSize="12" fill="#999">{money(view.projectColumnTotal)}</text>
             <g>
               {[...layout.left, ...layout.right].map(n => {
@@ -794,13 +794,17 @@ function AmountCell({ label, value }: { label: string; value: number }) {
   );
 }
 
-function DetailTabs({ tabs, active, onChange }: { tabs: string[]; active: number; onChange: (i: number) => void }) {
+/** タブに件数を添える。/sankey-svg の省庁/事業/支出先タブと同じ「ラベル(件数)」表示
+ * （リストではなく集計値だけのタブは count を省略する） */
+function DetailTabs({ tabs, active, onChange }: { tabs: { label: string; count?: number }[]; active: number; onChange: (i: number) => void }) {
   const tabBtnBase: React.CSSProperties = { flex: 1, padding: '6px 4px', fontSize: 13, fontWeight: 600, background: 'transparent', border: 'none', borderBottom: '2px solid transparent', cursor: 'pointer', color: '#999' };
   const tabBtnActive: React.CSSProperties = { ...tabBtnBase, color: '#333', borderBottom: '2px solid #4a90d9' };
   return (
     <div style={{ display: 'flex', borderBottom: '1px solid #eee', flexShrink: 0, background: '#fff' }}>
       {tabs.map((t, i) => (
-        <button key={t} type="button" style={i === active ? tabBtnActive : tabBtnBase} onClick={() => onChange(i)}>{t}</button>
+        <button key={t.label} type="button" style={i === active ? tabBtnActive : tabBtnBase} onClick={() => onChange(i)}>
+          {t.label}{t.count !== undefined && <span style={{ fontWeight: 400, fontSize: 11 }}>（{t.count.toLocaleString()}）</span>}
+        </button>
       ))}
     </div>
   );
@@ -843,7 +847,7 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
           <span style={{ fontSize: 11, color: '#666' }}>{section.ministry}{section.organization ? ` / ${section.organization}` : ''}{section.subAccount ? ` / ${section.subAccount}` : ''}</span>
         </>}
       />
-      <DetailTabs tabs={['目一覧', 'RS事業一覧']} active={tab} onChange={setTab} />
+      <DetailTabs tabs={[{ label: '目一覧', count: itemEdges.length }, { label: 'RS事業一覧', count: projectTotals.size }]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
           [...itemEdges].sort((a, b) => b.value - a.value).slice(0, 200).map(e => (
@@ -897,9 +901,24 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
           <span style={{ fontSize: 11, color: '#666' }}>{project.ministry}{rep ? ` / ${rep.organizationAccount}` : ''}</span>
         </>}
       />
-      <DetailTabs tabs={['予算執行一覧', '目一覧']} active={tab} onChange={setTab} />
+      <DetailTabs tabs={[
+        { label: '予算執行一覧', count: project.budgetBreakdown.length },
+        { label: '予算サマリ' },
+        { label: '目一覧', count: project.budgetItems.length },
+      ]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
+          // 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来のレコードをそのまま一覧にする
+          // （集計値ではなく生のレコード。集計サマリは別タブ）
+          project.budgetBreakdown.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>予算執行レコードがありません</p> : (
+            project.budgetBreakdown.map((i, n) => (
+              <div key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`} style={listButtonStyle}>
+                <span style={listNameStyle}>{i.subItem || i.item}<span style={{ color: '#aaa' }}> / {i.budgetType}（{i.fiscalYear}年度）</span></span>
+                <span style={listValueStyle}>{i.accountCategory} / {i.account} / {i.item} / {money(i.amount)}</span>
+              </div>
+            ))
+          )
+        ) : tab === 1 ? (
           <>
             {project.budgetSummary ? (
               <div style={{ marginBottom: 10 }}>

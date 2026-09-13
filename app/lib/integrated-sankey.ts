@@ -16,6 +16,9 @@ export interface IntegratedProjectNode {
   id: string; projectId: number; name: string; ministry: string; linkedAmount: number;
   initialBudget: number; mofUnlinkedAmount: number; accountType: IntegratedProjectAccountType;
   budgetSummary?: BudgetSummary;
+  /** 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来の全レコード（年度・予算種別で絞らない） */
+  budgetBreakdown: BudgetBreakdownItem[];
+  /** budgetBreakdown を当年度・当初予算のみに絞り、MOF紐づけ状況を付与したもの（目一覧タブ用） */
   budgetItems: Array<BudgetBreakdownItem & { connected: boolean }>;
 }
 export interface IntegratedItemEdge {
@@ -110,6 +113,7 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     projects.push({ id: `project:${projectId}`, projectId, name: rows[0].projectName, ministry: rows[0].projectMinistry,
       linkedAmount, initialBudget, mofUnlinkedAmount: Math.max(0, initialBudget - linkedAmount), accountType,
       budgetSummary: source?.budgetSummary,
+      budgetBreakdown: source?.budgetBreakdown ?? [],
       budgetItems: (source?.budgetBreakdown ?? []).filter(item => item.fiscalYear === budgetYear && item.budgetType === '当初予算')
         .map(item => ({ connected: rows.some(link => budgetItemMatchesLink(item, link)), ...item })) });
   }
