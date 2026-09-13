@@ -926,7 +926,7 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
         amountBlock={
           <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 12, rowGap: 4, marginTop: 5 }}>
             <AmountCell label="予算額" value={project.budgetAmount} />
-            <AmountCell label="支出額" value={project.budgetSummary?.executedAmount ?? 0} />
+            <AmountCell label="支出額" value={project.spendingAmount} />
           </div>
         }
         badges={<>

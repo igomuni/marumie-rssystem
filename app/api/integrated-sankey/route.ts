@@ -20,9 +20,17 @@ export async function GET(request: Request) {
     );
   const mof = loadYear(budgetYear);
   const graph = loadSankeyGraph(String(rsYear));
+  // 支出額はproject-budgetノードのbudgetSummary.executedAmount（RS 2-1予算執行サマリの執行額）
+  // ではなく、project-spendingノードのvalue（支出先データ由来の直接支出額合計。
+  // scripts/generate-sankey-svg-data.ts の spendingAmount）を使う。両者は別のデータソースで、
+  // RS 2-1に予算執行サマリが無い事業（例: PID21972）でも直接支出額は存在しうるため
+  const spendingByProjectId = new Map(
+    graph.nodes.filter(n => n.type === 'project-spending' && n.projectId !== undefined)
+      .map(n => [n.projectId!, n.value]));
   const projects = graph.nodes.filter(n => n.type === 'project-budget' && n.projectId !== undefined)
     .map(n => ({ projectId: n.projectId!, name: n.name, ministry: n.ministry ?? '',
-      budgetSummary: n.budgetSummary, budgetBreakdown: n.budgetBreakdown }));
+      budgetSummary: n.budgetSummary, budgetBreakdown: n.budgetBreakdown,
+      spendingAmount: spendingByProjectId.get(n.projectId!) ?? 0 }));
   const integrated = buildIntegratedGraph(mof.items, resolveLinks(budgetYear).links, projects, budgetYear, rsYear);
   return NextResponse.json({ ...integrated, linkageQuality: linkageQuality(budgetYear) });
 }

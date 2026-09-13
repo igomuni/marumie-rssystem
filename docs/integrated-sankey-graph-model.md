@@ -145,7 +145,7 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 | MOF項の総額 | 配下にあるMOF目の `amount` 合計 |
 | MOF項の前年度額・増減率 | 配下の目の `previousAmount`/`difference` を合算（null は0扱い） |
 | RS事業の予算額 | `budgetAmount`＝`budgetSummary.totalBudget`（予算現額合計） |
-| RS事業の支出額 | `budgetSummary.executedAmount` |
+| RS事業の支出額 | `spendingAmount`＝`/sankey-svg`の`project-spending`ノードの`value`（支出先データ由来の直接支出額合計） |
 | RS事業の会計区分 | `budgetBreakdown`（予算執行タブに出すRS事業自身のレコード）の`accountCategory`から集計。単一なら一般/特別、複数にまたがれば`mixed`。1件も無ければMOF紐づけ（`rows`）から代替集計。どちらも無ければ`unknown`（バッジ非表示） |
 
 **RS事業の会計区分はMOF紐づけ（`rows`）ではなく `budgetBreakdown`（予算執行タブの
@@ -167,6 +167,23 @@ MOF紐づけから代替集計する。
 `accountType: 'unknown'` のときは `getAccountBadgeStyle` に `null` を渡し、
 バッジそのものを出さない。予算執行タブの各行のバッジは影響を受けない
 （行単位は `accountCategory` を直接使うため）。
+
+**RS事業の支出額は `budgetSummary.executedAmount`（RS 2-1予算執行サマリの執行額）
+ではなく `spendingAmount`（`project-spending` ノードの `value`）を使う。** 両者は
+別のデータソースに由来する別概念で、常に一致するとは限らない——
+`budgetSummary` はRS 2-1予算執行サマリCSVに事業の記載がある場合のみ付与されるのに
+対し、`spendingAmount` は支出先データ（2-3 CSV等）由来の直接支出額集計で、
+RS 2-1に記載が無い事業でも支出記録は存在しうる。実例:
+PID21972「日米政府の戦略的投資イニシアティブに基づく投資等への対応」は
+`budgetSummary` が無い（`undefined`）が、直接支出額は1,000億円あり、
+`/sankey-svg` では正しく表示されるのに `/integrated-sankey` では
+`budgetSummary?.executedAmount ?? 0` により0円と表示されていた（2026-09-14指摘・修正）。
+`route.ts` がグラフの `project-spending-{pid}` ノードから `spendingAmount` を
+`IntegratedProjectSource` に含めて渡し、`buildIntegratedGraph` がそれを
+`IntegratedProjectNode.spendingAmount` にそのまま載せ、サイドパネルヘッダーの
+支出額表示（`AmountCell`）とサンキー描画の `spendOf`（Sankeyノードの支出側高さ）の
+両方がこれを参照する。予算サマリタブの「執行額」行（`budgetSummary.executedAmount`）
+はRS 2-1サマリ自身の値として引き続きそのまま表示する（別概念であり混同しない）。
 
 **RS事業の予算額は `initialBudget`（当初予算）ではなく `totalBudget`（予算現額合計＝
 当初＋補正＋繰越＋予備費使用等を含む現在の総額）を使う。** `/sankey-svg` の事業ノード

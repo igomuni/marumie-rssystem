@@ -97,4 +97,11 @@ describe('integrated sankey first cut', () => {
     const g=buildIntegratedGraph([item()],[],[{projectId:9,name:'事業Z',ministry:'省'}]);
     expect(g.projects.find(p=>p.projectId===9)?.accountType).toBe('unknown');
   });
+
+  it('uses spendingAmount (project-spending node value) rather than budgetSummary.executedAmount', () => {
+    // budgetSummaryが無い（RS 2-1予算執行サマリ未収録）事業でも、支出先データ由来の
+    // spendingAmountがあれば支出額として反映する（PID21972相当のケース）
+    const g=buildIntegratedGraph([item()],[],[{projectId:9,name:'事業Z',ministry:'省',spendingAmount:100_000_000_000}]);
+    expect(g.projects.find(p=>p.projectId===9)?.spendingAmount).toBe(100_000_000_000);
+  });
 });

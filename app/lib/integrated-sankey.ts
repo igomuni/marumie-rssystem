@@ -24,6 +24,11 @@ export interface IntegratedProjectNode {
    * それを使うと `/sankey-svg` では表示される事業が0円扱いになってしまう */
   budgetAmount: number;
   mofUnlinkedAmount: number; accountType: IntegratedProjectAccountType;
+  /** 支出額。budgetSummary.executedAmount（RS 2-1予算執行サマリの執行額）ではなく、
+   * `/sankey-svg` の project-spending ノードのvalue（支出先データ由来の直接支出額合計）
+   * を使う。RS 2-1サマリが無い事業でも直接支出額は存在しうるため（例: PID21972は
+   * budgetSummaryが無いが支出先データに1,000億円の直接支出がある） */
+  spendingAmount: number;
   budgetSummary?: BudgetSummary;
   /** 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来のレコード。対象年度（budgetYear、
    * scripts/generate-sankey-svg-data.ts の TARGET_BUDGET_YEAR）に絞った上で、予算種別
@@ -47,7 +52,7 @@ export interface IntegratedGraph {
 }
 export interface IntegratedProjectSource {
   projectId: number; name: string; ministry: string;
-  budgetSummary?: BudgetSummary; budgetBreakdown?: BudgetBreakdownItem[];
+  budgetSummary?: BudgetSummary; budgetBreakdown?: BudgetBreakdownItem[]; spendingAmount?: number;
 }
 
 export const sectionKey = (l: MofRsKouMokuLinkageRecord) =>
@@ -178,6 +183,7 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
       name: rows[0]?.projectName ?? source?.name ?? `事業${projectId}`,
       ministry: rows[0]?.projectMinistry ?? source?.ministry ?? '',
       linkedAmount, budgetAmount, mofUnlinkedAmount: Math.max(0, budgetAmount - linkedAmount), accountType,
+      spendingAmount: source?.spendingAmount ?? 0,
       budgetSummary: source?.budgetSummary,
       budgetBreakdown: source?.budgetBreakdown ?? [],
       budgetItems: (source?.budgetBreakdown ?? []).filter(item => item.fiscalYear === budgetYear && isRsPrimaryBudgetType(item.budgetType))
@@ -281,7 +287,7 @@ export function buildView(data: IntegratedGraph, filters: Filters, sectionWindow
   const projectRange = windowSlice(rankedProjects, projectWindow);
   const projectsTotal = rankedProjects.reduce((a, p) => a + p.budgetAmount, 0);
   const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.budgetAmount, 0);
-  const spendOf = (p: IntegratedProjectNode) => p.budgetSummary?.executedAmount ?? 0;
+  const spendOf = (p: IntegratedProjectNode) => p.spendingAmount;
   const projectTailSpendTotal = projectRange.tail.reduce((a, p) => a + spendOf(p), 0);
   const projectsSpendTotal = rankedProjects.reduce((a, p) => a + spendOf(p), 0);
 
