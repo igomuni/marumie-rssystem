@@ -150,18 +150,18 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     const source = sourceMap.get(projectId);
     const linkedAmount = rows.reduce((sum, link) => sum + link.rsAmount, 0);
     const budgetAmount = source?.budgetSummary?.totalBudget ?? linkedAmount;
-    // 会計区分は budgetSummary.accountSummaries（RS事業自身の予算・執行データ、
-    // MOF紐づけの成否に関係なく常に正しい）を優先して使う。MOF側とのリンク（rows）
+    // 会計区分は budgetBreakdown（予算執行タブに出すRS事業自身のレコード、MOF紐づけの
+    // 成否に関係なく常に正しい）のaccountCategoryを優先して使う。金額が0円の行も
+    // 会計区分としては有効に扱う（totalBudgetでは絞らない）。MOF側とのリンク（rows）
     // だけで判定すると、会計区分の一方がMOFと未紐づけの場合にその会計区分が
     // 抜け落ち、実際は一般・特別両方の目を持つ事業が片方だけの表示になる不具合に
     // なる（例: PID3522は一般会計8325.6億円＋特別会計1576.2億円を持つが、一般会計側は
     // MOFと未紐づけのため rows だけ見ると「特別」単独に誤判定される）
     const toAccountType = (category: string): IntegratedAccountType | null =>
       category === '一般会計' ? 'general' : category === '特別会計' ? 'special' : null;
-    const accountTypesFromSummary = new Set(
-      (source?.budgetSummary?.accountSummaries ?? [])
-        .filter(a => a.totalBudget > 0)
-        .map(a => toAccountType(a.accountCategory))
+    const accountTypesFromBreakdown = new Set(
+      (source?.budgetBreakdown ?? [])
+        .map(b => toAccountType(b.accountCategory))
         .filter((t): t is IntegratedAccountType => t !== null),
     );
     // 政府関係機関(agency)はRSに対応する会計区分が無く対象外のはずだが、型上は
@@ -169,9 +169,9 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     const accountTypesFromLinks = new Set(
       rows.map(r => r.mofAccountType).filter((t): t is IntegratedAccountType => t === 'general' || t === 'special'),
     );
-    const accountTypes = accountTypesFromSummary.size > 0 ? accountTypesFromSummary : accountTypesFromLinks;
-    // 予算執行データ（budgetSummary）もMOF紐づけも無い事業（実測554件）は判定材料が
-    // 無いため、根拠なく'general'に決め打ちせず'unknown'にする
+    const accountTypes = accountTypesFromBreakdown.size > 0 ? accountTypesFromBreakdown : accountTypesFromLinks;
+    // 予算執行のレコード（budgetBreakdown）が1件も無く、MOF紐づけも無い事業は
+    // 判定材料が無いため、根拠なく'general'に決め打ちせず'unknown'にする
     const accountType: IntegratedProjectAccountType =
       accountTypes.size > 1 ? 'mixed' : accountTypes.size === 1 ? [...accountTypes][0] : 'unknown';
     projects.push({ id: `project:${projectId}`, projectId,

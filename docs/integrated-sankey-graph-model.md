@@ -146,22 +146,27 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 | MOF項の前年度額・増減率 | 配下の目の `previousAmount`/`difference` を合算（null は0扱い） |
 | RS事業の予算額 | `budgetAmount`＝`budgetSummary.totalBudget`（予算現額合計） |
 | RS事業の支出額 | `budgetSummary.executedAmount` |
-| RS事業の会計区分 | `budgetSummary.accountSummaries`（RS事業自身の予算・執行データ）から集計。単一なら一般/特別、複数にまたがれば `mixed`。無ければMOF紐づけ（`rows`）から代替集計。どちらも無ければ `unknown`（バッジ非表示） |
+| RS事業の会計区分 | `budgetBreakdown`（予算執行タブに出すRS事業自身のレコード）の`accountCategory`から集計。単一なら一般/特別、複数にまたがれば`mixed`。1件も無ければMOF紐づけ（`rows`）から代替集計。どちらも無ければ`unknown`（バッジ非表示） |
 
-**RS事業の会計区分はMOF紐づけ（`rows`）ではなく `budgetSummary.accountSummaries`
-（RS事業自身の予算・執行データ）を優先して判定する。** MOF紐づけだけで判定すると、
-一般・特別のどちらか一方がMOF側と未紐づけの場合にその会計区分が集計から抜け落ち、
-実際は両方の目を持つ事業が片方だけの表示（サイドパネルヘッダーの会計区分バッジが
-「一般特別」ではなく「一般」または「特別」単独）になる不具合になる（実測: 42事業が
-該当。2026-09-14指摘）。`accountSummaries` が無い事業（`budgetSummary` 自体が
-無い等）のみ、従来通りMOF紐づけから代替集計する。
+**RS事業の会計区分はMOF紐づけ（`rows`）ではなく `budgetBreakdown`（予算執行タブの
+レコード）を優先して判定する。金額が0円の行も会計区分としては有効に扱う
+（`totalBudget` 等の金額では絞らない）。** MOF紐づけだけで判定すると、一般・特別の
+どちらか一方がMOF側と未紐づけの場合にその会計区分が集計から抜け落ち、実際は
+両方の目を持つ事業が片方だけの表示（サイドパネルヘッダーの会計区分バッジが
+「一般特別」ではなく「一般」または「特別」単独）になる不具合になる（例: PID3522は
+一般会計8325.6億円＋特別会計1576.2億円を持つが、一般会計側はMOFと未紐づけ）。
+当初は `budgetSummary.accountSummaries` を金額0円で除外しながら使っていたが、
+それだと「予算執行のレコードはあるが金額が0円」のケース（例: PID11）まで
+`unknown` 扱いになってしまうと指摘を受け、`budgetBreakdown` の生レコードをそのまま
+使う方式へ変更した（2026-09-14）。`budgetBreakdown` が無い事業のみ、従来通り
+MOF紐づけから代替集計する。
 
-**判定材料が一切無い事業（実測1,079件）は `'general'` に決め打ちせず `'unknown'`
-にする。** `budgetSummary.accountSummaries` も `rows`（MOF紐づけ）も無い事業を
-以前は根拠なく `'general'` としていたため、サイドパネルヘッダーに実際とは限らない
-「一般」バッジが出ていた（2026-09-14指摘）。`accountType: 'unknown'` のときは
-`getAccountBadgeStyle` に `null` を渡し、バッジそのものを出さない。予算執行タブの
-各行のバッジは影響を受けない（行単位は `accountCategory` を直接使うため）。
+**予算執行のレコード（`budgetBreakdown`）が1件も無く、MOF紐づけも無い事業
+（実測556件）だけ `'unknown'` にする。** 以前は根拠なく `'general'` としていたため、
+サイドパネルヘッダーに実際とは限らない「一般」バッジが出ていた（2026-09-14指摘）。
+`accountType: 'unknown'` のときは `getAccountBadgeStyle` に `null` を渡し、
+バッジそのものを出さない。予算執行タブの各行のバッジは影響を受けない
+（行単位は `accountCategory` を直接使うため）。
 
 **RS事業の予算額は `initialBudget`（当初予算）ではなく `totalBudget`（予算現額合計＝
 当初＋補正＋繰越＋予備費使用等を含む現在の総額）を使う。** `/sankey-svg` の事業ノード
