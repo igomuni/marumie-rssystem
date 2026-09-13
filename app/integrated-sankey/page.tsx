@@ -15,6 +15,7 @@ import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
 import { RangeWindowRow } from '@/client/components/SankeySvg/RangeWindowRows';
+import { parseAmountToYen } from '@/app/lib/format/yen';
 import type {
   IntegratedGraph,
   IntegratedItemEdge,
@@ -105,13 +106,13 @@ function buildView(
   data: IntegratedGraph,
   sectionWindow: RangeWindow,
   projectWindow: RangeWindow,
-  query: string,
+  /** 部分一致・正規表現の切り替えは呼び出し側（App）が担う。ここは述語を適用するだけ */
+  matchText: (haystack: string) => boolean,
 ) {
-  const q = query.trim().toLowerCase();
   const matchSection = (s: IntegratedSectionNode) =>
-    !q || `${s.name} ${s.ministry} ${s.organization}`.toLowerCase().includes(q);
+    matchText(`${s.name} ${s.ministry} ${s.organization} ${s.accountType === 'general' ? '一般会計' : '特別会計'}`);
   const matchProject = (p: IntegratedProjectNode) =>
-    !q || `${p.name} ${p.ministry} ${p.projectId}`.toLowerCase().includes(q);
+    matchText(`${p.name} ${p.ministry} ${p.projectId}`);
 
   const matchedProjectIds = new Set(data.projects.filter(matchProject).map(p => p.id));
   // 項そのものが一致するか、一致した事業へ繋がる項を残す
@@ -265,6 +266,38 @@ function buildLayout(view: ViewModel, zoom: number) {
   return { left, right, byId, bands, contentH };
 }
 
+function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-14 shrink-0 text-neutral-500">{label}</span>
+      <div className="flex flex-1 flex-wrap items-center gap-2">{children}</div>
+    </div>
+  );
+}
+
+/** MOF金額・RS予算のレンジ入力。「1.26億」「500万」等は parseAmountToYen が解釈する。
+ * 解釈できない非空文字は赤枠で知らせる（/sankey-svg の予算・支出フィルタと同じ検証表示） */
+function AmountRangeRow({ label, minText, maxText, setMin, setMax }: {
+  label: string; minText: string; maxText: string;
+  setMin: (v: string) => void; setMax: (v: string) => void;
+}) {
+  const invalid = (t: string) => t !== '' && parseAmountToYen(t) === null;
+  return (
+    <FilterRow label={label}>
+      <input value={minText} onChange={e => setMin(e.target.value)} placeholder="下限 例:100億"
+        className="w-24 min-w-0 flex-1 rounded border bg-neutral-50 px-1.5 py-0.5"
+        style={{ borderColor: invalid(minText) ? '#e53935' : '#d4d4d4' }} />
+      <span className="text-neutral-400">〜</span>
+      <input value={maxText} onChange={e => setMax(e.target.value)} placeholder="上限 例:1兆"
+        className="w-24 min-w-0 flex-1 rounded border bg-neutral-50 px-1.5 py-0.5"
+        style={{ borderColor: invalid(maxText) ? '#e53935' : '#d4d4d4' }} />
+      {(minText || maxText) && (
+        <button type="button" onClick={() => { setMin(''); setMax(''); }} className="text-neutral-400 hover:text-neutral-600">✕</button>
+      )}
+    </FilterRow>
+  );
+}
+
 /** 帯は塗りで描く。線幅で描くと両端の位置合わせができない */
 function ribbonPath(x0: number, sy: number, x1: number, ty: number, w: number) {
   const c1 = x0 + (x1 - x0) * 0.45;
@@ -291,6 +324,13 @@ function App() {
   const [accounts, setAccounts] = useState<string[]>(['general', 'special']);
   const [ministries, setMinistries] = useState<string[]>([]);
   const [itemQuery, setItemQuery] = useState('');
+  // 検索: /sankey-svg と同じく通常の部分一致・正規表現の2モードを切り替える
+  const [useRegex, setUseRegex] = useState(false);
+  // 金額レンジ。MOF項の総額とRS事業の当初予算は別々の軸として独立に指定できる
+  const [filterMofMinText, setFilterMofMinText] = useState('');
+  const [filterMofMaxText, setFilterMofMaxText] = useState('');
+  const [filterRsMinText, setFilterRsMinText] = useState('');
+  const [filterRsMaxText, setFilterRsMaxText] = useState('');
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
   // 詳細パネルの幅・折りたたみ・リサイズは /sankey-svg・/subcontracts と同じ共有フックに委ねる
@@ -303,16 +343,47 @@ function App() {
       .catch(e => setError(e.message));
   }, []);
 
+  // 正規表現が不正な場合はページをクラッシュさせず、該当なし（常にfalse）として扱う。
+  // /sankey-svg の searchRegexError と同じ考え方
+  const regexError = useMemo(() => {
+    if (!useRegex || !query.trim()) return false;
+    try { new RegExp(query.trim(), 'i'); return false; } catch { return true; }
+  }, [useRegex, query]);
+  const matchText = useMemo(() => {
+    const q = query.trim();
+    if (!q) return () => true;
+    if (useRegex) {
+      let re: RegExp | null = null;
+      try { re = new RegExp(q, 'i'); } catch { /* regexError 側で表示。ここは全件不一致にする */ }
+      return (s: string) => (re ? re.test(s) : false);
+    }
+    const qLower = q.toLowerCase();
+    return (s: string) => s.toLowerCase().includes(qLower);
+  }, [query, useRegex]);
+
   const filteredData = useMemo(() => {
     if (!data) return null;
-    const sections = data.sections.filter(s => accounts.includes(s.accountType) && (!ministries.length || ministries.includes(s.ministry)));
+    const mofMin = parseAmountToYen(filterMofMinText);
+    const mofMax = parseAmountToYen(filterMofMaxText);
+    const rsMin = parseAmountToYen(filterRsMinText);
+    const rsMax = parseAmountToYen(filterRsMaxText);
+    const sections = data.sections.filter(s =>
+      accounts.includes(s.accountType) &&
+      (!ministries.length || ministries.includes(s.ministry)) &&
+      (mofMin === null || s.amount >= mofMin) &&
+      (mofMax === null || s.amount <= mofMax));
+    const projects = data.projects.filter(p =>
+      (rsMin === null || p.initialBudget >= rsMin) &&
+      (rsMax === null || p.initialBudget <= rsMax));
     const ids = new Set(sections.map(s => s.id));
-    return { ...data, sections, edges: data.edges.filter(e => ids.has(e.source) && (!itemQuery || e.itemName.includes(itemQuery))) };
-  }, [data, accounts, ministries, itemQuery]);
-  useEffect(() => { setSectionOffset(0); setProjectOffset(0); }, [accounts, ministries, itemQuery]);
+    const edges = data.edges.filter(e => ids.has(e.source) && (!itemQuery || e.itemName.includes(itemQuery)));
+    return { ...data, sections, projects, edges };
+  }, [data, accounts, ministries, itemQuery, filterMofMinText, filterMofMaxText, filterRsMinText, filterRsMaxText]);
+  useEffect(() => { setSectionOffset(0); setProjectOffset(0); },
+    [accounts, ministries, itemQuery, filterMofMinText, filterMofMaxText, filterRsMinText, filterRsMaxText]);
   const view = useMemo(
-    () => (filteredData ? buildView(filteredData, { topN: topSection, offset: sectionOffset }, { topN: topProject, offset: projectOffset }, query) : null),
-    [filteredData, topSection, sectionOffset, topProject, projectOffset, query],
+    () => (filteredData ? buildView(filteredData, { topN: topSection, offset: sectionOffset }, { topN: topProject, offset: projectOffset }, matchText) : null),
+    [filteredData, topSection, sectionOffset, topProject, projectOffset, matchText],
   );
   const layout = useMemo(() => (view ? buildLayout(view, scale) : null), [view, scale]);
   const initiallyFitted = useRef(false);
@@ -480,7 +551,101 @@ function App() {
           )}
       </div>
 
-        {/* 右上クラスタ: ［検索 - 表示件数 - ズーム - ページ切替］。/sankey-svg と同じく
+        {/* 検索・フィルタ: /sankey-svg と同じく画面左上に置く。カード（入力＋開閉式フィルタ）＋
+            解除ボタンの構成、開閉トグルもsankey-svgと同じ位置（カード外・右下の小さな矢印）にする */}
+        <div className="absolute left-3 top-3 z-30 flex items-start gap-1">
+          <div className="flex flex-col" style={{ width: 288 }}>
+            <div
+              className="overflow-hidden rounded-lg rounded-br-none border bg-white/95 shadow-md backdrop-blur"
+              style={{ borderColor: regexError ? '#e53935' : 'rgba(0,0,0,0.1)' }}
+            >
+              <div className="relative">
+                <input
+                  data-testid="search-input"
+                  value={query}
+                  onChange={e => { setQuery(e.target.value); setSelected(null); }}
+                  placeholder="会計・省庁・項・RS事業を検索"
+                  className="h-9 w-full bg-transparent pl-3 pr-16 text-sm outline-none"
+                />
+                {/* 正規表現トグル。/sankey-svg の .* ボタンと同じ */}
+                <button
+                  type="button"
+                  aria-label={useRegex ? '正規表現検索をオフ' : '正規表現で検索'}
+                  aria-pressed={useRegex}
+                  title={useRegex ? '正規表現検索をオフ' : '正規表現で検索'}
+                  onClick={() => setUseRegex(v => !v)}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 rounded px-1.5 py-0.5 font-mono text-xs font-bold ${useRegex ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-neutral-600'}`}
+                >.*</button>
+                {query && (
+                  <button
+                    type="button"
+                    aria-label="検索語をクリア"
+                    onClick={() => setQuery('')}
+                    className={`absolute top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 ${useRegex ? 'right-9' : 'right-2'}`}
+                  >✕</button>
+                )}
+              </div>
+              {filtersOpen && (
+                <div className="flex flex-col gap-2.5 border-t border-black/5 px-3 py-2.5 text-xs">
+                  <FilterRow label="会計">
+                    {(['general', 'special'] as const).map(a => (
+                      <label key={a} className="flex items-center gap-1">
+                        <input type="checkbox" checked={accounts.includes(a)}
+                          onChange={() => setAccounts(v => v.includes(a) ? v.filter(x => x !== a) : [...v, a])} />
+                        {a === 'general' ? '一般会計' : '特別会計'}
+                      </label>
+                    ))}
+                  </FilterRow>
+                  <FilterRow label="所管">
+                    <details className="w-full">
+                      <summary className="cursor-pointer text-neutral-600">
+                        {ministries.length === 0 ? 'すべて' : `選択中 (${ministries.length})`}
+                      </summary>
+                      <div className="mt-1 max-h-40 overflow-auto rounded border bg-neutral-50 p-1">
+                        {[...new Set(data.sections.map(s => s.ministry))].sort().map(m => (
+                          <label key={m} className="flex items-center gap-1 p-0.5">
+                            <input type="checkbox" checked={ministries.includes(m)}
+                              onChange={() => setMinistries(v => v.includes(m) ? v.filter(x => x !== m) : [...v, m])} />
+                            {m}
+                          </label>
+                        ))}
+                      </div>
+                    </details>
+                  </FilterRow>
+                  <FilterRow label="目名">
+                    <input aria-label="目名" value={itemQuery} onChange={e => setItemQuery(e.target.value)}
+                      placeholder="部分一致" className="w-full rounded border border-neutral-300 bg-neutral-50 px-1.5 py-0.5" />
+                  </FilterRow>
+                  {/* MOF項の総額・RS事業の当初予算は独立したレンジとして持つ。同じ入力欄を共用しない */}
+                  <AmountRangeRow label="MOF金額" minText={filterMofMinText} maxText={filterMofMaxText}
+                    setMin={setFilterMofMinText} setMax={setFilterMofMaxText} />
+                  <AmountRangeRow label="RS予算" minText={filterRsMinText} maxText={filterRsMaxText}
+                    setMin={setFilterRsMinText} setMax={setFilterRsMaxText} />
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              aria-pressed={filtersOpen}
+              aria-label="フィルタの表示切替"
+              title={filtersOpen ? 'フィルタを隠す' : 'フィルタを表示'}
+              onClick={() => setFiltersOpen(v => !v)}
+              className="self-end rounded-b border border-t-0 border-black/10 bg-white/95 px-2 py-0.5 text-[10px] text-neutral-400 shadow-sm hover:text-neutral-600"
+            >{filtersOpen ? '▴' : '▾'}</button>
+          </div>
+          <button
+            type="button"
+            aria-label="フィルタを解除"
+            onClick={() => {
+              setQuery(''); setUseRegex(false);
+              setAccounts(['general', 'special']); setMinistries([]); setItemQuery('');
+              setFilterMofMinText(''); setFilterMofMaxText(''); setFilterRsMinText(''); setFilterRsMaxText('');
+            }}
+            className="h-9 rounded-lg border border-black/10 bg-white/90 px-2 text-xs shadow-md backdrop-blur hover:bg-white"
+          >解除</button>
+        </div>
+
+        {/* 右上クラスタ: ［表示範囲 - ページ切替］。/sankey-svg のrangeCard位置と同じ。
             右パネル展開時は rightControlsOffset ぶん左へ退避する。ページ切替メニューは
             ドロップダウンが右端基準で開くため、必ずクラスタの右端に置く */}
         <div
@@ -489,13 +654,6 @@ function App() {
             display: 'flex', gap: 8, alignItems: 'flex-start', transition: 'right 0.2s ease',
           }}
         >
-          <input
-            data-testid="search-input"
-            value={query}
-            onChange={e => { setQuery(e.target.value); setSelected(null); }}
-            placeholder="項・事業を検索"
-            className="h-9 w-52 rounded-lg border border-black/10 bg-white/90 px-3 text-sm shadow-md backdrop-blur"
-          />
           {/* 表示範囲。/sankey-svg の rangeCard と同じ「スライダー＝窓の位置、矢印＝件数」の
               RangeWindowRow を、MOF項・RS事業それぞれの軸に独立して1行ずつ並べる */}
           <div className="flex w-[300px] flex-col gap-1 rounded-lg border border-black/10 bg-white/90 px-2 py-1.5 shadow-md backdrop-blur">
@@ -512,19 +670,6 @@ function App() {
               onOffsetChange={setProjectOffset} markReplace={() => {}} metaFontPx={11}
             />
           </div>
-          <button aria-label="フィルタ を表示" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(v => !v)} className="h-9 rounded-lg border bg-white px-2 text-xs">フィルタ ▾</button>
-          <button aria-label="フィルタを解除" onClick={() => { setQuery(''); setAccounts(['general', 'special']); setMinistries([]); setItemQuery(''); }} className="h-9 rounded-lg border bg-white px-2 text-xs">解除</button>
-          {filtersOpen && <div className="absolute right-12 top-20 flex w-72 flex-col gap-3 rounded-xl border bg-white p-4 text-xs shadow-lg">
-            <details><summary className="cursor-pointer">会計区分（{accounts.length}件）</summary>
-              <button onClick={() => setAccounts(accounts.length === 2 ? [] : ['general', 'special'])}>すべて選択 / 解除</button>
-              {(['general', 'special'] as const).map(a => <label key={a} className="flex gap-2 p-1"><input type="checkbox" checked={accounts.includes(a)} onChange={() => setAccounts(v => v.includes(a) ? v.filter(x => x !== a) : [...v, a])} />{a === 'general' ? '一般会計' : '特別会計'}</label>)}
-            </details>
-            <details><summary className="cursor-pointer">所管（{ministries.length ? ministries.length + '件' : 'すべて'}）</summary>
-              <button onClick={() => setMinistries([])}>選択解除</button>
-              <div className="max-h-60 overflow-auto">{[...new Set(data.sections.map(s => s.ministry))].sort().map(m => <label key={m} className="flex gap-2 p-1"><input type="checkbox" checked={ministries.includes(m)} onChange={() => setMinistries(v => v.includes(m) ? v.filter(x => x !== m) : [...v, m])} />{m}</label>)}</div>
-            </details>
-            <label>目名 <input aria-label="目名" value={itemQuery} onChange={e => setItemQuery(e.target.value)} className="border rounded px-2" /></label>
-          </div>}
           <PageNavMenu current="/integrated-sankey" theme="light" />
         </div>
 

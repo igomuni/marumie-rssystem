@@ -181,14 +181,15 @@ test('ページ切替メニューが画面内に開く', async ({ page }) => {
   expect(box.x).toBeGreaterThanOrEqual(0);
   expect(box.x + box.width).toBeLessThanOrEqual(1920);
 
-  // 詳細パネルを開くと、右上クラスタはパネル幅ぶん左へ退避する
+  // 詳細パネルを開くと、右上クラスタ（表示範囲・ページ切替）はパネル幅ぶん左へ退避する。
+  // 検索・フィルタは左上固定なので対象外
   await page.keyboard.press('Escape');
   await page.mouse.click(10, 600);
-  const clusterBefore = (await page.getByTestId('search-input').boundingBox())!;
+  const navBefore = (await page.getByRole('button', { name: 'ページ切替メニュー' }).boundingBox())!;
   await page.getByTestId('sankey-node').first().click({ force: true });
   await expect(page.getByTestId('integrated-detail')).toBeVisible();
-  await expect.poll(async () => (await page.getByTestId('search-input').boundingBox())!.x)
-    .toBeLessThan(clusterBefore.x - 300);
+  await expect.poll(async () => (await page.getByRole('button', { name: 'ページ切替メニュー' }).boundingBox())!.x)
+    .toBeLessThan(navBefore.x - 300);
 });
 
 test('目エッジを集約せず、フィルタと縦ラベル間隔を維持する', async ({ page, request }) => {
@@ -199,18 +200,83 @@ test('目エッジを集約せず、フィルタと縦ラベル間隔を維持�
   await page.getByTestId('zoom-out').click();
   const labels = await page.locator('[data-kind="section"] > text').evaluateAll(nodes => nodes.map(n => { const r = n.getBoundingClientRect(); return { top:r.top, bottom:r.bottom }; }));
   for (let i=1; i<labels.length; i++) expect(labels[i].top).toBeGreaterThanOrEqual(labels[i-1].bottom);
-  await page.getByRole('button', {name:'フィルタ を表示'}).click();
-  await page.getByText('会計区分（2件）', {exact:true}).click();
+  await page.getByLabel('フィルタの表示切替').click();
   await page.getByRole('checkbox', {name:'特別会計'}).uncheck();
   await expect.poll(() => page.getByTestId('integrated-edge').count()).toBeLessThan(graph.edges.length);
-  await page.getByRole('button', {name:'フィルタを解除'}).click();
+  await page.getByLabel('フィルタを解除').click();
   await expect(page.getByTestId('integrated-edge')).toHaveCount(graph.edges.length);
   await page.getByRole('button', {name:'全体', exact:true}).click();
-  await page.getByRole('button', {name:'フィルタ を表示'}).click();
+  await page.getByLabel('フィルタの表示切替').click();
   await page.screenshot({path:'test-results/integrated-overview.png'});
   await page.getByTestId('zoom-in').click();
   await page.screenshot({path:'test-results/integrated-zoom.png'});
   await page.goto('/sankey-svg');
   await page.waitForTimeout(3000);
   await page.screenshot({path:'test-results/sankey-svg-baseline.png'});
+});
+
+test('検索は会計・所管・項・RS事業を横断し、正規表現も安全に扱う', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  // 部分一致検索: 母集合（総件数）が絞り込みで縮む。表示ウィンドウは固定件数なので
+  // ノード数ではなく RangeWindowRow のスライダー総数（aria-valuetext）で見る
+  const universeOf = async () => {
+    const vt = await page.getByRole('slider', { name: 'MOF項の表示開始位置' }).getAttribute('aria-valuetext');
+    return Number(vt?.split('/').pop()?.replace(/[^0-9]/g, ''));
+  };
+  const before = await universeOf();
+  await page.getByTestId('search-input').fill('国債');
+  await expect.poll(universeOf).toBeLessThan(before);
+
+  // 正規表現トグル: 不正な式を入れてもページはクラッシュしない（該当なしになるだけ）
+  await page.getByTestId('search-input').fill('');
+  await page.getByLabel('正規表現で検索').click();
+  await page.getByTestId('search-input').fill('[[[invalid');
+  await page.waitForTimeout(300);
+  expect(errors).toEqual([]);
+  await expect(page.locator('main')).toBeVisible();
+
+  // 有効な正規表現は機能する
+  await page.getByTestId('search-input').fill('^国債.*');
+  await expect.poll(universeOf).toBeLessThan(before);
+
+  await page.getByTestId('search-input').fill('');
+  await page.getByLabel('正規表現検索をオフ').click();
+  expect(errors).toEqual([]);
+});
+
+test('MOF金額・RS予算のレンジフィルタが独立して機能する', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.getByLabel('フィルタの表示切替').click();
+
+  // MOF金額の上限を絞ると、最大の項（国債整理支出 220.86兆円）が消える
+  const kokusaiLabel = () => page.locator('[data-testid="sankey-node"] text', { hasText: '国債整理支出' });
+  await expect(kokusaiLabel()).toBeVisible();
+  await page.getByPlaceholder('上限 例:1兆').first().fill('1000億');
+  await expect(kokusaiLabel()).toHaveCount(0);
+  await page.getByPlaceholder('上限 例:1兆').first().fill('');
+
+  // RS予算フィルタは独立して効く。極端な下限にすると右列がすべて集約ノードへ落ちる
+  await page.getByPlaceholder('下限 例:100億').nth(1).fill('1000兆');
+  await expect(page.locator('[data-testid="sankey-node"][data-kind="project"]')).toHaveCount(0);
+
+  await page.getByLabel('フィルタを解除').click();
+  await expect(kokusaiLabel()).toBeVisible();
+  await expect(page.locator('[data-testid="sankey-node"][data-kind="project"]').first()).toBeVisible();
+});
+
+test('検索・フィルタUIが左上、表示範囲・ページ切替が右上に配置される', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  const search = (await page.getByTestId('search-input').boundingBox())!;
+  const navMenu = (await page.getByRole('button', { name: 'ページ切替メニュー' }).boundingBox())!;
+  expect(search.x).toBeLessThan(200);
+  expect(navMenu.x).toBeGreaterThan(1700);
 });
