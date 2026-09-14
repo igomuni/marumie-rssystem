@@ -232,9 +232,7 @@ test('フィルタパネルの会計区分・所管・項/事業名・金額レ�
 
   await page.getByTitle('フィルタ を表示').click();
   await page.getByRole('button', { name: '会計', exact: true }).click();
-  // 「すべて選択/解除」がONの間は個別チェックボックスは表示上OFF。個別を1つチェックすると
-  // その1件だけの選択に切り替わり、マスターは自動でOFFになる（2026-09-15の挙動変更）
-  await page.getByRole('checkbox', { name: '一般会計' }).check();
+  await page.getByRole('checkbox', { name: '特別会計' }).uncheck();
   await expect.poll(() => universeOf('MOF項')).toBeLessThan(before);
   await page.mouse.click(900, 500); // コンボボックスを外側クリックで閉じる
 
@@ -245,7 +243,7 @@ test('フィルタパネルの会計区分・所管・項/事業名・金額レ�
   const beforeProject = await universeOf('RS事業');
   await page.getByRole('button', { name: '府省庁', exact: true }).click();
   const firstProjectMinistry = await page.getByRole('listbox', { name: '府省庁' }).locator('label').nth(1).innerText();
-  await page.getByRole('checkbox', { name: firstProjectMinistry }).check();
+  await page.getByRole('checkbox', { name: firstProjectMinistry }).uncheck();
   await expect.poll(() => universeOf('RS事業')).toBeLessThan(beforeProject);
   await page.mouse.click(900, 500);
   await page.getByLabel('フィルタを解除').click();

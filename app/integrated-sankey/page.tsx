@@ -193,31 +193,31 @@ function CheckboxCombobox({ label, options, selected, onChange }: {
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
-  // masterOn（すべて選択/解除がON）＝selected===null（絞り込みなし）。masterOnの間は
-  // 個別チェックボックスは表示上OFFにする——「すべて選択/解除」1つで「全部含む」を
-  // 表しているので、個別も全部チェック済みに見せると冗長・紛らわしいという指摘を受けた
-  // （2026-09-15）。個別を1つでもONにするとmasterOnは自動でOFFになり、その1件だけの
-  // 明示選択に切り替わる。全解除（0件）にするには、まずmasterOnの状態
-  // （selected===null）にしてから「すべて選択/解除」をもう一度押す（selected=[]になる）
-  const masterOn = selected === null;
-  const noneChecked = !masterOn && selected!.length === 0;
-  const summary = masterOn ? 'すべて'
-    : noneChecked ? 'なし（0件）'
-      : selected!.length === 1 ? (options.find(o => o.value === selected![0])?.label ?? selected![0])
-        : `選択中 (${selected!.length}/${options.length})`;
-  const isChecked = (v: string) => !masterOn && selected!.includes(v);
+  // 「すべて選択/解除」は個別チェックボックスの状態と完全に連動する通常のselect-all
+  // トグルに戻した（2026-09-15再指摘：個別を隠す挙動は違和感があるとのこと）。
+  // すべて選択（allChecked）のときは個別もすべてチェック済みで表示し、「すべて解除」は
+  // 個別がすべてチェック済みのとき（allChecked）だけ発動する——部分選択の状態で
+  // マスターを押すと「すべて選択」になる（allChecked以外は常に選択側へ倒す）
+  const effective = selected ?? options.map(o => o.value);
+  const allChecked = effective.length === options.length;
+  const noneChecked = effective.length === 0;
+  const summary = selected === null ? 'すべて'
+    : allChecked ? 'すべて'
+      : noneChecked ? 'なし（0件）'
+        : effective.length === 1 ? (options.find(o => o.value === effective[0])?.label ?? effective[0])
+          : `選択中 (${effective.length}/${options.length})`;
+  const isChecked = (v: string) => effective.includes(v);
   const toggle = (v: string) => {
-    if (masterOn) { onChange([v]); return; }
-    const next = selected!.includes(v) ? selected!.filter(x => x !== v) : [...selected!, v];
+    const next = effective.includes(v) ? effective.filter(x => x !== v) : [...effective, v];
     onChange(next);
   };
-  const toggleAll = () => onChange(masterOn ? [] : null);
+  const toggleAll = () => onChange(allChecked ? [] : options.map(o => o.value));
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <span style={{ fontSize: 11, color: '#555', width: '3.5em', whiteSpace: 'nowrap', flexShrink: 0 }}>{label}</span>
       <div ref={rootRef} style={{ flex: 1, minWidth: 0, position: 'relative' }}>
         <button type="button" aria-haspopup="listbox" aria-expanded={open} aria-label={label} onClick={() => setOpen(v => !v)}
-          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: masterOn ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: (selected === null || allChecked) ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         >{summary}</button>
         <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
           <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="#aaa"
@@ -230,7 +230,7 @@ function CheckboxCombobox({ label, options, selected, onChange }: {
             style={{ position: 'absolute', top: '100%', left: 0, marginTop: 2, zIndex: 50, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 'min(320px, 60vh)', overflowY: 'auto', minWidth: '100%', width: 'max-content' }}
           >
             <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
-              <input type="checkbox" checked={masterOn} onChange={toggleAll} style={{ width: 12, height: 12 }} />
+              <input type="checkbox" checked={allChecked} onChange={toggleAll} style={{ width: 12, height: 12 }} />
               <span style={{ fontSize: 11, color: '#333' }}>すべて選択/解除</span>
             </label>
             {options.map(o => (
