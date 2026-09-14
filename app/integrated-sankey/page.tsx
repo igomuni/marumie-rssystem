@@ -950,7 +950,7 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
               meta={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <BudgetTypeBadge budgetType={g.budgetType} />
-                  {g.connectedCount > 0 && <MofBadge label={`RS × ${g.connectedCount}`} background="#78909c" />}
+                  {g.connectedCount > 0 && <OutlineBadge label={`RS × ${g.connectedCount}`} color="#78909c" />}
                   {g.hasExcess && <span>超過・要確認</span>}
                 </div>
               } />
