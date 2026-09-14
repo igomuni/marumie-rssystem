@@ -26,7 +26,10 @@ test('API集計が仕様書の基準実測値と一致する（RS2025×MOF2024�
   expect(sum('special')).toBeCloseTo(EXPECTED.mofSpecial, 2);
   expect(metadata.mofAmount / CHO).toBeCloseTo(EXPECTED.mofTotal, 2);
   expect(metadata.connectedAmount / CHO).toBeCloseTo(EXPECTED.connected, 2);
-  expect(metadata.connectedAmount + metadata.unconnectedAmount - metadata.excessAmount).toBe(metadata.mofAmount);
+  // unlinkedReductionAmount: 補正予算の減額でRS紐づけが1件も無い目（超過扱いにしない）分。
+  // connected+unconnected-excessだけでは説明されない残差として別立てで持つ
+  expect(metadata.connectedAmount + metadata.unconnectedAmount - metadata.excessAmount + metadata.unlinkedReductionAmount)
+    .toBe(metadata.mofAmount);
 
   expect(graph.linkageQuality).toBeTruthy();
   expect(graph.linkageQuality.counts.projectLinked / graph.linkageQuality.counts.projectTotal).toBeGreaterThan(0.9);

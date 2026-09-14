@@ -236,6 +236,23 @@ PID21972「日米政府の戦略的投資イニシアティブに基づく投資
 `IntegratedItemEdge.budgetType`（元のMOF目の `budgetType`）をそのまま使う（RS側の表記
 変換 `toMofBudgetType()` は不要。既にMOF表記）。
 
+**補正予算の減額（`difference`が負）でRS紐づけが1件も無い目（`linked===0`）は「超過」
+にしない。** `residual = itemAmount(item) - linked` が負になるケースはこれまで無条件で
+「超過（要確認）」に分類していたが、当初予算しか対象にしていなかった間はそれで正しかった
+（`amount`が常に非負）。補正予算対応後、`itemAmount`が負（減額）で`linked===0`（RSは
+何も主張していない）の場合にも同じ分岐へ入ってしまい、「MOFが単に減額しただけ」を
+「RSが超過請求した」という誤った意味のバッジで表示してしまう不具合があった（実測711行、
+-9.15兆円相当。例: 国債整理基金の債務償還費、補正1号で-2.98兆円の減額だがRS側の
+紐づけは無い。「国債費の補正超過は実は補正でマイナスされているだけではないか」との
+指摘で発覚、2026-09-14）。`linked > 0`（RSが実際に何らかの金額を主張している）の場合は
+その主張とMOFの負の差額との食い違いが実在するので、通常どおり超過として扱う。
+
+この結果、`connectedAmount + unconnectedAmount - excessAmount` は `mofAmount` と
+一致しなくなる（除外した項目のamount、常に負の合計だけずれる）。この残差を
+`metadata.unlinkedReductionAmount` として別立てで持ち、恒等式は
+`connectedAmount + unconnectedAmount - excessAmount + unlinkedReductionAmount === mofAmount`
+になる。
+
 RS事業側を拾う `links`（`projectLinks` の元）は元から**補正予算経由の紐づけも含めていた**。
 紐づけが補正予算経由のみで当初予算の紐づけを一切持たないRS事業（RS2025×MOF2024で772件、
 最大3.47兆円規模、2026-09-13実測）が、当初予算限定だと `projects` 配列に一切現れず

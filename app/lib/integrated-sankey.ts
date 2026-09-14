@@ -50,7 +50,12 @@ export interface IntegratedItemEdge {
 }
 export interface IntegratedGraph {
   metadata: { budgetYear: number; rsYear: number; mofAmount: number; connectedAmount: number;
-    unconnectedAmount: number; excessAmount: number; sectionCount: number; projectCount: number; itemCount: number };
+    unconnectedAmount: number; excessAmount: number;
+    /** 補正予算の減額（differenceが負）でRS紐づけが1件も無い目のamount合計（常に0以下）。
+     * connectedAmount+unconnectedAmount-excessAmountでは説明されない残差。
+     * mofAmount = connectedAmount + unconnectedAmount - excessAmount + unlinkedReductionAmount */
+    unlinkedReductionAmount: number;
+    sectionCount: number; projectCount: number; itemCount: number };
   sections: IntegratedSectionNode[]; projects: IntegratedProjectNode[]; edges: IntegratedItemEdge[];
 }
 export interface IntegratedProjectSource {
@@ -137,7 +142,7 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
 
   const sections = new Map<string, IntegratedSectionNode>();
   const edges = new Map<string, IntegratedItemEdge>();
-  let connectedAmount = 0, unconnectedAmount = 0, excessAmount = 0;
+  let connectedAmount = 0, unconnectedAmount = 0, excessAmount = 0, unlinkedReductionAmount = 0;
   for (const item of items) {
     const source = itemSectionKey(item);
     const section = sections.get(source) ?? { id: source, name: item.sectionName, accountType: item.accountType,
@@ -163,16 +168,24 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
       connectedAmount += link.rsAmount;
     }
     const residual = amount - linked;
+    // 補正予算の減額（differenceが負）でRS側の紐づけが1件も無い場合（linked===0）、
+    // residualは負になるが「超過」ではない——RSは何も主張していないので、MOFが
+    // 減らしただけで確認すべき差異は無い（実測711行、-9.15兆円相当。指摘: 国債費の
+    // 補正超過は実は補正でマイナスされているだけではないか、2026-09-14）。
+    // linked>0（RSが何らかの金額を主張している）なら、その主張とMOFの負の差額との
+    // 食い違いは実際の要確認事項なので、通常どおり超過として扱う
     if (residual > 0) {
       edges.set(`${item.id}|unconnected`, { id: `${item.id}|unconnected`, source, target: 'rs-unconnected',
         itemKey: item.key, itemName: item.subItemName, value: residual, mofAmount: amount,
         status: 'unconnected', budgetType: item.budgetType, sourceUrl: item.sourceUrl, page: item.page });
       unconnectedAmount += residual;
-    } else if (residual < 0) {
+    } else if (residual < 0 && linked > 0) {
       edges.set(`${item.id}|excess`, { id: `${item.id}|excess`, source, target: 'rs-excess', itemKey: item.key,
         itemName: item.subItemName, value: -residual, mofAmount: amount, status: 'excess',
         budgetType: item.budgetType, sourceUrl: item.sourceUrl, page: item.page });
       excessAmount += -residual;
+    } else if (residual < 0) {
+      unlinkedReductionAmount += residual;
     }
   }
 
@@ -224,8 +237,8 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
         .map(item => ({ connected: rows.some(link => budgetItemMatchesLink(item, link)), ...item })) });
   }
   return { metadata: { budgetYear, rsYear, mofAmount: items.reduce((sum, item) => sum + itemAmount(item), 0),
-    connectedAmount, unconnectedAmount, excessAmount, sectionCount: sections.size, projectCount: projects.length,
-    itemCount: items.length }, sections: [...sections.values()].sort((a, b) => b.amount - a.amount),
+    connectedAmount, unconnectedAmount, excessAmount, unlinkedReductionAmount, sectionCount: sections.size,
+    projectCount: projects.length, itemCount: items.length }, sections: [...sections.values()].sort((a, b) => b.amount - a.amount),
     projects: projects.sort((a, b) => b.linkedAmount - a.linkedAmount), edges: [...edges.values()] };
 }
 

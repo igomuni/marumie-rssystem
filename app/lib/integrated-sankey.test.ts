@@ -112,6 +112,33 @@ describe('integrated sankey first cut', () => {
     expect(g.sections[0].difference).toBe(20);
   });
 
+  it('does not report excess for a supplementary-budget cut with no RS linkage (negative diff, linked=0)', () => {
+    // 補正予算の減額（difference負）でRSの紐づけが1件も無い場合、residualは負に
+    // なるが「超過」ではない——RSは何も主張していないので、MOFが減らしただけで
+    // 確認すべき差異は無い（例: 国債費の補正超過は実は補正でマイナスされている
+    // だけだった、2026-09-14指摘）
+    const g=buildIntegratedGraph(
+      [item({ budgetType: '補正予算（第1号）', amount: 70, previousAmount: 100, difference: -30 })],
+      [], []);
+    expect(g.edges).toHaveLength(0);
+    expect(g.metadata.excessAmount).toBe(0);
+    expect(g.metadata.unconnectedAmount).toBe(0);
+    expect(g.metadata.unlinkedReductionAmount).toBe(-30);
+    expect(g.metadata.connectedAmount + g.metadata.unconnectedAmount - g.metadata.excessAmount + g.metadata.unlinkedReductionAmount)
+      .toBe(g.metadata.mofAmount);
+  });
+
+  it('still reports excess when RS claims an amount despite a supplementary-budget cut (negative diff, linked>0)', () => {
+    // MOFの補正が減額でも、RSがその目に対して金額を主張している場合は
+    // 食い違いとして超過扱いのまま残す（要確認事項として有効）
+    const g=buildIntegratedGraph(
+      [item({ budgetType: '補正予算（第1号）', amount: 70, previousAmount: 100, difference: -30 })],
+      [link({ mofBudgetType: '補正予算（第1号）', rsAmount: 50 })],
+      []);
+    expect(g.metadata.connectedAmount).toBe(50);
+    expect(g.metadata.excessAmount).toBe(80); // linked(50) - amount(-30) = 80
+  });
+
   it('tags each edge with the source item budgetType', () => {
     const g=buildIntegratedGraph(
       [item(), item({ id: 'i2', key: 'k2', budgetType: '補正予算（第1号）', subItemName: '目b', amount: 130, difference: 30 })],
