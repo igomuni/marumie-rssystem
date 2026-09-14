@@ -32,3 +32,16 @@ export function getAccountBadgeStyle(category?: string | null): { label: string;
   }
   return null;
 }
+
+/** RS側の予算種別のうち「前年度から繰越し」「予備費等N」はMOFの予算種別
+ * （当初/補正/暫定/決算）に対応しない値なので、`integrated-sankey`の
+ * `toMofBudgetType`で丸めず、独自の色でバッジ表示する（MOFの配色空間と混同しない
+ * よう別の色を使う）。対応が無い理由: これらの行は所管・項・目が空でMOF側と
+ * 突合できない（scripts/generate-mof-rs-kou-moku-linkage.ts の
+ * resolveMofBudgetType 参照） */
+export function rsOnlyBudgetTypeBadge(rsBudgetType: string): { label: string; color: string } | null {
+  if (rsBudgetType === '前年度から繰越し') return { label: '繰越', color: '#2196f3' };
+  const m = /^予備費等(\d+)$/.exec(rsBudgetType);
+  if (m) return { label: `予備費${m[1]}`, color: '#009688' };
+  return null;
+}

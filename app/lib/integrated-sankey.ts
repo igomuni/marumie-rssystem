@@ -1,4 +1,4 @@
-import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
+import type { BudgetBreakdownItem, BudgetSummary, GraphData } from '@/types/sankey-svg';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import { parseAmountToYen } from '@/app/lib/format/yen';
@@ -53,6 +53,22 @@ export interface IntegratedGraph {
 export interface IntegratedProjectSource {
   projectId: number; name: string; ministry: string;
   budgetSummary?: BudgetSummary; budgetBreakdown?: BudgetBreakdownItem[]; spendingAmount?: number;
+}
+
+/** `/sankey-svg`のsankey-svg-{year}-graph.jsonからintegrated-sankey用の事業ソースを
+ * 抽出する。支出額はproject-budgetノードのbudgetSummary.executedAmount（RS 2-1
+ * 予算執行サマリの執行額）ではなく、project-spendingノードのvalue（支出先データ由来の
+ * 直接支出額合計。scripts/generate-sankey-svg-data.ts の spendingAmount）を使う。
+ * 両者は別のデータソースで、RS 2-1に予算執行サマリが無い事業（例: PID21972）でも
+ * 直接支出額は存在しうるため */
+export function projectSourcesFromGraph(graph: GraphData): IntegratedProjectSource[] {
+  const spendingByProjectId = new Map(
+    graph.nodes.filter(n => n.type === 'project-spending' && n.projectId !== undefined)
+      .map(n => [n.projectId!, n.value]));
+  return graph.nodes.filter(n => n.type === 'project-budget' && n.projectId !== undefined)
+    .map(n => ({ projectId: n.projectId!, name: n.name, ministry: n.ministry ?? '',
+      budgetSummary: n.budgetSummary, budgetBreakdown: n.budgetBreakdown,
+      spendingAmount: spendingByProjectId.get(n.projectId!) ?? 0 }));
 }
 
 export const sectionKey = (l: MofRsKouMokuLinkageRecord) =>
@@ -246,6 +262,15 @@ export const EMPTY_FILTERS: Filters = {
   mofMinText: '', mofMaxText: '', rsMinText: '', rsMaxText: '',
 };
 
+/** RS事業の並び順の比較関数。予算額の降順を第一キー、支出額の降順を第二キー
+ * （タイブレーク）とする。予算額が同額（0円同士含む）の事業が多いため、支出額を
+ * 無視すると同額グループ内の順序が不定になる。`buildView`の`rankedProjects`と
+ * `jumpTo`（app/integrated-sankey/page.tsx）の両方で同じ並びを使う必要があるため
+ * 共有する（片方だけ古い並びのままだと、タイのある窓でジャンプ先のオフセット計算が
+ * ズレて選択ノードが表示範囲外になる不具合になる） */
+export const compareProjects = (a: IntegratedProjectNode, b: IntegratedProjectNode) =>
+  b.budgetAmount - a.budgetAmount || b.spendingAmount - a.spendingAmount;
+
 export const OTHER_SECTIONS = 'other-sections';
 export const OTHER_PROJECTS = 'other-projects';
 
@@ -283,8 +308,7 @@ export function buildView(data: IntegratedGraph, filters: Filters, sectionWindow
     projectNameMatch(p.name) &&
     (rsMin === null || p.budgetAmount >= rsMin) &&
     (rsMax === null || p.budgetAmount <= rsMax));
-  // 予算額が同額（0円同士含む）の場合は支出額の降順で並べる
-  const rankedProjects = [...keptProjects].sort((a, b) => b.budgetAmount - a.budgetAmount || b.spendingAmount - a.spendingAmount);
+  const rankedProjects = [...keptProjects].sort(compareProjects);
   const projectRange = windowSlice(rankedProjects, projectWindow);
   const projectsTotal = rankedProjects.reduce((a, p) => a + p.budgetAmount, 0);
   const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.budgetAmount, 0);

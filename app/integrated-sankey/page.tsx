@@ -23,13 +23,14 @@ import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
 import { RangeWindowRow } from '@/client/components/SankeySvg/RangeWindowRows';
 import { parseAmountToYen } from '@/app/lib/format/yen';
-import { getAccountBadgeStyle } from '@/app/lib/account-badge';
+import { getAccountBadgeStyle, rsOnlyBudgetTypeBadge } from '@/app/lib/account-badge';
 import { BudgetTypeBadge, Badge as MofBadge, OutlineBadge } from '@/client/components/mof-kou/Badge';
 import { classifyAccountCategory } from '@/app/lib/account-badge';
 import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
 import {
   buildMatcher,
   buildView,
+  compareProjects,
   EMPTY_FILTERS,
   OTHER_PROJECTS,
   OTHER_SECTIONS,
@@ -95,18 +96,6 @@ function toMofBudgetType(rsBudgetType: string): MOFBudgetType {
   if (m) { const n = Number(m[1]); if (n >= 1 && n <= 4) return revisedBudgetType(n as MOFRevisionNumber); }
   if (rsBudgetType === '当初予算' || rsBudgetType === '暫定予算' || rsBudgetType === '決算') return rsBudgetType;
   return '当初予算';
-}
-
-/** RS側の予算種別のうち「前年度から繰越し」「予備費等N」はMOFの予算種別
- * （当初/補正/暫定/決算）に対応しない値なので `toMofBudgetType` で丸めず、
- * 独自の色でバッジ表示する（MOFの配色空間と混同しないよう別の色を使う）。
- * 対応が無い理由: これらの行は所管・項・目が空でMOF側と突合できない
- * （scripts/generate-mof-rs-kou-moku-linkage.ts の resolveMofBudgetType 参照） */
-function rsOnlyBudgetTypeBadge(rsBudgetType: string): { label: string; color: string } | null {
-  if (rsBudgetType === '前年度から繰越し') return { label: '繰越', color: '#2196f3' };
-  const m = /^予備費等(\d+)$/.exec(rsBudgetType);
-  if (m) return { label: `予備費${m[1]}`, color: '#009688' };
-  return null;
 }
 
 const SUPPORTED_YEARS = [2025, 2024] as const;
@@ -542,7 +531,7 @@ function App() {
       const idx = ranked.findIndex(s => s.id === hit.id);
       if (idx >= 0) setSectionOffset(Math.max(0, idx - Math.floor(topSection / 2)));
     } else {
-      const ranked = [...data.projects].sort((a, b) => b.budgetAmount - a.budgetAmount);
+      const ranked = [...data.projects].sort(compareProjects);
       const idx = ranked.findIndex(p => p.id === hit.id);
       if (idx >= 0) setProjectOffset(Math.max(0, idx - Math.floor(topProject / 2)));
     }
