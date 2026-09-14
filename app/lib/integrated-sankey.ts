@@ -1,4 +1,4 @@
-import type { BudgetBreakdownItem, BudgetSummary } from '@/types/sankey-svg';
+import type { BudgetBreakdownItem, BudgetSummary, GraphData } from '@/types/sankey-svg';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import { parseAmountToYen } from '@/app/lib/format/yen';
@@ -11,8 +11,10 @@ export interface IntegratedSectionNode {
   /** 前年度額・増減率。項配下の目を合算する（目単位が null の場合は0として扱う） */
   previousAmount: number; difference: number;
 }
-/** 'mixed' = 一般会計・特別会計の両方から接続する目を持つ事業 */
-export type IntegratedProjectAccountType = IntegratedAccountType | 'mixed';
+/** 'mixed' = 一般会計・特別会計の両方から接続する目を持つ事業。
+ * 'unknown' = 予算執行データ（budgetSummary.accountSummaries）もMOF紐づけも
+ * 無く、会計区分を判定する材料が無い事業（'general'へ根拠なく決め打ちしない） */
+export type IntegratedProjectAccountType = IntegratedAccountType | 'mixed' | 'unknown';
 export interface IntegratedProjectNode {
   id: string; projectId: number; name: string; ministry: string; linkedAmount: number;
   /** RS事業の予算額。budgetSummary.totalBudget（予算現額合計＝当初＋補正＋繰越＋予備費使用等を
@@ -22,6 +24,11 @@ export interface IntegratedProjectNode {
    * それを使うと `/sankey-svg` では表示される事業が0円扱いになってしまう */
   budgetAmount: number;
   mofUnlinkedAmount: number; accountType: IntegratedProjectAccountType;
+  /** 支出額。budgetSummary.executedAmount（RS 2-1予算執行サマリの執行額）ではなく、
+   * `/sankey-svg` の project-spending ノードのvalue（支出先データ由来の直接支出額合計）
+   * を使う。RS 2-1サマリが無い事業でも直接支出額は存在しうるため（例: PID21972は
+   * budgetSummaryが無いが支出先データに1,000億円の直接支出がある） */
+  spendingAmount: number;
   budgetSummary?: BudgetSummary;
   /** 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来のレコード。対象年度（budgetYear、
    * scripts/generate-sankey-svg-data.ts の TARGET_BUDGET_YEAR）に絞った上で、予算種別
@@ -45,7 +52,23 @@ export interface IntegratedGraph {
 }
 export interface IntegratedProjectSource {
   projectId: number; name: string; ministry: string;
-  budgetSummary?: BudgetSummary; budgetBreakdown?: BudgetBreakdownItem[];
+  budgetSummary?: BudgetSummary; budgetBreakdown?: BudgetBreakdownItem[]; spendingAmount?: number;
+}
+
+/** `/sankey-svg`のsankey-svg-{year}-graph.jsonからintegrated-sankey用の事業ソースを
+ * 抽出する。支出額はproject-budgetノードのbudgetSummary.executedAmount（RS 2-1
+ * 予算執行サマリの執行額）ではなく、project-spendingノードのvalue（支出先データ由来の
+ * 直接支出額合計。scripts/generate-sankey-svg-data.ts の spendingAmount）を使う。
+ * 両者は別のデータソースで、RS 2-1に予算執行サマリが無い事業（例: PID21972）でも
+ * 直接支出額は存在しうるため */
+export function projectSourcesFromGraph(graph: GraphData): IntegratedProjectSource[] {
+  const spendingByProjectId = new Map(
+    graph.nodes.filter(n => n.type === 'project-spending' && n.projectId !== undefined)
+      .map(n => [n.projectId!, n.value]));
+  return graph.nodes.filter(n => n.type === 'project-budget' && n.projectId !== undefined)
+    .map(n => ({ projectId: n.projectId!, name: n.name, ministry: n.ministry ?? '',
+      budgetSummary: n.budgetSummary, budgetBreakdown: n.budgetBreakdown,
+      spendingAmount: spendingByProjectId.get(n.projectId!) ?? 0 }));
 }
 
 export const sectionKey = (l: MofRsKouMokuLinkageRecord) =>
@@ -148,17 +171,35 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     const source = sourceMap.get(projectId);
     const linkedAmount = rows.reduce((sum, link) => sum + link.rsAmount, 0);
     const budgetAmount = source?.budgetSummary?.totalBudget ?? linkedAmount;
+    // 会計区分は budgetBreakdown（予算執行タブに出すRS事業自身のレコード、MOF紐づけの
+    // 成否に関係なく常に正しい）のaccountCategoryを優先して使う。金額が0円の行も
+    // 会計区分としては有効に扱う（totalBudgetでは絞らない）。MOF側とのリンク（rows）
+    // だけで判定すると、会計区分の一方がMOFと未紐づけの場合にその会計区分が
+    // 抜け落ち、実際は一般・特別両方の目を持つ事業が片方だけの表示になる不具合に
+    // なる（例: PID3522は一般会計8325.6億円＋特別会計1576.2億円を持つが、一般会計側は
+    // MOFと未紐づけのため rows だけ見ると「特別」単独に誤判定される）
+    const toAccountType = (category: string): IntegratedAccountType | null =>
+      category === '一般会計' ? 'general' : category === '特別会計' ? 'special' : null;
+    const accountTypesFromBreakdown = new Set(
+      (source?.budgetBreakdown ?? [])
+        .map(b => toAccountType(b.accountCategory))
+        .filter((t): t is IntegratedAccountType => t !== null),
+    );
     // 政府関係機関(agency)はRSに対応する会計区分が無く対象外のはずだが、型上は
     // 除外しきれないため念のためフィルタする（実データでは一般・特別のみのはず）
-    const accountTypes = new Set(
+    const accountTypesFromLinks = new Set(
       rows.map(r => r.mofAccountType).filter((t): t is IntegratedAccountType => t === 'general' || t === 'special'),
     );
+    const accountTypes = accountTypesFromBreakdown.size > 0 ? accountTypesFromBreakdown : accountTypesFromLinks;
+    // 予算執行のレコード（budgetBreakdown）が1件も無く、MOF紐づけも無い事業は
+    // 判定材料が無いため、根拠なく'general'に決め打ちせず'unknown'にする
     const accountType: IntegratedProjectAccountType =
-      accountTypes.size > 1 ? 'mixed' : accountTypes.size === 1 ? [...accountTypes][0] : 'general';
+      accountTypes.size > 1 ? 'mixed' : accountTypes.size === 1 ? [...accountTypes][0] : 'unknown';
     projects.push({ id: `project:${projectId}`, projectId,
       name: rows[0]?.projectName ?? source?.name ?? `事業${projectId}`,
       ministry: rows[0]?.projectMinistry ?? source?.ministry ?? '',
       linkedAmount, budgetAmount, mofUnlinkedAmount: Math.max(0, budgetAmount - linkedAmount), accountType,
+      spendingAmount: source?.spendingAmount ?? 0,
       budgetSummary: source?.budgetSummary,
       budgetBreakdown: source?.budgetBreakdown ?? [],
       budgetItems: (source?.budgetBreakdown ?? []).filter(item => item.fiscalYear === budgetYear && isRsPrimaryBudgetType(item.budgetType))
@@ -221,6 +262,15 @@ export const EMPTY_FILTERS: Filters = {
   mofMinText: '', mofMaxText: '', rsMinText: '', rsMaxText: '',
 };
 
+/** RS事業の並び順の比較関数。予算額の降順を第一キー、支出額の降順を第二キー
+ * （タイブレーク）とする。予算額が同額（0円同士含む）の事業が多いため、支出額を
+ * 無視すると同額グループ内の順序が不定になる。`buildView`の`rankedProjects`と
+ * `jumpTo`（app/integrated-sankey/page.tsx）の両方で同じ並びを使う必要があるため
+ * 共有する（片方だけ古い並びのままだと、タイのある窓でジャンプ先のオフセット計算が
+ * ズレて選択ノードが表示範囲外になる不具合になる） */
+export const compareProjects = (a: IntegratedProjectNode, b: IntegratedProjectNode) =>
+  b.budgetAmount - a.budgetAmount || b.spendingAmount - a.spendingAmount;
+
 export const OTHER_SECTIONS = 'other-sections';
 export const OTHER_PROJECTS = 'other-projects';
 
@@ -258,11 +308,11 @@ export function buildView(data: IntegratedGraph, filters: Filters, sectionWindow
     projectNameMatch(p.name) &&
     (rsMin === null || p.budgetAmount >= rsMin) &&
     (rsMax === null || p.budgetAmount <= rsMax));
-  const rankedProjects = [...keptProjects].sort((a, b) => b.budgetAmount - a.budgetAmount);
+  const rankedProjects = [...keptProjects].sort(compareProjects);
   const projectRange = windowSlice(rankedProjects, projectWindow);
   const projectsTotal = rankedProjects.reduce((a, p) => a + p.budgetAmount, 0);
   const projectTailTotal = projectRange.tail.reduce((a, p) => a + p.budgetAmount, 0);
-  const spendOf = (p: IntegratedProjectNode) => p.budgetSummary?.executedAmount ?? 0;
+  const spendOf = (p: IntegratedProjectNode) => p.spendingAmount;
   const projectTailSpendTotal = projectRange.tail.reduce((a, p) => a + spendOf(p), 0);
   const projectsSpendTotal = rankedProjects.reduce((a, p) => a + spendOf(p), 0);
 

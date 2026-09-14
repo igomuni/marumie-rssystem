@@ -145,8 +145,51 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 | MOF項の総額 | 配下にあるMOF目の `amount` 合計 |
 | MOF項の前年度額・増減率 | 配下の目の `previousAmount`/`difference` を合算（null は0扱い） |
 | RS事業の予算額 | `budgetAmount`＝`budgetSummary.totalBudget`（予算現額合計） |
-| RS事業の支出額 | `budgetSummary.executedAmount` |
-| RS事業の会計区分 | 接続する目の `mofAccountType` から集計。単一なら一般/特別、複数にまたがれば `mixed` |
+| RS事業の支出額 | `spendingAmount`＝`/sankey-svg`の`project-spending`ノードの`value`（支出先データ由来の直接支出額合計） |
+| RS事業の会計区分 | `budgetBreakdown`（予算執行タブに出すRS事業自身のレコード）の`accountCategory`から集計。単一なら一般/特別、複数にまたがれば`mixed`。1件も無ければMOF紐づけ（`rows`）から代替集計。どちらも無ければ`unknown`（バッジ非表示） |
+
+**RS事業ノードの並び順は `budgetAmount` の降順を第一キー、`spendingAmount` の降順を
+第二キー（タイブレーク）とする（`buildView` の `rankedProjects`）。** 予算額が
+同額（0円同士を含む）の事業が多数あるとき、支出額を無視するとその中の並びが
+不定・実質ランダムになるため、支出額が大きい事業を上位に来るようにする
+（2026-09-14指摘）。
+
+**RS事業の会計区分はMOF紐づけ（`rows`）ではなく `budgetBreakdown`（予算執行タブの
+レコード）を優先して判定する。金額が0円の行も会計区分としては有効に扱う
+（`totalBudget` 等の金額では絞らない）。** MOF紐づけだけで判定すると、一般・特別の
+どちらか一方がMOF側と未紐づけの場合にその会計区分が集計から抜け落ち、実際は
+両方の目を持つ事業が片方だけの表示（サイドパネルヘッダーの会計区分バッジが
+「一般特別」ではなく「一般」または「特別」単独）になる不具合になる（例: PID3522は
+一般会計8325.6億円＋特別会計1576.2億円を持つが、一般会計側はMOFと未紐づけ）。
+当初は `budgetSummary.accountSummaries` を金額0円で除外しながら使っていたが、
+それだと「予算執行のレコードはあるが金額が0円」のケース（例: PID11）まで
+`unknown` 扱いになってしまうと指摘を受け、`budgetBreakdown` の生レコードをそのまま
+使う方式へ変更した（2026-09-14）。`budgetBreakdown` が無い事業のみ、従来通り
+MOF紐づけから代替集計する。
+
+**予算執行のレコード（`budgetBreakdown`）が1件も無く、MOF紐づけも無い事業
+（実測556件）だけ `'unknown'` にする。** 以前は根拠なく `'general'` としていたため、
+サイドパネルヘッダーに実際とは限らない「一般」バッジが出ていた（2026-09-14指摘）。
+`accountType: 'unknown'` のときは `getAccountBadgeStyle` に `null` を渡し、
+バッジそのものを出さない。予算執行タブの各行のバッジは影響を受けない
+（行単位は `accountCategory` を直接使うため）。
+
+**RS事業の支出額は `budgetSummary.executedAmount`（RS 2-1予算執行サマリの執行額）
+ではなく `spendingAmount`（`project-spending` ノードの `value`）を使う。** 両者は
+別のデータソースに由来する別概念で、常に一致するとは限らない——
+`budgetSummary` はRS 2-1予算執行サマリCSVに事業の記載がある場合のみ付与されるのに
+対し、`spendingAmount` は支出先データ（2-3 CSV等）由来の直接支出額集計で、
+RS 2-1に記載が無い事業でも支出記録は存在しうる。実例:
+PID21972「日米政府の戦略的投資イニシアティブに基づく投資等への対応」は
+`budgetSummary` が無い（`undefined`）が、直接支出額は1,000億円あり、
+`/sankey-svg` では正しく表示されるのに `/integrated-sankey` では
+`budgetSummary?.executedAmount ?? 0` により0円と表示されていた（2026-09-14指摘・修正）。
+`route.ts` がグラフの `project-spending-{pid}` ノードから `spendingAmount` を
+`IntegratedProjectSource` に含めて渡し、`buildIntegratedGraph` がそれを
+`IntegratedProjectNode.spendingAmount` にそのまま載せ、サイドパネルヘッダーの
+支出額表示（`AmountCell`）とサンキー描画の `spendOf`（Sankeyノードの支出側高さ）の
+両方がこれを参照する。予算サマリタブの「執行額」行（`budgetSummary.executedAmount`）
+はRS 2-1サマリ自身の値として引き続きそのまま表示する（別概念であり混同しない）。
 
 **RS事業の予算額は `initialBudget`（当初予算）ではなく `totalBudget`（予算現額合計＝
 当初＋補正＋繰越＋予備費使用等を含む現在の総額）を使う。** `/sankey-svg` の事業ノード
@@ -300,11 +343,11 @@ MOF予算書には「目」（性質別）とは別に「事項」（目的別�
   対象年度以外の年度の行は、そもそもMOF側の同一年度突き合わせの対象外なので
   含まない——`scripts/generate-sankey-svg-data.ts` の `TARGET_BUDGET_YEAR` で
   生成時点から絞られている）。集計値ではなく生レコードの一覧である点が
-  「目」タブとの違い。各行の先頭に予算種別バッジ（`BudgetTypeBadge`、
-  `client/components/mof-kou/Badge.tsx`。`/mof-kou-moku` 等と共有し、
-  当初=緑・補正=橙・決算=紫の白背景アウトラインピル）、その右に会計区分バッジ
-  （`getAccountBadgeStyle(classifyAccountCategory(...))` を共有 `Badge` で描画）を
-  並べる。年度の併記（「（N年度）」）はノイズなので付けない。目名（`subItem`）は
+  「目」タブとの違い。各行の先頭に会計区分バッジ（`getAccountBadgeStyle(
+  classifyAccountCategory(...))` を共有 `Badge` で描画）、その右に予算種別バッジ
+  （`BudgetTypeBadge`、`client/components/mof-kou/Badge.tsx`。`/mof-kou-moku` 等と
+  共有し、当初=緑・補正=橙・決算=紫の白背景アウトラインピル）を並べる。年度の併記
+  （「（N年度）」）はノイズなので付けない。目名（`subItem`）は
   同じ行の右側に金額を右寄せで表示するため `trim()` で切り詰め、`overflow:hidden`
   で折り返さずellipsis表示にする。名前側のflexアイテムは `flex: '1 1 0%'`
   （`flex-basis: 0`）にする必要がある——`flex: '1 1 auto'` だと折り返し判定が
@@ -313,6 +356,17 @@ MOF予算書には「目」（性質別）とは別に「事項」（目的別�
   行の下にセカンダリ行として表示する。`BudgetBreakdownItem.budgetType` はRS側
   表記（「第N次補正予算」）なので、`toMofBudgetType()` でMOF側表記
   （「補正予算（第N号）」）へ変換してから渡す
+
+  **「前年度から繰越し」「予備費等N」はMOFの予算種別（当初/補正/暫定/決算）に
+  対応しないため、`toMofBudgetType()` で丸めず独自の色でバッジ表示する**
+  （`rsOnlyBudgetTypeBadge`。繰越=青、予備費N=青緑の `OutlineBadge`）。これらの
+  行は生成時点から`budgetBreakdown`に含まれていた（`generate-sankey-svg-data.ts`
+  は予算種別で絞らない）が、`toMofBudgetType()` が未知の値を「当初予算」へ
+  暗黙に丸めており、実際は繰越・予備費の行が「当初」バッジで誤表示されていた
+  （2026-09-14指摘）。これらの行は所管・項・目が空のことが多く
+  （`scripts/generate-mof-rs-kou-moku-linkage.ts` の `resolveMofBudgetType` が
+  MOF側と突合不可能として除外する理由と同じ）、目名（`subItem`/`item`）が
+  空の場合は `note`→`budgetType` の順でフォールバックして表示する
 - **予算サマリ**：`budgetSummary` の当初・補正・繰越・予備費・執行率等の
   集計表示、接続するMOF項一覧。一覧ではなく集計値なのでタブに件数を付けない
 - **目**：`budgetItems`（`budgetBreakdown` を当年度・当初予算＋補正予算（決算等は

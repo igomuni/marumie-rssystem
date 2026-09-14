@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { loadYear } from '@/app/lib/api/mof-kou-moku-loader';
 import { loadSankeyGraph } from '@/app/lib/api/sankey-graph-loader';
 import { resolveLinks, linkageRsYear, linkageQuality } from '@/app/lib/api/mof-rs-kou-moku-linkage-loader';
-import { buildIntegratedGraph } from '@/app/lib/integrated-sankey';
+import { buildIntegratedGraph, projectSourcesFromGraph } from '@/app/lib/integrated-sankey';
 
 /**
  * 紐づけ生成済みの年度（予算年度=会計年度）。年度により紐づけ品質が大きく異なる
@@ -20,9 +20,7 @@ export async function GET(request: Request) {
     );
   const mof = loadYear(budgetYear);
   const graph = loadSankeyGraph(String(rsYear));
-  const projects = graph.nodes.filter(n => n.type === 'project-budget' && n.projectId !== undefined)
-    .map(n => ({ projectId: n.projectId!, name: n.name, ministry: n.ministry ?? '',
-      budgetSummary: n.budgetSummary, budgetBreakdown: n.budgetBreakdown }));
+  const projects = projectSourcesFromGraph(graph);
   const integrated = buildIntegratedGraph(mof.items, resolveLinks(budgetYear).links, projects, budgetYear, rsYear);
   return NextResponse.json({ ...integrated, linkageQuality: linkageQuality(budgetYear) });
 }

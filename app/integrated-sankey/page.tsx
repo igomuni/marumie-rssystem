@@ -23,13 +23,14 @@ import { SidePanelChrome } from '@/client/components/SidePanelChrome';
 import { useSidePanel, SIDE_PANEL_WIDTH_MIN, SIDE_PANEL_WIDTH_MAX } from '@/client/hooks/useSidePanel';
 import { RangeWindowRow } from '@/client/components/SankeySvg/RangeWindowRows';
 import { parseAmountToYen } from '@/app/lib/format/yen';
-import { getAccountBadgeStyle } from '@/app/lib/account-badge';
-import { BudgetTypeBadge, Badge as MofBadge } from '@/client/components/mof-kou/Badge';
+import { getAccountBadgeStyle, rsOnlyBudgetTypeBadge } from '@/app/lib/account-badge';
+import { BudgetTypeBadge, Badge as MofBadge, OutlineBadge } from '@/client/components/mof-kou/Badge';
 import { classifyAccountCategory } from '@/app/lib/account-badge';
 import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
 import {
   buildMatcher,
   buildView,
+  compareProjects,
   EMPTY_FILTERS,
   OTHER_PROJECTS,
   OTHER_SECTIONS,
@@ -530,7 +531,7 @@ function App() {
       const idx = ranked.findIndex(s => s.id === hit.id);
       if (idx >= 0) setSectionOffset(Math.max(0, idx - Math.floor(topSection / 2)));
     } else {
-      const ranked = [...data.projects].sort((a, b) => b.budgetAmount - a.budgetAmount);
+      const ranked = [...data.projects].sort(compareProjects);
       const idx = ranked.findIndex(p => p.id === hit.id);
       if (idx >= 0) setProjectOffset(Math.max(0, idx - Math.floor(topProject / 2)));
     }
@@ -900,7 +901,10 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
   const sectionById = new Map(sections.map(s => [s.id, s]));
   // 部課局は代表値（目内訳の先頭行）。事業内で複数組織にまたがる場合は近似
   const rep = project.budgetItems[0];
-  const accountBadge = getAccountBadgeStyle(project.accountType === 'mixed' ? 'both' : project.accountType);
+  // 'unknown'（予算執行データもMOF紐づけも無く判定材料が無い事業）はバッジを出さない
+  const accountBadge = getAccountBadgeStyle(
+    project.accountType === 'mixed' ? 'both' : project.accountType === 'unknown' ? null : project.accountType,
+  );
   const bySection = new Map<string, number>();
   for (const e of itemEdges) bySection.set(e.source, (bySection.get(e.source) ?? 0) + e.value);
   return (
@@ -911,7 +915,7 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
         amountBlock={
           <div style={{ display: 'flex', flexWrap: 'wrap', columnGap: 12, rowGap: 4, marginTop: 5 }}>
             <AmountCell label="予算額" value={project.budgetAmount} />
-            <AmountCell label="支出額" value={project.budgetSummary?.executedAmount ?? 0} />
+            <AmountCell label="支出額" value={project.spendingAmount} />
           </div>
         }
         badges={<>
@@ -936,16 +940,21 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
               const accBadge = getAccountBadgeStyle(category);
               // 会計区分が一般のときは「会計」列が常に「一般会計」で自明なので表示しない
               const accountText = category === 'general' ? null : i.account;
+              // 前年度から繰越し・予備費等Nは所管・項・目が空のことが多い
+              // （MOF側と突合できない行のため）。名前が取れない場合は予算種別を代わりに出す
+              const rsOnlyBadge = rsOnlyBudgetTypeBadge(i.budgetType);
               return (
                 <ListRow key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`}
                   badges={<>
-                    <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />
                     {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
+                    {rsOnlyBadge
+                      ? <OutlineBadge label={rsOnlyBadge.label} color={rsOnlyBadge.color} />
+                      : <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />}
                   </>}
-                  name={i.subItem || i.item} amount={money(i.amount)}
+                  name={i.subItem || i.item || i.note || i.budgetType || '（内訳なし）'} amount={money(i.amount)}
                   meta={<>
                     <div>{[accountText, i.item].filter(Boolean).join(' / ')}</div>
-                    {i.note.trim() && <div>補足: {i.note}</div>}
+                    {i.note.trim() && (i.subItem || i.item) && <div>補足: {i.note}</div>}
                   </>}
                 />
               );

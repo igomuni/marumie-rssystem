@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildIntegratedGraph } from './integrated-sankey';
+import { buildIntegratedGraph, buildView, EMPTY_FILTERS } from './integrated-sankey';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import type { BudgetBreakdownItem } from '@/types/sankey-svg';
@@ -91,5 +91,27 @@ describe('integrated sankey first cut', () => {
   it('reports a single account type when a project receives from only one', () => {
     const g=buildIntegratedGraph([item()],[link()],[]);
     expect(g.projects[0].accountType).toBe('general');
+  });
+
+  it('reports unknown account type for a project with no budget data or MOF linkage', () => {
+    const g=buildIntegratedGraph([item()],[],[{projectId:9,name:'事業Z',ministry:'省'}]);
+    expect(g.projects.find(p=>p.projectId===9)?.accountType).toBe('unknown');
+  });
+
+  it('uses spendingAmount (project-spending node value) rather than budgetSummary.executedAmount', () => {
+    // budgetSummaryが無い（RS 2-1予算執行サマリ未収録）事業でも、支出先データ由来の
+    // spendingAmountがあれば支出額として反映する（PID21972相当のケース）
+    const g=buildIntegratedGraph([item()],[],[{projectId:9,name:'事業Z',ministry:'省',spendingAmount:100_000_000_000}]);
+    expect(g.projects.find(p=>p.projectId===9)?.spendingAmount).toBe(100_000_000_000);
+  });
+
+  it('breaks ties in project ordering (same budgetAmount, including 0円) by spendingAmount descending', () => {
+    const g=buildIntegratedGraph([],[],[
+      {projectId:1,name:'事業A',ministry:'省',spendingAmount:10},
+      {projectId:2,name:'事業B',ministry:'省',spendingAmount:30},
+      {projectId:3,name:'事業C',ministry:'省',spendingAmount:20},
+    ]);
+    const view=buildView(g, EMPTY_FILTERS, {topN:10,offset:0}, {topN:10,offset:0});
+    expect(view.rankedProjects.map(p=>p.projectId)).toEqual([2,3,1]);
   });
 });
