@@ -880,7 +880,11 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
         {tab === 0 ? (
           [...itemEdges].sort((a, b) => b.value - a.value).slice(0, 200).map(e => (
             <ListRow key={e.id} name={e.itemName} amount={money(e.value)}
-              meta={e.status === 'connected' ? `RS接続済み${e.target.startsWith('project:') ? `（${projectById.get(e.target)?.name ?? ''}）` : ''}` : e.status === 'excess' ? '超過・要確認' : 'RS未接続'} />
+              badges={<BudgetTypeBadge budgetType={e.budgetType} />}
+              // 未接続（status: 'unconnected'）はラベル無し。「RS未接続」は事実の割に
+              // 目立ちすぎる／誤解を招くとの指摘を受け、良い代替案が出るまで何も出さない
+              // （2026-09-14）
+              meta={e.status === 'connected' ? `RS接続済み${e.target.startsWith('project:') ? `（${projectById.get(e.target)?.name ?? ''}）` : ''}` : e.status === 'excess' ? '超過・要確認' : undefined} />
           ))
         ) : (
           projectTotals.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているRS事業がありません</p> : (

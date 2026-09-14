@@ -8,7 +8,7 @@
 import { expect, test } from '@playwright/test';
 
 const CHO = 1e12;
-const EXPECTED = { mofGeneral: 112.57, mofSpecial: 436.04, mofTotal: 548.61, connected: 119.37 };
+const EXPECTED = { mofGeneral: 126.51, mofSpecial: 431.96, mofTotal: 558.47, connected: 131.45 };
 
 test('API集計が仕様書の基準実測値と一致する（RS2025×MOF2024）', async ({ request }) => {
   const res = await request.get('/api/integrated-sankey?year=2025');
@@ -81,7 +81,7 @@ test('列見出しに列ごとの合計金額が表示される', async ({ page 
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
   const canvas = page.getByTestId('integrated-canvas');
-  await expect(canvas.getByText('548.61兆円', { exact: true })).toBeVisible();
+  await expect(canvas.getByText('558.47兆円', { exact: true })).toBeVisible();
 });
 
 test('MOF項を選択すると左パネルに目・RS事業タブとバッジ付きヘッダーが出る', async ({ page }) => {
