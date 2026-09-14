@@ -112,8 +112,8 @@ test('MOF項を選択すると左パネルに目・RS事業タブとバッジ付
 test('MOF項の目タブは目レコード単位でRS事業件数バッジを出し、RS事業タブは予算種別×件数を出す', async ({ page }) => {
   // 1目が複数RS事業に按分されているケース（生活保護等対策費）で、目タブが
   // エッジ単位（按分先ごとに1行）ではなく目レコード単位（1目1行＋接続件数バッジ）に
-  // なっていること、RS事業タブが予算種別ごとの接続件数を「補正1×1件」のように
-  // 区切り付きで出すこと（区切りが無いと「補正1」+「1件」が「補正11件」に読めて
+  // なっていること、RS事業タブが予算種別ごとの接続件数を「補正1×1」のように
+  // 区切り付きで出すこと（区切りが無いと「補正1」+「1」が「補正11」に読めて
   // しまう誤読バグがあった）を確認する（2026-09-15指摘・修正）
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/integrated-sankey');
@@ -123,13 +123,14 @@ test('MOF項の目タブは目レコード単位でRS事業件数バッジを出
   const detail = page.getByTestId('integrated-detail');
   await expect(detail).toBeVisible();
 
+  // 目タブ: RS紐づき件数バッジは2行目（meta）に「RS × N」形式で出る
   await detail.getByRole('button', { name: '目', exact: false }).click();
-  await expect(detail.getByText(/^RS事業\d+件$/).first()).toBeVisible();
+  await expect(detail.getByText(/^RS × \d+$/).first()).toBeVisible();
 
   await detail.getByRole('button', { name: 'RS事業', exact: false }).click();
   const rsText = await detail.innerText();
-  expect(rsText).toMatch(/(当初|補正\d+)×\d+件/);
-  expect(rsText).not.toMatch(/補正\d+\d+件/); // 「補正11件」のような区切り無し誤読表記が無いこと
+  expect(rsText).toMatch(/(当初|補正\d+)×\d+/);
+  expect(rsText).not.toMatch(/補正\d+\d+/); // 「補正11」のような区切り無し誤読表記が無いこと
 
   await detail.getByRole('button', { name: 'サマリー', exact: true }).click();
   await expect(detail.getByText('RS接続額', { exact: true })).toBeVisible();

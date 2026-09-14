@@ -888,6 +888,8 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
     itemCount: itemRows.length,
     initialItemCount: itemRows.filter(g => g.budgetType === '当初予算').length,
     revisedItemCount: itemRows.filter(g => g.budgetType !== '当初予算').length,
+    initialAmount: itemRows.filter(g => g.budgetType === '当初予算').reduce((s, g) => s + g.mofAmount, 0),
+    revisedAmount: itemRows.filter(g => g.budgetType !== '当初予算').reduce((s, g) => s + g.mofAmount, 0),
     projectCount: projectTotals.size,
   };
   // 増減はsection.difference（当初予算行のみのYoY差額）ではなく、実際に表示している
@@ -932,20 +934,25 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
             <Row label="RS接続額" v={summary.connectedAmount} strong />
             <Row label="未接続額" v={summary.unconnectedAmount} />
             <Row label="超過額（要確認）" v={summary.excessAmount} />
+            <Row label="当初予算額" v={summary.initialAmount} />
+            <Row label="補正予算による増減" v={summary.revisedAmount} />
             <StatRow label="目数" value={`${summary.itemCount}件（当初${summary.initialItemCount}・補正${summary.revisedItemCount}）`} />
             <StatRow label="接続RS事業数" value={`${summary.projectCount}件`} />
           </div>
         ) : tab === 1 ? (
           itemRows.map(g => (
             <ListRow key={g.itemName + g.budgetType} name={g.itemName} amount={money(g.mofAmount)}
-              badges={<>
-                <BudgetTypeBadge budgetType={g.budgetType} />
-                {g.connectedCount > 0 && <MofBadge label={`RS事業${g.connectedCount}件`} background="#78909c" />}
-              </>}
+              badges={<BudgetTypeBadge budgetType={g.budgetType} />}
               // 未接続（status: 'unconnected'）はラベル無し。「RS未接続」は事実の割に
               // 目立ちすぎる／誤解を招くとの指摘を受け、良い代替案が出るまで何も出さない
-              // （2026-09-14）
-              meta={g.hasExcess ? '超過・要確認' : undefined} />
+              // （2026-09-14）。RS事業の接続件数バッジは2行目（meta）に移動し、
+              // ラベルは「RS × N」に変更（2026-09-15指摘）
+              meta={(g.connectedCount > 0 || g.hasExcess) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {g.connectedCount > 0 && <MofBadge label={`RS × ${g.connectedCount}`} background="#78909c" />}
+                  {g.hasExcess && <span>超過・要確認</span>}
+                </div>
+              )} />
           ))
         ) : (
           projectTotals.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているRS事業がありません</p> : (
