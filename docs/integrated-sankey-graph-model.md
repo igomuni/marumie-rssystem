@@ -145,7 +145,9 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 | 対象 | 使用する金額 |
 | --- | --- |
 | MOF項の総額 | 配下にあるMOF目の `itemAmount`（当初予算は`amount`、補正予算は`difference`）合計 |
-| MOF項の前年度額・増減率 | 配下の目の `previousAmount`/`difference` を合算（null は0扱い） |
+| MOF項の前年度額 | 配下の当初予算行の目の `previousAmount` を合算（null は0扱い） |
+| MOF項の増減額・増減率（表示用） | `section.difference`（当初予算行のみのYoY差額）ではなく、`section.amount −
+  section.previousAmount`（表示中の本年度額と前年度額の差）から算出する |
 | RS事業の予算額 | `budgetAmount`＝`budgetSummary.totalBudget`（予算現額合計） |
 | RS事業の支出額 | `spendingAmount`＝`/sankey-svg`の`project-spending`ノードの`value`（支出先データ由来の直接支出額合計） |
 | RS事業の会計区分 | `budgetBreakdown`（予算執行タブに出すRS事業自身のレコード）の`accountCategory`から集計。単一なら一般/特別、複数にまたがれば`mixed`。1件も無ければMOF紐づけ（`rows`）から代替集計。どちらも無ければ`unknown`（バッジ非表示） |
@@ -238,6 +240,16 @@ RS紐づけが1件も無い目」参照）、`excess` は `-residual`（常に�
 補正予算行の `previousAmount`/`difference` は「補正前の成立予算額」「当該号の増減額」という
 別概念（年度内の話）で、前年度比（YoY）とは無関係。混ぜて集計すると意味の異なる数値が
 合算されてしまう。
+
+**サイドパネルヘッダーの増減額・増減率は `section.difference`（当初予算行のみのYoY差額）を
+そのまま出さず、表示中の本年度額と前年度額の差（`section.amount - section.previousAmount`）
+から算出する（`app/integrated-sankey/page.tsx` の `SectionDetail`）。** `section.amount`は
+当初＋補正の合計に対し、`section.difference`は当初のみのYoY差額——両者の基準が異なるため、
+`section.difference`をそのまま「増減」として出すと「本年度額-前年度額」の見た目の差と
+数値が一致せず、ヘッダー内でズレて見える不具合になる（当初のみを基準にしていたための
+齟齬、2026-09-15指摘）。前年度額自体は前年度の当初予算額（前年度の補正実績は元データに
+無く取得不能）のままなので、YoYの厳密な比較ではなく近似である点は変わらないが、
+少なくとも画面に表示されている2つの金額と増減額の整合は取れるようにする。
 
 **MOF項側の目一覧タブには目ごとに予算種別バッジ（`BudgetTypeBadge`）を表示する。**
 `IntegratedItemEdge.budgetType`（元のMOF目の `budgetType`）をそのまま使う（RS側の表記

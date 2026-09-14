@@ -108,6 +108,35 @@ test('MOF項を選択すると左パネルに目・RS事業タブとバッジ付
   await expect(detail).toBeHidden();
 });
 
+test('MOF項ヘッダーの増減額は本年度額と前年度額の差に一致する（当初のみの差額とはズレる）', async ({ page, request }) => {
+  // section.difference（当初予算行のみのYoY差額）ではなく、実際に表示している
+  // 本年度額（当初＋補正の合計）と前年度額の差から増減を出す必要がある
+  // （当初だけを基準にするとズレる、2026-09-15指摘）
+  const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
+  const target = graph.sections.find((s: { amount: number; previousAmount: number; difference: number }) =>
+    Math.abs(s.amount - s.previousAmount - s.difference) > 1);
+  expect(target, '当初のみの差額とamount-previousAmountがズレる項が見つからない').toBeTruthy();
+
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill(target.name);
+  await page.getByText(target.name, { exact: false }).first().click();
+
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  const expectedDiff = target.amount - target.previousAmount;
+  const money = (v: number) => {
+    const abs = Math.abs(v);
+    if (abs >= 1e12) return `${(v / 1e12).toFixed(2)}兆円`;
+    if (abs >= 1e8) return `${(v / 1e8).toFixed(1)}億円`;
+    if (abs >= 1e4) return `${Math.round(v / 1e4).toLocaleString()}万円`;
+    return `${v.toLocaleString()}円`;
+  };
+  const expectedText = `${expectedDiff >= 0 ? '+' : ''}${money(expectedDiff)}`;
+  await expect(detail.getByText(expectedText, { exact: false })).toBeVisible();
+});
+
 test('RS事業を選択すると予算サマリ・予算執行・MOF項タブが出て、接続先のMOF項が確認できる', async ({ page, request }) => {
   const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
   const withLinked = graph.projects.find((p: { linkedAmount: number }) => p.linkedAmount > 0);

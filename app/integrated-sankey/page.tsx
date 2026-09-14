@@ -849,7 +849,12 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
   const projectById = new Map(projects.map(p => [p.id, p]));
   const projectTotals = new Map<string, number>();
   for (const e of itemEdges) if (e.target.startsWith('project:')) projectTotals.set(e.target, (projectTotals.get(e.target) ?? 0) + e.value);
-  const changeRate = section.previousAmount > 0 ? (section.difference / section.previousAmount * 100) : null;
+  // 増減はsection.difference（当初予算行のみのYoY差額）ではなく、実際に表示している
+  // 本年度額（当初＋補正の合計）と前年度額（前年度の当初予算額）の差から計算する。
+  // section.differenceを使うと「本年度額-前年度額」と表示中の増減額が一致せず
+  // ズレて見える不具合になる（当初のみを基準にしていたための齟齬、2026-09-15指摘）
+  const difference = section.amount - section.previousAmount;
+  const changeRate = section.previousAmount > 0 ? (difference / section.previousAmount * 100) : null;
   const accountBadge = getAccountBadgeStyle(section.accountType);
   return (
     <PanelShell>
@@ -863,8 +868,8 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
           </div>
           <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>
             <span style={{ fontSize: 11, color: '#aaa', marginRight: 4 }}>増減</span>
-            <b style={{ color: section.difference < 0 ? '#e11d48' : '#2d7d46' }}>
-              {section.difference >= 0 ? '+' : ''}{money(section.difference)}
+            <b style={{ color: difference < 0 ? '#e11d48' : '#2d7d46' }}>
+              {difference >= 0 ? '+' : ''}{money(difference)}
             </b>
             {changeRate !== null && <span style={{ color: '#999', marginLeft: 4 }}>（{changeRate >= 0 ? '+' : ''}{changeRate.toFixed(1)}%）</span>}
           </div>
