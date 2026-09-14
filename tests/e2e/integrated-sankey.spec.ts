@@ -123,9 +123,9 @@ test('MOF項の目タブは目レコード単位でRS事業件数バッジを出
   const detail = page.getByTestId('integrated-detail');
   await expect(detail).toBeVisible();
 
-  // 目タブ: RS紐づき件数バッジは2行目（meta）に「RS × N」形式で出る
+  // 目タブ: RS紐づき件数バッジは2行目（meta）に「RS×N」形式で出る
   await detail.getByRole('button', { name: '目', exact: false }).click();
-  await expect(detail.getByText(/^RS × \d+$/).first()).toBeVisible();
+  await expect(detail.getByText(/^RS×\d+$/).first()).toBeVisible();
 
   await detail.getByRole('button', { name: 'RS事業', exact: false }).click();
   const rsText = await detail.innerText();
