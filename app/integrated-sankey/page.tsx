@@ -926,12 +926,38 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
         </>}
       />
       <DetailTabs tabs={[
-        { label: '予算執行', count: project.budgetBreakdown.length },
         { label: '予算サマリ' },
+        { label: 'MOF項', count: bySection.size },
+        { label: '予算執行', count: project.budgetBreakdown.length },
         { label: '目', count: project.budgetItems.length },
       ]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
+          project.budgetSummary ? (
+            <div style={{ marginBottom: 10 }}>
+              <Row label="当初予算" v={project.budgetSummary.initialBudget} />
+              <Row label="補正予算" v={project.budgetSummary.supplementaryBudget} />
+              <Row label="繰越予算" v={project.budgetSummary.carryoverBudget} />
+              <Row label="予備費使用等" v={project.budgetSummary.reserveFund} />
+              <Row label="予算現額" v={project.budgetSummary.totalBudget} strong />
+              <Row label="執行額" v={project.budgetSummary.executedAmount} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f5f5f5', padding: '4px 0' }}>
+                <span style={{ color: '#999', fontSize: 12 }}>執行率</span><b style={{ fontSize: 12 }}>{project.budgetSummary.executionRate?.toFixed(1) ?? '—'}%</b>
+              </div>
+              <Row label="翌年度繰越額" v={project.budgetSummary.carryoverToNext} />
+              <Row label="翌年度要求額" v={project.budgetSummary.nextYearRequest} />
+            </div>
+          ) : <p style={{ fontSize: 12, color: '#aaa' }}>予算執行データがありません</p>
+        ) : tab === 1 ? (
+          // MOF項一覧: 目一覧（RS自身の予算内訳、接続済み/未接続の二値のみ）より、
+          // 実際に紐づいたMOF項の名前と金額をそのまま見せる方がつながりを表現しやすい
+          // という指摘を受け、独立タブへ格上げした（2026-09-14）
+          bySection.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているMOF項がありません</p> : (
+            [...bySection.entries()].sort((a, b) => b[1] - a[1]).map(([sid, value]) => (
+              <ListRow key={sid} name={sectionById.get(sid)?.name ?? sid} amount={money(value)} />
+            ))
+          )
+        ) : tab === 2 ? (
           // 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来のレコードをそのまま一覧にする
           // （集計値ではなく生のレコード。集計サマリは別タブ）
           project.budgetBreakdown.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>予算執行レコードがありません</p> : (
@@ -960,30 +986,6 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
               );
             })
           )
-        ) : tab === 1 ? (
-          <>
-            {project.budgetSummary ? (
-              <div style={{ marginBottom: 10 }}>
-                <Row label="当初予算" v={project.budgetSummary.initialBudget} />
-                <Row label="補正予算" v={project.budgetSummary.supplementaryBudget} />
-                <Row label="繰越予算" v={project.budgetSummary.carryoverBudget} />
-                <Row label="予備費使用等" v={project.budgetSummary.reserveFund} />
-                <Row label="予算現額" v={project.budgetSummary.totalBudget} strong />
-                <Row label="執行額" v={project.budgetSummary.executedAmount} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f5f5f5', padding: '4px 0' }}>
-                  <span style={{ color: '#999', fontSize: 12 }}>執行率</span><b style={{ fontSize: 12 }}>{project.budgetSummary.executionRate?.toFixed(1) ?? '—'}%</b>
-                </div>
-                <Row label="翌年度繰越額" v={project.budgetSummary.carryoverToNext} />
-                <Row label="翌年度要求額" v={project.budgetSummary.nextYearRequest} />
-              </div>
-            ) : <p style={{ fontSize: 12, color: '#aaa' }}>予算執行データがありません</p>}
-            <h3 style={{ fontSize: 13, fontWeight: 700, margin: '10px 0 4px' }}>MOF項からの接続</h3>
-            {bySection.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているMOF項がありません</p> : (
-              [...bySection.entries()].sort((a, b) => b[1] - a[1]).map(([sid, value]) => (
-                <ListRow key={sid} name={sectionById.get(sid)?.name ?? sid} amount={money(value)} />
-              ))
-            )}
-          </>
         ) : (
           project.budgetItems.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>目内訳がありません</p> : (
             project.budgetItems.map((i, n) => (
