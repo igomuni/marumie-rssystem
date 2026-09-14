@@ -927,9 +927,8 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
       />
       <DetailTabs tabs={[
         { label: '予算サマリ' },
-        { label: 'MOF項', count: bySection.size },
         { label: '予算執行', count: project.budgetBreakdown.length },
-        { label: '目', count: project.budgetItems.length },
+        { label: 'MOF項', count: bySection.size },
       ]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
@@ -949,15 +948,6 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
             </div>
           ) : <p style={{ fontSize: 12, color: '#aaa' }}>予算執行データがありません</p>
         ) : tab === 1 ? (
-          // MOF項一覧: 目一覧（RS自身の予算内訳、接続済み/未接続の二値のみ）より、
-          // 実際に紐づいたMOF項の名前と金額をそのまま見せる方がつながりを表現しやすい
-          // という指摘を受け、独立タブへ格上げした（2026-09-14）
-          bySection.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているMOF項がありません</p> : (
-            [...bySection.entries()].sort((a, b) => b[1] - a[1]).map(([sid, value]) => (
-              <ListRow key={sid} name={sectionById.get(sid)?.name ?? sid} amount={money(value)} />
-            ))
-          )
-        ) : tab === 2 ? (
           // 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来のレコードをそのまま一覧にする
           // （集計値ではなく生のレコード。集計サマリは別タブ）
           project.budgetBreakdown.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>予算執行レコードがありません</p> : (
@@ -987,17 +977,13 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
             })
           )
         ) : (
-          project.budgetItems.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>目内訳がありません</p> : (
-            project.budgetItems.map((i, n) => (
-              <ListRow key={`${i.item}-${i.subItem}-${n}`}
-                badges={
-                  <span style={{ background: i.connected ? '#d1fae5' : '#e5e5e5', color: i.connected ? '#065f46' : '#555', padding: '1px 5px', borderRadius: 8, fontSize: 10, fontWeight: 600, flexShrink: 0 }}>
-                    {i.connected ? 'MOF接続済み' : 'MOF未接続'}
-                  </span>
-                }
-                name={i.subItem || i.item} amount={money(i.amount)}
-                meta={`${i.accountCategory} / ${i.item}`}
-              />
+          // MOF項一覧: 目一覧（RS自身の予算内訳、接続済み/未接続の二値のみ）より、
+          // 実際に紐づいたMOF項の名前と金額をそのまま見せる方がつながりを表現しやすい
+          // という指摘を受け、独立タブへ格上げした（目タブ自体は不要と判断し廃止。
+          // 2026-09-14）
+          bySection.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているMOF項がありません</p> : (
+            [...bySection.entries()].sort((a, b) => b[1] - a[1]).map(([sid, value]) => (
+              <ListRow key={sid} name={sectionById.get(sid)?.name ?? sid} amount={money(value)} />
             ))
           )
         )}
