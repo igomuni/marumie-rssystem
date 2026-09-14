@@ -48,8 +48,10 @@ Pure・HTTP/React禁止）に従い、**フィルタ・表示ウィンドウの�
 
 ### 項の識別
 
-会計区分・予算種別・所管・組織／特別会計・勘定・項コードの組で識別する
+会計区分・所管・組織／特別会計・勘定・項コードの組で識別する
 （`app/lib/integrated-sankey.ts` の `itemSectionKey`）。項名または項コード単独をIDにしない。
+予算種別（当初/補正）は含めない——当初予算行と補正予算行（差額）を同じ項へ合算するため
+（後述「MOF項の対象予算種別」参照）。
 
 ## 検索とフィルタは別物
 
@@ -142,7 +144,7 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 
 | 対象 | 使用する金額 |
 | --- | --- |
-| MOF項の総額 | 配下にあるMOF目の `amount` 合計 |
+| MOF項の総額 | 配下にあるMOF目の `itemAmount`（当初予算は`amount`、補正予算は`difference`）合計 |
 | MOF項の前年度額・増減率 | 配下の目の `previousAmount`/`difference` を合算（null は0扱い） |
 | RS事業の予算額 | `budgetAmount`＝`budgetSummary.totalBudget`（予算現額合計） |
 | RS事業の支出額 | `spendingAmount`＝`/sankey-svg`の`project-spending`ノードの`value`（支出先データ由来の直接支出額合計） |
@@ -215,8 +217,13 @@ PID21972「日米政府の戦略的投資イニシアティブに基づく投資
 「当初との差額」（2号以降は前号との差額）を表すフィールドとして元データに既に存在する
 （`MOFKouMokuItem.difference`、決算以外の帳票に入る比較欄）。`itemAmount(item)` ヘルパーが
 `当初予算 → amount` / `それ以外（補正予算） → difference ?? 0` を返し、これを
-`section.amount`・エッジの `value`/`mofAmount`・`metadata.mofAmount` の集計に使う
+`section.amount`・エッジの `mofAmount`・`metadata.mofAmount` の集計に使う
 （実測: 558.47兆円。当初548.61兆円＋補正予算の実質増減9.86兆円相当）。
+エッジの `value` は `mofAmount` と別物で、ステータスにより意味が異なる——
+`connected` は `link.rsAmount`（RS側の主張額、常に正）、`unconnected` は
+`residual`（`= itemAmount(item) - linked`。通常は正だが、補正予算の減額で
+`linked===0`の場合はマイナスのまま入る。後述「補正予算の減額（`difference`が負）で
+RS紐づけが1件も無い目」参照）、`excess` は `-residual`（常に正）。
 
 **当初から変化のない目は「諸謝金外N目」のような集約行になり、差額は0円。** 補正予算行のうち
 実際に金額が変わった目は個別の目名で1行ずつ現れるが、変化の無い目は「諸謝金外7目」のように
