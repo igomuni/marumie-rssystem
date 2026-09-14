@@ -148,6 +148,15 @@ describe('integrated sankey first cut', () => {
     expect(byBudgetType.get('k2')).toBe('補正予算（第1号）');
   });
 
+  it('filters RS projects by their own ministry (projectMinistries), independent of MOF所管', () => {
+    const g=buildIntegratedGraph([item()],[],[
+      {projectId:1,name:'事業A',ministry:'厚生労働省'},
+      {projectId:2,name:'事業B',ministry:'経済産業省'},
+    ]);
+    const view=buildView(g, {...EMPTY_FILTERS, projectMinistries:['厚生労働省']}, {topN:10,offset:0}, {topN:10,offset:0});
+    expect(view.rankedProjects.map(p=>p.projectId)).toEqual([1]);
+  });
+
   it('reports a single account type when a project receives from only one', () => {
     const g=buildIntegratedGraph([item()],[link()],[]);
     expect(g.projects[0].accountType).toBe('general');

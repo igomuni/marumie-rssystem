@@ -193,28 +193,31 @@ function CheckboxCombobox({ label, options, selected, onChange }: {
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
-  const effective = selected ?? options.map(o => o.value);
-  const allChecked = effective.length === options.length;
-  const noneChecked = effective.length === 0;
-  const summary = selected === null ? 'すべて'
-    : allChecked ? 'すべて'
-      : noneChecked ? 'なし（0件）'
-        : effective.length === 1 ? (options.find(o => o.value === effective[0])?.label ?? effective[0])
-          : `選択中 (${effective.length}/${options.length})`;
-  const isChecked = (v: string) => effective.includes(v);
+  // masterOn（すべて選択/解除がON）＝selected===null（絞り込みなし）。masterOnの間は
+  // 個別チェックボックスは表示上OFFにする——「すべて選択/解除」1つで「全部含む」を
+  // 表しているので、個別も全部チェック済みに見せると冗長・紛らわしいという指摘を受けた
+  // （2026-09-15）。個別を1つでもONにするとmasterOnは自動でOFFになり、その1件だけの
+  // 明示選択に切り替わる。全解除（0件）にするには、まずmasterOnの状態
+  // （selected===null）にしてから「すべて選択/解除」をもう一度押す（selected=[]になる）
+  const masterOn = selected === null;
+  const noneChecked = !masterOn && selected!.length === 0;
+  const summary = masterOn ? 'すべて'
+    : noneChecked ? 'なし（0件）'
+      : selected!.length === 1 ? (options.find(o => o.value === selected![0])?.label ?? selected![0])
+        : `選択中 (${selected!.length}/${options.length})`;
+  const isChecked = (v: string) => !masterOn && selected!.includes(v);
   const toggle = (v: string) => {
-    const next = effective.includes(v) ? effective.filter(x => x !== v) : [...effective, v];
+    if (masterOn) { onChange([v]); return; }
+    const next = selected!.includes(v) ? selected!.filter(x => x !== v) : [...selected!, v];
     onChange(next);
   };
-  // /sankey-svg の「すべて選択/解除」チェックボックスと同じ: 全選択済みなら全解除、
-  // それ以外（一部・ゼロ）なら全選択、の単純トグル。空配列=フィルタなしに圧縮しない
-  const toggleAll = () => onChange(allChecked ? [] : options.map(o => o.value));
+  const toggleAll = () => onChange(masterOn ? [] : null);
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <span style={{ fontSize: 11, color: '#555', width: '3.5em', whiteSpace: 'nowrap', flexShrink: 0 }}>{label}</span>
       <div ref={rootRef} style={{ flex: 1, minWidth: 0, position: 'relative' }}>
         <button type="button" aria-haspopup="listbox" aria-expanded={open} aria-label={label} onClick={() => setOpen(v => !v)}
-          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: (selected === null || allChecked) ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          style={{ width: '100%', fontSize: 11, border: '1px solid #ddd', borderRadius: 4, padding: '3px 20px 3px 5px', background: '#fafafa', color: masterOn ? '#aaa' : '#333', outline: 'none', cursor: 'pointer', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         >{summary}</button>
         <span style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
           <svg xmlns="http://www.w3.org/2000/svg" height="14px" viewBox="0 -960 960 960" width="14px" fill="#aaa"
@@ -227,7 +230,7 @@ function CheckboxCombobox({ label, options, selected, onChange }: {
             style={{ position: 'absolute', top: '100%', left: 0, marginTop: 2, zIndex: 50, background: '#fff', border: '1px solid #ddd', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', maxHeight: 'min(320px, 60vh)', overflowY: 'auto', minWidth: '100%', width: 'max-content' }}
           >
             <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 8px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0', fontWeight: 600 }}>
-              <input type="checkbox" checked={allChecked} onChange={toggleAll} style={{ width: 12, height: 12 }} />
+              <input type="checkbox" checked={masterOn} onChange={toggleAll} style={{ width: 12, height: 12 }} />
               <span style={{ fontSize: 11, color: '#333' }}>すべて選択/解除</span>
             </label>
             {options.map(o => (
@@ -567,6 +570,7 @@ function App() {
   const leftControlsOffset = selected && !detailPanel.collapsed ? detailPanel.effectiveWidth : 0;
 
   const allMinistries = [...new Set(data.sections.flatMap(s => s.ministry.split(/及び|・|、/).map(x => x.trim()).filter(Boolean)))].sort();
+  const allProjectMinistries = [...new Set(data.projects.flatMap(p => p.ministry.split(/及び|・|、/).map(x => x.trim()).filter(Boolean)))].sort();
 
   return (
     <main className="fixed inset-0 overflow-hidden bg-[#f7f8f5] text-neutral-800">
@@ -680,6 +684,8 @@ function App() {
                   options={[{ value: 'general', label: '一般会計' }, { value: 'special', label: '特別会計' }]} />
                 <CheckboxCombobox label="所管" selected={filters.ministries} onChange={v => setFilter('ministries', v)}
                   options={allMinistries.map(m => ({ value: m, label: m }))} />
+                <CheckboxCombobox label="府省庁" selected={filters.projectMinistries} onChange={v => setFilter('projectMinistries', v)}
+                  options={allProjectMinistries.map(m => ({ value: m, label: m }))} />
                 <TextFilterRow label="項" ariaLabel="項名で絞り込み" value={filters.sectionNameQuery}
                   onChange={v => setFilter('sectionNameQuery', v)} useRegex={filters.sectionNameRegex}
                   onToggleRegex={() => setFilter('sectionNameRegex', !filters.sectionNameRegex)} />

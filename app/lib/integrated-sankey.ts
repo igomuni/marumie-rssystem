@@ -280,12 +280,16 @@ export interface Filters {
   // のような「個々の値が独立してon/offできる」挙動を、空配列=フィルタなしに
   // 圧縮してしまわないための表現
   accounts: string[] | null; ministries: string[] | null;
+  /** RS事業の府省庁（IntegratedProjectNode.ministry）による絞り込み。MOF項の`ministries`
+   * （所管）とは別軸——MOF項に接続していないRS事業にも所管の概念は無いがRS事業自身の
+   * 府省庁はあるため、独立してフィルタできるようにする */
+  projectMinistries: string[] | null;
   sectionNameQuery: string; sectionNameRegex: boolean;
   projectNameQuery: string; projectNameRegex: boolean;
   mofMinText: string; mofMaxText: string; rsMinText: string; rsMaxText: string;
 }
 export const EMPTY_FILTERS: Filters = {
-  accounts: null, ministries: null, sectionNameQuery: '', sectionNameRegex: false,
+  accounts: null, ministries: null, projectMinistries: null, sectionNameQuery: '', sectionNameRegex: false,
   projectNameQuery: '', projectNameRegex: false,
   mofMinText: '', mofMaxText: '', rsMinText: '', rsMaxText: '',
 };
@@ -334,6 +338,7 @@ export function buildView(data: IntegratedGraph, filters: Filters, sectionWindow
 
   const keptProjects = data.projects.filter(p =>
     projectNameMatch(p.name) &&
+    (filters.projectMinistries === null || ministriesOf(p.ministry).some(m => filters.projectMinistries!.includes(m))) &&
     (rsMin === null || p.budgetAmount >= rsMin) &&
     (rsMax === null || p.budgetAmount <= rsMax));
   const rankedProjects = [...keptProjects].sort(compareProjects);
