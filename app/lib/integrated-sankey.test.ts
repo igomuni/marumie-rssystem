@@ -112,20 +112,20 @@ describe('integrated sankey first cut', () => {
     expect(g.sections[0].difference).toBe(20);
   });
 
-  it('does not report excess for a supplementary-budget cut with no RS linkage (negative diff, linked=0)', () => {
+  it('reports a supplementary-budget cut with no RS linkage as unconnected with a negative value (not excess)', () => {
     // 補正予算の減額（difference負）でRSの紐づけが1件も無い場合、residualは負に
-    // なるが「超過」ではない——RSは何も主張していないので、MOFが減らしただけで
-    // 確認すべき差異は無い（例: 国債費の補正超過は実は補正でマイナスされている
-    // だけだった、2026-09-14指摘）
+    // なるが「超過」ではない——RSは何も主張していないので、MOFが減らしたという事実を
+    // マイナスのまま一覧に出す（0円に丸めたり一覧から消したりしない）。
+    // 例: 国債費の補正超過は実は補正でマイナスされているだけだった（2026-09-14指摘）
     const g=buildIntegratedGraph(
       [item({ budgetType: '補正予算（第1号）', amount: 70, previousAmount: 100, difference: -30 })],
       [], []);
-    expect(g.edges).toHaveLength(0);
+    expect(g.edges).toHaveLength(1);
+    expect(g.edges[0].status).toBe('unconnected');
+    expect(g.edges[0].value).toBe(-30);
     expect(g.metadata.excessAmount).toBe(0);
-    expect(g.metadata.unconnectedAmount).toBe(0);
-    expect(g.metadata.unlinkedReductionAmount).toBe(-30);
-    expect(g.metadata.connectedAmount + g.metadata.unconnectedAmount - g.metadata.excessAmount + g.metadata.unlinkedReductionAmount)
-      .toBe(g.metadata.mofAmount);
+    expect(g.metadata.unconnectedAmount).toBe(-30);
+    expect(g.metadata.connectedAmount + g.metadata.unconnectedAmount - g.metadata.excessAmount).toBe(g.metadata.mofAmount);
   });
 
   it('still reports excess when RS claims an amount despite a supplementary-budget cut (negative diff, linked>0)', () => {
