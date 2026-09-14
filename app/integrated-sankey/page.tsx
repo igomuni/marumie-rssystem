@@ -857,7 +857,39 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
   const [tab, setTab] = useState(0);
   const projectById = new Map(projects.map(p => [p.id, p]));
   const projectTotals = new Map<string, number>();
-  for (const e of itemEdges) if (e.target.startsWith('project:')) projectTotals.set(e.target, (projectTotals.get(e.target) ?? 0) + e.value);
+  // RS事業タブの2行目用: 事業ごとに予算種別（当初/補正N）別の接続件数を数える
+  const projectBudgetTypeCounts = new Map<string, Map<MOFBudgetType, number>>();
+  for (const e of itemEdges) {
+    if (!e.target.startsWith('project:')) continue;
+    projectTotals.set(e.target, (projectTotals.get(e.target) ?? 0) + e.value);
+    const counts = projectBudgetTypeCounts.get(e.target) ?? new Map<MOFBudgetType, number>();
+    counts.set(e.budgetType, (counts.get(e.budgetType) ?? 0) + 1);
+    projectBudgetTypeCounts.set(e.target, counts);
+  }
+  // 目タブ用: MOFの目レコード単位（itemKey）にグルーピングし直す。1つの目が複数の
+  // RS事業に按分されている場合、以前はitemEdgesをそのまま1行1エッジで展開しており、
+  // 同じ目名が何度も並んで重複に見えていた（実データでは重複ではなく按分。2026-09-15
+  // 指摘）。一覧はMOFの目レコードに忠実に1行1目とし、紐づくRS事業の件数はバッジで示す
+  const itemGroups = new Map<string, {
+    itemName: string; budgetType: MOFBudgetType; mofAmount: number; connectedCount: number; hasExcess: boolean;
+  }>();
+  for (const e of itemEdges) {
+    const g = itemGroups.get(e.itemKey) ??
+      { itemName: e.itemName, budgetType: e.budgetType, mofAmount: e.mofAmount, connectedCount: 0, hasExcess: false };
+    if (e.status === 'connected') g.connectedCount += 1;
+    if (e.status === 'excess') g.hasExcess = true;
+    itemGroups.set(e.itemKey, g);
+  }
+  const itemRows = [...itemGroups.values()].sort((a, b) => b.mofAmount - a.mofAmount);
+  const summary = {
+    connectedAmount: itemEdges.filter(e => e.status === 'connected').reduce((s, e) => s + e.value, 0),
+    unconnectedAmount: itemEdges.filter(e => e.status === 'unconnected').reduce((s, e) => s + e.value, 0),
+    excessAmount: itemEdges.filter(e => e.status === 'excess').reduce((s, e) => s + e.value, 0),
+    itemCount: itemRows.length,
+    initialItemCount: itemRows.filter(g => g.budgetType === '当初予算').length,
+    revisedItemCount: itemRows.filter(g => g.budgetType !== '当初予算').length,
+    projectCount: projectTotals.size,
+  };
   // 増減はsection.difference（当初予算行のみのYoY差額）ではなく、実際に表示している
   // 本年度額（当初＋補正の合計）と前年度額（前年度の当初予算額）の差から計算する。
   // section.differenceを使うと「本年度額-前年度額」と表示中の増減額が一致せず
@@ -889,21 +921,41 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
           <span style={{ fontSize: 11, color: '#666' }}>{section.ministry}{section.organization ? ` / ${section.organization}` : ''}{section.subAccount ? ` / ${section.subAccount}` : ''}</span>
         </>}
       />
-      <DetailTabs tabs={[{ label: '目', count: itemEdges.length }, { label: 'RS事業', count: projectTotals.size }]} active={tab} onChange={setTab} />
+      <DetailTabs tabs={[
+        { label: 'サマリー' },
+        { label: '目', count: itemRows.length },
+        { label: 'RS事業', count: projectTotals.size },
+      ]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
-          [...itemEdges].sort((a, b) => b.value - a.value).slice(0, 200).map(e => (
-            <ListRow key={e.id} name={e.itemName} amount={money(e.value)}
-              badges={<BudgetTypeBadge budgetType={e.budgetType} />}
+          <div style={{ marginBottom: 10 }}>
+            <Row label="RS接続額" v={summary.connectedAmount} strong />
+            <Row label="未接続額" v={summary.unconnectedAmount} />
+            <Row label="超過額（要確認）" v={summary.excessAmount} />
+            <StatRow label="目数" value={`${summary.itemCount}件（当初${summary.initialItemCount}・補正${summary.revisedItemCount}）`} />
+            <StatRow label="接続RS事業数" value={`${summary.projectCount}件`} />
+          </div>
+        ) : tab === 1 ? (
+          itemRows.map(g => (
+            <ListRow key={g.itemName + g.budgetType} name={g.itemName} amount={money(g.mofAmount)}
+              badges={<>
+                <BudgetTypeBadge budgetType={g.budgetType} />
+                {g.connectedCount > 0 && <MofBadge label={`RS事業${g.connectedCount}件`} background="#78909c" />}
+              </>}
               // 未接続（status: 'unconnected'）はラベル無し。「RS未接続」は事実の割に
               // 目立ちすぎる／誤解を招くとの指摘を受け、良い代替案が出るまで何も出さない
               // （2026-09-14）
-              meta={e.status === 'connected' ? `RS接続済み${e.target.startsWith('project:') ? `（${projectById.get(e.target)?.name ?? ''}）` : ''}` : e.status === 'excess' ? '超過・要確認' : undefined} />
+              meta={g.hasExcess ? '超過・要確認' : undefined} />
           ))
         ) : (
           projectTotals.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているRS事業がありません</p> : (
             [...projectTotals.entries()].sort((a, b) => b[1] - a[1]).map(([pid, value]) => (
-              <ListRow key={pid} name={projectById.get(pid)?.name ?? pid} amount={money(value)} />
+              <ListRow key={pid} name={projectById.get(pid)?.name ?? pid} amount={money(value)}
+                meta={<div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  {[...(projectBudgetTypeCounts.get(pid)?.entries() ?? [])]
+                    .sort((a, b) => (a[0] === '当初予算' ? -1 : b[0] === '当初予算' ? 1 : 0))
+                    .map(([bt, count]) => <BudgetTypeBadge key={bt} budgetType={bt} count={count} />)}
+                </div>} />
             ))
           )
         )}
@@ -1014,6 +1066,15 @@ function Row({ label, v, strong }: { label: string; v: number; strong?: boolean 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f5f5f5', padding: '4px 0', fontWeight: strong ? 700 : 400 }}>
       <span style={{ color: '#999', fontSize: 12 }}>{label}</span><span style={{ fontSize: 12 }}>{money(v)}</span>
+    </div>
+  );
+}
+
+/** Rowと同じ見た目で、金額ではなく件数等の任意テキストを右側に出す */
+function StatRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f5f5f5', padding: '4px 0' }}>
+      <span style={{ color: '#999', fontSize: 12 }}>{label}</span><span style={{ fontSize: 12 }}>{value}</span>
     </div>
   );
 }

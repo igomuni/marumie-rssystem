@@ -101,11 +101,40 @@ test('MOF項を選択すると左パネルに目・RS事業タブとバッジ付
   await expect(detail.getByText('本年度額', { exact: true })).toBeVisible();
   await expect(detail.getByText('前年度額', { exact: true })).toBeVisible();
   await expect(detail.getByText('項', { exact: true })).toBeVisible();
+  await expect(detail.getByRole('button', { name: 'サマリー', exact: true })).toBeVisible();
   await expect(detail.getByRole('button', { name: '目', exact: false }).first()).toBeVisible();
   await expect(detail.getByRole('button', { name: 'RS事業', exact: false })).toBeVisible();
 
   await detail.getByLabel('閉じる（選択解除）').click();
   await expect(detail).toBeHidden();
+});
+
+test('MOF項の目タブは目レコード単位でRS事業件数バッジを出し、RS事業タブは予算種別×件数を出す', async ({ page }) => {
+  // 1目が複数RS事業に按分されているケース（生活保護等対策費）で、目タブが
+  // エッジ単位（按分先ごとに1行）ではなく目レコード単位（1目1行＋接続件数バッジ）に
+  // なっていること、RS事業タブが予算種別ごとの接続件数を「補正1×1件」のように
+  // 区切り付きで出すこと（区切りが無いと「補正1」+「1件」が「補正11件」に読めて
+  // しまう誤読バグがあった）を確認する（2026-09-15指摘・修正）
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+  await expect(detail.getByText(/^RS事業\d+件$/).first()).toBeVisible();
+
+  await detail.getByRole('button', { name: 'RS事業', exact: false }).click();
+  const rsText = await detail.innerText();
+  expect(rsText).toMatch(/(当初|補正\d+)×\d+件/);
+  expect(rsText).not.toMatch(/補正\d+\d+件/); // 「補正11件」のような区切り無し誤読表記が無いこと
+
+  await detail.getByRole('button', { name: 'サマリー', exact: true }).click();
+  await expect(detail.getByText('RS接続額', { exact: true })).toBeVisible();
+  await expect(detail.getByText('目数', { exact: true })).toBeVisible();
+  await expect(detail.getByText('接続RS事業数', { exact: true })).toBeVisible();
 });
 
 test('サイドパネル表示時にサンキー図はPanせずパネルがオーバーレイする', async ({ page }) => {
