@@ -574,7 +574,10 @@ function App() {
 
   return (
     <main className="fixed inset-0 overflow-hidden bg-[#f7f8f5] text-neutral-800">
-      <div ref={containerRef} className="absolute inset-y-0 right-0" style={{ left: leftControlsOffset, transition: 'left 0.2s ease' }}>
+      {/* サイドパネル表示時もサンキー図自体はPanしない。/sankey-svg と同じく、
+          パネルはこのコンテナの上にオーバーレイするだけで、図の幅・位置は変えない
+          （leftControlsOffsetは検索ボックス等のフローティングUIの位置調整にのみ使う） */}
+      <div ref={containerRef} className="absolute inset-0">
         <svg
           data-testid="integrated-canvas"
           className="h-full w-full cursor-grab"

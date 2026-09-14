@@ -374,6 +374,17 @@ MOF予算書には「目」（性質別）とは別に「事項」（目的別�
 `/sankey-svg` の左ノード詳細と同じ構造：ヘッダーは固定（`flexShrink: 0`）、
 タブバーも固定、**タブ内容のみが `overflowY: auto` でスクロールする**。
 
+**パネル表示時もサンキー図自体はPanしない。パネルは図の上にオーバーレイするだけ。**
+`SidePanelChrome` は `position: fixed` の自己完結コンポーネントで図の外側に独立して
+重なるが、以前は図を描くSVGコンテナ（`containerRef`の`div`）の `left` を
+`detailPanel.effectiveWidth` ぶん動かしており、`ResizeObserver` がそのコンテナの
+実測幅の変化を検知して `dims`（viewBoxのw/h）を再計算し、図全体がPanして見える
+不具合になっていた（`/sankey-svg` は図のコンテナに`position: fixed, inset: 0`を
+使い、パネル幅による調整はフローティングUI——検索ボックス等——の`left`位置だけに
+適用しており、図のコンテナ自体は動かさない。2026-09-15指摘・修正）。図コンテナは
+常に`inset-0`（全画面固定）とし、`leftControlsOffset`（`detailPanel.effectiveWidth`
+から算出）は検索ボックス・フィルタトグル等のフローティングUIの位置調整にのみ使う。
+
 ### ヘッダー構成
 
 名前＋閉じるボタン（✕）の行、その下に金額ブロック（ラベル・太字の金額・実数円の

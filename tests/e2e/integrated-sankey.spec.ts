@@ -108,6 +108,21 @@ test('MOF項を選択すると左パネルに目・RS事業タブとバッジ付
   await expect(detail).toBeHidden();
 });
 
+test('サイドパネル表示時にサンキー図はPanせずパネルがオーバーレイする', async ({ page }) => {
+  // /sankey-svg と同じく、パネルは図の上にオーバーレイするだけで、図自体の
+  // viewBox（幅・位置）は変えない（2026-09-15指摘: 以前はコンテナの左端を
+  // パネル幅ぶん動かしており、図がPanして見えていた）
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  const canvas = page.getByTestId('integrated-canvas');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  const viewBoxBefore = await canvas.getAttribute('viewBox');
+
+  await page.getByTestId('sankey-node').first().click({ force: true });
+  await expect(page.getByTestId('integrated-detail')).toBeVisible();
+  expect(await canvas.getAttribute('viewBox')).toBe(viewBoxBefore);
+});
+
 test('MOF項ヘッダーの増減額は本年度額と前年度額の差に一致する（当初のみの差額とはズレる）', async ({ page, request }) => {
   // section.difference（当初予算行のみのYoY差額）ではなく、実際に表示している
   // 本年度額（当初＋補正の合計）と前年度額の差から増減を出す必要がある
