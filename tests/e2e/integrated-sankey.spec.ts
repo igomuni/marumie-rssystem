@@ -138,6 +138,33 @@ test('MOF項の目タブは目レコード単位でRS事業件数バッジを出
   await expect(detail.getByText('接続RS事業数', { exact: true })).toBeVisible();
 });
 
+test('×N付きバッジをクリックすると内訳ポップアップが出て、外側クリックで閉じる', async ({ page }) => {
+  // 「×付きのバッジをクリックしたらポップアップで内訳みたいですね」との提案を
+  // 受けて実装（2026-09-15）。MOF項の目タブのRS×Nバッジ、RS事業タブの予算種別×N
+  // バッジの両方で確認する
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+
+  // 目タブ: RS×Nバッジ→接続先RS事業の名前・金額一覧
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+  await detail.getByText(/^RS×\d+$/).first().click();
+  await expect(page.getByText(/接続先（\d+件）/)).toBeVisible();
+  await page.mouse.click(900, 600); // 外側クリックで閉じる
+  await expect(page.getByText(/接続先（\d+件）/)).toBeHidden();
+
+  // RS事業タブ: 予算種別×Nバッジ→内訳（目名・金額一覧）
+  await detail.getByRole('button', { name: 'RS事業', exact: false }).click();
+  await detail.getByText(/^当初×\d+$/).first().click();
+  await expect(page.getByText(/の内訳（\d+件）/)).toBeVisible();
+  await page.mouse.click(900, 600);
+  await expect(page.getByText(/の内訳（\d+件）/)).toBeHidden();
+});
+
 test('予算種別・会計区分バッジは名前と同じ行ではなく2行目（meta）に置かれる', async ({ page }) => {
   // 「バッジは2行目の方が良さそう」との指摘を受け、MOF項の目タブ・RS事業側の
   // 予算執行タブの両方でバッジ（予算種別・会計区分）を1行目から2行目へ統一した

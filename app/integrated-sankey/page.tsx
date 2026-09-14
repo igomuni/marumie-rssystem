@@ -851,32 +851,74 @@ function ListRow({ badges, name, amount, meta }: { badges?: React.ReactNode; nam
   );
 }
 
+/** 「N件」を示すバッジ（RS×N、当初×N等）の内訳ポップアップの状態。クリック位置
+ * （バッジのDOM位置）にポップアップを出す */
+interface BadgePopupState { title: string; rows: { name: string; amount: number }[]; x: number; y: number }
+
+/** ×N付きバッジをクリックすると内訳（名前・金額の一覧）をポップアップで見せる
+ * （「×付きのバッジをクリックしたらポップアップで内訳」との指摘、2026-09-15） */
+function ClickableBadge({ onClick, children }: { onClick: (e: React.MouseEvent<HTMLSpanElement>) => void; children: React.ReactNode }) {
+  return <span onClick={onClick} style={{ cursor: 'pointer' }}>{children}</span>;
+}
+
+function BadgePopup({ state, onClose }: { state: BadgePopupState; onClose: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) onClose(); };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [onClose]);
+  return (
+    <div ref={ref}
+      style={{ position: 'fixed', left: state.x, top: state.y, zIndex: 60, background: '#fff', border: '1px solid #ddd',
+        borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', maxHeight: 320, overflowY: 'auto', minWidth: 220, maxWidth: 360 }}>
+      <div style={{ padding: '6px 10px', borderBottom: '1px solid #f0f0f0', fontSize: 11, fontWeight: 700, color: '#555',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, position: 'sticky', top: 0, background: '#fff' }}>
+        <span>{state.title}</span>
+        <button type="button" onClick={onClose} aria-label="閉じる"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: 14, lineHeight: 1, flexShrink: 0 }}>×</button>
+      </div>
+      <div style={{ padding: '4px 0' }}>
+        {state.rows.map((r, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 10px', fontSize: 11 }}>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
+            <span style={{ flexShrink: 0, color: '#666' }}>{money(r.amount)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SectionDetail({ section, itemEdges, projects, onClose }: {
   section: IntegratedSectionNode; itemEdges: IntegratedItemEdge[]; projects: IntegratedProjectNode[]; onClose: () => void;
 }) {
   const [tab, setTab] = useState(0);
+  const [popup, setPopup] = useState<BadgePopupState | null>(null);
   const projectById = new Map(projects.map(p => [p.id, p]));
   const projectTotals = new Map<string, number>();
-  // RS事業タブの2行目用: 事業ごとに予算種別（当初/補正N）別の接続件数を数える
-  const projectBudgetTypeCounts = new Map<string, Map<MOFBudgetType, number>>();
+  // RS事業タブの2行目用: 事業ごとに予算種別（当初/補正N）別の接続エッジを集める
+  // （バッジクリックで内訳ポップアップを出すため、件数だけでなくエッジ自体を保持する）
+  const projectBudgetTypeEdges = new Map<string, Map<MOFBudgetType, IntegratedItemEdge[]>>();
   for (const e of itemEdges) {
     if (!e.target.startsWith('project:')) continue;
     projectTotals.set(e.target, (projectTotals.get(e.target) ?? 0) + e.value);
-    const counts = projectBudgetTypeCounts.get(e.target) ?? new Map<MOFBudgetType, number>();
-    counts.set(e.budgetType, (counts.get(e.budgetType) ?? 0) + 1);
-    projectBudgetTypeCounts.set(e.target, counts);
+    const byType = projectBudgetTypeEdges.get(e.target) ?? new Map<MOFBudgetType, IntegratedItemEdge[]>();
+    byType.set(e.budgetType, [...(byType.get(e.budgetType) ?? []), e]);
+    projectBudgetTypeEdges.set(e.target, byType);
   }
   // 目タブ用: MOFの目レコード単位（itemKey）にグルーピングし直す。1つの目が複数の
   // RS事業に按分されている場合、以前はitemEdgesをそのまま1行1エッジで展開しており、
   // 同じ目名が何度も並んで重複に見えていた（実データでは重複ではなく按分。2026-09-15
   // 指摘）。一覧はMOFの目レコードに忠実に1行1目とし、紐づくRS事業の件数はバッジで示す
+  // （接続エッジ自体も保持し、バッジクリックで内訳ポップアップを出す）
   const itemGroups = new Map<string, {
-    itemName: string; budgetType: MOFBudgetType; mofAmount: number; connectedCount: number; hasExcess: boolean;
+    itemName: string; budgetType: MOFBudgetType; mofAmount: number; connectedEdges: IntegratedItemEdge[]; hasExcess: boolean;
   }>();
   for (const e of itemEdges) {
     const g = itemGroups.get(e.itemKey) ??
-      { itemName: e.itemName, budgetType: e.budgetType, mofAmount: e.mofAmount, connectedCount: 0, hasExcess: false };
-    if (e.status === 'connected') g.connectedCount += 1;
+      { itemName: e.itemName, budgetType: e.budgetType, mofAmount: e.mofAmount, connectedEdges: [], hasExcess: false };
+    if (e.status === 'connected') g.connectedEdges.push(e);
     if (e.status === 'excess') g.hasExcess = true;
     itemGroups.set(e.itemKey, g);
   }
@@ -950,7 +992,19 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
               meta={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <BudgetTypeBadge budgetType={g.budgetType} />
-                  {g.connectedCount > 0 && <OutlineBadge label={`RS×${g.connectedCount}`} color="#78909c" />}
+                  {g.connectedEdges.length > 0 && (
+                    <ClickableBadge onClick={e => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setPopup({
+                        title: `${g.itemName}の接続先（${g.connectedEdges.length}件）`,
+                        rows: g.connectedEdges.map(ed => ({ name: projectById.get(ed.target)?.name ?? ed.target, amount: ed.value })),
+                        x: rect.left, y: rect.bottom + 4,
+                      });
+                    }}>
+                      <OutlineBadge label={`RS×${g.connectedEdges.length}`} color="#78909c" />
+                    </ClickableBadge>
+                  )}
                   {g.hasExcess && <span>超過・要確認</span>}
                 </div>
               } />
@@ -960,14 +1014,27 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
             [...projectTotals.entries()].sort((a, b) => b[1] - a[1]).map(([pid, value]) => (
               <ListRow key={pid} name={projectById.get(pid)?.name ?? pid} amount={money(value)}
                 meta={<div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                  {[...(projectBudgetTypeCounts.get(pid)?.entries() ?? [])]
+                  {[...(projectBudgetTypeEdges.get(pid)?.entries() ?? [])]
                     .sort((a, b) => (a[0] === '当初予算' ? -1 : b[0] === '当初予算' ? 1 : 0))
-                    .map(([bt, count]) => <BudgetTypeBadge key={bt} budgetType={bt} count={count} />)}
+                    .map(([bt, edges]) => (
+                      <ClickableBadge key={bt} onClick={e => {
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setPopup({
+                          title: `${bt}の内訳（${edges.length}件）`,
+                          rows: edges.map(ed => ({ name: ed.itemName, amount: ed.value })),
+                          x: rect.left, y: rect.bottom + 4,
+                        });
+                      }}>
+                        <BudgetTypeBadge budgetType={bt} count={edges.length} />
+                      </ClickableBadge>
+                    ))}
                 </div>} />
             ))
           )
         )}
       </div>
+      {popup && <BadgePopup state={popup} onClose={() => setPopup(null)} />}
     </PanelShell>
   );
 }
