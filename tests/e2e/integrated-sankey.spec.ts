@@ -138,6 +138,41 @@ test('MOF項の目タブは目レコード単位でRS事業件数バッジを出
   await expect(detail.getByText('接続RS事業数', { exact: true })).toBeVisible();
 });
 
+test('予算種別・会計区分バッジは名前と同じ行ではなく2行目（meta）に置かれる', async ({ page }) => {
+  // 「バッジは2行目の方が良さそう」との指摘を受け、MOF項の目タブ・RS事業側の
+  // 予算執行タブの両方でバッジ（予算種別・会計区分）を1行目から2行目へ統一した
+  // （2026-09-15）。ListRowのdata-testid（list-row/list-row-name/list-row-meta）で
+  // 行ごとに1行目・2行目を厳密に区別して確認する
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  // MOF項側: 目タブ
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+  const itemRow = detail.getByTestId('list-row').filter({ hasText: '医療扶助費等負担金' }).first();
+  await expect(itemRow.getByTestId('list-row-name')).toContainText('医療扶助費等負担金');
+  await expect(itemRow.getByTestId('list-row-name')).not.toContainText('当初');
+  await expect(itemRow.getByTestId('list-row-meta')).toContainText('当初');
+  await detail.getByLabel('閉じる（選択解除）').click();
+
+  // RS事業側: 予算執行タブ
+  const graph = await (await page.request.get('/api/integrated-sankey?year=2025')).json();
+  const withBreakdown = graph.projects.find((p: { budgetBreakdown: { accountCategory: string }[] }) =>
+    p.budgetBreakdown.some((b) => b.accountCategory === '一般会計'));
+  await page.locator('input[placeholder*="項名"]').fill(withBreakdown.name);
+  await page.getByText(withBreakdown.name, { exact: false }).first().click();
+  const detail2 = page.getByTestId('integrated-detail');
+  await expect(detail2).toBeVisible();
+  await detail2.getByRole('button', { name: '予算執行', exact: false }).click();
+  const firstRow = detail2.getByTestId('list-row').first();
+  await expect(firstRow.getByTestId('list-row-name')).not.toContainText('当初');
+  await expect(firstRow.getByTestId('list-row-meta')).toContainText('当初');
+});
+
 test('サイドパネル表示時にサンキー図はPanせずパネルがオーバーレイする', async ({ page }) => {
   // /sankey-svg と同じく、パネルは図の上にオーバーレイするだけで、図自体の
   // viewBox（幅・位置）は変えない（2026-09-15指摘: 以前はコンテナの左端を

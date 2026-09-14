@@ -840,13 +840,13 @@ const listValueStyle: React.CSSProperties = { flex: '0 0 100%', minWidth: 0, fon
  * この構造に統一する */
 function ListRow({ badges, name, amount, meta }: { badges?: React.ReactNode; name: string; amount: React.ReactNode; meta?: React.ReactNode }) {
   return (
-    <div style={listButtonStyle}>
+    <div style={listButtonStyle} data-testid="list-row">
       <span style={{ ...listNameStyle, flex: '1 1 0%', display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
         {badges}
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(name)}</span>
+        <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(name)}</span>
       </span>
       <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{amount}</span>
-      {meta && <div style={{ flex: '0 0 100%', fontSize: 11, color: '#999', textAlign: 'left' }}>{meta}</div>}
+      {meta && <div data-testid="list-row-meta" style={{ flex: '0 0 100%', fontSize: 11, color: '#999', textAlign: 'left' }}>{meta}</div>}
     </div>
   );
 }
@@ -942,17 +942,18 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
         ) : tab === 1 ? (
           itemRows.map(g => (
             <ListRow key={g.itemName + g.budgetType} name={g.itemName} amount={money(g.mofAmount)}
-              badges={<BudgetTypeBadge budgetType={g.budgetType} />}
               // 未接続（status: 'unconnected'）はラベル無し。「RS未接続」は事実の割に
               // 目立ちすぎる／誤解を招くとの指摘を受け、良い代替案が出るまで何も出さない
-              // （2026-09-14）。RS事業の接続件数バッジは2行目（meta）に移動し、
-              // ラベルは「RS × N」に変更（2026-09-15指摘）
-              meta={(g.connectedCount > 0 || g.hasExcess) && (
+              // （2026-09-14）。バッジ類（予算種別・RS接続件数・超過）は1行目ではなく
+              // すべて2行目（meta）に統一する（2026-09-15指摘：バッジは2行目の方が
+              // 良さそう、予算種別・会計区分を他タブ・RS事業サイドパネルでも統一）
+              meta={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <BudgetTypeBadge budgetType={g.budgetType} />
                   {g.connectedCount > 0 && <MofBadge label={`RS × ${g.connectedCount}`} background="#78909c" />}
                   {g.hasExcess && <span>超過・要確認</span>}
                 </div>
-              )} />
+              } />
           ))
         ) : (
           projectTotals.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているRS事業がありません</p> : (
@@ -1038,14 +1039,16 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
               const rsOnlyBadge = rsOnlyBudgetTypeBadge(i.budgetType);
               return (
                 <ListRow key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`}
-                  badges={<>
-                    {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
-                    {rsOnlyBadge
-                      ? <OutlineBadge label={rsOnlyBadge.label} color={rsOnlyBadge.color} />
-                      : <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />}
-                  </>}
                   name={i.subItem || i.item || i.note || i.budgetType || '（内訳なし）'} amount={money(i.amount)}
+                  // バッジ（会計区分・予算種別）は1行目ではなく2行目（meta）に統一する
+                  // （「バッジは2行目の方が良さそう」との指摘、2026-09-15）
                   meta={<>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
+                      {rsOnlyBadge
+                        ? <OutlineBadge label={rsOnlyBadge.label} color={rsOnlyBadge.color} />
+                        : <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />}
+                    </div>
                     <div>{[accountText, i.item].filter(Boolean).join(' / ')}</div>
                     {i.note.trim() && (i.subItem || i.item) && <div>補足: {i.note}</div>}
                   </>}
