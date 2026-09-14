@@ -8,7 +8,7 @@
 import { expect, test } from '@playwright/test';
 
 const CHO = 1e12;
-const EXPECTED = { mofGeneral: 112.57, mofSpecial: 436.04, mofTotal: 548.61, connected: 119.37 };
+const EXPECTED = { mofGeneral: 126.51, mofSpecial: 431.96, mofTotal: 558.47, connected: 131.45 };
 
 test('API集計が仕様書の基準実測値と一致する（RS2025×MOF2024）', async ({ request }) => {
   const res = await request.get('/api/integrated-sankey?year=2025');
@@ -26,6 +26,8 @@ test('API集計が仕様書の基準実測値と一致する（RS2025×MOF2024�
   expect(sum('special')).toBeCloseTo(EXPECTED.mofSpecial, 2);
   expect(metadata.mofAmount / CHO).toBeCloseTo(EXPECTED.mofTotal, 2);
   expect(metadata.connectedAmount / CHO).toBeCloseTo(EXPECTED.connected, 2);
+  // unconnectedAmountは補正予算の減額（RS紐づけ無し）分を負のまま含むため、
+  // この恒等式は符号込みでちょうど一致する
   expect(metadata.connectedAmount + metadata.unconnectedAmount - metadata.excessAmount).toBe(metadata.mofAmount);
 
   expect(graph.linkageQuality).toBeTruthy();
@@ -81,7 +83,7 @@ test('列見出しに列ごとの合計金額が表示される', async ({ page 
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
   const canvas = page.getByTestId('integrated-canvas');
-  await expect(canvas.getByText('548.61兆円', { exact: true })).toBeVisible();
+  await expect(canvas.getByText('558.47兆円', { exact: true })).toBeVisible();
 });
 
 test('MOF項を選択すると左パネルに目・RS事業タブとバッジ付きヘッダーが出る', async ({ page }) => {
@@ -106,30 +108,32 @@ test('MOF項を選択すると左パネルに目・RS事業タブとバッジ付
   await expect(detail).toBeHidden();
 });
 
-test('RS事業を選択すると予算執行・目タブが出て、MOF未接続項目も確認できる', async ({ page, request }) => {
+test('RS事業を選択すると予算サマリ・予算執行・MOF項タブが出て、接続先のMOF項が確認できる', async ({ page, request }) => {
   const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
-  const withUnlinked = graph.projects.find((p: { name: string; budgetItems: { connected: boolean }[] }) => p.budgetItems.some(i => !i.connected));
-  expect(withUnlinked, 'MOF未接続の歳出予算項目を持つRS事業が見つからない').toBeTruthy();
+  const withLinked = graph.projects.find((p: { linkedAmount: number }) => p.linkedAmount > 0);
+  expect(withLinked, 'MOF項に接続しているRS事業が見つからない').toBeTruthy();
 
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/integrated-sankey');
   await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
 
-  // withUnlinked自身を検索してクリックする（先頭事業ではなく、実際に未接続項目を
-  // 持つ事業を選んで検証する）
-  await page.locator('input[placeholder*="項名"]').fill(withUnlinked.name);
-  await page.getByText(withUnlinked.name, { exact: false }).first().click();
+  // withLinked自身を検索してクリックする（先頭事業ではなく、実際にMOF項へ接続している
+  // 事業を選んで検証する）
+  await page.locator('input[placeholder*="項名"]').fill(withLinked.name);
+  await page.getByText(withLinked.name, { exact: false }).first().click();
 
   const detail = page.getByTestId('integrated-detail');
   await expect(detail).toBeVisible();
   await expect(detail.getByText('予算額', { exact: true })).toBeVisible();
   await expect(detail.getByText('支出額', { exact: true })).toBeVisible();
   await expect(detail.getByText('事業', { exact: true })).toBeVisible();
-  await expect(detail.getByRole('button', { name: '予算執行', exact: false })).toBeVisible();
   await expect(detail.getByRole('button', { name: '予算サマリ', exact: false })).toBeVisible();
-  await expect(detail.getByRole('button', { name: '目', exact: false })).toBeVisible();
-  await detail.getByRole('button', { name: '目', exact: false }).click();
-  await expect(detail.getByText('MOF未接続', { exact: true }).first()).toBeVisible();
+  await expect(detail.getByRole('button', { name: '予算執行', exact: false })).toBeVisible();
+  await expect(detail.getByRole('button', { name: 'MOF項', exact: false })).toBeVisible();
+  // RS事業自身の目一覧タブは廃止済み（MOF項タブへ一本化）
+  await expect(detail.getByRole('button', { name: '目', exact: false })).toHaveCount(0);
+  await detail.getByRole('button', { name: 'MOF項', exact: false }).click();
+  await expect(detail.locator('text=接続しているMOF項がありません')).toHaveCount(0);
 });
 
 test('「その他の項」集約ノードを選択すると内訳の目一覧が出る', async ({ page }) => {

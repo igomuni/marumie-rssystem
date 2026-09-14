@@ -1,5 +1,6 @@
 import type { BudgetBreakdownItem, BudgetSummary, GraphData } from '@/types/sankey-svg';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
+import type { MOFBudgetType } from '@/types/mof-jikou';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import { parseAmountToYen } from '@/app/lib/format/yen';
 
@@ -43,10 +44,15 @@ export interface IntegratedProjectNode {
 export interface IntegratedItemEdge {
   id: string; source: string; target: string; itemKey: string; itemName: string;
   value: number; mofAmount: number; status: 'connected' | 'unconnected' | 'excess';
+  /** MOF目の予算種別。当初予算/補正予算（第N号）。MOF項側の目一覧タブでバッジ表示する */
+  budgetType: MOFBudgetType;
   projectId?: number; sourceUrl?: string; page?: number | null;
 }
 export interface IntegratedGraph {
   metadata: { budgetYear: number; rsYear: number; mofAmount: number; connectedAmount: number;
+    /** RS紐づけがない目のresidual合計。補正予算の減額（differenceが負）でRS紐づけが
+     * 1件も無い目はマイナスのまま含む（0円に丸めない）ため、unconnectedAmount自体が
+     * 負になり得る */
     unconnectedAmount: number; excessAmount: number; sectionCount: number; projectCount: number; itemCount: number };
   sections: IntegratedSectionNode[]; projects: IntegratedProjectNode[]; edges: IntegratedItemEdge[];
 }
@@ -73,8 +79,11 @@ export function projectSourcesFromGraph(graph: GraphData): IntegratedProjectSour
 
 export const sectionKey = (l: MofRsKouMokuLinkageRecord) =>
   [l.mofAccountType, l.mofBudgetType, l.mofMinistry, l.mofOrganization, l.mofSubAccount, l.sectionCode].join('|');
+/** 項の識別子には予算種別（budgetType）を含めない。項自体は当初・補正を通じて同一の
+ * ものであり、当初予算行と補正予算行（差額）を同じ項に合算するため
+ * （budgetTypeを含めると当初と補正が別の項として分裂してしまう） */
 export const itemSectionKey = (item: MOFKouMokuItem) =>
-  [item.accountType, item.budgetType, item.ministry,
+  [item.accountType, item.ministry,
     item.accountType === 'special' ? item.specialAccount : item.organization,
     item.subAccount, item.sectionCode].join('|');
 
@@ -112,10 +121,17 @@ function budgetItemMatchesLink(item: BudgetBreakdownItem, link: MofRsKouMokuLink
 // 目単位の対応が無いため、itemEdgesには含まれない。正しい挙動）
 const isPrimaryBudgetType = (t: string) => t === '当初予算' || t.startsWith('補正予算');
 
+/** 目1件の実効金額。補正予算の`amount`は「改予算額」＝その号成立後の累計額で当初予算額を
+ * 包含するため、当初予算行とそのまま合算すると二重計上になる。RS側の2-2 CSVも予算種別ごとに
+ * 積み上げの差分（当初＋補正1号＋補正2号＋…＝現在の予算現額）として記録しているため、
+ * 補正予算行は累計額`amount`ではなく増減額`difference`（＝当初との差額、2号以降は前号との差額）
+ * を使う（2026-09-14指摘。当初は`amount`のまま） */
+const itemAmount = (item: MOFKouMokuItem) => item.budgetType === '当初予算' ? item.amount : (item.difference ?? 0);
+
 export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRsKouMokuLinkageRecord[],
   projectSources: IntegratedProjectSource[], budgetYear = 2024, rsYear = 2025): IntegratedGraph {
   const items = allItems.filter((item): item is MOFKouMokuItem & { accountType: IntegratedAccountType } =>
-    item.budgetType === '当初予算' && (item.accountType === 'general' || item.accountType === 'special'));
+    isPrimaryBudgetType(item.budgetType) && (item.accountType === 'general' || item.accountType === 'special'));
   const links = allLinks.filter(link => isPrimaryBudgetType(link.mofBudgetType) && !link.carriedOverFrom && link.rsAmount > 0);
   const linksByItem = new Map<string, MofRsKouMokuLinkageRecord[]>();
   for (const link of links) linksByItem.set(link.kouMokuKey, [...(linksByItem.get(link.kouMokuKey) ?? []), link]);
@@ -130,9 +146,14 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
     const section = sections.get(source) ?? { id: source, name: item.sectionName, accountType: item.accountType,
       ministry: item.ministry, organization: item.accountType === 'special' ? item.specialAccount : item.organization,
       subAccount: item.subAccount, amount: 0, itemCount: 0, previousAmount: 0, difference: 0 };
-    section.amount += item.amount; section.itemCount += 1;
-    section.previousAmount += item.previousAmount ?? 0; section.difference += item.difference ?? 0;
+    section.amount += itemAmount(item); section.itemCount += 1;
+    // 前年度額・増減率は「前年度比」（YoY）専用の表示。補正予算行のprevious/differenceは
+    // 「補正前の成立予算額」「当該号の増減額」という別概念（年度内の話）なので混ぜない
+    if (item.budgetType === '当初予算') {
+      section.previousAmount += item.previousAmount ?? 0; section.difference += item.difference ?? 0;
+    }
     sections.set(source, section);
+    const amount = itemAmount(item);
     const itemLinks = lastItemByKey.get(item.key) === item ? linksByItem.get(item.key) ?? [] : [];
     const linked = itemLinks.reduce((sum, link) => sum + link.rsAmount, 0);
     for (const link of itemLinks) {
@@ -140,20 +161,27 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
       const old = edges.get(id);
       if (old) old.value += link.rsAmount;
       else edges.set(id, { id, source, target: `project:${link.projectId}`, itemKey: item.key,
-        itemName: item.subItemName, value: link.rsAmount, mofAmount: item.amount, status: 'connected',
-        projectId: link.projectId, sourceUrl: item.sourceUrl, page: item.page });
+        itemName: item.subItemName, value: link.rsAmount, mofAmount: amount, status: 'connected',
+        budgetType: item.budgetType, projectId: link.projectId, sourceUrl: item.sourceUrl, page: item.page });
       connectedAmount += link.rsAmount;
     }
-    const residual = item.amount - linked;
-    if (residual > 0) {
+    const residual = amount - linked;
+    // 補正予算の減額（differenceが負）でRS側の紐づけが1件も無い場合（linked===0）は
+    // 「超過」ではなく「未接続」に分類し、値はマイナスのまま一覧に出す——RSは何も
+    // 主張していないので、MOFが単に減らしたという事実をそのまま見せる（0円に丸めたり
+    // 一覧から消したりしない）。指摘: 国債費の補正超過は実は補正でマイナスされている
+    // だけではないか、マイナスならマイナスで一覧に出すべき（2026-09-14）。
+    // linked>0（RSが何らかの金額を主張している）でresidualが負の場合のみ、その主張と
+    // MOFの差額との食い違いが実在するので超過として扱う
+    if (residual > 0 || (residual < 0 && linked === 0)) {
       edges.set(`${item.id}|unconnected`, { id: `${item.id}|unconnected`, source, target: 'rs-unconnected',
-        itemKey: item.key, itemName: item.subItemName, value: residual, mofAmount: item.amount,
-        status: 'unconnected', sourceUrl: item.sourceUrl, page: item.page });
+        itemKey: item.key, itemName: item.subItemName, value: residual, mofAmount: amount,
+        status: 'unconnected', budgetType: item.budgetType, sourceUrl: item.sourceUrl, page: item.page });
       unconnectedAmount += residual;
     } else if (residual < 0) {
       edges.set(`${item.id}|excess`, { id: `${item.id}|excess`, source, target: 'rs-excess', itemKey: item.key,
-        itemName: item.subItemName, value: -residual, mofAmount: item.amount, status: 'excess',
-        sourceUrl: item.sourceUrl, page: item.page });
+        itemName: item.subItemName, value: -residual, mofAmount: amount, status: 'excess',
+        budgetType: item.budgetType, sourceUrl: item.sourceUrl, page: item.page });
       excessAmount += -residual;
     }
   }
@@ -205,9 +233,9 @@ export function buildIntegratedGraph(allItems: MOFKouMokuItem[], allLinks: MofRs
       budgetItems: (source?.budgetBreakdown ?? []).filter(item => item.fiscalYear === budgetYear && isRsPrimaryBudgetType(item.budgetType))
         .map(item => ({ connected: rows.some(link => budgetItemMatchesLink(item, link)), ...item })) });
   }
-  return { metadata: { budgetYear, rsYear, mofAmount: items.reduce((sum, item) => sum + item.amount, 0),
-    connectedAmount, unconnectedAmount, excessAmount, sectionCount: sections.size, projectCount: projects.length,
-    itemCount: items.length }, sections: [...sections.values()].sort((a, b) => b.amount - a.amount),
+  return { metadata: { budgetYear, rsYear, mofAmount: items.reduce((sum, item) => sum + itemAmount(item), 0),
+    connectedAmount, unconnectedAmount, excessAmount, sectionCount: sections.size,
+    projectCount: projects.length, itemCount: items.length }, sections: [...sections.values()].sort((a, b) => b.amount - a.amount),
     projects: projects.sort((a, b) => b.linkedAmount - a.linkedAmount), edges: [...edges.values()] };
 }
 

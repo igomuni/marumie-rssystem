@@ -88,6 +88,66 @@ describe('integrated sankey first cut', () => {
     expect(g.projects[0].accountType).toBe('mixed');
   });
 
+  it('adds a supplementary-budget item as its difference (not the cumulative amount) into the same section as the initial item', () => {
+    // 補正予算の amount は累計額（当初を包含）。単純合算だと二重計上になるため、
+    // 補正予算行は amount ではなく difference（当初との差額）を項に加算する
+    const g=buildIntegratedGraph(
+      [item(), item({ id: 'i2', key: 'k2', budgetType: '補正予算（第1号）', subItemName: '目b',
+        amount: 130, previousAmount: 100, difference: 30 })],
+      [], []);
+    expect(g.sections).toHaveLength(1);
+    expect(g.sections[0].amount).toBe(130);
+    expect(g.sections[0].itemCount).toBe(2);
+  });
+
+  it('keeps 前年度額・増減率 (YoY) scoped to 当初予算 rows, ignoring supplementary-budget previousAmount/difference', () => {
+    // 補正予算のprevious/differenceは「補正前の成立予算額」「当該号の増減額」という
+    // 別概念（年度内の話）。前年度比（YoY）の集計に混ぜてはいけない
+    const g=buildIntegratedGraph(
+      [item({ previousAmount: 80, difference: 20 }),
+       item({ id: 'i2', key: 'k2', budgetType: '補正予算（第1号）', subItemName: '目b',
+         amount: 130, previousAmount: 100, difference: 30 })],
+      [], []);
+    expect(g.sections[0].previousAmount).toBe(80);
+    expect(g.sections[0].difference).toBe(20);
+  });
+
+  it('reports a supplementary-budget cut with no RS linkage as unconnected with a negative value (not excess)', () => {
+    // 補正予算の減額（difference負）でRSの紐づけが1件も無い場合、residualは負に
+    // なるが「超過」ではない——RSは何も主張していないので、MOFが減らしたという事実を
+    // マイナスのまま一覧に出す（0円に丸めたり一覧から消したりしない）。
+    // 例: 国債費の補正超過は実は補正でマイナスされているだけだった（2026-09-14指摘）
+    const g=buildIntegratedGraph(
+      [item({ budgetType: '補正予算（第1号）', amount: 70, previousAmount: 100, difference: -30 })],
+      [], []);
+    expect(g.edges).toHaveLength(1);
+    expect(g.edges[0].status).toBe('unconnected');
+    expect(g.edges[0].value).toBe(-30);
+    expect(g.metadata.excessAmount).toBe(0);
+    expect(g.metadata.unconnectedAmount).toBe(-30);
+    expect(g.metadata.connectedAmount + g.metadata.unconnectedAmount - g.metadata.excessAmount).toBe(g.metadata.mofAmount);
+  });
+
+  it('still reports excess when RS claims an amount despite a supplementary-budget cut (negative diff, linked>0)', () => {
+    // MOFの補正が減額でも、RSがその目に対して金額を主張している場合は
+    // 食い違いとして超過扱いのまま残す（要確認事項として有効）
+    const g=buildIntegratedGraph(
+      [item({ budgetType: '補正予算（第1号）', amount: 70, previousAmount: 100, difference: -30 })],
+      [link({ mofBudgetType: '補正予算（第1号）', rsAmount: 50 })],
+      []);
+    expect(g.metadata.connectedAmount).toBe(50);
+    expect(g.metadata.excessAmount).toBe(80); // linked(50) - amount(-30) = 80
+  });
+
+  it('tags each edge with the source item budgetType', () => {
+    const g=buildIntegratedGraph(
+      [item(), item({ id: 'i2', key: 'k2', budgetType: '補正予算（第1号）', subItemName: '目b', amount: 130, difference: 30 })],
+      [], []);
+    const byBudgetType = new Map(g.edges.map(e => [e.itemKey, e.budgetType]));
+    expect(byBudgetType.get('k1')).toBe('当初予算');
+    expect(byBudgetType.get('k2')).toBe('補正予算（第1号）');
+  });
+
   it('reports a single account type when a project receives from only one', () => {
     const g=buildIntegratedGraph([item()],[link()],[]);
     expect(g.projects[0].accountType).toBe('general');
