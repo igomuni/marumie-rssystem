@@ -165,6 +165,31 @@ test('×N付きバッジをクリックすると内訳ポップアップが出�
   await expect(page.getByText(/の内訳（\d+件）/)).toBeHidden();
 });
 
+test('一覧の下の方のバッジをクリックしてもポップアップがビューポート内に収まる', async ({ page }) => {
+  // 「一覧の下の方のバッジクリックしたらポップアップが見切れています」との指摘
+  // （2026-09-15）。バッジのすぐ下に決め打ちで出すと、ビューポート下端に近い
+  // バッジではポップアップが画面外にはみ出して見切れていた。ポップアップの実測
+  // サイズをもとに、はみ出す場合はバッジの上側へ表示を反転するよう修正した
+  await page.setViewportSize({ width: 1200, height: 700 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+
+  const badges = detail.getByText(/^RS×\d+$/);
+  const lastBadge = badges.nth((await badges.count()) - 1);
+  await lastBadge.scrollIntoViewIfNeeded();
+  await lastBadge.click();
+  const popup = page.getByText(/接続先（\d+件）/).locator('xpath=ancestor::div[2]');
+  await expect(popup).toBeVisible();
+  const popupBox = (await popup.boundingBox())!;
+  expect(popupBox.y).toBeGreaterThanOrEqual(0);
+  expect(popupBox.y + popupBox.height).toBeLessThanOrEqual(700 + 1);
+});
+
 test('予算種別・会計区分バッジは名前と同じ行ではなく2行目（meta）に置かれる', async ({ page }) => {
   // 「バッジは2行目の方が良さそう」との指摘を受け、MOF項の目タブ・RS事業側の
   // 予算執行タブの両方でバッジ（予算種別・会計区分）を1行目から2行目へ統一した

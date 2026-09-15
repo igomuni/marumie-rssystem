@@ -15,7 +15,7 @@
  * 横断する（/sankey-svg の検索が事業名・支出先名を1本で横断するのと同じ考え方）。
  */
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
@@ -851,9 +851,12 @@ function ListRow({ badges, name, amount, meta }: { badges?: React.ReactNode; nam
   );
 }
 
-/** 「N件」を示すバッジ（RS×N、当初×N等）の内訳ポップアップの状態。クリック位置
- * （バッジのDOM位置）にポップアップを出す */
-interface BadgePopupState { title: string; rows: { name: string; amount: number }[]; x: number; y: number }
+/** 「N件」を示すバッジ（RS×N、当初×N等）の内訳ポップアップの状態。クリックした
+ * バッジ自身の`getBoundingClientRect()`を`anchor`として持ち、`BadgePopup`側で
+ * 実際のポップアップサイズを測ってから画面内に収まる位置を計算する（バッジの
+ * すぐ下に決め打ちすると、一覧の下の方のバッジをクリックしたときにポップアップが
+ * ビューポート下端からはみ出して見切れる不具合になる、2026-09-15指摘） */
+interface BadgePopupState { title: string; rows: { name: string; amount: number }[]; anchor: DOMRect }
 
 /** ×N付きバッジをクリックすると内訳（名前・金額の一覧）をポップアップで見せる
  * （「×付きのバッジをクリックしたらポップアップで内訳」との指摘、2026-09-15） */
@@ -863,6 +866,25 @@ function ClickableBadge({ onClick, children }: { onClick: (e: React.MouseEvent<H
 
 function BadgePopup({ state, onClose }: { state: BadgePopupState; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
+  // 初回描画はanchorのすぐ下（見えない状態）に置いて実サイズを測り、ビューポート内に
+  // 収まるようclampした位置を確定してから表示する。下端をはみ出す場合はバッジの
+  // 上側に表示を反転する
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const margin = 8;
+    const rect = el.getBoundingClientRect();
+    let top = state.anchor.bottom + 4;
+    if (top + rect.height > window.innerHeight - margin) {
+      const above = state.anchor.top - rect.height - 4;
+      top = above >= margin ? above : Math.max(margin, window.innerHeight - rect.height - margin);
+    }
+    let left = state.anchor.left;
+    if (left + rect.width > window.innerWidth - margin) left = window.innerWidth - rect.width - margin;
+    left = Math.max(margin, left);
+    setPos({ left, top });
+  }, [state]);
   useEffect(() => {
     const onDown = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) onClose(); };
     document.addEventListener('mousedown', onDown);
@@ -870,7 +892,8 @@ function BadgePopup({ state, onClose }: { state: BadgePopupState; onClose: () =>
   }, [onClose]);
   return (
     <div ref={ref}
-      style={{ position: 'fixed', left: state.x, top: state.y, zIndex: 60, background: '#fff', border: '1px solid #ddd',
+      style={{ position: 'fixed', left: pos?.left ?? state.anchor.left, top: pos?.top ?? state.anchor.bottom + 4,
+        visibility: pos ? 'visible' : 'hidden', zIndex: 60, background: '#fff', border: '1px solid #ddd',
         borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', maxHeight: 320, overflowY: 'auto', minWidth: 220, maxWidth: 360 }}>
       <div style={{ padding: '6px 10px', borderBottom: '1px solid #f0f0f0', fontSize: 11, fontWeight: 700, color: '#555',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, position: 'sticky', top: 0, background: '#fff' }}>
@@ -999,7 +1022,7 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
                       setPopup({
                         title: `${g.itemName}の接続先（${g.connectedEdges.length}件）`,
                         rows: g.connectedEdges.map(ed => ({ name: projectById.get(ed.target)?.name ?? ed.target, amount: ed.value })),
-                        x: rect.left, y: rect.bottom + 4,
+                        anchor: rect,
                       });
                     }}>
                       <OutlineBadge label={`RS×${g.connectedEdges.length}`} color="#78909c" />
@@ -1023,7 +1046,7 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
                         setPopup({
                           title: `${bt}の内訳（${edges.length}件）`,
                           rows: edges.map(ed => ({ name: ed.itemName, amount: ed.value })),
-                          x: rect.left, y: rect.bottom + 4,
+                          anchor: rect,
                         });
                       }}>
                         <BudgetTypeBadge budgetType={bt} count={edges.length} />

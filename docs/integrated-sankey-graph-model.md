@@ -473,10 +473,21 @@ MOF予算書には「目」（性質別）とは別に「事項」（目的別�
 クリックすると、その予算種別で接続しているMOF目（目名・金額）一覧をポップアップ
 表示する。`ClickableBadge`（クリック領域のラッパー、`e.stopPropagation()`で
 親のクリックハンドラへの伝播を止める）と`BadgePopup`（`position: fixed`、
-クリックしたバッジのすぐ下に表示、`CheckboxCombobox`と同じ外側クリック検知で
-閉じる）の2つを新設。内訳データは`itemGroups`/`projectBudgetTypeEdges`に
-（件数だけでなく）元の`IntegratedItemEdge`をそのまま保持しておき、そこから
-名前・金額を組み立てる。
+`CheckboxCombobox`と同じ外側クリック検知で閉じる）の2つを新設。内訳データは
+`itemGroups`/`projectBudgetTypeEdges`に（件数だけでなく）元の`IntegratedItemEdge`
+をそのまま保持しておき、そこから名前・金額を組み立てる。
+
+**ポップアップの位置はクリックしたバッジの`DOMRect`（`anchor`）から実測して
+ビューポート内に収まるよう補正する。** 当初はバッジの`bottom + 4px`に決め打ちで
+配置していたが、一覧の下の方のバッジをクリックするとポップアップがビューポート
+下端をはみ出して見切れる不具合があった（2026-09-15指摘）。`BadgePopup`は
+`useLayoutEffect`で自身を一旦`visibility: hidden`のまま`anchor`のすぐ下に描画し、
+実測した高さ・幅をもとに位置を補正してから表示する——下にはみ出す場合はバッジの
+上側へ表示を反転し（`anchor.top - 高さ - 4px`）、それでも収まらない場合は
+ビューポート下端基準にクランプする（左右も同様に画面内へクランプ）。この2段階
+描画のため、`position: fixed`・`visibility: hidden`のまま初回レンダーし、
+`useLayoutEffect`実行後（ブラウザ描画前）に確定した位置で`visibility: visible`
+に切り替える——ちらつき無く位置が決まる。
 
 ### 事業選択時
 
