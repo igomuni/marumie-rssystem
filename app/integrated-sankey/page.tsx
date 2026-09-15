@@ -856,12 +856,21 @@ function ListRow({ badges, name, amount, meta }: { badges?: React.ReactNode; nam
  * 実際のポップアップサイズを測ってから画面内に収まる位置を計算する（バッジの
  * すぐ下に決め打ちすると、一覧の下の方のバッジをクリックしたときにポップアップが
  * ビューポート下端からはみ出して見切れる不具合になる、2026-09-15指摘） */
-interface BadgePopupState { title: string; rows: { name: string; amount: number }[]; anchor: DOMRect }
+/** idはどのバッジが開いたポップアップかを識別する。同じバッジを再クリックした
+ * ときは閉じ、別のバッジをクリックしたときは切り替える（トグル）ために使う
+ * （「同じバッジを再クリックしたときに閉じたい、他バッジは切り替える既存の挙動は
+ * 維持」との指摘、2026-09-15） */
+interface BadgePopupState { id: string; title: string; rows: { name: string; amount: number }[]; anchor: DOMRect }
 
 /** ×N付きバッジをクリックすると内訳（名前・金額の一覧）をポップアップで見せる
  * （「×付きのバッジをクリックしたらポップアップで内訳」との指摘、2026-09-15） */
 function ClickableBadge({ onClick, children }: { onClick: (e: React.MouseEvent<HTMLSpanElement>) => void; children: React.ReactNode }) {
-  return <span onClick={onClick} style={{ cursor: 'pointer' }}>{children}</span>;
+  // data-badge-trigger: BadgePopupの外側クリック検知（mousedown）から除外するための
+  // 目印。無いと、同じバッジを再クリックしたときにmousedownの外側クリック判定が
+  // 先に発火してポップアップをonClose()で閉じてしまい、直後のonClick（トグル処理）が
+  // 「閉じている状態からの再オープン」と誤認して即座に開き直してしまう
+  // （トグルで閉じたいのに閉じられない不具合になる、2026-09-15指摘）
+  return <span data-badge-trigger="true" onClick={onClick} style={{ cursor: 'pointer' }}>{children}</span>;
 }
 
 function BadgePopup({ state, onClose }: { state: BadgePopupState; onClose: () => void }) {
@@ -886,7 +895,11 @@ function BadgePopup({ state, onClose }: { state: BadgePopupState; onClose: () =>
     setPos({ left, top });
   }, [state]);
   useEffect(() => {
-    const onDown = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) onClose(); };
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // バッジ自身のクリックは除外し、バッジ側のonClick（トグル処理）に任せる
+      if (!ref.current?.contains(target) && !target.closest?.('[data-badge-trigger]')) onClose();
+    };
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
   }, [onClose]);
@@ -1019,8 +1032,9 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
                     <ClickableBadge onClick={e => {
                       e.stopPropagation();
                       const rect = e.currentTarget.getBoundingClientRect();
-                      setPopup({
-                        title: `${g.itemName}の接続先（${g.connectedEdges.length}件）`,
+                      const id = `item:${g.itemName}|${g.budgetType}`;
+                      setPopup(prev => prev?.id === id ? null : {
+                        id, title: `${g.itemName}の接続先（${g.connectedEdges.length}件）`,
                         rows: g.connectedEdges.map(ed => ({ name: projectById.get(ed.target)?.name ?? ed.target, amount: ed.value })),
                         anchor: rect,
                       });
@@ -1043,8 +1057,9 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
                       <ClickableBadge key={bt} onClick={e => {
                         e.stopPropagation();
                         const rect = e.currentTarget.getBoundingClientRect();
-                        setPopup({
-                          title: `${bt}の内訳（${edges.length}件）`,
+                        const id = `project:${pid}|${bt}`;
+                        setPopup(prev => prev?.id === id ? null : {
+                          id, title: `${bt}の内訳（${edges.length}件）`,
                           rows: edges.map(ed => ({ name: ed.itemName, amount: ed.value })),
                           anchor: rect,
                         });

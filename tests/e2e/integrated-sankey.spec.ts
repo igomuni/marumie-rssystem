@@ -165,6 +165,41 @@ test('×N付きバッジをクリックすると内訳ポップアップが出�
   await expect(page.getByText(/の内訳（\d+件）/)).toBeHidden();
 });
 
+test('同じバッジを再クリックするとポップアップが閉じ、別バッジをクリックすると切り替わる', async ({ page }) => {
+  // 「同じバッジを再クリックしたときに閉じたい、他バッジは切り替えるなどの既存の
+  // 挙動は維持」との指摘（2026-09-15）。実装当初は、同じバッジの再クリックで
+  // mousedownの外側クリック判定が先に発火してonClose()が呼ばれ、直後のonClick
+  // （トグル処理）が「閉じている状態からの再オープン」と誤認して開き直してしまう
+  // 不具合があった。バッジに`data-badge-trigger`を付け、外側クリック判定から
+  // バッジ自身のクリックを除外して修正した
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+  const badges = detail.getByText(/^RS×\d+$/);
+  const first = badges.nth(0);
+  const second = badges.nth(1);
+
+  await first.click();
+  await expect(page.getByText(/接続先（\d+件）/)).toBeVisible();
+  const firstTitle = await page.getByText(/接続先（\d+件）/).innerText();
+
+  await first.click(); // 同じバッジを再クリック -> 閉じる
+  await expect(page.getByText(/接続先（\d+件）/)).toBeHidden();
+
+  await first.click();
+  await second.click(); // 別バッジをクリック -> 切り替わる（閉じない）
+  await expect(page.getByText(/接続先（\d+件）/)).toBeVisible();
+  expect(await page.getByText(/接続先（\d+件）/).innerText()).not.toBe(firstTitle);
+
+  await page.mouse.click(900, 700); // 外側クリックは引き続き閉じる
+  await expect(page.getByText(/接続先（\d+件）/)).toBeHidden();
+});
+
 test('一覧の下の方のバッジをクリックしてもポップアップがビューポート内に収まる', async ({ page }) => {
   // 「一覧の下の方のバッジクリックしたらポップアップが見切れています」との指摘
   // （2026-09-15）。バッジのすぐ下に決め打ちで出すと、ビューポート下端に近い
