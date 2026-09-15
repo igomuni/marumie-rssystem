@@ -67,9 +67,13 @@ const BUDGET_TYPE_COLOR: Record<string, string> = {
 };
 const REVISED_COLOR = '#ffa000';
 
-/** 予算種別バッジ（当初/暫定/補正N/決算） */
-export function BudgetTypeBadge({ budgetType }: { budgetType: MOFBudgetType }) {
+/** 予算種別バッジ（当初/暫定/補正N/決算）。`count`を渡すと「補正1×2」のように
+ * 件数を添える（integrated-sankeyのRS事業タブで予算種別ごとの接続件数を示す用途）。
+ * 区切りの`×`は必須——補正Nのラベルには既に号数の数字が入っており（例:「補正1」）、
+ * 区切りなしで件数を続けると「補正1」+「1」が「補正11」に読めてしまう
+ * （実際は補正1号への1件の接続なのに11件に見える誤読バグがあった、2026-09-15） */
+export function BudgetTypeBadge({ budgetType, count }: { budgetType: MOFBudgetType; count?: number }) {
   const label = budgetTypeLabel(budgetType);
   const color = BUDGET_TYPE_COLOR[label] ?? (label.startsWith('補正') ? REVISED_COLOR : BUDGET_TYPE_COLOR.当初);
-  return <OutlineBadge label={label} color={color} />;
+  return <OutlineBadge label={count !== undefined ? `${label}×${count}` : label} color={color} />;
 }

@@ -15,7 +15,7 @@
  * 横断する（/sankey-svg の検索が事業名・支出先名を1本で横断するのと同じ考え方）。
  */
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PageNavMenu } from '@/components/navigation/PageNavMenu';
 import { YearSelect } from '@/components/navigation/YearSelect';
@@ -29,6 +29,7 @@ import { classifyAccountCategory } from '@/app/lib/account-badge';
 import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
 import {
   buildMatcher,
+  buildSectionDetailView,
   buildView,
   compareProjects,
   EMPTY_FILTERS,
@@ -193,6 +194,11 @@ function CheckboxCombobox({ label, options, selected, onChange }: {
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
+  // 「すべて選択/解除」は個別チェックボックスの状態と完全に連動する通常のselect-all
+  // トグルに戻した（2026-09-15再指摘：個別を隠す挙動は違和感があるとのこと）。
+  // すべて選択（allChecked）のときは個別もすべてチェック済みで表示し、「すべて解除」は
+  // 個別がすべてチェック済みのとき（allChecked）だけ発動する——部分選択の状態で
+  // マスターを押すと「すべて選択」になる（allChecked以外は常に選択側へ倒す）
   const effective = selected ?? options.map(o => o.value);
   const allChecked = effective.length === options.length;
   const noneChecked = effective.length === 0;
@@ -206,8 +212,6 @@ function CheckboxCombobox({ label, options, selected, onChange }: {
     const next = effective.includes(v) ? effective.filter(x => x !== v) : [...effective, v];
     onChange(next);
   };
-  // /sankey-svg の「すべて選択/解除」チェックボックスと同じ: 全選択済みなら全解除、
-  // それ以外（一部・ゼロ）なら全選択、の単純トグル。空配列=フィルタなしに圧縮しない
   const toggleAll = () => onChange(allChecked ? [] : options.map(o => o.value));
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -567,10 +571,14 @@ function App() {
   const leftControlsOffset = selected && !detailPanel.collapsed ? detailPanel.effectiveWidth : 0;
 
   const allMinistries = [...new Set(data.sections.flatMap(s => s.ministry.split(/及び|・|、/).map(x => x.trim()).filter(Boolean)))].sort();
+  const allProjectMinistries = [...new Set(data.projects.flatMap(p => p.ministry.split(/及び|・|、/).map(x => x.trim()).filter(Boolean)))].sort();
 
   return (
     <main className="fixed inset-0 overflow-hidden bg-[#f7f8f5] text-neutral-800">
-      <div ref={containerRef} className="absolute inset-y-0 right-0" style={{ left: leftControlsOffset, transition: 'left 0.2s ease' }}>
+      {/* サイドパネル表示時もサンキー図自体はPanしない。/sankey-svg と同じく、
+          パネルはこのコンテナの上にオーバーレイするだけで、図の幅・位置は変えない
+          （leftControlsOffsetは検索ボックス等のフローティングUIの位置調整にのみ使う） */}
+      <div ref={containerRef} className="absolute inset-0">
         <svg
           data-testid="integrated-canvas"
           className="h-full w-full cursor-grab"
@@ -680,6 +688,8 @@ function App() {
                   options={[{ value: 'general', label: '一般会計' }, { value: 'special', label: '特別会計' }]} />
                 <CheckboxCombobox label="所管" selected={filters.ministries} onChange={v => setFilter('ministries', v)}
                   options={allMinistries.map(m => ({ value: m, label: m }))} />
+                <CheckboxCombobox label="府省庁" selected={filters.projectMinistries} onChange={v => setFilter('projectMinistries', v)}
+                  options={allProjectMinistries.map(m => ({ value: m, label: m }))} />
                 <TextFilterRow label="項" ariaLabel="項名で絞り込み" value={filters.sectionNameQuery}
                   onChange={v => setFilter('sectionNameQuery', v)} useRegex={filters.sectionNameRegex}
                   onToggleRegex={() => setFilter('sectionNameRegex', !filters.sectionNameRegex)} />
@@ -831,13 +841,95 @@ const listValueStyle: React.CSSProperties = { flex: '0 0 100%', minWidth: 0, fon
  * この構造に統一する */
 function ListRow({ badges, name, amount, meta }: { badges?: React.ReactNode; name: string; amount: React.ReactNode; meta?: React.ReactNode }) {
   return (
-    <div style={listButtonStyle}>
+    <div style={listButtonStyle} data-testid="list-row">
       <span style={{ ...listNameStyle, flex: '1 1 0%', display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
         {badges}
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(name)}</span>
+        <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(name)}</span>
       </span>
       <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{amount}</span>
-      {meta && <div style={{ flex: '0 0 100%', fontSize: 11, color: '#999', textAlign: 'left' }}>{meta}</div>}
+      {meta && <div data-testid="list-row-meta" style={{ flex: '0 0 100%', fontSize: 11, color: '#999', textAlign: 'left' }}>{meta}</div>}
+    </div>
+  );
+}
+
+/** 「N件」を示すバッジ（RS×N、当初×N等）の内訳ポップアップの状態。クリックした
+ * バッジ自身の`getBoundingClientRect()`を`anchor`として持ち、`BadgePopup`側で
+ * 実際のポップアップサイズを測ってから画面内に収まる位置を計算する（バッジの
+ * すぐ下に決め打ちすると、一覧の下の方のバッジをクリックしたときにポップアップが
+ * ビューポート下端からはみ出して見切れる不具合になる、2026-09-15指摘） */
+/** idはどのバッジが開いたポップアップかを識別する。同じバッジを再クリックした
+ * ときは閉じ、別のバッジをクリックしたときは切り替える（トグル）ために使う
+ * （「同じバッジを再クリックしたときに閉じたい、他バッジは切り替える既存の挙動は
+ * 維持」との指摘、2026-09-15） */
+interface BadgePopupState { id: string; title: string; rows: { name: string; amount: number }[]; anchor: DOMRect }
+
+/** ×N付きバッジをクリックすると内訳（名前・金額の一覧）をポップアップで見せる
+ * （「×付きのバッジをクリックしたらポップアップで内訳」との指摘、2026-09-15）。
+ * `button`でキーボード操作（Tab移動・Enter/Space）にも対応する（`span`は
+ * フォーカス不可でキーボードから開けなかった、PRレビュー指摘） */
+function ClickableBadge({ onClick, children }: { onClick: (e: React.MouseEvent<HTMLButtonElement>) => void; children: React.ReactNode }) {
+  // data-badge-trigger: BadgePopupの外側クリック検知（mousedown）から除外するための
+  // 目印。無いと、同じバッジを再クリックしたときにmousedownの外側クリック判定が
+  // 先に発火してポップアップをonClose()で閉じてしまい、直後のonClick（トグル処理）が
+  // 「閉じている状態からの再オープン」と誤認して即座に開き直してしまう
+  // （トグルで閉じたいのに閉じられない不具合になる、2026-09-15指摘）
+  return (
+    <button type="button" data-badge-trigger="true" onClick={onClick}
+      style={{ cursor: 'pointer', padding: 0, border: 0, background: 'transparent' }}>
+      {children}
+    </button>
+  );
+}
+
+function BadgePopup({ state, onClose }: { state: BadgePopupState; onClose: () => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // 初回描画はanchorのすぐ下（見えない状態）に置いて実サイズを測り、ビューポート内に
+  // 収まるようclampした位置を確定してから表示する。下端をはみ出す場合はバッジの
+  // 上側に表示を反転する
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const margin = 8;
+    const rect = el.getBoundingClientRect();
+    let top = state.anchor.bottom + 4;
+    if (top + rect.height > window.innerHeight - margin) {
+      const above = state.anchor.top - rect.height - 4;
+      top = above >= margin ? above : Math.max(margin, window.innerHeight - rect.height - margin);
+    }
+    let left = state.anchor.left;
+    if (left + rect.width > window.innerWidth - margin) left = window.innerWidth - rect.width - margin;
+    left = Math.max(margin, left);
+    setPos({ left, top });
+  }, [state]);
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // バッジ自身のクリックは除外し、バッジ側のonClick（トグル処理）に任せる
+      if (!ref.current?.contains(target) && !target.closest?.('[data-badge-trigger]')) onClose();
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [onClose]);
+  return (
+    <div ref={ref}
+      style={{ position: 'fixed', left: pos?.left ?? state.anchor.left, top: pos?.top ?? state.anchor.bottom + 4,
+        visibility: pos ? 'visible' : 'hidden', zIndex: 60, background: '#fff', border: '1px solid #ddd',
+        borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.15)', maxHeight: 320, overflowY: 'auto', minWidth: 220, maxWidth: 360 }}>
+      <div style={{ padding: '6px 10px', borderBottom: '1px solid #f0f0f0', fontSize: 11, fontWeight: 700, color: '#555',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, position: 'sticky', top: 0, background: '#fff' }}>
+        <span>{state.title}</span>
+        <button type="button" onClick={onClose} aria-label="閉じる"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#999', fontSize: 14, lineHeight: 1, flexShrink: 0 }}>×</button>
+      </div>
+      <div style={{ padding: '4px 0' }}>
+        {state.rows.map((r, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '3px 10px', fontSize: 11 }}>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
+            <span style={{ flexShrink: 0, color: '#666' }}>{money(r.amount)}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -846,10 +938,9 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
   section: IntegratedSectionNode; itemEdges: IntegratedItemEdge[]; projects: IntegratedProjectNode[]; onClose: () => void;
 }) {
   const [tab, setTab] = useState(0);
+  const [popup, setPopup] = useState<BadgePopupState | null>(null);
   const projectById = new Map(projects.map(p => [p.id, p]));
-  const projectTotals = new Map<string, number>();
-  for (const e of itemEdges) if (e.target.startsWith('project:')) projectTotals.set(e.target, (projectTotals.get(e.target) ?? 0) + e.value);
-  const changeRate = section.previousAmount > 0 ? (section.difference / section.previousAmount * 100) : null;
+  const { projectTotals, projectBudgetTypeEdges, itemRows, summary, difference, changeRate } = buildSectionDetailView(section, itemEdges);
   const accountBadge = getAccountBadgeStyle(section.accountType);
   return (
     <PanelShell>
@@ -863,8 +954,8 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
           </div>
           <div style={{ fontSize: 12, color: '#777', marginTop: 4 }}>
             <span style={{ fontSize: 11, color: '#aaa', marginRight: 4 }}>増減</span>
-            <b style={{ color: section.difference < 0 ? '#e11d48' : '#2d7d46' }}>
-              {section.difference >= 0 ? '+' : ''}{money(section.difference)}
+            <b style={{ color: difference < 0 ? '#e11d48' : '#2d7d46' }}>
+              {difference >= 0 ? '+' : ''}{money(difference)}
             </b>
             {changeRate !== null && <span style={{ color: '#999', marginLeft: 4 }}>（{changeRate >= 0 ? '+' : ''}{changeRate.toFixed(1)}%）</span>}
           </div>
@@ -875,25 +966,78 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
           <span style={{ fontSize: 11, color: '#666' }}>{section.ministry}{section.organization ? ` / ${section.organization}` : ''}{section.subAccount ? ` / ${section.subAccount}` : ''}</span>
         </>}
       />
-      <DetailTabs tabs={[{ label: '目', count: itemEdges.length }, { label: 'RS事業', count: projectTotals.size }]} active={tab} onChange={setTab} />
+      <DetailTabs tabs={[
+        { label: 'サマリー' },
+        { label: '目', count: itemRows.length },
+        { label: 'RS事業', count: projectTotals.size },
+      ]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
-          [...itemEdges].sort((a, b) => b.value - a.value).slice(0, 200).map(e => (
-            <ListRow key={e.id} name={e.itemName} amount={money(e.value)}
-              badges={<BudgetTypeBadge budgetType={e.budgetType} />}
+          <div style={{ marginBottom: 10 }}>
+            <Row label="RS接続額" v={summary.connectedAmount} strong />
+            <Row label="未接続額" v={summary.unconnectedAmount} />
+            <Row label="超過額（要確認）" v={summary.excessAmount} />
+            <Row label="当初予算額" v={summary.initialAmount} />
+            <Row label="補正予算による増減" v={summary.revisedAmount} />
+            <StatRow label="目数" value={`${summary.itemCount}件（当初${summary.initialItemCount}・補正${summary.revisedItemCount}）`} />
+            <StatRow label="接続RS事業数" value={`${summary.projectCount}件`} />
+          </div>
+        ) : tab === 1 ? (
+          itemRows.map(g => (
+            <ListRow key={g.itemKey} name={g.itemName} amount={money(g.mofAmount)}
               // 未接続（status: 'unconnected'）はラベル無し。「RS未接続」は事実の割に
               // 目立ちすぎる／誤解を招くとの指摘を受け、良い代替案が出るまで何も出さない
-              // （2026-09-14）
-              meta={e.status === 'connected' ? `RS接続済み${e.target.startsWith('project:') ? `（${projectById.get(e.target)?.name ?? ''}）` : ''}` : e.status === 'excess' ? '超過・要確認' : undefined} />
+              // （2026-09-14）。バッジ類（予算種別・RS接続件数・超過）は1行目ではなく
+              // すべて2行目（meta）に統一する（2026-09-15指摘：バッジは2行目の方が
+              // 良さそう、予算種別・会計区分を他タブ・RS事業サイドパネルでも統一）
+              meta={
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <BudgetTypeBadge budgetType={g.budgetType} />
+                  {g.connectedEdges.length > 0 && (
+                    <ClickableBadge onClick={e => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const id = `item:${g.itemKey}`;
+                      setPopup(prev => prev?.id === id ? null : {
+                        id, title: `${g.itemName}の接続先（${g.connectedEdges.length}件）`,
+                        rows: g.connectedEdges.map(ed => ({ name: projectById.get(ed.target)?.name ?? ed.target, amount: ed.value })),
+                        anchor: rect,
+                      });
+                    }}>
+                      <OutlineBadge label={`RS×${g.connectedEdges.length}`} color="#78909c" />
+                    </ClickableBadge>
+                  )}
+                  {g.hasExcess && <span>超過・要確認</span>}
+                </div>
+              } />
           ))
         ) : (
           projectTotals.size === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>接続しているRS事業がありません</p> : (
             [...projectTotals.entries()].sort((a, b) => b[1] - a[1]).map(([pid, value]) => (
-              <ListRow key={pid} name={projectById.get(pid)?.name ?? pid} amount={money(value)} />
+              <ListRow key={pid} name={projectById.get(pid)?.name ?? pid} amount={money(value)}
+                meta={<div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  {[...(projectBudgetTypeEdges.get(pid)?.entries() ?? [])]
+                    .sort((a, b) => (a[0] === '当初予算' ? -1 : b[0] === '当初予算' ? 1 : 0))
+                    .map(([bt, edges]) => (
+                      <ClickableBadge key={bt} onClick={e => {
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const id = `project:${pid}|${bt}`;
+                        setPopup(prev => prev?.id === id ? null : {
+                          id, title: `${bt}の内訳（${edges.length}件）`,
+                          rows: edges.map(ed => ({ name: ed.itemName, amount: ed.value })),
+                          anchor: rect,
+                        });
+                      }}>
+                        <BudgetTypeBadge budgetType={bt} count={edges.length} />
+                      </ClickableBadge>
+                    ))}
+                </div>} />
             ))
           )
         )}
       </div>
+      {popup && <BadgePopup state={popup} onClose={() => setPopup(null)} />}
     </PanelShell>
   );
 }
@@ -965,14 +1109,16 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
               const rsOnlyBadge = rsOnlyBudgetTypeBadge(i.budgetType);
               return (
                 <ListRow key={`${i.fiscalYear}-${i.budgetType}-${i.accountCategory}-${i.item}-${i.subItem}-${n}`}
-                  badges={<>
-                    {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
-                    {rsOnlyBadge
-                      ? <OutlineBadge label={rsOnlyBadge.label} color={rsOnlyBadge.color} />
-                      : <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />}
-                  </>}
                   name={i.subItem || i.item || i.note || i.budgetType || '（内訳なし）'} amount={money(i.amount)}
+                  // バッジ（会計区分・予算種別）は1行目ではなく2行目（meta）に統一する
+                  // （「バッジは2行目の方が良さそう」との指摘、2026-09-15）
                   meta={<>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      {accBadge && <MofBadge label={accBadge.label} background={accBadge.background} />}
+                      {rsOnlyBadge
+                        ? <OutlineBadge label={rsOnlyBadge.label} color={rsOnlyBadge.color} />
+                        : <BudgetTypeBadge budgetType={toMofBudgetType(i.budgetType)} />}
+                    </div>
                     <div>{[accountText, i.item].filter(Boolean).join(' / ')}</div>
                     {i.note.trim() && (i.subItem || i.item) && <div>補足: {i.note}</div>}
                   </>}
@@ -1000,6 +1146,15 @@ function Row({ label, v, strong }: { label: string; v: number; strong?: boolean 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f5f5f5', padding: '4px 0', fontWeight: strong ? 700 : 400 }}>
       <span style={{ color: '#999', fontSize: 12 }}>{label}</span><span style={{ fontSize: 12 }}>{money(v)}</span>
+    </div>
+  );
+}
+
+/** Rowと同じ見た目で、金額ではなく件数等の任意テキストを右側に出す */
+function StatRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f5f5f5', padding: '4px 0' }}>
+      <span style={{ color: '#999', fontSize: 12 }}>{label}</span><span style={{ fontSize: 12 }}>{value}</span>
     </div>
   );
 }

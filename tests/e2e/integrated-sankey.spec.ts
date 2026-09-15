@@ -101,11 +101,207 @@ test('MOF項を選択すると左パネルに目・RS事業タブとバッジ付
   await expect(detail.getByText('本年度額', { exact: true })).toBeVisible();
   await expect(detail.getByText('前年度額', { exact: true })).toBeVisible();
   await expect(detail.getByText('項', { exact: true })).toBeVisible();
+  await expect(detail.getByRole('button', { name: 'サマリー', exact: true })).toBeVisible();
   await expect(detail.getByRole('button', { name: '目', exact: false }).first()).toBeVisible();
   await expect(detail.getByRole('button', { name: 'RS事業', exact: false })).toBeVisible();
 
   await detail.getByLabel('閉じる（選択解除）').click();
   await expect(detail).toBeHidden();
+});
+
+test('MOF項の目タブは目レコード単位でRS事業件数バッジを出し、RS事業タブは予算種別×件数を出す', async ({ page }) => {
+  // 1目が複数RS事業に按分されているケース（生活保護等対策費）で、目タブが
+  // エッジ単位（按分先ごとに1行）ではなく目レコード単位（1目1行＋接続件数バッジ）に
+  // なっていること、RS事業タブが予算種別ごとの接続件数を「補正1×1」のように
+  // 区切り付きで出すこと（区切りが無いと「補正1」+「1」が「補正11」に読めて
+  // しまう誤読バグがあった）を確認する（2026-09-15指摘・修正）
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+
+  // 目タブ: RS紐づき件数バッジは2行目（meta）に「RS×N」形式で出る
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+  await expect(detail.getByText(/^RS×\d+$/).first()).toBeVisible();
+
+  await detail.getByRole('button', { name: 'RS事業', exact: false }).click();
+  const rsText = await detail.innerText();
+  expect(rsText).toMatch(/(当初|補正\d+)×\d+/);
+  expect(rsText).not.toMatch(/補正\d+\d+/); // 「補正11」のような区切り無し誤読表記が無いこと
+
+  await detail.getByRole('button', { name: 'サマリー', exact: true }).click();
+  await expect(detail.getByText('RS接続額', { exact: true })).toBeVisible();
+  await expect(detail.getByText('目数', { exact: true })).toBeVisible();
+  await expect(detail.getByText('接続RS事業数', { exact: true })).toBeVisible();
+});
+
+test('×N付きバッジをクリックすると内訳ポップアップが出て、外側クリックで閉じる', async ({ page }) => {
+  // 「×付きのバッジをクリックしたらポップアップで内訳みたいですね」との提案を
+  // 受けて実装（2026-09-15）。MOF項の目タブのRS×Nバッジ、RS事業タブの予算種別×N
+  // バッジの両方で確認する
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+
+  // 目タブ: RS×Nバッジ→接続先RS事業の名前・金額一覧
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+  await detail.getByText(/^RS×\d+$/).first().click();
+  await expect(page.getByText(/接続先（\d+件）/)).toBeVisible();
+  await page.mouse.click(900, 600); // 外側クリックで閉じる
+  await expect(page.getByText(/接続先（\d+件）/)).toBeHidden();
+
+  // RS事業タブ: 予算種別×Nバッジ→内訳（目名・金額一覧）
+  await detail.getByRole('button', { name: 'RS事業', exact: false }).click();
+  await detail.getByText(/^当初×\d+$/).first().click();
+  await expect(page.getByText(/の内訳（\d+件）/)).toBeVisible();
+  await page.mouse.click(900, 600);
+  await expect(page.getByText(/の内訳（\d+件）/)).toBeHidden();
+});
+
+test('同じバッジを再クリックするとポップアップが閉じ、別バッジをクリックすると切り替わる', async ({ page }) => {
+  // 「同じバッジを再クリックしたときに閉じたい、他バッジは切り替えるなどの既存の
+  // 挙動は維持」との指摘（2026-09-15）。実装当初は、同じバッジの再クリックで
+  // mousedownの外側クリック判定が先に発火してonClose()が呼ばれ、直後のonClick
+  // （トグル処理）が「閉じている状態からの再オープン」と誤認して開き直してしまう
+  // 不具合があった。バッジに`data-badge-trigger`を付け、外側クリック判定から
+  // バッジ自身のクリックを除外して修正した
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+  const badges = detail.getByText(/^RS×\d+$/);
+  const first = badges.nth(0);
+  const second = badges.nth(1);
+
+  await first.click();
+  await expect(page.getByText(/接続先（\d+件）/)).toBeVisible();
+  const firstTitle = await page.getByText(/接続先（\d+件）/).innerText();
+
+  await first.click(); // 同じバッジを再クリック -> 閉じる
+  await expect(page.getByText(/接続先（\d+件）/)).toBeHidden();
+
+  await first.click();
+  await second.click(); // 別バッジをクリック -> 切り替わる（閉じない）
+  await expect(page.getByText(/接続先（\d+件）/)).toBeVisible();
+  expect(await page.getByText(/接続先（\d+件）/).innerText()).not.toBe(firstTitle);
+
+  await page.mouse.click(900, 700); // 外側クリックは引き続き閉じる
+  await expect(page.getByText(/接続先（\d+件）/)).toBeHidden();
+});
+
+test('一覧の下の方のバッジをクリックしてもポップアップがビューポート内に収まる', async ({ page }) => {
+  // 「一覧の下の方のバッジクリックしたらポップアップが見切れています」との指摘
+  // （2026-09-15）。バッジのすぐ下に決め打ちで出すと、ビューポート下端に近い
+  // バッジではポップアップが画面外にはみ出して見切れていた。ポップアップの実測
+  // サイズをもとに、はみ出す場合はバッジの上側へ表示を反転するよう修正した
+  await page.setViewportSize({ width: 1200, height: 700 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+
+  const badges = detail.getByText(/^RS×\d+$/);
+  const lastBadge = badges.nth((await badges.count()) - 1);
+  await lastBadge.scrollIntoViewIfNeeded();
+  await lastBadge.click();
+  const popup = page.getByText(/接続先（\d+件）/).locator('xpath=ancestor::div[2]');
+  await expect(popup).toBeVisible();
+  const popupBox = (await popup.boundingBox())!;
+  expect(popupBox.y).toBeGreaterThanOrEqual(0);
+  expect(popupBox.y + popupBox.height).toBeLessThanOrEqual(700 + 1);
+});
+
+test('予算種別・会計区分バッジは名前と同じ行ではなく2行目（meta）に置かれる', async ({ page }) => {
+  // 「バッジは2行目の方が良さそう」との指摘を受け、MOF項の目タブ・RS事業側の
+  // 予算執行タブの両方でバッジ（予算種別・会計区分）を1行目から2行目へ統一した
+  // （2026-09-15）。ListRowのdata-testid（list-row/list-row-name/list-row-meta）で
+  // 行ごとに1行目・2行目を厳密に区別して確認する
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  // MOF項側: 目タブ
+  await page.locator('input[placeholder*="項名"]').fill('生活保護等対策費');
+  await page.getByText('生活保護等対策費', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  await detail.getByRole('button', { name: '目', exact: false }).click();
+  const itemRow = detail.getByTestId('list-row').filter({ hasText: '医療扶助費等負担金' }).first();
+  await expect(itemRow.getByTestId('list-row-name')).toContainText('医療扶助費等負担金');
+  await expect(itemRow.getByTestId('list-row-name')).not.toContainText('当初');
+  await expect(itemRow.getByTestId('list-row-meta')).toContainText('当初');
+  await detail.getByLabel('閉じる（選択解除）').click();
+
+  // RS事業側: 予算執行タブ
+  const graph = await (await page.request.get('/api/integrated-sankey?year=2025')).json();
+  const withBreakdown = graph.projects.find((p: { budgetBreakdown: { accountCategory: string }[] }) =>
+    p.budgetBreakdown.some((b) => b.accountCategory === '一般会計'));
+  await page.locator('input[placeholder*="項名"]').fill(withBreakdown.name);
+  await page.getByText(withBreakdown.name, { exact: false }).first().click();
+  const detail2 = page.getByTestId('integrated-detail');
+  await expect(detail2).toBeVisible();
+  await detail2.getByRole('button', { name: '予算執行', exact: false }).click();
+  const firstRow = detail2.getByTestId('list-row').first();
+  await expect(firstRow.getByTestId('list-row-name')).not.toContainText('当初');
+  await expect(firstRow.getByTestId('list-row-meta')).toContainText('当初');
+});
+
+test('サイドパネル表示時にサンキー図はPanせずパネルがオーバーレイする', async ({ page }) => {
+  // /sankey-svg と同じく、パネルは図の上にオーバーレイするだけで、図自体の
+  // viewBox（幅・位置）は変えない（2026-09-15指摘: 以前はコンテナの左端を
+  // パネル幅ぶん動かしており、図がPanして見えていた）
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  const canvas = page.getByTestId('integrated-canvas');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  const viewBoxBefore = await canvas.getAttribute('viewBox');
+
+  await page.getByTestId('sankey-node').first().click({ force: true });
+  await expect(page.getByTestId('integrated-detail')).toBeVisible();
+  expect(await canvas.getAttribute('viewBox')).toBe(viewBoxBefore);
+});
+
+test('MOF項ヘッダーの増減額は本年度額と前年度額の差に一致する（当初のみの差額とはズレる）', async ({ page, request }) => {
+  // section.difference（当初予算行のみのYoY差額）ではなく、実際に表示している
+  // 本年度額（当初＋補正の合計）と前年度額の差から増減を出す必要がある
+  // （当初だけを基準にするとズレる、2026-09-15指摘）
+  const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
+  const target = graph.sections.find((s: { amount: number; previousAmount: number; difference: number }) =>
+    Math.abs(s.amount - s.previousAmount - s.difference) > 1);
+  expect(target, '当初のみの差額とamount-previousAmountがズレる項が見つからない').toBeTruthy();
+
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+  await page.locator('input[placeholder*="項名"]').fill(target.name);
+  await page.getByText(target.name, { exact: false }).first().click();
+
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  const expectedDiff = target.amount - target.previousAmount;
+  const money = (v: number) => {
+    const abs = Math.abs(v);
+    if (abs >= 1e12) return `${(v / 1e12).toFixed(2)}兆円`;
+    if (abs >= 1e8) return `${(v / 1e8).toFixed(1)}億円`;
+    if (abs >= 1e4) return `${Math.round(v / 1e4).toLocaleString()}万円`;
+    return `${v.toLocaleString()}円`;
+  };
+  const expectedText = `${expectedDiff >= 0 ? '+' : ''}${money(expectedDiff)}`;
+  await expect(detail.getByText(expectedText, { exact: false })).toBeVisible();
 });
 
 test('RS事業を選択すると予算サマリ・予算執行・MOF項タブが出て、接続先のMOF項が確認できる', async ({ page, request }) => {
@@ -209,6 +405,16 @@ test('フィルタパネルの会計区分・所管・項/事業名・金額レ�
 
   await page.getByLabel('フィルタを解除').click();
   await expect.poll(() => universeOf('MOF項')).toBe(before);
+
+  // 府省庁（RS事業の所管）フィルタはMOF項側の所管とは独立にRS事業側の母集合だけを絞る
+  const beforeProject = await universeOf('RS事業');
+  await page.getByRole('button', { name: '府省庁', exact: true }).click();
+  const firstProjectMinistry = await page.getByRole('listbox', { name: '府省庁' }).locator('label').nth(1).innerText();
+  await page.getByRole('checkbox', { name: firstProjectMinistry }).uncheck();
+  await expect.poll(() => universeOf('RS事業')).toBeLessThan(beforeProject);
+  await page.mouse.click(900, 500);
+  await page.getByLabel('フィルタを解除').click();
+  await expect.poll(() => universeOf('RS事業')).toBe(beforeProject);
 
   const kokusaiLabel = () => page.locator('[data-testid="sankey-node"] text', { hasText: '国債整理支出' });
   await expect(kokusaiLabel()).toBeVisible();
