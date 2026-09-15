@@ -42,7 +42,13 @@ MOF項・RS事業という2ノード型は、`/sankey-svg` の4列（総計/省�
 Pure・HTTP/React禁止）に従い、**フィルタ・表示ウィンドウのデータ変換（`buildView`・
 `windowSlice`・`buildMatcher` 等）は `app/lib/integrated-sankey.ts` に置く**。ピクセル
 座標を扱うレイアウト計算（`buildLayout`・`fitZoom`・`colGeometry` 等）はReact状態
-（`dims`・`zoom`・`pan`）と一体で使うため `page.tsx` 側に残す。
+（`dims`・`zoom`・`pan`）と一体で使うため `page.tsx` 側に残す。同様に、詳細パネル
+（`SectionDetail`）の集計（事業ごとの合計・予算種別別のエッジ集計・目レコード単位
+グルーピング・サマリー統計・増減額）も`app/lib/integrated-sankey.ts`の
+`buildSectionDetailView`に置く——当初はコンポーネント内にpureな計算をそのまま
+書いていたが、レイヤー規約違反としてPRレビューで指摘され移動した（2026-09-15）。
+一方、`ClickableBadge`・`BadgePopup`（クリック位置・開閉状態を持つ）は状態管理・
+描画を伴うため`page.tsx`側に残す。
 一方、検索ボックス・フィルタパネル・ズームコントロール・サイドパネルヘッダーの
 **UI構造とスタイル値は `/sankey-svg` の実装からそのまま移植**する（近似で書き直さない）。
 
@@ -161,8 +167,7 @@ x=列のノード左端＋ノード幅/2）で置く。`/sankey-svg` の列見�
 | --- | --- |
 | MOF項の総額 | 配下にあるMOF目の `itemAmount`（当初予算は`amount`、補正予算は`difference`）合計 |
 | MOF項の前年度額 | 配下の当初予算行の目の `previousAmount` を合算（null は0扱い） |
-| MOF項の増減額・増減率（表示用） | `section.difference`（当初予算行のみのYoY差額）ではなく、`section.amount −
-  section.previousAmount`（表示中の本年度額と前年度額の差）から算出する |
+| MOF項の増減額・増減率（表示用） | `section.difference`（当初予算行のみのYoY差額）ではなく、`section.amount − section.previousAmount`（表示中の本年度額と前年度額の差）から算出する |
 | RS事業の予算額 | `budgetAmount`＝`budgetSummary.totalBudget`（予算現額合計） |
 | RS事業の支出額 | `spendingAmount`＝`/sankey-svg`の`project-spending`ノードの`value`（支出先データ由来の直接支出額合計） |
 | RS事業の会計区分 | `budgetBreakdown`（予算執行タブに出すRS事業自身のレコード）の`accountCategory`から集計。単一なら一般/特別、複数にまたがれば`mixed`。1件も無ければMOF紐づけ（`rows`）から代替集計。どちらも無ければ`unknown`（バッジ非表示） |
@@ -447,8 +452,9 @@ MOF予算書には「目」（性質別）とは別に「事項」（目的別�
   おり、同じ目名が按分先の数だけ何度も並んで重複に見えていた——実データは重複では
   なく按分だったが紛らわしかった、2026-09-15指摘）。行の金額は目レコード自身の
   金額（`mofAmount`。補正予算の目は`amount`ではなく`difference`＝差額）。
-  1行目は予算種別バッジ（`当初`/`補正N`）のみ。**接続するRS事業の件数は2行目
-  （meta）に「RS×N」バッジで示す**（当初は1行目に置いていたが、「2行目にして
+  2行目（`ListRow.meta`）に予算種別バッジ（`当初`/`補正N`）と接続件数バッジを
+  表示する。**接続するRS事業の件数は2行目（meta）に「RS×N」バッジで示す**
+  （当初は1行目に置いていたが、「2行目にして
   ラベルは`RS × N`にしてほしい」との指摘で移動、2026-09-15。直後に「×のスペースは
   いらないかも」との指摘を受け`RS×N`へ詰めた）。バッジの見た目は`OutlineBadge`
   （白背景＋色付き枠線＋黒系文字。色は`#78909c`）——当初は塗りつぶしの`Badge`

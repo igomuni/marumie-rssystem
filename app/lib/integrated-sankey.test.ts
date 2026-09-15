@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildIntegratedGraph, buildView, EMPTY_FILTERS } from './integrated-sankey';
+import { buildIntegratedGraph, buildSectionDetailView, buildView, EMPTY_FILTERS } from './integrated-sankey';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import type { BudgetBreakdownItem } from '@/types/sankey-svg';
@@ -182,5 +182,33 @@ describe('integrated sankey first cut', () => {
     ]);
     const view=buildView(g, EMPTY_FILTERS, {topN:10,offset:0}, {topN:10,offset:0});
     expect(view.rankedProjects.map(p=>p.projectId)).toEqual([2,3,1]);
+  });
+
+  it('buildSectionDetailView groups edges by itemKey (one row per MOF record, not per fan-out edge)', () => {
+    // 1つの目が複数のRS事業に按分されている場合、目一覧は目レコード単位で
+    // 1行にまとめる（按分先ごとに行を増やさない）。RS事業一覧は事業単位で予算種別
+    // ごとの接続エッジをそのまま持つ（内訳ポップアップ用）
+    const g=buildIntegratedGraph(
+      [item()],
+      [link(),link({projectId:2,projectName:'事業Y',rsAmount:25})],
+      []);
+    const view=buildSectionDetailView(g.sections[0], g.edges);
+    expect(view.itemRows).toHaveLength(1);
+    expect(view.itemRows[0].itemKey).toBe('k1');
+    expect(view.itemRows[0].connectedEdges).toHaveLength(2);
+    expect(view.projectTotals.get('project:1')).toBe(60);
+    expect(view.projectTotals.get('project:2')).toBe(25);
+    expect(view.projectBudgetTypeEdges.get('project:1')?.get('当初予算')).toHaveLength(1);
+    expect(view.summary.connectedAmount).toBe(85);
+    expect(view.summary.initialItemCount).toBe(1);
+  });
+
+  it('buildSectionDetailView computes difference from displayed amount/previousAmount, not section.difference', () => {
+    const g=buildIntegratedGraph(
+      [item({previousAmount:80,difference:20}),
+       item({id:'i2',key:'k2',budgetType:'補正予算（第1号）',subItemName:'目b',amount:130,previousAmount:100,difference:30})],
+      [],[]);
+    const view=buildSectionDetailView(g.sections[0], g.edges);
+    expect(view.difference).toBe(g.sections[0].amount - g.sections[0].previousAmount);
   });
 });

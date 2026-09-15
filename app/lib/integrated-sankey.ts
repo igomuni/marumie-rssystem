@@ -378,3 +378,54 @@ export function buildView(data: IntegratedGraph, filters: Filters, sectionWindow
 }
 
 export type ViewModel = ReturnType<typeof buildView>;
+
+/** MOF項の詳細パネル（`SectionDetail`、app/integrated-sankey/page.tsx）が使う集計。
+ * ページ側は状態管理・イベントハンドラ・描画のみを担い、純粋な集計ロジックは
+ * app/lib/ 側に置く（レイヤー規約、PRレビュー指摘 2026-09-15）。 */
+export function buildSectionDetailView(section: IntegratedSectionNode, itemEdges: IntegratedItemEdge[]) {
+  const projectTotals = new Map<string, number>();
+  // RS事業タブの2行目用: 事業ごとに予算種別（当初/補正N）別の接続エッジを集める
+  // （バッジクリックで内訳ポップアップを出すため、件数だけでなくエッジ自体を保持する）
+  const projectBudgetTypeEdges = new Map<string, Map<MOFBudgetType, IntegratedItemEdge[]>>();
+  for (const e of itemEdges) {
+    if (!e.target.startsWith('project:')) continue;
+    projectTotals.set(e.target, (projectTotals.get(e.target) ?? 0) + e.value);
+    const byType = projectBudgetTypeEdges.get(e.target) ?? new Map<MOFBudgetType, IntegratedItemEdge[]>();
+    byType.set(e.budgetType, [...(byType.get(e.budgetType) ?? []), e]);
+    projectBudgetTypeEdges.set(e.target, byType);
+  }
+  // 目タブ用: MOFの目レコード単位（itemKey）にグルーピングし直す。1つの目が複数の
+  // RS事業に按分されている場合、以前はitemEdgesをそのまま1行1エッジで展開しており、
+  // 同じ目名が何度も並んで重複に見えていた（実データでは重複ではなく按分。2026-09-15
+  // 指摘）。一覧はMOFの目レコードに忠実に1行1目とし、紐づくRS事業の件数はバッジで示す
+  // （接続エッジ自体も保持し、バッジクリックで内訳ポップアップを出す）
+  const itemGroups = new Map<string, {
+    itemKey: string; itemName: string; budgetType: MOFBudgetType; mofAmount: number; connectedEdges: IntegratedItemEdge[]; hasExcess: boolean;
+  }>();
+  for (const e of itemEdges) {
+    const g = itemGroups.get(e.itemKey) ??
+      { itemKey: e.itemKey, itemName: e.itemName, budgetType: e.budgetType, mofAmount: e.mofAmount, connectedEdges: [], hasExcess: false };
+    if (e.status === 'connected') g.connectedEdges.push(e);
+    if (e.status === 'excess') g.hasExcess = true;
+    itemGroups.set(e.itemKey, g);
+  }
+  const itemRows = [...itemGroups.values()].sort((a, b) => b.mofAmount - a.mofAmount);
+  const summary = {
+    connectedAmount: itemEdges.filter(e => e.status === 'connected').reduce((s, e) => s + e.value, 0),
+    unconnectedAmount: itemEdges.filter(e => e.status === 'unconnected').reduce((s, e) => s + e.value, 0),
+    excessAmount: itemEdges.filter(e => e.status === 'excess').reduce((s, e) => s + e.value, 0),
+    itemCount: itemRows.length,
+    initialItemCount: itemRows.filter(g => g.budgetType === '当初予算').length,
+    revisedItemCount: itemRows.filter(g => g.budgetType !== '当初予算').length,
+    initialAmount: itemRows.filter(g => g.budgetType === '当初予算').reduce((s, g) => s + g.mofAmount, 0),
+    revisedAmount: itemRows.filter(g => g.budgetType !== '当初予算').reduce((s, g) => s + g.mofAmount, 0),
+    projectCount: projectTotals.size,
+  };
+  // 増減はsection.difference（当初予算行のみのYoY差額）ではなく、実際に表示している
+  // 本年度額（当初＋補正の合計）と前年度額（前年度の当初予算額）の差から計算する。
+  // section.differenceを使うと「本年度額-前年度額」と表示中の増減額が一致せず
+  // ズレて見える不具合になる（当初のみを基準にしていたための齟齬、2026-09-15指摘）
+  const difference = section.amount - section.previousAmount;
+  const changeRate = section.previousAmount > 0 ? (difference / section.previousAmount * 100) : null;
+  return { projectTotals, projectBudgetTypeEdges, itemRows, summary, difference, changeRate };
+}

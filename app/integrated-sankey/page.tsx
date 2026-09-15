@@ -29,6 +29,7 @@ import { classifyAccountCategory } from '@/app/lib/account-badge';
 import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
 import {
   buildMatcher,
+  buildSectionDetailView,
   buildView,
   compareProjects,
   EMPTY_FILTERS,
@@ -863,14 +864,21 @@ function ListRow({ badges, name, amount, meta }: { badges?: React.ReactNode; nam
 interface BadgePopupState { id: string; title: string; rows: { name: string; amount: number }[]; anchor: DOMRect }
 
 /** ×N付きバッジをクリックすると内訳（名前・金額の一覧）をポップアップで見せる
- * （「×付きのバッジをクリックしたらポップアップで内訳」との指摘、2026-09-15） */
-function ClickableBadge({ onClick, children }: { onClick: (e: React.MouseEvent<HTMLSpanElement>) => void; children: React.ReactNode }) {
+ * （「×付きのバッジをクリックしたらポップアップで内訳」との指摘、2026-09-15）。
+ * `button`でキーボード操作（Tab移動・Enter/Space）にも対応する（`span`は
+ * フォーカス不可でキーボードから開けなかった、PRレビュー指摘） */
+function ClickableBadge({ onClick, children }: { onClick: (e: React.MouseEvent<HTMLButtonElement>) => void; children: React.ReactNode }) {
   // data-badge-trigger: BadgePopupの外側クリック検知（mousedown）から除外するための
   // 目印。無いと、同じバッジを再クリックしたときにmousedownの外側クリック判定が
   // 先に発火してポップアップをonClose()で閉じてしまい、直後のonClick（トグル処理）が
   // 「閉じている状態からの再オープン」と誤認して即座に開き直してしまう
   // （トグルで閉じたいのに閉じられない不具合になる、2026-09-15指摘）
-  return <span data-badge-trigger="true" onClick={onClick} style={{ cursor: 'pointer' }}>{children}</span>;
+  return (
+    <button type="button" data-badge-trigger="true" onClick={onClick}
+      style={{ cursor: 'pointer', padding: 0, border: 0, background: 'transparent' }}>
+      {children}
+    </button>
+  );
 }
 
 function BadgePopup({ state, onClose }: { state: BadgePopupState; onClose: () => void }) {
@@ -932,50 +940,7 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
   const [tab, setTab] = useState(0);
   const [popup, setPopup] = useState<BadgePopupState | null>(null);
   const projectById = new Map(projects.map(p => [p.id, p]));
-  const projectTotals = new Map<string, number>();
-  // RS事業タブの2行目用: 事業ごとに予算種別（当初/補正N）別の接続エッジを集める
-  // （バッジクリックで内訳ポップアップを出すため、件数だけでなくエッジ自体を保持する）
-  const projectBudgetTypeEdges = new Map<string, Map<MOFBudgetType, IntegratedItemEdge[]>>();
-  for (const e of itemEdges) {
-    if (!e.target.startsWith('project:')) continue;
-    projectTotals.set(e.target, (projectTotals.get(e.target) ?? 0) + e.value);
-    const byType = projectBudgetTypeEdges.get(e.target) ?? new Map<MOFBudgetType, IntegratedItemEdge[]>();
-    byType.set(e.budgetType, [...(byType.get(e.budgetType) ?? []), e]);
-    projectBudgetTypeEdges.set(e.target, byType);
-  }
-  // 目タブ用: MOFの目レコード単位（itemKey）にグルーピングし直す。1つの目が複数の
-  // RS事業に按分されている場合、以前はitemEdgesをそのまま1行1エッジで展開しており、
-  // 同じ目名が何度も並んで重複に見えていた（実データでは重複ではなく按分。2026-09-15
-  // 指摘）。一覧はMOFの目レコードに忠実に1行1目とし、紐づくRS事業の件数はバッジで示す
-  // （接続エッジ自体も保持し、バッジクリックで内訳ポップアップを出す）
-  const itemGroups = new Map<string, {
-    itemName: string; budgetType: MOFBudgetType; mofAmount: number; connectedEdges: IntegratedItemEdge[]; hasExcess: boolean;
-  }>();
-  for (const e of itemEdges) {
-    const g = itemGroups.get(e.itemKey) ??
-      { itemName: e.itemName, budgetType: e.budgetType, mofAmount: e.mofAmount, connectedEdges: [], hasExcess: false };
-    if (e.status === 'connected') g.connectedEdges.push(e);
-    if (e.status === 'excess') g.hasExcess = true;
-    itemGroups.set(e.itemKey, g);
-  }
-  const itemRows = [...itemGroups.values()].sort((a, b) => b.mofAmount - a.mofAmount);
-  const summary = {
-    connectedAmount: itemEdges.filter(e => e.status === 'connected').reduce((s, e) => s + e.value, 0),
-    unconnectedAmount: itemEdges.filter(e => e.status === 'unconnected').reduce((s, e) => s + e.value, 0),
-    excessAmount: itemEdges.filter(e => e.status === 'excess').reduce((s, e) => s + e.value, 0),
-    itemCount: itemRows.length,
-    initialItemCount: itemRows.filter(g => g.budgetType === '当初予算').length,
-    revisedItemCount: itemRows.filter(g => g.budgetType !== '当初予算').length,
-    initialAmount: itemRows.filter(g => g.budgetType === '当初予算').reduce((s, g) => s + g.mofAmount, 0),
-    revisedAmount: itemRows.filter(g => g.budgetType !== '当初予算').reduce((s, g) => s + g.mofAmount, 0),
-    projectCount: projectTotals.size,
-  };
-  // 増減はsection.difference（当初予算行のみのYoY差額）ではなく、実際に表示している
-  // 本年度額（当初＋補正の合計）と前年度額（前年度の当初予算額）の差から計算する。
-  // section.differenceを使うと「本年度額-前年度額」と表示中の増減額が一致せず
-  // ズレて見える不具合になる（当初のみを基準にしていたための齟齬、2026-09-15指摘）
-  const difference = section.amount - section.previousAmount;
-  const changeRate = section.previousAmount > 0 ? (difference / section.previousAmount * 100) : null;
+  const { projectTotals, projectBudgetTypeEdges, itemRows, summary, difference, changeRate } = buildSectionDetailView(section, itemEdges);
   const accountBadge = getAccountBadgeStyle(section.accountType);
   return (
     <PanelShell>
@@ -1019,7 +984,7 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
           </div>
         ) : tab === 1 ? (
           itemRows.map(g => (
-            <ListRow key={g.itemName + g.budgetType} name={g.itemName} amount={money(g.mofAmount)}
+            <ListRow key={g.itemKey} name={g.itemName} amount={money(g.mofAmount)}
               // 未接続（status: 'unconnected'）はラベル無し。「RS未接続」は事実の割に
               // 目立ちすぎる／誤解を招くとの指摘を受け、良い代替案が出るまで何も出さない
               // （2026-09-14）。バッジ類（予算種別・RS接続件数・超過）は1行目ではなく
@@ -1032,7 +997,7 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
                     <ClickableBadge onClick={e => {
                       e.stopPropagation();
                       const rect = e.currentTarget.getBoundingClientRect();
-                      const id = `item:${g.itemName}|${g.budgetType}`;
+                      const id = `item:${g.itemKey}`;
                       setPopup(prev => prev?.id === id ? null : {
                         id, title: `${g.itemName}の接続先（${g.connectedEdges.length}件）`,
                         rows: g.connectedEdges.map(ed => ({ name: projectById.get(ed.target)?.name ?? ed.target, amount: ed.value })),
