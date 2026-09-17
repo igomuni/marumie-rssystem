@@ -357,10 +357,12 @@ test('事業サイドパネルに支出先・ブロックタブが出て、再�
   await expect(detail.getByText('直接', { exact: true }).first()).toBeVisible();
   await expect(detail.getByText('再委託', { exact: true }).first()).toBeVisible();
 
-  // ブロックタブ: ブロック同士の親子関係（事業本体からの直接支出フロー）が一覧に出る
+  // ブロックタブ: ブロック同士の親子関係が一覧に出る。直接支出（事業本体から）の
+  // 行は起点ブロックが無いので「事業本体（直接支出）→」を付けず対象ブロックのみ表示する
   await detail.getByRole('button', { name: 'ブロック', exact: false }).click();
-  await expect(detail.locator('text=事業本体（直接支出）').first()).toBeVisible();
+  await expect(detail.locator('text=事業本体').first()).toHaveCount(0);
   await expect(detail.getByText('A', { exact: true }).first()).toBeVisible();
+  await expect(detail.getByText('直接', { exact: true }).first()).toBeVisible();
 });
 
 test('「その他の項」集約ノードを選択すると内訳の目一覧が出る', async ({ page }) => {

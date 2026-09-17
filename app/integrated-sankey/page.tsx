@@ -1241,21 +1241,28 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
           subGraphState.status !== 'ready'
             ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
             : flowRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>ブロックのつながりがありません</p> : (
+              // ブロック番号バッジは各ブロック名の直左に置く（ListRowの`name`は文字列
+              // 専用でバッジを名前に隣接できないため、ここだけ独自のレイアウトにする。
+              // 「ブロックバッジの位置はブロック名の左に」との指摘、2026-09-17）
               flowRows.map((f, i) => (
-                <ListRow key={`${f.sourceBlockId ?? 'root'}-${f.targetBlockId}-${i}`}
-                  name={`${f.sourceBlockName ?? '事業本体（直接支出）'} → ${f.targetBlockName}`}
-                  amount={money(f.targetAmount)}
-                  meta={<>
+                <div key={`${f.sourceBlockId ?? 'root'}-${f.targetBlockId}-${i}`} style={listButtonStyle} data-testid="list-row">
+                  <span style={{ ...listNameStyle, flex: '1 1 0%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
+                    {f.sourceBlockId && <>
+                      <BlockIdBadge id={f.sourceBlockId} />
+                      <span>→</span>
+                    </>}
+                    <BlockIdBadge id={f.targetBlockId} />
+                    <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(f.targetBlockName)}</span>
+                  </span>
+                  <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{money(f.targetAmount)}</span>
+                  <div data-testid="list-row-meta" style={{ flex: '0 0 100%', fontSize: 11, color: '#999', textAlign: 'left' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                       <TagChip kind={flowOriginToTagKind(f.origin)}>{flowOriginLabel(f.origin)}</TagChip>
-                      {f.sourceBlockId && <BlockIdBadge id={f.sourceBlockId} />}
-                      <span>→</span>
-                      <BlockIdBadge id={f.targetBlockId} />
                       {f.targetIncomingBlockCount > 1 && <span>対象ブロックへの合流{f.targetIncomingBlockCount}件</span>}
                     </div>
                     {f.note && <div>補足: {f.note}{f.isReference ? '（参考情報）' : ''}</div>}
-                  </>}
-                />
+                  </div>
+                </div>
               ))
             )
         )}
