@@ -840,15 +840,22 @@ const listButtonStyle: React.CSSProperties = { display: 'flex', flexWrap: 'wrap'
 const listNameStyle: React.CSSProperties = { flex: '1 1 150px', minWidth: 0, fontSize: 13, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 const listValueStyle: React.CSSProperties = { flex: '0 0 100%', minWidth: 0, fontSize: 12, color: '#777', textAlign: 'right' };
 
-/** サイドパネルの一覧行の共通レイアウト。1行目＝バッジ＋名前（trimして省略）＋金額の
- * 右寄せ併記、2行目以降＝補足情報を左寄せで表示する。詳細パネルの全タブの一覧で
- * この構造に統一する */
+/** サイドパネルの一覧行の共通レイアウト。1行目＝バッジ＋名前（CSSのellipsisで
+ * 省略）＋金額の右寄せ併記、2行目以降＝補足情報を左寄せで表示する。詳細パネルの
+ * 全タブの一覧でこの構造に統一する。
+ *
+ * 名前は`trim()`（文字数固定の事前カット）ではなくCSSの`text-overflow:ellipsis`
+ * のみで省略する。サイドパネルはユーザーがドラッグで幅を変えられるため、事前に
+ * 固定文字数で切ると幅を広げても続きが表示されない不具合になる（「電気・ガス
+ * 価格激変緩和対策等事業のデロイトトーマツファイナンシャルアドバイザリー合同
+ * 会社ほかがサイドパネルを広げても最後まで表示されない」との指摘、2026-09-17）。
+ * `trim()`はSVGのノードラベル（幅固定でCSS ellipsisが使えない）専用として残す */
 function ListRow({ badges, name, amount, meta }: { badges?: React.ReactNode; name: string; amount: React.ReactNode; meta?: React.ReactNode }) {
   return (
     <div style={listButtonStyle} data-testid="list-row">
       <span style={{ ...listNameStyle, flex: '1 1 0%', display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
         {badges}
-        <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(name)}</span>
+        <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
       </span>
       <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{amount}</span>
       {meta && <div data-testid="list-row-meta" style={{ flex: '0 0 100%', fontSize: 11, color: '#999', textAlign: 'left' }}>{meta}</div>}
@@ -1243,15 +1250,15 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
                       <span>→</span>
                     </>}
                     <BlockIdBadge id={f.targetBlockId} />
-                    <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(f.targetBlockName)}</span>
+                    <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.targetBlockName}</span>
                   </span>
                   <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{money(f.targetAmount)}</span>
-                  <div data-testid="list-row-meta" style={{ flex: '0 0 100%', fontSize: 11, color: '#999', textAlign: 'left' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <TagChip kind={flowOriginToTagKind(f.origin)}>{flowOriginLabel(f.origin)}</TagChip>
-                      {f.targetIncomingBlockCount > 1 && <span>対象ブロックへの合流{f.targetIncomingBlockCount}件</span>}
-                    </div>
-                    {f.note && <div>補足: {f.note}{f.isReference ? '（参考情報）' : ''}</div>}
+                  {/* 補足（note）は起点種別バッジと同じ行に置く（別行だと切り替わりの
+                      文脈がつかみにくいという指摘、2026-09-17） */}
+                  <div data-testid="list-row-meta" style={{ flex: '0 0 100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, fontSize: 11, color: '#999', textAlign: 'left' }}>
+                    <TagChip kind={flowOriginToTagKind(f.origin)}>{flowOriginLabel(f.origin)}</TagChip>
+                    {f.targetIncomingBlockCount > 1 && <span>対象ブロックへの合流{f.targetIncomingBlockCount}件</span>}
+                    {f.note && <span>補足: {f.note}{f.isReference ? '（参考情報）' : ''}</span>}
                   </div>
                 </div>
               ))
