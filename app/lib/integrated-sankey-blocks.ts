@@ -70,16 +70,23 @@ function parentBlocksOf(graph: SubcontractGraph, blockId: string, nameById: Map<
   return parents;
 }
 
-/** 起点種別の並び順（直接→再委託→別財源）。/subcontracts の tierOf と同じ考え方 */
-function originTier(kind: BlockOriginKind): number {
-  return kind === 'direct' ? 0 : kind === 'subcontract' ? 1 : 2;
+/**
+ * ブロック番号（A, B, … Z, AA, AB, …のExcel列名方式）を自然な順序で比較する。
+ * 文字数が少ない方を先にし（"T" < "AA"。文字コード比較だと逆になる）、同じ文字数
+ * なら通常の文字列比較。生成器（scripts/generate-subcontracts.ts）はブロックを
+ * 発見した順に番号を振り、実測では子ブロックの番号が親より必ず大きくなるため、
+ * 番号順で並べるだけで親子関係もおおむね保たれる
+ */
+function compareBlockId(a: string, b: string): number {
+  return a.length !== b.length ? a.length - b.length : a < b ? -1 : a > b ? 1 : 0;
 }
 
 /**
- * ブロックを「ルート（直接支出・別財源など親を持たないブロック）→その子孫」の
- * 深さ優先順に並べたIDリストを返す。ルートは起点種別→金額降順、各ブロックの子は
- * 金額降順（兄弟ブロック内の並び）。マージ（複数の親を持つブロック）は最初に
- * 訪れた経路の位置に1回だけ現れる
+ * ブロックを「ルート（親を持たないブロック）→その子孫」の深さ優先順に並べた
+ * IDリストを返す。ルート・兄弟ブロックの並びはブロック番号の自然順（`compareBlockId`）。
+ * 「一覧の並びをブロックバッジ順にしたい」「北海道開発事業のブロックがブロック
+ * 番号バッジ順じゃない」との指摘（2026-09-17）で金額降順から変更した。
+ * マージ（複数の親を持つブロック）は最初に訪れた経路の位置に1回だけ現れる
  */
 function orderedBlockIds(graph: SubcontractGraph): string[] {
   const childrenByParent = new Map<string, string[]>();
@@ -91,13 +98,10 @@ function orderedBlockIds(graph: SubcontractGraph): string[] {
     if (!list.includes(flow.targetBlock)) list.push(flow.targetBlock);
     childrenByParent.set(flow.sourceBlock, list);
   }
-  const amountById = new Map(graph.blocks.map(b => [b.blockId, b.totalAmount]));
-  const tierById = new Map(graph.blocks.map(b => [b.blockId, originTier(b.originKind)]));
-  const byAmountDesc = (ids: string[]) => [...ids].sort((a, b) => (amountById.get(b) ?? 0) - (amountById.get(a) ?? 0));
-  for (const [parent, children] of childrenByParent) childrenByParent.set(parent, byAmountDesc(children));
+  const byBlockId = (ids: string[]) => [...ids].sort(compareBlockId);
+  for (const [parent, children] of childrenByParent) childrenByParent.set(parent, byBlockId(children));
 
-  const roots = byAmountDesc(graph.blocks.map(b => b.blockId).filter(id => !hasParent.has(id)))
-    .sort((a, b) => (tierById.get(a) ?? 0) - (tierById.get(b) ?? 0)); // 金額降順を保ったまま起点種別で安定ソート
+  const roots = byBlockId(graph.blocks.map(b => b.blockId).filter(id => !hasParent.has(id)));
 
   const order: string[] = [];
   const visited = new Set<string>();

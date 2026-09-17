@@ -1088,21 +1088,6 @@ function BlockIdBadge({ id }: { id: string }) {
   return <OutlineBadge label={id} color="#9aa0a6" />;
 }
 
-/** 再委託元（親ブロック）を小さく添えるメタ行の断片 */
-function ParentBlocksNote({ parentBlocks }: { parentBlocks: { blockId: string; blockName: string }[] }) {
-  if (parentBlocks.length === 0) return null;
-  return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4, marginTop: 2 }}>
-      <span>再委託元:</span>
-      {parentBlocks.map(p => (
-        <span key={p.blockId} style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-          <BlockIdBadge id={p.blockId} />{p.blockName}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
   project: IntegratedProjectNode; itemEdges: IntegratedItemEdge[]; sections: IntegratedSectionNode[]; year: number; onClose: () => void;
 }) {
@@ -1217,16 +1202,22 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
           subGraphState.status !== 'ready'
             ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
             : recipientRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>支出先がありません</p> : (
+              // ブロックバッジの並びはブロックタブと揃える: 再委託・別財源は
+              // 親バッジ（名前は出さない）→ 対象ブロックバッジ→ブロック名。
+              // 直接は対象ブロックバッジ→ブロック名のみ（「支出先タブのブロック
+              // バッジの再委託はブロックと合わせて、親の名前不要でブロックバッジ→
+              // 子ブロックバッジ」との指摘、2026-09-17）
               recipientRows.map((r, i) => (
                 <ListRow key={`${r.blockId}-${r.name}-${i}`} name={r.name} amount={money(r.amount)}
-                  meta={<>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                  meta={
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
                       <TagChip kind={originKindToTagKind(r.originKind)}>{originKindLabel(r.originKind)}</TagChip>
+                      {r.parentBlocks.map(p => <BlockIdBadge key={p.blockId} id={p.blockId} />)}
+                      {r.parentBlocks.length > 0 && <span>→</span>}
                       <BlockIdBadge id={r.blockId} />
                       <span>{r.blockName}</span>
                     </div>
-                    <ParentBlocksNote parentBlocks={r.parentBlocks} />
-                  </>}
+                  }
                 />
               ))
             )
