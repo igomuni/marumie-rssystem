@@ -765,7 +765,7 @@ function App() {
           {selectedNode?.section ? (
             <SectionDetail section={selectedNode.section} itemEdges={selectedItemEdges} projects={data.projects} onClose={() => setSelected(null)} />
           ) : selectedNode?.project ? (
-            <ProjectDetail key={`${selectedNode.project.projectId}-${year}`} project={selectedNode.project} itemEdges={selectedItemEdges} sections={data.sections} year={year} onClose={() => setSelected(null)} />
+            <ProjectDetail project={selectedNode.project} itemEdges={selectedItemEdges} sections={data.sections} year={year} onClose={() => setSelected(null)} />
           ) : (
             <AggregateDetail
               name={selectedNode?.name ?? ''}
@@ -1064,10 +1064,21 @@ type SubGraphState =
   | { status: 'error' };
 
 function useSubcontractGraph(projectId: number, year: number): SubGraphState {
+  const key = `${projectId}-${year}`;
+  const keyRef = useRef(key);
   const [state, setState] = useState<SubGraphState>({ status: 'loading' });
+  // 事業・年度が切り替わったら、useEffect実行前（このレンダー内）で古いready
+  // データを捨てる。ProjectDetail自体はkeyでremountしない（remountすると
+  // タブ選択（tab state）もリセットされてしまい、「選択タブが予算サマリに
+  // 戻ってしまう」不具合になる、2026-09-18指摘）。Reactの「レンダー中に前回の
+  // propsとの差分でstateを調整する」パターンで、タブ選択を保ったまま
+  // 古いグラフが一瞬表示される問題も避ける
+  const stale = keyRef.current !== key;
+  if (stale) keyRef.current = key;
+  const effectiveState: SubGraphState = stale ? { status: 'loading' } : state;
+  if (stale) setState(effectiveState);
   useEffect(() => {
     let cancelled = false;
-    setState({ status: 'loading' });
     fetch(`/api/subcontracts/${projectId}?year=${year}`)
       .then(res => {
         if (res.status === 404) return null;
@@ -1078,7 +1089,7 @@ function useSubcontractGraph(projectId: number, year: number): SubGraphState {
       .catch(() => { if (!cancelled) setState({ status: 'error' }); });
     return () => { cancelled = true; };
   }, [projectId, year]);
-  return state;
+  return effectiveState;
 }
 
 /** 再委託構造タブ（支出先・ブロック・ブロックのつながり）共通の空/読込/エラー表示 */

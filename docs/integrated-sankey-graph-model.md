@@ -585,6 +585,16 @@ MOF予算書には「目」（性質別）とは別に「事項」（目的別�
   同一エンドポイント）を事業選択時に遅延取得する（`useSubcontractGraph`）。
   全事業分を`/api/integrated-sankey`に同梱すると無駄が大きいため
   （事業数は数千、再委託構造データは事業ごとに数〜数十ブロック）。
+
+  **`ProjectDetail`は事業・年度が変わってもremountしない（`key`を付けない）。**
+  事業を切り替えたときに前の事業の`SubcontractGraph`が一瞬残るのを防ぐ目的で
+  一度`key={${projectId}-${year}}`を付けたが、`ProjectDetail`自体がremountされ
+  タブ選択（`tab` state）もリセットされてしまい、「事業ノードを切り替えると
+  選択タブが予算サマリに戻ってしまう」不具合になった（2026-09-18指摘）。
+  代わりに`useSubcontractGraph`内で、Reactの「レンダー中に前回のpropsとの
+  差分でstateを調整する」パターン（`useRef`で前回のキーを保持し、キーが
+  変わっていたらレンダー中に`loading`へ戻す）を使い、`useEffect`実行前に
+  古いグラフを捨てる。remountを伴わないため`tab` stateは保たれる
   純関数（`app/lib/integrated-sankey-blocks.ts`）で2種類のビューに整形する：
   - **支出先**：`graph.blocks[].recipients[]` を全ブロック（直接・再委託・
     別財源）横断でフラット化し、各行に所属ブロックの起点種別
