@@ -1081,10 +1081,26 @@ function SubGraphStatusMessage({ state, emptyText }: { state: SubGraphState; emp
   return <p style={{ fontSize: 12, color: '#aaa' }}>{emptyText}</p>;
 }
 
+/** ブロック番号（5-2 CSVの「支出先ブロック番号」等）を小さなバッジで示す。
+ * 既存の`OutlineBadge`を中立色（識別子であって意味分類ではないため）で流用する
+ * （「ブロック番号はバッジにできそう」との指摘、2026-09-17） */
+function BlockIdBadge({ id }: { id: string }) {
+  return <OutlineBadge label={id} color="#9aa0a6" />;
+}
+
 /** 再委託元（親ブロック）を小さく添えるメタ行の断片 */
 function ParentBlocksNote({ parentBlocks }: { parentBlocks: { blockId: string; blockName: string }[] }) {
   if (parentBlocks.length === 0) return null;
-  return <div>再委託元: {parentBlocks.map(p => `${p.blockName}(${p.blockId})`).join('、')}</div>;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4, marginTop: 2 }}>
+      <span>再委託元:</span>
+      {parentBlocks.map(p => (
+        <span key={p.blockId} style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+          <BlockIdBadge id={p.blockId} />{p.blockName}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
@@ -1203,7 +1219,8 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
                   meta={<>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                       <TagChip kind={originKindToTagKind(r.originKind)}>{originKindLabel(r.originKind)}</TagChip>
-                      <span>{r.blockName}（{r.blockId}）</span>
+                      <BlockIdBadge id={r.blockId} />
+                      <span>{r.blockName}</span>
                     </div>
                     <ParentBlocksNote parentBlocks={r.parentBlocks} />
                   </>}
@@ -1217,10 +1234,11 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
             ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
             : blockRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>ブロックがありません</p> : (
               blockRows.map(b => (
-                <ListRow key={b.blockId} name={`${b.blockName}（${b.blockId}）`} amount={money(b.totalAmount)}
+                <ListRow key={b.blockId} name={b.blockName} amount={money(b.totalAmount)}
                   meta={<>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                       <TagChip kind={originKindToTagKind(b.originKind)}>{originKindLabel(b.originKind)}</TagChip>
+                      <BlockIdBadge id={b.blockId} />
                       <span>支出先{b.recipientCount}件{b.role ? ` / ${b.role}` : ''}</span>
                     </div>
                     <ParentBlocksNote parentBlocks={b.parentBlocks} />
@@ -1242,6 +1260,9 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
                   meta={<>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                       <TagChip kind={flowOriginToTagKind(f.origin)}>{flowOriginLabel(f.origin)}</TagChip>
+                      {f.sourceBlockId && <BlockIdBadge id={f.sourceBlockId} />}
+                      <span>→</span>
+                      <BlockIdBadge id={f.targetBlockId} />
                       {f.targetIncomingBlockCount > 1 && <span>対象ブロックへの合流{f.targetIncomingBlockCount}件</span>}
                     </div>
                     {f.note && <div>補足: {f.note}{f.isReference ? '（参考情報）' : ''}</div>}

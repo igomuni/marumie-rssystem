@@ -356,9 +356,9 @@ test('事業サイドパネルに支出先・ブロック・ブロックのつ�
   await expect(detail.getByText('直接', { exact: true }).first()).toBeVisible();
   await expect(detail.getByText('再委託', { exact: true }).first()).toBeVisible();
 
-  // ブロックタブ: ブロックIDを含む名前が一覧に出る
+  // ブロックタブ: ブロック番号がバッジで出る
   await detail.getByRole('button', { name: 'ブロック（', exact: false }).click();
-  await expect(detail.locator('text=（A）').first()).toBeVisible();
+  await expect(detail.getByText('A', { exact: true }).first()).toBeVisible();
 
   // ブロックのつながりタブ: 事業本体からの直接支出フローが一覧に出る
   await detail.getByRole('button', { name: 'ブロックのつながり', exact: false }).click();
