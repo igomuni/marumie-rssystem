@@ -27,6 +27,10 @@ import { getAccountBadgeStyle, rsOnlyBudgetTypeBadge } from '@/app/lib/account-b
 import { BudgetTypeBadge, Badge as MofBadge, OutlineBadge } from '@/client/components/mof-kou/Badge';
 import { classifyAccountCategory } from '@/app/lib/account-badge';
 import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
+import { TagChip } from '@/client/components/TagChip';
+import { flowOriginLabel, flowOriginToTagKind, originKindLabel, originKindToTagKind } from '@/client/components/subcontract/origin-kind';
+import { buildFlowRows, buildRecipientRows } from '@/app/lib/integrated-sankey-blocks';
+import type { SubcontractGraph } from '@/types/subcontract';
 import {
   buildMatcher,
   buildSectionDetailView,
@@ -761,7 +765,7 @@ function App() {
           {selectedNode?.section ? (
             <SectionDetail section={selectedNode.section} itemEdges={selectedItemEdges} projects={data.projects} onClose={() => setSelected(null)} />
           ) : selectedNode?.project ? (
-            <ProjectDetail project={selectedNode.project} itemEdges={selectedItemEdges} sections={data.sections} onClose={() => setSelected(null)} />
+            <ProjectDetail key={`${selectedNode.project.projectId}-${year}`} project={selectedNode.project} itemEdges={selectedItemEdges} sections={data.sections} year={year} onClose={() => setSelected(null)} />
           ) : (
             <AggregateDetail
               name={selectedNode?.name ?? ''}
@@ -836,15 +840,22 @@ const listButtonStyle: React.CSSProperties = { display: 'flex', flexWrap: 'wrap'
 const listNameStyle: React.CSSProperties = { flex: '1 1 150px', minWidth: 0, fontSize: 13, color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
 const listValueStyle: React.CSSProperties = { flex: '0 0 100%', minWidth: 0, fontSize: 12, color: '#777', textAlign: 'right' };
 
-/** サイドパネルの一覧行の共通レイアウト。1行目＝バッジ＋名前（trimして省略）＋金額の
- * 右寄せ併記、2行目以降＝補足情報を左寄せで表示する。詳細パネルの全タブの一覧で
- * この構造に統一する */
+/** サイドパネルの一覧行の共通レイアウト。1行目＝バッジ＋名前（CSSのellipsisで
+ * 省略）＋金額の右寄せ併記、2行目以降＝補足情報を左寄せで表示する。詳細パネルの
+ * 全タブの一覧でこの構造に統一する。
+ *
+ * 名前は`trim()`（文字数固定の事前カット）ではなくCSSの`text-overflow:ellipsis`
+ * のみで省略する。サイドパネルはユーザーがドラッグで幅を変えられるため、事前に
+ * 固定文字数で切ると幅を広げても続きが表示されない不具合になる（「電気・ガス
+ * 価格激変緩和対策等事業のデロイトトーマツファイナンシャルアドバイザリー合同
+ * 会社ほかがサイドパネルを広げても最後まで表示されない」との指摘、2026-09-17）。
+ * `trim()`はSVGのノードラベル（幅固定でCSS ellipsisが使えない）専用として残す */
 function ListRow({ badges, name, amount, meta }: { badges?: React.ReactNode; name: string; amount: React.ReactNode; meta?: React.ReactNode }) {
   return (
     <div style={listButtonStyle} data-testid="list-row">
       <span style={{ ...listNameStyle, flex: '1 1 0%', display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
         {badges}
-        <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trim(name)}</span>
+        <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
       </span>
       <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{amount}</span>
       {meta && <div data-testid="list-row-meta" style={{ flex: '0 0 100%', fontSize: 11, color: '#999', textAlign: 'left' }}>{meta}</div>}
@@ -1042,8 +1053,50 @@ function SectionDetail({ section, itemEdges, projects, onClose }: {
   );
 }
 
-function ProjectDetail({ project, itemEdges, sections, onClose }: {
-  project: IntegratedProjectNode; itemEdges: IntegratedItemEdge[]; sections: IntegratedSectionNode[]; onClose: () => void;
+/** 再委託構造（`SubcontractGraph`）の取得状態。5-1・5-2 CSV由来の既存データ
+ * （`/api/subcontracts/[projectId]`。scripts/generate-subcontracts.ts が生成）を
+ * 事業選択時に都度取得する。件数が事業ごとに大きく異なり、全事業分を
+ * `/api/integrated-sankey` に同梱すると無駄が大きいため遅延取得にしている */
+type SubGraphState =
+  | { status: 'loading' }
+  | { status: 'ready'; graph: SubcontractGraph }
+  | { status: 'empty' }
+  | { status: 'error' };
+
+function useSubcontractGraph(projectId: number, year: number): SubGraphState {
+  const [state, setState] = useState<SubGraphState>({ status: 'loading' });
+  useEffect(() => {
+    let cancelled = false;
+    setState({ status: 'loading' });
+    fetch(`/api/subcontracts/${projectId}?year=${year}`)
+      .then(res => {
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<SubcontractGraph>;
+      })
+      .then(graph => { if (!cancelled) setState(graph ? { status: 'ready', graph } : { status: 'empty' }); })
+      .catch(() => { if (!cancelled) setState({ status: 'error' }); });
+    return () => { cancelled = true; };
+  }, [projectId, year]);
+  return state;
+}
+
+/** 再委託構造タブ（支出先・ブロック・ブロックのつながり）共通の空/読込/エラー表示 */
+function SubGraphStatusMessage({ state, emptyText }: { state: SubGraphState; emptyText: string }) {
+  if (state.status === 'loading') return <p style={{ fontSize: 12, color: '#aaa' }}>読み込み中…</p>;
+  if (state.status === 'error') return <p style={{ fontSize: 12, color: '#aaa' }}>再委託構造データの取得に失敗しました</p>;
+  return <p style={{ fontSize: 12, color: '#aaa' }}>{emptyText}</p>;
+}
+
+/** ブロック番号（5-2 CSVの「支出先ブロック番号」等）を小さなバッジで示す。
+ * 既存の`OutlineBadge`を中立色（識別子であって意味分類ではないため）で流用する
+ * （「ブロック番号はバッジにできそう」との指摘、2026-09-17） */
+function BlockIdBadge({ id }: { id: string }) {
+  return <OutlineBadge label={id} color="#9aa0a6" />;
+}
+
+function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
+  project: IntegratedProjectNode; itemEdges: IntegratedItemEdge[]; sections: IntegratedSectionNode[]; year: number; onClose: () => void;
 }) {
   const [tab, setTab] = useState(0);
   const sectionById = new Map(sections.map(s => [s.id, s]));
@@ -1055,6 +1108,15 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
   );
   const bySection = new Map<string, number>();
   for (const e of itemEdges) bySection.set(e.source, (bySection.get(e.source) ?? 0) + e.value);
+  // 支出先・ブロックの2タブは再委託構造（既存データ。新規CSVパース無し）から作る。
+  // 「ブロック」タブは当初ブロック単体の一覧と、ブロック同士の親子関係一覧を別タブに
+  // 分けていたが、「ブロックタブ消して、ブロックのつながりタブをブロックタブにして」
+  // との指摘を受け、親子関係一覧（flows）の方を「ブロック」タブとして残した
+  // （2026-09-17。ブロック単体の情報はブロックのつながり側で対象ブロックの
+  // 合計金額として表示済みのため、単体一覧は独立タブとしては不要と判断）
+  const subGraphState = useSubcontractGraph(project.projectId, year);
+  const recipientRows = subGraphState.status === 'ready' ? buildRecipientRows(subGraphState.graph) : [];
+  const flowRows = subGraphState.status === 'ready' ? buildFlowRows(subGraphState.graph) : [];
   return (
     <PanelShell>
       <PanelHeader
@@ -1077,6 +1139,8 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
         { label: '予算サマリ' },
         { label: '予算執行', count: project.budgetBreakdown.length },
         { label: 'MOF項', count: bySection.size },
+        { label: '支出先', count: subGraphState.status === 'ready' ? recipientRows.length : undefined },
+        { label: 'ブロック', count: subGraphState.status === 'ready' ? flowRows.length : undefined },
       ]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
@@ -1126,7 +1190,7 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
               );
             })
           )
-        ) : (
+        ) : tab === 2 ? (
           // MOF項一覧: 目一覧（RS自身の予算内訳、接続済み/未接続の二値のみ）より、
           // 実際に紐づいたMOF項の名前と金額をそのまま見せる方がつながりを表現しやすい
           // という指摘を受け、独立タブへ格上げした（目タブ自体は不要と判断し廃止。
@@ -1136,6 +1200,69 @@ function ProjectDetail({ project, itemEdges, sections, onClose }: {
               <ListRow key={sid} name={sectionById.get(sid)?.name ?? sid} amount={money(value)} />
             ))
           )
+        ) : tab === 3 ? (
+          // 支出先: 直接支出先ブロックだけでなく再委託・別財源ブロックの支出先も横断で見せる
+          // （「支出先、ブロック、ブロックのつながりでタブを分けたい」「支出先には直接支出先
+          // ブロックなのか再委託ブロックなのか、再委託であればどのブロックの再委託なのかを」
+          // との指摘、2026-09-17）。データは5-2 CSVの直接/間接判定を1階層目のみに限る
+          // /sankey-svgの直接支出先合計より広く、再委託構造データ（既存）をそのまま使う
+          subGraphState.status !== 'ready'
+            ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
+            : recipientRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>支出先がありません</p> : (
+              // ブロックバッジの並びはブロックタブと揃える: 再委託・別財源は
+              // 親バッジ（名前は出さない）→ 対象ブロックバッジ→ブロック名。
+              // 直接は対象ブロックバッジ→ブロック名のみ（「支出先タブのブロック
+              // バッジの再委託はブロックと合わせて、親の名前不要でブロックバッジ→
+              // 子ブロックバッジ」との指摘、2026-09-17）
+              recipientRows.map((r, i) => (
+                <ListRow key={`${r.blockId}-${r.name}-${i}`} name={r.name} amount={money(r.amount)}
+                  meta={
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+                      <TagChip kind={originKindToTagKind(r.originKind)}>{originKindLabel(r.originKind)}</TagChip>
+                      {r.parentBlocks.map(p => <BlockIdBadge key={p.blockId} id={p.blockId} />)}
+                      {r.parentBlocks.length > 0 && <span>→</span>}
+                      <BlockIdBadge id={r.blockId} />
+                      <span>{r.blockName}</span>
+                    </div>
+                  }
+                />
+              ))
+            )
+        ) : (
+          // ブロック: ブロック同士の親子関係（5-2 CSVの「支出元の支出先ブロック」→
+          // 「支出先の支出先ブロック」）を一覧化する（「ブロックのつながりでは、
+          // ブロック同士の親子関係が一覧化されていてほしい」との指摘）。
+          // 当初はブロック単体の一覧を別タブ（旧「ブロック」タブ）にしていたが、
+          // 「ブロックタブ消して、ブロックのつながりタブをブロックタブにして」との
+          // 指摘を受けて1本化した（2026-09-17。対象ブロックの合計金額はこの
+          // 一覧の`amount`列にそのまま出ているため単体一覧は重複だった）
+          subGraphState.status !== 'ready'
+            ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
+            : flowRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>ブロックのつながりがありません</p> : (
+              // ブロック番号バッジは各ブロック名の直左に置く（ListRowの`name`は文字列
+              // 専用でバッジを名前に隣接できないため、ここだけ独自のレイアウトにする。
+              // 「ブロックバッジの位置はブロック名の左に」との指摘、2026-09-17）
+              flowRows.map((f, i) => (
+                <div key={`${f.sourceBlockId ?? 'root'}-${f.targetBlockId}-${i}`} style={listButtonStyle} data-testid="list-row">
+                  <span style={{ ...listNameStyle, flex: '1 1 0%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
+                    {f.sourceBlockId && <>
+                      <BlockIdBadge id={f.sourceBlockId} />
+                      <span>→</span>
+                    </>}
+                    <BlockIdBadge id={f.targetBlockId} />
+                    <span data-testid="list-row-name" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.targetBlockName}</span>
+                  </span>
+                  <span style={{ ...listValueStyle, flex: '0 0 auto', marginLeft: 8 }}>{money(f.targetAmount)}</span>
+                  {/* 補足（note）は起点種別バッジと同じ行に置く（別行だと切り替わりの
+                      文脈がつかみにくいという指摘、2026-09-17） */}
+                  <div data-testid="list-row-meta" style={{ flex: '0 0 100%', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, fontSize: 11, color: '#999', textAlign: 'left' }}>
+                    <TagChip kind={flowOriginToTagKind(f.origin)}>{flowOriginLabel(f.origin)}</TagChip>
+                    {f.targetIncomingBlockCount > 1 && <span>対象ブロックへの合流{f.targetIncomingBlockCount}件</span>}
+                    {f.note && <span>補足: {f.note}{f.isReference ? '（参考情報）' : ''}</span>}
+                  </div>
+                </div>
+              ))
+            )
         )}
       </div>
     </PanelShell>

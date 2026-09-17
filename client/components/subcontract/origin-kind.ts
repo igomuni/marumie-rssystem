@@ -17,6 +17,17 @@ export function originKindToTagKind(kind: BlockOriginKind): TagKind {
   return kind === 'direct' ? 'direct' : kind === 'subcontract' ? 'subcontract' : 'separate-origin';
 }
 
+/** フローの起点種別の表示ラベル */
+export function flowOriginLabel(origin: FlowOrigin): string {
+  switch (origin) {
+    case 'direct': return '直接';
+    case 'transfer': return '移替';
+    case 'separate-origin': return '別財源';
+    case 'reference': return '参考';
+    case 'subcontract': return '再委託';
+  }
+}
+
 /** フローの origin を共有 TagChip の kind に変換する（移替・参考は意味色を持たせずグレー） */
 export function flowOriginToTagKind(origin: FlowOrigin): TagKind {
   switch (origin) {

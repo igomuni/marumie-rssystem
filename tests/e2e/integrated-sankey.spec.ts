@@ -332,6 +332,39 @@ test('RS事業を選択すると予算サマリ・予算執行・MOF項タブが
   await expect(detail.locator('text=接続しているMOF項がありません')).toHaveCount(0);
 });
 
+test('事業サイドパネルに支出先・ブロックタブが出て、再委託構造（既存データ）を確認できる', async ({ page, request }) => {
+  // PID11（第一期政府共通プラットフォーム）は予算0円・支出ありの事業で、
+  // 5-2 CSVの直接/再委託判定を持つ再委託構造データが既にある
+  const sub = await (await request.get('/api/subcontracts/11?year=2025')).json();
+  expect(sub.blocks?.length, '検証対象事業の再委託構造データが取得できない').toBeGreaterThan(0);
+
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  await page.locator('input[placeholder*="項名"]').fill(sub.projectName);
+  await page.getByText(sub.projectName, { exact: false }).first().click();
+
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  await expect(detail.getByRole('button', { name: '支出先', exact: false })).toBeVisible();
+  await expect(detail.getByRole('button', { name: 'ブロック', exact: false })).toBeVisible();
+  // 「ブロックのつながり」タブは「ブロック」タブへ1本化済み（旧ブロック単体タブは廃止）
+  await expect(detail.getByRole('button', { name: 'ブロックのつながり', exact: false })).toHaveCount(0);
+
+  // 支出先タブ: 直接・再委託の区分が見える
+  await detail.getByRole('button', { name: '支出先', exact: false }).click();
+  await expect(detail.getByText('直接', { exact: true }).first()).toBeVisible();
+  await expect(detail.getByText('再委託', { exact: true }).first()).toBeVisible();
+
+  // ブロックタブ: ブロック同士の親子関係が一覧に出る。直接支出（事業本体から）の
+  // 行は起点ブロックが無いので「事業本体（直接支出）→」を付けず対象ブロックのみ表示する
+  await detail.getByRole('button', { name: 'ブロック', exact: false }).click();
+  await expect(detail.locator('text=事業本体').first()).toHaveCount(0);
+  await expect(detail.getByText('A', { exact: true }).first()).toBeVisible();
+  await expect(detail.getByText('直接', { exact: true }).first()).toBeVisible();
+});
+
 test('「その他の項」集約ノードを選択すると内訳の目一覧が出る', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/integrated-sankey');
