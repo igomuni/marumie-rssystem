@@ -765,7 +765,7 @@ function App() {
           {selectedNode?.section ? (
             <SectionDetail section={selectedNode.section} itemEdges={selectedItemEdges} projects={data.projects} onClose={() => setSelected(null)} />
           ) : selectedNode?.project ? (
-            <ProjectDetail project={selectedNode.project} itemEdges={selectedItemEdges} sections={data.sections} year={year} onClose={() => setSelected(null)} />
+            <ProjectDetail key={`${selectedNode.project.projectId}-${year}`} project={selectedNode.project} itemEdges={selectedItemEdges} sections={data.sections} year={year} onClose={() => setSelected(null)} />
           ) : (
             <AggregateDetail
               name={selectedNode?.name ?? ''}
