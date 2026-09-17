@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildBlockRows, buildFlowRows, buildRecipientRows } from './integrated-sankey-blocks';
+import { buildFlowRows, buildRecipientRows } from './integrated-sankey-blocks';
 import type { BlockEdge, BlockNode, SubcontractGraph } from '@/types/subcontract';
 
 const block = (o: Partial<BlockNode> = {}): BlockNode => ({
@@ -57,29 +57,6 @@ describe('buildRecipientRows', () => {
     });
     const rows = buildRecipientRows(g).filter(r => r.blockId === 'B');
     expect(rows[0].parentBlocks).toHaveLength(1);
-  });
-});
-
-describe('buildBlockRows', () => {
-  it('sorts blocks by totalAmount descending and attaches parent blocks', () => {
-    const g = graph({
-      blocks: [
-        block({ blockId: 'A', totalAmount: 10 }),
-        block({ blockId: 'B', totalAmount: 90, originKind: 'subcontract', isDirect: false }),
-      ],
-      flows: [flow({ targetBlock: 'A' }), flow({ sourceBlock: 'A', targetBlock: 'B', origin: 'subcontract' })],
-    });
-    const rows = buildBlockRows(g);
-    expect(rows.map(r => r.blockId)).toEqual(['B', 'A']);
-    expect(rows[0].parentBlocks).toEqual([{ blockId: 'A', blockName: 'ブロックA' }]);
-    expect(rows[1].parentBlocks).toEqual([]);
-  });
-
-  it('carries role and recipientCount through unchanged', () => {
-    const g = graph({ blocks: [block({ role: '調査委託', recipientCount: 3 })] });
-    const rows = buildBlockRows(g);
-    expect(rows[0].role).toBe('調査委託');
-    expect(rows[0].recipientCount).toBe(3);
   });
 });
 

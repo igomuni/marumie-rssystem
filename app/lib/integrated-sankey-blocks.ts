@@ -1,14 +1,16 @@
 /**
- * `/integrated-sankey` の事業サイドパネル「支出先／ブロック／ブロックのつながり」3タブ用の
- * ビュー整形。データソースは再委託構造（`SubcontractGraph`。scripts/generate-subcontracts.ts
+ * `/integrated-sankey` の事業サイドパネル「支出先／ブロック」2タブ用のビュー整形。
+ * データソースは再委託構造（`SubcontractGraph`。scripts/generate-subcontracts.ts
  * が5-1・5-2 CSVから生成した既存データ）で、新規のCSVパースは行わない。
  *
- * 3タブの対応関係:
+ * 2タブの対応関係:
  *   - 支出先: `graph.blocks[].recipients[]` を全ブロック（直接＋再委託＋別財源）横断でフラット化。
  *     各行に所属ブロックの起点種別（direct/subcontract/separate-origin-*）と、
  *     再委託・別財源の場合は上流（親）ブロックを付与する
- *   - ブロック: `graph.blocks[]` そのもの（親ブロック情報を付与）
- *   - ブロックのつながり: `graph.flows[]` そのもの（ブロック名を解決）
+ *   - ブロック: `graph.flows[]`（ブロック同士の親子関係。ブロック名・対象ブロックの
+ *     合計金額を解決）。当初はブロック単体の一覧（`buildBlockRows`）を別タブに
+ *     していたが、対象ブロックの合計金額はこの一覧の`targetAmount`に出ているため
+ *     単体一覧は重複と判断して1本化した（2026-09-17）
  *
  * 純関数（HTTP・React禁止）。fetch は呼び出し側（app/integrated-sankey/page.tsx）の責務。
  */
@@ -28,17 +30,6 @@ export interface IntegratedRecipientRow {
   blockName: string;
   originKind: BlockOriginKind;
   /** 再委託・別財源ブロックの場合、資金の出どころ（1つのブロックに複数の親がつくことがある） */
-  parentBlocks: ParentBlockRef[];
-}
-
-export interface IntegratedBlockRow {
-  blockId: string;
-  blockName: string;
-  totalAmount: number;
-  originKind: BlockOriginKind;
-  isTerminal: boolean;
-  recipientCount: number;
-  role?: string;
   parentBlocks: ParentBlockRef[];
 }
 
@@ -92,24 +83,7 @@ export function buildRecipientRows(graph: SubcontractGraph): IntegratedRecipient
   return rows.sort((a, b) => b.amount - a.amount);
 }
 
-/** ブロックタブ: ブロック一覧を金額降順で */
-export function buildBlockRows(graph: SubcontractGraph): IntegratedBlockRow[] {
-  const nameById = blockNameMap(graph);
-  return graph.blocks
-    .map(block => ({
-      blockId: block.blockId,
-      blockName: block.blockName,
-      totalAmount: block.totalAmount,
-      originKind: block.originKind,
-      isTerminal: block.isTerminal,
-      recipientCount: block.recipientCount,
-      role: block.role,
-      parentBlocks: parentBlocksOf(graph, block.blockId, nameById),
-    }))
-    .sort((a, b) => b.totalAmount - a.totalAmount);
-}
-
-/** ブロックのつながりタブ: ブロック間の親子関係一覧（対象ブロックの金額降順） */
+/** ブロックタブ: ブロック間の親子関係一覧（対象ブロックの金額降順） */
 export function buildFlowRows(graph: SubcontractGraph): IntegratedFlowRow[] {
   const nameById = blockNameMap(graph);
   const amountById = new Map(graph.blocks.map(b => [b.blockId, b.totalAmount]));

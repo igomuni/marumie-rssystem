@@ -29,7 +29,7 @@ import { classifyAccountCategory } from '@/app/lib/account-badge';
 import { revisedBudgetType, type MOFBudgetType, type MOFRevisionNumber } from '@/types/mof-jikou';
 import { TagChip } from '@/client/components/TagChip';
 import { flowOriginLabel, flowOriginToTagKind, originKindLabel, originKindToTagKind } from '@/client/components/subcontract/origin-kind';
-import { buildBlockRows, buildFlowRows, buildRecipientRows } from '@/app/lib/integrated-sankey-blocks';
+import { buildFlowRows, buildRecipientRows } from '@/app/lib/integrated-sankey-blocks';
 import type { SubcontractGraph } from '@/types/subcontract';
 import {
   buildMatcher,
@@ -1116,10 +1116,14 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
   );
   const bySection = new Map<string, number>();
   for (const e of itemEdges) bySection.set(e.source, (bySection.get(e.source) ?? 0) + e.value);
-  // 支出先・ブロック・ブロックのつながりの3タブは再委託構造（既存データ。新規CSVパース無し）から作る
+  // 支出先・ブロックの2タブは再委託構造（既存データ。新規CSVパース無し）から作る。
+  // 「ブロック」タブは当初ブロック単体の一覧と、ブロック同士の親子関係一覧を別タブに
+  // 分けていたが、「ブロックタブ消して、ブロックのつながりタブをブロックタブにして」
+  // との指摘を受け、親子関係一覧（flows）の方を「ブロック」タブとして残した
+  // （2026-09-17。ブロック単体の情報はブロックのつながり側で対象ブロックの
+  // 合計金額として表示済みのため、単体一覧は独立タブとしては不要と判断）
   const subGraphState = useSubcontractGraph(project.projectId, year);
   const recipientRows = subGraphState.status === 'ready' ? buildRecipientRows(subGraphState.graph) : [];
-  const blockRows = subGraphState.status === 'ready' ? buildBlockRows(subGraphState.graph) : [];
   const flowRows = subGraphState.status === 'ready' ? buildFlowRows(subGraphState.graph) : [];
   return (
     <PanelShell>
@@ -1144,8 +1148,7 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
         { label: '予算執行', count: project.budgetBreakdown.length },
         { label: 'MOF項', count: bySection.size },
         { label: '支出先', count: subGraphState.status === 'ready' ? recipientRows.length : undefined },
-        { label: 'ブロック', count: subGraphState.status === 'ready' ? blockRows.length : undefined },
-        { label: 'ブロックのつながり', count: subGraphState.status === 'ready' ? flowRows.length : undefined },
+        { label: 'ブロック', count: subGraphState.status === 'ready' ? flowRows.length : undefined },
       ]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
@@ -1227,29 +1230,14 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
                 />
               ))
             )
-        ) : tab === 4 ? (
-          // ブロック: 5-2 CSVが定義する支出先ブロック単位の一覧（支出先個別ではなくブロック
-          // そのもの。「ブロックには直接支出先ブロックなのか、再委託ブロックなのか」との指摘）
-          subGraphState.status !== 'ready'
-            ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
-            : blockRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>ブロックがありません</p> : (
-              blockRows.map(b => (
-                <ListRow key={b.blockId} name={b.blockName} amount={money(b.totalAmount)}
-                  meta={<>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <TagChip kind={originKindToTagKind(b.originKind)}>{originKindLabel(b.originKind)}</TagChip>
-                      <BlockIdBadge id={b.blockId} />
-                      <span>支出先{b.recipientCount}件{b.role ? ` / ${b.role}` : ''}</span>
-                    </div>
-                    <ParentBlocksNote parentBlocks={b.parentBlocks} />
-                  </>}
-                />
-              ))
-            )
         ) : (
-          // ブロックのつながり: ブロック同士の親子関係（5-2 CSVの「支出元の支出先ブロック」→
-          // 「支出先の支出先ブロック」）をそのまま一覧化する（「ブロックのつながりでは、
-          // ブロック同士の親子関係が一覧化されていてほしい」との指摘）
+          // ブロック: ブロック同士の親子関係（5-2 CSVの「支出元の支出先ブロック」→
+          // 「支出先の支出先ブロック」）を一覧化する（「ブロックのつながりでは、
+          // ブロック同士の親子関係が一覧化されていてほしい」との指摘）。
+          // 当初はブロック単体の一覧を別タブ（旧「ブロック」タブ）にしていたが、
+          // 「ブロックタブ消して、ブロックのつながりタブをブロックタブにして」との
+          // 指摘を受けて1本化した（2026-09-17。対象ブロックの合計金額はこの
+          // 一覧の`amount`列にそのまま出ているため単体一覧は重複だった）
           subGraphState.status !== 'ready'
             ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
             : flowRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>ブロックのつながりがありません</p> : (
