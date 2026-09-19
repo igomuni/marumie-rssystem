@@ -65,6 +65,30 @@ export interface RsBudgetEvent {
   provenance: Provenance;
 }
 
+/**
+ * RSの歳出予算科目（2-2 CSV由来）。MOFの科目別内訳と同じ語彙（所管・組織/特別会計・勘定・項・目）
+ * を持つため、derived層でMOF BudgetEntityとの完全一致キー結合に使う
+ * （V1のgenerate-mof-rs-kou-moku-linkage.tsと同じ方式）。
+ */
+export interface RsBudgetItem {
+  projectId: string;
+  sourceYear: number;
+  fiscalYear: number;
+  /** '一般会計' | '特別会計'。政府関係機関はこのCSVに現れない */
+  accountCategory: string;
+  /** RS表記の予算種別（'当初予算' | '第N次補正予算' | '前年度から繰越し' | '予備費等N' 等） */
+  budgetTypeRaw: string;
+  ministry: string;
+  /** 一般会計は「組織・勘定」、特別会計は「会計」（特別会計名） */
+  organization: string;
+  /** 特別会計のみ。一般会計は空文字 */
+  subAccount: string;
+  sectionName: string;
+  itemName: string;
+  amount: number;
+  provenance: Provenance;
+}
+
 /** RS支出先（5-1 CSV由来） */
 export interface RsExpenditure {
   projectId: string;

@@ -19,7 +19,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { listZipEntries, readZipEntryText } from '@/scripts/zip-reader';
 import { parseCsv, parseAmount } from './lib/csv';
-import type { RsProject, RsBudgetEvent, RsExpenditure, Provenance } from './types';
+import type { RsProject, RsBudgetEvent, RsBudgetItem, RsExpenditure, Provenance } from './types';
 
 function readCsvZip(zipPath: string): Record<string, string>[] {
   const entries = listZipEntries(zipPath).filter(e => e.toLowerCase().endsWith('.csv'));
@@ -86,6 +86,38 @@ function normalizeBudgetEvents(year: number): RsBudgetEvent[] {
   return events;
 }
 
+/**
+ * 2-2 CSV（予算種別・歳出予算項目）。MOFの科目別内訳と同じ語彙で
+ * 所管/組織・勘定（一般会計）または所管/会計/勘定（特別会計）/項/目を持つ列。
+ * 列名の丸括弧は原本では全角（例:「予算額（歳出予算項目ごと）」）。
+ * V1の`data/year_*`側は正規化時に半角へ変換しているが、rawのZIPは全角のまま。
+ */
+function normalizeBudgetItems(year: number): RsBudgetItem[] {
+  const label = '予算・執行_予算種別・歳出予算項目';
+  const zip = zipPathFor(year, '2-2', label);
+  const rows = readCsvZip(zip);
+  const provenance = provenanceFor(year, path.basename(zip));
+  return rows
+    .map(r => {
+      const accountCategory = r['会計区分'] ?? '';
+      return {
+        projectId: r['予算事業ID'],
+        sourceYear: Number(r['事業年度']),
+        fiscalYear: Number(r['予算年度']),
+        accountCategory,
+        budgetTypeRaw: r['予算種別'] ?? '',
+        ministry: r['所管'] ?? '',
+        organization: accountCategory === '特別会計' ? (r['会計'] ?? '') : (r['組織・勘定'] ?? ''),
+        subAccount: accountCategory === '特別会計' ? (r['勘定'] ?? '') : '',
+        sectionName: r['項'] ?? '',
+        itemName: r['目'] ?? '',
+        amount: parseAmount(r['予算額（歳出予算項目ごと）']),
+        provenance,
+      };
+    })
+    .filter(e => e.projectId && !Number.isNaN(e.fiscalYear) && e.amount !== 0);
+}
+
 function normalizeExpenditures(year: number): RsExpenditure[] {
   const label = '支出先_支出情報';
   const zip = zipPathFor(year, '5-1', label);
@@ -121,6 +153,10 @@ function processYear(year: number): void {
   const budgetEvents = normalizeBudgetEvents(year);
   writeJson(path.join(outDir, 'budget-events.json'), budgetEvents);
   console.log(`  budget-events.json: ${budgetEvents.length}件`);
+
+  const budgetItems = normalizeBudgetItems(year);
+  writeJson(path.join(outDir, 'budget-items.json'), budgetItems);
+  console.log(`  budget-items.json: ${budgetItems.length}件`);
 
   const expenditures = normalizeExpenditures(year);
   writeJson(path.join(outDir, 'expenditures.json'), expenditures);
