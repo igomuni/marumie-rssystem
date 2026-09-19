@@ -37,10 +37,62 @@ export function eventLabel(e: EventGroup) {
   return (eventNames[e.eventType] ?? e.eventType) + (e.budgetStatus === 'submitted' ? '・提出案' : e.budgetStatus === 'enacted' ? '・成立' : '') + (e.revision === null ? '' : `・第${e.revision}号`);
 }
 export function isAdjustment(type: string) { return ['parliamentary_amendment', 'supplement_adjustment', 'carryover_in', 'reserve_use', 'budget_rule_increase', 'transfer_adjustment', 'reallocation'].includes(type); }
-export function filterEntities(entities: EntitySummary[], account: string, query: string, mode: string) {
-  const q = query.trim().normalize('NFKC').toLowerCase();
-  return entities.filter(e => (!account || e.accountType === account)
+export function searchMatcher(query: string, regex = false): { matches: (value: string) => boolean; error: string } {
+  const q = query.trim().normalize('NFKC');
+  try {
+    const pattern = regex ? new RegExp(q, 'i') : null;
+    return { matches: value => pattern ? pattern.test(value.normalize('NFKC')) : value.normalize('NFKC').toLowerCase().includes(q.toLowerCase()), error: '' };
+  } catch {
+    return { matches: () => false, error: '正規表現が正しくありません。' };
+  }
+}
+export const organizationNames = (e: EntitySummary) => [e.ministry, e.organization, e.agency].filter(Boolean);
+export function filterEntities(entities: EntitySummary[], account: string | string[], query: string, mode: string, organizations: string[] = [], regex = false) {
+  const selectedAccounts = typeof account === 'string' ? (account ? [account] : []) : account;
+  const { matches } = searchMatcher(query, regex);
+  return entities.filter(e => (!selectedAccounts.length || selectedAccounts.includes(e.accountType))
+    && (!organizations.length || organizationNames(e).some(name => organizations.includes(name)))
     && (mode !== 'settlement' || e.stages.includes('settlement'))
-    && [e.sectionName, e.sectionCode, e.ministry, e.organization, e.specialAccount, e.subAccount, e.agency].join(' ').normalize('NFKC').toLowerCase().includes(q));
+    && matches([e.sectionName, e.sectionCode, e.ministry, e.organization, e.specialAccount, e.subAccount, e.agency].join(' ')));
+}
+export function initialEnactedAmount(events: EventGroup[]): number | null {
+  return events.find(e => e.eventType === 'initial_budget_state' && e.budgetStatus === 'enacted' && e.revision === null)?.amountYen ?? null;
 }
 export const yen = (n: number) => `${n.toLocaleString('ja-JP')} 円`;
+
+export type EntitySortKey = 'sectionName' | 'organization' | 'accountType' | 'sectionCode' | 'amount';
+export type EntitySort = { key: EntitySortKey; direction: 'asc' | 'desc' };
+export function parseAmountRange(minText: string, maxText: string) {
+  const parse = (text: string) => {
+    const normalized = text.normalize('NFKC').trim().replaceAll(',', '');
+    if (!normalized) return null;
+    return /^\d+$/.test(normalized) && Number.isSafeInteger(Number(normalized)) ? Number(normalized) : NaN;
+  };
+  const min = parse(minText), max = parse(maxText);
+  const error = Number.isNaN(min) || Number.isNaN(max) ? '金額は0以上の整数（円）で入力してください。'
+    : min !== null && max !== null && min > max ? '下限は上限以下にしてください。' : '';
+  return { min, max, error, active: min !== null || max !== null };
+}
+export function filterAmountRange(entities: EntitySummary[], amounts: Record<string, number | null>, range: ReturnType<typeof parseAmountRange>) {
+  if (range.error) return [];
+  if (!range.active) return entities;
+  return entities.filter(e => {
+    const amount = amounts[e.id];
+    return amount !== undefined && amount !== null && (range.min === null || amount >= range.min) && (range.max === null || amount <= range.max);
+  });
+}
+export function sortEntities(entities: EntitySummary[], amounts: Record<string, number | null>, sort: EntitySort | null) {
+  if (!sort) return entities;
+  const direction = sort.direction === 'asc' ? 1 : -1;
+  const text = (e: EntitySummary) => sort.key === 'organization' ? organizationNames(e).join(' / ')
+    : sort.key === 'accountType' ? accounts[e.accountType] ?? e.accountType : e[sort.key as 'sectionName' | 'sectionCode'];
+  return [...entities].sort((a, b) => {
+    if (sort.key === 'amount') {
+      const x = amounts[a.id], y = amounts[b.id];
+      // Missing and not-yet-loaded values stay last in either direction. Zero is a value.
+      if (x == null || y == null) return x == null ? (y == null ? 0 : 1) : -1;
+      return (x - y) * direction;
+    }
+    return text(a).localeCompare(text(b), 'ja', { numeric: true }) * direction;
+  });
+}

@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { accounts, eventLabel, filterEntities, isAdjustment, orderedEvents, yen, type EntityDetail, type Index } from './model';
+import { accounts, filterAmountRange, parseAmountRange, sortEntities, type EntitySort, initialEnactedAmount, organizationNames, eventLabel, filterEntities, isAdjustment, orderedEvents, yen, type EntityDetail, type Index } from './model';
 import styles from './page.module.css';
+import { EntityTable } from './entity-table';
+import { MultiSelect, PaneLayout, SearchInput } from './controls';
 
 async function readData<T>(url: string, signal: AbortSignal): Promise<T> {
   const response = await fetch(url, { signal });
@@ -17,7 +19,15 @@ async function readData<T>(url: string, signal: AbortSignal): Promise<T> {
 export default function BudgetFlow() {
   const [year, setYear] = useState(2024);
   const [mode, setMode] = useState('all');
-  const [account, setAccount] = useState('general');
+  const [account, setAccount] = useState<string[]>(['general']);
+  const [organizations, setOrganizations] = useState<string[]>([]);
+  const [regex, setRegex] = useState(false);
+  const [amounts, setAmounts] = useState<Record<string, number | null>>({});
+  const [minAmount, setMinAmount] = useState('');
+  const [maxAmount, setMaxAmount] = useState('');
+  const [sort, setSort] = useState<EntitySort | null>(null);
+  const [amountsLoading, setAmountsLoading] = useState(false);
+  const [amountError, setAmountError] = useState(false);
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState<Index | null>(null);
   const [selected, setSelected] = useState('');
@@ -35,7 +45,32 @@ export default function BudgetFlow() {
     });
     return () => abort.abort();
   }, [year, retry]);
-  const filtered = useMemo(() => filterEntities(index?.entities ?? [], account, query, mode), [index, account, query, mode]);
+  useEffect(() => {
+    const abort = new AbortController();
+    setAmounts({}); setAmountError(false); setAmountsLoading(false);
+    if (index && index.fiscalYear === year) {
+      // Read existing display shards; do not alter Pipeline V2 or aggregate budget stages.
+      setAmountsLoading(true);
+      const prefixes = [...new Set(index.entities.map(e => e.id[0]))];
+      void (async () => {
+        for (const prefix of prefixes) {
+          if (abort.signal.aborted) break;
+          try {
+            const data = await readData<Record<string, EntityDetail>>(`/budget-flow-v2/${year}/${prefix}.json.gz`, abort.signal);
+            setAmounts(previous => ({ ...previous, ...Object.fromEntries(Object.values(data).map(e => [e.id, initialEnactedAmount(e.events)])) }));
+          } catch { if (!abort.signal.aborted) setAmountError(true); }
+        }
+        if (!abort.signal.aborted) setAmountsLoading(false);
+      })();
+    }
+    return () => abort.abort();
+  }, [index, year, retry]);
+  const organizationOptions = useMemo(() => [...new Set(index?.entities.flatMap(organizationNames) ?? [])].sort((a, b) => a.localeCompare(b, 'ja')).map(name => ({ value: name, label: name })), [index]);
+  const amountRange = useMemo(() => parseAmountRange(minAmount, maxAmount), [minAmount, maxAmount]);
+  const filtered = useMemo(() => filterAmountRange(filterEntities(index?.entities ?? [], account, query, mode, organizations, regex), amounts, amountRange), [index, account, query, mode, organizations, regex, amounts, amountRange]);
+  const sorted = useMemo(() => sortEntities(filtered, amounts, sort), [filtered, amounts, sort]);
+  const resetFilters = () => { setAccount([]); setOrganizations([]); setQuery(''); setRegex(false); setMode('all'); setMinAmount(''); setMaxAmount(''); };
+
   const current = filtered.find(e => e.id === selected) ?? filtered[0];
   const entityId = current?.id ?? '';
   useEffect(() => {
@@ -53,34 +88,40 @@ export default function BudgetFlow() {
   const rawById = useMemo(() => new Map(detail?.records.map(r => [r.recordId, r]) ?? []), [detail]);
   const sourceYears = [...new Set(detail?.links.map(l => l.sourceYear) ?? [])].sort();
   const chooseRelated = (id: string) => {
-    setAccount(''); setQuery(''); setMode('all'); setSelected(id);
+    resetFilters(); setSelected(id);
   };
   return <main className={styles.page}>
     <header className={styles.header}>
       <div><div className={styles.eyebrow}>MARUMIE / PIPELINE V2</div><h1>Budget Flow <span>予算の変化を、原典から。</span></h1></div>
       <Link className={styles.link} href="/integrated-sankey?year=2025">現行 Integrated（MOF2024 / RS2025）↗</Link>
     </header>
-    <section className={styles.controls} aria-label="表示条件">
-      <label>予算年度 · fiscalYear<select aria-label="予算年度 · fiscalYear" value={year} onChange={e => setYear(Number(e.target.value))}><option>2024</option><option>2025</option></select></label>
-      <label>モード<select aria-label="モード" value={mode} onChange={e => setMode(e.target.value)}><option value="all">予算から決算まで</option><option value="settlement">決算のある項</option></select></label>
-      <label>会計<select aria-label="会計" value={account} onChange={e => setAccount(e.target.value)}><option value="">すべての会計</option>{Object.entries(accounts).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
-      <label className={styles.search}>項・所管を検索<input type="search" placeholder="例：科学技術、復興、デジタル庁" value={query} onChange={e => setQuery(e.target.value)} /></label>
-    </section>
     <p className={styles.note}>金額は円。残高・増減・支出を区別して表示します。並びは予算の段階順で、実施日の時系列ではありません。移替先の特定・名称変更をまたぐ統合は未解決です。</p>
     {error && <div className={styles.error} role="alert">{error} <button onClick={() => { setError(''); setRetry(n => n + 1); }}>再読み込み</button></div>}
     {!index && !error && <p role="status">実データを読み込み中…</p>}
-    {index && <div className={styles.workspace}>
-      <aside className={styles.sidebar}>
-        <div className={styles.listTitle}><h2>項一覧</h2><span>{filtered.length.toLocaleString()} 件</span></div>
-        <p className={styles.muted}>会計・所管・組織・勘定・項コード・項名を保持</p>
-        <div className={styles.list} aria-label="項一覧">
-          {filtered.map(e => <button key={e.id} aria-pressed={e.id === entityId} className={e.id === entityId ? styles.selected : ''} onClick={() => setSelected(e.id)}>
-            <span>{e.sectionName}</span><small>{e.ministry || e.agency} / {e.organization || e.specialAccount} {e.subAccount}</small><small>項 {e.sectionCode} · {e.eventCount} events{e.relationCount > 0 ? ' · 関係あり' : ''}</small>
-          </button>)}
+    <PaneLayout filters={<section className={styles.controls} aria-label="表示条件"><div className={styles.filterTitle}><h2>フィルタ</h2><button onClick={resetFilters}>リセット</button></div>
+      <label>予算年度 · fiscalYear<select aria-label="予算年度 · fiscalYear" value={year} onChange={e => setYear(Number(e.target.value))}><option>2024</option><option>2025</option></select></label>
+      <label>モード<select aria-label="モード" value={mode} onChange={e => setMode(e.target.value)}><option value="all">予算から決算まで</option><option value="settlement">決算のある項</option></select></label>
+      <div className={styles.filterField}><span>会計</span><MultiSelect searchable={false} label="会計" options={Object.entries(accounts).map(([value, label]) => ({ value, label }))} value={account} onChange={setAccount} /></div>
+      <div className={styles.filterField}><span>所管・組織</span><MultiSelect label="所管・組織" options={organizationOptions} value={organizations} onChange={setOrganizations} /></div>
+      <div className={styles.filterField}><span>項名・キーワード</span><SearchInput label="項・所管を検索" value={query} onChange={setQuery} regex={regex} onRegex={setRegex} /></div>
+      <fieldset className={styles.amountFilter}><legend>当初予算・成立額（円）</legend><div>
+        <label>下限<input type="text" inputMode="numeric" aria-label="金額の下限（円）" placeholder="指定なし" value={minAmount} onChange={e => setMinAmount(e.target.value)} aria-invalid={!!amountRange.error} aria-describedby={amountRange.error ? 'amount-range-error' : undefined} /></label>
+        <span>〜</span><label>上限<input type="text" inputMode="numeric" aria-label="金額の上限（円）" placeholder="指定なし" value={maxAmount} onChange={e => setMaxAmount(e.target.value)} aria-invalid={!!amountRange.error} aria-describedby={amountRange.error ? 'amount-range-error' : undefined} /></label>
+      </div>{amountRange.error && <p id="amount-range-error" role="alert" className={styles.searchError}>{amountRange.error}</p>}</fieldset>
+      <p className={styles.muted}>条件の変更は自動で反映されます。選択なしの場合はすべて表示します。</p>
+    </section>} list={
+      <section className={styles.sidebar} aria-label="項一覧ペイン">
+        <div className={styles.listTitle}><h2>項一覧</h2><span role="status">{filtered.length.toLocaleString()} 件 / 全 {index?.entities.length.toLocaleString() ?? 0} 件</span></div>
+        <p className={styles.muted}>金額は当初予算・成立。— は該当イベントなし。列見出しで並べ替え、境界で列幅調整。</p>
+        {amountsLoading && (amountRange.active || sort?.key === 'amount') && <p className={styles.muted} role="status">金額を読み込み中です。取得済みの金額から反映しています。</p>}
+        {amountError && <p role="alert" className={styles.searchError}>一覧の金額を取得できませんでした。<button onClick={() => setRetry(n => n + 1)}>再読み込み</button></p>}
+        <div className={styles.list}>
+          <EntityTable entities={sorted} amounts={amounts} amountError={amountError} selected={entityId} onSelect={setSelected} sort={sort} onSort={key => setSort(previous => ({ key, direction: previous?.key === key && previous.direction === 'asc' ? 'desc' : 'asc' }))} />
+          {index && !filtered.length && <p className={styles.empty}>該当する項はありません</p>}
         </div>
-      </aside>
+      </section>} detail={
       <section className={styles.content}>
-        {!current ? <div className={styles.empty}><h2>該当する項はありません</h2><p>{year === 2025 && mode === 'settlement' ? 'このフルデータには2025年度のMOF決算イベントがありません。' : '検索語や会計、モードを変更してください。'}</p><button onClick={() => { setQuery(''); setAccount(''); setMode('all'); }}>条件をリセット</button></div> : <>
+        {!index ? <p role="status">{error ? 'データを読み込めませんでした。' : '実データを読み込み中…'}</p> : !current ? <div className={styles.empty}><h2>該当する項はありません</h2><p>{year === 2025 && mode === 'settlement' ? 'このフルデータには2025年度のMOF決算イベントがありません。' : '検索語や会計、モード、金額範囲を変更してください。'}</p><button onClick={resetFilters}>条件をリセット</button></div> : <>
           <div className={styles.entityHeader}><span className={styles.badge}>{accounts[current.accountType]}</span><span className={styles.muted}>FY {year} / 項 {current.sectionCode}</span><h2>{current.sectionName}</h2><p>{[current.ministry, current.organization, current.specialAccount, current.subAccount, current.agency].filter(Boolean).join(' / ')}</p></div>
           <nav className={styles.tabs} aria-label="詳細表示"><button aria-pressed={tab === 'events'} onClick={() => setTab('events')}>Budget Events</button><button aria-pressed={tab === 'identity'} onClick={() => setTab('identity')}>Identity / RS</button><button aria-pressed={tab === 'diff'} onClick={() => setTab('diff')}>現行モデルとの差分</button></nav>
           {!detail ? <p role="status">項のイベントを読み込み中…</p> : <>
@@ -106,7 +147,7 @@ export default function BudgetFlow() {
           </>}
         </>}
       </section>
-    </div>}
+    } />
     {index && <footer className={styles.footer}>独立参照フルデータ · {index.recordCount.toLocaleString()} 原典レコード / {index.eventCount.toLocaleString()} Budget Events · 決算式検算 {index.settlementChecks.toLocaleString()} 項<br /><span className={styles.code}>ZIP SHA-256: {index.archiveSha256}</span></footer>}
   </main>;
 }
