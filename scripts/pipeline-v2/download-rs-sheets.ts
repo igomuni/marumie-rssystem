@@ -33,7 +33,14 @@ async function discoverMinistrySlugs(page: Page, year: number): Promise<string[]
   return [...new Set(hrefs.filter(h => h.startsWith(prefix)))].map(h => h.slice(prefix.length));
 }
 
-/** 1府省庁ページを開き、CSV/PDFボタン押下で発行される実URLを集める */
+/**
+ * 1府省庁ページを開き、CSVボタン押下で発行される実URLを集める。
+ *
+ * 各様式はCSV/PDFの両方が同一内容で提供されるが（全タイトルで完全に一致することを
+ * 実データで確認済み。docs/tasks/20260919_1523_...参照）、PDFは非構造化で
+ * パイプラインでは使わないためCSVのみ取得する（2026-09-19判断。130MB相当の
+ * 重複ダウンロードを回避）。
+ */
 async function collectFileUrls(page: Page, year: number, slug: string): Promise<string[]> {
   const urls: string[] = [];
   const onRequest = (req: import('playwright').Request) => {
@@ -44,7 +51,7 @@ async function collectFileUrls(page: Page, year: number, slug: string): Promise<
   try {
     await page.goto(`https://rssystem.go.jp/sheets/${year}/${slug}`, { waitUntil: 'networkidle', timeout: NAV_TIMEOUT_MS });
     await page.waitForTimeout(300);
-    const buttons = await page.locator('button:has-text("CSV"), button:has-text("PDF")').all();
+    const buttons = await page.locator('button:has-text("CSV")').all();
     for (const b of buttons) {
       await Promise.all([
         page.waitForEvent('download', { timeout: 8_000 }).catch(() => null),
