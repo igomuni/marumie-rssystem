@@ -52,6 +52,18 @@ Pipeline V2の当面のスコープ（MOF当初/補正/決算の金額サマリ�
 前者は概算要求時点、後者は国会修正議決後の最終版。内容は異なる（提出時点と成立時点で金額が変わりうる）ため
 厳密には重複ではないが、V2で使うのは基本的に成立版（`2025/`）のみで足りる。
 
+## 追記（2026-09-19）: `data/download` をV1/V2で分離
+
+整理のため、`data/download/` 配下のV1（既存パイプライン）が使っていたデータ一式
+（`RS_{YEAR}/`・`mof_{YEAR}/`・`mof_archive/`・`digital_agency_budget_2024/`等28件）を
+`data/download_old/` へ移動した。`data/download/` にはV2の新規取得分
+（`mof.go.jp/`・`rssystem.go.jp/`）のみが残る。
+
+**影響**: `npm run generate-mof-data`・`generate-mof-jikou`等、V1のCSV/XML生成コマンドは
+`data/download/mof_{YEAR}/`を直接参照するため、移動後はこれらのコマンドが動かない。
+元に戻すには `data/download_old/*` を `data/download/` へ戻す（`data/`はgitignore対象で
+Git管理外のため、この移動はローカル状態のみに影響し、リポジトリ・他環境には影響しない）。
+
 ## 対応方針の提案
 
 | 対象 | 提案 |
