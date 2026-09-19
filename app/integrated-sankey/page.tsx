@@ -1065,16 +1065,18 @@ type SubGraphState =
 
 function useSubcontractGraph(projectId: number, year: number): SubGraphState {
   const key = `${projectId}-${year}`;
-  const keyRef = useRef(key);
+  const [prevKey, setPrevKey] = useState(key);
   const [state, setState] = useState<SubGraphState>({ status: 'loading' });
   // 事業・年度が切り替わったら、useEffect実行前（このレンダー内）で古いready
   // データを捨てる。ProjectDetail自体はkeyでremountしない（remountすると
   // タブ選択（tab state）もリセットされてしまい、「選択タブが予算サマリに
   // 戻ってしまう」不具合になる、2026-09-18指摘）。Reactの「レンダー中に前回の
   // propsとの差分でstateを調整する」パターンで、タブ選択を保ったまま
-  // 古いグラフが一瞬表示される問題も避ける
-  const stale = keyRef.current !== key;
-  if (stale) keyRef.current = key;
+  // 古いグラフが一瞬表示される問題も避ける。破棄されうるレンダー中の副作用は
+  // useRefではなくuseStateで持つ（refへの書き込みは破棄されたレンダーでも
+  // 残ってしまうため、CodeRabbit指摘 2026-09-19）
+  const stale = prevKey !== key;
+  if (stale) setPrevKey(key);
   const effectiveState: SubGraphState = stale ? { status: 'loading' } : state;
   if (stale) setState(effectiveState);
   useEffect(() => {
@@ -1182,7 +1184,7 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
                 <Row label="再委託金額" v={subGraphState.graph.totalExpense - subGraphState.graph.directExpenseTotal} />
               </div>
             ) : subGraphState.status !== 'loading' && (
-              <p style={{ fontSize: 12, color: '#aaa' }}>再委託構造データがありません</p>
+              <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
             )}
           </>
         ) : tab === 1 ? (
