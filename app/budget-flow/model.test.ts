@@ -25,7 +25,7 @@ describe('multi-select and search', () => {
     expect(filterEntities(rows, ['special', 'general'], '', 'all', ['復興庁', '研究局'])).toEqual(rows);
     expect(filterEntities(rows, ['general'], '', 'all', ['復興庁'])).toEqual([]);
     expect(filterEntities(rows, [], '', 'settlement', ['研究局'])).toEqual([rows[1]]);
-    expect(filterEntities(rows, [], '', 'all', [])).length(2);
+    expect(filterEntities(rows, [], '', 'all', [])).toHaveLength(2);
   });
   it('distinguishes literal and regex search and rejects invalid expressions', () => {
     expect(filterEntities(rows, [], '復興|研究', 'all')).toEqual([]);

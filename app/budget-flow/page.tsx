@@ -77,6 +77,7 @@ export default function BudgetFlow() {
     const abort = new AbortController();
     setDetail(null); setActiveEvent(0); setEvidencePage(0);
     if (!entityId) return () => abort.abort();
+    setError('');
     readData<Record<string, EntityDetail>>(`/budget-flow-v2/${year}/${entityId[0]}.json.gz`, abort.signal).then(data => {
       if (!data[entityId]) throw new Error('選択した項のデータがありません。');
       setDetail(data[entityId]);

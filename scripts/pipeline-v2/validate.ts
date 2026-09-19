@@ -62,6 +62,36 @@ function recountMofExpenditure(zipPath: string): { sectionCount: number; amount:
 }
 
 /**
+ * クォート対応の最小CSVパーサ（1レコード=1行の配列）。RSの自由記述列（主な増減理由等）が
+ * カンマ・改行を含みうるため、単純split(',')では後続列がずれる。
+ * lib/csv.tsとは意図的に別実装にしている（正規化パイプラインのパーサ自体にバグがあった
+ * 場合にvalidate.ts側で検出できるようにするため。同じコードを共有すると同じバグを
+ * 再現しうる。CodeRabbit指摘、2026-09-19）。
+ */
+function parseCsvRowsIndependently(content: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = '';
+  let inQuotes = false;
+  const pushField = () => { row.push(field); field = ''; };
+  const pushRow = () => { pushField(); if (row.some(v => v !== '')) rows.push(row); row = []; };
+  for (let i = 0; i < content.length; i++) {
+    const c = content[i];
+    if (inQuotes) {
+      if (c === '"' && content[i + 1] === '"') { field += '"'; i++; }
+      else if (c === '"') inQuotes = false;
+      else field += c;
+    } else if (c === '"') inQuotes = true;
+    else if (c === ',') pushField();
+    else if (c === '\r') { pushRow(); if (content[i + 1] === '\n') i++; }
+    else if (c === '\n') pushRow();
+    else field += c;
+  }
+  if (field !== '' || row.length > 0) pushRow();
+  return rows;
+}
+
+/**
  * V1の生raw CSV（data/download_old/RS_{year}/2-1_*.zip）から、指定した予算年度の
  * 列の合計を独立に再集計する（normalize-rs.tsとは別コード。列名は呼び出し側で指定）。
  */
@@ -70,14 +100,14 @@ function recountRsColumn(zipPath: string, budgetYear: number, columnName: string
   const entry = listZipEntries(zipPath).find(e => e.toLowerCase().endsWith('.csv'));
   if (!entry) return null;
   const content = readZipEntryText(zipPath, entry).replace(/^﻿/, '');
-  const lines = content.split(/\r?\n/).filter(l => l.trim());
-  const headers = lines[0].split(',');
+  const rows = parseCsvRowsIndependently(content);
+  if (rows.length === 0) return null;
+  const headers = rows[0];
   const yearCol = headers.indexOf('予算年度');
   const valueCol = headers.indexOf(columnName);
   if (yearCol < 0 || valueCol < 0) return null;
   let total = 0;
-  for (const line of lines.slice(1)) {
-    const cells = line.split(',');
+  for (const cells of rows.slice(1)) {
     if (Number(cells[yearCol]) !== budgetYear) continue;
     total += Number(cells[valueCol].replace(/,/g, '')) || 0;
   }

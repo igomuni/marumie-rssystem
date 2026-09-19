@@ -37,8 +37,21 @@ export function eventLabel(e: EventGroup) {
   return (eventNames[e.eventType] ?? e.eventType) + (e.budgetStatus === 'submitted' ? '・提出案' : e.budgetStatus === 'enacted' ? '・成立' : '') + (e.revision === null ? '' : `・第${e.revision}号`);
 }
 export function isAdjustment(type: string) { return ['parliamentary_amendment', 'supplement_adjustment', 'carryover_in', 'reserve_use', 'budget_rule_increase', 'transfer_adjustment', 'reallocation'].includes(type); }
+/**
+ * 入れ子の量指定子（例: `(.+)+`）を検出する。この形は破局的バックトラックを起こし、
+ * メインスレッドで同期実行する`RegExp.test`をフリーズさせうるため事前に弾く
+ * （簡易ヒューリスティックであり全パターンを検出できるわけではないが、
+ * CodeRabbitが実証した典型形はこれで防げる。2026-09-19対応）。
+ */
+function hasCatastrophicBacktrackingShape(pattern: string): boolean {
+  return /\([^()]*[+*][^()]*\)[+*]/.test(pattern);
+}
+
 export function searchMatcher(query: string, regex = false): { matches: (value: string) => boolean; error: string } {
   const q = query.trim().normalize('NFKC');
+  if (regex && hasCatastrophicBacktrackingShape(q)) {
+    return { matches: () => false, error: '入れ子の繰り返し（例: (.+)+）を含む正規表現は使えません。' };
+  }
   try {
     const pattern = regex ? new RegExp(q, 'i') : null;
     return { matches: value => pattern ? pattern.test(value.normalize('NFKC')) : value.normalize('NFKC').toLowerCase().includes(q.toLowerCase()), error: '' };

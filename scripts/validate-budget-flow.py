@@ -1,11 +1,22 @@
 """Independent audit of every rendered event against the source ZIP."""
 import collections, gzip, json, pathlib, zipfile
+
+def load_unique(pairs):
+    """dict(pairs) silently keeps only the last value on a duplicate key. Fail loudly instead,
+    since a duplicate eventId/recordId/entity key here would mean the generator produced
+    colliding identifiers that this audit must not paper over."""
+    result = {}
+    for key, value in pairs:
+        assert key not in result, f'Duplicate identifier: {key!r}'
+        result[key] = value
+    return result
+
 root = pathlib.Path(__file__).resolve().parent.parent
 with zipfile.ZipFile(root/'data/pipeline-v2-full-output.zip') as z:
     for year in (2024, 2025):
-        source = {r['eventId']: r for line in z.open(f'derived/mof/fy{year}/budget-events.jsonl') if (r := json.loads(line))}
-        raw = {r['recordId']: r for line in z.open(f'normalized/mof/fy{year}/budget-items.jsonl') if (r := json.loads(line))}
-        entities = {k: v for f in (root/f'public/budget-flow-v2/{year}').glob('*.json.gz') for k, v in json.loads(gzip.decompress(f.read_bytes())).items()}
+        source = load_unique((r['eventId'], r) for line in z.open(f'derived/mof/fy{year}/budget-events.jsonl') if (r := json.loads(line)))
+        raw = load_unique((r['recordId'], r) for line in z.open(f'normalized/mof/fy{year}/budget-items.jsonl') if (r := json.loads(line)))
+        entities = load_unique((k, v) for f in (root/f'public/budget-flow-v2/{year}').glob('*.json.gz') for k, v in json.loads(gzip.decompress(f.read_bytes())).items())
         seen = set()
         zero_count = 0
         stages = collections.Counter()

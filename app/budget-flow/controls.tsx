@@ -17,8 +17,9 @@ export function MultiSelect({ label, options, value, onChange, searchable = true
   const { matches } = searchMatcher(query, regex);
   const visible = options.filter(option => matches(option.label));
   const details = useRef<HTMLDetailsElement>(null);
+  const selectionText = value.length ? options.filter(option => value.includes(option.value)).map(option => option.label).join('、') : 'すべて';
   return <details ref={details} className={styles.multiSelect} onKeyDown={e => { if (e.key === 'Escape' && details.current) { details.current.open = false; details.current.querySelector('summary')?.focus(); } }}>
-    <summary aria-label={label}><span>{value.length ? options.filter(option => value.includes(option.value)).map(option => option.label).join('、') : 'すべて'}</span></summary>
+    <summary aria-label={`${label}: ${selectionText}`}><span>{selectionText}</span></summary>
     <div className={styles.optionsPanel}>{searchable && <SearchInput label={`${label}の候補を検索`} value={query} onChange={setQuery} regex={regex} onRegex={setRegex} />}
       <button className={styles.clearSelection} onClick={() => onChange([])}>選択を解除（すべて表示）</button>
       <div className={styles.options} role="group" aria-label={`${label}の選択肢`}>{visible.map(option => <label key={option.value}><input type="checkbox" checked={value.includes(option.value)} onChange={e => onChange(e.target.checked ? [...value, option.value] : value.filter(v => v !== option.value))} /><span>{option.label}</span></label>)}{!visible.length && <p>候補がありません</p>}</div>

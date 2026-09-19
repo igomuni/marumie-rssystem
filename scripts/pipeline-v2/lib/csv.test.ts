@@ -27,6 +27,19 @@ describe('parseCsv', () => {
     expect(rows).toEqual([{ a: '1', b: '2' }, { a: '3', b: '4' }]);
   });
 
+  it('CR単独の改行にも対応する（レコードを1行に潰さない）', () => {
+    const rows = parseCsv('a,b\r1,2\r3,4\r');
+    expect(rows).toEqual([{ a: '1', b: '2' }, { a: '3', b: '4' }]);
+  });
+
+  it('クォート内のCR/LFはそのまま保持する', () => {
+    const rows = parseCsv('name,note\n"事業A","1行目\r\n2行目"\n"事業B","3行目\r4行目"\n');
+    expect(rows).toEqual([
+      { name: '事業A', note: '1行目\r\n2行目' },
+      { name: '事業B', note: '3行目\r4行目' },
+    ]);
+  });
+
   it('空行を無視する', () => {
     const rows = parseCsv('a,b\n1,2\n\n3,4\n');
     expect(rows).toEqual([{ a: '1', b: '2' }, { a: '3', b: '4' }]);

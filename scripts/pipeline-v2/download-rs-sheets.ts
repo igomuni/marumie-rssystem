@@ -16,6 +16,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { chromium, type Browser, type Page } from 'playwright';
+import { writeFileAtomic } from './lib/atomic-write';
 
 const NAV_TIMEOUT_MS = 20_000;
 const THROTTLE_MS = 300;
@@ -82,7 +83,7 @@ async function saveFile(url: string, outDir: string): Promise<DownloadResult> {
     if (!res.ok) return { fileName, status: 'failed', error: `HTTP ${res.status}` };
     const buf = Buffer.from(await res.arrayBuffer());
     fs.mkdirSync(outDir, { recursive: true });
-    fs.writeFileSync(outPath, buf);
+    writeFileAtomic(outPath, buf);
     return { fileName, status: 'downloaded', bytes: buf.length };
   } catch (e) {
     return { fileName, status: 'failed', error: e instanceof Error ? e.message : String(e) };

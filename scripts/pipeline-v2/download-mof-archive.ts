@@ -26,6 +26,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
+import { writeFileAtomic } from './lib/atomic-write';
 
 const FETCH_TIMEOUT_MS = 30_000;
 const THROTTLE_MS = 1_000;
@@ -106,7 +107,7 @@ async function downloadOne({ href, text }: ArchiveLink, outRoot: string): Promis
     if (!res.ok) return { href, text, status: 'failed', error: `HTTP ${res.status}` };
     const buf = Buffer.from(await res.arrayBuffer());
     fs.mkdirSync(path.dirname(outPath), { recursive: true });
-    fs.writeFileSync(outPath, buf);
+    writeFileAtomic(outPath, buf);
     return { href, text, status: 'downloaded', bytes: buf.length };
   } catch (e) {
     return { href, text, status: 'failed', error: e instanceof Error ? e.message : String(e) };

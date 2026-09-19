@@ -36,7 +36,13 @@ function parseRows(content: string): string[][] {
       row.push(field);
       field = '';
     } else if (c === '\r') {
-      // 改行はLFのみで扱う。CRは無視
+      // CR単独・CRLFのどちらも行区切りとして終端する（CRのみ改行のファイルも対応）。
+      // CRLFの場合はLFを消費して二重に行が終わらないようにする
+      row.push(field);
+      field = '';
+      if (row.some(v => v !== '')) rows.push(row);
+      row = [];
+      if (next === '\n') i++;
     } else if (c === '\n') {
       row.push(field);
       field = '';

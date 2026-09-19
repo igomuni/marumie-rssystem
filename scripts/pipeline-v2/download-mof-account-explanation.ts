@@ -18,6 +18,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
+import { writeFileAtomic } from './lib/atomic-write';
 
 const FETCH_TIMEOUT_MS = 30_000;
 
@@ -46,7 +47,7 @@ async function downloadOne(year: number): Promise<boolean> {
     }
     const buf = Buffer.from(await res.arrayBuffer());
     fs.mkdirSync(outDir, { recursive: true });
-    fs.writeFileSync(outPath, buf);
+    writeFileAtomic(outPath, buf);
     console.log(`  [downloaded] ${fileName} ${(buf.length / 1024).toFixed(0)}KB`);
     return true;
   } catch (e) {

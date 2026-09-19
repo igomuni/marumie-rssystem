@@ -18,7 +18,7 @@ V1は同時に「V2の正しさを検算する基準」としても機能する�
 - 公式原本（raw）→原典別正規化（normalized）→意味解決済み統合データ（derived）→アプリ向け成果物（products）の4層に責務を分離する
 - MOF・RSそれぞれの「予算年度」の概念のズレ（sourceYear/fiscalYear、3節）を型レベルで区別する
 - 金額を静的な1レコードに潰さず、当初・補正・決算・執行等を`BudgetEvent`として表現する（5節）
-- 将来のBudget Flow機能実装のための土台を作る（今回のPRではBudget Flow UI自体は作らない）
+- Budget Flow機能実装の土台を作る（`/budget-flow`ページはこの正規化・突合結果を読む）
 
 ## 3. sourceYearとfiscalYearの区別
 

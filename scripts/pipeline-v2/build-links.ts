@@ -4,7 +4,9 @@
  * 方式はV1（scripts/generate-mof-rs-kou-moku-linkage.ts）と同じ: RSの2-2 CSV
  * （予算種別・歳出予算項目）はMOFの科目別内訳と同じ語彙（所管・組織/特別会計・勘定・項・目）を
  * 持つため、名前照合や語幹一致は使わず完全一致キーで直接突き合わせる（V1実測: 一般会計・当初予算で
- * 事業の92.7%・金額の97.9%が一致）。誤検出は原理上ない（両者が同じMOF語彙を使っているため）。
+ * 事業の92.7%・金額の97.9%が一致）。ただしRS側にsectionCodeが無いため、MOF側で
+ * sectionCode違いの別entityが同名になるケース（実データで226件）は一意に決まらず、
+ * 誤って一方へ寄せることを避けるためリンクしない（下記ambiguousKeys参照）。
  *
  * V1との違い: V1はbudgetType（当初/補正第N号）ごとに別キー空間で照合するが、V2のMOF
  * BudgetEntityは同一項・目であればbudgetTypeをまたいで1つのentityに集約済みのため
@@ -48,17 +50,27 @@ function processYear(year: number): void {
   }
 
   const entities: BudgetEntity[] = JSON.parse(fs.readFileSync(entitiesPath, 'utf-8'));
-  const entityByKey = new Map<string, string>();
+  // build-identities.tsのentity識別キーはsectionCodeを含むが、RS側にはsectionCodeが無い
+  // （2-2 CSVは項名のみを持つ）ため、entityMatchKeyはsectionCodeを含まない縮小キーになる。
+  // 同一名でsectionCodeだけ異なる別entityが実在する（例: 予算段階と決算段階でコードが
+  // 振り直された東日本大震災復興特別会計の項目、実データで226件確認）ため、縮小キーが
+  // 複数entityIdに対応する場合は「どちらか分からない」ものとしてリンクを作らない
+  // （推測による強制統合を避ける。CodeRabbit指摘、2026-09-19）
+  const entityByKey = new Map<string, Set<string>>();
   for (const e of entities) {
     const key = entityMatchKey(e.account, e.organization, e.subAccount ?? '', e.sectionName, e.itemName);
-    entityByKey.set(key, e.entityId); // 同一キーが複数entityIdを持つことは無い（build-identitiesで既に一意化済み）
+    const set = entityByKey.get(key) ?? new Set<string>();
+    set.add(e.entityId);
+    entityByKey.set(key, set);
   }
+  const ambiguousKeys = new Set([...entityByKey.entries()].filter(([, ids]) => ids.size > 1).map(([k]) => k));
 
   const items: RsBudgetItem[] = JSON.parse(fs.readFileSync(itemsPath, 'utf-8'));
   const targetItems = items.filter(i => i.fiscalYear === year && (i.accountCategory === '一般会計' || i.accountCategory === '特別会計'));
 
   const linkMap = new Map<string, ProjectLink>(); // `${projectId}|${entityId}`
   let linkedRows = 0;
+  let ambiguousRows = 0;
   let totalAmount = 0;
   let linkedAmount = 0;
   const totalProjects = new Set<string>();
@@ -68,7 +80,9 @@ function processYear(year: number): void {
     totalAmount += item.amount;
     totalProjects.add(item.projectId);
     const key = entityMatchKey(item.ministry, item.organization, item.subAccount, item.sectionName, item.itemName);
-    const entityId = entityByKey.get(key);
+    if (ambiguousKeys.has(key)) { ambiguousRows++; continue; }
+    const ids = entityByKey.get(key);
+    const entityId = ids?.size === 1 ? [...ids][0] : undefined;
     if (!entityId) continue;
 
     linkedRows++;
@@ -86,6 +100,7 @@ function processYear(year: number): void {
 
   console.log(`  対象行（一般会計＋特別会計）: ${targetItems.length}件`);
   console.log(`  完全一致: ${linkedRows}行 → project-links.json: ${links.length}件（事業×entity）`);
+  console.log(`  曖昧（同名で複数entityに対応し判定不能。リンクしない）: ${ambiguousRows}行 / ${ambiguousKeys.size}キー`);
   console.log(`  事業カバレッジ: ${linkedProjects.size} / ${totalProjects.size} (${(linkedProjects.size / totalProjects.size * 100).toFixed(1)}%)`);
   console.log(`  金額カバレッジ: ${(linkedAmount / 1e12).toFixed(2)} / ${(totalAmount / 1e12).toFixed(2)} 兆円 (${(linkedAmount / totalAmount * 100).toFixed(1)}%)`);
 
@@ -98,6 +113,8 @@ function processYear(year: number): void {
       matchKey: 'ministry+organization+subAccount+sectionName+itemName (NFKC正規化)',
       targetRows: targetItems.length,
       linkedRows,
+      ambiguousRows,
+      ambiguousKeyCount: ambiguousKeys.size,
       linkCount: links.length,
       projectTotal: totalProjects.size,
       projectLinked: linkedProjects.size,
