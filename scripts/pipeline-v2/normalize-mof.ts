@@ -98,7 +98,11 @@ function eventsFromInitialOrSupplementary(
   const events: MofBudgetEvent[] = [];
   for (const row of rows) {
     const amount = yen(row, amountCol) * 1000; // 予算書CSVは千円単位
-    if (amount === 0) continue;
+    // amount===0でも行（目）自体は存在する（0円計上は「予算措置なし」ではなく
+    // 「0円で計上されている」という意味のある情報）ため、0円だからと言って
+    // イベント自体を捨てない。参照実装（Python版pipeline-v2-reference）との
+    // 突合で判明: 0円行を捨てるとFY2024当初・一般会計の項数が739件になり、
+    // source-preservingな784件と一致しなかった（2026-09-19）
     events.push({
       fiscalYear,
       eventType: kind,

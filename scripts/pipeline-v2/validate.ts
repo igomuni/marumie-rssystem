@@ -29,22 +29,32 @@ function readJsonIfExists<T>(p: string): T | null {
   return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf-8')) : null;
 }
 
-/** V1の生raw CSV（data/download_old/mof_{year}/DL{id}.zip）から歳出表の項コード集合と金額を独立に再集計する。
- *  normalize-mof.tsとは別実装で、V2側のパースバグ検出を目的とする */
+/**
+ * V1の生raw CSV（data/download_old/mof_{year}/DL{id}.zip）から歳出表の項の集合と金額を
+ * 独立に再集計する。normalize-mof.tsとは別実装で、V2側のパースバグ検出を目的とする。
+ *
+ * 項の同一性は「項コード」単独では判定できない（同じ項コードが所管・組織をまたいで
+ * 再利用されるため）。所管+組織+項コード+項名の組で数える必要がある
+ * （Python参照実装との突合で判明。項コードのみだと259件になり、正しい784件と一致しなかった）。
+ */
 function recountMofExpenditure(zipPath: string): { sectionCount: number; amount: number } | null {
   if (!fs.existsSync(zipPath)) return null;
   const entry = listZipEntries(zipPath).find(e => e.toLowerCase().endsWith('b.csv'));
   if (!entry) return null;
   const lines = readZipEntryText(zipPath, entry).split(/\r?\n/).filter(l => l.trim());
   const headers = lines[0].split(',').map(h => h.trim());
-  const sectionCodeCol = headers.indexOf('項コード');
+  const idx = (name: string) => headers.indexOf(name);
+  const accountCol = idx('所管');
+  const orgCol = idx('組織');
+  const sectionCodeCol = idx('項コード');
+  const sectionNameCol = idx('項名');
   const amountCol = headers.findIndex(h => /^(令和|平成)(元|\d+)年度/.test(h));
-  if (sectionCodeCol < 0 || amountCol < 0) return null;
+  if (accountCol < 0 || orgCol < 0 || sectionCodeCol < 0 || sectionNameCol < 0 || amountCol < 0) return null;
   const sections = new Set<string>();
   let amount = 0;
   for (const line of lines.slice(1)) {
     const cells = line.split(',');
-    sections.add(cells[sectionCodeCol]);
+    sections.add([cells[accountCol], cells[orgCol], cells[sectionCodeCol], cells[sectionNameCol]].join('|'));
     const n = parseInt((cells[amountCol] ?? '').replace(/,/g, ''), 10);
     if (!Number.isNaN(n)) amount += n * 1000;
   }
@@ -99,19 +109,20 @@ function main(): void {
     `public/data/mof-budget-overview-${year}.json`
   );
   const mofRecount = recountMofExpenditure(path.join('data', 'download_old', `mof_${year}`, 'DL202411001.zip'));
-  const derivedEvents = readJsonIfExists<{ eventType: string; sectionCode: string; amount: number; provenance: { file: string } }[]>(
+  const derivedEvents = readJsonIfExists<{ eventType: string; account: string; organization: string; sectionCode: string; sectionName: string; amount: number; provenance: { file: string } }[]>(
     path.join('data', 'derived', String(year), 'budget-events.json')
   );
   const v2InitialGeneral = derivedEvents?.filter(e => e.eventType === 'initial' && e.provenance.file === 'DL202411001.zip') ?? null;
   const v2InitialAmount = v2InitialGeneral ? v2InitialGeneral.reduce((a, e) => a + e.amount, 0) : null;
-  const v2InitialSections = v2InitialGeneral ? new Set(v2InitialGeneral.map(e => e.sectionCode)).size : null;
+  const v2InitialSections = v2InitialGeneral
+    ? new Set(v2InitialGeneral.map(e => [e.account, e.organization, e.sectionCode, e.sectionName].join('|'))).size
+    : null;
 
   results.push(metric(
     'MOF当初 項数（一般会計、raw再集計 vs derived）',
     mofRecount?.sectionCount ?? null, v2InitialSections,
-    'V1側はdata/download_old/の生CSVをvalidate.ts独自実装で再集計（normalize-mof.tsとは別コード）。' +
-      'どちらも項コードのユニーク数だが、derived側は金額0円の行を除外している（normalize-mof.tsの仕様）ため、' +
-      '全目が0円の項がある場合はその分V2の方が少なくなりうる（要確認）'
+    'どちらも所管+組織+項コード+項名のユニーク数（項コード単独は所管をまたいで再利用されるため不可）。' +
+      'Python参照実装（docs/tasksのpipeline-v2-reference）との突合で784件が正であることを確認済み'
   ));
   results.push(metric(
     'MOF当初 金額（一般会計歳出、円）',
