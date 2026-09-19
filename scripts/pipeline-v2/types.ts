@@ -30,8 +30,12 @@ export interface Provenance {
 export interface MofBudgetEvent {
   fiscalYear: number;
   eventType: EventType;
+  /** 所管（一般会計・特別会計）または政府関係機関名 */
   account: string;
+  /** 組織（一般会計）・特別会計名（特別会計）・業務（政府関係機関） */
   organization: string;
+  /** 勘定。特別会計のみ存在（所管・特別会計名だけでは一意にならないため必須の識別要素） */
+  subAccount?: string;
   sectionCode: string;
   sectionName: string;
   itemName: string;

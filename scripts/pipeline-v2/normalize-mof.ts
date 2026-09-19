@@ -65,10 +65,17 @@ function isExpenditureTable(headers: string[]): boolean {
   return headers.some(h => h.includes('主要経費別分類')) || headers.some(h => h.includes('使途別分類コード')) && headers.some(h => h.includes('項名'));
 }
 
-function accountColumns(headers: string[]): { account?: string; organization?: string } {
-  const account = findColumn(headers, h => ['所管', '特別会計', '政府関係機関'].includes(h));
-  const organization = findColumn(headers, h => ['組織', '勘定', '業務'].includes(h));
-  return { account, organization };
+/**
+ * 所管/組織系の列は帳票により3パターンある:
+ *   一般会計:     所管, 組織
+ *   特別会計:     所管, 特別会計(名), 勘定   ← 3列とも識別に必要（勘定だけでは一意にならない）
+ *   政府関係機関: 政府関係機関(名), 業務
+ */
+function accountColumns(headers: string[]): { account?: string; organization?: string; subAccount?: string } {
+  const account = findColumn(headers, h => ['所管', '政府関係機関'].includes(h));
+  const organization = findColumn(headers, h => ['組織', '特別会計', '業務'].includes(h));
+  const subAccount = findColumn(headers, h => h === '勘定');
+  return { account, organization, subAccount };
 }
 
 function eventsFromInitialOrSupplementary(
@@ -79,7 +86,7 @@ function eventsFromInitialOrSupplementary(
 ): MofBudgetEvent[] {
   if (rows.length === 0) return [];
   const headers = Object.keys(rows[0]);
-  const { account, organization } = accountColumns(headers);
+  const { account, organization, subAccount } = accountColumns(headers);
   const sectionCode = findColumn(headers, h => h === '項コード');
   const sectionName = findColumn(headers, h => h === '項名');
   const itemName = findColumn(headers, h => h === '目名');
@@ -97,6 +104,7 @@ function eventsFromInitialOrSupplementary(
       eventType: kind,
       account: account ? row[account] : '',
       organization: organization ? row[organization] : '',
+      subAccount: subAccount ? row[subAccount] : undefined,
       sectionCode: row[sectionCode],
       sectionName: row[sectionName],
       itemName: row[itemName],
@@ -120,7 +128,7 @@ function eventsFromSettlement(rows: CsvRow[], fiscalYear: number, provenance: Pr
   if (rows.length === 0) return [];
   const headers = Object.keys(rows[0]);
   if (!isYenUnit(headers)) return [];
-  const { account, organization } = accountColumns(headers);
+  const { account, organization, subAccount } = accountColumns(headers);
   const sectionCode = findColumn(headers, h => h === '項コード');
   const sectionName = findColumn(headers, h => h === '項名');
   const itemName = findColumn(headers, h => h === '目名');
@@ -141,6 +149,7 @@ function eventsFromSettlement(rows: CsvRow[], fiscalYear: number, provenance: Pr
         eventType,
         account: account ? row[account] : '',
         organization: organization ? row[organization] : '',
+        subAccount: subAccount ? row[subAccount] : undefined,
         sectionCode: row[sectionCode],
         sectionName: row[sectionName],
         itemName: row[itemName],

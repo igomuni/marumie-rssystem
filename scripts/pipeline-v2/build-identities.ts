@@ -28,6 +28,7 @@ interface BudgetEntity {
   fiscalYear: number;
   account: string;
   organization: string;
+  subAccount?: string;
   sectionCode: string;
   sectionName: string;
   itemName: string;
@@ -39,8 +40,9 @@ interface DerivedBudgetEvent extends MofBudgetEvent {
   entityId: string;
 }
 
+/** 特別会計は「勘定」を含めないと所管・特別会計名だけでは一意にならない（例: 同じ特別会計内の複数勘定） */
 function entityKey(e: MofBudgetEvent): string {
-  return [e.account, e.organization, e.sectionCode, e.sectionName, e.itemName].join('|');
+  return [e.account, e.organization, e.subAccount ?? '', e.sectionCode, e.sectionName, e.itemName].join('|');
 }
 
 function buildEntities(events: MofBudgetEvent[], fiscalYear: number): { entities: BudgetEntity[]; keyToId: Map<string, string> } {
@@ -53,8 +55,13 @@ function buildEntities(events: MofBudgetEvent[], fiscalYear: number): { entities
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   const entities: BudgetEntity[] = [...keyToId.entries()].map(([key, entityId]) => {
-    const [account, organization, sectionCode, sectionName, itemName] = key.split('|');
-    return { entityId, fiscalYear, account, organization, sectionCode, sectionName, itemName, eventCount: counts.get(key) ?? 0 };
+    const [account, organization, subAccount, sectionCode, sectionName, itemName] = key.split('|');
+    return {
+      entityId, fiscalYear, account, organization,
+      subAccount: subAccount || undefined,
+      sectionCode, sectionName, itemName,
+      eventCount: counts.get(key) ?? 0,
+    };
   });
   return { entities, keyToId };
 }
@@ -81,7 +88,7 @@ function processYear(year: number): void {
       rawEventCount: events.length,
       canonicalEntityCount: entities.length,
       matchMethod: 'exact_match' as const,
-      matchKey: 'account+organization+sectionCode+sectionName+itemName',
+      matchKey: 'account+organization+subAccount+sectionCode+sectionName+itemName',
       note: '年度内のみで完結。fiscalYearをまたいだ項コード変更・名称変更の同一性判定はこのPoCでは行わない',
     },
     unresolved: [
