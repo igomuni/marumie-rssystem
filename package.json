@@ -42,7 +42,8 @@
     "pipeline:v2:download:mof": "tsx scripts/pipeline-v2/download-mof-archive.ts",
     "pipeline:v2:download:mof-account-explanation": "tsx scripts/pipeline-v2/download-mof-account-explanation.ts",
     "pipeline:v2:normalize:rs": "tsx scripts/pipeline-v2/normalize-rs.ts",
-    "pipeline:v2:normalize:mof": "tsx scripts/pipeline-v2/normalize-mof.ts"
+    "pipeline:v2:normalize:mof": "tsx scripts/pipeline-v2/normalize-mof.ts",
+    "pipeline:v2:derive": "tsx scripts/pipeline-v2/build-identities.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
