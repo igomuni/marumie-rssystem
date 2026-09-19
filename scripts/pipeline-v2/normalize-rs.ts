@@ -115,7 +115,9 @@ function normalizeBudgetItems(year: number): RsBudgetItem[] {
         provenance,
       };
     })
-    .filter(e => e.projectId && !Number.isNaN(e.fiscalYear) && e.amount !== 0);
+    // amount===0でも行自体（事業がその科目に計上されている事実）は残す。
+    // MOF側と同じ理由（0円計上除外による過少カウント、2026-09-19修正）でここも除外しない
+    .filter(e => e.projectId && !Number.isNaN(e.fiscalYear));
 }
 
 function normalizeExpenditures(year: number): RsExpenditure[] {
