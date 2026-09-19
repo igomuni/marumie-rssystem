@@ -765,7 +765,7 @@ function App() {
           {selectedNode?.section ? (
             <SectionDetail section={selectedNode.section} itemEdges={selectedItemEdges} projects={data.projects} onClose={() => setSelected(null)} />
           ) : selectedNode?.project ? (
-            <ProjectDetail key={`${selectedNode.project.projectId}-${year}`} project={selectedNode.project} itemEdges={selectedItemEdges} sections={data.sections} year={year} onClose={() => setSelected(null)} />
+            <ProjectDetail project={selectedNode.project} itemEdges={selectedItemEdges} sections={data.sections} year={year} onClose={() => setSelected(null)} />
           ) : (
             <AggregateDetail
               name={selectedNode?.name ?? ''}
@@ -1064,10 +1064,23 @@ type SubGraphState =
   | { status: 'error' };
 
 function useSubcontractGraph(projectId: number, year: number): SubGraphState {
+  const key = `${projectId}-${year}`;
+  const [prevKey, setPrevKey] = useState(key);
   const [state, setState] = useState<SubGraphState>({ status: 'loading' });
+  // 事業・年度が切り替わったら、useEffect実行前（このレンダー内）で古いready
+  // データを捨てる。ProjectDetail自体はkeyでremountしない（remountすると
+  // タブ選択（tab state）もリセットされてしまい、「選択タブが予算サマリに
+  // 戻ってしまう」不具合になる、2026-09-18指摘）。Reactの「レンダー中に前回の
+  // propsとの差分でstateを調整する」パターンで、タブ選択を保ったまま
+  // 古いグラフが一瞬表示される問題も避ける。破棄されうるレンダー中の副作用は
+  // useRefではなくuseStateで持つ（refへの書き込みは破棄されたレンダーでも
+  // 残ってしまうため、CodeRabbit指摘 2026-09-19）
+  const stale = prevKey !== key;
+  if (stale) setPrevKey(key);
+  const effectiveState: SubGraphState = stale ? { status: 'loading' } : state;
+  if (stale) setState(effectiveState);
   useEffect(() => {
     let cancelled = false;
-    setState({ status: 'loading' });
     fetch(`/api/subcontracts/${projectId}?year=${year}`)
       .then(res => {
         if (res.status === 404) return null;
@@ -1078,7 +1091,7 @@ function useSubcontractGraph(projectId: number, year: number): SubGraphState {
       .catch(() => { if (!cancelled) setState({ status: 'error' }); });
     return () => { cancelled = true; };
   }, [projectId, year]);
-  return state;
+  return effectiveState;
 }
 
 /** 再委託構造タブ（支出先・ブロック・ブロックのつながり）共通の空/読込/エラー表示 */
@@ -1136,29 +1149,44 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
         </>}
       />
       <DetailTabs tabs={[
-        { label: '予算サマリ' },
+        { label: 'サマリ' },
         { label: '予算執行', count: project.budgetBreakdown.length },
         { label: 'MOF項', count: bySection.size },
-        { label: '支出先', count: subGraphState.status === 'ready' ? recipientRows.length : undefined },
         { label: 'ブロック', count: subGraphState.status === 'ready' ? flowRows.length : undefined },
+        { label: '支出先', count: subGraphState.status === 'ready' ? recipientRows.length : undefined },
       ]} active={tab} onChange={setTab} />
       <div style={{ padding: '10px 14px', flex: 1, overflowY: 'auto' }}>
         {tab === 0 ? (
-          project.budgetSummary ? (
-            <div style={{ marginBottom: 10 }}>
-              <Row label="当初予算" v={project.budgetSummary.initialBudget} />
-              <Row label="補正予算" v={project.budgetSummary.supplementaryBudget} />
-              <Row label="繰越予算" v={project.budgetSummary.carryoverBudget} />
-              <Row label="予備費使用等" v={project.budgetSummary.reserveFund} />
-              <Row label="予算現額" v={project.budgetSummary.totalBudget} strong />
-              <Row label="執行額" v={project.budgetSummary.executedAmount} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f5f5f5', padding: '4px 0' }}>
-                <span style={{ color: '#999', fontSize: 12 }}>執行率</span><b style={{ fontSize: 12 }}>{project.budgetSummary.executionRate?.toFixed(1) ?? '—'}%</b>
+          <>
+            {project.budgetSummary ? (
+              <div style={{ marginBottom: 10 }}>
+                <Row label="当初予算" v={project.budgetSummary.initialBudget} />
+                <Row label="補正予算" v={project.budgetSummary.supplementaryBudget} />
+                <Row label="繰越予算" v={project.budgetSummary.carryoverBudget} />
+                <Row label="予備費使用等" v={project.budgetSummary.reserveFund} />
+                <Row label="予算現額" v={project.budgetSummary.totalBudget} strong />
+                <Row label="執行額" v={project.budgetSummary.executedAmount} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #f5f5f5', padding: '4px 0' }}>
+                  <span style={{ color: '#999', fontSize: 12 }}>執行率</span><b style={{ fontSize: 12 }}>{project.budgetSummary.executionRate?.toFixed(1) ?? '—'}%</b>
+                </div>
+                <Row label="翌年度繰越額" v={project.budgetSummary.carryoverToNext} />
+                <Row label="翌年度要求額" v={project.budgetSummary.nextYearRequest} />
               </div>
-              <Row label="翌年度繰越額" v={project.budgetSummary.carryoverToNext} />
-              <Row label="翌年度要求額" v={project.budgetSummary.nextYearRequest} />
-            </div>
-          ) : <p style={{ fontSize: 12, color: '#aaa' }}>予算執行データがありません</p>
+            ) : <p style={{ fontSize: 12, color: '#aaa' }}>予算執行データがありません</p>}
+            {/* 再委託構造（ブロック・支出先）のサマリ。「予算サマリ」を「サマリ」に改称し、
+                ブロック・支出先タブの集計値も併せて出す（2026-09-18指摘） */}
+            {subGraphState.status === 'ready' ? (
+              <div>
+                <StatRow label="ブロック数" value={`${subGraphState.graph.totalBlockCount.toLocaleString()}件`} />
+                <StatRow label="支出先数" value={`${subGraphState.graph.totalRecipientCount.toLocaleString()}件`} />
+                <StatRow label="階層数" value={`${subGraphState.graph.maxDepth.toLocaleString()}`} />
+                <Row label="直接支出金額" v={subGraphState.graph.directExpenseTotal} />
+                <Row label="再委託金額" v={subGraphState.graph.totalExpense - subGraphState.graph.directExpenseTotal} />
+              </div>
+            ) : subGraphState.status !== 'loading' && (
+              <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
+            )}
+          </>
         ) : tab === 1 ? (
           // 「2-2_予算・執行_予算種別・歳出予算項目」CSV由来のレコードをそのまま一覧にする
           // （集計値ではなく生のレコード。集計サマリは別タブ）
@@ -1201,41 +1229,15 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
             ))
           )
         ) : tab === 3 ? (
-          // 支出先: 直接支出先ブロックだけでなく再委託・別財源ブロックの支出先も横断で見せる
-          // （「支出先、ブロック、ブロックのつながりでタブを分けたい」「支出先には直接支出先
-          // ブロックなのか再委託ブロックなのか、再委託であればどのブロックの再委託なのかを」
-          // との指摘、2026-09-17）。データは5-2 CSVの直接/間接判定を1階層目のみに限る
-          // /sankey-svgの直接支出先合計より広く、再委託構造データ（既存）をそのまま使う
-          subGraphState.status !== 'ready'
-            ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
-            : recipientRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>支出先がありません</p> : (
-              // ブロックバッジの並びはブロックタブと揃える: 再委託・別財源は
-              // 親バッジ（名前は出さない）→ 対象ブロックバッジ→ブロック名。
-              // 直接は対象ブロックバッジ→ブロック名のみ（「支出先タブのブロック
-              // バッジの再委託はブロックと合わせて、親の名前不要でブロックバッジ→
-              // 子ブロックバッジ」との指摘、2026-09-17）
-              recipientRows.map((r, i) => (
-                <ListRow key={`${r.blockId}-${r.name}-${i}`} name={r.name} amount={money(r.amount)}
-                  meta={
-                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
-                      <TagChip kind={originKindToTagKind(r.originKind)}>{originKindLabel(r.originKind)}</TagChip>
-                      {r.parentBlocks.map(p => <BlockIdBadge key={p.blockId} id={p.blockId} />)}
-                      {r.parentBlocks.length > 0 && <span>→</span>}
-                      <BlockIdBadge id={r.blockId} />
-                      <span>{r.blockName}</span>
-                    </div>
-                  }
-                />
-              ))
-            )
-        ) : (
           // ブロック: ブロック同士の親子関係（5-2 CSVの「支出元の支出先ブロック」→
           // 「支出先の支出先ブロック」）を一覧化する（「ブロックのつながりでは、
           // ブロック同士の親子関係が一覧化されていてほしい」との指摘）。
           // 当初はブロック単体の一覧を別タブ（旧「ブロック」タブ）にしていたが、
           // 「ブロックタブ消して、ブロックのつながりタブをブロックタブにして」との
           // 指摘を受けて1本化した（2026-09-17。対象ブロックの合計金額はこの
-          // 一覧の`amount`列にそのまま出ているため単体一覧は重複だった）
+          // 一覧の`amount`列にそのまま出ているため単体一覧は重複だった）。
+          // タブの並びは「支出先」より前（「タブの並びを支出先とブロックを入れ替えて」
+          // との指摘、2026-09-18）
           subGraphState.status !== 'ready'
             ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
             : flowRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>ブロックのつながりがありません</p> : (
@@ -1261,6 +1263,34 @@ function ProjectDetail({ project, itemEdges, sections, year, onClose }: {
                     {f.note && <span>補足: {f.note}{f.isReference ? '（参考情報）' : ''}</span>}
                   </div>
                 </div>
+              ))
+            )
+        ) : (
+          // 支出先: 直接支出先ブロックだけでなく再委託・別財源ブロックの支出先も横断で見せる
+          // （「支出先、ブロック、ブロックのつながりでタブを分けたい」「支出先には直接支出先
+          // ブロックなのか再委託ブロックなのか、再委託であればどのブロックの再委託なのかを」
+          // との指摘、2026-09-17）。データは5-2 CSVの直接/間接判定を1階層目のみに限る
+          // /sankey-svgの直接支出先合計より広く、再委託構造データ（既存）をそのまま使う
+          subGraphState.status !== 'ready'
+            ? <SubGraphStatusMessage state={subGraphState} emptyText="再委託構造データがありません" />
+            : recipientRows.length === 0 ? <p style={{ fontSize: 12, color: '#aaa' }}>支出先がありません</p> : (
+              // ブロックバッジの並びはブロックタブと揃える: 再委託・別財源は
+              // 親バッジ（名前は出さない）→ 対象ブロックバッジ→ブロック名。
+              // 直接は対象ブロックバッジ→ブロック名のみ（「支出先タブのブロック
+              // バッジの再委託はブロックと合わせて、親の名前不要でブロックバッジ→
+              // 子ブロックバッジ」との指摘、2026-09-17）
+              recipientRows.map((r, i) => (
+                <ListRow key={`${r.blockId}-${r.name}-${i}`} name={r.name} amount={money(r.amount)}
+                  meta={
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 4 }}>
+                      <TagChip kind={originKindToTagKind(r.originKind)}>{originKindLabel(r.originKind)}</TagChip>
+                      {r.parentBlocks.map(p => <BlockIdBadge key={p.blockId} id={p.blockId} />)}
+                      {r.parentBlocks.length > 0 && <span>→</span>}
+                      <BlockIdBadge id={r.blockId} />
+                      <span>{r.blockName}</span>
+                    </div>
+                  }
+                />
               ))
             )
         )}

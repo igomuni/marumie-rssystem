@@ -304,7 +304,7 @@ test('MOF項ヘッダーの増減額は本年度額と前年度額の差に一�
   await expect(detail.getByText(expectedText, { exact: false })).toBeVisible();
 });
 
-test('RS事業を選択すると予算サマリ・予算執行・MOF項タブが出て、接続先のMOF項が確認できる', async ({ page, request }) => {
+test('RS事業を選択するとサマリ・予算執行・MOF項タブが出て、接続先のMOF項が確認できる', async ({ page, request }) => {
   const graph = await (await request.get('/api/integrated-sankey?year=2025')).json();
   const withLinked = graph.projects.find((p: { linkedAmount: number }) => p.linkedAmount > 0);
   expect(withLinked, 'MOF項に接続しているRS事業が見つからない').toBeTruthy();
@@ -323,7 +323,7 @@ test('RS事業を選択すると予算サマリ・予算執行・MOF項タブが
   await expect(detail.getByText('予算額', { exact: true })).toBeVisible();
   await expect(detail.getByText('支出額', { exact: true })).toBeVisible();
   await expect(detail.getByText('事業', { exact: true })).toBeVisible();
-  await expect(detail.getByRole('button', { name: '予算サマリ', exact: false })).toBeVisible();
+  await expect(detail.getByRole('button', { name: 'サマリ', exact: false })).toBeVisible();
   await expect(detail.getByRole('button', { name: '予算執行', exact: false })).toBeVisible();
   await expect(detail.getByRole('button', { name: 'MOF項', exact: false })).toBeVisible();
   // RS事業自身の目一覧タブは廃止済み（MOF項タブへ一本化）
@@ -347,15 +347,22 @@ test('事業サイドパネルに支出先・ブロックタブが出て、再�
 
   const detail = page.getByTestId('integrated-detail');
   await expect(detail).toBeVisible();
-  await expect(detail.getByRole('button', { name: '支出先', exact: false })).toBeVisible();
+  // タブの並びは サマリ→予算執行→MOF項→ブロック→支出先（「タブの並びを支出先とブロックを
+  // 入れ替えて」との指摘、2026-09-18。以前は支出先がブロックより前だった）
   await expect(detail.getByRole('button', { name: 'ブロック', exact: false })).toBeVisible();
+  await expect(detail.getByRole('button', { name: '支出先', exact: false })).toBeVisible();
   // 「ブロックのつながり」タブは「ブロック」タブへ1本化済み（旧ブロック単体タブは廃止）
   await expect(detail.getByRole('button', { name: 'ブロックのつながり', exact: false })).toHaveCount(0);
 
-  // 支出先タブ: 直接・再委託の区分が見える
-  await detail.getByRole('button', { name: '支出先', exact: false }).click();
-  await expect(detail.getByText('直接', { exact: true }).first()).toBeVisible();
-  await expect(detail.getByText('再委託', { exact: true }).first()).toBeVisible();
+  // サマリタブ（旧「予算サマリ」）: ブロック数・支出先数・階層数・直接支出金額・
+  // 再委託金額を再委託構造データから出す（2026-09-18追加）
+  await expect(detail.getByText('ブロック数', { exact: true })).toBeVisible();
+  await expect(detail.getByText(`${sub.totalBlockCount}件`, { exact: true })).toBeVisible();
+  await expect(detail.getByText('支出先数', { exact: true })).toBeVisible();
+  await expect(detail.getByText(`${sub.totalRecipientCount}件`, { exact: true })).toBeVisible();
+  await expect(detail.getByText('階層数', { exact: true })).toBeVisible();
+  await expect(detail.getByText('直接支出金額', { exact: true })).toBeVisible();
+  await expect(detail.getByText('再委託金額', { exact: true })).toBeVisible();
 
   // ブロックタブ: ブロック同士の親子関係が一覧に出る。直接支出（事業本体から）の
   // 行は起点ブロックが無いので「事業本体（直接支出）→」を付けず対象ブロックのみ表示する
@@ -363,6 +370,36 @@ test('事業サイドパネルに支出先・ブロックタブが出て、再�
   await expect(detail.locator('text=事業本体').first()).toHaveCount(0);
   await expect(detail.getByText('A', { exact: true }).first()).toBeVisible();
   await expect(detail.getByText('直接', { exact: true }).first()).toBeVisible();
+
+  // 支出先タブ: 直接・再委託の区分が見える
+  await detail.getByRole('button', { name: '支出先', exact: false }).click();
+  await expect(detail.getByText('直接', { exact: true }).first()).toBeVisible();
+  await expect(detail.getByText('再委託', { exact: true }).first()).toBeVisible();
+});
+
+test('別のRS事業ノードに切り替えてもサイドパネルの選択タブが維持される', async ({ page }) => {
+  // 事業を切り替えるとタブが「予算サマリ」に戻ってしまう不具合の再現・回帰テスト
+  // （2026-09-18指摘）。useSubcontractGraphの取得状態リセットのためProjectDetailに
+  // keyを付けてremountさせていたのが原因（tab stateごとリセットされてしまう）
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/integrated-sankey');
+  await expect(page.getByTestId('sankey-node').first()).toBeVisible({ timeout: 60000 });
+
+  await page.locator('input[placeholder*="項名"]').fill('第一期政府共通プラットフォーム');
+  await page.getByText('第一期政府共通プラットフォーム', { exact: false }).first().click();
+  const detail = page.getByTestId('integrated-detail');
+  await expect(detail).toBeVisible();
+  await detail.getByRole('button', { name: '支出先', exact: false }).click();
+  await expect(detail.getByText('直接', { exact: true }).first()).toBeVisible();
+
+  // 別の事業へ切り替える
+  await page.locator('input[placeholder*="項名"]').fill('電気・ガス価格激変緩和対策等事業');
+  await page.getByText('電気・ガス価格激変緩和対策等事業', { exact: false }).first().click();
+  await expect(detail.getByText('9766.5億円', { exact: false })).toBeVisible();
+
+  // 「支出先」タブが選択されたまま（「サマリ」に戻っていない）ことを確認
+  await expect(detail.getByRole('button', { name: '支出先', exact: false })).toHaveCSS('border-bottom-color', 'rgb(74, 144, 217)');
+  await expect(detail.getByRole('button', { name: 'サマリ', exact: false })).not.toHaveCSS('border-bottom-color', 'rgb(74, 144, 217)');
 });
 
 test('「その他の項」集約ノードを選択すると内訳の目一覧が出る', async ({ page }) => {
