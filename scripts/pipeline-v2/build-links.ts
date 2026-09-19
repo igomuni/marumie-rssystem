@@ -21,6 +21,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import type { RsBudgetItem } from './types';
+import { entityMatchKey } from './lib/match-key';
 
 interface BudgetEntity {
   entityId: string;
@@ -35,15 +36,6 @@ interface ProjectLink {
   projectId: string;
   entityId: string;
   amount: number;
-}
-
-/** 突合用の文字列正規化: NFKC + 空白除去（V1のnorm()と同じ） */
-function norm(s: string): string {
-  return s.normalize('NFKC').replace(/\s+/g, '');
-}
-
-function entityMatchKey(account: string, organization: string, subAccount: string, sectionName: string, itemName: string): string {
-  return [norm(account), norm(organization), norm(subAccount), norm(sectionName), norm(itemName)].join('|');
 }
 
 function processYear(year: number): void {
