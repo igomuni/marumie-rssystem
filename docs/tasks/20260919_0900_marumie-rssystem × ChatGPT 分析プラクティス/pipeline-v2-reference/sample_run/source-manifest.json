@@ -1,0 +1,1560 @@
+{
+  "fileCount": 311,
+  "files": [
+    {
+      "path": "mof.go.jp/account/fy2024/kessan_06_zenntaibann.pdf",
+      "sha256": "4ebb3e5161445f9532a59160a6522324367ba48e05ad5f0a9b079847df0e0095",
+      "sizeBytes": 9943466
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/csv/DL202411001.zip",
+      "sha256": "234bd440ac8647a07e458e3609457d00a133ffbbef2fc766b1421e1c5510e06f",
+      "sizeBytes": 161598
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/csv/DL202412001.zip",
+      "sha256": "48392740ce2a8b83c6e3af0141f37e3ebeebd268466890a506658fa75487603c",
+      "sizeBytes": 41607
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/csv/DL202413001.zip",
+      "sha256": "803d5b48d022af32e67b59967cde08fde3be67f411501c2ec007c0f7d9f9cee3",
+      "sizeBytes": 4571
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/csv/DL202421001.zip",
+      "sha256": "26f9ccf138f5e277c38ec83ad872777e4123fcf7443dd5333d78c218da8a216b",
+      "sizeBytes": 83536
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/csv/DL202422001.zip",
+      "sha256": "c96fbce1195da1148c8fa5aceca0a5197a3db818b49c74df44805578135dc5d9",
+      "sizeBytes": 16822
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/csv/DL202476001.zip",
+      "sha256": "b1bee343dd908cd075aa36a368b75568d2e38f2e235e2e697e63b9cbf05024ed",
+      "sizeBytes": 6113
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/csv/DL202477001.zip",
+      "sha256": "5536fd4f9477cf4ce312d74f9000c8822d979fc1098adefa645d49a6d1e187e4",
+      "sizeBytes": 232046
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/csv/DL202478001.zip",
+      "sha256": "d51972865f25f9ce6f83f5d0f1fbd7b4a1e81ba64689e1cff51844b10048cc47",
+      "sizeBytes": 54618
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL202414001.pdf",
+      "sha256": "56581ff7f5a0768d738beeb33ae7f510369a774f4b33a45ab4a34f95a48056c9",
+      "sizeBytes": 4197022
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL202421011.pdf",
+      "sha256": "7839746002386119b7923fd780ed67e33a6213d68556289ed01a8f4d87748124",
+      "sizeBytes": 109263
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL202423001.pdf",
+      "sha256": "1ce8f991cc029b7d97aa14fad025bacc1fc0f2dcc630b5451d6bcbf8bfd815f3",
+      "sizeBytes": 58257
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL202472001.pdf",
+      "sha256": "b5c716df5d6e896f887483cccdb5563ae5a16d035b415348876bc45660e1484c",
+      "sizeBytes": 1058286
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL202473001.pdf",
+      "sha256": "cae366857ce5df5f2243b5ec27c793bda700f6b319ee33304fa534419e822561",
+      "sizeBytes": 65592
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL202475001.pdf",
+      "sha256": "64e3cd2d49b58d8ccc4d13045e5ee0f920c4b9a05d549cc65f85876792f21db4",
+      "sizeBytes": 364135
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL20247A0010.pdf",
+      "sha256": "0e39881864cf472c9f5b1ae328f3faafa0f3972f9cefd51b9a37dff6b0b0956b",
+      "sizeBytes": 146623
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL20247A0012.pdf",
+      "sha256": "3a674921b6373fa02cff45939bb3a93cf449e5c33cc0c3c3d21fc667de29ad75",
+      "sizeBytes": 612146
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL20247C0010.pdf",
+      "sha256": "9d33accb94caf5bd094e0b30557214f6030a782fc371f5e88f84479b812ff3c2",
+      "sizeBytes": 286540
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL20247C0012.pdf",
+      "sha256": "eb5730eb5bc2f3c53efe27fda4fca2a3919835045968935a1c5394acf77bd762",
+      "sizeBytes": 273822
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL2024e1011.pdf",
+      "sha256": "413b02a467e25ea15c09024d8ea0b4350f6da1d89e87c163de9be9b5594979d7",
+      "sizeBytes": 482549
+    },
+    {
+      "path": "mof.go.jp/archive/2024/2024/dlpdf/DL2024e1012.pdf",
+      "sha256": "6b9ff1eabe6f683fdb331d50ee93c7142a8fa7c4af4505b97141e44b791914a3",
+      "sizeBytes": 604795
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/csv/DL202511001.zip",
+      "sha256": "ad3e482a8c2102f29e8ccd1fc2484b4144650993781cd9c53e2b7a66166cdc2d",
+      "sizeBytes": 163254
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/csv/DL202512001.zip",
+      "sha256": "7332b8691a2fecf625338785d4972f879e45236698fe4a58ea60fdbd17982e15",
+      "sizeBytes": 42492
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/csv/DL202513001.zip",
+      "sha256": "01ab3563fdd5851728dae459589415a3e19f73f98fa9755110a272364f96b817",
+      "sizeBytes": 4534
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/csv/DL202521001.zip",
+      "sha256": "b0394b38ec5f252bd48ebcc6cb8f6c50c4605290ed94b3b22c285d478973b4a9",
+      "sizeBytes": 86608
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/csv/DL202522001.zip",
+      "sha256": "bd2feaf0fca88ac24d7fa5f674cdb17299240487abb193273641fdbdc26d9ad5",
+      "sizeBytes": 16152
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/dlpdf/DL202511011.pdf",
+      "sha256": "c5a9e95290d0a2f670f61e65d0a805894b7756a20b2f213bad4841995be0c8ee",
+      "sizeBytes": 6894497
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/dlpdf/DL202512011.pdf",
+      "sha256": "0ceb8f65a5b5bc85f05e4b74b59a9b7ce50575df1495f2bde4ed648fe63a598e",
+      "sizeBytes": 3502259
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/dlpdf/DL202514001.pdf",
+      "sha256": "eec68f7a2b0980b8628cb79e56746529c72feb6785d5ec31fa03052efd3562e0",
+      "sizeBytes": 4219370
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/dlpdf/DL202514011.pdf",
+      "sha256": "f8ef6943c34d0b2739b89991a0409714c534fa690d2635ced13e3747ba3f225a",
+      "sizeBytes": 12105505
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/dlpdf/DL2025e1011.pdf",
+      "sha256": "367abbec73d68a1955858b469c7dd474f0f41473a7c915419917a9189c6ee98f",
+      "sizeBytes": 556099
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/dlpdf/DL2025e1012.pdf",
+      "sha256": "f28e091168d8adee2a11d80f0cb1a58c5aadd62cd795b1c107f927bfac984bab",
+      "sizeBytes": 477022
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025/dlpdf/DL2025e3011.pdf",
+      "sha256": "b0de6539fdda5bd15c7f3bd6e21269ad8d2cb655d6c250be6a2018874148254c",
+      "sizeBytes": 452794
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025_teishutsu/csv/DL202511001.zip",
+      "sha256": "8af4d9f0b5f0d38fdee72f67b458e39bfa9c016b7f3f789009abf29a31cbadc7",
+      "sizeBytes": 163174
+    },
+    {
+      "path": "mof.go.jp/archive/2025/2025_teishutsu/csv/DL202512001.zip",
+      "sha256": "4031d7f9e387ed2211156cb9168e5dba2d42078f2899c153ce92c503886f8766",
+      "sizeBytes": 42479
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/1-1_RS_2024_基本情報_組織情報.zip",
+      "sha256": "408ac54ebef0f13c224d2de538cb3dccff5d4a92d9f0a1bd9b7cffad3bd49fc5",
+      "sizeBytes": 260140
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/1-2_RS_2024_基本情報_事業概要等.zip",
+      "sha256": "82488871dff9b2a450444d11b4010951ca02e2ec7bd886e6e923c4b2a512e4e2",
+      "sizeBytes": 3273985
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/1-3_RS_2024_基本情報_政策・施策、法令等.zip",
+      "sha256": "890d31b93d7d4266975fb763ceb707458a103ba21bada92999e92a5be177eced",
+      "sizeBytes": 781764
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/1-4_RS_2024_基本情報_補助率等.zip",
+      "sha256": "99782f371d0b2633c9e61b0070346d0b9ca250f4e801fa4f527a76bdd520d162",
+      "sizeBytes": 299748
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/1-5_RS_2024_基本情報_関連事業.zip",
+      "sha256": "2af89532aee5a61b06315aeafd94bd29ec75fcb3839f96e9d6c763d9c167ce2a",
+      "sizeBytes": 200626
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/2-1_RS_2024_予算・執行_サマリ.zip",
+      "sha256": "a054b9e8e87850ffbf9ab5ec478eaf5a344259989d868dda02bb1b92fbf1909e",
+      "sizeBytes": 1490664
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/2-2_RS_2024_予算・執行_予算種別・歳出予算項目.zip",
+      "sha256": "eb9e9d02b046da88c04d582ea28f8794841af570d93b2c20cb234d27be205576",
+      "sizeBytes": 961722
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/3-1_RS_2024_効果発現経路_目標・実績.zip",
+      "sha256": "d104c7bf573d6f1704f28ded98a6244a7d512e173420285212d05381bb4ca868",
+      "sizeBytes": 4671079
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/3-2_RS_2024_効果発現経路_目標のつながり.zip",
+      "sha256": "1e130c3836de39760a1ce0c001f7e3c1d6d645c1a616895dc2dc52d36d80347b",
+      "sizeBytes": 3432181
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/4-1_RS_2024_点検・評価.zip",
+      "sha256": "73aa5512b664cb78499c381e6fa3bc786e95500c166bc94f1f3def07f9f388db",
+      "sizeBytes": 2370071
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/5-1_RS_2024_支出先_支出情報.zip",
+      "sha256": "4624b0c1e179cbe2c6edcff4bbf30e4108ff8bb3f2751c74f7e216821afe895d",
+      "sizeBytes": 5920574
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/5-2_RS_2024_支出先_支出ブロックのつながり.zip",
+      "sha256": "b60e0aee00dc2f93a6de9d0f2347445e12f3c88c0f4d86330659f21108376821",
+      "sizeBytes": 553926
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/5-3_RS_2024_支出先_費目・使途.zip",
+      "sha256": "4af8a709fa1b4fbe47981073275bf13de3079f80e7cd56256b9e8138acfe0fb9",
+      "sizeBytes": 1481575
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/5-4_RS_2024_支出先_国庫債務負担行為等による契約.zip",
+      "sha256": "e73706f3f9956c28484a9c40ea9ac015ff4fb37693337ceda3c2e452827d53b4",
+      "sizeBytes": 384948
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2024/6-1_RS_2024_その他備考.zip",
+      "sha256": "7e681be3bb70e154928b70c0c7b08dcbeb12180e774914d2db4e421222aed024",
+      "sizeBytes": 195206
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/1-1_RS_2025_基本情報_組織情報.zip",
+      "sha256": "a9d353df76661fd140ca9fa38db9ab6059441bc7c657dd36fdf60ddb6fb1736b",
+      "sizeBytes": 258071
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/1-2_RS_2025_基本情報_事業概要等.zip",
+      "sha256": "4030473de09a9e622d9d6ab049c3e3dc4cda9cfacafb2f962bd62da08e9b98c2",
+      "sizeBytes": 3261688
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/1-3_RS_2025_基本情報_政策・施策、法令等.zip",
+      "sha256": "a1cb674ebea3ef7808fea9384110785fc9f71b3dd39ee098b618bf05f05603a6",
+      "sizeBytes": 836837
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/1-4_RS_2025_基本情報_補助率等.zip",
+      "sha256": "c3f9ae7f7b85e8423446986a5921af9fad645ddd862f1f67ca3355653ac6c346",
+      "sizeBytes": 316778
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/1-5_RS_2025_基本情報_関連事業.zip",
+      "sha256": "a2984b0ada0cf723281f44208b83f848b48e03de83c462ce1e36dbfd1556a143",
+      "sizeBytes": 200353
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/2-1_RS_2025_予算・執行_サマリ.zip",
+      "sha256": "6540aa6a8902a061656233c4888e164b3596e9592a86cde4df9d1afe6064d1b6",
+      "sizeBytes": 1757530
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/2-2_RS_2025_予算・執行_予算種別・歳出予算項目.zip",
+      "sha256": "2419675cd011192e35eed1bf332c6028366d3cbc07272630d99378e41b90b7c6",
+      "sizeBytes": 1231793
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/3-1_RS_2025_効果発現経路_目標・実績.zip",
+      "sha256": "bd94115f5fa638fd44dc7b1bd324c6ebe8d35c7f21108b14b861c4cc0635fda6",
+      "sizeBytes": 5309287
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/3-2_RS_2025_効果発現経路_目標のつながり.zip",
+      "sha256": "ddb3ad38e460243f08e6d8cdf3d240fcd4b26b78ce9d3b14302e68d615ffd3f4",
+      "sizeBytes": 3698528
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/4-1_RS_2025_点検・評価.zip",
+      "sha256": "93248128997ba9cef4ada8f49c4d012dcb5f6fbb72a9a3148e9c07d1ae98184d",
+      "sizeBytes": 2451332
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/5-1_RS_2025_支出先_支出情報.zip",
+      "sha256": "e379dbc4aa4653b06f9a310cdb84fc795c880799cc68c5c5c7f8de194be2634c",
+      "sizeBytes": 6078771
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/5-2_RS_2025_支出先_支出ブロックのつながり.zip",
+      "sha256": "0a2636df78c68fcd94b1296ff1aa9580d936658121039e3a204025c99bed3a68",
+      "sizeBytes": 566177
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/5-3_RS_2025_支出先_費目・使途.zip",
+      "sha256": "addd97465e8916b05b27a908447e2f8bc44ec7d78456825ab45895d283490965",
+      "sizeBytes": 1477461
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/5-4_RS_2025_支出先_国庫債務負担行為等による契約.zip",
+      "sha256": "7dcc56293b9bc7d8a04e6ce4064a717f7e94618e07299812a145ad92e6a34e56",
+      "sizeBytes": 408787
+    },
+    {
+      "path": "rssystem.go.jp/download-csv/2025/6-1_RS_2025_その他備考.zip",
+      "sha256": "ad748fa644e14a691470d5a9f41c653f23a4b69353f037afc0ba53cd0b5d8ba3",
+      "sizeBytes": 201951
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣官房_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "d602f4118818268561056cb406bd327c7b8f0518351e38266358e59d3dc2bc4d",
+      "sizeBytes": 12568
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣官房_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "0c121e6acf11d3e7c2c833f5bdf887f8e86209ad5c7b277efefdf715a683f5fd",
+      "sizeBytes": 1159
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣府_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "870bebae693f63953a6026dc0ef0c36c02b73fd0b75665592f8b3613327a899a",
+      "sizeBytes": 98912
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣府_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "86af50b72249355b7562844dea6a5988f7f7e4fae6c975e8d429c61cd91a28ec",
+      "sizeBytes": 3330
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣府_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "f6b6924edeaff5e02cb09b390546b849d48adeb02dcda9de37a0172c15a6f114",
+      "sizeBytes": 5002
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣府_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "77226cc2deb2fdf4d432c010943dad9739f4e5d899eb3565e1e34da0cf841614",
+      "sizeBytes": 1169
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣府_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "72769ee9a6e459f81b13ade4d4d70cc8c9685e3925d0d0535a81490cb5b4903b",
+      "sizeBytes": 2497
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣府_2024年度_出資状況表.csv",
+      "sha256": "61644801858aab270e65c48595db87ec7cd963de89b213b20b20a6e11a03c9de",
+      "sizeBytes": 4088
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣府_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "5b219850f557780f9e10728e9175d3a34282508748ca70658737e715de0d4c74",
+      "sizeBytes": 10338
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/cabinet-secretariat-cabinet-office/内閣府_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "43149fe5537822ea25c674ad0d16cb8d17459b8f6df2539b54402952c2669951",
+      "sizeBytes": 13469
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/casino-regulatory-commission/カジノ管理委員会_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "d85a6378bb13a5f9c6903f6844eb185387b83ae33dd97ab7e1d2e6227f6c0001",
+      "sizeBytes": 4443
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/casino-regulatory-commission/カジノ管理委員会_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "686b612a768eade7cb3ef7ac673aff45e0893370d39f69f51850d86de7fb96f4",
+      "sizeBytes": 1152
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/children-and-families-agency/こども家庭庁_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "d48918d41cf8d13fee42b74558ea915adfbed3705efb5342a83081d856cfe34f",
+      "sizeBytes": 41184
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/children-and-families-agency/こども家庭庁_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "98c0520274829367a032d6ba82e00c42ab1ecd6ec3bd167219b07a46461235dd",
+      "sizeBytes": 2258
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/children-and-families-agency/こども家庭庁_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "fe5edb3a71eb6d96c3c6eae6ec573aaf0dfb1032b8863f4632c0623a613694e6",
+      "sizeBytes": 16018
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/children-and-families-agency/こども家庭庁_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "cf90d9ed626ee5c81a28252cfaada292d0929d60114c25b52a536b7b0046cf73",
+      "sizeBytes": 1261
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/children-and-families-agency/こども家庭庁_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "be8a1ffa0cf6b22be10256e7615bfa592d4ca44ad88d78825343a3068f033391",
+      "sizeBytes": 711
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/children-and-families-agency/こども家庭庁_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "7556bf5c02e637f09b53a9cca2581940897afa0c2edc594c14278aa2cebe9e88",
+      "sizeBytes": 579
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/children-and-families-agency/こども家庭庁_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "39963e964038c343825a4e9bcc9a410f5afecebea7ee309d56066f61766004ef",
+      "sizeBytes": 2235
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/consumer-affairs-agency/消費者庁_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "5ce5be71817725e62376f37500e82f4573b121c74f99b5c64e4dd238e9fd241b",
+      "sizeBytes": 25697
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/consumer-affairs-agency/消費者庁_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "3a0325a00162da125ef58364758bc18f0ae6fabb282ec8ce81dc48aaf5ccfbd1",
+      "sizeBytes": 8359
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/consumer-affairs-agency/消費者庁_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "c15fa272829cfa3f03e029b1f5ca8e25b703100b799b582892a41a365af7ff1d",
+      "sizeBytes": 1244
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/digital-agency/デジタル庁_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "95fff9486ae56d691368218f56fb356529363fb1695944460704e16a879c8fd6",
+      "sizeBytes": 85587
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/digital-agency/デジタル庁_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "4c52340f905995b0e6a550c60a93e118aa3d1c755b7cdf3ece89b6015f817b89",
+      "sizeBytes": 7318
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/digital-agency/デジタル庁_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "a8d4cae5a4ebe2c1acce18c68412295aa0d06c375ac336373a75278abe683876",
+      "sizeBytes": 5423
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/digital-agency/デジタル庁_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "1d6c986acfb24e746394b6d4cd58760df5378cd7cf13537533f72c09faeb617f",
+      "sizeBytes": 1250
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/fair-trade-commission/公正取引委員会_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "da8ce80ddd88e93f9b4a9b1ce7dd1b86d019cbb60e6472d15ede50ae4a0d9822",
+      "sizeBytes": 9416
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/fair-trade-commission/公正取引委員会_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "51371b3de6b8bfbdee25e17dee1723a3a7fe6e2a93c343b199321c382268e4cd",
+      "sizeBytes": 1252
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/financial-services-agency/金融庁_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "fcb21ee6e8c3c6c98f3dd421f9e69c00328bdf87184ef85f2d383393dcfc24e4",
+      "sizeBytes": 23574
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/financial-services-agency/金融庁_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "f501a8b1845b0356f50119cca87c77ee7b1752746c3270b306f84f27a92fddeb",
+      "sizeBytes": 652
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/financial-services-agency/金融庁_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "52f4b6e942197a02cab09c87ec7e5f9f18b8d633e0136e3588f7047cbacdfe2a",
+      "sizeBytes": 3520
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/financial-services-agency/金融庁_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "013ed8fcf276a0f3cbcbea741ba99a3568b32ebfd14b646d6f9457a131e3cae3",
+      "sizeBytes": 1240
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "09a0fe044a6f33a7d00c8a4a59ddc07e1f1c0ea6ed8cab39403ac846283f926a",
+      "sizeBytes": 249335
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "50c55c50685e423b9192ea0ee351ae003659d6c6a4dbda2686dc59355f366781",
+      "sizeBytes": 6419
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "4c054c384aef26d5a18a469e5fe5a06ac7a7752c48d606de9d162ce59313b54c",
+      "sizeBytes": 32226
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "488ecb9f96297a2dcdd9c062bed561cc2f2c0040f9e597f5c41bfab46d23306c",
+      "sizeBytes": 1548
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "955511bdf993576f8abaabf6fd82f5d29bad74d2b7fe38c0f021367ba80f3519",
+      "sizeBytes": 16287
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2024年度_出資状況表.csv",
+      "sha256": "4bdbbd3c96c0eb1e6cdd87c7868dace719ca153b8a41fb54d751641f923ce103",
+      "sizeBytes": 3638
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "42a57e6367d026128ca06a223ab2e2af43d4549a42031829fa2b71b070e7fe43",
+      "sizeBytes": 8849
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "75225dc3491294b22211d0c6e32114622a3bf021947926b10bb80ebb34e5b644",
+      "sizeBytes": 19084
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-defense/防衛省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "34ad25d69b081791bff1fb00b42a979f59e28e9cef53105cac1577c85c34d73c",
+      "sizeBytes": 231138
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-defense/防衛省_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "bf12f0627cc269d7fe9619c6d86429ab819fe5ec553a2aae58a6c919929286e2",
+      "sizeBytes": 6744
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-defense/防衛省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "80f1a939ef73244b0093b8e14ff7d6d94a0789bc3aff32045731a3a566e6a932",
+      "sizeBytes": 9731
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-defense/防衛省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "80d0e13c14248dd2679ef53138c5096fc5e84e37b974d6d26c3c6937f190c50f",
+      "sizeBytes": 1274
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-defense/防衛省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "1e2aaa6fd6f333b9b84dd3d75f2621b87fd48a445e7657e9a1ae88c49150e666",
+      "sizeBytes": 904
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-defense/防衛省_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "969239f2075c7b9f17fb2b6e0eea896fa6a90f7cea1ba040b737a8b18ad08100",
+      "sizeBytes": 4775
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-defense/防衛省_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "70a11be8af47add54f7d493319a52613178196c97b81be34b4df9450f6ca4e69",
+      "sizeBytes": 4973
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-economy-trade-and-industry/経済産業省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "598a6bd56d9bd890f2994c9936e5e981c9f0ba7489bb1dcb4e8a703ed3b3f9f6",
+      "sizeBytes": 257284
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-economy-trade-and-industry/経済産業省_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "9940d98670c465a6133b98729e33b56d92d34e0f3bea8f9c5253fd64b5d9fb9a",
+      "sizeBytes": 7421
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-economy-trade-and-industry/経済産業省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "77dbd00d99661fd7e3ce6280b9c478d6e8211c1ce1fa9f6a32343c68ae24ff81",
+      "sizeBytes": 20579
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-economy-trade-and-industry/経済産業省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "b4d19ba26be972fc1d014ab05da1410d8c06a38403481fec6655169d72f3d46d",
+      "sizeBytes": 1426
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-economy-trade-and-industry/経済産業省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "3943629e22a9f10be66c0706bfff231a144aa4db2fcee7fb811446df5066807b",
+      "sizeBytes": 18038
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-economy-trade-and-industry/経済産業省_2024年度_出資状況表.csv",
+      "sha256": "4dc5ac0ffd044042d18699b2cb425f5180f93204e145d6441ce5f3e2f70f6571",
+      "sizeBytes": 10193
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-economy-trade-and-industry/経済産業省_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "fee4dc45bfdb6f7f72671130f0eba1031722bb8ac77957d15ba0e051bf7ae911",
+      "sizeBytes": 13682
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-economy-trade-and-industry/経済産業省_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "a661f5728816ecf8416bfc59c29504070540742a06df0e8673915911dc2d3435",
+      "sizeBytes": 15534
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-education-culture-sports-science-and-technology/文部科学省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "11ec866d4cf24cd5d8cd33ae6c5714661e51c38aa5b74891cc5633a1602c328d",
+      "sizeBytes": 319341
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-education-culture-sports-science-and-technology/文部科学省_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "34904c9fbc93a7be31928429c90f9dfec1a57b2070edd54c51d967050e5ebdc0",
+      "sizeBytes": 2618
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-education-culture-sports-science-and-technology/文部科学省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "025797128823a9bb7ad88a02a95c07d90022592581167d82a3885da2235c655b",
+      "sizeBytes": 16822
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-education-culture-sports-science-and-technology/文部科学省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "12883db38d64dae3aea8c32d9cafc35a313c5beff7cf5c6258f6da2d1bfc5e81",
+      "sizeBytes": 1553
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-education-culture-sports-science-and-technology/文部科学省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "115c116db387919b2a9f9e1e530061af06ea756054b7b1e2eeaf1493df73c361",
+      "sizeBytes": 6289
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-education-culture-sports-science-and-technology/文部科学省_2024年度_出資状況表.csv",
+      "sha256": "ddeb051b4df3b5ee6cb6e01f8b14121c5bce4807b9824cd38da4fd007a0ec069",
+      "sizeBytes": 6137
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-education-culture-sports-science-and-technology/文部科学省_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "31bbdea3953ae298eb214c47653c408b50cd317161a628890348d1f8f6b64377",
+      "sizeBytes": 6009
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-education-culture-sports-science-and-technology/文部科学省_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "46fd8e6e088de90527259f2737c3d158bb78bb8909be444dd2ca386970f5590c",
+      "sizeBytes": 6846
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-finance/財務省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "ccbcf5c68eb411c4de2d61d7e85b89341a5a7f120b2dd834119ae3a2e4b603b3",
+      "sizeBytes": 33381
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-finance/財務省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "7cc0fb29cc8b268b7102e2dfd252db5aa00db150862aa2d920d4d89af8befd18",
+      "sizeBytes": 2686
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-finance/財務省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "91674e372c4c8c4aaac40d6b47ed101bab84788c8edc393d87208c95d2e3f882",
+      "sizeBytes": 1421
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-finance/財務省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "c33ae926d017dba3cd788441044996b9ec86185ada6cdd6cfcb8168e28c36811",
+      "sizeBytes": 637
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-foreign-affairs/外務省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "8ef66f8a80f57a9bd11ed114d559015a473b87245696bec8a68528dff2179c74",
+      "sizeBytes": 209178
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-foreign-affairs/外務省_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "80c77323bdd8a9b9f261f1e292e066633e5277e0ddc41b6200078bd558fd2ae5",
+      "sizeBytes": 2566
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-foreign-affairs/外務省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "0fd3b8210679899562afa3d220107607b11ae84e485481cd17a13e58f2ef4f7e",
+      "sizeBytes": 3451
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-foreign-affairs/外務省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "4e4b3fa7de03d6bde223e075060e9363c4b00a2a66e0caec1c0c6babe047b734",
+      "sizeBytes": 1276
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-foreign-affairs/外務省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "bb26eef50926b4445e524f096a9c476f9d7bbeef4e2d57ed1aa5050d1bbb12f0",
+      "sizeBytes": 936
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-foreign-affairs/外務省_2024年度_出資状況表.csv",
+      "sha256": "d8d60480883f02383d11f37b5ac4b70d4589154633115a433c4c2d45e88633fd",
+      "sizeBytes": 1429
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-health-labour-and-welfare/厚生労働省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "2820243bc003ee486747c9ce80ec3e66bad2d224adc51732d258214990598ae5",
+      "sizeBytes": 757589
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-health-labour-and-welfare/厚生労働省_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "58d8fb58347a3b8eb930d95be6f3e1ea129ea1004170bbb0c18a9b981ff6bb0f",
+      "sizeBytes": 7760
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-health-labour-and-welfare/厚生労働省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "f5b8598af35f6ddbef67d65048e836f18eaca61e53306a502587196c2ff7c17a",
+      "sizeBytes": 39268
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-health-labour-and-welfare/厚生労働省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "908d0d8d9ba52dcf678f53c68943348c899a1992269f6213aec9d2058df54331",
+      "sizeBytes": 1444
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-health-labour-and-welfare/厚生労働省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "547ef9f6eab0962163d1342a13853feb21b367d4c09ebbdcb369d0cc14d45382",
+      "sizeBytes": 3531
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-health-labour-and-welfare/厚生労働省_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "52bc44d0b361924da99865f6c6c85dff1bbf67fa6cbc0159024755ab16938fa0",
+      "sizeBytes": 4352
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-health-labour-and-welfare/厚生労働省_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "27d900d520cc4d95e505b44bc20853301da3fac420ee41fed770273ffc359164",
+      "sizeBytes": 6879
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-internal-affairs-and-communications/総務省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "b26e6a98e8a11da15def1ff029aea35871d0327ee9f9a672616815e47da8d595",
+      "sizeBytes": 109369
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-internal-affairs-and-communications/総務省_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "98954658e7dc157d0adeb0473d8f05510012f086f1d74a7201ace07fb51007e3",
+      "sizeBytes": 1474
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-internal-affairs-and-communications/総務省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "4e8eb74a8eb7f963d86efc1d917e027179924d4f65d6a77242d6d4087932dcab",
+      "sizeBytes": 4075
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-internal-affairs-and-communications/総務省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "864f610f052c82c1f5bcee4b695a90db2cd13dc099f8dcf83391885429c96a39",
+      "sizeBytes": 1511
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-internal-affairs-and-communications/総務省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "f4269ffcae1431d5fb6c302d92c69d99779820fe08a2e4000c6911b5c74c2c77",
+      "sizeBytes": 2116
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-internal-affairs-and-communications/総務省_2024年度_出資状況表.csv",
+      "sha256": "877baf3ceb5a76205370ffaf6527697e9c7b16a2af3df4b226d2be29e35de04f",
+      "sizeBytes": 1766
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-justice/法務省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "d83c59a53f500684c4240363a85c1f7068d412c5eec8828770b75c55394d378f",
+      "sizeBytes": 24221
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-justice/法務省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "651835f957c018713897c157a891d3dc438298162f8447aec99fdb5641a0ae91",
+      "sizeBytes": 1184
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-justice/法務省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "0c5fed98fcc00d5456536dc95216efe23438dd40905e721aeded7b521c326156",
+      "sizeBytes": 1397
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-land-infrastructure-and-transport/国土交通省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "bbfe62a1c28cf92a344bb3ed5e0c9cdb03b4186b35a1947d87d2d90ec41f587f",
+      "sizeBytes": 412502
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-land-infrastructure-and-transport/国土交通省_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "7696ca0769b1319b8618fb3cebbc2e6d7e7935300d65f3b1f9015461fe212388",
+      "sizeBytes": 13818
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-land-infrastructure-and-transport/国土交通省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "e43f1a9342a86a30bd7a6ed6a713a7b69538dea1df175f005cb92f8cc10095ba",
+      "sizeBytes": 20055
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-land-infrastructure-and-transport/国土交通省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "76c45f212576d401de94eede1e0b071db0faf5fb4c0ec512f182f88f979a9f63",
+      "sizeBytes": 1858
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-land-infrastructure-and-transport/国土交通省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "ae469aea2bf95cb7bb613daa9fa6a8b345fd4b2ddbe94c083f5e7f03c43bb50a",
+      "sizeBytes": 5887
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-land-infrastructure-and-transport/国土交通省_2024年度_出資状況表.csv",
+      "sha256": "f3e69dd08239d92e42dc0e4f039b2f3d498531dca1cdc7808019480f8f641a42",
+      "sizeBytes": 1968
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-land-infrastructure-and-transport/国土交通省_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "7de56a2b7a25a28044fa21511941bbdd5730d3387ad1d616d5a116085b7fba2e",
+      "sizeBytes": 936
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-land-infrastructure-and-transport/国土交通省_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "9d619f0f2636075f59c23d1c8a203f2fefa549cd23bdcda2ddf713607490cdcf",
+      "sizeBytes": 2557
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-the-environment/環境省_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "065393d9145a6f865e3b0111a7e46dbad94580056b6efcd2dbf0a03dd5d699fd",
+      "sizeBytes": 105475
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-the-environment/環境省_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "b5026cd3ff2e5ce9415b024ab7038f96df5fbe25ed4634b295f8a9a2d99e8294",
+      "sizeBytes": 670
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-the-environment/環境省_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "ae710e6f69e76c2cddd36d86df2e8e9d3425a1e821d55fd9ebf3eec352b5fd4b",
+      "sizeBytes": 7215
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-the-environment/環境省_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "00948ff9dc273235d4013b32093876027f243245abb822a53102a45e4f58f01e",
+      "sizeBytes": 1304
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-the-environment/環境省_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "82f26a7cee0dc023be99bb8a178d13f0ff82890571c336b870cc97df70f8f51c",
+      "sizeBytes": 2628
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-the-environment/環境省_2024年度_出資状況表.csv",
+      "sha256": "bce07ff9851fbde1a59b752834741eac537c2f19d97763f8fbf8c6bb7e910250",
+      "sizeBytes": 2704
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-the-environment/環境省_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "790efff52cac7b2adbc45e94242f3be5c073d4b5f9137e039323ea86d46ccd92",
+      "sizeBytes": 3278
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/ministry-of-the-environment/環境省_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "8a927e33d4b5e308a03b190beb83cc9167eff92a151a3958aeedbd2e10171554",
+      "sizeBytes": 5313
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/national-police-agency/警察庁_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "cf8fd5f88e026db3cfebb6df341647e98c71d0770682f691f051fc2de86994bf",
+      "sizeBytes": 91384
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/national-police-agency/警察庁_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "e475937d560f54f50e3897273d3b80e55a66932e8ebd62f665935f6a28c3638b",
+      "sizeBytes": 440
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/national-police-agency/警察庁_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "531b64566ae1bc67a7d9936b36f12ca3ac56090ecbd03073afec6201aaeed466",
+      "sizeBytes": 4163
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/national-police-agency/警察庁_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "42d948ebdab2e10ddeb858b3d4be59917fb07e4fd9a19b110d7137c54aa9ac5d",
+      "sizeBytes": 1257
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/nuclear-regulation-authority/原子力規制委員会_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "728c6e6ce371b6975e4c721d7bb5337a30572f8e38ea8d616c094dfcea69548a",
+      "sizeBytes": 35763
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/nuclear-regulation-authority/原子力規制委員会_2024年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "fcad16e181aa53762e052280fc8187cdb79541e90344a28ee3fac1dd1fef8a91",
+      "sizeBytes": 1063
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/nuclear-regulation-authority/原子力規制委員会_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "a34b1c6a8ecf1d4e457080821fe3d4b0c3fee6432e3de83b79042d6f6ab98c53",
+      "sizeBytes": 4342
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/nuclear-regulation-authority/原子力規制委員会_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "c81e91843279746f06fd40a0149069e1c4f2b3639c95ce6afc7fe2f8f3a308eb",
+      "sizeBytes": 1293
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/personal-information-protection-commission/個人情報保護委員会_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "5bec88b58bc724b4885240454dfc95d2469132e24652975a50aead2b90f9bcb0",
+      "sizeBytes": 5894
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/personal-information-protection-commission/個人情報保護委員会_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "f35d161f59fb276efffb9dcbe65fd9b85065da3707a04e1406f53c59f33c5050",
+      "sizeBytes": 1255
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/reconstruction-agency/復興庁_2024年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "13ccf26d152fae78498025ca97ebf73103b1ebfe579f1aea90453f95342226d0",
+      "sizeBytes": 146144
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/reconstruction-agency/復興庁_2024年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "a3ee498ae057d6522e9394bdf01a1cce9d0a1fb360cfc13a1109e6140f940906",
+      "sizeBytes": 14246
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/reconstruction-agency/復興庁_2024年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "1c4f7b6a43c571b5742788ab3afbfa5d50d2775f890c9b827c1aba41d63e2ae8",
+      "sizeBytes": 1270
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/reconstruction-agency/復興庁_2024年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "053ed32e4f47135b82a37cbef7f2f1e884488e6c79674f1578ba754fa6b1bf8e",
+      "sizeBytes": 3672
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/reconstruction-agency/復興庁_2024年度_出資状況表.csv",
+      "sha256": "c09b58af02b918bbf415f94193204109a011c2899f9134179522d1f577b1ad4b",
+      "sizeBytes": 1825
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/reconstruction-agency/復興庁_2024年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "bccf7c7521930c9231630b3c6d686ac294a1f284d727e17f8f678eaadeae67bb",
+      "sizeBytes": 24164
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2024/reconstruction-agency/復興庁_2024年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "63f28a6efd2b25f9388591f588ee72d8aceeb21e32651d9d39986b6dd56aab7a",
+      "sizeBytes": 16147
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣官房_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "1e2d2a769055d768914a92c43f079eb7ed05f5d33873e8fdfd5e94e29a057f4d",
+      "sizeBytes": 13484
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣官房_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "4b59302297b02363fb4425345ce841fdb5e8d62739dc9b5b4c41f3d9ee921700",
+      "sizeBytes": 473
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣官房_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "98bd6af0acc8fd334b01e909160c2e51acabd7e29b221d3e3ec96720bc602b69",
+      "sizeBytes": 1262
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣府_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "cda38790a9cff6a0963e55aa0d4fff37d7e18c3a86e9578fde0c00fce38da288",
+      "sizeBytes": 109422
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣府_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "b59de3cd6e3b412b4669e9977603268ba45070a849d421f9ad8ac5671cb4f264",
+      "sizeBytes": 6296
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣府_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "476330261ad86b4f90923f9ce2d8521897ce1ee6122e70c432220d0d99bb8e12",
+      "sizeBytes": 5364
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣府_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "e8d82593a0c94ccdfbdea08f177eea3eaab74c76e6e374bcacde5418881f5747",
+      "sizeBytes": 1263
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣府_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "56186331ef231f985cbef85ec1a2c0895919e1bfad69b7db4ea95509724d0bfc",
+      "sizeBytes": 2508
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣府_2025年度_出資状況表.csv",
+      "sha256": "fd16fe0a68bdcc9e62a5e16a2b54a172ca1b84aed28076f1c7e2501b23a086de",
+      "sizeBytes": 4066
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣府_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "34a93ae0a9bcce8fd372754c6e88ad7830e73b7fc7ac05765ab6824110c63218",
+      "sizeBytes": 11148
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/cabinet-secretariat-cabinet-office/内閣府_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "a78c3e53973864527fca21a67bdd1fa47956888ef062e9325c35296b232f0019",
+      "sizeBytes": 15079
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/casino-regulatory-commission/カジノ管理委員会_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "5f34d674f855e17b8e5a0ea53c6544dd3f7e3a2317c1e2b39c05a59045d27e7c",
+      "sizeBytes": 1362
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/casino-regulatory-commission/カジノ管理委員会_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "b028266fae741fbd61709da0a0d64debd9c1ebb856e8795d82db69e7450c8f9c",
+      "sizeBytes": 1252
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/children-and-families-agency/こども家庭庁_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "0150467fa6a88f6234cf6fcc6b33d7a3ab4e86c3d80f089387f74b116a0b17bf",
+      "sizeBytes": 87454
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/children-and-families-agency/こども家庭庁_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "5a410013969bf7b64b8132a1cf675118078c050cf051b6a05410174753770e23",
+      "sizeBytes": 1542
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/children-and-families-agency/こども家庭庁_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "f55e8cef412e598064c223a8b6046f692a89b04ca5ae19c373fbc6421fdcadde",
+      "sizeBytes": 3716
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/children-and-families-agency/こども家庭庁_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "ade9a90844971e40a02bf6aeb63f444a9356c7cf7eeb17b884117915b2bab124",
+      "sizeBytes": 1284
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/children-and-families-agency/こども家庭庁_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "259ee7cb3dd480267aa48240032bdd4556769aa721ca9dee3a447e6b7f592b6d",
+      "sizeBytes": 716
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/children-and-families-agency/こども家庭庁_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "0bfeaef0284dcfd39cfcffe17f49790e8627bc9f9214dcdafb21cdf8a5ee41df",
+      "sizeBytes": 575
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/children-and-families-agency/こども家庭庁_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "dc591458a6690c19b291b0c82a844dde1604cdbb13f858b63f593c3156d6a23d",
+      "sizeBytes": 2209
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/consumer-affairs-agency/消費者庁_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "dc69e0d5f239457660106e83bc8b9cc6f0e82f42a76a700e2a8be28b856dbe92",
+      "sizeBytes": 29429
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/consumer-affairs-agency/消費者庁_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "f086308633f59b7bbeefdb7287ea9b387887d524b5fde93924c198fd8606e784",
+      "sizeBytes": 1371
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/consumer-affairs-agency/消費者庁_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "2640b30d5d38c36fd632a681d10516ce7ad750ede786b22c2ff8c65f1ce3bdb2",
+      "sizeBytes": 1244
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/digital-agency/デジタル庁_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "78f1101a4632d23db622858101dbfd26e500aff09a6cd7d00ce9ea08a7940dc9",
+      "sizeBytes": 134950
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/digital-agency/デジタル庁_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "80212536e7caa7bbc287e8a755c5928efa38fb9ca0fbf16c09cbe276fc686a0c",
+      "sizeBytes": 5506
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/digital-agency/デジタル庁_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "72f1031edfea9efa7ec2743676eaec5d9e8e1719f20d0ee7a6eec3d3f5de10f3",
+      "sizeBytes": 2226
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/digital-agency/デジタル庁_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "bdfe54e1224cdbfad64de42ab4b85794c361227c596a6f2c36a03a9f76380b20",
+      "sizeBytes": 1250
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/fair-trade-commission/公正取引委員会_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "35d460138b7b6d59221cc6c97624d92157aa634f9b21d0e5208eb41f0e870632",
+      "sizeBytes": 14196
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/fair-trade-commission/公正取引委員会_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "9a33f656e2b4f5eb22594e57aaecef74db7f203e182f39f3a57be73bac72fc82",
+      "sizeBytes": 1252
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/financial-services-agency/金融庁_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "f25348d2b243ca40aad130f9d9a8069ea79bfce6e0700d73292130fd24609f45",
+      "sizeBytes": 23000
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/financial-services-agency/金融庁_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "4b30024694ed6872aec986e1004f1120f06c24796561e98702c0e3e0f784662e",
+      "sizeBytes": 840
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/financial-services-agency/金融庁_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "3a724ff141fdf152508eb9433f52261d8f6a608fc299d0270ab6bed4f7a07a57",
+      "sizeBytes": 2908
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/financial-services-agency/金融庁_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "cec38625ee35e51af6c8a9e558d300b02ac6f8cdb1f5d6edb4fc9dff41fc94b6",
+      "sizeBytes": 1240
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "b46d907d423c84438e307429af2f23f7b2038e0ae34d479ed0d97d7613e1d3de",
+      "sizeBytes": 256802
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "48d7837ef22ca9733595572701b4007eabde1ee8a4672339f6ff14145abf2459",
+      "sizeBytes": 6799
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "1ce280d70cb1231da04f24c1a0797e06aec45a545b5db7af0af74b6ef0ca422e",
+      "sizeBytes": 30653
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "a776dd03d5dca37062d8d7c9e9a046e5ad970ad82116d2505a11b2ae3633ac99",
+      "sizeBytes": 1541
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "470abf71e8bcb9c5c35952325530e18687ccf7a42faed2bb23d947ee58c22382",
+      "sizeBytes": 20136
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2025年度_出資状況表.csv",
+      "sha256": "2ce27f5adb0ec7dbde0a09bd3b7f272ca65083cc9c1c8b7c54b0c5227e5b7e33",
+      "sizeBytes": 3652
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "ff7f0d532b53f1f73a8bd4af6ee9478e78e6146eb02947fbf099e61c27001bb0",
+      "sizeBytes": 9134
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-agriculture-forestry-and-fisheries/農林水産省_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "5d327f0536c7587716f16a705b67f9c49df44574b857da3db62c1485f08927bb",
+      "sizeBytes": 19488
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-defense/防衛省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "3d92425295bbba9dc9bf4ac931bcb88ff7c9e457407fdac868f064240a06d975",
+      "sizeBytes": 273833
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-defense/防衛省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "856725906249397cb540bee562049b32d53fa7573e4c9ce426f364b6bf7a1365",
+      "sizeBytes": 5505
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-defense/防衛省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "6293440f138e5332ee1e227cc4ac2ac2ae43d34ca610c85d663b2d3c57b6ac53",
+      "sizeBytes": 12874
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-defense/防衛省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "d0d10d23922ecb6680fad16470ae902f15eda7f63cdf525b8b52e3b2a0cbc5fe",
+      "sizeBytes": 1268
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-defense/防衛省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "7f2d016df70019df1577dd9d5a6f800bf5f1b48cb91df4a139b30e4eceeddb7b",
+      "sizeBytes": 928
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-defense/防衛省_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "81990740c3773da242d18be5caa0a35f4126aeb45349ab7d2e6d4173a274b8c3",
+      "sizeBytes": 4769
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-defense/防衛省_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "3e6b7b7d81670b8945ba579b07c8b9ad81f0fb656f1627f7e8fdbce8f6fde3a9",
+      "sizeBytes": 4910
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-economy-trade-and-industry/経済産業省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "b7faea5fca124387ac88ced9bcbc69b8f120f6bdb77b1672b279b1cbd8d80107",
+      "sizeBytes": 255794
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-economy-trade-and-industry/経済産業省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "72fa108faefa422b4aa402baacf176d6dbc6aace613439ba67cf9331a159a462",
+      "sizeBytes": 2802
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-economy-trade-and-industry/経済産業省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "99a710d293028a70a8532f35ea144085ace85955815d24d3943aaaf8cd2409b3",
+      "sizeBytes": 35302
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-economy-trade-and-industry/経済産業省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "b945a54cadad208895094cff04988114ef8aada42d68d4e04fa6153487959dfd",
+      "sizeBytes": 1407
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-economy-trade-and-industry/経済産業省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "6bb3ac976b839554cafbc44a8e9e1f2d738e67a28ed13dd888ac870aa3f3be1f",
+      "sizeBytes": 18160
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-economy-trade-and-industry/経済産業省_2025年度_出資状況表.csv",
+      "sha256": "8895c468df1df764df539bd65d0d522f50f98dc76c50bfecb78ac5fcdd0d504e",
+      "sizeBytes": 11505
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-economy-trade-and-industry/経済産業省_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "bdb8e373a8d0c44ed4243c3b7a4f4b066b2ccd538068896c742387e453691749",
+      "sizeBytes": 13668
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-economy-trade-and-industry/経済産業省_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "8efbbc39e4ba06101eea33212471e6d58e0c415eb4dbc9e084bf97e48d5a7c9d",
+      "sizeBytes": 15385
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-education-culture-sports-science-and-technology/文部科学省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "faa35fb338a4f4c7a7c205be7c22dc80e0ed6028fd912d590d993bdfc8f1b725",
+      "sizeBytes": 300715
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-education-culture-sports-science-and-technology/文部科学省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "0b71df09deb1e77afddb824a5f63de0f6780d2d5111db8742669120653f83890",
+      "sizeBytes": 5215
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-education-culture-sports-science-and-technology/文部科学省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "718f540969f25345fc965bacb25a457c0bdef83884a2f764d5ce82f1aecb0e7c",
+      "sizeBytes": 14504
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-education-culture-sports-science-and-technology/文部科学省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "c050584473f8d940f05c8e513da1452b11e3bc26f165081b28d7b59d05eb740d",
+      "sizeBytes": 1521
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-education-culture-sports-science-and-technology/文部科学省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "5f67f8b4eadfccdb8987ee5d109a794879d3a0caef5b902d45627fae0d70640e",
+      "sizeBytes": 6908
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-education-culture-sports-science-and-technology/文部科学省_2025年度_出資状況表.csv",
+      "sha256": "233abb62690df9737c7857035a22bcc8f719694054b432a8688591ea8c43d2d7",
+      "sizeBytes": 6401
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-education-culture-sports-science-and-technology/文部科学省_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "89840f132c2eec42fa5deec52d59500c82a507f37bcac6a46d962d468b97eca2",
+      "sizeBytes": 4434
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-education-culture-sports-science-and-technology/文部科学省_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "8f1fe9db54ad24aee0ecbf7588c6f794a196e978034b7be7e6f5b8db7fdb11a5",
+      "sizeBytes": 5744
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-finance/財務省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "64fd18ab1f955a4b13791ca4eacd79b192094cef8dfec27d6acb80bec15b89c6",
+      "sizeBytes": 33807
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-finance/財務省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "7bd608d6836dbccf9ba9d64ea2b896592963184c045171cc4faeb8b909b81a17",
+      "sizeBytes": 478
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-finance/財務省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "f624c90cda03ff38271dcaf46d490c0522574db1d9d6473a847106ca80932f4d",
+      "sizeBytes": 4544
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-finance/財務省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "fbfe4c6476d1f839360f8f5b01e37613cd231cca9b8d488d627876e2877cb272",
+      "sizeBytes": 1409
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-finance/財務省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "2cb6ebc3d318701a8afcc96346b58f73173da6c542cec77572d7c1dc4ac66e8d",
+      "sizeBytes": 636
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-foreign-affairs/外務省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "cdb232da2e06384193f0efab9cc5471ab8c7dd5dcbae754bb0369c890f97aa5c",
+      "sizeBytes": 205795
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-foreign-affairs/外務省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "f9c9f5f6458c11b22a6327cdc61a7d7504115bfc68ec90a2ff3eca036b4bcd0c",
+      "sizeBytes": 3584
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-foreign-affairs/外務省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "c388b34e39daed372ddf6a868a69776e4b007b558845b65cb1cec7f2a19a93b9",
+      "sizeBytes": 1070
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-foreign-affairs/外務省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "5b5c127b3d819d3c418dd1708f703a8cd8ee14c5744558c87b51934d80dd6396",
+      "sizeBytes": 1260
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-foreign-affairs/外務省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "1d5cab7892fa156e27aae6fac50cbe46cf2f968f297ebe1c43b0e33bf2012581",
+      "sizeBytes": 940
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-foreign-affairs/外務省_2025年度_出資状況表.csv",
+      "sha256": "6437e146d38f696d0612d54372423fe248c3ca9b0297150db1f833e1dcd28fbb",
+      "sizeBytes": 1429
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-health-labour-and-welfare/厚生労働省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "381f90af4dd128fc5d220e2dedf4ab9dcea9fa6b4d15ad77f5eaa89d70280a43",
+      "sizeBytes": 766456
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-health-labour-and-welfare/厚生労働省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "cdb238571e23061cbd401b611bf556c0bc13d8fafa834e45c2b9cf26dc7e8e30",
+      "sizeBytes": 11420
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-health-labour-and-welfare/厚生労働省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "00b81a3a37f27295263ea1e706f90f63cbc6c8e6af138102f3221691d7b6fcbe",
+      "sizeBytes": 29111
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-health-labour-and-welfare/厚生労働省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "33cec986ab84001cd90143c9ca0bcc0fafa36311a9b30d9a32f49c5cf2a99951",
+      "sizeBytes": 1442
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-health-labour-and-welfare/厚生労働省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "54b12a5042f19239de2bb6e71b1ff0337439088d275245e97eacb8b93f1ac775",
+      "sizeBytes": 3820
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-health-labour-and-welfare/厚生労働省_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "01fa81104d51bee3f525a26626ab754fbe3330c6be04389aec00b64d0234380c",
+      "sizeBytes": 3636
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-health-labour-and-welfare/厚生労働省_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "911c5afc64ba561edf37c89cac12ec9e66c6c32c136e76de77e012a0df53029d",
+      "sizeBytes": 5946
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-internal-affairs-and-communications/総務省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "ec9251082d143a165ff1d4ef2f1e8f588333a3e1f16b3c09ded8174b4137cb59",
+      "sizeBytes": 133798
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-internal-affairs-and-communications/総務省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "41340ae1949a5ada505fd30ccc5c2030b693e54bec10811785b0ebd8ed81e8f9",
+      "sizeBytes": 2338
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-internal-affairs-and-communications/総務省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "b6b82ce60cb52653a22100f868e5756997a42f1882ebbb44aa700b6dae80eba2",
+      "sizeBytes": 14532
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-internal-affairs-and-communications/総務省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "e756ceb5e0972d46d615fb87a92927208f7187c7316f7e3282510d33af5cec6c",
+      "sizeBytes": 1490
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-internal-affairs-and-communications/総務省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "4cfcadfa559540624db1d7ba3bc1aebef07c397c32de59da33464b39986f0f63",
+      "sizeBytes": 2096
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-internal-affairs-and-communications/総務省_2025年度_出資状況表.csv",
+      "sha256": "0acb47fefb06411381f02c3bdaf138847acc65eae0add94b5772050e69f60c6d",
+      "sizeBytes": 1762
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-justice/法務省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "1b655601728ea10f7af48ebbbfe6d542f440c1d211ff3c16ec72998adb7f29b3",
+      "sizeBytes": 24024
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-justice/法務省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "49ff4d6d38e21c6f68da462e4b4f6cfa4a72ab73803b2e0a906f6ae3d8573263",
+      "sizeBytes": 4604
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-justice/法務省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "4c7447e74e2628b79df9ba24ecf62d240d9e8cc0dfb8aa4e6e7ff52cd81d8fd4",
+      "sizeBytes": 1388
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-land-infrastructure-and-transport/国土交通省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "36f6ab992b865718c71cd3a02046d1289ad8243682279944eccf83a544606801",
+      "sizeBytes": 440402
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-land-infrastructure-and-transport/国土交通省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "9736f2a80ac1e1a0087aedd07eec123ec55b8ae107c0871d2c9d1b260abfac95",
+      "sizeBytes": 10515
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-land-infrastructure-and-transport/国土交通省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "67fafb62b1eb0d2cd23dcdf4df262da17e4188ba2a87ceff5097dee1e2266784",
+      "sizeBytes": 24730
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-land-infrastructure-and-transport/国土交通省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "5cee57cf7b13404050d1949c85fadfd47f99e447d31d1f749de1b165e964d553",
+      "sizeBytes": 1811
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-land-infrastructure-and-transport/国土交通省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "06e5210853251030b0df72d8abd15395212e397784f428a41c3f6df2d1ed3f4b",
+      "sizeBytes": 5845
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-land-infrastructure-and-transport/国土交通省_2025年度_出資状況表.csv",
+      "sha256": "5989718c4f61e0a6da89026ad20228d5f1bf542988bd761c054f25ec074a5bac",
+      "sizeBytes": 1984
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-land-infrastructure-and-transport/国土交通省_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "080ffe742832818c17353234aca377e605379c6c6a1f73914bb528fb0418c701",
+      "sizeBytes": 932
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-land-infrastructure-and-transport/国土交通省_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "9698c153a49a74489dbf20c1722668629ad573478315bb53f75a510a59f6ac86",
+      "sizeBytes": 2553
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-the-environment/環境省_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "31de237dcddc4f2d1b32bbaa7ba28a583ed928d16fb99287f549213f2a84813a",
+      "sizeBytes": 119277
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-the-environment/環境省_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "7829b12eacfd86203a5dc30b4d50f4c24cea8f666ac774ecee389ddef6c852c1",
+      "sizeBytes": 4005
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-the-environment/環境省_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "92c84c0d22c15268f6febd5461d2978547befec5c05f97b1596cdac02999b753",
+      "sizeBytes": 10246
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-the-environment/環境省_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "0d303bcd82a036d67902d1ffca9f1ab9454c97165bc9ac8d6c412c8e67878d00",
+      "sizeBytes": 1271
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-the-environment/環境省_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "8a14a831ddd41f23fb6d650f88d67801f19fcbeeb3f0f9cb9fdc9598427a81a7",
+      "sizeBytes": 2241
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-the-environment/環境省_2025年度_出資状況表.csv",
+      "sha256": "e52f84e6f2a12746a12229de1f89af78758588018fe077a7fb845cccc35fac49",
+      "sizeBytes": 2738
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-the-environment/環境省_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "d7d3c19c49763948617af6b8c39ed14573a3c6982a2c2ee62da30b605b2e57ac",
+      "sizeBytes": 3999
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/ministry-of-the-environment/環境省_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "ef4351dbe7907444167dfb18fd2660c324d336aa0a4834708e30b78b85013291",
+      "sizeBytes": 5883
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/national-police-agency/警察庁_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "06be06301803dfb191cce3de0dd0c1a4779ed0b50b8008b3e5f0a8e43e78ac25",
+      "sizeBytes": 94018
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/national-police-agency/警察庁_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "671c1cd26dac47f0323089761964ea4e0961f0035fa5a99cc3cd76f06c08a153",
+      "sizeBytes": 4137
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/national-police-agency/警察庁_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "36a2645fc21348fb62460f7f4736888d2985815214e2f79b37b6e5a900ba9cc5",
+      "sizeBytes": 1242
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/nuclear-regulation-authority/原子力規制委員会_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "93f99fcb34e8bd0a48d1794649bf61dfacd5aad8a340143242ea764fc15df5c3",
+      "sizeBytes": 41370
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/nuclear-regulation-authority/原子力規制委員会_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "560d073420796b5a5593d503237b5e742488d4e8550ee14121802133fe43fc5f",
+      "sizeBytes": 564
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/nuclear-regulation-authority/原子力規制委員会_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "9d076489d71cacf87b5f319822d4eef5bc18bc64a459ceef498da2579280b9ec",
+      "sizeBytes": 5452
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/nuclear-regulation-authority/原子力規制委員会_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "2a2dbda9fb7ee5887ccb7dfb599a77b2f18202120a50e4175f837f27e5b9a4f7",
+      "sizeBytes": 1265
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/personal-information-protection-commission/個人情報保護委員会_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "b84a6415682e2ceb97fd20d93fc811c1bce7ca3831c5343868a9e0504e0dbba9",
+      "sizeBytes": 5978
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/personal-information-protection-commission/個人情報保護委員会_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "1eb2157e2fca25e516c1958b46678cf50967cd5490234d7a2c29c16f54a18a26",
+      "sizeBytes": 1255
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/reconstruction-agency/復興庁_2025年度_(様式1)【前年度事業及び新規開始事業】行政事業レビュー点検結果の翌年度予算概算要求への反映状況調表.csv",
+      "sha256": "f72f2f69016716ba6aec50bbf1e2200c0e21fc0d02dcd954939f981962ae7eb9",
+      "sizeBytes": 94386
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/reconstruction-agency/復興庁_2025年度_(様式2)【新規要求事業】に係る事業単位整理表.csv",
+      "sha256": "8b8e943d0721cf6a36a4bde4a49444035e3995e72f3810ff1cd64ef11db060c4",
+      "sizeBytes": 1585
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/reconstruction-agency/復興庁_2025年度_(様式3)公開プロセス結果の翌年度予算概算要求への反映状況.csv",
+      "sha256": "b3e72212f8281029cb42576c9b1e3933fd7e26b550023758c27296f97310ba12",
+      "sizeBytes": 7767
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/reconstruction-agency/復興庁_2025年度_(様式4)行政事業レビュー点検結果の翌年度予算概算要求への反映状況(集計表).csv",
+      "sha256": "51dc1870e49e01a9047cab5e0025ed6924c015977929de180b28128125d6709c",
+      "sizeBytes": 1271
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/reconstruction-agency/復興庁_2025年度_公益法人等に造成された基金の執行状況一覧表.csv",
+      "sha256": "7728068221d45ff0c3fe6810c72297282dd363a218e98df5062aa335d56f353d",
+      "sizeBytes": 4084
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/reconstruction-agency/復興庁_2025年度_出資状況表.csv",
+      "sha256": "897900be8fa22ab02b46528009cc26063aa197835089671d56daba9fb772b922",
+      "sizeBytes": 1841
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/reconstruction-agency/復興庁_2025年度_地方公共団体等保有基金執行状況表【A表(基礎情報)】.csv",
+      "sha256": "20b5c70c846aa5adfa055d4918edda7f9ca041bfb3266ebd27bba70df7f90aa8",
+      "sizeBytes": 24144
+    },
+    {
+      "path": "rssystem.go.jp/sheets/2025/reconstruction-agency/復興庁_2025年度_地方公共団体等保有基金執行状況表【B表(収入・支出等)】.csv",
+      "sha256": "39c66b5b2da75e3784ab02a69c91ac698b366b3aa137d4965f44e3db49ac6c62",
+      "sizeBytes": 15998
+    }
+  ]
+}

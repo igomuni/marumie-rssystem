@@ -1,0 +1,25 @@
+{
+  "fiscalYear": 2024,
+  "relationCount": 4803,
+  "schemaVersion": 1,
+  "transitions": {
+    "initial_enacted->supplement_1": {
+      "linkedSourceRecords": 2391,
+      "linkedTargetRecords": 2391,
+      "relationCount": 2391,
+      "sourceRecords": 8088,
+      "targetRecords": 3234,
+      "unlinkedSourceRecords": 5697,
+      "unlinkedTargetRecords": 843
+    },
+    "supplement_1->settlement": {
+      "linkedSourceRecords": 2412,
+      "linkedTargetRecords": 2414,
+      "relationCount": 2412,
+      "sourceRecords": 3234,
+      "targetRecords": 8358,
+      "unlinkedSourceRecords": 822,
+      "unlinkedTargetRecords": 5944
+    }
+  }
+}

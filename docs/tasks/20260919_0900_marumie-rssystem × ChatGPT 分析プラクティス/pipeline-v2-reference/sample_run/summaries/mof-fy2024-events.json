@@ -1,0 +1,21 @@
+{
+  "eventCount": 94902,
+  "eventTypeCounts": {
+    "budget_rule_increase": 8358,
+    "carryover_in": 8358,
+    "carryover_out": 8358,
+    "current_budget_state": 8358,
+    "initial_budget_state": 8088,
+    "reallocation": 8358,
+    "reserve_use": 8358,
+    "settlement_budget_appropriation": 8358,
+    "spent": 8358,
+    "supplement_adjustment": 3234,
+    "transfer_adjustment": 8358,
+    "unused": 8358
+  },
+  "fiscalYear": 2024,
+  "parliamentaryAmendmentCount": 0,
+  "parliamentaryAmendmentNetDeltaYen": 0,
+  "schemaVersion": 1
+}
