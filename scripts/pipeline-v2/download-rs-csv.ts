@@ -11,7 +11,8 @@
  * download-csvページの各ZIPボタン押下時の実リクエストを観測して特定。
  * 認証不要・APIキー不要の静的ファイル配信）。
  *
- * 使い方: npx tsx scripts/pipeline-v2/download-rs-csv.ts [year]
+ * 使い方: npx tsx scripts/pipeline-v2/download-rs-csv.ts [year...]
+ *   （年度省略時は 2024 2025。現行フォーマットのRSデータは2024年度以降のみ）
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -77,10 +78,9 @@ async function downloadOne(year: number, no: string, label: string, outDir: stri
   }
 }
 
-async function main() {
-  const year = parseInt(process.argv[2] ?? '2024', 10);
+async function processYear(year: number): Promise<number> {
   const outDir = path.join('data', 'download', 'rssystem.go.jp', 'download-csv', String(year));
-  console.log(`RS CSV download: year=${year} outDir=${outDir}`);
+  console.log(`\n=== RS CSV download: year=${year} outDir=${outDir} ===`);
 
   const results: DownloadResult[] = [];
   for (const { no, label } of RS_CSV_GROUPS) {
@@ -91,11 +91,18 @@ async function main() {
   }
 
   const failed = results.filter(r => r.status === 'failed');
-  console.log(`\n合計 ${results.length}件: downloaded=${results.filter(r => r.status === 'downloaded').length} cached=${results.filter(r => r.status === 'cached').length} failed=${failed.length}`);
-  if (failed.length > 0) {
-    console.error('失敗したファイルがあります:', failed.map(f => f.fileName).join(', '));
-    process.exitCode = 1;
-  }
+  console.log(`合計 ${results.length}件: downloaded=${results.filter(r => r.status === 'downloaded').length} cached=${results.filter(r => r.status === 'cached').length} failed=${failed.length}`);
+  if (failed.length > 0) console.error('失敗したファイルがあります:', failed.map(f => f.fileName).join(', '));
+  return failed.length;
+}
+
+async function main() {
+  const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
+  const targetYears = years.length > 0 ? years : [2024, 2025];
+
+  let totalFailed = 0;
+  for (const year of targetYears) totalFailed += await processYear(year);
+  if (totalFailed > 0) process.exitCode = 1;
 }
 
 main();
