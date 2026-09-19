@@ -1,7 +1,9 @@
 /**
  * 財務省「決算の説明」（`https://www.mof.go.jp/policy/budget/budger_workflow/account/fy{year}/`）の
  * 一括ダウンロード版PDF（全体版）を取得し、
- * `data/download/mof.go.jp/account/{year}/` へ原本のまま保存する。
+ * `data/download/mof.go.jp/account/fy{year}/` へ原本のまま保存する（`fy`接頭辞はURL
+ * `account/fy{year}/`にそのまま合わせたもの。bb.mof.go.jpのarchive側はURLに
+ * `fy`が無いため`archive/{year}/`のまま。ソースURLの表記にディレクトリ名を合わせる方針）。
  *
  * Pipeline V2 download層。bb.mof.go.jp/archive（download-mof-archive.ts）の
  * 予算書・決算書CSVとは別の情報源で、決算を歳出目的別（社会保障・防衛・公共事業等）に
@@ -29,7 +31,7 @@ async function downloadOne(year: number): Promise<boolean> {
   const era = eraCodeFor(year);
   const fileName = `kessan_${era}_zenntaibann.pdf`;
   const url = `https://www.mof.go.jp/policy/budget/budger_workflow/account/fy${year}/${fileName}`;
-  const outDir = path.join('data', 'download', 'mof.go.jp', 'account', String(year));
+  const outDir = path.join('data', 'download', 'mof.go.jp', 'account', `fy${year}`);
   const outPath = path.join(outDir, fileName);
 
   if (fs.existsSync(outPath)) {

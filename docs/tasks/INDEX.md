@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20260919_0900_marumie-rssystem × ChatGPT 分析プラクティス/20260919_Pipeline_V2基盤整備_実装タスク_v2.md](20260919_0900_marumie-rssystem%20×%20ChatGPT%20分析プラクティス/20260919_Pipeline_V2基盤整備_実装タスク_v2.md) — v1に「19. MOF決算の説明PDFの位置付け」を追記した改訂版。構造化原本(CSV)を主データ、決算説明PDFを補助証拠/検算という位置付けに整理。ディレクトリ命名はソースURL表記にそのまま合わせる方針（archive/2024・account/fy2024）に統一
 - [20260919_1523_Pipeline_V2_downloadファイル一覧と重複分析.md](20260919_1523_Pipeline_V2_downloadファイル一覧と重複分析.md) — download層で取得した611ファイル(281MB)の拡張子別内訳。RSレビューシートは全タイトルCSV+PDFの完全重複（PDF130MB）、MOF主要帳票もcsv/excel/dlpdfが同一内容の別形式（重複約77MB）。決算参照等15帳票はPDFのみが公式の唯一の入手経路で重複ではない
 - [20260919_0900_marumie-rssystem × ChatGPT 分析プラクティス/20260919_Pipeline_V2基盤整備_実装タスク.md](20260919_0900_marumie-rssystem%20×%20ChatGPT%20分析プラクティス/20260919_Pipeline_V2基盤整備_実装タスク.md) — 既存パイプライン（V1）を凍結し、download/normalized/derived/productsの4層構造を持つPipeline V2を新設する実装タスク仕様。fiscalYearとsourceYearの区別、BudgetEntity/BudgetEvent分離、V1/V2比較検証コマンドを規定。着手はdownload層のRS CSV取得スクリプト（`scripts/pipeline-v2/download-rs-csv.ts`）から
 - [20260913_1555_統合サンキー再構築の確定仕様.md](20260913_1555_統合サンキー再構築の確定仕様.md) — **実装済み**。当初の帯付き設計から「帯を持たない2列のノード一覧」へ再度作り直した。検索1本化(項名/事業名のみ)・サイドパネル左配置・/sankey-svg準拠のヘッダーバッジ構成・列ごとの合計金額表示に修正。RS2024×MOF2023の紐づけ品質が事業紐づけ率21.3%と著しく低いことが判明し精度改善は別task docへ分離。恒久仕様はdocs/integrated-sankey-graph-model.mdへ転記済み
