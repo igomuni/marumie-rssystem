@@ -100,3 +100,88 @@ export interface RsExpenditure {
   amount: number;
   provenance: Provenance;
 }
+
+// ─────────────────────────────────────────────────────────────
+// 以下、20260920_Pipeline_V2_MOF_RS統合_publicまで_最終仕様.md に基づく
+// source-preserving normalize層の型（MofBudgetEvent等の旧イベント集約型とは別系統）。
+// ─────────────────────────────────────────────────────────────
+
+/** raw原本の由来。どのZIP・どのCSVエントリ・何行目かまで追跡できる */
+export interface SourceRef {
+  domain: 'mof.go.jp' | 'rssystem.go.jp';
+  /** raw_rootからの相対パス */
+  path: string;
+  file: string;
+  dataset?: string;
+  year?: number;
+  zipEntry?: string;
+  rowNumber?: number;
+  sourceUrl?: string;
+}
+
+export type MofAccountType = 'general' | 'special' | 'agency';
+export type MofPhase = 'initial' | 'supplement' | 'provisional' | 'settlement';
+export type MofBudgetStatus = 'submitted' | 'enacted' | 'settled' | 'published';
+
+/**
+ * MOF予算・決算CSVの1行をそのまま保持するsource-preservingなレコード。
+ * 金額の集約・イベント化はderived層で行う（normalized層では行わない）。
+ * sectionNaturalKey（項名を含む識別子）とlegacySectionKey（項コードのみ、項名を含まない
+ * 識別子。同一コードが複数の項名で再利用される場合に意図的に潰れる）を両方持ち、
+ * どちらの同一性判定を使ったか比較できるようにする（仕様書8節）。
+ */
+export interface MofBudgetItemRecord {
+  schemaVersion: number;
+  recordType: 'mof_budget_item';
+  recordId: string;
+  fiscalYear: number;
+  phase: MofPhase;
+  budgetStatus: MofBudgetStatus;
+  /** 補正号数。補正以外はnull */
+  revision: number | null;
+  accountType: MofAccountType;
+  ministry: string;
+  organization: string;
+  specialAccount: string;
+  subAccount: string;
+  agency: string;
+  sectionCode: string;
+  sectionName: string;
+  subItemCode: string;
+  subItemName: string;
+  /** account系+sectionCode+sectionNameで作る識別子（項名を含む） */
+  sectionNaturalKey: string;
+  /** account系+sectionCodeのみで作る識別子（項名を含まない。同名衝突を意図的に許す比較用） */
+  legacySectionKey: string;
+  /** sectionNaturalKey + subItemCode + subItemName */
+  itemNaturalKey: string;
+  /** account系+sectionName+subItemName（コードを含まない）。RS側にコードが無いためlink用に使う */
+  scopeNameItemKey: string;
+  source: SourceRef;
+
+  // phase別のフィールド。該当しないphaseではundefined
+  /** initial/provisional: 本年度額 */
+  amountYen?: number | null;
+  previousAmountYen?: number | null;
+  differenceYen?: number | null;
+  sourceAmountColumn?: string | null;
+
+  /** supplement */
+  baseAmountYen?: number | null;
+  supplementAdditionYen?: number | null;
+  supplementReductionYen?: number | null;
+  supplementDeltaYen?: number | null;
+  revisedAmountYen?: number | null;
+
+  /** settlement */
+  budgetAmountYen?: number | null;
+  carryoverInYen?: number | null;
+  reserveUseYen?: number | null;
+  budgetRuleIncreaseYen?: number | null;
+  reallocationYen?: number | null;
+  transferAdjustmentYen?: number | null;
+  currentBudgetYen?: number | null;
+  spentYen?: number | null;
+  carryoverOutYen?: number | null;
+  unusedYen?: number | null;
+}

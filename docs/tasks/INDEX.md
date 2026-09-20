@@ -2,6 +2,11 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20260919_0900_marumie-rssystem × ChatGPT 分析プラクティス/20260920_Pipeline_V2_main移植_ファイル単位実装計画.md](20260919_0900_marumie-rssystem%20×%20ChatGPT%20分析プラクティス/20260920_Pipeline_V2_main移植_ファイル単位実装計画.md) — Pipeline V2をRS全15CSV・stable ID・public/data/v2配信層まで拡張してmainへ移植するファイル単位計画（PR-A/B/C分割案）。着手中（MOF正規化のsource-preserving化から開始）
+- [20260919_0900_marumie-rssystem × ChatGPT 分析プラクティス/20260920_Pipeline_V2_MOF_RS統合_publicまで_最終仕様.md](20260919_0900_marumie-rssystem%20×%20ChatGPT%20分析プラクティス/20260920_Pipeline_V2_MOF_RS統合_publicまで_最終仕様.md) — 上記実装計画が参照する最終仕様。4層+publish構造、reviewYear/fiscalYear分離、MOF項目identity、256shard構成
+- [20260919_0900_marumie-rssystem × ChatGPT 分析プラクティス/20260920_Pipeline_V2_MOF_RS統合_参照実装_実行結果.md](20260919_0900_marumie-rssystem%20×%20ChatGPT%20分析プラクティス/20260920_Pipeline_V2_MOF_RS統合_参照実装_実行結果.md) — Python参照実装をMOF+RS+links+publishまで拡張して実データ実行した結果。PID:4の決算未解決ギャップ等の発見あり
+- [20260919_0900_marumie-rssystem × ChatGPT 分析プラクティス/20260920_Pipeline_V2_RS_public_publish仕様.md](20260919_0900_marumie-rssystem%20×%20ChatGPT%20分析プラクティス/20260920_Pipeline_V2_RS_public_publish仕様.md) — 巨大な中間データからpublic/data/v2（Core/Full）だけを配信する方針
+
 - [20260919_0900_marumie-rssystem × ChatGPT 分析プラクティス/20260919_Pipeline_V2基盤整備_実装タスク_v2.md](20260919_0900_marumie-rssystem%20×%20ChatGPT%20分析プラクティス/20260919_Pipeline_V2基盤整備_実装タスク_v2.md) — v1に「19. MOF決算の説明PDFの位置付け」を追記した改訂版。構造化原本(CSV)を主データ、決算説明PDFを補助証拠/検算という位置付けに整理。ディレクトリ命名はソースURL表記にそのまま合わせる方針（archive/2024・account/fy2024）に統一
 - [20260919_1523_Pipeline_V2_downloadファイル一覧と重複分析.md](20260919_1523_Pipeline_V2_downloadファイル一覧と重複分析.md) — download層で取得した611ファイル(281MB)の拡張子別内訳。RSレビューシートは全タイトルCSV+PDFの完全重複（PDF130MB）、MOF主要帳票もcsv/excel/dlpdfが同一内容の別形式（重複約77MB）。決算参照等15帳票はPDFのみが公式の唯一の入手経路で重複ではない
 - [20260919_0900_marumie-rssystem × ChatGPT 分析プラクティス/20260919_Pipeline_V2基盤整備_実装タスク.md](20260919_0900_marumie-rssystem%20×%20ChatGPT%20分析プラクティス/20260919_Pipeline_V2基盤整備_実装タスク.md) — 既存パイプライン（V1）を凍結し、download/normalized/derived/productsの4層構造を持つPipeline V2を新設する実装タスク仕様。fiscalYearとsourceYearの区別、BudgetEntity/BudgetEvent分離、V1/V2比較検証コマンドを規定。着手はdownload層のRS CSV取得スクリプト（`scripts/pipeline-v2/download-rs-csv.ts`）から

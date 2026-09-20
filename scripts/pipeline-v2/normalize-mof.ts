@@ -1,218 +1,287 @@
 /**
  * MOF予算書・決算書CSV（download-mof-archive.tsが取得したraw ZIP）を、
- * 正規化されたBudgetEvent列へ変換する。
+ * source-preservingな行レベルレコードへ変換する（正規化のみ。集約・イベント化はderived層）。
  *
- * Pipeline V2 normalized層。RSとの結合・項コードの同一性判定はここでは行わない
- * （derived層の責務）。項・目コードは原典表記のまま保持する。
+ * 仕様: 20260920_Pipeline_V2_MOF_RS統合_publicまで_最終仕様.md
+ * 参照実装: Python版 pipeline_v2/normalize_mof.py に合わせている（帳票種別・列名解決・
+ * 識別キーの作り方を含めて同じロジック）。
+ *
+ * 帳票ID→(accountType, phase)の対応:
+ *   11=一般会計当初 12=特別会計当初 13=政府関係機関当初                 → initial
+ *   21=一般会計補正 22=特別会計補正                                    → supplement
+ *   31=一般会計概算 32=特別会計概算 33=政府関係機関概算（未使用/将来用） → provisional
+ *   76=政府関係機関決算 77=一般会計決算 78=特別会計決算                 → settlement
+ *
+ * 提出版/成立版の区別はディレクトリ名（`{year}_teishutsu`か否か）で判定する
+ * （bb.mof.go.jpのarchiveページのURL構造そのまま。download-mof-archive.ts参照）。
  *
  * 入力: data/download/mof.go.jp/archive/{year}/{yearDir}/csv/DL*.zip
- * 出力: data/normalized/mof/{year}/budget-events.json
- *
- * 帳票ID→イベント種別の対応（docs/mof-budget-data-guide.md準拠）:
- *   11001=一般会計当初 12001=特別会計当初 13001=政府関係機関当初 → initial
- *   21001=一般会計補正第1号 22001=特別会計補正第1号            → supplementary
- *   76001=政府関係機関決算 77001=一般会計決算 78001=特別会計決算  → settlement系
- *     （支出済/予備費使用/前年度繰越/翌年度繰越/不用/移替の複数イベントに分解）
+ * 出力: data/normalized/mof/fy{year}/{budget-items.jsonl,manifest.json}
  *
  * 使い方: npx tsx scripts/pipeline-v2/normalize-mof.ts [year...]
- *   （年度省略時は 2024 2025。2025年度は補正・決算未成立のため当初分のみ生成される）
+ *   （年度省略時は 2024 2025）
  */
 import * as fs from 'fs';
 import * as path from 'path';
 import { listZipEntries, readZipEntryText } from '@/scripts/zip-reader';
-import type { MofBudgetEvent, Provenance } from './types';
+import { stableId, normalizeText } from './lib/stable-id';
+import { parseIntValue, yenFromThousand } from './lib/parse';
+import { writeJsonl, writeJson } from './lib/jsonl';
+import { scopeOf, sectionNaturalKey, legacySectionKey, scopeNameItemKey, findHeader, standardAmountColumn, isExpenditureHeaders } from './lib/mof-keys';
+import type { MofBudgetItemRecord, MofAccountType, MofPhase, MofBudgetStatus, SourceRef } from './types';
 
-type CsvRow = Record<string, string>;
+const ZIP_RE = /^DL(\d{4})(\d{2})(\d{3})\.zip$/;
 
-const REPORT_KIND: Record<string, 'initial' | 'supplementary' | 'settlement'> = {
-  '11001': 'initial', '12001': 'initial', '13001': 'initial',
-  '21001': 'supplementary', '22001': 'supplementary',
-  '76001': 'settlement', '77001': 'settlement', '78001': 'settlement',
+const DOCUMENT_KINDS: Record<string, { accountType: MofAccountType; phase: MofPhase }> = {
+  '11': { accountType: 'general', phase: 'initial' },
+  '12': { accountType: 'special', phase: 'initial' },
+  '13': { accountType: 'agency', phase: 'initial' },
+  '21': { accountType: 'general', phase: 'supplement' },
+  '22': { accountType: 'special', phase: 'supplement' },
+  '31': { accountType: 'general', phase: 'provisional' },
+  '32': { accountType: 'special', phase: 'provisional' },
+  '33': { accountType: 'agency', phase: 'provisional' },
+  '76': { accountType: 'agency', phase: 'settlement' },
+  '77': { accountType: 'general', phase: 'settlement' },
+  '78': { accountType: 'special', phase: 'settlement' },
 };
 
-/** 予算書CSVは値にカンマを含まないため単純split で足りる（scripts/mof-budget-csv.tsと同じ前提） */
-function parseCsv(content: string): CsvRow[] {
+interface MofDocument {
+  fiscalYear: number;
+  kind: string;
+  sequence: number;
+  revision: number | null;
+  accountType: MofAccountType;
+  phase: MofPhase;
+  budgetStatus: MofBudgetStatus;
+  releaseDir: string;
+  zipPath: string;
+}
+
+/** raw_root相対パス（source refに使う。Python版のrelpathと同じ発想） */
+function relFromRawRoot(rawRoot: string, absPath: string): string {
+  return path.relative(rawRoot, absPath).split(path.sep).join('/');
+}
+
+function discoverMofDocuments(rawRoot: string, years?: Set<number>): MofDocument[] {
+  const archiveRoot = path.join(rawRoot, 'mof.go.jp', 'archive');
+  if (!fs.existsSync(archiveRoot)) return [];
+  const docs: MofDocument[] = [];
+  for (const yearDirName of fs.readdirSync(archiveRoot)) {
+    const yearPath = path.join(archiveRoot, yearDirName);
+    if (!fs.statSync(yearPath).isDirectory()) continue;
+    for (const releaseDir of fs.readdirSync(yearPath)) {
+      const csvDir = path.join(yearPath, releaseDir, 'csv');
+      if (!fs.existsSync(csvDir)) continue;
+      for (const zipName of fs.readdirSync(csvDir)) {
+        const m = ZIP_RE.exec(zipName);
+        if (!m) continue;
+        const fiscalYear = Number(m[1]);
+        if (years && !years.has(fiscalYear)) continue;
+        const kind = m[2];
+        const doc = DOCUMENT_KINDS[kind];
+        if (!doc) continue;
+        const sequence = Number(m[3]);
+        const submitted = releaseDir.endsWith('_teishutsu');
+        let budgetStatus: MofBudgetStatus;
+        if (doc.phase === 'initial' || doc.phase === 'provisional') budgetStatus = submitted ? 'submitted' : 'enacted';
+        else if (doc.phase === 'settlement') budgetStatus = 'settled';
+        else budgetStatus = submitted ? 'submitted' : 'published';
+        docs.push({
+          fiscalYear,
+          kind,
+          sequence,
+          revision: doc.phase === 'supplement' ? sequence : null,
+          accountType: doc.accountType,
+          phase: doc.phase,
+          budgetStatus,
+          releaseDir,
+          zipPath: path.join(csvDir, zipName),
+        });
+      }
+    }
+  }
+  return docs;
+}
+
+/** parseCsvと同じ前提（値にカンマを含まない）でZIP内の歳出表エントリを取得する */
+function expenditureZipEntry(zipPath: string): { entry: string; rows: Record<string, string>[] } {
+  for (const entry of listZipEntries(zipPath).filter(e => e.toLowerCase().endsWith('.csv'))) {
+    const rows = parseCsv(readZipEntryText(zipPath, entry));
+    if (rows.length > 0 && isExpenditureHeaders(Object.keys(rows[0]))) return { entry, rows };
+  }
+  throw new Error(`歳出表CSVが見つかりません: ${zipPath}`);
+}
+
+function parseCsv(content: string): Record<string, string>[] {
   const lines = content.split(/\r?\n/).filter(l => l.trim());
   if (lines.length === 0) return [];
   const headers = lines[0].split(',').map(h => h.trim());
   return lines.slice(1).map(line => {
     const cells = line.split(',');
-    const row: CsvRow = {};
+    const row: Record<string, string> = {};
     headers.forEach((h, i) => { if (h) row[h] = (cells[i] ?? '').trim(); });
     return row;
   });
 }
 
-function yen(row: CsvRow, column: string | undefined): number {
-  if (!column) return 0;
-  const raw = row[column];
-  if (!raw) return 0;
-  const n = parseInt(raw.replace(/,/g, ''), 10);
-  return Number.isNaN(n) ? 0 : n;
-}
-
-/** 帳票が千円単位か円単位かを、列名の"(円)"有無で判定する */
-function isYenUnit(headers: string[]): boolean {
-  return headers.some(h => h.includes('(円)'));
-}
-
-function findColumn(headers: string[], test: (h: string) => boolean): string | undefined {
-  return headers.find(test);
-}
-
-/** 歳出側の表かどうか。分類コードの有無で判定する（V1のisExpenditureTableと同じ考え方） */
-function isExpenditureTable(headers: string[]): boolean {
-  return headers.some(h => h.includes('主要経費別分類')) || headers.some(h => h.includes('使途別分類コード')) && headers.some(h => h.includes('項名'));
-}
-
-/**
- * 所管/組織系の列は帳票により3パターンある:
- *   一般会計:     所管, 組織
- *   特別会計:     所管, 特別会計(名), 勘定   ← 3列とも識別に必要（勘定だけでは一意にならない）
- *   政府関係機関: 政府関係機関(名), 業務
- */
-function accountColumns(headers: string[]): { account?: string; organization?: string; subAccount?: string } {
-  const account = findColumn(headers, h => ['所管', '政府関係機関'].includes(h));
-  const organization = findColumn(headers, h => ['組織', '特別会計', '業務'].includes(h));
-  const subAccount = findColumn(headers, h => h === '勘定');
-  return { account, organization, subAccount };
-}
-
-function eventsFromInitialOrSupplementary(
-  rows: CsvRow[],
-  kind: 'initial' | 'supplementary',
-  fiscalYear: number,
-  provenance: Provenance
-): MofBudgetEvent[] {
+function normalizeMofDocument(rawRoot: string, doc: MofDocument): MofBudgetItemRecord[] {
+  const { entry, rows } = expenditureZipEntry(doc.zipPath);
   if (rows.length === 0) return [];
   const headers = Object.keys(rows[0]);
-  const { account, organization, subAccount } = accountColumns(headers);
-  const sectionCode = findColumn(headers, h => h === '項コード');
-  const sectionName = findColumn(headers, h => h === '項名');
-  const itemName = findColumn(headers, h => h === '目名');
-  const amountCol = kind === 'initial'
-    ? findColumn(headers, h => /^(令和|平成)(元|\d+)年度/.test(h))
-    : findColumn(headers, h => h.endsWith('差引額(千円)'));
-  if (!sectionCode || !sectionName || !itemName || !amountCol) return [];
+  const { phase, accountType } = doc;
 
-  const events: MofBudgetEvent[] = [];
-  for (const row of rows) {
-    const amount = yen(row, amountCol) * 1000; // 予算書CSVは千円単位
-    // amount===0でも行（目）自体は存在する（0円計上は「予算措置なし」ではなく
-    // 「0円で計上されている」という意味のある情報）ため、0円だからと言って
-    // イベント自体を捨てない。参照実装（Python版pipeline-v2-reference）との
-    // 突合で判明: 0円行を捨てるとFY2024当初・一般会計の項数が739件になり、
-    // source-preservingな784件と一致しなかった（2026-09-19）
-    events.push({
-      fiscalYear,
-      eventType: kind,
-      account: account ? row[account] : '',
-      organization: organization ? row[organization] : '',
-      subAccount: subAccount ? row[subAccount] : undefined,
-      sectionCode: row[sectionCode],
-      sectionName: row[sectionName],
-      itemName: row[itemName],
-      amount,
-      provenance,
-    });
-  }
-  return events;
-}
+  const standardCol = phase === 'initial' || phase === 'provisional' ? standardAmountColumn(headers) : undefined;
+  const previousCol = findHeader(headers, ['前年度予算額']);
+  const compareCol = findHeader(headers, ['比較増△減額']);
 
-const SETTLEMENT_COLUMNS: { eventType: MofBudgetEvent['eventType']; candidates: string[] }[] = [
-  { eventType: 'execution', candidates: ['支出済歳出額(円)', '支出済額(円)'] },
-  { eventType: 'reserve', candidates: ['予備費使用額(円)'] },
-  { eventType: 'carryover_in', candidates: ['前年度繰越額(円)'] },
-  { eventType: 'carryover_out', candidates: ['翌年度繰越額(円)'] },
-  { eventType: 'unused', candidates: ['不用額(円)'] },
-  { eventType: 'transfer', candidates: ['予算決定後移替増△減額(円)'] },
-];
+  const baseCol = phase === 'supplement' ? findHeader(headers, ['成立予算額']) : undefined;
+  const addCol = phase === 'supplement' ? findHeader(headers, ['補正', '追加額']) : undefined;
+  const reductionCol = phase === 'supplement' ? findHeader(headers, ['補正', '修正減少額']) : undefined;
+  const deltaCol = phase === 'supplement' ? findHeader(headers, ['補正', '差引額']) : undefined;
+  const revisedCol = phase === 'supplement' ? headers.find(h => h.startsWith('改') && (h.includes('予算額') || h.includes('予定額'))) : undefined;
 
-function eventsFromSettlement(rows: CsvRow[], fiscalYear: number, provenance: Provenance): MofBudgetEvent[] {
-  if (rows.length === 0) return [];
-  const headers = Object.keys(rows[0]);
-  if (!isYenUnit(headers)) return [];
-  const { account, organization, subAccount } = accountColumns(headers);
-  const sectionCode = findColumn(headers, h => h === '項コード');
-  const sectionName = findColumn(headers, h => h === '項名');
-  const itemName = findColumn(headers, h => h === '目名');
-  if (!sectionCode || !sectionName || !itemName) return [];
+  const relZipPath = relFromRawRoot(rawRoot, doc.zipPath);
+  const out: MofBudgetItemRecord[] = [];
+  rows.forEach((row, i) => {
+    const rowNumber = i + 2; // ヘッダー行の次から2行目起算（Python版に合わせる）
+    const scope = scopeOf(row, accountType);
+    const sectionCode = (row['項コード'] ?? '').trim();
+    const sectionName = (row['項名'] ?? '').trim();
+    const subItemName = (row['目名'] ?? '').trim();
+    const subItemCode = (row['目番号'] ?? row['目コード'] ?? row['目別分類コード'] ?? '').trim();
+    const sectionKey = sectionNaturalKey(accountType, scope, sectionCode, sectionName);
+    const legacyKey = legacySectionKey(accountType, scope, sectionCode);
+    const scopeNameKey = scopeNameItemKey(accountType, scope, sectionName, subItemName);
+    const itemKey = [sectionKey, normalizeText(subItemCode), normalizeText(subItemName)].join('|');
 
-  const resolved = SETTLEMENT_COLUMNS.map(({ eventType, candidates }) => ({
-    eventType,
-    column: findColumn(headers, h => candidates.includes(h)),
-  })).filter(r => r.column);
+    const source: SourceRef = {
+      domain: 'mof.go.jp',
+      path: relZipPath,
+      file: path.basename(doc.zipPath),
+      zipEntry: entry,
+      rowNumber,
+    };
 
-  const events: MofBudgetEvent[] = [];
-  for (const row of rows) {
-    for (const { eventType, column } of resolved) {
-      const amount = yen(row, column);
-      if (amount === 0) continue;
-      events.push({
-        fiscalYear,
-        eventType,
-        account: account ? row[account] : '',
-        organization: organization ? row[organization] : '',
-        subAccount: subAccount ? row[subAccount] : undefined,
-        sectionCode: row[sectionCode],
-        sectionName: row[sectionName],
-        itemName: row[itemName],
-        amount,
-        provenance,
-      });
-    }
-  }
-  return events;
-}
+    const rec: MofBudgetItemRecord = {
+      schemaVersion: 2,
+      recordType: 'mof_budget_item',
+      recordId: stableId([relZipPath, entry, rowNumber], 'mofrow_'),
+      fiscalYear: doc.fiscalYear,
+      phase,
+      budgetStatus: doc.budgetStatus,
+      revision: doc.revision,
+      accountType,
+      ...scope,
+      sectionCode,
+      sectionName,
+      subItemCode,
+      subItemName,
+      sectionNaturalKey: sectionKey,
+      legacySectionKey: legacyKey,
+      itemNaturalKey: itemKey,
+      scopeNameItemKey: scopeNameKey,
+      source,
+    };
 
-function findYearDirs(year: number): string[] {
-  const root = path.join('data', 'download', 'mof.go.jp', 'archive', String(year));
-  if (!fs.existsSync(root)) return [];
-  // 2025年度は "2025"(成立版) と "2025_teishutsu"(概算要求時点) が両方ありうる。
-  // V2で使うのは成立版のみ（20260919_1523...で判断済み）なので "_teishutsu" は除外
-  return fs.readdirSync(root, { withFileTypes: true })
-    .filter(e => e.isDirectory() && !e.name.endsWith('_teishutsu'))
-    .map(e => path.join(root, e.name));
-}
-
-function processYear(year: number): MofBudgetEvent[] {
-  const events: MofBudgetEvent[] = [];
-  for (const yearDir of findYearDirs(year)) {
-    const csvDir = path.join(yearDir, 'csv');
-    if (!fs.existsSync(csvDir)) continue;
-    for (const zipName of fs.readdirSync(csvDir).filter(f => f.endsWith('.zip'))) {
-      const idMatch = zipName.match(/^DL\d{4}(\d{5})\.zip$/);
-      const kind = idMatch ? REPORT_KIND[idMatch[1]] : undefined;
-      if (!kind) continue;
-
-      const zipPath = path.join(csvDir, zipName);
-      const provenance: Provenance = { domain: 'mof.go.jp', dataset: 'archive', year, file: zipName };
-      for (const entryName of listZipEntries(zipPath).filter(e => e.toLowerCase().endsWith('.csv'))) {
-        const rows = parseCsv(readZipEntryText(zipPath, entryName));
-        if (rows.length === 0) continue;
-        if (!isExpenditureTable(Object.keys(rows[0]))) continue; // 歳入側はスキップ（当面は歳出のみ）
-        const newEvents = kind === 'settlement'
-          ? eventsFromSettlement(rows, year, provenance)
-          : eventsFromInitialOrSupplementary(rows, kind, year, provenance);
-        events.push(...newEvents);
-        console.log(`  [${zipName}/${entryName}] ${kind} ${newEvents.length}件`);
+    if (phase === 'initial' || phase === 'provisional') {
+      rec.amountYen = yenFromThousand(row[standardCol!]);
+      rec.previousAmountYen = yenFromThousand(previousCol ? row[previousCol] : undefined);
+      rec.differenceYen = yenFromThousand(compareCol ? row[compareCol] : undefined);
+      rec.sourceAmountColumn = standardCol ?? null;
+    } else if (phase === 'supplement') {
+      rec.baseAmountYen = yenFromThousand(baseCol ? row[baseCol] : undefined);
+      rec.supplementAdditionYen = yenFromThousand(addCol ? row[addCol] : undefined);
+      rec.supplementReductionYen = yenFromThousand(reductionCol ? row[reductionCol] : undefined);
+      rec.supplementDeltaYen = yenFromThousand(deltaCol ? row[deltaCol] : undefined);
+      rec.revisedAmountYen = yenFromThousand(revisedCol ? row[revisedCol] : undefined);
+    } else if (phase === 'settlement') {
+      if (accountType === 'agency') {
+        rec.budgetAmountYen = parseIntValue(row['支出予算額(円)']);
+        rec.carryoverInYen = parseIntValue(row['前年度繰越額(円)']);
+        rec.reserveUseYen = parseIntValue(row['予備費使用額(円)']);
+        rec.budgetRuleIncreaseYen = parseIntValue(row['予算総則の規定による経費増額(円)']);
+        rec.reallocationYen = parseIntValue(row['流用等増△減額(円)']);
+        rec.transferAdjustmentYen = 0;
+        rec.currentBudgetYen = parseIntValue(row['支出予算現額(円)']);
+        rec.spentYen = parseIntValue(row['支出済額(円)']);
+        rec.carryoverOutYen = parseIntValue(row['翌年度繰越額(円)']);
+        rec.unusedYen = parseIntValue(row['不用額(円)']);
+      } else {
+        rec.budgetAmountYen = parseIntValue(row['歳出予算額(円)']);
+        rec.carryoverInYen = parseIntValue(row['前年度繰越額(円)']);
+        rec.reserveUseYen = parseIntValue(row['予備費使用額(円)']);
+        rec.budgetRuleIncreaseYen = parseIntValue(row['予算総則の規定による経費増額(円)']);
+        rec.reallocationYen = parseIntValue(row['流用等増△減額(円)']);
+        rec.transferAdjustmentYen = parseIntValue(row['予算決定後移替増△減額(円)']);
+        rec.currentBudgetYen = parseIntValue(row['歳出予算現額(円)']);
+        rec.spentYen = parseIntValue(row['支出済歳出額(円)']);
+        rec.carryoverOutYen = parseIntValue(row['翌年度繰越額(円)']);
+        rec.unusedYen = parseIntValue(row['不用額(円)']);
       }
     }
+    out.push(rec);
+  });
+  return out;
+}
+
+function sortKey(r: MofBudgetItemRecord): string {
+  return [r.phase, r.budgetStatus, r.revision ?? 0, r.accountType, r.sectionNaturalKey, r.subItemName, r.recordId].join('\x1f');
+}
+
+function processYear(rawRoot: string, outputRoot: string, year: number, docs: MofDocument[]): void {
+  console.log(`\n=== MOF normalize: fiscalYear=${year} ===`);
+  const rows: MofBudgetItemRecord[] = [];
+  const inputSummaries: { phase: MofPhase; budgetStatus: MofBudgetStatus; revision: number | null; accountType: MofAccountType; path: string; rowCount: number }[] = [];
+  for (const doc of docs) {
+    const docRows = normalizeMofDocument(rawRoot, doc);
+    rows.push(...docRows);
+    inputSummaries.push({
+      phase: doc.phase, budgetStatus: doc.budgetStatus, revision: doc.revision, accountType: doc.accountType,
+      path: relFromRawRoot(rawRoot, doc.zipPath), rowCount: docRows.length,
+    });
+    console.log(`  [${path.basename(doc.zipPath)} / ${doc.releaseDir}] ${doc.phase}/${doc.budgetStatus} ${docRows.length}件`);
   }
-  return events;
+  rows.sort((a, b) => (sortKey(a) < sortKey(b) ? -1 : sortKey(a) > sortKey(b) ? 1 : 0));
+
+  const yearDir = path.join(outputRoot, 'normalized', 'mof', `fy${year}`);
+  const rowCount = writeJsonl(path.join(yearDir, 'budget-items.jsonl'), rows);
+
+  const phaseCounts = new Map<string, number>();
+  for (const r of rows) {
+    const key = `${r.phase}\x1f${r.budgetStatus}\x1f${r.accountType}`;
+    phaseCounts.set(key, (phaseCounts.get(key) ?? 0) + 1);
+  }
+  const phaseCountList = [...phaseCounts.entries()].map(([key, count]) => {
+    const [phase, budgetStatus, accountType] = key.split('\x1f');
+    return { phase, budgetStatus, accountType, count };
+  });
+
+  writeJson(path.join(yearDir, 'manifest.json'), {
+    schemaVersion: 2,
+    fiscalYear: year,
+    rowCount,
+    phaseCounts: phaseCountList,
+    inputs: inputSummaries,
+  });
+  console.log(`  budget-items.jsonl: ${rowCount}行`);
 }
 
 function main(): void {
   const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
-  const targetYears = years.length > 0 ? years : [2024, 2025];
+  const targetYears = years.length > 0 ? new Set(years) : new Set([2024, 2025]);
 
-  for (const year of targetYears) {
-    console.log(`\n=== MOF normalize: year=${year} ===`);
-    const events = processYear(year);
-    const outPath = path.join('data', 'normalized', 'mof', String(year), 'budget-events.json');
-    fs.mkdirSync(path.dirname(outPath), { recursive: true });
-    fs.writeFileSync(outPath, JSON.stringify(events, null, 2));
-    console.log(`合計 budget-events.json: ${events.length}件`);
+  const rawRoot = path.join('data', 'download');
+  const outputRoot = 'data';
+  const docs = discoverMofDocuments(rawRoot, targetYears);
+  const byYear = new Map<number, MofDocument[]>();
+  for (const doc of docs) {
+    const list = byYear.get(doc.fiscalYear) ?? [];
+    list.push(doc);
+    byYear.set(doc.fiscalYear, list);
+  }
+  for (const year of [...targetYears].sort()) {
+    processYear(rawRoot, outputRoot, year, byYear.get(year) ?? []);
   }
 }
 
