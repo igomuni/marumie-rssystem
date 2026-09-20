@@ -44,6 +44,7 @@
     "pipeline:v2:normalize:rs": "tsx scripts/pipeline-v2/normalize-rs.ts",
     "pipeline:v2:normalize:mof": "tsx scripts/pipeline-v2/normalize-mof.ts",
     "pipeline:v2:derive": "tsx scripts/pipeline-v2/build-identities.ts && tsx scripts/pipeline-v2/build-links.ts",
+    "pipeline:v2:derive:mof": "tsx scripts/pipeline-v2/derive-mof.ts",
     "pipeline:v2:validate": "tsx scripts/pipeline-v2/validate.ts"
   },
   "dependencies": {

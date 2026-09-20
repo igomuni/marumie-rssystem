@@ -193,3 +193,45 @@ export interface MofBudgetItemRecord {
   carryoverOutYen?: number | null;
   unusedYen?: number | null;
 }
+
+/** derive-mof.tsが生成するMOFの金額イベント（旧MofBudgetEventとは別系統。budget-items.jsonlのrecordId単位） */
+export interface MofDerivedBudgetEvent {
+  schemaVersion: number;
+  recordType: 'budget_event';
+  eventId: string;
+  sourceSystem: 'mof';
+  fiscalYear: number;
+  eventType: string;
+  amountYen: number;
+  accountType: MofAccountType;
+  ministry: string;
+  organization: string;
+  specialAccount: string;
+  subAccount: string;
+  agency: string;
+  sectionCode: string;
+  sectionName: string;
+  subItemName: string;
+  sourceRecordIds: string[];
+  source: SourceRef;
+  budgetStatus?: MofBudgetStatus;
+  revision?: number | null;
+  baseAmountYen?: number;
+  resultingAmountYen?: number;
+  submittedAmountYen?: number;
+  enactedAmountYen?: number;
+  evidenceMethod?: string;
+}
+
+/** 段階間（提出→成立、当初→補正→決算）の項目同一性の根拠関係 */
+export interface MofIdentityRelation {
+  schemaVersion: number;
+  recordType: 'budget_item_relation';
+  relationId: string;
+  sourceStage: string;
+  targetStage: string;
+  relationType: 'same_item' | 'code_changed';
+  evidenceMethod: 'exact-key' | 'same-scope-same-name';
+  sourceRecordIds: string[];
+  targetRecordIds: string[];
+}
