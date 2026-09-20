@@ -58,4 +58,19 @@ describe('normalizeSpending: block/recipient/contract separation', () => {
     expect(recipients).toHaveLength(1);
     expect(recipients[0].evidenceRowIds).toHaveLength(2);
   });
+
+  it('ブロック集計行のマップ対象外列は複数行の値を配列でユニーク化して保持する', () => {
+    const rows = [
+      { ...BASE, '支出先ブロック番号': 'A', '支出先ブロック名': 'ブロックA', '将来追加された列': '値1' },
+      { ...BASE, '支出先ブロック番号': 'A', '支出先ブロック名': 'ブロックA', '将来追加された列': '値2' },
+    ];
+    const { blocks } = normalizeSpending('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    expect(blocks[0].extraFields['将来追加された列']).toEqual(['値1', '値2']);
+  });
+
+  it('支出先行はマップ済み列のみで構成が完結するためextraFieldsは常に空', () => {
+    const rows = [{ ...BASE, '支出先ブロック番号': 'A', '支出先名': '株式会社X', '将来追加された列': '値' }];
+    const { recipients } = normalizeSpending('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    expect(recipients[0].extraFields).toEqual({});
+  });
 });

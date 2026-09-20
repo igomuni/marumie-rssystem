@@ -59,3 +59,24 @@ export function canonicalProjectId(raw: string | null | undefined): string {
   if (/^[0-9]+$/.test(n)) return n.replace(/^0+/, '') || '0';
   return n;
 }
+
+const TRUE_TOKENS = new Set(['TRUE', '1', 'YES', 'Y', '○', '有', 'あり']);
+const FALSE_TOKENS = new Set(['FALSE', '0', 'NO', 'N', '×', '無', 'なし']);
+
+/** TRUE/FALSE系フラグ列を読む。Python参照実装のparse_boolと同じトークン集合 */
+export function parseBool(raw: string | null | undefined): boolean | null {
+  const s = (raw ?? '').toString().normalize('NFKC').trim().toUpperCase();
+  if (!s) return null;
+  if (TRUE_TOKENS.has(s)) return true;
+  if (FALSE_TOKENS.has(s)) return false;
+  return null;
+}
+
+/** TRUE/FALSEとして読めればboolean、読めなければ原本の文字列（空欄はnull）を返す。
+ *  1-2の実施方法列のように「1固定 or 空欄」だが将来別表記が来ても値を失わないため */
+export function boolOrRaw(raw: string | null | undefined): boolean | string | null {
+  const b = parseBool(raw);
+  if (b !== null) return b;
+  const s = (raw ?? '').toString().trim();
+  return s || null;
+}

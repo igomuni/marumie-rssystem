@@ -4,22 +4,21 @@
  * 「一般有向グラフ」として保持する（tree/DAG/single-rootを前提にしない）。
  * Python参照実装 pipeline_v2/normalize_rs.py の normalize_funding_relations と同じ。
  */
-import { rsBase, rsSourceRef, rsRecordId } from './rs-common';
+import { rsBase, rsSourceRef, rsRecordId, extraFields, sourceInventory, COMMON_COLUMNS } from './rs-common';
 import { stableId } from './stable-id';
-import { parseNumber } from './parse';
-import type { RsFundingRelationRecord, RsIndirectExpenseRecord } from '../types';
+import { parseNumber, parseBool } from './parse';
+import type { RsFundingRelationRecord, RsIndirectExpenseRecord, SourceInventory } from '../types';
 
-function parseBoolOrNull(raw: string | undefined): boolean | null {
-  const s = (raw ?? '').trim();
-  if (!s) return null;
-  if (['○', '有', 'あり', 'TRUE', '1', 'YES', 'Y'].includes(s) || ['TRUE', '1', 'YES', 'Y'].includes(s.toUpperCase())) return true;
-  if (['×', '無', 'なし', 'FALSE', '0', 'NO', 'N'].includes(s) || ['FALSE', '0', 'NO', 'N'].includes(s.toUpperCase())) return false;
-  return null;
-}
+const MAPPED = new Set([
+  ...COMMON_COLUMNS,
+  '支出元の支出先ブロック', '支出元の支出先ブロック名', '担当組織からの支出',
+  '支出先の支出先ブロック', '支出先の支出先ブロック名', '資金の流れの補足情報',
+  '国自らが支出する間接経費', '国自らが支出する間接経費の項目', '国自らが支出する間接経費の金額',
+]);
 
 export function normalizeFundingRelations(
   rawRoot: string, zipPath: string, entry: string, rows: Record<string, string>[], year: number
-): { relations: RsFundingRelationRecord[]; indirect: RsIndirectExpenseRecord[] } {
+): { relations: RsFundingRelationRecord[]; indirect: RsIndirectExpenseRecord[]; sourceInventory: SourceInventory } {
   const relations: RsFundingRelationRecord[] = [];
   const indirect: RsIndirectExpenseRecord[] = [];
 
@@ -33,7 +32,7 @@ export function normalizeFundingRelations(
     const sname = (row['支出元の支出先ブロック名'] ?? '').trim();
     const tbid = (row['支出先の支出先ブロック'] ?? '').trim();
     const tname = (row['支出先の支出先ブロック名'] ?? '').trim();
-    const fromOrg = parseBoolOrNull(row['担当組織からの支出']);
+    const fromOrg = parseBool(row['担当組織からの支出']);
 
     // ターゲット（支出先）が無い行はグラフの辺として意味を持たないため対象外。
     // ソースが無い行は「事業自体からの直接支出（ルートブロックへの入力）」として保持する
@@ -49,6 +48,7 @@ export function normalizeFundingRelations(
         targetBlockName: tname,
         note: (row['資金の流れの補足情報'] ?? '').trim(),
         sourceRowId: rowId,
+        extraFields: extraFields(row, MAPPED),
         source,
       });
     }
@@ -66,10 +66,15 @@ export function normalizeFundingRelations(
         amountYen: parseNumber(amountRaw),
         amountRaw,
         sourceRowId: rowId,
+        extraFields: extraFields(row, MAPPED),
         source,
       });
     }
   });
 
-  return { relations, indirect };
+  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+  return {
+    relations, indirect,
+    sourceInventory: sourceInventory(rawRoot, zipPath, entry, headers, rows, MAPPED, '5-2', '支出先_支出ブロックのつながり', year),
+  };
 }

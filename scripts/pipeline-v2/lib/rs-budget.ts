@@ -7,10 +7,10 @@
  * 混同しない。RS側に所管/組織/項/目が記録されておらずMOFのどの予備費使用に対応するか
  * 特定できないため（'予備費等N'という原本表記のまま保持し、断定しない）。
  */
-import { rsBase, rsSourceRef, rsRecordId } from './rs-common';
+import { rsBase, rsSourceRef, rsRecordId, extraFields, sourceInventory, COMMON_COLUMNS } from './rs-common';
 import { normalizeText, stableId } from './stable-id';
 import { parseNumber } from './parse';
-import type { RsAccountType, RsBudgetEventRecord, RsBudgetSummaryRecord, RsBudgetItemRecordV2, RsEventType } from '../types';
+import type { RsAccountType, RsBudgetEventRecord, RsBudgetSummaryRecord, RsBudgetItemRecordV2, RsEventType, SourceInventory } from '../types';
 
 function accountType(value: string): RsAccountType {
   const v = normalizeText(value);
@@ -53,12 +53,15 @@ const ACCOUNT_AMOUNT_COLUMNS: Record<string, [RsEventType, number | null]> = {
 
 const ALL_AMOUNT_COLUMNS = [...Object.keys(PROJECT_TOTAL_AMOUNT_COLUMNS), ...Object.keys(ACCOUNT_AMOUNT_COLUMNS)];
 
+const SUMMARY_MAPPED = new Set([
+  ...COMMON_COLUMNS,
+  '予算年度', '執行率', '主な増減理由', 'その他特記事項', '会計区分', '会計', '勘定', '備考',
+  ...ALL_AMOUNT_COLUMNS,
+]);
+
 export function normalizeBudgetSummary(
   rawRoot: string, zipPath: string, entry: string, rows: Record<string, string>[], year: number
-): { summaries: RsBudgetSummaryRecord[]; events: RsBudgetEventRecord[] } {
-  // 注: 参照実装はextraFields（未マッピング列の将来検知）も持つが、このPoCでは
-  // budget-summary/eventsの主要フィールドを優先し、extraFieldsは他データセット
-  // （5-1等）にのみ実装している
+): { summaries: RsBudgetSummaryRecord[]; events: RsBudgetEventRecord[]; sourceInventory: SourceInventory } {
   const summaries: RsBudgetSummaryRecord[] = [];
   const events: RsBudgetEventRecord[] = [];
 
@@ -90,6 +93,7 @@ export function normalizeBudgetSummary(
       specialNotes: (row['その他特記事項'] ?? '').trim(),
       note: (row['備考'] ?? '').trim(),
       amounts,
+      extraFields: extraFields(row, SUMMARY_MAPPED),
       source,
     });
 
@@ -123,13 +127,20 @@ export function normalizeBudgetSummary(
     }
   });
 
-  return { summaries, events };
+  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+  return { summaries, events, sourceInventory: sourceInventory(rawRoot, zipPath, entry, headers, rows, SUMMARY_MAPPED, '2-1', '予算・執行_サマリ', year) };
 }
+
+const ITEMS_MAPPED = new Set([
+  ...COMMON_COLUMNS,
+  '予算年度', '会計区分', '会計', '勘定', '予算種別', '所管', '組織・勘定', '項', '目',
+  '歳出予算項目の補足情報', '予算額（歳出予算項目ごと）', '翌年度要求額（歳出予算項目ごと）', '備考（歳出予算項目ごと）',
+]);
 
 export function normalizeBudgetItems(
   rawRoot: string, zipPath: string, entry: string, rows: Record<string, string>[], year: number
-): RsBudgetItemRecordV2[] {
-  return rows.map((row, i) => {
+): { rows: RsBudgetItemRecordV2[]; sourceInventory: SourceInventory } {
+  const out = rows.map((row, i) => {
     const rowNumber = i + 2;
     const base = rsBase(row, year);
     const fyRaw = (row['予算年度'] ?? '').trim();
@@ -150,7 +161,7 @@ export function normalizeBudgetItems(
       // 一致しない行がある場合ここを府省庁のまま残すとMOFリンクを静かに誤らせるため上書きする
       // （CodeRabbit相当の指摘、2026-09-20）
       ministry,
-      recordType: 'rs_budget_item',
+      recordType: 'rs_budget_item' as const,
       recordId: rsRecordId(rawRoot, zipPath, entry, rowNumber, 'rsitem_'),
       fiscalYear: Number.isNaN(fy as number) ? null : fy,
       accountType: type,
@@ -169,7 +180,10 @@ export function normalizeBudgetItems(
       requestFiscalYear: fy !== null && requestRaw ? fy + 1 : null,
       note: (row['備考（歳出予算項目ごと）'] ?? '').trim(),
       mofNameNaturalKey: [type, ministry, orgAcc, section, item].map(normalizeText).join('|'),
+      extraFields: extraFields(row, ITEMS_MAPPED),
       source: rsSourceRef(rawRoot, zipPath, entry, rowNumber, '予算・執行_予算種別・歳出予算項目', year),
     };
   });
+  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+  return { rows: out, sourceInventory: sourceInventory(rawRoot, zipPath, entry, headers, rows, ITEMS_MAPPED, '2-2', '予算・執行_予算種別・歳出予算項目', year) };
 }

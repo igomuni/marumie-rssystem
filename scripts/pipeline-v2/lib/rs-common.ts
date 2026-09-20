@@ -3,9 +3,10 @@
  * _base/_extra_fields/_source/_record_id と同じロジック。
  */
 import * as path from 'path';
+import * as crypto from 'crypto';
 import { stableId } from './stable-id';
 import { canonicalProjectId } from './parse';
-import type { SourceRef } from '../types';
+import type { SourceRef, SourceInventory } from '../types';
 
 export const COMMON_COLUMNS = new Set([
   'シート種別', '事業年度', '予算事業ID', '事業名', '府省庁の建制順',
@@ -86,4 +87,39 @@ export function rsSourceRef(rawRoot: string, filePath: string, entry: string | n
 
 export function rsRecordId(rawRoot: string, filePath: string, entry: string | null, rowNumber: number, prefix: string): string {
   return stableId([path.relative(rawRoot, filePath).split(path.sep).join('/'), entry ?? '', rowNumber], prefix);
+}
+
+/**
+ * 列単位の突合監査（mapped/extra_preserved/empty_unmapped）とヘッダーのSHA-256を作る。
+ * 非空の未マップ列（extra_preserved）はextraFieldsで値自体は保持されるが、この一覧により
+ * 「将来列が追加/リネームされたときにmanifest/validationで検知できる」ことを目的とする。
+ * Python参照実装 pipeline_v2/normalize_rs.py の_source_inventoryと同じ。
+ */
+export function sourceInventory(
+  rawRoot: string, filePath: string, entry: string, headers: string[], rows: Record<string, string>[],
+  mapped: Set<string>, datasetCode: string, datasetName: string, year: number
+): SourceInventory {
+  const counts = new Map<string, number>(headers.map(h => [h, 0]));
+  for (const row of rows) {
+    for (const h of headers) {
+      if ((row[h] ?? '').trim()) counts.set(h, (counts.get(h) ?? 0) + 1);
+    }
+  }
+  const columns: SourceInventory['columns'] = headers.map(h => {
+    const nonEmptyCount = counts.get(h) ?? 0;
+    const status: SourceInventory['columns'][number]['status'] = mapped.has(h) ? 'mapped' : nonEmptyCount ? 'extra_preserved' : 'empty_unmapped';
+    return { column: h, nonEmptyCount, status };
+  });
+  const headerSha256 = crypto.createHash('sha256').update(JSON.stringify(headers)).digest('hex');
+  return {
+    datasetCode,
+    datasetName,
+    sourceYear: year,
+    path: path.relative(rawRoot, filePath).split(path.sep).join('/'),
+    zipEntry: entry,
+    rowCount: rows.length,
+    columnCount: headers.length,
+    headerSha256,
+    columns,
+  };
 }

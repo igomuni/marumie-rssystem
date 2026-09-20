@@ -301,7 +301,19 @@ export interface RsOrganizationRelation extends RsBaseFields {
   additionalTeam: string;
   additionalUnit: string;
   responsiblePerson: string;
+  extraFields: Record<string, string>;
   source: SourceRef;
+}
+
+/** 1-2「実施方法」列（1-2 CSVは1固定 or 空欄のフラグ列）。将来別表記が来ても値を失わないよう
+ *  boolean化できなければ原本文字列を保持する（boolOrRaw） */
+export interface RsImplementationMethods {
+  direct: boolean | string | null;
+  subsidy: boolean | string | null;
+  burden: boolean | string | null;
+  grant: boolean | string | null;
+  contribution: boolean | string | null;
+  other: string | null;
 }
 
 export interface RsProjectSourceRow extends RsBaseFields {
@@ -319,9 +331,30 @@ export interface RsProjectSourceRow extends RsBaseFields {
   noPlannedEnd: boolean | null;
   majorExpense: string;
   note: string;
+  implementationMethods: RsImplementationMethods;
   legacyProjectNumber: string;
   displayOrderRaw: string;
+  extraFields: Record<string, string>;
   source: SourceRef;
+}
+
+/** 列単位の突合監査（source inventory）。将来の列追加・リネームをmanifestで検知できるようにする */
+export interface SourceInventoryColumn {
+  column: string;
+  nonEmptyCount: number;
+  status: 'mapped' | 'extra_preserved' | 'empty_unmapped';
+}
+
+export interface SourceInventory {
+  datasetCode: string;
+  datasetName: string;
+  sourceYear: number;
+  path: string;
+  zipEntry: string;
+  rowCount: number;
+  columnCount: number;
+  headerSha256: string;
+  columns: SourceInventoryColumn[];
 }
 
 /** RS予算・執行の会計区分。原本値が空なら空文字のまま（決め打ちしない） */
@@ -346,6 +379,7 @@ export interface RsBudgetSummaryRecord extends RsBaseFields {
   specialNotes: string;
   note: string;
   amounts: Record<string, number | null>;
+  extraFields: Record<string, string>;
   source: SourceRef;
 }
 
@@ -391,6 +425,7 @@ export interface RsBudgetItemRecordV2 extends RsBaseFields {
   note: string;
   /** MOFの科目別内訳と同じ語彙で作る識別子（accountType+ministry+組織/勘定+項+目）。MOF↔RSリンクに使う */
   mofNameNaturalKey: string;
+  extraFields: Record<string, string>;
   source: SourceRef;
 }
 
@@ -406,6 +441,8 @@ export interface RsSpendingBlockRecord extends RsBaseFields {
   evidenceRowIds: string[];
   sources: SourceRef[];
   summaryRowCount: number;
+  /** 複数行にまたがるブロックのため、競合する値は配列でユニーク化して保持する（参照実装と同じ） */
+  extraFields: Record<string, string[]>;
 }
 
 export interface RsRecipientRecord extends RsBaseFields {
@@ -420,6 +457,8 @@ export interface RsRecipientRecord extends RsBaseFields {
   totalAmountValuesYen: number[];
   evidenceRowIds: string[];
   sources: SourceRef[];
+  /** 参照実装と同じく、支出先行はマップ済み列で構成が完結するため常に空 */
+  extraFields: Record<string, string>;
 }
 
 export interface RsContractRecord extends RsBaseFields {
@@ -440,6 +479,7 @@ export interface RsContractRecord extends RsBaseFields {
   singleBidReason: string;
   otherContract: boolean | null;
   sourceRowId: string;
+  extraFields: Record<string, string>;
   source: SourceRef;
 }
 
@@ -459,6 +499,7 @@ export interface RsFundingRelationRecord extends RsBaseFields {
   targetBlockName: string;
   note: string;
   sourceRowId: string;
+  extraFields: Record<string, string>;
   source: SourceRef;
 }
 
@@ -470,5 +511,6 @@ export interface RsIndirectExpenseRecord extends RsBaseFields {
   amountYen: number | null;
   amountRaw: string;
   sourceRowId: string;
+  extraFields: Record<string, string>;
   source: SourceRef;
 }

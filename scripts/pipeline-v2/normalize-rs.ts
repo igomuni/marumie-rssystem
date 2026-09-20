@@ -32,12 +32,14 @@ import { normalizeBudgetSummary, normalizeBudgetItems } from './lib/rs-budget';
 import { normalizeSpending, toExpenditureCompat } from './lib/rs-spending';
 import { normalizeFundingRelations } from './lib/rs-funding';
 import { writeJsonl, writeJson } from './lib/jsonl';
+import type { SourceInventory } from './types';
 
 function processYear(rawRoot: string, outputRoot: string, year: number): Record<string, number> {
   console.log(`\n=== RS normalize: reviewYear=${year} ===`);
   const yearDir = path.join(rawRoot, 'rssystem.go.jp', 'download-csv', String(year));
   const outDir = path.join(outputRoot, 'normalized', 'rs', `review-${year}`);
   const counts: Record<string, number> = {};
+  const sourceInventories: SourceInventory[] = [];
 
   const emit = (name: string, rows: unknown[]) => {
     const n = writeJsonl(path.join(outDir, `${name}.jsonl`), rows);
@@ -46,35 +48,57 @@ function processYear(rawRoot: string, outputRoot: string, year: number): Record<
   };
 
   const zip11 = findRsZip(yearDir, '1-1', year);
-  emit('organizations', zip11 ? (() => { const { entry, rows } = readSingleCsv(zip11); return normalizeOrganizations(rawRoot, zip11, entry, rows, year); })() : []);
+  if (zip11) {
+    const { entry, rows } = readSingleCsv(zip11);
+    const result = normalizeOrganizations(rawRoot, zip11, entry, rows, year);
+    emit('organizations', result.rows);
+    sourceInventories.push(result.sourceInventory);
+  } else {
+    emit('organizations', []);
+  }
 
   const zip12 = findRsZip(yearDir, '1-2', year);
-  const projectSourceRows = zip12 ? (() => { const { entry, rows } = readSingleCsv(zip12); return normalizeProjectRows(rawRoot, zip12, entry, rows, year); })() : [];
+  let projectSourceRows: ReturnType<typeof normalizeProjectRows>['rows'] = [];
+  if (zip12) {
+    const { entry, rows } = readSingleCsv(zip12);
+    const result = normalizeProjectRows(rawRoot, zip12, entry, rows, year);
+    projectSourceRows = result.rows;
+    sourceInventories.push(result.sourceInventory);
+  }
   emit('project-source-rows', projectSourceRows);
   emit('projects', mergeProjects(projectSourceRows, year));
 
   const zip21 = findRsZip(yearDir, '2-1', year);
   if (zip21) {
     const { entry, rows } = readSingleCsv(zip21);
-    const { summaries, events } = normalizeBudgetSummary(rawRoot, zip21, entry, rows, year);
+    const { summaries, events, sourceInventory } = normalizeBudgetSummary(rawRoot, zip21, entry, rows, year);
     emit('budget-summaries', summaries);
     emit('budget-events', events);
+    sourceInventories.push(sourceInventory);
   } else {
     emit('budget-summaries', []);
     emit('budget-events', []);
   }
 
   const zip22 = findRsZip(yearDir, '2-2', year);
-  emit('budget-items', zip22 ? (() => { const { entry, rows } = readSingleCsv(zip22); return normalizeBudgetItems(rawRoot, zip22, entry, rows, year); })() : []);
+  if (zip22) {
+    const { entry, rows } = readSingleCsv(zip22);
+    const result = normalizeBudgetItems(rawRoot, zip22, entry, rows, year);
+    emit('budget-items', result.rows);
+    sourceInventories.push(result.sourceInventory);
+  } else {
+    emit('budget-items', []);
+  }
 
   const zip51 = findRsZip(yearDir, '5-1', year);
   if (zip51) {
     const { entry, rows } = readSingleCsv(zip51);
-    const { blocks, recipients, contracts } = normalizeSpending(rawRoot, zip51, entry, rows, year);
+    const { blocks, recipients, contracts, sourceInventory } = normalizeSpending(rawRoot, zip51, entry, rows, year);
     emit('spending-blocks', blocks);
     emit('recipients', recipients);
     emit('contracts', contracts);
     emit('expenditures', toExpenditureCompat(contracts, year));
+    sourceInventories.push(sourceInventory);
   } else {
     emit('spending-blocks', []);
     emit('recipients', []);
@@ -85,12 +109,19 @@ function processYear(rawRoot: string, outputRoot: string, year: number): Record<
   const zip52 = findRsZip(yearDir, '5-2', year);
   if (zip52) {
     const { entry, rows } = readSingleCsv(zip52);
-    const { relations, indirect } = normalizeFundingRelations(rawRoot, zip52, entry, rows, year);
+    const { relations, indirect, sourceInventory } = normalizeFundingRelations(rawRoot, zip52, entry, rows, year);
     emit('funding-relations', relations);
     emit('indirect-expenses', indirect);
+    sourceInventories.push(sourceInventory);
   } else {
     emit('funding-relations', []);
     emit('indirect-expenses', []);
+  }
+
+  const unknownNonEmptyColumns = sourceInventories
+    .flatMap(inv => inv.columns.filter(c => c.status === 'extra_preserved').map(c => `${inv.datasetCode}:${c.column}`));
+  if (unknownNonEmptyColumns.length > 0) {
+    console.log(`  ※ 未マッピングだが非空の列（extraFieldsに保持済み）: ${unknownNonEmptyColumns.join(', ')}`);
   }
 
   writeJson(path.join(outDir, 'manifest.json'), {
@@ -100,6 +131,7 @@ function processYear(rawRoot: string, outputRoot: string, year: number): Record<
     recordCounts: counts,
     implementedDatasets: ['1-1', '1-2', '2-1', '2-2', '5-1', '5-2'],
     pendingDatasets: ['1-3', '1-4', '1-5', '3-1', '3-2', '4-1', '5-3', '5-4', '6-1', 'review-sheets-merge'],
+    sourceInventories,
   });
 
   return counts;

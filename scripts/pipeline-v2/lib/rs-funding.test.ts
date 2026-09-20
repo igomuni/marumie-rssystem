@@ -46,4 +46,12 @@ describe('normalizeFundingRelations: 一般有向グラフとして保持する'
     expect(indirect).toHaveLength(1);
     expect(indirect[0].amountYen).toBe(1000);
   });
+
+  it('マップ対象外の非空列はextraFields・source inventoryのextra_preservedに現れる', () => {
+    const rows = [{ ...BASE, '支出元の支出先ブロック': 'A', '支出先の支出先ブロック': 'B', '支出先の支出先ブロック名': 'B', '将来追加された列': '値' }];
+    const { relations, sourceInventory } = normalizeFundingRelations('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    expect(relations[0].extraFields).toEqual({ '将来追加された列': '値' });
+    const col = sourceInventory.columns.find(c => c.column === '将来追加された列');
+    expect(col?.status).toBe('extra_preserved');
+  });
 });

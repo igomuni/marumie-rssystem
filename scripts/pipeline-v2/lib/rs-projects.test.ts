@@ -12,7 +12,7 @@ describe('canonicalProjectId normalization via mergeProjects', () => {
       { ...BASE, '予算事業ID': '004' },
       { ...BASE, '予算事業ID': '4' },
     ];
-    const sourceRows = normalizeProjectRows('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    const { rows: sourceRows } = normalizeProjectRows('/root', '/root/x.zip', 'x.csv', rows, 2024);
     const projects = mergeProjects(sourceRows, 2024);
     expect(projects).toHaveLength(1);
     expect(projects[0].projectId).toBe('4');
@@ -20,7 +20,7 @@ describe('canonicalProjectId normalization via mergeProjects', () => {
 
   it('projectIdが空の行はprojects.jsonlから除外する', () => {
     const rows = [{ ...BASE, '予算事業ID': '' }];
-    const sourceRows = normalizeProjectRows('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    const { rows: sourceRows } = normalizeProjectRows('/root', '/root/x.zip', 'x.csv', rows, 2024);
     const projects = mergeProjects(sourceRows, 2024);
     expect(projects).toHaveLength(0);
   });
@@ -30,10 +30,29 @@ describe('canonicalProjectId normalization via mergeProjects', () => {
       { ...BASE, '予算事業ID': '1', '事業名': '旧名称' },
       { ...BASE, '予算事業ID': '1', '事業名': '新名称' },
     ];
-    const sourceRows = normalizeProjectRows('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    const { rows: sourceRows } = normalizeProjectRows('/root', '/root/x.zip', 'x.csv', rows, 2024);
     const projects = mergeProjects(sourceRows, 2024);
     expect(projects).toHaveLength(1);
     expect(projects[0].projectName).toBe('新名称');
     expect(projects[0].sources).toHaveLength(2);
+  });
+});
+
+describe('normalizeProjectRows: 実施方法・extraFields', () => {
+  it('実施方法各種はtyped fieldとしてbooleanで保持する', () => {
+    const rows = [{
+      ...BASE, '予算事業ID': '1',
+      '実施方法ー直接実施': '1', '実施方法ー補助': '', '実施方法ーその他': 'その他の方法',
+    }];
+    const { rows: [row] } = normalizeProjectRows('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    expect(row.implementationMethods.direct).toBe(true);
+    expect(row.implementationMethods.subsidy).toBeNull();
+    expect(row.implementationMethods.other).toBe('その他の方法');
+  });
+
+  it('マップ対象外の非空列はextraFieldsに保持する', () => {
+    const rows = [{ ...BASE, '予算事業ID': '1', '将来追加された列': '値' }];
+    const { rows: [row] } = normalizeProjectRows('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    expect(row.extraFields).toEqual({ '将来追加された列': '値' });
   });
 });

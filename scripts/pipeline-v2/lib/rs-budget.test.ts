@@ -57,6 +57,15 @@ describe('normalizeBudgetSummary: 予備費等はneutral adjustment', () => {
   });
 });
 
+describe('normalizeBudgetSummary: extraFields・source inventory', () => {
+  it('マップ対象外の非空列はextraFieldsに保持する', () => {
+    const row = { ...HEADER_ROW_COMMON, '予算年度': '2024', '会計区分': '', '将来追加された列': '値' };
+    const { summaries, sourceInventory } = normalizeBudgetSummary('/root', '/root/x.zip', 'x.csv', [row], 2024);
+    expect(summaries[0].extraFields).toEqual({ '将来追加された列': '値' });
+    expect(sourceInventory.columns.find(c => c.column === '将来追加された列')?.status).toBe('extra_preserved');
+  });
+});
+
 describe('normalizeBudgetSummary: 翌年度要求額はfiscalYear+1', () => {
   it('request系イベントのfiscalYearは元の予算年度+1になる', () => {
     const row = { ...HEADER_ROW_COMMON, '予算年度': '2024', '会計区分': '', '翌年度要求額（合計）': '1000' };
@@ -73,19 +82,25 @@ describe('normalizeBudgetItems', () => {
       ...HEADER_ROW_COMMON, '予算年度': '2024', '会計区分': '一般会計', '所管': '外務省',
       '組織・勘定': '在外公館', '項': '経済協力費', '目': '在外公館必要経費', '予算額（歳出予算項目ごと）': '100',
     };
-    const [item] = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
+    const { rows: [item] } = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
     expect(item.mofNameNaturalKey).toBe('general|外務省|在外公館|経済協力費|在外公館必要経費');
   });
 
   it('record.ministryはMOF突合用の「所管」列を使う（「府省庁」列とは限らず一致しないことがある。実データで17.5%の行が不一致）', () => {
     const row = { ...HEADER_ROW_COMMON, '府省庁': 'デジタル庁', '所管': '内閣府', '予算年度': '2024', '会計区分': '一般会計' };
-    const [item] = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
+    const { rows: [item] } = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
     expect(item.ministry).toBe('内閣府');
   });
 
   it('金額が空欄ならbudgetAmountYenはnull', () => {
     const row = { ...HEADER_ROW_COMMON, '予算年度': '2024', '会計区分': '一般会計', '予算額（歳出予算項目ごと）': '' };
-    const [item] = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
+    const { rows: [item] } = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
     expect(item.budgetAmountYen).toBeNull();
+  });
+
+  it('マップ対象外の非空列はextraFieldsに保持する', () => {
+    const row = { ...HEADER_ROW_COMMON, '予算年度': '2024', '会計区分': '一般会計', '将来追加された列': '値' };
+    const { rows: [item] } = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
+    expect(item.extraFields).toEqual({ '将来追加された列': '値' });
   });
 });
