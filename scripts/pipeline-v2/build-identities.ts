@@ -1,4 +1,13 @@
 /**
+ * @deprecated 2026-09-20時点でレガシー。旧normalize-mof.tsの出力
+ * （data/normalized/mof/{year}/budget-events.json）を前提にしており、
+ * 現在のnormalize-mof.ts（source-preserving行、data/normalized/mof/fy{year}/
+ * budget-items.jsonl）とは非互換。MOF側の後継は derive-mof.ts
+ * （npm run pipeline:v2:derive:mof）。RS側の後継（derive-rs.ts）と
+ * リンク側の後継（derive-links.ts）の実装後にこのファイルとbuild-links.tsは削除する。
+ * 実行するには `npm run pipeline:v2:derive:legacy` を使う（意図しない実行を避けるため
+ * package.jsonから`pipeline:v2:derive`という名前は外してある）。
+ *
  * MOF normalizedイベント（当初・補正・決算）を、項・目単位のcanonical BudgetEntityへ
  * 集約するPipeline V2 derived層の最小実装。
  *

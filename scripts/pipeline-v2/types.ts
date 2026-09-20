@@ -223,6 +223,52 @@ export interface MofDerivedBudgetEvent {
   evidenceMethod?: string;
 }
 
+/**
+ * 項（section）単位に金額イベントを集約したderived成果物。
+ * `initialYen`は成立額があれば成立額、無ければ提出額（両方を足し合わせない＝別スナップショット）。
+ * `unresolvedPreSettlementDeltaYen`は「補正後予算(initialYen+supplementDeltaYen)」と
+ * 「決算書の歳出予算額(settlementBudgetYen)」の差。0でなければ実際に起きた変化のevidenceだが、
+ * 移替・予備費等どの理由かは公式の対応表が無い限り断定しない（PID:4相当のFY2024
+ * デジタル庁「情報通信技術調達等適正・効率化推進費」で-509,690,849,950円を再現することを
+ * 実装のacceptanceにしている）。
+ */
+export interface MofDerivedSection {
+  id: string;
+  fiscalYear: number;
+  accountType: MofAccountType;
+  ministry: string;
+  organization: string;
+  specialAccount: string;
+  subAccount: string;
+  agency: string;
+  sectionCode: string;
+  sectionName: string;
+  itemCount: number;
+  eventCount: number;
+  stages: string[];
+  initialSubmittedYen?: number;
+  initialEnactedYen?: number;
+  initialYen?: number;
+  supplementDeltaYen?: number;
+  settlementBudgetYen?: number;
+  currentBudgetYen?: number;
+  spentYen?: number;
+  carryoverOutYen?: number;
+  unusedYen?: number;
+  unresolvedPreSettlementDeltaYen?: number;
+}
+
+export interface MofStageGap {
+  sectionId: string;
+  fiscalYear: number;
+  sectionName: string;
+  from: 'post_supplement_budget';
+  to: 'settlement_budget_appropriation';
+  deltaYen: number;
+  classification: 'unresolved';
+  note: string;
+}
+
 /** 段階間（提出→成立、当初→補正→決算）の項目同一性の根拠関係 */
 export interface MofIdentityRelation {
   schemaVersion: number;

@@ -17,6 +17,8 @@ import * as path from 'path';
 import { stableId } from './lib/stable-id';
 import { readJsonl, writeJsonl, writeJson } from './lib/jsonl';
 import { semanticItemKey, transitionLinks, type TransitionStats } from './lib/mof-transitions';
+import { aggregateMofSections } from './lib/mof-sections';
+import { validateSettlementEquations } from './lib/mof-settlement';
 import type { MofBudgetItemRecord, MofDerivedBudgetEvent, MofIdentityRelation } from './types';
 
 function groupAmount(rows: MofBudgetItemRecord[], field: keyof MofBudgetItemRecord): number {
@@ -208,6 +210,26 @@ function buildMofIdentity(outputRoot: string, fiscalYear: number): { relationCou
   return summary;
 }
 
+function buildMofSectionsForYear(outputRoot: string, fiscalYear: number): { sectionCount: number; stageGapCount: number } {
+  const items = readJsonl<MofBudgetItemRecord>(path.join(outputRoot, 'normalized', 'mof', `fy${fiscalYear}`, 'budget-items.jsonl'));
+  const events = readJsonl<MofDerivedBudgetEvent>(path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`, 'budget-events.jsonl'));
+  const { sections, stageGaps } = aggregateMofSections(items, events, fiscalYear);
+
+  const outDir = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`);
+  writeJsonl(path.join(outDir, 'sections.jsonl'), sections);
+  writeJsonl(path.join(outDir, 'stage-gaps.jsonl'), stageGaps);
+
+  const settlement = validateSettlementEquations(items);
+  writeJson(path.join(outDir, 'settlement-equation.json'), { schemaVersion: 2, fiscalYear, ...settlement });
+
+  console.log(`  sections.jsonl: ${sections.length}件`);
+  console.log(`  stage-gaps.jsonl: ${stageGaps.length}件（未解決の補正後→決算差分）`);
+  console.log(`  決算検算: checked=${settlement.checkedRows} skipped=${settlement.skippedRows} ` +
+    `components→現額mismatch=${settlement.componentsToCurrentBudgetMismatches} ` +
+    `現額→支出済+繰越+不用mismatch=${settlement.currentBudgetToSpentMismatches}`);
+  return { sectionCount: sections.length, stageGapCount: stageGaps.length };
+}
+
 function main(): void {
   const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
   const targetYears = years.length > 0 ? years : [2024, 2025];
@@ -223,6 +245,7 @@ function main(): void {
     for (const [transition, stats] of Object.entries(identitySummary.transitions)) {
       console.log(`    ${transition}: ${JSON.stringify(stats)}`);
     }
+    buildMofSectionsForYear(outputRoot, year);
   }
 }
 
