@@ -7,6 +7,7 @@ import styles from './page.module.css';
 import { EntityTable } from './entity-table';
 import { MultiSelect, PaneLayout, SearchInput } from './controls';
 import { fetchV2Index, fetchV2EntityDetails, v2ShardOf } from './v2-source';
+import { RsProjectsView } from './rs-view';
 
 async function readData<T>(url: string, signal: AbortSignal): Promise<T> {
   const response = await fetch(url, { signal });
@@ -35,6 +36,7 @@ function readEntityShard(source: DataSource, year: number, prefix: string, signa
 }
 
 export default function BudgetFlow() {
+  const [view, setView] = useState<'mof' | 'rs'>('mof');
   const [year, setYear] = useState(2024);
   const [source, setSource] = useState<DataSource>('v2');
   const [mode, setMode] = useState('all');
@@ -115,6 +117,8 @@ export default function BudgetFlow() {
       <div><div className={styles.eyebrow}>MARUMIE / PIPELINE V2</div><h1>Budget Flow <span>予算の変化を、原典から。</span></h1></div>
       <Link className={styles.link} href="/integrated-sankey?year=2025">現行 Integrated（MOF2024 / RS2025）↗</Link>
     </header>
+    <nav className={styles.tabs} aria-label="表示切替"><button aria-pressed={view === 'mof'} onClick={() => setView('mof')}>MOF項</button><button aria-pressed={view === 'rs'} onClick={() => setView('rs')}>RS事業</button></nav>
+    {view === 'rs' ? <RsProjectsView /> : <>
     <p className={styles.note}>金額は円。残高・増減・支出を区別して表示します。並びは予算の段階順で、実施日の時系列ではありません。移替先の特定・名称変更をまたぐ統合は未解決です。</p>
     {error && <div className={styles.error} role="alert">{error} <button onClick={() => { setError(''); setRetry(n => n + 1); }}>再読み込み</button></div>}
     {!index && !error && <p role="status">実データを読み込み中…</p>}
@@ -170,5 +174,6 @@ export default function BudgetFlow() {
       </section>
     } />
     {index && <footer className={styles.footer}>{source === 'v2' ? 'Pipeline V2（public/data/v2/mof）' : '独立参照フルデータ'} · {index.recordCount.toLocaleString()} 原典レコード / {index.eventCount.toLocaleString()} Budget Events · 決算式検算 {index.settlementChecks.toLocaleString()} 項{source === 'v1' && <><br /><span className={styles.code}>ZIP SHA-256: {index.archiveSha256}</span></>}</footer>}
+    </>}
   </main>;
 }
