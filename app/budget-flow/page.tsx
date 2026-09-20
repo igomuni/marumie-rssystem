@@ -6,6 +6,7 @@ import { accounts, filterAmountRange, parseAmountRange, sortEntities, type Entit
 import styles from './page.module.css';
 import { EntityTable } from './entity-table';
 import { MultiSelect, PaneLayout, SearchInput } from './controls';
+import { fetchV2Index, fetchV2EntityDetails, v2ShardOf } from './v2-source';
 
 async function readData<T>(url: string, signal: AbortSignal): Promise<T> {
   const response = await fetch(url, { signal });
@@ -16,8 +17,26 @@ async function readData<T>(url: string, signal: AbortSignal): Promise<T> {
   return data;
 }
 
+/**
+ * データソース切替。'v2'がPipeline V2（public/data/v2/mof）、'v1'が旧
+ * public/budget-flow-v2（pipeline-v2-full-output.zip由来）。V1は比較・
+ * rollback用に残す（2026-09-20指摘）。切替はUI/view model（EntitySummary/
+ * EntityDetail/Index）を変えず、fetch先とshard分割方法だけを差し替える。
+ */
+type DataSource = 'v1' | 'v2';
+function readIndex(source: DataSource, year: number, signal: AbortSignal): Promise<Index> {
+  return source === 'v2' ? fetchV2Index(year, signal) : readData<Index>(`/budget-flow-v2/${year}.json.gz`, signal);
+}
+function shardPrefixesOf(source: DataSource, entities: { id: string }[]): string[] {
+  return [...new Set(entities.map(e => source === 'v2' ? v2ShardOf(e.id) : e.id[0]))];
+}
+function readEntityShard(source: DataSource, year: number, prefix: string, signal: AbortSignal): Promise<Record<string, EntityDetail>> {
+  return source === 'v2' ? fetchV2EntityDetails(year, prefix, signal) : readData<Record<string, EntityDetail>>(`/budget-flow-v2/${year}/${prefix}.json.gz`, signal);
+}
+
 export default function BudgetFlow() {
   const [year, setYear] = useState(2024);
+  const [source, setSource] = useState<DataSource>('v2');
   const [mode, setMode] = useState('all');
   const [account, setAccount] = useState<string[]>(['general']);
   const [organizations, setOrganizations] = useState<string[]>([]);
@@ -40,23 +59,23 @@ export default function BudgetFlow() {
   useEffect(() => {
     const abort = new AbortController();
     setIndex(null); setSelected(''); setDetail(null); setError('');
-    readData<Index>(`/budget-flow-v2/${year}.json.gz`, abort.signal).then(setIndex).catch(e => {
+    readIndex(source, year, abort.signal).then(setIndex).catch(e => {
       if (!abort.signal.aborted) setError(String(e.message));
     });
     return () => abort.abort();
-  }, [year, retry]);
+  }, [year, source, retry]);
   useEffect(() => {
     const abort = new AbortController();
     setAmounts({}); setAmountError(false); setAmountsLoading(false);
     if (index && index.fiscalYear === year) {
       // Read existing display shards; do not alter Pipeline V2 or aggregate budget stages.
       setAmountsLoading(true);
-      const prefixes = [...new Set(index.entities.map(e => e.id[0]))];
+      const prefixes = shardPrefixesOf(source, index.entities);
       void (async () => {
         for (const prefix of prefixes) {
           if (abort.signal.aborted) break;
           try {
-            const data = await readData<Record<string, EntityDetail>>(`/budget-flow-v2/${year}/${prefix}.json.gz`, abort.signal);
+            const data = await readEntityShard(source, year, prefix, abort.signal);
             setAmounts(previous => ({ ...previous, ...Object.fromEntries(Object.values(data).map(e => [e.id, initialEnactedAmount(e.events)])) }));
           } catch { if (!abort.signal.aborted) setAmountError(true); }
         }
@@ -64,7 +83,7 @@ export default function BudgetFlow() {
       })();
     }
     return () => abort.abort();
-  }, [index, year, retry]);
+  }, [index, year, source, retry]);
   const organizationOptions = useMemo(() => [...new Set(index?.entities.flatMap(organizationNames) ?? [])].sort((a, b) => a.localeCompare(b, 'ja')).map(name => ({ value: name, label: name })), [index]);
   const amountRange = useMemo(() => parseAmountRange(minAmount, maxAmount), [minAmount, maxAmount]);
   const filtered = useMemo(() => filterAmountRange(filterEntities(index?.entities ?? [], account, query, mode, organizations, regex), amounts, amountRange), [index, account, query, mode, organizations, regex, amounts, amountRange]);
@@ -78,12 +97,12 @@ export default function BudgetFlow() {
     setDetail(null); setActiveEvent(0); setEvidencePage(0);
     if (!entityId) return () => abort.abort();
     setError('');
-    readData<Record<string, EntityDetail>>(`/budget-flow-v2/${year}/${entityId[0]}.json.gz`, abort.signal).then(data => {
+    readEntityShard(source, year, source === 'v2' ? v2ShardOf(entityId) : entityId[0], abort.signal).then(data => {
       if (!data[entityId]) throw new Error('選択した項のデータがありません。');
       setDetail(data[entityId]);
     }).catch(e => { if (!abort.signal.aborted) setError(String(e.message)); });
     return () => abort.abort();
-  }, [entityId, year, retry]);
+  }, [entityId, year, source, retry]);
   const events = useMemo(() => orderedEvents(detail?.events ?? []), [detail]);
   const event = events[activeEvent];
   const rawById = useMemo(() => new Map(detail?.records.map(r => [r.recordId, r]) ?? []), [detail]);
@@ -100,6 +119,7 @@ export default function BudgetFlow() {
     {error && <div className={styles.error} role="alert">{error} <button onClick={() => { setError(''); setRetry(n => n + 1); }}>再読み込み</button></div>}
     {!index && !error && <p role="status">実データを読み込み中…</p>}
     <PaneLayout filters={<section className={styles.controls} aria-label="表示条件"><div className={styles.filterTitle}><h2>フィルタ</h2><button onClick={resetFilters}>リセット</button></div>
+      <label>データソース<select aria-label="データソース" value={source} onChange={e => setSource(e.target.value as DataSource)}><option value="v2">Pipeline V2（public/data/v2）</option><option value="v1">V1（旧budget-flow-v2）</option></select></label>
       <label>予算年度 · fiscalYear<select aria-label="予算年度 · fiscalYear" value={year} onChange={e => setYear(Number(e.target.value))}><option>2024</option><option>2025</option></select></label>
       <label>モード<select aria-label="モード" value={mode} onChange={e => setMode(e.target.value)}><option value="all">予算から決算まで</option><option value="settlement">決算のある項</option></select></label>
       <div className={styles.filterField}><span>会計</span><MultiSelect searchable={false} label="会計" options={Object.entries(accounts).map(([value, label]) => ({ value, label }))} value={account} onChange={setAccount} /></div>
@@ -144,11 +164,11 @@ export default function BudgetFlow() {
               const links = detail.links.filter(l => l.sourceYear === sy);
               return <details key={sy}><summary>sourceYear {sy} → fiscalYear {year} · {new Set(links.flatMap(l => l.projectIds)).size} 事業 / {links.length} リンク</summary>{links.map(l => <p className={styles.code} key={l.linkId}>{l.linkId} / {l.matchMethod} / {l.phase}<br />事業ID: {l.projectIds.join(', ')}{l.spansEntities && '（複数項にまたがるリンク）'}</p>)}</details>;
             })}</section>}
-            {tab === 'diff' && <section className={styles.panel}><h3>現行モデルとの金額比較</h3><p>現行V1のMOF公開データ（Integratedと共通の原データから生成）と、会計・所管・組織・勘定・コード・名称の完全一致で比較します。当初は成立額、決算は歳出予算額同士を比較し、項構成が異なる場合は未比較とします。</p><p className={styles.code}>{index.v1File}<br />SHA-256: {index.v1Sha256}</p>{detail.comparisons.length === 0 ? <p>同じ範囲・金額種別で比較可能なV1レコードはありません。</p> : <div className={styles.tableWrap}><table><thead><tr><th>金額種別</th><th>現行 V1</th><th>Budget Flow V2</th><th>差額 V2 − V1</th></tr></thead><tbody>{detail.comparisons.map(c => <tr key={c.v1Id}><th>{c.budgetType}</th><td>{yen(c.v1Amount)}</td><td>{yen(c.v2Amount)}</td><td>{yen(c.differenceYen)}</td></tr>)}</tbody></table></div>}<h3>モデル上の違い</h3><p>V2では元レコード・識別情報・金額イベントを分離します。同じ項コードの異なる項名は保持し、当初・補正・決算の残高を足し合わせません。移替は純増減のみを示し、相手先は推測しません。</p></section>}
+            {tab === 'diff' && <section className={styles.panel}><h3>現行モデルとの金額比較</h3><p>現行V1のMOF公開データ（Integratedと共通の原データから生成）と、会計・所管・組織・勘定・コード・名称の完全一致で比較します。当初は成立額、決算は歳出予算額同士を比較し、項構成が異なる場合は未比較とします。</p>{source === 'v2' ? <p className={styles.muted}>データソースがPipeline V2のため、この比較はV1データソースを選択した場合のみ計算されます。</p> : <p className={styles.code}>{index.v1File}<br />SHA-256: {index.v1Sha256}</p>}{detail.comparisons.length === 0 ? <p>同じ範囲・金額種別で比較可能なV1レコードはありません。</p> : <div className={styles.tableWrap}><table><thead><tr><th>金額種別</th><th>現行 V1</th><th>Budget Flow V2</th><th>差額 V2 − V1</th></tr></thead><tbody>{detail.comparisons.map(c => <tr key={c.v1Id}><th>{c.budgetType}</th><td>{yen(c.v1Amount)}</td><td>{yen(c.v2Amount)}</td><td>{yen(c.differenceYen)}</td></tr>)}</tbody></table></div>}<h3>モデル上の違い</h3><p>V2では元レコード・識別情報・金額イベントを分離します。同じ項コードの異なる項名は保持し、当初・補正・決算の残高を足し合わせません。移替は純増減のみを示し、相手先は推測しません。</p></section>}
           </>}
         </>}
       </section>
     } />
-    {index && <footer className={styles.footer}>独立参照フルデータ · {index.recordCount.toLocaleString()} 原典レコード / {index.eventCount.toLocaleString()} Budget Events · 決算式検算 {index.settlementChecks.toLocaleString()} 項<br /><span className={styles.code}>ZIP SHA-256: {index.archiveSha256}</span></footer>}
+    {index && <footer className={styles.footer}>{source === 'v2' ? 'Pipeline V2（public/data/v2/mof）' : '独立参照フルデータ'} · {index.recordCount.toLocaleString()} 原典レコード / {index.eventCount.toLocaleString()} Budget Events · 決算式検算 {index.settlementChecks.toLocaleString()} 項{source === 'v1' && <><br /><span className={styles.code}>ZIP SHA-256: {index.archiveSha256}</span></>}</footer>}
   </main>;
 }
