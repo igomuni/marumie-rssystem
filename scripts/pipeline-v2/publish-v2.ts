@@ -355,8 +355,13 @@ function publishMofYear(outputRoot: string, publicRoot: string, fiscalYear: numb
     maxShardBytes = Math.max(maxShardBytes, bytes);
   }
 
-  const indexRows = sections.map(s => buildMofIndexRow(s, rsLinkCountsBySection.get(s.id) ?? {}, rsProjectsBySection.get(s.id)?.size ?? 0));
-  const indexObj = { schemaVersion: 2, publishSchemaVersion: PUBLISH_SCHEMA_VERSION, fiscalYear, sectionCount: indexRows.length, sections: indexRows };
+  const indexRows = sections.map(s => buildMofIndexRow(s, rsLinkCountsBySection.get(s.id) ?? {}, rsProjectsBySection.get(s.id)?.size ?? 0, details.get(s.id)?.relations?.length ?? 0));
+  const settlementPath = path.join(droot, 'settlement-equation.json');
+  const settlementChecks = fs.existsSync(settlementPath) ? (JSON.parse(fs.readFileSync(settlementPath, 'utf-8')).checkedRows ?? 0) : 0;
+  const indexObj = {
+    schemaVersion: 2, publishSchemaVersion: PUBLISH_SCHEMA_VERSION, fiscalYear, sectionCount: indexRows.length,
+    recordCount: items.length, eventCount: events.length, settlementChecks, sections: indexRows,
+  };
   const indexGzipBytes = writeGzipJson(path.join(outDir, 'index.json.gz'), indexObj);
 
   const manifestObj = {

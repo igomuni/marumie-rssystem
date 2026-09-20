@@ -122,6 +122,9 @@ export function buildMofSectionDetails(
       targetSectionIds: [...new Set(tgtRecords.map(id => recordToSection.get(id)!))].sort(),
       sourceItemIds: [...new Set(srcRecords.map(id => recordToItemId.get(id)).filter((x): x is string => Boolean(x)))].sort(),
       targetItemIds: [...new Set(tgtRecords.map(id => recordToItemId.get(id)).filter((x): x is string => Boolean(x)))].sort(),
+      // 生recordIdも残す（budget-flow UIのIdentity/RSタブが原典レコード単位でtraceできるように）
+      sourceRecordIds: [...rel.sourceRecordIds].sort(),
+      targetRecordIds: [...rel.targetRecordIds].sort(),
     };
     for (const sid of sids) {
       if (!details.has(sid)) continue;
@@ -136,9 +139,12 @@ export function buildMofSectionDetails(
       const mofRecords = link.mofRecordIds.filter(id => recordToSection.has(id));
       const sids = [...new Set(mofRecords.map(id => recordToSection.get(id)!))];
       const compact = {
-        linkId: link.linkId, reviewYear, phase: link.phase, revision: link.revision,
+        linkId: link.linkId, reviewYear, phase: link.phase, revision: link.revision, matchMethod: link.matchMethod,
         projectIds: link.projectIds, itemIds: [...new Set(mofRecords.map(id => recordToItemId.get(id)).filter((x): x is string => Boolean(x)))].sort(),
         mofAmountYen: link.mofAmountYen, rsAmountYen: link.rsAmountYen, differenceYen: link.differenceYen,
+        // このlinkのmofRecordIdsが複数sectionにまたがる場合、budget-flow UIで「この項だけの
+        // リンクではない」ことが分かるようにする（MOF↔RS linkは1:1を仮定しない原則と同じ理由）
+        spansEntities: sids.length > 1,
       };
       for (const sid of sids) {
         if (!details.has(sid)) continue;
@@ -165,8 +171,8 @@ export function buildMofSectionDetails(
   return details;
 }
 
-export function buildMofIndexRow(section: MofDerivedSection, rsLinkCounts: Record<string, number>, rsProjectCount: number): Record<string, unknown> {
-  const row: Record<string, unknown> = { ...section, shard: mofSectionShard(section.id) };
+export function buildMofIndexRow(section: MofDerivedSection, rsLinkCounts: Record<string, number>, rsProjectCount: number, relationCount: number): Record<string, unknown> {
+  const row: Record<string, unknown> = { ...section, shard: mofSectionShard(section.id), relationCount };
   if (Object.keys(rsLinkCounts).length > 0) {
     row.rsLinkCounts = rsLinkCounts;
     row.rsProjectCount = rsProjectCount;

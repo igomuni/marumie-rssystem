@@ -67,7 +67,7 @@ describe('buildMofIndexRow', () => {
       id: sectionIdOf(item({})), fiscalYear: 2024, accountType: 'general', ministry: '外務省', organization: '在外公館',
       specialAccount: '', subAccount: '', agency: '', sectionCode: '027', sectionName: '経済協力費', itemCount: 1, eventCount: 1, stages: [],
     };
-    const row = buildMofIndexRow(section, {}, 0);
+    const row = buildMofIndexRow(section, {}, 0, 0);
     expect(row.shard).toBe(mofSectionShard(section.id));
   });
 });
