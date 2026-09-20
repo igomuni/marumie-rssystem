@@ -85,7 +85,7 @@ function runBudgetItems(rows: Record<string, string>[]) {
 }
 
 describe('normalizeBudgetItems', () => {
-  it('mofNameNaturalKeyはaccountType+ministry+組織+項+目で作る', () => {
+  it('mofNameNaturalKeyはaccountType+budgetMinistry（所管）+組織+項+目で作る', () => {
     const row = {
       ...HEADER_ROW_COMMON, '予算年度': '2024', '会計区分': '一般会計', '所管': '外務省',
       '組織・勘定': '在外公館', '項': '経済協力費', '目': '在外公館必要経費', '予算額（歳出予算項目ごと）': '100',
@@ -94,10 +94,12 @@ describe('normalizeBudgetItems', () => {
     expect(item.mofNameNaturalKey).toBe('general|外務省|在外公館|経済協力費|在外公館必要経費');
   });
 
-  it('record.ministryはMOF突合用の「所管」列を使う（「府省庁」列とは限らず一致しないことがある。実データで17.5%の行が不一致）', () => {
+  it('ministry（府省庁）とbudgetMinistry（所管）は上書きせず両方保持する（17.5%の行が不一致という実データが判明したため。2026-09-20: 所管による上書きを撤回）', () => {
     const row = { ...HEADER_ROW_COMMON, '府省庁': 'デジタル庁', '所管': '内閣府', '予算年度': '2024', '会計区分': '一般会計' };
     const { rows: [item] } = runBudgetItems([row]);
-    expect(item.ministry).toBe('内閣府');
+    expect(item.ministry).toBe('デジタル庁');
+    expect(item.budgetMinistry).toBe('内閣府');
+    expect(item.mofNameNaturalKey).toContain('内閣府');
   });
 
   it('金額が空欄ならbudgetAmountYenはnull', () => {

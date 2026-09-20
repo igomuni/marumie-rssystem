@@ -158,7 +158,7 @@ export function normalizeBudgetItems(
       const fyRaw = (row['予算年度'] ?? '').trim();
       const fy = fyRaw ? parseInt(fyRaw, 10) : null;
       const ac = (row['会計区分'] ?? '').trim();
-      const ministry = (row['所管'] ?? '').trim();
+      const budgetMinistry = (row['所管'] ?? '').trim();
       const orgAcc = (row['組織・勘定'] ?? '').trim();
       const section = (row['項'] ?? '').trim();
       const item = (row['目'] ?? '').trim();
@@ -168,11 +168,11 @@ export function normalizeBudgetItems(
 
       yield {
         ...base,
-        // rsBase()のministryは共通列「府省庁」から取るが、2-2 CSVのMOF突合に使うべきは
-        // 「所管」列（MOFの科目別内訳と同じ語彙）。府省庁と所管は同じ値のことが多いが、
-        // 一致しない行がある場合ここを府省庁のまま残すとMOFリンクを静かに誤らせるため上書きする
-        // （CodeRabbit相当の指摘、2026-09-20）
-        ministry,
+        // base.ministryは共通列「府省庁」のまま保持する（source-preserving）。MOF突合に
+        // 使うべき「所管」列（MOFの科目別内訳と同じ語彙）はbudgetMinistryとして別に持つ。
+        // 実データで19,941行中3,484行（17.5%）が府省庁≠所管であり、これ自体が意味のある
+        // 情報のため、ministryを所管で上書きすると原本の情報が失われる（2026-09-20指摘の訂正）
+        budgetMinistry,
         recordType: 'rs_budget_item' as const,
         recordId: rsRecordId(rawRoot, zipPath, entry, rowNumber, 'rsitem_'),
         fiscalYear: Number.isNaN(fy as number) ? null : fy,
@@ -191,7 +191,7 @@ export function normalizeBudgetItems(
         nextYearRequestRaw: requestRaw,
         requestFiscalYear: fy !== null && requestRaw ? fy + 1 : null,
         note: (row['備考（歳出予算項目ごと）'] ?? '').trim(),
-        mofNameNaturalKey: [type, ministry, orgAcc, section, item].map(normalizeText).join('|'),
+        mofNameNaturalKey: [type, budgetMinistry, orgAcc, section, item].map(normalizeText).join('|'),
         extraFields: extraFields(row, ITEMS_MAPPED),
         source: rsSourceRef(rawRoot, zipPath, entry, rowNumber, '予算・執行_予算種別・歳出予算項目', year),
       };
