@@ -145,6 +145,11 @@ export function normalizeBudgetItems(
 
     return {
       ...base,
+      // rsBase()のministryは共通列「府省庁」から取るが、2-2 CSVのMOF突合に使うべきは
+      // 「所管」列（MOFの科目別内訳と同じ語彙）。府省庁と所管は同じ値のことが多いが、
+      // 一致しない行がある場合ここを府省庁のまま残すとMOFリンクを静かに誤らせるため上書きする
+      // （CodeRabbit相当の指摘、2026-09-20）
+      ministry,
       recordType: 'rs_budget_item',
       recordId: rsRecordId(rawRoot, zipPath, entry, rowNumber, 'rsitem_'),
       fiscalYear: Number.isNaN(fy as number) ? null : fy,

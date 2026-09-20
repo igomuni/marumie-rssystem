@@ -108,14 +108,23 @@ function processYear(rawRoot: string, outputRoot: string, year: number): Record<
 function main(): void {
   const rawRoot = path.join('data', 'download');
   const outputRoot = 'data';
-  const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
-  const targetYears = years.length > 0 ? years : discoverRsYears(rawRoot);
+  const explicitYears = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
+  const { downloadCsvYears, sheetsOnlyYears } = discoverRsYears(rawRoot, explicitYears.length > 0 ? new Set(explicitYears) : undefined);
+
+  if (sheetsOnlyYears.length > 0) {
+    console.log(`\n※ sheets-onlyの年度（CSVバルク未公開、レビューシートのみ）はスキップ: ${sheetsOnlyYears.join(', ')}`);
+    console.log('  review-sheetsとのマージ（事業マスタの取り込み）が未実装のため、対象にすると「0件」という誤解を招く出力になる');
+  }
 
   const allCounts: Record<string, Record<string, number>> = {};
-  for (const year of targetYears) {
+  for (const year of downloadCsvYears) {
     allCounts[String(year)] = processYear(rawRoot, outputRoot, year);
   }
-  writeJson(path.join(outputRoot, 'normalized', 'rs', 'manifest.json'), { schemaVersion: 2, sourceYears: allCounts });
+  writeJson(path.join(outputRoot, 'normalized', 'rs', 'manifest.json'), {
+    schemaVersion: 2,
+    sourceYears: allCounts,
+    sheetsOnlyYearsSkipped: sheetsOnlyYears,
+  });
 }
 
 main();
