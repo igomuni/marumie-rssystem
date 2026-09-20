@@ -414,7 +414,7 @@ export interface RsBudgetItemRecordV2 extends RsBaseFields {
   subAccount: string;
   budgetType: string;
   /** 2-2 CSVの「所管」列。MOFの科目別内訳と同じ語彙で、MOF突合（mofNameNaturalKey）に使う。
-   *  RsBaseFields.ministry（共通列「府省庁」）とは別物で、実データで17.5%の行が異なるため
+   *  RsBaseFields.ministry（共通列「府省庁」）とは別物で、実データでは相当数の行が異なるため
    *  どちらも原本のまま保持する（source-preserving。2026-09-20: 所管による上書きを撤回） */
   budgetMinistry: string;
   organizationOrAccount: string;

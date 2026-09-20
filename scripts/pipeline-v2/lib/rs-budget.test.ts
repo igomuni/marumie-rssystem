@@ -94,7 +94,7 @@ describe('normalizeBudgetItems', () => {
     expect(item.mofNameNaturalKey).toBe('general|外務省|在外公館|経済協力費|在外公館必要経費');
   });
 
-  it('ministry（府省庁）とbudgetMinistry（所管）は上書きせず両方保持する（17.5%の行が不一致という実データが判明したため。2026-09-20: 所管による上書きを撤回）', () => {
+  it('ministry（府省庁）とbudgetMinistry（所管）は上書きせず両方保持する（実データで相当数の行が不一致と判明したため。2026-09-20: 所管による上書きを撤回）', () => {
     const row = { ...HEADER_ROW_COMMON, '府省庁': 'デジタル庁', '所管': '内閣府', '予算年度': '2024', '会計区分': '一般会計' };
     const { rows: [item] } = runBudgetItems([row]);
     expect(item.ministry).toBe('デジタル庁');

@@ -170,7 +170,7 @@ export function normalizeBudgetItems(
         ...base,
         // base.ministryは共通列「府省庁」のまま保持する（source-preserving）。MOF突合に
         // 使うべき「所管」列（MOFの科目別内訳と同じ語彙）はbudgetMinistryとして別に持つ。
-        // 実データで19,941行中3,484行（17.5%）が府省庁≠所管であり、これ自体が意味のある
+        // 実データでは府省庁≠所管の行が相当数（FY2024で過半数超）あり、これ自体が意味のある
         // 情報のため、ministryを所管で上書きすると原本の情報が失われる（2026-09-20指摘の訂正）
         budgetMinistry,
         recordType: 'rs_budget_item' as const,
