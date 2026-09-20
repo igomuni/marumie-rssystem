@@ -90,3 +90,37 @@ describe('buildFundingGraphsForYear: 一般有向グラフとして保持する'
     expect(graphs[0].semanticEdges).toHaveLength(0);
   });
 });
+
+describe('buildFundingGraphsForYear: rootNodeIds/externalRootBlockIds/orphanBlockIdsの区別', () => {
+  it('担当組織1点から複数ブロックへ配る星型では、rootは担当組織ノード1個のみ（ブロック自体はrootでもorphanでもない）', () => {
+    // FY2025 PID:1相当（8ブロックへ担当組織から配る構造）を単純化した固定fixture
+    const blocks = [block('1', 'A'), block('1', 'B'), block('1', 'C')];
+    const rels = blocks.map(b => relation('1', null, b.blockId, true));
+    const { graphs } = buildFundingGraphsForYear(2024, blocks, rels, NO_INDIRECT, [project('1')]);
+    const m = graphs[0].metrics;
+    expect(m.rootNodeIds).toHaveLength(1);
+    expect(m.rootNodeIds[0]).toBe(m.responsibleOrganizationNodeId);
+    expect(m.externalRootBlockIds).toHaveLength(0);
+    expect(m.orphanBlockIds).toHaveLength(0);
+  });
+
+  it('辺が一切無い複数ブロックは、全ブロックがrootNodeIdsかつorphanBlockIds（externalRootBlockIdsは0）', () => {
+    // FY2025 PID:3339相当（30ブロック・relation 0件）を単純化した固定fixture
+    const blocks = [block('1', 'A'), block('1', 'B'), block('1', 'C')];
+    const { graphs } = buildFundingGraphsForYear(2024, blocks, [], NO_INDIRECT, [project('1')]);
+    const m = graphs[0].metrics;
+    expect(m.rootNodeIds).toHaveLength(3);
+    expect(m.orphanBlockIds).toHaveLength(3);
+    expect(m.externalRootBlockIds).toHaveLength(0);
+  });
+
+  it('他ブロックへ資金を渡すが自身は誰からも受け取らないブロックはexternalRootBlockIds（rootかつorphanではない）', () => {
+    // FY2025 PID:2776相当（block-to-blockの単純な1辺）を単純化した固定fixture
+    const { graphs } = buildFundingGraphsForYear(2024,
+      [block('1', 'A'), block('1', 'B')], [relation('1', 'A', 'B')], NO_INDIRECT, [project('1')]);
+    const m = graphs[0].metrics;
+    expect(m.rootNodeIds).toEqual(['project:1:block:A']);
+    expect(m.externalRootBlockIds).toEqual(['A']);
+    expect(m.orphanBlockIds).toHaveLength(0);
+  });
+});

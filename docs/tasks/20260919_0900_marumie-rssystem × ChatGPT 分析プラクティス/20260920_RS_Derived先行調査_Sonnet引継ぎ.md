@@ -23,23 +23,34 @@ Normalizeの原典忠実データをDerivedで破壊しない。特にfunding re
 - rootから到達不能なblockは `orphanBlockIds` として保持
 - rootが0でも不正として捨てない
 
-## FY2025 stress acceptance（最新TS Normalizeから実測）
-| PID | blocks | relations | roots | cycle | orphans | duplicate pairs | indirect |
-|---:|---:|---:|---:|:---:|---:|---:|---:|
-| 1 | 8 | 8 | 8 | false | 0 | 0 | 2 |
-| 4 | 2 | 2 | 2 | false | 0 | 0 | 0 |
-| 142 | 33 | 40 | 3 | false | 0 | 0 | 0 |
-| 500 | 10 | 18 | 9 | false | 0 | 0 | 0 |
-| 1406 | 5 | 5 | 1 | false | 2 | 0 | 0 |
-| 1409 | 4 | 5 | 1 | **true** | 0 | 0 | 0 |
-| 2776 | 2 | 1 | **0** | false | 2 | 0 | 0 |
-| 333 | 6 | 5 | 2 | false | 4 | 0 | 0 |
-| 3339 | 30 | 0 | 0 | false | **30** | 0 | 0 |
-| 747 | 28 | 52 | 5 | false | 0 | **21** | 1 |
-| 1082 | **55** | 55 | **55** | false | 0 | 0 | 0 |
-| 4162 | 10 | 10 | 5 | false | 0 | 0 | **12** |
+## FY2025 stress acceptance（2026-09-20訂正版。derive-rs.ts実装・Sonnet実測に基づく）
 
-この表を`derive-rs`のacceptance fixtureとして固定する。
+初版の`roots`/`orphans`列は、`rootNodeIds`（担当組織の合成ノードを含む全ノードのindegree=0）と
+`externalRootBlockIds`（spending blockのうちindegree=0かつoutdegree>0）を混同していた誤り。
+両者を分離し、Python参照実装（funding_graph.py）・TS実装（rs-funding-graph.ts）と一致する値に訂正する。
+
+正式な定義:
+- `rootNodeIds`: 全ノード（synthetic responsible organization含む）のうちindegree=0
+- `externalRootBlockIds`: spending blockのうちindegree=0かつoutdegree>0
+- `orphanBlockIds`: spending blockのうちindegree=0かつoutdegree=0
+
+| PID | blocks | relations | rootNodeIds | externalRootBlockIds | orphanBlockIds | cycle | duplicate pairs | indirect |
+|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| 1 | 8 | 8 | 1 | 0 | 0 | false | 0 | 2 |
+| 4 | 2 | 2 | 1 | 0 | 0 | false | 0 | 0 |
+| 142 | 33 | 40 | 1 | 0 | 0 | false | 0 | 0 |
+| 500 | 10 | 18 | 1 | 0 | 0 | false | 0 | 0 |
+| 1406 | 5 | 5 | 3 | 2 | 0 | false | 0 | 0 |
+| 1409 | 4 | 5 | 1 | 0 | 0 | **true** | 0 | 0 |
+| 2776 | 2 | 1 | 1 | 1 | 0 | false | 0 | 0 |
+| 333 | 6 | 5 | 2 | 1 | 0 | false | 0 | 0 |
+| 3339 | 30 | 0 | **30** | 0 | **30** | false | 0 | 0 |
+| 747 | 28 | 52 | 1 | 0 | 0 | false | **21** | 1 |
+| 1082 | **55** | 55 | 1 | 0 | 0 | false | 0 | 0 |
+| 4162 | 10 | 10 | 1 | 0 | 0 | false | 0 | **12** |
+
+blocks/relations/cycle/duplicate pairs/indirectは初版の期待値と全PIDで一致（実装バグではなく
+初版の`roots`ラベルの定義が曖昧だっただけと確認済み）。この表を`derive-rs`のacceptance fixtureとして固定する。
 
 ## Project counts
 - review-2024: 5,669 projects
