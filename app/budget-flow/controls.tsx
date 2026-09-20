@@ -27,7 +27,7 @@ export function MultiSelect({ label, options, value, onChange, searchable = true
   </details>;
 }
 
-export function PaneLayout({ filters, list, detail }: { filters: ReactNode; list: ReactNode; detail: ReactNode }) {
+export function PaneLayout({ filters, list, detail, listName = '項一覧' }: { listName?: string; filters: ReactNode; list: ReactNode; detail: ReactNode }) {
   const [left, setLeft] = useState(240);
   const [right, setRight] = useState(460);
   const container = useRef<HTMLDivElement>(null);
@@ -37,6 +37,7 @@ export function PaneLayout({ filters, list, detail }: { filters: ReactNode; list
     const observer = new ResizeObserver(() => {
       if (window.innerWidth <= 1100) return;
       const available = element.clientWidth;
+      if (!available) return;
       const nextLeft = Math.max(200, Math.min(left, available - 704));
       setLeft(nextLeft);
       setRight(width => Math.max(340, Math.min(width, available - nextLeft - 364)));
@@ -52,7 +53,7 @@ export function PaneLayout({ filters, list, detail }: { filters: ReactNode; list
     const max = Math.max(min, Math.min(side === 'left' ? 360 : 760, available - other - 364));
     (side === 'left' ? setLeft : setRight)(Math.max(min, Math.min(max, width)));
   };
-  const separator = (side: 'left' | 'right') => <div role="separator" aria-label={side === 'left' ? 'フィルタと項一覧の幅' : '項一覧と詳細の幅'} aria-orientation="vertical" aria-valuemin={side === 'left' ? 200 : 340} aria-valuemax={side === 'left' ? 360 : 760} aria-valuenow={side === 'left' ? left : right} tabIndex={0} className={styles.resizeHandle}
+  const separator = (side: 'left' | 'right') => <div role="separator" aria-label={side === 'left' ? `フィルタと${listName}の幅` : `${listName}と詳細の幅`} aria-orientation="vertical" aria-valuemin={side === 'left' ? 200 : 340} aria-valuemax={side === 'left' ? 360 : 760} aria-valuenow={side === 'left' ? left : right} tabIndex={0} className={styles.resizeHandle}
     onPointerDown={e => { drag.current = { x: e.clientX, width: side === 'left' ? left : right }; e.currentTarget.setPointerCapture(e.pointerId); e.preventDefault(); }}
     onPointerMove={e => { if (drag.current) resize(side, drag.current.width + (e.clientX - drag.current.x) * (side === 'left' ? 1 : -1)); }}
     onPointerUp={() => { drag.current = null; }} onLostPointerCapture={() => { drag.current = null; }}

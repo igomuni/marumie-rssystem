@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Budget Flow Mock</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --panel:#ffffff;
+      --line:#d9dce7;
+      --text:#1f2430;
+      --muted:#6b7280;
+      --blue:#2f6fed;
+      --green:#22a06b;
+      --orange:#d97706;
+      --red:#d14343;
+      --purple:#7c3aed;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans JP",sans-serif;
+    }
+    .app{
+      max-width:1400px;
+      margin:0 auto;
+      padding:20px;
+    }
+    .header{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:16px 18px;
+      box-shadow:0 1px 2px rgba(0,0,0,.03);
+    }
+    .title-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:12px;
+    }
+    h1{
+      font-size:24px;
+      margin:0;
+    }
+    .subtitle{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+    .controls{
+      display:grid;
+      grid-template-columns: 160px 160px 160px 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .control{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .control label{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .fake-input{
+      height:38px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:9px 12px;
+      font-size:14px;
+    }
+    .seg{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+    .pill{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:13px;
+      color:#374151;
+    }
+    .pill.active{
+      background:#edf3ff;
+      border-color:#b6cafb;
+      color:#1849b9;
+      font-weight:600;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:12px;
+      margin-top:16px;
+    }
+    .stat{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:14px;
+    }
+    .stat .k{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .stat .v{font-size:24px;font-weight:700}
+    .stat .note{font-size:12px;color:var(--muted);margin-top:4px}
+
+    .main{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:16px;
+      margin-top:16px;
+    }
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:14px;
+      box-shadow:0 1px 2px rgba(0,0,0,.03);
+    }
+    .panel-header{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .panel-header h2{
+      font-size:16px;
+      margin:0;
+    }
+    .panel-body{padding:14px 16px}
+
+    .item-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .item{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      background:#fff;
+    }
+    .item.active{
+      border-color:#a9c2ff;
+      background:#f5f8ff;
+    }
+    .item .name{
+      font-size:14px;
+      font-weight:600;
+      margin-bottom:6px;
+    }
+    .meta{
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .tag{
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fafafa;
+      color:#4b5563;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+    }
+    .tab{
+      padding:8px 12px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:13px;
+    }
+    .tab.active{
+      background:#edf3ff;
+      border-color:#b6cafb;
+      color:#1849b9;
+      font-weight:600;
+    }
+
+    .timeline{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:8px;
+    }
+    .event{
+      display:grid;
+      grid-template-columns: 28px 1fr 210px;
+      gap:12px;
+      align-items:start;
+      position:relative;
+    }
+    .event:not(:last-child)::after{
+      content:"";
+      position:absolute;
+      left:13px;
+      top:32px;
+      width:2px;
+      height:calc(100% + 10px);
+      background:#dbe3f8;
+    }
+    .dot{
+      width:28px;height:28px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-size:12px;font-weight:700;
+      margin-top:2px;
+    }
+    .dot.initial{background:var(--blue)}
+    .dot.supp{background:var(--orange)}
+    .dot.transfer{background:var(--purple)}
+    .dot.current{background:#0f766e}
+    .dot.spent{background:var(--green)}
+    .dot.carry{background:#64748b}
+    .dot.unused{background:var(--red)}
+    .card{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      background:#fff;
+    }
+    .card-title{
+      font-size:14px;
+      font-weight:600;
+      margin-bottom:6px;
+    }
+    .card-note{
+      color:var(--muted);
+      font-size:12px;
+    }
+    .amount{
+      text-align:right;
+      font-weight:700;
+      font-size:16px;
+      padding-top:8px;
+    }
+    .amount.plus{color:#965c00}
+    .amount.minus{color:#7c3aed}
+    .amount.normal{color:#111827}
+
+    .two-col{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:16px;
+      margin-top:16px;
+    }
+
+    .table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    .table th, .table td{
+      border-bottom:1px solid var(--line);
+      padding:10px 8px;
+      text-align:left;
+      vertical-align:top;
+    }
+    .table th{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:600;
+      background:#fbfbfd;
+    }
+    .code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      background:#f6f7fb;
+      border:1px solid var(--line);
+      border-radius:8px;
+      padding:8px 10px;
+      font-size:12px;
+      white-space:pre-wrap;
+    }
+    .evidence-box{
+      border:1px dashed var(--line);
+      border-radius:10px;
+      padding:10px 12px;
+      margin-top:10px;
+      background:#fcfcfe;
+    }
+    .small{font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="title-row">
+        <div>
+          <h1>Budget Flow</h1>
+          <div class="subtitle">MOF / RS の raw・normalized・derived を前提にした検証ページのモック</div>
+        </div>
+        <div class="tabs">
+          <div class="tab">現行 Integrated</div>
+          <div class="tab active">新 Budget Flow</div>
+          <div class="tab">差分</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label>年度</label>
+          <div class="fake-input">2024 ▼</div>
+        </div>
+        <div class="control">
+          <label>モード</label>
+          <div class="fake-input">決算ベース ▼</div>
+        </div>
+        <div class="control">
+          <label>会計</label>
+          <div class="fake-input">一般会計 ▼</div>
+        </div>
+        <div class="control">
+          <label>検索</label>
+          <div class="fake-input">科学技術 / 水道 / 防衛力強化 ...</div>
+        </div>
+      </div>
+
+      <div class="seg">
+        <div class="pill active">Canonical項</div>
+        <div class="pill">Raw項</div>
+        <div class="pill">移替あり</div>
+        <div class="pill">前年度繰越あり</div>
+        <div class="pill">補正新設</div>
+        <div class="pill">unresolvedのみ</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="k">当初 項数</div>
+          <div class="v">1,056</div>
+          <div class="note">source-preserving</div>
+        </div>
+        <div class="stat">
+          <div class="k">補正第1号 項数</div>
+          <div class="v">999</div>
+          <div class="note">submitted / enacted 差分考慮可</div>
+        </div>
+        <div class="stat">
+          <div class="k">決算 項数</div>
+          <div class="v">1,272</div>
+          <div class="note">source-preserving</div>
+        </div>
+        <div class="stat">
+          <div class="k">決算のみ</div>
+          <div class="v">254</div>
+          <div class="note">新規項ではない</div>
+        </div>
+        <div class="stat">
+          <div class="k">MOF ↔ RS exact-name link</div>
+          <div class="v">4,537</div>
+          <div class="note">review 2025 → fy2024</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>項一覧</h2>
+          <span class="small">3 / 254 selected</span>
+        </div>
+        <div class="panel-body">
+          <div class="item-list">
+            <div class="item active">
+              <div class="name">生活基盤施設耐震化等対策費</div>
+              <div class="meta">
+                <span>厚生労働省 → 国土交通省</span>
+                <span>項コード: 055 / 023</span>
+              </div>
+              <div class="tags">
+                <span class="tag">前年度繰越</span>
+                <span class="tag">行政移管</span>
+                <span class="tag">移替</span>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="name">防衛力強化資金へ繰入</div>
+              <div class="meta">
+                <span>財務省</span>
+                <span>項コード: 066</span>
+              </div>
+              <div class="tags">
+                <span class="tag">補正新設</span>
+                <span class="tag">名称差あり</span>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="name">科学技術イノベーション創造推進費</div>
+              <div class="meta">
+                <span>内閣府</span>
+                <span>項コード: 048</span>
+              </div>
+              <div class="tags">
+                <span class="tag">移替</span>
+                <span class="tag">所管・組織展開</span>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="name">情報通信技術調達等適正・効率化推進費</div>
+              <div class="meta">
+                <span>デジタル庁</span>
+                <span>項コード: 004</span>
+              </div>
+              <div class="tags">
+                <span class="tag">移替</span>
+                <span class="tag">複数所管展開</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2>項のイベントタイムライン</h2>
+            <div class="tabs">
+              <div class="tab active">タイムライン</div>
+              <div class="tab">フロー図</div>
+              <div class="tab">差分表</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="card" style="margin-bottom:14px">
+              <div class="card-title">生活基盤施設耐震化等対策費</div>
+              <div class="card-note">Canonical ID: canon:mof:2024:seikatsu-kiban-taishinka / validation: pass</div>
+            </div>
+
+            <div class="timeline">
+              <div class="event">
+                <div class="dot initial">初</div>
+                <div class="card">
+                  <div class="card-title">当初予算</div>
+                  <div class="card-note">厚生労働省 / 厚生労働本省 / 項コード 055</div>
+                </div>
+                <div class="amount normal">0 円</div>
+              </div>
+
+              <div class="event">
+                <div class="dot carry">繰</div>
+                <div class="card">
+                  <div class="card-title">前年度繰越額</div>
+                  <div class="card-note">令和5年度からの繰越</div>
+                </div>
+                <div class="amount normal">45,258,792,360 円</div>
+              </div>
+
+              <div class="event">
+                <div class="dot transfer">移</div>
+                <div class="card">
+                  <div class="card-title">行政移管 / 移替（出）</div>
+                  <div class="card-note">厚労省 → 国交省 / official-transfer-table</div>
+                </div>
+                <div class="amount minus">-45,258,792,360 円</div>
+              </div>
+
+              <div class="event">
+                <div class="dot transfer">移</div>
+                <div class="card">
+                  <div class="card-title">行政移管 / 移替（入）</div>
+                  <div class="card-note">国交省側で同額受入 / 項コード 023</div>
+                </div>
+                <div class="amount plus">+45,258,792,360 円</div>
+              </div>
+
+              <div class="event">
+                <div class="dot current">現</div>
+                <div class="card">
+                  <div class="card-title">歳出予算現額</div>
+                  <div class="card-note">決算CSVより算出式一致</div>
+                </div>
+                <div class="amount normal">45,258,792,360 円</div>
+              </div>
+
+              <div class="event">
+                <div class="dot spent">支</div>
+                <div class="card">
+                  <div class="card-title">支出済歳出額</div>
+                  <div class="card-note">決算ベースの実績</div>
+                </div>
+                <div class="amount normal">14,203,000,000 円</div>
+              </div>
+
+              <div class="event">
+                <div class="dot carry">繰</div>
+                <div class="card">
+                  <div class="card-title">翌年度繰越額</div>
+                  <div class="card-note">決算列から取得</div>
+                </div>
+                <div class="amount normal">29,871,000,000 円</div>
+              </div>
+
+              <div class="event">
+                <div class="dot unused">不用</div>
+                <div class="card">
+                  <div class="card-title">不用額</div>
+                  <div class="card-note">予算現額 = 支出済 + 翌年度繰越 + 不用</div>
+                </div>
+                <div class="amount normal">1,184,792,360 円</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Evidence / 原典</h2>
+            </div>
+            <div class="panel-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>種別</th>
+                    <th>原典</th>
+                    <th>根拠</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>MOF CSV</td>
+                    <td>account/fy2024/DL202477001.zip</td>
+                    <td>決算の項・金額列</td>
+                  </tr>
+                  <tr>
+                    <td>MOF PDF</td>
+                    <td>kessan_06_zenntaibann.pdf</td>
+                    <td>移替経費内訳、検算</td>
+                  </tr>
+                  <tr>
+                    <td>判定</td>
+                    <td>administrative_transfer</td>
+                    <td>厚労省→国交省へ行政移管</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="evidence-box">
+                <div class="small">Identity resolution</div>
+                <div class="code">matchMethod = official-transfer-table
+confidence  = strong
+canonical   = canon:mof:2024:seikatsu-kiban-taishinka
+sourceItems = 2
+notes       = 厚生労働省側の前年度繰越を国土交通省側へ全額移替</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>現行モデルとの差分</h2>
+            </div>
+            <div class="panel-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>観点</th>
+                    <th>現行 Integrated</th>
+                    <th>新 Budget Flow</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ノードの意味</td>
+                    <td>当初 + 補正差額</td>
+                    <td>イベント列の履歴</td>
+                  </tr>
+                  <tr>
+                    <td>決算</td>
+                    <td>直接は未統合</td>
+                    <td>支出・繰越・不用まで表示</td>
+                  </tr>
+                  <tr>
+                    <td>移替</td>
+                    <td>見えにくい</td>
+                    <td>transfer_in / transfer_out として明示</td>
+                  </tr>
+                  <tr>
+                    <td>identity</td>
+                    <td>項コード中心</td>
+                    <td>canonical + raw分離</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="evidence-box">
+                <div class="small">次の実装ステップ</div>
+                <div class="code">1. /budget-flow/page.tsx の骨格
+2. sample_run の JSON を読み込む loader
+3. 左一覧 + 中央 timeline + 下 evidence の3ペイン
+4. 2024固定で先に動かす
+5. その後、モード切替と比較タブ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>

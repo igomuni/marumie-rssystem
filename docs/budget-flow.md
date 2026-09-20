@@ -49,3 +49,50 @@ npx playwright test tests/e2e/budget-flow.spec.ts tests/e2e/integrated-sankey.sp
 ```
 
 生成時に金額の整数精度、原典参照の存在、項ごとの決算式を検査。独立validatorは全event IDと金額が元ZIPに一致すること、原典の行参照、ゼロ行、年度・段階の件数、同一コード異名称の分離、2025年の提出/成立の分離を検査する。UIテストは検索・原典・差分・年度・欠損決算・モバイル・通信失敗からの再読込を検査する。
+
+## RS全事業一覧・双方向接続
+
+上部の「MOF 項 / RS 事業」で切り替える。両視点のフィルター・選択・ペイン幅は切替時も保持する。接続先へ移動する場合は対象側のフィルターを解除して対象年度・項／事業を選択する。既存MOFのイベント・原典・V1比較はそのまま利用できる。既存のMultiSelect、SearchInput（正規表現含む）、PaneLayoutとCSSを再利用し、RS一覧もページ分割せずスクロールする。列ソート・列幅変更にも対応。
+
+### 入力調査とキー
+
+- 現行Budget Flowと同じ `data/pipeline-v2-full-output.zip` を入力とする独立したPRODUCTS adapterを追加。SOURCE、NORMALIZED、DERIVED、V1、既存MOF productを更新しない。
+- `normalized/rs/review-{reviewYear}/projects.jsonl` は1-1組織情報の**行**。同じ事業が複数行あり、年度内の `projectId` ごとにまとめる。UIキーは `reviewYear:projectId`。年度間の同一事業は推測しない。
+- 2024は8,537行→5,664事業、2025は8,540行→5,794事業。調査時点のローカルTS版 `data/normalized/rs/{year}/projects.json`（1-2由来）ともユニーク事業ID集合は一致した。ローカルTS版と参照ZIPのスキーマは混ぜない。
+- `budget-summary.jsonl` の `scopeLevel=project_total` のみを表示。会計別行を合計に加算しない。同一事業・予算年度の重複合計は各項目の非null値の一致を確認し統合する（不一致は生成失敗）。ゼロは値として残し、全nullはnull。原典行参照はすべて保持。重複グループは2024レビュー2組、2025レビュー17組。
+- `initialBudgetYen / currentBudgetYen / executionYen` は行の `fiscalYear`、`nextYearRequestYen` は `requestFiscalYear` に対応。要求年度をレビュー年度から推測しない。
+- 会計フィルターは `budget-items.jsonl` の年度別 `accountType` を使う。金額のない事業も初期状態では除外しない。金額・会計条件を明示した場合だけ該当するものに絞る。
+- 参照ZIPには1-2の目的・概要がないため、事業名・複数組織・年度別予算／執行・原典を表示し、概要を創作しない。
+
+### 接続と年度
+
+`derived/links/mof-rs-review-{reviewYear}-fy{fiscalYear}.jsonl` の `projectIds` を反転し、`mofRecordIds` から既存MOFと同じ年度・完全識別キーによるEntity IDに接続する。リンクID・phase・revision・matchMethod・RS/MOFレコードIDを保持。複数項や複数事業にまたがるリンクの金額を事業単位の配分額として表示しない。
+
+左側でレビュー年度と表示金額／接続の予算年度を別に選ぶ。レビュー年度の全事業が母集団であり、予算年度変更だけでは事業を除外しない。MOF照合対象外の年度には「照合データなし」と表示する。「接続なし」フィルターはこの状態も含む旨を明示。MOF詳細のIdentity / RSにはレビュー年度別の事業名と遷移ボタン、RS詳細には選択予算年度の項名と逆方向の遷移ボタンを表示する。
+
+| レビュー年度 | 対象MOF予算年度 | 全事業 | 接続あり | 接続なし |
+|---|---|---:|---:|---:|
+| 2024 | 2024 | 5,664 | 4,673 | 991 |
+| 2025 | 2024 | 5,794 | 4,537 | 1,257 |
+| 2025 | 2025 | 5,794 | 4,851 | 943 |
+
+2025レビューで対象MOF年度を横断したユニーク接続ありは5,112事業、なし682事業。年度別の接続あり件数は重複があるため足し合わせない。
+
+### 生成と検証
+
+```sh
+python3 scripts/generate-budget-flow-rs.py
+# 外部の参照ZIPを指定する場合
+python3 scripts/generate-budget-flow-rs.py --archive /path/to/pipeline-v2-full-output.zip
+python3 -m unittest discover -s scripts -p test_budget_flow_rs.py
+# 検証時のZIPも指定可能
+BUDGET_FLOW_ARCHIVE=/path/to/pipeline-v2-full-output.zip python3 -m unittest discover -s scripts -p test_budget_flow_rs.py
+npx vitest run
+npx tsc --noEmit --incremental false
+npm run build
+npx playwright test tests/e2e/budget-flow.spec.ts tests/e2e/budget-flow-rs.spec.ts tests/e2e/integrated-sankey.spec.ts --workers=2
+```
+
+`public/budget-flow-v2/rs/` にレビュー年度別index、IDハッシュ先頭文字による16分割詳細、件数サマリー付きmanifestをgzipで保存（合計約10MB）。indexは約487KB / 583KB。`DecompressionStream('gzip')` を使い、詳細は選択したシャードのみ読む。gzip時刻を固定し、同じ入力からバイト一致で再生成できる。build時に原典の取得・生成はしない。原典ZIPは従来どおりGit管理対象外、配信用gzipはGit管理対象。
+
+生成時に件数サマリーを標準出力し、manifestにも保持。Python検証は全事業の母集団、元の合計金額、全リンク・年度・phase、既存MOF productへの参照を独立照合する。参照ZIPがない環境ではフル照合をskipするため、リリース前にはZIP指定で実行する。

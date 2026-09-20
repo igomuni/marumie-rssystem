@@ -15,7 +15,7 @@ test('実データの検索、原典、年度、同一コードの別項を確�
   await expect(page.getByText('canonical ID:', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: '現行モデルとの差分', exact: true }).click();
   await expect(page.getByRole('table').last()).toBeVisible();
-  await page.getByLabel('会計', { exact: true }).click();
+  await page.getByLabel(/^会計:/).click();
   await page.getByRole('checkbox', { name: '一般会計', exact: true }).uncheck();
   await page.getByRole('checkbox', { name: '特別会計', exact: true }).check();
   await page.getByRole('searchbox', { name: '項・所管を検索', exact: true }).fill('復興');
@@ -51,10 +51,10 @@ test('複数選択・候補検索・正規表現・ペイン幅を操作する',
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.goto('/budget-flow');
   await expect(page.getByRole('heading', { name: 'Budget Event タイムライン' })).toBeVisible();
-  await page.getByLabel('会計', { exact: true }).click();
+  await page.getByLabel(/^会計:/).click();
   await page.getByRole('checkbox', { name: '特別会計', exact: true }).check();
   await expect(page.getByRole('checkbox', { name: '一般会計', exact: true })).toBeChecked();
-  await page.getByLabel('所管・組織', { exact: true }).click();
+  await page.getByLabel(/^所管・組織:/).click();
   await page.getByRole('searchbox', { name: '所管・組織の候補を検索', exact: true }).fill('デジタル庁');
   await page.getByRole('checkbox', { name: 'デジタル庁', exact: true }).check();
   const table = page.getByRole('table', { name: '項一覧', exact: true });
@@ -98,7 +98,7 @@ test('一覧ソート、列幅、クリア位置、金額範囲を操作する',
   await page.setViewportSize({ width: 1800, height: 1000 });
   await page.goto('/budget-flow');
   await expect(page.getByRole('heading', { name: 'Budget Event タイムライン' })).toBeVisible();
-  await page.getByLabel('会計', { exact: true }).click();
+  await page.getByLabel(/^会計:/).click();
   await expect(page.getByRole('searchbox', { name: '会計の候補を検索', exact: true })).toHaveCount(0);
   const keyword = page.getByRole('searchbox', { name: '項・所管を検索', exact: true });
   await keyword.fill('デジタル庁');
