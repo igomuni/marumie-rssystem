@@ -6,10 +6,18 @@ const BASE = {
   '府省庁の建制順': '1', '政策所管府省庁': 'A省', '府省庁': 'A省', '局・庁': '', '部': '', '課': '', '室': '', '班': '', '係': '',
 };
 
+/** streaming API: rowsはgenerator。sourceInventory()はrows消費後にのみ正しい値を返す */
+function run(rows: Record<string, string>[]) {
+  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const result = normalizeOrganizations('/root', '/root/x.zip', 'x.csv', rows, 2024, headers);
+  const outRows = [...result.rows];
+  return { rows: outRows, sourceInventory: result.sourceInventory() };
+}
+
 describe('normalizeOrganizations: extraFields・source inventory', () => {
   it('マップ対象外の非空列はextraFieldsに保持し、source inventoryでextra_preservedになる', () => {
     const rows = [{ ...BASE, '将来追加された列': '値' }];
-    const { rows: [row], sourceInventory } = normalizeOrganizations('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    const { rows: [row], sourceInventory } = run(rows);
     expect(row.extraFields).toEqual({ '将来追加された列': '値' });
     const col = sourceInventory.columns.find(c => c.column === '将来追加された列');
     expect(col?.status).toBe('extra_preserved');
@@ -18,14 +26,14 @@ describe('normalizeOrganizations: extraFields・source inventory', () => {
 
   it('空欄の未マップ列はempty_unmappedになる', () => {
     const rows = [{ ...BASE, '将来追加された列': '' }];
-    const { sourceInventory } = normalizeOrganizations('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    const { sourceInventory } = run(rows);
     const col = sourceInventory.columns.find(c => c.column === '将来追加された列');
     expect(col?.status).toBe('empty_unmapped');
   });
 
   it('マップ済み列はmappedになる', () => {
     const rows = [{ ...BASE, '作成責任者': '担当者A' }];
-    const { rows: [row], sourceInventory } = normalizeOrganizations('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    const { rows: [row], sourceInventory } = run(rows);
     expect(row.responsiblePerson).toBe('担当者A');
     const col = sourceInventory.columns.find(c => c.column === '作成責任者');
     expect(col?.status).toBe('mapped');
@@ -33,8 +41,15 @@ describe('normalizeOrganizations: extraFields・source inventory', () => {
 
   it('「建制順」はrsBaseのministryOrderRawフォールバック元列としてmapped扱い（実データで検出した抜け漏れの回帰）', () => {
     const rows = [{ ...BASE, '府省庁の建制順': '', '建制順': '5' }];
-    const { rows: [row], sourceInventory } = normalizeOrganizations('/root', '/root/x.zip', 'x.csv', rows, 2024);
+    const { rows: [row], sourceInventory } = run(rows);
     expect(row.ministryOrderRaw).toBe('5');
     expect(sourceInventory.columns.find(c => c.column === '建制順')?.status).toBe('mapped');
+  });
+
+  it('複数行を正しくstreamingで消費できる（generatorの単一パス消費）', () => {
+    const rows = [{ ...BASE, '予算事業ID': '1' }, { ...BASE, '予算事業ID': '2' }];
+    const { rows: outRows, sourceInventory } = run(rows);
+    expect(outRows).toHaveLength(2);
+    expect(sourceInventory.rowCount).toBe(2);
   });
 });

@@ -7,7 +7,7 @@
 
 /** BOMを除去し、ヘッダー行をキーにしたレコード配列を返す */
 export function parseCsv(content: string): Record<string, string>[] {
-  const rows = parseRows(content.replace(/^﻿/, ''));
+  const rows = [...parseRowsIter(content.replace(/^﻿/, ''))];
   if (rows.length === 0) return [];
   const headers = rows[0];
   return rows.slice(1).map(cells => {
@@ -17,9 +17,29 @@ export function parseCsv(content: string): Record<string, string>[] {
   });
 }
 
-/** クォート・改行入りセルに対応したCSVパース（RFC4180準拠の最小実装） */
-function parseRows(content: string): string[][] {
-  const rows: string[][] = [];
+/**
+ * ヘッダー配列と、行オブジェクトを1行ずつ生成するgeneratorを返す。
+ * RS 15CSV（3-1は12万行超）の投入に備え、CSV row iterator→normalize generator→
+ * writeJsonlの経路全体でraw行配列・出力配列を二重に全展開しないための入口。
+ * ヘッダーは即座に確定する（1行目を読むだけ）ので、本体行はrows generatorを
+ * 消費するまで一切メモリに保持しない。
+ */
+export function parseCsvStream(content: string): { headers: string[]; rows: Generator<Record<string, string>> } {
+  const iter = parseRowsIter(content.replace(/^﻿/, ''));
+  const first = iter.next();
+  const headers = first.done ? [] : first.value;
+  function* rows(): Generator<Record<string, string>> {
+    for (const cells of iter) {
+      const row: Record<string, string> = {};
+      headers.forEach((h, i) => { if (h) row[h] = cells[i] ?? ''; });
+      yield row;
+    }
+  }
+  return { headers, rows: rows() };
+}
+
+/** クォート・改行入りセルに対応したCSVパース（RFC4180準拠の最小実装）。1行完成するごとにyieldする */
+function* parseRowsIter(content: string): Generator<string[]> {
   let row: string[] = [];
   let field = '';
   let inQuotes = false;
@@ -40,13 +60,13 @@ function parseRows(content: string): string[][] {
       // CRLFの場合はLFを消費して二重に行が終わらないようにする
       row.push(field);
       field = '';
-      if (row.some(v => v !== '')) rows.push(row);
+      if (row.some(v => v !== '')) yield row;
       row = [];
       if (next === '\n') i++;
     } else if (c === '\n') {
       row.push(field);
       field = '';
-      if (row.some(v => v !== '')) rows.push(row);
+      if (row.some(v => v !== '')) yield row;
       row = [];
     } else {
       field += c;
@@ -54,9 +74,8 @@ function parseRows(content: string): string[][] {
   }
   if (field !== '' || row.length > 0) {
     row.push(field);
-    if (row.some(v => v !== '')) rows.push(row);
+    if (row.some(v => v !== '')) yield row;
   }
-  return rows;
 }
 
 /** 金額文字列を数値に変換する。カンマ・空欄に対応し、非数値は0 */

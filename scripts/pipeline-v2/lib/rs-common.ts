@@ -123,3 +123,48 @@ export function sourceInventory(
     columns,
   };
 }
+
+/**
+ * sourceInventory()の1行ずつ計上できる版。CSV row iterator→normalize generator→
+ * writeJsonlのstreaming経路（1-1/1-2/2-2）では入力行配列を保持しないため、
+ * 列ごとの非空件数をrecord()の副作用として集計し、generatorを最後まで
+ * 消費し終えたあとにfinish()で確定させる。
+ */
+export class SourceInventoryTracker {
+  private readonly counts: Map<string, number>;
+  private rowCount = 0;
+
+  constructor(private readonly headers: string[]) {
+    this.counts = new Map(headers.map(h => [h, 0]));
+  }
+
+  record(row: Record<string, string>): void {
+    this.rowCount++;
+    for (const h of this.headers) {
+      if ((row[h] ?? '').trim()) this.counts.set(h, (this.counts.get(h) ?? 0) + 1);
+    }
+  }
+
+  finish(
+    rawRoot: string, filePath: string, entry: string,
+    mapped: Set<string>, datasetCode: string, datasetName: string, year: number
+  ): SourceInventory {
+    const columns: SourceInventory['columns'] = this.headers.map(h => {
+      const nonEmptyCount = this.counts.get(h) ?? 0;
+      const status: SourceInventory['columns'][number]['status'] = mapped.has(h) ? 'mapped' : nonEmptyCount ? 'extra_preserved' : 'empty_unmapped';
+      return { column: h, nonEmptyCount, status };
+    });
+    const headerSha256 = crypto.createHash('sha256').update(JSON.stringify(this.headers)).digest('hex');
+    return {
+      datasetCode,
+      datasetName,
+      sourceYear: year,
+      path: path.relative(rawRoot, filePath).split(path.sep).join('/'),
+      zipEntry: entry,
+      rowCount: this.rowCount,
+      columnCount: this.headers.length,
+      headerSha256,
+      columns,
+    };
+  }
+}

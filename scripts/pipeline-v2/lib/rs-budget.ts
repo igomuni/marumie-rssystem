@@ -7,7 +7,7 @@
  * 混同しない。RS側に所管/組織/項/目が記録されておらずMOFのどの予備費使用に対応するか
  * 特定できないため（'予備費等N'という原本表記のまま保持し、断定しない）。
  */
-import { rsBase, rsSourceRef, rsRecordId, extraFields, sourceInventory, COMMON_COLUMNS } from './rs-common';
+import { rsBase, rsSourceRef, rsRecordId, extraFields, sourceInventory, SourceInventoryTracker, COMMON_COLUMNS } from './rs-common';
 import { normalizeText, stableId } from './stable-id';
 import { parseNumber } from './parse';
 import type { RsAccountType, RsBudgetEventRecord, RsBudgetSummaryRecord, RsBudgetItemRecordV2, RsEventType, SourceInventory } from '../types';
@@ -137,53 +137,69 @@ const ITEMS_MAPPED = new Set([
   '歳出予算項目の補足情報', '予算額（歳出予算項目ごと）', '翌年度要求額（歳出予算項目ごと）', '備考（歳出予算項目ごと）',
 ]);
 
+/**
+ * CSV row iterator→normalize generator→writeJsonlのstreaming経路。
+ * 1行入力→1行出力の単純な変換のため、rows引数を1件も配列化せずgeneratorのまま
+ * yieldする。source inventory()はrows消費後にのみ正しい値を返すdeferred function
+ * （rs-organizations.ts・rs-projects.tsと同じ設計）。2-1（normalizeBudgetSummary）は
+ * 同一行から複数output（summaries/events）を作る都合上、引き続き配列ベースのまま。
+ */
 export function normalizeBudgetItems(
-  rawRoot: string, zipPath: string, entry: string, rows: Record<string, string>[], year: number
-): { rows: RsBudgetItemRecordV2[]; sourceInventory: SourceInventory } {
-  const out = rows.map((row, i) => {
-    const rowNumber = i + 2;
-    const base = rsBase(row, year);
-    const fyRaw = (row['予算年度'] ?? '').trim();
-    const fy = fyRaw ? parseInt(fyRaw, 10) : null;
-    const ac = (row['会計区分'] ?? '').trim();
-    const ministry = (row['所管'] ?? '').trim();
-    const orgAcc = (row['組織・勘定'] ?? '').trim();
-    const section = (row['項'] ?? '').trim();
-    const item = (row['目'] ?? '').trim();
-    const amountRaw = (row['予算額（歳出予算項目ごと）'] ?? '').trim();
-    const requestRaw = (row['翌年度要求額（歳出予算項目ごと）'] ?? '').trim();
-    const type = accountType(ac);
+  rawRoot: string, zipPath: string, entry: string, rows: Iterable<Record<string, string>>, year: number, headers: string[]
+): { rows: Generator<RsBudgetItemRecordV2>; sourceInventory: () => SourceInventory } {
+  const tracker = new SourceInventoryTracker(headers);
 
-    return {
-      ...base,
-      // rsBase()のministryは共通列「府省庁」から取るが、2-2 CSVのMOF突合に使うべきは
-      // 「所管」列（MOFの科目別内訳と同じ語彙）。府省庁と所管は同じ値のことが多いが、
-      // 一致しない行がある場合ここを府省庁のまま残すとMOFリンクを静かに誤らせるため上書きする
-      // （CodeRabbit相当の指摘、2026-09-20）
-      ministry,
-      recordType: 'rs_budget_item' as const,
-      recordId: rsRecordId(rawRoot, zipPath, entry, rowNumber, 'rsitem_'),
-      fiscalYear: Number.isNaN(fy as number) ? null : fy,
-      accountType: type,
-      accountClass: ac,
-      account: (row['会計'] ?? '').trim(),
-      subAccount: (row['勘定'] ?? '').trim(),
-      budgetType: (row['予算種別'] ?? '').trim(),
-      organizationOrAccount: orgAcc,
-      sectionName: section,
-      subItemName: item,
-      supplementalInfo: (row['歳出予算項目の補足情報'] ?? '').trim(),
-      budgetAmountYen: parseNumber(amountRaw),
-      budgetAmountRaw: amountRaw,
-      nextYearRequestYen: parseNumber(requestRaw),
-      nextYearRequestRaw: requestRaw,
-      requestFiscalYear: fy !== null && requestRaw ? fy + 1 : null,
-      note: (row['備考（歳出予算項目ごと）'] ?? '').trim(),
-      mofNameNaturalKey: [type, ministry, orgAcc, section, item].map(normalizeText).join('|'),
-      extraFields: extraFields(row, ITEMS_MAPPED),
-      source: rsSourceRef(rawRoot, zipPath, entry, rowNumber, '予算・執行_予算種別・歳出予算項目', year),
-    };
-  });
-  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
-  return { rows: out, sourceInventory: sourceInventory(rawRoot, zipPath, entry, headers, rows, ITEMS_MAPPED, '2-2', '予算・執行_予算種別・歳出予算項目', year) };
+  function* generate(): Generator<RsBudgetItemRecordV2> {
+    let rowNumber = 1;
+    for (const row of rows) {
+      rowNumber++;
+      tracker.record(row);
+      const base = rsBase(row, year);
+      const fyRaw = (row['予算年度'] ?? '').trim();
+      const fy = fyRaw ? parseInt(fyRaw, 10) : null;
+      const ac = (row['会計区分'] ?? '').trim();
+      const ministry = (row['所管'] ?? '').trim();
+      const orgAcc = (row['組織・勘定'] ?? '').trim();
+      const section = (row['項'] ?? '').trim();
+      const item = (row['目'] ?? '').trim();
+      const amountRaw = (row['予算額（歳出予算項目ごと）'] ?? '').trim();
+      const requestRaw = (row['翌年度要求額（歳出予算項目ごと）'] ?? '').trim();
+      const type = accountType(ac);
+
+      yield {
+        ...base,
+        // rsBase()のministryは共通列「府省庁」から取るが、2-2 CSVのMOF突合に使うべきは
+        // 「所管」列（MOFの科目別内訳と同じ語彙）。府省庁と所管は同じ値のことが多いが、
+        // 一致しない行がある場合ここを府省庁のまま残すとMOFリンクを静かに誤らせるため上書きする
+        // （CodeRabbit相当の指摘、2026-09-20）
+        ministry,
+        recordType: 'rs_budget_item' as const,
+        recordId: rsRecordId(rawRoot, zipPath, entry, rowNumber, 'rsitem_'),
+        fiscalYear: Number.isNaN(fy as number) ? null : fy,
+        accountType: type,
+        accountClass: ac,
+        account: (row['会計'] ?? '').trim(),
+        subAccount: (row['勘定'] ?? '').trim(),
+        budgetType: (row['予算種別'] ?? '').trim(),
+        organizationOrAccount: orgAcc,
+        sectionName: section,
+        subItemName: item,
+        supplementalInfo: (row['歳出予算項目の補足情報'] ?? '').trim(),
+        budgetAmountYen: parseNumber(amountRaw),
+        budgetAmountRaw: amountRaw,
+        nextYearRequestYen: parseNumber(requestRaw),
+        nextYearRequestRaw: requestRaw,
+        requestFiscalYear: fy !== null && requestRaw ? fy + 1 : null,
+        note: (row['備考（歳出予算項目ごと）'] ?? '').trim(),
+        mofNameNaturalKey: [type, ministry, orgAcc, section, item].map(normalizeText).join('|'),
+        extraFields: extraFields(row, ITEMS_MAPPED),
+        source: rsSourceRef(rawRoot, zipPath, entry, rowNumber, '予算・執行_予算種別・歳出予算項目', year),
+      };
+    }
+  }
+
+  return {
+    rows: generate(),
+    sourceInventory: () => tracker.finish(rawRoot, zipPath, entry, ITEMS_MAPPED, '2-2', '予算・執行_予算種別・歳出予算項目', year),
+  };
 }

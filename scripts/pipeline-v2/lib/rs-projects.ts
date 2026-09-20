@@ -6,8 +6,12 @@
  * source rowをそのまま「事業」として扱わず、canonical projectIdで畳んだprojects.jsonlを
  * 別に作る（Python参照実装の`_merge_projects`と同じ考え方。ただしレビューシートとの
  * マージ部分はこのPoCでは未実装で、1-2 CSV側のみを畳む）。
+ *
+ * CSV row iterator（readSingleCsvIter）→normalize generator→writeJsonlのstreaming経路。
+ * normalizeProjectRowsの出力（rows）はgeneratorのまま返す。source inventory()は
+ * rows消費後にのみ正しい値を返すdeferred function（rs-organizations.tsと同じ設計）。
  */
-import { rsBase, rsSourceRef, rsRecordId, extraFields, sourceInventory, COMMON_COLUMNS } from './rs-common';
+import { rsBase, rsSourceRef, rsRecordId, extraFields, SourceInventoryTracker, COMMON_COLUMNS } from './rs-common';
 import { stableId } from './stable-id';
 import { parseIntValue, parseBool, boolOrRaw } from './parse';
 import type { RsProjectSourceRow, SourceInventory } from '../types';
@@ -21,42 +25,51 @@ const MAPPED = new Set([
 ]);
 
 export function normalizeProjectRows(
-  rawRoot: string, zipPath: string, entry: string, rows: Record<string, string>[], year: number
-): { rows: RsProjectSourceRow[]; sourceInventory: SourceInventory } {
-  const out = rows.map((row, i) => {
-    const rowNumber = i + 2;
-    return {
-      ...rsBase(row, year),
-      recordType: 'rs_project_source_row' as const,
-      recordId: rsRecordId(rawRoot, zipPath, entry, rowNumber, 'rsproj_'),
-      purpose: (row['事業の目的'] ?? '').trim(),
-      currentIssues: (row['現状・課題'] ?? '').trim(),
-      overview: (row['事業の概要'] ?? '').trim(),
-      overviewUrl: (row['事業概要URL'] ?? '').trim(),
-      projectCategory: (row['事業区分'] ?? '').trim(),
-      startYear: parseIntValue(row['事業開始年度'], { noneIfBlank: true }),
-      startYearUnknown: parseBool(row['開始年度不明']),
-      endYear: parseIntValue(row['事業終了（予定）年度'], { noneIfBlank: true }),
-      endYearRaw: (row['事業終了（予定）年度'] ?? '').trim(),
-      noPlannedEnd: parseBool(row['終了予定なし']),
-      majorExpense: (row['主要経費'] ?? '').trim(),
-      note: (row['備考'] ?? '').trim(),
-      implementationMethods: {
-        direct: boolOrRaw(row['実施方法ー直接実施']),
-        subsidy: boolOrRaw(row['実施方法ー補助']),
-        burden: boolOrRaw(row['実施方法ー負担']),
-        grant: boolOrRaw(row['実施方法ー交付']),
-        contribution: boolOrRaw(row['実施方法ー分担金・拠出金']),
-        other: (row['実施方法ーその他'] ?? '').trim() || null,
-      },
-      legacyProjectNumber: (row['旧事業番号'] ?? '').trim(),
-      displayOrderRaw: (row['整理表表示順'] ?? '').trim(),
-      extraFields: extraFields(row, MAPPED),
-      source: rsSourceRef(rawRoot, zipPath, entry, rowNumber, '基本情報_事業概要等', year),
-    };
-  });
-  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
-  return { rows: out, sourceInventory: sourceInventory(rawRoot, zipPath, entry, headers, rows, MAPPED, '1-2', '基本情報_事業概要等', year) };
+  rawRoot: string, zipPath: string, entry: string, rows: Iterable<Record<string, string>>, year: number, headers: string[]
+): { rows: Generator<RsProjectSourceRow>; sourceInventory: () => SourceInventory } {
+  const tracker = new SourceInventoryTracker(headers);
+
+  function* generate(): Generator<RsProjectSourceRow> {
+    let rowNumber = 1;
+    for (const row of rows) {
+      rowNumber++;
+      tracker.record(row);
+      yield {
+        ...rsBase(row, year),
+        recordType: 'rs_project_source_row' as const,
+        recordId: rsRecordId(rawRoot, zipPath, entry, rowNumber, 'rsproj_'),
+        purpose: (row['事業の目的'] ?? '').trim(),
+        currentIssues: (row['現状・課題'] ?? '').trim(),
+        overview: (row['事業の概要'] ?? '').trim(),
+        overviewUrl: (row['事業概要URL'] ?? '').trim(),
+        projectCategory: (row['事業区分'] ?? '').trim(),
+        startYear: parseIntValue(row['事業開始年度'], { noneIfBlank: true }),
+        startYearUnknown: parseBool(row['開始年度不明']),
+        endYear: parseIntValue(row['事業終了（予定）年度'], { noneIfBlank: true }),
+        endYearRaw: (row['事業終了（予定）年度'] ?? '').trim(),
+        noPlannedEnd: parseBool(row['終了予定なし']),
+        majorExpense: (row['主要経費'] ?? '').trim(),
+        note: (row['備考'] ?? '').trim(),
+        implementationMethods: {
+          direct: boolOrRaw(row['実施方法ー直接実施']),
+          subsidy: boolOrRaw(row['実施方法ー補助']),
+          burden: boolOrRaw(row['実施方法ー負担']),
+          grant: boolOrRaw(row['実施方法ー交付']),
+          contribution: boolOrRaw(row['実施方法ー分担金・拠出金']),
+          other: (row['実施方法ーその他'] ?? '').trim() || null,
+        },
+        legacyProjectNumber: (row['旧事業番号'] ?? '').trim(),
+        displayOrderRaw: (row['整理表表示順'] ?? '').trim(),
+        extraFields: extraFields(row, MAPPED),
+        source: rsSourceRef(rawRoot, zipPath, entry, rowNumber, '基本情報_事業概要等', year),
+      };
+    }
+  }
+
+  return {
+    rows: generate(),
+    sourceInventory: () => tracker.finish(rawRoot, zipPath, entry, MAPPED, '1-2', '基本情報_事業概要等', year),
+  };
 }
 
 /** canonical projectId単位の事業マスタ。Rsdataclass名は`rs_project`（source rowの`rs_project_source_row`と区別） */
@@ -67,7 +80,7 @@ export interface RsProject extends Omit<RsProjectSourceRow, 'recordType' | 'reco
 }
 
 /** 同一projectIdの複数source rowを1事業へ畳む（後勝ち。Pythonのdict代入と同じ挙動） */
-export function mergeProjects(sourceRows: RsProjectSourceRow[], year: number): RsProject[] {
+export function mergeProjects(sourceRows: Iterable<RsProjectSourceRow>, year: number): RsProject[] {
   const byId = new Map<string, RsProject>();
   for (const row of sourceRows) {
     if (!row.projectId) continue;

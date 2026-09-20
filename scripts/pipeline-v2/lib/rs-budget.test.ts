@@ -76,31 +76,50 @@ describe('normalizeBudgetSummary: 翌年度要求額はfiscalYear+1', () => {
   });
 });
 
+/** normalizeBudgetItemsのrowsはgenerator（streaming API）。テストではheadersを明示して渡す */
+function runBudgetItems(rows: Record<string, string>[]) {
+  const headers = rows.length > 0 ? Object.keys(rows[0]) : [];
+  const result = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', rows, 2024, headers);
+  const outRows = [...result.rows];
+  return { rows: outRows, sourceInventory: result.sourceInventory() };
+}
+
 describe('normalizeBudgetItems', () => {
   it('mofNameNaturalKeyはaccountType+ministry+組織+項+目で作る', () => {
     const row = {
       ...HEADER_ROW_COMMON, '予算年度': '2024', '会計区分': '一般会計', '所管': '外務省',
       '組織・勘定': '在外公館', '項': '経済協力費', '目': '在外公館必要経費', '予算額（歳出予算項目ごと）': '100',
     };
-    const { rows: [item] } = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
+    const { rows: [item] } = runBudgetItems([row]);
     expect(item.mofNameNaturalKey).toBe('general|外務省|在外公館|経済協力費|在外公館必要経費');
   });
 
   it('record.ministryはMOF突合用の「所管」列を使う（「府省庁」列とは限らず一致しないことがある。実データで17.5%の行が不一致）', () => {
     const row = { ...HEADER_ROW_COMMON, '府省庁': 'デジタル庁', '所管': '内閣府', '予算年度': '2024', '会計区分': '一般会計' };
-    const { rows: [item] } = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
+    const { rows: [item] } = runBudgetItems([row]);
     expect(item.ministry).toBe('内閣府');
   });
 
   it('金額が空欄ならbudgetAmountYenはnull', () => {
     const row = { ...HEADER_ROW_COMMON, '予算年度': '2024', '会計区分': '一般会計', '予算額（歳出予算項目ごと）': '' };
-    const { rows: [item] } = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
+    const { rows: [item] } = runBudgetItems([row]);
     expect(item.budgetAmountYen).toBeNull();
   });
 
   it('マップ対象外の非空列はextraFieldsに保持する', () => {
     const row = { ...HEADER_ROW_COMMON, '予算年度': '2024', '会計区分': '一般会計', '将来追加された列': '値' };
-    const { rows: [item] } = normalizeBudgetItems('/root', '/root/x.zip', 'x.csv', [row], 2024);
+    const { rows: [item], sourceInventory } = runBudgetItems([row]);
     expect(item.extraFields).toEqual({ '将来追加された列': '値' });
+    expect(sourceInventory.columns.find(c => c.column === '将来追加された列')?.status).toBe('extra_preserved');
+  });
+
+  it('複数行を正しくstreamingで消費できる（generatorの単一パス消費）', () => {
+    const rows = [
+      { ...HEADER_ROW_COMMON, '予算事業ID': '1' },
+      { ...HEADER_ROW_COMMON, '予算事業ID': '2' },
+    ];
+    const { rows: outRows, sourceInventory } = runBudgetItems(rows);
+    expect(outRows).toHaveLength(2);
+    expect(sourceInventory.rowCount).toBe(2);
   });
 });

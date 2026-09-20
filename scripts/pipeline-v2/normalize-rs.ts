@@ -18,6 +18,11 @@
  *     block/recipient/contractの3種類へ明示的に分離する
  *   - 5-2は一般有向グラフとして扱う。重複辺・循環・多始点・孤立ブロックを削除・統合しない
  *
+ * streaming: 1行入力→1行出力の1-1/1-2/2-2はCSV row iterator（readSingleCsvIter）→
+ * normalize generator→writeJsonlの経路で、raw行配列・出力配列のどちらも全展開しない
+ * （3-1のような大規模データセット投入前に用意した経路）。2-1/5-1/5-2は同一行から
+ * 複数output・Map集約を要するため、引き続き配列ベース（readSingleCsv）のまま。
+ *
  * 入力: data/download/rssystem.go.jp/download-csv/{year}/*.zip
  * 出力: data/normalized/rs/review-{year}/*.jsonl + manifest.json
  *
@@ -25,14 +30,14 @@
  *   （年度省略時はdata/download/rssystem.go.jp/download-csvから検出した全年度）
  */
 import * as path from 'path';
-import { discoverRsYears, findRsZip, readSingleCsv } from './lib/rs-zip';
+import { discoverRsYears, findRsZip, readSingleCsv, readSingleCsvIter } from './lib/rs-zip';
 import { normalizeOrganizations } from './lib/rs-organizations';
 import { normalizeProjectRows, mergeProjects } from './lib/rs-projects';
 import { normalizeBudgetSummary, normalizeBudgetItems } from './lib/rs-budget';
 import { normalizeSpending, toExpenditureCompat } from './lib/rs-spending';
 import { normalizeFundingRelations } from './lib/rs-funding';
 import { writeJsonl, writeJson } from './lib/jsonl';
-import type { SourceInventory } from './types';
+import type { RsProjectSourceRow, SourceInventory } from './types';
 
 function processYear(rawRoot: string, outputRoot: string, year: number): Record<string, number> {
   console.log(`\n=== RS normalize: reviewYear=${year} ===`);
@@ -41,7 +46,7 @@ function processYear(rawRoot: string, outputRoot: string, year: number): Record<
   const counts: Record<string, number> = {};
   const sourceInventories: SourceInventory[] = [];
 
-  const emit = (name: string, rows: unknown[]) => {
+  const emit = (name: string, rows: Iterable<unknown>) => {
     const n = writeJsonl(path.join(outDir, `${name}.jsonl`), rows);
     counts[name] = n;
     console.log(`  ${name}.jsonl: ${n}件`);
@@ -49,21 +54,24 @@ function processYear(rawRoot: string, outputRoot: string, year: number): Record<
 
   const zip11 = findRsZip(yearDir, '1-1', year);
   if (zip11) {
-    const { entry, rows } = readSingleCsv(zip11);
-    const result = normalizeOrganizations(rawRoot, zip11, entry, rows, year);
+    const { entry, headers, rows } = readSingleCsvIter(zip11);
+    const result = normalizeOrganizations(rawRoot, zip11, entry, rows, year, headers);
     emit('organizations', result.rows);
-    sourceInventories.push(result.sourceInventory);
+    sourceInventories.push(result.sourceInventory());
   } else {
     emit('organizations', []);
   }
 
   const zip12 = findRsZip(yearDir, '1-2', year);
-  let projectSourceRows: ReturnType<typeof normalizeProjectRows>['rows'] = [];
+  // mergeProjects()とproject-source-rows.jsonlの両方が全行を必要とするため、
+  // ここだけはgeneratorを配列へ確定させる（mergeProjectsのMap集約自体が
+  // 参照実装と同じく全件走査を要するため、避けられない）
+  let projectSourceRows: RsProjectSourceRow[] = [];
   if (zip12) {
-    const { entry, rows } = readSingleCsv(zip12);
-    const result = normalizeProjectRows(rawRoot, zip12, entry, rows, year);
-    projectSourceRows = result.rows;
-    sourceInventories.push(result.sourceInventory);
+    const { entry, headers, rows } = readSingleCsvIter(zip12);
+    const result = normalizeProjectRows(rawRoot, zip12, entry, rows, year, headers);
+    projectSourceRows = [...result.rows];
+    sourceInventories.push(result.sourceInventory());
   }
   emit('project-source-rows', projectSourceRows);
   emit('projects', mergeProjects(projectSourceRows, year));
@@ -82,10 +90,10 @@ function processYear(rawRoot: string, outputRoot: string, year: number): Record<
 
   const zip22 = findRsZip(yearDir, '2-2', year);
   if (zip22) {
-    const { entry, rows } = readSingleCsv(zip22);
-    const result = normalizeBudgetItems(rawRoot, zip22, entry, rows, year);
+    const { entry, headers, rows } = readSingleCsvIter(zip22);
+    const result = normalizeBudgetItems(rawRoot, zip22, entry, rows, year, headers);
     emit('budget-items', result.rows);
-    sourceInventories.push(result.sourceInventory);
+    sourceInventories.push(result.sourceInventory());
   } else {
     emit('budget-items', []);
   }
