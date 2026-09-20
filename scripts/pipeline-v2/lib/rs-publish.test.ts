@@ -61,6 +61,33 @@ describe('compactRsFundingGraph', () => {
     expect(out.metrics).toMatchObject({ rootNodeIds: ['n1'], orphanBlockIds: ['n1'] });
     expect(out.unresolvedRelationIds).toEqual(['rel1']);
     expect(out.duplicateRelationPairs).toEqual([]);
+    // 回帰テスト: cyclicComponents=[]（循環無しという確定した検証結果）はpick()のmeaningful()
+    // フィルタで空配列として落とされ、UI側でmetrics.cyclicComponents.flat()がundefined参照で
+    // クラッシュするバグを実機（Playwright）で検出した。空配列でもキー自体は必ず残す
+    expect(out.metrics).toHaveProperty('cyclicComponents');
+    expect((out.metrics as { cyclicComponents: unknown[] }).cyclicComponents).toEqual([]);
+  });
+
+  it('nodes/edgesも空配列フィールド（nameVariants/roles/noteVariants等）を落とさない', () => {
+    const graph: RsFundingGraph = {
+      schemaVersion: 2, recordType: 'rs_funding_graph', reviewYear: 2024, sourceYear: 2024, projectId: '1', projectName: 'X', ministry: 'A省',
+      nodes: [{ nodeId: 'n1', nodeType: 'spending_block', blockId: 'A', name: 'A', nameVariants: [], roles: [], recipientCountValues: [], totalAmountValuesYen: [], evidenceRowIds: [], summaryRowCount: 0 }],
+      semanticEdges: [{ edgeId: 'e1', sourceNodeId: 'n1', targetNodeId: 'n1', amountYen: null, amountStatus: 'not_provided_by_5-2', evidenceRelationIds: [], evidenceCount: 0, noteVariants: [], sourceNameVariants: [], targetNameVariants: [], fromResponsibleOrganizationValues: [] }],
+      unresolvedRelationIds: [], unresolvedRelationDetails: [],
+      metrics: {
+        blockCount: 1, nodeCount: 1, relationEvidenceCount: 0, semanticEdgeCount: 1, indirectExpenseCount: 0,
+        responsibleOrganizationNodeId: null, hasResponsibleOrganizationRoot: false, rootNodeIds: [], externalRootBlockIds: [],
+        orphanBlockIds: [], duplicateRelationPairCount: 0, duplicateRelationEvidenceExtraCount: 0, hasCycle: false,
+        cyclicComponents: [], weakComponentCount: 1, weakComponentSizes: [1], maxOutDegree: 0, maxInDegree: 0,
+        sameNameMultipleBlocks: [], unresolvedRelationEvidenceCount: 0,
+      },
+      duplicateRelationPairs: [],
+    };
+    const out = compactRsFundingGraph(graph) as { nodes: Record<string, unknown>[]; edges: Record<string, unknown>[] };
+    expect(out.nodes[0]).toHaveProperty('nameVariants');
+    expect(out.nodes[0]).toHaveProperty('roles');
+    expect(out.edges[0]).toHaveProperty('noteVariants');
+    expect(out.edges[0]).toHaveProperty('evidenceRelationIds');
   });
 });
 

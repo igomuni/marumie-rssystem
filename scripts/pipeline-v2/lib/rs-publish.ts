@@ -77,6 +77,15 @@ const GRAPH_METRICS_KEYS = [
   'hasResponsibleOrganizationRoot', 'responsibleOrganizationNodeId', 'rootNodeIds', 'unresolvedRelationEvidenceCount',
 ] as const;
 
+/** pick()の`meaningful()`は空配列・空オブジェクトを「無い」として落とすため、Funding Graphの
+ *  診断フィールド（例: cyclicComponents=[]は「循環無し」という確定した検証結果であり、
+ *  フィールド自体が無いのとは違う）には使えない。この3種類はキーをそのまま複写する */
+function pickAlways<T extends Record<string, unknown>>(row: T, keys: readonly (keyof T & string)[]): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const key of keys) out[key] = row[key];
+  return out;
+}
+
 /**
  * Funding Graphは一般有向グラフの表現のまま保持する（Sankey専用形式への変換はUI側の責務）。
  * 診断情報（rootNodeIds/externalRootBlockIds/orphanBlockIds/cyclicComponents等）・
@@ -84,9 +93,9 @@ const GRAPH_METRICS_KEYS = [
  */
 export function compactRsFundingGraph(graph: RsFundingGraph): Record<string, unknown> {
   return {
-    nodes: graph.nodes.map(n => pick(n as unknown as Record<string, unknown>, GRAPH_NODE_KEYS as readonly string[])),
-    edges: graph.semanticEdges.map(e => pick(e as unknown as Record<string, unknown>, GRAPH_EDGE_KEYS as readonly string[])),
-    metrics: pick(graph.metrics as unknown as Record<string, unknown>, GRAPH_METRICS_KEYS as readonly string[]),
+    nodes: graph.nodes.map(n => pickAlways(n as unknown as Record<string, unknown>, GRAPH_NODE_KEYS as readonly string[])),
+    edges: graph.semanticEdges.map(e => pickAlways(e as unknown as Record<string, unknown>, GRAPH_EDGE_KEYS as readonly string[])),
+    metrics: pickAlways(graph.metrics as unknown as Record<string, unknown>, GRAPH_METRICS_KEYS as readonly string[]),
     unresolvedRelationIds: graph.unresolvedRelationIds,
     unresolvedRelationDetails: graph.unresolvedRelationDetails,
     duplicateRelationPairs: graph.duplicateRelationPairs,
