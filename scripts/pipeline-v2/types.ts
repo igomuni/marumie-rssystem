@@ -518,3 +518,281 @@ export interface RsIndirectExpenseRecord extends RsBaseFields {
   extraFields: Record<string, string>;
   source: SourceRef;
 }
+
+export interface RsPolicyLawRelation extends RsBaseFields {
+  recordType: 'rs_policy_law_relation';
+  recordId: string;
+  policyMeasureNo: string;
+  policyOwnerMinistry: string;
+  policy: string;
+  measure: string;
+  policyMeasureUrl: string;
+  lawNo: string;
+  lawName: string;
+  lawNumber: string;
+  lawId: string;
+  article: string;
+  paragraph: string;
+  item: string;
+  planNo: string;
+  planName: string;
+  planUrl: string;
+  extraFields: Record<string, string>;
+  source: SourceRef;
+}
+
+export interface RsSubsidyRule extends RsBaseFields {
+  recordType: 'rs_subsidy_rule';
+  recordId: string;
+  ruleNo: string;
+  target: string;
+  rateRaw: string;
+  upperLimitRaw: string;
+  url: string;
+  hasRule: boolean;
+  extraFields: Record<string, string>;
+  source: SourceRef;
+}
+
+export interface RsProjectRelation extends RsBaseFields {
+  recordType: 'rs_project_relation';
+  recordId: string;
+  relationNo: string;
+  relatedProjectId: string;
+  relatedProjectIdRaw: string;
+  relatedProjectName: string;
+  relationTypeRaw: string;
+  hasRelation: boolean;
+  extraFields: Record<string, string>;
+  source: SourceRef;
+}
+
+/** RS3-1「効果発現経路_目標・実績」の1ノード（アクティビティ／アウトプット／アウトカム）。
+ *  同一logicNodeIdの複数行を集約する（5-1のblockと同じ考え方） */
+export interface RsLogicNode extends RsBaseFields {
+  recordType: 'rs_logic_node';
+  logicNodeId: string;
+  nodeNumber: string;
+  nodeTypeRaw: string;
+  outcomePeriod: string;
+  goalType: string;
+  goal: string;
+  indicator: string;
+  unit: string;
+  direction: string;
+  statisticsSource: string;
+  qualitativeReason: string;
+  qualitativeResult: string;
+  kpiDecisionName: string;
+  kpiDecisionSection: string;
+  kpiDecisionUrl: string;
+  evidenceRowIds: string[];
+  sources: SourceRef[];
+  /** 複数行にまたがるnodeのため、競合する値は配列化して保持する */
+  extraFields: Record<string, string | string[]>;
+}
+
+/** RS3-1の年度別実績列（20xx形式）を1件ずつレコード化したもの。logicNodeIdでnodeに紐づく */
+export interface RsLogicObservation {
+  schemaVersion: number;
+  recordType: 'rs_logic_observation';
+  observationId: string;
+  sourceYear: number;
+  reviewYear: number;
+  projectId: string;
+  projectIdRaw: string;
+  logicNodeId: string;
+  fiscalYear: number;
+  valueType: 'target_year' | 'target' | 'actual' | 'achievement_rate' | 'other';
+  valueTypeRaw: string;
+  valueRaw: string;
+  valueNumber: number | null;
+  unit: string;
+  sourceRowId: string;
+  source: SourceRef;
+}
+
+export interface RsLogicRelation extends RsBaseFields {
+  recordType: 'rs_logic_relation';
+  relationId: string;
+  sourceNodeNumber: string;
+  sourceNodeTypeRaw: string;
+  sourceLogicNodeId: string;
+  sourceOutcomePeriod: string;
+  sourceGoal: string;
+  sourceIndicator: string;
+  targetNodeNumber: string;
+  targetNodeTypeRaw: string;
+  targetLogicNodeId: string;
+  targetOutcomePeriod: string;
+  targetGoal: string;
+  targetIndicator: string;
+  connectionToLaterOutcome: string;
+  reasonNoMultipleOutcomeStages: string;
+  hasRelation: boolean;
+  extraFields: Record<string, string>;
+  source: SourceRef;
+}
+
+export interface RsEvaluation extends RsBaseFields {
+  recordType: 'rs_evaluation';
+  recordId: string;
+  departmentCheckResult: string;
+  departmentImprovementDirection: string;
+  targetYearEffectEvaluation: string;
+  externalReviewLatestYear: string;
+  externalReviewTarget: string;
+  externalReviewReason: string;
+  externalReviewFindings: string;
+  publicProcessSummary: string;
+  reviewTeamFinding: string;
+  reviewTeamFindingDetail: string;
+  requestReflectionStatus: string;
+  requestReflectionDetail: string;
+  reflectionGeneralRaw: string;
+  reflectionSpecialAccount: string;
+  reflectionSpecialSubAccount: string;
+  reflectionSpecialRaw: string;
+  pastFindingCategory: string;
+  pastFindingYear: string;
+  pastFinding: string;
+  pastFindingResponse: string;
+  otherFindingSource: string;
+  otherFindingYear: string;
+  otherFinding: string;
+  otherFindingResponse: string;
+  reflectionGeneralYen: number | null;
+  reflectionSpecialYen: number | null;
+  extraFields: Record<string, string>;
+  source: SourceRef;
+}
+
+export interface RsExpenseUse extends RsBaseFields {
+  recordType: 'rs_expense_use';
+  expenseUseId: string;
+  blockId: string;
+  recipientName: string;
+  corporateNumber: string;
+  contractSummary: string;
+  expenseItem: string;
+  use: string;
+  amountYen: number | null;
+  amountRaw: string;
+  extraFields: Record<string, string>;
+  source: SourceRef;
+}
+
+export interface RsMultiYearContract extends RsBaseFields {
+  recordType: 'rs_multi_year_contract';
+  contractId: string;
+  blockId: string;
+  recipientName: string;
+  corporateNumber: string;
+  location: string;
+  corporateType: string;
+  summary: string;
+  amountYen: number | null;
+  amountRaw: string;
+  method: string;
+  methodDetail: string;
+  bidderCount: number | null;
+  winningRate: number | null;
+  singleBidReason: string;
+  otherContractRaw: string;
+  hasContract: boolean;
+  extraFields: Record<string, string>;
+  source: SourceRef;
+}
+
+export interface RsProjectNote extends RsBaseFields {
+  recordType: 'rs_project_note';
+  noteId: string;
+  note: string;
+  extraFields: Record<string, string>;
+  source: SourceRef;
+}
+
+/**
+ * RSレビューシート（sheets/{year}/{府省庁}/*.csv）。download-csv ZIPではなく
+ * 個別ファイルから読む点が他と異なる。様式1（前年度事業・新規開始事業）と
+ * 様式2（新規要求事業）でフィールド構成が異なるため union型にしている
+ * （様式3・様式4は仕様対象外。Python参照実装と同じ）。
+ */
+export interface RsReviewSheetBase {
+  schemaVersion: number;
+  recordType: 'rs_review_sheet';
+  recordId: string;
+  sourceYear: number;
+  reviewYear: number;
+  projectId: string;
+  projectIdRaw: string;
+  projectName: string;
+  ministryFromFile: string;
+  policy: string;
+  measure: string;
+  responsibleOffice: string;
+  accountClass: string;
+  officialProjectUrl: string;
+  reviewTeamFinding: string;
+  extraFields: Record<string, string>;
+  source: SourceRef;
+}
+
+export interface RsReviewSheetForm1 extends RsReviewSheetBase {
+  sheetForm: 'form1';
+  projectCategory: 'existing_or_new_start';
+  startYear: number | null;
+  startYearRaw: string;
+  endYear: number | null;
+  endYearRaw: string;
+  priorBudgetFiscalYear: number;
+  priorBudgetYen: number | null;
+  priorExecutionYen: number | null;
+  currentInitialFiscalYear: number;
+  currentInitialYen: number | null;
+  nextRequestFiscalYear: number;
+  nextRequestYen: number | null;
+  requestDifferenceYen: number | null;
+  externalExpertFinding: string;
+  reflectionAmountYen: number | null;
+  improvementReflection: string;
+  externalReviewTarget: string;
+  externalReviewReason: string;
+  latestExternalReviewYearRaw: string;
+}
+
+export interface RsReviewSheetForm2 extends RsReviewSheetBase {
+  sheetForm: 'form2';
+  projectCategory: 'new_request';
+  nextRequestFiscalYear: number;
+  nextRequestYen: number | null;
+}
+
+export type RsReviewSheetRecord = RsReviewSheetForm1 | RsReviewSheetForm2;
+
+export interface RsReviewSheetFileInfo {
+  path: string;
+  form: 'form1' | 'form2';
+  rowCount: number;
+  headers: string[];
+}
+
+export interface RsReviewSheetManifest {
+  sourceYear: number;
+  available: boolean;
+  files: RsReviewSheetFileInfo[];
+  ignoredFiles: { path: string; reason: string }[];
+  rowCount: number;
+  formCounts?: Record<string, number>;
+  officialProjectUrlCount?: number;
+}
+
+/** 1-2 CSV（projects）とreview-sheetsのマージで値が食い違った箇所の記録（断定せず両方残す） */
+export interface RsProjectSheetConflict {
+  sourceYear: number;
+  projectId: string;
+  field: string;
+  downloadValue: unknown;
+  sheetValue: unknown;
+  sheetRecordId: string;
+}

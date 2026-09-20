@@ -21,7 +21,7 @@ describe('canonicalProjectId normalization via mergeProjects', () => {
       { ...BASE, '予算事業ID': '4' },
     ];
     const { rows: sourceRows } = run(rows);
-    const projects = mergeProjects(sourceRows, 2024);
+    const { projects } = mergeProjects(sourceRows, [], 2024);
     expect(projects).toHaveLength(1);
     expect(projects[0].projectId).toBe('4');
   });
@@ -29,20 +29,77 @@ describe('canonicalProjectId normalization via mergeProjects', () => {
   it('projectIdが空の行はprojects.jsonlから除外する', () => {
     const rows = [{ ...BASE, '予算事業ID': '' }];
     const { rows: sourceRows } = run(rows);
-    const projects = mergeProjects(sourceRows, 2024);
+    const { projects } = mergeProjects(sourceRows, [], 2024);
     expect(projects).toHaveLength(0);
   });
 
-  it('複数行が同一projectIdの場合、後の行の値で上書きする', () => {
+  it('複数行が同一projectIdの場合、後の行の値で上書きする（ただしsourcesは蓄積する）', () => {
     const rows = [
       { ...BASE, '予算事業ID': '1', '事業名': '旧名称' },
       { ...BASE, '予算事業ID': '1', '事業名': '新名称' },
     ];
     const { rows: sourceRows } = run(rows);
-    const projects = mergeProjects(sourceRows, 2024);
+    const { projects } = mergeProjects(sourceRows, [], 2024);
     expect(projects).toHaveLength(1);
     expect(projects[0].projectName).toBe('新名称');
     expect(projects[0].sources).toHaveLength(2);
+  });
+});
+
+describe('mergeProjects: レビューシートとのマージ', () => {
+  const SHEET_BASE = {
+    schemaVersion: 2 as const, recordType: 'rs_review_sheet' as const, sourceYear: 2024, reviewYear: 2024,
+    ministryFromFile: 'デジタル庁', policy: '', measure: '', responsibleOffice: '', accountClass: '一般会計',
+    officialProjectUrl: '', reviewTeamFinding: '', extraFields: {},
+    source: { domain: 'rssystem.go.jp' as const, path: 'x', file: 'x.csv', dataset: 'sheets-form1', year: 2024 },
+  };
+
+  it('1-2に無いprojectIdはレビューシートのみから事業を作る', () => {
+    const sheetRows = [{
+      ...SHEET_BASE, recordId: 'rssheet_1', sheetForm: 'form1' as const, projectId: '99', projectIdRaw: '99',
+      projectName: 'シート限定事業', projectCategory: 'existing_or_new_start' as const,
+      startYear: 2020, startYearRaw: '2020', endYear: null, endYearRaw: '',
+      priorBudgetFiscalYear: 2023, priorBudgetYen: null, priorExecutionYen: null,
+      currentInitialFiscalYear: 2024, currentInitialYen: null, nextRequestFiscalYear: 2025, nextRequestYen: null,
+      requestDifferenceYen: null, externalExpertFinding: '', reflectionAmountYen: null, improvementReflection: '',
+      externalReviewTarget: '', externalReviewReason: '', latestExternalReviewYearRaw: '',
+    }];
+    const { projects, conflicts } = mergeProjects([], sheetRows, 2024);
+    expect(projects).toHaveLength(1);
+    expect(projects[0].projectName).toBe('シート限定事業');
+    expect(projects[0].sourceKinds).toEqual(['sheets:form1']);
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it('1-2側が空欄の項目のみレビューシートで補完する（1-2側の値がある項目は上書きしない）', () => {
+    const rows = [{ ...BASE, '予算事業ID': '1', '事業名': '', '事業終了（予定）年度': '2030' }];
+    const { rows: sourceRows } = run(rows);
+    const sheetRows = [{
+      ...SHEET_BASE, recordId: 'rssheet_1', sheetForm: 'form2' as const, projectId: '1', projectIdRaw: '1',
+      projectName: 'シート由来の名称', projectCategory: 'new_request' as const,
+      nextRequestFiscalYear: 2025, nextRequestYen: null,
+    }];
+    const { projects, conflicts } = mergeProjects(sourceRows, sheetRows, 2024);
+    expect(projects).toHaveLength(1);
+    expect(projects[0].projectName).toBe('シート由来の名称');
+    expect(projects[0].endYear).toBe(2030);
+    expect(conflicts).toHaveLength(0);
+  });
+
+  it('1-2とレビューシートで値が食い違う場合はconflictsに記録し、1-2側を優先したまま残す', () => {
+    const rows = [{ ...BASE, '予算事業ID': '1', '事業名': '1-2の名称' }];
+    const { rows: sourceRows } = run(rows);
+    const sheetRows = [{
+      ...SHEET_BASE, recordId: 'rssheet_1', sheetForm: 'form2' as const, projectId: '1', projectIdRaw: '1',
+      projectName: 'シートの名称（食い違い）', projectCategory: 'new_request' as const,
+      nextRequestFiscalYear: 2025, nextRequestYen: null,
+    }];
+    const { projects, conflicts } = mergeProjects(sourceRows, sheetRows, 2024);
+    expect(projects[0].projectName).toBe('1-2の名称');
+    expect(conflicts).toHaveLength(1);
+    expect(conflicts[0].field).toBe('projectName');
+    expect(conflicts[0].downloadValue).toBe('1-2の名称');
+    expect(conflicts[0].sheetValue).toBe('シートの名称（食い違い）');
   });
 });
 

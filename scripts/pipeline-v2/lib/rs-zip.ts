@@ -50,9 +50,9 @@ function yearDirsUnder(base: string): Set<number> {
  * rssystem.go.jp/download-csv、sheets配下から利用可能な年度を検出する。
  * download-csvが無くsheetsのみの年度（例: 2026は本稿執筆時点でレビューシートのみ
  * 順次公開中でCSVバルクは未公開）は`sheetsOnlyYears`として区別する。
- * review-sheetsとのマージ（_merge_projects相当）が未実装のこのPoCでは、
- * sheets-onlyの年度をnormalize対象にすると「0件」という誤解を招く出力になるため、
- * 呼び出し側でdownloadCsvYearsのみを処理対象にする。
+ * normalize-rs.tsはdownloadCsvYears・sheetsOnlyYearsの両方を処理対象にするが、
+ * sheets-onlyの年度はreview-sheets.jsonl・projects.jsonl（レビューシート由来）のみが
+ * 生成され、zipベースのデータセットは全て0件になる（Python参照実装と同じ挙動）。
  */
 export function discoverRsYears(rawRoot: string, years?: Set<number>): { downloadCsvYears: number[]; sheetsOnlyYears: number[] } {
   const downloadCsv = yearDirsUnder(path.join(rawRoot, 'rssystem.go.jp', 'download-csv'));

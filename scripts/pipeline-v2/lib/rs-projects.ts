@@ -4,17 +4,17 @@
  * 1-2 CSVは1行=1レコードのsource rowだが、同一projectIdが複数行に現れることがある
  * （実データ確認: review-2025で6,061行に対し一意projectIdは5,794件）。そのため
  * source rowをそのまま「事業」として扱わず、canonical projectIdで畳んだprojects.jsonlを
- * 別に作る（Python参照実装の`_merge_projects`と同じ考え方。ただしレビューシートとの
- * マージ部分はこのPoCでは未実装で、1-2 CSV側のみを畳む）。
+ * 別に作る（Python参照実装の`_merge_projects`と同じ考え方）。レビューシート
+ * （rs-review-sheets.ts）とのマージもmergeProjects()内で行う。
  *
  * CSV row iterator（readSingleCsvIter）→normalize generator→writeJsonlのstreaming経路。
  * normalizeProjectRowsの出力（rows）はgeneratorのまま返す。source inventory()は
  * rows消費後にのみ正しい値を返すdeferred function（rs-organizations.tsと同じ設計）。
  */
 import { rsBase, rsSourceRef, rsRecordId, extraFields, SourceInventoryTracker, COMMON_COLUMNS } from './rs-common';
-import { stableId } from './stable-id';
+import { normalizeText, stableId } from './stable-id';
 import { parseIntValue, parseBool, boolOrRaw } from './parse';
-import type { RsProjectSourceRow, SourceInventory } from '../types';
+import type { RsProjectSourceRow, RsProjectSheetConflict, RsReviewSheetRecord, SourceInventory, SourceRef } from '../types';
 
 const MAPPED = new Set([
   ...COMMON_COLUMNS,
@@ -76,11 +76,33 @@ export function normalizeProjectRows(
 export interface RsProject extends Omit<RsProjectSourceRow, 'recordType' | 'recordId' | 'source'> {
   recordType: 'rs_project';
   recordId: string;
-  sources: import('../types').SourceRef[];
+  projectIdRawVariants: string[];
+  sources: SourceRef[];
+  officialProjectUrl: string;
+  accountClass: string;
+  /** 由来（'download-csv:1-2' / 'sheets:form1' / 'sheets:form2'）を全て記録する */
+  sourceKinds: string[];
 }
 
-/** 同一projectIdの複数source rowを1事業へ畳む（後勝ち。Pythonのdict代入と同じ挙動） */
-export function mergeProjects(sourceRows: Iterable<RsProjectSourceRow>, year: number): RsProject[] {
+/** レビューシートから補完する際、1-2 CSV側が空欄の場合にのみ埋めるフィールド（Python参照実装と同じ） */
+const SHEET_SUPPLEMENT_FIELDS = ['projectName', 'startYear', 'endYear', 'accountClass', 'officialProjectUrl'] as const;
+
+function isBlank(v: unknown): boolean {
+  return v === null || v === undefined || v === '';
+}
+
+/**
+ * 1-2 CSVの事業行とレビューシート行を同一projectIdで畳んで事業マスタを作る
+ * （Python参照実装の`_merge_projects`と同じ考え方）。値が競合する場合は断定せず
+ * project-sheet-conflictsとして記録し、1-2 CSV側の値を優先したまま残す。
+ *
+ * 参照実装との既知の相違: 参照実装は1-2側で同一projectIdが複数行に現れる場合、
+ * 最後の行のsourcesで完全に上書きし、それ以前の行の証跡を失う。source-preservingの
+ * 原則を優先し、TS実装ではsourcesを蓄積して全ての重複行の証跡を残す（意図的な改善）。
+ */
+export function mergeProjects(
+  sourceRows: Iterable<RsProjectSourceRow>, sheetRows: RsReviewSheetRecord[], year: number
+): { projects: RsProject[]; conflicts: RsProjectSheetConflict[] } {
   const byId = new Map<string, RsProject>();
   for (const row of sourceRows) {
     if (!row.projectId) continue;
@@ -90,8 +112,92 @@ export function mergeProjects(sourceRows: Iterable<RsProjectSourceRow>, year: nu
       ...rest,
       recordType: 'rs_project',
       recordId: stableId([year, row.projectId], 'rsproject_'),
+      projectIdRawVariants: [...new Set([...(existing?.projectIdRawVariants ?? []), row.projectIdRaw])],
       sources: [...(existing?.sources ?? []), source],
+      officialProjectUrl: existing?.officialProjectUrl ?? '',
+      accountClass: existing?.accountClass ?? '',
+      sourceKinds: [...(existing?.sourceKinds ?? []), 'download-csv:1-2'],
     });
   }
-  return [...byId.values()].sort((a, b) => (a.projectId < b.projectId ? -1 : a.projectId > b.projectId ? 1 : 0));
+
+  const conflicts: RsProjectSheetConflict[] = [];
+  for (const s of sheetRows) {
+    const pid = s.projectId;
+    if (!pid) continue;
+    const existing = byId.get(pid);
+    if (!existing) {
+      byId.set(pid, {
+        schemaVersion: 2,
+        sourceSystem: 'rs',
+        sourceYear: year,
+        reviewYear: year,
+        recordType: 'rs_project',
+        recordId: stableId([year, pid], 'rsproject_'),
+        sheetType: '',
+        projectId: pid,
+        projectIdRaw: s.projectIdRaw,
+        projectIdRawVariants: [s.projectIdRaw],
+        projectName: s.projectName,
+        policyMinistry: '',
+        ministry: s.ministryFromFile,
+        bureau: '',
+        department: '',
+        division: s.responsibleOffice,
+        office: '',
+        team: '',
+        unit: '',
+        ministryOrderRaw: '',
+        purpose: '',
+        currentIssues: '',
+        overview: '',
+        overviewUrl: '',
+        projectCategory: s.projectCategory,
+        startYear: 'startYear' in s ? s.startYear : null,
+        startYearUnknown: null,
+        endYear: 'endYear' in s ? s.endYear : null,
+        endYearRaw: 'endYearRaw' in s ? s.endYearRaw : '',
+        noPlannedEnd: null,
+        majorExpense: '',
+        note: '',
+        // 1-2側の実データが無いため確定情報が無い旨を明示する（参照実装は空dict {} を使うが、
+        // TS側は型安全のため全フィールドnullの形で同じ意味を表す）
+        implementationMethods: { direct: null, subsidy: null, burden: null, grant: null, contribution: null, other: null },
+        legacyProjectNumber: '',
+        displayOrderRaw: '',
+        extraFields: {},
+        officialProjectUrl: s.officialProjectUrl,
+        accountClass: s.accountClass,
+        sources: [s.source],
+        sourceKinds: [`sheets:${s.sheetForm}`],
+      });
+      continue;
+    }
+    existing.sources.push(s.source);
+    existing.sourceKinds.push(`sheets:${s.sheetForm}`);
+    if (s.projectIdRaw && !existing.projectIdRawVariants.includes(s.projectIdRaw)) existing.projectIdRawVariants.push(s.projectIdRaw);
+
+    const sheetValues: Record<string, unknown> = {
+      projectName: s.projectName,
+      startYear: 'startYear' in s ? s.startYear : undefined,
+      endYear: 'endYear' in s ? s.endYear : undefined,
+      accountClass: s.accountClass,
+      officialProjectUrl: s.officialProjectUrl,
+    };
+    for (const field of SHEET_SUPPLEMENT_FIELDS) {
+      const sv = sheetValues[field];
+      if (isBlank(sv)) continue;
+      const record = existing as unknown as Record<string, unknown>;
+      const pv = record[field];
+      if (isBlank(pv)) {
+        record[field] = sv;
+      } else if (normalizeText(String(pv)) !== normalizeText(String(sv))) {
+        conflicts.push({ sourceYear: year, projectId: pid, field, downloadValue: pv, sheetValue: sv, sheetRecordId: s.recordId });
+      }
+    }
+  }
+
+  return {
+    projects: [...byId.values()].sort((a, b) => (a.projectId < b.projectId ? -1 : a.projectId > b.projectId ? 1 : 0)),
+    conflicts,
+  };
 }
