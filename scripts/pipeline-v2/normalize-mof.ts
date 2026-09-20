@@ -195,6 +195,13 @@ function normalizeMofDocument(rawRoot: string, doc: MofDocument): MofBudgetItemR
       rec.supplementReductionYen = yenFromThousand(reductionCol ? row[reductionCol] : undefined);
       rec.supplementDeltaYen = yenFromThousand(deltaCol ? row[deltaCol] : undefined);
       rec.revisedAmountYen = yenFromThousand(revisedCol ? row[revisedCol] : undefined);
+      rec.sourceAmountColumns = {
+        base: baseCol ?? null,
+        addition: addCol ?? null,
+        reduction: reductionCol ?? null,
+        delta: deltaCol ?? null,
+        revised: revisedCol ?? null,
+      };
     } else if (phase === 'settlement') {
       if (accountType === 'agency') {
         rec.budgetAmountYen = parseIntValue(row['支出予算額(円)']);

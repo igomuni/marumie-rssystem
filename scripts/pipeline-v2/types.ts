@@ -172,6 +172,14 @@ export interface MofBudgetItemRecord {
   supplementReductionYen?: number | null;
   supplementDeltaYen?: number | null;
   revisedAmountYen?: number | null;
+  /** どの列から補正の各金額を読んだか（列名は年度で揺れるため。参照実装と同じくprovenanceとして残す） */
+  sourceAmountColumns?: {
+    base: string | null;
+    addition: string | null;
+    reduction: string | null;
+    delta: string | null;
+    revised: string | null;
+  };
 
   /** settlement */
   budgetAmountYen?: number | null;
