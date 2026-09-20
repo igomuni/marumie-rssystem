@@ -796,3 +796,153 @@ export interface RsProjectSheetConflict {
   sheetValue: unknown;
   sheetRecordId: string;
 }
+
+// ─────────────────────────────────────────────────────────────
+// RS Derived層（normalize出力から金額イベント・資金フローグラフ・MOF↔RSリンクを作る）。
+// 参照実装: Python版 pipeline_v2/derive.py（build_rs_events/build_mof_rs_links）・
+// funding_graph.py（build_funding_graphs_for_year）。
+// ─────────────────────────────────────────────────────────────
+
+/** RS 2-2/2-1由来の予算イベント種別（MOFのbudget_eventとは別の型・意味論） */
+export type RsDerivedEventType =
+  | 'initial_budget' | 'supplementary_budget' | 'carryover_in' | 'reserve_or_other'
+  | 'unclassified_budget' | 'other_budget' | 'next_year_request'
+  | 'execution' | 'carryover_in_project_account' | 'next_year_request_project_account';
+
+export interface RsDerivedBudgetEvent {
+  schemaVersion: number;
+  recordType: 'budget_event';
+  eventId: string;
+  sourceSystem: 'rs';
+  reviewYear: number;
+  fiscalYear: number | null;
+  sourceFiscalYear?: number | null;
+  eventType: RsDerivedEventType;
+  sourceBudgetType?: string;
+  amountYen: number;
+  projectId: string;
+  projectName: string;
+  accountType: string;
+  ministry?: string;
+  account: string;
+  subAccount: string;
+  organizationOrAccount?: string;
+  sectionName?: string;
+  subItemName?: string;
+  sourceRecordIds: string[];
+  source: SourceRef;
+}
+
+/** RS5-1/5-2から作る資金フローグラフのノード。ブロック由来と、5-2の「担当組織からの支出」の
+ *  受け皿として合成する担当組織ノード（synthetic）の2種類がある */
+export interface RsFundingGraphNode {
+  nodeId: string;
+  nodeType: 'spending_block' | 'responsible_organization';
+  blockId: string | null;
+  name: string;
+  nameVariants: string[];
+  roles: string[];
+  recipientCountValues?: number[];
+  totalAmountValuesYen?: number[];
+  summaryRowCount?: number;
+  evidenceRowIds?: string[];
+  synthetic?: boolean;
+  syntheticReason?: string;
+}
+
+/**
+ * source-target単位に5-2のrelation証跡をまとめたsemantic edge。金額は5-2に無いため
+ * 断定せず`amountYen: null`のまま`amountStatus`で明示する（一般有向グラフとして扱う原則）。
+ */
+export interface RsFundingGraphEdge {
+  edgeId: string;
+  sourceNodeId: string;
+  targetNodeId: string;
+  amountYen: null;
+  amountStatus: 'not_provided_by_5-2';
+  evidenceRelationIds: string[];
+  evidenceCount: number;
+  noteVariants: string[];
+  sourceNameVariants: string[];
+  targetNameVariants: string[];
+  fromResponsibleOrganizationValues: (boolean | null)[];
+}
+
+export interface RsFundingGraphDuplicatePair {
+  sourceNodeId: string;
+  targetNodeId: string;
+  evidenceCount: number;
+  evidenceRelationIds: string[];
+  noteVariants: string[];
+}
+
+export interface RsFundingGraphMetrics {
+  blockCount: number;
+  nodeCount: number;
+  relationEvidenceCount: number;
+  semanticEdgeCount: number;
+  indirectExpenseCount: number;
+  responsibleOrganizationNodeId: string | null;
+  hasResponsibleOrganizationRoot: boolean;
+  rootNodeIds: string[];
+  externalRootBlockIds: string[];
+  orphanBlockIds: string[];
+  duplicateRelationPairCount: number;
+  duplicateRelationEvidenceExtraCount: number;
+  hasCycle: boolean;
+  cyclicComponents: string[][];
+  weakComponentCount: number;
+  weakComponentSizes: number[];
+  maxOutDegree: number;
+  maxInDegree: number;
+  sameNameMultipleBlocks: { normalizedName: string; blockIds: string[] }[];
+  unresolvedRelationEvidenceCount: number;
+}
+
+export interface RsFundingGraphUnresolvedRelation {
+  relationId: string;
+  sourceBlockId: string | null;
+  targetBlockId: string;
+  sourceResolution: '5-1-block' | 'responsible-organization' | 'unresolved';
+  targetResolution: '5-1-block' | 'unresolved';
+}
+
+/**
+ * 事業単位の資金フローグラフ。tree/DAG/single-rootを前提にせず、重複辺・循環・
+ * 多始点・孤立ブロックをそのまま`metrics`で可視化する（削除・統合しない）。
+ */
+export interface RsFundingGraph {
+  schemaVersion: number;
+  recordType: 'rs_funding_graph';
+  reviewYear: number;
+  sourceYear: number;
+  projectId: string;
+  projectName: string;
+  ministry: string;
+  nodes: RsFundingGraphNode[];
+  semanticEdges: RsFundingGraphEdge[];
+  unresolvedRelationIds: string[];
+  unresolvedRelationDetails: RsFundingGraphUnresolvedRelation[];
+  metrics: RsFundingGraphMetrics;
+  duplicateRelationPairs: RsFundingGraphDuplicatePair[];
+}
+
+/** MOF↔RS（2-2予算項目単位）のリンクグループ。名寄せが一意でない場合はグループ化して
+ *  金額を突合するのみで、個々のRS行とMOF行を1:1断定しない */
+export interface MofRsProjectLinkGroup {
+  schemaVersion: number;
+  recordType: 'mof_rs_project_link_group';
+  linkId: string;
+  reviewYear: number;
+  fiscalYear: number;
+  phase: 'initial' | 'supplement';
+  revision: number | null;
+  matchMethod: 'exact-name-key';
+  naturalKey: string;
+  mofRecordIds: string[];
+  rsRecordIds: string[];
+  projectIds: string[];
+  mofAmountYen: number;
+  rsAmountYen: number;
+  differenceYen: number;
+}
