@@ -1,174 +1,121 @@
 /**
- * RS公開CSV（download-rs-csv.tsが取得したraw ZIP）を、原典ごとの正規化JSONへ変換する。
+ * RS公開CSV（download-rs-csv.tsが取得したraw ZIP）をsource-preservingな
+ * 正規化JSONLへ変換する。仕様: 20260920_Pipeline_V2_MOF_RS統合_publicまで_最終仕様.md 6節。
+ * 参照実装: Python版 pipeline_v2/normalize_rs.py。
  *
- * Pipeline V2 normalized層。MOFとの結合・名寄せ・項コード同一性判定はここでは行わない
- * （derived層の責務）。sourceYear（RS提出年度）とfiscalYear（各行が指す予算年度）は
- * 必ず区別する（2-1 CSVの1事業は複数の予算年度行を持ちうるため）。
+ * 今回のスコープ（優先度の高い4系統を実装、残りは今後）:
+ *   実装済み: 1-1(organizations) 1-2(projects, sheetマージ無し) 2-1(budget-summaries/
+ *             budget-events) 2-2(budget-items) 5-1(spending-blocks/recipients/contracts)
+ *             5-2(funding-relations/indirect-expenses)
+ *   未実装:   1-3/1-4/1-5(policies-laws/subsidy-rules/project-relations) 3-1/3-2(logic-model)
+ *             4-1(evaluations) 5-3(expense-uses) 5-4(multi-year-contracts) 6-1(notes)
+ *             review-sheetsとのproject merge
+ *
+ * 重要な意味論（参照実装と同じ）:
+ *   - blank（空欄）と明示的な0円を区別する（parseNumberはblankでnullを返す。0に潰さない）
+ *   - RS `予備費等`はneutralな'adjustment'として扱い、決算のreserve_useと混同しない
+ *   - 5-1は支出先ブロック集計行・支出先行・契約行が同じCSVに混在するため、
+ *     block/recipient/contractの3種類へ明示的に分離する
+ *   - 5-2は一般有向グラフとして扱う。重複辺・循環・多始点・孤立ブロックを削除・統合しない
  *
  * 入力: data/download/rssystem.go.jp/download-csv/{year}/*.zip
- * 出力: data/normalized/rs/{year}/{projects,budget-events,expenditures}.json
- *   （仕様書の例示ではbudgets.json/requests.jsonを分けているが、どちらも
- *   「1事業・1予算年度あたりのBudgetEvent」という同じ形なので
- *   budget-events.json 1本に統合している。requestイベントは
- *   eventType==='request'で区別できる）
+ * 出力: data/normalized/rs/review-{year}/*.jsonl + manifest.json
  *
  * 使い方: npx tsx scripts/pipeline-v2/normalize-rs.ts [year...]
- *   （年度省略時は 2024 2025）
+ *   （年度省略時はdata/download/rssystem.go.jp/download-csvから検出した全年度）
  */
-import * as fs from 'fs';
 import * as path from 'path';
-import { listZipEntries, readZipEntryText } from '@/scripts/zip-reader';
-import { parseCsv, parseAmount } from './lib/csv';
-import type { RsProject, RsBudgetEvent, RsBudgetItem, RsExpenditure, Provenance } from './types';
+import { discoverRsYears, findRsZip, readSingleCsv } from './lib/rs-zip';
+import { normalizeOrganizations } from './lib/rs-organizations';
+import { normalizeProjectRows, mergeProjects } from './lib/rs-projects';
+import { normalizeBudgetSummary, normalizeBudgetItems } from './lib/rs-budget';
+import { normalizeSpending, toExpenditureCompat } from './lib/rs-spending';
+import { normalizeFundingRelations } from './lib/rs-funding';
+import { writeJsonl, writeJson } from './lib/jsonl';
 
-function readCsvZip(zipPath: string): Record<string, string>[] {
-  const entries = listZipEntries(zipPath).filter(e => e.toLowerCase().endsWith('.csv'));
-  if (entries.length !== 1) {
-    throw new Error(`CSVエントリが1件ではありません: ${zipPath} (${entries.join(', ')})`);
-  }
-  return parseCsv(readZipEntryText(zipPath, entries[0]));
-}
+function processYear(rawRoot: string, outputRoot: string, year: number): Record<string, number> {
+  console.log(`\n=== RS normalize: reviewYear=${year} ===`);
+  const yearDir = path.join(rawRoot, 'rssystem.go.jp', 'download-csv', String(year));
+  const outDir = path.join(outputRoot, 'normalized', 'rs', `review-${year}`);
+  const counts: Record<string, number> = {};
 
-function zipPathFor(year: number, no: string, label: string): string {
-  return path.join('data', 'download', 'rssystem.go.jp', 'download-csv', String(year), `${no}_RS_${year}_${label}.zip`);
-}
-
-function provenanceFor(year: number, fileName: string): Provenance {
-  return { domain: 'rssystem.go.jp', dataset: 'download-csv', year, file: fileName };
-}
-
-function normalizeProjects(year: number): RsProject[] {
-  const label = '基本情報_事業概要等';
-  const zip = zipPathFor(year, '1-2', label);
-  const rows = readCsvZip(zip);
-  const provenance = provenanceFor(year, path.basename(zip));
-  return rows.map(r => ({
-    projectId: r['予算事業ID'],
-    projectName: r['事業名'],
-    sourceYear: Number(r['事業年度']),
-    ministry: r['府省庁'],
-    bureau: r['局・庁'],
-    purpose: r['事業の目的'],
-    provenance,
-  }));
-}
-
-/** 2-1 CSVの1行から、当初/補正/執行/翌年度要求のBudgetEventを起こす */
-function eventsFromBudgetRow(row: Record<string, string>, sourceYear: number, provenance: Provenance): RsBudgetEvent[] {
-  const projectId = row['予算事業ID'];
-  const fiscalYear = Number(row['予算年度']);
-  if (!projectId || Number.isNaN(fiscalYear)) return [];
-
-  const events: RsBudgetEvent[] = [];
-  const push = (eventType: RsBudgetEvent['eventType'], amount: number, eventFiscalYear = fiscalYear) => {
-    if (amount !== 0) events.push({ projectId, sourceYear, fiscalYear: eventFiscalYear, eventType, amount, provenance });
+  const emit = (name: string, rows: unknown[]) => {
+    const n = writeJsonl(path.join(outDir, `${name}.jsonl`), rows);
+    counts[name] = n;
+    console.log(`  ${name}.jsonl: ${n}件`);
   };
 
-  push('initial', parseAmount(row['当初予算']));
-  push('supplementary', parseAmount(row['第1次補正予算']) + parseAmount(row['第2次補正予算']) + parseAmount(row['第3次補正予算']) + parseAmount(row['第4次補正予算']) + parseAmount(row['第5次補正予算']));
-  push('carryover_in', parseAmount(row['前年度から繰越し']));
-  push('reserve', parseAmount(row['予備費等1']) + parseAmount(row['予備費等2']) + parseAmount(row['予備費等3']) + parseAmount(row['予備費等4']));
-  push('execution', parseAmount(row['執行額']));
-  push('carryover_out', parseAmount(row['翌年度への繰越し(合計）']));
-  // 翌年度要求額は「次の年度」への要求なので、イベント自体のfiscalYearは+1にする
-  push('request', parseAmount(row['翌年度要求額（合計）']), fiscalYear + 1);
+  const zip11 = findRsZip(yearDir, '1-1', year);
+  emit('organizations', zip11 ? (() => { const { entry, rows } = readSingleCsv(zip11); return normalizeOrganizations(rawRoot, zip11, entry, rows, year); })() : []);
 
-  return events;
-}
+  const zip12 = findRsZip(yearDir, '1-2', year);
+  const projectSourceRows = zip12 ? (() => { const { entry, rows } = readSingleCsv(zip12); return normalizeProjectRows(rawRoot, zip12, entry, rows, year); })() : [];
+  emit('project-source-rows', projectSourceRows);
+  emit('projects', mergeProjects(projectSourceRows, year));
 
-function normalizeBudgetEvents(year: number): RsBudgetEvent[] {
-  const label = '予算・執行_サマリ';
-  const zip = zipPathFor(year, '2-1', label);
-  const rows = readCsvZip(zip);
-  const provenance = provenanceFor(year, path.basename(zip));
-  const events: RsBudgetEvent[] = [];
-  for (const row of rows) events.push(...eventsFromBudgetRow(row, year, provenance));
-  return events;
-}
+  const zip21 = findRsZip(yearDir, '2-1', year);
+  if (zip21) {
+    const { entry, rows } = readSingleCsv(zip21);
+    const { summaries, events } = normalizeBudgetSummary(rawRoot, zip21, entry, rows, year);
+    emit('budget-summaries', summaries);
+    emit('budget-events', events);
+  } else {
+    emit('budget-summaries', []);
+    emit('budget-events', []);
+  }
 
-/**
- * 2-2 CSV（予算種別・歳出予算項目）。MOFの科目別内訳と同じ語彙で
- * 所管/組織・勘定（一般会計）または所管/会計/勘定（特別会計）/項/目を持つ列。
- * 列名の丸括弧は原本では全角（例:「予算額（歳出予算項目ごと）」）。
- * V1の`data/year_*`側は正規化時に半角へ変換しているが、rawのZIPは全角のまま。
- */
-function normalizeBudgetItems(year: number): RsBudgetItem[] {
-  const label = '予算・執行_予算種別・歳出予算項目';
-  const zip = zipPathFor(year, '2-2', label);
-  const rows = readCsvZip(zip);
-  const provenance = provenanceFor(year, path.basename(zip));
-  return rows
-    .map(r => {
-      const accountCategory = r['会計区分'] ?? '';
-      return {
-        projectId: r['予算事業ID'],
-        sourceYear: Number(r['事業年度']),
-        fiscalYear: Number(r['予算年度']),
-        accountCategory,
-        budgetTypeRaw: r['予算種別'] ?? '',
-        ministry: r['所管'] ?? '',
-        organization: accountCategory === '特別会計' ? (r['会計'] ?? '') : (r['組織・勘定'] ?? ''),
-        subAccount: accountCategory === '特別会計' ? (r['勘定'] ?? '') : '',
-        sectionName: r['項'] ?? '',
-        itemName: r['目'] ?? '',
-        amount: parseAmount(r['予算額（歳出予算項目ごと）']),
-        provenance,
-      };
-    })
-    // amount===0でも行自体（事業がその科目に計上されている事実）は残す。
-    // MOF側と同じ理由（0円計上除外による過少カウント、2026-09-19修正）でここも除外しない
-    .filter(e => e.projectId && !Number.isNaN(e.fiscalYear));
-}
+  const zip22 = findRsZip(yearDir, '2-2', year);
+  emit('budget-items', zip22 ? (() => { const { entry, rows } = readSingleCsv(zip22); return normalizeBudgetItems(rawRoot, zip22, entry, rows, year); })() : []);
 
-function normalizeExpenditures(year: number): RsExpenditure[] {
-  const label = '支出先_支出情報';
-  const zip = zipPathFor(year, '5-1', label);
-  const rows = readCsvZip(zip);
-  const provenance = provenanceFor(year, path.basename(zip));
-  return rows
-    .map(r => ({
-      projectId: r['予算事業ID'],
-      sourceYear: Number(r['事業年度']),
-      blockId: r['支出先ブロック番号'],
-      blockName: r['支出先ブロック名'],
-      recipientName: r['支出先名'],
-      corporateNumber: r['法人番号'],
-      amount: parseAmount(r['金額']),
-      provenance,
-    }))
-    .filter(e => e.amount !== 0);
-}
+  const zip51 = findRsZip(yearDir, '5-1', year);
+  if (zip51) {
+    const { entry, rows } = readSingleCsv(zip51);
+    const { blocks, recipients, contracts } = normalizeSpending(rawRoot, zip51, entry, rows, year);
+    emit('spending-blocks', blocks);
+    emit('recipients', recipients);
+    emit('contracts', contracts);
+    emit('expenditures', toExpenditureCompat(contracts, year));
+  } else {
+    emit('spending-blocks', []);
+    emit('recipients', []);
+    emit('contracts', []);
+    emit('expenditures', []);
+  }
 
-function writeJson(outPath: string, data: unknown): void {
-  fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  fs.writeFileSync(outPath, JSON.stringify(data, null, 2));
-}
+  const zip52 = findRsZip(yearDir, '5-2', year);
+  if (zip52) {
+    const { entry, rows } = readSingleCsv(zip52);
+    const { relations, indirect } = normalizeFundingRelations(rawRoot, zip52, entry, rows, year);
+    emit('funding-relations', relations);
+    emit('indirect-expenses', indirect);
+  } else {
+    emit('funding-relations', []);
+    emit('indirect-expenses', []);
+  }
 
-function processYear(year: number): void {
-  console.log(`\n=== RS normalize: year=${year} ===`);
-  const outDir = path.join('data', 'normalized', 'rs', String(year));
+  writeJson(path.join(outDir, 'manifest.json'), {
+    schemaVersion: 2,
+    sourceYear: year,
+    reviewYear: year,
+    recordCounts: counts,
+    implementedDatasets: ['1-1', '1-2', '2-1', '2-2', '5-1', '5-2'],
+    pendingDatasets: ['1-3', '1-4', '1-5', '3-1', '3-2', '4-1', '5-3', '5-4', '6-1', 'review-sheets-merge'],
+  });
 
-  const projects = normalizeProjects(year);
-  writeJson(path.join(outDir, 'projects.json'), projects);
-  console.log(`  projects.json: ${projects.length}件`);
-
-  const budgetEvents = normalizeBudgetEvents(year);
-  writeJson(path.join(outDir, 'budget-events.json'), budgetEvents);
-  console.log(`  budget-events.json: ${budgetEvents.length}件`);
-
-  const budgetItems = normalizeBudgetItems(year);
-  writeJson(path.join(outDir, 'budget-items.json'), budgetItems);
-  console.log(`  budget-items.json: ${budgetItems.length}件`);
-
-  const expenditures = normalizeExpenditures(year);
-  writeJson(path.join(outDir, 'expenditures.json'), expenditures);
-  console.log(`  expenditures.json: ${expenditures.length}件`);
+  return counts;
 }
 
 function main(): void {
+  const rawRoot = path.join('data', 'download');
+  const outputRoot = 'data';
   const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
-  const targetYears = years.length > 0 ? years : [2024, 2025];
-  for (const year of targetYears) processYear(year);
+  const targetYears = years.length > 0 ? years : discoverRsYears(rawRoot);
+
+  const allCounts: Record<string, Record<string, number>> = {};
+  for (const year of targetYears) {
+    allCounts[String(year)] = processYear(rawRoot, outputRoot, year);
+  }
+  writeJson(path.join(outputRoot, 'normalized', 'rs', 'manifest.json'), { schemaVersion: 2, sourceYears: allCounts });
 }
 
 main();

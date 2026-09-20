@@ -281,3 +281,194 @@ export interface MofIdentityRelation {
   sourceRecordIds: string[];
   targetRecordIds: string[];
 }
+
+// ─────────────────────────────────────────────────────────────
+// 以下、RS全15CSV対応のsource-preserving normalize層（既存RsProject等の簡易版とは別系統）。
+// 20260920_Pipeline_V2_MOF_RS統合_publicまで_最終仕様.md 6節。
+// ─────────────────────────────────────────────────────────────
+
+import type { RsBaseFields } from './lib/rs-common';
+
+export interface RsOrganizationRelation extends RsBaseFields {
+  recordType: 'rs_organization_relation';
+  recordId: string;
+  additionalOrganizationNo: string;
+  additionalMinistry: string;
+  additionalBureau: string;
+  additionalDepartment: string;
+  additionalDivision: string;
+  additionalOffice: string;
+  additionalTeam: string;
+  additionalUnit: string;
+  responsiblePerson: string;
+  source: SourceRef;
+}
+
+export interface RsProjectSourceRow extends RsBaseFields {
+  recordType: 'rs_project_source_row';
+  recordId: string;
+  purpose: string;
+  currentIssues: string;
+  overview: string;
+  overviewUrl: string;
+  projectCategory: string;
+  startYear: number | null;
+  startYearUnknown: boolean | null;
+  endYear: number | null;
+  endYearRaw: string;
+  noPlannedEnd: boolean | null;
+  majorExpense: string;
+  note: string;
+  legacyProjectNumber: string;
+  displayOrderRaw: string;
+  source: SourceRef;
+}
+
+/** RS予算・執行の会計区分。原本値が空なら空文字のまま（決め打ちしない） */
+export type RsAccountType = 'general' | 'special' | 'other' | '';
+
+/** RS予算イベント種別。予備費等はneutralな'adjustment'とし、決算のreserveと混同しない
+ *  （予備費「等」であり予算総則増額等も含みうるため。RS側に所管/組織/項/目が無く
+ *  MOFの何に対応するか特定できないという事情もある） */
+export type RsEventType = 'initial' | 'supplementary' | 'carryover_in' | 'adjustment' | 'current_budget' | 'execution' | 'carryover_out' | 'request' | 'request_preference';
+
+export interface RsBudgetSummaryRecord extends RsBaseFields {
+  recordType: 'rs_budget_summary';
+  recordId: string;
+  fiscalYear: number | null;
+  scopeLevel: 'account' | 'project_total';
+  accountType: RsAccountType;
+  accountClass: string;
+  account: string;
+  subAccount: string;
+  executionRateRaw: string;
+  changeReason: string;
+  specialNotes: string;
+  note: string;
+  amounts: Record<string, number | null>;
+  source: SourceRef;
+}
+
+export interface RsBudgetEventRecord extends RsBaseFields {
+  recordType: 'rs_budget_event';
+  eventId: string;
+  sourceRecordId: string;
+  fiscalYear: number | null;
+  sourceFiscalYear: number | null;
+  eventType: RsEventType;
+  revision: number | null;
+  amountYen: number;
+  amountRaw: string;
+  sourceAmountColumn: string;
+  scopeLevel: 'account' | 'project_total';
+  accountType: RsAccountType;
+  accountClass: string;
+  account: string;
+  subAccount: string;
+  /** 予備費等等、原典の性質上MOF側イベント種別に断定できないものは'source_neutral' */
+  semanticStatus: 'source_neutral' | 'source_labeled';
+  source: SourceRef;
+}
+
+export interface RsBudgetItemRecordV2 extends RsBaseFields {
+  recordType: 'rs_budget_item';
+  recordId: string;
+  fiscalYear: number | null;
+  accountType: RsAccountType;
+  accountClass: string;
+  account: string;
+  subAccount: string;
+  budgetType: string;
+  organizationOrAccount: string;
+  sectionName: string;
+  subItemName: string;
+  supplementalInfo: string;
+  budgetAmountYen: number | null;
+  budgetAmountRaw: string;
+  nextYearRequestYen: number | null;
+  nextYearRequestRaw: string;
+  requestFiscalYear: number | null;
+  note: string;
+  /** MOFの科目別内訳と同じ語彙で作る識別子（accountType+ministry+組織/勘定+項+目）。MOF↔RSリンクに使う */
+  mofNameNaturalKey: string;
+  source: SourceRef;
+}
+
+export interface RsSpendingBlockRecord extends RsBaseFields {
+  recordType: 'rs_spending_block';
+  nodeId: string;
+  blockId: string;
+  blockName: string;
+  blockNames: string[];
+  recipientCountValues: number[];
+  roles: string[];
+  totalAmountValuesYen: number[];
+  evidenceRowIds: string[];
+  sources: SourceRef[];
+  summaryRowCount: number;
+}
+
+export interface RsRecipientRecord extends RsBaseFields {
+  recordType: 'rs_recipient';
+  recipientId: string;
+  blockId: string;
+  recipientName: string;
+  corporateNumber: string;
+  location: string;
+  corporateType: string;
+  otherRecipient: boolean | null;
+  totalAmountValuesYen: number[];
+  evidenceRowIds: string[];
+  sources: SourceRef[];
+}
+
+export interface RsContractRecord extends RsBaseFields {
+  recordType: 'rs_contract';
+  contractId: string;
+  blockId: string;
+  recipientId: string | null;
+  recipientLinkMethod: 'same-row' | 'preceding-row' | null;
+  recipientNameRaw: string;
+  corporateNumberRaw: string;
+  summary: string;
+  amountYen: number | null;
+  amountRaw: string;
+  method: string;
+  methodDetail: string;
+  bidderCount: number | null;
+  winningRate: number | null;
+  singleBidReason: string;
+  otherContract: boolean | null;
+  sourceRowId: string;
+  source: SourceRef;
+}
+
+/**
+ * RS5-2「支出ブロックのつながり」1行＝1辺。一般有向グラフとして扱う
+ * （tree/DAG/single-rootを前提にしない。重複辺・循環・多始点・孤立ブロックをすべて許容し、
+ * normalize層では何も削除・統合しない）。
+ */
+export interface RsFundingRelationRecord extends RsBaseFields {
+  recordType: 'rs_funding_relation';
+  relationId: string;
+  sourceBlockId: string | null;
+  sourceBlockName: string;
+  /** 「担当組織からの支出」。事業を実施する組織自身からの支出かどうか（parse_bool、判定不能ならnull） */
+  fromResponsibleOrganization: boolean | null;
+  targetBlockId: string;
+  targetBlockName: string;
+  note: string;
+  sourceRowId: string;
+  source: SourceRef;
+}
+
+export interface RsIndirectExpenseRecord extends RsBaseFields {
+  recordType: 'rs_indirect_expense';
+  expenseId: string;
+  categoryRaw: string;
+  item: string;
+  amountYen: number | null;
+  amountRaw: string;
+  sourceRowId: string;
+  source: SourceRef;
+}
