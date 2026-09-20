@@ -48,7 +48,8 @@
     "pipeline:v2:derive:rs": "tsx scripts/pipeline-v2/derive-rs.ts",
     "pipeline:v2:derive:integrated": "tsx scripts/pipeline-v2/derive-integrated.ts",
     "pipeline:v2:validate:legacy": "tsx scripts/pipeline-v2/validate.ts",
-    "pipeline:v2:validate": "tsx scripts/pipeline-v2/validate-v2.ts"
+    "pipeline:v2:validate": "tsx scripts/pipeline-v2/validate-v2.ts",
+    "pipeline:v2:publish": "tsx scripts/pipeline-v2/publish-v2.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
