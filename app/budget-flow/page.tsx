@@ -74,13 +74,19 @@ export default function BudgetFlow() {
       setAmountsLoading(true);
       const prefixes = shardPrefixesOf(source, index.entities);
       void (async () => {
-        for (const prefix of prefixes) {
-          if (abort.signal.aborted) break;
-          try {
-            const data = await readEntityShard(source, year, prefix, abort.signal);
-            setAmounts(previous => ({ ...previous, ...Object.fromEntries(Object.values(data).map(e => [e.id, initialEnactedAmount(e.events)])) }));
-          } catch { if (!abort.signal.aborted) setAmountError(true); }
-        }
+        // V2はshard数がV1の16から256へ増えるため、直列await（256往復）だと表示が遅い。
+        // 少数の並行workerで消費する（2026-09-20 CodeRabbit指摘）
+        const queue = [...prefixes];
+        const worker = async () => {
+          for (let prefix = queue.shift(); prefix !== undefined; prefix = queue.shift()) {
+            if (abort.signal.aborted) return;
+            try {
+              const data = await readEntityShard(source, year, prefix, abort.signal);
+              setAmounts(previous => ({ ...previous, ...Object.fromEntries(Object.values(data).map(e => [e.id, initialEnactedAmount(e.events)])) }));
+            } catch { if (!abort.signal.aborted) setAmountError(true); }
+          }
+        };
+        await Promise.all(Array.from({ length: Math.min(6, queue.length) }, worker));
         if (!abort.signal.aborted) setAmountsLoading(false);
       })();
     }

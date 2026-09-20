@@ -24,6 +24,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { listZipEntries, readZipEntryText } from '@/scripts/zip-reader';
+import { parseCsv as parseQuoteAwareCsv } from './lib/csv';
 import { stableId, normalizeText } from './lib/stable-id';
 import { parseIntValue, yenFromThousand } from './lib/parse';
 import { writeJsonl, writeJson } from './lib/jsonl';
@@ -104,7 +105,7 @@ function discoverMofDocuments(rawRoot: string, years?: Set<number>): MofDocument
   return docs;
 }
 
-/** parseCsvと同じ前提（値にカンマを含まない）でZIP内の歳出表エントリを取得する */
+/** ZIP内の歳出表エントリを取得する */
 function expenditureZipEntry(zipPath: string): { entry: string; rows: Record<string, string>[] } {
   for (const entry of listZipEntries(zipPath).filter(e => e.toLowerCase().endsWith('.csv'))) {
     const rows = parseCsv(readZipEntryText(zipPath, entry));
@@ -113,15 +114,19 @@ function expenditureZipEntry(zipPath: string): { entry: string; rows: Record<str
   throw new Error(`歳出表CSVが見つかりません: ${zipPath}`);
 }
 
+/**
+ * quote対応のlib/csv.tsを使う（従来の素朴なsplit(',')は、値がクォート付きカンマや
+ * 改行を含む場合に列がずれる可能性があった。2026-09-20 CodeRabbit指摘）。
+ * ヘッダー・値をtrimし、空ヘッダー列を除外する従来の挙動は維持する
+ */
 function parseCsv(content: string): Record<string, string>[] {
-  const lines = content.split(/\r?\n/).filter(l => l.trim());
-  if (lines.length === 0) return [];
-  const headers = lines[0].split(',').map(h => h.trim());
-  return lines.slice(1).map(line => {
-    const cells = line.split(',');
-    const row: Record<string, string> = {};
-    headers.forEach((h, i) => { if (h) row[h] = (cells[i] ?? '').trim(); });
-    return row;
+  return parseQuoteAwareCsv(content).map(row => {
+    const trimmed: Record<string, string> = {};
+    for (const [key, value] of Object.entries(row)) {
+      const header = key.trim();
+      if (header) trimmed[header] = value.trim();
+    }
+    return trimmed;
   });
 }
 
