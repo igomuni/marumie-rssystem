@@ -1,4 +1,9 @@
 /**
+ * @deprecated 2026-09-20時点でレガシー。旧normalize-mof.ts/build-identities.ts/build-links.tsの
+ * 出力（旧形式）を前提にした一部メトリクスを含む。後継のvalidate:mof/validate:rs/
+ * validate:links/validate:publicは未実装（RS derive完了後に着手）。実行するには
+ * `npm run pipeline:v2:validate:legacy` を使う。
+ *
  * Pipeline V1/V2比較検証（仕様書10節）。
  *
  * V1の既存生成物（public/data/*.json）・V1が使うraw原本（data/download_old/、

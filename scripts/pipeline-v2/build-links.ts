@@ -1,4 +1,8 @@
 /**
+ * @deprecated 2026-09-20時点でレガシー。build-identities.tsの出力（旧形式）に依存する。
+ * 後継はderive-links.ts（未実装。derive-rs.ts完了後に着手）。実行するには
+ * `npm run pipeline:v2:derive:legacy` を使う。
+ *
  * RS事業 ↔ MOF BudgetEntity（項・目）を完全一致キーで結合し、project-links.jsonを作る。
  *
  * 方式はV1（scripts/generate-mof-rs-kou-moku-linkage.ts）と同じ: RSの2-2 CSV
