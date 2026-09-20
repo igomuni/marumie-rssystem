@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
   compactRsProject, compactRsBudgetSummary, compactRsFundingGraph, compactPolicy, compactNote,
-  compactMultiYearContract, computeDroppedFieldsReport,
+  compactMultiYearContract, compactMofRsLink, computeDroppedFieldsReport,
 } from './rs-publish';
-import type { RsBudgetSummaryRecord, RsFundingGraph, RsPolicyLawRelation, RsProjectNote, RsMultiYearContract } from '../types';
+import type { RsBudgetSummaryRecord, RsFundingGraph, RsPolicyLawRelation, RsProjectNote, RsMultiYearContract, MofRsProjectLinkGroup } from '../types';
 import type { RsProject } from './rs-projects';
 
 const SRC = { domain: 'rssystem.go.jp' as const, path: 'x', file: 'x.csv', dataset: 'd', year: 2024 };
@@ -86,6 +86,25 @@ describe('compactMultiYearContract: hasContract=falseならnull', () => {
   it('契約情報が無いプレースホルダー行を除外する', () => {
     const row = { hasContract: false } as RsMultiYearContract;
     expect(compactMultiYearContract(row)).toBeNull();
+  });
+});
+
+describe('compactMofRsLink: link groupが複数事業を束ねる意味論を保持する', () => {
+  it('projectIds/projectCountを保持する（1 link groupが複数RS事業を束ねることがあるため）', () => {
+    const link: MofRsProjectLinkGroup = {
+      schemaVersion: 2, recordType: 'mof_rs_project_link_group', linkId: 'l1', reviewYear: 2025, fiscalYear: 2024,
+      phase: 'initial', revision: null, matchMethod: 'exact-name-key', naturalKey: 'k',
+      mofRecordIds: ['mof1'], rsRecordIds: ['rs1', 'rs2'], projectIds: ['1', '2'],
+      mofAmountYen: 100, rsAmountYen: 90, differenceYen: 10,
+    };
+    const out = compactMofRsLink(link);
+    expect(out.projectIds).toEqual(['1', '2']);
+    expect(out.projectCount).toBe(2);
+    expect(out.mofAmountYen).toBe(100);
+    expect(out).not.toHaveProperty('naturalKey');
+    expect(out).not.toHaveProperty('mofRecordIds');
+    expect(out).not.toHaveProperty('rsRecordIds');
+    expect(out).not.toHaveProperty('matchMethod');
   });
 });
 

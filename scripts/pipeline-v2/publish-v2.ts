@@ -31,6 +31,8 @@ import type {
   RsReviewSheetRecord, MofRsProjectLinkGroup,
 } from './types';
 import type { RsProject } from './lib/rs-projects';
+import { buildMofSectionDetails, buildMofIndexRow, sectionIdOf, mofSectionShard } from './lib/mof-publish';
+import type { MofBudgetItemRecord, MofDerivedBudgetEvent, MofIdentityRelation, MofStageGap, MofDerivedSection } from './types';
 
 type Profile = 'core' | 'context' | 'spending';
 type Bundle = Record<string, unknown>;
@@ -280,15 +282,151 @@ function publishRsYear(outputRoot: string, publicRoot: string, reviewYear: numbe
   return { reviewYear, projectCount: indexRows.length, indexGzipBytes, profiles: profileStats, completeness, referentialIntegrityErrors };
 }
 
+/**
+ * public/data/v2/mof/fy{year} を生成する。参照実装 publish_mof_year を土台に、
+ * 項単位の集約はderive-mof.tsのsections.jsonl/stage-gaps.jsonlをそのまま使う
+ * （同じ計算をpublish層で再度行わない）。detail shard（records/items/events/
+ * relations/rsLinks）はlib/mof-publish.tsで組み立てる。
+ * 戻り値のrecordToSectionは、standalone links product構築で再利用する。
+ */
+function publishMofYear(outputRoot: string, publicRoot: string, fiscalYear: number, reviewYears: number[]): {
+  result: { fiscalYear: number; sectionCount: number; indexGzipBytes: number; shardCount: number; gzipBytes: number; maxShardBytes: number } | null;
+  recordToSection: Map<string, string>;
+} {
+  const normDir = path.join(outputRoot, 'normalized', 'mof', `fy${fiscalYear}`);
+  const droot = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`);
+  const itemsPath = path.join(normDir, 'budget-items.jsonl');
+  const eventsPath = path.join(droot, 'budget-events.jsonl');
+  if (!fs.existsSync(itemsPath) || !fs.existsSync(eventsPath)) return { result: null, recordToSection: new Map() };
+
+  const items = readJsonl<MofBudgetItemRecord>(itemsPath);
+  const events = readJsonl<MofDerivedBudgetEvent>(eventsPath);
+  const relations = readJsonl<MofIdentityRelation>(path.join(droot, 'identity-relations.jsonl'));
+  const stageGaps = readJsonl<MofStageGap>(path.join(droot, 'stage-gaps.jsonl'));
+  const sections = readJsonl<MofDerivedSection>(path.join(droot, 'sections.jsonl'));
+
+  const recordToSection = new Map(items.map(r => [r.recordId, sectionIdOf(r)] as const));
+
+  const linksByReviewYear: { reviewYear: number; links: import('./types').MofRsProjectLinkGroup[] }[] = [];
+  const linkProducts: { reviewYear: number; fiscalYear: number; linkGroupCount: number; linkedProjectCount: number }[] = [];
+  const linksDir = path.join(outputRoot, 'derived', 'links');
+  for (const reviewYear of reviewYears) {
+    const linkPath = path.join(linksDir, `mof-rs-review-${reviewYear}-fy${fiscalYear}.jsonl`);
+    if (!fs.existsSync(linkPath)) continue;
+    const links = readJsonl<import('./types').MofRsProjectLinkGroup>(linkPath);
+    linksByReviewYear.push({ reviewYear, links });
+    linkProducts.push({ reviewYear, fiscalYear, linkGroupCount: links.length, linkedProjectCount: new Set(links.flatMap(l => l.projectIds)).size });
+  }
+
+  const details = buildMofSectionDetails(fiscalYear, items, events, relations, stageGaps, linksByReviewYear);
+
+  // section単位のRS link件数（index用）。reviewYear別の件数と、事業数（重複除去）を出す
+  const rsLinkCountsBySection = new Map<string, Record<string, number>>();
+  const rsProjectsBySection = new Map<string, Set<string>>();
+  for (const { reviewYear, links } of linksByReviewYear) {
+    for (const link of links) {
+      const sids = new Set(link.mofRecordIds.filter(id => recordToSection.has(id)).map(id => recordToSection.get(id)!));
+      for (const sid of sids) {
+        const counts = rsLinkCountsBySection.get(sid) ?? {};
+        counts[String(reviewYear)] = (counts[String(reviewYear)] ?? 0) + 1;
+        rsLinkCountsBySection.set(sid, counts);
+        const projects = rsProjectsBySection.get(sid) ?? new Set<string>();
+        for (const pid of link.projectIds) projects.add(pid);
+        rsProjectsBySection.set(sid, projects);
+      }
+    }
+  }
+
+  const outDir = path.join(publicRoot, 'data', 'v2', 'mof', `fy${fiscalYear}`);
+  fs.rmSync(outDir, { recursive: true, force: true });
+
+  const detailsByShard = new Map<string, Record<string, unknown>>();
+  for (const [sid, detail] of details) {
+    const shard = mofSectionShard(sid);
+    const shardMap = detailsByShard.get(shard) ?? {};
+    shardMap[sid] = detail;
+    detailsByShard.set(shard, shardMap);
+  }
+  let gzipBytes = 0;
+  let maxShardBytes = 0;
+  for (const [shard, values] of detailsByShard) {
+    const bytes = writeGzipJson(path.join(outDir, 'sections', `${shard}.json.gz`), values);
+    gzipBytes += bytes;
+    maxShardBytes = Math.max(maxShardBytes, bytes);
+  }
+
+  const indexRows = sections.map(s => buildMofIndexRow(s, rsLinkCountsBySection.get(s.id) ?? {}, rsProjectsBySection.get(s.id)?.size ?? 0));
+  const indexObj = { schemaVersion: 2, publishSchemaVersion: PUBLISH_SCHEMA_VERSION, fiscalYear, sectionCount: indexRows.length, sections: indexRows };
+  const indexGzipBytes = writeGzipJson(path.join(outDir, 'index.json.gz'), indexObj);
+
+  const manifestObj = {
+    schemaVersion: 2, publishSchemaVersion: PUBLISH_SCHEMA_VERSION, fiscalYear, sectionCount: indexRows.length,
+    shardAlgorithm: 'sectionId 先頭2桁', index: 'index.json.gz',
+    sections: { pathTemplate: 'sections/{shard}.json.gz', shardCount: detailsByShard.size, compressedBytes: gzipBytes, maxShardBytes },
+    linkProducts,
+  };
+  writeJson(path.join(outDir, 'manifest.json'), manifestObj);
+
+  return {
+    result: { fiscalYear, sectionCount: indexRows.length, indexGzipBytes, shardCount: detailsByShard.size, gzipBytes, maxShardBytes },
+    recordToSection,
+  };
+}
+
+/**
+ * public/data/v2/links/review-{ry}-fy{fy} を生成する。project coreへの埋め込みは
+ * 「この事業からMOFを見る」用途、standalone linksは「このMOF項から複数事業を見る」
+ * 用途として別に持つ（2026-09-20指摘）。
+ */
+function publishLinkProduct(outputRoot: string, publicRoot: string, reviewYear: number, fiscalYear: number, recordToSection: Map<string, string>): {
+  reviewYear: number; fiscalYear: number; linkGroupCount: number; projectCount: number; sectionCount: number; gzipBytes: number;
+} | null {
+  const linkPath = path.join(outputRoot, 'derived', 'links', `mof-rs-review-${reviewYear}-fy${fiscalYear}.jsonl`);
+  if (!fs.existsSync(linkPath)) return null;
+  const rows = readJsonl<import('./types').MofRsProjectLinkGroup>(linkPath);
+  const projectIds = new Set<string>();
+  const sectionIds = new Set<string>();
+  const links = rows.map(row => {
+    const sids = [...new Set(row.mofRecordIds.filter(id => recordToSection.has(id)).map(id => recordToSection.get(id)!))].sort();
+    for (const pid of row.projectIds) projectIds.add(pid);
+    for (const sid of sids) sectionIds.add(sid);
+    return {
+      linkId: row.linkId, phase: row.phase, revision: row.revision,
+      sectionIds: sids, projectIds: row.projectIds,
+      mofAmountYen: row.mofAmountYen, rsAmountYen: row.rsAmountYen, differenceYen: row.differenceYen,
+    };
+  });
+  const outDir = path.join(publicRoot, 'data', 'v2', 'links', `review-${reviewYear}-fy${fiscalYear}`);
+  fs.rmSync(outDir, { recursive: true, force: true });
+  const gzipBytes = writeGzipJson(path.join(outDir, 'links.json.gz'), { schemaVersion: 2, publishSchemaVersion: PUBLISH_SCHEMA_VERSION, reviewYear, fiscalYear, links });
+  const manifestObj = { schemaVersion: 2, publishSchemaVersion: PUBLISH_SCHEMA_VERSION, reviewYear, fiscalYear, linkGroupCount: links.length, projectCount: projectIds.size, sectionCount: sectionIds.size, compressedBytes: gzipBytes, file: 'links.json.gz' };
+  writeJson(path.join(outDir, 'manifest.json'), manifestObj);
+  return { reviewYear, fiscalYear, linkGroupCount: links.length, projectCount: projectIds.size, sectionCount: sectionIds.size, gzipBytes };
+}
+
+function dirSizeBytes(dir: string): number {
+  if (!fs.existsSync(dir)) return 0;
+  let total = 0;
+  for (const name of fs.readdirSync(dir)) {
+    const p = path.join(dir, name);
+    const stat = fs.statSync(p);
+    total += stat.isDirectory() ? dirSizeBytes(p) : stat.size;
+  }
+  return total;
+}
+
 function main(): void {
   const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
-  const targetYears = years.length > 0 ? years : [2024, 2025, 2026];
+  const reviewYears = years.length > 0 ? years : [2024, 2025, 2026];
+  const fiscalYears = [2024, 2025];
   const outputRoot = 'data';
   const publicRoot = 'public';
+  fs.rmSync(path.join(publicRoot, 'data', 'v2'), { recursive: true, force: true });
 
   console.log('=== publish-v2: RS ===');
+  const rsProducts: Record<string, unknown>[] = [];
   let totalBytes = 0;
-  for (const year of targetYears) {
+  for (const year of reviewYears) {
     const result = publishRsYear(outputRoot, publicRoot, year);
     if (!result) { console.log(`review-${year}: スキップ（projects.jsonlが無い）`); continue; }
     const profileTotal = Object.values(result.profiles).reduce((s, p) => s + p.gzipBytes, 0);
@@ -300,8 +438,50 @@ function main(): void {
       console.log(`  ※ referential integrity errors: ${result.referentialIntegrityErrors.length}件`);
       for (const err of result.referentialIntegrityErrors.slice(0, 5)) console.log(`    - ${err}`);
     }
+    rsProducts.push({ reviewYear: year, projectCount: result.projectCount, completeness: result.completeness, indexGzipBytes: result.indexGzipBytes });
   }
+
+  console.log('\n=== publish-v2: MOF ===');
+  const mofProducts: Record<string, unknown>[] = [];
+  const recordToSectionByFy = new Map<number, Map<string, string>>();
+  for (const fy of fiscalYears) {
+    const { result, recordToSection } = publishMofYear(outputRoot, publicRoot, fy, reviewYears);
+    recordToSectionByFy.set(fy, recordToSection);
+    if (!result) { console.log(`fy${fy}: スキップ（normalized/derivedのbudget-items.jsonlが無い）`); continue; }
+    totalBytes += result.indexGzipBytes + result.gzipBytes;
+    console.log(`fy${fy}: sections=${result.sectionCount} index=${result.indexGzipBytes}B sections=${result.gzipBytes}B(${result.shardCount}shard,max${result.maxShardBytes}B)`);
+    mofProducts.push({ fiscalYear: fy, sectionCount: result.sectionCount, indexGzipBytes: result.indexGzipBytes });
+  }
+
+  console.log('\n=== publish-v2: links (standalone) ===');
+  const linkProducts: Record<string, unknown>[] = [];
+  for (const reviewYear of reviewYears) {
+    for (const fiscalYear of fiscalYears) {
+      if (fiscalYear > reviewYear) continue;
+      const recordToSection = recordToSectionByFy.get(fiscalYear);
+      if (!recordToSection || recordToSection.size === 0) continue;
+      const result = publishLinkProduct(outputRoot, publicRoot, reviewYear, fiscalYear, recordToSection);
+      if (!result) continue;
+      totalBytes += result.gzipBytes;
+      console.log(`review-${reviewYear}×fy${fiscalYear}: linkGroups=${result.linkGroupCount} projects=${result.projectCount} sections=${result.sectionCount} ${result.gzipBytes}B`);
+      linkProducts.push(result as unknown as Record<string, unknown>);
+    }
+  }
+
   console.log(`\n合計gzipサイズ: ${totalBytes.toLocaleString()} bytes (${(totalBytes / 1024 / 1024).toFixed(2)} MiB)`);
+
+  const v2Root = path.join(publicRoot, 'data', 'v2');
+  const rootManifest = {
+    schemaVersion: 2,
+    publishSchemaVersion: PUBLISH_SCHEMA_VERSION,
+    generatedAt: new Date().toISOString(),
+    compression: 'gzip-json',
+    sharding: { hexBuckets: 256 },
+    mof: mofProducts,
+    rs: rsProducts,
+    links: linkProducts,
+  };
+  writeJson(path.join(v2Root, 'manifest.json'), { ...rootManifest, totalPublicBytes: dirSizeBytes(v2Root) });
 
   console.log('\n=== publish時に落としたフィールド一覧（no silent dropの可視化） ===');
   for (const report of computeDroppedFieldsReport()) {

@@ -59,11 +59,22 @@ export function writeJson(filePath: string, value: unknown): number {
   return data.length;
 }
 
-/** gzip -9、mtime固定でビルドの再現性を確保する */
+/**
+ * gzip -9で圧縮する。gzipヘッダのMTIMEフィールド（バイト4-7）をゼロ埋めし、
+ * 実行時刻に依存せずbyte-for-byteで再現可能にする（Python参照実装の
+ * gzip.compress(..., mtime=0)と同じ意図。Node標準のzlib.gzipSyncにmtime
+ * 指定オプションが無いため、圧縮後にヘッダを直接ゼロ埋めする）。
+ */
+export function gzipDeterministic(data: Buffer): Buffer {
+  const compressed = zlib.gzipSync(data, { level: 9 });
+  compressed.writeUInt32LE(0, 4);
+  return compressed;
+}
+
 export function writeGzipJson(filePath: string, value: unknown): number {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const data = Buffer.from(JSON.stringify(value), 'utf-8');
-  const compressed = zlib.gzipSync(data, { level: 9 });
+  const compressed = gzipDeterministic(data);
   fs.writeFileSync(filePath, compressed);
   return compressed.length;
 }

@@ -157,9 +157,19 @@ export function compactIndirectExpense(row: RsIndirectExpenseRecord): Record<str
   return pick(row as unknown as Record<string, unknown>, INDIRECT_KEYS as readonly string[]);
 }
 
-const LINK_KEYS = ['linkId', 'fiscalYear', 'phase', 'revision', 'matchMethod', 'mofAmountYen', 'rsAmountYen', 'differenceYen'] as const;
+/**
+ * MOF 1項目 ≠ RS 1事業であり、1 link groupが複数のRS事業を束ねることがある
+ * （2026-09-20指摘）。projectIds/projectCountを落とすと、project単体のcoreへ
+ * 埋め込んだmofAmountYen/rsAmountYenが「そのprojectだけの金額」なのか
+ * 「同じlink groupを共有する複数事業の合計」なのかUI側で誤読しうるため、
+ * project bundleへ埋め込む射影でもprojectIds/projectCountを必ず保持する。
+ * matchMethod/naturalKeyは内部実装の詳細なので落としてよい。mofRecordIds/
+ * rsRecordIdsは原典trace UIを作る段階まで不要なため落とす（standalone
+ * links productの生データ側には残っているので、必要になれば復元できる）。
+ */
+const LINK_KEYS = ['linkId', 'phase', 'revision', 'projectIds', 'mofAmountYen', 'rsAmountYen', 'differenceYen'] as const;
 export function compactMofRsLink(link: MofRsProjectLinkGroup): Record<string, unknown> {
-  return pick(link as unknown as Record<string, unknown>, LINK_KEYS as readonly string[]);
+  return { ...pick(link as unknown as Record<string, unknown>, LINK_KEYS as readonly string[]), projectCount: link.projectIds.length };
 }
 
 /**
@@ -195,6 +205,6 @@ export function computeDroppedFieldsReport(): DroppedFieldsReport[] {
     diffFields('expense-uses', [...RS_BASE_FIELDS, 'recordType', ...EXPENSE_USE_KEYS, 'extraFields', 'source'], EXPENSE_USE_KEYS),
     diffFields('multi-year-contracts', [...RS_BASE_FIELDS, 'recordType', ...MULTI_CONTRACT_KEYS, 'otherContractRaw', 'hasContract', 'extraFields', 'source'], MULTI_CONTRACT_KEYS),
     diffFields('indirect-expenses', [...RS_BASE_FIELDS, 'recordType', ...INDIRECT_KEYS, 'amountRaw', 'sourceRowId', 'extraFields', 'source'], INDIRECT_KEYS),
-    diffFields('mof-rs-links', ['schemaVersion', 'recordType', ...LINK_KEYS, 'naturalKey', 'mofRecordIds', 'rsRecordIds', 'projectIds'], LINK_KEYS),
+    diffFields('mof-rs-links', ['schemaVersion', 'recordType', 'matchMethod', 'naturalKey', 'mofRecordIds', 'rsRecordIds', ...LINK_KEYS], LINK_KEYS),
   ];
 }
