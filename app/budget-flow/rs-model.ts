@@ -7,7 +7,7 @@ export interface RsProjectSummary {
   budgetInitialYen: number | null; budgetSupplementsYen: number | null; budgetTotalYen: number | null;
   hasFundingGraph: boolean; blockCount: number; semanticEdgeCount: number;
   hasCycle: boolean; hasOrphanBlocks: boolean; hasDuplicateRelations: boolean;
-  hasMofLink: boolean; mofLinkCount: number;
+  hasMofLink: boolean; mofLinkCount: number; mofSectionCount: number;
   contextCounts: { policies: number; subsidyRules: number; projectRelations: number; logicModel: number; evaluations: number };
 }
 
@@ -60,7 +60,7 @@ export function filterRsProjects(projects: RsProjectSummary[], query: string, or
     && matches([p.projectId, p.projectName, p.ministry, p.bureau].join(' ')));
 }
 
-export type RsProjectSortKey = 'projectId' | 'projectName' | 'ministry' | 'budgetTotalYen' | 'blockCount';
+export type RsProjectSortKey = 'projectId' | 'projectName' | 'ministry' | 'budgetTotalYen' | 'blockCount' | 'mofSectionCount';
 export type RsProjectSort = { key: RsProjectSortKey; direction: 'asc' | 'desc' };
 
 export function filterRsAmountRange(projects: RsProjectSummary[], range: ReturnType<typeof parseAmountRange>) {
@@ -76,7 +76,7 @@ export function sortRsProjects(projects: RsProjectSummary[], sort: RsProjectSort
   if (!sort) return projects;
   const direction = sort.direction === 'asc' ? 1 : -1;
   return [...projects].sort((a, b) => {
-    if (sort.key === 'budgetTotalYen' || sort.key === 'blockCount') {
+    if (sort.key === 'budgetTotalYen' || sort.key === 'blockCount' || sort.key === 'mofSectionCount') {
       const x = a[sort.key], y = b[sort.key];
       if (x == null || y == null) return x == null ? (y == null ? 0 : 1) : -1;
       return (x - y) * direction;

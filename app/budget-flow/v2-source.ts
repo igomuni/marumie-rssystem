@@ -44,7 +44,7 @@ export function toEntitySummary(row: V2SectionIndexRow): EntitySummary {
     accountType: row.accountType, ministry: row.ministry, organization: row.organization,
     specialAccount: row.specialAccount, subAccount: row.subAccount, agency: row.agency,
     sectionCode: row.sectionCode, sectionName: row.sectionName, stages: row.stages,
-    eventCount: row.eventCount, relationCount: row.relationCount,
+    eventCount: row.eventCount, relationCount: row.relationCount, rsProjectCount: row.rsProjectCount ?? 0,
   };
 }
 
