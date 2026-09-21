@@ -338,6 +338,36 @@ describe('diagnoseSupplementalExactFallback', () => {
     expect(result.summary.p2aFullPathExactCount).toBe(1);
   });
 
+  it('review指摘: 一般会計マーカーが無い4token（所管/組織/項/目）full pathもexplicit-scope-exactとして解析する', () => {
+    const mof = mofItem({ sectionName: '国土交通統計調査費', subItemName: '諸謝金', ministry: '国土交通省', organization: '国土交通本省' });
+    const rs = missingKeyItem({ supplementalInfo: '国土交通省/国土交通本省/国土交通統計調査費/諸謝金' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-exact');
+  });
+
+  it('review指摘: 先頭の「※新規予算項目」等のnoteを除いた上でfull pathを解析する', () => {
+    const mof = mofItem({ sectionName: '消防防災体制等整備費', subItemName: '密集市街地火災対策支援補助金', ministry: '総務省', organization: '消防庁' });
+    const rs = missingKeyItem({ supplementalInfo: '※新規予算項目／一般会計 / 総務省 / 消防庁 / 消防防災体制等整備費 / 密集市街地火災対策支援補助金' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-exact');
+  });
+
+  it('review指摘: 特別会計のマーカー無しfull path（specialAccount/ministry/subAccount/項/目の順）も解析する', () => {
+    const mof = mofItem({
+      accountType: 'special', ministry: '内閣府、文部科学省、経済産業省及び環境省', specialAccount: 'エネルギー対策', subAccount: '電源開発促進勘定',
+      sectionName: '脱炭素成長型経済構造移行推進機構出資', subItemName: '脱炭素成長型経済構造移行推進機構出資金',
+    });
+    const rs = missingKeyItem({
+      accountType: 'special',
+      supplementalInfo: 'エネルギー対策 / 内閣府、文部科学省、経済産業省及び環境省 / 電源開発促進勘定 / 脱炭素成長型経済構造移行推進機構出資 / 脱炭素成長型経済構造移行推進機構出資金',
+    });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-exact');
+  });
+
   it('full pathの明示scopeがMOF targetと矛盾する場合は項・目と金額が一致してもsafeにしない（explicit-scope-conflict）', () => {
     const mof = mofItem({ sectionName: '総合研究費', subItemName: '庁費', ministry: '法務省', organization: '法務総合研究所', amountYen: 500 });
     const rs = missingKeyItem({ supplementalInfo: '一般会計／法務省／総務総合研究所／総合研究費／庁費', budgetAmountYen: 500 }); // 組織名がsource typo相当で不一致

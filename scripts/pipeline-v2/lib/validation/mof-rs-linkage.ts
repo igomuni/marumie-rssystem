@@ -402,31 +402,37 @@ function parseLabeled(s: string): ParsedSupplementalInfo | null {
   return { kind: 'labeled', sectionName: section, subItemName: item, explicitScope: Object.keys(explicitScope).length > 0 ? explicitScope : undefined };
 }
 
-/** B. `一般会計 / 所管 / 組織 / 項 / 目`型のfull path表記 */
-function parseSlashPath(s: string): ParsedSupplementalInfo | null {
-  const tokens = s.split(/[／/]/).map(t => t.trim()).filter(t => t.length > 0);
+/**
+ * B. full path表記。`一般会計/特別会計`マーカーの有無、先頭の`※新規予算項目`等のnoteの有無に
+ * 関わらず、末尾2tokenを項・目、残りをscope componentとして accountType別に位置で割り当てる
+ * （review指摘: RS実データでは`一般会計`マーカーを伴わない`所管/組織/項/目`4token表記や、
+ * `※新規予算項目／一般会計／所管／組織／項／目`のようなnote付きが多数を占める。マーカー必須の
+ * 実装ではこれらを丸ごと取りこぼしていた）。
+ */
+function parseSlashPath(s: string, accountType: 'general' | 'special'): ParsedSupplementalInfo | null {
+  let tokens = s.split(/[／/]/).map(t => t.trim()).filter(t => t.length > 0);
+  if (tokens.length > 0 && tokens[0].startsWith('※')) tokens = tokens.slice(1);
+  if (tokens.length > 0 && (tokens[0] === '一般会計' || tokens[0] === '特別会計')) tokens = tokens.slice(1);
   if (tokens.length < 3) return null;
-  const marker = tokens[0];
-  if (marker === '一般会計') {
-    if (tokens.length !== 5) return null;
-    const [, ministry, organization, section, item] = tokens;
-    if (isRejectedFragment(section) || isRejectedFragment(item)) return null;
-    return { kind: 'slash-path', sectionName: section, subItemName: item, explicitScope: { ministry, organization } };
-  }
-  if (marker === '特別会計') {
-    if (tokens.length < 4) return null;
-    const section = tokens[tokens.length - 2];
-    const item = tokens[tokens.length - 1];
-    if (isRejectedFragment(section) || isRejectedFragment(item)) return null;
-    const rest = tokens.slice(1, -2);
-    if (rest.length === 0) return null;
-    const explicitScope: ExplicitScope = {};
-    if (rest.length === 1) { explicitScope.specialAccount = stripAccountSuffix(rest[0]); }
+
+  const section = tokens[tokens.length - 2];
+  const item = tokens[tokens.length - 1];
+  if (isRejectedFragment(section) || isRejectedFragment(item)) return null;
+  const rest = tokens.slice(0, -2);
+
+  const explicitScope: ExplicitScope = {};
+  if (accountType === 'general') {
+    if (rest.length === 2) { explicitScope.ministry = rest[0]; explicitScope.organization = rest[1]; }
+    else if (rest.length === 1) { explicitScope.ministry = rest[0]; }
+    else return null;
+  } else {
+    // 実データ確認済みの順序: specialAccount / ministry / subAccount（"特別会計"マーカー無し）
+    if (rest.length === 3) { explicitScope.specialAccount = stripAccountSuffix(rest[0]); explicitScope.ministry = rest[1]; explicitScope.subAccount = rest[2]; }
     else if (rest.length === 2) { explicitScope.specialAccount = stripAccountSuffix(rest[0]); explicitScope.subAccount = rest[1]; }
-    else { explicitScope.ministry = rest[0]; explicitScope.specialAccount = stripAccountSuffix(rest[1]); explicitScope.subAccount = rest[2]; }
-    return { kind: 'slash-path', sectionName: section, subItemName: item, explicitScope };
+    else if (rest.length === 1) { explicitScope.specialAccount = stripAccountSuffix(rest[0]); }
+    else return null;
   }
-  return null;
+  return { kind: 'slash-path', sectionName: section, subItemName: item, explicitScope };
 }
 
 /** C. `項名　目名`（U+3000区切り、厳密2token） */
@@ -448,10 +454,10 @@ function parseSlashPair(s: string): ParsedSupplementalInfo | null {
 }
 
 /** parser優先順位: labeled → slash-path → fwspace-pair → slash-pair */
-export function parseSupplementalExactInfo(raw: string): ParsedSupplementalInfo | null {
+export function parseSupplementalExactInfo(raw: string, accountType: 'general' | 'special'): ParsedSupplementalInfo | null {
   const s = (raw ?? '').trim();
   if (!s || isRejectedFragment(s)) return null;
-  return parseLabeled(s) ?? parseSlashPath(s) ?? parseFwspacePair(s) ?? parseSlashPair(s);
+  return parseLabeled(s) ?? parseSlashPath(s, accountType) ?? parseFwspacePair(s) ?? parseSlashPair(s);
 }
 
 /** 明示scopeとして与えられたfieldだけをMOF targetのscopeと比較する（未指定fieldは判定しない） */
@@ -599,7 +605,7 @@ export function diagnoseSupplementalExactFallback(
   for (const r of targetRows) {
     if (r.accountType !== 'general' && r.accountType !== 'special') { parseRejectedCount++; continue; }
     const accountType: 'general' | 'special' = r.accountType;
-    const parsed = parseSupplementalExactInfo(r.supplementalInfo);
+    const parsed = parseSupplementalExactInfo(r.supplementalInfo, accountType);
     if (!parsed) { parseRejectedCount++; continue; }
     parsedCandidateCount++;
 
