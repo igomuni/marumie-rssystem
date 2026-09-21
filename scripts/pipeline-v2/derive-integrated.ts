@@ -20,7 +20,7 @@ import { readJsonl, writeJsonl, writeJson } from './lib/jsonl';
 import { buildMofRsLinks } from './lib/mof-rs-links';
 import type { MofBudgetItemRecord, RsBudgetItemRecordV2 } from './types';
 
-const FISCAL_YEARS = [2024, 2025];
+const FISCAL_YEARS = [2023, 2024, 2025];
 const REVIEW_YEARS = [2024, 2025, 2026];
 
 function main(): void {

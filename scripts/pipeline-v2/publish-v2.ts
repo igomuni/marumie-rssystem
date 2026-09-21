@@ -442,7 +442,7 @@ function dirSizeBytes(dir: string): number {
 function main(): void {
   const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
   const reviewYears = years.length > 0 ? years : [2024, 2025, 2026];
-  const fiscalYears = [2024, 2025];
+  const fiscalYears = [2023, 2024, 2025];
   const outputRoot = 'data';
   const publicRoot = 'public';
   fs.rmSync(path.join(publicRoot, 'data', 'v2'), { recursive: true, force: true });

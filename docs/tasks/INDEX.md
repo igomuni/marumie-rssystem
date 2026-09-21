@@ -2,6 +2,8 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20260921_2222_Pipeline_V2_MOF_FY2023取り込み.md](20260921_2222_Pipeline_V2_MOF_FY2023取り込み.md) — MOF FY2023をnormalize/derive/derive-integrated/publish/validate全層に取り込み。FISCAL_YEARSハードコード3箇所を[2023,2024,2025]に変更、error=0
+
 - [20260920_2212_Pipeline_V2_フルパイプラインclean実行と再現性検証.md](20260920_2212_Pipeline_V2_フルパイプラインclean実行と再現性検証.md) — MOF/RS/links publish完成後、clean状態からRaw→Publishまで通しで実行。所要時間約65秒、publish出力がbyte-for-byte再現可能、public合計約83.8MiBを確認
 - [20260920_1739_RS_Normalize_全15CSV対応完了と全件一致検証.md](20260920_1739_RS_Normalize_全15CSV対応完了と全件一致検証.md) — 残り9系統（1-3/1-4/1-5/3-1/3-2/4-1/5-3/5-4/6-1）+ review-sheetsマージを実装。FY2024/2025/2026(sheets-only)の全出力がPython参照実装と完全一致（project-sheet-conflicts含む）
 - [20260920_1708_RS_Normalize_4件修正と参照実装全件一致検証.md](20260920_1708_RS_Normalize_4件修正と参照実装全件一致検証.md) — 2-2 ministry不整合・2026 sheets-only誤出力・extraFields/実施方法/source inventory・streaming化の4件修正。5-1/5-2はPython参照実装と全件一致確認済み（projectsのみreview-sheets merge未実装により既知の差分）
