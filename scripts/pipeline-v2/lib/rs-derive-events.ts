@@ -10,7 +10,7 @@ import { stableId } from './stable-id';
 import type { RsBudgetItemRecordV2, RsBudgetSummaryRecord, RsDerivedBudgetEvent, RsDerivedEventType } from '../types';
 
 /** RS2-2の「予算種別」原本表記からイベント種別へ分類する。予備費「等」は断定せずreserve_or_otherに留める */
-function rsBudgetEventType(budgetType: string): RsDerivedEventType {
+export function rsBudgetEventType(budgetType: string): RsDerivedEventType {
   if (budgetType === '当初予算') return 'initial_budget';
   if (/^第\d+次補正予算$/.test(budgetType)) return 'supplementary_budget';
   if (budgetType === '前年度から繰越し') return 'carryover_in';

@@ -25,9 +25,13 @@ import {
   compareLinkBaseline, decideExitFailure,
   type Finding,
 } from './lib/validate-checks';
+import {
+  checkRsCurrentBudgetEquation, checkRsSummaryItemReconciliation,
+  checkRsDerivedEventProvenance, checkRsZeroBlankPropagation,
+} from './lib/validation/rs-money';
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2,
-  RsProjectSheetConflict, MofBudgetItemRecord, MofRsProjectLinkGroup,
+  RsBudgetSummaryRecord, RsDerivedBudgetEvent, RsProjectSheetConflict, MofBudgetItemRecord, MofRsProjectLinkGroup,
 } from './types';
 
 const REVIEW_YEARS = [2024, 2025, 2026];
@@ -64,6 +68,11 @@ function withReviewYear(findings: Finding[], reviewYear: number): Finding[] {
 interface RsYearMetrics {
   reviewYear: number; sourceInventoryDatasets: number; blockCount: number; relationCount: number;
   unresolvedRelationCount: number; budgetItemCount: number; sheetConflictCount: number;
+  budgetSummaryCount: number; derivedBudgetEventCount: number;
+  currentBudgetEquation: { checked: number; mismatches: number };
+  summaryItemReconciliation: { checkedGroups: number; mismatches: number };
+  derivedEventProvenance: { checkedEvents: number; missingSourceRecords: number; amountMismatches: number };
+  explicitZeroBlank: { explicitZeroSourceRows: number; explicitZeroEvents: number; blankSourceRows: number; blankUnexpectedEvents: number };
 }
 
 function validateRsYear(outputRoot: string, reviewYear: number): { findings: Finding[]; metrics: RsYearMetrics | null } {
@@ -97,10 +106,43 @@ function validateRsYear(outputRoot: string, reviewYear: number): { findings: Fin
   if (conflictFindings.length > 0) console.log(`  review-${reviewYear}: ${conflictFindings[0].message}`);
   findings.push(...withReviewYear(conflictFindings, reviewYear));
 
+  // Stage B: RS monetary invariants。summaries/itemsはここまでで読み込み済みの配列を再利用する
+  const summaries = readJsonl<RsBudgetSummaryRecord>(path.join(normDir, 'budget-summaries.jsonl'));
+  const derivedEventsPath = path.join(outputRoot, 'derived', 'rs', `review-${reviewYear}`, 'budget-events.jsonl');
+  const derivedEvents = fs.existsSync(derivedEventsPath) ? readJsonl<RsDerivedBudgetEvent>(derivedEventsPath) : [];
+
+  const equationResult = checkRsCurrentBudgetEquation(summaries);
+  findings.push(...withReviewYear(equationResult.findings, reviewYear));
+
+  const reconciliationResult = checkRsSummaryItemReconciliation(reviewYear, summaries, items);
+  findings.push(...withReviewYear(reconciliationResult.findings, reviewYear));
+
+  const provenanceResult = derivedEvents.length > 0
+    ? checkRsDerivedEventProvenance(derivedEvents, items, summaries)
+    : { findings: [] as Finding[], checkedEvents: 0, missingSourceRecords: 0, amountMismatches: 0 };
+  findings.push(...withReviewYear(provenanceResult.findings, reviewYear));
+
+  const zeroBlankResult = checkRsZeroBlankPropagation(items, derivedEvents);
+  findings.push(...withReviewYear(zeroBlankResult.findings, reviewYear));
+
+  console.log(`  review-${reviewYear}: RS monetary invariants — 現額式 checked=${equationResult.checked} mismatch=${equationResult.mismatches} / ` +
+    `2-1↔2-2 checkedGroups=${reconciliationResult.checkedGroups} mismatch=${reconciliationResult.mismatches} / ` +
+    `derived provenance checkedEvents=${provenanceResult.checkedEvents} missing=${provenanceResult.missingSourceRecords} amountMismatch=${provenanceResult.amountMismatches}`);
+
   const metrics: RsYearMetrics = {
     reviewYear, sourceInventoryDatasets: manifest.sourceInventories?.length ?? 0,
     blockCount: blocks.length, relationCount: relations.length, unresolvedRelationCount: unresolvedCount,
     budgetItemCount: items.length, sheetConflictCount: conflicts.length,
+    budgetSummaryCount: summaries.length, derivedBudgetEventCount: derivedEvents.length,
+    currentBudgetEquation: { checked: equationResult.checked, mismatches: equationResult.mismatches },
+    summaryItemReconciliation: { checkedGroups: reconciliationResult.checkedGroups, mismatches: reconciliationResult.mismatches },
+    derivedEventProvenance: {
+      checkedEvents: provenanceResult.checkedEvents, missingSourceRecords: provenanceResult.missingSourceRecords, amountMismatches: provenanceResult.amountMismatches,
+    },
+    explicitZeroBlank: {
+      explicitZeroSourceRows: zeroBlankResult.explicitZeroSourceRows, explicitZeroEvents: zeroBlankResult.explicitZeroEvents,
+      blankSourceRows: zeroBlankResult.blankSourceRows, blankUnexpectedEvents: zeroBlankResult.blankUnexpectedEvents,
+    },
   };
   return { findings, metrics };
 }

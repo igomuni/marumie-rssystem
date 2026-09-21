@@ -25,6 +25,8 @@ export interface FindingScope {
   projectId?: string;
   recordId?: string;
   linkId?: string;
+  /** Stage B: Derived event単位の検査（rs-money.ts）で使う */
+  eventId?: string;
 }
 
 export interface Finding {
