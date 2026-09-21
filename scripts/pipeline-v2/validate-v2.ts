@@ -30,7 +30,8 @@ import {
   checkRsDerivedEventProvenance, checkRsZeroBlankPropagation,
 } from './lib/validation/rs-money';
 import {
-  checkMofSettlementEquation, checkMofDerivedEventProvenance, checkMofStructuralZero,
+  checkMofSettlementEquation, checkMofDerivedEventProvenance,
+  checkMofParliamentaryAmendmentProvenance, checkMofStructuralZeroFromRaw,
 } from './lib/validation/mof-money';
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2,
@@ -174,13 +175,19 @@ interface MofYearMetrics {
   settlementEquation: { checked: number; skipped: number; mismatches: number };
   derivedEventProvenance: {
     expectedEvents: number; actualEvents: number; missingExpectedEvents: number; duplicateOrUnexpectedEvents: number;
-    amountMismatches: number; fiscalYearMismatches: number; eventTypeMismatches: number;
-    parliamentaryEventsChecked: number; parliamentaryIntegrityErrors: number;
+    amountMismatches: number; fiscalYearMismatches: number; eventTypeMismatches: number; sourceCardinalityErrors: number;
   };
-  structuralZero: { agencyTransferAdjustmentRows: number; agencyTransferAdjustmentAnomalies: number };
+  parliamentaryAmendmentProvenance: {
+    expectedEvents: number; actualEvents: number; missingExpectedEvents: number; duplicateOrUnexpectedEvents: number;
+    amountMismatches: number; expectedNetAmendmentAmountYen: number;
+  };
+  structuralZero: {
+    counts: ReturnType<typeof checkMofStructuralZeroFromRaw>['counts'];
+    rawSourceUnavailableRows: number;
+  };
 }
 
-function validateMofYear(outputRoot: string, fiscalYear: number): { findings: Finding[]; metrics: MofYearMetrics | null } {
+function validateMofYear(outputRoot: string, rawRoot: string, fiscalYear: number): { findings: Finding[]; metrics: MofYearMetrics | null } {
   const findings: Finding[] = [];
   const normDir = path.join(outputRoot, 'normalized', 'mof', `fy${fiscalYear}`);
   const itemsPath = path.join(normDir, 'budget-items.jsonl');
@@ -200,18 +207,29 @@ function validateMofYear(outputRoot: string, fiscalYear: number): { findings: Fi
     : {
       findings: [] as Finding[], checkedEvents: 0, expectedEvents: 0, actualEvents: 0,
       missingExpectedEvents: 0, duplicateOrUnexpectedEvents: 0, amountMismatches: 0,
-      fiscalYearMismatches: 0, eventTypeMismatches: 0, parliamentaryEventsChecked: 0, parliamentaryIntegrityErrors: 0,
+      fiscalYearMismatches: 0, eventTypeMismatches: 0, sourceCardinalityErrors: 0,
     };
   findings.push(...withFiscalYear(provenanceResult.findings, fiscalYear));
 
-  const structuralZeroResult = checkMofStructuralZero(items);
+  const parliamentaryResult = fs.existsSync(derivedEventsPath)
+    ? checkMofParliamentaryAmendmentProvenance(derivedEvents, items)
+    : {
+      findings: [] as Finding[], expectedEvents: 0, actualEvents: 0, missingExpectedEvents: 0,
+      duplicateOrUnexpectedEvents: 0, amountMismatches: 0, expectedNetAmendmentAmountYen: 0,
+    };
+  findings.push(...withFiscalYear(parliamentaryResult.findings, fiscalYear));
+
+  const structuralZeroResult = checkMofStructuralZeroFromRaw(rawRoot, items);
   findings.push(...withFiscalYear(structuralZeroResult.findings, fiscalYear));
 
   console.log(`  fy${fiscalYear}: MOF monetary invariants — 決算等式 checked=${equationResult.checked} skipped=${equationResult.skipped} mismatch=${equationResult.mismatches} / ` +
     `derived provenance expected=${provenanceResult.expectedEvents} actual=${provenanceResult.actualEvents} ` +
-    `missing=${provenanceResult.missingExpectedEvents} dup/unexpected=${provenanceResult.duplicateOrUnexpectedEvents} amountMismatch=${provenanceResult.amountMismatches} / ` +
-    `国会修正整合性 checked=${provenanceResult.parliamentaryEventsChecked} errors=${provenanceResult.parliamentaryIntegrityErrors} / ` +
-    `structural-zero(政府関係機関transferAdjustment) rows=${structuralZeroResult.agencyTransferAdjustmentRows}`);
+    `missing=${provenanceResult.missingExpectedEvents} dup/unexpected=${provenanceResult.duplicateOrUnexpectedEvents} amountMismatch=${provenanceResult.amountMismatches} ` +
+    `cardinalityErrors=${provenanceResult.sourceCardinalityErrors} / ` +
+    `国会修正 expected=${parliamentaryResult.expectedEvents} actual=${parliamentaryResult.actualEvents} ` +
+    `missing=${parliamentaryResult.missingExpectedEvents} dup/unexpected=${parliamentaryResult.duplicateOrUnexpectedEvents} ` +
+    `netAmendment=${parliamentaryResult.expectedNetAmendmentAmountYen.toLocaleString()}円 / ` +
+    `structural-zero rawSourceUnavailable=${structuralZeroResult.rawSourceUnavailableRows}`);
 
   const metrics: MofYearMetrics = {
     fiscalYear, budgetItemCount: items.length, derivedBudgetEventCount: derivedEvents.length,
@@ -220,9 +238,15 @@ function validateMofYear(outputRoot: string, fiscalYear: number): { findings: Fi
       expectedEvents: provenanceResult.expectedEvents, actualEvents: provenanceResult.actualEvents,
       missingExpectedEvents: provenanceResult.missingExpectedEvents, duplicateOrUnexpectedEvents: provenanceResult.duplicateOrUnexpectedEvents,
       amountMismatches: provenanceResult.amountMismatches, fiscalYearMismatches: provenanceResult.fiscalYearMismatches, eventTypeMismatches: provenanceResult.eventTypeMismatches,
-      parliamentaryEventsChecked: provenanceResult.parliamentaryEventsChecked, parliamentaryIntegrityErrors: provenanceResult.parliamentaryIntegrityErrors,
+      sourceCardinalityErrors: provenanceResult.sourceCardinalityErrors,
     },
-    structuralZero: { agencyTransferAdjustmentRows: structuralZeroResult.agencyTransferAdjustmentRows, agencyTransferAdjustmentAnomalies: structuralZeroResult.agencyTransferAdjustmentAnomalies },
+    parliamentaryAmendmentProvenance: {
+      expectedEvents: parliamentaryResult.expectedEvents, actualEvents: parliamentaryResult.actualEvents,
+      missingExpectedEvents: parliamentaryResult.missingExpectedEvents, duplicateOrUnexpectedEvents: parliamentaryResult.duplicateOrUnexpectedEvents,
+      amountMismatches: parliamentaryResult.amountMismatches,
+      expectedNetAmendmentAmountYen: parliamentaryResult.expectedNetAmendmentAmountYen,
+    },
+    structuralZero: { counts: structuralZeroResult.counts, rawSourceUnavailableRows: structuralZeroResult.rawSourceUnavailableRows },
   };
   return { findings, metrics };
 }
@@ -268,6 +292,7 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
 
 function main(): void {
   const outputRoot = 'data';
+  const rawRoot = path.join('data', 'download');
   const strictBaseline = process.argv.includes('--strict-baseline');
   const allFindings: Finding[] = [];
   const rsMetrics: RsYearMetrics[] = [];
@@ -281,7 +306,7 @@ function main(): void {
     if (metrics) rsMetrics.push(metrics);
   }
   for (const year of FISCAL_YEARS) {
-    const { findings, metrics } = validateMofYear(outputRoot, year);
+    const { findings, metrics } = validateMofYear(outputRoot, rawRoot, year);
     allFindings.push(...findings);
     if (metrics) mofMetrics.push(metrics);
   }
