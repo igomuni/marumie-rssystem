@@ -19,7 +19,7 @@
  * 出力: data/normalized/mof/fy{year}/{budget-items.jsonl,manifest.json}
  *
  * 使い方: npx tsx scripts/pipeline-v2/normalize-mof.ts [year...]
- *   （年度省略時は 2024 2025）
+ *   （年度省略時は 2023 2024 2025）
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -281,7 +281,7 @@ function processYear(rawRoot: string, outputRoot: string, year: number, docs: Mo
 
 function main(): void {
   const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
-  const targetYears = years.length > 0 ? new Set(years) : new Set([2024, 2025]);
+  const targetYears = years.length > 0 ? new Set(years) : new Set([2023, 2024, 2025]);
 
   const rawRoot = path.join('data', 'download');
   const outputRoot = 'data';

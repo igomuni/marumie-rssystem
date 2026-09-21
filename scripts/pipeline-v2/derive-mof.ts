@@ -11,7 +11,7 @@
  *                                   identity-relations.jsonl,identity-summary.json}
  *
  * 使い方: npx tsx scripts/pipeline-v2/derive-mof.ts [year...]
- *   （年度省略時は 2024 2025）
+ *   （年度省略時は 2023 2024 2025）
  */
 import * as path from 'path';
 import { stableId } from './lib/stable-id';
@@ -232,7 +232,7 @@ function buildMofSectionsForYear(outputRoot: string, fiscalYear: number): { sect
 
 function main(): void {
   const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
-  const targetYears = years.length > 0 ? years : [2024, 2025];
+  const targetYears = years.length > 0 ? years : [2023, 2024, 2025];
   const outputRoot = 'data';
 
   for (const year of targetYears) {

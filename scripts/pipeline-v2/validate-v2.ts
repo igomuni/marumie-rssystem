@@ -55,7 +55,7 @@ import type {
 } from './types';
 
 const REVIEW_YEARS = [2024, 2025, 2026];
-const FISCAL_YEARS = [2024, 2025];
+const FISCAL_YEARS = [2023, 2024, 2025];
 
 /**
  * MOF_RS_Linkage先行検証doc記載のgolden acceptance（review-2025のみ固定）。

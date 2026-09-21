@@ -22,7 +22,7 @@
  *     にキャッシュ済みのため、常に取得しない
  *
  * 使い方: npx tsx scripts/pipeline-v2/download-mof-archive.ts [year...]
- *   （年度省略時は 2024 2025。年度→令和年号は year - 2018 で変換）
+ *   （年度省略時は 2023 2024 2025。年度→令和年号は year - 2018 で変換）
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -146,7 +146,7 @@ async function processYear(year: number): Promise<number> {
 
 async function main() {
   const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
-  const targetYears = years.length > 0 ? years : [2024, 2025];
+  const targetYears = years.length > 0 ? years : [2023, 2024, 2025];
 
   let totalFailed = 0;
   for (const year of targetYears) totalFailed += await processYear(year);
