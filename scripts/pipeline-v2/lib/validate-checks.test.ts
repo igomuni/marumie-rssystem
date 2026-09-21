@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   checkNoUnknownNonEmptyColumns, checkFundingRelationBlockReferences,
-  checkExplicitZeroPreserved, checkMofRsLinkIntegrity,
+  checkExplicitZeroPreserved, checkMofRsLinkIntegrity, compareLinkBaseline, decideExitFailure,
+  type Finding,
 } from './validate-checks';
 import type { SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2, MofBudgetItemRecord, MofRsProjectLinkGroup } from '../types';
 
@@ -101,5 +102,67 @@ describe('checkMofRsLinkIntegrity', () => {
     const link2 = { ...validLink, linkId: 'l2', naturalKey: 'k2' };
     const findings = checkMofRsLinkIntegrity([validLink, link2], [mofItem], [rsItem]);
     expect(findings.some(f => f.message.includes('重複所属'))).toBe(true);
+  });
+
+  it('invariant violationはcategory=invariantかつstructured scope/metricsを持つ（Stage A）', () => {
+    const link = { ...validLink, differenceYen: 999 };
+    const findings = checkMofRsLinkIntegrity([link], [mofItem], [rsItem]);
+    const finding = findings.find(f => f.message.includes('differenceYen'))!;
+    expect(finding.category).toBe('invariant');
+    expect(finding.scope?.linkId).toBe('l1');
+    expect(finding.metrics).toMatchObject({ mofAmountYen: 100, rsAmountYen: 90, differenceYen: 999, expectedDifferenceYen: 10 });
+  });
+
+  it('重複所属findingはrecordIdをscopeに、重複先linkIdをsampleIdsに持つ（Stage A）', () => {
+    const link2 = { ...validLink, linkId: 'l2', naturalKey: 'k2' };
+    const findings = checkMofRsLinkIntegrity([validLink, link2], [mofItem], [rsItem]);
+    const finding = findings.find(f => f.message.includes('重複所属'))!;
+    expect(finding.scope?.recordId).toBe('rs1');
+    expect(finding.sampleIds).toEqual(['l1', 'l2']);
+  });
+});
+
+describe('compareLinkBaseline（Stage A: baseline driftとinvariantの分離）', () => {
+  const scope = { reviewYear: 2025, fiscalYear: 2024 };
+
+  it('baselineと一致すればfindingsは空', () => {
+    const golden = { linkGroupCount: 100, mofAmountAcrossGroupsYen: 5000 };
+    const summary = { linkGroupCount: 100, mofAmountAcrossGroupsYen: 5000 };
+    expect(compareLinkBaseline(golden, summary, scope)).toHaveLength(0);
+  });
+
+  it('baselineと不一致ならcategory=baseline-drift・severity=warning（errorではない）', () => {
+    const golden = { linkGroupCount: 100 };
+    const summary = { linkGroupCount: 102 };
+    const findings = compareLinkBaseline(golden, summary, scope);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].category).toBe('baseline-drift');
+    expect(findings[0].scope).toEqual(scope);
+    expect(findings[0].metrics).toMatchObject({ key: 'linkGroupCount', expected: 100, actual: 102 });
+  });
+});
+
+describe('decideExitFailure（Stage A: exit codeはerrorのみに連動）', () => {
+  const invariantError: Finding = { severity: 'error', check: 'x', category: 'invariant', message: 'x' };
+  const baselineDrift: Finding = { severity: 'warning', check: 'y', category: 'baseline-drift', message: 'y' };
+  const info: Finding = { severity: 'info', check: 'z', message: 'z' };
+
+  it('invariant違反（error）があれば常に失敗', () => {
+    expect(decideExitFailure([invariantError])).toBe(true);
+    expect(decideExitFailure([invariantError], { strictBaseline: false })).toBe(true);
+  });
+
+  it('baseline driftのみでは既定では失敗にしない', () => {
+    expect(decideExitFailure([baselineDrift, info])).toBe(false);
+  });
+
+  it('--strict-baseline相当（strictBaseline:true）ならbaseline driftも失敗にする', () => {
+    expect(decideExitFailure([baselineDrift], { strictBaseline: true })).toBe(true);
+  });
+
+  it('findingsが空、またはinfoのみなら失敗にしない', () => {
+    expect(decideExitFailure([])).toBe(false);
+    expect(decideExitFailure([info], { strictBaseline: true })).toBe(false);
   });
 });
