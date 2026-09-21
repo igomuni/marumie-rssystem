@@ -29,9 +29,13 @@ import {
   checkRsCurrentBudgetEquation, checkRsSummaryItemReconciliation,
   checkRsDerivedEventProvenance, checkRsZeroBlankPropagation,
 } from './lib/validation/rs-money';
+import {
+  checkMofSettlementEquation, checkMofDerivedEventProvenance, checkMofStructuralZero,
+} from './lib/validation/mof-money';
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2,
   RsBudgetSummaryRecord, RsDerivedBudgetEvent, RsProjectSheetConflict, MofBudgetItemRecord, MofRsProjectLinkGroup,
+  MofDerivedBudgetEvent,
 } from './types';
 
 const REVIEW_YEARS = [2024, 2025, 2026];
@@ -160,6 +164,69 @@ function validateRsYear(outputRoot: string, reviewYear: number): { findings: Fin
   return { findings, metrics };
 }
 
+/** findingにfiscalYearをscopeとして付与しつつ、既存のmessage prefix方式も維持する（後方互換） */
+function withFiscalYear(findings: Finding[], fiscalYear: number): Finding[] {
+  return findings.map(f => ({ ...f, scope: { ...f.scope, fiscalYear }, message: `fy${fiscalYear} ${f.message}` }));
+}
+
+interface MofYearMetrics {
+  fiscalYear: number; budgetItemCount: number; derivedBudgetEventCount: number;
+  settlementEquation: { checked: number; skipped: number; mismatches: number };
+  derivedEventProvenance: {
+    expectedEvents: number; actualEvents: number; missingExpectedEvents: number; duplicateOrUnexpectedEvents: number;
+    amountMismatches: number; fiscalYearMismatches: number; eventTypeMismatches: number;
+    parliamentaryEventsChecked: number; parliamentaryIntegrityErrors: number;
+  };
+  structuralZero: { agencyTransferAdjustmentRows: number; agencyTransferAdjustmentAnomalies: number };
+}
+
+function validateMofYear(outputRoot: string, fiscalYear: number): { findings: Finding[]; metrics: MofYearMetrics | null } {
+  const findings: Finding[] = [];
+  const normDir = path.join(outputRoot, 'normalized', 'mof', `fy${fiscalYear}`);
+  const itemsPath = path.join(normDir, 'budget-items.jsonl');
+  if (!fs.existsSync(itemsPath)) return { findings, metrics: null };
+
+  const items = readJsonl<MofBudgetItemRecord>(itemsPath);
+  const derivedEventsPath = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`, 'budget-events.jsonl');
+  const derivedEvents = fs.existsSync(derivedEventsPath) ? readJsonl<MofDerivedBudgetEvent>(derivedEventsPath) : [];
+
+  // Stage C: 決算等式はlib/mof-settlement.tsのvalidateSettlementEquations()を呼ばず、
+  // このvalidator自身で独立に再実装した式を使う（09_validator-hardening-plan.md C-1）
+  const equationResult = checkMofSettlementEquation(items);
+  findings.push(...withFiscalYear(equationResult.findings, fiscalYear));
+
+  const provenanceResult = fs.existsSync(derivedEventsPath)
+    ? checkMofDerivedEventProvenance(derivedEvents, items)
+    : {
+      findings: [] as Finding[], checkedEvents: 0, expectedEvents: 0, actualEvents: 0,
+      missingExpectedEvents: 0, duplicateOrUnexpectedEvents: 0, amountMismatches: 0,
+      fiscalYearMismatches: 0, eventTypeMismatches: 0, parliamentaryEventsChecked: 0, parliamentaryIntegrityErrors: 0,
+    };
+  findings.push(...withFiscalYear(provenanceResult.findings, fiscalYear));
+
+  const structuralZeroResult = checkMofStructuralZero(items);
+  findings.push(...withFiscalYear(structuralZeroResult.findings, fiscalYear));
+
+  console.log(`  fy${fiscalYear}: MOF monetary invariants — 決算等式 checked=${equationResult.checked} skipped=${equationResult.skipped} mismatch=${equationResult.mismatches} / ` +
+    `derived provenance expected=${provenanceResult.expectedEvents} actual=${provenanceResult.actualEvents} ` +
+    `missing=${provenanceResult.missingExpectedEvents} dup/unexpected=${provenanceResult.duplicateOrUnexpectedEvents} amountMismatch=${provenanceResult.amountMismatches} / ` +
+    `国会修正整合性 checked=${provenanceResult.parliamentaryEventsChecked} errors=${provenanceResult.parliamentaryIntegrityErrors} / ` +
+    `structural-zero(政府関係機関transferAdjustment) rows=${structuralZeroResult.agencyTransferAdjustmentRows}`);
+
+  const metrics: MofYearMetrics = {
+    fiscalYear, budgetItemCount: items.length, derivedBudgetEventCount: derivedEvents.length,
+    settlementEquation: { checked: equationResult.checked, skipped: equationResult.skipped, mismatches: equationResult.mismatches },
+    derivedEventProvenance: {
+      expectedEvents: provenanceResult.expectedEvents, actualEvents: provenanceResult.actualEvents,
+      missingExpectedEvents: provenanceResult.missingExpectedEvents, duplicateOrUnexpectedEvents: provenanceResult.duplicateOrUnexpectedEvents,
+      amountMismatches: provenanceResult.amountMismatches, fiscalYearMismatches: provenanceResult.fiscalYearMismatches, eventTypeMismatches: provenanceResult.eventTypeMismatches,
+      parliamentaryEventsChecked: provenanceResult.parliamentaryEventsChecked, parliamentaryIntegrityErrors: provenanceResult.parliamentaryIntegrityErrors,
+    },
+    structuralZero: { agencyTransferAdjustmentRows: structuralZeroResult.agencyTransferAdjustmentRows, agencyTransferAdjustmentAnomalies: structuralZeroResult.agencyTransferAdjustmentAnomalies },
+  };
+  return { findings, metrics };
+}
+
 interface LinkPairMetrics { reviewYear: number; fiscalYear: number; linkGroupCount: number; summary: Record<string, unknown> }
 
 function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics: LinkPairMetrics[] } {
@@ -205,11 +272,18 @@ function main(): void {
   const allFindings: Finding[] = [];
   const rsMetrics: RsYearMetrics[] = [];
 
+  const mofMetrics: MofYearMetrics[] = [];
+
   console.log('=== Pipeline V2 validate-v2 ===');
   for (const year of REVIEW_YEARS) {
     const { findings, metrics } = validateRsYear(outputRoot, year);
     allFindings.push(...findings);
     if (metrics) rsMetrics.push(metrics);
+  }
+  for (const year of FISCAL_YEARS) {
+    const { findings, metrics } = validateMofYear(outputRoot, year);
+    allFindings.push(...findings);
+    if (metrics) mofMetrics.push(metrics);
   }
   const { findings: linkFindings, metrics: linkMetrics } = validateMofRsLinks(outputRoot);
   allFindings.push(...linkFindings);
@@ -232,7 +306,7 @@ function main(): void {
     findings: allFindings,
     metrics: {
       rs: rsMetrics,
-      mof: {},
+      mof: mofMetrics,
       links: linkMetrics,
       publish: {},
     },
