@@ -634,7 +634,9 @@ export function checkMofDetailEventAggregation(
           continue;
         }
         const recordIdsMatch = JSON.stringify([...(ev.recordIds ?? [])].sort()) === JSON.stringify(exp.recordIds ?? []);
-        if (ev.amountYen !== exp.amountYen || !recordIdsMatch
+        const itemIdsMatch = JSON.stringify([...(ev.itemIds ?? [])].sort()) === JSON.stringify(exp.itemIds ?? []);
+        if (ev.amountYen !== exp.amountYen || !recordIdsMatch || !itemIdsMatch
+          || (ev.itemName || undefined) !== exp.itemName
           || (ev.submittedAmountYen ?? undefined) !== exp.submittedAmountYen || (ev.enactedAmountYen ?? undefined) !== exp.enactedAmountYen) {
           pushError(findings, 'mof-publish-detail-evidence-value', { ...scope, recordId: sectionId, eventId: ev.eventId },
             `sectionId=${sectionId} group=${groupKey} eventId=${ev.eventId}: evidenceの値がDerived eventと不一致`);

@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as zlib from 'zlib';
+import * as crypto from 'crypto';
 import {
   independentRsShard, independentMofSectionShard, checkArtifactExists,
   checkRsProjectCounts, checkRsShardReferentialIntegrity, checkRsBudgetSummaryPreservation,
@@ -51,7 +52,6 @@ function link(overrides: Partial<MofRsProjectLinkGroup>): MofRsProjectLinkGroup 
 
 describe('independentRsShard / independentMofSectionShard', () => {
   it('rsShard()と同じアルゴリズム（sha256("rs-project:"+id)先頭2桁）を独立に計算する', () => {
-    const crypto = require('crypto');
     const expected = crypto.createHash('sha256').update('rs-project:42').digest('hex').slice(0, 2);
     expect(independentRsShard('42')).toBe(expected);
   });
@@ -456,6 +456,20 @@ describe('checkMofDetailRecords / checkMofDetailEventAggregation', () => {
   it('checkMofDetailEventAggregation: evidenceの値がDerived eventと不一致なら検出する', () => {
     const events = [mofEvent({})];
     const badDetail: MofSectionDetail = { ...validDetail, events: [{ ...validDetail.events[0], evidence: [{ ...validDetail.events[0].evidence![0], amountYen: 999 }] }] };
+    const result = checkMofDetailEventAggregation(2024, events, derivedSections, [mofItem({})], () => badDetail);
+    expect(result.findings.some(f => f.check === 'mof-publish-detail-evidence-value')).toBe(true);
+  });
+
+  it('checkMofDetailEventAggregation: evidenceのitemIdsが不一致なら検出する（amountYen/recordIdsが一致していても見逃さない）', () => {
+    const events = [mofEvent({})];
+    const badDetail: MofSectionDetail = { ...validDetail, events: [{ ...validDetail.events[0], evidence: [{ ...validDetail.events[0].evidence![0], itemIds: ['wrong-item'] }] }] };
+    const result = checkMofDetailEventAggregation(2024, events, derivedSections, [mofItem({})], () => badDetail);
+    expect(result.findings.some(f => f.check === 'mof-publish-detail-evidence-value')).toBe(true);
+  });
+
+  it('checkMofDetailEventAggregation: evidenceのitemNameが不一致なら検出する', () => {
+    const events = [mofEvent({})];
+    const badDetail: MofSectionDetail = { ...validDetail, events: [{ ...validDetail.events[0], evidence: [{ ...validDetail.events[0].evidence![0], itemName: 'wrong-name' }] }] };
     const result = checkMofDetailEventAggregation(2024, events, derivedSections, [mofItem({})], () => badDetail);
     expect(result.findings.some(f => f.check === 'mof-publish-detail-evidence-value')).toBe(true);
   });

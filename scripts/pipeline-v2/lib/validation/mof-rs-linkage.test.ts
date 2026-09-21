@@ -153,6 +153,37 @@ describe('diagnoseJointMinistryFallback', () => {
     expect(result.candidates).toHaveLength(1);
     expect(result.candidates[0].exactReconciliation).toBe(true);
   });
+
+  it('review指摘: 同一altGroupKeyに複数候補がある場合、合算した額でexactReconciliationを判定する（過大評価の防止）', () => {
+    // 単独では両方ともMOF額を下回るが、2件合算するとMOF額をちょうど超える
+    const mof = mofItem({ ministry: '厚生労働省', amountYen: 150 });
+    const candidateA = rsItem({ recordId: 'candidateA', ministry: '厚生労働省', budgetMinistry: '内閣府及び厚生労働省', budgetAmountYen: 100 });
+    const candidateB = rsItem({ recordId: 'candidateB', ministry: '厚生労働省', budgetMinistry: '内閣府及び厚生労働省', budgetAmountYen: 100 });
+    const result = diagnoseJointMinistryFallback(2025, 2025, [mof], [candidateA, candidateB]);
+    expect(result.candidates).toHaveLength(2);
+    // 個別には100<150で一見「まだ足りない」ように見えるが、合算(200)はMOF額(150)を超えている
+    for (const c of result.candidates) {
+      expect(c.reconstructedRsAmountYen).toBe(200);
+      expect(c.differenceAfterYen).toBe(-50);
+      expect(c.exactReconciliation).toBe(false);
+    }
+    expect(result.findings[0].metrics?.exactReconciliationCount).toBe(0);
+  });
+
+  it('review指摘: 同一altGroupKeyの複数候補を合算するとちょうどMOF額に一致する場合、exactReconciliationCountはグループ単位で1回だけ数える', () => {
+    const mof = mofItem({ ministry: '厚生労働省', amountYen: 200 });
+    const candidateA = rsItem({ recordId: 'candidateA', ministry: '厚生労働省', budgetMinistry: '内閣府及び厚生労働省', budgetAmountYen: 120 });
+    const candidateB = rsItem({ recordId: 'candidateB', ministry: '厚生労働省', budgetMinistry: '内閣府及び厚生労働省', budgetAmountYen: 80 });
+    const result = diagnoseJointMinistryFallback(2025, 2025, [mof], [candidateA, candidateB]);
+    expect(result.candidates).toHaveLength(2);
+    for (const c of result.candidates) {
+      expect(c.reconstructedRsAmountYen).toBe(200);
+      expect(c.exactReconciliation).toBe(true);
+    }
+    // candidateCountは2件のままだが、exactReconciliationCountはグループ単位で1（候補単位で2にしない）
+    expect(result.findings[0].metrics?.candidateCount).toBe(2);
+    expect(result.findings[0].metrics?.exactReconciliationCount).toBe(1);
+  });
 });
 
 describe('checkLinkTaxonomyConsistency', () => {

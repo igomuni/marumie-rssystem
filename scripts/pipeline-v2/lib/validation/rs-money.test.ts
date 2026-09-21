@@ -262,6 +262,17 @@ describe('checkRsDerivedEventProvenance', () => {
     expect(result.missingExpectedEvents).toBe(0);
     expect(result.duplicateOrUnexpectedEvents).toBe(0);
   });
+
+  it('review指摘: sourceRecordIdsが2件以上のeventはcardinality invariant違反として検出する（buildRsEventsは常に1件のはず）', () => {
+    const e = event({ eventType: 'initial_budget', amountYen: 100, fiscalYear: 2024, sourceRecordIds: ['rsitem_1', 'rsitem_2'] });
+    const result = checkRsDerivedEventProvenance([e], [], []);
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0].message).toContain('sourceRecordIdsが1件のはずだが2件ある');
+    expect(result.findings[0].category).toBe('invariant');
+    expect(result.duplicateOrUnexpectedEvents).toBe(1);
+    // cardinality違反のeventはsourceRecordIds[0]で順方向・逆方向照合に紛れ込ませない（二重計上防止）
+    expect(result.missingSourceRecords).toBe(0);
+  });
 });
 
 describe('checkRsZeroBlankPropagation', () => {

@@ -171,7 +171,11 @@ export function diagnoseJointMinistryFallback(
     rsLinkedAmountByGroup.set(groupKey, (rsLinkedAmountByGroup.get(groupKey) ?? 0) + (r.budgetAmountYen ?? 0));
   }
 
-  const candidates: JointMinistryFallbackCandidate[] = [];
+  // review指摘: 同一altGroupKeyに複数の候補行が乗り得るため、候補は一旦altGroupKeyでまとめてから
+  // reconstructedRsAmountYen/差額/exactReconciliationを「グループ単位で1回」算出する。
+  // 各行を独立にexistingRsAmountYenと比較すると、合算すればMOF額を超える／ちょうど一致する
+  // ケースを見落とす（過小評価・過大評価いずれも起こりうる）
+  const groups = new Map<string, { mofAmountYen: number; existingRsAmountYen: number; records: RsBudgetItemRecordV2[] }>();
   for (const r of rsRowsForYear) {
     const stage = rsPhase(r);
     if (!stage) continue;
@@ -195,16 +199,27 @@ export function diagnoseJointMinistryFallback(
     const altGroupKey = `${stageKey(stage)}\x1f${altKey}`;
     const mofAmountYen = mofAmountByGroup.get(altGroupKey);
     if (mofAmountYen === undefined) continue; // altでも一致するMOF targetが無い
-    const existingRsAmountYen = rsLinkedAmountByGroup.get(altGroupKey) ?? 0;
-    const candidateRsAmountYen = r.budgetAmountYen ?? 0;
-    const reconstructedRsAmountYen = existingRsAmountYen + candidateRsAmountYen;
-    candidates.push({
-      rsRecordId: r.recordId, projectId: r.projectId,
-      existingRsAmountYen, candidateRsAmountYen, reconstructedRsAmountYen, mofAmountYen,
-      differenceBeforeYen: mofAmountYen - existingRsAmountYen,
-      differenceAfterYen: mofAmountYen - reconstructedRsAmountYen,
-      exactReconciliation: mofAmountYen - reconstructedRsAmountYen === 0,
-    });
+    const group = groups.get(altGroupKey) ?? { mofAmountYen, existingRsAmountYen: rsLinkedAmountByGroup.get(altGroupKey) ?? 0, records: [] };
+    group.records.push(r);
+    groups.set(altGroupKey, group);
+  }
+
+  const candidates: JointMinistryFallbackCandidate[] = [];
+  let exactReconciliationGroupCount = 0;
+  for (const group of groups.values()) {
+    const reconstructedRsAmountYen = group.existingRsAmountYen + group.records.reduce((s, r) => s + (r.budgetAmountYen ?? 0), 0);
+    const exactReconciliation = group.mofAmountYen - reconstructedRsAmountYen === 0;
+    if (exactReconciliation) exactReconciliationGroupCount++;
+    for (const r of group.records) {
+      candidates.push({
+        rsRecordId: r.recordId, projectId: r.projectId,
+        existingRsAmountYen: group.existingRsAmountYen, candidateRsAmountYen: r.budgetAmountYen ?? 0, reconstructedRsAmountYen,
+        mofAmountYen: group.mofAmountYen,
+        differenceBeforeYen: group.mofAmountYen - group.existingRsAmountYen,
+        differenceAfterYen: group.mofAmountYen - reconstructedRsAmountYen,
+        exactReconciliation,
+      });
+    }
   }
 
   if (candidates.length > 0) {
@@ -214,7 +229,7 @@ export function diagnoseJointMinistryFallback(
       metrics: {
         candidateCount: candidates.length,
         candidateAmountYen: candidates.reduce((s, c) => s + c.candidateRsAmountYen, 0),
-        exactReconciliationCount: candidates.filter(c => c.exactReconciliation).length,
+        exactReconciliationCount: exactReconciliationGroupCount,
       },
       sampleIds: candidates.map(c => c.rsRecordId).slice(0, 10),
       message: `review-${reviewYear}×fy${fiscalYear}: budgetMinistryではなくcommon ministryで一意にMOF targetへ接続できる候補が${candidates.length}件ある` +

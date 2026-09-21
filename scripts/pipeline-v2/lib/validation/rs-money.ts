@@ -266,7 +266,20 @@ export function checkRsDerivedEventProvenance(
 
   // 2) 実在eventを(sourceRecordId, eventType)でindex化する
   const actualByIdentity = new Map<string, RsDerivedBudgetEvent[]>();
+  const cardinalityInvalidEventIds = new Set<string>();
   for (const e of events) {
+    if (e.sourceRecordIds.length !== 1) {
+      duplicateOrUnexpectedEvents++;
+      cardinalityInvalidEventIds.add(e.eventId);
+      findings.push({
+        severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant',
+        scope: { reviewYear: e.reviewYear, projectId: e.projectId, eventId: e.eventId },
+        metrics: { eventType: e.eventType, sourceRecordIdCount: e.sourceRecordIds.length },
+        sampleIds: e.sourceRecordIds,
+        message: `eventId=${e.eventId}: RS derived eventはsourceRecordIdsが1件のはずだが${e.sourceRecordIds.length}件ある`,
+      });
+      continue;
+    }
     const sourceId = e.sourceRecordIds[0];
     if (!sourceId) continue;
     const key = rsEventIdentity(sourceId, e.eventType);
@@ -337,6 +350,7 @@ export function checkRsDerivedEventProvenance(
   let checkedEvents = 0;
   for (const e of events) {
     checkedEvents++;
+    if (cardinalityInvalidEventIds.has(e.eventId)) continue;
     const sourceId = e.sourceRecordIds[0] as string | undefined;
     const scope = { reviewYear: e.reviewYear, projectId: e.projectId, eventId: e.eventId, recordId: sourceId };
 
