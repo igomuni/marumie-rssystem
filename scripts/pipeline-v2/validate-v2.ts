@@ -71,7 +71,11 @@ interface RsYearMetrics {
   budgetSummaryCount: number; derivedBudgetEventCount: number;
   currentBudgetEquation: { checked: number; mismatches: number };
   summaryItemReconciliation: { checkedGroups: number; mismatches: number };
-  derivedEventProvenance: { checkedEvents: number; missingSourceRecords: number; amountMismatches: number };
+  derivedEventProvenance: {
+    checkedEvents: number; missingSourceRecords: number; amountMismatches: number;
+    expectedEvents: number; actualEvents: number; missingExpectedEvents: number; duplicateOrUnexpectedEvents: number;
+    fiscalYearMismatches: number; eventTypeMismatches: number;
+  };
   explicitZeroBlank: { explicitZeroSourceRows: number; explicitZeroEvents: number; blankSourceRows: number; blankUnexpectedEvents: number };
 }
 
@@ -114,12 +118,16 @@ function validateRsYear(outputRoot: string, reviewYear: number): { findings: Fin
   const equationResult = checkRsCurrentBudgetEquation(summaries);
   findings.push(...withReviewYear(equationResult.findings, reviewYear));
 
-  const reconciliationResult = checkRsSummaryItemReconciliation(reviewYear, summaries, items);
+  const reconciliationResult = checkRsSummaryItemReconciliation(summaries, items);
   findings.push(...withReviewYear(reconciliationResult.findings, reviewYear));
 
-  const provenanceResult = derivedEvents.length > 0
+  const provenanceResult = fs.existsSync(derivedEventsPath)
     ? checkRsDerivedEventProvenance(derivedEvents, items, summaries)
-    : { findings: [] as Finding[], checkedEvents: 0, missingSourceRecords: 0, amountMismatches: 0 };
+    : {
+      findings: [] as Finding[], checkedEvents: 0, missingSourceRecords: 0, amountMismatches: 0,
+      expectedEvents: 0, actualEvents: 0, missingExpectedEvents: 0, duplicateOrUnexpectedEvents: 0,
+      fiscalYearMismatches: 0, eventTypeMismatches: 0,
+    };
   findings.push(...withReviewYear(provenanceResult.findings, reviewYear));
 
   const zeroBlankResult = checkRsZeroBlankPropagation(items, derivedEvents);
@@ -127,7 +135,9 @@ function validateRsYear(outputRoot: string, reviewYear: number): { findings: Fin
 
   console.log(`  review-${reviewYear}: RS monetary invariants — 現額式 checked=${equationResult.checked} mismatch=${equationResult.mismatches} / ` +
     `2-1↔2-2 checkedGroups=${reconciliationResult.checkedGroups} mismatch=${reconciliationResult.mismatches} / ` +
-    `derived provenance checkedEvents=${provenanceResult.checkedEvents} missing=${provenanceResult.missingSourceRecords} amountMismatch=${provenanceResult.amountMismatches}`);
+    `derived provenance expected=${provenanceResult.expectedEvents} actual=${provenanceResult.actualEvents} ` +
+    `missing=${provenanceResult.missingExpectedEvents} dup/unexpected=${provenanceResult.duplicateOrUnexpectedEvents} ` +
+    `amountMismatch=${provenanceResult.amountMismatches} fyMismatch=${provenanceResult.fiscalYearMismatches}`);
 
   const metrics: RsYearMetrics = {
     reviewYear, sourceInventoryDatasets: manifest.sourceInventories?.length ?? 0,
@@ -138,6 +148,9 @@ function validateRsYear(outputRoot: string, reviewYear: number): { findings: Fin
     summaryItemReconciliation: { checkedGroups: reconciliationResult.checkedGroups, mismatches: reconciliationResult.mismatches },
     derivedEventProvenance: {
       checkedEvents: provenanceResult.checkedEvents, missingSourceRecords: provenanceResult.missingSourceRecords, amountMismatches: provenanceResult.amountMismatches,
+      expectedEvents: provenanceResult.expectedEvents, actualEvents: provenanceResult.actualEvents,
+      missingExpectedEvents: provenanceResult.missingExpectedEvents, duplicateOrUnexpectedEvents: provenanceResult.duplicateOrUnexpectedEvents,
+      fiscalYearMismatches: provenanceResult.fiscalYearMismatches, eventTypeMismatches: provenanceResult.eventTypeMismatches,
     },
     explicitZeroBlank: {
       explicitZeroSourceRows: zeroBlankResult.explicitZeroSourceRows, explicitZeroEvents: zeroBlankResult.explicitZeroEvents,

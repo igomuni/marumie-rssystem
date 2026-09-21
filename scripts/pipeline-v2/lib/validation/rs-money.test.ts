@@ -75,14 +75,14 @@ describe('checkRsSummaryItemReconciliation', () => {
   it('1:1で一致すればfindingsは空', () => {
     const s = summary({ amounts: { '当初予算': 100 } });
     const i = item({ budgetType: '当初予算', budgetAmountYen: 100 });
-    const result = checkRsSummaryItemReconciliation(2024, [s], [i]);
+    const result = checkRsSummaryItemReconciliation([s], [i]);
     expect(result.mismatches).toBe(0);
   });
 
   it('複数itemの合計と2-1が一致すればfindingsは空', () => {
     const s = summary({ amounts: { '当初予算': 150 } });
     const items = [item({ recordId: 'a', budgetType: '当初予算', budgetAmountYen: 100 }), item({ recordId: 'b', budgetType: '当初予算', budgetAmountYen: 50 })];
-    const result = checkRsSummaryItemReconciliation(2024, [s], items);
+    const result = checkRsSummaryItemReconciliation([s], items);
     expect(result.mismatches).toBe(0);
   });
 
@@ -93,14 +93,14 @@ describe('checkRsSummaryItemReconciliation', () => {
       summary({ recordId: 's2', amounts: { '当初予算': 100, '第1次補正予算': 0 } }),
     ];
     const items = [item({ recordId: 'a', budgetType: '当初予算', budgetAmountYen: 100 }), item({ recordId: 'b', budgetType: '第1次補正予算', budgetAmountYen: 20 })];
-    const result = checkRsSummaryItemReconciliation(2024, summaries, items);
+    const result = checkRsSummaryItemReconciliation(summaries, items);
     expect(result.mismatches).toBe(0);
   });
 
   it('補正予算(第N次)の不一致を検出する', () => {
     const s = summary({ amounts: { '第1次補正予算': 20 } });
     const i = item({ budgetType: '第1次補正予算', budgetAmountYen: 25 });
-    const result = checkRsSummaryItemReconciliation(2024, [s], [i]);
+    const result = checkRsSummaryItemReconciliation([s], [i]);
     expect(result.mismatches).toBe(1);
     expect(result.findings[0].category).toBe('invariant');
   });
@@ -108,13 +108,13 @@ describe('checkRsSummaryItemReconciliation', () => {
   it('0円の一致もfindingsを出さない', () => {
     const s = summary({ amounts: { '当初予算': 0 } });
     const i = item({ budgetType: '当初予算', budgetAmountYen: 0 });
-    const result = checkRsSummaryItemReconciliation(2024, [s], [i]);
+    const result = checkRsSummaryItemReconciliation([s], [i]);
     expect(result.mismatches).toBe(0);
   });
 
   it('2-1にしか無い指標（執行額等）は比較対象外', () => {
     const s = summary({ amounts: { '執行額': 999 } });
-    const result = checkRsSummaryItemReconciliation(2024, [s], []);
+    const result = checkRsSummaryItemReconciliation([s], []);
     expect(result.checkedGroups).toBe(0);
     expect(result.findings).toHaveLength(0);
   });
@@ -122,17 +122,37 @@ describe('checkRsSummaryItemReconciliation', () => {
   it('2-2にのみ明示的0円のevidenceがある場合はinfo（既知のEXPECTED_VARIANCE）', () => {
     const s = summary({ amounts: { '当初予算': null } });
     const i = item({ budgetType: '当初予算', budgetAmountYen: 0 });
-    const result = checkRsSummaryItemReconciliation(2024, [s], [i]);
+    const result = checkRsSummaryItemReconciliation([s], [i]);
     expect(result.mismatches).toBe(0);
     expect(result.findings[0].severity).toBe('info');
   });
 
-  it('reviewYearと異なる年度の行は対象外', () => {
-    const s = summary({ fiscalYear: 2023, amounts: { '当初予算': 999 } });
-    const i = item({ fiscalYear: 2023, budgetType: '当初予算', budgetAmountYen: 1 });
-    const result = checkRsSummaryItemReconciliation(2024, [s], [i]);
-    expect(result.checkedGroups).toBe(0);
-    expect(result.findings).toHaveLength(0);
+  it('reviewYearと異なる過去年度（FY2021等の継続事業の履歴行）も検査対象にする', () => {
+    // 02_rs-money-preservation.md 4章記載の既知ケース（project 398/401/4040, FY2021）と同型:
+    // 2-2は明示的0円のevidenceを持つが2-1側はblank。過去年度でもinfoとして可視化されるべき
+    const s = summary({ fiscalYear: 2021, amounts: { '当初予算': null } });
+    const i = item({ fiscalYear: 2021, budgetType: '当初予算', budgetAmountYen: 0 });
+    const result = checkRsSummaryItemReconciliation([s], [i]);
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0].severity).toBe('info');
+    expect(result.findings[0].scope?.fiscalYear).toBe(2021);
+  });
+
+  it('reviewYearと異なる過去年度でも金額不一致はinvariant errorとして検出する', () => {
+    const s = summary({ fiscalYear: 2021, amounts: { '当初予算': 999 } });
+    const i = item({ fiscalYear: 2021, budgetType: '当初予算', budgetAmountYen: 1 });
+    const result = checkRsSummaryItemReconciliation([s], [i]);
+    expect(result.mismatches).toBe(1);
+    expect(result.findings[0].category).toBe('invariant');
+  });
+
+  it('2-1に対応する会計別行が一切存在しない2-2 evidenceも検出する（summary/item groupのunion）', () => {
+    // 2-1側にこのaccountType/account/subAccountキーの行が無い（summaries配列が空）が
+    // 2-2に非0の目別金額が存在するケース。silent skipせず検出できることを確認する
+    const i = item({ budgetType: '当初予算', budgetAmountYen: 500 });
+    const result = checkRsSummaryItemReconciliation([], [i]);
+    expect(result.mismatches).toBe(1);
+    expect(result.findings[0].message).toContain('2-1側がblank');
   });
 });
 
@@ -181,6 +201,53 @@ describe('checkRsDerivedEventProvenance', () => {
     const badEvent = event({ eventType: 'next_year_request_project_account', amountYen: 50, fiscalYear: 2024, sourceFiscalYear: 2024, sourceRecordIds: ['rssum_1'] });
     const result = checkRsDerivedEventProvenance([badEvent], [], [s]);
     expect(result.findings.some(f => f.message.includes('fiscalYear'))).toBe(true);
+  });
+
+  it('順方向: sourceがnon-nullなのに対応するeventが丸ごと欠落していれば検出する', () => {
+    const i = item({ budgetType: '当初予算', budgetAmountYen: 100 });
+    const result = checkRsDerivedEventProvenance([], [i], []);
+    expect(result.expectedEvents).toBe(1);
+    expect(result.actualEvents).toBe(0);
+    expect(result.missingExpectedEvents).toBe(1);
+    expect(result.findings[0].category).toBe('invariant');
+    expect(result.findings[0].message).toContain('存在しない');
+  });
+
+  it('順方向: 同じsourceから同じeventが重複生成されていれば検出する', () => {
+    const i = item({ budgetType: '当初予算', budgetAmountYen: 100 });
+    const e1 = event({ eventId: 'rsevt_1', eventType: 'initial_budget', amountYen: 100, sourceRecordIds: ['rsitem_1'] });
+    const e2 = event({ eventId: 'rsevt_2', eventType: 'initial_budget', amountYen: 100, sourceRecordIds: ['rsitem_1'] });
+    const result = checkRsDerivedEventProvenance([e1, e2], [i], []);
+    expect(result.expectedEvents).toBe(1);
+    expect(result.actualEvents).toBe(2);
+    expect(result.duplicateOrUnexpectedEvents).toBe(1);
+    expect(result.findings.some(f => f.message.includes('重複生成'))).toBe(true);
+  });
+
+  it('逆方向: 対応するsourceのnon-null値が無いのにeventが存在すれば検出する（unexpected event）', () => {
+    const i = item({ budgetAmountYen: null });
+    const unexpected = event({ eventType: 'initial_budget', amountYen: 0, sourceRecordIds: ['rsitem_1'] });
+    const result = checkRsDerivedEventProvenance([unexpected], [i], []);
+    expect(result.expectedEvents).toBe(0);
+    expect(result.duplicateOrUnexpectedEvents).toBe(1);
+    expect(result.findings.some(f => f.message.includes('unexpected'))).toBe(true);
+  });
+
+  it('未知のeventTypeはsilent skipせずwarning診断を出す', () => {
+    const unknown = event({ eventType: 'future_event_type' as never, sourceRecordIds: ['rsitem_1'] });
+    const result = checkRsDerivedEventProvenance([unknown], [item({})], []);
+    expect(result.eventTypeMismatches).toBe(1);
+    expect(result.findings[0].severity).toBe('warning');
+    expect(result.findings[0].category).toBe('semantic-diagnostic');
+  });
+
+  it('正常系ではexpectedEvents === actualEvents', () => {
+    const i = item({ budgetType: '当初予算', budgetAmountYen: 100, fiscalYear: 2024 });
+    const e = event({ eventType: 'initial_budget', amountYen: 100, fiscalYear: 2024, sourceRecordIds: ['rsitem_1'] });
+    const result = checkRsDerivedEventProvenance([e], [i], []);
+    expect(result.expectedEvents).toBe(result.actualEvents);
+    expect(result.missingExpectedEvents).toBe(0);
+    expect(result.duplicateOrUnexpectedEvents).toBe(0);
   });
 });
 

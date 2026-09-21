@@ -81,40 +81,46 @@ function itemKey(projectId: string, fiscalYear: number | null, accountType: stri
  * (projectId, fiscalYear, accountType, account, subAccount, budgetType)粒度で2-2目別合計と
  * 2-1会計別サマリを突合する。2-1にしか無い指標（執行額・翌年度要求額等）は対象外。
  *
+ * Normalized 2-1 ↔ Normalized 2-2 のsource-preservation検証であり、Publish index用の
+ * current-year検証（publish-v2.tsのindexBudgetByProject）とは別物。全fiscalYear
+ * （過去の継続事業の履歴行を含む）を対象にする。
+ *
  * 実データで確認: 同一(projectId, fiscalYear, accountType, account, subAccount)キーに対して
  * 2-1会計別行が複数存在することがある（当初予算だけ非0の行・補正予算だけ非0の行、等に分かれて
  * 出現し、互いに他方の列は明示的0を持つ）。行ごとに独立比較すると誤ってmismatch判定してしまうため、
  * 同一キーの行は列ごとに合算してから2-2側の合計と比較する（合算すると2-2側と一致することを
- * projectId=1151等の実データで確認済み）。reviewYearと異なる過去年度（継続事業の履歴行）は
- * このvalidatorの手前でどの行が「正」かを断定できないため対象外にする
- * （publish-v2.tsのindexBudgetByProjectがproject_totalで`row.fiscalYear === reviewYear`を
- * 条件にしているのと同じ理由・同じ既存Pipeline規約に合わせた制約）。
+ * projectId=1151等の実データで確認済み）。
+ *
+ * summary側group・item側groupのunionを走査する。2-1に対応する会計別行が
+ * 一切存在しない2-2 evidence（silent skipされていた既知の逆ケース）も検出対象にする。
  */
 export function checkRsSummaryItemReconciliation(
-  reviewYear: number, summaries: RsBudgetSummaryRecord[], items: RsBudgetItemRecordV2[]
+  summaries: RsBudgetSummaryRecord[], items: RsBudgetItemRecordV2[]
 ): { findings: Finding[]; checkedGroups: number; mismatches: number } {
   const findings: Finding[] = [];
   let checkedGroups = 0;
   let mismatches = 0;
 
+  interface GroupIdentity { reviewYear: number; projectId: string; fiscalYear: number | null }
+  const groupIdentity = new Map<string, GroupIdentity>();
+
   const itemSumByKey = new Map<string, number>();
   const itemGroupExists = new Set<string>();
   for (const item of items) {
-    if (item.fiscalYear !== reviewYear) continue;
     if (!RECONCILABLE_BUDGET_TYPES.includes(item.budgetType)) continue;
+    const groupKey = accountGroupKey(item.projectId, item.fiscalYear, item.accountType, item.account, item.subAccount);
+    if (!groupIdentity.has(groupKey)) groupIdentity.set(groupKey, { reviewYear: item.reviewYear, projectId: item.projectId, fiscalYear: item.fiscalYear });
     const key = itemKey(item.projectId, item.fiscalYear, item.accountType, item.account, item.subAccount, item.budgetType);
     itemGroupExists.add(key);
     if (item.budgetAmountYen !== null) itemSumByKey.set(key, (itemSumByKey.get(key) ?? 0) + item.budgetAmountYen);
   }
 
-  interface GroupIdentity { reviewYear: number; projectId: string; fiscalYear: number | null }
-  const groupIdentity = new Map<string, GroupIdentity>();
   const summarySumByGroup = new Map<string, Record<string, number>>();
   const summaryHasValueByGroup = new Map<string, Set<string>>();
   for (const summary of summaries) {
-    if (summary.scopeLevel !== 'account' || summary.fiscalYear !== reviewYear) continue;
+    if (summary.scopeLevel !== 'account') continue;
     const groupKey = accountGroupKey(summary.projectId, summary.fiscalYear, summary.accountType, summary.account, summary.subAccount);
-    groupIdentity.set(groupKey, { reviewYear: summary.reviewYear, projectId: summary.projectId, fiscalYear: summary.fiscalYear });
+    if (!groupIdentity.has(groupKey)) groupIdentity.set(groupKey, { reviewYear: summary.reviewYear, projectId: summary.projectId, fiscalYear: summary.fiscalYear });
     const sums = summarySumByGroup.get(groupKey) ?? {};
     const hasValue = summaryHasValueByGroup.get(groupKey) ?? new Set<string>();
     for (const budgetType of RECONCILABLE_BUDGET_TYPES) {
@@ -129,8 +135,8 @@ export function checkRsSummaryItemReconciliation(
   }
 
   for (const [groupKey, identity] of groupIdentity) {
-    const sums = summarySumByGroup.get(groupKey)!;
-    const hasValue = summaryHasValueByGroup.get(groupKey)!;
+    const sums = summarySumByGroup.get(groupKey) ?? {};
+    const hasValue = summaryHasValueByGroup.get(groupKey) ?? new Set<string>();
     const scope = { reviewYear: identity.reviewYear, projectId: identity.projectId, fiscalYear: identity.fiscalYear ?? undefined };
 
     for (const budgetType of RECONCILABLE_BUDGET_TYPES) {
@@ -159,7 +165,8 @@ export function checkRsSummaryItemReconciliation(
           message: `projectId=${identity.projectId} fiscalYear=${identity.fiscalYear} budgetType=${budgetType}: 2-1側がblankだが2-2に非0の目別金額(${itemSum})がある`,
         });
       } else if (hasItems && itemSum === 0) {
-        // 02_rs-money-preservation.md 4章で確認済みのEXPECTED_VARIANCE（2-2にのみ明示的0円のevidence）
+        // 02_rs-money-preservation.md 4章で確認済みのEXPECTED_VARIANCE（2-2にのみ明示的0円のevidence）。
+        // 過去年度（FY2021等）にも実在するケースのため、fiscalYearをreviewYearに限定しない
         findings.push({
           severity: 'info', check: 'rs-summary-item-reconciliation', category: 'semantic-diagnostic', scope,
           metrics: { budgetType },
@@ -178,87 +185,187 @@ const SUMMARY_EVENT_COLUMNS: Partial<Record<RsDerivedEventType, string>> = {
   execution: '執行額', carryover_in_project_account: '前年度から繰越し', next_year_request_project_account: '翌年度要求額',
 };
 
+const KNOWN_EVENT_TYPES = new Set<RsDerivedEventType>([...ITEM_EVENT_TYPES, 'next_year_request', 'execution', 'carryover_in_project_account', 'next_year_request_project_account']);
+
+interface ExpectedRsEventSpec {
+  sourceRecordId: string; eventType: RsDerivedEventType;
+  expectedAmountYen: number; expectedFiscalYear: number | null; expectedSourceFiscalYear: number | null;
+  scope: { reviewYear: number; projectId: string };
+}
+
+function rsEventIdentity(sourceRecordId: string, eventType: RsDerivedEventType): string {
+  return `${sourceRecordId}\x1f${eventType}`;
+}
+
 /**
- * B-3: Derived RS Budget Event provenance。
- * Derived eventのsourceRecordIdsを使ってNormalized 2-2/2-1へ逆照合し、金額・fiscalYear・
- * イベント種別分類（rsBudgetEventType()）が実際のPipelineコードから再現可能であることを確認する。
+ * B-3: Derived RS Budget Event provenance（双方向・cardinality検証）。
+ *
+ * 片方向（Derived event→source）だけでは、非0eventが丸ごと欠落した場合や、
+ * 同じsourceから同じeventが重複生成された場合を検出できない。そのため
+ * 「sourceのnon-null値ごとに期待されるeventを1件ずつ再構成する」順方向と、
+ * 「実在するDerived eventがsourceから正しく再現できるか」逆方向の両方を検査する。
+ *
+ * logical identityは(sourceRecordId, eventType)。budgetAmountYen由来event（eventType=
+ * rsBudgetEventType(item.budgetType)）とnextYearRequestYen由来event（eventType=
+ * 'next_year_request'）は常に異なるeventTypeになるため、この組で一意に識別できる。
  */
 export function checkRsDerivedEventProvenance(
   events: RsDerivedBudgetEvent[], items: RsBudgetItemRecordV2[], summaries: RsBudgetSummaryRecord[]
-): { findings: Finding[]; checkedEvents: number; missingSourceRecords: number; amountMismatches: number } {
+): {
+  findings: Finding[]; checkedEvents: number; missingSourceRecords: number; amountMismatches: number;
+  expectedEvents: number; actualEvents: number; missingExpectedEvents: number; duplicateOrUnexpectedEvents: number;
+  fiscalYearMismatches: number; eventTypeMismatches: number;
+} {
   const findings: Finding[] = [];
-  let checkedEvents = 0;
   let missingSourceRecords = 0;
   let amountMismatches = 0;
+  let fiscalYearMismatches = 0;
+  let eventTypeMismatches = 0;
+  let missingExpectedEvents = 0;
+  let duplicateOrUnexpectedEvents = 0;
 
+  // 1) sourceのnon-null値から期待eventを再構成する
+  const expected: ExpectedRsEventSpec[] = [];
+  for (const item of items) {
+    if (item.budgetAmountYen !== null) {
+      expected.push({
+        sourceRecordId: item.recordId, eventType: rsBudgetEventType(item.budgetType),
+        expectedAmountYen: item.budgetAmountYen, expectedFiscalYear: item.fiscalYear, expectedSourceFiscalYear: null,
+        scope: { reviewYear: item.reviewYear, projectId: item.projectId },
+      });
+    }
+    if (item.nextYearRequestYen !== null) {
+      expected.push({
+        sourceRecordId: item.recordId, eventType: 'next_year_request',
+        expectedAmountYen: item.nextYearRequestYen, expectedFiscalYear: item.requestFiscalYear, expectedSourceFiscalYear: item.fiscalYear,
+        scope: { reviewYear: item.reviewYear, projectId: item.projectId },
+      });
+    }
+  }
+  for (const summary of summaries) {
+    if (summary.scopeLevel !== 'account') continue;
+    for (const [eventType, column] of Object.entries(SUMMARY_EVENT_COLUMNS) as [RsDerivedEventType, string][]) {
+      const value = summary.amounts[column];
+      if (value === null || value === undefined) continue;
+      const expectedFiscalYear = eventType === 'next_year_request_project_account' && summary.fiscalYear !== null ? summary.fiscalYear + 1 : summary.fiscalYear;
+      expected.push({
+        sourceRecordId: summary.recordId, eventType,
+        expectedAmountYen: value, expectedFiscalYear, expectedSourceFiscalYear: summary.fiscalYear,
+        scope: { reviewYear: summary.reviewYear, projectId: summary.projectId },
+      });
+    }
+  }
+
+  // 2) 実在eventを(sourceRecordId, eventType)でindex化する
+  const actualByIdentity = new Map<string, RsDerivedBudgetEvent[]>();
+  for (const e of events) {
+    const sourceId = e.sourceRecordIds[0];
+    if (!sourceId) continue;
+    const key = rsEventIdentity(sourceId, e.eventType);
+    const list = actualByIdentity.get(key) ?? [];
+    list.push(e);
+    actualByIdentity.set(key, list);
+  }
+
+  // 3) 順方向: 期待した各eventが「1件だけ」「正しい値で」存在するか
+  const consumedIdentities = new Set<string>();
+  for (const spec of expected) {
+    const key = rsEventIdentity(spec.sourceRecordId, spec.eventType);
+    consumedIdentities.add(key);
+    const matches = actualByIdentity.get(key) ?? [];
+    const baseScope = { ...spec.scope, recordId: spec.sourceRecordId };
+
+    if (matches.length === 0) {
+      missingExpectedEvents++;
+      findings.push({
+        severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant', scope: baseScope,
+        metrics: { expectedEventType: spec.eventType, expectedAmountYen: spec.expectedAmountYen },
+        message: `recordId=${spec.sourceRecordId}: eventType=${spec.eventType}を期待するDerived eventが存在しない（source側はnon-null）`,
+      });
+      continue;
+    }
+    if (matches.length > 1) {
+      duplicateOrUnexpectedEvents += matches.length - 1;
+      findings.push({
+        severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant',
+        scope: { ...baseScope, eventId: matches[0].eventId },
+        metrics: { eventType: spec.eventType, duplicateCount: matches.length },
+        sampleIds: matches.map(m => m.eventId),
+        message: `recordId=${spec.sourceRecordId}: eventType=${spec.eventType}のDerived eventが${matches.length}件重複生成されている`,
+      });
+    }
+
+    const e = matches[0];
+    const eventScope = { ...baseScope, eventId: e.eventId };
+    if (e.amountYen !== spec.expectedAmountYen) {
+      amountMismatches++;
+      findings.push({
+        severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant', scope: eventScope,
+        metrics: { expectedAmountYen: spec.expectedAmountYen, actualAmountYen: e.amountYen },
+        message: `eventId=${e.eventId}: 期待金額(${spec.expectedAmountYen})とevent.amountYen(${e.amountYen})が不一致`,
+      });
+    }
+    if (e.fiscalYear !== spec.expectedFiscalYear) {
+      fiscalYearMismatches++;
+      findings.push({
+        severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant', scope: eventScope,
+        metrics: { expectedFiscalYear: spec.expectedFiscalYear, actualFiscalYear: e.fiscalYear, field: 'fiscalYear' },
+        message: `eventId=${e.eventId}: fiscalYearが期待値(${spec.expectedFiscalYear})と不一致（実際${e.fiscalYear}）`,
+      });
+    }
+    if ((e.sourceFiscalYear ?? null) !== spec.expectedSourceFiscalYear) {
+      fiscalYearMismatches++;
+      findings.push({
+        severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant', scope: eventScope,
+        metrics: { expectedSourceFiscalYear: spec.expectedSourceFiscalYear, actualSourceFiscalYear: e.sourceFiscalYear ?? null, field: 'sourceFiscalYear' },
+        message: `eventId=${e.eventId}: sourceFiscalYearが期待値(${spec.expectedSourceFiscalYear})と不一致（実際${e.sourceFiscalYear ?? null}）`,
+      });
+    }
+  }
+
+  // 4) 逆方向: 実在する各eventがsourceレコードを持ち、期待済みidentityに属するか
   const itemsById = new Map(items.map(i => [i.recordId, i]));
   const summariesById = new Map(summaries.map(s => [s.recordId, s]));
-
-  const pushMissing = (e: RsDerivedBudgetEvent, sourceId: string | undefined) => {
-    missingSourceRecords++;
-    findings.push({
-      severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant',
-      scope: { reviewYear: e.reviewYear, projectId: e.projectId, eventId: e.eventId, recordId: sourceId },
-      message: `eventId=${e.eventId}: sourceRecordId=${sourceId ?? '(なし)'}のNormalizedレコードが実在しない`,
-    });
-  };
-  const pushAmountMismatch = (e: RsDerivedBudgetEvent, expected: number | null, field: string) => {
-    amountMismatches++;
-    findings.push({
-      severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant',
-      scope: { reviewYear: e.reviewYear, projectId: e.projectId, eventId: e.eventId, recordId: e.sourceRecordIds[0] },
-      metrics: { expectedAmountYen: expected, actualAmountYen: e.amountYen, sourceField: field },
-      message: `eventId=${e.eventId}: ${field}(${expected})とevent.amountYen(${e.amountYen})が不一致`,
-    });
-  };
-  const pushFyMismatch = (e: RsDerivedBudgetEvent, expected: number | null, actual: number | null, field: string) => {
-    findings.push({
-      severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant',
-      scope: { reviewYear: e.reviewYear, projectId: e.projectId, eventId: e.eventId, recordId: e.sourceRecordIds[0] },
-      metrics: { expected, actual, field },
-      message: `eventId=${e.eventId}: ${field}が期待値(${expected})と不一致（実際${actual}）`,
-    });
-  };
-
+  let checkedEvents = 0;
   for (const e of events) {
     checkedEvents++;
     const sourceId = e.sourceRecordIds[0] as string | undefined;
+    const scope = { reviewYear: e.reviewYear, projectId: e.projectId, eventId: e.eventId, recordId: sourceId };
 
-    if (ITEM_EVENT_TYPES.has(e.eventType) || e.eventType === 'next_year_request') {
-      const item = sourceId ? itemsById.get(sourceId) : undefined;
-      if (!item) { pushMissing(e, sourceId); continue; }
-
-      if (e.eventType === 'next_year_request') {
-        if (item.nextYearRequestYen !== e.amountYen) pushAmountMismatch(e, item.nextYearRequestYen, 'nextYearRequestYen');
-        if (item.requestFiscalYear !== e.fiscalYear) pushFyMismatch(e, item.requestFiscalYear, e.fiscalYear, 'fiscalYear(requestFiscalYear)');
-        if (item.fiscalYear !== (e.sourceFiscalYear ?? null)) pushFyMismatch(e, item.fiscalYear, e.sourceFiscalYear ?? null, 'sourceFiscalYear');
-      } else {
-        if (item.budgetAmountYen !== e.amountYen) pushAmountMismatch(e, item.budgetAmountYen, 'budgetAmountYen');
-        if (item.fiscalYear !== e.fiscalYear) pushFyMismatch(e, item.fiscalYear, e.fiscalYear, 'fiscalYear');
-        const expectedType = rsBudgetEventType(item.budgetType);
-        if (expectedType !== e.eventType) {
-          findings.push({
-            severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant',
-            scope: { reviewYear: e.reviewYear, projectId: e.projectId, eventId: e.eventId, recordId: sourceId },
-            metrics: { expectedEventType: expectedType, actualEventType: e.eventType, sourceBudgetType: item.budgetType },
-            message: `eventId=${e.eventId}: budgetType「${item.budgetType}」のrsBudgetEventType()判定(${expectedType})とevent.eventType(${e.eventType})が不一致`,
-          });
-        }
-      }
-    } else if (e.eventType in SUMMARY_EVENT_COLUMNS) {
-      const summary = sourceId ? summariesById.get(sourceId) : undefined;
-      if (!summary) { pushMissing(e, sourceId); continue; }
-
-      const column = SUMMARY_EVENT_COLUMNS[e.eventType]!;
-      const expectedAmount = summary.amounts[column] ?? null;
-      if (expectedAmount !== e.amountYen) pushAmountMismatch(e, expectedAmount, `amounts["${column}"]`);
-      if (summary.fiscalYear !== (e.sourceFiscalYear ?? null)) pushFyMismatch(e, summary.fiscalYear, e.sourceFiscalYear ?? null, 'sourceFiscalYear');
-      const expectedFiscalYear = e.eventType === 'next_year_request_project_account' && summary.fiscalYear !== null ? summary.fiscalYear + 1 : summary.fiscalYear;
-      if (expectedFiscalYear !== e.fiscalYear) pushFyMismatch(e, expectedFiscalYear, e.fiscalYear, 'fiscalYear');
+    if (!KNOWN_EVENT_TYPES.has(e.eventType)) {
+      eventTypeMismatches++;
+      findings.push({
+        severity: 'warning', check: 'rs-derived-event-provenance', category: 'semantic-diagnostic', scope,
+        metrics: { eventType: e.eventType },
+        message: `eventId=${e.eventId}: 未知のeventType「${e.eventType}」はこのvalidatorの対応対象外（診断のみ・silent skipしない）`,
+      });
+      continue;
     }
-    // 上記どちらにも属さないeventType（将来追加分）は現時点で検査対象外。無視して静かに通す。
+    if (!sourceId || (!itemsById.has(sourceId) && !summariesById.has(sourceId))) {
+      missingSourceRecords++;
+      findings.push({
+        severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant', scope,
+        message: `eventId=${e.eventId}: sourceRecordId=${sourceId ?? '(なし)'}のNormalizedレコードが実在しない`,
+      });
+      continue;
+    }
+    const key = rsEventIdentity(sourceId, e.eventType);
+    if (!consumedIdentities.has(key)) {
+      // 対応するsourceのnon-null値が無いのにeventが生成されている（blankから生成された等）
+      duplicateOrUnexpectedEvents++;
+      findings.push({
+        severity: 'error', check: 'rs-derived-event-provenance', category: 'invariant', scope,
+        metrics: { eventType: e.eventType },
+        message: `eventId=${e.eventId}: 対応するsourceのnon-null値が無いのにeventが生成されている（unexpected event）`,
+      });
+    }
   }
-  return { findings, checkedEvents, missingSourceRecords, amountMismatches };
+
+  return {
+    findings, checkedEvents, missingSourceRecords, amountMismatches,
+    expectedEvents: expected.length, actualEvents: events.length,
+    missingExpectedEvents, duplicateOrUnexpectedEvents, fiscalYearMismatches, eventTypeMismatches,
+  };
 }
 
 /**
