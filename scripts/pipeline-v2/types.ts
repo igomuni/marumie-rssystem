@@ -1,7 +1,5 @@
 /**
  * Pipeline V2 共通型定義。normalized・derived層で共有する。
- * 仕様: docs/tasks/20260919_0900_marumie-rssystem × ChatGPT 分析プラクティス/
- *       20260919_Pipeline_V2基盤整備_実装タスク_v2.md
  */
 
 /** 金額イベントの種別。今回のPoCで実際に生成するのは initial/supplementary/settlement系（reserve/transfer/carryover/execution/unused）とrequestのみ */
