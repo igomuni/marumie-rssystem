@@ -37,10 +37,21 @@ import {
   classifyUnlinkedReasons, checkLinkTaxonomyConsistency, diagnoseJointMinistryFallback,
   analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups, type JointMinistryFallbackCandidate,
 } from './lib/validation/mof-rs-linkage';
+import {
+  readGzipJson, readJsonFile, independentRsShard, checkArtifactExists,
+  checkRsProjectCounts, checkRsShardReferentialIntegrity, checkRsBudgetSummaryPreservation,
+  checkRsBudgetItemPreservation, checkRsFalsePreservation, checkRsIndexBudgetSummaryReconstruction,
+  checkMofSectionCounts, checkMofSectionSemantics, checkMofDetailRecords, checkMofDetailEventAggregation,
+  checkLinksPublishCounts, checkLinksSemanticEquality, checkLinksSectionIdsReconstruction, checkLinksManifestSetCounts,
+  checkRootManifestConsistency,
+  type RsPublishIndex, type RsPublishManifest, type MofPublishIndex, type MofPublishManifest,
+  type PublishedLink, type LinksPublishManifest, type RootManifest,
+} from './lib/validation/publish';
+import type { RsProject } from './lib/rs-projects';
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2,
   RsBudgetSummaryRecord, RsDerivedBudgetEvent, RsProjectSheetConflict, MofBudgetItemRecord, MofRsProjectLinkGroup,
-  MofDerivedBudgetEvent,
+  MofDerivedBudgetEvent, MofDerivedSection,
 } from './types';
 
 const REVIEW_YEARS = [2024, 2025, 2026];
@@ -364,6 +375,188 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
   return { findings, metrics };
 }
 
+// ============================================================
+// Stage E: Publish validation（public/data/v2）
+// 原則: publish-v2.tsを再実行したり、compact*()/build*()等のPublish生成関数を
+// 呼んで期待値を作らない。Normalized/Derived/public/data/v2をそれぞれ独立に読み、
+// semantic invariantとして再検算する（lib/validation/publish.ts参照）。
+// ============================================================
+
+interface RsPublishMetrics {
+  reviewYear: number; projectCount: number; indexProjectCount: number;
+  budgetSummaries: { sourceCount: number; publishedCount: number };
+  budgetItems: { sourceCount: number; publishedCount: number };
+  indexBudgetSummary: { checkedProjects: number };
+  falsePreservationChecked: number;
+}
+interface MofPublishMetrics {
+  fiscalYear: number; sectionCount: number; recordCount: number; eventCount: number;
+  checkedRecords: number; checkedEventGroups: number;
+}
+interface LinksPublishMetrics { reviewYear: number; fiscalYear: number; derivedCount: number; publishedCount: number }
+
+function validatePublish(outputRoot: string, publicRoot: string): {
+  findings: Finding[]; publish: { rs: RsPublishMetrics[]; mof: MofPublishMetrics[]; links: LinksPublishMetrics[]; rootManifest: { checkedProducts: number } };
+} {
+  const findings: Finding[] = [];
+  const v2Root = path.join(publicRoot, 'data', 'v2');
+  const rsMetrics: RsPublishMetrics[] = [];
+  const mofMetrics: MofPublishMetrics[] = [];
+  const linksMetrics: LinksPublishMetrics[] = [];
+  const rsIndexesForRoot: { reviewYear: number; projectCount: number }[] = [];
+  const mofIndexesForRoot: { fiscalYear: number; sectionCount: number }[] = [];
+  const linkManifestsForRoot: { reviewYear: number; fiscalYear: number; linkGroupCount: number; projectCount: number; sectionCount: number }[] = [];
+
+  // --- E-1: RS ---
+  for (const reviewYear of REVIEW_YEARS) {
+    const normDir = path.join(outputRoot, 'normalized', 'rs', `review-${reviewYear}`);
+    const projectsPath = path.join(normDir, 'projects.jsonl');
+    if (!fs.existsSync(projectsPath)) continue;
+    const normProjects = readJsonl<RsProject>(projectsPath);
+    if (normProjects.length === 0) continue;
+
+    const rsOutDir = path.join(v2Root, 'rs', `review-${reviewYear}`);
+    const manifestPath = path.join(rsOutDir, 'manifest.json');
+    const indexPath = path.join(rsOutDir, 'index.json.gz');
+    findings.push(...checkArtifactExists('rs-publish-artifact-presence', manifestPath, { reviewYear }));
+    findings.push(...checkArtifactExists('rs-publish-artifact-presence', indexPath, { reviewYear }));
+
+    const index = readGzipJson<RsPublishIndex>(indexPath);
+    const manifest = readJsonFile<RsPublishManifest>(manifestPath);
+    findings.push(...checkRsProjectCounts(reviewYear, normProjects, index, manifest));
+
+    const projectIds = new Set(normProjects.map(p => p.projectId));
+    const readCoreShard = (shard: string) => readGzipJson<Record<string, unknown>>(path.join(rsOutDir, 'core', `${shard}.json.gz`));
+    const readContextShard = (shard: string) => readGzipJson<Record<string, unknown>>(path.join(rsOutDir, 'context', `${shard}.json.gz`));
+    const shardOf = (projectId: string) => independentRsShard(projectId);
+
+    findings.push(...checkRsShardReferentialIntegrity(reviewYear, index, readCoreShard));
+
+    const normSummaries = readJsonl<RsBudgetSummaryRecord>(path.join(normDir, 'budget-summaries.jsonl'));
+    const summaryResult = checkRsBudgetSummaryPreservation(reviewYear, normSummaries, projectIds, readCoreShard, shardOf);
+    findings.push(...summaryResult.findings);
+
+    const normItems = readJsonl<RsBudgetItemRecordV2>(path.join(normDir, 'budget-items.jsonl'));
+    const itemResult = checkRsBudgetItemPreservation(reviewYear, normItems, projectIds, readContextShard, shardOf);
+    findings.push(...itemResult.findings);
+
+    const falseResult = checkRsFalsePreservation(reviewYear, normProjects, index, readCoreShard, shardOf);
+    findings.push(...falseResult.findings);
+
+    const indexBudgetResult = checkRsIndexBudgetSummaryReconstruction(reviewYear, normSummaries, index);
+    findings.push(...indexBudgetResult.findings);
+
+    if (manifest?.normalizedRecordCounts) {
+      if (manifest.normalizedRecordCounts.budgetSummaries !== normSummaries.length) {
+        findings.push({
+          severity: 'error', check: 'rs-publish-manifest-record-counts', category: 'invariant', scope: { reviewYear },
+          message: `manifest.normalizedRecordCounts.budgetSummaries(${manifest.normalizedRecordCounts.budgetSummaries})とNormalized件数(${normSummaries.length})が不一致`,
+        });
+      }
+      if (manifest.normalizedRecordCounts.budgetItems !== normItems.length) {
+        findings.push({
+          severity: 'error', check: 'rs-publish-manifest-record-counts', category: 'invariant', scope: { reviewYear },
+          message: `manifest.normalizedRecordCounts.budgetItems(${manifest.normalizedRecordCounts.budgetItems})とNormalized件数(${normItems.length})が不一致`,
+        });
+      }
+    }
+
+    console.log(`  review-${reviewYear}: Publish(RS) — projects=${index?.projectCount ?? 0} budgetSummaries checked=${summaryResult.sourceCount} findings=${summaryResult.findings.length} ` +
+      `budgetItems checked=${itemResult.sourceCount} findings=${itemResult.findings.length} falsePreservation checked=${falseResult.checked} findings=${falseResult.findings.length}`);
+
+    if (index) rsIndexesForRoot.push({ reviewYear, projectCount: index.projectCount });
+    rsMetrics.push({
+      reviewYear, projectCount: normProjects.length, indexProjectCount: index?.projectCount ?? 0,
+      budgetSummaries: { sourceCount: summaryResult.sourceCount, publishedCount: summaryResult.publishedCount },
+      budgetItems: { sourceCount: itemResult.sourceCount, publishedCount: itemResult.publishedCount },
+      indexBudgetSummary: { checkedProjects: indexBudgetResult.checkedProjects },
+      falsePreservationChecked: falseResult.checked,
+    });
+  }
+
+  // --- E-2: MOF ---
+  for (const fiscalYear of FISCAL_YEARS) {
+    const normDir = path.join(outputRoot, 'normalized', 'mof', `fy${fiscalYear}`);
+    const droot = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`);
+    const itemsPath = path.join(normDir, 'budget-items.jsonl');
+    if (!fs.existsSync(itemsPath)) continue;
+    const normItems = readJsonl<MofBudgetItemRecord>(itemsPath);
+    if (normItems.length === 0) continue;
+
+    const mofOutDir = path.join(v2Root, 'mof', `fy${fiscalYear}`);
+    const manifestPath = path.join(mofOutDir, 'manifest.json');
+    const indexPath = path.join(mofOutDir, 'index.json.gz');
+    findings.push(...checkArtifactExists('mof-publish-artifact-presence', manifestPath, { fiscalYear }));
+    findings.push(...checkArtifactExists('mof-publish-artifact-presence', indexPath, { fiscalYear }));
+
+    const derivedSections = readJsonl<MofDerivedSection>(path.join(droot, 'sections.jsonl'));
+    const derivedEvents = readJsonl<MofDerivedBudgetEvent>(path.join(droot, 'budget-events.jsonl'));
+    const index = readGzipJson<MofPublishIndex>(indexPath);
+    const manifest = readJsonFile<MofPublishManifest>(manifestPath);
+
+    findings.push(...checkMofSectionCounts(fiscalYear, normItems, derivedSections, derivedEvents, index, manifest));
+    findings.push(...checkMofSectionSemantics(fiscalYear, derivedSections, index));
+
+    const readSectionDetail = (sectionId: string) => {
+      const shard = sectionId.slice(7, 9);
+      const shardData = readGzipJson<Record<string, { records: Record<string, unknown>[]; sources: Record<string, unknown>[]; events: { eventType: string; budgetStatus?: string; revision?: number | null; amountYen: number }[] }>>(path.join(mofOutDir, 'sections', `${shard}.json.gz`));
+      return shardData?.[sectionId] ?? null;
+    };
+    const recordResult = checkMofDetailRecords(fiscalYear, normItems, derivedSections, readSectionDetail, s => s.slice(7, 9));
+    findings.push(...recordResult.findings);
+    const eventResult = checkMofDetailEventAggregation(fiscalYear, derivedEvents, derivedSections, normItems, readSectionDetail);
+    findings.push(...eventResult.findings);
+
+    console.log(`  fy${fiscalYear}: Publish(MOF) — sections=${index?.sectionCount ?? 0} detail records checked=${recordResult.checkedRecords} findings=${recordResult.findings.length} ` +
+      `event groups checked=${eventResult.checkedGroups} findings=${eventResult.findings.length}`);
+
+    if (index) mofIndexesForRoot.push({ fiscalYear, sectionCount: index.sectionCount });
+    mofMetrics.push({
+      fiscalYear, sectionCount: derivedSections.length, recordCount: normItems.length, eventCount: derivedEvents.length,
+      checkedRecords: recordResult.checkedRecords, checkedEventGroups: eventResult.checkedGroups,
+    });
+  }
+
+  // --- E-3: standalone links ---
+  for (const reviewYear of REVIEW_YEARS) {
+    for (const fiscalYear of FISCAL_YEARS) {
+      if (fiscalYear > reviewYear) continue;
+      const derivedLinksPath = path.join(outputRoot, 'derived', 'links', `mof-rs-review-${reviewYear}-fy${fiscalYear}.jsonl`);
+      if (!fs.existsSync(derivedLinksPath)) continue;
+      const derivedLinks = readJsonl<MofRsProjectLinkGroup>(derivedLinksPath);
+
+      const linksOutDir = path.join(v2Root, 'links', `review-${reviewYear}-fy${fiscalYear}`);
+      const manifestPath = path.join(linksOutDir, 'manifest.json');
+      const linksPath = path.join(linksOutDir, 'links.json.gz');
+      findings.push(...checkArtifactExists('links-publish-artifact-presence', manifestPath, { reviewYear, fiscalYear }));
+      findings.push(...checkArtifactExists('links-publish-artifact-presence', linksPath, { reviewYear, fiscalYear }));
+
+      const published = readGzipJson<{ links: PublishedLink[] }>(linksPath);
+      const manifest = readJsonFile<LinksPublishManifest>(manifestPath);
+      findings.push(...checkLinksPublishCounts(reviewYear, fiscalYear, derivedLinks, published, manifest));
+      findings.push(...checkLinksSemanticEquality(reviewYear, fiscalYear, derivedLinks, published));
+
+      const normMofItems = readJsonl<MofBudgetItemRecord>(path.join(outputRoot, 'normalized', 'mof', `fy${fiscalYear}`, 'budget-items.jsonl'));
+      const derivedSections = readJsonl<MofDerivedSection>(path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`, 'sections.jsonl'));
+      findings.push(...checkLinksSectionIdsReconstruction(reviewYear, fiscalYear, derivedLinks, normMofItems, derivedSections, published));
+      findings.push(...checkLinksManifestSetCounts(reviewYear, fiscalYear, published, manifest));
+
+      console.log(`  review-${reviewYear}×fy${fiscalYear}: Publish(links) — derived=${derivedLinks.length} published=${published?.links.length ?? 0}`);
+
+      if (manifest) linkManifestsForRoot.push({ reviewYear, fiscalYear, linkGroupCount: manifest.linkGroupCount, projectCount: manifest.projectCount, sectionCount: manifest.sectionCount });
+      linksMetrics.push({ reviewYear, fiscalYear, derivedCount: derivedLinks.length, publishedCount: published?.links.length ?? 0 });
+    }
+  }
+
+  // --- root manifest ---
+  const rootManifest = readJsonFile<RootManifest>(path.join(v2Root, 'manifest.json'));
+  findings.push(...checkArtifactExists('root-manifest-presence', path.join(v2Root, 'manifest.json'), {}));
+  const rootResult = checkRootManifestConsistency(rootManifest, rsIndexesForRoot, mofIndexesForRoot, linkManifestsForRoot);
+  findings.push(...rootResult.findings);
+
+  return { findings, publish: { rs: rsMetrics, mof: mofMetrics, links: linksMetrics, rootManifest: { checkedProducts: rootResult.checkedProducts } } };
+}
+
 function main(): void {
   const outputRoot = 'data';
   const rawRoot = path.join('data', 'download');
@@ -387,6 +580,10 @@ function main(): void {
   const { findings: linkFindings, metrics: linkMetrics } = validateMofRsLinks(outputRoot);
   allFindings.push(...linkFindings);
 
+  const publicRoot = 'public';
+  const { findings: publishFindings, publish: publishMetrics } = validatePublish(outputRoot, publicRoot);
+  allFindings.push(...publishFindings);
+
   const errorCount = allFindings.filter(f => f.severity === 'error').length;
   const warningCount = allFindings.filter(f => f.severity === 'warning').length;
   const infoCount = allFindings.filter(f => f.severity === 'info').length;
@@ -407,7 +604,7 @@ function main(): void {
       rs: rsMetrics,
       mof: mofMetrics,
       links: linkMetrics,
-      publish: {},
+      publish: publishMetrics,
     },
     baseline: { driftCount: driftFindings.length },
   });
