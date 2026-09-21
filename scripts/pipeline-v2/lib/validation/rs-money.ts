@@ -105,14 +105,14 @@ export function checkRsSummaryItemReconciliation(
   const groupIdentity = new Map<string, GroupIdentity>();
 
   const itemSumByKey = new Map<string, number>();
-  const itemGroupExists = new Set<string>();
   for (const item of items) {
     if (!RECONCILABLE_BUDGET_TYPES.includes(item.budgetType)) continue;
     const groupKey = accountGroupKey(item.projectId, item.fiscalYear, item.accountType, item.account, item.subAccount);
     if (!groupIdentity.has(groupKey)) groupIdentity.set(groupKey, { reviewYear: item.reviewYear, projectId: item.projectId, fiscalYear: item.fiscalYear });
-    const key = itemKey(item.projectId, item.fiscalYear, item.accountType, item.account, item.subAccount, item.budgetType);
-    itemGroupExists.add(key);
-    if (item.budgetAmountYen !== null) itemSumByKey.set(key, (itemSumByKey.get(key) ?? 0) + item.budgetAmountYen);
+    if (item.budgetAmountYen !== null) {
+      const key = itemKey(item.projectId, item.fiscalYear, item.accountType, item.account, item.subAccount, item.budgetType);
+      itemSumByKey.set(key, (itemSumByKey.get(key) ?? 0) + item.budgetAmountYen);
+    }
   }
 
   const summarySumByGroup = new Map<string, Record<string, number>>();
@@ -141,7 +141,11 @@ export function checkRsSummaryItemReconciliation(
 
     for (const budgetType of RECONCILABLE_BUDGET_TYPES) {
       const key = `${groupKey}\x1f${budgetType}`;
-      const hasItems = itemGroupExists.has(key);
+      // itemHasNumericValue: このキー・budgetTypeで少なくとも1件はbudgetAmountYenが
+      // non-nullな2-2行がある、という意味。「2-2行が存在する」こと自体（全行blankの
+      // グループも含む）とは分けて判定する。分けないと「2-2行はあるが全部blank」な
+      // グループをexplicit zero evidenceと誤分類しうる（blank≠0の原則に反する）。
+      const itemHasNumericValue = itemSumByKey.has(key);
       const itemSum = itemSumByKey.get(key) ?? 0;
 
       if (hasValue.has(budgetType)) {
@@ -155,7 +159,7 @@ export function checkRsSummaryItemReconciliation(
             message: `projectId=${identity.projectId} fiscalYear=${identity.fiscalYear} budgetType=${budgetType}: 2-1会計サマリ(同一キー内合算)と2-2目別合計が不一致（2-1=${summaryValue} 2-2=${itemSum}）`,
           });
         }
-      } else if (hasItems && itemSum !== 0) {
+      } else if (itemHasNumericValue && itemSum !== 0) {
         // 2-1側がblankなのに2-2に非0の目別金額がある：報告書で確認済みのケースには無いが、
         // 金額影響がありうるためinvariant扱いとする
         mismatches++;
@@ -164,8 +168,10 @@ export function checkRsSummaryItemReconciliation(
           metrics: { summaryAmountYen: null, itemAmountYen: itemSum, differenceYen: itemSum, budgetType },
           message: `projectId=${identity.projectId} fiscalYear=${identity.fiscalYear} budgetType=${budgetType}: 2-1側がblankだが2-2に非0の目別金額(${itemSum})がある`,
         });
-      } else if (hasItems && itemSum === 0) {
+      } else if (itemHasNumericValue && itemSum === 0) {
         // 02_rs-money-preservation.md 4章で確認済みのEXPECTED_VARIANCE（2-2にのみ明示的0円のevidence）。
+        // itemHasNumericValueがtrueの場合のみ「明示的0のevidenceがある」と言える
+        // （全行blankの場合はitemHasNumericValue=falseになりこの分岐に来ない）。
         // 過去年度（FY2021等）にも実在するケースのため、fiscalYearをreviewYearに限定しない
         findings.push({
           severity: 'info', check: 'rs-summary-item-reconciliation', category: 'semantic-diagnostic', scope,
@@ -173,6 +179,8 @@ export function checkRsSummaryItemReconciliation(
           message: `projectId=${identity.projectId} fiscalYear=${identity.fiscalYear} budgetType=${budgetType}: 2-2にのみ明示的0円のevidenceがある（2-1はblank。既知のEXPECTED_VARIANCE）`,
         });
       }
+      // 2-2行はあるが全てblank（itemHasNumericValue=false）で2-1側もblankの場合は、
+      // 2-1・2-2ともに数値evidenceが無いということなので、報告すべき差異が無く静かにskipする。
     }
   }
   return { findings, checkedGroups, mismatches };

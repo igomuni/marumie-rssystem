@@ -154,6 +154,19 @@ describe('checkRsSummaryItemReconciliation', () => {
     expect(result.mismatches).toBe(1);
     expect(result.findings[0].message).toContain('2-1側がblank');
   });
+
+  it('2-2行は存在するがbudgetAmountYenが全てblank(null)の場合はexplicit zero evidenceと誤分類しない（review 2点目）', () => {
+    // 2-2に「行」はあるが数値は一切無い（budgetAmountYen=null）、2-1もblankまたはgroup自体が無い。
+    // itemSum(null扱い時のデフォルト0) === 0 だけで判定すると誤ってexplicit zero evidence扱いに
+    // なりうるため、itemHasNumericValueで区別できていることを確認する
+    const i = item({ budgetType: '当初予算', budgetAmountYen: null });
+    const resultNoSummaryGroup = checkRsSummaryItemReconciliation([], [i]);
+    expect(resultNoSummaryGroup.findings).toHaveLength(0);
+
+    const s = summary({ amounts: { '当初予算': null } });
+    const resultBlankSummary = checkRsSummaryItemReconciliation([s], [i]);
+    expect(resultBlankSummary.findings).toHaveLength(0);
+  });
 });
 
 describe('checkRsDerivedEventProvenance', () => {
