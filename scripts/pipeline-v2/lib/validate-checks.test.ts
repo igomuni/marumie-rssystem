@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
   checkNoUnknownNonEmptyColumns, checkFundingRelationBlockReferences,
-  checkExplicitZeroPreserved, checkMofRsLinkIntegrity,
+  checkExplicitZeroPreserved, checkMofRsLinkIntegrity, compareLinkBaseline, decideExitFailure,
+  checkDerivedArtifactPresence,
+  type Finding,
 } from './validate-checks';
 import type { SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2, MofBudgetItemRecord, MofRsProjectLinkGroup } from '../types';
 
@@ -25,6 +27,21 @@ describe('checkNoUnknownNonEmptyColumns', () => {
     ])]);
     expect(findings).toHaveLength(1);
     expect(findings[0].severity).toBe('error');
+  });
+
+  it('RS SourceInventory.sourceYearはreview yearであり、根拠のないscope.fiscalYearを付けない（Stage A review fix）', () => {
+    const findings = checkNoUnknownNonEmptyColumns([inventory([
+      { column: 'x', nonEmptyCount: 5, status: 'unknown_nonempty' as SourceInventory['columns'][number]['status'] },
+    ])]);
+    expect(findings[0].scope?.fiscalYear).toBeUndefined();
+    expect(findings[0].metrics).toMatchObject({ sourceYear: 2024 });
+
+    // 呼び出し元validateRsYear()のwithReviewYear()相当の合成を再現し、
+    // reviewYearだけが付与されfiscalYearは付与されないことを確認する
+    const reviewYear = 2024;
+    const withScope = { ...findings[0], scope: { ...findings[0].scope, reviewYear } };
+    expect(withScope.scope.reviewYear).toBe(2024);
+    expect(withScope.scope.fiscalYear).toBeUndefined();
   });
 });
 
@@ -101,5 +118,93 @@ describe('checkMofRsLinkIntegrity', () => {
     const link2 = { ...validLink, linkId: 'l2', naturalKey: 'k2' };
     const findings = checkMofRsLinkIntegrity([validLink, link2], [mofItem], [rsItem]);
     expect(findings.some(f => f.message.includes('重複所属'))).toBe(true);
+  });
+
+  it('invariant violationはcategory=invariantかつstructured scope/metricsを持つ（Stage A）', () => {
+    const link = { ...validLink, differenceYen: 999 };
+    const findings = checkMofRsLinkIntegrity([link], [mofItem], [rsItem]);
+    const finding = findings.find(f => f.message.includes('differenceYen'))!;
+    expect(finding.category).toBe('invariant');
+    expect(finding.scope?.linkId).toBe('l1');
+    expect(finding.metrics).toMatchObject({ mofAmountYen: 100, rsAmountYen: 90, differenceYen: 999, expectedDifferenceYen: 10 });
+  });
+
+  it('重複所属findingはrecordIdをscopeに、重複先linkIdをsampleIdsに持つ（Stage A）', () => {
+    const link2 = { ...validLink, linkId: 'l2', naturalKey: 'k2' };
+    const findings = checkMofRsLinkIntegrity([validLink, link2], [mofItem], [rsItem]);
+    const finding = findings.find(f => f.message.includes('重複所属'))!;
+    expect(finding.scope?.recordId).toBe('rs1');
+    expect(finding.sampleIds).toEqual(['l1', 'l2']);
+  });
+});
+
+describe('compareLinkBaseline（Stage A: baseline driftとinvariantの分離）', () => {
+  const scope = { reviewYear: 2025, fiscalYear: 2024 };
+
+  it('baselineと一致すればfindingsは空', () => {
+    const golden = { linkGroupCount: 100, mofAmountAcrossGroupsYen: 5000 };
+    const summary = { linkGroupCount: 100, mofAmountAcrossGroupsYen: 5000 };
+    expect(compareLinkBaseline(golden, summary, scope)).toHaveLength(0);
+  });
+
+  it('baselineと不一致ならcategory=baseline-drift・severity=warning（errorではない）', () => {
+    const golden = { linkGroupCount: 100 };
+    const summary = { linkGroupCount: 102 };
+    const findings = compareLinkBaseline(golden, summary, scope);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].severity).toBe('warning');
+    expect(findings[0].category).toBe('baseline-drift');
+    expect(findings[0].scope).toEqual(scope);
+    expect(findings[0].metrics).toMatchObject({ key: 'linkGroupCount', expected: 100, actual: 102 });
+  });
+});
+
+describe('decideExitFailure（Stage A: exit codeはerrorのみに連動）', () => {
+  const invariantError: Finding = { severity: 'error', check: 'x', category: 'invariant', message: 'x' };
+  const baselineDrift: Finding = { severity: 'warning', check: 'y', category: 'baseline-drift', message: 'y' };
+  const info: Finding = { severity: 'info', check: 'z', message: 'z' };
+
+  it('invariant違反（error）があれば常に失敗', () => {
+    expect(decideExitFailure([invariantError])).toBe(true);
+    expect(decideExitFailure([invariantError], { strictBaseline: false })).toBe(true);
+  });
+
+  it('baseline driftのみでは既定では失敗にしない', () => {
+    expect(decideExitFailure([baselineDrift, info])).toBe(false);
+  });
+
+  it('--strict-baseline相当（strictBaseline:true）ならbaseline driftも失敗にする', () => {
+    expect(decideExitFailure([baselineDrift], { strictBaseline: true })).toBe(true);
+  });
+
+  it('findingsが空、またはinfoのみなら失敗にしない', () => {
+    expect(decideExitFailure([])).toBe(false);
+    expect(decideExitFailure([info], { strictBaseline: true })).toBe(false);
+  });
+});
+
+describe('checkDerivedArtifactPresence（Stage B/C共通のorchestration gap対策）', () => {
+  it('sourceにレコードがありartifactも存在すればfindingsは空（RS想定）', () => {
+    expect(checkDerivedArtifactPresence('rs-derived-artifact-presence', 153404, true, { reviewYear: 2024 })).toHaveLength(0);
+  });
+
+  it('sourceにレコードがあるのにartifactが存在しなければinvariant error（RS想定）', () => {
+    const findings = checkDerivedArtifactPresence('rs-derived-artifact-presence', 153404, false, { reviewYear: 2024 });
+    expect(findings).toHaveLength(1);
+    expect(findings[0].severity).toBe('error');
+    expect(findings[0].category).toBe('invariant');
+    expect(findings[0].check).toBe('rs-derived-artifact-presence');
+    expect(findings[0].scope).toEqual({ reviewYear: 2024 });
+  });
+
+  it('sourceにレコードがあるのにartifactが存在しなければinvariant error（MOF想定）', () => {
+    const findings = checkDerivedArtifactPresence('mof-derived-artifact-presence', 8358, false, { fiscalYear: 2024 });
+    expect(findings).toHaveLength(1);
+    expect(findings[0].check).toBe('mof-derived-artifact-presence');
+    expect(findings[0].metrics).toMatchObject({ sourceRecordCount: 8358 });
+  });
+
+  it('sourceが0件ならartifact不存在でもfindingsは空（対象年度がまだ無いだけのケース）', () => {
+    expect(checkDerivedArtifactPresence('rs-derived-artifact-presence', 0, false, { reviewYear: 2026 })).toHaveLength(0);
   });
 });
