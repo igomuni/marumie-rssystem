@@ -14,13 +14,13 @@
 import { normalizeText, stableId } from './stable-id';
 import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup } from '../types';
 
-type Stage = readonly [phase: 'initial' | 'supplement', revision: number | null];
+export type Stage = readonly [phase: 'initial' | 'supplement', revision: number | null];
 
-function stageKey(stage: Stage): string {
+export function stageKey(stage: Stage): string {
   return `${stage[0]}\x1f${stage[1] ?? ''}`;
 }
 
-function mofKeyFrom(m: MofBudgetItemRecord): string | null {
+export function mofKeyFrom(m: MofBudgetItemRecord): string | null {
   if (!m.sectionName || !m.subItemName) return null;
   let parts: string[];
   if (m.accountType === 'general') {
@@ -33,7 +33,7 @@ function mofKeyFrom(m: MofBudgetItemRecord): string | null {
   return parts.map(normalizeText).join('|');
 }
 
-function rsKeyFrom(r: RsBudgetItemRecordV2): string | null {
+export function rsKeyFrom(r: RsBudgetItemRecordV2): string | null {
   if (!r.sectionName || !r.subItemName || !r.budgetMinistry) return null;
   let parts: string[];
   if (r.accountType === 'general') {
@@ -46,7 +46,7 @@ function rsKeyFrom(r: RsBudgetItemRecordV2): string | null {
   return parts.map(normalizeText).join('|');
 }
 
-function rsPhase(r: RsBudgetItemRecordV2): Stage | null {
+export function rsPhase(r: RsBudgetItemRecordV2): Stage | null {
   const bt = r.budgetType ?? '';
   if (bt === '当初予算') return ['initial', null];
   const m = /^第(\d+)次補正予算$/.exec(bt);

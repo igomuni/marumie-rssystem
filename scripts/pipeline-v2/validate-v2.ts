@@ -33,6 +33,10 @@ import {
   checkMofSettlementEquation, checkMofDerivedEventProvenance,
   checkMofParliamentaryAmendmentProvenance, checkMofStructuralZeroFromRaw,
 } from './lib/validation/mof-money';
+import {
+  classifyUnlinkedReasons, diagnoseJointMinistryFallback,
+  analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups,
+} from './lib/validation/mof-rs-linkage';
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2,
   RsBudgetSummaryRecord, RsDerivedBudgetEvent, RsProjectSheetConflict, MofBudgetItemRecord, MofRsProjectLinkGroup,
@@ -269,7 +273,17 @@ function validateMofYear(outputRoot: string, rawRoot: string, fiscalYear: number
   return { findings, metrics };
 }
 
-interface LinkPairMetrics { reviewYear: number; fiscalYear: number; linkGroupCount: number; summary: Record<string, unknown> }
+interface LinkPairMetrics {
+  reviewYear: number; fiscalYear: number; linkGroupCount: number; summary: Record<string, unknown>;
+  unlinkedReasons: {
+    unsupportedBudgetType: { recordCount: number; amountYen: number };
+    missingLinkKey: { recordCount: number; amountYen: number; missingFieldCounts: Record<string, number> };
+    validKeyNoMatch: { recordCount: number; amountYen: number };
+  };
+  jointMinistryFallback: { candidateCount: number; candidateAmountYen: number; exactReconciliationCount: number };
+  difference: ReturnType<typeof analyzeLinkDifferenceTaxonomy>;
+  multiProject: ReturnType<typeof analyzeMultiProjectGroups>;
+}
 
 function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics: LinkPairMetrics[] } {
   const findings: Finding[] = [];
@@ -292,7 +306,35 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
       console.log(`  review-${reviewYear}×fy${fiscalYear}: link整合性チェック findings=${integrityFindings.length}`);
 
       const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
-      metrics.push({ reviewYear, fiscalYear, linkGroupCount: links.length, summary });
+
+      // Stage D: linkage diagnostics（診断のみ。production link algorithmは変更しない）
+      const rsItemsForYear = rsItems.filter(r => r.fiscalYear === fiscalYear);
+      const unlinkedReasons = classifyUnlinkedReasons(mofItems, rsItemsForYear);
+      const jointMinistry = diagnoseJointMinistryFallback(reviewYear, fiscalYear, mofItems, rsItemsForYear);
+      findings.push(...jointMinistry.findings);
+      const difference = analyzeLinkDifferenceTaxonomy(links);
+      const multiProject = analyzeMultiProjectGroups(links);
+
+      metrics.push({
+        reviewYear, fiscalYear, linkGroupCount: links.length, summary,
+        unlinkedReasons: {
+          unsupportedBudgetType: unlinkedReasons.unsupportedBudgetType,
+          missingLinkKey: unlinkedReasons.missingLinkKey,
+          validKeyNoMatch: unlinkedReasons.validKeyNoMatch,
+        },
+        jointMinistryFallback: {
+          candidateCount: jointMinistry.candidates.length,
+          candidateAmountYen: jointMinistry.candidates.reduce((s, c) => s + c.candidateRsAmountYen, 0),
+          exactReconciliationCount: jointMinistry.candidates.filter(c => c.exactReconciliation).length,
+        },
+        difference, multiProject,
+      });
+
+      console.log(`  review-${reviewYear}×fy${fiscalYear}: unlinked理由 unsupported=${unlinkedReasons.unsupportedBudgetType.recordCount} ` +
+        `missingKey=${unlinkedReasons.missingLinkKey.recordCount} validKeyNoMatch=${unlinkedReasons.validKeyNoMatch.recordCount} / ` +
+        `jointMinistry候補=${jointMinistry.candidates.length}件 / ` +
+        `差額分布 zero=${difference.exactZeroGroupCount} nonzero=${difference.nonZeroGroupCount} top10share=${(difference.top10Share * 100).toFixed(1)}% / ` +
+        `multiProject groups=${multiProject.multiProjectGroupCount}/${multiProject.groupCount} max=${multiProject.maxProjectCountPerGroup}`);
 
       // golden acceptanceは「検証済み時点のbaseline snapshot」であり不変条件ではない（L-017）。
       // joint-ministry fallback等の正しいアルゴリズム改善でもこの値は変わりうるため、
