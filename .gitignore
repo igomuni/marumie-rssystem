@@ -80,3 +80,9 @@ __pycache__/
 # --- IGNORE ---
 docs/*ignore*
 docs/image*.png
+# ChatGPTとのやり取りログ（作業ログであってtask docではない。docs/tasks/INDEX.mdの索引対象外）。
+# 親ディレクトリ自体を再includeしないと配下ファイルの再include（assets.zip）が効かないため、
+# ディレクトリ・対象ファイルの両方を明示的に!で戻す
+/docs/chats/**
+!/docs/chats/
+!/docs/chats/assets.zip
