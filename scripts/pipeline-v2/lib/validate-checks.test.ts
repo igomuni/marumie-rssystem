@@ -27,6 +27,21 @@ describe('checkNoUnknownNonEmptyColumns', () => {
     expect(findings).toHaveLength(1);
     expect(findings[0].severity).toBe('error');
   });
+
+  it('RS SourceInventory.sourceYearはreview yearであり、根拠のないscope.fiscalYearを付けない（Stage A review fix）', () => {
+    const findings = checkNoUnknownNonEmptyColumns([inventory([
+      { column: 'x', nonEmptyCount: 5, status: 'unknown_nonempty' as SourceInventory['columns'][number]['status'] },
+    ])]);
+    expect(findings[0].scope?.fiscalYear).toBeUndefined();
+    expect(findings[0].metrics).toMatchObject({ sourceYear: 2024 });
+
+    // 呼び出し元validateRsYear()のwithReviewYear()相当の合成を再現し、
+    // reviewYearだけが付与されfiscalYearは付与されないことを確認する
+    const reviewYear = 2024;
+    const withScope = { ...findings[0], scope: { ...findings[0].scope, reviewYear } };
+    expect(withScope.scope.reviewYear).toBe(2024);
+    expect(withScope.scope.fiscalYear).toBeUndefined();
+  });
 });
 
 const RS_BASE = {

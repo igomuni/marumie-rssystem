@@ -49,8 +49,9 @@ export function checkNoUnknownNonEmptyColumns(inventories: SourceInventory[]): F
           severity: 'error',
           check: 'no-silent-drop',
           category: 'source-preservation',
-          scope: { fiscalYear: inv.sourceYear },
-          metrics: { nonEmptyCount: col.nonEmptyCount, column: col.column, datasetCode: inv.datasetCode },
+          // sourceYearはこの呼び出し文脈（RS SourceInventory）ではreview yearであり、fiscalYearではない。
+          // scope.reviewYearは呼び出し元validateRsYear()のwithReviewYear()が付与するため、ここでは付けない。
+          metrics: { nonEmptyCount: col.nonEmptyCount, column: col.column, datasetCode: inv.datasetCode, sourceYear: inv.sourceYear },
           message: `${inv.datasetCode}(${inv.sourceYear}): 列「${col.column}」が非空(${col.nonEmptyCount}件)なのにmapped/extra_preservedのどちらでもない`,
         });
       }
