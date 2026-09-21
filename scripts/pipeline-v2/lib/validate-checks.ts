@@ -200,6 +200,24 @@ export function decideExitFailure(findings: Finding[], options: { strictBaseline
   return hasError || (options.strictBaseline && hasDrift);
 }
 
+/**
+ * Stage B/C共通のorchestration gap対策（Stage C review指摘）。
+ * Normalized sourceにレコードがあるのに、期待されるDerived artifact（budget-events.jsonl等）が
+ * ファイルごと存在しない場合、既存の`fs.existsSync(...) ? check(...) : {全部0のfallback}`という
+ * 構造では「provenance検査対象0件・error無し」として静かに通ってしまう。これを検出する。
+ * 大量のsource行ごとにfindingを出すのではなく、artifact単位で1件にする。
+ */
+export function checkDerivedArtifactPresence(
+  check: string, sourceRecordCount: number, artifactExists: boolean, scope: FindingScope
+): Finding[] {
+  if (sourceRecordCount === 0 || artifactExists) return [];
+  return [{
+    severity: 'error', check, category: 'invariant', scope,
+    metrics: { sourceRecordCount },
+    message: `Normalized sourceに${sourceRecordCount}件のレコードがあるのに、期待されるDerived artifactが存在しない`,
+  }];
+}
+
 /** project-sheet-conflicts.jsonlの件数をレポートするだけ（断定せず両方残す設計のため、自動補正しない） */
 export function summarizeProjectSheetConflicts(conflicts: RsProjectSheetConflict[]): Finding[] {
   if (conflicts.length === 0) return [];

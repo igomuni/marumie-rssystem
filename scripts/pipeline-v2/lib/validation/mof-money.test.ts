@@ -338,9 +338,69 @@ describe('checkMofStructuralZeroFromRaw（raw ZIP読み込みを含む統合テ�
     const items = [item({ recordId: 'mismatchRow', accountType: 'general', budgetRuleIncreaseYen: 0, source: { domain: 'mof.go.jp', path: relZipPath, file: 'x.zip', zipEntry, rowNumber: 2 } })];
     const result = checkMofStructuralZeroFromRaw(rawRoot, items);
 
-    expect(result.findings.some(f => f.severity === 'error' && f.category === 'invariant' && f.message.includes('取りこぼし'))).toBe(true);
+    expect(result.findings.some(f => f.severity === 'error' && f.category === 'invariant' && f.message.includes('不一致'))).toBe(true);
 
     fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('rawとNormalizedが両方nonzeroでも値が異なればinvariant error（review指摘: raw=100/normalized=200を検出する）', async () => {
+    const fs = await import('fs');
+    const os = await import('os');
+    const path = await import('path');
+    const { buildStoredZip } = await import('./test-helpers/zip-fixture');
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mof-structural-zero-valuediff-'));
+    const rawRoot = tmpDir;
+    const relZipPath = 'mof.go.jp/archive/fy2024/settlement_general.zip';
+    const zipEntry = 'settlement.csv';
+    const absZipPath = path.join(rawRoot, relZipPath);
+    fs.mkdirSync(path.dirname(absZipPath), { recursive: true });
+    fs.writeFileSync(absZipPath, buildStoredZip([{ name: zipEntry, data: Buffer.from('予算総則の規定による経費増額(円)\n100\n', 'utf-8') }]));
+
+    const matching = item({ recordId: 'matchRow', accountType: 'general', budgetRuleIncreaseYen: 100, source: { domain: 'mof.go.jp', path: relZipPath, file: 'x.zip', zipEntry, rowNumber: 2 } });
+    const okResult = checkMofStructuralZeroFromRaw(rawRoot, [matching]);
+    expect(okResult.findings.some(f => f.severity === 'error')).toBe(false);
+
+    const mismatching = item({ recordId: 'diffRow', accountType: 'general', budgetRuleIncreaseYen: 200, source: { domain: 'mof.go.jp', path: relZipPath, file: 'x.zip', zipEntry, rowNumber: 2 } });
+    const badResult = checkMofStructuralZeroFromRaw(rawRoot, [mismatching]);
+    expect(badResult.findings.some(f => f.severity === 'error' && f.category === 'invariant')).toBe(true);
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('負の数値でもraw/Normalizedが一致すればfindingsは空', async () => {
+    const fs = await import('fs');
+    const os = await import('os');
+    const path = await import('path');
+    const { buildStoredZip } = await import('./test-helpers/zip-fixture');
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mof-structural-zero-negative-'));
+    const rawRoot = tmpDir;
+    const relZipPath = 'mof.go.jp/archive/fy2024/settlement_general.zip';
+    const zipEntry = 'settlement.csv';
+    const absZipPath = path.join(rawRoot, relZipPath);
+    fs.mkdirSync(path.dirname(absZipPath), { recursive: true });
+    fs.writeFileSync(absZipPath, buildStoredZip([{ name: zipEntry, data: Buffer.from('予算総則の規定による経費増額(円)\n-100\n', 'utf-8') }]));
+
+    const items = [item({ recordId: 'negRow', accountType: 'general', budgetRuleIncreaseYen: -100, source: { domain: 'mof.go.jp', path: relZipPath, file: 'x.zip', zipEntry, rowNumber: 2 } })];
+    const result = checkMofStructuralZeroFromRaw(rawRoot, items);
+    expect(result.findings.some(f => f.severity === 'error')).toBe(false);
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('政府関係機関のtransferAdjustmentYenが0以外ならハードコード前提が崩れているとしてinvariant errorにする（review指摘）', () => {
+    const items = [item({ recordId: 'a1', accountType: 'agency', transferAdjustmentYen: 1, source: { domain: 'mof.go.jp', path: 'does/not/exist.zip', file: 'x.zip', zipEntry: 'x.csv', rowNumber: 2 } })];
+    const result = checkMofStructuralZeroFromRaw('/nonexistent-raw-root', items);
+    expect(result.findings.some(f => f.severity === 'error' && f.category === 'invariant' && f.message.includes('政府関係機関'))).toBe(true);
+    expect(result.counts.transferAdjustmentYen.agency?.notApplicableHardcoded ?? 0).toBe(0);
+  });
+
+  it('政府関係機関のtransferAdjustmentYen=0はinvariant違反にならない', () => {
+    const items = [item({ recordId: 'a1', accountType: 'agency', transferAdjustmentYen: 0, source: { domain: 'mof.go.jp', path: 'does/not/exist.zip', file: 'x.zip', zipEntry: 'x.csv', rowNumber: 2 } })];
+    const result = checkMofStructuralZeroFromRaw('/nonexistent-raw-root', items);
+    expect(result.findings.some(f => f.severity === 'error')).toBe(false);
+    expect(result.counts.transferAdjustmentYen.agency).toMatchObject({ notApplicableHardcoded: 1 });
   });
 
   it('政府関係機関のtransferAdjustmentYenはraw読み込みせずnotApplicableHardcodedに分類する', () => {
@@ -353,10 +413,11 @@ describe('checkMofStructuralZeroFromRaw（raw ZIP読み込みを含む統合テ�
     expect(result.counts.transferAdjustmentYen.agency).toMatchObject({ notApplicableHardcoded: 1 });
   });
 
-  it('raw sourceが読めない行はrawSourceUnavailableRowsとして計上し、エラーにはしない', () => {
+  it('raw sourceが読めない行はrawSourceUnavailableRowsとして計上し、invariant errorにはしないが集約warningを出す（review指摘: silent countにしない）', () => {
     const items = [item({ recordId: 'r1', accountType: 'general', source: { domain: 'mof.go.jp', path: 'does/not/exist.zip', file: 'x.zip', zipEntry: 'x.csv', rowNumber: 2 } })];
     const result = checkMofStructuralZeroFromRaw('/nonexistent-raw-root', items);
     expect(result.rawSourceUnavailableRows).toBe(1);
-    expect(result.findings).toHaveLength(0);
+    expect(result.findings.every(f => f.severity !== 'error')).toBe(true);
+    expect(result.findings.some(f => f.severity === 'warning' && f.category === 'source-preservation' && f.metrics?.rawSourceUnavailableRows === 1)).toBe(true);
   });
 });

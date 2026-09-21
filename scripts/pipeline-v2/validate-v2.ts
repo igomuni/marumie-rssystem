@@ -22,7 +22,7 @@ import { readJsonl, writeJson } from './lib/jsonl';
 import {
   checkNoUnknownNonEmptyColumns, checkFundingRelationBlockReferences,
   checkExplicitZeroPreserved, checkMofRsLinkIntegrity, summarizeProjectSheetConflicts,
-  compareLinkBaseline, decideExitFailure,
+  compareLinkBaseline, decideExitFailure, checkDerivedArtifactPresence,
   type Finding,
 } from './lib/validate-checks';
 import {
@@ -118,7 +118,16 @@ function validateRsYear(outputRoot: string, reviewYear: number): { findings: Fin
   // Stage B: RS monetary invariants。summaries/itemsはここまでで読み込み済みの配列を再利用する
   const summaries = readJsonl<RsBudgetSummaryRecord>(path.join(normDir, 'budget-summaries.jsonl'));
   const derivedEventsPath = path.join(outputRoot, 'derived', 'rs', `review-${reviewYear}`, 'budget-events.jsonl');
-  const derivedEvents = fs.existsSync(derivedEventsPath) ? readJsonl<RsDerivedBudgetEvent>(derivedEventsPath) : [];
+  const derivedArtifactExists = fs.existsSync(derivedEventsPath);
+  const derivedEvents = derivedArtifactExists ? readJsonl<RsDerivedBudgetEvent>(derivedEventsPath) : [];
+
+  // review指摘（Stage B/C共通のorchestration gap）: sourceにレコードがあるのに
+  // budget-events.jsonl自体が丸ごと無い場合、既存のfallback（provenance結果を全0で代用）
+  // だけでは静かに素通りしてしまうため、artifact欠落自体を1件のinvariant errorにする
+  findings.push(...withReviewYear(
+    checkDerivedArtifactPresence('rs-derived-artifact-presence', items.length + summaries.length, derivedArtifactExists, {}),
+    reviewYear,
+  ));
 
   const equationResult = checkRsCurrentBudgetEquation(summaries);
   findings.push(...withReviewYear(equationResult.findings, reviewYear));
@@ -126,7 +135,7 @@ function validateRsYear(outputRoot: string, reviewYear: number): { findings: Fin
   const reconciliationResult = checkRsSummaryItemReconciliation(summaries, items);
   findings.push(...withReviewYear(reconciliationResult.findings, reviewYear));
 
-  const provenanceResult = fs.existsSync(derivedEventsPath)
+  const provenanceResult = derivedArtifactExists
     ? checkRsDerivedEventProvenance(derivedEvents, items, summaries)
     : {
       findings: [] as Finding[], checkedEvents: 0, missingSourceRecords: 0, amountMismatches: 0,
@@ -195,14 +204,23 @@ function validateMofYear(outputRoot: string, rawRoot: string, fiscalYear: number
 
   const items = readJsonl<MofBudgetItemRecord>(itemsPath);
   const derivedEventsPath = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`, 'budget-events.jsonl');
-  const derivedEvents = fs.existsSync(derivedEventsPath) ? readJsonl<MofDerivedBudgetEvent>(derivedEventsPath) : [];
+  const derivedArtifactExists = fs.existsSync(derivedEventsPath);
+  const derivedEvents = derivedArtifactExists ? readJsonl<MofDerivedBudgetEvent>(derivedEventsPath) : [];
+
+  // review指摘（Stage B/C共通のorchestration gap）: sourceにレコードがあるのに
+  // budget-events.jsonl自体が丸ごと無い場合、既存のfallback（provenance結果を全0で代用）
+  // だけでは静かに素通りしてしまうため、artifact欠落自体を1件のinvariant errorにする
+  findings.push(...withFiscalYear(
+    checkDerivedArtifactPresence('mof-derived-artifact-presence', items.length, derivedArtifactExists, {}),
+    fiscalYear,
+  ));
 
   // Stage C: 決算等式はlib/mof-settlement.tsのvalidateSettlementEquations()を呼ばず、
   // このvalidator自身で独立に再実装した式を使う（09_validator-hardening-plan.md C-1）
   const equationResult = checkMofSettlementEquation(items);
   findings.push(...withFiscalYear(equationResult.findings, fiscalYear));
 
-  const provenanceResult = fs.existsSync(derivedEventsPath)
+  const provenanceResult = derivedArtifactExists
     ? checkMofDerivedEventProvenance(derivedEvents, items)
     : {
       findings: [] as Finding[], checkedEvents: 0, expectedEvents: 0, actualEvents: 0,
@@ -211,7 +229,7 @@ function validateMofYear(outputRoot: string, rawRoot: string, fiscalYear: number
     };
   findings.push(...withFiscalYear(provenanceResult.findings, fiscalYear));
 
-  const parliamentaryResult = fs.existsSync(derivedEventsPath)
+  const parliamentaryResult = derivedArtifactExists
     ? checkMofParliamentaryAmendmentProvenance(derivedEvents, items)
     : {
       findings: [] as Finding[], expectedEvents: 0, actualEvents: 0, missingExpectedEvents: 0,

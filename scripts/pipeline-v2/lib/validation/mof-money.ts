@@ -409,12 +409,24 @@ const TRANSFER_ADJUSTMENT_COLUMN = '予算決定後移替増△減額(円)';
 
 interface RawCsvCache { headers: Set<string>; rows: Record<string, string>[] }
 
+/**
+ * raw CSVセルを独立に数値化する。normalize-mof.tsの`parseIntValue()`は呼ばず、
+ * NFKC正規化・カンマ除去・trim・Number化・整数化という同程度の処理をここで再現する
+ * （review指摘: 正解をPipeline実装と共有せず、raw値とNormalized値を独立に突き合わせるため）。
+ * blank/column absentはnull、非数値もnullを返す。
+ */
+function parseRawInt(raw: string | undefined): number | null {
+  const cleaned = (raw ?? '').normalize('NFKC').replace(/,/g, '').trim();
+  if (!cleaned || BLANK_TOKENS.has(cleaned)) return null;
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? Math.trunc(n) : null;
+}
+
 export function classifyRawValue(raw: string | undefined, present: boolean): StructuralZeroState {
   if (!present) return 'columnAbsent';
-  const cleaned = (raw ?? '').normalize('NFKC').replace(/,/g, '').trim();
-  if (!cleaned || BLANK_TOKENS.has(cleaned)) return 'blank';
-  const n = Number(cleaned);
-  return Number.isFinite(n) && n === 0 ? 'explicitZero' : 'nonzero';
+  const n = parseRawInt(raw);
+  if (n === null) return 'blank';
+  return n === 0 ? 'explicitZero' : 'nonzero';
 }
 
 /** normalize-mof.tsの`parseCsv()`と同じtrim/空ヘッダー除外ロジックをraw provenance確認用に再現する */
@@ -455,22 +467,22 @@ export function checkMofStructuralZeroFromRaw(rawRoot: string, items: MofBudgetI
     counts[field][accountType] = byAccount;
   };
   let rawSourceUnavailableRows = 0;
+  const unavailableSampleIds: string[] = [];
 
-  const checkConsistency = (row: MofBudgetItemRecord, field: 'budgetRuleIncreaseYen' | 'transferAdjustmentYen', state: StructuralZeroState) => {
+  /**
+   * raw値とNormalized値をexact numericで突き合わせる。
+   * review指摘: 「rawがnonzeroなのにNormalizedが0」だけでなく「raw=100, normalized=200」
+   * のような値の食い違いもsource-preservation違反として検出する。
+   */
+  const checkConsistency = (row: MofBudgetItemRecord, field: 'budgetRuleIncreaseYen' | 'transferAdjustmentYen', state: StructuralZeroState, rawNumericValue: number | null) => {
     const normalizedValue = row[field] ?? 0;
-    if (state === 'nonzero' && normalizedValue === 0) {
+    const expectedValue = state === 'nonzero' ? rawNumericValue : 0;
+    if (normalizedValue !== expectedValue) {
       findings.push({
         severity: 'error', check: 'mof-structural-zero', category: 'invariant',
         scope: { fiscalYear: row.fiscalYear, recordId: row.recordId },
-        metrics: { field, rawState: state, normalizedValue },
-        message: `recordId=${row.recordId}: raw${field}列はnonzeroだがNormalizedは0になっている（値の取りこぼし）`,
-      });
-    } else if (state !== 'nonzero' && normalizedValue !== 0) {
-      findings.push({
-        severity: 'error', check: 'mof-structural-zero', category: 'invariant',
-        scope: { fiscalYear: row.fiscalYear, recordId: row.recordId },
-        metrics: { field, rawState: state, normalizedValue },
-        message: `recordId=${row.recordId}: raw${field}列は${state}だがNormalizedは${normalizedValue}になっている（不整合）`,
+        metrics: { field, rawState: state, rawNumericValue, normalizedValue },
+        message: `recordId=${row.recordId}: raw${field}列（状態=${state}、値=${rawNumericValue}）とNormalized値(${normalizedValue})が不一致`,
       });
     }
   };
@@ -479,28 +491,52 @@ export function checkMofStructuralZeroFromRaw(rawRoot: string, items: MofBudgetI
     if (row.phase !== 'settlement') continue;
 
     if (row.accountType === 'agency') {
-      bump('transferAdjustmentYen', 'agency', 'notApplicableHardcoded');
+      // ハードコード仕様（normalize-mof.ts）の前提が崩れていないか検証する。
+      // review指摘: カウントするだけでNormalized値自体を確認していなかった
+      if ((row.transferAdjustmentYen ?? null) !== 0) {
+        findings.push({
+          severity: 'error', check: 'mof-structural-zero', category: 'invariant',
+          scope: { fiscalYear: row.fiscalYear, recordId: row.recordId },
+          metrics: { field: 'transferAdjustmentYen', normalizedValue: row.transferAdjustmentYen ?? null },
+          message: `recordId=${row.recordId}: 政府関係機関のtransferAdjustmentYenは常に0のはずだが${row.transferAdjustmentYen ?? null}になっている（normalize-mof.tsのハードコード前提が崩れている）`,
+        });
+      } else {
+        bump('transferAdjustmentYen', 'agency', 'notApplicableHardcoded');
+      }
     }
 
     const zipEntry = row.source.zipEntry;
-    if (!zipEntry || row.source.rowNumber === undefined) { rawSourceUnavailableRows++; continue; }
+    if (!zipEntry || row.source.rowNumber === undefined) { rawSourceUnavailableRows++; if (unavailableSampleIds.length < 10) unavailableSampleIds.push(row.recordId); continue; }
     const cached = loadRawCsv(rawRoot, row.source.path, zipEntry, cache);
     const dataRow = cached?.rows[row.source.rowNumber - 2];
-    if (!cached || !dataRow) { rawSourceUnavailableRows++; continue; }
+    if (!cached || !dataRow) { rawSourceUnavailableRows++; if (unavailableSampleIds.length < 10) unavailableSampleIds.push(row.recordId); continue; }
 
     // budgetRuleIncreaseYen: 全accountType共通の列名
     const rulePresent = cached.headers.has(BUDGET_RULE_INCREASE_COLUMN);
-    const ruleState = classifyRawValue(dataRow[BUDGET_RULE_INCREASE_COLUMN], rulePresent);
+    const ruleValue = dataRow[BUDGET_RULE_INCREASE_COLUMN];
+    const ruleState = classifyRawValue(ruleValue, rulePresent);
     bump('budgetRuleIncreaseYen', row.accountType, ruleState);
-    checkConsistency(row, 'budgetRuleIncreaseYen', ruleState);
+    checkConsistency(row, 'budgetRuleIncreaseYen', ruleState, rulePresent ? parseRawInt(ruleValue) : null);
 
-    // transferAdjustmentYen: 政府関係機関は上でハードコード済みとして計上済みのためraw確認は不要
+    // transferAdjustmentYen: 政府関係機関は上でハードコード検証済みのためraw確認は不要
     if (row.accountType !== 'agency') {
       const transferPresent = cached.headers.has(TRANSFER_ADJUSTMENT_COLUMN);
-      const transferState = classifyRawValue(dataRow[TRANSFER_ADJUSTMENT_COLUMN], transferPresent);
+      const transferValue = dataRow[TRANSFER_ADJUSTMENT_COLUMN];
+      const transferState = classifyRawValue(transferValue, transferPresent);
       bump('transferAdjustmentYen', row.accountType, transferState);
-      checkConsistency(row, 'transferAdjustmentYen', transferState);
+      checkConsistency(row, 'transferAdjustmentYen', transferState, transferPresent ? parseRawInt(transferValue) : null);
     }
+  }
+
+  if (rawSourceUnavailableRows > 0) {
+    // review指摘: raw sourceを読めない場合をsilent countだけにせず、
+    // 「検査できなかった」事実自体をFindingとして残す（既定ではexit codeに影響しないwarning）
+    findings.push({
+      severity: 'warning', check: 'mof-structural-zero', category: 'source-preservation',
+      metrics: { rawSourceUnavailableRows },
+      sampleIds: unavailableSampleIds,
+      message: `決算行${rawSourceUnavailableRows}件でraw ZIP/CSVを読めず、structural-zero分類を検査できなかった`,
+    });
   }
 
   // 集約finding（1行ずつではなく1件に集約。Stage Aの5-1-5-2-consistency等と同じ方針）

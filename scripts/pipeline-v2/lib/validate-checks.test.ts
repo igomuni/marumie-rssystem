@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   checkNoUnknownNonEmptyColumns, checkFundingRelationBlockReferences,
   checkExplicitZeroPreserved, checkMofRsLinkIntegrity, compareLinkBaseline, decideExitFailure,
+  checkDerivedArtifactPresence,
   type Finding,
 } from './validate-checks';
 import type { SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2, MofBudgetItemRecord, MofRsProjectLinkGroup } from '../types';
@@ -179,5 +180,31 @@ describe('decideExitFailure（Stage A: exit codeはerrorのみに連動）', () 
   it('findingsが空、またはinfoのみなら失敗にしない', () => {
     expect(decideExitFailure([])).toBe(false);
     expect(decideExitFailure([info], { strictBaseline: true })).toBe(false);
+  });
+});
+
+describe('checkDerivedArtifactPresence（Stage B/C共通のorchestration gap対策）', () => {
+  it('sourceにレコードがありartifactも存在すればfindingsは空（RS想定）', () => {
+    expect(checkDerivedArtifactPresence('rs-derived-artifact-presence', 153404, true, { reviewYear: 2024 })).toHaveLength(0);
+  });
+
+  it('sourceにレコードがあるのにartifactが存在しなければinvariant error（RS想定）', () => {
+    const findings = checkDerivedArtifactPresence('rs-derived-artifact-presence', 153404, false, { reviewYear: 2024 });
+    expect(findings).toHaveLength(1);
+    expect(findings[0].severity).toBe('error');
+    expect(findings[0].category).toBe('invariant');
+    expect(findings[0].check).toBe('rs-derived-artifact-presence');
+    expect(findings[0].scope).toEqual({ reviewYear: 2024 });
+  });
+
+  it('sourceにレコードがあるのにartifactが存在しなければinvariant error（MOF想定）', () => {
+    const findings = checkDerivedArtifactPresence('mof-derived-artifact-presence', 8358, false, { fiscalYear: 2024 });
+    expect(findings).toHaveLength(1);
+    expect(findings[0].check).toBe('mof-derived-artifact-presence');
+    expect(findings[0].metrics).toMatchObject({ sourceRecordCount: 8358 });
+  });
+
+  it('sourceが0件ならartifact不存在でもfindingsは空（対象年度がまだ無いだけのケース）', () => {
+    expect(checkDerivedArtifactPresence('rs-derived-artifact-presence', 0, false, { reviewYear: 2026 })).toHaveLength(0);
   });
 });
