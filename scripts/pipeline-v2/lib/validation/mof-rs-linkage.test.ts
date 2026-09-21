@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  classifyUnlinkedReasons, diagnoseJointMinistryFallback,
+  classifyUnlinkedReasons, checkLinkTaxonomyConsistency, diagnoseJointMinistryFallback,
   analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups,
 } from './mof-rs-linkage';
 import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup } from '../../types';
@@ -127,6 +127,72 @@ describe('diagnoseJointMinistryFallback', () => {
     const result = diagnoseJointMinistryFallback(2025, 2025, [mof], [candidate]);
     expect(result.candidates).toHaveLength(1);
     expect(result.candidates[0].exactReconciliation).toBe(false);
+  });
+
+  it('review指摘: budgetMinistry欠損（missing-link-key）はprimary keyが完成していないため候補にしない', () => {
+    const mof = mofItem({ ministry: '厚生労働省' });
+    const candidate = rsItem({ budgetMinistry: '', ministry: '厚生労働省' }); // rsKeyFrom()がnullになる
+    const result = diagnoseJointMinistryFallback(2025, 2025, [mof], [candidate]);
+    expect(result.candidates).toHaveLength(0);
+  });
+
+  it('review指摘: budgetMinistryがministryと無関係（部分文字列に含まれない）なら候補にしない', () => {
+    // primary keyは完成しているが、budgetMinistryにnormalized ministryが含まれない
+    // （「joint-ministry（複合所管）」ではなく単に別の省庁が書かれているだけのケース）
+    const mof = mofItem({ ministry: '厚生労働省' });
+    const candidate = rsItem({ budgetMinistry: '経済産業省', ministry: '厚生労働省' });
+    const result = diagnoseJointMinistryFallback(2025, 2025, [mof], [candidate]);
+    expect(result.candidates).toHaveLength(0);
+  });
+
+  it('review指摘: project 2836 fixtureで従来どおりexact reconciliationを維持する（strict化の回帰確認）', () => {
+    const mof = mofItem({ ministry: '厚生労働省', amountYen: 259_342_596_000 });
+    const existingLinked = rsItem({ recordId: 'existing', ministry: '厚生労働省', budgetMinistry: '厚生労働省', budgetAmountYen: 6_009_122_000 });
+    const candidate = rsItem({ recordId: 'candidate', projectId: '2836', ministry: '厚生労働省', budgetMinistry: '内閣府及び厚生労働省', budgetAmountYen: 253_333_474_000 });
+    const result = diagnoseJointMinistryFallback(2025, 2025, [mof], [existingLinked, candidate]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].exactReconciliation).toBe(true);
+  });
+});
+
+describe('checkLinkTaxonomyConsistency', () => {
+  const scope = { reviewYear: 2025, fiscalYear: 2025 };
+  const taxonomy = {
+    findings: [] as never[],
+    linkedRecordCount: 100,
+    unsupportedBudgetType: { recordCount: 10, amountYen: 0 },
+    missingLinkKey: { recordCount: 5, amountYen: 0, missingFieldCounts: {} },
+    validKeyNoMatch: { recordCount: 3, amountYen: 0 },
+  };
+
+  it('taxonomyとsummaryが一致していればfindingsは空', () => {
+    const summary = { linkedRsRecordCount: 100, unlinkedRsRecordCount: 8, unsupportedBudgetTypeRecordCount: 10 };
+    const findings = checkLinkTaxonomyConsistency(taxonomy, summary, 118, scope);
+    expect(findings).toHaveLength(0);
+  });
+
+  it('linkedRecordCountがsummaryと不一致ならinvariant error', () => {
+    const summary = { linkedRsRecordCount: 999, unlinkedRsRecordCount: 8, unsupportedBudgetTypeRecordCount: 10 };
+    const findings = checkLinkTaxonomyConsistency(taxonomy, summary, 118, scope);
+    expect(findings.some(f => f.severity === 'error' && f.category === 'invariant' && f.message.includes('linkedRecordCount'))).toBe(true);
+  });
+
+  it('missingLinkKey+validKeyNoMatchがsummary.unlinkedRsRecordCountと不一致ならinvariant error', () => {
+    const summary = { linkedRsRecordCount: 100, unlinkedRsRecordCount: 999, unsupportedBudgetTypeRecordCount: 10 };
+    const findings = checkLinkTaxonomyConsistency(taxonomy, summary, 118, scope);
+    expect(findings.some(f => f.message.includes('unlinkedRsRecordCount'))).toBe(true);
+  });
+
+  it('unsupportedBudgetTypeがsummaryと不一致ならinvariant error', () => {
+    const summary = { linkedRsRecordCount: 100, unlinkedRsRecordCount: 8, unsupportedBudgetTypeRecordCount: 999 };
+    const findings = checkLinkTaxonomyConsistency(taxonomy, summary, 118, scope);
+    expect(findings.some(f => f.message.includes('unsupportedBudgetTypeRecordCount'))).toBe(true);
+  });
+
+  it('taxonomy全bucketの合計がRS全レコード数と不一致ならinvariant error', () => {
+    const summary = { linkedRsRecordCount: 100, unlinkedRsRecordCount: 8, unsupportedBudgetTypeRecordCount: 10 };
+    const findings = checkLinkTaxonomyConsistency(taxonomy, summary, 999, scope);
+    expect(findings.some(f => f.message.includes('全レコード数'))).toBe(true);
   });
 });
 

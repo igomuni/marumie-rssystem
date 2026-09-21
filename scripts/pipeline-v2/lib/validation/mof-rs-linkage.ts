@@ -72,6 +72,45 @@ export function classifyUnlinkedReasons(
   return { findings: [], linkedRecordCount, unsupportedBudgetType, missingLinkKey, validKeyNoMatch };
 }
 
+/**
+ * D-1フォローアップ: taxonomy（診断側の再分類）とproduction summary（同一run内で
+ * buildMofRsLinks()が実際に生成した集計）が一致することを検査する。これはgolden
+ * acceptance（baseline drift）ではなく、「production出力」と「productionの境界を
+ * 説明する診断」が同一run内で食い違っていないかというinvariant。
+ */
+export function checkLinkTaxonomyConsistency(
+  taxonomy: ReturnType<typeof classifyUnlinkedReasons>,
+  summary: { linkedRsRecordCount?: unknown; unlinkedRsRecordCount?: unknown; unsupportedBudgetTypeRecordCount?: unknown },
+  totalRsRecordCount: number,
+  scope: { reviewYear: number; fiscalYear: number }
+): Finding[] {
+  const findings: Finding[] = [];
+  const push = (message: string, metrics: Record<string, string | number | boolean | null>) => {
+    findings.push({ severity: 'error', check: 'mof-rs-link-taxonomy-consistency', category: 'invariant', scope, metrics, message });
+  };
+
+  const unlinkedSum = taxonomy.missingLinkKey.recordCount + taxonomy.validKeyNoMatch.recordCount;
+  const partitionSum = taxonomy.linkedRecordCount + unlinkedSum + taxonomy.unsupportedBudgetType.recordCount;
+
+  if (taxonomy.linkedRecordCount !== summary.linkedRsRecordCount) {
+    push(`review-${scope.reviewYear}×fy${scope.fiscalYear}: taxonomy.linkedRecordCount(${taxonomy.linkedRecordCount})とsummary.linkedRsRecordCount(${summary.linkedRsRecordCount})が不一致`,
+      { taxonomyValue: taxonomy.linkedRecordCount, summaryValue: summary.linkedRsRecordCount as number ?? null });
+  }
+  if (unlinkedSum !== summary.unlinkedRsRecordCount) {
+    push(`review-${scope.reviewYear}×fy${scope.fiscalYear}: taxonomy(missingLinkKey+validKeyNoMatch=${unlinkedSum})とsummary.unlinkedRsRecordCount(${summary.unlinkedRsRecordCount})が不一致`,
+      { taxonomyValue: unlinkedSum, summaryValue: summary.unlinkedRsRecordCount as number ?? null });
+  }
+  if (taxonomy.unsupportedBudgetType.recordCount !== summary.unsupportedBudgetTypeRecordCount) {
+    push(`review-${scope.reviewYear}×fy${scope.fiscalYear}: taxonomy.unsupportedBudgetType.recordCount(${taxonomy.unsupportedBudgetType.recordCount})とsummary.unsupportedBudgetTypeRecordCount(${summary.unsupportedBudgetTypeRecordCount})が不一致`,
+      { taxonomyValue: taxonomy.unsupportedBudgetType.recordCount, summaryValue: summary.unsupportedBudgetTypeRecordCount as number ?? null });
+  }
+  if (partitionSum !== totalRsRecordCount) {
+    push(`review-${scope.reviewYear}×fy${scope.fiscalYear}: taxonomy各bucketの合計(${partitionSum})がRS対象年度の全レコード数(${totalRsRecordCount})と不一致`,
+      { taxonomyValue: partitionSum, summaryValue: totalRsRecordCount });
+  }
+  return findings;
+}
+
 export interface JointMinistryFallbackCandidate {
   rsRecordId: string; projectId: string;
   existingRsAmountYen: number; candidateRsAmountYen: number; reconstructedRsAmountYen: number;
@@ -90,8 +129,15 @@ function rsKeyWithMinistry(r: RsBudgetItemRecordV2, ministry: string): string | 
 
 /**
  * D-2: strict joint-ministry fallback diagnostic。production linkには適用しない。
- * primary(budgetMinistry) exactで未接続のRS recordについて、common `ministry`に
- * 差し替えた場合にのみ一意なMOF targetへ接続できる候補を診断する。
+ *
+ * 対象はstrictに「primary key（rsKeyFrom）は完成しているが、複合所管表記
+ * （例:「内閣府及び厚生労働省」）のためbudgetMinistry exactでMOF groupに一致しない」
+ * ケースのみに限定する（review指摘）。primary keyそのものが欠けている行
+ * （missing-link-key）は対象外にする。これにより無関係なministryへの汎用fallback
+ * ではなく、真に「joint-ministry（複合所管）」と呼べるケースだけを診断する:
+ * - `rsKeyFrom(r)`が非null（primary keyは完成している）
+ * - `normalizeText(budgetMinistry)`が`normalizeText(ministry)`を部分文字列として含む
+ * - common `ministry`に差し替えた代替keyが一意なMOF targetへ一致する
  */
 export function diagnoseJointMinistryFallback(
   reviewYear: number, fiscalYear: number, mofRows: MofBudgetItemRecord[], rsRowsForYear: RsBudgetItemRecordV2[]
@@ -129,13 +175,21 @@ export function diagnoseJointMinistryFallback(
   for (const r of rsRowsForYear) {
     const stage = rsPhase(r);
     if (!stage) continue;
+
+    // review指摘: strict valid-key-no-matchのみに限定する。primary keyそのものが
+    // 完成していない行（missing-link-key）は対象外にする。「joint-ministry」診断は
+    // 「複合所管のためexact matchしなかった」ケースに限定し、汎用fallbackへ拡大しない
     const primaryKey = rsKeyFrom(r);
-    if (primaryKey) {
-      const primaryGroupKey = `${stageKey(stage)}\x1f${primaryKey}`;
-      if (mofAmountByGroup.has(primaryGroupKey)) continue; // 既にprimaryでlink済み
-    }
-    // primaryがmissing-link-keyまたはvalid-key-no-matchの行のみ対象
+    if (!primaryKey) continue;
+    const primaryGroupKey = `${stageKey(stage)}\x1f${primaryKey}`;
+    if (mofAmountByGroup.has(primaryGroupKey)) continue; // 既にprimaryでlink済み
+
     if (!r.ministry || r.ministry === r.budgetMinistry) continue; // 差し替える意味が無い
+    // budgetMinistry（例:「内閣府及び厚生労働省」）にnormalizedしたministry（例:「厚生労働省」）が
+    // 部分文字列として含まれる場合のみ「joint-ministry（複合所管）」表記とみなす。
+    // 無関係なministryへの汎用fallbackを防ぐ
+    if (!normalizeText(r.budgetMinistry).includes(normalizeText(r.ministry))) continue;
+
     const altKey = rsKeyWithMinistry(r, r.ministry);
     if (!altKey) continue;
     const altGroupKey = `${stageKey(stage)}\x1f${altKey}`;
@@ -173,6 +227,7 @@ export function diagnoseJointMinistryFallback(
 export interface LinkDifferenceTaxonomy {
   exactZeroGroupCount: number; nonZeroGroupCount: number; mofGreaterGroupCount: number; rsGreaterGroupCount: number;
   netDifferenceYen: number; absoluteDifferenceYen: number;
+  mofGreaterAbsoluteDifferenceYen: number; rsGreaterAbsoluteDifferenceYen: number;
   top10AbsoluteDifferenceYen: number; top10Share: number; top100AbsoluteDifferenceYen: number; top100Share: number;
   ratioBuckets: { lt0_5: number; between0_5and0_9: number; between0_9and1_1: number; gt1_1: number; mofZero: number };
 }
@@ -187,6 +242,7 @@ export interface MultiProjectGroupMetrics { groupCount: number; multiProjectGrou
 export function analyzeLinkDifferenceTaxonomy(links: MofRsProjectLinkGroup[]): LinkDifferenceTaxonomy {
   let exactZeroGroupCount = 0, mofGreaterGroupCount = 0, rsGreaterGroupCount = 0;
   let netDifferenceYen = 0, absoluteDifferenceYen = 0;
+  let mofGreaterAbsoluteDifferenceYen = 0, rsGreaterAbsoluteDifferenceYen = 0;
   const ratioBuckets = { lt0_5: 0, between0_5and0_9: 0, between0_9and1_1: 0, gt1_1: 0, mofZero: 0 };
 
   for (const l of links) {
@@ -194,8 +250,8 @@ export function analyzeLinkDifferenceTaxonomy(links: MofRsProjectLinkGroup[]): L
     const abs = Math.abs(l.differenceYen);
     absoluteDifferenceYen += abs;
     if (l.differenceYen === 0) exactZeroGroupCount++;
-    else if (l.differenceYen > 0) mofGreaterGroupCount++;
-    else rsGreaterGroupCount++;
+    else if (l.differenceYen > 0) { mofGreaterGroupCount++; mofGreaterAbsoluteDifferenceYen += abs; }
+    else { rsGreaterGroupCount++; rsGreaterAbsoluteDifferenceYen += abs; }
 
     if (l.mofAmountYen === 0) { ratioBuckets.mofZero++; continue; }
     const ratio = l.rsAmountYen / l.mofAmountYen;
@@ -211,7 +267,7 @@ export function analyzeLinkDifferenceTaxonomy(links: MofRsProjectLinkGroup[]): L
 
   return {
     exactZeroGroupCount, nonZeroGroupCount: links.length - exactZeroGroupCount, mofGreaterGroupCount, rsGreaterGroupCount,
-    netDifferenceYen, absoluteDifferenceYen,
+    netDifferenceYen, absoluteDifferenceYen, mofGreaterAbsoluteDifferenceYen, rsGreaterAbsoluteDifferenceYen,
     top10AbsoluteDifferenceYen, top10Share: absoluteDifferenceYen > 0 ? top10AbsoluteDifferenceYen / absoluteDifferenceYen : 0,
     top100AbsoluteDifferenceYen, top100Share: absoluteDifferenceYen > 0 ? top100AbsoluteDifferenceYen / absoluteDifferenceYen : 0,
     ratioBuckets,

@@ -34,8 +34,8 @@ import {
   checkMofParliamentaryAmendmentProvenance, checkMofStructuralZeroFromRaw,
 } from './lib/validation/mof-money';
 import {
-  classifyUnlinkedReasons, diagnoseJointMinistryFallback,
-  analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups,
+  classifyUnlinkedReasons, checkLinkTaxonomyConsistency, diagnoseJointMinistryFallback,
+  analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups, type JointMinistryFallbackCandidate,
 } from './lib/validation/mof-rs-linkage';
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2,
@@ -275,12 +275,17 @@ function validateMofYear(outputRoot: string, rawRoot: string, fiscalYear: number
 
 interface LinkPairMetrics {
   reviewYear: number; fiscalYear: number; linkGroupCount: number; summary: Record<string, unknown>;
+  // production summaryのcore countをtyped fieldとしても持つ（review指摘: summary内に埋めない）
+  linkedRsRecordCount: number; unlinkedRsRecordCount: number; unsupportedBudgetTypeRecordCount: number;
   unlinkedReasons: {
     unsupportedBudgetType: { recordCount: number; amountYen: number };
     missingLinkKey: { recordCount: number; amountYen: number; missingFieldCounts: Record<string, number> };
     validKeyNoMatch: { recordCount: number; amountYen: number };
   };
-  jointMinistryFallback: { candidateCount: number; candidateAmountYen: number; exactReconciliationCount: number };
+  jointMinistryFallback: {
+    candidateCount: number; candidateAmountYen: number; exactReconciliationCount: number;
+    candidates: JointMinistryFallbackCandidate[];
+  };
   difference: ReturnType<typeof analyzeLinkDifferenceTaxonomy>;
   multiProject: ReturnType<typeof analyzeMultiProjectGroups>;
 }
@@ -315,8 +320,15 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
       const difference = analyzeLinkDifferenceTaxonomy(links);
       const multiProject = analyzeMultiProjectGroups(links);
 
+      // review指摘: taxonomy（診断側の再分類）とproduction summaryが同一run内で一致することを
+      // invariantとして検査する（golden acceptanceではない。baseline driftとは別種）
+      const taxonomyConsistencyFindings = checkLinkTaxonomyConsistency(unlinkedReasons, summary, rsItemsForYear.length, { reviewYear, fiscalYear });
+      findings.push(...taxonomyConsistencyFindings);
+
       metrics.push({
         reviewYear, fiscalYear, linkGroupCount: links.length, summary,
+        linkedRsRecordCount: summary.linkedRsRecordCount, unlinkedRsRecordCount: summary.unlinkedRsRecordCount,
+        unsupportedBudgetTypeRecordCount: summary.unsupportedBudgetTypeRecordCount,
         unlinkedReasons: {
           unsupportedBudgetType: unlinkedReasons.unsupportedBudgetType,
           missingLinkKey: unlinkedReasons.missingLinkKey,
@@ -326,12 +338,14 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
           candidateCount: jointMinistry.candidates.length,
           candidateAmountYen: jointMinistry.candidates.reduce((s, c) => s + c.candidateRsAmountYen, 0),
           exactReconciliationCount: jointMinistry.candidates.filter(c => c.exactReconciliation).length,
+          candidates: jointMinistry.candidates,
         },
         difference, multiProject,
       });
 
       console.log(`  review-${reviewYear}×fy${fiscalYear}: unlinked理由 unsupported=${unlinkedReasons.unsupportedBudgetType.recordCount} ` +
         `missingKey=${unlinkedReasons.missingLinkKey.recordCount} validKeyNoMatch=${unlinkedReasons.validKeyNoMatch.recordCount} / ` +
+        `taxonomy整合性 findings=${taxonomyConsistencyFindings.length} / ` +
         `jointMinistry候補=${jointMinistry.candidates.length}件 / ` +
         `差額分布 zero=${difference.exactZeroGroupCount} nonzero=${difference.nonZeroGroupCount} top10share=${(difference.top10Share * 100).toFixed(1)}% / ` +
         `multiProject groups=${multiProject.multiProjectGroupCount}/${multiProject.groupCount} max=${multiProject.maxProjectCountPerGroup}`);
