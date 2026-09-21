@@ -94,15 +94,32 @@ export function checkRsProjectCounts(
   return findings;
 }
 
-/** index.shardの独立検算と、対応するcore shardにprojectのbundleが実在するかを検査する */
+/**
+ * index.shardの独立検算と、core/context/spendingの各shardにprojectのbundleが実在するかを検査する。
+ *
+ * review指摘: coreは`profiles`に列挙されているかどうかに関わらず、publish-v2.tsの設計上
+ * 「全project」に無条件で作られる（`for (const [pid, project] of projectById)`ループが
+ * projectById全件をcoreに追加する）。そのため「profilesにcoreが無ければcore bundle確認を
+ * skipする」実装では、indexのprofile一覧とbundleの両方が消えている壊れ方（例:
+ * profiles配列自体が壊れてcoreを含まなくなった場合）を検出できなかった。coreはprofilesの
+ * 内容に関わらず常時必須として検査し、context/spendingはprofilesに列挙されている場合に
+ * bundleが実在するかを検査する（列挙が実態と食い違うケースも検出する）。
+ */
 export function checkRsShardReferentialIntegrity(
-  reviewYear: number, index: RsPublishIndex | null, readCoreShard: (shard: string) => Record<string, unknown> | null
+  reviewYear: number, index: RsPublishIndex | null,
+  readShard: (profile: 'core' | 'context' | 'spending', shard: string) => Record<string, unknown> | null
 ): Finding[] {
   const findings: Finding[] = [];
   const scope = { reviewYear };
   if (!index) return findings;
 
   const shardCache = new Map<string, Record<string, unknown> | null>();
+  const readCached = (profile: 'core' | 'context' | 'spending', shard: string) => {
+    const key = `${profile}\x1f${shard}`;
+    if (!shardCache.has(key)) shardCache.set(key, readShard(profile, shard));
+    return shardCache.get(key)!;
+  };
+
   for (const row of index.projects) {
     const expectedShard = independentRsShard(row.projectId);
     if (row.shard !== expectedShard) {
@@ -110,12 +127,26 @@ export function checkRsShardReferentialIntegrity(
         `projectId=${row.projectId}: index.shard(${row.shard})と独立計算したshard(${expectedShard})が不一致`);
       continue;
     }
-    if (!row.profiles.includes('core')) continue; // core無しはcheckRsProjectCounts側の対象外だが個別にも守る
-    if (!shardCache.has(row.shard)) shardCache.set(row.shard, readCoreShard(row.shard));
-    const shardData = shardCache.get(row.shard);
-    if (!shardData || !(row.projectId in shardData)) {
+
+    // core: publish-v2.tsの設計上、全projectに無条件で作られる。profilesの内容に関わらず必須
+    const coreData = readCached('core', row.shard);
+    if (!coreData || !(row.projectId in coreData)) {
       pushError(findings, 'rs-publish-shard-integrity', { ...scope, projectId: row.projectId },
-        `projectId=${row.projectId}: core/${row.shard}.json.gzにbundleが存在しない`);
+        `projectId=${row.projectId}: core/${row.shard}.json.gzにbundleが存在しない（coreは全projectに必須）`);
+    }
+    if (!row.profiles.includes('core')) {
+      pushError(findings, 'rs-publish-shard-integrity', { ...scope, projectId: row.projectId },
+        `projectId=${row.projectId}: index.profilesにcoreが含まれていない（coreは全projectに必須のはず）`);
+    }
+
+    // context/spending: profilesに列挙されている場合のみ、bundleの実在を確認する
+    for (const profile of ['context', 'spending'] as const) {
+      if (!row.profiles.includes(profile)) continue;
+      const data = readCached(profile, row.shard);
+      if (!data || !(row.projectId in data)) {
+        pushError(findings, 'rs-publish-shard-integrity', { ...scope, projectId: row.projectId },
+          `projectId=${row.projectId}: profilesに${profile}が含まれているが${profile}/${row.shard}.json.gzにbundleが存在しない`);
+      }
     }
   }
   return findings;
@@ -179,7 +210,13 @@ const BUDGET_ITEM_FIELDS = [
   'budgetMinistry', 'organizationOrAccount', 'sectionName', 'subItemName', 'budgetAmountYen', 'nextYearRequestYen', 'note', 'supplementalInfo',
 ] as const;
 
-/** recordIdをkeyにNormalized budget-items.jsonlとPublish context shardのbudgetItems[]を全件突合する */
+/**
+ * recordIdをkeyにNormalized budget-items.jsonlとPublish context shardのbudgetItems[]を
+ * exact setとして全件突合する（review指摘）。
+ * - Publish側にNormalizedに無いrecordId（unexpected）が無いこと
+ * - 同一recordIdがPublish側に重複していないこと
+ * - sourceCount !== publishedCountを検算件数不一致としてfinding化する（metricsに残すだけにしない）
+ */
 export function checkRsBudgetItemPreservation(
   reviewYear: number, normItems: RsBudgetItemRecordV2[], projectIds: Set<string>,
   readContextShard: (shard: string) => Record<string, unknown> | null, shardOf: (projectId: string) => string
@@ -187,14 +224,35 @@ export function checkRsBudgetItemPreservation(
   const findings: Finding[] = [];
   const scope = { reviewYear };
   const relevant = normItems.filter(r => projectIds.has(r.projectId));
+  const normById = new Map(relevant.map(r => [r.recordId, r]));
 
   const shardCache = new Map<string, Record<string, unknown> | null>();
   const publishedByRecordId = new Map<string, Record<string, unknown>>();
+  let publishedCount = 0;
   for (const projectId of new Set(relevant.map(r => r.projectId))) {
     const shard = shardOf(projectId);
     if (!shardCache.has(shard)) shardCache.set(shard, readContextShard(shard));
     const bundle = shardCache.get(shard)?.[projectId] as { budgetItems?: Record<string, unknown>[] } | undefined;
-    for (const item of bundle?.budgetItems ?? []) publishedByRecordId.set(item.recordId as string, item);
+    for (const item of bundle?.budgetItems ?? []) {
+      publishedCount++;
+      const recordId = item.recordId as string;
+      if (publishedByRecordId.has(recordId)) {
+        pushError(findings, 'rs-publish-budget-item-duplicate', { ...scope, projectId, recordId },
+          `recordId=${recordId}: Publish context shardに重複して存在する`);
+        continue;
+      }
+      publishedByRecordId.set(recordId, item);
+      if (!normById.has(recordId)) {
+        pushError(findings, 'rs-publish-budget-item-unexpected', { ...scope, projectId, recordId },
+          `recordId=${recordId}: NormalizedにこのrecordIdが存在しないのにPublishに存在する（unexpected record）`);
+      }
+    }
+  }
+
+  if (publishedCount !== relevant.length) {
+    pushError(findings, 'rs-publish-budget-item-count', { ...scope },
+      `Normalized budget-items(${relevant.length})とPublish合計件数(${publishedCount})が不一致`,
+      { sourceCount: relevant.length, publishedCount });
   }
 
   for (const row of relevant) {
@@ -407,16 +465,41 @@ function independentRecordToSection(item: MofBudgetItemRecord, sectionKeyToId: M
   return sectionKeyToId.get(key);
 }
 
-/** Normalized recordがsection detail.recordsに存在し、sourceRefが有効範囲を指すことを検査する */
+export interface MofDetailRecord { id: string; itemId?: string; phase: string; budgetStatus?: string; revision?: number | null; sourceAmountColumn?: string; sourceRef?: number }
+export interface MofDetailSource { domain?: string; dataset?: string; year?: number; path?: string; zipEntry?: string; rowNumber?: number }
+export interface MofDetailEvidence { eventId: string; amountYen: number; itemName?: string; itemIds?: string[]; recordIds?: string[]; submittedAmountYen?: number; enactedAmountYen?: number }
+export interface MofDetailEventGroup { eventType: string; budgetStatus?: string; revision?: number | null; amountYen: number; evidence?: MofDetailEvidence[] }
+export interface MofSectionDetail { records: MofDetailRecord[]; sources: MofDetailSource[]; events: MofDetailEventGroup[] }
+
+/** SourceRefのうちevidence追跡に必要なfieldだけを独立に抽出する（compactSource()は呼ばない） */
+function extractComparableSource(source: { domain?: string; dataset?: string; year?: number; path?: string; zipEntry?: string; rowNumber?: number } | undefined): Record<string, unknown> {
+  if (!source) return {};
+  const out: Record<string, unknown> = {};
+  for (const key of ['domain', 'dataset', 'year', 'path', 'zipEntry', 'rowNumber'] as const) {
+    const v = source[key];
+    if (v !== null && v !== undefined && v !== '') out[key] = v;
+  }
+  return out;
+}
+
+/**
+ * Normalized recordがsection detail.recordsに存在すること、itemId/phase/budgetStatus/
+ * revision/sourceAmountColumnが一致すること、sourceRefが範囲内かつ正しいsourceを
+ * 指していることを検査する。
+ *
+ * review指摘: section detail自体が読めない場合、従来は`continue`でsilent passしていた
+ * （section集合の存在チェックとは別に、shard/detail entry自体が壊れているケースを
+ * 検出できていなかった）。detailが必要なのに読めない場合はinvariant errorにする。
+ */
 export function checkMofDetailRecords(
   fiscalYear: number, normItems: MofBudgetItemRecord[], derivedSections: MofDerivedSection[],
-  readSectionDetail: (sectionId: string) => { records: Record<string, unknown>[]; sources: Record<string, unknown>[] } | null,
-  shardOf: (sectionId: string) => string
+  readSectionDetail: (sectionId: string) => MofSectionDetail | null
 ): { findings: Finding[]; checkedRecords: number } {
   const findings: Finding[] = [];
   const scope = { fiscalYear };
   const sectionKeyToId = buildIndependentSectionIndex(derivedSections);
-  const detailCache = new Map<string, { records: Record<string, unknown>[]; sources: Record<string, unknown>[] } | null>();
+  const detailCache = new Map<string, MofSectionDetail | null>();
+  const reportedMissingDetail = new Set<string>();
   let checkedRecords = 0;
 
   for (const item of normItems) {
@@ -424,7 +507,14 @@ export function checkMofDetailRecords(
     if (!sectionId) continue; // section集合不一致は別checkで検出済み
     if (!detailCache.has(sectionId)) detailCache.set(sectionId, readSectionDetail(sectionId));
     const detail = detailCache.get(sectionId);
-    if (!detail) continue; // section detail欠落は別途artifact/section countで検出
+    if (!detail) {
+      if (!reportedMissingDetail.has(sectionId)) {
+        reportedMissingDetail.add(sectionId);
+        pushError(findings, 'mof-publish-detail-missing', { ...scope, recordId: sectionId },
+          `sectionId=${sectionId}: Normalizedレコードが属するはずのsection detailが読めない（shard欠落・破損の疑い）`);
+      }
+      continue;
+    }
     checkedRecords++;
     const record = detail.records.find(r => r.id === item.recordId);
     if (!record) {
@@ -432,57 +522,88 @@ export function checkMofDetailRecords(
         `recordId=${item.recordId}: section detail(${sectionId})のrecordsに見つからない`);
       continue;
     }
-    if (record.phase !== item.phase || record.budgetStatus !== item.budgetStatus) {
+    if (record.phase !== item.phase || record.budgetStatus !== item.budgetStatus
+      || (record.revision ?? null) !== (item.revision ?? null) || (record.itemId ?? undefined) !== (item.itemNaturalKey || undefined)
+      || (record.sourceAmountColumn ?? undefined) !== (item.sourceAmountColumn || undefined)) {
       pushError(findings, 'mof-publish-detail-record-value', { ...scope, recordId: item.recordId },
-        `recordId=${item.recordId}: phase/budgetStatusがNormalizedと不一致`);
+        `recordId=${item.recordId}: phase/budgetStatus/revision/itemId/sourceAmountColumnのいずれかがNormalizedと不一致`);
     }
     const sourceRef = record.sourceRef;
-    if (sourceRef !== undefined && (typeof sourceRef !== 'number' || sourceRef < 0 || sourceRef >= detail.sources.length)) {
+    if (sourceRef === undefined) continue;
+    if (typeof sourceRef !== 'number' || sourceRef < 0 || sourceRef >= detail.sources.length) {
       pushError(findings, 'mof-publish-detail-source-ref', { ...scope, recordId: item.recordId },
         `recordId=${item.recordId}: sourceRef(${sourceRef})がsources配列の範囲外`);
+      continue;
+    }
+    const expectedSource = extractComparableSource(item.source);
+    const actualSource = detail.sources[sourceRef] as Record<string, unknown>;
+    if (JSON.stringify(actualSource) !== JSON.stringify(expectedSource)) {
+      pushError(findings, 'mof-publish-detail-source-ref', { ...scope, recordId: item.recordId },
+        `recordId=${item.recordId}: sourceRef(${sourceRef})が指すsourceがNormalizedのsourceと不一致`);
     }
   }
   return { findings, checkedRecords };
 }
 
 /**
- * Derived eventを独立にsection×(eventType,budgetStatus,revision)でgroup化した期待amountYen合計と、
- * section detail.eventsの各groupのamountYenが一致することを検査する。
+ * Derived eventを独立にsection×(eventType,budgetStatus,revision)でgroup化した期待amountYen合計・
+ * evidence一覧（eventId/amountYen/itemIds/recordIds/submittedAmountYen/enactedAmountYen）を再構成し、
+ * section detail.eventsの各groupと突合する。合計額だけでなくevidence単位の欠落・重複・値の不一致も検出する。
  */
 export function checkMofDetailEventAggregation(
   fiscalYear: number, derivedEvents: MofDerivedBudgetEvent[], derivedSections: MofDerivedSection[],
   normItems: MofBudgetItemRecord[],
-  readSectionDetail: (sectionId: string) => { events: { eventType: string; budgetStatus?: string; revision?: number | null; amountYen: number }[] } | null
+  readSectionDetail: (sectionId: string) => MofSectionDetail | null
 ): { findings: Finding[]; checkedGroups: number } {
   const findings: Finding[] = [];
   const scope = { fiscalYear };
   const sectionKeyToId = buildIndependentSectionIndex(derivedSections);
   const recordToSection = new Map<string, string>();
+  const recordToItemId = new Map<string, string>();
   for (const item of normItems) {
     const sid = independentRecordToSection(item, sectionKeyToId);
     if (sid) recordToSection.set(item.recordId, sid);
+    recordToItemId.set(item.recordId, item.itemNaturalKey);
   }
 
-  // 期待: section -> groupKey -> amount合計
-  const expected = new Map<string, Map<string, number>>();
+  // 期待: section -> groupKey -> (amount合計、eventIdごとのevidence)
+  interface ExpectedGroup { amount: number; evidenceByEventId: Map<string, MofDetailEvidence> }
+  const expected = new Map<string, Map<string, ExpectedGroup>>();
   for (const e of derivedEvents) {
     const sourceIds = (e.sourceRecordIds ?? []).filter(id => recordToSection.has(id));
     const sids = sourceIds.length > 0 ? [...new Set(sourceIds.map(id => recordToSection.get(id)!))] : [];
     const groupKey = `${e.eventType}\x1f${e.budgetStatus ?? ''}\x1f${e.revision ?? ''}`;
+    const itemIds = [...new Set(sourceIds.map(id => recordToItemId.get(id)).filter((x): x is string => Boolean(x)))].sort();
+    const evidence: MofDetailEvidence = {
+      eventId: e.eventId, amountYen: e.amountYen ?? 0, itemName: e.subItemName || undefined,
+      itemIds: itemIds.length > 0 ? itemIds : undefined, recordIds: [...sourceIds].sort(),
+      submittedAmountYen: e.submittedAmountYen ?? undefined, enactedAmountYen: e.enactedAmountYen ?? undefined,
+    };
     for (const sid of sids) {
-      const bySection = expected.get(sid) ?? new Map<string, number>();
-      bySection.set(groupKey, (bySection.get(groupKey) ?? 0) + (e.amountYen ?? 0));
+      const bySection = expected.get(sid) ?? new Map<string, ExpectedGroup>();
+      const group = bySection.get(groupKey) ?? { amount: 0, evidenceByEventId: new Map() };
+      group.amount += e.amountYen ?? 0;
+      group.evidenceByEventId.set(e.eventId, evidence);
+      bySection.set(groupKey, group);
       expected.set(sid, bySection);
     }
   }
 
   let checkedGroups = 0;
-  const detailCache = new Map<string, { events: { eventType: string; budgetStatus?: string; revision?: number | null; amountYen: number }[] } | null>();
+  const detailCache = new Map<string, MofSectionDetail | null>();
+  const reportedMissingDetail = new Set<string>();
   for (const [sectionId, groups] of expected) {
     if (!detailCache.has(sectionId)) detailCache.set(sectionId, readSectionDetail(sectionId));
     const detail = detailCache.get(sectionId);
-    if (!detail) continue;
-    for (const [groupKey, expectedAmount] of groups) {
+    if (!detail) {
+      if (!reportedMissingDetail.has(sectionId)) {
+        reportedMissingDetail.add(sectionId);
+        pushError(findings, 'mof-publish-detail-missing', { ...scope, recordId: sectionId },
+          `sectionId=${sectionId}: Derived eventが属するはずのsection detailが読めない（shard欠落・破損の疑い）`);
+      }
+      continue;
+    }
+    for (const [groupKey, expectedGroup] of groups) {
       checkedGroups++;
       const [eventType, budgetStatus, revisionRaw] = groupKey.split('\x1f');
       const published = detail.events.find(g => g.eventType === eventType && (g.budgetStatus ?? '') === budgetStatus && String(g.revision ?? '') === revisionRaw);
@@ -491,9 +612,39 @@ export function checkMofDetailEventAggregation(
           `sectionId=${sectionId} group=${groupKey}: section detailのeventsに見つからない`);
         continue;
       }
-      if (published.amountYen !== expectedAmount) {
+      if (published.amountYen !== expectedGroup.amount) {
         pushError(findings, 'mof-publish-detail-event-amount', { ...scope, recordId: sectionId },
-          `sectionId=${sectionId} group=${groupKey}: 独立再構成した合計(${expectedAmount})とPublish(${published.amountYen})が不一致`);
+          `sectionId=${sectionId} group=${groupKey}: 独立再構成した合計(${expectedGroup.amount})とPublish(${published.amountYen})が不一致`);
+      }
+
+      // evidence[]の欠落・重複・値の不一致を検査する（合計額が同じでも壊れうるため）
+      const publishedEvidence = published.evidence ?? [];
+      const seenEventIds = new Set<string>();
+      for (const ev of publishedEvidence) {
+        if (seenEventIds.has(ev.eventId)) {
+          pushError(findings, 'mof-publish-detail-evidence-duplicate', { ...scope, recordId: sectionId, eventId: ev.eventId },
+            `sectionId=${sectionId} group=${groupKey} eventId=${ev.eventId}: evidenceが重複している`);
+          continue;
+        }
+        seenEventIds.add(ev.eventId);
+        const exp = expectedGroup.evidenceByEventId.get(ev.eventId);
+        if (!exp) {
+          pushError(findings, 'mof-publish-detail-evidence-unexpected', { ...scope, recordId: sectionId, eventId: ev.eventId },
+            `sectionId=${sectionId} group=${groupKey} eventId=${ev.eventId}: 対応するDerived eventが無いのにevidenceが存在する`);
+          continue;
+        }
+        const recordIdsMatch = JSON.stringify([...(ev.recordIds ?? [])].sort()) === JSON.stringify(exp.recordIds ?? []);
+        if (ev.amountYen !== exp.amountYen || !recordIdsMatch
+          || (ev.submittedAmountYen ?? undefined) !== exp.submittedAmountYen || (ev.enactedAmountYen ?? undefined) !== exp.enactedAmountYen) {
+          pushError(findings, 'mof-publish-detail-evidence-value', { ...scope, recordId: sectionId, eventId: ev.eventId },
+            `sectionId=${sectionId} group=${groupKey} eventId=${ev.eventId}: evidenceの値がDerived eventと不一致`);
+        }
+      }
+      for (const eventId of expectedGroup.evidenceByEventId.keys()) {
+        if (!seenEventIds.has(eventId)) {
+          pushError(findings, 'mof-publish-detail-evidence-missing', { ...scope, recordId: sectionId, eventId },
+            `sectionId=${sectionId} group=${groupKey} eventId=${eventId}: 期待されるevidenceがpublished eventsに見つからない`);
+        }
       }
     }
   }

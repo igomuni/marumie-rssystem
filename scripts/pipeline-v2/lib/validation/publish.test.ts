@@ -7,12 +7,12 @@ import {
   independentRsShard, independentMofSectionShard, checkArtifactExists,
   checkRsProjectCounts, checkRsShardReferentialIntegrity, checkRsBudgetSummaryPreservation,
   checkRsBudgetItemPreservation, checkRsFalsePreservation, checkRsIndexBudgetSummaryReconstruction,
-  checkMofSectionCounts, checkMofSectionSemantics,
+  checkMofSectionCounts, checkMofSectionSemantics, checkMofDetailRecords, checkMofDetailEventAggregation,
   checkLinksPublishCounts, checkLinksSemanticEquality, checkLinksManifestSetCounts,
   checkRootManifestConsistency, readGzipJson,
-  type RsPublishIndex, type MofPublishIndex, type PublishedLink,
+  type RsPublishIndex, type MofPublishIndex, type PublishedLink, type MofSectionDetail,
 } from './publish';
-import type { RsBudgetItemRecordV2, RsBudgetSummaryRecord, MofDerivedSection, MofRsProjectLinkGroup } from '../../types';
+import type { RsBudgetItemRecordV2, RsBudgetSummaryRecord, MofDerivedSection, MofRsProjectLinkGroup, MofBudgetItemRecord, MofDerivedBudgetEvent } from '../../types';
 import type { RsProject } from '../rs-projects';
 
 function project(overrides: Partial<RsProject>): RsProject {
@@ -106,7 +106,7 @@ describe('checkRsShardReferentialIntegrity', () => {
   it('shardが独立計算と一致し、core bundleが実在すればfindingsは空', () => {
     const shard = independentRsShard('1');
     const index: RsPublishIndex = { projectCount: 1, projects: [{ projectId: '1', shard, profiles: ['core'] }] };
-    const findings = checkRsShardReferentialIntegrity(2024, index, s => (s === shard ? { '1': {} } : null));
+    const findings = checkRsShardReferentialIntegrity(2024, index, (profile, s) => (profile === 'core' && s === shard ? { '1': {} } : null));
     expect(findings).toHaveLength(0);
   });
 
@@ -121,6 +121,27 @@ describe('checkRsShardReferentialIntegrity', () => {
     const index: RsPublishIndex = { projectCount: 1, projects: [{ projectId: '1', shard, profiles: ['core'] }] };
     const findings = checkRsShardReferentialIntegrity(2024, index, () => ({})); // bundleに'1'キーが無い
     expect(findings.some(f => f.message.includes('bundleが存在しない'))).toBe(true);
+  });
+
+  it('coreはprofilesに列挙が無くても常時必須として検査する', () => {
+    const shard = independentRsShard('1');
+    const index: RsPublishIndex = { projectCount: 1, projects: [{ projectId: '1', shard, profiles: [] }] };
+    const findings = checkRsShardReferentialIntegrity(2024, index, () => ({})); // core bundle無し、profilesにもcore無し
+    expect(findings.some(f => f.message.includes('coreは全projectに必須'))).toBe(true);
+  });
+
+  it('profilesにcontextが列挙されているのにbundleが無ければerror', () => {
+    const shard = independentRsShard('1');
+    const index: RsPublishIndex = { projectCount: 1, projects: [{ projectId: '1', shard, profiles: ['core', 'context'] }] };
+    const findings = checkRsShardReferentialIntegrity(2024, index, (profile, s) => (profile === 'core' && s === shard ? { '1': {} } : null));
+    expect(findings.some(f => f.message.includes('context/') && f.message.includes('bundleが存在しない'))).toBe(true);
+  });
+
+  it('context/spendingが実在しprofilesにも列挙されていればfindingsは空', () => {
+    const shard = independentRsShard('1');
+    const index: RsPublishIndex = { projectCount: 1, projects: [{ projectId: '1', shard, profiles: ['core', 'context', 'spending'] }] };
+    const findings = checkRsShardReferentialIntegrity(2024, index, () => ({ '1': {} }));
+    expect(findings).toHaveLength(0);
   });
 });
 
@@ -200,6 +221,35 @@ describe('checkRsBudgetItemPreservation', () => {
     const readContextShard = () => ({ '1': { budgetItems: [{ recordId: 'rsitem_1', fiscalYear: 2024, budgetType: '当初予算', accountType: 'general', account: '一般会計', budgetMinistry: 'A省', sectionName: 'S', subItemName: 'I', budgetAmountYen: 999 }] } });
     const result = checkRsBudgetItemPreservation(2024, items, new Set(['1']), readContextShard, () => 'aa');
     expect(result.findings.some(f => f.check === 'rs-publish-budget-item-value' && f.message.includes('budgetAmountYen'))).toBe(true);
+  });
+
+  it('Publish側にrecordIdが重複していればduplicateとして検出する', () => {
+    const items = [item({})];
+    const row = { recordId: 'rsitem_1', fiscalYear: 2024, budgetType: '当初予算', accountType: 'general', account: '一般会計', budgetMinistry: 'A省', sectionName: 'S', subItemName: 'I', budgetAmountYen: 100 };
+    const readContextShard = () => ({ '1': { budgetItems: [row, row] } });
+    const result = checkRsBudgetItemPreservation(2024, items, new Set(['1']), readContextShard, () => 'aa');
+    expect(result.findings.some(f => f.check === 'rs-publish-budget-item-duplicate')).toBe(true);
+  });
+
+  it('NormalizedにないrecordIdがPublishに存在すればunexpectedとして検出する', () => {
+    const items = [item({})];
+    const readContextShard = () => ({
+      '1': {
+        budgetItems: [
+          { recordId: 'rsitem_1', fiscalYear: 2024, budgetType: '当初予算', accountType: 'general', account: '一般会計', budgetMinistry: 'A省', sectionName: 'S', subItemName: 'I', budgetAmountYen: 100 },
+          { recordId: 'rsitem_ghost', fiscalYear: 2024, budgetType: '当初予算', accountType: 'general', account: '一般会計', budgetMinistry: 'A省', sectionName: 'S', subItemName: 'I', budgetAmountYen: 999 },
+        ],
+      },
+    });
+    const result = checkRsBudgetItemPreservation(2024, items, new Set(['1']), readContextShard, () => 'aa');
+    expect(result.findings.some(f => f.check === 'rs-publish-budget-item-unexpected')).toBe(true);
+  });
+
+  it('sourceCountとpublishedCountが不一致ならfindingとして検出する（metricsだけに留めない）', () => {
+    const items = [item({ recordId: 'rsitem_1' }), item({ recordId: 'rsitem_2' })];
+    const readContextShard = () => ({ '1': { budgetItems: [{ recordId: 'rsitem_1', fiscalYear: 2024, budgetType: '当初予算', accountType: 'general', account: '一般会計', budgetMinistry: 'A省', sectionName: 'S', subItemName: 'I', budgetAmountYen: 100 }] } });
+    const result = checkRsBudgetItemPreservation(2024, items, new Set(['1']), readContextShard, () => 'aa');
+    expect(result.findings.some(f => f.check === 'rs-publish-budget-item-count')).toBe(true);
   });
 });
 
@@ -325,6 +375,96 @@ describe('checkMofSectionSemantics', () => {
     const index: MofPublishIndex = { sectionCount: 1, recordCount: 0, eventCount: 0, sections: [{ ...s, currentBudgetYen: 999, shard: independentMofSectionShard(s.id), relationCount: 0 }] };
     const findings = checkMofSectionSemantics(2024, [s], index);
     expect(findings.some(f => f.check === 'mof-publish-section-value' && f.message.includes('currentBudgetYen'))).toBe(true);
+  });
+});
+
+describe('checkMofDetailRecords / checkMofDetailEventAggregation', () => {
+  function mofItem(overrides: Partial<MofBudgetItemRecord>): MofBudgetItemRecord {
+    return {
+      schemaVersion: 2, recordType: 'mof_budget_item', recordId: 'mofrec_1', fiscalYear: 2024,
+      phase: 'initial', budgetStatus: 'initial', revision: null,
+      accountType: 'general', ministry: 'X', organization: 'Y', specialAccount: '', subAccount: '', agency: '',
+      sectionCode: '001', sectionName: 'S', subItemCode: '01', subItemName: 'I',
+      sectionNaturalKey: 'k', legacySectionKey: 'lk', itemNaturalKey: 'ik', scopeNameItemKey: 'sk',
+      source: { domain: 'mof.go.jp', path: 'x', file: 'x.zip', dataset: 'd', year: 2024, zipEntry: 'e.csv', rowNumber: 5 },
+      sourceAmountColumn: 'col', amountYen: 100,
+      ...overrides,
+    } as MofBudgetItemRecord;
+  }
+  function mofEvent(overrides: Partial<MofDerivedBudgetEvent>): MofDerivedBudgetEvent {
+    return {
+      schemaVersion: 2, recordType: 'budget_event', eventId: 'evt_1', sourceSystem: 'mof',
+      fiscalYear: 2024, eventType: 'initial_budget_state', amountYen: 100, budgetStatus: 'initial', revision: null,
+      accountType: 'general', ministry: 'X', organization: 'Y', specialAccount: '', subAccount: '', agency: '',
+      sectionCode: '001', sectionName: 'S', subItemName: 'I',
+      sourceRecordIds: ['mofrec_1'], source: { domain: 'mof.go.jp', path: 'x', file: 'x.zip' },
+      ...overrides,
+    } as MofDerivedBudgetEvent;
+  }
+  const derivedSections = [section({ id: 'mofsec_1', accountType: 'general', ministry: 'X', organization: 'Y', specialAccount: '', subAccount: '', agency: '', sectionCode: '001', sectionName: 'S' })];
+  const validDetail: MofSectionDetail = {
+    records: [{ id: 'mofrec_1', itemId: 'ik', phase: 'initial', budgetStatus: 'initial', revision: null, sourceAmountColumn: 'col', sourceRef: 0 }],
+    sources: [{ domain: 'mof.go.jp', dataset: 'd', year: 2024, path: 'x', zipEntry: 'e.csv', rowNumber: 5 }],
+    events: [{ eventType: 'initial_budget_state', budgetStatus: 'initial', revision: null, amountYen: 100, evidence: [{ eventId: 'evt_1', amountYen: 100, itemName: 'I', itemIds: ['ik'], recordIds: ['mofrec_1'] }] }],
+  };
+
+  it('checkMofDetailRecords: recordが一致すればfindingsは空', () => {
+    const items = [mofItem({})];
+    const result = checkMofDetailRecords(2024, items, derivedSections, () => validDetail);
+    expect(result.findings).toHaveLength(0);
+  });
+
+  it('checkMofDetailRecords: section detailが読めなければmof-publish-detail-missingを検出する（silent passしない）', () => {
+    const items = [mofItem({})];
+    const result = checkMofDetailRecords(2024, items, derivedSections, () => null);
+    expect(result.findings.some(f => f.check === 'mof-publish-detail-missing')).toBe(true);
+  });
+
+  it('checkMofDetailRecords: itemId/revision/sourceAmountColumnの不一致を検出する', () => {
+    const items = [mofItem({})];
+    const badDetail: MofSectionDetail = { ...validDetail, records: [{ ...validDetail.records[0], itemId: 'wrong', revision: 3, sourceAmountColumn: 'other' }] };
+    const result = checkMofDetailRecords(2024, items, derivedSections, () => badDetail);
+    expect(result.findings.some(f => f.check === 'mof-publish-detail-record-value')).toBe(true);
+  });
+
+  it('checkMofDetailRecords: sourceRefが指すsourceの内容がNormalizedと不一致なら検出する', () => {
+    const items = [mofItem({})];
+    const badDetail: MofSectionDetail = { ...validDetail, sources: [{ domain: 'mof.go.jp', dataset: 'wrong-dataset' }] };
+    const result = checkMofDetailRecords(2024, items, derivedSections, () => badDetail);
+    expect(result.findings.some(f => f.check === 'mof-publish-detail-source-ref')).toBe(true);
+  });
+
+  it('checkMofDetailEventAggregation: 合計・evidenceが一致すればfindingsは空', () => {
+    const events = [mofEvent({})];
+    const result = checkMofDetailEventAggregation(2024, events, derivedSections, [mofItem({})], () => validDetail);
+    expect(result.findings).toHaveLength(0);
+  });
+
+  it('checkMofDetailEventAggregation: section detailが読めなければmof-publish-detail-missingを検出する（silent passしない）', () => {
+    const events = [mofEvent({})];
+    const result = checkMofDetailEventAggregation(2024, events, derivedSections, [mofItem({})], () => null);
+    expect(result.findings.some(f => f.check === 'mof-publish-detail-missing')).toBe(true);
+  });
+
+  it('checkMofDetailEventAggregation: 合計額が同じでもevidenceが欠落していれば検出する', () => {
+    const events = [mofEvent({}), mofEvent({ eventId: 'evt_2', amountYen: 0 })];
+    // evt_2のamountYen=0なので合計は変わらないが、evt_2分のevidenceがpublishedに無い
+    const result = checkMofDetailEventAggregation(2024, events, derivedSections, [mofItem({})], () => validDetail);
+    expect(result.findings.some(f => f.check === 'mof-publish-detail-evidence-missing')).toBe(true);
+  });
+
+  it('checkMofDetailEventAggregation: evidenceの値がDerived eventと不一致なら検出する', () => {
+    const events = [mofEvent({})];
+    const badDetail: MofSectionDetail = { ...validDetail, events: [{ ...validDetail.events[0], evidence: [{ ...validDetail.events[0].evidence![0], amountYen: 999 }] }] };
+    const result = checkMofDetailEventAggregation(2024, events, derivedSections, [mofItem({})], () => badDetail);
+    expect(result.findings.some(f => f.check === 'mof-publish-detail-evidence-value')).toBe(true);
+  });
+
+  it('checkMofDetailEventAggregation: evidenceが重複していれば検出する', () => {
+    const events = [mofEvent({})];
+    const badDetail: MofSectionDetail = { ...validDetail, events: [{ ...validDetail.events[0], evidence: [validDetail.events[0].evidence![0], validDetail.events[0].evidence![0]] }] };
+    const result = checkMofDetailEventAggregation(2024, events, derivedSections, [mofItem({})], () => badDetail);
+    expect(result.findings.some(f => f.check === 'mof-publish-detail-evidence-duplicate')).toBe(true);
   });
 });
 

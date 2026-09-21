@@ -45,7 +45,7 @@ import {
   checkLinksPublishCounts, checkLinksSemanticEquality, checkLinksSectionIdsReconstruction, checkLinksManifestSetCounts,
   checkRootManifestConsistency,
   type RsPublishIndex, type RsPublishManifest, type MofPublishIndex, type MofPublishManifest,
-  type PublishedLink, type LinksPublishManifest, type RootManifest,
+  type PublishedLink, type LinksPublishManifest, type RootManifest, type MofSectionDetail,
 } from './lib/validation/publish';
 import type { RsProject } from './lib/rs-projects';
 import type {
@@ -428,9 +428,12 @@ function validatePublish(outputRoot: string, publicRoot: string): {
     const projectIds = new Set(normProjects.map(p => p.projectId));
     const readCoreShard = (shard: string) => readGzipJson<Record<string, unknown>>(path.join(rsOutDir, 'core', `${shard}.json.gz`));
     const readContextShard = (shard: string) => readGzipJson<Record<string, unknown>>(path.join(rsOutDir, 'context', `${shard}.json.gz`));
+    const readSpendingShard = (shard: string) => readGzipJson<Record<string, unknown>>(path.join(rsOutDir, 'spending', `${shard}.json.gz`));
     const shardOf = (projectId: string) => independentRsShard(projectId);
+    const readProfileShard = (profile: 'core' | 'context' | 'spending', shard: string) =>
+      profile === 'core' ? readCoreShard(shard) : profile === 'context' ? readContextShard(shard) : readSpendingShard(shard);
 
-    findings.push(...checkRsShardReferentialIntegrity(reviewYear, index, readCoreShard));
+    findings.push(...checkRsShardReferentialIntegrity(reviewYear, index, readProfileShard));
 
     const normSummaries = readJsonl<RsBudgetSummaryRecord>(path.join(normDir, 'budget-summaries.jsonl'));
     const summaryResult = checkRsBudgetSummaryPreservation(reviewYear, normSummaries, projectIds, readCoreShard, shardOf);
@@ -499,10 +502,10 @@ function validatePublish(outputRoot: string, publicRoot: string): {
 
     const readSectionDetail = (sectionId: string) => {
       const shard = sectionId.slice(7, 9);
-      const shardData = readGzipJson<Record<string, { records: Record<string, unknown>[]; sources: Record<string, unknown>[]; events: { eventType: string; budgetStatus?: string; revision?: number | null; amountYen: number }[] }>>(path.join(mofOutDir, 'sections', `${shard}.json.gz`));
+      const shardData = readGzipJson<Record<string, MofSectionDetail>>(path.join(mofOutDir, 'sections', `${shard}.json.gz`));
       return shardData?.[sectionId] ?? null;
     };
-    const recordResult = checkMofDetailRecords(fiscalYear, normItems, derivedSections, readSectionDetail, s => s.slice(7, 9));
+    const recordResult = checkMofDetailRecords(fiscalYear, normItems, derivedSections, readSectionDetail);
     findings.push(...recordResult.findings);
     const eventResult = checkMofDetailEventAggregation(fiscalYear, derivedEvents, derivedSections, normItems, readSectionDetail);
     findings.push(...eventResult.findings);
