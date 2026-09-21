@@ -6,14 +6,11 @@ import { PaneLayout, SearchInput, MultiSelect } from './controls';
 import { parseAmountRange, yen } from './model';
 import {
   filterRsProjects, filterRsAmountRange, sortRsProjects, rsOrganizationNames,
-  type RsProjectSummary, type RsProjectDetail, type RsProjectSort, type RsProjectSortKey,
+  type RsProjectSummary, type RsProjectDetail, type RsProjectSort,
 } from './rs-model';
 import { fetchRsIndex, fetchRsProjectCore, type V2RsManifest } from './rs-source';
 import { FundingSankey } from './funding-sankey';
-
-const SORT_LABELS: Record<RsProjectSortKey, string> = {
-  projectId: '事業ID', projectName: '事業名', ministry: '府省庁', budgetTotalYen: '予算現額', blockCount: 'ブロック数',
-};
+import { RsProjectTable } from './rs-project-table';
 
 export function RsProjectsView() {
   const [year, setYear] = useState(2025);
@@ -78,22 +75,11 @@ export function RsProjectsView() {
         <label>下限<input type="text" inputMode="numeric" aria-label="金額の下限（円）" placeholder="指定なし" value={minAmount} onChange={e => setMinAmount(e.target.value)} /></label>
         <span>〜</span><label>上限<input type="text" inputMode="numeric" aria-label="金額の上限（円）" placeholder="指定なし" value={maxAmount} onChange={e => setMaxAmount(e.target.value)} /></label>
       </div>{amountRange.error && <p role="alert" className={styles.searchError}>{amountRange.error}</p>}</fieldset>
-      <div className={styles.filterField}><span>並び替え</span><select aria-label="並び替え" value={sort?.key ?? ''} onChange={e => setSort(e.target.value ? { key: e.target.value as RsProjectSortKey, direction: 'asc' } : null)}>
-        <option value="">既定</option>
-        {(Object.keys(SORT_LABELS) as RsProjectSortKey[]).map(k => <option key={k} value={k}>{SORT_LABELS[k]}</option>)}
-      </select></div>
     </section>} list={
       <section className={styles.sidebar} aria-label="事業一覧ペイン">
         <div className={styles.listTitle}><h2>事業一覧</h2><span role="status">{filtered.length.toLocaleString()} 件 / 全 {projects?.length.toLocaleString() ?? 0} 件</span></div>
         <div className={styles.list}>
-          <table><tbody>
-            {sorted.map(p => <tr key={p.projectId} aria-selected={p.projectId === current?.projectId} onClick={() => setSelected(p.projectId)} style={{ cursor: 'pointer', background: p.projectId === current?.projectId ? '#eef4ff' : undefined }}>
-              <td>{p.projectId}</td>
-              <td>{p.projectName}<br /><small>{[p.ministry, p.bureau].filter(Boolean).join(' / ')}</small></td>
-              <td>{p.budgetTotalYen != null ? yen(p.budgetTotalYen) : '—'}</td>
-              <td>{p.hasCycle && <span title="循環あり">🔁</span>} {p.hasMofLink && <span title="MOF項リンクあり">🔗</span>} {p.hasDuplicateRelations && <span title="重複関係あり">⚠</span>}</td>
-            </tr>)}
-          </tbody></table>
+          <RsProjectTable projects={sorted} selected={current?.projectId ?? ''} onSelect={setSelected} sort={sort} onSort={key => setSort(previous => ({ key, direction: previous?.key === key && previous.direction === 'asc' ? 'desc' : 'asc' }))} />
           {projects && !filtered.length && <p className={styles.empty}>該当する事業はありません</p>}
         </div>
       </section>} detail={

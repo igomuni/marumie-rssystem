@@ -2,7 +2,7 @@ export interface EntitySummary {
   id: string; fiscalYear: number; sourceYear: number; accountType: string;
   ministry: string; organization: string; specialAccount: string; subAccount: string;
   agency: string; sectionCode: string; sectionName: string; stages: string[];
-  eventCount: number; relationCount: number;
+  eventCount: number; relationCount: number; rsProjectCount?: number;
 }
 export interface Source { path: string; zipEntry: string; rowNumber: number }
 export interface RawRecord {
@@ -73,7 +73,7 @@ export function initialEnactedAmount(events: EventGroup[]): number | null {
 }
 export const yen = (n: number) => `${n.toLocaleString('ja-JP')} 円`;
 
-export type EntitySortKey = 'sectionName' | 'organization' | 'accountType' | 'sectionCode' | 'amount';
+export type EntitySortKey = 'sectionName' | 'organization' | 'accountType' | 'sectionCode' | 'amount' | 'rsProjectCount';
 export type EntitySort = { key: EntitySortKey; direction: 'asc' | 'desc' };
 export function parseAmountRange(minText: string, maxText: string) {
   const parse = (text: string) => {
@@ -106,6 +106,7 @@ export function sortEntities(entities: EntitySummary[], amounts: Record<string, 
       if (x == null || y == null) return x == null ? (y == null ? 0 : 1) : -1;
       return (x - y) * direction;
     }
+    if (sort.key === 'rsProjectCount') return ((a.rsProjectCount ?? 0) - (b.rsProjectCount ?? 0)) * direction;
     return text(a).localeCompare(text(b), 'ja', { numeric: true }) * direction;
   });
 }

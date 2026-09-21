@@ -61,6 +61,14 @@ function groupByProjectId<T extends { projectId: string }>(rows: T[]): Map<strin
   return map;
 }
 
+// MOF recordId → 項（section）idの対応。publishMofYearと同じ定義をRS側（項→事業数の逆算）でも使う。
+function loadRecordToSection(outputRoot: string, fiscalYear: number): Map<string, string> {
+  const itemsPath = path.join(outputRoot, 'normalized', 'mof', `fy${fiscalYear}`, 'budget-items.jsonl');
+  if (!fs.existsSync(itemsPath)) return new Map();
+  const items = readJsonl<MofBudgetItemRecord>(itemsPath);
+  return new Map(items.map(r => [r.recordId, sectionIdOf(r)] as const));
+}
+
 function publishRsYear(outputRoot: string, publicRoot: string, reviewYear: number): {
   reviewYear: number; projectCount: number; indexGzipBytes: number; profiles: Record<Profile, { shardCount: number; gzipBytes: number; maxShardBytes: number }>;
   completeness: 'full' | 'partial'; referentialIntegrityErrors: string[];
@@ -82,6 +90,7 @@ function publishRsYear(outputRoot: string, publicRoot: string, reviewYear: numbe
   const graphByProject = new Map(graphs.map(g => [g.projectId, g]));
 
   const linksByProject = new Map<string, { fiscalYear: number; link: MofRsProjectLinkGroup }[]>();
+  const recordToSectionCache = new Map<number, Map<string, string>>();
   const linkProducts: { fiscalYear: number; linkGroupCount: number; projectCount: number }[] = [];
   const linksDir = path.join(outputRoot, 'derived', 'links');
   if (fs.existsSync(linksDir)) {
@@ -240,6 +249,16 @@ function publishRsYear(outputRoot: string, publicRoot: string, reviewYear: numbe
     const links = linksByProject.get(pid) ?? [];
     row.hasMofLink = links.length > 0;
     row.mofLinkCount = links.length;
+    const mofSectionIds = new Set<string>();
+    for (const { fiscalYear, link } of links) {
+      const recordToSection = recordToSectionCache.get(fiscalYear) ?? loadRecordToSection(outputRoot, fiscalYear);
+      recordToSectionCache.set(fiscalYear, recordToSection);
+      for (const rid of link.mofRecordIds) {
+        const sid = recordToSection.get(rid);
+        if (sid) mofSectionIds.add(sid);
+      }
+    }
+    row.mofSectionCount = mofSectionIds.size;
 
     const contextBundle = bundlesByProfile.context.get(pid);
     row.contextCounts = pick({
@@ -305,7 +324,7 @@ function publishMofYear(outputRoot: string, publicRoot: string, fiscalYear: numb
   const stageGaps = readJsonl<MofStageGap>(path.join(droot, 'stage-gaps.jsonl'));
   const sections = readJsonl<MofDerivedSection>(path.join(droot, 'sections.jsonl'));
 
-  const recordToSection = new Map(items.map(r => [r.recordId, sectionIdOf(r)] as const));
+  const recordToSection = loadRecordToSection(outputRoot, fiscalYear);
 
   const linksByReviewYear: { reviewYear: number; links: import('./types').MofRsProjectLinkGroup[] }[] = [];
   const linkProducts: { reviewYear: number; fiscalYear: number; linkGroupCount: number; linkedProjectCount: number }[] = [];

@@ -40,7 +40,7 @@ export default function BudgetFlow() {
   const [year, setYear] = useState(2024);
   const [source, setSource] = useState<DataSource>('v2');
   const [mode, setMode] = useState('all');
-  const [account, setAccount] = useState<string[]>(['general']);
+  const [account, setAccount] = useState<string[]>([]);
   const [organizations, setOrganizations] = useState<string[]>([]);
   const [regex, setRegex] = useState(false);
   const [amounts, setAmounts] = useState<Record<string, number | null>>({});

@@ -21,7 +21,7 @@ interface V2RsIndexRow {
   hasFundingGraph: boolean;
   graph?: { blockCount: number; semanticEdgeCount: number; hasCycle: boolean; weakComponentCount: number; maxOutDegree: number; orphanBlockIds: string[]; externalRootBlockIds: string[]; duplicateRelationPairCount: number; indirectExpenseCount: number };
   hasCycle?: boolean; hasOrphanBlocks?: boolean; hasDuplicateRelations?: boolean;
-  hasMofLink: boolean; mofLinkCount: number;
+  hasMofLink: boolean; mofLinkCount: number; mofSectionCount?: number;
   contextCounts?: { policies?: number; subsidyRules?: number; projectRelations?: number; logicModel?: number; evaluations?: number };
 }
 interface V2RsIndex { reviewYear: number; projectCount: number; projects: V2RsIndexRow[] }
@@ -39,7 +39,7 @@ export function toRsProjectSummary(row: V2RsIndexRow): RsProjectSummary {
     budgetInitialYen: row.budgetSummary?.initial ?? null, budgetSupplementsYen: row.budgetSummary?.supplements ?? null, budgetTotalYen: row.budgetSummary?.total ?? null,
     hasFundingGraph: row.hasFundingGraph, blockCount: row.graph?.blockCount ?? 0, semanticEdgeCount: row.graph?.semanticEdgeCount ?? 0,
     hasCycle: Boolean(row.hasCycle), hasOrphanBlocks: Boolean(row.hasOrphanBlocks), hasDuplicateRelations: Boolean(row.hasDuplicateRelations),
-    hasMofLink: row.hasMofLink, mofLinkCount: row.mofLinkCount,
+    hasMofLink: row.hasMofLink, mofLinkCount: row.mofLinkCount, mofSectionCount: row.mofSectionCount ?? 0,
     contextCounts: {
       policies: row.contextCounts?.policies ?? 0, subsidyRules: row.contextCounts?.subsidyRules ?? 0,
       projectRelations: row.contextCounts?.projectRelations ?? 0, logicModel: row.contextCounts?.logicModel ?? 0, evaluations: row.contextCounts?.evaluations ?? 0,
