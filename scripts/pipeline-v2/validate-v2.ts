@@ -35,7 +35,8 @@ import {
 } from './lib/validation/mof-money';
 import {
   classifyUnlinkedReasons, checkLinkTaxonomyConsistency, diagnoseJointMinistryFallback,
-  analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups, type JointMinistryFallbackCandidate,
+  analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups, diagnoseSupplementalExactFallback,
+  type JointMinistryFallbackCandidate, type SupplementalExactCandidate,
 } from './lib/validation/mof-rs-linkage';
 import {
   readGzipJson, readJsonFile, independentRsShard, checkArtifactExists,
@@ -297,6 +298,13 @@ interface LinkPairMetrics {
     candidateCount: number; candidateAmountYen: number; exactReconciliationCount: number;
     candidates: JointMinistryFallbackCandidate[];
   };
+  supplementalExactFallback: {
+    parsedCandidateCount: number;
+    exactReconciliationRecordCount: number; exactReconciliationGroupCount: number;
+    safeExactRecordCount: number; safeExactGroupCount: number;
+    p2cHistoricalScopeMismatchCount: number; explicitScopeConflictCount: number;
+    candidates: SupplementalExactCandidate[];
+  };
   difference: ReturnType<typeof analyzeLinkDifferenceTaxonomy>;
   multiProject: ReturnType<typeof analyzeMultiProjectGroups>;
 }
@@ -328,6 +336,8 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
       const unlinkedReasons = classifyUnlinkedReasons(mofItems, rsItemsForYear);
       const jointMinistry = diagnoseJointMinistryFallback(reviewYear, fiscalYear, mofItems, rsItemsForYear);
       findings.push(...jointMinistry.findings);
+      const supplementalExact = diagnoseSupplementalExactFallback(reviewYear, fiscalYear, mofItems, rsItemsForYear);
+      findings.push(...supplementalExact.findings);
       const difference = analyzeLinkDifferenceTaxonomy(links);
       const multiProject = analyzeMultiProjectGroups(links);
 
@@ -351,6 +361,16 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
           exactReconciliationCount: jointMinistry.candidates.filter(c => c.exactReconciliation).length,
           candidates: jointMinistry.candidates,
         },
+        supplementalExactFallback: {
+          parsedCandidateCount: supplementalExact.summary.parsedCandidateCount,
+          exactReconciliationRecordCount: supplementalExact.summary.exactReconciliationRecordCount,
+          exactReconciliationGroupCount: supplementalExact.summary.exactReconciliationGroupCount,
+          safeExactRecordCount: supplementalExact.summary.safeExactRecordCount,
+          safeExactGroupCount: supplementalExact.summary.safeExactGroupCount,
+          p2cHistoricalScopeMismatchCount: supplementalExact.summary.p2cHistoricalScopeMismatchCount,
+          explicitScopeConflictCount: supplementalExact.summary.explicitScopeConflictCount,
+          candidates: supplementalExact.candidates,
+        },
         difference, multiProject,
       });
 
@@ -360,6 +380,9 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
         `jointMinistry候補=${jointMinistry.candidates.length}件 / ` +
         `差額分布 zero=${difference.exactZeroGroupCount} nonzero=${difference.nonZeroGroupCount} top10share=${(difference.top10Share * 100).toFixed(1)}% / ` +
         `multiProject groups=${multiProject.multiProjectGroupCount}/${multiProject.groupCount} max=${multiProject.maxProjectCountPerGroup}`);
+      console.log(`  review-${reviewYear}×fy${fiscalYear}: supplementalExact parsed=${supplementalExact.summary.parsedCandidateCount} ` +
+        `safe=${supplementalExact.summary.safeExactRecordCount}行/${supplementalExact.summary.safeExactGroupCount}group ` +
+        `p2cMismatch=${supplementalExact.summary.p2cHistoricalScopeMismatchCount} explicitConflict=${supplementalExact.summary.explicitScopeConflictCount}`);
 
       // golden acceptanceは「検証済み時点のbaseline snapshot」であり不変条件ではない（L-017）。
       // joint-ministry fallback等の正しいアルゴリズム改善でもこの値は変わりうるため、
