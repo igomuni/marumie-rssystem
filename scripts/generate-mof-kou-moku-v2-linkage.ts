@@ -7,6 +7,7 @@ import type { V2MatchMethod } from '@/app/lib/v2-public-linkage';
 import type { MofKouMokuV2LinkGroup, MofKouMokuV2LinkageProduct, MofKouMokuV2Project } from '@/types/mof-kou-moku-v2-linkage';
 import type { MofRsProjectLinkGroup, RsBudgetItemRecordV2, RsBudgetSummaryRecord } from '@/scripts/pipeline-v2/types';
 import { readJsonl } from '@/scripts/pipeline-v2/lib/jsonl';
+import { aggregateRsProjectAmounts } from '@/app/lib/mof-kou-moku-v2-linkage';
 
 type Root = { publishSchemaVersion: number; links: { reviewYear: number; fiscalYear: number }[] };
 type Link = { linkId: string; phase: 'initial' | 'supplement'; revision: number | null; matchMethod: V2MatchMethod; sectionIds: string[]; projectIds: string[]; mofAmountYen: number; rsAmountYen: number; differenceYen: number };
@@ -25,11 +26,12 @@ function budgetType(phase: Link['phase'], revision: number | null): MOFBudgetTyp
   return phase === 'initial' ? '当初予算' : revision === null ? null : `補正予算（第${revision}号）` as MOFBudgetType;
 }
 function projectBreakdown(link: MofRsProjectLinkGroup, rows: Map<string, RsBudgetItemRecordV2>) {
-  const amounts = new Map<string, number>(); const counts = new Map<string, number>();
+  const matchedRows: RsBudgetItemRecordV2[] = []; const counts = new Map<string, number>();
   for (const recordId of link.rsRecordIds) {
     const row = rows.get(recordId); if (!row) throw new Error(`RS normalized record not found: linkId=${link.linkId} recordId=${recordId}`);
-    const id = String(row.projectId); amounts.set(id, (amounts.get(id) ?? 0) + (row.budgetAmountYen ?? 0)); counts.set(id, (counts.get(id) ?? 0) + 1);
+    matchedRows.push(row); const id = String(row.projectId); counts.set(id, (counts.get(id) ?? 0) + 1);
   }
+  const amounts = aggregateRsProjectAmounts(matchedRows);
   const actual = [...amounts.keys()].sort(); const expected = [...link.projectIds].map(String).sort();
   if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`projectIds mismatch: linkId=${link.linkId}`);
   const total = [...amounts.values()].reduce((sum, value) => sum + value, 0);
@@ -61,7 +63,7 @@ function build(reviewYear: number, fiscalYear: number) {
   const summaries = readJsonl<RsBudgetSummaryRecord>(path.resolve(process.cwd(), 'data/normalized/rs', `review-${reviewYear}`, 'budget-summaries.jsonl'));
   const projectBudgetById = new Map<string, number | null>();
   for (const summary of summaries) {
-    if (summary.scopeLevel === 'project_total' && summary.fiscalYear === reviewYear) {
+    if (summary.scopeLevel === 'project_total' && summary.fiscalYear === fiscalYear) {
       projectBudgetById.set(String(summary.projectId), summary.amounts['計（歳出予算現額合計）'] ?? null);
     }
   }

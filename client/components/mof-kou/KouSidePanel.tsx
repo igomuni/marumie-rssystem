@@ -41,6 +41,8 @@ export interface V2PanelData {
   itemNames: Map<string, string> | null;
   /** projectId → 事業名・府省庁（V2 RS index由来） */
   projectNames: Map<string, { name: string; ministry: string }> | null;
+  sectionLoading: boolean;
+  sectionError: string | null;
 }
 
 export type Tab = 'history' | 'jikou' | 'koumoku' | 'rs';
@@ -687,10 +689,10 @@ function RsTab({
   gridState: GridViewState;
   onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
 }) {
-  if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
-  if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
-
   if (v2) return <V2RsTab v2={v2} gridState={gridState} onGridStateChange={onGridStateChange} />;
+  if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
+  if (loading) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+  if (!detail) return <p className="p-3 text-neutral-400">紐づく RS 事業は見つかりませんでした。</p>;
 
   const columns: GridColumn<MofRsKouMokuLinkageRecord>[] = [
     {
@@ -763,7 +765,9 @@ function V2RsTab({
     return <p className="p-3 text-neutral-400">この予算種別（決算・暫定）はV2のMOF↔RSリンクの対象外です。</p>;
   }
   if (v2.links === null) {
-    return <p className="p-3 text-neutral-400">読み込み中…</p>;
+    if (v2.sectionError) return <p className="p-3 text-red-600">V2リンクの取得に失敗しました: {v2.sectionError}</p>;
+    if (v2.sectionLoading) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+    return <p className="p-3 text-neutral-400">紐づく RS 事業は見つかりませんでした。</p>;
   }
 
   const itemName = (id: string) => v2.itemNames?.get(id) ?? id;
@@ -824,20 +828,13 @@ function V2RsTab({
   ];
 
   return (
-    <div>
-      <p className="px-2 pb-1.5 pt-2 text-[11px] text-neutral-400">
-        V2のMOF↔RSリンクをRS事業ごとに1行で表示しています。group列の金額・比率は個別事業額ではなくlink group全体の値であり、同じgroup内の各行で繰り返し表示されます。
-        <br />
-        「補足情報から復元」はRSの補足情報から完全キーを復元したTier-1リンクです。金額でリンク先を選択していません。
-      </p>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        rowKey={row => `${row.link.linkId}:${row.projectId}`}
-        state={gridState}
-        onStateChange={onGridStateChange}
-        emptyMessage="紐づく RS 事業は見つかりませんでした。"
-      />
-    </div>
+    <DataGrid
+      rows={rows}
+      columns={columns}
+      rowKey={row => `${row.link.linkId}:${row.projectId}`}
+      state={gridState}
+      onStateChange={onGridStateChange}
+      emptyMessage="紐づく RS 事業は見つかりませんでした。"
+    />
   );
 }

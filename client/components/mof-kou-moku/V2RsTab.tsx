@@ -26,9 +26,6 @@ export function V2KouMokuRsTab({ links, reviewYear, loading, error, gridState, o
     !row.project.projectBudgetAmountYen ? null : row.project.rsAmountYen / row.project.projectBudgetAmountYen;
   const mofItemShare = (row: V2ProjectRow) =>
     row.group.mofAmountYen === 0 ? null : row.project.rsAmountYen / row.group.mofAmountYen;
-  const uniqueGroups = new Map(links.map(group => [group.linkId, group]));
-  const groupRsTotal = [...uniqueGroups.values()].reduce((sum, group) => sum + group.rsAmountYen, 0);
-  const projectRsTotal = rows.reduce((sum, row) => sum + row.project.rsAmountYen, 0);
   const columns: GridColumn<V2ProjectRow>[] = [
     { key: 'matchMethod', label: '根拠', width: 100, sortValue: row => row.group.matchMethod, render: row => <MatchMethodBadge method={row.group.matchMethod} /> },
     {
@@ -40,8 +37,5 @@ export function V2KouMokuRsTab({ links, reviewYear, loading, error, gridState, o
     { key: 'projectBudgetShare', label: 'RS事業%', width: 82, numeric: true, sortValue: projectBudgetShare, render: row => formatRate(projectBudgetShare(row)) },
     { key: 'mofItemShare', label: 'MOF目%', width: 82, numeric: true, sortValue: mofItemShare, render: row => formatRate(mofItemShare(row)) },
   ];
-  return <div>
-    <p className="px-2 pb-1.5 pt-2 text-[11px] leading-5 text-neutral-400">RS事業額は、正式link groupに採用されたRS 2-2行を事業ID別に合算した当該目・stageの内訳です。按分値ではありません。RS事業%はRS 2-1の「計（歳出予算現額合計）」に対する割合、MOF目%はMOF額に対するRS事業額の割合です。複数目をまたぐlinkでは、MOF目%の分母はlink group全体のMOF額です。{rows.length > 0 && <> 事業別合計 {formatYen(projectRsTotal)} / RS合計 {formatYen(groupRsTotal)}</>}</p>
-    <DataGrid rows={rows} columns={columns} rowKey={row => `${row.group.linkId}:${row.group.itemNaturalKey}:${row.project.projectId}`} state={gridState} onStateChange={onGridStateChange} emptyMessage="紐づく RS 事業は見つかりませんでした。" />
-  </div>;
+  return <DataGrid rows={rows} columns={columns} rowKey={row => `${row.group.linkId}:${row.group.itemNaturalKey}:${row.project.projectId}`} state={gridState} onStateChange={onGridStateChange} emptyMessage="紐づく RS 事業は見つかりませんでした。" />;
 }

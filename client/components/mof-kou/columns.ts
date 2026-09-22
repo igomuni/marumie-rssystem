@@ -61,7 +61,7 @@ export const COLUMNS: ColumnSpec[] = [
   { key: 'jikouCount', label: '事項数', width: 80, numeric: true, note: '目的別内訳（/mof-jikou）での件数' },
   { key: 'kouMokuCount', label: '目数', width: 72, numeric: true, note: '性質別内訳（/mof-kou-moku）での件数' },
   { key: 'amount', label: '本年度額', width: 110, numeric: true, note: '目（kou-moku）側の合計' },
-  { key: 'previousAmount', label: '前年度額', width: 110, numeric: true },
+  { key: 'previousAmount', label: '比較対象額', width: 110, numeric: true, note: '当初は前年度額、補正は補正前の成立予算額' },
   { key: 'difference', label: '増減額', width: 100, numeric: true },
   { key: 'rate', label: '増減率', width: 84, numeric: true },
 ];

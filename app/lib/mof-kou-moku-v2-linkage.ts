@@ -43,3 +43,15 @@ export function countV2ProjectsByKouMoku(
   }
   return out;
 }
+
+/** 2-2の金額を符号を保ったままRS事業単位に合算する。 */
+export function aggregateRsProjectAmounts(
+  records: ReadonlyArray<{ projectId: string | number; budgetAmountYen: number | null }>
+): Map<string, number> {
+  const amounts = new Map<string, number>();
+  for (const record of records) {
+    const projectId = String(record.projectId);
+    amounts.set(projectId, (amounts.get(projectId) ?? 0) + (record.budgetAmountYen ?? 0));
+  }
+  return amounts;
+}

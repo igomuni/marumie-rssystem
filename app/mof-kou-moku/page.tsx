@@ -106,8 +106,16 @@ function boundsOf(values: number[]): [number, number] {
 export default function MOFKouMokuPage() {
   const [data, setData] = useState<MOFKouMokuData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  /** 選択中の会計年度。null は「収録済みの最新年度」をAPIに任せる */
-  const [year, setYear] = useState<number | null>(null);
+  /** `/mof-kou` と共有する前回選択年度を、初回fetch前に同期的に復元する。 */
+  const [year, setYear] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem('mof-kou:year');
+      return raw !== null ? (JSON.parse(raw) as number) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const [filters, setFilters] = useState<FilterSidebarState>(INITIAL_FILTERS);
   const [showFilters, setShowFilters] = useState(true);
@@ -153,6 +161,15 @@ export default function MOFKouMokuPage() {
       cancelled = true;
     };
   }, [year]);
+
+  useEffect(() => {
+    if (!data) return;
+    try {
+      localStorage.setItem('mof-kou:year', JSON.stringify(data.metadata.fiscalYear));
+    } catch {
+      // 保存できなくても表示は継続する
+    }
+  }, [data]);
 
   function changeYear(next: number) {
     setYear(next);

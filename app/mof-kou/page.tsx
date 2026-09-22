@@ -146,6 +146,8 @@ export default function MOFKouPage() {
   const [v2Links, setV2Links] = useState<V2StandaloneLinksProduct | null>(null);
   const [v2RsIndex, setV2RsIndex] = useState<V2RsIndex | null>(null);
   const [v2SectionDetail, setV2SectionDetail] = useState<V2MofSectionDetail | null>(null);
+  const [v2SectionLoading, setV2SectionLoading] = useState(false);
+  const [v2SectionError, setV2SectionError] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -280,6 +282,17 @@ export default function MOFKouPage() {
   function changeYear(next: number) {
     setYear(next);
     setData(null);
+  }
+
+  function toggleSelectedRow(id: string) {
+    const next = selected === id ? null : id;
+    if (next !== null) {
+      // effectがfetchを開始する前の描画で「空」を見せない。
+      setDetail(null);
+      setDetailError(null);
+      setDetailLoading(true);
+    }
+    setSelected(next);
   }
 
   function setFilter<K extends keyof FilterSidebarState>(key: K, value: FilterSidebarState[K]) {
@@ -493,13 +506,21 @@ export default function MOFKouPage() {
   useEffect(() => {
     // 選択項を切り替えた直後に、前の項のlink groupを表示しない。
     setV2SectionDetail(null);
+    setV2SectionError(null);
     if (!selectedV2Section || !data) {
+      setV2SectionLoading(false);
       return;
     }
     const controller = new AbortController();
+    setV2SectionLoading(true);
     fetchV2MofSection(data.metadata.fiscalYear, selectedV2Section.id, controller.signal)
       .then(setV2SectionDetail)
-      .catch(() => setV2SectionDetail(null));
+      .catch(error => {
+        if (!controller.signal.aborted) setV2SectionError(error instanceof Error ? error.message : String(error));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setV2SectionLoading(false);
+      });
     return () => controller.abort();
   }, [selectedV2Section, data]);
 
@@ -528,8 +549,10 @@ export default function MOFKouPage() {
       links,
       itemNames,
       projectNames,
+      sectionLoading: v2SectionLoading,
+      sectionError: v2SectionError,
     };
-  }, [v2Active, selectedRow, selectedV2Section, v2SectionCurrent, v2SectionDetail, v2RsIndex, v2RsIndexCurrent, reviewYear]);
+  }, [v2Active, selectedRow, selectedV2Section, v2SectionCurrent, v2SectionDetail, v2RsIndex, v2RsIndexCurrent, reviewYear, v2SectionLoading, v2SectionError]);
 
   if (error) {
     return (
@@ -689,7 +712,7 @@ export default function MOFKouPage() {
               widths={widths}
               onWidthsChange={setWidths}
               selectedId={selected}
-              onSelectRow={id => setSelected(cur => (cur === id ? null : id))}
+              onSelectRow={toggleSelectedRow}
             />
           </div>
         </div>

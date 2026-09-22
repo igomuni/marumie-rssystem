@@ -191,6 +191,21 @@ export function KouMokuTable({
               <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
                 <span className="line-clamp-2">{item.sectionName}</span>
               </td>
+              <td className="px-2 py-1.5 font-medium text-neutral-900 dark:text-neutral-100">
+                <span className="line-clamp-2">{item.subItemName}</span>
+              </td>
+              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
+                {formatYen(item.amount)}
+              </td>
+              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                {formatYen(item.previousAmount)}
+              </td>
+              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                {formatYen(item.difference)}
+              </td>
+              <td className={`truncate px-2 py-1.5 text-right tabular-nums ${rateClass(rate)}`}>
+                {formatChangeRate(rate)}
+              </td>
               <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
                 <span className="line-clamp-2">
                   {item.majorExpenseName || (item.majorExpenseCode ? `(${item.majorExpenseCode})` : '—')}
@@ -217,21 +232,6 @@ export function KouMokuTable({
                 </span>
               </td>
               <td className="truncate px-2 py-1.5 tabular-nums text-neutral-500">{item.subItemCode}</td>
-              <td className="px-2 py-1.5 font-medium text-neutral-900 dark:text-neutral-100">
-                <span className="line-clamp-2">{item.subItemName}</span>
-              </td>
-              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
-                {formatYen(item.amount)}
-              </td>
-              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
-                {formatYen(item.previousAmount)}
-              </td>
-              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
-                {formatYen(item.difference)}
-              </td>
-              <td className={`truncate px-2 py-1.5 text-right tabular-nums ${rateClass(rate)}`}>
-                {formatChangeRate(rate)}
-              </td>
               <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
                 {formatYen(item.currentAmount)}
               </td>
