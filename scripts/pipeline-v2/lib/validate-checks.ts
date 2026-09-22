@@ -164,6 +164,22 @@ export function checkMofRsLinkIntegrity(
     // 「どの行がどう一致したか」という監査自体が虚偽になるためinvariant errorにする（warningにしない）
     const evidenceByRsRecordId = new Map<string, number>();
     for (const ev of link.rsMatchEvidence) {
+      // review指摘: MofRsMatchEvidenceは型上discriminated unionだが、JSON artifactを読んだ
+      // 時点ではTypeScriptの型は実行時に強制されない。P1/P2の必須fieldの組み合わせを
+      // runtimeでも検証する（TSの静的narrowingはdiscriminated unionを信頼して
+      // 「あり得ない」分岐をnever型にしてしまうため、意図的にunknown経由で緩めて比較する）
+      const evUnsafe = ev as unknown as { method: string; sourceField: string; resolution?: string; parseKind?: string };
+      if (evUnsafe.method === 'exact-name-key') {
+        if (evUnsafe.sourceField !== 'structured-fields') {
+          findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: ev.rsRecordId }, message: `linkId=${link.linkId}: method=exact-name-keyのevidenceのsourceFieldは'structured-fields'であるべきだが${evUnsafe.sourceField}` });
+        }
+      } else if (evUnsafe.method === 'supplemental-exact') {
+        if (evUnsafe.sourceField !== 'supplementalInfo') {
+          findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: ev.rsRecordId }, message: `linkId=${link.linkId}: method=supplemental-exactのevidenceのsourceFieldは'supplementalInfo'であるべきだが${evUnsafe.sourceField}` });
+        }
+        if (!evUnsafe.resolution) findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: ev.rsRecordId }, message: `linkId=${link.linkId}: method=supplemental-exactのevidenceにresolutionが無い` });
+        if (!evUnsafe.parseKind) findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: ev.rsRecordId }, message: `linkId=${link.linkId}: method=supplemental-exactのevidenceにparseKindが無い` });
+      }
       evidenceByRsRecordId.set(ev.rsRecordId, (evidenceByRsRecordId.get(ev.rsRecordId) ?? 0) + 1);
       if (!link.rsRecordIds.includes(ev.rsRecordId)) {
         findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: ev.rsRecordId }, message: `linkId=${link.linkId}: rsMatchEvidenceのrsRecordId=${ev.rsRecordId}がrsRecordIdsに含まれない` });

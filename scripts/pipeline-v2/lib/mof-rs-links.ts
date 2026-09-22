@@ -12,14 +12,18 @@
  * リンクが成立しなくなる（2026-09-20の`budgetMinistry`分離と同じ理由）。
  */
 import { stableId } from './stable-id';
-import { type Stage, stageKey, mofKeyFrom, rsKeyFrom, rsPhase } from './mof-rs-match-core';
-import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup, MofRsMatchEvidence } from '../types';
+import {
+  type Stage, stageKey, mofKeyFrom, rsKeyFrom, rsPhase,
+  evaluateSupplementalExact, selectSupplementalExactTier1Candidates,
+} from './mof-rs-match-core';
+import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup, MofRsMatchEvidence, MofRsGroupMatchMethod, MofRsSupplementalResolution } from '../types';
 
-// P1 matching primitive（Stage/stageKey/mofKeyFrom/rsKeyFrom/rsPhase）は
-// lib/mof-rs-match-core.tsへ移動した（P2 production昇格準備。53_sonnet-p2-shared-core-
-// extraction-instructions.md）。production/validation双方が同一実装を参照するneutral
-// coreであり、ロジック自体はこのファイルに置かれていた時と完全に同一。呼び出し元
-// （mof-rs-links.test.ts等）との後方互換のためここでも再exportする。
+// P1 matching primitive（Stage/stageKey/mofKeyFrom/rsKeyFrom/rsPhase）とP2 matching core
+// （evaluateSupplementalExact/selectSupplementalExactTier1Candidates）はlib/mof-rs-match-core.ts
+// へ集約した（P2 production昇格。55_sonnet-p2-tier1-production-activation-instructions.md）。
+// production/validation双方が同じTier-1昇格条件を参照する（二重実装しない）。
+// Stage/stageKey/mofKeyFrom/rsKeyFrom/rsPhaseは呼び出し元（mof-rs-links.test.ts等）との
+// 後方互換のためここでも再exportする。
 export type { Stage };
 export { stageKey, mofKeyFrom, rsKeyFrom, rsPhase };
 
@@ -34,10 +38,13 @@ export interface MofRsLinkResult {
   rsAmountAcrossGroupsYen: number;
 }
 
+interface GroupEntry { row: RsBudgetItemRecordV2; evidence: MofRsMatchEvidence }
+
 export function buildMofRsLinks(
   reviewYear: number, fiscalYear: number, mofRows: MofBudgetItemRecord[], rsRowsAllYears: RsBudgetItemRecordV2[]
 ): MofRsLinkResult {
   const rsRows = rsRowsAllYears.filter(r => r.fiscalYear === fiscalYear);
+  const rsById = new Map(rsRows.map(r => [r.recordId, r]));
 
   // stage -> key -> mof rows（対象amountを付与済み）
   const mofMaps = new Map<string, Map<string, (MofBudgetItemRecord & { _linkAmountYen: number })[]>>();
@@ -63,33 +70,61 @@ export function buildMofRsLinks(
     byKey.set(key, list);
   }
 
-  const groupedRs = new Map<string, { stage: Stage; key: string; rows: RsBudgetItemRecordV2[] }>();
-  let unlinked = 0;
+  const groupedRs = new Map<string, { stage: Stage; key: string; entries: GroupEntry[] }>();
   let unsupported = 0;
+
+  // P1: 構造化key完全一致。missing-link-key（key===null）はここではunlinkedへ計上しない
+  // （P2でlinkされる可能性があるため。最終的なunlinkedはsupported-linkedから算出する）
   for (const r of rsRows) {
     const stage = rsPhase(r);
     if (!stage) { unsupported++; continue; }
     const key = rsKeyFrom(r);
-    if (!key) { unlinked++; continue; }
+    if (!key) continue;
     const groupKey = `${stageKey(stage)}\x1f${key}`;
-    const entry = groupedRs.get(groupKey) ?? { stage, key, rows: [] };
-    entry.rows.push(r);
+    const entry = groupedRs.get(groupKey) ?? { stage, key, entries: [] };
+    entry.entries.push({ row: r, evidence: { rsRecordId: r.recordId, projectId: r.projectId, method: 'exact-name-key', sourceField: 'structured-fields' } });
+    groupedRs.set(groupKey, entry);
+  }
+
+  // P2 Tier-1: supplementalInfoから復元したexplicit-scope-exact（無条件）・
+  // pair-unique/rs-scope-resolved（safe target groupがexactの場合のみ）を、
+  // 既存P1 groupへmerge、または無ければ新規groupとして追加する（1 MOF target = 1 link groupを維持）。
+  // Tier-1判定はlib/mof-rs-match-core.tsのselectSupplementalExactTier1Candidates()に一本化されており、
+  // ここで独自の昇格条件を再実装しない
+  const { candidates } = evaluateSupplementalExact(mofRows, rsRows, fiscalYear);
+  const tier1 = selectSupplementalExactTier1Candidates(candidates);
+  for (const c of tier1) {
+    const row = rsById.get(c.rsRecordId);
+    if (!row) continue; // 通常発生しない（P2候補はrsRowsForYearから抽出されている）。防御的にskip
+    const stage = rsPhase(row)!; // P2対象はrsPhase!==nullの行に限定済み（evaluateSupplementalExactのtargetRowsフィルタ）
+    const groupKey = `${stageKey(stage)}\x1f${c.targetNaturalKey}`;
+    const entry = groupedRs.get(groupKey) ?? { stage, key: c.targetNaturalKey, entries: [] };
+    entry.entries.push({
+      row,
+      evidence: {
+        rsRecordId: row.recordId, projectId: row.projectId, method: 'supplemental-exact', sourceField: 'supplementalInfo',
+        resolution: c.targetResolution as MofRsSupplementalResolution, parseKind: c.parseKind,
+      },
+    });
     groupedRs.set(groupKey, entry);
   }
 
   const links: MofRsProjectLinkGroup[] = [];
-  let linkedRsRecords = 0;
+  const linkedRecordIds = new Set<string>();
   const sortedGroups = [...groupedRs.values()].sort((a, b) => {
     const ka = `${stageKey(a.stage)}\x1f${a.key}`;
     const kb = `${stageKey(b.stage)}\x1f${b.key}`;
     return ka < kb ? -1 : ka > kb ? 1 : 0;
   });
-  for (const { stage, key, rows } of sortedGroups) {
+  for (const { stage, key, entries } of sortedGroups) {
     const mrows = mofMaps.get(stageKey(stage))?.get(key) ?? [];
-    if (mrows.length === 0) { unlinked += rows.length; continue; }
-    linkedRsRecords += rows.length;
-    const rsAmount = rows.reduce((sum, r) => sum + (r.budgetAmountYen ?? 0), 0);
+    if (mrows.length === 0) continue; // valid-key-no-match（P1）。P2はtargetが実在する前提のため通常ここに来ない
+    for (const e of entries) linkedRecordIds.add(e.row.recordId);
+    const rsAmount = entries.reduce((sum, e) => sum + (e.row.budgetAmountYen ?? 0), 0);
     const mofAmount = mrows.reduce((sum, m) => sum + (m._linkAmountYen ?? 0), 0);
+    const sortedEntries = [...entries].sort((a, b) => (a.row.recordId < b.row.recordId ? -1 : a.row.recordId > b.row.recordId ? 1 : 0));
+    const methods = new Set(entries.map(e => e.evidence.method));
+    const matchMethod: MofRsGroupMatchMethod = methods.size > 1 ? 'mixed' : [...methods][0];
     links.push({
       schemaVersion: 2,
       recordType: 'mof_rs_project_link_group',
@@ -98,27 +133,26 @@ export function buildMofRsLinks(
       fiscalYear,
       phase: stage[0],
       revision: stage[1],
-      matchMethod: 'exact-name-key',
+      matchMethod,
       naturalKey: key,
       mofRecordIds: mrows.map(m => m.recordId).sort(),
-      rsRecordIds: rows.map(r => r.recordId).sort(),
-      projectIds: [...new Set(rows.map(r => r.projectId))].sort(),
+      rsRecordIds: sortedEntries.map(e => e.row.recordId),
+      projectIds: [...new Set(entries.map(e => e.row.projectId))].sort(),
       mofAmountYen: mofAmount,
       rsAmountYen: rsAmount,
       differenceYen: mofAmount - rsAmount,
-      rsMatchEvidence: [...rows]
-        .sort((a, b) => (a.recordId < b.recordId ? -1 : a.recordId > b.recordId ? 1 : 0))
-        .map((r): MofRsMatchEvidence => ({
-          rsRecordId: r.recordId, projectId: r.projectId, method: 'exact-name-key', sourceField: 'structured-fields',
-        })),
+      rsMatchEvidence: sortedEntries.map(e => e.evidence),
     });
   }
+
+  const supportedCount = rsRows.length - unsupported;
+  const linkedRsRecordCount = linkedRecordIds.size;
 
   return {
     links,
     linkGroupCount: links.length,
-    linkedRsRecordCount: linkedRsRecords,
-    unlinkedRsRecordCount: unlinked,
+    linkedRsRecordCount,
+    unlinkedRsRecordCount: supportedCount - linkedRsRecordCount,
     unsupportedBudgetTypeRecordCount: unsupported,
     linkedProjectCount: new Set(links.flatMap(l => l.projectIds)).size,
     mofAmountAcrossGroupsYen: links.reduce((sum, l) => sum + l.mofAmountYen, 0),

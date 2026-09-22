@@ -35,7 +35,7 @@ export interface RsFundingGraph {
   unresolvedRelationIds: string[]; unresolvedRelationDetails: unknown[]; duplicateRelationPairs: unknown[];
 }
 export interface RsMofLink {
-  linkId: string; phase: string; revision: number | null; projectIds: string[]; projectCount: number;
+  linkId: string; phase: string; revision: number | null; matchMethod: string; projectIds: string[]; projectCount: number;
   mofAmountYen: number; rsAmountYen: number; differenceYen: number; fiscalYear: number;
 }
 export interface RsBudgetSummary { fiscalYear: number | null; scopeLevel: string; amounts: Record<string, number | null> }

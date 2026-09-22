@@ -7,7 +7,9 @@ import * as path from 'path';
 import * as zlib from 'zlib';
 import * as crypto from 'crypto';
 
-export const PUBLISH_SCHEMA_VERSION = 1;
+// v1→v2（PR #351 review指摘）: RS compact link projection・standalone links productへ
+// group-level matchMethodを追加した公開JSON shapeの変更のため、公開契約の識別のためにbumpする
+export const PUBLISH_SCHEMA_VERSION = 2;
 export const SHARD_COUNT = 256;
 
 /** 意味のある値かどうか（null/undefined/空文字/空配列/空オブジェクトは「無い」として扱う。0とfalseは残す） */

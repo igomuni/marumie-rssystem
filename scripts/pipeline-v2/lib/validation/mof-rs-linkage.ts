@@ -22,7 +22,7 @@
  */
 import {
   mofKeyFrom, rsKeyFrom, rsPhase, stageKey, type Stage,
-  evaluateSupplementalExact, SAFE_TARGET_RESOLUTIONS,
+  evaluateSupplementalExact, selectSupplementalExactTier1Candidates, SAFE_TARGET_RESOLUTIONS,
   type SupplementalExactParseKind, type SupplementalExactTargetResolution, type SupplementalExactReconciliation,
   type SupplementalExactCandidate, type SupplementalExactSummary,
 } from '../mof-rs-match-core';
@@ -35,11 +35,16 @@ export type { SupplementalExactParseKind, SupplementalExactTargetResolution, Sup
 export interface UnlinkedReasonBucket { recordCount: number; amountYen: number }
 
 /**
- * D-1: unlinked reason taxonomy。buildMofRsLinks()と同じ判定順序・同じkey生成で
- * RS recordをunsupported-budget-type/missing-link-key/valid-key-no-matchに分類する。
+ * D-1: unlinked reason taxonomy。
+ *
+ * review指摘（55_sonnet-p2-tier1-production-activation-instructions.md）: P2 production昇格後は
+ * `rsKeyFrom(r)===null`を即missing-link-keyに分類すると、P2でproduction linkされた行を
+ * 誤ってunlinked扱いする虚偽の診断になる。そのため、まず`productionLinkedRecordIds`
+ * （実際のproduction link group群から集めたrsRecordId集合。P1/P2どちらでlinkされたかは問わない）に
+ * 含まれるかを最優先で判定し、それ以外の行だけを従来どおりunsupported/missing-key/no-matchへ分類する。
  */
 export function classifyUnlinkedReasons(
-  mofRows: MofBudgetItemRecord[], rsRowsForYear: RsBudgetItemRecordV2[]
+  rsRowsForYear: RsBudgetItemRecordV2[], productionLinkedRecordIds: ReadonlySet<string>
 ): {
   findings: Finding[];
   linkedRecordCount: number;
@@ -47,17 +52,6 @@ export function classifyUnlinkedReasons(
   missingLinkKey: UnlinkedReasonBucket & { missingFieldCounts: Record<string, number> };
   validKeyNoMatch: UnlinkedReasonBucket;
 } {
-  const mofGroupKeys = new Set<string>();
-  for (const m of mofRows) {
-    let stage: Stage;
-    if (m.phase === 'initial' && m.budgetStatus === 'enacted') stage = ['initial', null];
-    else if (m.phase === 'supplement') stage = ['supplement', m.revision ?? 0];
-    else continue;
-    const key = mofKeyFrom(m);
-    if (!key) continue;
-    mofGroupKeys.add(`${stageKey(stage)}\x1f${key}`);
-  }
-
   let linkedRecordCount = 0;
   const unsupportedBudgetType: UnlinkedReasonBucket = { recordCount: 0, amountYen: 0 };
   const missingLinkKey: UnlinkedReasonBucket & { missingFieldCounts: Record<string, number> } = { recordCount: 0, amountYen: 0, missingFieldCounts: {} };
@@ -67,6 +61,12 @@ export function classifyUnlinkedReasons(
 
   for (const r of rsRowsForYear) {
     const amount = r.budgetAmountYen ?? 0;
+
+    // review指摘: production linked record（P1/P2どちらでlinkされたかは問わない）を最優先で判定する。
+    // これを先に見ないと、P2でlinkされた行が`rsKeyFrom()===null`のままmissing-link-keyへ
+    // 誤分類される（P2 production昇格前の虚偽の診断になる）
+    if (productionLinkedRecordIds.has(r.recordId)) { linkedRecordCount++; continue; }
+
     const stage = rsPhase(r);
     if (!stage) { unsupportedBudgetType.recordCount++; unsupportedBudgetType.amountYen += amount; continue; }
 
@@ -79,7 +79,8 @@ export function classifyUnlinkedReasons(
       continue;
     }
 
-    if (mofGroupKeys.has(`${stageKey(stage)}\x1f${key}`)) { linkedRecordCount++; continue; }
+    // 構造化keyは完成しているが、production未link（Tier-1条件を満たさなかったP2候補や、
+    // MOF側に一致するgroupが無いvalid-key-no-matchのいずれも含む）
     validKeyNoMatch.recordCount++; validKeyNoMatch.amountYen += amount;
   }
 
@@ -152,9 +153,15 @@ function rsKeyWithMinistry(r: RsBudgetItemRecordV2, ministry: string): string | 
  * - `rsKeyFrom(r)`が非null（primary keyは完成している）
  * - `normalizeText(budgetMinistry)`が`normalizeText(ministry)`を部分文字列として含む
  * - common `ministry`に差し替えた代替keyが一意なMOF targetへ一致する
+ *
+ * review指摘（55_sonnet-p2-tier1-production-activation-instructions.md）: existing linked
+ * amount（altGroupKeyに既にlinkされているRS金額）は、P1構造化matchからの再構築ではなく
+ * actual production links（P1+P2昇格後の実際のlink group）の`rsAmountYen`を基準にする。
+ * P2 production昇格後はP1のみの再構築では過小評価になり、この診断のreconciliation
+ * （P3 shadow候補が本当にexactへ収束するか）が不正確になるため。
  */
 export function diagnoseJointMinistryFallback(
-  reviewYear: number, fiscalYear: number, mofRows: MofBudgetItemRecord[], rsRowsForYear: RsBudgetItemRecordV2[]
+  reviewYear: number, fiscalYear: number, mofRows: MofBudgetItemRecord[], rsRowsForYear: RsBudgetItemRecordV2[], productionLinks: MofRsProjectLinkGroup[]
 ): { findings: Finding[]; candidates: JointMinistryFallbackCandidate[] } {
   const findings: Finding[] = [];
 
@@ -172,17 +179,12 @@ export function diagnoseJointMinistryFallback(
     mofAmountByGroup.set(groupKey, (mofAmountByGroup.get(groupKey) ?? 0) + amount);
   }
 
-  // RS側: 実際にlinkが成立する（primary keyがMOF groupに存在する）行を、stage+primary keyでグループ化
+  // RS側: actual production link（P1+P2昇格後）のrsAmountYenをstage+naturalKeyで引けるようにする
   // → 「altKeyが既存link groupと一致するか」を判定するのに使う（existingRsAmountYen）
   const rsLinkedAmountByGroup = new Map<string, number>();
-  for (const r of rsRowsForYear) {
-    const stage = rsPhase(r);
-    if (!stage) continue;
-    const key = rsKeyFrom(r);
-    if (!key) continue;
-    const groupKey = `${stageKey(stage)}\x1f${key}`;
-    if (!mofAmountByGroup.has(groupKey)) continue; // 未接続なのでこの合算には含めない
-    rsLinkedAmountByGroup.set(groupKey, (rsLinkedAmountByGroup.get(groupKey) ?? 0) + (r.budgetAmountYen ?? 0));
+  for (const link of productionLinks) {
+    const groupKey = `${stageKey([link.phase, link.revision])}\x1f${link.naturalKey}`;
+    rsLinkedAmountByGroup.set(groupKey, link.rsAmountYen);
   }
 
   // review指摘: 同一altGroupKeyに複数の候補行が乗り得るため、候補は一旦altGroupKeyでまとめてから
@@ -339,9 +341,11 @@ export function analyzeMultiProjectGroups(links: MofRsProjectLinkGroup[]): Multi
 // ============================================================
 
 /**
- * D-5: P2 Supplemental Exact Fallback shadow diagnostic。
+ * D-5: P2 Supplemental Exact Fallbackの記述的診断。
  * 対象はStage D taxonomy上のmissing-link-keyのみ（`rsKeyFrom(r) === null`）。
- * production link（buildMofRsLinks）は一切変更せず、独立に抽出・分類・金額検算するのみ。
+ * このevaluateSupplementalExact()自体の意味論（生のRSデータからP1 baseline + P2候補を評価する）は
+ * production昇格後も変更していない。Tier-1昇格の実際の判定・productionとの整合性検査は
+ * `checkSupplementalExactProductionPolicy()`が別途行う。
  */
 export function diagnoseSupplementalExactFallback(
   reviewYear: number, fiscalYear: number, mofRows: MofBudgetItemRecord[], rsRowsForYear: RsBudgetItemRecordV2[]
@@ -359,9 +363,96 @@ export function diagnoseSupplementalExactFallback(
       },
       sampleIds: candidates.filter(c => SAFE_TARGET_RESOLUTIONS.has(c.targetResolution) && c.reconciliation === 'exact').map(c => c.rsRecordId).slice(0, 10),
       message: `review-${reviewYear}×fy${fiscalYear}: supplementalInfoからMOF項・目を復元しexact reconciliationした安全候補が${summary.safeExactRecordCount}行（${summary.safeExactGroupCount} target group）ある` +
-        `（現行linkは変更せず候補のみ。安全と断定はしない）`,
+        `（explicit-scope-exactおよびexactなpair-unique/rs-scope-resolvedはTier-1としてproduction linkへ反映済み。詳細はcheckSupplementalExactProductionPolicy参照）`,
     });
   }
 
   return { findings, candidates, summary };
+}
+
+export interface SupplementalExactProductionPolicyMetrics {
+  productionP2RecordCount: number;
+  productionP2GroupCount: number;
+  p2aProductionCount: number;
+  p2bProductionCount: number;
+  p2bWithheldNonExactCount: number;
+  p2cHistoricalScopeMismatchCount: number;
+  explicitScopeConflictCount: number;
+  ambiguousTargetCount: number;
+  parseRejectedCount: number;
+}
+
+/**
+ * D-5: production-policy invariant。shared coreのTier-1 selector
+ * （selectSupplementalExactTier1Candidates、lib/mof-rs-match-core.ts）が期待するP2 setと、
+ * 実際のderived link（`rsMatchEvidence.method==='supplemental-exact'`）をrecordId単位で
+ * 突き合わせ、buildMofRsLinks()が同じTier-1条件を正しく適用しているかを検査する
+ * （production/validatorで昇格条件がずれていないかのinvariant。golden acceptanceではない）。
+ */
+export function checkSupplementalExactProductionPolicy(
+  reviewYear: number, fiscalYear: number, mofRows: MofBudgetItemRecord[], rsRowsForYear: RsBudgetItemRecordV2[], productionLinks: MofRsProjectLinkGroup[]
+): { findings: Finding[]; metrics: SupplementalExactProductionPolicyMetrics } {
+  const { candidates, summary } = evaluateSupplementalExact(mofRows, rsRowsForYear, fiscalYear);
+  const tier1 = selectSupplementalExactTier1Candidates(candidates);
+  const expectedByRecordId = new Map(tier1.map(c => [c.rsRecordId, c]));
+
+  // review指摘: 実データ検証で判明した点。naturalKeyだけをgroup識別子にすると、同じMOF
+  // natural key（項・目）がinitial/supplement等の異なるstageで別々のlink group（別linkId）に
+  // なっているケースを1つに潰してしまう（実測でreview-2024×fy2023など3組がこれで1件ずつ
+  // 過少カウントしていた）。production側の実際のgroup識別子であるlinkIdをそのまま使う
+  const actualByRecordId = new Map<string, { resolution: SupplementalExactTargetResolution; parseKind: SupplementalExactParseKind; naturalKey: string; linkId: string; phase: string; revision: number | null }>();
+  for (const link of productionLinks) {
+    for (const ev of link.rsMatchEvidence) {
+      if (ev.method === 'supplemental-exact') {
+        actualByRecordId.set(ev.rsRecordId, { resolution: ev.resolution, parseKind: ev.parseKind, naturalKey: link.naturalKey, linkId: link.linkId, phase: link.phase, revision: link.revision });
+      }
+    }
+  }
+
+  // review指摘: naturalKey/resolution/parseKindだけでなくphase/revisionもexpected/actualで
+  // 比較する。今回のgroup-count集計バグ（naturalKeyのみでは別stageのgroupを区別できない）と
+  // 同じ失敗クラスを、record単位の突合でも見逃さないようにする
+  const rsByRecordId = new Map(rsRowsForYear.map(r => [r.recordId, r]));
+
+  const findings: Finding[] = [];
+  const pushError = (recordId: string, message: string) => {
+    findings.push({ severity: 'error', check: 'mof-rs-supplemental-exact-production-policy', category: 'invariant', scope: { reviewYear, fiscalYear, recordId }, message });
+  };
+
+  for (const [recordId, expected] of expectedByRecordId) {
+    const actual = actualByRecordId.get(recordId);
+    if (!actual) {
+      pushError(recordId, `recordId=${recordId}: Tier-1で昇格されるべきP2候補がproduction linkに存在しない（targetNaturalKey=${expected.targetNaturalKey}, resolution=${expected.targetResolution}）`);
+      continue;
+    }
+    if (actual.naturalKey !== expected.targetNaturalKey) pushError(recordId, `recordId=${recordId}: production linkのnaturalKey(${actual.naturalKey})が期待値(${expected.targetNaturalKey})と不一致`);
+    if (actual.resolution !== expected.targetResolution) pushError(recordId, `recordId=${recordId}: production evidenceのresolution(${actual.resolution})が期待値(${expected.targetResolution})と不一致`);
+    if (actual.parseKind !== expected.parseKind) pushError(recordId, `recordId=${recordId}: production evidenceのparseKind(${actual.parseKind})が期待値(${expected.parseKind})と不一致`);
+    const expectedStage = rsPhase(rsByRecordId.get(recordId)!);
+    if (expectedStage) {
+      if (actual.phase !== expectedStage[0]) pushError(recordId, `recordId=${recordId}: production linkのphase(${actual.phase})が期待値(${expectedStage[0]})と不一致`);
+      if (actual.revision !== expectedStage[1]) pushError(recordId, `recordId=${recordId}: production linkのrevision(${actual.revision})が期待値(${expectedStage[1]})と不一致`);
+    }
+  }
+  for (const [recordId, actual] of actualByRecordId) {
+    if (!expectedByRecordId.has(recordId)) pushError(recordId, `recordId=${recordId}: Tier-1で昇格されないはずのP2 recordがproduction linkに存在する（naturalKey=${actual.naturalKey}）`);
+  }
+
+  const withheld = candidates.filter(c =>
+    (c.targetResolution === 'pair-unique' || c.targetResolution === 'rs-scope-resolved') && c.reconciliation !== 'exact'
+  );
+
+  const metrics: SupplementalExactProductionPolicyMetrics = {
+    productionP2RecordCount: actualByRecordId.size,
+    productionP2GroupCount: new Set([...actualByRecordId.values()].map(a => a.linkId)).size,
+    p2aProductionCount: tier1.filter(c => c.targetResolution === 'explicit-scope-exact').length,
+    p2bProductionCount: tier1.filter(c => c.targetResolution === 'pair-unique' || c.targetResolution === 'rs-scope-resolved').length,
+    p2bWithheldNonExactCount: withheld.length,
+    p2cHistoricalScopeMismatchCount: summary.p2cHistoricalScopeMismatchCount,
+    explicitScopeConflictCount: summary.explicitScopeConflictCount,
+    ambiguousTargetCount: summary.ambiguousTargetCount,
+    parseRejectedCount: summary.parseRejectedCount,
+  };
+
+  return { findings, metrics };
 }

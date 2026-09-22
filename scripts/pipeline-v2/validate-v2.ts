@@ -36,7 +36,8 @@ import {
 import {
   classifyUnlinkedReasons, checkLinkTaxonomyConsistency, diagnoseJointMinistryFallback,
   analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups, diagnoseSupplementalExactFallback,
-  type JointMinistryFallbackCandidate, type SupplementalExactCandidate,
+  checkSupplementalExactProductionPolicy,
+  type JointMinistryFallbackCandidate, type SupplementalExactCandidate, type SupplementalExactProductionPolicyMetrics,
 } from './lib/validation/mof-rs-linkage';
 import {
   readGzipJson, readJsonFile, independentRsShard, checkArtifactExists,
@@ -69,15 +70,20 @@ const LINK_GOLDEN_ACCEPTANCE: Record<string, {
   unlinkedRsRecordCount: number; unsupportedBudgetTypeRecordCount: number;
   mofAmountAcrossGroupsYen: number; rsAmountAcrossGroupsYen: number;
 }> = {
+  // review指摘（55_sonnet-p2-tier1-production-activation-instructions.md）: P2 Tier-1 production
+  // 昇格により意図的にリンク結果が変わったため更新する。旧値でderive+validateを実行し
+  // baseline-drift warningを確認、reviewer提示のexpected snapshotと実出力が完全一致することを
+  // 検証した上で更新した（実装報告参照。数値をexpected snapshotに合わせるための変更ではなく、
+  // 独立した実データ計測が両者で一致したことを確認してから反映している）。
   '2025:2024': {
-    linkGroupCount: 4914, linkedProjectCount: 4537, linkedRsRecordCount: 13087,
-    unlinkedRsRecordCount: 1093, unsupportedBudgetTypeRecordCount: 2466,
-    mofAmountAcrossGroupsYen: 132_282_025_855_000, rsAmountAcrossGroupsYen: 131_634_536_373_813,
+    linkGroupCount: 5065, linkedProjectCount: 4645, linkedRsRecordCount: 13366,
+    unlinkedRsRecordCount: 814, unsupportedBudgetTypeRecordCount: 2466,
+    mofAmountAcrossGroupsYen: 132_967_619_003_000, rsAmountAcrossGroupsYen: 132_363_032_469_813,
   },
   '2025:2025': {
-    linkGroupCount: 5086, linkedProjectCount: 4851, linkedRsRecordCount: 14017,
-    unlinkedRsRecordCount: 1034, unsupportedBudgetTypeRecordCount: 1992,
-    mofAmountAcrossGroupsYen: 136_591_411_159_000, rsAmountAcrossGroupsYen: 135_391_998_467_250,
+    linkGroupCount: 5228, linkedProjectCount: 4950, linkedRsRecordCount: 14266,
+    unlinkedRsRecordCount: 785, unsupportedBudgetTypeRecordCount: 1992,
+    mofAmountAcrossGroupsYen: 137_226_726_441_000, rsAmountAcrossGroupsYen: 136_060_423_522_250,
   },
 };
 
@@ -305,6 +311,7 @@ interface LinkPairMetrics {
     p2cHistoricalScopeMismatchCount: number; explicitScopeConflictCount: number;
     candidates: SupplementalExactCandidate[];
   };
+  productionPolicy: SupplementalExactProductionPolicyMetrics;
   difference: ReturnType<typeof analyzeLinkDifferenceTaxonomy>;
   multiProject: ReturnType<typeof analyzeMultiProjectGroups>;
 }
@@ -331,13 +338,19 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
 
       const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
 
-      // Stage D: linkage diagnostics（診断のみ。production link algorithmは変更しない）
+      // Stage D: linkage diagnostics。D-1/D-2はP2 production昇格後、actual production
+      // link membership（P1+P2）を基準にする（review指摘: 55_sonnet-p2-tier1-production-
+      // activation-instructions.md）。D-5はshared coreのTier-1 selectorが期待するP2 setと
+      // productionのrsMatchEvidenceが一致するかのinvariantを検査する
       const rsItemsForYear = rsItems.filter(r => r.fiscalYear === fiscalYear);
-      const unlinkedReasons = classifyUnlinkedReasons(mofItems, rsItemsForYear);
-      const jointMinistry = diagnoseJointMinistryFallback(reviewYear, fiscalYear, mofItems, rsItemsForYear);
+      const productionLinkedRecordIds = new Set(links.flatMap(l => l.rsRecordIds));
+      const unlinkedReasons = classifyUnlinkedReasons(rsItemsForYear, productionLinkedRecordIds);
+      const jointMinistry = diagnoseJointMinistryFallback(reviewYear, fiscalYear, mofItems, rsItemsForYear, links);
       findings.push(...jointMinistry.findings);
       const supplementalExact = diagnoseSupplementalExactFallback(reviewYear, fiscalYear, mofItems, rsItemsForYear);
       findings.push(...supplementalExact.findings);
+      const productionPolicy = checkSupplementalExactProductionPolicy(reviewYear, fiscalYear, mofItems, rsItemsForYear, links);
+      findings.push(...productionPolicy.findings);
       const difference = analyzeLinkDifferenceTaxonomy(links);
       const multiProject = analyzeMultiProjectGroups(links);
 
@@ -371,6 +384,7 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
           explicitScopeConflictCount: supplementalExact.summary.explicitScopeConflictCount,
           candidates: supplementalExact.candidates,
         },
+        productionPolicy: productionPolicy.metrics,
         difference, multiProject,
       });
 
@@ -383,6 +397,9 @@ function validateMofRsLinks(outputRoot: string): { findings: Finding[]; metrics:
       console.log(`  review-${reviewYear}×fy${fiscalYear}: supplementalExact parsed=${supplementalExact.summary.parsedCandidateCount} ` +
         `safe=${supplementalExact.summary.safeExactRecordCount}行/${supplementalExact.summary.safeExactGroupCount}group ` +
         `p2cMismatch=${supplementalExact.summary.p2cHistoricalScopeMismatchCount} explicitConflict=${supplementalExact.summary.explicitScopeConflictCount}`);
+      console.log(`  review-${reviewYear}×fy${fiscalYear}: productionPolicy P2production=${productionPolicy.metrics.productionP2RecordCount}行/${productionPolicy.metrics.productionP2GroupCount}group ` +
+        `(P2a=${productionPolicy.metrics.p2aProductionCount} P2b=${productionPolicy.metrics.p2bProductionCount}) ` +
+        `withheldNonExact=${productionPolicy.metrics.p2bWithheldNonExactCount} expected/actual差findings=${productionPolicy.findings.length}`);
 
       // golden acceptanceは「検証済み時点のbaseline snapshot」であり不変条件ではない（L-017）。
       // joint-ministry fallback等の正しいアルゴリズム改善でもこの値は変わりうるため、
