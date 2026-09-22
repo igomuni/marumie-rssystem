@@ -168,6 +168,33 @@ describe('checkMofRsLinkIntegrity', () => {
     expect(findings.some(f => f.check === 'mof-rs-link-evidence-integrity' && f.message.includes('matchMethod'))).toBe(true);
   });
 
+  it('review指摘: 全rsMatchEvidenceがsupplemental-exactなのにgroup matchMethod=exact-name-keyのままならerror', () => {
+    const link = {
+      ...validLink,
+      rsMatchEvidence: [{ rsRecordId: 'rs1', projectId: '1', method: 'supplemental-exact' as const, sourceField: 'supplementalInfo' as const, resolution: 'pair-unique' as const, parseKind: 'fwspace-pair' as const }],
+    };
+    const findings = checkMofRsLinkIntegrity([link], [mofItem], [rsItem]);
+    expect(findings.some(f => f.check === 'mof-rs-link-evidence-integrity' && f.message.includes('matchMethod'))).toBe(true);
+  });
+
+  it('review指摘: P1+P2混在のrsMatchEvidenceを持つgroupはmatchMethod=mixedでなければerror', () => {
+    const rsItem2 = { recordId: 'rs2', projectId: '1' } as RsBudgetItemRecordV2;
+    const link = {
+      ...validLink,
+      rsRecordIds: ['rs1', 'rs2'],
+      rsMatchEvidence: [
+        { rsRecordId: 'rs1', projectId: '1', method: 'exact-name-key' as const, sourceField: 'structured-fields' as const },
+        { rsRecordId: 'rs2', projectId: '1', method: 'supplemental-exact' as const, sourceField: 'supplementalInfo' as const, resolution: 'pair-unique' as const, parseKind: 'fwspace-pair' as const },
+      ],
+    };
+    // matchMethodが'exact-name-key'のまま(mixedでない)ならerror
+    const findingsWrong = checkMofRsLinkIntegrity([link], [mofItem], [rsItem, rsItem2]);
+    expect(findingsWrong.some(f => f.check === 'mof-rs-link-evidence-integrity' && f.message.includes('matchMethod'))).toBe(true);
+    // matchMethod='mixed'ならfindingsは空
+    const findingsCorrect = checkMofRsLinkIntegrity([{ ...link, matchMethod: 'mixed' }], [mofItem], [rsItem, rsItem2]);
+    expect(findingsCorrect).toHaveLength(0);
+  });
+
   it('review指摘: rsMatchEvidenceが正しく1:1対応していればfindingsは空（回帰確認）', () => {
     expect(checkMofRsLinkIntegrity([validLink], [mofItem], [rsItem])).toHaveLength(0);
   });

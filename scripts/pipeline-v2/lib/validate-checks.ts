@@ -7,7 +7,7 @@
  */
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord,
-  RsProjectSheetConflict, MofRsProjectLinkGroup, RsBudgetItemRecordV2, MofBudgetItemRecord,
+  RsProjectSheetConflict, MofRsProjectLinkGroup, RsBudgetItemRecordV2, MofBudgetItemRecord, MofRsGroupMatchMethod,
 } from '../types';
 
 /**
@@ -179,9 +179,21 @@ export function checkMofRsLinkIntegrity(
       if (count === 0) findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: id }, message: `linkId=${link.linkId}: rsRecordId=${id}に対応するrsMatchEvidenceが無い` });
       else if (count > 1) findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: id }, message: `linkId=${link.linkId}: rsRecordId=${id}に対応するrsMatchEvidenceが${count}件重複している` });
     }
-    const allExactNameKey = link.rsMatchEvidence.length > 0 && link.rsMatchEvidence.every(ev => ev.method === 'exact-name-key');
-    if (allExactNameKey && link.matchMethod !== 'exact-name-key') {
-      findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId }, message: `linkId=${link.linkId}: 全rsMatchEvidenceがexact-name-keyなのにgroup matchMethod=${link.matchMethod}` });
+    // review指摘: group-level matchMethodはrsMatchEvidenceのmethod集合から完全に導出できる
+    // 状態（exact-name-key/supplemental-exact/mixed）でなければならない。従来は「全evidenceが
+    // exact-name-keyならgroupもexact-name-key」という片方向チェックのみで、'mixed'を含む
+    // 残り2パターン（全evidenceがsupplemental-exact→group='supplemental-exact'、
+    // P1+P2混在→group='mixed'）を検査していなかった
+    if (link.rsMatchEvidence.length > 0) {
+      const methods = new Set(link.rsMatchEvidence.map(ev => ev.method));
+      const expectedMatchMethod: MofRsGroupMatchMethod = methods.size > 1 ? 'mixed' : [...methods][0];
+      if (link.matchMethod !== expectedMatchMethod) {
+        findings.push({
+          severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId },
+          metrics: { expectedMatchMethod, actualMatchMethod: link.matchMethod },
+          message: `linkId=${link.linkId}: rsMatchEvidenceのmethod集合(${[...methods].join(',')})から導出されるgroup matchMethod(${expectedMatchMethod})と実際のmatchMethod(${link.matchMethod})が不一致`,
+        });
+      }
     }
   }
   for (const [key, linkIds] of rsRecordStageMembership) {
