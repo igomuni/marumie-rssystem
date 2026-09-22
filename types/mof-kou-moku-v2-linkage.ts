@@ -1,5 +1,5 @@
-import type { MOFBudgetType } from './mof-kou-moku';
-import type { V2MatchMethod } from '@/app/lib/v2-public-linkage';
+import type { MOFBudgetType } from "./mof-kou-moku";
+import type { V2MatchMethod } from "@/app/lib/v2-public-linkage";
 
 export interface MofKouMokuV2Project {
   projectId: string;
@@ -16,7 +16,7 @@ export interface MofKouMokuV2LinkGroup {
   linkId: string;
   reviewYear: number;
   fiscalYear: number;
-  phase: 'initial' | 'supplement';
+  phase: "initial" | "supplement";
   revision: number | null;
   matchMethod: V2MatchMethod;
   kouMokuKey: string;
@@ -33,9 +33,12 @@ export interface MofKouMokuV2LinkGroup {
 
 export interface MofKouMokuV2IdentitySource {
   linkId: string;
-  phase: 'initial' | 'supplement';
+  phase: "initial" | "supplement";
   revision: number | null;
   matchMethod: V2MatchMethod;
+  /** このRS事業に採用されたRS 2-2行の当該stage金額（按分ではない） */
+  rsAmountYen: number;
+  spansItems: boolean;
 }
 
 export interface MofKouMokuV2IdentityProject {
@@ -47,7 +50,7 @@ export interface MofKouMokuV2IdentityProject {
 
 export interface MofKouMokuV2IdentityRelation {
   relationId: string;
-  relationKind: 'inherited-from-budget-link';
+  relationKind: "inherited-from-budget-link";
   reviewYear: number;
   fiscalYear: number;
   kouMokuKey: string;
@@ -57,7 +60,7 @@ export interface MofKouMokuV2IdentityRelation {
 }
 
 export interface MofKouMokuV2LinkageProduct {
-  schemaVersion: 3;
+  schemaVersion: 4;
   sourcePublishSchemaVersion: number;
   generatedAt: string;
   reviewYear: number;
