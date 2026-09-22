@@ -58,7 +58,7 @@ test("shows exact budget-link identities for an FY2024 settlement item", async (
     page.locator("thead").getByRole("button", { name: "補正1", exact: true }),
   ).toBeVisible();
   await expect(
-    page.locator("thead").getByRole("button", { name: "予算計", exact: true }),
+    page.locator("thead").getByRole("button", { name: "当初＋補正", exact: true }),
   ).toBeVisible();
   await expect(page.getByText("4539.1億円", { exact: true })).toBeVisible();
   await expect(page.getByText("2046.6億円", { exact: true })).toBeVisible();

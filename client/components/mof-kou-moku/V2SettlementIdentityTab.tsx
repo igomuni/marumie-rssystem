@@ -126,7 +126,7 @@ export function V2SettlementIdentityTab({
     })),
     {
       key: "budgetTotal",
-      label: "予算計",
+      label: "当初＋補正",
       headerTitle:
         "当初・補正の金額は、同じMOF目に正式リンクされたRS 2-2予算額です。決算額の事業別内訳を示すものではありません。",
       width: 108,

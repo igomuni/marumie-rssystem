@@ -60,7 +60,7 @@ export interface MofKouMokuV2IdentityRelation {
 }
 
 export interface MofKouMokuV2LinkageProduct {
-  schemaVersion: 4;
+  schemaVersion: 5;
   sourcePublishSchemaVersion: number;
   generatedAt: string;
   reviewYear: number;
@@ -81,5 +81,6 @@ export interface MofKouMokuV2LinkageProduct {
     settlementIdentityProjectCount: number;
     settlementIdentityUnmatchedItemCount: number;
     settlementIdentityAmbiguousItemCount: number;
+    settlementIdentitySkippedMultiItemGroupCount: number;
   };
 }

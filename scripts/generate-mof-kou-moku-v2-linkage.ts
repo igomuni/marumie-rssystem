@@ -300,8 +300,14 @@ function build(reviewYear: number, fiscalYear: number) {
   const itemResolutionSeen = new Set<string>();
   let settlementIdentityUnmatchedItemCount = 0;
   let settlementIdentityAmbiguousItemCount = 0;
+  let settlementIdentitySkippedMultiItemGroupCount = 0;
 
   for (const group of groups) {
+    // 1つの2-2金額を複数目に重複表示しない。item単位の内訳を持てるまでidentityへは投影しない。
+    if (group.spansItems) {
+      settlementIdentitySkippedMultiItemGroupCount++;
+      continue;
+    }
     const source: MofKouMokuV2IdentitySource = {
       linkId: group.linkId,
       phase: group.phase,
@@ -385,7 +391,7 @@ function build(reviewYear: number, fiscalYear: number) {
     })
     .sort((a, b) => a.kouMokuKey.localeCompare(b.kouMokuKey, "ja"));
   const product: MofKouMokuV2LinkageProduct = {
-    schemaVersion: 4,
+    schemaVersion: 5,
     sourcePublishSchemaVersion: read<Root>(path.join(rootDir, "manifest.json"))
       .publishSchemaVersion,
     generatedAt: new Date().toISOString(),
@@ -409,6 +415,7 @@ function build(reviewYear: number, fiscalYear: number) {
       ).size,
       settlementIdentityUnmatchedItemCount,
       settlementIdentityAmbiguousItemCount,
+      settlementIdentitySkippedMultiItemGroupCount,
     },
   };
   const output = path.join(
@@ -422,7 +429,7 @@ function build(reviewYear: number, fiscalYear: number) {
     zlib.gzipSync(JSON.stringify(product), { level: 9 }),
   );
   console.log(
-    `review-${reviewYear} × fy${fiscalYear}: groups=${groups.length} items=${product.diagnostics.linkedKouMokuCount} projects=${product.diagnostics.linkedProjectCount} settlementRelations=${identityRelations.length} settlementProjects=${product.diagnostics.settlementIdentityProjectCount} settlementUnmatched=${settlementIdentityUnmatchedItemCount} settlementAmbiguous=${settlementIdentityAmbiguousItemCount}`,
+    `review-${reviewYear} × fy${fiscalYear}: groups=${groups.length} items=${product.diagnostics.linkedKouMokuCount} projects=${product.diagnostics.linkedProjectCount} settlementRelations=${identityRelations.length} settlementProjects=${product.diagnostics.settlementIdentityProjectCount} settlementUnmatched=${settlementIdentityUnmatchedItemCount} settlementAmbiguous=${settlementIdentityAmbiguousItemCount} settlementSkippedMultiItemGroups=${settlementIdentitySkippedMultiItemGroupCount}`,
   );
 }
 const review = process.argv.find((x) => x.startsWith("--review="));
