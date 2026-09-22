@@ -35,5 +35,5 @@ export function V2SettlementIdentityTab({ relations, reviewYear, loading, error,
     gridState.sortKey !== null && validSortKeys.has(gridState.sortKey)
       ? gridState
       : { ...gridState, sortKey: 'project', sortDir: 'asc' };
-  return <div><p className="px-2 pb-1.5 pt-2 text-[11px] leading-5 text-neutral-400">この決算項目と同じMOF目について、当初予算または補正予算で正式に対応付けられたRS事業を表示しています。決算額とRS予算額の一致や、決算額の事業別配分を示すものではありません。</p><DataGrid rows={rows} columns={columns} rowKey={row => `${row.relation.relationId}:${row.project.projectId}`} state={effectiveState} onStateChange={onGridStateChange} emptyMessage="予算段階で対応付けられたRS事業は見つかりませんでした。" /></div>;
+  return <DataGrid rows={rows} columns={columns} rowKey={row => `${row.relation.relationId}:${row.project.projectId}`} state={effectiveState} onStateChange={onGridStateChange} emptyMessage="予算段階で対応付けられたRS事業は見つかりませんでした。" />;
 }
