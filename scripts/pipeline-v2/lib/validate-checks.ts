@@ -158,6 +158,31 @@ export function checkMofRsLinkIntegrity(
         message: `linkId=${link.linkId}: mofAmountYen-rsAmountYen !== differenceYen`,
       });
     }
+
+    // rsMatchEvidence（record-level provenance）の整合性検査。
+    // P1/P2混在を将来表現するための監査情報なので、rsRecordIdsとの1:1対応が崩れると
+    // 「どの行がどう一致したか」という監査自体が虚偽になるためinvariant errorにする（warningにしない）
+    const evidenceByRsRecordId = new Map<string, number>();
+    for (const ev of link.rsMatchEvidence) {
+      evidenceByRsRecordId.set(ev.rsRecordId, (evidenceByRsRecordId.get(ev.rsRecordId) ?? 0) + 1);
+      if (!link.rsRecordIds.includes(ev.rsRecordId)) {
+        findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: ev.rsRecordId }, message: `linkId=${link.linkId}: rsMatchEvidenceのrsRecordId=${ev.rsRecordId}がrsRecordIdsに含まれない` });
+        continue;
+      }
+      const evidenceRs = rsById.get(ev.rsRecordId);
+      if (evidenceRs && evidenceRs.projectId !== ev.projectId) {
+        findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: ev.rsRecordId }, message: `linkId=${link.linkId}: rsMatchEvidence.projectId(${ev.projectId})がrsRecordId=${ev.rsRecordId}の実際のprojectId(${evidenceRs.projectId})と不一致` });
+      }
+    }
+    for (const id of link.rsRecordIds) {
+      const count = evidenceByRsRecordId.get(id) ?? 0;
+      if (count === 0) findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: id }, message: `linkId=${link.linkId}: rsRecordId=${id}に対応するrsMatchEvidenceが無い` });
+      else if (count > 1) findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: id }, message: `linkId=${link.linkId}: rsRecordId=${id}に対応するrsMatchEvidenceが${count}件重複している` });
+    }
+    const allExactNameKey = link.rsMatchEvidence.length > 0 && link.rsMatchEvidence.every(ev => ev.method === 'exact-name-key');
+    if (allExactNameKey && link.matchMethod !== 'exact-name-key') {
+      findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId }, message: `linkId=${link.linkId}: 全rsMatchEvidenceがexact-name-keyなのにgroup matchMethod=${link.matchMethod}` });
+    }
   }
   for (const [key, linkIds] of rsRecordStageMembership) {
     if (linkIds.length > 1) {

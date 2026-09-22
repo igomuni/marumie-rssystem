@@ -84,4 +84,24 @@ describe('buildMofRsLinks: exact-name-key突合', () => {
     expect(result.unlinkedRsRecordCount).toBe(0);
     expect(result.unsupportedBudgetTypeRecordCount).toBe(0);
   });
+
+  it('review指摘（provenance準備）: 各link groupにrsRecordIds全件と1:1対応するrsMatchEvidenceを持つ', () => {
+    const result = buildMofRsLinks(2024, 2024, [mofItem({})], [rsItem({})]);
+    expect(result.links[0].matchMethod).toBe('exact-name-key');
+    expect(result.links[0].rsMatchEvidence).toEqual([
+      { rsRecordId: 'rsitem_1', projectId: '1', method: 'exact-name-key', sourceField: 'structured-fields' },
+    ]);
+  });
+
+  it('review指摘（provenance準備）: 1 targetに複数RS行が乗る場合、rsMatchEvidenceはrecordId順にソートされ全件を1:1で持つ', () => {
+    const rsA = rsItem({ recordId: 'rsitem_b', projectId: '2', budgetAmountYen: 100 });
+    const rsB = rsItem({ recordId: 'rsitem_a', projectId: '1', budgetAmountYen: 200 });
+    const result = buildMofRsLinks(2024, 2024, [mofItem({})], [rsA, rsB]);
+    expect(result.linkGroupCount).toBe(1);
+    expect(result.links[0].rsRecordIds).toEqual(['rsitem_a', 'rsitem_b']);
+    expect(result.links[0].rsMatchEvidence).toEqual([
+      { rsRecordId: 'rsitem_a', projectId: '1', method: 'exact-name-key', sourceField: 'structured-fields' },
+      { rsRecordId: 'rsitem_b', projectId: '2', method: 'exact-name-key', sourceField: 'structured-fields' },
+    ]);
+  });
 });

@@ -96,6 +96,7 @@ describe('checkMofRsLinkIntegrity', () => {
     schemaVersion: 2, recordType: 'mof_rs_project_link_group', linkId: 'l1', reviewYear: 2024, fiscalYear: 2024,
     phase: 'initial', revision: null, matchMethod: 'exact-name-key', naturalKey: 'k', mofRecordIds: ['mof1'],
     rsRecordIds: ['rs1'], projectIds: ['1'], mofAmountYen: 100, rsAmountYen: 90, differenceYen: 10,
+    rsMatchEvidence: [{ rsRecordId: 'rs1', projectId: '1', method: 'exact-name-key', sourceField: 'structured-fields' }],
   };
 
   it('全て整合していればfindingsは空', () => {
@@ -135,6 +136,40 @@ describe('checkMofRsLinkIntegrity', () => {
     const finding = findings.find(f => f.message.includes('重複所属'))!;
     expect(finding.scope?.recordId).toBe('rs1');
     expect(finding.sampleIds).toEqual(['l1', 'l2']);
+  });
+
+  it('review指摘: rsRecordIdsに対応するrsMatchEvidenceが無ければerror', () => {
+    const link = { ...validLink, rsMatchEvidence: [] };
+    const findings = checkMofRsLinkIntegrity([link], [mofItem], [rsItem]);
+    expect(findings.some(f => f.check === 'mof-rs-link-evidence-integrity' && f.message.includes('対応するrsMatchEvidenceが無い'))).toBe(true);
+  });
+
+  it('review指摘: rsMatchEvidenceがrsRecordIdsに含まれないrsRecordIdを参照していればerror', () => {
+    const link = { ...validLink, rsMatchEvidence: [...validLink.rsMatchEvidence, { rsRecordId: 'ghost', projectId: '1', method: 'exact-name-key' as const, sourceField: 'structured-fields' as const }] };
+    const findings = checkMofRsLinkIntegrity([link], [mofItem], [rsItem]);
+    expect(findings.some(f => f.check === 'mof-rs-link-evidence-integrity' && f.message.includes('rsRecordIdsに含まれない'))).toBe(true);
+  });
+
+  it('review指摘: 同一rsRecordIdに対応するrsMatchEvidenceが重複していればerror', () => {
+    const link = { ...validLink, rsMatchEvidence: [...validLink.rsMatchEvidence, ...validLink.rsMatchEvidence] };
+    const findings = checkMofRsLinkIntegrity([link], [mofItem], [rsItem]);
+    expect(findings.some(f => f.check === 'mof-rs-link-evidence-integrity' && f.message.includes('重複している'))).toBe(true);
+  });
+
+  it('review指摘: rsMatchEvidence.projectIdが実際のRS行のprojectIdと不一致ならerror', () => {
+    const link = { ...validLink, rsMatchEvidence: [{ rsRecordId: 'rs1', projectId: '999', method: 'exact-name-key' as const, sourceField: 'structured-fields' as const }] };
+    const findings = checkMofRsLinkIntegrity([link], [mofItem], [rsItem]);
+    expect(findings.some(f => f.check === 'mof-rs-link-evidence-integrity' && f.message.includes('projectId'))).toBe(true);
+  });
+
+  it('review指摘: 全rsMatchEvidenceがexact-name-keyなのにgroup matchMethodがexact-name-keyでなければerror', () => {
+    const link = { ...validLink, matchMethod: 'supplemental-exact' as const };
+    const findings = checkMofRsLinkIntegrity([link], [mofItem], [rsItem]);
+    expect(findings.some(f => f.check === 'mof-rs-link-evidence-integrity' && f.message.includes('matchMethod'))).toBe(true);
+  });
+
+  it('review指摘: rsMatchEvidenceが正しく1:1対応していればfindingsは空（回帰確認）', () => {
+    expect(checkMofRsLinkIntegrity([validLink], [mofItem], [rsItem])).toHaveLength(0);
   });
 });
 

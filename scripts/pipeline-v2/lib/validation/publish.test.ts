@@ -46,7 +46,9 @@ function link(overrides: Partial<MofRsProjectLinkGroup>): MofRsProjectLinkGroup 
     schemaVersion: 2, recordType: 'mof_rs_project_link_group', linkId: 'l1', reviewYear: 2024, fiscalYear: 2024,
     phase: 'initial', revision: null, matchMethod: 'exact-name-key', naturalKey: 'k',
     mofRecordIds: ['mof_1'], rsRecordIds: ['rs_1'], projectIds: ['1'],
-    mofAmountYen: 100, rsAmountYen: 100, differenceYen: 0, ...overrides,
+    mofAmountYen: 100, rsAmountYen: 100, differenceYen: 0,
+    rsMatchEvidence: [{ rsRecordId: 'rs_1', projectId: '1', method: 'exact-name-key', sourceField: 'structured-fields' }],
+    ...overrides,
   };
 }
 

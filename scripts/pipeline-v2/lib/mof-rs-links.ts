@@ -12,7 +12,7 @@
  * リンクが成立しなくなる（2026-09-20の`budgetMinistry`分離と同じ理由）。
  */
 import { normalizeText, stableId } from './stable-id';
-import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup } from '../types';
+import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup, MofRsMatchEvidence } from '../types';
 
 export type Stage = readonly [phase: 'initial' | 'supplement', revision: number | null];
 
@@ -137,6 +137,11 @@ export function buildMofRsLinks(
       mofAmountYen: mofAmount,
       rsAmountYen: rsAmount,
       differenceYen: mofAmount - rsAmount,
+      rsMatchEvidence: [...rows]
+        .sort((a, b) => (a.recordId < b.recordId ? -1 : a.recordId > b.recordId ? 1 : 0))
+        .map((r): MofRsMatchEvidence => ({
+          rsRecordId: r.recordId, projectId: r.projectId, method: 'exact-name-key', sourceField: 'structured-fields',
+        })),
     });
   }
 
