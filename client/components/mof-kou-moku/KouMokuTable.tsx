@@ -56,9 +56,9 @@ export function KouMokuTable({
 }: Props) {
   const RS_COLUMN_WIDTH = 70;
   const RECONCILIATION_COLUMNS = [
-    { key: 'rs22', label: 'RS 2-2', width: 105, numeric: true },
-    { key: 'rsMinusMof', label: 'RS−MOF', width: 105, numeric: true },
-    { key: 'rsToMof', label: 'RS/MOF', width: 78, numeric: true },
+    { key: 'rs22', label: 'RS 2-2', headerTitle: '当初はRS 2-2当初額、補正はRS 2-2補正額', width: 105, numeric: true },
+    { key: 'rsMinusMof', label: 'RS−MOF', headerTitle: '当初は RS 2-2当初額 − MOF本年度額、補正は RS 2-2補正額 − MOF増減額', width: 105, numeric: true },
+    { key: 'rsToMof', label: 'RS/MOF', headerTitle: '当初は RS 2-2当初額 ÷ MOF本年度額、補正は RS 2-2補正額 ÷ MOF増減額', width: 78, numeric: true },
   ] as const;
   const tableWidth = COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0)
     + RS_COLUMN_WIDTH
@@ -154,7 +154,7 @@ export function KouMokuTable({
             );
             const reconciliationHeaders = v2ReconciliationsByKey && col.key === 'amount'
               ? RECONCILIATION_COLUMNS.map(column => (
-                  <th key={column.key} scope="col" title={column.label} className="select-none px-2 py-2 text-right font-medium">
+                  <th key={column.key} scope="col" title={column.headerTitle} className="select-none px-2 py-2 text-right font-medium">
                     {column.label}
                   </th>
                 ))
