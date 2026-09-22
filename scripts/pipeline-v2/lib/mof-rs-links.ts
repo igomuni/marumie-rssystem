@@ -11,48 +11,17 @@
  * （共通列「府省庁」）で代用すると、府省庁≠所管の行（実データで過半数）で
  * リンクが成立しなくなる（2026-09-20の`budgetMinistry`分離と同じ理由）。
  */
-import { normalizeText, stableId } from './stable-id';
+import { stableId } from './stable-id';
+import { type Stage, stageKey, mofKeyFrom, rsKeyFrom, rsPhase } from './mof-rs-match-core';
 import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup, MofRsMatchEvidence } from '../types';
 
-export type Stage = readonly [phase: 'initial' | 'supplement', revision: number | null];
-
-export function stageKey(stage: Stage): string {
-  return `${stage[0]}\x1f${stage[1] ?? ''}`;
-}
-
-export function mofKeyFrom(m: MofBudgetItemRecord): string | null {
-  if (!m.sectionName || !m.subItemName) return null;
-  let parts: string[];
-  if (m.accountType === 'general') {
-    parts = ['general', m.ministry ?? '', m.organization ?? '', m.sectionName, m.subItemName];
-  } else if (m.accountType === 'special') {
-    parts = ['special', m.ministry ?? '', m.specialAccount ?? '', m.subAccount ?? '', m.sectionName, m.subItemName];
-  } else {
-    return null;
-  }
-  return parts.map(normalizeText).join('|');
-}
-
-export function rsKeyFrom(r: RsBudgetItemRecordV2): string | null {
-  if (!r.sectionName || !r.subItemName || !r.budgetMinistry) return null;
-  let parts: string[];
-  if (r.accountType === 'general') {
-    parts = ['general', r.budgetMinistry, r.organizationOrAccount ?? '', r.sectionName, r.subItemName];
-  } else if (r.accountType === 'special') {
-    parts = ['special', r.budgetMinistry, r.account ?? '', r.subAccount ?? '', r.sectionName, r.subItemName];
-  } else {
-    return null;
-  }
-  return parts.map(normalizeText).join('|');
-}
-
-export function rsPhase(r: RsBudgetItemRecordV2): Stage | null {
-  const bt = r.budgetType ?? '';
-  if (bt === '当初予算') return ['initial', null];
-  const m = /^第(\d+)次補正予算$/.exec(bt);
-  if (m) return ['supplement', Number(m[1])];
-  return null;
-}
+// P1 matching primitive（Stage/stageKey/mofKeyFrom/rsKeyFrom/rsPhase）は
+// lib/mof-rs-match-core.tsへ移動した（P2 production昇格準備。53_sonnet-p2-shared-core-
+// extraction-instructions.md）。production/validation双方が同一実装を参照するneutral
+// coreであり、ロジック自体はこのファイルに置かれていた時と完全に同一。呼び出し元
+// （mof-rs-links.test.ts等）との後方互換のためここでも再exportする。
+export type { Stage };
+export { stageKey, mofKeyFrom, rsKeyFrom, rsPhase };
 
 export interface MofRsLinkResult {
   links: MofRsProjectLinkGroup[];
