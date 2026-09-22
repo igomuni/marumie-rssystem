@@ -45,10 +45,12 @@ describe("published mof-kou-moku V2 reconciliation artifacts", () => {
     const group = fy2024.groups.find(group =>
       group.phase === "initial" && group.kouMokuKey.includes("情報処理業務庁費") && group.projects.some(project => project.projectId === "4"),
     );
-    expect(group?.mofAmountYen).toBe(453_911_195_000);
-    expect(group?.rsAmountYen).toBe(454_849_037_000);
-    expect(group?.rsAmountYen! - group?.mofAmountYen!).toBe(937_842_000);
-    expect(group?.projects.find(project => project.projectId === "4")?.rsAmountYen).toBe(453_911_195_000);
+    expect(group).toBeDefined();
+    if (!group) throw new Error("PID 4 reconciliation group is missing");
+    expect(group.mofAmountYen).toBe(453_911_195_000);
+    expect(group.rsAmountYen).toBe(454_849_037_000);
+    expect(group.rsAmountYen - group.mofAmountYen).toBe(937_842_000);
+    expect(group.projects.find(project => project.projectId === "4")?.rsAmountYen).toBe(453_911_195_000);
   });
 
   it("preserves NEDO/JOGMEC mismatch, multi-row, zero-MOF, and negative evidence", () => {
