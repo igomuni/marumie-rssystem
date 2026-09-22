@@ -381,7 +381,7 @@ function stripAccountSuffix(s: string): string {
 }
 
 /** A. `（項）.../（目）...`等のラベル型（（所管）（組織）（会計）（勘定）も明示scopeとして拾う） */
-function parseLabeled(s: string): ParsedSupplementalInfo | null {
+function parseLabeled(s: string, accountType: 'general' | 'special'): ParsedSupplementalInfo | null {
   const segments = s.split(/[／/]/).map(seg => seg.trim()).filter(seg => seg.length > 0);
   const labelMap: Partial<Record<'所管' | '組織' | '会計' | '勘定' | '項' | '目', string>> = {};
   let hasAnyLabel = false;
@@ -397,8 +397,15 @@ function parseLabeled(s: string): ParsedSupplementalInfo | null {
   const explicitScope: ExplicitScope = {};
   if (labelMap['所管']) explicitScope.ministry = labelMap['所管'];
   if (labelMap['組織']) explicitScope.organization = labelMap['組織'];
-  if (labelMap['会計']) explicitScope.specialAccount = stripAccountSuffix(labelMap['会計']);
-  if (labelMap['勘定']) explicitScope.subAccount = labelMap['勘定'];
+  // review指摘: 一般会計行に（会計）一般会計のようなラベルが付くケースでは、これは単なる
+  // account種別の確認であり実在するspecialAccount値ではない。一般会計にspecialAccount/subAccountは
+  // 存在しないため、specialアカウントの行でのみ（会計）（勘定）ラベルをscopeとして採用する
+  // （一般会計行でstripAccountSuffix("一般会計")="一般"をspecialAccountとして格納すると、
+  // scopeIsConsistent()がMOF targetのspecialAccount=""と比較して誤ってexplicit-scope-conflictにする）
+  if (accountType === 'special') {
+    if (labelMap['会計']) explicitScope.specialAccount = stripAccountSuffix(labelMap['会計']);
+    if (labelMap['勘定']) explicitScope.subAccount = labelMap['勘定'];
+  }
   return { kind: 'labeled', sectionName: section, subItemName: item, explicitScope: Object.keys(explicitScope).length > 0 ? explicitScope : undefined };
 }
 
@@ -457,7 +464,7 @@ function parseSlashPair(s: string): ParsedSupplementalInfo | null {
 export function parseSupplementalExactInfo(raw: string, accountType: 'general' | 'special'): ParsedSupplementalInfo | null {
   const s = (raw ?? '').trim();
   if (!s || isRejectedFragment(s)) return null;
-  return parseLabeled(s) ?? parseSlashPath(s, accountType) ?? parseFwspacePair(s) ?? parseSlashPair(s);
+  return parseLabeled(s, accountType) ?? parseSlashPath(s, accountType) ?? parseFwspacePair(s) ?? parseSlashPair(s);
 }
 
 /** 明示scopeとして与えられたfieldだけをMOF targetのscopeと比較する（未指定fieldは判定しない） */
@@ -662,14 +669,20 @@ export function diagnoseSupplementalExactFallback(
     }
   }
 
-  // target group単位（stage+targetResolution+targetNaturalKey）でP2候補を合算し、reconciliationを1回だけ算出する。
-  // resolution種別ごとに分けるのは、explicit-scope-conflict/historical-scope-mismatch（unsafe）の金額が
-  // pair-unique/rs-scope-resolved（safe）のreconciliation判定を汚染しないようにするため
+  // target group単位（stage+resolutionバケット+targetNaturalKey）でP2候補を合算し、reconciliationを1回だけ算出する。
+  // review指摘: safe（explicit-scope-exact/pair-unique/rs-scope-resolved）は「同じtargetへの
+  // 安全な候補」という意味で1つのbucketにまとめて合算しないと、同一targetに複数のsafe候補が
+  // 別々のresolution種別で乗った場合に、それぞれが独立に（過小な）金額でexact判定されてしまう
+  // （例: MOF1000円のtargetにpair-unique 1000円とrs-scope-resolved 1000円が両方乗ると、
+  // 合算すれば2000円で超過のはずが、別々に見るとどちらも1000円でexactと誤判定する）。
+  // unsafe（explicit-scope-conflict/historical-scope-mismatch）はsafeの金額を汚染しないよう
+  // 引き続き別bucketのままにする
   interface GroupAgg { mofAmountYen: number; existingRsAmountYen: number; mofRecordIds: string[]; rows: ResolvedRow[] }
   const groups = new Map<string, GroupAgg>();
   for (const row of resolvedRows) {
     const stage = rsPhase(row.r)!;
-    const groupKey = `${stageKey(stage)}\x1f${row.targetResolution}\x1f${row.targetNaturalKey}`;
+    const resolutionBucket = SAFE_TARGET_RESOLUTIONS.has(row.targetResolution) ? 'safe' : row.targetResolution;
+    const groupKey = `${stageKey(stage)}\x1f${resolutionBucket}\x1f${row.targetNaturalKey}`;
     const existingRsAmountYen = rsLinkedAmountByGroup.get(`${stageKey(stage)}\x1f${row.targetNaturalKey}`) ?? 0;
     const g = groups.get(groupKey) ?? { mofAmountYen: row.mofAmountYen, existingRsAmountYen, mofRecordIds: row.mofRecordIds, rows: [] };
     g.rows.push(row);

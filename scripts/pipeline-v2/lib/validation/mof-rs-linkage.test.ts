@@ -368,6 +368,36 @@ describe('diagnoseSupplementalExactFallback', () => {
     expect(result.candidates[0].targetResolution).toBe('explicit-scope-exact');
   });
 
+  it('review指摘: 一般会計行の（会計）一般会計ラベルをspecialAccountとして誤って矛盾判定しない', () => {
+    // 修正前は（会計）一般会計 → stripAccountSuffix()で"一般"がspecialAccountとして格納され、
+    // 一般会計MOF targetのspecialAccount=""と比較して誤ってexplicit-scope-conflictになっていた
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1000 });
+    const rs = missingKeyItem({ supplementalInfo: '（会計）一般会計／（項）内閣官房共通費／（目）諸謝金', budgetAmountYen: 1000 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).not.toBe('explicit-scope-conflict');
+    expect(result.candidates[0].reconciliation).toBe('exact');
+  });
+
+  it('review指摘: 同一targetへ異なるsafe resolution種別（explicit-scope-exact + rs-scope-resolved）の候補が乗る場合は合算してreconciliationする', () => {
+    // 修正前はtargetResolution別に別groupへ分けていたため、同一targetに複数のsafe候補が
+    // 異なるresolution種別で乗ると、それぞれ独立に（過小な）金額でexact/no-improve判定されていた
+    const mofA = mofItem({ recordId: 'mof_a', sectionName: '共通経費', subItemName: '庁費', ministry: '外務省', organization: '在外公館', amountYen: 1000 });
+    const mofB = mofItem({ recordId: 'mof_b', sectionName: '共通経費', subItemName: '庁費', ministry: '農林水産省', organization: '農林水産本省' });
+    const rowA = missingKeyItem({ recordId: 'rsitem_a', supplementalInfo: '一般会計／外務省／在外公館／共通経費／庁費', budgetAmountYen: 600 });
+    const rowB = missingKeyItem({ recordId: 'rsitem_b', supplementalInfo: '共通経費　庁費', ministry: '外務省', budgetAmountYen: 400 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mofA, mofB], [rowA, rowB]);
+    const candA = result.candidates.find(c => c.rsRecordId === 'rsitem_a')!;
+    const candB = result.candidates.find(c => c.rsRecordId === 'rsitem_b')!;
+    expect(candA.targetResolution).toBe('explicit-scope-exact');
+    expect(candB.targetResolution).toBe('rs-scope-resolved');
+    expect(candA.targetNaturalKey).toBe(candB.targetNaturalKey);
+    expect(candA.candidateGroupAmountYen).toBe(1000);
+    expect(candB.candidateGroupAmountYen).toBe(1000);
+    expect(candA.reconciliation).toBe('exact');
+    expect(candB.reconciliation).toBe('exact');
+  });
+
   it('full pathの明示scopeがMOF targetと矛盾する場合は項・目と金額が一致してもsafeにしない（explicit-scope-conflict）', () => {
     const mof = mofItem({ sectionName: '総合研究費', subItemName: '庁費', ministry: '法務省', organization: '法務総合研究所', amountYen: 500 });
     const rs = missingKeyItem({ supplementalInfo: '一般会計／法務省／総務総合研究所／総合研究費／庁費', budgetAmountYen: 500 }); // 組織名がsource typo相当で不一致
