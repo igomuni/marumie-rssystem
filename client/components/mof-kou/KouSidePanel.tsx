@@ -43,8 +43,6 @@ export interface V2PanelData {
   itemNames: Map<string, string> | null;
   /** projectId → 事業名・府省庁（V2 RS index由来） */
   projectNames: Map<string, { name: string; ministry: string }> | null;
-  /** 選択中のMOF項の金額。PID別行のMOF項%の分母に使う。 */
-  sectionAmountYen: number;
   /** 当初・補正時のPID別2-2内訳。linkId × itemNaturalKeyでprojectionから絞ったもの */
   projectionGroups: MofKouMokuV2LinkGroup[] | null;
   projectionLoading: boolean;
@@ -811,44 +809,27 @@ function V2RsTab({
     return <p className="p-3 text-neutral-400">V2内訳は利用できません。</p>;
   }
 
-  type V2ProjectRow = {
-    project: MofKouMokuV2Project;
-    groups: MofKouMokuV2LinkGroup[];
-    itemKeys: Set<string>;
-    rsAmountYen: number;
-    rsRecordCount: number;
-  };
-  const byProject = new Map<string, V2ProjectRow>();
-  for (const group of v2.projectionGroups) {
-    for (const project of group.projects) {
-      const row = byProject.get(project.projectId) ?? {
-        project,
-        groups: [],
-        itemKeys: new Set<string>(),
-        rsAmountYen: 0,
-        rsRecordCount: 0,
-      };
-      row.groups.push(group);
-      row.itemKeys.add(group.kouMokuKey);
-      row.rsAmountYen += project.rsAmountYen;
-      row.rsRecordCount += project.rsRecordCount;
-      byProject.set(project.projectId, row);
-    }
-  }
-  const rows = [...byProject.values()];
+  /** 同じPIDが複数目に出ること自体を分析できるよう、目×PIDの粒度を保持する。 */
+  type V2ProjectRow = { group: MofKouMokuV2LinkGroup; project: MofKouMokuV2Project };
+  const rows: V2ProjectRow[] = v2.projectionGroups.flatMap(group =>
+    group.projects.map(project => ({ group, project }))
+  );
   const projectBudgetShare = (row: V2ProjectRow) =>
-    row.project.projectBudgetAmountYen === null ? null : row.rsAmountYen / row.project.projectBudgetAmountYen;
-  const mofSectionShare = (row: V2ProjectRow) =>
-    v2.sectionAmountYen === 0 ? null : row.rsAmountYen / v2.sectionAmountYen;
+    row.project.projectBudgetAmountYen === null ? null : row.project.rsAmountYen / row.project.projectBudgetAmountYen;
+  const mofItemShare = (row: V2ProjectRow) =>
+    row.group.mofAmountYen === 0 ? null : row.project.rsAmountYen / row.group.mofAmountYen;
+  const itemName = (row: V2ProjectRow) =>
+    v2.itemNames?.get(row.group.itemNaturalKey) ?? row.group.itemNaturalKey;
 
   const columns: GridColumn<V2ProjectRow>[] = [
     {
       key: 'matchMethod',
       label: '根拠',
       width: 100,
-      sortValue: row => [...new Set(row.groups.map(group => group.matchMethod))].join(','),
-      render: row => <span className="flex flex-wrap gap-1">{[...new Set(row.groups.map(group => group.matchMethod))].map(method => <MatchMethodBadge key={method} method={method} />)}</span>,
+      sortValue: row => row.group.matchMethod,
+      render: row => <MatchMethodBadge method={row.group.matchMethod} />,
     },
+    { key: 'item', label: '目', width: 180, sortValue: itemName, render: row => <span title={itemName(row)}>{itemName(row)}</span> },
     {
       key: 'project',
       label: 'RS事業',
@@ -856,15 +837,14 @@ function V2RsTab({
       sortValue: row => row.project.projectName || row.project.projectId,
       render: row => v2.reviewYear !== null ? <a href={sankeySvgProjectUrl(Number(row.project.projectId), row.project.projectName || row.project.projectId, v2.reviewYear)} target="_blank" rel="noopener noreferrer" className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100" title={row.project.projectId}>{row.project.projectName || row.project.projectId}</a> : row.project.projectName || row.project.projectId,
     },
-    { key: 'itemCount', label: '目数', width: 60, numeric: true, sortValue: row => row.itemKeys.size, render: row => row.itemKeys.size },
     { key: 'ministry', label: '府省庁', width: 120, sortValue: row => row.project.ministry, render: row => row.project.ministry || '—' },
     {
       key: 'projectRsAmount',
       label: 'RS事業額',
       width: 120,
       numeric: true,
-      sortValue: row => row.rsAmountYen,
-      render: row => <span className="font-medium text-neutral-900 dark:text-neutral-100" title={`RS 2-2 ${row.rsRecordCount}行の合計`}>{formatYen(row.rsAmountYen)}</span>,
+      sortValue: row => row.project.rsAmountYen,
+      render: row => <span className="font-medium text-neutral-900 dark:text-neutral-100" title={`RS 2-2 ${row.project.rsRecordCount}行の合計`}>{formatYen(row.project.rsAmountYen)}</span>,
     },
     {
       key: 'projectBudgetShare',
@@ -875,12 +855,12 @@ function V2RsTab({
       render: row => formatRate(projectBudgetShare(row)),
     },
     {
-      key: 'mofSectionShare',
-      label: 'MOF項%',
+      key: 'mofItemShare',
+      label: 'MOF目%',
       width: 82,
       numeric: true,
-      sortValue: mofSectionShare,
-      render: row => formatRate(mofSectionShare(row)),
+      sortValue: mofItemShare,
+      render: row => formatRate(mofItemShare(row)),
     },
   ];
 
@@ -888,7 +868,7 @@ function V2RsTab({
     <DataGrid
       rows={rows}
       columns={columns}
-      rowKey={row => row.project.projectId}
+      rowKey={row => `${row.group.linkId}:${row.group.itemNaturalKey}:${row.project.projectId}`}
       state={gridState}
       onStateChange={onGridStateChange}
       emptyMessage="紐づく RS 事業は見つかりませんでした。"

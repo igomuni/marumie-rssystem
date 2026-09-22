@@ -70,6 +70,8 @@ export function buildV2KouMokuReconciliations(
 ): Map<string, V2KouMokuReconciliation> {
   const out = new Map<string, V2KouMokuReconciliation>();
   for (const group of groups) {
+    // 1つのgroup金額を複数の目へ配分する根拠はないため、目別照合には使わない。
+    if (group.spansItems) continue;
     const current = out.get(group.kouMokuKey) ?? {
       mofAmountYen: 0,
       rsAmountYen: 0,

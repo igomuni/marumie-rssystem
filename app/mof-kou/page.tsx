@@ -598,7 +598,6 @@ export default function MOFKouPage() {
       links,
       itemNames,
       projectNames,
-      sectionAmountYen: selectedRow.amount,
       projectionGroups,
       projectionLoading: v2KouMokuLinkageLoading,
       projectionError: v2KouMokuLinkageError,

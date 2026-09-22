@@ -74,6 +74,13 @@ describe("buildV2KouMokuReconciliations", () => {
     expect(actual.rsAmountYen).toBe(100);
     expect(actual.projectIds).toEqual(new Set(["A", "B"]));
   });
+
+  it("does not allocate a multi-item group to either item without evidence", () => {
+    const actual = buildV2KouMokuReconciliations([
+      group({ kouMokuKey: "item-a", spansItems: true, mofAmountYen: 100, rsAmountYen: 100 }),
+    ]);
+    expect(actual.size).toBe(0);
+  });
 });
 
 describe("aggregateV2IdentitySourceAmounts", () => {
