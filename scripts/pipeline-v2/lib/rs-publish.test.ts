@@ -131,7 +131,11 @@ describe('compactMofRsLink: link groupが複数事業を束ねる意味論を保
     expect(out).not.toHaveProperty('naturalKey');
     expect(out).not.toHaveProperty('mofRecordIds');
     expect(out).not.toHaveProperty('rsRecordIds');
-    expect(out).not.toHaveProperty('matchMethod');
+    expect(out).not.toHaveProperty('rsMatchEvidence');
+    // review指摘: P2 Tier-1 production昇格後、group-level matchMethodは単なる内部詳細ではなく
+    // 「P1のみ/P2を含む/混在」というリンクの根拠情報になるため公開する（naturalKey/個々のRS行
+    // 単位のfull rsMatchEvidenceは引き続き非公開のまま）
+    expect(out.matchMethod).toBe('exact-name-key');
   });
 });
 

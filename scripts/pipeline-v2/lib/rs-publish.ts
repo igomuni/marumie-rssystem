@@ -172,11 +172,17 @@ export function compactIndirectExpense(row: RsIndirectExpenseRecord): Record<str
  * 埋め込んだmofAmountYen/rsAmountYenが「そのprojectだけの金額」なのか
  * 「同じlink groupを共有する複数事業の合計」なのかUI側で誤読しうるため、
  * project bundleへ埋め込む射影でもprojectIds/projectCountを必ず保持する。
- * matchMethod/naturalKeyは内部実装の詳細なので落としてよい。mofRecordIds/
- * rsRecordIdsは原典trace UIを作る段階まで不要なため落とす（standalone
- * links productの生データ側には残っているので、必要になれば復元できる）。
+ * naturalKeyは内部実装の詳細なので落としてよい。mofRecordIds/rsRecordIdsは
+ * 原典trace UIを作る段階まで不要なため落とす（standalone links productの
+ * 生データ側には残っているので、必要になれば復元できる）。
+ *
+ * matchMethod（review指摘: 55_sonnet-p2-tier1-production-activation-instructions.md）は
+ * P2 Tier-1 production昇格後は単なる内部実装の詳細ではなくなった。P1（exact-name-key）だけの
+ * linkかP2（supplemental-exact）を含むlink（mixed含む）かはリンクの根拠として利用者に
+ * 意味がある情報のため、group-level matchMethodのみ公開する（naturalKeyや個々のRS行単位の
+ * full rsMatchEvidenceは引き続き非公開のまま）。
  */
-const LINK_KEYS = ['linkId', 'phase', 'revision', 'projectIds', 'mofAmountYen', 'rsAmountYen', 'differenceYen'] as const;
+const LINK_KEYS = ['linkId', 'phase', 'revision', 'matchMethod', 'projectIds', 'mofAmountYen', 'rsAmountYen', 'differenceYen'] as const;
 export function compactMofRsLink(link: MofRsProjectLinkGroup): Record<string, unknown> {
   return { ...pick(link as unknown as Record<string, unknown>, LINK_KEYS as readonly string[]), projectCount: link.projectIds.length };
 }
@@ -214,6 +220,6 @@ export function computeDroppedFieldsReport(): DroppedFieldsReport[] {
     diffFields('expense-uses', [...RS_BASE_FIELDS, 'recordType', ...EXPENSE_USE_KEYS, 'extraFields', 'source'], EXPENSE_USE_KEYS),
     diffFields('multi-year-contracts', [...RS_BASE_FIELDS, 'recordType', ...MULTI_CONTRACT_KEYS, 'otherContractRaw', 'hasContract', 'extraFields', 'source'], MULTI_CONTRACT_KEYS),
     diffFields('indirect-expenses', [...RS_BASE_FIELDS, 'recordType', ...INDIRECT_KEYS, 'amountRaw', 'sourceRowId', 'extraFields', 'source'], INDIRECT_KEYS),
-    diffFields('mof-rs-links', ['schemaVersion', 'recordType', 'matchMethod', 'naturalKey', 'mofRecordIds', 'rsRecordIds', 'rsMatchEvidence', ...LINK_KEYS], LINK_KEYS),
+    diffFields('mof-rs-links', ['schemaVersion', 'recordType', 'naturalKey', 'mofRecordIds', 'rsRecordIds', 'rsMatchEvidence', ...LINK_KEYS], LINK_KEYS),
   ];
 }

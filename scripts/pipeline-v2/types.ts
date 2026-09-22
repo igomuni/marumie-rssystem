@@ -944,15 +944,18 @@ export type MofRsSupplementalParseKind = 'labeled' | 'slash-path' | 'fwspace-pai
  * （1つのMOF targetへ複数RS行が乗る設計上、P2がexisting P1 targetへ追加されるケースが多い）、
  * group-level matchMethod 1個だけでは個々のRS行のmatch方法を表現できない。
  * record-level evidenceとして持たせることで、group-level matchMethodを崩さず後方互換を保つ。
+ *
+ * discriminated union化（review指摘: 55_sonnet-p2-tier1-production-activation-
+ * instructions.md）: P2 evidenceは`resolution`/`parseKind`が必須であるべきなのに、
+ * 従来のoptionalな形では「method='supplemental-exact'なのにresolution/parseKindが
+ * 無い」不完全なP2 evidenceを型上作れてしまっていた。
  */
-export interface MofRsMatchEvidence {
-  rsRecordId: string;
-  projectId: string;
-  method: MofRsRecordMatchMethod;
-  sourceField: 'structured-fields' | 'supplementalInfo';
-  resolution?: MofRsSupplementalResolution;
-  parseKind?: MofRsSupplementalParseKind;
-}
+export type MofRsMatchEvidence =
+  | { rsRecordId: string; projectId: string; method: 'exact-name-key'; sourceField: 'structured-fields' }
+  | {
+      rsRecordId: string; projectId: string; method: 'supplemental-exact'; sourceField: 'supplementalInfo';
+      resolution: MofRsSupplementalResolution; parseKind: MofRsSupplementalParseKind;
+    };
 
 export interface MofRsProjectLinkGroup {
   schemaVersion: number;

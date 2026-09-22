@@ -415,7 +415,7 @@ function publishLinkProduct(outputRoot: string, publicRoot: string, reviewYear: 
     for (const pid of row.projectIds) projectIds.add(pid);
     for (const sid of sids) sectionIds.add(sid);
     return {
-      linkId: row.linkId, phase: row.phase, revision: row.revision,
+      linkId: row.linkId, phase: row.phase, revision: row.revision, matchMethod: row.matchMethod,
       sectionIds: sids, projectIds: row.projectIds,
       mofAmountYen: row.mofAmountYen, rsAmountYen: row.rsAmountYen, differenceYen: row.differenceYen,
     };

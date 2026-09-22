@@ -487,7 +487,7 @@ describe('checkMofDetailRecords / checkMofDetailEventAggregation', () => {
 describe('checkLinksPublishCounts / checkLinksSemanticEquality / checkLinksManifestSetCounts', () => {
   it('件数・semantic valueが一致すればfindingsは空', () => {
     const d = link({});
-    const p: PublishedLink = { linkId: 'l1', phase: 'initial', revision: null, sectionIds: ['s1'], projectIds: ['1'], mofAmountYen: 100, rsAmountYen: 100, differenceYen: 0 };
+    const p: PublishedLink = { linkId: 'l1', phase: 'initial', revision: null, matchMethod: 'exact-name-key', sectionIds: ['s1'], projectIds: ['1'], mofAmountYen: 100, rsAmountYen: 100, differenceYen: 0 };
     const countFindings = checkLinksPublishCounts(2024, 2024, [d], { links: [p] }, { linkGroupCount: 1, projectCount: 1, sectionCount: 1 });
     expect(countFindings).toHaveLength(0);
     const semanticFindings = checkLinksSemanticEquality(2024, 2024, [d], { links: [p] });
@@ -506,20 +506,20 @@ describe('checkLinksPublishCounts / checkLinksSemanticEquality / checkLinksManif
 
   it('projectIdsのsemantic不一致を検出する', () => {
     const d = link({ projectIds: ['1', '2'] });
-    const p: PublishedLink = { linkId: 'l1', phase: 'initial', revision: null, sectionIds: [], projectIds: ['1'], mofAmountYen: 100, rsAmountYen: 100, differenceYen: 0 };
+    const p: PublishedLink = { linkId: 'l1', phase: 'initial', revision: null, matchMethod: 'exact-name-key', sectionIds: [], projectIds: ['1'], mofAmountYen: 100, rsAmountYen: 100, differenceYen: 0 };
     const findings = checkLinksSemanticEquality(2024, 2024, [d], { links: [p] });
     expect(findings.some(f => f.message.includes('semantic value'))).toBe(true);
   });
 
   it('differenceYenの算術不一致を検出する', () => {
     const d = link({});
-    const p: PublishedLink = { linkId: 'l1', phase: 'initial', revision: null, sectionIds: [], projectIds: ['1'], mofAmountYen: 100, rsAmountYen: 50, differenceYen: 999 };
+    const p: PublishedLink = { linkId: 'l1', phase: 'initial', revision: null, matchMethod: 'exact-name-key', sectionIds: [], projectIds: ['1'], mofAmountYen: 100, rsAmountYen: 50, differenceYen: 999 };
     const findings = checkLinksSemanticEquality(2024, 2024, [d], { links: [p] });
     expect(findings.some(f => f.message.includes('mofAmountYen-rsAmountYen'))).toBe(true);
   });
 
   it('manifestのprojectCount/sectionCountをpublished linksから独立再構成して検算する', () => {
-    const p: PublishedLink = { linkId: 'l1', phase: 'initial', revision: null, sectionIds: ['s1', 's2'], projectIds: ['1', '2'], mofAmountYen: 100, rsAmountYen: 100, differenceYen: 0 };
+    const p: PublishedLink = { linkId: 'l1', phase: 'initial', revision: null, matchMethod: 'exact-name-key', sectionIds: ['s1', 's2'], projectIds: ['1', '2'], mofAmountYen: 100, rsAmountYen: 100, differenceYen: 0 };
     const okFindings = checkLinksManifestSetCounts(2024, 2024, { links: [p] }, { linkGroupCount: 1, projectCount: 2, sectionCount: 2 });
     expect(okFindings).toHaveLength(0);
     const badFindings = checkLinksManifestSetCounts(2024, 2024, { links: [p] }, { linkGroupCount: 1, projectCount: 999, sectionCount: 2 });

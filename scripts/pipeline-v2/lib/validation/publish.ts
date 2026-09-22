@@ -657,7 +657,7 @@ export function checkMofDetailEventAggregation(
 // E-3: Standalone Links Publish
 // ============================================================
 
-export interface PublishedLink { linkId: string; phase: string; revision: number | null; sectionIds: string[]; projectIds: string[]; mofAmountYen: number; rsAmountYen: number; differenceYen: number }
+export interface PublishedLink { linkId: string; phase: string; revision: number | null; matchMethod: string; sectionIds: string[]; projectIds: string[]; mofAmountYen: number; rsAmountYen: number; differenceYen: number }
 export interface LinksPublishManifest { linkGroupCount: number; projectCount: number; sectionCount: number }
 
 export function checkLinksPublishCounts(
@@ -685,7 +685,7 @@ export function checkLinksSemanticEquality(reviewYear: number, fiscalYear: numbe
   for (const d of derivedLinks) {
     const p = publishedById.get(d.linkId);
     if (!p) { pushError(findings, 'links-publish-semantic', { ...scope, linkId: d.linkId }, `linkId=${d.linkId}: publishedに見つからない`); continue; }
-    if (p.phase !== d.phase || p.revision !== d.revision
+    if (p.phase !== d.phase || p.revision !== d.revision || p.matchMethod !== d.matchMethod
       || JSON.stringify([...p.projectIds].sort()) !== JSON.stringify([...d.projectIds].sort())
       || p.mofAmountYen !== d.mofAmountYen || p.rsAmountYen !== d.rsAmountYen || p.differenceYen !== d.differenceYen) {
       pushError(findings, 'links-publish-semantic', { ...scope, linkId: d.linkId }, `linkId=${d.linkId}: DerivedとPublishedのsemantic valueが不一致`);

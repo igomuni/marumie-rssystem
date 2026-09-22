@@ -486,3 +486,25 @@ export function evaluateSupplementalExact(
 
   return { candidates, summary };
 }
+
+/**
+ * P2 Tier-1 production admission rule（55_sonnet-p2-tier1-production-activation-instructions.md）。
+ * production（buildMofRsLinks）とD-5 validatorが同じ昇格条件を二重実装しないよう、
+ * ここに1箇所だけ実装する。
+ *
+ * - explicit-scope-exact（P2a）: reconciliationに関係なくproduction admission
+ *   （supplementalInfoからfull natural keyを完全復元しており、実質的にP1と同じ情報が
+ *   別フィールドに入っているだけのため）
+ * - pair-unique / rs-scope-resolved（P2b）: 同一safe target groupのreconciliationが
+ *   'exact'の場合のみproduction admission（groupのreconciliationは
+ *   evaluateSupplementalExact()が既にsafe 3種を1 targetにまとめて算出済みの値であり、
+ *   ここでsubset選択や金額によるtarget選択は一切行わない）
+ * - historical-scope-mismatch/explicit-scope-conflict/ambiguous/parse rejectはいずれも
+ *   admitしない（候補にすら含まれない、またはtargetResolutionが対象外）
+ */
+export function selectSupplementalExactTier1Candidates(candidates: SupplementalExactCandidate[]): SupplementalExactCandidate[] {
+  return candidates.filter(c =>
+    c.targetResolution === 'explicit-scope-exact' ||
+    ((c.targetResolution === 'pair-unique' || c.targetResolution === 'rs-scope-resolved') && c.reconciliation === 'exact')
+  );
+}
