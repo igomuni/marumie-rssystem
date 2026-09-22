@@ -398,6 +398,32 @@ describe('diagnoseSupplementalExactFallback', () => {
     expect(candB.reconciliation).toBe('exact');
   });
 
+  it('review指摘: 同一targetへexplicit-scope-exact + pair-uniqueが同時に乗り、合算するとMOF額を超過する場合はovercountになる', () => {
+    const mof = mofItem({ sectionName: '共通経費', subItemName: '庁費', ministry: '外務省', organization: '在外公館', amountYen: 1000 });
+    const rowExact = missingKeyItem({ recordId: 'rsitem_exact', supplementalInfo: '一般会計／外務省／在外公館／共通経費／庁費', budgetAmountYen: 1000 });
+    const rowPairUnique = missingKeyItem({ recordId: 'rsitem_pair', supplementalInfo: '共通経費　庁費', budgetAmountYen: 100 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rowExact, rowPairUnique]);
+    const candExact = result.candidates.find(c => c.rsRecordId === 'rsitem_exact')!;
+    const candPair = result.candidates.find(c => c.rsRecordId === 'rsitem_pair')!;
+    expect(candExact.targetResolution).toBe('explicit-scope-exact');
+    expect(candPair.targetResolution).toBe('pair-unique');
+    expect(candExact.candidateGroupAmountYen).toBe(1100);
+    // 修正前はexplicit-scope-exact単独(1000円)がMOF額(1000円)とexact判定され、
+    // pair-unique単独(100円)は別groupでno-improve扱いになり、超過が検出できなかった
+    expect(candExact.reconciliation).toBe('overcount');
+    expect(candPair.reconciliation).toBe('overcount');
+  });
+
+  it('review指摘: 明示（所管）はMOFのorganizationへのfallbackを許さずministryとexact比較する（明示scopeは弱めない）', () => {
+    // 補足情報の（所管）観光庁 はMOFのministry=国土交通省と一致しない。RS共通ministry列とは異なり、
+    // organization一致で救済すると明示scope矛盾を見逃す（R5「明示scopeは弱めない」に反する）
+    const mof = mofItem({ sectionName: '観光振興費', subItemName: '職員旅費', ministry: '国土交通省', organization: '観光庁' });
+    const rs = missingKeyItem({ supplementalInfo: '（所管）観光庁／（項）観光振興費／（目）職員旅費' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-conflict');
+  });
+
   it('full pathの明示scopeがMOF targetと矛盾する場合は項・目と金額が一致してもsafeにしない（explicit-scope-conflict）', () => {
     const mof = mofItem({ sectionName: '総合研究費', subItemName: '庁費', ministry: '法務省', organization: '法務総合研究所', amountYen: 500 });
     const rs = missingKeyItem({ supplementalInfo: '一般会計／法務省／総務総合研究所／総合研究費／庁費', budgetAmountYen: 500 }); // 組織名がsource typo相当で不一致

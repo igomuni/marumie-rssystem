@@ -468,14 +468,15 @@ export function parseSupplementalExactInfo(raw: string, accountType: 'general' |
 }
 
 /** 明示scopeとして与えられたfieldだけをMOF targetのscopeと比較する（未指定fieldは判定しない） */
-function scopeIsConsistent(accountType: 'general' | 'special', scope: MofScope, explicit: ExplicitScope): boolean {
-  if (explicit.ministry !== undefined) {
-    const nm = normalizeText(explicit.ministry);
-    const matches = accountType === 'general'
-      ? (nm === normalizeText(scope.ministry) || nm === normalizeText(scope.organization))
-      : nm === normalizeText(scope.ministry);
-    if (!matches) return false;
-  }
+/**
+ * review指摘: 補足情報の（所管）／full pathの所管は明示scopeであり、RS共通ministry列
+ * （structuralScopeMatches側でministry/organizationいずれかに一致すればOKとする曖昧な列）とは
+ * 性質が異なる。R5「明示scopeは弱めない」を守るため、明示ministryはMOFのministryフィールドと
+ * のみexact比較する（organizationへのfallbackを許すと、例えば補足情報「（所管）観光庁」が
+ * MOFのministry=国土交通省/organization=観光庁と矛盾なしと判定されてしまう）
+ */
+function scopeIsConsistent(scope: MofScope, explicit: ExplicitScope): boolean {
+  if (explicit.ministry !== undefined && normalizeText(explicit.ministry) !== normalizeText(scope.ministry)) return false;
   if (explicit.organization !== undefined && normalizeText(explicit.organization) !== normalizeText(scope.organization)) return false;
   if (explicit.specialAccount !== undefined && normalizeText(explicit.specialAccount) !== normalizeText(scope.specialAccount)) return false;
   if (explicit.subAccount !== undefined && normalizeText(explicit.subAccount) !== normalizeText(scope.subAccount)) return false;
@@ -645,7 +646,7 @@ export function diagnoseSupplementalExactFallback(
       const onlyKey = [...candidateKeys][0];
       const scope = mofScopeByNaturalKey.get(onlyKey)!;
       // R5: 明示scopeが宣言されているのに、唯一の候補のscopeと矛盾する → 項・目と金額が一致しても安全候補にしない
-      if (parsed.explicitScope && !scopeIsConsistent(accountType, scope, parsed.explicitScope)) {
+      if (parsed.explicitScope && !scopeIsConsistent(scope, parsed.explicitScope)) {
         pushResolved('explicit-scope-conflict', onlyKey);
         continue;
       }
@@ -660,7 +661,7 @@ export function diagnoseSupplementalExactFallback(
 
     // candidateKeys.size > 1: 明示scope（無ければRS構造化scope）で1件へ絞り込めた場合のみR3として解決する
     const narrowed = parsed.explicitScope
-      ? [...candidateKeys].filter(k => scopeIsConsistent(accountType, mofScopeByNaturalKey.get(k)!, parsed.explicitScope!))
+      ? [...candidateKeys].filter(k => scopeIsConsistent(mofScopeByNaturalKey.get(k)!, parsed.explicitScope!))
       : [...candidateKeys].filter(k => structuralScopeMatches(accountType, mofScopeByNaturalKey.get(k)!, r));
     if (narrowed.length === 1) {
       pushResolved('rs-scope-resolved', narrowed[0]); // R3
