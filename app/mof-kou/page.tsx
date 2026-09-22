@@ -170,8 +170,8 @@ export default function MOFKouPage() {
 
   useEffect(() => {
     // manifestのmof一覧に無い年度はV2 MOFデータが未生成のため、404を承知で叩かない
+    setV2MofIndex(null);
     if (!data || !v2Manifest?.mof.some(m => m.fiscalYear === data.metadata.fiscalYear)) {
-      setV2MofIndex(null);
       return;
     }
     const controller = new AbortController();
@@ -182,8 +182,9 @@ export default function MOFKouPage() {
   }, [data, v2Manifest]);
 
   useEffect(() => {
+    // 年度・review年度を切り替えた直後に旧リンク件数を表示しない。
+    setV2Links(null);
     if (!data || reviewYear === null) {
-      setV2Links(null);
       return;
     }
     const controller = new AbortController();
@@ -194,8 +195,9 @@ export default function MOFKouPage() {
   }, [data, reviewYear]);
 
   useEffect(() => {
+    // review年度の切替中に、旧RS indexの事業名を新しいリンクへ流用しない。
+    setV2RsIndex(null);
     if (reviewYear === null) {
-      setV2RsIndex(null);
       return;
     }
     const controller = new AbortController();
@@ -218,10 +220,19 @@ export default function MOFKouPage() {
     return mapping;
   }, [data, v2MofIndex]);
 
-  const v2ProjectCounts = useMemo(() => (v2Links ? buildV2SectionProjectCounts(v2Links.links) : null), [v2Links]);
+  const currentFiscalYear = data?.metadata.fiscalYear ?? null;
+  const v2MofIndexCurrent = v2MofIndex?.fiscalYear === currentFiscalYear;
+  const v2LinksCurrent =
+    v2Links?.reviewYear === reviewYear && v2Links?.fiscalYear === currentFiscalYear;
+  const v2RsIndexCurrent = v2RsIndex?.reviewYear === reviewYear;
+
+  const v2ProjectCounts = useMemo(
+    () => (v2LinksCurrent && v2Links ? buildV2SectionProjectCounts(v2Links.links) : null),
+    [v2Links, v2LinksCurrent]
+  );
 
   /** V2 overlayがこの画面全体で有効かどうか。有効/無効は画面単位で切り替え、行ごとにV1/V2を混在させない */
-  const v2Active = v2MofIndex !== null && v2Links !== null && sectionMapping !== null;
+  const v2Active = v2MofIndexCurrent && v2LinksCurrent && sectionMapping !== null;
 
   function v2RsProjectCountFor(row: MOFKouSectionSummary): number {
     if (!v2Active || !sectionMapping || !v2ProjectCounts) return row.rsProjectCount;
@@ -480,8 +491,9 @@ export default function MOFKouPage() {
   );
 
   useEffect(() => {
+    // 選択項を切り替えた直後に、前の項のlink groupを表示しない。
+    setV2SectionDetail(null);
     if (!selectedV2Section || !data) {
-      setV2SectionDetail(null);
       return;
     }
     const controller = new AbortController();
@@ -491,17 +503,23 @@ export default function MOFKouPage() {
     return () => controller.abort();
   }, [selectedV2Section, data]);
 
+  const v2SectionCurrent =
+    v2SectionDetail?.section.id === selectedV2Section?.id &&
+    v2SectionDetail?.section.fiscalYear === currentFiscalYear;
+
   const v2PanelData: V2PanelData | null = useMemo(() => {
     if (!v2Active || !selectedRow) return null;
     const stage = legacyBudgetTypeToV2Stage(selectedRow.budgetType);
-    const links = stage && v2SectionDetail?.rsLinks
-      ? v2SectionDetail.rsLinks.filter(
+    const currentSectionDetail = v2SectionCurrent ? v2SectionDetail : null;
+    const currentRsIndex = v2RsIndexCurrent ? v2RsIndex : null;
+    const links = stage && currentSectionDetail?.rsLinks
+      ? currentSectionDetail.rsLinks.filter(
           l => l.reviewYear === reviewYear && l.phase === stage.phase && l.revision === stage.revision
         )
       : null;
-    const itemNames = v2SectionDetail ? new Map(v2SectionDetail.items.map(it => [it.id, it.name])) : null;
-    const projectNames = v2RsIndex
-      ? new Map(v2RsIndex.projects.map(p => [p.projectId, { name: p.projectName, ministry: p.ministry }]))
+    const itemNames = currentSectionDetail ? new Map(currentSectionDetail.items.map(it => [it.id, it.name])) : null;
+    const projectNames = currentRsIndex
+      ? new Map(currentRsIndex.projects.map(p => [p.projectId, { name: p.projectName, ministry: p.ministry }]))
       : null;
     return {
       reviewYear,
@@ -511,7 +529,7 @@ export default function MOFKouPage() {
       itemNames,
       projectNames,
     };
-  }, [v2Active, selectedRow, selectedV2Section, v2SectionDetail, v2RsIndex, reviewYear]);
+  }, [v2Active, selectedRow, selectedV2Section, v2SectionCurrent, v2SectionDetail, v2RsIndex, v2RsIndexCurrent, reviewYear]);
 
   if (error) {
     return (

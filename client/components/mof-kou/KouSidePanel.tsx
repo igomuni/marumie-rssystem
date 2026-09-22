@@ -19,7 +19,7 @@ import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
 import { legacyItemNaturalKey, type V2MofRsLink } from '@/app/lib/v2-public-linkage';
 import { MatchMethodBadge } from '@/client/components/mof-rs/MatchMethodBadge';
-import { changeRate, formatChangeRate, formatYen } from '@/client/components/mof-jikou/format';
+import { changeRate, formatChangeRate, formatRate, formatYen } from '@/client/components/mof-jikou/format';
 import { AccountBadge, BudgetTypeBadge } from './Badge';
 import { orgColumn } from './columns';
 import { DataGrid, type GridColumn, type GridViewState } from './DataGrid';
@@ -768,93 +768,72 @@ function V2RsTab({
 
   const itemName = (id: string) => v2.itemNames?.get(id) ?? id;
   const projectName = (id: string) => v2.projectNames?.get(id)?.name ?? id;
+  const projectMinistry = (id: string) => v2.projectNames?.get(id)?.ministry ?? '';
+  type V2ProjectRow = { link: V2MofRsLink; projectId: string };
+  const rows: V2ProjectRow[] = v2.links.flatMap(link => link.projectIds.map(projectId => ({ link, projectId })));
+  const rsToMofRate = (link: V2MofRsLink) => link.mofAmountYen === 0 ? null : link.rsAmountYen / link.mofAmountYen;
 
-  const columns: GridColumn<V2MofRsLink>[] = [
+  const columns: GridColumn<V2ProjectRow>[] = [
     {
       key: 'matchMethod',
       label: '根拠',
       width: 100,
-      sortValue: l => l.matchMethod,
-      render: l => <MatchMethodBadge method={l.matchMethod} />,
+      sortValue: row => row.link.matchMethod,
+      render: row => <MatchMethodBadge method={row.link.matchMethod} />,
     },
     {
       key: 'items',
       label: '目',
       width: 150,
-      sortValue: l => l.itemIds.map(itemName).join(','),
-      render: l => <span title={l.itemIds.map(itemName).join('\n')}>{l.itemIds.map(itemName).join(' / ')}</span>,
+      sortValue: row => row.link.itemIds.map(itemName).join(','),
+      render: row => <span title={row.link.itemIds.map(itemName).join('\n')}>{row.link.itemIds.map(itemName).join(' / ')}</span>,
     },
     {
-      key: 'projects',
+      key: 'project',
       label: 'RS事業',
       width: 200,
-      sortValue: l => l.projectIds.map(projectName).join(','),
-      render: l => (
-        <span className="flex flex-wrap gap-x-1">
-          {l.projectIds.map((pid, i) => (
-            <span key={pid}>
-              {v2.reviewYear !== null ? (
-                <a
-                  href={sankeySvgProjectUrl(Number(pid), projectName(pid), v2.reviewYear)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100"
-                >
-                  {projectName(pid)}
-                </a>
-              ) : (
-                projectName(pid)
-              )}
-              {i < l.projectIds.length - 1 && '、'}
-            </span>
-          ))}
-        </span>
-      ),
+      sortValue: row => projectName(row.projectId),
+      render: row => v2.reviewYear !== null ? <a href={sankeySvgProjectUrl(Number(row.projectId), projectName(row.projectId), v2.reviewYear)} target="_blank" rel="noopener noreferrer" className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100" title={row.projectId}>{projectName(row.projectId)}</a> : projectName(row.projectId),
     },
+    { key: 'ministry', label: '府省庁', width: 120, sortValue: row => projectMinistry(row.projectId), render: row => projectMinistry(row.projectId) || '—' },
     {
       key: 'mofAmount',
-      label: 'MOF額',
-      width: 100,
+      label: 'MOF額（group）',
+      width: 120,
       numeric: true,
-      sortValue: l => l.mofAmountYen,
-      render: l => <span className="text-neutral-900 dark:text-neutral-100">{formatYen(l.mofAmountYen)}</span>,
+      sortValue: row => row.link.mofAmountYen,
+      render: row => <span className="text-neutral-900 dark:text-neutral-100">{formatYen(row.link.mofAmountYen)}</span>,
     },
     {
       key: 'rsAmount',
-      label: 'RSリンク額',
-      width: 100,
+      label: 'RSリンク額（group）',
+      width: 130,
       numeric: true,
-      sortValue: l => l.rsAmountYen,
-      render: l => <span className="text-neutral-900 dark:text-neutral-100">{formatYen(l.rsAmountYen)}</span>,
+      sortValue: row => row.link.rsAmountYen,
+      render: row => <span className="text-neutral-900 dark:text-neutral-100">{formatYen(row.link.rsAmountYen)}</span>,
     },
+    { key: 'rsToMofRate', label: 'RS/MOF', width: 85, numeric: true, sortValue: row => rsToMofRate(row.link), render: row => formatRate(rsToMofRate(row.link)) },
     {
       key: 'difference',
-      label: '差額',
-      width: 100,
+      label: '差額（group）',
+      width: 120,
       numeric: true,
-      sortValue: l => l.differenceYen,
-      render: l => formatYen(l.differenceYen),
+      sortValue: row => row.link.differenceYen,
+      render: row => formatYen(row.link.differenceYen),
     },
   ];
-
-  const hasMultiProjectGroup = v2.links.some(l => l.projectIds.length > 1);
 
   return (
     <div>
       <p className="px-2 pb-1.5 pt-2 text-[11px] text-neutral-400">
-        V2のMOF↔RSリンクを表示しています。複数事業を含むリンクのRS金額は、個別事業額ではなくlink group全体の合計です。
-        {hasMultiProjectGroup && (
-          <>
-            <br />※ 複数事業を含むリンクがあります（金額はlink group合計）。
-          </>
-        )}
+        V2のMOF↔RSリンクをRS事業ごとに1行で表示しています。group列の金額・比率は個別事業額ではなくlink group全体の値であり、同じgroup内の各行で繰り返し表示されます。
         <br />
         「補足情報から復元」はRSの補足情報から完全キーを復元したTier-1リンクです。金額でリンク先を選択していません。
       </p>
       <DataGrid
-        rows={v2.links}
+        rows={rows}
         columns={columns}
-        rowKey={l => l.linkId}
+        rowKey={row => `${row.link.linkId}:${row.projectId}`}
         state={gridState}
         onStateChange={onGridStateChange}
         emptyMessage="紐づく RS 事業は見つかりませんでした。"

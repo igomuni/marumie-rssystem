@@ -39,6 +39,13 @@ export interface ColumnSpec {
 }
 
 export const COLUMNS: ColumnSpec[] = [
+  {
+    key: 'rsProjectCount',
+    label: 'RS',
+    width: 52,
+    numeric: true,
+    note: 'V2 link groupで紐づいたRS事業の実数（重複除き）。V2未対応年度は旧集計',
+  },
   { key: 'budgetType', label: '予算種別', width: 76 },
   { key: 'accountType', label: '会計区分', width: 64 },
   { key: 'ministry', label: '所管', width: 150, note: '政府関係機関の帳票には所管の欄が無い' },
@@ -53,13 +60,6 @@ export const COLUMNS: ColumnSpec[] = [
   { key: 'sectionName', label: '項名', width: 220 },
   { key: 'jikouCount', label: '事項数', width: 80, numeric: true, note: '目的別内訳（/mof-jikou）での件数' },
   { key: 'kouMokuCount', label: '目数', width: 72, numeric: true, note: '性質別内訳（/mof-kou-moku）での件数' },
-  {
-    key: 'rsProjectCount',
-    label: 'RS事業数',
-    width: 90,
-    numeric: true,
-    note: '目単位の完全一致で紐づいたRS事業の実数（重複除き）。政府関係機関は対象外',
-  },
   { key: 'amount', label: '本年度額', width: 110, numeric: true, note: '目（kou-moku）側の合計' },
   { key: 'previousAmount', label: '前年度額', width: 110, numeric: true },
   { key: 'difference', label: '増減額', width: 100, numeric: true },

@@ -24,6 +24,8 @@ interface Props {
   onSelectRow: (id: string) => void;
   /** kouMokuKey → 紐づくRS事業。年度分を一括取得したもの（取得はページ層の責務）。RS列の件数表示に使う */
   linkageByKey: Map<string, MofRsKouMokuLinkageRecord[]>;
+  /** V2 projection有効時の目→distinct RS事業数。nullならlegacy linkageを使う */
+  v2RsCountByKey?: Map<string, number> | null;
   emptyMessage?: string;
 }
 
@@ -45,6 +47,7 @@ export function KouMokuTable({
   selectedId,
   onSelectRow,
   linkageByKey,
+  v2RsCountByKey = null,
   emptyMessage = '条件に合う目がありません。',
 }: Props) {
   const RS_COLUMN_WIDTH = 52;
@@ -143,7 +146,9 @@ export function KouMokuTable({
           const rate = changeRate(item.amount, item.previousAmount);
           const exec = executionRate(item);
           const isSelected = selectedId === item.id;
-          const rsCount = new Set((linkageByKey.get(item.key) ?? []).map(l => l.projectId)).size;
+          const rsCount = v2RsCountByKey !== null
+            ? (v2RsCountByKey.get(item.key) ?? 0)
+            : new Set((linkageByKey.get(item.key) ?? []).map(l => l.projectId)).size;
           return (
             <tr
               key={item.id}

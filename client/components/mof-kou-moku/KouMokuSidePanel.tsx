@@ -15,6 +15,8 @@ import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } fr
 import { AccountBadge, BudgetTypeBadge } from '@/client/components/mof-kou/Badge';
 import { DataGrid, type GridColumn, type GridViewState } from '@/client/components/mof-kou/DataGrid';
 import { orgColumn } from './columns';
+import type { MofKouMokuV2LinkGroup } from '@/types/mof-kou-moku-v2-linkage';
+import { V2KouMokuRsTab } from './V2RsTab';
 
 export type Tab = 'history' | 'rs';
 
@@ -42,6 +44,12 @@ interface Props {
   linkageRsYear: number | null;
   linkageLoading: boolean;
   linkageError: string | null;
+  /** Pipeline V2 projection。v2Mode=trueならlegacy RS tabを使わない */
+  v2Mode?: boolean;
+  v2ReviewYear?: number | null;
+  v2Links?: MofKouMokuV2LinkGroup[];
+  v2Loading?: boolean;
+  v2Error?: string | null;
   width: number;
   tab: Tab;
   onTabChange: (tab: Tab) => void;
@@ -73,6 +81,11 @@ export function KouMokuSidePanel({
   linkageRsYear,
   linkageLoading,
   linkageError,
+  v2Mode = false,
+  v2ReviewYear = null,
+  v2Links = [],
+  v2Loading = false,
+  v2Error = null,
   width,
   tab,
   onTabChange,
@@ -144,7 +157,7 @@ export function KouMokuSidePanel({
             }`}
           >
             {t.label}
-            {t.key === 'rs' && ` (${new Set(rsLinks.map(l => l.projectId)).size})`}
+            {t.key === 'rs' && ` (${v2Mode ? new Set(v2Links.flatMap(l => l.projectIds)).size : new Set(rsLinks.map(l => l.projectId)).size})`}
           </button>
         ))}
       </div>
@@ -159,17 +172,11 @@ export function KouMokuSidePanel({
             onGridStateChange={updater => onGridStateChange('history', updater)}
           />
         )}
-        {tab === 'rs' && (
-          <RsTab
-            links={rsLinks}
-            linkageAvailable={linkageAvailable}
-            linkageRsYear={linkageRsYear}
-            loading={linkageLoading}
-            error={linkageError}
-            gridState={gridStates.rs}
-            onGridStateChange={updater => onGridStateChange('rs', updater)}
-          />
-        )}
+        {tab === 'rs' && (v2Mode ? (
+          <V2KouMokuRsTab links={v2Links} reviewYear={v2ReviewYear} loading={v2Loading} error={v2Error} gridState={gridStates.rs} onGridStateChange={updater => onGridStateChange('rs', updater)} />
+        ) : (
+          <RsTab links={rsLinks} linkageAvailable={linkageAvailable} linkageRsYear={linkageRsYear} loading={linkageLoading} error={linkageError} gridState={gridStates.rs} onGridStateChange={updater => onGridStateChange('rs', updater)} />
+        ))}
       </div>
     </aside>
   );
