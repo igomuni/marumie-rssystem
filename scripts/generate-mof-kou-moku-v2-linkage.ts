@@ -5,6 +5,8 @@ import * as zlib from 'zlib';
 import type { MOFBudgetType, MOFKouMokuData, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { V2MatchMethod } from '@/app/lib/v2-public-linkage';
 import type { MofKouMokuV2LinkGroup, MofKouMokuV2LinkageProduct, MofKouMokuV2Project } from '@/types/mof-kou-moku-v2-linkage';
+import type { MofRsProjectLinkGroup, RsBudgetItemRecordV2, RsBudgetSummaryRecord } from '@/scripts/pipeline-v2/types';
+import { readJsonl } from '@/scripts/pipeline-v2/lib/jsonl';
 
 type Root = { publishSchemaVersion: number; links: { reviewYear: number; fiscalYear: number }[] };
 type Link = { linkId: string; phase: 'initial' | 'supplement'; revision: number | null; matchMethod: V2MatchMethod; sectionIds: string[]; projectIds: string[]; mofAmountYen: number; rsAmountYen: number; differenceYen: number };
@@ -22,6 +24,18 @@ function itemKey(i: MOFKouMokuItem) {
 function budgetType(phase: Link['phase'], revision: number | null): MOFBudgetType | null {
   return phase === 'initial' ? '当初予算' : revision === null ? null : `補正予算（第${revision}号）` as MOFBudgetType;
 }
+function projectBreakdown(link: MofRsProjectLinkGroup, rows: Map<string, RsBudgetItemRecordV2>) {
+  const amounts = new Map<string, number>(); const counts = new Map<string, number>();
+  for (const recordId of link.rsRecordIds) {
+    const row = rows.get(recordId); if (!row) throw new Error(`RS normalized record not found: linkId=${link.linkId} recordId=${recordId}`);
+    const id = String(row.projectId); amounts.set(id, (amounts.get(id) ?? 0) + (row.budgetAmountYen ?? 0)); counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  const actual = [...amounts.keys()].sort(); const expected = [...link.projectIds].map(String).sort();
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`projectIds mismatch: linkId=${link.linkId}`);
+  const total = [...amounts.values()].reduce((sum, value) => sum + value, 0);
+  if (total !== link.rsAmountYen) throw new Error(`project amount sum mismatch: linkId=${link.linkId} breakdown=${total} group=${link.rsAmountYen}`);
+  return { amounts, counts, recordCount: link.rsRecordIds.length };
+}
 function build(reviewYear: number, fiscalYear: number) {
   const rootDir = path.resolve(process.cwd(), 'public/data/v2');
   const legacy = read<MOFKouMokuData>(path.resolve(process.cwd(), `public/data/mof-kou-moku-${fiscalYear}.json`));
@@ -38,16 +52,33 @@ function build(reviewYear: number, fiscalYear: number) {
       const old = links.get(link.linkId); links.set(link.linkId, old ? { ...old, itemIds: [...new Set([...old.itemIds, ...link.itemIds])].sort() } : { ...link, itemIds: [...link.itemIds].sort() });
     }
   }
-  const rs = readGz<{ projects: MofKouMokuV2Project[] }>(path.join(rootDir, 'rs', `review-${reviewYear}`, 'index.json.gz'));
+  const rs = readGz<{ projects: Pick<MofKouMokuV2Project, 'projectId' | 'projectName' | 'ministry'>[] }>(path.join(rootDir, 'rs', `review-${reviewYear}`, 'index.json.gz'));
   const projects = new Map(rs.projects.map(p => [String(p.projectId), { ...p, projectId: String(p.projectId) }]));
-  const groups: MofKouMokuV2LinkGroup[] = []; let unmatched = 0; let ambiguous = 0; let multi = 0;
-  for (const link of links.values()) {
-    const type = budgetType(link.phase, link.revision); if (!type) continue; if (link.itemIds.length > 1) multi++;
-    for (const id of link.itemIds) { const candidates = rows.get(`${id}\x1f${type}`) ?? []; if (candidates.length !== 1) { candidates.length ? ambiguous++ : unmatched++; continue; } const item = candidates[0];
-      groups.push({ linkId: link.linkId, reviewYear, fiscalYear, phase: link.phase, revision: link.revision, matchMethod: link.matchMethod, kouMokuKey: item.key, itemNaturalKey: id, mofBudgetType: type, projectIds: [...link.projectIds], projects: link.projectIds.map(id => projects.get(String(id)) ?? { projectId: String(id), projectName: String(id), ministry: '' }), mofAmountYen: link.mofAmountYen, rsAmountYen: link.rsAmountYen, differenceYen: link.differenceYen, spansItems: link.itemIds.length > 1 });
+  const derived = readJsonl<MofRsProjectLinkGroup>(path.resolve(process.cwd(), 'data/derived/links', `mof-rs-review-${reviewYear}-fy${fiscalYear}.jsonl`));
+  const derivedById = new Map(derived.map(link => [link.linkId, link]));
+  const normalized = readJsonl<RsBudgetItemRecordV2>(path.resolve(process.cwd(), 'data/normalized/rs', `review-${reviewYear}`, 'budget-items.jsonl'));
+  const normalizedById = new Map(normalized.map(row => [row.recordId, row]));
+  const summaries = readJsonl<RsBudgetSummaryRecord>(path.resolve(process.cwd(), 'data/normalized/rs', `review-${reviewYear}`, 'budget-summaries.jsonl'));
+  const projectBudgetById = new Map<string, number | null>();
+  for (const summary of summaries) {
+    if (summary.scopeLevel === 'project_total' && summary.fiscalYear === reviewYear) {
+      projectBudgetById.set(String(summary.projectId), summary.amounts['計（歳出予算現額合計）'] ?? null);
     }
   }
-  const product: MofKouMokuV2LinkageProduct = { schemaVersion: 1, sourcePublishSchemaVersion: read<Root>(path.join(rootDir, 'manifest.json')).publishSchemaVersion, generatedAt: new Date().toISOString(), reviewYear, fiscalYear, groups, diagnostics: { sourceLinkGroupCount: standalone.links.length, projectedGroupItemCount: groups.length, unmatchedItemIdCount: unmatched, ambiguousItemIdCount: ambiguous, multiItemGroupCount: multi, linkedKouMokuCount: new Set(groups.map(g => g.kouMokuKey)).size, linkedProjectCount: new Set(groups.flatMap(g => g.projectIds)).size } };
+  const breakdowns = new Map<string, ReturnType<typeof projectBreakdown>>();
+  const groups: MofKouMokuV2LinkGroup[] = []; let unmatched = 0; let ambiguous = 0; let multi = 0; let breakdownRecords = 0;
+  for (const link of links.values()) {
+    const type = budgetType(link.phase, link.revision); if (!type) continue; if (link.itemIds.length > 1) multi++;
+    const derivedLink = derivedById.get(link.linkId); if (!derivedLink) throw new Error(`derived link not found: linkId=${link.linkId}`);
+    if (derivedLink.rsAmountYen !== link.rsAmountYen || derivedLink.mofAmountYen !== link.mofAmountYen) throw new Error(`public/derived amount mismatch: linkId=${link.linkId}`);
+    let breakdown = breakdowns.get(link.linkId); if (!breakdown) { breakdown = projectBreakdown(derivedLink, normalizedById); breakdowns.set(link.linkId, breakdown); breakdownRecords += breakdown.recordCount; }
+    for (const id of link.itemIds) { const candidates = rows.get(`${id}\x1f${type}`) ?? []; if (candidates.length !== 1) { candidates.length ? ambiguous++ : unmatched++; continue; } const item = candidates[0];
+      const projectRows = link.projectIds.map(raw => { const projectId = String(raw); const meta = projects.get(projectId) ?? { projectId, projectName: projectId, ministry: '' }; return { ...meta, rsAmountYen: breakdown!.amounts.get(projectId) ?? 0, rsRecordCount: breakdown!.counts.get(projectId) ?? 0, projectBudgetAmountYen: projectBudgetById.get(projectId) ?? null }; });
+      if (projectRows.reduce((sum, project) => sum + project.rsAmountYen, 0) !== link.rsAmountYen) throw new Error(`projected project sum mismatch: linkId=${link.linkId}`);
+      groups.push({ linkId: link.linkId, reviewYear, fiscalYear, phase: link.phase, revision: link.revision, matchMethod: link.matchMethod, kouMokuKey: item.key, itemNaturalKey: id, mofBudgetType: type, projectIds: [...link.projectIds].map(String), projects: projectRows, mofAmountYen: link.mofAmountYen, rsAmountYen: link.rsAmountYen, differenceYen: link.differenceYen, spansItems: link.itemIds.length > 1 });
+    }
+  }
+  const product: MofKouMokuV2LinkageProduct = { schemaVersion: 2, sourcePublishSchemaVersion: read<Root>(path.join(rootDir, 'manifest.json')).publishSchemaVersion, generatedAt: new Date().toISOString(), reviewYear, fiscalYear, groups, diagnostics: { sourceLinkGroupCount: standalone.links.length, projectedGroupItemCount: groups.length, unmatchedItemIdCount: unmatched, ambiguousItemIdCount: ambiguous, multiItemGroupCount: multi, linkedKouMokuCount: new Set(groups.map(g => g.kouMokuKey)).size, linkedProjectCount: new Set(groups.flatMap(g => g.projectIds)).size, projectBreakdownRecordCount: breakdownRecords, projectBreakdownCheckedGroupCount: breakdowns.size } };
   const output = path.join(rootDir, 'ui/mof-kou-moku', `review-${reviewYear}-fy${fiscalYear}.json.gz`); fs.mkdirSync(path.dirname(output), { recursive: true }); fs.writeFileSync(output, zlib.gzipSync(JSON.stringify(product), { level: 9 }));
   console.log(`review-${reviewYear} × fy${fiscalYear}: groups=${groups.length} items=${product.diagnostics.linkedKouMokuCount} projects=${product.diagnostics.linkedProjectCount} unmatched=${unmatched} ambiguous=${ambiguous}`);
 }

@@ -5,6 +5,11 @@ export interface MofKouMokuV2Project {
   projectId: string;
   projectName: string;
   ministry: string;
+  /** このlink groupに採用されたRS 2-2行の事業別合計（按分ではない） */
+  rsAmountYen: number;
+  rsRecordCount: number;
+  /** RS 2-1 project_total の計（歳出予算現額合計）。欠損時はnull */
+  projectBudgetAmountYen: number | null;
 }
 
 export interface MofKouMokuV2LinkGroup {
@@ -27,7 +32,7 @@ export interface MofKouMokuV2LinkGroup {
 }
 
 export interface MofKouMokuV2LinkageProduct {
-  schemaVersion: 1;
+  schemaVersion: 2;
   sourcePublishSchemaVersion: number;
   generatedAt: string;
   reviewYear: number;
@@ -41,5 +46,7 @@ export interface MofKouMokuV2LinkageProduct {
     multiItemGroupCount: number;
     linkedKouMokuCount: number;
     linkedProjectCount: number;
+    projectBreakdownRecordCount: number;
+    projectBreakdownCheckedGroupCount: number;
   };
 }
