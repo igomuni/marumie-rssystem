@@ -400,14 +400,19 @@ export function checkSupplementalExactProductionPolicy(
   // natural key（項・目）がinitial/supplement等の異なるstageで別々のlink group（別linkId）に
   // なっているケースを1つに潰してしまう（実測でreview-2024×fy2023など3組がこれで1件ずつ
   // 過少カウントしていた）。production側の実際のgroup識別子であるlinkIdをそのまま使う
-  const actualByRecordId = new Map<string, { resolution: SupplementalExactTargetResolution; parseKind: SupplementalExactParseKind; naturalKey: string; linkId: string }>();
+  const actualByRecordId = new Map<string, { resolution: SupplementalExactTargetResolution; parseKind: SupplementalExactParseKind; naturalKey: string; linkId: string; phase: string; revision: number | null }>();
   for (const link of productionLinks) {
     for (const ev of link.rsMatchEvidence) {
       if (ev.method === 'supplemental-exact') {
-        actualByRecordId.set(ev.rsRecordId, { resolution: ev.resolution, parseKind: ev.parseKind, naturalKey: link.naturalKey, linkId: link.linkId });
+        actualByRecordId.set(ev.rsRecordId, { resolution: ev.resolution, parseKind: ev.parseKind, naturalKey: link.naturalKey, linkId: link.linkId, phase: link.phase, revision: link.revision });
       }
     }
   }
+
+  // review指摘: naturalKey/resolution/parseKindだけでなくphase/revisionもexpected/actualで
+  // 比較する。今回のgroup-count集計バグ（naturalKeyのみでは別stageのgroupを区別できない）と
+  // 同じ失敗クラスを、record単位の突合でも見逃さないようにする
+  const rsByRecordId = new Map(rsRowsForYear.map(r => [r.recordId, r]));
 
   const findings: Finding[] = [];
   const pushError = (recordId: string, message: string) => {
@@ -423,6 +428,11 @@ export function checkSupplementalExactProductionPolicy(
     if (actual.naturalKey !== expected.targetNaturalKey) pushError(recordId, `recordId=${recordId}: production linkのnaturalKey(${actual.naturalKey})が期待値(${expected.targetNaturalKey})と不一致`);
     if (actual.resolution !== expected.targetResolution) pushError(recordId, `recordId=${recordId}: production evidenceのresolution(${actual.resolution})が期待値(${expected.targetResolution})と不一致`);
     if (actual.parseKind !== expected.parseKind) pushError(recordId, `recordId=${recordId}: production evidenceのparseKind(${actual.parseKind})が期待値(${expected.parseKind})と不一致`);
+    const expectedStage = rsPhase(rsByRecordId.get(recordId)!);
+    if (expectedStage) {
+      if (actual.phase !== expectedStage[0]) pushError(recordId, `recordId=${recordId}: production linkのphase(${actual.phase})が期待値(${expectedStage[0]})と不一致`);
+      if (actual.revision !== expectedStage[1]) pushError(recordId, `recordId=${recordId}: production linkのrevision(${actual.revision})が期待値(${expectedStage[1]})と不一致`);
+    }
   }
   for (const [recordId, actual] of actualByRecordId) {
     if (!expectedByRecordId.has(recordId)) pushError(recordId, `recordId=${recordId}: Tier-1で昇格されないはずのP2 recordがproduction linkに存在する（naturalKey=${actual.naturalKey}）`);

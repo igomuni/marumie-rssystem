@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   classifyUnlinkedReasons, checkLinkTaxonomyConsistency, diagnoseJointMinistryFallback,
   analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups, diagnoseSupplementalExactFallback,
+  checkSupplementalExactProductionPolicy,
 } from './mof-rs-linkage';
 import { evaluateSupplementalExact, mofKeyFrom, stageKey } from '../mof-rs-match-core';
 import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup } from '../../types';
@@ -555,5 +556,82 @@ describe('diagnoseSupplementalExactFallback', () => {
     expect(direct.candidates.every(c => c.targetResolution === 'pair-unique')).toBe(true);
     expect(direct.candidates.every(c => c.reconciliation === 'exact')).toBe(true);
     expect(direct.summary.safeExactGroupCount).toBe(1);
+  });
+});
+
+describe('checkSupplementalExactProductionPolicy', () => {
+  function missingKeyItem(overrides: Partial<RsBudgetItemRecordV2>): RsBudgetItemRecordV2 {
+    return rsItem({
+      fiscalYear: 2025, budgetMinistry: '', sectionName: '', subItemName: '', organizationOrAccount: '', account: '', subAccount: '',
+      supplementalInfo: '', ...overrides,
+    });
+  }
+
+  it('Tier-1で期待されるP2 recordがproduction linkに正しく反映されていればfindingsは空', () => {
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1000 });
+    const rs = missingKeyItem({ supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 1000 });
+    const productionLink = link({
+      naturalKey: 'general|内閣|内閣官房|内閣官房共通費|諸謝金', phase: 'initial', revision: null,
+      rsRecordIds: ['rsitem_1'], rsAmountYen: 1000,
+      matchMethod: 'supplemental-exact',
+      rsMatchEvidence: [{ rsRecordId: 'rsitem_1', projectId: '1', method: 'supplemental-exact', sourceField: 'supplementalInfo', resolution: 'pair-unique', parseKind: 'fwspace-pair' }],
+    });
+    const result = checkSupplementalExactProductionPolicy(2025, 2025, [mof], [rs], [productionLink]);
+    expect(result.findings).toHaveLength(0);
+    expect(result.metrics.productionP2RecordCount).toBe(1);
+    expect(result.metrics.productionP2GroupCount).toBe(1);
+  });
+
+  it('Tier-1で期待されるP2候補がproduction linkに存在しなければerror', () => {
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1000 });
+    const rs = missingKeyItem({ supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 1000 });
+    const result = checkSupplementalExactProductionPolicy(2025, 2025, [mof], [rs], []); // production linkが空
+    expect(result.findings.some(f => f.message.includes('production linkに存在しない'))).toBe(true);
+  });
+
+  it('review指摘: production linkのphase/revisionが期待stageと不一致ならerror（naturalKeyのみの比較では見逃す失敗クラス）', () => {
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1000 });
+    const rs = missingKeyItem({ supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 1000, budgetType: '当初予算' }); // stage=['initial', null]
+    // naturalKeyは一致するが、production側がsupplement(revision=1)として誤ってlinkされているケース
+    const wrongStageLink = link({
+      naturalKey: 'general|内閣|内閣官房|内閣官房共通費|諸謝金', phase: 'supplement', revision: 1,
+      rsRecordIds: ['rsitem_1'], rsAmountYen: 1000, matchMethod: 'supplemental-exact',
+      rsMatchEvidence: [{ rsRecordId: 'rsitem_1', projectId: '1', method: 'supplemental-exact', sourceField: 'supplementalInfo', resolution: 'pair-unique', parseKind: 'fwspace-pair' }],
+    });
+    const result = checkSupplementalExactProductionPolicy(2025, 2025, [mof], [rs], [wrongStageLink]);
+    expect(result.findings.some(f => f.message.includes('phase'))).toBe(true);
+    expect(result.findings.some(f => f.message.includes('revision'))).toBe(true);
+  });
+
+  it('Tier-1で昇格されないはずのP2 recordがproduction linkに存在すればerror', () => {
+    const mof = mofItem({ sectionName: '共通経費', subItemName: '庁費', ministry: '外務省', organization: '在外公館', amountYen: 1000 });
+    const rs = missingKeyItem({ supplementalInfo: '共通経費　庁費', ministry: '外務省', budgetAmountYen: 500 }); // non-exact→Tier-1非該当のはず
+    const unexpectedLink = link({
+      naturalKey: 'general|外務省|在外公館|共通経費|庁費', phase: 'initial', revision: null,
+      rsRecordIds: ['rsitem_1'], rsAmountYen: 500, matchMethod: 'supplemental-exact',
+      rsMatchEvidence: [{ rsRecordId: 'rsitem_1', projectId: '1', method: 'supplemental-exact', sourceField: 'supplementalInfo', resolution: 'pair-unique', parseKind: 'fwspace-pair' }],
+    });
+    const result = checkSupplementalExactProductionPolicy(2025, 2025, [mof], [rs], [unexpectedLink]);
+    expect(result.findings.some(f => f.message.includes('昇格されないはず'))).toBe(true);
+  });
+
+  it('review指摘: 同一naturalKeyが異なるstageで別groupになる場合、productionP2GroupCountはlinkId単位で正しく2と数える', () => {
+    const mofInitial = mofItem({ recordId: 'mof_initial', sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1000 });
+    const mofSupplement = mofItem({ recordId: 'mof_supplement', phase: 'supplement', revision: 1, sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', supplementDeltaYen: 200 } as Partial<MofBudgetItemRecord>);
+    const rsInitial = missingKeyItem({ recordId: 'rsitem_initial', supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 1000, budgetType: '当初予算' });
+    const rsSupplement = missingKeyItem({ recordId: 'rsitem_supplement', supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 200, budgetType: '第1次補正予算' });
+    const naturalKey = 'general|内閣|内閣官房|内閣官房共通費|諸謝金';
+    const linkInitial = link({
+      linkId: 'l-initial', naturalKey, phase: 'initial', revision: null, rsRecordIds: ['rsitem_initial'], rsAmountYen: 1000, matchMethod: 'supplemental-exact',
+      rsMatchEvidence: [{ rsRecordId: 'rsitem_initial', projectId: '1', method: 'supplemental-exact', sourceField: 'supplementalInfo', resolution: 'pair-unique', parseKind: 'fwspace-pair' }],
+    });
+    const linkSupplement = link({
+      linkId: 'l-supplement', naturalKey, phase: 'supplement', revision: 1, rsRecordIds: ['rsitem_supplement'], rsAmountYen: 200, matchMethod: 'supplemental-exact',
+      rsMatchEvidence: [{ rsRecordId: 'rsitem_supplement', projectId: '1', method: 'supplemental-exact', sourceField: 'supplementalInfo', resolution: 'pair-unique', parseKind: 'fwspace-pair' }],
+    });
+    const result = checkSupplementalExactProductionPolicy(2025, 2025, [mofInitial, mofSupplement], [rsInitial, rsSupplement], [linkInitial, linkSupplement]);
+    expect(result.findings).toHaveLength(0);
+    expect(result.metrics.productionP2RecordCount).toBe(2);
+    expect(result.metrics.productionP2GroupCount).toBe(2); // naturalKeyは同じだがstageが違う2 groupとして正しく数える
   });
 });
