@@ -3,6 +3,7 @@ import {
   classifyUnlinkedReasons, checkLinkTaxonomyConsistency, diagnoseJointMinistryFallback,
   analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups, diagnoseSupplementalExactFallback,
 } from './mof-rs-linkage';
+import { evaluateSupplementalExact } from '../mof-rs-match-core';
 import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup } from '../../types';
 
 const SRC = { domain: 'mof.go.jp' as const, path: 'x', file: 'x.csv', dataset: 'd', year: 2024 };
@@ -516,5 +517,32 @@ describe('diagnoseSupplementalExactFallback', () => {
     const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [wrongYear, unsupportedType, alreadyKeyed]);
     expect(result.candidates).toHaveLength(0);
     expect(result.summary.parsedCandidateCount).toBe(0);
+  });
+
+  // review指摘（53_sonnet-p2-shared-core-extraction-instructions.md）: shared core抽出後、
+  // validationのdiagnoseSupplementalExactFallback()がlib/mof-rs-match-core.tsの
+  // evaluateSupplementalExact()と同じ判定・同じ値を返すことを直接確認する
+  it('shared core検証: P2a（explicit-scope-exact）行でevaluateSupplementalExact()とdiagnoseSupplementalExactFallback()が同じ判定・値を返す', () => {
+    const mof = mofItem({ sectionName: '情報処理費', subItemName: '委託費', ministry: '総務省', organization: '総合通信基盤局', amountYen: 500 });
+    const rs = missingKeyItem({ supplementalInfo: '一般会計／総務省／総合通信基盤局／情報処理費／委託費', budgetAmountYen: 500 });
+    const direct = evaluateSupplementalExact([mof], [rs], 2025);
+    const wrapped = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(wrapped.candidates).toEqual(direct.candidates);
+    expect(wrapped.summary).toEqual(direct.summary);
+    expect(direct.candidates[0].targetResolution).toBe('explicit-scope-exact');
+    expect(direct.candidates[0].reconciliation).toBe('exact');
+  });
+
+  it('shared core検証: P2b（pair-unique）exact groupでevaluateSupplementalExact()とdiagnoseSupplementalExactFallback()が同じ判定・値を返す', () => {
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1000 });
+    const rsA = missingKeyItem({ recordId: 'rsitem_a', supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 400 });
+    const rsB = missingKeyItem({ recordId: 'rsitem_b', supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 600 });
+    const direct = evaluateSupplementalExact([mof], [rsA, rsB], 2025);
+    const wrapped = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rsA, rsB]);
+    expect(wrapped.candidates).toEqual(direct.candidates);
+    expect(wrapped.summary).toEqual(direct.summary);
+    expect(direct.candidates.every(c => c.targetResolution === 'pair-unique')).toBe(true);
+    expect(direct.candidates.every(c => c.reconciliation === 'exact')).toBe(true);
+    expect(direct.summary.safeExactGroupCount).toBe(1);
   });
 });
