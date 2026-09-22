@@ -674,7 +674,7 @@ function KouMokuTab({
         },
       },
       {
-        key: 'rsMinusMof', label: 'RS差', width: 110, numeric: true,
+        key: 'rsMinusMof', label: 'RS差', headerTitle: '当初は RS 2-2当初額 − MOF本年度額、補正は RS 2-2補正額 − MOF増減額', width: 110, numeric: true,
         sortValue: (it: MOFKouMokuItem) => reconciliations.get(it.key)?.rsMinusMofYen ?? null,
         render: (it: MOFKouMokuItem) => {
           const value = reconciliations.get(it.key)?.rsMinusMofYen;
@@ -682,7 +682,7 @@ function KouMokuTab({
         },
       },
       {
-        key: 'rsToMof', label: 'RS比', width: 80, numeric: true,
+        key: 'rsToMof', label: 'RS比', headerTitle: '当初は RS 2-2当初額 ÷ MOF本年度額、補正は RS 2-2補正額 ÷ MOF増減額', width: 80, numeric: true,
         sortValue: (it: MOFKouMokuItem) => reconciliations.get(it.key)?.rsToMofRate ?? null,
         render: (it: MOFKouMokuItem) => formatRate(reconciliations.get(it.key)?.rsToMofRate ?? null),
       },

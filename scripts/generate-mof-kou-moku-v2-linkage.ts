@@ -244,6 +244,13 @@ function build(reviewYear: number, fiscalYear: number) {
         continue;
       }
       const item = candidates[0];
+      const expectedMofAmount =
+        link.phase === "initial" ? item.amount : item.difference;
+      if (expectedMofAmount === null || expectedMofAmount !== link.mofAmountYen) {
+        throw new Error(
+          `MOF stage amount mismatch: linkId=${link.linkId} item=${item.key} phase=${link.phase} legacy=${expectedMofAmount} projection=${link.mofAmountYen}`,
+        );
+      }
       const projectRows = link.projectIds.map((raw) => {
         const projectId = String(raw);
         const meta = projects.get(projectId) ?? {
