@@ -44,7 +44,13 @@ import type { GridViewState } from '@/client/components/mof-kou/DataGrid';
 import { FilterSidebar, type FilterDomains, type FilterSidebarState, type NumRange } from '@/client/components/mof-kou-moku/FilterSidebar';
 import { textMatches } from '@/client/components/mof-kou/RegexTextFilter';
 import { availableReviewYearsForFiscalYear, fetchV2RootManifest, type V2RootManifest } from '@/app/lib/v2-public-linkage';
-import { countV2ProjectsByKouMoku, fetchMofKouMokuV2Linkage, groupV2KouMokuLinksByKey } from '@/app/lib/mof-kou-moku-v2-linkage';
+import {
+  countV2IdentityProjectsByKouMoku,
+  countV2ProjectsByKouMoku,
+  fetchMofKouMokuV2Linkage,
+  groupV2KouMokuLinksByKey,
+  groupV2SettlementIdentityByKey,
+} from '@/app/lib/mof-kou-moku-v2-linkage';
 import type { MofKouMokuV2LinkageProduct } from '@/types/mof-kou-moku-v2-linkage';
 import {
   ACCOUNT_LABEL,
@@ -251,7 +257,20 @@ export default function MOFKouMokuPage() {
     return () => controller.abort();
   }, [data, reviewYear, reviewYearOptions]);
   const v2ByKey = useMemo(() => groupV2KouMokuLinksByKey(v2Linkage?.groups ?? []), [v2Linkage]);
-  const v2RsCountByKey = useMemo(() => countV2ProjectsByKouMoku(v2ByKey), [v2ByKey]);
+  const v2IdentityByKey = useMemo(
+    () => groupV2SettlementIdentityByKey(v2Linkage?.identityRelations ?? []),
+    [v2Linkage]
+  );
+  const v2BudgetRsCountByKey = useMemo(() => countV2ProjectsByKouMoku(v2ByKey), [v2ByKey]);
+  const v2SettlementRsCountByKey = useMemo(
+    () => countV2IdentityProjectsByKouMoku(v2IdentityByKey),
+    [v2IdentityByKey]
+  );
+  const v2RsCountByKey = useMemo(() => {
+    const out = new Map(v2BudgetRsCountByKey);
+    for (const [key, count] of v2SettlementRsCountByKey) out.set(key, count);
+    return out;
+  }, [v2BudgetRsCountByKey, v2SettlementRsCountByKey]);
 
   /**
    * その年度の RS 事業との紐づけを一括で取る（完全一致キーによる自動突合。
@@ -528,6 +547,7 @@ export default function MOFKouMokuPage() {
   const selectedRow = selected ? (filtered.find(r => r.id === selected) ?? data?.items.find(r => r.id === selected)) : undefined;
   const rsLinksForSelected = selectedRow ? (linkageByKey.get(selectedRow.key) ?? []) : [];
   const v2LinksForSelected = selectedRow ? (v2ByKey.get(selectedRow.key) ?? []) : [];
+  const v2IdentityForSelected = selectedRow ? (v2IdentityByKey.get(selectedRow.key) ?? []) : [];
 
   if (error) {
     return (
@@ -743,6 +763,7 @@ export default function MOFKouMokuPage() {
               v2Mode={v2Mode}
               v2ReviewYear={reviewYear}
               v2Links={v2LinksForSelected}
+              v2IdentityRelations={v2IdentityForSelected}
               v2Loading={v2LinkageLoading}
               v2Error={v2LinkageError}
               width={panelWidth}

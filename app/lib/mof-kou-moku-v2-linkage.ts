@@ -1,4 +1,8 @@
-import type { MofKouMokuV2LinkGroup, MofKouMokuV2LinkageProduct } from '@/types/mof-kou-moku-v2-linkage';
+import type {
+  MofKouMokuV2IdentityRelation,
+  MofKouMokuV2LinkGroup,
+  MofKouMokuV2LinkageProduct,
+} from '@/types/mof-kou-moku-v2-linkage';
 
 async function fetchGzipJson<T>(url: string, signal: AbortSignal): Promise<T> {
   const response = await fetch(url, { signal });
@@ -40,6 +44,28 @@ export function countV2ProjectsByKouMoku(
   const out = new Map<string, number>();
   for (const [key, groups] of byKey) {
     out.set(key, new Set(groups.flatMap(g => g.projectIds)).size);
+  }
+  return out;
+}
+
+export function groupV2SettlementIdentityByKey(
+  relations: MofKouMokuV2IdentityRelation[]
+): Map<string, MofKouMokuV2IdentityRelation[]> {
+  const out = new Map<string, MofKouMokuV2IdentityRelation[]>();
+  for (const relation of relations) {
+    const rows = out.get(relation.kouMokuKey) ?? [];
+    rows.push(relation);
+    out.set(relation.kouMokuKey, rows);
+  }
+  return out;
+}
+
+export function countV2IdentityProjectsByKouMoku(
+  byKey: Map<string, MofKouMokuV2IdentityRelation[]>
+): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const [key, relations] of byKey) {
+    out.set(key, new Set(relations.flatMap(relation => relation.projectIds)).size);
   }
   return out;
 }

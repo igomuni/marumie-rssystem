@@ -31,13 +31,39 @@ export interface MofKouMokuV2LinkGroup {
   spansItems: boolean;
 }
 
+export interface MofKouMokuV2IdentitySource {
+  linkId: string;
+  phase: 'initial' | 'supplement';
+  revision: number | null;
+  matchMethod: V2MatchMethod;
+}
+
+export interface MofKouMokuV2IdentityProject {
+  projectId: string;
+  projectName: string;
+  ministry: string;
+  sources: MofKouMokuV2IdentitySource[];
+}
+
+export interface MofKouMokuV2IdentityRelation {
+  relationId: string;
+  relationKind: 'inherited-from-budget-link';
+  reviewYear: number;
+  fiscalYear: number;
+  kouMokuKey: string;
+  itemNaturalKey: string;
+  projectIds: string[];
+  projects: MofKouMokuV2IdentityProject[];
+}
+
 export interface MofKouMokuV2LinkageProduct {
-  schemaVersion: 2;
+  schemaVersion: 3;
   sourcePublishSchemaVersion: number;
   generatedAt: string;
   reviewYear: number;
   fiscalYear: number;
   groups: MofKouMokuV2LinkGroup[];
+  identityRelations: MofKouMokuV2IdentityRelation[];
   diagnostics: {
     sourceLinkGroupCount: number;
     projectedGroupItemCount: number;
@@ -48,5 +74,9 @@ export interface MofKouMokuV2LinkageProduct {
     linkedProjectCount: number;
     projectBreakdownRecordCount: number;
     projectBreakdownCheckedGroupCount: number;
+    settlementIdentityRelationCount: number;
+    settlementIdentityProjectCount: number;
+    settlementIdentityUnmatchedItemCount: number;
+    settlementIdentityAmbiguousItemCount: number;
   };
 }

@@ -4,7 +4,14 @@ import * as path from 'path';
 import * as zlib from 'zlib';
 import type { MOFBudgetType, MOFKouMokuData, MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { V2MatchMethod } from '@/app/lib/v2-public-linkage';
-import type { MofKouMokuV2LinkGroup, MofKouMokuV2LinkageProduct, MofKouMokuV2Project } from '@/types/mof-kou-moku-v2-linkage';
+import type {
+  MofKouMokuV2IdentityProject,
+  MofKouMokuV2IdentityRelation,
+  MofKouMokuV2IdentitySource,
+  MofKouMokuV2LinkGroup,
+  MofKouMokuV2LinkageProduct,
+  MofKouMokuV2Project,
+} from '@/types/mof-kou-moku-v2-linkage';
 import type { MofRsProjectLinkGroup, RsBudgetItemRecordV2, RsBudgetSummaryRecord } from '@/scripts/pipeline-v2/types';
 import { readJsonl } from '@/scripts/pipeline-v2/lib/jsonl';
 import { aggregateRsProjectAmounts } from '@/app/lib/mof-kou-moku-v2-linkage';
@@ -24,6 +31,9 @@ function itemKey(i: MOFKouMokuItem) {
 }
 function budgetType(phase: Link['phase'], revision: number | null): MOFBudgetType | null {
   return phase === 'initial' ? '当初予算' : revision === null ? null : `補正予算（第${revision}号）` as MOFBudgetType;
+}
+function sourceSortKey(source: MofKouMokuV2IdentitySource): string {
+  return `${source.phase === 'initial' ? '0' : '1'}:${String(source.revision ?? 0).padStart(4, '0')}:${source.linkId}`;
 }
 function projectBreakdown(link: MofRsProjectLinkGroup, rows: Map<string, RsBudgetItemRecordV2>) {
   const matchedRows: RsBudgetItemRecordV2[] = []; const counts = new Map<string, number>();
@@ -80,9 +90,89 @@ function build(reviewYear: number, fiscalYear: number) {
       groups.push({ linkId: link.linkId, reviewYear, fiscalYear, phase: link.phase, revision: link.revision, matchMethod: link.matchMethod, kouMokuKey: item.key, itemNaturalKey: id, mofBudgetType: type, projectIds: [...link.projectIds].map(String), projects: projectRows, mofAmountYen: link.mofAmountYen, rsAmountYen: link.rsAmountYen, differenceYen: link.differenceYen, spansItems: link.itemIds.length > 1 });
     }
   }
-  const product: MofKouMokuV2LinkageProduct = { schemaVersion: 2, sourcePublishSchemaVersion: read<Root>(path.join(rootDir, 'manifest.json')).publishSchemaVersion, generatedAt: new Date().toISOString(), reviewYear, fiscalYear, groups, diagnostics: { sourceLinkGroupCount: standalone.links.length, projectedGroupItemCount: groups.length, unmatchedItemIdCount: unmatched, ambiguousItemIdCount: ambiguous, multiItemGroupCount: multi, linkedKouMokuCount: new Set(groups.map(g => g.kouMokuKey)).size, linkedProjectCount: new Set(groups.flatMap(g => g.projectIds)).size, projectBreakdownRecordCount: breakdownRecords, projectBreakdownCheckedGroupCount: breakdowns.size } };
+  type IdentityProjectAcc = {
+    projectId: string;
+    projectName: string;
+    ministry: string;
+    sources: Map<string, MofKouMokuV2IdentitySource>;
+  };
+  type IdentityAcc = {
+    relationId: string;
+    kouMokuKey: string;
+    itemNaturalKey: string;
+    projects: Map<string, IdentityProjectAcc>;
+  };
+  const identityByItem = new Map<string, IdentityAcc>();
+  const itemResolutionSeen = new Set<string>();
+  let settlementIdentityUnmatchedItemCount = 0;
+  let settlementIdentityAmbiguousItemCount = 0;
+
+  for (const link of links.values()) {
+    const source: MofKouMokuV2IdentitySource = {
+      linkId: link.linkId,
+      phase: link.phase,
+      revision: link.revision,
+      matchMethod: link.matchMethod,
+    };
+    for (const itemId of link.itemIds) {
+      const settlementCandidates = rows.get(`${itemId}\x1f決算`) ?? [];
+      if (settlementCandidates.length !== 1) {
+        if (!itemResolutionSeen.has(itemId)) {
+          itemResolutionSeen.add(itemId);
+          if (settlementCandidates.length === 0) settlementIdentityUnmatchedItemCount++;
+          else settlementIdentityAmbiguousItemCount++;
+        }
+        continue;
+      }
+      itemResolutionSeen.add(itemId);
+      const settlementItem = settlementCandidates[0];
+      let relation = identityByItem.get(itemId);
+      if (!relation) {
+        relation = {
+          relationId: `settlement_identity:${reviewYear}:${fiscalYear}:${itemId}`,
+          kouMokuKey: settlementItem.key,
+          itemNaturalKey: itemId,
+          projects: new Map(),
+        };
+        identityByItem.set(itemId, relation);
+      }
+      for (const rawProjectId of link.projectIds) {
+        const projectId = String(rawProjectId);
+        const meta = projects.get(projectId) ?? { projectId, projectName: projectId, ministry: '' };
+        let project = relation.projects.get(projectId);
+        if (!project) {
+          project = { ...meta, sources: new Map() };
+          relation.projects.set(projectId, project);
+        }
+        project.sources.set(link.linkId, source);
+      }
+    }
+  }
+  const identityRelations: MofKouMokuV2IdentityRelation[] = [...identityByItem.values()]
+    .map(relation => {
+      const identityProjects: MofKouMokuV2IdentityProject[] = [...relation.projects.values()]
+        .map(project => ({
+          projectId: project.projectId,
+          projectName: project.projectName,
+          ministry: project.ministry,
+          sources: [...project.sources.values()].sort((a, b) => sourceSortKey(a).localeCompare(sourceSortKey(b))),
+        }))
+        .sort((a, b) => (a.projectName || a.projectId).localeCompare(b.projectName || b.projectId, 'ja'));
+      return {
+        relationId: relation.relationId,
+        relationKind: 'inherited-from-budget-link' as const,
+        reviewYear,
+        fiscalYear,
+        kouMokuKey: relation.kouMokuKey,
+        itemNaturalKey: relation.itemNaturalKey,
+        projectIds: identityProjects.map(project => project.projectId).sort(),
+        projects: identityProjects,
+      };
+    })
+    .sort((a, b) => a.kouMokuKey.localeCompare(b.kouMokuKey, 'ja'));
+  const product: MofKouMokuV2LinkageProduct = { schemaVersion: 3, sourcePublishSchemaVersion: read<Root>(path.join(rootDir, 'manifest.json')).publishSchemaVersion, generatedAt: new Date().toISOString(), reviewYear, fiscalYear, groups, identityRelations, diagnostics: { sourceLinkGroupCount: standalone.links.length, projectedGroupItemCount: groups.length, unmatchedItemIdCount: unmatched, ambiguousItemIdCount: ambiguous, multiItemGroupCount: multi, linkedKouMokuCount: new Set(groups.map(g => g.kouMokuKey)).size, linkedProjectCount: new Set(groups.flatMap(g => g.projectIds)).size, projectBreakdownRecordCount: breakdownRecords, projectBreakdownCheckedGroupCount: breakdowns.size, settlementIdentityRelationCount: identityRelations.length, settlementIdentityProjectCount: new Set(identityRelations.flatMap(r => r.projectIds)).size, settlementIdentityUnmatchedItemCount, settlementIdentityAmbiguousItemCount } };
   const output = path.join(rootDir, 'ui/mof-kou-moku', `review-${reviewYear}-fy${fiscalYear}.json.gz`); fs.mkdirSync(path.dirname(output), { recursive: true }); fs.writeFileSync(output, zlib.gzipSync(JSON.stringify(product), { level: 9 }));
-  console.log(`review-${reviewYear} × fy${fiscalYear}: groups=${groups.length} items=${product.diagnostics.linkedKouMokuCount} projects=${product.diagnostics.linkedProjectCount} unmatched=${unmatched} ambiguous=${ambiguous}`);
+  console.log(`review-${reviewYear} × fy${fiscalYear}: groups=${groups.length} items=${product.diagnostics.linkedKouMokuCount} projects=${product.diagnostics.linkedProjectCount} settlementRelations=${identityRelations.length} settlementProjects=${product.diagnostics.settlementIdentityProjectCount} settlementUnmatched=${settlementIdentityUnmatchedItemCount} settlementAmbiguous=${settlementIdentityAmbiguousItemCount}`);
 }
 const review = process.argv.find(x => x.startsWith('--review=')); const fy = process.argv.find(x => x.startsWith('--fy=')); const root = read<Root>(path.resolve(process.cwd(), 'public/data/v2/manifest.json'));
 for (const combo of root.links.filter(x => !review || x.reviewYear === Number(review.split('=')[1])).filter(x => !fy || x.fiscalYear === Number(fy.split('=')[1]))) build(combo.reviewYear, combo.fiscalYear);
