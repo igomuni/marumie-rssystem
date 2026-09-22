@@ -58,6 +58,8 @@ import {
   type V2StandaloneLinksProduct,
 } from '@/app/lib/v2-public-linkage';
 import type { V2PanelData } from '@/client/components/mof-kou/KouSidePanel';
+import { fetchMofKouMokuV2Linkage, selectV2ProjectionGroupsForLinks } from '@/app/lib/mof-kou-moku-v2-linkage';
+import type { MofKouMokuV2LinkGroup, MofKouMokuV2LinkageProduct } from '@/types/mof-kou-moku-v2-linkage';
 
 const EMPTY_RANGE: NumRange = [null, null];
 
@@ -149,6 +151,9 @@ export default function MOFKouPage() {
   const [v2SectionDetail, setV2SectionDetail] = useState<V2MofSectionDetail | null>(null);
   const [v2SectionLoading, setV2SectionLoading] = useState(false);
   const [v2SectionError, setV2SectionError] = useState<string | null>(null);
+  const [v2KouMokuLinkage, setV2KouMokuLinkage] = useState<MofKouMokuV2LinkageProduct | null>(null);
+  const [v2KouMokuLinkageLoading, setV2KouMokuLinkageLoading] = useState(false);
+  const [v2KouMokuLinkageError, setV2KouMokuLinkageError] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -194,6 +199,33 @@ export default function MOFKouPage() {
     fetchV2StandaloneLinks(reviewYear, data.metadata.fiscalYear, controller.signal)
       .then(setV2Links)
       .catch(() => setV2Links(null));
+    return () => controller.abort();
+  }, [data, reviewYear]);
+
+  useEffect(() => {
+    // PID別2-2内訳のsource of truth。年度切替中は旧projectionを使わない。
+    setV2KouMokuLinkage(null);
+    setV2KouMokuLinkageError(null);
+    if (!data || reviewYear === null) {
+      setV2KouMokuLinkageLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    const fiscalYear = data.metadata.fiscalYear;
+    setV2KouMokuLinkageLoading(true);
+    fetchMofKouMokuV2Linkage(reviewYear, fiscalYear, controller.signal)
+      .then(product => {
+        if (product.reviewYear !== reviewYear || product.fiscalYear !== fiscalYear) {
+          throw new Error('V2 projectionの年度が現在のselectionと一致しません。');
+        }
+        setV2KouMokuLinkage(product);
+      })
+      .catch(error => {
+        if (!controller.signal.aborted) setV2KouMokuLinkageError(error instanceof Error ? error.message : String(error));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setV2KouMokuLinkageLoading(false);
+      });
     return () => controller.abort();
   }, [data, reviewYear]);
 
@@ -534,6 +566,9 @@ export default function MOFKouPage() {
   const v2SectionCurrent =
     v2SectionDetail?.section.id === selectedV2Section?.id &&
     v2SectionDetail?.section.fiscalYear === currentFiscalYear;
+  const v2KouMokuLinkageCurrent =
+    v2KouMokuLinkage?.reviewYear === reviewYear &&
+    v2KouMokuLinkage?.fiscalYear === currentFiscalYear;
 
   const v2PanelData: V2PanelData | null = useMemo(() => {
     if (!v2Active || !selectedRow) return null;
@@ -552,6 +587,10 @@ export default function MOFKouPage() {
     const projectNames = currentRsIndex
       ? new Map(currentRsIndex.projects.map(p => [p.projectId, { name: p.projectName, ministry: p.ministry }]))
       : null;
+    const projectionGroups: MofKouMokuV2LinkGroup[] | null =
+      mode === 'budget-link' && currentSectionDetail?.rsLinks && v2KouMokuLinkageCurrent && v2KouMokuLinkage
+        ? selectV2ProjectionGroupsForLinks(v2KouMokuLinkage.groups, links ?? [])
+        : null;
     return {
       reviewYear,
       sectionMatched: selectedV2Section !== null,
@@ -559,10 +598,14 @@ export default function MOFKouPage() {
       links,
       itemNames,
       projectNames,
+      sectionAmountYen: selectedRow.amount,
+      projectionGroups,
+      projectionLoading: v2KouMokuLinkageLoading,
+      projectionError: v2KouMokuLinkageError,
       sectionLoading: v2SectionLoading,
       sectionError: v2SectionError,
     };
-  }, [v2Active, selectedRow, selectedV2Section, v2SectionCurrent, v2SectionDetail, v2RsIndex, v2RsIndexCurrent, reviewYear, v2SectionLoading, v2SectionError]);
+  }, [v2Active, selectedRow, selectedV2Section, v2SectionCurrent, v2SectionDetail, v2RsIndex, v2RsIndexCurrent, reviewYear, v2SectionLoading, v2SectionError, v2KouMokuLinkage, v2KouMokuLinkageCurrent, v2KouMokuLinkageLoading, v2KouMokuLinkageError]);
 
   if (error) {
     return (

@@ -4,6 +4,7 @@ import type {
   MofKouMokuV2LinkGroup,
   MofKouMokuV2LinkageProduct,
 } from "@/types/mof-kou-moku-v2-linkage";
+import type { V2MofRsLink } from "@/app/lib/v2-public-linkage";
 
 async function fetchGzipJson<T>(url: string, signal: AbortSignal): Promise<T> {
   const response = await fetch(url, { signal });
@@ -49,6 +50,59 @@ export function countV2ProjectsByKouMoku(
     out.set(key, new Set(groups.flatMap((g) => g.projectIds)).size);
   }
   return out;
+}
+
+/**
+ * UIで表示する「目」単位のMOF↔RS 2-2照合値。
+ * differenceYen はproduction linkでは MOF - RS なので、ここでは画面の列名に
+ * 合わせて RS - MOF を明示的に計算する。
+ */
+export interface V2KouMokuReconciliation {
+  mofAmountYen: number;
+  rsAmountYen: number;
+  rsMinusMofYen: number;
+  rsToMofRate: number | null;
+  projectIds: Set<string>;
+}
+
+export function buildV2KouMokuReconciliations(
+  groups: MofKouMokuV2LinkGroup[],
+): Map<string, V2KouMokuReconciliation> {
+  const out = new Map<string, V2KouMokuReconciliation>();
+  for (const group of groups) {
+    const current = out.get(group.kouMokuKey) ?? {
+      mofAmountYen: 0,
+      rsAmountYen: 0,
+      rsMinusMofYen: 0,
+      rsToMofRate: null,
+      projectIds: new Set<string>(),
+    };
+    current.mofAmountYen += group.mofAmountYen;
+    current.rsAmountYen += group.rsAmountYen;
+    for (const projectId of group.projectIds) current.projectIds.add(projectId);
+    current.rsMinusMofYen = current.rsAmountYen - current.mofAmountYen;
+    current.rsToMofRate =
+      current.mofAmountYen === 0
+        ? null
+        : current.rsAmountYen / current.mofAmountYen;
+    out.set(group.kouMokuKey, current);
+  }
+  return out;
+}
+
+/** section detailのlink集合から、同一linkId・同一itemNaturalKeyのprojectionだけを選ぶ。 */
+export function selectV2ProjectionGroupsForLinks(
+  groups: MofKouMokuV2LinkGroup[],
+  links: Pick<V2MofRsLink, "linkId" | "itemIds">[],
+): MofKouMokuV2LinkGroup[] {
+  const pairs = new Set(
+    links.flatMap((link) =>
+      link.itemIds.map((itemNaturalKey) => `${link.linkId}\x1f${itemNaturalKey}`),
+    ),
+  );
+  return groups.filter((group) =>
+    pairs.has(`${group.linkId}\x1f${group.itemNaturalKey}`),
+  );
 }
 
 export function groupV2SettlementIdentityByKey(

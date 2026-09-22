@@ -47,6 +47,7 @@ import { availableReviewYearsForFiscalYear, fetchV2RootManifest, type V2RootMani
 import {
   countV2IdentityProjectsByKouMoku,
   countV2ProjectsByKouMoku,
+  buildV2KouMokuReconciliations,
   fetchMofKouMokuV2Linkage,
   groupV2KouMokuLinksByKey,
   groupV2SettlementIdentityByKey,
@@ -271,6 +272,10 @@ export default function MOFKouMokuPage() {
     for (const [key, count] of v2SettlementRsCountByKey) out.set(key, count);
     return out;
   }, [v2BudgetRsCountByKey, v2SettlementRsCountByKey]);
+  const v2ReconciliationsByKey = useMemo(
+    () => buildV2KouMokuReconciliations(v2Linkage?.groups ?? []),
+    [v2Linkage]
+  );
 
   /**
    * その年度の RS 事業との紐づけを一括で取る（完全一致キーによる自動突合。
@@ -707,6 +712,7 @@ export default function MOFKouMokuPage() {
               onSelectRow={id => setSelected(cur => (cur === id ? null : id))}
               linkageByKey={linkageByKey}
               v2RsCountByKey={v2Mode ? v2RsCountByKey : null}
+              v2ReconciliationsByKey={v2Mode && v2Linkage ? v2ReconciliationsByKey : null}
             />
           </div>
 
