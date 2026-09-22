@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   availableReviewYearsForFiscalYear,
+  buildV2SectionIdentityProjectCounts,
   buildV2SectionProjectCounts,
   findV2SectionForLegacyRow,
   legacyBudgetTypeToV2Stage,
@@ -179,6 +180,14 @@ describe('V2 public linkage UI helpers', () => {
     const counts = buildV2SectionProjectCounts(links);
     expect(counts.get('mofsec_abc\x1finitial\x1f')?.size).toBe(3);
     expect(counts.get('mofsec_abc\x1fsupplement\x1f2')?.size).toBe(1);
+  });
+
+  it('決算用にsection内の当初・補正projectをdistinctで集計する', () => {
+    const links: V2StandaloneLink[] = [
+      { linkId: 'i', phase: 'initial', revision: null, matchMethod: 'exact-name-key', sectionIds: ['A'], projectIds: ['1', '2'], mofAmountYen: 0, rsAmountYen: 0, differenceYen: 0 },
+      { linkId: 's', phase: 'supplement', revision: 1, matchMethod: 'exact-name-key', sectionIds: ['A'], projectIds: ['2', '3'], mofAmountYen: 0, rsAmountYen: 0, differenceYen: 0 },
+    ];
+    expect(buildV2SectionIdentityProjectCounts(links).get('A')).toEqual(new Set(['1', '2', '3']));
   });
 
   it('fiscalYearに紐づくreviewYear候補を新しい順で求める', () => {

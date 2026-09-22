@@ -47,3 +47,31 @@ test('shows an empty RS tab for a V2 row with no linked projects', async ({ page
   await expect(page.getByText('紐づく RS 事業は見つかりませんでした。')).toBeVisible({ timeout: 30_000 });
   expect(pageErrors).toEqual([]);
 });
+
+test('shows settlement section identities without budget amounts', async ({ page }) => {
+  const pageErrors: string[] = [];
+  page.on('pageerror', error => pageErrors.push(error.message));
+
+  await page.goto('/mof-kou');
+  await page.getByLabel('年度', { exact: true }).selectOption('2024');
+  await page.getByLabel('RS review').selectOption('2025');
+  await expect(page.getByText('V2', { exact: true })).toBeVisible({ timeout: 30_000 });
+
+  const rows = page.locator('tbody tr');
+  const settlementIndex = await rows.evaluateAll(tableRows =>
+    tableRows.findIndex(row =>
+      row instanceof HTMLTableRowElement &&
+      row.cells[0]?.textContent?.trim() !== '—' &&
+      row.cells[1]?.textContent?.trim() === '決算'
+    )
+  );
+  expect(settlementIndex).toBeGreaterThanOrEqual(0);
+  await rows.nth(settlementIndex).click();
+
+  await page.getByRole('button', { name: /^関連RS事業 \([1-9]/ }).click();
+  await expect(page.getByText('関連する目', { exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText('リンク元', { exact: true })).toBeVisible();
+  await expect(page.getByText('元リンク根拠', { exact: true })).toBeVisible();
+  await expect(page.getByText('RSリンク額（group）', { exact: true })).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
+});

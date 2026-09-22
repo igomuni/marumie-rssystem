@@ -320,6 +320,19 @@ export function buildV2SectionProjectCounts(links: V2StandaloneLink[]): Map<stri
   return map;
 }
 
+/** 決算用: section内の当初・補正正式linkをstageをまたいでdistinct projectへ集約する。 */
+export function buildV2SectionIdentityProjectCounts(links: V2StandaloneLink[]): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>();
+  for (const link of links) {
+    for (const sectionId of link.sectionIds) {
+      const set = map.get(sectionId) ?? new Set<string>();
+      for (const projectId of link.projectIds) set.add(projectId);
+      map.set(sectionId, set);
+    }
+  }
+  return map;
+}
+
 export interface LegacySectionMappingResult {
   /** legacySectionNaturalKey(legacy) -> 一意接続できたV2 section */
   byLegacyKey: Map<string, V2MofSectionIndexRow>;
