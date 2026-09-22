@@ -927,6 +927,33 @@ export interface RsFundingGraph {
 
 /** MOF↔RS（2-2予算項目単位）のリンクグループ。名寄せが一意でない場合はグループ化して
  *  金額を突合するのみで、個々のRS行とMOF行を1:1断定しない */
+/** 個々のRS行がMOF targetへ一致した方法（record-level）。'mixed'はgroup-level状態であり
+ *  個々の行の一致方法ではないため、record側の型には含めない（review指摘） */
+export type MofRsRecordMatchMethod = 'exact-name-key' | 'supplemental-exact';
+
+/** group内の全RS行のrecord-level match methodから導出されるgroup全体の状態 */
+export type MofRsGroupMatchMethod = MofRsRecordMatchMethod | 'mixed';
+
+export type MofRsSupplementalResolution = 'explicit-scope-exact' | 'pair-unique' | 'rs-scope-resolved';
+
+export type MofRsSupplementalParseKind = 'labeled' | 'slash-path' | 'fwspace-pair' | 'slash-pair';
+
+/**
+ * link groupを構成する個々のRS行が「どうやってこのMOF targetへ一致したか」の監査情報。
+ * P1（構造化key完全一致）とP2（supplementalInfoからの復元）が同一group内に混在しうるため
+ * （1つのMOF targetへ複数RS行が乗る設計上、P2がexisting P1 targetへ追加されるケースが多い）、
+ * group-level matchMethod 1個だけでは個々のRS行のmatch方法を表現できない。
+ * record-level evidenceとして持たせることで、group-level matchMethodを崩さず後方互換を保つ。
+ */
+export interface MofRsMatchEvidence {
+  rsRecordId: string;
+  projectId: string;
+  method: MofRsRecordMatchMethod;
+  sourceField: 'structured-fields' | 'supplementalInfo';
+  resolution?: MofRsSupplementalResolution;
+  parseKind?: MofRsSupplementalParseKind;
+}
+
 export interface MofRsProjectLinkGroup {
   schemaVersion: number;
   recordType: 'mof_rs_project_link_group';
@@ -935,7 +962,7 @@ export interface MofRsProjectLinkGroup {
   fiscalYear: number;
   phase: 'initial' | 'supplement';
   revision: number | null;
-  matchMethod: 'exact-name-key';
+  matchMethod: MofRsGroupMatchMethod;
   naturalKey: string;
   mofRecordIds: string[];
   rsRecordIds: string[];
@@ -943,4 +970,5 @@ export interface MofRsProjectLinkGroup {
   mofAmountYen: number;
   rsAmountYen: number;
   differenceYen: number;
+  rsMatchEvidence: MofRsMatchEvidence[];
 }

@@ -7,7 +7,7 @@
  */
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord,
-  RsProjectSheetConflict, MofRsProjectLinkGroup, RsBudgetItemRecordV2, MofBudgetItemRecord,
+  RsProjectSheetConflict, MofRsProjectLinkGroup, RsBudgetItemRecordV2, MofBudgetItemRecord, MofRsGroupMatchMethod,
 } from '../types';
 
 /**
@@ -157,6 +157,43 @@ export function checkMofRsLinkIntegrity(
         metrics: { mofAmountYen: link.mofAmountYen, rsAmountYen: link.rsAmountYen, differenceYen: link.differenceYen, expectedDifferenceYen: link.mofAmountYen - link.rsAmountYen },
         message: `linkId=${link.linkId}: mofAmountYen-rsAmountYen !== differenceYen`,
       });
+    }
+
+    // rsMatchEvidence（record-level provenance）の整合性検査。
+    // P1/P2混在を将来表現するための監査情報なので、rsRecordIdsとの1:1対応が崩れると
+    // 「どの行がどう一致したか」という監査自体が虚偽になるためinvariant errorにする（warningにしない）
+    const evidenceByRsRecordId = new Map<string, number>();
+    for (const ev of link.rsMatchEvidence) {
+      evidenceByRsRecordId.set(ev.rsRecordId, (evidenceByRsRecordId.get(ev.rsRecordId) ?? 0) + 1);
+      if (!link.rsRecordIds.includes(ev.rsRecordId)) {
+        findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: ev.rsRecordId }, message: `linkId=${link.linkId}: rsMatchEvidenceのrsRecordId=${ev.rsRecordId}がrsRecordIdsに含まれない` });
+        continue;
+      }
+      const evidenceRs = rsById.get(ev.rsRecordId);
+      if (evidenceRs && evidenceRs.projectId !== ev.projectId) {
+        findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: ev.rsRecordId }, message: `linkId=${link.linkId}: rsMatchEvidence.projectId(${ev.projectId})がrsRecordId=${ev.rsRecordId}の実際のprojectId(${evidenceRs.projectId})と不一致` });
+      }
+    }
+    for (const id of link.rsRecordIds) {
+      const count = evidenceByRsRecordId.get(id) ?? 0;
+      if (count === 0) findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: id }, message: `linkId=${link.linkId}: rsRecordId=${id}に対応するrsMatchEvidenceが無い` });
+      else if (count > 1) findings.push({ severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId, recordId: id }, message: `linkId=${link.linkId}: rsRecordId=${id}に対応するrsMatchEvidenceが${count}件重複している` });
+    }
+    // review指摘: group-level matchMethodはrsMatchEvidenceのmethod集合から完全に導出できる
+    // 状態（exact-name-key/supplemental-exact/mixed）でなければならない。従来は「全evidenceが
+    // exact-name-keyならgroupもexact-name-key」という片方向チェックのみで、'mixed'を含む
+    // 残り2パターン（全evidenceがsupplemental-exact→group='supplemental-exact'、
+    // P1+P2混在→group='mixed'）を検査していなかった
+    if (link.rsMatchEvidence.length > 0) {
+      const methods = new Set(link.rsMatchEvidence.map(ev => ev.method));
+      const expectedMatchMethod: MofRsGroupMatchMethod = methods.size > 1 ? 'mixed' : [...methods][0];
+      if (link.matchMethod !== expectedMatchMethod) {
+        findings.push({
+          severity: 'error', check: 'mof-rs-link-evidence-integrity', category: 'invariant', scope: { linkId: link.linkId },
+          metrics: { expectedMatchMethod, actualMatchMethod: link.matchMethod },
+          message: `linkId=${link.linkId}: rsMatchEvidenceのmethod集合(${[...methods].join(',')})から導出されるgroup matchMethod(${expectedMatchMethod})と実際のmatchMethod(${link.matchMethod})が不一致`,
+        });
+      }
     }
   }
   for (const [key, linkIds] of rsRecordStageMembership) {

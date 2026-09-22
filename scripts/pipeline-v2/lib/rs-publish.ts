@@ -214,6 +214,6 @@ export function computeDroppedFieldsReport(): DroppedFieldsReport[] {
     diffFields('expense-uses', [...RS_BASE_FIELDS, 'recordType', ...EXPENSE_USE_KEYS, 'extraFields', 'source'], EXPENSE_USE_KEYS),
     diffFields('multi-year-contracts', [...RS_BASE_FIELDS, 'recordType', ...MULTI_CONTRACT_KEYS, 'otherContractRaw', 'hasContract', 'extraFields', 'source'], MULTI_CONTRACT_KEYS),
     diffFields('indirect-expenses', [...RS_BASE_FIELDS, 'recordType', ...INDIRECT_KEYS, 'amountRaw', 'sourceRowId', 'extraFields', 'source'], INDIRECT_KEYS),
-    diffFields('mof-rs-links', ['schemaVersion', 'recordType', 'matchMethod', 'naturalKey', 'mofRecordIds', 'rsRecordIds', ...LINK_KEYS], LINK_KEYS),
+    diffFields('mof-rs-links', ['schemaVersion', 'recordType', 'matchMethod', 'naturalKey', 'mofRecordIds', 'rsRecordIds', 'rsMatchEvidence', ...LINK_KEYS], LINK_KEYS),
   ];
 }

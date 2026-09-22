@@ -122,7 +122,7 @@ describe('compactMofRsLink: link groupが複数事業を束ねる意味論を保
       schemaVersion: 2, recordType: 'mof_rs_project_link_group', linkId: 'l1', reviewYear: 2025, fiscalYear: 2024,
       phase: 'initial', revision: null, matchMethod: 'exact-name-key', naturalKey: 'k',
       mofRecordIds: ['mof1'], rsRecordIds: ['rs1', 'rs2'], projectIds: ['1', '2'],
-      mofAmountYen: 100, rsAmountYen: 90, differenceYen: 10,
+      mofAmountYen: 100, rsAmountYen: 90, differenceYen: 10, rsMatchEvidence: [],
     };
     const out = compactMofRsLink(link);
     expect(out.projectIds).toEqual(['1', '2']);
