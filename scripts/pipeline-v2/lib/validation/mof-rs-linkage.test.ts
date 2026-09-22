@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   classifyUnlinkedReasons, checkLinkTaxonomyConsistency, diagnoseJointMinistryFallback,
-  analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups,
+  analyzeLinkDifferenceTaxonomy, analyzeMultiProjectGroups, diagnoseSupplementalExactFallback,
 } from './mof-rs-linkage';
 import type { MofBudgetItemRecord, RsBudgetItemRecordV2, MofRsProjectLinkGroup } from '../../types';
 
@@ -297,5 +297,222 @@ describe('analyzeMultiProjectGroups', () => {
     const result = analyzeMultiProjectGroups([]);
     expect(result.multiProjectGroupShare).toBe(0);
     expect(result.maxProjectCountPerGroup).toBe(0);
+  });
+});
+
+describe('diagnoseSupplementalExactFallback', () => {
+  /** missing-link-key（rsKeyFrom()===null）を作るため、budgetMinistry/sectionName/subItemNameを空にする */
+  function missingKeyItem(overrides: Partial<RsBudgetItemRecordV2>): RsBudgetItemRecordV2 {
+    return rsItem({
+      fiscalYear: 2025, budgetMinistry: '', sectionName: '', subItemName: '', organizationOrAccount: '', account: '', subAccount: '',
+      supplementalInfo: '', ...overrides,
+    });
+  }
+
+  it('fwspace-pair（項　目）がpair-uniqueとして安全候補になり、exact reconciliationする', () => {
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1000 });
+    const rs = missingKeyItem({ supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 1000 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('pair-unique');
+    expect(result.candidates[0].reconciliation).toBe('exact');
+    expect(result.summary.safeExactRecordCount).toBe(1);
+    expect(result.summary.safeExactGroupCount).toBe(1);
+  });
+
+  it('区切り文字が無く項・目を分離できない場合は候補にしない（substring一致を許さない）', () => {
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金' });
+    const rs = missingKeyItem({ supplementalInfo: '内閣官房共通費諸謝金' }); // fwspace/slash区切りが無い一つの塊
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(0);
+    expect(result.summary.parseRejectedCount).toBe(1);
+    expect(result.summary.parsedCandidateCount).toBe(0);
+  });
+
+  it('full path（一般会計／所管／組織／項／目）でscopeまで完全一致すればexplicit-scope-exact（P2a）になる', () => {
+    const mof = mofItem({ sectionName: '情報処理費', subItemName: '委託費', ministry: '総務省', organization: '総合通信基盤局' });
+    const rs = missingKeyItem({ supplementalInfo: '一般会計／総務省／総合通信基盤局／情報処理費／委託費' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-exact');
+    expect(result.summary.p2aFullPathExactCount).toBe(1);
+  });
+
+  it('review指摘: 一般会計マーカーが無い4token（所管/組織/項/目）full pathもexplicit-scope-exactとして解析する', () => {
+    const mof = mofItem({ sectionName: '国土交通統計調査費', subItemName: '諸謝金', ministry: '国土交通省', organization: '国土交通本省' });
+    const rs = missingKeyItem({ supplementalInfo: '国土交通省/国土交通本省/国土交通統計調査費/諸謝金' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-exact');
+  });
+
+  it('review指摘: 先頭の「※新規予算項目」等のnoteを除いた上でfull pathを解析する', () => {
+    const mof = mofItem({ sectionName: '消防防災体制等整備費', subItemName: '密集市街地火災対策支援補助金', ministry: '総務省', organization: '消防庁' });
+    const rs = missingKeyItem({ supplementalInfo: '※新規予算項目／一般会計 / 総務省 / 消防庁 / 消防防災体制等整備費 / 密集市街地火災対策支援補助金' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-exact');
+  });
+
+  it('review指摘: 特別会計のマーカー無しfull path（specialAccount/ministry/subAccount/項/目の順）も解析する', () => {
+    const mof = mofItem({
+      accountType: 'special', ministry: '内閣府、文部科学省、経済産業省及び環境省', specialAccount: 'エネルギー対策', subAccount: '電源開発促進勘定',
+      sectionName: '脱炭素成長型経済構造移行推進機構出資', subItemName: '脱炭素成長型経済構造移行推進機構出資金',
+    });
+    const rs = missingKeyItem({
+      accountType: 'special',
+      supplementalInfo: 'エネルギー対策 / 内閣府、文部科学省、経済産業省及び環境省 / 電源開発促進勘定 / 脱炭素成長型経済構造移行推進機構出資 / 脱炭素成長型経済構造移行推進機構出資金',
+    });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-exact');
+  });
+
+  it('review指摘: 一般会計行の（会計）一般会計ラベルをspecialAccountとして誤って矛盾判定しない', () => {
+    // 修正前は（会計）一般会計 → stripAccountSuffix()で"一般"がspecialAccountとして格納され、
+    // 一般会計MOF targetのspecialAccount=""と比較して誤ってexplicit-scope-conflictになっていた
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1000 });
+    const rs = missingKeyItem({ supplementalInfo: '（会計）一般会計／（項）内閣官房共通費／（目）諸謝金', budgetAmountYen: 1000 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).not.toBe('explicit-scope-conflict');
+    expect(result.candidates[0].reconciliation).toBe('exact');
+  });
+
+  it('review指摘: 同一targetへ異なるsafe resolution種別（explicit-scope-exact + rs-scope-resolved）の候補が乗る場合は合算してreconciliationする', () => {
+    // 修正前はtargetResolution別に別groupへ分けていたため、同一targetに複数のsafe候補が
+    // 異なるresolution種別で乗ると、それぞれ独立に（過小な）金額でexact/no-improve判定されていた
+    const mofA = mofItem({ recordId: 'mof_a', sectionName: '共通経費', subItemName: '庁費', ministry: '外務省', organization: '在外公館', amountYen: 1000 });
+    const mofB = mofItem({ recordId: 'mof_b', sectionName: '共通経費', subItemName: '庁費', ministry: '農林水産省', organization: '農林水産本省' });
+    const rowA = missingKeyItem({ recordId: 'rsitem_a', supplementalInfo: '一般会計／外務省／在外公館／共通経費／庁費', budgetAmountYen: 600 });
+    const rowB = missingKeyItem({ recordId: 'rsitem_b', supplementalInfo: '共通経費　庁費', ministry: '外務省', budgetAmountYen: 400 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mofA, mofB], [rowA, rowB]);
+    const candA = result.candidates.find(c => c.rsRecordId === 'rsitem_a')!;
+    const candB = result.candidates.find(c => c.rsRecordId === 'rsitem_b')!;
+    expect(candA.targetResolution).toBe('explicit-scope-exact');
+    expect(candB.targetResolution).toBe('rs-scope-resolved');
+    expect(candA.targetNaturalKey).toBe(candB.targetNaturalKey);
+    expect(candA.candidateGroupAmountYen).toBe(1000);
+    expect(candB.candidateGroupAmountYen).toBe(1000);
+    expect(candA.reconciliation).toBe('exact');
+    expect(candB.reconciliation).toBe('exact');
+  });
+
+  it('review指摘: 同一targetへexplicit-scope-exact + pair-uniqueが同時に乗り、合算するとMOF額を超過する場合はovercountになる', () => {
+    const mof = mofItem({ sectionName: '共通経費', subItemName: '庁費', ministry: '外務省', organization: '在外公館', amountYen: 1000 });
+    const rowExact = missingKeyItem({ recordId: 'rsitem_exact', supplementalInfo: '一般会計／外務省／在外公館／共通経費／庁費', budgetAmountYen: 1000 });
+    const rowPairUnique = missingKeyItem({ recordId: 'rsitem_pair', supplementalInfo: '共通経費　庁費', budgetAmountYen: 100 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rowExact, rowPairUnique]);
+    const candExact = result.candidates.find(c => c.rsRecordId === 'rsitem_exact')!;
+    const candPair = result.candidates.find(c => c.rsRecordId === 'rsitem_pair')!;
+    expect(candExact.targetResolution).toBe('explicit-scope-exact');
+    expect(candPair.targetResolution).toBe('pair-unique');
+    expect(candExact.candidateGroupAmountYen).toBe(1100);
+    // 修正前はexplicit-scope-exact単独(1000円)がMOF額(1000円)とexact判定され、
+    // pair-unique単独(100円)は別groupでno-improve扱いになり、超過が検出できなかった
+    expect(candExact.reconciliation).toBe('overcount');
+    expect(candPair.reconciliation).toBe('overcount');
+  });
+
+  it('review指摘: 明示（所管）はMOFのorganizationへのfallbackを許さずministryとexact比較する（明示scopeは弱めない）', () => {
+    // 補足情報の（所管）観光庁 はMOFのministry=国土交通省と一致しない。RS共通ministry列とは異なり、
+    // organization一致で救済すると明示scope矛盾を見逃す（R5「明示scopeは弱めない」に反する）
+    const mof = mofItem({ sectionName: '観光振興費', subItemName: '職員旅費', ministry: '国土交通省', organization: '観光庁' });
+    const rs = missingKeyItem({ supplementalInfo: '（所管）観光庁／（項）観光振興費／（目）職員旅費' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-conflict');
+  });
+
+  it('full pathの明示scopeがMOF targetと矛盾する場合は項・目と金額が一致してもsafeにしない（explicit-scope-conflict）', () => {
+    const mof = mofItem({ sectionName: '総合研究費', subItemName: '庁費', ministry: '法務省', organization: '法務総合研究所', amountYen: 500 });
+    const rs = missingKeyItem({ supplementalInfo: '一般会計／法務省／総務総合研究所／総合研究費／庁費', budgetAmountYen: 500 }); // 組織名がsource typo相当で不一致
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('explicit-scope-conflict');
+    expect(result.summary.safeExactRecordCount).toBe(0);
+    expect(result.summary.explicitScopeConflictCount).toBe(1);
+  });
+
+  it('pairがMOF複数targetに存在しても、RS構造化scope(ministry)でexactに1件へ絞れればrs-scope-resolvedになる', () => {
+    const mofA = mofItem({ recordId: 'mof_a', sectionName: '共通経費', subItemName: '庁費', ministry: '厚生労働省', organization: '厚生労働本省' });
+    const mofB = mofItem({ recordId: 'mof_b', sectionName: '共通経費', subItemName: '庁費', ministry: '農林水産省', organization: '農林水産本省' });
+    const rs = missingKeyItem({ supplementalInfo: '共通経費　庁費', ministry: '厚生労働省' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mofA, mofB], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('rs-scope-resolved');
+    expect(result.candidates[0].targetNaturalKey).toContain('厚生労働省');
+  });
+
+  it('構造化scopeで絞り込んでも複数残る場合はambiguous-targetとして候補にしない', () => {
+    const mofA = mofItem({ recordId: 'mof_a', sectionName: '共通経費', subItemName: '庁費', ministry: '厚生労働省', organization: '厚生労働本省' });
+    const mofC = mofItem({ recordId: 'mof_c', sectionName: '共通経費', subItemName: '庁費', ministry: '厚生労働省', organization: '検疫所' });
+    const rs = missingKeyItem({ supplementalInfo: '共通経費　庁費', ministry: '厚生労働省' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mofA, mofC], [rs]);
+    expect(result.candidates).toHaveLength(0);
+    expect(result.summary.ambiguousTargetCount).toBe(1);
+  });
+
+  it('section/itemはglobally uniqueだがreview時点RS scopeと過年度MOF scopeが一致しない場合はhistorical-scope-mismatch（P2c）としてsafeから除外する', () => {
+    const mof = mofItem({ sectionName: '費目X', subItemName: '項目Y', ministry: '厚生労働省', organization: '厚生労働本省' });
+    const rs = missingKeyItem({ supplementalInfo: '費目X　項目Y', ministry: '消費者庁' }); // 明示scopeは無い。組織移管等で現在の府省庁名が異なる
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('historical-scope-mismatch');
+    expect(result.summary.p2cHistoricalScopeMismatchCount).toBe(1);
+    expect(result.summary.safeExactRecordCount).toBe(0);
+  });
+
+  it('同一targetへ複数のP2候補がある場合は合算してからreconciliationする', () => {
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1500 });
+    const rsA = missingKeyItem({ recordId: 'rsitem_a', supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 900 });
+    const rsB = missingKeyItem({ recordId: 'rsitem_b', supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 600 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rsA, rsB]);
+    expect(result.candidates).toHaveLength(2);
+    for (const c of result.candidates) {
+      expect(c.candidateGroupAmountYen).toBe(1500);
+      expect(c.reconciliation).toBe('exact');
+    }
+    expect(result.summary.safeExactGroupCount).toBe(1);
+    expect(result.summary.safeExactRecordCount).toBe(2);
+  });
+
+  it('既存P1リンク済み金額 + P2候補合計 = MOF額でexactになる', () => {
+    const mof = mofItem({ sectionName: '共通経費', subItemName: '庁費', ministry: '外務省', organization: '在外公館', amountYen: 1000 });
+    const linkedRs = rsItem({ recordId: 'rsitem_linked', fiscalYear: 2025, sectionName: '共通経費', subItemName: '庁費', budgetMinistry: '外務省', organizationOrAccount: '在外公館', budgetAmountYen: 400 });
+    const candidateRs = missingKeyItem({ recordId: 'rsitem_candidate', supplementalInfo: '共通経費　庁費', ministry: '外務省', budgetAmountYen: 600 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [linkedRs, candidateRs]);
+    const candidate = result.candidates.find(c => c.rsRecordId === 'rsitem_candidate')!;
+    expect(candidate.existingRsAmountYen).toBe(400);
+    expect(candidate.reconstructedRsAmountYen).toBe(1000);
+    expect(candidate.reconciliation).toBe('exact');
+  });
+
+  it('P1だけで既にMOF額を満たしているtargetへP2を追加するとovercountになる', () => {
+    const mof = mofItem({ sectionName: '共通経費', subItemName: '庁費', ministry: '外務省', organization: '在外公館', amountYen: 400 });
+    const linkedRs = rsItem({ recordId: 'rsitem_linked', fiscalYear: 2025, sectionName: '共通経費', subItemName: '庁費', budgetMinistry: '外務省', organizationOrAccount: '在外公館', budgetAmountYen: 400 });
+    const candidateRs = missingKeyItem({ recordId: 'rsitem_candidate', supplementalInfo: '共通経費　庁費', ministry: '外務省', budgetAmountYen: 600 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [linkedRs, candidateRs]);
+    const candidate = result.candidates.find(c => c.rsRecordId === 'rsitem_candidate')!;
+    expect(candidate.reconciliation).toBe('overcount');
+  });
+
+  it('target選択に金額を使わない: MOF額とRS額が大きく異なっていても名称一致だけでtargetを決める', () => {
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房', amountYen: 1 });
+    const rs = missingKeyItem({ supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣', budgetAmountYen: 999_999_999 });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [rs]);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.candidates[0].targetResolution).toBe('pair-unique'); // 金額が大きく乖離していてもtargetは決まる
+    expect(result.candidates[0].reconciliation).not.toBe('exact'); // reconciliationはあくまで金額次第
+  });
+
+  it('fiscalYearが一致しない行・rsPhaseが対応しない行・rsKeyFromが非nullの行はP2対象から除外する', () => {
+    const mof = mofItem({ sectionName: '内閣官房共通費', subItemName: '諸謝金', ministry: '内閣', organization: '内閣官房' });
+    const wrongYear = missingKeyItem({ recordId: 'wrong_year', fiscalYear: 2024, supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣' });
+    const unsupportedType = missingKeyItem({ recordId: 'unsupported_type', budgetType: '前年度から繰越し', supplementalInfo: '内閣官房共通費　諸謝金', ministry: '内閣' });
+    const alreadyKeyed = rsItem({ recordId: 'already_keyed', fiscalYear: 2025, sectionName: '内閣官房共通費', subItemName: '諸謝金', budgetMinistry: '内閣', organizationOrAccount: '内閣官房', supplementalInfo: '内閣官房共通費　諸謝金' });
+    const result = diagnoseSupplementalExactFallback(2025, 2025, [mof], [wrongYear, unsupportedType, alreadyKeyed]);
+    expect(result.candidates).toHaveLength(0);
+    expect(result.summary.parsedCandidateCount).toBe(0);
   });
 });
