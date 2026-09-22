@@ -38,6 +38,25 @@ import {
   type SortDir,
   type SortKey,
 } from '@/client/components/mof-kou/columns';
+import {
+  availableReviewYearsForFiscalYear,
+  buildV2SectionProjectCounts,
+  fetchV2MofIndex,
+  fetchV2MofSection,
+  fetchV2RootManifest,
+  fetchV2RsIndex,
+  fetchV2StandaloneLinks,
+  legacyBudgetTypeToV2Stage,
+  lookupV2Section,
+  mapLegacySectionsToV2,
+  v2StageKey,
+  type V2MofIndex,
+  type V2MofSectionDetail,
+  type V2RootManifest,
+  type V2RsIndex,
+  type V2StandaloneLinksProduct,
+} from '@/app/lib/v2-public-linkage';
+import type { V2PanelData } from '@/client/components/mof-kou/KouSidePanel';
 
 const EMPTY_RANGE: NumRange = [null, null];
 
@@ -119,6 +138,107 @@ export default function MOFKouPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // --- Pipeline V2 linkage overlay（既存UIは変えず、RS紐づけだけV2 public dataへ差し替える） ---
+  const [v2Manifest, setV2Manifest] = useState<V2RootManifest | null>(null);
+  const [reviewYear, setReviewYear] = useState<number | null>(null);
+  const [v2MofIndex, setV2MofIndex] = useState<V2MofIndex | null>(null);
+  const [v2Links, setV2Links] = useState<V2StandaloneLinksProduct | null>(null);
+  const [v2RsIndex, setV2RsIndex] = useState<V2RsIndex | null>(null);
+  const [v2SectionDetail, setV2SectionDetail] = useState<V2MofSectionDetail | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchV2RootManifest(controller.signal)
+      .then(setV2Manifest)
+      .catch(() => setV2Manifest(null));
+    return () => controller.abort();
+  }, []);
+
+  const reviewYearOptions = useMemo(
+    () => (v2Manifest && data ? availableReviewYearsForFiscalYear(v2Manifest, data.metadata.fiscalYear) : []),
+    [v2Manifest, data]
+  );
+
+  // fiscalYearが変わって選択中のreviewYearが候補から外れたら、最新のreviewYearへ揃える
+  useEffect(() => {
+    setReviewYear(prev => {
+      if (reviewYearOptions.length === 0) return null;
+      return prev !== null && reviewYearOptions.includes(prev) ? prev : reviewYearOptions[0];
+    });
+  }, [reviewYearOptions]);
+
+  useEffect(() => {
+    // manifestのmof一覧に無い年度はV2 MOFデータが未生成のため、404を承知で叩かない
+    if (!data || !v2Manifest?.mof.some(m => m.fiscalYear === data.metadata.fiscalYear)) {
+      setV2MofIndex(null);
+      return;
+    }
+    const controller = new AbortController();
+    fetchV2MofIndex(data.metadata.fiscalYear, controller.signal)
+      .then(setV2MofIndex)
+      .catch(() => setV2MofIndex(null));
+    return () => controller.abort();
+  }, [data, v2Manifest]);
+
+  useEffect(() => {
+    if (!data || reviewYear === null) {
+      setV2Links(null);
+      return;
+    }
+    const controller = new AbortController();
+    fetchV2StandaloneLinks(reviewYear, data.metadata.fiscalYear, controller.signal)
+      .then(setV2Links)
+      .catch(() => setV2Links(null));
+    return () => controller.abort();
+  }, [data, reviewYear]);
+
+  useEffect(() => {
+    if (reviewYear === null) {
+      setV2RsIndex(null);
+      return;
+    }
+    const controller = new AbortController();
+    fetchV2RsIndex(reviewYear, controller.signal)
+      .then(setV2RsIndex)
+      .catch(() => setV2RsIndex(null));
+    return () => controller.abort();
+  }, [reviewYear]);
+
+  /** legacy「項」行 → V2 section の一括接続。実データでの診断（matched/unmatched/ambiguous）はconsoleへ出す */
+  const sectionMapping = useMemo(() => {
+    if (!data || !v2MofIndex) return null;
+    const mapping = mapLegacySectionsToV2(data.sections, v2MofIndex.sections);
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line no-console
+      console.info(
+        `[mof-kou V2 overlay] fiscalYear=${data.metadata.fiscalYear} legacyRows=${data.sections.length} matched=${mapping.matchedCount} unmatched=${mapping.unmatchedCount} ambiguous=${mapping.ambiguousCount}`
+      );
+    }
+    return mapping;
+  }, [data, v2MofIndex]);
+
+  const v2ProjectCounts = useMemo(() => (v2Links ? buildV2SectionProjectCounts(v2Links.links) : null), [v2Links]);
+
+  /** V2 overlayがこの画面全体で有効かどうか。有効/無効は画面単位で切り替え、行ごとにV1/V2を混在させない */
+  const v2Active = v2MofIndex !== null && v2Links !== null && sectionMapping !== null;
+
+  function v2RsProjectCountFor(row: MOFKouSectionSummary): number {
+    if (!v2Active || !sectionMapping || !v2ProjectCounts) return row.rsProjectCount;
+    const v2Section = lookupV2Section(sectionMapping, row);
+    const stage = legacyBudgetTypeToV2Stage(row.budgetType);
+    if (!v2Section || !stage) return 0;
+    const key = `${v2Section.id}\x1f${v2StageKey(stage)}`;
+    return v2ProjectCounts.get(key)?.size ?? 0;
+  }
+
+  const sections = useMemo(() => {
+    if (!data) return [];
+    if (!v2Active) return data.sections;
+    return data.sections.map(row => ({ ...row, rsProjectCount: v2RsProjectCountFor(row) }));
+    // v2RsProjectCountForはsectionMapping/v2ProjectCounts/v2Activeにのみ依存する（rowはmapが渡す）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, v2Active, sectionMapping, v2ProjectCounts]);
 
   useEffect(() => {
     let cancelled = false;
@@ -206,13 +326,12 @@ export default function MOFKouPage() {
   const { account, budgetType, ministry, organization, subAccount } = filters;
 
   const baseRows = useMemo(() => {
-    if (!data) return [];
-    return data.sections.filter(s => {
+    return sections.filter(s => {
       if (account.length > 0 && !account.includes(ACCOUNT_LABEL[s.accountType])) return false;
       if (budgetType.length > 0 && !budgetType.includes(s.budgetType)) return false;
       return true;
     });
-  }, [data, account, budgetType]);
+  }, [sections, account, budgetType]);
 
   const ministries = useMemo(
     () => sortByCodeOrder([...new Set(baseRows.map(s => s.ministry || s.agency).filter(Boolean))], MINISTRY_ORDER),
@@ -244,7 +363,7 @@ export default function MOFKouPage() {
 
   /** 数値スライダーの可動域は年度全体（他の絞り込みの影響を受けない）から求める */
   const domains: FilterDomains = useMemo(() => {
-    const rows = data?.sections ?? [];
+    const rows = sections;
     const rates = rows.map(s => changeRate(s.amount, s.previousAmount)).filter((v): v is number => typeof v === 'number');
     return {
       jikouCount: boundsOf(rows.map(s => s.jikouCount)),
@@ -255,7 +374,7 @@ export default function MOFKouPage() {
       difference: boundsOf(rows.map(s => s.difference).filter((v): v is number => v !== null)),
       rate: boundsOf(rates),
     };
-  }, [data]);
+  }, [sections]);
 
   const filtered = useMemo(() => {
     function rateOf(row: MOFKouSectionSummary): number | null {
@@ -353,7 +472,46 @@ export default function MOFKouPage() {
     document.body.style.userSelect = 'none';
   }
 
-  const selectedRow = selected ? (filtered.find(r => r.id === selected) ?? data?.sections.find(r => r.id === selected)) : undefined;
+  const selectedRow = selected ? (filtered.find(r => r.id === selected) ?? sections.find(r => r.id === selected)) : undefined;
+
+  const selectedV2Section = useMemo(
+    () => (selectedRow && sectionMapping ? lookupV2Section(sectionMapping, selectedRow) : null),
+    [selectedRow, sectionMapping]
+  );
+
+  useEffect(() => {
+    if (!selectedV2Section || !data) {
+      setV2SectionDetail(null);
+      return;
+    }
+    const controller = new AbortController();
+    fetchV2MofSection(data.metadata.fiscalYear, selectedV2Section.id, controller.signal)
+      .then(setV2SectionDetail)
+      .catch(() => setV2SectionDetail(null));
+    return () => controller.abort();
+  }, [selectedV2Section, data]);
+
+  const v2PanelData: V2PanelData | null = useMemo(() => {
+    if (!v2Active || !selectedRow) return null;
+    const stage = legacyBudgetTypeToV2Stage(selectedRow.budgetType);
+    const links = stage && v2SectionDetail?.rsLinks
+      ? v2SectionDetail.rsLinks.filter(
+          l => l.reviewYear === reviewYear && l.phase === stage.phase && l.revision === stage.revision
+        )
+      : null;
+    const itemNames = v2SectionDetail ? new Map(v2SectionDetail.items.map(it => [it.id, it.name])) : null;
+    const projectNames = v2RsIndex
+      ? new Map(v2RsIndex.projects.map(p => [p.projectId, { name: p.projectName, ministry: p.ministry }]))
+      : null;
+    return {
+      reviewYear,
+      sectionMatched: selectedV2Section !== null,
+      stageSupported: stage !== null,
+      links,
+      itemNames,
+      projectNames,
+    };
+  }, [v2Active, selectedRow, selectedV2Section, v2SectionDetail, v2RsIndex, reviewYear]);
 
   if (error) {
     return (
@@ -452,6 +610,26 @@ export default function MOFKouPage() {
               列幅をリセット
             </button>
           )}
+
+          {reviewYearOptions.length > 0 && (
+            <label className="flex items-center gap-1.5 whitespace-nowrap text-neutral-500">
+              RS review
+              <select
+                value={reviewYear ?? ''}
+                onChange={e => setReviewYear(Number(e.target.value))}
+                className="rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-neutral-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+              >
+                {reviewYearOptions.map(y => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+              <span className={v2Active ? 'text-emerald-700 dark:text-emerald-400' : 'text-neutral-400'}>
+                {v2Active ? 'V2' : '旧集計'}
+              </span>
+            </label>
+          )}
         </div>
       </section>
 
@@ -521,6 +699,7 @@ export default function MOFKouPage() {
               historyLoading={historyLoading}
               historyError={historyError}
               linkageRsYear={data.metadata.linkage.rsYear}
+              v2={v2PanelData}
               width={panelWidth}
               tab={panelTab}
               onTabChange={setPanelTab}
