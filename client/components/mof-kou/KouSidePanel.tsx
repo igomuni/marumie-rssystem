@@ -805,7 +805,7 @@ function V2RsTab({
     );
   }
   if (v2.mode === 'unsupported') {
-    return <p className="p-3 text-neutral-400">この予算種別（決算・暫定）はV2のMOF↔RSリンクの対象外です。</p>;
+    return <p className="p-3 text-neutral-400">この予算種別（暫定）はV2のMOF↔RSリンクの対象外です。</p>;
   }
 
   if (v2.mode === 'settlement-identity') {
@@ -830,7 +830,7 @@ function V2RsTab({
     group.projects.map(project => ({ group, project }))
   );
   const projectBudgetShare = (row: V2ProjectRow) =>
-    row.project.projectBudgetAmountYen === null ? null : row.project.rsAmountYen / row.project.projectBudgetAmountYen;
+    !row.project.projectBudgetAmountYen ? null : row.project.rsAmountYen / row.project.projectBudgetAmountYen;
   const mofItemShare = (row: V2ProjectRow) =>
     row.group.mofAmountYen === 0 ? null : row.project.rsAmountYen / row.group.mofAmountYen;
   const itemName = (row: V2ProjectRow) =>

@@ -236,7 +236,10 @@ export default function MOFKouMokuPage() {
   useEffect(() => {
     setReviewYear(prev => reviewYearOptions.length === 0 ? null : (prev !== null && reviewYearOptions.includes(prev) ? prev : reviewYearOptions[0]));
   }, [reviewYearOptions]);
-  const v2Mode = reviewYearOptions.length > 0 && reviewYear !== null;
+  // v2Linkageが読めていない（404・年度不一致・読込中）間はV1件数を出し続ける。
+  // reviewYearOptionsだけで判定すると、projectionが読めない場合でも空のv2RsCountByKeyを
+  // 見せてしまい、RS列が全行0になる・件数フィルタが全行を落とす等の不整合が起こる。
+  const v2Mode = reviewYearOptions.length > 0 && reviewYear !== null && v2Linkage !== null;
   useEffect(() => {
     // selection変更時には旧payloadを即座に無効化する。
     setV2Linkage(null);

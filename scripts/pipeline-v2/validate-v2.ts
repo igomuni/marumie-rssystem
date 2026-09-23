@@ -47,6 +47,7 @@ import {
   checkLinksPublishCounts, checkLinksSemanticEquality, checkLinksSectionIdsReconstruction, checkLinksManifestSetCounts,
   checkSettlementPublishCounts, checkSettlementSemanticEquality, checkSettlementSourceLinksReferenceFormalLinks,
   checkSettlementSectionIdsReconstruction, checkSettlementManifestCounts, checkSettlementPayloadSchema,
+  checkSettlementManifestPresence,
   checkRootManifestConsistency,
   type RsPublishIndex, type RsPublishManifest, type MofPublishIndex, type MofPublishManifest,
   type PublishedLink, type LinksPublishManifest, type RootManifest, type MofSectionDetail,
@@ -613,6 +614,7 @@ function validatePublish(outputRoot: string, publicRoot: string): {
       const publishedSettlement = readGzipJson<SettlementPublishPayload & { dataStatus: string }>(settlementPath);
       const settlementManifest = manifest && 'settlement' in manifest ? (manifest as unknown as { settlement: SettlementPublishManifest }).settlement : null;
 
+      findings.push(...checkSettlementManifestPresence(reviewYear, fiscalYear, manifest !== null, settlementManifest));
       findings.push(...checkSettlementPayloadSchema(reviewYear, fiscalYear, publishedSettlement, SETTLEMENT_PRODUCT_SCHEMA_VERSION, PUBLISH_SCHEMA_VERSION));
       findings.push(...checkSettlementPublishCounts(reviewYear, fiscalYear, derivedRelations, publishedSettlement, settlementManifest));
       findings.push(...checkSettlementSemanticEquality(reviewYear, fiscalYear, derivedRelations, publishedSettlement));

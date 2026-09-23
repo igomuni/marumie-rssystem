@@ -12,6 +12,7 @@ import {
   checkLinksPublishCounts, checkLinksSemanticEquality, checkLinksManifestSetCounts,
   checkSettlementPublishCounts, checkSettlementSemanticEquality, checkSettlementSourceLinksReferenceFormalLinks,
   checkSettlementSectionIdsReconstruction, checkSettlementManifestCounts, checkSettlementPayloadSchema,
+  checkSettlementManifestPresence,
   checkRootManifestConsistency, readGzipJson,
   type RsPublishIndex, type MofPublishIndex, type PublishedLink, type MofSectionDetail,
   type PublishedSettlementIdentity, type SettlementPublishPayload,
@@ -577,6 +578,23 @@ describe('checkSettlementPublishCounts / checkSettlementSemanticEquality', () =>
     expect(findings.length).toBeGreaterThan(0);
   });
 
+  it('manifestがnullでも、derivedとpublishedの件数不一致検算はskipしない（review指摘: manifest欠落がcount checkをsilentに無効化しないこと）', () => {
+    const findings = checkSettlementPublishCounts(
+      2024, 2024,
+      [settlementRelation({}), settlementRelation({ settlementItemNaturalKey: 'ik2' })],
+      { identities: [] },
+      null,
+    );
+    expect(findings.some(f => f.message.includes('Derived relation'))).toBe(true);
+  });
+
+  it('manifestがnullでも、derivedとpublishedの件数が一致していればfindingsは空', () => {
+    const d = settlementRelation({});
+    const p = publishedSettlementIdentity({});
+    const findings = checkSettlementPublishCounts(2024, 2024, [d], { identities: [p] }, null);
+    expect(findings).toHaveLength(0);
+  });
+
   it('settlementItemIdがpublishedに見つからなければerror', () => {
     const findings = checkSettlementSemanticEquality(2024, 2024, [settlementRelation({ settlementItemNaturalKey: 'missing' })], { identities: [] });
     expect(findings.some(f => f.message.includes('見つからない'))).toBe(true);
@@ -679,6 +697,23 @@ describe('checkSettlementPayloadSchema', () => {
   it('reviewYear/fiscalYearが対象と不一致なら検出する（ディレクトリと中身のずれ検出）', () => {
     const findings = checkSettlementPayloadSchema(2024, 2024, settlementPayload({ reviewYear: 2025, fiscalYear: 2023 }), 2, 3);
     expect(findings.filter(f => f.message.includes('reviewYear') || f.message.includes('fiscalYear'))).toHaveLength(2);
+  });
+});
+
+describe('checkSettlementManifestPresence', () => {
+  it('manifest.jsonが存在し、settlementサマリも存在すればfindingsは空', () => {
+    const findings = checkSettlementManifestPresence(2024, 2024, true, { dataStatus: 'available', relationCount: 1, linkedProjectCount: 1, compressedBytes: 10, file: 'settlement.json.gz' });
+    expect(findings).toHaveLength(0);
+  });
+
+  it('manifest.jsonは存在するがsettlementサマリが欠落していればerror（review指摘: silentに他checkがskipされるのを防ぐ）', () => {
+    const findings = checkSettlementManifestPresence(2024, 2024, true, null);
+    expect(findings.some(f => f.message.includes('settlementサマリが存在しない'))).toBe(true);
+  });
+
+  it('manifest.json自体が存在しない場合は、settlementサマリ欠落として二重報告しない（別のartifact-presence checkの責務）', () => {
+    const findings = checkSettlementManifestPresence(2024, 2024, false, null);
+    expect(findings).toHaveLength(0);
   });
 });
 

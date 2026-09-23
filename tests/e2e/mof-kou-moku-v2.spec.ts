@@ -14,6 +14,58 @@ test("loads the FY2025 V2 item projection", async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
+test("keeps the legacy RS tab active until the V2 projection payload actually loads (review fix)", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  let releaseProjection!: () => void;
+  const projectionRequest = new Promise<void>((resolve) => {
+    releaseProjection = resolve;
+  });
+  // FY2025は決算データ自体が無い年度（no_settlement_rows）のため、決算行を持つFY2024
+  // ×review-2025のペアで検証する。
+  await page.route(
+    "**/data/v2/ui/mof-kou-moku/review-2025-fy2024.json.gz",
+    async (route) => {
+      await projectionRequest;
+      await route.continue();
+    },
+  );
+
+  await page.goto("/mof-kou-moku");
+  await page.getByLabel("年度", { exact: true }).selectOption("2024");
+  await page.getByLabel("RS review").selectOption("2025");
+  await expect(page.getByLabel("RS review")).toHaveValue("2025", {
+    timeout: 30_000,
+  });
+  await expect(page.getByText("V2読込中", { exact: true })).toBeVisible({
+    timeout: 30_000,
+  });
+
+  // reviewYearOptionsだけを条件にすると、projectionが未取得でもv2Mode=trueになり、
+  // 一覧のRS件数が空のv2RsCountByKeyから引かれて全行「—」になってしまう（review指摘）。
+  // projectionが届くまでは、legacy linkageByKey由来の実件数を出し続けるべき
+  // （このreviewYear×fiscalYearペアは実際にRSリンクを持つ行が存在する）。
+  const tableRows = page.locator("tbody tr");
+  await expect(tableRows.first()).toBeVisible();
+  const nonZeroDuringLoad = await tableRows.evaluateAll((rowEls) =>
+    rowEls.some(
+      (row) =>
+        row instanceof HTMLTableRowElement &&
+        Number(row.cells[0]?.textContent?.trim()) > 0,
+    ),
+  );
+  expect(nonZeroDuringLoad).toBe(true);
+
+  releaseProjection();
+  await expect(page.getByText("V2", { exact: true })).toBeVisible({
+    timeout: 30_000,
+  });
+  expect(errors).toEqual([]);
+});
+
 test("shows exact budget-link identities for an FY2024 settlement item", async ({
   page,
 }) => {

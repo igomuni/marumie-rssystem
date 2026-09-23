@@ -768,6 +768,23 @@ export function checkSettlementPayloadSchema(
   return findings;
 }
 
+/**
+ * manifest.jsonにsettlementサマリ（manifest.settlement）が存在するか検証する。
+ * manifest自体は存在するがsettlementサマリだけが欠落している場合、
+ * checkSettlementPublishCounts等のmanifest依存checkがsilentにskipされるため、
+ * その手前でこの欠落自体を独立したfindingとして検出する。
+ */
+export function checkSettlementManifestPresence(
+  reviewYear: number, fiscalYear: number, manifestExists: boolean, settlementManifest: SettlementPublishManifest | null
+): Finding[] {
+  const findings: Finding[] = [];
+  if (manifestExists && !settlementManifest) {
+    pushError(findings, 'settlement-publish-manifest-presence', { reviewYear, fiscalYear },
+      `review-${reviewYear}×fy${fiscalYear}: manifest.jsonにsettlementサマリが存在しない`);
+  }
+  return findings;
+}
+
 /** derived relation件数とpublished identities件数・manifest.relationCountを検算する */
 export function checkSettlementPublishCounts(
   reviewYear: number, fiscalYear: number, derivedRelations: MofRsSettlementIdentityRelation[],
@@ -775,9 +792,13 @@ export function checkSettlementPublishCounts(
 ): Finding[] {
   const findings: Finding[] = [];
   const scope = { reviewYear, fiscalYear };
-  if (!published || !manifest) return findings;
+  if (!published) return findings;
   if (derivedRelations.length !== published.identities.length) pushError(findings, 'settlement-publish-count', scope,
     `Derived relation(${derivedRelations.length})とpublished identities.length(${published.identities.length})が不一致`);
+  // manifestが無い（=manifest.jsonにsettlementサマリが欠落している）場合、それ自体は
+  // 別checkで検出するが、derived↔published件数の検算はmanifestの有無に関わらず行う
+  // （manifestが無いことを理由にcount checkをsilentにskipしない）。
+  if (!manifest) return findings;
   if (published.identities.length !== manifest.relationCount) pushError(findings, 'settlement-publish-count', scope,
     `published identities.length(${published.identities.length})とmanifest.relationCount(${manifest.relationCount})が不一致`);
   return findings;
