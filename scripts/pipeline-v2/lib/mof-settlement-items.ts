@@ -7,8 +7,10 @@
  * 方針:
  * - itemNaturalKey は budget-items.jsonl の既存キー（normalize-mof.ts生成）をそのまま使い、
  *   新しいキー生成ロジックは作らない。
- * - 同一itemNaturalKeyに複数のsettlement行がある場合、どちらか一方を選ばず ambiguous として残す
- *   （合算はするが matchStatus で明示する。値を握りつぶさない）。
+ * - 同一itemNaturalKeyに複数のsettlement行があるのは、財政法公債金対象非対象別分類コード等
+ *   による内訳行の分割であり、複数のcanonical item候補ではない。したがって常に合算し、
+ *   `sourceRecordCount` で複数sourceであることだけを保持する（identity ambiguityとしては扱わない）。
+ *   真のambiguity（名称fallbackキーから複数のitemNaturalKeyが候補になるケース）はPhase B/Cで扱う。
  * - 必須フィールドのいずれかがnull/undefinedの行が混ざるグループは、その項目をnullのまま伝播する
  *   （0で埋めない）。
  */
@@ -41,8 +43,8 @@ export interface SettlementItemRecord {
   carryoverOutYen: number | null;
   unusedYen: number | null;
 
-  matchStatus: 'exact' | 'ambiguous';
-  candidateCount: number;
+  /** 同一itemNaturalKeyの内訳行数（分類コード違い等）。1より大きくてもidentity ambiguityではない */
+  sourceRecordCount: number;
   sourceRecordIds: string[];
 
   equationChecked: boolean;
@@ -54,8 +56,7 @@ export interface SettlementItemsSummary {
   schemaVersion: number;
   fiscalYear: number;
   itemCount: number;
-  exactCount: number;
-  ambiguousCount: number;
+  multiSourceItemCount: number;
   equationCheckedCount: number;
   equationSkippedCount: number;
   componentsToCurrentBudgetMismatches: number;
@@ -74,7 +75,7 @@ function sumField(rows: MofBudgetItemRecord[], field: keyof MofBudgetItemRecord)
   return rows.reduce((sum, r) => sum + (Number(r[field]) || 0), 0);
 }
 
-export function buildSettlementItems(items: MofBudgetItemRecord[]): { items: SettlementItemRecord[]; summary: SettlementItemsSummary } {
+export function buildSettlementItems(items: MofBudgetItemRecord[], fiscalYear: number): { items: SettlementItemRecord[]; summary: SettlementItemsSummary } {
   const settlementRows = items.filter(r => r.phase === 'settlement');
   const groups = new Map<string, MofBudgetItemRecord[]>();
   for (const row of settlementRows) {
@@ -84,8 +85,7 @@ export function buildSettlementItems(items: MofBudgetItemRecord[]): { items: Set
   }
 
   const result: SettlementItemRecord[] = [];
-  let exactCount = 0;
-  let ambiguousCount = 0;
+  let multiSourceItemCount = 0;
   let equationCheckedCount = 0;
   let equationSkippedCount = 0;
   let componentsToCurrentBudgetMismatches = 0;
@@ -95,8 +95,7 @@ export function buildSettlementItems(items: MofBudgetItemRecord[]): { items: Set
   for (const key of [...groups.keys()].sort()) {
     const rows = groups.get(key)!;
     const template = rows[0];
-    const matchStatus: 'exact' | 'ambiguous' = rows.length > 1 ? 'ambiguous' : 'exact';
-    if (matchStatus === 'ambiguous') ambiguousCount++; else exactCount++;
+    if (rows.length > 1) multiSourceItemCount++;
 
     const budgetAppropriationYen = sumField(rows, 'budgetAmountYen');
     const carryoverInYen = sumField(rows, 'carryoverInYen');
@@ -133,7 +132,7 @@ export function buildSettlementItems(items: MofBudgetItemRecord[]): { items: Set
     result.push({
       schemaVersion: 1,
       recordType: 'mof_settlement_item',
-      fiscalYear: template.fiscalYear,
+      fiscalYear,
       itemNaturalKey: key,
       accountType: template.accountType,
       ministry: template.ministry ?? '',
@@ -155,8 +154,7 @@ export function buildSettlementItems(items: MofBudgetItemRecord[]): { items: Set
       spentYen,
       carryoverOutYen,
       unusedYen,
-      matchStatus,
-      candidateCount: rows.length,
+      sourceRecordCount: rows.length,
       sourceRecordIds: rows.map(r => r.recordId).sort(),
       equationChecked,
       componentsToCurrentBudgetMismatch,
@@ -166,10 +164,9 @@ export function buildSettlementItems(items: MofBudgetItemRecord[]): { items: Set
 
   const summary: SettlementItemsSummary = {
     schemaVersion: 1,
-    fiscalYear: settlementRows[0]?.fiscalYear ?? 0,
+    fiscalYear,
     itemCount: result.length,
-    exactCount,
-    ambiguousCount,
+    multiSourceItemCount,
     equationCheckedCount,
     equationSkippedCount,
     componentsToCurrentBudgetMismatches,

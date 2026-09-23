@@ -231,19 +231,19 @@ function buildMofSectionsForYear(outputRoot: string, fiscalYear: number): { sect
   return { sectionCount: sections.length, stageGapCount: stageGaps.length };
 }
 
-function buildSettlementItemsForYear(outputRoot: string, fiscalYear: number): { itemCount: number; exactCount: number; ambiguousCount: number } {
+function buildSettlementItemsForYear(outputRoot: string, fiscalYear: number): { itemCount: number; multiSourceItemCount: number } {
   const items = readJsonl<MofBudgetItemRecord>(path.join(outputRoot, 'normalized', 'mof', `fy${fiscalYear}`, 'budget-items.jsonl'));
-  const { items: settlementItems, summary } = buildSettlementItems(items);
+  const { items: settlementItems, summary } = buildSettlementItems(items, fiscalYear);
 
   const outDir = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`);
   writeJsonl(path.join(outDir, 'settlement-items.jsonl'), settlementItems);
   writeJson(path.join(outDir, 'settlement-items-summary.json'), summary);
 
-  console.log(`  settlement-items.jsonl: ${summary.itemCount}件（exact=${summary.exactCount} ambiguous=${summary.ambiguousCount}）`);
+  console.log(`  settlement-items.jsonl: ${summary.itemCount}件（multiSource=${summary.multiSourceItemCount}）`);
   console.log(`  決算item検算: checked=${summary.equationCheckedCount} skipped=${summary.equationSkippedCount} ` +
     `components→現額mismatch=${summary.componentsToCurrentBudgetMismatches} ` +
     `現額→支出済+繰越+不用mismatch=${summary.currentBudgetToSpentMismatches}`);
-  return { itemCount: summary.itemCount, exactCount: summary.exactCount, ambiguousCount: summary.ambiguousCount };
+  return { itemCount: summary.itemCount, multiSourceItemCount: summary.multiSourceItemCount };
 }
 
 function main(): void {
