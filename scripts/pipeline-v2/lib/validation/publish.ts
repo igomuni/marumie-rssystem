@@ -747,6 +747,26 @@ export interface PublishedSettlementSource { linkId: string; budgetItemId: strin
 export interface PublishedSettlementAmounts { budgetAppropriationYen: number | null; currentBudgetYen: number | null; spentYen: number | null; carryoverOutYen: number | null; unusedYen: number | null }
 export interface PublishedSettlementIdentity { settlementItemId: string; settlementSectionId: string; accountType: string; projectIds: string[]; sources: PublishedSettlementSource[]; amounts: PublishedSettlementAmounts }
 export interface SettlementPublishManifest { dataStatus: string; relationCount: number; linkedProjectCount: number; compressedBytes: number; file: string }
+export interface SettlementPublishPayload { schemaVersion: number; publishSchemaVersion: number; reviewYear: number; fiscalYear: number; identities: PublishedSettlementIdentity[] }
+
+/** settlement.json.gz自身のschemaVersion/publishSchemaVersion/reviewYear/fiscalYearを検証する */
+export function checkSettlementPayloadSchema(
+  reviewYear: number, fiscalYear: number, published: SettlementPublishPayload | null,
+  expectedSchemaVersion: number, expectedPublishSchemaVersion: number
+): Finding[] {
+  const findings: Finding[] = [];
+  const scope = { reviewYear, fiscalYear };
+  if (!published) return findings;
+  if (published.schemaVersion !== expectedSchemaVersion) pushError(findings, 'settlement-publish-payload-schema', scope,
+    `settlement.json.gzのschemaVersion(${published.schemaVersion})が期待値(${expectedSchemaVersion})と不一致`);
+  if (published.publishSchemaVersion !== expectedPublishSchemaVersion) pushError(findings, 'settlement-publish-payload-schema', scope,
+    `settlement.json.gzのpublishSchemaVersion(${published.publishSchemaVersion})が期待値(${expectedPublishSchemaVersion})と不一致`);
+  if (published.reviewYear !== reviewYear) pushError(findings, 'settlement-publish-payload-schema', scope,
+    `settlement.json.gzのreviewYear(${published.reviewYear})が対象reviewYear(${reviewYear})と不一致`);
+  if (published.fiscalYear !== fiscalYear) pushError(findings, 'settlement-publish-payload-schema', scope,
+    `settlement.json.gzのfiscalYear(${published.fiscalYear})が対象fiscalYear(${fiscalYear})と不一致`);
+  return findings;
+}
 
 /** derived relation件数とpublished identities件数・manifest.relationCountを検算する */
 export function checkSettlementPublishCounts(

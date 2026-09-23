@@ -11,10 +11,10 @@ import {
   checkMofSectionCounts, checkMofSectionSemantics, checkMofDetailRecords, checkMofDetailEventAggregation,
   checkLinksPublishCounts, checkLinksSemanticEquality, checkLinksManifestSetCounts,
   checkSettlementPublishCounts, checkSettlementSemanticEquality, checkSettlementSourceLinksReferenceFormalLinks,
-  checkSettlementSectionIdsReconstruction, checkSettlementManifestCounts,
+  checkSettlementSectionIdsReconstruction, checkSettlementManifestCounts, checkSettlementPayloadSchema,
   checkRootManifestConsistency, readGzipJson,
   type RsPublishIndex, type MofPublishIndex, type PublishedLink, type MofSectionDetail,
-  type PublishedSettlementIdentity,
+  type PublishedSettlementIdentity, type SettlementPublishPayload,
 } from './publish';
 import type { RsBudgetItemRecordV2, RsBudgetSummaryRecord, MofDerivedSection, MofRsProjectLinkGroup, MofBudgetItemRecord, MofDerivedBudgetEvent } from '../../types';
 import type { RsProject } from '../rs-projects';
@@ -653,6 +653,32 @@ describe('checkSettlementManifestCounts', () => {
   it('dataStatusの不一致を検出する', () => {
     const findings = checkSettlementManifestCounts(2024, 2024, { dataStatus: 'available', identities: [] }, { dataStatus: 'artifact_missing', relationCount: 0, linkedProjectCount: 0, compressedBytes: 0, file: 'settlement.json.gz' });
     expect(findings.some(f => f.message.includes('dataStatus'))).toBe(true);
+  });
+});
+
+function settlementPayload(overrides: Partial<SettlementPublishPayload>): SettlementPublishPayload {
+  return { schemaVersion: 2, publishSchemaVersion: 3, reviewYear: 2024, fiscalYear: 2024, identities: [], ...overrides };
+}
+
+describe('checkSettlementPayloadSchema', () => {
+  it('schemaVersion/publishSchemaVersion/reviewYear/fiscalYearが期待値どおりならfindingsは空', () => {
+    const findings = checkSettlementPayloadSchema(2024, 2024, settlementPayload({}), 2, 3);
+    expect(findings).toHaveLength(0);
+  });
+
+  it('schemaVersionが期待値と不一致なら検出する（他productがschemaVersion=2で揃っている中、settlementだけ古いshapeで公開されるのを防ぐ）', () => {
+    const findings = checkSettlementPayloadSchema(2024, 2024, settlementPayload({ schemaVersion: 1 }), 2, 3);
+    expect(findings.some(f => f.message.includes('schemaVersion'))).toBe(true);
+  });
+
+  it('publishSchemaVersionが期待値と不一致なら検出する', () => {
+    const findings = checkSettlementPayloadSchema(2024, 2024, settlementPayload({ publishSchemaVersion: 2 }), 2, 3);
+    expect(findings.some(f => f.message.includes('publishSchemaVersion'))).toBe(true);
+  });
+
+  it('reviewYear/fiscalYearが対象と不一致なら検出する（ディレクトリと中身のずれ検出）', () => {
+    const findings = checkSettlementPayloadSchema(2024, 2024, settlementPayload({ reviewYear: 2025, fiscalYear: 2023 }), 2, 3);
+    expect(findings.filter(f => f.message.includes('reviewYear') || f.message.includes('fiscalYear'))).toHaveLength(2);
   });
 });
 

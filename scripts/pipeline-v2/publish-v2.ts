@@ -32,9 +32,9 @@ import type {
 } from './types';
 import type { RsProject } from './lib/rs-projects';
 import { buildMofSectionDetails, buildMofIndexRow, sectionIdOf, mofSectionShard } from './lib/mof-publish';
-import { compactSettlementIdentity, compactSettlementDiagnostics } from './lib/settlement-publish';
+import { compactSettlementIdentity, compactSettlementDiagnostics, SETTLEMENT_PRODUCT_SCHEMA_VERSION } from './lib/settlement-publish';
 import { SETTLEMENT_IDENTITY_SCHEMA_VERSION, type MofRsSettlementDiagnostics, type MofRsSettlementIdentityRelation } from './lib/mof-rs-settlement-identity';
-import type { SettlementItemRecord } from './lib/mof-settlement-items';
+import { SETTLEMENT_ITEM_SCHEMA_VERSION, type SettlementItemRecord } from './lib/mof-settlement-items';
 import type { MofBudgetItemRecord, MofDerivedBudgetEvent, MofIdentityRelation, MofStageGap, MofDerivedSection } from './types';
 
 type Profile = 'core' | 'context' | 'spending';
@@ -455,15 +455,44 @@ function publishSettlementProduct(
       `(expected ${SETTLEMENT_IDENTITY_SCHEMA_VERSION}). Re-run derive-integrated.ts before publishing.`
     );
   }
+  if (!fs.existsSync(relationsPath)) {
+    throw new Error(
+      `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}.jsonl is missing even though its diagnostics.json exists. ` +
+      'Re-run derive-integrated.ts before publishing.'
+    );
+  }
 
   const relations = readJsonl<MofRsSettlementIdentityRelation>(relationsPath);
+  if (relations.length !== diagnostics.relationCount) {
+    throw new Error(
+      `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}.jsonl row count(${relations.length}) does not match ` +
+      `diagnostics.relationCount(${diagnostics.relationCount}). Re-run derive-integrated.ts before publishing.`
+    );
+  }
+  for (const r of relations) {
+    if (r.schemaVersion !== SETTLEMENT_IDENTITY_SCHEMA_VERSION) {
+      throw new Error(
+        `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}.jsonl contains a relation (settlementItemNaturalKey=${r.settlementItemNaturalKey}) ` +
+        `with unexpected schemaVersion=${r.schemaVersion} (expected ${SETTLEMENT_IDENTITY_SCHEMA_VERSION}). Re-run derive-integrated.ts before publishing.`
+      );
+    }
+  }
+  for (const item of settlementItems) {
+    if (item.schemaVersion !== SETTLEMENT_ITEM_SCHEMA_VERSION) {
+      throw new Error(
+        `settlement-items.jsonl (fy${fiscalYear}) contains an item (itemNaturalKey=${item.itemNaturalKey}) with unexpected ` +
+        `schemaVersion=${item.schemaVersion} (expected ${SETTLEMENT_ITEM_SCHEMA_VERSION}). Re-run derive-mof.ts before publishing.`
+      );
+    }
+  }
+
   const settlementItemsByKey = new Map(settlementItems.map(s => [s.itemNaturalKey, s]));
   const identities = relations.map(r => compactSettlementIdentity(r, settlementItemsByKey));
   const diagnosticsSummary = compactSettlementDiagnostics(diagnostics);
 
   const outDir = path.join(publicRoot, 'data', 'v2', 'links', `review-${reviewYear}-fy${fiscalYear}`);
   const settlementObj = {
-    schemaVersion: 1, publishSchemaVersion: PUBLISH_SCHEMA_VERSION, reviewYear, fiscalYear,
+    schemaVersion: SETTLEMENT_PRODUCT_SCHEMA_VERSION, publishSchemaVersion: PUBLISH_SCHEMA_VERSION, reviewYear, fiscalYear,
     dataStatus: diagnostics.settlementDataStatus, identities, diagnostics: diagnosticsSummary,
   };
   const gzipBytes = writeGzipJson(path.join(outDir, 'settlement.json.gz'), settlementObj);

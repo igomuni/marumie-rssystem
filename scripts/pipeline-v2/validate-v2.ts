@@ -46,12 +46,14 @@ import {
   checkMofSectionCounts, checkMofSectionSemantics, checkMofDetailRecords, checkMofDetailEventAggregation,
   checkLinksPublishCounts, checkLinksSemanticEquality, checkLinksSectionIdsReconstruction, checkLinksManifestSetCounts,
   checkSettlementPublishCounts, checkSettlementSemanticEquality, checkSettlementSourceLinksReferenceFormalLinks,
-  checkSettlementSectionIdsReconstruction, checkSettlementManifestCounts,
+  checkSettlementSectionIdsReconstruction, checkSettlementManifestCounts, checkSettlementPayloadSchema,
   checkRootManifestConsistency,
   type RsPublishIndex, type RsPublishManifest, type MofPublishIndex, type MofPublishManifest,
   type PublishedLink, type LinksPublishManifest, type RootManifest, type MofSectionDetail,
-  type PublishedSettlementIdentity, type SettlementPublishManifest,
+  type SettlementPublishManifest, type SettlementPublishPayload,
 } from './lib/validation/publish';
+import { PUBLISH_SCHEMA_VERSION } from './lib/publish-common';
+import { SETTLEMENT_PRODUCT_SCHEMA_VERSION } from './lib/settlement-publish';
 import type { RsProject } from './lib/rs-projects';
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2,
@@ -608,9 +610,10 @@ function validatePublish(outputRoot: string, publicRoot: string): {
 
       const settlementPath = path.join(linksOutDir, 'settlement.json.gz');
       findings.push(...checkArtifactExists('settlement-publish-artifact-presence', settlementPath, { reviewYear, fiscalYear }));
-      const publishedSettlement = readGzipJson<{ dataStatus: string; identities: PublishedSettlementIdentity[] }>(settlementPath);
+      const publishedSettlement = readGzipJson<SettlementPublishPayload & { dataStatus: string }>(settlementPath);
       const settlementManifest = manifest && 'settlement' in manifest ? (manifest as unknown as { settlement: SettlementPublishManifest }).settlement : null;
 
+      findings.push(...checkSettlementPayloadSchema(reviewYear, fiscalYear, publishedSettlement, SETTLEMENT_PRODUCT_SCHEMA_VERSION, PUBLISH_SCHEMA_VERSION));
       findings.push(...checkSettlementPublishCounts(reviewYear, fiscalYear, derivedRelations, publishedSettlement, settlementManifest));
       findings.push(...checkSettlementSemanticEquality(reviewYear, fiscalYear, derivedRelations, publishedSettlement));
       findings.push(...checkSettlementSourceLinksReferenceFormalLinks(reviewYear, fiscalYear, publishedSettlement, published));

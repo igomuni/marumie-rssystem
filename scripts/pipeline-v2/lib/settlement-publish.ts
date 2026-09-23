@@ -21,6 +21,12 @@ import type { MofAccountType } from '../types';
 import type { MofRsSettlementDiagnostics, MofRsSettlementIdentityRelation, SettlementResolutionMethod } from './mof-rs-settlement-identity';
 import type { SettlementItemRecord } from './mof-settlement-items';
 
+/**
+ * settlement.json.gz自身のshape schema version。他のpublic V2 product（links.json.gz等）と
+ * 揃えて2から始める（PUBLISH_SCHEMA_VERSIONとは別軸の、この1 productだけのshape version）。
+ */
+export const SETTLEMENT_PRODUCT_SCHEMA_VERSION = 2;
+
 export interface PublishedSettlementSource {
   linkId: string;
   budgetItemId: string;
