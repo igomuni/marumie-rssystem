@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   availableReviewYearsForFiscalYear,
-  buildV2SectionIdentityProjectCounts,
   buildV2SectionProjectCounts,
+  buildV2SettlementSectionProjectCounts,
   findV2SectionForLegacyRow,
   legacyBudgetTypeToV2Stage,
   legacyItemNaturalKey,
@@ -15,6 +15,7 @@ import {
   type LegacySectionIdentity,
   type V2MofSectionIndexRow,
   type V2RootManifest,
+  type V2SettlementIdentity,
   type V2StandaloneLink,
 } from './v2-public-linkage';
 
@@ -182,12 +183,36 @@ describe('V2 public linkage UI helpers', () => {
     expect(counts.get('mofsec_abc\x1fsupplement\x1f2')?.size).toBe(1);
   });
 
-  it('決算用にsection内の当初・補正projectをdistinctで集計する', () => {
-    const links: V2StandaloneLink[] = [
-      { linkId: 'i', phase: 'initial', revision: null, matchMethod: 'exact-name-key', sectionIds: ['A'], projectIds: ['1', '2'], mofAmountYen: 0, rsAmountYen: 0, differenceYen: 0 },
-      { linkId: 's', phase: 'supplement', revision: 1, matchMethod: 'exact-name-key', sectionIds: ['A'], projectIds: ['2', '3'], mofAmountYen: 0, rsAmountYen: 0, differenceYen: 0 },
+  it('決算用にsettlementSectionId単位でdistinct projectをidentityから集計する（budget側sectionIdsは使わない）', () => {
+    const identities: V2SettlementIdentity[] = [
+      {
+        settlementItemId: 'ik-a', settlementSectionId: 'settlement-section-A', accountType: 'general', projectIds: ['1', '2'],
+        sources: [{ linkId: 'l1', budgetItemId: 'ik-a', resolutionMethod: 'exact-item-key' }],
+        amounts: { budgetAppropriationYen: null, currentBudgetYen: null, spentYen: null, carryoverOutYen: null, unusedYen: null },
+      },
+      {
+        settlementItemId: 'ik-b', settlementSectionId: 'settlement-section-A', accountType: 'general', projectIds: ['2', '3'],
+        sources: [{ linkId: 'l2', budgetItemId: 'ik-b', resolutionMethod: 'exact-item-key' }],
+        amounts: { budgetAppropriationYen: null, currentBudgetYen: null, spentYen: null, carryoverOutYen: null, unusedYen: null },
+      },
     ];
-    expect(buildV2SectionIdentityProjectCounts(links).get('A')).toEqual(new Set(['1', '2', '3']));
+    expect(buildV2SettlementSectionProjectCounts(identities).get('settlement-section-A')).toEqual(new Set(['1', '2', '3']));
+  });
+
+  it('unique-name-fallback: budget側sectionCodeを誤集計せず、settlement側sectionへ集計する', () => {
+    // budgetItemIdは項コード36（budget側）を含むが、settlementSectionIdは決算側の
+    // sectionId（項コード701）であり、budget側sectionへは計上されない。
+    const identities: V2SettlementIdentity[] = [
+      {
+        settlementItemId: 'special|X|東日本大震災復興特別会計|復興|701|東日本大震災復興支援事業費|00|農業用施設等災害関連事業費補助',
+        settlementSectionId: 'mofsec_settlement_701', accountType: 'special', projectIds: ['9'],
+        sources: [{ linkId: 'l1', budgetItemId: 'special|X|東日本大震災復興特別会計|復興|36|東日本大震災復興支援事業費|00|農業用施設等災害関連事業費補助', resolutionMethod: 'unique-name-fallback' }],
+        amounts: { budgetAppropriationYen: null, currentBudgetYen: null, spentYen: null, carryoverOutYen: null, unusedYen: null },
+      },
+    ];
+    const counts = buildV2SettlementSectionProjectCounts(identities);
+    expect(counts.get('mofsec_settlement_701')).toEqual(new Set(['9']));
+    expect(counts.has('mofsec_budget_36')).toBe(false);
   });
 
   it('fiscalYearに紐づくreviewYear候補を新しい順で求める', () => {

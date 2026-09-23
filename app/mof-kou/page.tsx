@@ -40,12 +40,13 @@ import {
 } from '@/client/components/mof-kou/columns';
 import {
   availableReviewYearsForFiscalYear,
-  buildV2SectionIdentityProjectCounts,
   buildV2SectionProjectCounts,
+  buildV2SettlementSectionProjectCounts,
   fetchV2MofIndex,
   fetchV2MofSection,
   fetchV2RootManifest,
   fetchV2RsIndex,
+  fetchV2SettlementIdentities,
   fetchV2StandaloneLinks,
   legacyBudgetTypeToV2Stage,
   lookupV2Section,
@@ -55,6 +56,7 @@ import {
   type V2MofSectionDetail,
   type V2RootManifest,
   type V2RsIndex,
+  type V2SettlementProduct,
   type V2StandaloneLinksProduct,
 } from '@/app/lib/v2-public-linkage';
 import type { V2PanelData } from '@/client/components/mof-kou/KouSidePanel';
@@ -147,6 +149,7 @@ export default function MOFKouPage() {
   const [reviewYear, setReviewYear] = useState<number | null>(null);
   const [v2MofIndex, setV2MofIndex] = useState<V2MofIndex | null>(null);
   const [v2Links, setV2Links] = useState<V2StandaloneLinksProduct | null>(null);
+  const [v2Settlement, setV2Settlement] = useState<V2SettlementProduct | null>(null);
   const [v2RsIndex, setV2RsIndex] = useState<V2RsIndex | null>(null);
   const [v2SectionDetail, setV2SectionDetail] = useState<V2MofSectionDetail | null>(null);
   const [v2SectionLoading, setV2SectionLoading] = useState(false);
@@ -199,6 +202,19 @@ export default function MOFKouPage() {
     fetchV2StandaloneLinks(reviewYear, data.metadata.fiscalYear, controller.signal)
       .then(setV2Links)
       .catch(() => setV2Links(null));
+    return () => controller.abort();
+  }, [data, reviewYear]);
+
+  useEffect(() => {
+    // 決算identityのsource of truth（settlement.json.gz、Phase B3b）。年度切替中は旧値を使わない。
+    setV2Settlement(null);
+    if (!data || reviewYear === null) {
+      return;
+    }
+    const controller = new AbortController();
+    fetchV2SettlementIdentities(reviewYear, data.metadata.fiscalYear, controller.signal)
+      .then(setV2Settlement)
+      .catch(() => setV2Settlement(null));
     return () => controller.abort();
   }, [data, reviewYear]);
 
@@ -259,26 +275,31 @@ export default function MOFKouPage() {
   const v2MofIndexCurrent = v2MofIndex?.fiscalYear === currentFiscalYear;
   const v2LinksCurrent =
     v2Links?.reviewYear === reviewYear && v2Links?.fiscalYear === currentFiscalYear;
+  const v2SettlementCurrent =
+    v2Settlement?.reviewYear === reviewYear && v2Settlement?.fiscalYear === currentFiscalYear;
   const v2RsIndexCurrent = v2RsIndex?.reviewYear === reviewYear;
 
   const v2ProjectCounts = useMemo(
     () => (v2LinksCurrent && v2Links ? buildV2SectionProjectCounts(v2Links.links) : null),
     [v2Links, v2LinksCurrent]
   );
-  const v2IdentityProjectCounts = useMemo(
-    () => (v2LinksCurrent && v2Links ? buildV2SectionIdentityProjectCounts(v2Links.links) : null),
-    [v2Links, v2LinksCurrent]
+  // 決算件数はbudget formal linkのsectionIds（budget側section）ではなく、settlement.json.gz
+  // 自身のsettlementSectionIdで集計する（unique-name-fallbackではbudget側とdecision側で
+  // 項コードが変わるため、budget側sectionへ誤計上しないようにする）。
+  const v2SettlementSectionProjectCounts = useMemo(
+    () => (v2SettlementCurrent && v2Settlement ? buildV2SettlementSectionProjectCounts(v2Settlement.identities) : null),
+    [v2Settlement, v2SettlementCurrent]
   );
 
   /** V2 overlayがこの画面全体で有効かどうか。有効/無効は画面単位で切り替え、行ごとにV1/V2を混在させない */
   const v2Active = v2MofIndexCurrent && v2LinksCurrent && sectionMapping !== null;
 
   function v2RsProjectCountFor(row: MOFKouSectionSummary): number {
-    if (!v2Active || !sectionMapping || !v2ProjectCounts || !v2IdentityProjectCounts) return row.rsProjectCount;
+    if (!v2Active || !sectionMapping || !v2ProjectCounts || !v2SettlementSectionProjectCounts) return row.rsProjectCount;
     const v2Section = lookupV2Section(sectionMapping, row);
     const stage = legacyBudgetTypeToV2Stage(row.budgetType);
     if (!v2Section) return 0;
-    if (row.budgetType === '決算') return v2IdentityProjectCounts.get(v2Section.id)?.size ?? 0;
+    if (row.budgetType === '決算') return v2SettlementSectionProjectCounts.get(v2Section.id)?.size ?? 0;
     if (!stage) return 0;
     const key = `${v2Section.id}\x1f${v2StageKey(stage)}`;
     return v2ProjectCounts.get(key)?.size ?? 0;
@@ -290,7 +311,7 @@ export default function MOFKouPage() {
     return data.sections.map(row => ({ ...row, rsProjectCount: v2RsProjectCountFor(row) }));
     // v2RsProjectCountForはsectionMapping/v2ProjectCounts/v2Activeにのみ依存する（rowはmapが渡す）
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, v2Active, sectionMapping, v2ProjectCounts, v2IdentityProjectCounts]);
+  }, [data, v2Active, sectionMapping, v2ProjectCounts, v2SettlementSectionProjectCounts]);
 
   useEffect(() => {
     let cancelled = false;
@@ -578,11 +599,14 @@ export default function MOFKouPage() {
     const mode = selectedRow.budgetType === '決算'
       ? 'settlement-identity' as const
       : stage ? 'budget-link' as const : 'unsupported' as const;
-    const links = mode === 'settlement-identity' && currentSectionDetail?.rsLinks
-      ? currentSectionDetail.rsLinks.filter(l => l.reviewYear === reviewYear)
-      : mode === 'budget-link' && currentSectionDetail?.rsLinks
-        ? currentSectionDetail.rsLinks.filter(l => l.reviewYear === reviewYear && l.phase === stage!.phase && l.revision === stage!.revision)
-        : null;
+    const links = mode === 'budget-link' && currentSectionDetail?.rsLinks
+      ? currentSectionDetail.rsLinks.filter(l => l.reviewYear === reviewYear && l.phase === stage!.phase && l.revision === stage!.revision)
+      : null;
+    // 決算モードでは選択中sectionのbudget側rsLinksから再構成しない。settlement.json.gz
+    // （public v3 authority）を、選択中V2 sectionのsettlementSectionIdで直接絞り込む。
+    const settlementIdentities = mode === 'settlement-identity' && v2SettlementCurrent && v2Settlement && selectedV2Section
+      ? v2Settlement.identities.filter(identity => identity.settlementSectionId === selectedV2Section.id)
+      : null;
     const itemNames = currentSectionDetail ? new Map(currentSectionDetail.items.map(it => [it.id, it.name])) : null;
     const projectNames = currentRsIndex
       ? new Map(currentRsIndex.projects.map(p => [p.projectId, { name: p.projectName, ministry: p.ministry }]))
@@ -590,12 +614,18 @@ export default function MOFKouPage() {
     const projectionGroups: MofKouMokuV2LinkGroup[] | null =
       mode === 'budget-link' && currentSectionDetail?.rsLinks && v2KouMokuLinkageCurrent && v2KouMokuLinkage
         ? selectV2ProjectionGroupsForLinks(v2KouMokuLinkage.groups, links ?? [])
-        : null;
+        : mode === 'settlement-identity' && settlementIdentities && v2KouMokuLinkageCurrent && v2KouMokuLinkage
+          ? selectV2ProjectionGroupsForLinks(
+              v2KouMokuLinkage.groups,
+              settlementIdentities.flatMap(identity => identity.sources.map(source => ({ linkId: source.linkId, itemIds: [source.budgetItemId] })))
+            )
+          : null;
     return {
       reviewYear,
       sectionMatched: selectedV2Section !== null,
       mode,
       links,
+      settlementIdentities,
       itemNames,
       projectNames,
       projectionGroups,
@@ -604,7 +634,7 @@ export default function MOFKouPage() {
       sectionLoading: v2SectionLoading,
       sectionError: v2SectionError,
     };
-  }, [v2Active, selectedRow, selectedV2Section, v2SectionCurrent, v2SectionDetail, v2RsIndex, v2RsIndexCurrent, reviewYear, v2SectionLoading, v2SectionError, v2KouMokuLinkage, v2KouMokuLinkageCurrent, v2KouMokuLinkageLoading, v2KouMokuLinkageError]);
+  }, [v2Active, selectedRow, selectedV2Section, v2SectionCurrent, v2SectionDetail, v2RsIndex, v2RsIndexCurrent, reviewYear, v2SectionLoading, v2SectionError, v2KouMokuLinkage, v2KouMokuLinkageCurrent, v2KouMokuLinkageLoading, v2KouMokuLinkageError, v2Settlement, v2SettlementCurrent]);
 
   if (error) {
     return (

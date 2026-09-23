@@ -293,6 +293,71 @@ export async function fetchV2StandaloneLinks(
   return fetchGzipJson<V2StandaloneLinksProduct>(`/data/v2/links/review-${reviewYear}-fy${fiscalYear}/links.json.gz`, signal);
 }
 
+// ============================================================
+// 決算identity（Phase B2 → public schema v3 → UI、settlement.json.gz）
+// production matchingのidentity resolutionはここでは行わない。publish済みの
+// settlement.json.gzをそのまま表示用に読むだけ（lib/settlement-publish.tsと同じshape）。
+// ============================================================
+
+export type V2SettlementDataStatus = 'artifact_missing' | 'no_settlement_rows' | 'available';
+export type V2SettlementResolutionMethod = 'exact-item-key' | 'unique-name-fallback';
+
+export interface V2SettlementSource {
+  linkId: string;
+  budgetItemId: string;
+  resolutionMethod: V2SettlementResolutionMethod;
+}
+
+export interface V2SettlementAmounts {
+  budgetAppropriationYen: number | null;
+  currentBudgetYen: number | null;
+  spentYen: number | null;
+  carryoverOutYen: number | null;
+  unusedYen: number | null;
+}
+
+export interface V2SettlementIdentity {
+  settlementItemId: string;
+  settlementSectionId: string;
+  accountType: string;
+  projectIds: string[];
+  sources: V2SettlementSource[];
+  amounts: V2SettlementAmounts;
+}
+
+export interface V2SettlementProduct {
+  schemaVersion: number;
+  publishSchemaVersion: number;
+  reviewYear: number;
+  fiscalYear: number;
+  dataStatus: V2SettlementDataStatus;
+  identities: V2SettlementIdentity[];
+}
+
+export async function fetchV2SettlementIdentities(
+  reviewYear: number,
+  fiscalYear: number,
+  signal: AbortSignal
+): Promise<V2SettlementProduct> {
+  return fetchGzipJson<V2SettlementProduct>(`/data/v2/links/review-${reviewYear}-fy${fiscalYear}/settlement.json.gz`, signal);
+}
+
+/**
+ * 決算用: settlementSectionId単位でdistinct projectIdsを集計する。
+ * budget formal linkのsectionIds（budget側section）は使わない。unique-name-fallback
+ * （復興特会等で予算時点と決算時点の項コードが変わるケース）ではbudget側sectionと
+ * 決算側sectionが異なるため、settlement.json.gz自身のsettlementSectionIdをauthorityにする。
+ */
+export function buildV2SettlementSectionProjectCounts(identities: V2SettlementIdentity[]): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>();
+  for (const identity of identities) {
+    const set = map.get(identity.settlementSectionId) ?? new Set<string>();
+    for (const projectId of identity.projectIds) set.add(projectId);
+    map.set(identity.settlementSectionId, set);
+  }
+  return map;
+}
+
 /**
  * root manifestのlink productsから、指定fiscalYearに存在するreviewYear候補を求める
  * （新しい順）。fiscalYearとreviewYearは同じ軸ではないため、rootのmof/rs一覧からではなく
@@ -315,19 +380,6 @@ export function buildV2SectionProjectCounts(links: V2StandaloneLink[]): Map<stri
       const set = map.get(mapKey) ?? new Set<string>();
       for (const pid of link.projectIds) set.add(pid);
       map.set(mapKey, set);
-    }
-  }
-  return map;
-}
-
-/** 決算用: section内の当初・補正正式linkをstageをまたいでdistinct projectへ集約する。 */
-export function buildV2SectionIdentityProjectCounts(links: V2StandaloneLink[]): Map<string, Set<string>> {
-  const map = new Map<string, Set<string>>();
-  for (const link of links) {
-    for (const sectionId of link.sectionIds) {
-      const set = map.get(sectionId) ?? new Set<string>();
-      for (const projectId of link.projectIds) set.add(projectId);
-      map.set(sectionId, set);
     }
   }
   return map;

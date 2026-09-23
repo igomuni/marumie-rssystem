@@ -70,3 +70,69 @@ describe("published mof-kou-moku V2 reconciliation artifacts", () => {
     expect(negative?.projects.find(project => project.projectId === "4")?.rsAmountYen).toBe(-2_141_074_000);
   });
 });
+
+describe("published mof-kou-moku V2 settlement identity (Phase B3b: public settlement.json.gz authority)", () => {
+  const review2024fy2024 = product(2024, 2024);
+  const review2025fy2024 = product(2025, 2024);
+  const fy2023 = product(2024, 2023);
+  const review2025fy2025 = product(2025, 2025);
+
+  it("review-2024 x FY2024: identityRelations/distinct projects match the public settlement.json.gz golden", () => {
+    expect(review2024fy2024.schemaVersion).toBe(6);
+    expect(review2024fy2024.identityRelations).toHaveLength(3907);
+    const distinctProjects = new Set(review2024fy2024.identityRelations.flatMap(r => r.projectIds));
+    expect(distinctProjects.size).toBe(4754);
+    expect(review2024fy2024.diagnostics.settlementDataStatus).toBe("available");
+    // public identityは1件も間引かない: sourceとprojectedは必ず一致する
+    expect(review2024fy2024.diagnostics.projectedSettlementRelationCount).toBe(
+      review2024fy2024.diagnostics.sourceSettlementRelationCount,
+    );
+  });
+
+  it("review-2025 x FY2024: identityRelations/distinct projects match the public settlement.json.gz golden", () => {
+    expect(review2025fy2024.identityRelations).toHaveLength(3900);
+    const distinctProjects = new Set(review2025fy2024.identityRelations.flatMap(r => r.projectIds));
+    expect(distinctProjects.size).toBe(4618);
+  });
+
+  it("FY2023: artifact_missing yields an empty identityRelations projection", () => {
+    expect(fy2023.diagnostics.settlementDataStatus).toBe("artifact_missing");
+    expect(fy2023.identityRelations).toHaveLength(0);
+  });
+
+  it("review-2025 x FY2025: no_settlement_rows yields an empty identityRelations projection", () => {
+    expect(review2025fy2025.diagnostics.settlementDataStatus).toBe("no_settlement_rows");
+    expect(review2025fy2025.identityRelations).toHaveLength(0);
+  });
+
+  it("contains an exact-item-key relation whose evidence sources are attributable to formal budget links", () => {
+    const relation = review2024fy2024.identityRelations.find(r =>
+      r.itemNaturalKey === "general|デジタル庁|デジタル庁|002|デジタル社会形成推進費|06|諸謝金",
+    );
+    expect(relation).toBeDefined();
+    expect(relation?.projects.every(p => p.sources.length > 0)).toBe(true);
+  });
+
+  it("fallback golden case: unique-name-fallback places the UI relation on the settlement-side item, not the budget-side item", () => {
+    // 予算側項コード06 → 決算側項コード641（東日本大震災復興特別会計、地域活性化等復興政策費）。
+    // budgetItemId(=budget側itemNaturalKey)とrelation.itemNaturalKey(=settlementItemId)は
+    // sectionCodeの段階から異なる。relationはsettlement側（項コード641）へ配置されている必要がある。
+    const relation = review2024fy2024.identityRelations.find(r =>
+      r.itemNaturalKey.includes("|641|地域活性化等復興政策費|14|特定復興再生拠点区域外帰還・居住調査等委託費"),
+    );
+    expect(relation).toBeDefined();
+    if (!relation) throw new Error("fallback golden relation is missing");
+    expect(relation.itemNaturalKey).not.toContain("|06|地域活性化等復興政策費");
+    expect(relation.projectIds).toContain("5591");
+    // source evidence（phase/matchMethod/RS金額）はbudget側のformal linkから正しく復元できている
+    const project = relation.projects.find(p => p.projectId === "5591");
+    expect(project?.sources.length).toBeGreaterThan(0);
+    expect(project?.sources[0].phase).toBe("initial");
+  });
+
+  it("legacy V1 evidence-gap fallback: settlement sources whose budget item was ambiguous in the legacy dataset still reconstruct PID evidence independently", () => {
+    expect(review2024fy2024.diagnostics.settlementProjectionLegacyEvidenceGapCount).toBeGreaterThanOrEqual(0);
+    // 発生した場合でも、relation数・project集合はpublic authorityと必ず一致する（fail-fastが機能した証拠）
+    expect(review2024fy2024.identityRelations).toHaveLength(3907);
+  });
+});

@@ -41,6 +41,40 @@ type Link = {
 };
 type DetailLink = Link & { reviewYear: number; itemIds: string[] };
 type Detail = { rsLinks?: DetailLink[] };
+
+/**
+ * public/data/v2/links/review-{ry}-fy{fy}/settlement.json.gz（Phase B3a、
+ * lib/settlement-publish.tsが生成するshapeと同一）。決算identityの唯一のauthority。
+ * ここでは表示用に読むだけで、独自の決算candidate探索は一切行わない。
+ */
+type PublishedSettlementResolutionMethod = "exact-item-key" | "unique-name-fallback";
+type PublishedSettlementSource = {
+  linkId: string;
+  budgetItemId: string;
+  resolutionMethod: PublishedSettlementResolutionMethod;
+};
+type PublishedSettlementIdentity = {
+  settlementItemId: string;
+  settlementSectionId: string;
+  accountType: string;
+  projectIds: string[];
+  sources: PublishedSettlementSource[];
+  amounts: {
+    budgetAppropriationYen: number | null;
+    currentBudgetYen: number | null;
+    spentYen: number | null;
+    carryoverOutYen: number | null;
+    unusedYen: number | null;
+  };
+};
+type PublishedSettlementProduct = {
+  schemaVersion: number;
+  publishSchemaVersion: number;
+  reviewYear: number;
+  fiscalYear: number;
+  dataStatus: "artifact_missing" | "no_settlement_rows" | "available";
+  identities: PublishedSettlementIdentity[];
+};
 const read = <T>(p: string) => JSON.parse(fs.readFileSync(p, "utf-8")) as T;
 const readGz = <T>(p: string) =>
   JSON.parse(zlib.gunzipSync(fs.readFileSync(p)).toString("utf-8")) as T;
@@ -127,6 +161,18 @@ function build(reviewYear: number, fiscalYear: number) {
       "links.json.gz",
     ),
   );
+  const settlement = readGz<PublishedSettlementProduct>(
+    path.join(
+      rootDir,
+      "links",
+      `review-${reviewYear}-fy${fiscalYear}`,
+      "settlement.json.gz",
+    ),
+  );
+  if (settlement.reviewYear !== reviewYear || settlement.fiscalYear !== fiscalYear)
+    throw new Error(
+      `settlement.json.gz year mismatch: expected review-${reviewYear}-fy${fiscalYear}, got review-${settlement.reviewYear}-fy${settlement.fiscalYear}`,
+    );
   const expected = new Set(standalone.links.map((x) => x.linkId));
   const byShard = new Map<string, Set<string>>();
   for (const l of standalone.links)
@@ -291,114 +337,135 @@ function build(reviewYear: number, fiscalYear: number) {
       });
     }
   }
-  type IdentityProjectAcc = {
-    projectId: string;
-    projectName: string;
-    ministry: string;
-    sources: Map<string, MofKouMokuV2IdentitySource>;
-  };
-  type IdentityAcc = {
-    relationId: string;
-    kouMokuKey: string;
-    itemNaturalKey: string;
-    projects: Map<string, IdentityProjectAcc>;
-  };
-  const identityByItem = new Map<string, IdentityAcc>();
-  const itemResolutionSeen = new Set<string>();
-  let settlementIdentityUnmatchedItemCount = 0;
-  let settlementIdentityAmbiguousItemCount = 0;
-  let settlementIdentitySkippedMultiItemGroupCount = 0;
-
+  // 決算identityはpublic settlement.json.gz（Phase B2 → schema v3）だけをauthorityとする。
+  // ここではlegacy決算行の独自candidate探索は一切行わない。budget側itemNaturalKeyから
+  // 決算行を推測することもしない（unique-name-fallbackではbudget項コードと決算項コードが
+  // 異なるため、budget itemNaturalKeyでは決算識別子として使えない）。
+  const groupByLinkAndItem = new Map<string, MofKouMokuV2LinkGroup>();
   for (const group of groups) {
-    // 1つの2-2金額を複数目に重複表示しない。item単位の内訳を持てるまでidentityへは投影しない。
-    if (group.spansItems) {
-      settlementIdentitySkippedMultiItemGroupCount++;
-      continue;
-    }
-    const source: MofKouMokuV2IdentitySource = {
-      linkId: group.linkId,
-      phase: group.phase,
-      revision: group.revision,
-      matchMethod: group.matchMethod,
-      rsAmountYen: 0,
-      spansItems: group.spansItems,
-    };
-    const itemId = group.itemNaturalKey;
-    const settlementCandidates = rows.get(`${itemId}\x1f決算`) ?? [];
-    if (settlementCandidates.length !== 1) {
-      if (!itemResolutionSeen.has(itemId)) {
-        itemResolutionSeen.add(itemId);
-        if (settlementCandidates.length === 0)
-          settlementIdentityUnmatchedItemCount++;
-        else settlementIdentityAmbiguousItemCount++;
-      }
-      continue;
-    }
-    itemResolutionSeen.add(itemId);
-    const settlementItem = settlementCandidates[0];
-    let relation = identityByItem.get(itemId);
-    if (!relation) {
-      relation = {
-        relationId: `settlement_identity:${reviewYear}:${fiscalYear}:${itemId}`,
-        kouMokuKey: settlementItem.key,
-        itemNaturalKey: itemId,
-        projects: new Map(),
-      };
-      identityByItem.set(itemId, relation);
-    }
-    for (const projectRow of group.projects) {
-      const projectId = projectRow.projectId;
-      let project = relation.projects.get(projectId);
-      if (!project) {
-        project = {
-          projectId,
-          projectName: projectRow.projectName,
-          ministry: projectRow.ministry,
-          sources: new Map(),
-        };
-        relation.projects.set(projectId, project);
-      }
-      project.sources.set(group.linkId, {
-        ...source,
-        rsAmountYen: projectRow.rsAmountYen,
-      });
-    }
+    const key = `${group.linkId}\x1f${group.itemNaturalKey}`;
+    if (groupByLinkAndItem.has(key))
+      throw new Error(`duplicate budget projection group for linkId+itemNaturalKey: ${key}`);
+    groupByLinkAndItem.set(key, group);
   }
-  const identityRelations: MofKouMokuV2IdentityRelation[] = [
-    ...identityByItem.values(),
-  ]
-    .map((relation) => {
-      const identityProjects: MofKouMokuV2IdentityProject[] = [
-        ...relation.projects.values(),
-      ]
+
+  let settlementProjectionUnmatchedLegacyItemCount = 0;
+  let settlementProjectionAmbiguousLegacyItemCount = 0;
+  // legacy mof-kou-moku-{fy}.json（V1データセット）側でbudget item+budgetTypeが一意に
+  // 解決できず(0件/複数件)、groupByLinkAndItemにその(linkId,budgetItemId)のgroupが無い
+  // 稀なケース。PID別evidence自体はderived link + normalized RS行から独立に再構成できる
+  // ため、legacy V1側の不完全性を理由にidentity全体をfail-fastしない
+  // （fail-fastするのは、その独立再構成すら破綻する＝真の構造的不整合のときだけ）。
+  let settlementProjectionLegacyEvidenceGapCount = 0;
+
+  const identityRelations: MofKouMokuV2IdentityRelation[] = settlement.identities
+    .map((identity) => {
+      // legacy決算行は、あくまで表示用のkouMokuKey（既存/mof-kou-mokuの行キー）を得る
+      // ためだけに引く。この対応付けの成否はrelationの有無やprojectIdsには一切影響しない
+      // （public identityは必ず1件のrelationになる）。
+      const legacyCandidates = rows.get(`${identity.settlementItemId}\x1f決算`) ?? [];
+      let kouMokuKey = identity.settlementItemId;
+      if (legacyCandidates.length === 1) {
+        kouMokuKey = legacyCandidates[0].key;
+      } else if (legacyCandidates.length === 0) {
+        settlementProjectionUnmatchedLegacyItemCount++;
+      } else {
+        settlementProjectionAmbiguousLegacyItemCount++;
+      }
+
+      const projectAcc = new Map<
+        string,
+        { projectId: string; projectName: string; ministry: string; sources: Map<string, MofKouMokuV2IdentitySource> }
+      >();
+      for (const source of identity.sources) {
+        const groupKey = `${source.linkId}\x1f${source.budgetItemId}`;
+        const group = groupByLinkAndItem.get(groupKey);
+        if (group) {
+          for (const projectRow of group.projects) {
+            const projectId = projectRow.projectId;
+            let project = projectAcc.get(projectId);
+            if (!project) {
+              project = { projectId, projectName: projectRow.projectName, ministry: projectRow.ministry, sources: new Map() };
+              projectAcc.set(projectId, project);
+            }
+            project.sources.set(group.linkId, {
+              linkId: group.linkId,
+              phase: group.phase,
+              revision: group.revision,
+              matchMethod: group.matchMethod,
+              rsAmountYen: projectRow.rsAmountYen,
+              spansItems: group.spansItems,
+            });
+          }
+          continue;
+        }
+        // legacy V1未解決フォールバック: derived link + normalized RS行から独立にPID別内訳を
+        // 再構成する（legacyのbudgetType一致に依存しない）。spansItemsな formal link（複数item）
+        // にbudgetItemIdが属する場合はPID別金額をこのitemだけに帰属できないため、それはfail-fast。
+        const detailLink = links.get(source.linkId);
+        if (!detailLink || !detailLink.itemIds.includes(source.budgetItemId) || detailLink.itemIds.length > 1)
+          throw new Error(
+            `settlement source has no matching budget evidence: settlementItemId=${identity.settlementItemId} linkId=${source.linkId} budgetItemId=${source.budgetItemId}`,
+          );
+        const derivedLink = derivedById.get(source.linkId);
+        if (!derivedLink)
+          throw new Error(`derived link not found for settlement source: linkId=${source.linkId}`);
+        let breakdown = breakdowns.get(source.linkId);
+        if (!breakdown) {
+          breakdown = projectBreakdown(derivedLink, normalizedById);
+          breakdowns.set(source.linkId, breakdown);
+          breakdownRecords += breakdown.recordCount;
+        }
+        settlementProjectionLegacyEvidenceGapCount++;
+        for (const rawProjectId of detailLink.projectIds) {
+          const projectId = String(rawProjectId);
+          const meta = projects.get(projectId) ?? { projectId, projectName: projectId, ministry: "" };
+          let project = projectAcc.get(projectId);
+          if (!project) {
+            project = { projectId, projectName: meta.projectName, ministry: meta.ministry, sources: new Map() };
+            projectAcc.set(projectId, project);
+          }
+          project.sources.set(detailLink.linkId, {
+            linkId: detailLink.linkId,
+            phase: detailLink.phase,
+            revision: detailLink.revision,
+            matchMethod: detailLink.matchMethod,
+            rsAmountYen: breakdown.amounts.get(projectId) ?? 0,
+            spansItems: false,
+          });
+        }
+      }
+      const reconstructedProjectIds = [...projectAcc.keys()].sort();
+      const expectedProjectIds = [...identity.projectIds].map(String).sort();
+      if (JSON.stringify(reconstructedProjectIds) !== JSON.stringify(expectedProjectIds))
+        throw new Error(
+          `settlement identity projectIds mismatch: settlementItemId=${identity.settlementItemId} public=${JSON.stringify(expectedProjectIds)} reconstructed=${JSON.stringify(reconstructedProjectIds)}`,
+        );
+
+      const identityProjects: MofKouMokuV2IdentityProject[] = [...projectAcc.values()]
         .map((project) => ({
           projectId: project.projectId,
           projectName: project.projectName,
           ministry: project.ministry,
-          sources: [...project.sources.values()].sort((a, b) =>
-            sourceSortKey(a).localeCompare(sourceSortKey(b)),
-          ),
+          sources: [...project.sources.values()].sort((a, b) => sourceSortKey(a).localeCompare(sourceSortKey(b))),
         }))
-        .sort((a, b) =>
-          (a.projectName || a.projectId).localeCompare(
-            b.projectName || b.projectId,
-            "ja",
-          ),
-        );
+        .sort((a, b) => (a.projectName || a.projectId).localeCompare(b.projectName || b.projectId, "ja"));
+
       return {
-        relationId: relation.relationId,
+        relationId: `settlement_identity:${reviewYear}:${fiscalYear}:${identity.settlementItemId}`,
         relationKind: "inherited-from-budget-link" as const,
         reviewYear,
         fiscalYear,
-        kouMokuKey: relation.kouMokuKey,
-        itemNaturalKey: relation.itemNaturalKey,
+        kouMokuKey,
+        itemNaturalKey: identity.settlementItemId,
         projectIds: identityProjects.map((project) => project.projectId).sort(),
         projects: identityProjects,
       };
     })
     .sort((a, b) => a.kouMokuKey.localeCompare(b.kouMokuKey, "ja"));
+
   const product: MofKouMokuV2LinkageProduct = {
-    schemaVersion: 5,
+    schemaVersion: 6,
     sourcePublishSchemaVersion: read<Root>(path.join(rootDir, "manifest.json"))
       .publishSchemaVersion,
     generatedAt: new Date().toISOString(),
@@ -416,15 +483,21 @@ function build(reviewYear: number, fiscalYear: number) {
       linkedProjectCount: new Set(groups.flatMap((g) => g.projectIds)).size,
       projectBreakdownRecordCount: breakdownRecords,
       projectBreakdownCheckedGroupCount: breakdowns.size,
-      settlementIdentityRelationCount: identityRelations.length,
+      settlementDataStatus: settlement.dataStatus,
+      sourceSettlementRelationCount: settlement.identities.length,
+      projectedSettlementRelationCount: identityRelations.length,
+      settlementProjectionUnmatchedLegacyItemCount,
+      settlementProjectionAmbiguousLegacyItemCount,
+      settlementProjectionLegacyEvidenceGapCount,
       settlementIdentityProjectCount: new Set(
         identityRelations.flatMap((r) => r.projectIds),
       ).size,
-      settlementIdentityUnmatchedItemCount,
-      settlementIdentityAmbiguousItemCount,
-      settlementIdentitySkippedMultiItemGroupCount,
     },
   };
+  if (product.diagnostics.projectedSettlementRelationCount !== product.diagnostics.sourceSettlementRelationCount)
+    throw new Error(
+      `settlement relation count drift: source=${product.diagnostics.sourceSettlementRelationCount} projected=${product.diagnostics.projectedSettlementRelationCount} (public identityを間引いてはいけない)`,
+    );
   const output = path.join(
     rootDir,
     "ui/mof-kou-moku",
@@ -436,7 +509,10 @@ function build(reviewYear: number, fiscalYear: number) {
     zlib.gzipSync(JSON.stringify(product), { level: 9 }),
   );
   console.log(
-    `review-${reviewYear} × fy${fiscalYear}: groups=${groups.length} items=${product.diagnostics.linkedKouMokuCount} projects=${product.diagnostics.linkedProjectCount} settlementRelations=${identityRelations.length} settlementProjects=${product.diagnostics.settlementIdentityProjectCount} settlementUnmatched=${settlementIdentityUnmatchedItemCount} settlementAmbiguous=${settlementIdentityAmbiguousItemCount} settlementSkippedMultiItemGroups=${settlementIdentitySkippedMultiItemGroupCount}`,
+    `review-${reviewYear} × fy${fiscalYear}: groups=${groups.length} items=${product.diagnostics.linkedKouMokuCount} projects=${product.diagnostics.linkedProjectCount} ` +
+    `settlement[${settlement.dataStatus}]=${identityRelations.length} settlementProjects=${product.diagnostics.settlementIdentityProjectCount} ` +
+    `legacyUnmatched=${settlementProjectionUnmatchedLegacyItemCount} legacyAmbiguous=${settlementProjectionAmbiguousLegacyItemCount} ` +
+    `legacyEvidenceGap=${settlementProjectionLegacyEvidenceGapCount}`,
   );
 }
 const review = process.argv.find((x) => x.startsWith("--review="));
