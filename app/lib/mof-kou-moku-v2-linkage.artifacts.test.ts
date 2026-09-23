@@ -130,9 +130,24 @@ describe("published mof-kou-moku V2 settlement identity (Phase B3b: public settl
     expect(project?.sources[0].phase).toBe("initial");
   });
 
-  it("legacy V1 evidence-gap fallback: settlement sources whose budget item was ambiguous in the legacy dataset still reconstruct PID evidence independently", () => {
-    expect(review2024fy2024.diagnostics.settlementProjectionLegacyEvidenceGapCount).toBeGreaterThanOrEqual(0);
+  it("legacy V1 evidence-gap fallback golden: 気象庁 世界気象機関等分担金（legacy V1側でbudget item+budgetTypeが曖昧で通常のbudget projection groupが無いケース）でもPID evidenceが独立再構成される", () => {
+    expect(review2024fy2024.diagnostics.settlementProjectionLegacyEvidenceGapCount).toBe(2);
     // 発生した場合でも、relation数・project集合はpublic authorityと必ず一致する（fail-fastが機能した証拠）
     expect(review2024fy2024.identityRelations).toHaveLength(3907);
+
+    for (const [itemNaturalKey, linkId, rsAmountYen] of [
+      ["general|国土交通省|気象庁|233|観測予報等業務費|16|世界気象機関等分担金", "mofrs_2dffd7a9983d0905606c", 818_548_000],
+      ["general|国土交通省|気象庁|233|観測予報等業務費|16|政府開発援助世界気象機関分担金", "mofrs_cab579382ec8a14f3699", 33_766_000],
+    ] as const) {
+      const relation = review2024fy2024.identityRelations.find(r => r.itemNaturalKey === itemNaturalKey);
+      expect(relation, itemNaturalKey).toBeDefined();
+      if (!relation) throw new Error(`legacy evidence-gap golden relation is missing: ${itemNaturalKey}`);
+      expect(relation.projectIds).toEqual(["4100"]);
+      const project = relation.projects.find(p => p.projectId === "4100");
+      expect(project?.sources).toHaveLength(1);
+      expect(project?.sources[0].linkId).toBe(linkId);
+      expect(project?.sources[0].phase).toBe("initial");
+      expect(project?.sources[0].rsAmountYen).toBe(rsAmountYen);
+    }
   });
 });

@@ -292,7 +292,7 @@ export default function MOFKouPage() {
   );
 
   /** V2 overlayがこの画面全体で有効かどうか。有効/無効は画面単位で切り替え、行ごとにV1/V2を混在させない */
-  const v2Active = v2MofIndexCurrent && v2LinksCurrent && sectionMapping !== null;
+  const v2Active = v2MofIndexCurrent && v2LinksCurrent && v2SettlementCurrent && sectionMapping !== null;
 
   function v2RsProjectCountFor(row: MOFKouSectionSummary): number {
     if (!v2Active || !sectionMapping || !v2ProjectCounts || !v2SettlementSectionProjectCounts) return row.rsProjectCount;
@@ -604,8 +604,20 @@ export default function MOFKouPage() {
       : null;
     // 決算モードでは選択中sectionのbudget側rsLinksから再構成しない。settlement.json.gz
     // （public v3 authority）を、選択中V2 sectionのsettlementSectionIdで直接絞り込む。
+    // public settlement identityはsection identity/relation存在/件数のauthorityとして使い、
+    // PID別evidence（phase/revision/matchMethod/RS金額）はgeneratorが既に復元済みの
+    // v2KouMokuLinkage.identityRelations（legacy evidence-gap fallbackを含む）から取る。
+    // budget projection group（v2.groups）へ再度linkId+budgetItemIdでjoinし直すと、
+    // legacy V1側で一意解決できなかった稀なsource（settlementProjectionLegacyEvidenceGapCount）
+    // がここで再び脱落してしまうため、それはしない。
     const settlementIdentities = mode === 'settlement-identity' && v2SettlementCurrent && v2Settlement && selectedV2Section
       ? v2Settlement.identities.filter(identity => identity.settlementSectionId === selectedV2Section.id)
+      : null;
+    const settlementIdentityRelations = mode === 'settlement-identity' && currentSectionDetail && v2KouMokuLinkageCurrent && v2KouMokuLinkage
+      ? (() => {
+          const selectedSectionItemIds = new Set(currentSectionDetail.items.map(it => it.id));
+          return v2KouMokuLinkage.identityRelations.filter(relation => selectedSectionItemIds.has(relation.itemNaturalKey));
+        })()
       : null;
     const itemNames = currentSectionDetail ? new Map(currentSectionDetail.items.map(it => [it.id, it.name])) : null;
     const projectNames = currentRsIndex
@@ -614,18 +626,14 @@ export default function MOFKouPage() {
     const projectionGroups: MofKouMokuV2LinkGroup[] | null =
       mode === 'budget-link' && currentSectionDetail?.rsLinks && v2KouMokuLinkageCurrent && v2KouMokuLinkage
         ? selectV2ProjectionGroupsForLinks(v2KouMokuLinkage.groups, links ?? [])
-        : mode === 'settlement-identity' && settlementIdentities && v2KouMokuLinkageCurrent && v2KouMokuLinkage
-          ? selectV2ProjectionGroupsForLinks(
-              v2KouMokuLinkage.groups,
-              settlementIdentities.flatMap(identity => identity.sources.map(source => ({ linkId: source.linkId, itemIds: [source.budgetItemId] })))
-            )
-          : null;
+        : null;
     return {
       reviewYear,
       sectionMatched: selectedV2Section !== null,
       mode,
       links,
       settlementIdentities,
+      settlementIdentityRelations,
       itemNames,
       projectNames,
       projectionGroups,
