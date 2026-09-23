@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildSettlementIdentityRelations } from './mof-rs-settlement-identity';
 import type { MofBudgetItemRecord, MofRsProjectLinkGroup } from '../types';
-import type { SettlementItemRecord } from './mof-settlement-items';
+import { SETTLEMENT_ITEM_SCHEMA_VERSION, type SettlementItemRecord } from './mof-settlement-items';
 
 const SRC = { domain: 'mof.go.jp' as const, path: 'x', file: 'x.csv', dataset: 'd', year: 2024 };
 
@@ -27,7 +27,7 @@ function linkGroup(overrides: Partial<MofRsProjectLinkGroup>): MofRsProjectLinkG
 
 function settlementItem(overrides: Partial<SettlementItemRecord>): SettlementItemRecord {
   return {
-    schemaVersion: 1, recordType: 'mof_settlement_item', fiscalYear: 2024, itemNaturalKey: 'ik', scopeNameItemKey: 'sk',
+    schemaVersion: SETTLEMENT_ITEM_SCHEMA_VERSION, recordType: 'mof_settlement_item', fiscalYear: 2024, itemNaturalKey: 'ik', scopeNameItemKey: 'sk',
     accountType: 'general', ministry: 'X', organization: 'Y', specialAccount: '', subAccount: '', agency: '',
     sectionCode: '001', sectionName: 'S', subItemCode: '01', subItemName: 'I',
     budgetAppropriationYen: 1000, carryoverInYen: 0, reserveUseYen: 0, budgetRuleIncreaseYen: 0,
@@ -214,5 +214,25 @@ describe('buildSettlementIdentityRelations: scopeNameItemKey unique fallback（P
     expect(relations[0].projectIds).toEqual(['42']);
     // settlement金額は選択したsettlement itemの値そのままで、RS/MOF budget linkの金額と混ざらない
     expect(relations[0].currentBudgetYen).toBe(999999);
+  });
+});
+
+describe('buildSettlementIdentityRelations: stale settlement-items artifact検出', () => {
+  it('B1形式のstale settlement item（schemaVersion旧版）を読むと、静かにfallback=0へ後退せず例外を投げる', () => {
+    const staleItem: SettlementItemRecord = { ...settlementItem({}), schemaVersion: 1 };
+    expect(() => buildSettlementIdentityRelations([mofRow({})], [linkGroup({})], [staleItem], 2024, 2024, 'available'))
+      .toThrow(/settlement-items\.jsonl is incompatible/);
+  });
+
+  it('scopeNameItemKeyが欠落したstale settlement item（旧shape）を読むと例外を投げる', () => {
+    const staleItem = { ...settlementItem({}) } as Partial<SettlementItemRecord>;
+    delete staleItem.scopeNameItemKey;
+    expect(() => buildSettlementIdentityRelations([mofRow({})], [linkGroup({})], [staleItem as SettlementItemRecord], 2024, 2024, 'available'))
+      .toThrow(/settlement-items\.jsonl is incompatible/);
+  });
+
+  it('artifact_missing/no_settlement_rowsではstale検出より前に即座returnするため、settlementItemsが空でも例外を投げない', () => {
+    expect(() => buildSettlementIdentityRelations([mofRow({})], [linkGroup({})], [], 2024, 2023, 'artifact_missing')).not.toThrow();
+    expect(() => buildSettlementIdentityRelations([mofRow({})], [linkGroup({})], [], 2024, 2025, 'no_settlement_rows')).not.toThrow();
   });
 });

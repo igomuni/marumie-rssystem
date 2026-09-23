@@ -29,7 +29,15 @@
  *   （sourceLink.budgetItemNaturalKey / relation.settlementItemNaturalKey）。
  */
 import type { MofAccountType, MofBudgetItemRecord, MofRsGroupMatchMethod, MofRsProjectLinkGroup } from '../types';
-import type { SettlementItemRecord } from './mof-settlement-items';
+import { SETTLEMENT_ITEM_SCHEMA_VERSION, type SettlementItemRecord } from './mof-settlement-items';
+
+/**
+ * このderived成果物（relation/diagnostics）自体のschema version。B2で
+ * `itemNaturalKey`→`settlementItemNaturalKey`、sourceLinkへの
+ * `budgetItemNaturalKey`/`resolutionMethod`追加、diagnosticsへのfallback系
+ * フィールド追加でshapeが変わったため1→2。
+ */
+const SETTLEMENT_IDENTITY_SCHEMA_VERSION = 2;
 
 export type SettlementResolutionMethod = 'exact-item-key' | 'unique-name-fallback';
 
@@ -123,9 +131,28 @@ interface Contribution {
   accountType: MofAccountType;
 }
 
+/**
+ * settlement-items.jsonlが、B2が前提とするshape（schemaVersion一致・scopeNameItemKey保持）を
+ * 満たすか検証する。B1時点で生成された古いartifact（scopeNameItemKeyフィールド無し）を
+ * そのまま読むと、fallback検索キーがundefinedになりexact joinだけ成功してfallbackが
+ * 静かに0件へ後退する（B1相当へのsilent degradation）。これを防ぐためfail-fastする。
+ */
+function assertSettlementItemsCompatible(settlementItems: SettlementItemRecord[]): void {
+  for (const item of settlementItems) {
+    const hasScopeNameItemKey = typeof item.scopeNameItemKey === 'string' && item.scopeNameItemKey.length > 0;
+    if (item.schemaVersion !== SETTLEMENT_ITEM_SCHEMA_VERSION || !hasScopeNameItemKey) {
+      throw new Error(
+        `settlement-items.jsonl is incompatible with Phase B2 (expected schemaVersion=${SETTLEMENT_ITEM_SCHEMA_VERSION} with a non-empty scopeNameItemKey, ` +
+        `got schemaVersion=${item.schemaVersion} itemNaturalKey=${item.itemNaturalKey} scopeNameItemKey=${JSON.stringify(item.scopeNameItemKey)}). ` +
+        'Re-run derive-mof.ts to regenerate settlement-items.jsonl before running derive-integrated.ts.'
+      );
+    }
+  }
+}
+
 function emptyDiagnostics(reviewYear: number, fiscalYear: number, settlementDataStatus: SettlementDataStatus, sourceLinkGroupCount: number): MofRsSettlementDiagnostics {
   return {
-    schemaVersion: 1, reviewYear, fiscalYear, settlementDataStatus,
+    schemaVersion: SETTLEMENT_IDENTITY_SCHEMA_VERSION, reviewYear, fiscalYear, settlementDataStatus,
     sourceLinkGroupCount,
     exactJoinLinkGroupCount: 0,
     uniqueNameFallbackLinkGroupCount: 0,
@@ -154,6 +181,7 @@ export function buildSettlementIdentityRelations(
   if (settlementDataStatus !== 'available') {
     return { relations: [], diagnostics: emptyDiagnostics(reviewYear, fiscalYear, settlementDataStatus, linkGroups.length) };
   }
+  assertSettlementItemsCompatible(settlementItems);
 
   const mofItemByRecordId = new Map<string, { itemNaturalKey: string; scopeNameItemKey: string; accountType: MofAccountType }>();
   for (const r of mofRows) mofItemByRecordId.set(r.recordId, { itemNaturalKey: r.itemNaturalKey, scopeNameItemKey: r.scopeNameItemKey, accountType: r.accountType });
@@ -254,7 +282,7 @@ export function buildSettlementIdentityRelations(
     relationCountByResolutionMethod[methodsPresent.size > 1 ? 'mixed' : [...methodsPresent][0]]++;
 
     relations.push({
-      schemaVersion: 1,
+      schemaVersion: SETTLEMENT_IDENTITY_SCHEMA_VERSION,
       recordType: 'mof_rs_settlement_identity_relation',
       reviewYear,
       fiscalYear,
@@ -280,7 +308,7 @@ export function buildSettlementIdentityRelations(
     - Object.values(accountTypeFallbackCounts).reduce((s, n) => s + n, 0);
 
   const diagnostics: MofRsSettlementDiagnostics = {
-    schemaVersion: 1,
+    schemaVersion: SETTLEMENT_IDENTITY_SCHEMA_VERSION,
     reviewYear,
     fiscalYear,
     settlementDataStatus: 'available',

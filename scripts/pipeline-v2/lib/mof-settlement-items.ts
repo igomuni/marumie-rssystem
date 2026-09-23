@@ -16,6 +16,15 @@
  */
 import type { MofBudgetItemRecord, MofAccountType } from '../types';
 
+/**
+ * settlement-items.jsonl / settlement-items-summary.jsonのschema version。
+ * Phase B2で`scopeNameItemKey`を追加してshapeが変わったため1→2。
+ * 消費側（mof-rs-settlement-identity.ts）はこのバージョンを検証し、旧shapeの
+ * stale artifactを読んだ場合にfallbackが静かに0件へ後退しないようfail-fastする。
+ */
+export const SETTLEMENT_ITEM_SCHEMA_VERSION = 2;
+export const SETTLEMENT_ITEMS_SUMMARY_SCHEMA_VERSION = 2;
+
 export interface SettlementItemRecord {
   schemaVersion: number;
   recordType: 'mof_settlement_item';
@@ -132,7 +141,7 @@ export function buildSettlementItems(items: MofBudgetItemRecord[], fiscalYear: n
     }
 
     result.push({
-      schemaVersion: 1,
+      schemaVersion: SETTLEMENT_ITEM_SCHEMA_VERSION,
       recordType: 'mof_settlement_item',
       fiscalYear,
       itemNaturalKey: key,
@@ -166,7 +175,7 @@ export function buildSettlementItems(items: MofBudgetItemRecord[], fiscalYear: n
   }
 
   const summary: SettlementItemsSummary = {
-    schemaVersion: 1,
+    schemaVersion: SETTLEMENT_ITEMS_SUMMARY_SCHEMA_VERSION,
     fiscalYear,
     itemCount: result.length,
     multiSourceItemCount,
