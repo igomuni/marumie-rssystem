@@ -26,7 +26,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { readJsonl, writeJsonl, writeJson } from './lib/jsonl';
 import { buildMofRsLinks } from './lib/mof-rs-links';
-import { buildSettlementIdentityRelations } from './lib/mof-rs-settlement-identity';
+import { buildSettlementIdentityRelations, type SettlementDataStatus } from './lib/mof-rs-settlement-identity';
 import type { MofBudgetItemRecord, RsBudgetItemRecordV2 } from './types';
 import type { SettlementItemRecord } from './lib/mof-settlement-items';
 
@@ -72,14 +72,19 @@ function main(): void {
       summaries[`${reviewYear}:${fiscalYear}`] = summary;
 
       // Phase B1: 既存link group（result.links）をitemNaturalKey経由でsettlement-items.jsonl
-      // （Phase A、derive-mof.tsが生成）へ接続する。settlement-items.jsonlが無い年度は
-      // readJsonlが[]を返すため、relations=0件として安全にスキップされる。
+      // （Phase A、derive-mof.tsが生成）へ接続する。「決算データがまだ無い
+      // (artifact_missing/no_settlement_rows)」と「決算データはあるがexact joinに失敗した
+      // (no_exact_settlement_item)」を区別する（両者を混同するとdiagnosticsの意味が壊れる）。
       const settlementItemsPath = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`, 'settlement-items.jsonl');
+      const settlementArtifactExists = fs.existsSync(settlementItemsPath);
       const settlementItems = readJsonl<SettlementItemRecord>(settlementItemsPath);
-      const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, result.links, settlementItems, reviewYear, fiscalYear);
+      const settlementDataStatus: SettlementDataStatus = !settlementArtifactExists
+        ? 'artifact_missing'
+        : settlementItems.length === 0 ? 'no_settlement_rows' : 'available';
+      const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, result.links, settlementItems, reviewYear, fiscalYear, settlementDataStatus);
       writeJsonl(path.join(outDir, `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}.jsonl`), relations);
       writeJson(path.join(outDir, `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}-diagnostics.json`), diagnostics);
-      console.log(`  settlement identity: relations=${diagnostics.relationCount} ` +
+      console.log(`  settlement identity[${settlementDataStatus}]: relations=${diagnostics.relationCount} ` +
         `exactJoin=${diagnostics.exactJoinLinkGroupCount}/${diagnostics.sourceLinkGroupCount} ` +
         `spansMultipleItems=${diagnostics.spansMultipleItemsLinkGroupCount} ` +
         `unmatched=${diagnostics.unmatchedSettlementLinkGroupCount} ` +

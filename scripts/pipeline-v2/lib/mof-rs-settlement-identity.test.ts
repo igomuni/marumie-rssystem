@@ -42,7 +42,7 @@ function settlementItem(overrides: Partial<SettlementItemRecord>): SettlementIte
 describe('buildSettlementIdentityRelations', () => {
   it('一般会計: 単一link groupがexactにitemNaturalKeyへ辿れ、settlement itemとjoinする', () => {
     const { relations, diagnostics } = buildSettlementIdentityRelations(
-      [mofRow({})], [linkGroup({})], [settlementItem({})], 2024, 2024,
+      [mofRow({})], [linkGroup({})], [settlementItem({})], 2024, 2024, 'available',
     );
     expect(relations).toHaveLength(1);
     expect(relations[0].accountType).toBe('general');
@@ -62,7 +62,7 @@ describe('buildSettlementIdentityRelations', () => {
       [mofRow({ recordId: 'mof_sp', accountType: 'special', specialAccount: '東日本大震災復興特別会計', subAccount: '復興', itemNaturalKey: 'ik-sp' })],
       [linkGroup({ linkId: 'link_sp', mofRecordIds: ['mof_sp'], naturalKey: 'special|X|東日本大震災復興特別会計|復興|S|I' })],
       [settlementItem({ itemNaturalKey: 'ik-sp', accountType: 'special', specialAccount: '東日本大震災復興特別会計', subAccount: '復興' })],
-      2024, 2024,
+      2024, 2024, 'available',
     );
     expect(relations).toHaveLength(1);
     expect(relations[0].accountType).toBe('special');
@@ -72,7 +72,7 @@ describe('buildSettlementIdentityRelations', () => {
 
   it('決算側にsourceRecordCount>1（複数内訳行合算）のitemがjoinされた場合、multiSourceSettlementItemCountへ計上する', () => {
     const { relations, diagnostics } = buildSettlementIdentityRelations(
-      [mofRow({})], [linkGroup({})], [settlementItem({ sourceRecordCount: 2 })], 2024, 2024,
+      [mofRow({})], [linkGroup({})], [settlementItem({ sourceRecordCount: 2 })], 2024, 2024, 'available',
     );
     expect(relations[0].settlementSourceRecordCount).toBe(2);
     expect(diagnostics.multiSourceSettlementItemCount).toBe(1);
@@ -87,7 +87,7 @@ describe('buildSettlementIdentityRelations', () => {
       linkGroup({ linkId: 'link_initial', phase: 'initial', revision: null, mofRecordIds: ['mof_initial'], projectIds: ['7'] }),
       linkGroup({ linkId: 'link_supp1', phase: 'supplement', revision: 1, mofRecordIds: ['mof_supp'], projectIds: ['7'] }),
     ];
-    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, [settlementItem({})], 2024, 2024);
+    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, [settlementItem({})], 2024, 2024, 'available');
     expect(relations).toHaveLength(1);
     expect(relations[0].projectIds).toEqual(['7']);
     expect(relations[0].sourceLinks.map(l => l.linkId).sort()).toEqual(['link_initial', 'link_supp1']);
@@ -101,7 +101,7 @@ describe('buildSettlementIdentityRelations', () => {
       mofRow({ recordId: 'mof_b', itemNaturalKey: 'ik-b' }),
     ];
     const links = [linkGroup({ mofRecordIds: ['mof_a', 'mof_b'] })];
-    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, [settlementItem({ itemNaturalKey: 'ik-a' }), settlementItem({ itemNaturalKey: 'ik-b' })], 2024, 2024);
+    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, [settlementItem({ itemNaturalKey: 'ik-a' }), settlementItem({ itemNaturalKey: 'ik-b' })], 2024, 2024, 'available');
     expect(relations).toHaveLength(0);
     expect(diagnostics.spansMultipleItemsLinkGroupCount).toBe(1);
     expect(diagnostics.unresolvedLinkGroups[0].reason).toBe('spans_multiple_items');
@@ -109,9 +109,30 @@ describe('buildSettlementIdentityRelations', () => {
   });
 
   it('settlement側にexact itemNaturalKeyが無い場合、fallbackせずunmatchedとして残す', () => {
-    const { relations, diagnostics } = buildSettlementIdentityRelations([mofRow({})], [linkGroup({})], [], 2024, 2024);
+    const { relations, diagnostics } = buildSettlementIdentityRelations([mofRow({})], [linkGroup({})], [], 2024, 2024, 'available');
     expect(relations).toHaveLength(0);
+    expect(diagnostics.settlementDataStatus).toBe('available');
     expect(diagnostics.unmatchedSettlementLinkGroupCount).toBe(1);
     expect(diagnostics.unresolvedLinkGroups[0].reason).toBe('no_exact_settlement_item');
+  });
+
+  it('settlement-items.jsonl自体が存在しない年度(artifact_missing)は、no_exact_settlement_itemへ計上せずrelationCount=0で即座に返す', () => {
+    const { relations, diagnostics } = buildSettlementIdentityRelations([mofRow({})], [linkGroup({}), linkGroup({ linkId: 'link_2' })], [], 2024, 2023, 'artifact_missing');
+    expect(relations).toHaveLength(0);
+    expect(diagnostics.settlementDataStatus).toBe('artifact_missing');
+    expect(diagnostics.sourceLinkGroupCount).toBe(2);
+    expect(diagnostics.relationCount).toBe(0);
+    expect(diagnostics.unmatchedSettlementLinkGroupCount).toBe(0);
+    expect(diagnostics.unresolvedLinkGroups).toHaveLength(0);
+  });
+
+  it('settlement行が0件の年度(no_settlement_rows)は、no_exact_settlement_itemへ計上せずrelationCount=0で即座に返す', () => {
+    const { relations, diagnostics } = buildSettlementIdentityRelations([mofRow({})], [linkGroup({})], [], 2024, 2025, 'no_settlement_rows');
+    expect(relations).toHaveLength(0);
+    expect(diagnostics.settlementDataStatus).toBe('no_settlement_rows');
+    expect(diagnostics.sourceLinkGroupCount).toBe(1);
+    expect(diagnostics.relationCount).toBe(0);
+    expect(diagnostics.unmatchedSettlementLinkGroupCount).toBe(0);
+    expect(diagnostics.unresolvedLinkGroups).toHaveLength(0);
   });
 });

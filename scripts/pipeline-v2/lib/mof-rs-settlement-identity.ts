@@ -55,10 +55,21 @@ export interface MofRsSettlementUnresolvedLinkGroup {
   projectIds: string[];
 }
 
+/**
+ * settlement-items.jsonl（Phase A成果物）の可用性。
+ * - artifact_missing: derive-mof.tsが当該年度でまだ実行されていない（ファイル自体が無い）
+ * - no_settlement_rows: ファイルはあるが決算行が0件の年度（例: 決算未確定のFY）
+ * - available: 決算行がありexact joinを試みられる状態
+ * artifact_missing/no_settlement_rowsを「exact joinに失敗した(no_exact_settlement_item)」
+ * と混同すると、「決算データが無い」と「決算データはあるがキーが不一致」を区別できなくなる。
+ */
+export type SettlementDataStatus = 'artifact_missing' | 'no_settlement_rows' | 'available';
+
 export interface MofRsSettlementDiagnostics {
   schemaVersion: number;
   reviewYear: number;
   fiscalYear: number;
+  settlementDataStatus: SettlementDataStatus;
   sourceLinkGroupCount: number;
   exactJoinLinkGroupCount: number;
   spansMultipleItemsLinkGroupCount: number;
@@ -83,7 +94,27 @@ export function buildSettlementIdentityRelations(
   settlementItems: SettlementItemRecord[],
   reviewYear: number,
   fiscalYear: number,
+  settlementDataStatus: SettlementDataStatus,
 ): { relations: MofRsSettlementIdentityRelation[]; diagnostics: MofRsSettlementDiagnostics } {
+  if (settlementDataStatus !== 'available') {
+    return {
+      relations: [],
+      diagnostics: {
+        schemaVersion: 1, reviewYear, fiscalYear, settlementDataStatus,
+        sourceLinkGroupCount: linkGroups.length,
+        exactJoinLinkGroupCount: 0,
+        spansMultipleItemsLinkGroupCount: 0,
+        unmatchedSettlementLinkGroupCount: 0,
+        noMofItemKeyLinkGroupCount: 0,
+        relationCount: 0,
+        multiSourceSettlementItemCount: 0,
+        linkedProjectCount: 0,
+        accountTypeCounts: {},
+        unresolvedLinkGroups: [],
+      },
+    };
+  }
+
   const mofItemByRecordId = new Map<string, { itemNaturalKey: string; accountType: MofAccountType }>();
   for (const r of mofRows) mofItemByRecordId.set(r.recordId, { itemNaturalKey: r.itemNaturalKey, accountType: r.accountType });
   const settlementByKey = new Map(settlementItems.map(s => [s.itemNaturalKey, s]));
@@ -170,6 +201,7 @@ export function buildSettlementIdentityRelations(
     schemaVersion: 1,
     reviewYear,
     fiscalYear,
+    settlementDataStatus: 'available',
     sourceLinkGroupCount: linkGroups.length,
     exactJoinLinkGroupCount: linkGroups.length - noMofItemKeyLinkGroupCount - spansMultipleItemsLinkGroupCount - unmatchedSettlementLinkGroupCount,
     spansMultipleItemsLinkGroupCount,
