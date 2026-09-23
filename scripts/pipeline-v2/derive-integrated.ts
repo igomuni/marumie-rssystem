@@ -71,10 +71,12 @@ function main(): void {
         `mofYen=${result.mofAmountAcrossGroupsYen.toLocaleString()} rsYen=${result.rsAmountAcrossGroupsYen.toLocaleString()}`);
       summaries[`${reviewYear}:${fiscalYear}`] = summary;
 
-      // Phase B1: 既存link group（result.links）をitemNaturalKey経由でsettlement-items.jsonl
-      // （Phase A、derive-mof.tsが生成）へ接続する。「決算データがまだ無い
-      // (artifact_missing/no_settlement_rows)」と「決算データはあるがexact joinに失敗した
-      // (no_exact_settlement_item)」を区別する（両者を混同するとdiagnosticsの意味が壊れる）。
+      // Phase B1/B2: 既存link group（result.links）を、budget側の既存itemNaturalKey経由で
+      // settlement-items.jsonl（Phase A、derive-mof.tsが生成）へ接続する。exact join優先、
+      // 無ければscopeNameItemKey unique fallback、複数候補はambiguousとして自動解決しない
+      // （lib/mof-rs-settlement-identity.ts）。「決算データがまだ無い
+      // (artifact_missing/no_settlement_rows)」と「決算データはあるがjoinに失敗した
+      // (unmatched/ambiguous_name_fallback)」を区別する（混同するとdiagnosticsの意味が壊れる）。
       const settlementItemsPath = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`, 'settlement-items.jsonl');
       const settlementArtifactExists = fs.existsSync(settlementItemsPath);
       const settlementItems = readJsonl<SettlementItemRecord>(settlementItemsPath);
@@ -85,12 +87,13 @@ function main(): void {
       writeJsonl(path.join(outDir, `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}.jsonl`), relations);
       writeJson(path.join(outDir, `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}-diagnostics.json`), diagnostics);
       console.log(`  settlement identity[${settlementDataStatus}]: relations=${diagnostics.relationCount} ` +
-        `exactJoin=${diagnostics.exactJoinLinkGroupCount}/${diagnostics.sourceLinkGroupCount} ` +
-        `spansMultipleItems=${diagnostics.spansMultipleItemsLinkGroupCount} ` +
-        `unmatched=${diagnostics.unmatchedSettlementLinkGroupCount} ` +
+        `exact=${diagnostics.exactJoinLinkGroupCount} fallback=${diagnostics.uniqueNameFallbackLinkGroupCount} ` +
+        `ambiguous=${diagnostics.ambiguousNameFallbackLinkGroupCount} unmatched=${diagnostics.unmatchedSettlementLinkGroupCount} ` +
+        `spansMultipleItems=${diagnostics.spansMultipleItemsLinkGroupCount} / source=${diagnostics.sourceLinkGroupCount} ` +
         `multiSourceItems=${diagnostics.multiSourceSettlementItemCount} ` +
         `linkedProjects=${diagnostics.linkedProjectCount} ` +
-        `accountTypes=${JSON.stringify(diagnostics.accountTypeCounts)}`);
+        `accountTypes=${JSON.stringify(diagnostics.accountTypeCounts)} ` +
+        `fallbackByAccountType=${JSON.stringify(diagnostics.accountTypeFallbackCounts)}`);
     }
   }
 

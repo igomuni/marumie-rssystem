@@ -21,6 +21,8 @@ export interface SettlementItemRecord {
   recordType: 'mof_settlement_item';
   fiscalYear: number;
   itemNaturalKey: string;
+  /** コードを含まない識別キー（mof-keys.tsのscopeNameItemKeyと同一ロジック）。Phase B2の名称fallback用 */
+  scopeNameItemKey: string;
   accountType: MofAccountType;
   ministry: string;
   organization: string;
@@ -134,6 +136,7 @@ export function buildSettlementItems(items: MofBudgetItemRecord[], fiscalYear: n
       recordType: 'mof_settlement_item',
       fiscalYear,
       itemNaturalKey: key,
+      scopeNameItemKey: template.scopeNameItemKey,
       accountType: template.accountType,
       ministry: template.ministry ?? '',
       organization: template.organization ?? '',

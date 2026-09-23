@@ -27,7 +27,7 @@ function linkGroup(overrides: Partial<MofRsProjectLinkGroup>): MofRsProjectLinkG
 
 function settlementItem(overrides: Partial<SettlementItemRecord>): SettlementItemRecord {
   return {
-    schemaVersion: 1, recordType: 'mof_settlement_item', fiscalYear: 2024, itemNaturalKey: 'ik',
+    schemaVersion: 1, recordType: 'mof_settlement_item', fiscalYear: 2024, itemNaturalKey: 'ik', scopeNameItemKey: 'sk',
     accountType: 'general', ministry: 'X', organization: 'Y', specialAccount: '', subAccount: '', agency: '',
     sectionCode: '001', sectionName: 'S', subItemCode: '01', subItemName: 'I',
     budgetAppropriationYen: 1000, carryoverInYen: 0, reserveUseYen: 0, budgetRuleIncreaseYen: 0,
@@ -39,20 +39,24 @@ function settlementItem(overrides: Partial<SettlementItemRecord>): SettlementIte
   };
 }
 
-describe('buildSettlementIdentityRelations', () => {
+describe('buildSettlementIdentityRelations: exact join（Phase B1）', () => {
   it('一般会計: 単一link groupがexactにitemNaturalKeyへ辿れ、settlement itemとjoinする', () => {
     const { relations, diagnostics } = buildSettlementIdentityRelations(
       [mofRow({})], [linkGroup({})], [settlementItem({})], 2024, 2024, 'available',
     );
     expect(relations).toHaveLength(1);
     expect(relations[0].accountType).toBe('general');
-    expect(relations[0].itemNaturalKey).toBe('ik');
+    expect(relations[0].settlementItemNaturalKey).toBe('ik');
     expect(relations[0].projectIds).toEqual(['7']);
     expect(relations[0].sourceLinks).toHaveLength(1);
     expect(relations[0].sourceLinks[0].linkId).toBe('link_1');
+    expect(relations[0].sourceLinks[0].budgetItemNaturalKey).toBe('ik');
+    expect(relations[0].sourceLinks[0].resolutionMethod).toBe('exact-item-key');
     expect(relations[0].currentBudgetYen).toBe(1000);
     expect(relations[0].spentYen).toBe(800);
     expect(diagnostics.exactJoinLinkGroupCount).toBe(1);
+    expect(diagnostics.uniqueNameFallbackLinkGroupCount).toBe(0);
+    expect(diagnostics.relationCountByResolutionMethod['exact-item-key']).toBe(1);
     expect(diagnostics.linkedProjectCount).toBe(1);
     expect(diagnostics.accountTypeCounts.general).toBe(1);
   });
@@ -66,7 +70,7 @@ describe('buildSettlementIdentityRelations', () => {
     );
     expect(relations).toHaveLength(1);
     expect(relations[0].accountType).toBe('special');
-    expect(relations[0].itemNaturalKey).toBe('ik-sp');
+    expect(relations[0].settlementItemNaturalKey).toBe('ik-sp');
     expect(diagnostics.accountTypeCounts.special).toBe(1);
   });
 
@@ -105,18 +109,10 @@ describe('buildSettlementIdentityRelations', () => {
     expect(relations).toHaveLength(0);
     expect(diagnostics.spansMultipleItemsLinkGroupCount).toBe(1);
     expect(diagnostics.unresolvedLinkGroups[0].reason).toBe('spans_multiple_items');
-    expect(diagnostics.unresolvedLinkGroups[0].itemNaturalKeyCandidates).toEqual(['ik-a', 'ik-b']);
+    expect(diagnostics.unresolvedLinkGroups[0].budgetItemNaturalKeyCandidates).toEqual(['ik-a', 'ik-b']);
   });
 
-  it('settlement側にexact itemNaturalKeyが無い場合、fallbackせずunmatchedとして残す', () => {
-    const { relations, diagnostics } = buildSettlementIdentityRelations([mofRow({})], [linkGroup({})], [], 2024, 2024, 'available');
-    expect(relations).toHaveLength(0);
-    expect(diagnostics.settlementDataStatus).toBe('available');
-    expect(diagnostics.unmatchedSettlementLinkGroupCount).toBe(1);
-    expect(diagnostics.unresolvedLinkGroups[0].reason).toBe('no_exact_settlement_item');
-  });
-
-  it('settlement-items.jsonl自体が存在しない年度(artifact_missing)は、no_exact_settlement_itemへ計上せずrelationCount=0で即座に返す', () => {
+  it('artifact_missing: settlement-items.jsonl自体が存在しない年度はrelationCount=0で即座に返し、unresolvedLinkGroupsを展開しない', () => {
     const { relations, diagnostics } = buildSettlementIdentityRelations([mofRow({})], [linkGroup({}), linkGroup({ linkId: 'link_2' })], [], 2024, 2023, 'artifact_missing');
     expect(relations).toHaveLength(0);
     expect(diagnostics.settlementDataStatus).toBe('artifact_missing');
@@ -126,7 +122,7 @@ describe('buildSettlementIdentityRelations', () => {
     expect(diagnostics.unresolvedLinkGroups).toHaveLength(0);
   });
 
-  it('settlement行が0件の年度(no_settlement_rows)は、no_exact_settlement_itemへ計上せずrelationCount=0で即座に返す', () => {
+  it('no_settlement_rows: settlement行が0件の年度はrelationCount=0で即座に返し、unresolvedLinkGroupsを展開しない', () => {
     const { relations, diagnostics } = buildSettlementIdentityRelations([mofRow({})], [linkGroup({})], [], 2024, 2025, 'no_settlement_rows');
     expect(relations).toHaveLength(0);
     expect(diagnostics.settlementDataStatus).toBe('no_settlement_rows');
@@ -134,5 +130,89 @@ describe('buildSettlementIdentityRelations', () => {
     expect(diagnostics.relationCount).toBe(0);
     expect(diagnostics.unmatchedSettlementLinkGroupCount).toBe(0);
     expect(diagnostics.unresolvedLinkGroups).toHaveLength(0);
+  });
+});
+
+describe('buildSettlementIdentityRelations: scopeNameItemKey unique fallback（Phase B2）', () => {
+  it('復興特会golden case: 予算側項コード36→決算側項コード701、項名・目名は同じ場合、unique-name-fallbackで安全に接続する', () => {
+    const mofRows = [mofRow({
+      recordId: 'mof_fukko', accountType: 'special', specialAccount: '東日本大震災復興特別会計', subAccount: '復興',
+      sectionCode: '36', sectionName: '東日本大震災復興支援事業費', subItemCode: '00', subItemName: '農業用施設等災害関連事業費補助',
+      itemNaturalKey: 'special|X|東日本大震災復興特別会計|復興|36|東日本大震災復興支援事業費|00|農業用施設等災害関連事業費補助',
+      scopeNameItemKey: 'special|X|東日本大震災復興特別会計|復興|東日本大震災復興支援事業費|農業用施設等災害関連事業費補助',
+    })];
+    const links = [linkGroup({ linkId: 'link_fukko', mofRecordIds: ['mof_fukko'] })];
+    const settlement = [settlementItem({
+      itemNaturalKey: 'special|X|東日本大震災復興特別会計|復興|701|東日本大震災復興支援事業費|00|農業用施設等災害関連事業費補助',
+      scopeNameItemKey: 'special|X|東日本大震災復興特別会計|復興|東日本大震災復興支援事業費|農業用施設等災害関連事業費補助',
+      accountType: 'special', specialAccount: '東日本大震災復興特別会計', subAccount: '復興',
+      sectionCode: '701', subItemCode: '00',
+    })];
+    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, settlement, 2024, 2024, 'available');
+    expect(relations).toHaveLength(1);
+    expect(relations[0].settlementItemNaturalKey).toContain('701');
+    expect(relations[0].sourceLinks[0].budgetItemNaturalKey).toContain('36');
+    expect(relations[0].sourceLinks[0].resolutionMethod).toBe('unique-name-fallback');
+    expect(relations[0].currentBudgetYen).toBe(1000);
+    expect(diagnostics.exactJoinLinkGroupCount).toBe(0);
+    expect(diagnostics.uniqueNameFallbackLinkGroupCount).toBe(1);
+    expect(diagnostics.accountTypeFallbackCounts.special).toBe(1);
+    expect(diagnostics.relationCountByResolutionMethod['unique-name-fallback']).toBe(1);
+  });
+
+  it('exact itemNaturalKeyが存在する場合はfallbackを試みず必ずexactを優先する', () => {
+    const mofRows = [mofRow({ itemNaturalKey: 'ik-exact', scopeNameItemKey: 'sk-shared' })];
+    const links = [linkGroup({})];
+    // exact一致するitemに加え、同じscopeNameItemKeyを持つ別itemも存在する（fallbackなら曖昧になる状況）
+    const settlement = [
+      settlementItem({ itemNaturalKey: 'ik-exact', scopeNameItemKey: 'sk-shared', currentBudgetYen: 1000 }),
+      settlementItem({ itemNaturalKey: 'ik-other', scopeNameItemKey: 'sk-shared', currentBudgetYen: 9999 }),
+    ];
+    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, settlement, 2024, 2024, 'available');
+    expect(relations).toHaveLength(1);
+    expect(relations[0].settlementItemNaturalKey).toBe('ik-exact');
+    expect(relations[0].currentBudgetYen).toBe(1000);
+    expect(relations[0].sourceLinks[0].resolutionMethod).toBe('exact-item-key');
+    expect(diagnostics.exactJoinLinkGroupCount).toBe(1);
+    expect(diagnostics.uniqueNameFallbackLinkGroupCount).toBe(0);
+    expect(diagnostics.ambiguousNameFallbackLinkGroupCount).toBe(0);
+  });
+
+  it('fallback候補が2件以上の場合はambiguous-name-fallbackとして残し、自動選択・relation作成をしない', () => {
+    const mofRows = [mofRow({ itemNaturalKey: 'ik-budget-only', scopeNameItemKey: 'sk-shared' })];
+    const links = [linkGroup({})];
+    const settlement = [
+      settlementItem({ itemNaturalKey: 'ik-cand-1', scopeNameItemKey: 'sk-shared' }),
+      settlementItem({ itemNaturalKey: 'ik-cand-2', scopeNameItemKey: 'sk-shared' }),
+    ];
+    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, settlement, 2024, 2024, 'available');
+    expect(relations).toHaveLength(0);
+    expect(diagnostics.ambiguousNameFallbackLinkGroupCount).toBe(1);
+    expect(diagnostics.uniqueNameFallbackLinkGroupCount).toBe(0);
+    const entry = diagnostics.unresolvedLinkGroups[0];
+    expect(entry.reason).toBe('ambiguous_name_fallback');
+    expect(entry.linkId).toBe('link_1');
+    expect(entry.scopeNameItemKey).toBe('sk-shared');
+    expect(entry.settlementCandidateItemNaturalKeys).toEqual(['ik-cand-1', 'ik-cand-2']);
+  });
+
+  it('fallback候補が0件の場合はunmatchedとして残す（推測フォールバックしない）', () => {
+    const mofRows = [mofRow({ itemNaturalKey: 'ik-budget-only', scopeNameItemKey: 'sk-no-match' })];
+    const links = [linkGroup({})];
+    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, [], 2024, 2024, 'available');
+    expect(relations).toHaveLength(0);
+    expect(diagnostics.unmatchedSettlementLinkGroupCount).toBe(1);
+    expect(diagnostics.unresolvedLinkGroups[0].reason).toBe('unmatched');
+    expect(diagnostics.unresolvedLinkGroups[0].scopeNameItemKey).toBe('sk-no-match');
+  });
+
+  it('projectIds/sourceLinksはfallback時もB1と同じく既存formal budget link由来のみで、RS↔決算の新規金額マッチを行わない', () => {
+    const mofRows = [mofRow({ itemNaturalKey: 'ik-budget', scopeNameItemKey: 'sk-shared' })];
+    const links = [linkGroup({ projectIds: ['42'], rsAmountYen: 123, mofAmountYen: 123 })];
+    const settlement = [settlementItem({ itemNaturalKey: 'ik-settlement', scopeNameItemKey: 'sk-shared', currentBudgetYen: 999999 })];
+    const { relations } = buildSettlementIdentityRelations(mofRows, links, settlement, 2024, 2024, 'available');
+    expect(relations[0].projectIds).toEqual(['42']);
+    // settlement金額は選択したsettlement itemの値そのままで、RS/MOF budget linkの金額と混ざらない
+    expect(relations[0].currentBudgetYen).toBe(999999);
   });
 });
