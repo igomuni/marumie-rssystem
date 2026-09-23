@@ -49,7 +49,6 @@
     "pipeline:v2:derive:integrated": "tsx scripts/pipeline-v2/derive-integrated.ts",
     "pipeline:v2:validate:legacy": "tsx scripts/pipeline-v2/validate.ts",
     "pipeline:v2:validate": "tsx scripts/pipeline-v2/validate-v2.ts",
-    "pipeline:v2:publish": "tsx scripts/pipeline-v2/publish-v2.ts",
     "pipeline:v2:publish:core": "tsx scripts/pipeline-v2/publish-v2.ts",
     "pipeline:v2:publish:ui": "tsx scripts/generate-mof-kou-moku-v2-linkage.ts",
     "pipeline:v2:publish:all": "npm run pipeline:v2:publish:core && npm run pipeline:v2:publish:ui && npm run pipeline:v2:validate"

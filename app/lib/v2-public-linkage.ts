@@ -1,8 +1,6 @@
 /**
  * Pipeline V2 の public/data/v2 を UI から読むための軽量アダプタ。
- *
- * PoCでは /mof-kou-v2-poc から使用する。
- * 将来は /mof-kou / /mof-kou-moku / /budget-flow で共通利用する想定。
+ * /mof-kou・/mof-kou-mokuが使用する（/budget-flowは別途app/budget-flow/v2-source.tsを持つ）。
  *
  * production linkage の判定ロジックはここには置かない。
  * この層は publish 済みの V2 データを表示用に読むだけ。
@@ -194,8 +192,9 @@ export function normalizeSpecialAccount(value: string): string {
 }
 
 /**
- * 既存 MOF UI の行と V2 section index を意味キーで接続するための PoC helper。
+ * 既存 MOF UI（legacy V1）の行と V2 section index を意味キーで接続する。
  * ID体系が違っても、項の構造化フィールドが同じならV2 sectionを見つけられる。
+ * 候補が複数（曖昧）なら接続しない（自動選択しない）。
  */
 export function findV2SectionForLegacyRow(
   rows: V2MofSectionIndexRow[],
