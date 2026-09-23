@@ -19,6 +19,8 @@ import type {
 } from '../../types';
 import type { RsProject } from '../rs-projects';
 import type { Finding } from '../validate-checks';
+import type { MofRsSettlementIdentityRelation } from '../mof-rs-settlement-identity';
+import type { SettlementItemRecord } from '../mof-settlement-items';
 
 export function readGzipJson<T>(filePath: string): T | null {
   if (!fs.existsSync(filePath)) return null;
@@ -738,20 +740,147 @@ export function checkLinksManifestSetCounts(reviewYear: number, fiscalYear: numb
 }
 
 // ============================================================
+// E-4: Standalone Settlement Identity Publish（Phase B3a）
+// ============================================================
+
+export interface PublishedSettlementSource { linkId: string; budgetItemId: string; resolutionMethod: string }
+export interface PublishedSettlementAmounts { budgetAppropriationYen: number | null; currentBudgetYen: number | null; spentYen: number | null; carryoverOutYen: number | null; unusedYen: number | null }
+export interface PublishedSettlementIdentity { settlementItemId: string; settlementSectionId: string; accountType: string; projectIds: string[]; sources: PublishedSettlementSource[]; amounts: PublishedSettlementAmounts }
+export interface SettlementPublishManifest { dataStatus: string; relationCount: number; linkedProjectCount: number; compressedBytes: number; file: string }
+
+/** derived relation件数とpublished identities件数・manifest.relationCountを検算する */
+export function checkSettlementPublishCounts(
+  reviewYear: number, fiscalYear: number, derivedRelations: MofRsSettlementIdentityRelation[],
+  published: { identities: PublishedSettlementIdentity[] } | null, manifest: SettlementPublishManifest | null
+): Finding[] {
+  const findings: Finding[] = [];
+  const scope = { reviewYear, fiscalYear };
+  if (!published || !manifest) return findings;
+  if (derivedRelations.length !== published.identities.length) pushError(findings, 'settlement-publish-count', scope,
+    `Derived relation(${derivedRelations.length})とpublished identities.length(${published.identities.length})が不一致`);
+  if (published.identities.length !== manifest.relationCount) pushError(findings, 'settlement-publish-count', scope,
+    `published identities.length(${published.identities.length})とmanifest.relationCount(${manifest.relationCount})が不一致`);
+  return findings;
+}
+
+/** settlementItemIdをkeyにDerivedとPublishedを全件突合し、金額・projectIds・sourcesのsemantic equalityを検算する */
+export function checkSettlementSemanticEquality(
+  reviewYear: number, fiscalYear: number, derivedRelations: MofRsSettlementIdentityRelation[],
+  published: { identities: PublishedSettlementIdentity[] } | null
+): Finding[] {
+  const findings: Finding[] = [];
+  const scope = { reviewYear, fiscalYear };
+  if (!published) return findings;
+  const publishedByKey = new Map(published.identities.map(i => [i.settlementItemId, i]));
+
+  for (const d of derivedRelations) {
+    const p = publishedByKey.get(d.settlementItemNaturalKey);
+    if (!p) { pushError(findings, 'settlement-publish-semantic', { ...scope, settlementItemId: d.settlementItemNaturalKey }, `settlementItemId=${d.settlementItemNaturalKey}: publishedに見つからない`); continue; }
+    if (p.accountType !== d.accountType
+      || JSON.stringify([...p.projectIds].sort()) !== JSON.stringify([...d.projectIds].sort())
+      || p.amounts.budgetAppropriationYen !== d.budgetAppropriationYen
+      || p.amounts.currentBudgetYen !== d.currentBudgetYen
+      || p.amounts.spentYen !== d.spentYen
+      || p.amounts.carryoverOutYen !== d.carryoverOutYen
+      || p.amounts.unusedYen !== d.unusedYen) {
+      pushError(findings, 'settlement-publish-semantic', { ...scope, settlementItemId: d.settlementItemNaturalKey }, `settlementItemId=${d.settlementItemNaturalKey}: DerivedとPublishedのsemantic valueが不一致`);
+    }
+    const expectedSources = d.sourceLinks.map(s => `${s.linkId}\x1f${s.budgetItemNaturalKey}\x1f${s.resolutionMethod}`).sort();
+    const actualSources = p.sources.map(s => `${s.linkId}\x1f${s.budgetItemId}\x1f${s.resolutionMethod}`).sort();
+    if (JSON.stringify(expectedSources) !== JSON.stringify(actualSources)) {
+      pushError(findings, 'settlement-publish-semantic', { ...scope, settlementItemId: d.settlementItemNaturalKey }, `settlementItemId=${d.settlementItemNaturalKey}: sourcesがDerivedのsourceLinksと不一致`);
+    }
+  }
+  return findings;
+}
+
+/** published identities[].sources[].linkIdが、同ディレクトリのlinks.json.gz（formal budget link）に実在するか検算する */
+export function checkSettlementSourceLinksReferenceFormalLinks(
+  reviewYear: number, fiscalYear: number, published: { identities: PublishedSettlementIdentity[] } | null,
+  publishedLinks: { links: PublishedLink[] } | null
+): Finding[] {
+  const findings: Finding[] = [];
+  const scope = { reviewYear, fiscalYear };
+  if (!published) return findings;
+  const linkIds = new Set((publishedLinks?.links ?? []).map(l => l.linkId));
+  for (const identity of published.identities) {
+    for (const source of identity.sources) {
+      if (!linkIds.has(source.linkId)) {
+        pushError(findings, 'settlement-publish-source-link-reference', { ...scope, settlementItemId: identity.settlementItemId, linkId: source.linkId },
+          `settlementItemId=${identity.settlementItemId}: sources[].linkId=${source.linkId}が同ディレクトリのlinks.json.gzに存在しない`);
+      }
+    }
+  }
+  return findings;
+}
+
+/**
+ * published settlementSectionIdを、Normalized/Derivedから独立に再構成したsettlement item
+ * （settlement-items.jsonl）→sectionId対応で検算する。budget側sectionではなく
+ * settlement側itemのsection情報から求めていることを検証する（復興特会fallback対策）。
+ */
+export function checkSettlementSectionIdsReconstruction(
+  reviewYear: number, fiscalYear: number, derivedRelations: MofRsSettlementIdentityRelation[], settlementItems: SettlementItemRecord[],
+  derivedSections: MofDerivedSection[], published: { identities: PublishedSettlementIdentity[] } | null
+): Finding[] {
+  const findings: Finding[] = [];
+  const scope = { reviewYear, fiscalYear };
+  if (!published) return findings;
+  const sectionKeyToId = buildIndependentSectionIndex(derivedSections);
+  const itemKeyToSectionId = new Map<string, string>();
+  for (const item of settlementItems) {
+    const key = [item.accountType, item.ministry, item.organization, item.specialAccount, item.subAccount, item.agency, item.sectionCode, item.sectionName].join('\x1f');
+    const sid = sectionKeyToId.get(key);
+    if (sid) itemKeyToSectionId.set(item.itemNaturalKey, sid);
+  }
+  const publishedByKey = new Map(published.identities.map(i => [i.settlementItemId, i]));
+
+  for (const d of derivedRelations) {
+    const p = publishedByKey.get(d.settlementItemNaturalKey);
+    if (!p) continue;
+    const expected = itemKeyToSectionId.get(d.settlementItemNaturalKey);
+    if (!expected || expected !== p.settlementSectionId) {
+      pushError(findings, 'settlement-publish-section-id', { ...scope, settlementItemId: d.settlementItemNaturalKey },
+        `settlementItemId=${d.settlementItemNaturalKey}: 独立再構成したsettlementSectionId(${expected})とpublished(${p.settlementSectionId})が不一致`);
+    }
+  }
+  return findings;
+}
+
+/** manifestのdataStatus/linkedProjectCountを、published identitiesから独立に再構成して検算する */
+export function checkSettlementManifestCounts(
+  reviewYear: number, fiscalYear: number, published: { dataStatus: string; identities: PublishedSettlementIdentity[] } | null, manifest: SettlementPublishManifest | null
+): Finding[] {
+  const findings: Finding[] = [];
+  const scope = { reviewYear, fiscalYear };
+  if (!published || !manifest) return findings;
+  if (published.dataStatus !== manifest.dataStatus) pushError(findings, 'settlement-publish-manifest-counts', scope,
+    `published dataStatus(${published.dataStatus})とmanifest.dataStatus(${manifest.dataStatus})が不一致`);
+  const linkedProjectCount = new Set(published.identities.flatMap(i => i.projectIds)).size;
+  if (linkedProjectCount !== manifest.linkedProjectCount) pushError(findings, 'settlement-publish-manifest-counts', scope,
+    `独立再構成したlinkedProjectCount(${linkedProjectCount})とmanifest.linkedProjectCount(${manifest.linkedProjectCount})が不一致`);
+  return findings;
+}
+
+// ============================================================
 // Root manifest
 // ============================================================
 
 export interface RootManifest {
   rs: { reviewYear: number; projectCount: number }[];
   mof: { fiscalYear: number; sectionCount: number }[];
-  links: { reviewYear: number; fiscalYear: number; linkGroupCount: number; projectCount: number; sectionCount: number }[];
+  links: {
+    reviewYear: number; fiscalYear: number; linkGroupCount: number; projectCount: number; sectionCount: number;
+    settlement?: { dataStatus: string; relationCount: number; linkedProjectCount: number; gzipBytes: number };
+  }[];
 }
 
 export function checkRootManifestConsistency(
   root: RootManifest | null,
   rsIndexes: { reviewYear: number; projectCount: number }[],
   mofIndexes: { fiscalYear: number; sectionCount: number }[],
-  linkManifests: { reviewYear: number; fiscalYear: number; linkGroupCount: number; projectCount: number; sectionCount: number }[]
+  linkManifests: { reviewYear: number; fiscalYear: number; linkGroupCount: number; projectCount: number; sectionCount: number }[],
+  settlementManifests: { reviewYear: number; fiscalYear: number; dataStatus: string; relationCount: number; linkedProjectCount: number; gzipBytes: number }[] = []
 ): { findings: Finding[]; checkedProducts: number } {
   const findings: Finding[] = [];
   let checkedProducts = 0;
@@ -779,6 +908,16 @@ export function checkRootManifestConsistency(
     if (!entry || entry.linkGroupCount !== link.linkGroupCount || entry.projectCount !== link.projectCount || entry.sectionCount !== link.sectionCount) {
       pushError(findings, 'root-manifest-consistency', { reviewYear: link.reviewYear, fiscalYear: link.fiscalYear },
         `root manifest.links[review-${link.reviewYear}×fy${link.fiscalYear}]がsub-product manifestと不一致`);
+    }
+  }
+  for (const settlement of settlementManifests) {
+    checkedProducts++;
+    const entry = root.links.find(l => l.reviewYear === settlement.reviewYear && l.fiscalYear === settlement.fiscalYear);
+    const s = entry?.settlement;
+    if (!s || s.dataStatus !== settlement.dataStatus || s.relationCount !== settlement.relationCount
+      || s.linkedProjectCount !== settlement.linkedProjectCount || s.gzipBytes !== settlement.gzipBytes) {
+      pushError(findings, 'root-manifest-consistency', { reviewYear: settlement.reviewYear, fiscalYear: settlement.fiscalYear },
+        `root manifest.links[review-${settlement.reviewYear}×fy${settlement.fiscalYear}].settlementがsub-product manifestと不一致`);
     }
   }
   return { findings, checkedProducts };

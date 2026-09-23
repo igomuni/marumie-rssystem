@@ -37,7 +37,7 @@ import { SETTLEMENT_ITEM_SCHEMA_VERSION, type SettlementItemRecord } from './mof
  * `budgetItemNaturalKey`/`resolutionMethod`追加、diagnosticsへのfallback系
  * フィールド追加でshapeが変わったため1→2。
  */
-const SETTLEMENT_IDENTITY_SCHEMA_VERSION = 2;
+export const SETTLEMENT_IDENTITY_SCHEMA_VERSION = 2;
 
 export type SettlementResolutionMethod = 'exact-item-key' | 'unique-name-fallback';
 

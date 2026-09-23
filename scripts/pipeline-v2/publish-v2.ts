@@ -32,6 +32,9 @@ import type {
 } from './types';
 import type { RsProject } from './lib/rs-projects';
 import { buildMofSectionDetails, buildMofIndexRow, sectionIdOf, mofSectionShard } from './lib/mof-publish';
+import { compactSettlementIdentity, compactSettlementDiagnostics } from './lib/settlement-publish';
+import { SETTLEMENT_IDENTITY_SCHEMA_VERSION, type MofRsSettlementDiagnostics, type MofRsSettlementIdentityRelation } from './lib/mof-rs-settlement-identity';
+import type { SettlementItemRecord } from './lib/mof-settlement-items';
 import type { MofBudgetItemRecord, MofDerivedBudgetEvent, MofIdentityRelation, MofStageGap, MofDerivedSection } from './types';
 
 type Profile = 'core' | 'context' | 'spending';
@@ -428,6 +431,60 @@ function publishLinkProduct(outputRoot: string, publicRoot: string, reviewYear: 
   return { reviewYear, fiscalYear, linkGroupCount: links.length, projectCount: projectIds.size, sectionCount: sectionIds.size, gzipBytes };
 }
 
+/**
+ * public/data/v2/links/review-{ry}-fy{fy}/settlement.json.gz を生成する（Phase B3a）。
+ * publishLinkProduct()が同ディレクトリへlinks.json.gz/manifest.jsonを書き終えた後に
+ * 呼び出す前提（rmSyncせず、既存manifest.jsonへsettlementサマリを追記する）。
+ *
+ * derivedのmof-rs-settlement-review-*-diagnostics.jsonが無い（=derive-integrated.tsが
+ * この年度組み合わせで決算identityを一度も生成していない）場合はnullを返しスキップする。
+ * artifact_missing/no_settlement_rowsの場合もこの関数自体は実行され、
+ * identities=[]のsettlement.json.gzを生成する（dataStatusで区別可能にする）。
+ */
+function publishSettlementProduct(
+  outputRoot: string, publicRoot: string, reviewYear: number, fiscalYear: number, settlementItems: SettlementItemRecord[]
+): { reviewYear: number; fiscalYear: number; dataStatus: string; relationCount: number; linkedProjectCount: number; gzipBytes: number } | null {
+  const diagnosticsPath = path.join(outputRoot, 'derived', 'links', `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}-diagnostics.json`);
+  const relationsPath = path.join(outputRoot, 'derived', 'links', `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}.jsonl`);
+  if (!fs.existsSync(diagnosticsPath)) return null;
+
+  const diagnostics = JSON.parse(fs.readFileSync(diagnosticsPath, 'utf-8')) as MofRsSettlementDiagnostics;
+  if (diagnostics.schemaVersion !== SETTLEMENT_IDENTITY_SCHEMA_VERSION) {
+    throw new Error(
+      `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}-diagnostics.json has unexpected schemaVersion=${diagnostics.schemaVersion} ` +
+      `(expected ${SETTLEMENT_IDENTITY_SCHEMA_VERSION}). Re-run derive-integrated.ts before publishing.`
+    );
+  }
+
+  const relations = readJsonl<MofRsSettlementIdentityRelation>(relationsPath);
+  const settlementItemsByKey = new Map(settlementItems.map(s => [s.itemNaturalKey, s]));
+  const identities = relations.map(r => compactSettlementIdentity(r, settlementItemsByKey));
+  const diagnosticsSummary = compactSettlementDiagnostics(diagnostics);
+
+  const outDir = path.join(publicRoot, 'data', 'v2', 'links', `review-${reviewYear}-fy${fiscalYear}`);
+  const settlementObj = {
+    schemaVersion: 1, publishSchemaVersion: PUBLISH_SCHEMA_VERSION, reviewYear, fiscalYear,
+    dataStatus: diagnostics.settlementDataStatus, identities, diagnostics: diagnosticsSummary,
+  };
+  const gzipBytes = writeGzipJson(path.join(outDir, 'settlement.json.gz'), settlementObj);
+
+  const manifestPath = path.join(outDir, 'manifest.json');
+  const existingManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')) as Record<string, unknown>;
+  const manifestObj = {
+    ...existingManifest,
+    settlement: {
+      dataStatus: diagnostics.settlementDataStatus, relationCount: diagnostics.relationCount,
+      linkedProjectCount: diagnostics.linkedProjectCount, compressedBytes: gzipBytes, file: 'settlement.json.gz',
+    },
+  };
+  writeJson(manifestPath, manifestObj);
+
+  return {
+    reviewYear, fiscalYear, dataStatus: diagnostics.settlementDataStatus,
+    relationCount: diagnostics.relationCount, linkedProjectCount: diagnostics.linkedProjectCount, gzipBytes,
+  };
+}
+
 function dirSizeBytes(dir: string): number {
   if (!fs.existsSync(dir)) return 0;
   let total = 0;
@@ -468,9 +525,12 @@ function main(): void {
   console.log('\n=== publish-v2: MOF ===');
   const mofProducts: Record<string, unknown>[] = [];
   const recordToSectionByFy = new Map<number, Map<string, string>>();
+  const settlementItemsByFy = new Map<number, SettlementItemRecord[]>();
   for (const fy of fiscalYears) {
     const { result, recordToSection } = publishMofYear(outputRoot, publicRoot, fy, reviewYears);
     recordToSectionByFy.set(fy, recordToSection);
+    const settlementItemsPath = path.join(outputRoot, 'derived', 'mof', `fy${fy}`, 'settlement-items.jsonl');
+    settlementItemsByFy.set(fy, fs.existsSync(settlementItemsPath) ? readJsonl<SettlementItemRecord>(settlementItemsPath) : []);
     if (!result) { console.log(`fy${fy}: スキップ（normalized/derivedのbudget-items.jsonlが無い）`); continue; }
     totalBytes += result.indexGzipBytes + result.gzipBytes;
     console.log(`fy${fy}: sections=${result.sectionCount} index=${result.indexGzipBytes}B sections=${result.gzipBytes}B(${result.shardCount}shard,max${result.maxShardBytes}B)`);
@@ -488,7 +548,18 @@ function main(): void {
       if (!result) continue;
       totalBytes += result.gzipBytes;
       console.log(`review-${reviewYear}×fy${fiscalYear}: linkGroups=${result.linkGroupCount} projects=${result.projectCount} sections=${result.sectionCount} ${result.gzipBytes}B`);
-      linkProducts.push(result as unknown as Record<string, unknown>);
+      const linkEntry: Record<string, unknown> = { ...result };
+
+      const settlementResult = publishSettlementProduct(outputRoot, publicRoot, reviewYear, fiscalYear, settlementItemsByFy.get(fiscalYear) ?? []);
+      if (settlementResult) {
+        totalBytes += settlementResult.gzipBytes;
+        console.log(`  settlement[${settlementResult.dataStatus}]: relations=${settlementResult.relationCount} linkedProjects=${settlementResult.linkedProjectCount} ${settlementResult.gzipBytes}B`);
+        linkEntry.settlement = {
+          dataStatus: settlementResult.dataStatus, relationCount: settlementResult.relationCount,
+          linkedProjectCount: settlementResult.linkedProjectCount, gzipBytes: settlementResult.gzipBytes,
+        };
+      }
+      linkProducts.push(linkEntry);
     }
   }
 
