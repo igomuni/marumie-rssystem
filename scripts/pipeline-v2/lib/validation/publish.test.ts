@@ -10,11 +10,17 @@ import {
   checkRsBudgetItemPreservation, checkRsFalsePreservation, checkRsIndexBudgetSummaryReconstruction,
   checkMofSectionCounts, checkMofSectionSemantics, checkMofDetailRecords, checkMofDetailEventAggregation,
   checkLinksPublishCounts, checkLinksSemanticEquality, checkLinksManifestSetCounts,
+  checkSettlementPublishCounts, checkSettlementSemanticEquality, checkSettlementSourceLinksReferenceFormalLinks,
+  checkSettlementSectionIdsReconstruction, checkSettlementManifestCounts, checkSettlementPayloadSchema,
+  checkSettlementManifestPresence,
   checkRootManifestConsistency, readGzipJson,
   type RsPublishIndex, type MofPublishIndex, type PublishedLink, type MofSectionDetail,
+  type PublishedSettlementIdentity, type SettlementPublishPayload,
 } from './publish';
 import type { RsBudgetItemRecordV2, RsBudgetSummaryRecord, MofDerivedSection, MofRsProjectLinkGroup, MofBudgetItemRecord, MofDerivedBudgetEvent } from '../../types';
 import type { RsProject } from '../rs-projects';
+import type { MofRsSettlementIdentityRelation } from '../mof-rs-settlement-identity';
+import type { SettlementItemRecord } from '../mof-settlement-items';
 
 function project(overrides: Partial<RsProject>): RsProject {
   return {
@@ -527,6 +533,190 @@ describe('checkLinksPublishCounts / checkLinksSemanticEquality / checkLinksManif
   });
 });
 
+function settlementRelation(overrides: Partial<MofRsSettlementIdentityRelation>): MofRsSettlementIdentityRelation {
+  return {
+    schemaVersion: 2, recordType: 'mof_rs_settlement_identity_relation', reviewYear: 2024, fiscalYear: 2024,
+    accountType: 'general', settlementItemNaturalKey: 'ik', projectIds: ['1'],
+    sourceLinks: [{ linkId: 'l1', phase: 'initial', revision: null, matchMethod: 'exact-name-key', projectIds: ['1'], budgetItemNaturalKey: 'ik', resolutionMethod: 'exact-item-key' }],
+    settlementSourceRecordCount: 1, budgetAppropriationYen: 1000, currentBudgetYen: 1000, spentYen: 800, carryoverOutYen: 100, unusedYen: 100,
+    ...overrides,
+  };
+}
+function settlementItem(overrides: Partial<SettlementItemRecord>): SettlementItemRecord {
+  return {
+    schemaVersion: 2, recordType: 'mof_settlement_item', fiscalYear: 2024, itemNaturalKey: 'ik', scopeNameItemKey: 'sk',
+    accountType: 'general', ministry: 'X', organization: 'Y', specialAccount: '', subAccount: '', agency: '',
+    sectionCode: '001', sectionName: 'S', subItemCode: '01', subItemName: 'I',
+    budgetAppropriationYen: 1000, carryoverInYen: 0, reserveUseYen: 0, budgetRuleIncreaseYen: 0,
+    reallocationYen: 0, transferAdjustmentYen: 0, currentBudgetYen: 1000, spentYen: 800, carryoverOutYen: 100, unusedYen: 100,
+    sourceRecordCount: 1, sourceRecordIds: ['s1'],
+    equationChecked: true, componentsToCurrentBudgetMismatch: false, currentBudgetToSpentMismatch: false,
+    ...overrides,
+  };
+}
+function publishedSettlementIdentity(overrides: Partial<PublishedSettlementIdentity>): PublishedSettlementIdentity {
+  return {
+    settlementItemId: 'ik', settlementSectionId: 'mofsec_abcdef1234567890abcd', accountType: 'general', projectIds: ['1'],
+    sources: [{ linkId: 'l1', budgetItemId: 'ik', resolutionMethod: 'exact-item-key' }],
+    amounts: { budgetAppropriationYen: 1000, currentBudgetYen: 1000, spentYen: 800, carryoverOutYen: 100, unusedYen: 100 },
+    ...overrides,
+  };
+}
+
+describe('checkSettlementPublishCounts / checkSettlementSemanticEquality', () => {
+  it('件数・semantic valueが一致すればfindingsは空', () => {
+    const d = settlementRelation({});
+    const p = publishedSettlementIdentity({});
+    const countFindings = checkSettlementPublishCounts(2024, 2024, [d], { identities: [p] }, { dataStatus: 'available', relationCount: 1, linkedProjectCount: 1, compressedBytes: 10, file: 'settlement.json.gz' });
+    expect(countFindings).toHaveLength(0);
+    const semanticFindings = checkSettlementSemanticEquality(2024, 2024, [d], { identities: [p] });
+    expect(semanticFindings).toHaveLength(0);
+  });
+
+  it('derivedとpublishedの件数不一致を検出する', () => {
+    const findings = checkSettlementPublishCounts(2024, 2024, [settlementRelation({}), settlementRelation({ settlementItemNaturalKey: 'ik2' })], { identities: [] }, { dataStatus: 'available', relationCount: 0, linkedProjectCount: 0, compressedBytes: 0, file: 'settlement.json.gz' });
+    expect(findings.length).toBeGreaterThan(0);
+  });
+
+  it('manifestがnullでも、derivedとpublishedの件数不一致検算はskipしない（review指摘: manifest欠落がcount checkをsilentに無効化しないこと）', () => {
+    const findings = checkSettlementPublishCounts(
+      2024, 2024,
+      [settlementRelation({}), settlementRelation({ settlementItemNaturalKey: 'ik2' })],
+      { identities: [] },
+      null,
+    );
+    expect(findings.some(f => f.message.includes('Derived relation'))).toBe(true);
+  });
+
+  it('manifestがnullでも、derivedとpublishedの件数が一致していればfindingsは空', () => {
+    const d = settlementRelation({});
+    const p = publishedSettlementIdentity({});
+    const findings = checkSettlementPublishCounts(2024, 2024, [d], { identities: [p] }, null);
+    expect(findings).toHaveLength(0);
+  });
+
+  it('settlementItemIdがpublishedに見つからなければerror', () => {
+    const findings = checkSettlementSemanticEquality(2024, 2024, [settlementRelation({ settlementItemNaturalKey: 'missing' })], { identities: [] });
+    expect(findings.some(f => f.message.includes('見つからない'))).toBe(true);
+  });
+
+  it('金額のsemantic不一致を検出する', () => {
+    const d = settlementRelation({ spentYen: 800 });
+    const p = publishedSettlementIdentity({ amounts: { budgetAppropriationYen: 1000, currentBudgetYen: 1000, spentYen: 999, carryoverOutYen: 100, unusedYen: 100 } });
+    const findings = checkSettlementSemanticEquality(2024, 2024, [d], { identities: [p] });
+    expect(findings.some(f => f.message.includes('semantic value'))).toBe(true);
+  });
+
+  it('sourcesがderivedのsourceLinksと不一致なら検出する（budgetItemId/resolutionMethod欠落含む）', () => {
+    const d = settlementRelation({ sourceLinks: [{ linkId: 'l1', phase: 'initial', revision: null, matchMethod: 'exact-name-key', projectIds: ['1'], budgetItemNaturalKey: 'ik-budget', resolutionMethod: 'unique-name-fallback' }] });
+    const p = publishedSettlementIdentity({ sources: [{ linkId: 'l1', budgetItemId: 'ik-budget', resolutionMethod: 'exact-item-key' }] });
+    const findings = checkSettlementSemanticEquality(2024, 2024, [d], { identities: [p] });
+    expect(findings.some(f => f.message.includes('sources'))).toBe(true);
+  });
+});
+
+describe('checkSettlementSourceLinksReferenceFormalLinks', () => {
+  it('sources[].linkIdが同ディレクトリのlinks.json.gzに存在すればfindingsは空', () => {
+    const p = publishedSettlementIdentity({});
+    const publishedLink: PublishedLink = { linkId: 'l1', phase: 'initial', revision: null, matchMethod: 'exact-name-key', sectionIds: [], projectIds: ['1'], mofAmountYen: 1000, rsAmountYen: 1000, differenceYen: 0 };
+    const findings = checkSettlementSourceLinksReferenceFormalLinks(2024, 2024, { identities: [p] }, { links: [publishedLink] });
+    expect(findings).toHaveLength(0);
+  });
+
+  it('sources[].linkIdがlinks.json.gzに存在しない場合は検出する（B3aの中核不変条件）', () => {
+    const p = publishedSettlementIdentity({ sources: [{ linkId: 'l-missing', budgetItemId: 'ik', resolutionMethod: 'exact-item-key' }] });
+    const findings = checkSettlementSourceLinksReferenceFormalLinks(2024, 2024, { identities: [p] }, { links: [] });
+    expect(findings.some(f => f.message.includes('存在しない'))).toBe(true);
+  });
+});
+
+describe('checkSettlementSectionIdsReconstruction', () => {
+  it('settlementSectionIdをsettlement item（budget側ではない）から独立再構成して一致を確認する', () => {
+    const sec = section({ id: 'mofsec_settlement00000001', accountType: 'special', ministry: 'X', organization: '', specialAccount: '東日本大震災復興特別会計', subAccount: '復興', sectionCode: '701', sectionName: 'T' });
+    const item = settlementItem({ itemNaturalKey: 'ik-settlement', accountType: 'special', ministry: 'X', organization: '', specialAccount: '東日本大震災復興特別会計', subAccount: '復興', sectionCode: '701', sectionName: 'T' });
+    const d = settlementRelation({
+      settlementItemNaturalKey: 'ik-settlement', accountType: 'special',
+      sourceLinks: [{ linkId: 'l1', phase: 'initial', revision: null, matchMethod: 'exact-name-key', projectIds: ['1'], budgetItemNaturalKey: 'ik-budget-code-36', resolutionMethod: 'unique-name-fallback' }],
+    });
+    const p = publishedSettlementIdentity({ settlementItemId: 'ik-settlement', settlementSectionId: sec.id, accountType: 'special' });
+    const findings = checkSettlementSectionIdsReconstruction(2024, 2024, [d], [item], [sec], { identities: [p] });
+    expect(findings).toHaveLength(0);
+  });
+
+  it('publishedSettlementSectionIdがbudget側のsectionを使い回していた場合に不一致として検出する', () => {
+    const settlementSection = section({ id: 'mofsec_settlement00000001', accountType: 'special', sectionCode: '701', sectionName: 'T' });
+    const budgetSection = section({ id: 'mofsec_budget000000000001', accountType: 'special', sectionCode: '36', sectionName: 'T' });
+    const item = settlementItem({ itemNaturalKey: 'ik-settlement', accountType: 'special', sectionCode: '701', sectionName: 'T' });
+    const d = settlementRelation({ settlementItemNaturalKey: 'ik-settlement', accountType: 'special' });
+    // publishedがbudget側sectionを誤って使い回しているケースを模擬
+    const p = publishedSettlementIdentity({ settlementItemId: 'ik-settlement', settlementSectionId: budgetSection.id, accountType: 'special' });
+    const findings = checkSettlementSectionIdsReconstruction(2024, 2024, [d], [item], [settlementSection, budgetSection], { identities: [p] });
+    expect(findings.some(f => f.message.includes('settlementSectionId'))).toBe(true);
+  });
+});
+
+describe('checkSettlementManifestCounts', () => {
+  it('dataStatus/linkedProjectCountが一致すればfindingsは空', () => {
+    const p = publishedSettlementIdentity({});
+    const findings = checkSettlementManifestCounts(2024, 2024, { dataStatus: 'available', identities: [p] }, { dataStatus: 'available', relationCount: 1, linkedProjectCount: 1, compressedBytes: 10, file: 'settlement.json.gz' });
+    expect(findings).toHaveLength(0);
+  });
+
+  it('独立再構成したlinkedProjectCountがmanifestと不一致なら検出する', () => {
+    const p = publishedSettlementIdentity({ projectIds: ['1', '2'] });
+    const findings = checkSettlementManifestCounts(2024, 2024, { dataStatus: 'available', identities: [p] }, { dataStatus: 'available', relationCount: 1, linkedProjectCount: 999, compressedBytes: 10, file: 'settlement.json.gz' });
+    expect(findings.length).toBeGreaterThan(0);
+  });
+
+  it('dataStatusの不一致を検出する', () => {
+    const findings = checkSettlementManifestCounts(2024, 2024, { dataStatus: 'available', identities: [] }, { dataStatus: 'artifact_missing', relationCount: 0, linkedProjectCount: 0, compressedBytes: 0, file: 'settlement.json.gz' });
+    expect(findings.some(f => f.message.includes('dataStatus'))).toBe(true);
+  });
+});
+
+function settlementPayload(overrides: Partial<SettlementPublishPayload>): SettlementPublishPayload {
+  return { schemaVersion: 2, publishSchemaVersion: 3, reviewYear: 2024, fiscalYear: 2024, identities: [], ...overrides };
+}
+
+describe('checkSettlementPayloadSchema', () => {
+  it('schemaVersion/publishSchemaVersion/reviewYear/fiscalYearが期待値どおりならfindingsは空', () => {
+    const findings = checkSettlementPayloadSchema(2024, 2024, settlementPayload({}), 2, 3);
+    expect(findings).toHaveLength(0);
+  });
+
+  it('schemaVersionが期待値と不一致なら検出する（他productがschemaVersion=2で揃っている中、settlementだけ古いshapeで公開されるのを防ぐ）', () => {
+    const findings = checkSettlementPayloadSchema(2024, 2024, settlementPayload({ schemaVersion: 1 }), 2, 3);
+    expect(findings.some(f => f.message.includes('schemaVersion'))).toBe(true);
+  });
+
+  it('publishSchemaVersionが期待値と不一致なら検出する', () => {
+    const findings = checkSettlementPayloadSchema(2024, 2024, settlementPayload({ publishSchemaVersion: 2 }), 2, 3);
+    expect(findings.some(f => f.message.includes('publishSchemaVersion'))).toBe(true);
+  });
+
+  it('reviewYear/fiscalYearが対象と不一致なら検出する（ディレクトリと中身のずれ検出）', () => {
+    const findings = checkSettlementPayloadSchema(2024, 2024, settlementPayload({ reviewYear: 2025, fiscalYear: 2023 }), 2, 3);
+    expect(findings.filter(f => f.message.includes('reviewYear') || f.message.includes('fiscalYear'))).toHaveLength(2);
+  });
+});
+
+describe('checkSettlementManifestPresence', () => {
+  it('manifest.jsonが存在し、settlementサマリも存在すればfindingsは空', () => {
+    const findings = checkSettlementManifestPresence(2024, 2024, true, { dataStatus: 'available', relationCount: 1, linkedProjectCount: 1, compressedBytes: 10, file: 'settlement.json.gz' });
+    expect(findings).toHaveLength(0);
+  });
+
+  it('manifest.jsonは存在するがsettlementサマリが欠落していればerror（review指摘: silentに他checkがskipされるのを防ぐ）', () => {
+    const findings = checkSettlementManifestPresence(2024, 2024, true, null);
+    expect(findings.some(f => f.message.includes('settlementサマリが存在しない'))).toBe(true);
+  });
+
+  it('manifest.json自体が存在しない場合は、settlementサマリ欠落として二重報告しない（別のartifact-presence checkの責務）', () => {
+    const findings = checkSettlementManifestPresence(2024, 2024, false, null);
+    expect(findings).toHaveLength(0);
+  });
+});
+
 describe('checkRootManifestConsistency', () => {
   it('全sub-productが一致すればfindingsは空', () => {
     const root = { rs: [{ reviewYear: 2024, projectCount: 100 }], mof: [{ fiscalYear: 2024, sectionCount: 50 }], links: [{ reviewYear: 2024, fiscalYear: 2024, linkGroupCount: 10, projectCount: 5, sectionCount: 3 }] };
@@ -538,6 +728,25 @@ describe('checkRootManifestConsistency', () => {
   it('root manifestのrs projectCountがsub-productと不一致ならerror', () => {
     const root = { rs: [{ reviewYear: 2024, projectCount: 999 }], mof: [], links: [] };
     const result = checkRootManifestConsistency(root, [{ reviewYear: 2024, projectCount: 100 }], [], []);
+    expect(result.findings.length).toBeGreaterThan(0);
+  });
+
+  it('links entry内のnested settlementサマリが一致すればfindingsは空（Phase B3a）', () => {
+    const root = {
+      rs: [], mof: [],
+      links: [{ reviewYear: 2024, fiscalYear: 2024, linkGroupCount: 10, projectCount: 5, sectionCount: 3, settlement: { dataStatus: 'available', relationCount: 8, linkedProjectCount: 4, gzipBytes: 123 } }],
+    };
+    const result = checkRootManifestConsistency(root, [], [], [], [{ reviewYear: 2024, fiscalYear: 2024, dataStatus: 'available', relationCount: 8, linkedProjectCount: 4, gzipBytes: 123 }]);
+    expect(result.findings).toHaveLength(0);
+    expect(result.checkedProducts).toBe(1);
+  });
+
+  it('links entry内のnested settlementサマリが不一致ならerror', () => {
+    const root = {
+      rs: [], mof: [],
+      links: [{ reviewYear: 2024, fiscalYear: 2024, linkGroupCount: 10, projectCount: 5, sectionCount: 3, settlement: { dataStatus: 'available', relationCount: 999, linkedProjectCount: 4, gzipBytes: 123 } }],
+    };
+    const result = checkRootManifestConsistency(root, [], [], [], [{ reviewYear: 2024, fiscalYear: 2024, dataStatus: 'available', relationCount: 8, linkedProjectCount: 4, gzipBytes: 123 }]);
     expect(result.findings.length).toBeGreaterThan(0);
   });
 });

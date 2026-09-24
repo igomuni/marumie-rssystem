@@ -62,6 +62,11 @@ export const COLUMNS: ColumnSpec[] = [
   { key: 'subAccount', label: '勘定／業務', width: 110, note: '特別会計は勘定、政府関係機関は業務区分' },
   { key: 'sectionCode', label: '項', width: 48, note: '項コード（組織・勘定内の連番）' },
   { key: 'sectionName', label: '項名', width: 190 },
+  { key: 'subItemName', label: '目名', width: 220, note: '支出の性質による分類（事項＝目的による分類とは別系統）' },
+  { key: 'amount', label: '本年度額', width: 100, numeric: true, note: '補正は改予算額、決算は歳出予算額' },
+  { key: 'previousAmount', label: '比較対象額', width: 100, numeric: true, note: '当初・暫定は前年度予算額、補正は補正前の成立予算額、決算は欄なし' },
+  { key: 'difference', label: '増減額', width: 100, numeric: true },
+  { key: 'rate', label: '増減率', width: 84, numeric: true },
   {
     key: 'majorExpenseName',
     label: '主要経費',
@@ -73,17 +78,6 @@ export const COLUMNS: ColumnSpec[] = [
   { key: 'economicNatureName', label: '経済性質別', width: 110, note: '政府関係機関の帳票には無い' },
   { key: 'purposeName', label: '使途別', width: 110 },
   { key: 'subItemCode', label: '目コード', width: 64 },
-  { key: 'subItemName', label: '目名', width: 220, note: '支出の性質による分類（事項＝目的による分類とは別系統）' },
-  { key: 'amount', label: '本年度額', width: 100, numeric: true, note: '補正は改予算額、決算は歳出予算額' },
-  {
-    key: 'previousAmount',
-    label: '比較対象額',
-    width: 100,
-    numeric: true,
-    note: '当初・暫定は前年度予算額、補正は補正前の成立予算額、決算は欄なし',
-  },
-  { key: 'difference', label: '増減額', width: 100, numeric: true },
-  { key: 'rate', label: '増減率', width: 84, numeric: true },
   // 以下は決算の帳票にだけ値が入る
   {
     key: 'currentAmount',

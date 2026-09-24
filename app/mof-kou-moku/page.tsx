@@ -43,6 +43,16 @@ import {
 import type { GridViewState } from '@/client/components/mof-kou/DataGrid';
 import { FilterSidebar, type FilterDomains, type FilterSidebarState, type NumRange } from '@/client/components/mof-kou-moku/FilterSidebar';
 import { textMatches } from '@/client/components/mof-kou/RegexTextFilter';
+import { availableReviewYearsForFiscalYear, fetchV2RootManifest, type V2RootManifest } from '@/app/lib/v2-public-linkage';
+import {
+  countV2IdentityProjectsByKouMoku,
+  countV2ProjectsByKouMoku,
+  buildV2KouMokuReconciliations,
+  fetchMofKouMokuV2Linkage,
+  groupV2KouMokuLinksByKey,
+  groupV2SettlementIdentityByKey,
+} from '@/app/lib/mof-kou-moku-v2-linkage';
+import type { MofKouMokuV2LinkageProduct } from '@/types/mof-kou-moku-v2-linkage';
 import {
   ACCOUNT_LABEL,
   COLUMNS,
@@ -103,8 +113,16 @@ function boundsOf(values: number[]): [number, number] {
 export default function MOFKouMokuPage() {
   const [data, setData] = useState<MOFKouMokuData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  /** 選択中の会計年度。null は「収録済みの最新年度」をAPIに任せる */
-  const [year, setYear] = useState<number | null>(null);
+  /** `/mof-kou` と共有する前回選択年度を、初回fetch前に同期的に復元する。 */
+  const [year, setYear] = useState<number | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem('mof-kou:year');
+      return raw !== null ? (JSON.parse(raw) as number) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const [filters, setFilters] = useState<FilterSidebarState>(INITIAL_FILTERS);
   const [showFilters, setShowFilters] = useState(true);
@@ -128,6 +146,12 @@ export default function MOFKouMokuPage() {
   const [linkageRsYear, setLinkageRsYear] = useState<number | null>(null);
   const [linkageLoading, setLinkageLoading] = useState(false);
   const [linkageError, setLinkageError] = useState<string | null>(null);
+  // MOF本体は既存APIのまま、RS関連だけbuild時projectionでV2へoverlayする。
+  const [v2Manifest, setV2Manifest] = useState<V2RootManifest | null>(null);
+  const [reviewYear, setReviewYear] = useState<number | null>(null);
+  const [v2Linkage, setV2Linkage] = useState<MofKouMokuV2LinkageProduct | null>(null);
+  const [v2LinkageLoading, setV2LinkageLoading] = useState(false);
+  const [v2LinkageError, setV2LinkageError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -144,6 +168,15 @@ export default function MOFKouMokuPage() {
       cancelled = true;
     };
   }, [year]);
+
+  useEffect(() => {
+    if (!data) return;
+    try {
+      localStorage.setItem('mof-kou:year', JSON.stringify(data.metadata.fiscalYear));
+    } catch {
+      // 保存できなくても表示は継続する
+    }
+  }, [data]);
 
   function changeYear(next: number) {
     setYear(next);
@@ -189,6 +222,63 @@ export default function MOFKouMokuPage() {
   useEffect(() => {
     setPage(1);
   }, [filters]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchV2RootManifest(controller.signal).then(setV2Manifest).catch(() => setV2Manifest(null));
+    return () => controller.abort();
+  }, []);
+
+  const reviewYearOptions = useMemo(
+    () => v2Manifest && data ? availableReviewYearsForFiscalYear(v2Manifest, data.metadata.fiscalYear) : [],
+    [v2Manifest, data]
+  );
+  useEffect(() => {
+    setReviewYear(prev => reviewYearOptions.length === 0 ? null : (prev !== null && reviewYearOptions.includes(prev) ? prev : reviewYearOptions[0]));
+  }, [reviewYearOptions]);
+  // v2Linkageが読めていない（404・年度不一致・読込中）間はV1件数を出し続ける。
+  // reviewYearOptionsだけで判定すると、projectionが読めない場合でも空のv2RsCountByKeyを
+  // 見せてしまい、RS列が全行0になる・件数フィルタが全行を落とす等の不整合が起こる。
+  const v2Mode = reviewYearOptions.length > 0 && reviewYear !== null && v2Linkage !== null;
+  useEffect(() => {
+    // selection変更時には旧payloadを即座に無効化する。
+    setV2Linkage(null);
+    setV2LinkageError(null);
+    if (!data || reviewYear === null || !reviewYearOptions.includes(reviewYear)) {
+      setV2LinkageLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    const fiscalYear = data.metadata.fiscalYear;
+    setV2LinkageLoading(true);
+    fetchMofKouMokuV2Linkage(reviewYear, fiscalYear, controller.signal)
+      .then(product => {
+        if (product.reviewYear !== reviewYear || product.fiscalYear !== fiscalYear) throw new Error('V2 projectionの年度が現在のselectionと一致しません。');
+        setV2Linkage(product);
+      })
+      .catch(e => !controller.signal.aborted && setV2LinkageError(e instanceof Error ? e.message : String(e)))
+      .finally(() => !controller.signal.aborted && setV2LinkageLoading(false));
+    return () => controller.abort();
+  }, [data, reviewYear, reviewYearOptions]);
+  const v2ByKey = useMemo(() => groupV2KouMokuLinksByKey(v2Linkage?.groups ?? []), [v2Linkage]);
+  const v2IdentityByKey = useMemo(
+    () => groupV2SettlementIdentityByKey(v2Linkage?.identityRelations ?? []),
+    [v2Linkage]
+  );
+  const v2BudgetRsCountByKey = useMemo(() => countV2ProjectsByKouMoku(v2ByKey), [v2ByKey]);
+  const v2SettlementRsCountByKey = useMemo(
+    () => countV2IdentityProjectsByKouMoku(v2IdentityByKey),
+    [v2IdentityByKey]
+  );
+  const v2RsCountByKey = useMemo(() => {
+    const out = new Map(v2BudgetRsCountByKey);
+    for (const [key, count] of v2SettlementRsCountByKey) out.set(key, count);
+    return out;
+  }, [v2BudgetRsCountByKey, v2SettlementRsCountByKey]);
+  const v2ReconciliationsByKey = useMemo(
+    () => buildV2KouMokuReconciliations(v2Linkage?.groups ?? []),
+    [v2Linkage]
+  );
 
   /**
    * その年度の RS 事業との紐づけを一括で取る（完全一致キーによる自動突合。
@@ -330,6 +420,7 @@ export default function MOFKouMokuPage() {
 
   /** その目に紐づくRS事業数（事業IDの重複除去件数） */
   function rsCountOf(item: MOFKouMokuItem): number {
+    if (v2Mode) return v2RsCountByKey.get(item.key) ?? 0;
     return new Set((linkageByKey.get(item.key) ?? []).map(l => l.projectId)).size;
   }
 
@@ -345,7 +436,7 @@ export default function MOFKouMokuPage() {
       rate: boundsOf(rates),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, linkageByKey]);
+  }, [data, linkageByKey, v2Mode, v2RsCountByKey]);
 
   const filtered = useMemo(() => {
     function rateOf(item: MOFKouMokuItem): number | null {
@@ -374,7 +465,7 @@ export default function MOFKouMokuPage() {
     }
     return sortItems(rows, sortKey, sortDir);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scopedRows, filters, sortKey, sortDir, linkageByKey]);
+  }, [scopedRows, filters, sortKey, sortDir, linkageByKey, v2Mode, v2RsCountByKey]);
 
   /** 絞り込み結果の合計 */
   const filteredTotal = useMemo(() => {
@@ -463,6 +554,8 @@ export default function MOFKouMokuPage() {
 
   const selectedRow = selected ? (filtered.find(r => r.id === selected) ?? data?.items.find(r => r.id === selected)) : undefined;
   const rsLinksForSelected = selectedRow ? (linkageByKey.get(selectedRow.key) ?? []) : [];
+  const v2LinksForSelected = selectedRow ? (v2ByKey.get(selectedRow.key) ?? []) : [];
+  const v2IdentityForSelected = selectedRow ? (v2IdentityByKey.get(selectedRow.key) ?? []) : [];
 
   if (error) {
     return (
@@ -566,6 +659,15 @@ export default function MOFKouMokuPage() {
             列幅をリセット
           </button>
         )}
+        {reviewYearOptions.length > 0 && (
+          <label className="flex items-center gap-1.5 whitespace-nowrap text-neutral-500">
+            RS review
+            <select value={reviewYear ?? ''} onChange={e => setReviewYear(Number(e.target.value))} className="rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-neutral-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+              {reviewYearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+            <span className={v2Linkage ? 'text-emerald-700 dark:text-emerald-400' : 'text-neutral-400'}>{v2LinkageLoading ? 'V2読込中' : v2Linkage ? 'V2' : 'V2未生成'}</span>
+          </label>
+        )}
       </section>
 
       <div className="flex min-h-0 flex-1 px-3 pb-3">
@@ -612,6 +714,8 @@ export default function MOFKouMokuPage() {
               selectedId={selected}
               onSelectRow={id => setSelected(cur => (cur === id ? null : id))}
               linkageByKey={linkageByKey}
+              v2RsCountByKey={v2Mode ? v2RsCountByKey : null}
+              v2ReconciliationsByKey={v2Mode && v2Linkage ? v2ReconciliationsByKey : null}
             />
           </div>
 
@@ -665,6 +769,12 @@ export default function MOFKouMokuPage() {
               linkageRsYear={linkageRsYear}
               linkageLoading={linkageLoading}
               linkageError={linkageError}
+              v2Mode={v2Mode}
+              v2ReviewYear={reviewYear}
+              v2Links={v2LinksForSelected}
+              v2IdentityRelations={v2IdentityForSelected}
+              v2Loading={v2LinkageLoading}
+              v2Error={v2LinkageError}
               width={panelWidth}
               tab={panelTab}
               onTabChange={setPanelTab}

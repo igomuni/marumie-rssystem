@@ -19,6 +19,7 @@ import { readJsonl, writeJsonl, writeJson } from './lib/jsonl';
 import { semanticItemKey, transitionLinks, type TransitionStats } from './lib/mof-transitions';
 import { aggregateMofSections } from './lib/mof-sections';
 import { validateSettlementEquations } from './lib/mof-settlement';
+import { buildSettlementItems } from './lib/mof-settlement-items';
 import type { MofBudgetItemRecord, MofDerivedBudgetEvent, MofIdentityRelation } from './types';
 
 function groupAmount(rows: MofBudgetItemRecord[], field: keyof MofBudgetItemRecord): number {
@@ -230,6 +231,21 @@ function buildMofSectionsForYear(outputRoot: string, fiscalYear: number): { sect
   return { sectionCount: sections.length, stageGapCount: stageGaps.length };
 }
 
+function buildSettlementItemsForYear(outputRoot: string, fiscalYear: number): { itemCount: number; multiSourceItemCount: number } {
+  const items = readJsonl<MofBudgetItemRecord>(path.join(outputRoot, 'normalized', 'mof', `fy${fiscalYear}`, 'budget-items.jsonl'));
+  const { items: settlementItems, summary } = buildSettlementItems(items, fiscalYear);
+
+  const outDir = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`);
+  writeJsonl(path.join(outDir, 'settlement-items.jsonl'), settlementItems);
+  writeJson(path.join(outDir, 'settlement-items-summary.json'), summary);
+
+  console.log(`  settlement-items.jsonl: ${summary.itemCount}件（multiSource=${summary.multiSourceItemCount}）`);
+  console.log(`  決算item検算: checked=${summary.equationCheckedCount} skipped=${summary.equationSkippedCount} ` +
+    `components→現額mismatch=${summary.componentsToCurrentBudgetMismatches} ` +
+    `現額→支出済+繰越+不用mismatch=${summary.currentBudgetToSpentMismatches}`);
+  return { itemCount: summary.itemCount, multiSourceItemCount: summary.multiSourceItemCount };
+}
+
 function main(): void {
   const years = process.argv.slice(2).map(Number).filter(n => !Number.isNaN(n));
   const targetYears = years.length > 0 ? years : [2023, 2024, 2025];
@@ -246,6 +262,7 @@ function main(): void {
       console.log(`    ${transition}: ${JSON.stringify(stats)}`);
     }
     buildMofSectionsForYear(outputRoot, year);
+    buildSettlementItemsForYear(outputRoot, year);
   }
 }
 

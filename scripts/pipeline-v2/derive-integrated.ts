@@ -9,8 +9,16 @@
  *
  * 入力: data/normalized/mof/fy{fiscalYear}/budget-items.jsonl
  *       data/normalized/rs/review-{reviewYear}/budget-items.jsonl
+ *       data/derived/mof/fy{fiscalYear}/settlement-items.jsonl（Phase A、無ければ空扱い）
  * 出力: data/derived/links/mof-rs-review-{reviewYear}-fy{fiscalYear}.jsonl
  *       data/derived/links/mof-rs-review-{reviewYear}-fy{fiscalYear}-summary.json
+ *
+ * Phase B1（決算接続）: 上記link groupを根拠に、既存MOF budget itemの itemNaturalKey
+ * 経由でsettlement-items.jsonlへexact joinし、RS事業→MOF予算項目→決算項目のidentity
+ * relationをderived層に追加する。新規のRS↔決算名称マッチ・金額マッチは行わない
+ * （lib/mof-rs-settlement-identity.ts）。
+ * 出力: data/derived/links/mof-rs-settlement-review-{reviewYear}-fy{fiscalYear}.jsonl
+ *       data/derived/links/mof-rs-settlement-review-{reviewYear}-fy{fiscalYear}-diagnostics.json
  *
  * 使い方: npx tsx scripts/pipeline-v2/derive-integrated.ts
  */
@@ -18,7 +26,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { readJsonl, writeJsonl, writeJson } from './lib/jsonl';
 import { buildMofRsLinks } from './lib/mof-rs-links';
+import { buildSettlementIdentityRelations, type SettlementDataStatus } from './lib/mof-rs-settlement-identity';
 import type { MofBudgetItemRecord, RsBudgetItemRecordV2 } from './types';
+import type { SettlementItemRecord } from './lib/mof-settlement-items';
 
 const FISCAL_YEARS = [2023, 2024, 2025];
 const REVIEW_YEARS = [2024, 2025, 2026];
@@ -60,6 +70,30 @@ function main(): void {
         `unlinkedRs=${result.unlinkedRsRecordCount} unsupported=${result.unsupportedBudgetTypeRecordCount} ` +
         `mofYen=${result.mofAmountAcrossGroupsYen.toLocaleString()} rsYen=${result.rsAmountAcrossGroupsYen.toLocaleString()}`);
       summaries[`${reviewYear}:${fiscalYear}`] = summary;
+
+      // Phase B1/B2: 既存link group（result.links）を、budget側の既存itemNaturalKey経由で
+      // settlement-items.jsonl（Phase A、derive-mof.tsが生成）へ接続する。exact join優先、
+      // 無ければscopeNameItemKey unique fallback、複数候補はambiguousとして自動解決しない
+      // （lib/mof-rs-settlement-identity.ts）。「決算データがまだ無い
+      // (artifact_missing/no_settlement_rows)」と「決算データはあるがjoinに失敗した
+      // (unmatched/ambiguous_name_fallback)」を区別する（混同するとdiagnosticsの意味が壊れる）。
+      const settlementItemsPath = path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`, 'settlement-items.jsonl');
+      const settlementArtifactExists = fs.existsSync(settlementItemsPath);
+      const settlementItems = readJsonl<SettlementItemRecord>(settlementItemsPath);
+      const settlementDataStatus: SettlementDataStatus = !settlementArtifactExists
+        ? 'artifact_missing'
+        : settlementItems.length === 0 ? 'no_settlement_rows' : 'available';
+      const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, result.links, settlementItems, reviewYear, fiscalYear, settlementDataStatus);
+      writeJsonl(path.join(outDir, `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}.jsonl`), relations);
+      writeJson(path.join(outDir, `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}-diagnostics.json`), diagnostics);
+      console.log(`  settlement identity[${settlementDataStatus}]: relations=${diagnostics.relationCount} ` +
+        `exact=${diagnostics.exactJoinLinkGroupCount} fallback=${diagnostics.uniqueNameFallbackLinkGroupCount} ` +
+        `ambiguous=${diagnostics.ambiguousNameFallbackLinkGroupCount} unmatched=${diagnostics.unmatchedSettlementLinkGroupCount} ` +
+        `spansMultipleItems=${diagnostics.spansMultipleItemsLinkGroupCount} / source=${diagnostics.sourceLinkGroupCount} ` +
+        `multiSourceItems=${diagnostics.multiSourceSettlementItemCount} ` +
+        `linkedProjects=${diagnostics.linkedProjectCount} ` +
+        `accountTypes=${JSON.stringify(diagnostics.accountTypeCounts)} ` +
+        `fallbackByAccountType=${JSON.stringify(diagnostics.accountTypeFallbackCounts)}`);
     }
   }
 

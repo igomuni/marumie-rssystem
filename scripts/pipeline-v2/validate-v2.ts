@@ -45,16 +45,24 @@ import {
   checkRsBudgetItemPreservation, checkRsFalsePreservation, checkRsIndexBudgetSummaryReconstruction,
   checkMofSectionCounts, checkMofSectionSemantics, checkMofDetailRecords, checkMofDetailEventAggregation,
   checkLinksPublishCounts, checkLinksSemanticEquality, checkLinksSectionIdsReconstruction, checkLinksManifestSetCounts,
+  checkSettlementPublishCounts, checkSettlementSemanticEquality, checkSettlementSourceLinksReferenceFormalLinks,
+  checkSettlementSectionIdsReconstruction, checkSettlementManifestCounts, checkSettlementPayloadSchema,
+  checkSettlementManifestPresence,
   checkRootManifestConsistency,
   type RsPublishIndex, type RsPublishManifest, type MofPublishIndex, type MofPublishManifest,
   type PublishedLink, type LinksPublishManifest, type RootManifest, type MofSectionDetail,
+  type SettlementPublishManifest, type SettlementPublishPayload,
 } from './lib/validation/publish';
+import { PUBLISH_SCHEMA_VERSION } from './lib/publish-common';
+import { SETTLEMENT_PRODUCT_SCHEMA_VERSION } from './lib/settlement-publish';
 import type { RsProject } from './lib/rs-projects';
 import type {
   SourceInventory, RsSpendingBlockRecord, RsFundingRelationRecord, RsBudgetItemRecordV2,
   RsBudgetSummaryRecord, RsDerivedBudgetEvent, RsProjectSheetConflict, MofBudgetItemRecord, MofRsProjectLinkGroup,
   MofDerivedBudgetEvent, MofDerivedSection,
 } from './types';
+import type { MofRsSettlementIdentityRelation } from './lib/mof-rs-settlement-identity';
+import type { SettlementItemRecord } from './lib/mof-settlement-items';
 
 const REVIEW_YEARS = [2024, 2025, 2026];
 const FISCAL_YEARS = [2023, 2024, 2025];
@@ -434,18 +442,24 @@ interface MofPublishMetrics {
   checkedRecords: number; checkedEventGroups: number;
 }
 interface LinksPublishMetrics { reviewYear: number; fiscalYear: number; derivedCount: number; publishedCount: number }
+interface SettlementPublishMetrics { reviewYear: number; fiscalYear: number; dataStatus: string; derivedCount: number; publishedCount: number }
 
 function validatePublish(outputRoot: string, publicRoot: string): {
-  findings: Finding[]; publish: { rs: RsPublishMetrics[]; mof: MofPublishMetrics[]; links: LinksPublishMetrics[]; rootManifest: { checkedProducts: number } };
+  findings: Finding[]; publish: {
+    rs: RsPublishMetrics[]; mof: MofPublishMetrics[]; links: LinksPublishMetrics[]; settlement: SettlementPublishMetrics[];
+    rootManifest: { checkedProducts: number };
+  };
 } {
   const findings: Finding[] = [];
   const v2Root = path.join(publicRoot, 'data', 'v2');
   const rsMetrics: RsPublishMetrics[] = [];
   const mofMetrics: MofPublishMetrics[] = [];
   const linksMetrics: LinksPublishMetrics[] = [];
+  const settlementMetrics: SettlementPublishMetrics[] = [];
   const rsIndexesForRoot: { reviewYear: number; projectCount: number }[] = [];
   const mofIndexesForRoot: { fiscalYear: number; sectionCount: number }[] = [];
   const linkManifestsForRoot: { reviewYear: number; fiscalYear: number; linkGroupCount: number; projectCount: number; sectionCount: number }[] = [];
+  const settlementManifestsForRoot: { reviewYear: number; fiscalYear: number; dataStatus: string; relationCount: number; linkedProjectCount: number; gzipBytes: number }[] = [];
 
   // --- E-1: RS ---
   for (const reviewYear of REVIEW_YEARS) {
@@ -588,16 +602,53 @@ function validatePublish(outputRoot: string, publicRoot: string): {
 
       if (manifest) linkManifestsForRoot.push({ reviewYear, fiscalYear, linkGroupCount: manifest.linkGroupCount, projectCount: manifest.projectCount, sectionCount: manifest.sectionCount });
       linksMetrics.push({ reviewYear, fiscalYear, derivedCount: derivedLinks.length, publishedCount: published?.links.length ?? 0 });
+
+      // --- E-4: standalone settlement identity（Phase B3a） ---
+      const settlementDiagnosticsPath = path.join(outputRoot, 'derived', 'links', `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}-diagnostics.json`);
+      if (!fs.existsSync(settlementDiagnosticsPath)) continue;
+      const derivedRelations = readJsonl<MofRsSettlementIdentityRelation>(
+        path.join(outputRoot, 'derived', 'links', `mof-rs-settlement-review-${reviewYear}-fy${fiscalYear}.jsonl`));
+
+      const settlementPath = path.join(linksOutDir, 'settlement.json.gz');
+      findings.push(...checkArtifactExists('settlement-publish-artifact-presence', settlementPath, { reviewYear, fiscalYear }));
+      const publishedSettlement = readGzipJson<SettlementPublishPayload & { dataStatus: string }>(settlementPath);
+      const settlementManifest = manifest && 'settlement' in manifest ? (manifest as unknown as { settlement: SettlementPublishManifest }).settlement : null;
+
+      findings.push(...checkSettlementManifestPresence(reviewYear, fiscalYear, manifest !== null, settlementManifest));
+      findings.push(...checkSettlementPayloadSchema(reviewYear, fiscalYear, publishedSettlement, SETTLEMENT_PRODUCT_SCHEMA_VERSION, PUBLISH_SCHEMA_VERSION));
+      findings.push(...checkSettlementPublishCounts(reviewYear, fiscalYear, derivedRelations, publishedSettlement, settlementManifest));
+      findings.push(...checkSettlementSemanticEquality(reviewYear, fiscalYear, derivedRelations, publishedSettlement));
+      findings.push(...checkSettlementSourceLinksReferenceFormalLinks(reviewYear, fiscalYear, publishedSettlement, published));
+
+      const settlementItems = readJsonl<SettlementItemRecord>(path.join(outputRoot, 'derived', 'mof', `fy${fiscalYear}`, 'settlement-items.jsonl'));
+      findings.push(...checkSettlementSectionIdsReconstruction(reviewYear, fiscalYear, derivedRelations, settlementItems, derivedSections, publishedSettlement));
+      findings.push(...checkSettlementManifestCounts(reviewYear, fiscalYear, publishedSettlement, settlementManifest));
+
+      console.log(`  review-${reviewYear}×fy${fiscalYear}: Publish(settlement) — derived=${derivedRelations.length} published=${publishedSettlement?.identities.length ?? 0} dataStatus=${publishedSettlement?.dataStatus ?? 'n/a'}`);
+
+      if (settlementManifest) {
+        settlementManifestsForRoot.push({
+          reviewYear, fiscalYear, dataStatus: settlementManifest.dataStatus, relationCount: settlementManifest.relationCount,
+          linkedProjectCount: settlementManifest.linkedProjectCount, gzipBytes: settlementManifest.compressedBytes,
+        });
+      }
+      settlementMetrics.push({
+        reviewYear, fiscalYear, dataStatus: publishedSettlement?.dataStatus ?? 'n/a',
+        derivedCount: derivedRelations.length, publishedCount: publishedSettlement?.identities.length ?? 0,
+      });
     }
   }
 
   // --- root manifest ---
   const rootManifest = readJsonFile<RootManifest>(path.join(v2Root, 'manifest.json'));
   findings.push(...checkArtifactExists('root-manifest-presence', path.join(v2Root, 'manifest.json'), {}));
-  const rootResult = checkRootManifestConsistency(rootManifest, rsIndexesForRoot, mofIndexesForRoot, linkManifestsForRoot);
+  const rootResult = checkRootManifestConsistency(rootManifest, rsIndexesForRoot, mofIndexesForRoot, linkManifestsForRoot, settlementManifestsForRoot);
   findings.push(...rootResult.findings);
 
-  return { findings, publish: { rs: rsMetrics, mof: mofMetrics, links: linksMetrics, rootManifest: { checkedProducts: rootResult.checkedProducts } } };
+  return {
+    findings,
+    publish: { rs: rsMetrics, mof: mofMetrics, links: linksMetrics, settlement: settlementMetrics, rootManifest: { checkedProducts: rootResult.checkedProducts } },
+  };
 }
 
 function main(): void {

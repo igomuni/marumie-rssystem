@@ -133,6 +133,15 @@ export function KouTable({
                 isSelected ? 'bg-blue-50 dark:bg-blue-950/40' : ''
               }`}
             >
+              <td
+                className={`truncate px-2 py-1.5 text-right tabular-nums ${
+                  row.rsProjectCount > 0
+                    ? 'font-medium text-emerald-700 dark:text-emerald-400'
+                    : 'text-neutral-300 dark:text-neutral-700'
+                }`}
+              >
+                {row.rsProjectCount.toLocaleString()}
+              </td>
               <td className="truncate px-2 py-1.5">
                 <BudgetTypeBadge budgetType={row.budgetType} />
               </td>
@@ -157,15 +166,6 @@ export function KouTable({
               </td>
               <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-600 dark:text-neutral-400">
                 {row.kouMokuCount.toLocaleString()}
-              </td>
-              <td
-                className={`truncate px-2 py-1.5 text-right tabular-nums ${
-                  row.rsProjectCount > 0
-                    ? 'font-medium text-emerald-700 dark:text-emerald-400'
-                    : 'text-neutral-300 dark:text-neutral-700'
-                }`}
-              >
-                {row.rsProjectCount.toLocaleString()}
               </td>
               <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
                 {formatYen(row.amount)}

@@ -9,7 +9,10 @@ import * as crypto from 'crypto';
 
 // v1→v2（PR #351 review指摘）: RS compact link projection・standalone links productへ
 // group-level matchMethodを追加した公開JSON shapeの変更のため、公開契約の識別のためにbumpする
-export const PUBLISH_SCHEMA_VERSION = 2;
+// v2→v3（PR #352 Phase B3a）: standalone links productのディレクトリへ、決算identity
+// （RS事業→MOF予算項目→決算項目、既存formal budget linkからのexact/fallback join結果）
+// を公開する`settlement.json.gz`を新設したため、公開契約の識別のためにbumpする
+export const PUBLISH_SCHEMA_VERSION = 3;
 export const SHARD_COUNT = 256;
 
 /** 意味のある値かどうか（null/undefined/空文字/空配列/空オブジェクトは「無い」として扱う。0とfalseは残す） */

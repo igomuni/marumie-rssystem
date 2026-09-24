@@ -11,6 +11,7 @@ import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage'
 import { AccountBadge, BudgetTypeBadge } from '@/client/components/mof-kou/Badge';
 import { changeRate, executionRate, formatChangeRate, formatRate, formatYen } from '@/client/components/mof-jikou/format';
 import { COLUMNS, DEFAULT_WIDTHS, MIN_COLUMN_WIDTH, orgColumn, type ColumnSpec, type SortDir, type SortKey } from './columns';
+import type { V2KouMokuReconciliation } from '@/app/lib/mof-kou-moku-v2-linkage';
 
 interface Props {
   /** 表示するページ分の目 */
@@ -24,6 +25,10 @@ interface Props {
   onSelectRow: (id: string) => void;
   /** kouMokuKey → 紐づくRS事業。年度分を一括取得したもの（取得はページ層の責務）。RS列の件数表示に使う */
   linkageByKey: Map<string, MofRsKouMokuLinkageRecord[]>;
+  /** V2 projection有効時の目→distinct RS事業数。nullならlegacy linkageを使う */
+  v2RsCountByKey?: Map<string, number> | null;
+  /** V2当初・補正の目別MOF↔RS 2-2照合値 */
+  v2ReconciliationsByKey?: Map<string, V2KouMokuReconciliation> | null;
   emptyMessage?: string;
 }
 
@@ -45,10 +50,19 @@ export function KouMokuTable({
   selectedId,
   onSelectRow,
   linkageByKey,
+  v2RsCountByKey = null,
+  v2ReconciliationsByKey = null,
   emptyMessage = '条件に合う目がありません。',
 }: Props) {
-  const RS_COLUMN_WIDTH = 52;
-  const tableWidth = COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0) + RS_COLUMN_WIDTH;
+  const RS_COLUMN_WIDTH = 70;
+  const RECONCILIATION_COLUMNS = [
+    { key: 'rs22', label: 'RS 2-2', headerTitle: '当初はRS 2-2当初額、補正はRS 2-2補正額', width: 105, numeric: true },
+    { key: 'rsMinusMof', label: 'RS−MOF', headerTitle: '当初は RS 2-2当初額 − MOF本年度額、補正は RS 2-2補正額 − MOF増減額', width: 105, numeric: true },
+    { key: 'rsToMof', label: 'RS/MOF', headerTitle: '当初は RS 2-2当初額 ÷ MOF本年度額、補正は RS 2-2補正額 ÷ MOF増減額', width: 78, numeric: true },
+  ] as const;
+  const tableWidth = COLUMNS.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0)
+    + RS_COLUMN_WIDTH
+    + (v2ReconciliationsByKey ? RECONCILIATION_COLUMNS.reduce((sum, c) => sum + c.width, 0) : 0);
 
   function startResize(event: React.MouseEvent, key: string) {
     event.preventDefault();
@@ -77,33 +91,36 @@ export function KouMokuTable({
 
   return (
     <table className="w-full table-fixed border-collapse text-xs" style={{ minWidth: tableWidth }}>
-      <colgroup>
-        <col style={{ width: RS_COLUMN_WIDTH }} />
-        {COLUMNS.map(c => (
-          <col key={c.key} style={{ width: widths[c.key] ?? c.width }} />
-        ))}
+        <colgroup>
+          <col style={{ width: RS_COLUMN_WIDTH }} />
+        {COLUMNS.flatMap(c => [
+          <col key={c.key} style={{ width: widths[c.key] ?? c.width }} />,
+          ...(v2ReconciliationsByKey && c.key === 'amount'
+            ? RECONCILIATION_COLUMNS.map(column => <col key={column.key} style={{ width: column.width }} />)
+            : []),
+        ])}
       </colgroup>
       <thead className="sticky top-0 z-10 bg-neutral-100 text-left text-neutral-500 dark:bg-neutral-800">
         <tr>
           <th
             scope="col"
-            title="紐づく RS 事業数（所管×組織×項×目の完全一致）"
+            title="紐づく RS 事業数"
             aria-sort={sortKey === 'rs' ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
             className={`relative select-none p-0 font-medium ${sortKey === 'rs' ? 'text-neutral-900 dark:text-neutral-100' : ''}`}
             style={{ width: RS_COLUMN_WIDTH }}
           >
             <button
               type="button"
-              onClick={() => onToggleSort({ key: 'rs', label: 'RS', width: RS_COLUMN_WIDTH, numeric: true })}
+              onClick={() => onToggleSort({ key: 'rs', label: 'RS事業', width: RS_COLUMN_WIDTH, numeric: true })}
               className="flex w-full items-center justify-end gap-0.5 overflow-hidden px-1 py-2 hover:bg-neutral-200 dark:hover:bg-neutral-700"
             >
-              <span className="min-w-0 truncate">RS</span>
+              <span className="min-w-0 truncate">RS事業</span>
               <span className="w-2.5 shrink-0 text-[9px]">{sortKey === 'rs' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
             </button>
           </th>
-          {COLUMNS.map(col => {
+          {COLUMNS.flatMap(col => {
             const active = sortKey === col.key;
-            return (
+            const header = (
               <th
                 key={col.key}
                 scope="col"
@@ -135,6 +152,14 @@ export function KouMokuTable({
                 />
               </th>
             );
+            const reconciliationHeaders = v2ReconciliationsByKey && col.key === 'amount'
+              ? RECONCILIATION_COLUMNS.map(column => (
+                  <th key={column.key} scope="col" title={column.headerTitle} className="select-none px-2 py-2 text-right font-medium">
+                    {column.label}
+                  </th>
+                ))
+              : [];
+            return [header, ...reconciliationHeaders];
           })}
         </tr>
       </thead>
@@ -143,7 +168,9 @@ export function KouMokuTable({
           const rate = changeRate(item.amount, item.previousAmount);
           const exec = executionRate(item);
           const isSelected = selectedId === item.id;
-          const rsCount = new Set((linkageByKey.get(item.key) ?? []).map(l => l.projectId)).size;
+          const rsCount = v2RsCountByKey !== null
+            ? (v2RsCountByKey.get(item.key) ?? 0)
+            : new Set((linkageByKey.get(item.key) ?? []).map(l => l.projectId)).size;
           return (
             <tr
               key={item.id}
@@ -186,6 +213,29 @@ export function KouMokuTable({
               <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
                 <span className="line-clamp-2">{item.sectionName}</span>
               </td>
+              <td className="px-2 py-1.5 font-medium text-neutral-900 dark:text-neutral-100">
+                <span className="line-clamp-2">{item.subItemName}</span>
+              </td>
+              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
+                {formatYen(item.amount)}
+              </td>
+              {v2ReconciliationsByKey && (() => {
+                const reconciliation = v2ReconciliationsByKey.get(item.key);
+                return <>
+                  <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">{reconciliation ? formatYen(reconciliation.rsAmountYen) : '—'}</td>
+                  <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-600 dark:text-neutral-400">{reconciliation ? formatYen(reconciliation.rsMinusMofYen) : '—'}</td>
+                  <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-600 dark:text-neutral-400">{formatRate(reconciliation?.rsToMofRate ?? null)}</td>
+                </>;
+              })()}
+              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                {formatYen(item.previousAmount)}
+              </td>
+              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
+                {formatYen(item.difference)}
+              </td>
+              <td className={`truncate px-2 py-1.5 text-right tabular-nums ${rateClass(rate)}`}>
+                {formatChangeRate(rate)}
+              </td>
               <td className="px-2 py-1.5 text-neutral-600 dark:text-neutral-400">
                 <span className="line-clamp-2">
                   {item.majorExpenseName || (item.majorExpenseCode ? `(${item.majorExpenseCode})` : '—')}
@@ -212,21 +262,6 @@ export function KouMokuTable({
                 </span>
               </td>
               <td className="truncate px-2 py-1.5 tabular-nums text-neutral-500">{item.subItemCode}</td>
-              <td className="px-2 py-1.5 font-medium text-neutral-900 dark:text-neutral-100">
-                <span className="line-clamp-2">{item.subItemName}</span>
-              </td>
-              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-900 dark:text-neutral-100">
-                {formatYen(item.amount)}
-              </td>
-              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
-                {formatYen(item.previousAmount)}
-              </td>
-              <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
-                {formatYen(item.difference)}
-              </td>
-              <td className={`truncate px-2 py-1.5 text-right tabular-nums ${rateClass(rate)}`}>
-                {formatChangeRate(rate)}
-              </td>
               <td className="truncate px-2 py-1.5 text-right tabular-nums text-neutral-500">
                 {formatYen(item.currentAmount)}
               </td>

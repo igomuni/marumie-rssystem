@@ -17,10 +17,54 @@ import type { MOFKouSectionDetail, MOFKouSectionHistory, MOFKouSectionSummary } 
 import type { MOFJikouItem } from '@/types/mof-jikou';
 import type { MOFKouMokuItem } from '@/types/mof-kou-moku';
 import type { MofRsKouMokuLinkageRecord } from '@/types/mof-rs-kou-moku-linkage';
-import { changeRate, formatChangeRate, formatYen } from '@/client/components/mof-jikou/format';
+import { legacyItemNaturalKey, phaseLabel, type V2MofRsLink, type V2SettlementIdentity } from '@/app/lib/v2-public-linkage';
+import { MatchMethodBadge } from '@/client/components/mof-rs/MatchMethodBadge';
+import { changeRate, formatChangeRate, formatRate, formatYen } from '@/client/components/mof-jikou/format';
 import { AccountBadge, BudgetTypeBadge } from './Badge';
 import { orgColumn } from './columns';
 import { DataGrid, type GridColumn, type GridViewState } from './DataGrid';
+import { buildV2KouMokuReconciliations } from '@/app/lib/mof-kou-moku-v2-linkage';
+import type { MofKouMokuV2IdentityRelation, MofKouMokuV2LinkGroup, MofKouMokuV2Project } from '@/types/mof-kou-moku-v2-linkage';
+
+/**
+ * Pipeline V2 linkage overlay用にページ層（app/mof-kou/page.tsx）が組み立てて渡すデータ。
+ * null のときはこのパネルは完全に旧V1 linkage（detail.rsLinks）で描画する
+ * （V1/V2を画面内で混在させないため、V2利用可能時はKouMokuTab/RsTabの両方をV2側へ揃える）。
+ */
+export interface V2PanelData {
+  reviewYear: number | null;
+  /** 選択中の項がV2 sectionへ一意に接続できたか */
+  sectionMatched: boolean;
+  /** 当初・補正は金額link、決算はsettlement identity（public settlement.json.gz authority）、暫定等は未対応 */
+  mode: 'budget-link' | 'settlement-identity' | 'unsupported';
+  /** budget-linkモードでのみ使う、絞ったV2 link group。section detail取得前は null */
+  links: V2MofRsLink[] | null;
+  /**
+   * settlement-identityモードでのみ使う。選択中V2 sectionのsettlementSectionIdへ
+   * 一致するpublic settlement identity（budget側rsLinksから再構成しない、B3b）。
+   * section identity・relationの有無・件数のauthorityとして使う（項目タブのRS件数等）。
+   */
+  settlementIdentities: V2SettlementIdentity[] | null;
+  /**
+   * settlement-identityモードでのみ使う。選択中V2 sectionのitem集合（settlementItemId）へ
+   * 一致するUI projection側のidentity relation（v2KouMokuLinkage.identityRelations）。
+   * generatorが既に`linkId + budgetItemId`でbudget projection groupへjoinし、legacy
+   * evidence-gap fallbackも含めてPID別evidence（phase/revision/matchMethod/RS金額）を
+   * 復元済みのため、ここで再度groupへjoinし直さない（再joinするとgap sourceが脱落する）。
+   */
+  settlementIdentityRelations: MofKouMokuV2IdentityRelation[] | null;
+  /** itemNaturalKey → 目名（V2 section detail由来）。settlement-identityモードでは
+   *  selectedV2SectionがsettlementItemIdと同じ体系のためsettlementItemIdの表示名にも使える */
+  itemNames: Map<string, string> | null;
+  /** projectId → 事業名・府省庁（V2 RS index由来） */
+  projectNames: Map<string, { name: string; ministry: string }> | null;
+  /** 当初・補正時のPID別2-2内訳（budget-linkモードでのみ使う）。linkId × itemNaturalKeyでprojectionから絞ったもの。 */
+  projectionGroups: MofKouMokuV2LinkGroup[] | null;
+  projectionLoading: boolean;
+  projectionError: string | null;
+  sectionLoading: boolean;
+  sectionError: string | null;
+}
 
 export type Tab = 'history' | 'jikou' | 'koumoku' | 'rs';
 
@@ -53,6 +97,7 @@ interface Props {
   historyLoading: boolean;
   historyError: string | null;
   linkageRsYear: number | null;
+  v2: V2PanelData | null;
   width: number;
   tab: Tab;
   onTabChange: (tab: Tab) => void;
@@ -86,6 +131,7 @@ export function KouSidePanel({
   historyLoading,
   historyError,
   linkageRsYear,
+  v2,
   width,
   tab,
   onTabChange,
@@ -161,7 +207,7 @@ export function KouSidePanel({
                 : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'
             }`}
           >
-            {t.label}
+            {t.key === 'rs' && v2?.mode === 'settlement-identity' ? '関連RS事業' : t.label}
             {t.key === 'jikou' && ` (${row.jikouCount})`}
             {t.key === 'koumoku' && ` (${row.kouMokuCount})`}
             {t.key === 'rs' && ` (${row.rsProjectCount})`}
@@ -193,6 +239,7 @@ export function KouSidePanel({
             detail={detail}
             loading={detailLoading}
             error={detailError}
+            v2={v2}
             gridState={gridStates.koumoku}
             onGridStateChange={updater => onGridStateChange('koumoku', updater)}
           />
@@ -203,6 +250,7 @@ export function KouSidePanel({
             loading={detailLoading}
             error={detailError}
             linkageRsYear={linkageRsYear}
+            v2={v2}
             gridState={gridStates.rs}
             onGridStateChange={updater => onGridStateChange('rs', updater)}
           />
@@ -495,23 +543,46 @@ function KouMokuTab({
   detail,
   loading,
   error,
+  v2,
   gridState,
   onGridStateChange,
 }: {
   detail: MOFKouSectionDetail | null;
   loading: boolean;
   error: string | null;
+  v2: V2PanelData | null;
   gridState: GridViewState;
   onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
 }) {
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
   if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
 
+  const reconciliations = buildV2KouMokuReconciliations(v2?.projectionGroups ?? []);
+
   const rsByKouMokuKey = new Map<string, MofRsKouMokuLinkageRecord[]>();
   for (const l of detail.rsLinks) {
     const list = rsByKouMokuKey.get(l.kouMokuKey) ?? [];
     list.push(l);
     rsByKouMokuKey.set(l.kouMokuKey, list);
+  }
+
+  /** V2利用可能時は目ごとのRS件数もV2側から再計算する（V1と混在させない） */
+  function v2ProjectIdsFor(it: MOFKouMokuItem): Set<string> | null {
+    if (!v2 || !v2.sectionMatched || v2.mode === 'unsupported') return null;
+    if (v2.mode === 'budget-link') {
+      if (v2.projectionGroups === null) return null;
+      return new Set(
+        v2.projectionGroups
+          .filter(group => group.kouMokuKey === it.key)
+          .flatMap(group => group.projectIds)
+      );
+    }
+    // settlement-identity: public settlement identity（settlementItemId）をauthorityとする。
+    // budget側rsLinksからは再構成しない（B3b）。
+    if (v2.settlementIdentities === null) return null;
+    const itemKey = legacyItemNaturalKey(it, { subItemCode: it.subItemCode, subItemName: it.subItemName });
+    const identity = v2.settlementIdentities.find(i => i.settlementItemId === itemKey);
+    return identity ? new Set(identity.projectIds) : new Set();
   }
 
   const columns: GridColumn<MOFKouMokuItem>[] = [
@@ -550,11 +621,30 @@ function KouMokuTab({
     },
     {
       key: 'rs',
-      label: 'RS',
+      label: 'RS事業',
       width: 60,
       numeric: true,
-      sortValue: it => new Set((rsByKouMokuKey.get(it.key) ?? []).map(l => l.projectId)).size,
+      sortValue: it => {
+        if (v2) return v2ProjectIdsFor(it)?.size ?? 0;
+        return new Set((rsByKouMokuKey.get(it.key) ?? []).map(l => l.projectId)).size;
+      },
       render: it => {
+        if (v2) {
+          const ids = v2ProjectIdsFor(it);
+          if (ids === null) {
+            return <span className="text-neutral-300 dark:text-neutral-700" title="V2でこの項に接続できませんでした">—</span>;
+          }
+          const names = v2.projectNames;
+          const title = names ? [...ids].map(id => names.get(id)?.name ?? id).join('\n') : undefined;
+          return (
+            <span
+              className={ids.size > 0 ? 'font-medium text-emerald-700 dark:text-emerald-400' : 'text-neutral-300 dark:text-neutral-700'}
+              title={title}
+            >
+              {ids.size || '—'}
+            </span>
+          );
+        }
         const links = rsByKouMokuKey.get(it.key) ?? [];
         const count = new Set(links.map(l => l.projectId)).size;
         return (
@@ -568,26 +658,17 @@ function KouMokuTab({
       },
     },
     {
-      key: 'amount',
-      label: '本年度額',
-      width: 100,
-      numeric: true,
+      key: 'amount', label: '本年度額', width: 100, numeric: true,
       sortValue: it => it.amount,
       render: it => <span className="text-neutral-900 dark:text-neutral-100">{formatYen(it.amount)}</span>,
     },
     {
-      key: 'previousAmount',
-      label: '前年度額',
-      width: 100,
-      numeric: true,
+      key: 'previousAmount', label: '比較対象額', width: 100, numeric: true,
       sortValue: it => it.previousAmount,
       render: it => formatYen(it.previousAmount),
     },
     {
-      key: 'rate',
-      label: '増減率',
-      width: 80,
-      numeric: true,
+      key: 'rate', label: '増減率', width: 80, numeric: true,
       sortValue: it => {
         const rate = changeRate(it.amount, it.previousAmount);
         return rate === null || rate === 'new' ? null : rate;
@@ -597,6 +678,29 @@ function KouMokuTab({
         return <span className={rateClass(rate)}>{formatChangeRate(rate)}</span>;
       },
     },
+    ...(v2?.mode === 'budget-link' && v2.projectionGroups !== null ? [
+      {
+        key: 'rs22Amount', label: 'RS金額', width: 110, numeric: true,
+        sortValue: (it: MOFKouMokuItem) => reconciliations.get(it.key)?.rsAmountYen ?? null,
+        render: (it: MOFKouMokuItem) => {
+          const value = reconciliations.get(it.key)?.rsAmountYen;
+          return value === undefined ? '—' : formatYen(value);
+        },
+      },
+      {
+        key: 'rsMinusMof', label: 'RS差', headerTitle: '当初は RS 2-2当初額 − MOF本年度額、補正は RS 2-2補正額 − MOF増減額', width: 110, numeric: true,
+        sortValue: (it: MOFKouMokuItem) => reconciliations.get(it.key)?.rsMinusMofYen ?? null,
+        render: (it: MOFKouMokuItem) => {
+          const value = reconciliations.get(it.key)?.rsMinusMofYen;
+          return value === undefined ? '—' : formatYen(value);
+        },
+      },
+      {
+        key: 'rsToMof', label: 'RS比', headerTitle: '当初は RS 2-2当初額 ÷ MOF本年度額、補正は RS 2-2補正額 ÷ MOF増減額', width: 80, numeric: true,
+        sortValue: (it: MOFKouMokuItem) => reconciliations.get(it.key)?.rsToMofRate ?? null,
+        render: (it: MOFKouMokuItem) => formatRate(reconciliations.get(it.key)?.rsToMofRate ?? null),
+      },
+    ] : []),
   ];
 
   return (
@@ -616,6 +720,7 @@ function RsTab({
   loading,
   error,
   linkageRsYear,
+  v2,
   gridState,
   onGridStateChange,
 }: {
@@ -623,11 +728,14 @@ function RsTab({
   loading: boolean;
   error: string | null;
   linkageRsYear: number | null;
+  v2: V2PanelData | null;
   gridState: GridViewState;
   onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
 }) {
+  if (v2) return <V2RsTab v2={v2} gridState={gridState} onGridStateChange={onGridStateChange} />;
   if (error) return <p className="p-3 text-red-600">取得に失敗しました: {error}</p>;
-  if (loading || !detail) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+  if (loading) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+  if (!detail) return <p className="p-3 text-neutral-400">紐づく RS 事業は見つかりませんでした。</p>;
 
   const columns: GridColumn<MofRsKouMokuLinkageRecord>[] = [
     {
@@ -676,6 +784,186 @@ function RsTab({
       state={gridState}
       onStateChange={onGridStateChange}
       emptyMessage="紐づく RS 事業は見つかりませんでした。"
+    />
+  );
+}
+
+function V2RsTab({
+  v2,
+  gridState,
+  onGridStateChange,
+}: {
+  v2: V2PanelData;
+  gridState: GridViewState;
+  onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
+}) {
+  if (!v2.sectionMatched) {
+    return (
+      <p className="p-3 text-neutral-400">
+        この項はV2データへ一意に接続できませんでした（項名・所管などの表記差の可能性があります）。
+      </p>
+    );
+  }
+  if (v2.mode === 'unsupported') {
+    return <p className="p-3 text-neutral-400">この予算種別（暫定）はV2のMOF↔RSリンクの対象外です。</p>;
+  }
+
+  if (v2.mode === 'settlement-identity') {
+    return <V2SettlementIdentityRsTab v2={v2} gridState={gridState} onGridStateChange={onGridStateChange} />;
+  }
+
+  if (v2.links === null) {
+    if (v2.sectionError) return <p className="p-3 text-red-600">V2リンクの取得に失敗しました: {v2.sectionError}</p>;
+    if (v2.sectionLoading) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+    return <p className="p-3 text-neutral-400">紐づく RS 事業は見つかりませんでした。</p>;
+  }
+
+  if (v2.projectionGroups === null) {
+    if (v2.projectionError) return <p className="p-3 text-red-600">V2内訳の取得に失敗しました: {v2.projectionError}</p>;
+    if (v2.projectionLoading) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+    return <p className="p-3 text-neutral-400">V2内訳は利用できません。</p>;
+  }
+
+  /** 同じPIDが複数目に出ること自体を分析できるよう、目×PIDの粒度を保持する。 */
+  type V2ProjectRow = { group: MofKouMokuV2LinkGroup; project: MofKouMokuV2Project };
+  const rows: V2ProjectRow[] = v2.projectionGroups.flatMap(group =>
+    group.projects.map(project => ({ group, project }))
+  );
+  const projectBudgetShare = (row: V2ProjectRow) =>
+    !row.project.projectBudgetAmountYen ? null : row.project.rsAmountYen / row.project.projectBudgetAmountYen;
+  const mofItemShare = (row: V2ProjectRow) =>
+    row.group.mofAmountYen === 0 ? null : row.project.rsAmountYen / row.group.mofAmountYen;
+  const itemName = (row: V2ProjectRow) =>
+    v2.itemNames?.get(row.group.itemNaturalKey) ?? row.group.itemNaturalKey;
+
+  const columns: GridColumn<V2ProjectRow>[] = [
+    {
+      key: 'matchMethod',
+      label: '根拠',
+      width: 100,
+      sortValue: row => row.group.matchMethod,
+      render: row => <MatchMethodBadge method={row.group.matchMethod} />,
+    },
+    { key: 'item', label: '目', width: 180, sortValue: itemName, render: row => <span title={itemName(row)}>{itemName(row)}</span> },
+    {
+      key: 'project',
+      label: 'RS事業',
+      width: 200,
+      sortValue: row => row.project.projectName || row.project.projectId,
+      render: row => v2.reviewYear !== null ? <a href={sankeySvgProjectUrl(Number(row.project.projectId), row.project.projectName || row.project.projectId, v2.reviewYear)} target="_blank" rel="noopener noreferrer" className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100" title={row.project.projectId}>{row.project.projectName || row.project.projectId}</a> : row.project.projectName || row.project.projectId,
+    },
+    { key: 'ministry', label: '府省庁', width: 120, sortValue: row => row.project.ministry, render: row => row.project.ministry || '—' },
+    {
+      key: 'projectRsAmount',
+      label: 'RS事業額',
+      width: 120,
+      numeric: true,
+      sortValue: row => row.project.rsAmountYen,
+      render: row => <span className="font-medium text-neutral-900 dark:text-neutral-100" title={`RS 2-2 ${row.project.rsRecordCount}行の合計`}>{formatYen(row.project.rsAmountYen)}</span>,
+    },
+    {
+      key: 'projectBudgetShare',
+      label: 'RS事業%',
+      width: 82,
+      numeric: true,
+      sortValue: projectBudgetShare,
+      render: row => formatRate(projectBudgetShare(row)),
+    },
+    {
+      key: 'mofItemShare',
+      label: 'MOF目%',
+      width: 82,
+      numeric: true,
+      sortValue: mofItemShare,
+      render: row => formatRate(mofItemShare(row)),
+    },
+  ];
+
+  return (
+    <DataGrid
+      rows={rows}
+      columns={columns}
+      rowKey={row => `${row.group.linkId}:${row.group.itemNaturalKey}:${row.project.projectId}`}
+      state={gridState}
+      onStateChange={onGridStateChange}
+      emptyMessage="紐づく RS 事業は見つかりませんでした。"
+    />
+  );
+}
+
+/**
+ * 決算タブ（B3b）: selectedV2SectionのsettlementSectionIdへ一致するpublic settlement
+ * identityをauthorityとし、budget側rsLinksからは再構成しない。PID別evidence
+ * （phase/revision/matchMethod/RS金額）は、generatorが既に`linkId + budgetItemId`で
+ * budget projection groupへjoin済みのv2.settlementIdentityRelations
+ * （v2KouMokuLinkage.identityRelations）をそのまま使う。ここで改めてv2.groupsへ
+ * re-joinしない（legacy V1側でbudget itemが一意解決できずgroupが無かったsource
+ * ＝settlementProjectionLegacyEvidenceGapCountも、generator側で既に独立再構成済みの
+ * ためこの経路なら脱落しない）。
+ * fallback（resolutionMethod=unique-name-fallback）ではbudgetItemId !== settlementItemId
+ * となるが、relation.itemNaturalKeyは常にsettlement側（settlementItemId）を指す。
+ */
+function V2SettlementIdentityRsTab({
+  v2,
+  gridState,
+  onGridStateChange,
+}: {
+  v2: V2PanelData;
+  gridState: GridViewState;
+  onGridStateChange: (updater: (prev: GridViewState) => GridViewState) => void;
+}) {
+  if (v2.settlementIdentities === null || v2.settlementIdentityRelations === null) {
+    if (v2.sectionError) return <p className="p-3 text-red-600">V2決算identityの取得に失敗しました: {v2.sectionError}</p>;
+    if (v2.sectionLoading || v2.projectionLoading) return <p className="p-3 text-neutral-400">読み込み中…</p>;
+    if (v2.projectionError) return <p className="p-3 text-red-600">V2内訳の取得に失敗しました: {v2.projectionError}</p>;
+    return <p className="p-3 text-neutral-400">紐づく RS 事業は見つかりませんでした。</p>;
+  }
+
+  const itemName = (id: string) => v2.itemNames?.get(id) ?? id;
+
+  type SettlementRow = {
+    relation: MofKouMokuV2IdentityRelation;
+    project: MofKouMokuV2IdentityRelation['projects'][number];
+    source: MofKouMokuV2IdentityRelation['projects'][number]['sources'][number];
+  };
+  const rows: SettlementRow[] = v2.settlementIdentityRelations.flatMap(relation =>
+    relation.projects.flatMap(project => project.sources.map(source => ({ relation, project, source })))
+  );
+
+  const columns: GridColumn<SettlementRow>[] = [
+    {
+      key: 'matchMethod', label: '根拠', width: 100, sortValue: row => row.source.matchMethod,
+      render: row => <MatchMethodBadge method={row.source.matchMethod} />,
+    },
+    {
+      key: 'item', label: '決算目', width: 200, sortValue: row => itemName(row.relation.itemNaturalKey),
+      render: row => <span title={itemName(row.relation.itemNaturalKey)}>{itemName(row.relation.itemNaturalKey)}</span>,
+    },
+    {
+      key: 'project', label: 'RS事業', width: 220, sortValue: row => row.project.projectName || row.project.projectId,
+      render: row => v2.reviewYear !== null ? <a href={sankeySvgProjectUrl(Number(row.project.projectId), row.project.projectName || row.project.projectId, v2.reviewYear)} target="_blank" rel="noopener noreferrer" className="text-neutral-700 underline hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100" title={row.project.projectId}>{row.project.projectName || row.project.projectId}</a> : row.project.projectName || row.project.projectId,
+    },
+    { key: 'ministry', label: '府省庁', width: 120, sortValue: row => row.project.ministry, render: row => row.project.ministry || '—' },
+    {
+      key: 'projectRsAmount', label: 'RS事業額', width: 120, numeric: true, sortValue: row => row.source.rsAmountYen,
+      render: row => <span className="font-medium text-neutral-900 dark:text-neutral-100">{formatYen(row.source.rsAmountYen)}</span>,
+    },
+    {
+      key: 'stages', label: 'リンク元', width: 100, sortValue: row => phaseLabel(row.source.phase, row.source.revision),
+      render: row => <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-[11px] text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">{phaseLabel(row.source.phase, row.source.revision)}</span>,
+    },
+  ];
+  const validSortKeys = new Set(columns.map(column => column.key));
+  const effectiveState = gridState.sortKey !== null && validSortKeys.has(gridState.sortKey)
+    ? gridState : { ...gridState, sortKey: 'project', sortDir: 'asc' as const };
+  return (
+    <DataGrid
+      rows={rows}
+      columns={columns}
+      rowKey={row => `${row.relation.relationId}:${row.project.projectId}:${row.source.linkId}`}
+      state={effectiveState}
+      onStateChange={onGridStateChange}
+      emptyMessage="予算段階で対応付けられたRS事業は見つかりませんでした。"
     />
   );
 }

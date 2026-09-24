@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * サイドパネルの各タブ（年度推移・事項・目・RS）で使う汎用グリッド。
@@ -11,12 +11,14 @@
  * ようにするため。
  */
 
-import type { ReactNode } from 'react';
-import { useMemo } from 'react';
+import type { ReactNode } from "react";
+import { useMemo } from "react";
 
 export interface GridColumn<T> {
   key: string;
   label: string;
+  /** 見出しに表示する補足（表示文言は増やさない） */
+  headerTitle?: string;
   width: number;
   numeric?: boolean;
   /** 省略した列はソート不可（見出しクリックが無効になる） */
@@ -26,7 +28,7 @@ export interface GridColumn<T> {
 
 export interface GridViewState {
   sortKey: string | null;
-  sortDir: 'asc' | 'desc';
+  sortDir: "asc" | "desc";
   widths: Record<string, number>;
 }
 
@@ -38,7 +40,7 @@ export function DataGrid<T>({
   rowKey,
   state,
   onStateChange,
-  emptyMessage = 'データがありません。',
+  emptyMessage = "データがありません。",
 }: {
   rows: T[];
   columns: GridColumn<T>[];
@@ -50,28 +52,29 @@ export function DataGrid<T>({
   const { sortKey, sortDir, widths } = state;
 
   const sorted = useMemo(() => {
-    const col = columns.find(c => c.key === sortKey);
+    const col = columns.find((c) => c.key === sortKey);
     if (!col?.sortValue) return rows;
     const sortValue = col.sortValue;
-    const factor = sortDir === 'asc' ? 1 : -1;
+    const factor = sortDir === "asc" ? 1 : -1;
     return [...rows].sort((a, b) => {
       const va = sortValue(a);
       const vb = sortValue(b);
       if (va === null && vb === null) return 0;
       if (va === null) return 1;
       if (vb === null) return -1;
-      if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * factor;
-      return String(va).localeCompare(String(vb), 'ja') * factor;
+      if (typeof va === "number" && typeof vb === "number")
+        return (va - vb) * factor;
+      return String(va).localeCompare(String(vb), "ja") * factor;
     });
     // columns is stable per tab（呼び出し側でインライン定義しても件数は少なく、再計算コストは無視できる）
   }, [rows, columns, sortKey, sortDir]);
 
   function toggleSort(col: GridColumn<T>) {
     if (!col.sortValue) return;
-    onStateChange(s =>
+    onStateChange((s) =>
       s.sortKey === col.key
-        ? { ...s, sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' }
-        : { ...s, sortKey: col.key, sortDir: col.numeric ? 'desc' : 'asc' }
+        ? { ...s, sortDir: s.sortDir === "asc" ? "desc" : "asc" }
+        : { ...s, sortKey: col.key, sortDir: col.numeric ? "desc" : "asc" },
     );
   }
 
@@ -79,55 +82,68 @@ export function DataGrid<T>({
     event.preventDefault();
     event.stopPropagation();
     const startX = event.clientX;
-    const col = columns.find(c => c.key === key);
+    const col = columns.find((c) => c.key === key);
     const startWidth = widths[key] ?? col?.width ?? MIN_COLUMN_WIDTH;
     const onMove = (e: MouseEvent) => {
       const next = Math.max(MIN_COLUMN_WIDTH, startWidth + e.clientX - startX);
-      onStateChange(s => ({ ...s, widths: { ...s.widths, [key]: next } }));
+      onStateChange((s) => ({ ...s, widths: { ...s.widths, [key]: next } }));
     };
     const onUp = () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
     };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
   }
 
   if (rows.length === 0) {
     return <p className="p-3 text-neutral-400">{emptyMessage}</p>;
   }
 
-  const tableWidth = columns.reduce((sum, c) => sum + (widths[c.key] ?? c.width), 0);
+  const tableWidth = columns.reduce(
+    (sum, c) => sum + (widths[c.key] ?? c.width),
+    0,
+  );
 
   return (
-    <table className="w-full table-fixed border-collapse text-[11px]" style={{ minWidth: tableWidth }}>
+    <table
+      className="w-full table-fixed border-collapse text-[11px]"
+      style={{ minWidth: tableWidth }}
+    >
       <colgroup>
-        {columns.map(c => (
+        {columns.map((c) => (
           <col key={c.key} style={{ width: widths[c.key] ?? c.width }} />
         ))}
       </colgroup>
       <thead className="sticky top-0 z-10 bg-neutral-50 text-left font-medium text-neutral-400 dark:bg-neutral-900">
         <tr>
-          {columns.map(col => {
+          {columns.map((col) => {
             const active = sortKey === col.key;
             return (
-              <th key={col.key} scope="col" className="relative select-none p-0">
+              <th
+                key={col.key}
+                scope="col"
+                title={col.headerTitle}
+                className="relative select-none p-0"
+              >
                 <button
                   type="button"
                   onClick={() => toggleSort(col)}
                   disabled={!col.sortValue}
                   className={`flex w-full items-center gap-0.5 overflow-hidden px-2 py-1.5 ${
-                    col.sortValue ? 'hover:bg-neutral-200 dark:hover:bg-neutral-700' : 'cursor-default'
-                  } ${col.numeric ? 'justify-end' : 'justify-start'} ${active ? 'text-neutral-900 dark:text-neutral-100' : ''}`}
+                    col.sortValue
+                      ? "hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                      : "cursor-default"
+                  } ${col.numeric ? "justify-end" : "justify-start"} ${active ? "text-neutral-900 dark:text-neutral-100" : ""}`}
                 >
                   <span className="min-w-0 truncate">{col.label}</span>
                   {col.sortValue && (
                     <span className="w-2 shrink-0 text-[9px]">
-                      {active ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                      {active ? (sortDir === "asc" ? "▲" : "▼") : ""}
                     </span>
                   )}
                 </button>
@@ -135,8 +151,8 @@ export function DataGrid<T>({
                   role="separator"
                   aria-orientation="vertical"
                   aria-label={`${col.label}の列幅を変更`}
-                  onMouseDown={e => startResize(e, col.key)}
-                  onClick={e => e.stopPropagation()}
+                  onMouseDown={(e) => startResize(e, col.key)}
+                  onClick={(e) => e.stopPropagation()}
                   className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize hover:bg-neutral-400/60"
                 />
               </th>
@@ -145,13 +161,16 @@ export function DataGrid<T>({
         </tr>
       </thead>
       <tbody className="text-neutral-600 dark:text-neutral-400">
-        {sorted.map(row => (
+        {sorted.map((row) => (
           <tr
             key={rowKey(row)}
             className="border-t border-neutral-100 hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
           >
-            {columns.map(col => (
-              <td key={col.key} className={`truncate px-2 py-1.5 ${col.numeric ? 'text-right tabular-nums' : ''}`}>
+            {columns.map((col) => (
+              <td
+                key={col.key}
+                className={`truncate px-2 py-1.5 ${col.numeric ? "text-right tabular-nums" : ""}`}
+              >
                 {col.render(row)}
               </td>
             ))}
