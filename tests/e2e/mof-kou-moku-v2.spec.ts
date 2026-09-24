@@ -50,14 +50,21 @@ test("keeps the legacy RS tab active until the V2 projection payload actually lo
   // （このreviewYear×fiscalYearペアは実際にRSリンクを持つ行が存在する）。
   const tableRows = page.locator("tbody tr");
   await expect(tableRows.first()).toBeVisible();
-  const nonZeroDuringLoad = await tableRows.evaluateAll((rowEls) =>
-    rowEls.some(
-      (row) =>
-        row instanceof HTMLTableRowElement &&
-        Number(row.cells[0]?.textContent?.trim()) > 0,
-    ),
-  );
-  expect(nonZeroDuringLoad).toBe(true);
+  // legacy linkageByKey自体も非同期取得のため、初回描画直後は一時的に全行0のことがある。
+  // pollingでlegacy件数が実際に反映されるのを待ってから判定する（route delay自体は維持）。
+  await expect
+    .poll(
+      () =>
+        tableRows.evaluateAll((rowEls) =>
+          rowEls.some(
+            (row) =>
+              row instanceof HTMLTableRowElement &&
+              Number(row.cells[0]?.textContent?.trim()) > 0,
+          ),
+        ),
+      { timeout: 15_000 },
+    )
+    .toBe(true);
 
   releaseProjection();
   await expect(page.getByText("V2", { exact: true })).toBeVisible({

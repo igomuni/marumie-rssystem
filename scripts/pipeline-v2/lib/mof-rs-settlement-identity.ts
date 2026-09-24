@@ -15,6 +15,15 @@
  *   文字列結合・normalizeロジックはここでは作らない。
  * - fallback候補が2件以上の場合（ambiguous-name-fallback）は自動選択しない。
  *   金額による候補選択も行わない。診断へ残し、relationを作らない。
+ *   ambiguous-name-fallbackは2つの独立した原因で起こりうる（reasonは共通、原因は
+ *   diagnosticsのfieldで区別可能）:
+ *     (a) settlement側: 同一scopeNameItemKeyに決算itemの候補が複数ある
+ *     (b) budget側: 同一phase+revision+scopeNameItemKeyに、異なるbudgetItemNaturalKeyを
+ *         持つbudget itemが複数存在する（当初/補正のcode変更でscopeNameItemKeyが
+ *         偶然衝突するケース）。この場合、settlement側候補がたとえ1件でも「本当に
+ *         uniqueにfallback先を決められる」とは言えないため、自動選択しない
+ *         （fallback先を"名前が同じだから"という理由だけでbudget item間に配賦しない）。
+ *         phase/revisionをまたいだ同名は許容する（当初→補正のcode変更を妨げないため）。
  * - 1 link groupのmofRecordIdsが複数の異なるitemNaturalKeyにまたがる場合
  *   （`spans_multiple_items`）、根拠なく1つの決算itemへ金額配賦しない。診断へ残し、
  *   relationを作らない。
@@ -76,7 +85,13 @@ export interface MofRsSettlementUnresolvedLinkGroup {
   linkId: string;
   reason: MofRsSettlementUnresolvedReason;
   projectIds: string[];
-  /** spans_multiple_items: budget側で複数に分かれたitemNaturalKey候補 */
+  /**
+   * spans_multiple_items: 1 link groupのmofRecordIdsが分かれた複数itemNaturalKey。
+   * ambiguous_name_fallback（budget側原因）: 同一phase+revision+scopeNameItemKeyに存在する
+   * 複数の異なるbudgetItemNaturalKey（この場合は要素数2件以上）。
+   * ambiguous_name_fallback（settlement側原因）/ unmatched: このlink group自身の
+   * budgetItemNaturalKey 1件のみ。
+   */
   budgetItemNaturalKeyCandidates: string[];
   /** ambiguous_name_fallback / unmatched: 照合を試みたbudget側のscopeNameItemKey */
   scopeNameItemKey?: string;
@@ -221,6 +236,17 @@ export function buildSettlementIdentityRelations(
     keyResolutions.push({ link, budgetItemNaturalKey: distinctKeys[0], budgetScopeNameItemKey: itemInfos[0].scopeNameItemKey, accountType: itemInfos[0].accountType });
   }
 
+  // budget側の「同一phase+revision+scopeNameItemKeyに複数の異なるbudgetItemNaturalKeyが
+  // 存在するか」を事前に集計する。name fallbackはexact missのときだけ試みるため、
+  // ここでの判定はfallback候補のuniqueness判定にのみ使う（exact matchには影響しない）。
+  const budgetKeysByPhaseAndName = new Map<string, Set<string>>();
+  for (const { link, budgetItemNaturalKey, budgetScopeNameItemKey } of keyResolutions) {
+    const key = `${link.phase}\x1f${link.revision ?? ''}\x1f${budgetScopeNameItemKey}`;
+    const set = budgetKeysByPhaseAndName.get(key) ?? new Set<string>();
+    set.add(budgetItemNaturalKey);
+    budgetKeysByPhaseAndName.set(key, set);
+  }
+
   // Step 2: budget側キーをsettlementへ解決する。exact優先、無ければscopeNameItemKey fallback。
   const contributionsBySettlementKey = new Map<string, Contribution[]>();
 
@@ -233,19 +259,24 @@ export function buildSettlementIdentityRelations(
       continue;
     }
 
+    const phaseRevisionNameKey = `${link.phase}\x1f${link.revision ?? ''}\x1f${budgetScopeNameItemKey}`;
+    const budgetSideKeys = budgetKeysByPhaseAndName.get(phaseRevisionNameKey) ?? new Set([budgetItemNaturalKey]);
+    const budgetSideAmbiguous = budgetSideKeys.size > 1;
+
     const candidates = settlementByNameKey.get(budgetScopeNameItemKey) ?? [];
-    if (candidates.length === 1) {
+    if (candidates.length === 1 && !budgetSideAmbiguous) {
       accountTypeFallbackCounts[accountType] = (accountTypeFallbackCounts[accountType] ?? 0) + 1;
       const list = contributionsBySettlementKey.get(candidates[0].itemNaturalKey) ?? [];
       list.push({ link, budgetItemNaturalKey, resolutionMethod: 'unique-name-fallback', accountType });
       contributionsBySettlementKey.set(candidates[0].itemNaturalKey, list);
       continue;
     }
-    if (candidates.length > 1) {
+    if (candidates.length > 1 || (candidates.length === 1 && budgetSideAmbiguous)) {
       ambiguousNameFallbackLinkGroupCount++;
       unresolvedLinkGroups.push({
         linkId: link.linkId, reason: 'ambiguous_name_fallback', projectIds: link.projectIds,
-        budgetItemNaturalKeyCandidates: [budgetItemNaturalKey], scopeNameItemKey: budgetScopeNameItemKey,
+        budgetItemNaturalKeyCandidates: budgetSideAmbiguous ? [...budgetSideKeys].sort() : [budgetItemNaturalKey],
+        scopeNameItemKey: budgetScopeNameItemKey,
         settlementCandidateItemNaturalKeys: candidates.map(c => c.itemNaturalKey).sort(),
       });
       continue;

@@ -217,6 +217,76 @@ describe('buildSettlementIdentityRelations: scopeNameItemKey unique fallback（P
   });
 });
 
+describe('buildSettlementIdentityRelations: budget-side uniqueness guard（review指摘、B2原則「曖昧なら自動選択しない」の境界条件強化）', () => {
+  it('budget-side ambiguity: 同一phase+revision+scopeNameItemKeyに異なるbudgetItemNaturalKeyが2件あれば、settlement候補が1件でもfallbackしない', () => {
+    const mofRows = [
+      mofRow({ recordId: 'mof_a', itemNaturalKey: 'ik-a', scopeNameItemKey: 'sk-shared' }),
+      mofRow({ recordId: 'mof_b', itemNaturalKey: 'ik-b', scopeNameItemKey: 'sk-shared' }),
+    ];
+    const links = [
+      linkGroup({ linkId: 'link_a', mofRecordIds: ['mof_a'] }),
+      linkGroup({ linkId: 'link_b', mofRecordIds: ['mof_b'] }),
+    ];
+    // settlement候補は1件のみ（ik-a/ik-bのどちらとも一致しないitemNaturalKey）
+    const settlement = [settlementItem({ itemNaturalKey: 'ik-settlement', scopeNameItemKey: 'sk-shared' })];
+    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, settlement, 2024, 2024, 'available');
+    expect(relations).toHaveLength(0);
+    expect(diagnostics.ambiguousNameFallbackLinkGroupCount).toBe(2);
+    expect(diagnostics.uniqueNameFallbackLinkGroupCount).toBe(0);
+    const reasons = diagnostics.unresolvedLinkGroups.map(g => g.reason);
+    expect(reasons).toEqual(['ambiguous_name_fallback', 'ambiguous_name_fallback']);
+    for (const entry of diagnostics.unresolvedLinkGroups) {
+      expect(entry.budgetItemNaturalKeyCandidates).toEqual(['ik-a', 'ik-b']);
+      expect(entry.scopeNameItemKey).toBe('sk-shared');
+      expect(entry.settlementCandidateItemNaturalKeys).toEqual(['ik-settlement']);
+    }
+  });
+
+  it('phase/revisionが異なれば同名でもbudget-side ambiguityにしない（当初→補正のcode変更を妨げない）', () => {
+    const mofRows = [
+      mofRow({ recordId: 'mof_initial', itemNaturalKey: 'ik-initial', scopeNameItemKey: 'sk-shared' }),
+      mofRow({ recordId: 'mof_supp', itemNaturalKey: 'ik-supp', scopeNameItemKey: 'sk-shared' }),
+    ];
+    const links = [
+      linkGroup({ linkId: 'link_initial', phase: 'initial', revision: null, mofRecordIds: ['mof_initial'], projectIds: ['7'] }),
+      linkGroup({ linkId: 'link_supp', phase: 'supplement', revision: 1, mofRecordIds: ['mof_supp'], projectIds: ['7'] }),
+    ];
+    const settlement = [settlementItem({ itemNaturalKey: 'ik-settlement', scopeNameItemKey: 'sk-shared' })];
+    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, settlement, 2024, 2024, 'available');
+    expect(diagnostics.ambiguousNameFallbackLinkGroupCount).toBe(0);
+    expect(diagnostics.uniqueNameFallbackLinkGroupCount).toBe(2);
+    // 同一settlement itemへ両方merge（B1由来のidentity集約）されるので1 relationになる
+    expect(relations).toHaveLength(1);
+    expect(relations[0].sourceLinks).toHaveLength(2);
+    expect(relations[0].sourceLinks.every(s => s.resolutionMethod === 'unique-name-fallback')).toBe(true);
+  });
+
+  it('exact precedence: budget側に同名衝突があっても、itemNaturalKey exact matchが存在するlinkはexactで解決される', () => {
+    const mofRows = [
+      mofRow({ recordId: 'mof_exact', itemNaturalKey: 'ik-exact', scopeNameItemKey: 'sk-shared' }),
+      mofRow({ recordId: 'mof_other', itemNaturalKey: 'ik-other', scopeNameItemKey: 'sk-shared' }),
+    ];
+    const links = [
+      linkGroup({ linkId: 'link_exact', mofRecordIds: ['mof_exact'], projectIds: ['1'] }),
+      linkGroup({ linkId: 'link_other', mofRecordIds: ['mof_other'], projectIds: ['2'] }),
+    ];
+    // ik-exactはsettlement側にexact一致item、名称candidateとしても衝突しているscopeNameItemKeyを共有
+    const settlement = [settlementItem({ itemNaturalKey: 'ik-exact', scopeNameItemKey: 'sk-shared' })];
+    const { relations, diagnostics } = buildSettlementIdentityRelations(mofRows, links, settlement, 2024, 2024, 'available');
+    const exactRelation = relations.find(r => r.settlementItemNaturalKey === 'ik-exact');
+    expect(exactRelation).toBeDefined();
+    expect(exactRelation?.sourceLinks).toHaveLength(1);
+    expect(exactRelation?.sourceLinks[0].resolutionMethod).toBe('exact-item-key');
+    expect(exactRelation?.projectIds).toEqual(['1']);
+    // ik-otherはexact一致が無くfallbackを試みるが、ik-exact/ik-otherが同一phase+revision+
+    // scopeNameItemKeyで衝突しているため、settlement候補が1件(ik-exact)でも自動選択しない
+    expect(diagnostics.ambiguousNameFallbackLinkGroupCount).toBe(1);
+    const otherEntry = diagnostics.unresolvedLinkGroups.find(g => g.linkId === 'link_other');
+    expect(otherEntry?.reason).toBe('ambiguous_name_fallback');
+    expect(otherEntry?.budgetItemNaturalKeyCandidates).toEqual(['ik-exact', 'ik-other']);
+  });
+});
+
 describe('buildSettlementIdentityRelations: stale settlement-items artifact検出', () => {
   it('B1形式のstale settlement item（schemaVersion旧版）を読むと、静かにfallback=0へ後退せず例外を投げる', () => {
     const staleItem: SettlementItemRecord = { ...settlementItem({}), schemaVersion: 1 };
