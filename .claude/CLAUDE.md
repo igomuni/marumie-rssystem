@@ -6,7 +6,7 @@
 - **回答の出力先**: 設計・調査・分析などの回答を出力する場合は `docs/tasks/YYYYMMDD_HHMM_{タイトル}.md` に保存すること（日時は `TZ=Asia/Tokyo date +%Y%m%d_%H%M` で取得）。**作成したら `docs/tasks/INDEX.md` に1行追記する**（新しいものを上に）。
 - **task doc の長さは中身に合わせる**: 必要な実質だけを書き、水増しの節・重複するまとめ・定型の前置きを足さない。
 - **コード・`docs/*.md` から `docs/tasks/*.md` を参照しない**: task doc は rs-vis へ展開されず、archive 移動でパスも変わるため、展開先でリンクが切れる。恒久的な仕様・制約・設計判断は `docs/*.md` のガイドに書き、コードはそこを指す。task doc を参照してよいのは `.claude/` 配下と他の task doc のみ。
-- **データファイル（`public/data/*.json`・`data/`）を Read で開かない**: 展開後 96MB 級があり1回で数万トークンになる。中身の確認・集計は `/data-query` スキルの作法（dev API / jq / gunzip -c / sqlite3）で行う。settings.json の deny でも拒否される。
+- **データファイル（`public/data/*.json`・`data/`）を Read で開かない**: 展開後 96MB 級があり1回で数万トークンになる。中身の確認・集計は `/data-query` スキルの作法（dev API / jq / gunzip -c / sqlite3）で行う。settings.json の deny でも拒否される。`data/download/` は生データ形式（zip/csv/pdf/xml/json/gz/xlsx/xls）だけ deny で、人手向け指示書（`_MANUAL_DOWNLOAD.md` 等）のような小さいテキストは読める。`data/result/`・`data/cache/`・`data/houjin.db*` は全面 deny のまま。
 
 ## 探索の規律（トークン節約）
 
