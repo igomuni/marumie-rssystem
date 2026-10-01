@@ -10,6 +10,8 @@
  * 使い方: npx tsx scripts/pipeline-v2/download-budget-requests.ts [year] [--dry-run] [--only=domain,domain]
  *   （年度省略時は 2024。manifest未定義の年度はエラー）
  *   --dry-run: network access・file書き込みをせず、targetと保存先の一覧だけを表示する
+ *   --prepare-manual: network accessなしで、manual-required targetの保存先directory作成と
+ *                     人間向け指示書 _MANUAL_DOWNLOAD.md の生成だけを行う（PDFは取得しない）
  *   --only:    publisherDomainで対象を絞る（例: --only=ndl.go.jp,mof.go.jp）
  */
 import {
@@ -17,16 +19,20 @@ import {
   downloadAll,
   expandTargets,
   localPathFor,
+  nodeBudgetRequestFs,
   summarizeResults,
   type BudgetRequestDownloadResult,
   type BudgetRequestDownloadTarget,
 } from './lib/budget-request-download';
+import { prepareManual } from './lib/budget-request-manual';
 import { createPlaywrightAcquirer } from './lib/budget-request-browser';
 import { getBudgetRequestManifest, validateBudgetRequestManifest } from './lib/budget-request-manifest';
 
-const USAGE = `usage: download-budget-requests.ts [year] [--dry-run] [--only=domain,domain]
-  year        対象年度（省略時 2024。manifest未定義の年度はエラー）
-  --dry-run   network access・file書き込みなしでtargetと保存先を表示
+const USAGE = `usage: download-budget-requests.ts [year] [--dry-run | --prepare-manual] [--only=domain,domain]
+  year             対象年度（省略時 2024。manifest未定義の年度はエラー）
+  --dry-run        network access・file書き込みなしでtargetと保存先を表示
+  --prepare-manual network accessなし。manual-required targetの保存先directoryを作り、
+                   人間向けの取得指示書 _MANUAL_DOWNLOAD.md を生成（--dry-runとは併用不可）
   --only=     publisherDomainで絞る（例: --only=ndl.go.jp,mof.go.jp）`;
 
 function label(t: BudgetRequestDownloadTarget): string {
@@ -116,6 +122,20 @@ function printReport(targets: BudgetRequestDownloadTarget[], results: BudgetRequ
   }
 }
 
+/** network accessなし。実装上のエラー（不正なlocal path・mkdir/書き込み失敗）のみ終了コード1 */
+function runPrepareManual(year: number, targets: BudgetRequestDownloadTarget[]): void {
+  try {
+    const prep = prepareManual(year, targets, nodeBudgetRequestFs);
+    for (const e of prep.entries) console.log(`  [${e.state}] ${e.purpose}\n      ${e.target.canonicalUrl}\n      → ${e.localPath}`);
+    const count = (s: string) => prep.entries.filter(e => e.state === s).length;
+    console.log(`\ndirectories: ${prep.directories.join(', ') || '(none)'}\ninstructions: ${prep.instructionFiles.join(', ') || '(none)'}`);
+    console.log(`--- prepare-manual: manual targets=${prep.entries.length} MISSING=${count('MISSING')} VALID PDF=${count('VALID PDF')} INVALID FILE=${count('INVALID FILE')} ---`);
+  } catch (e) {
+    console.error(`prepare-manual failed: ${e instanceof Error ? e.message : String(e)}`);
+    process.exitCode = 1;
+  }
+}
+
 function usageError(message: string): void {
   console.error(`${message}\n${USAGE}`);
   process.exitCode = 1;
@@ -123,7 +143,7 @@ function usageError(message: string): void {
 
 async function main() {
   const args = process.argv.slice(2);
-  const unknown = args.filter(a => a.startsWith('--') && a !== '--dry-run' && !a.startsWith('--only='));
+  const unknown = args.filter(a => a.startsWith('--') && a !== '--dry-run' && a !== '--prepare-manual' && !a.startsWith('--only='));
   const positional = args.filter(a => !a.startsWith('--'));
   if (args.includes('--help') || args.includes('-h')) return console.log(USAGE);
   if (unknown.length > 0) return usageError(`unknown option: ${unknown.join(' ')}`);
@@ -131,6 +151,8 @@ async function main() {
     return usageError(`year must be a 4-digit fiscal year: ${positional.join(' ')}`);
   }
   const isDryRun = args.includes('--dry-run');
+  const isPrepareManual = args.includes('--prepare-manual');
+  if (isDryRun && isPrepareManual) return usageError('--dry-run と --prepare-manual は併用できません');
   const onlyArg = args.find(a => a.startsWith('--only='))?.slice('--only='.length);
   if (onlyArg !== undefined && onlyArg === '') return usageError('--only= requires domain(s)');
   const only = onlyArg?.split(',');
@@ -149,8 +171,9 @@ async function main() {
   }
 
   const targets = expandTargets(manifest).filter(t => !only || only.includes(t.publisherDomain));
-  console.log(`\n=== 概算要求PDF: year=${year} targets=${targets.length}${isDryRun ? ' (dry-run)' : ''} ===`);
+  console.log(`\n=== 概算要求PDF: year=${year} targets=${targets.length}${isDryRun ? ' (dry-run)' : isPrepareManual ? ' (prepare-manual)' : ''} ===`);
   if (isDryRun) return dryRun(targets);
+  if (isPrepareManual) return runPrepareManual(year, targets);
   const browser = createPlaywrightAcquirer(); // browserは初回の取得時に初めて起動する
   let results: BudgetRequestDownloadResult[];
   try {

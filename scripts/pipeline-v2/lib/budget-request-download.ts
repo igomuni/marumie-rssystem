@@ -39,6 +39,8 @@ export interface BudgetRequestDownloadTarget {
   // document
   accountType?: 'general' | 'special';
   account?: string;
+  subAccounts?: string[];
+  relatedAuthority?: string;
   logicalAuthority?: string;
   role?: string;
   // reference
@@ -152,6 +154,8 @@ export function expandTargets(manifest: BudgetRequestManifest): BudgetRequestDow
           timeoutMs: f.timeoutMs,
           accountType: doc.accountType,
           account: doc.account,
+          subAccounts: doc.subAccounts,
+          relatedAuthority: doc.relatedAuthority,
           logicalAuthority: doc.logicalAuthority,
           role: f.role,
         });
