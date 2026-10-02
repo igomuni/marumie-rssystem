@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { describe, expect, it } from 'vitest';
 import { observeDocumentHierarchy, type HierarchyPageInput } from './budget-request-document-hierarchy';
+import { classifyBHoldout, type Counts } from './budget-request-document-hierarchy-eval';
 import { observeDocumentHierarchyV2, V1_EQUIVALENT_OPTIONS, type DocumentHierarchyV2Result, type HierarchyV2ExperimentalOptions } from './budget-request-document-hierarchy-v2';
 import { listExtractionTargets } from './budget-request-extraction';
 import { resolveLogicalRows } from './budget-request-logical-row';
@@ -216,6 +217,58 @@ describe('実験境界（静的確認）: GT・凍結層・コード値に依存
       const gt = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../tests/fixtures/budget-request-document-hierarchy/2024', gtFile), 'utf8')) as { nodes: { name: string }[] };
       for (const n of gt.nodes) expect(src.includes(n.name), n.name).toBe(false);
     }
+  });
+});
+
+describe('B の判断過程の診断（観測のみ。決定は変えない）', () => {
+  it('発火: 診断に required/observed の run 長・隣接差・正規化gap・理由が残る', () => {
+    const r = run(singleRootDoc(), 'off', 'lattice-supported');
+    expect(r.latticeDiagnostics.finalOutcome).toBe('activated');
+    const step = r.latticeDiagnostics.steps[0];
+    expect(step).toMatchObject({ decision: 'placed', reason: 'one_step_left_of_regular_staircase', requiredRunLength: 3, singletonCandidateSupport: 1 });
+    expect(step.observedRunLength).toBeGreaterThanOrEqual(3);
+    expect(step.normalizedGapToRun).toBeCloseTo((step.gapToRun as number) / r.latticeDiagnostics.referenceFontSize, 2);
+  });
+  it('不発火（階段不足）: rejected と staircase_too_short、required 3 と observed が残り、結果は v1 と同じ', () => {
+    const doc = [100, 101].map(n => pageOf(n, [...(n === 100 ? [head('501', X.l1)] : []), head('502', X.l2), head('503', X.l2), head('504', X.l3), head('505', X.l3)]));
+    const r = run(doc, 'off', 'lattice-supported');
+    expect(r.latticeDiagnostics.finalOutcome).toBe('not_activated');
+    const last = r.latticeDiagnostics.steps[r.latticeDiagnostics.steps.length - 1];
+    expect(last).toMatchObject({ decision: 'rejected', reason: 'staircase_too_short', requiredRunLength: 3 });
+    expect(last.observedRunLength).toBeLessThan(3);
+    const v1 = observeDocumentHierarchy('detail', doc);
+    expect(r.nodes.map(n => n.xIndentEvidence.level)).toEqual(v1.nodes.map(n => n.xIndentEvidence.level));
+  });
+  it('off のときは診断が空', () => {
+    const r = run(singleRootDoc(), 'off', 'off');
+    expect(r.latticeDiagnostics).toMatchObject({ finalOutcome: 'off', steps: [] });
+  });
+});
+
+describe('B holdout の分類（事前に固定した定義）', () => {
+  const c = (o: Partial<Counts> & { exact: number; gtEdges: number; depthOk: number; n: number }): Counts => ({
+    falseParent: 0, unresolved: 0, childNotFound: 0, precision: null, recall: null, f1: null, ancestorExact: { x: 0, n: 0 },
+    depthExact: { x: o.depthOk, matched: o.n, n: o.n }, nodesMatched: { x: o.n, n: o.n }, ...o,
+  });
+  const v1 = c({ exact: 5, gtEdges: 10, depthOk: 0, n: 11, unresolved: 5 });
+  it('PASS: 発火し、根が level 1、exact/depth 改善、false parent 増加なし、regression なし', () => {
+    const r = classifyBHoldout({ singleOrganization: true, activated: true, lastReason: 'one_step_left_of_regular_staircase', v1, v2b: c({ exact: 10, gtEdges: 10, depthOk: 11, n: 11 }), rootLevelV2b: 1, regressionUnchanged: true });
+    expect(r).toMatchObject({ classification: 'B-HOLDOUT-PASS', label: 'CONFIRMED-WITH-SCOPE' });
+  });
+  it('OUT-OF-SCOPE: 階段不足で発火せず v2-B == v1（B の失敗ではない）', () => {
+    const r = classifyBHoldout({ singleOrganization: true, activated: false, lastReason: 'staircase_too_short', v1, v2b: v1, rootLevelV2b: null, regressionUnchanged: true });
+    expect(r).toMatchObject({ classification: 'B-HOLDOUT-OUT-OF-SCOPE', label: 'GO-WITH-COVERAGE-LIMIT' });
+  });
+  it('FAIL: 発火したが false parent が増える／根が level 1 でない／発火しないのに結果が v1 と違う／regression がある', () => {
+    const base = { singleOrganization: true, lastReason: 'x', v1, regressionUnchanged: true };
+    expect(classifyBHoldout({ ...base, activated: true, v2b: c({ exact: 10, gtEdges: 10, depthOk: 11, n: 11, falseParent: 1 }), rootLevelV2b: 1 }).classification).toBe('B-HOLDOUT-FAIL');
+    expect(classifyBHoldout({ ...base, activated: true, v2b: c({ exact: 10, gtEdges: 10, depthOk: 11, n: 11 }), rootLevelV2b: 2 }).classification).toBe('B-HOLDOUT-FAIL');
+    expect(classifyBHoldout({ ...base, activated: false, lastReason: 'staircase_too_short', v2b: c({ exact: 6, gtEdges: 10, depthOk: 0, n: 11, unresolved: 4 }), rootLevelV2b: null }).classification).toBe('B-HOLDOUT-FAIL');
+    expect(classifyBHoldout({ ...base, activated: true, v2b: c({ exact: 10, gtEdges: 10, depthOk: 11, n: 11 }), rootLevelV2b: 1, regressionUnchanged: false }).classification).toBe('B-HOLDOUT-FAIL');
+  });
+  it('NOT-APPLICABLE: singleton root 候補が無い（根が支持で placed 済み）', () => {
+    const r = classifyBHoldout({ singleOrganization: true, activated: false, lastReason: 'no_unplaced_cluster_left_of_placed_clusters', v1, v2b: v1, rootLevelV2b: 1, regressionUnchanged: true });
+    expect(r.classification).toBe('B-HOLDOUT-NOT-APPLICABLE');
   });
 });
 

@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { DOCUMENT_HIERARCHY_WORK_DIR } from './lib/budget-request-document-hierarchy-paths';
 import type { DocumentHierarchyResult } from './lib/budget-request-document-hierarchy';
-import { countExcludedGtMatches, evaluateView, summarize, type Counts, type GtNode, type MatchOptions, type SummaryMatchMode } from './lib/budget-request-document-hierarchy-eval';
+import { classifyBHoldout, countExcludedGtMatches, evaluateView, summarize, type Counts, type GtNode, type MatchOptions, type SummaryMatchMode } from './lib/budget-request-document-hierarchy-eval';
 
 const FIX = path.join('tests', 'fixtures', 'budget-request-document-hierarchy', '2024');
 type Scope = (n: GtNode, rootOf: (k: string) => string) => boolean;
@@ -20,7 +20,7 @@ const subtree = (orgKey: string): Scope => (n, rootOf) => rootOf(n.key) === orgK
 
 interface Config {
   id: string;
-  group: 'development' | 'regression' | 'holdout';
+  group: 'development' | 'regression' | 'holdout' | 'holdout-b2';
   view: 'summary' | 'detail';
   gtFile: string;
   scope: Scope;
@@ -41,6 +41,7 @@ const CONFIGS: Config[] = [
   { id: 'meti-detail-pre-header', group: 'regression', view: 'detail', gtFile: 'meti-toc-hierarchy-gt.json', scope: n => n.printedStartPage + 4 <= 103, summaryMode: 'pageRef' },
   { id: 'env-detail', group: 'holdout', view: 'detail', gtFile: 'env-toc-hierarchy-gt.json', scope: all, summaryMode: 'pageRef' },
   { id: 'maff-fukko-detail', group: 'holdout', view: 'detail', gtFile: 'maff-fukko-toc-hierarchy-gt.json', scope: all, summaryMode: 'pageRef', orgKey: 'org-010' },
+  { id: 'mlit-fukko-detail', group: 'holdout-b2', view: 'detail', gtFile: 'mlit-fukko-toc-hierarchy-gt.json', scope: all, summaryMode: 'pageRef', orgKey: 'org-010' },
 ];
 const VARIANTS = ['v1', 'v2-off-off', 'v2-A', 'v2-B', 'v2-AB'] as const;
 type Variant = (typeof VARIANTS)[number];
@@ -175,8 +176,24 @@ async function main() {
   console.log('\n=== checks (pre-registered success criteria)');
   for (const [k, v] of Object.entries(checks)) console.log(`  ${v ? 'PASS' : 'FAIL'}  ${k}`);
   console.log(`\njudgments: ${JSON.stringify(judgments)}${hasHoldout ? '' : '  (holdout not yet run → at most INCONCLUSIVE)'}`);
+  let bHoldout: unknown = null;
+  if (has('mlit-fukko-detail')) {
+    const artifact = JSON.parse(fs.readFileSync(path.join(dir, 'v2-B', 'mlit-fukko-detail.json'), 'utf8')) as { latticeDiagnostics: { finalOutcome: string; steps: { reason: string }[] } };
+    const gtRaw = JSON.parse(fs.readFileSync(path.join(FIX, 'mlit-fukko-toc-hierarchy-gt.json'), 'utf8')) as { nodes: GtNode[] };
+    const cl = classifyBHoldout({
+      singleOrganization: gtRaw.nodes.filter(n => n.depth === 1).length === 1,
+      activated: artifact.latticeDiagnostics.finalOutcome === 'activated',
+      lastReason: artifact.latticeDiagnostics.steps.length ? artifact.latticeDiagnostics.steps[artifact.latticeDiagnostics.steps.length - 1].reason : null,
+      v1: c('mlit-fukko-detail', 'v1'),
+      v2b: c('mlit-fukko-detail', 'v2-B'),
+      rootLevelV2b: cells['mlit-fukko-detail']['v2-B'].rootLevels['org-010'] ?? null,
+      regressionUnchanged: regIds.length > 0 ? regressionUnchanged('v2-B') : true,
+    });
+    bHoldout = { ...cl, regressionChecked: regIds.length > 0, latticeDiagnostics: artifact.latticeDiagnostics };
+    console.log(`\nB holdout (mlit-fukko-detail): ${cl.classification} → ${cl.label}\n  ${cl.reasons.join('; ')}${regIds.length > 0 ? '' : '  (regression group not evaluated in this run)'}`);
+  }
   const file = path.join(dir, `evaluation-${tag}.json`);
-  fs.writeFileSync(file, `${JSON.stringify({ tag, primaryMatcher: 'posthoc (nameOnly+ordinalTiebreak, defined in #364, applied identically to all variants)', cells, checks, judgments }, null, 2)}\n`);
+  fs.writeFileSync(file, `${JSON.stringify({ tag, bHoldout, primaryMatcher: 'posthoc (nameOnly+ordinalTiebreak, defined in #364, applied identically to all variants)', cells, checks, judgments }, null, 2)}\n`);
   console.log(`→ ${file}`);
 }
 

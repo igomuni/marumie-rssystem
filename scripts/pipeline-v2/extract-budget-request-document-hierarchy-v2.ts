@@ -2,7 +2,7 @@
  * DocumentHierarchy v2 failure isolation 実験 — 段階A（推論）の薄いランナー。GTを読まない。
  * 各実験のページを1回だけ抽出し、variant（v1 / v2-off-off / v2-A / v2-B / v2-AB）ごとに推論して別々のartifactに保存する。
  *
- * 使い方: npx tsx scripts/pipeline-v2/extract-budget-request-document-hierarchy-v2.ts [year] [--group=development|regression|holdout[,..]] [--only=<id>[,<id>]]
+ * 使い方: npx tsx scripts/pipeline-v2/extract-budget-request-document-hierarchy-v2.ts [year] [--group=development|regression|holdout|holdout-b2[,..]] [--only=<id>[,<id>]]
  * 出力: data/work/budget-request-document-hierarchy/{year}/v2-failure-isolation/{variant}/{id}.json（v1の既存artifactは上書きしない）
  * holdout は規則を固定した後に初めて実行する（実験計画）。
  */
@@ -23,8 +23,9 @@ const MEXT_SUMMARY = 'https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000
 const MEXT_DETAIL = 'https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf';
 const ENV = 'https://www.env.go.jp/content/000157010.pdf';
 const MAFF_FUKKO = 'https://www.maff.go.jp/j/budget/attach/pdf/230901-4.pdf';
+const MLIT_FUKKO = 'https://www.mlit.go.jp/page/content/001630395.pdf';
 
-type Group = 'development' | 'regression' | 'holdout';
+type Group = 'development' | 'regression' | 'holdout' | 'holdout-b2';
 export interface V2Experiment {
   id: string;
   group: Group;
@@ -47,6 +48,8 @@ export const V2_EXPERIMENTS: V2Experiment[] = [
   { id: 'meti-detail-pre-header', group: 'regression', view: 'detail', canonicalUrl: METI, pages: [9, 103] },
   { id: 'env-detail', group: 'holdout', view: 'detail', canonicalUrl: ENV, pages: [21, 193] },
   { id: 'maff-fukko-detail', group: 'holdout', view: 'detail', canonicalUrl: MAFF_FUKKO, pages: [7, 20] },
+  /** 追加holdout（v2-Bのみ。規則固定後。v2-Aの対象ではない） */
+  { id: 'mlit-fukko-detail', group: 'holdout-b2', view: 'detail', canonicalUrl: MLIT_FUKKO, pages: [7, 10] },
 ];
 
 export const V2_VARIANTS: { name: string; options: HierarchyV2ExperimentalOptions | null }[] = [
