@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_0558_rs_system_custom_abstraction_design_memo.md](20261003_0558_rs_system_custom_abstraction_design_memo.md) — RSシステム設計メモ。汎用ライブラリ（サンキー図・PDF抽出など）から必要な抽象化を自前で持つ方針の整理
 - [20261003_0557_DocumentHierarchy_A2_実験計画.md](20261003_0557_DocumentHierarchy_A2_実験計画.md) — v2-A の STOP を受けた A2（page-edge を domain にした header identity）の事前登録。primary rule を1つに固定、development/negative/regression、封印した holdout（防衛省・こども家庭庁）、成功条件・stop。実装・実行はしない
 - [20261003_0555_DocumentHierarchy_v2B_追加Holdout_結果.md](20261003_0555_DocumentHierarchy_v2B_追加Holdout_結果.md) — v2-B（singleton root の lattice-supported placement）の追加holdout（MLIT復興特会）。B-HOLDOUT-PASS→CONFIRMED-WITH-SCOPE（exact 12/20→20/20・depth 0/21→21/21・false 0・regression 0）。診断・適用範囲・限界を記録
 - [20261003_0537_DocumentHierarchy_v2_FailureIsolation_結果.md](20261003_0537_DocumentHierarchy_v2_FailureIsolation_結果.md) — DocumentHierarchy v2 failure isolation の結果。A(ヘッダ衝突)=STOP（holdoutで本物の要求を1件誤除外）、B(single-organization lattice)=GO、AB=STOP。v1 baseline は #364 と完全一致、60 artifact 決定的
