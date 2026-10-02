@@ -2,6 +2,8 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261002_2149_MHLW文書階層PoC_結果.md](20261002_2149_MHLW文書階層PoC_結果.md) — MHLW文書階層PoCのv1結果。総表+明細見出しから組織→項→要求の親エッジを拡張GT37ノードで dev/holdout とも100%復元（false parent 0）。評価側照合の修正・感度診断・限界・GO判断を記録
+- [20261002_2141_MHLW文書階層PoC_実験計画.md](20261002_2141_MHLW文書階層PoC_実験計画.md) — 総表+明細見出しからMHLWの組織→項→要求を復元するPoCの実験契約。dev=070/holdout=080・拡張GT37ノード・禁止evidenceと停止条件を実装前に固定
 - [20260921_2222_Pipeline_V2_MOF_FY2023取り込み.md](20260921_2222_Pipeline_V2_MOF_FY2023取り込み.md) — MOF FY2023をnormalize/derive/derive-integrated/publish/validate全層に取り込み。FISCAL_YEARSハードコード3箇所を[2023,2024,2025]に変更、error=0
 
 - [20260920_2212_Pipeline_V2_フルパイプラインclean実行と再現性検証.md](20260920_2212_Pipeline_V2_フルパイプラインclean実行と再現性検証.md) — MOF/RS/links publish完成後、clean状態からRaw→Publishまで通しで実行。所要時間約65秒、publish出力がbyte-for-byte再現可能、public合計約83.8MiBを確認
