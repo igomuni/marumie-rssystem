@@ -1,0 +1,226 @@
+{
+ "schemaVersion": "budget-request-document-hierarchy-gt/v1",
+ "purpose": "EVALUATION ONLY. Inference code must never read, import or reference this file. Frozen before any v1/v2 run on this document (pre-observation commit of the v2-B additional-holdout task).",
+ "frozenBeforeV2Run": true,
+ "method": "Transcribed mechanically from the document's own table of contents (poppler pdftotext -layout, physical page 3 cropped into left/right columns at x=408pt, regex over printed lines: （組織）NNN name page / （項）NNN name page / request-no NN-NN name page). Names are the first printed line. The TOC also prints （会計）and（所管）lines above the organization; they are not hierarchy nodes of this evaluation (same as the MAFF 復興特会 fixture). Independent consistency checks (not derived from any v1/v2 output): request numbers consecutive 1..12, printed start pages non-decreasing, every item has at least one request. The extraction script is a scratch tool and is not committed.",
+ "codeNote": "Request codes written with ASCII '-'. depth 1/2/3 = organization/item/request (labels of this evaluation file only). set='test'.",
+ "source": {
+  "ministry": "MLIT (東日本大震災復興特別会計)",
+  "canonicalUrl": "https://www.mlit.go.jp/page/content/001630395.pdf",
+  "fiscalYear": 2024,
+  "pageCount": 10,
+  "fileBytes": 15546,
+  "tocPages": "physical 3 (printed 1)",
+  "detailPhysicalPages": "7-10 (printed 3-6)",
+  "manifest": "present in the FY2024 budget-request manifest (publisher 国土交通省, 東日本大震災復興特別会計, special account)"
+ },
+ "detailPrintedToPhysicalPageOffset": 4,
+ "offsetBasis": "physical p7 prints 復興特 3 (first detail page); p8 prints 4 復興特; p10 prints 6 復興特",
+ "counts": {
+  "organizations": 1,
+  "items": 8,
+  "requests": 12
+ },
+ "nodes": [
+  {
+   "key": "org-010",
+   "depth": 1,
+   "code": "010",
+   "name": "復興庁",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "item-010-691",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "691",
+   "name": "住宅・地域公共交通等復興政策費",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "req-1",
+   "depth": 3,
+   "parent": "item-010-691",
+   "requestNo": "1",
+   "code": "05-95",
+   "name": "住宅市場の環境整備の推進に必要な経費",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "req-2",
+   "depth": 3,
+   "parent": "item-010-691",
+   "requestNo": "2",
+   "code": "25-95",
+   "name": "地域公共交通の維持・活性化の推進に必要な経費",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "req-3",
+   "depth": 3,
+   "parent": "item-010-691",
+   "requestNo": "3",
+   "code": "50-95",
+   "name": "観光振興に必要な経費",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "item-010-769",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "769",
+   "name": "東日本大震災復興道路整備事業工事諸費",
+   "printedStartPage": 4,
+   "set": "test"
+  },
+  {
+   "key": "req-4",
+   "depth": 3,
+   "parent": "item-010-769",
+   "requestNo": "4",
+   "code": "05-42",
+   "name": "東日本大震災復興に係る道路整備事業工事諸費に必要な経費",
+   "printedStartPage": 4,
+   "set": "test"
+  },
+  {
+   "key": "item-010-772",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "772",
+   "name": "東日本大震災復興港湾整備事業工事諸費",
+   "printedStartPage": 4,
+   "set": "test"
+  },
+  {
+   "key": "req-5",
+   "depth": 3,
+   "parent": "item-010-772",
+   "requestNo": "5",
+   "code": "06-43",
+   "name": "東日本大震災復興に係る港湾整備事業工事諸費に必要な経費",
+   "printedStartPage": 4,
+   "set": "test"
+  },
+  {
+   "key": "item-010-812",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "812",
+   "name": "東日本大震災復興治水事業工事諸費",
+   "printedStartPage": 4,
+   "set": "test"
+  },
+  {
+   "key": "req-6",
+   "depth": 3,
+   "parent": "item-010-812",
+   "requestNo": "6",
+   "code": "06-41",
+   "name": "東日本大震災復興に係る治水事業工事諸費に必要な経費",
+   "printedStartPage": 4,
+   "set": "test"
+  },
+  {
+   "key": "item-010-815",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "815",
+   "name": "東日本大震災復興国営追悼・祈念施設整備事業工事諸費",
+   "printedStartPage": 4,
+   "set": "test"
+  },
+  {
+   "key": "req-7",
+   "depth": 3,
+   "parent": "item-010-815",
+   "requestNo": "7",
+   "code": "01-45",
+   "name": "東日本大震災復興に係る国営追悼・祈念施設整備事業工事諸費に必要な経費",
+   "printedStartPage": 4,
+   "set": "test"
+  },
+  {
+   "key": "item-010-818",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "818",
+   "name": "東日本大震災復興河川等災害復旧事業工事諸費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "req-8",
+   "depth": 3,
+   "parent": "item-010-818",
+   "requestNo": "8",
+   "code": "05-49",
+   "name": "東日本大震災復興に係る河川等災害復旧事業工事諸費に必要な経費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "item-010-901",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "901",
+   "name": "東日本大震災復興事業費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "req-9",
+   "depth": 3,
+   "parent": "item-010-901",
+   "requestNo": "9",
+   "code": "50-44",
+   "name": "住宅対策諸費に必要な経費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "req-10",
+   "depth": 3,
+   "parent": "item-010-901",
+   "requestNo": "10",
+   "code": "55-45",
+   "name": "国営追悼・祈念施設整備に必要な経費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "req-11",
+   "depth": 3,
+   "parent": "item-010-901",
+   "requestNo": "11",
+   "code": "71-47",
+   "name": "社会資本総合整備事業に必要な経費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "item-010-906",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "906",
+   "name": "東日本大震災災害復旧等事業費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "req-12",
+   "depth": 3,
+   "parent": "item-010-906",
+   "requestNo": "12",
+   "code": "50-49",
+   "name": "河川等災害復旧事業に必要な経費",
+   "printedStartPage": 5,
+   "set": "test"
+  }
+ ]
+}
