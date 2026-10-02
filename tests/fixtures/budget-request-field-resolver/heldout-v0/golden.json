@@ -1,0 +1,5015 @@
+{
+  "schemaVersion": "budget-request-field-resolver-heldout-golden/v0",
+  "purpose": "held-out ground truth for FieldResolver v0 (freeze abc57b9). Visual-only: created from rendered original PDF pages before any FieldResolver output on these pages was produced or viewed.",
+  "status": "frozen-before-first-evaluation",
+  "freezeCommit": "abc57b9f8296df7dc8eb87bd98a6eaf7f050bee9",
+  "selectionManifest": "tests/fixtures/budget-request-field-resolver/heldout-v0/manifest.json",
+  "observationMethod": {
+    "author": "the working assistant (AI), by reading rendered pages",
+    "rendering": "pdftoppm; ledger-left region at 170 dpi and whole-page overview at 110 dpi (総表 pages read from the 110 dpi whole page)",
+    "forbidden": [
+      "FieldResolver output",
+      "extracted amount values",
+      "arithmetic completion of differences",
+      "sign inference from magnitudes",
+      "completion from other pages",
+      "general knowledge"
+    ],
+    "cellStates": [
+      "explicit number",
+      "explicit zero",
+      "visual blank",
+      "visually uncertain"
+    ],
+    "visuallyUncertainPolicy": "a cell that could not be read with confidence would be recorded as visually uncertain and excluded from evaluation; no such cell was recorded"
+  },
+  "humanReview": {
+    "status": "pending",
+    "reviewer": null,
+    "note": "An independent human visual review had not been performed when this GT was frozen. If a later review changes a value, the first-run evaluation is not replaced; the difference is reported separately.",
+    "exceptions": [
+      {
+        "target": "moe-p75-line-011-nature-positive",
+        "field": "name",
+        "detail": "full-width vs half-width ＮＰ cannot be decided visually; compare after whitespace removal and NFKC"
+      },
+      {
+        "target": "maff-p150-line-006-sign",
+        "field": "name",
+        "detail": "full-width vs half-width digit in 農林水産１係 cannot be decided visually; compare after whitespace removal and NFKC"
+      }
+    ]
+  },
+  "columnBandsPt": {
+    "standard-ledger": {
+      "previousBudget": [
+        204,
+        256
+      ],
+      "requestedBudget": [
+        256,
+        307
+      ],
+      "difference": [
+        411,
+        463
+      ]
+    },
+    "sohyo-total-sheet": {
+      "previousBudget": [
+        364,
+        422
+      ],
+      "requestedBudget": [
+        541,
+        599
+      ],
+      "difference": [
+        716,
+        775
+      ],
+      "note": "総表 layout: 計(A) / 計(B) / 比較増△減(B−A) columns, visual estimate from the 110 dpi whole-page render (page width 842 pt)"
+    }
+  },
+  "columnBandsNote": "the first group is the common ledger template (all pages other than the two 総表 pages)",
+  "evaluationCriteria": "docs/tasks/20261003_0805_FieldResolver_v0_Heldout_Preregistration.md sections 9-10",
+  "samples": [
+    {
+      "id": "mod-ippan-p12",
+      "tier": "normal",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+        "ministry": "防衛省"
+      },
+      "sourcePage": 12,
+      "printedPageLabel": "8 防（本）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "",
+      "targets": [
+        {
+          "id": "mod-p12-line-1500-retirement",
+          "kind": "detail_line",
+          "purpose": [
+            "normal three-amount row; code printed directly before the name"
+          ],
+          "visualLocator": {
+            "approxYPt": 114.4,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "35030-2111-05-1500"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "退　職　手　当"
+              ],
+              "normalized": "退職手当",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "1,105,467",
+              "magnitudeNumeric": 1105467,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "2,242,766",
+              "magnitudeNumeric": 2242766,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "1,137,299",
+              "magnitudeNumeric": 1137299,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand remark column: 事務官等 and sub-lines with 既定分 / 前年度給与改定ハネ返り分 and their own amounts",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mod-p12-line-7500-mutual-aid",
+          "kind": "detail_line",
+          "purpose": [
+            "wrapped name",
+            "normal three-amount row"
+          ],
+          "visualLocator": {
+            "approxYPt": 294.4,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "35030-2115-16-7500"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "国家公務員共済",
+                "組合負担金"
+              ],
+              "normalized": "国家公務員共済組合負担金",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "8,045,153",
+              "magnitudeNumeric": 8045153,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "8,547,742",
+              "magnitudeNumeric": 8547742,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "502,589",
+              "magnitudeNumeric": 502589,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand remark column with 既定分 / 給与制度等の改善 sub-lines and amounts",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "mod-ippan-p505",
+      "tier": "blank-zero-rich",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+        "ministry": "防衛省"
+      },
+      "sourcePage": 505,
+      "printedPageLabel": "防（地）501（右上に印字）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "",
+      "targets": [
+        {
+          "id": "mod-p505-line-03-1100-sign-diff",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit △ on the difference cell"
+          ],
+          "visualLocator": {
+            "approxYPt": 58.4,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "03-1100"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "住　居　手　当"
+              ],
+              "normalized": "住居手当",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "308,459",
+              "magnitudeNumeric": 308459,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "307,346",
+              "magnitudeNumeric": 307346,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "1,113",
+              "magnitudeNumeric": 1113,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 事務官等 / 既定分 lines with their own amounts",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mod-p505-line-05-0050-zero-wrapped",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero previous",
+            "three-line wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 224.9,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "05-0050"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "定年前再任用",
+                "短時間勤務職",
+                "員給与"
+              ],
+              "normalized": "定年前再任用短時間勤務職員給与",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "37,294",
+              "magnitudeNumeric": 37294,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "37,294",
+              "magnitudeNumeric": 37294,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 事務官等 / 既定分 lines",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mod-p505-line-03-0300-zero-prev-sign-req",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero previous followed by a △ at the left edge of the requested cell",
+            "same value in the remark"
+          ],
+          "visualLocator": {
+            "approxYPt": 475.2,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "03-0300"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "通　勤　手　当"
+              ],
+              "normalized": "通勤手当",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "2,605",
+              "magnitudeNumeric": 2605,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "2,605",
+              "magnitudeNumeric": 2605,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 事務官等 line with △2,605( 0) (the same value in the remark)",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mod-p505-line-003-heading-blank",
+          "kind": "detail_line",
+          "purpose": [
+            "heading row with all three amount cells visually blank"
+          ],
+          "visualLocator": {
+            "approxYPt": 280.8,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "003"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "定員合理化に伴う経費"
+              ],
+              "normalized": "定員合理化に伴う経費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "mod-ippan-p480",
+      "tier": "auxiliary-heavy",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+        "ministry": "防衛省"
+      },
+      "sourcePage": 480,
+      "printedPageLabel": "476 防（本）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "",
+      "targets": [
+        {
+          "id": "mod-p480-line-2010-zero-req",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero requested",
+            "△ difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 127.9,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "35030-2123-09-2010"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "営　　舎　　費"
+              ],
+              "normalized": "営舎費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "1,972",
+              "magnitudeNumeric": 1972,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "1,972",
+              "magnitudeNumeric": 1972,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 防疫費 / 予防接種の実施 sub-lines with their own amounts",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mod-p480-line-2640-training",
+          "kind": "detail_line",
+          "purpose": [
+            "same values appear in the remark breakdown",
+            "△ difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 210.9,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "35030-2123-09-2640"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "教　育　訓　練　費"
+              ],
+              "normalized": "教育訓練費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "103,488",
+              "magnitudeNumeric": 103488,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "32,277",
+              "magnitudeNumeric": 32277,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "71,211",
+              "magnitudeNumeric": 71211,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "breakdown_table",
+              "visualDescription": "right-hand 教育訓練演習費 line repeats 32,277 and 103,488 (requested/previous in remark order) followed by many sub-lines",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "mod-ippan-p535",
+      "tier": "structural-template-boundary",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+        "ministry": "防衛省"
+      },
+      "sourcePage": 535,
+      "printedPageLabel": "防（装）531（右上に印字）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "multiple tables on the page (国庫債務負担行為 table at the right/bottom)",
+      "targets": [
+        {
+          "id": "mod-p535-line-9478-intl-dev",
+          "kind": "detail_line",
+          "purpose": [
+            "wrapped name",
+            "explicit zero previous"
+          ],
+          "visualLocator": {
+            "approxYPt": 211.8,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "35030-2725-16-9478"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "国際共同開発分",
+                "担金（仮称）"
+              ],
+              "normalized": "国際共同開発分担金（仮称）",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "4,003,068",
+              "magnitudeNumeric": 4003068,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "4,003,068",
+              "magnitudeNumeric": 4003068,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 国際共同開発分担金 sub-lines",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mod-p535-req64-blank",
+          "kind": "request",
+          "purpose": [
+            "request row (request number 64) with all three amount cells blank"
+          ],
+          "visualLocator": {
+            "approxYPt": 267.2,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "10-35"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "防衛生産基盤の強化に必",
+                "要な経費（仮称）"
+              ],
+              "normalized": "防衛生産基盤の強化に必要な経費（仮称）",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand quoted note 「前年度予算事項（事項）装備品等の効率的な取得等に必要な経費及び防衛生産基盤の強化に必要な経費の一部を組替え」",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mod-p535-line-14-sonota",
+          "kind": "detail_line",
+          "purpose": [
+            "two-digit code row below 056 そ の 他 (structure boundary)"
+          ],
+          "visualLocator": {
+            "approxYPt": 315.5,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "14"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "そ　の　他"
+              ],
+              "normalized": "その他",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "28,947,421",
+              "magnitudeNumeric": 28947421,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "47,566,136",
+              "magnitudeNumeric": 47566136,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "18,618,715",
+              "magnitudeNumeric": 18618715,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mod-p535-line-1040-zero-req-sign",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero requested",
+            "△ difference",
+            "wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 385.0,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "35030-2203-09-1040"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "情報処理業務庁",
+                "費"
+              ],
+              "normalized": "情報処理業務庁費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "5,439",
+              "magnitudeNumeric": 5439,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "5,439",
+              "magnitudeNumeric": 5439,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 情報処理業務庁費 sub-line with 0( 5,439)",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "moe-ippan-p110",
+      "tier": "normal",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+        "ministry": "環境省"
+      },
+      "sourcePage": 110,
+      "printedPageLabel": "106 環（本）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "",
+      "targets": [
+        {
+          "id": "moe-p110-line-2130-survey",
+          "kind": "detail_line",
+          "purpose": [
+            "normal three-amount row with a long breakdown on the right"
+          ],
+          "visualLocator": {
+            "approxYPt": 128.3,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "13054-2123-09-2130"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "公　害　調　査　費"
+              ],
+              "normalized": "公害調査費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "220,130",
+              "magnitudeNumeric": 220130,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "231,802",
+              "magnitudeNumeric": 231802,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "11,672",
+              "magnitudeNumeric": 11672,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "breakdown_table",
+              "visualDescription": "right-hand 化学物質環境実態調査費 and many indented sub-lines with their own amounts",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p110-line-1441-local-gov",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero difference",
+            "wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 461.2,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "13054-2125-14-1441"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "公害調査等地方",
+                "公共団体委託費"
+              ],
+              "normalized": "公害調査等地方公共団体委託費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "100,870",
+              "magnitudeNumeric": 100870,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "100,870",
+              "magnitudeNumeric": 100870,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "breakdown_table",
+              "visualDescription": "right-hand 地方公共団体による化学物質環境実態調査推進支援事業 with numbered sub-lines",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "moe-ippan-p40",
+      "tier": "blank-zero-rich",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+        "ministry": "環境省"
+      },
+      "sourcePage": 40,
+      "printedPageLabel": "36 環（本）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "",
+      "targets": [
+        {
+          "id": "moe-p40-line-2605-energy-transfer",
+          "kind": "detail_line",
+          "purpose": [
+            "four-line wrapped name",
+            "large amounts"
+          ],
+          "visualLocator": {
+            "approxYPt": 58.4,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "63051-2306-22-2605"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "石油石炭税財源",
+                "のエネルギー対",
+                "策特別会計へ繰",
+                "入"
+              ],
+              "normalized": "石油石炭税財源のエネルギー対策特別会計へ繰入",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "129,005,000",
+              "magnitudeNumeric": 129005000,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "166,955,940",
+              "magnitudeNumeric": 166955940,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "37,950,940",
+              "magnitudeNumeric": 37950940,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand （義務的性格の根拠）特別会計に関する法律第90条",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p40-req8-sign",
+          "kind": "request",
+          "purpose": [
+            "request row (request number 8) with △ difference",
+            "wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 107.2,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "05-95"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "地球環境の保全に必要な",
+                "経費"
+              ],
+              "normalized": "地球環境の保全に必要な経費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "3,060,141",
+              "magnitudeNumeric": 3060141,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "2,813,861",
+              "magnitudeNumeric": 2813861,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "246,280",
+              "magnitudeNumeric": 246280,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p40-line-0110-zero-diff",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 149.1,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "95016-2129-06-0110"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "諸　　謝　　金"
+              ],
+              "normalized": "諸謝金",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "544",
+              "magnitudeNumeric": 544,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "544",
+              "magnitudeNumeric": 544,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p40-line-003-heading-blank",
+          "kind": "detail_line",
+          "purpose": [
+            "heading row with all three amount cells visually blank"
+          ],
+          "visualLocator": {
+            "approxYPt": 385.0,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "003"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "国　際　会　議　等　経　費"
+              ],
+              "normalized": "国際会議等経費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "moe-ippan-p75",
+      "tier": "auxiliary-heavy",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+        "ministry": "環境省"
+      },
+      "sourcePage": 75,
+      "printedPageLabel": "環（本）71（右上に印字）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "a \"(単位:千円)\" label exists only inside the 限度額 table in the right-hand remark; it is not the unit label of the ledger"
+      },
+      "notes": "auxiliary-heavy: 要旨 paragraphs and a 限度額 table in the remark column",
+      "targets": [
+        {
+          "id": "moe-p75-line-011-nature-positive",
+          "kind": "detail_line",
+          "purpose": [
+            "five-line wrapped name",
+            "explicit zero difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 107.2,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "medium",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "011"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "ネイチャーポジティブ（",
+                "ＮＰ）の実現に向けた生",
+                "物多様性保全等のための",
+                "国際協力・ルール先導推",
+                "進費"
+              ],
+              "normalized": "ネイチャーポジティブ（ＮＰ）の実現に向けた生物多様性保全等のための国際協力・ルール先導推進費",
+              "wrapped": true,
+              "observationConfidence": "medium",
+              "note": "whether ＮＰ is two full-width characters or half-width characters drawn with spacing cannot be decided visually; compare after whitespace removal and do not require code points"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "124,588",
+              "magnitudeNumeric": 124588,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "124,588",
+              "magnitudeNumeric": 124588,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand （要求要旨） paragraph about the Kunming-Montreal framework",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p75-line-1450-sign-small",
+          "kind": "detail_line",
+          "purpose": [
+            "same code also appears in the row above (11,684 / 11,777 / 93)",
+            "small △ difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 218.5,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "95016-2125-14-1450"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "環境保全調査等",
+                "委託費"
+              ],
+              "normalized": "環境保全調査等委託費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "64,202",
+              "magnitudeNumeric": 64202,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "64,198",
+              "magnitudeNumeric": 64198,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "4",
+              "magnitudeNumeric": 4,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p75-line-016-sign",
+          "kind": "detail_line",
+          "purpose": [
+            "△ difference",
+            "wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 239.3,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "016"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "自然環境保全・再生等経",
+                "費"
+              ],
+              "normalized": "自然環境保全・再生等経費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "1,499,913",
+              "magnitudeNumeric": 1499913,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "1,256,381",
+              "magnitudeNumeric": 1256381,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "243,532",
+              "magnitudeNumeric": 243532,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 環A16 marker",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p75-line-2112-limit-table",
+          "kind": "detail_line",
+          "purpose": [
+            "same values appear in the remark",
+            "a body-level unit label belongs to the side table"
+          ],
+          "visualLocator": {
+            "approxYPt": 329.1,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "95016-2123-09-2112"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "環境保全調査費"
+              ],
+              "normalized": "環境保全調査費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "300,693",
+              "magnitudeNumeric": 300693,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "404,669",
+              "magnitudeNumeric": 404669,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "103,976",
+              "magnitudeNumeric": 103976,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "history_table",
+              "visualDescription": "right-hand 雑役務費 line repeats 404,669( 300,693) and a 限度額 table (令和5年度/6年度/7年度) with 国庫債務負担行為 amounts and a (単位:千円) label below",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "moe-ippan-p18",
+      "tier": "structural-template-boundary",
+      "columnLayout": "sohyo-total-sheet",
+      "document": {
+        "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+        "ministry": "環境省"
+      },
+      "sourcePage": 18,
+      "printedPageLabel": "14 環",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "TEMPLATE NOVELTY: 総表 layout. 前年度予算額 and 6年度概算要求額 are each split into 一般行政経費 / その他の経費 / 計, followed by two blank columns, 対前年度比較増△減(B−A) and 明細書頁数. In this GT previousBudget = 前年度予算額 計(A), requestedBudget = 6年度概算要求額 計(B), difference = 比較増△減(B−A), as labelled on the page.",
+      "targets": [
+        {
+          "id": "moe-p18-line-026-total-sheet",
+          "kind": "detail_line",
+          "purpose": [
+            "template novelty: six amount columns (一般行政経費/その他の経費/計 ×2) + difference + page-count column"
+          ],
+          "visualLocator": {
+            "approxYPt": 106.7,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-110dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "026"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "外　来　生　物　対　策　費"
+              ],
+              "normalized": "外来生物対策費",
+              "wrapped": false,
+              "observationConfidence": "high",
+              "note": "previousBudget/requestedBudget are the 計 columns of the 総表 layout"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "340,645",
+              "magnitudeNumeric": 340645,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "329,178",
+              "magnitudeNumeric": 329178,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "11,467",
+              "magnitudeNumeric": 11467,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p18-req38-total-sheet",
+          "kind": "request",
+          "purpose": [
+            "template novelty request row (request number 38)"
+          ],
+          "visualLocator": {
+            "approxYPt": 162.3,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-110dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "16-95"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "環境・経済・社会の統合的向上に必要な経費"
+              ],
+              "normalized": "環境・経済・社会の統合的向上に必要な経費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "147,548",
+              "magnitudeNumeric": 147548,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "168,888",
+              "magnitudeNumeric": 168888,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "21,340",
+              "magnitudeNumeric": 21340,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p18-line-003-sign-both",
+          "kind": "detail_line",
+          "purpose": [
+            "template novelty with △ on 計(A) and 計(B) (and no sign on the positive difference)"
+          ],
+          "visualLocator": {
+            "approxYPt": 413.7,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-110dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "003"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "定　員　合　理　化　に　伴　う　経　費"
+              ],
+              "normalized": "定員合理化に伴う経費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "22,529",
+              "magnitudeNumeric": 22529,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "5,645",
+              "magnitudeNumeric": 5645,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "16,884",
+              "magnitudeNumeric": 16884,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "moe-p18-line-007-all-zero",
+          "kind": "detail_line",
+          "purpose": [
+            "template novelty: all three 計 cells explicit zero"
+          ],
+          "visualLocator": {
+            "approxYPt": 439.2,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-110dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "007"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "増員要求に伴う経費（障害者雇用経費）"
+              ],
+              "normalized": "増員要求に伴う経費（障害者雇用経費）",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "maff-ippan-p290",
+      "tier": "normal",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+        "ministry": "農林水産省"
+      },
+      "sourcePage": 290,
+      "printedPageLabel": "284 農（林）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "",
+      "targets": [
+        {
+          "id": "maff-p290-req70-blank",
+          "kind": "request",
+          "purpose": [
+            "request row (request number 70) with all three amount cells blank",
+            "wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 59.3,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "11-95"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "山林事業指導監督に必要",
+                "な経費"
+              ],
+              "normalized": "山林事業指導監督に必要な経費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "maff-p290-line-001-zero-diff",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero difference on a 3-digit-code row"
+          ],
+          "visualLocator": {
+            "approxYPt": 79.6,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "001"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "山林事業指導監督事務費"
+              ],
+              "normalized": "山林事業指導監督事務費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "26,333",
+              "magnitudeNumeric": 26333,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "26,333",
+              "magnitudeNumeric": 26333,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "maff-p290-line-2231-disaster-travel",
+          "kind": "detail_line",
+          "purpose": [
+            "normal three-amount row"
+          ],
+          "visualLocator": {
+            "approxYPt": 107.6,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "95059-2122-08-2231"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "災　害　検　査　旅　費"
+              ],
+              "normalized": "災害検査旅費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "16,402",
+              "magnitudeNumeric": 16402,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "16,452",
+              "magnitudeNumeric": 16452,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "50",
+              "magnitudeNumeric": 50,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 内国旅費 label with a number column",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "maff-p290-line-1010-sign-aux",
+          "kind": "detail_line",
+          "purpose": [
+            "△ difference",
+            "same values repeat in the remark breakdown (計)"
+          ],
+          "visualLocator": {
+            "approxYPt": 121.1,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "95061-2123-09-1010"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "庁　　　　　　費"
+              ],
+              "normalized": "庁費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "3,743",
+              "magnitudeNumeric": 3743,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "3,640",
+              "magnitudeNumeric": 3640,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "103",
+              "magnitudeNumeric": 103,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "breakdown_table",
+              "visualDescription": "right-hand numbered breakdown 1.消耗品費 … 4.雑役務費 and 計 3,640( 3,743) repeating the same values",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "maff-ippan-p150",
+      "tier": "blank-zero-rich",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+        "ministry": "農林水産省"
+      },
+      "sourcePage": 150,
+      "printedPageLabel": "144 農（本）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "the page starts with the heading rows of a new item; most of the page is empty",
+      "targets": [
+        {
+          "id": "maff-p150-item200-blank",
+          "kind": "item",
+          "purpose": [
+            "item heading with all three amount cells blank"
+          ],
+          "visualLocator": {
+            "approxYPt": 59.3,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "200"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "独立行政法人農畜産業振",
+                "興機構運営費"
+              ],
+              "normalized": "独立行政法人農畜産業振興機構運営費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "maff-p150-req26-sign",
+          "kind": "request",
+          "purpose": [
+            "request row (request number 26) with △ difference",
+            "three-line wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 79.6,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "01-65"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "独立行政法人農畜産業振",
+                "興機構運営費交付金に必",
+                "要な経費"
+              ],
+              "normalized": "独立行政法人農畜産業振興機構運営費交付金に必要な経費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "3,141,588",
+              "magnitudeNumeric": 3141588,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "3,101,802",
+              "magnitudeNumeric": 3101802,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "39,786",
+              "magnitudeNumeric": 39786,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "maff-p150-line-006-sign",
+          "kind": "detail_line",
+          "purpose": [
+            "△ difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 107.6,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "medium",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "006"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "農林水産１係（畜産局）"
+              ],
+              "normalized": "農林水産１係（畜産局）",
+              "wrapped": false,
+              "observationConfidence": "medium",
+              "note": "the digit in 農林水産１係 appears to be a full-width digit; the Unicode representation is not settled visually, compare after whitespace removal and NFKC"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "924,881",
+              "magnitudeNumeric": 924881,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "857,321",
+              "magnitudeNumeric": 857321,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "67,560",
+              "magnitudeNumeric": 67560,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "maff-ippan-p220",
+      "tier": "auxiliary-heavy",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+        "ministry": "農林水産省"
+      },
+      "sourcePage": 220,
+      "printedPageLabel": "214 農（検）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "",
+      "targets": [
+        {
+          "id": "maff-p220-line-2271-quarantine-travel",
+          "kind": "detail_line",
+          "purpose": [
+            "same values repeat in the remark"
+          ],
+          "visualLocator": {
+            "approxYPt": 225.3,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "65061-2122-08-2271"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "検査検疫旅費"
+              ],
+              "normalized": "検査検疫旅費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "3,692",
+              "magnitudeNumeric": 3692,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "3,710",
+              "magnitudeNumeric": 3710,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "18",
+              "magnitudeNumeric": 18,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 内国旅費 / 検査事業旅費 / 動物用医薬品検査旅費 sub-lines with 3,710( 3,692) repeating the same values",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "maff-p220-line-6010-committee-travel",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 267.2,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "65061-2122-08-6010"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "委　員　等　旅　費"
+              ],
+              "normalized": "委員等旅費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "446",
+              "magnitudeNumeric": 446,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "446",
+              "magnitudeNumeric": 446,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 環A15 marker and 会議出席等旅費 lines",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "maff-p220-line-2351-quarantine-office",
+          "kind": "detail_line",
+          "purpose": [
+            "large breakdown on the right"
+          ],
+          "visualLocator": {
+            "approxYPt": 308.8,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "65061-2123-09-2351"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "検査検疫庁費"
+              ],
+              "normalized": "検査検疫庁費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "276,299",
+              "magnitudeNumeric": 276299,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "309,285",
+              "magnitudeNumeric": 309285,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "32,986",
+              "magnitudeNumeric": 32986,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "breakdown_table",
+              "visualDescription": "right-hand 1 検査事業費 breakdown with 235,901( 234,266) and sub-items (備品費, 消耗品費, … ) and a 国庫債務負担行為 reference block",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "maff-ippan-p12",
+      "tier": "structural-template-boundary",
+      "columnLayout": "sohyo-total-sheet",
+      "document": {
+        "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+        "ministry": "農林水産省"
+      },
+      "sourcePage": 12,
+      "printedPageLabel": "6 農",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "TEMPLATE NOVELTY: 総表 layout (same as the 環境省 総表): 前年度予算額 and 6年度概算要求額 are each split into 一般行政経費 / その他の経費 / 計, then two blank columns, 対前年度比較増△減(B−A) and 明細書頁数. previousBudget = 計(A), requestedBudget = 計(B), difference = 比較増△減(B−A).",
+      "targets": [
+        {
+          "id": "maff-p12-req69-total-sheet",
+          "kind": "request",
+          "purpose": [
+            "template novelty request row (request number 69)"
+          ],
+          "visualLocator": {
+            "approxYPt": 134.8,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-110dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "06-95"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "審議会に必要な経費"
+              ],
+              "normalized": "審議会に必要な経費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "5,123",
+              "magnitudeNumeric": 5123,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "5,133",
+              "magnitudeNumeric": 5133,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "10",
+              "magnitudeNumeric": 10,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "maff-p12-line-110-zero-req-sign",
+          "kind": "detail_line",
+          "purpose": [
+            "template novelty: explicit zero requested 計(B) and △ difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 488.9,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-110dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "110"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "林　業　振　興　対　策　費"
+              ],
+              "normalized": "林業振興対策費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "4,981,733",
+              "magnitudeNumeric": 4981733,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "4,981,733",
+              "magnitudeNumeric": 4981733,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "maff-p12-req82-zero-req-sign",
+          "kind": "request",
+          "purpose": [
+            "template novelty request row (request number 82): explicit zero requested and △ difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 502.7,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-110dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "01-65"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "林業振興対策に必要な経費"
+              ],
+              "normalized": "林業振興対策に必要な経費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "4,981,733",
+              "magnitudeNumeric": 4981733,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "4,981,733",
+              "magnitudeNumeric": 4981733,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "mlit-ippan-p560",
+      "tier": "normal",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+        "ministry": "国土交通省"
+      },
+      "sourcePage": 560,
+      "printedPageLabel": "550 国（総）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "",
+      "targets": [
+        {
+          "id": "mlit-p560-line-3131-all-zero",
+          "kind": "detail_line",
+          "purpose": [
+            "all three cells explicit zero",
+            "remark breakdown with zeros"
+          ],
+          "visualLocator": {
+            "approxYPt": 127.9,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "41051-1203-09-3131"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "車　　両　　費"
+              ],
+              "normalized": "車両費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "breakdown_table",
+              "visualDescription": "right-hand numbered breakdown 1. 備品費 … 7. 借料及び損料 … with 計 and 0( 0) values",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mlit-p560-req203-blank",
+          "kind": "request",
+          "purpose": [
+            "request row (request number 203) with all three amount cells blank",
+            "wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 253.3,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "01-42"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "道路整備事業工事諸費に",
+                "必要な経費"
+              ],
+              "normalized": "道路整備事業工事諸費に必要な経費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mlit-p560-line-001-jinkenhi-sign",
+          "kind": "detail_line",
+          "purpose": [
+            "△ difference on a 3-digit-code detail row"
+          ],
+          "visualLocator": {
+            "approxYPt": 294.8,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "001"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "人　　　　　件　　　　　費"
+              ],
+              "normalized": "人件費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "247,410",
+              "magnitudeNumeric": 247410,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "241,843",
+              "magnitudeNumeric": 241843,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "5,567",
+              "magnitudeNumeric": 5567,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mlit-p560-line-03-0300-zero-diff",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 405.7,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "03-0300"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "通　勤　手　当"
+              ],
+              "normalized": "通勤手当",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "3,266",
+              "magnitudeNumeric": 3266,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "3,266",
+              "magnitudeNumeric": 3266,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "mlit-ippan-p330",
+      "tier": "blank-zero-rich",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+        "ministry": "国土交通省"
+      },
+      "sourcePage": 330,
+      "printedPageLabel": "320 国（本）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "",
+      "targets": [
+        {
+          "id": "mlit-p330-line-0110-blank-req",
+          "kind": "detail_line",
+          "purpose": [
+            "requested cell visually blank",
+            "△ difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 58.9,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "95016-2129-06-0110"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "諸　　謝　　金"
+              ],
+              "normalized": "諸謝金",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "210",
+              "magnitudeNumeric": 210,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "210",
+              "magnitudeNumeric": 210,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "remark_text",
+              "visualDescription": "right-hand 土地政策に係る制度課題等検討経費 / 会議等出席謝金 lines",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mlit-p330-line-2234-market",
+          "kind": "detail_line",
+          "purpose": [
+            "same value 18,000 appears in the remark",
+            "△ difference",
+            "wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 183.8,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "95016-2123-09-2234"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "不動産市場整備",
+                "等推進調査費"
+              ],
+              "normalized": "不動産市場整備等推進調査費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "50,052",
+              "magnitudeNumeric": 50052,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "18,000",
+              "magnitudeNumeric": 18000,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "32,052",
+              "magnitudeNumeric": 32052,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "breakdown_table",
+              "visualDescription": "right-hand numbered breakdown 1. 土地白書作成経費 repeats 18,000 and sub-lines",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mlit-p330-line-035-item-blank-req",
+          "kind": "detail_line",
+          "purpose": [
+            "requested cell visually blank",
+            "three-line wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 419.7,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "035"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "所有者不明土地・空き地",
+                "の円滑な利活用や適正管",
+                "理の推進"
+              ],
+              "normalized": "所有者不明土地・空き地の円滑な利活用や適正管理の推進",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "60,659",
+              "magnitudeNumeric": 60659,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "60,659",
+              "magnitudeNumeric": 60659,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mlit-p330-line-0141-subsidy",
+          "kind": "detail_line",
+          "purpose": [
+            "requested cell visually blank",
+            "three-line wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 461.6,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "95016-2815-16-0141"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "所有者不明土地",
+                "等対策事業費補",
+                "助金"
+              ],
+              "normalized": "所有者不明土地等対策事業費補助金",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "60,051",
+              "magnitudeNumeric": 60051,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "60,051",
+              "magnitudeNumeric": 60051,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "breakdown_table",
+              "visualDescription": "right-hand numbered breakdown 1. 所有者不明土地の実態把握 … 5. 関連事業 and 計",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "mlit-ippan-p120",
+      "tier": "auxiliary-heavy",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+        "ministry": "国土交通省"
+      },
+      "sourcePage": 120,
+      "printedPageLabel": "110 国（本）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "a single ledger row; the right-hand remark holds a long 積算 table (people × times × unit price with (previous) values)",
+      "targets": [
+        {
+          "id": "mlit-p120-line-1010-chohi",
+          "kind": "detail_line",
+          "purpose": [
+            "dense auxiliary numbers (quantities, unit prices, percentages) beside a single ledger row"
+          ],
+          "visualLocator": {
+            "approxYPt": 233.7,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-110dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "95016-2123-09-1010"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "庁　　　　　　費"
+              ],
+              "normalized": "庁費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "2,335",
+              "magnitudeNumeric": 2335,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "2,640",
+              "magnitudeNumeric": 2640,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "305",
+              "magnitudeNumeric": 305,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "breakdown_table",
+              "visualDescription": "right-hand 積算: committee names with 人数・回数・100%・@単価円 and (previous) values in parentheses, then 1. 印刷製本費 … 2. 会議費 … with amounts such as 187( 186)",
+              "expectedAttachToAmountFields": "none"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "mlit-ippan-p780",
+      "tier": "structural-template-boundary",
+      "columnLayout": "standard-ledger",
+      "document": {
+        "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+        "ministry": "国土交通省"
+      },
+      "sourcePage": 780,
+      "printedPageLabel": "770 国（運）",
+      "pageUnitLabel": {
+        "status": "not_observed",
+        "raw": null,
+        "note": "no unit label is printed on this page"
+      },
+      "notes": "item heading rows (021 / 022) and detail rows mixed; △ attached to the requested cell as in 0△",
+      "targets": [
+        {
+          "id": "mlit-p780-item021-blank",
+          "kind": "item",
+          "purpose": [
+            "heading row with all three amount cells blank",
+            "wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 58.4,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "021"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "振替定員に伴う経費（業",
+                "務改革に伴う減）"
+              ],
+              "normalized": "振替定員に伴う経費（業務改革に伴う減）",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "visual blank",
+              "status": "blank",
+              "magnitudeRaw": null,
+              "magnitudeNumeric": null,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_applicable",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mlit-p780-line-01-zero-prev-sign",
+          "kind": "detail_line",
+          "purpose": [
+            "explicit zero previous followed by △ at the left edge of the requested cell; △ difference"
+          ],
+          "visualLocator": {
+            "approxYPt": 79.6,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "01"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "人　　　　　件　　　　　費"
+              ],
+              "normalized": "人件費",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "100,083",
+              "magnitudeNumeric": 100083,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "100,083",
+              "magnitudeNumeric": 100083,
+              "explicitZero": false,
+              "sign": {
+                "status": "resolved",
+                "raw": "△",
+                "position": "at the left edge of the cell"
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mlit-p780-line-02-0100-zero-zero-zero",
+          "kind": "detail_line",
+          "purpose": [
+            "all three cells explicit zero",
+            "same code also appears above with △ values (0 / △56,481 / △56,481)"
+          ],
+          "visualLocator": {
+            "approxYPt": 294.4,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "02-0100"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "職　員　俸　給"
+              ],
+              "normalized": "職員俸給",
+              "wrapped": false,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit zero",
+              "status": "resolved",
+              "magnitudeRaw": "0",
+              "magnitudeNumeric": 0,
+              "explicitZero": true,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row",
+            "requestedBudget": "same_row",
+            "difference": "same_row",
+            "signs": "same_row"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        },
+        {
+          "id": "mlit-p780-item025-general",
+          "kind": "item",
+          "purpose": [
+            "3-digit-code row with amounts and a wrapped name"
+          ],
+          "visualLocator": {
+            "approxYPt": 433.3,
+            "yToleranceBandPt": 8,
+            "locatorMethod": "visual-estimate-from-170dpi-render"
+          },
+          "observationConfidence": "high",
+          "rowLocal": {
+            "code": {
+              "status": "resolved",
+              "raw": "025"
+            },
+            "name": {
+              "status": "resolved",
+              "rawLines": [
+                "地方運輸局一般行政共通",
+                "経費"
+              ],
+              "normalized": "地方運輸局一般行政共通経費",
+              "wrapped": true,
+              "observationConfidence": "high"
+            },
+            "previousBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "1,355,838",
+              "magnitudeNumeric": 1355838,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "requestedBudget": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "1,650,129",
+              "magnitudeNumeric": 1650129,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            },
+            "difference": {
+              "cellState": "explicit number",
+              "status": "resolved",
+              "magnitudeRaw": "294,291",
+              "magnitudeNumeric": 294291,
+              "explicitZero": false,
+              "sign": {
+                "status": "not_observed",
+                "raw": null
+              }
+            }
+          },
+          "auxiliary": [
+            {
+              "class": "none",
+              "visualDescription": "no auxiliary content on this row"
+            }
+          ],
+          "expectedSourceClass": {
+            "code": "same_row",
+            "name": "same_row_or_continuation",
+            "previousBudget": "same_row_or_continuation",
+            "requestedBudget": "same_row_or_continuation",
+            "difference": "same_row_or_continuation",
+            "signs": "same_row_or_continuation"
+          },
+          "hierarchy": {
+            "inputState": "not_available",
+            "reason": "no frozen DocumentHierarchy artifact is evaluated for the held-out pages; hierarchy-dependent fields are outside v0 held-out scope",
+            "expected": {
+              "parentItemAssociation": {
+                "status": "outside_v0_scope"
+              },
+              "parentOrganizationAssociation": {
+                "status": "outside_v0_scope"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
