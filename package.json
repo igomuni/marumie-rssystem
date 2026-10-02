@@ -48,6 +48,7 @@
     "pipeline:v2:extract:budget-request-logical-row": "tsx scripts/pipeline-v2/extract-budget-request-logical-row.ts",
     "pipeline:v2:extract:budget-request-spatial-region": "tsx scripts/pipeline-v2/extract-budget-request-spatial-region.ts",
     "pipeline:v2:extract:budget-request-region-relation": "tsx scripts/pipeline-v2/extract-budget-request-region-relation.ts",
+    "pipeline:v2:extract:budget-request-semantic-record": "tsx scripts/pipeline-v2/extract-budget-request-semantic-record.ts",
     "pipeline:v2:normalize:rs": "tsx scripts/pipeline-v2/normalize-rs.ts",
     "pipeline:v2:normalize:mof": "tsx scripts/pipeline-v2/normalize-mof.ts",
     "pipeline:v2:derive:legacy": "tsx scripts/pipeline-v2/build-identities.ts && tsx scripts/pipeline-v2/build-links.ts",
