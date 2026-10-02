@@ -247,6 +247,40 @@ npm run pipeline:v2:extract:budget-request-spatial-region -- 2024 --document=<ca
 - **negative findings**: ①gutter evidenceは冗長だった（4サンプルとも、gutterが抑制したedgeは0。gutter幅の基準とproximityの基準が近いため、gutterが追加の境界を作らない）。connected-components単体でも左右の構造が橋渡し（bridge）されるケースは出なかった ②垂直近接の係数に敏感（MEXT p876: 1.5×では行間20.8ptが境界ちょうどで20 region・148 token unassignedに断片化し、2.5×では右側が274 token・35行の1 regionになる。2.0×は両側に余裕がある値として採用） ③表内の列間の空白（24pt級）と、独立した構造間の空白を、幅だけでは区別できない（METI p9の金額の3列グループは水平近接の係数次第で別regionになる） ④右側の積算（MEXT p876）はgutterで左側から分離できるが、内部は複数region（右端の2つの金額列は別region）になる ⑤METI p9の `（要求要旨）` は、金額の3列グループとは別regionに入るが、それは水平近接のしきい値次第で、geometryだけで安定して分離できるとは言えない ⑥ColumnBandはregion判定に使っていない（前段で判別力が弱いため）。
 - **安全条件**: MHLW p1555の上部の大構造と下部 `01-95` は同一regionにならない（false positive merge なし）。MHLW p1268の右側の大表（334 token・36 row）はページ全体の1 regionにならず、LogicalRowCandidateがambiguousだらけ（37/54）でもregion観測が成立する。MEXT p876はcontinuationが0件でも、右側の積算構造が複数logical rowにまたがる2D region候補として観測できる。
 
+### RegionRelationResolver PoC（RegionRelationCandidate）
+
+```text
+… → LogicalRowResolver → SpatialRegionDetector → RegionRelationResolver（RegionRelationCandidate）
+```
+
+```bash
+npm run pipeline:v2:extract:budget-request-region-relation -- 2024 --golden
+npm run pipeline:v2:extract:budget-request-region-relation -- 2024 --sample=mhlw-ippan-p1555
+npm run pipeline:v2:extract:budget-request-region-relation -- 2024 --document=<canonicalUrl> --page=<N>
+```
+
+出力: `data/work/budget-request-extraction/{year}/region-relation-poc/{id}.json`（`schema: budget-request-region-relation-poc/v1`。parameters（tableGeometry / logicalRow / spatialRegion / regionRelation）/ relations / ambiguities / diagnostics）。実装は `lib/budget-request-region-relation.ts`。
+
+**RegionRelationCandidate は semantic record ではない。** 「source と target がページ上の配置・近接・包含から関連している可能性」を、方向つきの幾何の観測と evidence として記録するだけで、`target is remark of source` のような意味関係・Core/Auxiliaryの確定関連付けは作らない。意味ラベルを持たず、rawTextを判定に使わない（幾何量のみ）。入力（SourceToken / TableGeometry / LogicalRowResult / SpatialRegionResult）は読み取るだけ。
+
+- **relation model**: node は SpatialRegionCandidate（regionIndex）と LogicalRowCandidate（logicalRowIndex）。region↔region（sourceはregionIndexの小さい側）と logical_row→region。`direction`（`horizontal: target_right_of_source | target_left_of_source | overlap`、`vertical: target_below_source | target_above_source | overlap`）で、どちらからどちらを見たrelationかを明示。`geometry`（horizontalGap / verticalGap / xOverlap / yOverlap / 各ratio / centerDx / centerDy）はbboxから再計算できる。confidenceのような単一スコアは作らず、evidence（`shares_physical_rows` / `row_tokens_in_region` / `within_horizontal_cutoff` / `within_vertical_cutoff` 等、計測値つき）に分解。
+- **候補の条件**（ページ由来の相対cutoff。既定値を「正解」とみなさない）: ①logical rowのtokenがregionに属する（所属）、またはregion同士がphysical rowを共有する、②bbox間の水平距離 ≤ 0.4×ページ幅 かつ 垂直距離 ≤ 2.0×physical row間隔の中央値。垂直cutoffはSpatialRegionDetectorの垂直近接と同じ尺度（これも4サンプルの診断で決めた値）。水平0.4は大きめの任意値。
+- **nearest winnerは作らない**: 同じnodeから見て同じ種類の相手・同じ方向の候補が2つ以上あるときは全て残し、`ambiguity.competingRelationIndexes` を付ける（rowがregionにtokenを持つ「所属」は選択候補ではないので競合の対象外。複数regionにまたがることは `diagnostics.logicalRowsSpanningMultipleRegions` に出る）。
+- **stability（regionの安定性とは別に観測）**: stable = ①source/targetがambiguousなregion・logical rowでない ②cutoffを0.8倍にしても候補に残る ③競合候補がない。理由は `stability.reasons`（`source_region_is_ambiguous` / `target_region_is_ambiguous` / `source_logical_row_is_ambiguous` / `candidate_disappears_at_cutoff_x0.8` / `competing_candidates`）。cutoffを0.8/1.0/1.25倍に振ったときの候補数は `diagnostics.sensitivity`。
+- **結果（FY2024 Golden Sample）**:
+
+| サンプル | region | logical row | region↔region | row→region | stable | unstable | competing |
+|---|---|---|---|---|---|---|---|
+| METI p9 | 4 | 35 | 2 | 64 | 40 | 26 | 0 |
+| MHLW p1268 | 7 | 54 | 10 | 76 | 3 | 83 | 19 |
+| MHLW p1555 | 8 | 39 | 7 | 52 | 5 | 54 | 11 |
+| MEXT p876 | 4 | 37 | 4 | 109 | 0 | 113 | 20 |
+
+  候補数の感度（0.8× / 1.0× / 1.25×）: METI 66/66/67、MHLW p1268 79/86/91、p1555 55/59/61、MEXT 109/113/116。pair数（region pair / row×region pair）: 6/140、21/378、28/312、6/148。
+- **仮説の結果**: A「relation生成にregion内部の理解は不要」→ 成立（MHLW右側表・MEXT積算の意味が不明でも、左側row↔右側regionの位置関係は観測できた）。B「単純なnearest-neighborでは不足」→ 同じ側に複数の近い候補が並ぶ例を観測（ヘッダー帯のregionが水平距離109pt/316ptで並ぶ等）。ただし正解データがないため「nearestが誤り」とまでは言えず、複数候補を残すべき構造があることまでを確認。C「relationの安定性はregionの安定性とは別に必要」→ 成立（regionがambiguousでなくても、cutoff×0.8で消える候補や競合候補がunstableになる。逆にambiguousなregionがtargetなら全relationがunstableに伝播する）。
+- **negative findings**: ①relation候補が多い（66〜113件）。ほとんどが「rowがregionにtokenを持つ」所属で、近接候補としての情報は少ない ②region ambiguityの伝播が支配的（MEXT p876はregion 4つすべてがambiguousで、113件すべてのrelationが `target_region_is_ambiguous`、stableは0。MHLW p1268も stable 3/86）。前段のregion層の不安定さをrelation層が解消できない ③cutoffで候補が入れ替わる（p1268は0.8×で7件消え、1.25×で5件増える） ④logical rowがambiguousなこと（p1268は40件）もunstable理由として伝播する ⑤競合候補はヘッダー帯の隣接regionに多く、意味の手がかり無しにどれを採るかは決められない。
+- **安全条件**: MHLW p1555の上部の大構造と下部 `01-95` の行・region の間に直接のrelation候補は生成されない（垂直gap 48.6pt > cutoff 13.9pt。このページのphysical row間隔の中央値が6.94ptのため。cutoffを約3.5倍に広げると現れるので、安全の余裕は約3.5倍）。なお垂直cutoffは「physical row間隔の中央値」に比例するため、ページごとに値が変わる（折り返しや半行ピッチの行が多いページでは小さくなる）。
+
 ## 8. V1/V2比較方法
 
 ```bash
