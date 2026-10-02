@@ -421,6 +421,21 @@ v1 を他PDFに当てて分かった、v1 の MHLW 固有だった仮定（修�
 - **single-organization 感度は再現**: 範囲内の根見出しが1件だと根のクラスタが unplaced となり level がずれる（METI 組織035のみ・MEXT 組織030のみ）。
 - 評価側の照合は、折返しで途中までしか印字されない名称・組織名で始まる項名・同一コードかつ同名の項（MEXT の `060`）で曖昧になる。事前固定の照合と、事後に追加した診断用の照合（`posthoc`）を分けて記録している。
 
+#### DocumentHierarchy v2 failure isolation（v2-experimental。v1 は変更しない）
+
+```bash
+npm run pipeline:v2:extract:budget-request-document-hierarchy-v2 -- 2024 [--group=development|regression|holdout]   # v1 / v2-off-off / v2-A / v2-B / v2-AB を別artifactに出力（GTを読まない）
+npm run pipeline:v2:evaluate:budget-request-document-hierarchy-v2 -- 2024 --tag=all                                 # 評価専用GTと突き合わせ、事前登録の成功条件を機械判定
+```
+
+出力: `data/work/budget-request-document-hierarchy/{year}/v2-failure-isolation/{variant}/{id}.json`（schema `budget-request-document-hierarchy-poc/v2-experimental`。`data/derived` へは昇格しない）。実装は `lib/budget-request-document-hierarchy-v2.ts`（`headerCollisionHandling` / `singletonRootPlacement` の2オプション。off/off は v1 と同値）。
+
+v1 の推論失敗2つを独立した仮説として切り分けた実験の結果:
+
+- **A（ヘッダ衝突）**: ページ上下端に反復する page-header 型の行を、GT-free evidence（最上/最下行・y帯の反復・頁番号の連番）の2種以上で見出し候補から除外し、理由を残す。development（METI）と holdout（環境省）では v1 の level ずれを解消したが、holdout（農水省復興特会）で**本物の要求を1件誤除外**した（頁番号の証拠をページ端の行に限定せず、要求番号の数字が物理頁−オフセットと偶然一致）。事前登録の stop condition に該当し **STOP**（v2-A は採用しない）。
+- **B（single-organization）**: 支持が少ない根のクラスタを、document-local な等間隔階段（run 3クラスタ以上、1段分の差）を根拠にだけ placed にする（`minClusterSupport` は下げない）。development 3件と holdout で根が placed になり depth が回復し、regression は v1 と完全一致。**GO**（単独で成立。ただしヘッダの根レベルが左にある文書では B 単独は効かず、A 相当の対策が前提）。
+- **AB**: A が STOP のため **STOP**。
+
 ## 8. V1/V2比較方法
 
 ```bash
