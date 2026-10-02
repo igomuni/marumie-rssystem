@@ -217,6 +217,36 @@ npm run pipeline:v2:extract:budget-request-logical-row -- 2024 --document=<canon
 - **TableGeometryのchaining診断**: `PhysicalRowCandidate` 内のbaseline span（max−min）が `rowClustering.tolerance` を超える行を `diagnostics.tableGeometryChaining` に列挙（TableGeometryのアルゴリズムは変更しない）。FY2024の4 Golden Sampleでは該当なし（最大span 0.147pt、tolerance 1.736pt）。
 - **既知の限界**: ①segment境界は `gapFactor` に敏感（METI p9で gapFactor 1.5/2.5/3.5/5 → 156/133/121/93 segment）。金額の右隣に1文字分しか離れずに続く `（要求要旨）` のような左右は区切れない ②罫線グリッドの表（MHLW p1268/p1555の右側の表）は大半が `ambiguous` で残り、行・列の構造化は次段 ③ColumnBandの繰り返し配置はevidenceとしても判別力が弱い（MEXT p876では継続候補の不一致segmentの多くにも帯がある） ④複数ページにまたがる継続、複数行にまたがる事項名の文字列確定は未対応。
 
+### SpatialRegion PoC（SpatialRegionCandidate）
+
+```text
+SourceToken → TableGeometry → LogicalRowResolver → SpatialRegionDetector（SpatialRegionCandidate）
+```
+
+```bash
+npm run pipeline:v2:extract:budget-request-spatial-region -- 2024 --golden
+npm run pipeline:v2:extract:budget-request-spatial-region -- 2024 --sample=mhlw-ippan-p1268
+npm run pipeline:v2:extract:budget-request-spatial-region -- 2024 --document=<canonicalUrl> --page=<N>
+```
+
+出力: `data/work/budget-request-extraction/{year}/spatial-region-poc/{id}.json`（`schema: budget-request-spatial-region-poc/v1`。parameters / spatialRegions / unassignedTokenIndexes / ambiguousAssignments / gutters / diagnostics）。実装は `lib/budget-request-spatial-region.ts`。
+
+**SpatialRegionCandidate は semantic region ではない。** 「ページ上で互いに近く、2次元的な連続性を持つHorizontalSegmentの集合」を、`core` / `remark` / `matter` / `amount` / `request_summary` 等の意味を付けずに観測するだけで、token文字列（rawText）は判定に使わない（幾何量のみ）。regionはdisjointで、SourceToken.index / PhysicalRowCandidate.rowIndex / LogicalRowCandidate.logicalRowIndex / segment参照へ戻れ、bboxは構成tokenのbboxのunion。根拠の弱い孤立segmentは `unassigned`、しきい値を少し振ると結合/分割する境界は `ambiguity` / `ambiguousAssignments` として残す（移動はしない）。
+
+- **検討した方式**: A. connected-components（segmentをnode、x近接/重なり+y近接をedge）/ B. gutter（x方向の被覆が途切れる空白帯を境界にする）/ C. hybrid（gutterで区切ったx-band内でだけ局所接続）。**採用はC**。ただし4 Golden Sampleでは、gutterがedgeを抑制した数は常に0で、A単体とCの結果は同一だった（下記）。
+- **パラメータ**（ページ由来の相対値。すべて出力JSONに記録。既定値は4サンプルの診断を見て決めたもので、独立した根拠ではない）: gutter幅 ≥ 3.0×fontSize中央値 / 水平近接 ≤ 5.0×fontSize中央値 / 垂直近接 baseline差 ≤ 2.0×physical row間隔の中央値 / region = 2 physical row以上 / 感度分析のスケール 1.25（proximityを×1.25で結合、÷1.25で分割する境界をambiguityに記録）。PDF別・Golden Sample別のhard-codeはない。
+- **診断の結果（4 Golden Sample）**:
+
+| サンプル | token | physical row | logical | region | assigned | unassigned | ambiguous | 最大region |
+|---|---|---|---|---|---|---|---|---|
+| METI p9 | 501 | 42 | 35 | 4 | 284 | 21 | 1 | 176 tok / 30 row |
+| MHLW p1268 | 833 | 55 | 54 | 7 | 445 | 4 | 1 | 334 tok / 36 row |
+| MHLW p1555 | 645 | 40 | 39 | 8 | 341 | 30 | 3 | 220 tok / 21 row |
+| MEXT p876 | 545 | 37 | 37 | 4 | 299 | 25 | 5 | 176 tok / 34 row |
+
+- **negative findings**: ①gutter evidenceは冗長だった（4サンプルとも、gutterが抑制したedgeは0。gutter幅の基準とproximityの基準が近いため、gutterが追加の境界を作らない）。connected-components単体でも左右の構造が橋渡し（bridge）されるケースは出なかった ②垂直近接の係数に敏感（MEXT p876: 1.5×では行間20.8ptが境界ちょうどで20 region・148 token unassignedに断片化し、2.5×では右側が274 token・35行の1 regionになる。2.0×は両側に余裕がある値として採用） ③表内の列間の空白（24pt級）と、独立した構造間の空白を、幅だけでは区別できない（METI p9の金額の3列グループは水平近接の係数次第で別regionになる） ④右側の積算（MEXT p876）はgutterで左側から分離できるが、内部は複数region（右端の2つの金額列は別region）になる ⑤METI p9の `（要求要旨）` は、金額の3列グループとは別regionに入るが、それは水平近接のしきい値次第で、geometryだけで安定して分離できるとは言えない ⑥ColumnBandはregion判定に使っていない（前段で判別力が弱いため）。
+- **安全条件**: MHLW p1555の上部の大構造と下部 `01-95` は同一regionにならない（false positive merge なし）。MHLW p1268の右側の大表（334 token・36 row）はページ全体の1 regionにならず、LogicalRowCandidateがambiguousだらけ（37/54）でもregion観測が成立する。MEXT p876はcontinuationが0件でも、右側の積算構造が複数logical rowにまたがる2D region候補として観測できる。
+
 ## 8. V1/V2比較方法
 
 ```bash
