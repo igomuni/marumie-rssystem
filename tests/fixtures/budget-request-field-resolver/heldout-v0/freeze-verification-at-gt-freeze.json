@@ -1,0 +1,60 @@
+{
+  "freezeCommit": "abc57b9f8296df7dc8eb87bd98a6eaf7f050bee9",
+  "entries": [
+    {
+      "path": "scripts/pipeline-v2/lib/budget-request-field-resolver.ts",
+      "blobShaAtFreeze": "f9065b28382899ca939d91a86ea0a3b42427a8bc",
+      "blobShaCurrent": "f9065b28382899ca939d91a86ea0a3b42427a8bc",
+      "match": true
+    },
+    {
+      "path": "scripts/pipeline-v2/lib/budget-request-field-resolver-runs.ts",
+      "blobShaAtFreeze": "13fb7fa80f4ae2ac00656276892f9a226cf79fb2",
+      "blobShaCurrent": "13fb7fa80f4ae2ac00656276892f9a226cf79fb2",
+      "match": true
+    },
+    {
+      "path": "scripts/pipeline-v2/lib/budget-request-field-resolver-paths.ts",
+      "blobShaAtFreeze": "ebdb88aa951542c2e7cbd1808751353c76649863",
+      "blobShaCurrent": "ebdb88aa951542c2e7cbd1808751353c76649863",
+      "match": true
+    },
+    {
+      "path": "scripts/pipeline-v2/extract-budget-request-field-resolver.ts",
+      "blobShaAtFreeze": "250f7a9fadb6931df7251223876275220df0246a",
+      "blobShaCurrent": "250f7a9fadb6931df7251223876275220df0246a",
+      "match": true
+    },
+    {
+      "path": "scripts/pipeline-v2/lib/budget-request-field-resolver-evaluator.ts",
+      "blobShaAtFreeze": "30db4e55232f2d7ac9e17c9501e4854d31db1558",
+      "blobShaCurrent": "30db4e55232f2d7ac9e17c9501e4854d31db1558",
+      "match": true
+    },
+    {
+      "path": "scripts/pipeline-v2/evaluate-budget-request-field-resolver.ts",
+      "blobShaAtFreeze": "6bf73888fd3c9ead145afada6d23c5f8b3de452d",
+      "blobShaCurrent": "6bf73888fd3c9ead145afada6d23c5f8b3de452d",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/budget-request-field-resolver/v0/golden.json",
+      "blobShaAtFreeze": "c0ecdc8cb09704b0a42fb84baefe9464ae2068d8",
+      "blobShaCurrent": "c0ecdc8cb09704b0a42fb84baefe9464ae2068d8",
+      "match": true
+    },
+    {
+      "path": "docs/tasks/20261003_0648_FieldResolver_v0_Contract.md",
+      "blobShaAtFreeze": "a3c02e14363448c49c6f6c1face412a5de10db56",
+      "blobShaCurrent": "a3c02e14363448c49c6f6c1face412a5de10db56",
+      "match": true
+    },
+    {
+      "path": "docs/tasks/20261003_0648_FieldResolver_v0_Golden_Samples.md",
+      "blobShaAtFreeze": "4fc3760da1f325373e2f54e4fe516701f70b1697",
+      "blobShaCurrent": "4fc3760da1f325373e2f54e4fe516701f70b1697",
+      "match": true
+    }
+  ],
+  "allMatch": true
+}
