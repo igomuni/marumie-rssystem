@@ -10,19 +10,10 @@
  * 出力: data/work/budget-request-extraction/{year}/source-token-poc/{id}.json（data/downloadには書かない）。
  * Golden Sampleに人間確認値（human-observations.json）がある場合は、抽出結果との差を表示する（評価専用）。
  */
-import * as fs from 'fs';
 import * as path from 'path';
 import { nodeBudgetRequestFs } from './lib/budget-request-download';
-import {
-  EXTRACTION_WORK_DIR,
-  goldenSamplePath,
-  humanObservationsPath,
-  inspectTarget,
-  listExtractionTargets,
-  resolveGoldenSamples,
-  type ExtractionTarget,
-  type GoldenSampleFile,
-} from './lib/budget-request-extraction';
+import { EXTRACTION_WORK_DIR, inspectTarget, listExtractionTargets } from './lib/budget-request-extraction';
+import { loadHumanObservations, resolvePageJobs, type PageJob } from './lib/budget-request-page-jobs';
 import { getBudgetRequestManifest } from './lib/budget-request-manifest';
 import { buildPocOutput, extractPageTokens, pdfjsVersion } from './lib/budget-request-pdf-page';
 import { compareObservation, type HumanObservation } from './lib/budget-request-source-token';
@@ -39,14 +30,7 @@ function usageError(message: string): void {
   process.exitCode = 1;
 }
 
-interface Job {
-  id: string;
-  target: ExtractionTarget;
-  page: number;
-  sample?: { id: string; tier: string };
-}
-
-async function runJob(year: number, job: Job, observations: HumanObservation[]): Promise<void> {
+async function runJob(year: number, job: PageJob, observations: HumanObservation[]): Promise<void> {
   const state = inspectTarget(job.target, nodeBudgetRequestFs).state;
   if (state !== 'FOUND') throw new Error(`原本が${state}です: ${job.target.localPath}`);
   const extraction = await extractPageTokens(job.target.localPath, job.page);
@@ -95,33 +79,9 @@ async function main() {
   }
   const targets = listExtractionTargets(manifest);
 
-  const jobs: Job[] = [];
-  const sampleIds = opt('sample')?.split(',');
-  const documentUrl = opt('document');
-  if (!sampleIds && !args.includes('--golden') && !documentUrl) return usageError('--sample= / --golden / --document= のいずれかが必要です');
-
-  if (sampleIds || args.includes('--golden')) {
-    const gsPath = goldenSamplePath(year);
-    if (!fs.existsSync(gsPath)) return usageError(`Golden Sample fixtureがありません: ${gsPath}`);
-    const { resolved, problems } = resolveGoldenSamples(JSON.parse(fs.readFileSync(gsPath, 'utf8')) as GoldenSampleFile, targets);
-    if (problems.length > 0) return usageError(`Golden Sample fixtureに問題があります:\n  ${problems.join('\n  ')}`);
-    const picked = sampleIds ? sampleIds.map(id => resolved.find(r => r.sample.id === id) ?? null) : resolved;
-    const missing = sampleIds?.filter((_, i) => picked[i] === null);
-    if (missing?.length) return usageError(`未知のGolden Sample id: ${missing.join(', ')}（有効: ${resolved.map(r => r.sample.id).join(', ')}）`);
-    for (const r of picked) if (r) jobs.push({ id: r.sample.id, target: r.target, page: r.sample.pdfPage, sample: { id: r.sample.id, tier: r.sample.tier } });
-  }
-  if (documentUrl) {
-    const target = targets.find(t => t.canonicalUrl === documentUrl);
-    const page = Number(opt('page'));
-    if (!target) return usageError(`manifestに無いcanonical URLです: ${documentUrl}`);
-    if (!Number.isInteger(page) || page < 1) return usageError('--page= には1以上の整数が必要です');
-    jobs.push({ id: `${path.basename(target.localPath, '.pdf')}-p${page}`, target, page });
-  }
-
-  const obsPath = humanObservationsPath(year);
-  const observations: Record<string, HumanObservation[]> = fs.existsSync(obsPath)
-    ? (JSON.parse(fs.readFileSync(obsPath, 'utf8')) as { observations: Record<string, HumanObservation[]> }).observations
-    : {};
+  const { jobs, error } = resolvePageJobs(year, targets, { sampleIds: opt('sample')?.split(','), golden: args.includes('--golden'), documentUrl: opt('document'), page: Number(opt('page')) });
+  if (error) return usageError(error);
+  const observations = loadHumanObservations(year);
   console.log(`=== SourceToken PoC: year=${year} jobs=${jobs.length} ===`);
   for (const job of jobs) {
     try {
