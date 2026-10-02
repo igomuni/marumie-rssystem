@@ -15,7 +15,7 @@ import { resolveFields, serializeFieldResolverResult } from './lib/budget-reques
 import { FIELD_RESOLVER_WORK_DIR } from './lib/budget-request-field-resolver-paths';
 import type { HeldoutManifest } from './lib/budget-request-field-resolver-heldout-manifest';
 
-export const HELDOUT_WORK_DIR = path.join(FIELD_RESOLVER_WORK_DIR, 'heldout-v0');
+const HELDOUT_WORK_DIR = path.join(FIELD_RESOLVER_WORK_DIR, 'heldout-v0');
 
 async function main() {
   const manifest = JSON.parse(fs.readFileSync(path.join('tests', 'fixtures', 'budget-request-field-resolver', 'heldout-v0', 'manifest.json'), 'utf8')) as HeldoutManifest;
