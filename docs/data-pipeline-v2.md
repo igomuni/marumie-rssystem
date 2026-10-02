@@ -436,6 +436,10 @@ v1 の推論失敗2つを独立した仮説として切り分けた実験の結�
 - **B（single-organization）**: 支持が少ない根のクラスタを、document-local な等間隔階段（run 3クラスタ以上、1段分の差）を根拠にだけ placed にする（`minClusterSupport` は下げない）。development 3件と holdout で根が placed になり depth が回復し、regression は v1 と完全一致。**GO**（単独で成立。ただしヘッダの根レベルが左にある文書では B 単独は効かず、A 相当の対策が前提）。
 - **AB**: A が STOP のため **STOP**。
 
+**v2-B の追加 holdout（MLIT 復興特会、10頁・組織1つ）**: 規則Bは発火し（根の右に規則的な階段が4クラスタ、1段分の差）、exact 12/20→20/20・depth 0/21→21/21・unresolved 8→0、false parent 0、通常rangeはv1と一致（`B-HOLDOUT-PASS` → `CONFIRMED-WITH-SCOPE`）。B は「single-organization solver」ではなく、**singleton root + 十分な支持を持つ indentation staircase に対する安全な placement rule**として適用範囲を持つ（階段が少ない小文書では発火せず OUT-OF-SCOPE になりうる）。判断過程は artifact の `latticeDiagnostics`（required/observed の run 長・隣接差・正規化gap・理由）に残る。
+
+**A2（page-edge を domain にした header identity）**: 事前登録のみ。除外は「ページ端の行 かつ 頁番号の正準な10進表記と一致する token を持つ かつ y 帯が過半数のページで反復」の全てが成立したときだけ。実装・実行・holdout の観測は未実施。holdout 候補（防衛省・こども家庭庁）は `tests/fixtures/budget-request-document-hierarchy/2024/a2-holdout-candidates.json` に封印状態で記録。
+
 ## 8. V1/V2比較方法
 
 ```bash
