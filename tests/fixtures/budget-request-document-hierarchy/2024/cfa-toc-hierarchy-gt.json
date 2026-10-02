@@ -1,0 +1,391 @@
+{
+ "schemaVersion": "budget-request-document-hierarchy-gt/v1",
+ "purpose": "EVALUATION ONLY. Inference code must never read, import or reference this file. Constructed AFTER the A2 implementation freeze commit (093fea7) and BEFORE any A2 (or v2) output for this document exists (A2 first-holdout-run order: freeze -> GT construction -> GT freeze commit -> first run). The only pages opened to build it: the table of contents and, to fix the printed-to-physical offset and the last detail page, the first and last pages' printed labels.",
+ "frozenBeforeA2HoldoutRun": true,
+ "method": "Transcribed mechanically from the document's own table of contents (poppler pdftotext -layout, TOC pages cropped into left/right columns at x=408pt, regex over printed lines: （組織）NNN name page / （項）NNN name page / request-no NN-NN name page). Names are the first printed line. Independent consistency checks (not derived from any A2/v1/v2 output): request numbers consecutive 1..N, printed start pages non-decreasing, every item has at least one request. The extraction script is a scratch tool and is not committed.",
+ "codeNote": "Request codes written with ASCII '-'. depth 1/2/3 = organization/item/request. set='test'.",
+ "source": {
+  "ministry": "こども家庭庁 (一般会計)",
+  "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+  "fiscalYear": 2024,
+  "pageCount": 147,
+  "tocPages": "physical 3 (printed 1)",
+  "detailPhysicalPages": "7-147 (printed 3-143)",
+  "status": "A2 strict holdout (sealed until A2 implementation freeze)"
+ },
+ "detailPrintedToPhysicalPageOffset": 4,
+ "offsetBasis": "physical p7 prints 内（こ） 3 (first detail page); p147 prints 内（こ） 143",
+ "counts": {
+  "organizations": 1,
+  "items": 13,
+  "requests": 24
+ },
+ "note": "single-organization document (one 組織): relevant to the A2/B interaction; A2 alone is evaluated here",
+ "nodes": [
+  {
+   "key": "org-110",
+   "depth": 1,
+   "code": "110",
+   "name": "こども家庭庁",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "item-110-001",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "001",
+   "name": "こども家庭庁共通費",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "req-1",
+   "depth": 3,
+   "parent": "item-110-001",
+   "requestNo": "1",
+   "code": "05-95",
+   "name": "こども家庭庁一般行政に必要な経費",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "req-2",
+   "depth": 3,
+   "parent": "item-110-001",
+   "requestNo": "2",
+   "code": "07-95",
+   "name": "審議会等に必要な経費",
+   "printedStartPage": 34,
+   "set": "test"
+  },
+  {
+   "key": "req-3",
+   "depth": 3,
+   "parent": "item-110-001",
+   "requestNo": "3",
+   "code": "10-95",
+   "name": "こども政策に必要な経費",
+   "printedStartPage": 37,
+   "set": "test"
+  },
+  {
+   "key": "item-110-015",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "015",
+   "name": "母子保健衛生対策費",
+   "printedStartPage": 88,
+   "set": "test"
+  },
+  {
+   "key": "req-4",
+   "depth": 3,
+   "parent": "item-110-015",
+   "requestNo": "4",
+   "code": "05-03",
+   "name": "未熟児養育医療等に必要な経費",
+   "printedStartPage": 88,
+   "set": "test"
+  },
+  {
+   "key": "req-5",
+   "depth": 3,
+   "parent": "item-110-015",
+   "requestNo": "5",
+   "code": "10-06",
+   "name": "母子保健衛生対策に必要な経費",
+   "printedStartPage": 88,
+   "set": "test"
+  },
+  {
+   "key": "item-110-025",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "025",
+   "name": "保育対策費",
+   "printedStartPage": 93,
+   "set": "test"
+  },
+  {
+   "key": "req-6",
+   "depth": 3,
+   "parent": "item-110-025",
+   "requestNo": "6",
+   "code": "10-06",
+   "name": "保育対策に必要な経費",
+   "printedStartPage": 93,
+   "set": "test"
+  },
+  {
+   "key": "item-110-045",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "045",
+   "name": "こども安全対策費",
+   "printedStartPage": 93,
+   "set": "test"
+  },
+  {
+   "key": "req-7",
+   "depth": 3,
+   "parent": "item-110-045",
+   "requestNo": "7",
+   "code": "10-15",
+   "name": "こども安全対策に必要な経費",
+   "printedStartPage": 93,
+   "set": "test"
+  },
+  {
+   "key": "item-110-050",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "050",
+   "name": "子ども・子育て支援年金特別会計へ繰入",
+   "printedStartPage": 94,
+   "set": "test"
+  },
+  {
+   "key": "req-8",
+   "depth": 3,
+   "parent": "item-110-050",
+   "requestNo": "8",
+   "code": "01-05",
+   "name": "子ども・子育て支援の財源の年金特別会計子ども・子育て支援勘定へ繰入れに",
+   "printedStartPage": 94,
+   "set": "test"
+  },
+  {
+   "key": "req-9",
+   "depth": 3,
+   "parent": "item-110-050",
+   "requestNo": "9",
+   "code": "05-06",
+   "name": "特例給付等の財源の年金特別会計子ども・子育て支援勘定へ繰入れに必要な経",
+   "printedStartPage": 94,
+   "set": "test"
+  },
+  {
+   "key": "item-110-055",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "055",
+   "name": "児童虐待防止等対策費",
+   "printedStartPage": 95,
+   "set": "test"
+  },
+  {
+   "key": "req-10",
+   "depth": 3,
+   "parent": "item-110-055",
+   "requestNo": "10",
+   "code": "03-03",
+   "name": "児童福祉施設入所児童等の医療に必要な経費",
+   "printedStartPage": 95,
+   "set": "test"
+  },
+  {
+   "key": "req-11",
+   "depth": 3,
+   "parent": "item-110-055",
+   "requestNo": "11",
+   "code": "05-05",
+   "name": "児童福祉施設入所児童等の保護等に必要な経費",
+   "printedStartPage": 95,
+   "set": "test"
+  },
+  {
+   "key": "req-12",
+   "depth": 3,
+   "parent": "item-110-055",
+   "requestNo": "12",
+   "code": "06-06",
+   "name": "児童虐待防止等対策に必要な経費",
+   "printedStartPage": 96,
+   "set": "test"
+  },
+  {
+   "key": "item-110-065",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "065",
+   "name": "国立児童自立支援施設",
+   "printedStartPage": 97,
+   "set": "test"
+  },
+  {
+   "key": "req-13",
+   "depth": 3,
+   "parent": "item-110-065",
+   "requestNo": "13",
+   "code": "06-06",
+   "name": "国立児童自立支援施設に必要な経費",
+   "printedStartPage": 97,
+   "set": "test"
+  },
+  {
+   "key": "req-14",
+   "depth": 3,
+   "parent": "item-110-065",
+   "requestNo": "14",
+   "code": "20-05",
+   "name": "国立児童自立支援施設入所児童等の処遇等に必要な経費",
+   "printedStartPage": 119,
+   "set": "test"
+  },
+  {
+   "key": "req-15",
+   "depth": 3,
+   "parent": "item-110-065",
+   "requestNo": "15",
+   "code": "30-06",
+   "name": "国立児童自立支援施設の運営に必要な経費",
+   "printedStartPage": 128,
+   "set": "test"
+  },
+  {
+   "key": "item-110-075",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "075",
+   "name": "国立児童自立支援施設整備費",
+   "printedStartPage": 131,
+   "set": "test"
+  },
+  {
+   "key": "req-16",
+   "depth": 3,
+   "parent": "item-110-075",
+   "requestNo": "16",
+   "code": "06-06",
+   "name": "国立児童自立支援施設整備に必要な経費",
+   "printedStartPage": 131,
+   "set": "test"
+  },
+  {
+   "key": "item-110-085",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "085",
+   "name": "母子家庭等対策費",
+   "printedStartPage": 132,
+   "set": "test"
+  },
+  {
+   "key": "req-17",
+   "depth": 3,
+   "parent": "item-110-085",
+   "requestNo": "17",
+   "code": "06-06",
+   "name": "母子家庭等の自立支援に必要な経費",
+   "printedStartPage": 132,
+   "set": "test"
+  },
+  {
+   "key": "item-110-095",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "095",
+   "name": "障害児支援等対策費",
+   "printedStartPage": 134,
+   "set": "test"
+  },
+  {
+   "key": "req-18",
+   "depth": 3,
+   "parent": "item-110-095",
+   "requestNo": "18",
+   "code": "10-03",
+   "name": "障害児医療に必要な経費",
+   "printedStartPage": 134,
+   "set": "test"
+  },
+  {
+   "key": "req-19",
+   "depth": 3,
+   "parent": "item-110-095",
+   "requestNo": "19",
+   "code": "20-06",
+   "name": "障害児支援に必要な経費",
+   "printedStartPage": 134,
+   "set": "test"
+  },
+  {
+   "key": "item-110-110",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "110",
+   "name": "こども政策推進費",
+   "printedStartPage": 135,
+   "set": "test"
+  },
+  {
+   "key": "req-20",
+   "depth": 3,
+   "parent": "item-110-110",
+   "requestNo": "20",
+   "code": "06-06",
+   "name": "こども政策の推進に必要な経費",
+   "printedStartPage": 135,
+   "set": "test"
+  },
+  {
+   "key": "req-21",
+   "depth": 3,
+   "parent": "item-110-110",
+   "requestNo": "21",
+   "code": "20-07",
+   "name": "こども家庭調査研究に必要な経費",
+   "printedStartPage": 141,
+   "set": "test"
+  },
+  {
+   "key": "req-22",
+   "depth": 3,
+   "parent": "item-110-110",
+   "requestNo": "22",
+   "code": "30-13",
+   "name": "こども家庭科学研究に必要な経費",
+   "printedStartPage": 141,
+   "set": "test"
+  },
+  {
+   "key": "item-110-120",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "120",
+   "name": "児童福祉施設等整備費",
+   "printedStartPage": 142,
+   "set": "test"
+  },
+  {
+   "key": "req-23",
+   "depth": 3,
+   "parent": "item-110-120",
+   "requestNo": "23",
+   "code": "06-06",
+   "name": "児童福祉施設等施設整備に必要な経費",
+   "printedStartPage": 142,
+   "set": "test"
+  },
+  {
+   "key": "item-110-125",
+   "depth": 2,
+   "parent": "org-110",
+   "code": "125",
+   "name": "大学等修学支援費",
+   "printedStartPage": 143,
+   "set": "test"
+  },
+  {
+   "key": "req-24",
+   "depth": 3,
+   "parent": "item-110-125",
+   "requestNo": "24",
+   "code": "05-05",
+   "name": "大学等における修学の支援に必要な経費",
+   "printedStartPage": 143,
+   "set": "test"
+  }
+ ]
+}
