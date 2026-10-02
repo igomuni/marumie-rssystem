@@ -8,6 +8,8 @@ import { describe, expect, it } from 'vitest';
 import { observeDocumentHierarchy, type HierarchyPageInput } from './budget-request-document-hierarchy';
 import { observeDocumentHierarchyV2, type DocumentHierarchyV2Result, type HierarchyV2ExperimentalOptions } from './budget-request-document-hierarchy-v2';
 import { A2_EXPERIMENTS, A2_VARIANTS } from './budget-request-document-hierarchy-a2-experiments';
+import { a2Judgment, classifyHoldout, integrationOk, type HoldoutClass } from './budget-request-document-hierarchy-a2-eval-config';
+import type { Counts } from './budget-request-document-hierarchy-eval';
 import { listExtractionTargets } from './budget-request-extraction';
 import { resolveLogicalRows } from './budget-request-logical-row';
 import { getBudgetRequestManifest } from './budget-request-manifest';
@@ -191,7 +193,49 @@ describe('決定性・variant 定義', () => {
     expect(v['v2-B']).toEqual({ headerCollisionHandling: 'off', singletonRootPlacement: 'lattice-supported' });
     expect(v['v2-B-A2']).toEqual({ headerCollisionHandling: 'page-edge-domain', singletonRootPlacement: 'lattice-supported' });
     expect(v['v2-B-obs']).toEqual({ headerCollisionHandling: 'observe-only', singletonRootPlacement: 'lattice-supported' });
-    expect(A2_EXPERIMENTS.filter(e => e.set === 'a2-holdout')).toEqual([]); // holdout の範囲は規則固定とGT固定の後でだけ定義する
+    // holdout の範囲は規則固定（093fea7）とGT固定（ca75180）の後でだけ定義した（明細の全ページ）
+    expect(A2_EXPERIMENTS.filter(e => e.set === 'a2-holdout').map(e => [e.id, e.pages])).toEqual([['mod-general-detail', [9, 540]], ['cfa-general-detail', [7, 147]]]);
+  });
+});
+
+describe('holdout の分類・A2 判定・統合確認の基準（事前にコード化。結果を見て変えない）', () => {
+  const c = (o: Partial<Counts> & { exact: number; depth: number; n?: number }): Counts => ({
+    gtEdges: 10, falseParent: 0, unresolved: 0, childNotFound: 0, precision: null, recall: null, f1: null, ancestorExact: { x: 0, n: 0 },
+    depthExact: { x: o.depth, matched: o.n ?? 11, n: o.n ?? 11 }, nodesMatched: { x: o.n ?? 11, n: o.n ?? 11 }, ...o,
+  });
+  const base = { gtExcluded: 0, allExcludedHaveThreeEvidence: true };
+  it('INFORMATIVE（v1 depth < 90%）: A2 の depth >= 90%・false 増加なし・GT除外0 → PASS', () => {
+    expect(classifyHoldout({ ...base, v1: c({ exact: 5, depth: 0 }), a2: c({ exact: 10, depth: 11 }) }).cls).toBe('INFORMATIVE-PASS');
+  });
+  it('INFORMATIVE で A2 の depth が 90% 未満／GTノードを除外／false parent 増加 → FAIL', () => {
+    expect(classifyHoldout({ ...base, v1: c({ exact: 5, depth: 0 }), a2: c({ exact: 6, depth: 3 }) }).cls).toBe('INFORMATIVE-FAIL');
+    expect(classifyHoldout({ ...base, gtExcluded: 1, v1: c({ exact: 5, depth: 0 }), a2: c({ exact: 10, depth: 11 }) }).cls).toBe('INFORMATIVE-FAIL');
+    expect(classifyHoldout({ ...base, v1: c({ exact: 5, depth: 0 }), a2: c({ exact: 10, depth: 11, falseParent: 1 }) }).cls).toBe('INFORMATIVE-FAIL');
+  });
+  it('NON-INFORMATIVE（v1 depth >= 90%）: A2 が v1 と同じなら NON-INFORMATIVE（成功とも失敗とも数えない）', () => {
+    const r = classifyHoldout({ ...base, v1: c({ exact: 10, depth: 11 }), a2: c({ exact: 10, depth: 11 }) });
+    expect(r).toMatchObject({ cls: 'NON-INFORMATIVE', informative: false });
+  });
+  it('NON-INFORMATIVE で A2 が exact/depth を下げる／GT除外／false 増加 → NON-INFORMATIVE-FAIL（stop）', () => {
+    expect(classifyHoldout({ ...base, v1: c({ exact: 10, depth: 11 }), a2: c({ exact: 10, depth: 8 }) }).cls).toBe('NON-INFORMATIVE-FAIL');
+    expect(classifyHoldout({ ...base, gtExcluded: 1, v1: c({ exact: 10, depth: 11 }), a2: c({ exact: 10, depth: 11 }) }).cls).toBe('NON-INFORMATIVE-FAIL');
+  });
+  it('A2 判定: development 失敗 → STOP／holdout に FAIL → STOP／informative PASS が1件以上 → GO／全て NON-INFORMATIVE → INCONCLUSIVE', () => {
+    const j = (developmentPassed: boolean, holdouts: HoldoutClass[]) => a2Judgment({ developmentPassed, holdouts });
+    expect(j(false, ['INFORMATIVE-PASS'])).toBe('STOP');
+    expect(j(true, ['INFORMATIVE-PASS', 'INFORMATIVE-FAIL'])).toBe('STOP');
+    expect(j(true, ['NON-INFORMATIVE', 'NON-INFORMATIVE-FAIL'])).toBe('STOP');
+    expect(j(true, ['INFORMATIVE-PASS', 'NON-INFORMATIVE'])).toBe('GO');
+    expect(j(true, ['NON-INFORMATIVE', 'NON-INFORMATIVE'])).toBe('INCONCLUSIVE');
+  });
+  it('統合確認: B+A2 が単独の成分の最良（exact・depth）を下回らず、false 増加・GT除外がなければ OK', () => {
+    const v1 = c({ exact: 5, depth: 0 });
+    const b = c({ exact: 8, depth: 5 });
+    const a2 = c({ exact: 7, depth: 6 });
+    expect(integrationOk({ v1, b, a2, ba2: c({ exact: 10, depth: 11 }), gtExcluded: 0 }).ok).toBe(true);
+    expect(integrationOk({ v1, b, a2, ba2: c({ exact: 7, depth: 11 }), gtExcluded: 0 }).ok).toBe(false); // B の成分を下回る
+    expect(integrationOk({ v1, b, a2, ba2: c({ exact: 10, depth: 11, falseParent: 1 }), gtExcluded: 0 }).ok).toBe(false);
+    expect(integrationOk({ v1, b, a2, ba2: c({ exact: 10, depth: 11 }), gtExcluded: 1 }).ok).toBe(false);
   });
 });
 

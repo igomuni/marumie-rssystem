@@ -9,41 +9,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { DOCUMENT_HIERARCHY_WORK_DIR } from './lib/budget-request-document-hierarchy-paths';
 import type { DocumentHierarchyResult } from './lib/budget-request-document-hierarchy';
-import { countExcludedGtMatches, evaluateView, summarize, type Counts, type GtNode, type MatchOptions, type SummaryMatchMode } from './lib/budget-request-document-hierarchy-eval';
+import { countExcludedGtMatches, evaluateView, summarize, type Counts, type GtNode } from './lib/budget-request-document-hierarchy-eval';
+import { A2_EVAL_CONFIGS, A2_MATCHERS as MATCHERS, sigOf } from './lib/budget-request-document-hierarchy-a2-eval-config';
 import { A2_EXPERIMENTS } from './lib/budget-request-document-hierarchy-a2-experiments';
 
 const FIX = path.join('tests', 'fixtures', 'budget-request-document-hierarchy', '2024');
-type Scope = (n: GtNode, rootOf: (k: string) => string) => boolean;
-const all: Scope = () => true;
-const inRange: Scope = n => n.inDetailRange !== false;
-const subtree = (orgKey: string): Scope => (n, rootOf) => rootOf(n.key) === orgKey;
-
-interface Config {
-  id: string;
-  gtFile: string;
-  scope: Scope;
-  summaryMode: SummaryMatchMode;
-}
-export const A2_EVAL_CONFIGS: Config[] = [
-  { id: 'meti-detail', gtFile: 'meti-toc-hierarchy-gt.json', scope: all, summaryMode: 'pageRef' },
-  { id: 'env-detail', gtFile: 'env-toc-hierarchy-gt.json', scope: all, summaryMode: 'pageRef' },
-  { id: 'maff-fukko-detail', gtFile: 'maff-fukko-toc-hierarchy-gt.json', scope: all, summaryMode: 'pageRef' },
-  { id: 'mlit-fukko-detail', gtFile: 'mlit-fukko-toc-hierarchy-gt.json', scope: all, summaryMode: 'pageRef' },
-  { id: 'mhlw-summary', gtFile: 'mhlw-toc-hierarchy-gt-extended.json', scope: all, summaryMode: 'pageRef' },
-  { id: 'mhlw-detail', gtFile: 'mhlw-toc-hierarchy-gt-extended.json', scope: all, summaryMode: 'pageRef' },
-  { id: 'meti-summary', gtFile: 'meti-toc-hierarchy-gt.json', scope: all, summaryMode: 'codeName' },
-  { id: 'mext-summary', gtFile: 'mext-toc-hierarchy-gt.json', scope: all, summaryMode: 'codeName' },
-  { id: 'mext-detail', gtFile: 'mext-toc-hierarchy-gt.json', scope: inRange, summaryMode: 'pageRef' },
-  { id: 'meti-detail-pre-header', gtFile: 'meti-toc-hierarchy-gt.json', scope: n => n.printedStartPage + 4 <= 103, summaryMode: 'pageRef' },
-  { id: 'meti-detail-narrow', gtFile: 'meti-toc-hierarchy-gt.json', scope: subtree('org-035'), summaryMode: 'pageRef' },
-  { id: 'mext-detail-narrow', gtFile: 'mext-toc-hierarchy-gt.json', scope: subtree('org-030'), summaryMode: 'pageRef' },
-  { id: 'mhlw-detail-narrow', gtFile: 'mhlw-toc-hierarchy-gt-extended.json', scope: subtree('org-070'), summaryMode: 'pageRef' },
-];
-const MATCHERS: { name: 'preregistered' | 'posthoc'; opts: MatchOptions }[] = [
-  { name: 'preregistered', opts: {} },
-  { name: 'posthoc', opts: { nameOnly: true, ordinalTiebreak: true } },
-];
-export const sigOf = (c: Counts): string => JSON.stringify([c.gtEdges, c.exact, c.falseParent, c.unresolved, c.childNotFound, c.ancestorExact, c.depthExact, c.nodesMatched]);
+const DEV_IDS = new Set(['meti-detail', 'env-detail', 'maff-fukko-detail', 'mlit-fukko-detail', 'mhlw-summary', 'mhlw-detail', 'meti-summary', 'mext-summary', 'mext-detail', 'meti-detail-pre-header', 'meti-detail-narrow', 'mext-detail-narrow', 'mhlw-detail-narrow']);
 const line = (c: Counts): string => `exact ${c.exact}/${c.gtEdges} false ${c.falseParent}/${c.gtEdges} unres ${c.unresolved}/${c.gtEdges} notFound ${c.childNotFound}/${c.gtEdges} anc ${c.ancestorExact.x}/${c.ancestorExact.n} depth ${c.depthExact.x}/${c.depthExact.n} matched ${c.nodesMatched.x}/${c.nodesMatched.n}`;
 
 type Cell = { counts: Record<'preregistered' | 'posthoc', Counts>; excludedNodeIds: string[]; gtExcluded: { excluded: number; keys: string[] }; excludedCount: number; unplaced: number };
@@ -55,7 +26,7 @@ async function main() {
   const dir = path.join(DOCUMENT_HIERARCHY_WORK_DIR, String(year), 'a2-final');
   const variants = ['v1', 'v2-A', 'v2-A2', 'v2-B', 'v2-B-obs'] as const;
   const cells: Record<string, Record<string, Cell>> = {};
-  for (const cfg of A2_EVAL_CONFIGS) {
+  for (const cfg of A2_EVAL_CONFIGS.filter(c => DEV_IDS.has(c.id))) {
     const exp = A2_EXPERIMENTS.find(e => e.id === cfg.id);
     if (!exp) continue;
     const gtRaw = JSON.parse(fs.readFileSync(path.join(FIX, cfg.gtFile), 'utf8')) as { detailPrintedToPhysicalPageOffset?: number; source?: { printedToPhysicalPageOffset?: number }; nodes: GtNode[] };
