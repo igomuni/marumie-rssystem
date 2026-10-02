@@ -383,6 +383,28 @@ npm run pipeline:v2:extract:budget-request-page-template -- 2024 --document=<can
 - **文脈の比較（`010` と既知のページ見出し候補）**: 同じ点: どれも自分のindent clusterと row family が単独（size 1）で、後続に金額patternを持つ子孫行がない（hierarchyのdescendantは 0）。違う点: 既知の見出し候補（METI `27` / MHLW p1268 `1260` / MEXT `884`）は、**それより前（ページ上側）に金額列patternを持つ行が無く、直前の行も金額patternを持たない**（先頭付近の行）のに対し、MHLW p1555 の `010` は直前の行（`070`）が金額patternを持ち、境界に `amount_pattern_disappears` と `vertical_gap_increase` がある。ただしこの差は「ページ上端の見出しか、データ行の後か」という位置の違いで、RecordAnchorの `page_relative_top` とほぼ同じ情報であり、独立した追加evidenceと言えるかは今回の4サンプルでは判断できない。
 - **negative findings**: ①階層候補はindentが段々深くなる連なり（METI p9のcode列）で推移的に膨らむ（121件、25行が複数の妥当な祖先を持ち、119件が複数候補由来でunstable）。階層としての解像度は低い ②indent clusterは階層の段ごとに分かれ、METI p9は14 cluster・15 family（単独12）。row familyが「同じ階層の反復」より「同じ階層の1行」に細分化される（RecordAnchorの8 family/isolated 6より過分割） ③右側の罫線表（MHLW p1268）のindentの跳びは列の違いとして階層候補から外したが、先に遠い祖先まで推移的に結ぶ実装では左側の行から右側の表への偽の階層候補が出た（修正して除去。感度1.25×では17件増える）。MHLW p1268の `1260` は `020` の祖先候補（indentが深い）として残る ④`010` でも、`27`・`884` でも、descendant・family・indent evidenceでは区別できず、区別できたのは位置（直前に金額patternを持つ行があるか）だけ ⑤boundary candidateはほぼ全ての隣接行で複数のevidenceが同時に立ち（MHLW p1268は隣り合う53組中51組）、単独では区切りの判断に使えない ⑥罫線表（ruled）の行はfamilyの鍵にrule有無を入れたが、罫線のgrid構造は観測できていない ⑦amount patternは4サンプルとも1つ（金額列は1ページ内で1種類）。patternの種類が複数あるページでの挙動は未確認。
 
+### DocumentHierarchy PoC（MHLW・文書階層の見出し候補と親子候補）
+
+```text
+SourceToken → TableGeometry → LogicalRow → 見出し候補行 → xインデントの階段 → 文書順stack → 親子候補   ← SpatialRegion以降の凍結層は使わない
+```
+
+```bash
+npm run pipeline:v2:extract:budget-request-document-hierarchy -- 2024 --mhlw-poc          # 段階A: 推論（GTを読まない）
+npm run pipeline:v2:extract:budget-request-document-hierarchy -- 2024 --view=detail --document=<canonicalUrl> --pages=<A-B>
+npm run pipeline:v2:evaluate:budget-request-document-hierarchy -- 2024 --tag=v1            # 段階B: 評価専用GTとの突き合わせ
+```
+
+出力: `data/work/budget-request-document-hierarchy/{year}/{summary,detail}.json`（`schema: budget-request-document-hierarchy-poc/v1`。`data/derived` へは昇格しない）と `evaluation-{tag}.json`。実装は `lib/budget-request-document-hierarchy.ts`（推論）と `lib/budget-request-document-hierarchy-eval.ts`（評価）。**最終的な階層schemaではない**（観測・候補のPoC artifact）。
+
+- **見出し候補行**: 論理行の先頭tokenの**形**だけで拾う。形A=先頭が3桁で後続あり、形B=要求番号（1〜3桁）+ `NN-NN`。コード値・「組織」「項」の語は見ない。金額は解釈しない（△/▲/-の推定・blank→0・差額計算なし）。
+- **level**: view（summary=総表 / detail=明細。呼び出し側が与える入力で自動判別はしない）ごとに key token のxMinを単一連結クラスタリング（隣接差 ≤ 0.25×基準フォントサイズ。支持2行未満は unplaced）し、xの昇順の順位をlevelとする。levelは意味の型ではない。実データでは明細が約1em（6.9pt）刻み、総表が約0.5em刻みの階段。
+- **親子候補**: 文書順（ページ昇順→行順）のstack。level以上のtopをpopし、残ったtopを親候補とする。levelが連続なら `resolved_by_indent_sequence`、飛ぶなら `level_gap`（ambiguous）、親無しなら `unresolved`。祖先候補（stack全体）・縦の行数・ページ遷移（親が同一ページか）をevidenceとして保持。見出し形状を持たない行（過年度表など）はstackに載らず親にならない。親見出しが再掲されないページの要求も、stackが前ページの親へ辿る。
+- **provenance**: 全nodeが `sourceRowRefs`（LogicalRowCandidate / PhysicalRowCandidate）と `sourceTokenRefs`（SourceToken.index）、rawTextの `observedCodeParts` / `observedTextParts`、`xIndentEvidence`、頁数列の候補（`printedPageRefCandidate`）を持つ。
+- **評価の分離**: GT（目次由来）を読むのは評価CLI・テストだけ。推論側がGT・評価・凍結層をimportしないこと、GTのコード値・名称を埋め込んでいないことをテストで確認。
+- **既知の制約（v1）**: ①範囲に組織が1つしか無いと、根のインデント段の支持が1行になり unplaced となり levelが1つずれる（`minClusterSupport=2`が必要。範囲に2組織以上を含める） ②x階段の係数は 0.05〜0.49 で結果が同一だが、0.5以上では総表の階段が1つに融合し全て unresolved に縮退する（false parentにはならない） ③右側の備考欄の「3桁+テキスト」行も見出し候補になる（xが遠く、親にも左側の行の子孫にもならないが、node数を増やす） ④頁数列の候補は4桁だけのtokenに限る ⑤MHLW 1文書のみ（他省庁・他のsummary構造は未確認）。
+- **実験契約**: `--mhlw-poc` の入力は MHLW `05-1b-01.pdf` の総表 物理p19–20 と 明細 物理p1555–1700（070・080 の部分木を覆う走査範囲の指定で、親子関係は含まない）。評価は development=組織070の部分木 / holdout=組織080の部分木。評価専用GTは `tests/fixtures/budget-request-document-hierarchy/2024/mhlw-toc-hierarchy-gt-extended.json`（目次由来・37ノード。research repo の11ノードGTを包含）。目次から作ったGTで同じ目次を読むのではなく、総表+明細見出し（body側）から復元して目次GTで評価する。結果が当初の基準を満たさなかったとき基準を動かさず、v1/v2 として分けて記録する。
+
 ## 8. V1/V2比較方法
 
 ```bash
