@@ -348,6 +348,41 @@ SemanticRecordCandidate（anchor候補）が `detail_candidate`（主要明細�
   既知のfalse anchor（METI p9 `27 …`、MHLW p1268 `1260 …`、MEXT p876 `884 …`）は3例とも page_relative_top + isolated_layout + lacks_field_structure のheading evidenceが揃い `heading_candidate`、detail evidenceは無し。detail controlは、METI p9の `01-95` 等が three_amount_groups + repeated_amount_columns、MEXT p876の `95016-…` が加えて family_membership、MHLW p1555の下部 `01-95` が three_amount_groups + repeated_amount_columns（上部の大構造のregionはevidenceに混入しない）。MHLW p1268 の `020` は金額3列が同じ行に無いが `heading_candidate` に確定せず `ambiguous`（lacks_field_structure と isolated_layout はあるが page_relative_top を満たさない）。
 - **negative findings**: ①MHLW p1268の `020` は top帯の境界に近い（yMin比 0.187 vs 帯 0.15。1.25×の帯 0.1875 では heading evidence が揃い classification が変わるので unstable）。見出し側の判定は top帯の設定に敏感で、`020` を ambiguous に残せたのは余裕の薄い結果 ②MHLW p1555の `010`（組織下の項目行）が `heading_candidate`（top帯の内側・金額が同じ行に無い・isolated）。detailの行が、金額が次の行にあるなどの理由で見出しに見える **false negative側のリスク**。これを避ける規則は今回入れていない ③METI p9の `001`（節見出しのように見える行）と `95016-2111-05-1360`、MEXT p876の `95016-2123-09-1010`（金額が見えない行）は ambiguous で残る ④blocking conflict と insufficient_evidence は、現在のevidence定義では実データで発生しない（detail側とheading側のevidenceが構造上ほぼ排他になる。`classifyFromEvidence` の単体テストでのみ検証）⑤family_membershipは階層のインデント（code左端）ごとにfamilyが分かれるため、METI p9では8 familyに分かれ、6件がisolated ⑥3例の共通evidenceは「ページ上端の帯・同じlayoutの仲間がいない・金額が3列見えない」で、**文字内容は使っていない**。3例にsample固有のevidenceは使っておらず（既知の3件を落とすための個別規則は無い）、同じ規則が3例すべてで同じevidenceを返した。ただし3件とも「ページ上端のごく近く」にある共通点があり、上端でない節見出し（METI p9の `001` 等）は ambiguous のままになる。
 
+### PageTemplateObservation PoC
+
+```text
+… → SemanticRecordCandidate → RecordAnchorResolver → PageTemplateObservation   ← ページ全体の行配置・反復・構造切替の観測
+```
+
+```bash
+npm run pipeline:v2:extract:budget-request-page-template -- 2024 --golden
+npm run pipeline:v2:extract:budget-request-page-template -- 2024 --sample=mhlw-ippan-p1555
+npm run pipeline:v2:extract:budget-request-page-template -- 2024 --document=<canonicalUrl> --page=<N>
+```
+
+出力: `data/work/budget-request-extraction/{year}/page-template-poc/{id}.json`（`schema: budget-request-page-template-poc/v1`。rowObservations / indentationClusters / amountColumnPatterns / rowFamilies / sequenceObservations / boundaryCandidates / hierarchyRelationCandidates / diagnostics）。実装は `lib/budget-request-page-template.ts`。
+
+局所的には似て見える「ページ見出し・節(グループ)行・階層の上位行」を区別する追加evidenceが、**ページ全体の観測**から得られるかを見るための層。semantic typeは確定せず、**RecordAnchorAssessment の classification / stable を featureに使わない**（assessmentIndexは参照のみ。テストで反転させても結果が同一なことを確認）。主要ロジックは文字内容を使わない（罫線tokenの文字クラスのみ）。特定のコード値・見出し語・個別行の例外ルールも、RecordAnchorのthreshold変更もない。
+
+- **観測単位**: LogicalRowCandidate（PhysicalRow・SourceTokenへ戻れる）。SemanticRecordCandidateにならなかった行も観測する。位置はraw(pt)とページ相対値の両方を保持。
+- **indentation cluster**: 行の開始x（先頭の単独の短いtokenのsegmentを飛ばした最初のsegmentの左端）を、最小値を起点にbin化（連鎖しない。幅 0.25×fontSize中央値）。階層（見出し/節/明細）への対応は付けない。
+- **amount column pattern**: 金額groupの右端の並びが反復するpattern（support数・spread・正規化位置）。3列=detailとは解釈しない。
+- **row family（PageRowFamily）**: (indent cluster, 金額列pattern, 罫線有無) が同じ行の反復。
+- **sequence / boundary**: 行のy順に前後のfamily・縦の間隔・行間比を再計算可能な形で保持。隣り合う行の間で、indent cluster変化・family変化・金額pattern出現/消失・縦の間隔の増加・font-size変化・region占有の変化の組み合わせを boundary candidate として記録（単独では確定しない）。
+- **hierarchy relation candidate**: indentと縦の並びから、行Bを子孫に持ちうる「開いている」行Aを、indent差が1段の上限（10×fontSize中央値）以内のもの全てを候補として保持し、複数あれば競合として残す（winnerを選ばない）。indentの跳びは列の違いとして、遠い祖先とは結ばず新しい列の起点にする。親/子のsemantic名は付けない。
+- **sensitivity**: 位置の揃い・indent差の上限・縦の間隔の閾値を 0.8×/1.25× に振った変化を `diagnostics.sensitivity` に記録。
+- **結果（FY2024 Golden Sample）**:
+
+| サンプル | row | indent cluster | amount pattern | row family | isolated | boundary | hierarchy候補 | unstable（boundary / hierarchy） |
+|---|---|---|---|---|---|---|---|---|
+| METI p9 | 35 | 14 | 1 | 15 | 12 | 18 | 121 | 6 / 119 |
+| MHLW p1268 | 54 | 10 | 1 | 11 | 6 | 51 | 1 | 1 / 0 |
+| MHLW p1555 | 39 | 14 | 1 | 14 | 10 | 21 | 4 | 1 / 0 |
+| MEXT p876 | 37 | 12 | 1 | 13 | 8 | 36 | 12 | 13 / 4 |
+
+- **文脈の比較（`010` と既知のページ見出し候補）**: 同じ点: どれも自分のindent clusterと row family が単独（size 1）で、後続に金額patternを持つ子孫行がない（hierarchyのdescendantは 0）。違う点: 既知の見出し候補（METI `27` / MHLW p1268 `1260` / MEXT `884`）は、**それより前（ページ上側）に金額列patternを持つ行が無く、直前の行も金額patternを持たない**（先頭付近の行）のに対し、MHLW p1555 の `010` は直前の行（`070`）が金額patternを持ち、境界に `amount_pattern_disappears` と `vertical_gap_increase` がある。ただしこの差は「ページ上端の見出しか、データ行の後か」という位置の違いで、RecordAnchorの `page_relative_top` とほぼ同じ情報であり、独立した追加evidenceと言えるかは今回の4サンプルでは判断できない。
+- **negative findings**: ①階層候補はindentが段々深くなる連なり（METI p9のcode列）で推移的に膨らむ（121件、25行が複数の妥当な祖先を持ち、119件が複数候補由来でunstable）。階層としての解像度は低い ②indent clusterは階層の段ごとに分かれ、METI p9は14 cluster・15 family（単独12）。row familyが「同じ階層の反復」より「同じ階層の1行」に細分化される（RecordAnchorの8 family/isolated 6より過分割） ③右側の罫線表（MHLW p1268）のindentの跳びは列の違いとして階層候補から外したが、先に遠い祖先まで推移的に結ぶ実装では左側の行から右側の表への偽の階層候補が出た（修正して除去。感度1.25×では17件増える）。MHLW p1268の `1260` は `020` の祖先候補（indentが深い）として残る ④`010` でも、`27`・`884` でも、descendant・family・indent evidenceでは区別できず、区別できたのは位置（直前に金額patternを持つ行があるか）だけ ⑤boundary candidateはほぼ全ての隣接行で複数のevidenceが同時に立ち（MHLW p1268は隣り合う53組中51組）、単独では区切りの判断に使えない ⑥罫線表（ruled）の行はfamilyの鍵にrule有無を入れたが、罫線のgrid構造は観測できていない ⑦amount patternは4サンプルとも1つ（金額列は1ページ内で1種類）。patternの種類が複数あるページでの挙動は未確認。
+
 ## 8. V1/V2比較方法
 
 ```bash
