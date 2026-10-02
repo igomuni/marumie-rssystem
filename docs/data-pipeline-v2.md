@@ -281,6 +281,41 @@ npm run pipeline:v2:extract:budget-request-region-relation -- 2024 --document=<c
 - **negative findings**: ①relation候補が多い（66〜113件）。ほとんどが「rowがregionにtokenを持つ」所属で、近接候補としての情報は少ない ②region ambiguityの伝播が支配的（MEXT p876はregion 4つすべてがambiguousで、113件すべてのrelationが `target_region_is_ambiguous`、stableは0。MHLW p1268も stable 3/86）。前段のregion層の不安定さをrelation層が解消できない ③cutoffで候補が入れ替わる（p1268は0.8×で7件消え、1.25×で5件増える） ④logical rowがambiguousなこと（p1268は40件）もunstable理由として伝播する ⑤競合候補はヘッダー帯の隣接regionに多く、意味の手がかり無しにどれを採るかは決められない。
 - **安全条件**: MHLW p1555の上部の大構造と下部 `01-95` の行・region の間に直接のrelation候補は生成されない（垂直gap 48.6pt > cutoff 13.9pt。このページのphysical row間隔の中央値が6.94ptのため。cutoffを約3.5倍に広げると現れるので、安全の余裕は約3.5倍）。なお垂直cutoffは「physical row間隔の中央値」に比例するため、ページごとに値が変わる（折り返しや半行ピッチの行が多いページでは小さくなる）。
 
+### SemanticRecordCandidate PoC（主要明細行候補）
+
+```text
+SourceToken → TableGeometry → LogicalRowResolver → SpatialRegionDetector → RegionRelationResolver   ← ここまで geometry / observation
+  → SemanticRecordCandidate（detail_record_candidate）   ← 初めての semantic interpretation の「候補」層
+```
+
+```bash
+npm run pipeline:v2:extract:budget-request-semantic-record -- 2024 --golden
+npm run pipeline:v2:extract:budget-request-semantic-record -- 2024 --sample=meti-ippan-p9
+npm run pipeline:v2:extract:budget-request-semantic-record -- 2024 --document=<canonicalUrl> --page=<N>
+```
+
+出力: `data/work/budget-request-extraction/{year}/semantic-record-poc/{id}.json`（`schema: budget-request-semantic-record-poc/v1`。parameters / semanticRecordCandidates / unassignedSemanticObservations / diagnostics）。実装は `lib/budget-request-semantic-record.ts`。
+
+**SemanticRecordCandidate は最終的な LogicalDetailRecord ではない。** 前段までと違い、この層は rawText の内容を候補判定に使う（文字を変えれば結果が変わるのは正常。ただしgeometry層の結果は変わらない）。それでも、観測（evidence=token index・rawText）と解釈（interpretation）を分け、SourceTokenまで戻れるprovenanceを保ち、**unknown > guess / ambiguous > forced assignment** を維持する。
+
+- **anchor（detail code候補）**: text pattern（桁と区切りのコードらしい文字列）だけでは確定せず、geometry evidence を併用する: 行（最初のphysical row）のsegment先頭のtoken、または先頭segmentが単独の数字tokenのときの2つ目のsegment先頭のtoken、かつ同じsegmentで後続するtokenに文字（matter）がある。コードの左端の繰り返し配置も evidence に残す（ColumnBandは使わない）。条件を満たさないコードらしい文字列は捨てず `diagnostics.regexOnlyCodeMatches` に残す。
+- **matter**: token参照（tokenIndexes / rawTexts / physicalRowIndexes）。LogicalRowResolverのcontinuationで開始位置が揃う継続行のtokenを参照として追加。`previewText` は表示確認用の **non-authoritative** な値（source truthではない）。
+- **金額**: anchor行のmatterの右にある金額らしいtoken（桁・カンマ）を、x-gapでgroupにする。canonical valueは作らず（数値へparseしない）、`tokenIndexes`（content stream順）と `visualTokenIndexes`（x順）を別に保持する（金額chunkの逆順を保つ）。**groupがちょうど3つのときだけ**、previous/request/difference を列順の「候補」として付ける（`interpretation: *_by_column_order`）。3つでなければ割り当てず ambiguity（`amount_group_count_not_3`）。空欄を0にしない・差額を計算しない・値の大小から符号を推測しない。
+- **符号**: 金額groupの直前（他のtokenを挟まない）に実際の `△` `▲` `-` のSourceTokenがあるときだけ `signObservation`（tokenIndex・rawText・gapToGroup）。無ければ `null`。signは別列に置かれることがあり距離が大きければ `sign_attachment_distance_large` のambiguity。
+- **relatedStructures**: logical row → SpatialRegion のRegionRelation refを、`membership`（rowのtokenがregionに属する）/ `proximity`（近接のみ）/ `mixed` のevidenceKindで保持。stable / unstable のrelation indexを別々に保持し、**stable relationだけを使わない**（unstableでも捨てず、candidateの `status` を `ambiguous` にする）。semantic type（request_summary等）は付けず、nearest winnerも作らない。
+- **unassigned**: anchorに属さない金額らしいtoken群・sign tokenは `unassignedSemanticObservations` に残す（捨てない）。
+- **結果（FY2024 Golden Sample）**:
+
+| サンプル | candidate | うちambiguous | 金額group | sign | 関連構造 | unassigned | regexだけ一致（非anchor） |
+|---|---|---|---|---|---|---|---|
+| METI p9 | 28 | 25 | 72（3つ: 24行） | 6 | 56（membership53 / proximity3） | 5 | 69 |
+| MHLW p1268 | 2 | 2 | 1 | 0 | 6 | 48 | 5 |
+| MHLW p1555 | 3 | 2 | 6 | 0 | 8 | 45 | 36 |
+| MEXT p876 | 6 | 6 | 12（3つ: 4行） | 0 | 17 | 100 | 60 |
+
+- **negative findings**: ①regex + 行頭のgeometryでも、ページ見出し（METI `27 経済産業省所管`、MEXT `884 文（本）`、MHLW `1260 厚（ハ）`）が anchor になる（誤検出）。ページ見出しと明細行を区別するevidenceがまだ無い ②regexだけではコードを確定できない: 金額chunkの末尾（`005` `829` 等）も桁だけ見ればコードに一致する（69/36/60件がanchor外として残った）。金額側も、MHLW p1268の右側表の見出し `30 年度` の `30` が金額groupとして誤検出された ③matter境界が曖昧: 直後のlogical rowがambiguousで継続の可能性があるcandidateは `matter_boundary_possible_continuation`（MEXT p876は6件中4件） ④金額groupの境界が曖昧: MEXTで金額の右にある積算側の数字が `amount_like_tokens_beyond_text_boundary` として残る ⑤前段のregion/relationの不安定さがsemantic層へ伝播: MEXT p876は前段のstable relationが0で、6件のcandidateすべてが ambiguous。関連構造の参照は保持できた（17件のunstable ref）が、確定はできない ⑥METI型（コード+事項名+3列の金額）とMHLW型（p1268は継続ページで、行頭コード+事項名のみで金額が同一行にない）で anchor evidence は共通だが、金額groupの数が異なる。金額列のgeometryは、1ページ内で再利用できる（同じ順序番号のgroupの右端は1つに揃う）だけでなく、金額groupが3つ見えた3サンプル（METI p9・MHLW p1555・MEXT p876）で右端の中央値が同一（255.4 / 307.2 / 462.5pt）だった。同じ様式のテンプレートを使っている可能性があるが、検出ロジックにはこの座標を使っておらず（hard-codeしない）、4サンプルだけでは省庁横断で再利用できるとは言えない ⑦MEXT p876の右側積算（1,2,3…の階層・単価×人数×回数）はanchorを持たないため、金額らしいtoken群（100件）がunassignedとして残るだけで、構造としては保持できていない。
+- **安全条件**: MHLW p1555の下部 `01-95` の候補へ、上部の大構造のregionを関連構造として付けていない。符号の推測・空欄の0化・差額の計算はしていない。
+
 ## 8. V1/V2比較方法
 
 ```bash
