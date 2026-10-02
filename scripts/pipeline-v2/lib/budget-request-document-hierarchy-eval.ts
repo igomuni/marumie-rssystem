@@ -97,7 +97,11 @@ export type SummaryMatchMode = 'pageRef' | 'codeName';
 export interface MatchOptions {
   nameOnly?: boolean;
   ordinalTiebreak?: boolean;
+  /** v2-experimental の hierarchyEligibility==='excluded' のnodeも照合の候補に含める（既定は含めない。「GTのnodeが誤って除外されていないか」の検査用） */
+  includeExcluded?: boolean;
 }
+
+const isExcluded = (n: DocumentHierarchyNodeObservation): boolean => (n as unknown as { hierarchyEligibility?: string }).hierarchyEligibility === 'excluded';
 
 export function matchGtNodes(result: DocumentHierarchyResult, gt: GtNode[], pageOffset: number, nameTiebreak = true, summaryMode: SummaryMatchMode = 'pageRef', opts: MatchOptions = {}): MatchResult {
   const matched = new Map<string, DocumentHierarchyNodeObservation>();
@@ -105,6 +109,7 @@ export function matchGtNodes(result: DocumentHierarchyResult, gt: GtNode[], page
   for (const g of gt) {
     const wantShape = g.requestNo ? 'request_no_then_code' : 'code3_then_text';
     const cands = result.nodes.filter(n => {
+      if (!opts.includeExcluded && isExcluded(n)) return false;
       if (n.rowShape !== wantShape) return false;
       if (normCode(n.observedCodeParts.code) !== normCode(g.code)) return false;
       if (g.requestNo && n.observedCodeParts.requestNo !== g.requestNo) return false;
@@ -218,4 +223,11 @@ export function verdictOf(c: Counts): Verdict {
   if (exact >= 0.9 && fals <= 0.05 && depth >= 0.9) return 'SUCCESS';
   if (exact >= 0.5 && fals <= 0.1) return 'PARTIAL';
   return 'FAIL';
+}
+
+/** GTのnodeに対応する推論nodeのうち、hierarchyEligibility==='excluded' になっているものの数（本物の見出しを消していないかの検査。v1 artifactでは常に0） */
+export function countExcludedGtMatches(result: DocumentHierarchyResult, gt: GtNode[], pageOffset: number, summaryMode: SummaryMatchMode = 'pageRef', opts: MatchOptions = {}): { excluded: number; keys: string[] } {
+  const m = matchGtNodes(result, gt, pageOffset, true, summaryMode, { ...opts, includeExcluded: true });
+  const keys = [...m.matched.entries()].filter(([, n]) => isExcluded(n)).map(([k]) => k);
+  return { excluded: keys.length, keys };
 }
