@@ -1,0 +1,849 @@
+{
+ "schemaVersion": "budget-request-document-hierarchy-gt/v1",
+ "purpose": "EVALUATION ONLY. Inference code (budget-request-document-hierarchy.ts and the experiment runner) must never read, import or reference this file. Read only by the evaluator and tests. Frozen before any v1 run on this document (pre-observation contract commit).",
+ "frozenBeforeV1Run": true,
+ "method": "Transcribed mechanically from the document's own table of contents (poppler pdftotext -layout, page cropped into left/right columns at x=408pt, then regex over the printed lines: （組織）NNN name page / （項）NNN name page / request-no NN-NN name page). Names are the first printed line of each entry (wrapped continuation lines are not joined). Independent consistency checks (not derived from any v1 output): request numbers are consecutive 1..N, printed start pages are non-decreasing in document order, every item has at least one request. The extraction script is a scratch tool and is not committed; this fixture is the artifact.",
+ "codeNote": "Request codes written with ASCII '-'. depth 1/2/3 = organization/item/request (labels of this evaluation file only; not inference outputs). set='test': v1 is frozen so there is no development set; all nodes are out-of-sample.",
+ "source": {
+  "ministry": "METI",
+  "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+  "tocPages": "physical 3-4 (printed 1-2)"
+ },
+ "detailPrintedToPhysicalPageOffset": 4,
+ "offsetBasis": "header of physical p9 prints 経（本） 5; physical p66 prints 62 経（局）; physical p106 prints 102",
+ "counts": {
+  "organizations": 5,
+  "items": 32,
+  "requests": 50
+ },
+ "nodes": [
+  {
+   "key": "org-010",
+   "depth": 1,
+   "code": "010",
+   "name": "経済産業本省",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "item-010-010",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "010",
+   "name": "経済産業本省共通費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "req-1",
+   "depth": 3,
+   "parent": "item-010-010",
+   "requestNo": "1",
+   "code": "01-95",
+   "name": "経済産業本省一般行政に必要な経費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "req-2",
+   "depth": 3,
+   "parent": "item-010-010",
+   "requestNo": "2",
+   "code": "11-95",
+   "name": "審議会等に必要な経費",
+   "printedStartPage": 16,
+   "set": "test"
+  },
+  {
+   "key": "req-3",
+   "depth": 3,
+   "parent": "item-010-010",
+   "requestNo": "3",
+   "code": "19-95",
+   "name": "経済産業に関する政策の調査等に必要な経費",
+   "printedStartPage": 18,
+   "set": "test"
+  },
+  {
+   "key": "req-4",
+   "depth": 3,
+   "parent": "item-010-010",
+   "requestNo": "4",
+   "code": "20-95",
+   "name": "国際会議に必要な経費",
+   "printedStartPage": 19,
+   "set": "test"
+  },
+  {
+   "key": "req-5",
+   "depth": 3,
+   "parent": "item-010-010",
+   "requestNo": "5",
+   "code": "76-95",
+   "name": "経済産業研修所に必要な経費",
+   "printedStartPage": 20,
+   "set": "test"
+  },
+  {
+   "key": "item-010-020",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "020",
+   "name": "経済産業本省施設費",
+   "printedStartPage": 22,
+   "set": "test"
+  },
+  {
+   "key": "req-6",
+   "depth": 3,
+   "parent": "item-010-020",
+   "requestNo": "6",
+   "code": "01-95",
+   "name": "経済産業本省施設整備に必要な経費",
+   "printedStartPage": 22,
+   "set": "test"
+  },
+  {
+   "key": "item-010-040",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "040",
+   "name": "独立行政法人経済産業研究所運営費",
+   "printedStartPage": 22,
+   "set": "test"
+  },
+  {
+   "key": "req-7",
+   "depth": 3,
+   "parent": "item-010-040",
+   "requestNo": "7",
+   "code": "01-95",
+   "name": "独立行政法人経済産業研究所運営費交付金に必要な経費",
+   "printedStartPage": 22,
+   "set": "test"
+  },
+  {
+   "key": "item-010-045",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "045",
+   "name": "独立行政法人日本貿易振興機構運営費",
+   "printedStartPage": 22,
+   "set": "test"
+  },
+  {
+   "key": "req-8",
+   "depth": 3,
+   "parent": "item-010-045",
+   "requestNo": "8",
+   "code": "05-95",
+   "name": "独立行政法人日本貿易振興機構運営費交付金に必要な経費",
+   "printedStartPage": 22,
+   "set": "test"
+  },
+  {
+   "key": "item-010-110",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "110",
+   "name": "国立研究開発法人日本原子力研究開発機構出資",
+   "printedStartPage": 23,
+   "set": "test"
+  },
+  {
+   "key": "req-9",
+   "depth": 3,
+   "parent": "item-010-110",
+   "requestNo": "9",
+   "code": "01-13",
+   "name": "国立研究開発法人日本原子力開発機構出資に必要な経費",
+   "printedStartPage": 23,
+   "set": "test"
+  },
+  {
+   "key": "item-010-120",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "120",
+   "name": "国立研究開発法人産業技術総合研究所運営費",
+   "printedStartPage": 24,
+   "set": "test"
+  },
+  {
+   "key": "req-10",
+   "depth": 3,
+   "parent": "item-010-120",
+   "requestNo": "10",
+   "code": "01-13",
+   "name": "国立研究開発法人産業技術総合研究所運営費交付金に必要な経費",
+   "printedStartPage": 24,
+   "set": "test"
+  },
+  {
+   "key": "item-010-125",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "125",
+   "name": "国立研究開発法人産業技術総合研究所施設整備費",
+   "printedStartPage": 24,
+   "set": "test"
+  },
+  {
+   "key": "req-11",
+   "depth": 3,
+   "parent": "item-010-125",
+   "requestNo": "11",
+   "code": "01-13",
+   "name": "国立研究開発法人産業技術総合研究所施設整備に必要な経費",
+   "printedStartPage": 24,
+   "set": "test"
+  },
+  {
+   "key": "item-010-126",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "126",
+   "name": "国立研究開発法人新エネルギー・産業技術総合開発機構運営費",
+   "printedStartPage": 25,
+   "set": "test"
+  },
+  {
+   "key": "req-12",
+   "depth": 3,
+   "parent": "item-010-126",
+   "requestNo": "12",
+   "code": "01-13",
+   "name": "国立研究開発法人新エネルギー・産業技術総合開発機構運営費交付金に必要な",
+   "printedStartPage": 25,
+   "set": "test"
+  },
+  {
+   "key": "item-010-127",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "127",
+   "name": "独立行政法人情報処理推進機構運営費",
+   "printedStartPage": 25,
+   "set": "test"
+  },
+  {
+   "key": "req-13",
+   "depth": 3,
+   "parent": "item-010-127",
+   "requestNo": "13",
+   "code": "01-13",
+   "name": "独立行政法人情報処理推進機構運営費交付金に必要な経費",
+   "printedStartPage": 25,
+   "set": "test"
+  },
+  {
+   "key": "item-010-140",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "140",
+   "name": "独立行政法人製品評価技術基盤機構運営費",
+   "printedStartPage": 26,
+   "set": "test"
+  },
+  {
+   "key": "req-14",
+   "depth": 3,
+   "parent": "item-010-140",
+   "requestNo": "14",
+   "code": "01-95",
+   "name": "独立行政法人製品評価技術基盤機構運営費交付金に必要な経費",
+   "printedStartPage": 26,
+   "set": "test"
+  },
+  {
+   "key": "item-010-145",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "145",
+   "name": "独立行政法人製品評価技術基盤機構施設整備費",
+   "printedStartPage": 26,
+   "set": "test"
+  },
+  {
+   "key": "req-15",
+   "depth": 3,
+   "parent": "item-010-145",
+   "requestNo": "15",
+   "code": "01-95",
+   "name": "独立行政法人製品評価技術基盤機構施設整備に必要な経費",
+   "printedStartPage": 26,
+   "set": "test"
+  },
+  {
+   "key": "item-010-180",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "180",
+   "name": "工業用水道事業費",
+   "printedStartPage": 26,
+   "set": "test"
+  },
+  {
+   "key": "req-16",
+   "depth": 3,
+   "parent": "item-010-180",
+   "requestNo": "16",
+   "code": "01-45",
+   "name": "工業用水道事業に必要な経費",
+   "printedStartPage": 26,
+   "set": "test"
+  },
+  {
+   "key": "item-010-421",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "421",
+   "name": "登録免許税納付確認等事務費特許特別会計へ繰入",
+   "printedStartPage": 27,
+   "set": "test"
+  },
+  {
+   "key": "req-17",
+   "depth": 3,
+   "parent": "item-010-421",
+   "requestNo": "17",
+   "code": "66-95",
+   "name": "登録免許税納付確認等事務の財源の特許特別会計へ繰入れに必要な経費",
+   "printedStartPage": 27,
+   "set": "test"
+  },
+  {
+   "key": "item-010-500",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "500",
+   "name": "経済構造改革推進費",
+   "printedStartPage": 27,
+   "set": "test"
+  },
+  {
+   "key": "req-18",
+   "depth": 3,
+   "parent": "item-010-500",
+   "requestNo": "18",
+   "code": "01-60",
+   "name": "中小企業の経済構造改革の推進に必要な経費",
+   "printedStartPage": 27,
+   "set": "test"
+  },
+  {
+   "key": "req-19",
+   "depth": 3,
+   "parent": "item-010-500",
+   "requestNo": "19",
+   "code": "05-95",
+   "name": "経済構造改革の推進に必要な経費",
+   "printedStartPage": 30,
+   "set": "test"
+  },
+  {
+   "key": "item-010-510",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "510",
+   "name": "対外経済政策推進費",
+   "printedStartPage": 32,
+   "set": "test"
+  },
+  {
+   "key": "req-20",
+   "depth": 3,
+   "parent": "item-010-510",
+   "requestNo": "20",
+   "code": "01-50",
+   "name": "経済協力に係る対外経済関係の円滑な発展に必要な経費",
+   "printedStartPage": 32,
+   "set": "test"
+  },
+  {
+   "key": "req-21",
+   "depth": 3,
+   "parent": "item-010-510",
+   "requestNo": "21",
+   "code": "03-13",
+   "name": "対外経済関係の円滑な発展に係る研究開発等に必要な経費",
+   "printedStartPage": 36,
+   "set": "test"
+  },
+  {
+   "key": "req-22",
+   "depth": 3,
+   "parent": "item-010-510",
+   "requestNo": "22",
+   "code": "05-60",
+   "name": "中小企業の対外経済関係の円滑な発展に必要な経費",
+   "printedStartPage": 36,
+   "set": "test"
+  },
+  {
+   "key": "req-23",
+   "depth": 3,
+   "parent": "item-010-510",
+   "requestNo": "23",
+   "code": "10-95",
+   "name": "対外経済関係の円滑な発展に必要な経費",
+   "printedStartPage": 39,
+   "set": "test"
+  },
+  {
+   "key": "item-010-520",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "520",
+   "name": "産業技術・環境・産業標準政策推進費",
+   "printedStartPage": 43,
+   "set": "test"
+  },
+  {
+   "key": "req-24",
+   "depth": 3,
+   "parent": "item-010-520",
+   "requestNo": "24",
+   "code": "01-13",
+   "name": "産業技術・環境・産業標準政策の研究開発等に必要な経費",
+   "printedStartPage": 43,
+   "set": "test"
+  },
+  {
+   "key": "req-25",
+   "depth": 3,
+   "parent": "item-010-520",
+   "requestNo": "25",
+   "code": "06-60",
+   "name": "中小企業の産業技術・環境・産業標準政策の推進に必要な経費",
+   "printedStartPage": 46,
+   "set": "test"
+  },
+  {
+   "key": "item-010-530",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "530",
+   "name": "情報処理・サービス・製造産業振興費",
+   "printedStartPage": 48,
+   "set": "test"
+  },
+  {
+   "key": "req-26",
+   "depth": 3,
+   "parent": "item-010-530",
+   "requestNo": "26",
+   "code": "01-13",
+   "name": "情報処理の促進及びサービス・製造産業の振興に係る研究開発等に必要な経費",
+   "printedStartPage": 48,
+   "set": "test"
+  },
+  {
+   "key": "req-27",
+   "depth": 3,
+   "parent": "item-010-530",
+   "requestNo": "27",
+   "code": "06-60",
+   "name": "中小企業の情報処理の促進及びサービス・製造産業の振興に必要な経費",
+   "printedStartPage": 50,
+   "set": "test"
+  },
+  {
+   "key": "req-28",
+   "depth": 3,
+   "parent": "item-010-530",
+   "requestNo": "28",
+   "code": "11-95",
+   "name": "情報処理の促進及びサービス・製造産業の振興に必要な経費",
+   "printedStartPage": 57,
+   "set": "test"
+  },
+  {
+   "key": "req-29",
+   "depth": 3,
+   "parent": "item-010-530",
+   "requestNo": "29",
+   "code": "16-60",
+   "name": "中小企業電子経済産業省構築事業に必要な経費",
+   "printedStartPage": 58,
+   "set": "test"
+  },
+  {
+   "key": "req-30",
+   "depth": 3,
+   "parent": "item-010-530",
+   "requestNo": "30",
+   "code": "21-95",
+   "name": "電子経済産業省構築事業に必要な経費",
+   "printedStartPage": 58,
+   "set": "test"
+  },
+  {
+   "key": "item-010-540",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "540",
+   "name": "産業保安確保費",
+   "printedStartPage": 59,
+   "set": "test"
+  },
+  {
+   "key": "req-31",
+   "depth": 3,
+   "parent": "item-010-540",
+   "requestNo": "31",
+   "code": "06-60",
+   "name": "中小企業の産業保安の確保に必要な経費",
+   "printedStartPage": 59,
+   "set": "test"
+  },
+  {
+   "key": "req-32",
+   "depth": 3,
+   "parent": "item-010-540",
+   "requestNo": "32",
+   "code": "11-95",
+   "name": "産業保安の確保に必要な経費",
+   "printedStartPage": 59,
+   "set": "test"
+  },
+  {
+   "key": "item-010-550",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "550",
+   "name": "地域経済政策推進費",
+   "printedStartPage": 59,
+   "set": "test"
+  },
+  {
+   "key": "req-33",
+   "depth": 3,
+   "parent": "item-010-550",
+   "requestNo": "33",
+   "code": "01-60",
+   "name": "中小企業の地域経済の発展に必要な経費",
+   "printedStartPage": 59,
+   "set": "test"
+  },
+  {
+   "key": "req-34",
+   "depth": 3,
+   "parent": "item-010-550",
+   "requestNo": "34",
+   "code": "06-95",
+   "name": "地域経済産業活性化に必要な経費",
+   "printedStartPage": 61,
+   "set": "test"
+  },
+  {
+   "key": "org-035",
+   "depth": 1,
+   "code": "035",
+   "name": "経済産業局",
+   "printedStartPage": 62,
+   "set": "test"
+  },
+  {
+   "key": "item-035-010",
+   "depth": 2,
+   "parent": "org-035",
+   "code": "010",
+   "name": "経済産業局",
+   "printedStartPage": 62,
+   "set": "test"
+  },
+  {
+   "key": "req-35",
+   "depth": 3,
+   "parent": "item-035-010",
+   "requestNo": "35",
+   "code": "01-95",
+   "name": "経済産業局一般行政に必要な経費",
+   "printedStartPage": 62,
+   "set": "test"
+  },
+  {
+   "key": "item-035-020",
+   "depth": 2,
+   "parent": "org-035",
+   "code": "020",
+   "name": "経済産業局施設費",
+   "printedStartPage": 75,
+   "set": "test"
+  },
+  {
+   "key": "req-36",
+   "depth": 3,
+   "parent": "item-035-020",
+   "requestNo": "36",
+   "code": "05-95",
+   "name": "経済産業局施設整備に必要な経費",
+   "printedStartPage": 75,
+   "set": "test"
+  },
+  {
+   "key": "org-037",
+   "depth": 1,
+   "code": "037",
+   "name": "産業保安監督官署",
+   "printedStartPage": 78,
+   "set": "test"
+  },
+  {
+   "key": "item-037-010",
+   "depth": 2,
+   "parent": "org-037",
+   "code": "010",
+   "name": "産業保安監督官署",
+   "printedStartPage": 78,
+   "set": "test"
+  },
+  {
+   "key": "req-37",
+   "depth": 3,
+   "parent": "item-037-010",
+   "requestNo": "37",
+   "code": "05-95",
+   "name": "産業保安監督官署一般行政に必要な経費",
+   "printedStartPage": 78,
+   "set": "test"
+  },
+  {
+   "key": "org-040",
+   "depth": 1,
+   "code": "040",
+   "name": "資源エネルギー庁",
+   "printedStartPage": 81,
+   "set": "test"
+  },
+  {
+   "key": "item-040-010",
+   "depth": 2,
+   "parent": "org-040",
+   "code": "010",
+   "name": "資源エネルギー庁共通費",
+   "printedStartPage": 81,
+   "set": "test"
+  },
+  {
+   "key": "req-38",
+   "depth": 3,
+   "parent": "item-040-010",
+   "requestNo": "38",
+   "code": "01-95",
+   "name": "資源エネルギー庁一般行政に必要な経費",
+   "printedStartPage": 81,
+   "set": "test"
+  },
+  {
+   "key": "req-39",
+   "depth": 3,
+   "parent": "item-040-010",
+   "requestNo": "39",
+   "code": "06-95",
+   "name": "総合資源エネルギー調査会に必要な経費",
+   "printedStartPage": 86,
+   "set": "test"
+  },
+  {
+   "key": "req-40",
+   "depth": 3,
+   "parent": "item-040-010",
+   "requestNo": "40",
+   "code": "11-95",
+   "name": "国際会議に必要な経費",
+   "printedStartPage": 87,
+   "set": "test"
+  },
+  {
+   "key": "item-040-015",
+   "depth": 2,
+   "parent": "org-040",
+   "code": "015",
+   "name": "原子力損害賠償支援対策費エネルギー対策特別会計へ繰入",
+   "printedStartPage": 87,
+   "set": "test"
+  },
+  {
+   "key": "req-41",
+   "depth": 3,
+   "parent": "item-040-015",
+   "requestNo": "41",
+   "code": "01-63",
+   "name": "原子力損害賠償支援対策の財源のエネルギー対策特別会計原子力損害賠償支援",
+   "printedStartPage": 87,
+   "set": "test"
+  },
+  {
+   "key": "item-040-020",
+   "depth": 2,
+   "parent": "org-040",
+   "code": "020",
+   "name": "鉱物資源安定供給確保費",
+   "printedStartPage": 87,
+   "set": "test"
+  },
+  {
+   "key": "req-42",
+   "depth": 3,
+   "parent": "item-040-020",
+   "requestNo": "42",
+   "code": "01-95",
+   "name": "鉱物資源の安定供給の確保に必要な経費",
+   "printedStartPage": 88,
+   "set": "test"
+  },
+  {
+   "key": "item-040-030",
+   "depth": 2,
+   "parent": "org-040",
+   "code": "030",
+   "name": "石油石炭税財源燃料安定供給対策及エネルギー需給構造高度化対策費エネルギ",
+   "printedStartPage": 88,
+   "set": "test"
+  },
+  {
+   "key": "req-43",
+   "depth": 3,
+   "parent": "item-040-030",
+   "requestNo": "43",
+   "code": "01-63",
+   "name": "石油石炭税財源の燃料安定供給対策及エネルギー需給構造高度化対策に係るエ",
+   "printedStartPage": 88,
+   "set": "test"
+  },
+  {
+   "key": "item-040-040",
+   "depth": 2,
+   "parent": "org-040",
+   "code": "040",
+   "name": "電源開発促進税財源電源立地対策及電源利用対策費エネルギー対策特別会計へ",
+   "printedStartPage": 89,
+   "set": "test"
+  },
+  {
+   "key": "req-44",
+   "depth": 3,
+   "parent": "item-040-040",
+   "requestNo": "44",
+   "code": "01-63",
+   "name": "電源開発促進税財源の電源立地対策及電源利用対策に係るエネルギー対策特別",
+   "printedStartPage": 89,
+   "set": "test"
+  },
+  {
+   "key": "item-040-050",
+   "depth": 2,
+   "parent": "org-040",
+   "code": "050",
+   "name": "独立行政法人エネルギー・金属鉱物資源機構運営費",
+   "printedStartPage": 89,
+   "set": "test"
+  },
+  {
+   "key": "req-45",
+   "depth": 3,
+   "parent": "item-040-050",
+   "requestNo": "45",
+   "code": "01-95",
+   "name": "独立行政法人エネルギー・金属鉱物資源機構運営費交付金に必要な経費",
+   "printedStartPage": 89,
+   "set": "test"
+  },
+  {
+   "key": "org-060",
+   "depth": 1,
+   "code": "060",
+   "name": "中小企業庁",
+   "printedStartPage": 90,
+   "set": "test"
+  },
+  {
+   "key": "item-060-010",
+   "depth": 2,
+   "parent": "org-060",
+   "code": "010",
+   "name": "中小企業庁共通費",
+   "printedStartPage": 90,
+   "set": "test"
+  },
+  {
+   "key": "req-46",
+   "depth": 3,
+   "parent": "item-060-010",
+   "requestNo": "46",
+   "code": "01-60",
+   "name": "中小企業庁一般行政に必要な経費",
+   "printedStartPage": 90,
+   "set": "test"
+  },
+  {
+   "key": "req-47",
+   "depth": 3,
+   "parent": "item-060-010",
+   "requestNo": "47",
+   "code": "04-60",
+   "name": "審議会に必要な経費",
+   "printedStartPage": 93,
+   "set": "test"
+  },
+  {
+   "key": "item-060-030",
+   "depth": 2,
+   "parent": "org-060",
+   "code": "030",
+   "name": "中小企業政策推進費",
+   "printedStartPage": 94,
+   "set": "test"
+  },
+  {
+   "key": "req-48",
+   "depth": 3,
+   "parent": "item-060-030",
+   "requestNo": "48",
+   "code": "01-60",
+   "name": "中小企業政策の推進に必要な経費",
+   "printedStartPage": 94,
+   "set": "test"
+  },
+  {
+   "key": "item-060-063",
+   "depth": 2,
+   "parent": "org-060",
+   "code": "063",
+   "name": "独立行政法人中小企業基盤整備機構出資",
+   "printedStartPage": 101,
+   "set": "test"
+  },
+  {
+   "key": "req-49",
+   "depth": 3,
+   "parent": "item-060-063",
+   "requestNo": "49",
+   "code": "05-60",
+   "name": "独立行政法人中小企業基盤整備機構出資に必要な経費",
+   "printedStartPage": 101,
+   "set": "test"
+  },
+  {
+   "key": "item-060-080",
+   "depth": 2,
+   "parent": "org-060",
+   "code": "080",
+   "name": "独立行政法人中小企業基盤整備機構運営費",
+   "printedStartPage": 102,
+   "set": "test"
+  },
+  {
+   "key": "req-50",
+   "depth": 3,
+   "parent": "item-060-080",
+   "requestNo": "50",
+   "code": "01-60",
+   "name": "独立行政法人中小企業基盤整備機構運営費交付金に必要な経費",
+   "printedStartPage": 102,
+   "set": "test"
+  }
+ ]
+}
