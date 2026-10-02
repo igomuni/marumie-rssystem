@@ -146,6 +146,36 @@ failed
 - 内閣府の一般会計は確認済みの2本（`0.pdf`/`1.pdf`）のみで、実際は約50本に分割されている（`coverage: known-confirmed-files-only`）。内閣官房 `r6_01〜r6_17`（01〜15=一般会計、16〜17=復興特会）は確認済みhrefのみ。
 - 厚労省 `05-1b-01.pdf` は3.3MBだが1,723頁（`pdfinfo`確認済み）。法務省 `001402818.pdf` は約141MB（120秒timeout内に取得できる）。
 
+## 7-3. 概算要求PDFのExtraction基盤（入力検査のみ）
+
+取得済みの概算要求PDFを構造化データへ変換する工程の土台。**PDF本文の解析はまだしない**（明細行・数値・表構造の抽出は次のPoC）。Downloaderと同じmanifest（`getBudgetRequestManifest`）・同じpath解決（`localPathFor`）を使い、PDF一覧を二重に持たない。
+
+```bash
+npm run pipeline:v2:extract:budget-requests -- 2024                    # manifest→localPath→原本の存在・PDF妥当性を検査し Found/Missing/Invalid を集計
+npm run pipeline:v2:extract:budget-requests -- 2024 --only=meti.go.jp  # domainで絞る
+npm run pipeline:v2:extract:budget-requests -- 2024 --write-inventory  # 検査結果を data/work/.../2024/inventory.json へ書く
+```
+
+- 対象は概算要求書のdocument PDF（FY2024は82本）。検算用のreference（`sy050905.pdf`）は含めない。MISSING/INVALIDがあれば終了コード1。
+- 原本（`data/download/`）は読み取りのみ。解析途中の再生成可能な生成物は `data/work/budget-request-extraction/{year}/` に置く（`data/download`=原本 / `data/work`=解析途中 / `data/derived`=意味確定データ / `public/data`=アプリ配信用）。
+- Golden Sampleのlocator: `tests/fixtures/budget-request-extraction/{year}/golden-samples.json`。PDFはコピーせず、manifestのcanonical URL + PDF物理ページ番号（1始まり）で原本を参照する。正解データ（groundTruth）は人間がPDF原本を確認して作成するまで `pending-human-review`。FY2024の候補はNormal（METI `ippan_o.pdf` p9）/ Moderate（MHLW `05-1b-01.pdf` p1268）/ Extreme（同 p1555）。
+
+### SourceToken PoC（指定ページのtext layerと位置の取得）
+
+次段（TableGeometry等）に進めるだけのSource Fidelityが得られるかの検証。指定した1ページだけをpdf.jsで読み、文字列と位置を持つ `SourceToken` を `data/work/budget-request-extraction/{year}/source-token-poc/{id}.json` へ書く（`data/download` へは書かない）。全82 documentは走査しない。
+
+```bash
+npm run pipeline:v2:extract:budget-request-page -- 2024 --golden                       # Golden Sample全件
+npm run pipeline:v2:extract:budget-request-page -- 2024 --sample=mext-detail-p876      # idで指定
+npm run pipeline:v2:extract:budget-request-page -- 2024 --document=<canonicalUrl> --page=<N>
+```
+
+- **SourceTokenは意味的な「単語」ではない**: pdf.jsのtext item 1個 = 1 token。`rawText` は補正・正規化・trimなし（空文字・空白のみ・桁区切りの順序反転したchunkもそのまま）。単語化・行化・読み順・列/領域の分類・Core/Auxiliaryの関連付けは後段の責務で、PoCでは行わない。
+- **座標系**: 原点=ページ左上、x右が正、y下が正、単位pt（1/72 inch）。`bbox.yMin/yMax` は pdf.js のフォントmetrics（ascent/descent）から導いた文字のem上端/下端（glyphのインク範囲ではない近似）、`xMin/xMax` は `item.width` による。元のPDF user space（左下原点）の値は `transform` にそのまま保持。人間が過去に確認した座標（左端x・上端y）は `bbox.xMin/yMin` と同じ座標系。詳細は `lib/budget-request-source-token.ts` の冒頭コメント。
+- **PDFライブラリ**: `pdf-parse` 2.4.5 の公開API（getText/getTable等）はページ文字列のみでbboxを返さないため、`pdfjs-dist`（5.4.296、pdf-parseが使う版と同じ）を直接dependencyに追加して `legacy/build/pdf.mjs` を使う。
+- **評価専用の人間確認値**: `tests/fixtures/budget-request-extraction/{year}/human-observations.json`。抽出結果との比較にだけ使い、Extractorの入力・補正には使わない。実PDFを使うテスト（`*.golden.test.ts`）はローカルの `data/download/` が無い環境では自動skip。
+- Golden Sampleの4系統: Normal（METI `ippan_o.pdf` p9）/ Moderate（MHLW `05-1b-01.pdf` p1268）/ Extreme（同 p1555）/ Structured Remark（MEXT 第2表 `…000031817_03.pdf` p876。備考列に階層的な積算内訳が並ぶ）。
+
 ## 8. V1/V2比較方法
 
 ```bash
