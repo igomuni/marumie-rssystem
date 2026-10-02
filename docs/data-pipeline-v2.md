@@ -176,6 +176,24 @@ npm run pipeline:v2:extract:budget-request-page -- 2024 --document=<canonicalUrl
 - **評価専用の人間確認値**: `tests/fixtures/budget-request-extraction/{year}/human-observations.json`。抽出結果との比較にだけ使い、Extractorの入力・補正には使わない。実PDFを使うテスト（`*.golden.test.ts`）はローカルの `data/download/` が無い環境では自動skip。
 - Golden Sampleの4系統: Normal（METI `ippan_o.pdf` p9）/ Moderate（MHLW `05-1b-01.pdf` p1268）/ Extreme（同 p1555）/ Structured Remark（MEXT 第2表 `…000031817_03.pdf` p876。備考列に階層的な積算内訳が並ぶ）。
 
+### TableGeometry PoC（PhysicalRowCandidate / ColumnBandObservation）
+
+SourceTokenの次の中間層。**意味を決めない物理配置の観測のみ**（LogicalRowResolver・CoreFields・数値parse・△の判定・SourceRegion・Core/Auxiliary関連付けは次段）。`PhysicalRowCandidate` は「ページ上でほぼ同じ高さに配置されたSourceTokenの集合」で明細行ではない。`ColumnBandObservation` は「x座標の端の揃いとして観測した、縦方向に繰り返し現れる配置帯」で、事項・金額・備考等の意味ラベル（`columnName` / `regionType`）を持たない。
+
+```bash
+npm run pipeline:v2:extract:budget-request-geometry -- 2024 --golden
+npm run pipeline:v2:extract:budget-request-geometry -- 2024 --sample=meti-ippan-p9
+npm run pipeline:v2:extract:budget-request-geometry -- 2024 --document=<canonicalUrl> --page=<N>
+```
+
+出力: `data/work/budget-request-extraction/{year}/table-geometry-poc/{id}.json`（`schema: budget-request-table-geometry-poc/v1`。source / page / parameters / sourceTokenCount / physicalRows / columnBands / diagnostics）。実装は `lib/budget-request-table-geometry.ts`（SourceToken実装とは分離。入力は `SourceToken[]` + `PageMeta` で、SourceTokenは読み取るだけ）。
+
+- **不変条件**: ①SourceTokenを書き換えない ②raw order（`SourceToken.index`=pdf.js text item順）を捨てない: `rawTokenIndexes`（index昇順）と `visualTokenIndexes`（bbox.xMin昇順。「正しい文字列順」ではない観測上の順序）を別に持ち、`rawOrderMatchesVisualOrder` で並びの違いを観測できる。金額chunk（`916`/`599,`/`234,` が右から左のitemで並ぶ）を結合して金額文字列を作ることはしない ③空白のみ・空文字のtokenは行クラスタリングの入力から除外するがSourceTokenからは消さず、近い行から `whitespaceTokenIndexes` で参照する ④罫線文字（`│`等のみのtoken）は行には残し、帯の観測からだけ除外する ⑤rowは `text` を持たずtoken参照のみ。
+- **行クラスタリング**: 1次元gap法。非空白tokenをy代表値で昇順に並べ、隣り合う差が `tolerance` を超えたら新しい行。`tolerance = 0.25 × ページの非空白tokenのfontSize中央値`（FY2024の4ページでは1.736pt）。xは行判定に使わない。PDF別・Golden Sample別のルールは持たない。しきい値・algorithm・除外ルールはすべて出力JSONの `parameters` に記録。
+- **y代表値の比較（baseline / bbox.yMin / centerY）**: `diagnostics.yReferenceSweep` に toleranceFactor を振ったときの行数を出す。4ページの結果: baseline は factor 0.05〜0.4 で行数が一定（METI p9=42行, MHLW p1268=55, p1555=40, MEXT p876=37）。yMin/centerY は混在するfontSize（METI p9の見出し13.89ptと本文6.94pt）で factor が小さいと行が分かれ（METI p9: 0.05/0.1で43行）、安定する範囲が狭い。bbox.yMin/yMaxはフォントmetrics由来の近似なので、PDF user spaceの `transform[5]` から揃えた baseline を採用。factor 0.5 以上では半行（3.472pt）離れた行が併合され始めるため 0.25 とした。
+- **ColumnBand観測**: 空白・罫線文字を除くtokenについて、左端（xMin）と右端（xMax）の揃いを別々に、最小値を起点に幅 `edgeTolerance`（= 0.25×fontSize中央値）以内のtokenを1つの帯とし、物理行が `minRows`（3）以上に繰り返すものだけを残す。帯は重なり得る（同じtokenが左端帯と右端帯に入る）。
+- **既知の限界**: ①帯が多い（FY2024の4ページで43〜78本）。金額が数値chunkごとに別tokenのため、chunkごとの端が別々の帯になる。帯の統合・意味付けは次段 ②縦方向のbbox（フォントmetrics由来）は近似 ③複数ページにまたがる行、複数rowにまたがる事項名、表の罫線（行・列の区切り）の利用は未対応 ④右側の独立した表（MHLW p1268）や備考列の積算（MEXT p876）は、同じy付近のrowに物理的に同居するだけで、左側Coreとの関連付けも意味分類もしない。
+
 ## 8. V1/V2比較方法
 
 ```bash
