@@ -61,6 +61,24 @@ export interface IndentClusterV2 extends IndentClusterObservation {
   latticeEvidence?: { step: number; gapToRun: number; runClusterIndexes: number[]; tolerance: number };
 }
 
+/** 規則Bの判断過程（なぜ発火した／しなかったか）。観測のみで、判断には使われない */
+export interface LatticeStepDiagnostic {
+  decision: 'placed' | 'rejected';
+  reason: string;
+  requiredRunLength: number;
+  singletonCandidateClusterIndex?: number;
+  singletonCandidateSupport?: number;
+  leftmostPlacedClusterIndex?: number;
+  observedRunLength?: number;
+  runClusterIndexes?: number[];
+  adjacentGaps?: number[];
+  step?: number | null;
+  gapToRun?: number;
+  normalizedGapToRun?: number;
+  normalizedStep?: number | null;
+  tolerance?: number;
+}
+
 export interface DocumentHierarchyV2Result {
   schema: typeof DOCUMENT_HIERARCHY_V2_SCHEMA;
   view: HierarchyView;
@@ -77,6 +95,8 @@ export interface DocumentHierarchyV2Result {
   nodes: DocumentHierarchyNodeV2[];
   edges: DocumentHierarchyEdgeCandidate[];
   indentClusters: IndentClusterV2[];
+  /** 規則Bの判断過程（optionがoffのときは空） */
+  latticeDiagnostics: { requiredRunLength: number; referenceFontSize: number; tolerance: number; steps: LatticeStepDiagnostic[]; finalOutcome: 'activated' | 'not_activated' | 'off' };
   diagnostics: {
     logicalRowCount: number;
     headingCandidateCount: number;
@@ -89,6 +109,9 @@ export interface DocumentHierarchyV2Result {
     nodeCountByLevel: Record<string, number>;
   };
 }
+
+/** 規則Bが要求する、規則的な階段を成す placed クラスタの最小数（変更しない） */
+const LATTICE_REQUIRED_RUN_LENGTH = 3;
 
 export const V1_EQUIVALENT_OPTIONS: HierarchyV2ExperimentalOptions = { headerCollisionHandling: 'off', singletonRootPlacement: 'off' };
 
@@ -247,14 +270,21 @@ export function observeDocumentHierarchyV2(
   }
   const placedBySupport = new Set<number>(groups.map((g, i) => (g.xs.length >= v1Options.minClusterSupport ? i : -1)).filter(i => i >= 0));
   const lattice = new Map<number, NonNullable<IndentClusterV2['latticeEvidence']>>();
+  const latticeSteps: LatticeStepDiagnostic[] = [];
   if (options.singletonRootPlacement === 'lattice-supported') {
     for (;;) {
       const placed = [...placedBySupport, ...lattice.keys()].sort((a, b) => a - b);
-      if (placed.length === 0) break;
+      if (placed.length === 0) {
+        latticeSteps.push({ decision: 'rejected', reason: 'no_placed_cluster', requiredRunLength: LATTICE_REQUIRED_RUN_LENGTH });
+        break;
+      }
       const leftmost = placed[0];
       // 根側: 全てのplacedクラスタより左にある、最も近い未placedクラスタ
       const c = [...groups.keys()].filter(i => i < leftmost && !placed.includes(i)).pop();
-      if (c === undefined) break;
+      if (c === undefined) {
+        latticeSteps.push({ decision: 'rejected', reason: 'no_unplaced_cluster_left_of_placed_clusters', requiredRunLength: LATTICE_REQUIRED_RUN_LENGTH, leftmostPlacedClusterIndex: leftmost });
+        break;
+      }
       // 右隣から始まる規則的なplacedクラスタのrun（隣接差が許容差以内で揃う）
       const gaps: number[] = [];
       const run = [leftmost];
@@ -264,11 +294,32 @@ export function observeDocumentHierarchyV2(
         gaps.push(gap);
         run.push(placed[k]);
       }
-      if (run.length < 3) break;
-      const step = median(gaps);
+      const step = gaps.length > 0 ? median(gaps) : null;
       const gapToRun = groups[leftmost].xs[0] - groups[c].xs[0];
-      if (Math.abs(gapToRun - step) > clusterGap) break;
+      const base: Omit<LatticeStepDiagnostic, 'decision' | 'reason'> = {
+        requiredRunLength: LATTICE_REQUIRED_RUN_LENGTH,
+        singletonCandidateClusterIndex: c,
+        singletonCandidateSupport: groups[c].xs.length,
+        leftmostPlacedClusterIndex: leftmost,
+        observedRunLength: run.length,
+        runClusterIndexes: run,
+        adjacentGaps: gaps.map(round3),
+        step: step === null ? null : round3(step),
+        gapToRun: round3(gapToRun),
+        normalizedGapToRun: round3(gapToRun / referenceFontSize),
+        normalizedStep: step === null ? null : round3(step / referenceFontSize),
+        tolerance: clusterGap,
+      };
+      if (run.length < LATTICE_REQUIRED_RUN_LENGTH) {
+        latticeSteps.push({ ...base, decision: 'rejected', reason: 'staircase_too_short' });
+        break;
+      }
+      if (step === null || Math.abs(gapToRun - step) > clusterGap) {
+        latticeSteps.push({ ...base, decision: 'rejected', reason: 'gap_to_run_is_not_one_step' });
+        break;
+      }
       lattice.set(c, { step: round3(step), gapToRun: round3(gapToRun), runClusterIndexes: run, tolerance: clusterGap });
+      latticeSteps.push({ ...base, decision: 'placed', reason: 'one_step_left_of_regular_staircase' });
     }
   }
   const placedAll = new Set<number>([...placedBySupport, ...lattice.keys()]);
@@ -339,6 +390,13 @@ export function observeDocumentHierarchyV2(
     nodes: candidates.map(c => c.node),
     edges,
     indentClusters,
+    latticeDiagnostics: {
+      requiredRunLength: LATTICE_REQUIRED_RUN_LENGTH,
+      referenceFontSize: round3(referenceFontSize),
+      tolerance: clusterGap,
+      steps: latticeSteps,
+      finalOutcome: options.singletonRootPlacement === 'off' ? 'off' : lattice.size > 0 ? 'activated' : 'not_activated',
+    },
     diagnostics: {
       logicalRowCount,
       headingCandidateCount: candidates.length,
