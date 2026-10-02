@@ -316,6 +316,38 @@ npm run pipeline:v2:extract:budget-request-semantic-record -- 2024 --document=<c
 - **negative findings**: ①regex + 行頭のgeometryでも、ページ見出し（METI `27 経済産業省所管`、MEXT `884 文（本）`、MHLW `1260 厚（ハ）`）が anchor になる（誤検出）。ページ見出しと明細行を区別するevidenceがまだ無い ②regexだけではコードを確定できない: 金額chunkの末尾（`005` `829` 等）も桁だけ見ればコードに一致する（69/36/60件がanchor外として残った）。金額側も、MHLW p1268の右側表の見出し `30 年度` の `30` が金額groupとして誤検出された ③matter境界が曖昧: 直後のlogical rowがambiguousで継続の可能性があるcandidateは `matter_boundary_possible_continuation`（MEXT p876は6件中4件） ④金額groupの境界が曖昧: MEXTで金額の右にある積算側の数字が `amount_like_tokens_beyond_text_boundary` として残る ⑤前段のregion/relationの不安定さがsemantic層へ伝播: MEXT p876は前段のstable relationが0で、6件のcandidateすべてが ambiguous。関連構造の参照は保持できた（17件のunstable ref）が、確定はできない ⑥METI型（コード+事項名+3列の金額）とMHLW型（p1268は継続ページで、行頭コード+事項名のみで金額が同一行にない）で anchor evidence は共通だが、金額groupの数が異なる。金額列のgeometryは、1ページ内で再利用できる（同じ順序番号のgroupの右端は1つに揃う）だけでなく、金額groupが3つ見えた3サンプル（METI p9・MHLW p1555・MEXT p876）で右端の中央値が同一（255.4 / 307.2 / 462.5pt）だった。同じ様式のテンプレートを使っている可能性があるが、検出ロジックにはこの座標を使っておらず（hard-codeしない）、4サンプルだけでは省庁横断で再利用できるとは言えない ⑦MEXT p876の右側積算（1,2,3…の階層・単価×人数×回数）はanchorを持たないため、金額らしいtoken群（100件）がunassignedとして残るだけで、構造としては保持できていない。
 - **安全条件**: MHLW p1555の下部 `01-95` の候補へ、上部の大構造のregionを関連構造として付けていない。符号の推測・空欄の0化・差額の計算はしていない。
 
+### RecordAnchorResolver PoC（RecordAnchorAssessment）
+
+```text
+… → RegionRelationResolver → SemanticRecordCandidate → RecordAnchorResolver（RecordAnchorAssessment）
+```
+
+```bash
+npm run pipeline:v2:extract:budget-request-record-anchor -- 2024 --golden
+npm run pipeline:v2:extract:budget-request-record-anchor -- 2024 --sample=mhlw-ippan-p1268
+npm run pipeline:v2:extract:budget-request-record-anchor -- 2024 --document=<canonicalUrl> --page=<N>
+```
+
+出力: `data/work/budget-request-extraction/{year}/record-anchor-poc/{id}.json`（`schema: budget-request-record-anchor-poc/v1`。parameters / layoutFamilies / anchorAssessments / diagnostics）。実装は `lib/budget-request-record-anchor.ts`。
+
+SemanticRecordCandidate（anchor候補）が `detail_candidate`（主要明細行らしい）/ `heading_candidate`（ページ・節の見出しらしい）/ `ambiguous` / `insufficient_evidence` のどれに見えるかを、**分解されたevidence付きで観測する独立層**。SemanticRecordCandidateは削除・変更しない（`heading_candidate` は除外を意味しない。field observationも変更しない）。**このresolverは文字内容（rawText）を読まず**、特定の見出し語・ページ番号・コード値も使わない。幾何（bbox・金額groupの数と位置・関連構造の数）とページ寸法だけを使う。単一のscoreも使わない。
+
+- **evidence**（それぞれ supports・計測値・thresholdを持つ）: detailを支持 = `three_amount_groups` / `repeated_amount_columns`（同じ金額列の右端が揃う別候補）/ `family_membership`（反復するlayout familyに属する）/ `sign_token_in_amount_region`。headingを支持 = `page_relative_top`（ページ高さに対する比）/ `isolated_layout`（反復するfamilyに属さず金額列も共有しない）/ `lacks_field_structure`（金額groupが3つでなく符号も無い）。中立 = `relation_context`（membership/proximity・stable/unstable relation数の観測のみ）。
+- **classification**（evidenceの種類から再計算できる純粋関数 `classifyFromEvidence`）: detail側の異なる種別が2種類以上 → detail満たす / `page_relative_top` かつ `isolated_layout` かつ `lacks_field_structure` → heading満たす。両方 → blocking conflict で `ambiguous`、片方のみ → その分類、どちらも満たさなければ evidence があれば `ambiguous`、無ければ `insufficient_evidence`。反対側のevidenceが混在する場合は severity=noted のconflictとして記録（分類は変えない）。**3つの金額groupだけではdetailに確定せず、金額が無いだけではheadingに確定しない。**
+- **layout family**: code左端 → matter開始 の2段で、最小値を起点に幅 `alignmentTolerance`（0.25×fontSize中央値）以内をbin化（連鎖しない。family数は固定しない）。semantic typeではない反復レイアウトの観測。
+- **stability**: thresholdを0.8×/1.25×に振ってclassificationが変わるならstableにしない（SemanticRecordCandidateのambiguityとは別に観測）。top帯 = 0.15×ページ高さ。**thresholdはGolden Sampleの正解に合わせて調整していないが、0.15は4サンプルの観測（見出し行が0.035〜0.117、`020` が0.187）を見て置いた値で、独立した根拠ではない。**
+- **結果（FY2024 Golden Sample）**:
+
+| サンプル | semantic candidate | detail | heading | ambiguous | stable | unstable | family | isolated |
+|---|---|---|---|---|---|---|---|---|
+| METI p9 | 28 | 24 | 1 | 3 | 28 | 0 | 8 | 6 |
+| MHLW p1268 | 2 | 0 | 1 | 1 | 1 | 1 | 2 | 2 |
+| MHLW p1555 | 3 | 2 | 1 | 0 | 3 | 0 | 3 | 3 |
+| MEXT p876 | 6 | 4 | 1 | 1 | 6 | 0 | 3 | 2 |
+
+  既知のfalse anchor（METI p9 `27 …`、MHLW p1268 `1260 …`、MEXT p876 `884 …`）は3例とも page_relative_top + isolated_layout + lacks_field_structure のheading evidenceが揃い `heading_candidate`、detail evidenceは無し。detail controlは、METI p9の `01-95` 等が three_amount_groups + repeated_amount_columns、MEXT p876の `95016-…` が加えて family_membership、MHLW p1555の下部 `01-95` が three_amount_groups + repeated_amount_columns（上部の大構造のregionはevidenceに混入しない）。MHLW p1268 の `020` は金額3列が同じ行に無いが `heading_candidate` に確定せず `ambiguous`（lacks_field_structure と isolated_layout はあるが page_relative_top を満たさない）。
+- **negative findings**: ①MHLW p1268の `020` は top帯の境界に近い（yMin比 0.187 vs 帯 0.15。1.25×の帯 0.1875 では heading evidence が揃い classification が変わるので unstable）。見出し側の判定は top帯の設定に敏感で、`020` を ambiguous に残せたのは余裕の薄い結果 ②MHLW p1555の `010`（組織下の項目行）が `heading_candidate`（top帯の内側・金額が同じ行に無い・isolated）。detailの行が、金額が次の行にあるなどの理由で見出しに見える **false negative側のリスク**。これを避ける規則は今回入れていない ③METI p9の `001`（節見出しのように見える行）と `95016-2111-05-1360`、MEXT p876の `95016-2123-09-1010`（金額が見えない行）は ambiguous で残る ④blocking conflict と insufficient_evidence は、現在のevidence定義では実データで発生しない（detail側とheading側のevidenceが構造上ほぼ排他になる。`classifyFromEvidence` の単体テストでのみ検証）⑤family_membershipは階層のインデント（code左端）ごとにfamilyが分かれるため、METI p9では8 familyに分かれ、6件がisolated ⑥3例の共通evidenceは「ページ上端の帯・同じlayoutの仲間がいない・金額が3列見えない」で、**文字内容は使っていない**。3例にsample固有のevidenceは使っておらず（既知の3件を落とすための個別規則は無い）、同じ規則が3例すべてで同じevidenceを返した。ただし3件とも「ページ上端のごく近く」にある共通点があり、上端でない節見出し（METI p9の `001` 等）は ambiguous のままになる。
+
 ## 8. V1/V2比較方法
 
 ```bash
