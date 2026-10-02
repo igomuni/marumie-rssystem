@@ -1,0 +1,371 @@
+{
+ "schemaVersion": "budget-request-document-hierarchy-gt/v1",
+ "purpose": "EVALUATION ONLY. Inference code (budget-request-document-hierarchy*.ts and the experiment runners) must never read, import or reference this file. Frozen before any v1/v2 run on this document (pre-observation contract commit of the v2 failure-isolation experiment).",
+ "frozenBeforeV2Run": true,
+ "method": "Transcribed mechanically from the document's own table of contents (poppler pdftotext -layout, page cropped into left/right columns at x=408pt, then regex over the printed lines: （組織）NNN name page / （項）NNN name page / request-no NN-NN name page). Names are the first printed line of each entry. Independent consistency checks (not derived from any v1/v2 output): request numbers are consecutive 1..N, printed start pages are non-decreasing in document order, every item has at least one request. The extraction script is a scratch tool and is not committed; this fixture is the artifact.",
+ "codeNote": "Request codes written with ASCII '-'. depth 1/2/3 = organization/item/request (labels of this evaluation file only). set='test'.",
+ "source": {
+  "ministry": "MAFF (東日本大震災復興特別会計)",
+  "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+  "tocPages": "physical 3 (printed 1)"
+ },
+ "detailPrintedToPhysicalPageOffset": 4,
+ "offsetBasis": "physical p7 prints 復興特 3 (first detail page); p8 prints 4 復興特; p20 prints 16 復興特",
+ "counts": {
+  "organizations": 1,
+  "items": 8,
+  "requests": 27
+ },
+ "nodes": [
+  {
+   "key": "org-010",
+   "depth": 1,
+   "code": "010",
+   "name": "復興庁",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "item-010-541",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "541",
+   "name": "農林水産省共通費",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "req-1",
+   "depth": 3,
+   "parent": "item-010-541",
+   "requestNo": "1",
+   "code": "01-95",
+   "name": "農林水産省一般行政に必要な経費",
+   "printedStartPage": 3,
+   "set": "test"
+  },
+  {
+   "key": "item-010-547",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "547",
+   "name": "農林水産業復興政策費",
+   "printedStartPage": 6,
+   "set": "test"
+  },
+  {
+   "key": "req-2",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "2",
+   "code": "03-65",
+   "name": "食品の安全と消費者の信頼確保対策に必要な経費",
+   "printedStartPage": 6,
+   "set": "test"
+  },
+  {
+   "key": "req-3",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "3",
+   "code": "11-65",
+   "name": "農業・食品産業強化対策に必要な経費",
+   "printedStartPage": 6,
+   "set": "test"
+  },
+  {
+   "key": "req-4",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "4",
+   "code": "16-65",
+   "name": "担い手育成・確保等対策に必要な経費",
+   "printedStartPage": 6,
+   "set": "test"
+  },
+  {
+   "key": "req-5",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "5",
+   "code": "20-65",
+   "name": "農地集積・集約化等対策に必要な経費",
+   "printedStartPage": 7,
+   "set": "test"
+  },
+  {
+   "key": "req-6",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "6",
+   "code": "41-65",
+   "name": "森林整備・保全に必要な経費",
+   "printedStartPage": 7,
+   "set": "test"
+  },
+  {
+   "key": "req-7",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "7",
+   "code": "46-65",
+   "name": "林業振興対策に必要な経費",
+   "printedStartPage": 8,
+   "set": "test"
+  },
+  {
+   "key": "req-8",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "8",
+   "code": "51-65",
+   "name": "林産物供給等振興対策に必要な経費",
+   "printedStartPage": 8,
+   "set": "test"
+  },
+  {
+   "key": "req-9",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "9",
+   "code": "56-65",
+   "name": "水産資源管理対策に必要な経費",
+   "printedStartPage": 9,
+   "set": "test"
+  },
+  {
+   "key": "req-10",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "10",
+   "code": "61-65",
+   "name": "水産業振興対策に必要な経費",
+   "printedStartPage": 9,
+   "set": "test"
+  },
+  {
+   "key": "req-11",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "11",
+   "code": "65-65",
+   "name": "国産農産物生産基盤強化等対策に必要な経費",
+   "printedStartPage": 11,
+   "set": "test"
+  },
+  {
+   "key": "req-12",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "12",
+   "code": "66-65",
+   "name": "漁村活性化対策に必要な経費",
+   "printedStartPage": 11,
+   "set": "test"
+  },
+  {
+   "key": "req-13",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "13",
+   "code": "81-13",
+   "name": "農林水産分野のイノベーション創出・技術開発の推進に必要な経費",
+   "printedStartPage": 12,
+   "set": "test"
+  },
+  {
+   "key": "req-14",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "14",
+   "code": "86-65",
+   "name": "農林水産業再生支援対策に必要な経費",
+   "printedStartPage": 13,
+   "set": "test"
+  },
+  {
+   "key": "req-15",
+   "depth": 3,
+   "parent": "item-010-547",
+   "requestNo": "15",
+   "code": "91-65",
+   "name": "共同利用小型漁船建造に必要な経費",
+   "printedStartPage": 13,
+   "set": "test"
+  },
+  {
+   "key": "item-010-551",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "551",
+   "name": "農林水産業復興事業費",
+   "printedStartPage": 14,
+   "set": "test"
+  },
+  {
+   "key": "req-16",
+   "depth": 3,
+   "parent": "item-010-551",
+   "requestNo": "16",
+   "code": "06-65",
+   "name": "農業・食品産業強化対策に必要な経費",
+   "printedStartPage": 14,
+   "set": "test"
+  },
+  {
+   "key": "req-17",
+   "depth": 3,
+   "parent": "item-010-551",
+   "requestNo": "17",
+   "code": "26-65",
+   "name": "林業振興対策に必要な経費",
+   "printedStartPage": 14,
+   "set": "test"
+  },
+  {
+   "key": "item-010-553",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "553",
+   "name": "東日本大震災復興国立研究開発法人水産研究・教育機構運営費",
+   "printedStartPage": 14,
+   "set": "test"
+  },
+  {
+   "key": "req-18",
+   "depth": 3,
+   "parent": "item-010-553",
+   "requestNo": "18",
+   "code": "01-13",
+   "name": "東日本大震災復興に係る国立研究開発法人水産研究・教育機構運営費交付金に",
+   "printedStartPage": 14,
+   "set": "test"
+  },
+  {
+   "key": "item-010-625",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "625",
+   "name": "東日本大震災復興農業施設災害復旧事業等工事諸費",
+   "printedStartPage": 14,
+   "set": "test"
+  },
+  {
+   "key": "req-19",
+   "depth": 3,
+   "parent": "item-010-625",
+   "requestNo": "19",
+   "code": "01-49",
+   "name": "東日本大震災復興に係る農業施設災害復旧事業等工事諸費に必要な経費",
+   "printedStartPage": 14,
+   "set": "test"
+  },
+  {
+   "key": "item-010-824",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "824",
+   "name": "環境保全復興政策費",
+   "printedStartPage": 15,
+   "set": "test"
+  },
+  {
+   "key": "req-20",
+   "depth": 3,
+   "parent": "item-010-824",
+   "requestNo": "20",
+   "code": "41-95",
+   "name": "放射性物質による環境の汚染への対処に必要な経費",
+   "printedStartPage": 15,
+   "set": "test"
+  },
+  {
+   "key": "item-010-901",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "901",
+   "name": "東日本大震災復興事業費",
+   "printedStartPage": 15,
+   "set": "test"
+  },
+  {
+   "key": "req-21",
+   "depth": 3,
+   "parent": "item-010-901",
+   "requestNo": "21",
+   "code": "10-46",
+   "name": "農業生産基盤整備事業に必要な経費",
+   "printedStartPage": 15,
+   "set": "test"
+  },
+  {
+   "key": "req-22",
+   "depth": 3,
+   "parent": "item-010-901",
+   "requestNo": "22",
+   "code": "16-41",
+   "name": "治山事業に必要な経費",
+   "printedStartPage": 15,
+   "set": "test"
+  },
+  {
+   "key": "req-23",
+   "depth": 3,
+   "parent": "item-010-901",
+   "requestNo": "23",
+   "code": "18-46",
+   "name": "森林整備事業に必要な経費",
+   "printedStartPage": 15,
+   "set": "test"
+  },
+  {
+   "key": "req-24",
+   "depth": 3,
+   "parent": "item-010-901",
+   "requestNo": "24",
+   "code": "22-46",
+   "name": "農山漁村地域整備事業に必要な経費",
+   "printedStartPage": 15,
+   "set": "test"
+  },
+  {
+   "key": "item-010-906",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "906",
+   "name": "東日本大震災災害復旧等事業費",
+   "printedStartPage": 15,
+   "set": "test"
+  },
+  {
+   "key": "req-25",
+   "depth": 3,
+   "parent": "item-010-906",
+   "requestNo": "25",
+   "code": "10-49",
+   "name": "農業施設災害復旧事業に必要な経費",
+   "printedStartPage": 15,
+   "set": "test"
+  },
+  {
+   "key": "req-26",
+   "depth": 3,
+   "parent": "item-010-906",
+   "requestNo": "26",
+   "code": "12-49",
+   "name": "農業施設災害関連事業に必要な経費",
+   "printedStartPage": 16,
+   "set": "test"
+  },
+  {
+   "key": "req-27",
+   "depth": 3,
+   "parent": "item-010-906",
+   "requestNo": "27",
+   "code": "18-49",
+   "name": "漁港施設災害復旧事業に必要な経費",
+   "printedStartPage": 16,
+   "set": "test"
+  }
+ ]
+}
