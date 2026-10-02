@@ -12,6 +12,8 @@ const MEXT_DETAIL = 'https://www.mext.go.jp/content/20230914-mxt_kaikesou01-0000
 const ENV = 'https://www.env.go.jp/content/000157010.pdf';
 const MAFF_FUKKO = 'https://www.maff.go.jp/j/budget/attach/pdf/230901-4.pdf';
 const MLIT_FUKKO = 'https://www.mlit.go.jp/page/content/001630395.pdf';
+const MOD = 'https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf';
+const CFA = 'https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf';
 
 export type A2Set = 'a2-development' | 'regression' | 'b-development' | 'a2-holdout';
 export interface A2Experiment {
@@ -37,6 +39,9 @@ export const A2_EXPERIMENTS: A2Experiment[] = [
   { id: 'meti-detail-narrow', set: 'b-development', view: 'detail', canonicalUrl: METI, pages: [66, 81] },
   { id: 'mext-detail-narrow', set: 'b-development', view: 'detail', canonicalUrl: MEXT_DETAIL, pages: [1045, 1259] },
   { id: 'mhlw-detail-narrow', set: 'b-development', view: 'detail', canonicalUrl: MHLW, pages: [1555, 1602] },
+  /** A2 strict holdout（規則固定 093fea7 と GT 固定 ca75180 の後に定義。明細の全ページ） */
+  { id: 'mod-general-detail', set: 'a2-holdout', view: 'detail', canonicalUrl: MOD, pages: [9, 540] },
+  { id: 'cfa-general-detail', set: 'a2-holdout', view: 'detail', canonicalUrl: CFA, pages: [7, 147] },
 ];
 
 export const A2_VARIANTS: { name: string; options: HierarchyV2ExperimentalOptions | null }[] = [
