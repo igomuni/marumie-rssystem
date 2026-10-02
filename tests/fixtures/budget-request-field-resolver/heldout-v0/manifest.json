@@ -1,0 +1,175 @@
+{
+  "schema": "budget-request-field-resolver-heldout-manifest/v0",
+  "freezeCommit": "abc57b9f8296df7dc8eb87bd98a6eaf7f050bee9",
+  "selectionPolicyVersion": "field-resolver-heldout/v0",
+  "preregistrationCommit": "ce73e00",
+  "selectionMethod": "pdftoppm low-resolution render (75 dpi) of spread-out candidate pages, classified by visual inspection only; no FieldResolver output, diagnostic, reasonCode or evaluator output was used or viewed",
+  "documents": [
+    {
+      "documentId": "mod-ippan",
+      "ministry": "防衛省",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "totalPages": 540,
+      "candidatePagesViewed": [
+        12,
+        40,
+        200,
+        300,
+        330,
+        420,
+        480,
+        505,
+        535
+      ],
+      "pages": [
+        {
+          "physicalPage": 12,
+          "category": "normal",
+          "printedPageLabel": "8 防（本）",
+          "selectionBasis": "human visual PDF inspection only: 退職手当・国家公務員共済組合負担金など通常の3金額行が並ぶ"
+        },
+        {
+          "physicalPage": 505,
+          "category": "blank-zero-rich",
+          "printedPageLabel": "防（地）501",
+          "selectionBasis": "human visual PDF inspection only: 前年度に明示的な 0 が多く、増減に △ が並ぶ"
+        },
+        {
+          "physicalPage": 480,
+          "category": "auxiliary-heavy",
+          "printedPageLabel": "476 防（本）",
+          "selectionBasis": "human visual PDF inspection only: 右側の備考に内訳・積算が多く、営舎費・教育訓練費の行に △ がある"
+        },
+        {
+          "physicalPage": 535,
+          "category": "structural-template-boundary",
+          "printedPageLabel": "防（装）531",
+          "selectionBasis": "human visual PDF inspection only: 複数の表（国庫債務負担行為の表）が同居し、折返し名称・△ を含む"
+        }
+      ]
+    },
+    {
+      "documentId": "moe-ippan",
+      "ministry": "環境省",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "localPath": "data/download/env.go.jp/content/000157010.pdf",
+      "totalPages": 193,
+      "candidatePagesViewed": [
+        18,
+        40,
+        75,
+        110,
+        150
+      ],
+      "pages": [
+        {
+          "physicalPage": 110,
+          "category": "normal",
+          "printedPageLabel": "106 環（本）",
+          "selectionBasis": "human visual PDF inspection only: 標準の台帳行（公害調査費など）が並ぶ"
+        },
+        {
+          "physicalPage": 40,
+          "category": "blank-zero-rich",
+          "printedPageLabel": "36 環（本）",
+          "selectionBasis": "human visual PDF inspection only: 増減が明示的な 0 の行が多い"
+        },
+        {
+          "physicalPage": 75,
+          "category": "auxiliary-heavy",
+          "printedPageLabel": "環（本）71",
+          "selectionBasis": "human visual PDF inspection only: 要旨の文章・限度額の表など補助的な記載が多い"
+        },
+        {
+          "physicalPage": 18,
+          "category": "structural-template-boundary",
+          "printedPageLabel": "14 環",
+          "selectionBasis": "human visual PDF inspection only: 総表形式で、前年度・6年度の金額が 一般行政経費／その他の経費／計 に分かれる別の列構成"
+        }
+      ]
+    },
+    {
+      "documentId": "maff-ippan",
+      "ministry": "農林水産省",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "totalPages": 378,
+      "candidatePagesViewed": [
+        12,
+        45,
+        90,
+        150,
+        220,
+        290,
+        350
+      ],
+      "pages": [
+        {
+          "physicalPage": 290,
+          "category": "normal",
+          "printedPageLabel": "284 農（林）",
+          "selectionBasis": "human visual PDF inspection only: 要求番号付きの事項と明細行が少数並ぶ通常行"
+        },
+        {
+          "physicalPage": 150,
+          "category": "blank-zero-rich",
+          "printedPageLabel": "144 農（本）",
+          "selectionBasis": "human visual PDF inspection only: ページ先頭で項・事項の金額セルが空欄の行と △ を含む"
+        },
+        {
+          "physicalPage": 220,
+          "category": "auxiliary-heavy",
+          "printedPageLabel": "214 農（検）",
+          "selectionBasis": "human visual PDF inspection only: 検査事業費の内訳・国庫債務負担行為の参考表など補助的記載が多い"
+        },
+        {
+          "physicalPage": 12,
+          "category": "structural-template-boundary",
+          "printedPageLabel": "6 農",
+          "selectionBasis": "human visual PDF inspection only: 総表形式で、列構成が通常の明細表と異なる"
+        }
+      ]
+    },
+    {
+      "documentId": "mlit-ippan",
+      "ministry": "国土交通省",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+      "totalPages": 1097,
+      "candidatePagesViewed": [
+        14,
+        120,
+        330,
+        560,
+        780
+      ],
+      "pages": [
+        {
+          "physicalPage": 560,
+          "category": "normal",
+          "printedPageLabel": "550 国（総）",
+          "selectionBasis": "human visual PDF inspection only: 明細行が階層的に並び、増減に明示的な 0 が多い"
+        },
+        {
+          "physicalPage": 330,
+          "category": "blank-zero-rich",
+          "printedPageLabel": "320 国（本）",
+          "selectionBasis": "human visual PDF inspection only: 6年度の金額セルが空欄の行と △ が多い"
+        },
+        {
+          "physicalPage": 120,
+          "category": "auxiliary-heavy",
+          "printedPageLabel": "110 国（本）",
+          "selectionBasis": "human visual PDF inspection only: 右側に数量×単価の積算が多い"
+        },
+        {
+          "physicalPage": 780,
+          "category": "structural-template-boundary",
+          "printedPageLabel": "770 国（運）",
+          "selectionBasis": "human visual PDF inspection only: 項・事項の見出し行と明細行が混在し、△ と空欄の見出し行を含む"
+        }
+      ]
+    }
+  ]
+}
