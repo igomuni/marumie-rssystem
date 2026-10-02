@@ -92,13 +92,14 @@ describe('Golden Sample locator', () => {
       ['normal', 'meti.go.jp', 'ippan_o.pdf', 9],
       ['moderate', 'mhlw.go.jp', '05-1b-01.pdf', 1268],
       ['extreme', 'mhlw.go.jp', '05-1b-01.pdf', 1555],
+      ['structured-remark', 'mext.go.jp', '20230914-mxt_kaikesou01-000031817_03.pdf', 876],
     ]);
   });
 
   it('正解データは未作成（pending-human-review）で、PDFはfixtureへコピーしていない', () => {
     expect(file.samples.every(s => s.groundTruthStatus === 'pending-human-review')).toBe(true);
     const dir = path.dirname(goldenSamplePath(2024));
-    expect(fs.readdirSync(dir)).toEqual(['golden-samples.json']);
+    expect(fs.readdirSync(dir).sort()).toEqual(['golden-samples.json', 'human-observations.json']);
   });
 
   it('未知のURL・不正なページ・id重複を検出する', () => {

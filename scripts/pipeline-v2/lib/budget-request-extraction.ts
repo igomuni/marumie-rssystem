@@ -76,13 +76,15 @@ export function summarizeInspection(items: InspectedTarget[]): { total: number; 
 
 export interface GoldenSampleLocator {
   id: string;
-  tier: 'normal' | 'moderate' | 'extreme';
+  tier: 'normal' | 'moderate' | 'extreme' | 'structured-remark';
   /** manifestのcanonical URL。PDF原本はここから data/download/... を引く（PDFはfixtureへコピーしない） */
   canonicalUrl: string;
   /** PDFの物理ページ番号（1始まり） */
   pdfPage: number;
   /** 正解データは人間がPDF原本を確認して作成する。作成前は pending-human-review */
   groundTruthStatus: 'pending-human-review' | 'human-verified';
+  /** サンプルを選定した理由・観点（任意）。正解データではない */
+  selectionNote?: string;
 }
 
 export interface GoldenSampleFile {
@@ -94,6 +96,9 @@ export interface ResolvedGoldenSample {
   sample: GoldenSampleLocator;
   target: ExtractionTarget;
 }
+
+export const humanObservationsPath = (fiscalYear: number): string =>
+  path.join('tests', 'fixtures', 'budget-request-extraction', String(fiscalYear), 'human-observations.json');
 
 export const goldenSamplePath = (fiscalYear: number): string =>
   path.join('tests', 'fixtures', 'budget-request-extraction', String(fiscalYear), 'golden-samples.json');

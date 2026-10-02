@@ -22,6 +22,14 @@
       "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
       "pdfPage": 1555,
       "groundTruthStatus": "pending-human-review"
+    },
+    {
+      "id": "mext-detail-p876",
+      "tier": "structured-remark",
+      "canonicalUrl": "https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "pdfPage": 876,
+      "groundTruthStatus": "pending-human-review",
+      "selectionNote": "物理レイアウト上の備考列に、（要旨）の自由記述に続いて、階層的な積算内訳（１．…／計、@単価円 × 人数 × 回数、金額(  )）と折り返し行が並ぶページ。原本のtext layerのレイアウトを確認して選定（ページ番号は推測ではなく、第2表明細表の全ページのうち積算内訳の語（@・×・円・人・回・計）が特に密に出るページから、内容を見て1枚選んだ）。備考列の位置を意味分類（free_text等）に直結させないためのケース。"
     }
   ]
 }
