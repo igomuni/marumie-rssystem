@@ -1,0 +1,27 @@
+{
+  "fiscalYear": 2024,
+  "note": "Golden Sampleのlocator。PDF原本(data/download/...)を参照するだけで、PDFはfixtureへコピーしない。groundTruthは人間がPDF原本を確認して今後作成する（ここに説明文を正解として埋め込まない）。pdfPageはPDFの物理ページ番号（1始まり）。",
+  "samples": [
+    {
+      "id": "meti-ippan-p9",
+      "tier": "normal",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "pdfPage": 9,
+      "groundTruthStatus": "pending-human-review"
+    },
+    {
+      "id": "mhlw-ippan-p1268",
+      "tier": "moderate",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "pdfPage": 1268,
+      "groundTruthStatus": "pending-human-review"
+    },
+    {
+      "id": "mhlw-ippan-p1555",
+      "tier": "extreme",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "pdfPage": 1555,
+      "groundTruthStatus": "pending-human-review"
+    }
+  ]
+}
