@@ -1,0 +1,980 @@
+{
+ "schemaVersion": "budget-request-document-hierarchy-gt/v1",
+ "purpose": "EVALUATION ONLY. Inference code must never read, import or reference this file. Constructed AFTER the A2 implementation freeze commit (093fea7) and BEFORE any A2 (or v2) output for this document exists (A2 first-holdout-run order: freeze -> GT construction -> GT freeze commit -> first run). The only pages opened to build it: the table of contents and, to fix the printed-to-physical offset and the last detail page, the first and last pages' printed labels.",
+ "frozenBeforeA2HoldoutRun": true,
+ "method": "Transcribed mechanically from the document's own table of contents (poppler pdftotext -layout, TOC pages cropped into left/right columns at x=408pt, regex over printed lines: （組織）NNN name page / （項）NNN name page / request-no NN-NN name page). Names are the first printed line. Independent consistency checks (not derived from any A2/v1/v2 output): request numbers consecutive 1..N, printed start pages non-decreasing, every item has at least one request. The extraction script is a scratch tool and is not committed.",
+ "codeNote": "Request codes written with ASCII '-'. depth 1/2/3 = organization/item/request. set='test'.",
+ "source": {
+  "ministry": "防衛省 (一般会計)",
+  "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+  "fiscalYear": 2024,
+  "pageCount": 540,
+  "tocPages": "physical 3-4 (printed 1-2)",
+  "detailPhysicalPages": "9-540 (printed 5-536)",
+  "status": "A2 strict holdout (sealed until A2 implementation freeze)"
+ },
+ "detailPrintedToPhysicalPageOffset": 4,
+ "offsetBasis": "physical p9 prints 防（本） 5 (first detail page); p500 prints 496 防（本）; p540 prints 536 防（装）",
+ "counts": {
+  "organizations": 3,
+  "items": 29,
+  "requests": 67
+ },
+ "nodes": [
+  {
+   "key": "org-010",
+   "depth": 1,
+   "code": "010",
+   "name": "防衛本省",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "item-010-800",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "800",
+   "name": "防衛本省共通費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "req-1",
+   "depth": 3,
+   "parent": "item-010-800",
+   "requestNo": "1",
+   "code": "01-35",
+   "name": "防衛本省一般行政に必要な経費",
+   "printedStartPage": 5,
+   "set": "test"
+  },
+  {
+   "key": "req-2",
+   "depth": 3,
+   "parent": "item-010-800",
+   "requestNo": "2",
+   "code": "03-35",
+   "name": "審議会等に必要な経費",
+   "printedStartPage": 27,
+   "set": "test"
+  },
+  {
+   "key": "req-3",
+   "depth": 3,
+   "parent": "item-010-800",
+   "requestNo": "3",
+   "code": "06-35",
+   "name": "施設等機関等の運営に必要な経費",
+   "printedStartPage": 28,
+   "set": "test"
+  },
+  {
+   "key": "req-4",
+   "depth": 3,
+   "parent": "item-010-800",
+   "requestNo": "4",
+   "code": "07-35",
+   "name": "統合幕僚監部の運営に必要な経費",
+   "printedStartPage": 87,
+   "set": "test"
+  },
+  {
+   "key": "req-5",
+   "depth": 3,
+   "parent": "item-010-800",
+   "requestNo": "5",
+   "code": "09-35",
+   "name": "陸上自衛隊の運営に必要な経費",
+   "printedStartPage": 102,
+   "set": "test"
+  },
+  {
+   "key": "req-6",
+   "depth": 3,
+   "parent": "item-010-800",
+   "requestNo": "6",
+   "code": "15-35",
+   "name": "海上自衛隊の運営に必要な経費",
+   "printedStartPage": 121,
+   "set": "test"
+  },
+  {
+   "key": "req-7",
+   "depth": 3,
+   "parent": "item-010-800",
+   "requestNo": "7",
+   "code": "18-35",
+   "name": "航空自衛隊の運営に必要な経費",
+   "printedStartPage": 138,
+   "set": "test"
+  },
+  {
+   "key": "item-010-803",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "803",
+   "name": "防衛本省施設費",
+   "printedStartPage": 153,
+   "set": "test"
+  },
+  {
+   "key": "req-8",
+   "depth": 3,
+   "parent": "item-010-803",
+   "requestNo": "8",
+   "code": "01-35",
+   "name": "防衛本省施設整備に必要な経費",
+   "printedStartPage": 153,
+   "set": "test"
+  },
+  {
+   "key": "item-010-805",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "805",
+   "name": "自衛官給与費",
+   "printedStartPage": 154,
+   "set": "test"
+  },
+  {
+   "key": "req-9",
+   "depth": 3,
+   "parent": "item-010-805",
+   "requestNo": "9",
+   "code": "01-35",
+   "name": "自衛官の給与に必要な経費",
+   "printedStartPage": 154,
+   "set": "test"
+  },
+  {
+   "key": "item-010-810",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "810",
+   "name": "防衛力基盤強化推進費",
+   "printedStartPage": 170,
+   "set": "test"
+  },
+  {
+   "key": "req-10",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "10",
+   "code": "05-35",
+   "name": "人的基盤の強化に必要な経費",
+   "printedStartPage": 170,
+   "set": "test"
+  },
+  {
+   "key": "req-11",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "11",
+   "code": "10-35",
+   "name": "装備品等の効率的な取得等に必要な経費",
+   "printedStartPage": 211,
+   "set": "test"
+  },
+  {
+   "key": "req-12",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "12",
+   "code": "15-35",
+   "name": "相互防衛援助協定交付金等に必要な経費",
+   "printedStartPage": 218,
+   "set": "test"
+  },
+  {
+   "key": "req-13",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "13",
+   "code": "20-35",
+   "name": "地域コミュニティーとの連携に必要な経費",
+   "printedStartPage": 218,
+   "set": "test"
+  },
+  {
+   "key": "req-14",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "14",
+   "code": "25-35",
+   "name": "沖縄に関する特別行動委員会最終報告に盛り込まれた措置の実施に必要な経費",
+   "printedStartPage": 275,
+   "set": "test"
+  },
+  {
+   "key": "req-15",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "15",
+   "code": "30-35",
+   "name": "在日米軍の兵力構成見直し等に関する政府の取組の実施に必要な経費",
+   "printedStartPage": 277,
+   "set": "test"
+  },
+  {
+   "key": "req-16",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "16",
+   "code": "35-35",
+   "name": "知的基盤の強化に必要な経費",
+   "printedStartPage": 280,
+   "set": "test"
+  },
+  {
+   "key": "req-17",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "17",
+   "code": "40-35",
+   "name": "訓練・演習の実施に必要な経費",
+   "printedStartPage": 285,
+   "set": "test"
+  },
+  {
+   "key": "req-18",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "18",
+   "code": "45-35",
+   "name": "運用基盤等の強化に必要な経費",
+   "printedStartPage": 300,
+   "set": "test"
+  },
+  {
+   "key": "req-19",
+   "depth": 3,
+   "parent": "item-010-810",
+   "requestNo": "19",
+   "code": "55-35",
+   "name": "衛生機能の強化に必要な経費",
+   "printedStartPage": 333,
+   "set": "test"
+  },
+  {
+   "key": "item-010-815",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "815",
+   "name": "武器車両等整備費",
+   "printedStartPage": 346,
+   "set": "test"
+  },
+  {
+   "key": "req-20",
+   "depth": 3,
+   "parent": "item-010-815",
+   "requestNo": "20",
+   "code": "05-35",
+   "name": "武器車両等の購入に必要な経費",
+   "printedStartPage": 346,
+   "set": "test"
+  },
+  {
+   "key": "req-21",
+   "depth": 3,
+   "parent": "item-010-815",
+   "requestNo": "21",
+   "code": "10-35",
+   "name": "武器車両等の整備維持に必要な経費",
+   "printedStartPage": 386,
+   "set": "test"
+  },
+  {
+   "key": "req-22",
+   "depth": 3,
+   "parent": "item-010-815",
+   "requestNo": "22",
+   "code": "12-35",
+   "name": "特定防衛調達武器車両等の購入に必要な経費",
+   "printedStartPage": 432,
+   "set": "test"
+  },
+  {
+   "key": "req-23",
+   "depth": 3,
+   "parent": "item-010-815",
+   "requestNo": "23",
+   "code": "15-35",
+   "name": "特定防衛調達武器車両等の整備維持に必要な経費",
+   "printedStartPage": 432,
+   "set": "test"
+  },
+  {
+   "key": "req-24",
+   "depth": 3,
+   "parent": "item-010-815",
+   "requestNo": "24",
+   "code": "20-35",
+   "name": "民間資金等を活用した通信衛星の整備維持に必要な経費",
+   "printedStartPage": 433,
+   "set": "test"
+  },
+  {
+   "key": "req-25",
+   "depth": 3,
+   "parent": "item-010-815",
+   "requestNo": "25",
+   "code": "93-35",
+   "name": "可動数向上に必要な経費",
+   "printedStartPage": 433,
+   "set": "test"
+  },
+  {
+   "key": "req-26",
+   "depth": 3,
+   "parent": "item-010-815",
+   "requestNo": "26",
+   "code": "94-35",
+   "name": "弾薬確保に必要な経費",
+   "printedStartPage": 433,
+   "set": "test"
+  },
+  {
+   "key": "item-010-820",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "820",
+   "name": "艦船整備費",
+   "printedStartPage": 433,
+   "set": "test"
+  },
+  {
+   "key": "req-27",
+   "depth": 3,
+   "parent": "item-010-820",
+   "requestNo": "27",
+   "code": "21-35",
+   "name": "艦船の整備維持に必要な経費",
+   "printedStartPage": 433,
+   "set": "test"
+  },
+  {
+   "key": "req-28",
+   "depth": 3,
+   "parent": "item-010-820",
+   "requestNo": "28",
+   "code": "26-35",
+   "name": "民間資金等を活用した船舶の維持管理及び運営に必要な経費",
+   "printedStartPage": 438,
+   "set": "test"
+  },
+  {
+   "key": "req-29",
+   "depth": 3,
+   "parent": "item-010-820",
+   "requestNo": "29",
+   "code": "93-35",
+   "name": "可動数向上に必要な経費",
+   "printedStartPage": 439,
+   "set": "test"
+  },
+  {
+   "key": "item-010-825",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "825",
+   "name": "航空機整備費",
+   "printedStartPage": 439,
+   "set": "test"
+  },
+  {
+   "key": "req-30",
+   "depth": 3,
+   "parent": "item-010-825",
+   "requestNo": "30",
+   "code": "05-35",
+   "name": "航空機の購入に必要な経費",
+   "printedStartPage": 439,
+   "set": "test"
+  },
+  {
+   "key": "req-31",
+   "depth": 3,
+   "parent": "item-010-825",
+   "requestNo": "31",
+   "code": "07-35",
+   "name": "特定防衛調達航空機の購入に必要な経費",
+   "printedStartPage": 441,
+   "set": "test"
+  },
+  {
+   "key": "req-32",
+   "depth": 3,
+   "parent": "item-010-825",
+   "requestNo": "32",
+   "code": "10-35",
+   "name": "航空機の整備維持に必要な経費",
+   "printedStartPage": 442,
+   "set": "test"
+  },
+  {
+   "key": "req-33",
+   "depth": 3,
+   "parent": "item-010-825",
+   "requestNo": "33",
+   "code": "12-35",
+   "name": "特定防衛調達航空機の整備維持に必要な経費",
+   "printedStartPage": 449,
+   "set": "test"
+  },
+  {
+   "key": "req-34",
+   "depth": 3,
+   "parent": "item-010-825",
+   "requestNo": "34",
+   "code": "93-35",
+   "name": "可動数向上に必要な経費",
+   "printedStartPage": 451,
+   "set": "test"
+  },
+  {
+   "key": "req-35",
+   "depth": 3,
+   "parent": "item-010-825",
+   "requestNo": "35",
+   "code": "95-35",
+   "name": "企業撤退に起因する維持基盤再構築に必要な経費",
+   "printedStartPage": 451,
+   "set": "test"
+  },
+  {
+   "key": "item-010-838",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "838",
+   "name": "令和元年度潜水艦建造費",
+   "printedStartPage": 451,
+   "set": "test"
+  },
+  {
+   "key": "req-36",
+   "depth": 3,
+   "parent": "item-010-838",
+   "requestNo": "36",
+   "code": "01-35",
+   "name": "令和元年度潜水艦建造に必要な経費",
+   "printedStartPage": 451,
+   "set": "test"
+  },
+  {
+   "key": "item-010-839",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "839",
+   "name": "令和２年度甲Ⅴ型警備艦建造費",
+   "printedStartPage": 451,
+   "set": "test"
+  },
+  {
+   "key": "req-37",
+   "depth": 3,
+   "parent": "item-010-839",
+   "requestNo": "37",
+   "code": "01-35",
+   "name": "令和２年度甲Ⅴ型警備艦建造に必要な経費",
+   "printedStartPage": 451,
+   "set": "test"
+  },
+  {
+   "key": "item-010-840",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "840",
+   "name": "令和２年度潜水艦建造費",
+   "printedStartPage": 451,
+   "set": "test"
+  },
+  {
+   "key": "req-38",
+   "depth": 3,
+   "parent": "item-010-840",
+   "requestNo": "38",
+   "code": "01-35",
+   "name": "令和２年度潜水艦建造に必要な経費",
+   "printedStartPage": 451,
+   "set": "test"
+  },
+  {
+   "key": "item-010-841",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "841",
+   "name": "令和３年度甲Ⅴ型警備艦建造費",
+   "printedStartPage": 452,
+   "set": "test"
+  },
+  {
+   "key": "req-39",
+   "depth": 3,
+   "parent": "item-010-841",
+   "requestNo": "39",
+   "code": "01-35",
+   "name": "令和３年度甲Ⅴ型警備艦建造に必要な経費",
+   "printedStartPage": 452,
+   "set": "test"
+  },
+  {
+   "key": "item-010-842",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "842",
+   "name": "令和３年度潜水艦建造費",
+   "printedStartPage": 452,
+   "set": "test"
+  },
+  {
+   "key": "req-40",
+   "depth": 3,
+   "parent": "item-010-842",
+   "requestNo": "40",
+   "code": "01-35",
+   "name": "令和３年度潜水艦建造に必要な経費",
+   "printedStartPage": 452,
+   "set": "test"
+  },
+  {
+   "key": "item-010-843",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "843",
+   "name": "令和４年度甲Ⅴ型警備艦建造費",
+   "printedStartPage": 452,
+   "set": "test"
+  },
+  {
+   "key": "req-41",
+   "depth": 3,
+   "parent": "item-010-843",
+   "requestNo": "41",
+   "code": "01-35",
+   "name": "令和４年度甲Ⅴ型警備艦建造に必要な経費",
+   "printedStartPage": 452,
+   "set": "test"
+  },
+  {
+   "key": "item-010-844",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "844",
+   "name": "令和４年度潜水艦建造費",
+   "printedStartPage": 453,
+   "set": "test"
+  },
+  {
+   "key": "req-42",
+   "depth": 3,
+   "parent": "item-010-844",
+   "requestNo": "42",
+   "code": "01-35",
+   "name": "令和４年度潜水艦建造に必要な経費",
+   "printedStartPage": 453,
+   "set": "test"
+  },
+  {
+   "key": "item-010-845",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "845",
+   "name": "令和５年度甲Ⅴ型警備艦建造費",
+   "printedStartPage": 453,
+   "set": "test"
+  },
+  {
+   "key": "req-43",
+   "depth": 3,
+   "parent": "item-010-845",
+   "requestNo": "43",
+   "code": "01-35",
+   "name": "令和５年度甲Ⅴ型警備艦建造に必要な経費",
+   "printedStartPage": 453,
+   "set": "test"
+  },
+  {
+   "key": "item-010-846",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "846",
+   "name": "令和５年度潜水艦建造費",
+   "printedStartPage": 453,
+   "set": "test"
+  },
+  {
+   "key": "req-44",
+   "depth": 3,
+   "parent": "item-010-846",
+   "requestNo": "44",
+   "code": "01-35",
+   "name": "令和５年度潜水艦建造に必要な経費",
+   "printedStartPage": 453,
+   "set": "test"
+  },
+  {
+   "key": "item-010-847",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "847",
+   "name": "令和６年度甲Ⅴ型警備艦建造費",
+   "printedStartPage": 453,
+   "set": "test"
+  },
+  {
+   "key": "req-45",
+   "depth": 3,
+   "parent": "item-010-847",
+   "requestNo": "45",
+   "code": "01-35",
+   "name": "令和６年度甲Ⅴ型警備艦建造に必要な経費",
+   "printedStartPage": 454,
+   "set": "test"
+  },
+  {
+   "key": "item-010-848",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "848",
+   "name": "令和６年度甲型警備艦建造費",
+   "printedStartPage": 454,
+   "set": "test"
+  },
+  {
+   "key": "req-46",
+   "depth": 3,
+   "parent": "item-010-848",
+   "requestNo": "46",
+   "code": "01-35",
+   "name": "令和６年度甲型警備艦建造に必要な経費",
+   "printedStartPage": 454,
+   "set": "test"
+  },
+  {
+   "key": "item-010-849",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "849",
+   "name": "令和６年度潜水艦建造費",
+   "printedStartPage": 454,
+   "set": "test"
+  },
+  {
+   "key": "req-47",
+   "depth": 3,
+   "parent": "item-010-849",
+   "requestNo": "47",
+   "code": "01-35",
+   "name": "令和６年度潜水艦建造に必要な経費",
+   "printedStartPage": 454,
+   "set": "test"
+  },
+  {
+   "key": "item-010-860",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "860",
+   "name": "在日米軍等駐留関連諸費",
+   "printedStartPage": 456,
+   "set": "test"
+  },
+  {
+   "key": "req-48",
+   "depth": 3,
+   "parent": "item-010-860",
+   "requestNo": "48",
+   "code": "05-35",
+   "name": "在日米軍等の駐留に必要な経費",
+   "printedStartPage": 456,
+   "set": "test"
+  },
+  {
+   "key": "req-49",
+   "depth": 3,
+   "parent": "item-010-860",
+   "requestNo": "49",
+   "code": "10-35",
+   "name": "沖縄に関する特別行動委員会最終報告に盛り込まれた措置の実施に必要な経費",
+   "printedStartPage": 470,
+   "set": "test"
+  },
+  {
+   "key": "req-50",
+   "depth": 3,
+   "parent": "item-010-860",
+   "requestNo": "50",
+   "code": "15-35",
+   "name": "在日米軍の兵力構成見直し等に関する政府の取組の実施に必要な経費",
+   "printedStartPage": 472,
+   "set": "test"
+  },
+  {
+   "key": "item-010-870",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "870",
+   "name": "独立行政法人駐留軍等労働者労務管理機構運営費",
+   "printedStartPage": 474,
+   "set": "test"
+  },
+  {
+   "key": "req-51",
+   "depth": 3,
+   "parent": "item-010-870",
+   "requestNo": "51",
+   "code": "01-35",
+   "name": "独立行政法人駐留軍等労働者労務管理機構運営費交付金に必要な経費",
+   "printedStartPage": 474,
+   "set": "test"
+  },
+  {
+   "key": "item-010-885",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "885",
+   "name": "安全保障協力推進費",
+   "printedStartPage": 474,
+   "set": "test"
+  },
+  {
+   "key": "req-52",
+   "depth": 3,
+   "parent": "item-010-885",
+   "requestNo": "52",
+   "code": "05-35",
+   "name": "防衛協力・交流の推進に必要な経費",
+   "printedStartPage": 474,
+   "set": "test"
+  },
+  {
+   "key": "req-53",
+   "depth": 3,
+   "parent": "item-010-885",
+   "requestNo": "53",
+   "code": "10-35",
+   "name": "能力構築支援に必要な経費",
+   "printedStartPage": 478,
+   "set": "test"
+  },
+  {
+   "key": "item-010-900",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "900",
+   "name": "防衛力基盤強化施設整備費",
+   "printedStartPage": 478,
+   "set": "test"
+  },
+  {
+   "key": "req-54",
+   "depth": 3,
+   "parent": "item-010-900",
+   "requestNo": "54",
+   "code": "45-35",
+   "name": "運用基盤等の強化に必要な経費",
+   "printedStartPage": 478,
+   "set": "test"
+  },
+  {
+   "key": "req-55",
+   "depth": 3,
+   "parent": "item-010-900",
+   "requestNo": "55",
+   "code": "55-35",
+   "name": "衛生機能の強化に必要な経費",
+   "printedStartPage": 493,
+   "set": "test"
+  },
+  {
+   "key": "item-010-905",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "905",
+   "name": "艦船建造費",
+   "printedStartPage": 496,
+   "set": "test"
+  },
+  {
+   "key": "req-56",
+   "depth": 3,
+   "parent": "item-010-905",
+   "requestNo": "56",
+   "code": "16-35",
+   "name": "艦船建造に必要な経費",
+   "printedStartPage": 496,
+   "set": "test"
+  },
+  {
+   "key": "org-015",
+   "depth": 1,
+   "code": "015",
+   "name": "地方防衛局",
+   "printedStartPage": 500,
+   "set": "test"
+  },
+  {
+   "key": "item-015-030",
+   "depth": 2,
+   "parent": "org-015",
+   "code": "030",
+   "name": "地方防衛局",
+   "printedStartPage": 500,
+   "set": "test"
+  },
+  {
+   "key": "req-57",
+   "depth": 3,
+   "parent": "item-015-030",
+   "requestNo": "57",
+   "code": "01-35",
+   "name": "地方防衛局一般行政に必要な経費",
+   "printedStartPage": 500,
+   "set": "test"
+  },
+  {
+   "key": "req-58",
+   "depth": 3,
+   "parent": "item-015-030",
+   "requestNo": "58",
+   "code": "06-35",
+   "name": "審議会に必要な経費",
+   "printedStartPage": 509,
+   "set": "test"
+  },
+  {
+   "key": "req-59",
+   "depth": 3,
+   "parent": "item-015-030",
+   "requestNo": "59",
+   "code": "11-35",
+   "name": "地方防衛局の移転に必要な経費",
+   "printedStartPage": 510,
+   "set": "test"
+  },
+  {
+   "key": "item-015-040",
+   "depth": 2,
+   "parent": "org-015",
+   "code": "040",
+   "name": "地方防衛局施設費",
+   "printedStartPage": 511,
+   "set": "test"
+  },
+  {
+   "key": "req-60",
+   "depth": 3,
+   "parent": "item-015-040",
+   "requestNo": "60",
+   "code": "01-35",
+   "name": "地方防衛局施設整備に必要な経費",
+   "printedStartPage": 511,
+   "set": "test"
+  },
+  {
+   "key": "org-035",
+   "depth": 1,
+   "code": "035",
+   "name": "防衛装備庁",
+   "printedStartPage": 512,
+   "set": "test"
+  },
+  {
+   "key": "item-035-500",
+   "depth": 2,
+   "parent": "org-035",
+   "code": "500",
+   "name": "防衛装備庁共通費",
+   "printedStartPage": 512,
+   "set": "test"
+  },
+  {
+   "key": "req-61",
+   "depth": 3,
+   "parent": "item-035-500",
+   "requestNo": "61",
+   "code": "01-35",
+   "name": "防衛装備庁一般行政に必要な経費",
+   "printedStartPage": 512,
+   "set": "test"
+  },
+  {
+   "key": "req-62",
+   "depth": 3,
+   "parent": "item-035-500",
+   "requestNo": "62",
+   "code": "03-35",
+   "name": "審議会に必要な経費",
+   "printedStartPage": 524,
+   "set": "test"
+  },
+  {
+   "key": "item-035-550",
+   "depth": 2,
+   "parent": "org-035",
+   "code": "550",
+   "name": "防衛力基盤強化推進費",
+   "printedStartPage": 525,
+   "set": "test"
+  },
+  {
+   "key": "req-63",
+   "depth": 3,
+   "parent": "item-035-550",
+   "requestNo": "63",
+   "code": "05-35",
+   "name": "防衛技術基盤の強化に必要な経費（仮称）",
+   "printedStartPage": 525,
+   "set": "test"
+  },
+  {
+   "key": "req-64",
+   "depth": 3,
+   "parent": "item-035-550",
+   "requestNo": "64",
+   "code": "10-35",
+   "name": "防衛生産基盤の強化に必要な経費（仮称）",
+   "printedStartPage": 531,
+   "set": "test"
+  },
+  {
+   "key": "req-65",
+   "depth": 3,
+   "parent": "item-035-550",
+   "requestNo": "65",
+   "code": "15-35",
+   "name": "運用基盤等の強化に必要な経費",
+   "printedStartPage": 533,
+   "set": "test"
+  },
+  {
+   "key": "req-66",
+   "depth": 3,
+   "parent": "item-035-550",
+   "requestNo": "66",
+   "code": "20-35",
+   "name": "防衛装備移転の推進に必要な経費（仮称）",
+   "printedStartPage": 533,
+   "set": "test"
+  },
+  {
+   "key": "item-035-560",
+   "depth": 2,
+   "parent": "org-035",
+   "code": "560",
+   "name": "防衛力基盤強化施設整備費",
+   "printedStartPage": 534,
+   "set": "test"
+  },
+  {
+   "key": "req-67",
+   "depth": 3,
+   "parent": "item-035-560",
+   "requestNo": "67",
+   "code": "15-35",
+   "name": "運用基盤等の強化に必要な経費",
+   "printedStartPage": 534,
+   "set": "test"
+  }
+ ]
+}
