@@ -1,6 +1,8 @@
 /**
  * DocumentHierarchy v2-experimental: v1（budget-request-document-hierarchy.ts。変更しない）に、独立した2つの実験オプションを足した比較用の実装。
  *  A) headerCollisionHandling = 'observational-filter': ページ上下端に反復して現れる page-header/footer 型の行を hierarchy placement から除外する（行は消さず、理由を残す）。
+ *  A2) headerCollisionHandling = 'page-edge-domain': 事前登録した primary rule。ページ端の行 かつ 頁番号の正準な10進表記（先頭0なし）のtoken かつ y帯の過半数反復の
+ *      3つが全て成立する行だけを除外する。'observe-only' は同じ evidence を観測として残すだけ（除外しない）。
  *  B) singletonRootPlacement = 'lattice-supported': 支持が少ない根のクラスタを、document-local なインデント階段（lattice）の連続を根拠にだけ placed にする。
  * off/off は v1 と同値（テストで確認）。A と B は別の仮説で、variant を独立に比較する（実験計画: docs/data-pipeline-v2.md の DocumentHierarchy 節）。
  *
@@ -37,7 +39,12 @@ import { DEFAULT_HIERARCHY_OPTIONS } from './budget-request-document-hierarchy';
 export const DOCUMENT_HIERARCHY_V2_SCHEMA = 'budget-request-document-hierarchy-poc/v2-experimental';
 
 export interface HierarchyV2ExperimentalOptions {
-  headerCollisionHandling: 'off' | 'observational-filter';
+  /**
+   * off: 何もしない（v1と同値）／ observational-filter: v2-A（STOP。比較用に残す）／
+   * page-edge-domain: A2（事前登録した primary rule。ページ端の行 かつ 頁番号の正準な10進表記のtoken かつ y帯の過半数反復の全てで除外）／
+   * observe-only: A2 と同じ定義の evidence を観測として残すだけで、除外しない（hierarchyの判断は off と同じ）
+   */
+  headerCollisionHandling: 'off' | 'observational-filter' | 'page-edge-domain' | 'observe-only';
   singletonRootPlacement: 'off' | 'lattice-supported';
 }
 
@@ -54,6 +61,25 @@ export interface DocumentHierarchyNodeV2 extends DocumentHierarchyNodeObservatio
   exclusionEvidence: ExclusionEvidence[];
   /** 観測した header evidence（候補行ごとに全て記録。optionがoffのときは空） */
   headerEvidenceObserved: ExclusionEvidence[];
+  hierarchyResolutionContext: HierarchyResolutionContext;
+}
+
+/** FieldResolver が「なぜ hierarchy が確定しなかったか」を判別するための文脈（観測。decisionとは別） */
+export interface HierarchyResolutionContext {
+  /** header 系の evidence（page_edge_row / vertical_repetition / page_number_sequence）が1つでも観測された行か */
+  headerCollisionObserved: boolean;
+  /** hierarchy placement から除外されたか（決定） */
+  headerCandidateExcluded: boolean;
+  observedEvidenceKinds: HeaderEvidenceKind[];
+  exclusionEvidence: ExclusionEvidence[];
+}
+
+export interface EdgeHeaderContext {
+  childNodeId: string;
+  status: EdgeStatus;
+  childHasHeaderEvidence: boolean;
+  parentHasHeaderEvidence: boolean;
+  ancestorHasHeaderEvidence: boolean;
 }
 
 export interface IndentClusterV2 extends IndentClusterObservation {
@@ -95,6 +121,16 @@ export interface DocumentHierarchyV2Result {
   nodes: DocumentHierarchyNodeV2[];
   edges: DocumentHierarchyEdgeCandidate[];
   indentClusters: IndentClusterV2[];
+  /** header collision の観測（観測と decision を分離）。off のときは mode 以外は空 */
+  headerCollisionObservation: {
+    mode: HierarchyV2ExperimentalOptions['headerCollisionHandling'];
+    pagesAnalyzed: number;
+    pageNumberOffset: number | null;
+    nodesWithHeaderEvidence: string[];
+    excludedNodeIds: string[];
+    /** unresolved / level_gap の edge、または header evidence を持つ node が関わる edge の文脈（resolved で header evidence 無しの edge は含めない） */
+    edgeContexts: EdgeHeaderContext[];
+  };
   /** 規則Bの判断過程（optionがoffのときは空） */
   latticeDiagnostics: { requiredRunLength: number; referenceFontSize: number; tolerance: number; steps: LatticeStepDiagnostic[]; finalOutcome: 'activated' | 'not_activated' | 'off' };
   diagnostics: {
@@ -120,6 +156,8 @@ const CODE3 = /^\d{3}$/;
 const REQUEST_NO = /^\d{1,3}$/;
 const PAGE_REF = /^\d{4}$/;
 const DIGITS_ONLY = /^\d+$/;
+/** 頁番号の正準な10進表記（先頭に0を持たない） */
+const CANONICAL_DECIMAL = /^(0|[1-9]\d*)$/;
 const round3 = (n: number): number => Math.round(n * 1000) / 1000;
 
 function median(values: number[]): number {
@@ -182,6 +220,7 @@ export function observeDocumentHierarchyV2(
             hierarchyEligibility: 'candidate',
             exclusionEvidence: [],
             headerEvidenceObserved: [],
+            hierarchyResolutionContext: { headerCollisionObserved: false, headerCandidateExcluded: false, observedEvidenceKinds: [], exclusionEvidence: [] },
           },
         });
       }
@@ -192,7 +231,9 @@ export function observeDocumentHierarchyV2(
 
   // A: header collision evidence
   let pageNumberOffset: number | null = null;
-  if (options.headerCollisionHandling === 'observational-filter') {
+  const headerMode = options.headerCollisionHandling;
+  const canonicalA2 = headerMode === 'page-edge-domain' || headerMode === 'observe-only';
+  if (headerMode !== 'off') {
     const nPages = ordered.length;
     const enough = nPages >= 3;
     // 各ページの最上/最下の論理行
@@ -227,7 +268,7 @@ export function observeDocumentHierarchyV2(
         if (ri < 0) continue;
         for (const ti of p.logical.logicalRowCandidates[ri].rawTokenIndexes) {
           const t = p.tokens[ti].rawText.trim();
-          if (DIGITS_ONLY.test(t)) seen.add(Number(t) - p.meta.number);
+          if (canonicalA2 ? CANONICAL_DECIMAL.test(t) : DIGITS_ONLY.test(t)) seen.add(Number(t) - p.meta.number);
         }
       }
       for (const o of seen) offsetPages.set(o, (offsetPages.get(o) ?? 0) + 1);
@@ -247,14 +288,23 @@ export function observeDocumentHierarchyV2(
         if (pagesInBand > nPages / 2) observed.push({ kind: 'vertical_repetition', detail: { pagesWithRowInBand: pagesInBand, pages: nPages } });
       }
       if (pageNumberOffset !== null) {
-        const hit = row.rawTokenIndexes.map(ti => p.tokens[ti].rawText.trim()).find(t => DIGITS_ONLY.test(t) && Number(t) - p.meta.number === pageNumberOffset);
+        const expected = String(p.meta.number + pageNumberOffset);
+        const hit = row.rawTokenIndexes.map(ti => p.tokens[ti].rawText.trim()).find(t => (canonicalA2 ? CANONICAL_DECIMAL.test(t) && t === expected : DIGITS_ONLY.test(t) && Number(t) - p.meta.number === pageNumberOffset));
         if (hit !== undefined) observed.push({ kind: 'page_number_sequence', detail: { offset: pageNumberOffset, token: hit } });
       }
       c.node.headerEvidenceObserved = observed;
-      if (observed.length >= 2) {
+      // v2-A: 2種以上で除外 / A2: 3種全て（ページ端の行 + 頁番号の正準な10進表記 + y帯の過半数反復）で除外 / observe-only: 除外しない
+      const exclude = headerMode === 'observational-filter' ? observed.length >= 2 : headerMode === 'page-edge-domain' ? new Set(observed.map(e => e.kind)).size === 3 : false;
+      if (exclude) {
         c.node.hierarchyEligibility = 'excluded';
         c.node.exclusionEvidence = observed;
       }
+      c.node.hierarchyResolutionContext = {
+        headerCollisionObserved: observed.length > 0,
+        headerCandidateExcluded: exclude,
+        observedEvidenceKinds: observed.map(e => e.kind),
+        exclusionEvidence: exclude ? observed : [],
+      };
     }
   }
 
@@ -390,6 +440,24 @@ export function observeDocumentHierarchyV2(
     nodes: candidates.map(c => c.node),
     edges,
     indentClusters,
+    headerCollisionObservation: (() => {
+      const withEv = new Set(candidates.filter(c => c.node.hierarchyResolutionContext.headerCollisionObserved).map(c => c.node.id));
+      const contexts: EdgeHeaderContext[] = [];
+      for (const e of edges) {
+        const child = withEv.has(e.childNodeId);
+        const parent = e.parentNodeId !== null && withEv.has(e.parentNodeId);
+        const anc = e.ancestorCandidateNodeIds.some(id => withEv.has(id));
+        if (e.status !== 'resolved_by_indent_sequence' || child || parent || anc) contexts.push({ childNodeId: e.childNodeId, status: e.status, childHasHeaderEvidence: child, parentHasHeaderEvidence: parent, ancestorHasHeaderEvidence: anc });
+      }
+      return {
+        mode: headerMode,
+        pagesAnalyzed: ordered.length,
+        pageNumberOffset,
+        nodesWithHeaderEvidence: [...withEv],
+        excludedNodeIds: candidates.filter(c => c.node.hierarchyEligibility === 'excluded').map(c => c.node.id),
+        edgeContexts: contexts,
+      };
+    })(),
     latticeDiagnostics: {
       requiredRunLength: LATTICE_REQUIRED_RUN_LENGTH,
       referenceFontSize: round3(referenceFontSize),
