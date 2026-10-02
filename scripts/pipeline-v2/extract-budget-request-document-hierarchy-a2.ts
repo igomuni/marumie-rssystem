@@ -2,7 +2,7 @@
  * DocumentHierarchy A2 最終実験 — 段階A（推論）の薄いランナー。GTを読まない。
  * 事前登録した A2（headerCollisionHandling='page-edge-domain'）を、v1 / v2-A（STOP・比較用）/ v2-B（凍結）/ A2 / B+A2 / B+観測のみ と並べて実行する。
  *
- * 使い方: npx tsx scripts/pipeline-v2/extract-budget-request-document-hierarchy-a2.ts [year] [--only=<id>[,<id>]] [--variants=<name>[,<name>]] [--set=development|holdout]
+ * 使い方: npx tsx scripts/pipeline-v2/extract-budget-request-document-hierarchy-a2.ts [year] [--only=<id>[,<id>]] [--variants=<name>[,<name>]] [--set=<set>]  （既定の variant に v2-B-A2 は含まない）
  * 出力: data/work/budget-request-document-hierarchy/{year}/a2-final/{variant}/{id}.json
  * holdout の範囲は、規則固定と holdout GT のコミットの後でだけ定義・実行する（実験計画）。
  */
@@ -54,7 +54,8 @@ async function run(year: number, target: ExtractionTarget, e: A2Experiment, vari
 async function main() {
   const args = process.argv.slice(2);
   const only = args.find(a => a.startsWith('--only='))?.slice(7).split(',');
-  const variants = args.find(a => a.startsWith('--variants='))?.slice(11).split(',') ?? A2_VARIANTS.map(v => v.name);
+  // v2-B-A2（B+A2 の統合確認）は A2 = GO のときだけ実行する（指示書 §16–17）ので、既定には含めず、--variants= で明示したときだけ実行する
+  const variants = args.find(a => a.startsWith('--variants='))?.slice(11).split(',') ?? A2_VARIANTS.map(v => v.name).filter(n => n !== 'v2-B-A2');
   const sets = args.find(a => a.startsWith('--set='))?.slice(6).split(',');
   const positional = args.filter(a => !a.startsWith('--'));
   const year = positional[0] ? Number(positional[0]) : 2024;
