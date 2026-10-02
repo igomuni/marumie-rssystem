@@ -57,6 +57,7 @@ async function main() {
   const args = process.argv.slice(2);
   const tag = args.find(a => a.startsWith('--tag='))?.slice(6) ?? 'holdout';
   const integration = args.includes('--integration');
+  const final = args.includes('--final');
   const year = Number(args.filter(a => !a.startsWith('--'))[0] ?? 2024);
   const dir = path.join(DOCUMENT_HIERARCHY_WORK_DIR, String(year), 'a2-final');
   const out: Record<string, unknown> = { tag, primaryMatcher: 'posthoc (defined in #364; same matcher for all variants)' };
@@ -116,6 +117,48 @@ async function main() {
     }
     out.integration = { rows, passed: allOk };
     console.log(`\nB+A2 integration: ${allOk ? 'PASS' : 'STOP'}`);
+  }
+  // ---- 最終採用（B only = B + 観測のみ）の記述的な確認（判定には使わない）。FieldResolver への引き継ぎ状態も数える ----
+  if (final) {
+    const rows: Record<string, unknown> = {};
+    for (const e of A2_EXPERIMENTS) {
+      const cfg = A2_EVAL_CONFIGS.find(c => c.id === e.id) as (typeof A2_EVAL_CONFIGS)[number];
+      const gt = JSON.parse(fs.readFileSync(path.join(FIX, cfg.gtFile), 'utf8')) as { detailPrintedToPhysicalPageOffset?: number; source?: { printedToPhysicalPageOffset?: number }; nodes: GtNode[] };
+      const gtN = { ...gt, detailPrintedToPhysicalPageOffset: gt.detailPrintedToPhysicalPageOffset ?? gt.source?.printedToPhysicalPageOffset ?? 0 };
+      const byKey = new Map(gt.nodes.map(n => [n.key, n]));
+      const rootOf = (k: string): string => {
+        let cur = byKey.get(k) as GtNode;
+        while (cur.parent) cur = byKey.get(cur.parent) as GtNode;
+        return cur.key;
+      };
+      const keys = new Set(gt.nodes.filter(n => cfg.scope(n, rootOf)).map(n => n.key));
+      const v1 = cellFor(dir, 'v1', e.id, gtN, keys, cfg.summaryMode);
+      const bo = cellFor(dir, 'v2-B-obs', e.id, gtN, keys, cfg.summaryMode);
+      const art = JSON.parse(fs.readFileSync(path.join(dir, 'v2-B-obs', `${e.id}.json`), 'utf8')) as {
+        nodes: { id: string; hierarchyResolutionContext: { observedEvidenceKinds: string[] } }[];
+        edges: { childNodeId: string; parentNodeId: string | null; status: string; ancestorCandidateNodeIds: string[] }[];
+        headerCollisionObservation: { nodesWithHeaderEvidence: string[]; excludedNodeIds: string[] };
+        latticeDiagnostics: { finalOutcome: string };
+        diagnostics: { edgeStatusCounts: Record<string, number> };
+      };
+      // 強い header evidence: 2種以上（ページ端を含む）。弱い evidence（1種だけ。y帯の反復など）は多くの見出し行に付くので、判別には使わない
+      const strong = new Set(art.nodes.filter(n => n.hierarchyResolutionContext.observedEvidenceKinds.length >= 2 && n.hierarchyResolutionContext.observedEvidenceKinds.includes('page_edge_row')).map(n => n.id));
+      const touches = (x: (typeof art.edges)[number]) => strong.has(x.childNodeId) || (x.parentNodeId !== null && strong.has(x.parentNodeId)) || x.ancestorCandidateNodeIds.some(id => strong.has(id));
+      const byStatus = (pred: (x: (typeof art.edges)[number]) => boolean) => ({
+        resolved: art.edges.filter(x => x.status === 'resolved_by_indent_sequence' && pred(x)).length,
+        level_gap: art.edges.filter(x => x.status === 'level_gap' && pred(x)).length,
+        unresolved: art.edges.filter(x => x.status === 'unresolved' && pred(x)).length,
+      });
+      const parentIsHeader = (x: (typeof art.edges)[number]) => x.parentNodeId !== null && strong.has(x.parentNodeId);
+      rows[e.id] = {
+        set: e.set, v1: v1.counts.posthoc, bObs: bo.counts.posthoc, excludedByDecision: bo.excludedCount, gtExcluded: bo.gtExcluded.excluded,
+        bActivated: art.latticeDiagnostics.finalOutcome === 'activated', strongHeaderEvidenceNodes: strong.size, weakOrStrongEvidenceNodes: art.headerCollisionObservation.nodesWithHeaderEvidence.length,
+        edgesTouchingStrongHeader: byStatus(touches), edgesWithStrongHeaderAsParent: byStatus(parentIsHeader), edgeStatusCounts: art.diagnostics.edgeStatusCounts,
+      };
+      const t = byStatus(touches);
+      console.log(`  final B-only ${e.id.padEnd(24)} ${line(bo.counts.posthoc)} | B=${art.latticeDiagnostics.finalOutcome} strongHeaderNodes=${strong.size} edgesTouchingStrongHeader: resolved=${t.resolved} level_gap=${t.level_gap} unresolved=${t.unresolved}`);
+    }
+    out.finalBOnly = rows;
   }
   const file = path.join(dir, `evaluation-${tag}.json`);
   fs.writeFileSync(file, `${JSON.stringify(out, null, 2)}\n`);
