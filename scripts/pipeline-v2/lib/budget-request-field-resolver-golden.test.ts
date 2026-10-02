@@ -116,12 +116,14 @@ describe('検証が不正な fixture を拒否する', () => {
 });
 
 describe('static boundary: 推論側が Golden を参照しない', () => {
-  it('scripts/pipeline-v2 の Golden 検証・テスト以外のソースは budget-request-field-resolver の fixture を参照しない', () => {
+  it('Golden の fixture / validator を参照してよいのは、Golden 検証・評価側（evaluator・評価CLI・テスト）だけ', () => {
     const root = path.join(__dirname, '..');
     const files: string[] = [];
     const walk = (d: string) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else if (p.endsWith('.ts')) files.push(p); } };
     walk(root);
-    const offenders = files.filter(f => !/budget-request-field-resolver-golden(\.test)?\.ts$/.test(f)).filter(f => fs.readFileSync(f, 'utf8').includes('budget-request-field-resolver'));
+    const evaluationSide = /(budget-request-field-resolver-golden(\.test)?|budget-request-field-resolver-evaluator|budget-request-field-resolver(-boundary)?\.test|evaluate-budget-request-field-resolver)\.ts$/;
+    const referencesGolden = /fixtures['"/,\s]+budget-request-field-resolver|budget-request-field-resolver-golden/;
+    const offenders = files.filter(f => !evaluationSide.test(f)).filter(f => referencesGolden.test(fs.readFileSync(f, 'utf8')));
     expect(offenders).toEqual([]);
   });
 });
