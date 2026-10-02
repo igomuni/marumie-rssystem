@@ -449,6 +449,14 @@ v1 の推論失敗2つを独立した仮説として切り分けた実験の結�
 - **FieldResolver は欠けた階層の親を推測してはならない**（nearest parent で埋める・コード/名称から推測・GT から補完・level_gap の圧縮・見かけ上 resolved への変換はしない）。artifact の `headerCollisionObservation` / `hierarchyResolutionContext`（strong header evidence = 2種以上・ページ端を含む）、`edges[].status`、`indentClusters[].placementBasis` / `latticeDiagnostics` を判別に使う。観測（evidence）と decision（edge の status）は分離されている。
 - 再開条件: FieldResolver / end-to-end の evidence から「再開する価値」が別途示されること。Future Experiment C（`printedPageRefCandidate` の4桁限定）は自動的に次タスクにしない。
 
+### FieldResolver v0（Contract と Golden の固定。実装は未着手）
+
+DocumentHierarchy が CLOSED になったので、次工程は FieldResolver（SourceToken・TableGeometry・LogicalRow と、DocumentHierarchy B-only の artifact から、予算 field を安全に確定できるか判定する層）。**まず Contract と評価専用 Golden を固定した**（実装は次タスクの PoC）。優先順位: ①false resolve を避ける ②wrong source association を避ける ③provenance を保持する ④safe resolved coverage。
+
+- **Contract**: field ごとに status（`resolved` / `blank` / `unresolved` / `ambiguous` / `not_observed` / `not_applicable`）と provenance を返す。row-local な field（code・name・3金額・各 sign・ページの単位表記）は、hierarchy が unresolved / risky でも evidence が十分なら解決する。hierarchy-dependent な association（要求→項・項→組織）は、`resolved_by_indent_sequence` かつ strong header evidence が edge の端に無いときだけ解決し、`unresolved` / `level_gap` / strong header risk は確定しない。remark は値としては解決せず参照のみ（物理的な右側 ≠ 備考）。sign・blank・difference・unit を推定・計算しない（不変）。
+- **Golden**: 8ページ・20 target（アシスタントの視覚観測。人間レビュー pending）。通常行・明示の△（差額・要求額）・blank と明示の0・補助領域・階層リスクの境界を含む。「差額が表示されない行」は NOT FOUND IN CURRENT GOLDEN SET。fixture は評価専用で、推論側から参照しない（静的テストで確認）。
+- 検証: `scripts/pipeline-v2/lib/budget-request-field-resolver-golden.ts`（fixture integrity のみ）。
+
 ## 8. V1/V2比較方法
 
 ```bash

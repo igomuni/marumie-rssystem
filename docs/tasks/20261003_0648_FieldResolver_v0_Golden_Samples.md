@@ -123,6 +123,8 @@ Golden は **FieldResolver の inference より先に**固定する。Golden の
 - Golden は小さい（8ページ・20 target）。他省庁・他の書式の多様性は未検証。
 - 要求番号（丸数字）・remark の本文・総表ページ・ページ跨ぎの continuation は v0 の対象外。
 
-## 11. freeze commit
+## 11. fixture validation と freeze
 
-（commit 3 で追記: fixture integrity の検証・freeze 宣言・freeze commit）
+- 検証コード（最小）: `scripts/pipeline-v2/lib/budget-request-field-resolver-golden.ts`（schema・status 語彙・amount の整合・blank に値が無いこと・explicit zero・name の normalized と rawLines の整合・auxiliary が amount に attach しないこと・hierarchy の期待の整合・provenance・coverage）。テスト `budget-request-field-resolver-golden.test.ts`（20件）: 実 fixture が検証を通ること、必須の挙動が全てカバーされていること、NOT FOUND が明示され値を作っていないこと、不正な fixture（重複 ID・不正 status・blank が数値を持つ・evidence なしの resolved・不整合な normalized・auxiliary が attach・hierarchy の期待の不備・provenance の欠落）を拒否すること、推論側が Golden を参照しないこと。**FieldResolver の inference のテスト・コードは無い。**
+- **freeze 宣言**: Golden fixture（`tests/fixtures/budget-request-field-resolver/v0/golden.json`）・Contract・評価方針（Contract §15–16）は、この commit（`git log` の `Golden freeze`）で固定する。FieldResolver の PoC 実装は、この commit の後から始める。以降、PoC の結果を見て Golden を追加・変更しない（人間レビューで値の誤りが見つかった場合は、PoC より前に別 commit で訂正を記録する）。
+- 状態: inference implementation = **なし**。DocumentHierarchy は CLOSED のまま（A3・B+A2 の再評価・B の再調整・header 規則の再設計・Future Experiment C は行っていない）。
