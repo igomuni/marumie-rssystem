@@ -2,6 +2,8 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_0648_FieldResolver_v0_Golden_Samples.md](20261003_0648_FieldResolver_v0_Golden_Samples.md) — FieldResolver v0 の Golden Samples（評価専用）。既存資産の棚卸しと human-observations.json の再利用判定（現在 commit 1）。金額・符号・blank の既存GTは無く、新規の視覚観測で作る
+- [20261003_0648_FieldResolver_v0_Contract.md](20261003_0648_FieldResolver_v0_Contract.md) — FieldResolver v0 Contract（実装前に固定）。責務・入出力・status model・invariants・hierarchy consumption policy（strong header risk）・source association・評価指標
 - [20261003_0615_DocumentHierarchy_A2_最終実験_結果.md](20261003_0615_DocumentHierarchy_A2_最終実験_結果.md) — DocumentHierarchy A2 最終実験の結果。A2=STOP（防衛省 exact 34/96→96/96 だが、こども家庭庁は単一組織で depth 37/38→0/38）、統合確認は実行せず最終採用は B only。DocumentHierarchy 探索を CLOSED、FieldResolver 引き継ぎ契約を記載
 - [20261003_0558_rs_system_custom_abstraction_design_memo.md](20261003_0558_rs_system_custom_abstraction_design_memo.md) — RSシステム設計メモ。汎用ライブラリ（サンキー図・PDF抽出など）から必要な抽象化を自前で持つ方針の整理
 - [20261003_0557_DocumentHierarchy_A2_実験計画.md](20261003_0557_DocumentHierarchy_A2_実験計画.md) — v2-A の STOP を受けた A2（page-edge を domain にした header identity）の事前登録。primary rule を1つに固定、development/negative/regression、封印した holdout（防衛省・こども家庭庁）、成功条件・stop。実装・実行はしない
