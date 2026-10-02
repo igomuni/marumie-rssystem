@@ -194,6 +194,29 @@ npm run pipeline:v2:extract:budget-request-geometry -- 2024 --document=<canonica
 - **ColumnBand観測**: 空白・罫線文字を除くtokenについて、左端（xMin）と右端（xMax）の揃いを別々に、最小値を起点に幅 `edgeTolerance`（= 0.25×fontSize中央値）以内のtokenを1つの帯とし、物理行が `minRows`（3）以上に繰り返すものだけを残す。帯は重なり得る（同じtokenが左端帯と右端帯に入る）。
 - **既知の限界**: ①帯が多い（FY2024の4ページで43〜78本）。金額が数値chunkごとに別tokenのため、chunkごとの端が別々の帯になる。帯の統合・意味付けは次段 ②縦方向のbbox（フォントmetrics由来）は近似 ③複数ページにまたがる行、複数rowにまたがる事項名、表の罫線（行・列の区切り）の利用は未対応 ④右側の独立した表（MHLW p1268）や備考列の積算（MEXT p876）は、同じy付近のrowに物理的に同居するだけで、左側Coreとの関連付けも意味分類もしない。
 
+### LogicalRowResolver PoC（LogicalRowCandidate）
+
+```text
+SourceToken  →  TableGeometry（PhysicalRowCandidate / ColumnBandObservation）  →  LogicalRowResolver（LogicalRowCandidate）
+```
+
+```bash
+npm run pipeline:v2:extract:budget-request-logical-row -- 2024 --golden
+npm run pipeline:v2:extract:budget-request-logical-row -- 2024 --sample=meti-ippan-p9
+npm run pipeline:v2:extract:budget-request-logical-row -- 2024 --document=<canonicalUrl> --page=<N>
+```
+
+出力: `data/work/budget-request-extraction/{year}/logical-row-poc/{id}.json`（`schema: budget-request-logical-row-poc/v1`。parameters / physicalRowCount / logicalRowCandidates / diagnostics。SourceTokenは複製せず `SourceToken.index` / `PhysicalRowCandidate.rowIndex` で参照）。実装は `lib/budget-request-logical-row.ts`。
+
+**LogicalRowCandidate はまだ予算明細のsemantic record（LogicalDetailRecord）ではない。** 「複数のPhysicalRowCandidateが同一の論理行候補を構成している可能性」を表す可逆な観測結果で、要求番号・事項・金額・備考の意味、数値parse、符号（△▲-）、blankの扱い、Core/Auxiliary関連付けは行わない。
+
+- **可逆性**: candidateは必ず `physicalRowIndexes` を持ち、SourceToken・PhysicalRowCandidateは書き換えない。`rawTokenIndexes`（index昇順）と `visualTokenIndexes`（physical row順に各rowのvisual-x orderを連結）を区別し、文字列は結合しない（`234,599,916` を作らない）。
+- **水平分割（HorizontalSegment）**: 同じphysical row内を、visual-x順のx-gap（次のxMin − ここまでのxMax最大値）が `gapFactor(2.5) × fontSize中央値` を超えたところで区切る純粋なgeometry。左右の独立構造が同じbaselineに同居しても1つの文字列にしない。segmentに意味名は付けない。
+- **継続判定**: 隣り合うphysical row A→B で、①baseline差が `[0.75, 1.5] × fontSize`（折り返し行の行間）②Bの全segmentの開始xが、candidateに含まれるtokenの開始xと `0.25 × fontSize` 以内で揃う → `continuation_by_geometry`（merge）。縦は範囲内だが一部しか揃わない、または罫線文字を含む行（表のグリッド）→ merge せず `ambiguous`（理由と計測値をevidenceに残す）。縦が範囲外 → `same_physical_row`。false positive merge より ambiguous を優先する。ColumnBandは判定に使わず、`columnBandEvidence` として補助的に記録するだけ。
+- **しきい値**: すべてページのfontSize中央値に対する相対値で、出力JSONの `parameters` に記録。PDF別・Golden Sample別のhard-codeはない。
+- **TableGeometryのchaining診断**: `PhysicalRowCandidate` 内のbaseline span（max−min）が `rowClustering.tolerance` を超える行を `diagnostics.tableGeometryChaining` に列挙（TableGeometryのアルゴリズムは変更しない）。FY2024の4 Golden Sampleでは該当なし（最大span 0.147pt、tolerance 1.736pt）。
+- **既知の限界**: ①segment境界は `gapFactor` に敏感（METI p9で gapFactor 1.5/2.5/3.5/5 → 156/133/121/93 segment）。金額の右隣に1文字分しか離れずに続く `（要求要旨）` のような左右は区切れない ②罫線グリッドの表（MHLW p1268/p1555の右側の表）は大半が `ambiguous` で残り、行・列の構造化は次段 ③ColumnBandの繰り返し配置はevidenceとしても判別力が弱い（MEXT p876では継続候補の不一致segmentの多くにも帯がある） ④複数ページにまたがる継続、複数行にまたがる事項名の文字列確定は未対応。
+
 ## 8. V1/V2比較方法
 
 ```bash
