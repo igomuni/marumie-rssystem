@@ -191,7 +191,7 @@ Golden の各 field の状態は 3 種に分ける: **resolvable**（GT が `res
 
 ## 17. known limitations / explicitly deferred
 
-- Golden は小さい（8ページ・20 target）で、**視覚確認はアシスタント（AI）がレンダリング画像を読んだもの**。人間による確認は未実施（Golden Samples 文書）。
+- Golden は小さい（8ページ・20 target）で、**視覚確認はアシスタント（AI）がレンダリング画像を読んだもの**。row-local の視覚 field は人間レビューで確認済み（MEXT p876 `015` の名称の全角コードポイント性は pending。階層の期待値は policy 由来でレビュー対象外）（Golden Samples 文書）。
 - 「前年度・要求額はあるが差額が表示されない行」は現在の Golden に見つかっていない（NOT FOUND IN CURRENT GOLDEN SET。v0 PoC の評価対象外）。
 - hierarchy-dependent field の評価は、凍結済みの hierarchy artifact がある範囲（METI p9・p10・p96、MHLW p1555、こども家庭庁 p136）だけ。MHLW p1268・MEXT p876 は対象外。
 - `pageUnitLabel` は、ページに印字されている場合だけ。単位の推定・換算はしない。

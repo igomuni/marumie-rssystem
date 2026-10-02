@@ -32,9 +32,21 @@ describe('Golden fixture（実物）の整合性', () => {
     expect(ids).toHaveLength(20);
     expect(new Set(ids).size).toBe(20);
   });
-  it('観測方法・限界が記録されている（アシスタントの視覚観測・人間レビューは pending・抽出テキストを値に使っていない）', () => {
-    const om = load().observationMethod;
-    expect(om).toMatchObject({ method: 'assistant-visual-render', observer: 'assistant (AI)', humanReview: 'pending', usedExtractedTextForValues: false });
+  it('観測方法が記録されている（アシスタントの視覚観測・抽出テキストを値に使っていない）', () => {
+    const fx = load();
+    expect(fx.observationMethod).toMatchObject({ method: 'assistant-visual-render', observer: 'assistant (AI)', usedExtractedTextForValues: false });
+  });
+  it('human review の記録: row-local の視覚 field は確認済み、MEXT p876 の名称の全角性だけ pending、階層の期待値は対象外、値は変更していない', () => {
+    const fx = load();
+    expect(fx.humanReview).toMatchObject({ status: 'row-local-visual-confirmed-with-exception', goldenValuesChanged: false });
+    expect(fx.humanReview.exceptions).toHaveLength(1);
+    expect(fx.humanReview.exceptions[0]).toMatchObject({ target: 'mext-p876-line015', field: 'name' });
+    expect(fx.humanReview.excludedFromHumanVisualReview).toContain('hierarchy.expected');
+    const targets = fx.samples.flatMap((s: any) => s.targets); // eslint-disable-line @typescript-eslint/no-explicit-any
+    expect(targets.filter((t: any) => t.humanReview === 'visual-confirmed')).toHaveLength(19); // eslint-disable-line @typescript-eslint/no-explicit-any
+    const exc = targets.find((t: any) => t.id === 'mext-p876-line015'); // eslint-disable-line @typescript-eslint/no-explicit-any
+    expect(exc.humanReview).toBe('visual-confirmed-except-name-unicode-pending');
+    expect(exc.observationConfidence).toBe('medium');
   });
   it('既存の人間確認アンカー（human-observations.json）は位置のアンカーとして参照されている', () => {
     const anchors = load().samples.flatMap((s: any) => s.humanAnchors); // eslint-disable-line @typescript-eslint/no-explicit-any
