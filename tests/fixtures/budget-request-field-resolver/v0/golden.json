@@ -7,7 +7,7 @@
   "method": "assistant-visual-render",
   "description": "Each sample page was rendered to an image (pdftoppm, 130 dpi full page; 220 dpi crops for dense or low-confidence cells) and read visually by the assistant (an AI), not by a human. Values come from the rendered page only: no extracted text, no neighbouring-value arithmetic, no general knowledge. Cells that could not be read are not recorded as values. Where an existing human coordinate anchor exists (human-observations.json) it is referenced.",
   "observer": "assistant (AI)",
-  "humanReview": "pending",
+  "humanReview": "row-local-visual-confirmed-with-exception",
   "usedExtractedTextForValues": false,
   "pageSelectionNote": "The four core pages are the existing Golden Sample locators. METI p10, p96, p105 and こども家庭庁 p136 were added for field-behaviour boundaries; p96/p105/p136 were found using extraction output as a SEARCH aid only (candidate pages), and their values were then read from the rendered page.",
   "hierarchyInputStates": "The hierarchy.inputState fields record the state in the frozen DocumentHierarchy B-only artifact (derived input, regenerable). They are inputs to the Contract policy, not visual truth. Hierarchy-dependent expected statuses are policy-derived (Contract section 9)."
@@ -159,7 +159,8 @@
         "status": "not_applicable"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "meti-p9-req01-95",
@@ -264,7 +265,8 @@
         "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "meti-p9-line-02-0200-sign",
@@ -345,7 +347,8 @@
         "status": "not_applicable"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "meti-p9-line-03-0200-zero-diff",
@@ -427,7 +430,8 @@
         "status": "not_applicable"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "meti-p9-line-001-blank",
@@ -507,7 +511,8 @@
         "status": "not_applicable"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     }
    ]
   },
@@ -621,7 +626,8 @@
        }
       }
      },
-     "notes": "The △ of the requested cell sits immediately to the right of the previous-year \"0\" and belongs to the requested cell (left edge of the cell)."
+     "notes": "The △ of the requested cell sits immediately to the right of the previous-year \"0\" and belongs to the requested cell (left edge of the cell).",
+     "humanReview": "visual-confirmed"
     }
    ]
   },
@@ -723,7 +729,8 @@
         "status": "not_applicable"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "meti-p96-line-05-0100-explicit-zero",
@@ -806,7 +813,8 @@
         "status": "not_applicable"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "meti-p96-line-1360-blank-all",
@@ -887,7 +895,8 @@
         "status": "not_applicable"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "meti-p96-line-1010-aux-number",
@@ -975,7 +984,8 @@
         "status": "not_applicable"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     }
    ]
   },
@@ -1085,7 +1095,8 @@
         "derivedFrom": "policy (Contract §9), not visual truth"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "meti-p105-req49",
@@ -1179,7 +1190,8 @@
         "derivedFrom": "policy (Contract §9), not visual truth"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     }
    ]
   },
@@ -1310,7 +1322,8 @@
        }
       }
      },
-     "notes": "The core row has no amounts printed on this page. None of the numbers in the right-hand regions belong to the 020 row; physical right side != semantic remark."
+     "notes": "The core row has no amounts printed on this page. None of the numbers in the right-hand regions belong to the 020 row; physical right side != semantic remark.",
+     "humanReview": "visual-confirmed"
     }
    ]
   },
@@ -1426,7 +1439,8 @@
         "status": "not_applicable"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "mhlw-p1555-item010",
@@ -1523,7 +1537,8 @@
         "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "mhlw-p1555-req186",
@@ -1636,7 +1651,8 @@
         "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     }
    ]
   },
@@ -1753,7 +1769,8 @@
        }
       }
      },
-     "notes": "name glyph details (full-width Latin letters) have medium observation confidence."
+     "notes": "name glyph details (full-width Latin letters) have medium observation confidence.",
+     "humanReview": "visual-confirmed-except-name-unicode-pending"
     },
     {
      "id": "mext-p876-line-honorarium",
@@ -1841,7 +1858,8 @@
         "status": "outside_v0_scope"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     }
    ]
   },
@@ -1950,7 +1968,8 @@
         "derivedFrom": "policy (Contract §9), not visual truth"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     },
     {
      "id": "cfa-p136-req17",
@@ -2053,9 +2072,27 @@
         "derivedFrom": "policy (Contract §9), not visual truth"
        }
       }
-     }
+     },
+     "humanReview": "visual-confirmed"
     }
    ]
   }
- ]
+ ],
+ "humanReview": {
+  "status": "row-local-visual-confirmed-with-exception",
+  "reviewer": "user (a review report on the rendered original PDF pages was received in the session; recorded here, not re-derived)",
+  "method": "high-resolution render of the original PDF pages, visual comparison with the Golden row-local fields; no extracted text used to complete values",
+  "scope": "row-local visual fields of all 20 targets: code, name (as displayed), previous / requested / difference amounts, explicit signs, blank vs explicit zero, source association class",
+  "result": "no correction needed to any amount, sign, blank or zero value; the distinctions that matter were confirmed (METI p10 003: separate △ on the requested and the difference cell, and a separate headcount \"△27人\" in the remark; METI p96 blank previous-year cell vs explicit 0/0/0; こども家庭庁 p136 06-06 difference △3,599,805; MHLW p1268 020 amount cells blank with △ values only in the right-hand tables)",
+  "exceptions": [
+   {
+    "target": "mext-p876-line015",
+    "field": "name",
+    "status": "displayed-text-confirmed; Unicode representation pending",
+    "detail": "The displayed name \"ＳＤＧｓ達成の担い手育成（ＥＳＤ）推進事業\" matches. Whether \"ＳＤＧｓ\"/\"ＥＳＤ\" are full-width code points or half-width characters drawn with extra spacing cannot be decided from visual review alone, so observationConfidence stays medium. The evaluator must compare names after whitespace removal and must not require the full-width code points until this is settled."
+   }
+  ],
+  "excludedFromHumanVisualReview": "hierarchy.expected.* (parentItemAssociation / parentOrganizationAssociation): policy expectations derived from the frozen DocumentHierarchy artifact and Contract section 9 (derivedFrom says so); they are not visual truth and are not part of this review",
+  "goldenValuesChanged": false
+ }
 }

@@ -106,7 +106,7 @@ hierarchy-dependent field の期待値は **Contract §9 の policy から導い
 
 ## 8. observation method（観測方法・限界）
 
-- 各ページを `pdftoppm` で画像に描画（全体130dpi、読み取りにくい行は220dpiの切り抜き）し、**アシスタント（AI）が視覚で読み取った**。**人間による視認ではない**。`humanReview: pending`。
+- 各ページを `pdftoppm` で画像に描画（全体130dpi、読み取りにくい行は220dpiの切り抜き）し、**アシスタント（AI）が視覚で読み取った**。その後、**ユーザー側で原本PDFを高解像度で描画した視覚レビュー**の報告を受け、fixture の `humanReview` に記録した（下記「human review の結果」）。
 - 値は描画した画像だけから読み、抽出テキスト・隣接値の計算・一般知識・過去の会話の値は使っていない。読み取れない値は記録していない。確度が下がるものは `observationConfidence: medium`（MEXT p876 の名称の全角記号）。
 - ページの選定には、p96・p105・p136 で**抽出結果を探索の補助**として使った（候補ページの発見だけ）。値は描画画像から読んだ。
 - 既存の人間確認（`human-observations.json`）は位置のアンカーとして参照した。値の真値としては使っていない。
@@ -117,7 +117,7 @@ Golden は **FieldResolver の inference より先に**固定する。Golden の
 
 ## 10. known gaps（現時点）
 
-- 視覚確認がAIによるもので、**人間のレビューが未実施**（レビューで値が変われば、PoC の前に別 commit で訂正する）。
+- **human review の結果（`humanReview`）**: 20 target の row-local な視覚 field（code・name の表示・3金額・明示の sign・blank と explicit zero・source association の class）について、訂正が必要な値は**見つからなかった**（確認した重要点: METI p10 `003` の要求額と差額それぞれの `△` と備考の `△27人` は別、METI p96 の前年度空欄と明示の `0/0/0`、こども家庭庁 p136 `06-06` の差額 `△3,599,805`、MHLW p1268 `020` の金額欄は空欄で右側の表にだけ `△` 等）。**例外は1件**: MEXT p876 `015` の名称は表示内容としては一致するが、`ＳＤＧｓ`・`ＥＳＤ` が全角コードポイントか、半角を字間を空けて描画したものかは視覚だけでは確定できない（`observationConfidence: medium` のまま。評価は空白除去後の比較で行い、全角コードポイントを要求しない）。**階層の期待値（`hierarchy.expected.*`）は policy 由来で、視覚レビューの対象外**。Golden の値は変更していない（`goldenValuesChanged: false`）。
 - 「差額が表示されない行」は NOT FOUND。
 - hierarchy-dependent field の評価は、凍結済み hierarchy artifact がある5ページだけ。MHLW p1268・MEXT p876 は対象外。
 - Golden は小さい（8ページ・20 target）。他省庁・他の書式の多様性は未検証。
