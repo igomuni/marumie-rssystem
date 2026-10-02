@@ -77,7 +77,8 @@ A2 の rule・閾値は事前登録（`f8ce677`）から変更していない。
 | development checkpoint + **A2 implementation freeze** | `093fea7` |
 | holdout GT（**GT freeze**） | `ca75180` |
 | holdout の範囲・分類・A2判定・統合確認の基準をコード化（出力なし） | `40f2e02` |
-| **first holdout run** + 評価 + 結果（本コミット） | 次の commit（`git log` の `holdout first run`） |
+| **first holdout run** + 評価 + 結果 | `5ab98b7` |
+| 最終採用・引き継ぎ契約・クローズ宣言 + docs | 本ドキュメントの最終コミット（`git log` の `closure`） |
 
 順序は崩れていない。`40f2e02` 以降に変えたのは、`--final` 段階（B only の記述的な確認）の追加と、ランナーの既定 variant から `v2-B-A2` を外したことだけで、規則・実験定義・分類・判定のコード（`budget-request-document-hierarchy-v2.ts`・`…-a2-experiments.ts`・`…-a2-eval-config.ts`）は `40f2e02` から差分なし。
 
@@ -118,3 +119,65 @@ A2 の rule・閾値は事前登録（`f8ce677`）から変更していない。
 - depth の後退（こども家庭庁）の原因は、**この文書が組織1つだけ**で、根のクラスタ（x=51.8）が支持1のため未配置のまま（規則Bの対象。A2 単独では B を有効にしていない）という既知の single-organization の失敗にある。v1 では22行のヘッダが偽の level 1 を作り、**偶然**項を level 2（正しい値）に押し上げていた。A2 がヘッダを除外すると、その偶然が消えて、根が未配置のままなので項が level 1 になった。
 - v1 の false parent 6/37 は、ヘッダ行（level 1）を親とした項（level 2）が隣接のため `resolved` になったもの（B only の最終構成でも同じ）。
 - B+A2 の統合確認は、指示書 §17 に従い**実行していない**。この観察から、B+A2 では depth が回復する可能性があるが、それは今回の判定には使わない。
+
+## 11. false parent / erroneous exclusion / provenance / determinism
+
+- **false parent**: A2 は両 holdout で増やさなかった（防衛省 0→0、こども家庭庁 6→0）。development・regression でも増加なし。
+- **erroneous exclusion**: GT hierarchy node の誤除外は development・holdout の全実験で **0**（A2 が除外した行: METI 2、環境省 45、防衛省 219、こども家庭庁 22。全て3種の evidence を満たす本物のページヘッダ）。農水省復興特会・MLIT復興特会の negative でも除外 0。
+- **provenance**: 除外した行は削除せず node として残り、`hierarchyEligibility`・`exclusionEvidence`・`hierarchyResolutionContext`・sourcePage・sourceRowRefs・sourceTokenRefs・x を保持（テストと holdout 評価で確認。`provenanceOk = true`）。
+- **determinism**: 最終採用の構成を含む73 artifact（development 13実験×5 variant + holdout 2実験×4 variant）と評価 JSON を2回生成してバイト一致。
+
+## 12. B+A2 integration
+
+**実行していない**（A2 = STOP のため。指示書 §17）。「§7 実行上の事故」の `v2-B-A2` artifact は評価せず削除した。
+
+## 13. final hierarchy selection: **B only**
+
+最終採用: `{ headerCollisionHandling: 'observe-only', singletonRootPlacement: 'lattice-supported' }`（variant `v2-B-obs`）。decision は B（`lattice-supported`）だけで、A2 の除外は採用しない。ヘッダ衝突は **unresolved / level_gap / ambiguous のまま安全に残し**、header collision の evidence は観測として残す（`observe-only` は decision を変えない。`v2-B` と全指標で一致することを確認済み）。**A3 は作らない。**
+
+### B only の最終構成の状態（posthoc。strong header evidence = 2種以上・ページ端を含む）
+
+| 実験 | exact / depth | B 発火 | strong header evidence の node | その node が親の resolved edge |
+| --- | --- | --- | --- | --- |
+| METI detail | 80/82 / 0/87 | no | 2 | 0 |
+| 環境省 detail | 58/81 / 0/84 | no | 45 | 2 |
+| 防衛省 detail | 34/96 / 0/99 | no | 233 | 11 |
+| こども家庭庁 detail | 20/37 / 37/38（false parent 6/37） | no | 22 | 6 |
+| 農水省復興特会・MLIT復興特会・narrow 3件 | 全て v2-B の結果（農水省 35/35・36/36、MLIT 20/20・21/21、narrow 4/4・31/31・15/15） | yes | 0 | 0 |
+| regression 6実験（MHLW・MEXT・METI） | v1 と同じ（全て 100%・depth 100%） | no | 0 | 0 |
+
+strong header evidence は、衝突のある4文書だけに現れ、衝突のない11実験では 0（偽陽性なし）。防衛省の strong 233 は A2 の除外219より14多い（ページ端+1種の evidence だけの node。未調査）。
+
+## 14. unresolved boundary
+
+- header collision のある文書では、B only は v1 と同じ状態を残す: level が体系的にずれる（depth）、ヘッダ行を親とする項・要求が `resolved` になりうる（こども家庭庁で false parent 6/37、環境省 2・防衛省 11 の edge）、level_gap・unresolved が多い（防衛省で 218 + 219）。
+- これらは**有効な出力**（unresolved / level_gap）として下流に渡す。nearest parent で埋める・コードや名称から親を推測する・GT から補完する・level_gap を圧縮する・見かけ上 resolved に変換する、のいずれもしない。
+
+## 15. FieldResolver handoff contract
+
+最終 artifact（`v2-B-obs`）で、FieldResolver は次を判別できる。
+
+| 知りたいこと | artifact のフィールド |
+| --- | --- |
+| node の状態（placed / unplaced） | `nodes[].xIndentEvidence.placed` / `.level`（unplaced は `level: null`） |
+| edge の状態（resolved / level_gap / unresolved） | `edges[].status`（`resolved_by_indent_sequence` / `level_gap` / `unresolved`）と `parentNodeId`（`unresolved` は null） |
+| B placement を適用したか | `indentClusters[].placementBasis === 'lattice_supported'`、`latticeDiagnostics.finalOutcome`、`latticeDiagnostics.steps`（判断過程。required/observed の run 長・正規化 gap・理由） |
+| A2 の除外を適用したか | **適用していない**（`hierarchyEligibility` は常に `candidate`、`hierarchyResolutionContext.headerCandidateExcluded === false`、`headerCollisionObservation.excludedNodeIds` は空） |
+| header collision の evidence を観測したか | `nodes[].hierarchyResolutionContext.headerCollisionObserved` と `observedEvidenceKinds`（`page_edge_row` / `vertical_repetition` / `page_number_sequence`）。**弱い evidence（1種）は多くの見出し行に付くので、判別には「2種以上で `page_edge_row` を含む」（strong）を使う** |
+| 除外候補の存在 | `headerCollisionObservation.nodesWithHeaderEvidence`（候補あり）。除外はしない |
+| ordinary level_gap との区別 | `headerCollisionObservation.edgeContexts[]`（`childHasHeaderEvidence` / `parentHasHeaderEvidence` / `ancestorHasHeaderEvidence`。unresolved・level_gap の edge、または header evidence が関わる edge を列挙） |
+| 位置・出典 | `sourcePage`・`sourceRowRefs`（LogicalRow / PhysicalRow）・`sourceTokenRefs`（SourceToken.index）・`xIndentEvidence.keyTokenXMin`。bbox は SourceToken から再計算できる |
+
+**観測と decision を分離**: header collision の観測（`headerCollisionObservation` / `hierarchyResolutionContext`）は decision（`edges[].status`）とは独立で、A2 の STOP の除外判断を本番判断として流用していない。FieldResolver は、unresolved / level_gap の親を勝手に補完してはならない。strong header evidence を持つ node を親・子とする edge の扱い（信頼しない等）は FieldResolver 側の policy で、この研究では decision にしていない。
+
+## 16. limitations
+
+- A2 の判定は2つの holdout（各1文書）に基づき、STOP の原因は「v1 が偶然正しい level を出していた single-organization 文書」への A2 単独の適用で、A2 の除外判断の誤りではない（除外の誤りは0）。B と A2 を同時に適用した結果は評価していない（§17 に従い統合確認は実行しない）。
+- 防衛省の strong evidence 14件の内訳は未調査。header collision を持つ文書で B only の level（depth）は直らず、`resolved` の false parent が出うる（こども家庭庁）。
+- 評価の主は posthoc 照合（#364）。GT は目次由来で、holdout の GT は今回の PoC で作成した評価専用データ。MHLW 以外の省庁・書式の多様性は未検証。`printedPageRefCandidate`（Future Experiment C）は触れていない。
+
+## 17. DocumentHierarchy research closure declaration
+
+**DocumentHierarchy exploration status: CLOSED。** 最終採用: **B only**（`lattice-supported` + header evidence の観測のみ）。A2・A3・B2・C統合・hierarchy heuristic の追加探索はしない。FieldResolver の実装中に hierarchy の failure を観測しても、記録し・provenance を残し・unresolved として扱うだけで、直ちに A3 / B2 / C 統合へ戻らない。再開するには、FieldResolver / end-to-end の evidence から「再開する価値」が別途示されることを条件とする。
+
+次の工程: **FieldResolver**（Future Experiment C は自動的に次タスクにしない）。
