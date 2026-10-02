@@ -1,0 +1,820 @@
+{
+ "schemaVersion": "budget-request-document-hierarchy-gt/v1",
+ "purpose": "EVALUATION ONLY. Inference code (budget-request-document-hierarchy*.ts and the experiment runners) must never read, import or reference this file. Frozen before any v1/v2 run on this document (pre-observation contract commit of the v2 failure-isolation experiment).",
+ "frozenBeforeV2Run": true,
+ "method": "Transcribed mechanically from the document's own table of contents (poppler pdftotext -layout, page cropped into left/right columns at x=408pt, then regex over the printed lines: （組織）NNN name page / （項）NNN name page / request-no NN-NN name page). Names are the first printed line of each entry. Independent consistency checks (not derived from any v1/v2 output): request numbers are consecutive 1..N, printed start pages are non-decreasing in document order, every item has at least one request. The extraction script is a scratch tool and is not committed; this fixture is the artifact.",
+ "codeNote": "Request codes written with ASCII '-'. depth 1/2/3 = organization/item/request (labels of this evaluation file only). set='test'.",
+ "source": {
+  "ministry": "ENV",
+  "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+  "tocPages": "physical 3-4 (printed 1-2)"
+ },
+ "detailPrintedToPhysicalPageOffset": 4,
+ "offsetBasis": "physical p110 prints 106 環（本）; p111 prints 環（本） 107; p193 prints 環（原） 189",
+ "counts": {
+  "organizations": 3,
+  "items": 35,
+  "requests": 46
+ },
+ "nodes": [
+  {
+   "key": "org-010",
+   "depth": 1,
+   "code": "010",
+   "name": "環境本省",
+   "printedStartPage": 17,
+   "set": "test"
+  },
+  {
+   "key": "item-010-005",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "005",
+   "name": "環境本省共通費",
+   "printedStartPage": 17,
+   "set": "test"
+  },
+  {
+   "key": "req-1",
+   "depth": 3,
+   "parent": "item-010-005",
+   "requestNo": "1",
+   "code": "01-95",
+   "name": "環境本省一般行政に必要な経費",
+   "printedStartPage": 17,
+   "set": "test"
+  },
+  {
+   "key": "req-2",
+   "depth": 3,
+   "parent": "item-010-005",
+   "requestNo": "2",
+   "code": "06-95",
+   "name": "審議会等に必要な経費",
+   "printedStartPage": 28,
+   "set": "test"
+  },
+  {
+   "key": "item-010-010",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "010",
+   "name": "環境本省施設費",
+   "printedStartPage": 29,
+   "set": "test"
+  },
+  {
+   "key": "req-3",
+   "depth": 3,
+   "parent": "item-010-010",
+   "requestNo": "3",
+   "code": "01-95",
+   "name": "環境本省施設整備に必要な経費",
+   "printedStartPage": 29,
+   "set": "test"
+  },
+  {
+   "key": "item-010-017",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "017",
+   "name": "地球温暖化対策推進費",
+   "printedStartPage": 31,
+   "set": "test"
+  },
+  {
+   "key": "req-4",
+   "depth": 3,
+   "parent": "item-010-017",
+   "requestNo": "4",
+   "code": "01-95",
+   "name": "地球温暖化対策の推進に必要な経費",
+   "printedStartPage": 31,
+   "set": "test"
+  },
+  {
+   "key": "req-5",
+   "depth": 3,
+   "parent": "item-010-017",
+   "requestNo": "5",
+   "code": "11-13",
+   "name": "気候変動の影響への適応策に関する調査研究に必要な経費",
+   "printedStartPage": 34,
+   "set": "test"
+  },
+  {
+   "key": "item-010-018",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "018",
+   "name": "脱炭素成長型経済構造移行費用財源脱炭素化産業成長促進対策費エネルギー対",
+   "printedStartPage": 35,
+   "set": "test"
+  },
+  {
+   "key": "req-6",
+   "depth": 3,
+   "parent": "item-010-018",
+   "requestNo": "6",
+   "code": "01-63",
+   "name": "脱炭素成長型経済構造移行費用財源の脱炭素化産業成長促進対策に係るエネル",
+   "printedStartPage": 35,
+   "set": "test"
+  },
+  {
+   "key": "item-010-019",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "019",
+   "name": "石油石炭税財源エネルギー需給構造高度化対策費エネルギー対策特別会計へ繰",
+   "printedStartPage": 35,
+   "set": "test"
+  },
+  {
+   "key": "req-7",
+   "depth": 3,
+   "parent": "item-010-019",
+   "requestNo": "7",
+   "code": "01-63",
+   "name": "石油石炭税財源のエネルギー需給構造高度化対策に係るエネルギー対策特別会",
+   "printedStartPage": 35,
+   "set": "test"
+  },
+  {
+   "key": "item-010-020",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "020",
+   "name": "地球環境保全費",
+   "printedStartPage": 36,
+   "set": "test"
+  },
+  {
+   "key": "req-8",
+   "depth": 3,
+   "parent": "item-010-020",
+   "requestNo": "8",
+   "code": "05-95",
+   "name": "地球環境の保全に必要な経費",
+   "printedStartPage": 36,
+   "set": "test"
+  },
+  {
+   "key": "item-010-050",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "050",
+   "name": "大気・水・土壌環境等保全費",
+   "printedStartPage": 40,
+   "set": "test"
+  },
+  {
+   "key": "req-9",
+   "depth": 3,
+   "parent": "item-010-050",
+   "requestNo": "9",
+   "code": "01-95",
+   "name": "大気・水・土壌環境等の保全に必要な経費",
+   "printedStartPage": 40,
+   "set": "test"
+  },
+  {
+   "key": "item-010-060",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "060",
+   "name": "資源循環政策推進費",
+   "printedStartPage": 56,
+   "set": "test"
+  },
+  {
+   "key": "req-10",
+   "depth": 3,
+   "parent": "item-010-060",
+   "requestNo": "10",
+   "code": "01-95",
+   "name": "資源循環政策の推進に必要な経費",
+   "printedStartPage": 56,
+   "set": "test"
+  },
+  {
+   "key": "item-010-070",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "070",
+   "name": "廃棄物処理施設整備費",
+   "printedStartPage": 67,
+   "set": "test"
+  },
+  {
+   "key": "req-11",
+   "depth": 3,
+   "parent": "item-010-070",
+   "requestNo": "11",
+   "code": "01-45",
+   "name": "廃棄物処理施設整備に必要な経費",
+   "printedStartPage": 67,
+   "set": "test"
+  },
+  {
+   "key": "item-010-080",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "080",
+   "name": "生物多様性保全等推進費",
+   "printedStartPage": 68,
+   "set": "test"
+  },
+  {
+   "key": "req-12",
+   "depth": 3,
+   "parent": "item-010-080",
+   "requestNo": "12",
+   "code": "01-95",
+   "name": "生物多様性の保全等の推進に必要な経費",
+   "printedStartPage": 68,
+   "set": "test"
+  },
+  {
+   "key": "item-010-090",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "090",
+   "name": "環境保全施設整備費",
+   "printedStartPage": 75,
+   "set": "test"
+  },
+  {
+   "key": "req-13",
+   "depth": 3,
+   "parent": "item-010-090",
+   "requestNo": "13",
+   "code": "01-95",
+   "name": "環境保全施設整備に必要な経費",
+   "printedStartPage": 75,
+   "set": "test"
+  },
+  {
+   "key": "item-010-100",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "100",
+   "name": "自然公園等事業費",
+   "printedStartPage": 76,
+   "set": "test"
+  },
+  {
+   "key": "req-14",
+   "depth": 3,
+   "parent": "item-010-100",
+   "requestNo": "14",
+   "code": "01-45",
+   "name": "自然公園等事業に必要な経費",
+   "printedStartPage": 76,
+   "set": "test"
+  },
+  {
+   "key": "item-010-120",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "120",
+   "name": "化学物質対策推進費",
+   "printedStartPage": 76,
+   "set": "test"
+  },
+  {
+   "key": "req-15",
+   "depth": 3,
+   "parent": "item-010-120",
+   "requestNo": "15",
+   "code": "05-95",
+   "name": "化学物質対策の推進に必要な経費",
+   "printedStartPage": 76,
+   "set": "test"
+  },
+  {
+   "key": "item-010-130",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "130",
+   "name": "環境保健対策推進費",
+   "printedStartPage": 84,
+   "set": "test"
+  },
+  {
+   "key": "req-16",
+   "depth": 3,
+   "parent": "item-010-130",
+   "requestNo": "16",
+   "code": "05-95",
+   "name": "環境保健対策の推進に必要な経費",
+   "printedStartPage": 84,
+   "set": "test"
+  },
+  {
+   "key": "item-010-135",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "135",
+   "name": "自動車重量税財源公害健康被害補償費",
+   "printedStartPage": 93,
+   "set": "test"
+  },
+  {
+   "key": "req-17",
+   "depth": 3,
+   "parent": "item-010-135",
+   "requestNo": "17",
+   "code": "05-95",
+   "name": "自動車重量税財源公害健康被害補償に必要な経費",
+   "printedStartPage": 93,
+   "set": "test"
+  },
+  {
+   "key": "item-010-170",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "170",
+   "name": "環境・経済・社会の統合的向上費",
+   "printedStartPage": 93,
+   "set": "test"
+  },
+  {
+   "key": "req-18",
+   "depth": 3,
+   "parent": "item-010-170",
+   "requestNo": "18",
+   "code": "01-95",
+   "name": "環境・経済・社会の統合的向上に必要な経費",
+   "printedStartPage": 93,
+   "set": "test"
+  },
+  {
+   "key": "item-010-180",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "180",
+   "name": "環境政策基盤整備費",
+   "printedStartPage": 98,
+   "set": "test"
+  },
+  {
+   "key": "req-19",
+   "depth": 3,
+   "parent": "item-010-180",
+   "requestNo": "19",
+   "code": "01-95",
+   "name": "環境政策基盤整備等に必要な経費",
+   "printedStartPage": 98,
+   "set": "test"
+  },
+  {
+   "key": "req-20",
+   "depth": 3,
+   "parent": "item-010-180",
+   "requestNo": "20",
+   "code": "11-13",
+   "name": "環境問題に対する調査・研究・技術開発に必要な経費",
+   "printedStartPage": 104,
+   "set": "test"
+  },
+  {
+   "key": "item-010-187",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "187",
+   "name": "環境調査研修所",
+   "printedStartPage": 113,
+   "set": "test"
+  },
+  {
+   "key": "req-21",
+   "depth": 3,
+   "parent": "item-010-187",
+   "requestNo": "21",
+   "code": "01-13",
+   "name": "環境調査研修所に必要な経費",
+   "printedStartPage": 113,
+   "set": "test"
+  },
+  {
+   "key": "req-22",
+   "depth": 3,
+   "parent": "item-010-187",
+   "requestNo": "22",
+   "code": "06-13",
+   "name": "環境保全に関する調査、研修等に必要な経費",
+   "printedStartPage": 117,
+   "set": "test"
+  },
+  {
+   "key": "item-010-205",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "205",
+   "name": "独立行政法人環境再生保全機構運営費",
+   "printedStartPage": 124,
+   "set": "test"
+  },
+  {
+   "key": "req-23",
+   "depth": 3,
+   "parent": "item-010-205",
+   "requestNo": "23",
+   "code": "01-95",
+   "name": "独立行政法人環境再生保全機構運営費交付金に必要な経費",
+   "printedStartPage": 124,
+   "set": "test"
+  },
+  {
+   "key": "req-24",
+   "depth": 3,
+   "parent": "item-010-205",
+   "requestNo": "24",
+   "code": "11-13",
+   "name": "独立行政法人環境再生保全機構環境保全研究・技術開発運営費交付金に必要な",
+   "printedStartPage": 125,
+   "set": "test"
+  },
+  {
+   "key": "item-010-210",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "210",
+   "name": "国立研究開発法人国立環境研究所運営費",
+   "printedStartPage": 125,
+   "set": "test"
+  },
+  {
+   "key": "req-25",
+   "depth": 3,
+   "parent": "item-010-210",
+   "requestNo": "25",
+   "code": "01-13",
+   "name": "国立研究開発法人国立環境研究所運営費交付金に必要な経費",
+   "printedStartPage": 125,
+   "set": "test"
+  },
+  {
+   "key": "item-010-220",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "220",
+   "name": "国立研究開発法人国立環境研究所施設整備費",
+   "printedStartPage": 126,
+   "set": "test"
+  },
+  {
+   "key": "req-26",
+   "depth": 3,
+   "parent": "item-010-220",
+   "requestNo": "26",
+   "code": "01-13",
+   "name": "国立研究開発法人国立環境研究所施設整備に必要な経費",
+   "printedStartPage": 126,
+   "set": "test"
+  },
+  {
+   "key": "item-010-230",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "230",
+   "name": "地球環境保全等試験研究費",
+   "printedStartPage": 127,
+   "set": "test"
+  },
+  {
+   "key": "req-27",
+   "depth": 3,
+   "parent": "item-010-230",
+   "requestNo": "27",
+   "code": "01-13",
+   "name": "地球環境保全等試験研究に必要な経費",
+   "printedStartPage": 127,
+   "set": "test"
+  },
+  {
+   "key": "item-010-240",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "240",
+   "name": "地域脱炭素推進費",
+   "printedStartPage": 127,
+   "set": "test"
+  },
+  {
+   "key": "req-28",
+   "depth": 3,
+   "parent": "item-010-240",
+   "requestNo": "28",
+   "code": "05-95",
+   "name": "地域脱炭素の推進に必要な経費",
+   "printedStartPage": 127,
+   "set": "test"
+  },
+  {
+   "key": "item-010-250",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "250",
+   "name": "石綿健康被害救済事務費労働保険特別会計へ繰入",
+   "printedStartPage": 129,
+   "set": "test"
+  },
+  {
+   "key": "req-29",
+   "depth": 3,
+   "parent": "item-010-250",
+   "requestNo": "29",
+   "code": "05-95",
+   "name": "石綿健康被害救済事務の財源の労働保険特別会計徴収勘定へ繰入れに必要な経",
+   "printedStartPage": 129,
+   "set": "test"
+  },
+  {
+   "key": "item-010-255",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "255",
+   "name": "廃棄物処理施設整備事業調査諸費",
+   "printedStartPage": 129,
+   "set": "test"
+  },
+  {
+   "key": "req-30",
+   "depth": 3,
+   "parent": "item-010-255",
+   "requestNo": "30",
+   "code": "01-45",
+   "name": "廃棄物処理施設整備事業調査諸費に必要な経費",
+   "printedStartPage": 129,
+   "set": "test"
+  },
+  {
+   "key": "item-010-260",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "260",
+   "name": "自然公園等事業工事諸費",
+   "printedStartPage": 129,
+   "set": "test"
+  },
+  {
+   "key": "req-31",
+   "depth": 3,
+   "parent": "item-010-260",
+   "requestNo": "31",
+   "code": "01-45",
+   "name": "自然公園等事業工事諸費に必要な経費",
+   "printedStartPage": 129,
+   "set": "test"
+  },
+  {
+   "key": "item-010-265",
+   "depth": 2,
+   "parent": "org-010",
+   "code": "265",
+   "name": "廃棄物処理施設災害復旧事業費",
+   "printedStartPage": 133,
+   "set": "test"
+  },
+  {
+   "key": "req-32",
+   "depth": 3,
+   "parent": "item-010-265",
+   "requestNo": "32",
+   "code": "01-49",
+   "name": "廃棄物処理施設災害復旧事業に必要な経費",
+   "printedStartPage": 133,
+   "set": "test"
+  },
+  {
+   "key": "org-020",
+   "depth": 1,
+   "code": "020",
+   "name": "地方環境事務所",
+   "printedStartPage": 134,
+   "set": "test"
+  },
+  {
+   "key": "item-020-010",
+   "depth": 2,
+   "parent": "org-020",
+   "code": "010",
+   "name": "地方環境事務所共通費",
+   "printedStartPage": 134,
+   "set": "test"
+  },
+  {
+   "key": "req-33",
+   "depth": 3,
+   "parent": "item-020-010",
+   "requestNo": "33",
+   "code": "01-95",
+   "name": "地方環境事務所一般行政に必要な経費",
+   "printedStartPage": 134,
+   "set": "test"
+  },
+  {
+   "key": "item-020-020",
+   "depth": 2,
+   "parent": "org-020",
+   "code": "020",
+   "name": "地方環境事務所施設費",
+   "printedStartPage": 151,
+   "set": "test"
+  },
+  {
+   "key": "req-34",
+   "depth": 3,
+   "parent": "item-020-020",
+   "requestNo": "34",
+   "code": "02-95",
+   "name": "地方環境事務所施設整備に必要な経費",
+   "printedStartPage": 151,
+   "set": "test"
+  },
+  {
+   "key": "item-020-030",
+   "depth": 2,
+   "parent": "org-020",
+   "code": "030",
+   "name": "地方環境対策費",
+   "printedStartPage": 152,
+   "set": "test"
+  },
+  {
+   "key": "req-35",
+   "depth": 3,
+   "parent": "item-020-030",
+   "requestNo": "35",
+   "code": "03-95",
+   "name": "大気・水・土壌環境等の保全に必要な経費",
+   "printedStartPage": 152,
+   "set": "test"
+  },
+  {
+   "key": "req-36",
+   "depth": 3,
+   "parent": "item-020-030",
+   "requestNo": "36",
+   "code": "06-95",
+   "name": "資源循環政策の推進に必要な経費",
+   "printedStartPage": 152,
+   "set": "test"
+  },
+  {
+   "key": "req-37",
+   "depth": 3,
+   "parent": "item-020-030",
+   "requestNo": "37",
+   "code": "11-95",
+   "name": "生物多様性の保全等の推進に必要な経費",
+   "printedStartPage": 154,
+   "set": "test"
+  },
+  {
+   "key": "req-38",
+   "depth": 3,
+   "parent": "item-020-030",
+   "requestNo": "38",
+   "code": "16-95",
+   "name": "環境・経済・社会の統合的向上に必要な経費",
+   "printedStartPage": 157,
+   "set": "test"
+  },
+  {
+   "key": "req-39",
+   "depth": 3,
+   "parent": "item-020-030",
+   "requestNo": "39",
+   "code": "21-95",
+   "name": "環境政策基盤整備等に必要な経費",
+   "printedStartPage": 158,
+   "set": "test"
+  },
+  {
+   "key": "req-40",
+   "depth": 3,
+   "parent": "item-020-030",
+   "requestNo": "40",
+   "code": "26-95",
+   "name": "地域脱炭素の推進に必要な経費",
+   "printedStartPage": 158,
+   "set": "test"
+  },
+  {
+   "key": "org-030",
+   "depth": 1,
+   "code": "030",
+   "name": "原子力規制委員会",
+   "printedStartPage": 160,
+   "set": "test"
+  },
+  {
+   "key": "item-030-510",
+   "depth": 2,
+   "parent": "org-030",
+   "code": "510",
+   "name": "原子力規制委員会共通費",
+   "printedStartPage": 160,
+   "set": "test"
+  },
+  {
+   "key": "req-41",
+   "depth": 3,
+   "parent": "item-030-510",
+   "requestNo": "41",
+   "code": "01-95",
+   "name": "原子力規制委員会に必要な経費",
+   "printedStartPage": 160,
+   "set": "test"
+  },
+  {
+   "key": "req-42",
+   "depth": 3,
+   "parent": "item-030-510",
+   "requestNo": "42",
+   "code": "06-95",
+   "name": "審議会等に必要な経費",
+   "printedStartPage": 168,
+   "set": "test"
+  },
+  {
+   "key": "item-030-520",
+   "depth": 2,
+   "parent": "org-030",
+   "code": "520",
+   "name": "原子力規制委員会施設費",
+   "printedStartPage": 174,
+   "set": "test"
+  },
+  {
+   "key": "req-43",
+   "depth": 3,
+   "parent": "item-030-520",
+   "requestNo": "43",
+   "code": "01-95",
+   "name": "原子力規制委員会施設整備に必要な経費",
+   "printedStartPage": 174,
+   "set": "test"
+  },
+  {
+   "key": "item-030-525",
+   "depth": 2,
+   "parent": "org-030",
+   "code": "525",
+   "name": "原子力安全確保費",
+   "printedStartPage": 175,
+   "set": "test"
+  },
+  {
+   "key": "req-44",
+   "depth": 3,
+   "parent": "item-030-525",
+   "requestNo": "44",
+   "code": "11-95",
+   "name": "原子力の安全確保に必要な経費",
+   "printedStartPage": 175,
+   "set": "test"
+  },
+  {
+   "key": "item-030-530",
+   "depth": 2,
+   "parent": "org-030",
+   "code": "530",
+   "name": "放射能調査研究費",
+   "printedStartPage": 188,
+   "set": "test"
+  },
+  {
+   "key": "req-45",
+   "depth": 3,
+   "parent": "item-030-530",
+   "requestNo": "45",
+   "code": "16-13",
+   "name": "放射能調査研究に必要な経費",
+   "printedStartPage": 188,
+   "set": "test"
+  },
+  {
+   "key": "item-030-550",
+   "depth": 2,
+   "parent": "org-030",
+   "code": "550",
+   "name": "電源開発促進税財源電源利用対策及原子力安全規制対策費エネルギー対策特別",
+   "printedStartPage": 189,
+   "set": "test"
+  },
+  {
+   "key": "req-46",
+   "depth": 3,
+   "parent": "item-030-550",
+   "requestNo": "46",
+   "code": "01-63",
+   "name": "電源開発促進税財源の電源利用対策及原子力安全規制対策に係るエネルギー対",
+   "printedStartPage": 189,
+   "set": "test"
+  }
+ ]
+}
