@@ -53,6 +53,8 @@
     "pipeline:v2:extract:budget-request-page-template": "tsx scripts/pipeline-v2/extract-budget-request-page-template.ts",
     "pipeline:v2:extract:budget-request-document-hierarchy": "tsx scripts/pipeline-v2/extract-budget-request-document-hierarchy.ts",
     "pipeline:v2:evaluate:budget-request-document-hierarchy": "tsx scripts/pipeline-v2/evaluate-budget-request-document-hierarchy.ts",
+    "pipeline:v2:extract:budget-request-document-hierarchy-generalization": "tsx scripts/pipeline-v2/extract-budget-request-document-hierarchy-generalization.ts",
+    "pipeline:v2:evaluate:budget-request-document-hierarchy-generalization": "tsx scripts/pipeline-v2/evaluate-budget-request-document-hierarchy-generalization.ts",
     "pipeline:v2:normalize:rs": "tsx scripts/pipeline-v2/normalize-rs.ts",
     "pipeline:v2:normalize:mof": "tsx scripts/pipeline-v2/normalize-mof.ts",
     "pipeline:v2:derive:legacy": "tsx scripts/pipeline-v2/build-identities.ts && tsx scripts/pipeline-v2/build-links.ts",

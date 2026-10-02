@@ -18,8 +18,10 @@ export interface GtNode {
   requestNo?: string;
   name: string;
   printedStartPage: number;
-  set: 'development' | 'holdout';
-  inResearchGT: boolean;
+  set: 'development' | 'holdout' | 'test';
+  inResearchGT?: boolean;
+  /** 明細の走査範囲内か（範囲外の組織は明細viewの母数に入れない）。省略=範囲内 */
+  inDetailRange?: boolean;
 }
 
 export type EdgeOutcome = 'exact' | 'false_parent' | 'unresolved' | 'child_not_found';
@@ -61,13 +63,43 @@ export interface MatchResult {
 const compact = (s: string): string => s.replace(/\s+/g, '');
 
 /** 候補が複数のときだけの絞り込み（評価側）: 見出し行のtext partsを連結した文字列とGTの名称が前方一致の関係にあるもの */
+function nameOnlyOf(n: DocumentHierarchyNodeObservation): string {
+  const parts: string[] = [];
+  for (const p of n.observedTextParts) {
+    if (/\d/.test(p)) break;
+    parts.push(p);
+  }
+  return compact(parts.join(''));
+}
+function nameCompatibleNameOnly(n: DocumentHierarchyNodeObservation, gtName: string): { ok: boolean; exact: boolean } {
+  const a = nameOnlyOf(n);
+  const g = compact(gtName);
+  return { ok: a.length >= 2 && (a === g || g.startsWith(a)), exact: a === g };
+}
 function nameCompatible(n: DocumentHierarchyNodeObservation, gtName: string): boolean {
   const t = compact(n.observedTextParts.join(''));
   const g = compact(gtName);
   return t.startsWith(g) || g.startsWith(t);
 }
 
-export function matchGtNodes(result: DocumentHierarchyResult, gt: GtNode[], pageOffset: number, nameTiebreak = true): MatchResult {
+/**
+ * summaryMode: 'pageRef'（既定。MHLWと同じ: v1の頁数列の候補==印字開始頁）/ 'codeName'（形・コードが一致し、名称が前方一致する候補。
+ * v1の頁数列の候補が4桁限定のため1–3桁の頁数を取れない文書用の、評価側だけの補助）。detail には影響しない。
+ */
+export type SummaryMatchMode = 'pageRef' | 'codeName';
+
+/**
+ * 事後診断用の照合オプション（既定は無効。MHLW・事前固定の評価の挙動は変わらない）。
+ * nameOnly: 名称の比較を「見出し行のtext partsのうち最初の数字を含むtokenの手前まで」に限り、完全一致を優先する
+ *   （組織名で始まる項名や、折返しで途中までしか印字されない名称で前方一致が曖昧になるのを避ける）。
+ * ordinalTiebreak: 同じ（形・コード・要求番号・名称）のGT nodeが複数あり、推論側の候補数が同じとき、文書順の序数で対応づける（summaryのみ）。
+ */
+export interface MatchOptions {
+  nameOnly?: boolean;
+  ordinalTiebreak?: boolean;
+}
+
+export function matchGtNodes(result: DocumentHierarchyResult, gt: GtNode[], pageOffset: number, nameTiebreak = true, summaryMode: SummaryMatchMode = 'pageRef', opts: MatchOptions = {}): MatchResult {
   const matched = new Map<string, DocumentHierarchyNodeObservation>();
   const status = new Map<string, 'matched' | 'not_found' | 'ambiguous_match'>();
   for (const g of gt) {
@@ -76,9 +108,21 @@ export function matchGtNodes(result: DocumentHierarchyResult, gt: GtNode[], page
       if (n.rowShape !== wantShape) return false;
       if (normCode(n.observedCodeParts.code) !== normCode(g.code)) return false;
       if (g.requestNo && n.observedCodeParts.requestNo !== g.requestNo) return false;
-      return result.view === 'detail' ? n.sourcePage === g.printedStartPage + pageOffset : n.structureEvidence.printedPageRefCandidate === String(g.printedStartPage);
+      if (result.view === 'detail') return n.sourcePage === g.printedStartPage + pageOffset;
+      return summaryMode === 'codeName' ? true : n.structureEvidence.printedPageRefCandidate === String(g.printedStartPage);
     });
-    const picked = cands.length > 1 && nameTiebreak ? cands.filter(c => nameCompatible(c, g.name)) : cands;
+    let picked: DocumentHierarchyNodeObservation[];
+    const useName = (cands.length > 1 && nameTiebreak) || (result.view === 'summary' && summaryMode === 'codeName');
+    if (opts.nameOnly && useName) {
+      const ok = cands.map(c => ({ c, r: nameCompatibleNameOnly(c, g.name) })).filter(x => x.r.ok);
+      const exact = ok.filter(x => x.r.exact);
+      picked = (exact.length > 0 ? exact : ok).map(x => x.c);
+    } else picked = useName ? cands.filter(c => nameCompatible(c, g.name)) : cands;
+    if (picked.length > 1 && opts.ordinalTiebreak && result.view === 'summary') {
+      const sig = (x: GtNode): string => `${x.requestNo ?? ''}|${x.code}|${compact(x.name)}`;
+      const dups = gt.filter(x => sig(x) === sig(g));
+      if (dups.length === picked.length) picked = [picked[dups.indexOf(g)]];
+    }
     if (picked.length === 1) {
       matched.set(g.key, picked[0]);
       status.set(g.key, 'matched');
@@ -87,8 +131,8 @@ export function matchGtNodes(result: DocumentHierarchyResult, gt: GtNode[], page
   return { matched, status };
 }
 
-export function evaluateView(result: DocumentHierarchyResult, gt: GtNode[], pageOffset: number, nameTiebreak = true): { edges: EdgeEvaluation[]; match: MatchResult; nodeIdToGtKey: Map<string, string> } {
-  const match = matchGtNodes(result, gt, pageOffset, nameTiebreak);
+export function evaluateView(result: DocumentHierarchyResult, gt: GtNode[], pageOffset: number, nameTiebreak = true, summaryMode: SummaryMatchMode = 'pageRef', opts: MatchOptions = {}): { edges: EdgeEvaluation[]; match: MatchResult; nodeIdToGtKey: Map<string, string> } {
+  const match = matchGtNodes(result, gt, pageOffset, nameTiebreak, summaryMode, opts);
   const nodeIdToGtKey = new Map<string, string>();
   for (const [k, n] of match.matched) nodeIdToGtKey.set(n.id, k);
   const edgeByChild = new Map<string, DocumentHierarchyEdgeCandidate>(result.edges.map(e => [e.childNodeId, e]));
@@ -161,4 +205,17 @@ export function summarize(result: DocumentHierarchyResult, gtAll: GtNode[], subs
     if (chain.length === want.length && want.every(w => chain.includes(w)) && chain.every(c => c !== null && c !== '__broken__')) ancX++;
   }
   return { gtEdges: edges.length, exact, falseParent, unresolved, childNotFound, precision, recall, f1, ancestorExact: { x: ancX, n: ancN }, depthExact: { x: depthX, matched: depthMatched, n: depthN }, nodesMatched: { x: nodesMatched, n: subsetKeys.size } };
+}
+
+export type Verdict = 'SUCCESS' | 'PARTIAL' | 'FAIL' | 'EVALUATION BLOCKED';
+/** 実験計画で固定した判定基準 */
+export function verdictOf(c: Counts): Verdict {
+  const n = c.nodesMatched.n;
+  if (n === 0 || c.nodesMatched.x / n < 0.5) return 'EVALUATION BLOCKED';
+  const exact = c.gtEdges ? c.exact / c.gtEdges : 0;
+  const fals = c.gtEdges ? c.falseParent / c.gtEdges : 0;
+  const depth = c.depthExact.n ? c.depthExact.x / c.depthExact.n : 0;
+  if (exact >= 0.9 && fals <= 0.05 && depth >= 0.9) return 'SUCCESS';
+  if (exact >= 0.5 && fals <= 0.1) return 'PARTIAL';
+  return 'FAIL';
 }

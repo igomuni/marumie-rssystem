@@ -405,6 +405,22 @@ npm run pipeline:v2:evaluate:budget-request-document-hierarchy -- 2024 --tag=v1 
 - **既知の制約（v1）**: ①範囲に組織が1つしか無いと、根のインデント段の支持が1行になり unplaced となり levelが1つずれる（`minClusterSupport=2`が必要。範囲に2組織以上を含める） ②x階段の係数は 0.05〜0.49 で結果が同一だが、0.5以上では総表の階段が1つに融合し全て unresolved に縮退する（false parentにはならない） ③右側の備考欄の「3桁+テキスト」行も見出し候補になる（xが遠く、親にも左側の行の子孫にもならないが、node数を増やす） ④頁数列の候補は4桁だけのtokenに限る ⑤MHLW 1文書のみ（他省庁・他のsummary構造は未確認）。
 - **実験契約**: `--mhlw-poc` の入力は MHLW `05-1b-01.pdf` の総表 物理p19–20 と 明細 物理p1555–1700（070・080 の部分木を覆う走査範囲の指定で、親子関係は含まない）。評価は development=組織070の部分木 / holdout=組織080の部分木。評価専用GTは `tests/fixtures/budget-request-document-hierarchy/2024/mhlw-toc-hierarchy-gt-extended.json`（目次由来・37ノード。research repo の11ノードGTを包含）。目次から作ったGTで同じ目次を読むのではなく、総表+明細見出し（body側）から復元して目次GTで評価する。結果が当初の基準を満たさなかったとき基準を動かさず、v1/v2 として分けて記録する。
 
+#### DocumentHierarchy v1 の他省庁 generalization（v1 frozen・METI / MEXT）
+
+```bash
+npm run pipeline:v2:extract:budget-request-document-hierarchy-generalization -- 2024    # 推論（v1のまま。GTを読まない）
+npm run pipeline:v2:evaluate:budget-request-document-hierarchy-generalization -- 2024 --tag=v1   # 評価専用GT（目次由来）との突き合わせ
+```
+
+出力: `data/work/budget-request-document-hierarchy/{year}/generalization-v1/{id}.json` と `evaluation-{tag}.json`（`data/derived` へは昇格しない）。v1 の推論ルール・係数（0.25 / minClusterSupport 2）は変更していない。評価専用GTは `tests/fixtures/budget-request-document-hierarchy/2024/{meti,mext}-toc-hierarchy-gt.json`（各PDFの目次から転記。METI 87ノード、MEXT 186ノード）。走査範囲: METI 総表 物理p5–8 / 明細 p9–106、MEXT（目次 `_01`・総表 `_02`・明細 `_03` の分割配布）総表 `_02` p1–8 / 明細 `_03` p1045–1339（組織030・040）、感度用の狭い範囲（METI p66–81、MEXT `_03` p1045–1259）。
+
+v1 を他PDFに当てて分かった、v1 の MHLW 固有だった仮定（修正せず記録）:
+
+- **見出し形状の衝突**: 印字頁が3桁のページヘッダ（METI の「100 経（中）」）が、見出し形状（先頭3桁+後続）に一致し、繰り返すと余分な根レベルのクラスタ（level 1）を作る。levelが体系的に1段ずれ、見出しのstackで本来の組織を押し出して後続の親を `level_gap` にする（false parentにはならない）。
+- **頁数列の候補は4桁限定**: METI・MEXT の総表の頁数は多くが1–3桁で、`printedPageRefCandidate` が取れない（MHLW は4桁）。
+- **single-organization 感度は再現**: 範囲内の根見出しが1件だと根のクラスタが unplaced となり level がずれる（METI 組織035のみ・MEXT 組織030のみ）。
+- 評価側の照合は、折返しで途中までしか印字されない名称・組織名で始まる項名・同一コードかつ同名の項（MEXT の `060`）で曖昧になる。事前固定の照合と、事後に追加した診断用の照合（`posthoc`）を分けて記録している。
+
 ## 8. V1/V2比較方法
 
 ```bash
