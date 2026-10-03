@@ -1,0 +1,738 @@
+{
+  "schema": "budget-request-incomplete-name-guard-p3-evaluation/v0",
+  "baseCommit": "587a477",
+  "guardOption": {
+    "name": "incompleteNameGuard",
+    "default": false,
+    "evaluatedAs": "on"
+  },
+  "predicateVersion": "A∧B∧¬C∧¬D (preregistration 2e9eff1 + supplement e5e5cd8)",
+  "resolverSourceSha256": "758eb8f6afdf45bd39c9853623201a4afbac8e8d6883626149d889335c2bb224",
+  "sample": {
+    "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/sample.json",
+    "units": 43,
+    "sha256": "bffdbd3229c64179df1888ea97cd066a885c2ebaa890bfc10853348d1df90807"
+  },
+  "visualGt": {
+    "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/visual-gt.json",
+    "units": 43,
+    "sha256": "dcca2625403f93d641cf06d62afaf1172431086670b13a1c70bc4efe7bc9efe2"
+  },
+  "freezeVerification": {
+    "freezeCommit": "587a477",
+    "entries": [
+      {
+        "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/sample.json",
+        "blobShaAtFreeze": "1a7d8718f40a4f98841cc1191ea86f79abf70e67",
+        "blobShaCurrent": "1a7d8718f40a4f98841cc1191ea86f79abf70e67",
+        "match": true
+      },
+      {
+        "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/visual-gt.json",
+        "blobShaAtFreeze": "c3bf420e8c2cef292278df74a7f7da611cb8f11a",
+        "blobShaCurrent": "c3bf420e8c2cef292278df74a7f7da611cb8f11a",
+        "match": true
+      },
+      {
+        "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/gt-worklist.json",
+        "blobShaAtFreeze": "a6241fd9e17acc2c399e9c08da928227b5f99c49",
+        "blobShaCurrent": "a6241fd9e17acc2c399e9c08da928227b5f99c49",
+        "match": true
+      },
+      {
+        "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/baseline-artifacts.json",
+        "blobShaAtFreeze": "4124455dba8c172089726eedebafd692441c4a5e",
+        "blobShaCurrent": "4124455dba8c172089726eedebafd692441c4a5e",
+        "match": true
+      },
+      {
+        "path": "docs/tasks/20261003_1321_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration.md",
+        "blobShaAtFreeze": "6490007727c8e41299b5cfd54d6a81ba91536935",
+        "blobShaCurrent": "6490007727c8e41299b5cfd54d6a81ba91536935",
+        "match": true
+      },
+      {
+        "path": "docs/tasks/20261003_1437_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration_Supplement.md",
+        "blobShaAtFreeze": "f1ee7a2c7d6c23db7cc0bb84378fa554fb832d10",
+        "blobShaCurrent": "f1ee7a2c7d6c23db7cc0bb84378fa554fb832d10",
+        "match": true
+      },
+      {
+        "path": "scripts/pipeline-v2/lib/budget-request-logical-row.ts",
+        "blobShaAtFreeze": "5f823228970a12033d5db478910841fae5b272e8",
+        "blobShaCurrent": "5f823228970a12033d5db478910841fae5b272e8",
+        "match": true
+      }
+    ],
+    "allMatch": true
+  },
+  "metrics": {
+    "falseResolvedIncomplete": 0,
+    "safetyCatches": 27,
+    "falseAbstainedComplete": 0,
+    "preservedComplete": 16,
+    "incomplete": 27,
+    "complete": 16,
+    "unclear": 0,
+    "fired": 27,
+    "firedDecisive": 27,
+    "facRate": 0,
+    "guardPrecision": 1,
+    "guardRecall": 1
+  },
+  "confusionMatrix": {
+    "incomplete": {
+      "guardFires": 27,
+      "doesNotFire": 0
+    },
+    "complete": {
+      "guardFires": 0,
+      "doesNotFire": 16
+    }
+  },
+  "knownP75Failures": {
+    "moe-ippan:75:7": {
+      "unitId": "moe-ippan:75:7",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    "moe-ippan:75:27": {
+      "unitId": "moe-ippan:75:27",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    "moe-ippan:75:31": {
+      "unitId": "moe-ippan:75:31",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    }
+  },
+  "differential": {
+    "records": 3365,
+    "fired": 65,
+    "nonNameDifferences": 0,
+    "unexpectedNameChanges": 0
+  },
+  "developmentGolden": {
+    "off": {
+      "gtResolvable": 112,
+      "exact": 111,
+      "falseResolved": 0,
+      "wrongNormalization": 0,
+      "wrongSource": 0,
+      "unresolved": 2,
+      "ambiguous": 1,
+      "notObserved": 0,
+      "notFound": 0,
+      "outputResolvedOrBlank": 111,
+      "correctAbstention": 88,
+      "precision": 1,
+      "safeCoverage": 0.9911,
+      "falseResolveRate": 0
+    },
+    "on": {
+      "gtResolvable": 112,
+      "exact": 111,
+      "falseResolved": 0,
+      "wrongNormalization": 0,
+      "wrongSource": 0,
+      "unresolved": 2,
+      "ambiguous": 1,
+      "notObserved": 0,
+      "notFound": 0,
+      "outputResolvedOrBlank": 111,
+      "correctAbstention": 88,
+      "precision": 1,
+      "safeCoverage": 0.9911,
+      "falseResolveRate": 0
+    },
+    "changedOutcomes": []
+  },
+  "heldout": {
+    "off": {
+      "gtResolvable": 282,
+      "exact": 231,
+      "correctAbstention": 125,
+      "falseResolved": 2,
+      "wrongNormalization": 0,
+      "wrongSource": 0,
+      "unresolved": 49,
+      "ambiguous": 1,
+      "notObserved": 0,
+      "notFound": 30,
+      "outputResolvedOrBlank": 233,
+      "precision": 0.9914,
+      "safeCoverage": 0.8191,
+      "falseResolveRate": 0.0086
+    },
+    "on": {
+      "gtResolvable": 282,
+      "exact": 231,
+      "correctAbstention": 125,
+      "falseResolved": 1,
+      "wrongNormalization": 0,
+      "wrongSource": 0,
+      "unresolved": 49,
+      "ambiguous": 2,
+      "notObserved": 0,
+      "notFound": 30,
+      "outputResolvedOrBlank": 232,
+      "precision": 0.9957,
+      "safeCoverage": 0.8191,
+      "falseResolveRate": 0.0043
+    },
+    "changedOutcomes": [
+      "moe-p75-line-011-nature-positive|name|ambiguous"
+    ],
+    "offFalseResolved": [
+      "maff-p12-req69-total-sheet.code",
+      "moe-p75-line-011-nature-positive.name"
+    ],
+    "onFalseResolved": [
+      "maff-p12-req69-total-sheet.code"
+    ]
+  },
+  "verdict": {
+    "verdict": "GO-WITH-SCOPE",
+    "checks": [
+      {
+        "name": "safety: known failure の false-resolved incomplete = 0",
+        "pass": true,
+        "detail": "0"
+      },
+      {
+        "name": "safety: 全体の FRI ≤ 2 かつ incomplete(decisive) の 10% 以下",
+        "pass": true,
+        "detail": "FRI=0, incomplete=27"
+      },
+      {
+        "name": "regression: FAC ≤ 2 かつ 発火した decisive unit の 10% 以下",
+        "pass": true,
+        "detail": "FAC=0, firedDecisive=27"
+      },
+      {
+        "name": "invariant: name 以外の差 0",
+        "pass": true,
+        "detail": "0"
+      },
+      {
+        "name": "invariant: name の変化は resolved→ambiguous(value null)のみ",
+        "pass": true,
+        "detail": "0"
+      },
+      {
+        "name": "invariant: development Golden の評価が baseline と同一",
+        "pass": true,
+        "detail": "changed outcomes=0"
+      },
+      {
+        "name": "invariant: Golden で false resolved / wrong source / wrong normalization = 0",
+        "pass": true,
+        "detail": "{\"falseResolved\":0,\"wrongSource\":0,\"wrongNormalization\":0}"
+      },
+      {
+        "name": "invariant: held-out で wrong source / wrong normalization / blank↔zero = 0",
+        "pass": true,
+        "detail": "{\"wrongSource\":0,\"wrongNormalization\":0,\"blankAsZero\":0,\"zeroAsBlank\":0}"
+      },
+      {
+        "name": "identity: baseline の名称が凍結した標本と一致",
+        "pass": true,
+        "detail": "0"
+      }
+    ]
+  },
+  "units": [
+    {
+      "unitId": "mlit-additional:967:26",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "P",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "mod-additional:58:11",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "P",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "moe-additional:164:14",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "P",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "maff-additional:364:28",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "P",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "meti-detail-9-106:50:13",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:108:29",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "P",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "meti-detail-9-106:89:38",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "P",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "mext-detail-870-880:875:29",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "P",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "maff-additional:58:8",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mhlw-detail-1555-1700:1609:6",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "P",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "meti-detail-9-106:38:15",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "NB",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "maff-additional:166:10",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "NB",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "mlit-additional:468:5",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "NB",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "maff-additional:298:16",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "moe-additional:133:21",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "NB",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "mod-additional:386:34",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "NB",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "maff-additional:111:30",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mod-additional:478:7",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mhlw-detail-1260-1275:1264:18",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "NB",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "mext-detail-870-880:871:30",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "NB",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:139:7",
+      "visualGt": "complete_on_current_logical_row",
+      "stratum": "NB",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": false,
+      "afterStatus": "resolved",
+      "reasonCode": null,
+      "note": ""
+    },
+    {
+      "unitId": "maff-additional:69:21",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mod-additional:256:4",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mlit-additional:238:12",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "meti-detail-9-106:55:5",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mlit-additional:292:25",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mlit-additional:275:37",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "meti-detail-9-106:56:30",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:31",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "moe-ippan:75:27",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mlit-additional:267:21",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mod-additional:236:16",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "moe-additional:105:4",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "moe-additional:100:4",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "moe-additional:133:7",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mod-additional:472:24",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:94:24",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "moe-additional:130:34",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "moe-ippan:75:31",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "mhlw-detail-1555-1700:1651:26",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:56:25",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:56:15",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    },
+    {
+      "unitId": "moe-ippan:75:7",
+      "visualGt": "incomplete_continues_below",
+      "stratum": "G",
+      "beforeStatus": "resolved",
+      "beforeNameMatchesFrozenBaseline": true,
+      "guardFired": true,
+      "afterStatus": "ambiguous",
+      "reasonCode": "name_continuation_evidence_unmerged",
+      "note": "incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete"
+    }
+  ]
+}
