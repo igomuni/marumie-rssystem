@@ -1,0 +1,2098 @@
+{
+ "schemaVersion": "budget-request-field-resolver-golden/v0",
+ "purpose": "EVALUATION ONLY. FieldResolver inference must never import, read or reference this file. Fixed before any FieldResolver implementation exists.",
+ "status": "frozen-at-commit-3",
+ "contract": "docs/tasks/20261003_0648_FieldResolver_v0_Contract.md",
+ "observationMethod": {
+  "method": "assistant-visual-render",
+  "description": "Each sample page was rendered to an image (pdftoppm, 130 dpi full page; 220 dpi crops for dense or low-confidence cells) and read visually by the assistant (an AI), not by a human. Values come from the rendered page only: no extracted text, no neighbouring-value arithmetic, no general knowledge. Cells that could not be read are not recorded as values. Where an existing human coordinate anchor exists (human-observations.json) it is referenced.",
+  "observer": "assistant (AI)",
+  "humanReview": "row-local-visual-confirmed-with-exception",
+  "usedExtractedTextForValues": false,
+  "pageSelectionNote": "The four core pages are the existing Golden Sample locators. METI p10, p96, p105 and こども家庭庁 p136 were added for field-behaviour boundaries; p96/p105/p136 were found using extraction output as a SEARCH aid only (candidate pages), and their values were then read from the rendered page.",
+  "hierarchyInputStates": "The hierarchy.inputState fields record the state in the frozen DocumentHierarchy B-only artifact (derived input, regenerable). They are inputs to the Contract policy, not visual truth. Hierarchy-dependent expected statuses are policy-derived (Contract section 9)."
+ },
+ "statusVocabulary": [
+  "resolved",
+  "blank",
+  "unresolved",
+  "ambiguous",
+  "not_observed",
+  "not_applicable"
+ ],
+ "columnBandsPt": {
+  "previousBudget": [
+   204,
+   256
+  ],
+  "requestedBudget": [
+   256,
+   307
+  ],
+  "difference": [
+   411,
+   463
+  ],
+  "remarks": [
+   463,
+   842
+  ],
+  "note": "visual estimate of the common ledger template from the 130 dpi render; page width 842 pt; the same template appears on all sample pages"
+ },
+ "samples": [
+  {
+   "id": "meti-ippan-p9",
+   "tier": "normal",
+   "document": {
+    "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf"
+   },
+   "sourcePage": 9,
+   "printedPageLabel": "経（本） 5",
+   "pageUnitLabel": {
+    "status": "resolved",
+    "raw": "(単位:千円)",
+    "note": "printed at the top right of the page"
+   },
+   "hierarchyInput": {
+    "available": true,
+    "artifact": "DocumentHierarchy B only (v2-B-obs), experiment meti-detail, physical pages 9-106; input state recorded from the frozen artifact (derived input, not visual truth)"
+   },
+   "humanAnchors": [
+    {
+     "text": "01-95",
+     "x": 65.569,
+     "y": 131.93,
+     "source": "tests/fixtures/budget-request-extraction/2024/human-observations.json"
+    },
+    {
+     "text": "経済産業本省一般行政",
+     "x": 89.726,
+     "y": 131.93,
+     "source": "tests/fixtures/budget-request-extraction/2024/human-observations.json"
+    },
+    {
+     "text": "（要求要旨）",
+     "x": 469.336,
+     "y": 131.93,
+     "source": "tests/fixtures/budget-request-extraction/2024/human-observations.json"
+    }
+   ],
+   "notes": "METI normal ledger page. 要求番号 is a circled digit at the left (v0 out of scope). Right-side remark text only on the request row.",
+   "targets": [
+    {
+     "id": "meti-p9-org010",
+     "kind": "organization",
+     "purpose": [
+      "organization row with amounts",
+      "explicitly unresolved hierarchy (root) but row-local fields resolvable"
+     ],
+     "visualLocator": {
+      "description": "row \"010 経済産業本省\" at the top of the table",
+      "approxYPt": 106.9,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "010"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "経 済 産 業 本 省"
+       ],
+       "normalized": "経済産業本省",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "234,599,916",
+       "magnitudeNumeric": 234599916,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "243,224,946",
+       "magnitudeNumeric": 243224946,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "8,625,030",
+       "magnitudeNumeric": 8625030,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "explicitly_unresolved",
+      "detail": "root: the hierarchy artifact has no parent for this node (status unresolved)",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "meti-p9-req01-95",
+     "kind": "request",
+     "purpose": [
+      "normal 3 amounts",
+      "right-side request-summary text",
+      "request with safe hierarchy"
+     ],
+     "visualLocator": {
+      "description": "request row \"01-95 経済産業本省一般行政に必要な経費\" (name wraps to 2 lines)",
+      "approxYPt": 134.6,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "human-anchor + visual-estimate"
+     },
+     "humanAnchorRefs": [
+      "01-95",
+      "経済産業本省一般行政",
+      "（要求要旨）"
+     ],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "01-95"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "経済産業本省一般行政に",
+        "必要な経費"
+       ],
+       "normalized": "経済産業本省一般行政に必要な経費",
+       "wrapped": true,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "42,331,005",
+       "magnitudeNumeric": 42331005,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "46,887,829",
+       "magnitudeNumeric": 46887829,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "4,556,824",
+       "magnitudeNumeric": 4556824,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [
+      {
+       "class": "remark_text",
+       "visualDescription": "「（要求要旨）」and the sentence \"「経済産業省設置法」に定める本省内部部局所掌の一般事務を処理するため必要な庁費等\" in the right-hand remark column on the same row",
+       "expectedAttachToAmountFields": "none",
+       "note": "reference only (Contract §13); the text is not a v0 field"
+      }
+     ],
+     "hierarchy": {
+      "inputState": "safe",
+      "detail": "request->item resolved; item->organization resolved; no strong header evidence on either edge",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "resolved",
+        "value": {
+         "code": "010",
+         "name": "経済産業本省共通費"
+        },
+        "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
+       },
+       "parentOrganizationAssociation": {
+        "status": "resolved",
+        "value": {
+         "code": "010",
+         "name": "経済産業本省"
+        },
+        "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "meti-p9-line-02-0200-sign",
+     "kind": "detail_line",
+     "purpose": [
+      "explicit sign in the difference cell"
+     ],
+     "visualLocator": {
+      "description": "detail line \"02-0200 扶養手当\" (under 95016-2111-02-0000 職員基本給)",
+      "approxYPt": 239.2,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "02-0200"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "扶 養 手 当"
+       ],
+       "normalized": "扶養手当",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "218,700",
+       "magnitudeNumeric": 218700,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "211,955",
+       "magnitudeNumeric": 211955,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "6,745",
+       "magnitudeNumeric": 6745,
+       "explicitZero": false,
+       "sign": {
+        "status": "resolved",
+        "raw": "△",
+        "position": "at the left edge of the cell, separated from the digits"
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "not_applicable",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "meti-p9-line-03-0200-zero-diff",
+     "kind": "detail_line",
+     "purpose": [
+      "explicit zero in the difference cell",
+      "wrapped name"
+     ],
+     "visualLocator": {
+      "description": "detail line \"03-0200 初任給調整手当\" (name wraps to 2 lines)",
+      "approxYPt": 288.0,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "03-0200"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "初任給調整手",
+        "当"
+       ],
+       "normalized": "初任給調整手当",
+       "wrapped": true,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "1,428",
+       "magnitudeNumeric": 1428,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "1,428",
+       "magnitudeNumeric": 1428,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "0",
+       "magnitudeNumeric": 0,
+       "explicitZero": true,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "not_applicable",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "meti-p9-line-001-blank",
+     "kind": "detail_line",
+     "purpose": [
+      "visually blank amounts (all three cells) on a category row"
+     ],
+     "visualLocator": {
+      "description": "category row \"001 既定定員に伴う経費\" between the request row and the 001 人件費 row",
+      "approxYPt": 183.3,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "001"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "既 定 定 員 に 伴 う 経 費"
+       ],
+       "normalized": "既定定員に伴う経費",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "not_applicable",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    }
+   ]
+  },
+  {
+   "id": "meti-ippan-p10",
+   "tier": "boundary-sign",
+   "document": {
+    "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf"
+   },
+   "sourcePage": 10,
+   "printedPageLabel": "6 経（本）",
+   "pageUnitLabel": {
+    "status": "not_observed",
+    "raw": null,
+    "note": "no unit label is printed on this page; the unit must not be inferred from other pages"
+   },
+   "hierarchyInput": {
+    "available": true,
+    "artifact": "DocumentHierarchy B only (v2-B-obs), experiment meti-detail, physical pages 9-106; input state recorded from the frozen artifact (derived input, not visual truth)"
+   },
+   "humanAnchors": [],
+   "notes": "Page with △ in the requested amount column and in the difference column.",
+   "targets": [
+    {
+     "id": "meti-p10-line-003-signed-request",
+     "kind": "detail_line",
+     "purpose": [
+      "sign on the REQUESTED amount (not only the difference)",
+      "explicit zero previous",
+      "△ inside remark text is a headcount, not an amount sign"
+     ],
+     "visualLocator": {
+      "description": "category row \"003 定員合理化に伴う経費\"",
+      "approxYPt": 191.1,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "003"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "定 員 合 理 化 に 伴 う 経 費"
+       ],
+       "normalized": "定員合理化に伴う経費",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "0",
+       "magnitudeNumeric": 0,
+       "explicitZero": true,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "173,380",
+       "magnitudeNumeric": 173380,
+       "explicitZero": false,
+       "sign": {
+        "status": "resolved",
+        "raw": "△",
+        "position": "at the left edge of the cell, separated from the digits"
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "173,380",
+       "magnitudeNumeric": 173380,
+       "explicitZero": false,
+       "sign": {
+        "status": "resolved",
+        "raw": "△",
+        "position": "at the left edge of the cell, separated from the digits"
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [
+      {
+       "class": "remark_text",
+       "visualDescription": "right-hand remark \"行政職俸給表（一） 1級 12箇月 △27人\"; the △ here marks a headcount (27 people), not the sign of an amount",
+       "expectedAttachToAmountFields": "none",
+       "mustNotUseAsSign": true
+      }
+     ],
+     "hierarchy": {
+      "inputState": "not_applicable",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "notes": "The △ of the requested cell sits immediately to the right of the previous-year \"0\" and belongs to the requested cell (left edge of the cell).",
+     "humanReview": "visual-confirmed"
+    }
+   ]
+  },
+  {
+   "id": "meti-ippan-p96",
+   "tier": "boundary-blank-zero",
+   "document": {
+    "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf"
+   },
+   "sourcePage": 96,
+   "printedPageLabel": "92 経（中）",
+   "pageUnitLabel": {
+    "status": "not_observed",
+    "raw": null,
+    "note": "no unit label is printed on this page; the unit must not be inferred from other pages"
+   },
+   "hierarchyInput": {
+    "available": true,
+    "artifact": "DocumentHierarchy B only (v2-B-obs), experiment meti-detail, physical pages 9-106; input state recorded from the frozen artifact (derived input, not visual truth)"
+   },
+   "humanAnchors": [],
+   "notes": "Page with blank cells and explicit zeros side by side.",
+   "targets": [
+    {
+     "id": "meti-p96-line-03-0300-blank-prev",
+     "kind": "detail_line",
+     "purpose": [
+      "blank previous-year amount with requested and difference present (blank != 0)"
+     ],
+     "visualLocator": {
+      "description": "detail line \"03-0300 通勤手当\" at the top of the page",
+      "approxYPt": 58.2,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "03-0300"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "通 勤 手 当"
+       ],
+       "normalized": "通勤手当",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "704",
+       "magnitudeNumeric": 704,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "704",
+       "magnitudeNumeric": 704,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "not_applicable",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "meti-p96-line-05-0100-explicit-zero",
+     "kind": "detail_line",
+     "purpose": [
+      "explicit 0 / 0 / 0 on the same page as blank cells",
+      "3-line wrapped name"
+     ],
+     "visualLocator": {
+      "description": "detail line \"05-0100 暫定再任用短時間勤務職員給与\" (name wraps to 3 lines)",
+      "approxYPt": 168.9,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "05-0100"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "暫定再任用短",
+        "時間勤務職員",
+        "給与"
+       ],
+       "normalized": "暫定再任用短時間勤務職員給与",
+       "wrapped": true,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "0",
+       "magnitudeNumeric": 0,
+       "explicitZero": true,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "0",
+       "magnitudeNumeric": 0,
+       "explicitZero": true,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "0",
+       "magnitudeNumeric": 0,
+       "explicitZero": true,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "not_applicable",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "meti-p96-line-1360-blank-all",
+     "kind": "detail_line",
+     "purpose": [
+      "all three amount cells visually blank on a detail line"
+     ],
+     "visualLocator": {
+      "description": "detail line \"60062-2111-05-1360 短時間勤務職員給与\" (name wraps to 2 lines)",
+      "approxYPt": 146.8,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "60062-2111-05-1360"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "短時間勤務職員",
+        "給与"
+       ],
+       "normalized": "短時間勤務職員給与",
+       "wrapped": true,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "not_applicable",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "meti-p96-line-1010-aux-number",
+     "kind": "detail_line",
+     "purpose": [
+      "blank previous-year amount",
+      "auxiliary label-number in the remark column must not fill any amount"
+     ],
+     "visualLocator": {
+      "description": "detail line \"60062-2123-09-1010 庁費\"",
+      "approxYPt": 211.0,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "60062-2123-09-1010"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "庁 　　 費"
+       ],
+       "normalized": "庁費",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "177",
+       "magnitudeNumeric": 177,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "177",
+       "magnitudeNumeric": 177,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [
+      {
+       "class": "inline_label_number",
+       "visualDescription": "right-hand remark column shows the label \"職員厚生経費\" and the number \"177\"",
+       "expectedAttachToAmountFields": "none",
+       "note": "the number 177 is an auxiliary item; it equals the requested amount here, but it must not be used to fill the blank previous-year cell or as the source of the requested amount"
+      }
+     ],
+     "hierarchy": {
+      "inputState": "not_applicable",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    }
+   ]
+  },
+  {
+   "id": "meti-ippan-p105",
+   "tier": "boundary-hierarchy-risk",
+   "document": {
+    "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf"
+   },
+   "sourcePage": 105,
+   "printedPageLabel": "経（中） 101",
+   "pageUnitLabel": {
+    "status": "not_observed",
+    "raw": null,
+    "note": "no unit label is printed on this page; the unit must not be inferred from other pages"
+   },
+   "hierarchyInput": {
+    "available": true,
+    "artifact": "DocumentHierarchy B only (v2-B-obs), experiment meti-detail, physical pages 9-106; input state recorded from the frozen artifact (derived input, not visual truth)"
+   },
+   "humanAnchors": [],
+   "notes": "Page whose bottom shows item 063 and request 05-60 with amounts not printed on this page (they continue on the next page; v0 does not cross pages).",
+   "targets": [
+    {
+     "id": "meti-p105-item063",
+     "kind": "item",
+     "purpose": [
+      "item row with blank amounts",
+      "hierarchy: level_gap with a strong header parent (item->organization must not be resolved)"
+     ],
+     "visualLocator": {
+      "description": "item row \"063 独立行政法人中小企業基盤整備機構出資\" near the bottom of the page (name wraps to 2 lines)",
+      "approxYPt": 502.9,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "063"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "独立行政法人中小企業基",
+        "盤整備機構出資"
+       ],
+       "normalized": "独立行政法人中小企業基盤整備機構出資",
+       "wrapped": true,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "resolved_risky_or_level_gap",
+      "detail": "hierarchy artifact: edge status level_gap and its parent is a strong header-collision node (the page header \"101 経（中）\" of the previous page)",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_resolved",
+        "acceptableStatuses": [
+         "unresolved",
+         "ambiguous"
+        ],
+        "derivedFrom": "policy (Contract §9), not visual truth"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "meti-p105-req49",
+     "kind": "request",
+     "purpose": [
+      "request row at the page end with blank amounts (values are not on this page)",
+      "request->item safe, request->organization composed through a risky hop"
+     ],
+     "visualLocator": {
+      "description": "request row \"05-60 独立行政法人中小企業基盤整備機構出資に必要な経費\" (name wraps to 3 lines)",
+      "approxYPt": 524.5,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "05-60"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "独立行政法人中小企業基",
+        "盤整備機構出資に必要な",
+        "経費"
+       ],
+       "normalized": "独立行政法人中小企業基盤整備機構出資に必要な経費",
+       "wrapped": true,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "safe_edge_risky_composition",
+      "detail": "request->item edge: resolved, no strong header evidence on either endpoint; item->organization hop: level_gap + strong header parent, so the composed organization association is not safe",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "resolved",
+        "value": {
+         "code": "063",
+         "name": "独立行政法人中小企業基盤整備機構出資"
+        },
+        "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_resolved",
+        "acceptableStatuses": [
+         "unresolved",
+         "ambiguous"
+        ],
+        "derivedFrom": "policy (Contract §9), not visual truth"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    }
+   ]
+  },
+  {
+   "id": "mhlw-ippan-p1268",
+   "tier": "moderate",
+   "document": {
+    "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf"
+   },
+   "sourcePage": 1268,
+   "printedPageLabel": "1260 厚（ハ）",
+   "pageUnitLabel": {
+    "status": "not_observed",
+    "raw": null,
+    "note": "no unit label is printed on this page; the unit must not be inferred from other pages"
+   },
+   "hierarchyInput": {
+    "available": false,
+    "artifact": null
+   },
+   "humanAnchors": [
+    {
+     "text": "020",
+     "x": 58.667,
+     "y": 111.099,
+     "source": "tests/fixtures/budget-request-extraction/2024/human-observations.json"
+    }
+   ],
+   "notes": "Moderate page: left core row (blank amounts) and large auxiliary regions.",
+   "targets": [
+    {
+     "id": "mhlw-p1268-item020",
+     "kind": "item",
+     "purpose": [
+      "item row with blank amounts and three auxiliary regions on the right",
+      "auxiliary tables contain △ and many numbers that must not attach to the core row"
+     ],
+     "visualLocator": {
+      "description": "item row \"020 国立ハンセン病療養所運営費\" (name wraps to 2 lines) in the left column",
+      "approxYPt": 114.6,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "human-anchor + visual-estimate"
+     },
+     "humanAnchorRefs": [
+      "020"
+     ],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "020"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "国立ハンセン病療養所運",
+        "営費"
+       ],
+       "normalized": "国立ハンセン病療養所運営費",
+       "wrapped": true,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [
+      {
+       "class": "breakdown_table",
+       "visualDescription": "right-hand remark column: rows \"3 工事監理事務費 77,245( 65,001)\", \"4 ボーリング調査費 0( 0)\", \"5 施設解体経費 0( 0)\", \"計 212,253( 218,076)\"",
+       "expectedAttachToAmountFields": "none"
+      },
+      {
+       "class": "history_table",
+       "visualDescription": "right-hand 5-year table (30年度, 元年度, 2年度, 3年度, 4年度) with 予算額・補正予算額・流用等△減額・前年度繰越額・予備費使用額・決算額・翌年度繰越額・不用額",
+       "expectedAttachToAmountFields": "none"
+      },
+      {
+       "class": "ruled_table",
+       "visualDescription": "ruled table at the lower right (区分, 令和4年度予算額, 補正予算額, 流用増減, 前年度繰越額, 予算現額, 支出額, 翌年度繰越額, 不用額) with entries such as △113,000 and △ 26,723",
+       "expectedAttachToAmountFields": "none"
+      }
+     ],
+     "hierarchy": {
+      "inputState": "not_available",
+      "reason": "no frozen DocumentHierarchy artifact covers this page; hierarchy-dependent fields are outside v0 evaluation for this sample",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "outside_v0_scope"
+       },
+       "parentOrganizationAssociation": {
+        "status": "outside_v0_scope"
+       }
+      }
+     },
+     "notes": "The core row has no amounts printed on this page. None of the numbers in the right-hand regions belong to the 020 row; physical right side != semantic remark.",
+     "humanReview": "visual-confirmed"
+    }
+   ]
+  },
+  {
+   "id": "mhlw-ippan-p1555",
+   "tier": "extreme",
+   "document": {
+    "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf"
+   },
+   "sourcePage": 1555,
+   "printedPageLabel": "厚（地） 1547",
+   "pageUnitLabel": {
+    "status": "not_observed",
+    "raw": null,
+    "note": "no unit label is printed on this page; the unit must not be inferred from other pages"
+   },
+   "hierarchyInput": {
+    "available": true,
+    "artifact": "DocumentHierarchy B only (v2-B-obs), experiment mhlw-detail, physical pages 1555-1700"
+   },
+   "humanAnchors": [
+    {
+     "text": "01-95",
+     "x": 65.569,
+     "y": 423.567,
+     "source": "tests/fixtures/budget-request-extraction/2024/human-observations.json"
+    },
+    {
+     "text": "（要求要旨）",
+     "x": 469.336,
+     "y": 451.342,
+     "source": "tests/fixtures/budget-request-extraction/2024/human-observations.json"
+    }
+   ],
+   "notes": "Extreme page: upper org/item rows, large intervening tables, lower request.",
+   "targets": [
+    {
+     "id": "mhlw-p1555-org070",
+     "kind": "organization",
+     "purpose": [
+      "organization row with amounts at the top"
+     ],
+     "visualLocator": {
+      "description": "row \"070 地方厚生局\" at the top of the table",
+      "approxYPt": 58.2,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "070"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "地 方 厚 生 局"
+       ],
+       "normalized": "地方厚生局",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "17,396,623",
+       "magnitudeNumeric": 17396623,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "17,793,343",
+       "magnitudeNumeric": 17793343,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "396,720",
+       "magnitudeNumeric": 396720,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "explicitly_unresolved",
+      "detail": "root: the hierarchy artifact has no parent for this node",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_applicable"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "mhlw-p1555-item010",
+     "kind": "item",
+     "purpose": [
+      "item row with blank amounts followed by a 5-year history table and a ruled table"
+     ],
+     "visualLocator": {
+      "description": "item row \"010 地方厚生局共通費\" below the organization row",
+      "approxYPt": 72.0,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "010"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "地 方 厚 生 局 共 通 費"
+       ],
+       "normalized": "地方厚生局共通費",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [
+      {
+       "class": "history_table",
+       "visualDescription": "right-hand 5-year table (30年度 ... 4年度) with 予算額・決算額・不用額・翌年度繰越額・移替増△減額・前年度繰越額",
+       "expectedAttachToAmountFields": "none"
+      },
+      {
+       "class": "ruled_table",
+       "visualDescription": "large ruled table in the middle-right (区分, 令和4年度予算額, 補正等増△額, 前年度繰越額, 流用等増△減額, 歳出予算現額, 支出済歳出額, 翌年度繰越額, 不用額) with entries such as △32,088",
+       "expectedAttachToAmountFields": "none"
+      }
+     ],
+     "hierarchy": {
+      "inputState": "safe",
+      "detail": "item->organization: resolved, no strong header evidence",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "resolved",
+        "value": {
+         "code": "070",
+         "name": "地方厚生局"
+        },
+        "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "mhlw-p1555-req186",
+     "kind": "request",
+     "purpose": [
+      "request row separated from its item by large intervening tables",
+      "upper tables must not attach to the lower request",
+      "request with safe hierarchy"
+     ],
+     "visualLocator": {
+      "description": "request row \"01-95 地方厚生局一般行政に必要な経費\" in the lower part of the page (name wraps to 2 lines)",
+      "approxYPt": 426.4,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "human-anchor + visual-estimate"
+     },
+     "humanAnchorRefs": [
+      "01-95",
+      "（要求要旨）"
+     ],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "01-95"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "地方厚生局一般行政に必",
+        "要な経費"
+       ],
+       "normalized": "地方厚生局一般行政に必要な経費",
+       "wrapped": true,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "13,893,142",
+       "magnitudeNumeric": 13893142,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "14,591,637",
+       "magnitudeNumeric": 14591637,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "698,495",
+       "magnitudeNumeric": 698495,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [
+      {
+       "class": "remark_text",
+       "visualDescription": "「（要求要旨）」and the sentence \"中央省庁等再編の基本方針に基づき設置された地方厚生局において実施する麻薬等取締、薬事等監視指導、各種許認可業務等を行うために必要な経費である。\" below the request row",
+       "expectedAttachToAmountFields": "none"
+      },
+      {
+       "class": "history_table",
+       "visualDescription": "upper 5-year table (belongs to the 010 item region, not to the 01-95 request)",
+       "expectedAttachToAmountFields": "none"
+      },
+      {
+       "class": "ruled_table",
+       "visualDescription": "middle ruled table between the item and the request",
+       "expectedAttachToAmountFields": "none"
+      }
+     ],
+     "hierarchy": {
+      "inputState": "safe",
+      "detail": "request->item and item->organization both resolved; no strong header evidence",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "resolved",
+        "value": {
+         "code": "010",
+         "name": "地方厚生局共通費"
+        },
+        "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
+       },
+       "parentOrganizationAssociation": {
+        "status": "resolved",
+        "value": {
+         "code": "070",
+         "name": "地方厚生局"
+        },
+        "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    }
+   ]
+  },
+  {
+   "id": "mext-detail-p876",
+   "tier": "structured-remark",
+   "document": {
+    "canonicalUrl": "https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf"
+   },
+   "sourcePage": 876,
+   "printedPageLabel": "884 文（本）",
+   "pageUnitLabel": {
+    "status": "not_observed",
+    "raw": null,
+    "note": "no unit label is printed on this page; the unit must not be inferred from other pages"
+   },
+   "hierarchyInput": {
+    "available": false,
+    "artifact": null
+   },
+   "humanAnchors": [],
+   "notes": "Structured-remark page: physical 備考 column holds free text and a hierarchical calculation table.",
+   "targets": [
+    {
+     "id": "mext-p876-line015",
+     "kind": "detail_line",
+     "purpose": [
+      "explicit zero difference on a core row",
+      "remark column holds a free-text summary followed by a structured calculation table"
+     ],
+     "visualLocator": {
+      "description": "top row \"015 ＳＤＧｓ達成の担い手育成（ＥＳＤ）推進事業\" (name wraps to 2 lines; letter-spaced full-width characters)",
+      "approxYPt": 58.2,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "medium",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "015"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "ＳＤＧｓ達成の担い手育",
+        "成（ＥＳＤ）推進事業"
+       ],
+       "normalized": "ＳＤＧｓ達成の担い手育成（ＥＳＤ）推進事業",
+       "wrapped": true,
+       "observationConfidence": "medium"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "43,764",
+       "magnitudeNumeric": 43764,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "43,764",
+       "magnitudeNumeric": 43764,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "0",
+       "magnitudeNumeric": 0,
+       "explicitZero": true,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [
+      {
+       "class": "remark_text",
+       "visualDescription": "right-hand \"（要旨）\" followed by a two-line sentence about SDGs education activities",
+       "expectedAttachToAmountFields": "none"
+      },
+      {
+       "class": "breakdown_table",
+       "visualDescription": "below the summary: calculation rows such as \"1. 事業選定審査謝金 @14,260円 6人 2回 171( 171)\"",
+       "expectedAttachToAmountFields": "none"
+      }
+     ],
+     "hierarchy": {
+      "inputState": "not_available",
+      "reason": "no frozen DocumentHierarchy artifact covers this page; hierarchy-dependent fields are outside v0 evaluation for this sample",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "outside_v0_scope"
+       },
+       "parentOrganizationAssociation": {
+        "status": "outside_v0_scope"
+       }
+      }
+     },
+     "notes": "name glyph details (full-width Latin letters) have medium observation confidence.",
+     "humanReview": "visual-confirmed-except-name-unicode-pending"
+    },
+    {
+     "id": "mext-p876-line-honorarium",
+     "kind": "detail_line",
+     "purpose": [
+      "auxiliary breakdown totals equal the row amounts but must not be the source",
+      "explicit zero difference"
+     ],
+     "visualLocator": {
+      "description": "detail line \"95016-2129-06-0110 諸謝金\"",
+      "approxYPt": 85.8,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "95016-2129-06-0110"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "諸 　　 謝 　　 金"
+       ],
+       "normalized": "諸謝金",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "464",
+       "magnitudeNumeric": 464,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "464",
+       "magnitudeNumeric": 464,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "0",
+       "magnitudeNumeric": 0,
+       "explicitZero": true,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [
+      {
+       "class": "breakdown_table",
+       "visualDescription": "right-hand rows \"1. 事業選定審査謝金 … 171( 171)\", … , \"計 464( 464)\" whose total equals the row amount 464",
+       "expectedAttachToAmountFields": "none"
+      }
+     ],
+     "hierarchy": {
+      "inputState": "not_available",
+      "reason": "no frozen DocumentHierarchy artifact covers this page; hierarchy-dependent fields are outside v0 evaluation for this sample",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "outside_v0_scope"
+       },
+       "parentOrganizationAssociation": {
+        "status": "outside_v0_scope"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    }
+   ]
+  },
+  {
+   "id": "cfa-general-p136",
+   "tier": "boundary-hierarchy-risk",
+   "document": {
+    "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf"
+   },
+   "sourcePage": 136,
+   "printedPageLabel": "132 内（こ）",
+   "pageUnitLabel": {
+    "status": "not_observed",
+    "raw": null,
+    "note": "no unit label is printed on this page; the unit must not be inferred from other pages"
+   },
+   "hierarchyInput": {
+    "available": true,
+    "artifact": "DocumentHierarchy B only (v2-B-obs), experiment cfa-general-detail, physical pages 7-147"
+   },
+   "humanAnchors": [],
+   "notes": "Single-organization document with 3-digit printed page headers; the page shows a request with a △ difference under a risky item.",
+   "targets": [
+    {
+     "id": "cfa-p136-item085",
+     "kind": "item",
+     "purpose": [
+      "item row with blank amounts",
+      "hierarchy: resolved edge whose parent is a strong header-collision node (item->organization must not be resolved)"
+     ],
+     "visualLocator": {
+      "description": "item row \"085 母子家庭等対策費\" above the request 17 row",
+      "approxYPt": 330.1,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "085"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "母 子 家 庭 等 対 策 費"
+       ],
+       "normalized": "母子家庭等対策費",
+       "wrapped": false,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "blank",
+       "magnitudeRaw": null,
+       "magnitudeNumeric": null,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_applicable",
+        "raw": null
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [],
+     "hierarchy": {
+      "inputState": "resolved_risky",
+      "detail": "hierarchy artifact: edge status resolved_by_indent_sequence, but its parent node is a strong header-collision node (the page header \"132 内（こ）\" read as a heading)",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "not_applicable"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_resolved",
+        "acceptableStatuses": [
+         "unresolved",
+         "ambiguous"
+        ],
+        "derivedFrom": "policy (Contract §9), not visual truth"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    },
+    {
+     "id": "cfa-p136-req17",
+     "kind": "request",
+     "purpose": [
+      "explicit △ in the difference cell of a request",
+      "wrapped name",
+      "request->item safe; organization composition not safe",
+      "remark text sits beside the NEXT row"
+     ],
+     "visualLocator": {
+      "description": "request row \"06-06 母子家庭等の自立支援に必要な経費\" (request no. 17; name wraps to 2 lines)",
+      "approxYPt": 343.9,
+      "yToleranceBandPt": 8,
+      "locatorMethod": "visual-estimate-from-130dpi-render"
+     },
+     "humanAnchorRefs": [],
+     "observationConfidence": "high",
+     "rowLocal": {
+      "code": {
+       "status": "resolved",
+       "raw": "06-06"
+      },
+      "name": {
+       "status": "resolved",
+       "rawLines": [
+        "母子家庭等の自立支援に",
+        "必要な経費"
+       ],
+       "normalized": "母子家庭等の自立支援に必要な経費",
+       "wrapped": true,
+       "observationConfidence": "high"
+      },
+      "previousBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "166,416,447",
+       "magnitudeNumeric": 166416447,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "requestedBudget": {
+       "status": "resolved",
+       "magnitudeRaw": "162,816,642",
+       "magnitudeNumeric": 162816642,
+       "explicitZero": false,
+       "sign": {
+        "status": "not_observed",
+        "raw": null
+       }
+      },
+      "difference": {
+       "status": "resolved",
+       "magnitudeRaw": "3,599,805",
+       "magnitudeNumeric": 3599805,
+       "explicitZero": false,
+       "sign": {
+        "status": "resolved",
+        "raw": "△",
+        "position": "at the left edge of the cell, separated from the digits"
+       }
+      }
+     },
+     "expectedSourceClass": {
+      "code": "same_row",
+      "name": "same_row_or_continuation",
+      "previousBudget": "same_row",
+      "requestedBudget": "same_row",
+      "difference": "same_row",
+      "signs": "same_row"
+     },
+     "auxiliary": [
+      {
+       "class": "remark_text",
+       "visualDescription": "「（要 求 要 旨）」and the sentence \"「児童扶養手当法」に基づき、母子家庭の母等に対し、児童扶養手当を支給するために必要な経費である。\" printed beside the 001 児童扶養手当 row just below (physical row != the request row)",
+       "expectedAttachToAmountFields": "none",
+       "note": "association of this remark to the request is a hierarchy/cross-row association; v0 returns a reference only"
+      }
+     ],
+     "hierarchy": {
+      "inputState": "safe_edge_risky_composition",
+      "detail": "request->item edge resolved (no strong header evidence on either endpoint); item->organization hop resolved but its parent is a strong header-collision node, so the composed organization association is not safe",
+      "expected": {
+       "parentItemAssociation": {
+        "status": "resolved",
+        "value": {
+         "code": "085",
+         "name": "母子家庭等対策費"
+        },
+        "derivedFrom": "visual (the heading is the nearest enclosing heading on the page) and policy-safe edge"
+       },
+       "parentOrganizationAssociation": {
+        "status": "not_resolved",
+        "acceptableStatuses": [
+         "unresolved",
+         "ambiguous"
+        ],
+        "derivedFrom": "policy (Contract §9), not visual truth"
+       }
+      }
+     },
+     "humanReview": "visual-confirmed"
+    }
+   ]
+  }
+ ],
+ "humanReview": {
+  "status": "row-local-visual-confirmed-with-exception",
+  "reviewer": "user (a review report on the rendered original PDF pages was received in the session; recorded here, not re-derived)",
+  "method": "high-resolution render of the original PDF pages, visual comparison with the Golden row-local fields; no extracted text used to complete values",
+  "scope": "row-local visual fields of all 20 targets: code, name (as displayed), previous / requested / difference amounts, explicit signs, blank vs explicit zero, source association class",
+  "result": "no correction needed to any amount, sign, blank or zero value; the distinctions that matter were confirmed (METI p10 003: separate △ on the requested and the difference cell, and a separate headcount \"△27人\" in the remark; METI p96 blank previous-year cell vs explicit 0/0/0; こども家庭庁 p136 06-06 difference △3,599,805; MHLW p1268 020 amount cells blank with △ values only in the right-hand tables)",
+  "exceptions": [
+   {
+    "target": "mext-p876-line015",
+    "field": "name",
+    "status": "displayed-text-confirmed; Unicode representation pending",
+    "detail": "The displayed name \"ＳＤＧｓ達成の担い手育成（ＥＳＤ）推進事業\" matches. Whether \"ＳＤＧｓ\"/\"ＥＳＤ\" are full-width code points or half-width characters drawn with extra spacing cannot be decided from visual review alone, so observationConfidence stays medium. The evaluator must compare names after whitespace removal and must not require the full-width code points until this is settled."
+   }
+  ],
+  "excludedFromHumanVisualReview": "hierarchy.expected.* (parentItemAssociation / parentOrganizationAssociation): policy expectations derived from the frozen DocumentHierarchy artifact and Contract section 9 (derivedFrom says so); they are not visual truth and are not part of this review",
+  "goldenValuesChanged": false
+ }
+}
