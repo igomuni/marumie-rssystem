@@ -2,6 +2,12 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_0615_DocumentHierarchy_A2_最終実験_結果.md](20261003_0615_DocumentHierarchy_A2_最終実験_結果.md) — DocumentHierarchy A2 最終実験の結果。A2=STOP（防衛省 exact 34/96→96/96 だが、こども家庭庁は単一組織で depth 37/38→0/38）、統合確認は実行せず最終採用は B only。DocumentHierarchy 探索を CLOSED、FieldResolver 引き継ぎ契約を記載
+- [20261003_0558_rs_system_custom_abstraction_design_memo.md](20261003_0558_rs_system_custom_abstraction_design_memo.md) — RSシステム設計メモ。汎用ライブラリ（サンキー図・PDF抽出など）から必要な抽象化を自前で持つ方針の整理
+- [20261003_0557_DocumentHierarchy_A2_実験計画.md](20261003_0557_DocumentHierarchy_A2_実験計画.md) — v2-A の STOP を受けた A2（page-edge を domain にした header identity）の事前登録。primary rule を1つに固定、development/negative/regression、封印した holdout（防衛省・こども家庭庁）、成功条件・stop。実装・実行はしない
+- [20261003_0555_DocumentHierarchy_v2B_追加Holdout_結果.md](20261003_0555_DocumentHierarchy_v2B_追加Holdout_結果.md) — v2-B（singleton root の lattice-supported placement）の追加holdout（MLIT復興特会）。B-HOLDOUT-PASS→CONFIRMED-WITH-SCOPE（exact 12/20→20/20・depth 0/21→21/21・false 0・regression 0）。診断・適用範囲・限界を記録
+- [20261003_0537_DocumentHierarchy_v2_FailureIsolation_結果.md](20261003_0537_DocumentHierarchy_v2_FailureIsolation_結果.md) — DocumentHierarchy v2 failure isolation の結果。A(ヘッダ衝突)=STOP（holdoutで本物の要求を1件誤除外）、B(single-organization lattice)=GO、AB=STOP。v1 baseline は #364 と完全一致、60 artifact 決定的
+- [20261003_0528_DocumentHierarchy_v2_FailureIsolation_実験計画.md](20261003_0528_DocumentHierarchy_v2_FailureIsolation_実験計画.md) — v1の推論失敗2つ（ページヘッダ衝突・single-organization）を独立仮説A/Bとして切り分ける実験の契約。variant・成功条件・stop・holdout（環境省/農水省復興特会）とGTをv2実装前に固定
 - [20261002_2222_DocumentHierarchy_v1_他省庁Generalization_結果.md](20261002_2222_DocumentHierarchy_v1_他省庁Generalization_結果.md) — DocumentHierarchy v1（frozen）をMETI・MEXTに当てた結果。全体PARTIAL。MEXT明細は46/46、METI明細は3桁頁番号のページヘッダが余分な根を作りlevelがずれる。single-organization感度は再現。v2 candidate記録
 - [20261002_2216_DocumentHierarchy_v1_他省庁Generalization_実験計画.md](20261002_2216_DocumentHierarchy_v1_他省庁Generalization_実験計画.md) — DocumentHierarchy v1（frozen）を METI・MEXT に当てる out-of-sample 実験の契約。範囲・GT（METI 87/MEXT 186ノード）・判定基準・感度範囲を v1 実行前に固定
 - [20261002_2149_MHLW文書階層PoC_結果.md](20261002_2149_MHLW文書階層PoC_結果.md) — MHLW文書階層PoCのv1結果。総表+明細見出しから組織→項→要求の親エッジを拡張GT37ノードで dev/holdout とも100%復元（false parent 0）。評価側照合の修正・感度診断・限界・GO判断を記録

@@ -97,7 +97,11 @@ export type SummaryMatchMode = 'pageRef' | 'codeName';
 export interface MatchOptions {
   nameOnly?: boolean;
   ordinalTiebreak?: boolean;
+  /** v2-experimental の hierarchyEligibility==='excluded' のnodeも照合の候補に含める（既定は含めない。「GTのnodeが誤って除外されていないか」の検査用） */
+  includeExcluded?: boolean;
 }
+
+const isExcluded = (n: DocumentHierarchyNodeObservation): boolean => (n as unknown as { hierarchyEligibility?: string }).hierarchyEligibility === 'excluded';
 
 export function matchGtNodes(result: DocumentHierarchyResult, gt: GtNode[], pageOffset: number, nameTiebreak = true, summaryMode: SummaryMatchMode = 'pageRef', opts: MatchOptions = {}): MatchResult {
   const matched = new Map<string, DocumentHierarchyNodeObservation>();
@@ -105,6 +109,7 @@ export function matchGtNodes(result: DocumentHierarchyResult, gt: GtNode[], page
   for (const g of gt) {
     const wantShape = g.requestNo ? 'request_no_then_code' : 'code3_then_text';
     const cands = result.nodes.filter(n => {
+      if (!opts.includeExcluded && isExcluded(n)) return false;
       if (n.rowShape !== wantShape) return false;
       if (normCode(n.observedCodeParts.code) !== normCode(g.code)) return false;
       if (g.requestNo && n.observedCodeParts.requestNo !== g.requestNo) return false;
@@ -218,4 +223,51 @@ export function verdictOf(c: Counts): Verdict {
   if (exact >= 0.9 && fals <= 0.05 && depth >= 0.9) return 'SUCCESS';
   if (exact >= 0.5 && fals <= 0.1) return 'PARTIAL';
   return 'FAIL';
+}
+
+/** GTのnodeに対応する推論nodeのうち、hierarchyEligibility==='excluded' になっているものの数（本物の見出しを消していないかの検査。v1 artifactでは常に0） */
+export function countExcludedGtMatches(result: DocumentHierarchyResult, gt: GtNode[], pageOffset: number, summaryMode: SummaryMatchMode = 'pageRef', opts: MatchOptions = {}): { excluded: number; keys: string[] } {
+  const m = matchGtNodes(result, gt, pageOffset, true, summaryMode, { ...opts, includeExcluded: true });
+  const keys = [...m.matched.entries()].filter(([, n]) => isExcluded(n)).map(([k]) => k);
+  return { excluded: keys.length, keys };
+}
+
+export type BHoldoutClass = 'B-HOLDOUT-PASS' | 'B-HOLDOUT-OUT-OF-SCOPE' | 'B-HOLDOUT-FAIL' | 'B-HOLDOUT-NOT-APPLICABLE';
+export type BEvidenceLabel = 'CONFIRMED-WITH-SCOPE' | 'GO-WITH-COVERAGE-LIMIT' | 'REOPEN' | 'NO-EVIDENCE';
+
+/**
+ * v2-B の追加holdoutの分類（事前に固定。規則Bは変更しない）。
+ * - PASS: 適用条件が成立しBが発火し、根が level 1 に正しく置かれ、exact・depthが改善し、false parent が増えず、通常rangeのregressionが無い。
+ * - OUT-OF-SCOPE: single-organization で singleton root は存在するが、事前定義の階段evidence（run 3クラスタ以上・1段分の差）が不足してBが発火せず、v2-B の結果は v1 と同じ。B の失敗ではない。
+ * - NOT-APPLICABLE: singleton root 候補が無い（根が支持で placed 済み）等、Bの適用対象ではない。
+ * - FAIL: 適用条件が成立しているのに根の誤配置・false parent 増加・depth 非改善・正常hierarchyの破壊が起きる、またはBが発火しないのに結果が v1 と異なる。
+ */
+export function classifyBHoldout(i: {
+  singleOrganization: boolean;
+  activated: boolean;
+  lastReason: string | null;
+  v1: Counts;
+  v2b: Counts;
+  rootLevelV2b: number | null;
+  regressionUnchanged: boolean;
+}): { classification: BHoldoutClass; label: BEvidenceLabel; reasons: string[] } {
+  const reasons: string[] = [];
+  const same = JSON.stringify([i.v1.exact, i.v1.falseParent, i.v1.unresolved, i.v1.childNotFound, i.v1.ancestorExact, i.v1.depthExact, i.v1.nodesMatched]) ===
+    JSON.stringify([i.v2b.exact, i.v2b.falseParent, i.v2b.unresolved, i.v2b.childNotFound, i.v2b.ancestorExact, i.v2b.depthExact, i.v2b.nodesMatched]);
+  if (!i.regressionUnchanged) reasons.push('regression: a normal range changed');
+  if (i.activated) {
+    if (i.rootLevelV2b !== 1) reasons.push(`root not placed at level 1 (level=${i.rootLevelV2b})`);
+    if (i.v2b.falseParent > i.v1.falseParent) reasons.push('false parent increased');
+    if (i.v2b.exact < i.v1.exact) reasons.push('exact parent decreased');
+    if (!(i.v2b.depthExact.x > i.v1.depthExact.x)) reasons.push('depth did not improve');
+    if (reasons.length === 0) return { classification: 'B-HOLDOUT-PASS', label: 'CONFIRMED-WITH-SCOPE', reasons: ['activated; root at level 1; exact/depth improved; no false-parent increase; no regression'] };
+    return { classification: 'B-HOLDOUT-FAIL', label: 'REOPEN', reasons };
+  }
+  if (!same) reasons.push('B did not activate but results differ from v1');
+  if (reasons.length > 0) return { classification: 'B-HOLDOUT-FAIL', label: 'REOPEN', reasons };
+  if (!i.singleOrganization) return { classification: 'B-HOLDOUT-NOT-APPLICABLE', label: 'NO-EVIDENCE', reasons: ['not a single-organization range'] };
+  if (i.lastReason === 'staircase_too_short' || i.lastReason === 'gap_to_run_is_not_one_step') {
+    return { classification: 'B-HOLDOUT-OUT-OF-SCOPE', label: 'GO-WITH-COVERAGE-LIMIT', reasons: [`predefined staircase evidence insufficient (${i.lastReason}); B did not activate; v2-B == v1`] };
+  }
+  return { classification: 'B-HOLDOUT-NOT-APPLICABLE', label: 'NO-EVIDENCE', reasons: [`no singleton-root candidate for B (${i.lastReason ?? 'n/a'})`] };
 }

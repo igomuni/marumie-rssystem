@@ -1,0 +1,79 @@
+{
+ "schemaVersion": "budget-request-document-hierarchy-a2-holdout-candidates/v1",
+ "purpose": "Sealed holdout candidates for the A2 header-identity experiment. Outer metadata only. These documents have NOT been opened for header strings, x/y, indentation clusters, heading candidates, or v1/v2 outputs. GT for them is created later, from their own table of contents, BEFORE any A2 output (separate commit).",
+ "selected": [
+  {
+   "id": "mod-general-detail",
+   "ministry": "防衛省",
+   "account": "一般会計",
+   "fiscalYear": 2024,
+   "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "pageCount": 540,
+   "fileBytes": 1091689,
+   "status": "sealed",
+   "strict": true,
+   "rationale": "概算要求書（manifest登録）。540頁で、物理p104以降に3桁の印字頁が現れうる。development文書（METI・環境省・農水省復興特会・MLIT復興特会）とは別省庁。",
+   "inspectedBeforeSealing": "manifest metadata, pdfinfo page count, file size, count of （組織） lines on pages 1-6 (=6; outer TOC-level count from the earlier candidate survey)",
+   "notInspected": "header strings, any body-page text, x/y, indentation clusters, heading candidates, v1/v2 output, TOC content beyond the organization-line count"
+  },
+  {
+   "id": "cfa-general-detail",
+   "ministry": "こども家庭庁",
+   "account": "一般会計",
+   "fiscalYear": 2024,
+   "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pageCount": 147,
+   "fileBytes": 284727,
+   "status": "sealed",
+   "strict": true,
+   "rationale": "概算要求書（manifest登録）。147頁で、物理p104以降に3桁の印字頁が現れうる。development文書とは別省庁。",
+   "inspectedBeforeSealing": "manifest metadata, pdfinfo page count, file size, count of （組織） lines on pages 1-6 (=2)",
+   "notInspected": "header strings, any body-page text, x/y, indentation clusters, heading candidates, v1/v2 output, TOC content beyond the organization-line count"
+  }
+ ],
+ "reserves": [
+  {
+   "ministry": "公正取引委員会",
+   "canonicalUrl": "https://www.jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "pageCount": 140,
+   "note": "unobserved reserve; use only if a selected holdout cannot be obtained"
+  },
+  {
+   "ministry": "警察庁（一般会計）",
+   "canonicalUrl": "https://www.npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "pageCount": 112,
+   "note": "unobserved reserve; few 3-digit-header pages (physical p104-112)"
+  }
+ ],
+ "notEligibleAsStrictHoldout": [
+  {
+   "ministry": "外務省",
+   "reason": "page-110/111 first lines (header strings) were seen in the A-holdout candidate survey of the previous task"
+  },
+  {
+   "ministry": "農林水産省（本省・一般会計）",
+   "reason": "same"
+  },
+  {
+   "ministry": "総務省（一般会計）",
+   "reason": "same"
+  },
+  {
+   "ministry": "裁判所",
+   "reason": "same"
+  },
+  {
+   "ministry": "消費者庁（内閣府）",
+   "reason": "same"
+  },
+  {
+   "ministry": "環境省",
+   "reason": "development document of v2-A (A-holdout of the previous task, already used)"
+  },
+  {
+   "ministry": "METI / 農水省復興特会 / MLIT復興特会 / MHLW / MEXT",
+   "reason": "development / regression documents"
+  }
+ ],
+ "excludedByRule": "MAFF復興特会・METI・環境省は development のため A2 holdout として再利用しない。MLIT復興特会は B の holdout で、v2-A の誤除外（本文行1件）を開示した上で A2 の development（negative）として扱い、A2 holdout としては使わない。"
+}

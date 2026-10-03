@@ -421,6 +421,34 @@ v1 を他PDFに当てて分かった、v1 の MHLW 固有だった仮定（修�
 - **single-organization 感度は再現**: 範囲内の根見出しが1件だと根のクラスタが unplaced となり level がずれる（METI 組織035のみ・MEXT 組織030のみ）。
 - 評価側の照合は、折返しで途中までしか印字されない名称・組織名で始まる項名・同一コードかつ同名の項（MEXT の `060`）で曖昧になる。事前固定の照合と、事後に追加した診断用の照合（`posthoc`）を分けて記録している。
 
+#### DocumentHierarchy v2 failure isolation（v2-experimental。v1 は変更しない）
+
+```bash
+npm run pipeline:v2:extract:budget-request-document-hierarchy-v2 -- 2024 [--group=development|regression|holdout]   # v1 / v2-off-off / v2-A / v2-B / v2-AB を別artifactに出力（GTを読まない）
+npm run pipeline:v2:evaluate:budget-request-document-hierarchy-v2 -- 2024 --tag=all                                 # 評価専用GTと突き合わせ、事前登録の成功条件を機械判定
+```
+
+出力: `data/work/budget-request-document-hierarchy/{year}/v2-failure-isolation/{variant}/{id}.json`（schema `budget-request-document-hierarchy-poc/v2-experimental`。`data/derived` へは昇格しない）。実装は `lib/budget-request-document-hierarchy-v2.ts`（`headerCollisionHandling` / `singletonRootPlacement` の2オプション。off/off は v1 と同値）。
+
+v1 の推論失敗2つを独立した仮説として切り分けた実験の結果:
+
+- **A（ヘッダ衝突）**: ページ上下端に反復する page-header 型の行を、GT-free evidence（最上/最下行・y帯の反復・頁番号の連番）の2種以上で見出し候補から除外し、理由を残す。development（METI）と holdout（環境省）では v1 の level ずれを解消したが、holdout（農水省復興特会）で**本物の要求を1件誤除外**した（頁番号の証拠をページ端の行に限定せず、要求番号の数字が物理頁−オフセットと偶然一致）。事前登録の stop condition に該当し **STOP**（v2-A は採用しない）。
+- **B（single-organization）**: 支持が少ない根のクラスタを、document-local な等間隔階段（run 3クラスタ以上、1段分の差）を根拠にだけ placed にする（`minClusterSupport` は下げない）。development 3件と holdout で根が placed になり depth が回復し、regression は v1 と完全一致。**GO**（単独で成立。ただしヘッダの根レベルが左にある文書では B 単独は効かず、A 相当の対策が前提）。
+- **AB**: A が STOP のため **STOP**。
+
+**v2-B の追加 holdout（MLIT 復興特会、10頁・組織1つ）**: 規則Bは発火し（根の右に規則的な階段が4クラスタ、1段分の差）、exact 12/20→20/20・depth 0/21→21/21・unresolved 8→0、false parent 0、通常rangeはv1と一致（`B-HOLDOUT-PASS` → `CONFIRMED-WITH-SCOPE`）。B は「single-organization solver」ではなく、**singleton root + 十分な支持を持つ indentation staircase に対する安全な placement rule**として適用範囲を持つ（階段が少ない小文書では発火せず OUT-OF-SCOPE になりうる）。判断過程は artifact の `latticeDiagnostics`（required/observed の run 長・隣接差・正規化gap・理由）に残る。
+
+**A2（page-edge を domain にした header identity）**: 事前登録のみ。除外は「ページ端の行 かつ 頁番号の正準な10進表記と一致する token を持つ かつ y 帯が過半数のページで反復」の全てが成立したときだけ。実装・実行・holdout の観測は未実施。holdout 候補（防衛省・こども家庭庁）は `tests/fixtures/budget-request-document-hierarchy/2024/a2-holdout-candidates.json` に封印状態で記録。
+
+#### DocumentHierarchy 探索の終了（A2 最終実験）
+
+**DocumentHierarchy exploration status: CLOSED。最終採用: B only**（`singletonRootPlacement: 'lattice-supported'` + header collision は観測のみ `headerCollisionHandling: 'observe-only'`）。
+
+- A2（page-edge-domain header identity。ページ端の行 かつ 頁番号の正準な10進表記のtoken かつ y帯の過半数反復）: development は GO（METI 2行・環境省45行を除外、農水省・MLITの誤除外0、regression は v1 一致）。strict holdout は防衛省が INFORMATIVE-PASS（exact 34/96→96/96、depth 0/99→99/99、GT除外0）、こども家庭庁が NON-INFORMATIVE-FAIL（組織が1つの文書で、v1 が偶然正しかった depth 37/38 が、ヘッダ除外後に根の未配置が露出して 0/38）。事前登録の基準で **A2 = STOP**（規則は変更せず、A3 は作らない）。A2 の除外判断自体の誤り（GTノードの誤除外）は0。B+A2 の統合確認は実行していない。
+- **unresolved / level_gap は有効な出力**。header collision のある文書では level のずれと、ヘッダ行を親とする `resolved` の false parent（こども家庭庁 6/37）が残りうる。
+- **FieldResolver は欠けた階層の親を推測してはならない**（nearest parent で埋める・コード/名称から推測・GT から補完・level_gap の圧縮・見かけ上 resolved への変換はしない）。artifact の `headerCollisionObservation` / `hierarchyResolutionContext`（strong header evidence = 2種以上・ページ端を含む）、`edges[].status`、`indentClusters[].placementBasis` / `latticeDiagnostics` を判別に使う。観測（evidence）と decision（edge の status）は分離されている。
+- 再開条件: FieldResolver / end-to-end の evidence から「再開する価値」が別途示されること。Future Experiment C（`printedPageRefCandidate` の4桁限定）は自動的に次タスクにしない。
+
 ## 8. V1/V2比較方法
 
 ```bash

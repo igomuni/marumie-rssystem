@@ -1,0 +1,2965 @@
+{
+ "schemaVersion": "budget-request-document-hierarchy-a2-development-result/v1",
+ "purpose": "Compact record of the A2 development-stage evaluation (pre-registered criteria applied mechanically). Evaluation-only data; regenerate with the evaluate CLI.",
+ "a2Rule": {
+  "headerCollisionHandling": "page-edge-domain",
+  "singletonRootPlacement": "off",
+  "conditions": [
+   "page_edge_row (domain)",
+   "page_number_sequence: digit-only token equal to canonical decimal string of (physicalPage + offset)",
+   "vertical_repetition: y-band has rows on more than half of the pages"
+  ],
+  "thresholds": {
+   "majority": "> 50% of pages",
+   "minPages": 3,
+   "yBandTolerance": "TableGeometry row-clustering tolerance",
+   "pageNumberCanonicalForm": "0|[1-9][0-9]*"
+  }
+ },
+ "primaryMatcher": "posthoc (defined in #364; same matcher for all variants)",
+ "developmentJudgment": "GO",
+ "checks": {
+  "positive meti-detail: A2 excluded rows == v2-A excluded rows (preregistered prediction P1)": true,
+  "positive meti-detail: metrics == v2-A": true,
+  "positive env-detail: A2 excluded rows == v2-A excluded rows (preregistered prediction P1)": true,
+  "positive env-detail: metrics == v2-A": true,
+  "negative maff-fukko-detail: no erroneous exclusion (excluded = 0)": true,
+  "negative maff-fukko-detail: metrics == v1 (P2)": true,
+  "negative mlit-fukko-detail: no erroneous exclusion (excluded = 0)": true,
+  "negative mlit-fukko-detail: metrics == v1 (P2)": true,
+  "regression mhlw-summary: A2 == v1 (P3)": true,
+  "regression mhlw-detail: A2 == v1 (P3)": true,
+  "regression meti-summary: A2 == v1 (P3)": true,
+  "regression mext-summary: A2 == v1 (P3)": true,
+  "regression mext-detail: A2 == v1 (P3)": true,
+  "regression meti-detail-pre-header: A2 == v1 (P3)": true,
+  "no GT hierarchy node excluded by A2 (all experiments)": true,
+  "no false-parent increase vs v1 (A2, all experiments)": true,
+  "B-only metrics frozen: v2-B-obs == v2-B (observe-only does not change decisions)": true
+ },
+ "experiments": {
+  "meti-detail": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 80,
+     "falseParent": 0,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      78,
+      82
+     ],
+     "depthExact": [
+      0,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 61,
+     "falseParent": 19,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      25,
+      82
+     ],
+     "depthExact": [
+      0,
+      87
+     ],
+     "nodesMatched": [
+      86,
+      87
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 82,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      82,
+      82
+     ],
+     "depthExact": [
+      87,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 63,
+     "falseParent": 19,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      29,
+      82
+     ],
+     "depthExact": [
+      86,
+      87
+     ],
+     "nodesMatched": [
+      86,
+      87
+     ]
+    },
+    "excludedCount": 2,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": [
+     "detail-p104-r0",
+     "detail-p106-r0"
+    ]
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 82,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      82,
+      82
+     ],
+     "depthExact": [
+      87,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 63,
+     "falseParent": 19,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      29,
+      82
+     ],
+     "depthExact": [
+      86,
+      87
+     ],
+     "nodesMatched": [
+      86,
+      87
+     ]
+    },
+    "excludedCount": 2,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": [
+     "detail-p104-r0",
+     "detail-p106-r0"
+    ]
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 80,
+     "falseParent": 0,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      78,
+      82
+     ],
+     "depthExact": [
+      0,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 61,
+     "falseParent": 19,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      25,
+      82
+     ],
+     "depthExact": [
+      0,
+      87
+     ],
+     "nodesMatched": [
+      86,
+      87
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 80,
+     "falseParent": 0,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      78,
+      82
+     ],
+     "depthExact": [
+      0,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 61,
+     "falseParent": 19,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      25,
+      82
+     ],
+     "depthExact": [
+      0,
+      87
+     ],
+     "nodesMatched": [
+      86,
+      87
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "env-detail": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 81,
+     "exact": 58,
+     "falseParent": 0,
+     "unresolved": 23,
+     "childNotFound": 0,
+     "ancestorExact": [
+      36,
+      81
+     ],
+     "depthExact": [
+      0,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 81,
+     "exact": 58,
+     "falseParent": 0,
+     "unresolved": 23,
+     "childNotFound": 0,
+     "ancestorExact": [
+      36,
+      81
+     ],
+     "depthExact": [
+      0,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 81,
+     "exact": 81,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      81,
+      81
+     ],
+     "depthExact": [
+      84,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 81,
+     "exact": 81,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      81,
+      81
+     ],
+     "depthExact": [
+      84,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "excludedCount": 45,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": [
+     "detail-p104-r0",
+     "detail-p106-r0",
+     "detail-p108-r0",
+     "detail-p110-r0",
+     "detail-p112-r0",
+     "detail-p114-r0",
+     "detail-p116-r0",
+     "detail-p118-r0",
+     "detail-p120-r0",
+     "detail-p122-r0",
+     "detail-p124-r0",
+     "detail-p126-r0",
+     "detail-p128-r0",
+     "detail-p130-r0",
+     "detail-p132-r0",
+     "detail-p134-r0",
+     "detail-p136-r0",
+     "detail-p138-r0",
+     "detail-p140-r0",
+     "detail-p142-r0",
+     "detail-p144-r0",
+     "detail-p146-r0",
+     "detail-p148-r0",
+     "detail-p150-r0",
+     "detail-p152-r0",
+     "detail-p154-r0",
+     "detail-p156-r0",
+     "detail-p158-r0",
+     "detail-p160-r0",
+     "detail-p162-r0",
+     "detail-p164-r0",
+     "detail-p166-r0",
+     "detail-p168-r0",
+     "detail-p170-r0",
+     "detail-p172-r0",
+     "detail-p174-r0",
+     "detail-p176-r0",
+     "detail-p178-r0",
+     "detail-p180-r0",
+     "detail-p182-r0",
+     "detail-p184-r0",
+     "detail-p186-r0",
+     "detail-p188-r0",
+     "detail-p190-r0",
+     "detail-p192-r0"
+    ]
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 81,
+     "exact": 81,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      81,
+      81
+     ],
+     "depthExact": [
+      84,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 81,
+     "exact": 81,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      81,
+      81
+     ],
+     "depthExact": [
+      84,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "excludedCount": 45,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": [
+     "detail-p104-r0",
+     "detail-p106-r0",
+     "detail-p108-r0",
+     "detail-p110-r0",
+     "detail-p112-r0",
+     "detail-p114-r0",
+     "detail-p116-r0",
+     "detail-p118-r0",
+     "detail-p120-r0",
+     "detail-p122-r0",
+     "detail-p124-r0",
+     "detail-p126-r0",
+     "detail-p128-r0",
+     "detail-p130-r0",
+     "detail-p132-r0",
+     "detail-p134-r0",
+     "detail-p136-r0",
+     "detail-p138-r0",
+     "detail-p140-r0",
+     "detail-p142-r0",
+     "detail-p144-r0",
+     "detail-p146-r0",
+     "detail-p148-r0",
+     "detail-p150-r0",
+     "detail-p152-r0",
+     "detail-p154-r0",
+     "detail-p156-r0",
+     "detail-p158-r0",
+     "detail-p160-r0",
+     "detail-p162-r0",
+     "detail-p164-r0",
+     "detail-p166-r0",
+     "detail-p168-r0",
+     "detail-p170-r0",
+     "detail-p172-r0",
+     "detail-p174-r0",
+     "detail-p176-r0",
+     "detail-p178-r0",
+     "detail-p180-r0",
+     "detail-p182-r0",
+     "detail-p184-r0",
+     "detail-p186-r0",
+     "detail-p188-r0",
+     "detail-p190-r0",
+     "detail-p192-r0"
+    ]
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 81,
+     "exact": 58,
+     "falseParent": 0,
+     "unresolved": 23,
+     "childNotFound": 0,
+     "ancestorExact": [
+      36,
+      81
+     ],
+     "depthExact": [
+      0,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 81,
+     "exact": 58,
+     "falseParent": 0,
+     "unresolved": 23,
+     "childNotFound": 0,
+     "ancestorExact": [
+      36,
+      81
+     ],
+     "depthExact": [
+      0,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 81,
+     "exact": 58,
+     "falseParent": 0,
+     "unresolved": 23,
+     "childNotFound": 0,
+     "ancestorExact": [
+      36,
+      81
+     ],
+     "depthExact": [
+      0,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 81,
+     "exact": 58,
+     "falseParent": 0,
+     "unresolved": 23,
+     "childNotFound": 0,
+     "ancestorExact": [
+      36,
+      81
+     ],
+     "depthExact": [
+      0,
+      84
+     ],
+     "nodesMatched": [
+      84,
+      84
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "maff-fukko-detail": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 27,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      35
+     ],
+     "depthExact": [
+      0,
+      36
+     ],
+     "nodesMatched": [
+      36,
+      36
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 27,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      35
+     ],
+     "depthExact": [
+      0,
+      36
+     ],
+     "nodesMatched": [
+      36,
+      36
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 26,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 1,
+     "ancestorExact": [
+      0,
+      35
+     ],
+     "depthExact": [
+      0,
+      36
+     ],
+     "nodesMatched": [
+      35,
+      36
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 26,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 1,
+     "ancestorExact": [
+      0,
+      35
+     ],
+     "depthExact": [
+      0,
+      36
+     ],
+     "nodesMatched": [
+      35,
+      36
+     ]
+    },
+    "excludedCount": 1,
+    "gtNodesExcluded": 1,
+    "excludedNodeIds": [
+     "detail-p13-r12"
+    ]
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 27,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      35
+     ],
+     "depthExact": [
+      0,
+      36
+     ],
+     "nodesMatched": [
+      36,
+      36
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 27,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      35
+     ],
+     "depthExact": [
+      0,
+      36
+     ],
+     "nodesMatched": [
+      36,
+      36
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      36,
+      36
+     ],
+     "nodesMatched": [
+      36,
+      36
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      36,
+      36
+     ],
+     "nodesMatched": [
+      36,
+      36
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      36,
+      36
+     ],
+     "nodesMatched": [
+      36,
+      36
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      36,
+      36
+     ],
+     "nodesMatched": [
+      36,
+      36
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "mlit-fukko-detail": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 20,
+     "exact": 12,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      20
+     ],
+     "depthExact": [
+      0,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 20,
+     "exact": 12,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      20
+     ],
+     "depthExact": [
+      0,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 20,
+     "exact": 12,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      20
+     ],
+     "depthExact": [
+      0,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 20,
+     "exact": 12,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      20
+     ],
+     "depthExact": [
+      0,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "excludedCount": 1,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": [
+     "detail-p9-r18"
+    ]
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 20,
+     "exact": 12,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      20
+     ],
+     "depthExact": [
+      0,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 20,
+     "exact": 12,
+     "falseParent": 0,
+     "unresolved": 8,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      20
+     ],
+     "depthExact": [
+      0,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 20,
+     "exact": 20,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      20,
+      20
+     ],
+     "depthExact": [
+      21,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 20,
+     "exact": 20,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      20,
+      20
+     ],
+     "depthExact": [
+      21,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 20,
+     "exact": 20,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      20,
+      20
+     ],
+     "depthExact": [
+      21,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 20,
+     "exact": 20,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      20,
+      20
+     ],
+     "depthExact": [
+      21,
+      21
+     ],
+     "nodesMatched": [
+      21,
+      21
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "mhlw-summary": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "mhlw-detail": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 35,
+     "exact": 35,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      35,
+      35
+     ],
+     "depthExact": [
+      37,
+      37
+     ],
+     "nodesMatched": [
+      37,
+      37
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "meti-summary": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 82,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      82,
+      82
+     ],
+     "depthExact": [
+      87,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 34,
+     "falseParent": 14,
+     "unresolved": 0,
+     "childNotFound": 34,
+     "ancestorExact": [
+      19,
+      82
+     ],
+     "depthExact": [
+      52,
+      87
+     ],
+     "nodesMatched": [
+      52,
+      87
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 82,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      82,
+      82
+     ],
+     "depthExact": [
+      87,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 34,
+     "falseParent": 14,
+     "unresolved": 0,
+     "childNotFound": 34,
+     "ancestorExact": [
+      19,
+      82
+     ],
+     "depthExact": [
+      52,
+      87
+     ],
+     "nodesMatched": [
+      52,
+      87
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 82,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      82,
+      82
+     ],
+     "depthExact": [
+      87,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 34,
+     "falseParent": 14,
+     "unresolved": 0,
+     "childNotFound": 34,
+     "ancestorExact": [
+      19,
+      82
+     ],
+     "depthExact": [
+      52,
+      87
+     ],
+     "nodesMatched": [
+      52,
+      87
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 82,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      82,
+      82
+     ],
+     "depthExact": [
+      87,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 34,
+     "falseParent": 14,
+     "unresolved": 0,
+     "childNotFound": 34,
+     "ancestorExact": [
+      19,
+      82
+     ],
+     "depthExact": [
+      52,
+      87
+     ],
+     "nodesMatched": [
+      52,
+      87
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 82,
+     "exact": 82,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      82,
+      82
+     ],
+     "depthExact": [
+      87,
+      87
+     ],
+     "nodesMatched": [
+      87,
+      87
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 82,
+     "exact": 34,
+     "falseParent": 14,
+     "unresolved": 0,
+     "childNotFound": 34,
+     "ancestorExact": [
+      19,
+      82
+     ],
+     "depthExact": [
+      52,
+      87
+     ],
+     "nodesMatched": [
+      52,
+      87
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "mext-summary": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 182,
+     "exact": 182,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      182,
+      182
+     ],
+     "depthExact": [
+      186,
+      186
+     ],
+     "nodesMatched": [
+      186,
+      186
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 182,
+     "exact": 62,
+     "falseParent": 40,
+     "unresolved": 0,
+     "childNotFound": 80,
+     "ancestorExact": [
+      36,
+      182
+     ],
+     "depthExact": [
+      105,
+      186
+     ],
+     "nodesMatched": [
+      105,
+      186
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 182,
+     "exact": 182,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      182,
+      182
+     ],
+     "depthExact": [
+      186,
+      186
+     ],
+     "nodesMatched": [
+      186,
+      186
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 182,
+     "exact": 62,
+     "falseParent": 40,
+     "unresolved": 0,
+     "childNotFound": 80,
+     "ancestorExact": [
+      36,
+      182
+     ],
+     "depthExact": [
+      105,
+      186
+     ],
+     "nodesMatched": [
+      105,
+      186
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 182,
+     "exact": 182,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      182,
+      182
+     ],
+     "depthExact": [
+      186,
+      186
+     ],
+     "nodesMatched": [
+      186,
+      186
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 182,
+     "exact": 62,
+     "falseParent": 40,
+     "unresolved": 0,
+     "childNotFound": 80,
+     "ancestorExact": [
+      36,
+      182
+     ],
+     "depthExact": [
+      105,
+      186
+     ],
+     "nodesMatched": [
+      105,
+      186
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 182,
+     "exact": 182,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      182,
+      182
+     ],
+     "depthExact": [
+      186,
+      186
+     ],
+     "nodesMatched": [
+      186,
+      186
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 182,
+     "exact": 62,
+     "falseParent": 40,
+     "unresolved": 0,
+     "childNotFound": 80,
+     "ancestorExact": [
+      36,
+      182
+     ],
+     "depthExact": [
+      105,
+      186
+     ],
+     "nodesMatched": [
+      105,
+      186
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 182,
+     "exact": 182,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      182,
+      182
+     ],
+     "depthExact": [
+      186,
+      186
+     ],
+     "nodesMatched": [
+      186,
+      186
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 182,
+     "exact": 62,
+     "falseParent": 40,
+     "unresolved": 0,
+     "childNotFound": 80,
+     "ancestorExact": [
+      36,
+      182
+     ],
+     "depthExact": [
+      105,
+      186
+     ],
+     "nodesMatched": [
+      105,
+      186
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "mext-detail": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 46,
+     "exact": 46,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      46,
+      46
+     ],
+     "depthExact": [
+      48,
+      48
+     ],
+     "nodesMatched": [
+      48,
+      48
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "meti-detail-pre-header": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 78,
+     "exact": 78,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      78,
+      78
+     ],
+     "depthExact": [
+      83,
+      83
+     ],
+     "nodesMatched": [
+      83,
+      83
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 78,
+     "exact": 59,
+     "falseParent": 19,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      25,
+      78
+     ],
+     "depthExact": [
+      82,
+      83
+     ],
+     "nodesMatched": [
+      82,
+      83
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 78,
+     "exact": 78,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      78,
+      78
+     ],
+     "depthExact": [
+      83,
+      83
+     ],
+     "nodesMatched": [
+      83,
+      83
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 78,
+     "exact": 59,
+     "falseParent": 19,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      25,
+      78
+     ],
+     "depthExact": [
+      82,
+      83
+     ],
+     "nodesMatched": [
+      82,
+      83
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 78,
+     "exact": 78,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      78,
+      78
+     ],
+     "depthExact": [
+      83,
+      83
+     ],
+     "nodesMatched": [
+      83,
+      83
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 78,
+     "exact": 59,
+     "falseParent": 19,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      25,
+      78
+     ],
+     "depthExact": [
+      82,
+      83
+     ],
+     "nodesMatched": [
+      82,
+      83
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 78,
+     "exact": 78,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      78,
+      78
+     ],
+     "depthExact": [
+      83,
+      83
+     ],
+     "nodesMatched": [
+      83,
+      83
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 78,
+     "exact": 59,
+     "falseParent": 19,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      25,
+      78
+     ],
+     "depthExact": [
+      82,
+      83
+     ],
+     "nodesMatched": [
+      82,
+      83
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 78,
+     "exact": 78,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      78,
+      78
+     ],
+     "depthExact": [
+      83,
+      83
+     ],
+     "nodesMatched": [
+      83,
+      83
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 78,
+     "exact": 59,
+     "falseParent": 19,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      25,
+      78
+     ],
+     "depthExact": [
+      82,
+      83
+     ],
+     "nodesMatched": [
+      82,
+      83
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "meti-detail-narrow": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 4,
+     "exact": 2,
+     "falseParent": 0,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      4
+     ],
+     "depthExact": [
+      0,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 4,
+     "exact": 2,
+     "falseParent": 0,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      4
+     ],
+     "depthExact": [
+      0,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 4,
+     "exact": 2,
+     "falseParent": 0,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      4
+     ],
+     "depthExact": [
+      0,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 4,
+     "exact": 2,
+     "falseParent": 0,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      4
+     ],
+     "depthExact": [
+      0,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 4,
+     "exact": 2,
+     "falseParent": 0,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      4
+     ],
+     "depthExact": [
+      0,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 4,
+     "exact": 2,
+     "falseParent": 0,
+     "unresolved": 2,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      4
+     ],
+     "depthExact": [
+      0,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 4,
+     "exact": 4,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      4,
+      4
+     ],
+     "depthExact": [
+      5,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 4,
+     "exact": 4,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      4,
+      4
+     ],
+     "depthExact": [
+      5,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 4,
+     "exact": 4,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      4,
+      4
+     ],
+     "depthExact": [
+      5,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 4,
+     "exact": 4,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      4,
+      4
+     ],
+     "depthExact": [
+      5,
+      5
+     ],
+     "nodesMatched": [
+      5,
+      5
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "mext-detail-narrow": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 31,
+     "exact": 17,
+     "falseParent": 0,
+     "unresolved": 14,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      31
+     ],
+     "depthExact": [
+      0,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 31,
+     "exact": 17,
+     "falseParent": 0,
+     "unresolved": 14,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      31
+     ],
+     "depthExact": [
+      0,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 31,
+     "exact": 17,
+     "falseParent": 0,
+     "unresolved": 14,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      31
+     ],
+     "depthExact": [
+      0,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 31,
+     "exact": 17,
+     "falseParent": 0,
+     "unresolved": 14,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      31
+     ],
+     "depthExact": [
+      0,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 31,
+     "exact": 17,
+     "falseParent": 0,
+     "unresolved": 14,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      31
+     ],
+     "depthExact": [
+      0,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 31,
+     "exact": 17,
+     "falseParent": 0,
+     "unresolved": 14,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      31
+     ],
+     "depthExact": [
+      0,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 31,
+     "exact": 31,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      31,
+      31
+     ],
+     "depthExact": [
+      32,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 31,
+     "exact": 31,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      31,
+      31
+     ],
+     "depthExact": [
+      32,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 31,
+     "exact": 31,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      31,
+      31
+     ],
+     "depthExact": [
+      32,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 31,
+     "exact": 31,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      31,
+      31
+     ],
+     "depthExact": [
+      32,
+      32
+     ],
+     "nodesMatched": [
+      32,
+      32
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  },
+  "mhlw-detail-narrow": {
+   "v1": {
+    "posthoc": {
+     "gtEdges": 15,
+     "exact": 9,
+     "falseParent": 0,
+     "unresolved": 6,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      15
+     ],
+     "depthExact": [
+      0,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 15,
+     "exact": 9,
+     "falseParent": 0,
+     "unresolved": 6,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      15
+     ],
+     "depthExact": [
+      0,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A": {
+    "posthoc": {
+     "gtEdges": 15,
+     "exact": 9,
+     "falseParent": 0,
+     "unresolved": 6,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      15
+     ],
+     "depthExact": [
+      0,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 15,
+     "exact": 9,
+     "falseParent": 0,
+     "unresolved": 6,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      15
+     ],
+     "depthExact": [
+      0,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-A2": {
+    "posthoc": {
+     "gtEdges": 15,
+     "exact": 9,
+     "falseParent": 0,
+     "unresolved": 6,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      15
+     ],
+     "depthExact": [
+      0,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 15,
+     "exact": 9,
+     "falseParent": 0,
+     "unresolved": 6,
+     "childNotFound": 0,
+     "ancestorExact": [
+      0,
+      15
+     ],
+     "depthExact": [
+      0,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B": {
+    "posthoc": {
+     "gtEdges": 15,
+     "exact": 15,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      15,
+      15
+     ],
+     "depthExact": [
+      16,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 15,
+     "exact": 15,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      15,
+      15
+     ],
+     "depthExact": [
+      16,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   },
+   "v2-B-obs": {
+    "posthoc": {
+     "gtEdges": 15,
+     "exact": 15,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      15,
+      15
+     ],
+     "depthExact": [
+      16,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "preregistered": {
+     "gtEdges": 15,
+     "exact": 15,
+     "falseParent": 0,
+     "unresolved": 0,
+     "childNotFound": 0,
+     "ancestorExact": [
+      15,
+      15
+     ],
+     "depthExact": [
+      16,
+      16
+     ],
+     "nodesMatched": [
+      16,
+      16
+     ]
+    },
+    "excludedCount": 0,
+    "gtNodesExcluded": 0,
+    "excludedNodeIds": []
+   }
+  }
+ }
+}
