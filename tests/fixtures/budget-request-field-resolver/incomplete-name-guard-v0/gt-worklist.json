@@ -1,0 +1,435 @@
+{
+  "schema": "budget-request-incomplete-name-guard-gt-worklist/v0",
+  "units": [
+    {
+      "unitId": "mlit-additional:967:26",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 967,
+      "code": "95191-2123-09-5010",
+      "anchorYPt": [
+        368,
+        375
+      ]
+    },
+    {
+      "unitId": "mod-additional:58:11",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 58,
+      "code": "35030-2111-04-0100",
+      "anchorYPt": [
+        152.8,
+        159.7
+      ]
+    },
+    {
+      "unitId": "moe-additional:164:14",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 164,
+      "code": "02-0200",
+      "anchorYPt": [
+        194.4,
+        201.4
+      ]
+    },
+    {
+      "unitId": "maff-additional:364:28",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 364,
+      "code": "140",
+      "anchorYPt": [
+        437.5,
+        444.4
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:50:13",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 50,
+      "code": "13062-2125-14-5930",
+      "anchorYPt": [
+        236.1,
+        250
+      ]
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:108:29",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 108,
+      "code": "06083-2123-09-1010",
+      "anchorYPt": [
+        458.3,
+        465.2
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:89:38",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 89,
+      "code": "95062-2959-07-1010",
+      "anchorYPt": [
+        541.6,
+        548.6
+      ]
+    },
+    {
+      "unitId": "mext-detail-870-880:875:29",
+      "canonicalUrl": "https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "physicalPage": 875,
+      "code": "95016-2123-09-6010",
+      "anchorYPt": [
+        465.2,
+        479.1
+      ]
+    },
+    {
+      "unitId": "maff-additional:58:8",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 58,
+      "code": "65061-2855-16-2735",
+      "anchorYPt": [
+        138.9,
+        152.8
+      ]
+    },
+    {
+      "unitId": "mhlw-detail-1555-1700:1609:6",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 1609,
+      "code": "03-1100",
+      "anchorYPt": [
+        83.3,
+        90.3
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:38:15",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 38,
+      "code": "005",
+      "anchorYPt": [
+        347.2,
+        368
+      ]
+    },
+    {
+      "unitId": "maff-additional:166:10",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 166,
+      "code": "13061-2202-08-6330",
+      "anchorYPt": [
+        138.9,
+        152.8
+      ]
+    },
+    {
+      "unitId": "mlit-additional:468:5",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 468,
+      "code": "95016-2122-08-6012",
+      "anchorYPt": [
+        69.4,
+        83.3
+      ]
+    },
+    {
+      "unitId": "maff-additional:298:16",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 298,
+      "code": "65061-2305-16-8075",
+      "anchorYPt": [
+        236.1,
+        243
+      ]
+    },
+    {
+      "unitId": "moe-additional:133:21",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 133,
+      "code": "01-45",
+      "anchorYPt": [
+        347.2,
+        361.1
+      ]
+    },
+    {
+      "unitId": "mod-additional:386:34",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 386,
+      "code": "35030-2203-09-3140",
+      "anchorYPt": [
+        444.4,
+        451.3
+      ]
+    },
+    {
+      "unitId": "maff-additional:111:30",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 111,
+      "code": "65061-2815-16-2848",
+      "anchorYPt": [
+        458.3,
+        465.2
+      ]
+    },
+    {
+      "unitId": "mod-additional:478:7",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 478,
+      "code": "35030-2305-16-7715",
+      "anchorYPt": [
+        125,
+        138.9
+      ]
+    },
+    {
+      "unitId": "mhlw-detail-1260-1275:1264:18",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 1264,
+      "code": "010",
+      "anchorYPt": [
+        236.1,
+        250
+      ]
+    },
+    {
+      "unitId": "mext-detail-870-880:871:30",
+      "canonicalUrl": "https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "physicalPage": 871,
+      "code": "95016-2122-08-6012",
+      "anchorYPt": [
+        527.7,
+        541.6
+      ]
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:139:7",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 139,
+      "code": "06083-2845-16-7615",
+      "anchorYPt": [
+        97.2,
+        111.1
+      ]
+    },
+    {
+      "unitId": "maff-additional:69:21",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 69,
+      "code": "65061-2125-14-4118",
+      "anchorYPt": [
+        340.2,
+        354.1
+      ]
+    },
+    {
+      "unitId": "mod-additional:256:4",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 256,
+      "code": "35030-2125-14-1128",
+      "anchorYPt": [
+        76.4,
+        83.3
+      ]
+    },
+    {
+      "unitId": "mlit-additional:238:12",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 238,
+      "code": "619",
+      "anchorYPt": [
+        173.6,
+        187.5
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:55:5",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 55,
+      "code": "60062-2123-09-1330",
+      "anchorYPt": [
+        90.3,
+        104.2
+      ]
+    },
+    {
+      "unitId": "mlit-additional:292:25",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 292,
+      "code": "420",
+      "anchorYPt": [
+        437.5,
+        444.4
+      ]
+    },
+    {
+      "unitId": "mlit-additional:275:37",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 275,
+      "code": "850",
+      "anchorYPt": [
+        486.1,
+        493
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:56:30",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 56,
+      "code": "60062-2305-16-3997",
+      "anchorYPt": [
+        479.1,
+        493
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:64:31",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 64,
+      "code": "60062-2129-06-0788",
+      "anchorYPt": [
+        451.3,
+        458.3
+      ]
+    },
+    {
+      "unitId": "moe-ippan:75:27",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 75,
+      "code": "006",
+      "anchorYPt": [
+        430.5,
+        437.5
+      ]
+    },
+    {
+      "unitId": "mlit-additional:267:21",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 267,
+      "code": "530",
+      "anchorYPt": [
+        305.5,
+        312.5
+      ]
+    },
+    {
+      "unitId": "mod-additional:236:16",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 236,
+      "code": "35030-2125-14-1120",
+      "anchorYPt": [
+        263.9,
+        270.8
+      ]
+    },
+    {
+      "unitId": "moe-additional:105:4",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 105,
+      "code": "031",
+      "anchorYPt": [
+        55.5,
+        69.4
+      ]
+    },
+    {
+      "unitId": "moe-additional:100:4",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 100,
+      "code": "006",
+      "anchorYPt": [
+        55.5,
+        69.4
+      ]
+    },
+    {
+      "unitId": "moe-additional:133:7",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 133,
+      "code": "015",
+      "anchorYPt": [
+        97.2,
+        111.1
+      ]
+    },
+    {
+      "unitId": "mod-additional:472:24",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 472,
+      "code": "35030-2725-16-9485",
+      "anchorYPt": [
+        402.7,
+        409.7
+      ]
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:94:24",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 94,
+      "code": "06083-2129-06-0145",
+      "anchorYPt": [
+        388.8,
+        395.8
+      ]
+    },
+    {
+      "unitId": "moe-additional:130:34",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 130,
+      "code": "13054-1305-16-0031",
+      "anchorYPt": [
+        499.9,
+        513.8
+      ]
+    },
+    {
+      "unitId": "moe-ippan:75:31",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 75,
+      "code": "011",
+      "anchorYPt": [
+        493,
+        499.9
+      ]
+    },
+    {
+      "unitId": "mhlw-detail-1555-1700:1651:26",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 1651,
+      "code": "08085-2122-08-6069",
+      "anchorYPt": [
+        340.2,
+        354.1
+      ]
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:56:25",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 56,
+      "code": "076",
+      "anchorYPt": [
+        347.2,
+        354.1
+      ]
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:56:15",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 56,
+      "code": "074",
+      "anchorYPt": [
+        208.3,
+        215.3
+      ]
+    },
+    {
+      "unitId": "moe-ippan:75:7",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 75,
+      "code": "011",
+      "anchorYPt": [
+        104.2,
+        111.1
+      ]
+    }
+  ]
+}
