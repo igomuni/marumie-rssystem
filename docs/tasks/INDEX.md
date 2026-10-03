@@ -2,6 +2,8 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_2049_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration_Supplement.md](20261003_2049_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration_Supplement.md) — HV 事前登録の補遺。集計を知る人は blind reviewer 不適格・declaration・blind violation 規則と reviewer package(protocol/manifest/原本7本)を凍結。54ba20d不変
+- [20261003_2048_FieldResolver_v0_H1_Human_Reviewer_Protocol.md](20261003_2048_FieldResolver_v0_H1_Human_Reviewer_Protocol.md) — reviewer に渡す手順書（AI結果を含まない。3ラベル・視覚のみ規則・declaration・記録形式）
 - [20261003_2043_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration.md](20261003_2043_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration.md) — H1 独立 human validation の事前登録。frozen 65 unit（27+38）の blind worklist(a58e83f)・VALIDATED/CONTRADICTED/INCONCLUSIVE 規則を凍結。PDF未確認
 - [20261003_2031_FieldResolver_v0_H1_Scope_Completion_Audit_P4_Result.md](20261003_2031_FieldResolver_v0_H1_Scope_Completion_Audit_P4_Result.md) — H1 P4 result。frozen AI Visual GT 上 N_complete 0 / incomplete 38 / unclear 0 で GO（65件の観測分類のみ・一般化せず・human review pending）
 - [20261003_2014_FieldResolver_v0_H1_P3_Visual_GT_Freeze.md](20261003_2014_FieldResolver_v0_H1_P3_Visual_GT_Freeze.md) — H1 P3: frozen 38 unit の Visual GT を visual-only・blind で作成し freeze。評価・判定は未実施（P4）
