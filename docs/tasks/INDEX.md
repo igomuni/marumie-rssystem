@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_1225_FieldResolver_v0_MOE_p75_false_resolve_failure_isolation.md](20261003_1225_FieldResolver_v0_MOE_p75_false_resolve_failure_isolation.md) — 環境省p75 `011` 名称切れの failure isolation（LogicalRowの連鎖で ambiguous が上書きされ、FieldResolverが信号なし=完結と解釈。同型83件の候補）。コード変更なし
 - [20261003_0825_FieldResolver_v0_Heldout_Result.md](20261003_0825_FieldResolver_v0_Heldout_Result.md) — FieldResolver v0 held-out 初回結果。16ページ・52 target で STOP（名称切れの false resolve 1＋GT locator転記ミス1）、blank 24/24・総表は安全にabstain
 - [20261003_0805_FieldResolver_v0_Heldout_Preregistration.md](20261003_0805_FieldResolver_v0_Heldout_Preregistration.md) — FieldResolver v0 held-out 評価の事前登録（abc57b9 freeze・MOD/MOE/MAFF/MLIT・4カテゴリ選定・first-run rule・STOP基準）
 - [20261003_0740_FieldResolver_v0_PoC_Result.md](20261003_0740_FieldResolver_v0_PoC_Result.md) — FieldResolver v0 PoC の結果。Golden 20 target で false resolved 0・safe coverage 99.1%、未確定3件の理由、評価を見て直した規則の開示、GO
