@@ -1,0 +1,175 @@
+{
+  "schema": "budget-request-incomplete-name-guard-h1-visual-gt/v0",
+  "method": "frozen H1 worklist の 38 unit を、原本 PDF の 170 dpi 目視のみで分類（pdftoppm の単純切り出し。アンカー行の範囲を余白に枠で示した）。baseline name・guard 出力・predicate・reasonCode・extracted text・OCR・既存 visual-gt.json の個別ラベルは参照していない。guard-fire reason / machine output に対して blind（38 件が guard 発火母集団であること自体は既知）",
+  "labelContract": "H1 事前登録（4ad66c4）+ 補遺（2e7656e）のとおり。complete_on_current_logical_row / incomplete_continues_below / unclear",
+  "worklist": {
+    "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-scope-completion-worklist.json",
+    "sha256": "fa9a3abebad3452d0a4bfd761044f83b88427ba1eef2bc7069179155ce57028c",
+    "freezeCommit": "caefc6206f85bf9217b307797ea7ae01b7c83bd3"
+  },
+  "preregistration": {
+    "commit": "4ad66c4bbb915d5d8385d02a61702d5ad0b812df",
+    "supplementCommit": "2e7656e0e822b14083c3ac8165d151b8e6de8fcc"
+  },
+  "sourcePdfs": {
+    "maff": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+    "meti": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+    "mlit": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+    "mod": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47"
+  },
+  "humanReview": "pending",
+  "units": [
+    {
+      "unitId": "maff-additional:166:34",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:29:11",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:31:19",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:33:4",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:35:6",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:39:20",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:39:7",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:41:12",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:43:23",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:47:27",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:48:15",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:48:31",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:49:5",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:51:25",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:51:9",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:52:24",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:52:26",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:52:29",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:52:9",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:54:5",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:55:23",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:55:33",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:57:13",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:57:20",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:58:26",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:58:5",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:59:18",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:63:15",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:10",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:33",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:4",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:6",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:8",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:92:32",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "meti-detail-9-106:93:6",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "mlit-additional:292:18",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "mlit-additional:292:28",
+      "label": "incomplete_continues_below"
+    },
+    {
+      "unitId": "mod-additional:472:15",
+      "label": "incomplete_continues_below"
+    }
+  ]
+}
