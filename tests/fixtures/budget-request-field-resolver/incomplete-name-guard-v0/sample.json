@@ -1,0 +1,768 @@
+{
+  "schema": "budget-request-incomplete-name-guard-sample/v0",
+  "selectionRule": "sha1(documentKey:page:logicalRowIndex) ascending within (stratum, group); G: up to 4 per group; NB/P: 1 per group; NC/ND: up to 1 per group; H: top up to 6 amountless headings (1 per group); known failures always included",
+  "poolCounts": {
+    "P": {
+      "meti": 1046,
+      "mhlw": 784,
+      "cfa": 445,
+      "mext": 30,
+      "mod": 1689,
+      "moe": 1378,
+      "maff": 2021,
+      "mlit": 8262
+    },
+    "NB": {
+      "meti": 92,
+      "mhlw": 89,
+      "cfa": 48,
+      "mext": 9,
+      "mod": 306,
+      "moe": 150,
+      "mlit": 590,
+      "maff": 207
+    },
+    "G": {
+      "meti": 38,
+      "mhlw": 1,
+      "cfa": 3,
+      "moe": 12,
+      "mod": 6,
+      "maff": 63,
+      "mlit": 31
+    }
+  },
+  "sample": [
+    {
+      "selectedAs": "known-failure",
+      "stratum": "G",
+      "source": "heldout-v0-pages",
+      "group": "moe",
+      "documentKey": "moe-ippan",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "page": 75,
+      "logicalRowIndex": 7,
+      "code": "011",
+      "baselineName": "ネイチャーポジティブ（",
+      "yPt": [
+        104.2,
+        111.1
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "known-failure",
+      "stratum": "G",
+      "source": "heldout-v0-pages",
+      "group": "moe",
+      "documentKey": "moe-ippan",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "page": 75,
+      "logicalRowIndex": 27,
+      "code": "006",
+      "baselineName": "自然環境保全地域等保全",
+      "yPt": [
+        430.5,
+        437.5
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "known-failure",
+      "stratum": "G",
+      "source": "heldout-v0-pages",
+      "group": "moe",
+      "documentKey": "moe-ippan",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "page": 75,
+      "logicalRowIndex": 31,
+      "code": "011",
+      "baselineName": "世界自然遺産等保全対策",
+      "yPt": [
+        493,
+        499.9
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "development",
+      "group": "meti",
+      "documentKey": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "page": 50,
+      "logicalRowIndex": 13,
+      "code": "13062-2125-14-5930",
+      "baselineName": "産業技術・環境\n・産業標準政策",
+      "yPt": [
+        236.1,
+        250
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "maff",
+      "documentKey": "maff-additional",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "page": 58,
+      "logicalRowIndex": 8,
+      "code": "65061-2855-16-2735",
+      "baselineName": "農林水産物・食\n品輸出促進対策",
+      "yPt": [
+        138.9,
+        152.8
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "maff",
+      "documentKey": "maff-additional",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "page": 298,
+      "logicalRowIndex": 16,
+      "code": "65061-2305-16-8075",
+      "baselineName": "幹線林道事業移",
+      "yPt": [
+        236.1,
+        243
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "maff",
+      "documentKey": "maff-additional",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "page": 111,
+      "logicalRowIndex": 30,
+      "code": "65061-2815-16-2848",
+      "baselineName": "被害農家営農資",
+      "yPt": [
+        458.3,
+        465.2
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "mod",
+      "documentKey": "mod-additional",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "page": 478,
+      "logicalRowIndex": 7,
+      "code": "35030-2305-16-7715",
+      "baselineName": "独立行政法人駐\n留軍等労働者労",
+      "yPt": [
+        125,
+        138.9
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "maff",
+      "documentKey": "maff-additional",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "page": 69,
+      "logicalRowIndex": 21,
+      "code": "65061-2125-14-4118",
+      "baselineName": "食品の安全・消\n費者の信頼確保",
+      "yPt": [
+        340.2,
+        354.1
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "mod",
+      "documentKey": "mod-additional",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "page": 256,
+      "logicalRowIndex": 4,
+      "code": "35030-2125-14-1128",
+      "baselineName": "在日米軍地域交",
+      "yPt": [
+        76.4,
+        83.3
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "mlit",
+      "documentKey": "mlit-additional",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "page": 238,
+      "logicalRowIndex": 12,
+      "code": "619",
+      "baselineName": "資格制度及び監査等によ\nる航行安全確保に必要な",
+      "yPt": [
+        173.6,
+        187.5
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "development",
+      "group": "meti",
+      "documentKey": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "page": 55,
+      "logicalRowIndex": 5,
+      "code": "60062-2123-09-1330",
+      "baselineName": "中小企業情報処\n理・サービス・",
+      "yPt": [
+        90.3,
+        104.2
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "mlit",
+      "documentKey": "mlit-additional",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "page": 292,
+      "logicalRowIndex": 25,
+      "code": "420",
+      "baselineName": "民間施設との連携による",
+      "yPt": [
+        437.5,
+        444.4
+      ],
+      "allBlankAmounts": true
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "mlit",
+      "documentKey": "mlit-additional",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "page": 275,
+      "logicalRowIndex": 37,
+      "code": "850",
+      "baselineName": "北東アジア港湾局長会議",
+      "yPt": [
+        486.1,
+        493
+      ],
+      "allBlankAmounts": true
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "development",
+      "group": "meti",
+      "documentKey": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "page": 56,
+      "logicalRowIndex": 30,
+      "code": "60062-2305-16-3997",
+      "baselineName": "中小企業情報処\n理・サービス・",
+      "yPt": [
+        479.1,
+        493
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "development",
+      "group": "meti",
+      "documentKey": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "page": 64,
+      "logicalRowIndex": 31,
+      "code": "60062-2129-06-0788",
+      "baselineName": "中小企業地域経",
+      "yPt": [
+        451.3,
+        458.3
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "mlit",
+      "documentKey": "mlit-additional",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "page": 267,
+      "logicalRowIndex": 21,
+      "code": "530",
+      "baselineName": "道路構造物のメンテナン",
+      "yPt": [
+        305.5,
+        312.5
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "mod",
+      "documentKey": "mod-additional",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "page": 236,
+      "logicalRowIndex": 16,
+      "code": "35030-2125-14-1120",
+      "baselineName": "施設区域等関連",
+      "yPt": [
+        263.9,
+        270.8
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "moe",
+      "documentKey": "moe-additional",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "page": 105,
+      "logicalRowIndex": 4,
+      "code": "031",
+      "baselineName": "前年度限りの経費（地域\nからのグリーン社会の実",
+      "yPt": [
+        55.5,
+        69.4
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "moe",
+      "documentKey": "moe-additional",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "page": 100,
+      "logicalRowIndex": 4,
+      "code": "006",
+      "baselineName": "持続可能な社会構築に向\nけた企業経営における環",
+      "yPt": [
+        55.5,
+        69.4
+      ],
+      "allBlankAmounts": true
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "moe",
+      "documentKey": "moe-additional",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "page": 133,
+      "logicalRowIndex": 7,
+      "code": "015",
+      "baselineName": "前年度限りの経費（環境\nで地域を元気にする地域",
+      "yPt": [
+        97.2,
+        111.1
+      ],
+      "allBlankAmounts": true
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "mod",
+      "documentKey": "mod-additional",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "page": 472,
+      "logicalRowIndex": 24,
+      "code": "35030-2725-16-9485",
+      "baselineName": "合衆国軍隊特別",
+      "yPt": [
+        402.7,
+        409.7
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "development",
+      "group": "cfa",
+      "documentKey": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "page": 94,
+      "logicalRowIndex": 24,
+      "code": "06083-2129-06-0145",
+      "baselineName": "旧優生保護一時",
+      "yPt": [
+        388.8,
+        395.8
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "additional",
+      "group": "moe",
+      "documentKey": "moe-additional",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "page": 130,
+      "logicalRowIndex": 34,
+      "code": "13054-1305-16-0031",
+      "baselineName": "国立研究開発法\n人国立環境研究",
+      "yPt": [
+        499.9,
+        513.8
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "development",
+      "group": "mhlw",
+      "documentKey": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "page": 1651,
+      "logicalRowIndex": 26,
+      "code": "08085-2122-08-6069",
+      "baselineName": "障害者等雇用安\n定促進業務委員",
+      "yPt": [
+        340.2,
+        354.1
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "development",
+      "group": "cfa",
+      "documentKey": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "page": 56,
+      "logicalRowIndex": 25,
+      "code": "076",
+      "baselineName": "こども政策に関するデー",
+      "yPt": [
+        347.2,
+        354.1
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "G-guard-fires",
+      "stratum": "G",
+      "source": "development",
+      "group": "cfa",
+      "documentKey": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "page": 56,
+      "logicalRowIndex": 15,
+      "code": "074",
+      "baselineName": "こどもまんなか社会実現",
+      "yPt": [
+        208.3,
+        215.3
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "NB-below-not-name-aligned",
+      "stratum": "NB",
+      "source": "development",
+      "group": "meti",
+      "documentKey": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "page": 38,
+      "logicalRowIndex": 15,
+      "code": "005",
+      "baselineName": "経済協力の促進調査指導\n及び広報",
+      "yPt": [
+        347.2,
+        368
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "NB-below-not-name-aligned",
+      "stratum": "NB",
+      "source": "additional",
+      "group": "maff",
+      "documentKey": "maff-additional",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "page": 166,
+      "logicalRowIndex": 10,
+      "code": "13061-2202-08-6330",
+      "baselineName": "外国研究者招へ\nい旅費",
+      "yPt": [
+        138.9,
+        152.8
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "NB-below-not-name-aligned",
+      "stratum": "NB",
+      "source": "additional",
+      "group": "mlit",
+      "documentKey": "mlit-additional",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "page": 468,
+      "logicalRowIndex": 5,
+      "code": "95016-2122-08-6012",
+      "baselineName": "政府開発援助委\n員等旅費",
+      "yPt": [
+        69.4,
+        83.3
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "NB-below-not-name-aligned",
+      "stratum": "NB",
+      "source": "additional",
+      "group": "moe",
+      "documentKey": "moe-additional",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "page": 133,
+      "logicalRowIndex": 21,
+      "code": "01-45",
+      "baselineName": "廃棄物処理施設整備事業\n調査諸費に必要な経費",
+      "yPt": [
+        347.2,
+        361.1
+      ],
+      "allBlankAmounts": true
+    },
+    {
+      "selectedAs": "NB-below-not-name-aligned",
+      "stratum": "NB",
+      "source": "additional",
+      "group": "mod",
+      "documentKey": "mod-additional",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "page": 386,
+      "logicalRowIndex": 34,
+      "code": "35030-2203-09-3140",
+      "baselineName": "諸 器 材 購 入 費",
+      "yPt": [
+        444.4,
+        451.3
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "NB-below-not-name-aligned",
+      "stratum": "NB",
+      "source": "development",
+      "group": "mhlw",
+      "documentKey": "mhlw-detail-1260-1275",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "page": 1264,
+      "logicalRowIndex": 18,
+      "code": "010",
+      "baselineName": "国立ハンセン病療養所施\n設費",
+      "yPt": [
+        236.1,
+        250
+      ],
+      "allBlankAmounts": true
+    },
+    {
+      "selectedAs": "NB-below-not-name-aligned",
+      "stratum": "NB",
+      "source": "development",
+      "group": "mext",
+      "documentKey": "mext-detail-870-880",
+      "canonicalUrl": "https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "page": 871,
+      "logicalRowIndex": 30,
+      "code": "95016-2122-08-6012",
+      "baselineName": "政府開発援助委\n員等旅費",
+      "yPt": [
+        527.7,
+        541.6
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "NB-below-not-name-aligned",
+      "stratum": "NB",
+      "source": "development",
+      "group": "cfa",
+      "documentKey": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "page": 139,
+      "logicalRowIndex": 7,
+      "code": "06083-2845-16-7615",
+      "baselineName": "障害児入所給付\n費等負担金",
+      "yPt": [
+        97.2,
+        111.1
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "P-no-adjacent-successor",
+      "stratum": "P",
+      "source": "additional",
+      "group": "mlit",
+      "documentKey": "mlit-additional",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "page": 967,
+      "logicalRowIndex": 26,
+      "code": "95191-2123-09-5010",
+      "baselineName": "土 地 建 物 借 料",
+      "yPt": [
+        368,
+        375
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "P-no-adjacent-successor",
+      "stratum": "P",
+      "source": "additional",
+      "group": "mod",
+      "documentKey": "mod-additional",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "page": 58,
+      "logicalRowIndex": 11,
+      "code": "35030-2111-04-0100",
+      "baselineName": "超 過 勤 務 手 当",
+      "yPt": [
+        152.8,
+        159.7
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "P-no-adjacent-successor",
+      "stratum": "P",
+      "source": "additional",
+      "group": "moe",
+      "documentKey": "moe-additional",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "page": 164,
+      "logicalRowIndex": 14,
+      "code": "02-0200",
+      "baselineName": "扶養手当",
+      "yPt": [
+        194.4,
+        201.4
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "P-no-adjacent-successor",
+      "stratum": "P",
+      "source": "additional",
+      "group": "maff",
+      "documentKey": "maff-additional",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "page": 364,
+      "logicalRowIndex": 28,
+      "code": "140",
+      "baselineName": "海 岸 事 業 調 査 諸 費",
+      "yPt": [
+        437.5,
+        444.4
+      ],
+      "allBlankAmounts": true
+    },
+    {
+      "selectedAs": "P-no-adjacent-successor",
+      "stratum": "P",
+      "source": "development",
+      "group": "cfa",
+      "documentKey": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "page": 108,
+      "logicalRowIndex": 29,
+      "code": "06083-2123-09-1010",
+      "baselineName": "庁費",
+      "yPt": [
+        458.3,
+        465.2
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "P-no-adjacent-successor",
+      "stratum": "P",
+      "source": "development",
+      "group": "meti",
+      "documentKey": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "page": 89,
+      "logicalRowIndex": 38,
+      "code": "95062-2959-07-1010",
+      "baselineName": "報償費",
+      "yPt": [
+        541.6,
+        548.6
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "P-no-adjacent-successor",
+      "stratum": "P",
+      "source": "development",
+      "group": "mext",
+      "documentKey": "mext-detail-870-880",
+      "canonicalUrl": "https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "page": 875,
+      "logicalRowIndex": 29,
+      "code": "95016-2123-09-6010",
+      "baselineName": "招へい外国人滞\n在費",
+      "yPt": [
+        465.2,
+        479.1
+      ],
+      "allBlankAmounts": false
+    },
+    {
+      "selectedAs": "P-no-adjacent-successor",
+      "stratum": "P",
+      "source": "development",
+      "group": "mhlw",
+      "documentKey": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "page": 1609,
+      "logicalRowIndex": 6,
+      "code": "03-1100",
+      "baselineName": "住居手当",
+      "yPt": [
+        83.3,
+        90.3
+      ],
+      "allBlankAmounts": false
+    }
+  ]
+}

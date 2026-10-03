@@ -1,0 +1,27 @@
+{
+  "schema": "baseline-artifact-sha1/v0",
+  "note": "current FieldResolver v0 (abc57b9 inference) artifacts, regenerated deterministically; the guard-off path must reproduce these byte for byte",
+  "artifacts": {
+    "cfa-general-detail-7-147/field-resolution.json": "299af3ad2e4f0d15843bfde8f7c5b55eeeeec5d4",
+    "heldout-v0/maff-ippan-p12/field-resolution.json": "7eb4f06482e94f466510e9410c952a380b370162",
+    "heldout-v0/maff-ippan-p150/field-resolution.json": "16cc09e72ce0b34e699cb66bb95362cb80e6c0b2",
+    "heldout-v0/maff-ippan-p220/field-resolution.json": "93a109645124a58261e23c52021f9ea557e4081a",
+    "heldout-v0/maff-ippan-p290/field-resolution.json": "7d7c4d1627ae08f8450c50f28381f61e0fb6a3cd",
+    "heldout-v0/mlit-ippan-p120/field-resolution.json": "29c02706223154ba139903404f58f6204f241187",
+    "heldout-v0/mlit-ippan-p330/field-resolution.json": "5d27b560a21b78f1d75408819d0ed88106dc4312",
+    "heldout-v0/mlit-ippan-p560/field-resolution.json": "a9d57ba3ed43c82a1ef5a286521be22f42cb52e5",
+    "heldout-v0/mlit-ippan-p780/field-resolution.json": "2e22b0bf80d5bab483dfe21b6be15f4c57737c24",
+    "heldout-v0/mod-ippan-p12/field-resolution.json": "6cc376993a576cdecf15e7f8f33dff0a90a788f9",
+    "heldout-v0/mod-ippan-p480/field-resolution.json": "95a8cfbe38093bea3245f66617ab28320677d005",
+    "heldout-v0/mod-ippan-p505/field-resolution.json": "251cb0f0a7fef9adaf50c3870ba48a196e88b41c",
+    "heldout-v0/mod-ippan-p535/field-resolution.json": "05815900e9548b25a71f37cf0f08d486c4bb9247",
+    "heldout-v0/moe-ippan-p110/field-resolution.json": "fd186712e94bfc88bb46e7f3c5b561891a253a14",
+    "heldout-v0/moe-ippan-p18/field-resolution.json": "bc2f333ba56ca73d84ebd9b1da9fc5e019149210",
+    "heldout-v0/moe-ippan-p40/field-resolution.json": "dbe13fefb7341a8ff6f880443ef921524854e5e9",
+    "heldout-v0/moe-ippan-p75/field-resolution.json": "6567a31c13574a803d27f88415d0c940553f3532",
+    "meti-detail-9-106/field-resolution.json": "fb4566a8bf51f38386e3402558eb55ccdacbf93d",
+    "mext-detail-870-880/field-resolution.json": "2cf34496fe8b0f8a4cfdb9470fc85bc77302dcb1",
+    "mhlw-detail-1260-1275/field-resolution.json": "2a70e4d291237ffdeaa73630ad08a6a70f95a26e",
+    "mhlw-detail-1555-1700/field-resolution.json": "c7a78c774d0467e166bf25a9739c1b21d4dc72ac"
+  }
+}
