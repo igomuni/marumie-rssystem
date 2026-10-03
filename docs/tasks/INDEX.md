@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_1518_FieldResolver_v0_Incomplete_Name_Safety_Guard_P3_Result.md](20261003_1518_FieldResolver_v0_Incomplete_Name_Safety_Guard_P3_Result.md) — incomplete-name guard の P3 実装・凍結評価。GO-WITH-SCOPE（incomplete 27/27 を ambiguous 化・FAC 0。G層にcompleteが無くFACは未測定）
 - [20261003_1446_FieldResolver_v0_Incomplete_Name_Visual_GT_P2.md](20261003_1446_FieldResolver_v0_Incomplete_Name_Visual_GT_P2.md) — incomplete-name guard の視覚GT（P2）。43 unit・complete 16 / incomplete 27 / unclear 0。guard・評価は未実施
 - [20261003_1437_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration_Supplement.md](20261003_1437_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration_Supplement.md) — 1321 事前登録の補遺（P0の現行状態・evidence属性・status/provenance照合・P3実装計画・debt）。ルールは変更なし
 - [20261003_1321_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration.md](20261003_1321_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration.md) — 不完全な名称の safety guard 事前登録（A∧B∧¬C∧¬D・発火時 ambiguous・評価標本43unit・数値GO/STOP）。実装なし

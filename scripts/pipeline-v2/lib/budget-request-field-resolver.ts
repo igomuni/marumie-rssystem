@@ -103,6 +103,11 @@ export interface FieldResolverInput {
   pages: FieldResolverPageInput[];
   /** DocumentHierarchy v2-B（凍結済み）の観測結果。無ければ hierarchy 依存 field は not_observed */
   hierarchy: DocumentHierarchyV2Result | null;
+  /**
+   * 不完全な名称の safety guard（事前登録 `…Incomplete_Name_Safety_Guard_Preregistration.md` §6〜§8）。既定は off（off の出力は従来と同一）。
+   * on のとき、発火した record の name だけが resolved → ambiguous になる（後続行の文字列は加えない。他の field は変えない）。
+   */
+  incompleteNameGuard?: boolean;
 }
 
 export interface FieldResolverResult {
@@ -565,6 +570,69 @@ function hierarchyFields(
 }
 
 // ---------------------------------------------------------------------------------------------
+// 不完全な名称の safety guard（事前登録の転記。発火条件は A ∧ B ∧ ¬C ∧ ¬D）
+// ---------------------------------------------------------------------------------------------
+
+export const INCOMPLETE_NAME_GUARD_REASON = 'name_continuation_evidence_unmerged';
+/** LogicalRow の既存定数（行間 0.75〜1.5 倍・x 許容 0.25 倍）。新しい閾値は作らない */
+const GUARD_DY_MIN_FACTOR = 0.75;
+const GUARD_DY_MAX_FACTOR = 1.5;
+const GUARD_ALIGN_FACTOR = 0.25;
+
+export interface IncompleteNameGuardObservation {
+  /** 次の logical row が無い等で評価できない場合は null */
+  A: boolean | null;
+  B: boolean | null;
+  C: boolean | null;
+  D: boolean | null;
+  fires: boolean;
+}
+
+/**
+ * record の logical row L と、同じページの次の logical row S について、事前登録の predicate を計算する。
+ * A: S の先頭 physical row が L の最終 physical row の直下（baseline の差が [0.75, 1.5] × 基準フォントサイズ）
+ * B: S の先頭 physical row の最初の非空白 token が名称領域にあり、その xMin が L の名称領域内の非空白 token（code 系は除く）のいずれかの xMin と 0.25 × 基準フォントサイズ以内
+ * C: S が record の code で始まる（既存の code 観測）
+ * D: S の非空白 token の中心が前年度〜増減の列領域にある（金額を持つ）
+ * 発火 = A ∧ B ∧ ¬C ∧ ¬D
+ */
+export function observeIncompleteNameGuard(
+  page: FieldResolverPageInput,
+  layout: ColumnLayout,
+  row: LogicalRowCandidate,
+  next: LogicalRowCandidate | undefined,
+  toks: { token: SourceToken; physicalRowIndex: number }[],
+  codeIdx: Set<number>,
+): IncompleteNameGuardObservation {
+  if (!next) return { A: null, B: null, C: null, D: null, fires: false };
+  const ref = page.geometry.parameters.rowClustering.referenceFontSize;
+  const lastL = page.geometry.physicalRows[row.physicalRowIndexes[row.physicalRowIndexes.length - 1]];
+  const firstS = page.geometry.physicalRows[next.physicalRowIndexes[0]];
+  const dy = firstS.baselineY - lastL.baselineY;
+  const A = dy >= GUARD_DY_MIN_FACTOR * ref - 1e-9 && dy <= GUARD_DY_MAX_FACTOR * ref + 1e-9;
+  const sFirstRow = firstS.visualTokenIndexes.map(i => page.tokens[i]).filter(t => !isBlank(t));
+  const F = sFirstRow[0];
+  const nameXs = toks.filter(x => !codeIdx.has(x.token.index) && regionOf(layout, center(x.token.bbox)) === 'name').map(x => x.token.bbox.xMin);
+  const B = !!F && regionOf(layout, center(F.bbox)) === 'name' && nameXs.some(x => Math.abs(F.bbox.xMin - x) <= GUARD_ALIGN_FACTOR * ref);
+  const C = observeCode(rowTokens(page, next)).code !== null;
+  const D = next.rawTokenIndexes.some(i => {
+    const t = page.tokens[i];
+    if (isBlank(t)) return false;
+    const cx = center(t.bbox);
+    return cx >= layout.regions.previousBudget[0] && cx < layout.regions.difference[1];
+  });
+  return { A, B, C, D, fires: A && B && !C && !D };
+}
+
+function guardedName(base: FieldResult<{ raw: string; normalized: string }>): FieldResult<{ raw: string; normalized: string }> {
+  // 断片の evidence（既存 token のみ）を candidate として 1 つ保持する。後続行の文字列は入れない
+  const fragment: FieldEvidence | null = base.evidence
+    ? { ...base.evidence, geometryNote: 'incomplete-name guard fired: the next logical row is directly below, starts at the same name x, has no record code and no amount; this fragment is not asserted complete' }
+    : null;
+  return { status: 'ambiguous', value: null, reasonCode: INCOMPLETE_NAME_GUARD_REASON, evidence: null, ...(fragment ? { candidates: [fragment] } : {}) };
+}
+
+// ---------------------------------------------------------------------------------------------
 // entry point
 // ---------------------------------------------------------------------------------------------
 
@@ -618,10 +686,12 @@ export function resolveFields(input: FieldResolverInput): FieldResolverResult {
         next?.resolution.kind === 'ambiguous' && next.resolution.evidence.possibleContinuationOfLogicalRow === row.logicalRowIndex
           ? rowTokens(page, next).flatMap(x => piecesOf(x.token, x.physicalRowIndex))
           : [];
-      const name = nameField(page, row, layout, layoutReason, toks, codeIdx, possibleContinuation);
+      const nameBase = nameField(page, row, layout, layoutReason, toks, codeIdx, possibleContinuation);
+      // guard は resolved → ambiguous の方向だけ。blank の判定（rowOk）は guard 適用前の name の状態で決め、他の field を変えない
+      const name = input.incompleteNameGuard && layout && nameBase.status === 'resolved' && observeIncompleteNameGuard(page, layout, row, next, toks, codeIdx).fires ? guardedName(nameBase) : nameBase;
 
       const pieces = toks.flatMap(x => piecesOf(x.token, x.physicalRowIndex));
-      const rowOk = name.status === 'resolved' && row.resolution.kind !== 'ambiguous';
+      const rowOk = nameBase.status === 'resolved' && row.resolution.kind !== 'ambiguous';
       const cols = (['previousBudget', 'requestedBudget', 'difference'] as const).map(c =>
         layout
           ? amountField(c, layout, pageNo, row, pieces, rowOk, possibleContinuation)
