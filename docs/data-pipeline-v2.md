@@ -45,7 +45,8 @@ data/
 │   │   └── sheets/{year}/{省庁slug}/  # 府省庁レビューシート（CSV。PDFは同一内容のため取得しない）
 │   └── mof.go.jp/
 │       ├── archive/{year}/{yearDir}/  # bb.mof.go.jp予算書・決算書DB。URLにfyが無いため年数のみ
-│       │   └── csv|dlpdf/DL*.zip|pdf  # csvが無い帳票のみdlpdfを取得
+│       │   ├── csv|dlpdf/DL*.zip|pdf  # csvが無い帳票のみdlpdfを取得（科目別内訳＝項→目）
+│       │   └── html|xml/{id}Main.html,{id}menu.html,*.xml  # 予算書本体XML（事項を含む）。--xml=<帳票ID> を明示したときだけ取得
 │       └── account/fy{year}/          # 決算の説明（全体版PDFのみ。個別41章は取得しない）
 │   # 概算要求書PDFは {publisherDomain}/{canonical URL path} に保存（7-2節）。mof.go.jpでは
 │   # about_mof/・policy/ 配下になり、上のarchive/・account/ とは同domain内でもpathが衝突しない
@@ -83,7 +84,7 @@ normalized/derivedの全レコードは`provenance`（`domain`・`dataset`・`ye
 |---|---|---|---|
 | `download-rs-csv.ts` | rssystem.go.jp（公式サイト） | `data/download/rssystem.go.jp/download-csv/{year}/*.zip` | `pipeline:v2:download:rs` |
 | `download-rs-sheets.ts` | rssystem.go.jp（公式サイト、Playwrightでボタン押下時の実URLを観測） | `data/download/rssystem.go.jp/sheets/{year}/{slug}/*.csv` | `pipeline:v2:download:rs-sheets` |
-| `download-mof-archive.ts` | bb.mof.go.jp/archive（公式サイト） | `data/download/mof.go.jp/archive/{year}/**` | `pipeline:v2:download:mof` |
+| `download-mof-archive.ts` | bb.mof.go.jp/archive（公式サイト） | `data/download/mof.go.jp/archive/{year}/**` | `pipeline:v2:download:mof`（予算書XML: `-- 2024 --xml=202411001`、`--dry-run` で対象のみ表示。由来は `data/work/mof-xml-download/{year}/{id}.json`） |
 | `download-mof-account-explanation.ts` | www.mof.go.jp（公式サイト） | `data/download/mof.go.jp/account/fy{year}/*.pdf` | `pipeline:v2:download:mof-account-explanation` |
 | `download-budget-requests.ts` | 各府省庁の公式サイト（FY2024歳出概算要求書PDF。manifest固定） | `data/download/{publisherDomain}/{canonical URL path}`（83 PDF） | `pipeline:v2:download:budget-requests` |
 | `normalize-rs.ts` | 上記RS raw ZIP | `data/normalized/rs/{year}/*.json` | `pipeline:v2:normalize:rs` |
@@ -476,7 +477,7 @@ V1側の比較対象は3種類ある。
 - **transfer-links（MOF移替関係）**: 予算現額移替調書等の対応表を未取り込みのため対象外
 - **決算目への引き継ぎ**（V1にはある）: V2のBudgetEntityは当初/補正/決算を既に同一entityへ集約済みのため、この引き継ぎ自体が不要
 - **MOF決算説明PDF（`kessan_06_zenntaibann.pdf`）の本文パース**: 構造化原本（CSV）を主データとし、PDFは移替・予備費・繰越等の補助証拠・検算用途に将来使う位置付け（本文は未パース）
-- **RSレビューシートのPDF・MOF帳票のExcel/dlpdf（CSV/XMLが存在する場合）**: CSVと完全に同一内容と確認済みのため取得しない
+- **RSレビューシートのPDF・MOF帳票のExcel**: CSVと同一内容と確認済みのため取得しない。**MOF帳票の【PDF版】【XML版】は科目別内訳（CSV/Excel）とは別の資料**（予算書本体。事項別内訳を含む）で、CSVの重複ではない。XML版は `--xml=<帳票ID>` で明示取得する（既定の取得対象は変えていない）。csvが無い帳票のdlpdf取得は従来どおり
 
 ## 10. 再生成手順
 
