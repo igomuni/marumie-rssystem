@@ -1,0 +1,21 @@
+{
+  "schema": "budget-request-incomplete-name-guard-h1-human-validation-reviewer-metadata/v0",
+  "reviewerId": "H01",
+  "reviewerType": "human",
+  "rawResponsePath": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-human-validation-reviewer-response-H01.json",
+  "rawResponseSha256": "3fa66693676aff229d61e90eb6be52612058a2bd3f0078c5361c7920fa1a8427",
+  "reviewPackageIdentity": {
+    "packageDefinitionCommit": "25b0aab3d5755b2e697929d46cdd916714290ee6",
+    "worklistSha256": "3546e523b8982c863dad51b889d0cb07dd978a529e20bcc70a12ef5eb8226c69",
+    "protocolSha256": "6c9d40cf6a24c4998cdc0e3b339b97f66439f6593940e42c76a4380eb7b9993d",
+    "manifestSha256": "33d2b5d1a01a6edb78e4826ebb07ff66ea20732cd7ffa15a25ccb63345fd59df"
+  },
+  "blindnessCase": "B",
+  "blindnessEvidenceStatus": "user_attested_independent_reviewer",
+  "declarationTiming": "not_recorded_pre_review",
+  "reviewerAuthoredDeclaration": false,
+  "protocolDeviation": true,
+  "userProvidedProvenanceStatementPresent": true,
+  "userProvidedProvenanceStatement": "H01 はこの研究を初めて見る第三者である（ユーザーによる確認）。reviewer 本人が review 開始前に記録した declaration ではない。",
+  "note": "返却された raw response には reviewerId と units のみがあり、declaration は含まれていない。preregistration で予定した reviewer-authored pre-review declaration は記録されていない。後知恵で pre-review 確認済みとは扱わない。"
+}
