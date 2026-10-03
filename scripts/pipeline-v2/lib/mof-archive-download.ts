@@ -90,6 +90,13 @@ export function parseMenuXmlFileNames(menuHtml: string): string[] {
   return out;
 }
 
+/** 目次から本文 XML を1件も列挙できなければ throw する（形式変更・encoding 問題を「成功」にしない）。明示取得した帳票の目次は必ず XML を含む前提 */
+export function requireMenuXmlFileNames(menuHtml: string, reportId: string): string[] {
+  const names = parseMenuXmlFileNames(menuHtml);
+  if (names.length === 0) throw new Error(`目次から本文XMLを1件も列挙できません（目次の形式変更または decode の問題の可能性）: ${reportId}`);
+  return names;
+}
+
 /** href（`/server/2024/html/202411001Main.html`）から、同じ階層の目次 URL パス（`.../202411001menu.html`）と XML ディレクトリ（`/server/2024/xml/`）を導く */
 export function xmlDocumentPaths(mainHref: string): { menuHref: string; xmlDirHref: string } {
   const m = /^(\/server\/[^/]+)\/html\/([0-9A-Za-z_]+)Main\.html$/.exec(mainHref);

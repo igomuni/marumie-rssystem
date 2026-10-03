@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { extractServerLinks, isXmlEditionLink, parseMenuXmlFileNames, selectLinksToDownload, selectXmlDocumentLinks, xmlDocumentPaths } from './mof-archive-download';
+import { extractServerLinks, isXmlEditionLink, parseMenuXmlFileNames, requireMenuXmlFileNames, selectLinksToDownload, selectXmlDocumentLinks, xmlDocumentPaths } from './mof-archive-download';
 
 // 実アーカイブページの形（令和6年度 一般会計 当初予算）を模した fixture。network には依存しない
 const HTML = `
@@ -58,5 +58,10 @@ describe('目次からの XML 列挙', () => {
   it('Main.html から目次と XML ディレクトリの path を導く。形が違えば throw', () => {
     expect(xmlDocumentPaths('/server/2024/html/202411001Main.html')).toEqual({ menuHref: '/server/2024/html/202411001menu.html', xmlDirHref: '/server/2024/xml/' });
     expect(() => xmlDocumentPaths('/server/2024/csv/DL202411001.zip')).toThrow();
+  });
+  it('目次から XML を1件も列挙できなければ throw する（0件を成功扱いにしない）', () => {
+    expect(() => requireMenuXmlFileNames('LineOut(01,1,"見出しだけ","","");', '202411001')).toThrow(/202411001/);
+    expect(() => requireMenuXmlFileNames('', '202411001')).toThrow();
+    expect(requireMenuXmlFileNames(MENU, '202411001')).toHaveLength(4);
   });
 });

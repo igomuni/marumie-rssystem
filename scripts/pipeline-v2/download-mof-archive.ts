@@ -34,7 +34,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { writeFileAtomic } from './lib/atomic-write';
-import { extractServerLinks, parseMenuXmlFileNames, selectLinksToDownload, selectXmlDocumentLinks, xmlDocumentPaths, type ArchiveLink } from './lib/mof-archive-download';
+import { extractServerLinks, requireMenuXmlFileNames, selectLinksToDownload, selectXmlDocumentLinks, xmlDocumentPaths, type ArchiveLink } from './lib/mof-archive-download';
 
 const FETCH_TIMEOUT_MS = 30_000;
 const THROTTLE_MS = 1_000;
@@ -127,7 +127,13 @@ async function downloadXmlDocument(year: number, link: ArchiveLink, outRoot: str
     return 1;
   }
   // 目次は EUC-JP。ファイル名の列挙にだけデコードして使い、保存するのは取得した byte 列のまま
-  const names = parseMenuXmlFileNames(new TextDecoder('euc-jp').decode(fs.readFileSync(local(menuHref))));
+  let names: string[];
+  try {
+    names = requireMenuXmlFileNames(new TextDecoder('euc-jp').decode(fs.readFileSync(local(menuHref))), link.reportId);
+  } catch (e) {
+    console.error(`    ${e instanceof Error ? e.message : String(e)}`);
+    return 1;
+  }
   console.log(`    目次から本文XML ${names.length}件`);
   for (const name of names) {
     const rec = await downloadRawFile(abs(`${xmlDirHref}${name}`), local(`${xmlDirHref}${name}`));
