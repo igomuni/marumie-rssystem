@@ -1,0 +1,63 @@
+{
+  "schema": "budget-request-incomplete-name-guard-h1-human-validation-package-manifest/v0",
+  "packageVersion": 1,
+  "worklist": {
+    "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-human-validation-worklist.json",
+    "sha256": "3546e523b8982c863dad51b889d0cb07dd978a529e20bcc70a12ef5eb8226c69"
+  },
+  "protocol": {
+    "path": "docs/tasks/20261003_2048_FieldResolver_v0_H1_Human_Reviewer_Protocol.md",
+    "sha256": "6c9d40cf6a24c4998cdc0e3b339b97f66439f6593940e42c76a4380eb7b9993d"
+  },
+  "sources": [
+    {
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "reviewerFilename": "20230907_policies_budget_04.pdf",
+      "sha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+      "pageCount": 147,
+      "unitCount": 3
+    },
+    {
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "reviewerFilename": "000157010.pdf",
+      "sha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+      "pageCount": 193,
+      "unitCount": 7
+    },
+    {
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "reviewerFilename": "230901-2.pdf",
+      "sha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+      "pageCount": 378,
+      "unitCount": 5
+    },
+    {
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "reviewerFilename": "ippan_o.pdf",
+      "sha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+      "pageCount": 106,
+      "unitCount": 38
+    },
+    {
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "reviewerFilename": "05-1b-01.pdf",
+      "sha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+      "pageCount": 1723,
+      "unitCount": 1
+    },
+    {
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "reviewerFilename": "001630995.pdf",
+      "sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+      "pageCount": 1097,
+      "unitCount": 6
+    },
+    {
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "reviewerFilename": "gaisanyoukyu.pdf",
+      "sha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47",
+      "pageCount": 540,
+      "unitCount": 5
+    }
+  ]
+}

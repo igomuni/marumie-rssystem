@@ -1,0 +1,84 @@
+{
+  "schema": "budget-request-incomplete-name-guard-h1-human-validation-evaluation/v0",
+  "evaluationType": "frozen human GT (reviewer H01) status + AI/human agreement",
+  "frozenInputs": {
+    "h1-human-validation-visual-gt.json": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-human-validation-visual-gt.json",
+      "sha256": "25ca613a3f8fdfd806a60d7c6033109561bbb627719a5324ee3c16746cb514a4"
+    },
+    "h1-human-validation-reviewer-response-H01.json": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-human-validation-reviewer-response-H01.json",
+      "sha256": "3fa66693676aff229d61e90eb6be52612058a2bd3f0078c5361c7920fa1a8427"
+    },
+    "h1-human-validation-reviewer-metadata.json": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-human-validation-reviewer-metadata.json",
+      "sha256": "42c5741e4ea086e936bb3754a82591ab5a78a6a62032b47318c90648fab2a124"
+    },
+    "h1-human-validation-worklist.json": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-human-validation-worklist.json",
+      "sha256": "3546e523b8982c863dad51b889d0cb07dd978a529e20bcc70a12ef5eb8226c69"
+    },
+    "h1-scope-completion-visual-gt.json": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-scope-completion-visual-gt.json",
+      "sha256": "3cb9eb9a5825ba3739a560e17940f224633c62890243a846d0cc89920a1318b9"
+    },
+    "visual-gt.json": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/visual-gt.json",
+      "sha256": "dcca2625403f93d641cf06d62afaf1172431086670b13a1c70bc4efe7bc9efe2"
+    }
+  },
+  "blindness": {
+    "case": "B",
+    "blindnessEvidenceStatus": "user_attested_independent_reviewer",
+    "declarationTiming": "not_recorded_pre_review",
+    "reviewerAuthoredDeclaration": false,
+    "protocolDeviation": true
+  },
+  "humanCounts": {
+    "population": 65,
+    "H_complete": 0,
+    "H_incomplete": 65,
+    "H_unclear": 0,
+    "H_decisive": 65
+  },
+  "humanValidationStatus": {
+    "status": "VALIDATED",
+    "rule": "VALIDATED: H_complete==0 && H_unclear==0 / CONTRADICTED: H_complete>=1 / INCONCLUSIVE: H_complete==0 && H_unclear>=1",
+    "note": "status は事前登録規則の機械適用。blindness procedure compliance（Case B・protocolDeviation）とは別"
+  },
+  "aiPopulation": {
+    "size": 65,
+    "L27": 27,
+    "U38": 38,
+    "aiLabelCounts": {
+      "complete": 0,
+      "incomplete": 65,
+      "unclear": 0,
+      "decisive": 65
+    }
+  },
+  "agreement": {
+    "total": 65,
+    "exactAgreementCount": 65,
+    "exactAgreementRate": 1,
+    "confusion": {
+      "complete_on_current_logical_row": {
+        "complete_on_current_logical_row": 0,
+        "incomplete_continues_below": 0,
+        "unclear": 0
+      },
+      "incomplete_continues_below": {
+        "complete_on_current_logical_row": 0,
+        "incomplete_continues_below": 65,
+        "unclear": 0
+      },
+      "unclear": {
+        "complete_on_current_logical_row": 0,
+        "incomplete_continues_below": 0,
+        "unclear": 0
+      }
+    },
+    "disagreementCount": 0,
+    "disagreementUnitIds": []
+  }
+}

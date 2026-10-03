@@ -1,0 +1,54 @@
+{
+  "schema": "budget-request-incomplete-name-guard-h1-human-validation-provenance/v0",
+  "researchPurpose": "independent human validation of frozen AI Visual GT",
+  "populationDefinition": "complete frozen #367 P3 guard-fire population",
+  "populationSize": 65,
+  "derivation": "H = L27 ∪ U38 = F（L27 = P3 評価で guard 発火した labeled unit、U38 = H1 worklist）。identity は unitId の完全一致のみ",
+  "sourceCommits": {
+    "p3Freeze": "587a477",
+    "h1Worklist": "caefc6206f85bf9217b307797ea7ae01b7c83bd3",
+    "h1Preregistration": "4ad66c4bbb915d5d8385d02a61702d5ad0b812df",
+    "h1Supplement": "2e7656e0e822b14083c3ac8165d151b8e6de8fcc",
+    "h1AiGtFreeze": "3d00e16c9da64b79ddf6a4f0304972f1cde6a358",
+    "h1P4ResultFreeze": "b8c71b2743d22b36c4476121e7db91788f2acfc6"
+  },
+  "sourceArtifacts": {
+    "p3Evaluation": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/p3-evaluation.json",
+      "sha256": "4c8662b3f9de8cede6f384e52232d83f0217aaddc2ad54921c92f6fc4342a11d"
+    },
+    "gtWorklist": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/gt-worklist.json",
+      "sha256": "6836588b1e017eedea3559567b0b1b6e603da5943c410fb6831660d0b61ca7b1"
+    },
+    "h1Worklist": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-scope-completion-worklist.json",
+      "sha256": "fa9a3abebad3452d0a4bfd761044f83b88427ba1eef2bc7069179155ce57028c"
+    },
+    "h1P4Evaluation": {
+      "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-scope-completion-p4-evaluation.json",
+      "sha256": "015ded4173b3f03b6fb69d43053c447d10f79b5219490fa395fe5cca3ee3e767"
+    }
+  },
+  "canonicalIdentityRule": "unitId = documentKey:page:logicalRowIndex の完全一致（名称・code・目視による照合は禁止）",
+  "canonicalOrderingRule": "unitId の辞書順",
+  "excludedAnchoringFields": [
+    "AI label",
+    "existing visual GT label",
+    "H1 visual GT label",
+    "baselineName",
+    "baselineValue",
+    "guard output",
+    "predicate values",
+    "reasonCode",
+    "continuation candidate",
+    "stratum",
+    "knownFailure",
+    "agreement",
+    "machine prediction"
+  ],
+  "humanFacingWorklist": {
+    "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/h1-human-validation-worklist.json",
+    "sha256": "3546e523b8982c863dad51b889d0cb07dd978a529e20bcc70a12ef5eb8226c69"
+  }
+}

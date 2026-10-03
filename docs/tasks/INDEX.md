@@ -2,6 +2,15 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_2238_FieldResolver_v0_H1_Human_Validation_Result.md](20261003_2238_FieldResolver_v0_H1_Human_Validation_Result.md) — H1 human validation result。H01の65件はH_complete0/incomplete65/unclear0でstatus=VALIDATED、AIと65/65一致。Case B（事前declarationなし）のprotocol deviation付き・一般化せず
+- [20261003_2230_FieldResolver_v0_H1_Human_GT_Freeze.md](20261003_2230_FieldResolver_v0_H1_Human_GT_Freeze.md) — H1 human GT freeze。reviewer H01 の raw response(65 unit)と human GT を改変せず保全。blindness は user_attested（本人の事前declarationなし＝protocol deviation）。件数・判定・agreement は未実施
+- [20261003_2049_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration_Supplement.md](20261003_2049_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration_Supplement.md) — HV 事前登録の補遺。集計を知る人は blind reviewer 不適格・declaration・blind violation 規則と reviewer package(protocol/manifest/原本7本)を凍結。54ba20d不変
+- [20261003_2048_FieldResolver_v0_H1_Human_Reviewer_Protocol.md](20261003_2048_FieldResolver_v0_H1_Human_Reviewer_Protocol.md) — reviewer に渡す手順書（AI結果を含まない。3ラベル・視覚のみ規則・declaration・記録形式）
+- [20261003_2043_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration.md](20261003_2043_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration.md) — H1 独立 human validation の事前登録。frozen 65 unit（27+38）の blind worklist(a58e83f)・VALIDATED/CONTRADICTED/INCONCLUSIVE 規則を凍結。PDF未確認
+- [20261003_2031_FieldResolver_v0_H1_Scope_Completion_Audit_P4_Result.md](20261003_2031_FieldResolver_v0_H1_Scope_Completion_Audit_P4_Result.md) — H1 P4 result。frozen AI Visual GT 上 N_complete 0 / incomplete 38 / unclear 0 で GO（65件の観測分類のみ・一般化せず・human review pending）
+- [20261003_2014_FieldResolver_v0_H1_P3_Visual_GT_Freeze.md](20261003_2014_FieldResolver_v0_H1_P3_Visual_GT_Freeze.md) — H1 P3: frozen 38 unit の Visual GT を visual-only・blind で作成し freeze。評価・判定は未実施（P4）
+- [20261003_2007_FieldResolver_v0_H1_Scope_Completion_Audit_Preregistration_Supplement.md](20261003_2007_FieldResolver_v0_H1_Scope_Completion_Audit_Preregistration_Supplement.md) — H1 事前登録の補遺。ラベル定義を #367 と同じ視覚的意味に固定（baseline非参照・「確認できない」はunclear）。仮説・基準・worklistは不変
+- [20261003_2001_FieldResolver_v0_H1_Scope_Completion_Audit_Preregistration.md](20261003_2001_FieldResolver_v0_H1_Scope_Completion_Audit_Preregistration.md) — H1 事前登録。#367 の guard 発火65件のうち未ラベル38件を全数 audit する規則・worklist(caefc62)・GO/STOP/INCONCLUSIVE を凍結。PDF未確認
 - [20261003_1518_FieldResolver_v0_Incomplete_Name_Safety_Guard_P3_Result.md](20261003_1518_FieldResolver_v0_Incomplete_Name_Safety_Guard_P3_Result.md) — incomplete-name guard の P3 実装・凍結評価。GO-WITH-SCOPE（incomplete 27/27 を ambiguous 化・FAC 0。G層にcompleteが無くFACは未測定）
 - [20261003_1446_FieldResolver_v0_Incomplete_Name_Visual_GT_P2.md](20261003_1446_FieldResolver_v0_Incomplete_Name_Visual_GT_P2.md) — incomplete-name guard の視覚GT（P2）。43 unit・complete 16 / incomplete 27 / unclear 0。guard・評価は未実施
 - [20261003_1437_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration_Supplement.md](20261003_1437_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration_Supplement.md) — 1321 事前登録の補遺（P0の現行状態・evidence属性・status/provenance照合・P3実装計画・debt）。ルールは変更なし

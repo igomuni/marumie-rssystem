@@ -1,0 +1,330 @@
+{
+  "reviewerId": "H01",
+  "units": [
+    {
+      "unitId": "cfa-general-detail-7-147:56:15",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:56:25",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:94:24",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "maff-additional:111:30",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "maff-additional:166:34",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "maff-additional:298:16",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "maff-additional:58:8",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "maff-additional:69:21",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:29:11",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:31:19",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:33:4",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:35:6",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:39:20",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:39:7",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:41:12",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:43:23",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:47:27",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:48:15",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:48:31",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:49:5",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:50:13",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:51:25",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:51:9",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:52:24",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:52:26",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:52:29",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:52:9",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:54:5",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:55:23",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:55:33",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:55:5",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:56:30",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:57:13",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:57:20",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:58:26",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:58:5",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:59:18",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:63:15",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:10",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:31",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:33",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:4",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:6",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:8",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:92:32",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "meti-detail-9-106:93:6",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mhlw-detail-1555-1700:1651:26",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mlit-additional:238:12",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mlit-additional:267:21",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mlit-additional:275:37",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mlit-additional:292:18",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mlit-additional:292:25",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mlit-additional:292:28",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mod-additional:236:16",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mod-additional:256:4",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mod-additional:472:15",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mod-additional:472:24",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "mod-additional:478:7",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "moe-additional:100:4",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "moe-additional:105:4",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "moe-additional:130:34",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "moe-additional:133:7",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "moe-ippan:75:27",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "moe-ippan:75:31",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    },
+    {
+      "unitId": "moe-ippan:75:7",
+      "label": "incomplete_continues_below",
+      "reviewerType": "human"
+    }
+  ]
+}

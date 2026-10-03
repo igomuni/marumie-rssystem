@@ -1,0 +1,417 @@
+{
+  "schema": "budget-request-incomplete-name-guard-h1-worklist/v0",
+  "provenance": {
+    "researchPurpose": "#367 scope-completion audit",
+    "parentExperiment": "FieldResolver v0 incomplete-name safety guard P3",
+    "populationDefinition": "frozen P3 guard-fire population（P3 凍結評価 CLI と同一の文脈・resolver・guard on/off で name が変化した record 全て）",
+    "derivation": "U = F \\ L（L = F ∩ visual-gt.json の 43 unit = 27 件。identity は documentKey:page:logicalRowIndex の完全一致。43 unit のうち guard 非発火の 16 件は F に含まれない）",
+    "guardFireCount": 65,
+    "previouslyLabeledCount": 27,
+    "auditUnitCount": 38,
+    "baseFreezeCommit": "587a477",
+    "predicateVersion": "A∧B∧¬C∧¬D (preregistration 2e9eff1 + supplement e5e5cd8)",
+    "resolverSourceSha256": "758eb8f6afdf45bd39c9853623201a4afbac8e8d6883626149d889335c2bb224",
+    "inputArtifacts": {
+      "sample": {
+        "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/sample.json",
+        "sha256": "bffdbd3229c64179df1888ea97cd066a885c2ebaa890bfc10853348d1df90807"
+      },
+      "visualGt": {
+        "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/visual-gt.json",
+        "sha256": "dcca2625403f93d641cf06d62afaf1172431086670b13a1c70bc4efe7bc9efe2"
+      },
+      "p3Evaluation": {
+        "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/p3-evaluation.json",
+        "sha256": "4c8662b3f9de8cede6f384e52232d83f0217aaddc2ad54921c92f6fc4342a11d"
+      },
+      "baselineArtifacts": {
+        "path": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/baseline-artifacts.json",
+        "sha256": "79a08299dd9ebe04e1fcb2d74b8f31c68f71fccccf42ee0e334b83848ae2e98e"
+      }
+    },
+    "canonicalOrdering": "unitId の辞書順（昇順・内容に依存しない）",
+    "excludedFields": "baselineName・guard 出力・predicate 値・reasonCode・stratum・予測ラベルは含めない（GT anchoring 回避）"
+  },
+  "units": [
+    {
+      "unitId": "maff-additional:166:34",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 166,
+      "code": "036",
+      "anchorYPt": [
+        499.9,
+        506.9
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:29:11",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 29,
+      "code": "13062-2305-16-8329",
+      "anchorYPt": [
+        215.3,
+        229.1
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:31:19",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 31,
+      "code": "010",
+      "anchorYPt": [
+        333.3,
+        340.2
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:33:4",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 33,
+      "code": "60062-2123-09-1335",
+      "anchorYPt": [
+        55.5,
+        69.4
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:35:6",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 35,
+      "code": "95062-2405-16-0916",
+      "anchorYPt": [
+        83.3,
+        90.3
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:39:20",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 39,
+      "code": "50062-2125-14-5923",
+      "anchorYPt": [
+        305.5,
+        319.4
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:39:7",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 39,
+      "code": "50062-2125-14-5923",
+      "anchorYPt": [
+        111.1,
+        125
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:41:12",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 41,
+      "code": "015",
+      "anchorYPt": [
+        187.5,
+        201.4
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:43:23",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 43,
+      "code": "010",
+      "anchorYPt": [
+        395.8,
+        402.7
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:47:27",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 47,
+      "code": "13062-2123-09-1329",
+      "anchorYPt": [
+        499.9,
+        513.8
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:48:15",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 48,
+      "code": "13062-2125-14-5930",
+      "anchorYPt": [
+        201.4,
+        215.3
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:48:31",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 48,
+      "code": "13062-2122-08-2083",
+      "anchorYPt": [
+        506.9,
+        520.8
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:49:5",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 49,
+      "code": "13062-2123-09-1329",
+      "anchorYPt": [
+        90.3,
+        104.2
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:51:25",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 51,
+      "code": "60062-2123-09-1336",
+      "anchorYPt": [
+        437.5,
+        451.3
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:51:9",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 51,
+      "code": "60062-2123-09-1336",
+      "anchorYPt": [
+        187.5,
+        201.4
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:52:24",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 52,
+      "code": "13062-2125-14-5941",
+      "anchorYPt": [
+        354.1,
+        368
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:52:26",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 52,
+      "code": "13062-2305-16-3998",
+      "anchorYPt": [
+        388.8,
+        402.7
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:52:29",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 52,
+      "code": "13062-2305-16-3998",
+      "anchorYPt": [
+        437.5,
+        451.3
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:52:9",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 52,
+      "code": "60062-2123-09-1336",
+      "anchorYPt": [
+        118,
+        131.9
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:54:5",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 54,
+      "code": "13062-2123-09-1338",
+      "anchorYPt": [
+        90.3,
+        104.2
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:55:23",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 55,
+      "code": "60062-2125-14-5940",
+      "anchorYPt": [
+        368,
+        381.9
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:55:33",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 55,
+      "code": "60062-2125-14-5940",
+      "anchorYPt": [
+        506.9,
+        520.8
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:57:13",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 57,
+      "code": "60062-2123-09-1330",
+      "anchorYPt": [
+        215.3,
+        229.1
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:57:20",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 57,
+      "code": "60062-2125-14-5940",
+      "anchorYPt": [
+        326.4,
+        333.3
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:58:26",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 58,
+      "code": "061",
+      "anchorYPt": [
+        423.6,
+        437.5
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:58:5",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 58,
+      "code": "60062-2123-09-1330",
+      "anchorYPt": [
+        90.3,
+        104.2
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:59:18",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 59,
+      "code": "60062-2123-09-1330",
+      "anchorYPt": [
+        340.2,
+        354.1
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:63:15",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 63,
+      "code": "95062-2825-16-3855",
+      "anchorYPt": [
+        215.3,
+        229.1
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:64:10",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 64,
+      "code": "60062-2123-09-1332",
+      "anchorYPt": [
+        180.5,
+        187.5
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:64:33",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 64,
+      "code": "60062-2123-09-1332",
+      "anchorYPt": [
+        493,
+        499.9
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:64:4",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 64,
+      "code": "60062-2129-06-0788",
+      "anchorYPt": [
+        55.5,
+        62.5
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:64:6",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 64,
+      "code": "60062-2122-08-2085",
+      "anchorYPt": [
+        97.2,
+        104.2
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:64:8",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 64,
+      "code": "60062-2122-08-6499",
+      "anchorYPt": [
+        138.9,
+        145.8
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:92:32",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 92,
+      "code": "63062-2306-22-2610",
+      "anchorYPt": [
+        506.9,
+        513.8
+      ]
+    },
+    {
+      "unitId": "meti-detail-9-106:93:6",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 93,
+      "code": "63062-2306-22-2611",
+      "anchorYPt": [
+        131.9,
+        138.9
+      ]
+    },
+    {
+      "unitId": "mlit-additional:292:18",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 292,
+      "code": "410",
+      "anchorYPt": [
+        319.4,
+        326.4
+      ]
+    },
+    {
+      "unitId": "mlit-additional:292:28",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 292,
+      "code": "435",
+      "anchorYPt": [
+        493,
+        499.9
+      ]
+    },
+    {
+      "unitId": "mod-additional:472:15",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 472,
+      "code": "35030-2725-16-9484",
+      "anchorYPt": [
+        263.9,
+        270.8
+      ]
+    }
+  ]
+}
