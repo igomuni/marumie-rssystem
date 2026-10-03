@@ -1,0 +1,615 @@
+{
+  "schema": "budget-request-incomplete-name-guard-visual-gt/v0",
+  "status": "frozen-before-implementation",
+  "preregistration": "docs/tasks/20261003_1321_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration.md",
+  "worklist": "tests/fixtures/budget-request-field-resolver/incomplete-name-guard-v0/gt-worklist.json",
+  "labelContract": {
+    "complete_on_current_logical_row": "the whole visible name lies within the y-range of the current logical row (anchorYPt); nothing below belongs to the same name",
+    "incomplete_continues_below": "visible name lines continue below the y-range of the current logical row",
+    "unclear": "could not be decided visually (none recorded)"
+  },
+  "method": {
+    "author": "the working assistant (AI), reading rendered crops (pdftoppm, 150 dpi, x 0-510 pt, anchor y -30..+75 pt) of the original PDFs",
+    "inputsUsed": "gt-worklist.json only (unit location, record code, anchor y-range)",
+    "notUsed": [
+      "sample.json (strata, baselineName)",
+      "FieldResolver output",
+      "guard predicates",
+      "Treatment output"
+    ],
+    "caveat": "the author also designed the sample and knows from the conversation that the three p75 units are the known failures; strata and predicates were not consulted while labelling; an independent human review is pending"
+  },
+  "humanReview": {
+    "status": "pending"
+  },
+  "units": [
+    {
+      "unitId": "mlit-additional:967:26",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 967,
+      "codeVisual": "95191-2123-09-5010",
+      "visualNameLines": [
+        "土地建物借料"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mod-additional:58:11",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 58,
+      "codeVisual": "35030-2111-04-0100",
+      "visualNameLines": [
+        "超過勤務手当"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "moe-additional:164:14",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 164,
+      "codeVisual": "02-0200",
+      "visualNameLines": [
+        "扶養手当"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "maff-additional:364:28",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 364,
+      "codeVisual": "140",
+      "visualNameLines": [
+        "海岸事業調査諸費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "meti-detail-9-106:50:13",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 50,
+      "codeVisual": "13062-2125-14-5930",
+      "visualNameLines": [
+        "産業技術・環境",
+        "・産業標準政策",
+        "推進研究開発等",
+        "委託費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:108:29",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 108,
+      "codeVisual": "06083-2123-09-1010",
+      "visualNameLines": [
+        "庁費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "meti-detail-9-106:89:38",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 89,
+      "codeVisual": "95062-2959-07-1010",
+      "visualNameLines": [
+        "報償費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mext-detail-870-880:875:29",
+      "canonicalUrl": "https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "physicalPage": 875,
+      "codeVisual": "95016-2123-09-6010",
+      "visualNameLines": [
+        "招へい外国人滞",
+        "在費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "maff-additional:58:8",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 58,
+      "codeVisual": "65061-2855-16-2735",
+      "visualNameLines": [
+        "農林水産物・食",
+        "品輸出促進対策",
+        "地方公共団体事",
+        "業費補助金"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mhlw-detail-1555-1700:1609:6",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 1609,
+      "codeVisual": "03-1100",
+      "visualNameLines": [
+        "住居手当"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "meti-detail-9-106:38:15",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 38,
+      "codeVisual": "005",
+      "visualNameLines": [
+        "経済協力の促進調査指導",
+        "及び広報"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "maff-additional:166:10",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 166,
+      "codeVisual": "13061-2202-08-6330",
+      "visualNameLines": [
+        "外国研究者招へ",
+        "い旅費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mlit-additional:468:5",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 468,
+      "codeVisual": "95016-2122-08-6012",
+      "visualNameLines": [
+        "政府開発援助委",
+        "員等旅費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "maff-additional:298:16",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 298,
+      "codeVisual": "65061-2305-16-8075",
+      "visualNameLines": [
+        "幹線林道事業移",
+        "行円滑化対策交",
+        "付金"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "moe-additional:133:21",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 133,
+      "codeVisual": "01-45",
+      "visualNameLines": [
+        "廃棄物処理施設整備事業",
+        "調査諸費に必要な経費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mod-additional:386:34",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 386,
+      "codeVisual": "35030-2203-09-3140",
+      "visualNameLines": [
+        "諸器材購入費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "maff-additional:111:30",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 111,
+      "codeVisual": "65061-2815-16-2848",
+      "visualNameLines": [
+        "被害農家営農資",
+        "金利子補給等補",
+        "助金"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mod-additional:478:7",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 478,
+      "codeVisual": "35030-2305-16-7715",
+      "visualNameLines": [
+        "独立行政法人駐",
+        "留軍等労働者労",
+        "務管理機構運営",
+        "費交付金"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mhlw-detail-1260-1275:1264:18",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 1264,
+      "codeVisual": "010",
+      "visualNameLines": [
+        "国立ハンセン病療養所施",
+        "設費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mext-detail-870-880:871:30",
+      "canonicalUrl": "https://www.mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "physicalPage": 871,
+      "codeVisual": "95016-2122-08-6012",
+      "visualNameLines": [
+        "政府開発援助委",
+        "員等旅費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:139:7",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 139,
+      "codeVisual": "06083-2845-16-7615",
+      "visualNameLines": [
+        "障害児入所給付",
+        "費等負担金"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "complete_on_current_logical_row",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "maff-additional:69:21",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "physicalPage": 69,
+      "codeVisual": "65061-2125-14-4118",
+      "visualNameLines": [
+        "食品の安全・消",
+        "費者の信頼確保",
+        "対策調査等地方",
+        "公共団体委託費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mod-additional:256:4",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 256,
+      "codeVisual": "35030-2125-14-1128",
+      "visualNameLines": [
+        "在日米軍地域交",
+        "流業務委託費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mlit-additional:238:12",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 238,
+      "codeVisual": "619",
+      "visualNameLines": [
+        "資格制度及び監査等によ",
+        "る航行安全確保に必要な",
+        "経費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "meti-detail-9-106:55:5",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 55,
+      "codeVisual": "60062-2123-09-1330",
+      "visualNameLines": [
+        "中小企業情報処",
+        "理・サービス・",
+        "製造産業振興業",
+        "務庁費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mlit-additional:292:25",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 292,
+      "codeVisual": "420",
+      "visualNameLines": [
+        "民間施設との連携による",
+        "高速道路の快適な利用環",
+        "境実現に向けた取組に関",
+        "する検討経費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mlit-additional:275:37",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 275,
+      "codeVisual": "850",
+      "visualNameLines": [
+        "北東アジア港湾局長会議",
+        "等に必要な経費（前年度",
+        "限りの経費）"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "meti-detail-9-106:56:30",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 56,
+      "codeVisual": "60062-2305-16-3997",
+      "visualNameLines": [
+        "中小企業情報処",
+        "理・サービス・",
+        "製造産業振興事",
+        "業費補助金"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "meti-detail-9-106:64:31",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "physicalPage": 64,
+      "codeVisual": "60062-2129-06-0788",
+      "visualNameLines": [
+        "中小企業地域経",
+        "済政策推進業務",
+        "諸謝金"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "moe-ippan:75:27",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 75,
+      "codeVisual": "006",
+      "visualNameLines": [
+        "自然環境保全地域等保全",
+        "対策費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mlit-additional:267:21",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "physicalPage": 267,
+      "codeVisual": "530",
+      "visualNameLines": [
+        "道路構造物のメンテナン",
+        "スサイクル確立に向けた",
+        "経費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mod-additional:236:16",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 236,
+      "codeVisual": "35030-2125-14-1120",
+      "visualNameLines": [
+        "施設区域等関連",
+        "事務地方公共団",
+        "体委託費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "moe-additional:105:4",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 105,
+      "codeVisual": "031",
+      "visualNameLines": [
+        "前年度限りの経費（地域",
+        "からのグリーン社会の実",
+        "現に向けたステークホル",
+        "ダー連携促進事業）"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "moe-additional:100:4",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 100,
+      "codeVisual": "006",
+      "visualNameLines": [
+        "持続可能な社会構築に向",
+        "けた企業経営における環",
+        "境三社会の統合的達成促",
+        "進事業"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "moe-additional:133:7",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 133,
+      "codeVisual": "015",
+      "visualNameLines": [
+        "前年度限りの経費（環境",
+        "で地域を元気にする地域",
+        "循環共生圏づくりプラッ",
+        "トフォーム事業費）"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mod-additional:472:24",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "physicalPage": 472,
+      "codeVisual": "35030-2725-16-9485",
+      "visualNameLines": [
+        "合衆国軍隊特別",
+        "協定光熱水料等",
+        "支出金"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:94:24",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 94,
+      "codeVisual": "06083-2129-06-0145",
+      "visualNameLines": [
+        "旧優生保護一時",
+        "金支給等業務諸",
+        "謝金"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "moe-additional:130:34",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 130,
+      "codeVisual": "13054-1305-16-0031",
+      "visualNameLines": [
+        "国立研究開発法",
+        "人国立環境研究",
+        "所施設整備費補",
+        "助金"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "moe-ippan:75:31",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 75,
+      "codeVisual": "011",
+      "visualNameLines": [
+        "世界自然遺産等保全対策",
+        "費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "mhlw-detail-1555-1700:1651:26",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "physicalPage": 1651,
+      "codeVisual": "08085-2122-08-6069",
+      "visualNameLines": [
+        "障害者等雇用安",
+        "定促進業務委員",
+        "等旅費"
+      ],
+      "linesWithinAnchorRow": 2,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:56:25",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 56,
+      "codeVisual": "076",
+      "visualNameLines": [
+        "こども政策に関するデー",
+        "タ・統計とＥＢＰＭの充",
+        "実に関する経費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised; the characters ＥＢＰＭ look full-width but the code points cannot be decided visually"
+    },
+    {
+      "unitId": "cfa-general-detail-7-147:56:15",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "physicalPage": 56,
+      "codeVisual": "074",
+      "visualNameLines": [
+        "こどもまんなか社会実現",
+        "プラットフォームの設立",
+        "及び運営経費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised"
+    },
+    {
+      "unitId": "moe-ippan:75:7",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "physicalPage": 75,
+      "codeVisual": "011",
+      "visualNameLines": [
+        "ネイチャーポジティブ（",
+        "ＮＰ）の実現に向けた生",
+        "物多様性保全等のための",
+        "国際協力・ルール先導推",
+        "進費"
+      ],
+      "linesWithinAnchorRow": 1,
+      "visualLabel": "incomplete_continues_below",
+      "reviewNote": "transcribed from the 150 dpi crop of the original PDF page; inter-character spacing and full/half-width forms are not normalised; ＮＰ looks full-width but the code points cannot be decided visually"
+    }
+  ]
+}

@@ -2,6 +2,11 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_1518_FieldResolver_v0_Incomplete_Name_Safety_Guard_P3_Result.md](20261003_1518_FieldResolver_v0_Incomplete_Name_Safety_Guard_P3_Result.md) — incomplete-name guard の P3 実装・凍結評価。GO-WITH-SCOPE（incomplete 27/27 を ambiguous 化・FAC 0。G層にcompleteが無くFACは未測定）
+- [20261003_1446_FieldResolver_v0_Incomplete_Name_Visual_GT_P2.md](20261003_1446_FieldResolver_v0_Incomplete_Name_Visual_GT_P2.md) — incomplete-name guard の視覚GT（P2）。43 unit・complete 16 / incomplete 27 / unclear 0。guard・評価は未実施
+- [20261003_1437_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration_Supplement.md](20261003_1437_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration_Supplement.md) — 1321 事前登録の補遺（P0の現行状態・evidence属性・status/provenance照合・P3実装計画・debt）。ルールは変更なし
+- [20261003_1321_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration.md](20261003_1321_FieldResolver_v0_Incomplete_Name_Safety_Guard_Preregistration.md) — 不完全な名称の safety guard 事前登録（A∧B∧¬C∧¬D・発火時 ambiguous・評価標本43unit・数値GO/STOP）。実装なし
+- [20261003_1225_FieldResolver_v0_MOE_p75_false_resolve_failure_isolation.md](20261003_1225_FieldResolver_v0_MOE_p75_false_resolve_failure_isolation.md) — 環境省p75 `011` 名称切れの failure isolation（LogicalRowの連鎖で ambiguous が上書きされ、FieldResolverが信号なし=完結と解釈。同型83件の候補）。コード変更なし
 - [20261003_0825_FieldResolver_v0_Heldout_Result.md](20261003_0825_FieldResolver_v0_Heldout_Result.md) — FieldResolver v0 held-out 初回結果。16ページ・52 target で STOP（名称切れの false resolve 1＋GT locator転記ミス1）、blank 24/24・総表は安全にabstain
 - [20261003_0805_FieldResolver_v0_Heldout_Preregistration.md](20261003_0805_FieldResolver_v0_Heldout_Preregistration.md) — FieldResolver v0 held-out 評価の事前登録（abc57b9 freeze・MOD/MOE/MAFF/MLIT・4カテゴリ選定・first-run rule・STOP基準）
 - [20261003_0740_FieldResolver_v0_PoC_Result.md](20261003_0740_FieldResolver_v0_PoC_Result.md) — FieldResolver v0 PoC の結果。Golden 20 target で false resolved 0・safe coverage 99.1%、未確定3件の理由、評価を見て直した規則の開示、GO
