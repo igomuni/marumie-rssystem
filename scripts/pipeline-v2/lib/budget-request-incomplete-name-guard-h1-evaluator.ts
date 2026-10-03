@@ -18,3 +18,36 @@ export function decideH1(c: Pick<H1Counts, 'complete' | 'unclear'>): H1Decision 
   if (c.complete >= 1) return 'STOP';
   return c.unclear === 0 ? 'GO' : 'INCONCLUSIVE';
 }
+
+export type HumanValidationStatus = 'VALIDATED' | 'CONTRADICTED' | 'INCONCLUSIVE';
+
+/** HV-P2 事前登録 §11: VALIDATED = H_complete 0 かつ H_unclear 0 / CONTRADICTED = H_complete >= 1 / INCONCLUSIVE = H_complete 0 かつ H_unclear >= 1 */
+export function humanValidationStatus(c: Pick<H1Counts, 'complete' | 'unclear'>): HumanValidationStatus {
+  if (c.complete >= 1) return 'CONTRADICTED';
+  return c.unclear === 0 ? 'VALIDATED' : 'INCONCLUSIVE';
+}
+
+export interface AgreementResult {
+  total: number;
+  exactAgreementCount: number;
+  exactAgreementRate: number;
+  /** confusion[human][ai] */
+  confusion: Record<H1Label, Record<H1Label, number>>;
+  disagreementCount: number;
+  disagreementUnitIds: string[];
+}
+
+/** human と AI の exact label agreement（unitId の完全一致で結合。集合が一致しなければ throw） */
+export function agreement(human: Map<string, string>, ai: Map<string, string>): AgreementResult {
+  const hk = [...human.keys()].sort(), ak = [...ai.keys()].sort();
+  if (hk.length !== ak.length || hk.some((k, i) => k !== ak[i])) throw new Error('human と AI の unitId 集合が一致しない');
+  const confusion = Object.fromEntries(H1_LABELS.map(h => [h, Object.fromEntries(H1_LABELS.map(a => [a, 0]))])) as AgreementResult['confusion'];
+  const dis: string[] = [];
+  for (const id of hk) {
+    const h = human.get(id) as H1Label, a = ai.get(id) as H1Label;
+    if (!H1_LABELS.includes(h) || !H1_LABELS.includes(a)) throw new Error(`unknown label: ${id}`);
+    confusion[h][a]++;
+    if (h !== a) dis.push(id);
+  }
+  return { total: hk.length, exactAgreementCount: hk.length - dis.length, exactAgreementRate: (hk.length - dis.length) / hk.length, confusion, disagreementCount: dis.length, disagreementUnitIds: dis };
+}

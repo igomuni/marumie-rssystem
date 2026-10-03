@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_2238_FieldResolver_v0_H1_Human_Validation_Result.md](20261003_2238_FieldResolver_v0_H1_Human_Validation_Result.md) — H1 human validation result。H01の65件はH_complete0/incomplete65/unclear0でstatus=VALIDATED、AIと65/65一致。Case B（事前declarationなし）のprotocol deviation付き・一般化せず
 - [20261003_2230_FieldResolver_v0_H1_Human_GT_Freeze.md](20261003_2230_FieldResolver_v0_H1_Human_GT_Freeze.md) — H1 human GT freeze。reviewer H01 の raw response(65 unit)と human GT を改変せず保全。blindness は user_attested（本人の事前declarationなし＝protocol deviation）。件数・判定・agreement は未実施
 - [20261003_2049_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration_Supplement.md](20261003_2049_FieldResolver_v0_H1_Independent_Human_Validation_Preregistration_Supplement.md) — HV 事前登録の補遺。集計を知る人は blind reviewer 不適格・declaration・blind violation 規則と reviewer package(protocol/manifest/原本7本)を凍結。54ba20d不変
 - [20261003_2048_FieldResolver_v0_H1_Human_Reviewer_Protocol.md](20261003_2048_FieldResolver_v0_H1_Human_Reviewer_Protocol.md) — reviewer に渡す手順書（AI結果を含まない。3ラベル・視覚のみ規則・declaration・記録形式）

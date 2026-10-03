@@ -14,3 +14,24 @@ describe('H1 decision rule', () => {
     expect(() => countLabels(['x'])).toThrow();
   });
 });
+
+import { agreement, humanValidationStatus } from './budget-request-incomplete-name-guard-h1-evaluator';
+
+// HV-P2 の status 規則・agreement 計算そのものの test（frozen GT の結果は参照しない）
+describe('human-validation status rule', () => {
+  it('VALIDATED / CONTRADICTED / INCONCLUSIVE', () => {
+    expect(humanValidationStatus({ complete: 0, unclear: 0 })).toBe('VALIDATED');
+    expect(humanValidationStatus({ complete: 1, unclear: 0 })).toBe('CONTRADICTED');
+    expect(humanValidationStatus({ complete: 2, unclear: 3 })).toBe('CONTRADICTED');
+    expect(humanValidationStatus({ complete: 0, unclear: 1 })).toBe('INCONCLUSIVE');
+  });
+});
+describe('agreement', () => {
+  const C = 'complete_on_current_logical_row', I = 'incomplete_continues_below', U = 'unclear';
+  it('exact agreement・confusion・不一致 unitId を算出し、集合不一致は throw', () => {
+    const r = agreement(new Map([['a', I], ['b', C], ['c', U]]), new Map([['a', I], ['b', I], ['c', U]]));
+    expect(r).toMatchObject({ total: 3, exactAgreementCount: 2, disagreementCount: 1, disagreementUnitIds: ['b'] });
+    expect(r.confusion[C][I]).toBe(1);
+    expect(() => agreement(new Map([['a', I]]), new Map([['b', I]]))).toThrow();
+  });
+});
