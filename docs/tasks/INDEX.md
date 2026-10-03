@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261003_2007_FieldResolver_v0_H1_Scope_Completion_Audit_Preregistration_Supplement.md](20261003_2007_FieldResolver_v0_H1_Scope_Completion_Audit_Preregistration_Supplement.md) — H1 事前登録の補遺。ラベル定義を #367 と同じ視覚的意味に固定（baseline非参照・「確認できない」はunclear）。仮説・基準・worklistは不変
 - [20261003_2001_FieldResolver_v0_H1_Scope_Completion_Audit_Preregistration.md](20261003_2001_FieldResolver_v0_H1_Scope_Completion_Audit_Preregistration.md) — H1 事前登録。#367 の guard 発火65件のうち未ラベル38件を全数 audit する規則・worklist(caefc62)・GO/STOP/INCONCLUSIVE を凍結。PDF未確認
 - [20261003_1518_FieldResolver_v0_Incomplete_Name_Safety_Guard_P3_Result.md](20261003_1518_FieldResolver_v0_Incomplete_Name_Safety_Guard_P3_Result.md) — incomplete-name guard の P3 実装・凍結評価。GO-WITH-SCOPE（incomplete 27/27 を ambiguous 化・FAC 0。G層にcompleteが無くFACは未測定）
 - [20261003_1446_FieldResolver_v0_Incomplete_Name_Visual_GT_P2.md](20261003_1446_FieldResolver_v0_Incomplete_Name_Visual_GT_P2.md) — incomplete-name guard の視覚GT（P2）。43 unit・complete 16 / incomplete 27 / unclear 0。guard・評価は未実施
