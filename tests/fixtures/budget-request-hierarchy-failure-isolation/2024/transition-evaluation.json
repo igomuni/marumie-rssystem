@@ -1,0 +1,944 @@
+{
+  "byPublisher": {
+    "こども家庭庁": {
+      "I": 0,
+      "P": 0,
+      "R": 0,
+      "X": 111
+    },
+    "厚生労働省": {
+      "I": 14,
+      "P": 21,
+      "R": 0,
+      "X": 193
+    },
+    "国土交通省": {
+      "I": 8,
+      "P": 12,
+      "R": 0,
+      "X": 20
+    },
+    "文部科学省": {
+      "I": 19,
+      "P": 27,
+      "R": 0,
+      "X": 188
+    },
+    "環境省": {
+      "I": 17,
+      "P": 19,
+      "R": 0,
+      "X": 302
+    },
+    "経済産業省": {
+      "I": 30,
+      "P": 48,
+      "R": 0,
+      "X": 330
+    },
+    "農林水産省": {
+      "I": 8,
+      "P": 27,
+      "R": 0,
+      "X": 41
+    },
+    "防衛省": {
+      "I": 1,
+      "P": 4,
+      "R": 0,
+      "X": 199
+    }
+  },
+  "decision": {
+    "decision": "HIERARCHY_MAJOR_CAUSAL_FACTOR",
+    "rule": 3
+  },
+  "frozen": {
+    "hashes": {
+      "docs/tasks/20261005_0730_Budget_Request_Hierarchy_Failure_Isolation_Preregistration.md": "0841ed5b9dadafc2f62b24124facc8e462238ff7bd3b07d9b916dfdaa3e2484d",
+      "scripts/pipeline-v2/lib/budget-request-field-resolver.ts": "758eb8f6afdf45bd39c9853623201a4afbac8e8d6883626149d889335c2bb224",
+      "scripts/pipeline-v2/lib/budget-request-mof-reconciliation.ts": "da08b37713ecee53b642f74a0098a129de6a1e1e7ccebfb822228309acb8c19a",
+      "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+      "tests/fixtures/budget-request-full-corpus-baseline/2024/extraction-baseline.json": "89b28cbea73c9b7384e80cd2927c3c6ee35eabc4baf0f042730943657be4069f",
+      "tests/fixtures/budget-request-full-corpus-baseline/2024/extraction-population.json": "3ec53c133117033ea0c8a8f23a3196f5b28ff18120957c7531c48c6df15fdbf8",
+      "tests/fixtures/budget-request-full-corpus-baseline/2024/reconciliation-result.json": "2f14d15c2a78d41f0b9669642b150637eeae6489ed8b7ac8a9d3a84e3e912904",
+      "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1"
+    },
+    "mofJikouSha256": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+    "onControlAllMatched": true,
+    "pairedManifest": "paired-manifest.json"
+  },
+  "fullCorpusObservation74Pdfs": {
+    "byKind": {
+      "detail_line": 17677,
+      "request": 2968,
+      "unclassified": 9409
+    },
+    "pdfs": 74,
+    "requestParentItemStatus": {
+      "not_observed": 2968
+    }
+  },
+  "funnel": {
+    "off": {
+      "byClass": {
+        "name_unavailable": 19,
+        "parent_unresolved": 216
+      },
+      "jikouExactUnique": 0,
+      "nameAvailable": 216,
+      "parentItemKindResolved": 0,
+      "parentMofExactUnique_comparable": 0,
+      "requestsGeneralAccount": 235
+    },
+    "on": {
+      "byClass": {
+        "exact_unique": 98,
+        "name_unavailable": 19,
+        "no_exact_match": 3,
+        "parent_unresolved": 115
+      },
+      "jikouExactUnique": 98,
+      "nameAvailable": 216,
+      "parentItemKindResolved": 103,
+      "parentMofExactUnique_comparable": 101,
+      "requestsGeneralAccount": 235
+    }
+  },
+  "itemTransitions": {
+    "off_unclassified": 97
+  },
+  "join": {
+    "duplicateOff": 0,
+    "duplicateOn": 0,
+    "joined": 7973,
+    "offRecords": 7973,
+    "onRecords": 7973,
+    "pageSetsEqual": true,
+    "unjoinableOff": 0,
+    "unjoinableOn": 0,
+    "unjoinableSamples": []
+  },
+  "kindMatrix": {
+    "detail_line": {
+      "detail_line": 5237,
+      "item": 0,
+      "organization": 0,
+      "other": 0,
+      "request": 0,
+      "unclassified": 1267
+    },
+    "item": {
+      "detail_line": 0,
+      "item": 0,
+      "organization": 0,
+      "other": 0,
+      "request": 0,
+      "unclassified": 97
+    },
+    "organization": {
+      "detail_line": 0,
+      "item": 0,
+      "organization": 0,
+      "other": 0,
+      "request": 0,
+      "unclassified": 20
+    },
+    "request": {
+      "detail_line": 0,
+      "item": 0,
+      "organization": 0,
+      "other": 0,
+      "request": 274,
+      "unclassified": 0
+    },
+    "unclassified": {
+      "detail_line": 0,
+      "item": 0,
+      "organization": 0,
+      "other": 0,
+      "request": 0,
+      "unclassified": 1078
+    }
+  },
+  "kindMatrixByPdf": {
+    "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf": {
+      "detail_line": {
+        "detail_line": 360,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 104
+      },
+      "item": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 0
+      },
+      "organization": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 7
+      },
+      "request": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 24,
+        "unclassified": 0
+      },
+      "unclassified": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 62
+      }
+    },
+    "data/download/env.go.jp/content/000157010.pdf": {
+      "detail_line": {
+        "detail_line": 1122,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 284
+      },
+      "item": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 17
+      },
+      "organization": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 1
+      },
+      "request": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 46,
+        "unclassified": 0
+      },
+      "unclassified": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 161
+      }
+    },
+    "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf": {
+      "detail_line": {
+        "detail_line": 41,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 32
+      },
+      "item": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 8
+      },
+      "organization": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 1
+      },
+      "request": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 27,
+        "unclassified": 0
+      },
+      "unclassified": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 1
+      }
+    },
+    "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf": {
+      "detail_line": {
+        "detail_line": 844,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 295
+      },
+      "item": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 30
+      },
+      "organization": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 5
+      },
+      "request": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 50,
+        "unclassified": 0
+      },
+      "unclassified": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 14
+      }
+    },
+    "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf": {
+      "detail_line": {
+        "detail_line": 695,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 167
+      },
+      "item": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 19
+      },
+      "organization": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 2
+      },
+      "request": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 27,
+        "unclassified": 0
+      },
+      "unclassified": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 172
+      }
+    },
+    "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf": {
+      "detail_line": {
+        "detail_line": 628,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 177
+      },
+      "item": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 14
+      },
+      "organization": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 2
+      },
+      "request": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 21,
+        "unclassified": 0
+      },
+      "unclassified": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 156
+      }
+    },
+    "data/download/mlit.go.jp/page/content/001630395.pdf": {
+      "detail_line": {
+        "detail_line": 11,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 11
+      },
+      "item": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 8
+      },
+      "organization": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 1
+      },
+      "request": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 12,
+        "unclassified": 0
+      },
+      "unclassified": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 2
+      }
+    },
+    "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf": {
+      "detail_line": {
+        "detail_line": 1536,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 197
+      },
+      "item": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 1
+      },
+      "organization": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 1
+      },
+      "request": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 67,
+        "unclassified": 0
+      },
+      "unclassified": {
+        "detail_line": 0,
+        "item": 0,
+        "organization": 0,
+        "other": 0,
+        "request": 0,
+        "unclassified": 510
+      }
+    }
+  },
+  "nameStatus": {
+    "changed": {},
+    "reasonCounts": {
+      "column_layout_unobserved": {
+        "off": 0,
+        "on": 0
+      },
+      "continuation_ambiguous": {
+        "off": 838,
+        "on": 838
+      },
+      "no_name_token": {
+        "off": 146,
+        "on": 146
+      }
+    },
+    "unchanged": 7973,
+    "unchangedByLabel": {
+      "ambiguous/continuation_ambiguous": 838,
+      "resolved/none": 6985,
+      "unresolved/column_layout_not_corroborated_on_page": 4,
+      "unresolved/no_name_token": 146
+    }
+  },
+  "parentItemNotItemKind68": {
+    "byPublisher": {
+      "こども家庭庁": 20,
+      "環境省": 20,
+      "経済産業省": 1,
+      "防衛省": 27
+    },
+    "inPairedPopulation": 68,
+    "notInPairedPopulation": 0,
+    "offParentState": {
+      "not_observed": 68
+    },
+    "offRecordKind": {
+      "request": 68
+    },
+    "onParentRecordKind": {
+      "organization": 13,
+      "unclassified": 55
+    },
+    "stillNotItemKindInOff": 0,
+    "total": 68
+  },
+  "perPdf": [
+    {
+      "I": 0,
+      "P": 0,
+      "R": 0,
+      "X": 111,
+      "Y": 62,
+      "accountType": "general",
+      "duplicateOff": 0,
+      "duplicateOn": 0,
+      "itemTransitions": {},
+      "joined": 557,
+      "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "offByKind": {
+        "detail_line": 360,
+        "request": 24,
+        "unclassified": 173
+      },
+      "offRecords": 557,
+      "onByKind": {
+        "detail_line": 464,
+        "organization": 7,
+        "request": 24,
+        "unclassified": 62
+      },
+      "onRecords": 557,
+      "pageSetsEqual": true,
+      "publisherAuthority": "こども家庭庁",
+      "requestParentTransitions": {
+        "resolved_non_item→not_observed": 20,
+        "unresolved→not_observed": 4
+      },
+      "segment": [
+        7,
+        147
+      ],
+      "unjoinableOff": 0,
+      "unjoinableOn": 0
+    },
+    {
+      "I": 17,
+      "P": 19,
+      "R": 0,
+      "X": 302,
+      "Y": 161,
+      "accountType": "general",
+      "duplicateOff": 0,
+      "duplicateOn": 0,
+      "itemTransitions": {
+        "off_unclassified": 17
+      },
+      "joined": 1631,
+      "localPath": "data/download/env.go.jp/content/000157010.pdf",
+      "offByKind": {
+        "detail_line": 1122,
+        "request": 46,
+        "unclassified": 463
+      },
+      "offRecords": 1631,
+      "onByKind": {
+        "detail_line": 1406,
+        "item": 17,
+        "organization": 1,
+        "request": 46,
+        "unclassified": 161
+      },
+      "onRecords": 1631,
+      "pageSetsEqual": true,
+      "publisherAuthority": "環境省",
+      "requestParentTransitions": {
+        "resolved_item→not_observed": 19,
+        "resolved_non_item→not_observed": 20,
+        "unresolved→not_observed": 7
+      },
+      "segment": [
+        21,
+        193
+      ],
+      "unjoinableOff": 0,
+      "unjoinableOn": 0
+    },
+    {
+      "I": 8,
+      "P": 27,
+      "R": 0,
+      "X": 41,
+      "Y": 1,
+      "accountType": "special",
+      "duplicateOff": 0,
+      "duplicateOn": 0,
+      "itemTransitions": {
+        "off_unclassified": 8
+      },
+      "joined": 110,
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "offByKind": {
+        "detail_line": 41,
+        "request": 27,
+        "unclassified": 42
+      },
+      "offRecords": 110,
+      "onByKind": {
+        "detail_line": 73,
+        "item": 8,
+        "organization": 1,
+        "request": 27,
+        "unclassified": 1
+      },
+      "onRecords": 110,
+      "pageSetsEqual": true,
+      "publisherAuthority": "農林水産省",
+      "requestParentTransitions": {
+        "resolved_item→not_observed": 27
+      },
+      "segment": [
+        7,
+        20
+      ],
+      "unjoinableOff": 0,
+      "unjoinableOn": 0
+    },
+    {
+      "I": 30,
+      "P": 48,
+      "R": 0,
+      "X": 330,
+      "Y": 14,
+      "accountType": "general",
+      "duplicateOff": 0,
+      "duplicateOn": 0,
+      "itemTransitions": {
+        "off_unclassified": 30
+      },
+      "joined": 1238,
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "offByKind": {
+        "detail_line": 844,
+        "request": 50,
+        "unclassified": 344
+      },
+      "offRecords": 1238,
+      "onByKind": {
+        "detail_line": 1139,
+        "item": 30,
+        "organization": 5,
+        "request": 50,
+        "unclassified": 14
+      },
+      "onRecords": 1238,
+      "pageSetsEqual": true,
+      "publisherAuthority": "経済産業省",
+      "requestParentTransitions": {
+        "resolved_item→not_observed": 48,
+        "resolved_non_item→not_observed": 2
+      },
+      "segment": [
+        9,
+        106
+      ],
+      "unjoinableOff": 0,
+      "unjoinableOn": 0
+    },
+    {
+      "I": 19,
+      "P": 27,
+      "R": 0,
+      "X": 188,
+      "Y": 172,
+      "accountType": "general",
+      "duplicateOff": 0,
+      "duplicateOn": 0,
+      "itemTransitions": {
+        "off_unclassified": 19
+      },
+      "joined": 1082,
+      "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "offByKind": {
+        "detail_line": 695,
+        "request": 27,
+        "unclassified": 360
+      },
+      "offRecords": 1082,
+      "onByKind": {
+        "detail_line": 862,
+        "item": 19,
+        "organization": 2,
+        "request": 27,
+        "unclassified": 172
+      },
+      "onRecords": 1082,
+      "pageSetsEqual": true,
+      "publisherAuthority": "文部科学省",
+      "requestParentTransitions": {
+        "resolved_item→not_observed": 27
+      },
+      "segment": [
+        1045,
+        1339
+      ],
+      "unjoinableOff": 0,
+      "unjoinableOn": 0
+    },
+    {
+      "I": 14,
+      "P": 21,
+      "R": 0,
+      "X": 193,
+      "Y": 156,
+      "accountType": "general",
+      "duplicateOff": 0,
+      "duplicateOn": 0,
+      "itemTransitions": {
+        "off_unclassified": 14
+      },
+      "joined": 998,
+      "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "offByKind": {
+        "detail_line": 628,
+        "request": 21,
+        "unclassified": 349
+      },
+      "offRecords": 998,
+      "onByKind": {
+        "detail_line": 805,
+        "item": 14,
+        "organization": 2,
+        "request": 21,
+        "unclassified": 156
+      },
+      "onRecords": 998,
+      "pageSetsEqual": true,
+      "publisherAuthority": "厚生労働省",
+      "requestParentTransitions": {
+        "resolved_item→not_observed": 21
+      },
+      "segment": [
+        1555,
+        1700
+      ],
+      "unjoinableOff": 0,
+      "unjoinableOn": 0
+    },
+    {
+      "I": 8,
+      "P": 12,
+      "R": 0,
+      "X": 20,
+      "Y": 2,
+      "accountType": "special",
+      "duplicateOff": 0,
+      "duplicateOn": 0,
+      "itemTransitions": {
+        "off_unclassified": 8
+      },
+      "joined": 45,
+      "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+      "offByKind": {
+        "detail_line": 11,
+        "request": 12,
+        "unclassified": 22
+      },
+      "offRecords": 45,
+      "onByKind": {
+        "detail_line": 22,
+        "item": 8,
+        "organization": 1,
+        "request": 12,
+        "unclassified": 2
+      },
+      "onRecords": 45,
+      "pageSetsEqual": true,
+      "publisherAuthority": "国土交通省",
+      "requestParentTransitions": {
+        "resolved_item→not_observed": 12
+      },
+      "segment": [
+        7,
+        10
+      ],
+      "unjoinableOff": 0,
+      "unjoinableOn": 0
+    },
+    {
+      "I": 1,
+      "P": 4,
+      "R": 0,
+      "X": 199,
+      "Y": 510,
+      "accountType": "general",
+      "duplicateOff": 0,
+      "duplicateOn": 0,
+      "itemTransitions": {
+        "off_unclassified": 1
+      },
+      "joined": 2312,
+      "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "offByKind": {
+        "detail_line": 1536,
+        "request": 67,
+        "unclassified": 709
+      },
+      "offRecords": 2312,
+      "onByKind": {
+        "detail_line": 1733,
+        "item": 1,
+        "organization": 1,
+        "request": 67,
+        "unclassified": 510
+      },
+      "onRecords": 2312,
+      "pageSetsEqual": true,
+      "publisherAuthority": "防衛省",
+      "requestParentTransitions": {
+        "resolved_item→not_observed": 4,
+        "resolved_non_item→not_observed": 27,
+        "unresolved→not_observed": 36
+      },
+      "segment": [
+        9,
+        540
+      ],
+      "unjoinableOff": 0,
+      "unjoinableOn": 0
+    }
+  ],
+  "requestParentTransitions": {
+    "resolved_item→not_observed": 158,
+    "resolved_non_item→not_observed": 69,
+    "unresolved→not_observed": 47
+  },
+  "schema": "budget-request-hierarchy-failure-isolation/v0",
+  "stats": {
+    "Coff": 0,
+    "Con": 101,
+    "I": 97,
+    "P": 158,
+    "R": 0,
+    "X": 1384,
+    "Y": 1078,
+    "controlMatched": true,
+    "duplicates": 0,
+    "offRunFailed": false,
+    "pageSetsEqual": true,
+    "pairedPdfs": 8,
+    "pdfsWithI": 7,
+    "pdfsWithP": 7,
+    "publishers": 8,
+    "publishersWithI": 7,
+    "publishersWithP": 7,
+    "unjoinable": 0
+  },
+  "unclassifiedOffNew": {
+    "nameStatus": {
+      "ambiguous/continuation_ambiguous": 102,
+      "resolved/none": 1262,
+      "unresolved/no_name_token": 20
+    },
+    "neighbor": {
+      "detail_line|detail_line": 492,
+      "detail_line|request": 60,
+      "detail_line|unclassified": 188,
+      "request|detail_line": 78,
+      "request|request": 11,
+      "request|unclassified": 130,
+      "segment_start|unclassified": 5,
+      "unclassified|detail_line": 337,
+      "unclassified|request": 33,
+      "unclassified|unclassified": 50
+    },
+    "offUnclassifiedNameStatus": {
+      "ambiguous/continuation_ambiguous": 618,
+      "resolved/none": 1695,
+      "unresolved/column_layout_not_corroborated_on_page": 3,
+      "unresolved/no_name_token": 146
+    },
+    "offUnclassifiedNeighbor": {
+      "detail_line|detail_line": 856,
+      "detail_line|request": 118,
+      "detail_line|segment_end": 1,
+      "detail_line|unclassified": 455,
+      "request|detail_line": 80,
+      "request|request": 14,
+      "request|unclassified": 137,
+      "segment_start|unclassified": 8,
+      "unclassified|detail_line": 543,
+      "unclassified|request": 57,
+      "unclassified|unclassified": 193
+    },
+    "offUnclassifiedTotal": 2462,
+    "onKind": {
+      "detail_line": 1267,
+      "item": 97,
+      "organization": 20
+    },
+    "total": 1384
+  }
+}
