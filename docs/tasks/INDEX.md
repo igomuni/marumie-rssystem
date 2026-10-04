@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_0849_Budget_Request_Rule_Line_Geometry_Item_Anchor_Result.md](20261005_0849_Budget_Request_Rule_Line_Geometry_Item_Anchor_Result.md) — 罫線anchor feasibilityの結果。pdf.jsのvector罫線から全page x=50.0の決定的anchor(32/32 range、sparse 38/38)を構成できたが、itemとorganization/明細行がanchor相対値で重なる(混入89%)。判定=RULE_LINE_PRESENT_BUT_SEMANTICALLY_INSUFFICIENT
 - [20261005_0850_Budget_Request_Rule_Line_Anchor_Preregistration.md](20261005_0850_Budget_Request_Rule_Line_Anchor_Preregistration.md) — 罫線anchor(T1=thinなlong垂直罫線の最左、range最頻値)の定義・数値gate F1〜F6・sparse protocolをsparse結果を見る前に凍結。development所見(anchorは全page x=50.0で決定的だがitem/組織/明細をanchor相対値だけでは区別不能)を含む
 - [20261005_0839_Budget_Request_Rule_Line_Geometry_Inventory_Protocol.md](20261005_0839_Budget_Request_Rule_Line_Geometry_Inventory_Protocol.md) — 罫線(描画primitive)を項anchorにできるかのfeasibility inventoryの機構棚卸しとdevelopment protocol。現行pipelineは罫線未使用(getOperatorList無し)、pdf.js operator listからprimitive抽出、canonicalization・候補anchor(V1..V4)を固定。数値gateはinventory後・sparse前に別途freeze
 - [20261005_0824_Budget_Request_Range_Local_Item_Extraction_Result.md](20261005_0824_Budget_Request_Range_Local_Item_Extraction_Result.md) — range-local座標ベース項抽出の結果。control既存item97/97、候補934行(一般会計634・MOF名称単独overlap96.7%)、001630395は0→8件、55.22群は11PDFで回復。ただし評価可能PDFは51→32に減少(request5件未満range=fail-closed)。判定=RANGE_LOCAL_COORDINATE_ITEM_EXTRACTION_SUPPORTED
