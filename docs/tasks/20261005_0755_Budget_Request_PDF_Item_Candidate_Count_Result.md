@@ -1,6 +1,6 @@
 # 概算要求PDF 項候補数の全コーパス確認 — 結果
 
-事前登録: `20261005_0752_Budget_Request_PDF_Item_Candidate_Count_Preregistration.md`（Commit A `aba8b4c`、doc SHA-256 `e53be9e1…9336`）。全件走査は Commit B `95f1d7a`。規則・判定規則は結果を見た後に変更していない。production code は無変更（`scripts/pipeline-v2/lib` は新規ファイルの追加のみ）。
+事前登録: `20261005_0752_Budget_Request_PDF_Item_Candidate_Count_Preregistration.md`（Commit A `aba8b4c`、doc SHA-256 `e53be9e1…e49319`）。全件走査は Commit B `95f1d7a`。規則・判定規則は結果を見た後に変更していない。production code は無変更（`scripts/pipeline-v2/lib` は新規ファイルの追加のみ）。
 
 **判定: `ITEM_POPULATION_HIDDEN_BY_HIERARCHY`（規則 4）。ただし下記の限界つき。** 候補は item-shaped row であり正式な項 GT ではない。MOF 784 を PDF 側の正解母数とは仮定しない。
 
