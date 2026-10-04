@@ -1,0 +1,198 @@
+{
+  "schema": "budget-request-item-candidate-development/v0",
+  "scope": "hierarchy 契約を持つ 8 PDF の hierarchy 区間。候補は hierarchy=null の artifact から検出し、ON の recordKind=item は妥当性確認用ラベル（規則の調整には使わない）",
+  "rule": {
+    "step": 6.9,
+    "tolerance": 1,
+    "minReferenceRequests": 5
+  },
+  "totals": {
+    "candidates": 158,
+    "existingItems": 97,
+    "itemsInCandidates": 97,
+    "candidatesNotItem": 61,
+    "itemsNotCandidate": 0,
+    "ambiguous": 3,
+    "unique": 155,
+    "duplicates": 0
+  },
+  "candidatesNotExistingItemByOnKind": {
+    "organization": 7,
+    "unclassified": 54
+  },
+  "candidatesNotExistingItemNameStatus": {
+    "resolved": 60,
+    "ambiguous": 1
+  },
+  "existingItemsMissedByCandidate": [],
+  "perPdf": [
+    {
+      "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "publisherAuthority": "こども家庭庁",
+      "accountType": "general",
+      "segment": [
+        7,
+        147
+      ],
+      "referenceX": 65.57,
+      "referenceRequests": 24,
+      "candidates": {
+        "rows": 13,
+        "withKey": 12,
+        "ambiguous": 1,
+        "withinDocumentUnique": 12,
+        "duplicateRows": 0
+      },
+      "existingItems": 0,
+      "itemsInCandidates": 0,
+      "candidatesNotItem": 13
+    },
+    {
+      "localPath": "data/download/env.go.jp/content/000157010.pdf",
+      "publisherAuthority": "環境省",
+      "accountType": "general",
+      "segment": [
+        21,
+        193
+      ],
+      "referenceX": 65.57,
+      "referenceRequests": 46,
+      "candidates": {
+        "rows": 35,
+        "withKey": 35,
+        "ambiguous": 0,
+        "withinDocumentUnique": 35,
+        "duplicateRows": 0
+      },
+      "existingItems": 17,
+      "itemsInCandidates": 17,
+      "candidatesNotItem": 18
+    },
+    {
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "publisherAuthority": "農林水産省",
+      "accountType": "special",
+      "segment": [
+        7,
+        20
+      ],
+      "referenceX": 79.37,
+      "referenceRequests": 27,
+      "candidates": {
+        "rows": 8,
+        "withKey": 8,
+        "ambiguous": 0,
+        "withinDocumentUnique": 8,
+        "duplicateRows": 0
+      },
+      "existingItems": 8,
+      "itemsInCandidates": 8,
+      "candidatesNotItem": 0
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "publisherAuthority": "経済産業省",
+      "accountType": "general",
+      "segment": [
+        9,
+        106
+      ],
+      "referenceX": 65.57,
+      "referenceRequests": 50,
+      "candidates": {
+        "rows": 32,
+        "withKey": 32,
+        "ambiguous": 0,
+        "withinDocumentUnique": 32,
+        "duplicateRows": 0
+      },
+      "existingItems": 30,
+      "itemsInCandidates": 30,
+      "candidatesNotItem": 2
+    },
+    {
+      "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "publisherAuthority": "文部科学省",
+      "accountType": "general",
+      "segment": [
+        1045,
+        1339
+      ],
+      "referenceX": 65.57,
+      "referenceRequests": 27,
+      "candidates": {
+        "rows": 19,
+        "withKey": 17,
+        "ambiguous": 2,
+        "withinDocumentUnique": 17,
+        "duplicateRows": 0
+      },
+      "existingItems": 19,
+      "itemsInCandidates": 19,
+      "candidatesNotItem": 0
+    },
+    {
+      "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "publisherAuthority": "厚生労働省",
+      "accountType": "general",
+      "segment": [
+        1555,
+        1700
+      ],
+      "referenceX": 65.57,
+      "referenceRequests": 21,
+      "candidates": {
+        "rows": 14,
+        "withKey": 14,
+        "ambiguous": 0,
+        "withinDocumentUnique": 14,
+        "duplicateRows": 0
+      },
+      "existingItems": 14,
+      "itemsInCandidates": 14,
+      "candidatesNotItem": 0
+    },
+    {
+      "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+      "publisherAuthority": "国土交通省",
+      "accountType": "special",
+      "segment": [
+        7,
+        10
+      ],
+      "referenceX": 79.37,
+      "referenceRequests": 12,
+      "candidates": {
+        "rows": 8,
+        "withKey": 8,
+        "ambiguous": 0,
+        "withinDocumentUnique": 8,
+        "duplicateRows": 0
+      },
+      "existingItems": 8,
+      "itemsInCandidates": 8,
+      "candidatesNotItem": 0
+    },
+    {
+      "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "publisherAuthority": "防衛省",
+      "accountType": "general",
+      "segment": [
+        9,
+        540
+      ],
+      "referenceX": 65.57,
+      "referenceRequests": 67,
+      "candidates": {
+        "rows": 29,
+        "withKey": 29,
+        "ambiguous": 0,
+        "withinDocumentUnique": 29,
+        "duplicateRows": 0
+      },
+      "existingItems": 1,
+      "itemsInCandidates": 1,
+      "candidatesNotItem": 28
+    }
+  ]
+}
