@@ -1,0 +1,21 @@
+{
+ "artifacts": {
+  "control": "8dc35f02cf299cc0585216bc319f532c153ed060c48a1472b801a99a5781e7fb",
+  "full": "421dbf8b3165057926ba21c84a7debb549a31941dfc8c62df2e39df651c9519d",
+  "mof": "de88e7ac434a7a79fba9db80e389e3da3c98a656eda2307e9723bbd332337c7c"
+ },
+ "decision": "RANGE_LOCAL_COORDINATE_ITEM_EXTRACTION_SUPPORTED",
+ "facts": {
+  "con": 0.04430379746835443,
+  "controlUnjoinableOrDuplicate": 0,
+  "det": true,
+  "evaluableDetailRanges": 32,
+  "existing": 97,
+  "fc": true,
+  "ov": 0.9665071770334929,
+  "rec": 97,
+  "wk": true
+ },
+ "rule": 3,
+ "schema": "budget-request-range-local-item-decision/v0"
+}
