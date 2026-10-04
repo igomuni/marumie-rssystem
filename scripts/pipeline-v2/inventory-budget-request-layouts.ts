@@ -136,9 +136,11 @@ async function main() {
     const v = variants.get(r.signature) ?? { pdfs: new Set(), pages: 0, ranges: 0, general: new Set(), special: new Set(), reqDominantX: {}, plain3Offset: {}, withRequest: 0, withPlain3: 0 };
     v.pdfs.add(e.localPath); (e.accountType === 'general' ? v.general : v.special).add(e.localPath); v.ranges++; v.pages += r.assignedPages; variants.set(r.signature, v);
   }
-  for (const { p } of allPages) {
+  for (const { doc, p } of allPages) {
     if (!p.signature) continue;
-    const v = variants.get(p.signature)!;
+    const range = doc.ranges.find(r => p.page >= r.from && p.page <= r.to);
+    if (!range) throw new Error(`signature のある page が range に属さない: ${doc.localPath} p${p.page}`);
+    const v = variants.get(range.signature)!;
     if (p.requestDominantX !== null) inc(v.reqDominantX, p.requestDominantX.toFixed(1));
     if (p.lexical.request_like > 0) v.withRequest++;
     if (p.lexical.plain3 > 0) v.withPlain3++;
