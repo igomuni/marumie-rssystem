@@ -2,6 +2,11 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261004_2134_MOF_PipelineV2_XML事項Parser_v0_Evaluator厳密化_追記.md](20261004_2134_MOF_PipelineV2_XML事項Parser_v0_Evaluator厳密化_追記.md) — PR #370 レビュー対応。evaluatorのGO条件を厳密化（source set完全性・non-target 234/234・fail-closed test通過）して再実行、判定は同じGO。parser/oracle/初回artifactは不変
+- [20261004_2117_MOF_PipelineV2_XML事項Parser_v0_Frozen_Evaluation_Result.md](20261004_2117_MOF_PipelineV2_XML事項Parser_v0_Frozen_Evaluation_Result.md) — MOF XML事項parser v0 の first full frozen evaluation。94/94認識・1,256/1,256・全fieldとgaiji/qt 100% exact。判定=GO（scopeはFY2024一般会計当初のみ・一般化せず）
+- [20261004_2116_MOF_PipelineV2_XML事項Parser_v0_Implementation_Freeze.md](20261004_2116_MOF_PipelineV2_XML事項Parser_v0_Implementation_Freeze.md) — MOF XML事項parser v0 の実装freeze。preregistration どおりの production parser と開発 test（hand fixture 29行・fail-closed）。full 1,256 評価は freeze 後に実行
+- [20261004_2104_MOF_PipelineV2_FY2024一般会計XML事項Parser_v0_Preregistration.md](20261004_2104_MOF_PipelineV2_FY2024一般会計XML事項Parser_v0_Preregistration.md) — FY2024一般会計XML事項parser v0の事前登録。入力契約・fail-closed・組織/項carry-forward/名称復元/gaiji・qt/金額の規則、oracle(94件/1,256行・29行hand fixture)、100%exactのGO/STOPを実装前に凍結。parser未実装
+- [20261004_2031_MOF_PipelineV2_予算書XML_Source_Schema_Inventory.md](20261004_2031_MOF_PipelineV2_予算書XML_Source_Schema_Inventory.md) — MOF予算書XML(一般会計当初202411001・328件)のsource/schema inventory。事項は94ファイルの汎用セル表、項は直前引き継ぎ（Deterministic but indirect）、視覚推論不要。判定=NEEDS DESIGN WORK（parser未実装）
 - [20261004_0738_MOF_PipelineV2_予算書XML_Download対応.md](20261004_0738_MOF_PipelineV2_予算書XML_Download対応.md) — V2 MOF downloader に予算書【XML版】取得を追加（--xml=帳票ID。CSVと別source roleで共存）。FY2024 一般会計当初 XML 328件を公式から新規取得（V1非使用）。解析は未着手
 - [20261004_0637_Budget_Request_MOF_Reconciliation_P0_Source_Schema_Inventory.md](20261004_0637_Budget_Request_MOF_Reconciliation_P0_Source_Schema_Inventory.md) — 概算要求PDF×MOF項・事項の照合P0（source/schema/inventory）。年度同一・予算段階は異なる、項コードは体系が別でkeyにならない、PDF抽出は一部runのみ。判定=NEEDS DESIGN WORK（照合・match率は未実施）
 - [20261003_2238_FieldResolver_v0_H1_Human_Validation_Result.md](20261003_2238_FieldResolver_v0_H1_Human_Validation_Result.md) — H1 human validation result。H01の65件はH_complete0/incomplete65/unclear0でstatus=VALIDATED、AIと65/65一致。Case B（事前declarationなし）のprotocol deviation付き・一般化せず

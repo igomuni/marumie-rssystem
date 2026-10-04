@@ -1,0 +1,828 @@
+{
+  "schema": "mof-budget-xml-item-parser-v0-frozen-evaluation/v0",
+  "scope": "FY2024 一般会計 当初予算 202411001（frozen XML source set）。first full frozen evaluation（implementation freeze 後に初めて実行）",
+  "implementation": {
+    "commit": "b890e748462ac126f784576227351df1da2a65af",
+    "parserPath": "scripts/pipeline-v2/lib/mof-budget-xml-items.ts",
+    "parserSha256": "1d52634ba40bcfabd6fcdae477417daaf309ce8f2c8decf3c9ca251e6e041a79",
+    "testPath": "scripts/pipeline-v2/lib/mof-budget-xml-items.test.ts",
+    "testSha256": "c65006546cc9bbdbc14b07a3c6c492fb109052a00a1a1c37873d55ad09db316a",
+    "preregistrationCommit": "2305be0ef217e76af484b646c732c6ce3578a7fd"
+  },
+  "frozenInputs": [
+    {
+      "path": "tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-source-set.json",
+      "expected": "62df90fb32caf5997ecb2772eb0c84da66789b635eb1bc024743cf6a8da2afe3",
+      "actual": "62df90fb32caf5997ecb2772eb0c84da66789b635eb1bc024743cf6a8da2afe3",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-reference-projection.json",
+      "expected": "e6335aceb0c7d69888206cada038dcb03db5e25f7c2a10a8d5ae6104c2d615d9",
+      "actual": "e6335aceb0c7d69888206cada038dcb03db5e25f7c2a10a8d5ae6104c2d615d9",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-hand-checked-fixture.json",
+      "expected": "664f0fbee2470311831db9dfbe53cd6e315a0e1f549767612d159b862d408fd1",
+      "actual": "664f0fbee2470311831db9dfbe53cd6e315a0e1f549767612d159b862d408fd1",
+      "match": true
+    },
+    {
+      "path": "scripts/pipeline-v2/lib/mof-budget-xml-items.ts",
+      "expected": "1d52634ba40bcfabd6fcdae477417daaf309ce8f2c8decf3c9ca251e6e041a79",
+      "actual": "1d52634ba40bcfabd6fcdae477417daaf309ce8f2c8decf3c9ca251e6e041a79",
+      "match": true
+    },
+    {
+      "path": "scripts/pipeline-v2/lib/mof-budget-xml-items.test.ts",
+      "expected": "c65006546cc9bbdbc14b07a3c6c492fb109052a00a1a1c37873d55ad09db316a",
+      "actual": "c65006546cc9bbdbc14b07a3c6c492fb109052a00a1a1c37873d55ad09db316a",
+      "match": true
+    }
+  ],
+  "supersedes": {
+    "note": "初回評価の artifact は保持。本 run は evaluator の GO 条件を厳密化（source set の完全性・non-target 234/234・fail-closed test 通過）して再実行した結果",
+    "firstRunArtifact": "tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-frozen-evaluation.json",
+    "firstRunSha256": "627b86565f699702057cf70ba70166f88ff6b06f62041ccb51f527a31ddf5da9",
+    "firstRunDecision": "GO"
+  },
+  "sourceSetCompleteness": {
+    "complete": true,
+    "localCount": 328,
+    "expectedCount": 328,
+    "missingLocally": [],
+    "unexpectedLocally": [],
+    "duplicateExpected": []
+  },
+  "failClosedTests": {
+    "path": "scripts/pipeline-v2/lib/mof-budget-xml-items.test.ts",
+    "minimumTests": 44,
+    "numTotalTestSuites": 5,
+    "numPassedTestSuites": 5,
+    "numFailedTestSuites": 0,
+    "numPendingTestSuites": 0,
+    "numTotalTests": 44,
+    "numPassedTests": 44,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "snapshot": {
+      "added": 0,
+      "failure": false,
+      "filesAdded": 0,
+      "filesRemoved": 0,
+      "filesRemovedList": [],
+      "filesUnmatched": 0,
+      "filesUpdated": 0,
+      "matched": 0,
+      "total": 0,
+      "unchecked": 0,
+      "uncheckedKeysByFile": [],
+      "unmatched": 0,
+      "updated": 0,
+      "didUpdate": false
+    },
+    "startTime": 1791117263257,
+    "success": true,
+    "testResults": [
+      {
+        "assertionResults": [
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — 基本"
+            ],
+            "fullName": "MOF XML item parser v0 — 基本 組織・項の carry-forward・事項名・金額・col4 を事前登録どおりに出す",
+            "status": "passed",
+            "title": "組織・項の carry-forward・事項名・金額・col4 を事前登録どおりに出す",
+            "duration": 6.161458999999994,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — 基本"
+            ],
+            "fullName": "MOF XML item parser v0 — 基本 組織計行・説明のみ行は出力せず数える",
+            "status": "passed",
+            "title": "組織計行・説明のみ行は出力せず数える",
+            "duration": 0.3253750000000082,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — 基本"
+            ],
+            "fullName": "MOF XML item parser v0 — 基本 名称は <l> を区切りなしで連結し、trim・空白追加をしない（col11 は複数 <p> でも解釈しない）",
+            "status": "passed",
+            "title": "名称は <l> を区切りなしで連結し、trim・空白追加をしない（col11 は複数 <p> でも解釈しない）",
+            "duration": 0.9664580000000029,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — 基本"
+            ],
+            "fullName": "MOF XML item parser v0 — 基本 gaiji（1508/填）は子文字を採用して保持、qt は文字に寄与せず数だけ保持する",
+            "status": "passed",
+            "title": "gaiji（1508/填）は子文字を採用して保持、qt は文字に寄与せず数だけ保持する",
+            "duration": 0.27158400000000427,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — 基本"
+            ],
+            "fullName": "MOF XML item parser v0 — 基本 目次から祖先 chain を作る",
+            "status": "passed",
+            "title": "目次から祖先 chain を作る",
+            "duration": 0.18979200000001129,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — not_target / unsupported（silent skip しない）"
+            ],
+            "fullName": "MOF XML item parser v0 — not_target / unsupported（silent skip しない） title が異なるファイルは not_target（失敗ではない。部分一致で事項表にしない）",
+            "status": "passed",
+            "title": "title が異なるファイルは not_target（失敗ではない。部分一致で事項表にしない）",
+            "duration": 0.4103329999999943,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — not_target / unsupported（silent skip しない）"
+            ],
+            "fullName": "MOF XML item parser v0 — not_target / unsupported（silent skip しない） document id が違う・source set に無い・hash 不一致は unsupported",
+            "status": "passed",
+            "title": "document id が違う・source set に無い・hash 不一致は unsupported",
+            "duration": 0.2734170000000091,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — hard failure"
+            ],
+            "fullName": "MOF XML item parser v0 — hard failure decode 不能・malformed XML・root / encoding / DOCTYPE 不一致",
+            "status": "passed",
+            "title": "decode 不能・malformed XML・root / encoding / DOCTYPE 不一致",
+            "duration": 0.5330419999999947,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — hard failure"
+            ],
+            "fullName": "MOF XML item parser v0 — hard failure table が 1 つでない・header 不一致（必要列欠落・語の相違）",
+            "status": "passed",
+            "title": "table が 1 つでない・header 不一致（必要列欠落・語の相違）",
+            "duration": 0.32279200000000685,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — hard failure"
+            ],
+            "fullName": "MOF XML item parser v0 — hard failure 未知の行・先頭行が項を持たない・空セル",
+            "status": "passed",
+            "title": "未知の行・先頭行が項を持たない・空セル",
+            "duration": 0.3191669999999931,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — hard failure"
+            ],
+            "fullName": "MOF XML item parser v0 — hard failure 項コード: 3 桁数字でない・重複・片方だけ",
+            "status": "passed",
+            "title": "項コード: 3 桁数字でない・重複・片方だけ",
+            "duration": 0.3422079999999994,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — hard failure"
+            ],
+            "fullName": "MOF XML item parser v0 — hard failure col4・金額: 2 桁数字でない／blank／非数値／△0／△ を col6 に置く／カンマ形式違い",
+            "status": "passed",
+            "title": "col4・金額: 2 桁数字でない／blank／非数値／△0／△ を col6 に置く／カンマ形式違い",
+            "duration": 0.8935830000000067,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — hard failure"
+            ],
+            "fullName": "MOF XML item parser v0 — hard failure 組織: primary と running_title の不一致、目次の祖先に無い、目次 chain なし",
+            "status": "passed",
+            "title": "組織: primary と running_title の不一致、目次の祖先に無い、目次 chain なし",
+            "duration": 0.5611250000000041,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — hard failure"
+            ],
+            "fullName": "MOF XML item parser v0 — hard failure セル内容: 未知 gaiji・空でない qt・想定外の子要素・非 CDATA の文字・複数 <p>",
+            "status": "passed",
+            "title": "セル内容: 未知 gaiji・空でない qt・想定外の子要素・非 CDATA の文字・複数 <p>",
+            "duration": 0.7090409999999991,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — hard failure"
+            ],
+            "fullName": "MOF XML item parser v0 — hard failure 文書順の逆転・同一セルの重複",
+            "status": "passed",
+            "title": "文書順の逆転・同一セルの重複",
+            "duration": 0.2518749999999983,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000265b.xml p265-4.1 structural fingerprint 5e76da9b の先頭ファイル先頭行",
+            "status": "passed",
+            "title": "202411001000265b.xml p265-4.1 structural fingerprint 5e76da9b の先頭ファイル先頭行",
+            "duration": 0.5317079999999947,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000265b.xml p265-5.1 col10 が △（先頭）",
+            "status": "passed",
+            "title": "202411001000265b.xml p265-5.1 col10 が △（先頭）",
+            "duration": 0.18737500000000296,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000265b.xml p265-6.1 複数行の事項名（先頭）",
+            "status": "passed",
+            "title": "202411001000265b.xml p265-6.1 複数行の事項名（先頭）",
+            "duration": 0.173333999999997,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000269b.xml p269-3.1 structural fingerprint 8cbfafd7 の先頭ファイル先頭行",
+            "status": "passed",
+            "title": "202411001000269b.xml p269-3.1 structural fingerprint 8cbfafd7 の先頭ファイル先頭行",
+            "duration": 0.09199999999999875,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000272a.xml p272-3.1 structural fingerprint 16006d26 の先頭ファイル先頭行",
+            "status": "passed",
+            "title": "202411001000272a.xml p272-3.1 structural fingerprint 16006d26 の先頭ファイル先頭行",
+            "duration": 0.08720800000000395,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000276a.xml p276-3.1 structural fingerprint ce226ea9 の先頭ファイル先頭行",
+            "status": "passed",
+            "title": "202411001000276a.xml p276-3.1 structural fingerprint ce226ea9 の先頭ファイル先頭行",
+            "duration": 0.09224999999999284,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000291b.xml p291-3.1 structural fingerprint a6b0b6dc の先頭ファイル先頭行",
+            "status": "passed",
+            "title": "202411001000291b.xml p291-3.1 structural fingerprint a6b0b6dc の先頭ファイル先頭行",
+            "duration": 0.11887499999998852,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000309b.xml p309-7.1 col8 が 0（先頭）",
+            "status": "passed",
+            "title": "202411001000309b.xml p309-7.1 col8 が 0（先頭）",
+            "duration": 0.13929199999999753,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000313a.xml p313-4.1 structural fingerprint f04b97b3 の先頭ファイル先頭行",
+            "status": "passed",
+            "title": "202411001000313a.xml p313-4.1 structural fingerprint f04b97b3 の先頭ファイル先頭行",
+            "duration": 0.10362500000000807,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000314a.xml p314-4.1 structural fingerprint 38d58a65 の先頭ファイル先頭行",
+            "status": "passed",
+            "title": "202411001000314a.xml p314-4.1 structural fingerprint 38d58a65 の先頭ファイル先頭行",
+            "duration": 0.1059580000000011,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000328a.xml p328-4.1 structural fingerprint 8e83a7bf の先頭ファイル先頭行",
+            "status": "passed",
+            "title": "202411001000328a.xml p328-4.1 structural fingerprint 8e83a7bf の先頭ファイル先頭行",
+            "duration": 0.0957080000000019,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000328a.xml p329-8.1 頁境界で項が再掲されない行（出現順 1）",
+            "status": "passed",
+            "title": "202411001000328a.xml p329-8.1 頁境界で項が再掲されない行（出現順 1）",
+            "duration": 0.1301249999999925,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000328a.xml p331-23.1 頁境界で項が再掲されない行（出現順 2）",
+            "status": "passed",
+            "title": "202411001000328a.xml p331-23.1 頁境界で項が再掲されない行（出現順 2）",
+            "duration": 0.12958400000000836,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000328a.xml p332-34.1 頁境界で項が再掲されない行（出現順 3）",
+            "status": "passed",
+            "title": "202411001000328a.xml p332-34.1 頁境界で項が再掲されない行（出現順 3）",
+            "duration": 0.1250830000000036,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000328a.xml p335-70.1 col6 が 0（先頭）",
+            "status": "passed",
+            "title": "202411001000328a.xml p335-70.1 col6 が 0（先頭）",
+            "duration": 0.12316699999999514,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000453b.xml p453-3.1 structural fingerprint dc8a81c0 の先頭ファイル先頭行",
+            "status": "passed",
+            "title": "202411001000453b.xml p453-3.1 structural fingerprint dc8a81c0 の先頭ファイル先頭行",
+            "duration": 0.09762500000000784,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000453b.xml p455-18.1 gaiji（全件）",
+            "status": "passed",
+            "title": "202411001000453b.xml p455-18.1 gaiji（全件）",
+            "duration": 0.14449999999999363,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001000576a.xml p576-5.1 gaiji（全件）",
+            "status": "passed",
+            "title": "202411001000576a.xml p576-5.1 gaiji（全件）",
+            "duration": 0.1441249999999883,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-41.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-41.1 qt（全件）",
+            "duration": 0.13650000000001228,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-42.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-42.1 qt（全件）",
+            "duration": 0.12858400000000358,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-43.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-43.1 qt（全件）",
+            "duration": 0.1309580000000068,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-44.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-44.1 qt（全件）",
+            "duration": 0.11766599999999983,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-45.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-45.1 qt（全件）",
+            "duration": 0.12704200000000299,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-46.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-46.1 qt（全件）",
+            "duration": 0.10995799999999178,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-47.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-47.1 qt（全件）",
+            "duration": 0.11270799999999781,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-48.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-48.1 qt（全件）",
+            "duration": 0.11320799999998599,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-49.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-49.1 qt（全件）",
+            "duration": 0.11516699999999958,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1083-50.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1083-50.1 qt（全件）",
+            "duration": 0.14708400000000665,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          },
+          {
+            "ancestorTitles": [
+              "MOF XML item parser v0 — frozen hand-checked fixture（29 行）"
+            ],
+            "fullName": "MOF XML item parser v0 — frozen hand-checked fixture（29 行） 202411001001079b.xml p1085-60.1 qt（全件）",
+            "status": "passed",
+            "title": "202411001001079b.xml p1085-60.1 qt（全件）",
+            "duration": 0.11345900000000597,
+            "failureMessages": [],
+            "meta": {},
+            "tags": []
+          }
+        ],
+        "startTime": 1791117263425,
+        "endTime": 1791117263442.147,
+        "status": "passed",
+        "message": "",
+        "name": "/Users/igomuni/MyGitHub/marumie-rssystem/scripts/pipeline-v2/lib/mof-budget-xml-items.test.ts"
+      }
+    ]
+  },
+  "structural": {
+    "xmlFiles": 328,
+    "expectedTargetFiles": 94,
+    "expectedNonTargetFiles": 234,
+    "recognizedTargetFiles": 94,
+    "targetFilesNotRecognized": [],
+    "nonTargetFilesCorrectlyNotTarget": 234,
+    "nonTargetFilesMisclassified": [],
+    "recognizedButNotTarget": [],
+    "structuralFailures": 0,
+    "failures": [],
+    "unsupported": 0,
+    "unexpectedSilentSkip": 0
+  },
+  "coverage": {
+    "expected": 1256,
+    "actual": 1256,
+    "missing": 0,
+    "extra": 0,
+    "duplicate": 0,
+    "missingKeys": [],
+    "extraKeys": [],
+    "duplicateKeys": []
+  },
+  "fieldExactness": {
+    "organization": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemCode": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemName": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemNameLines": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "requestName": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "requestNameLines": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsRaw.col6": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsRaw.col8": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsRaw.col10": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsThousandYen.col6": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsThousandYen.col8": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsThousandYen.col10": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "col4Raw": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemStartsInThisRow": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.file": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.row": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.page": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.rowNo": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "requestQtCount": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "requestGaiji": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemQtCount": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemGaiji": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.sourceSha256": {
+      "exact": 94,
+      "mismatch": 0
+    }
+  },
+  "hierarchy": {
+    "itemAssignmentExact": 1256,
+    "itemAssignmentMismatch": 0,
+    "orphan": 0,
+    "ambiguous": 0
+  },
+  "specialStructures": {
+    "gaiji": {
+      "expectedRows": 2,
+      "exact": 2
+    },
+    "qt": {
+      "expectedRows": 11,
+      "exact": 11
+    },
+    "knownTargetFingerprints": [
+      {
+        "fingerprint": "16006d26",
+        "files": 3,
+        "recognized": 3
+      },
+      {
+        "fingerprint": "38d58a65",
+        "files": 33,
+        "recognized": 33
+      },
+      {
+        "fingerprint": "5e76da9b",
+        "files": 2,
+        "recognized": 2
+      },
+      {
+        "fingerprint": "8cbfafd7",
+        "files": 1,
+        "recognized": 1
+      },
+      {
+        "fingerprint": "8e83a7bf",
+        "files": 9,
+        "recognized": 9
+      },
+      {
+        "fingerprint": "a6b0b6dc",
+        "files": 4,
+        "recognized": 4
+      },
+      {
+        "fingerprint": "ce226ea9",
+        "files": 9,
+        "recognized": 9
+      },
+      {
+        "fingerprint": "dc8a81c0",
+        "files": 2,
+        "recognized": 2
+      },
+      {
+        "fingerprint": "f04b97b3",
+        "files": 31,
+        "recognized": 31
+      }
+    ],
+    "rowCountMismatchFiles": []
+  },
+  "sourceShaMismatch": [],
+  "conditions": {
+    "sourceSetIntegrity": true,
+    "sourceSetComplete328": true,
+    "nonTarget234of234": true,
+    "targets94of94": true,
+    "nonTargetMisclassifiedZero": true,
+    "noStructuralFailureOrUnsupported": true,
+    "records1256": true,
+    "missingExtraDuplicateZero": true,
+    "orphanAmbiguousZero": true,
+    "requiredFieldsExact": true,
+    "failClosedTestsPass": true,
+    "specialStructuresExact": true
+  },
+  "decision": "GO",
+  "rule": "preregistration §16: GO は全 condition が真。1 件でも偽なら STOP（oracle/source の不備で評価不能なら INCONCLUSIVE）",
+  "mismatches": []
+}

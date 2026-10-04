@@ -1,0 +1,4622 @@
+{
+  "schema": "mof-budget-xml-source-inventory/v0",
+  "scope": "FY2024 一般会計 当初予算 202411001（research / inspection。production schema ではない）",
+  "main": {
+    "path": "data/download/mof.go.jp/archive/2024/2024/html/202411001Main.html",
+    "bytes": 995,
+    "sha256": "769a220ca991eea56d37e9f41ab6869c750d656ed16d8e05183b5e189393913f"
+  },
+  "menu": {
+    "path": "data/download/mof.go.jp/archive/2024/2024/html/202411001menu.html",
+    "bytes": 37968,
+    "sha256": "19ccfb611a1b7208423bf53b4977a09039c6f87780f667d2c663ac0532dfc422",
+    "enumeratedXmlFiles": 328
+  },
+  "xml": {
+    "localFiles": 328,
+    "totalBytes": 11621700,
+    "menuMissingLocally": [],
+    "localNotInMenu": [],
+    "duplicatesInMenuList": 0
+  },
+  "provenance": {
+    "present": true,
+    "manifestSha256": "08c54089192b118b6e266a916d9f3b7eec389eaa074728dd4f5c379cb37d33a7",
+    "files": 328,
+    "hashOrBytesMismatch": 0
+  },
+  "files": [
+    {
+      "filename": "202411001000001a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000001a.xml",
+      "bytes": 156208,
+      "sha256": "9c0dc4f95c0d5223394fa38a8cc66e7c0ff901b0c38b67dab770f8770ac2cb8b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000001a.xsl"
+    },
+    {
+      "filename": "202411001000029a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000029a.xml",
+      "bytes": 62529,
+      "sha256": "509286bc37fe428c23e425d0cdb4fb489c6b15641f4d026edae409f8d131372a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000029a.xsl"
+    },
+    {
+      "filename": "202411001000043a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000043a.xml",
+      "bytes": 195433,
+      "sha256": "fddcda08e73f85e1038c8c2802873b5ae005bd07d0ced51fe9a4dc677ecc969a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000043a.xsl"
+    },
+    {
+      "filename": "202411001000086a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000086a.xml",
+      "bytes": 26196,
+      "sha256": "a3e166284188f78742df75ade3ce8625fb1f6d4a6784bb21f76c16098617a84e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000086a.xsl"
+    },
+    {
+      "filename": "202411001000090a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000090a.xml",
+      "bytes": 194755,
+      "sha256": "e892de691ef153d3ee284ba44bd3525343bc6b4d52ee058581fbe3baea778ef5",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000090a.xsl"
+    },
+    {
+      "filename": "202411001000121a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000121a.xml",
+      "bytes": 521816,
+      "sha256": "abb0df403166c9865c61e88d9647632ed6206f1e61ec45c68cdc5d8bfbfadd51",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000121a.xsl"
+    },
+    {
+      "filename": "202411001000193a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000193a.xml",
+      "bytes": 5559,
+      "sha256": "c19093de2ad09170705578343b50cde340d4bb3953ef2fc201bc697c5dffacf8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000193a.xsl"
+    },
+    {
+      "filename": "202411001000194a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000194a.xml",
+      "bytes": 6878,
+      "sha256": "d7547f540b4f322a0459cf6cc7451f5e0cefe5fae1daaad81190907d9a3fbc98",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000194a.xsl"
+    },
+    {
+      "filename": "202411001000195a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000195a.xml",
+      "bytes": 854,
+      "sha256": "3c8e913cff76a46b2315254af17efcb4ae996e6d14009c65a20c47574af1cc19",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000195a.xsl"
+    },
+    {
+      "filename": "202411001000197a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000197a.xml",
+      "bytes": 152007,
+      "sha256": "9bd6a8826f6ba70b4cbe0b2bb9dc7edd6f17f054dc4f8de2f7ec0837d7ccc473",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000197a.xsl"
+    },
+    {
+      "filename": "202411001000207a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000207a.xml",
+      "bytes": 2147,
+      "sha256": "b34c667bcd60cdb8addebe5b456c49b4aba10de46f2b2f73fa731d638200f491",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000207a.xsl"
+    },
+    {
+      "filename": "202411001000207b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000207b.xml",
+      "bytes": 11257,
+      "sha256": "b29c2590d398f938179db94b884738f041dab2699d6a95881f7a612d7e045862",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000207b.xsl"
+    },
+    {
+      "filename": "202411001000209a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000209a.xml",
+      "bytes": 2158,
+      "sha256": "645d19693a0c7802fcb13d5ca0c3eacaa33efebf6f67f18bbe9e3aab352ae23b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000209a.xsl"
+    },
+    {
+      "filename": "202411001000209b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000209b.xml",
+      "bytes": 17946,
+      "sha256": "c1c04bb26b2589901ae92c138122c93aa6c7e5945f2070e89c032401b2731298",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000209b.xsl"
+    },
+    {
+      "filename": "202411001000211a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000211a.xml",
+      "bytes": 2154,
+      "sha256": "14c9e16882277ed098c55d1d84fd2720dd2fa6d2a4caa48e392779538c8a14ec",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000211a.xsl"
+    },
+    {
+      "filename": "202411001000211b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000211b.xml",
+      "bytes": 10049,
+      "sha256": "73f9d12fa2a81690882cb65bf7b2597d8f55361f302fdfe02357a2f839fab1d7",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000211b.xsl"
+    },
+    {
+      "filename": "202411001000212a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000212a.xml",
+      "bytes": 2146,
+      "sha256": "5d3eaf34cb3a4e3c3ca1fae2e4a9a014e263f82ef7b11c2cccec0992426b0457",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000212a.xsl"
+    },
+    {
+      "filename": "202411001000212b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000212b.xml",
+      "bytes": 11227,
+      "sha256": "7cf335b1423ce69ad10b6ac16b7262bd78d6119e70de0f08a7f77ff6211b95d1",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000212b.xsl"
+    },
+    {
+      "filename": "202411001000214a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000214a.xml",
+      "bytes": 2165,
+      "sha256": "052d7850797c7218420eeb925b344262023c4692ee037e3e78dc7e80ee89a14e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000214a.xsl"
+    },
+    {
+      "filename": "202411001000214b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000214b.xml",
+      "bytes": 32476,
+      "sha256": "ecb0f48c1183441d352712101c5206a5942c1268655480026aa003abba0830e0",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000214b.xsl"
+    },
+    {
+      "filename": "202411001000218a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000218a.xml",
+      "bytes": 2158,
+      "sha256": "8f5f76a93ca9d212e7e52e4b01e59be8d3a34e52f2738870ad5f7cfcc6ae6b17",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000218a.xsl"
+    },
+    {
+      "filename": "202411001000218b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000218b.xml",
+      "bytes": 6681,
+      "sha256": "0ef0608bd56a5ea108e9dc5445f6862c8c1a26116273ad9e2beb82cf7f74f393",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000218b.xsl"
+    },
+    {
+      "filename": "202411001000219a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000219a.xml",
+      "bytes": 2164,
+      "sha256": "b8491cfba9de7bf4e8ba6781348949f1a9d03dab7d28cc2a94569ba110cfaaab",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000219a.xsl"
+    },
+    {
+      "filename": "202411001000219b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000219b.xml",
+      "bytes": 15046,
+      "sha256": "4c4b27a253dcca1c237c103372d30a08f7b09f779639e678a16b7cd59c7d7854",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000219b.xsl"
+    },
+    {
+      "filename": "202411001000221a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000221a.xml",
+      "bytes": 2158,
+      "sha256": "8fa711dbbe1210c4afcd46f286ad690834d7ccb9a55ef2076c9db6b20b0b26c8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000221a.xsl"
+    },
+    {
+      "filename": "202411001000221b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000221b.xml",
+      "bytes": 18121,
+      "sha256": "9640dba601caee73709c2b0a184cf57188cba86b4b751c4dd8a78f4890ea9376",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000221b.xsl"
+    },
+    {
+      "filename": "202411001000223a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000223a.xml",
+      "bytes": 2159,
+      "sha256": "554447d9cc6bd1a369ff52c4ac2eaa6c1d15db800a3477160938525ed9af4ad5",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000223a.xsl"
+    },
+    {
+      "filename": "202411001000223b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000223b.xml",
+      "bytes": 15696,
+      "sha256": "049304d5a62dd489d4740bf96ee1184a3ef5aede264b0b2823e3a8c045994901",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000223b.xsl"
+    },
+    {
+      "filename": "202411001000225a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000225a.xml",
+      "bytes": 2176,
+      "sha256": "d9f940a59aa22311c35139e861ab2e70bb9b041a54524593e4ec886fb91dbce0",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000225a.xsl"
+    },
+    {
+      "filename": "202411001000225b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000225b.xml",
+      "bytes": 77760,
+      "sha256": "eba8f6eef62166c898cac66a097313e88f3cdf3263b22605704f7f51a4b2ca17",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000225b.xsl"
+    },
+    {
+      "filename": "202411001000235a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000235a.xml",
+      "bytes": 2175,
+      "sha256": "f015a47e97fee549250b2895ac77f6557ac367578fe3cfa07f469412eb271f37",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000235a.xsl"
+    },
+    {
+      "filename": "202411001000235b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000235b.xml",
+      "bytes": 23760,
+      "sha256": "ff1bae386e96e9147ce77a55cf6f289856c81a6a5e6f5f0ca25980f8cb2c69a4",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000235b.xsl"
+    },
+    {
+      "filename": "202411001000238a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000238a.xml",
+      "bytes": 2179,
+      "sha256": "320a0b5fc826afc93acff2923e5329d5af697d161e299c34b99bcb27d428e26a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000238a.xsl"
+    },
+    {
+      "filename": "202411001000238b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000238b.xml",
+      "bytes": 31936,
+      "sha256": "b44b0b49458a6d744990698690a09d06ed8a111ddc07ee1a3c62842453cdf0b6",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000238b.xsl"
+    },
+    {
+      "filename": "202411001000242a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000242a.xml",
+      "bytes": 2176,
+      "sha256": "b5bf5e6926cd59d852df43572ed9cc2c0c60fd0e9d440ad9db7772fbba06984a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000242a.xsl"
+    },
+    {
+      "filename": "202411001000242b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000242b.xml",
+      "bytes": 41054,
+      "sha256": "d0d553fdb86786714f9f8417a917d9fbdd2d2d2a289911e33da6626387da04c2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000242b.xsl"
+    },
+    {
+      "filename": "202411001000247a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000247a.xml",
+      "bytes": 2176,
+      "sha256": "a211bbf4aaed3c3ebba30f662cbeefe67b48585bb3dfedc7b4aac450ca260b7f",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000247a.xsl"
+    },
+    {
+      "filename": "202411001000247b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000247b.xml",
+      "bytes": 23409,
+      "sha256": "c5a4d3c1291cf3ce0585232d09cca268b4c50a7d869479b203734ba159491ac5",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000247b.xsl"
+    },
+    {
+      "filename": "202411001000250a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000250a.xml",
+      "bytes": 2179,
+      "sha256": "9007906d9a39f6d8f544741855077b67073bc9546253f594fa0b6f493e78c9bf",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000250a.xsl"
+    },
+    {
+      "filename": "202411001000250b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000250b.xml",
+      "bytes": 47743,
+      "sha256": "b7847adf7c8961d109abef951655c15a8c5fbb45aac58caef718102837b18deb",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000250b.xsl"
+    },
+    {
+      "filename": "202411001000255a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000255a.xml",
+      "bytes": 2158,
+      "sha256": "478dfc032581b737e7fe8daea64fea00e1ce9b4952a7b714031982c5dcafe400",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000255a.xsl"
+    },
+    {
+      "filename": "202411001000255b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000255b.xml",
+      "bytes": 13272,
+      "sha256": "756a6b6ddfde77d0c3282b3b7d0d66fc7d6e097755bb0e213878e88458da1eab",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000255b.xsl"
+    },
+    {
+      "filename": "202411001000257a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000257a.xml",
+      "bytes": 2158,
+      "sha256": "f7c56c725a14006357c92d026c191ea10b34d6b8fae181bef696a7a53f3e7976",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000257a.xsl"
+    },
+    {
+      "filename": "202411001000257b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000257b.xml",
+      "bytes": 24992,
+      "sha256": "e4112504e2efb55fd31504ead403fc903a7893d73910ea16a305b3c06678b7c9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000257b.xsl"
+    },
+    {
+      "filename": "202411001000261a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000261a.xml",
+      "bytes": 968,
+      "sha256": "6d510478353169ce41010a91cf71f31f8feba7a5667f37baebd9da7c3397c44c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000261a.xsl"
+    },
+    {
+      "filename": "202411001000263a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000263a.xml",
+      "bytes": 21883,
+      "sha256": "29f9ce4f769d5e76beac836f1ee9032662b506b3e455f89b656264fb119bd48d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000263a.xsl"
+    },
+    {
+      "filename": "202411001000265a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000265a.xml",
+      "bytes": 3001,
+      "sha256": "7a00ba87e3aa82a1f1be1c7b853a2eca3e531f96cffbd8c429f587842808276a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000265a.xsl"
+    },
+    {
+      "filename": "202411001000265b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000265b.xml",
+      "bytes": 6106,
+      "sha256": "b2796e4ef18bea4dc511b93be141e5086d0ea2709c1165e7b1989ab38d3c787d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000265b.xsl"
+    },
+    {
+      "filename": "202411001000266a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000266a.xml",
+      "bytes": 9627,
+      "sha256": "c1e537d1bc272d8110d710ad4abf6a78f8ee9d02b783349e7fcc849e92a52fc6",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000266a.xsl"
+    },
+    {
+      "filename": "202411001000267a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000267a.xml",
+      "bytes": 4267,
+      "sha256": "a7e4ce6bd6dafd21948bd7e5fcf7f63affa05f889446491cdc88abe7a4a52054",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000267a.xsl"
+    },
+    {
+      "filename": "202411001000268a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000268a.xml",
+      "bytes": 7346,
+      "sha256": "5e6a3e5f272e3bb8c99d2dde57aa1bed7a8177773bce168cf4e8d4dbc561f45f",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000268a.xsl"
+    },
+    {
+      "filename": "202411001000269a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000269a.xml",
+      "bytes": 3707,
+      "sha256": "fe76ca14ba6a9dc8faf38f355f8d75e83479148aacdfb7f8333fc54bc69c11ec",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000269a.xsl"
+    },
+    {
+      "filename": "202411001000269b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000269b.xml",
+      "bytes": 6606,
+      "sha256": "2a60eb3c25fc411fc17368b1940c3efd7c9ffa1f9717a3539dcaa9827c1e0097",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000269b.xsl"
+    },
+    {
+      "filename": "202411001000270a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000270a.xml",
+      "bytes": 29191,
+      "sha256": "3173bf51405b1a488c34e00291c92ecc944524380fc7a4216c32795cac1fb3cc",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000270a.xsl"
+    },
+    {
+      "filename": "202411001000272a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000272a.xml",
+      "bytes": 5850,
+      "sha256": "b66615a15b89ad19284cfe7c4cadefdc6d25c09e9d62df0286d42803c3f2f598",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000272a.xsl"
+    },
+    {
+      "filename": "202411001000272b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000272b.xml",
+      "bytes": 27115,
+      "sha256": "60d3ddf34684bae5d88580c50d35e9e6e66eb288a4ef43803b584ddf5c8fc578",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000272b.xsl"
+    },
+    {
+      "filename": "202411001000274a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000274a.xml",
+      "bytes": 5954,
+      "sha256": "a88abae767fe5cfcea7ce2f2e8c7f3691dbdb32984e6cebc53da616c929c8a82",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000274a.xsl"
+    },
+    {
+      "filename": "202411001000274b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000274b.xml",
+      "bytes": 23700,
+      "sha256": "3f002356852e3a89224841bcd345e8416f467092157b8778d61fc6b68efa4e0c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000274b.xsl"
+    },
+    {
+      "filename": "202411001000276a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000276a.xml",
+      "bytes": 3354,
+      "sha256": "7865b3ecbff9368a227c36a3c8b718d4d6fea3152d2d8769dc3185366d2bb395",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000276a.xsl"
+    },
+    {
+      "filename": "202411001000276b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000276b.xml",
+      "bytes": 8481,
+      "sha256": "544e880d29b9f9ecaf3630f8b94fed35be84e1d64e25e5a5e8f79cb1ddf266bb",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000276b.xsl"
+    },
+    {
+      "filename": "202411001000277a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000277a.xml",
+      "bytes": 4428,
+      "sha256": "23853a00700797eba2c944b3322181bebfc68f4de633c15f016ca87d0181431d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000277a.xsl"
+    },
+    {
+      "filename": "202411001000277b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000277b.xml",
+      "bytes": 8470,
+      "sha256": "a04d86bdd95f1dc5ab37bdf4ca85fd0375fd5e26361e3263d7d706689a8af071",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000277b.xsl"
+    },
+    {
+      "filename": "202411001000278a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000278a.xml",
+      "bytes": 8715,
+      "sha256": "ddbff00f8a21e7f937ebd39ead4f9ee34006fc92801008aab308f66248b06b15",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000278a.xsl"
+    },
+    {
+      "filename": "202411001000280a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000280a.xml",
+      "bytes": 24244,
+      "sha256": "5074fe68ab5375be0054e8f8f8ff0e000d2c65c7f054fd2e4b01731e70b22d4c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000280a.xsl"
+    },
+    {
+      "filename": "202411001000283a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000283a.xml",
+      "bytes": 7734,
+      "sha256": "e1546f0a023a5199de6eae8cc8c07a572864ad8de0671e0512ee5990c7807d2f",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000283a.xsl"
+    },
+    {
+      "filename": "202411001000283b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000283b.xml",
+      "bytes": 50571,
+      "sha256": "6f851a82533be1ebbadc15c62747a9687d2b930a35d23cccec16fce67a760a34",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000283b.xsl"
+    },
+    {
+      "filename": "202411001000291a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000291a.xml",
+      "bytes": 3027,
+      "sha256": "318adf849ce0905041702719ed78d595b8b59c0238fd585ae06bce672467c075",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000291a.xsl"
+    },
+    {
+      "filename": "202411001000291b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000291b.xml",
+      "bytes": 9969,
+      "sha256": "e5c186be4e18d553bd58d12a67da07c6740c4928475b41cc92568c34435df004",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000291b.xsl"
+    },
+    {
+      "filename": "202411001000292a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000292a.xml",
+      "bytes": 48323,
+      "sha256": "000242ab5fb0931e258a93962ba82f464a6ccb4025bd1d2ec360cf3cc35efa11",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000292a.xsl"
+    },
+    {
+      "filename": "202411001000295a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000295a.xml",
+      "bytes": 4354,
+      "sha256": "d3b99792c049fdadea57b08e6f7f4e10caf8e4123c380486bcd21dcf4f60fd9c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000295a.xsl"
+    },
+    {
+      "filename": "202411001000296a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000296a.xml",
+      "bytes": 8209,
+      "sha256": "0000cd3526f6bcae2dac1fed2bcb018ea20d60f2f92c4cfbeae6746c6fb18530",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000296a.xsl"
+    },
+    {
+      "filename": "202411001000297a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000297a.xml",
+      "bytes": 9410,
+      "sha256": "c8afba7d672d3c099c9bd09461adb166a4c10fe8ac73d2471ac1bde1bd3fb988",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000297a.xsl"
+    },
+    {
+      "filename": "202411001000297b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000297b.xml",
+      "bytes": 41180,
+      "sha256": "d5e41e13ebb360dba010a1a7f215e9cbdfe0c95f3040623f250152e0fa846610",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000297b.xsl"
+    },
+    {
+      "filename": "202411001000303a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000303a.xml",
+      "bytes": 3033,
+      "sha256": "3cfe1e1f018f8853f4aa0f1def4cb7f2a5285397c63b34a1fb0d2b874624c95c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000303a.xsl"
+    },
+    {
+      "filename": "202411001000303b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000303b.xml",
+      "bytes": 4467,
+      "sha256": "61649c1ab2fd905702cfbbe9347ea1340f911362a85ece1974e2317b2a5a95d2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000303b.xsl"
+    },
+    {
+      "filename": "202411001000303c.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000303c.xml",
+      "bytes": 25802,
+      "sha256": "2beaf0325f8b59fb22d9acf78c9e77051d615fff28ae6ab98b15acd0c296d8bd",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000303c.xsl"
+    },
+    {
+      "filename": "202411001000305a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000305a.xml",
+      "bytes": 4190,
+      "sha256": "71779c9131237b8ed8c691a79619a6345a01bb4c834a1dc79064985d9a91bc00",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000305a.xsl"
+    },
+    {
+      "filename": "202411001000306a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000306a.xml",
+      "bytes": 7471,
+      "sha256": "ce3bc89b2b0fc7ab85cb82743d3c3adc14bf437ea01ac2465139be434c8059ac",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000306a.xsl"
+    },
+    {
+      "filename": "202411001000307a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000307a.xml",
+      "bytes": 7929,
+      "sha256": "b1d3756eb173dae9c2d53582c83d7e21700f17831a860fe312ea3e2cda9ad189",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000307a.xsl"
+    },
+    {
+      "filename": "202411001000307b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000307b.xml",
+      "bytes": 14150,
+      "sha256": "3595565b3ef7afae02b5d4cb5ef9d36451800aead21495fb63c13f2b0b306d40",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000307b.xsl"
+    },
+    {
+      "filename": "202411001000309a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000309a.xml",
+      "bytes": 3711,
+      "sha256": "1bbd3e91009bbae1c04a506e27eb6900d8ccf0be5621c97e384f164326303dfa",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000309a.xsl"
+    },
+    {
+      "filename": "202411001000309b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000309b.xml",
+      "bytes": 9399,
+      "sha256": "c4c911575b3fe52bf0a09b894a929cc0c837051515305f9095f9a33e6bb38b46",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000309b.xsl"
+    },
+    {
+      "filename": "202411001000310a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000310a.xml",
+      "bytes": 36841,
+      "sha256": "c9acbc0585fc660827096b57d8d3999254d46525e395a27625e18085d50a9378",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000310a.xsl"
+    },
+    {
+      "filename": "202411001000313a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000313a.xml",
+      "bytes": 4600,
+      "sha256": "25b46a346896f0d2a6170e570aa23f5900c267c8d6a6982b796d25351221c0d2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000313a.xsl"
+    },
+    {
+      "filename": "202411001000313b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000313b.xml",
+      "bytes": 9585,
+      "sha256": "c62f575bdd5fc5ace47f00077a6d91673012993e29ab832ffd942e7f4e9d83aa",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000313b.xsl"
+    },
+    {
+      "filename": "202411001000314a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000314a.xml",
+      "bytes": 5580,
+      "sha256": "a998a81d3d6fd8519ea6b1ffe68ed4a86018df570520f634029892e9a2f6cab8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000314a.xsl"
+    },
+    {
+      "filename": "202411001000314b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000314b.xml",
+      "bytes": 22057,
+      "sha256": "4c96f434ea15f7bedd7e139f87ae4439c1b42a48109ba86423f82d2e7b6dc5f3",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000314b.xsl"
+    },
+    {
+      "filename": "202411001000316a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000316a.xml",
+      "bytes": 8836,
+      "sha256": "f112fe50cc89d79ac21839782c213e480ec49824a71e0a7c2e04f4db36101011",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000316a.xsl"
+    },
+    {
+      "filename": "202411001000318a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000318a.xml",
+      "bytes": 17180,
+      "sha256": "8ea458ccab842fe4e77120e11b33243e93e355e6783ed016da2372bbf6a8bed1",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000318a.xsl"
+    },
+    {
+      "filename": "202411001000320a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000320a.xml",
+      "bytes": 12132,
+      "sha256": "82854c00a0a9ee8e221b3a2fa43afce5f648f3a5a4a3466b25d3f535a380b863",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000320a.xsl"
+    },
+    {
+      "filename": "202411001000320b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000320b.xml",
+      "bytes": 47257,
+      "sha256": "f73baa08f1e8c164bbacf8ff4fb04911a69dc00b7aafd82475feee7197da637e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000320b.xsl"
+    },
+    {
+      "filename": "202411001000327a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000327a.xml",
+      "bytes": 14200,
+      "sha256": "899f10be1796767d3f9a97ea3c33451a70ca2d702f2ba4ce59e5a75b3e8d9474",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000327a.xsl"
+    },
+    {
+      "filename": "202411001000328a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000328a.xml",
+      "bytes": 62825,
+      "sha256": "f66a9d0b6b688386c81f4edb373b4b48aec6a2ab14fce5023e71d9806ee647ec",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000328a.xsl"
+    },
+    {
+      "filename": "202411001000336a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000336a.xml",
+      "bytes": 167322,
+      "sha256": "e420ebf16531af783c70b42d44d505c59e1641ae9d98f4b6036961d5aeffcc0c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000336a.xsl"
+    },
+    {
+      "filename": "202411001000345a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000345a.xml",
+      "bytes": 9596,
+      "sha256": "63e56297dd9b11cb26ce0dab0f0a0b6d884ee6fa5e401bc90872629cd46fd964",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000345a.xsl"
+    },
+    {
+      "filename": "202411001000346a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000346a.xml",
+      "bytes": 16184,
+      "sha256": "e71138fdb28253a5e94c2e028827e3689aeda01e37d7f5b68c675665ffc53eff",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000346a.xsl"
+    },
+    {
+      "filename": "202411001000347a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000347a.xml",
+      "bytes": 3525,
+      "sha256": "7567b8ccd209546d9034a4289dd2d32a356fb6f40b610b234c568bbbd63b5580",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000347a.xsl"
+    },
+    {
+      "filename": "202411001000347b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000347b.xml",
+      "bytes": 8088,
+      "sha256": "1d3a1ef41cad14510e9ca26d87ef1d47479f5057c63c9765e15b87ecacbccd94",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000347b.xsl"
+    },
+    {
+      "filename": "202411001000348a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000348a.xml",
+      "bytes": 7522,
+      "sha256": "76bf7dc1c2471de814d033215e8ecf629e7a6800d52ae6f54f9f8fc6d20f28f9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000348a.xsl"
+    },
+    {
+      "filename": "202411001000348b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000348b.xml",
+      "bytes": 16854,
+      "sha256": "e8c23acf5d3e1e6a6a4d8a3a7d205b017f650a2557756d5acf9b5aa3aee9612b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000348b.xsl"
+    },
+    {
+      "filename": "202411001000350a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000350a.xml",
+      "bytes": 4655,
+      "sha256": "3e41dea05f54320cb99b358353628f037551c56c5de2f6061832b518d81a0d6b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000350a.xsl"
+    },
+    {
+      "filename": "202411001000350b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000350b.xml",
+      "bytes": 8082,
+      "sha256": "c959f2acd4d54e55b586a51db2c671ac0ededf5ce18ac0906e1101284180f5e6",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000350b.xsl"
+    },
+    {
+      "filename": "202411001000351a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000351a.xml",
+      "bytes": 6544,
+      "sha256": "d17f2275c1f790566a2e431d6a7179378b209f0b4d8b0bf4c2fcd979f2fd91a8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000351a.xsl"
+    },
+    {
+      "filename": "202411001000351b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000351b.xml",
+      "bytes": 15078,
+      "sha256": "417c83d750ae6bb98a677063e35446911f92531ce8cc33e289510e236d377b20",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000351b.xsl"
+    },
+    {
+      "filename": "202411001000353a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000353a.xml",
+      "bytes": 5561,
+      "sha256": "707e52154cd30d7b3642dd818815699b9546aa4c2459ae9ec4c40af4442cdcf2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000353a.xsl"
+    },
+    {
+      "filename": "202411001000353b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000353b.xml",
+      "bytes": 8961,
+      "sha256": "c0210fa9b47faa1a779f822faa4a7a06725af538b20f7cc1bc59b087ad087884",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000353b.xsl"
+    },
+    {
+      "filename": "202411001000354a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000354a.xml",
+      "bytes": 5450,
+      "sha256": "674e5a05cd099cf1b41dd7b6fe3418dfe84d4582fff620e9d5b17aafe0767d84",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000354a.xsl"
+    },
+    {
+      "filename": "202411001000354b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000354b.xml",
+      "bytes": 14388,
+      "sha256": "6d5dfab00f7f9e4665a065981589c4bc2546cf46d65594b8d7cca344cc1da7f3",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000354b.xsl"
+    },
+    {
+      "filename": "202411001000356a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000356a.xml",
+      "bytes": 4640,
+      "sha256": "c3a62fd6fb18aa3c4d3a4c9364295df3b3a37050337b247afc3b5e830fb3de74",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000356a.xsl"
+    },
+    {
+      "filename": "202411001000356b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000356b.xml",
+      "bytes": 10087,
+      "sha256": "8c5a5b64086785a28adb8dfb25730e7a1f668172cfa11d311b02238622ad0abf",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000356b.xsl"
+    },
+    {
+      "filename": "202411001000357a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000357a.xml",
+      "bytes": 4477,
+      "sha256": "6b4dd7acce9c6c0f8db05a09b58a53884534eb4e3c92f34ea20468c447b0b248",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000357a.xsl"
+    },
+    {
+      "filename": "202411001000357b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000357b.xml",
+      "bytes": 12641,
+      "sha256": "7c23d1e6a87518621baa27c36cf81214a837ae5e2e91b0a199076987d27e9801",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000357b.xsl"
+    },
+    {
+      "filename": "202411001000358a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000358a.xml",
+      "bytes": 3457,
+      "sha256": "86b3ae46b7ae99b1ebbccd28294811603973ea0dbb47458b4c8f2ef8586a5668",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000358a.xsl"
+    },
+    {
+      "filename": "202411001000358b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000358b.xml",
+      "bytes": 8642,
+      "sha256": "2182f0ede095685bfba415f8ec8a998f7333cfe9d342f9cbaa351bdd7b3c4109",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000358b.xsl"
+    },
+    {
+      "filename": "202411001000359a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000359a.xml",
+      "bytes": 12237,
+      "sha256": "a6ff44893473b20402125b9f892e98dcad77b8e96a48a52f5df14169e57b34ca",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000359a.xsl"
+    },
+    {
+      "filename": "202411001000360a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000360a.xml",
+      "bytes": 86998,
+      "sha256": "5d4350749799f327ece331bef0340bf6b1e9e90e7cd50aaf603f03d8355ab1a7",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000360a.xsl"
+    },
+    {
+      "filename": "202411001000364a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000364a.xml",
+      "bytes": 3325,
+      "sha256": "a3f8426cbb03e855331ccbb64658216e0c53ba35f80dfd098aa0c14ad646b9ef",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000364a.xsl"
+    },
+    {
+      "filename": "202411001000364b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000364b.xml",
+      "bytes": 16290,
+      "sha256": "69f57f4b77236cae4b79941850a11800cfb548197637c10831b9fc7cb78daf31",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000364b.xsl"
+    },
+    {
+      "filename": "202411001000365a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000365a.xml",
+      "bytes": 5904,
+      "sha256": "b01d2bbb0d660dffd503baa4fc577b423925dc6a30f545b123695c53140ec7ec",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000365a.xsl"
+    },
+    {
+      "filename": "202411001000365b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000365b.xml",
+      "bytes": 24107,
+      "sha256": "9c44a2d583c329cd071557f32cb0412237c3097104508c6e07f27d1f019e633b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000365b.xsl"
+    },
+    {
+      "filename": "202411001000367a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000367a.xml",
+      "bytes": 21222,
+      "sha256": "b11b6e81d7ea3eb11baafd2a17ad38ff871045a33dc576484f3c6ec42f099abc",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000367a.xsl"
+    },
+    {
+      "filename": "202411001000369a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000369a.xml",
+      "bytes": 76186,
+      "sha256": "397b63585736325464ea97b029851caa85b2485e430df543d74653f3262d52ca",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000369a.xsl"
+    },
+    {
+      "filename": "202411001000373a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000373a.xml",
+      "bytes": 4759,
+      "sha256": "5337ee6410571f7b73d045c4a37824caec33c698f0104d108d44a2c5240ac860",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000373a.xsl"
+    },
+    {
+      "filename": "202411001000373b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000373b.xml",
+      "bytes": 17428,
+      "sha256": "7ff669f786d817bc46d241dd605a2f8445c2855da1135178ea95b0abf75375f0",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000373b.xsl"
+    },
+    {
+      "filename": "202411001000375a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000375a.xml",
+      "bytes": 5235,
+      "sha256": "4117899d5763a6eec1029cab590a3e34bed753c07dfb2435f862dd6969d7e9e9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000375a.xsl"
+    },
+    {
+      "filename": "202411001000375b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000375b.xml",
+      "bytes": 18646,
+      "sha256": "094f7f4ab7855f70bab0341bd2f89458700d51b285a8113e937b4c81142ab2ac",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000375b.xsl"
+    },
+    {
+      "filename": "202411001000377a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000377a.xml",
+      "bytes": 9539,
+      "sha256": "e38521c382cbeeb9d552146bb395fe2150c8a5782a622e0ac4be1eeb80e0725e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000377a.xsl"
+    },
+    {
+      "filename": "202411001000377b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000377b.xml",
+      "bytes": 35151,
+      "sha256": "c4640e4f7f23947532428875eadcf43b01cb57da725c6564aff3b15c9b201ff0",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000377b.xsl"
+    },
+    {
+      "filename": "202411001000380a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000380a.xml",
+      "bytes": 7475,
+      "sha256": "ce07dbf0125a1533d324802044608f1e4c55d8bc30f700675d438ed9b3bb75d2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000380a.xsl"
+    },
+    {
+      "filename": "202411001000380b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000380b.xml",
+      "bytes": 29264,
+      "sha256": "428333bd84a4a109232c77d2fdfc3124c695b736f638c12eb3d4d3c07fda6c4a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000380b.xsl"
+    },
+    {
+      "filename": "202411001000382a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000382a.xml",
+      "bytes": 27698,
+      "sha256": "18397342e409e78e3033cb43e83ab7b1b4cee2bb27ae552084b30ec28a3479ee",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000382a.xsl"
+    },
+    {
+      "filename": "202411001000385a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000385a.xml",
+      "bytes": 63956,
+      "sha256": "36cd803dbe61b00923dd453c9848ced3ee8c2834fc9dfb35c883b637fefba8e7",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000385a.xsl"
+    },
+    {
+      "filename": "202411001000389a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000389a.xml",
+      "bytes": 59360,
+      "sha256": "b9692e905b13b61652592a408384d11af1fedd3055ce68b5c08b89ac7c2a87b9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000389a.xsl"
+    },
+    {
+      "filename": "202411001000400a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000400a.xml",
+      "bytes": 115197,
+      "sha256": "503c94daa5141bdc7014f69a015413be5e83f730ad21c6bb849a255dde1b385f",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000400a.xsl"
+    },
+    {
+      "filename": "202411001000416a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000416a.xml",
+      "bytes": 18368,
+      "sha256": "ba8dfe7037140713b81113ce0e8933e64d604ab8de0efc0882d4b38d7d127b4c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000416a.xsl"
+    },
+    {
+      "filename": "202411001000417a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000417a.xml",
+      "bytes": 259454,
+      "sha256": "37e3570e08879540ac3ee2e229f20f5e4a97b9b5785b770dc6e041a39033dbab",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000417a.xsl"
+    },
+    {
+      "filename": "202411001000445a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000445a.xml",
+      "bytes": 3053,
+      "sha256": "19e8ce1881f268a9aebf01c4d3213cc10d499faf7fda37637521f7e91289ea74",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000445a.xsl"
+    },
+    {
+      "filename": "202411001000445b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000445b.xml",
+      "bytes": 6404,
+      "sha256": "8d4817b646ecbbfe2d7648b736f841b6b1b68cd09694a28b269ab89c0a929a7a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000445b.xsl"
+    },
+    {
+      "filename": "202411001000446a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000446a.xml",
+      "bytes": 27653,
+      "sha256": "308a4f73e05d7f23e0b07df9c6a2c4036462bce415123d891b09699369f28a03",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000446a.xsl"
+    },
+    {
+      "filename": "202411001000448a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000448a.xml",
+      "bytes": 5920,
+      "sha256": "d8d84942b93a19e357c3bd2fbdf05c9a66bbc1b16b0950cbbf8c1bbda6e27b20",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000448a.xsl"
+    },
+    {
+      "filename": "202411001000449a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000449a.xml",
+      "bytes": 5075,
+      "sha256": "f1843f0b452b264cb89df7c99eb204acb48e563d26ad0d98e17af2f63eb4df94",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000449a.xsl"
+    },
+    {
+      "filename": "202411001000450a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000450a.xml",
+      "bytes": 6234,
+      "sha256": "1facd30529656ed228ec5a360f2517270e8147708e01294ebcd1e1dc3bd6afc3",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000450a.xsl"
+    },
+    {
+      "filename": "202411001000450b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000450b.xml",
+      "bytes": 9650,
+      "sha256": "2a37391672116888142b855fca4fd12f06a2acfc49b3c1b6a135df906f02bad4",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000450b.xsl"
+    },
+    {
+      "filename": "202411001000453a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000453a.xml",
+      "bytes": 5236,
+      "sha256": "a8bc988d24d24274afaeb91913007eeaa9e5a0f646c1f2a6495bab9222ae3475",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000453a.xsl"
+    },
+    {
+      "filename": "202411001000453b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000453b.xml",
+      "bytes": 42075,
+      "sha256": "120fe2c077c0559d5879bf7e82acdc02855f9b75f0a8e53966e67cb21817329e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000453b.xsl"
+    },
+    {
+      "filename": "202411001000458a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000458a.xml",
+      "bytes": 144081,
+      "sha256": "e4d2129217e2cde65298553e1457811be9450002fa7374c972038fd8bd6f391b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000458a.xsl"
+    },
+    {
+      "filename": "202411001000466a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000466a.xml",
+      "bytes": 5673,
+      "sha256": "e20371b2a4b55b77deb70519268372449e513c87a2197e01255b0ebe0c94b001",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000466a.xsl"
+    },
+    {
+      "filename": "202411001000466b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000466b.xml",
+      "bytes": 16839,
+      "sha256": "05bc54a11d315697b55a5986b4f8c02ffd5a9c58b230661e894205ab42e47da8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000466b.xsl"
+    },
+    {
+      "filename": "202411001000468a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000468a.xml",
+      "bytes": 6223,
+      "sha256": "aa0f43f5c568a012e2633fa92d350d8e64071a8c1576dcce57e9bcde36cbf88d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000468a.xsl"
+    },
+    {
+      "filename": "202411001000468b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000468b.xml",
+      "bytes": 22256,
+      "sha256": "ce8e5d6ad1de3ac190ea700dbe1a22eec2711c5df591c2a452310f985ee0210a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000468b.xsl"
+    },
+    {
+      "filename": "202411001000470a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000470a.xml",
+      "bytes": 4536,
+      "sha256": "97d1bdd31746d025231bff88de96cc8e60ceef44bd9c47dbe52dea844cbba5f2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000470a.xsl"
+    },
+    {
+      "filename": "202411001000470b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000470b.xml",
+      "bytes": 10983,
+      "sha256": "f86489e9db91749b4897bc2a3cdd6289fda1da29c7fda8e0397d2b64766a994a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000470b.xsl"
+    },
+    {
+      "filename": "202411001000471a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000471a.xml",
+      "bytes": 7630,
+      "sha256": "ab263ea7049fd620410f2664d0e975e6a3a2aa39740cd2fcbdc17217c7b55e36",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000471a.xsl"
+    },
+    {
+      "filename": "202411001000471b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000471b.xml",
+      "bytes": 28123,
+      "sha256": "a99561d848b64b2feef11aa7830e7fa00508a7c0971fd89a916e968251c01eb6",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000471b.xsl"
+    },
+    {
+      "filename": "202411001000473a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000473a.xml",
+      "bytes": 25112,
+      "sha256": "25d21103edc5787c67117244f4b3b8b0e0a7ed32cd54fb3b1e3eacc1654fdf90",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000473a.xsl"
+    },
+    {
+      "filename": "202411001000478a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000478a.xml",
+      "bytes": 50400,
+      "sha256": "299a319c7d5e6460f98e3d45bcdfc093c1a77863145030c364665037b9269955",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000478a.xsl"
+    },
+    {
+      "filename": "202411001000485a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000485a.xml",
+      "bytes": 13503,
+      "sha256": "b4b105dc84d6d11c076d0b060788ba6429fa15c88009f2900e969c3d029e10c9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000485a.xsl"
+    },
+    {
+      "filename": "202411001000485b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000485b.xml",
+      "bytes": 66784,
+      "sha256": "30f32e95911aa392c5eb968c88f85764b53f892d59e82cffbfdd6fd215244f04",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000485b.xsl"
+    },
+    {
+      "filename": "202411001000493a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000493a.xml",
+      "bytes": 3037,
+      "sha256": "7829193bfaa4e2e000d73ad0b259fd846e7871d9591d919bd0f75adb6714a8cd",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000493a.xsl"
+    },
+    {
+      "filename": "202411001000493b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000493b.xml",
+      "bytes": 21878,
+      "sha256": "4dfbdc2b3e433d59b7bcf0d19214a0006e80742ea63d57d5e42dbf410cc9bec9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000493b.xsl"
+    },
+    {
+      "filename": "202411001000495a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000495a.xml",
+      "bytes": 61930,
+      "sha256": "b23afca74fa900e97e375dc38b510edb03b67c99234f4fb172e652a289124891",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000495a.xsl"
+    },
+    {
+      "filename": "202411001000499a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000499a.xml",
+      "bytes": 6014,
+      "sha256": "a0f1b85b2febab2199aabca5dc602fa708a1ea1ed01c174888dc3b158121b27f",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000499a.xsl"
+    },
+    {
+      "filename": "202411001000499b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000499b.xml",
+      "bytes": 19503,
+      "sha256": "df226eb2d01718610cfb42f43527d3e26338a3248002d99b11f2fa6aec387e51",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000499b.xsl"
+    },
+    {
+      "filename": "202411001000501a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000501a.xml",
+      "bytes": 5746,
+      "sha256": "be7d4438897d0435a6223902ab0da1d6d81cecef9d77ff41cd1f786a8a9257be",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000501a.xsl"
+    },
+    {
+      "filename": "202411001000501b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000501b.xml",
+      "bytes": 21729,
+      "sha256": "79e3e12bd74dfa9d8d4e6c9b3fb6ed871560194c4e810b68affb0397d4cf2152",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000501b.xsl"
+    },
+    {
+      "filename": "202411001000503a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000503a.xml",
+      "bytes": 7976,
+      "sha256": "8654728d064ac4b0d7e1261e1698ec087503fcf0d6dc0338dfaeb7cc9a854dc6",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000503a.xsl"
+    },
+    {
+      "filename": "202411001000503b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000503b.xml",
+      "bytes": 32273,
+      "sha256": "01c36f2168681ca6cb747c5ad2ba84d1df69892cedd13f0ef2f0f550059c5a2e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000503b.xsl"
+    },
+    {
+      "filename": "202411001000506a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000506a.xml",
+      "bytes": 6036,
+      "sha256": "252623c8a527eb6f9e17e7000f8946d0579216f1552862a09ed6678e604f5fbd",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000506a.xsl"
+    },
+    {
+      "filename": "202411001000506b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000506b.xml",
+      "bytes": 20419,
+      "sha256": "f0bc8286e0ee21e199b7e7ef9c1c44ebc5369758e8424430710075815a930f4d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000506b.xsl"
+    },
+    {
+      "filename": "202411001000508a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000508a.xml",
+      "bytes": 7009,
+      "sha256": "be4bf25337e98af1a8efc53d9e5ac452254c961f64738822bee1f996e78af773",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000508a.xsl"
+    },
+    {
+      "filename": "202411001000508b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000508b.xml",
+      "bytes": 22565,
+      "sha256": "6faf5eea1b0a1a08c30dc3547205844daeeefef3f568bf96e7f660b3122a004c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000508b.xsl"
+    },
+    {
+      "filename": "202411001000510a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000510a.xml",
+      "bytes": 7662,
+      "sha256": "5cea9a4e6d3edf91e42adfc3c7e0237e5b77d7e7fd8079e4ecb9eae9a3db9371",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000510a.xsl"
+    },
+    {
+      "filename": "202411001000510b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000510b.xml",
+      "bytes": 29957,
+      "sha256": "8accaed31e50bede5b9e43d88fd831390d83743f8a40cf584d9f1bcb97e6a1c0",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000510b.xsl"
+    },
+    {
+      "filename": "202411001000513a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000513a.xml",
+      "bytes": 3383,
+      "sha256": "a7665a77ed62749a6da3e213ac05a8a8f8a55866df32454c181df5f43435c1de",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000513a.xsl"
+    },
+    {
+      "filename": "202411001000513b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000513b.xml",
+      "bytes": 8471,
+      "sha256": "7dd9bd8b5f85aabe87fb0ab0244886841600130ad10fa3e368231e76c2067b4b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000513b.xsl"
+    },
+    {
+      "filename": "202411001000514a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000514a.xml",
+      "bytes": 5392,
+      "sha256": "e5f493e364e6bd0f3040b82cd0c553c55dae7a1880265bf371974290ca2e0f91",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000514a.xsl"
+    },
+    {
+      "filename": "202411001000514b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000514b.xml",
+      "bytes": 14035,
+      "sha256": "6f5b7fd701c4762e6c29a16c0161996f34a461d19d407235bbe599704aaf9793",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000514b.xsl"
+    },
+    {
+      "filename": "202411001000515a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000515a.xml",
+      "bytes": 9177,
+      "sha256": "934f3017c549a94df74b06c3e082999ab6c3fe1dda35f6447a2541ab59ca1fab",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000515a.xsl"
+    },
+    {
+      "filename": "202411001000517a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000517a.xml",
+      "bytes": 77738,
+      "sha256": "d215975b224b1325b23dbd0a9c749355096f479036be19ff384e23fc8ab3caa8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000517a.xsl"
+    },
+    {
+      "filename": "202411001000529a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000529a.xml",
+      "bytes": 17383,
+      "sha256": "a110b1b57a169d0cb1c60e7747df8eb13d8722089b8c42afb95e859973f60afb",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000529a.xsl"
+    },
+    {
+      "filename": "202411001000530a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000530a.xml",
+      "bytes": 215035,
+      "sha256": "1cdd739384f3abfa108bfb63f9764f05f74b018ae61fddb3a852f13953adf5ab",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000530a.xsl"
+    },
+    {
+      "filename": "202411001000549a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000549a.xml",
+      "bytes": 4020,
+      "sha256": "b6c15dbf8567e657553ce715253c4f8bf631fef9ee2ad8573a4c0fc0acd8cda2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000549a.xsl"
+    },
+    {
+      "filename": "202411001000549b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000549b.xml",
+      "bytes": 33632,
+      "sha256": "611a772757e8d1c19a3c7cc700231a6dd0af67d266de795ce2881a70ca6a4fb9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000549b.xsl"
+    },
+    {
+      "filename": "202411001000553a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000553a.xml",
+      "bytes": 105508,
+      "sha256": "01fab89d3cb92abfc43612b3cda00b0cacba98b80425b1e5bc840434de1b7537",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000553a.xsl"
+    },
+    {
+      "filename": "202411001000559a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000559a.xml",
+      "bytes": 18797,
+      "sha256": "a8fe41e3b2f3b5c3ea54df846bd54beb43866041b2fe2af544d2b4b6216ff1e6",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000559a.xsl"
+    },
+    {
+      "filename": "202411001000561a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000561a.xml",
+      "bytes": 61157,
+      "sha256": "83a79b7f33d20ae5319664ed4ceb3d40c875cab68787871f2dde6d293e033d75",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000561a.xsl"
+    },
+    {
+      "filename": "202411001000564a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000564a.xml",
+      "bytes": 9557,
+      "sha256": "8718b1d64f0caf665ced005a5d80ac3530b6eea04e4d4956417653d5cddbbefe",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000564a.xsl"
+    },
+    {
+      "filename": "202411001000566a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000566a.xml",
+      "bytes": 34006,
+      "sha256": "30eca4983a4c98aa6ff123365cec99fb9abd9e7a2a429f8532950eda98bec5d9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000566a.xsl"
+    },
+    {
+      "filename": "202411001000570a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000570a.xml",
+      "bytes": 14464,
+      "sha256": "ca87c1851f59193840f2a3354731e6bdaea1c3a08d9821a9392417ee2b756f30",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000570a.xsl"
+    },
+    {
+      "filename": "202411001000571a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000571a.xml",
+      "bytes": 37327,
+      "sha256": "500685a24843a0b2cf243029e22828d5cb83279119479e5d071588669758b26a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000571a.xsl"
+    },
+    {
+      "filename": "202411001000575a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000575a.xml",
+      "bytes": 8906,
+      "sha256": "af15cf98058a68c84cf358fbc09b14fa717e06a043a71d6eee78fefaa74aa530",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000575a.xsl"
+    },
+    {
+      "filename": "202411001000576a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000576a.xml",
+      "bytes": 43174,
+      "sha256": "be05db2527ba2a01d10f32a2d6c0550602b5d4f028ffdc3da3b783786de71133",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000576a.xsl"
+    },
+    {
+      "filename": "202411001000581a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000581a.xml",
+      "bytes": 80647,
+      "sha256": "4d0229b901b51b960466a60061900096f6a9a6a7a65fd63e319c2d0e8c9b53f9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000581a.xsl"
+    },
+    {
+      "filename": "202411001000586a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000586a.xml",
+      "bytes": 8735,
+      "sha256": "ae9ab12b44be007daf24cb0fb10fa91bfdfd00e123c50a9488dddd18a703fbaf",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000586a.xsl"
+    },
+    {
+      "filename": "202411001000586b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000586b.xml",
+      "bytes": 25266,
+      "sha256": "35298c90eb698a5df29fdaa6cbc1d3486d543cf01354a0c8d8db5dcfee258901",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000586b.xsl"
+    },
+    {
+      "filename": "202411001000588a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000588a.xml",
+      "bytes": 6404,
+      "sha256": "60d21ad6dd73e0c5055b725278191fcac02e0a4dc37f0684402b7e7adee98868",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000588a.xsl"
+    },
+    {
+      "filename": "202411001000588b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000588b.xml",
+      "bytes": 26170,
+      "sha256": "2e484773d8decf1cca069c9996b62a837389dc1ba7761752e6cf450de98141e2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000588b.xsl"
+    },
+    {
+      "filename": "202411001000590a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000590a.xml",
+      "bytes": 11487,
+      "sha256": "8451d06037841307acaebc7682c71e7c0ad78ec856f1629b1a5a6b874b2b0308",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000590a.xsl"
+    },
+    {
+      "filename": "202411001000591a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000591a.xml",
+      "bytes": 41875,
+      "sha256": "ef7c76250c0635e3293dbd1d4dd32c1cf9c509b9555d7519d27536ed3c63daf1",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000591a.xsl"
+    },
+    {
+      "filename": "202411001000593a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000593a.xml",
+      "bytes": 12301,
+      "sha256": "20c11f0f479c7a0604c7889195f463e0afa4c4311fb956be1d3cf37d0965833c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000593a.xsl"
+    },
+    {
+      "filename": "202411001000595a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000595a.xml",
+      "bytes": 56973,
+      "sha256": "731358bc996a9248bdfb1e8f354ec2226d4e8a88a075f8a8d240bff6bc9a422c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000595a.xsl"
+    },
+    {
+      "filename": "202411001000602a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000602a.xml",
+      "bytes": 18467,
+      "sha256": "f37e7a0e8914594c216054833617eee4de6aee0b5ef09aac154a821a5c76912a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000602a.xsl"
+    },
+    {
+      "filename": "202411001000603a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000603a.xml",
+      "bytes": 123736,
+      "sha256": "e9456286d0307f0af65cdc92225ccb202aa8fa21b1987f8938d5e5cdca2bb064",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000603a.xsl"
+    },
+    {
+      "filename": "202411001000615a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000615a.xml",
+      "bytes": 7621,
+      "sha256": "de292557094f5a0c43406c2071f517d9b02b8c4235c524fa956183d722cc0e71",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000615a.xsl"
+    },
+    {
+      "filename": "202411001000616a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000616a.xml",
+      "bytes": 86999,
+      "sha256": "3b11d4fd30335a5cdba35246e157ae0d0c2bcaffed32d2d2c5793b797013ef56",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000616a.xsl"
+    },
+    {
+      "filename": "202411001000627a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000627a.xml",
+      "bytes": 220043,
+      "sha256": "e5dd40c00a02d2b549a8a7c759ec1449f3971fab332c356d3693f59626f6488d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000627a.xsl"
+    },
+    {
+      "filename": "202411001000640a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000640a.xml",
+      "bytes": 7870,
+      "sha256": "047a9bc899dc4f0b0152647f0060da8b8fcf5afbbae8859065248059809347f9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000640a.xsl"
+    },
+    {
+      "filename": "202411001000640b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000640b.xml",
+      "bytes": 32793,
+      "sha256": "bd6f6a85ebf1744dd91ab1cd89fd86c82095f566ec6d3ad07e1c1fbe78ade55d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000640b.xsl"
+    },
+    {
+      "filename": "202411001000643a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000643a.xml",
+      "bytes": 13813,
+      "sha256": "87252cf9ac6037c06f7161f5825ed408d3213db28e3fb7c69c0bc61e57ec34b1",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000643a.xsl"
+    },
+    {
+      "filename": "202411001000644a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000644a.xml",
+      "bytes": 24143,
+      "sha256": "399d54c3da3a0cf54f588bec28143f47247f71e2412b7b3038e9477cdf75d0ca",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000644a.xsl"
+    },
+    {
+      "filename": "202411001000646a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000646a.xml",
+      "bytes": 20936,
+      "sha256": "1975d9c2e7713a4eb60c9060b4f30923fd95bf2269563f49454754e8accd3289",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000646a.xsl"
+    },
+    {
+      "filename": "202411001000648a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000648a.xml",
+      "bytes": 66114,
+      "sha256": "ffc3f57e5945a58e93e08bf17c78119e0eeba1097b218293ea1a0f9cf5b0a17c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000648a.xsl"
+    },
+    {
+      "filename": "202411001000652a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000652a.xml",
+      "bytes": 39496,
+      "sha256": "2b4a2e7c5f8c78e1a94aabaf392b7d853e94ab81dd12c295f7ea4f5284b55320",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000652a.xsl"
+    },
+    {
+      "filename": "202411001000658a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000658a.xml",
+      "bytes": 50330,
+      "sha256": "1e50133643e745720ad3df93597eadb1f88cc0b034e44d871255016f408e5b64",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000658a.xsl"
+    },
+    {
+      "filename": "202411001000666a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000666a.xml",
+      "bytes": 8677,
+      "sha256": "4c77e0cce6a7e71114baab743e0d41283494312c3d3de2a288149dfbfae54458",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000666a.xsl"
+    },
+    {
+      "filename": "202411001000666b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000666b.xml",
+      "bytes": 48819,
+      "sha256": "a37c3fd7f86fc03e73b09a4ace038f33d9298e7998b27e329dcea7e39eb0b2ab",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000666b.xsl"
+    },
+    {
+      "filename": "202411001000673a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000673a.xml",
+      "bytes": 9317,
+      "sha256": "2a95f4e37eb71cd086fe27bc11c927b5bc2e28a497b3854ae02186e7da4791af",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000673a.xsl"
+    },
+    {
+      "filename": "202411001000674a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000674a.xml",
+      "bytes": 149959,
+      "sha256": "3b604bdc5071ebe8a8f3dee7d84648c1d770b81c03e7794c757e2a67c7634287",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000674a.xsl"
+    },
+    {
+      "filename": "202411001000694a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000694a.xml",
+      "bytes": 438358,
+      "sha256": "ec6e15b24913ce1b70cf511d421b83ddffbc3de40bee110ef360080d23213b41",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000694a.xsl"
+    },
+    {
+      "filename": "202411001000717a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000717a.xml",
+      "bytes": 6379,
+      "sha256": "7d0ff356595ada9992996d351c189849deeae0fc72802b16c3f499b298ee0e32",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000717a.xsl"
+    },
+    {
+      "filename": "202411001000717b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000717b.xml",
+      "bytes": 22659,
+      "sha256": "0d4032d5fbc703e4a5a224cef1c7718a9c1091175204d2670d65a7992238c943",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000717b.xsl"
+    },
+    {
+      "filename": "202411001000719a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000719a.xml",
+      "bytes": 5818,
+      "sha256": "55b034afc4f32635bd58a4ab46fa3f30cd3b0e9636adf7dc6c3361a3f6c1da40",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000719a.xsl"
+    },
+    {
+      "filename": "202411001000719b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000719b.xml",
+      "bytes": 21315,
+      "sha256": "48e7fb8d86c6e958807f05fc2bd022bf2814006d3e457baab08f7812e976e879",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000719b.xsl"
+    },
+    {
+      "filename": "202411001000721a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000721a.xml",
+      "bytes": 12397,
+      "sha256": "958c7bb2b89fbb03dc7dfa07a1350cc8a8073fd08bd8434ee9369333b6d26fc7",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000721a.xsl"
+    },
+    {
+      "filename": "202411001000722a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000722a.xml",
+      "bytes": 24500,
+      "sha256": "92a816609ec0b26e1303e715df86c2a7907f2313f8b4fd1b332ab79396e47719",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000722a.xsl"
+    },
+    {
+      "filename": "202411001000724a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000724a.xml",
+      "bytes": 6364,
+      "sha256": "a4601aecb78d6be393f53f6813e976b4a08c3e11557899278d51d913fb2d05f3",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000724a.xsl"
+    },
+    {
+      "filename": "202411001000724b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000724b.xml",
+      "bytes": 21070,
+      "sha256": "4152d6267acab6a162c1cedad90e50a93562a1f640bfcca10440de54465925a2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000724b.xsl"
+    },
+    {
+      "filename": "202411001000726a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000726a.xml",
+      "bytes": 10611,
+      "sha256": "a6f49bf3ef4e3ba3374fc18d4549d2be69f67940e8b1b611cf29fb5a701780d0",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000726a.xsl"
+    },
+    {
+      "filename": "202411001000727a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000727a.xml",
+      "bytes": 27272,
+      "sha256": "22f6bff46c03c16a710bf405d54e436249f51eac8a1e23a7c3523b5688f9e693",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000727a.xsl"
+    },
+    {
+      "filename": "202411001000729a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000729a.xml",
+      "bytes": 13792,
+      "sha256": "4508131c7a6dafb1f0c447ea399249a5d125cbd28bd961ab9977a77580e8c621",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000729a.xsl"
+    },
+    {
+      "filename": "202411001000730a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000730a.xml",
+      "bytes": 40755,
+      "sha256": "b9adf6709f8d3f998f971c4411aa3d3a2d98e303e3e3a1b65c08da30fc59f55e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000730a.xsl"
+    },
+    {
+      "filename": "202411001000733a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000733a.xml",
+      "bytes": 4938,
+      "sha256": "c9538754479d9f839834a2f8c7d8b9a56e818ef970cd7b6f0eb8be347ddd594b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000733a.xsl"
+    },
+    {
+      "filename": "202411001000733b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000733b.xml",
+      "bytes": 11987,
+      "sha256": "162aa3b1e0eb491af8d695b289859402ec576f6a56b4ba08a9d74e998e405467",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000733b.xsl"
+    },
+    {
+      "filename": "202411001000734a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000734a.xml",
+      "bytes": 31452,
+      "sha256": "82dce1851783dcd5f628a5a183709996ff17a06440bf4d6aa129fc3d4f17f0eb",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000734a.xsl"
+    },
+    {
+      "filename": "202411001000739a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000739a.xml",
+      "bytes": 61254,
+      "sha256": "1d72787f94653475bfae49a4411fffed0c1d4ec76bdc1fd815a2379a80c08e2f",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000739a.xsl"
+    },
+    {
+      "filename": "202411001000748a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000748a.xml",
+      "bytes": 17367,
+      "sha256": "445933b2078b804b65991f7a3fd9ca5e0da183d1ee781857760786afa0e7d2d8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000748a.xsl"
+    },
+    {
+      "filename": "202411001000749a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000749a.xml",
+      "bytes": 141838,
+      "sha256": "6af89d22bae3bb34b34254469a313f48ec82cfebb912e8fb944a6fe3be0c3d4a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000749a.xsl"
+    },
+    {
+      "filename": "202411001000763a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000763a.xml",
+      "bytes": 6765,
+      "sha256": "f0b364d315f56c025a04b5e0cdf95204c8bad3ba1a3c7675d938cdd060672aff",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000763a.xsl"
+    },
+    {
+      "filename": "202411001000763b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000763b.xml",
+      "bytes": 57223,
+      "sha256": "f8a3359abfb4489a4391980c1e0601488342508e9e255f122fccbf104ebcaf2b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000763b.xsl"
+    },
+    {
+      "filename": "202411001000771a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000771a.xml",
+      "bytes": 187660,
+      "sha256": "5fb365c5253563a67d7879e881f25208472dd7ea2230516536ff6612865a6f44",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000771a.xsl"
+    },
+    {
+      "filename": "202411001000781a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000781a.xml",
+      "bytes": 8096,
+      "sha256": "4a94c39d104a3db449779d7470b345c1dd6278d074d0683cf53a395573f5a31f",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000781a.xsl"
+    },
+    {
+      "filename": "202411001000781b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000781b.xml",
+      "bytes": 16386,
+      "sha256": "d2becdec3a7ebdd6f757b21c90cf85f0973ddec461eb7bf63d999908743946ca",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000781b.xsl"
+    },
+    {
+      "filename": "202411001000783a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000783a.xml",
+      "bytes": 11225,
+      "sha256": "98784a70fdf77a2a98cc65e033f3cc7245c81bb16a8e41de3ae05170b5399a0e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000783a.xsl"
+    },
+    {
+      "filename": "202411001000784a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000784a.xml",
+      "bytes": 26937,
+      "sha256": "4e3ef934d58951e263216b805a38f1c22ce76deff0e1594e682b3f495e4a2b8e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000784a.xsl"
+    },
+    {
+      "filename": "202411001000786a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000786a.xml",
+      "bytes": 7360,
+      "sha256": "08e1105411e555b4f405b98d45f72436b7b15efe81e58047195b3b706693b121",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000786a.xsl"
+    },
+    {
+      "filename": "202411001000786b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000786b.xml",
+      "bytes": 35885,
+      "sha256": "406c655783e21faae0a083f70e115299dfe5450c4c3e87358b5450f816811c32",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000786b.xsl"
+    },
+    {
+      "filename": "202411001000789a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000789a.xml",
+      "bytes": 4812,
+      "sha256": "49a8fc1ffac2a98e9976c9fcef22f09a0bc2fb70de61142e1e611fb17a59215e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000789a.xsl"
+    },
+    {
+      "filename": "202411001000789b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000789b.xml",
+      "bytes": 12930,
+      "sha256": "ee9f59af1c775bcf67549ea20299f931d59a63db45ae6fd7dfda85fd8baa28cf",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000789b.xsl"
+    },
+    {
+      "filename": "202411001000790a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000790a.xml",
+      "bytes": 26780,
+      "sha256": "5d8b4bad7dd823388cba7c88605ea01f62be78174d43639be8e9cd5cd3ae9d10",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000790a.xsl"
+    },
+    {
+      "filename": "202411001000792a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000792a.xml",
+      "bytes": 93535,
+      "sha256": "07f923abd2231c2b2ba7e1b6bcac99331754004107456c3ccb82b6243dea68a4",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000792a.xsl"
+    },
+    {
+      "filename": "202411001000798a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000798a.xml",
+      "bytes": 24767,
+      "sha256": "1a163ff220e97a8567118d1ec45d0eedc74c0197b170b7992acda8973e08eca2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000798a.xsl"
+    },
+    {
+      "filename": "202411001000801a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000801a.xml",
+      "bytes": 68273,
+      "sha256": "1998fa5aec7436cfa7eabbba9862438cd8e13bd2ebcd5ff6765d73dab335322c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000801a.xsl"
+    },
+    {
+      "filename": "202411001000805a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000805a.xml",
+      "bytes": 60616,
+      "sha256": "b8f24d393bc5ade9fedcf22b3b8c2f9aa93ad551fe615bed4b63f64be3bfaf1c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000805a.xsl"
+    },
+    {
+      "filename": "202411001000815a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000815a.xml",
+      "bytes": 92287,
+      "sha256": "461000847b6191336221e98e2ad09e80473cb9020ce5615055250618eed73db6",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000815a.xsl"
+    },
+    {
+      "filename": "202411001000828a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000828a.xml",
+      "bytes": 15313,
+      "sha256": "922b8de2534d85dd9c5170371c3c959c7f262b945cf15a84d6072735f5ae3eba",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000828a.xsl"
+    },
+    {
+      "filename": "202411001000829a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000829a.xml",
+      "bytes": 132719,
+      "sha256": "48f449953f8b2a85393286e2efc3e321c2e7b223dc4b618f1b14fd325c243f68",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000829a.xsl"
+    },
+    {
+      "filename": "202411001000841a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000841a.xml",
+      "bytes": 5990,
+      "sha256": "8fdf01013aa085e93ec82f7762a34ab76d25d6ef52fa3d32a7b918ed4ee530fe",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000841a.xsl"
+    },
+    {
+      "filename": "202411001000841b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000841b.xml",
+      "bytes": 36221,
+      "sha256": "d3889c30d48c7ba26af86f54c24577f497c2be633e413c30699f756b6ea9b00d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000841b.xsl"
+    },
+    {
+      "filename": "202411001000846a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000846a.xml",
+      "bytes": 90379,
+      "sha256": "5cc26e29a67d419e756d184709284f207cced0b4996984b57bc53f218ad61bd2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000846a.xsl"
+    },
+    {
+      "filename": "202411001000852a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000852a.xml",
+      "bytes": 4602,
+      "sha256": "2df8f992b4a2b966a3e3b686b6140e4de64fd5adbc75784c874b3752fe537842",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000852a.xsl"
+    },
+    {
+      "filename": "202411001000852b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000852b.xml",
+      "bytes": 12932,
+      "sha256": "0cead4a2d294ad8c1461cf7fbc364514983887b8a80865d98d6a023c9fac77c2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000852b.xsl"
+    },
+    {
+      "filename": "202411001000853a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000853a.xml",
+      "bytes": 3476,
+      "sha256": "b4fb775e7d8c6e081b574445289e63a9f1bb1a36a14119ba5fd1aed0268f524d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000853a.xsl"
+    },
+    {
+      "filename": "202411001000853b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000853b.xml",
+      "bytes": 10506,
+      "sha256": "cbc2436c3ca4a75ac341b5bed10227ddfcb7d676d7a37cb7f405bee981baf745",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000853b.xsl"
+    },
+    {
+      "filename": "202411001000854a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000854a.xml",
+      "bytes": 11893,
+      "sha256": "2ce65ffe3002c1cc8f03a809999cac6a142f580fc8a3bf9d42409ae8377dad68",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000854a.xsl"
+    },
+    {
+      "filename": "202411001000855a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000855a.xml",
+      "bytes": 22209,
+      "sha256": "841d2ab568bae92493d2d67b035ae925883b7992173748e926510ff3477a0cc8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000855a.xsl"
+    },
+    {
+      "filename": "202411001000857a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000857a.xml",
+      "bytes": 7783,
+      "sha256": "1f9210e2a1c70d3eda58b7f01b6ef36a412d4067bb7813ac586bbe6aeaadc274",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000857a.xsl"
+    },
+    {
+      "filename": "202411001000857b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000857b.xml",
+      "bytes": 23595,
+      "sha256": "934d87952ff996b4adbc598269cdb4617485fca197bda4377141f1762584797b",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000857b.xsl"
+    },
+    {
+      "filename": "202411001000859a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000859a.xml",
+      "bytes": 17511,
+      "sha256": "98b4e1e0de862fd3957f4e13836c457f4b295c9cc6012f22aefcde098d80a049",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000859a.xsl"
+    },
+    {
+      "filename": "202411001000863a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000863a.xml",
+      "bytes": 25975,
+      "sha256": "06a28acb94f8f744d2c28fd16a0bca0a11b736be5324223fcbb4e48f7306dcff",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000863a.xsl"
+    },
+    {
+      "filename": "202411001000867a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000867a.xml",
+      "bytes": 14124,
+      "sha256": "f40a446f997d45b7c97fea898116fdb1cfa94158c7928a406a141c0bc49439d6",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000867a.xsl"
+    },
+    {
+      "filename": "202411001000867b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000867b.xml",
+      "bytes": 67990,
+      "sha256": "e11d0725903e2d0daf90cfc418e2de210c9076a5159b4dcb8a4c48ebfc1b160a",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000867b.xsl"
+    },
+    {
+      "filename": "202411001000875a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000875a.xml",
+      "bytes": 10511,
+      "sha256": "54e79acf24b01cb87ee7c512d8b7a96a54d233758dbd811a005826e49d2743b5",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000875a.xsl"
+    },
+    {
+      "filename": "202411001000876a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000876a.xml",
+      "bytes": 185844,
+      "sha256": "94456278e8f16c0c7131eadd8885d500529e7d93bc5de461c007dfa1233819f8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000876a.xsl"
+    },
+    {
+      "filename": "202411001000900a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000900a.xml",
+      "bytes": 397255,
+      "sha256": "f01a53b26c36f6eea3e2fe55fdb6c1580bff69839f328a42bfd2eb367143e2bb",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000900a.xsl"
+    },
+    {
+      "filename": "202411001000920a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000920a.xml",
+      "bytes": 8582,
+      "sha256": "0968feab452d495eecdcc668856a3c839d4d7304da7208d76c596e97d28ad207",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000920a.xsl"
+    },
+    {
+      "filename": "202411001000920b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000920b.xml",
+      "bytes": 47277,
+      "sha256": "915bc53c805c95d6fed80c2eeef91a73fee51ac71216499cd79d750aebca8ae2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000920b.xsl"
+    },
+    {
+      "filename": "202411001000923a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000923a.xml",
+      "bytes": 7930,
+      "sha256": "5efcc218f89f978f530490a3a61775369a05817b704e4e118686cec201371e15",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000923a.xsl"
+    },
+    {
+      "filename": "202411001000923b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000923b.xml",
+      "bytes": 27499,
+      "sha256": "d56fb6b0307ea2204718ceb5675f4c9fc77ea86744fe20837371cb16d07ee9ba",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000923b.xsl"
+    },
+    {
+      "filename": "202411001000925a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000925a.xml",
+      "bytes": 4808,
+      "sha256": "dd720b61331dfdebad2e90403e77f551ccd2169f9970c2dddf21cba476c9c47e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000925a.xsl"
+    },
+    {
+      "filename": "202411001000925b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000925b.xml",
+      "bytes": 13329,
+      "sha256": "40603fe97f6b40fdb9bd8d68dd94347f0fcbb369e444740557284c7459b38c60",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000925b.xsl"
+    },
+    {
+      "filename": "202411001000926a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000926a.xml",
+      "bytes": 13190,
+      "sha256": "d0eef2e4b82bb6c423ef11165e9da31d0bdcf8e91a8157f20f57b436392fcf04",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000926a.xsl"
+    },
+    {
+      "filename": "202411001000927a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000927a.xml",
+      "bytes": 96016,
+      "sha256": "0f0592f7355c6703d3f5076d60d402ae1e5ece731dc553714924d3d3e5fffe05",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000927a.xsl"
+    },
+    {
+      "filename": "202411001000932a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000932a.xml",
+      "bytes": 13015,
+      "sha256": "9fb4391c8378ccab75d50507d094272b2efc6900dfd114f30a405bafb78aaec0",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000932a.xsl"
+    },
+    {
+      "filename": "202411001000933a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000933a.xml",
+      "bytes": 95259,
+      "sha256": "dae56a3ad14a39c7c6deb73ea4901a6a658703755770342a5ee19f2e91178c84",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000933a.xsl"
+    },
+    {
+      "filename": "202411001000938a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000938a.xml",
+      "bytes": 11540,
+      "sha256": "a45dad25e3defd8abe81805fa949506aa3616b3aa4cd0c528c87b488b438154d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000938a.xsl"
+    },
+    {
+      "filename": "202411001000939a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000939a.xml",
+      "bytes": 24978,
+      "sha256": "8142d9b53e2502e52815c7d7d593de4129af223183f09d0b31397badaef8f4b4",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000939a.xsl"
+    },
+    {
+      "filename": "202411001000941a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000941a.xml",
+      "bytes": 4641,
+      "sha256": "e8d5497a3b349a09c9bcfb459b12c117c7716d3b141f4328e0045746453374e8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000941a.xsl"
+    },
+    {
+      "filename": "202411001000941b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000941b.xml",
+      "bytes": 10973,
+      "sha256": "cd6d1afab5f20b61a887aefc7bca26168a0fad088225a1ae176fb120139e9fc9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000941b.xsl"
+    },
+    {
+      "filename": "202411001000942a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000942a.xml",
+      "bytes": 13740,
+      "sha256": "72b20134b2a149ed85453d5e7171da031a41f95838e6b8468e81501d06321b89",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000942a.xsl"
+    },
+    {
+      "filename": "202411001000943a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000943a.xml",
+      "bytes": 30258,
+      "sha256": "c30030a2242149a4b3c01219a0830fda276b0da9690865699306e14ba53888e8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000943a.xsl"
+    },
+    {
+      "filename": "202411001000946a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000946a.xml",
+      "bytes": 8812,
+      "sha256": "50841da16dbd63a54ac448a1b5ce266449fa72db52e9a59a79ee73d1594dae9d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000946a.xsl"
+    },
+    {
+      "filename": "202411001000946b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000946b.xml",
+      "bytes": 42565,
+      "sha256": "b311b83f626d5f2017391e5803032b84774490bee2229087c51a068542b26e86",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000946b.xsl"
+    },
+    {
+      "filename": "202411001000949a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000949a.xml",
+      "bytes": 4468,
+      "sha256": "756a098af33192ed9383cfaebf0dab1653fcd734aa567a330a80994c40430f9c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000949a.xsl"
+    },
+    {
+      "filename": "202411001000949b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000949b.xml",
+      "bytes": 11557,
+      "sha256": "4dd54c4001d345b29d0d3a1eb793b02d2190a56af4cecea7b9c0f1b528593360",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000949b.xsl"
+    },
+    {
+      "filename": "202411001000950a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000950a.xml",
+      "bytes": 10440,
+      "sha256": "bc4a6f03eb49b613e2841660c668a0ccbe24d4860f0e830f8c83e15758458fc6",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000950a.xsl"
+    },
+    {
+      "filename": "202411001000950b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000950b.xml",
+      "bytes": 53933,
+      "sha256": "475a0cf025f70283031bc0be47c3067e4b27fb2b2700dc0c6a524f0bbf4c0d84",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000950b.xsl"
+    },
+    {
+      "filename": "202411001000954a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000954a.xml",
+      "bytes": 106869,
+      "sha256": "915a1c355fb763b09c4da3cc09eaf6f32a1862ac8cfbac3fdc7fa46914cf47dc",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000954a.xsl"
+    },
+    {
+      "filename": "202411001000971a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001000971a.xml",
+      "bytes": 355859,
+      "sha256": "10303113cf80bef978f82ccda7c3bee248ad589afe2acb5672aade768b6d6920",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001000971a.xsl"
+    },
+    {
+      "filename": "202411001001020a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001020a.xml",
+      "bytes": 21672,
+      "sha256": "40d7f7cfbd6be28c5759d18f5786fe16638a75798194cf60cc91d218dd5f7e93",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001020a.xsl"
+    },
+    {
+      "filename": "202411001001021a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001021a.xml",
+      "bytes": 237373,
+      "sha256": "3fbac900156588594441262da46b602435b1434169d4d9f6a0cec2cbe1d8f996",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001021a.xsl"
+    },
+    {
+      "filename": "202411001001045a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001045a.xml",
+      "bytes": 5903,
+      "sha256": "1be7cf0ff141a4b71fff0df844bdc07d712ed1209a713dc59f02ee752f5b4620",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001045a.xsl"
+    },
+    {
+      "filename": "202411001001045b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001045b.xml",
+      "bytes": 40486,
+      "sha256": "cfc45b082f09df98af826eb73c102f4bfdec3a3d86f7995a68be96e3e58893d2",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001045b.xsl"
+    },
+    {
+      "filename": "202411001001051a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001051a.xml",
+      "bytes": 143986,
+      "sha256": "e0b481c23ac68736b99a8ec615705b611b2b8eae8525918e758f66376421e3e9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001051a.xsl"
+    },
+    {
+      "filename": "202411001001058a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001058a.xml",
+      "bytes": 9089,
+      "sha256": "4b6833b0c7df1b65b8165dd9c1475b0291338262e13d05fff2a2a3a2d9be7b4d",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001058a.xsl"
+    },
+    {
+      "filename": "202411001001058b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001058b.xml",
+      "bytes": 17941,
+      "sha256": "0efe1c58d0df43af14466b4d534abefee5819aa063ba170fe3cedf77c601a6b3",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001058b.xsl"
+    },
+    {
+      "filename": "202411001001060a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001060a.xml",
+      "bytes": 10362,
+      "sha256": "55a8c2f98f9d70bd657b469ec721dd8d3962be37304b64c0d394976d38141447",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001060a.xsl"
+    },
+    {
+      "filename": "202411001001061a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001061a.xml",
+      "bytes": 33349,
+      "sha256": "46841ffd44c615b3d63fa30d6ff3afa0d3383e57254187ae9a6ffb52e85ea843",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001061a.xsl"
+    },
+    {
+      "filename": "202411001001063a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001063a.xml",
+      "bytes": 30218,
+      "sha256": "2017ef8910eb5a62f3fd1b99ea4b47d64fe435696f88801c2d210373d76d9687",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001063a.xsl"
+    },
+    {
+      "filename": "202411001001068a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001068a.xml",
+      "bytes": 35303,
+      "sha256": "c892f1df4f55e5fbbffe4bcd72a319d16600dc286d0c263e2389ad74f78bbbff",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001068a.xsl"
+    },
+    {
+      "filename": "202411001001073a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001073a.xml",
+      "bytes": 10939,
+      "sha256": "463d719746f4607c91eedab8bdf38d7c4b2f0ce0bd8185f68fad5ddcb061d02c",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001073a.xsl"
+    },
+    {
+      "filename": "202411001001073b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001073b.xml",
+      "bytes": 41518,
+      "sha256": "e3caeb394701fd25a578e8e05fe011130aa8b6ddc32934c0db92d60bc51c2714",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001073b.xsl"
+    },
+    {
+      "filename": "202411001001079a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001079a.xml",
+      "bytes": 3056,
+      "sha256": "5ce2fc5bb013169de43b4b9b589af98839db91d8d046c0b1001055fe615faae8",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001079a.xsl"
+    },
+    {
+      "filename": "202411001001079b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001079b.xml",
+      "bytes": 52531,
+      "sha256": "a793cdc2962b1f37b3da39c5dcef66e754fcca704ef6f63d5d7e9e918d22117f",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001079b.xsl"
+    },
+    {
+      "filename": "202411001001085a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001085a.xml",
+      "bytes": 100792,
+      "sha256": "ab88f0f709e8ba0e97c43b7ca34a2c09f0f42abfdd5d3fec4cb99702dd9bc0e4",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001085a.xsl"
+    },
+    {
+      "filename": "202411001001091a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001091a.xml",
+      "bytes": 5889,
+      "sha256": "1727d9d5d4c6a82ad98c10c8727215b14135e438493b1e0abb686143e183a56f",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001091a.xsl"
+    },
+    {
+      "filename": "202411001001091b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001091b.xml",
+      "bytes": 17402,
+      "sha256": "cc6dc8f8ccf609e1529c5e93a5feeeb9f7e2493e5ab6b54c138fbed1da6bfcb3",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001091b.xsl"
+    },
+    {
+      "filename": "202411001001093a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001093a.xml",
+      "bytes": 8654,
+      "sha256": "bf815b2703e18def3f54145434313278a3c55c44004545e4beb9429081514899",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001093a.xsl"
+    },
+    {
+      "filename": "202411001001093b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001093b.xml",
+      "bytes": 31416,
+      "sha256": "695b97d003a062615c0e6e9624cc85d4664cb9e6dae4132ea87fdbe2b6900775",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001093b.xsl"
+    },
+    {
+      "filename": "202411001001096a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001096a.xml",
+      "bytes": 29651,
+      "sha256": "d99c7329b945d54dffed2f901ccd130cf02aeda52cba0174c4f5d2bfc7e82a2e",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001096a.xsl"
+    },
+    {
+      "filename": "202411001001100a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001100a.xml",
+      "bytes": 36328,
+      "sha256": "00b497b45b8aebded05ec280716f7c0d3c454258634764ce970f898997911420",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001100a.xsl"
+    },
+    {
+      "filename": "202411001001105a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001105a.xml",
+      "bytes": 102259,
+      "sha256": "cd5f254fda7cb5d6bb749186e34b64831d2e6806785b39708a47ad3320a0f791",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001105a.xsl"
+    },
+    {
+      "filename": "202411001001118a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001118a.xml",
+      "bytes": 6827,
+      "sha256": "aa49630a2b781aeefdfb8904fcfaf6e5285750adb5fed5b14b11d7732cc57449",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001118a.xsl"
+    },
+    {
+      "filename": "202411001001118b.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001118b.xml",
+      "bytes": 231329,
+      "sha256": "bafc493e936e4a2923588f9fe29565d205c592c9983871cbf0719be22cf2ca32",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001118b.xsl"
+    },
+    {
+      "filename": "202411001001135a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001001135a.xml",
+      "bytes": 55780,
+      "sha256": "c37b40650cdffb03b35431ef06271218ef9fa48f945a1590be77a14be0b1f481",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001001135a.xsl"
+    },
+    {
+      "filename": "202411001110001a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001110001a.xml",
+      "bytes": 3794,
+      "sha256": "2c2a6abb0478f321bfcec45eb8503b6d3010eb0606990bf6d90a6401a1403dc9",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001110001a.xsl"
+    },
+    {
+      "filename": "202411001120001a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001120001a.xml",
+      "bytes": 15122,
+      "sha256": "01a9735a3b272a670bcacca444daa075871a7cd34e793be16edd5d4ff63eac04",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001120001a.xsl"
+    },
+    {
+      "filename": "202411001130001a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001130001a.xml",
+      "bytes": 40338,
+      "sha256": "b020f218f74b65821243d80b608329fea9fc8990f99d00ffa161decf08eb0986",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001130001a.xsl"
+    },
+    {
+      "filename": "202411001910001a.xml",
+      "sourceUrl": "https://www.bb.mof.go.jp/server/2024/xml/202411001910001a.xml",
+      "bytes": 1000,
+      "sha256": "cc42e4d4d3adbea28d55f4f70b5bfc6e0c5e7d09aec7661546c176c3ce8d9d31",
+      "xmlDeclaration": {
+        "version": "1.0",
+        "encoding": "Shift_JIS"
+      },
+      "encoding": "Shift_JIS",
+      "root": "budget",
+      "doctype": "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\"",
+      "stylesheet": "../xsl/202411001910001a.xsl"
+    }
+  ]
+}

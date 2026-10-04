@@ -1,0 +1,2880 @@
+{
+  "schema": "mof-budget-xml-parser-v0-source-set/v0",
+  "scope": "FY2024 一般会計 当初予算 202411001（frozen）",
+  "generator": "scripts/pipeline-v2/project-mof-budget-xml-reference.ts",
+  "xmlFiles": 328,
+  "targetTableFiles": 94,
+  "nonTargetFiles": 234,
+  "expected": {
+    "itemStartRows": 784,
+    "requestRows": 1256,
+    "subtotalRows": 88,
+    "descriptionOnlyRows": 32
+  },
+  "targets": [
+    {
+      "file": "202411001000265b.xml",
+      "sha256": "b2796e4ef18bea4dc511b93be141e5086d0ea2709c1165e7b1989ab38d3c787d",
+      "bytes": 6106,
+      "fingerprint": "5e76da9b",
+      "runningTitle": "皇室費",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "皇室費",
+        "甲号予定経費要求書",
+        "〔組織別事項別内訳〕"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000269b.xml",
+      "sha256": "2a60eb3c25fc411fc17368b1940c3efd7c9ffa1f9717a3539dcaa9827c1e0097",
+      "bytes": 6606,
+      "fingerprint": "8cbfafd7",
+      "runningTitle": "国会所管  衆議院",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国会所管",
+        "甲号予定経費要求書",
+        "衆議院"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 5,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000272a.xml",
+      "sha256": "b66615a15b89ad19284cfe7c4cadefdc6d25c09e9d62df0286d42803c3f2f598",
+      "bytes": 5850,
+      "fingerprint": "16006d26",
+      "runningTitle": "国会所管  参議院",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国会所管",
+        "甲号予定経費要求書",
+        "参議院"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000274a.xml",
+      "sha256": "a88abae767fe5cfcea7ce2f2e8c7f3691dbdb32984e6cebc53da616c929c8a82",
+      "bytes": 5954,
+      "fingerprint": "16006d26",
+      "runningTitle": "国会所管  国立国会図書館",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国会所管",
+        "甲号予定経費要求書",
+        "国立国会図書館"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000276a.xml",
+      "sha256": "7865b3ecbff9368a227c36a3c8b718d4d6fea3152d2d8769dc3185366d2bb395",
+      "bytes": 3354,
+      "fingerprint": "ce226ea9",
+      "runningTitle": "国会所管  裁判官訴追委員会",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国会所管",
+        "甲号予定経費要求書",
+        "裁判官訴追委員会"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 1,
+      "subtotalRows": 0,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000277a.xml",
+      "sha256": "23853a00700797eba2c944b3322181bebfc68f4de633c15f016ca87d0181431d",
+      "bytes": 4428,
+      "fingerprint": "ce226ea9",
+      "runningTitle": "国会所管  裁判官弾劾裁判所",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国会所管",
+        "甲号予定経費要求書",
+        "裁判官弾劾裁判所"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000291b.xml",
+      "sha256": "e5c186be4e18d553bd58d12a67da07c6740c4928475b41cc92568c34435df004",
+      "bytes": 9969,
+      "fingerprint": "a6b0b6dc",
+      "runningTitle": "裁判所所管  裁判所",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "裁判所所管",
+        "甲号予定経費要求書",
+        "裁判所"
+      ],
+      "itemStartRows": 6,
+      "requestRows": 9,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000303b.xml",
+      "sha256": "61649c1ab2fd905702cfbbe9347ea1340f911362a85ece1974e2317b2a5a95d2",
+      "bytes": 4467,
+      "fingerprint": "a6b0b6dc",
+      "runningTitle": "会計検査院所管  会計検査院",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "会計検査院所管",
+        "甲号予定経費要求書",
+        "会計検査院"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000309b.xml",
+      "sha256": "c4c911575b3fe52bf0a09b894a929cc0c837051515305f9095f9a33e6bb38b46",
+      "bytes": 9399,
+      "fingerprint": "5e76da9b",
+      "runningTitle": "内閣所管  内閣官房",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣所管",
+        "甲号予定経費要求書",
+        "内閣官房"
+      ],
+      "itemStartRows": 4,
+      "requestRows": 8,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000313a.xml",
+      "sha256": "25b46a346896f0d2a6170e570aa23f5900c267c8d6a6982b796d25351221c0d2",
+      "bytes": 4600,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣所管  内閣法制局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣所管",
+        "甲号予定経費要求書",
+        "内閣法制局"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000314a.xml",
+      "sha256": "a998a81d3d6fd8519ea6b1ffe68ed4a86018df570520f634029892e9a2f6cab8",
+      "bytes": 5580,
+      "fingerprint": "38d58a65",
+      "runningTitle": "内閣所管  人事院",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣所管",
+        "甲号予定経費要求書",
+        "人事院"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000328a.xml",
+      "sha256": "f66a9d0b6b688386c81f4edb373b4b48aec6a2ab14fce5023e71d9806ee647ec",
+      "bytes": 62825,
+      "fingerprint": "8e83a7bf",
+      "runningTitle": "内閣府所管  内閣本府",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "内閣本府"
+      ],
+      "itemStartRows": 36,
+      "requestRows": 60,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 3
+    },
+    {
+      "file": "202411001000345a.xml",
+      "sha256": "63e56297dd9b11cb26ce0dab0f0a0b6d884ee6fa5e401bc90872629cd46fd964",
+      "bytes": 9596,
+      "fingerprint": "38d58a65",
+      "runningTitle": "内閣府所管  地方創生推進事務局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "地方創生推進事務局"
+      ],
+      "itemStartRows": 5,
+      "requestRows": 6,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000347a.xml",
+      "sha256": "7567b8ccd209546d9034a4289dd2d32a356fb6f40b610b234c568bbbd63b5580",
+      "bytes": 3525,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  知的財産戦略推進事務局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "知的財産戦略推進事務局"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 1,
+      "subtotalRows": 0,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000348a.xml",
+      "sha256": "76bf7dc1c2471de814d033215e8ecf629e7a6800d52ae6f54f9f8fc6d20f28f9",
+      "bytes": 7522,
+      "fingerprint": "38d58a65",
+      "runningTitle": "内閣府所管  科学技術・イノベーション推進事務局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "科学技術・イノベーション推進事務局"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 5,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000350a.xml",
+      "sha256": "3e41dea05f54320cb99b358353628f037551c56c5de2f6061832b518d81a0d6b",
+      "bytes": 4655,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  健康・医療戦略推進事務局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "健康・医療戦略推進事務局"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000351a.xml",
+      "sha256": "d17f2275c1f790566a2e431d6a7179378b209f0b4d8b0bf4c2fcd979f2fd91a8",
+      "bytes": 6544,
+      "fingerprint": "38d58a65",
+      "runningTitle": "内閣府所管  宇宙開発戦略推進事務局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "宇宙開発戦略推進事務局"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000353a.xml",
+      "sha256": "707e52154cd30d7b3642dd818815699b9546aa4c2459ae9ec4c40af4442cdcf2",
+      "bytes": 5561,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  北方対策本部",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "北方対策本部"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000354a.xml",
+      "sha256": "674e5a05cd099cf1b41dd7b6fe3418dfe84d4582fff620e9d5b17aafe0767d84",
+      "bytes": 5450,
+      "fingerprint": "38d58a65",
+      "runningTitle": "内閣府所管  総合海洋政策推進事務局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "総合海洋政策推進事務局"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000356a.xml",
+      "sha256": "c3a62fd6fb18aa3c4d3a4c9364295df3b3a37050337b247afc3b5e830fb3de74",
+      "bytes": 4640,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  国際平和協力本部",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "国際平和協力本部"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000357a.xml",
+      "sha256": "6b4dd7acce9c6c0f8db05a09b58a53884534eb4e3c92f34ea20468c447b0b248",
+      "bytes": 4477,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  日本学術会議",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "日本学術会議"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000358a.xml",
+      "sha256": "86b3ae46b7ae99b1ebbccd28294811603973ea0dbb47458b4c8f2ef8586a5668",
+      "bytes": 3457,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  官民人材交流センター",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "官民人材交流センター"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 1,
+      "subtotalRows": 0,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000359a.xml",
+      "sha256": "a6ff44893473b20402125b9f892e98dcad77b8e96a48a52f5df14169e57b34ca",
+      "bytes": 12237,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  沖縄総合事務局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "沖縄総合事務局"
+      ],
+      "itemStartRows": 10,
+      "requestRows": 10,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000364a.xml",
+      "sha256": "a3f8426cbb03e855331ccbb64658216e0c53ba35f80dfd098aa0c14ad646b9ef",
+      "bytes": 3325,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  宮内庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "宮内庁"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 1,
+      "subtotalRows": 0,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000365a.xml",
+      "sha256": "b01d2bbb0d660dffd503baa4fc577b423925dc6a30f545b123695c53140ec7ec",
+      "bytes": 5904,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  公正取引委員会",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "公正取引委員会"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000367a.xml",
+      "sha256": "b11b6e81d7ea3eb11baafd2a17ad38ff871045a33dc576484f3c6ec42f099abc",
+      "bytes": 21222,
+      "fingerprint": "38d58a65",
+      "runningTitle": "内閣府所管  警察庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "警察庁"
+      ],
+      "itemStartRows": 14,
+      "requestRows": 19,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000373a.xml",
+      "sha256": "5337ee6410571f7b73d045c4a37824caec33c698f0104d108d44a2c5240ac860",
+      "bytes": 4759,
+      "fingerprint": "38d58a65",
+      "runningTitle": "内閣府所管  個人情報保護委員会",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "個人情報保護委員会"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000375a.xml",
+      "sha256": "4117899d5763a6eec1029cab590a3e34bed753c07dfb2435f862dd6969d7e9e9",
+      "bytes": 5235,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  カジノ管理委員会",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "カジノ管理委員会"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000377a.xml",
+      "sha256": "e38521c382cbeeb9d552146bb395fe2150c8a5782a622e0ac4be1eeb80e0725e",
+      "bytes": 9539,
+      "fingerprint": "38d58a65",
+      "runningTitle": "内閣府所管  金融庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "金融庁"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 8,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000380a.xml",
+      "sha256": "ce07dbf0125a1533d324802044608f1e4c55d8bc30f700675d438ed9b3bb75d2",
+      "bytes": 7475,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "内閣府所管  消費者庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "消費者庁"
+      ],
+      "itemStartRows": 4,
+      "requestRows": 5,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000382a.xml",
+      "sha256": "18397342e409e78e3033cb43e83ab7b1b4cee2bb27ae552084b30ec28a3479ee",
+      "bytes": 27698,
+      "fingerprint": "38d58a65",
+      "runningTitle": "内閣府所管  こども家庭庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "内閣府所管",
+        "甲号予定経費要求書",
+        "こども家庭庁"
+      ],
+      "itemStartRows": 13,
+      "requestRows": 24,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 1
+    },
+    {
+      "file": "202411001000445b.xml",
+      "sha256": "8d4817b646ecbbfe2d7648b736f841b6b1b68cd09694a28b269ab89c0a929a7a",
+      "bytes": 6404,
+      "fingerprint": "a6b0b6dc",
+      "runningTitle": "デジタル庁所管  デジタル庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "デジタル庁所管",
+        "甲号予定経費要求書",
+        "デジタル庁"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000453b.xml",
+      "sha256": "120fe2c077c0559d5879bf7e82acdc02855f9b75f0a8e53966e67cb21817329e",
+      "bytes": 42075,
+      "fingerprint": "dc8a81c0",
+      "runningTitle": "総務省所管  総務本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "総務省所管",
+        "甲号予定経費要求書",
+        "総務本省"
+      ],
+      "itemStartRows": 27,
+      "requestRows": 36,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000466a.xml",
+      "sha256": "e20371b2a4b55b77deb70519268372449e513c87a2197e01255b0ebe0c94b001",
+      "bytes": 5673,
+      "fingerprint": "ce226ea9",
+      "runningTitle": "総務省所管  管区行政評価局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "総務省所管",
+        "甲号予定経費要求書",
+        "管区行政評価局"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000468a.xml",
+      "sha256": "aa0f43f5c568a012e2633fa92d350d8e64071a8c1576dcce57e9bcde36cbf88d",
+      "bytes": 6223,
+      "fingerprint": "16006d26",
+      "runningTitle": "総務省所管  総合通信局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "総務省所管",
+        "甲号予定経費要求書",
+        "総合通信局"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000470a.xml",
+      "sha256": "97d1bdd31746d025231bff88de96cc8e60ceef44bd9c47dbe52dea844cbba5f2",
+      "bytes": 4536,
+      "fingerprint": "ce226ea9",
+      "runningTitle": "総務省所管  公害等調整委員会",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "総務省所管",
+        "甲号予定経費要求書",
+        "公害等調整委員会"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000471a.xml",
+      "sha256": "ab263ea7049fd620410f2664d0e975e6a3a2aa39740cd2fcbdc17217c7b55e36",
+      "bytes": 7630,
+      "fingerprint": "ce226ea9",
+      "runningTitle": "総務省所管  消防庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "総務省所管",
+        "甲号予定経費要求書",
+        "消防庁"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 5,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000493b.xml",
+      "sha256": "4dfbdc2b3e433d59b7bcf0d19214a0006e80742ea63d57d5e42dbf410cc9bec9",
+      "bytes": 21878,
+      "fingerprint": "8e83a7bf",
+      "runningTitle": "法務省所管  法務本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "法務省所管",
+        "甲号予定経費要求書",
+        "法務本省"
+      ],
+      "itemStartRows": 13,
+      "requestRows": 21,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000499a.xml",
+      "sha256": "a0f1b85b2febab2199aabca5dc602fa708a1ea1ed01c174888dc3b158121b27f",
+      "bytes": 6014,
+      "fingerprint": "38d58a65",
+      "runningTitle": "法務省所管  法務総合研究所",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "法務省所管",
+        "甲号予定経費要求書",
+        "法務総合研究所"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000501a.xml",
+      "sha256": "be7d4438897d0435a6223902ab0da1d6d81cecef9d77ff41cd1f786a8a9257be",
+      "bytes": 5746,
+      "fingerprint": "38d58a65",
+      "runningTitle": "法務省所管  検察庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "法務省所管",
+        "甲号予定経費要求書",
+        "検察庁"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000503a.xml",
+      "sha256": "8654728d064ac4b0d7e1261e1698ec087503fcf0d6dc0338dfaeb7cc9a854dc6",
+      "bytes": 7976,
+      "fingerprint": "38d58a65",
+      "runningTitle": "法務省所管  矯正官署",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "法務省所管",
+        "甲号予定経費要求書",
+        "矯正官署"
+      ],
+      "itemStartRows": 4,
+      "requestRows": 5,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000506a.xml",
+      "sha256": "252623c8a527eb6f9e17e7000f8946d0579216f1552862a09ed6678e604f5fbd",
+      "bytes": 6036,
+      "fingerprint": "38d58a65",
+      "runningTitle": "法務省所管  更生保護官署",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "法務省所管",
+        "甲号予定経費要求書",
+        "更生保護官署"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000508a.xml",
+      "sha256": "be4bf25337e98af1a8efc53d9e5ac452254c961f64738822bee1f996e78af773",
+      "bytes": 7009,
+      "fingerprint": "38d58a65",
+      "runningTitle": "法務省所管  法務局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "法務省所管",
+        "甲号予定経費要求書",
+        "法務局"
+      ],
+      "itemStartRows": 4,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000510a.xml",
+      "sha256": "5cea9a4e6d3edf91e42adfc3c7e0237e5b77d7e7fd8079e4ecb9eae9a3db9371",
+      "bytes": 7662,
+      "fingerprint": "38d58a65",
+      "runningTitle": "法務省所管  出入国在留管理庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "法務省所管",
+        "甲号予定経費要求書",
+        "出入国在留管理庁"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000513a.xml",
+      "sha256": "a7665a77ed62749a6da3e213ac05a8a8f8a55866df32454c181df5f43435c1de",
+      "bytes": 3383,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "法務省所管  公安審査委員会",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "法務省所管",
+        "甲号予定経費要求書",
+        "公安審査委員会"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 1,
+      "subtotalRows": 0,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000514a.xml",
+      "sha256": "e5f493e364e6bd0f3040b82cd0c553c55dae7a1880265bf371974290ca2e0f91",
+      "bytes": 5392,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "法務省所管  公安調査庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "法務省所管",
+        "甲号予定経費要求書",
+        "公安調査庁"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000549b.xml",
+      "sha256": "611a772757e8d1c19a3c7cc700231a6dd0af67d266de795ce2881a70ca6a4fb9",
+      "bytes": 33632,
+      "fingerprint": "a6b0b6dc",
+      "runningTitle": "外務省所管  外務本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "外務省所管",
+        "甲号予定経費要求書",
+        "外務本省"
+      ],
+      "itemStartRows": 11,
+      "requestRows": 34,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 1
+    },
+    {
+      "file": "202411001000559a.xml",
+      "sha256": "a8fe41e3b2f3b5c3ea54df846bd54beb43866041b2fe2af544d2b4b6216ff1e6",
+      "bytes": 18797,
+      "fingerprint": "ce226ea9",
+      "runningTitle": "外務省所管  在外公館",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "外務省所管",
+        "甲号予定経費要求書",
+        "在外公館"
+      ],
+      "itemStartRows": 7,
+      "requestRows": 20,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000576a.xml",
+      "sha256": "be05db2527ba2a01d10f32a2d6c0550602b5d4f028ffdc3da3b783786de71133",
+      "bytes": 43174,
+      "fingerprint": "dc8a81c0",
+      "runningTitle": "財務省所管  財務本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "財務省所管",
+        "甲号予定経費要求書",
+        "財務本省"
+      ],
+      "itemStartRows": 20,
+      "requestRows": 44,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000586a.xml",
+      "sha256": "ae9ab12b44be007daf24cb0fb10fa91bfdfd00e123c50a9488dddd18a703fbaf",
+      "bytes": 8735,
+      "fingerprint": "ce226ea9",
+      "runningTitle": "財務省所管  財務局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "財務省所管",
+        "甲号予定経費要求書",
+        "財務局"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 7,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000588a.xml",
+      "sha256": "60d21ad6dd73e0c5055b725278191fcac02e0a4dc37f0684402b7e7adee98868",
+      "bytes": 6404,
+      "fingerprint": "ce226ea9",
+      "runningTitle": "財務省所管  税関",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "財務省所管",
+        "甲号予定経費要求書",
+        "税関"
+      ],
+      "itemStartRows": 4,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000590a.xml",
+      "sha256": "8451d06037841307acaebc7682c71e7c0ad78ec856f1629b1a5a6b874b2b0308",
+      "bytes": 11487,
+      "fingerprint": "ce226ea9",
+      "runningTitle": "財務省所管  国税庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "財務省所管",
+        "甲号予定経費要求書",
+        "国税庁"
+      ],
+      "itemStartRows": 6,
+      "requestRows": 10,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000616a.xml",
+      "sha256": "3b11d4fd30335a5cdba35246e157ae0d0c2bcaffed32d2d2c5793b797013ef56",
+      "bytes": 86999,
+      "fingerprint": "8e83a7bf",
+      "runningTitle": "文部科学省所管  文部科学本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "文部科学省所管",
+        "甲号予定経費要求書",
+        "文部科学本省"
+      ],
+      "itemStartRows": 50,
+      "requestRows": 82,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 3
+    },
+    {
+      "file": "202411001000640a.xml",
+      "sha256": "047a9bc899dc4f0b0152647f0060da8b8fcf5afbbae8859065248059809347f9",
+      "bytes": 7870,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "文部科学省所管  文部科学本省所轄機関",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "文部科学省所管",
+        "甲号予定経費要求書",
+        "文部科学本省所轄機関"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 6,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000643a.xml",
+      "sha256": "87252cf9ac6037c06f7161f5825ed408d3213db28e3fb7c69c0bc61e57ec34b1",
+      "bytes": 13813,
+      "fingerprint": "38d58a65",
+      "runningTitle": "文部科学省所管  スポーツ庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "文部科学省所管",
+        "甲号予定経費要求書",
+        "スポーツ庁"
+      ],
+      "itemStartRows": 6,
+      "requestRows": 12,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000646a.xml",
+      "sha256": "1975d9c2e7713a4eb60c9060b4f30923fd95bf2269563f49454754e8accd3289",
+      "bytes": 20936,
+      "fingerprint": "38d58a65",
+      "runningTitle": "文部科学省所管  文化庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "文部科学省所管",
+        "甲号予定経費要求書",
+        "文化庁"
+      ],
+      "itemStartRows": 14,
+      "requestRows": 18,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 1
+    },
+    {
+      "file": "202411001000674a.xml",
+      "sha256": "3b604bdc5071ebe8a8f3dee7d84648c1d770b81c03e7794c757e2a67c7634287",
+      "bytes": 149959,
+      "fingerprint": "8e83a7bf",
+      "runningTitle": "厚生労働省所管  厚生労働本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "厚生労働省所管",
+        "甲号予定経費要求書",
+        "厚生労働本省"
+      ],
+      "itemStartRows": 81,
+      "requestRows": 141,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 7
+    },
+    {
+      "file": "202411001000717a.xml",
+      "sha256": "7d0ff356595ada9992996d351c189849deeae0fc72802b16c3f499b298ee0e32",
+      "bytes": 6379,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "厚生労働省所管  検疫所",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "厚生労働省所管",
+        "甲号予定経費要求書",
+        "検疫所"
+      ],
+      "itemStartRows": 4,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000719a.xml",
+      "sha256": "55b034afc4f32635bd58a4ab46fa3f30cd3b0e9636adf7dc6c3361a3f6c1da40",
+      "bytes": 5818,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "厚生労働省所管  国立ハンセン病療養所",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "厚生労働省所管",
+        "甲号予定経費要求書",
+        "国立ハンセン病療養所"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000721a.xml",
+      "sha256": "958c7bb2b89fbb03dc7dfa07a1350cc8a8073fd08bd8434ee9369333b6d26fc7",
+      "bytes": 12397,
+      "fingerprint": "38d58a65",
+      "runningTitle": "厚生労働省所管  厚生労働本省試験研究機関",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "厚生労働省所管",
+        "甲号予定経費要求書",
+        "厚生労働本省試験研究機関"
+      ],
+      "itemStartRows": 4,
+      "requestRows": 11,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000724a.xml",
+      "sha256": "a4601aecb78d6be393f53f6813e976b4a08c3e11557899278d51d913fb2d05f3",
+      "bytes": 6364,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "厚生労働省所管  国立障害者リハビリテーションセンター",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "厚生労働省所管",
+        "甲号予定経費要求書",
+        "国立障害者リハビリテーションセンター"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 3,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000726a.xml",
+      "sha256": "a6f49bf3ef4e3ba3374fc18d4549d2be69f67940e8b1b611cf29fb5a701780d0",
+      "bytes": 10611,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "厚生労働省所管  地方厚生局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "厚生労働省所管",
+        "甲号予定経費要求書",
+        "地方厚生局"
+      ],
+      "itemStartRows": 6,
+      "requestRows": 9,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000729a.xml",
+      "sha256": "4508131c7a6dafb1f0c447ea399249a5d125cbd28bd961ab9977a77580e8c621",
+      "bytes": 13792,
+      "fingerprint": "38d58a65",
+      "runningTitle": "厚生労働省所管  都道府県労働局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "厚生労働省所管",
+        "甲号予定経費要求書",
+        "都道府県労働局"
+      ],
+      "itemStartRows": 8,
+      "requestRows": 12,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000733a.xml",
+      "sha256": "c9538754479d9f839834a2f8c7d8b9a56e818ef970cd7b6f0eb8be347ddd594b",
+      "bytes": 4938,
+      "fingerprint": "38d58a65",
+      "runningTitle": "厚生労働省所管  中央労働委員会",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "厚生労働省所管",
+        "甲号予定経費要求書",
+        "中央労働委員会"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000763b.xml",
+      "sha256": "f8a3359abfb4489a4391980c1e0601488342508e9e255f122fccbf104ebcaf2b",
+      "bytes": 57223,
+      "fingerprint": "8e83a7bf",
+      "runningTitle": "農林水産省所管  農林水産本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "農林水産省所管",
+        "甲号予定経費要求書",
+        "農林水産本省"
+      ],
+      "itemStartRows": 38,
+      "requestRows": 48,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 4
+    },
+    {
+      "file": "202411001000781a.xml",
+      "sha256": "4a94c39d104a3db449779d7470b345c1dd6278d074d0683cf53a395573f5a31f",
+      "bytes": 8096,
+      "fingerprint": "38d58a65",
+      "runningTitle": "農林水産省所管  農林水産本省検査指導機関",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "農林水産省所管",
+        "甲号予定経費要求書",
+        "農林水産本省検査指導機関"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 6,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000783a.xml",
+      "sha256": "98784a70fdf77a2a98cc65e033f3cc7245c81bb16a8e41de3ae05170b5399a0e",
+      "bytes": 11225,
+      "fingerprint": "38d58a65",
+      "runningTitle": "農林水産省所管  農林水産技術会議",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "農林水産省所管",
+        "甲号予定経費要求書",
+        "農林水産技術会議"
+      ],
+      "itemStartRows": 7,
+      "requestRows": 7,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000786a.xml",
+      "sha256": "08e1105411e555b4f405b98d45f72436b7b15efe81e58047195b3b706693b121",
+      "bytes": 7360,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "農林水産省所管  地方農政局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "農林水産省所管",
+        "甲号予定経費要求書",
+        "地方農政局"
+      ],
+      "itemStartRows": 5,
+      "requestRows": 5,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000789a.xml",
+      "sha256": "49a8fc1ffac2a98e9976c9fcef22f09a0bc2fb70de61142e1e611fb17a59215e",
+      "bytes": 4812,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "農林水産省所管  北海道農政事務所",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "農林水産省所管",
+        "甲号予定経費要求書",
+        "北海道農政事務所"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000790a.xml",
+      "sha256": "5d8b4bad7dd823388cba7c88605ea01f62be78174d43639be8e9cd5cd3ae9d10",
+      "bytes": 26780,
+      "fingerprint": "38d58a65",
+      "runningTitle": "農林水産省所管  林野庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "農林水産省所管",
+        "甲号予定経費要求書",
+        "林野庁"
+      ],
+      "itemStartRows": 18,
+      "requestRows": 23,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000798a.xml",
+      "sha256": "1a163ff220e97a8567118d1ec45d0eedc74c0197b170b7992acda8973e08eca2",
+      "bytes": 24767,
+      "fingerprint": "38d58a65",
+      "runningTitle": "農林水産省所管  水産庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "農林水産省所管",
+        "甲号予定経費要求書",
+        "水産庁"
+      ],
+      "itemStartRows": 17,
+      "requestRows": 20,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 1
+    },
+    {
+      "file": "202411001000841b.xml",
+      "sha256": "d3889c30d48c7ba26af86f54c24577f497c2be633e413c30699f756b6ea9b00d",
+      "bytes": 36221,
+      "fingerprint": "8e83a7bf",
+      "runningTitle": "経済産業省所管  経済産業本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "経済産業省所管",
+        "甲号予定経費要求書",
+        "経済産業本省"
+      ],
+      "itemStartRows": 19,
+      "requestRows": 33,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000852a.xml",
+      "sha256": "2df8f992b4a2b966a3e3b686b6140e4de64fd5adbc75784c874b3752fe537842",
+      "bytes": 4602,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "経済産業省所管  経済産業局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "経済産業省所管",
+        "甲号予定経費要求書",
+        "経済産業局"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000853a.xml",
+      "sha256": "b4fb775e7d8c6e081b574445289e63a9f1bb1a36a14119ba5fd1aed0268f524d",
+      "bytes": 3476,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "経済産業省所管  産業保安監督官署",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "経済産業省所管",
+        "甲号予定経費要求書",
+        "産業保安監督官署"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 1,
+      "subtotalRows": 0,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000854a.xml",
+      "sha256": "2ce65ffe3002c1cc8f03a809999cac6a142f580fc8a3bf9d42409ae8377dad68",
+      "bytes": 11893,
+      "fingerprint": "38d58a65",
+      "runningTitle": "経済産業省所管  資源エネルギー庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "経済産業省所管",
+        "甲号予定経費要求書",
+        "資源エネルギー庁"
+      ],
+      "itemStartRows": 6,
+      "requestRows": 8,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000857a.xml",
+      "sha256": "1f9210e2a1c70d3eda58b7f01b6ef36a412d4067bb7813ac586bbe6aeaadc274",
+      "bytes": 7783,
+      "fingerprint": "38d58a65",
+      "runningTitle": "経済産業省所管  中小企業庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "経済産業省所管",
+        "甲号予定経費要求書",
+        "中小企業庁"
+      ],
+      "itemStartRows": 4,
+      "requestRows": 5,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000876a.xml",
+      "sha256": "94456278e8f16c0c7131eadd8885d500529e7d93bc5de461c007dfa1233819f8",
+      "bytes": 185844,
+      "fingerprint": "8e83a7bf",
+      "runningTitle": "国土交通省所管  国土交通本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "国土交通本省"
+      ],
+      "itemStartRows": 110,
+      "requestRows": 180,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 8
+    },
+    {
+      "file": "202411001000920a.xml",
+      "sha256": "0968feab452d495eecdcc668856a3c839d4d7304da7208d76c596e97d28ad207",
+      "bytes": 8582,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "国土交通省所管  国土技術政策総合研究所",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "国土技術政策総合研究所"
+      ],
+      "itemStartRows": 6,
+      "requestRows": 6,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000923a.xml",
+      "sha256": "5efcc218f89f978f530490a3a61775369a05817b704e4e118686cec201371e15",
+      "bytes": 7930,
+      "fingerprint": "38d58a65",
+      "runningTitle": "国土交通省所管  国土地理院",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "国土地理院"
+      ],
+      "itemStartRows": 5,
+      "requestRows": 5,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000925a.xml",
+      "sha256": "dd720b61331dfdebad2e90403e77f551ccd2169f9970c2dddf21cba476c9c47e",
+      "bytes": 4808,
+      "fingerprint": "38d58a65",
+      "runningTitle": "国土交通省所管  海難審判所",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "海難審判所"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000926a.xml",
+      "sha256": "d0eef2e4b82bb6c423ef11165e9da31d0bdcf8e91a8157f20f57b436392fcf04",
+      "bytes": 13190,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "国土交通省所管  地方整備局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "地方整備局"
+      ],
+      "itemStartRows": 9,
+      "requestRows": 12,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000932a.xml",
+      "sha256": "9fb4391c8378ccab75d50507d094272b2efc6900dfd114f30a405bafb78aaec0",
+      "bytes": 13015,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "国土交通省所管  北海道開発局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "北海道開発局"
+      ],
+      "itemStartRows": 10,
+      "requestRows": 11,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000938a.xml",
+      "sha256": "a45dad25e3defd8abe81805fa949506aa3616b3aa4cd0c528c87b488b438154d",
+      "bytes": 11540,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "国土交通省所管  地方運輸局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "地方運輸局"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 12,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000941a.xml",
+      "sha256": "e8d5497a3b349a09c9bcfb459b12c117c7716d3b141f4328e0045746453374e8",
+      "bytes": 4641,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "国土交通省所管  地方航空局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "地方航空局"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000942a.xml",
+      "sha256": "72b20134b2a149ed85453d5e7171da031a41f95838e6b8468e81501d06321b89",
+      "bytes": 13740,
+      "fingerprint": "38d58a65",
+      "runningTitle": "国土交通省所管  観光庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "観光庁"
+      ],
+      "itemStartRows": 5,
+      "requestRows": 10,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 1
+    },
+    {
+      "file": "202411001000946a.xml",
+      "sha256": "50841da16dbd63a54ac448a1b5ce266449fa72db52e9a59a79ee73d1594dae9d",
+      "bytes": 8812,
+      "fingerprint": "38d58a65",
+      "runningTitle": "国土交通省所管  気象庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "気象庁"
+      ],
+      "itemStartRows": 4,
+      "requestRows": 7,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000949a.xml",
+      "sha256": "756a098af33192ed9383cfaebf0dab1653fcd734aa567a330a80994c40430f9c",
+      "bytes": 4468,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "国土交通省所管  運輸安全委員会",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "運輸安全委員会"
+      ],
+      "itemStartRows": 1,
+      "requestRows": 2,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001000950a.xml",
+      "sha256": "bc4a6f03eb49b613e2841660c668a0ccbe24d4860f0e830f8c83e15758458fc6",
+      "bytes": 10440,
+      "fingerprint": "38d58a65",
+      "runningTitle": "国土交通省所管  海上保安庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "国土交通省所管",
+        "甲号予定経費要求書",
+        "海上保安庁"
+      ],
+      "itemStartRows": 7,
+      "requestRows": 8,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001001045b.xml",
+      "sha256": "cfc45b082f09df98af826eb73c102f4bfdec3a3d86f7995a68be96e3e58893d2",
+      "bytes": 40486,
+      "fingerprint": "8e83a7bf",
+      "runningTitle": "環境省所管  環境本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "環境省所管",
+        "甲号予定経費要求書",
+        "環境本省"
+      ],
+      "itemStartRows": 27,
+      "requestRows": 32,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 2
+    },
+    {
+      "file": "202411001001058a.xml",
+      "sha256": "4b6833b0c7df1b65b8165dd9c1475b0291338262e13d05fff2a2a3a2d9be7b4d",
+      "bytes": 9089,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "環境省所管  地方環境事務所",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "環境省所管",
+        "甲号予定経費要求書",
+        "地方環境事務所"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 8,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001001060a.xml",
+      "sha256": "55a8c2f98f9d70bd657b469ec721dd8d3962be37304b64c0d394976d38141447",
+      "bytes": 10362,
+      "fingerprint": "38d58a65",
+      "runningTitle": "環境省所管  原子力規制委員会",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "環境省所管",
+        "甲号予定経費要求書",
+        "原子力規制委員会"
+      ],
+      "itemStartRows": 5,
+      "requestRows": 6,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001001079b.xml",
+      "sha256": "a793cdc2962b1f37b3da39c5dcef66e754fcca704ef6f63d5d7e9e918d22117f",
+      "bytes": 52531,
+      "fingerprint": "8e83a7bf",
+      "runningTitle": "防衛省所管  防衛本省",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "防衛省所管",
+        "甲号予定経費要求書",
+        "防衛本省"
+      ],
+      "itemStartRows": 24,
+      "requestRows": 51,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001001091a.xml",
+      "sha256": "1727d9d5d4c6a82ad98c10c8727215b14135e438493b1e0abb686143e183a56f",
+      "bytes": 5889,
+      "fingerprint": "f04b97b3",
+      "runningTitle": "防衛省所管  地方防衛局",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "防衛省所管",
+        "甲号予定経費要求書",
+        "地方防衛局"
+      ],
+      "itemStartRows": 2,
+      "requestRows": 4,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    },
+    {
+      "file": "202411001001093a.xml",
+      "sha256": "bf815b2703e18def3f54145434313278a3c55c44004545e4beb9429081514899",
+      "bytes": 8654,
+      "fingerprint": "38d58a65",
+      "runningTitle": "防衛省所管  防衛装備庁",
+      "menuChain": [
+        "令和6年度一般会計予算参照書",
+        "令和6年度一般会計各省各庁予定経費要求書等",
+        "防衛省所管",
+        "甲号予定経費要求書",
+        "防衛装備庁"
+      ],
+      "itemStartRows": 3,
+      "requestRows": 7,
+      "subtotalRows": 1,
+      "descriptionOnlyRows": 0
+    }
+  ],
+  "nonTargets": [
+    {
+      "file": "202411001000001a.xml",
+      "sha256": "9c0dc4f95c0d5223394fa38a8cc66e7c0ff901b0c38b67dab770f8770ac2cb8b",
+      "titleForList": "一般会計予算"
+    },
+    {
+      "file": "202411001000029a.xml",
+      "sha256": "509286bc37fe428c23e425d0cdb4fb489c6b15641f4d026edae409f8d131372a",
+      "titleForList": "歳入"
+    },
+    {
+      "file": "202411001000043a.xml",
+      "sha256": "fddcda08e73f85e1038c8c2802873b5ae005bd07d0ced51fe9a4dc677ecc969a",
+      "titleForList": "歳出"
+    },
+    {
+      "file": "202411001000086a.xml",
+      "sha256": "a3e166284188f78742df75ade3ce8625fb1f6d4a6784bb21f76c16098617a84e",
+      "titleForList": "継続費"
+    },
+    {
+      "file": "202411001000090a.xml",
+      "sha256": "e892de691ef153d3ee284ba44bd3525343bc6b4d52ee058581fbe3baea778ef5",
+      "titleForList": "繰越明許費"
+    },
+    {
+      "file": "202411001000121a.xml",
+      "sha256": "abb0df403166c9865c61e88d9647632ed6206f1e61ec45c68cdc5d8bfbfadd51",
+      "titleForList": "国庫債務負担行為"
+    },
+    {
+      "file": "202411001000193a.xml",
+      "sha256": "c19093de2ad09170705578343b50cde340d4bb3953ef2fc201bc697c5dffacf8",
+      "titleForList": "財政法の規定により令和6年度に発行を予定する公債の償還計画表"
+    },
+    {
+      "file": "202411001000194a.xml",
+      "sha256": "d7547f540b4f322a0459cf6cc7451f5e0cefe5fae1daaad81190907d9a3fbc98",
+      "titleForList": "財政運営に必要な財源の確保を図るための公債の発行の特例に関する法律の規定により令和6年度に発行を予定する公債の償還計画表"
+    },
+    {
+      "file": "202411001000195a.xml",
+      "sha256": "3c8e913cff76a46b2315254af17efcb4ae996e6d14009c65a20c47574af1cc19",
+      "titleForList": "一般会計歳入予算明細書"
+    },
+    {
+      "file": "202411001000197a.xml",
+      "sha256": "9bd6a8826f6ba70b4cbe0b2bb9dc7edd6f17f054dc4f8de2f7ec0837d7ccc473",
+      "titleForList": "歳入予算部款項目別表"
+    },
+    {
+      "file": "202411001000207a.xml",
+      "sha256": "b34c667bcd60cdb8addebe5b456c49b4aba10de46f2b2f73fa731d638200f491",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000207b.xml",
+      "sha256": "b29c2590d398f938179db94b884738f041dab2699d6a95881f7a612d7e045862",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000209a.xml",
+      "sha256": "645d19693a0c7802fcb13d5ca0c3eacaa33efebf6f67f18bbe9e3aab352ae23b",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000209b.xml",
+      "sha256": "c1c04bb26b2589901ae92c138122c93aa6c7e5945f2070e89c032401b2731298",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000211a.xml",
+      "sha256": "14c9e16882277ed098c55d1d84fd2720dd2fa6d2a4caa48e392779538c8a14ec",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000211b.xml",
+      "sha256": "73f9d12fa2a81690882cb65bf7b2597d8f55361f302fdfe02357a2f839fab1d7",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000212a.xml",
+      "sha256": "5d3eaf34cb3a4e3c3ca1fae2e4a9a014e263f82ef7b11c2cccec0992426b0457",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000212b.xml",
+      "sha256": "7cf335b1423ce69ad10b6ac16b7262bd78d6119e70de0f08a7f77ff6211b95d1",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000214a.xml",
+      "sha256": "052d7850797c7218420eeb925b344262023c4692ee037e3e78dc7e80ee89a14e",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000214b.xml",
+      "sha256": "ecb0f48c1183441d352712101c5206a5942c1268655480026aa003abba0830e0",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000218a.xml",
+      "sha256": "8f5f76a93ca9d212e7e52e4b01e59be8d3a34e52f2738870ad5f7cfcc6ae6b17",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000218b.xml",
+      "sha256": "0ef0608bd56a5ea108e9dc5445f6862c8c1a26116273ad9e2beb82cf7f74f393",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000219a.xml",
+      "sha256": "b8491cfba9de7bf4e8ba6781348949f1a9d03dab7d28cc2a94569ba110cfaaab",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000219b.xml",
+      "sha256": "4c4b27a253dcca1c237c103372d30a08f7b09f779639e678a16b7cd59c7d7854",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000221a.xml",
+      "sha256": "8fa711dbbe1210c4afcd46f286ad690834d7ccb9a55ef2076c9db6b20b0b26c8",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000221b.xml",
+      "sha256": "9640dba601caee73709c2b0a184cf57188cba86b4b751c4dd8a78f4890ea9376",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000223a.xml",
+      "sha256": "554447d9cc6bd1a369ff52c4ac2eaa6c1d15db800a3477160938525ed9af4ad5",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000223b.xml",
+      "sha256": "049304d5a62dd489d4740bf96ee1184a3ef5aede264b0b2823e3a8c045994901",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000225a.xml",
+      "sha256": "d9f940a59aa22311c35139e861ab2e70bb9b041a54524593e4ec886fb91dbce0",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000225b.xml",
+      "sha256": "eba8f6eef62166c898cac66a097313e88f3cdf3263b22605704f7f51a4b2ca17",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000235a.xml",
+      "sha256": "f015a47e97fee549250b2895ac77f6557ac367578fe3cfa07f469412eb271f37",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000235b.xml",
+      "sha256": "ff1bae386e96e9147ce77a55cf6f289856c81a6a5e6f5f0ca25980f8cb2c69a4",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000238a.xml",
+      "sha256": "320a0b5fc826afc93acff2923e5329d5af697d161e299c34b99bcb27d428e26a",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000238b.xml",
+      "sha256": "b44b0b49458a6d744990698690a09d06ed8a111ddc07ee1a3c62842453cdf0b6",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000242a.xml",
+      "sha256": "b5bf5e6926cd59d852df43572ed9cc2c0c60fd0e9d440ad9db7772fbba06984a",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000242b.xml",
+      "sha256": "d0d553fdb86786714f9f8417a917d9fbdd2d2d2a289911e33da6626387da04c2",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000247a.xml",
+      "sha256": "a211bbf4aaed3c3ebba30f662cbeefe67b48585bb3dfedc7b4aac450ca260b7f",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000247b.xml",
+      "sha256": "c5a4d3c1291cf3ce0585232d09cca268b4c50a7d869479b203734ba159491ac5",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000250a.xml",
+      "sha256": "9007906d9a39f6d8f544741855077b67073bc9546253f594fa0b6f493e78c9bf",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000250b.xml",
+      "sha256": "b7847adf7c8961d109abef951655c15a8c5fbb45aac58caef718102837b18deb",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000255a.xml",
+      "sha256": "478dfc032581b737e7fe8daea64fea00e1ce9b4952a7b714031982c5dcafe400",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000255b.xml",
+      "sha256": "756a6b6ddfde77d0c3282b3b7d0d66fc7d6e097755bb0e213878e88458da1eab",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000257a.xml",
+      "sha256": "f7c56c725a14006357c92d026c191ea10b34d6b8fae181bef696a7a53f3e7976",
+      "titleForList": "歳入予算明細書"
+    },
+    {
+      "file": "202411001000257b.xml",
+      "sha256": "e4112504e2efb55fd31504ead403fc903a7893d73910ea16a305b3c06678b7c9",
+      "titleForList": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎"
+    },
+    {
+      "file": "202411001000261a.xml",
+      "sha256": "6d510478353169ce41010a91cf71f31f8feba7a5667f37baebd9da7c3397c44c",
+      "titleForList": "一般会計各省各庁予定経費要求書等"
+    },
+    {
+      "file": "202411001000263a.xml",
+      "sha256": "29f9ce4f769d5e76beac836f1ee9032662b506b3e455f89b656264fb119bd48d",
+      "titleForList": "予定経費要求書"
+    },
+    {
+      "file": "202411001000265a.xml",
+      "sha256": "7a00ba87e3aa82a1f1be1c7b853a2eca3e531f96cffbd8c429f587842808276a",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000266a.xml",
+      "sha256": "c1e537d1bc272d8110d710ad4abf6a78f8ee9d02b783349e7fcc849e92a52fc6",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000267a.xml",
+      "sha256": "a7e4ce6bd6dafd21948bd7e5fcf7f63affa05f889446491cdc88abe7a4a52054",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000268a.xml",
+      "sha256": "5e6a3e5f272e3bb8c99d2dde57aa1bed7a8177773bce168cf4e8d4dbc561f45f",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000269a.xml",
+      "sha256": "fe76ca14ba6a9dc8faf38f355f8d75e83479148aacdfb7f8333fc54bc69c11ec",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000270a.xml",
+      "sha256": "3173bf51405b1a488c34e00291c92ecc944524380fc7a4216c32795cac1fb3cc",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000272b.xml",
+      "sha256": "60d3ddf34684bae5d88580c50d35e9e6e66eb288a4ef43803b584ddf5c8fc578",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000274b.xml",
+      "sha256": "3f002356852e3a89224841bcd345e8416f467092157b8778d61fc6b68efa4e0c",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000276b.xml",
+      "sha256": "544e880d29b9f9ecaf3630f8b94fed35be84e1d64e25e5a5e8f79cb1ddf266bb",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000277b.xml",
+      "sha256": "a04d86bdd95f1dc5ab37bdf4ca85fd0375fd5e26361e3263d7d706689a8af071",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000278a.xml",
+      "sha256": "ddbff00f8a21e7f937ebd39ead4f9ee34006fc92801008aab308f66248b06b15",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000280a.xml",
+      "sha256": "5074fe68ab5375be0054e8f8f8ff0e000d2c65c7f054fd2e4b01731e70b22d4c",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000283a.xml",
+      "sha256": "e1546f0a023a5199de6eae8cc8c07a572864ad8de0671e0512ee5990c7807d2f",
+      "titleForList": "国会職員 総表"
+    },
+    {
+      "file": "202411001000283b.xml",
+      "sha256": "6f851a82533be1ebbadc15c62747a9687d2b930a35d23cccec16fce67a760a34",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000291a.xml",
+      "sha256": "318adf849ce0905041702719ed78d595b8b59c0238fd585ae06bce672467c075",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000292a.xml",
+      "sha256": "000242ab5fb0931e258a93962ba82f464a6ccb4025bd1d2ec360cf3cc35efa11",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000295a.xml",
+      "sha256": "d3b99792c049fdadea57b08e6f7f4e10caf8e4123c380486bcd21dcf4f60fd9c",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000296a.xml",
+      "sha256": "0000cd3526f6bcae2dac1fed2bcb018ea20d60f2f92c4cfbeae6746c6fb18530",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000297a.xml",
+      "sha256": "c8afba7d672d3c099c9bd09461adb166a4c10fe8ac73d2471ac1bde1bd3fb988",
+      "titleForList": "裁判所職員 総表"
+    },
+    {
+      "file": "202411001000297b.xml",
+      "sha256": "d5e41e13ebb360dba010a1a7f215e9cbdfe0c95f3040623f250152e0fa846610",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000303a.xml",
+      "sha256": "3cfe1e1f018f8853f4aa0f1def4cb7f2a5285397c63b34a1fb0d2b874624c95c",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000303c.xml",
+      "sha256": "2beaf0325f8b59fb22d9acf78c9e77051d615fff28ae6ab98b15acd0c296d8bd",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000305a.xml",
+      "sha256": "71779c9131237b8ed8c691a79619a6345a01bb4c834a1dc79064985d9a91bc00",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000306a.xml",
+      "sha256": "ce3bc89b2b0fc7ab85cb82743d3c3adc14bf437ea01ac2465139be434c8059ac",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000307a.xml",
+      "sha256": "b1d3756eb173dae9c2d53582c83d7e21700f17831a860fe312ea3e2cda9ad189",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000307b.xml",
+      "sha256": "3595565b3ef7afae02b5d4cb5ef9d36451800aead21495fb63c13f2b0b306d40",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000309a.xml",
+      "sha256": "1bbd3e91009bbae1c04a506e27eb6900d8ccf0be5621c97e384f164326303dfa",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000310a.xml",
+      "sha256": "c9acbc0585fc660827096b57d8d3999254d46525e395a27625e18085d50a9378",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000313b.xml",
+      "sha256": "c62f575bdd5fc5ace47f00077a6d91673012993e29ab832ffd942e7f4e9d83aa",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000314b.xml",
+      "sha256": "4c96f434ea15f7bedd7e139f87ae4439c1b42a48109ba86423f82d2e7b6dc5f3",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000316a.xml",
+      "sha256": "f112fe50cc89d79ac21839782c213e480ec49824a71e0a7c2e04f4db36101011",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000318a.xml",
+      "sha256": "8ea458ccab842fe4e77120e11b33243e93e355e6783ed016da2372bbf6a8bed1",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000320a.xml",
+      "sha256": "82854c00a0a9ee8e221b3a2fa43afce5f648f3a5a4a3466b25d3f535a380b863",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000320b.xml",
+      "sha256": "f73baa08f1e8c164bbacf8ff4fb04911a69dc00b7aafd82475feee7197da637e",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000327a.xml",
+      "sha256": "899f10be1796767d3f9a97ea3c33451a70ca2d702f2ba4ce59e5a75b3e8d9474",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000336a.xml",
+      "sha256": "e420ebf16531af783c70b42d44d505c59e1641ae9d98f4b6036961d5aeffcc0c",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000346a.xml",
+      "sha256": "e71138fdb28253a5e94c2e028827e3689aeda01e37d7f5b68c675665ffc53eff",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000347b.xml",
+      "sha256": "1d3a1ef41cad14510e9ca26d87ef1d47479f5057c63c9765e15b87ecacbccd94",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000348b.xml",
+      "sha256": "e8c23acf5d3e1e6a6a4d8a3a7d205b017f650a2557756d5acf9b5aa3aee9612b",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000350b.xml",
+      "sha256": "c959f2acd4d54e55b586a51db2c671ac0ededf5ce18ac0906e1101284180f5e6",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000351b.xml",
+      "sha256": "417c83d750ae6bb98a677063e35446911f92531ce8cc33e289510e236d377b20",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000353b.xml",
+      "sha256": "c0210fa9b47faa1a779f822faa4a7a06725af538b20f7cc1bc59b087ad087884",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000354b.xml",
+      "sha256": "6d5dfab00f7f9e4665a065981589c4bc2546cf46d65594b8d7cca344cc1da7f3",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000356b.xml",
+      "sha256": "8c5a5b64086785a28adb8dfb25730e7a1f668172cfa11d311b02238622ad0abf",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000357b.xml",
+      "sha256": "7c23d1e6a87518621baa27c36cf81214a837ae5e2e91b0a199076987d27e9801",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000358b.xml",
+      "sha256": "2182f0ede095685bfba415f8ec8a998f7333cfe9d342f9cbaa351bdd7b3c4109",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000360a.xml",
+      "sha256": "5d4350749799f327ece331bef0340bf6b1e9e90e7cd50aaf603f03d8355ab1a7",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000364b.xml",
+      "sha256": "69f57f4b77236cae4b79941850a11800cfb548197637c10831b9fc7cb78daf31",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000365b.xml",
+      "sha256": "9c44a2d583c329cd071557f32cb0412237c3097104508c6e07f27d1f019e633b",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000369a.xml",
+      "sha256": "397b63585736325464ea97b029851caa85b2485e430df543d74653f3262d52ca",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000373b.xml",
+      "sha256": "7ff669f786d817bc46d241dd605a2f8445c2855da1135178ea95b0abf75375f0",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000375b.xml",
+      "sha256": "094f7f4ab7855f70bab0341bd2f89458700d51b285a8113e937b4c81142ab2ac",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000377b.xml",
+      "sha256": "c4640e4f7f23947532428875eadcf43b01cb57da725c6564aff3b15c9b201ff0",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000380b.xml",
+      "sha256": "428333bd84a4a109232c77d2fdfc3124c695b736f638c12eb3d4d3c07fda6c4a",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000385a.xml",
+      "sha256": "36cd803dbe61b00923dd453c9848ced3ee8c2834fc9dfb35c883b637fefba8e7",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000389a.xml",
+      "sha256": "b9692e905b13b61652592a408384d11af1fedd3055ce68b5c08b89ac7c2a87b9",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000400a.xml",
+      "sha256": "503c94daa5141bdc7014f69a015413be5e83f730ad21c6bb849a255dde1b385f",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000416a.xml",
+      "sha256": "ba8dfe7037140713b81113ce0e8933e64d604ab8de0efc0882d4b38d7d127b4c",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000417a.xml",
+      "sha256": "37e3570e08879540ac3ee2e229f20f5e4a97b9b5785b770dc6e041a39033dbab",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000445a.xml",
+      "sha256": "19e8ce1881f268a9aebf01c4d3213cc10d499faf7fda37637521f7e91289ea74",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000446a.xml",
+      "sha256": "308a4f73e05d7f23e0b07df9c6a2c4036462bce415123d891b09699369f28a03",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000448a.xml",
+      "sha256": "d8d84942b93a19e357c3bd2fbdf05c9a66bbc1b16b0950cbbf8c1bbda6e27b20",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000449a.xml",
+      "sha256": "f1843f0b452b264cb89df7c99eb204acb48e563d26ad0d98e17af2f63eb4df94",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000450a.xml",
+      "sha256": "1facd30529656ed228ec5a360f2517270e8147708e01294ebcd1e1dc3bd6afc3",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000450b.xml",
+      "sha256": "2a37391672116888142b855fca4fd12f06a2acfc49b3c1b6a135df906f02bad4",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000453a.xml",
+      "sha256": "a8bc988d24d24274afaeb91913007eeaa9e5a0f646c1f2a6495bab9222ae3475",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000458a.xml",
+      "sha256": "e4d2129217e2cde65298553e1457811be9450002fa7374c972038fd8bd6f391b",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000466b.xml",
+      "sha256": "05bc54a11d315697b55a5986b4f8c02ffd5a9c58b230661e894205ab42e47da8",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000468b.xml",
+      "sha256": "ce8e5d6ad1de3ac190ea700dbe1a22eec2711c5df591c2a452310f985ee0210a",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000470b.xml",
+      "sha256": "f86489e9db91749b4897bc2a3cdd6289fda1da29c7fda8e0397d2b64766a994a",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000471b.xml",
+      "sha256": "a99561d848b64b2feef11aa7830e7fa00508a7c0971fd89a916e968251c01eb6",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000473a.xml",
+      "sha256": "25d21103edc5787c67117244f4b3b8b0e0a7ed32cd54fb3b1e3eacc1654fdf90",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000478a.xml",
+      "sha256": "299a319c7d5e6460f98e3d45bcdfc093c1a77863145030c364665037b9269955",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000485a.xml",
+      "sha256": "b4b105dc84d6d11c076d0b060788ba6429fa15c88009f2900e969c3d029e10c9",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000485b.xml",
+      "sha256": "30f32e95911aa392c5eb968c88f85764b53f892d59e82cffbfdd6fd215244f04",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000493a.xml",
+      "sha256": "7829193bfaa4e2e000d73ad0b259fd846e7871d9591d919bd0f75adb6714a8cd",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000495a.xml",
+      "sha256": "b23afca74fa900e97e375dc38b510edb03b67c99234f4fb172e652a289124891",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000499b.xml",
+      "sha256": "df226eb2d01718610cfb42f43527d3e26338a3248002d99b11f2fa6aec387e51",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000501b.xml",
+      "sha256": "79e3e12bd74dfa9d8d4e6c9b3fb6ed871560194c4e810b68affb0397d4cf2152",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000503b.xml",
+      "sha256": "01c36f2168681ca6cb747c5ad2ba84d1df69892cedd13f0ef2f0f550059c5a2e",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000506b.xml",
+      "sha256": "f0bc8286e0ee21e199b7e7ef9c1c44ebc5369758e8424430710075815a930f4d",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000508b.xml",
+      "sha256": "6faf5eea1b0a1a08c30dc3547205844daeeefef3f568bf96e7f660b3122a004c",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000510b.xml",
+      "sha256": "8accaed31e50bede5b9e43d88fd831390d83743f8a40cf584d9f1bcb97e6a1c0",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000513b.xml",
+      "sha256": "7dd9bd8b5f85aabe87fb0ab0244886841600130ad10fa3e368231e76c2067b4b",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000514b.xml",
+      "sha256": "6f5b7fd701c4762e6c29a16c0161996f34a461d19d407235bbe599704aaf9793",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000515a.xml",
+      "sha256": "934f3017c549a94df74b06c3e082999ab6c3fe1dda35f6447a2541ab59ca1fab",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000517a.xml",
+      "sha256": "d215975b224b1325b23dbd0a9c749355096f479036be19ff384e23fc8ab3caa8",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000529a.xml",
+      "sha256": "a110b1b57a169d0cb1c60e7747df8eb13d8722089b8c42afb95e859973f60afb",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000530a.xml",
+      "sha256": "1cdd739384f3abfa108bfb63f9764f05f74b018ae61fddb3a852f13953adf5ab",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000549a.xml",
+      "sha256": "b6c15dbf8567e657553ce715253c4f8bf631fef9ee2ad8573a4c0fc0acd8cda2",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000553a.xml",
+      "sha256": "01fab89d3cb92abfc43612b3cda00b0cacba98b80425b1e5bc840434de1b7537",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000561a.xml",
+      "sha256": "83a79b7f33d20ae5319664ed4ceb3d40c875cab68787871f2dde6d293e033d75",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000564a.xml",
+      "sha256": "8718b1d64f0caf665ced005a5d80ac3530b6eea04e4d4956417653d5cddbbefe",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000566a.xml",
+      "sha256": "30eca4983a4c98aa6ff123365cec99fb9abd9e7a2a429f8532950eda98bec5d9",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000570a.xml",
+      "sha256": "ca87c1851f59193840f2a3354731e6bdaea1c3a08d9821a9392417ee2b756f30",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000571a.xml",
+      "sha256": "500685a24843a0b2cf243029e22828d5cb83279119479e5d071588669758b26a",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000575a.xml",
+      "sha256": "af15cf98058a68c84cf358fbc09b14fa717e06a043a71d6eee78fefaa74aa530",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000581a.xml",
+      "sha256": "4d0229b901b51b960466a60061900096f6a9a6a7a65fd63e319c2d0e8c9b53f9",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000586b.xml",
+      "sha256": "35298c90eb698a5df29fdaa6cbc1d3486d543cf01354a0c8d8db5dcfee258901",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000588b.xml",
+      "sha256": "2e484773d8decf1cca069c9996b62a837389dc1ba7761752e6cf450de98141e2",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000591a.xml",
+      "sha256": "ef7c76250c0635e3293dbd1d4dd32c1cf9c509b9555d7519d27536ed3c63daf1",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000593a.xml",
+      "sha256": "20c11f0f479c7a0604c7889195f463e0afa4c4311fb956be1d3cf37d0965833c",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000595a.xml",
+      "sha256": "731358bc996a9248bdfb1e8f354ec2226d4e8a88a075f8a8d240bff6bc9a422c",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000602a.xml",
+      "sha256": "f37e7a0e8914594c216054833617eee4de6aee0b5ef09aac154a821a5c76912a",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000603a.xml",
+      "sha256": "e9456286d0307f0af65cdc92225ccb202aa8fa21b1987f8938d5e5cdca2bb064",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000615a.xml",
+      "sha256": "de292557094f5a0c43406c2071f517d9b02b8c4235c524fa956183d722cc0e71",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000627a.xml",
+      "sha256": "e5dd40c00a02d2b549a8a7c759ec1449f3971fab332c356d3693f59626f6488d",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000640b.xml",
+      "sha256": "bd6f6a85ebf1744dd91ab1cd89fd86c82095f566ec6d3ad07e1c1fbe78ade55d",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000644a.xml",
+      "sha256": "399d54c3da3a0cf54f588bec28143f47247f71e2412b7b3038e9477cdf75d0ca",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000648a.xml",
+      "sha256": "ffc3f57e5945a58e93e08bf17c78119e0eeba1097b218293ea1a0f9cf5b0a17c",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000652a.xml",
+      "sha256": "2b4a2e7c5f8c78e1a94aabaf392b7d853e94ab81dd12c295f7ea4f5284b55320",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000658a.xml",
+      "sha256": "1e50133643e745720ad3df93597eadb1f88cc0b034e44d871255016f408e5b64",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000666a.xml",
+      "sha256": "4c77e0cce6a7e71114baab743e0d41283494312c3d3de2a288149dfbfae54458",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000666b.xml",
+      "sha256": "a37c3fd7f86fc03e73b09a4ace038f33d9298e7998b27e329dcea7e39eb0b2ab",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000673a.xml",
+      "sha256": "2a95f4e37eb71cd086fe27bc11c927b5bc2e28a497b3854ae02186e7da4791af",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000694a.xml",
+      "sha256": "ec6e15b24913ce1b70cf511d421b83ddffbc3de40bee110ef360080d23213b41",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000717b.xml",
+      "sha256": "0d4032d5fbc703e4a5a224cef1c7718a9c1091175204d2670d65a7992238c943",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000719b.xml",
+      "sha256": "48e7fb8d86c6e958807f05fc2bd022bf2814006d3e457baab08f7812e976e879",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000722a.xml",
+      "sha256": "92a816609ec0b26e1303e715df86c2a7907f2313f8b4fd1b332ab79396e47719",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000724b.xml",
+      "sha256": "4152d6267acab6a162c1cedad90e50a93562a1f640bfcca10440de54465925a2",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000727a.xml",
+      "sha256": "22f6bff46c03c16a710bf405d54e436249f51eac8a1e23a7c3523b5688f9e693",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000730a.xml",
+      "sha256": "b9adf6709f8d3f998f971c4411aa3d3a2d98e303e3e3a1b65c08da30fc59f55e",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000733b.xml",
+      "sha256": "162aa3b1e0eb491af8d695b289859402ec576f6a56b4ba08a9d74e998e405467",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000734a.xml",
+      "sha256": "82dce1851783dcd5f628a5a183709996ff17a06440bf4d6aa129fc3d4f17f0eb",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000739a.xml",
+      "sha256": "1d72787f94653475bfae49a4411fffed0c1d4ec76bdc1fd815a2379a80c08e2f",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000748a.xml",
+      "sha256": "445933b2078b804b65991f7a3fd9ca5e0da183d1ee781857760786afa0e7d2d8",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000749a.xml",
+      "sha256": "6af89d22bae3bb34b34254469a313f48ec82cfebb912e8fb944a6fe3be0c3d4a",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000763a.xml",
+      "sha256": "f0b364d315f56c025a04b5e0cdf95204c8bad3ba1a3c7675d938cdd060672aff",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000771a.xml",
+      "sha256": "5fb365c5253563a67d7879e881f25208472dd7ea2230516536ff6612865a6f44",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000781b.xml",
+      "sha256": "d2becdec3a7ebdd6f757b21c90cf85f0973ddec461eb7bf63d999908743946ca",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000784a.xml",
+      "sha256": "4e3ef934d58951e263216b805a38f1c22ce76deff0e1594e682b3f495e4a2b8e",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000786b.xml",
+      "sha256": "406c655783e21faae0a083f70e115299dfe5450c4c3e87358b5450f816811c32",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000789b.xml",
+      "sha256": "ee9f59af1c775bcf67549ea20299f931d59a63db45ae6fd7dfda85fd8baa28cf",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000792a.xml",
+      "sha256": "07f923abd2231c2b2ba7e1b6bcac99331754004107456c3ccb82b6243dea68a4",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000801a.xml",
+      "sha256": "1998fa5aec7436cfa7eabbba9862438cd8e13bd2ebcd5ff6765d73dab335322c",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000805a.xml",
+      "sha256": "b8f24d393bc5ade9fedcf22b3b8c2f9aa93ad551fe615bed4b63f64be3bfaf1c",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000815a.xml",
+      "sha256": "461000847b6191336221e98e2ad09e80473cb9020ce5615055250618eed73db6",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000828a.xml",
+      "sha256": "922b8de2534d85dd9c5170371c3c959c7f262b945cf15a84d6072735f5ae3eba",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000829a.xml",
+      "sha256": "48f449953f8b2a85393286e2efc3e321c2e7b223dc4b618f1b14fd325c243f68",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000841a.xml",
+      "sha256": "8fdf01013aa085e93ec82f7762a34ab76d25d6ef52fa3d32a7b918ed4ee530fe",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000846a.xml",
+      "sha256": "5cc26e29a67d419e756d184709284f207cced0b4996984b57bc53f218ad61bd2",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000852b.xml",
+      "sha256": "0cead4a2d294ad8c1461cf7fbc364514983887b8a80865d98d6a023c9fac77c2",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000853b.xml",
+      "sha256": "cbc2436c3ca4a75ac341b5bed10227ddfcb7d676d7a37cb7f405bee981baf745",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000855a.xml",
+      "sha256": "841d2ab568bae92493d2d67b035ae925883b7992173748e926510ff3477a0cc8",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000857b.xml",
+      "sha256": "934d87952ff996b4adbc598269cdb4617485fca197bda4377141f1762584797b",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000859a.xml",
+      "sha256": "98b4e1e0de862fd3957f4e13836c457f4b295c9cc6012f22aefcde098d80a049",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000863a.xml",
+      "sha256": "06a28acb94f8f744d2c28fd16a0bca0a11b736be5324223fcbb4e48f7306dcff",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001000867a.xml",
+      "sha256": "f40a446f997d45b7c97fea898116fdb1cfa94158c7928a406a141c0bc49439d6",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001000867b.xml",
+      "sha256": "e11d0725903e2d0daf90cfc418e2de210c9076a5159b4dcb8a4c48ebfc1b160a",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001000875a.xml",
+      "sha256": "54e79acf24b01cb87ee7c512d8b7a96a54d233758dbd811a005826e49d2743b5",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001000900a.xml",
+      "sha256": "f01a53b26c36f6eea3e2fe55fdb6c1580bff69839f328a42bfd2eb367143e2bb",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000920b.xml",
+      "sha256": "915bc53c805c95d6fed80c2eeef91a73fee51ac71216499cd79d750aebca8ae2",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000923b.xml",
+      "sha256": "d56fb6b0307ea2204718ceb5675f4c9fc77ea86744fe20837371cb16d07ee9ba",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000925b.xml",
+      "sha256": "40603fe97f6b40fdb9bd8d68dd94347f0fcbb369e444740557284c7459b38c60",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000927a.xml",
+      "sha256": "0f0592f7355c6703d3f5076d60d402ae1e5ece731dc553714924d3d3e5fffe05",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000933a.xml",
+      "sha256": "dae56a3ad14a39c7c6deb73ea4901a6a658703755770342a5ee19f2e91178c84",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000939a.xml",
+      "sha256": "8142d9b53e2502e52815c7d7d593de4129af223183f09d0b31397badaef8f4b4",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000941b.xml",
+      "sha256": "cd6d1afab5f20b61a887aefc7bca26168a0fad088225a1ae176fb120139e9fc9",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000943a.xml",
+      "sha256": "c30030a2242149a4b3c01219a0830fda276b0da9690865699306e14ba53888e8",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000946b.xml",
+      "sha256": "b311b83f626d5f2017391e5803032b84774490bee2229087c51a068542b26e86",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000949b.xml",
+      "sha256": "4dd54c4001d345b29d0d3a1eb793b02d2190a56af4cecea7b9c0f1b528593360",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000950b.xml",
+      "sha256": "475a0cf025f70283031bc0be47c3067e4b27fb2b2700dc0c6a524f0bbf4c0d84",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001000954a.xml",
+      "sha256": "915a1c355fb763b09c4da3cc09eaf6f32a1862ac8cfbac3fdc7fa46914cf47dc",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001000971a.xml",
+      "sha256": "10303113cf80bef978f82ccda7c3bee248ad589afe2acb5672aade768b6d6920",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001001020a.xml",
+      "sha256": "40d7f7cfbd6be28c5759d18f5786fe16638a75798194cf60cc91d218dd5f7e93",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001001021a.xml",
+      "sha256": "3fbac900156588594441262da46b602435b1434169d4d9f6a0cec2cbe1d8f996",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001001045a.xml",
+      "sha256": "1be7cf0ff141a4b71fff0df844bdc07d712ed1209a713dc59f02ee752f5b4620",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001001051a.xml",
+      "sha256": "e0b481c23ac68736b99a8ec615705b611b2b8eae8525918e758f66376421e3e9",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001001058b.xml",
+      "sha256": "0efe1c58d0df43af14466b4d534abefee5819aa063ba170fe3cedf77c601a6b3",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001001061a.xml",
+      "sha256": "46841ffd44c615b3d63fa30d6ff3afa0d3383e57254187ae9a6ffb52e85ea843",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001001063a.xml",
+      "sha256": "2017ef8910eb5a62f3fd1b99ea4b47d64fe435696f88801c2d210373d76d9687",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001001068a.xml",
+      "sha256": "c892f1df4f55e5fbbffe4bcd72a319d16600dc286d0c263e2389ad74f78bbbff",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001001073a.xml",
+      "sha256": "463d719746f4607c91eedab8bdf38d7c4b2f0ce0bd8185f68fad5ddcb061d02c",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001001073b.xml",
+      "sha256": "e3caeb394701fd25a578e8e05fe011130aa8b6ddc32934c0db92d60bc51c2714",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001001079a.xml",
+      "sha256": "5ce2fc5bb013169de43b4b9b589af98839db91d8d046c0b1001055fe615faae8",
+      "titleForList": "甲号 予定経費要求書"
+    },
+    {
+      "file": "202411001001085a.xml",
+      "sha256": "ab88f0f709e8ba0e97c43b7ca34a2c09f0f42abfdd5d3fec4cb99702dd9bc0e4",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001001091b.xml",
+      "sha256": "cc6dc8f8ccf609e1529c5e93a5feeeb9f7e2493e5ab6b54c138fbed1da6bfcb3",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001001093b.xml",
+      "sha256": "695b97d003a062615c0e6e9624cc85d4664cb9e6dae4132ea87fdbe2b6900775",
+      "titleForList": "科目別内訳"
+    },
+    {
+      "file": "202411001001096a.xml",
+      "sha256": "d99c7329b945d54dffed2f901ccd130cf02aeda52cba0174c4f5d2bfc7e82a2e",
+      "titleForList": "乙号 継続費要求書"
+    },
+    {
+      "file": "202411001001100a.xml",
+      "sha256": "00b497b45b8aebded05ec280716f7c0d3c454258634764ce970f898997911420",
+      "titleForList": "丙号 繰越明許費要求書"
+    },
+    {
+      "file": "202411001001105a.xml",
+      "sha256": "cd5f254fda7cb5d6bb749186e34b64831d2e6806785b39708a47ad3320a0f791",
+      "titleForList": "丁号 国庫債務負担行為要求書"
+    },
+    {
+      "file": "202411001001118a.xml",
+      "sha256": "aa49630a2b781aeefdfb8904fcfaf6e5285750adb5fed5b14b11d7732cc57449",
+      "titleForList": "政府職員 総表"
+    },
+    {
+      "file": "202411001001118b.xml",
+      "sha256": "bafc493e936e4a2923588f9fe29565d205c592c9983871cbf0719be22cf2ca32",
+      "titleForList": "組織別等内訳"
+    },
+    {
+      "file": "202411001001135a.xml",
+      "sha256": "c37b40650cdffb03b35431ef06271218ef9fa48f945a1590be77a14be0b1f481",
+      "titleForList": "コード番号について"
+    },
+    {
+      "file": "202411001110001a.xml",
+      "sha256": "2c2a6abb0478f321bfcec45eb8503b6d3010eb0606990bf6d90a6401a1403dc9",
+      "titleForList": "目録"
+    },
+    {
+      "file": "202411001120001a.xml",
+      "sha256": "01a9735a3b272a670bcacca444daa075871a7cd34e793be16edd5d4ff63eac04",
+      "titleForList": "目録"
+    },
+    {
+      "file": "202411001130001a.xml",
+      "sha256": "b020f218f74b65821243d80b608329fea9fc8990f99d00ffa161decf08eb0986",
+      "titleForList": "目録"
+    },
+    {
+      "file": "202411001910001a.xml",
+      "sha256": "cc42e4d4d3adbea28d55f4f70b5bfc6e0c5e7d09aec7661546c176c3ce8d9d31",
+      "titleForList": "表紙"
+    }
+  ]
+}

@@ -1,0 +1,1521 @@
+{
+  "schema": "mof-budget-xml-parser-v0-hand-checked-fixture/v0",
+  "note": "代表例の fixture。選択規則は事後に選べない deterministic 規則（下記 selectionRules）。rawClmFragments は raw XML の clm 要素の原文（改行・インデントのみ除去）。expected は reference projection と同じ値で、AI による原文との目視照合を経ている（independent human GT ではない）。",
+  "selectionRules": [
+    "gaiji 全件",
+    "qt 全件",
+    "structural fingerprint ごとに辞書順先頭ファイルの先頭行",
+    "頁境界で項が再掲されない行の先頭 3 件",
+    "2 つ目のファイルの先頭行",
+    "複数行の事項名の先頭 / 1 行の事項名の先頭",
+    "col10 が △ / 0 の先頭、col6 が 0 の先頭、col8 が 0 の先頭"
+  ],
+  "rowCount": 29,
+  "rows": [
+    {
+      "file": "202411001000265b.xml",
+      "row": "p265-4.1",
+      "reasons": [
+        "structural fingerprint 5e76da9b の先頭ファイル先頭行",
+        "1 行の事項名（先頭）",
+        "col10 が 0（先頭）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p265-4.1-1.1\"><p><l><![CDATA[皇室費]]></l></p></clm>",
+        "<clm id=\"p265-4.1-2.1\"><p><l><![CDATA[001]]></l></p></clm>",
+        "<clm id=\"p265-4.1-3.1\"><p><l><![CDATA[内廷費]]></l></p></clm>",
+        "<clm id=\"p265-4.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p265-4.1-5.1\"><p><l><![CDATA[内廷に必要な経費]]></l></p></clm>",
+        "<clm id=\"p265-4.1-6.1\"><p><l><![CDATA[324,000]]></l></p></clm>",
+        "<clm id=\"p265-4.1-8.1\"><p><l><![CDATA[324,000]]></l></p></clm>",
+        "<clm id=\"p265-4.1-10.1\"><p><l><![CDATA[0]]></l></p></clm>",
+        "<clm id=\"p265-4.1-11.1\"><p><l><![CDATA[｢日本国憲法｣及び｢皇室経済法｣に基づく内廷費]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000265b.xml",
+        "row": "p265-4.1",
+        "page": 265,
+        "rowNo": 4,
+        "organization": "皇室費",
+        "itemCode": "001",
+        "itemName": "内廷費",
+        "itemNameLines": [
+          "内廷費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "内廷に必要な経費",
+        "requestNameLines": [
+          "内廷に必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "324,000",
+          "col8": "324,000",
+          "col10": "0"
+        },
+        "amountsThousandYen": {
+          "col6": 324000,
+          "col8": 324000,
+          "col10": 0
+        }
+      }
+    },
+    {
+      "file": "202411001000265b.xml",
+      "row": "p265-5.1",
+      "reasons": [
+        "col10 が △（先頭）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p265-5.1-2.1\"><p><l><![CDATA[002]]></l></p></clm>",
+        "<clm id=\"p265-5.1-3.1\"><p><l><![CDATA[宮廷費]]></l></p></clm>",
+        "<clm id=\"p265-5.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p265-5.1-5.1\"><p><l><![CDATA[宮廷に必要な経費]]></l></p></clm>",
+        "<clm id=\"p265-5.1-6.1\"><p><l><![CDATA[5,847,144]]></l></p></clm>",
+        "<clm id=\"p265-5.1-8.1\"><p><l><![CDATA[5,854,454]]></l></p></clm>",
+        "<clm id=\"p265-5.1-10.1\"><p><l><![CDATA[△ 7,310]]></l></p></clm>",
+        "<clm id=\"p265-5.1-11.1\"><p><l><![CDATA[｢日本国憲法｣及び｢皇室経済法｣に基づく宮廷費]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000265b.xml",
+        "row": "p265-5.1",
+        "page": 265,
+        "rowNo": 5,
+        "organization": "皇室費",
+        "itemCode": "002",
+        "itemName": "宮廷費",
+        "itemNameLines": [
+          "宮廷費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "宮廷に必要な経費",
+        "requestNameLines": [
+          "宮廷に必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "5,847,144",
+          "col8": "5,854,454",
+          "col10": "△ 7,310"
+        },
+        "amountsThousandYen": {
+          "col6": 5847144,
+          "col8": 5854454,
+          "col10": -7310
+        }
+      }
+    },
+    {
+      "file": "202411001000265b.xml",
+      "row": "p265-6.1",
+      "reasons": [
+        "複数行の事項名（先頭）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p265-6.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p265-6.1-5.1\"><p><l><![CDATA[国際観光旅客税財]]></l><l><![CDATA[源宮廷に必要な経]]></l><l><![CDATA[費]]></l></p></clm>",
+        "<clm id=\"p265-6.1-6.1\"><p><l><![CDATA[3,706,667]]></l></p></clm>",
+        "<clm id=\"p265-6.1-8.1\"><p><l><![CDATA[269,409]]></l></p></clm>",
+        "<clm id=\"p265-6.1-10.1\"><p><l><![CDATA[3,437,258]]></l></p></clm>",
+        "<clm id=\"p265-6.1-11.1\"><p><l><![CDATA[｢外国人観光旅客の来訪の促進等による国際観光の振興に関]]></l><l><![CDATA[する法律｣に基づく本年度において見込まれる国際観光旅客]]></l><l><![CDATA[税収入を財源として施行する三の丸尚蔵館及び皇居東御苑大]]></l><l><![CDATA[手休憩所(仮称)の施設整備 ]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000265b.xml",
+        "row": "p265-6.1",
+        "page": 265,
+        "rowNo": 6,
+        "organization": "皇室費",
+        "itemCode": "002",
+        "itemName": "宮廷費",
+        "itemNameLines": [
+          "宮廷費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": false,
+        "requestName": "国際観光旅客税財源宮廷に必要な経費",
+        "requestNameLines": [
+          "国際観光旅客税財",
+          "源宮廷に必要な経",
+          "費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "3,706,667",
+          "col8": "269,409",
+          "col10": "3,437,258"
+        },
+        "amountsThousandYen": {
+          "col6": 3706667,
+          "col8": 269409,
+          "col10": 3437258
+        }
+      }
+    },
+    {
+      "file": "202411001000269b.xml",
+      "row": "p269-3.1",
+      "reasons": [
+        "structural fingerprint 8cbfafd7 の先頭ファイル先頭行",
+        "ファイル先頭行（currentItem の初期化）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p269-3.1-1.1\"><p><l><![CDATA[衆議院]]></l></p></clm>",
+        "<clm id=\"p269-3.1-2.1\"><p><l><![CDATA[001]]></l></p></clm>",
+        "<clm id=\"p269-3.1-3.1\"><p><l><![CDATA[衆議院]]></l></p></clm>",
+        "<clm id=\"p269-3.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p269-3.1-5.1\"><p><l><![CDATA[国会の権能行使に]]></l><l><![CDATA[必要な経費]]></l></p></clm>",
+        "<clm id=\"p269-3.1-6.1\"><p><l><![CDATA[44,506,498]]></l></p></clm>",
+        "<clm id=\"p269-3.1-8.1\"><p><l><![CDATA[43,946,940]]></l></p></clm>",
+        "<clm id=\"p269-3.1-10.1\"><p><l><![CDATA[559,558]]></l></p></clm>",
+        "<clm id=\"p269-3.1-11.1\"><p><l><![CDATA[｢日本国憲法｣、｢国会法｣等に基づく国会の権能行使]]></l></p><p><l><![CDATA[　　　　　　　　]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000269b.xml",
+        "row": "p269-3.1",
+        "page": 269,
+        "rowNo": 3,
+        "organization": "衆議院",
+        "itemCode": "001",
+        "itemName": "衆議院",
+        "itemNameLines": [
+          "衆議院"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "国会の権能行使に必要な経費",
+        "requestNameLines": [
+          "国会の権能行使に",
+          "必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "44,506,498",
+          "col8": "43,946,940",
+          "col10": "559,558"
+        },
+        "amountsThousandYen": {
+          "col6": 44506498,
+          "col8": 43946940,
+          "col10": 559558
+        }
+      }
+    },
+    {
+      "file": "202411001000272a.xml",
+      "row": "p272-3.1",
+      "reasons": [
+        "structural fingerprint 16006d26 の先頭ファイル先頭行"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p272-3.1-1.1\"><p><l><![CDATA[参議院]]></l></p></clm>",
+        "<clm id=\"p272-3.1-2.1\"><p><l><![CDATA[011]]></l></p></clm>",
+        "<clm id=\"p272-3.1-3.1\"><p><l><![CDATA[参議院]]></l></p></clm>",
+        "<clm id=\"p272-3.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p272-3.1-5.1\"><p><l><![CDATA[国会の権能行使に]]></l><l><![CDATA[必要な経費]]></l></p></clm>",
+        "<clm id=\"p272-3.1-6.1\"><p><l><![CDATA[24,686,919]]></l></p></clm>",
+        "<clm id=\"p272-3.1-8.1\"><p><l><![CDATA[24,275,527]]></l></p></clm>",
+        "<clm id=\"p272-3.1-10.1\"><p><l><![CDATA[411,392]]></l></p></clm>",
+        "<clm id=\"p272-3.1-11.1\"><p><l><![CDATA[｢日本国憲法｣、｢国会法｣等に基づく国会の権能行使]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000272a.xml",
+        "row": "p272-3.1",
+        "page": 272,
+        "rowNo": 3,
+        "organization": "参議院",
+        "itemCode": "011",
+        "itemName": "参議院",
+        "itemNameLines": [
+          "参議院"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "国会の権能行使に必要な経費",
+        "requestNameLines": [
+          "国会の権能行使に",
+          "必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "24,686,919",
+          "col8": "24,275,527",
+          "col10": "411,392"
+        },
+        "amountsThousandYen": {
+          "col6": 24686919,
+          "col8": 24275527,
+          "col10": 411392
+        }
+      }
+    },
+    {
+      "file": "202411001000276a.xml",
+      "row": "p276-3.1",
+      "reasons": [
+        "structural fingerprint ce226ea9 の先頭ファイル先頭行"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p276-3.1-1.1\"><p><l><![CDATA[裁判官訴追]]></l><l><![CDATA[委員会]]></l></p></clm>",
+        "<clm id=\"p276-3.1-2.1\"><p><l><![CDATA[031]]></l></p></clm>",
+        "<clm id=\"p276-3.1-3.1\"><p><l><![CDATA[裁判官訴追]]></l><l><![CDATA[委員会]]></l></p></clm>",
+        "<clm id=\"p276-3.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p276-3.1-5.1\"><p><l><![CDATA[裁判官訴追委員会]]></l><l><![CDATA[に必要な経費]]></l></p></clm>",
+        "<clm id=\"p276-3.1-6.1\"><p><l><![CDATA[137,352]]></l></p></clm>",
+        "<clm id=\"p276-3.1-8.1\"><p><l><![CDATA[125,947]]></l></p></clm>",
+        "<clm id=\"p276-3.1-10.1\"><p><l><![CDATA[11,405]]></l></p></clm>",
+        "<clm id=\"p276-3.1-11.1\"><p><l><![CDATA[｢日本国憲法｣、｢国会法｣及び｢裁判官弾劾法｣に基づく]]></l></p><p><l><qt></qt><![CDATA[1　]]><qt></qt><![CDATA[裁判官罷免の訴追]]></l></p><p><l><qt></qt><![CDATA[2　]]><qt></qt><![CDATA[裁判官訴追委員会事務局所掌の事務処理]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000276a.xml",
+        "row": "p276-3.1",
+        "page": 276,
+        "rowNo": 3,
+        "organization": "裁判官訴追委員会",
+        "itemCode": "031",
+        "itemName": "裁判官訴追委員会",
+        "itemNameLines": [
+          "裁判官訴追",
+          "委員会"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "裁判官訴追委員会に必要な経費",
+        "requestNameLines": [
+          "裁判官訴追委員会",
+          "に必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "137,352",
+          "col8": "125,947",
+          "col10": "11,405"
+        },
+        "amountsThousandYen": {
+          "col6": 137352,
+          "col8": 125947,
+          "col10": 11405
+        }
+      }
+    },
+    {
+      "file": "202411001000291b.xml",
+      "row": "p291-3.1",
+      "reasons": [
+        "structural fingerprint a6b0b6dc の先頭ファイル先頭行"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p291-3.1-1.1\"><p><l><![CDATA[裁判所]]></l></p></clm>",
+        "<clm id=\"p291-3.1-2.1\"><p><l><![CDATA[001]]></l></p></clm>",
+        "<clm id=\"p291-3.1-3.1\"><p><l><![CDATA[最高裁判所]]></l></p></clm>",
+        "<clm id=\"p291-3.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p291-3.1-5.1\"><p><l><![CDATA[最高裁判所の事務]]></l><l><![CDATA[処理に必要な経費]]></l></p></clm>",
+        "<clm id=\"p291-3.1-6.1\"><p><l><![CDATA[75,274,053]]></l></p></clm>",
+        "<clm id=\"p291-3.1-8.1\"><p><l><![CDATA[68,486,686]]></l></p></clm>",
+        "<clm id=\"p291-3.1-10.1\"><p><l><![CDATA[6,787,367]]></l></p></clm>",
+        "<clm id=\"p291-3.1-11.1\"><p><l><![CDATA[｢裁判所法｣に基づく最高裁判所の司法行政事務処理]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000291b.xml",
+        "row": "p291-3.1",
+        "page": 291,
+        "rowNo": 3,
+        "organization": "裁判所",
+        "itemCode": "001",
+        "itemName": "最高裁判所",
+        "itemNameLines": [
+          "最高裁判所"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "最高裁判所の事務処理に必要な経費",
+        "requestNameLines": [
+          "最高裁判所の事務",
+          "処理に必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "75,274,053",
+          "col8": "68,486,686",
+          "col10": "6,787,367"
+        },
+        "amountsThousandYen": {
+          "col6": 75274053,
+          "col8": 68486686,
+          "col10": 6787367
+        }
+      }
+    },
+    {
+      "file": "202411001000309b.xml",
+      "row": "p309-7.1",
+      "reasons": [
+        "col8 が 0（先頭）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p309-7.1-4.1\"><p><l><![CDATA[13]]></l></p></clm>",
+        "<clm id=\"p309-7.1-5.1\"><p><l><![CDATA[サイバーセキュリ]]></l><l><![CDATA[ティの研究開発に]]></l><l><![CDATA[必要な経費]]></l></p></clm>",
+        "<clm id=\"p309-7.1-6.1\"><p><l><![CDATA[1,000,000]]></l></p></clm>",
+        "<clm id=\"p309-7.1-8.1\"><p><l><![CDATA[0]]></l></p></clm>",
+        "<clm id=\"p309-7.1-10.1\"><p><l><![CDATA[1,000,000]]></l></p></clm>",
+        "<clm id=\"p309-7.1-11.1\"><p><l><![CDATA[サイバーセキュリティに関する研究開発の民間団体等への委]]></l><l><![CDATA[託]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000309b.xml",
+        "row": "p309-7.1",
+        "page": 309,
+        "rowNo": 7,
+        "organization": "内閣官房",
+        "itemCode": "001",
+        "itemName": "内閣官房共通費",
+        "itemNameLines": [
+          "内閣官房共",
+          "通費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": false,
+        "requestName": "サイバーセキュリティの研究開発に必要な経費",
+        "requestNameLines": [
+          "サイバーセキュリ",
+          "ティの研究開発に",
+          "必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "13",
+        "amountsRaw": {
+          "col6": "1,000,000",
+          "col8": "0",
+          "col10": "1,000,000"
+        },
+        "amountsThousandYen": {
+          "col6": 1000000,
+          "col8": 0,
+          "col10": 1000000
+        }
+      }
+    },
+    {
+      "file": "202411001000313a.xml",
+      "row": "p313-4.1",
+      "reasons": [
+        "structural fingerprint f04b97b3 の先頭ファイル先頭行"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p313-4.1-1.1\"><p><l><![CDATA[内閣法制局]]></l></p></clm>",
+        "<clm id=\"p313-4.1-2.1\"><p><l><![CDATA[011]]></l></p></clm>",
+        "<clm id=\"p313-4.1-3.1\"><p><l><![CDATA[内閣法制局]]></l></p></clm>",
+        "<clm id=\"p313-4.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p313-4.1-5.1\"><p><l><![CDATA[内閣法制局一般行]]></l><l><![CDATA[政に必要な経費]]></l></p></clm>",
+        "<clm id=\"p313-4.1-6.1\"><p><l><![CDATA[1,041,551]]></l></p></clm>",
+        "<clm id=\"p313-4.1-8.1\"><p><l><![CDATA[995,781]]></l></p></clm>",
+        "<clm id=\"p313-4.1-10.1\"><p><l><![CDATA[45,770]]></l></p></clm>",
+        "<clm id=\"p313-4.1-11.1\"><p><l><![CDATA[｢内閣法制局設置法｣に基づく内閣法制局所掌の一般事務処理]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000313a.xml",
+        "row": "p313-4.1",
+        "page": 313,
+        "rowNo": 4,
+        "organization": "内閣法制局",
+        "itemCode": "011",
+        "itemName": "内閣法制局",
+        "itemNameLines": [
+          "内閣法制局"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "内閣法制局一般行政に必要な経費",
+        "requestNameLines": [
+          "内閣法制局一般行",
+          "政に必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "1,041,551",
+          "col8": "995,781",
+          "col10": "45,770"
+        },
+        "amountsThousandYen": {
+          "col6": 1041551,
+          "col8": 995781,
+          "col10": 45770
+        }
+      }
+    },
+    {
+      "file": "202411001000314a.xml",
+      "row": "p314-4.1",
+      "reasons": [
+        "structural fingerprint 38d58a65 の先頭ファイル先頭行"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p314-4.1-1.1\"><p><l><![CDATA[人事院]]></l></p></clm>",
+        "<clm id=\"p314-4.1-2.1\"><p><l><![CDATA[021]]></l></p></clm>",
+        "<clm id=\"p314-4.1-3.1\"><p><l><![CDATA[人事院]]></l></p></clm>",
+        "<clm id=\"p314-4.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p314-4.1-5.1\"><p><l><![CDATA[人事院一般行政に]]></l><l><![CDATA[必要な経費]]></l></p></clm>",
+        "<clm id=\"p314-4.1-6.1\"><p><l><![CDATA[7,763,430]]></l></p></clm>",
+        "<clm id=\"p314-4.1-8.1\"><p><l><![CDATA[7,564,766]]></l></p></clm>",
+        "<clm id=\"p314-4.1-10.1\"><p><l><![CDATA[198,664]]></l></p></clm>",
+        "<clm id=\"p314-4.1-11.1\"><p><l><![CDATA[｢国家公務員法｣に基づく所掌事務のうち、人事院所掌の一般]]></l><l><![CDATA[事務処理]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000314a.xml",
+        "row": "p314-4.1",
+        "page": 314,
+        "rowNo": 4,
+        "organization": "人事院",
+        "itemCode": "021",
+        "itemName": "人事院",
+        "itemNameLines": [
+          "人事院"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "人事院一般行政に必要な経費",
+        "requestNameLines": [
+          "人事院一般行政に",
+          "必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "7,763,430",
+          "col8": "7,564,766",
+          "col10": "198,664"
+        },
+        "amountsThousandYen": {
+          "col6": 7763430,
+          "col8": 7564766,
+          "col10": 198664
+        }
+      }
+    },
+    {
+      "file": "202411001000328a.xml",
+      "row": "p328-4.1",
+      "reasons": [
+        "structural fingerprint 8e83a7bf の先頭ファイル先頭行"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p328-4.1-1.1\"><p><l><![CDATA[内閣本府]]></l></p></clm>",
+        "<clm id=\"p328-4.1-2.1\"><p><l><![CDATA[001]]></l></p></clm>",
+        "<clm id=\"p328-4.1-3.1\"><p><l><![CDATA[内閣本府共]]></l><l><![CDATA[通費]]></l></p></clm>",
+        "<clm id=\"p328-4.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p328-4.1-5.1\"><p><l><![CDATA[内閣本府一般行政]]></l><l><![CDATA[に必要な経費]]></l></p></clm>",
+        "<clm id=\"p328-4.1-6.1\"><p><l><![CDATA[25,385,791]]></l></p></clm>",
+        "<clm id=\"p328-4.1-8.1\"><p><l><![CDATA[24,026,698]]></l></p></clm>",
+        "<clm id=\"p328-4.1-10.1\"><p><l><![CDATA[1,359,093]]></l></p></clm>",
+        "<clm id=\"p328-4.1-11.1\"><p><l><![CDATA[｢内閣府設置法｣に基づく所掌事務のうち、本府内部部局等所]]></l><l><![CDATA[掌の一般事務処理]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000328a.xml",
+        "row": "p328-4.1",
+        "page": 328,
+        "rowNo": 4,
+        "organization": "内閣本府",
+        "itemCode": "001",
+        "itemName": "内閣本府共通費",
+        "itemNameLines": [
+          "内閣本府共",
+          "通費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "内閣本府一般行政に必要な経費",
+        "requestNameLines": [
+          "内閣本府一般行政",
+          "に必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "25,385,791",
+          "col8": "24,026,698",
+          "col10": "1,359,093"
+        },
+        "amountsThousandYen": {
+          "col6": 25385791,
+          "col8": 24026698,
+          "col10": 1359093
+        }
+      }
+    },
+    {
+      "file": "202411001000328a.xml",
+      "row": "p329-8.1",
+      "reasons": [
+        "頁境界で項が再掲されない行（出現順 1）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p329-8.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p329-8.1-5.1\"><p><l><![CDATA[重要政策に関する]]></l><l><![CDATA[会議等に必要な経]]></l><l><![CDATA[費]]></l></p></clm>",
+        "<clm id=\"p329-8.1-6.1\"><p><l><![CDATA[1,695,955]]></l></p></clm>",
+        "<clm id=\"p329-8.1-8.1\"><p><l><![CDATA[1,644,456]]></l></p></clm>",
+        "<clm id=\"p329-8.1-10.1\"><p><l><![CDATA[51,499]]></l></p></clm>",
+        "<clm id=\"p329-8.1-11.1\"><p><l><![CDATA[｢内閣府設置法｣に基づく]]></l></p><p><l><qt></qt><![CDATA[1　]]><qt></qt><![CDATA[重要政策に関する会議所掌の事務処理]]></l></p><p><l><qt></qt><![CDATA[2　]]><qt></qt><![CDATA[民間資金等活用事業推進委員会等の運営]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000328a.xml",
+        "row": "p329-8.1",
+        "page": 329,
+        "rowNo": 8,
+        "organization": "内閣本府",
+        "itemCode": "001",
+        "itemName": "内閣本府共通費",
+        "itemNameLines": [
+          "内閣本府共",
+          "通費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": false,
+        "requestName": "重要政策に関する会議等に必要な経費",
+        "requestNameLines": [
+          "重要政策に関する",
+          "会議等に必要な経",
+          "費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "1,695,955",
+          "col8": "1,644,456",
+          "col10": "51,499"
+        },
+        "amountsThousandYen": {
+          "col6": 1695955,
+          "col8": 1644456,
+          "col10": 51499
+        }
+      }
+    },
+    {
+      "file": "202411001000328a.xml",
+      "row": "p331-23.1",
+      "reasons": [
+        "頁境界で項が再掲されない行（出現順 2）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p331-23.1-4.1\"><p><l><![CDATA[13]]></l></p></clm>",
+        "<clm id=\"p331-23.1-5.1\"><p><l><![CDATA[沖縄産業技術開発]]></l><l><![CDATA[の推進に必要な経]]></l><l><![CDATA[費]]></l></p></clm>",
+        "<clm id=\"p331-23.1-6.1\"><p><l><![CDATA[167,000]]></l></p></clm>",
+        "<clm id=\"p331-23.1-8.1\"><p><l><![CDATA[108,779]]></l></p></clm>",
+        "<clm id=\"p331-23.1-10.1\"><p><l><![CDATA[58,221]]></l></p></clm>",
+        "<clm id=\"p331-23.1-11.1\"><p><l><![CDATA[民間団体等が行う沖縄型スタートアップ拠点化推進事業に要]]></l><l><![CDATA[する費用の補助等]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000328a.xml",
+        "row": "p331-23.1",
+        "page": 331,
+        "rowNo": 23,
+        "organization": "内閣本府",
+        "itemCode": "015",
+        "itemName": "沖縄政策費",
+        "itemNameLines": [
+          "沖縄政策費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": false,
+        "requestName": "沖縄産業技術開発の推進に必要な経費",
+        "requestNameLines": [
+          "沖縄産業技術開発",
+          "の推進に必要な経",
+          "費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "13",
+        "amountsRaw": {
+          "col6": "167,000",
+          "col8": "108,779",
+          "col10": "58,221"
+        },
+        "amountsThousandYen": {
+          "col6": 167000,
+          "col8": 108779,
+          "col10": 58221
+        }
+      }
+    },
+    {
+      "file": "202411001000328a.xml",
+      "row": "p332-34.1",
+      "reasons": [
+        "頁境界で項が再掲されない行（出現順 3）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p332-34.1-4.1\"><p><l><![CDATA[41]]></l></p></clm>",
+        "<clm id=\"p332-34.1-5.1\"><p><l><![CDATA[治山事業に必要な]]></l><l><![CDATA[経費]]></l></p></clm>",
+        "<clm id=\"p332-34.1-6.1\"><p><l><![CDATA[356,000]]></l></p></clm>",
+        "<clm id=\"p332-34.1-8.1\"><p><l><![CDATA[410,000]]></l></p></clm>",
+        "<clm id=\"p332-34.1-10.1\"><p><l><![CDATA[△ 54,000]]></l></p></clm>",
+        "<clm id=\"p332-34.1-11.1\"><p><l><qt></qt><![CDATA[1　]]><qt></qt><![CDATA[国有林野内治山事業の施行]]></l></p><p><l><qt></qt><![CDATA[2　]]><qt></qt><![CDATA[沖縄県が施行する治山事業に要する事業費の補助]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000328a.xml",
+        "row": "p332-34.1",
+        "page": 332,
+        "rowNo": 34,
+        "organization": "内閣本府",
+        "itemCode": "028",
+        "itemName": "沖縄開発事業費",
+        "itemNameLines": [
+          "沖縄開発事",
+          "業費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": false,
+        "requestName": "治山事業に必要な経費",
+        "requestNameLines": [
+          "治山事業に必要な",
+          "経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "41",
+        "amountsRaw": {
+          "col6": "356,000",
+          "col8": "410,000",
+          "col10": "△ 54,000"
+        },
+        "amountsThousandYen": {
+          "col6": 356000,
+          "col8": 410000,
+          "col10": -54000
+        }
+      }
+    },
+    {
+      "file": "202411001000328a.xml",
+      "row": "p335-70.1",
+      "reasons": [
+        "col6 が 0（先頭）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p335-70.1-2.1\"><p><l><![CDATA[287]]></l></p></clm>",
+        "<clm id=\"p335-70.1-3.1\"><p><l><![CDATA[物価高騰対]]></l><l><![CDATA[応地方創生]]></l><l><![CDATA[推進費]]></l></p></clm>",
+        "<clm id=\"p335-70.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p335-70.1-5.1\"><p><l><![CDATA[物価高騰対応重点]]></l><l><![CDATA[支援地方創生臨時]]></l><l><![CDATA[交付金に必要な経]]></l><l><![CDATA[費]]></l></p></clm>",
+        "<clm id=\"p335-70.1-6.1\"><p><l><![CDATA[0]]></l></p></clm>",
+        "<clm id=\"p335-70.1-8.1\"><p><l><![CDATA[1,559,225,000]]></l></p></clm>",
+        "<clm id=\"p335-70.1-10.1\"><p><l><![CDATA[△ 1,559,225,000]]></l></p></clm>",
+        "<clm id=\"p335-70.1-11.1\"><p><l><![CDATA[前年度限りの経費]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000328a.xml",
+        "row": "p335-70.1",
+        "page": 335,
+        "rowNo": 70,
+        "organization": "内閣本府",
+        "itemCode": "287",
+        "itemName": "物価高騰対応地方創生推進費",
+        "itemNameLines": [
+          "物価高騰対",
+          "応地方創生",
+          "推進費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "物価高騰対応重点支援地方創生臨時交付金に必要な経費",
+        "requestNameLines": [
+          "物価高騰対応重点",
+          "支援地方創生臨時",
+          "交付金に必要な経",
+          "費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "0",
+          "col8": "1,559,225,000",
+          "col10": "△ 1,559,225,000"
+        },
+        "amountsThousandYen": {
+          "col6": 0,
+          "col8": 1559225000,
+          "col10": -1559225000
+        }
+      }
+    },
+    {
+      "file": "202411001000453b.xml",
+      "row": "p453-3.1",
+      "reasons": [
+        "structural fingerprint dc8a81c0 の先頭ファイル先頭行"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p453-3.1-1.1\"><p><l><![CDATA[総務本省]]></l></p></clm>",
+        "<clm id=\"p453-3.1-2.1\"><p><l><![CDATA[001]]></l></p></clm>",
+        "<clm id=\"p453-3.1-3.1\"><p><l><![CDATA[総務本省共]]></l><l><![CDATA[通費]]></l></p></clm>",
+        "<clm id=\"p453-3.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p453-3.1-5.1\"><p><l><![CDATA[総務本省一般行政]]></l><l><![CDATA[に必要な経費]]></l></p></clm>",
+        "<clm id=\"p453-3.1-6.1\"><p><l><![CDATA[40,599,601]]></l></p></clm>",
+        "<clm id=\"p453-3.1-8.1\"><p><l><![CDATA[38,367,970]]></l></p></clm>",
+        "<clm id=\"p453-3.1-10.1\"><p><l><![CDATA[2,231,631]]></l></p></clm>",
+        "<clm id=\"p453-3.1-11.1\"><p><l><![CDATA[｢総務省設置法｣に基づく所掌事務のうち、本省内部部局等所]]></l><l><![CDATA[掌の一般事務処理]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000453b.xml",
+        "row": "p453-3.1",
+        "page": 453,
+        "rowNo": 3,
+        "organization": "総務本省",
+        "itemCode": "001",
+        "itemName": "総務本省共通費",
+        "itemNameLines": [
+          "総務本省共",
+          "通費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "総務本省一般行政に必要な経費",
+        "requestNameLines": [
+          "総務本省一般行政",
+          "に必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "40,599,601",
+          "col8": "38,367,970",
+          "col10": "2,231,631"
+        },
+        "amountsThousandYen": {
+          "col6": 40599601,
+          "col8": 38367970,
+          "col10": 2231631
+        }
+      }
+    },
+    {
+      "file": "202411001000453b.xml",
+      "row": "p455-18.1",
+      "reasons": [
+        "gaiji（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p455-18.1-4.1\"><p><l><![CDATA[32]]></l></p></clm>",
+        "<clm id=\"p455-18.1-5.1\"><p><l><![CDATA[新型コロナウイル]]></l><l><![CDATA[ス感染症対策地方]]></l><l><![CDATA[税減収補]]><gaiji code=\"1508\"><![CDATA[填]]></gaiji><![CDATA[特別交]]></l><l><![CDATA[付金財源の交付税]]></l><l><![CDATA[及び譲与税配付金]]></l><l><![CDATA[特別会計へ繰入れ]]></l><l><![CDATA[に必要な経費]]></l></p></clm>",
+        "<clm id=\"p455-18.1-6.1\"><p><l><![CDATA[11,200,000]]></l></p></clm>",
+        "<clm id=\"p455-18.1-8.1\"><p><l><![CDATA[12,400,000]]></l></p></clm>",
+        "<clm id=\"p455-18.1-10.1\"><p><l><![CDATA[△ 1,200,000]]></l></p></clm>",
+        "<clm id=\"p455-18.1-11.1\"><p><l><![CDATA[｢地方税法｣に基づく新型コロナウイルス感染症対策地方税減]]></l><l><![CDATA[収補]]><gaiji code=\"1508\"><![CDATA[填]]></gaiji><![CDATA[特別交付金の財源に充てるための交付税及び譲与税配]]></l><l><![CDATA[付金特別会計への繰入れ]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000453b.xml",
+        "row": "p455-18.1",
+        "page": 455,
+        "rowNo": 18,
+        "organization": "総務本省",
+        "itemCode": "010",
+        "itemName": "地方特例交付金",
+        "itemNameLines": [
+          "地方特例交",
+          "付金"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": false,
+        "requestName": "新型コロナウイルス感染症対策地方税減収補填特別交付金財源の交付税及び譲与税配付金特別会計へ繰入れに必要な経費",
+        "requestNameLines": [
+          "新型コロナウイル",
+          "ス感染症対策地方",
+          "税減収補填特別交",
+          "付金財源の交付税",
+          "及び譲与税配付金",
+          "特別会計へ繰入れ",
+          "に必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [
+          {
+            "code": "1508",
+            "text": "填"
+          }
+        ],
+        "col4Raw": "32",
+        "amountsRaw": {
+          "col6": "11,200,000",
+          "col8": "12,400,000",
+          "col10": "△ 1,200,000"
+        },
+        "amountsThousandYen": {
+          "col6": 11200000,
+          "col8": 12400000,
+          "col10": -1200000
+        }
+      }
+    },
+    {
+      "file": "202411001000576a.xml",
+      "row": "p576-5.1",
+      "reasons": [
+        "gaiji（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p576-5.1-4.1\"><p><l><![CDATA[95]]></l></p></clm>",
+        "<clm id=\"p576-5.1-5.1\"><p><l><![CDATA[貨幣交換差減補]]><gaiji code=\"1508\"><![CDATA[填]]></gaiji></l><l><![CDATA[金に必要な経費]]></l></p></clm>",
+        "<clm id=\"p576-5.1-6.1\"><p><l><![CDATA[166,262,782]]></l></p></clm>",
+        "<clm id=\"p576-5.1-8.1\"><p><l><![CDATA[197,613,193]]></l></p></clm>",
+        "<clm id=\"p576-5.1-10.1\"><p><l><![CDATA[△ 31,350,411]]></l></p></clm>",
+        "<clm id=\"p576-5.1-11.1\"><p><l><![CDATA[外国送金取組等差減額の補]]><gaiji code=\"1508\"><![CDATA[填]]></gaiji></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001000576a.xml",
+        "row": "p576-5.1",
+        "page": 576,
+        "rowNo": 5,
+        "organization": "財務本省",
+        "itemCode": "001",
+        "itemName": "財務本省共通費",
+        "itemNameLines": [
+          "財務本省共",
+          "通費"
+        ],
+        "itemQtCount": 0,
+        "itemGaiji": [],
+        "itemStartsInThisRow": false,
+        "requestName": "貨幣交換差減補填金に必要な経費",
+        "requestNameLines": [
+          "貨幣交換差減補填",
+          "金に必要な経費"
+        ],
+        "requestQtCount": 0,
+        "requestGaiji": [
+          {
+            "code": "1508",
+            "text": "填"
+          }
+        ],
+        "col4Raw": "95",
+        "amountsRaw": {
+          "col6": "166,262,782",
+          "col8": "197,613,193",
+          "col10": "△ 31,350,411"
+        },
+        "amountsThousandYen": {
+          "col6": 166262782,
+          "col8": 197613193,
+          "col10": -31350411
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-41.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-41.1-2.1\"><p><l><![CDATA[013]]></l></p></clm>",
+        "<clm id=\"p1083-41.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[2]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[潜水艦建造]]></l><l><![CDATA[費]]></l></p></clm>",
+        "<clm id=\"p1083-41.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-41.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[2]]><qt></qt><![CDATA[年度潜水艦]]></l><l><![CDATA[建造に必要な経費]]></l></p></clm>",
+        "<clm id=\"p1083-41.1-6.1\"><p><l><![CDATA[16,372,472]]></l></p></clm>",
+        "<clm id=\"p1083-41.1-8.1\"><p><l><![CDATA[29,252,087]]></l></p></clm>",
+        "<clm id=\"p1083-41.1-10.1\"><p><l><![CDATA[△ 12,879,615]]></l></p></clm>",
+        "<clm id=\"p1083-41.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[2]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[2]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度にわた]]></l><l><![CDATA[り継続費で建造している潜水艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-41.1",
+        "page": 1083,
+        "rowNo": 41,
+        "organization": "防衛本省",
+        "itemCode": "013",
+        "itemName": "令和2年度潜水艦建造費",
+        "itemNameLines": [
+          "令和2年度",
+          "潜水艦建造",
+          "費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和2年度潜水艦建造に必要な経費",
+        "requestNameLines": [
+          "令和2年度潜水艦",
+          "建造に必要な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "16,372,472",
+          "col8": "29,252,087",
+          "col10": "△ 12,879,615"
+        },
+        "amountsThousandYen": {
+          "col6": 16372472,
+          "col8": 29252087,
+          "col10": -12879615
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-42.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-42.1-2.1\"><p><l><![CDATA[014]]></l></p></clm>",
+        "<clm id=\"p1083-42.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[3]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[甲Ⅴ型警備]]></l><l><![CDATA[艦建造費]]></l></p></clm>",
+        "<clm id=\"p1083-42.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-42.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[3]]><qt></qt><![CDATA[年度甲Ⅴ型]]></l><l><![CDATA[警備艦建造に必要]]></l><l><![CDATA[な経費]]></l></p></clm>",
+        "<clm id=\"p1083-42.1-6.1\"><p><l><![CDATA[21,126,166]]></l></p></clm>",
+        "<clm id=\"p1083-42.1-8.1\"><p><l><![CDATA[66,978,957]]></l></p></clm>",
+        "<clm id=\"p1083-42.1-10.1\"><p><l><![CDATA[△ 45,852,791]]></l></p></clm>",
+        "<clm id=\"p1083-42.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[3]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[3]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度にわた]]></l><l><![CDATA[り継続費で建造している甲Ⅴ型警備艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-42.1",
+        "page": 1083,
+        "rowNo": 42,
+        "organization": "防衛本省",
+        "itemCode": "014",
+        "itemName": "令和3年度甲Ⅴ型警備艦建造費",
+        "itemNameLines": [
+          "令和3年度",
+          "甲Ⅴ型警備",
+          "艦建造費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和3年度甲Ⅴ型警備艦建造に必要な経費",
+        "requestNameLines": [
+          "令和3年度甲Ⅴ型",
+          "警備艦建造に必要",
+          "な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "21,126,166",
+          "col8": "66,978,957",
+          "col10": "△ 45,852,791"
+        },
+        "amountsThousandYen": {
+          "col6": 21126166,
+          "col8": 66978957,
+          "col10": -45852791
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-43.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-43.1-2.1\"><p><l><![CDATA[015]]></l></p></clm>",
+        "<clm id=\"p1083-43.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[3]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[潜水艦建造]]></l><l><![CDATA[費]]></l></p></clm>",
+        "<clm id=\"p1083-43.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-43.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[3]]><qt></qt><![CDATA[年度潜水艦]]></l><l><![CDATA[建造に必要な経費]]></l></p></clm>",
+        "<clm id=\"p1083-43.1-6.1\"><p><l><![CDATA[13,833,372]]></l></p></clm>",
+        "<clm id=\"p1083-43.1-8.1\"><p><l><![CDATA[33,118,606]]></l></p></clm>",
+        "<clm id=\"p1083-43.1-10.1\"><p><l><![CDATA[△ 19,285,234]]></l></p></clm>",
+        "<clm id=\"p1083-43.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[3]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[3]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[7]]><qt></qt><![CDATA[年度にわた]]></l><l><![CDATA[り継続費で建造している潜水艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-43.1",
+        "page": 1083,
+        "rowNo": 43,
+        "organization": "防衛本省",
+        "itemCode": "015",
+        "itemName": "令和3年度潜水艦建造費",
+        "itemNameLines": [
+          "令和3年度",
+          "潜水艦建造",
+          "費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和3年度潜水艦建造に必要な経費",
+        "requestNameLines": [
+          "令和3年度潜水艦",
+          "建造に必要な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "13,833,372",
+          "col8": "33,118,606",
+          "col10": "△ 19,285,234"
+        },
+        "amountsThousandYen": {
+          "col6": 13833372,
+          "col8": 33118606,
+          "col10": -19285234
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-44.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-44.1-2.1\"><p><l><![CDATA[016]]></l></p></clm>",
+        "<clm id=\"p1083-44.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[4]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[甲Ⅴ型警備]]></l><l><![CDATA[艦建造費]]></l></p></clm>",
+        "<clm id=\"p1083-44.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-44.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[4]]><qt></qt><![CDATA[年度甲Ⅴ型]]></l><l><![CDATA[警備艦建造に必要]]></l><l><![CDATA[な経費]]></l></p></clm>",
+        "<clm id=\"p1083-44.1-6.1\"><p><l><![CDATA[43,548,489]]></l></p></clm>",
+        "<clm id=\"p1083-44.1-8.1\"><p><l><![CDATA[16,550,869]]></l></p></clm>",
+        "<clm id=\"p1083-44.1-10.1\"><p><l><![CDATA[26,997,620]]></l></p></clm>",
+        "<clm id=\"p1083-44.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[4]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[4]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[7]]><qt></qt><![CDATA[年度にわた]]></l><l><![CDATA[り継続費で建造している甲Ⅴ型警備艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-44.1",
+        "page": 1083,
+        "rowNo": 44,
+        "organization": "防衛本省",
+        "itemCode": "016",
+        "itemName": "令和4年度甲Ⅴ型警備艦建造費",
+        "itemNameLines": [
+          "令和4年度",
+          "甲Ⅴ型警備",
+          "艦建造費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和4年度甲Ⅴ型警備艦建造に必要な経費",
+        "requestNameLines": [
+          "令和4年度甲Ⅴ型",
+          "警備艦建造に必要",
+          "な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "43,548,489",
+          "col8": "16,550,869",
+          "col10": "26,997,620"
+        },
+        "amountsThousandYen": {
+          "col6": 43548489,
+          "col8": 16550869,
+          "col10": 26997620
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-45.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-45.1-2.1\"><p><l><![CDATA[017]]></l></p></clm>",
+        "<clm id=\"p1083-45.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[4]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[潜水艦建造]]></l><l><![CDATA[費]]></l></p></clm>",
+        "<clm id=\"p1083-45.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-45.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[4]]><qt></qt><![CDATA[年度潜水艦]]></l><l><![CDATA[建造に必要な経費]]></l></p></clm>",
+        "<clm id=\"p1083-45.1-6.1\"><p><l><![CDATA[16,765,318]]></l></p></clm>",
+        "<clm id=\"p1083-45.1-8.1\"><p><l><![CDATA[10,425,758]]></l></p></clm>",
+        "<clm id=\"p1083-45.1-10.1\"><p><l><![CDATA[6,339,560]]></l></p></clm>",
+        "<clm id=\"p1083-45.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[4]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[4]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[8]]><qt></qt><![CDATA[年度にわた]]></l><l><![CDATA[り継続費で建造している潜水艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-45.1",
+        "page": 1083,
+        "rowNo": 45,
+        "organization": "防衛本省",
+        "itemCode": "017",
+        "itemName": "令和4年度潜水艦建造費",
+        "itemNameLines": [
+          "令和4年度",
+          "潜水艦建造",
+          "費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和4年度潜水艦建造に必要な経費",
+        "requestNameLines": [
+          "令和4年度潜水艦",
+          "建造に必要な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "16,765,318",
+          "col8": "10,425,758",
+          "col10": "6,339,560"
+        },
+        "amountsThousandYen": {
+          "col6": 16765318,
+          "col8": 10425758,
+          "col10": 6339560
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-46.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-46.1-2.1\"><p><l><![CDATA[007]]></l></p></clm>",
+        "<clm id=\"p1083-46.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[5]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[甲Ⅴ型警備]]></l><l><![CDATA[艦建造費]]></l></p></clm>",
+        "<clm id=\"p1083-46.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-46.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[5]]><qt></qt><![CDATA[年度甲Ⅴ型]]></l><l><![CDATA[警備艦建造に必要]]></l><l><![CDATA[な経費]]></l></p></clm>",
+        "<clm id=\"p1083-46.1-6.1\"><p><l><![CDATA[17,027,835]]></l></p></clm>",
+        "<clm id=\"p1083-46.1-8.1\"><p><l><![CDATA[3,021,908]]></l></p></clm>",
+        "<clm id=\"p1083-46.1-10.1\"><p><l><![CDATA[14,005,927]]></l></p></clm>",
+        "<clm id=\"p1083-46.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[5]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[5]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[8]]><qt></qt><![CDATA[年度にわた]]></l><l><![CDATA[り継続費で建造している甲Ⅴ型警備艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-46.1",
+        "page": 1083,
+        "rowNo": 46,
+        "organization": "防衛本省",
+        "itemCode": "007",
+        "itemName": "令和5年度甲Ⅴ型警備艦建造費",
+        "itemNameLines": [
+          "令和5年度",
+          "甲Ⅴ型警備",
+          "艦建造費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和5年度甲Ⅴ型警備艦建造に必要な経費",
+        "requestNameLines": [
+          "令和5年度甲Ⅴ型",
+          "警備艦建造に必要",
+          "な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "17,027,835",
+          "col8": "3,021,908",
+          "col10": "14,005,927"
+        },
+        "amountsThousandYen": {
+          "col6": 17027835,
+          "col8": 3021908,
+          "col10": 14005927
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-47.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-47.1-2.1\"><p><l><![CDATA[024]]></l></p></clm>",
+        "<clm id=\"p1083-47.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[5]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[潜水艦建造]]></l><l><![CDATA[費]]></l></p></clm>",
+        "<clm id=\"p1083-47.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-47.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[5]]><qt></qt><![CDATA[年度潜水艦]]></l><l><![CDATA[建造に必要な経費]]></l></p></clm>",
+        "<clm id=\"p1083-47.1-6.1\"><p><l><![CDATA[6,593,130]]></l></p></clm>",
+        "<clm id=\"p1083-47.1-8.1\"><p><l><![CDATA[5,267,356]]></l></p></clm>",
+        "<clm id=\"p1083-47.1-10.1\"><p><l><![CDATA[1,325,774]]></l></p></clm>",
+        "<clm id=\"p1083-47.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[5]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[5]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[9]]><qt></qt><![CDATA[年度にわた]]></l><l><![CDATA[り継続費で建造している潜水艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-47.1",
+        "page": 1083,
+        "rowNo": 47,
+        "organization": "防衛本省",
+        "itemCode": "024",
+        "itemName": "令和5年度潜水艦建造費",
+        "itemNameLines": [
+          "令和5年度",
+          "潜水艦建造",
+          "費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和5年度潜水艦建造に必要な経費",
+        "requestNameLines": [
+          "令和5年度潜水艦",
+          "建造に必要な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "6,593,130",
+          "col8": "5,267,356",
+          "col10": "1,325,774"
+        },
+        "amountsThousandYen": {
+          "col6": 6593130,
+          "col8": 5267356,
+          "col10": 1325774
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-48.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-48.1-2.1\"><p><l><![CDATA[008]]></l></p></clm>",
+        "<clm id=\"p1083-48.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[甲Ⅴ型警備]]></l><l><![CDATA[艦建造費]]></l></p></clm>",
+        "<clm id=\"p1083-48.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-48.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度甲Ⅴ型]]></l><l><![CDATA[警備艦建造に必要]]></l><l><![CDATA[な経費]]></l></p></clm>",
+        "<clm id=\"p1083-48.1-6.1\"><p><l><![CDATA[1,697,088]]></l></p></clm>",
+        "<clm id=\"p1083-48.1-8.1\"><p><l><![CDATA[0]]></l></p></clm>",
+        "<clm id=\"p1083-48.1-10.1\"><p><l><![CDATA[1,697,088]]></l></p></clm>",
+        "<clm id=\"p1083-48.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[10]]><qt></qt><![CDATA[年度にわ]]></l><l><![CDATA[たり継続費で建造を予定する甲Ⅴ型警備艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割]]></l><l><![CDATA[額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-48.1",
+        "page": 1083,
+        "rowNo": 48,
+        "organization": "防衛本省",
+        "itemCode": "008",
+        "itemName": "令和6年度甲Ⅴ型警備艦建造費",
+        "itemNameLines": [
+          "令和6年度",
+          "甲Ⅴ型警備",
+          "艦建造費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和6年度甲Ⅴ型警備艦建造に必要な経費",
+        "requestNameLines": [
+          "令和6年度甲Ⅴ型",
+          "警備艦建造に必要",
+          "な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "1,697,088",
+          "col8": "0",
+          "col10": "1,697,088"
+        },
+        "amountsThousandYen": {
+          "col6": 1697088,
+          "col8": 0,
+          "col10": 1697088
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-49.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-49.1-2.1\"><p><l><![CDATA[009]]></l></p></clm>",
+        "<clm id=\"p1083-49.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[甲Ⅵ型警備]]></l><l><![CDATA[艦建造費]]></l></p></clm>",
+        "<clm id=\"p1083-49.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-49.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度甲Ⅵ型]]></l><l><![CDATA[警備艦建造に必要]]></l><l><![CDATA[な経費]]></l></p></clm>",
+        "<clm id=\"p1083-49.1-6.1\"><p><l><![CDATA[584,724]]></l></p></clm>",
+        "<clm id=\"p1083-49.1-8.1\"><p><l><![CDATA[0]]></l></p></clm>",
+        "<clm id=\"p1083-49.1-10.1\"><p><l><![CDATA[584,724]]></l></p></clm>",
+        "<clm id=\"p1083-49.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[10]]><qt></qt><![CDATA[年度にわ]]></l><l><![CDATA[たり継続費で建造を予定する甲Ⅵ型警備艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割]]></l><l><![CDATA[額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-49.1",
+        "page": 1083,
+        "rowNo": 49,
+        "organization": "防衛本省",
+        "itemCode": "009",
+        "itemName": "令和6年度甲Ⅵ型警備艦建造費",
+        "itemNameLines": [
+          "令和6年度",
+          "甲Ⅵ型警備",
+          "艦建造費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和6年度甲Ⅵ型警備艦建造に必要な経費",
+        "requestNameLines": [
+          "令和6年度甲Ⅵ型",
+          "警備艦建造に必要",
+          "な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "584,724",
+          "col8": "0",
+          "col10": "584,724"
+        },
+        "amountsThousandYen": {
+          "col6": 584724,
+          "col8": 0,
+          "col10": 584724
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1083-50.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1083-50.1-2.1\"><p><l><![CDATA[010]]></l></p></clm>",
+        "<clm id=\"p1083-50.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[潜水艦建造]]></l><l><![CDATA[費]]></l></p></clm>",
+        "<clm id=\"p1083-50.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1083-50.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度潜水艦]]></l><l><![CDATA[建造に必要な経費]]></l></p></clm>",
+        "<clm id=\"p1083-50.1-6.1\"><p><l><![CDATA[6,267,608]]></l></p></clm>",
+        "<clm id=\"p1083-50.1-8.1\"><p><l><![CDATA[0]]></l></p></clm>",
+        "<clm id=\"p1083-50.1-10.1\"><p><l><![CDATA[6,267,608]]></l></p></clm>",
+        "<clm id=\"p1083-50.1-11.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度建造計画により令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度から令和]]><qt></qt><![CDATA[10]]><qt></qt><![CDATA[年度にわ]]></l><l><![CDATA[たり継続費で建造を予定する潜水艦の令和]]><qt></qt><![CDATA[6]]><qt></qt><![CDATA[年度年割額]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1083-50.1",
+        "page": 1083,
+        "rowNo": 50,
+        "organization": "防衛本省",
+        "itemCode": "010",
+        "itemName": "令和6年度潜水艦建造費",
+        "itemNameLines": [
+          "令和6年度",
+          "潜水艦建造",
+          "費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和6年度潜水艦建造に必要な経費",
+        "requestNameLines": [
+          "令和6年度潜水艦",
+          "建造に必要な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "6,267,608",
+          "col8": "0",
+          "col10": "6,267,608"
+        },
+        "amountsThousandYen": {
+          "col6": 6267608,
+          "col8": 0,
+          "col10": 6267608
+        }
+      }
+    },
+    {
+      "file": "202411001001079b.xml",
+      "row": "p1085-60.1",
+      "reasons": [
+        "qt（全件）"
+      ],
+      "rawClmFragments": [
+        "<clm id=\"p1085-60.1-2.1\"><p><l><![CDATA[012]]></l></p></clm>",
+        "<clm id=\"p1085-60.1-3.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[2]]><qt></qt><![CDATA[年度]]></l><l><![CDATA[甲Ⅴ型警備]]></l><l><![CDATA[艦建造費]]></l></p></clm>",
+        "<clm id=\"p1085-60.1-4.1\"><p><l><![CDATA[35]]></l></p></clm>",
+        "<clm id=\"p1085-60.1-5.1\"><p><l><![CDATA[令和]]><qt></qt><![CDATA[2]]><qt></qt><![CDATA[年度甲Ⅴ型]]></l><l><![CDATA[警備艦建造に必要]]></l><l><![CDATA[な経費]]></l></p></clm>",
+        "<clm id=\"p1085-60.1-6.1\"><p><l><![CDATA[0]]></l></p></clm>",
+        "<clm id=\"p1085-60.1-8.1\"><p><l><![CDATA[40,674,631]]></l></p></clm>",
+        "<clm id=\"p1085-60.1-10.1\"><p><l><![CDATA[△ 40,674,631]]></l></p></clm>",
+        "<clm id=\"p1085-60.1-11.1\"><p><l><![CDATA[前年度限りの経費]]></l></p></clm>"
+      ],
+      "expected": {
+        "file": "202411001001079b.xml",
+        "row": "p1085-60.1",
+        "page": 1085,
+        "rowNo": 60,
+        "organization": "防衛本省",
+        "itemCode": "012",
+        "itemName": "令和2年度甲Ⅴ型警備艦建造費",
+        "itemNameLines": [
+          "令和2年度",
+          "甲Ⅴ型警備",
+          "艦建造費"
+        ],
+        "itemQtCount": 2,
+        "itemGaiji": [],
+        "itemStartsInThisRow": true,
+        "requestName": "令和2年度甲Ⅴ型警備艦建造に必要な経費",
+        "requestNameLines": [
+          "令和2年度甲Ⅴ型",
+          "警備艦建造に必要",
+          "な経費"
+        ],
+        "requestQtCount": 2,
+        "requestGaiji": [],
+        "col4Raw": "35",
+        "amountsRaw": {
+          "col6": "0",
+          "col8": "40,674,631",
+          "col10": "△ 40,674,631"
+        },
+        "amountsThousandYen": {
+          "col6": 0,
+          "col8": 40674631,
+          "col10": -40674631
+        }
+      }
+    }
+  ]
+}
