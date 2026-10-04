@@ -1,0 +1,241 @@
+{
+  "schema": "mof-budget-xml-item-parser-v0-frozen-evaluation/v0",
+  "scope": "FY2024 一般会計 当初予算 202411001（frozen XML source set）。first full frozen evaluation（implementation freeze 後に初めて実行）",
+  "implementation": {
+    "commit": "b890e748462ac126f784576227351df1da2a65af",
+    "parserPath": "scripts/pipeline-v2/lib/mof-budget-xml-items.ts",
+    "parserSha256": "1d52634ba40bcfabd6fcdae477417daaf309ce8f2c8decf3c9ca251e6e041a79",
+    "testPath": "scripts/pipeline-v2/lib/mof-budget-xml-items.test.ts",
+    "testSha256": "c65006546cc9bbdbc14b07a3c6c492fb109052a00a1a1c37873d55ad09db316a",
+    "preregistrationCommit": "2305be0ef217e76af484b646c732c6ce3578a7fd"
+  },
+  "frozenInputs": [
+    {
+      "path": "tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-source-set.json",
+      "expected": "62df90fb32caf5997ecb2772eb0c84da66789b635eb1bc024743cf6a8da2afe3",
+      "actual": "62df90fb32caf5997ecb2772eb0c84da66789b635eb1bc024743cf6a8da2afe3",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-reference-projection.json",
+      "expected": "e6335aceb0c7d69888206cada038dcb03db5e25f7c2a10a8d5ae6104c2d615d9",
+      "actual": "e6335aceb0c7d69888206cada038dcb03db5e25f7c2a10a8d5ae6104c2d615d9",
+      "match": true
+    },
+    {
+      "path": "tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-hand-checked-fixture.json",
+      "expected": "664f0fbee2470311831db9dfbe53cd6e315a0e1f549767612d159b862d408fd1",
+      "actual": "664f0fbee2470311831db9dfbe53cd6e315a0e1f549767612d159b862d408fd1",
+      "match": true
+    },
+    {
+      "path": "scripts/pipeline-v2/lib/mof-budget-xml-items.ts",
+      "expected": "1d52634ba40bcfabd6fcdae477417daaf309ce8f2c8decf3c9ca251e6e041a79",
+      "actual": "1d52634ba40bcfabd6fcdae477417daaf309ce8f2c8decf3c9ca251e6e041a79",
+      "match": true
+    },
+    {
+      "path": "scripts/pipeline-v2/lib/mof-budget-xml-items.test.ts",
+      "expected": "c65006546cc9bbdbc14b07a3c6c492fb109052a00a1a1c37873d55ad09db316a",
+      "actual": "c65006546cc9bbdbc14b07a3c6c492fb109052a00a1a1c37873d55ad09db316a",
+      "match": true
+    }
+  ],
+  "structural": {
+    "xmlFiles": 328,
+    "expectedTargetFiles": 94,
+    "expectedNonTargetFiles": 234,
+    "recognizedTargetFiles": 94,
+    "targetFilesNotRecognized": [],
+    "nonTargetFilesCorrectlyNotTarget": 234,
+    "nonTargetFilesMisclassified": [],
+    "recognizedButNotTarget": [],
+    "structuralFailures": 0,
+    "failures": [],
+    "unsupported": 0,
+    "unexpectedSilentSkip": 0
+  },
+  "coverage": {
+    "expected": 1256,
+    "actual": 1256,
+    "missing": 0,
+    "extra": 0,
+    "duplicate": 0,
+    "missingKeys": [],
+    "extraKeys": [],
+    "duplicateKeys": []
+  },
+  "fieldExactness": {
+    "organization": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemCode": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemName": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemNameLines": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "requestName": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "requestNameLines": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsRaw.col6": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsRaw.col8": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsRaw.col10": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsThousandYen.col6": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsThousandYen.col8": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "amountsThousandYen.col10": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "col4Raw": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemStartsInThisRow": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.file": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.row": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.page": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.rowNo": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "requestQtCount": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "requestGaiji": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemQtCount": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "itemGaiji": {
+      "exact": 1256,
+      "mismatch": 0
+    },
+    "provenance.sourceSha256": {
+      "exact": 94,
+      "mismatch": 0
+    }
+  },
+  "hierarchy": {
+    "itemAssignmentExact": 1256,
+    "itemAssignmentMismatch": 0,
+    "orphan": 0,
+    "ambiguous": 0
+  },
+  "specialStructures": {
+    "gaiji": {
+      "expectedRows": 2,
+      "exact": 2
+    },
+    "qt": {
+      "expectedRows": 11,
+      "exact": 11
+    },
+    "knownTargetFingerprints": [
+      {
+        "fingerprint": "16006d26",
+        "files": 3,
+        "recognized": 3
+      },
+      {
+        "fingerprint": "38d58a65",
+        "files": 33,
+        "recognized": 33
+      },
+      {
+        "fingerprint": "5e76da9b",
+        "files": 2,
+        "recognized": 2
+      },
+      {
+        "fingerprint": "8cbfafd7",
+        "files": 1,
+        "recognized": 1
+      },
+      {
+        "fingerprint": "8e83a7bf",
+        "files": 9,
+        "recognized": 9
+      },
+      {
+        "fingerprint": "a6b0b6dc",
+        "files": 4,
+        "recognized": 4
+      },
+      {
+        "fingerprint": "ce226ea9",
+        "files": 9,
+        "recognized": 9
+      },
+      {
+        "fingerprint": "dc8a81c0",
+        "files": 2,
+        "recognized": 2
+      },
+      {
+        "fingerprint": "f04b97b3",
+        "files": 31,
+        "recognized": 31
+      }
+    ],
+    "rowCountMismatchFiles": []
+  },
+  "sourceShaMismatch": [],
+  "conditions": {
+    "sourceSetIntegrity": true,
+    "targets94of94": true,
+    "nonTargetMisclassifiedZero": true,
+    "noStructuralFailureOrUnsupported": true,
+    "records1256": true,
+    "missingExtraDuplicateZero": true,
+    "orphanAmbiguousZero": true,
+    "requiredFieldsExact": true,
+    "specialStructuresExact": true
+  },
+  "decision": "GO",
+  "rule": "preregistration §16: GO は全 condition が真。1 件でも偽なら STOP（oracle/source の不備で評価不能なら INCONCLUSIVE）",
+  "mismatches": []
+}
