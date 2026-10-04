@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_0701_Budget_Request_FY2024_Full_Corpus_Baseline_Result.md](20261005_0701_Budget_Request_FY2024_Full_Corpus_Baseline_Result.md) — FY2024概算要求82PDFの無修正baseline結果。74成功/8失敗(rotate=90)、request4,245・item97、一般会計の比較可能な事項101件でexact97.0%（全抽出の2.3%）。失敗の大半は名称未取得・hierarchy未観測。判定=GO_TO_FAILURE_PRIORITIZATION
 - [20261005_0650_Budget_Request_FY2024_Full_Corpus_Baseline_Protocol_Preregistration.md](20261005_0650_Budget_Request_FY2024_Full_Corpus_Baseline_Protocol_Preregistration.md) — FY2024概算要求82PDFの現行pipeline無修正baselineのprotocol事前登録。corpus(82PDF/9,899頁/manifest・digest)・既存契約だけから決めた実行計画(runnable 8/hierarchy契約なし74)・runner役割・照合はP1規則を再利用・判定基準を結果を見る前に凍結
 - [20261005_0611_Budget_Request_MOF_Reconciliation_P1_Result.md](20261005_0611_Budget_Request_MOF_Reconciliation_P1_Result.md) — 概算要求PDF×MOF V2 事項 照合P1の結果。項43/44・事項56/123がexact_unique（親解決済みでは94.9%）、失敗は抽出側前提（名称status・hierarchy・item種別）が大半。判定=GO_TO_NEXT_DESIGN（金額・コード・fuzzy不使用）
 - [20261005_0608_Budget_Request_MOF_Reconciliation_P1_Preregistration.md](20261005_0608_Budget_Request_MOF_Reconciliation_P1_Preregistration.md) — 概算要求PDF×MOF V2 事項 照合P1の事前登録。既存抽出のPDF population(item44/request123)・NFKC+空白除去の名称key・項→事項の2段階exact・分類/failure isolation/GO基準をmatch結果を見る前に凍結
