@@ -1,0 +1,103 @@
+{
+  "schema": "mof-jikou-normalized-integration-evaluation/v0",
+  "scope": "FY2024 一般会計 当初予算 202411001（production generation）。tsc・lint・full vitest は別途確認",
+  "output": {
+    "path": "data/normalized/mof/fy2024/budget-jikou.jsonl",
+    "sha256": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+    "manifestPath": "data/normalized/mof/fy2024/budget-jikou-manifest.json",
+    "manifestSha256": "2d8c90d5bd9e003511e6857ed40e5e2427c84c8a5d13972ebb4af9bae1af48c8"
+  },
+  "population": {
+    "records": 1256,
+    "uniqueRecordIds": 1256,
+    "duplicateRecordIds": 0,
+    "missing": [],
+    "extra": [],
+    "duplicateLocators": [],
+    "counts": {
+      "xmlFiles": 328,
+      "targetFiles": 94,
+      "notTargetFiles": 234,
+      "organizations": 94,
+      "sourceXmlFiles": 94,
+      "uniqueRecordIds": 1256,
+      "parentSections": 784
+    },
+    "parentResolution": {
+      "bySectionNaturalKey": 1256,
+      "bySectionId": 1256,
+      "both": 1256,
+      "orphan": 0,
+      "ambiguous": 0
+    }
+  },
+  "frozenReference": {
+    "path": "tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-reference-projection.json",
+    "sha256": "e6335aceb0c7d69888206cada038dcb03db5e25f7c2a10a8d5ae6104c2d615d9",
+    "fieldExact": {
+      "organization": 1256,
+      "sectionCode": 1256,
+      "sectionName": 1256,
+      "jikouName": 1256,
+      "jikouNameLines": 1256,
+      "col4Raw": 1256,
+      "amountYen": 1256,
+      "previousAmountYen": 1256,
+      "differenceYen": 1256,
+      "amountsRawThousand": 1256,
+      "nameQtCount": 1256,
+      "nameGaiji": 1256,
+      "locator": 1256
+    },
+    "mismatches": []
+  },
+  "existingOutputs": [
+    {
+      "path": "data/normalized/mof/fy2024/budget-items.jsonl",
+      "before": "56b82f5aefcad43848b9f21994ca90ea49e024b56168ebd28f5559333f4c7c93",
+      "after": "56b82f5aefcad43848b9f21994ca90ea49e024b56168ebd28f5559333f4c7c93",
+      "unchanged": true
+    },
+    {
+      "path": "data/normalized/mof/fy2024/manifest.json",
+      "before": "f23071f33481d8d1cfdd8c195b3f03a903bb2bcfc207e9def8301876a47ae531",
+      "after": "f23071f33481d8d1cfdd8c195b3f03a903bb2bcfc207e9def8301876a47ae531",
+      "unchanged": true
+    },
+    {
+      "path": "data/derived/mof/fy2024/sections.jsonl",
+      "before": "a5881f4d7a91d4da21229dfd6048a2b238af4be9f55950fefeb57f21cc52db62",
+      "after": "a5881f4d7a91d4da21229dfd6048a2b238af4be9f55950fefeb57f21cc52db62",
+      "unchanged": true
+    },
+    {
+      "path": "data/derived/mof/fy2024/budget-events.jsonl",
+      "before": "0f4e8e5f1643b809f172ec143210159bb9b6d18db7edccc80f208b59be30b489",
+      "after": "0f4e8e5f1643b809f172ec143210159bb9b6d18db7edccc80f208b59be30b489",
+      "unchanged": true
+    }
+  ],
+  "deterministicRerun": {
+    "first": {
+      "jikou": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+      "manifest": "2d8c90d5bd9e003511e6857ed40e5e2427c84c8a5d13972ebb4af9bae1af48c8"
+    },
+    "second": {
+      "jikou": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+      "manifest": "2d8c90d5bd9e003511e6857ed40e5e2427c84c8a5d13972ebb4af9bae1af48c8"
+    },
+    "rerunExit": 0
+  },
+  "conditions": {
+    "productionGenerated": true,
+    "records1256": true,
+    "missingExtraDuplicateZero": true,
+    "requiredProvenanceAll": true,
+    "amountSemanticsPreserved": true,
+    "parentAllResolved": true,
+    "existingOutputsUnchanged": true,
+    "deterministicRerun": true,
+    "parserUnchangedFromFreeze": true
+  },
+  "decision": "GO"
+}
