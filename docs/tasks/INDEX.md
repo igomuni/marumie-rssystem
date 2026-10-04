@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_0755_Budget_Request_PDF_Item_Candidate_Count_Result.md](20261005_0755_Budget_Request_PDF_Item_Candidate_Count_Result.md) — 概算要求PDFの項候補数の結果。74成功PDFのうち51PDFで候補929行(一般会計641・unique611、MOF784比0.82は参考値)、契約なし43PDFで618行>現行item97。layout混在・基準x不明23PDFの限界つき。判定=ITEM_POPULATION_HIDDEN_BY_HIERARCHY
 - [20261005_0752_Budget_Request_PDF_Item_Candidate_Count_Preregistration.md](20261005_0752_Budget_Request_PDF_Item_Candidate_Count_Preregistration.md) — 概算要求PDFの項候補数(item-shaped row)をhierarchy非依存で数える診断の事前登録。request行のcode xを基準に1インデント左の3桁code行を候補とする規則・development(既存item97/97を包含)・判定規則を74PDF走査前に凍結
 - [20261005_0735_Budget_Request_Hierarchy_Failure_Isolation_Result.md](20261005_0735_Budget_Request_Hierarchy_Failure_Isolation_Result.md) — hierarchy ON/OFF paired診断の結果。OFFでitem97→0・組織20→0・親の項は全件not_observed・一般会計comparable101→0、名称statusは7,973件不変。判定=HIERARCHY_MAJOR_CAUSAL_FACTOR（8PDF限定・回復件数は推計せず）
 - [20261005_0730_Budget_Request_Hierarchy_Failure_Isolation_Preregistration.md](20261005_0730_Budget_Request_Hierarchy_Failure_Isolation_Preregistration.md) — hierarchy有無とitem/親/unclassifiedの関係を切り分けるpaired ON/OFF診断の事前登録。作用機構のコード棚卸し・paired母集団(8PDF/1,403頁)・H1〜H4と機械的な判定規則をOFF結果を見る前に凍結
