@@ -1,0 +1,28 @@
+{
+ "byStatus": {
+  "exact_ambiguous": 63,
+  "exact_unique": 543,
+  "name_unavailable": 7,
+  "no_exact_match": 21
+ },
+ "exactOverlapRate": 0.9665071770334929,
+ "fullEvaluationSha256": "421dbf8b3165057926ba21c84a7debb549a31941dfc8c62df2e39df651c9519d",
+ "generalCandidateRows": 634,
+ "mofJikouSha256": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+ "mofSections": 784,
+ "nameResolved": 627,
+ "reference": {
+  "formalReconciliation": {
+   "comparable": 79,
+   "exactUnique": 77
+  },
+  "previousGlobalDetectorDiagnostic": {
+   "exactAmbiguous": 63,
+   "exactUnique": 534,
+   "nameResolved": 618,
+   "noExact": 21
+  }
+ },
+ "schema": "budget-request-range-local-item-mof-exact-diagnostic/v0",
+ "scope": "diagnostic only（名称単独 exact。precision / recall ではない）"
+}
