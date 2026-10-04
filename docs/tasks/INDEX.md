@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_0611_Budget_Request_MOF_Reconciliation_P1_Result.md](20261005_0611_Budget_Request_MOF_Reconciliation_P1_Result.md) — 概算要求PDF×MOF V2 事項 照合P1の結果。項43/44・事項56/123がexact_unique（親解決済みでは94.9%）、失敗は抽出側前提（名称status・hierarchy・item種別）が大半。判定=GO_TO_NEXT_DESIGN（金額・コード・fuzzy不使用）
 - [20261005_0608_Budget_Request_MOF_Reconciliation_P1_Preregistration.md](20261005_0608_Budget_Request_MOF_Reconciliation_P1_Preregistration.md) — 概算要求PDF×MOF V2 事項 照合P1の事前登録。既存抽出のPDF population(item44/request123)・NFKC+空白除去の名称key・項→事項の2段階exact・分類/failure isolation/GO基準をmatch結果を見る前に凍結
 - [20261004_2210_MOF_PipelineV2_事項Normalizer_入力境界の厳密化_追記.md](20261004_2210_MOF_PipelineV2_事項Normalizer_入力境界の厳密化_追記.md) — PR #371 レビュー対応。事項normalizerの入力境界をfail-closed化（source-set artifactのhash pin・menu集合の328=94+234完全一致・生成後population検査）。出力は不変・GO artifactも不変
 - [20261004_2155_MOF_PipelineV2_FY2024一般会計_事項NormalizedOutput統合.md](20261004_2155_MOF_PipelineV2_FY2024一般会計_事項NormalizedOutput統合.md) — 事項のV2 normalized output統合の結果。FY2024一般会計の1,256件をbudget-jikou.jsonlに生成、親の項は1,256/1,256決定的に解決、既存output不変・再実行決定的。判定=GO

@@ -1,0 +1,3339 @@
+{
+  "schema": "budget-request-mof-reconciliation-p1-result/v0",
+  "scope": "既存の PDF 抽出 population（item 44 / request 123）× MOF V2 FY2024 一般会計 当初予算の section / jikou。deterministic exact 照合のみ（金額・コード・fuzzy は不使用）",
+  "preregistration": {
+    "document": "docs/tasks/20261005_0608_Budget_Request_MOF_Reconciliation_P1_Preregistration.md",
+    "commit": "7f527af7c4757229b99b08f634dd039e8ae15591"
+  },
+  "frozenInputs": {
+    "pdfPopulation": {
+      "path": "tests/fixtures/budget-request-mof-reconciliation/2024/p1-pdf-population.json",
+      "sha256": "f726c81b203eb22398cb7fd4c051bd059f40fea6e018a2a78a9e4babdfbd94b6"
+    },
+    "mofJikou": {
+      "path": "data/normalized/mof/fy2024/budget-jikou.jsonl",
+      "sha256": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+      "records": 1256,
+      "sections": 784
+    }
+  },
+  "items": {
+    "total": 44,
+    "byClass": {
+      "exact_unique": 43,
+      "exact_ambiguous": 0,
+      "no_exact_match": 1,
+      "parent_unresolved": 0,
+      "name_unavailable": 0,
+      "out_of_scope": 0
+    },
+    "exactUniqueRate": 0.9772727272727273,
+    "byDiagnostic": {
+      "item_name_differs_in_organization": 1
+    }
+  },
+  "requests": {
+    "total": 123,
+    "byClass": {
+      "exact_unique": 56,
+      "exact_ambiguous": 0,
+      "no_exact_match": 3,
+      "parent_unresolved": 32,
+      "name_unavailable": 32,
+      "out_of_scope": 0
+    },
+    "exactUniqueRate": 0.45528455284552843,
+    "parentExactUnique": 59,
+    "conditionalExactRateGivenResolvedParent": 0.9491525423728814,
+    "parentUnresolvedByReason": {
+      "parent_item_no_match": 1,
+      "parent_item_not_item_kind": 21,
+      "parent_item_not_observed": 7,
+      "parent_item_unresolved": 3
+    },
+    "byDiagnostic": {
+      "parent_unresolved:parent_item_no_match": 1,
+      "parent_unresolved:parent_item_not_item_kind": 21,
+      "parent_unresolved:parent_item_not_observed": 7,
+      "parent_unresolved:parent_item_unresolved": 3,
+      "pdf_name_unavailable": 32,
+      "request_name_differs_under_parent": 2,
+      "request_name_is_prefix_of_mof": 1
+    }
+  },
+  "bySource": {
+    "こども家庭庁": {
+      "items": {
+        "total": 0,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 0,
+          "name_unavailable": 0,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      },
+      "requests": {
+        "total": 24,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 23,
+          "name_unavailable": 1,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      }
+    },
+    "厚生労働省": {
+      "items": {
+        "total": 14,
+        "byClass": {
+          "exact_unique": 14,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 0,
+          "name_unavailable": 0,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 1
+      },
+      "requests": {
+        "total": 23,
+        "byClass": {
+          "exact_unique": 20,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 2,
+          "name_unavailable": 1,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0.8695652173913043
+      }
+    },
+    "国土交通省": {
+      "items": {
+        "total": 0,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 0,
+          "name_unavailable": 0,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      },
+      "requests": {
+        "total": 1,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 1,
+          "name_unavailable": 0,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      }
+    },
+    "環境省": {
+      "items": {
+        "total": 0,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 0,
+          "name_unavailable": 0,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      },
+      "requests": {
+        "total": 6,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 1,
+          "name_unavailable": 5,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      }
+    },
+    "経済産業省": {
+      "items": {
+        "total": 30,
+        "byClass": {
+          "exact_unique": 29,
+          "exact_ambiguous": 0,
+          "no_exact_match": 1,
+          "parent_unresolved": 0,
+          "name_unavailable": 0,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0.9666666666666667
+      },
+      "requests": {
+        "total": 50,
+        "byClass": {
+          "exact_unique": 36,
+          "exact_ambiguous": 0,
+          "no_exact_match": 3,
+          "parent_unresolved": 2,
+          "name_unavailable": 9,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0.72
+      }
+    },
+    "農林水産省": {
+      "items": {
+        "total": 0,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 0,
+          "name_unavailable": 0,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      },
+      "requests": {
+        "total": 18,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 2,
+          "name_unavailable": 16,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      }
+    },
+    "防衛省": {
+      "items": {
+        "total": 0,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 0,
+          "name_unavailable": 0,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      },
+      "requests": {
+        "total": 1,
+        "byClass": {
+          "exact_unique": 0,
+          "exact_ambiguous": 0,
+          "no_exact_match": 0,
+          "parent_unresolved": 1,
+          "name_unavailable": 0,
+          "out_of_scope": 0
+        },
+        "exactUniqueRate": 0
+      }
+    }
+  },
+  "byRun": {
+    "cfa-general-detail-7-147": {
+      "items": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 23,
+        "name_unavailable": 1,
+        "out_of_scope": 0
+      }
+    },
+    "heldout-v0/maff-ippan-p12": {
+      "items": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 16,
+        "out_of_scope": 0
+      }
+    },
+    "heldout-v0/maff-ippan-p150": {
+      "items": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 1,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      }
+    },
+    "heldout-v0/maff-ippan-p290": {
+      "items": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 1,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      }
+    },
+    "heldout-v0/mlit-ippan-p560": {
+      "items": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 1,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      }
+    },
+    "heldout-v0/mod-ippan-p535": {
+      "items": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 1,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      }
+    },
+    "heldout-v0/moe-ippan-p18": {
+      "items": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 5,
+        "out_of_scope": 0
+      }
+    },
+    "heldout-v0/moe-ippan-p40": {
+      "items": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 1,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      }
+    },
+    "meti-detail-9-106": {
+      "items": {
+        "exact_unique": 29,
+        "exact_ambiguous": 0,
+        "no_exact_match": 1,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 36,
+        "exact_ambiguous": 0,
+        "no_exact_match": 3,
+        "parent_unresolved": 2,
+        "name_unavailable": 9,
+        "out_of_scope": 0
+      }
+    },
+    "mhlw-detail-1260-1275": {
+      "items": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 0,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 2,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      }
+    },
+    "mhlw-detail-1555-1700": {
+      "items": {
+        "exact_unique": 14,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 0,
+        "out_of_scope": 0
+      },
+      "requests": {
+        "exact_unique": 20,
+        "exact_ambiguous": 0,
+        "no_exact_match": 0,
+        "parent_unresolved": 0,
+        "name_unavailable": 1,
+        "out_of_scope": 0
+      }
+    }
+  },
+  "failureIsolation": {
+    "overall": {
+      "item_name_differs_in_organization": 1,
+      "parent_unresolved:parent_item_no_match": 1,
+      "parent_unresolved:parent_item_not_item_kind": 21,
+      "parent_unresolved:parent_item_not_observed": 7,
+      "parent_unresolved:parent_item_unresolved": 3,
+      "pdf_name_unavailable": 32,
+      "request_name_differs_under_parent": 2,
+      "request_name_is_prefix_of_mof": 1
+    },
+    "decision": "GO_TO_NEXT_DESIGN",
+    "nonExact": 68,
+    "classifiedShare": 1,
+    "topCategory": "pdf_name_unavailable",
+    "topShare": 0.47058823529411764
+  },
+  "decision": "GO_TO_NEXT_DESIGN",
+  "rule": "preregistration §9",
+  "records": [
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 7,
+      "logicalRowIndex": 28,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "こども家庭庁一般行政に\n必要な経費",
+      "parentItemName": "こ ど も 家 庭 庁 共 通 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 38,
+      "logicalRowIndex": 27,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "審 議 会 等 に 必 要 な 経 費",
+      "parentItemName": "こ ど も 家 庭 庁 共 通 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 41,
+      "logicalRowIndex": 4,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "こども政策に必要な経費",
+      "parentItemName": "こ ど も 家 庭 庁 共 通 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 92,
+      "logicalRowIndex": 17,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "未熟児養育医療等に必要\nな経費",
+      "parentItemName": "母 子 保 健 衛 生 対 策 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 92,
+      "logicalRowIndex": 32,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "母子保健衛生対策に必要\nな経費",
+      "parentItemName": "母 子 保 健 衛 生 対 策 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 97,
+      "logicalRowIndex": 25,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "保 育 対 策 に 必 要 な 経 費",
+      "parentItemName": "保育対策費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 97,
+      "logicalRowIndex": 29,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "こども安全対策に必要な\n経費",
+      "parentItemName": "こ ど も 安 全 対 策 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 98,
+      "logicalRowIndex": 10,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "子ども・子育て支援の財\n源の年金特別会計子ども\n・子育て支援勘定へ繰入\nれに必要な経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 98,
+      "logicalRowIndex": 24,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "特例給付等の財源の年金\n特別会計子ども・子育て\n支援勘定へ繰入れに必要\nな経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 99,
+      "logicalRowIndex": 12,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "児童福祉施設入所児童等\nの医療に必要な経費",
+      "parentItemName": "児 童 虐 待 防 止 等 対 策 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 99,
+      "logicalRowIndex": 23,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "児童福祉施設入所児童等\nの保護等に必要な経費",
+      "parentItemName": "児 童 虐 待 防 止 等 対 策 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 100,
+      "logicalRowIndex": 6,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "児童虐待防止等対策に必\n要な経費",
+      "parentItemName": "児 童 虐 待 防 止 等 対 策 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 101,
+      "logicalRowIndex": 18,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "国立児童自立支援施設に\n必要な経費",
+      "parentItemName": "国 立 児 童 自 立 支 援 施 設",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 123,
+      "logicalRowIndex": 20,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 132,
+      "logicalRowIndex": 18,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_unresolved",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_unresolved",
+      "name": "国立児童自立支援施設の\n運営に必要な経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 135,
+      "logicalRowIndex": 31,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "国立児童自立支援施設整\n備に必要な経費",
+      "parentItemName": "国立児童自立支援施設整\n備費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 136,
+      "logicalRowIndex": 24,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "母子家庭等の自立支援に\n必要な経費",
+      "parentItemName": "母 子 家 庭 等 対 策 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 138,
+      "logicalRowIndex": 25,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "障害児医療に必要な経費",
+      "parentItemName": "障 害 児 支 援 等 対 策 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 138,
+      "logicalRowIndex": 30,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "障害児支援に必要な経費",
+      "parentItemName": "障 害 児 支 援 等 対 策 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 139,
+      "logicalRowIndex": 11,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "こども政策の推進に必要\nな経費",
+      "parentItemName": "こ ど も 政 策 推 進 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 145,
+      "logicalRowIndex": 34,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_unresolved",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_unresolved",
+      "name": "こども家庭調査研究に必\n要な経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 145,
+      "logicalRowIndex": 36,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_unresolved",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_unresolved",
+      "name": "こども家庭科学研究に必\n要な経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 146,
+      "logicalRowIndex": 21,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "児童福祉施設等施設整備\nに必要な経費",
+      "parentItemName": "児 童 福 祉 施 設 等 整 備 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "cfa-general-detail-7-147",
+      "canonicalUrl": "https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "sourceAuthority": "こども家庭庁",
+      "page": 147,
+      "logicalRowIndex": 5,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "大学等における修学の支\n援に必要な経費",
+      "parentItemName": "大 学 等 修 学 支 援 費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 10,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 11,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 12,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 13,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 15,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 17,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 19,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 21,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 22,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 24,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 26,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 28,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 30,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 32,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 34,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p12",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 12,
+      "logicalRowIndex": 36,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p150",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 150,
+      "logicalRowIndex": 5,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_observed",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_observed",
+      "name": "独立行政法人農畜産業振\n興機構運営費交付金に必\n要な経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/maff-ippan-p290",
+      "canonicalUrl": "https://www.maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "sourceAuthority": "農林水産省",
+      "page": 290,
+      "logicalRowIndex": 4,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_observed",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_observed",
+      "name": "山林事業指導監督に必要\nな経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/mlit-ippan-p560",
+      "canonicalUrl": "https://www.mlit.go.jp/page/content/001630995.pdf",
+      "sourceAuthority": "国土交通省",
+      "page": 560,
+      "logicalRowIndex": 18,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_observed",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_observed",
+      "name": "道路整備事業工事諸費に\n必要な経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/mod-ippan-p535",
+      "canonicalUrl": "https://www.mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "sourceAuthority": "防衛省",
+      "page": 535,
+      "logicalRowIndex": 21,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_observed",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_observed",
+      "name": "防衛生産基盤の強化に必\n要な経費（仮称）",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/moe-ippan-p18",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "sourceAuthority": "環境省",
+      "page": 18,
+      "logicalRowIndex": 14,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/moe-ippan-p18",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "sourceAuthority": "環境省",
+      "page": 18,
+      "logicalRowIndex": 17,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/moe-ippan-p18",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "sourceAuthority": "環境省",
+      "page": 18,
+      "logicalRowIndex": 20,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/moe-ippan-p18",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "sourceAuthority": "環境省",
+      "page": 18,
+      "logicalRowIndex": 26,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/moe-ippan-p18",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "sourceAuthority": "環境省",
+      "page": 18,
+      "logicalRowIndex": 34,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "heldout-v0/moe-ippan-p40",
+      "canonicalUrl": "https://www.env.go.jp/content/000157010.pdf",
+      "sourceAuthority": "環境省",
+      "page": 40,
+      "logicalRowIndex": 6,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_observed",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_observed",
+      "name": "地球環境の保全に必要な\n経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 9,
+      "logicalRowIndex": 8,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_8f8ac31b90dc835245d8",
+      "candidateIds": [
+        "mofsec_8f8ac31b90dc835245d8"
+      ],
+      "diagnostic": null,
+      "name": "経 済 産 業 本 省 共 通 費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 9,
+      "logicalRowIndex": 9,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_c911d299b776634f2750",
+      "candidateIds": [
+        "mofjik_c911d299b776634f2750"
+      ],
+      "diagnostic": null,
+      "name": "経済産業本省一般行政に\n必要な経費",
+      "parentItemName": "経 済 産 業 本 省 共 通 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 20,
+      "logicalRowIndex": 15,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_b2e57f88c1fdce4e6561",
+      "candidateIds": [
+        "mofjik_b2e57f88c1fdce4e6561"
+      ],
+      "diagnostic": null,
+      "name": "審 議 会 等 に 必 要 な 経 費",
+      "parentItemName": "経 済 産 業 本 省 共 通 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 22,
+      "logicalRowIndex": 24,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_103e8b6e5e29f36368c5",
+      "candidateIds": [
+        "mofjik_103e8b6e5e29f36368c5"
+      ],
+      "diagnostic": null,
+      "name": "経済産業に関する政策の\n調査等に必要な経費",
+      "parentItemName": "経 済 産 業 本 省 共 通 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 23,
+      "logicalRowIndex": 32,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_52a6e24a22555612155a",
+      "candidateIds": [
+        "mofjik_52a6e24a22555612155a"
+      ],
+      "diagnostic": null,
+      "name": "国 際 会 議 に 必 要 な 経 費",
+      "parentItemName": "経 済 産 業 本 省 共 通 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 24,
+      "logicalRowIndex": 28,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_91b400553cbad52b25f5",
+      "candidateIds": [
+        "mofjik_91b400553cbad52b25f5"
+      ],
+      "diagnostic": null,
+      "name": "経済産業研修所に必要な\n経費",
+      "parentItemName": "経 済 産 業 本 省 共 通 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 26,
+      "logicalRowIndex": 7,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_543e09c3efa3f2634990",
+      "candidateIds": [
+        "mofsec_543e09c3efa3f2634990"
+      ],
+      "diagnostic": null,
+      "name": "経 済 産 業 本 省 施 設 費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 26,
+      "logicalRowIndex": 8,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_6ba2a619a4f6ab6da962",
+      "candidateIds": [
+        "mofjik_6ba2a619a4f6ab6da962"
+      ],
+      "diagnostic": null,
+      "name": "経済産業本省施設整備に\n必要な経費",
+      "parentItemName": "経 済 産 業 本 省 施 設 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 26,
+      "logicalRowIndex": 21,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_0e0601b3481b73888ea3",
+      "candidateIds": [
+        "mofsec_0e0601b3481b73888ea3"
+      ],
+      "diagnostic": null,
+      "name": "独立行政法人経済産業研\n究所運営費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 26,
+      "logicalRowIndex": 22,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_c641a2beb04bdab12ee2",
+      "candidateIds": [
+        "mofjik_c641a2beb04bdab12ee2"
+      ],
+      "diagnostic": null,
+      "name": "独立行政法人経済産業研\n究所運営費交付金に必要\nな経費",
+      "parentItemName": "独立行政法人経済産業研\n究所運営費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 26,
+      "logicalRowIndex": 30,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_5f5dd0e07ffa164c5f29",
+      "candidateIds": [
+        "mofsec_5f5dd0e07ffa164c5f29"
+      ],
+      "diagnostic": null,
+      "name": "独立行政法人日本貿易振\n興機構運営費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 26,
+      "logicalRowIndex": 31,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "独立行政法人日本貿易振\n興機構運営費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 27,
+      "logicalRowIndex": 4,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_abf51ebd06df7aed9f94",
+      "candidateIds": [
+        "mofsec_abf51ebd06df7aed9f94"
+      ],
+      "diagnostic": null,
+      "name": "国立研究開発法人日本原\n子力研究開発機構出資",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 27,
+      "logicalRowIndex": 5,
+      "recordKind": "request",
+      "classification": "no_exact_match",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "request_name_differs_under_parent",
+      "name": "国立研究開発法人日本原\n子力開発機構出資に必要\nな経費",
+      "parentItemName": "国立研究開発法人日本原\n子力研究開発機構出資",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 28,
+      "logicalRowIndex": 4,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_0f6fa5ce1188a7250dc3",
+      "candidateIds": [
+        "mofsec_0f6fa5ce1188a7250dc3"
+      ],
+      "diagnostic": null,
+      "name": "国立研究開発法人産業技\n術総合研究所運営費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 28,
+      "logicalRowIndex": 5,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "国立研究開発法人産業技\n術総合研究所運営費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 28,
+      "logicalRowIndex": 10,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_f5893e7e2295d1cddebf",
+      "candidateIds": [
+        "mofsec_f5893e7e2295d1cddebf"
+      ],
+      "diagnostic": null,
+      "name": "国立研究開発法人産業技\n術総合研究所施設整備費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 28,
+      "logicalRowIndex": 11,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "国立研究開発法人産業技\n術総合研究所施設整備費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 29,
+      "logicalRowIndex": 4,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_6036b24bd0904f4fbf8b",
+      "candidateIds": [
+        "mofsec_6036b24bd0904f4fbf8b"
+      ],
+      "diagnostic": null,
+      "name": "国立研究開発法人新エネ\nルギー・産業技術総合開\n発機構運営費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 29,
+      "logicalRowIndex": 5,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "国立研究開発法人新エネ\nルギー・産業技術総合開\n発機構運営費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 29,
+      "logicalRowIndex": 9,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_1a85306c31536d093c41",
+      "candidateIds": [
+        "mofsec_1a85306c31536d093c41"
+      ],
+      "diagnostic": null,
+      "name": "独立行政法人情報処理推\n進機構運営費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 29,
+      "logicalRowIndex": 10,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_12775488d4b8e5bd2de8",
+      "candidateIds": [
+        "mofjik_12775488d4b8e5bd2de8"
+      ],
+      "diagnostic": null,
+      "name": "独立行政法人情報処理推\n進機構運営費交付金に必\n要な経費",
+      "parentItemName": "独立行政法人情報処理推\n進機構運営費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 30,
+      "logicalRowIndex": 4,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_99d4fc1ab2e3abb8b221",
+      "candidateIds": [
+        "mofsec_99d4fc1ab2e3abb8b221"
+      ],
+      "diagnostic": null,
+      "name": "独立行政法人製品評価技\n術基盤機構運営費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 30,
+      "logicalRowIndex": 5,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "独立行政法人製品評価技\n術基盤機構運営費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 30,
+      "logicalRowIndex": 9,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_afdf5a6f64ae41263640",
+      "candidateIds": [
+        "mofsec_afdf5a6f64ae41263640"
+      ],
+      "diagnostic": null,
+      "name": "独立行政法人製品評価技\n術基盤機構施設整備費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 30,
+      "logicalRowIndex": 10,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "独立行政法人製品評価技\n術基盤機構施設整備費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 30,
+      "logicalRowIndex": 14,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_891c867f39b3ae13b87f",
+      "candidateIds": [
+        "mofsec_891c867f39b3ae13b87f"
+      ],
+      "diagnostic": null,
+      "name": "工 業 用 水 道 事 業 費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 30,
+      "logicalRowIndex": 15,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_6f7cab9c0759003a917f",
+      "candidateIds": [
+        "mofjik_6f7cab9c0759003a917f"
+      ],
+      "diagnostic": null,
+      "name": "工業用水道事業に必要な\n経費",
+      "parentItemName": "工 業 用 水 道 事 業 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 31,
+      "logicalRowIndex": 7,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_307bddac2ddb97ea8dc6",
+      "candidateIds": [
+        "mofsec_307bddac2ddb97ea8dc6"
+      ],
+      "diagnostic": null,
+      "name": "登録免許税納付確認等事\n務費特許特別会計へ繰入",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 31,
+      "logicalRowIndex": 8,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_d3574b428d71e9210689",
+      "candidateIds": [
+        "mofjik_d3574b428d71e9210689"
+      ],
+      "diagnostic": null,
+      "name": "登録免許税納付確認等事\n務の財源の特許特別会計\nへ繰入れに必要な経費",
+      "parentItemName": "登録免許税納付確認等事\n務費特許特別会計へ繰入",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 31,
+      "logicalRowIndex": 10,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_ad725987a35f68f7808b",
+      "candidateIds": [
+        "mofsec_ad725987a35f68f7808b"
+      ],
+      "diagnostic": null,
+      "name": "経 済 構 造 改 革 推 進 費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 31,
+      "logicalRowIndex": 11,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_8f625364c0eb4e5df474",
+      "candidateIds": [
+        "mofjik_8f625364c0eb4e5df474"
+      ],
+      "diagnostic": null,
+      "name": "中小企業の経済構造改革\nの推進に必要な経費",
+      "parentItemName": "経 済 構 造 改 革 推 進 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 34,
+      "logicalRowIndex": 29,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_fb42e0a56d53972f176f",
+      "candidateIds": [
+        "mofjik_fb42e0a56d53972f176f"
+      ],
+      "diagnostic": null,
+      "name": "経済構造改革の推進に必\n要な経費",
+      "parentItemName": "経 済 構 造 改 革 推 進 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 36,
+      "logicalRowIndex": 38,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_d62b96601c96165adcc7",
+      "candidateIds": [
+        "mofsec_d62b96601c96165adcc7"
+      ],
+      "diagnostic": null,
+      "name": "対 外 経 済 政 策 推 進 費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 36,
+      "logicalRowIndex": 39,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_e1275a118e98f04e2930",
+      "candidateIds": [
+        "mofjik_e1275a118e98f04e2930"
+      ],
+      "diagnostic": null,
+      "name": "経済協力に係る対外経済\n関係の円滑な発展に必要\nな経費",
+      "parentItemName": "対 外 経 済 政 策 推 進 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 40,
+      "logicalRowIndex": 8,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_a99639d16c0b4c2b7951",
+      "candidateIds": [
+        "mofjik_a99639d16c0b4c2b7951"
+      ],
+      "diagnostic": null,
+      "name": "対外経済関係の円滑な発\n展に係る研究開発等に必\n要な経費",
+      "parentItemName": "対 外 経 済 政 策 推 進 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 40,
+      "logicalRowIndex": 18,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_6abca740d5f3cc9bcaf0",
+      "candidateIds": [
+        "mofjik_6abca740d5f3cc9bcaf0"
+      ],
+      "diagnostic": null,
+      "name": "中小企業の対外経済関係\nの円滑な発展に必要な経\n費",
+      "parentItemName": "対 外 経 済 政 策 推 進 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 43,
+      "logicalRowIndex": 11,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_f5d5058cb3b35958eb8b",
+      "candidateIds": [
+        "mofjik_f5d5058cb3b35958eb8b"
+      ],
+      "diagnostic": null,
+      "name": "対外経済関係の円滑な発\n展に必要な経費",
+      "parentItemName": "対 外 経 済 政 策 推 進 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 47,
+      "logicalRowIndex": 20,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_aa455fe4add9cae38d74",
+      "candidateIds": [
+        "mofsec_aa455fe4add9cae38d74"
+      ],
+      "diagnostic": null,
+      "name": "産業技術・環境・産業標\n準政策推進費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 47,
+      "logicalRowIndex": 21,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_c54898dbe5b22a3f7028",
+      "candidateIds": [
+        "mofjik_c54898dbe5b22a3f7028"
+      ],
+      "diagnostic": null,
+      "name": "産業技術・環境・産業標\n準政策の研究開発等に必\n要な経費",
+      "parentItemName": "産業技術・環境・産業標\n準政策推進費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 50,
+      "logicalRowIndex": 28,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_a5fd4d54152259354d7a",
+      "candidateIds": [
+        "mofjik_a5fd4d54152259354d7a"
+      ],
+      "diagnostic": null,
+      "name": "中小企業の産業技術・環\n境・産業標準政策の推進\nに必要な経費",
+      "parentItemName": "産業技術・環境・産業標\n準政策推進費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 52,
+      "logicalRowIndex": 16,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_28e9f7ac096c42b39963",
+      "candidateIds": [
+        "mofsec_28e9f7ac096c42b39963"
+      ],
+      "diagnostic": null,
+      "name": "情報処理・サービス・製\n造産業振興費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 52,
+      "logicalRowIndex": 17,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_26706004baa8520acd08",
+      "candidateIds": [
+        "mofjik_26706004baa8520acd08"
+      ],
+      "diagnostic": null,
+      "name": "情報処理の促進及びサー\nビス・製造産業の振興に\n係る研究開発等に必要な\n経費",
+      "parentItemName": "情報処理・サービス・製\n造産業振興費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 54,
+      "logicalRowIndex": 13,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_7eb0701e379e252f314d",
+      "candidateIds": [
+        "mofjik_7eb0701e379e252f314d"
+      ],
+      "diagnostic": null,
+      "name": "中小企業の情報処理の促\n進及びサービス・製造産\n業の振興に必要な経費",
+      "parentItemName": "情報処理・サービス・製\n造産業振興費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 61,
+      "logicalRowIndex": 19,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_5524fff53af4344dc31c",
+      "candidateIds": [
+        "mofjik_5524fff53af4344dc31c"
+      ],
+      "diagnostic": null,
+      "name": "情報処理の促進及びサー\nビス・製造産業の振興に\n必要な経費",
+      "parentItemName": "情報処理・サービス・製\n造産業振興費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 62,
+      "logicalRowIndex": 13,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_94c498a57febb2bbdf4d",
+      "candidateIds": [
+        "mofjik_94c498a57febb2bbdf4d"
+      ],
+      "diagnostic": null,
+      "name": "中小企業電子経済産業省\n構築事業に必要な経費",
+      "parentItemName": "情報処理・サービス・製\n造産業振興費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 62,
+      "logicalRowIndex": 18,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_d5fdd801cabdc1527385",
+      "candidateIds": [
+        "mofjik_d5fdd801cabdc1527385"
+      ],
+      "diagnostic": null,
+      "name": "電子経済産業省構築事業\nに必要な経費",
+      "parentItemName": "情報処理・サービス・製\n造産業振興費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 63,
+      "logicalRowIndex": 4,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_065b8778d42c65117a1e",
+      "candidateIds": [
+        "mofsec_065b8778d42c65117a1e"
+      ],
+      "diagnostic": null,
+      "name": "産業保安確保費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 63,
+      "logicalRowIndex": 5,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_dfc3e26d8d3c097a492b",
+      "candidateIds": [
+        "mofjik_dfc3e26d8d3c097a492b"
+      ],
+      "diagnostic": null,
+      "name": "中小企業の産業保安の確\n保に必要な経費",
+      "parentItemName": "産業保安確保費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 63,
+      "logicalRowIndex": 13,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_d2d41dd96a4b47b8715e",
+      "candidateIds": [
+        "mofjik_d2d41dd96a4b47b8715e"
+      ],
+      "diagnostic": null,
+      "name": "産業保安の確保に必要な\n経費",
+      "parentItemName": "産業保安確保費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 63,
+      "logicalRowIndex": 28,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_48a23a309e870695dcd8",
+      "candidateIds": [
+        "mofsec_48a23a309e870695dcd8"
+      ],
+      "diagnostic": null,
+      "name": "地 域 経 済 政 策 推 進 費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 63,
+      "logicalRowIndex": 29,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_c00741ca3bb1f3ccad46",
+      "candidateIds": [
+        "mofjik_c00741ca3bb1f3ccad46"
+      ],
+      "diagnostic": null,
+      "name": "中小企業の地域経済の発\n展に必要な経費",
+      "parentItemName": "地 域 経 済 政 策 推 進 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 65,
+      "logicalRowIndex": 23,
+      "recordKind": "request",
+      "classification": "no_exact_match",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "request_name_differs_under_parent",
+      "name": "地域経済産業活性化に必\n要な経費",
+      "parentItemName": "地 域 経 済 政 策 推 進 費",
+      "parentOrganizationName": "経済産業本省"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 66,
+      "logicalRowIndex": 5,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_557d7cb857c94d99aefd",
+      "candidateIds": [
+        "mofsec_557d7cb857c94d99aefd"
+      ],
+      "diagnostic": null,
+      "name": "経済産業局",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業局"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 66,
+      "logicalRowIndex": 6,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_d8e241dfa09f35b293d3",
+      "candidateIds": [
+        "mofjik_d8e241dfa09f35b293d3"
+      ],
+      "diagnostic": null,
+      "name": "経済産業局一般行政に必\n要な経費",
+      "parentItemName": "経済産業局",
+      "parentOrganizationName": "経済産業局"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 79,
+      "logicalRowIndex": 25,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_c3fb749a43bdd7ab8769",
+      "candidateIds": [
+        "mofsec_c3fb749a43bdd7ab8769"
+      ],
+      "diagnostic": null,
+      "name": "経 済 産 業 局 施 設 費",
+      "parentItemName": null,
+      "parentOrganizationName": "経済産業局"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 79,
+      "logicalRowIndex": 26,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_71ab3f504991ed50144b",
+      "candidateIds": [
+        "mofjik_71ab3f504991ed50144b"
+      ],
+      "diagnostic": null,
+      "name": "経済産業局施設整備に必\n要な経費",
+      "parentItemName": "経 済 産 業 局 施 設 費",
+      "parentOrganizationName": "経済産業局"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 82,
+      "logicalRowIndex": 5,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_b88fa3dcca0816230a73",
+      "candidateIds": [
+        "mofsec_b88fa3dcca0816230a73"
+      ],
+      "diagnostic": null,
+      "name": "産 業 保 安 監 督 官 署",
+      "parentItemName": null,
+      "parentOrganizationName": "産 業 保 安 監 督 官 署"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 82,
+      "logicalRowIndex": 6,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_102fd12c3658168e5fba",
+      "candidateIds": [
+        "mofjik_102fd12c3658168e5fba"
+      ],
+      "diagnostic": null,
+      "name": "産業保安監督官署一般行\n政に必要な経費",
+      "parentItemName": "産 業 保 安 監 督 官 署",
+      "parentOrganizationName": "産 業 保 安 監 督 官 署"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 85,
+      "logicalRowIndex": 5,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_a68cbb8422f53ffe490b",
+      "candidateIds": [
+        "mofsec_a68cbb8422f53ffe490b"
+      ],
+      "diagnostic": null,
+      "name": "資源エネルギー庁共通費",
+      "parentItemName": null,
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 85,
+      "logicalRowIndex": 6,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_7fe893e852ba448e744e",
+      "candidateIds": [
+        "mofjik_7fe893e852ba448e744e"
+      ],
+      "diagnostic": null,
+      "name": "資源エネルギー庁一般行\n政に必要な経費",
+      "parentItemName": "資源エネルギー庁共通費",
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 90,
+      "logicalRowIndex": 38,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_8c40858bb20a5e1c5221",
+      "candidateIds": [
+        "mofjik_8c40858bb20a5e1c5221"
+      ],
+      "diagnostic": null,
+      "name": "総合資源エネルギー調査\n会に必要な経費",
+      "parentItemName": "資源エネルギー庁共通費",
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 91,
+      "logicalRowIndex": 15,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_47a6a938559680573781",
+      "candidateIds": [
+        "mofjik_47a6a938559680573781"
+      ],
+      "diagnostic": null,
+      "name": "国 際 会 議 に 必 要 な 経 費",
+      "parentItemName": "資源エネルギー庁共通費",
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 91,
+      "logicalRowIndex": 29,
+      "recordKind": "item",
+      "classification": "no_exact_match",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "item_name_differs_in_organization",
+      "name": "原子力損害賠償支援対策\n費エネルギー対策特別会\n計へ繰入",
+      "parentItemName": null,
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 91,
+      "logicalRowIndex": 30,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_no_match",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_no_match",
+      "name": "原子力損害賠償支援対策\nの財源のエネルギー対策\n特別会計原子力損害賠償\n支援勘定へ繰入れに必要\nな経費",
+      "parentItemName": "原子力損害賠償支援対策\n費エネルギー対策特別会\n計へ繰入",
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 91,
+      "logicalRowIndex": 32,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_76cc48f8e98ef2c8ed1f",
+      "candidateIds": [
+        "mofsec_76cc48f8e98ef2c8ed1f"
+      ],
+      "diagnostic": null,
+      "name": "鉱物資源安定供給確保費",
+      "parentItemName": null,
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 92,
+      "logicalRowIndex": 4,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_a6af5bcd77399cf0a571",
+      "candidateIds": [
+        "mofjik_a6af5bcd77399cf0a571"
+      ],
+      "diagnostic": null,
+      "name": "鉱物資源の安定供給の確\n保に必要な経費",
+      "parentItemName": "鉱物資源安定供給確保費",
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 92,
+      "logicalRowIndex": 29,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_28e8ed2188c51fcc54d1",
+      "candidateIds": [
+        "mofsec_28e8ed2188c51fcc54d1"
+      ],
+      "diagnostic": null,
+      "name": "石油石炭税財源燃料安定\n供給対策及エネルギー需\n給構造高度化対策費エネ\nルギー対策特別会計へ繰\n入",
+      "parentItemName": null,
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 92,
+      "logicalRowIndex": 30,
+      "recordKind": "request",
+      "classification": "no_exact_match",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "request_name_is_prefix_of_mof",
+      "name": "石油石炭税財源の燃料安\n定供給対策及エネルギー\n需給構造高度化対策に係\nるエネルギー対策特別会\n計エネルギー需給勘定へ\n繰入れに必",
+      "parentItemName": "石油石炭税財源燃料安定\n供給対策及エネルギー需\n給構造高度化対策費エネ\nルギー対策特別会計へ繰\n入",
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 93,
+      "logicalRowIndex": 4,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_2baa7acb1fffbd033602",
+      "candidateIds": [
+        "mofsec_2baa7acb1fffbd033602"
+      ],
+      "diagnostic": null,
+      "name": "電源開発促進税財源電源\n立地対策及電源利用対策\n費エネルギー対策特別会\n計へ繰入",
+      "parentItemName": null,
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 93,
+      "logicalRowIndex": 5,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_2a84f500312e385317a0",
+      "candidateIds": [
+        "mofjik_2a84f500312e385317a0"
+      ],
+      "diagnostic": null,
+      "name": "電源開発促進税財源の電\n源立地対策及電源利用対\n策に係るエネルギー対策\n特別会計電源開発促進勘\n定へ繰入れに必要な経費",
+      "parentItemName": "電源開発促進税財源電源\n立地対策及電源利用対策\n費エネルギー対策特別会\n計へ繰入",
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 93,
+      "logicalRowIndex": 8,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_7ce0415939c8b057cdec",
+      "candidateIds": [
+        "mofsec_7ce0415939c8b057cdec"
+      ],
+      "diagnostic": null,
+      "name": "独立行政法人エネルギー\n・金属鉱物資源機構運営\n費",
+      "parentItemName": null,
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 93,
+      "logicalRowIndex": 9,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "独立行政法人エネルギー\n・金属鉱物資源機構運営\n費",
+      "parentOrganizationName": "資 源 エ ネ ル ギ ー 庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 94,
+      "logicalRowIndex": 5,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_6cca3be28021187b8631",
+      "candidateIds": [
+        "mofsec_6cca3be28021187b8631"
+      ],
+      "diagnostic": null,
+      "name": "中 小 企 業 庁 共 通 費",
+      "parentItemName": null,
+      "parentOrganizationName": "中小企業庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 94,
+      "logicalRowIndex": 6,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "中 小 企 業 庁 共 通 費",
+      "parentOrganizationName": "中小企業庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 97,
+      "logicalRowIndex": 30,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_5d906f28714f576b0e03",
+      "candidateIds": [
+        "mofjik_5d906f28714f576b0e03"
+      ],
+      "diagnostic": null,
+      "name": "審 議 会 に 必 要 な 経 費",
+      "parentItemName": "中 小 企 業 庁 共 通 費",
+      "parentOrganizationName": "中小企業庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 98,
+      "logicalRowIndex": 4,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_fdc3832775b31271c1d7",
+      "candidateIds": [
+        "mofsec_fdc3832775b31271c1d7"
+      ],
+      "diagnostic": null,
+      "name": "中 小 企 業 政 策 推 進 費",
+      "parentItemName": null,
+      "parentOrganizationName": "中小企業庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 98,
+      "logicalRowIndex": 5,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_d0abf687a6bcdcb979b2",
+      "candidateIds": [
+        "mofjik_d0abf687a6bcdcb979b2"
+      ],
+      "diagnostic": null,
+      "name": "中小企業政策の推進に必\n要な経費",
+      "parentItemName": "中 小 企 業 政 策 推 進 費",
+      "parentOrganizationName": "中小企業庁"
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 105,
+      "logicalRowIndex": 36,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_item_kind",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_item_kind",
+      "name": "独立行政法人中小企業基\n盤整備機構出資に必要な\n経費",
+      "parentItemName": "独立行政法人中小企業基\n盤整備機構出資",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "meti-detail-9-106",
+      "canonicalUrl": "https://www.meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "sourceAuthority": "経済産業省",
+      "page": 106,
+      "logicalRowIndex": 6,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "独立行政法人中小企業基\n盤整備機構運営費",
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "mhlw-detail-1260-1275",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1264,
+      "logicalRowIndex": 30,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_observed",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_observed",
+      "name": "国立ハンセン病療養所施\n設整備に必要な経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "mhlw-detail-1260-1275",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1269,
+      "logicalRowIndex": 4,
+      "recordKind": "request",
+      "classification": "parent_unresolved",
+      "reason": "parent_item_not_observed",
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "parent_unresolved:parent_item_not_observed",
+      "name": "国立ハンセン病療養所の\n運営に必要な経費",
+      "parentItemName": null,
+      "parentOrganizationName": null
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1555,
+      "logicalRowIndex": 5,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_0a3a9b7580760c78f1d7",
+      "candidateIds": [
+        "mofsec_0a3a9b7580760c78f1d7"
+      ],
+      "diagnostic": null,
+      "name": "地 方 厚 生 局 共 通 費",
+      "parentItemName": null,
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1555,
+      "logicalRowIndex": 34,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_aa749200eb70c3891b3c",
+      "candidateIds": [
+        "mofjik_aa749200eb70c3891b3c"
+      ],
+      "diagnostic": null,
+      "name": "地方厚生局一般行政に必\n要な経費",
+      "parentItemName": "地 方 厚 生 局 共 通 費",
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1587,
+      "logicalRowIndex": 32,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_db24b4ffa9b282ba6d41",
+      "candidateIds": [
+        "mofsec_db24b4ffa9b282ba6d41"
+      ],
+      "diagnostic": null,
+      "name": "地 方 厚 生 局 施 設 費",
+      "parentItemName": null,
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1587,
+      "logicalRowIndex": 33,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_ad9be65b3bf3158394fc",
+      "candidateIds": [
+        "mofjik_ad9be65b3bf3158394fc"
+      ],
+      "diagnostic": null,
+      "name": "地方厚生局施設整備に必\n要な経費",
+      "parentItemName": "地 方 厚 生 局 施 設 費",
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1589,
+      "logicalRowIndex": 34,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_077b42beb54fc4c309af",
+      "candidateIds": [
+        "mofsec_077b42beb54fc4c309af"
+      ],
+      "diagnostic": null,
+      "name": "保険医療機関等指導監督\n等実施費",
+      "parentItemName": null,
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1589,
+      "logicalRowIndex": 35,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_bcfac1361089ede1d8e3",
+      "candidateIds": [
+        "mofjik_bcfac1361089ede1d8e3"
+      ],
+      "diagnostic": null,
+      "name": "保険医療機関等に対する\n指導及び監督等に必要な\n経費",
+      "parentItemName": "保険医療機関等指導監督\n等実施費",
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1595,
+      "logicalRowIndex": 29,
+      "recordKind": "request",
+      "classification": "name_unavailable",
+      "reason": null,
+      "matchedId": null,
+      "candidateIds": [],
+      "diagnostic": "pdf_name_unavailable",
+      "name": null,
+      "parentItemName": "保険医療機関等指導監督\n等実施費",
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1597,
+      "logicalRowIndex": 9,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_dbcce241a2acf8efe03f",
+      "candidateIds": [
+        "mofsec_dbcce241a2acf8efe03f"
+      ],
+      "diagnostic": null,
+      "name": "医 師 等 国 家 試 験 実 施 費",
+      "parentItemName": null,
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1597,
+      "logicalRowIndex": 10,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_3cf25a4209a4e313908d",
+      "candidateIds": [
+        "mofjik_3cf25a4209a4e313908d"
+      ],
+      "diagnostic": null,
+      "name": "医師等国家試験実施の推\n進に必要な経費",
+      "parentItemName": "医 師 等 国 家 試 験 実 施 費",
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1597,
+      "logicalRowIndex": 21,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_a08c0a71a4a44ff3bf3b",
+      "candidateIds": [
+        "mofjik_a08c0a71a4a44ff3bf3b"
+      ],
+      "diagnostic": null,
+      "name": "医師等国家試験実施に必\n要な経費",
+      "parentItemName": "医 師 等 国 家 試 験 実 施 費",
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1597,
+      "logicalRowIndex": 33,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_9c27db81153e5faa23c2",
+      "candidateIds": [
+        "mofsec_9c27db81153e5faa23c2"
+      ],
+      "diagnostic": null,
+      "name": "麻 薬 ・ 覚 醒 剤 等 対 策 費",
+      "parentItemName": null,
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1597,
+      "logicalRowIndex": 34,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_5ef7eaf2c1762639114d",
+      "candidateIds": [
+        "mofjik_5ef7eaf2c1762639114d"
+      ],
+      "diagnostic": null,
+      "name": "麻薬・覚醒剤等対策に必\n要な経費",
+      "parentItemName": "麻 薬 ・ 覚 醒 剤 等 対 策 費",
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1600,
+      "logicalRowIndex": 34,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_c48e315f4650cf69357a",
+      "candidateIds": [
+        "mofjik_c48e315f4650cf69357a"
+      ],
+      "diagnostic": null,
+      "name": "麻薬・覚醒剤等対策の推\n進に必要な経費",
+      "parentItemName": "麻 薬 ・ 覚 醒 剤 等 対 策 費",
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1601,
+      "logicalRowIndex": 17,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_5ed3fb4f8aae169c71e9",
+      "candidateIds": [
+        "mofsec_5ed3fb4f8aae169c71e9"
+      ],
+      "diagnostic": null,
+      "name": "医 療 観 察 等 実 施 費",
+      "parentItemName": null,
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1601,
+      "logicalRowIndex": 18,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_ec7b1b9c025e0bd18fd7",
+      "candidateIds": [
+        "mofjik_ec7b1b9c025e0bd18fd7"
+      ],
+      "diagnostic": null,
+      "name": "入院の決定の執行等に必\n要な経費",
+      "parentItemName": "医 療 観 察 等 実 施 費",
+      "parentOrganizationName": "地方厚生局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1603,
+      "logicalRowIndex": 5,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_83a53bd3960e91f09edb",
+      "candidateIds": [
+        "mofsec_83a53bd3960e91f09edb"
+      ],
+      "diagnostic": null,
+      "name": "都 道 府 県 労 働 局 共 通 費",
+      "parentItemName": null,
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1603,
+      "logicalRowIndex": 6,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_578f46b1c8a439f756ab",
+      "candidateIds": [
+        "mofjik_578f46b1c8a439f756ab"
+      ],
+      "diagnostic": null,
+      "name": "都道府県労働局一般行政\nに必要な経費",
+      "parentItemName": "都 道 府 県 労 働 局 共 通 費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1624,
+      "logicalRowIndex": 26,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_41efed6799432903ebed",
+      "candidateIds": [
+        "mofjik_41efed6799432903ebed"
+      ],
+      "diagnostic": null,
+      "name": "地方労働審議会に必要な\n経費",
+      "parentItemName": "都 道 府 県 労 働 局 共 通 費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1626,
+      "logicalRowIndex": 4,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_6ea085929e8485cc342b",
+      "candidateIds": [
+        "mofjik_6ea085929e8485cc342b"
+      ],
+      "diagnostic": null,
+      "name": "厚生労働統計調査に必要\nな経費",
+      "parentItemName": "都 道 府 県 労 働 局 共 通 費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1626,
+      "logicalRowIndex": 18,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_db75c31a30ef6842c352",
+      "candidateIds": [
+        "mofsec_db75c31a30ef6842c352"
+      ],
+      "diagnostic": null,
+      "name": "都 道 府 県 労 働 局 施 設 費",
+      "parentItemName": null,
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1626,
+      "logicalRowIndex": 21,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_9cd1dc7cde155876928e",
+      "candidateIds": [
+        "mofjik_9cd1dc7cde155876928e"
+      ],
+      "diagnostic": null,
+      "name": "都道府県労働局施設整備\nに必要な経費",
+      "parentItemName": "都 道 府 県 労 働 局 施 設 費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1627,
+      "logicalRowIndex": 38,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_5c8314a595e586974c7e",
+      "candidateIds": [
+        "mofsec_5c8314a595e586974c7e"
+      ],
+      "diagnostic": null,
+      "name": "労働条件確保・改善対策\n費",
+      "parentItemName": null,
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1628,
+      "logicalRowIndex": 4,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_87e9b0b7ebc15403b779",
+      "candidateIds": [
+        "mofjik_87e9b0b7ebc15403b779"
+      ],
+      "diagnostic": null,
+      "name": "労働条件の確保・改善に\n必要な経費",
+      "parentItemName": "労働条件確保・改善対策\n費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1639,
+      "logicalRowIndex": 13,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_9284171dbf7a7a290b09",
+      "candidateIds": [
+        "mofsec_9284171dbf7a7a290b09"
+      ],
+      "diagnostic": null,
+      "name": "個 別 労 働 紛 争 対 策 費",
+      "parentItemName": null,
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1639,
+      "logicalRowIndex": 16,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_500aa525fa51c36e921b",
+      "candidateIds": [
+        "mofjik_500aa525fa51c36e921b"
+      ],
+      "diagnostic": null,
+      "name": "個別労働紛争対策に必要\nな経費",
+      "parentItemName": "個 別 労 働 紛 争 対 策 費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1639,
+      "logicalRowIndex": 38,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_c0328cc12d02e90b3db7",
+      "candidateIds": [
+        "mofsec_c0328cc12d02e90b3db7"
+      ],
+      "diagnostic": null,
+      "name": "職 業 紹 介 事 業 等 実 施 費",
+      "parentItemName": null,
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1639,
+      "logicalRowIndex": 39,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_d20a6402ca47b9644c3f",
+      "candidateIds": [
+        "mofjik_d20a6402ca47b9644c3f"
+      ],
+      "diagnostic": null,
+      "name": "職業紹介事業等の実施に\n必要な経費",
+      "parentItemName": "職 業 紹 介 事 業 等 実 施 費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1643,
+      "logicalRowIndex": 34,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_d7c635fd3ab9b7db136f",
+      "candidateIds": [
+        "mofsec_d7c635fd3ab9b7db136f"
+      ],
+      "diagnostic": null,
+      "name": "高齢者等雇用安定・促進\n費",
+      "parentItemName": null,
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1643,
+      "logicalRowIndex": 35,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_7fc7490f12cb1bd52243",
+      "candidateIds": [
+        "mofjik_7fc7490f12cb1bd52243"
+      ],
+      "diagnostic": null,
+      "name": "高齢者等の雇用の安定・\n促進に必要な経費",
+      "parentItemName": "高齢者等雇用安定・促進\n費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1665,
+      "logicalRowIndex": 20,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_f423426686b6d920073f",
+      "candidateIds": [
+        "mofjik_f423426686b6d920073f"
+      ],
+      "diagnostic": null,
+      "name": "高齢者等の雇用安定等の\n推進に必要な経費",
+      "parentItemName": "高齢者等雇用安定・促進\n費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1690,
+      "logicalRowIndex": 7,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_e1bda5ddb8ac254f3b43",
+      "candidateIds": [
+        "mofsec_e1bda5ddb8ac254f3b43"
+      ],
+      "diagnostic": null,
+      "name": "男 女 均 等 雇 用 対 策 費",
+      "parentItemName": null,
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1690,
+      "logicalRowIndex": 10,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_5618dd943ff515e546cb",
+      "candidateIds": [
+        "mofjik_5618dd943ff515e546cb"
+      ],
+      "diagnostic": null,
+      "name": "男女労働者の均等な雇用\n環境等の整備に必要な経\n費",
+      "parentItemName": "男 女 均 等 雇 用 対 策 費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1699,
+      "logicalRowIndex": 28,
+      "recordKind": "item",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofsec_a61f0fb2eea261a2a5de",
+      "candidateIds": [
+        "mofsec_a61f0fb2eea261a2a5de"
+      ],
+      "diagnostic": null,
+      "name": "若年者等職業能力開発支\n援費",
+      "parentItemName": null,
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1699,
+      "logicalRowIndex": 29,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_a116bc3dea7e9f810250",
+      "candidateIds": [
+        "mofjik_a116bc3dea7e9f810250"
+      ],
+      "diagnostic": null,
+      "name": "若年者等に対する職業能\n力開発の支援に必要な経\n費",
+      "parentItemName": "若年者等職業能力開発支\n援費",
+      "parentOrganizationName": "都道府県労働局"
+    },
+    {
+      "runId": "mhlw-detail-1555-1700",
+      "canonicalUrl": "https://www.mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "sourceAuthority": "厚生労働省",
+      "page": 1700,
+      "logicalRowIndex": 4,
+      "recordKind": "request",
+      "classification": "exact_unique",
+      "reason": null,
+      "matchedId": "mofjik_aaebdd466a7faf6f919a",
+      "candidateIds": [
+        "mofjik_aaebdd466a7faf6f919a"
+      ],
+      "diagnostic": null,
+      "name": "若年者等に対する職業能\n力開発の推進に必要な経\n費",
+      "parentItemName": "若年者等職業能力開発支\n援費",
+      "parentOrganizationName": "都道府県労働局"
+    }
+  ]
+}
