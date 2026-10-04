@@ -1,0 +1,1503 @@
+{
+  "schema": "mof-budget-xml-structure-summary/v0",
+  "scope": "FY2024 一般会計 当初予算 202411001。観測のみ（意味は決め打ちしない。normalization・production schema は決めない）",
+  "xmlFiles": 328,
+  "structure": {
+    "declarations": {
+      "distinct": 1,
+      "encodingValues": [
+        "Shift_JIS"
+      ],
+      "rootValues": [
+        "budget"
+      ],
+      "doctypeValues": [
+        "DOCTYPE budget SYSTEM \"../dtd/202401.dtd\""
+      ],
+      "stylesheetFiles": 328
+    },
+    "elementPathCount": 47,
+    "fingerprintCount": 28,
+    "fingerprints": [
+      {
+        "fingerprint": "a643198d",
+        "files": 1,
+        "firstFiles": [
+          "202411001000001a.xml"
+        ],
+        "pathCount": 29,
+        "titleForList": [
+          {
+            "title": "一般会計予算",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "eb4f8cf7",
+        "files": 1,
+        "firstFiles": [
+          "202411001000029a.xml"
+        ],
+        "pathCount": 21,
+        "titleForList": [
+          {
+            "title": "歳入",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "9da2999f",
+        "files": 3,
+        "firstFiles": [
+          "202411001000043a.xml",
+          "202411001000090a.xml",
+          "202411001000121a.xml"
+        ],
+        "pathCount": 22,
+        "titleForList": [
+          {
+            "title": "国庫債務負担行為",
+            "files": 1
+          },
+          {
+            "title": "歳出",
+            "files": 1
+          },
+          {
+            "title": "繰越明許費",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "63470d11",
+        "files": 1,
+        "firstFiles": [
+          "202411001000086a.xml"
+        ],
+        "pathCount": 23,
+        "titleForList": [
+          {
+            "title": "継続費",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "7ce1585b",
+        "files": 2,
+        "firstFiles": [
+          "202411001000193a.xml",
+          "202411001000194a.xml"
+        ],
+        "pathCount": 28,
+        "titleForList": [
+          {
+            "title": "財政法の規定により令和6年度に発行を予定する公債の償還計画表",
+            "files": 1
+          },
+          {
+            "title": "財政運営に必要な財源の確保を図るための公債の発行の特例に関する法律の規定により令和6年度に発行を予定する公債の償還計画表",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "b58346e9",
+        "files": 2,
+        "firstFiles": [
+          "202411001000195a.xml",
+          "202411001000261a.xml"
+        ],
+        "pathCount": 13,
+        "titleForList": [
+          {
+            "title": "一般会計各省各庁予定経費要求書等",
+            "files": 1
+          },
+          {
+            "title": "一般会計歳入予算明細書",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "3965c4b9",
+        "files": 42,
+        "firstFiles": [
+          "202411001000197a.xml",
+          "202411001000207a.xml",
+          "202411001000209a.xml"
+        ],
+        "pathCount": 24,
+        "titleForList": [
+          {
+            "title": "予定経費要求書",
+            "files": 1
+          },
+          {
+            "title": "国会職員 総表",
+            "files": 1
+          },
+          {
+            "title": "政府職員 総表",
+            "files": 3
+          },
+          {
+            "title": "歳入予算明細書",
+            "files": 17
+          },
+          {
+            "title": "歳入予算部款項目別表",
+            "files": 1
+          },
+          {
+            "title": "甲号 予定経費要求書",
+            "files": 18
+          },
+          {
+            "title": "裁判所職員 総表",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "8cbfafd7",
+        "files": 108,
+        "firstFiles": [
+          "202411001000207b.xml",
+          "202411001000209b.xml",
+          "202411001000211b.xml"
+        ],
+        "pathCount": 23,
+        "titleForList": [
+          {
+            "title": "〔組織別事項別内訳〕",
+            "files": 1
+          },
+          {
+            "title": "科目別内訳",
+            "files": 91
+          },
+          {
+            "title": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎",
+            "files": 16
+          }
+        ]
+      },
+      {
+        "fingerprint": "a6b0b6dc",
+        "files": 25,
+        "firstFiles": [
+          "202411001000225b.xml",
+          "202411001000268a.xml",
+          "202411001000280a.xml"
+        ],
+        "pathCount": 24,
+        "titleForList": [
+          {
+            "title": "〔組織別事項別内訳〕",
+            "files": 4
+          },
+          {
+            "title": "丁号 国庫債務負担行為要求書",
+            "files": 18
+          },
+          {
+            "title": "乙号 継続費要求書",
+            "files": 1
+          },
+          {
+            "title": "科目別内訳",
+            "files": 1
+          },
+          {
+            "title": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "5e76da9b",
+        "files": 2,
+        "firstFiles": [
+          "202411001000265b.xml",
+          "202411001000309b.xml"
+        ],
+        "pathCount": 27,
+        "titleForList": [
+          {
+            "title": "〔組織別事項別内訳〕",
+            "files": 2
+          }
+        ]
+      },
+      {
+        "fingerprint": "104fc22c",
+        "files": 13,
+        "firstFiles": [
+          "202411001000267a.xml",
+          "202411001000278a.xml",
+          "202411001000295a.xml"
+        ],
+        "pathCount": 26,
+        "titleForList": [
+          {
+            "title": "丙号 繰越明許費要求書",
+            "files": 13
+          }
+        ]
+      },
+      {
+        "fingerprint": "16006d26",
+        "files": 3,
+        "firstFiles": [
+          "202411001000272a.xml",
+          "202411001000274a.xml",
+          "202411001000468a.xml"
+        ],
+        "pathCount": 23,
+        "titleForList": [
+          {
+            "title": "〔組織別事項別内訳〕",
+            "files": 3
+          }
+        ]
+      },
+      {
+        "fingerprint": "ce226ea9",
+        "files": 9,
+        "firstFiles": [
+          "202411001000276a.xml",
+          "202411001000277a.xml",
+          "202411001000466a.xml"
+        ],
+        "pathCount": 24,
+        "titleForList": [
+          {
+            "title": "〔組織別事項別内訳〕",
+            "files": 9
+          }
+        ]
+      },
+      {
+        "fingerprint": "87095a12",
+        "files": 5,
+        "firstFiles": [
+          "202411001000283b.xml",
+          "202411001000297b.xml",
+          "202411001000307b.xml"
+        ],
+        "pathCount": 28,
+        "titleForList": [
+          {
+            "title": "組織別等内訳",
+            "files": 5
+          }
+        ]
+      },
+      {
+        "fingerprint": "f04b97b3",
+        "files": 31,
+        "firstFiles": [
+          "202411001000313a.xml",
+          "202411001000347a.xml",
+          "202411001000350a.xml"
+        ],
+        "pathCount": 27,
+        "titleForList": [
+          {
+            "title": "〔組織別事項別内訳〕",
+            "files": 31
+          }
+        ]
+      },
+      {
+        "fingerprint": "38d58a65",
+        "files": 33,
+        "firstFiles": [
+          "202411001000314a.xml",
+          "202411001000345a.xml",
+          "202411001000348a.xml"
+        ],
+        "pathCount": 28,
+        "titleForList": [
+          {
+            "title": "〔組織別事項別内訳〕",
+            "files": 33
+          }
+        ]
+      },
+      {
+        "fingerprint": "0adb5552",
+        "files": 12,
+        "firstFiles": [
+          "202411001000320a.xml",
+          "202411001000416a.xml",
+          "202411001000485a.xml"
+        ],
+        "pathCount": 25,
+        "titleForList": [
+          {
+            "title": "政府職員 総表",
+            "files": 12
+          }
+        ]
+      },
+      {
+        "fingerprint": "00e12981",
+        "files": 10,
+        "firstFiles": [
+          "202411001000320b.xml",
+          "202411001000417a.xml",
+          "202411001000485b.xml"
+        ],
+        "pathCount": 29,
+        "titleForList": [
+          {
+            "title": "組織別等内訳",
+            "files": 10
+          }
+        ]
+      },
+      {
+        "fingerprint": "8e83a7bf",
+        "files": 9,
+        "firstFiles": [
+          "202411001000328a.xml",
+          "202411001000493b.xml",
+          "202411001000616a.xml"
+        ],
+        "pathCount": 28,
+        "titleForList": [
+          {
+            "title": "〔組織別事項別内訳〕",
+            "files": 9
+          }
+        ]
+      },
+      {
+        "fingerprint": "dc8a81c0",
+        "files": 2,
+        "firstFiles": [
+          "202411001000453b.xml",
+          "202411001000576a.xml"
+        ],
+        "pathCount": 25,
+        "titleForList": [
+          {
+            "title": "〔組織別事項別内訳〕",
+            "files": 2
+          }
+        ]
+      },
+      {
+        "fingerprint": "aafb64b8",
+        "files": 5,
+        "firstFiles": [
+          "202411001000473a.xml",
+          "202411001000593a.xml",
+          "202411001000652a.xml"
+        ],
+        "pathCount": 27,
+        "titleForList": [
+          {
+            "title": "丙号 繰越明許費要求書",
+            "files": 5
+          }
+        ]
+      },
+      {
+        "fingerprint": "09379a6d",
+        "files": 2,
+        "firstFiles": [
+          "202411001000530a.xml",
+          "202411001000749a.xml"
+        ],
+        "pathCount": 30,
+        "titleForList": [
+          {
+            "title": "組織別等内訳",
+            "files": 2
+          }
+        ]
+      },
+      {
+        "fingerprint": "937ae570",
+        "files": 2,
+        "firstFiles": [
+          "202411001000581a.xml",
+          "202411001000771a.xml"
+        ],
+        "pathCount": 24,
+        "titleForList": [
+          {
+            "title": "科目別内訳",
+            "files": 2
+          }
+        ]
+      },
+      {
+        "fingerprint": "520b298c",
+        "files": 1,
+        "firstFiles": [
+          "202411001001135a.xml"
+        ],
+        "pathCount": 28,
+        "titleForList": [
+          {
+            "title": "コード番号について",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "0d1531bd",
+        "files": 1,
+        "firstFiles": [
+          "202411001110001a.xml"
+        ],
+        "pathCount": 17,
+        "titleForList": [
+          {
+            "title": "目録",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "5509d7c7",
+        "files": 1,
+        "firstFiles": [
+          "202411001120001a.xml"
+        ],
+        "pathCount": 17,
+        "titleForList": [
+          {
+            "title": "目録",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "de319558",
+        "files": 1,
+        "firstFiles": [
+          "202411001130001a.xml"
+        ],
+        "pathCount": 18,
+        "titleForList": [
+          {
+            "title": "目録",
+            "files": 1
+          }
+        ]
+      },
+      {
+        "fingerprint": "1cc20cc9",
+        "files": 1,
+        "firstFiles": [
+          "202411001910001a.xml"
+        ],
+        "pathCount": 12,
+        "titleForList": [
+          {
+            "title": "表紙",
+            "files": 1
+          }
+        ]
+      }
+    ],
+    "pathStats": [
+      {
+        "path": "/budget",
+        "files": 328,
+        "nodes": 328,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body",
+        "files": 328,
+        "nodes": 715,
+        "attrNames": {
+          "layer": 715
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/notes",
+        "files": 112,
+        "nodes": 112,
+        "attrNames": {
+          "copy": 64
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/notes/blk",
+        "files": 112,
+        "nodes": 124,
+        "attrNames": {
+          "id": 124
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/notes/blk/p",
+        "files": 112,
+        "nodes": 210,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/notes/blk/p/l",
+        "files": 112,
+        "nodes": 284,
+        "attrNames": {},
+        "withOwnText": 266
+      },
+      {
+        "path": "/budget/body/notes/blk/p/l/qt",
+        "files": 19,
+        "nodes": 382,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/table",
+        "files": 321,
+        "nodes": 335,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/table/data",
+        "files": 321,
+        "nodes": 901,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/table/data/clm",
+        "files": 321,
+        "nodes": 91288,
+        "attrNames": {
+          "id": 91288
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/table/data/clm/p",
+        "files": 321,
+        "nodes": 93953,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/table/data/clm/p/l",
+        "files": 321,
+        "nodes": 113234,
+        "attrNames": {},
+        "withOwnText": 112048
+      },
+      {
+        "path": "/budget/body/table/data/clm/p/l/gaiji",
+        "files": 7,
+        "nodes": 96,
+        "attrNames": {
+          "code": 96
+        },
+        "withOwnText": 96
+      },
+      {
+        "path": "/budget/body/table/data/clm/p/l/qt",
+        "files": 114,
+        "nodes": 11117,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/table/header",
+        "files": 321,
+        "nodes": 900,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/table/header/clm",
+        "files": 321,
+        "nodes": 7623,
+        "attrNames": {
+          "id": 7623
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/table/header/clm/p",
+        "files": 321,
+        "nodes": 7623,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/table/header/clm/p/l",
+        "files": 321,
+        "nodes": 8433,
+        "attrNames": {},
+        "withOwnText": 8433
+      },
+      {
+        "path": "/budget/body/table/header/clm/p/l/qt",
+        "files": 296,
+        "nodes": 2276,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/title",
+        "files": 328,
+        "nodes": 328,
+        "attrNames": {
+          "copy": 76
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/title/blk",
+        "files": 328,
+        "nodes": 447,
+        "attrNames": {
+          "id": 447
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/title/blk/p",
+        "files": 328,
+        "nodes": 447,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/title/blk/p/l",
+        "files": 328,
+        "nodes": 448,
+        "attrNames": {},
+        "withOwnText": 448
+      },
+      {
+        "path": "/budget/body/title/blk/p/l/qt",
+        "files": 62,
+        "nodes": 126,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing",
+        "files": 5,
+        "nodes": 15,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk",
+        "files": 5,
+        "nodes": 790,
+        "attrNames": {
+          "id": 790
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk/body",
+        "files": 1,
+        "nodes": 13,
+        "attrNames": {
+          "layer": 13
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk/body/table",
+        "files": 1,
+        "nodes": 13,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk/body/table/data",
+        "files": 1,
+        "nodes": 13,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk/body/table/data/clm",
+        "files": 1,
+        "nodes": 368,
+        "attrNames": {
+          "id": 368
+        },
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk/body/table/data/clm/p",
+        "files": 1,
+        "nodes": 368,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk/body/table/data/clm/p/l",
+        "files": 1,
+        "nodes": 382,
+        "attrNames": {},
+        "withOwnText": 381
+      },
+      {
+        "path": "/budget/body/writing/blk/body/table/data/clm/p/l/qt",
+        "files": 1,
+        "nodes": 4,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk/body/table/data/clm/p/l/sl",
+        "files": 1,
+        "nodes": 1,
+        "attrNames": {
+          "type": 1
+        },
+        "withOwnText": 1
+      },
+      {
+        "path": "/budget/body/writing/blk/p",
+        "files": 5,
+        "nodes": 777,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk/p/l",
+        "files": 5,
+        "nodes": 821,
+        "attrNames": {},
+        "withOwnText": 809
+      },
+      {
+        "path": "/budget/body/writing/blk/p/l/b",
+        "files": 1,
+        "nodes": 1,
+        "attrNames": {},
+        "withOwnText": 1
+      },
+      {
+        "path": "/budget/body/writing/blk/p/l/b/qt",
+        "files": 1,
+        "nodes": 1,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/body/writing/blk/p/l/gaiji",
+        "files": 1,
+        "nodes": 12,
+        "attrNames": {
+          "code": 12
+        },
+        "withOwnText": 12
+      },
+      {
+        "path": "/budget/body/writing/blk/p/l/qt",
+        "files": 4,
+        "nodes": 345,
+        "attrNames": {},
+        "withOwnText": 0
+      },
+      {
+        "path": "/budget/fiscal_year",
+        "files": 328,
+        "nodes": 328,
+        "attrNames": {
+          "ad": 328
+        },
+        "withOwnText": 328
+      },
+      {
+        "path": "/budget/handings_of_budget",
+        "files": 328,
+        "nodes": 328,
+        "attrNames": {
+          "kind": 328
+        },
+        "withOwnText": 327
+      },
+      {
+        "path": "/budget/handings_of_budget/title_page",
+        "files": 315,
+        "nodes": 315,
+        "attrNames": {},
+        "withOwnText": 315
+      },
+      {
+        "path": "/budget/running_title",
+        "files": 325,
+        "nodes": 325,
+        "attrNames": {},
+        "withOwnText": 325
+      },
+      {
+        "path": "/budget/title_for_list",
+        "files": 328,
+        "nodes": 328,
+        "attrNames": {},
+        "withOwnText": 328
+      },
+      {
+        "path": "/budget/types_of_account",
+        "files": 328,
+        "nodes": 328,
+        "attrNames": {},
+        "withOwnText": 328
+      },
+      {
+        "path": "/budget/types_of_budget",
+        "files": 328,
+        "nodes": 328,
+        "attrNames": {},
+        "withOwnText": 328
+      }
+    ],
+    "clmIdFormMismatch": {
+      "clm": 0,
+      "total": 99279
+    },
+    "titleForList": [
+      {
+        "title": "〔組織別事項別内訳〕",
+        "files": 94
+      },
+      {
+        "title": "科目別内訳",
+        "files": 94
+      },
+      {
+        "title": "丁号 国庫債務負担行為要求書",
+        "files": 18
+      },
+      {
+        "title": "丙号 繰越明許費要求書",
+        "files": 18
+      },
+      {
+        "title": "甲号 予定経費要求書",
+        "files": 18
+      },
+      {
+        "title": "歳入予算明細書",
+        "files": 17
+      },
+      {
+        "title": "組織別等内訳",
+        "files": 17
+      },
+      {
+        "title": "部・款・項・目別区分並びに各目の見積の事由及び計算の基礎",
+        "files": 17
+      },
+      {
+        "title": "政府職員 総表",
+        "files": 15
+      },
+      {
+        "title": "目録",
+        "files": 3
+      },
+      {
+        "title": "コード番号について",
+        "files": 1
+      },
+      {
+        "title": "一般会計予算",
+        "files": 1
+      },
+      {
+        "title": "一般会計各省各庁予定経費要求書等",
+        "files": 1
+      },
+      {
+        "title": "一般会計歳入予算明細書",
+        "files": 1
+      },
+      {
+        "title": "乙号 継続費要求書",
+        "files": 1
+      },
+      {
+        "title": "予定経費要求書",
+        "files": 1
+      },
+      {
+        "title": "国会職員 総表",
+        "files": 1
+      },
+      {
+        "title": "国庫債務負担行為",
+        "files": 1
+      },
+      {
+        "title": "歳入",
+        "files": 1
+      },
+      {
+        "title": "歳入予算部款項目別表",
+        "files": 1
+      },
+      {
+        "title": "歳出",
+        "files": 1
+      },
+      {
+        "title": "継続費",
+        "files": 1
+      },
+      {
+        "title": "繰越明許費",
+        "files": 1
+      },
+      {
+        "title": "表紙",
+        "files": 1
+      },
+      {
+        "title": "裁判所職員 総表",
+        "files": 1
+      },
+      {
+        "title": "財政法の規定により令和6年度に発行を予定する公債の償還計画表",
+        "files": 1
+      },
+      {
+        "title": "財政運営に必要な財源の確保を図るための公債の発行の特例に関する法律の規定により令和6年度に発行を予定する公債の償還計画表",
+        "files": 1
+      }
+    ],
+    "menu": {
+      "entries": 424,
+      "entriesWithXml": 419,
+      "distinctXml": 328,
+      "filesLinkedByMultipleEntries": 23,
+      "maxEntriesPerFile": 19
+    }
+  },
+  "jikouTableFingerprints": [
+    {
+      "fingerprint": "8cbfafd7",
+      "files": 1,
+      "firstFile": "202411001000269b.xml",
+      "pathsMissingVsMostCommon": [
+        "/budget/body/notes",
+        "/budget/body/notes/blk",
+        "/budget/body/notes/blk/p",
+        "/budget/body/notes/blk/p/l",
+        "/budget/body/table/data/clm/p/l/qt"
+      ],
+      "pathsExtraVsMostCommon": []
+    },
+    {
+      "fingerprint": "a6b0b6dc",
+      "files": 4,
+      "firstFile": "202411001000291b.xml",
+      "pathsMissingVsMostCommon": [
+        "/budget/body/notes",
+        "/budget/body/notes/blk",
+        "/budget/body/notes/blk/p",
+        "/budget/body/notes/blk/p/l"
+      ],
+      "pathsExtraVsMostCommon": []
+    },
+    {
+      "fingerprint": "5e76da9b",
+      "files": 2,
+      "firstFile": "202411001000265b.xml",
+      "pathsMissingVsMostCommon": [
+        "/budget/body/table/data/clm/p/l/qt"
+      ],
+      "pathsExtraVsMostCommon": []
+    },
+    {
+      "fingerprint": "16006d26",
+      "files": 3,
+      "firstFile": "202411001000272a.xml",
+      "pathsMissingVsMostCommon": [
+        "/budget/body/notes",
+        "/budget/body/notes/blk",
+        "/budget/body/notes/blk/p",
+        "/budget/body/notes/blk/p/l",
+        "/budget/body/table/data/clm/p/l/qt"
+      ],
+      "pathsExtraVsMostCommon": []
+    },
+    {
+      "fingerprint": "ce226ea9",
+      "files": 9,
+      "firstFile": "202411001000276a.xml",
+      "pathsMissingVsMostCommon": [
+        "/budget/body/notes",
+        "/budget/body/notes/blk",
+        "/budget/body/notes/blk/p",
+        "/budget/body/notes/blk/p/l"
+      ],
+      "pathsExtraVsMostCommon": []
+    },
+    {
+      "fingerprint": "f04b97b3",
+      "files": 31,
+      "firstFile": "202411001000313a.xml",
+      "pathsMissingVsMostCommon": [
+        "/budget/body/table/data/clm/p/l/qt"
+      ],
+      "pathsExtraVsMostCommon": []
+    },
+    {
+      "fingerprint": "38d58a65",
+      "files": 33,
+      "firstFile": "202411001000314a.xml",
+      "pathsMissingVsMostCommon": [],
+      "pathsExtraVsMostCommon": []
+    },
+    {
+      "fingerprint": "8e83a7bf",
+      "files": 9,
+      "firstFile": "202411001000328a.xml",
+      "pathsMissingVsMostCommon": [],
+      "pathsExtraVsMostCommon": []
+    },
+    {
+      "fingerprint": "dc8a81c0",
+      "files": 2,
+      "firstFile": "202411001000453b.xml",
+      "pathsMissingVsMostCommon": [
+        "/budget/body/notes",
+        "/budget/body/notes/blk",
+        "/budget/body/notes/blk/p",
+        "/budget/body/notes/blk/p/l"
+      ],
+      "pathsExtraVsMostCommon": [
+        "/budget/body/table/data/clm/p/l/gaiji"
+      ]
+    }
+  ],
+  "jikouLabelOccurrences": {
+    "headerLabel事項ByTitle": [
+      {
+        "title": "〔組織別事項別内訳〕",
+        "filesWithHeaderLabel": 94,
+        "headerLabelFiles": [
+          "202411001000265b.xml",
+          "202411001000269b.xml"
+        ]
+      },
+      {
+        "title": "丁号 国庫債務負担行為要求書",
+        "filesWithHeaderLabel": 18,
+        "headerLabelFiles": [
+          "202411001000268a.xml",
+          "202411001000280a.xml"
+        ]
+      },
+      {
+        "title": "丙号 繰越明許費要求書",
+        "filesWithHeaderLabel": 18,
+        "headerLabelFiles": [
+          "202411001000267a.xml",
+          "202411001000278a.xml"
+        ]
+      },
+      {
+        "title": "乙号 継続費要求書",
+        "filesWithHeaderLabel": 1,
+        "headerLabelFiles": [
+          "202411001001096a.xml"
+        ]
+      },
+      {
+        "title": "予定経費要求書",
+        "filesWithHeaderLabel": 1,
+        "headerLabelFiles": [
+          "202411001000263a.xml"
+        ]
+      },
+      {
+        "title": "国庫債務負担行為",
+        "filesWithHeaderLabel": 1,
+        "headerLabelFiles": [
+          "202411001000121a.xml"
+        ]
+      },
+      {
+        "title": "繰越明許費",
+        "filesWithHeaderLabel": 1,
+        "headerLabelFiles": [
+          "202411001000090a.xml"
+        ]
+      }
+    ]
+  },
+  "jikouTables": {
+    "files": 94,
+    "tables": 94,
+    "headerLayouts": [
+      {
+        "header": "1-1.2=組織|1-2.2=項|1-4.2=事項|1-6.2=令和6年度|1-8.2=前年度|1-10.2=比較増△減額(千円)|1-11.2=説明|2-6.3=要求額|2-7.1=(千円)|2-8.3=予算額|2-9.1=(千円)",
+        "files": 94,
+        "firstFile": "202411001000265b.xml"
+      }
+    ],
+    "rowClasses": [
+      {
+        "class": "description-only-row(11.1)",
+        "rows": 32
+      },
+      {
+        "class": "jikou-row",
+        "rows": 472
+      },
+      {
+        "class": "kou+jikou-row",
+        "rows": 690
+      },
+      {
+        "class": "org+kou+jikou-row",
+        "rows": 94
+      },
+      {
+        "class": "subtotal-row(4.2)",
+        "rows": 88
+      }
+    ],
+    "counts": {
+      "kouStartRows": 784,
+      "jikouRows": 1256,
+      "subtotalRows": 88,
+      "descriptionOnlyRows": 32,
+      "orgCells": 94
+    },
+    "organization": {
+      "runningTitleForm": {
+        "ministryPrefixPlusOrg": 93,
+        "bare": 1
+      },
+      "firstRowOrgCellEqualsRunningTitleOrgPart": 94,
+      "differs": [],
+      "ministryNames": [
+        "デジタル庁所管",
+        "会計検査院所管",
+        "内閣府所管",
+        "内閣所管",
+        "厚生労働省所管",
+        "国会所管",
+        "国土交通省所管",
+        "外務省所管",
+        "文部科学省所管",
+        "法務省所管",
+        "環境省所管",
+        "経済産業省所管",
+        "総務省所管",
+        "裁判所所管",
+        "財務省所管",
+        "農林水産省所管",
+        "防衛省所管"
+      ],
+      "distinctRunningTitles": 94,
+      "menuAncestorChain": {
+        "fileHasMenuChain": 94,
+        "chainContainsRunningTitle": 94
+      }
+    },
+    "kou": {
+      "codeChecks": {
+        "numeric3": 784,
+        "notNumeric3": 0,
+        "nonIncreasingWithinFile": 99,
+        "duplicateWithinFile": 0,
+        "filesWithNonIncreasingCodeOrder": 25
+      },
+      "uniqueCodeNamePairs": 750,
+      "namesAppearingInMultipleKouRows": 30
+    },
+    "jikou": {
+      "codeCellForm": [
+        [
+          "2桁数字",
+          1256
+        ]
+      ],
+      "uniqueNames": 1078,
+      "namesAppearingMoreThanOnce": 107
+    },
+    "assignment": {
+      "jikouWithPrecedingKouInFile": 1256,
+      "jikouWithoutPrecedingKou": 0,
+      "kouRowsAlsoCarryJikou": 784,
+      "kouRowWithoutJikou": 0
+    },
+    "docOrderChecks": {
+      "filesChecked": 94,
+      "notAscending": 0,
+      "rowsOnNewPageStartWithKou": 187,
+      "pageFirstRows": 219
+    },
+    "amounts": {
+      "blankByColumn": {
+        "col6": 0,
+        "col8": 0,
+        "col10": 0
+      },
+      "forms": [
+        {
+          "form": "10.1:N",
+          "rows": 510
+        },
+        {
+          "form": "10.1:△ N",
+          "rows": 746
+        },
+        {
+          "form": "6.1:N",
+          "rows": 1256
+        },
+        {
+          "form": "8.1:N",
+          "rows": 1256
+        }
+      ]
+    },
+    "text": {
+      "jikouNames": 1256,
+      "multiLine": 1250,
+      "withInnerSpace": 0,
+      "withFullwidthSpace": 0,
+      "withGaiji": 2,
+      "withQt": 11,
+      "halfwidthAscii": 11,
+      "kouNames": 784,
+      "kouMultiLine": 713,
+      "kouWithInnerSpace": 0,
+      "kouWithGaiji": 0
+    },
+    "examples": [
+      {
+        "file": "202411001000265b.xml",
+        "row": "p265-4.1",
+        "kou": {
+          "code": "001",
+          "name": "内廷費"
+        },
+        "cells": {
+          "1.1": [
+            "皇室費"
+          ],
+          "2.1": [
+            "001"
+          ],
+          "3.1": [
+            "内廷費"
+          ],
+          "4.1": [
+            "95"
+          ],
+          "5.1": [
+            "内廷に必要な経費"
+          ],
+          "6.1": [
+            "324,000"
+          ],
+          "8.1": [
+            "324,000"
+          ],
+          "10.1": [
+            "0"
+          ],
+          "11.1": [
+            "｢日本国憲法｣及び｢皇室経済法｣に基づく内廷費"
+          ]
+        }
+      },
+      {
+        "file": "202411001000265b.xml",
+        "row": "p265-5.1",
+        "kou": {
+          "code": "002",
+          "name": "宮廷費"
+        },
+        "cells": {
+          "2.1": [
+            "002"
+          ],
+          "3.1": [
+            "宮廷費"
+          ],
+          "4.1": [
+            "95"
+          ],
+          "5.1": [
+            "宮廷に必要な経費"
+          ],
+          "6.1": [
+            "5,847,144"
+          ],
+          "8.1": [
+            "5,854,454"
+          ],
+          "10.1": [
+            "△ 7,310"
+          ],
+          "11.1": [
+            "｢日本国憲法｣及び｢皇室経済法｣に基づく宮廷費"
+          ]
+        }
+      },
+      {
+        "file": "202411001000265b.xml",
+        "row": "p265-6.1",
+        "kou": {
+          "code": "002",
+          "name": "宮廷費"
+        },
+        "cells": {
+          "4.1": [
+            "95"
+          ],
+          "5.1": [
+            "国際観光旅客税財",
+            "源宮廷に必要な経",
+            "費"
+          ],
+          "6.1": [
+            "3,706,667"
+          ],
+          "8.1": [
+            "269,409"
+          ],
+          "10.1": [
+            "3,437,258"
+          ],
+          "11.1": [
+            "｢外国人観光旅客の来訪の促進等による国際観光の振興に関",
+            "する法律｣に基づく本年度において見込まれる国際観光旅客",
+            "税収入を財源として施行する三の丸尚蔵館及び皇居東御苑大",
+            "手休憩所(仮称)の施設整備 "
+          ]
+        }
+      },
+      {
+        "file": "202411001000265b.xml",
+        "row": "p265-7.1",
+        "kou": {
+          "code": "003",
+          "name": "皇族費"
+        },
+        "cells": {
+          "2.1": [
+            "003"
+          ],
+          "3.1": [
+            "皇族費"
+          ],
+          "4.1": [
+            "95"
+          ],
+          "5.1": [
+            "皇族に必要な経費"
+          ],
+          "6.1": [
+            "263,724"
+          ],
+          "8.1": [
+            "260,165"
+          ],
+          "10.1": [
+            "3,559"
+          ],
+          "11.1": [
+            "｢日本国憲法｣及び｢皇室経済法｣に基づく皇族費"
+          ]
+        }
+      },
+      {
+        "file": "202411001000269b.xml",
+        "row": "p269-3.1",
+        "kou": {
+          "code": "001",
+          "name": "衆議院"
+        },
+        "cells": {
+          "1.1": [
+            "衆議院"
+          ],
+          "2.1": [
+            "001"
+          ],
+          "3.1": [
+            "衆議院"
+          ],
+          "4.1": [
+            "95"
+          ],
+          "5.1": [
+            "国会の権能行使に",
+            "必要な経費"
+          ],
+          "6.1": [
+            "44,506,498"
+          ],
+          "8.1": [
+            "43,946,940"
+          ],
+          "10.1": [
+            "559,558"
+          ],
+          "11.1": [
+            "｢日本国憲法｣、｢国会法｣等に基づく国会の権能行使",
+            "　　　　　　　　"
+          ]
+        }
+      },
+      {
+        "file": "202411001000269b.xml",
+        "row": "p269-4.1",
+        "kou": {
+          "code": "001",
+          "name": "衆議院"
+        },
+        "cells": {
+          "4.1": [
+            "95"
+          ],
+          "5.1": [
+            "衆議院の運営に必",
+            "要な経費"
+          ],
+          "6.1": [
+            "21,333,829"
+          ],
+          "8.1": [
+            "20,842,398"
+          ],
+          "10.1": [
+            "491,431"
+          ],
+          "11.1": [
+            "｢国会法｣等に基づく衆議院事務局及び衆議院法制局所掌の事",
+            "務処理"
+          ]
+        }
+      }
+    ],
+    "exceptions": []
+  }
+}
