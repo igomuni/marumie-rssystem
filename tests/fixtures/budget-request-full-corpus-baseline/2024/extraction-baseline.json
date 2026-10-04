@@ -1,0 +1,2868 @@
+{
+  "schema": "budget-request-full-corpus-baseline-extraction/v0",
+  "scope": "FY2024 概算要求 82 PDF を現行 pipeline に無修正で適用した extraction-only の baseline（MOF との照合は含まない）",
+  "frozen": {
+    "corpusManifestSha256": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+    "protocolCommit": "4d76dbcf2b45f9a0e2338f8026b476e3842d8849",
+    "runnerCommit": "3ae5c819c1c84ee58853aad13124551acdf8588c"
+  },
+  "document": {
+    "totalPdfs": 82,
+    "status": {
+      "hard_failure": 8,
+      "success": 74
+    },
+    "byExecutionClass": {
+      "runnable_existing_contract": {
+        "pdfs": 8,
+        "pages": 4079,
+        "success": 8,
+        "failed": 0
+      },
+      "unrunnable_missing_hierarchy": {
+        "pdfs": 74,
+        "pages": 5820,
+        "success": 66,
+        "failed": 8
+      },
+      "unrunnable_missing_layout_contract": {
+        "pdfs": 0,
+        "pages": 0,
+        "success": 0,
+        "failed": 0
+      },
+      "unrunnable_other": {
+        "pdfs": 0,
+        "pages": 0,
+        "success": 0,
+        "failed": 0
+      }
+    },
+    "pages": {
+      "total": 9899,
+      "attempted": 9899,
+      "processed": 8663
+    },
+    "successfulPdfsPages": 8663,
+    "stageCounts": {
+      "sourceTokens": 3248816,
+      "logicalRowCandidates": 301017,
+      "pagesWithColumnLayout": 8136,
+      "pagesWithoutColumnLayout": 527
+    },
+    "unsupported": 0,
+    "notRunnable": 0,
+    "failures": [
+      {
+        "localPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+        "publisherAuthority": "公正取引委員会",
+        "accountType": "general",
+        "pages": 140,
+        "executionClass": "unrunnable_missing_hierarchy",
+        "errors": [
+          {
+            "pages": [
+              1,
+              140
+            ],
+            "mode": "null_hierarchy",
+            "status": "hard_failure",
+            "error": "extract:p138: 回転ページ(rotate=90)は未対応です（page 138）"
+          }
+        ]
+      },
+      {
+        "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_04.pdf",
+        "publisherAuthority": "文部科学省",
+        "accountType": "general",
+        "pages": 6,
+        "executionClass": "unrunnable_missing_hierarchy",
+        "errors": [
+          {
+            "pages": [
+              1,
+              6
+            ],
+            "mode": "null_hierarchy",
+            "status": "hard_failure",
+            "error": "extract:p1: 回転ページ(rotate=90)は未対応です（page 1）"
+          }
+        ]
+      },
+      {
+        "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+        "publisherAuthority": "財務省",
+        "accountType": "special",
+        "pages": 20,
+        "executionClass": "unrunnable_missing_hierarchy",
+        "errors": [
+          {
+            "pages": [
+              1,
+              20
+            ],
+            "mode": "null_hierarchy",
+            "status": "hard_failure",
+            "error": "extract:p20: 回転ページ(rotate=90)は未対応です（page 20）"
+          }
+        ]
+      },
+      {
+        "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+        "publisherAuthority": "財務省",
+        "accountType": "general",
+        "pages": 297,
+        "executionClass": "unrunnable_missing_hierarchy",
+        "errors": [
+          {
+            "pages": [
+              1,
+              297
+            ],
+            "mode": "null_hierarchy",
+            "status": "hard_failure",
+            "error": "extract:p292: 回転ページ(rotate=90)は未対応です（page 292）"
+          }
+        ]
+      },
+      {
+        "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+        "publisherAuthority": "財務省",
+        "accountType": "special",
+        "pages": 9,
+        "executionClass": "unrunnable_missing_hierarchy",
+        "errors": [
+          {
+            "pages": [
+              1,
+              9
+            ],
+            "mode": "null_hierarchy",
+            "status": "hard_failure",
+            "error": "extract:p9: 回転ページ(rotate=90)は未対応です（page 9）"
+          }
+        ]
+      },
+      {
+        "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+        "publisherAuthority": "財務省",
+        "accountType": "special",
+        "pages": 11,
+        "executionClass": "unrunnable_missing_hierarchy",
+        "errors": [
+          {
+            "pages": [
+              1,
+              11
+            ],
+            "mode": "null_hierarchy",
+            "status": "hard_failure",
+            "error": "extract:p11: 回転ページ(rotate=90)は未対応です（page 11）"
+          }
+        ]
+      },
+      {
+        "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+        "publisherAuthority": "財務省",
+        "accountType": "special",
+        "pages": 16,
+        "executionClass": "unrunnable_missing_hierarchy",
+        "errors": [
+          {
+            "pages": [
+              1,
+              16
+            ],
+            "mode": "null_hierarchy",
+            "status": "hard_failure",
+            "error": "extract:p16: 回転ページ(rotate=90)は未対応です（page 16）"
+          }
+        ]
+      },
+      {
+        "localPath": "data/download/moj.go.jp/content/001402818.pdf",
+        "publisherAuthority": "法務省",
+        "accountType": "general",
+        "pages": 737,
+        "executionClass": "unrunnable_missing_hierarchy",
+        "errors": [
+          {
+            "pages": [
+              1,
+              737
+            ],
+            "mode": "null_hierarchy",
+            "status": "hard_failure",
+            "error": "extract:p1: 回転ページ(rotate=90)は未対応です（page 1）"
+          }
+        ]
+      }
+    ]
+  },
+  "records": {
+    "total": 49459,
+    "byKind": {
+      "detail_line": 29793,
+      "item": 97,
+      "organization": 20,
+      "request": 4245,
+      "unclassified": 15304
+    },
+    "byMode": {
+      "hierarchy_enabled": {
+        "detail_line": 6504,
+        "item": 97,
+        "organization": 20,
+        "request": 274,
+        "unclassified": 1078
+      },
+      "null_hierarchy": {
+        "detail_line": 23289,
+        "request": 3971,
+        "unclassified": 14226
+      }
+    },
+    "nameStatusByKind": {
+      "detail_line": {
+        "ambiguous": 823,
+        "resolved": 28935,
+        "unresolved": 35
+      },
+      "item": {
+        "ambiguous": 2,
+        "resolved": 95
+      },
+      "organization": {
+        "ambiguous": 1,
+        "resolved": 19
+      },
+      "request": {
+        "ambiguous": 114,
+        "resolved": 1446,
+        "unresolved": 2685
+      },
+      "unclassified": {
+        "ambiguous": 3799,
+        "resolved": 8399,
+        "unresolved": 3106
+      }
+    },
+    "nameUnavailableReasonByKind": {
+      "detail_line": {
+        "column_layout_not_corroborated_on_page": 15,
+        "continuation_ambiguous": 823,
+        "no_name_token": 20
+      },
+      "item": {
+        "continuation_ambiguous": 2
+      },
+      "organization": {
+        "continuation_ambiguous": 1
+      },
+      "request": {
+        "column_layout_unobserved": 2685,
+        "continuation_ambiguous": 114
+      },
+      "unclassified": {
+        "column_layout_not_corroborated_on_page": 58,
+        "column_layout_unobserved": 1623,
+        "continuation_ambiguous": 3799,
+        "no_name_token": 1425
+      }
+    }
+  },
+  "items": {
+    "total": 97,
+    "nameAvailable": 95,
+    "nameUnavailable": 2,
+    "parentOrganizationStatus": {
+      "resolved": 97
+    },
+    "parentOrganizationNamed": 97
+  },
+  "requests": {
+    "total": 4245,
+    "nameAvailable": 1446,
+    "parentItemStatus": {
+      "not_observed": 3971,
+      "resolved": 227,
+      "unresolved": 47
+    },
+    "parentRecordKind": {
+      "item": 158,
+      "organization": 13,
+      "unclassified": 56
+    },
+    "parentIsItemKind": 158,
+    "parentNamed": 223,
+    "parentOrganizationStatus": {
+      "not_observed": 3971,
+      "resolved": 162,
+      "unresolved": 112
+    }
+  },
+  "byMinistry": {
+    "こども家庭庁|general": {
+      "pdfs": 1,
+      "pages": 147,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 66,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 43,
+      "requestParentUnresolved": 66,
+      "organizationRecords": 7,
+      "detailLines": 464
+    },
+    "こども家庭庁|special": {
+      "pdfs": 1,
+      "pages": 29,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 24,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 16,
+      "requestParentUnresolved": 24,
+      "organizationRecords": 0,
+      "detailLines": 39
+    },
+    "カジノ管理委員会|general": {
+      "pdfs": 1,
+      "pages": 17,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 9,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 6,
+      "requestParentUnresolved": 9,
+      "organizationRecords": 0,
+      "detailLines": 79
+    },
+    "デジタル庁|general": {
+      "pdfs": 1,
+      "pages": 32,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 12,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 8,
+      "requestParentUnresolved": 12,
+      "organizationRecords": 0,
+      "detailLines": 231
+    },
+    "人事院|general": {
+      "pdfs": 1,
+      "pages": 98,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 12,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 9,
+      "requestParentUnresolved": 12,
+      "organizationRecords": 0,
+      "detailLines": 215
+    },
+    "会計検査院|general": {
+      "pdfs": 1,
+      "pages": 48,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 9,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 7,
+      "requestParentUnresolved": 9,
+      "organizationRecords": 0,
+      "detailLines": 147
+    },
+    "個人情報保護委員会|general": {
+      "pdfs": 1,
+      "pages": 30,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 6,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 4,
+      "requestParentUnresolved": 6,
+      "organizationRecords": 0,
+      "detailLines": 105
+    },
+    "公正取引委員会|general": {
+      "pdfs": 1,
+      "pages": 140,
+      "pdfsFailed": 1,
+      "items": 0,
+      "requests": 0,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 0,
+      "requestParentUnresolved": 0,
+      "organizationRecords": 0,
+      "detailLines": 0
+    },
+    "内閣官房|general": {
+      "pdfs": 15,
+      "pages": 91,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 30,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 6,
+      "requestParentUnresolved": 30,
+      "organizationRecords": 0,
+      "detailLines": 421
+    },
+    "内閣官房|special": {
+      "pdfs": 2,
+      "pages": 3,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 2,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 1,
+      "requestParentUnresolved": 2,
+      "organizationRecords": 0,
+      "detailLines": 6
+    },
+    "内閣府|general": {
+      "pdfs": 2,
+      "pages": 28,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 100,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 99,
+      "requestParentUnresolved": 100,
+      "organizationRecords": 0,
+      "detailLines": 9
+    },
+    "内閣府|special": {
+      "pdfs": 3,
+      "pages": 26,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 24,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 5,
+      "requestParentUnresolved": 24,
+      "organizationRecords": 0,
+      "detailLines": 66
+    },
+    "内閣法制局|general": {
+      "pdfs": 1,
+      "pages": 29,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 6,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 4,
+      "requestParentUnresolved": 6,
+      "organizationRecords": 0,
+      "detailLines": 83
+    },
+    "厚生労働省|general": {
+      "pdfs": 1,
+      "pages": 1723,
+      "pdfsFailed": 0,
+      "items": 14,
+      "requests": 550,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 360,
+      "requestParentUnresolved": 529,
+      "organizationRecords": 2,
+      "detailLines": 4750
+    },
+    "厚生労働省|special": {
+      "pdfs": 2,
+      "pages": 830,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 234,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 153,
+      "requestParentUnresolved": 234,
+      "organizationRecords": 0,
+      "detailLines": 262
+    },
+    "参議院|general": {
+      "pdfs": 1,
+      "pages": 21,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 12,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 8,
+      "requestParentUnresolved": 12,
+      "organizationRecords": 0,
+      "detailLines": 118
+    },
+    "国土交通省|general": {
+      "pdfs": 1,
+      "pages": 1097,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 744,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 486,
+      "requestParentUnresolved": 744,
+      "organizationRecords": 0,
+      "detailLines": 7283
+    },
+    "国土交通省|special": {
+      "pdfs": 2,
+      "pages": 61,
+      "pdfsFailed": 0,
+      "items": 8,
+      "requests": 122,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 76,
+      "requestParentUnresolved": 110,
+      "organizationRecords": 1,
+      "detailLines": 380
+    },
+    "国立国会図書館|general": {
+      "pdfs": 1,
+      "pages": 17,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 12,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 8,
+      "requestParentUnresolved": 12,
+      "organizationRecords": 0,
+      "detailLines": 108
+    },
+    "外務省|general": {
+      "pdfs": 1,
+      "pages": 314,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 140,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 95,
+      "requestParentUnresolved": 140,
+      "organizationRecords": 0,
+      "detailLines": 2337
+    },
+    "宮内庁|general": {
+      "pdfs": 2,
+      "pages": 53,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 15,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 10,
+      "requestParentUnresolved": 15,
+      "organizationRecords": 0,
+      "detailLines": 162
+    },
+    "復興庁|special": {
+      "pdfs": 1,
+      "pages": 103,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 284,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 186,
+      "requestParentUnresolved": 284,
+      "organizationRecords": 0,
+      "detailLines": 155
+    },
+    "文部科学省|general": {
+      "pdfs": 4,
+      "pages": 1359,
+      "pdfsFailed": 1,
+      "items": 19,
+      "requests": 291,
+      "itemNameUnavailable": 2,
+      "requestNameUnavailable": 204,
+      "requestParentUnresolved": 264,
+      "organizationRecords": 2,
+      "detailLines": 2529
+    },
+    "法務省|general": {
+      "pdfs": 1,
+      "pages": 737,
+      "pdfsFailed": 1,
+      "items": 0,
+      "requests": 0,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 0,
+      "requestParentUnresolved": 0,
+      "organizationRecords": 0,
+      "detailLines": 0
+    },
+    "法務省|special": {
+      "pdfs": 1,
+      "pages": 11,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 6,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 5,
+      "requestParentUnresolved": 6,
+      "organizationRecords": 0,
+      "detailLines": 16
+    },
+    "消費者庁|general": {
+      "pdfs": 1,
+      "pages": 200,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 12,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 9,
+      "requestParentUnresolved": 12,
+      "organizationRecords": 0,
+      "detailLines": 300
+    },
+    "消費者庁|special": {
+      "pdfs": 1,
+      "pages": 9,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 3,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 2,
+      "requestParentUnresolved": 3,
+      "organizationRecords": 0,
+      "detailLines": 0
+    },
+    "環境省|general": {
+      "pdfs": 1,
+      "pages": 193,
+      "pdfsFailed": 0,
+      "items": 17,
+      "requests": 126,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 80,
+      "requestParentUnresolved": 107,
+      "organizationRecords": 1,
+      "detailLines": 1406
+    },
+    "環境省|special": {
+      "pdfs": 3,
+      "pages": 71,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 126,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 83,
+      "requestParentUnresolved": 126,
+      "organizationRecords": 0,
+      "detailLines": 131
+    },
+    "経済産業省|general": {
+      "pdfs": 1,
+      "pages": 106,
+      "pdfsFailed": 0,
+      "items": 30,
+      "requests": 132,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 91,
+      "requestParentUnresolved": 84,
+      "organizationRecords": 5,
+      "detailLines": 1139
+    },
+    "経済産業省|special": {
+      "pdfs": 5,
+      "pages": 75,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 150,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 99,
+      "requestParentUnresolved": 150,
+      "organizationRecords": 0,
+      "detailLines": 174
+    },
+    "総務省|general": {
+      "pdfs": 1,
+      "pages": 454,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 133,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 85,
+      "requestParentUnresolved": 133,
+      "organizationRecords": 0,
+      "detailLines": 2011
+    },
+    "総務省|special": {
+      "pdfs": 1,
+      "pages": 22,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 48,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 32,
+      "requestParentUnresolved": 48,
+      "organizationRecords": 0,
+      "detailLines": 0
+    },
+    "衆議院|general": {
+      "pdfs": 1,
+      "pages": 36,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 15,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 10,
+      "requestParentUnresolved": 15,
+      "organizationRecords": 0,
+      "detailLines": 120
+    },
+    "裁判官弾劾裁判所|general": {
+      "pdfs": 1,
+      "pages": 9,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 6,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 4,
+      "requestParentUnresolved": 6,
+      "organizationRecords": 0,
+      "detailLines": 44
+    },
+    "裁判官訴追委員会|general": {
+      "pdfs": 1,
+      "pages": 8,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 3,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 2,
+      "requestParentUnresolved": 3,
+      "organizationRecords": 0,
+      "detailLines": 41
+    },
+    "裁判所|general": {
+      "pdfs": 1,
+      "pages": 127,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 27,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 18,
+      "requestParentUnresolved": 27,
+      "organizationRecords": 0,
+      "detailLines": 381
+    },
+    "警察庁|general": {
+      "pdfs": 1,
+      "pages": 112,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 54,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 37,
+      "requestParentUnresolved": 54,
+      "organizationRecords": 0,
+      "detailLines": 458
+    },
+    "警察庁|special": {
+      "pdfs": 1,
+      "pages": 7,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 6,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 5,
+      "requestParentUnresolved": 6,
+      "organizationRecords": 0,
+      "detailLines": 0
+    },
+    "財務省|general": {
+      "pdfs": 1,
+      "pages": 297,
+      "pdfsFailed": 1,
+      "items": 0,
+      "requests": 0,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 0,
+      "requestParentUnresolved": 0,
+      "organizationRecords": 0,
+      "detailLines": 0
+    },
+    "財務省|special": {
+      "pdfs": 6,
+      "pages": 71,
+      "pdfsFailed": 4,
+      "items": 0,
+      "requests": 42,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 28,
+      "requestParentUnresolved": 42,
+      "organizationRecords": 0,
+      "detailLines": 0
+    },
+    "農林水産省|general": {
+      "pdfs": 1,
+      "pages": 378,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 291,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 187,
+      "requestParentUnresolved": 291,
+      "organizationRecords": 0,
+      "detailLines": 1710
+    },
+    "農林水産省|special": {
+      "pdfs": 3,
+      "pages": 63,
+      "pdfsFailed": 0,
+      "items": 8,
+      "requests": 181,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 114,
+      "requestParentUnresolved": 154,
+      "organizationRecords": 1,
+      "detailLines": 180
+    },
+    "金融庁|general": {
+      "pdfs": 1,
+      "pages": 77,
+      "pdfsFailed": 0,
+      "items": 0,
+      "requests": 0,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 0,
+      "requestParentUnresolved": 0,
+      "organizationRecords": 0,
+      "detailLines": 0
+    },
+    "防衛省|general": {
+      "pdfs": 1,
+      "pages": 540,
+      "pdfsFailed": 0,
+      "items": 1,
+      "requests": 180,
+      "itemNameUnavailable": 0,
+      "requestNameUnavailable": 114,
+      "requestParentUnresolved": 176,
+      "organizationRecords": 1,
+      "detailLines": 1733
+    }
+  },
+  "failureDistribution": {
+    "A_documentRunBoundary": {
+      "hardFailureOrException": {
+        "hard_failure:extract:pN: 回転ページ(rotate=N)は未対応です（page N）": 8
+      },
+      "unsupported": 0,
+      "notRunnable": 0
+    },
+    "B_recordDetection": {
+      "pdfsWithSuccessAndNoItem": 67,
+      "pdfsWithSuccessAndNoRequest": 1,
+      "pdfsWithHierarchyContractAndNoItem": 1,
+      "unclassifiedRecords": 15304
+    },
+    "C_nameResolution": {
+      "detail_line": {
+        "column_layout_not_corroborated_on_page": 15,
+        "continuation_ambiguous": 823,
+        "no_name_token": 20
+      },
+      "item": {
+        "continuation_ambiguous": 2
+      },
+      "organization": {
+        "continuation_ambiguous": 1
+      },
+      "request": {
+        "column_layout_unobserved": 2685,
+        "continuation_ambiguous": 114
+      },
+      "unclassified": {
+        "column_layout_not_corroborated_on_page": 58,
+        "column_layout_unobserved": 1623,
+        "continuation_ambiguous": 3799,
+        "no_name_token": 1425
+      }
+    },
+    "D_hierarchy": {
+      "requestsParentItemNotObserved": 3971,
+      "requestsParentItemUnresolved": 47,
+      "requestsParentResolvedButNotItemKind": 69,
+      "requestsParentIsItem": 158
+    }
+  },
+  "perDocument": [
+    {
+      "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+      "publisherAuthority": "消費者庁",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 9,
+      "pagesProcessed": 9,
+      "records": 15,
+      "items": 0,
+      "requests": 3,
+      "segments": [
+        {
+          "pages": [
+            1,
+            9
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+      "publisherAuthority": "消費者庁",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 200,
+      "pagesProcessed": 200,
+      "records": 509,
+      "items": 0,
+      "requests": 12,
+      "segments": [
+        {
+          "pages": [
+            1,
+            200
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+      "publisherAuthority": "内閣府",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 25,
+      "pagesProcessed": 25,
+      "records": 175,
+      "items": 0,
+      "requests": 99,
+      "segments": [
+        {
+          "pages": [
+            1,
+            25
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf",
+      "publisherAuthority": "内閣府",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 3,
+      "pagesProcessed": 3,
+      "records": 18,
+      "items": 0,
+      "requests": 1,
+      "segments": [
+        {
+          "pages": [
+            1,
+            3
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
+      "publisherAuthority": "内閣府",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 19,
+      "pagesProcessed": 19,
+      "records": 121,
+      "items": 0,
+      "requests": 15,
+      "segments": [
+        {
+          "pages": [
+            1,
+            19
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f1.pdf",
+      "publisherAuthority": "内閣府",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 2,
+      "pagesProcessed": 2,
+      "records": 10,
+      "items": 0,
+      "requests": 5,
+      "segments": [
+        {
+          "pages": [
+            1,
+            2
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f2.pdf",
+      "publisherAuthority": "内閣府",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 5,
+      "pagesProcessed": 5,
+      "records": 13,
+      "items": 0,
+      "requests": 4,
+      "segments": [
+        {
+          "pages": [
+            1,
+            5
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_01.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 2,
+      "pagesProcessed": 2,
+      "records": 11,
+      "items": 0,
+      "requests": 6,
+      "segments": [
+        {
+          "pages": [
+            1,
+            2
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_02.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 2,
+      "pagesProcessed": 2,
+      "records": 14,
+      "items": 0,
+      "requests": 2,
+      "segments": [
+        {
+          "pages": [
+            1,
+            2
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_03.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 4,
+      "pagesProcessed": 4,
+      "records": 28,
+      "items": 0,
+      "requests": 1,
+      "segments": [
+        {
+          "pages": [
+            1,
+            4
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_04.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 4,
+      "pagesProcessed": 4,
+      "records": 20,
+      "items": 0,
+      "requests": 2,
+      "segments": [
+        {
+          "pages": [
+            1,
+            4
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_05.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 1,
+      "pagesProcessed": 1,
+      "records": 7,
+      "items": 0,
+      "requests": 1,
+      "segments": [
+        {
+          "pages": [
+            1,
+            1
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 6,
+      "pagesProcessed": 6,
+      "records": 146,
+      "items": 0,
+      "requests": 1,
+      "segments": [
+        {
+          "pages": [
+            1,
+            6
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_07.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 29,
+      "pagesProcessed": 29,
+      "records": 138,
+      "items": 0,
+      "requests": 2,
+      "segments": [
+        {
+          "pages": [
+            1,
+            29
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_08.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 4,
+      "pagesProcessed": 4,
+      "records": 24,
+      "items": 0,
+      "requests": 3,
+      "segments": [
+        {
+          "pages": [
+            1,
+            4
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_09.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 3,
+      "pagesProcessed": 3,
+      "records": 22,
+      "items": 0,
+      "requests": 2,
+      "segments": [
+        {
+          "pages": [
+            1,
+            3
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_10.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 4,
+      "pagesProcessed": 4,
+      "records": 27,
+      "items": 0,
+      "requests": 1,
+      "segments": [
+        {
+          "pages": [
+            1,
+            4
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 19,
+      "pagesProcessed": 19,
+      "records": 30,
+      "items": 0,
+      "requests": 2,
+      "segments": [
+        {
+          "pages": [
+            1,
+            19
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_12.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 4,
+      "pagesProcessed": 4,
+      "records": 22,
+      "items": 0,
+      "requests": 2,
+      "segments": [
+        {
+          "pages": [
+            1,
+            4
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_13.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 3,
+      "pagesProcessed": 3,
+      "records": 17,
+      "items": 0,
+      "requests": 2,
+      "segments": [
+        {
+          "pages": [
+            1,
+            3
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_14.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 3,
+      "pagesProcessed": 3,
+      "records": 14,
+      "items": 0,
+      "requests": 2,
+      "segments": [
+        {
+          "pages": [
+            1,
+            3
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_15.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 3,
+      "pagesProcessed": 3,
+      "records": 29,
+      "items": 0,
+      "requests": 1,
+      "segments": [
+        {
+          "pages": [
+            1,
+            3
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_16.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 2,
+      "pagesProcessed": 2,
+      "records": 5,
+      "items": 0,
+      "requests": 1,
+      "segments": [
+        {
+          "pages": [
+            1,
+            2
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_17.pdf",
+      "publisherAuthority": "内閣官房",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 1,
+      "pagesProcessed": 1,
+      "records": 13,
+      "items": 0,
+      "requests": 1,
+      "segments": [
+        {
+          "pages": [
+            1,
+            1
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+      "publisherAuthority": "こども家庭庁",
+      "accountType": "general",
+      "executionClass": "runnable_existing_contract",
+      "status": "success",
+      "pages": 147,
+      "pagesProcessed": 147,
+      "records": 613,
+      "items": 0,
+      "requests": 66,
+      "segments": [
+        {
+          "pages": [
+            1,
+            6
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            7,
+            147
+          ],
+          "mode": "hierarchy_enabled",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+      "publisherAuthority": "こども家庭庁",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 29,
+      "pagesProcessed": 29,
+      "records": 118,
+      "items": 0,
+      "requests": 24,
+      "segments": [
+        {
+          "pages": [
+            1,
+            29
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+      "publisherAuthority": "内閣法制局",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 29,
+      "pagesProcessed": 29,
+      "records": 109,
+      "items": 0,
+      "requests": 6,
+      "segments": [
+        {
+          "pages": [
+            1,
+            29
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+      "publisherAuthority": "裁判所",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 127,
+      "pagesProcessed": 127,
+      "records": 666,
+      "items": 0,
+      "requests": 27,
+      "segments": [
+        {
+          "pages": [
+            1,
+            127
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+      "publisherAuthority": "裁判官弾劾裁判所",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 9,
+      "pagesProcessed": 9,
+      "records": 60,
+      "items": 0,
+      "requests": 6,
+      "segments": [
+        {
+          "pages": [
+            1,
+            9
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+      "publisherAuthority": "デジタル庁",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 32,
+      "pagesProcessed": 32,
+      "records": 411,
+      "items": 0,
+      "requests": 12,
+      "segments": [
+        {
+          "pages": [
+            1,
+            32
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/env.go.jp/content/000157010.pdf",
+      "publisherAuthority": "環境省",
+      "accountType": "general",
+      "executionClass": "runnable_existing_contract",
+      "status": "success",
+      "pages": 193,
+      "pagesProcessed": 193,
+      "records": 2127,
+      "items": 17,
+      "requests": 126,
+      "segments": [
+        {
+          "pages": [
+            1,
+            20
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            21,
+            193
+          ],
+          "mode": "hierarchy_enabled",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/env.go.jp/content/000157012.pdf",
+      "publisherAuthority": "環境省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 16,
+      "pagesProcessed": 16,
+      "records": 157,
+      "items": 0,
+      "requests": 57,
+      "segments": [
+        {
+          "pages": [
+            1,
+            16
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/env.go.jp/content/000157013.pdf",
+      "publisherAuthority": "環境省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 25,
+      "pagesProcessed": 25,
+      "records": 166,
+      "items": 0,
+      "requests": 45,
+      "segments": [
+        {
+          "pages": [
+            1,
+            25
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/env.go.jp/content/000157016.pdf",
+      "publisherAuthority": "環境省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 30,
+      "pagesProcessed": 30,
+      "records": 117,
+      "items": 0,
+      "requests": 24,
+      "segments": [
+        {
+          "pages": [
+            1,
+            30
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf",
+      "publisherAuthority": "金融庁",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 77,
+      "pagesProcessed": 77,
+      "records": 0,
+      "items": 0,
+      "requests": 0,
+      "segments": [
+        {
+          "pages": [
+            1,
+            77
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+      "publisherAuthority": "会計検査院",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 48,
+      "pagesProcessed": 48,
+      "records": 176,
+      "items": 0,
+      "requests": 9,
+      "segments": [
+        {
+          "pages": [
+            1,
+            48
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+      "publisherAuthority": "カジノ管理委員会",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 17,
+      "pagesProcessed": 17,
+      "records": 102,
+      "items": 0,
+      "requests": 9,
+      "segments": [
+        {
+          "pages": [
+            1,
+            17
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+      "publisherAuthority": "公正取引委員会",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "hard_failure",
+      "pages": 140,
+      "pagesProcessed": 0,
+      "records": 0,
+      "items": 0,
+      "requests": 0,
+      "segments": [
+        {
+          "pages": [
+            1,
+            140
+          ],
+          "mode": "null_hierarchy",
+          "status": "hard_failure",
+          "error": "extract:p138: 回転ページ(rotate=90)は未対応です（page 138）"
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/jinji.go.jp/content/900024096.pdf",
+      "publisherAuthority": "人事院",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 98,
+      "pagesProcessed": 98,
+      "records": 317,
+      "items": 0,
+      "requests": 12,
+      "segments": [
+        {
+          "pages": [
+            1,
+            98
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+      "publisherAuthority": "宮内庁",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 33,
+      "pagesProcessed": 33,
+      "records": 88,
+      "items": 0,
+      "requests": 12,
+      "segments": [
+        {
+          "pages": [
+            1,
+            33
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+      "publisherAuthority": "宮内庁",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 20,
+      "pagesProcessed": 20,
+      "records": 145,
+      "items": 0,
+      "requests": 3,
+      "segments": [
+        {
+          "pages": [
+            1,
+            20
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+      "publisherAuthority": "農林水産省",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 378,
+      "pagesProcessed": 378,
+      "records": 2805,
+      "items": 0,
+      "requests": 291,
+      "segments": [
+        {
+          "pages": [
+            1,
+            378
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+      "publisherAuthority": "農林水産省",
+      "accountType": "special",
+      "executionClass": "runnable_existing_contract",
+      "status": "success",
+      "pages": 21,
+      "pagesProcessed": 21,
+      "records": 169,
+      "items": 8,
+      "requests": 74,
+      "segments": [
+        {
+          "pages": [
+            1,
+            6
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            7,
+            20
+          ],
+          "mode": "hierarchy_enabled",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            21,
+            21
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+      "publisherAuthority": "農林水産省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 35,
+      "pagesProcessed": 35,
+      "records": 318,
+      "items": 0,
+      "requests": 104,
+      "segments": [
+        {
+          "pages": [
+            1,
+            35
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf",
+      "publisherAuthority": "農林水産省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 7,
+      "pagesProcessed": 7,
+      "records": 9,
+      "items": 0,
+      "requests": 3,
+      "segments": [
+        {
+          "pages": [
+            1,
+            7
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+      "publisherAuthority": "経済産業省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 25,
+      "pagesProcessed": 25,
+      "records": 166,
+      "items": 0,
+      "requests": 45,
+      "segments": [
+        {
+          "pages": [
+            1,
+            25
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+      "publisherAuthority": "経済産業省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 7,
+      "pagesProcessed": 7,
+      "records": 24,
+      "items": 0,
+      "requests": 12,
+      "segments": [
+        {
+          "pages": [
+            1,
+            7
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+      "publisherAuthority": "経済産業省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 16,
+      "pagesProcessed": 16,
+      "records": 157,
+      "items": 0,
+      "requests": 57,
+      "segments": [
+        {
+          "pages": [
+            1,
+            16
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+      "publisherAuthority": "経済産業省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 10,
+      "pagesProcessed": 10,
+      "records": 39,
+      "items": 0,
+      "requests": 18,
+      "segments": [
+        {
+          "pages": [
+            1,
+            10
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+      "publisherAuthority": "経済産業省",
+      "accountType": "general",
+      "executionClass": "runnable_existing_contract",
+      "status": "success",
+      "pages": 106,
+      "pagesProcessed": 106,
+      "records": 1357,
+      "items": 30,
+      "requests": 132,
+      "segments": [
+        {
+          "pages": [
+            1,
+            8
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            9,
+            106
+          ],
+          "mode": "hierarchy_enabled",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+      "publisherAuthority": "経済産業省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 17,
+      "pagesProcessed": 17,
+      "records": 121,
+      "items": 0,
+      "requests": 18,
+      "segments": [
+        {
+          "pages": [
+            1,
+            17
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+      "publisherAuthority": "文部科学省",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 6,
+      "pagesProcessed": 6,
+      "records": 65,
+      "items": 0,
+      "requests": 65,
+      "segments": [
+        {
+          "pages": [
+            1,
+            6
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+      "publisherAuthority": "文部科学省",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 8,
+      "pagesProcessed": 8,
+      "records": 186,
+      "items": 0,
+      "requests": 113,
+      "segments": [
+        {
+          "pages": [
+            1,
+            8
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+      "publisherAuthority": "文部科学省",
+      "accountType": "general",
+      "executionClass": "runnable_existing_contract",
+      "status": "success",
+      "pages": 1339,
+      "pagesProcessed": 1339,
+      "records": 4135,
+      "items": 19,
+      "requests": 113,
+      "segments": [
+        {
+          "pages": [
+            1,
+            1044
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            1045,
+            1339
+          ],
+          "mode": "hierarchy_enabled",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_04.pdf",
+      "publisherAuthority": "文部科学省",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "hard_failure",
+      "pages": 6,
+      "pagesProcessed": 0,
+      "records": 0,
+      "items": 0,
+      "requests": 0,
+      "segments": [
+        {
+          "pages": [
+            1,
+            6
+          ],
+          "mode": "null_hierarchy",
+          "status": "hard_failure",
+          "error": "extract:p1: 回転ページ(rotate=90)は未対応です（page 1）"
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+      "publisherAuthority": "厚生労働省",
+      "accountType": "general",
+      "executionClass": "runnable_existing_contract",
+      "status": "success",
+      "pages": 1723,
+      "pagesProcessed": 1723,
+      "records": 8466,
+      "items": 14,
+      "requests": 550,
+      "segments": [
+        {
+          "pages": [
+            1,
+            1554
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            1555,
+            1700
+          ],
+          "mode": "hierarchy_enabled",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            1701,
+            1723
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+      "publisherAuthority": "厚生労働省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 782,
+      "pagesProcessed": 782,
+      "records": 1742,
+      "items": 0,
+      "requests": 133,
+      "segments": [
+        {
+          "pages": [
+            1,
+            782
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+      "publisherAuthority": "厚生労働省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 48,
+      "pagesProcessed": 48,
+      "records": 346,
+      "items": 0,
+      "requests": 101,
+      "segments": [
+        {
+          "pages": [
+            1,
+            48
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+      "publisherAuthority": "国土交通省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 51,
+      "pagesProcessed": 51,
+      "records": 546,
+      "items": 0,
+      "requests": 86,
+      "segments": [
+        {
+          "pages": [
+            1,
+            51
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+      "publisherAuthority": "国土交通省",
+      "accountType": "special",
+      "executionClass": "runnable_existing_contract",
+      "status": "success",
+      "pages": 10,
+      "pagesProcessed": 10,
+      "records": 81,
+      "items": 8,
+      "requests": 36,
+      "segments": [
+        {
+          "pages": [
+            1,
+            6
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            7,
+            10
+          ],
+          "mode": "hierarchy_enabled",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+      "publisherAuthority": "国土交通省",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 1097,
+      "pagesProcessed": 1097,
+      "records": 10392,
+      "items": 0,
+      "requests": 744,
+      "segments": [
+        {
+          "pages": [
+            1,
+            1097
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+      "publisherAuthority": "防衛省",
+      "accountType": "general",
+      "executionClass": "runnable_existing_contract",
+      "status": "success",
+      "pages": 540,
+      "pagesProcessed": 540,
+      "records": 2457,
+      "items": 1,
+      "requests": 180,
+      "segments": [
+        {
+          "pages": [
+            1,
+            8
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        },
+        {
+          "pages": [
+            9,
+            540
+          ],
+          "mode": "hierarchy_enabled",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+      "publisherAuthority": "財務省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "hard_failure",
+      "pages": 20,
+      "pagesProcessed": 0,
+      "records": 0,
+      "items": 0,
+      "requests": 0,
+      "segments": [
+        {
+          "pages": [
+            1,
+            20
+          ],
+          "mode": "null_hierarchy",
+          "status": "hard_failure",
+          "error": "extract:p20: 回転ページ(rotate=90)は未対応です（page 20）"
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+      "publisherAuthority": "財務省",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "hard_failure",
+      "pages": 297,
+      "pagesProcessed": 0,
+      "records": 0,
+      "items": 0,
+      "requests": 0,
+      "segments": [
+        {
+          "pages": [
+            1,
+            297
+          ],
+          "mode": "null_hierarchy",
+          "status": "hard_failure",
+          "error": "extract:p292: 回転ページ(rotate=90)は未対応です（page 292）"
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+      "publisherAuthority": "財務省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "hard_failure",
+      "pages": 9,
+      "pagesProcessed": 0,
+      "records": 0,
+      "items": 0,
+      "requests": 0,
+      "segments": [
+        {
+          "pages": [
+            1,
+            9
+          ],
+          "mode": "null_hierarchy",
+          "status": "hard_failure",
+          "error": "extract:p9: 回転ページ(rotate=90)は未対応です（page 9）"
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+      "publisherAuthority": "財務省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 9,
+      "pagesProcessed": 9,
+      "records": 101,
+      "items": 0,
+      "requests": 27,
+      "segments": [
+        {
+          "pages": [
+            1,
+            9
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+      "publisherAuthority": "財務省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 6,
+      "pagesProcessed": 6,
+      "records": 27,
+      "items": 0,
+      "requests": 15,
+      "segments": [
+        {
+          "pages": [
+            1,
+            6
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+      "publisherAuthority": "財務省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "hard_failure",
+      "pages": 11,
+      "pagesProcessed": 0,
+      "records": 0,
+      "items": 0,
+      "requests": 0,
+      "segments": [
+        {
+          "pages": [
+            1,
+            11
+          ],
+          "mode": "null_hierarchy",
+          "status": "hard_failure",
+          "error": "extract:p11: 回転ページ(rotate=90)は未対応です（page 11）"
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+      "publisherAuthority": "財務省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "hard_failure",
+      "pages": 16,
+      "pagesProcessed": 0,
+      "records": 0,
+      "items": 0,
+      "requests": 0,
+      "segments": [
+        {
+          "pages": [
+            1,
+            16
+          ],
+          "mode": "null_hierarchy",
+          "status": "hard_failure",
+          "error": "extract:p16: 回転ページ(rotate=90)は未対応です（page 16）"
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+      "publisherAuthority": "外務省",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 314,
+      "pagesProcessed": 314,
+      "records": 3636,
+      "items": 0,
+      "requests": 140,
+      "segments": [
+        {
+          "pages": [
+            1,
+            314
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/moj.go.jp/content/001402818.pdf",
+      "publisherAuthority": "法務省",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "hard_failure",
+      "pages": 737,
+      "pagesProcessed": 0,
+      "records": 0,
+      "items": 0,
+      "requests": 0,
+      "segments": [
+        {
+          "pages": [
+            1,
+            737
+          ],
+          "mode": "null_hierarchy",
+          "status": "hard_failure",
+          "error": "extract:p1: 回転ページ(rotate=90)は未対応です（page 1）"
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/moj.go.jp/content/001402819.pdf",
+      "publisherAuthority": "法務省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 11,
+      "pagesProcessed": 11,
+      "records": 42,
+      "items": 0,
+      "requests": 6,
+      "segments": [
+        {
+          "pages": [
+            1,
+            11
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+      "publisherAuthority": "国立国会図書館",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 17,
+      "pagesProcessed": 17,
+      "records": 142,
+      "items": 0,
+      "requests": 12,
+      "segments": [
+        {
+          "pages": [
+            1,
+            17
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+      "publisherAuthority": "警察庁",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 7,
+      "pagesProcessed": 7,
+      "records": 22,
+      "items": 0,
+      "requests": 6,
+      "segments": [
+        {
+          "pages": [
+            1,
+            7
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+      "publisherAuthority": "警察庁",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 112,
+      "pagesProcessed": 112,
+      "records": 738,
+      "items": 0,
+      "requests": 54,
+      "segments": [
+        {
+          "pages": [
+            1,
+            112
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+      "publisherAuthority": "個人情報保護委員会",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 30,
+      "pagesProcessed": 30,
+      "records": 141,
+      "items": 0,
+      "requests": 6,
+      "segments": [
+        {
+          "pages": [
+            1,
+            30
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+      "publisherAuthority": "復興庁",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 103,
+      "pagesProcessed": 103,
+      "records": 718,
+      "items": 0,
+      "requests": 284,
+      "segments": [
+        {
+          "pages": [
+            1,
+            103
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+      "publisherAuthority": "参議院",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 21,
+      "pagesProcessed": 21,
+      "records": 153,
+      "items": 0,
+      "requests": 12,
+      "segments": [
+        {
+          "pages": [
+            1,
+            21
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+      "publisherAuthority": "衆議院",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 36,
+      "pagesProcessed": 36,
+      "records": 167,
+      "items": 0,
+      "requests": 15,
+      "segments": [
+        {
+          "pages": [
+            1,
+            36
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+      "publisherAuthority": "裁判官訴追委員会",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 8,
+      "pagesProcessed": 8,
+      "records": 53,
+      "items": 0,
+      "requests": 3,
+      "segments": [
+        {
+          "pages": [
+            1,
+            8
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+      "publisherAuthority": "総務省",
+      "accountType": "general",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 454,
+      "pagesProcessed": 454,
+      "records": 3070,
+      "items": 0,
+      "requests": 133,
+      "segments": [
+        {
+          "pages": [
+            1,
+            454
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    },
+    {
+      "localPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+      "publisherAuthority": "総務省",
+      "accountType": "special",
+      "executionClass": "unrunnable_missing_hierarchy",
+      "status": "success",
+      "pages": 22,
+      "pagesProcessed": 22,
+      "records": 68,
+      "items": 0,
+      "requests": 48,
+      "segments": [
+        {
+          "pages": [
+            1,
+            22
+          ],
+          "mode": "null_hierarchy",
+          "status": "success",
+          "error": null
+        }
+      ]
+    }
+  ]
+}
