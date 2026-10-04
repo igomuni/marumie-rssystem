@@ -3,17 +3,23 @@
  * raw frozen XML → frozen production parser → actual → frozen reference projection → exact comparison。
  * preregistration（commit 2305be0）の判定規則を機械的に適用する。parser・oracle は変更しない。
  * 使い方: npx tsx scripts/pipeline-v2/evaluate-mof-budget-xml-items-v0.ts
- * 出力: tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-frozen-evaluation.json
+ * 出力: tests/fixtures/mof-budget-xml-parser-v0/2024/202411001-frozen-evaluation-hardened.json（初回評価の 202411001-frozen-evaluation.json は保持）
  */
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
+import { spawnSync } from 'child_process';
+import { checkSourceSetCompleteness, failClosedTestsPassed, type VitestSummary } from './lib/mof-budget-xml-items-evaluation-rules';
 import { MofXmlParseError, parseMofBudgetXmlItemFile, readMenuAncestorChains, MOF_ITEM_PARSER_V0_DOCUMENT_ID, type MofXmlItemRecord, type ParseOutcome } from './lib/mof-budget-xml-items';
 
 const XML_DIR = path.join('data', 'download', 'mof.go.jp', 'archive', '2024', '2024', 'xml');
 const MENU = path.join('data', 'download', 'mof.go.jp', 'archive', '2024', '2024', 'html', '202411001menu.html');
 const DIR = path.join('tests', 'fixtures', 'mof-budget-xml-parser-v0', '2024');
-const OUT = path.join(DIR, '202411001-frozen-evaluation.json');
+/** 初回評価の artifact（保持）。厳密化した evaluator の再実行は別 file に保存する */
+const FIRST_RUN = path.join(DIR, '202411001-frozen-evaluation.json');
+const OUT = path.join(DIR, '202411001-frozen-evaluation-hardened.json');
+const FAIL_CLOSED_TESTS = 'scripts/pipeline-v2/lib/mof-budget-xml-items.test.ts';
+const FAIL_CLOSED_MIN_TESTS = 44;
 const FROZEN: Record<string, string> = {
   [path.join(DIR, '202411001-source-set.json')]: '62df90fb32caf5997ecb2772eb0c84da66789b635eb1bc024743cf6a8da2afe3',
   [path.join(DIR, '202411001-reference-projection.json')]: 'e6335aceb0c7d69888206cada038dcb03db5e25f7c2a10a8d5ae6104c2d615d9',
@@ -38,6 +44,12 @@ async function main() {
   const targetFiles = new Set(set.targets.map(t => t.file));
   const chains = readMenuAncestorChains(new TextDecoder('euc-jp', { fatal: true }).decode(fs.readFileSync(MENU)));
   const files = fs.readdirSync(XML_DIR).filter(f => f.endsWith('.xml')).sort(cmp);
+
+  // ---- preregistration §16 の機械適用に必要な追加確認 ----
+  const completeness = checkSourceSetCompleteness(files, set.targets.map(t => t.file), set.nonTargets.map(t => t.file));
+  const vt = spawnSync('npx', ['vitest', 'run', FAIL_CLOSED_TESTS, '--reporter=json'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const jsonStart = vt.stdout.indexOf('{');
+  const vitestSummary = (jsonStart >= 0 ? JSON.parse(vt.stdout.slice(jsonStart)) : { numTotalTests: 0, numPassedTests: 0, numFailedTests: 1 }) as VitestSummary;
 
   // ---- 全 328 XML を frozen parser に通す ----
   const outcomes = new Map<string, ParseOutcome>();
@@ -130,6 +142,8 @@ async function main() {
   const fieldMismatchTotal = Object.values(fieldExactness).reduce((n, f) => n + f.mismatch, 0);
   const conditions = {
     sourceSetIntegrity: hashChecks.every(h => h.match),
+    sourceSetComplete328: completeness.complete && files.length === 328,
+    nonTarget234of234: structural.nonTargetFilesCorrectlyNotTarget === set.nonTargets.length,
     targets94of94: structural.recognizedTargetFiles === set.targets.length && structural.targetFilesNotRecognized.length === 0,
     nonTargetMisclassifiedZero: structural.nonTargetFilesMisclassified.length === 0 && structural.recognizedButNotTarget.length === 0,
     noStructuralFailureOrUnsupported: structural.structuralFailures === 0 && structural.unsupported === 0,
@@ -137,6 +151,7 @@ async function main() {
     missingExtraDuplicateZero: coverage.missing === 0 && coverage.extra === 0 && coverage.duplicate === 0 && refDup.length === 0,
     orphanAmbiguousZero: hierarchy.orphan === 0 && hierarchy.ambiguous === 0 && hierarchy.itemAssignmentMismatch === 0,
     requiredFieldsExact: fieldMismatchTotal === 0 && rowCountMismatch.length === 0,
+    failClosedTestsPass: failClosedTestsPassed(vitestSummary, FAIL_CLOSED_MIN_TESTS),
     specialStructuresExact: special.gaiji.expectedRows === special.gaiji.exact && special.qt.expectedRows === special.qt.exact && fingerprints.every(f => f.files === f.recognized),
   };
   const decision = Object.values(conditions).every(Boolean) ? 'GO' : 'STOP';
@@ -146,6 +161,8 @@ async function main() {
     scope: 'FY2024 一般会計 当初予算 202411001（frozen XML source set）。first full frozen evaluation（implementation freeze 後に初めて実行）',
     implementation: { commit: IMPLEMENTATION_COMMIT, parserPath: 'scripts/pipeline-v2/lib/mof-budget-xml-items.ts', parserSha256: FROZEN['scripts/pipeline-v2/lib/mof-budget-xml-items.ts'], testPath: 'scripts/pipeline-v2/lib/mof-budget-xml-items.test.ts', testSha256: FROZEN['scripts/pipeline-v2/lib/mof-budget-xml-items.test.ts'], preregistrationCommit: PREREGISTRATION_COMMIT },
     frozenInputs: hashChecks,
+    supersedes: { note: '初回評価の artifact は保持。本 run は evaluator の GO 条件を厳密化（source set の完全性・non-target 234/234・fail-closed test 通過）して再実行した結果', firstRunArtifact: FIRST_RUN, firstRunSha256: sha(fs.readFileSync(FIRST_RUN)), firstRunDecision: (JSON.parse(fs.readFileSync(FIRST_RUN, 'utf8')) as { decision: string }).decision },
+    sourceSetCompleteness: completeness, failClosedTests: { path: FAIL_CLOSED_TESTS, minimumTests: FAIL_CLOSED_MIN_TESTS, ...vitestSummary },
     structural, coverage, fieldExactness, hierarchy, specialStructures: special, sourceShaMismatch,
     conditions, decision,
     rule: 'preregistration §16: GO は全 condition が真。1 件でも偽なら STOP（oracle/source の不備で評価不能なら INCONCLUSIVE）',
