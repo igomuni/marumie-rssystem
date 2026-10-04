@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261004_2210_MOF_PipelineV2_事項Normalizer_入力境界の厳密化_追記.md](20261004_2210_MOF_PipelineV2_事項Normalizer_入力境界の厳密化_追記.md) — PR #371 レビュー対応。事項normalizerの入力境界をfail-closed化（source-set artifactのhash pin・menu集合の328=94+234完全一致・生成後population検査）。出力は不変・GO artifactも不変
 - [20261004_2155_MOF_PipelineV2_FY2024一般会計_事項NormalizedOutput統合.md](20261004_2155_MOF_PipelineV2_FY2024一般会計_事項NormalizedOutput統合.md) — 事項のV2 normalized output統合の結果。FY2024一般会計の1,256件をbudget-jikou.jsonlに生成、親の項は1,256/1,256決定的に解決、既存output不変・再実行決定的。判定=GO
 - [20261004_2152_MOF_PipelineV2_事項NormalizedOutput_Inventory_設計.md](20261004_2152_MOF_PipelineV2_事項NormalizedOutput_Inventory_設計.md) — 事項のV2 normalized output統合の設計。用語（V2のsection=項/item=目、parserのitem=項/request=事項）→jikou、additiveなbudget-jikou.jsonl、ID・親接続・金額規則、design gate通過（項784/784接続可）
 - [20261004_2134_MOF_PipelineV2_XML事項Parser_v0_Evaluator厳密化_追記.md](20261004_2134_MOF_PipelineV2_XML事項Parser_v0_Evaluator厳密化_追記.md) — PR #370 レビュー対応。evaluatorのGO条件を厳密化（source set完全性・non-target 234/234・fail-closed test通過）して再実行、判定は同じGO。parser/oracle/初回artifactは不変

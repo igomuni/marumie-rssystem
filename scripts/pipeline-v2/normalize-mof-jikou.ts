@@ -3,6 +3,7 @@
  * raw XML → frozen parser v0（lib/mof-budget-xml-items.ts, #370）→ 写像（lib/mof-jikou.ts）→ output。
  * 既存の normalized / derived output（budget-items.jsonl・manifest.json・sections.jsonl）は読み取りのみで変更しない。
  *
+ * 入力境界（fail-closed）: source-set artifact の SHA-256 を frozen 値に固定、menu の XML 集合が 328 = 94 + 234 と完全一致、生成結果が 94 / 234 / 1,256 でなければ出力しない（lib/mof-jikou-source-boundary.ts）。
  * scope: FY2024 一般会計 当初予算 202411001 のみ（parser v0 の frozen scope）。parser の契約により入力は frozen source set
  * （filename + SHA-256）で固定され、scope 外のファイルは unsupported として失敗する。他年度・特別会計・補正予算には未対応。
  *
@@ -18,6 +19,7 @@ import * as path from 'path';
 import { readJsonl, writeJson, writeJsonl } from './lib/jsonl';
 import { parseMenuXmlFileNames } from './lib/mof-archive-download';
 import { MOF_ITEM_PARSER_V0_DOCUMENT_ID, MofXmlParseError, parseMofBudgetXmlItemFile, readMenuAncestorChains } from './lib/mof-budget-xml-items';
+import { assertExpectedPopulation, assertFrozenSourceSetArtifact, assertMenuMatchesSourceSet } from './lib/mof-jikou-source-boundary';
 import { JIKOU_CONTEXT_FY2024_GENERAL_INITIAL, mapParserRecordToJikou, ministryFromMenuChain, sortJikou, validateJikouRecords } from './lib/mof-jikou';
 import type { MofBudgetItemRecord, MofBudgetJikouRecord, MofDerivedSection } from './types';
 
@@ -37,11 +39,15 @@ function main(): void {
   const menuPath = path.join(rawRoot, 'mof.go.jp', 'archive', '2024', '2024', 'html', `${ctx.documentId}menu.html`);
   const menuText = new TextDecoder('euc-jp', { fatal: true }).decode(fs.readFileSync(menuPath));
   const chains = readMenuAncestorChains(menuText);
-  const set = JSON.parse(fs.readFileSync(sourceSetPath, 'utf8')) as { targets: { file: string; sha256: string }[]; nonTargets: { file: string; sha256: string }[] };
+  // 入力境界（fail-closed）: source-set artifact は frozen 値に固定し、menu の XML 集合は 328 = 94 + 234 と完全一致を要求する
+  const sourceSetBytes = fs.readFileSync(sourceSetPath);
+  assertFrozenSourceSetArtifact(sourceSetBytes);
+  const set = JSON.parse(sourceSetBytes.toString('utf8')) as { targets: { file: string; sha256: string }[]; nonTargets: { file: string; sha256: string }[] };
   const sourceSet = new Map<string, string>([...set.targets, ...set.nonTargets].map(t => [t.file, t.sha256]));
 
   // 全 XML（menu が列挙する集合）を parser に通す。想定外は例外＝失敗（silent skip しない）
   const files = parseMenuXmlFileNames(menuText);
+  assertMenuMatchesSourceSet(files, set);
   const rows: MofBudgetJikouRecord[] = [];
   let targetFiles = 0, notTargetFiles = 0;
   const organizations = new Set<string>();
@@ -60,6 +66,7 @@ function main(): void {
     const ministry = ministryFromMenuChain(chains.get(f)!);
     for (const r of outcome.records) rows.push(mapParserRecordToJikou(r, ctx, ministry, outcome.sourceSha256));
   }
+  assertExpectedPopulation({ targetFiles, notTargetFiles, records: rows.length });
   const sorted = sortJikou(rows);
 
   // 親の項の解決確認（既存 output は読み取りのみ）
