@@ -44,3 +44,22 @@ export function ordinalAnchor(long: MergedRule[], k: number): { status: AnchorSt
   const x = xs[k - 1];
   return { status: long.filter(r => r.x === x).length > 1 ? 'ambiguous' : 'unique', x };
 }
+
+export const THIN_LINE_WIDTH_MAX = 0.5; // 観測された線幅は 0.333（表の罫線）と 1（page 枠）の 2 種のみ（development inventory）。thin = 全ての線幅が 0.5 未満
+export const isThinRule = (r: MergedRule): boolean => r.lineWidths.length > 0 && r.lineWidths.every(w => w < THIN_LINE_WIDTH_MAX);
+
+/** development inventory 後に追加した候補 T1: page の long rule のうち thin なものの最も左の x（page 枠の太い線を除く）。同 x に離れた rule が複数なら ambiguous */
+export function leftmostThinAnchor(long: MergedRule[]): { status: AnchorStatus; x: number | null } {
+  return ordinalAnchor(long.filter(isThinRule), 1);
+}
+
+/** range-local anchor: range 内の各 page の T1（unique のもの）の x の最頻値（同数なら小さい x）。unique な page が 1 つも無ければ unavailable */
+export function rangeAnchor(pageAnchors: { status: AnchorStatus; x: number | null }[]): { status: 'available' | 'unavailable'; x: number | null; uniquePages: number; modalPages: number } {
+  const counts = new Map<number, number>();
+  let unique = 0;
+  for (const a of pageAnchors) if (a.status === 'unique' && a.x !== null) { unique++; counts.set(a.x, (counts.get(a.x) ?? 0) + 1); }
+  if (unique === 0) return { status: 'unavailable', x: null, uniquePages: 0, modalPages: 0 };
+  let best: [number, number] | null = null;
+  for (const [x, n] of counts) if (!best || n > best[1] || (n === best[1] && x < best[0])) best = [x, n];
+  return { status: 'available', x: best![0], uniquePages: unique, modalPages: best![1] };
+}
