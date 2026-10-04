@@ -89,6 +89,7 @@ normalized/derivedの全レコードは`provenance`（`domain`・`dataset`・`ye
 | `download-budget-requests.ts` | 各府省庁の公式サイト（FY2024歳出概算要求書PDF。manifest固定） | `data/download/{publisherDomain}/{canonical URL path}`（83 PDF） | `pipeline:v2:download:budget-requests` |
 | `normalize-rs.ts` | 上記RS raw ZIP | `data/normalized/rs/{year}/*.json` | `pipeline:v2:normalize:rs` |
 | `normalize-mof.ts` | 上記MOF raw ZIP（archive分のみ。決算の説明PDFは対象外） | `data/normalized/mof/{year}/budget-events.json` | `pipeline:v2:normalize:mof` |
+| `normalize-mof-jikou.ts` | 予算書【XML版】（`download-mof-archive.ts --xml=` で取得）。凍結済み parser v0（`lib/mof-budget-xml-items.ts`）を使い、FY2024 一般会計 当初予算 `202411001` のみ対応 | `data/normalized/mof/fy{year}/{budget-jikou.jsonl,budget-jikou-manifest.json}`（既存の `budget-items.jsonl`・`sections.jsonl` は変更しない。用語: section＝項、item/subItem＝目、jikou＝事項） | `pipeline:v2:normalize:mof-jikou` |
 | `build-identities.ts` | `normalized/mof/{year}/budget-events.json` | `derived/{year}/{budget-entities,budget-events,identity-resolution}.json` | `pipeline:v2:derive`（の前半） |
 | `build-links.ts` | `derived/{year}/budget-entities.json` + `normalized/rs/{year}/budget-items.json` | `derived/{year}/project-links.json`（+ identity-resolution.jsonへの追記） | `pipeline:v2:derive`（の後半） |
 | `validate.ts` | V1公開物（`public/data/*.json`）・`data/download_old/`の生CSV・上記derived出力 | 標準出力（MATCH/DIFF/V1_ONLY/V2_ONLYの表） | `pipeline:v2:validate` |

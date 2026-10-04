@@ -192,6 +192,49 @@ export interface MofBudgetItemRecord {
   unusedYen?: number | null;
 }
 
+/**
+ * MOF 予算書【XML版】の「事項」1 件（source-preserving。normalize-mof-jikou.ts が生成する budget-jikou.jsonl の行）。
+ * 用語: V2 の section = 項、V2 の item/subItem = 目。事項はその下位の区分で `jikou` と呼ぶ（#370 parser v0 の item = 項、request = 事項 とは別の語）。
+ * 金額は円（parser の千円整数 ×1000。blank→0・差額計算・符号補完はしない）。設計: docs/tasks/20261004_2152_MOF_PipelineV2_事項NormalizedOutput_Inventory_設計.md
+ */
+export interface MofBudgetJikouRecord {
+  schemaVersion: number;
+  recordType: 'mof_budget_jikou';
+  /** stableId([fiscalYear, phase, budgetStatus, sectionNaturalKey, jikouName], 'mofjik_')。頁・行番号を含まない */
+  recordId: string;
+  fiscalYear: number;
+  phase: MofPhase;
+  budgetStatus: MofBudgetStatus;
+  accountType: MofAccountType;
+  ministry: string;
+  organization: string;
+  specialAccount: string;
+  subAccount: string;
+  agency: string;
+  /** 親の項（既存 MofBudgetItemRecord / MofDerivedSection と同じ key・id） */
+  sectionCode: string;
+  sectionName: string;
+  sectionNaturalKey: string;
+  parentSectionId: string;
+  /** 事項名（`<l>` を区切りなしで連結。trim・正規化なし） */
+  jikouName: string;
+  /** source-faithful な `<l>` ごとの文字列 */
+  jikouNameLines: string[];
+  nameQtCount: number;
+  nameGaiji: { code: string; text: string }[];
+  /** XML 上に意味ラベルが無い 2 桁の値。意味を付けない */
+  col4Raw: string;
+  amountYen: number;
+  previousAmountYen: number;
+  differenceYen: number;
+  /** source の raw 文字列（千円単位の表記のまま） */
+  amountsRawThousand: { current: string; previous: string; difference: string };
+  /** 各金額の source header の語 */
+  sourceAmountColumns: { current: string; previous: string; difference: string };
+  source: SourceRef;
+  sourceLocator: { documentId: string; row: string; page: number; rowNo: number; sourceSha256: string };
+}
+
 /** derive-mof.tsが生成するMOFの金額イベント（旧MofBudgetEventとは別系統。budget-items.jsonlのrecordId単位） */
 export interface MofDerivedBudgetEvent {
   schemaVersion: number;
