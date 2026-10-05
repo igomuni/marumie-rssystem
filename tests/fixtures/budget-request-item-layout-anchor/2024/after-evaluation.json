@@ -1,0 +1,775 @@
+{
+ "beforeAfter": {
+  "candidateClassCounts": {
+   "after": {
+    "name_exact_ambiguous": 65,
+    "name_exact_unique": 671,
+    "name_unavailable": 8,
+    "no_exact_name_match": 31
+   },
+   "before": {
+    "name_exact_ambiguous": 65,
+    "name_exact_unique": 612,
+    "name_unavailable": 8,
+    "no_exact_name_match": 25
+   }
+  },
+  "candidateRowsAll": {
+   "after": 1038,
+   "before": 973,
+   "delta": 65
+  },
+  "distinctNormalizedNamesCovered": {
+   "after": 683,
+   "before": 627,
+   "delta": 56
+  },
+  "exactCoveredMofRows": {
+   "after": 717,
+   "before": 661,
+   "delta": 56
+  },
+  "generalCandidateRows": {
+   "after": 775,
+   "before": 710
+  },
+  "mofTotal": {
+   "after": 784,
+   "before": 784
+  },
+  "unmatchedMofRows": {
+   "after": 67,
+   "before": 123,
+   "delta": -56
+  }
+ },
+ "frozen": {
+  "data/normalized/mof/fy2024/budget-jikou.jsonl": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e",
+  "docs/tasks/20261005_2245_Budget_Request_Item_Layout_Anchor_Coverage_Protocol.md": "8ee523588d43ced7a40b78f872ae6e408f9719303edcd27684e5b331acf8ebf4",
+  "scripts/pipeline-v2/lib/budget-request-mof-reconciliation.ts": "da08b37713ecee53b642f74a0098a129de6a1e1e7ccebfb822228309acb8c19a",
+  "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+  "tests/fixtures/budget-request-item-layout-anchor/2024/baseline.json": "68e601fcd16aab9b92ed685ddb11abe6384133233c9bee1b35eb57c09d766f24"
+ },
+ "gates": {
+  "baseline_reproduced_661_of_784": true,
+  "coverage_increased": true,
+  "deltaX_within_item_cluster": true,
+  "existing_candidate_names_unchanged": true,
+  "existing_candidates_removed_zero": true,
+  "lost_exact_mof_rows_zero": true,
+  "no_duplicate_candidate": true,
+  "only_item_level_candidates": true,
+  "profile_candidates_nonempty_names": true,
+  "profile_valid": true,
+  "unrelated_pdf_changed_zero": true
+ },
+ "go": true,
+ "libSha256": "d86b86bd80cd151533bdd930b9269f84890f88a79a4204730c167410e1da672d",
+ "newExactMatchesGzSha256": "a7b9f42920ff61dd165585ec011abad5f231fc2b45a67c92adf92f789bd815b0",
+ "newlyExactMof": [
+  {
+   "code": "187",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_129cfd44d5c9f6f45242",
+   "name": "沖縄振興交付金事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "197",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_14b8743ab1dcdbfbbbf6",
+   "name": "沖縄国立大学法人施設整備費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "034",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_15dc8eac0be9fe919a39",
+   "name": "男女共同参画社会形成促進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "104",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_161b3dc2e2506578a2ed",
+   "name": "沖縄港湾空港整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "232",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_17fa59b2e8b54427e95e",
+   "name": "総合特区推進調整費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "050",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_1a3322d066d5cfeb783f",
+   "name": "アイヌ政策推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "004",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_1d8bb54e3ce8799de456",
+   "name": "独立行政法人国立公文書館運営費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "235",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_25cb6f5791e2a21e94ac",
+   "name": "特定地域づくり事業推進費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "108",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_2b5c3d94cab2dd0fb035",
+   "name": "沖縄海岸事業調査諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "061",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_2c763c2d71fbacef99db",
+   "name": "北方対策本部",
+   "organization": "北方対策本部"
+  },
+  {
+   "code": "033",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_3d1197c5dde27ff04bbf",
+   "name": "栄典行政費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "062",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_4b10d5e32cfd526f4029",
+   "name": "独立行政法人北方領土問題対策協会運営費",
+   "organization": "北方対策本部"
+  },
+  {
+   "code": "188",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_4bba09e39bda0efa3524",
+   "name": "沖縄北部連携促進特別振興事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "284",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_52e09df4afa85b8d4fd1",
+   "name": "工業所有権事務費特許特別会計へ繰入",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "283",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_579c9a682149804f1f9a",
+   "name": "経済安全保障確保推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "231",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_58b451894a01dc9e76ed",
+   "name": "地方創生推進事務局",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "190",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_64fb330fd22dd1f975f2",
+   "name": "沖縄北部連携促進特別振興対策特定開発事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "241",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_669eecf7036d774b2e63",
+   "name": "知的財産戦略推進事務局",
+   "organization": "知的財産戦略推進事務局"
+  },
+  {
+   "code": "261",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_67ec58f05f8509fccdb0",
+   "name": "総合海洋政策推進事務局",
+   "organization": "総合海洋政策推進事務局"
+  },
+  {
+   "code": "115",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_6888ce0aaf2074b311e6",
+   "name": "沖縄水産基盤整備事業調査諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "101",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_6a576f03849b4090ef83",
+   "name": "沖縄総合事務局",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "003",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_6ac03419524ec28ba8dc",
+   "name": "公文書等管理政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "006",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_6c2361bf61416c11c262",
+   "name": "遺棄化学兵器廃棄処理事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "233",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_70f0047ad4ce3c838005",
+   "name": "地方創生推進費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "032",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_7c1ad4d23db03faaaab3",
+   "name": "共生社会政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "301",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_812c136aec462053c122",
+   "name": "健康・医療戦略推進事務局",
+   "organization": "健康・医療戦略推進事務局"
+  },
+  {
+   "code": "015",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_81499aacfb4d3e5280bb",
+   "name": "沖縄政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "107",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_8993789e382331d21965",
+   "name": "沖縄農業農村整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "023",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_8af90dd6cddc473dd837",
+   "name": "沖縄保健衛生諸費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "109",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_8e68afd22d24cf0865b9",
+   "name": "沖縄道路整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "102",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_902fad3f93e08fa5c4aa",
+   "name": "沖縄治水事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "013",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_94ab36f5b2d9288afdc7",
+   "name": "防災政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "262",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_984ff1a1779f4f609870",
+   "name": "有人国境離島政策推進費",
+   "organization": "総合海洋政策推進事務局"
+  },
+  {
+   "code": "041",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_990edf831e840b8ed29a",
+   "name": "経済社会総合研究所",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "251",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_9a064b0d89b3f2ad7f02",
+   "name": "宇宙開発戦略推進事務局",
+   "organization": "宇宙開発戦略推進事務局"
+  },
+  {
+   "code": "106",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_9cdbbcfb08d2627258f5",
+   "name": "沖縄国営公園事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "007",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_9d851e5529adf78b0aca",
+   "name": "経済財政政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "071",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_a203e2d7fd6c7b72d3a6",
+   "name": "国際平和協力本部",
+   "organization": "国際平和協力本部"
+  },
+  {
+   "code": "042",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_a3a0efdeb0203b5213dc",
+   "name": "迎賓施設運営費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "049",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_a6d9002ed55676deebcf",
+   "name": "航空機燃料税財源沖縄空港整備事業費自動車安全特別会計へ繰入",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "291",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_a9acc8d93fb36bf32f2d",
+   "name": "科学技術・イノベーション推進事務局",
+   "organization": "科学技術・イノベーション推進事務局"
+  },
+  {
+   "code": "009",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_b02a7af66b784e97a2dd",
+   "name": "地方創生支援費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "038",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_b13802eb4af0c2cebd52",
+   "name": "食品安全政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "028",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_b64543663914851f5f84",
+   "name": "沖縄開発事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "055",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_bff814a4a20fc0c5fd10",
+   "name": "沖縄振興特定事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "189",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_c6687c37ea1f87b4eda9",
+   "name": "沖縄振興推進調査費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "022",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_cfefe9701468198a5298",
+   "name": "沖縄教育振興事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "005",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_d14250d23e01c8ebc0db",
+   "name": "政府広報費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "110",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_de3afca90717c291cb1e",
+   "name": "沖縄道路環境整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "193",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_e4945f2746e0203544b4",
+   "name": "電源開発促進税財源原子力安全規制対策費エネルギー対策特別会計へ繰入",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "040",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_eed48c38669abf079ae2",
+   "name": "公益法人制度適正運営推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "252",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_f5a49b875b4085d259d9",
+   "name": "宇宙開発利用推進費",
+   "organization": "宇宙開発戦略推進事務局"
+  },
+  {
+   "code": "002",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_f60d6a2b8b03bbe38f4f",
+   "name": "内閣本府施設費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "234",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_f78c1612b99ad5e26a5c",
+   "name": "地方創生基盤整備事業推進費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "091",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_fc41a9d4c691ad37fc7e",
+   "name": "官民人材交流センター",
+   "organization": "官民人材交流センター"
+  },
+  {
+   "code": "282",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_fe4eb6d4a22d9ea2ebac",
+   "name": "重要土地等調査費",
+   "organization": "内閣本府"
+  }
+ ],
+ "newlyExactMofRows": 56,
+ "note": "source-derived layout profile（内閣府 0.pdf）で項 anchor を拡張した after 評価。MOF は candidate 生成に使っていない。GO 判定は gates の全 true",
+ "profile": {
+  "derivation": "markers + request rows + rule links (see protocol §4)",
+  "event": {
+   "count": 99,
+   "deltaX": 18.98,
+   "max": 18.987000000000002,
+   "min": 18.978,
+   "spread": 0.009
+  },
+  "evidence": {
+   "levelCounts": {
+    "event": 99,
+    "item": 65,
+    "organization": 11
+   },
+   "markerPages": [
+    5,
+    7,
+    9,
+    11,
+    13,
+    15,
+    17,
+    19,
+    21,
+    23,
+    25
+   ],
+   "rowsWithoutLinkedRule": 0
+  },
+  "invalidReason": null,
+  "item": {
+   "count": 65,
+   "deltaX": 15.529,
+   "max": 15.535999999999994,
+   "min": 15.526999999999994,
+   "spread": 0.009
+  },
+  "markerCount": 11,
+  "organization": {
+   "count": 11,
+   "deltaX": 12.078,
+   "max": 12.078000000000003,
+   "min": 12.078000000000003,
+   "spread": 0
+  },
+  "ruleX": 50.04,
+  "sourcePath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+  "sourceSha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+  "tolerance": 1.726,
+  "valid": true
+ },
+ "profileCandidates": {
+  "eventRowsInPdf": 99,
+  "excludedEmptyName": 0,
+  "levelOfCandidateRows": {
+   "item": 65
+  },
+  "organizationRowsInPdf": 11,
+  "priorIndependentMeasurement": 65,
+  "profileCandidatesGzSha256": "bbd828b2d0005bde638b3f22aa60a4db3056ed502012efdce3c8502cd50f4ce1",
+  "rows": 65
+ },
+ "regression": {
+  "changedPdfs": [
+   "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf"
+  ],
+  "duplicateCandidateIds": 0,
+  "existingCandidateNamesChanged": 0,
+  "existingCandidatesRemoved": 0,
+  "lostExactMof": [],
+  "lostExactMofRows": 0
+ },
+ "schema": "budget-request-item-layout-anchor-after/v0",
+ "scriptSha256": "a71a1b328f9d6d562d3d5345430deecc346ba0bf30382acf84ceee9e008e59e9",
+ "unmatchedAfter": {
+  "byMinistry": {
+   "内閣府": 10,
+   "厚生労働省": 3,
+   "国土交通省": 3,
+   "外務省": 1,
+   "文部科学省": 8,
+   "法務省": 35,
+   "環境省": 1,
+   "経済産業省": 1,
+   "財務省": 3,
+   "農林水産省": 1,
+   "防衛省": 1
+  },
+  "cabinetOffice": {
+   "after": 10,
+   "before": 66,
+   "newlyExact": 56,
+   "remaining": [
+    {
+     "code": "314",
+     "mofSectionId": "mofsec_0d5be75e595f1652833b",
+     "name": "子ども・子育て支援年金特別会計へ繰入",
+     "organization": "こども家庭庁",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    },
+    {
+     "code": "152",
+     "mofSectionId": "mofsec_10cee5a2b9a1f55b3e3a",
+     "name": "金融政策費",
+     "organization": "金融庁",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    },
+    {
+     "code": "287",
+     "mofSectionId": "mofsec_15382a9ba75787486bee",
+     "name": "物価高騰対応地方創生推進費",
+     "organization": "内閣本府",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    },
+    {
+     "code": "103",
+     "mofSectionId": "mofsec_20768216a29faff4cb2b",
+     "name": "沖縄災害復旧事業工事諸費",
+     "organization": "沖縄総合事務局",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    },
+    {
+     "code": "191",
+     "mofSectionId": "mofsec_2a148145ba1d009966d1",
+     "name": "原子力災害対策費",
+     "organization": "内閣本府",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    },
+    {
+     "code": "285",
+     "mofSectionId": "mofsec_3040bed673a16cbdd2a6",
+     "name": "孤独・孤立対策推進費",
+     "organization": "内閣本府",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    },
+    {
+     "code": "288",
+     "mofSectionId": "mofsec_307a53794f1f268b498e",
+     "name": "地方創生地域産業基盤整備事業推進費",
+     "organization": "内閣本府",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    },
+    {
+     "code": "164",
+     "mofSectionId": "mofsec_32f0bed17034776ed799",
+     "name": "食品衛生基準政策費",
+     "organization": "消費者庁",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    },
+    {
+     "code": "151",
+     "mofSectionId": "mofsec_51444d6367f9ed66f165",
+     "name": "金融庁共通費",
+     "organization": "金融庁",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    },
+    {
+     "code": "081",
+     "mofSectionId": "mofsec_ae06f02855cbd775c3af",
+     "name": "日本学術会議",
+     "organization": "日本学術会議",
+     "sourceClass": "unresolved_pdf_assignment (no item-level source evidence; not inferred from ministry name)"
+    }
+   ]
+  },
+  "mext": {
+   "count": 8,
+   "items": [
+    {
+     "code": "052",
+     "mofAmountDiagnostic": {
+      "amountYenSum": 0,
+      "items": 3,
+      "note": "診断列のみ。当初予算 0 と概算要求 PDF に項が無いことの因果は確定していない",
+      "previousAmountYenSum": 3325671000,
+      "sourceAmountColumns": [
+       "令和6年度要求額",
+       null
+      ]
+     },
+     "mofSectionId": "mofsec_31f6d9c946ba5053be13",
+     "name": "国立研究開発法人防災科学技術研究所施設整備費",
+     "organization": "文部科学本省",
+     "sourceClass": "SOURCE_FULL_NAME_ABSENT"
+    },
+    {
+     "code": "008",
+     "mofAmountDiagnostic": {
+      "amountYenSum": 0,
+      "items": 3,
+      "note": "診断列のみ。当初予算 0 と概算要求 PDF に項が無いことの因果は確定していない",
+      "previousAmountYenSum": 519420000,
+      "sourceAmountColumns": [
+       "令和6年度要求額",
+       null
+      ]
+     },
+     "mofSectionId": "mofsec_393c11b3c7bd77f977b7",
+     "name": "独立行政法人国立青少年教育振興機構施設整備費",
+     "organization": "文部科学本省",
+     "sourceClass": "SOURCE_FULL_NAME_ABSENT"
+    },
+    {
+     "code": "085",
+     "mofAmountDiagnostic": {
+      "amountYenSum": 100000000,
+      "items": 3,
+      "note": "診断列のみ。当初予算 0 と概算要求 PDF に項が無いことの因果は確定していない",
+      "previousAmountYenSum": 784176000,
+      "sourceAmountColumns": [
+       "令和6年度要求額",
+       null
+      ]
+     },
+     "mofSectionId": "mofsec_3f480016e51af92fac7c",
+     "name": "独立行政法人国立美術館施設整備費",
+     "organization": "文化庁",
+     "sourceClass": "SPLIT_ACROSS_ADJACENT_TOKENS_FULL_NAME_PRESENT_AFTER_JOIN"
+    },
+    {
+     "code": "046",
+     "mofAmountDiagnostic": {
+      "amountYenSum": 0,
+      "items": 3,
+      "note": "診断列のみ。当初予算 0 と概算要求 PDF に項が無いことの因果は確定していない",
+      "previousAmountYenSum": 516900000,
+      "sourceAmountColumns": [
+       "令和6年度要求額",
+       null
+      ]
+     },
+     "mofSectionId": "mofsec_44a80f1a7e23c4283e41",
+     "name": "国立研究開発法人日本原子力研究開発機構施設整備費",
+     "organization": "文部科学本省",
+     "sourceClass": "SOURCE_FULL_NAME_ABSENT"
+    },
+    {
+     "code": "087",
+     "mofAmountDiagnostic": {
+      "amountYenSum": 0,
+      "items": 3,
+      "note": "診断列のみ。当初予算 0 と概算要求 PDF に項が無いことの因果は確定していない",
+      "previousAmountYenSum": 309646000,
+      "sourceAmountColumns": [
+       "令和6年度要求額",
+       null
+      ]
+     },
+     "mofSectionId": "mofsec_6b3da73dddd24d1dff01",
+     "name": "独立行政法人日本芸術文化振興会施設整備費",
+     "organization": "文化庁",
+     "sourceClass": "SPLIT_ACROSS_ADJACENT_TOKENS_FULL_NAME_PRESENT_AFTER_JOIN"
+    },
+    {
+     "code": "010",
+     "mofAmountDiagnostic": {
+      "amountYenSum": 0,
+      "items": 3,
+      "note": "診断列のみ。当初予算 0 と概算要求 PDF に項が無いことの因果は確定していない",
+      "previousAmountYenSum": 184592000,
+      "sourceAmountColumns": [
+       "令和6年度要求額",
+       null
+      ]
+     },
+     "mofSectionId": "mofsec_9ffdf9616b66a75105bb",
+     "name": "独立行政法人教職員支援機構施設整備費",
+     "organization": "文部科学本省",
+     "sourceClass": "SOURCE_FULL_NAME_ABSENT"
+    },
+    {
+     "code": "023",
+     "mofAmountDiagnostic": {
+      "amountYenSum": 1526411000,
+      "items": 48,
+      "note": "診断列のみ。当初予算 0 と概算要求 PDF に項が無いことの因果は確定していない",
+      "previousAmountYenSum": 3247067000,
+      "sourceAmountColumns": [
+       "令和6年度要求額",
+       null
+      ]
+     },
+     "mofSectionId": "mofsec_a46fb2109aab2cde25e2",
+     "name": "科学技術・学術政策推進費",
+     "organization": "文部科学本省",
+     "sourceClass": "SPLIT_ACROSS_ADJACENT_TOKENS_FULL_NAME_PRESENT_AFTER_JOIN"
+    },
+    {
+     "code": "108",
+     "mofAmountDiagnostic": {
+      "amountYenSum": 0,
+      "items": 6,
+      "note": "診断列のみ。当初予算 0 と概算要求 PDF に項が無いことの因果は確定していない",
+      "previousAmountYenSum": 1540000000,
+      "sourceAmountColumns": [
+       "令和6年度要求額",
+       null
+      ]
+     },
+     "mofSectionId": "mofsec_ea99ca99415d94ce3fb6",
+     "name": "独立行政法人日本スポーツ振興センター施設整備費",
+     "organization": "スポーツ庁",
+     "sourceClass": "SOURCE_FULL_NAME_ABSENT"
+    }
+   ],
+   "unchangedThisPhase": true
+  },
+  "total": 67
+ }
+}
