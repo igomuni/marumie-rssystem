@@ -1,0 +1,184 @@
+{
+ "schema": "budget-request-source-range-manifest/v0",
+ "note": "manual は既存の手書き契約、source-derived は frozen layout inventory の detail-table range。新しい range detector・MOF・header label は不使用",
+ "frozen": {
+  "hashes": {
+   "tests/fixtures/budget-request-layout-hierarchy-inventory/2024/layout-summary.json": "67808613ed7d0a0e0ef7df7be736473a88159306417254100e6241fe69d63266",
+   "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1"
+  }
+ },
+ "relationCounts": {
+  "exact_same": 6,
+  "source_superset": 2
+ },
+ "pdfs": [
+  {
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "publisherAuthority": "こども家庭庁",
+   "totalPages": 147,
+   "manual": [
+    7,
+    147
+   ],
+   "sourceDerived": [
+    7,
+    147
+   ],
+   "sourceSignature": "H:w842|p207|r259|d414|R:66",
+   "relation": "exact_same",
+   "pagesByRegion": {
+    "intersection": 141,
+    "manual_only": 0,
+    "source_only": 0,
+    "outside_both": 6
+   }
+  },
+  {
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "publisherAuthority": "環境省",
+   "totalPages": 193,
+   "manual": [
+    21,
+    193
+   ],
+   "sourceDerived": [
+    21,
+    193
+   ],
+   "sourceSignature": "H:w842|p207|r259|d414|R:66",
+   "relation": "exact_same",
+   "pagesByRegion": {
+    "intersection": 173,
+    "manual_only": 0,
+    "source_only": 0,
+    "outside_both": 20
+   }
+  },
+  {
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "publisherAuthority": "農林水産省",
+   "totalPages": 21,
+   "manual": [
+    7,
+    20
+   ],
+   "sourceDerived": [
+    7,
+    20
+   ],
+   "sourceSignature": "H:w842|p207|r259|d414|R:79",
+   "relation": "exact_same",
+   "pagesByRegion": {
+    "intersection": 14,
+    "manual_only": 0,
+    "source_only": 0,
+    "outside_both": 7
+   }
+  },
+  {
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "publisherAuthority": "経済産業省",
+   "totalPages": 106,
+   "manual": [
+    9,
+    106
+   ],
+   "sourceDerived": [
+    9,
+    106
+   ],
+   "sourceSignature": "H:w842|p207|r259|d414|R:66",
+   "relation": "exact_same",
+   "pagesByRegion": {
+    "intersection": 98,
+    "manual_only": 0,
+    "source_only": 0,
+    "outside_both": 8
+   }
+  },
+  {
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "publisherAuthority": "文部科学省",
+   "totalPages": 1339,
+   "manual": [
+    1045,
+    1339
+   ],
+   "sourceDerived": [
+    1,
+    1339
+   ],
+   "sourceSignature": "H:w842|p207|r259|d414|R:66",
+   "relation": "source_superset",
+   "pagesByRegion": {
+    "intersection": 295,
+    "manual_only": 0,
+    "source_only": 1044,
+    "outside_both": 0
+   }
+  },
+  {
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "publisherAuthority": "厚生労働省",
+   "totalPages": 1723,
+   "manual": [
+    1555,
+    1700
+   ],
+   "sourceDerived": [
+    21,
+    1723
+   ],
+   "sourceSignature": "H:w842|p207|r259|d414|R:66",
+   "relation": "source_superset",
+   "pagesByRegion": {
+    "intersection": 146,
+    "manual_only": 0,
+    "source_only": 1557,
+    "outside_both": 20
+   }
+  },
+  {
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "publisherAuthority": "国土交通省",
+   "totalPages": 10,
+   "manual": [
+    7,
+    10
+   ],
+   "sourceDerived": [
+    7,
+    10
+   ],
+   "sourceSignature": "H:w842|p207|r259|d414|R:79",
+   "relation": "exact_same",
+   "pagesByRegion": {
+    "intersection": 4,
+    "manual_only": 0,
+    "source_only": 0,
+    "outside_both": 6
+   }
+  },
+  {
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "publisherAuthority": "防衛省",
+   "totalPages": 540,
+   "manual": [
+    9,
+    540
+   ],
+   "sourceDerived": [
+    9,
+    540
+   ],
+   "sourceSignature": "H:w842|p207|r259|d414|R:66",
+   "relation": "exact_same",
+   "pagesByRegion": {
+    "intersection": 532,
+    "manual_only": 0,
+    "source_only": 0,
+    "outside_both": 8
+   }
+  }
+ ]
+}

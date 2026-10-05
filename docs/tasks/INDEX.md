@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_1425_Budget_Request_Source_Range_Hierarchy_Paired_Protocol.md](20261005_1425_Budget_Request_Source_Range_Hierarchy_Paired_Protocol.md) — 手書きactivation rangeをsource-derived detail range(layout range)に置換して既存DocumentHierarchyを適用するpaired diagnosticの事前登録。8PDF(6exact_same・mext/mhlw superset)、変更は入力範囲のみ、change class・D1〜D4(D4→D2→D3→D1)をtreatment実行前に凍結
 - [20261005_1356_Budget_Request_Refined_Header_Structural_Gate_Reevaluation_Result.md](20261005_1356_Budget_Request_Refined_Header_Structural_Gate_Reevaluation_Result.md) — table-frame refined projection後に既存structural gateを再評価。G1/G3/G5 pass、G4が再びfail(mext 2・mhlw 7、9件は全てalternativeにも存在=source上の実在transition)。判定=HEADER_LABEL_INTRINSICALLY_NOT_BOUNDARY_SPECIFIC、header-label単独路線を終了
 - [20261005_1355_Budget_Request_Refined_Header_Structural_Gate_Reevaluation_Protocol.md](20261005_1355_Budget_Request_Refined_Header_Structural_Gate_Reevaluation_Protocol.md) — table-frame refined projection後に、以前のpage-header structural gate(G1/G3/G4/G5)を変更せず再適用する事前登録。入力差し替え1点のみ、gate定義のsource固定、D1〜D3、G4再fail時はheader-label単独路線を終了
 - [20261005_1331_Budget_Request_Table_Frame_Predicate_Refinement_Result.md](20261005_1331_Budget_Request_Table_Frame_Predicate_Refinement_Result.md) — table-frame relationをeligibilityに1つだけ加えたrefinementのfrozen評価。P1 dominant 2,530中2,529維持・outlier 2/2除外・P2の80.4%がbody/table・regression 0、ただしP2 shareとcoverageはgate近傍。初回runのmeasurement bug(reject pageのraw比較)を開示。判定=TABLE_FRAME_REFINEMENT_SUPPORTED
