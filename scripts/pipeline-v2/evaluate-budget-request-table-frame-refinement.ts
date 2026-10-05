@@ -131,8 +131,10 @@ async function main() {
       const k = `${d.localPath}|${p}`;
       const c0 = cm.get(p)!;
       if (c0.s === 'unavailable_rotate90') continue;
-      const refinedStatus = a.basis === 'label_on_first_code_row' && !acceptedPages.has(k) ? 'observed_blank' : a.s;
-      const refinedRaw = a.basis === 'label_on_first_code_row' && !acceptedPages.has(k) ? null : a.raw;
+      // 不採用（reject）の page は current projection の出力のまま（採用しないだけで、current の blank の raw 等は変えない）
+      const rejected = a.basis === 'label_on_first_code_row' && !acceptedPages.has(k);
+      const refinedStatus = rejected ? c0.s : a.s;
+      const refinedRaw = rejected ? c0.raw : a.raw;
       if (refinedStatus !== c0.s || refinedRaw !== c0.raw) { currentChanged++; if (!acceptedPages.has(k)) changedOutsideAccepted++; }
       if (c0.s === 'observed_nonblank' && (refinedStatus !== c0.s || refinedRaw !== c0.raw)) changedNonblank++;
       if (nonTarget.has(k) && refinedStatus !== 'observed_blank') changedNonTarget++;
