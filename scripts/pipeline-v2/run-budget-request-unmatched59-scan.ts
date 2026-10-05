@@ -29,10 +29,11 @@ async function main() {
   for (const [p, h] of Object.entries(FROZEN)) if (fileSha(p) !== h) throw new Error(`frozen input の hash 不一致（STOP）: ${p}`);
   const freeze = readJson<{ artifacts: Record<string, string> }>(`${R}/phaseA-freeze-manifest.json`);
   for (const [p, h] of Object.entries(freeze.artifacts)) if (fileSha(p) !== h) throw new Error(`Phase A の artifact が freeze と不一致（STOP）: ${p}`);
-  const baseline = readJson<{ unmatchedMof: { mofSectionId: string; name: string; normalized: string }[] }>(`${OUT}/baseline.json`);
+  const baseline = readJson<{ unmatchedMof: { mofSectionId: string; ministry: string; organization: string; name: string; normalized: string }[] }>(`${OUT}/baseline.json`);
   const docs = readJson<{ documents: { localPath: string; sha256: string; pages: number; publisherAuthority: string; accountType: string }[] }>(`${BASE_FIX}/corpus-manifest.json`).documents;
   if (docs.length !== 82) throw new Error('corpus 件数が 82 でない（STOP）');
-  const names = baseline.unmatchedMof.map(m => ({ id: m.mofSectionId, norm: normalizeText(m.name) }));
+  const names = baseline.unmatchedMof.map(m => ({ id: m.mofSectionId, norm: normalizeText(m.name), authorities: new Set([m.ministry, m.organization]) }));
+  const stemHits: Record<string, unknown[]> = Object.fromEntries(names.map(n => [n.id, []]));
   // 現行 candidate / universe（continuation 発火後の candidate 名称）
   const fired = new Map(readGz<{ candidateId: string; afterName: string }>(`${MC}/continuation-fired.jsonl.gz`).map(f => [f.candidateId, f.afterName]));
   const uni = readGz<UniRow>(`${R}/phaseA-universe.jsonl.gz`);
@@ -61,6 +62,11 @@ async function main() {
       pg.cleanup();
       if (nonBlank.length === 0) continue;
       for (const nm of names) {
+        if (nm.authorities.has(d.publisherAuthority) && (stemHits[nm.id] as unknown[]).length < 5 && nm.norm.length >= 8) {
+          const st = [nm.norm.slice(0, 8), nm.norm.slice(-8)];
+          const tk = nonBlank.find(t => { const x = normalizeText(t.rawText); return x.length >= 6 && st.some(q => x.includes(q)) && !x.includes(nm.norm); });
+          if (tk) (stemHits[nm.id] as unknown[]).push({ pdfPath: d.localPath, page: n, tokenText: normalizeText(tk.rawText).slice(0, 60), stemKinds: st.map((q, i) => (normalizeText(tk.rawText).includes(q) ? (i === 0 ? 'first8' : 'last8') : null)).filter(Boolean) });
+        }
         for (const h of findNameHits(toks, nm.norm)) {
           hitCounts[nm.id]++;
           const first = h.tokens[0];
@@ -80,10 +86,10 @@ async function main() {
     pdfInv.push({ localPath: d.localPath, sha256: d.sha256, pages: d.pages, publisherAuthority: d.publisherAuthority, accountType: d.accountType, rotation: rot, tokens, asciiDigitTokens: digits, pagesWithoutTokens, sampledOperatorCounts: sampledPages > 0 ? { pages: sampledPages, images: sampledImages, constructPath: sampledPaths } : null, representation });
     console.log(`${d.localPath.split('/').pop()} ${representation} tokens=${tokens}`);
   }
-  const gz = zlib.gzipSync(Buffer.from(JSON.stringify(sortDeep({ hitCounts, hits: hitsOut })), 'utf8'), { level: 9 });
+  const gz = zlib.gzipSync(Buffer.from(JSON.stringify(sortDeep({ hitCounts, hits: hitsOut, nearTextStemHits: stemHits })), 'utf8'), { level: 9 });
   fs.writeFileSync(`${OUT}/source-search-hits.json.gz`, gz);
   const text = `${JSON.stringify(sortDeep({
-    schema: 'budget-request-unmatched59-pdf-scan/v0', note: '全 82 PDF の representation と、unmatched 59 項の名称ヒット。新しい抽出 rule は無い。ヒット詳細は source-search-hits.json.gz',
+    schema: 'budget-request-unmatched59-pdf-scan/v0', note: '全 82 PDF の representation と、unmatched 59 項の名称ヒット（exact）と、同じ所管の PDF 内の近傍 text（名称の先頭 / 末尾 8 文字を含む token。分類には使わない記述のみ）。新しい抽出 rule は無い。ヒット詳細は source-search-hits.json.gz',
     frozen: Object.fromEntries(Object.keys(FROZEN).map(p => [p, fileSha(p)])), hitsGzSha256: sha(gz), pdfs: pdfInv,
   }), null, 1)}\n`;
   fs.writeFileSync(`${OUT}/source-pdf-scan.json`, text);
