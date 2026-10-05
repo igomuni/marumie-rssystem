@@ -1,0 +1,382 @@
+{
+ "confoundDiagnosticForCompleteSeparators": [
+  {
+   "distinctValues": 5,
+   "feature": "clusterFirstSupportPosition",
+   "valueToPdfs": {
+    "r0": [
+     "05-1b-01.pdf",
+     "20230914-mxt_kaikesou01-000031817_03.pdf"
+    ],
+    "r1": [
+     "gaisanyoukyu.pdf"
+    ],
+    "r4": [
+     "000157010.pdf"
+    ],
+    "r6": [
+     "20230907_policies_budget_04.pdf"
+    ],
+    "r9": [
+     "ippan_o.pdf"
+    ]
+   },
+   "valuesOccurringInOnePdfOnly": 4
+  },
+  {
+   "distinctValues": 3,
+   "feature": "clusterLastSupportPosition",
+   "valueToPdfs": {
+    "r5": [
+     "05-1b-01.pdf"
+    ],
+    "r7": [
+     "20230914-mxt_kaikesou01-000031817_03.pdf"
+    ],
+    "r9": [
+     "000157010.pdf",
+     "20230907_policies_budget_04.pdf",
+     "gaisanyoukyu.pdf",
+     "ippan_o.pdf"
+    ]
+   },
+   "valuesOccurringInOnePdfOnly": 2
+  },
+  {
+   "distinctValues": 5,
+   "feature": "clusterSupportPageSpan",
+   "valueToPdfs": {
+    "[20,50)": [
+     "20230907_policies_budget_04.pdf"
+    ],
+    "[200,500)": [
+     "gaisanyoukyu.pdf"
+    ],
+    "[3,5)": [
+     "ippan_o.pdf"
+    ],
+    "[50,100)": [
+     "000157010.pdf"
+    ],
+    "[500,1000)": [
+     "05-1b-01.pdf",
+     "20230914-mxt_kaikesou01-000031817_03.pdf"
+    ]
+   },
+   "valuesOccurringInOnePdfOnly": 4
+  },
+  {
+   "distinctValues": 7,
+   "feature": "layoutRangeId",
+   "valueToPdfs": {
+    "1-1339": [
+     "20230914-mxt_kaikesou01-000031817_03.pdf"
+    ],
+    "21-1723": [
+     "05-1b-01.pdf"
+    ],
+    "21-193": [
+     "000157010.pdf"
+    ],
+    "7-147": [
+     "20230907_policies_budget_04.pdf"
+    ],
+    "9-106": [
+     "ippan_o.pdf"
+    ],
+    "9-540": [
+     "gaisanyoukyu.pdf"
+    ],
+    "unassigned": [
+     "gaisanyoukyu.pdf"
+    ]
+   },
+   "valuesOccurringInOnePdfOnly": 7
+  },
+  {
+   "distinctValues": 4,
+   "feature": "layoutRangeLength",
+   "valueToPdfs": {
+    "[100,200)": [
+     "000157010.pdf",
+     "20230907_policies_budget_04.pdf"
+    ],
+    "[1000,∞)": [
+     "05-1b-01.pdf",
+     "20230914-mxt_kaikesou01-000031817_03.pdf"
+    ],
+    "[50,100)": [
+     "ippan_o.pdf"
+    ],
+    "[500,1000)": [
+     "gaisanyoukyu.pdf"
+    ]
+   },
+   "valuesOccurringInOnePdfOnly": 2
+  }
+ ],
+ "frozen": {
+  "docs/tasks/20261005_1815_Budget_Request_Header_Support_Provenance_Isolation_Protocol.md": "9e0da7875ba722463eec2050235a37fe5a397dc2aa42bee6a929b0022466487a",
+  "tests/fixtures/budget-request-level-frame-table-eligibility/2024/phaseB-diagnostic.json": "e93fc23adac0b77c2ec83ee8d933576defe94ce47e9f597621fa89377d7b73ca",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/range-manifest.json": "3e00df693627e1bb22274c291694ac1aed2c079daf758ceda5af084da217201e"
+ },
+ "note": "diagnostic のみ。Phase A の feature・separator・decision は変更しない。manual 前 / 後は rule にしない",
+ "p1PrimaryRelation": {
+  "note": "primary の 462 / 55 / 64 は manual range 内の row。P1 の page 位置との関係は上記の region 分布のみ（row 単位の帰属は frozen artifact に無い）",
+  "p1ByPdfAndManualRegion": {
+   "05-1b-01.pdf": {
+    "before_manual": 450
+   },
+   "20230914-mxt_kaikesou01-000031817_03.pdf": {
+    "before_manual": 450
+   }
+  },
+  "p1ContainsManualStartNode": 0,
+  "primaryRowTuples": {
+   "L=R0,P=R0,K=R0": 1543,
+   "L=R1,P=R0,K=R0": 11,
+   "L=R3,P=R0,K=R0": 399,
+   "L=R3,P=R2,K=R2": 8,
+   "L=R3,P=R4,K=R4": 55,
+   "L=R5,P=R5,K=R5": 64
+  }
+ },
+ "p2SameRangeRelation": {
+  "p2": {
+   "inChangedRows": 288,
+   "inUnplacedRows": 288,
+   "notInChangedRows": 0,
+   "total": 288
+  },
+  "p3": {
+   "inChangedRows": 1471,
+   "total": 1689
+  },
+  "sameRangeChangedRows": 1759,
+  "sameRangeRows": 5893
+ },
+ "phaseADecision": {
+  "decision": "HEADER_SUPPORT_PROVENANCE_STRUCTURALLY_DISTINCT",
+  "rule": "D1"
+ },
+ "phaseAFreeze": {
+  "tests/fixtures/budget-request-header-support-provenance/2024/phaseA-node-features.jsonl.gz": "18045cb66d99d7c5b43bbeb210154831c1a9c31dcb95e5388a5e34b35019d8fd",
+  "tests/fixtures/budget-request-header-support-provenance/2024/phaseA-primary-comparison.json": "1cf564b85ee788f2aca12d613960d56ffa8dd82e7f27a1daf8e58b14a70892bf"
+ },
+ "phaseAGatesPass": true,
+ "representatives": {
+  "P1|multi_run": [
+   "05-1b-01.pdf|detail-p1000-r0",
+   "05-1b-01.pdf|detail-p1002-r0"
+  ],
+  "P2|multi_run": [
+   "000157010.pdf|detail-p104-r0",
+   "000157010.pdf|detail-p106-r0"
+  ],
+  "P3|multi_page_single_run": [
+   "001630395.pdf|detail-p7-r10",
+   "001630395.pdf|detail-p7-r11"
+  ],
+  "P3|multi_run": [
+   "000157010.pdf|detail-p100-r10",
+   "000157010.pdf|detail-p100-r32"
+  ],
+  "P3|single_page": [
+   "001630395.pdf|detail-p7-r26",
+   "001630395.pdf|detail-p7-r9"
+  ],
+  "P4|multi_run": [
+   "05-1b-01.pdf|detail-p1079-r15",
+   "05-1b-01.pdf|detail-p1722-r14"
+  ],
+  "P4|single_page": [
+   "05-1b-01.pdf|detail-p1093-r14",
+   "05-1b-01.pdf|detail-p1093-r33"
+  ]
+ },
+ "schema": "budget-request-header-support-provenance-phaseB/v0",
+ "secondary": {
+  "P1_vs_P4": {
+   "completeSeparators": [
+    "clusterFirstSupportPosition",
+    "clusterGapCount",
+    "clusterLastSupportPosition",
+    "clusterMaxGap",
+    "clusterNodeCount",
+    "clusterNonRequestSupport",
+    "clusterPageCount",
+    "clusterRunCount",
+    "clusterSupportPageCount",
+    "clusterSupportPageSpan",
+    "frozenRelation",
+    "rowBottomMinusFrameTop",
+    "rowCharCount",
+    "rowNormalizedCharCount",
+    "rowTokenCount",
+    "rowTopMinusFrameTop"
+   ],
+   "populations": [
+    "P1",
+    "P4"
+   ],
+   "sizes": [
+    900,
+    51
+   ],
+   "strongPartialSeparators": [],
+   "topTvd": [
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterFirstSupportPosition",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterGapCount",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterLastSupportPosition",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterMaxGap",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterNodeCount",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterNonRequestSupport",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterPageCount",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterRunCount",
+     "tvd": 1
+    }
+   ]
+  },
+  "P2_vs_P3": {
+   "completeSeparators": [
+    "clusterMaxGap",
+    "frozenRelation",
+    "rowBottomMinusFrameTop",
+    "rowTopMinusFrameTop"
+   ],
+   "populations": [
+    "P2",
+    "P3"
+   ],
+   "sizes": [
+    288,
+    1689
+   ],
+   "strongPartialSeparators": [
+    "rowCharCount",
+    "rowNormalizedCharCount",
+    "rowTokenCount"
+   ],
+   "topTvd": [
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterMaxGap",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "frozenRelation",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "rowBottomMinusFrameTop",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "rowTopMinusFrameTop",
+     "tvd": 1
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "clusterFirstSupportPosition",
+     "tvd": 0.999408
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "rowCharCount",
+     "tvd": 0.917111
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "rowNormalizedCharCount",
+     "tvd": 0.917111
+    },
+    {
+     "availability": [
+      1,
+      1
+     ],
+     "name": "rowTokenCount",
+     "tvd": 0.875666
+    }
+   ]
+  }
+ }
+}
