@@ -4,6 +4,8 @@ task doc を新規作成したら本索引に1行追記する（新しいもの�
 
 - [20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md](20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md) — 補正の訂正。P1のみ対象(56/68=82.4%)、full-corpus 97.0%(98/101)とgate101は正
 - [20261006_1440_Budget_Request_P1_Reconciliation_Measurement_Correction.md](20261006_1440_Budget_Request_P1_Reconciliation_Measurement_Correction.md) — P1条件付きexact rateの測定補正。94.9%→82.4%(56/68)、full-corpus97.0%→85.2%。decision不変
+- [20261005_2100_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Result.md](20261005_2100_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Result.md) — 8.6±3pt罫線基準の項候補916行。MOF名称exactで632/784項をカバー、未一致152はband外ではなくsource universeに無し
+- [20261005_2040_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Protocol.md](20261005_2040_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Protocol.md) — 罫線8.6±3pt→plain NNN→名称(金額条件なし)の全corpus抽出とMOF名称only exact突合の事前登録
 - [20261005_2000_Budget_Request_RuleLine_Item_Population_Inventory_Result.md](20261005_2000_Budget_Request_RuleLine_Item_Population_Inventory_Result.md) — 罫線→NNN→名称→金額列の5,255行と距離分布(8.6/22.4/29.3pt等)。MOF exact重なりは5/784で金額条件が項行を落とす
 - [20261005_1930_Budget_Request_RuleLine_Item_Population_Inventory_Protocol.md](20261005_1930_Budget_Request_RuleLine_Item_Population_Inventory_Protocol.md) — 罫線基準の項population inventoryとMOF code+name exact突合の事前登録(Phase A source-only/B MOF)
 - [20261005_0849_Budget_Request_Rule_Line_Geometry_Item_Anchor_Result.md](20261005_0849_Budget_Request_Rule_Line_Geometry_Item_Anchor_Result.md) — 罫線anchor feasibilityの結果。pdf.jsのvector罫線から全page x=50.0の決定的anchor(32/32 range、sparse 38/38)を構成できたが、itemとorganization/明細行がanchor相対値で重なる(混入89%)。判定=RULE_LINE_PRESENT_BUT_SEMANTICALLY_INSUFFICIENT
