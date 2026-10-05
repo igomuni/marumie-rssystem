@@ -1,0 +1,1747 @@
+{
+ "decision": {
+  "decision": "ACTIVATION_RANGE_CHANGES_HIERARCHY_STATE",
+  "rule": 2
+ },
+ "facts": {
+  "infrastructureOk": true,
+  "intersectionChangedRows": 536,
+  "sameRangeExact": true,
+  "sourceOnlyItems": 2,
+  "sourceOnlyOrganizations": 2,
+  "sourceOnlyResolvedRequests": 191
+ },
+ "frozen": {
+  "hashes": {
+   "docs/tasks/20261005_1425_Budget_Request_Source_Range_Hierarchy_Paired_Protocol.md": "294f909669dfdf342726ff835047dd5e028f5f80cd6e2c76adae6b475e4f0362",
+   "scripts/pipeline-v2/lib/budget-request-document-hierarchy-v2.ts": "4372d9ff13e127c69976f1018bb1f41c1cf691ad5eee8b6cdef439ea311eea1d",
+   "scripts/pipeline-v2/lib/budget-request-field-resolver-runs.ts": "d2686cf42660c0ea8593045e40cf8ae3d618a7740b882820eb86c7c4b7a392b5",
+   "scripts/pipeline-v2/lib/budget-request-field-resolver.ts": "758eb8f6afdf45bd39c9853623201a4afbac8e8d6883626149d889335c2bb224",
+   "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+   "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+   "tests/fixtures/budget-request-source-range-hierarchy/2024/range-manifest.json": "3e00df693627e1bb22274c291694ac1aed2c079daf758ceda5af084da217201e"
+  },
+  "runDigestSha256": "509ae971a9cf6e9bcead5c7e969839b11ed05b37b1d3f4cf0154338bf0b5bffa"
+ },
+ "note": "source-only。MOF は未使用。existing hierarchy kind・manual contract は GT ではない",
+ "pdfs": [
+  {
+   "changeClassPrimary": {
+    "unchanged": 557
+   },
+   "changeFlags": {},
+   "changedRowsAnyField": 0,
+   "controlEqualsFrozenBaseline": "true",
+   "examples": [],
+   "hierarchyDerivedChangedRows": 0,
+   "join": {
+    "both": 557,
+    "controlOnly": 0,
+    "treatmentOnly": 0
+   },
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "manual": [
+    7,
+    147
+   ],
+   "regionRows": {
+    "intersection": 557
+   },
+   "relation": "exact_same",
+   "rowTableDigests": {
+    "control": "e37dcd75f06e56e049e96ae4bde342f791d90927c62c7611556d857bc3f51bb2",
+    "treatment": "e37dcd75f06e56e049e96ae4bde342f791d90927c62c7611556d857bc3f51bb2"
+   },
+   "sourceDerived": [
+    7,
+    147
+   ],
+   "sourceLocalChangedRows": 0,
+   "sourceOnlyRegionInventory": {
+    "detailLines": 0,
+    "distinctClusters": 0,
+    "items": 0,
+    "levelGap": 0,
+    "maxLevel": 0,
+    "nameStatus": {},
+    "nodes": 0,
+    "organizations": 0,
+    "parentNotObserved": 0,
+    "parentResolved": 0,
+    "parentUnresolved": 0,
+    "requests": 0,
+    "roots": 0,
+    "rows": 0,
+    "unclassified": 0
+   },
+   "stateComparison": {
+    "controlClusters": [
+     {
+      "level": 1,
+      "memberCount": 22,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 2,
+      "memberCount": 13,
+      "xMax": 58.667,
+      "xMin": 58.666
+     },
+     {
+      "level": 3,
+      "memberCount": 24,
+      "xMax": 65.57,
+      "xMin": 65.568
+     },
+     {
+      "level": 4,
+      "memberCount": 87,
+      "xMax": 72.472,
+      "xMin": 72.466
+     },
+     {
+      "level": 5,
+      "memberCount": 30,
+      "xMax": 79.375,
+      "xMin": 79.372
+     },
+     {
+      "level": 6,
+      "memberCount": 18,
+      "xMax": 514.221,
+      "xMin": 514.218
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 521.164,
+      "xMin": 521.164
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 545.466,
+      "xMin": 545.466
+     }
+    ],
+    "controlFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "level": null,
+     "page": 7,
+     "parentId": null,
+     "parentPage": null
+    },
+    "treatmentClusters": [
+     {
+      "level": 1,
+      "memberCount": 22,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 2,
+      "memberCount": 13,
+      "xMax": 58.667,
+      "xMin": 58.666
+     },
+     {
+      "level": 3,
+      "memberCount": 24,
+      "xMax": 65.57,
+      "xMin": 65.568
+     },
+     {
+      "level": 4,
+      "memberCount": 87,
+      "xMax": 72.472,
+      "xMin": 72.466
+     },
+     {
+      "level": 5,
+      "memberCount": 30,
+      "xMax": 79.375,
+      "xMin": 79.372
+     },
+     {
+      "level": 6,
+      "memberCount": 18,
+      "xMax": 514.221,
+      "xMin": 514.218
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 521.164,
+      "xMin": 521.164
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 545.466,
+      "xMin": 545.466
+     }
+    ],
+    "treatmentFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "level": null,
+     "page": 7,
+     "parentId": null,
+     "parentPage": null
+    }
+   }
+  },
+  {
+   "changeClassPrimary": {
+    "unchanged": 1631
+   },
+   "changeFlags": {},
+   "changedRowsAnyField": 0,
+   "controlEqualsFrozenBaseline": "true",
+   "examples": [],
+   "hierarchyDerivedChangedRows": 0,
+   "join": {
+    "both": 1631,
+    "controlOnly": 0,
+    "treatmentOnly": 0
+   },
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "manual": [
+    21,
+    193
+   ],
+   "regionRows": {
+    "intersection": 1631
+   },
+   "relation": "exact_same",
+   "rowTableDigests": {
+    "control": "3e66978e3cd3082fcff01d08331f913c9cd97aa530bb0ae50c91f32883819eac",
+    "treatment": "3e66978e3cd3082fcff01d08331f913c9cd97aa530bb0ae50c91f32883819eac"
+   },
+   "sourceDerived": [
+    21,
+    193
+   ],
+   "sourceLocalChangedRows": 0,
+   "sourceOnlyRegionInventory": {
+    "detailLines": 0,
+    "distinctClusters": 0,
+    "items": 0,
+    "levelGap": 0,
+    "maxLevel": 0,
+    "nameStatus": {},
+    "nodes": 0,
+    "organizations": 0,
+    "parentNotObserved": 0,
+    "parentResolved": 0,
+    "parentUnresolved": 0,
+    "requests": 0,
+    "roots": 0,
+    "rows": 0,
+    "unclassified": 0
+   },
+   "stateComparison": {
+    "controlClusters": [
+     {
+      "level": 1,
+      "memberCount": 45,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": 2,
+      "memberCount": 3,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 3,
+      "memberCount": 35,
+      "xMax": 58.668,
+      "xMin": 58.665
+     },
+     {
+      "level": 4,
+      "memberCount": 46,
+      "xMax": 65.57,
+      "xMin": 65.567
+     },
+     {
+      "level": 5,
+      "memberCount": 148,
+      "xMax": 72.472,
+      "xMin": 72.464
+     },
+     {
+      "level": 6,
+      "memberCount": 230,
+      "xMax": 79.376,
+      "xMin": 79.366
+     },
+     {
+      "level": 7,
+      "memberCount": 2,
+      "xMax": 514.22,
+      "xMin": 514.219
+     }
+    ],
+    "controlFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "level": 2,
+     "page": 21,
+     "parentId": null,
+     "parentPage": null
+    },
+    "treatmentClusters": [
+     {
+      "level": 1,
+      "memberCount": 45,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": 2,
+      "memberCount": 3,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 3,
+      "memberCount": 35,
+      "xMax": 58.668,
+      "xMin": 58.665
+     },
+     {
+      "level": 4,
+      "memberCount": 46,
+      "xMax": 65.57,
+      "xMin": 65.567
+     },
+     {
+      "level": 5,
+      "memberCount": 148,
+      "xMax": 72.472,
+      "xMin": 72.464
+     },
+     {
+      "level": 6,
+      "memberCount": 230,
+      "xMax": 79.376,
+      "xMin": 79.366
+     },
+     {
+      "level": 7,
+      "memberCount": 2,
+      "xMax": 514.22,
+      "xMin": 514.219
+     }
+    ],
+    "treatmentFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "level": 2,
+     "page": 21,
+     "parentId": null,
+     "parentPage": null
+    }
+   }
+  },
+  {
+   "changeClassPrimary": {
+    "unchanged": 110
+   },
+   "changeFlags": {},
+   "changedRowsAnyField": 0,
+   "controlEqualsFrozenBaseline": "true",
+   "examples": [],
+   "hierarchyDerivedChangedRows": 0,
+   "join": {
+    "both": 110,
+    "controlOnly": 0,
+    "treatmentOnly": 0
+   },
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "manual": [
+    7,
+    20
+   ],
+   "regionRows": {
+    "intersection": 110
+   },
+   "relation": "exact_same",
+   "rowTableDigests": {
+    "control": "c54671070cde014ad94b354c7ca6b3cb06d025000b2de74665fbdd61bdf4d893",
+    "treatment": "c54671070cde014ad94b354c7ca6b3cb06d025000b2de74665fbdd61bdf4d893"
+   },
+   "sourceDerived": [
+    7,
+    20
+   ],
+   "sourceLocalChangedRows": 0,
+   "sourceOnlyRegionInventory": {
+    "detailLines": 0,
+    "distinctClusters": 0,
+    "items": 0,
+    "levelGap": 0,
+    "maxLevel": 0,
+    "nameStatus": {},
+    "nodes": 0,
+    "organizations": 0,
+    "parentNotObserved": 0,
+    "parentResolved": 0,
+    "parentUnresolved": 0,
+    "requests": 0,
+    "roots": 0,
+    "rows": 0,
+    "unclassified": 0
+   },
+   "stateComparison": {
+    "controlClusters": [
+     {
+      "level": 1,
+      "memberCount": 1,
+      "xMax": 65.569,
+      "xMin": 65.569
+     },
+     {
+      "level": 2,
+      "memberCount": 8,
+      "xMax": 72.471,
+      "xMin": 72.471
+     },
+     {
+      "level": 3,
+      "memberCount": 27,
+      "xMax": 79.374,
+      "xMin": 79.372
+     },
+     {
+      "level": 4,
+      "memberCount": 19,
+      "xMax": 86.276,
+      "xMin": 86.271
+     },
+     {
+      "level": 5,
+      "memberCount": 13,
+      "xMax": 93.178,
+      "xMin": 93.172
+     }
+    ],
+    "controlFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "level": 1,
+     "page": 7,
+     "parentId": null,
+     "parentPage": null
+    },
+    "treatmentClusters": [
+     {
+      "level": 1,
+      "memberCount": 1,
+      "xMax": 65.569,
+      "xMin": 65.569
+     },
+     {
+      "level": 2,
+      "memberCount": 8,
+      "xMax": 72.471,
+      "xMin": 72.471
+     },
+     {
+      "level": 3,
+      "memberCount": 27,
+      "xMax": 79.374,
+      "xMin": 79.372
+     },
+     {
+      "level": 4,
+      "memberCount": 19,
+      "xMax": 86.276,
+      "xMin": 86.271
+     },
+     {
+      "level": 5,
+      "memberCount": 13,
+      "xMax": 93.178,
+      "xMin": 93.172
+     }
+    ],
+    "treatmentFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "level": 1,
+     "page": 7,
+     "parentId": null,
+     "parentPage": null
+    }
+   }
+  },
+  {
+   "changeClassPrimary": {
+    "unchanged": 1238
+   },
+   "changeFlags": {},
+   "changedRowsAnyField": 0,
+   "controlEqualsFrozenBaseline": "true",
+   "examples": [],
+   "hierarchyDerivedChangedRows": 0,
+   "join": {
+    "both": 1238,
+    "controlOnly": 0,
+    "treatmentOnly": 0
+   },
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "manual": [
+    9,
+    106
+   ],
+   "regionRows": {
+    "intersection": 1238
+   },
+   "relation": "exact_same",
+   "rowTableDigests": {
+    "control": "0ee57c5c82a4213e808f5cf617a3ad2876245f4a443845c75b23f230d0a7a684",
+    "treatment": "0ee57c5c82a4213e808f5cf617a3ad2876245f4a443845c75b23f230d0a7a684"
+   },
+   "sourceDerived": [
+    9,
+    106
+   ],
+   "sourceLocalChangedRows": 0,
+   "sourceOnlyRegionInventory": {
+    "detailLines": 0,
+    "distinctClusters": 0,
+    "items": 0,
+    "levelGap": 0,
+    "maxLevel": 0,
+    "nameStatus": {},
+    "nodes": 0,
+    "organizations": 0,
+    "parentNotObserved": 0,
+    "parentResolved": 0,
+    "parentUnresolved": 0,
+    "requests": 0,
+    "roots": 0,
+    "rows": 0,
+    "unclassified": 0
+   },
+   "stateComparison": {
+    "controlClusters": [
+     {
+      "level": 1,
+      "memberCount": 2,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": 2,
+      "memberCount": 5,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 3,
+      "memberCount": 32,
+      "xMax": 58.667,
+      "xMin": 58.664
+     },
+     {
+      "level": 4,
+      "memberCount": 50,
+      "xMax": 65.571,
+      "xMin": 65.565
+     },
+     {
+      "level": 5,
+      "memberCount": 205,
+      "xMax": 72.472,
+      "xMin": 72.467
+     },
+     {
+      "level": 6,
+      "memberCount": 100,
+      "xMax": 79.374,
+      "xMin": 79.368
+     }
+    ],
+    "controlFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "level": 2,
+     "page": 9,
+     "parentId": null,
+     "parentPage": null
+    },
+    "treatmentClusters": [
+     {
+      "level": 1,
+      "memberCount": 2,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": 2,
+      "memberCount": 5,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 3,
+      "memberCount": 32,
+      "xMax": 58.667,
+      "xMin": 58.664
+     },
+     {
+      "level": 4,
+      "memberCount": 50,
+      "xMax": 65.571,
+      "xMin": 65.565
+     },
+     {
+      "level": 5,
+      "memberCount": 205,
+      "xMax": 72.472,
+      "xMin": 72.467
+     },
+     {
+      "level": 6,
+      "memberCount": 100,
+      "xMax": 79.374,
+      "xMin": 79.368
+     }
+    ],
+    "treatmentFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "level": 2,
+     "page": 9,
+     "parentId": null,
+     "parentPage": null
+    }
+   }
+  },
+  {
+   "changeClassPrimary": {
+    "level_changed": 217,
+    "newly_unclassified": 21,
+    "parent_changed": 1,
+    "unchanged": 843
+   },
+   "changeFlags": {
+    "level_changed": 239,
+    "newly_unclassified": 21,
+    "parent_changed": 22,
+    "root_changed": 2
+   },
+   "changedRowsAnyField": 239,
+   "controlEqualsFrozenBaseline": "true",
+   "examples": [
+    {
+     "flags": [
+      "newly_unclassified",
+      "root_changed",
+      "parent_changed",
+      "level_changed"
+     ],
+     "key": "1045:4",
+     "primary": "newly_unclassified"
+    },
+    {
+     "flags": [
+      "newly_unclassified",
+      "parent_changed",
+      "level_changed"
+     ],
+     "key": "1046:4",
+     "primary": "newly_unclassified"
+    },
+    {
+     "flags": [
+      "level_changed"
+     ],
+     "key": "1047:4",
+     "primary": "level_changed"
+    },
+    {
+     "flags": [
+      "level_changed"
+     ],
+     "key": "1047:5",
+     "primary": "level_changed"
+    },
+    {
+     "flags": [
+      "level_changed"
+     ],
+     "key": "1047:6",
+     "primary": "level_changed"
+    }
+   ],
+   "hierarchyDerivedChangedRows": 239,
+   "join": {
+    "both": 1082,
+    "controlOnly": 0,
+    "treatmentOnly": 3053
+   },
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "manual": [
+    1045,
+    1339
+   ],
+   "regionRows": {
+    "intersection": 1082,
+    "source_only": 3053
+   },
+   "relation": "source_superset",
+   "rowTableDigests": {
+    "control": "82dda090d02e7bcdab9cd7fd9f9e2bfc56e2c84f91a357c0fa66cc486072e6cd",
+    "treatment": "ed523fe7134dbd9e0bf161a6548d1466e0533016925ca3d4dd7cd3642a3b6f01"
+   },
+   "sourceDerived": [
+    1,
+    1339
+   ],
+   "sourceLocalChangedRows": 0,
+   "sourceOnlyRegionInventory": {
+    "detailLines": 1818,
+    "distinctClusters": 24,
+    "items": 1,
+    "levelGap": 593,
+    "maxLevel": 22,
+    "nameStatus": {
+     "ambiguous": 660,
+     "resolved": 2120,
+     "unresolved": 273
+    },
+    "nodes": 1359,
+    "organizations": 1,
+    "parentNotObserved": 0,
+    "parentResolved": 50,
+    "parentUnresolved": 36,
+    "requests": 86,
+    "roots": 451,
+    "rows": 3053,
+    "unclassified": 1147
+   },
+   "stateComparison": {
+    "controlClusters": [
+     {
+      "level": 1,
+      "memberCount": 2,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 2,
+      "memberCount": 19,
+      "xMax": 58.667,
+      "xMin": 58.666
+     },
+     {
+      "level": 3,
+      "memberCount": 27,
+      "xMax": 65.569,
+      "xMin": 65.568
+     },
+     {
+      "level": 4,
+      "memberCount": 55,
+      "xMax": 72.471,
+      "xMin": 72.47
+     },
+     {
+      "level": 5,
+      "memberCount": 106,
+      "xMax": 79.375,
+      "xMin": 79.365
+     },
+     {
+      "level": 6,
+      "memberCount": 6,
+      "xMax": 514.22,
+      "xMin": 514.216
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 535.052,
+      "xMin": 535.052
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 552.411,
+      "xMin": 552.411
+     },
+     {
+      "level": 7,
+      "memberCount": 2,
+      "xMax": 566.3,
+      "xMin": 566.3
+     },
+     {
+      "level": 8,
+      "memberCount": 2,
+      "xMax": 580.188,
+      "xMin": 580.187
+     },
+     {
+      "level": 9,
+      "memberCount": 8,
+      "xMax": 583.933,
+      "xMin": 583.655
+     },
+     {
+      "level": 10,
+      "memberCount": 3,
+      "xMax": 594.076,
+      "xMin": 594.076
+     },
+     {
+      "level": 11,
+      "memberCount": 8,
+      "xMax": 601.02,
+      "xMin": 601.02
+     }
+    ],
+    "controlFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p1045-r4",
+     "level": 1,
+     "page": 1045,
+     "parentId": null,
+     "parentPage": null
+    },
+    "treatmentClusters": [
+     {
+      "level": 1,
+      "memberCount": 450,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": 2,
+      "memberCount": 4,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 3,
+      "memberCount": 69,
+      "xMax": 58.668,
+      "xMin": 58.666
+     },
+     {
+      "level": 4,
+      "memberCount": 113,
+      "xMax": 65.57,
+      "xMin": 65.568
+     },
+     {
+      "level": 5,
+      "memberCount": 323,
+      "xMax": 72.471,
+      "xMin": 72.469
+     },
+     {
+      "level": 6,
+      "memberCount": 337,
+      "xMax": 79.375,
+      "xMin": 79.358
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 500.604,
+      "xMin": 500.604
+     },
+     {
+      "level": 7,
+      "memberCount": 53,
+      "xMax": 514.22,
+      "xMin": 514.216
+     },
+     {
+      "level": 8,
+      "memberCount": 13,
+      "xMax": 517.964,
+      "xMin": 517.692
+     },
+     {
+      "level": 9,
+      "memberCount": 39,
+      "xMax": 521.164,
+      "xMin": 521.162
+     },
+     {
+      "level": 10,
+      "memberCount": 9,
+      "xMax": 524.636,
+      "xMin": 524.635
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 528.108,
+      "xMin": 528.108
+     },
+     {
+      "level": 11,
+      "memberCount": 4,
+      "xMax": 535.052,
+      "xMin": 535.051
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 545.468,
+      "xMin": 545.468
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 552.411,
+      "xMin": 552.411
+     },
+     {
+      "level": 12,
+      "memberCount": 3,
+      "xMax": 555.884,
+      "xMin": 555.884
+     },
+     {
+      "level": 13,
+      "memberCount": 3,
+      "xMax": 559.628,
+      "xMin": 559.356
+     },
+     {
+      "level": 14,
+      "memberCount": 2,
+      "xMax": 566.3,
+      "xMin": 566.3
+     },
+     {
+      "level": 15,
+      "memberCount": 2,
+      "xMax": 573.244,
+      "xMin": 573.244
+     },
+     {
+      "level": 16,
+      "memberCount": 3,
+      "xMax": 580.188,
+      "xMin": 580.187
+     },
+     {
+      "level": 17,
+      "memberCount": 36,
+      "xMax": 583.933,
+      "xMin": 583.655
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 587.132,
+      "xMin": 587.132
+     },
+     {
+      "level": 18,
+      "memberCount": 3,
+      "xMax": 590.604,
+      "xMin": 590.603
+     },
+     {
+      "level": 19,
+      "memberCount": 3,
+      "xMax": 594.076,
+      "xMin": 594.076
+     },
+     {
+      "level": 20,
+      "memberCount": 9,
+      "xMax": 601.02,
+      "xMin": 601.017
+     },
+     {
+      "level": 21,
+      "memberCount": 2,
+      "xMax": 604.491,
+      "xMin": 604.491
+     },
+     {
+      "level": 22,
+      "memberCount": 114,
+      "xMax": 728.161,
+      "xMin": 728.158
+     }
+    ],
+    "treatmentFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "resolved_by_indent_sequence",
+     "id": "detail-p1045-r4",
+     "level": 2,
+     "page": 1045,
+     "parentId": "detail-p990-r0",
+     "parentPage": 990
+    }
+   }
+  },
+  {
+   "changeClassPrimary": {
+    "level_changed": 273,
+    "newly_unclassified": 16,
+    "parent_changed": 8,
+    "unchanged": 701
+   },
+   "changeFlags": {
+    "level_changed": 297,
+    "newly_unclassified": 16,
+    "parent_changed": 24,
+    "root_changed": 2
+   },
+   "changedRowsAnyField": 297,
+   "controlEqualsFrozenBaseline": "true",
+   "examples": [
+    {
+     "flags": [
+      "level_changed"
+     ],
+     "key": "1555:34",
+     "primary": "level_changed"
+    },
+    {
+     "flags": [
+      "newly_unclassified",
+      "root_changed",
+      "parent_changed",
+      "level_changed"
+     ],
+     "key": "1555:4",
+     "primary": "newly_unclassified"
+    },
+    {
+     "flags": [
+      "newly_unclassified",
+      "parent_changed",
+      "level_changed"
+     ],
+     "key": "1555:5",
+     "primary": "newly_unclassified"
+    },
+    {
+     "flags": [
+      "level_changed"
+     ],
+     "key": "1556:63",
+     "primary": "level_changed"
+    },
+    {
+     "flags": [
+      "level_changed"
+     ],
+     "key": "1557:4",
+     "primary": "level_changed"
+    }
+   ],
+   "hierarchyDerivedChangedRows": 297,
+   "join": {
+    "both": 998,
+    "controlOnly": 0,
+    "treatmentOnly": 7001
+   },
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "manual": [
+    1555,
+    1700
+   ],
+   "regionRows": {
+    "intersection": 998,
+    "source_only": 7001
+   },
+   "relation": "source_superset",
+   "rowTableDigests": {
+    "control": "6b87d143c05cd1924c93231eb00ccdf4d54dff9b1428e108c70a4a92bb21c94e",
+    "treatment": "a8bbbf5f9547227b3b661fd9a48e8350f141a3f6dcf17f1c9e2d7e6d6e191045"
+   },
+   "sourceDerived": [
+    21,
+    1723
+   ],
+   "sourceLocalChangedRows": 0,
+   "sourceOnlyRegionInventory": {
+    "detailLines": 4855,
+    "distinctClusters": 31,
+    "items": 1,
+    "levelGap": 1106,
+    "maxLevel": 27,
+    "nameStatus": {
+     "ambiguous": 999,
+     "resolved": 5670,
+     "unresolved": 332
+    },
+    "nodes": 2771,
+    "organizations": 1,
+    "parentNotObserved": 0,
+    "parentResolved": 141,
+    "parentUnresolved": 46,
+    "requests": 187,
+    "roots": 451,
+    "rows": 7001,
+    "unclassified": 1957
+   },
+   "stateComparison": {
+    "controlClusters": [
+     {
+      "level": 1,
+      "memberCount": 2,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 2,
+      "memberCount": 14,
+      "xMax": 58.667,
+      "xMin": 58.665
+     },
+     {
+      "level": 3,
+      "memberCount": 21,
+      "xMax": 65.57,
+      "xMin": 65.567
+     },
+     {
+      "level": 4,
+      "memberCount": 86,
+      "xMax": 72.476,
+      "xMin": 72.467
+     },
+     {
+      "level": 5,
+      "memberCount": 84,
+      "xMax": 79.378,
+      "xMin": 79.371
+     },
+     {
+      "level": 6,
+      "memberCount": 7,
+      "xMax": 469.357,
+      "xMin": 469.356
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 476.3,
+      "xMin": 476.3
+     },
+     {
+      "level": 7,
+      "memberCount": 2,
+      "xMax": 486.716,
+      "xMin": 486.716
+     },
+     {
+      "level": 8,
+      "memberCount": 49,
+      "xMax": 514.491,
+      "xMin": 514.218
+     },
+     {
+      "level": 9,
+      "memberCount": 16,
+      "xMax": 521.164,
+      "xMin": 521.163
+     },
+     {
+      "level": 10,
+      "memberCount": 2,
+      "xMax": 524.635,
+      "xMin": 524.635
+     },
+     {
+      "level": 11,
+      "memberCount": 2,
+      "xMax": 528.107,
+      "xMin": 528.107
+     },
+     {
+      "level": 12,
+      "memberCount": 4,
+      "xMax": 552.41,
+      "xMin": 552.41
+     },
+     {
+      "level": 13,
+      "memberCount": 5,
+      "xMax": 559.354,
+      "xMin": 559.354
+     },
+     {
+      "level": 14,
+      "memberCount": 2,
+      "xMax": 728.161,
+      "xMin": 728.161
+     }
+    ],
+    "controlFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p1555-r4",
+     "level": 1,
+     "page": 1555,
+     "parentId": null,
+     "parentPage": null
+    },
+    "treatmentClusters": [
+     {
+      "level": 1,
+      "memberCount": 450,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": 2,
+      "memberCount": 8,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 3,
+      "memberCount": 117,
+      "xMax": 58.671,
+      "xMin": 58.664
+     },
+     {
+      "level": 4,
+      "memberCount": 208,
+      "xMax": 65.573,
+      "xMin": 65.566
+     },
+     {
+      "level": 5,
+      "memberCount": 775,
+      "xMax": 72.477,
+      "xMin": 72.467
+     },
+     {
+      "level": 6,
+      "memberCount": 1090,
+      "xMax": 79.378,
+      "xMin": 79.366
+     },
+     {
+      "level": 7,
+      "memberCount": 14,
+      "xMax": 469.357,
+      "xMin": 469.356
+     },
+     {
+      "level": 8,
+      "memberCount": 2,
+      "xMax": 472.827,
+      "xMin": 472.827
+     },
+     {
+      "level": 9,
+      "memberCount": 2,
+      "xMax": 476.3,
+      "xMin": 476.3
+     },
+     {
+      "level": 10,
+      "memberCount": 2,
+      "xMax": 486.716,
+      "xMin": 486.716
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 497.111,
+      "xMin": 497.111
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 511.019,
+      "xMin": 511.019
+     },
+     {
+      "level": 11,
+      "memberCount": 216,
+      "xMax": 514.491,
+      "xMin": 514.218
+     },
+     {
+      "level": 12,
+      "memberCount": 5,
+      "xMax": 517.692,
+      "xMin": 517.692
+     },
+     {
+      "level": 13,
+      "memberCount": 90,
+      "xMax": 521.166,
+      "xMin": 521.162
+     },
+     {
+      "level": 14,
+      "memberCount": 20,
+      "xMax": 524.637,
+      "xMin": 524.633
+     },
+     {
+      "level": 15,
+      "memberCount": 13,
+      "xMax": 528.107,
+      "xMin": 528.107
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 531.579,
+      "xMin": 531.579
+     },
+     {
+      "level": 16,
+      "memberCount": 3,
+      "xMax": 535.051,
+      "xMin": 535.051
+     },
+     {
+      "level": 17,
+      "memberCount": 5,
+      "xMax": 538.523,
+      "xMin": 538.523
+     },
+     {
+      "level": 18,
+      "memberCount": 2,
+      "xMax": 548.938,
+      "xMin": 548.938
+     },
+     {
+      "level": 19,
+      "memberCount": 4,
+      "xMax": 552.41,
+      "xMin": 552.41
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 555.882,
+      "xMin": 555.882
+     },
+     {
+      "level": 20,
+      "memberCount": 5,
+      "xMax": 559.354,
+      "xMin": 559.354
+     },
+     {
+      "level": 21,
+      "memberCount": 5,
+      "xMax": 562.826,
+      "xMin": 562.825
+     },
+     {
+      "level": 22,
+      "memberCount": 4,
+      "xMax": 566.298,
+      "xMin": 566.298
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 569.77,
+      "xMin": 569.77
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 576.713,
+      "xMin": 576.713
+     },
+     {
+      "level": 23,
+      "memberCount": 2,
+      "xMax": 580.185,
+      "xMin": 580.185
+     },
+     {
+      "level": 24,
+      "memberCount": 10,
+      "xMax": 583.657,
+      "xMin": 583.656
+     },
+     {
+      "level": 25,
+      "memberCount": 4,
+      "xMax": 587.129,
+      "xMin": 587.129
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 590.601,
+      "xMin": 590.601
+     },
+     {
+      "level": 26,
+      "memberCount": 2,
+      "xMax": 604.488,
+      "xMin": 604.488
+     },
+     {
+      "level": 27,
+      "memberCount": 3,
+      "xMax": 728.161,
+      "xMin": 728.161
+     }
+    ],
+    "treatmentFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "resolved_by_indent_sequence",
+     "id": "detail-p1555-r4",
+     "level": 2,
+     "page": 1555,
+     "parentId": "detail-p1006-r0",
+     "parentPage": 1006
+    }
+   }
+  },
+  {
+   "changeClassPrimary": {
+    "unchanged": 45
+   },
+   "changeFlags": {},
+   "changedRowsAnyField": 0,
+   "controlEqualsFrozenBaseline": "true",
+   "examples": [],
+   "hierarchyDerivedChangedRows": 0,
+   "join": {
+    "both": 45,
+    "controlOnly": 0,
+    "treatmentOnly": 0
+   },
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "manual": [
+    7,
+    10
+   ],
+   "regionRows": {
+    "intersection": 45
+   },
+   "relation": "exact_same",
+   "rowTableDigests": {
+    "control": "e6b315ec671f296ffc752bb9a6daa587a61b4af39eb456978ac3a1ad655eac10",
+    "treatment": "e6b315ec671f296ffc752bb9a6daa587a61b4af39eb456978ac3a1ad655eac10"
+   },
+   "sourceDerived": [
+    7,
+    10
+   ],
+   "sourceLocalChangedRows": 0,
+   "sourceOnlyRegionInventory": {
+    "detailLines": 0,
+    "distinctClusters": 0,
+    "items": 0,
+    "levelGap": 0,
+    "maxLevel": 0,
+    "nameStatus": {},
+    "nodes": 0,
+    "organizations": 0,
+    "parentNotObserved": 0,
+    "parentResolved": 0,
+    "parentUnresolved": 0,
+    "requests": 0,
+    "roots": 0,
+    "rows": 0,
+    "unclassified": 0
+   },
+   "stateComparison": {
+    "controlClusters": [
+     {
+      "level": 1,
+      "memberCount": 1,
+      "xMax": 65.569,
+      "xMin": 65.569
+     },
+     {
+      "level": 2,
+      "memberCount": 8,
+      "xMax": 72.474,
+      "xMin": 72.47
+     },
+     {
+      "level": 3,
+      "memberCount": 12,
+      "xMax": 79.376,
+      "xMin": 79.372
+     },
+     {
+      "level": 4,
+      "memberCount": 9,
+      "xMax": 86.278,
+      "xMin": 86.274
+     },
+     {
+      "level": 5,
+      "memberCount": 2,
+      "xMax": 93.18,
+      "xMin": 93.176
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 728.161,
+      "xMin": 728.161
+     }
+    ],
+    "controlFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "level": 1,
+     "page": 7,
+     "parentId": null,
+     "parentPage": null
+    },
+    "treatmentClusters": [
+     {
+      "level": 1,
+      "memberCount": 1,
+      "xMax": 65.569,
+      "xMin": 65.569
+     },
+     {
+      "level": 2,
+      "memberCount": 8,
+      "xMax": 72.474,
+      "xMin": 72.47
+     },
+     {
+      "level": 3,
+      "memberCount": 12,
+      "xMax": 79.376,
+      "xMin": 79.372
+     },
+     {
+      "level": 4,
+      "memberCount": 9,
+      "xMax": 86.278,
+      "xMin": 86.274
+     },
+     {
+      "level": 5,
+      "memberCount": 2,
+      "xMax": 93.18,
+      "xMin": 93.176
+     },
+     {
+      "level": null,
+      "memberCount": 1,
+      "xMax": 728.161,
+      "xMin": 728.161
+     }
+    ],
+    "treatmentFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "level": 1,
+     "page": 7,
+     "parentId": null,
+     "parentPage": null
+    }
+   }
+  },
+  {
+   "changeClassPrimary": {
+    "unchanged": 2312
+   },
+   "changeFlags": {},
+   "changedRowsAnyField": 0,
+   "controlEqualsFrozenBaseline": "true",
+   "examples": [],
+   "hierarchyDerivedChangedRows": 0,
+   "join": {
+    "both": 2312,
+    "controlOnly": 0,
+    "treatmentOnly": 0
+   },
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "manual": [
+    9,
+    540
+   ],
+   "regionRows": {
+    "intersection": 2312
+   },
+   "relation": "exact_same",
+   "rowTableDigests": {
+    "control": "06ba4a433f499013d5c9a360123602e032409fa9d6f2f56f6edb4a37fc550632",
+    "treatment": "06ba4a433f499013d5c9a360123602e032409fa9d6f2f56f6edb4a37fc550632"
+   },
+   "sourceDerived": [
+    9,
+    540
+   ],
+   "sourceLocalChangedRows": 0,
+   "sourceOnlyRegionInventory": {
+    "detailLines": 0,
+    "distinctClusters": 0,
+    "items": 0,
+    "levelGap": 0,
+    "maxLevel": 0,
+    "nameStatus": {},
+    "nodes": 0,
+    "organizations": 0,
+    "parentNotObserved": 0,
+    "parentResolved": 0,
+    "parentUnresolved": 0,
+    "requests": 0,
+    "roots": 0,
+    "rows": 0,
+    "unclassified": 0
+   },
+   "stateComparison": {
+    "controlClusters": [
+     {
+      "level": 1,
+      "memberCount": 219,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": 2,
+      "memberCount": 3,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 3,
+      "memberCount": 29,
+      "xMax": 58.667,
+      "xMin": 58.665
+     },
+     {
+      "level": 4,
+      "memberCount": 67,
+      "xMax": 65.571,
+      "xMin": 65.567
+     },
+     {
+      "level": 5,
+      "memberCount": 148,
+      "xMax": 72.473,
+      "xMin": 72.464
+     },
+     {
+      "level": 6,
+      "memberCount": 310,
+      "xMax": 79.376,
+      "xMin": 79.365
+     }
+    ],
+    "controlFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "level": 2,
+     "page": 9,
+     "parentId": null,
+     "parentPage": null
+    },
+    "treatmentClusters": [
+     {
+      "level": 1,
+      "memberCount": 219,
+      "xMax": 37.982,
+      "xMin": 37.982
+     },
+     {
+      "level": 2,
+      "memberCount": 3,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "level": 3,
+      "memberCount": 29,
+      "xMax": 58.667,
+      "xMin": 58.665
+     },
+     {
+      "level": 4,
+      "memberCount": 67,
+      "xMax": 65.571,
+      "xMin": 65.567
+     },
+     {
+      "level": 5,
+      "memberCount": 148,
+      "xMax": 72.473,
+      "xMin": 72.464
+     },
+     {
+      "level": 6,
+      "memberCount": 310,
+      "xMax": 79.376,
+      "xMin": 79.365
+     }
+    ],
+    "treatmentFirstNodeAtOrAfterManualStart": {
+     "ancestorPages": [],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "level": 2,
+     "page": 9,
+     "parentId": null,
+     "parentPage": null
+    }
+   }
+  }
+ ],
+ "schema": "budget-request-source-range-hierarchy-phaseA/v0",
+ "totals": {
+  "changeFlags": {
+   "perturbation|level_changed": 536,
+   "perturbation|newly_unclassified": 37,
+   "perturbation|parent_changed": 46,
+   "perturbation|root_changed": 4
+  },
+  "intersectionChangeClassPrimary": {
+   "perturbation|level_changed": 490,
+   "perturbation|newly_unclassified": 37,
+   "perturbation|parent_changed": 9,
+   "perturbation|unchanged": 1544,
+   "sameRange|unchanged": 5893
+  }
+ }
+}
