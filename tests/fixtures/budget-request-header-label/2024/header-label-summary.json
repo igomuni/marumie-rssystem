@@ -1,0 +1,1445 @@
+{
+ "coverage": {
+  "blankReason": {
+   "digits_only": 191,
+   "no_title_row": 2759
+  },
+  "byStatus": {
+   "observed_blank": 2950,
+   "observed_nonblank": 6195,
+   "unavailable_rotate90": 754
+  },
+  "evaluablePages": 9145,
+  "pages": 9899,
+  "pdfs": 82
+ },
+ "frozen": {
+  "hashes": {
+   "docs/tasks/20261005_0930_Budget_Request_Page_Header_Label_Segment_Protocol.md": "fed6229169503ce7b1e167bba09a0dab35d67d72b1960cdc703386a1c55a5493",
+   "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a"
+  }
+ },
+ "perPdf": [
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 9,
+   "publisherAuthority": "消費者庁",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 5
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 51,
+   "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "nonContiguousReappear": 48,
+   "page1HasLabel": true,
+   "pages": 200,
+   "publisherAuthority": "消費者庁",
+   "status": {
+    "observed_blank": 53,
+    "observed_nonblank": 147
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 21,
+   "group": "non_discovery",
+   "labelSegments": 22,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "nonContiguousReappear": 20,
+   "page1HasLabel": true,
+   "pages": 25,
+   "publisherAuthority": "内閣府",
+   "status": {
+    "observed_nonblank": 25
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 3,
+   "publisherAuthority": "内閣府",
+   "status": {
+    "observed_nonblank": 3
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 2,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 19,
+   "publisherAuthority": "内閣府",
+   "status": {
+    "observed_nonblank": 19
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 2,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f1.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 2,
+   "publisherAuthority": "内閣府",
+   "status": {
+    "observed_nonblank": 2
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f2.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 5,
+   "publisherAuthority": "内閣府",
+   "status": {
+    "observed_nonblank": 5
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 2,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_01.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 2,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 2
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_02.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 2,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 2
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_03.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 4,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 4
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_04.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 4,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 4
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_05.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 1,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 1
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 6,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 6
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_07.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 29,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 29
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_08.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 4,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 4
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_09.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 3,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 3
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_10.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 4,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 4
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 19,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 19
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_12.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 4,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 4
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_13.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 3,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 3
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_14.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 3,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 3
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_15.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 3,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 3
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 2,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_16.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 2,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 2
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_17.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 1,
+   "publisherAuthority": "内閣官房",
+   "status": {
+    "observed_nonblank": 1
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 1,
+   "group": "discovery",
+   "labelSegments": 25,
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "nonContiguousReappear": 22,
+   "page1HasLabel": true,
+   "pages": 147,
+   "publisherAuthority": "こども家庭庁",
+   "status": {
+    "observed_blank": 25,
+    "observed_nonblank": 122
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 29,
+   "publisherAuthority": "こども家庭庁",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 25
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 3,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 4,
+   "localPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 29,
+   "publisherAuthority": "内閣法制局",
+   "status": {
+    "observed_blank": 5,
+    "observed_nonblank": 24
+   },
+   "uniqueLabels": 4
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 5,
+   "group": "non_discovery",
+   "labelSegments": 14,
+   "localPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "nonContiguousReappear": 7,
+   "page1HasLabel": true,
+   "pages": 127,
+   "publisherAuthority": "裁判所",
+   "status": {
+    "observed_blank": 10,
+    "observed_nonblank": 117
+   },
+   "uniqueLabels": 7
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 9,
+   "publisherAuthority": "裁判官弾劾裁判所",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 5
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 32,
+   "publisherAuthority": "デジタル庁",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 28
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 3,
+   "directLabelTransitions": 1,
+   "group": "discovery",
+   "labelSegments": 48,
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "nonContiguousReappear": 43,
+   "page1HasLabel": true,
+   "pages": 193,
+   "publisherAuthority": "環境省",
+   "status": {
+    "observed_blank": 48,
+    "observed_nonblank": 145
+   },
+   "uniqueLabels": 5
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 3,
+   "group": "non_discovery",
+   "labelSegments": 6,
+   "localPath": "data/download/env.go.jp/content/000157012.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 16,
+   "publisherAuthority": "環境省",
+   "status": {
+    "observed_blank": 2,
+    "observed_nonblank": 14
+   },
+   "uniqueLabels": 6
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 3,
+   "group": "non_discovery",
+   "labelSegments": 6,
+   "localPath": "data/download/env.go.jp/content/000157013.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 25,
+   "publisherAuthority": "環境省",
+   "status": {
+    "observed_blank": 2,
+    "observed_nonblank": 23
+   },
+   "uniqueLabels": 6
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 2,
+   "localPath": "data/download/env.go.jp/content/000157016.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 30,
+   "publisherAuthority": "環境省",
+   "status": {
+    "observed_blank": 3,
+    "observed_nonblank": 27
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 0,
+   "localPath": "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": false,
+   "pages": 77,
+   "publisherAuthority": "金融庁",
+   "status": {
+    "observed_blank": 77
+   },
+   "uniqueLabels": 0
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 48,
+   "publisherAuthority": "会計検査院",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 44
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 17,
+   "publisherAuthority": "カジノ管理委員会",
+   "status": {
+    "observed_blank": 6,
+    "observed_nonblank": 11
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 21,
+   "localPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "nonContiguousReappear": 18,
+   "page1HasLabel": true,
+   "pages": 140,
+   "publisherAuthority": "公正取引委員会",
+   "status": {
+    "observed_blank": 22,
+    "observed_nonblank": 117,
+    "unavailable_rotate90": 1
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 4,
+   "localPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 98,
+   "publisherAuthority": "人事院",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 94
+   },
+   "uniqueLabels": 4
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 33,
+   "publisherAuthority": "宮内庁",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 29
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 4,
+   "localPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 20,
+   "publisherAuthority": "宮内庁",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 16
+   },
+   "uniqueLabels": 4
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 8,
+   "directLabelTransitions": 7,
+   "group": "non_discovery",
+   "labelSegments": 140,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "nonContiguousReappear": 127,
+   "page1HasLabel": true,
+   "pages": 378,
+   "publisherAuthority": "農林水産省",
+   "status": {
+    "observed_blank": 136,
+    "observed_nonblank": 242
+   },
+   "uniqueLabels": 13
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 1,
+   "group": "discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 21,
+   "publisherAuthority": "農林水産省",
+   "status": {
+    "observed_blank": 3,
+    "observed_nonblank": 18
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 7,
+   "group": "non_discovery",
+   "labelSegments": 10,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 35,
+   "publisherAuthority": "農林水産省",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 31
+   },
+   "uniqueLabels": 10
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 7,
+   "publisherAuthority": "農林水産省",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 3
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 3,
+   "group": "non_discovery",
+   "labelSegments": 6,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 25,
+   "publisherAuthority": "経済産業省",
+   "status": {
+    "observed_blank": 2,
+    "observed_nonblank": 23
+   },
+   "uniqueLabels": 6
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 3,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 4,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 7,
+   "publisherAuthority": "経済産業省",
+   "status": {
+    "observed_blank": 3,
+    "observed_nonblank": 4
+   },
+   "uniqueLabels": 4
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 3,
+   "group": "non_discovery",
+   "labelSegments": 6,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 16,
+   "publisherAuthority": "経済産業省",
+   "status": {
+    "observed_blank": 2,
+    "observed_nonblank": 14
+   },
+   "uniqueLabels": 6
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 10,
+   "publisherAuthority": "経済産業省",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 6
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 5,
+   "group": "discovery",
+   "labelSegments": 8,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 106,
+   "publisherAuthority": "経済産業省",
+   "status": {
+    "observed_blank": 5,
+    "observed_nonblank": 101
+   },
+   "uniqueLabels": 7
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 17,
+   "publisherAuthority": "経済産業省",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 13
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 6,
+   "publisherAuthority": "文部科学省",
+   "status": {
+    "observed_blank": 5,
+    "observed_nonblank": 1
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 8,
+   "publisherAuthority": "文部科学省",
+   "status": {
+    "observed_nonblank": 8
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 1,
+   "group": "discovery",
+   "labelSegments": 453,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "nonContiguousReappear": 449,
+   "page1HasLabel": true,
+   "pages": 1339,
+   "publisherAuthority": "文部科学省",
+   "status": {
+    "observed_blank": 451,
+    "observed_nonblank": 888
+   },
+   "uniqueLabels": 4
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 0,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_04.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": false,
+   "pages": 6,
+   "publisherAuthority": "文部科学省",
+   "status": {
+    "unavailable_rotate90": 6
+   },
+   "uniqueLabels": 0
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 8,
+   "group": "discovery",
+   "labelSegments": 460,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "nonContiguousReappear": 450,
+   "page1HasLabel": true,
+   "pages": 1723,
+   "publisherAuthority": "厚生労働省",
+   "status": {
+    "observed_blank": 457,
+    "observed_nonblank": 1266
+   },
+   "uniqueLabels": 10
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 3,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 342,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "nonContiguousReappear": 337,
+   "page1HasLabel": true,
+   "pages": 782,
+   "publisherAuthority": "厚生労働省",
+   "status": {
+    "observed_blank": 343,
+    "observed_nonblank": 439
+   },
+   "uniqueLabels": 5
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 5,
+   "group": "non_discovery",
+   "labelSegments": 8,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 48,
+   "publisherAuthority": "厚生労働省",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 44
+   },
+   "uniqueLabels": 8
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 2,
+   "group": "non_discovery",
+   "labelSegments": 5,
+   "localPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 51,
+   "publisherAuthority": "国土交通省",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 47
+   },
+   "uniqueLabels": 5
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 10,
+   "publisherAuthority": "国土交通省",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 6
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 13,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 453,
+   "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "nonContiguousReappear": 439,
+   "page1HasLabel": true,
+   "pages": 1097,
+   "publisherAuthority": "国土交通省",
+   "status": {
+    "observed_blank": 460,
+    "observed_nonblank": 637
+   },
+   "uniqueLabels": 14
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 3,
+   "directLabelTransitions": 1,
+   "group": "discovery",
+   "labelSegments": 221,
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "nonContiguousReappear": 216,
+   "page1HasLabel": true,
+   "pages": 540,
+   "publisherAuthority": "防衛省",
+   "status": {
+    "observed_blank": 222,
+    "observed_nonblank": 318
+   },
+   "uniqueLabels": 5
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 2,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 20,
+   "publisherAuthority": "財務省",
+   "status": {
+    "observed_blank": 1,
+    "observed_nonblank": 18,
+    "unavailable_rotate90": 1
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 4,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 97,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "nonContiguousReappear": 91,
+   "page1HasLabel": true,
+   "pages": 297,
+   "publisherAuthority": "財務省",
+   "status": {
+    "observed_blank": 97,
+    "observed_nonblank": 194,
+    "unavailable_rotate90": 6
+   },
+   "uniqueLabels": 6
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 2,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 9,
+   "publisherAuthority": "財務省",
+   "status": {
+    "observed_blank": 1,
+    "observed_nonblank": 7,
+    "unavailable_rotate90": 1
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 2,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 9,
+   "publisherAuthority": "財務省",
+   "status": {
+    "observed_blank": 1,
+    "observed_nonblank": 8
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 6,
+   "publisherAuthority": "財務省",
+   "status": {
+    "observed_blank": 1,
+    "observed_nonblank": 5
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 11,
+   "publisherAuthority": "財務省",
+   "status": {
+    "observed_blank": 1,
+    "observed_nonblank": 9,
+    "unavailable_rotate90": 1
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 16,
+   "publisherAuthority": "財務省",
+   "status": {
+    "observed_blank": 1,
+    "observed_nonblank": 14,
+    "unavailable_rotate90": 1
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 3,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 108,
+   "localPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "nonContiguousReappear": 104,
+   "page1HasLabel": true,
+   "pages": 314,
+   "publisherAuthority": "外務省",
+   "status": {
+    "observed_blank": 110,
+    "observed_nonblank": 204
+   },
+   "uniqueLabels": 4
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 0,
+   "localPath": "data/download/moj.go.jp/content/001402818.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": false,
+   "pages": 737,
+   "publisherAuthority": "法務省",
+   "status": {
+    "unavailable_rotate90": 737
+   },
+   "uniqueLabels": 0
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 4,
+   "localPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 11,
+   "publisherAuthority": "法務省",
+   "status": {
+    "observed_blank": 5,
+    "observed_nonblank": 6
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 4,
+   "group": "non_discovery",
+   "labelSegments": 6,
+   "localPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 17,
+   "publisherAuthority": "国立国会図書館",
+   "status": {
+    "observed_blank": 1,
+    "observed_nonblank": 16
+   },
+   "uniqueLabels": 5
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 7,
+   "publisherAuthority": "警察庁",
+   "status": {
+    "observed_blank": 2,
+    "observed_nonblank": 5
+   },
+   "uniqueLabels": 2
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 5,
+   "localPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "nonContiguousReappear": 2,
+   "page1HasLabel": true,
+   "pages": 112,
+   "publisherAuthority": "警察庁",
+   "status": {
+    "observed_blank": 10,
+    "observed_nonblank": 102
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 2,
+   "group": "non_discovery",
+   "labelSegments": 5,
+   "localPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 30,
+   "publisherAuthority": "個人情報保護委員会",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 26
+   },
+   "uniqueLabels": 5
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 103,
+   "publisherAuthority": "復興庁",
+   "status": {
+    "observed_blank": 102,
+    "observed_nonblank": 1
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 0,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 1,
+   "localPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 21,
+   "publisherAuthority": "参議院",
+   "status": {
+    "observed_blank": 20,
+    "observed_nonblank": 1
+   },
+   "uniqueLabels": 1
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 36,
+   "publisherAuthority": "衆議院",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 32
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 2,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "nonContiguousReappear": 0,
+   "page1HasLabel": true,
+   "pages": 8,
+   "publisherAuthority": "裁判官訴追委員会",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 4
+   },
+   "uniqueLabels": 3
+  },
+  {
+   "accountType": "general",
+   "blankBetweenDifferentLabels": 5,
+   "directLabelTransitions": 1,
+   "group": "non_discovery",
+   "labelSegments": 178,
+   "localPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "nonContiguousReappear": 171,
+   "page1HasLabel": true,
+   "pages": 454,
+   "publisherAuthority": "総務省",
+   "status": {
+    "observed_blank": 179,
+    "observed_nonblank": 275
+   },
+   "uniqueLabels": 7
+  },
+  {
+   "accountType": "special",
+   "blankBetweenDifferentLabels": 1,
+   "directLabelTransitions": 0,
+   "group": "non_discovery",
+   "labelSegments": 3,
+   "localPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "nonContiguousReappear": 1,
+   "page1HasLabel": true,
+   "pages": 22,
+   "publisherAuthority": "総務省",
+   "status": {
+    "observed_blank": 4,
+    "observed_nonblank": 18
+   },
+   "uniqueLabels": 2
+  }
+ ],
+ "schema": "budget-request-header-label-summary/v0",
+ "segments": {
+  "blankBetweenDifferentLabels": 114,
+  "directLabelTransitions": 96,
+  "labelSegments": 2818,
+  "lengthDistribution": {
+   "1": 2702,
+   "2": 11,
+   "3": 18,
+   "4": 14,
+   "5": 1,
+   "6": 2,
+   "7": 3,
+   "8": 2,
+   "9": 5,
+   "10+": 60
+  },
+  "nonContiguousReappearances": 2554,
+  "pdfsWithLabelOnPage1": 79
+ },
+ "vocabulary": {
+  "distinctNormalizedLabels": 190,
+  "distinctRawLabels": 5905,
+  "lexicalShapes": {
+   "other": 464,
+   "prefix(inner) prefix1 inner1": 5702,
+   "prefix(inner) prefix11 inner11": 1,
+   "prefix(inner) prefix11 inner8": 2,
+   "prefix(inner) prefix12 inner2": 1,
+   "prefix(inner) prefix12 inner3": 3,
+   "prefix(inner) prefix12 inner5": 5,
+   "prefix(inner) prefix4 inner3": 2,
+   "prefix(inner) prefix4 inner4": 1,
+   "prefix(inner) prefix4 inner7": 1,
+   "prefix(inner) prefix4 inner8": 2,
+   "prefix(inner) prefix5 inner3": 3,
+   "prefix(inner) prefix5 inner4": 1,
+   "prefix(inner) prefix5 inner6": 1,
+   "prefix(inner) prefix5 inner8": 1,
+   "prefix(inner) prefix5 inner9": 1,
+   "prefix(inner) prefix7 inner5": 1,
+   "prefix(inner) prefix9 inner10": 1,
+   "prefix(inner) prefix9 inner4": 1,
+   "prefix(inner) prefix9 inner8": 1
+  },
+  "parenthesizedPages": 5731
+ }
+}
