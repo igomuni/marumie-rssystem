@@ -1,0 +1,193 @@
+{
+ "corpus": {
+  "candidates": 14675,
+  "evaluablePages": 9145,
+  "populations": {
+   "P1_projected_same_row": 2532,
+   "P2_ambiguity_additional_after_code": 1786,
+   "P3_nonambiguous_additional_after_code": 534,
+   "P4_before_first_code": 5572,
+   "P5_other": 4251
+  }
+ },
+ "decision": "TABLE_FRAME_REFINEMENT_SUPPORTED",
+ "facts": {
+  "classifierReproduced": true,
+  "coverage": 0.9168654173764906,
+  "deterministic": true,
+  "fidelityViolations": 0,
+  "integrityOk": true,
+  "outliersExcluded": 2,
+  "outliersTotal": 2,
+  "p1DominantRetention": 0.999604743083004,
+  "p2BodyShare": 0.8040313549832027,
+  "provenanceLoss": 0,
+  "provenanceMissing": 0,
+  "regressionChanged": 0,
+  "synthesizedText": 0
+ },
+ "frameAvailability": {
+  "P1": {
+   "classification_available": 2531,
+   "frame_available": 2531,
+   "frame_unavailable": 1
+  },
+  "P1_dominant": {
+   "classification_available": 2529,
+   "frame_available": 2529,
+   "frame_unavailable": 1
+  },
+  "P1_outlier": {
+   "classification_available": 2,
+   "frame_available": 2
+  },
+  "P2": {
+   "classification_available": 1436,
+   "frame_ambiguous": 350,
+   "frame_available": 1786
+  },
+  "P3": {
+   "classification_available": 405,
+   "frame_ambiguous": 127,
+   "frame_available": 532,
+   "frame_unavailable": 2
+  },
+  "P4": {
+   "classification_available": 5348,
+   "frame_ambiguous": 220,
+   "frame_available": 5568,
+   "frame_unavailable": 4
+  },
+  "P5": {
+   "classification_available": 3735,
+   "frame_ambiguous": 499,
+   "frame_available": 4234,
+   "frame_unavailable": 17
+  },
+  "all": {
+   "classification_available": 13455,
+   "frame_ambiguous": 1196,
+   "frame_available": 14651,
+   "frame_unavailable": 24
+  }
+ },
+ "frozen": {
+  "hashes": {
+   "docs/tasks/20261005_1330_Budget_Request_Table_Frame_Predicate_Refinement_Preregistration.md": "edc182c8b44d6b1159f040628223cea81be53e44081f7e350ee0fcf68ea13216",
+   "scripts/pipeline-v2/lib/budget-request-alt-title-projection.ts": "17cb97efb9861bb2b14f6103f1ebf640e23cc322d66417c6fa0a91bff9f6dbf4",
+   "scripts/pipeline-v2/lib/budget-request-p1-outlier.ts": "9cb749d2a3b80f1e71ff3993f9db77e57c723f552c56e1ea5d3a88a11637e5d4",
+   "scripts/pipeline-v2/lib/budget-request-rule-line-anchor.ts": "39454c20ea706dfd2a61eb1b455dec656383696fe2a538165fb94c535725e262",
+   "tests/fixtures/budget-request-alt-title-projection/2024/alt-title-projection.json": "cc071c770fb51a3bf6500a1a01937bbc427283865e3143552ebd7cc5b988c6cd",
+   "tests/fixtures/budget-request-alt-title-projection/2024/population-manifest.json": "ffac4a9d68c7fc4a2cd7883ecb89ed2c5f6009026dcc2fd2d24b6792d981c38d",
+   "tests/fixtures/budget-request-alt-title-projection/2024/primary-evaluation.json": "79e5a63ad474fbc0fdf497d59734072a97f1bfa58711346d53aadae75a6cff06",
+   "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+   "tests/fixtures/budget-request-header-label/2024/header-label-projection.json": "9ff3b970d403d37aea3562cc0eb87a3ee07fca92cbd3bc03986c79b7b9c402e5",
+   "tests/fixtures/budget-request-label-candidate/2024/candidate-universe.json.gz": "429ad6c01c2e962c8a9eea65bcaac2c40fefed54cf941f6d08e90c00a26cb776",
+   "tests/fixtures/budget-request-label-candidate/2024/comparison-decision.json": "fd90b14273218f8608e05022abdcdaa503df6f67ff834344201d5b14c5d0ccda",
+   "tests/fixtures/budget-request-p1-outlier/2024/final-decision.json": "459b2175d6e2ba4ae2ccd487c2c7c5c6789e37bdc4968a72ce6ca732c6d6aab7",
+   "tests/fixtures/budget-request-p1-outlier/2024/population-freeze.json": "db22a783aa02a0b6c35f0962f270fccfad5256a14027136c09306d72a9aade5a",
+   "tests/fixtures/budget-request-p1-outlier/2024/source-evidence-packet.json": "de126ad5cc897f7298d586b079286392aed2b1fa696dd9f45eff7c63309733a8",
+   "tests/fixtures/budget-request-p1-outlier/2024/visual-evidence.json": "86c27c452cbfd37e6847a690a8b0d61fc07b8205b0625136802d6808cf0d361a"
+  },
+  "implementation": {
+   "eligibility": "b43eab8b5e129b5755619c9ea3f037682a2d843dae8c4fbfb39535ab5bfffdf2",
+   "script": "e834e6d8f5bd3ae88685698176a5a34fd10b3553f9be29f75d9e2e0ab2ac150b"
+  }
+ },
+ "gates": {
+  "G1_d1": true,
+  "G1_d2": true,
+  "G2": true,
+  "G3_d1": true,
+  "G3_d2": true,
+  "G4_d1": true,
+  "G4_d2": true,
+  "G5": true
+ },
+ "integrity": {
+  "candidateRelationsSha256": "cfce15fe8fc529ccb3e32a949baf774edf79e0a9e6bad5c9567e3c645363936b",
+  "classifierReproduced": true,
+  "deterministicRerun": true,
+  "fidelityViolations": 0,
+  "frozenCountsAndHashes": true,
+  "provenanceMissing": 0
+ },
+ "note": "P1 / P2 は human GT ではない。structural separation であり precision / recall ではない。MOF・manual contract 未使用",
+ "p1": {
+  "controlReproduced": true,
+  "dominant": {
+   "headerPositionRetained": 2529,
+   "rows": 2530
+  },
+  "outliers": {
+   "excludedAsBodyOrTable": 2,
+   "ids": [
+    "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf|66|4",
+    "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf|18|6"
+   ],
+   "rows": 2
+  }
+ },
+ "p2": {
+  "bodyOrTable": 1436,
+  "rows": 1786
+ },
+ "primaryPageLevel": {
+  "accepted": 2529,
+  "rejected_body_or_table": 2,
+  "rejected_unavailable": 1,
+  "target": 2537,
+  "unresolved_existing_mechanism": 5
+ },
+ "regression": {
+  "currentNonblankChanged": 0,
+  "currentProjectionChangedOutsideAcceptedTarget": 0,
+  "currentProjectionChangedTotal": 2529,
+  "nonTargetChanged": 0,
+  "provenanceLoss": 0,
+  "synthesizedSourceText": 0
+ },
+ "relationMatrix": {
+  "P1": {
+   "body_or_table_position_supported": 2,
+   "header_position_supported": 2529,
+   "unavailable": 1
+  },
+  "P1_dominant": {
+   "header_position_supported": 2529,
+   "unavailable": 1
+  },
+  "P1_outlier": {
+   "body_or_table_position_supported": 2
+  },
+  "P2": {
+   "ambiguous": 350,
+   "body_or_table_position_supported": 1436
+  },
+  "P3": {
+   "ambiguous": 127,
+   "body_or_table_position_supported": 405,
+   "unavailable": 2
+  },
+  "P4": {
+   "ambiguous": 220,
+   "body_or_table_position_supported": 1770,
+   "header_position_supported": 3578,
+   "unavailable": 4
+  },
+  "P5": {
+   "ambiguous": 499,
+   "body_or_table_position_supported": 1604,
+   "header_position_supported": 2131,
+   "unavailable": 17
+  },
+  "all": {
+   "ambiguous": 1196,
+   "body_or_table_position_supported": 5217,
+   "header_position_supported": 8238,
+   "unavailable": 24
+  }
+ },
+ "rule": 3,
+ "schema": "budget-request-table-frame-refinement-evaluation/v0"
+}
