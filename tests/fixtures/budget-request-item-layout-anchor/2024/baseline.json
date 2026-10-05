@@ -1,0 +1,1429 @@
+{
+ "artifactHashes": {
+  "scripts/pipeline-v2/lib/budget-request-display-page.ts": "0c31f949cd59ef417ec0e07143faa792e2f4d6deb48fc92a841fc81749477390",
+  "scripts/pipeline-v2/run-budget-request-rule-8p6-rotate-phase-a.ts": "d4401f86326366be9d9f1abf4a304d6a5ad74fdd5e0f24834c6e7a796923818e",
+  "tests/fixtures/budget-request-rule-8p6-rotate90/2024/phaseA-summary.json": "0d3d02b0a04eb850f7e69c74bb4693faf9f4d2216dabaff69e736ba96be792fa",
+  "tests/fixtures/budget-request-rule-8p6-rotate90/2024/phaseA-universe.jsonl.gz": "50fb9ac1545e96edfc0b9180b37084479569c43db9d690c7229b13dfec063f66"
+ },
+ "candidateRows": 973,
+ "distinctNormalizedNameDenominator": 750,
+ "distinctNormalizedNamesCovered": 627,
+ "exactCoveredMofRows": 661,
+ "exactMatchesGzSha256": "6dcdf24ff664550ed07aea6dc05907beae53bed9514dc83fda4da829c609ec78",
+ "generalCandidateRows": 710,
+ "mofTotal": 784,
+ "note": "変更前の baseline（既存 Phase B）。before/after 比較の基準は 661 / 784",
+ "perPdfCandidates": {
+  "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf": {
+   "account": "general",
+   "candidates": 3,
+   "pdfSha256": "b6cc6fa0604ab64cbbf9867137db53883943b9d3b3adfd0fdc9d9eb59fd5e5d4"
+  },
+  "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "7b5de5dbd397c7067cab4ea527ef02681e91265914057651ee5b886174de7f4e"
+  },
+  "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf": {
+   "account": "special",
+   "candidates": 12,
+   "pdfSha256": "6267ffbdc50e439899169659817271da4aa97596eb48e85fe3122f292f3ab7f2"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_02.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "37c5d82cb7fc835ab16d7f85c113f646d712c34315cf45fce556846f0419d5c0"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_03.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "09aa53885a046a66e5c16fcb2b68c1e3f0f1226a7689cec10995d06cb0793ec6"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_04.pdf": {
+   "account": "general",
+   "candidates": 2,
+   "pdfSha256": "4e772cf5027aab283acd0db52645aff0b4b60a9d1b9ecc6f3a60a648e9e0f113"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_05.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "1d61e924152e8301b5d23d132a521e07d437a403e2fbc8478b7755829d7f554d"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "b10ea4e5d675351ff448be312f918f51f547127b008b8186f1626e663ce38fd8"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_07.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "ed04c0bd225d8247281e057f577f0f539d87e0de875ee1e12951b12d081b4f64"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_08.pdf": {
+   "account": "general",
+   "candidates": 2,
+   "pdfSha256": "38098a4fc77d5315dc56e4eef28ef15ef94ec2e42b5633e59018da061729be12"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_09.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "8ee07dce6fd43b1d879c369be126cad4963f53b3898756a1e392f178ce2c28bf"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_10.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "7f09e773f3055fbcd48d7588c27261022dd0fd94bb37be792f4b047461024087"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf": {
+   "account": "general",
+   "candidates": 2,
+   "pdfSha256": "af935092d4eeb800a9909e12de837c336d489b83691a77250d4cdf6aa69acd11"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_12.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "1b516fb3640e34c5d2d2a494d43a894b6dbe07ba88cc67c9245adb1ee16fa714"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_13.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "6b488cc10a50febf979e8a39f411b8b2dae9d8586d122aa6acb6ffd9abd5ea72"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_14.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "f6108e547d3b5a51af2926786debb7dc80cb96b2fcc97b67e4770bb7cb74f210"
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_15.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "07d7b00dcb94d98995fb5398b366097ceb4bfb734c16d2886b37999dccf0dce7"
+  },
+  "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf": {
+   "account": "general",
+   "candidates": 13,
+   "pdfSha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc"
+  },
+  "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf": {
+   "account": "special",
+   "candidates": 6,
+   "pdfSha256": "e880abb5f5ccfaf7b2b9fe632c101287937e7b393e18e36775dc5ae92ad72026"
+  },
+  "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "dbd5467fe8a6d6f2fe44ac8fba5a5412a097c21feace047a082ae15eb03f57b5"
+  },
+  "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf": {
+   "account": "general",
+   "candidates": 6,
+   "pdfSha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06"
+  },
+  "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "370cd8991433528e8b07c35498959ab0b1fec0b3f634f87e12c7d539944f7a21"
+  },
+  "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf": {
+   "account": "general",
+   "candidates": 3,
+   "pdfSha256": "b77f25b26b5caf82b0b6617fb1af9b3bba9df059a8bf9a8ede63de8d1a8cfe89"
+  },
+  "data/download/env.go.jp/content/000157010.pdf": {
+   "account": "general",
+   "candidates": 35,
+   "pdfSha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd"
+  },
+  "data/download/env.go.jp/content/000157012.pdf": {
+   "account": "special",
+   "candidates": 17,
+   "pdfSha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823"
+  },
+  "data/download/env.go.jp/content/000157013.pdf": {
+   "account": "special",
+   "candidates": 12,
+   "pdfSha256": "5f42ccfb48cc1d2043ffe97776be359c1e51d19ad35c578166e446982eb4bbe5"
+  },
+  "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf": {
+   "account": "general",
+   "candidates": 2,
+   "pdfSha256": "c7070f558f985d0062cec9c73736bebe3c24f1290b895ce89d5afc676b21b72b"
+  },
+  "data/download/jcrc.go.jp/content/000001746.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "7632ed4048799b0f9b2001fef9a7ff94883885ff07e1145d55a4cd335f10583d"
+  },
+  "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf": {
+   "account": "general",
+   "candidates": 2,
+   "pdfSha256": "036b395c72de3e0e81f07c337e9d45361cdaedf99831d690c3ea262dfb6b57e6"
+  },
+  "data/download/jinji.go.jp/content/900024096.pdf": {
+   "account": "general",
+   "candidates": 2,
+   "pdfSha256": "2e0229d66535e4d94f1f35f5d6c169042a6461a20f963f80cbf8945972b61bd2"
+  },
+  "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf": {
+   "account": "general",
+   "candidates": 3,
+   "pdfSha256": "ffab15073beb2411d9396f7ca0cbb1ce33ccdf99be05e6d0d88e29366912e261"
+  },
+  "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "8a1049d06d4e27183a6f292e6afdd83e134775fd58ca4b5895bbb325a8d6ee8b"
+  },
+  "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf": {
+   "account": "general",
+   "candidates": 90,
+   "pdfSha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e"
+  },
+  "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf": {
+   "account": "special",
+   "candidates": 31,
+   "pdfSha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460"
+  },
+  "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf": {
+   "account": "special",
+   "candidates": 1,
+   "pdfSha256": "ba176e292576d8d618b0936fd36a7129d7082efb4a7c7204a746507d757aa137"
+  },
+  "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf": {
+   "account": "special",
+   "candidates": 12,
+   "pdfSha256": "d9ca160f33481511b3a484853f105375895f765a01535ed6bcae4b348eba6383"
+  },
+  "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf": {
+   "account": "special",
+   "candidates": 4,
+   "pdfSha256": "fbbeb3df06555205ae839e9849f460d3017d4b95cf1bfd3bf2aacb389a67e70f"
+  },
+  "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf": {
+   "account": "special",
+   "candidates": 17,
+   "pdfSha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6"
+  },
+  "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf": {
+   "account": "general",
+   "candidates": 32,
+   "pdfSha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a"
+  },
+  "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf": {
+   "account": "special",
+   "candidates": 4,
+   "pdfSha256": "6e083f0b4115530237d4c1c91e6d105fd3ee301d49f5ad3c0e649e11f4b13fc9"
+  },
+  "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf": {
+   "account": "general",
+   "candidates": 69,
+   "pdfSha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71"
+  },
+  "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf": {
+   "account": "general",
+   "candidates": 117,
+   "pdfSha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192"
+  },
+  "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf": {
+   "account": "special",
+   "candidates": 46,
+   "pdfSha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a"
+  },
+  "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf": {
+   "account": "special",
+   "candidates": 33,
+   "pdfSha256": "0391edca4cd6b88140195d118613ccac33550549baf065d1951db96e9625d0b5"
+  },
+  "data/download/mlit.go.jp/page/content/001630393.pdf": {
+   "account": "special",
+   "candidates": 31,
+   "pdfSha256": "efdef502e10961842477cd18cc2cb091c7a3206125881f6031fc7fa941613864"
+  },
+  "data/download/mlit.go.jp/page/content/001630995.pdf": {
+   "account": "general",
+   "candidates": 173,
+   "pdfSha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217"
+  },
+  "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf": {
+   "account": "general",
+   "candidates": 29,
+   "pdfSha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47"
+  },
+  "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf": {
+   "account": "special",
+   "candidates": 6,
+   "pdfSha256": "4993fdf151fd6f0b5b568be1eb0cd1d42e6a1d34e88a1aeba48410ea80f9dfdf"
+  },
+  "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf": {
+   "account": "general",
+   "candidates": 32,
+   "pdfSha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e"
+  },
+  "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf": {
+   "account": "special",
+   "candidates": 3,
+   "pdfSha256": "9b7690b4b4b8818949abd386ccf2375c79f95dff70d38934624de5ffca5e0fe5"
+  },
+  "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf": {
+   "account": "special",
+   "candidates": 3,
+   "pdfSha256": "bd0715a0585b04879c8796504d6841b91c612297299934d9298cb875cee55145"
+  },
+  "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf": {
+   "account": "special",
+   "candidates": 3,
+   "pdfSha256": "5744d1f8670a9a72d52e67771be8266e7d3d102ad35c102eb92b6c2eb5a84d75"
+  },
+  "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf": {
+   "account": "special",
+   "candidates": 7,
+   "pdfSha256": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede"
+  },
+  "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf": {
+   "account": "special",
+   "candidates": 7,
+   "pdfSha256": "f8ebf4dfcfbfa3b4ae0636554e2f3e5462190db71d406de0b87fc45f12d36485"
+  },
+  "data/download/mofa.go.jp/mofaj/files/100546568.pdf": {
+   "account": "general",
+   "candidates": 17,
+   "pdfSha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55"
+  },
+  "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf": {
+   "account": "general",
+   "candidates": 2,
+   "pdfSha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5"
+  },
+  "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf": {
+   "account": "general",
+   "candidates": 14,
+   "pdfSha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837"
+  },
+  "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3"
+  },
+  "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf": {
+   "account": "general",
+   "candidates": 3,
+   "pdfSha256": "a5a91f4b79e6809bac97613037530070f2a4ae898aaf5694dfbaea0562b1e28f"
+  },
+  "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf": {
+   "account": "general",
+   "candidates": 3,
+   "pdfSha256": "30d0dfc363a1f4f7e37b64a0059b48c2f03f13f997eb251e7ef5acaabd37c435"
+  },
+  "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf": {
+   "account": "general",
+   "candidates": 1,
+   "pdfSha256": "66a11094cdda23d47ee2d3c34f4ce741d528a8480a941cbea7803232a6aef029"
+  },
+  "data/download/soumu.go.jp/main_content/000901372.pdf": {
+   "account": "general",
+   "candidates": 36,
+   "pdfSha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b"
+  },
+  "data/download/soumu.go.jp/main_content/000901375.pdf": {
+   "account": "special",
+   "candidates": 8,
+   "pdfSha256": "fbe532b7b80e43f3f31685471f25a598f2532838ddcab33103ece1dd2f43a396"
+  }
+ },
+ "perPdfExact": {
+  "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_02.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_03.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_04.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 2,
+   "exactRows": 2
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_05.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_07.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_08.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 2,
+   "exactRows": 2
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_09.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_10.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 2,
+   "exactRows": 2
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_12.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_13.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_14.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cas.go.jp/jp/yosan/pdf/r6_15.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf": {
+   "candidates": 13,
+   "distinctMofRows": 12,
+   "exactRows": 12
+  },
+  "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf": {
+   "candidates": 6,
+   "distinctMofRows": 6,
+   "exactRows": 6
+  },
+  "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/env.go.jp/content/000157010.pdf": {
+   "candidates": 35,
+   "distinctMofRows": 34,
+   "exactRows": 34
+  },
+  "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/jcrc.go.jp/content/000001746.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/jinji.go.jp/content/900024096.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf": {
+   "candidates": 90,
+   "distinctMofRows": 91,
+   "exactRows": 88
+  },
+  "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf": {
+   "candidates": 32,
+   "distinctMofRows": 32,
+   "exactRows": 31
+  },
+  "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf": {
+   "candidates": 69,
+   "distinctMofRows": 66,
+   "exactRows": 65
+  },
+  "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf": {
+   "candidates": 117,
+   "distinctMofRows": 110,
+   "exactRows": 110
+  },
+  "data/download/mlit.go.jp/page/content/001630995.pdf": {
+   "candidates": 173,
+   "distinctMofRows": 167,
+   "exactRows": 162
+  },
+  "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf": {
+   "candidates": 29,
+   "distinctMofRows": 28,
+   "exactRows": 28
+  },
+  "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf": {
+   "candidates": 32,
+   "distinctMofRows": 34,
+   "exactRows": 30
+  },
+  "data/download/mofa.go.jp/mofaj/files/100546568.pdf": {
+   "candidates": 17,
+   "distinctMofRows": 18,
+   "exactRows": 17
+  },
+  "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf": {
+   "candidates": 2,
+   "distinctMofRows": 2,
+   "exactRows": 2
+  },
+  "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf": {
+   "candidates": 14,
+   "distinctMofRows": 14,
+   "exactRows": 14
+  },
+  "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf": {
+   "candidates": 3,
+   "distinctMofRows": 3,
+   "exactRows": 3
+  },
+  "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf": {
+   "candidates": 1,
+   "distinctMofRows": 1,
+   "exactRows": 1
+  },
+  "data/download/soumu.go.jp/main_content/000901372.pdf": {
+   "candidates": 36,
+   "distinctMofRows": 36,
+   "exactRows": 36
+  }
+ },
+ "phaseBDiagnosticSha256": "080419b590f183152fe9a49e5d0454a284c82b3c98ce41d1ccfe4fd7479b3fac",
+ "schema": "budget-request-item-layout-anchor-baseline/v0",
+ "unmatchedByMinistry": {
+  "内閣府": 66,
+  "厚生労働省": 3,
+  "国土交通省": 3,
+  "外務省": 1,
+  "文部科学省": 8,
+  "法務省": 35,
+  "環境省": 1,
+  "経済産業省": 1,
+  "財務省": 3,
+  "農林水産省": 1,
+  "防衛省": 1
+ },
+ "unmatchedMof": [
+  {
+   "code": "022",
+   "ministry": "環境省",
+   "mofSectionId": "mofsec_08fc1320c8a64ec1769e",
+   "name": "脱炭素成長型経済構造移行推進エネルギー対策特別会計へ繰入",
+   "organization": "環境本省"
+  },
+  {
+   "code": "314",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_0d5be75e595f1652833b",
+   "name": "子ども・子育て支援年金特別会計へ繰入",
+   "organization": "こども家庭庁"
+  },
+  {
+   "code": "152",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_10cee5a2b9a1f55b3e3a",
+   "name": "金融政策費",
+   "organization": "金融庁"
+  },
+  {
+   "code": "187",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_129cfd44d5c9f6f45242",
+   "name": "沖縄振興交付金事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "197",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_14b8743ab1dcdbfbbbf6",
+   "name": "沖縄国立大学法人施設整備費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "287",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_15382a9ba75787486bee",
+   "name": "物価高騰対応地方創生推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "034",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_15dc8eac0be9fe919a39",
+   "name": "男女共同参画社会形成促進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "104",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_161b3dc2e2506578a2ed",
+   "name": "沖縄港湾空港整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "232",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_17fa59b2e8b54427e95e",
+   "name": "総合特区推進調整費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "075",
+   "ministry": "国土交通省",
+   "mofSectionId": "mofsec_193fb4c527010152af99",
+   "name": "独立行政法人海技教育機構施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "code": "050",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_1a3322d066d5cfeb783f",
+   "name": "アイヌ政策推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "008",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_1c9944b741a17e470144",
+   "name": "債権管理回収業審査監督費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "004",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_1d8bb54e3ce8799de456",
+   "name": "独立行政法人国立公文書館運営費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "103",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_20768216a29faff4cb2b",
+   "name": "沖縄災害復旧事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "061",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_220414d472f65ac87dd4",
+   "name": "法務局共通費",
+   "organization": "法務局"
+  },
+  {
+   "code": "235",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_25cb6f5791e2a21e94ac",
+   "name": "特定地域づくり事業推進費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "043",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_276a201fbcf3a040e7a7",
+   "name": "矯正収容費",
+   "organization": "矯正官署"
+  },
+  {
+   "code": "032",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_2858be7c7b44f9f86ef7",
+   "name": "検察費",
+   "organization": "検察庁"
+  },
+  {
+   "code": "191",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_2a148145ba1d009966d1",
+   "name": "原子力災害対策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "108",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_2b5c3d94cab2dd0fb035",
+   "name": "沖縄海岸事業調査諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "061",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_2c763c2d71fbacef99db",
+   "name": "北方対策本部",
+   "organization": "北方対策本部"
+  },
+  {
+   "code": "041",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_2d0af0e958ad1208435e",
+   "name": "矯正官署共通費",
+   "organization": "矯正官署"
+  },
+  {
+   "code": "064",
+   "ministry": "財務省",
+   "mofSectionId": "mofsec_2f492d4203aa9a32ecee",
+   "name": "復興事業費等東日本大震災復興特別会計へ繰入",
+   "organization": "財務本省"
+  },
+  {
+   "code": "285",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_3040bed673a16cbdd2a6",
+   "name": "孤独・孤立対策推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "288",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_307a53794f1f268b498e",
+   "name": "地方創生地域産業基盤整備事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "052",
+   "ministry": "文部科学省",
+   "mofSectionId": "mofsec_31f6d9c946ba5053be13",
+   "name": "国立研究開発法人防災科学技術研究所施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "code": "164",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_32f0bed17034776ed799",
+   "name": "食品衛生基準政策費",
+   "organization": "消費者庁"
+  },
+  {
+   "code": "052",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_367369fcd252884837b4",
+   "name": "更生保護活動費",
+   "organization": "更生保護官署"
+  },
+  {
+   "code": "008",
+   "ministry": "文部科学省",
+   "mofSectionId": "mofsec_393c11b3c7bd77f977b7",
+   "name": "独立行政法人国立青少年教育振興機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "code": "007",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_395b4bc07723a7b10ab9",
+   "name": "更生保護企画調整推進費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "033",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_3d1197c5dde27ff04bbf",
+   "name": "栄典行政費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "085",
+   "ministry": "文部科学省",
+   "mofSectionId": "mofsec_3f480016e51af92fac7c",
+   "name": "独立行政法人国立美術館施設整備費",
+   "organization": "文化庁"
+  },
+  {
+   "code": "042",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_415ed03e8483c221a1f3",
+   "name": "矯正管理業務費",
+   "organization": "矯正官署"
+  },
+  {
+   "code": "046",
+   "ministry": "文部科学省",
+   "mofSectionId": "mofsec_44a80f1a7e23c4283e41",
+   "name": "国立研究開発法人日本原子力研究開発機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "code": "003",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_49d3168ed878c91ec0fa",
+   "name": "司法制度改革推進費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "062",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_4b10d5e32cfd526f4029",
+   "name": "独立行政法人北方領土問題対策協会運営費",
+   "organization": "北方対策本部"
+  },
+  {
+   "code": "188",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_4bba09e39bda0efa3524",
+   "name": "沖縄北部連携促進特別振興事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "257",
+   "ministry": "国土交通省",
+   "mofSectionId": "mofsec_4f340cb0609a31131fa1",
+   "name": "船舶交通安全基盤災害復旧事業費",
+   "organization": "海上保安庁"
+  },
+  {
+   "code": "151",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_51444d6367f9ed66f165",
+   "name": "金融庁共通費",
+   "organization": "金融庁"
+  },
+  {
+   "code": "284",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_52e09df4afa85b8d4fd1",
+   "name": "工業所有権事務費特許特別会計へ繰入",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "009",
+   "ministry": "防衛省",
+   "mofSectionId": "mofsec_5406be34c3c2668465b7",
+   "name": "令和6年度甲Ⅵ型警備艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "code": "081",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_56c25c7e8dd04adca8a3",
+   "name": "公安審査委員会",
+   "organization": "公安審査委員会"
+  },
+  {
+   "code": "283",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_579c9a682149804f1f9a",
+   "name": "経済安全保障確保推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "231",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_58b451894a01dc9e76ed",
+   "name": "地方創生推進事務局",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "092",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_5c857b62a4da2d31af4c",
+   "name": "破壊的団体等調査費",
+   "organization": "公安調査庁"
+  },
+  {
+   "code": "051",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_5c8692d507a3cf035cac",
+   "name": "更生保護官署共通費",
+   "organization": "更生保護官署"
+  },
+  {
+   "code": "103",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_5ca0617a0b6f73de0720",
+   "name": "出入国管理業務費",
+   "organization": "出入国在留管理庁"
+  },
+  {
+   "code": "023",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_5df7b3f168a29c52224e",
+   "name": "国際協力推進費",
+   "organization": "法務総合研究所"
+  },
+  {
+   "code": "005",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_616e3ac03d13f0be337c",
+   "name": "検察企画調整費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "190",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_64fb330fd22dd1f975f2",
+   "name": "沖縄北部連携促進特別振興対策特定開発事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "241",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_669eecf7036d774b2e63",
+   "name": "知的財産戦略推進事務局",
+   "organization": "知的財産戦略推進事務局"
+  },
+  {
+   "code": "261",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_67ec58f05f8509fccdb0",
+   "name": "総合海洋政策推進事務局",
+   "organization": "総合海洋政策推進事務局"
+  },
+  {
+   "code": "115",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_6888ce0aaf2074b311e6",
+   "name": "沖縄水産基盤整備事業調査諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "101",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_6a576f03849b4090ef83",
+   "name": "沖縄総合事務局",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "011",
+   "ministry": "農林水産省",
+   "mofSectionId": "mofsec_6aa32ca4857c9a40ece1",
+   "name": "独立行政法人農業者年金基金運営費",
+   "organization": "農林水産本省"
+  },
+  {
+   "code": "003",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_6ac03419524ec28ba8dc",
+   "name": "公文書等管理政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "087",
+   "ministry": "文部科学省",
+   "mofSectionId": "mofsec_6b3da73dddd24d1dff01",
+   "name": "独立行政法人日本芸術文化振興会施設整備費",
+   "organization": "文化庁"
+  },
+  {
+   "code": "006",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_6c2361bf61416c11c262",
+   "name": "遺棄化学兵器廃棄処理事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "233",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_70f0047ad4ce3c838005",
+   "name": "地方創生推進費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "021",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_76e7306847e1d88ee316",
+   "name": "法務総合研究所共通費",
+   "organization": "法務総合研究所"
+  },
+  {
+   "code": "044",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_7b0da8b44956d4d29ee0",
+   "name": "矯正施設民間開放推進費",
+   "organization": "矯正官署"
+  },
+  {
+   "code": "032",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_7c1ad4d23db03faaaab3",
+   "name": "共生社会政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "031",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_7ea9560ee6dc9b91ae28",
+   "name": "検察官署共通費",
+   "organization": "検察庁"
+  },
+  {
+   "code": "088",
+   "ministry": "経済産業省",
+   "mofSectionId": "mofsec_80300d9ad77824cf87f6",
+   "name": "エネルギー需給構造高度化対策費",
+   "organization": "資源エネルギー庁"
+  },
+  {
+   "code": "301",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_812c136aec462053c122",
+   "name": "健康・医療戦略推進事務局",
+   "organization": "健康・医療戦略推進事務局"
+  },
+  {
+   "code": "015",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_81499aacfb4d3e5280bb",
+   "name": "沖縄政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "004",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_8696800dbfc705ae41be",
+   "name": "日本司法支援センター運営費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "011",
+   "ministry": "外務省",
+   "mofSectionId": "mofsec_894049e0460c15ac31e8",
+   "name": "独立行政法人国際交流基金施設整備費",
+   "organization": "外務本省"
+  },
+  {
+   "code": "107",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_8993789e382331d21965",
+   "name": "沖縄農業農村整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "023",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_8af90dd6cddc473dd837",
+   "name": "沖縄保健衛生諸費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "109",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_8e68afd22d24cf0865b9",
+   "name": "沖縄道路整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "102",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_902fad3f93e08fa5c4aa",
+   "name": "沖縄治水事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "001",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_903a8d3234462ea57947",
+   "name": "法務本省共通費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "015",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_9410840bdc0f81bea2ab",
+   "name": "再犯防止等企画調整推進費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "013",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_94ab36f5b2d9288afdc7",
+   "name": "防災政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "065",
+   "ministry": "財務省",
+   "mofSectionId": "mofsec_956eae3cff007e27507f",
+   "name": "貨幣回収準備資金へ繰入",
+   "organization": "財務本省"
+  },
+  {
+   "code": "262",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_984ff1a1779f4f609870",
+   "name": "有人国境離島政策推進費",
+   "organization": "総合海洋政策推進事務局"
+  },
+  {
+   "code": "041",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_990edf831e840b8ed29a",
+   "name": "経済社会総合研究所",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "251",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_9a064b0d89b3f2ad7f02",
+   "name": "宇宙開発戦略推進事務局",
+   "organization": "宇宙開発戦略推進事務局"
+  },
+  {
+   "code": "010",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_9cca9a46aaf95a92bcc6",
+   "name": "訟務費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "106",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_9cdbbcfb08d2627258f5",
+   "name": "沖縄国営公園事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "007",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_9d851e5529adf78b0aca",
+   "name": "経済財政政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "002",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_9ef2ff20a93b0d5fa3e2",
+   "name": "基本法制整備費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "010",
+   "ministry": "文部科学省",
+   "mofSectionId": "mofsec_9ffdf9616b66a75105bb",
+   "name": "独立行政法人教職員支援機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "code": "071",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_a203e2d7fd6c7b72d3a6",
+   "name": "国際平和協力本部",
+   "organization": "国際平和協力本部"
+  },
+  {
+   "code": "042",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_a3a0efdeb0203b5213dc",
+   "name": "迎賓施設運営費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "023",
+   "ministry": "文部科学省",
+   "mofSectionId": "mofsec_a46fb2109aab2cde25e2",
+   "name": "科学技術・学術政策推進費",
+   "organization": "文部科学本省"
+  },
+  {
+   "code": "049",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_a6d9002ed55676deebcf",
+   "name": "航空機燃料税財源沖縄空港整備事業費自動車安全特別会計へ繰入",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "006",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_a87c656c92591aef3861",
+   "name": "矯正企画調整費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "291",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_a9acc8d93fb36bf32f2d",
+   "name": "科学技術・イノベーション推進事務局",
+   "organization": "科学技術・イノベーション推進事務局"
+  },
+  {
+   "code": "081",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_ae06f02855cbd775c3af",
+   "name": "日本学術会議",
+   "organization": "日本学術会議"
+  },
+  {
+   "code": "009",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_b02a7af66b784e97a2dd",
+   "name": "地方創生支援費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "038",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_b13802eb4af0c2cebd52",
+   "name": "食品安全政策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "102",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_b58d2e281cc91f038e93",
+   "name": "出入国管理企画調整推進費",
+   "organization": "出入国在留管理庁"
+  },
+  {
+   "code": "022",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_b6046e67b68611e6f8e7",
+   "name": "法務調査研究費",
+   "organization": "法務総合研究所"
+  },
+  {
+   "code": "028",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_b64543663914851f5f84",
+   "name": "沖縄開発事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "091",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_b65999bdbbb97b90eaec",
+   "name": "公安調査庁共通費",
+   "organization": "公安調査庁"
+  },
+  {
+   "code": "055",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_bff814a4a20fc0c5fd10",
+   "name": "沖縄振興特定事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "073",
+   "ministry": "厚生労働省",
+   "mofSectionId": "mofsec_c397c6e36a6fc0ac66eb",
+   "name": "独立行政法人国立重度知的障害者総合施設のぞみの園運営費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "code": "009",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_c413b9ce2f7817b3689e",
+   "name": "人権擁護推進費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "189",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_c6687c37ea1f87b4eda9",
+   "name": "沖縄振興推進調査費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "062",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_cbb3cac8059399445ac7",
+   "name": "国籍等事務処理費",
+   "organization": "法務局"
+  },
+  {
+   "code": "022",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_cfefe9701468198a5298",
+   "name": "沖縄教育振興事業費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "005",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_d14250d23e01c8ebc0db",
+   "name": "政府広報費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "033",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_d5374094731128df0098",
+   "name": "検察運営費",
+   "organization": "検察庁"
+  },
+  {
+   "code": "110",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_de3afca90717c291cb1e",
+   "name": "沖縄道路環境整備事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "074",
+   "ministry": "厚生労働省",
+   "mofSectionId": "mofsec_dfb8f05651dc500ba05a",
+   "name": "独立行政法人国立重度知的障害者総合施設のぞみの園施設整備費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "code": "377",
+   "ministry": "国土交通省",
+   "mofSectionId": "mofsec_e218f0142967c6056c6e",
+   "name": "上下水道一体効率化・基盤強化推進事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "code": "064",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_e22646fe4acd7014d83c",
+   "name": "登記事務処理費",
+   "organization": "法務局"
+  },
+  {
+   "code": "193",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_e4945f2746e0203544b4",
+   "name": "電源開発促進税財源原子力安全規制対策費エネルギー対策特別会計へ繰入",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "198",
+   "ministry": "厚生労働省",
+   "mofSectionId": "mofsec_e9844cb8a024e4488833",
+   "name": "昭和館施設費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "code": "108",
+   "ministry": "文部科学省",
+   "mofSectionId": "mofsec_ea99ca99415d94ce3fb6",
+   "name": "独立行政法人日本スポーツ振興センター施設整備費",
+   "organization": "スポーツ庁"
+  },
+  {
+   "code": "040",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_eed48c38669abf079ae2",
+   "name": "公益法人制度適正運営推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "252",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_f5a49b875b4085d259d9",
+   "name": "宇宙開発利用推進費",
+   "organization": "宇宙開発戦略推進事務局"
+  },
+  {
+   "code": "002",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_f60d6a2b8b03bbe38f4f",
+   "name": "内閣本府施設費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "101",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_f7305de8683aa80a2920",
+   "name": "出入国在留管理庁共通費",
+   "organization": "出入国在留管理庁"
+  },
+  {
+   "code": "234",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_f78c1612b99ad5e26a5c",
+   "name": "地方創生基盤整備事業推進費",
+   "organization": "地方創生推進事務局"
+  },
+  {
+   "code": "012",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_f7eb74792960a97bfcde",
+   "name": "法務省施設費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "018",
+   "ministry": "財務省",
+   "mofSectionId": "mofsec_f9b994d5e6d62fcbd1bc",
+   "name": "原油価格・物価高騰対策及び賃上げ促進環境整備対応予備費",
+   "organization": "財務本省"
+  },
+  {
+   "code": "063",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_fba0e9c5f3d2a85c1a69",
+   "name": "人権擁護活動費",
+   "organization": "法務局"
+  },
+  {
+   "code": "013",
+   "ministry": "法務省",
+   "mofSectionId": "mofsec_fbaafff0208ab03a63ec",
+   "name": "法務行政情報化推進費",
+   "organization": "法務本省"
+  },
+  {
+   "code": "091",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_fc41a9d4c691ad37fc7e",
+   "name": "官民人材交流センター",
+   "organization": "官民人材交流センター"
+  },
+  {
+   "code": "282",
+   "ministry": "内閣府",
+   "mofSectionId": "mofsec_fe4eb6d4a22d9ea2ebac",
+   "name": "重要土地等調査費",
+   "organization": "内閣本府"
+  }
+ ],
+ "unmatchedMofRows": 123
+}
