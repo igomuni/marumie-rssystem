@@ -1,0 +1,2306 @@
+{
+ "duplicates": 0,
+ "frozen": {
+  "docs/tasks/20261005_1735_Budget_Request_Level_Frame_Table_Eligibility_Counterfactual_Protocol.md": "20a124f1473873c16acd8132629057a53ce4854b0c6b72dda7ddcfffe3bdbb36",
+  "scripts/pipeline-v2/lib/budget-request-document-hierarchy-v2.ts": "4372d9ff13e127c69976f1018bb1f41c1cf691ad5eee8b6cdef439ea311eea1d",
+  "scripts/pipeline-v2/lib/budget-request-drawing-primitives.ts": "50f62f5c1e227452f1e6de4c72821ced6b6402835a048d53fb497909fb675cc7",
+  "scripts/pipeline-v2/lib/budget-request-field-resolver-runs.ts": "d2686cf42660c0ea8593045e40cf8ae3d618a7740b882820eb86c7c4b7a392b5",
+  "scripts/pipeline-v2/lib/budget-request-field-resolver.ts": "758eb8f6afdf45bd39c9853623201a4afbac8e8d6883626149d889335c2bb224",
+  "scripts/pipeline-v2/lib/budget-request-level-frame-counterfactual.ts": "07912b03fd9bf1353b8e7f3f826f3678b7fa1580f9fa23595047049776e4314e",
+  "scripts/pipeline-v2/lib/budget-request-p1-outlier.ts": "9cb749d2a3b80f1e71ff3993f9db77e57c723f552c56e1ea5d3a88a11637e5d4",
+  "scripts/pipeline-v2/lib/budget-request-rule-line-anchor.ts": "39454c20ea706dfd2a61eb1b455dec656383696fe2a538165fb94c535725e262",
+  "scripts/pipeline-v2/lib/budget-request-table-frame-eligibility.ts": "b43eab8b5e129b5755619c9ea3f037682a2d843dae8c4fbfb39535ab5bfffdf2",
+  "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+  "tests/fixtures/budget-request-layout-hierarchy-inventory/2024/layout-summary.json": "67808613ed7d0a0e0ef7df7be736473a88159306417254100e6241fe69d63266",
+  "tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseA-cluster-inventory.json": "2bb3e5929fcb9539b78018f740c112222956fd70a776796322e5900d46b672e5",
+  "tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseA-support-nodes.jsonl.gz": "fef26771118722adf35d9f367b4bdab03c0897c8f5f8efeecb9fdc3b4ee34b6e",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/phaseA-evaluation.json": "72ad477e5953316e8774919c7f3da2491b22af25332c95d52b65f981e90b67b6",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/range-manifest.json": "3e00df693627e1bb22274c291694ac1aed2c079daf758ceda5af084da217201e"
+ },
+ "gates": {
+  "000157010.pdf:A1_T2_frame_identity": true,
+  "000157010.pdf:A1_node_universe": true,
+  "000157010.pdf:A4_non_intervention_identity": true,
+  "000157010.pdf:T4_frame_nodes_equal_support": true,
+  "001630395.pdf:A1_T2_frame_identity": true,
+  "001630395.pdf:A1_node_universe": true,
+  "001630395.pdf:A4_non_intervention_identity": true,
+  "001630395.pdf:T4_frame_nodes_equal_support": true,
+  "05-1b-01.pdf:A1_T2_frame_identity": true,
+  "05-1b-01.pdf:A1_node_universe": true,
+  "05-1b-01.pdf:A4_non_intervention_identity": true,
+  "05-1b-01.pdf:T4_frame_nodes_equal_support": true,
+  "20230907_policies_budget_04.pdf:A1_T2_frame_identity": true,
+  "20230907_policies_budget_04.pdf:A1_node_universe": true,
+  "20230907_policies_budget_04.pdf:A4_non_intervention_identity": true,
+  "20230907_policies_budget_04.pdf:T4_frame_nodes_equal_support": true,
+  "20230914-mxt_kaikesou01-000031817_03.pdf:A1_T2_frame_identity": true,
+  "20230914-mxt_kaikesou01-000031817_03.pdf:A1_node_universe": true,
+  "20230914-mxt_kaikesou01-000031817_03.pdf:A4_non_intervention_identity": true,
+  "20230914-mxt_kaikesou01-000031817_03.pdf:T4_frame_nodes_equal_support": true,
+  "230901-4.pdf:A1_T2_frame_identity": true,
+  "230901-4.pdf:A1_node_universe": true,
+  "230901-4.pdf:A4_non_intervention_identity": true,
+  "230901-4.pdf:T4_frame_nodes_equal_support": true,
+  "A2_classifier_code_hash_frozen": true,
+  "A5_duplicates_zero": true,
+  "A6_provenance_loss_zero": true,
+  "A8_production_hash_frozen": true,
+  "gaisanyoukyu.pdf:A1_T2_frame_identity": true,
+  "gaisanyoukyu.pdf:A1_node_universe": true,
+  "gaisanyoukyu.pdf:A4_non_intervention_identity": true,
+  "gaisanyoukyu.pdf:T4_frame_nodes_equal_support": true,
+  "ippan_o.pdf:A1_T2_frame_identity": true,
+  "ippan_o.pdf:A1_node_universe": true,
+  "ippan_o.pdf:A4_non_intervention_identity": true,
+  "ippan_o.pdf:T4_frame_nodes_equal_support": true
+ },
+ "nodeCount": 6644,
+ "nodeRelationsGzSha256": "21f167c30d5f3ac51821de36bc3f53e87df88718c90474fba7eae6f44a46dcea",
+ "note": "source-only。C0・manual range・T3・MOF は未参照。T4 frame は support を body_or_table_position_supported の node に限定して既存 cluster algorithm で構築。node は削除しない",
+ "perPdf": [
+  {
+   "excluded": {
+    "ambiguous": 0,
+    "header": 22,
+    "unavailable": 0
+   },
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "mostLeftCluster37982": {
+    "excludedReasons": {
+     "header_position_supported": 22
+    },
+    "nodesRemainInHierarchy": true,
+    "relationDistribution": {
+     "header_position_supported": 22
+    },
+    "t2ClusterIndex": 0,
+    "t2SupportCount": 22,
+    "t2X": [
+     37.982,
+     37.982
+    ],
+    "t4ClusterCoveringT2Interval": null,
+    "t4FrameAssignment": {
+     "assigned": 0,
+     "unassigned": 22
+    },
+    "t4SupportCount": 0
+   },
+   "nodesOnPagesWithoutFrame": 0,
+   "pdf": "20230907_policies_budget_04.pdf",
+   "relation": "exact_same",
+   "relationDistribution": {
+    "body_or_table_position_supported": 175,
+    "header_position_supported": 22
+   },
+   "sourceDerived": [
+    7,
+    147
+   ],
+   "supportEligible": 175,
+   "t2": {
+    "clusterCount": 9,
+    "nodeCount": 197
+   },
+   "t4": {
+    "clusterCount": 8,
+    "clusters": [
+     {
+      "clusterIndex": 0,
+      "firstPage": 7,
+      "lastPage": 7,
+      "layoutRanges": [
+       "7-147"
+      ],
+      "level": 1,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "lattice_supported",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "firstPage": 7,
+      "lastPage": 147,
+      "layoutRanges": [
+       "7-147"
+      ],
+      "level": 2,
+      "memberCount": 13,
+      "pageSpan": 141,
+      "placementBasis": "support",
+      "runCount": 7,
+      "supportCount": 13,
+      "uniquePages": 12,
+      "xMax": 58.667,
+      "xMin": 58.666
+     },
+     {
+      "clusterIndex": 2,
+      "firstPage": 7,
+      "lastPage": 147,
+      "layoutRanges": [
+       "7-147"
+      ],
+      "level": 3,
+      "memberCount": 24,
+      "pageSpan": 141,
+      "placementBasis": "support",
+      "runCount": 10,
+      "supportCount": 24,
+      "uniquePages": 18,
+      "xMax": 65.57,
+      "xMin": 65.568
+     },
+     {
+      "clusterIndex": 3,
+      "firstPage": 7,
+      "lastPage": 146,
+      "layoutRanges": [
+       "7-147"
+      ],
+      "level": 4,
+      "memberCount": 87,
+      "pageSpan": 140,
+      "placementBasis": "support",
+      "runCount": 31,
+      "supportCount": 87,
+      "uniquePages": 57,
+      "xMax": 72.472,
+      "xMin": 72.466
+     },
+     {
+      "clusterIndex": 4,
+      "firstPage": 7,
+      "lastPage": 146,
+      "layoutRanges": [
+       "7-147"
+      ],
+      "level": 5,
+      "memberCount": 30,
+      "pageSpan": 140,
+      "placementBasis": "support",
+      "runCount": 13,
+      "supportCount": 30,
+      "uniquePages": 22,
+      "xMax": 79.375,
+      "xMin": 79.372
+     },
+     {
+      "clusterIndex": 5,
+      "firstPage": 9,
+      "lastPage": 122,
+      "layoutRanges": [
+       "7-147"
+      ],
+      "level": 6,
+      "memberCount": 18,
+      "pageSpan": 114,
+      "placementBasis": "support",
+      "runCount": 9,
+      "supportCount": 18,
+      "uniquePages": 11,
+      "xMax": 514.221,
+      "xMin": 514.218
+     },
+     {
+      "clusterIndex": 6,
+      "firstPage": 82,
+      "lastPage": 82,
+      "layoutRanges": [
+       "7-147"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 521.164,
+      "xMin": 521.164
+     },
+     {
+      "clusterIndex": 7,
+      "firstPage": 76,
+      "lastPage": 76,
+      "layoutRanges": [
+       "7-147"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 545.466,
+      "xMin": 545.466
+     }
+    ],
+    "frameUnassignedByRelation": {
+     "header_position_supported": 22
+    },
+    "frameUnassignedNodes": 22,
+    "indentClusters": [
+     {
+      "clusterIndex": 0,
+      "latticeEvidence": {
+       "gapToRun": 6.901,
+       "runClusterIndexes": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "step": 6.902,
+       "tolerance": 1.736
+      },
+      "level": 1,
+      "memberCount": 1,
+      "placementBasis": "lattice_supported",
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "level": 2,
+      "memberCount": 13,
+      "placementBasis": "support",
+      "xMax": 58.667,
+      "xMin": 58.666
+     },
+     {
+      "clusterIndex": 2,
+      "level": 3,
+      "memberCount": 24,
+      "placementBasis": "support",
+      "xMax": 65.57,
+      "xMin": 65.568
+     },
+     {
+      "clusterIndex": 3,
+      "level": 4,
+      "memberCount": 87,
+      "placementBasis": "support",
+      "xMax": 72.472,
+      "xMin": 72.466
+     },
+     {
+      "clusterIndex": 4,
+      "level": 5,
+      "memberCount": 30,
+      "placementBasis": "support",
+      "xMax": 79.375,
+      "xMin": 79.372
+     },
+     {
+      "clusterIndex": 5,
+      "level": 6,
+      "memberCount": 18,
+      "placementBasis": "support",
+      "xMax": 514.221,
+      "xMin": 514.218
+     },
+     {
+      "clusterIndex": 6,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 521.164,
+      "xMin": 521.164
+     },
+     {
+      "clusterIndex": 7,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 545.466,
+      "xMin": 545.466
+     }
+    ]
+   }
+  },
+  {
+   "excluded": {
+    "ambiguous": 0,
+    "header": 45,
+    "unavailable": 0
+   },
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "mostLeftCluster37982": {
+    "excludedReasons": {
+     "header_position_supported": 45
+    },
+    "nodesRemainInHierarchy": true,
+    "relationDistribution": {
+     "header_position_supported": 45
+    },
+    "t2ClusterIndex": 0,
+    "t2SupportCount": 45,
+    "t2X": [
+     37.982,
+     37.982
+    ],
+    "t4ClusterCoveringT2Interval": null,
+    "t4FrameAssignment": {
+     "assigned": 0,
+     "unassigned": 45
+    },
+    "t4SupportCount": 0
+   },
+   "nodesOnPagesWithoutFrame": 0,
+   "pdf": "000157010.pdf",
+   "relation": "exact_same",
+   "relationDistribution": {
+    "body_or_table_position_supported": 464,
+    "header_position_supported": 45
+   },
+   "sourceDerived": [
+    21,
+    193
+   ],
+   "supportEligible": 464,
+   "t2": {
+    "clusterCount": 7,
+    "nodeCount": 509
+   },
+   "t4": {
+    "clusterCount": 6,
+    "clusters": [
+     {
+      "clusterIndex": 0,
+      "firstPage": 21,
+      "lastPage": 164,
+      "layoutRanges": [
+       "21-193"
+      ],
+      "level": 1,
+      "memberCount": 3,
+      "pageSpan": 144,
+      "placementBasis": "support",
+      "runCount": 3,
+      "supportCount": 3,
+      "uniquePages": 3,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "firstPage": 21,
+      "lastPage": 193,
+      "layoutRanges": [
+       "21-193"
+      ],
+      "level": 2,
+      "memberCount": 35,
+      "pageSpan": 173,
+      "placementBasis": "support",
+      "runCount": 19,
+      "supportCount": 35,
+      "uniquePages": 29,
+      "xMax": 58.668,
+      "xMin": 58.665
+     },
+     {
+      "clusterIndex": 2,
+      "firstPage": 21,
+      "lastPage": 193,
+      "layoutRanges": [
+       "21-193"
+      ],
+      "level": 3,
+      "memberCount": 46,
+      "pageSpan": 173,
+      "placementBasis": "support",
+      "runCount": 24,
+      "supportCount": 46,
+      "uniquePages": 37,
+      "xMax": 65.57,
+      "xMin": 65.567
+     },
+     {
+      "clusterIndex": 3,
+      "firstPage": 21,
+      "lastPage": 193,
+      "layoutRanges": [
+       "21-193"
+      ],
+      "level": 4,
+      "memberCount": 148,
+      "pageSpan": 173,
+      "placementBasis": "support",
+      "runCount": 38,
+      "supportCount": 148,
+      "uniquePages": 95,
+      "xMax": 72.472,
+      "xMin": 72.464
+     },
+     {
+      "clusterIndex": 4,
+      "firstPage": 21,
+      "lastPage": 190,
+      "layoutRanges": [
+       "21-193"
+      ],
+      "level": 5,
+      "memberCount": 230,
+      "pageSpan": 170,
+      "placementBasis": "support",
+      "runCount": 28,
+      "supportCount": 230,
+      "uniquePages": 122,
+      "xMax": 79.376,
+      "xMin": 79.366
+     },
+     {
+      "clusterIndex": 5,
+      "firstPage": 124,
+      "lastPage": 159,
+      "layoutRanges": [
+       "21-193"
+      ],
+      "level": 6,
+      "memberCount": 2,
+      "pageSpan": 36,
+      "placementBasis": "support",
+      "runCount": 2,
+      "supportCount": 2,
+      "uniquePages": 2,
+      "xMax": 514.22,
+      "xMin": 514.219
+     }
+    ],
+    "frameUnassignedByRelation": {
+     "header_position_supported": 45
+    },
+    "frameUnassignedNodes": 45,
+    "indentClusters": [
+     {
+      "clusterIndex": 0,
+      "level": 1,
+      "memberCount": 3,
+      "placementBasis": "support",
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "level": 2,
+      "memberCount": 35,
+      "placementBasis": "support",
+      "xMax": 58.668,
+      "xMin": 58.665
+     },
+     {
+      "clusterIndex": 2,
+      "level": 3,
+      "memberCount": 46,
+      "placementBasis": "support",
+      "xMax": 65.57,
+      "xMin": 65.567
+     },
+     {
+      "clusterIndex": 3,
+      "level": 4,
+      "memberCount": 148,
+      "placementBasis": "support",
+      "xMax": 72.472,
+      "xMin": 72.464
+     },
+     {
+      "clusterIndex": 4,
+      "level": 5,
+      "memberCount": 230,
+      "placementBasis": "support",
+      "xMax": 79.376,
+      "xMin": 79.366
+     },
+     {
+      "clusterIndex": 5,
+      "level": 6,
+      "memberCount": 2,
+      "placementBasis": "support",
+      "xMax": 514.22,
+      "xMin": 514.219
+     }
+    ]
+   }
+  },
+  {
+   "excluded": {
+    "ambiguous": 0,
+    "header": 0,
+    "unavailable": 0
+   },
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "mostLeftCluster37982": null,
+   "nodesOnPagesWithoutFrame": 0,
+   "pdf": "230901-4.pdf",
+   "relation": "exact_same",
+   "relationDistribution": {
+    "body_or_table_position_supported": 68
+   },
+   "sourceDerived": [
+    7,
+    20
+   ],
+   "supportEligible": 68,
+   "t2": {
+    "clusterCount": 5,
+    "nodeCount": 68
+   },
+   "t4": {
+    "clusterCount": 5,
+    "clusters": [
+     {
+      "clusterIndex": 0,
+      "firstPage": 7,
+      "lastPage": 7,
+      "layoutRanges": [
+       "7-20"
+      ],
+      "level": 1,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "lattice_supported",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 65.569,
+      "xMin": 65.569
+     },
+     {
+      "clusterIndex": 1,
+      "firstPage": 7,
+      "lastPage": 19,
+      "layoutRanges": [
+       "7-20"
+      ],
+      "level": 2,
+      "memberCount": 8,
+      "pageSpan": 13,
+      "placementBasis": "support",
+      "runCount": 3,
+      "supportCount": 8,
+      "uniquePages": 4,
+      "xMax": 72.471,
+      "xMin": 72.471
+     },
+     {
+      "clusterIndex": 2,
+      "firstPage": 7,
+      "lastPage": 20,
+      "layoutRanges": [
+       "7-20"
+      ],
+      "level": 3,
+      "memberCount": 27,
+      "pageSpan": 14,
+      "placementBasis": "support",
+      "runCount": 3,
+      "supportCount": 27,
+      "uniquePages": 11,
+      "xMax": 79.374,
+      "xMin": 79.372
+     },
+     {
+      "clusterIndex": 3,
+      "firstPage": 7,
+      "lastPage": 19,
+      "layoutRanges": [
+       "7-20"
+      ],
+      "level": 4,
+      "memberCount": 19,
+      "pageSpan": 13,
+      "placementBasis": "support",
+      "runCount": 3,
+      "supportCount": 19,
+      "uniquePages": 10,
+      "xMax": 86.276,
+      "xMin": 86.271
+     },
+     {
+      "clusterIndex": 4,
+      "firstPage": 7,
+      "lastPage": 19,
+      "layoutRanges": [
+       "7-20"
+      ],
+      "level": 5,
+      "memberCount": 13,
+      "pageSpan": 13,
+      "placementBasis": "support",
+      "runCount": 3,
+      "supportCount": 13,
+      "uniquePages": 8,
+      "xMax": 93.178,
+      "xMin": 93.172
+     }
+    ],
+    "frameUnassignedByRelation": {},
+    "frameUnassignedNodes": 0,
+    "indentClusters": [
+     {
+      "clusterIndex": 0,
+      "latticeEvidence": {
+       "gapToRun": 6.902,
+       "runClusterIndexes": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "step": 6.901,
+       "tolerance": 1.736
+      },
+      "level": 1,
+      "memberCount": 1,
+      "placementBasis": "lattice_supported",
+      "xMax": 65.569,
+      "xMin": 65.569
+     },
+     {
+      "clusterIndex": 1,
+      "level": 2,
+      "memberCount": 8,
+      "placementBasis": "support",
+      "xMax": 72.471,
+      "xMin": 72.471
+     },
+     {
+      "clusterIndex": 2,
+      "level": 3,
+      "memberCount": 27,
+      "placementBasis": "support",
+      "xMax": 79.374,
+      "xMin": 79.372
+     },
+     {
+      "clusterIndex": 3,
+      "level": 4,
+      "memberCount": 19,
+      "placementBasis": "support",
+      "xMax": 86.276,
+      "xMin": 86.271
+     },
+     {
+      "clusterIndex": 4,
+      "level": 5,
+      "memberCount": 13,
+      "placementBasis": "support",
+      "xMax": 93.178,
+      "xMin": 93.172
+     }
+    ]
+   }
+  },
+  {
+   "excluded": {
+    "ambiguous": 0,
+    "header": 2,
+    "unavailable": 0
+   },
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "mostLeftCluster37982": {
+    "excludedReasons": {
+     "header_position_supported": 2
+    },
+    "nodesRemainInHierarchy": true,
+    "relationDistribution": {
+     "header_position_supported": 2
+    },
+    "t2ClusterIndex": 0,
+    "t2SupportCount": 2,
+    "t2X": [
+     37.982,
+     37.982
+    ],
+    "t4ClusterCoveringT2Interval": null,
+    "t4FrameAssignment": {
+     "assigned": 0,
+     "unassigned": 2
+    },
+    "t4SupportCount": 0
+   },
+   "nodesOnPagesWithoutFrame": 0,
+   "pdf": "ippan_o.pdf",
+   "relation": "exact_same",
+   "relationDistribution": {
+    "body_or_table_position_supported": 392,
+    "header_position_supported": 2
+   },
+   "sourceDerived": [
+    9,
+    106
+   ],
+   "supportEligible": 392,
+   "t2": {
+    "clusterCount": 6,
+    "nodeCount": 394
+   },
+   "t4": {
+    "clusterCount": 5,
+    "clusters": [
+     {
+      "clusterIndex": 0,
+      "firstPage": 9,
+      "lastPage": 94,
+      "layoutRanges": [
+       "9-106"
+      ],
+      "level": 1,
+      "memberCount": 5,
+      "pageSpan": 86,
+      "placementBasis": "support",
+      "runCount": 5,
+      "supportCount": 5,
+      "uniquePages": 5,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "firstPage": 9,
+      "lastPage": 106,
+      "layoutRanges": [
+       "9-106"
+      ],
+      "level": 2,
+      "memberCount": 32,
+      "pageSpan": 98,
+      "placementBasis": "support",
+      "runCount": 13,
+      "supportCount": 32,
+      "uniquePages": 22,
+      "xMax": 58.667,
+      "xMin": 58.664
+     },
+     {
+      "clusterIndex": 2,
+      "firstPage": 9,
+      "lastPage": 106,
+      "layoutRanges": [
+       "9-106"
+      ],
+      "level": 3,
+      "memberCount": 50,
+      "pageSpan": 98,
+      "placementBasis": "support",
+      "runCount": 20,
+      "supportCount": 50,
+      "uniquePages": 36,
+      "xMax": 65.571,
+      "xMin": 65.565
+     },
+     {
+      "clusterIndex": 3,
+      "firstPage": 9,
+      "lastPage": 105,
+      "layoutRanges": [
+       "9-106"
+      ],
+      "level": 4,
+      "memberCount": 205,
+      "pageSpan": 97,
+      "placementBasis": "support",
+      "runCount": 11,
+      "supportCount": 205,
+      "uniquePages": 83,
+      "xMax": 72.472,
+      "xMin": 72.467
+     },
+     {
+      "clusterIndex": 4,
+      "firstPage": 9,
+      "lastPage": 105,
+      "layoutRanges": [
+       "9-106"
+      ],
+      "level": 5,
+      "memberCount": 100,
+      "pageSpan": 97,
+      "placementBasis": "support",
+      "runCount": 15,
+      "supportCount": 100,
+      "uniquePages": 43,
+      "xMax": 79.374,
+      "xMin": 79.368
+     }
+    ],
+    "frameUnassignedByRelation": {
+     "header_position_supported": 2
+    },
+    "frameUnassignedNodes": 2,
+    "indentClusters": [
+     {
+      "clusterIndex": 0,
+      "level": 1,
+      "memberCount": 5,
+      "placementBasis": "support",
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "level": 2,
+      "memberCount": 32,
+      "placementBasis": "support",
+      "xMax": 58.667,
+      "xMin": 58.664
+     },
+     {
+      "clusterIndex": 2,
+      "level": 3,
+      "memberCount": 50,
+      "placementBasis": "support",
+      "xMax": 65.571,
+      "xMin": 65.565
+     },
+     {
+      "clusterIndex": 3,
+      "level": 4,
+      "memberCount": 205,
+      "placementBasis": "support",
+      "xMax": 72.472,
+      "xMin": 72.467
+     },
+     {
+      "clusterIndex": 4,
+      "level": 5,
+      "memberCount": 100,
+      "placementBasis": "support",
+      "xMax": 79.374,
+      "xMin": 79.368
+     }
+    ]
+   }
+  },
+  {
+   "excluded": {
+    "ambiguous": 848,
+    "header": 450,
+    "unavailable": 0
+   },
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "mostLeftCluster37982": {
+    "excludedReasons": {
+     "header_position_supported": 450
+    },
+    "nodesRemainInHierarchy": true,
+    "relationDistribution": {
+     "header_position_supported": 450
+    },
+    "t2ClusterIndex": 0,
+    "t2SupportCount": 450,
+    "t2X": [
+     37.982,
+     37.982
+    ],
+    "t4ClusterCoveringT2Interval": null,
+    "t4FrameAssignment": {
+     "assigned": 0,
+     "unassigned": 450
+    },
+    "t4SupportCount": 0
+   },
+   "nodesOnPagesWithoutFrame": 0,
+   "pdf": "20230914-mxt_kaikesou01-000031817_03.pdf",
+   "relation": "source_superset",
+   "relationDistribution": {
+    "ambiguous": 848,
+    "body_or_table_position_supported": 301,
+    "header_position_supported": 450
+   },
+   "sourceDerived": [
+    1,
+    1339
+   ],
+   "supportEligible": 301,
+   "t2": {
+    "clusterCount": 27,
+    "nodeCount": 1599
+   },
+   "t4": {
+    "clusterCount": 4,
+    "clusters": [
+     {
+      "clusterIndex": 0,
+      "firstPage": 1,
+      "lastPage": 1260,
+      "layoutRanges": [
+       "1-1339"
+      ],
+      "level": 1,
+      "memberCount": 4,
+      "pageSpan": 1260,
+      "placementBasis": "support",
+      "runCount": 4,
+      "supportCount": 4,
+      "uniquePages": 4,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "firstPage": 2,
+      "lastPage": 1338,
+      "layoutRanges": [
+       "1-1339"
+      ],
+      "level": 2,
+      "memberCount": 60,
+      "pageSpan": 1337,
+      "placementBasis": "support",
+      "runCount": 37,
+      "supportCount": 60,
+      "uniquePages": 54,
+      "xMax": 58.668,
+      "xMin": 58.666
+     },
+     {
+      "clusterIndex": 2,
+      "firstPage": 3,
+      "lastPage": 1327,
+      "layoutRanges": [
+       "1-1339"
+      ],
+      "level": 3,
+      "memberCount": 126,
+      "pageSpan": 1325,
+      "placementBasis": "support",
+      "runCount": 99,
+      "supportCount": 126,
+      "uniquePages": 126,
+      "xMax": 72.471,
+      "xMin": 72.47
+     },
+     {
+      "clusterIndex": 3,
+      "firstPage": 11,
+      "lastPage": 1331,
+      "layoutRanges": [
+       "1-1339"
+      ],
+      "level": 4,
+      "memberCount": 111,
+      "pageSpan": 1321,
+      "placementBasis": "support",
+      "runCount": 78,
+      "supportCount": 111,
+      "uniquePages": 96,
+      "xMax": 79.373,
+      "xMin": 79.368
+     }
+    ],
+    "frameUnassignedByRelation": {
+     "ambiguous": 429,
+     "header_position_supported": 450
+    },
+    "frameUnassignedNodes": 879,
+    "indentClusters": [
+     {
+      "clusterIndex": 0,
+      "level": 1,
+      "memberCount": 4,
+      "placementBasis": "support",
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "level": 2,
+      "memberCount": 60,
+      "placementBasis": "support",
+      "xMax": 58.668,
+      "xMin": 58.666
+     },
+     {
+      "clusterIndex": 2,
+      "level": 3,
+      "memberCount": 126,
+      "placementBasis": "support",
+      "xMax": 72.471,
+      "xMin": 72.47
+     },
+     {
+      "clusterIndex": 3,
+      "level": 4,
+      "memberCount": 111,
+      "placementBasis": "support",
+      "xMax": 79.373,
+      "xMin": 79.368
+     }
+    ]
+   }
+  },
+  {
+   "excluded": {
+    "ambiguous": 0,
+    "header": 450,
+    "unavailable": 0
+   },
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "mostLeftCluster37982": {
+    "excludedReasons": {
+     "header_position_supported": 450
+    },
+    "nodesRemainInHierarchy": true,
+    "relationDistribution": {
+     "header_position_supported": 450
+    },
+    "t2ClusterIndex": 0,
+    "t2SupportCount": 450,
+    "t2X": [
+     37.982,
+     37.982
+    ],
+    "t4ClusterCoveringT2Interval": null,
+    "t4FrameAssignment": {
+     "assigned": 0,
+     "unassigned": 450
+    },
+    "t4SupportCount": 0
+   },
+   "nodesOnPagesWithoutFrame": 0,
+   "pdf": "05-1b-01.pdf",
+   "relation": "source_superset",
+   "relationDistribution": {
+    "body_or_table_position_supported": 2618,
+    "header_position_supported": 450
+   },
+   "sourceDerived": [
+    21,
+    1723
+   ],
+   "supportEligible": 2618,
+   "t2": {
+    "clusterCount": 34,
+    "nodeCount": 3068
+   },
+   "t4": {
+    "clusterCount": 33,
+    "clusters": [
+     {
+      "clusterIndex": 0,
+      "firstPage": 21,
+      "lastPage": 1701,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 1,
+      "memberCount": 8,
+      "pageSpan": 1681,
+      "placementBasis": "support",
+      "runCount": 8,
+      "supportCount": 8,
+      "uniquePages": 8,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "firstPage": 21,
+      "lastPage": 1713,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 2,
+      "memberCount": 117,
+      "pageSpan": 1693,
+      "placementBasis": "support",
+      "runCount": 78,
+      "supportCount": 117,
+      "uniquePages": 94,
+      "xMax": 58.671,
+      "xMin": 58.664
+     },
+     {
+      "clusterIndex": 2,
+      "firstPage": 21,
+      "lastPage": 1713,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 3,
+      "memberCount": 208,
+      "pageSpan": 1693,
+      "placementBasis": "support",
+      "runCount": 119,
+      "supportCount": 208,
+      "uniquePages": 159,
+      "xMax": 65.573,
+      "xMin": 65.566
+     },
+     {
+      "clusterIndex": 3,
+      "firstPage": 21,
+      "lastPage": 1722,
+      "layoutRanges": [
+       "21-1723",
+       "unassigned"
+      ],
+      "level": 4,
+      "memberCount": 775,
+      "pageSpan": 1702,
+      "placementBasis": "support",
+      "runCount": 281,
+      "supportCount": 775,
+      "uniquePages": 559,
+      "xMax": 72.477,
+      "xMin": 72.467
+     },
+     {
+      "clusterIndex": 4,
+      "firstPage": 21,
+      "lastPage": 1708,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 5,
+      "memberCount": 1090,
+      "pageSpan": 1688,
+      "placementBasis": "support",
+      "runCount": 255,
+      "supportCount": 1090,
+      "uniquePages": 619,
+      "xMax": 79.378,
+      "xMin": 79.366
+     },
+     {
+      "clusterIndex": 5,
+      "firstPage": 94,
+      "lastPage": 1720,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 6,
+      "memberCount": 14,
+      "pageSpan": 1627,
+      "placementBasis": "support",
+      "runCount": 11,
+      "supportCount": 14,
+      "uniquePages": 12,
+      "xMax": 469.357,
+      "xMin": 469.356
+     },
+     {
+      "clusterIndex": 6,
+      "firstPage": 303,
+      "lastPage": 303,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 7,
+      "memberCount": 2,
+      "pageSpan": 1,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 2,
+      "uniquePages": 1,
+      "xMax": 472.827,
+      "xMin": 472.827
+     },
+     {
+      "clusterIndex": 7,
+      "firstPage": 1697,
+      "lastPage": 1712,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 8,
+      "memberCount": 2,
+      "pageSpan": 16,
+      "placementBasis": "support",
+      "runCount": 2,
+      "supportCount": 2,
+      "uniquePages": 2,
+      "xMax": 476.3,
+      "xMin": 476.3
+     },
+     {
+      "clusterIndex": 8,
+      "firstPage": 1697,
+      "lastPage": 1697,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 9,
+      "memberCount": 2,
+      "pageSpan": 1,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 2,
+      "uniquePages": 1,
+      "xMax": 486.716,
+      "xMin": 486.716
+     },
+     {
+      "clusterIndex": 9,
+      "firstPage": 1143,
+      "lastPage": 1143,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 497.111,
+      "xMin": 497.111
+     },
+     {
+      "clusterIndex": 10,
+      "firstPage": 1156,
+      "lastPage": 1156,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 511.019,
+      "xMin": 511.019
+     },
+     {
+      "clusterIndex": 11,
+      "firstPage": 22,
+      "lastPage": 1721,
+      "layoutRanges": [
+       "21-1723",
+       "unassigned"
+      ],
+      "level": 10,
+      "memberCount": 216,
+      "pageSpan": 1700,
+      "placementBasis": "support",
+      "runCount": 114,
+      "supportCount": 216,
+      "uniquePages": 150,
+      "xMax": 514.491,
+      "xMin": 514.218
+     },
+     {
+      "clusterIndex": 12,
+      "firstPage": 376,
+      "lastPage": 1722,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 11,
+      "memberCount": 5,
+      "pageSpan": 1347,
+      "placementBasis": "support",
+      "runCount": 4,
+      "supportCount": 5,
+      "uniquePages": 4,
+      "xMax": 517.692,
+      "xMin": 517.692
+     },
+     {
+      "clusterIndex": 13,
+      "firstPage": 48,
+      "lastPage": 1716,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 12,
+      "memberCount": 90,
+      "pageSpan": 1669,
+      "placementBasis": "support",
+      "runCount": 50,
+      "supportCount": 90,
+      "uniquePages": 61,
+      "xMax": 521.166,
+      "xMin": 521.162
+     },
+     {
+      "clusterIndex": 14,
+      "firstPage": 431,
+      "lastPage": 1697,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 13,
+      "memberCount": 20,
+      "pageSpan": 1267,
+      "placementBasis": "support",
+      "runCount": 9,
+      "supportCount": 20,
+      "uniquePages": 11,
+      "xMax": 524.637,
+      "xMin": 524.633
+     },
+     {
+      "clusterIndex": 15,
+      "firstPage": 406,
+      "lastPage": 1692,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 14,
+      "memberCount": 13,
+      "pageSpan": 1287,
+      "placementBasis": "support",
+      "runCount": 11,
+      "supportCount": 13,
+      "uniquePages": 11,
+      "xMax": 528.107,
+      "xMin": 528.107
+     },
+     {
+      "clusterIndex": 16,
+      "firstPage": 618,
+      "lastPage": 618,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 531.579,
+      "xMin": 531.579
+     },
+     {
+      "clusterIndex": 17,
+      "firstPage": 822,
+      "lastPage": 1079,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 15,
+      "memberCount": 3,
+      "pageSpan": 258,
+      "placementBasis": "support",
+      "runCount": 3,
+      "supportCount": 3,
+      "uniquePages": 3,
+      "xMax": 535.051,
+      "xMin": 535.051
+     },
+     {
+      "clusterIndex": 18,
+      "firstPage": 595,
+      "lastPage": 824,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 16,
+      "memberCount": 5,
+      "pageSpan": 230,
+      "placementBasis": "support",
+      "runCount": 2,
+      "supportCount": 5,
+      "uniquePages": 3,
+      "xMax": 538.523,
+      "xMin": 538.523
+     },
+     {
+      "clusterIndex": 19,
+      "firstPage": 1093,
+      "lastPage": 1093,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 17,
+      "memberCount": 2,
+      "pageSpan": 1,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 2,
+      "uniquePages": 1,
+      "xMax": 548.938,
+      "xMin": 548.938
+     },
+     {
+      "clusterIndex": 20,
+      "firstPage": 1686,
+      "lastPage": 1688,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 18,
+      "memberCount": 4,
+      "pageSpan": 3,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 4,
+      "uniquePages": 3,
+      "xMax": 552.41,
+      "xMin": 552.41
+     },
+     {
+      "clusterIndex": 21,
+      "firstPage": 640,
+      "lastPage": 640,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 555.882,
+      "xMin": 555.882
+     },
+     {
+      "clusterIndex": 22,
+      "firstPage": 1661,
+      "lastPage": 1687,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 19,
+      "memberCount": 5,
+      "pageSpan": 27,
+      "placementBasis": "support",
+      "runCount": 2,
+      "supportCount": 5,
+      "uniquePages": 3,
+      "xMax": 559.354,
+      "xMin": 559.354
+     },
+     {
+      "clusterIndex": 23,
+      "firstPage": 401,
+      "lastPage": 590,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 20,
+      "memberCount": 5,
+      "pageSpan": 190,
+      "placementBasis": "support",
+      "runCount": 2,
+      "supportCount": 5,
+      "uniquePages": 2,
+      "xMax": 562.826,
+      "xMin": 562.825
+     },
+     {
+      "clusterIndex": 24,
+      "firstPage": 192,
+      "lastPage": 192,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 21,
+      "memberCount": 4,
+      "pageSpan": 1,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 4,
+      "uniquePages": 1,
+      "xMax": 566.298,
+      "xMin": 566.298
+     },
+     {
+      "clusterIndex": 25,
+      "firstPage": 433,
+      "lastPage": 433,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 569.77,
+      "xMin": 569.77
+     },
+     {
+      "clusterIndex": 26,
+      "firstPage": 452,
+      "lastPage": 452,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 576.713,
+      "xMin": 576.713
+     },
+     {
+      "clusterIndex": 27,
+      "firstPage": 405,
+      "lastPage": 453,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 22,
+      "memberCount": 2,
+      "pageSpan": 49,
+      "placementBasis": "support",
+      "runCount": 2,
+      "supportCount": 2,
+      "uniquePages": 2,
+      "xMax": 580.185,
+      "xMin": 580.185
+     },
+     {
+      "clusterIndex": 28,
+      "firstPage": 490,
+      "lastPage": 817,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 23,
+      "memberCount": 10,
+      "pageSpan": 328,
+      "placementBasis": "support",
+      "runCount": 5,
+      "supportCount": 10,
+      "uniquePages": 6,
+      "xMax": 583.657,
+      "xMin": 583.656
+     },
+     {
+      "clusterIndex": 29,
+      "firstPage": 438,
+      "lastPage": 538,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 24,
+      "memberCount": 4,
+      "pageSpan": 101,
+      "placementBasis": "support",
+      "runCount": 3,
+      "supportCount": 4,
+      "uniquePages": 3,
+      "xMax": 587.129,
+      "xMin": 587.129
+     },
+     {
+      "clusterIndex": 30,
+      "firstPage": 801,
+      "lastPage": 801,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 590.601,
+      "xMin": 590.601
+     },
+     {
+      "clusterIndex": 31,
+      "firstPage": 464,
+      "lastPage": 464,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 25,
+      "memberCount": 2,
+      "pageSpan": 1,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 2,
+      "uniquePages": 1,
+      "xMax": 604.488,
+      "xMin": 604.488
+     },
+     {
+      "clusterIndex": 32,
+      "firstPage": 965,
+      "lastPage": 1593,
+      "layoutRanges": [
+       "21-1723"
+      ],
+      "level": 26,
+      "memberCount": 3,
+      "pageSpan": 629,
+      "placementBasis": "support",
+      "runCount": 2,
+      "supportCount": 3,
+      "uniquePages": 2,
+      "xMax": 728.161,
+      "xMin": 728.161
+     }
+    ],
+    "frameUnassignedByRelation": {
+     "header_position_supported": 450
+    },
+    "frameUnassignedNodes": 450,
+    "indentClusters": [
+     {
+      "clusterIndex": 0,
+      "level": 1,
+      "memberCount": 8,
+      "placementBasis": "support",
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "level": 2,
+      "memberCount": 117,
+      "placementBasis": "support",
+      "xMax": 58.671,
+      "xMin": 58.664
+     },
+     {
+      "clusterIndex": 2,
+      "level": 3,
+      "memberCount": 208,
+      "placementBasis": "support",
+      "xMax": 65.573,
+      "xMin": 65.566
+     },
+     {
+      "clusterIndex": 3,
+      "level": 4,
+      "memberCount": 775,
+      "placementBasis": "support",
+      "xMax": 72.477,
+      "xMin": 72.467
+     },
+     {
+      "clusterIndex": 4,
+      "level": 5,
+      "memberCount": 1090,
+      "placementBasis": "support",
+      "xMax": 79.378,
+      "xMin": 79.366
+     },
+     {
+      "clusterIndex": 5,
+      "level": 6,
+      "memberCount": 14,
+      "placementBasis": "support",
+      "xMax": 469.357,
+      "xMin": 469.356
+     },
+     {
+      "clusterIndex": 6,
+      "level": 7,
+      "memberCount": 2,
+      "placementBasis": "support",
+      "xMax": 472.827,
+      "xMin": 472.827
+     },
+     {
+      "clusterIndex": 7,
+      "level": 8,
+      "memberCount": 2,
+      "placementBasis": "support",
+      "xMax": 476.3,
+      "xMin": 476.3
+     },
+     {
+      "clusterIndex": 8,
+      "level": 9,
+      "memberCount": 2,
+      "placementBasis": "support",
+      "xMax": 486.716,
+      "xMin": 486.716
+     },
+     {
+      "clusterIndex": 9,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 497.111,
+      "xMin": 497.111
+     },
+     {
+      "clusterIndex": 10,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 511.019,
+      "xMin": 511.019
+     },
+     {
+      "clusterIndex": 11,
+      "level": 10,
+      "memberCount": 216,
+      "placementBasis": "support",
+      "xMax": 514.491,
+      "xMin": 514.218
+     },
+     {
+      "clusterIndex": 12,
+      "level": 11,
+      "memberCount": 5,
+      "placementBasis": "support",
+      "xMax": 517.692,
+      "xMin": 517.692
+     },
+     {
+      "clusterIndex": 13,
+      "level": 12,
+      "memberCount": 90,
+      "placementBasis": "support",
+      "xMax": 521.166,
+      "xMin": 521.162
+     },
+     {
+      "clusterIndex": 14,
+      "level": 13,
+      "memberCount": 20,
+      "placementBasis": "support",
+      "xMax": 524.637,
+      "xMin": 524.633
+     },
+     {
+      "clusterIndex": 15,
+      "level": 14,
+      "memberCount": 13,
+      "placementBasis": "support",
+      "xMax": 528.107,
+      "xMin": 528.107
+     },
+     {
+      "clusterIndex": 16,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 531.579,
+      "xMin": 531.579
+     },
+     {
+      "clusterIndex": 17,
+      "level": 15,
+      "memberCount": 3,
+      "placementBasis": "support",
+      "xMax": 535.051,
+      "xMin": 535.051
+     },
+     {
+      "clusterIndex": 18,
+      "level": 16,
+      "memberCount": 5,
+      "placementBasis": "support",
+      "xMax": 538.523,
+      "xMin": 538.523
+     },
+     {
+      "clusterIndex": 19,
+      "level": 17,
+      "memberCount": 2,
+      "placementBasis": "support",
+      "xMax": 548.938,
+      "xMin": 548.938
+     },
+     {
+      "clusterIndex": 20,
+      "level": 18,
+      "memberCount": 4,
+      "placementBasis": "support",
+      "xMax": 552.41,
+      "xMin": 552.41
+     },
+     {
+      "clusterIndex": 21,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 555.882,
+      "xMin": 555.882
+     },
+     {
+      "clusterIndex": 22,
+      "level": 19,
+      "memberCount": 5,
+      "placementBasis": "support",
+      "xMax": 559.354,
+      "xMin": 559.354
+     },
+     {
+      "clusterIndex": 23,
+      "level": 20,
+      "memberCount": 5,
+      "placementBasis": "support",
+      "xMax": 562.826,
+      "xMin": 562.825
+     },
+     {
+      "clusterIndex": 24,
+      "level": 21,
+      "memberCount": 4,
+      "placementBasis": "support",
+      "xMax": 566.298,
+      "xMin": 566.298
+     },
+     {
+      "clusterIndex": 25,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 569.77,
+      "xMin": 569.77
+     },
+     {
+      "clusterIndex": 26,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 576.713,
+      "xMin": 576.713
+     },
+     {
+      "clusterIndex": 27,
+      "level": 22,
+      "memberCount": 2,
+      "placementBasis": "support",
+      "xMax": 580.185,
+      "xMin": 580.185
+     },
+     {
+      "clusterIndex": 28,
+      "level": 23,
+      "memberCount": 10,
+      "placementBasis": "support",
+      "xMax": 583.657,
+      "xMin": 583.656
+     },
+     {
+      "clusterIndex": 29,
+      "level": 24,
+      "memberCount": 4,
+      "placementBasis": "support",
+      "xMax": 587.129,
+      "xMin": 587.129
+     },
+     {
+      "clusterIndex": 30,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 590.601,
+      "xMin": 590.601
+     },
+     {
+      "clusterIndex": 31,
+      "level": 25,
+      "memberCount": 2,
+      "placementBasis": "support",
+      "xMax": 604.488,
+      "xMin": 604.488
+     },
+     {
+      "clusterIndex": 32,
+      "level": 26,
+      "memberCount": 3,
+      "placementBasis": "support",
+      "xMax": 728.161,
+      "xMin": 728.161
+     }
+    ]
+   }
+  },
+  {
+   "excluded": {
+    "ambiguous": 0,
+    "header": 0,
+    "unavailable": 0
+   },
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "mostLeftCluster37982": null,
+   "nodesOnPagesWithoutFrame": 0,
+   "pdf": "001630395.pdf",
+   "relation": "exact_same",
+   "relationDistribution": {
+    "body_or_table_position_supported": 33
+   },
+   "sourceDerived": [
+    7,
+    10
+   ],
+   "supportEligible": 33,
+   "t2": {
+    "clusterCount": 6,
+    "nodeCount": 33
+   },
+   "t4": {
+    "clusterCount": 6,
+    "clusters": [
+     {
+      "clusterIndex": 0,
+      "firstPage": 7,
+      "lastPage": 7,
+      "layoutRanges": [
+       "7-10"
+      ],
+      "level": 1,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "lattice_supported",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 65.569,
+      "xMin": 65.569
+     },
+     {
+      "clusterIndex": 1,
+      "firstPage": 7,
+      "lastPage": 9,
+      "layoutRanges": [
+       "7-10"
+      ],
+      "level": 2,
+      "memberCount": 8,
+      "pageSpan": 3,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 8,
+      "uniquePages": 3,
+      "xMax": 72.474,
+      "xMin": 72.47
+     },
+     {
+      "clusterIndex": 2,
+      "firstPage": 7,
+      "lastPage": 9,
+      "layoutRanges": [
+       "7-10"
+      ],
+      "level": 3,
+      "memberCount": 12,
+      "pageSpan": 3,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 12,
+      "uniquePages": 3,
+      "xMax": 79.376,
+      "xMin": 79.372
+     },
+     {
+      "clusterIndex": 3,
+      "firstPage": 7,
+      "lastPage": 9,
+      "layoutRanges": [
+       "7-10"
+      ],
+      "level": 4,
+      "memberCount": 9,
+      "pageSpan": 3,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 9,
+      "uniquePages": 3,
+      "xMax": 86.278,
+      "xMin": 86.274
+     },
+     {
+      "clusterIndex": 4,
+      "firstPage": 8,
+      "lastPage": 9,
+      "layoutRanges": [
+       "7-10"
+      ],
+      "level": 5,
+      "memberCount": 2,
+      "pageSpan": 2,
+      "placementBasis": "support",
+      "runCount": 1,
+      "supportCount": 2,
+      "uniquePages": 2,
+      "xMax": 93.18,
+      "xMin": 93.176
+     },
+     {
+      "clusterIndex": 5,
+      "firstPage": 7,
+      "lastPage": 7,
+      "layoutRanges": [
+       "7-10"
+      ],
+      "level": null,
+      "memberCount": 1,
+      "pageSpan": 1,
+      "placementBasis": "unplaced",
+      "runCount": 1,
+      "supportCount": 1,
+      "uniquePages": 1,
+      "xMax": 728.161,
+      "xMin": 728.161
+     }
+    ],
+    "frameUnassignedByRelation": {},
+    "frameUnassignedNodes": 0,
+    "indentClusters": [
+     {
+      "clusterIndex": 0,
+      "latticeEvidence": {
+       "gapToRun": 6.901,
+       "runClusterIndexes": [
+        1,
+        2,
+        3,
+        4
+       ],
+       "step": 6.902,
+       "tolerance": 1.736
+      },
+      "level": 1,
+      "memberCount": 1,
+      "placementBasis": "lattice_supported",
+      "xMax": 65.569,
+      "xMin": 65.569
+     },
+     {
+      "clusterIndex": 1,
+      "level": 2,
+      "memberCount": 8,
+      "placementBasis": "support",
+      "xMax": 72.474,
+      "xMin": 72.47
+     },
+     {
+      "clusterIndex": 2,
+      "level": 3,
+      "memberCount": 12,
+      "placementBasis": "support",
+      "xMax": 79.376,
+      "xMin": 79.372
+     },
+     {
+      "clusterIndex": 3,
+      "level": 4,
+      "memberCount": 9,
+      "placementBasis": "support",
+      "xMax": 86.278,
+      "xMin": 86.274
+     },
+     {
+      "clusterIndex": 4,
+      "level": 5,
+      "memberCount": 2,
+      "placementBasis": "support",
+      "xMax": 93.18,
+      "xMin": 93.176
+     },
+     {
+      "clusterIndex": 5,
+      "level": null,
+      "memberCount": 1,
+      "placementBasis": "unplaced",
+      "xMax": 728.161,
+      "xMin": 728.161
+     }
+    ]
+   }
+  },
+  {
+   "excluded": {
+    "ambiguous": 0,
+    "header": 219,
+    "unavailable": 0
+   },
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "mostLeftCluster37982": {
+    "excludedReasons": {
+     "header_position_supported": 219
+    },
+    "nodesRemainInHierarchy": true,
+    "relationDistribution": {
+     "header_position_supported": 219
+    },
+    "t2ClusterIndex": 0,
+    "t2SupportCount": 219,
+    "t2X": [
+     37.982,
+     37.982
+    ],
+    "t4ClusterCoveringT2Interval": null,
+    "t4FrameAssignment": {
+     "assigned": 0,
+     "unassigned": 219
+    },
+    "t4SupportCount": 0
+   },
+   "nodesOnPagesWithoutFrame": 0,
+   "pdf": "gaisanyoukyu.pdf",
+   "relation": "exact_same",
+   "relationDistribution": {
+    "body_or_table_position_supported": 557,
+    "header_position_supported": 219
+   },
+   "sourceDerived": [
+    9,
+    540
+   ],
+   "supportEligible": 557,
+   "t2": {
+    "clusterCount": 6,
+    "nodeCount": 776
+   },
+   "t4": {
+    "clusterCount": 5,
+    "clusters": [
+     {
+      "clusterIndex": 0,
+      "firstPage": 9,
+      "lastPage": 516,
+      "layoutRanges": [
+       "9-540"
+      ],
+      "level": 1,
+      "memberCount": 3,
+      "pageSpan": 508,
+      "placementBasis": "support",
+      "runCount": 3,
+      "supportCount": 3,
+      "uniquePages": 3,
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "firstPage": 9,
+      "lastPage": 538,
+      "layoutRanges": [
+       "9-540"
+      ],
+      "level": 2,
+      "memberCount": 29,
+      "pageSpan": 530,
+      "placementBasis": "support",
+      "runCount": 15,
+      "supportCount": 29,
+      "uniquePages": 20,
+      "xMax": 58.667,
+      "xMin": 58.665
+     },
+     {
+      "clusterIndex": 2,
+      "firstPage": 9,
+      "lastPage": 538,
+      "layoutRanges": [
+       "9-540"
+      ],
+      "level": 3,
+      "memberCount": 67,
+      "pageSpan": 530,
+      "placementBasis": "support",
+      "runCount": 35,
+      "supportCount": 67,
+      "uniquePages": 48,
+      "xMax": 65.571,
+      "xMin": 65.567
+     },
+     {
+      "clusterIndex": 3,
+      "firstPage": 9,
+      "lastPage": 538,
+      "layoutRanges": [
+       "9-540",
+       "unassigned"
+      ],
+      "level": 4,
+      "memberCount": 148,
+      "pageSpan": 530,
+      "placementBasis": "support",
+      "runCount": 69,
+      "supportCount": 148,
+      "uniquePages": 112,
+      "xMax": 72.473,
+      "xMin": 72.464
+     },
+     {
+      "clusterIndex": 4,
+      "firstPage": 9,
+      "lastPage": 539,
+      "layoutRanges": [
+       "9-540",
+       "unassigned"
+      ],
+      "level": 5,
+      "memberCount": 310,
+      "pageSpan": 531,
+      "placementBasis": "support",
+      "runCount": 98,
+      "supportCount": 310,
+      "uniquePages": 209,
+      "xMax": 79.376,
+      "xMin": 79.365
+     }
+    ],
+    "frameUnassignedByRelation": {
+     "header_position_supported": 219
+    },
+    "frameUnassignedNodes": 219,
+    "indentClusters": [
+     {
+      "clusterIndex": 0,
+      "level": 1,
+      "memberCount": 3,
+      "placementBasis": "support",
+      "xMax": 51.765,
+      "xMin": 51.765
+     },
+     {
+      "clusterIndex": 1,
+      "level": 2,
+      "memberCount": 29,
+      "placementBasis": "support",
+      "xMax": 58.667,
+      "xMin": 58.665
+     },
+     {
+      "clusterIndex": 2,
+      "level": 3,
+      "memberCount": 67,
+      "placementBasis": "support",
+      "xMax": 65.571,
+      "xMin": 65.567
+     },
+     {
+      "clusterIndex": 3,
+      "level": 4,
+      "memberCount": 148,
+      "placementBasis": "support",
+      "xMax": 72.473,
+      "xMin": 72.464
+     },
+     {
+      "clusterIndex": 4,
+      "level": 5,
+      "memberCount": 310,
+      "placementBasis": "support",
+      "xMax": 79.376,
+      "xMin": 79.365
+     }
+    ]
+   }
+  }
+ ],
+ "provenanceLoss": 0,
+ "schema": "budget-request-level-frame-table-eligibility-phaseA/v0"
+}

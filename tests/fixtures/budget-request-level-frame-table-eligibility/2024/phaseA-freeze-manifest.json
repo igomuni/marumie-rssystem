@@ -1,0 +1,7 @@
+{
+ "artifacts": {
+  "tests/fixtures/budget-request-level-frame-table-eligibility/2024/phaseA-node-relations.jsonl.gz": "21f167c30d5f3ac51821de36bc3f53e87df88718c90474fba7eae6f44a46dcea",
+  "tests/fixtures/budget-request-level-frame-table-eligibility/2024/phaseA-t4-frame.json": "51e128205dbbd00c4ebae206ad6060f8098e3167cef78d229df89b91cf09fac8"
+ },
+ "note": "Phase A freeze\uff08A1-A8 pass\u3001A7 \u306f byte \u4e00\u81f4\u306e\u518d\u5b9f\u884c\u3067\u78ba\u8a8d\uff09\u3002Phase B \u306f\u3053\u306e hash \u3092\u691c\u67fb\u3059\u308b"
+}
