@@ -4,6 +4,8 @@ task doc を新規作成したら本索引に1行追記する（新しいもの�
 
 - [20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md](20261006_1500_Budget_Request_P1_Measurement_Correction_Revision.md) — 補正の訂正。P1のみ対象(56/68=82.4%)、full-corpus 97.0%(98/101)とgate101は正
 - [20261006_1440_Budget_Request_P1_Reconciliation_Measurement_Correction.md](20261006_1440_Budget_Request_P1_Reconciliation_Measurement_Correction.md) — P1条件付きexact rateの測定補正。94.9%→82.4%(56/68)、full-corpus97.0%→85.2%。decision不変
+- [20261005_2310_Budget_Request_Item_Layout_Anchor_Coverage_Result.md](20261005_2310_Budget_Request_Item_Layout_Anchor_Coverage_Result.md) — 内閣府0.pdfの項anchor(1段シフト)をsource導出でprofile化。MOF名称exact 661→717/784、loss 0
+- [20261005_2245_Budget_Request_Item_Layout_Anchor_Coverage_Protocol.md](20261005_2245_Budget_Request_Item_Layout_Anchor_Coverage_Protocol.md) — 項anchorのsource導出profileによるcoverage増加のprotocolと661/784 baseline
 - [20261005_2130_Budget_Request_8p6pt_Full_Corpus_With_Rotate90_Result.md](20261005_2130_Budget_Request_8p6pt_Full_Corpus_With_Rotate90_Result.md) — rotate正規化を含む82PDFで8.6pt候補973行。MOF名称exactは661/784。法務省PDFはテキスト層なしで評価不能
 - [20261005_2115_Budget_Request_8p6pt_Full_Corpus_With_Rotate90_Protocol.md](20261005_2115_Budget_Request_8p6pt_Full_Corpus_With_Rotate90_Protocol.md) — rotate≠0 pageを表示向きに座標正規化して8.6pt候補を全corpusで抽出する事前登録
 - [20261005_2100_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Result.md](20261005_2100_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Result.md) — 8.6±3pt罫線基準の項候補916行。MOF名称exactで632/784項をカバー、未一致152はband外ではなくsource universeに無し
