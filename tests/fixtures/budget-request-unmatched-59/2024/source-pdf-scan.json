@@ -1,0 +1,1444 @@
+{
+ "frozen": {
+  "docs/tasks/20261006_0830_Budget_Request_Unmatched_59_Source_Failure_Inventory_Protocol.md": "047427e984ad8cb0350b58a5610b6a75e943447e6c13bb7d558d99e93ab4bcca",
+  "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+  "tests/fixtures/budget-request-unmatched-59/2024/baseline.json": "7f7e219245849b4dcec9a7352dfdda70eeb09f0f404047d18f5a979ff1e24bb4"
+ },
+ "hitsGzSha256": "bdbf712e52a986502e274b801d0d73835898e556c1d83362777fc89fe0bf25b3",
+ "note": "全 82 PDF の representation と、unmatched 59 項の名称ヒット（exact）と、同じ所管の PDF 内の近傍 text（名称の先頭 / 末尾 8 文字を含む token。分類には使わない記述のみ）。新しい抽出 rule は無い。ヒット詳細は source-search-hits.json.gz",
+ "pdfs": [
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 257,
+   "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+   "pages": 9,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "消費者庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 9
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "69e170e83244c869cd1190d191b02b9d5cf4b5bca1388b57e20fa539bc08ca60",
+   "tokens": 640
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 18540,
+   "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+   "pages": 200,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "消費者庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 200
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "b6cc6fa0604ab64cbbf9867137db53883943b9d3b3adfd0fdc9d9eb59fd5e5d4",
+   "tokens": 42147
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 3157,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+   "pages": 25,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣府",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 25
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "315909085871656cc0428feaa5941ed456dd8d024c6511e511e86ab652623b33",
+   "tokens": 4938
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 183,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/1.pdf",
+   "pages": 3,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣府",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 3
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "7b5de5dbd397c7067cab4ea527ef02681e91265914057651ee5b886174de7f4e",
+   "tokens": 444
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 2749,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/e2.pdf",
+   "pages": 19,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣府",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 19
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "6267ffbdc50e439899169659817271da4aa97596eb48e85fe3122f292f3ab7f2",
+   "tokens": 5127
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 195,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f1.pdf",
+   "pages": 2,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣府",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 2
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "80a657b39cf675a938c21dc3ca3a79a58dfb3fef623af59ebaddc2eb60145386",
+   "tokens": 332
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 559,
+   "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/f2.pdf",
+   "pages": 5,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣府",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 5
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "feca6f529406523105741fb7e136d9d4439b862fc38f422567cf0f76dadc1f89",
+   "tokens": 1095
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 262,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_01.pdf",
+   "pages": 2,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 2
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "44067ca7f87e9165e0cf3e7ed27584ae113ce80200551485ec2acd1641ff0452",
+   "tokens": 405
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 179,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_02.pdf",
+   "pages": 2,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 2
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "37c5d82cb7fc835ab16d7f85c113f646d712c34315cf45fce556846f0419d5c0",
+   "tokens": 382
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 491,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_03.pdf",
+   "pages": 4,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 4
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "09aa53885a046a66e5c16fcb2b68c1e3f0f1226a7689cec10995d06cb0793ec6",
+   "tokens": 1032
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 456,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_04.pdf",
+   "pages": 4,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 4
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "4e772cf5027aab283acd0db52645aff0b4b60a9d1b9ecc6f3a60a648e9e0f113",
+   "tokens": 1039
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 44,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_05.pdf",
+   "pages": 1,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 1
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "1d61e924152e8301b5d23d132a521e07d437a403e2fbc8478b7755829d7f554d",
+   "tokens": 142
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 798,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_06.pdf",
+   "pages": 6,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 6
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "b10ea4e5d675351ff448be312f918f51f547127b008b8186f1626e663ce38fd8",
+   "tokens": 1401
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 2867,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_07.pdf",
+   "pages": 29,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 29
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "ed04c0bd225d8247281e057f577f0f539d87e0de875ee1e12951b12d081b4f64",
+   "tokens": 5894
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 394,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_08.pdf",
+   "pages": 4,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 4
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "38098a4fc77d5315dc56e4eef28ef15ef94ec2e42b5633e59018da061729be12",
+   "tokens": 876
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 314,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_09.pdf",
+   "pages": 3,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 3
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "8ee07dce6fd43b1d879c369be126cad4963f53b3898756a1e392f178ce2c28bf",
+   "tokens": 650
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 533,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_10.pdf",
+   "pages": 4,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 4
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "7f09e773f3055fbcd48d7588c27261022dd0fd94bb37be792f4b047461024087",
+   "tokens": 1224
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 1652,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_11.pdf",
+   "pages": 19,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 19
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "af935092d4eeb800a9909e12de837c336d489b83691a77250d4cdf6aa69acd11",
+   "tokens": 5465
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 376,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_12.pdf",
+   "pages": 4,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 4
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "1b516fb3640e34c5d2d2a494d43a894b6dbe07ba88cc67c9245adb1ee16fa714",
+   "tokens": 759
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 312,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_13.pdf",
+   "pages": 3,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 3
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "6b488cc10a50febf979e8a39f411b8b2dae9d8586d122aa6acb6ffd9abd5ea72",
+   "tokens": 639
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 254,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_14.pdf",
+   "pages": 3,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 3
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "f6108e547d3b5a51af2926786debb7dc80cb96b2fcc97b67e4770bb7cb74f210",
+   "tokens": 578
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 382,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_15.pdf",
+   "pages": 3,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 3
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "07d7b00dcb94d98995fb5398b366097ceb4bfb734c16d2886b37999dccf0dce7",
+   "tokens": 835
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 91,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_16.pdf",
+   "pages": 2,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 2
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "658f4248a6f9c60dfb847b4bd9f4c77a2c6297fe41d047f9cfb134686acb78a3",
+   "tokens": 200
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 96,
+   "localPath": "data/download/cas.go.jp/jp/yosan/pdf/r6_17.pdf",
+   "pages": 1,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "内閣官房",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 1
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "3535797d8740d594a4df9fbc5772f131b12aa51357df1cf232f900cece4bbae6",
+   "tokens": 206
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 15074,
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "pages": 147,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "こども家庭庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 147
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "49a975a4436da6d53319a32ca745e2d110c42839c441c6302a7361ed9a62e4cc",
+   "tokens": 34397
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 2760,
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+   "pages": 29,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "こども家庭庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 29
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "e880abb5f5ccfaf7b2b9fe632c101287937e7b393e18e36775dc5ae92ad72026",
+   "tokens": 5861
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 2029,
+   "localPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+   "pages": 29,
+   "pagesWithoutTokens": 4,
+   "publisherAuthority": "内閣法制局",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 29
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "dbd5467fe8a6d6f2fe44ac8fba5a5412a097c21feace047a082ae15eb03f57b5",
+   "tokens": 4264
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 12298,
+   "localPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+   "pages": 127,
+   "pagesWithoutTokens": 5,
+   "publisherAuthority": "裁判所",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 127
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "df43f2dc183da84fa9952ae4c5e17888177df186ad4c556ed1a519ba584e3c06",
+   "tokens": 26658
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 415,
+   "localPath": "data/download/dangai.go.jp/info/pdf/r06_saisyutu-gaisan.pdf",
+   "pages": 9,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "裁判官弾劾裁判所",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 9
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "370cd8991433528e8b07c35498959ab0b1fec0b3f634f87e12c7d539944f7a21",
+   "tokens": 918
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 4354,
+   "localPath": "data/download/digital.go.jp/assets/contents/node/basic_page/field_ref_resources/e9b99425-437c-4750-b4e2-6cca3cd877a6/0fab2c74/20230914_policies_budget_r6request_table_01.pdf",
+   "pages": 32,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "デジタル庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 32
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "b77f25b26b5caf82b0b6617fb1af9b3bba9df059a8bf9a8ede63de8d1a8cfe89",
+   "tokens": 8000
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 26976,
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "pages": 193,
+   "pagesWithoutTokens": 1,
+   "publisherAuthority": "環境省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 193
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 1
+   },
+   "sha256": "01170b6cc3b7518360718ef9d9c477f83c9481ad33640c502d8e4caf1e45a4dd",
+   "tokens": 51654
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 2247,
+   "localPath": "data/download/env.go.jp/content/000157012.pdf",
+   "pages": 16,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "環境省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 16
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "c71dd17f73464540ecb600d95d94104e59254e06b73efc2f282a5ecd8ba01823",
+   "tokens": 3706
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 3312,
+   "localPath": "data/download/env.go.jp/content/000157013.pdf",
+   "pages": 25,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "環境省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 25
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "5f42ccfb48cc1d2043ffe97776be359c1e51d19ad35c578166e446982eb4bbe5",
+   "tokens": 6075
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 2712,
+   "localPath": "data/download/env.go.jp/content/000157016.pdf",
+   "pages": 30,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "環境省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 30
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "68a26e86f73d51f0849b6b3e26b96a04ab9e9489713ce25721cf35910939866a",
+   "tokens": 5188
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 0,
+   "localPath": "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf",
+   "pages": 77,
+   "pagesWithoutTokens": 77,
+   "publisherAuthority": "金融庁",
+   "representation": "DRAWING_PATH_TEXT",
+   "rotation": {
+    "0": 77
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 1473,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "9803cfd8e2f33592ae01612cce6e570e56208f1a758027b09d69055cff91cb9b",
+   "tokens": 0
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 4275,
+   "localPath": "data/download/jbaudit.go.jp/jbaudit/bud_clo/bud/pdf/r06/20230906_02.pdf",
+   "pages": 48,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "会計検査院",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 48
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "c7070f558f985d0062cec9c73736bebe3c24f1290b895ce89d5afc676b21b72b",
+   "tokens": 9157
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 1316,
+   "localPath": "data/download/jcrc.go.jp/content/000001746.pdf",
+   "pages": 17,
+   "pagesWithoutTokens": 4,
+   "publisherAuthority": "カジノ管理委員会",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 17
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "7632ed4048799b0f9b2001fef9a7ff94883885ff07e1145d55a4cd335f10583d",
+   "tokens": 2446
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 11800,
+   "localPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "pages": 140,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "公正取引委員会",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 139,
+    "90": 1
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "036b395c72de3e0e81f07c337e9d45361cdaedf99831d690c3ea262dfb6b57e6",
+   "tokens": 27559
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 8389,
+   "localPath": "data/download/jinji.go.jp/content/900024096.pdf",
+   "pages": 98,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "人事院",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 98
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "2e0229d66535e4d94f1f35f5d6c169042a6461a20f963f80cbf8945972b61bd2",
+   "tokens": 20607
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 3539,
+   "localPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-02.pdf",
+   "pages": 33,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "宮内庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 33
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "ffab15073beb2411d9396f7ca0cbb1ce33ccdf99be05e6d0d88e29366912e261",
+   "tokens": 8634
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 2118,
+   "localPath": "data/download/kunaicho.go.jp/kunaicho/kunaicho/pdf/r06-03.pdf",
+   "pages": 20,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "宮内庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 20
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "8a1049d06d4e27183a6f292e6afdd83e134775fd58ca4b5895bbb325a8d6ee8b",
+   "tokens": 4322
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 33494,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+   "pages": 378,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "農林水産省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 378
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "01240bbecb2c3086809a1ba6cd85f60283073b74c8318115852e7e2df82d717e",
+   "tokens": 73416
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 2153,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "pages": 21,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "農林水産省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 21
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "3be3fa49d24cc02ed680f0104d41405ff5e69bfb4a84290dccc8fe8205eaa1f1",
+   "tokens": 4025
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 4535,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-6.pdf",
+   "pages": 35,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "農林水産省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 35
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "aaec655a87a74e2724ac35d81b6759697749c24e586a3b09934c46c4a4fca460",
+   "tokens": 7839
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 115,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-8.pdf",
+   "pages": 7,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "農林水産省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 7
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "ba176e292576d8d618b0936fd36a7129d7082efb4a7c7204a746507d757aa137",
+   "tokens": 293
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 3309,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneden_o.pdf",
+   "pages": 25,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "経済産業省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 25
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "d9ca160f33481511b3a484853f105375895f765a01535ed6bcae4b348eba6383",
+   "tokens": 6069
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 271,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/enegen_o.pdf",
+   "pages": 7,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "経済産業省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 7
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "fbbeb3df06555205ae839e9849f460d3017d4b95cf1bfd3bf2aacb389a67e70f",
+   "tokens": 550
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 2244,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/eneju_o.pdf",
+   "pages": 16,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "経済産業省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 16
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "2c1d6cb494a41dbb8d03a63099cc4154f31d70b966c7510bc6fce3501a70e7b6",
+   "tokens": 3700
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 588,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/fukko_o.pdf",
+   "pages": 10,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "経済産業省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 10
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "17c0efdce49fb24a188a08ecef5a3340ea3e76f9c6ccef10539eefd69e8d8363",
+   "tokens": 1134
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 12717,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "pages": 106,
+   "pagesWithoutTokens": 1,
+   "publisherAuthority": "経済産業省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 106
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 1
+   },
+   "sha256": "ba64c25df327161a33c293374a7255c203cc9a527130ece848574badefbf909a",
+   "tokens": 23930
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 2091,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/tokkyo_o.pdf",
+   "pages": 17,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "経済産業省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 17
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "6e083f0b4115530237d4c1c91e6d105fd3ee301d49f5ad3c0e649e11f4b13fc9",
+   "tokens": 3593
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 504,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_01.pdf",
+   "pages": 6,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "文部科学省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 6
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "91b39e9902610e13aa7be445db2d2d2a3e38166fd5f449bd11f94cfe5fe3b6d5",
+   "tokens": 852
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 3344,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_02.pdf",
+   "pages": 8,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "文部科学省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 8
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "d2d1927eb068a97901cb7dfb0c104013539bb6f9dda8bab4cd36dc1f9b45c831",
+   "tokens": 4328
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 124379,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "pages": 1339,
+   "pagesWithoutTokens": 1,
+   "publisherAuthority": "文部科学省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 1339
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 1,
+    "pages": 1
+   },
+   "sha256": "6df221dfd22c48e0f32dd59bcf2dbcbaad19720083be43005ce700b984a6bf71",
+   "tokens": 299857
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 0,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_04.pdf",
+   "pages": 6,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "文部科学省",
+   "representation": "TEXT_PRESENT_UNICODE_UNRESOLVED",
+   "rotation": {
+    "90": 6
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "d6f75f7674c94ef97eb5cb5ff1bcf73b150bb7b05bb940be1cb2adde4033f457",
+   "tokens": 1532
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 192422,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "pages": 1723,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "厚生労働省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 1723
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "09d26048b20d1b1dac7aab236ab6da452e482a12f4d97a8f6c28ec7c420eb192",
+   "tokens": 441146
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 86619,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-2b-01.pdf",
+   "pages": 782,
+   "pagesWithoutTokens": 1,
+   "publisherAuthority": "厚生労働省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 782
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 1
+   },
+   "sha256": "769a47c4ea979473abcd1fb04b3d4aec6bdf98bc358d802f7af628990036001a",
+   "tokens": 193054
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 6479,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-3b-01.pdf",
+   "pages": 48,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "厚生労働省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 48
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "0391edca4cd6b88140195d118613ccac33550549baf065d1951db96e9625d0b5",
+   "tokens": 11819
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 8888,
+   "localPath": "data/download/mlit.go.jp/page/content/001630393.pdf",
+   "pages": 51,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "国土交通省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 51
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "efdef502e10961842477cd18cc2cb091c7a3206125881f6031fc7fa941613864",
+   "tokens": 14566
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 788,
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "pages": 10,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "国土交通省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 10
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "d5e8250094ea55fee74951654a692ce345a2b8710a788017d0f5db7b9c259c1a",
+   "tokens": 1348
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 120995,
+   "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+   "pages": 1097,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "国土交通省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 1097
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "4eebb84cec72a4b3b11a2b89c41093550bef5a07095d5c7b178e238406b08217",
+   "tokens": 261925
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 57277,
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "pages": 540,
+   "pagesWithoutTokens": 1,
+   "publisherAuthority": "防衛省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 540
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 1
+   },
+   "sha256": "57861291846015dfdc831480149d8614a1d67c283e8b6e313f5c75f92a2a6b47",
+   "tokens": 137504
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 2094,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+   "pages": 20,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "財務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 19,
+    "90": 1
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "4993fdf151fd6f0b5b568be1eb0cd1d42e6a1d34e88a1aeba48410ea80f9dfdf",
+   "tokens": 4281
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 33561,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024ippan_2.pdf",
+   "pages": 297,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "財務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 291,
+    "90": 6
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "6cc573bf64747e4ceb41597cc83e371f5d8144a02e3e9033501597d64cfbbc5e",
+   "tokens": 71268
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 741,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024jisinn_2.pdf",
+   "pages": 9,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "財務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 8,
+    "90": 1
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "9b7690b4b4b8818949abd386ccf2375c79f95dff70d38934624de5ffca5e0fe5",
+   "tokens": 1677
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 1240,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024kokusaiseirikikinn_2.pdf",
+   "pages": 9,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "財務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 9
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "bd0715a0585b04879c8796504d6841b91c612297299934d9298cb875cee55145",
+   "tokens": 1916
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 544,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tokuzai_2.pdf",
+   "pages": 6,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "財務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 6
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "5744d1f8670a9a72d52e67771be8266e7d3d102ad35c102eb92b6c2eb5a84d75",
+   "tokens": 1048
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 1042,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024tousi_2.pdf",
+   "pages": 11,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "財務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 10,
+    "90": 1
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "be6b5bd2f3c0480bd8a5e9292a304e4eb37bd342deb21eb28b2464dfb5741ede",
+   "tokens": 2139
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 2003,
+   "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024zaiyuu_2.pdf",
+   "pages": 16,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "財務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 15,
+    "90": 1
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "f8ebf4dfcfbfa3b4ae0636554e2f3e5462190db71d406de0b87fc45f12d36485",
+   "tokens": 3827
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 38678,
+   "localPath": "data/download/mofa.go.jp/mofaj/files/100546568.pdf",
+   "pages": 314,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "外務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 314
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "85781ba1f867aaab4130b2c463c588c4fc9ca6211d097cedfd495c56bf024b55",
+   "tokens": 79142
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 0,
+   "localPath": "data/download/moj.go.jp/content/001402818.pdf",
+   "pages": 737,
+   "pagesWithoutTokens": 737,
+   "publisherAuthority": "法務省",
+   "representation": "DRAWING_PATH_TEXT",
+   "rotation": {
+    "90": 737
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 1927,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "bd5ce9c5dee48b03407e9a8d4050f3992c8a515f510c0339364316448dd9cf8c",
+   "tokens": 0
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 415,
+   "localPath": "data/download/moj.go.jp/content/001402819.pdf",
+   "pages": 11,
+   "pagesWithoutTokens": 4,
+   "publisherAuthority": "法務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 11
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "6635e0e5fbb8a962d439d6d8d256c0c34892b0d9a366ea04daf15d338a36bb7b",
+   "tokens": 949
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 1859,
+   "localPath": "data/download/ndl.go.jp/jp/aboutus/outline/r06_budgetrequest.pdf",
+   "pages": 17,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "国立国会図書館",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 17
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "cb0442175d186f3041d6b3df93c46139760920b2c0162ae5a61c3abedf0a60e5",
+   "tokens": 3371
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 230,
+   "localPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/hukkoutokubetukaikei.pdf",
+   "pages": 7,
+   "pagesWithoutTokens": 1,
+   "publisherAuthority": "警察庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 7
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 1
+   },
+   "sha256": "9e44e9f3b592398750c0472ec84f94d3817d68ae50c84cf0b4df859ea3e32843",
+   "tokens": 578
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 13740,
+   "localPath": "data/download/npa.go.jp/policies/budget/r6/gaisanyokyu/ippankaikei.pdf",
+   "pages": 112,
+   "pagesWithoutTokens": 0,
+   "publisherAuthority": "警察庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 112
+   },
+   "sampledOperatorCounts": null,
+   "sha256": "efbfdfefbf4d6c4f85c1da1867348c96964a56fefe6d4c952291e2bf3448e837",
+   "tokens": 28314
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 2913,
+   "localPath": "data/download/ppc.go.jp/files/pdf/230831youkyu.pdf",
+   "pages": 30,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "個人情報保護委員会",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 30
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "0a9a58273e0f9c137414e062872c1c642ad0fa5aec403ae5e606c56f198db9a3",
+   "tokens": 6123
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 11971,
+   "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "pages": 103,
+   "pagesWithoutTokens": 2,
+   "publisherAuthority": "復興庁",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 103
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 2
+   },
+   "sha256": "9e9995110a9959eb926c101b34f562ac4bff2241d68cec1d15ccb6e5d850f68c",
+   "tokens": 23280
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 1865,
+   "localPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "pages": 21,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "参議院",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 21
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "a5a91f4b79e6809bac97613037530070f2a4ae898aaf5694dfbaea0562b1e28f",
+   "tokens": 3780
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 3641,
+   "localPath": "data/download/shugiin.go.jp/internet/itdb_annai.nsf/html/statics/osirase/kaikei-saishutsugaisan6.pdf/%24File/kaikei-saishutsugaisan6.pdf",
+   "pages": 36,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "衆議院",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 36
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "30d0dfc363a1f4f7e37b64a0059b48c2f03f13f997eb251e7ef5acaabd37c435",
+   "tokens": 8217
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 368,
+   "localPath": "data/download/sotsui.go.jp/budget/images/r6budget_yokyu.pdf",
+   "pages": 8,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "裁判官訴追委員会",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 8
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "66a11094cdda23d47ee2d3c34f4ce741d528a8480a941cbea7803232a6aef029",
+   "tokens": 799
+  },
+  {
+   "accountType": "general",
+   "asciiDigitTokens": 42188,
+   "localPath": "data/download/soumu.go.jp/main_content/000901372.pdf",
+   "pages": 454,
+   "pagesWithoutTokens": 1,
+   "publisherAuthority": "総務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 454
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 1
+   },
+   "sha256": "cc54dbe5f689116619a1f8453747d47bca5b960137f90869ead26954d651703b",
+   "tokens": 92566
+  },
+  {
+   "accountType": "special",
+   "asciiDigitTokens": 960,
+   "localPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+   "pages": 22,
+   "pagesWithoutTokens": 3,
+   "publisherAuthority": "総務省",
+   "representation": "TEXT_GEOMETRY_AVAILABLE",
+   "rotation": {
+    "0": 22
+   },
+   "sampledOperatorCounts": {
+    "constructPath": 0,
+    "images": 0,
+    "pages": 3
+   },
+   "sha256": "fbe532b7b80e43f3f31685471f25a598f2532838ddcab33103ece1dd2f43a396",
+   "tokens": 1749
+  }
+ ],
+ "schema": "budget-request-unmatched59-pdf-scan/v0"
+}
