@@ -1,0 +1,692 @@
+{
+ "causalCounts": {
+  "S0": 1544,
+  "S1": 0,
+  "S2": 499,
+  "S3": 37,
+  "S4": 0,
+  "S5": 0
+ },
+ "causalRowsGzSha256": "e19d0098d7995ecfc618c20fe99476d482f41e0b91aff54912d1c053b5f390c9",
+ "decision": {
+  "decision": "INVALID",
+  "rule": "uncovered"
+ },
+ "fieldDecomposition": {
+  "level_changed": {
+   "C0_vs_T1": 490,
+   "S2": 490,
+   "T2_vs_C0": 490
+  },
+  "newly_unclassified": {
+   "C0_vs_T1": 37,
+   "S3": 37,
+   "T1_vs_T2": 37,
+   "T2_vs_C0": 37
+  },
+  "parent_changed": {
+   "C0_vs_T1": 9,
+   "S2": 9,
+   "T2_vs_C0": 9
+  }
+ },
+ "frozen": {
+  "docs/tasks/20261005_1450_Budget_Request_Hierarchy_Stack_Reset_Counterfactual_Protocol.md": "22884704f4b4529da2ba63a260e54a1df5fa32d553436c7683c3264482f07007",
+  "scripts/pipeline-v2/lib/budget-request-document-hierarchy-v2.ts": "4372d9ff13e127c69976f1018bb1f41c1cf691ad5eee8b6cdef439ea311eea1d",
+  "scripts/pipeline-v2/lib/budget-request-field-resolver.ts": "758eb8f6afdf45bd39c9853623201a4afbac8e8d6883626149d889335c2bb224",
+  "scripts/pipeline-v2/lib/budget-request-source-range-compare.ts": "c8b757e7cffc90c836ff0134eed057021edff45e4428ab76010a1db82fa34103",
+  "scripts/pipeline-v2/run-budget-request-source-range-hierarchy-paired.ts": "3601da017a8a501298e2d0eea3d502ce30f1cfbf62cc00c0ce8c4d1896e1e1e1",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/phaseA-evaluation.json": "72ad477e5953316e8774919c7f3da2491b22af25332c95d52b65f981e90b67b6",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/phaseB-mof-diagnostic.json": "5b6fe1f309854fce5a738c24d19aabe38bb931246dc35444252c313a90c4fd83",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/range-manifest.json": "3e00df693627e1bb22274c291694ac1aed2c079daf758ceda5af084da217201e"
+ },
+ "gateFailures": [],
+ "gatesPass": true,
+ "knownValueReproduction": {
+  "classes": true,
+  "clusters": true,
+  "primaryRows2080": true,
+  "priorChanged536": true,
+  "sameRangeRows5893": true,
+  "sourceOnly": true
+ },
+ "note": "T2 は T1 の frame（nodes / x cluster / level）固定で stack のみ manual 開始直前に reset。manual contract・MOF は GT ではない",
+ "pdfs": [
+  {
+   "gates": {
+    "C0_equals_frozen": true,
+    "M1_activation_range_identical": true,
+    "M2_node_population_identical": true,
+    "M3_cluster_population_identical": true,
+    "M4_level_assignment_identical": true,
+    "M5_reset_once_at_locator": true,
+    "M6_non_hierarchy_invariants": true,
+    "R0_replay_equals_T1_edges": true,
+    "T1_equals_frozen": true
+   },
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "manual": [
+    7,
+    147
+   ],
+   "manualStart": {
+    "c0": {
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "kind": "unclassified",
+     "level": null,
+     "parentId": null,
+     "parentPage": null
+    },
+    "kindC0T1T2": [
+     "unclassified",
+     "unclassified",
+     "unclassified"
+    ],
+    "levelSameAsT1InT2": true,
+    "parentRelationRemovedInT2": false,
+    "t1": {
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "kind": "unclassified",
+     "level": null,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t2": {
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "kind": "unclassified",
+     "level": null,
+     "parentId": null,
+     "parentPage": null
+    }
+   },
+   "relation": "exact_same",
+   "resetEvents": [],
+   "resetPage": null,
+   "rows": {
+    "causal": {
+     "S0": 557,
+     "S1": 0,
+     "S2": 0,
+     "S3": 0,
+     "S4": 0,
+     "S5": 0
+    },
+    "primary": 557,
+    "priorChanged": 0,
+    "t1VsT2DifferingRowsOutsideManualRange": 0
+   },
+   "sourceDerived": [
+    7,
+    147
+   ],
+   "tableDigests": {
+    "c0": "e37dcd75f06e56e049e96ae4bde342f791d90927c62c7611556d857bc3f51bb2",
+    "t1": "e37dcd75f06e56e049e96ae4bde342f791d90927c62c7611556d857bc3f51bb2",
+    "t2": "e37dcd75f06e56e049e96ae4bde342f791d90927c62c7611556d857bc3f51bb2"
+   }
+  },
+  {
+   "gates": {
+    "C0_equals_frozen": true,
+    "M1_activation_range_identical": true,
+    "M2_node_population_identical": true,
+    "M3_cluster_population_identical": true,
+    "M4_level_assignment_identical": true,
+    "M5_reset_once_at_locator": true,
+    "M6_non_hierarchy_invariants": true,
+    "R0_replay_equals_T1_edges": true,
+    "T1_equals_frozen": true
+   },
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "manual": [
+    21,
+    193
+   ],
+   "manualStart": {
+    "c0": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "kindC0T1T2": [
+     "organization",
+     "organization",
+     "organization"
+    ],
+    "levelSameAsT1InT2": true,
+    "parentRelationRemovedInT2": false,
+    "t1": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t2": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    }
+   },
+   "relation": "exact_same",
+   "resetEvents": [],
+   "resetPage": null,
+   "rows": {
+    "causal": {
+     "S0": 1631,
+     "S1": 0,
+     "S2": 0,
+     "S3": 0,
+     "S4": 0,
+     "S5": 0
+    },
+    "primary": 1631,
+    "priorChanged": 0,
+    "t1VsT2DifferingRowsOutsideManualRange": 0
+   },
+   "sourceDerived": [
+    21,
+    193
+   ],
+   "tableDigests": {
+    "c0": "3e66978e3cd3082fcff01d08331f913c9cd97aa530bb0ae50c91f32883819eac",
+    "t1": "3e66978e3cd3082fcff01d08331f913c9cd97aa530bb0ae50c91f32883819eac",
+    "t2": "3e66978e3cd3082fcff01d08331f913c9cd97aa530bb0ae50c91f32883819eac"
+   }
+  },
+  {
+   "gates": {
+    "C0_equals_frozen": true,
+    "M1_activation_range_identical": true,
+    "M2_node_population_identical": true,
+    "M3_cluster_population_identical": true,
+    "M4_level_assignment_identical": true,
+    "M5_reset_once_at_locator": true,
+    "M6_non_hierarchy_invariants": true,
+    "R0_replay_equals_T1_edges": true,
+    "T1_equals_frozen": true
+   },
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "manual": [
+    7,
+    20
+   ],
+   "manualStart": {
+    "c0": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    },
+    "kindC0T1T2": [
+     "organization",
+     "organization",
+     "organization"
+    ],
+    "levelSameAsT1InT2": true,
+    "parentRelationRemovedInT2": false,
+    "t1": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t2": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    }
+   },
+   "relation": "exact_same",
+   "resetEvents": [],
+   "resetPage": null,
+   "rows": {
+    "causal": {
+     "S0": 110,
+     "S1": 0,
+     "S2": 0,
+     "S3": 0,
+     "S4": 0,
+     "S5": 0
+    },
+    "primary": 110,
+    "priorChanged": 0,
+    "t1VsT2DifferingRowsOutsideManualRange": 0
+   },
+   "sourceDerived": [
+    7,
+    20
+   ],
+   "tableDigests": {
+    "c0": "c54671070cde014ad94b354c7ca6b3cb06d025000b2de74665fbdd61bdf4d893",
+    "t1": "c54671070cde014ad94b354c7ca6b3cb06d025000b2de74665fbdd61bdf4d893",
+    "t2": "c54671070cde014ad94b354c7ca6b3cb06d025000b2de74665fbdd61bdf4d893"
+   }
+  },
+  {
+   "gates": {
+    "C0_equals_frozen": true,
+    "M1_activation_range_identical": true,
+    "M2_node_population_identical": true,
+    "M3_cluster_population_identical": true,
+    "M4_level_assignment_identical": true,
+    "M5_reset_once_at_locator": true,
+    "M6_non_hierarchy_invariants": true,
+    "R0_replay_equals_T1_edges": true,
+    "T1_equals_frozen": true
+   },
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "manual": [
+    9,
+    106
+   ],
+   "manualStart": {
+    "c0": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "kindC0T1T2": [
+     "organization",
+     "organization",
+     "organization"
+    ],
+    "levelSameAsT1InT2": true,
+    "parentRelationRemovedInT2": false,
+    "t1": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t2": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    }
+   },
+   "relation": "exact_same",
+   "resetEvents": [],
+   "resetPage": null,
+   "rows": {
+    "causal": {
+     "S0": 1238,
+     "S1": 0,
+     "S2": 0,
+     "S3": 0,
+     "S4": 0,
+     "S5": 0
+    },
+    "primary": 1238,
+    "priorChanged": 0,
+    "t1VsT2DifferingRowsOutsideManualRange": 0
+   },
+   "sourceDerived": [
+    9,
+    106
+   ],
+   "tableDigests": {
+    "c0": "0ee57c5c82a4213e808f5cf617a3ad2876245f4a443845c75b23f230d0a7a684",
+    "t1": "0ee57c5c82a4213e808f5cf617a3ad2876245f4a443845c75b23f230d0a7a684",
+    "t2": "0ee57c5c82a4213e808f5cf617a3ad2876245f4a443845c75b23f230d0a7a684"
+   }
+  },
+  {
+   "gates": {
+    "C0_equals_frozen": true,
+    "M1_activation_range_identical": true,
+    "M2_node_population_identical": true,
+    "M3_cluster_population_identical": true,
+    "M4_level_assignment_identical": true,
+    "M5_reset_once_at_locator": true,
+    "M6_non_hierarchy_invariants": true,
+    "R0_replay_equals_T1_edges": true,
+    "T1_equals_frozen": true
+   },
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "manual": [
+    1045,
+    1339
+   ],
+   "manualStart": {
+    "c0": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p1045-r4",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    },
+    "kindC0T1T2": [
+     "organization",
+     "unclassified",
+     "organization"
+    ],
+    "levelSameAsT1InT2": true,
+    "parentRelationRemovedInT2": true,
+    "t1": {
+     "edgeStatus": "resolved_by_indent_sequence",
+     "id": "detail-p1045-r4",
+     "kind": "unclassified",
+     "level": 2,
+     "parentId": "detail-p990-r0",
+     "parentPage": 990
+    },
+    "t2": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p1045-r4",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    }
+   },
+   "relation": "source_superset",
+   "resetEvents": [
+    {
+     "beforeNodeId": "detail-p1045-r4",
+     "stackDepth": 4
+    }
+   ],
+   "resetPage": 1045,
+   "rows": {
+    "causal": {
+     "S0": 843,
+     "S1": 0,
+     "S2": 218,
+     "S3": 21,
+     "S4": 0,
+     "S5": 0
+    },
+    "primary": 1082,
+    "priorChanged": 239,
+    "t1VsT2DifferingRowsOutsideManualRange": 0
+   },
+   "sourceDerived": [
+    1,
+    1339
+   ],
+   "tableDigests": {
+    "c0": "82dda090d02e7bcdab9cd7fd9f9e2bfc56e2c84f91a357c0fa66cc486072e6cd",
+    "t1": "ed523fe7134dbd9e0bf161a6548d1466e0533016925ca3d4dd7cd3642a3b6f01",
+    "t2": "d3103ab31034d229263a31c8e1b2abd937cfaed4fd5cd63c827d3e7d11d9a62d"
+   }
+  },
+  {
+   "gates": {
+    "C0_equals_frozen": true,
+    "M1_activation_range_identical": true,
+    "M2_node_population_identical": true,
+    "M3_cluster_population_identical": true,
+    "M4_level_assignment_identical": true,
+    "M5_reset_once_at_locator": true,
+    "M6_non_hierarchy_invariants": true,
+    "R0_replay_equals_T1_edges": true,
+    "T1_equals_frozen": true
+   },
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "manual": [
+    1555,
+    1700
+   ],
+   "manualStart": {
+    "c0": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p1555-r4",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    },
+    "kindC0T1T2": [
+     "organization",
+     "unclassified",
+     "organization"
+    ],
+    "levelSameAsT1InT2": true,
+    "parentRelationRemovedInT2": true,
+    "t1": {
+     "edgeStatus": "resolved_by_indent_sequence",
+     "id": "detail-p1555-r4",
+     "kind": "unclassified",
+     "level": 2,
+     "parentId": "detail-p1006-r0",
+     "parentPage": 1006
+    },
+    "t2": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p1555-r4",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    }
+   },
+   "relation": "source_superset",
+   "resetEvents": [
+    {
+     "beforeNodeId": "detail-p1555-r4",
+     "stackDepth": 4
+    }
+   ],
+   "resetPage": 1555,
+   "rows": {
+    "causal": {
+     "S0": 701,
+     "S1": 0,
+     "S2": 281,
+     "S3": 16,
+     "S4": 0,
+     "S5": 0
+    },
+    "primary": 998,
+    "priorChanged": 297,
+    "t1VsT2DifferingRowsOutsideManualRange": 3
+   },
+   "sourceDerived": [
+    21,
+    1723
+   ],
+   "tableDigests": {
+    "c0": "6b87d143c05cd1924c93231eb00ccdf4d54dff9b1428e108c70a4a92bb21c94e",
+    "t1": "a8bbbf5f9547227b3b661fd9a48e8350f141a3f6dcf17f1c9e2d7e6d6e191045",
+    "t2": "fd8decdcab90ea27afd38c90a9e6a82f67b4a7c9ef0f8246b25fd5ab8c534d6b"
+   }
+  },
+  {
+   "gates": {
+    "C0_equals_frozen": true,
+    "M1_activation_range_identical": true,
+    "M2_node_population_identical": true,
+    "M3_cluster_population_identical": true,
+    "M4_level_assignment_identical": true,
+    "M5_reset_once_at_locator": true,
+    "M6_non_hierarchy_invariants": true,
+    "R0_replay_equals_T1_edges": true,
+    "T1_equals_frozen": true
+   },
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "manual": [
+    7,
+    10
+   ],
+   "manualStart": {
+    "c0": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    },
+    "kindC0T1T2": [
+     "organization",
+     "organization",
+     "organization"
+    ],
+    "levelSameAsT1InT2": true,
+    "parentRelationRemovedInT2": false,
+    "t1": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t2": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    }
+   },
+   "relation": "exact_same",
+   "resetEvents": [],
+   "resetPage": null,
+   "rows": {
+    "causal": {
+     "S0": 45,
+     "S1": 0,
+     "S2": 0,
+     "S3": 0,
+     "S4": 0,
+     "S5": 0
+    },
+    "primary": 45,
+    "priorChanged": 0,
+    "t1VsT2DifferingRowsOutsideManualRange": 0
+   },
+   "sourceDerived": [
+    7,
+    10
+   ],
+   "tableDigests": {
+    "c0": "e6b315ec671f296ffc752bb9a6daa587a61b4af39eb456978ac3a1ad655eac10",
+    "t1": "e6b315ec671f296ffc752bb9a6daa587a61b4af39eb456978ac3a1ad655eac10",
+    "t2": "e6b315ec671f296ffc752bb9a6daa587a61b4af39eb456978ac3a1ad655eac10"
+   }
+  },
+  {
+   "gates": {
+    "C0_equals_frozen": true,
+    "M1_activation_range_identical": true,
+    "M2_node_population_identical": true,
+    "M3_cluster_population_identical": true,
+    "M4_level_assignment_identical": true,
+    "M5_reset_once_at_locator": true,
+    "M6_non_hierarchy_invariants": true,
+    "R0_replay_equals_T1_edges": true,
+    "T1_equals_frozen": true
+   },
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "manual": [
+    9,
+    540
+   ],
+   "manualStart": {
+    "c0": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "kindC0T1T2": [
+     "organization",
+     "organization",
+     "organization"
+    ],
+    "levelSameAsT1InT2": true,
+    "parentRelationRemovedInT2": false,
+    "t1": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t2": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    }
+   },
+   "relation": "exact_same",
+   "resetEvents": [],
+   "resetPage": null,
+   "rows": {
+    "causal": {
+     "S0": 2312,
+     "S1": 0,
+     "S2": 0,
+     "S3": 0,
+     "S4": 0,
+     "S5": 0
+    },
+    "primary": 2312,
+    "priorChanged": 0,
+    "t1VsT2DifferingRowsOutsideManualRange": 0
+   },
+   "sourceDerived": [
+    9,
+    540
+   ],
+   "tableDigests": {
+    "c0": "06ba4a433f499013d5c9a360123602e032409fa9d6f2f56f6edb4a37fc550632",
+    "t1": "06ba4a433f499013d5c9a360123602e032409fa9d6f2f56f6edb4a37fc550632",
+    "t2": "06ba4a433f499013d5c9a360123602e032409fa9d6f2f56f6edb4a37fc550632"
+   }
+  }
+ ],
+ "population": {
+  "duplicates": 0,
+  "nonHierarchyInvariantViolations": 0,
+  "primaryRows": 2080,
+  "priorChangedRows": 536,
+  "sameRangeControlChanged": 0,
+  "sameRangeControlRows": 5893,
+  "unjoinable": 0
+ },
+ "schema": "budget-request-hierarchy-stack-reset-counterfactual/v0",
+ "t2VsT1FlagCounts": {
+  "05-1b-01.pdf|parent_changed": 16,
+  "05-1b-01.pdf|root_changed": 2,
+  "05-1b-01.pdf|unclassified_resolved": 16,
+  "20230914-mxt_kaikesou01-000031817_03.pdf|parent_changed": 21,
+  "20230914-mxt_kaikesou01-000031817_03.pdf|root_changed": 2,
+  "20230914-mxt_kaikesou01-000031817_03.pdf|unclassified_resolved": 21
+ }
+}
