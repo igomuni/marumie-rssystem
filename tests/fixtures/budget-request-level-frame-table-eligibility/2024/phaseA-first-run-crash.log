@@ -1,0 +1,7 @@
+20230907_policies_budget_04.pdf nodes=197 support=175 t2clusters=9 t4clusters=8 unassigned=22 gates=true/true/true
+000157010.pdf nodes=509 support=464 t2clusters=7 t4clusters=6 unassigned=45 gates=true/true/true
+230901-4.pdf nodes=68 support=68 t2clusters=5 t4clusters=5 unassigned=0 gates=true/true/true
+ippan_o.pdf nodes=394 support=392 t2clusters=6 t4clusters=5 unassigned=2 gates=true/true/true
+TypeError: Cannot read properties of undefined (reading 'size')
+    at observeDocumentHierarchyV2 (/Users/igomuni/MyGitHub/marumie-rssystem/scripts/pipeline-v2/lib/budget-request-document-hierarchy-v2.ts:287:99)
+    at main (/Users/igomuni/MyGitHub/marumie-rssystem/scripts/pipeline-v2/run-budget-request-table-eligibility-phase-a.ts:102:17)

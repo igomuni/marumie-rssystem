@@ -16,7 +16,7 @@ import { extractPageTokens } from './lib/budget-request-pdf-page';
 import { frameOf } from './lib/budget-request-p1-outlier';
 import { longRules, mergeVerticalRules } from './lib/budget-request-rule-line-anchor';
 import { buildTableGeometry } from './lib/budget-request-table-geometry';
-import { filterLogicalRows, nodeSupport } from './lib/budget-request-table-eligibility-frame';
+import { neutralizeNodeRows, nodeSupport } from './lib/budget-request-table-eligibility-frame';
 import { pageRuns } from './lib/budget-request-cluster-provenance';
 
 const FX = 'tests/fixtures';
@@ -96,9 +96,9 @@ async function main() {
       nodeLines.push(JSON.stringify(sortDeep({ pdf: name, nodeId: nd.id, page: nd.sourcePage, logicalRowIndex: nd.sourceRowRefs.logicalRowIndex, keyTokenXMin: nd.xIndentEvidence.keyTokenXMin, bbox: bbox ?? null, frameAvailable: s.rel.frameAvailable, frameBBox: fr, relation: s.rel.relation, supportEligible: s.supportEligible, eligibilityReason: s.reason, provenance: { keyTokenIndex: nd.sourceTokenRefs.keyTokenIndex, rowTokenIndexes: nd.sourceTokenRefs.rowTokenIndexes, physicalRowIndexes: nd.sourceRowRefs.physicalRowIndexes } })));
     }
     // 非介入の恒等性: 何も除外しない同じ code path が T2 frame を再現
-    const identity = JSON.stringify(sortDeep(observeDocumentHierarchyV2('detail', pages.map(p => ({ ...p, logical: { ...p.logical, logicalRowCandidates: filterLogicalRows(p.logical.logicalRowCandidates, new Set<number>()) } })), HIERARCHY_B_ONLY_OPTIONS).indentClusters)) === JSON.stringify(sortDeep(h2.indentClusters));
+    const identity = JSON.stringify(sortDeep(observeDocumentHierarchyV2('detail', pages.map(p => ({ ...p, logical: { ...p.logical, logicalRowCandidates: neutralizeNodeRows(p.logical.logicalRowCandidates, new Set<number>()) } })), HIERARCHY_B_ONLY_OPTIONS).indentClusters)) === JSON.stringify(sortDeep(h2.indentClusters));
     // T4 frame: support でない node の行を除いた入力に対する既存 cluster algorithm の indentClusters
-    const filtered: Pages = pages.map(p => ({ ...p, logical: { ...p.logical, logicalRowCandidates: filterLogicalRows(p.logical.logicalRowCandidates, excludedRowsByPage.get(p.meta.number) ?? new Set<number>()) } }));
+    const filtered: Pages = pages.map(p => ({ ...p, logical: { ...p.logical, logicalRowCandidates: neutralizeNodeRows(p.logical.logicalRowCandidates, excludedRowsByPage.get(p.meta.number) ?? new Set<number>()) } }));
     const h4f = observeDocumentHierarchyV2('detail', filtered, HIERARCHY_B_ONLY_OPTIONS);
     const frame = h4f.indentClusters;
     const supportIds = new Set([...perNode.entries()].filter(([, v]) => v.supportEligible).map(([k]) => k));

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { describe, expect, it } from 'vitest';
-import { decideTableEligibility, filterLogicalRows, nodeSupport, supportEffect, t2ParentOf, type TableEligibilityFacts } from './budget-request-table-eligibility-frame';
+import { decideTableEligibility, neutralizeNodeRows, nodeSupport, supportEffect, t2ParentOf, type TableEligibilityFacts } from './budget-request-table-eligibility-frame';
 
 const rules = [{ x: 10, yMin: 100, yMax: 700 }, { x: 500, yMin: 100, yMax: 700 }];
 describe('nodeSupport（既存 relationOf の再利用）', () => {
@@ -13,8 +13,8 @@ describe('nodeSupport（既存 relationOf の再利用）', () => {
   });
 });
 describe('補助関数', () => {
-  it('filterLogicalRows / supportEffect / t2ParentOf', () => {
-    expect(filterLogicalRows([{ logicalRowIndex: 0 }, { logicalRowIndex: 1 }, { logicalRowIndex: 2 }], new Set([1])).map(r => r.logicalRowIndex)).toEqual([0, 2]);
+  it('neutralizeNodeRows / supportEffect / t2ParentOf', () => {
+    expect(neutralizeNodeRows([{ logicalRowIndex: 0, visualTokenIndexes: [1] }, { logicalRowIndex: 1, visualTokenIndexes: [2, 3] }], new Set([1])).map(r => r.visualTokenIndexes)).toEqual([[1], []]);
     expect([supportEffect(0, 3), supportEffect(1, 3), supportEffect(3, 3)]).toEqual(['support_removed', 'support_reduced', 'support_maintained']);
     const t2 = [{ clusterIndex: 0, xMin: 10, xMax: 12 }, { clusterIndex: 1, xMin: 20, xMax: 30 }];
     expect(t2ParentOf({ xMin: 21, xMax: 25 }, t2)).toBe(1);

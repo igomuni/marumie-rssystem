@@ -14,9 +14,13 @@ export function nodeSupport(bbox: RowBBox | null | undefined, longVerticalRules:
   return { rel, supportEligible, reason: supportEligible ? `body_or_table: ${rel.reason}` : `excluded(${rel.relation}): ${rel.reason}` };
 }
 
-/** frame 構築用の page 入力から、support でない node の行だけを除く（node 以外の行は残す）。logicalRowIndex の集合で指定 */
-export function filterLogicalRows<T extends { logicalRowIndex: number }>(rows: T[], excludedNodeRowIndexes: Set<number>): T[] {
-  return rows.filter(r => !excludedNodeRowIndexes.has(r.logicalRowIndex));
+/**
+ * frame 構築用の page 入力で、support でない node の行を heading 候補にならないようにする（visualTokenIndexes を空にする）。
+ * 行そのものは配列に残す: hierarchy v2 は candidate の rowIndex = logicalRowIndex = 配列 index を前提にしているため、行を取り除くと header evidence の索引が壊れる
+ * （初回実行は行の除去で例外になった。結果は出ていない）。非 node 行と bbox / rawTokenIndexes は変更しない。
+ */
+export function neutralizeNodeRows<T extends { logicalRowIndex: number; visualTokenIndexes: number[] }>(rows: T[], excludedNodeRowIndexes: Set<number>): T[] {
+  return rows.map(r => (excludedNodeRowIndexes.has(r.logicalRowIndex) ? { ...r, visualTokenIndexes: [] } : r));
 }
 
 export type SupportEffect = 'support_removed' | 'support_reduced' | 'support_maintained';
