@@ -1,0 +1,286 @@
+{
+ "byCurrentCandidateStatus": {
+  "CANDIDATE_STATUS_UNRESOLVED": 37,
+  "SOURCE_ITEM_NOT_OBSERVED": 22
+ },
+ "byFailureClass": {
+  "F0": 16,
+  "F1": 37,
+  "F2": 5,
+  "F7": 1
+ },
+ "byMinistry": {
+  "内閣府": 9,
+  "厚生労働省": 1,
+  "国土交通省": 3,
+  "外務省": 1,
+  "文部科学省": 5,
+  "法務省": 35,
+  "環境省": 1,
+  "経済産業省": 1,
+  "財務省": 2,
+  "防衛省": 1
+ },
+ "byOrganization": {
+  "内閣府/内閣本府": 4,
+  "内閣府/日本学術会議": 1,
+  "内閣府/沖縄総合事務局": 1,
+  "内閣府/消費者庁": 1,
+  "内閣府/金融庁": 2,
+  "厚生労働省/厚生労働本省": 1,
+  "国土交通省/国土交通本省": 2,
+  "国土交通省/海上保安庁": 1,
+  "外務省/外務本省": 1,
+  "文部科学省/スポーツ庁": 1,
+  "文部科学省/文部科学本省": 4,
+  "法務省/公安審査委員会": 1,
+  "法務省/公安調査庁": 2,
+  "法務省/出入国在留管理庁": 3,
+  "法務省/更生保護官署": 2,
+  "法務省/検察庁": 3,
+  "法務省/法務局": 4,
+  "法務省/法務本省": 13,
+  "法務省/法務総合研究所": 3,
+  "法務省/矯正官署": 4,
+  "環境省/環境本省": 1,
+  "経済産業省/資源エネルギー庁": 1,
+  "財務省/財務本省": 2,
+  "防衛省/防衛本省": 1
+ },
+ "byRecoverabilityClass": {
+  "NOT_CURRENTLY_RECOVERABLE_FROM_SOURCE": 5,
+  "REQUIRES_NEW_REPRESENTATION_SUPPORT": 37,
+  "UNRESOLVED": 17
+ },
+ "byRepresentationClass": {
+  "DRAWING_PATH_TEXT": 37,
+  "TEXT_GEOMETRY_AVAILABLE": 22
+ },
+ "bySourceAssignmentStatus": {
+  "SOURCE_ASSIGNMENT_PARTIAL": 59
+ },
+ "bySourceFullNameStatus": {
+  "SOURCE_FULL_NAME_ABSENT": 5,
+  "SOURCE_FULL_NAME_PRESENT_ELSEWHERE": 1,
+  "SOURCE_FULL_NAME_UNRESOLVED": 16,
+  "SOURCE_TEXT_UNREADABLE": 37
+ },
+ "exactCovered": 725,
+ "f1RepresentationBlocker": {
+  "itemLevelAssignedCount": 0,
+  "itemsByAuthorityLevelPdf": {
+   "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf": 2,
+   "data/download/moj.go.jp/content/001402818.pdf": 35
+  }
+ },
+ "f2SourceFullNameAbsent": [
+  {
+   "code": "052",
+   "failureDetail": "baseline independent check = SOURCE_FULL_NAME_ABSENT; this scan: 0 exact hits in 3 readable same-authority PDF(s); same name found in other-authority PDFs: no; MOF fiscal-year amount 0 is NOT used",
+   "ministry": "文部科学省",
+   "mofRowId": "mofsec_31f6d9c946ba5053be13",
+   "name": "国立研究開発法人防災科学技術研究所施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "code": "008",
+   "failureDetail": "baseline independent check = SOURCE_FULL_NAME_ABSENT; this scan: 0 exact hits in 3 readable same-authority PDF(s); same name found in other-authority PDFs: no; MOF fiscal-year amount 0 is NOT used",
+   "ministry": "文部科学省",
+   "mofRowId": "mofsec_393c11b3c7bd77f977b7",
+   "name": "独立行政法人国立青少年教育振興機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "code": "046",
+   "failureDetail": "baseline independent check = SOURCE_FULL_NAME_ABSENT; this scan: 0 exact hits in 3 readable same-authority PDF(s); same name found in other-authority PDFs: yes; MOF fiscal-year amount 0 is NOT used",
+   "ministry": "文部科学省",
+   "mofRowId": "mofsec_44a80f1a7e23c4283e41",
+   "name": "国立研究開発法人日本原子力研究開発機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "code": "010",
+   "failureDetail": "baseline independent check = SOURCE_FULL_NAME_ABSENT; this scan: 0 exact hits in 3 readable same-authority PDF(s); same name found in other-authority PDFs: no; MOF fiscal-year amount 0 is NOT used",
+   "ministry": "文部科学省",
+   "mofRowId": "mofsec_9ffdf9616b66a75105bb",
+   "name": "独立行政法人教職員支援機構施設整備費",
+   "organization": "文部科学本省"
+  },
+  {
+   "code": "108",
+   "failureDetail": "baseline independent check = SOURCE_FULL_NAME_ABSENT; this scan: 0 exact hits in 3 readable same-authority PDF(s); same name found in other-authority PDFs: no; MOF fiscal-year amount 0 is NOT used",
+   "ministry": "文部科学省",
+   "mofRowId": "mofsec_ea99ca99415d94ce3fb6",
+   "name": "独立行政法人日本スポーツ振興センター施設整備費",
+   "organization": "スポーツ庁"
+  }
+ ],
+ "f3": [],
+ "f4": [],
+ "f7": [
+  {
+   "code": "088",
+   "failureDetail": "same name present in same-authority PDF but not as a general-account item row (e.g. special-account PDF, embedded text); identity with the MOF general-account item is not asserted",
+   "ministry": "経済産業省",
+   "mofRowId": "mofsec_80300d9ad77824cf87f6",
+   "name": "エネルギー需給構造高度化対策費",
+   "organization": "資源エネルギー庁"
+  }
+ ],
+ "frozen": {
+  "tests/fixtures/budget-request-unmatched-59/2024/baseline.json": "7f7e219245849b4dcec9a7352dfdda70eeb09f0f404047d18f5a979ff1e24bb4",
+  "tests/fixtures/budget-request-unmatched-59/2024/unmatched-59-inventory.jsonl.gz": "5d7eb41010cbac321fd30c7aca58e45b3e895ca4a787e9bcfa703cc64906b313"
+ },
+ "mofTotal": 784,
+ "notCurrentlyRecoverableFromSource": 5,
+ "note": "frozen 行別 inventory の集計。数値は実測。class 定義は変更していない。F1 の assignment は所管レベルのみ（item レベルの assignment ではない）",
+ "recoverableWithCurrentTextGeometry": 0,
+ "requiresNewRepresentationSupport": 37,
+ "routing": {
+  "counts": {
+   "F1": 37,
+   "F3": 0,
+   "F4": 0,
+   "unresolved": 16
+  },
+  "route": "C",
+  "rule": "A: F3>=1 → B: F4>=1 → C: F1 > unresolved(F0/F6/assignment unresolved) → D（優先順で 1 つ）"
+ },
+ "schema": "budget-request-unmatched59-summary/v0",
+ "sourcePdfsReferenced": [
+  "data/download/fsa.go.jp/common/budget/yosan/6youkyuu-2/01.pdf",
+  "data/download/moj.go.jp/content/001402818.pdf"
+ ],
+ "unmatched": 59,
+ "unresolved": 17,
+ "unresolvedRows": [
+  {
+   "code": "022",
+   "failureDetail": "no exact hit in 4 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 5",
+   "ministry": "環境省",
+   "mofRowId": "mofsec_08fc1320c8a64ec1769e",
+   "name": "脱炭素成長型経済構造移行推進エネルギー対策特別会計へ繰入",
+   "organization": "環境本省"
+  },
+  {
+   "code": "287",
+   "failureDetail": "no exact hit in 5 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 0",
+   "ministry": "内閣府",
+   "mofRowId": "mofsec_15382a9ba75787486bee",
+   "name": "物価高騰対応地方創生推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "075",
+   "failureDetail": "no exact hit in 3 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 4",
+   "ministry": "国土交通省",
+   "mofRowId": "mofsec_193fb4c527010152af99",
+   "name": "独立行政法人海技教育機構施設整備費",
+   "organization": "国土交通本省"
+  },
+  {
+   "code": "103",
+   "failureDetail": "no exact hit in 5 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 0",
+   "ministry": "内閣府",
+   "mofRowId": "mofsec_20768216a29faff4cb2b",
+   "name": "沖縄災害復旧事業工事諸費",
+   "organization": "沖縄総合事務局"
+  },
+  {
+   "code": "191",
+   "failureDetail": "no exact hit in 5 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 0",
+   "ministry": "内閣府",
+   "mofRowId": "mofsec_2a148145ba1d009966d1",
+   "name": "原子力災害対策費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "285",
+   "failureDetail": "no exact hit in 5 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 0",
+   "ministry": "内閣府",
+   "mofRowId": "mofsec_3040bed673a16cbdd2a6",
+   "name": "孤独・孤立対策推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "288",
+   "failureDetail": "no exact hit in 5 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 1",
+   "ministry": "内閣府",
+   "mofRowId": "mofsec_307a53794f1f268b498e",
+   "name": "地方創生地域産業基盤整備事業推進費",
+   "organization": "内閣本府"
+  },
+  {
+   "code": "164",
+   "failureDetail": "no exact hit in 7 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 0",
+   "ministry": "内閣府",
+   "mofRowId": "mofsec_32f0bed17034776ed799",
+   "name": "食品衛生基準政策費",
+   "organization": "消費者庁"
+  },
+  {
+   "code": "257",
+   "failureDetail": "no exact hit in 3 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 3",
+   "ministry": "国土交通省",
+   "mofRowId": "mofsec_4f340cb0609a31131fa1",
+   "name": "船舶交通安全基盤災害復旧事業費",
+   "organization": "海上保安庁"
+  },
+  {
+   "code": "009",
+   "failureDetail": "no exact hit in 1 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 0",
+   "ministry": "防衛省",
+   "mofRowId": "mofsec_5406be34c3c2668465b7",
+   "name": "令和6年度甲Ⅵ型警備艦建造費",
+   "organization": "防衛本省"
+  },
+  {
+   "code": "011",
+   "failureDetail": "no exact hit in 1 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 5",
+   "ministry": "外務省",
+   "mofRowId": "mofsec_894049e0460c15ac31e8",
+   "name": "独立行政法人国際交流基金施設整備費",
+   "organization": "外務本省"
+  },
+  {
+   "code": "065",
+   "failureDetail": "no exact hit in 7 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 1",
+   "ministry": "財務省",
+   "mofRowId": "mofsec_956eae3cff007e27507f",
+   "name": "貨幣回収準備資金へ繰入",
+   "organization": "財務本省"
+  },
+  {
+   "code": "081",
+   "failureDetail": "no exact hit in 5 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 0",
+   "ministry": "内閣府",
+   "mofRowId": "mofsec_ae06f02855cbd775c3af",
+   "name": "日本学術会議",
+   "organization": "日本学術会議"
+  },
+  {
+   "code": "377",
+   "failureDetail": "no exact hit in 3 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 0",
+   "ministry": "国土交通省",
+   "mofRowId": "mofsec_e218f0142967c6056c6e",
+   "name": "上下水道一体効率化・基盤強化推進事業費",
+   "organization": "国土交通本省"
+  },
+  {
+   "code": "198",
+   "failureDetail": "no exact hit in 3 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 0",
+   "ministry": "厚生労働省",
+   "mofRowId": "mofsec_e9844cb8a024e4488833",
+   "name": "昭和館施設費",
+   "organization": "厚生労働本省"
+  },
+  {
+   "code": "018",
+   "failureDetail": "no exact hit in 7 readable same-authority PDF(s); other-authority exact hits: 0; near-text (descriptive, not used for classification): 2",
+   "ministry": "財務省",
+   "mofRowId": "mofsec_f9b994d5e6d62fcbd1bc",
+   "name": "原油価格・物価高騰対策及び賃上げ促進環境整備対応予備費",
+   "organization": "財務本省"
+  }
+ ]
+}
