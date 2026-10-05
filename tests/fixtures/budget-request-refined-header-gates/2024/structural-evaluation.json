@@ -1,0 +1,385 @@
+{
+ "changedPagesAlternativeToRefined": {
+  "pages": 3,
+  "pdfs": 3
+ },
+ "decision": "HEADER_LABEL_INTRINSICALLY_NOT_BOUNDARY_SPECIFIC",
+ "frozen": {
+  "hashes": {
+   "docs/tasks/20261005_0930_Budget_Request_Page_Header_Label_Segment_Protocol.md": "fed6229169503ce7b1e167bba09a0dab35d67d72b1960cdc703386a1c55a5493",
+   "docs/tasks/20261005_1355_Budget_Request_Refined_Header_Structural_Gate_Reevaluation_Protocol.md": "649b6c44e1777d5cca1d07cc98bceac593a6b261ddb025bd4fc3c234a1173388",
+   "scripts/pipeline-v2/compare-budget-request-header-labels.ts": "658f0553b0f73c6cd2e06c75ba16decf3b0396eca730e0091e9066f3052f4676",
+   "scripts/pipeline-v2/evaluate-budget-request-alt-title-projection.ts": "de59c244b3fdab1dcfc1295002fb0f3347851d7b9fbc2f44e205b1e8c3dc997a",
+   "scripts/pipeline-v2/lib/budget-request-table-frame-eligibility.ts": "b43eab8b5e129b5755619c9ea3f037682a2d843dae8c4fbfb39535ab5bfffdf2",
+   "tests/fixtures/budget-request-alt-title-projection/2024/alt-title-projection.json": "cc071c770fb51a3bf6500a1a01937bbc427283865e3143552ebd7cc5b988c6cd",
+   "tests/fixtures/budget-request-alt-title-projection/2024/population-manifest.json": "ffac4a9d68c7fc4a2cd7883ecb89ed2c5f6009026dcc2fd2d24b6792d981c38d",
+   "tests/fixtures/budget-request-alt-title-projection/2024/primary-evaluation.json": "79e5a63ad474fbc0fdf497d59734072a97f1bfa58711346d53aadae75a6cff06",
+   "tests/fixtures/budget-request-alt-title-projection/2024/segment-structural-evaluation.json": "3eccc9ea6155d13290dd7dc3f25048ca00304eea1d7fed3115c4541323a7a005",
+   "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+   "tests/fixtures/budget-request-header-label/2024/header-label-projection.json": "9ff3b970d403d37aea3562cc0eb87a3ee07fca92cbd3bc03986c79b7b9c402e5",
+   "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+   "tests/fixtures/budget-request-label-candidate/2024/candidate-universe.json.gz": "429ad6c01c2e962c8a9eea65bcaac2c40fefed54cf941f6d08e90c00a26cb776",
+   "tests/fixtures/budget-request-layout-hierarchy-inventory/2024/layout-summary.json": "67808613ed7d0a0e0ef7df7be736473a88159306417254100e6241fe69d63266",
+   "tests/fixtures/budget-request-table-frame-refinement/2024/candidate-frame-relations.json.gz": "cfce15fe8fc529ccb3e32a949baf774edf79e0a9e6bad5c9567e3c645363936b",
+   "tests/fixtures/budget-request-table-frame-refinement/2024/refined-evaluation.json": "9100df1316115fbff0b196bb577ace812cf2f133b68e855fa68cd05ee80bb9dd"
+  },
+  "implementation": {
+   "gatesLib": "abbd94372f47b562af93ecc4b0d797c0fb6e544e9f2d4c04360a2aecb83fc078",
+   "script": "026b522f4a5224c8429e029f00c030bf66900016319ee5f07bf15653d9735882"
+  }
+ },
+ "gates": {
+  "G1": {
+   "allNonblankRatio": 0.9539639147074904,
+   "denominators": {
+    "all": 9145,
+    "nonDiscovery": 5066
+   },
+   "discoveryNonblankRatio": 0.9933807305712185,
+   "nonDiscoveryNonblankRatio": 0.9222266087643111,
+   "numerators": {
+    "all": 8724,
+    "nonDiscovery": 4672
+   },
+   "pass": true,
+   "threshold": ">= 0.5（corpus 全体と non-discovery の両方）"
+  },
+  "G3": {
+   "boundaries": [
+    {
+     "isLabelSegmentBoundary": true,
+     "key": "mext_start",
+     "layoutBoundary": false,
+     "ok": true
+    },
+    {
+     "isLabelSegmentBoundary": true,
+     "key": "mhlw_start",
+     "layoutBoundary": false,
+     "ok": true
+    },
+    {
+     "isLabelSegmentBoundary": true,
+     "key": "mhlw_end",
+     "layoutBoundary": false,
+     "ok": true
+    }
+   ],
+   "pass": true,
+   "threshold": "mext 開始・mhlw 開始・mhlw 終了のすべてが label segment の境界かつ layout 境界でない"
+  },
+  "G4": {
+   "mextOtherTransitions": 2,
+   "mhlwOtherTransitions": 7,
+   "pass": false,
+   "threshold": "<= 2 each"
+  },
+  "G5": {
+   "pass": true,
+   "pdfsParenthesizedMajority": 48,
+   "pdfsWithNonblank": 71,
+   "ratio": 0.676056338028169,
+   "threshold": ">= 0.5"
+  }
+ },
+ "gatesOnAlternativeForEquivalence": {
+  "G1": {
+   "allNonblankRatio": 0.9542919628212138,
+   "denominators": {
+    "all": 9145,
+    "nonDiscovery": 5066
+   },
+   "discoveryNonblankRatio": 0.9933807305712185,
+   "nonDiscoveryNonblankRatio": 0.9228187919463087,
+   "numerators": {
+    "all": 8727,
+    "nonDiscovery": 4675
+   },
+   "pass": true,
+   "threshold": ">= 0.5（corpus 全体と non-discovery の両方）"
+  },
+  "G4": {
+   "mextOtherTransitions": 2,
+   "mhlwOtherTransitions": 7,
+   "pass": false,
+   "threshold": "<= 2 each"
+  }
+ },
+ "manualBoundaryDiagnostic": [
+  {
+   "after": {
+    "label": "文(文)",
+    "status": "observed_nonblank"
+   },
+   "alternativeAt": {
+    "label": "文(文)",
+    "status": "observed_nonblank"
+   },
+   "at": {
+    "label": "文(文)",
+    "status": "observed_nonblank"
+   },
+   "before": {
+    "label": null,
+    "status": "observed_blank"
+   },
+   "boundary": "mext_start",
+   "layoutBoundary": false,
+   "page": 1045,
+   "provenance": {
+    "basis": "before_first_code_row",
+    "ref": [
+     0,
+     0,
+     2
+    ]
+   },
+   "segmentRelation": "label_segment_start"
+  },
+  {
+   "after": {
+    "label": "厚(地)",
+    "status": "observed_nonblank"
+   },
+   "alternativeAt": {
+    "label": "厚(地)",
+    "status": "observed_nonblank"
+   },
+   "at": {
+    "label": "厚(地)",
+    "status": "observed_nonblank"
+   },
+   "before": {
+    "label": "厚(障)",
+    "status": "observed_nonblank"
+   },
+   "boundary": "mhlw_start",
+   "layoutBoundary": false,
+   "page": 1555,
+   "provenance": {
+    "basis": "before_first_code_row",
+    "ref": [
+     0,
+     0,
+     2
+    ]
+   },
+   "segmentRelation": "label_segment_start"
+  },
+  {
+   "after": {
+    "label": "厚(中)",
+    "status": "observed_nonblank"
+   },
+   "alternativeAt": {
+    "label": "厚(労)",
+    "status": "observed_nonblank"
+   },
+   "at": {
+    "label": "厚(労)",
+    "status": "observed_nonblank"
+   },
+   "before": {
+    "label": "厚(労)",
+    "status": "observed_nonblank"
+   },
+   "boundary": "mhlw_end",
+   "layoutBoundary": false,
+   "page": 1700,
+   "provenance": {
+    "basis": "before_first_code_row",
+    "ref": [
+     0,
+     1,
+     0
+    ]
+   },
+   "segmentRelation": "label_segment_end"
+  }
+ ],
+ "manualContractRows": [
+  {
+   "endIsLabelSegmentEnd": false,
+   "endLayoutBoundary": false,
+   "interiorLabelTransitions": 0,
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "manual": [
+    7,
+    147
+   ],
+   "otherLabelTransitionsInPdf": 1,
+   "startIsLabelSegmentStart": true,
+   "startLayoutBoundary": true
+  },
+  {
+   "endIsLabelSegmentEnd": false,
+   "endLayoutBoundary": false,
+   "interiorLabelTransitions": 2,
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "manual": [
+    21,
+    193
+   ],
+   "otherLabelTransitionsInPdf": 3,
+   "startIsLabelSegmentStart": true,
+   "startLayoutBoundary": true
+  },
+  {
+   "endIsLabelSegmentEnd": true,
+   "endLayoutBoundary": true,
+   "interiorLabelTransitions": 0,
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "manual": [
+    7,
+    20
+   ],
+   "otherLabelTransitionsInPdf": 1,
+   "startIsLabelSegmentStart": false,
+   "startLayoutBoundary": true
+  },
+  {
+   "endIsLabelSegmentEnd": false,
+   "endLayoutBoundary": false,
+   "interiorLabelTransitions": 4,
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "manual": [
+    9,
+    106
+   ],
+   "otherLabelTransitionsInPdf": 5,
+   "startIsLabelSegmentStart": true,
+   "startLayoutBoundary": true
+  },
+  {
+   "endIsLabelSegmentEnd": false,
+   "endLayoutBoundary": false,
+   "interiorLabelTransitions": 1,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "manual": [
+    1045,
+    1339
+   ],
+   "otherLabelTransitionsInPdf": 2,
+   "startIsLabelSegmentStart": true,
+   "startLayoutBoundary": false
+  },
+  {
+   "endIsLabelSegmentEnd": true,
+   "endLayoutBoundary": false,
+   "interiorLabelTransitions": 1,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "manual": [
+    1555,
+    1700
+   ],
+   "otherLabelTransitionsInPdf": 7,
+   "startIsLabelSegmentStart": true,
+   "startLayoutBoundary": false
+  },
+  {
+   "endIsLabelSegmentEnd": false,
+   "endLayoutBoundary": false,
+   "interiorLabelTransitions": 0,
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "manual": [
+    7,
+    10
+   ],
+   "otherLabelTransitionsInPdf": 1,
+   "startIsLabelSegmentStart": true,
+   "startLayoutBoundary": true
+  },
+  {
+   "endIsLabelSegmentEnd": false,
+   "endLayoutBoundary": false,
+   "interiorLabelTransitions": 2,
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "manual": [
+    9,
+    540
+   ],
+   "otherLabelTransitionsInPdf": 3,
+   "startIsLabelSegmentStart": true,
+   "startLayoutBoundary": true
+  }
+ ],
+ "note": "入力 projection を alternative → refined に置き換えただけ。gate の式・threshold・segment algorithm は不変。manual contract は diagnostic のみ。label の意味は解釈しない",
+ "populationIntegrity": {
+  "accepted": {
+   "derived": 2529,
+   "frozen": 2529
+  },
+  "changedPagesVsCurrent": {
+   "derived": 2529,
+   "frozen": 2529
+  },
+  "currentNonblank": {
+   "derived": 6195,
+   "frozen": 6195
+  },
+  "currentNonblankChanged": {
+   "derived": 0,
+   "frozen": 0
+  },
+  "evaluablePages": {
+   "derived": 9145,
+   "frozen": 9145
+  },
+  "fidelityViolations": 0,
+  "gateEquivalenceWithFrozenAlternativeEvaluation": true,
+  "ok": true,
+  "provenanceMissing": 0,
+  "rejectedBodyOrTable": {
+   "derived": 2,
+   "frozen": 2
+  },
+  "rejectedUnavailable": {
+   "derived": 1,
+   "frozen": 1
+  },
+  "unresolved": {
+   "derived": 5,
+   "frozen": 5
+  }
+ },
+ "rule": 2,
+ "schema": "budget-request-refined-header-structural-evaluation/v0",
+ "segmentComparison": {
+  "alternative": {
+   "allSegments": 467,
+   "blankMediatedDifferentLabel": 85,
+   "blankMediatedSameLabel": 39,
+   "directLabelTransitions": 127,
+   "labelSegments": 330,
+   "mextSegments": 5,
+   "mhlwSegments": 11,
+   "observedBlank": 418,
+   "observedNonblank": 8727,
+   "sameLabelNonContiguousRecurrence": 64
+  },
+  "current": {
+   "allSegments": 5482,
+   "blankMediatedDifferentLabel": 114,
+   "blankMediatedSameLabel": 2529,
+   "directLabelTransitions": 96,
+   "labelSegments": 2818,
+   "mextSegments": 904,
+   "mhlwSegments": 911,
+   "observedBlank": 2950,
+   "observedNonblank": 6195,
+   "sameLabelNonContiguousRecurrence": 2554
+  },
+  "refined": {
+   "allSegments": 464,
+   "blankMediatedDifferentLabel": 83,
+   "blankMediatedSameLabel": 39,
+   "directLabelTransitions": 127,
+   "labelSegments": 328,
+   "mextSegments": 5,
+   "mhlwSegments": 11,
+   "observedBlank": 421,
+   "observedNonblank": 8724,
+   "sameLabelNonContiguousRecurrence": 64
+  }
+ }
+}

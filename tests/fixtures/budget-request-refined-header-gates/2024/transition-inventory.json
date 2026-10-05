@@ -1,0 +1,174 @@
+{
+ "changedPagesAlternativeToRefined": [
+  {
+   "labelSegmentsAfter": 4,
+   "labelSegmentsBefore": 4,
+   "localPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+   "new": {
+    "label": null,
+    "status": "observed_blank"
+   },
+   "old": {
+    "basis": "label_on_first_code_row",
+    "label": "内(取)",
+    "status": "observed_nonblank"
+   },
+   "page": 140,
+   "tableFrameRelation": "unavailable"
+  },
+  {
+   "labelSegmentsAfter": 1,
+   "labelSegmentsBefore": 2,
+   "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "new": {
+    "label": "",
+    "status": "observed_blank"
+   },
+   "old": {
+    "basis": "label_on_first_code_row",
+    "label": "国民健康保険助成費(社会福祉費)",
+    "status": "observed_nonblank"
+   },
+   "page": 66,
+   "tableFrameRelation": "body_or_table_position_supported"
+  },
+  {
+   "labelSegmentsAfter": 1,
+   "labelSegmentsBefore": 2,
+   "localPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+   "new": {
+    "label": "",
+    "status": "observed_blank"
+   },
+   "old": {
+    "basis": "label_on_first_code_row",
+    "label": "増員要求に伴う経費(新規増員)",
+    "status": "observed_nonblank"
+   },
+   "page": 18,
+   "tableFrameRelation": "body_or_table_position_supported"
+  }
+ ],
+ "g4TransitionInventory": [
+  {
+   "count": 2,
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "manual": [
+    1045,
+    1339
+   ],
+   "transitions": [
+    {
+     "afterLabel": "文(所)",
+     "beforeKind": "label",
+     "beforeLabel": "文(本)",
+     "beforeState": "文(本)",
+     "inAlternative": true,
+     "inCurrent": false,
+     "newInRefined": false,
+     "page": 896,
+     "transitionType": "direct_label_to_label"
+    },
+    {
+     "afterLabel": "文(ス)",
+     "beforeKind": "label",
+     "beforeLabel": "文(文)",
+     "beforeState": "文(文)",
+     "inAlternative": true,
+     "inCurrent": true,
+     "newInRefined": false,
+     "page": 1260,
+     "transitionType": "direct_label_to_label"
+    }
+   ]
+  },
+  {
+   "count": 7,
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "manual": [
+    1555,
+    1700
+   ],
+   "transitions": [
+    {
+     "afterLabel": "厚",
+     "beforeKind": "blank",
+     "beforeLabel": null,
+     "beforeState": "observed_blank",
+     "inAlternative": true,
+     "inCurrent": true,
+     "newInRefined": false,
+     "page": 9,
+     "transitionType": "after_blank"
+    },
+    {
+     "afterLabel": "厚(本)",
+     "beforeKind": "label",
+     "beforeLabel": "厚",
+     "beforeState": "厚",
+     "inAlternative": true,
+     "inCurrent": true,
+     "newInRefined": false,
+     "page": 21,
+     "transitionType": "direct_label_to_label"
+    },
+    {
+     "afterLabel": "厚(検)",
+     "beforeKind": "label",
+     "beforeLabel": "厚(本)",
+     "beforeState": "厚(本)",
+     "inAlternative": true,
+     "inCurrent": true,
+     "newInRefined": false,
+     "page": 1228,
+     "transitionType": "direct_label_to_label"
+    },
+    {
+     "afterLabel": "厚(ハ)",
+     "beforeKind": "label",
+     "beforeLabel": "厚(検)",
+     "beforeState": "厚(検)",
+     "inAlternative": true,
+     "inCurrent": true,
+     "newInRefined": false,
+     "page": 1256,
+     "transitionType": "direct_label_to_label"
+    },
+    {
+     "afterLabel": "厚(試)",
+     "beforeKind": "label",
+     "beforeLabel": "厚(ハ)",
+     "beforeState": "厚(ハ)",
+     "inAlternative": true,
+     "inCurrent": true,
+     "newInRefined": false,
+     "page": 1281,
+     "transitionType": "direct_label_to_label"
+    },
+    {
+     "afterLabel": "厚(障)",
+     "beforeKind": "label",
+     "beforeLabel": "厚(試)",
+     "beforeState": "厚(試)",
+     "inAlternative": true,
+     "inCurrent": true,
+     "newInRefined": false,
+     "page": 1470,
+     "transitionType": "direct_label_to_label"
+    },
+    {
+     "afterLabel": "厚(労)",
+     "beforeKind": "label",
+     "beforeLabel": "厚(地)",
+     "beforeState": "厚(地)",
+     "inAlternative": true,
+     "inCurrent": true,
+     "newInRefined": false,
+     "page": 1603,
+     "transitionType": "direct_label_to_label"
+    }
+   ]
+  }
+ ],
+ "schema": "budget-request-refined-header-transition-inventory/v0"
+}
