@@ -26,7 +26,7 @@ label segment 2,818（長さ 1 page が 2,702、10 page 以上が 60）。label�
 label segment の開始 2,739 件のうち layout range の境界と一致するのは 86（直接 15・blank 経由 71）、layout range の内部 2,508、layout 判定不能 145。逆に layout 境界 110 のうち、label transition を伴うもの 15、同一 label のまま 6、blank / unavailable を伴うもの 89。→ label segment は layout range の細分で、layout 境界の大半は blank page に隣接する。一致率の高低は semantic の根拠にしない。
 
 ## Manual contract relation（discovery 8 PDF）
-manual 開始・終了が label segment の開始・終了 page と一致するのは、layout 境界で説明できない 3 境界（mext 開始 1045・mhlw 開始 1555・mhlw 終了 1700）で 3/3（G3 通過）。layout 境界と manual 境界が一致する 6 PDF では、label の開始が layout 開始と同じ page に出ており（cfa・env・meti・mod・mlit・maff）、label が追加情報か layout との共起かは区別できない（label は layout を上回る境界情報を与えていない）。manual 境界以外の label transition は PDF 全体で mext 451・mhlw 457（G4 の ≤ 2 を満たさない）。
+manual 開始・終了が label segment の開始・終了 page と一致するのは、layout 境界で説明できない 3 境界（mext 開始 1045・mhlw 開始 1555・mhlw 終了 1700）で 3/3（G3 通過）。layout 境界と manual 境界が一致する 6 PDF では、label segment の開始が layout 開始と同じ page に出るのは 5 PDF（cfa・env・meti・mod・mlit）で、maff は manual 開始が label segment の開始でない（終了のみ一致）、label が追加情報か layout との共起かは区別できない（label は layout を上回る境界情報を与えていない）。manual 境界以外の label transition は PDF 全体で mext 451・mhlw 457（G4 の ≤ 2 を満たさない）。
 
 ## mext
 layout range 1-1339、manual 1045-1339。label segment は 904。manual 開始は label `文(文)` の segment の開始で、直前は空 title の page 1044（blank は bridge しない）。blank を挟んで別 label になる transition は `文(所)`→blank→`文(文)`。manual range 内部の直接 label→label transition は 1（`文(文)`→`文(ス)`、page 1260）。manual 終了 1339 は文書の最終 page。transition の大半は page 92 以降の偶数 page の blank 1 page と label の交互。manual 開始の transition は blank を挟む点で、他の「blank を挟む 450 の交互」と構造的には区別できない（違いは前後の label が異なること）。
