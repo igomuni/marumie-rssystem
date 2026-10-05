@@ -1,0 +1,9 @@
+{
+ "artifacts": {
+  "scripts/pipeline-v2/lib/budget-request-rule-line-item-population.ts": "d0ef587ffc9c76e7e8785c63fe93e3a7ee73b17736ebf17e073e714e14fbe247",
+  "scripts/pipeline-v2/run-budget-request-rule-line-item-phase-a.ts": "39ad517f471a15c8897c352877d9f0faaaa9b7ad66d1419a2fd6ba7e9927fd2a",
+  "tests/fixtures/budget-request-rule-line-item-population/2024/phaseA-candidates.jsonl.gz": "f5e36b1664fc50d8069093859e27849fb7b7d3e1aea5a339a926b0c38af42156",
+  "tests/fixtures/budget-request-rule-line-item-population/2024/phaseA-summary.json": "410e9383f48d0876c21832fdcd6815980859c3cb13887edd5a10fdb9a1332a5f"
+ },
+ "note": "Phase A freeze\uff08gate pass\u3001byte \u4e00\u81f4\u306e\u518d\u5b9f\u884c\u3067\u78ba\u8a8d\uff09\u3002Phase B \u306f\u3053\u306e hash \u3092\u691c\u67fb\u3059\u308b"
+}
