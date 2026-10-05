@@ -1,0 +1,4944 @@
+{
+ "completeSeparators": [
+  "clusterFirstSupportPosition",
+  "clusterLastSupportPosition",
+  "clusterSupportPageSpan",
+  "layoutRangeId",
+  "layoutRangeLength"
+ ],
+ "decision": {
+  "decision": "HEADER_SUPPORT_PROVENANCE_STRUCTURALLY_DISTINCT",
+  "rule": "D1"
+ },
+ "duplicates": 0,
+ "featureCatalog": [
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "categorical",
+   "name": "charClassSignature"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "categorical",
+   "name": "clusterExtent"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterFirstSupportPosition"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterGapCount"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterLastSupportPosition"
+  },
+  {
+   "circular": false,
+   "family": "F2",
+   "kind": "binned",
+   "name": "clusterLayoutRangeCount"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterLayoutRangeCountF6"
+  },
+  {
+   "circular": false,
+   "family": "F2",
+   "kind": "categorical",
+   "name": "clusterLayoutSingleRange"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterMaxGap"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterNodeCount"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterNonRequestSupport"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterPageCount"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterPdfCount"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterRequestShapedSupport"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "binned",
+   "name": "clusterRunCount"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "binned",
+   "name": "clusterRunId"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "binned",
+   "name": "clusterRunPageLength"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "categorical",
+   "name": "clusterSupportContiguous"
+  },
+  {
+   "circular": false,
+   "family": "F6",
+   "kind": "binned",
+   "name": "clusterSupportDensity"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "binned",
+   "name": "clusterSupportPageCount"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "binned",
+   "name": "clusterSupportPageSpan"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "categorical",
+   "name": "codeShaped"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "binned",
+   "name": "codeTokenLength"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "categorical",
+   "name": "firstTokenClass"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "categorical",
+   "name": "followingTokenExists"
+  },
+  {
+   "circular": false,
+   "family": "F3",
+   "kind": "categorical",
+   "name": "frameAvailable"
+  },
+  {
+   "circular": false,
+   "family": "F3",
+   "kind": "categorical",
+   "name": "frozenRelation"
+  },
+  {
+   "circular": true,
+   "family": "circular",
+   "kind": "descriptive",
+   "name": "keyTokenXMin"
+  },
+  {
+   "circular": false,
+   "family": "F2",
+   "kind": "categorical",
+   "name": "layoutDetailRange"
+  },
+  {
+   "circular": false,
+   "family": "F2",
+   "kind": "categorical",
+   "name": "layoutRangeId"
+  },
+  {
+   "circular": false,
+   "family": "F2",
+   "kind": "binned",
+   "name": "layoutRangeLength"
+  },
+  {
+   "circular": false,
+   "family": "F2",
+   "kind": "binned",
+   "name": "layoutRangePagePosition"
+  },
+  {
+   "circular": false,
+   "family": "F2",
+   "kind": "categorical",
+   "name": "layoutSignature"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "next1PageBreak"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "binned",
+   "name": "next1RowDistance"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "next1RowShape"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "next1XRelation"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "next2PageBreak"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "binned",
+   "name": "next2RowDistance"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "next2RowShape"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "next2XRelation"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "next3PageBreak"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "binned",
+   "name": "next3RowDistance"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "next3RowShape"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "next3XRelation"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "binned",
+   "name": "normalizedPagePosition"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "categorical",
+   "name": "numericOnlyCode"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "descriptive",
+   "name": "page"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "binned",
+   "name": "pageHierarchyNodeCount"
+  },
+  {
+   "circular": false,
+   "family": "F1",
+   "kind": "binned",
+   "name": "pageNodeOrdinal"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "categorical",
+   "name": "plain3Code"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "prev1PageBreak"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "binned",
+   "name": "prev1RowDistance"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "prev1RowShape"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "prev1XRelation"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "prev2PageBreak"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "binned",
+   "name": "prev2RowDistance"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "prev2RowShape"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "prev2XRelation"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "prev3PageBreak"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "binned",
+   "name": "prev3RowDistance"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "prev3RowShape"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "prev3XRelation"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "categorical",
+   "name": "requestShaped"
+  },
+  {
+   "circular": false,
+   "family": "F3",
+   "kind": "descriptive",
+   "name": "rowBottom"
+  },
+  {
+   "circular": false,
+   "family": "F3",
+   "kind": "binned",
+   "name": "rowBottomMinusFrameBottom"
+  },
+  {
+   "circular": false,
+   "family": "F3",
+   "kind": "binned",
+   "name": "rowBottomMinusFrameTop"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "binned",
+   "name": "rowCharCount"
+  },
+  {
+   "circular": true,
+   "family": "F3",
+   "kind": "descriptive",
+   "name": "rowLeft"
+  },
+  {
+   "circular": true,
+   "family": "F3",
+   "kind": "binned",
+   "name": "rowLeftMinusFrameLeft"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "binned",
+   "name": "rowNormalizedCharCount"
+  },
+  {
+   "circular": true,
+   "family": "F3",
+   "kind": "descriptive",
+   "name": "rowRight"
+  },
+  {
+   "circular": true,
+   "family": "F3",
+   "kind": "binned",
+   "name": "rowRightMinusFrameRight"
+  },
+  {
+   "circular": false,
+   "family": "F4",
+   "kind": "binned",
+   "name": "rowTokenCount"
+  },
+  {
+   "circular": false,
+   "family": "F3",
+   "kind": "descriptive",
+   "name": "rowTop"
+  },
+  {
+   "circular": false,
+   "family": "F3",
+   "kind": "binned",
+   "name": "rowTopMinusFrameTop"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "binned",
+   "name": "sameXRunLength"
+  },
+  {
+   "circular": false,
+   "family": "F5",
+   "kind": "categorical",
+   "name": "sameXRunPosition"
+  },
+  {
+   "circular": true,
+   "family": "circular",
+   "kind": "descriptive",
+   "name": "t2ClusterIndex"
+  }
+ ],
+ "frozen": {
+  "docs/tasks/20261005_1815_Budget_Request_Header_Support_Provenance_Isolation_Protocol.md": "9e0da7875ba722463eec2050235a37fe5a397dc2aa42bee6a929b0022466487a",
+  "scripts/pipeline-v2/lib/budget-request-cluster-provenance.ts": "d8f24f672c537e5fcf27482f83c8c3c312f0076215b460fcb7506cb969183764",
+  "scripts/pipeline-v2/lib/budget-request-document-hierarchy-v2.ts": "4372d9ff13e127c69976f1018bb1f41c1cf691ad5eee8b6cdef439ea311eea1d",
+  "scripts/pipeline-v2/lib/budget-request-field-resolver-runs.ts": "d2686cf42660c0ea8593045e40cf8ae3d618a7740b882820eb86c7c4b7a392b5",
+  "scripts/pipeline-v2/lib/budget-request-field-resolver.ts": "758eb8f6afdf45bd39c9853623201a4afbac8e8d6883626149d889335c2bb224",
+  "scripts/pipeline-v2/lib/budget-request-p1-outlier.ts": "9cb749d2a3b80f1e71ff3993f9db77e57c723f552c56e1ea5d3a88a11637e5d4",
+  "scripts/pipeline-v2/lib/budget-request-table-eligibility-frame.ts": "802796e97f2d5d644f60667e91f3201184c41475e3ecc42939b54b540b43a2b9",
+  "scripts/pipeline-v2/lib/budget-request-table-frame-eligibility.ts": "b43eab8b5e129b5755619c9ea3f037682a2d843dae8c4fbfb39535ab5bfffdf2",
+  "tests/fixtures/budget-request-hierarchy-failure-isolation/2024/paired-manifest.json": "4fb70f3ab49c6a823cd45dad8c05d6b395f6fffb8ab9ca8009b196445616d5e1",
+  "tests/fixtures/budget-request-layout-hierarchy-inventory/2024/layout-summary.json": "67808613ed7d0a0e0ef7df7be736473a88159306417254100e6241fe69d63266",
+  "tests/fixtures/budget-request-level-frame-cluster-provenance/2024/phaseA-support-nodes.jsonl.gz": "fef26771118722adf35d9f367b4bdab03c0897c8f5f8efeecb9fdc3b4ee34b6e",
+  "tests/fixtures/budget-request-level-frame-table-eligibility/2024/phaseA-node-relations.jsonl.gz": "21f167c30d5f3ac51821de36bc3f53e87df88718c90474fba7eae6f44a46dcea",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/range-manifest.json": "3e00df693627e1bb22274c291694ac1aed2c079daf758ceda5af084da217201e"
+ },
+ "gates": {
+  "A1_P1_900_450_450": true,
+  "A2_populations_unique_and_disjoint": true,
+  "A3_duplicate_node_id_zero": true,
+  "A4_unjoinable_zero": true,
+  "A5_provenance_loss_zero": true,
+  "A6_frozen_classifier_layout_hash": true,
+  "A9_production_hash_frozen": true,
+  "T2_node_universe_matches_frozen": true
+ },
+ "nodeFeaturesGzSha256": "18045cb66d99d7c5b43bbeb210154831c1a9c31dcb95e5388a5e34b35019d8fd",
+ "note": "source-only。C0・manual range・MOF・L/P/K・T3・T4 downstream outcome は未参照。circular feature は separator 判定から除外",
+ "populationByPdf": {
+  "P1": {
+   "05-1b-01.pdf": 450,
+   "20230914-mxt_kaikesou01-000031817_03.pdf": 450
+  },
+  "P2": {
+   "000157010.pdf": 45,
+   "20230907_policies_budget_04.pdf": 22,
+   "gaisanyoukyu.pdf": 219,
+   "ippan_o.pdf": 2
+  },
+  "P3": {
+   "000157010.pdf": 464,
+   "001630395.pdf": 33,
+   "20230907_policies_budget_04.pdf": 175,
+   "230901-4.pdf": 68,
+   "gaisanyoukyu.pdf": 557,
+   "ippan_o.pdf": 392
+  },
+  "P4": {
+   "05-1b-01.pdf": 51
+  }
+ },
+ "populationCounts": {
+  "P1": 900,
+  "P2": 288,
+  "P3": 1689,
+  "P4": 51
+ },
+ "primaryComparison": [
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.090535,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0.318841,
+    "ippan_o.pdf": 0.076923
+   },
+   "name": "charClassSignature",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "hphp": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "hpkp": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "hphp": 219
+    },
+    "ippan_o.pdf": {
+     "hphp": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "hphp",
+     "tvd": 0.076389
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "hphp",
+     "tvd": 0.076389
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.076389,
+   "valueSetP1": [
+    "hphp"
+   ],
+   "valueSetP2": [
+    "hphp",
+    "hpkp"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "clusterExtent",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "multi_run": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "multi_run": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "multi_run": 219
+    },
+    "ippan_o.pdf": {
+     "multi_run": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "multi_run",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "multi_run",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "multi_run"
+   ],
+   "valueSetP2": [
+    "multi_run"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": true,
+   "disjointCombined": true,
+   "distinct": 5,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 1,
+    "20230907_policies_budget_04.pdf": 1,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 1
+   },
+   "name": "clusterFirstSupportPosition",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "r4": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "r6": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "r1": 219
+    },
+    "ippan_o.pdf": {
+     "r9": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": "r0",
+     "tvd": 1
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": "r0",
+     "tvd": 1
+    }
+   },
+   "strongPartial": false,
+   "tvd": 1,
+   "valueSetP1": [
+    "r0"
+   ],
+   "valueSetP2": [
+    "r1",
+    "r4",
+    "r6",
+    "r9"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.098765,
+    "20230907_policies_budget_04.pdf": 0.176692,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 0.234266
+   },
+   "name": "clusterGapCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[20,50)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[20,50)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[200,500)": 219
+    },
+    "ippan_o.pdf": {
+     "[1,2)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.239583,
+   "valueSetP1": [
+    "[200,500)"
+   ],
+   "valueSetP2": [
+    "[1,2)",
+    "[20,50)",
+    "[200,500)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": true,
+   "disjointCombined": true,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 1,
+    "20230907_policies_budget_04.pdf": 1,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 1
+   },
+   "name": "clusterLastSupportPosition",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "r9": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "r9": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "r9": 219
+    },
+    "ippan_o.pdf": {
+     "r9": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": "r5",
+     "tvd": 1
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": "r7",
+     "tvd": 1
+    }
+   },
+   "strongPartial": false,
+   "tvd": 1,
+   "valueSetP1": [
+    "r5",
+    "r7"
+   ],
+   "valueSetP2": [
+    "r9"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F2",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.901235,
+    "20230907_policies_budget_04.pdf": 0.823308,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0.765734
+   },
+   "name": "clusterLayoutRangeCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[1,2)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[1,2)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[2,3)": 219
+    },
+    "ippan_o.pdf": {
+     "[1,2)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0.760417
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0.760417
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.760417,
+   "valueSetP1": [
+    "[1,2)"
+   ],
+   "valueSetP2": [
+    "[1,2)",
+    "[2,3)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.901235,
+    "20230907_policies_budget_04.pdf": 0.823308,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0.765734
+   },
+   "name": "clusterLayoutRangeCountF6",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[1,2)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[1,2)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[2,3)": 219
+    },
+    "ippan_o.pdf": {
+     "[1,2)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0.760417
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0.760417
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.760417,
+   "valueSetP1": [
+    "[1,2)"
+   ],
+   "valueSetP2": [
+    "[1,2)",
+    "[2,3)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F2",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.901235,
+    "20230907_policies_budget_04.pdf": 0.823308,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0.765734
+   },
+   "name": "clusterLayoutSingleRange",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "false": 219
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0.760417
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0.760417
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.760417,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "false",
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "clusterMaxGap",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[1,2)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[1,2)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[1,2)": 219
+    },
+    "ippan_o.pdf": {
+     "[1,2)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[1,2)"
+   ],
+   "valueSetP2": [
+    "[1,2)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.098765,
+    "20230907_policies_budget_04.pdf": 0.176692,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 0.234266
+   },
+   "name": "clusterNodeCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[20,50)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[20,50)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[200,500)": 219
+    },
+    "ippan_o.pdf": {
+     "[2,3)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.239583,
+   "valueSetP1": [
+    "[200,500)"
+   ],
+   "valueSetP2": [
+    "[2,3)",
+    "[20,50)",
+    "[200,500)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.098765,
+    "20230907_policies_budget_04.pdf": 0.176692,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 0.234266
+   },
+   "name": "clusterNonRequestSupport",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[20,50)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[20,50)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[200,500)": 219
+    },
+    "ippan_o.pdf": {
+     "[2,3)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.239583,
+   "valueSetP1": [
+    "[200,500)"
+   ],
+   "valueSetP2": [
+    "[2,3)",
+    "[20,50)",
+    "[200,500)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.098765,
+    "20230907_policies_budget_04.pdf": 0.176692,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 0.234266
+   },
+   "name": "clusterPageCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[20,50)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[20,50)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[200,500)": 219
+    },
+    "ippan_o.pdf": {
+     "[2,3)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.239583,
+   "valueSetP1": [
+    "[200,500)"
+   ],
+   "valueSetP2": [
+    "[2,3)",
+    "[20,50)",
+    "[200,500)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "clusterPdfCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[1,2)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[1,2)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[1,2)": 219
+    },
+    "ippan_o.pdf": {
+     "[1,2)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[1,2)"
+   ],
+   "valueSetP2": [
+    "[1,2)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "clusterRequestShapedSupport",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[0,1)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[0,1)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[0,1)": 219
+    },
+    "ippan_o.pdf": {
+     "[0,1)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[0,1)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[0,1)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[0,1)"
+   ],
+   "valueSetP2": [
+    "[0,1)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F1",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.098765,
+    "20230907_policies_budget_04.pdf": 0.176692,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 0.234266
+   },
+   "name": "clusterRunCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[20,50)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[20,50)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[200,500)": 219
+    },
+    "ippan_o.pdf": {
+     "[2,3)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.239583,
+   "valueSetP1": [
+    "[200,500)"
+   ],
+   "valueSetP2": [
+    "[2,3)",
+    "[20,50)",
+    "[200,500)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 10,
+   "eligibleForSeparator": true,
+   "family": "F1",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.477366,
+    "20230907_policies_budget_04.pdf": 0.484127,
+    "gaisanyoukyu.pdf": 0.888889,
+    "ippan_o.pdf": 0.489122
+   },
+   "name": "clusterRunId",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[0,1)": 1,
+     "[1,2)": 1,
+     "[10,20)": 10,
+     "[2,3)": 1,
+     "[20,50)": 25,
+     "[3,5)": 2,
+     "[5,10)": 5
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[0,1)": 1,
+     "[1,2)": 1,
+     "[10,20)": 10,
+     "[2,3)": 1,
+     "[20,50)": 2,
+     "[3,5)": 2,
+     "[5,10)": 5
+    },
+    "gaisanyoukyu.pdf": {
+     "[0,1)": 1,
+     "[1,2)": 1,
+     "[10,20)": 10,
+     "[100,200)": 100,
+     "[2,3)": 1,
+     "[20,50)": 30,
+     "[200,500)": 19,
+     "[3,5)": 2,
+     "[5,10)": 5,
+     "[50,100)": 50
+    },
+    "ippan_o.pdf": {
+     "[0,1)": 1,
+     "[1,2)": 1
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.489583
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.489583
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.489583,
+   "valueSetP1": [
+    "[0,1)",
+    "[1,2)",
+    "[10,20)",
+    "[100,200)",
+    "[2,3)",
+    "[20,50)",
+    "[200,500)",
+    "[3,5)",
+    "[5,10)",
+    "[50,100)"
+   ],
+   "valueSetP2": [
+    "[0,1)",
+    "[1,2)",
+    "[10,20)",
+    "[100,200)",
+    "[2,3)",
+    "[20,50)",
+    "[200,500)",
+    "[3,5)",
+    "[5,10)",
+    "[50,100)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F1",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "clusterRunPageLength",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[1,2)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[1,2)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[1,2)": 219
+    },
+    "ippan_o.pdf": {
+     "[1,2)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[1,2)"
+   ],
+   "valueSetP2": [
+    "[1,2)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F1",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "clusterSupportContiguous",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "false": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "false": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "false": 219
+    },
+    "ippan_o.pdf": {
+     "false": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "false",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "false",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "false"
+   ],
+   "valueSetP2": [
+    "false"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F6",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "clusterSupportDensity",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[1,1.5)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[1,1.5)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[1,1.5)": 219
+    },
+    "ippan_o.pdf": {
+     "[1,1.5)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[1,1.5)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[1,1.5)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[1,1.5)"
+   ],
+   "valueSetP2": [
+    "[1,1.5)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F1",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.098765,
+    "20230907_policies_budget_04.pdf": 0.176692,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 0.234266
+   },
+   "name": "clusterSupportPageCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[20,50)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[20,50)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[200,500)": 219
+    },
+    "ippan_o.pdf": {
+     "[2,3)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[200,500)",
+     "tvd": 0.239583
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.239583,
+   "valueSetP1": [
+    "[200,500)"
+   ],
+   "valueSetP2": [
+    "[2,3)",
+    "[20,50)",
+    "[200,500)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": true,
+   "disjointCombined": true,
+   "distinct": 5,
+   "eligibleForSeparator": true,
+   "family": "F1",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 1,
+    "20230907_policies_budget_04.pdf": 1,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 1
+   },
+   "name": "clusterSupportPageSpan",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[50,100)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[20,50)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[200,500)": 219
+    },
+    "ippan_o.pdf": {
+     "[3,5)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": "[500,1000)",
+     "tvd": 1
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": "[500,1000)",
+     "tvd": 1
+    }
+   },
+   "strongPartial": false,
+   "tvd": 1,
+   "valueSetP1": [
+    "[500,1000)"
+   ],
+   "valueSetP2": [
+    "[20,50)",
+    "[200,500)",
+    "[3,5)",
+    "[50,100)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "codeShaped",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "true": 219
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "codeTokenLength",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[3,5)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[3,5)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[3,5)": 219
+    },
+    "ippan_o.pdf": {
+     "[3,5)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[3,5)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[3,5)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[3,5)"
+   ],
+   "valueSetP2": [
+    "[3,5)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "firstTokenClass",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "code3_then_text": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "code3_then_text": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "code3_then_text": 219
+    },
+    "ippan_o.pdf": {
+     "code3_then_text": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "code3_then_text"
+   ],
+   "valueSetP2": [
+    "code3_then_text"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "followingTokenExists",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "true": 219
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F3",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "frameAvailable",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "true": 219
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F3",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "frozenRelation",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "header_position_supported": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "header_position_supported": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "header_position_supported": 219
+    },
+    "ippan_o.pdf": {
+     "header_position_supported": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "header_position_supported",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "header_position_supported",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "header_position_supported"
+   ],
+   "valueSetP2": [
+    "header_position_supported"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": true,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": false,
+   "family": "circular",
+   "ineligibleReason": "circular",
+   "kind": "descriptive",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "keyTokenXMin",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 0.996528,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F2",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "layoutDetailRange",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "true": 218
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": true,
+   "disjointCombined": true,
+   "distinct": 7,
+   "eligibleForSeparator": true,
+   "family": "F2",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 1,
+    "20230907_policies_budget_04.pdf": 1,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 1
+   },
+   "name": "layoutRangeId",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "21-193": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "7-147": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "9-540": 218,
+     "unassigned": 1
+    },
+    "ippan_o.pdf": {
+     "9-106": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": "21-1723",
+     "tvd": 1
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": "1-1339",
+     "tvd": 1
+    }
+   },
+   "strongPartial": false,
+   "tvd": 1,
+   "valueSetP1": [
+    "1-1339",
+    "21-1723"
+   ],
+   "valueSetP2": [
+    "21-193",
+    "7-147",
+    "9-106",
+    "9-540",
+    "unassigned"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 0.996528,
+   "circular": false,
+   "complete": true,
+   "disjointCombined": true,
+   "distinct": 4,
+   "eligibleForSeparator": true,
+   "family": "F2",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 1,
+    "20230907_policies_budget_04.pdf": 1,
+    "gaisanyoukyu.pdf": 1,
+    "ippan_o.pdf": 1
+   },
+   "name": "layoutRangeLength",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[100,200)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[100,200)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[500,1000)": 218
+    },
+    "ippan_o.pdf": {
+     "[50,100)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": "[1000,∞)",
+     "tvd": 1
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": "[1000,∞)",
+     "tvd": 1
+    }
+   },
+   "strongPartial": false,
+   "tvd": 1,
+   "valueSetP1": [
+    "[1000,∞)"
+   ],
+   "valueSetP2": [
+    "[100,200)",
+    "[50,100)",
+    "[500,1000)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 0.996528,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 10,
+   "eligibleForSeparator": true,
+   "family": "F2",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.432746,
+    "20230907_policies_budget_04.pdf": 0.431405,
+    "gaisanyoukyu.pdf": 0.736135,
+    "ippan_o.pdf": 0.463977
+   },
+   "name": "layoutRangePagePosition",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "r4": 2,
+     "r5": 9,
+     "r6": 8,
+     "r7": 9,
+     "r8": 8,
+     "r9": 9
+    },
+    "20230907_policies_budget_04.pdf": {
+     "r6": 1,
+     "r7": 7,
+     "r8": 7,
+     "r9": 7
+    },
+    "gaisanyoukyu.pdf": {
+     "r1": 6,
+     "r2": 27,
+     "r3": 26,
+     "r4": 27,
+     "r5": 26,
+     "r6": 26,
+     "r7": 26,
+     "r8": 27,
+     "r9": 27
+    },
+    "ippan_o.pdf": {
+     "r9": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "r1",
+     "tvd": 0.571429
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "r1",
+     "tvd": 0.389477
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.466984,
+   "valueSetP1": [
+    "r0",
+    "r1",
+    "r2",
+    "r3",
+    "r4",
+    "r5",
+    "r6",
+    "r7"
+   ],
+   "valueSetP2": [
+    "r1",
+    "r2",
+    "r3",
+    "r4",
+    "r5",
+    "r6",
+    "r7",
+    "r8",
+    "r9"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 0.996528,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F2",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "layoutSignature",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "H:w842|p207|r259|d414|R:66": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "H:w842|p207|r259|d414|R:66": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "H:w842|p207|r259|d414|R:66": 218
+    },
+    "ippan_o.pdf": {
+     "H:w842|p207|r259|d414|R:66": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "H:w842|p207|r259|d414|R:66",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "H:w842|p207|r259|d414|R:66",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "H:w842|p207|r259|d414|R:66"
+   ],
+   "valueSetP2": [
+    "H:w842|p207|r259|d414|R:66"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.080782,
+    "20230907_policies_budget_04.pdf": 0.051186,
+    "gaisanyoukyu.pdf": 0.087585,
+    "ippan_o.pdf": 0.05258
+   },
+   "name": "next1PageBreak",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "false": 29,
+     "true": 16
+    },
+    "20230907_policies_budget_04.pdf": {
+     "false": 11,
+     "true": 11
+    },
+    "gaisanyoukyu.pdf": {
+     "false": 94,
+     "no_neighbor": 1,
+     "true": 124
+    },
+    "ippan_o.pdf": {
+     "false": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "false",
+     "tvd": 0.107778
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0.013472
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.048889,
+   "valueSetP1": [
+    "false",
+    "true"
+   ],
+   "valueSetP2": [
+    "false",
+    "no_neighbor",
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 0.521111,
+   "availabilityP2": 0.472222,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 5,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.176773,
+    "20230907_policies_budget_04.pdf": 0.177296,
+    "gaisanyoukyu.pdf": 0.190832,
+    "ippan_o.pdf": 0.188699
+   },
+   "name": "next1RowDistance",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[10,20)": 8,
+     "[20,50)": 10,
+     "[3,5)": 6,
+     "[5,10)": 5
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[10,20)": 3,
+     "[20,50)": 4,
+     "[3,5)": 2,
+     "[5,10)": 2
+    },
+    "gaisanyoukyu.pdf": {
+     "[10,20)": 22,
+     "[20,50)": 33,
+     "[3,5)": 27,
+     "[5,10)": 9,
+     "[50,100)": 3
+    },
+    "ippan_o.pdf": {
+     "[3,5)": 1,
+     "[5,10)": 1
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[10,20)",
+     "tvd": 0.19174
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[3,5)",
+     "tvd": 0.422794
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.17959,
+   "valueSetP1": [
+    "[10,20)",
+    "[20,50)",
+    "[3,5)",
+    "[5,10)",
+    "[50,100)"
+   ],
+   "valueSetP2": [
+    "[10,20)",
+    "[20,50)",
+    "[3,5)",
+    "[5,10)",
+    "[50,100)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.044979,
+    "20230907_policies_budget_04.pdf": 0.04467,
+    "gaisanyoukyu.pdf": 0.041401,
+    "ippan_o.pdf": 0.045354
+   },
+   "name": "next1RowShape",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "code3_then_text": 41,
+     "request_no_then_code": 4
+    },
+    "20230907_policies_budget_04.pdf": {
+     "code3_then_text": 20,
+     "request_no_then_code": 2
+    },
+    "gaisanyoukyu.pdf": {
+     "code3_then_text": 199,
+     "no_neighbor": 1,
+     "request_no_then_code": 19
+    },
+    "ippan_o.pdf": {
+     "code3_then_text": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.059167
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.030278
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.044722,
+   "valueSetP1": [
+    "code3_then_text",
+    "request_no_then_code"
+   ],
+   "valueSetP2": [
+    "code3_then_text",
+    "no_neighbor",
+    "request_no_then_code"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.145185,
+    "20230907_policies_budget_04.pdf": 0.109958,
+    "gaisanyoukyu.pdf": 0.001353,
+    "ippan_o.pdf": 0.1154
+   },
+   "name": "next1XRelation",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "deeper": 36,
+     "same": 9
+    },
+    "20230907_policies_budget_04.pdf": {
+     "deeper": 13,
+     "same": 9
+    },
+    "gaisanyoukyu.pdf": {
+     "deeper": 129,
+     "no_neighbor": 1,
+     "same": 89
+    },
+    "ippan_o.pdf": {
+     "deeper": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "deeper",
+     "tvd": 0.172778
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "deeper",
+     "tvd": 0.052778
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.112778,
+   "valueSetP1": [
+    "deeper",
+    "same"
+   ],
+   "valueSetP2": [
+    "deeper",
+    "no_neighbor",
+    "same"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.03107,
+    "20230907_policies_budget_04.pdf": 0.073475,
+    "gaisanyoukyu.pdf": 0.202657,
+    "ippan_o.pdf": 0.064064
+   },
+   "name": "next2PageBreak",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "false": 24,
+     "true": 21
+    },
+    "20230907_policies_budget_04.pdf": {
+     "false": 6,
+     "true": 16
+    },
+    "gaisanyoukyu.pdf": {
+     "false": 62,
+     "no_neighbor": 1,
+     "true": 156
+    },
+    "ippan_o.pdf": {
+     "false": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0.01875
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0.11875
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.06875,
+   "valueSetP1": [
+    "false",
+    "true"
+   ],
+   "valueSetP2": [
+    "false",
+    "no_neighbor",
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 0.261111,
+   "availabilityP2": 0.326389,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 4,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.097872,
+    "20230907_policies_budget_04.pdf": 0.082882,
+    "gaisanyoukyu.pdf": 0.111702,
+    "ippan_o.pdf": 0.096716
+   },
+   "name": "next2RowDistance",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[10,20)": 8,
+     "[20,50)": 10,
+     "[5,10)": 6
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[10,20)": 3,
+     "[20,50)": 3
+    },
+    "gaisanyoukyu.pdf": {
+     "[10,20)": 11,
+     "[20,50)": 27,
+     "[5,10)": 23,
+     "[50,100)": 1
+    },
+    "ippan_o.pdf": {
+     "[5,10)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[20,50)",
+     "tvd": 0.18693
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[5,10)",
+     "tvd": 0.333371
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.087234,
+   "valueSetP1": [
+    "[10,20)",
+    "[20,50)",
+    "[5,10)",
+    "[50,100)"
+   ],
+   "valueSetP2": [
+    "[10,20)",
+    "[20,50)",
+    "[5,10)",
+    "[50,100)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.036996,
+    "20230907_policies_budget_04.pdf": 0.035263,
+    "gaisanyoukyu.pdf": 0.118406,
+    "ippan_o.pdf": 0.041888
+   },
+   "name": "next2RowShape",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "code3_then_text": 38,
+     "request_no_then_code": 7
+    },
+    "20230907_policies_budget_04.pdf": {
+     "code3_then_text": 17,
+     "request_no_then_code": 5
+    },
+    "gaisanyoukyu.pdf": {
+     "code3_then_text": 199,
+     "no_neighbor": 1,
+     "request_no_then_code": 19
+    },
+    "ippan_o.pdf": {
+     "code3_then_text": 1,
+     "request_no_then_code": 1
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.06125
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.027917
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.044583,
+   "valueSetP1": [
+    "code3_then_text",
+    "request_no_then_code"
+   ],
+   "valueSetP2": [
+    "code3_then_text",
+    "no_neighbor",
+    "request_no_then_code"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.03679,
+    "20230907_policies_budget_04.pdf": 0.006901,
+    "gaisanyoukyu.pdf": 0.048019,
+    "ippan_o.pdf": 0.016286
+   },
+   "name": "next2XRelation",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "deeper": 36,
+     "same": 9
+    },
+    "20230907_policies_budget_04.pdf": {
+     "deeper": 13,
+     "same": 9
+    },
+    "gaisanyoukyu.pdf": {
+     "deeper": 144,
+     "no_neighbor": 1,
+     "same": 74
+    },
+    "ippan_o.pdf": {
+     "deeper": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "deeper",
+     "tvd": 0.100694
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "deeper",
+     "tvd": 0.076111
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.014028,
+   "valueSetP1": [
+    "deeper",
+    "same"
+   ],
+   "valueSetP2": [
+    "deeper",
+    "no_neighbor",
+    "same"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.066749,
+    "20230907_policies_budget_04.pdf": 0.098897,
+    "gaisanyoukyu.pdf": 0.235652,
+    "ippan_o.pdf": 0.093613
+   },
+   "name": "next3PageBreak",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "false": 18,
+     "true": 27
+    },
+    "20230907_policies_budget_04.pdf": {
+     "false": 5,
+     "true": 17
+    },
+    "gaisanyoukyu.pdf": {
+     "false": 39,
+     "no_neighbor": 1,
+     "true": 179
+    },
+    "ippan_o.pdf": {
+     "false": 1,
+     "no_neighbor": 1
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0.06125
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0.136806
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.099028,
+   "valueSetP1": [
+    "false",
+    "true"
+   ],
+   "valueSetP2": [
+    "false",
+    "no_neighbor",
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 0.126667,
+   "availabilityP2": 0.21875,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 4,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.071345,
+    "20230907_policies_budget_04.pdf": 0.035088,
+    "gaisanyoukyu.pdf": 0.16886,
+    "ippan_o.pdf": 0.083475
+   },
+   "name": "next3RowDistance",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[10,20)": 6,
+     "[20,50)": 10,
+     "[5,10)": 2
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[20,50)": 5
+    },
+    "gaisanyoukyu.pdf": {
+     "[10,20)": 11,
+     "[20,50)": 18,
+     "[5,10)": 9,
+     "[50,100)": 1
+    },
+    "ippan_o.pdf": {
+     "[5,10)": 1
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[20,50)",
+     "tvd": 0.084728
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[5,10)",
+     "tvd": 0.264683
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.07477,
+   "valueSetP1": [
+    "[10,20)",
+    "[20,50)",
+    "[5,10)",
+    "[50,100)"
+   ],
+   "valueSetP2": [
+    "[10,20)",
+    "[20,50)",
+    "[5,10)",
+    "[50,100)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.037202,
+    "20230907_policies_budget_04.pdf": 0.044411,
+    "gaisanyoukyu.pdf": 0.106087,
+    "ippan_o.pdf": 0.044569
+   },
+   "name": "next3RowShape",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "code3_then_text": 38,
+     "request_no_then_code": 7
+    },
+    "20230907_policies_budget_04.pdf": {
+     "code3_then_text": 19,
+     "request_no_then_code": 3
+    },
+    "gaisanyoukyu.pdf": {
+     "code3_then_text": 201,
+     "no_neighbor": 1,
+     "request_no_then_code": 17
+    },
+    "ippan_o.pdf": {
+     "code3_then_text": 1,
+     "no_neighbor": 1
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.034028
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.060694
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.047361,
+   "valueSetP1": [
+    "code3_then_text",
+    "request_no_then_code"
+   ],
+   "valueSetP2": [
+    "code3_then_text",
+    "no_neighbor",
+    "request_no_then_code"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 3,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.084033,
+    "20230907_policies_budget_04.pdf": 0.113768,
+    "gaisanyoukyu.pdf": 0.109082,
+    "ippan_o.pdf": 0.097731
+   },
+   "name": "next3XRelation",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "deeper": 36,
+     "same": 9
+    },
+    "20230907_policies_budget_04.pdf": {
+     "deeper": 12,
+     "same": 10
+    },
+    "gaisanyoukyu.pdf": {
+     "deeper": 155,
+     "no_neighbor": 1,
+     "same": 63
+    },
+    "ippan_o.pdf": {
+     "deeper": 1,
+     "no_neighbor": 1
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "deeper",
+     "tvd": 0.044167
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "deeper",
+     "tvd": 0.155278
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.099722,
+   "valueSetP1": [
+    "deeper",
+    "same"
+   ],
+   "valueSetP2": [
+    "deeper",
+    "no_neighbor",
+    "same"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 10,
+   "eligibleForSeparator": true,
+   "family": "F1",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.43465,
+    "20230907_policies_budget_04.pdf": 0.43315,
+    "gaisanyoukyu.pdf": 0.736135,
+    "ippan_o.pdf": 0.465486
+   },
+   "name": "normalizedPagePosition",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "r4": 2,
+     "r5": 9,
+     "r6": 8,
+     "r7": 9,
+     "r8": 8,
+     "r9": 9
+    },
+    "20230907_policies_budget_04.pdf": {
+     "r6": 1,
+     "r7": 7,
+     "r8": 7,
+     "r9": 7
+    },
+    "gaisanyoukyu.pdf": {
+     "r1": 6,
+     "r2": 27,
+     "r3": 26,
+     "r4": 27,
+     "r5": 26,
+     "r6": 27,
+     "r7": 26,
+     "r8": 27,
+     "r9": 27
+    },
+    "ippan_o.pdf": {
+     "r9": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "r1",
+     "tvd": 0.572917
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "r1",
+     "tvd": 0.387917
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.468472,
+   "valueSetP1": [
+    "r0",
+    "r1",
+    "r2",
+    "r3",
+    "r4",
+    "r5",
+    "r6",
+    "r7"
+   ],
+   "valueSetP2": [
+    "r1",
+    "r2",
+    "r3",
+    "r4",
+    "r5",
+    "r6",
+    "r7",
+    "r8",
+    "r9"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "numericOnlyCode",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "true": 219
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": false,
+   "family": "F1",
+   "ineligibleReason": "descriptive_only",
+   "kind": "descriptive",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "page",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 5,
+   "eligibleForSeparator": true,
+   "family": "F1",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.139918,
+    "20230907_policies_budget_04.pdf": 0.136174,
+    "gaisanyoukyu.pdf": 0.202657,
+    "ippan_o.pdf": 0.136752
+   },
+   "name": "pageHierarchyNodeCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[1,2)": 16,
+     "[2,3)": 5,
+     "[3,5)": 10,
+     "[5,10)": 14
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[1,2)": 11,
+     "[10,20)": 1,
+     "[2,3)": 5,
+     "[3,5)": 2,
+     "[5,10)": 3
+    },
+    "gaisanyoukyu.pdf": {
+     "[1,2)": 125,
+     "[10,20)": 3,
+     "[2,3)": 32,
+     "[3,5)": 34,
+     "[5,10)": 25
+    },
+    "ippan_o.pdf": {
+     "[3,5)": 1,
+     "[5,10)": 1
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0.157639
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0.123194
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.135417,
+   "valueSetP1": [
+    "[1,2)",
+    "[10,20)",
+    "[2,3)",
+    "[3,5)",
+    "[5,10)"
+   ],
+   "valueSetP2": [
+    "[1,2)",
+    "[10,20)",
+    "[2,3)",
+    "[3,5)",
+    "[5,10)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F1",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "pageNodeOrdinal",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[0,1)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[0,1)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[0,1)": 219
+    },
+    "ippan_o.pdf": {
+     "[0,1)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[0,1)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[0,1)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[0,1)"
+   ],
+   "valueSetP2": [
+    "[0,1)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "plain3Code",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "true": 219
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "prev1PageBreak",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "true": 219
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "prev1RowDistance",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.001317,
+    "20230907_policies_budget_04.pdf": 0.001019,
+    "gaisanyoukyu.pdf": 0.040193,
+    "ippan_o.pdf": 0.000295
+   },
+   "name": "prev1RowShape",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "code3_then_text": 43,
+     "request_no_then_code": 2
+    },
+    "20230907_policies_budget_04.pdf": {
+     "code3_then_text": 21,
+     "request_no_then_code": 1
+    },
+    "gaisanyoukyu.pdf": {
+     "code3_then_text": 217,
+     "request_no_then_code": 2
+    },
+    "ippan_o.pdf": {
+     "code3_then_text": 1,
+     "request_no_then_code": 1
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.009722
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.003611
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.003056,
+   "valueSetP1": [
+    "code3_then_text",
+    "request_no_then_code"
+   ],
+   "valueSetP2": [
+    "code3_then_text",
+    "request_no_then_code"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.14107,
+    "20230907_policies_budget_04.pdf": 0.106199,
+    "gaisanyoukyu.pdf": 0.001353,
+    "ippan_o.pdf": 0.111904
+   },
+   "name": "prev1XRelation",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "same": 9,
+     "shallower": 36
+    },
+    "20230907_policies_budget_04.pdf": {
+     "same": 9,
+     "shallower": 13
+    },
+    "gaisanyoukyu.pdf": {
+     "same": 89,
+     "shallower": 130
+    },
+    "ippan_o.pdf": {
+     "shallower": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "shallower",
+     "tvd": 0.169306
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "shallower",
+     "tvd": 0.049306
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.109306,
+   "valueSetP1": [
+    "same",
+    "shallower"
+   ],
+   "valueSetP2": [
+    "same",
+    "shallower"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "prev2PageBreak",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "true": 219
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "prev2RowDistance",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.04321,
+    "20230907_policies_budget_04.pdf": 0.044277,
+    "gaisanyoukyu.pdf": 0.002415,
+    "ippan_o.pdf": 0.038073
+   },
+   "name": "prev2RowShape",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "code3_then_text": 43,
+     "request_no_then_code": 2
+    },
+    "20230907_policies_budget_04.pdf": {
+     "code3_then_text": 20,
+     "request_no_then_code": 2
+    },
+    "gaisanyoukyu.pdf": {
+     "code3_then_text": 218,
+     "request_no_then_code": 1
+    },
+    "ippan_o.pdf": {
+     "code3_then_text": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.031528
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.044861
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.038194,
+   "valueSetP1": [
+    "code3_then_text",
+    "request_no_then_code"
+   ],
+   "valueSetP2": [
+    "code3_then_text",
+    "request_no_then_code"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.032675,
+    "20230907_policies_budget_04.pdf": 0.003141,
+    "gaisanyoukyu.pdf": 0.048019,
+    "ippan_o.pdf": 0.012789
+   },
+   "name": "prev2XRelation",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "same": 9,
+     "shallower": 36
+    },
+    "20230907_policies_budget_04.pdf": {
+     "same": 9,
+     "shallower": 13
+    },
+    "gaisanyoukyu.pdf": {
+     "same": 74,
+     "shallower": 145
+    },
+    "ippan_o.pdf": {
+     "shallower": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "shallower",
+     "tvd": 0.097222
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "shallower",
+     "tvd": 0.076111
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.010556,
+   "valueSetP1": [
+    "same",
+    "shallower"
+   ],
+   "valueSetP2": [
+    "same",
+    "shallower"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "prev3PageBreak",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "true": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "true": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "true": 219
+    },
+    "ippan_o.pdf": {
+     "true": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "true",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "true"
+   ],
+   "valueSetP2": [
+    "true"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "prev3RowDistance",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.002181,
+    "20230907_policies_budget_04.pdf": 0.01117,
+    "gaisanyoukyu.pdf": 0.048164,
+    "ippan_o.pdf": 0.012642
+   },
+   "name": "prev3RowShape",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "code3_then_text": 39,
+     "request_no_then_code": 6
+    },
+    "20230907_policies_budget_04.pdf": {
+     "code3_then_text": 20,
+     "request_no_then_code": 2
+    },
+    "gaisanyoukyu.pdf": {
+     "code3_then_text": 204,
+     "request_no_then_code": 15
+    },
+    "ippan_o.pdf": {
+     "code3_then_text": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.022083
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "code3_then_text",
+     "tvd": 0.002083
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.012083,
+   "valueSetP1": [
+    "code3_then_text",
+    "request_no_then_code"
+   ],
+   "valueSetP2": [
+    "code3_then_text",
+    "request_no_then_code"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.084033,
+    "20230907_policies_budget_04.pdf": 0.113768,
+    "gaisanyoukyu.pdf": 0.109082,
+    "ippan_o.pdf": 0.097731
+   },
+   "name": "prev3XRelation",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "same": 9,
+     "shallower": 36
+    },
+    "20230907_policies_budget_04.pdf": {
+     "same": 10,
+     "shallower": 12
+    },
+    "gaisanyoukyu.pdf": {
+     "same": 63,
+     "shallower": 156
+    },
+    "ippan_o.pdf": {
+     "shallower": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "shallower",
+     "tvd": 0.044167
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "shallower",
+     "tvd": 0.155278
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.099722,
+   "valueSetP1": [
+    "same",
+    "shallower"
+   ],
+   "valueSetP2": [
+    "same",
+    "shallower"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "requestShaped",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "false": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "false": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "false": 219
+    },
+    "ippan_o.pdf": {
+     "false": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "false",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "false",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "false"
+   ],
+   "valueSetP2": [
+    "false"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": false,
+   "family": "F3",
+   "ineligibleReason": "descriptive_only",
+   "kind": "descriptive",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "rowBottom",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F3",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "rowBottomMinusFrameBottom",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[-∞,-100)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[-∞,-100)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[-∞,-100)": 219
+    },
+    "ippan_o.pdf": {
+     "[-∞,-100)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[-∞,-100)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[-∞,-100)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[-∞,-100)"
+   ],
+   "valueSetP2": [
+    "[-∞,-100)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F3",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "rowBottomMinusFrameTop",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[0,5)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[0,5)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[0,5)": 219
+    },
+    "ippan_o.pdf": {
+     "[0,5)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[0,5)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[0,5)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[0,5)"
+   ],
+   "valueSetP2": [
+    "[0,5)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "rowCharCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[5,10)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[5,10)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[5,10)": 219
+    },
+    "ippan_o.pdf": {
+     "[5,10)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[5,10)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[5,10)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[5,10)"
+   ],
+   "valueSetP2": [
+    "[5,10)"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": true,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": false,
+   "family": "F3",
+   "ineligibleReason": "circular",
+   "kind": "descriptive",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "rowLeft",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": true,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": false,
+   "family": "F3",
+   "ineligibleReason": "circular",
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.5,
+    "20230907_policies_budget_04.pdf": 0.5,
+    "gaisanyoukyu.pdf": 0.5,
+    "ippan_o.pdf": 0.5
+   },
+   "name": "rowLeftMinusFrameLeft",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[5,20)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[5,20)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[5,20)": 219
+    },
+    "ippan_o.pdf": {
+     "[5,20)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[5,20)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": "[-20,-5)",
+     "tvd": 1
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.5,
+   "valueSetP1": [
+    "[-20,-5)",
+    "[5,20)"
+   ],
+   "valueSetP2": [
+    "[5,20)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "rowNormalizedCharCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[5,10)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[5,10)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[5,10)": 219
+    },
+    "ippan_o.pdf": {
+     "[5,10)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[5,10)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[5,10)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[5,10)"
+   ],
+   "valueSetP2": [
+    "[5,10)"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": true,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": false,
+   "family": "F3",
+   "ineligibleReason": "circular",
+   "kind": "descriptive",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "rowRight",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": true,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 2,
+   "eligibleForSeparator": false,
+   "family": "F3",
+   "ineligibleReason": "circular",
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.016667,
+    "20230907_policies_budget_04.pdf": 0.016667,
+    "gaisanyoukyu.pdf": 0.016667,
+    "ippan_o.pdf": 0.016667
+   },
+   "name": "rowRightMinusFrameRight",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[-∞,-100)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[-∞,-100)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[-∞,-100)": 219
+    },
+    "ippan_o.pdf": {
+     "[-∞,-100)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[-∞,-100)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[-∞,-100)",
+     "tvd": 0.033333
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.016667,
+   "valueSetP1": [
+    "[-∞,-100)",
+    "[20,50)"
+   ],
+   "valueSetP2": [
+    "[-∞,-100)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F4",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "rowTokenCount",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[2,3)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[2,3)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[2,3)": 219
+    },
+    "ippan_o.pdf": {
+     "[2,3)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[2,3)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[2,3)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[2,3)"
+   ],
+   "valueSetP2": [
+    "[2,3)"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": false,
+   "family": "F3",
+   "ineligibleReason": "descriptive_only",
+   "kind": "descriptive",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "rowTop",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 1,
+   "eligibleForSeparator": true,
+   "family": "F3",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0,
+    "20230907_policies_budget_04.pdf": 0,
+    "gaisanyoukyu.pdf": 0,
+    "ippan_o.pdf": 0
+   },
+   "name": "rowTopMinusFrameTop",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[-20,-5)": 45
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[-20,-5)": 22
+    },
+    "gaisanyoukyu.pdf": {
+     "[-20,-5)": 219
+    },
+    "ippan_o.pdf": {
+     "[-20,-5)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[-20,-5)",
+     "tvd": 0
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[-20,-5)",
+     "tvd": 0
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0,
+   "valueSetP1": [
+    "[-20,-5)"
+   ],
+   "valueSetP2": [
+    "[-20,-5)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 5,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "binned",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.257202,
+    "20230907_policies_budget_04.pdf": 0.216792,
+    "gaisanyoukyu.pdf": 0.222126,
+    "ippan_o.pdf": 0.228438
+   },
+   "name": "sameXRunLength",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "[1,2)": 33,
+     "[2,3)": 2,
+     "[3,5)": 3,
+     "[5,10)": 7
+    },
+    "20230907_policies_budget_04.pdf": {
+     "[1,2)": 11,
+     "[3,5)": 4,
+     "[5,10)": 7
+    },
+    "gaisanyoukyu.pdf": {
+     "[1,2)": 85,
+     "[2,3)": 42,
+     "[3,5)": 60,
+     "[5,10)": 32
+    },
+    "ippan_o.pdf": {
+     "[1,2)": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0.272361
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "[1,2)",
+     "tvd": 0.179028
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.225694,
+   "valueSetP1": [
+    "[1,2)",
+    "[10,20)",
+    "[2,3)",
+    "[3,5)",
+    "[5,10)"
+   ],
+   "valueSetP2": [
+    "[1,2)",
+    "[2,3)",
+    "[3,5)",
+    "[5,10)"
+   ]
+  },
+  {
+   "availabilityP1": 1,
+   "availabilityP2": 1,
+   "circular": false,
+   "complete": false,
+   "disjointCombined": false,
+   "distinct": 4,
+   "eligibleForSeparator": true,
+   "family": "F5",
+   "ineligibleReason": null,
+   "kind": "categorical",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": 0.17893,
+    "20230907_policies_budget_04.pdf": 0.131094,
+    "gaisanyoukyu.pdf": 0.166184,
+    "ippan_o.pdf": 0.131173
+   },
+   "name": "sameXRunPosition",
+   "p2PerPdf": {
+    "000157010.pdf": {
+     "first": 3,
+     "last": 3,
+     "middle": 6,
+     "only": 33
+    },
+    "20230907_policies_budget_04.pdf": {
+     "first": 2,
+     "last": 2,
+     "middle": 7,
+     "only": 11
+    },
+    "gaisanyoukyu.pdf": {
+     "first": 45,
+     "last": 45,
+     "middle": 44,
+     "only": 85
+    },
+    "ippan_o.pdf": {
+     "only": 2
+    }
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": false,
+     "modal": "only",
+     "tvd": 0.194028
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": false,
+     "modal": "only",
+     "tvd": 0.060694
+    }
+   },
+   "strongPartial": false,
+   "tvd": 0.127361,
+   "valueSetP1": [
+    "first",
+    "last",
+    "middle",
+    "only"
+   ],
+   "valueSetP2": [
+    "first",
+    "last",
+    "middle",
+    "only"
+   ]
+  },
+  {
+   "availabilityP1": 0,
+   "availabilityP2": 0,
+   "circular": true,
+   "complete": false,
+   "disjointCombined": true,
+   "distinct": 0,
+   "eligibleForSeparator": false,
+   "family": "circular",
+   "ineligibleReason": "circular",
+   "kind": "descriptive",
+   "leaveOneP2PdfOutTvd": {
+    "000157010.pdf": null,
+    "20230907_policies_budget_04.pdf": null,
+    "gaisanyoukyu.pdf": null,
+    "ippan_o.pdf": null
+   },
+   "name": "t2ClusterIndex",
+   "p2PerPdf": {
+    "000157010.pdf": {},
+    "20230907_policies_budget_04.pdf": {},
+    "gaisanyoukyu.pdf": {},
+    "ippan_o.pdf": {}
+   },
+   "pdfLevel": {
+    "05-1b-01.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    },
+    "20230914-mxt_kaikesou01-000031817_03.pdf": {
+     "disjoint": true,
+     "modal": null,
+     "tvd": null
+    }
+   },
+   "strongPartial": false,
+   "tvd": null,
+   "valueSetP1": [],
+   "valueSetP2": []
+  }
+ ],
+ "provenanceLoss": 0,
+ "schema": "budget-request-header-support-provenance-phaseA/v0",
+ "strongPartialSeparators": [],
+ "unjoinable": 0
+}
