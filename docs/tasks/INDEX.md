@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_0918_Budget_Request_Organization_Root_Source_Evidence_Result.md](20261005_0918_Budget_Request_Organization_Root_Source_Evidence_Result.md) — organization/root境界のsource evidence結果。手書きA2範囲はlayout range境界と6/8のみ一致(mext/mhlwは説明できず)、org7とitem97を分けるnon-circular featureは0。post-hocでpage header label(文（文）等)がmhlw両端と一致。判定=CONTRACT_DEPENDENCY_REMAINS(A=LAYOUT_BOUNDARY_ONLY, B=INSUFFICIENT_EVIDENCE)
 - [20261005_0913_Budget_Request_Organization_Root_Source_Evidence_Protocol.md](20261005_0913_Budget_Request_Organization_Root_Source_Evidence_Protocol.md) — organization/root境界のsource evidence inventoryのprotocol。Activation boundary(手書きA2範囲)とRoot semantics(org7 vs item97)を別軸で判定、boundary context幅(+/-20行・+/-1頁、mext/mhlwは+/-10頁窓)・非循環feature・判定規則をinspection前に固定
 - [20261005_0903_Budget_Request_Semantic_Boundary_Inventory_Result.md](20261005_0903_Budget_Request_Semantic_Boundary_Inventory_Result.md) — 既存hierarchyの意味境界の結果。item/detail_lineはrange内request基準で+/-6.9に完全分離(行単独)、organization7はitemと同位置でroot(range内に浅い見出し無し)として定義されM3、unclassified170はlevel_gap157等のM2 abstention。判定=SEMANTIC_BOUNDARY_DETERMINISTIC_BUT_CONTRACT_DEPENDENT
 - [20261005_0905_Budget_Request_Semantic_Boundary_Inventory_Preregistration.md](20261005_0905_Budget_Request_Semantic_Boundary_Inventory_Preregistration.md) — item-shaped row887行(item97/detail613/unclassified170/org7)を既存DocumentHierarchyがどう意味分離するかのmechanism棚卸しと事前登録。nodeはcode3桁+後続token、kindはrange内x-level順位とstackで決まる(辞書不使用)、M1〜M4分類・判定規則を固定
