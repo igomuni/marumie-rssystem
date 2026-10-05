@@ -1,0 +1,364 @@
+{
+ "schema": "budget-request-alt-title-c2-failure-diagnostic/v0",
+ "note": "post-hoc diagnostic。rule は拡張しない",
+ "unresolvedPages": [
+  {
+   "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "page": 45,
+   "firstCodeRowByCurrentDefinition": 4,
+   "rows": [
+    {
+     "index": 0,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "39"
+    },
+    {
+     "index": 1,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "要求 前 年 度 ６ 年 度 対 前 年 度"
+    },
+    {
+     "index": 2,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "事 項 備 考"
+    },
+    {
+     "index": 3,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減"
+    },
+    {
+     "index": 4,
+     "cls": "request",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "28 30-15 教育機会の確保に必要な 東日本大震災復旧・復興対策経費 経費"
+    },
+    {
+     "index": 5,
+     "cls": "plain3",
+     "codeShaped": true,
+     "labelShaped": true,
+     "raw": "010 被災児童生徒就学支援等 （要旨）"
+    }
+   ]
+  },
+  {
+   "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "page": 47,
+   "firstCodeRowByCurrentDefinition": 4,
+   "rows": [
+    {
+     "index": 0,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "41"
+    },
+    {
+     "index": 1,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "要求 前 年 度 ６ 年 度 対 前 年 度"
+    },
+    {
+     "index": 2,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "事 項 備 考"
+    },
+    {
+     "index": 3,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減"
+    },
+    {
+     "index": 4,
+     "cls": "request",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "31 45-15 私立学校の振興に必要な 279, 606 195, 896 △ 83, 710 東"
+    },
+    {
+     "index": 5,
+     "cls": "plain3",
+     "codeShaped": true,
+     "labelShaped": true,
+     "raw": "001 私 立 大 学 等 経 常 費 補 助 (要旨)"
+    }
+   ]
+  },
+  {
+   "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "page": 48,
+   "firstCodeRowByCurrentDefinition": 4,
+   "rows": [
+    {
+     "index": 0,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "42"
+    },
+    {
+     "index": 1,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "要求 前 年 度 ６ 年 度 対 前 年 度"
+    },
+    {
+     "index": 2,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "事 項 備 考"
+    },
+    {
+     "index": 3,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減"
+    },
+    {
+     "index": 4,
+     "cls": "request",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "32 78-95 原子力損害賠償紛争審査 東日本大震災復旧・復興対策経費 会等に必要な経費"
+    },
+    {
+     "index": 5,
+     "cls": "plain3",
+     "codeShaped": true,
+     "labelShaped": true,
+     "raw": "010 原子力損害賠償紛争審査 2, 972, 331 2, 972, 263 △ 68 平成25年"
+    }
+   ]
+  },
+  {
+   "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "page": 59,
+   "firstCodeRowByCurrentDefinition": 4,
+   "rows": [
+    {
+     "index": 0,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "53"
+    },
+    {
+     "index": 1,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "要求 前 年 度 ６ 年 度 対 前 年 度"
+    },
+    {
+     "index": 2,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "事 項 備 考"
+    },
+    {
+     "index": 3,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減"
+    },
+    {
+     "index": 4,
+     "cls": "request",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "33 80-95 文化財の保存及び活用に 209, 674 205, 483 △ 4, 191 東日"
+    },
+    {
+     "index": 5,
+     "cls": "plain3",
+     "codeShaped": true,
+     "labelShaped": true,
+     "raw": "020 被災ミュージアム再興事 209, 674 205, 483 △ 4, 191 （要旨）"
+    }
+   ]
+  },
+  {
+   "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+   "page": 62,
+   "firstCodeRowByCurrentDefinition": 4,
+   "rows": [
+    {
+     "index": 0,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "56"
+    },
+    {
+     "index": 1,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "要求 前 年 度 ６ 年 度 対 前 年 度"
+    },
+    {
+     "index": 2,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "事 項 備 考"
+    },
+    {
+     "index": 3,
+     "cls": "other",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "番号 予 算 額 概 算 要 求 額 比 較 増 △ 減"
+    },
+    {
+     "index": 4,
+     "cls": "request",
+     "codeShaped": false,
+     "labelShaped": false,
+     "raw": "35 15-14 公立文教施設整備に必要 東日本大震災復旧・復興対策経費 な経費"
+    },
+    {
+     "index": 5,
+     "cls": "plain3",
+     "codeShaped": true,
+     "labelShaped": true,
+     "raw": "020 公立学校施設災害復旧費 （要旨）"
+    }
+   ]
+  }
+ ],
+ "ambiguousOtherLabelRows": {
+  "position": {
+   "other_after_first_code_row": 1786
+  },
+  "codeShaped": {
+   "other_not_code_shaped": 1636,
+   "other_is_code_shaped": 150
+  },
+  "topProjectedAndOtherNormalized": [
+   [
+    "厚(本) | 計,(,)",
+    30
+   ],
+   [
+    "外(本) | 計,(,)",
+    15
+   ],
+   [
+    "国(本) | 計,(,)",
+    13
+   ],
+   [
+    "文(本) | 計,(,)",
+    13
+   ],
+   [
+    "労(雇) | 計,(,)",
+    12
+   ],
+   [
+    "防(本) | 国庫債務負担行為の初年度前金,(,)",
+    11
+   ],
+   [
+    "防(本) | 既往年度国庫債務負担行為歳出化額,,(,,)",
+    10
+   ],
+   [
+    "外(在) | 計,(,)",
+    9
+   ],
+   [
+    "防(本) | 一般物件費,,(,,)",
+    8
+   ],
+   [
+    "総(消) | 計,(,)",
+    7
+   ],
+   [
+    "内(消) | 計,(,)",
+    6
+   ],
+   [
+    "文(本) | 内国旅費,(,)",
+    6
+   ],
+   [
+    "総(本) | 計,(,)",
+    6
+   ],
+   [
+    "労(災) | 計,(,)",
+    5
+   ],
+   [
+    "文(所) | 計,(,)",
+    5
+   ]
+  ],
+  "pagesByPdfTop": [
+   [
+    "05-1b-01.pdf",
+    175
+   ],
+   [
+    "05-2b-01.pdf",
+    173
+   ],
+   [
+    "001630995.pdf",
+    173
+   ],
+   [
+    "20230914-mxt_kaikesou01-000031817_03.pdf",
+    152
+   ],
+   [
+    "gaisanyoukyu.pdf",
+    121
+   ],
+   [
+    "2024ippan_2.pdf",
+    73
+   ],
+   [
+    "000901372.pdf",
+    67
+   ],
+   [
+    "100546568.pdf",
+    62
+   ],
+   [
+    "230901-2.pdf",
+    59
+   ],
+   [
+    "cms_caa205_230914_03.pdf",
+    26
+   ]
+  ]
+ }
+}

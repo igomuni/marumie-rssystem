@@ -2,6 +2,7 @@
 
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
+- [20261005_1147_Budget_Request_Alternative_Title_Projection_Result.md](20261005_1147_Budget_Request_Alternative_Title_Projection_Result.md) — label_and_code_same_row専用のsource-only alternative title projectionのfrozen評価。C2 2,537中2,532回復・regression/非対象変化0、ambiguousは事前定義の本文括弧行(1,123)。segment 5,482→467・過剰分断はprojection artifact、G4はmhlw 7件で不通過。判定=PARTIALLY_SUPPORTED
 - [20261005_1135_Budget_Request_Alternative_Title_Projection_Preregistration.md](20261005_1135_Budget_Request_Alternative_Title_Projection_Preregistration.md) — label_and_code_same_row(2,537page)のみを対象にしたsource-onlyなalternative title projectionの事前登録。現行mechanismのcode根拠・唯一の変更(最初のcode rowがlabel-shapedならそのrowを保持)・population C1〜C5固定・指標M1〜M6・判定規則・P4/P5(gate再適用)を実行前に凍結
 - [20261005_1121_Budget_Request_Page_Header_Blank_Title_Ordering_Result.md](20261005_1121_Budget_Request_Page_Header_Blank_Title_Ordering_Result.md) — header label blank 2,950pageの原因分離。88.4%(2,607)はlabel-shaped rowが存在するのにcurrent projectionが落とすartifact(先頭3桁ページ番号とlabelが同一row=2,537)、x=38 900行は全て該当。判定=PROJECTION_ARTIFACT_DOMINANT(production・補完なし)
 - [20261005_1117_Budget_Request_Page_Header_Blank_Title_Ordering_Protocol.md](20261005_1117_Budget_Request_Page_Header_Blank_Title_Ordering_Protocol.md) — header label blank page(2,950)がsource上のblankかcurrent projectionの文書順artifactかを分離するsource-schema inventoryのprotocol。label/code-shaped rowの定義・page class・blank reason優先順・判定規則をPhase A全件走査前に凍結
