@@ -80,6 +80,7 @@ async function main() {
     const getEx = async (n: number): Promise<DisplayExtraction> => { const c = exCache.get(n); if (c) return c; const page = await doc.getPage(n); const e = await extractDisplayPage(page as unknown as PdfjsPageLike, n, numPages); if (!fromBaseline || exCache.size < 5) exCache.set(n, e); return e; };
     let recs: SourceRecord[] = [];
     let source = '';
+    const textStats = { tokens: 0, pagesWithoutTokens: 0, asciiDigitTokens: 0 };
     try {
       if (fromBaseline) {
         source = 'baseline_records';
@@ -95,6 +96,7 @@ async function main() {
         const pages: FieldResolverPageInput[] = [];
         for (let n = 1; n <= numPages; n++) {
           const ex = await getEx(n); inc(rot, String(ex.rotate));
+          textStats.tokens += ex.tokens.length; if (ex.tokens.length === 0) textStats.pagesWithoutTokens++; textStats.asciiDigitTokens += ex.tokens.filter(t => /[0-9]/.test(t.rawText)).length;
           const geometry = buildTableGeometry(ex.tokens, ex.meta);
           pages.push({ meta: ex.meta, tokens: ex.tokens, geometry, logical: resolveLogicalRows(ex.tokens, ex.meta, geometry) });
         }
@@ -115,7 +117,7 @@ async function main() {
       if (pn < 1 || pn > numPages) { unjoinable += prs.length; continue; }
       const page = await doc.getPage(pn);
       const ex = await getEx(pn);
-      if (fromBaseline && tokenEquivalenceChecked < 3 && page.rotate === 0) { tokenEquivalenceChecked++; const prod = await extractPageTokens(d.localPath, pn); if (JSON.stringify(prod.tokens) === JSON.stringify(ex.tokens)) tokenEquivalenceOk++; }
+      if (fromBaseline && tokenEquivalenceChecked < 3 && page.rotate === 0) { tokenEquivalenceChecked++; const prod = await extractPageTokens(d.localPath, pn); const strip = (ts: typeof prod.tokens) => JSON.stringify(ts.map(({ fontName: _f, ...rest }) => rest)); if (strip(prod.tokens) === strip(ex.tokens)) tokenEquivalenceOk++; }
       inc(rot, String(page.rotate));
       const ol = await page.getOperatorList();
       const prims0 = extractDrawingPrimitives(ol.fnArray as number[], ol.argsArray as unknown[], OPS, page.view as number[]);
@@ -150,8 +152,9 @@ async function main() {
     }
     await doc.destroy();
     rotateByPdf[d.localPath] = rot;
-    inc(pdfStatusCounts, 'evaluated');
-    perPdf.push({ localPath: d.localPath, filename: d.localPath.split('/').pop(), publisherAuthority: d.publisherAuthority, account: d.accountType, pages: d.pages, source, status: 'evaluated', pagesByRotate: rot, universeRows: rows.length, candidateRows: pdfCandidates, ruleStatus: pdfRule });
+    const status = source === 'research_display_extraction' && textStats.tokens === 0 ? 'unavailable_no_text_layer' : source === 'research_display_extraction' && textStats.asciiDigitTokens === 0 ? 'unavailable_text_not_decodable' : 'evaluated';
+    inc(pdfStatusCounts, status);
+    perPdf.push({ localPath: d.localPath, filename: d.localPath.split('/').pop(), publisherAuthority: d.publisherAuthority, account: d.accountType, pages: d.pages, source, status, textStats: source === 'research_display_extraction' ? textStats : null, pagesByRotate: rot, universeRows: rows.length, candidateRows: pdfCandidates, ruleStatus: pdfRule });
     console.log(`${d.localPath.split('/').pop()} [${source}] universe=${rows.length} candidates=${pdfCandidates} rotate=${JSON.stringify(rot)}`);
   }
   // 前回 Phase A の candidate（74 evaluable PDF）を再現するか
@@ -162,11 +165,12 @@ async function main() {
   fs.mkdirSync(OUT, { recursive: true });
   fs.writeFileSync(`${OUT}/phaseA-universe.jsonl.gz`, gz);
   const evaluated = (perPdf as { status: string; candidateRows?: number; localPath: string }[]).filter(p => p.status === 'evaluated');
+  const unavailable = (perPdf as { status: string; localPath: string; pages: number; textStats?: unknown }[]).filter(p => p.status !== 'evaluated').map(p => ({ localPath: p.localPath, pages: p.pages, status: p.status, textStats: p.textStats ?? null }));
   const text = `${JSON.stringify(sortDeep({
     schema: 'budget-request-rule-8p6-rotate90-phaseA/v0',
     note: 'source-only。金額は条件にしない。rotate ≠ 0 の page は表示向きへ座標正規化して評価。MOF・hierarchy・manual・既存 item は未参照',
     frozen: Object.fromEntries(Object.keys(FROZEN).map(p => [p, fileSha(p)])), universeGzSha256: sha(gz), scriptSha256: fileSha('scripts/pipeline-v2/run-budget-request-rule-8p6-rotate-phase-a.ts'), displayLibSha256: fileSha('scripts/pipeline-v2/lib/budget-request-display-page.ts'),
-    corpus: { pdfs: docs.length, pages: docs.reduce((s, x) => s + x.pages, 0) }, pdfStatus: pdfStatusCounts, pageStatusExceptions: pageStatus,
+    corpus: { pdfs: docs.length, pages: docs.reduce((s, x) => s + x.pages, 0) }, pdfStatus: pdfStatusCounts, unavailablePdfs: unavailable, pageStatusExceptions: pageStatus,
     universeRows: counts.universe, candidateRows: counts.candidates, candidateByAccount: counts.account, candidateByPageRotate: counts.candidateByRotate, universeByPageRotate: counts.universeByRotate, ruleStatusUniverse: counts.ruleStatus,
     candidatePdfs: evaluated.filter(p => (p.candidateRows ?? 0) > 0).length, evaluatedPdfsWithoutCandidate: evaluated.filter(p => (p.candidateRows ?? 0) === 0).map(p => p.localPath),
     deltaX01: sortNum(dist01), gates, duplicates, provenanceLoss, perPdf,
