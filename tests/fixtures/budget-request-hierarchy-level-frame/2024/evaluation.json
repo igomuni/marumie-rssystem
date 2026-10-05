@@ -1,0 +1,1364 @@
+{
+ "byPriorChangeClass": {
+  "level_changed": {
+   "K": {
+    "R0": 490,
+    "R1": 0,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 0
+   },
+   "L": {
+    "R0": 0,
+    "R1": 490,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 0
+   },
+   "P": {
+    "R0": 490,
+    "R1": 0,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 0
+   },
+   "rows": 490,
+   "tuples": {
+    "L=R1,P=R0,K=R0": 490
+   }
+  },
+  "newly_unclassified": {
+   "K": {
+    "R0": 37,
+    "R1": 0,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 0
+   },
+   "L": {
+    "R0": 0,
+    "R1": 37,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 0
+   },
+   "P": {
+    "R0": 37,
+    "R1": 0,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 0
+   },
+   "rows": 37,
+   "tuples": {
+    "L=R1,P=R0,K=R0": 37
+   }
+  },
+  "parent_changed": {
+   "K": {
+    "R0": 0,
+    "R1": 9,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 0
+   },
+   "L": {
+    "R0": 0,
+    "R1": 9,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 0
+   },
+   "P": {
+    "R0": 0,
+    "R1": 9,
+    "R2": 0,
+    "R3": 0,
+    "R4": 0,
+    "R5": 0
+   },
+   "rows": 9,
+   "tuples": {
+    "L=R1,P=R1,K=R1": 9
+   }
+  }
+ },
+ "componentRowsGzSha256": "66c0584bf55a0526d4d9c7791accb3fc281c49387f714ae3436c3ac62e11b239",
+ "componentTransitions": {
+  "K": {
+   "R0": 2071,
+   "R1": 9,
+   "R2": 0,
+   "R3": 0,
+   "R4": 0,
+   "R5": 0
+  },
+  "L": {
+   "R0": 1544,
+   "R1": 536,
+   "R2": 0,
+   "R3": 0,
+   "R4": 0,
+   "R5": 0
+  },
+  "P": {
+   "R0": 2071,
+   "R1": 9,
+   "R2": 0,
+   "R3": 0,
+   "R4": 0,
+   "R5": 0
+  }
+ },
+ "decision": {
+  "decision": "INVALID",
+  "rule": "gate"
+ },
+ "frozen": {
+  "docs/tasks/20261005_1520_Budget_Request_Hierarchy_Stack_Reset_Counterfactual_Result.md": "31fc3cb2c4342a0f777a47844693d6d29de8b95ea986f6b74e4398186cc87e74",
+  "docs/tasks/20261005_1535_Budget_Request_Hierarchy_Level_Frame_Counterfactual_Protocol.md": "8b6a81b71ab5e82b46b55422a6219f7ca9d05dc1b805d81aca493e67422dde61",
+  "scripts/pipeline-v2/lib/budget-request-document-hierarchy-v2.ts": "4372d9ff13e127c69976f1018bb1f41c1cf691ad5eee8b6cdef439ea311eea1d",
+  "scripts/pipeline-v2/lib/budget-request-field-resolver.ts": "758eb8f6afdf45bd39c9853623201a4afbac8e8d6883626149d889335c2bb224",
+  "scripts/pipeline-v2/lib/budget-request-source-range-compare.ts": "c8b757e7cffc90c836ff0134eed057021edff45e4428ab76010a1db82fa34103",
+  "scripts/pipeline-v2/lib/budget-request-stack-reset-counterfactual.ts": "b0f940c99ec27a1ca4a185b811f944b8beda093862b0230912a5133999889c61",
+  "scripts/pipeline-v2/run-budget-request-hierarchy-stack-reset-counterfactual.ts": "b1b5f54382b4b34a876c65ec3ec4b94a05fcf2268d1a6af8e980149f341a4a5c",
+  "scripts/pipeline-v2/run-budget-request-source-range-hierarchy-paired.ts": "3601da017a8a501298e2d0eea3d502ce30f1cfbf62cc00c0ce8c4d1896e1e1e1",
+  "tests/fixtures/budget-request-hierarchy-stack-reset/2024/causal-rows.json.gz": "e19d0098d7995ecfc618c20fe99476d482f41e0b91aff54912d1c053b5f390c9",
+  "tests/fixtures/budget-request-hierarchy-stack-reset/2024/evaluation.json": "e31d2cadecd30ef401b5fc2a77f2b930c1eacd38c7bb15a35f6988a87a0d0128",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/phaseA-evaluation.json": "72ad477e5953316e8774919c7f3da2491b22af25332c95d52b65f981e90b67b6",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/phaseB-mof-diagnostic.json": "5b6fe1f309854fce5a738c24d19aabe38bb931246dc35444252c313a90c4fd83",
+  "tests/fixtures/budget-request-source-range-hierarchy/2024/range-manifest.json": "3e00df693627e1bb22274c291694ac1aed2c079daf758ceda5af084da217201e"
+ },
+ "gateFailures": [
+  "20230907_policies_budget_04.pdf:M5_frame_identical_to_C0",
+  "000157010.pdf:M5_frame_identical_to_C0",
+  "230901-4.pdf:M5_frame_identical_to_C0",
+  "ippan_o.pdf:M5_frame_identical_to_C0",
+  "20230914-mxt_kaikesou01-000031817_03.pdf:M5_frame_identical_to_C0",
+  "05-1b-01.pdf:M5_frame_identical_to_C0",
+  "001630395.pdf:M5_frame_identical_to_C0",
+  "gaisanyoukyu.pdf:M5_frame_identical_to_C0"
+ ],
+ "gatesPass": false,
+ "knownValueReproduction": {
+  "byPriorClass_490_37_9": true,
+  "primaryRows2080": true,
+  "priorChanged536": true,
+  "sameRangeRows5893": true
+ },
+ "note": "T3 は T2（source range・stack reset）の node population に C0 の frozen frame を既存 assignment 規則で適用。manual contract・MOF は GT ではない",
+ "pdfs": [
+  {
+   "frame": {
+    "c0ClusterCount": 9,
+    "frameUnassignedNodes": 0,
+    "t2ClusterCount": 9
+   },
+   "gates": {
+    "M1_activation_range_identical": true,
+    "M2_node_population_and_eligibility_identical": true,
+    "M3_document_order_identical": true,
+    "M4_reset_event_identical": true,
+    "M5_frame_identical_to_C0": false,
+    "M6_T2_and_C0_T1_reproduced": true,
+    "M7_non_hierarchy_invariants": true,
+    "M8_same_range_C0_T1_T2_T3_equal": true
+   },
+   "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+   "manual": [
+    7,
+    147
+   ],
+   "manualStart": {
+    "c0": {
+     "basis": "no edge for the node",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "unclassified",
+     "level": null,
+     "parentId": null,
+     "parentPage": null,
+     "placed": false,
+     "root": false
+    },
+    "frozenT2Observation": {
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "kind": "unclassified",
+     "level": null,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t1": {
+     "basis": "no edge for the node",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "unclassified",
+     "level": null,
+     "parentId": null,
+     "parentPage": null,
+     "placed": false,
+     "root": false
+    },
+    "t2": {
+     "basis": "no edge for the node",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "unclassified",
+     "level": null,
+     "parentId": null,
+     "parentPage": null,
+     "placed": false,
+     "root": false
+    },
+    "t3": {
+     "basis": "no edge for the node",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": null,
+     "id": "detail-p7-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "unclassified",
+     "level": null,
+     "parentId": null,
+     "parentPage": null,
+     "placed": false,
+     "root": false
+    }
+   },
+   "relation": "exact_same",
+   "resetEventsT2": [],
+   "resetEventsT3": [],
+   "resetLocator": null,
+   "rows": {
+    "components": {
+     "K": {
+      "R0": 557,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "L": {
+      "R0": 557,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "P": {
+      "R0": 557,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     }
+    },
+    "primary": 557,
+    "priorChanged": 0,
+    "unassignedRows": 0
+   },
+   "sourceDerived": [
+    7,
+    147
+   ],
+   "tableDigests": {
+    "c0": "e37dcd75f06e56e049e96ae4bde342f791d90927c62c7611556d857bc3f51bb2",
+    "t1": "e37dcd75f06e56e049e96ae4bde342f791d90927c62c7611556d857bc3f51bb2",
+    "t2": "e37dcd75f06e56e049e96ae4bde342f791d90927c62c7611556d857bc3f51bb2",
+    "t3": "e37dcd75f06e56e049e96ae4bde342f791d90927c62c7611556d857bc3f51bb2"
+   }
+  },
+  {
+   "frame": {
+    "c0ClusterCount": 7,
+    "frameUnassignedNodes": 0,
+    "t2ClusterCount": 7
+   },
+   "gates": {
+    "M1_activation_range_identical": true,
+    "M2_node_population_and_eligibility_identical": true,
+    "M3_document_order_identical": true,
+    "M4_reset_event_identical": true,
+    "M5_frame_identical_to_C0": false,
+    "M6_T2_and_C0_T1_reproduced": true,
+    "M7_non_hierarchy_invariants": true,
+    "M8_same_range_C0_T1_T2_T3_equal": true
+   },
+   "localPath": "data/download/env.go.jp/content/000157010.pdf",
+   "manual": [
+    21,
+    193
+   ],
+   "manualStart": {
+    "c0": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "frozenT2Observation": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t1": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t2": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t3": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p21-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    }
+   },
+   "relation": "exact_same",
+   "resetEventsT2": [],
+   "resetEventsT3": [],
+   "resetLocator": null,
+   "rows": {
+    "components": {
+     "K": {
+      "R0": 1631,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "L": {
+      "R0": 1631,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "P": {
+      "R0": 1631,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     }
+    },
+    "primary": 1631,
+    "priorChanged": 0,
+    "unassignedRows": 0
+   },
+   "sourceDerived": [
+    21,
+    193
+   ],
+   "tableDigests": {
+    "c0": "3e66978e3cd3082fcff01d08331f913c9cd97aa530bb0ae50c91f32883819eac",
+    "t1": "3e66978e3cd3082fcff01d08331f913c9cd97aa530bb0ae50c91f32883819eac",
+    "t2": "3e66978e3cd3082fcff01d08331f913c9cd97aa530bb0ae50c91f32883819eac",
+    "t3": "3e66978e3cd3082fcff01d08331f913c9cd97aa530bb0ae50c91f32883819eac"
+   }
+  },
+  {
+   "frame": {
+    "c0ClusterCount": 5,
+    "frameUnassignedNodes": 0,
+    "t2ClusterCount": 5
+   },
+   "gates": {
+    "M1_activation_range_identical": true,
+    "M2_node_population_and_eligibility_identical": true,
+    "M3_document_order_identical": true,
+    "M4_reset_event_identical": true,
+    "M5_frame_identical_to_C0": false,
+    "M6_T2_and_C0_T1_reproduced": true,
+    "M7_non_hierarchy_invariants": true,
+    "M8_same_range_C0_T1_T2_T3_equal": true
+   },
+   "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+   "manual": [
+    7,
+    20
+   ],
+   "manualStart": {
+    "c0": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      65.569,
+      65.569
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "keyTokenXMin": 65.569,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "frozenT2Observation": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t1": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      65.569,
+      65.569
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "keyTokenXMin": 65.569,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t2": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      65.569,
+      65.569
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "keyTokenXMin": 65.569,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t3": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      65.569,
+      65.569
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "keyTokenXMin": 65.569,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    }
+   },
+   "relation": "exact_same",
+   "resetEventsT2": [],
+   "resetEventsT3": [],
+   "resetLocator": null,
+   "rows": {
+    "components": {
+     "K": {
+      "R0": 110,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "L": {
+      "R0": 110,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "P": {
+      "R0": 110,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     }
+    },
+    "primary": 110,
+    "priorChanged": 0,
+    "unassignedRows": 0
+   },
+   "sourceDerived": [
+    7,
+    20
+   ],
+   "tableDigests": {
+    "c0": "c54671070cde014ad94b354c7ca6b3cb06d025000b2de74665fbdd61bdf4d893",
+    "t1": "c54671070cde014ad94b354c7ca6b3cb06d025000b2de74665fbdd61bdf4d893",
+    "t2": "c54671070cde014ad94b354c7ca6b3cb06d025000b2de74665fbdd61bdf4d893",
+    "t3": "c54671070cde014ad94b354c7ca6b3cb06d025000b2de74665fbdd61bdf4d893"
+   }
+  },
+  {
+   "frame": {
+    "c0ClusterCount": 6,
+    "frameUnassignedNodes": 0,
+    "t2ClusterCount": 6
+   },
+   "gates": {
+    "M1_activation_range_identical": true,
+    "M2_node_population_and_eligibility_identical": true,
+    "M3_document_order_identical": true,
+    "M4_reset_event_identical": true,
+    "M5_frame_identical_to_C0": false,
+    "M6_T2_and_C0_T1_reproduced": true,
+    "M7_non_hierarchy_invariants": true,
+    "M8_same_range_C0_T1_T2_T3_equal": true
+   },
+   "localPath": "data/download/meti.go.jp/main/yosangaisan/fy2024/pdf/ippan_o.pdf",
+   "manual": [
+    9,
+    106
+   ],
+   "manualStart": {
+    "c0": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "frozenT2Observation": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t1": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t2": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t3": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    }
+   },
+   "relation": "exact_same",
+   "resetEventsT2": [],
+   "resetEventsT3": [],
+   "resetLocator": null,
+   "rows": {
+    "components": {
+     "K": {
+      "R0": 1238,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "L": {
+      "R0": 1238,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "P": {
+      "R0": 1238,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     }
+    },
+    "primary": 1238,
+    "priorChanged": 0,
+    "unassignedRows": 0
+   },
+   "sourceDerived": [
+    9,
+    106
+   ],
+   "tableDigests": {
+    "c0": "0ee57c5c82a4213e808f5cf617a3ad2876245f4a443845c75b23f230d0a7a684",
+    "t1": "0ee57c5c82a4213e808f5cf617a3ad2876245f4a443845c75b23f230d0a7a684",
+    "t2": "0ee57c5c82a4213e808f5cf617a3ad2876245f4a443845c75b23f230d0a7a684",
+    "t3": "0ee57c5c82a4213e808f5cf617a3ad2876245f4a443845c75b23f230d0a7a684"
+   }
+  },
+  {
+   "frame": {
+    "c0ClusterCount": 13,
+    "frameUnassignedNodes": 649,
+    "t2ClusterCount": 27
+   },
+   "gates": {
+    "M1_activation_range_identical": true,
+    "M2_node_population_and_eligibility_identical": true,
+    "M3_document_order_identical": true,
+    "M4_reset_event_identical": true,
+    "M5_frame_identical_to_C0": false,
+    "M6_T2_and_C0_T1_reproduced": true,
+    "M7_non_hierarchy_invariants": true,
+    "M8_same_range_C0_T1_T2_T3_equal": true
+   },
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "manual": [
+    1045,
+    1339
+   ],
+   "manualStart": {
+    "c0": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p1045-r4",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "frozenT2Observation": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p1045-r4",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t1": {
+     "basis": "parent kind not determined",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "resolved_by_indent_sequence",
+     "id": "detail-p1045-r4",
+     "keyTokenXMin": 51.765,
+     "kind": "unclassified",
+     "level": 2,
+     "parentId": "detail-p990-r0",
+     "parentPage": 990,
+     "placed": true,
+     "root": false
+    },
+    "t2": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p1045-r4",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t3": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p1045-r4",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    }
+   },
+   "relation": "source_superset",
+   "resetEventsT2": [
+    {
+     "beforeNodeId": "detail-p1045-r4",
+     "stackDepth": 4
+    }
+   ],
+   "resetEventsT3": [
+    {
+     "beforeNodeId": "detail-p1045-r4",
+     "stackDepth": 4
+    }
+   ],
+   "resetLocator": "detail-p1045-r4",
+   "rows": {
+    "components": {
+     "K": {
+      "R0": 1081,
+      "R1": 1,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "L": {
+      "R0": 843,
+      "R1": 239,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "P": {
+      "R0": 1081,
+      "R1": 1,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     }
+    },
+    "primary": 1082,
+    "priorChanged": 239,
+    "unassignedRows": 0
+   },
+   "sourceDerived": [
+    1,
+    1339
+   ],
+   "tableDigests": {
+    "c0": "82dda090d02e7bcdab9cd7fd9f9e2bfc56e2c84f91a357c0fa66cc486072e6cd",
+    "t1": "ed523fe7134dbd9e0bf161a6548d1466e0533016925ca3d4dd7cd3642a3b6f01",
+    "t2": "d3103ab31034d229263a31c8e1b2abd937cfaed4fd5cd63c827d3e7d11d9a62d",
+    "t3": "ea4d34be7074f64deee2fb9bddcf084a475bbe8f352ecaaa6bf9894772676278"
+   }
+  },
+  {
+   "frame": {
+    "c0ClusterCount": 15,
+    "frameUnassignedNodes": 565,
+    "t2ClusterCount": 34
+   },
+   "gates": {
+    "M1_activation_range_identical": true,
+    "M2_node_population_and_eligibility_identical": true,
+    "M3_document_order_identical": true,
+    "M4_reset_event_identical": true,
+    "M5_frame_identical_to_C0": false,
+    "M6_T2_and_C0_T1_reproduced": true,
+    "M7_non_hierarchy_invariants": true,
+    "M8_same_range_C0_T1_T2_T3_equal": true
+   },
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "manual": [
+    1555,
+    1700
+   ],
+   "manualStart": {
+    "c0": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p1555-r4",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "frozenT2Observation": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p1555-r4",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t1": {
+     "basis": "parent kind not determined",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "resolved_by_indent_sequence",
+     "id": "detail-p1555-r4",
+     "keyTokenXMin": 51.765,
+     "kind": "unclassified",
+     "level": 2,
+     "parentId": "detail-p1006-r0",
+     "parentPage": 1006,
+     "placed": true,
+     "root": false
+    },
+    "t2": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p1555-r4",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t3": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p1555-r4",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    }
+   },
+   "relation": "source_superset",
+   "resetEventsT2": [
+    {
+     "beforeNodeId": "detail-p1555-r4",
+     "stackDepth": 4
+    }
+   ],
+   "resetEventsT3": [
+    {
+     "beforeNodeId": "detail-p1555-r4",
+     "stackDepth": 3
+    }
+   ],
+   "resetLocator": "detail-p1555-r4",
+   "rows": {
+    "components": {
+     "K": {
+      "R0": 990,
+      "R1": 8,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "L": {
+      "R0": 701,
+      "R1": 297,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "P": {
+      "R0": 990,
+      "R1": 8,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     }
+    },
+    "primary": 998,
+    "priorChanged": 297,
+    "unassignedRows": 0
+   },
+   "sourceDerived": [
+    21,
+    1723
+   ],
+   "tableDigests": {
+    "c0": "6b87d143c05cd1924c93231eb00ccdf4d54dff9b1428e108c70a4a92bb21c94e",
+    "t1": "a8bbbf5f9547227b3b661fd9a48e8350f141a3f6dcf17f1c9e2d7e6d6e191045",
+    "t2": "fd8decdcab90ea27afd38c90a9e6a82f67b4a7c9ef0f8246b25fd5ab8c534d6b",
+    "t3": "12908e836f1cd1189f230f3d907ddcc143e543b8d49e04cdebfe966c4967a8d4"
+   }
+  },
+  {
+   "frame": {
+    "c0ClusterCount": 6,
+    "frameUnassignedNodes": 0,
+    "t2ClusterCount": 6
+   },
+   "gates": {
+    "M1_activation_range_identical": true,
+    "M2_node_population_and_eligibility_identical": true,
+    "M3_document_order_identical": true,
+    "M4_reset_event_identical": true,
+    "M5_frame_identical_to_C0": false,
+    "M6_T2_and_C0_T1_reproduced": true,
+    "M7_non_hierarchy_invariants": true,
+    "M8_same_range_C0_T1_T2_T3_equal": true
+   },
+   "localPath": "data/download/mlit.go.jp/page/content/001630395.pdf",
+   "manual": [
+    7,
+    10
+   ],
+   "manualStart": {
+    "c0": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      65.569,
+      65.569
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "keyTokenXMin": 65.569,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "frozenT2Observation": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t1": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      65.569,
+      65.569
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "keyTokenXMin": 65.569,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t2": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      65.569,
+      65.569
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "keyTokenXMin": 65.569,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t3": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 0,
+     "clusterX": [
+      65.569,
+      65.569
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p7-r9",
+     "keyTokenXMin": 65.569,
+     "kind": "organization",
+     "level": 1,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    }
+   },
+   "relation": "exact_same",
+   "resetEventsT2": [],
+   "resetEventsT3": [],
+   "resetLocator": null,
+   "rows": {
+    "components": {
+     "K": {
+      "R0": 45,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "L": {
+      "R0": 45,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "P": {
+      "R0": 45,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     }
+    },
+    "primary": 45,
+    "priorChanged": 0,
+    "unassignedRows": 0
+   },
+   "sourceDerived": [
+    7,
+    10
+   ],
+   "tableDigests": {
+    "c0": "e6b315ec671f296ffc752bb9a6daa587a61b4af39eb456978ac3a1ad655eac10",
+    "t1": "e6b315ec671f296ffc752bb9a6daa587a61b4af39eb456978ac3a1ad655eac10",
+    "t2": "e6b315ec671f296ffc752bb9a6daa587a61b4af39eb456978ac3a1ad655eac10",
+    "t3": "e6b315ec671f296ffc752bb9a6daa587a61b4af39eb456978ac3a1ad655eac10"
+   }
+  },
+  {
+   "frame": {
+    "c0ClusterCount": 6,
+    "frameUnassignedNodes": 0,
+    "t2ClusterCount": 6
+   },
+   "gates": {
+    "M1_activation_range_identical": true,
+    "M2_node_population_and_eligibility_identical": true,
+    "M3_document_order_identical": true,
+    "M4_reset_event_identical": true,
+    "M5_frame_identical_to_C0": false,
+    "M6_T2_and_C0_T1_reproduced": true,
+    "M7_non_hierarchy_invariants": true,
+    "M8_same_range_C0_T1_T2_T3_equal": true
+   },
+   "localPath": "data/download/mod.go.jp/j/budget/gaisan/r6/gaisanyoukyu.pdf",
+   "manual": [
+    9,
+    540
+   ],
+   "manualStart": {
+    "c0": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "frozenT2Observation": {
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null
+    },
+    "t1": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t2": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    },
+    "t3": {
+     "basis": "hierarchy root: no parent candidate (edge unresolved)",
+     "clusterIndex": 1,
+     "clusterX": [
+      51.765,
+      51.765
+     ],
+     "edgeStatus": "unresolved",
+     "id": "detail-p9-r7",
+     "keyTokenXMin": 51.765,
+     "kind": "organization",
+     "level": 2,
+     "parentId": null,
+     "parentPage": null,
+     "placed": true,
+     "root": true
+    }
+   },
+   "relation": "exact_same",
+   "resetEventsT2": [],
+   "resetEventsT3": [],
+   "resetLocator": null,
+   "rows": {
+    "components": {
+     "K": {
+      "R0": 2312,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "L": {
+      "R0": 2312,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     },
+     "P": {
+      "R0": 2312,
+      "R1": 0,
+      "R2": 0,
+      "R3": 0,
+      "R4": 0,
+      "R5": 0
+     }
+    },
+    "primary": 2312,
+    "priorChanged": 0,
+    "unassignedRows": 0
+   },
+   "sourceDerived": [
+    9,
+    540
+   ],
+   "tableDigests": {
+    "c0": "06ba4a433f499013d5c9a360123602e032409fa9d6f2f56f6edb4a37fc550632",
+    "t1": "06ba4a433f499013d5c9a360123602e032409fa9d6f2f56f6edb4a37fc550632",
+    "t2": "06ba4a433f499013d5c9a360123602e032409fa9d6f2f56f6edb4a37fc550632",
+    "t3": "06ba4a433f499013d5c9a360123602e032409fa9d6f2f56f6edb4a37fc550632"
+   }
+  }
+ ],
+ "population": {
+  "duplicates": 0,
+  "frameUnassignedNodes": 1214,
+  "frameUnassignedPrimaryRows": 0,
+  "nonHierarchyInvariantViolations": 0,
+  "primaryRows": 2080,
+  "priorChangedRows": 536,
+  "sameRangeControlRows": 5893,
+  "unjoinable": 0
+ },
+ "rowTuples": {
+  "L=R0,P=R0,K=R0": 1544,
+  "L=R1,P=R0,K=R0": 527,
+  "L=R1,P=R1,K=R1": 9
+ },
+ "schema": "budget-request-hierarchy-level-frame-counterfactual/v0",
+ "totalAcrossComponents": {
+  "R0": 5686,
+  "R1": 554,
+  "R2": 0,
+  "R3": 0,
+  "R4": 0,
+  "R5": 0
+ }
+}
