@@ -1,0 +1,1688 @@
+{
+ "blankReasonDistribution": {
+  "byPrimaryClass": {
+   "code_before_label": 6,
+   "code_without_label": 91,
+   "label_and_code_same_row": 2537,
+   "label_before_code": 15,
+   "label_without_code": 36,
+   "multiple_labels_after_code": 9,
+   "multiple_labels_before_code": 4,
+   "neither_label_nor_code": 252
+  },
+  "byReason": {
+   "label_shape_unrecognized": 149,
+   "projection_cutoff_before_label": 2607,
+   "source_label_absent": 194
+  },
+  "denominator": 2950,
+  "projectionCutoffByPrimaryClass": {
+   "code_before_label": 6,
+   "label_and_code_same_row": 2537,
+   "label_before_code": 15,
+   "label_without_code": 36,
+   "multiple_labels_after_code": 9,
+   "multiple_labels_before_code": 4
+  }
+ },
+ "corpus": {
+  "evaluablePages": 9145,
+  "pages": 9899,
+  "pdfs": 82,
+  "previousObservedBlank": 2950,
+  "previousObservedNonblank": 6195,
+  "projectionReproduced": true
+ },
+ "decision": {
+  "decision": "PROJECTION_ARTIFACT_DOMINANT",
+  "rule": 2
+ },
+ "examples": {
+  "blank:label_shape_unrecognized|code_without_label": [
+   {
+    "code": {
+     "index": 11,
+     "raw": "001 既定定員に伴う経費 3",
+     "tokenIndexes": [
+      33,
+      35,
+      37
+     ],
+     "x": 62.1,
+     "y": 173.6
+    },
+    "label": null,
+    "localPath": "data/download/jinji.go.jp/content/900024096.pdf",
+    "page": 3
+   },
+   {
+    "code": {
+     "index": 23,
+     "raw": "100 01-65 水産業振興対策に必要な経費 346",
+     "tokenIndexes": [
+      435,
+      437,
+      439,
+      441
+     ],
+     "x": 417.6,
+     "y": 319.4
+    },
+    "label": null,
+    "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+    "page": 5
+   },
+   {
+    "code": {
+     "index": 5,
+     "raw": "109 01-49 漁港施設災害復旧事業に必要な経費 359",
+     "tokenIndexes": [
+      10,
+      12,
+      14,
+      16
+     ],
+     "x": 34.5,
+     "y": 69.4
+    },
+    "label": null,
+    "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-2.pdf",
+    "page": 6
+   }
+  ],
+  "blank:label_shape_unrecognized|neither_label_nor_code": [
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/aac2d779/20230907_policies_budget_05.pdf",
+    "page": 3
+   },
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/clb.go.jp/files/topics/4473_ext_05_1.pdf",
+    "page": 3
+   },
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+    "page": 3
+   }
+  ],
+  "blank:projection_cutoff_before_label|code_before_label": [
+   {
+    "code": {
+     "index": 0,
+     "raw": "882 観",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "label": {
+     "index": 8,
+     "normalized": ".多様な主体による提案型事業(補助)",
+     "raw": "３．多様な主体による提案型事業（補助）",
+     "tokenIndexes": [
+      35
+     ],
+     "x": 469.3,
+     "y": 111.1
+    },
+    "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+    "page": 892
+   },
+   {
+    "code": {
+     "index": 0,
+     "raw": "892 観",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "label": {
+     "index": 4,
+     "normalized": "多言語解説整備支援事業(,)",
+     "raw": "多言語解説整備支援事業 0 ( 115, 897 )",
+     "tokenIndexes": [
+      3,
+      5,
+      9,
+      8,
+      7,
+      11
+     ],
+     "x": 472.8,
+     "y": 55.6
+    },
+    "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+    "page": 902
+   },
+   {
+    "code": {
+     "index": 0,
+     "raw": "896 観",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "label": {
+     "index": 4,
+     "normalized": "計(,)",
+     "raw": "計 0 ( 189, 861 )",
+     "tokenIndexes": [
+      3,
+      5,
+      9,
+      8,
+      7,
+      11
+     ],
+     "x": 469.3,
+     "y": 55.6
+    },
+    "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+    "page": 906
+   }
+  ],
+  "blank:projection_cutoff_before_label|label_and_code_same_row": [
+   {
+    "code": {
+     "index": 0,
+     "raw": "100 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "100 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 104
+   },
+   {
+    "code": {
+     "index": 0,
+     "raw": "102 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "102 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 106
+   },
+   {
+    "code": {
+     "index": 0,
+     "raw": "104 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "104 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 108
+   }
+  ],
+  "blank:projection_cutoff_before_label|label_before_code": [
+   {
+    "code": {
+     "index": 11,
+     "raw": "334 復興加速化・福島再生予 備費",
+     "tokenIndexes": [
+      66,
+      68,
+      69
+     ],
+     "x": 72.5,
+     "y": 159.7
+    },
+    "label": {
+     "index": 8,
+     "normalized": ".雑役務費,(,)",
+     "raw": "７．雑役務費 10, 807 ( 7, 764 )",
+     "tokenIndexes": [
+      34,
+      37,
+      36,
+      41,
+      40,
+      39,
+      43
+     ],
+     "x": 472.8,
+     "y": 111.1
+    },
+    "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+    "page": 14
+   },
+   {
+    "code": {
+     "index": 9,
+     "raw": "025 貨幣交換差減補てん金経 費",
+     "tokenIndexes": [
+      64,
+      66,
+      67
+     ],
+     "x": 86.3,
+     "y": 131.9
+    },
+    "label": {
+     "index": 5,
+     "normalized": "計(,)",
+     "raw": "計 459 ( 1, 160 )",
+     "tokenIndexes": [
+      10,
+      12,
+      16,
+      15,
+      14,
+      18
+     ],
+     "x": 472.8,
+     "y": 69.4
+    },
+    "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+    "page": 26
+   },
+   {
+    "code": {
+     "index": 34,
+     "raw": "030 福島県教育復興推進事業 95, 422 95, 234 △ 188",
+     "tokenIndexes": [
+      359,
+      361,
+      364,
+      363,
+      367,
+      366,
+      369,
+      371
+     ],
+     "x": 86.3,
+     "y": 486.1
+    },
+    "label": {
+     "index": 4,
+     "normalized": "実施指導・助言旅費基準旅費(級)",
+     "raw": "実施指導・助言旅費 基準旅費（４級）",
+     "tokenIndexes": [
+      2,
+      4
+     ],
+     "x": 490.1,
+     "y": 55.6
+    },
+    "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+    "page": 43
+   }
+  ],
+  "blank:projection_cutoff_before_label|label_without_code": [
+   {
+    "code": null,
+    "label": {
+     "index": 2,
+     "normalized": "東日本大震災復興特別会計(内閣本府等)",
+     "raw": "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣本府等）",
+     "tokenIndexes": [
+      82,
+      83
+     ],
+     "x": 38,
+     "y": 54.5
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+    "page": 3
+   },
+   {
+    "code": null,
+    "label": {
+     "index": 2,
+     "normalized": "内閣府所管(消費者庁)",
+     "raw": "19 内 閣 府 所 管 （消費者庁）",
+     "tokenIndexes": [
+      106,
+      108,
+      110
+     ],
+     "x": 38,
+     "y": 54.5
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 3
+   },
+   {
+    "code": null,
+    "label": {
+     "index": 2,
+     "normalized": "内閣府所管(こども家庭庁)",
+     "raw": "19 内 閣 府 所 管 （こども家庭庁）",
+     "tokenIndexes": [
+      348,
+      350,
+      352
+     ],
+     "x": 38,
+     "y": 54.5
+    },
+    "localPath": "data/download/cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/88749a20-e454-4a5b-9da8-3a32e1788a23/585bb95a/20230907_policies_budget_04.pdf",
+    "page": 3
+   }
+  ],
+  "blank:projection_cutoff_before_label|multiple_labels_after_code": [
+   {
+    "code": {
+     "index": 0,
+     "raw": "864 観",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "label": {
+     "index": 4,
+     "normalized": "---観光振興調査費,△,雑役務費(,)",
+     "raw": "95016-2123-09-2143 観光振興調査費 132, 532 △ 132, 532 雑役務費 ( 132, 532 )",
+     "tokenIndexes": [
+      2,
+      4,
+      7,
+      6,
+      9,
+      12,
+      11,
+      14,
+      18,
+      17,
+      16,
+      20
+     ],
+     "x": 86.3,
+     "y": 55.6
+    },
+    "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+    "page": 874
+   },
+   {
+    "code": {
+     "index": 0,
+     "raw": "872 観",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "label": {
+     "index": 4,
+     "normalized": ".旅行・観光消費動向調査,(,)",
+     "raw": "３．旅行・観光消費動向調査 136, 320 ( 109, 642 )",
+     "tokenIndexes": [
+      3,
+      6,
+      5,
+      10,
+      9,
+      8,
+      12
+     ],
+     "x": 476.2,
+     "y": 55.6
+    },
+    "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+    "page": 882
+   },
+   {
+    "code": {
+     "index": 0,
+     "raw": "878 観",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 38,
+     "y": 20.8
+    },
+    "label": {
+     "index": 5,
+     "normalized": "イ備品費(,)",
+     "raw": "イ 備品費 0 ( 122, 990 )",
+     "tokenIndexes": [
+      12,
+      14,
+      16,
+      20,
+      19,
+      18,
+      22
+     ],
+     "x": 476.2,
+     "y": 69.4
+    },
+    "localPath": "data/download/mlit.go.jp/page/content/001630995.pdf",
+    "page": 888
+   }
+  ],
+  "blank:projection_cutoff_before_label|multiple_labels_before_code": [
+   {
+    "code": {
+     "index": 10,
+     "raw": "020 森 林 整 備 推 進 対 策 費 3, 707, 384 3, 667, 008 △ 40, 376",
+     "tokenIndexes": [
+      57,
+      59,
+      63,
+      62,
+      61,
+      67,
+      66,
+      65,
+      69,
+      72,
+      71
+     ],
+     "x": 86.3,
+     "y": 138.9
+    },
+    "label": {
+     "index": 6,
+     "normalized": ".雑役務費,(,)",
+     "raw": "３．雑役務費 4, 615 ( 4, 615 )",
+     "tokenIndexes": [
+      18,
+      21,
+      20,
+      25,
+      24,
+      23,
+      27
+     ],
+     "x": 472.8,
+     "y": 83.3
+    },
+    "localPath": "data/download/reconstruction.go.jp/files/user/topics/2023_fukkochougaisansaisyutsu.pdf",
+    "page": 74
+   },
+   {
+    "code": {
+     "index": 15,
+     "raw": "011 国会の権能行使に必要な 3, 414, 069 3, 469, 079 55, 010 （要 求 要 旨） 経費",
+     "tokenIndexes": [
+      179,
+      181,
+      186,
+      185,
+      184,
+      190,
+      189,
+      188,
+      193,
+      192,
+      195,
+      197,
+      199,
+      201,
+      182
+     ],
+     "x": 72.5,
+     "y": 215.3
+    },
+    "label": {
+     "index": 6,
+     "normalized": "議会雑費人@,日,(,)",
+     "raw": "議会雑費 3 人 @ 6,000 250 日 4, 500 ( 29, 700 )",
+     "tokenIndexes": [
+      23,
+      43,
+      48,
+      50,
+      45,
+      47,
+      52,
+      26,
+      25,
+      30,
+      29,
+      28,
+      32
+     ],
+     "x": 469.3,
+     "y": 83.3
+    },
+    "localPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+    "page": 8
+   },
+   {
+    "code": {
+     "index": 18,
+     "raw": "026 議員会館維持管理運営事 （要 求 要 旨） 業経費（第２期）",
+     "tokenIndexes": [
+      170,
+      172,
+      175,
+      177,
+      179,
+      181,
+      173
+     ],
+     "x": 72.5,
+     "y": 256.9
+    },
+    "label": {
+     "index": 5,
+     "normalized": ".印刷製本費,(,)",
+     "raw": "１．印刷製本費 125, 101 ( 138, 025 )",
+     "tokenIndexes": [
+      17,
+      20,
+      19,
+      24,
+      23,
+      22,
+      26
+     ],
+     "x": 469.3,
+     "y": 69.4
+    },
+    "localPath": "data/download/sangiin.go.jp/jpn/annai/oshirase/pdf/r6gaisan-yokyusyo-250905.pdf",
+    "page": 14
+   }
+  ],
+  "blank:source_label_absent|neither_label_nor_code": [
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+    "page": 2
+   },
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+    "page": 4
+   },
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+    "page": 6
+   }
+  ],
+  "observed_nonblank|code_before_label": [
+   {
+    "code": {
+     "index": 6,
+     "raw": "016 振 替 定 員 に 伴 う 経 費",
+     "tokenIndexes": [
+      31,
+      33
+     ],
+     "x": 93.2,
+     "y": 90.3
+    },
+    "label": {
+     "index": 7,
+     "normalized": "その他(地方環境事務所)",
+     "raw": "01 その他（地方環境事務所 ）",
+     "tokenIndexes": [
+      35,
+      37,
+      38
+     ],
+     "x": 96.6,
+     "y": 104.2
+    },
+    "localPath": "data/download/env.go.jp/content/000157016.pdf",
+    "page": 9
+   },
+   {
+    "code": {
+     "index": 4,
+     "raw": "834 環 境 保 全 復 興 事 業 費",
+     "tokenIndexes": [
+      5,
+      7
+     ],
+     "x": 72.5,
+     "y": 55.5
+    },
+    "label": {
+     "index": 6,
+     "normalized": "放射性物質汚染廃棄物処,,,,,,(要求要旨)",
+     "raw": "010 放射性物質汚染廃棄物処 9, 712, 671 11, 002, 885 1, 290, 214 （要 求 要 旨）",
+     "tokenIndexes": [
+      33,
+      35,
+      40,
+      39,
+      38,
+      44,
+      43,
+      42,
+      48,
+      47,
+      46,
+      50,
+      52,
+      54,
+      56
+     ],
+     "x": 86.3,
+     "y": 97.2
+    },
+    "localPath": "data/download/env.go.jp/content/000157016.pdf",
+    "page": 28
+   },
+   {
+    "code": {
+     "index": 4,
+     "raw": "020 地 方 特 例 交 付 金 216, 900, 000 207, 100, 000 △ 9, 800, 000 (注）この概算要求は、仮置きの計数であり、令和6年度所要見込額を仮に計上している。今後、経済",
+     "tokenIndexes": [
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      24,
+      23,
+      22,
+      28,
+      27,
+      26,
+      30,
+      34,
+      33,
+      32,
+      36
+     ],
+     "x": 58.7,
+     "y": 55.5
+    },
+    "label": {
+     "index": 7,
+     "normalized": "---地方特例交付金,,,,△,,住宅ローン減税分,,(,,)",
+     "raw": "32021- 865-16-8243 地方特例交付金 204, 500, 000 195, 900, 000 △ 8, 600, 000 住宅ローン減税分 195, 900, 000 ( 204, 500, 000 )",
+     "tokenIndexes": [
+      44,
+      46,
+      50,
+      49,
+      48,
+      54,
+      53,
+      52,
+      56,
+      60,
+      59,
+      58,
+      62,
+      66,
+      65,
+      64,
+      71,
+      70,
+      69,
+      68,
+      73
+     ],
+     "x": 86.3,
+     "y": 104.2
+    },
+    "localPath": "data/download/soumu.go.jp/main_content/000901375.pdf",
+    "page": 9
+   }
+  ],
+  "observed_nonblank|code_without_label": [
+   {
+    "code": {
+     "index": 4,
+     "raw": "155 消 費 生 活 復 興 政 策 費",
+     "tokenIndexes": [
+      5,
+      7
+     ],
+     "x": 72.5,
+     "y": 55.5
+    },
+    "label": null,
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+    "page": 8
+   },
+   {
+    "code": {
+     "index": 11,
+     "raw": "010 内 閣 本 府 25, 470, 218 344, 656, 355 370, 126, 573 27, 780, 510 321, 148, 951 348, 929, 461 △ 21, 197, 112 5",
+     "tokenIndexes": [
+      2,
+      4,
+      6,
+      8,
+      10,
+      14,
+      13,
+      12,
+      18,
+      17,
+      16,
+      22,
+      21,
+      20,
+      26,
+      25,
+      24,
+      30,
+      29,
+      28,
+      34,
+      33,
+      32,
+      36,
+      40,
+      39,
+      38,
+      42
+     ],
+     "x": 62.1,
+     "y": 125
+    },
+    "label": null,
+    "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+    "page": 2
+   },
+   {
+    "code": {
+     "index": 8,
+     "raw": "090 沖 縄 国 立 大 学 法 人 施 設 整 備 費 0 14, 262, 327 14, 262, 327 0 12, 740, 905 12, 740, 905 △ 1, 521, 422 173",
+     "tokenIndexes": [
+      2,
+      4,
+      6,
+      10,
+      9,
+      8,
+      14,
+      13,
+      12,
+      16,
+      20,
+      19,
+      18,
+      24,
+      23,
+      22,
+      26,
+      30,
+      29,
+      28,
+      32
+     ],
+     "x": 65.6,
+     "y": 76.4
+    },
+    "label": null,
+    "localPath": "data/download/cao.go.jp/yosan/soshiki/r06/pdf/0.pdf",
+    "page": 3
+   }
+  ],
+  "observed_nonblank|label_and_code_same_row": [
+   {
+    "code": {
+     "index": 8,
+     "raw": "006 地球環境保全試験研究費（国立研究開発法人 0 183, 106 183, 106 0 182, 988 182, 988 △ 118 127 委託費分）",
+     "tokenIndexes": [
+      3,
+      5,
+      8,
+      11,
+      10,
+      14,
+      13,
+      16,
+      19,
+      18,
+      22,
+      21,
+      24,
+      26,
+      28,
+      6
+     ],
+     "x": 79.4,
+     "y": 76.4
+    },
+    "label": {
+     "index": 8,
+     "normalized": "地球環境保全試験研究費(国立研究開発法人,,,,△委託費分)",
+     "raw": "006 地球環境保全試験研究費（国立研究開発法人 0 183, 106 183, 106 0 182, 988 182, 988 △ 118 127 委託費分）",
+     "tokenIndexes": [
+      3,
+      5,
+      8,
+      11,
+      10,
+      14,
+      13,
+      16,
+      19,
+      18,
+      22,
+      21,
+      24,
+      26,
+      28,
+      6
+     ],
+     "x": 79.4,
+     "y": 76.4
+    },
+    "localPath": "data/download/env.go.jp/content/000157010.pdf",
+    "page": 16
+   },
+   {
+    "code": {
+     "index": 5,
+     "raw": "010 原子力被災者環境放射線 （要 求 要 旨）",
+     "tokenIndexes": [
+      25,
+      27,
+      31,
+      33,
+      35,
+      37
+     ],
+     "x": 86.3,
+     "y": 76.4
+    },
+    "label": {
+     "index": 5,
+     "normalized": "原子力被災者環境放射線(要求要旨)",
+     "raw": "010 原子力被災者環境放射線 （要 求 要 旨）",
+     "tokenIndexes": [
+      25,
+      27,
+      31,
+      33,
+      35,
+      37
+     ],
+     "x": 86.3,
+     "y": 76.4
+    },
+    "localPath": "data/download/env.go.jp/content/000157016.pdf",
+    "page": 25
+   },
+   {
+    "code": {
+     "index": 4,
+     "raw": "020 放射性物質環境汚染状況 1, 148, 767 1, 151, 576 2, 809 （要 求 要 旨）",
+     "tokenIndexes": [
+      5,
+      7,
+      13,
+      12,
+      11,
+      17,
+      16,
+      15,
+      20,
+      19,
+      22,
+      24,
+      26,
+      28
+     ],
+     "x": 86.3,
+     "y": 55.5
+    },
+    "label": {
+     "index": 4,
+     "normalized": "放射性物質環境汚染状況,,,,,(要求要旨)",
+     "raw": "020 放射性物質環境汚染状況 1, 148, 767 1, 151, 576 2, 809 （要 求 要 旨）",
+     "tokenIndexes": [
+      5,
+      7,
+      13,
+      12,
+      11,
+      17,
+      16,
+      15,
+      20,
+      19,
+      22,
+      24,
+      26,
+      28
+     ],
+     "x": 86.3,
+     "y": 55.5
+    },
+    "localPath": "data/download/env.go.jp/content/000157016.pdf",
+    "page": 26
+   }
+  ],
+  "observed_nonblank|label_before_code": [
+   {
+    "code": {
+     "index": 13,
+     "raw": "010 復 興 庁 0 319, 944 319, 944 0 305, 178 305, 178 △ 14, 766 3",
+     "tokenIndexes": [
+      73,
+      75,
+      77,
+      79,
+      81,
+      84,
+      83,
+      87,
+      86,
+      89,
+      92,
+      91,
+      95,
+      94,
+      97,
+      100,
+      99,
+      102
+     ],
+     "x": 69,
+     "y": 152.8
+    },
+    "label": {
+     "index": 2,
+     "normalized": "東日本大震災復興特別会計(内閣本府等)",
+     "raw": "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣本府等）",
+     "tokenIndexes": [
+      250,
+      251
+     ],
+     "x": 38,
+     "y": 54.5
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+    "page": 5
+   },
+   {
+    "code": {
+     "index": 9,
+     "raw": "010 復 興 庁",
+     "tokenIndexes": [
+      16,
+      18,
+      20,
+      22
+     ],
+     "x": 65.6,
+     "y": 131.9
+    },
+    "label": {
+     "index": 2,
+     "normalized": "東日本大震災復興特別会計(内閣本府等)",
+     "raw": "9101 東 日 本 大 震 災 復 興 特 別 会 計 （内閣本府等）",
+     "tokenIndexes": [
+      54,
+      55
+     ],
+     "x": 38,
+     "y": 54.5
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+    "page": 7
+   },
+   {
+    "code": {
+     "index": 11,
+     "raw": "055 消 費 者 庁 4, 849, 364 9, 014, 799 13, 864, 163 4, 991, 087 6, 881, 187 11, 872, 274 △ 1, 991, 889 3",
+     "tokenIndexes": [
+      4,
+      6,
+      8,
+      10,
+      12,
+      16,
+      15,
+      14,
+      20,
+      19,
+      18,
+      24,
+      23,
+      22,
+      28,
+      27,
+      26,
+      32,
+      31,
+      30,
+      36,
+      35,
+      34,
+      38,
+      42,
+      41,
+      40,
+      44
+     ],
+     "x": 62.1,
+     "y": 125
+    },
+    "label": {
+     "index": 2,
+     "normalized": "内閣府所管(消費者庁)",
+     "raw": "19 内 閣 府 所 管 （消費者庁）",
+     "tokenIndexes": [
+      408,
+      410,
+      412
+     ],
+     "x": 41.4,
+     "y": 54.5
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 5
+   }
+  ],
+  "observed_nonblank|label_without_code": [
+   {
+    "code": null,
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "内（消） 7",
+     "tokenIndexes": [
+      0,
+      2
+     ],
+     "x": 748.9,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 11
+   },
+   {
+    "code": null,
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "内（消） 9",
+     "tokenIndexes": [
+      0,
+      2
+     ],
+     "x": 748.9,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 13
+   },
+   {
+    "code": null,
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "10 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 41.5,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 14
+   }
+  ],
+  "observed_nonblank|multiple_labels_after_code": [
+   {
+    "code": {
+     "index": 4,
+     "raw": "001 共通経費",
+     "tokenIndexes": [
+      23,
+      25
+     ],
+     "x": 100.6,
+     "y": 57.9
+    },
+    "label": {
+     "index": 5,
+     "normalized": "法廷等器具整備費,,,備品費,(,)",
+     "raw": "09 法廷等器具整備費 61,583 374,986 313,403 備品費 374,986 ( 61,583 )",
+     "tokenIndexes": [
+      27,
+      29,
+      31,
+      33,
+      35,
+      37,
+      39,
+      41,
+      43,
+      45
+     ],
+     "x": 113.1,
+     "y": 70.2
+    },
+    "localPath": "data/download/courts.go.jp/vc-files/courts/2023/R06saisyutsu_gaisanyoukyusyo_720kb.pdf",
+    "page": 125
+   },
+   {
+    "code": {
+     "index": 4,
+     "raw": "551 農 林 水 産 業 復 興 事 業 費 3, 322, 448 3, 297, 500 △ 24, 948",
+     "tokenIndexes": [
+      5,
+      7,
+      11,
+      10,
+      9,
+      15,
+      14,
+      13,
+      17,
+      20,
+      19
+     ],
+     "x": 72.5,
+     "y": 55.5
+    },
+    "label": {
+     "index": 6,
+     "normalized": "農林水産係(農産局)",
+     "raw": "001 農林水産３係（農産局）",
+     "tokenIndexes": [
+      27,
+      29
+     ],
+     "x": 86.3,
+     "y": 90.3
+    },
+    "localPath": "data/download/maff.go.jp/j/budget/attach/pdf/230901-4.pdf",
+    "page": 18
+   },
+   {
+    "code": {
+     "index": 4,
+     "raw": "020 諸 支 出 金",
+     "tokenIndexes": [
+      3,
+      5,
+      7,
+      9,
+      11
+     ],
+     "x": 58.7,
+     "y": 55.6
+    },
+    "label": {
+     "index": 7,
+     "normalized": "---手数料,,,,,,.銀行手数料,,(,,)",
+     "raw": "95016- 123-09-4540 手 数 料 14, 219, 903 17, 636, 102 3, 416, 199 １．銀行手数料 4, 113, 939 ( 2, 164, 900 )",
+     "tokenIndexes": [
+      41,
+      43,
+      45,
+      47,
+      51,
+      50,
+      49,
+      55,
+      54,
+      53,
+      59,
+      58,
+      57,
+      61,
+      65,
+      64,
+      63,
+      70,
+      69,
+      68,
+      67,
+      72
+     ],
+     "x": 86.3,
+     "y": 97.2
+    },
+    "localPath": "data/download/mof.go.jp/about_mof/mof_budget/budget/fy2024/2024gaitame_2.pdf",
+    "page": 18
+   }
+  ],
+  "observed_nonblank|multiple_labels_before_code": [
+   {
+    "code": {
+     "index": 7,
+     "raw": "055 消 費 者 庁 13, 864, 163 11, 872, 274 △ 1, 991, 889",
+     "tokenIndexes": [
+      6,
+      8,
+      10,
+      12,
+      14,
+      18,
+      17,
+      16,
+      22,
+      21,
+      20,
+      24,
+      28,
+      27,
+      26
+     ],
+     "x": 51.8,
+     "y": 104.2
+    },
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "内（消） 3",
+     "tokenIndexes": [
+      0,
+      2
+     ],
+     "x": 748.9,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 7
+   },
+   {
+    "code": {
+     "index": 10,
+     "raw": "150 台 @ 41,000 1.10 6, 765 ( 0 )",
+     "tokenIndexes": [
+      85,
+      90,
+      92,
+      87,
+      89,
+      79,
+      78,
+      82,
+      81,
+      84
+     ],
+     "x": 514.2,
+     "y": 145.8
+    },
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "内（消） 11",
+     "tokenIndexes": [
+      0,
+      2
+     ],
+     "x": 748.9,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 15
+   },
+   {
+    "code": {
+     "index": 29,
+     "raw": "600 回 @ 133.33 1.10 88 ( 88 )",
+     "tokenIndexes": [
+      251,
+      256,
+      258,
+      253,
+      255,
+      245,
+      248,
+      247,
+      250
+     ],
+     "x": 514.2,
+     "y": 430.5
+    },
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "58 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 41.5,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 62
+   }
+  ],
+  "observed_nonblank|neither_label_nor_code": [
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+    "page": 1
+   },
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_02.pdf",
+    "page": 9
+   },
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 1
+   }
+  ],
+  "observed_nonblank|ordering_ambiguous": [
+   {
+    "code": {
+     "index": 4,
+     "raw": "011 一 般 行 政 共 通 経 費 ３０年度 元 年 度 ２ 年 度 ３ 年 度 ４ 年 度",
+     "tokenIndexes": [
+      5,
+      7,
+      9,
+      11,
+      13,
+      15,
+      17
+     ],
+     "x": 72.5,
+     "y": 55.5
+    },
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "8 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 44.9,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 12
+   },
+   {
+    "code": {
+     "index": 4,
+     "raw": "081 新未来創造戦略本部に関 143, 739 142, 340 △ 1, 399 ３０年度 元 年 度 ２ 年 度 ３ 年 度 ４ 年 度 する経費",
+     "tokenIndexes": [
+      6,
+      8,
+      12,
+      11,
+      15,
+      14,
+      17,
+      20,
+      19,
+      22,
+      24,
+      26,
+      28,
+      30,
+      9
+     ],
+     "x": 72.5,
+     "y": 55.5
+    },
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "内（消） 39",
+     "tokenIndexes": [
+      0,
+      2
+     ],
+     "x": 748.9,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 43
+   },
+   {
+    "code": {
+     "index": 6,
+     "raw": "767 箇所 1 回 @ 580 445 ( 144 )",
+     "tokenIndexes": [
+      21,
+      26,
+      23,
+      28,
+      30,
+      25,
+      5,
+      8,
+      7,
+      10
+     ],
+     "x": 514.2,
+     "y": 76.4
+    },
+    "label": {
+     "index": 0,
+     "normalized": "内(消)",
+     "raw": "76 内（消）",
+     "tokenIndexes": [
+      1,
+      0
+     ],
+     "x": 41.5,
+     "y": 20.8
+    },
+    "localPath": "data/download/caa.go.jp/policies/budget/assets/cms_caa205_230914_03.pdf",
+    "page": 80
+   }
+  ],
+  "unavailable_rotate90|unavailable": [
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/jftc.go.jp/soshiki/kyotsukoukai/yosan/yosankessan/r6/r6sandanhyou.pdf",
+    "page": 138
+   },
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_04.pdf",
+    "page": 1
+   },
+   {
+    "code": null,
+    "label": null,
+    "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_04.pdf",
+    "page": 2
+   }
+  ]
+ },
+ "frozen": {
+  "hashes": {
+   "docs/tasks/20261005_1117_Budget_Request_Page_Header_Blank_Title_Ordering_Protocol.md": "b3ed79803f9d60a72bbd2b9b068d8893e042fb915958f287d4c1f2cf9af4f2f8",
+   "tests/fixtures/budget-request-full-corpus-baseline/2024/corpus-manifest.json": "4a2a10ec46d75cf90d11b441a7a162654daefb008bb92edf3d264f8d118dde7a",
+   "tests/fixtures/budget-request-header-label/2024/header-label-projection.json": "9ff3b970d403d37aea3562cc0eb87a3ee07fca92cbd3bc03986c79b7b9c402e5"
+  }
+ },
+ "note": "source-only。manual contract・layout 境界・existing hierarchy kind・MOF は未使用。blank に label を補完していない",
+ "orderingClass": {
+  "observedBlank": {
+   "code_before_label": 6,
+   "code_without_label": 91,
+   "label_and_code_same_row": 2537,
+   "label_before_code": 15,
+   "label_without_code": 36,
+   "multiple_labels_after_code": 9,
+   "multiple_labels_before_code": 4,
+   "neither_label_nor_code": 252
+  },
+  "observedNonblank": {
+   "code_before_label": 3,
+   "code_without_label": 242,
+   "label_and_code_same_row": 7,
+   "label_before_code": 2090,
+   "label_without_code": 2302,
+   "multiple_labels_after_code": 3,
+   "multiple_labels_before_code": 1085,
+   "neither_label_nor_code": 128,
+   "ordering_ambiguous": 335
+  }
+ },
+ "pdfDistribution": {
+  "byAccountBlankReason": {
+   "general": {
+    "label_shape_unrecognized": 69,
+    "projection_cutoff_before_label": 2222,
+    "source_label_absent": 144
+   },
+   "special": {
+    "label_shape_unrecognized": 80,
+    "projection_cutoff_before_label": 385,
+    "source_label_absent": 50
+   }
+  },
+  "pdfsWithBlank": 57,
+  "pdfsWithCutoffReason": 37,
+  "topPdfsByBlank": [
+   [
+    "001630995.pdf",
+    460,
+    431
+   ],
+   [
+    "05-1b-01.pdf",
+    457,
+    450
+   ],
+   [
+    "20230914-mxt_kaikesou01-000031817_03.pdf",
+    451,
+    450
+   ],
+   [
+    "05-2b-01.pdf",
+    343,
+    340
+   ],
+   [
+    "gaisanyoukyu.pdf",
+    222,
+    220
+   ],
+   [
+    "000901372.pdf",
+    179,
+    176
+   ],
+   [
+    "230901-2.pdf",
+    136,
+    130
+   ],
+   [
+    "100546568.pdf",
+    110,
+    106
+   ],
+   [
+    "2023_fukkochougaisansaisyutsu.pdf",
+    102,
+    35
+   ],
+   [
+    "2024ippan_2.pdf",
+    97,
+    95
+   ],
+   [
+    "01.pdf",
+    77,
+    0
+   ],
+   [
+    "cms_caa205_230914_03.pdf",
+    53,
+    50
+   ]
+  ]
+ },
+ "ruleVersion": "title-ordering-v1",
+ "schema": "budget-request-title-ordering-phaseA/v0",
+ "sequence": {
+  "blankRuns": {
+   "1": 2612,
+   "2": 2,
+   "3": 34,
+   "5": 2,
+   "7": 2,
+   "9": 1,
+   "10+": 3
+  },
+  "blankToLabel": 2642,
+  "labelBlankDifferent": 76,
+  "labelBlankSame": 2528,
+  "labelToBlank": 2655,
+  "recurrenceDistance": {
+   "1": 3377,
+   "2": 2552,
+   "3-5": 2
+  }
+ },
+ "topBandFraction": 0.2
+}
