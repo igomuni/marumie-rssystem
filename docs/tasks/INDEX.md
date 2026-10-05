@@ -3,6 +3,8 @@
 task doc を新規作成したら本索引に1行追記する（新しいものを上に）。過去の検討を探すときは本索引を先に読み、対象を特定してから本文を読むこと。
 
 - [20261005_1450_Budget_Request_Hierarchy_Stack_Reset_Counterfactual_Protocol.md](20261005_1450_Budget_Request_Hierarchy_Stack_Reset_Counterfactual_Protocol.md) — T1のframe固定でmanual開始直前にstackだけresetするC0/T1/T2の事前登録
+- [20261005_2100_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Result.md](20261005_2100_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Result.md) — 8.6±3pt罫線基準の項候補916行。MOF名称exactで632/784項をカバー、未一致152はband外ではなくsource universeに無し
+- [20261005_2040_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Protocol.md](20261005_2040_Budget_Request_8p6pt_Item_Candidate_Full_Corpus_Protocol.md) — 罫線8.6±3pt→plain NNN→名称(金額条件なし)の全corpus抽出とMOF名称only exact突合の事前登録
 - [20261005_2000_Budget_Request_RuleLine_Item_Population_Inventory_Result.md](20261005_2000_Budget_Request_RuleLine_Item_Population_Inventory_Result.md) — 罫線→NNN→名称→金額列の5,255行と距離分布(8.6/22.4/29.3pt等)。MOF exact重なりは5/784で金額条件が項行を落とす
 - [20261005_1930_Budget_Request_RuleLine_Item_Population_Inventory_Protocol.md](20261005_1930_Budget_Request_RuleLine_Item_Population_Inventory_Protocol.md) — 罫線基準の項population inventoryとMOF code+name exact突合の事前登録(Phase A source-only/B MOF)
 - [20261005_1900_Budget_Request_Header_Support_Provenance_Isolation_Result.md](20261005_1900_Budget_Request_Header_Support_Provenance_Isolation_Result.md) — headerサポートP1(900)vsP2(288)の判定D1だが、分離featureはdocument規模/PDF identityと交絡
