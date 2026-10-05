@@ -1,0 +1,60 @@
+{
+ "schema": "budget-request-source-range-hierarchy-phaseB-mof-diagnostic/v0",
+ "note": "post-freeze 診断。MOF は教師でも range 選択基準でもない。名称単独 exact（組織・勘定の絞り込みなし）。overlap が高くても低くても range の正否は結論しない。optional の item candidate overlap は未実施",
+ "frozen": {
+  "phaseASha256": "72ad477e5953316e8774919c7f3da2491b22af25332c95d52b65f981e90b67b6",
+  "mofJikouSha256": "a63f50504c821ad7aff9fe1c96c80635dda978ea0870976d15f9bc9735d3ef7e"
+ },
+ "pdfs": [
+  {
+   "localPath": "data/download/mext.go.jp/content/20230914-mxt_kaikesou01-000031817_03.pdf",
+   "intersectionKindTransitions": {
+    "organization->unclassified": 2,
+    "item->unclassified": 19
+   },
+   "intersectionChangedItemRows": {
+    "rows": 19,
+    "exact_unique": 14,
+    "exact_ambiguous": 3,
+    "name_unavailable": 2
+   },
+   "sourceOnlyItems": {
+    "rows": 1,
+    "exact_unique": 1
+   },
+   "sourceOnlyResolvedRequests": {
+    "rows": 50,
+    "jikou_exact_unique": 23,
+    "parent_no_exact_match": 2,
+    "parent_exact_ambiguous": 5,
+    "name_unavailable": 19,
+    "jikou_no_exact_match": 1
+   }
+  },
+  {
+   "localPath": "data/download/mhlw.go.jp/wp/yosan/yosan/24syokan/dl/05-1b-01.pdf",
+   "intersectionKindTransitions": {
+    "organization->unclassified": 2,
+    "item->unclassified": 14
+   },
+   "intersectionChangedItemRows": {
+    "rows": 14,
+    "exact_unique": 9,
+    "exact_ambiguous": 5
+   },
+   "sourceOnlyItems": {
+    "rows": 1,
+    "exact_unique": 1
+   },
+   "sourceOnlyResolvedRequests": {
+    "rows": 141,
+    "jikou_exact_unique": 102,
+    "jikou_no_exact_match": 9,
+    "parent_no_exact_match": 4,
+    "parent_name_unavailable": 3,
+    "name_unavailable": 15,
+    "parent_exact_ambiguous": 8
+   }
+  }
+ ]
+}
